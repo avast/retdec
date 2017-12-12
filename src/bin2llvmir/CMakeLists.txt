@@ -1,0 +1,86 @@
+
+set(BIN2LLVMIR_SOURCES
+	analyses/indirectly_called_funcs_analysis.cpp
+	analyses/reachable_funcs_analysis.cpp
+	analyses/reaching_definitions.cpp
+	analyses/store_load_analysis.cpp
+	analyses/symbolic_tree.cpp
+	analyses/traversal/bb_traversal_analysis.cpp
+	analyses/traversal/func_traversal_analysis.cpp
+	analyses/traversal/traversal_analysis.cpp
+	analyses/uses_analysis.cpp
+	analyses/var_depend_analysis.cpp
+	optimizations/adapter_methods/adapter_methods.cpp
+	optimizations/asm_inst_remover/asm_inst_remover.cpp
+	optimizations/cfg_function_detection/cfg_function_detection.cpp
+	optimizations/class_hierarchy/hierarchy.cpp
+	optimizations/class_hierarchy/hierarchy_analysis.cpp
+	optimizations/cond_branch_opt/cond_branch_opt.cpp
+	optimizations/constants/constants.cpp
+	optimizations/control_flow/arm.cpp
+	optimizations/control_flow/control_flow.cpp
+	optimizations/control_flow/mips.cpp
+	optimizations/control_flow/powerpc.cpp
+	optimizations/control_flow/x86.cpp
+	optimizations/ctor_dtor/ctor_dtor.cpp
+	optimizations/data_references/data_references.cpp
+	optimizations/decoder/decoder.cpp
+	optimizations/decoder/static_code.cpp
+	optimizations/dsm_generator/dsm_generator.cpp
+	optimizations/dump_module/dump_module.cpp
+	optimizations/globals/dead_global_assign.cpp
+	optimizations/globals/global_to_local.cpp
+	optimizations/globals/global_to_local_and_dead_global_assign.cpp
+	optimizations/idioms/idioms.cpp
+	optimizations/idioms/idioms_abstract.cpp
+	optimizations/idioms/idioms_analysis.cpp
+	optimizations/idioms/idioms_borland.cpp
+	optimizations/idioms/idioms_common.cpp
+	optimizations/idioms/idioms_gcc.cpp
+	optimizations/idioms/idioms_intel.cpp
+	optimizations/idioms/idioms_llvm.cpp
+	optimizations/idioms/idioms_magicdivmod.cpp
+	optimizations/idioms/idioms_owatcom.cpp
+	optimizations/idioms/idioms_vstudio.cpp
+	optimizations/idioms_libgcc/idioms_libgcc.cpp
+	optimizations/inst_opt/inst_opt.cpp
+	optimizations/local_vars/local_vars.cpp
+	optimizations/main_detection/main_detection.cpp
+	optimizations/never_returning_funcs/never_returning_funcs.cpp
+	optimizations/param_return/param_return.cpp
+	optimizations/phi2seq/phi2seq.cpp
+	optimizations/provider_init/provider_init.cpp
+	optimizations/register/register.cpp
+	optimizations/select_functions/select_functions.cpp
+	optimizations/simple_types/simple_types.cpp
+	optimizations/stack/stack.cpp
+	optimizations/stack_pointer_ops/stack_pointer_ops.cpp
+	optimizations/stack_protect/stack_protect.cpp
+	optimizations/syscalls/arm.cpp
+	optimizations/syscalls/mips.cpp
+	optimizations/syscalls/syscalls.cpp
+	optimizations/syscalls/x86.cpp
+	optimizations/type_conversions/type_conversions.cpp
+	optimizations/unreachable_funcs/unreachable_funcs.cpp
+	optimizations/volatilize/volatilize.cpp
+	optimizations/vtable/rtti_analysis.cpp
+	optimizations/vtable/rtti_gcc.cpp
+	optimizations/vtable/rtti_msvc.cpp
+	optimizations/vtable/vtable.cpp
+	providers/abi.cpp
+	providers/asm_instruction.cpp
+	providers/config.cpp
+	providers/debugformat.cpp
+	providers/demangler.cpp
+	providers/fileimage.cpp
+	providers/lti.cpp
+	utils/defs.cpp
+	utils/global_var.cpp
+	utils/instruction.cpp
+	utils/ir_modifier.cpp
+	utils/type.cpp
+)
+
+add_library(bin2llvmir STATIC ${BIN2LLVMIR_SOURCES})
+target_link_libraries(bin2llvmir ctypesparser loader fileformat debugformat retdec-config demangler capstone2llvmir stacofin llvm-support llvm)
+target_include_directories(bin2llvmir PUBLIC ${PROJECT_SOURCE_DIR}/include/)

@@ -1,0 +1,8 @@
+
+add_subdirectory(bin2llvmir)
+add_subdirectory(bin2llvmirtool)
+add_subdirectory(debugformat)
+add_subdirectory(dwarfparser)
+add_subdirectory(llvm-support)
+add_subdirectory(llvmir2hll)
+add_subdirectory(llvmir2hlltool)
