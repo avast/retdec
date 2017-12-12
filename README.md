@@ -1,4 +1,4 @@
-## RetDec
+# RetDec
 
 [RetDec](https://retdec.com/) is a retargetable machine-code decompiler based on [LLVM](https://llvm.org/).
 
