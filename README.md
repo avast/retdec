@@ -80,7 +80,7 @@ This section describes a manual build and installation of RetDec.
 
 ### Process
 
-**Warning: Install the decompiler into a clean, dedicated directory. Do NOT install into `/usr`, `/usr/local`, etc. I.e. always set `-DCMAKE_INSTALL_PREFIX=<path>` to a directory you created just for the decompiler. See [issue #12](https://github.com/avast-tl/retdec/issues/12) for more details.**
+**Warning: Currently, RetDec has to be installed into a clean, dedicated directory. Do NOT install it into `/usr`, `/usr/local`, etc. because our build system is not yet ready for system-wide installations. So, when running `cmake`, always set `-DCMAKE_INSTALL_PREFIX=<path>` to a directory that will be used just by RetDec. For more details, see #12.**
 
 * Recursively clone the repository (it contains submodules):
   * `git clone --recursive https://github.com/avast-tl/retdec`
