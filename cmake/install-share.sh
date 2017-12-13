@@ -33,7 +33,7 @@ INSTALL_PATH="$1"
 case "$(uname -s)" in
     *Windows*|*CYGWIN*|*MINGW*|*MSYS*)
         INSTALL_PATH="$(sed -e 's/\\/\//g' -e 's/://' <<< "/$INSTALL_PATH")"
-    ;;
+        ;;
 esac
 
 SHARE_DIR="$INSTALL_PATH/share"
