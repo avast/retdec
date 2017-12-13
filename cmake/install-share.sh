@@ -30,9 +30,11 @@ fi
 # Get install path from script options.
 INSTALL_PATH="$1"
 # Convert from Windows to Unix path on Windows.
-if [[ $(uname -s) == *MINGW* ]] || [[ $(uname -s) == *MSYS* ]]; then
-	INSTALL_PATH="$(sed -e 's/\\/\//g' -e 's/://' <<< "/$INSTALL_PATH")"
-fi
+case "$(uname -s)" in
+    *Windows*|*CYGWIN*|*MINGW*|*MSYS*)
+        INSTALL_PATH="$(sed -e 's/\\/\//g' -e 's/://' <<< "/$INSTALL_PATH")"
+    ;;
+esac
 
 SHARE_DIR="$INSTALL_PATH/share"
 
