@@ -104,7 +104,7 @@ check_arguments()
 		[ "$ARCH" ] && print_warning "Option -a|--arch is not used in mode $MODE"
 		[ "$FORMAT" ] && print_warning "Option -f|--format is not used in mode $MODE"
 		[ "$PDB_FILE" ] && print_warning "Option -p|--pdb is not used in mode $MODE"
-        [ "$CONFIG_DB" = "" ] && [ ! "$NO_CONFIG" ] && print_error_and_die "Option --config or --no-config must be specified in mode $MODE"
+		[ "$CONFIG_DB" = "" ] && [ ! "$NO_CONFIG" ] && print_error_and_die "Option --config or --no-config must be specified in mode $MODE"
 	elif [ "$MODE" = "raw" ]; then
 		# Errors -- missing critical arguments.
 		[ ! "$ARCH" ] && print_error_and_die "Option -a|--arch must be used with mode $MODE"
@@ -664,8 +664,8 @@ if [ "$MODE" = "bin" ] || [ "$MODE" = "raw" ]; then
 	echo "##### Gathering file information..."
 	echo "RUN: $FILEINFO ${FILEINFO_PARAMS[@]}"
 
-    $FILEINFO "${FILEINFO_PARAMS[@]}"
-    FILEINFO_RC=$?
+	$FILEINFO "${FILEINFO_PARAMS[@]}"
+	FILEINFO_RC=$?
 
 	if [ "$FILEINFO_RC" -ne 0 ]; then
 		cleanup
@@ -678,8 +678,8 @@ if [ "$MODE" = "bin" ] || [ "$MODE" = "raw" ]; then
 	## Unpacking.
 	##
 	UNPACK_PARAMS=(--extended-exit-codes --output "$OUT_UNPACKED" "$IN")
-    $UNPACK_SH "${UNPACK_PARAMS[@]}"
-    UNPACKER_RC=$?
+	$UNPACK_SH "${UNPACK_PARAMS[@]}"
+	UNPACKER_RC=$?
 
 	check_whether_decompilation_should_be_forcefully_stopped "unpacker"
 
@@ -708,8 +708,8 @@ if [ "$MODE" = "bin" ] || [ "$MODE" = "raw" ]; then
 		echo "##### Gathering file information after unpacking..."
 		echo "RUN: $FILEINFO ${FILEINFO_PARAMS[@]}"
 
-        $FILEINFO "${FILEINFO_PARAMS[@]}"
-        FILEINFO_RC=$?
+		$FILEINFO "${FILEINFO_PARAMS[@]}"
+		FILEINFO_RC=$?
 
 		if [ $FILEINFO_RC -ne 0 ]; then
 			cleanup
@@ -857,52 +857,52 @@ if [ "$MODE" = "bin" ] || [ "$MODE" = "raw" ]; then
 		done
 	fi
 
-    # Assignment of other used variables.
-    # We have to ensure that the .bc version of the decompiled .ll file is placed
-    # in the same directory as are other output files. Otherwise, there may be
-    # race-condition problems when the same input .ll file is decompiled in
-    # parallel processes because they would overwrite each other's .bc file. This
-    # is most likely to happen in regression tests in the "ll" mode.
-    OUT_BACKEND="$OUT.backend"
-    # If the input file is the same as $OUT_BACKEND_LL below, then we have to change the name of
-    # $OUT_BACKEND. Otherwise, the input file would get overwritten during the conversion.
-    [ "$OUT_FRONTEND_LL" = "$OUT_BACKEND.ll" ] && OUT_BACKEND="$OUT.backend.backend"
-    OUT_BACKEND_BC="$OUT_BACKEND.bc"
-    OUT_BACKEND_LL="$OUT_BACKEND.ll"
+	# Assignment of other used variables.
+	# We have to ensure that the .bc version of the decompiled .ll file is placed
+	# in the same directory as are other output files. Otherwise, there may be
+	# race-condition problems when the same input .ll file is decompiled in
+	# parallel processes because they would overwrite each other's .bc file. This
+	# is most likely to happen in regression tests in the "ll" mode.
+	OUT_BACKEND="$OUT.backend"
+	# If the input file is the same as $OUT_BACKEND_LL below, then we have to change the name of
+	# $OUT_BACKEND. Otherwise, the input file would get overwritten during the conversion.
+	[ "$OUT_FRONTEND_LL" = "$OUT_BACKEND.ll" ] && OUT_BACKEND="$OUT.backend.backend"
+	OUT_BACKEND_BC="$OUT_BACKEND.bc"
+	OUT_BACKEND_LL="$OUT_BACKEND.ll"
 
-    ##
-    ## Decompile the binary into LLVM IR.
-    ##
-    if [ "$KEEP_UNREACHABLE_FUNCS" ]; then
-        # Prevent bin2llvmir from removing unreachable functions.
-        BIN2LLVMIR_PARAMS="$(sed 's/-unreachable-funcs *//g' <<< "$BIN2LLVMIR_PARAMS")"
-    fi
+	##
+	## Decompile the binary into LLVM IR.
+	##
+	if [ "$KEEP_UNREACHABLE_FUNCS" ]; then
+		# Prevent bin2llvmir from removing unreachable functions.
+		BIN2LLVMIR_PARAMS="$(sed 's/-unreachable-funcs *//g' <<< "$BIN2LLVMIR_PARAMS")"
+	fi
 
-    if [ "$CONFIG" = "" ] && [ "$CONFIG_DB" != "" ]; then
-        CONFIG="$CONFIG_DB"
-    fi
+	if [ "$CONFIG" = "" ] && [ "$CONFIG_DB" != "" ]; then
+		CONFIG="$CONFIG_DB"
+	fi
 
-    BIN2LLVMIR_PARAMS=(-provider-init -config-path "$CONFIG" -decoder $BIN2LLVMIR_PARAMS)
+	BIN2LLVMIR_PARAMS=(-provider-init -config-path "$CONFIG" -decoder $BIN2LLVMIR_PARAMS)
 
-    echo ""
-    echo "##### Decompiling $IN into $OUT_BACKEND_BC..."
-    echo "RUN: $BIN2LLVMIR ${BIN2LLVMIR_PARAMS[@]} -o $OUT_BACKEND_BC"
+	echo ""
+	echo "##### Decompiling $IN into $OUT_BACKEND_BC..."
+	echo "RUN: $BIN2LLVMIR ${BIN2LLVMIR_PARAMS[@]} -o $OUT_BACKEND_BC"
 
 	$BIN2LLVMIR "${BIN2LLVMIR_PARAMS[@]}" -o "$OUT_BACKEND_BC"
 	BIN2LLVMIR_RC=$?
 
-    if [ "$BIN2LLVMIR_RC" -ne 0 ]; then
-        cleanup
-        print_error_and_die "Decompilation to LLVM IR failed"
-    fi
-    check_whether_decompilation_should_be_forcefully_stopped "bin2llvmir"
+	if [ "$BIN2LLVMIR_RC" -ne 0 ]; then
+		cleanup
+		print_error_and_die "Decompilation to LLVM IR failed"
+	fi
+	check_whether_decompilation_should_be_forcefully_stopped "bin2llvmir"
 
 fi # modes "bin" || "raw"
 
 # LL mode goes straight to backend.
 if [ "$MODE" = "ll" ]; then
-    OUT_BACKEND_BC="$IN"
-    CONFIG="$CONFIG_DB"
+	OUT_BACKEND_BC="$IN"
+	CONFIG="$CONFIG_DB"
 fi
 
 # Conditional initialization.

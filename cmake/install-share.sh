@@ -17,42 +17,42 @@ ARCH_NAME="retdec-support"_"$VERSION.$ARCH_SUFFIX"
 
 cleanup()
 {
-    rm -f "$INSTALL_PATH/$ARCH_NAME"
-    rm -rf "$SHARE_DIR"
+	rm -f "$INSTALL_PATH/$ARCH_NAME"
+	rm -rf "$SHARE_DIR"
 }
 
 # Check arguments.
 if [ "$#" -ne 1 ]; then
-    echo "ERROR: Unexpected number of arguments."
-    exit 1
+	echo "ERROR: Unexpected number of arguments."
+	exit 1
 fi
 
 # Get install path from script options.
 INSTALL_PATH="$1"
 # Convert from Windows to Unix path on Windows.
 case "$(uname -s)" in
-    *Windows*|*CYGWIN*|*MINGW*|*MSYS*)
-        INSTALL_PATH="$(sed -e 's/\\/\//g' -e 's/://' <<< "/$INSTALL_PATH")"
-        ;;
+	*Windows*|*CYGWIN*|*MINGW*|*MSYS*)
+		INSTALL_PATH="$(sed -e 's/\\/\//g' -e 's/://' <<< "/$INSTALL_PATH")"
+		;;
 esac
 
 SHARE_DIR="$INSTALL_PATH/share"
 
 # Share directory exists.
 if [ -d "$SHARE_DIR" ]; then
-    # Version file exists.
-    if [ -f "$SHARE_DIR/$VERSION_FILE_NAME" ]; then
-        VERSION_FROM_FILE=$(cat "$SHARE_DIR/$VERSION_FILE_NAME")
-        # Version is ok.
-        if [ "$VERSION" = "$VERSION_FROM_FILE" ]; then
-            echo "$SHARE_DIR already exists, version is ok"
-            exit
-        else
-            echo "versions is not as expected -> replace with expected version"
-        fi
-    fi
+	# Version file exists.
+	if [ -f "$SHARE_DIR/$VERSION_FILE_NAME" ]; then
+		VERSION_FROM_FILE=$(cat "$SHARE_DIR/$VERSION_FILE_NAME")
+		# Version is ok.
+		if [ "$VERSION" = "$VERSION_FROM_FILE" ]; then
+			echo "$SHARE_DIR already exists, version is ok"
+			exit
+		else
+			echo "versions is not as expected -> replace with expected version"
+		fi
+	fi
 
-    rm -rf "$SHARE_DIR"
+	rm -rf "$SHARE_DIR"
 fi
 
 # Make sure destination directory exists.
@@ -64,9 +64,9 @@ echo "RUN: wget ${WGET_PARAMS[@]}"
 wget "${WGET_PARAMS[@]}"
 WGET_RC=$?
 if [ "$WGET_RC" -ne 0 ]; then
-    echo "ERROR: wget failed"
-    cleanup
-    exit 1
+	echo "ERROR: wget failed"
+	cleanup
+	exit 1
 fi
 
 # Compute hash of the downloaded archive.
@@ -75,16 +75,16 @@ echo "RUN: sha256sum ${SHA256SUM_PARAMS[@]}"
 SHA256SUM=$(sha256sum "${SHA256SUM_PARAMS[@]}" | cut -d' ' -f1)
 SHA256SUM_RC=$?
 if [ "$SHA256SUM_RC" -ne 0 ]; then
-    echo "ERROR: sha256sum failed"
-    cleanup
-    exit 1
+	echo "ERROR: sha256sum failed"
+	cleanup
+	exit 1
 fi
 
 # Check that hash is ok.
 if [ "$SHA256SUM" != "$SHA256SUM_REF" ]; then
-    echo "ERROR: hash check failed"
-    cleanup
-    exit 1
+	echo "ERROR: hash check failed"
+	cleanup
+	exit 1
 fi
 
 # Unpack archive.
@@ -93,9 +93,9 @@ echo "RUN: tar xf ${UNPACK_PARAMS[@]}"
 tar xf "${UNPACK_PARAMS[@]}" &> /dev/null
 UNPACK_RC=$?
 if [ "$UNPACK_RC" -ne 0 ]; then
-    echo "ERROR: unpacking failed"
-    cleanup
-    exit 1
+	echo "ERROR: unpacking failed"
+	cleanup
+	exit 1
 fi
 
 # Remove archive.
