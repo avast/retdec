@@ -18,7 +18,10 @@ ARCH_NAME="retdec-support"_"$VERSION.$ARCH_SUFFIX"
 cleanup()
 {
 	rm -f "$INSTALL_PATH/$ARCH_NAME"
-	rm -rf "$SHARE_DIR"
+	rm -rf "$SHARE_DIR/arm"
+	rm -rf "$SHARE_DIR/generic"
+	rm -rf "$SHARE_DIR/x86"
+	rm -f "$SHARE_DIR/version.txt"
 }
 
 # Check arguments.
@@ -52,7 +55,7 @@ if [ -d "$SHARE_DIR" ]; then
 		fi
 	fi
 
-	rm -rf "$SHARE_DIR"
+	cleanup
 fi
 
 # Make sure destination directory exists.
