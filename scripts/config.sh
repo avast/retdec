@@ -9,29 +9,6 @@ if [ -z "$DECOMPILER_CONFIG" ]; then
 	DECOMPILER_CONFIG="./config.sh"
 fi
 
-#
-# Detect OS type (win / linux / linux64)
-#
-get_SYS()
-{
-	if [[ $(uname -s) == *Linux* ]]; then
-		echo "linux"
-	elif [[ $(uname -s) == *MINGW* ]] || [[ $(uname -s) == *MSYS* ]]; then
-		echo "win"
-	else
-		echo "unknown"
-	fi
-}
-
-##
-## Settings.
-##
-SYS="$(get_SYS)"
-if [ "$SYS" != "win" -a "$SYS" != "linux" ]; then
-	echo "Error: Unknown OS" >&2
-	exit 1
-fi
-
 ##
 ## Paths (everything has to be without the ending slash '/').
 ##
