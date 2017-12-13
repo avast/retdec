@@ -1,5 +1,4 @@
 FROM ubuntu:bionic
-LABEL maintainer="David Manouchehri"
 
 RUN useradd -m retdec
 WORKDIR /home/retdec
