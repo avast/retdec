@@ -73,6 +73,13 @@ This section describes a manual build and installation of RetDec.
   * [CMake](https://cmake.org/) (version >= 3.6)
   * [Perl](https://www.perl.org/)
   * standard tools (e.g. `sh`, `wget`, `sha256sum`)
+
+On Ubuntu 16.04 and 18.04, the required packages can be installed with apt-get.
+
+```sh
+sudo apt-get install build-essential git bc graphviz upx cmake python zlib1g-dev flex bison libtinfo-dev autoconf pkg-config m4 libtool wget
+```
+
 * Windows:
   * Microsoft Visual C++ (version >= Visual Studio 2015 Update 2)
   * [MSYS2](http://www.msys2.org/) and some other applications. Follow RetDec's [Windows environment setup guide](https://github.com/avast-tl/retdec/wiki/Windows-Environment) to get everything you need on Windows.
