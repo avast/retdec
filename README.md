@@ -49,7 +49,7 @@ Currently, we support only Windows and Linux.
 
 2. After you have built the decompiler, you will need to install the following packages via your distribution's package manager:
 
-    * [GNU Bash](https://www.gnu.org/software/bash/)
+    * [Bash](https://www.gnu.org/software/bash/)
     * [UPX](https://upx.github.io/)
     * [bc](https://www.gnu.org/software/bc/)
     * [Graphviz](http://www.graphviz.org/)
@@ -68,22 +68,30 @@ This section describes a manual build and installation of RetDec.
 
 ### Requirements
 
-* Linux:
-  * A compiler supporting C++14
-  * [CMake](https://cmake.org/) (version >= 3.6)
-  * [Perl](https://www.perl.org/)
-  * standard tools (e.g. `sh`, `wget`, `sha256sum`)
+#### Linux
 
-On Ubuntu 16.04 and 18.04, the required packages can be installed with apt-get.
+* A compiler supporting C++14
+* [CMake](https://cmake.org/) (version >= 3.6)
+* [Git](https://git-scm.com/)
+* [Perl](https://www.perl.org/)
+* [Python](https://www.python.org/) (version >= 3.4)
+* [Bash](https://www.gnu.org/software/bash/)
+* [coreutils](https://www.gnu.org/software/coreutils)
+* [wget](https://www.gnu.org/software/wget/)
+
+On Debian-based distributions (e.g. Ubuntu), the required packages can be installed with `apt-get`:
 
 ```sh
-sudo apt-get install build-essential git bc graphviz upx cmake python zlib1g-dev flex bison libtinfo-dev autoconf pkg-config m4 libtool wget
+sudo apt-get install build-essential cmake git perl python bash coreutils wget bc graphviz upx flex bison zlib1g-dev libtinfo-dev autoconf pkg-config m4 libtool
 ```
 
-* Windows:
-  * Microsoft Visual C++ (version >= Visual Studio 2015 Update 2)
-  * [MSYS2](http://www.msys2.org/) and some other applications. Follow RetDec's [Windows environment setup guide](https://github.com/avast-tl/retdec/wiki/Windows-Environment) to get everything you need on Windows.
-  * [Active Perl](https://www.activestate.com/activeperl). It needs to be the first Perl in `PATH`, or it has to be provided to CMake using `CMAKE_PROGRAM_PATH` variable, e.g. `-DCMAKE_PROGRAM_PATH=/c/perl/bin`.
+#### Windows
+
+* Microsoft Visual C++ (version >= Visual Studio 2015 Update 2)
+* [Git](https://git-scm.com/)
+* [MSYS2](http://www.msys2.org/) and some other applications. Follow RetDec's [Windows environment setup guide](https://github.com/avast-tl/retdec/wiki/Windows-Environment) to get everything you need on Windows.
+* [Active Perl](https://www.activestate.com/activeperl). It needs to be the first Perl in `PATH`, or it has to be provided to CMake using `CMAKE_PROGRAM_PATH` variable, e.g. `-DCMAKE_PROGRAM_PATH=/c/perl/bin`.
+* [Python](https://www.python.org/) (version >= 3.4)
 
 ### Process
 
