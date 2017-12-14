@@ -22,7 +22,7 @@ Features:
 
 ## Installation and Use
 
-Currently, we support only Windows and Linux.
+Currently, we support only Windows (7 or later) and Linux.
 
 ### Windows
 
