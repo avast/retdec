@@ -78,6 +78,8 @@ This section describes a manual build and installation of RetDec.
 * [Bash](https://www.gnu.org/software/bash/)
 * [coreutils](https://www.gnu.org/software/coreutils)
 * [wget](https://www.gnu.org/software/wget/)
+* [ncurses](http://invisible-island.net/ncurses/) (for `libtinfo`)
+* [zlib](http://zlib.net/)
 
 On Debian-based distributions (e.g. Ubuntu), the required packages can be installed with `apt-get`:
 
