@@ -3,7 +3,7 @@
 # Runs all the installed unit tests.
 #
 
-SCRIPTPATH="$( cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P )"
+SCRIPTPATH="$(dirname "$(readlink -e "$0")")"
 
 if [ -z "$DECOMPILER_CONFIG" ]; then
 	DECOMPILER_CONFIG="$SCRIPTPATH/config.sh"

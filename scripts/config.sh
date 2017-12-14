@@ -3,7 +3,7 @@
 # Decompiler's configuration. This file should be included in every decompilation script.
 #
 
-SCRIPTPATH="$( cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P )"
+SCRIPTPATH="$(dirname "$(readlink -e "$0")")"
 
 if [ -z "$DECOMPILER_CONFIG" ]; then
 	DECOMPILER_CONFIG="./config.sh"

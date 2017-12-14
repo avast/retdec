@@ -3,13 +3,23 @@
 # Compilation and decompilation utility functions.
 #
 
-SCRIPTPATH="$( cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P )"
+SCRIPTPATH="$(dirname "$(readlink -e "$0")")"
 
 if [ -z "$DECOMPILER_CONFIG" ]; then
 	DECOMPILER_CONFIG="$SCRIPTPATH/config.sh"
 fi
 
 . "$DECOMPILER_CONFIG"
+
+get_realpath()
+{
+  local inpath="$1"
+  if [[ "$(uname -s)" == *CYGWIN* ]]; then
+    cygpath -ma "$inpath"
+  else
+    readlink -f "$inpath"
+  fi
+}
 
 #
 # Print error message to stderr and die.
