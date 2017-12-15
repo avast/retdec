@@ -18,6 +18,9 @@ set(DEMANGLER_TESTS ${DEPS_TESTS} CACHE BOOL "enable demangler tests" FORCE)
 # fileformat
 set(FILEFORMAT_TESTS ${DEPS_TESTS} CACHE BOOL "enable fileformat tests" FORCE)
 
+# libdwarf
+set(LIBDWARF_INSTALL_TO_UNITTESTS ${RETDEC_TESTS} CACHE BOOL "enable libdwarf installation to unit tests directory" FORCE)
+
 # retdec-config
 set(RETDEC_CONFIG_TOOLS ON CACHE BOOL "enable retdec-config tools" FORCE)
 set(RETDEC_CONFIG_TESTS ${DEPS_TESTS} CACHE BOOL "enable retdec-config tests" FORCE)
