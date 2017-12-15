@@ -39,7 +39,7 @@ Currently, we support only Windows (7 or later) and Linux.
 
 3. Now, you are all set to run the decompiler. To decompile a binary file named `test.exe`, go into `$RETDEC_INSTALLED_DIR/bin` and run:
 
-    ```
+    ```sh
     bash decompile.sh test.exe
     ```
 
@@ -58,7 +58,7 @@ Currently, we support only Windows (7 or later) and Linux.
 
 3. Now, you are all set to run the decompiler. To decompile a binary file named `test.exe`, go into `$RETDEC_INSTALLED_DIR/bin` and run:
 
-    ```
+    ```sh
     ./decompile.sh test.exe
     ```
 
