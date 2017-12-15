@@ -17,18 +17,19 @@ fi
 INSTALL_BIN_DIR="$SCRIPTPATH"
 UNIT_TESTS_DIR="$INSTALL_BIN_DIR/unit-tests"
 UNPACKER_PLUGINS_DIR="$INSTALL_BIN_DIR/unpacker-plugins"
-INSTALL_SHARE_DIR="$INSTALL_BIN_DIR/../share"
-INSTALL_SHARE_YARA_DIR="$INSTALL_SHARE_DIR/generic/yara_patterns"
+INSTALL_SHARE_DIR="$INSTALL_BIN_DIR/../share/retdec"
+INSTALL_SUPPORT_DIR="$INSTALL_SHARE_DIR/support"
+INSTALL_SHARE_YARA_DIR="$INSTALL_SUPPORT_DIR/generic/yara_patterns"
 
 ## generic configuration
-GENERIC_TYPES_DIR="$INSTALL_SHARE_DIR/generic/types"
-GENERIC_SIGNATURES_DIR="$INSTALL_SHARE_DIR/generic/yara_patterns/static-code"
+GENERIC_TYPES_DIR="$INSTALL_SUPPORT_DIR/generic/types"
+GENERIC_SIGNATURES_DIR="$INSTALL_SHARE_YARA_DIR/static-code"
 
 ## ARM-specific configuration
-ARM_ORDS_DIR="$INSTALL_SHARE_DIR/arm/ords"
+ARM_ORDS_DIR="$INSTALL_SUPPORT_DIR/arm/ords"
 
 ## X86-specific configuration
-X86_ORDS_DIR="$INSTALL_SHARE_DIR/x86/ords"
+X86_ORDS_DIR="$INSTALL_SUPPORT_DIR/x86/ords"
 
 ## BIN2LLVMIR parameters
 # The following list of passes is -O3

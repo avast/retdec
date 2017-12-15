@@ -3,32 +3,23 @@
 # Get RetDec share directory.
 #
 
-###############################################################################
-
-VERSION_FILE_NAME="version.txt"
-ARCH_SUFFIX="tar.xz"
-
-SHA256SUM_REF="6376af57a77147f1363896963d8c1b3745ddb9a6bcec83d63a5846c3f78aeef9"
-VERSION="2017-12-12"
-
-###############################################################################
-
-ARCH_NAME="retdec-support"_"$VERSION.$ARCH_SUFFIX"
-
-cleanup()
-{
-	rm -f "$INSTALL_PATH/$ARCH_NAME"
-	rm -rf "$SHARE_DIR/arm"
-	rm -rf "$SHARE_DIR/generic"
-	rm -rf "$SHARE_DIR/x86"
-	rm -f "$SHARE_DIR/version.txt"
-}
-
 # Check arguments.
 if [ "$#" -ne 1 ]; then
 	echo "ERROR: Unexpected number of arguments."
 	exit 1
 fi
+
+###############################################################################
+
+VERSION_FILE_NAME="version.txt"
+ARCH_SUFFIX="tar.xz"
+
+SHA256SUM_REF="4ecbe72d38d6e95f057c5d18c79e25b5340265416687368ce7e5fd1ebb744b32"
+VERSION="2017-12-15"
+
+###############################################################################
+
+ARCH_NAME="retdec-support"_"$VERSION.$ARCH_SUFFIX"
 
 # Get install path from script options.
 INSTALL_PATH="$1"
@@ -40,15 +31,24 @@ case "$(uname -s)" in
 esac
 
 SHARE_DIR="$INSTALL_PATH/share"
+SHARE_RETDEC_DIR="$SHARE_DIR/retdec"
+SUPPORT_DIR="$SHARE_RETDEC_DIR/support"
+
+###############################################################################
+
+cleanup()
+{
+	rm -rf "$SUPPORT_DIR"
+}
 
 # Share directory exists.
-if [ -d "$SHARE_DIR" ]; then
+if [ -d "$SUPPORT_DIR" ]; then
 	# Version file exists.
-	if [ -f "$SHARE_DIR/$VERSION_FILE_NAME" ]; then
-		VERSION_FROM_FILE=$(cat "$SHARE_DIR/$VERSION_FILE_NAME")
+	if [ -f "$SUPPORT_DIR/$VERSION_FILE_NAME" ]; then
+		VERSION_FROM_FILE=$(cat "$SUPPORT_DIR/$VERSION_FILE_NAME")
 		# Version is ok.
 		if [ "$VERSION" = "$VERSION_FROM_FILE" ]; then
-			echo "$SHARE_DIR already exists, version is ok"
+			echo "$SUPPORT_DIR already exists, version is ok"
 			exit
 		else
 			echo "versions is not as expected -> replace with expected version"
@@ -59,10 +59,10 @@ if [ -d "$SHARE_DIR" ]; then
 fi
 
 # Make sure destination directory exists.
-mkdir -p "$INSTALL_PATH"
+mkdir -p "$SUPPORT_DIR"
 
 # Get archive using wget.
-WGET_PARAMS=("https://github.com/avast-tl/retdec-support/releases/download/$VERSION/$ARCH_NAME" -O "$INSTALL_PATH/$ARCH_NAME")
+WGET_PARAMS=(--no-verbose "https://github.com/avast-tl/retdec-support/releases/download/$VERSION/$ARCH_NAME" -O "$SUPPORT_DIR/$ARCH_NAME")
 echo "RUN: wget ${WGET_PARAMS[@]}"
 wget "${WGET_PARAMS[@]}"
 WGET_RC=$?
@@ -73,7 +73,7 @@ if [ "$WGET_RC" -ne 0 ]; then
 fi
 
 # Compute hash of the downloaded archive.
-SHA256SUM_PARAMS=("$INSTALL_PATH/$ARCH_NAME")
+SHA256SUM_PARAMS=("$SUPPORT_DIR/$ARCH_NAME")
 echo "RUN: sha256sum ${SHA256SUM_PARAMS[@]}"
 SHA256SUM=$(sha256sum "${SHA256SUM_PARAMS[@]}" | cut -d' ' -f1)
 SHA256SUM_RC=$?
@@ -91,7 +91,7 @@ if [ "$SHA256SUM" != "$SHA256SUM_REF" ]; then
 fi
 
 # Unpack archive.
-UNPACK_PARAMS=("$INSTALL_PATH/$ARCH_NAME" "--directory=$INSTALL_PATH")
+UNPACK_PARAMS=("$SUPPORT_DIR/$ARCH_NAME" "--directory=$SUPPORT_DIR")
 echo "RUN: tar xf ${UNPACK_PARAMS[@]}"
 tar xf "${UNPACK_PARAMS[@]}" &> /dev/null
 UNPACK_RC=$?
@@ -102,7 +102,7 @@ if [ "$UNPACK_RC" -ne 0 ]; then
 fi
 
 # Remove archive.
-rm -f "$INSTALL_PATH/$ARCH_NAME"
+rm -f "$SUPPORT_DIR/$ARCH_NAME"
 
-echo "RetDec share directory downloaded OK"
+echo "RetDec support directory downloaded OK"
 exit
