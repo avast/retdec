@@ -153,7 +153,7 @@ This repository contains the following scripts:
   * `run-unit-test.sh` -- run all tests in the unit test directory.
   * `utils.sh` -- a collection of bash utilities.
 
-## Related repositories
+## Related Repositories
 
 * [RetDec IDA plugin](https://github.com/avast-tl/retdec-idaplugin) -- embeds RetDec into IDA (Interactive Disassembler) and makes its use much easier.
 * [RetDec Regression Tests](https://github.com/avast-tl/retdec-regression-tests-framework) -- provides means to run and create regression tests for RetDec and related tools. This is a must if you plan to contribute to the RetDec project.
