@@ -24,6 +24,8 @@ Features:
 
 Currently, we support only Windows (7 or later) and Linux.
 
+**Warning: Decompilations of larger binaries (1 MB or more) may require a lot of RAM. When running decompilations, we advise you to limit the maximal virtual memory for processes before decompiling to prevent potential swapping and unresponsiveness. On Linux, you can run e.g. `ulimit -Sv 9863168` in your shell to limit the maximal virtual memory to 8 GB.**
+
 ### Windows
 
 1. Either download and unpack a pre-built package from the following list, or build and install the decompiler by yourself (the process is described below):
