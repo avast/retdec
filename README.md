@@ -88,6 +88,12 @@ On Debian-based distributions (e.g. Ubuntu), the required packages can be instal
 sudo apt-get install build-essential cmake git perl python bash coreutils wget bc graphviz upx flex bison zlib1g-dev libtinfo-dev autoconf pkg-config m4 libtool
 ```
 
+On RPM-based distributions (e.g. Fedora), the required packages can be installed with `dnf`:
+
+```sh
+sudo dnf install git cmake make gcc gcc-c++ perl python3 bash zlib-devel flex bison m4 coreutils autoconf automake libtool ncurses-devel wget bc doxygen graphviz upx pkg-config
+```
+
 #### Windows
 
 * Microsoft Visual C++ (version >= Visual Studio 2015 Update 2)
