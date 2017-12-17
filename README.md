@@ -74,7 +74,7 @@ This section describes a manual build and installation of RetDec.
 
 #### Linux
 
-* A compiler supporting C++14
+* A C++ compiler and standard C++ library supporting C++14 (e.g. GCC >= 4.9)
 * [CMake](https://cmake.org/) (version >= 3.6)
 * [Git](https://git-scm.com/)
 * [Perl](https://www.perl.org/)
