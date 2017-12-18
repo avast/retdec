@@ -90,7 +90,7 @@ This section describes a manual build and installation of RetDec.
 On Debian-based distributions (e.g. Ubuntu), the required packages can be installed with `apt-get`:
 
 ```sh
-sudo apt-get install build-essential cmake git perl python3 bash coreutils wget bc doxygen graphviz upx flex bison zlib1g-dev libtinfo-dev autoconf pkg-config m4 libtool
+sudo apt-get install build-essential cmake git perl python3 bash coreutils wget bc doxygen graphviz upx flex bison zlib1g-dev libtinfo-dev autoconf automake pkg-config m4 libtool
 ```
 
 On RPM-based distributions (e.g. Fedora), the required packages can be installed with `dnf`:
