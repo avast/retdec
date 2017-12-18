@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 #
 # Get RetDec share directory.
 #
@@ -26,7 +26,7 @@ INSTALL_PATH="$1"
 # Convert from Windows to Unix path on Windows.
 case "$(uname -s)" in
 	*Windows*|*CYGWIN*|*MINGW*|*MSYS*)
-		INSTALL_PATH="$(sed -e 's/\\/\//g' -e 's/://' <<< "/$INSTALL_PATH")"
+ 		INSTALL_PATH="$(echo "/$INSTALL_PATH" | sed -e 's/\\/\//g' -e 's/://')"
 		;;
 esac
 
@@ -62,9 +62,9 @@ fi
 mkdir -p "$SUPPORT_DIR"
 
 # Get archive using wget.
-WGET_PARAMS=(--no-verbose "https://github.com/avast-tl/retdec-support/releases/download/$VERSION/$ARCH_NAME" -O "$SUPPORT_DIR/$ARCH_NAME")
-echo "RUN: wget ${WGET_PARAMS[@]}"
-wget "${WGET_PARAMS[@]}"
+ARCH_URL="https://github.com/avast-tl/retdec-support/releases/download/$VERSION/$ARCH_NAME"
+echo "Downloading archive from $ARCH_URL ..."
+wget --no-verbose "$ARCH_URL" -O "$SUPPORT_DIR/$ARCH_NAME"
 WGET_RC=$?
 if [ "$WGET_RC" -ne 0 ]; then
 	echo "ERROR: wget failed"
@@ -73,9 +73,8 @@ if [ "$WGET_RC" -ne 0 ]; then
 fi
 
 # Compute hash of the downloaded archive.
-SHA256SUM_PARAMS=("$SUPPORT_DIR/$ARCH_NAME")
-echo "RUN: sha256sum ${SHA256SUM_PARAMS[@]}"
-SHA256SUM=$(sha256sum "${SHA256SUM_PARAMS[@]}" | cut -d' ' -f1)
+echo "Verfifying archive's checksum ..."
+SHA256SUM=$(sha256sum "$SUPPORT_DIR/$ARCH_NAME" | cut -d' ' -f1)
 SHA256SUM_RC=$?
 if [ "$SHA256SUM_RC" -ne 0 ]; then
 	echo "ERROR: sha256sum failed"
@@ -91,9 +90,9 @@ if [ "$SHA256SUM" != "$SHA256SUM_REF" ]; then
 fi
 
 # Unpack archive.
-UNPACK_PARAMS=("$SUPPORT_DIR/$ARCH_NAME" "--directory=$SUPPORT_DIR")
-echo "RUN: tar xf ${UNPACK_PARAMS[@]}"
-tar xf "${UNPACK_PARAMS[@]}" &> /dev/null
+UNPACK_PARAMS
+echo "Unpacking archive ..."
+tar xf "$SUPPORT_DIR/$ARCH_NAME" "--directory=$SUPPORT_DIR" > /dev/null 2>&1
 UNPACK_RC=$?
 if [ "$UNPACK_RC" -ne 0 ]; then
 	echo "ERROR: unpacking failed"
