@@ -64,7 +64,7 @@ mkdir -p "$SUPPORT_DIR"
 # Get archive using wget.
 ARCH_URL="https://github.com/avast-tl/retdec-support/releases/download/$VERSION/$ARCH_NAME"
 echo "Downloading archive from $ARCH_URL ..."
-wget --no-verbose "$ARCH_URL" -O "$SUPPORT_DIR/$ARCH_NAME"
+wget --no-verbose --read-timeout=10 "$ARCH_URL" -O "$SUPPORT_DIR/$ARCH_NAME"
 WGET_RC=$?
 if [ "$WGET_RC" -ne 0 ]; then
 	echo "ERROR: wget failed"
