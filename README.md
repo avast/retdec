@@ -39,7 +39,7 @@ Currently, we support only Windows (7 or later) and Linux.
 
 3. Install [MSYS2](http://www.msys2.org/) and other needed applications by following RetDec's [Windows environment setup guide](https://github.com/avast-tl/retdec/wiki/Windows-Environment).
 
-3. Now, you are all set to run the decompiler. To decompile a binary file named `test.exe`, go into `$RETDEC_INSTALLED_DIR/bin` and run:
+3. Now, you are all set to run the decompiler. To decompile a binary file named `test.exe`, go into `$RETDEC_INSTALL_DIR/bin` and run:
 
     ```sh
     bash decompile.sh test.exe
@@ -58,7 +58,7 @@ Currently, we support only Windows (7 or later) and Linux.
     * [bc](https://www.gnu.org/software/bc/)
     * [Graphviz](http://www.graphviz.org/)
 
-3. Now, you are all set to run the decompiler. To decompile a binary file named `test.exe`, go into `$RETDEC_INSTALLED_DIR/bin` and run:
+3. Now, you are all set to run the decompiler. To decompile a binary file named `test.exe`, go into `$RETDEC_INSTALL_DIR/bin` and run:
 
     ```sh
     ./decompile.sh test.exe
@@ -90,7 +90,7 @@ This section describes a manual build and installation of RetDec.
 On Debian-based distributions (e.g. Ubuntu), the required packages can be installed with `apt-get`:
 
 ```sh
-sudo apt-get install build-essential cmake git perl python3 bash coreutils wget bc doxygen graphviz upx flex bison zlib1g-dev libtinfo-dev autoconf pkg-config m4 libtool
+sudo apt-get install build-essential cmake git perl python3 bash coreutils wget bc doxygen graphviz upx flex bison zlib1g-dev libtinfo-dev autoconf automake pkg-config m4 libtool
 ```
 
 On RPM-based distributions (e.g. Fedora), the required packages can be installed with `dnf`:
