@@ -13,7 +13,7 @@ RUN git clone --recursive https://github.com/avast-tl/retdec && \
 	mkdir build && \
 	cd build && \
 	cmake .. -DCMAKE_INSTALL_PREFIX=/home/retdec/retdec-install && \
-	make && \
+	make -j$(nproc) && \
 	make install
 
 ENV PATH /home/retdec/retdec-install/bin:$PATH
