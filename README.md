@@ -27,7 +27,7 @@ For more information, you can check out:
 
 ## Installation and Use
 
-Currently, we support only Windows (7 or later), Linux and macOS.
+Currently, we support only Windows (7 or later), Linux and unofficially macOS.
 
 **Warning: Decompilations of larger binaries (1 MB or more) may require a lot of RAM. When running decompilations, we advise you to limit the maximal virtual memory for processes before decompiling to prevent potential swapping and unresponsiveness. On Linux, you can run e.g. `ulimit -Sv 9863168` in your shell to limit the maximal virtual memory to 8 GB.**
 
@@ -70,6 +70,8 @@ Currently, we support only Windows (7 or later), Linux and macOS.
    For more information, run `./decompile.sh --help`.
 
 ### macOS
+
+**Warning: macOS build was added based on community feedback and is not directly supported by Avast RetDec Team. We do not guarantee you that these instructions will work for you. If you encounter any problem with your build, file an issue so macOS community can help you out.**
 
 1. There are currently no pre-built packages for macOS. You will have to build and install the decompiler by yourself. The process is described below.
 
