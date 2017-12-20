@@ -109,7 +109,7 @@ sudo dnf install git cmake make gcc gcc-c++ perl python3 bash zlib-devel flex bi
 
 ### Process
 
-**Warning: Currently, RetDec has to be installed into a clean, dedicated directory. Do NOT install it into `/usr`, `/usr/local`, etc. because our build system is not yet ready for system-wide installations. So, when running `cmake`, always set `-DCMAKE_INSTALL_PREFIX=<path>` to a directory that will be used just by RetDec. For more details, see #12.**
+**Warning: Currently, RetDec has to be installed into a clean, dedicated directory. Do NOT install it into `/usr`, `/usr/local`, etc. because our build system is not yet ready for system-wide installations. So, when running `cmake`, always set `-DCMAKE_INSTALL_PREFIX=<path>` to a directory that will be used just by RetDec. For more details, see [#12](https://github.com/avast-tl/retdec/issues/12).**
 
 * Recursively clone the repository (it contains submodules):
   * `git clone --recursive https://github.com/avast-tl/retdec`
