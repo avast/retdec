@@ -143,7 +143,7 @@ auto ordered(const DefUseChains::DefUseChain &du) {
 			const auto &s2PredSize = s2->getNumberOfPredecessors();
 			if (s1PredSize != s2PredSize) {
 				return s1PredSize < s2PredSize;
-			} else if (s1PredSize > 0 && s1PredSize > 0) {
+			} else if (s1PredSize > 0 && s2PredSize > 0) {
 				const auto &s1Pred = *s1->predecessor_begin();
 				const auto &s2Pred = *s2->predecessor_begin();
 				cmpResult = compareStmtsInDUChains(s1Pred, s2Pred);
