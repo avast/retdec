@@ -13,6 +13,8 @@ if(MSVC)
 	# state 'llvmir2hll' twice in target_link_libraries(), first as a target to get
 	# its properties, second as path to library to link it as a whole.
 	target_link_libraries(llvmir2hlltool llvmir2hll -WHOLEARCHIVE:$<TARGET_FILE_NAME:llvmir2hll>)
+elseif(APPLE)
+	target_link_libraries(llvmir2hlltool -Wl,-force_load llvmir2hll)
 else() # Linux/MSYS2
 	target_link_libraries(llvmir2hlltool -Wl,--whole-archive llvmir2hll -Wl,--no-whole-archive)
 endif()
