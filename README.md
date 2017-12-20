@@ -166,8 +166,8 @@ This repository contains the following scripts:
 
 ## Related Repositories
 
-* [RetDec IDA plugin](https://github.com/avast-tl/retdec-idaplugin) -- embeds RetDec into IDA (Interactive Disassembler) and makes its use much easier.
-* [RetDec Regression Tests](https://github.com/avast-tl/retdec-regression-tests-framework) -- provides means to run and create regression tests for RetDec and related tools. This is a must if you plan to contribute to the RetDec project.
+* [retdec-idaplugin](https://github.com/avast-tl/retdec-idaplugin) -- embeds RetDec into IDA (Interactive Disassembler) and makes its use much easier.
+* [retdec-regression-tests-framework](https://github.com/avast-tl/retdec-regression-tests-framework) -- provides means to run and create regression tests for RetDec and related tools. This is a must if you plan to contribute to the RetDec project.
 * [retdec-python](https://github.com/s3rvac/retdec-python) -- Python library and tools providing easy access to our online decompilation service through its [REST API](https://retdec.com/api/).
 * [vim-syntax-retdecdsm](https://github.com/s3rvac/vim-syntax-retdecdsm) -- Vim syntax-highlighting file for the output from the RetDec's disassembler (`.dsm` files).
 
