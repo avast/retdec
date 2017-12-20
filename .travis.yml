@@ -1,0 +1,81 @@
+language: cpp
+cache:
+  apt:    true
+  ccache: true
+
+# Use https (public access) instead of git for git-submodules. This modifies only Travis-CI behavior!
+# disable the default submodule logic
+git:
+  submodules: false
+
+# use sed to replace the SSH URL with the public URL, then init and update submodules
+before_install:
+  - sed -i 's/git@github.com:/https:\/\/github.com\//' .gitmodules
+  - git submodule update --init --recursive
+
+addons:
+  apt:
+    packages:
+    - build-essential
+    - cmake
+    - perl
+    - python3
+    - bash
+    - coreutils
+    - wget
+    - bc
+    - doxygen
+    - graphviz
+    - upx
+    - flex
+    - bison
+    - zlib1g-dev
+    - libtinfo-dev
+    - autoconf
+    - automake
+    - pkg-config
+    - m4
+    - libtool
+
+matrix:
+  fast_finish: true
+  include:
+    - os: linux
+      compiler: gcc-7
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - g++-7
+      env:
+        - CMAKE_FLAGS="-DCMAKE_BUILD_TYPE=Debug
+                       -DCMAKE_C_COMPILER=gcc-7
+                       -DCMAKE_CXX_COMPILER=g++-7"
+    - os: linux
+      compiler: clang
+      env: CMAKE_FLAGS="-DCMAKE_BUILD_TYPE=Debug
+                        -DCMAKE_C_COMPILER=clang
+                        -DCMAKE_CXX_COMPILER=clang++"
+  allow_failures:
+    - os: linux
+      compiler: clang
+
+script:
+  - rm -rf build && mkdir -p build && cd build
+  - cmake ${CMAKE_FLAGS} -DCMAKE_INSTALL_PREFIX="$(pwd)/install" ..
+  - cmake --build . --target capstone2llvmir -- -j $(nproc)
+  # - cmake --build . -- -j $(nproc)
+  # - cmake --build . --target install -- -j $(nproc)
+
+branches:
+  only:
+    # Pushes and PR to the master branch
+    - master
+    # IMPORTANT Ruby regex to match tags. Required, or travis won't trigger deploys when a new tag
+    # is pushed. This regex matches semantic versions like v1.2.3-rc4+2016.02.22
+    - /^\d+\.\d+\.\d+.*$/
+
+notifications:
+  email:
+    on_success: never
