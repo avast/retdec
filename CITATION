@@ -1,0 +1,8 @@
+@Misc{RETDEC_BOTCONF_17,
+    author = {J. K\v{r}oustek and P. Matula and P. Zemek},
+    title = {RetDec: An Open-Source Machine-Code Decompiler},
+    year = {2017},
+    month = {December},
+    howpublished = {[talk]},
+    note = {Presented at Botconf 2017, Montpellier, FR}
+}
