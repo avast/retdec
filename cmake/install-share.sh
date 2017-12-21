@@ -90,7 +90,6 @@ if [ "$SHA256SUM" != "$SHA256SUM_REF" ]; then
 fi
 
 # Unpack archive.
-UNPACK_PARAMS
 echo "Unpacking archive ..."
 tar xf "$SUPPORT_DIR/$ARCH_NAME" "--directory=$SUPPORT_DIR" > /dev/null 2>&1
 UNPACK_RC=$?
