@@ -20,14 +20,14 @@ Features:
 * Output in two high-level languages: C and a Python-like language.
 * Generation of call graphs, control-flow graphs, and various statistics.
 
-For more information, you can check out:
-* [Wiki](https://github.com/avast-tl/retdec/wiki)
-* [our Botconf 2017 talk](https://retdec.com/web/files/publications/retdec-slides-botconf-2017.pdf) 
-* [our publications](https://retdec.com/publications/).
+For more information, check out our
+* [Wiki](https://github.com/avast-tl/retdec/wiki) (in progress)
+* [Botconf 2017 talk](https://retdec.com/web/files/publications/retdec-slides-botconf-2017.pdf)
+* [Publications](https://retdec.com/publications/)
 
 ## Installation and Use
 
-Currently, we support only Windows (7 or later), Linux and unofficially macOS.
+Currently, we support only Windows (7 or later), Linux, and unofficially macOS.
 
 **Warning: Decompilations of larger binaries (1 MB or more) may require a lot of RAM. When running decompilations, we advise you to limit the maximal virtual memory for processes before decompiling to prevent potential swapping and unresponsiveness. On Linux, you can run e.g. `ulimit -Sv 9863168` in your shell to limit the maximal virtual memory to 8 GB.**
 
@@ -71,16 +71,16 @@ Currently, we support only Windows (7 or later), Linux and unofficially macOS.
 
 ### macOS
 
-**Warning: macOS build was added based on community feedback and is not directly supported by Avast RetDec Team. We do not guarantee you that these instructions will work for you. If you encounter any problem with your build, file an issue so macOS community can help you out.**
+**Warning: macOS build was added based on community feedback and is not directly supported by the RetDec team. We do not guarantee you that these instructions will work for you. If you encounter any problem with your build, submit an issue so the macOS community can help you out.**
 
 1. There are currently no pre-built packages for macOS. You will have to build and install the decompiler by yourself. The process is described below.
 
 2. After you have built the decompiler, you will need to install the following packages:
 
+    * [Bash](https://www.gnu.org/software/bash/)
     * [UPX](https://upx.github.io/)
     * [Graphviz](http://www.graphviz.org/)
-    * GNU Bash
-    * GNU getopt -- should be first in PATH
+    * GNU getopt -- should be first in `PATH`
 
 3. Now, you are all set to run the decompiler. To decompile a binary file named `test.exe`, go into `$RETDEC_INSTALLED_DIR/bin` and run:
 
@@ -134,11 +134,11 @@ sudo dnf install git cmake make gcc gcc-c++ perl python3 bash zlib-devel flex bi
 * [Active Perl](https://www.activestate.com/activeperl). It needs to be the first Perl in `PATH`, or it has to be provided to CMake using `CMAKE_PROGRAM_PATH` variable, e.g. `-DCMAKE_PROGRAM_PATH=/c/perl/bin`.
 * [Python](https://www.python.org/) (version >= 3.4)
 
-#### macOS:
+#### macOS
 
   * Full Xcode installation (Command Line Tools are untested)
   * CMake (version >= 3.6)
-  * Newer versions of bison and flex, preferably installed via [Homebrew](https://brew.sh)
+  * Newer versions of Bison and Flex, preferably installed via [Homebrew](https://brew.sh)
   * [wget](https://www.gnu.org/software/wget/)
   * [Python](https://www.python.org/) (version >= 3.4, macOS has 2.7)
 
@@ -165,7 +165,7 @@ sudo dnf install git cmake make gcc gcc-c++ perl python3 bash zlib-devel flex bi
   * `cd retdec`
   * `mkdir build && cd build`
   * ```sh
-    # Apple ships old flex & bison, so Homebrew versions should be used
+    # Apple ships old Flex & Bison, so Homebrew versions should be used.
     export CMAKE_INCLUDE_PATH="/usr/local/opt/flex/include"
     export CMAKE_LIBRARY_PATH="/usr/local/opt/flex/lib;/usr/local/opt/bison/lib"
     export PATH="/usr/local/opt/flex/bin:/usr/local/opt/bison/bin:$PATH"
