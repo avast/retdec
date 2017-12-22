@@ -5,6 +5,7 @@
 * Enhancement: Decrease the default timeout when downloading the support package during installation ([#6](https://github.com/avast-tl/retdec/pull/6)).
 * Enhancement: Any shell can be used to install the decompiler, not just Bash.
 * Enhancement: Added unofficial support for macOS build ([#7](https://github.com/avast-tl/retdec/issues/7))
+* Fix: Build of `retdec-config` when two different compilers are employed ([#52](https://github.com/avast-tl/retdec/issues/52)).
 * Fix: Build of the `llvm` submodule with VS 2017 when DIA SDK is installed ([#61](https://github.com/avast-tl/retdec/issues/61)).
 * Fix: Ordering of compiler detections ([#39](https://github.com/avast-tl/retdec/issues/39)).
 * Fix: Remove duplicate `lib` prefix when installing [libdwarf](https://github.com/avast-tl/libdwarf) libraries ([#31](https://github.com/avast-tl/retdec/issues/31)).
