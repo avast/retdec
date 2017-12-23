@@ -482,7 +482,6 @@ void SimpleTypesAnalysis::processUse(llvm::Value* current, Value* u, std::queue<
 			 user->getOpcode() == Instruction::Shl ||
 			 user->getOpcode() == Instruction::LShr ||
 			 user->getOpcode() == Instruction::AShr ||
-			 user->getOpcode() == Instruction::AShr ||
 			 user->getOpcode() == Instruction::And ||
 			 user->getOpcode() == Instruction::Or ||
 			 user->getOpcode() == Instruction::Xor)
