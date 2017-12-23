@@ -11,14 +11,22 @@ fi
 
 . "$DECOMPILER_CONFIG"
 
+#
+# return the real, physical  location of a folder or file, relative, or absolute.        
+# 
 get_realpath()
 {
-  local inpath="$1"
-  if [[ "$(uname -s)" == *CYGWIN* ]]; then
-    cygpath -ma "$inpath"
-  else
-    readlink -f "$inpath"
-  fi
+	local inpath="$1"
+	# uses cygpath.exe on cygwin, due to cgwins virtual folder mountpoints
+	# (i.e., "/cygdrive/c/foo/bar" becomes "c:/foo/bar")
+	# cygpath args:
+	#   "-m" = mixed mode, that is, forward slashes, instead of backward slashes.
+	#   "-a" = absolute path (regardless if input is relative or not).    
+	if [[ "$(uname -s)" == *CYGWIN* ]]; then
+		cygpath -ma "$inpath"
+	else
+		readlink -f "$inpath"
+	fi
 }
 
 #
