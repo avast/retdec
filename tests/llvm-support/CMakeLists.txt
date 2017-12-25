@@ -1,4 +1,3 @@
-
 set(LLVM_SUPPORT_TESTS_SOURCES
 	utils_tests.cpp
 )

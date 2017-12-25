@@ -1,4 +1,3 @@
-
 set(LLVMIR2HLL_TESTS_SOURCES
 	analysis/alias_analysis/alias_analyses/simple_alias_analysis_tests.cpp
 	analysis/break_in_if_analysis_tests.cpp

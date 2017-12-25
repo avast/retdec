@@ -1,4 +1,3 @@
-
 set(DWARFPARSER_SOURCES
 	dwarf_base.cpp
 	dwarf_cu.cpp

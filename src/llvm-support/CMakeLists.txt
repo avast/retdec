@@ -1,4 +1,3 @@
-
 set(LLVM_SUPPORT_SOURCES
 	diagnostics.cpp
 	utils.cpp

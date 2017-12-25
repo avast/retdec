@@ -1,4 +1,3 @@
-
 set(LLVMIR2HLLTOOL_SOURCES
 	llvmir2hll.cpp
 )

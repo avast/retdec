@@ -1,4 +1,3 @@
-
 set(LLVMIR2HLL_SOURCES
 	analysis/alias_analysis/alias_analyses/basic_alias_analysis.cpp
 	analysis/alias_analysis/alias_analyses/simple_alias_analysis.cpp
@@ -345,5 +344,5 @@ target_include_directories(llvmir2hll PUBLIC ${PROJECT_SOURCE_DIR}/include/)
 #   fatal error C1128: number of sections exceeded object file format
 #                      limit: compile with /bigobj
 if(MSVC)
-	SET_TARGET_PROPERTIES(llvmir2hll PROPERTIES COMPILE_FLAGS "/bigobj")
+	set_target_properties(llvmir2hll PROPERTIES COMPILE_FLAGS "/bigobj")
 endif()

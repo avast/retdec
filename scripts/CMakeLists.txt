@@ -1,4 +1,3 @@
-
 install(PROGRAMS "color-c.py" DESTINATION bin)
 install(PROGRAMS "config.sh" DESTINATION bin)
 install(PROGRAMS "decompile-all.sh" DESTINATION bin)

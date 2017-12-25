@@ -1,9 +1,8 @@
-
 cmake_minimum_required(VERSION 3.6)
 
 project(retdec CXX)
 
-# Set the default build type to 'Release'
+# Set the default build type to 'Release'.
 if (NOT CMAKE_BUILD_TYPE)
 	set(default_build_type "Release")
 	message(STATUS "Setting build type to '${default_build_type}' as none was specified.")
@@ -23,7 +22,6 @@ set_directory_properties(PROPERTIES EP_PREFIX "${PROJECT_BINARY_DIR}/external")
 
 set(DEPS_TESTS ${RETDEC_TESTS})
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/deps-config.cmake)
-
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/install-external.cmake)
 
 add_subdirectory(deps)

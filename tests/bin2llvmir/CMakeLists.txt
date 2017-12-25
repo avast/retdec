@@ -1,4 +1,3 @@
-
 set(BIN2LLVMIR_TESTS_SOURCES
 	analyses/reaching_definitions_tests.cpp
 	analyses/uses_analysis_tests.cpp

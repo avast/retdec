@@ -1,4 +1,3 @@
-
 add_subdirectory(bin2llvmir)
 add_subdirectory(bin2llvmirtool)
 add_subdirectory(debugformat)

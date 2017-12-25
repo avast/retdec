@@ -1,4 +1,3 @@
-
 set(BIN2LLVMIR_SOURCES
 	analyses/indirectly_called_funcs_analysis.cpp
 	analyses/reachable_funcs_analysis.cpp

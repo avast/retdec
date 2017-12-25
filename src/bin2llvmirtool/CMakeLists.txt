@@ -1,4 +1,3 @@
-
 set(BIN2LLVMIRTOOL_SOURCES
 	bin2llvmir.cpp
 )
@@ -16,7 +15,7 @@ if(MSVC)
 	set_target_properties(bin2llvmirtool PROPERTIES LINK_FLAGS "/FORCE:MULTIPLE")
 elseif(APPLE)
 	target_link_libraries(bin2llvmirtool -Wl,-force_load bin2llvmir)
-else() # Linux/MSYS2
+else() # Linux
 	target_link_libraries(bin2llvmirtool -Wl,--whole-archive bin2llvmir -Wl,--no-whole-archive)
 endif()
 
