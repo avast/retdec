@@ -16,6 +16,11 @@ set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
 option(RETDEC_DOC "Build public API documentation (requires Doxygen)." OFF)
 option(RETDEC_TESTS "Build tests." OFF)
 
+# Build all external projects in the same directory that is directly inside the
+# build directory. This reduces path lengths, which is important on Windows as
+# there is a limit on how long a path can be.
+set_directory_properties(PROPERTIES EP_PREFIX "${PROJECT_BINARY_DIR}/external")
+
 set(DEPS_TESTS ${RETDEC_TESTS})
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/deps-config.cmake)
 
