@@ -219,9 +219,9 @@ This repository contains the following scripts:
 
 ## License
 
-Copyright (c) 2017 Avast Software, licensed under the MIT license. See the `LICENSE` file for more details.
+Copyright (c) 2017 Avast Software, licensed under the MIT license. See the [`LICENSE`](https://github.com/avast-tl/retdec/blob/master/LICENSE) file for more details.
 
-RetDec uses third-party libraries or other resources listed, along with their licenses, in the `LICENSE-THIRD-PARTY` file.
+RetDec uses third-party libraries or other resources listed, along with their licenses, in the [`LICENSE-THIRD-PARTY`](https://github.com/avast-tl/retdec/blob/master/LICENSE-THIRD-PARTY) file.
 
 ## Contributing
 
