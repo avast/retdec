@@ -126,6 +126,12 @@ On RPM-based distributions (e.g. Fedora), the required packages can be installed
 sudo dnf install git cmake make gcc gcc-c++ perl python3 bash zlib-devel flex bison m4 coreutils autoconf automake libtool ncurses-devel wget bc doxygen graphviz upx pkg-config
 ```
 
+On Arch Linux, the required packages can be installed with `pacman`:
+
+```sh
+sudo pacman -S base-devel cmake git perl python3 bash coreutils wget bc doxygen graphviz upx flex bison zlib ncurses autoconf automake pkg-config m4 libtool
+```
+
 #### Windows
 
 * Microsoft Visual C++ (version >= Visual Studio 2015 Update 2)
