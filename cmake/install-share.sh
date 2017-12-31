@@ -14,6 +14,7 @@ fi
 VERSION_FILE_NAME="version.txt"
 ARCH_SUFFIX="tar.xz"
 
+SHACMD='sha256sum'
 SHA256SUM_REF="4ecbe72d38d6e95f057c5d18c79e25b5340265416687368ce7e5fd1ebb744b32"
 VERSION="2017-12-15"
 
@@ -28,6 +29,8 @@ case "$(uname -s)" in
 	*Windows*|*CYGWIN*|*MINGW*|*MSYS*)
  		INSTALL_PATH="$(echo "/$INSTALL_PATH" | sed -e 's/\\/\//g' -e 's/://')"
 		;;
+	*Darwin*)
+		SHACMD='shasum -a 256'
 esac
 
 SHARE_DIR="$INSTALL_PATH/share"
@@ -74,7 +77,7 @@ fi
 
 # Compute hash of the downloaded archive.
 echo "Verfifying archive's checksum ..."
-SHA256SUM=$(sha256sum "$SUPPORT_DIR/$ARCH_NAME" | cut -d' ' -f1)
+SHA256SUM=$($SHACMD "$SUPPORT_DIR/$ARCH_NAME" | cut -d' ' -f1)
 SHA256SUM_RC=$?
 if [ "$SHA256SUM_RC" -ne 0 ]; then
 	echo "ERROR: sha256sum failed"
