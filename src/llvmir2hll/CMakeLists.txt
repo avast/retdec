@@ -344,5 +344,5 @@ target_include_directories(llvmir2hll PUBLIC ${PROJECT_SOURCE_DIR}/include/)
 #   fatal error C1128: number of sections exceeded object file format
 #                      limit: compile with /bigobj
 if(MSVC)
-	set_target_properties(llvmir2hll PROPERTIES COMPILE_FLAGS "/bigobj")
+	set_property(TARGET llvmir2hll APPEND_STRING PROPERTY COMPILE_FLAGS " /bigobj")
 endif()

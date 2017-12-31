@@ -12,7 +12,7 @@ if(MSVC)
 	# state 'bin2llvmir' twice in target_link_libraries(), first as a target to get
 	# its properties, second as path to library to link it as a whole.
 	target_link_libraries(bin2llvmirtool bin2llvmir -WHOLEARCHIVE:$<TARGET_FILE_NAME:bin2llvmir>)
-	set_target_properties(bin2llvmirtool PROPERTIES LINK_FLAGS "/FORCE:MULTIPLE")
+	set_property(TARGET bin2llvmirtool APPEND_STRING PROPERTY LINK_FLAGS " /FORCE:MULTIPLE")
 elseif(APPLE)
 	target_link_libraries(bin2llvmirtool -Wl,-force_load bin2llvmir)
 else() # Linux

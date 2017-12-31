@@ -21,7 +21,7 @@ endif()
 # Increase the stack size of the created binaries on MS Windows because the
 # default value is too small. The default Linux value is 8388608 (8 MB).
 if(MSVC)
-	set_target_properties(llvmir2hlltool PROPERTIES LINK_FLAGS "/STACK:16777216")
+	set_property(TARGET llvmir2hlltool APPEND_STRING PROPERTY LINK_FLAGS " /STACK:16777216")
 endif()
 
 set_target_properties(llvmir2hlltool PROPERTIES OUTPUT_NAME "llvmir2hll")
