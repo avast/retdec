@@ -24,5 +24,11 @@ if(MSVC)
 	set_property(TARGET llvmir2hlltool APPEND_STRING PROPERTY LINK_FLAGS " /STACK:16777216")
 endif()
 
+# Allow the 32b version of llvmir2hll on Windows handle addresses larger than 2
+# GB (up to 4 GB).
+if(MSVC AND CMAKE_SIZEOF_VOID_P MATCHES "4")
+	set_property(TARGET llvmir2hlltool APPEND_STRING PROPERTY LINK_FLAGS " /LARGEADDRESSAWARE")
+endif()
+
 set_target_properties(llvmir2hlltool PROPERTIES OUTPUT_NAME "llvmir2hll")
 install(TARGETS llvmir2hlltool RUNTIME DESTINATION bin)

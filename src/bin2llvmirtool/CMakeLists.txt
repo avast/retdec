@@ -19,5 +19,11 @@ else() # Linux
 	target_link_libraries(bin2llvmirtool -Wl,--whole-archive bin2llvmir -Wl,--no-whole-archive)
 endif()
 
+# Allow the 32b version of bin2llvmir on Windows handle addresses larger than 2
+# GB (up to 4 GB).
+if(MSVC AND CMAKE_SIZEOF_VOID_P MATCHES "4")
+	set_property(TARGET bin2llvmirtool APPEND_STRING PROPERTY LINK_FLAGS " /LARGEADDRESSAWARE")
+endif()
+
 set_target_properties(bin2llvmirtool PROPERTIES OUTPUT_NAME "bin2llvmir")
 install(TARGETS bin2llvmirtool RUNTIME DESTINATION bin)
