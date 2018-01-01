@@ -145,6 +145,7 @@ sudo pacman -S base-devel cmake git perl python3 bash coreutils wget bc doxygen 
   * Full Xcode installation (Command Line Tools are untested)
   * CMake (version >= 3.6)
   * Newer versions of Bison and Flex, preferably installed via [Homebrew](https://brew.sh)
+  * [coreutils](https://www.gnu.org/software/coreutils) (ensure that you have `$(brew --prefix coreutils)/libexec/gnubin` in your `PATH`)
   * [wget](https://www.gnu.org/software/wget/)
   * [Python](https://www.python.org/) (version >= 3.4, macOS has 2.7)
 
