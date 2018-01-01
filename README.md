@@ -204,12 +204,18 @@ sudo pacman -S base-devel cmake git perl python3 bash coreutils wget bc doxygen 
 
 #### macOS
 
-  * Full Xcode installation (Command Line Tools are untested)
-  * CMake (version >= 3.6)
-  * Newer versions of Bison and Flex, preferably installed via [Homebrew](https://brew.sh)
-  * [coreutils](https://www.gnu.org/software/coreutils) (ensure that you have `$(brew --prefix coreutils)/libexec/gnubin` in your `PATH`)
-  * [wget](https://www.gnu.org/software/wget/)
-  * [Python](https://www.python.org/) (version >= 3.4, macOS has 2.7)
+Packages should be preferably installed via [Homebrew](https://brew.sh).
+
+* Full Xcode installation (Command Line Tools are untested)
+* [CMake](https://cmake.org/) (version >= 3.6)
+* [Git](https://git-scm.com/)
+* [Perl](https://www.perl.org/)
+* [Python](https://www.python.org/) (version >= 3.4)
+* [Bison](https://www.gnu.org/software/bison/) (version >= 3.0)
+* [Flex](https://www.gnu.org/software/flex/) (version >= 2.6)
+* [coreutils](https://www.gnu.org/software/coreutils) (ensure that you have `$(brew --prefix coreutils)/libexec/gnubin` in your `PATH`)
+* [wget](https://www.gnu.org/software/wget/)
+* Optional: [Doxygen](http://www.stack.nl/~dimitri/doxygen/) and [Graphviz](http://www.graphviz.org/) for generating API documentation
 
 #### Process
 
