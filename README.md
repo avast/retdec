@@ -42,13 +42,13 @@ Currently, we support only Windows (7 or later), Linux, and unofficially macOS.
 
 3. Install [MSYS2](http://www.msys2.org/) and other needed applications by following RetDec's [Windows environment setup guide](https://github.com/avast-tl/retdec/wiki/Windows-Environment).
 
-3. Now, you are all set to run the decompiler. To decompile a binary file named `test.exe`, go into `$RETDEC_INSTALL_DIR/bin` and run:
+3. Now, you are all set to run the decompiler. To decompile a binary file named `test.exe`, run
 
     ```sh
-    bash decompile.sh test.exe
+    bash $RETDEC_INSTALL_DIR/bin/decompile.sh test.exe
     ```
 
-   For more information, run `bash decompile.sh --help`.
+   For more information, run `decompile.sh` with `--help`.
 
 ### Linux
 
@@ -61,13 +61,13 @@ Currently, we support only Windows (7 or later), Linux, and unofficially macOS.
     * [bc](https://www.gnu.org/software/bc/)
     * [Graphviz](http://www.graphviz.org/)
 
-3. Now, you are all set to run the decompiler. To decompile a binary file named `test.exe`, go into `$RETDEC_INSTALL_DIR/bin` and run:
+3. Now, you are all set to run the decompiler. To decompile a binary file named `test.exe`, run
 
     ```sh
-    ./decompile.sh test.exe
+    $RETDEC_INSTALL_DIR/bin/decompile.sh test.exe
     ```
 
-   For more information, run `./decompile.sh --help`.
+   For more information, run `decompile.sh` with `--help`.
 
 ### macOS
 
@@ -82,14 +82,14 @@ Currently, we support only Windows (7 or later), Linux, and unofficially macOS.
     * [Graphviz](http://www.graphviz.org/)
     * [GNU getopt](https://www.gnu.org/software/libc/manual/html_node/Getopt.html)-- should be first in `PATH`
 
-3. Now, you are all set to run the decompiler. To decompile a binary file named `test.exe`, go into `$RETDEC_INSTALLED_DIR/bin` and run:
+3. Now, you are all set to run the decompiler. To decompile a binary file named `test.exe`, run
 
     ```
     # /usr/local/bin/bash if installed via Homebrew
-    /path/to/gnu/bash ./decompile.sh test.exe
+    /path/to/gnu/bash $RETDEC_INSTALL_DIR/bin/decompile.sh test.exe
     ```
 
-   For more information, run `./decompile.sh --help`.
+   For more information, run `decompile.sh` with `--help`.
 
 ## Build and Installation
 
