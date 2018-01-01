@@ -2,6 +2,7 @@
 
 # dev
 
+* Enhancement: Added community support for building and running RetDec inside Docker ([#60](https://github.com/avast-tl/retdec/pull/60)).
 * Enhancement: Decrease the default timeout when downloading the support package during installation ([#6](https://github.com/avast-tl/retdec/pull/6)).
 * Enhancement: Any shell can be used to install the decompiler, not just Bash.
 * Enhancement: Added unofficial support for macOS build ([#7](https://github.com/avast-tl/retdec/issues/7)).
