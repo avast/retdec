@@ -93,72 +93,9 @@ Currently, we support only Windows (7 or later), Linux, and unofficially macOS.
 
 ## Build and Installation
 
-### Build in Docker
+This section describes a local build and installation of RetDec. Instructions for Docker are given in the next section.
 
-#### Build image
-
-Building in Docker doesn't require installation of required libraries locally.
-This is a good option for trying out retdec without setting up the whole build toolchain.
-
-To build the retdec docker image, run
-
-```
-docker build -t retdec .
-```
-
-This builds the container from the master branch of this repository.
-
-To build the container using the local copy of the repository, fully clone the repository:
-
-```
-git submodule update --init --recursive
-```
-
-Then build the container using the development Dockerfile, `Dockerfile.dev`:
-
-```
-docker build -t retdec:dev . -f Dockerfile.dev
-```
-
-#### Run container
-
-To decompile a binary, create a container to upload the binary to:
-
-```
-docker create --name retdec_init retdec
-```
-
-Upload the binary:
-Note the destination directory should be a directory with read/write permissions
-like /home/retdec/.
-
-```
-docker cp <file> retdec_init:/destination/path/of/binary
-```
-
-Commit the copied files into the container image:
-
-```
-docker commit retdec_init retdec:initialized
-```
-
-Run the decompiler:
-
-```
-docker run --name retdec retdec:initialized decompile.sh /destination/path/of/binary
-```
-
-Copy output back to host:
-
-```
-docker cp retdec:/destination/path/of/binary.c /path/to/save/file
-```
-
-### Build and install locally
-
-This section describes a manual build and installation of RetDec.
-
-#### Requirements
+### Requirements
 
 #### Linux
 
@@ -217,7 +154,7 @@ Packages should be preferably installed via [Homebrew](https://brew.sh).
 * [wget](https://www.gnu.org/software/wget/)
 * Optional: [Doxygen](http://www.stack.nl/~dimitri/doxygen/) and [Graphviz](http://www.graphviz.org/) for generating API documentation
 
-#### Process
+### Process
 
 **Warning: Currently, RetDec has to be installed into a clean, dedicated directory. Do NOT install it into `/usr`, `/usr/local`, etc. because our build system is not yet ready for system-wide installations. So, when running `cmake`, always set `-DCMAKE_INSTALL_PREFIX=<path>` to a directory that will be used just by RetDec. For more details, see [#12](https://github.com/avast-tl/retdec/issues/12).**
 
@@ -257,6 +194,58 @@ You can pass the following additional parameters to `cmake`:
 * `-DRETDEC_TESTS=ON` to build with tests, including all the tests in dependency submodules (disabled by default).
 * `-DCMAKE_BUILD_TYPE=Debug` to build with debugging information, which is useful during development. By default, the project is built in the `Release` mode. This has no effect on Windows, but the same thing can be achieved by running `msbuild` with the `/p:Configuration=Debug` parameter.
 * `-DCMAKE_PROGRAM_PATH=<path>` to use Perl at `<path>` (probably useful only on Windows).
+
+## Build in Docker
+
+Docker support is maintained by community. If something does not work for you or if you have suggestions for improvements, open an issue or PR.
+
+### Build Image
+
+Building in Docker does not require installation of required libraries locally. This is a good option for trying out RetDec without setting up the whole build toolchain.
+
+To build the RetDec docker image, run
+```
+docker build -t retdec .
+```
+
+This builds the container from the master branch of this repository.
+
+To build the container using the local copy of the repository, fully clone the repository:
+```
+git submodule update --init --recursive
+```
+
+Then, build the container using the development Dockerfile, `Dockerfile.dev`:
+```
+docker build -t retdec:dev . -f Dockerfile.dev
+```
+
+### Run Container
+
+To decompile a binary, create a container to upload the binary to:
+```
+docker create --name retdec_init retdec
+```
+
+Upload the binary (note the destination directory should be a directory with read/write permissions, such as `/home/retdec/`):
+```
+docker cp <file> retdec_init:/destination/path/of/binary
+```
+
+Commit the copied files into the container image:
+```
+docker commit retdec_init retdec:initialized
+```
+
+Run the decompiler:
+```
+docker run --name retdec retdec:initialized decompile.sh /destination/path/of/binary
+```
+
+Copy output back to host:
+```
+docker cp retdec:/destination/path/of/binary.c /path/to/save/file
+```
 
 ## Repository Overview
 
