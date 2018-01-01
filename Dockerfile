@@ -5,7 +5,7 @@ WORKDIR /home/retdec
 ENV HOME /home/retdec
 
 RUN apt-get -y update && \
-	DEBIAN_FRONTEND=noninteractive apt-get install -y 	\
+	DEBIAN_FRONTEND=noninteractive apt-get install -y   \
 	build-essential                                     \
 	cmake                                               \
 	git                                                 \
