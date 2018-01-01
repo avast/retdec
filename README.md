@@ -167,7 +167,6 @@ This section describes a manual build and installation of RetDec.
 * [Git](https://git-scm.com/)
 * [Perl](https://www.perl.org/)
 * [Python](https://www.python.org/) (version >= 3.4)
-* [Bash](https://www.gnu.org/software/bash/)
 * [Bison](https://www.gnu.org/software/bison/) (version >= 3.0)
 * [Flex](https://www.gnu.org/software/flex/)
 * [coreutils](https://www.gnu.org/software/coreutils)
