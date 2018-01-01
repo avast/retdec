@@ -93,9 +93,72 @@ Currently, we support only Windows (7 or later), Linux, and unofficially macOS.
 
 ## Build and Installation
 
+### Build in Docker
+
+#### Build image
+
+Building in Docker doesn't require installation of required libraries locally.
+This is a good option for trying out retdec without setting up the whole build toolchain.
+
+To build the retdec docker image, run
+
+```
+docker build -t retdec .
+```
+
+This builds the container from the master branch of this repository.
+
+To build the container using the local copy of the repository, fully clone the repository:
+
+```
+git submodule update --init --recursive
+```
+
+Then build the container using the development Dockerfile, `Dockerfile.dev`:
+
+```
+docker build -t retdec:dev . -f Dockerfile.dev
+```
+
+#### Run container
+
+To decompile a binary, create a container to upload the binary to:
+
+```
+docker create --name retdec_init retdec
+```
+
+Upload the binary:
+Note the destination directory should be a directory with read/write permissions
+like /home/retdec/.
+
+```
+docker cp <file> retdec_init:/destination/path/of/binary
+```
+
+Commit the copied files into the container image:
+
+```
+docker commit retdec_init retdec:initialized
+```
+
+Run the decompiler:
+
+```
+docker run --name retdec retdec:initialized decompile.sh /destination/path/of/binary
+```
+
+Copy output back to host:
+
+```
+docker cp retdec:/destination/path/of/binary.c /path/to/save/file
+```
+
+### Build and install locally
+
 This section describes a manual build and installation of RetDec.
 
-### Requirements
+#### Requirements
 
 #### Linux
 
@@ -149,7 +212,7 @@ sudo pacman -S base-devel cmake git perl python3 bash coreutils wget bc doxygen 
   * [wget](https://www.gnu.org/software/wget/)
   * [Python](https://www.python.org/) (version >= 3.4, macOS has 2.7)
 
-### Process
+#### Process
 
 **Warning: Currently, RetDec has to be installed into a clean, dedicated directory. Do NOT install it into `/usr`, `/usr/local`, etc. because our build system is not yet ready for system-wide installations. So, when running `cmake`, always set `-DCMAKE_INSTALL_PREFIX=<path>` to a directory that will be used just by RetDec. For more details, see [#12](https://github.com/avast-tl/retdec/issues/12).**
 
