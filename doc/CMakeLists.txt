@@ -1,4 +1,3 @@
-
 find_package(Doxygen REQUIRED)
 
 # Variables.

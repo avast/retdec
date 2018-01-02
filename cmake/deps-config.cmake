@@ -1,4 +1,3 @@
-
 # capstone2llvmir
 set(CAPSTONE2LLVMIR_TOOLS ON CACHE BOOL "enable capstone2llvmir" FORCE)
 set(CAPSTONE2LLVMIR_TESTS ${DEPS_TESTS} CACHE BOOL "enable capstone2llvmir tests" FORCE)
