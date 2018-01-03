@@ -116,19 +116,19 @@ This section describes a local build and installation of RetDec. Instructions fo
 On Debian-based distributions (e.g. Ubuntu), the required packages can be installed with `apt-get`:
 
 ```sh
-sudo apt-get install build-essential cmake git perl python3 bash coreutils wget bc doxygen graphviz upx flex bison zlib1g-dev libtinfo-dev autoconf automake pkg-config m4 libtool
+sudo apt-get install build-essential cmake git perl python3 bash bison flex autoconf automake libtool pkg-config m4 coreutils zlib1g-dev libtinfo-dev wget bc upx doxygen graphviz
 ```
 
 On RPM-based distributions (e.g. Fedora), the required packages can be installed with `dnf`:
 
 ```sh
-sudo dnf install git cmake make gcc gcc-c++ perl python3 bash zlib-devel flex bison m4 coreutils autoconf automake libtool ncurses-devel wget bc doxygen graphviz upx pkg-config
+sudo dnf install gcc gcc-c++ cmake make git perl python3 bash bison flex autoconf automake libtool pkg-config m4 coreutils zlib-devel ncurses-devel wget bc upx doxygen graphviz
 ```
 
 On Arch Linux, the required packages can be installed with `pacman`:
 
 ```sh
-sudo pacman -S base-devel cmake git perl python3 bash coreutils wget bc doxygen graphviz upx flex bison zlib ncurses autoconf automake pkg-config m4 libtool
+sudo pacman -S base-devel cmake git perl python3 bash bison flex autoconf automake libtool pkg-config m4 coreutils zlib ncurses wget bc upx doxygen graphviz
 ```
 
 #### Windows
