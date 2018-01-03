@@ -56,7 +56,7 @@ Currently, we support only Windows (7 or later), Linux, and unofficially macOS.
 
 2. After you have built the decompiler, you will need to install the following packages via your distribution's package manager:
 
-    * [Bash](https://www.gnu.org/software/bash/)
+    * [Bash](https://www.gnu.org/software/bash/) (version >= 4)
     * [UPX](https://upx.github.io/)
     * [bc](https://www.gnu.org/software/bc/)
     * [Graphviz](http://www.graphviz.org/)
@@ -77,7 +77,7 @@ Currently, we support only Windows (7 or later), Linux, and unofficially macOS.
 
 2. After you have built the decompiler, you will need to install the following packages:
 
-    * [Bash](https://www.gnu.org/software/bash/)
+    * [Bash](https://www.gnu.org/software/bash/) (version >= 4)
     * [UPX](https://upx.github.io/)
     * [Graphviz](http://www.graphviz.org/)
     * [GNU getopt](https://www.gnu.org/software/libc/manual/html_node/Getopt.html) -- should be first in `PATH`
