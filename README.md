@@ -107,6 +107,8 @@ This section describes a local build and installation of RetDec. Instructions fo
 * [Bison](https://www.gnu.org/software/bison/) (version >= 3.0)
 * [Flex](https://www.gnu.org/software/flex/) (version >= 2.6)
 * [autotools](https://en.wikipedia.org/wiki/GNU_Build_System) ([autoconf](https://www.gnu.org/software/autoconf/autoconf.html), [automake](https://www.gnu.org/software/automake/), and [libtool](https://www.gnu.org/software/libtool/))
+* [pkg-config](https://www.freedesktop.org/wiki/Software/pkg-config/)
+* [m4](https://www.gnu.org/software/m4/m4.html)
 * [coreutils](https://www.gnu.org/software/coreutils)
 * [wget](https://www.gnu.org/software/wget/)
 * [ncurses](http://invisible-island.net/ncurses/) (for `libtinfo`)
