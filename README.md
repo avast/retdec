@@ -80,7 +80,7 @@ Currently, we support only Windows (7 or later), Linux, and unofficially macOS.
     * [Bash](https://www.gnu.org/software/bash/)
     * [UPX](https://upx.github.io/)
     * [Graphviz](http://www.graphviz.org/)
-    * [GNU getopt](https://www.gnu.org/software/libc/manual/html_node/Getopt.html)-- should be first in `PATH`
+    * [GNU getopt](https://www.gnu.org/software/libc/manual/html_node/Getopt.html) -- should be first in `PATH`
 
 3. Now, you are all set to run the decompiler. To decompile a binary file named `test.exe`, run
 
