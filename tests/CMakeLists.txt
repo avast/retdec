@@ -1,3 +1,6 @@
+
+set(CMAKE_INSTALL_RPATH "$ORIGIN/../../lib")
+
 add_subdirectory(bin2llvmir)
 add_subdirectory(capstone2llvmir)
 add_subdirectory(ctypes)
