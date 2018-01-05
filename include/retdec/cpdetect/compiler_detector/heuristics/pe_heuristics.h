@@ -10,6 +10,7 @@
 #include "retdec/cpdetect/compiler_detector/heuristics/heuristics.h"
 #include "retdec/fileformat/file_format/pe/pe_format.h"
 
+namespace retdec {
 namespace cpdetect {
 
 /**
@@ -18,7 +19,7 @@ namespace cpdetect {
 class PeHeuristics : public Heuristics
 {
 	private:
-		fileformat::PeFormat &peParser; ///< parser of input PE file
+		retdec::fileformat::PeFormat &peParser; ///< parser of input PE file
 
 		/// @name Auxiliary methods
 		/// @{
@@ -75,10 +76,11 @@ class PeHeuristics : public Heuristics
 		virtual void getFormatSpecificLanguageHeuristics() override;
 		/// @}
 	public:
-		PeHeuristics(fileformat::PeFormat &parser, Search &searcher, ToolInformation &toolInfo);
+		PeHeuristics(retdec::fileformat::PeFormat &parser, Search &searcher, ToolInformation &toolInfo);
 		virtual ~PeHeuristics() override;
 };
 
 } // namespace cpdetect
+} // namespace retdec
 
 #endif

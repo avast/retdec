@@ -18,9 +18,10 @@
 #include "retdec/bin2llvmir/utils/instruction.h"
 #include "retdec/bin2llvmir/utils/type.h"
 
-using namespace llvm_support;
+using namespace retdec::llvm_support;
 using namespace llvm;
 
+namespace retdec {
 namespace bin2llvmir {
 
 /**
@@ -855,3 +856,4 @@ llvm::Function* splitFunctionOn(
 }
 
 } // namespace bin2llvmir
+} // namespace retdec

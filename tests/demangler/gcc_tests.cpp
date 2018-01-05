@@ -12,6 +12,7 @@ using namespace ::testing;
 
 #define DEM_EQ(mangled, demangled) EXPECT_EQ(demangled, gcc.demangleToString(mangled))
 
+namespace retdec {
 namespace demangler {
 namespace tests {
 
@@ -25,7 +26,7 @@ class GccDemanglerTests : public Test
 		}
 
 	protected:
-		demangler::CDemangler gcc;
+		retdec::demangler::CDemangler gcc;
 };
 
 TEST_F(GccDemanglerTests, DemangleFunctionsStartingWithExtraUnderscore_bug1434)
@@ -114,3 +115,4 @@ TEST_F(GccDemanglerTests, RandomTests)
 
 } // namespace tests
 } // namespace demangler
+} // namespace retdec

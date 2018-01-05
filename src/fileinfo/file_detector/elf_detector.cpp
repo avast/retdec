@@ -12,8 +12,8 @@
 
 using namespace retdec::utils;
 using namespace ELFIO;
-using namespace cpdetect;
-using namespace fileformat;
+using namespace retdec::cpdetect;
+using namespace retdec::fileformat;
 
 namespace fileinfo {
 
@@ -393,7 +393,7 @@ Relocation createRelocation(const std::string &name, std::uint64_t offset,
  * @param searchPar Parameters for detection of used compiler (or packer)
  * @param loadFlags Load flags
  */
-ElfDetector::ElfDetector(std::string pathToInputFile, FileInformation &finfo, cpdetect::DetectParams &searchPar, fileformat::LoadFlags loadFlags) :
+ElfDetector::ElfDetector(std::string pathToInputFile, FileInformation &finfo, retdec::cpdetect::DetectParams &searchPar, retdec::fileformat::LoadFlags loadFlags) :
 	FileDetector(pathToInputFile, finfo, searchPar, loadFlags)
 {
 	fileParser = elfParser = std::make_shared<ElfWrapper>(fileInfo.getPathToFile(), loadFlags);
@@ -1426,7 +1426,7 @@ void ElfDetector::getAdditionalInfo()
  * Pointer to detector is dynamically allocated and must be released (otherwise there is a memory leak)
  * More detailed description of this method is in the super class
  */
-cpdetect::CompilerDetector* ElfDetector::createCompilerDetector() const
+retdec::cpdetect::CompilerDetector* ElfDetector::createCompilerDetector() const
 {
 	return new ElfCompiler(*elfParser, cpParams, fileInfo.toolInfo);
 }

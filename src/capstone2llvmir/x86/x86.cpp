@@ -9,6 +9,7 @@
 
 #include "retdec/capstone2llvmir/x86/x86.h"
 
+namespace retdec {
 namespace capstone2llvmir {
 
 Capstone2LlvmIrTranslatorX86::Capstone2LlvmIrTranslatorX86(
@@ -5099,3 +5100,4 @@ void Capstone2LlvmIrTranslatorX86::translateBound(cs_insn* i, cs_x86* xi, llvm::
 }
 
 } // namespace capstone2llvmir
+} // namespace retdec

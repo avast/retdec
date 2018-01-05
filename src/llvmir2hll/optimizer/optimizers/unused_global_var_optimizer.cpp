@@ -14,6 +14,7 @@
 
 using retdec::utils::hasItem;
 
+namespace retdec {
 namespace llvmir2hll {
 
 /**
@@ -90,3 +91,4 @@ bool UnusedGlobalVarOptimizer::isUsed(ShPtr<Variable> var) const {
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

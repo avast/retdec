@@ -20,6 +20,7 @@
 #include "retdec/llvmir2hll/optimizer/optimizers/simplify_arithm_expr/zero_sub_optimizer.h"
 #include "retdec/llvmir2hll/support/debug.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 REGISTER_AT_FACTORY("Zero", ZERO_SUB_OPTIMIZER_ID, SubOptimizerFactory,
@@ -204,3 +205,4 @@ bool ZeroSubOptimizer::isOpZero(ShPtr<Expression> expr) const {
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

@@ -24,6 +24,7 @@ const std::string intel_hex_example_20bit =
 
 } // anonymous namespace
 
+namespace retdec {
 namespace fileformat {
 namespace tests {
 
@@ -76,3 +77,4 @@ TEST_F(IntelHexFormat20BitTests, CorrectInfo)
 
 } // namespace tests
 } // namespace fileformat
+} // namespace retdec

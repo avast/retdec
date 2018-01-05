@@ -6,6 +6,7 @@
 
 #include "retdec/fileformat/types/dotnet_headers/blob_stream.h"
 
+namespace retdec {
 namespace fileformat {
 
 /**
@@ -42,3 +43,4 @@ void BlobStream::addElement(std::size_t offset, const std::vector<std::uint8_t>&
 }
 
 } // namespace fileformat
+} // namespace retdec

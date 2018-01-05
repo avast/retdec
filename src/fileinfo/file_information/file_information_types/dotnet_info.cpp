@@ -158,7 +158,7 @@ const std::string& DotnetInfo::getTypeLibId() const
  * Returns defined class list.
  * @return Defined classes.
  */
-const std::vector<std::shared_ptr<fileformat::DotnetClass>>& DotnetInfo::getDefinedClassList() const
+const std::vector<std::shared_ptr<retdec::fileformat::DotnetClass>>& DotnetInfo::getDefinedClassList() const
 {
 	return definedClassList;
 }
@@ -167,7 +167,7 @@ const std::vector<std::shared_ptr<fileformat::DotnetClass>>& DotnetInfo::getDefi
  * Returns imported class list.
  * @return Imported classes.
  */
-const std::vector<std::shared_ptr<fileformat::DotnetClass>>& DotnetInfo::getImportedClassList() const
+const std::vector<std::shared_ptr<retdec::fileformat::DotnetClass>>& DotnetInfo::getImportedClassList() const
 {
 	return importedClassList;
 }
@@ -279,7 +279,7 @@ void DotnetInfo::setTypeLibId(const std::string& id)
  * Sets defined class list.
  * @param dotnetClassList Defined classes.
  */
-void DotnetInfo::setDefinedClassList(const std::vector<std::shared_ptr<fileformat::DotnetClass>>& dotnetClassList)
+void DotnetInfo::setDefinedClassList(const std::vector<std::shared_ptr<retdec::fileformat::DotnetClass>>& dotnetClassList)
 {
 	definedClassList = dotnetClassList;
 }
@@ -288,7 +288,7 @@ void DotnetInfo::setDefinedClassList(const std::vector<std::shared_ptr<fileforma
  * Sets imported class list.
  * @param dotnetClassList Imported classes.
  */
-void DotnetInfo::setImportedClassList(const std::vector<std::shared_ptr<fileformat::DotnetClass>>& dotnetClassList)
+void DotnetInfo::setImportedClassList(const std::vector<std::shared_ptr<retdec::fileformat::DotnetClass>>& dotnetClassList)
 {
 	importedClassList = dotnetClassList;
 }

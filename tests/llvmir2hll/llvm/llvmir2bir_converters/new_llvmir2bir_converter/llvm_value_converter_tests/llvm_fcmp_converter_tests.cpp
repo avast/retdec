@@ -28,6 +28,7 @@
 
 using namespace ::testing;
 
+namespace retdec {
 namespace llvmir2hll {
 namespace tests {
 
@@ -414,3 +415,4 @@ FCmpTrueInstructionIsConvertedCorrectly) {
 
 } // namespace tests
 } // namespace llvmir2hll
+} // namespace retdec

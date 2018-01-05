@@ -18,16 +18,17 @@
 #include "retdec/loader/loader/segment_data_source.h"
 #include "retdec/loader/utils/range.h"
 
+namespace retdec {
 namespace loader {
 
 class Segment
 {
 public:
-	Segment(const fileformat::SecSeg* secSeg, std::uint64_t address, std::uint64_t size, std::unique_ptr<SegmentDataSource>&& dataSource);
+	Segment(const retdec::fileformat::SecSeg* secSeg, std::uint64_t address, std::uint64_t size, std::unique_ptr<SegmentDataSource>&& dataSource);
 	Segment(const Segment& segment);
 	~Segment();
 
-	const fileformat::SecSeg* getSecSeg() const;
+	const retdec::fileformat::SecSeg* getSecSeg() const;
 
 	bool containsAddress(std::uint64_t address) const;
 	std::uint64_t getAddress() const;
@@ -56,7 +57,7 @@ public:
 	void addNonDecodableRange(retdec::utils::Range<std::uint64_t> range);
 
 private:
-	const fileformat::SecSeg* _secSeg;
+	const retdec::fileformat::SecSeg* _secSeg;
 	std::uint64_t _address;
 	std::uint64_t _size;
 	std::unique_ptr<SegmentDataSource> _dataSource;
@@ -65,5 +66,6 @@ private:
 };
 
 } // namespace loader
+} // namespace retdec
 
 #endif

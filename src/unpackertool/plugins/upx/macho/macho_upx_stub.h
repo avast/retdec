@@ -66,7 +66,7 @@ public:
 	using MachOHeaderType = typename MachOUpxStubTraits<bits>::MachOHeaderType;
 	using MachOSegmentCommandType = typename MachOUpxStubTraits<bits>::MachOSegmentCommandType;
 
-	MachOUpxStub(loader::Image* inputFile, const UpxStubData* stubData, const unpacker::DynamicBuffer& stubCapturedData,
+	MachOUpxStub(retdec::loader::Image* inputFile, const UpxStubData* stubData, const unpacker::DynamicBuffer& stubCapturedData,
 			std::unique_ptr<Decompressor> decompressor, const UpxMetadata& metadata);
 
 	virtual ~MachOUpxStub() override;

@@ -11,6 +11,7 @@
 using namespace retdec::utils;
 using namespace llvm;
 
+namespace retdec {
 namespace bin2llvmir {
 
 namespace {
@@ -117,3 +118,4 @@ FuncSet IndirectlyCalledFuncsAnalysis::getFuncsForIndirectCall(
 }
 
 } // namespace bin2llvmir
+} // namespace retdec

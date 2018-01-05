@@ -14,6 +14,7 @@
 using namespace retdec::utils;
 using namespace llvm;
 
+namespace retdec {
 namespace bin2llvmir {
 
 namespace {
@@ -311,3 +312,4 @@ FuncSet ReachableFuncsAnalysis::getIndirectlyReachableDefinedFuncsFor(
 }
 
 } // namespace bin2llvmir
+} // namespace retdec

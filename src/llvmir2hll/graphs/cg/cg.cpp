@@ -14,6 +14,7 @@
 
 using retdec::utils::addToSet;
 
+namespace retdec {
 namespace llvmir2hll {
 
 /**
@@ -139,3 +140,4 @@ CG::caller_iterator CG::caller_end() const {
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

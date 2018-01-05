@@ -10,7 +10,7 @@
 #include "fileinfo/file_presentation/getters/format.h"
 #include "fileinfo/file_presentation/getters/iterative_getter/iterative_subtitle_getter/loader_info_json_getter.h"
 
-using namespace fileformat;
+using namespace retdec::fileformat;
 
 namespace fileinfo {
 

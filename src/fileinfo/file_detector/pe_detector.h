@@ -38,10 +38,10 @@ class PeDetector : public FileDetector
 		virtual void detectArchitecture() override;
 		virtual void detectFileType() override;
 		virtual void getAdditionalInfo() override;
-		virtual cpdetect::CompilerDetector* createCompilerDetector() const override;
+		virtual retdec::cpdetect::CompilerDetector* createCompilerDetector() const override;
 		/// @}
 	public:
-		PeDetector(std::string pathToInputFile, FileInformation &finfo, cpdetect::DetectParams &searchPar, fileformat::LoadFlags loadFlags);
+		PeDetector(std::string pathToInputFile, FileInformation &finfo, retdec::cpdetect::DetectParams &searchPar, retdec::fileformat::LoadFlags loadFlags);
 		virtual ~PeDetector() override;
 };
 

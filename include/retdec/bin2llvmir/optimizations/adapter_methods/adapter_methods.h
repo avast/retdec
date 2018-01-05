@@ -14,6 +14,7 @@
 
 #include "retdec/bin2llvmir/providers/config.h"
 
+namespace retdec {
 namespace bin2llvmir {
 
 /**
@@ -54,5 +55,6 @@ class AdapterMethods: public llvm::FunctionPass
 };
 
 } // namespace bin2llvmir
+} // namespace retdec
 
 #endif

@@ -14,6 +14,7 @@
 
 #include "retdec/llvm-support/utils.h"
 
+namespace retdec {
 namespace llvm_support {
 
 /**
@@ -85,3 +86,4 @@ llvm::Value* skipCasts(llvm::Value* val)
 }
 
 } // namespace llvm_support
+} // namespace retdec

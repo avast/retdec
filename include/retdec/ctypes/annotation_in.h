@@ -9,6 +9,7 @@
 
 #include "retdec/ctypes/annotation.h"
 
+namespace retdec {
 namespace ctypes {
 
 /**
@@ -26,5 +27,6 @@ class AnnotationIn: public Annotation
 };
 
 } // namespace ctypes
+} // namespace retdec
 
 #endif

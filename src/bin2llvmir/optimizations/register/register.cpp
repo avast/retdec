@@ -16,7 +16,7 @@
 #include "retdec/llvm-support/utils.h"
 #include "retdec/bin2llvmir/utils/type.h"
 
-using namespace llvm_support;
+using namespace retdec::llvm_support;
 using namespace llvm;
 
 namespace {
@@ -44,6 +44,7 @@ std::map<std::pair<std::string, unsigned>, std::string> RegClassNum2Name =
 
 } // anonymous namespace
 
+namespace retdec {
 namespace bin2llvmir {
 
 char RegisterAnalysis::ID = 0;
@@ -341,3 +342,4 @@ llvm::GlobalVariable* RegisterAnalysis::getLlvmRegister(
 }
 
 } // namespace bin2llvmir
+} // namespace retdec

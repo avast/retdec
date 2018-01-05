@@ -89,6 +89,7 @@
 #include "retdec/llvmir2hll/support/types.h"
 #include "retdec/llvmir2hll/utils/ir.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 REGISTER_AT_FACTORY("py", PY_HLL_WRITER_ID, HLLWriterFactory, PyHLLWriter::create);
@@ -950,3 +951,4 @@ void PyHLLWriter::emitEntryPoint(ShPtr<Function> mainFunc) {
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

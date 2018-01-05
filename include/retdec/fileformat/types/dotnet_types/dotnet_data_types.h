@@ -13,6 +13,7 @@
 
 #include "retdec/fileformat/types/dotnet_headers/metadata_tables.h"
 
+namespace retdec {
 namespace fileformat {
 
 class DotnetClass;
@@ -339,5 +340,6 @@ using DotnetDataTypeCModOptional = DotnetDataType<ElementType::CModOptional>;
 //using DotnetDataTypeCustomEnum = DotnetDataType<ElementType::CustomEnum>;
 
 } // namespace fileformat
+} // namespace retdec
 
 #endif

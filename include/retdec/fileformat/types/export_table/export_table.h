@@ -11,6 +11,7 @@
 
 #include "retdec/fileformat/types/export_table/export.h"
 
+namespace retdec {
 namespace fileformat {
 
 /**
@@ -52,5 +53,6 @@ class ExportTable
 };
 
 } // namespace fileformat
+} // namespace retdec
 
 #endif

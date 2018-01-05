@@ -14,6 +14,7 @@
 #include "retdec/llvmir2hll/support/smart_ptr.h"
 #include "retdec/utils/string.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 class Expression;
@@ -77,5 +78,6 @@ private:
 };
 
 } // namespace llvmir2hll
+} // namespace retdec
 
 #endif

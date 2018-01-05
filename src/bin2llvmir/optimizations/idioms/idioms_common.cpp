@@ -13,6 +13,7 @@
 using namespace llvm;
 using namespace PatternMatch;
 
+namespace retdec {
 namespace bin2llvmir {
 
 /**
@@ -381,3 +382,4 @@ Instruction * IdiomsCommon::exchangeSignedModulo2n(BasicBlock::iterator iter) co
 }
 
 } // namespace bin2llvmir
+} // namespace retdec

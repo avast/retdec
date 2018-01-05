@@ -11,6 +11,7 @@
 
 #include "retdec/fileformat/types/dotnet_headers/stream.h"
 
+namespace retdec {
 namespace fileformat {
 
 class BlobStream : public Stream
@@ -32,5 +33,6 @@ class BlobStream : public Stream
 };
 
 } // namespace fileformat
+} // namespace retdec
 
 #endif

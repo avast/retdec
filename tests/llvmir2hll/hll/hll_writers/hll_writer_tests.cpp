@@ -18,6 +18,7 @@ using namespace ::testing;
 
 using retdec::utils::contains;
 
+namespace retdec {
 namespace llvmir2hll {
 namespace tests {
 
@@ -217,3 +218,4 @@ EmitsDetectedCryptoPatternsInCommentWhenAvailable) {
 
 } // namespace tests
 } // namespace llvmir2hll
+} // namespace retdec

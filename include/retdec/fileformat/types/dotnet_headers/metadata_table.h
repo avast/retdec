@@ -10,6 +10,7 @@
 #include <string>
 #include <vector>
 
+namespace retdec {
 namespace fileformat {
 
 enum class MetadataTableType
@@ -110,5 +111,6 @@ class MetadataTable : public BaseMetadataTable
 };
 
 } // namespace fileformat
+} // namespace retdec
 
 #endif

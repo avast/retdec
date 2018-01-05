@@ -13,6 +13,7 @@
 #include "retdec/llvmir2hll/support/debug.h"
 #include "retdec/llvmir2hll/support/types.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 REGISTER_AT_FACTORY("gcc-general", GCC_GENERAL_SEMANTICS_ID, SemanticsFactory,
@@ -55,3 +56,4 @@ Maybe<IntStringMap> GCCGeneralSemantics::getSymbolicNamesForParam(
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

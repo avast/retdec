@@ -9,6 +9,7 @@
 
 #include "retdec/capstone2llvmir/mips/mips.h"
 
+namespace retdec {
 namespace capstone2llvmir {
 
 Capstone2LlvmIrTranslatorMips::Capstone2LlvmIrTranslatorMips(
@@ -2282,3 +2283,4 @@ void Capstone2LlvmIrTranslatorMips::translateXor(cs_insn* i, cs_mips* mi, llvm::
 //
 
 } // namespace capstone2llvmir
+} // namespace retdec

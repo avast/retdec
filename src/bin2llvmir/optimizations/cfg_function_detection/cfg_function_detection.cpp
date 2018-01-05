@@ -21,10 +21,11 @@
 #include "retdec/bin2llvmir/utils/type.h"
 #include "retdec/bin2llvmir/utils/ir_modifier.h"
 
-using namespace llvm_support;
+using namespace retdec::llvm_support;
 using namespace retdec::utils;
 using namespace llvm;
 
+namespace retdec {
 namespace bin2llvmir {
 
 char CfgFunctionDetection::ID = 0;
@@ -352,3 +353,4 @@ bool CfgFunctionDetection::runOne()
 }
 
 } // namespace bin2llvmir
+} // namespace retdec

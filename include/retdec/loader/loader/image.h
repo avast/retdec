@@ -15,12 +15,13 @@
 #include "retdec/loader/loader/segment.h"
 #include "retdec/loader/utils/name_generator.h"
 
+namespace retdec {
 namespace loader {
 
 class Image : public retdec::utils::ByteValueStorage
 {
 public:
-	Image(const std::shared_ptr<fileformat::FileFormat>& fileFormat);
+	Image(const std::shared_ptr<retdec::fileformat::FileFormat>& fileFormat);
 	virtual ~Image();
 
 	/**
@@ -44,9 +45,9 @@ public:
 	virtual bool setXByte(std::uint64_t address, std::uint64_t x, std::uint64_t val, retdec::utils::Endianness e = retdec::utils::Endianness::UNKNOWN) override;
 	virtual bool setXBytes(std::uint64_t address, const std::vector<std::uint8_t>& res) override;
 
-	fileformat::FileFormat* getFileFormat();
-	const fileformat::FileFormat* getFileFormat() const;
-	std::weak_ptr<fileformat::FileFormat> getFileFormatWptr() const;
+	retdec::fileformat::FileFormat* getFileFormat();
+	const retdec::fileformat::FileFormat* getFileFormat() const;
+	std::weak_ptr<retdec::fileformat::FileFormat> getFileFormatWptr() const;
 
 	std::size_t getNumberOfSegments() const;
 	const std::vector<std::unique_ptr<Segment>>& getSegments() const;
@@ -86,7 +87,7 @@ private:
 	const Segment* _getSegmentWithIndex(std::size_t index) const;
 	const Segment* _getSegmentFromAddress(std::uint64_t address) const;
 
-	std::shared_ptr<fileformat::FileFormat> _fileFormat;
+	std::shared_ptr<retdec::fileformat::FileFormat> _fileFormat;
 	std::vector<std::unique_ptr<Segment>> _segments;
 	std::uint64_t _baseAddress;
 	NameGenerator _namelessSegNameGen;
@@ -94,5 +95,6 @@ private:
 };
 
 } // namespace loader
+} // namespace retdec
 
 #endif

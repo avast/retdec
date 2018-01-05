@@ -19,6 +19,7 @@
 using namespace retdec::utils;
 using namespace llvm;
 
+namespace retdec {
 namespace bin2llvmir {
 
 bool ControlFlow::runArm()
@@ -259,3 +260,4 @@ bool ControlFlow::runArmCall(AsmInstruction& ai)
 }
 
 } // namespace bin2llvmir
+} // namespace retdec

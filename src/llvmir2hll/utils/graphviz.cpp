@@ -16,6 +16,7 @@ using namespace std::string_literals;
 using retdec::utils::addSlashes;
 using retdec::utils::toHex;
 
+namespace retdec {
 namespace llvmir2hll {
 
 /**
@@ -65,3 +66,4 @@ std::string UtilsGraphviz::createNodeName(const std::string &str) {
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

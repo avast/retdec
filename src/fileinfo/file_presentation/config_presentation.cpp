@@ -11,8 +11,8 @@
 
 using namespace retdec::config;
 using namespace retdec::utils;
-using namespace cpdetect;
-using namespace fileformat;
+using namespace retdec::cpdetect;
+using namespace retdec::fileformat;
 
 namespace fileinfo {
 

@@ -13,6 +13,7 @@
 using retdec::utils::hasItem;
 using retdec::utils::shareSomeItem;
 
+namespace retdec {
 namespace llvmir2hll {
 
 /**
@@ -99,3 +100,4 @@ bool NoVarDefCFGTraversal::combineRetVals(bool origRetVal, bool newRetVal) const
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

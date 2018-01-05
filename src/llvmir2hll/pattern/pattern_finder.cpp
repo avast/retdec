@@ -9,6 +9,7 @@
 #include "retdec/llvmir2hll/pattern/pattern_finder.h"
 #include "retdec/llvmir2hll/support/debug.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 /**
@@ -36,3 +37,4 @@ PatternFinder::PatternFinder(ShPtr<ValueAnalysis> va,
 PatternFinder::~PatternFinder() {}
 
 } // namespace llvmir2hll
+} // namespace retdec

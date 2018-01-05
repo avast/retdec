@@ -12,6 +12,7 @@
 
 #include "retdec/fileformat/types/rich_header/linker_info.h"
 
+namespace retdec {
 namespace fileformat {
 
 /**
@@ -76,5 +77,6 @@ class RichHeader
 };
 
 } // namespace fileformat
+} // namespace retdec
 
 #endif

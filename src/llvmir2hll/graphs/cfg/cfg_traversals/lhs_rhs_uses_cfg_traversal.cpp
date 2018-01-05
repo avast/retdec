@@ -13,6 +13,7 @@
 #include "retdec/llvmir2hll/support/debug.h"
 #include "retdec/llvmir2hll/utils/ir.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 /**
@@ -239,3 +240,4 @@ bool LhsRhsUsesCFGTraversal::combineRetVals(bool origRetVal, bool newRetVal) con
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

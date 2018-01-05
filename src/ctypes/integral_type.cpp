@@ -10,6 +10,7 @@
 #include "retdec/ctypes/integral_type.h"
 #include "retdec/ctypes/visitor.h"
 
+namespace retdec {
 namespace ctypes {
 
 /**
@@ -79,3 +80,4 @@ void IntegralType::accept(Visitor *v) {
 }
 
 } // namespace ctypes
+} // namespace retdec

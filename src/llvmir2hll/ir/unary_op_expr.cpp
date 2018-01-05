@@ -7,6 +7,7 @@
 #include "retdec/llvmir2hll/ir/unary_op_expr.h"
 #include "retdec/llvmir2hll/support/debug.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 /**
@@ -91,3 +92,4 @@ void UnaryOpExpr::update(ShPtr<Value> subject, ShPtr<Value> arg) {
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

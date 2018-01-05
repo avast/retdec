@@ -11,20 +11,22 @@
 
 #include "retdec/loader/loader/image.h"
 
+namespace retdec {
 namespace loader {
 
 class IntelHexImage : public Image
 {
 public:
-	IntelHexImage(const std::shared_ptr<fileformat::FileFormat>& fileFormat);
+	IntelHexImage(const std::shared_ptr<retdec::fileformat::FileFormat>& fileFormat);
 	virtual ~IntelHexImage();
 
 	virtual bool load() override;
 
 protected:
-	Segment* addSegment(const fileformat::Section* section, std::uint64_t address, std::uint64_t memSize);
+	Segment* addSegment(const retdec::fileformat::Section* section, std::uint64_t address, std::uint64_t memSize);
 };
 
 } // namespace loader
+} // namespace retdec
 
 #endif

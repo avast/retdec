@@ -13,6 +13,7 @@
 #include "retdec/fileformat/types/certificate_table/certificate.h"
 #include "retdec/fileformat/utils/conversions.h"
 
+namespace retdec {
 namespace fileformat {
 
 namespace
@@ -389,3 +390,4 @@ const Certificate::Attributes& Certificate::getIssuer() const
 }
 
 } // namespace fileformat
+} // namespace retdec

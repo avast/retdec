@@ -17,6 +17,7 @@
 #include "retdec/bin2llvmir/providers/fileimage.h"
 #include "retdec/bin2llvmir/utils/instruction.h"
 
+namespace retdec {
 namespace bin2llvmir {
 
 class DsmGenerator : public llvm::ModulePass
@@ -36,7 +37,7 @@ class DsmGenerator : public llvm::ModulePass
 		void generateHeader(std::ostream& ret);
 		void generateCode(std::ostream& ret);
 		void generateCodeSeg(
-				const loader::Segment* seg,
+				const retdec::loader::Segment* seg,
 				std::ostream& ret);
 		void generateFunction(
 				retdec::config::Function* fnc,
@@ -44,7 +45,7 @@ class DsmGenerator : public llvm::ModulePass
 		void generateInstruction(AsmInstruction& ai, std::ostream& ret);
 		void generateData(std::ostream& ret);
 		void generateDataSeg(
-				const loader::Segment* seg,
+				const retdec::loader::Segment* seg,
 				std::ostream& ret);
 		void generateDataRange(
 				retdec::utils::Address start,
@@ -86,5 +87,6 @@ class DsmGenerator : public llvm::ModulePass
 };
 
 } // namespace bin2llvmir
+} // namespace retdec
 
 #endif

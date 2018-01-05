@@ -18,6 +18,7 @@
 #include "retdec/llvmir2hll/optimizer/optimizers/deref_to_array_index_optimizer.h"
 #include "retdec/llvmir2hll/support/debug.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 /**
@@ -125,3 +126,4 @@ void DerefToArrayIndexOptimizer::replaceDerefWithArrayIndex(ShPtr<DerefOpExpr>
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

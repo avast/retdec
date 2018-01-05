@@ -15,7 +15,7 @@
 
 using namespace retdec::utils;
 using namespace fnc_patterns::stacofin;
-using namespace loader;
+using namespace retdec::loader;
 
 
 /**

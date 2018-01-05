@@ -14,6 +14,7 @@
 #include "retdec/bin2llvmir/providers/fileimage.h"
 #include "retdec/bin2llvmir/providers/lti.h"
 
+namespace retdec {
 namespace bin2llvmir {
 
 class AsmInstruction;
@@ -45,5 +46,6 @@ class SyscallFixer : public llvm::ModulePass
 };
 
 } // namespace bin2llvmir
+} // namespace retdec
 
 #endif

@@ -8,6 +8,7 @@
 #include "retdec/llvmir2hll/optimizer/optimizers/empty_stmt_optimizer.h"
 #include "retdec/llvmir2hll/support/debug.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 /**
@@ -37,3 +38,4 @@ void EmptyStmtOptimizer::visit(ShPtr<EmptyStmt> stmt) {
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

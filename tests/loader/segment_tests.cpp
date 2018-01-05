@@ -10,6 +10,7 @@
 
 using namespace ::testing;
 
+namespace retdec {
 namespace loader {
 namespace tests {
 
@@ -381,4 +382,5 @@ ShrinkWithAddressWithinRangeButInvalidSizeForbiddenWorks) {
 }
 
 } // namespace loader
+} // namespace retdec
 } // namespace tests

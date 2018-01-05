@@ -12,8 +12,8 @@
 
 #include "retdec/dwarfparser/dwarf_parserdefs.h"
 
-namespace dwarfparser
-{
+namespace retdec {
+namespace dwarfparser {
 
 // Extern forward declarations.
 
@@ -56,5 +56,6 @@ class DwarfResources
 };
 
 } // namespace dwarfparser
+} // namespace retdec
 
 #endif

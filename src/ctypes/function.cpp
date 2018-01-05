@@ -11,6 +11,7 @@
 #include "retdec/ctypes/parameter.h"
 #include "retdec/utils/container.h"
 
+namespace retdec {
 namespace ctypes {
 
 /**
@@ -257,3 +258,4 @@ HeaderFile Function::getHeaderFile() const
 }
 
 } // namespace ctypes
+} // namespace retdec

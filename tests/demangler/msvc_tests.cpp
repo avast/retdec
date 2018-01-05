@@ -12,6 +12,7 @@ using namespace ::testing;
 
 #define DEM_EQ(mangled, demangled) EXPECT_EQ(demangled, msvc.demangleToString(mangled))
 
+namespace retdec {
 namespace demangler {
 namespace tests {
 
@@ -25,7 +26,7 @@ class MsvcDemanglerTests : public Test
 		}
 
 	protected:
-		demangler::CDemangler msvc;
+		retdec::demangler::CDemangler msvc;
 };
 
 TEST_F(MsvcDemanglerTests, DemangleCppClassNames)
@@ -88,3 +89,4 @@ TEST_F(MsvcDemanglerTests, RandomTests)
 
 } // namespace tests
 } // namespace demangler
+} // namespace retdec

@@ -52,6 +52,7 @@
 #include "retdec/llvmir2hll/llvm/string_conversions.h"
 #include "retdec/llvmir2hll/support/debug.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 namespace {
@@ -698,3 +699,4 @@ ShPtr<LLVMValueConverter> LLVMInstructionConverter::getConverter() {
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

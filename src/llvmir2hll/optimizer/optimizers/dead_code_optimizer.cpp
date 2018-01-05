@@ -18,6 +18,7 @@
 #include "retdec/llvmir2hll/optimizer/optimizers/dead_code_optimizer.h"
 #include "retdec/llvmir2hll/support/debug.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 /**
@@ -454,3 +455,4 @@ void DeadCodeOptimizer::tryToOptimizeForLoopStmt(ShPtr<ForLoopStmt> stmt) {
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

@@ -11,6 +11,7 @@
 
 #include "retdec/ctypes/type.h"
 
+namespace retdec {
 namespace ctypes {
 
 /**
@@ -34,5 +35,6 @@ class VoidType : public Type
 };
 
 } // namespace ctypes
+} // namespace retdec
 
 #endif

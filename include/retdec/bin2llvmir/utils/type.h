@@ -15,6 +15,7 @@
 #include "retdec/bin2llvmir/providers/fileimage.h"
 #include "retdec/bin2llvmir/utils/defs.h"
 
+namespace retdec {
 namespace bin2llvmir {
 
 const unsigned DEFAULT_ADDR_SPACE = 0;
@@ -74,5 +75,6 @@ std::vector<llvm::Type*> parseFormatString(
 		llvm::Function* calledFnc = nullptr);
 
 } // namespace bin2llvmir
+} // namespace retdec
 
 #endif

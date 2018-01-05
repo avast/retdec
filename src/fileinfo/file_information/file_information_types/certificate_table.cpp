@@ -496,7 +496,7 @@ std::string CertificateTable::getCertificateSubjectEmailAddress(std::size_t posi
  * Set certificate table data
  * @param certificateTable Instance of class with original information about certificate table
  */
-void CertificateTable::setTable(const fileformat::CertificateTable *certificateTable)
+void CertificateTable::setTable(const retdec::fileformat::CertificateTable *certificateTable)
 {
 	table = certificateTable;
 }

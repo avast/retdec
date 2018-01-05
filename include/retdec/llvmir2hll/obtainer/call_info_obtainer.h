@@ -16,6 +16,7 @@
 #include "retdec/llvmir2hll/support/types.h"
 #include "retdec/utils/non_copyable.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 class CFG;
@@ -407,5 +408,6 @@ private:
 };
 
 } // namespace llvmir2hll
+} // namespace retdec
 
 #endif

@@ -12,6 +12,7 @@ using namespace ::testing;
 
 #define DEM_EQ(mangled, demangled) EXPECT_EQ(demangled, borland.demangleToString(mangled))
 
+namespace retdec {
 namespace demangler {
 namespace tests {
 
@@ -25,7 +26,7 @@ class BorlandDemanglerTests : public Test
 		}
 
 	protected:
-		demangler::CDemangler borland;
+		retdec::demangler::CDemangler borland;
 };
 
 TEST_F(BorlandDemanglerTests, RandomTests)
@@ -66,3 +67,4 @@ TEST_F(BorlandDemanglerTests, RandomTests)
 
 } // namespace tests
 } // namespace demangler
+} // namespace retdec

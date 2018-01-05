@@ -15,6 +15,7 @@
 
 using namespace llvm;
 
+namespace retdec {
 namespace bin2llvmir {
 
 namespace {
@@ -335,3 +336,4 @@ void PHI2Seq::orderDependentPHINodes(BasicBlock &bb, const VarDependAnalysis::
 }
 
 } // namespace bin2llvmir
+} // namespace retdec

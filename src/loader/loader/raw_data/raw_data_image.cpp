@@ -12,9 +12,10 @@
 #include "retdec/fileformat/fileformat.h"
 #include "retdec/loader/loader/raw_data/raw_data_image.h"
 
+namespace retdec {
 namespace loader {
 
-RawDataImage::RawDataImage(const std::shared_ptr<fileformat::FileFormat>& fileFormat) : Image(fileFormat)
+RawDataImage::RawDataImage(const std::shared_ptr<retdec::fileformat::FileFormat>& fileFormat) : Image(fileFormat)
 {
 }
 
@@ -23,7 +24,7 @@ RawDataImage::~RawDataImage()
 }
 
 /**
- * Virtual method overridden from loader::Image, which is used in image factory.
+ * Virtual method overridden from retdec::loader::Image, which is used in image factory.
  * Loads the image using @c fileformat.
  *
  * @return True if loading was successful, otherwise false.
@@ -60,3 +61,4 @@ bool RawDataImage::reload()
 }
 
 } // namespace loader
+} // namespace retdec

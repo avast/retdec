@@ -20,9 +20,10 @@
 #include "retdec/llvm-support/utils.h"
 #include "retdec/bin2llvmir/utils/type.h"
 
-using namespace llvm_support;
+using namespace retdec::llvm_support;
 using namespace llvm;
 
+namespace retdec {
 namespace bin2llvmir {
 
 char StackAnalysis::ID = 0;
@@ -455,3 +456,4 @@ retdec::config::Object* StackAnalysis::getDebugStackVariable(
 }
 
 } // namespace bin2llvmir
+} // namespace retdec

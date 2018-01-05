@@ -13,7 +13,7 @@
 #include "retdec/utils/conversion.h"
 #include "retdec/macho-extractor/break_fat.h"
 
-using namespace macho_extractor;
+using namespace retdec::macho_extractor;
 using namespace rapidjson;
 
 namespace {

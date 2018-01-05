@@ -17,6 +17,7 @@
 
 using namespace llvm;
 
+namespace retdec {
 namespace bin2llvmir {
 
 IrModifier::IrModifier()
@@ -690,3 +691,4 @@ IrModifier::StackPair IrModifier::getStackVariable(
 }
 
 } // namespace bin2llvmir
+} // namespace retdec

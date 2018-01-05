@@ -30,6 +30,7 @@
 using namespace retdec::utils;
 using namespace PeLib;
 
+namespace retdec {
 namespace fileformat {
 
 namespace
@@ -165,9 +166,9 @@ void FileFormat::init()
 	}
 	else
 	{
-		crc32 = crypto::getCrc32(bytes.data(), bytes.size());
-		md5 = crypto::getMd5(bytes.data(), bytes.size());
-		sha256 = crypto::getSha256(bytes.data(), bytes.size());
+		crc32 = retdec::crypto::getCrc32(bytes.data(), bytes.size());
+		md5 = retdec::crypto::getMd5(bytes.data(), bytes.size());
+		sha256 = retdec::crypto::getSha256(bytes.data(), bytes.size());
 	}
 	initStream();
 }
@@ -325,9 +326,9 @@ void FileFormat::computeSectionTableHashes()
 
 	if(!data.empty())
 	{
-		sectionCrc32 = crypto::getCrc32(data.data(), data.size());
-		sectionMd5 = crypto::getMd5(data.data(), data.size());
-		sectionSha256 = crypto::getSha256(data.data(), data.size());
+		sectionCrc32 = retdec::crypto::getCrc32(data.data(), data.size());
+		sectionMd5 = retdec::crypto::getMd5(data.data(), data.size());
+		sectionSha256 = retdec::crypto::getSha256(data.data(), data.size());
 	}
 }
 
@@ -2496,3 +2497,4 @@ void FileFormat::dumpResourceTree(std::string &dumpStr)
 }
 
 } // namespace fileformat
+} // namespace retdec

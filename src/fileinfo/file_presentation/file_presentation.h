@@ -18,7 +18,7 @@ class FilePresentation
 {
 	protected:
 		FileInformation &fileinfo;        ///< class with information about file
-		cpdetect::ReturnCode returnCode; ///< return code of data member @a fileinfo
+		retdec::cpdetect::ReturnCode returnCode; ///< return code of data member @a fileinfo
 	public:
 		FilePresentation(FileInformation &fileinfo_);
 		virtual ~FilePresentation();

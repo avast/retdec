@@ -14,6 +14,7 @@
 #include "retdec/llvmir2hll/var_renamer/var_renamer_factory.h"
 #include "retdec/llvmir2hll/var_renamer/var_renamers/address_var_renamer.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 REGISTER_AT_FACTORY("address", ADDRESS_VAR_RENAMER_ID, VarRenamerFactory,
@@ -105,3 +106,4 @@ void AddressVarRenamer::renameFuncLocalVar(ShPtr<Variable> var,
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

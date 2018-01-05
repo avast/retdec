@@ -17,6 +17,7 @@
 
 using namespace llvm;
 
+namespace retdec {
 namespace bin2llvmir {
 
 namespace {
@@ -408,3 +409,4 @@ bool NeverReturningFuncs::neverReturns(const Function *func) {
 }
 
 } // namespace bin2llvmir
+} // namespace retdec

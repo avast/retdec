@@ -12,6 +12,7 @@ using retdec::utils::addToMap;
 using retdec::utils::mapGetValueOrDefault;
 using retdec::utils::mapHasKey;
 
+namespace retdec {
 namespace llvmir2hll {
 
 /**
@@ -172,3 +173,4 @@ APICallInfo::param_bind_iterator APICallInfo::param_bind_end() const {
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

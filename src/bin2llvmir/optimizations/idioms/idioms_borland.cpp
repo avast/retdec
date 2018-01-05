@@ -6,6 +6,8 @@
 
 #include "retdec/bin2llvmir/optimizations/idioms/idioms_borland.h"
 
+namespace retdec {
 namespace bin2llvmir {
 
 } // namespace bin2llvmir
+} // namespace retdec

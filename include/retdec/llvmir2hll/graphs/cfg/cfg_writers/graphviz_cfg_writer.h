@@ -14,6 +14,7 @@
 #include "retdec/llvmir2hll/graphs/cfg/cfg_writer.h"
 #include "retdec/llvmir2hll/support/smart_ptr.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 class CFG;
@@ -48,5 +49,6 @@ private:
 };
 
 } // namespace llvmir2hll
+} // namespace retdec
 
 #endif

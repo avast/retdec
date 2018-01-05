@@ -11,6 +11,7 @@
 #include <string>
 #include <vector>
 
+namespace retdec {
 namespace fileformat {
 
 /**
@@ -73,5 +74,6 @@ class Stream
 };
 
 } // namespace fileformat
+} // namespace retdec
 
 #endif

@@ -13,8 +13,8 @@
 #include "retdec/dwarfparser/dwarf_base.h"
 #include "retdec/dwarfparser/dwarf_resources.h"
 
-namespace dwarfparser
-{
+namespace retdec {
+namespace dwarfparser {
 
 // Extern forward declarations.
 class DwarfFunction;
@@ -110,5 +110,6 @@ class DwarfLocationDesc
 };
 
 } // namespace dwarfparser
+} // namespace retdec
 
 #endif

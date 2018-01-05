@@ -16,7 +16,7 @@
 #include "retdec/ar-extractor/detection.h"
 
 using namespace retdec::utils;
-using namespace ar_extractor;
+using namespace retdec::ar_extractor;
 using namespace rapidjson;
 
 /**

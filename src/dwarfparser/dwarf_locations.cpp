@@ -15,8 +15,8 @@
 
 using namespace std;
 
-namespace dwarfparser
-{
+namespace retdec {
+namespace dwarfparser {
 
 /**
  * @brief ctor.
@@ -1063,3 +1063,4 @@ DwarfLocationDesc::evaluateExpression(Expression &expr, string *retN,
 }
 
 } // namespace dwarfparser
+} // namespace retdec

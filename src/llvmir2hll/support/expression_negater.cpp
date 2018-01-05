@@ -51,6 +51,7 @@
 #include "retdec/llvmir2hll/support/debug.h"
 #include "retdec/llvmir2hll/support/expression_negater.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 /**
@@ -395,3 +396,4 @@ void ExpressionNegater::visit(ShPtr<UnknownType> type) {
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

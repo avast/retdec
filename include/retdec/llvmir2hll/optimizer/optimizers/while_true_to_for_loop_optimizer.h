@@ -11,6 +11,7 @@
 #include "retdec/llvmir2hll/support/smart_ptr.h"
 #include "retdec/llvmir2hll/utils/loop_optimizer.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 class ArithmExprEvaluator;
@@ -83,5 +84,6 @@ private:
 };
 
 } // namespace llvmir2hll
+} // namespace retdec
 
 #endif

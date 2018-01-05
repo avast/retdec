@@ -10,8 +10,9 @@
 #include "retdec/cpdetect/compiler_detector/macho_compiler.h"
 #include "retdec/cpdetect/compiler_detector/pe_compiler.h"
 
-using namespace fileformat;
+using namespace retdec::fileformat;
 
+namespace retdec {
 namespace cpdetect {
 
 /**
@@ -23,7 +24,7 @@ namespace cpdetect {
  *
  * If format of input file is not supported, function will return @c nullptr.
  */
-std::unique_ptr<CompilerDetector> createCompilerDetector(fileformat::FileFormat &parser,
+std::unique_ptr<CompilerDetector> createCompilerDetector(retdec::fileformat::FileFormat &parser,
 		DetectParams &params, ToolInformation &toolInfo)
 {
 	CoffFormat *coff = dynamic_cast<CoffFormat*>(&parser);
@@ -50,3 +51,4 @@ std::unique_ptr<CompilerDetector> createCompilerDetector(fileformat::FileFormat 
 }
 
 } // namespace cpdetect
+} // namespace retdec

@@ -13,6 +13,7 @@
 #include "retdec/llvmir2hll/llvm/llvm_debug_info_obtainer.h"
 #include "retdec/llvmir2hll/support/debug.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 /**
@@ -50,3 +51,4 @@ void LLVMDebugInfoObtainer::obtainVarNames(ShPtr<Module> module) {
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

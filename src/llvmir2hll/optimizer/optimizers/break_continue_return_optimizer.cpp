@@ -10,6 +10,7 @@
 #include "retdec/llvmir2hll/optimizer/optimizers/break_continue_return_optimizer.h"
 #include "retdec/llvmir2hll/support/debug.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 /**
@@ -65,3 +66,4 @@ void BreakContinueReturnOptimizer::visit(ShPtr<ReturnStmt> stmt) {
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

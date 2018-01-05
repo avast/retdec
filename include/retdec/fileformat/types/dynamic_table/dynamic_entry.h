@@ -9,6 +9,7 @@
 
 #include <string>
 
+namespace retdec {
 namespace fileformat {
 
 /**
@@ -40,5 +41,6 @@ class DynamicEntry
 };
 
 } // namespace fileformat
+} // namespace retdec
 
 #endif

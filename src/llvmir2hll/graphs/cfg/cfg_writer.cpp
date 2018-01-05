@@ -10,6 +10,7 @@
 
 using retdec::utils::toString;
 
+namespace retdec {
 namespace llvmir2hll {
 
 /**
@@ -27,3 +28,4 @@ CFGWriter::CFGWriter(ShPtr<CFG> cfg, std::ostream &out):
 CFGWriter::~CFGWriter() {}
 
 } // namespace llvmir2hll
+} // namespace retdec

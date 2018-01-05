@@ -8,6 +8,7 @@
 #include "retdec/llvmir2hll/support/debug.h"
 #include "retdec/llvmir2hll/support/visitor.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 /**
@@ -95,3 +96,4 @@ void FloatType::accept(Visitor *v) {
 std::map<unsigned, ShPtr<FloatType>> FloatType::createdTypes;
 
 } // namespace llvmir2hll
+} // namespace retdec

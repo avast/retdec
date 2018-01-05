@@ -9,6 +9,7 @@
 
 #include <stdexcept>
 
+namespace retdec {
 namespace ctypes {
 
 /**
@@ -21,5 +22,6 @@ class CTypesError: public std::runtime_error
 };
 
 } // namespace ctypes
+} // namespace retdec
 
 #endif

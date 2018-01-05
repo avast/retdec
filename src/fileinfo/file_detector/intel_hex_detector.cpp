@@ -7,8 +7,8 @@
 #include "retdec/fileformat/file_format/intel_hex/intel_hex_format.h"
 #include "fileinfo/file_detector/intel_hex_detector.h"
 
-using namespace cpdetect;
-using namespace fileformat;
+using namespace retdec::cpdetect;
+using namespace retdec::fileformat;
 
 namespace fileinfo {
 
@@ -20,7 +20,7 @@ namespace fileinfo {
  * @param loadFlags Load flags
  */
 IntelHexDetector::IntelHexDetector(std::string pathToInputFile, FileInformation &finfo,
-	cpdetect::DetectParams &searchPar, fileformat::LoadFlags loadFlags) :
+	retdec::cpdetect::DetectParams &searchPar, retdec::fileformat::LoadFlags loadFlags) :
 	FileDetector(pathToInputFile, finfo, searchPar, loadFlags)
 {
 	fileParser = ihexParser = std::make_shared<IntelHexFormat>(fileInfo.getPathToFile(), loadFlags);
@@ -140,7 +140,7 @@ void IntelHexDetector::getAdditionalInfo()
  * Pointer to detector is dynamically allocated and must be released (otherwise there is a memory leak)
  * More detailed description of this method is in the super class
  */
-cpdetect::CompilerDetector* IntelHexDetector::createCompilerDetector() const
+retdec::cpdetect::CompilerDetector* IntelHexDetector::createCompilerDetector() const
 {
 	return new IntelHexCompiler(*ihexParser, cpParams, fileInfo.toolInfo);
 }

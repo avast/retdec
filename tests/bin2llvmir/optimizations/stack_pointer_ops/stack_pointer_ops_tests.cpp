@@ -10,6 +10,7 @@
 
 using namespace ::testing;
 
+namespace retdec {
 namespace bin2llvmir {
 namespace tests {
 
@@ -105,3 +106,4 @@ TEST_F(StackPointerOpsRemoveTests, passKeepsAllStoresToNonStackPointerRegisters)
 
 } // namespace tests
 } // namespace bin2llvmir
+} // namespace retdec

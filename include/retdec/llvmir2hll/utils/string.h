@@ -9,6 +9,7 @@
 
 #include <string>
 
+namespace retdec {
 namespace llvmir2hll {
 
 /// @name Operations with Strings
@@ -28,5 +29,6 @@ std::string getAddressFromLabel(const std::string &label,
 /// @}
 
 } // namespace llvmir2hll
+} // namespace retdec
 
 #endif

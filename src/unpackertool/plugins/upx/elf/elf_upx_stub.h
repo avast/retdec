@@ -80,7 +80,7 @@ public:
 	using ElfHeaderType = typename ElfUpxStubTraits<bits>::ElfHeaderType;
 	using ProgHeaderType = typename ElfUpxStubTraits<bits>::ProgHeaderType;
 
-	ElfUpxStub(loader::Image* inputFile, const UpxStubData* stubData, const unpacker::DynamicBuffer& stubCapturedData,
+	ElfUpxStub(retdec::loader::Image* inputFile, const UpxStubData* stubData, const unpacker::DynamicBuffer& stubCapturedData,
 			std::unique_ptr<Decompressor> decompressor, const UpxMetadata& metadata);
 
 	virtual ~ElfUpxStub() override;

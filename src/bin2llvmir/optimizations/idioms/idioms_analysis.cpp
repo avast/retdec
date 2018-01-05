@@ -8,6 +8,7 @@
 
 using namespace llvm;
 
+namespace retdec {
 namespace bin2llvmir {
 
 /*
@@ -297,3 +298,4 @@ bool IdiomsAnalysis::analyse(llvm::Function & f, llvm::Pass * p, int (IdiomsAnal
 }
 
 } // namespace bin2llvmir
+} // namespace retdec

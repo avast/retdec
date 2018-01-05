@@ -12,6 +12,7 @@
 
 #include "retdec/ctypes/type.h"
 
+namespace retdec {
 namespace ctypes {
 
 class Context;
@@ -45,5 +46,6 @@ class PointerType: public Type
 };
 
 } // namespace ctypes
+} // namespace retdec
 
 #endif

@@ -19,6 +19,7 @@
 
 using retdec::utils::hasItem;
 
+namespace retdec {
 namespace llvmir2hll {
 
 /**
@@ -112,3 +113,4 @@ void WrittenIntoGlobalsVisitor::visit(ShPtr<ForLoopStmt> stmt) {
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

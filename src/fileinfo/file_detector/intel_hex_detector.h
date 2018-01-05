@@ -17,7 +17,7 @@ namespace fileinfo {
 class IntelHexDetector : public FileDetector
 {
 	private:
-		std::shared_ptr<fileformat::IntelHexFormat> ihexParser; ///< file parser
+		std::shared_ptr<retdec::fileformat::IntelHexFormat> ihexParser; ///< file parser
 
 		/// @name Auxiliary detection methods
 		/// @{
@@ -30,11 +30,11 @@ class IntelHexDetector : public FileDetector
 		virtual void detectArchitecture() override;
 		virtual void detectFileType() override;
 		virtual void getAdditionalInfo() override;
-		virtual cpdetect::CompilerDetector* createCompilerDetector() const override;
+		virtual retdec::cpdetect::CompilerDetector* createCompilerDetector() const override;
 		/// @}
 
 	public:
-		IntelHexDetector(std::string pathToInputFile, FileInformation &finfo, cpdetect::DetectParams &searchPar, fileformat::LoadFlags loadFlags);
+		IntelHexDetector(std::string pathToInputFile, FileInformation &finfo, retdec::cpdetect::DetectParams &searchPar, retdec::fileformat::LoadFlags loadFlags);
 		virtual ~IntelHexDetector() override;
 };
 

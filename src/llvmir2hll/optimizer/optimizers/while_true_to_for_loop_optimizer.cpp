@@ -29,6 +29,7 @@
 #include "retdec/llvmir2hll/utils/ir.h"
 #include "retdec/llvmir2hll/utils/loop_optimizer.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 /**
@@ -536,3 +537,4 @@ bool WhileTrueToForLoopOptimizer::isPositive(ShPtr<Expression> expr) {
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

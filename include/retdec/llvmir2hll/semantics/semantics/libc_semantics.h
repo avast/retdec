@@ -12,6 +12,7 @@
 #include "retdec/llvmir2hll/semantics/semantics/default_semantics.h"
 #include "retdec/llvmir2hll/support/smart_ptr.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 /**
@@ -46,5 +47,6 @@ protected:
 };
 
 } // namespace llvmir2hll
+} // namespace retdec
 
 #endif

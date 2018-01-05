@@ -19,6 +19,7 @@
 
 using namespace ::testing;
 
+namespace retdec {
 namespace llvmir2hll {
 namespace tests {
 
@@ -132,3 +133,4 @@ TernaryOperatorVariableNotOptimized) {
 
 } // namespace tests
 } // namespace llvmir2hll
+} // namespace retdec

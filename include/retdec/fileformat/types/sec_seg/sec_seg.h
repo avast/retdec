@@ -12,6 +12,7 @@
 
 #include <llvm/ADT/StringRef.h>
 
+namespace retdec {
 namespace fileformat {
 
 class FileFormat;
@@ -135,5 +136,6 @@ class SecSeg
 };
 
 } // namespace fileformat
+} // namespace retdec
 
 #endif

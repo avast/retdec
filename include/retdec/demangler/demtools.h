@@ -9,6 +9,7 @@
 
 #include <string>
 
+namespace retdec {
 namespace demangler {
 
 /**
@@ -32,5 +33,6 @@ sdate_t genTimeStruct();
 void xreplace(std::string &source, const std::string &tobereplaced, const std::string &replacement);
 
 } // namespace demangler
+} // namespace retdec
 
 #endif

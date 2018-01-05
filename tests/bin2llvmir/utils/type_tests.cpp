@@ -18,6 +18,7 @@
 using namespace ::testing;
 using namespace llvm;
 
+namespace retdec {
 namespace bin2llvmir {
 namespace tests {
 
@@ -732,3 +733,4 @@ TEST_F(TypeTests, parseFormatStringReturnsPointersIfCalledFunctionIsScanf)
 
 } // namespace tests
 } // namespace bin2llvmir
+} // namespace retdec

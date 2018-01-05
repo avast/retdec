@@ -8,6 +8,7 @@
 
 #include "retdec/demangler/stgrammars/borlandll.h"
 
+namespace retdec {
 namespace demangler {
 
 /**
@@ -6243,3 +6244,4 @@ cGram::igram_t cIgram_borlandll::getInternalGrammar() {
 }
 
 } // namespace demangler
+} // namespace retdec

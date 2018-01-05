@@ -26,6 +26,7 @@
 using retdec::utils::addToSet;
 using retdec::utils::hasItem;
 
+namespace retdec {
 namespace llvmir2hll {
 
 /**
@@ -592,3 +593,4 @@ bool GlobalToLocalOptimizer::globalVarMayBeConverted(ShPtr<Variable> var,
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

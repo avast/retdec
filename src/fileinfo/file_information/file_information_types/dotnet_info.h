@@ -37,8 +37,8 @@ class DotnetInfo
 		StreamInfo userStringStream;
 		std::string moduleVersionId;
 		std::string typeLibId;
-		std::vector<std::shared_ptr<fileformat::DotnetClass>> definedClassList;
-		std::vector<std::shared_ptr<fileformat::DotnetClass>> importedClassList;
+		std::vector<std::shared_ptr<retdec::fileformat::DotnetClass>> definedClassList;
+		std::vector<std::shared_ptr<retdec::fileformat::DotnetClass>> importedClassList;
 	public:
 		DotnetInfo();
 
@@ -58,8 +58,8 @@ class DotnetInfo
 		std::string getUserStringStreamSizeStr(std::ios_base &(* format)(std::ios_base &)) const;
 		const std::string& getModuleVersionId() const;
 		const std::string& getTypeLibId() const;
-		const std::vector<std::shared_ptr<fileformat::DotnetClass>>& getDefinedClassList() const;
-		const std::vector<std::shared_ptr<fileformat::DotnetClass>>& getImportedClassList() const;
+		const std::vector<std::shared_ptr<retdec::fileformat::DotnetClass>>& getDefinedClassList() const;
+		const std::vector<std::shared_ptr<retdec::fileformat::DotnetClass>>& getImportedClassList() const;
 		/// @}
 
 		/// @name Setters
@@ -74,8 +74,8 @@ class DotnetInfo
 		void setUserStringStreamInfo(std::uint64_t offset, std::uint64_t size);
 		void setModuleVersionId(const std::string& id);
 		void setTypeLibId(const std::string& id);
-		void setDefinedClassList(const std::vector<std::shared_ptr<fileformat::DotnetClass>>& dotnetClassList);
-		void setImportedClassList(const std::vector<std::shared_ptr<fileformat::DotnetClass>>& dotnetClassList);
+		void setDefinedClassList(const std::vector<std::shared_ptr<retdec::fileformat::DotnetClass>>& dotnetClassList);
+		void setImportedClassList(const std::vector<std::shared_ptr<retdec::fileformat::DotnetClass>>& dotnetClassList);
 		/// @}
 
 		/// @name Detection

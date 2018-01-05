@@ -7,4 +7,4 @@
 // As there is no better place to comment this namespace, we do this in the
 // present file.
 
-/// @namespace ctypesparser::tests Tests for @c ctypesparser.
+/// @namespace retdec::ctypesparser::tests Tests for @c ctypesparser.

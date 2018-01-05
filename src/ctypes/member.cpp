@@ -6,6 +6,7 @@
 
 #include "retdec/ctypes/member.h"
 
+namespace retdec {
 namespace ctypes {
 
 /**
@@ -41,3 +42,4 @@ bool Member::operator!=(const Member &other) const
 }
 
 } // namespace ctypes
+} // namespace retdec

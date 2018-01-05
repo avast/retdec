@@ -16,6 +16,7 @@
 #include "retdec/ctypes/function_type.h"
 #include "retdec/ctypes/header_file.h"
 
+namespace retdec {
 namespace ctypes {
 
 class Context;
@@ -105,5 +106,6 @@ class Function
 };
 
 } // namespace ctypes
+} // namespace retdec
 
 #endif

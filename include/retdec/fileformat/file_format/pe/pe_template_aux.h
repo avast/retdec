@@ -9,6 +9,7 @@
 
 #include <pelib/PeLib.h>
 
+namespace retdec {
 namespace fileformat {
 
 /**
@@ -35,5 +36,6 @@ template<int bits> bool peSectionName(const PeLib::PeHeaderT<bits> &peHeader, st
 }
 
 } // namespace fileformat
+} // namespace retdec
 
 #endif

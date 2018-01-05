@@ -8,6 +8,7 @@
 
 #include "retdec/fileformat/utils/conversions.h"
 
+namespace retdec {
 namespace fileformat {
 
 /**
@@ -63,3 +64,4 @@ void separateStrings(std::string &str, std::vector<std::string> &words)
 }
 
 } // namespace fileformat
+} // namespace retdec

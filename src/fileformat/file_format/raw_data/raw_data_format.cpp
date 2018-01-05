@@ -12,6 +12,7 @@
 
 using namespace retdec::utils;
 
+namespace retdec {
 namespace fileformat {
 
 /**
@@ -315,3 +316,4 @@ std::string RawDataFormat::dumpData() const
 }
 
 } // namespace fileformat
+} // namespace retdec

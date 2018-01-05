@@ -11,6 +11,7 @@
 
 #include "retdec/llvmir2hll/config/config.h"
 
+namespace retdec {
 namespace llvmir2hll {
 namespace tests {
 
@@ -63,6 +64,7 @@ public:
 
 } // namespace tests
 } // namespace llvmir2hll
+} // namespace retdec
 
 /**
 * @brief Instantiates ConfigMock with the given name.

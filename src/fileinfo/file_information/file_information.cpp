@@ -11,8 +11,8 @@
 #include "fileinfo/file_information/file_information_types/type_conversions.h"
 
 using namespace retdec::utils;
-using namespace cpdetect;
-using namespace fileformat;
+using namespace retdec::cpdetect;
+using namespace retdec::fileformat;
 
 namespace fileinfo {
 
@@ -2866,7 +2866,7 @@ const std::string& FileInformation::getDotnetTypeLibId() const
  * Returns .NET defined class list.
  * @return Defined .NET classes.
  */
-const std::vector<std::shared_ptr<fileformat::DotnetClass>>& FileInformation::getDotnetDefinedClassList() const
+const std::vector<std::shared_ptr<retdec::fileformat::DotnetClass>>& FileInformation::getDotnetDefinedClassList() const
 {
 	return dotnetInfo.getDefinedClassList();
 }
@@ -2875,7 +2875,7 @@ const std::vector<std::shared_ptr<fileformat::DotnetClass>>& FileInformation::ge
  * Returns .NET imported class list.
  * @return Imported .NET classes.
  */
-const std::vector<std::shared_ptr<fileformat::DotnetClass>>& FileInformation::getDotnetImportedClassList() const
+const std::vector<std::shared_ptr<retdec::fileformat::DotnetClass>>& FileInformation::getDotnetImportedClassList() const
 {
 	return dotnetInfo.getImportedClassList();
 }
@@ -3010,7 +3010,7 @@ void FileInformation::setSectionTableSha256(const std::string &sSha256)
  * Set file format
  * @param format File format in enumeration representation
  */
-void FileInformation::setFileFormatEnum(fileformat::Format format)
+void FileInformation::setFileFormatEnum(retdec::fileformat::Format format)
 {
 	fileFormatEnum = format;
 }
@@ -3370,7 +3370,7 @@ void FileInformation::setOverlaySize(unsigned long long size)
  * Set rich header
  * @param rHeader Information about rich header
  */
-void FileInformation::setRichHeader(const fileformat::RichHeader *rHeader)
+void FileInformation::setRichHeader(const retdec::fileformat::RichHeader *rHeader)
 {
 	richHeader.setHeader(rHeader);
 }
@@ -3424,7 +3424,7 @@ void FileInformation::setPdbTimeStamp(std::size_t sTimeStamp)
  * Set import table
  * @param sTable Information about import table
  */
-void FileInformation::setImportTable(const fileformat::ImportTable *sTable)
+void FileInformation::setImportTable(const retdec::fileformat::ImportTable *sTable)
 {
 	importTable.setTable(sTable);
 }
@@ -3433,7 +3433,7 @@ void FileInformation::setImportTable(const fileformat::ImportTable *sTable)
  * Set export table
  * @param sTable Information about export table
  */
-void FileInformation::setExportTable(const fileformat::ExportTable *sTable)
+void FileInformation::setExportTable(const retdec::fileformat::ExportTable *sTable)
 {
 	exportTable.setTable(sTable);
 }
@@ -3442,7 +3442,7 @@ void FileInformation::setExportTable(const fileformat::ExportTable *sTable)
  * Set pointer to detected strings
  * @param sStrings Pointer to detected strings
  */
-void FileInformation::setStrings(const std::vector<fileformat::String> *sStrings)
+void FileInformation::setStrings(const std::vector<retdec::fileformat::String> *sStrings)
 {
 	strings.setStrings(sStrings);
 }
@@ -3451,7 +3451,7 @@ void FileInformation::setStrings(const std::vector<fileformat::String> *sStrings
  * Set certificate table
  * @param sTable Information about certificate table
  */
-void FileInformation::setCertificateTable(const fileformat::CertificateTable *sTable)
+void FileInformation::setCertificateTable(const retdec::fileformat::CertificateTable *sTable)
 {
 	certificateTable.setTable(sTable);
 }
@@ -3583,7 +3583,7 @@ void FileInformation::setDotnetTypeLibId(const std::string& typeLibId)
  * Sets .NET defined class list.
  * @param dotnetClassList Defined .NET classes.
  */
-void FileInformation::setDotnetDefinedClassList(const std::vector<std::shared_ptr<fileformat::DotnetClass>>& dotnetClassList)
+void FileInformation::setDotnetDefinedClassList(const std::vector<std::shared_ptr<retdec::fileformat::DotnetClass>>& dotnetClassList)
 {
 	dotnetInfo.setDefinedClassList(dotnetClassList);
 }
@@ -3592,7 +3592,7 @@ void FileInformation::setDotnetDefinedClassList(const std::vector<std::shared_pt
  * Sets .NET imported class list.
  * @param dotnetClassList Imported .NET classes.
  */
-void FileInformation::setDotnetImportedClassList(const std::vector<std::shared_ptr<fileformat::DotnetClass>>& dotnetClassList)
+void FileInformation::setDotnetImportedClassList(const std::vector<std::shared_ptr<retdec::fileformat::DotnetClass>>& dotnetClassList)
 {
 	dotnetInfo.setImportedClassList(dotnetClassList);
 }

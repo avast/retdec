@@ -18,6 +18,7 @@
 
 using retdec::utils::hasItem;
 
+namespace retdec {
 namespace llvmir2hll {
 
 namespace {
@@ -179,3 +180,4 @@ GlobalVarDefVector GlobalVarsSorter::sortByInterdependencies(
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

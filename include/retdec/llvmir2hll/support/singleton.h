@@ -7,6 +7,7 @@
 #ifndef RETDEC_LLVMIR2HLL_SUPPORT_SINGLETON_H
 #define RETDEC_LLVMIR2HLL_SUPPORT_SINGLETON_H
 
+namespace retdec {
 namespace llvmir2hll {
 
 /**
@@ -58,5 +59,6 @@ public:
 };
 
 } // namespace llvmir2hll
+} // namespace retdec
 
 #endif

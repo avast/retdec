@@ -9,6 +9,7 @@
 #include "retdec/llvmir2hll/optimizer/optimizers/deref_address_optimizer.h"
 #include "retdec/llvmir2hll/support/debug.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 /**
@@ -41,3 +42,4 @@ void DerefAddressOptimizer::visit(ShPtr<DerefOpExpr> expr) {
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

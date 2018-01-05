@@ -6,6 +6,7 @@
 
 #include "retdec/capstone2llvmir/powerpc/powerpc.h"
 
+namespace retdec {
 namespace capstone2llvmir {
 
 void Capstone2LlvmIrTranslatorPowerpc::initializeArchSpecific()
@@ -1523,3 +1524,4 @@ Capstone2LlvmIrTranslatorPowerpc::_i2fm =
 };
 
 } // namespace capstone2llvmir
+} // namespace retdec

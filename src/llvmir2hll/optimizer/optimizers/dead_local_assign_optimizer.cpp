@@ -19,6 +19,7 @@
 
 using retdec::utils::hasItem;
 
+namespace retdec {
 namespace llvmir2hll {
 
 /**
@@ -132,3 +133,4 @@ bool DeadLocalAssignOptimizer::tryToOptimize(ShPtr<Function> func) {
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

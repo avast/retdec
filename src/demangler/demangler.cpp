@@ -10,6 +10,7 @@
 
 #include "retdec/demangler/demangler.h"
 
+namespace retdec {
 namespace demangler {
 
 /**
@@ -129,3 +130,4 @@ void CDemangler::setSubAnalyze(bool x) {
 }
 
 } // namespace demangler
+} // namespace retdec

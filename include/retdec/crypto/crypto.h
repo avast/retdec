@@ -10,6 +10,7 @@
 #include <cstdint>
 #include <string>
 
+namespace retdec {
 namespace crypto {
 
 std::uint64_t getCrc16(const unsigned char *data, std::uint64_t length);
@@ -19,5 +20,6 @@ std::string getSha1(const unsigned char *data, std::uint64_t length);
 std::string getSha256(const unsigned char *data, std::uint64_t length);
 
 } // namespace crypto
+} // namespace retdec
 
 #endif

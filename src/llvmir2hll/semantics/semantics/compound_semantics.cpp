@@ -8,6 +8,7 @@
 #include "retdec/llvmir2hll/semantics/semantics_factory.h"
 #include "retdec/llvmir2hll/support/debug.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 namespace {
@@ -148,3 +149,4 @@ Maybe<IntStringMap> CompoundSemantics::getSymbolicNamesForParam(
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

@@ -14,6 +14,7 @@
 
 using namespace llvm;
 
+namespace retdec {
 namespace bin2llvmir {
 
 char ClassHierarchyAnalysis::ID = 0;
@@ -247,3 +248,4 @@ void ClassHierarchyAnalysis::setToConfig(llvm::Module* m) const
 }
 
 } // namespace bin2llvmir
+} // namespace retdec

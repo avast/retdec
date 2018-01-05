@@ -9,7 +9,7 @@
 #include "fileinfo/file_presentation/getters/iterative_getter/iterative_subtitle_getter/symbol_tables_json_getter.h"
 
 using namespace retdec::utils;
-using namespace fileformat;
+using namespace retdec::fileformat;
 
 namespace fileinfo {
 

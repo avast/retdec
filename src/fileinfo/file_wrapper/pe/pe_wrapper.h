@@ -16,12 +16,12 @@ namespace fileinfo {
 /**
  * Wrapper for parsing PE files
  */
-class PeWrapper : public fileformat::PeFormat
+class PeWrapper : public retdec::fileformat::PeFormat
 {
 	private:
 		PeWrapperParser *wrapperParser; ///< parser of PE file
 	public:
-		PeWrapper(std::string pathToFile, fileformat::LoadFlags loadFlags);
+		PeWrapper(std::string pathToFile, retdec::fileformat::LoadFlags loadFlags);
 		virtual ~PeWrapper() override;
 
 		/// @name Detection methods

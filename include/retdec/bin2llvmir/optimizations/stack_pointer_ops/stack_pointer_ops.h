@@ -13,6 +13,7 @@
 
 #include "retdec/bin2llvmir/providers/config.h"
 
+namespace retdec {
 namespace bin2llvmir {
 
 class StackPointerOpsRemove : public llvm::ModulePass
@@ -34,5 +35,6 @@ class StackPointerOpsRemove : public llvm::ModulePass
 };
 
 } // namespace bin2llvmir
+} // namespace retdec
 
 #endif

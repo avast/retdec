@@ -10,6 +10,7 @@
 
 #include "retdec/llvmir2hll/graphs/cfg/cfg_traversal.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 class ValueAnalysis;
@@ -46,5 +47,6 @@ private:
 };
 
 } // namespace llvmir2hll
+} // namespace retdec
 
 #endif

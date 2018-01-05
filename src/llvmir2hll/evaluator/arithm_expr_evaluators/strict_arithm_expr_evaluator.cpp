@@ -12,6 +12,7 @@
 #include "retdec/llvmir2hll/support/debug.h"
 #include "retdec/llvmir2hll/support/types.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 REGISTER_AT_FACTORY("strict", STRICT_ARITHM_EXPR_EVALUATOR_ID,
@@ -147,3 +148,4 @@ void StrictArithmExprEvaluator::resolveOverflowForAPFloat(
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

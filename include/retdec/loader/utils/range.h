@@ -9,10 +9,12 @@
 
 #include <cstdint>
 
+namespace retdec {
 namespace loader {
 
 std::uint64_t distanceBetween(std::uint64_t value1, std::uint64_t value2);
 
 } // namespace loader
+} // namespace retdec
 
 #endif

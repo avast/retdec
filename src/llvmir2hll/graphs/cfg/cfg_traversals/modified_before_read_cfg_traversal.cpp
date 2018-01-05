@@ -10,6 +10,7 @@
 #include "retdec/llvmir2hll/obtainer/call_info_obtainer.h"
 #include "retdec/llvmir2hll/support/debug.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 /**
@@ -126,3 +127,4 @@ bool ModifiedBeforeReadCFGTraversal::combineRetVals(bool origRetVal,
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

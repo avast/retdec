@@ -39,6 +39,7 @@ std::string llvmObjToString(const T* t)
 	return ss.str();
 }
 
+namespace retdec {
 namespace capstone2llvmir {
 namespace tests {
 
@@ -222,7 +223,7 @@ class Capstone2LlvmIrTranslatorTests : public ::testing::Test
 	protected:
 		virtual void initLlvmEmulator()
 		{
-			_emulator = std::make_unique<llvmir_emul::LlvmIrEmulator>(
+			_emulator = std::make_unique<retdec::llvmir_emul::LlvmIrEmulator>(
 					&_module);
 		}
 
@@ -838,12 +839,13 @@ class Capstone2LlvmIrTranslatorTests : public ::testing::Test
 		/// we do not need to pass it everywhere.
 		llvm::Function* _function = nullptr;
 
-		std::unique_ptr<llvmir_emul::LlvmIrEmulator> _emulator;
+		std::unique_ptr<retdec::llvmir_emul::LlvmIrEmulator> _emulator;
 		std::unique_ptr<Capstone2LlvmIrTranslator> _translator;
 		ks_engine* _assembler = nullptr;
 };
 
 } // namespace tests
 } // namespace capstone2llvmir
+} // namespace retdec
 
 #endif

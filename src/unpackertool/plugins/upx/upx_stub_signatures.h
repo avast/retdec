@@ -20,8 +20,8 @@ namespace upx {
  */
 struct UpxStubData
 {
-	fileformat::Architecture architecture; ///< Architecture this unpacking stub occures on.
-	fileformat::Format format; ///< File format this unpacking stub occures in.
+	retdec::fileformat::Architecture architecture; ///< Architecture this unpacking stub occures on.
+	retdec::fileformat::Format format; ///< File format this unpacking stub occures in.
 	unpacker::Signature* signature; ///< Signature of this unpacking stub.
 	UpxStubVersion version; ///< Version this unpacking stub associates with.
 	std::uint32_t size; ///< Size of the whole unpacking stub. Not used on ELF, only on PE.
@@ -39,7 +39,7 @@ struct UpxStubData
  *        0x00, 0x01, 0x02, ANY, CAP
  *    };
  *    @endcode
- * 2. Add signature into @ref allStubs. Provide right fileformat::Architecture, fileformat::FileFormat and unpacker::upx::UpxStubVersion.
+ * 2. Add signature into @ref allStubs. Provide right retdec::fileformat::Architecture, retdec::fileformat::FileFormat and unpacker::upx::UpxStubVersion.
  *    PE signature also require their whole size to be provided. ELF does not require this. If you signature is located at the variable offset from
  *    entry point, you also need to provide maximum search distance. See @ref UpxStubData for further details.
  *
@@ -53,9 +53,9 @@ public:
 	UpxStubSignatures(const UpxStubSignatures&) = delete;
 	~UpxStubSignatures();
 
-	static const UpxStubData* matchSignatures(loader::Image* file, unpacker::DynamicBuffer& captureData);
+	static const UpxStubData* matchSignatures(retdec::loader::Image* file, unpacker::DynamicBuffer& captureData);
 	static const UpxStubData* matchSignatures(const unpacker::DynamicBuffer& data, unpacker::DynamicBuffer& captureData,
-			fileformat::Architecture architecture = fileformat::Architecture::UNKNOWN, fileformat::Format format = fileformat::Format::UNKNOWN);
+			retdec::fileformat::Architecture architecture = retdec::fileformat::Architecture::UNKNOWN, retdec::fileformat::Format format = retdec::fileformat::Format::UNKNOWN);
 
 private:
 	UpxStubSignatures& operator =(const UpxStubSignatures&);

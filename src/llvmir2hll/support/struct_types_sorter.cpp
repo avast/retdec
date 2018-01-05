@@ -14,6 +14,7 @@
 
 using retdec::utils::hasItem;
 
+namespace retdec {
 namespace llvmir2hll {
 
 namespace {
@@ -172,3 +173,4 @@ StructTypeVector StructTypesSorter::sort(const StructTypeSet &types) {
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

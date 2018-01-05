@@ -13,8 +13,8 @@
 
 using namespace retdec::utils;
 using namespace PeLib;
-using namespace cpdetect;
-using namespace fileformat;
+using namespace retdec::cpdetect;
+using namespace retdec::fileformat;
 
 namespace fileinfo {
 
@@ -34,7 +34,7 @@ const unsigned long long PE_16_FLAGS_SIZE = 16;
  * @param searchPar Parameters for detection of used compiler (or packer)
  * @param loadFlags Load flags
  */
-PeDetector::PeDetector(std::string pathToInputFile, FileInformation &finfo, cpdetect::DetectParams &searchPar, fileformat::LoadFlags loadFlags) :
+PeDetector::PeDetector(std::string pathToInputFile, FileInformation &finfo, retdec::cpdetect::DetectParams &searchPar, retdec::fileformat::LoadFlags loadFlags) :
 	FileDetector(pathToInputFile, finfo, searchPar, loadFlags)
 {
 	fileParser = peParser = std::make_shared<PeWrapper>(fileInfo.getPathToFile(), loadFlags);
@@ -521,7 +521,7 @@ void PeDetector::getAdditionalInfo()
  * Pointer to detector is dynamically allocated and must be released (otherwise there is a memory leak)
  * More detailed description of this method is in the super class
  */
-cpdetect::CompilerDetector* PeDetector::createCompilerDetector() const
+retdec::cpdetect::CompilerDetector* PeDetector::createCompilerDetector() const
 {
 	return new PeCompiler(*peParser, cpParams, fileInfo.toolInfo);
 }

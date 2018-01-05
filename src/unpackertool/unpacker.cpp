@@ -29,10 +29,10 @@ enum ExitCode
 	EXIT_CODE_PREPROCESSING_ERROR ///< Error with preprocessing of input file before unpacking.
 };
 
-bool detectPackers(const std::string& inputFile, std::vector<cpdetect::DetectResult>& detectedPackers)
+bool detectPackers(const std::string& inputFile, std::vector<retdec::cpdetect::DetectResult>& detectedPackers)
 {
-	using namespace cpdetect;
-	using namespace fileformat;
+	using namespace retdec::cpdetect;
+	using namespace retdec::fileformat;
 
 	DetectParams detectionParams(SearchType::MOST_SIMILAR, true, true);
 
@@ -70,7 +70,7 @@ bool detectPackers(const std::string& inputFile, std::vector<cpdetect::DetectRes
 	return true;
 }
 
-ExitCode unpackFile(const std::string& inputFile, const std::string& outputFile, bool brute, const std::vector<cpdetect::DetectResult>& detectedPackers)
+ExitCode unpackFile(const std::string& inputFile, const std::string& outputFile, bool brute, const std::vector<retdec::cpdetect::DetectResult>& detectedPackers)
 {
 	Plugin::Arguments pluginArgs = { inputFile, outputFile, brute };
 
@@ -149,7 +149,7 @@ ExitCode processArgs(ArgHandler& handler, char argc, char** argv)
 	{
 		std::string inputFile = handler.getRawInputs()[0];
 		std::string outputFile = handler["output"]->used ? handler["output"]->input : std::string{inputFile}.append("-unpacked");
-		std::vector<cpdetect::DetectResult> detectedPackers;
+		std::vector<retdec::cpdetect::DetectResult> detectedPackers;
 
 		if (!detectPackers(inputFile, detectedPackers))
 			return EXIT_CODE_PREPROCESSING_ERROR;

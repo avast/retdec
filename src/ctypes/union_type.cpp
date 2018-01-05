@@ -11,6 +11,7 @@
 #include "retdec/ctypes/union_type.h"
 #include "retdec/ctypes/visitor.h"
 
+namespace retdec {
 namespace ctypes {
 
 /**
@@ -65,3 +66,4 @@ void UnionType::accept(Visitor *v) {
 }
 
 } // namespace ctypes
+} // namespace retdec

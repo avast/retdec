@@ -16,6 +16,7 @@
 #include "retdec/llvmir2hll/optimizer/optimizers/void_return_optimizer.h"
 #include "retdec/llvmir2hll/support/debug.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 /**
@@ -136,3 +137,4 @@ void VoidReturnOptimizer::visit(ShPtr<UForLoopStmt> stmt) {
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

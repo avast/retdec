@@ -14,6 +14,7 @@
 #include "retdec/demangler/demangler.h"
 #include "retdec/config/tool_info.h"
 
+namespace retdec {
 namespace bin2llvmir {
 
 /**
@@ -29,23 +30,24 @@ namespace bin2llvmir {
 class DemanglerProvider
 {
 	public:
-		static demangler::CDemangler* addDemangler(
+		static retdec::demangler::CDemangler* addDemangler(
 				llvm::Module* m,
 				const retdec::config::ToolInfoContainer& t);
 
-		static demangler::CDemangler* getDemangler(llvm::Module* m);
+		static retdec::demangler::CDemangler* getDemangler(llvm::Module* m);
 		static bool getDemangler(
 				llvm::Module* m,
-				demangler::CDemangler*& d);
+				retdec::demangler::CDemangler*& d);
 
 		static void clear();
 
 	private:
-		using Demangler = std::unique_ptr<demangler::CDemangler>;
+		using Demangler = std::unique_ptr<retdec::demangler::CDemangler>;
 		/// Mapping of modules to demanglers associated with them.
 		static std::map<llvm::Module*, Demangler> _module2demangler;
 };
 
 } // namespace bin2llvmir
+} // namespace retdec
 
 #endif

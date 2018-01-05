@@ -17,8 +17,9 @@
 #include "retdec/fileformat/utils/file_io.h"
 
 using namespace retdec::utils;
-using namespace fileformat;
+using namespace retdec::fileformat;
 
+namespace retdec {
 namespace cpdetect {
 
 namespace
@@ -36,7 +37,7 @@ const std::map<Architecture, std::vector<Search::RelativeJump>> jumpMap =
  * Constructor
  * @param fileParser Parser of input file
  */
-Search::Search(fileformat::FileFormat &fileParser) : parser(fileParser), averageSlashLen(0)
+Search::Search(retdec::fileformat::FileFormat &fileParser) : parser(fileParser), averageSlashLen(0)
 {
 	const auto &bytes = parser.getLoadedBytes();
 	bytesToHexString(bytes, nibbles);
@@ -511,7 +512,7 @@ bool Search::hasString(const std::string &str, std::size_t startOffset, std::siz
  * @param section Selected section
  * @return @c true if string is present in selected section, @c false otherwise
  */
-bool Search::hasStringInSection(const std::string &str, const fileformat::Section *section) const
+bool Search::hasStringInSection(const std::string &str, const retdec::fileformat::Section *section) const
 {
 	return section && hasString(str, section->getOffset(), section->getOffset() + section->getLoadedSize() - 1);
 }
@@ -572,3 +573,4 @@ bool Search::createSignature(std::string &pattern, std::size_t fileOffset, std::
 }
 
 } // namespace cpdetect
+} // namespace retdec

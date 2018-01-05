@@ -11,6 +11,7 @@
 #include "retdec/ctypes/visitor.h"
 #include "retdec/utils/container.h"
 
+namespace retdec {
 namespace ctypes {
 
 /**
@@ -149,3 +150,4 @@ void EnumType::accept(Visitor *v) {
 }
 
 } // namespace ctypes
+} // namespace retdec

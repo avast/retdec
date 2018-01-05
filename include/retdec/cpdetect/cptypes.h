@@ -12,6 +12,7 @@
 
 #include "retdec/fileformat/fftypes.h"
 
+namespace retdec {
 namespace cpdetect {
 
 /**
@@ -173,7 +174,7 @@ struct ToolInformation
 	unsigned long long imageBase;    ///< image base address
 	unsigned long long epAddress;    ///< entry point address
 	unsigned long long epOffset;     ///< entry point offset
-	fileformat::Section epSection;  ///< entry point section
+	retdec::fileformat::Section epSection;  ///< entry point section
 	std::string epBytes;             ///< hexadecimal representation of entry point bytes
 
 	bool packerDetected = false;      ///< @c true if at least one packer was detected
@@ -223,5 +224,6 @@ std::string packedToString(Packed packed);
 
 
 } // namespace cpdetect
+} // namespace retdec
 
 #endif

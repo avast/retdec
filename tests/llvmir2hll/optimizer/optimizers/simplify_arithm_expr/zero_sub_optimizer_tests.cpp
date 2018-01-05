@@ -27,6 +27,7 @@
 
 using namespace ::testing;
 
+namespace retdec {
 namespace llvmir2hll {
 namespace tests {
 
@@ -590,3 +591,4 @@ SecOpIsZeroConstIntModNotOptimized) {
 
 } // namespace tests
 } // namespace llvmir2hll
+} // namespace retdec

@@ -19,7 +19,7 @@ namespace fileinfo {
 class Strings
 {
 	private:
-		const std::vector<fileformat::String>* strings;
+		const std::vector<retdec::fileformat::String>* strings;
 	public:
 		Strings();
 		~Strings() = default;
@@ -35,7 +35,7 @@ class Strings
 
 		/// @name Setters
 		/// @{
-		void setStrings(const std::vector<fileformat::String> *detectedStrings);
+		void setStrings(const std::vector<retdec::fileformat::String> *detectedStrings);
 		/// @}
 
 		/// @name Other methods

@@ -30,6 +30,7 @@
 using namespace retdec::utils;
 using namespace PeLib;
 
+namespace retdec {
 namespace fileformat {
 
 namespace
@@ -1242,13 +1243,13 @@ bool PeFormat::verifySignature(PKCS7 *p7)
 
 	auto digestAlgoOIDStr = std::static_pointer_cast<Asn1Object>(digestAlgoOID)->getIdentifier();
 
-	crypto::HashAlgorithm algorithm;
+	retdec::crypto::HashAlgorithm algorithm;
 	if (digestAlgoOIDStr == DigestAlgorithmOID_Sha1)
-		algorithm = crypto::HashAlgorithm::Sha1;
+		algorithm = retdec::crypto::HashAlgorithm::Sha1;
 	else if (digestAlgoOIDStr == DigestAlgorithmOID_Sha256)
-		algorithm = crypto::HashAlgorithm::Sha256;
+		algorithm = retdec::crypto::HashAlgorithm::Sha256;
 	else if (digestAlgoOIDStr == DigestAlgorithmOID_Md5)
-		algorithm = crypto::HashAlgorithm::Md5;
+		algorithm = retdec::crypto::HashAlgorithm::Md5;
 	else
 	{
 		EVP_cleanup();
@@ -1324,9 +1325,9 @@ std::vector<std::tuple<const std::uint8_t*, std::size_t>> PeFormat::getDigestRan
  * @param hashType Algorithm to use.
  * @return Hex string of hash.
  */
-std::string PeFormat::calculateDigest(crypto::HashAlgorithm hashType) const
+std::string PeFormat::calculateDigest(retdec::crypto::HashAlgorithm hashType) const
 {
-	crypto::HashContext hashCtx;
+	retdec::crypto::HashContext hashCtx;
 	if (!hashCtx.init(hashType))
 		return {};
 
@@ -2499,3 +2500,4 @@ const std::vector<std::shared_ptr<DotnetClass>>& PeFormat::getImportedDotnetClas
 }
 
 } // namespace fileformat
+} // namespace retdec

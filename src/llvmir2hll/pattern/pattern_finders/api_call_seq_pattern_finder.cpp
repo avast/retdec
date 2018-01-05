@@ -26,8 +26,9 @@
 #include "retdec/llvmir2hll/utils/ir.h"
 #include "retdec/llvm-support/diagnostics.h"
 
-using namespace llvm_support;
+using namespace retdec::llvm_support;
 
+namespace retdec {
 namespace llvmir2hll {
 
 REGISTER_AT_FACTORY("APICallSeq", API_CALL_SEQ_PATTERN_FINDER_ID,
@@ -1154,3 +1155,4 @@ PatternFinder::Patterns APICallSeqPatternFinder::findPatterns(
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

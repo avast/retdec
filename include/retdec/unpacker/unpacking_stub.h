@@ -27,7 +27,7 @@ public:
 	 *
 	 * @param file File to operate on.
 	 */
-	UnpackingStub(loader::Image* file) : _file(file) {}
+	UnpackingStub(retdec::loader::Image* file) : _file(file) {}
 
 	/**
 	 * Destructor.
@@ -51,12 +51,12 @@ public:
 	 *
 	 * @return The input file.
 	 */
-	loader::Image* getFile() { return _file; }
+	retdec::loader::Image* getFile() { return _file; }
 
 protected:
-	void setFile(loader::Image* file) { _file = file; }
+	void setFile(retdec::loader::Image* file) { _file = file; }
 
-	loader::Image* _file;
+	retdec::loader::Image* _file;
 };
 
 } // namespace unpacker

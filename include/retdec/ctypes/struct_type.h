@@ -12,6 +12,7 @@
 
 #include "retdec/ctypes/composite_type.h"
 
+namespace retdec {
 namespace ctypes {
 
 class Context;
@@ -40,5 +41,6 @@ class StructType: public CompositeType
 };
 
 } // namespace ctypes
+} // namespace retdec
 
 #endif

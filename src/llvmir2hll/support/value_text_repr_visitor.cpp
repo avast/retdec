@@ -74,6 +74,7 @@
 #include "retdec/llvmir2hll/support/smart_ptr.h"
 #include "retdec/llvmir2hll/support/value_text_repr_visitor.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 /**
@@ -693,3 +694,4 @@ void ValueTextReprVisitor::visit(ShPtr<UnknownType> type) {
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

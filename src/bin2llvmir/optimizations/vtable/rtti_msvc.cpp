@@ -12,6 +12,7 @@
 
 #define debug_enabled false
 
+namespace retdec {
 namespace bin2llvmir {
 
 //
@@ -103,3 +104,4 @@ std::string RTTICompleteObjectLocator::dump() const
 }
 
 } // namespace bin2llvmir
+} // namespace retdec

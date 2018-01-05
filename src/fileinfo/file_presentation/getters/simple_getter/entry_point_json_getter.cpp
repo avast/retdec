@@ -9,7 +9,7 @@
 #include "fileinfo/file_presentation/getters/simple_getter/entry_point_json_getter.h"
 
 using namespace retdec::utils;
-using namespace fileformat;
+using namespace retdec::fileformat;
 
 namespace fileinfo {
 

@@ -9,6 +9,7 @@
 
 #include "retdec/fileformat/types/sec_seg/section.h"
 
+namespace retdec {
 namespace fileformat {
 
 /**
@@ -33,5 +34,6 @@ class PeCoffSection : public Section
 };
 
 } // namespace fileformat
+} // namespace retdec
 
 #endif

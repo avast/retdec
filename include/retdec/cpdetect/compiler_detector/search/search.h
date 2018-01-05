@@ -10,6 +10,7 @@
 #include "retdec/cpdetect/cptypes.h"
 #include "retdec/fileformat/file_format/file_format.h"
 
+namespace retdec {
 namespace cpdetect {
 
 /**
@@ -38,7 +39,7 @@ class Search
 				/// @}
 		};
 	private:
-		fileformat::FileFormat &parser; ///< parser of input file
+		retdec::fileformat::FileFormat &parser; ///< parser of input file
 		std::string nibbles;             ///< content of file in hexadecimal string representation
 		std::string plain;               ///< content of file as plain string
 		std::vector<RelativeJump> jumps; ///< representation of supported relative jumps
@@ -53,7 +54,7 @@ class Search
 		std::size_t bytesFromNibbles(std::size_t nNibbles) const;
 		/// @}
 	public:
-		Search(fileformat::FileFormat &fileParser);
+		Search(retdec::fileformat::FileFormat &fileParser);
 		~Search();
 
 		/// @name Status methods
@@ -88,7 +89,7 @@ class Search
 		bool hasString(const std::string &str) const;
 		bool hasString(const std::string &str, std::size_t fileOffset) const;
 		bool hasString(const std::string &str, std::size_t startOffset, std::size_t stopOffset) const;
-		bool hasStringInSection(const std::string &str, const fileformat::Section *section) const;
+		bool hasStringInSection(const std::string &str, const retdec::fileformat::Section *section) const;
 		bool hasStringInSection(const std::string &str, std::size_t sectionIndex) const;
 		bool hasStringInSection(const std::string &str, const std::string &sectionName) const;
 		/// @}
@@ -100,5 +101,6 @@ class Search
 };
 
 } // namespace cpdetect
+} // namespace retdec
 
 #endif

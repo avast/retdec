@@ -11,6 +11,7 @@
 #include "retdec/llvmir2hll/obtainer/calls_in_module_obtainer.h"
 #include "retdec/llvmir2hll/support/debug.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 /**
@@ -89,3 +90,4 @@ void CallsInModuleObtainer::visit(ShPtr<CallExpr> expr) {
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

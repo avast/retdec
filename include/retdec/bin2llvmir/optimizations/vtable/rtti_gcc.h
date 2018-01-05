@@ -24,6 +24,7 @@
 
 #include "retdec/utils/address.h"
 
+namespace retdec {
 namespace bin2llvmir {
 
 class TypeInfo;
@@ -168,5 +169,6 @@ class BaseClassTypeInfo
 };
 
 } // namespace bin2llvmir
+} // namespace retdec
 
 #endif

@@ -11,6 +11,7 @@
 #include "retdec/llvmir2hll/ir/module.h"
 #include "retdec/llvmir2hll/support/debug.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 /**
@@ -86,3 +87,4 @@ void NullPointerAnalysis::visit(ShPtr<ConstNullPointer> constant) {
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

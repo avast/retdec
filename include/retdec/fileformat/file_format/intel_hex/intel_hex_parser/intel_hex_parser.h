@@ -14,6 +14,7 @@
 #include "retdec/utils/address.h"
 #include "retdec/fileformat/file_format/intel_hex/intel_hex_parser/intel_hex_tokenizer.h"
 
+namespace retdec {
 namespace fileformat {
 
 /**
@@ -91,5 +92,6 @@ class IntelHexParser
 };
 
 } // namespace fileformat
+} // namespace retdec
 
 #endif

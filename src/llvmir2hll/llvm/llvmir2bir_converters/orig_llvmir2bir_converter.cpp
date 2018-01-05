@@ -70,12 +70,13 @@
 #include "retdec/utils/container.h"
 #include "retdec/utils/conversion.h"
 
-using namespace llvm_support;
+using namespace retdec::llvm_support;
 using namespace std::string_literals;
 
 using retdec::utils::hasItem;
 using retdec::utils::mapHasKey;
 
+namespace retdec {
 namespace llvmir2hll {
 
 namespace {
@@ -1995,3 +1996,4 @@ ShPtr<Value> OrigLLVMIR2BIRConverter::visitReturnInst(llvm::ReturnInst &i) {
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

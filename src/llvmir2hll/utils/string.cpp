@@ -19,6 +19,7 @@ using retdec::utils::startsWith;
 using retdec::utils::toHex;
 using retdec::utils::toLower;
 
+namespace retdec {
 namespace llvmir2hll {
 
 /**
@@ -191,3 +192,4 @@ std::string getAddressFromLabel(const std::string &label,
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

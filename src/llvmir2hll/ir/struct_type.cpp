@@ -12,6 +12,7 @@
 #include "retdec/llvmir2hll/support/visitor.h"
 #include "retdec/utils/conversion.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 /**
@@ -93,3 +94,4 @@ void StructType::accept(Visitor *v) {
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

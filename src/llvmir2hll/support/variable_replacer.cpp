@@ -10,6 +10,7 @@
 #include "retdec/llvmir2hll/support/debug.h"
 #include "retdec/llvmir2hll/support/variable_replacer.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 /**
@@ -49,3 +50,4 @@ void VariableReplacer::visit(ShPtr<Variable> var) {
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

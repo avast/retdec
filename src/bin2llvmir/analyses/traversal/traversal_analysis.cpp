@@ -10,6 +10,7 @@
 
 using namespace llvm;
 
+namespace retdec {
 namespace bin2llvmir {
 
 /**
@@ -183,3 +184,4 @@ TraversalAnalysis::Node *TraversalAnalysis::Node::createNodeNotInSCC(
 }
 
 } // namespace bin2llvmir
+} // namespace retdec

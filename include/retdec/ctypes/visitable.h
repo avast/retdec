@@ -7,6 +7,7 @@
 #ifndef RETDEC_CTYPES_VISITABLE_H
 #define RETDEC_CTYPES_VISITABLE_H
 
+namespace retdec {
 namespace ctypes {
 
 class Visitor;
@@ -42,5 +43,6 @@ class Visitable
 };
 
 } // namespace ctypes
+} // namespace retdec
 
 #endif

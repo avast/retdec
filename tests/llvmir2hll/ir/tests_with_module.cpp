@@ -16,6 +16,7 @@
 
 using namespace ::testing;
 
+namespace retdec {
 namespace llvmir2hll {
 namespace tests {
 
@@ -90,3 +91,4 @@ ShPtr<CallStmt> TestsWithModule::addCall(const std::string &callerName,
 
 } // namespace tests
 } // namespace llvmir2hll
+} // namespace retdec

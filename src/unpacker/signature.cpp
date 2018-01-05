@@ -85,9 +85,9 @@ uint64_t Signature::getCaptureSize() const
  *
  * @return True if the signature matched successfuly, otherwise false.
  */
-bool Signature::match(const Signature::MatchSettings& settings, loader::Image* file) const
+bool Signature::match(const Signature::MatchSettings& settings, retdec::loader::Image* file) const
 {
-	const loader::Segment* seg = file->getEpSegment();
+	const retdec::loader::Segment* seg = file->getEpSegment();
 	if (seg == nullptr)
 		return false;
 
@@ -126,9 +126,9 @@ bool Signature::match(const Signature::MatchSettings& settings, const DynamicBuf
  *
  * @return True if the signature matched successfuly, otherwise false.
  */
-bool Signature::match(const Signature::MatchSettings& settings, loader::Image* file, DynamicBuffer& capturedData) const
+bool Signature::match(const Signature::MatchSettings& settings, retdec::loader::Image* file, DynamicBuffer& capturedData) const
 {
-	const loader::Segment* seg = file->getEpSegment();
+	const retdec::loader::Segment* seg = file->getEpSegment();
 	if (seg == nullptr)
 		return false;
 

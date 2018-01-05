@@ -17,6 +17,7 @@
 
 #include "retdec/llvmir2hll/support/smart_ptr.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 class CallExpr;
@@ -141,5 +142,6 @@ using VarVarSetMap = std::map<ShPtr<Variable>, VarSet>;
 using StringStringUMap = std::unordered_map<std::string, std::string>;
 
 } // namespace llvmir2hll
+} // namespace retdec
 
 #endif

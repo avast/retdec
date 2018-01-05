@@ -12,9 +12,10 @@
 #include "retdec/loader/loader/coff/coff_image.h"
 #include "retdec/loader/utils/range.h"
 
+namespace retdec {
 namespace loader {
 
-CoffImage::CoffImage(const std::shared_ptr<fileformat::FileFormat>& fileFormat) : Image(fileFormat)
+CoffImage::CoffImage(const std::shared_ptr<retdec::fileformat::FileFormat>& fileFormat) : Image(fileFormat)
 {
 }
 
@@ -23,7 +24,7 @@ CoffImage::~CoffImage()
 }
 
 /**
- * Virtual method overridden from loader::Image, which is used in image factory.
+ * Virtual method overridden from retdec::loader::Image, which is used in image factory.
  * Loads the image using @c fileformat.
  *
  * @return True if loading was successful, otherwise false.
@@ -37,7 +38,7 @@ bool CoffImage::load()
 		return false;
 
 	// Do a reverse mapping, from section indices to symbols that link to that particular section.
-	std::unordered_map<std::uint32_t, std::vector<fileformat::Symbol*>> secIndexToSyms;
+	std::unordered_map<std::uint32_t, std::vector<retdec::fileformat::Symbol*>> secIndexToSyms;
 	for (auto& symbolTable : getFileFormat()->getSymbolTables())
 	{
 		for (auto& symbol : *symbolTable)
@@ -86,7 +87,7 @@ bool CoffImage::load()
 	return true;
 }
 
-Segment* CoffImage::addSegment(const fileformat::Section* section, std::uint64_t address, std::uint64_t memSize)
+Segment* CoffImage::addSegment(const retdec::fileformat::Section* section, std::uint64_t address, std::uint64_t memSize)
 {
 	std::unique_ptr<SegmentDataSource> dataSource;
 	// Do not load BSS sections from file.
@@ -123,7 +124,7 @@ void CoffImage::applyRelocations()
 	}
 }
 
-void CoffImage::resolveRelocation(const fileformat::Relocation& rel, const fileformat::Symbol& sym)
+void CoffImage::resolveRelocation(const retdec::fileformat::Relocation& rel, const retdec::fileformat::Symbol& sym)
 {
 	unsigned long long symbolAddress;
 	if (!sym.getAddress(symbolAddress))
@@ -131,7 +132,7 @@ void CoffImage::resolveRelocation(const fileformat::Relocation& rel, const filef
 
 	switch (getFileFormat()->getTargetArchitecture())
 	{
-		case fileformat::Architecture::X86:
+		case retdec::fileformat::Architecture::X86:
 		{
 			switch (rel.getType())
 			{
@@ -157,7 +158,7 @@ void CoffImage::resolveRelocation(const fileformat::Relocation& rel, const filef
 			}
 			break;
 		}
-		case fileformat::Architecture::ARM:
+		case retdec::fileformat::Architecture::ARM:
 		{
 			switch (rel.getType())
 			{
@@ -193,3 +194,4 @@ void CoffImage::resolveRelocation(const fileformat::Relocation& rel, const filef
 }
 
 } // namespace loader
+} // namespace retdec

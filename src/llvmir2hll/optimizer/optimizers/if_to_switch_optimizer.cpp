@@ -18,6 +18,7 @@
 #include "retdec/llvmir2hll/support/debug.h"
 #include "retdec/llvmir2hll/support/types.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 /**
@@ -200,3 +201,4 @@ ShPtr<Expression> IfToSwitchOptimizer::getNextOpIfSecondOneIsConstInt(
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

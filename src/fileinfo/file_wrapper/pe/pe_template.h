@@ -45,7 +45,7 @@ template<int bits> std::string peFileStatus(const PeLib::PeHeaderT<bits> &peHead
 template<int bits> bool peSectionWithIndex(const PeLib::PeHeaderT<bits> &peHeader, FileSection &section, unsigned long long sectionIndex)
 {
 	std::string sectionName;
-	if(!fileformat::peSectionName(peHeader, sectionName, sectionIndex))
+	if(!retdec::fileformat::peSectionName(peHeader, sectionName, sectionIndex))
 	{
 		return false;
 	}

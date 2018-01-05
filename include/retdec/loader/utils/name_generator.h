@@ -10,6 +10,7 @@
 #include <cstdint>
 #include <string>
 
+namespace retdec {
 namespace loader {
 
 /**
@@ -33,5 +34,6 @@ private:
 };
 
 } // namespace loader
+} // namespace retdec
 
 #endif

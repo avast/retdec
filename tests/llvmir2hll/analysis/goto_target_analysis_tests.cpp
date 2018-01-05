@@ -20,6 +20,7 @@
 
 using namespace ::testing;
 
+namespace retdec {
 namespace llvmir2hll {
 namespace tests {
 
@@ -200,3 +201,4 @@ GotoLabelAfterIfStmt) {
 
 } // namespace tests
 } // namespace llvmir2hll
+} // namespace retdec

@@ -17,8 +17,8 @@
 
 using namespace std;
 
-namespace dwarfparser
-{
+namespace retdec {
+namespace dwarfparser {
 
 /*
  * =============================================================================
@@ -1458,3 +1458,4 @@ DwarfVolatileType::DwarfVolatileType(DwarfTypeContainer *prnt, Dwarf_Off o) :
 }
 
 } // namespace dwarfparser
+} // namespace retdec

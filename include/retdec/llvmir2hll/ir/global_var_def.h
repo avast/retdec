@@ -10,6 +10,7 @@
 #include "retdec/llvmir2hll/ir/value.h"
 #include "retdec/llvmir2hll/support/smart_ptr.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 class Expression;
@@ -67,5 +68,6 @@ private:
 };
 
 } // namespace llvmir2hll
+} // namespace retdec
 
 #endif

@@ -9,6 +9,7 @@
 
 #include "retdec/fileformat/types/symbol_table/symbol.h"
 
+namespace retdec {
 namespace fileformat {
 
 /**
@@ -40,5 +41,6 @@ class ElfSymbol : public Symbol
 };
 
 } // namespace fileformat
+} // namespace retdec
 
 #endif

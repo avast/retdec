@@ -48,6 +48,7 @@
 #include "retdec/llvmir2hll/ir/variable.h"
 #include "retdec/llvmir2hll/support/debug.h"
 
+namespace retdec {
 namespace llvmir2hll {
 namespace {
 
@@ -1168,3 +1169,4 @@ bool ArithmExprEvaluator::isConstantZero(ShPtr<Constant> constant) {
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

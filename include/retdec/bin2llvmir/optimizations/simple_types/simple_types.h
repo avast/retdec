@@ -21,6 +21,7 @@
 #include "retdec/bin2llvmir/providers/fileimage.h"
 #include "retdec/bin2llvmir/utils/defs.h"
 
+namespace retdec {
 namespace bin2llvmir {
 
 class ValueEntry;
@@ -230,5 +231,6 @@ class SimpleTypesAnalysis : public llvm::ModulePass
 };
 
 } // namespace bin2llvmir
+} // namespace retdec
 
 #endif

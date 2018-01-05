@@ -8,6 +8,7 @@
 #include "retdec/ctypes/parameter.h"
 #include "retdec/ctypes/type.h"
 
+namespace retdec {
 namespace ctypes {
 
 /**
@@ -120,3 +121,4 @@ bool Parameter::operator!=(const Parameter &other) const
 }
 
 } // namespace ctypes
+} // namespace retdec

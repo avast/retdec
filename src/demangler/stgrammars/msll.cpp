@@ -8,6 +8,7 @@
 
 #include "retdec/demangler/stgrammars/msll.h"
 
+namespace retdec {
 namespace demangler {
 
 /**
@@ -5447,3 +5448,4 @@ cGram::igram_t cIgram_msll::getInternalGrammar() {
 }
 
 } // namespace demangler
+} // namespace retdec

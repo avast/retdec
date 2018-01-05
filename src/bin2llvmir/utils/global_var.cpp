@@ -12,6 +12,7 @@
 
 using namespace llvm;
 
+namespace retdec {
 namespace bin2llvmir {
 
 namespace {
@@ -346,3 +347,4 @@ GlobalVariable* getGlobalVariable(
 }
 
 } // namespace bin2llvmir
+} // namespace retdec

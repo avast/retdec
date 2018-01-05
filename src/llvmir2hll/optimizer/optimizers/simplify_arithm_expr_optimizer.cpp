@@ -30,6 +30,7 @@
 #include "retdec/llvmir2hll/support/debug.h"
 #include "retdec/llvmir2hll/support/types.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 /**
@@ -187,3 +188,4 @@ void SimplifyArithmExprOptimizer::createSubOptimizers(ShPtr<ArithmExprEvaluator>
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

@@ -12,6 +12,7 @@
 using namespace ::testing;
 using namespace llvm;
 
+namespace retdec {
 namespace capstone2llvmir {
 namespace tests {
 
@@ -9076,3 +9077,4 @@ TEST_P(Capstone2LlvmIrTranslatorPowerpcTests, PPC_INS_BDZFLRL_zero_false_cr4)
 
 } // namespace tests
 } // namespace capstone2llvmir
+} // namespace retdec

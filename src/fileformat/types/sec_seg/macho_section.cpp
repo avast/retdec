@@ -6,6 +6,7 @@
 
 #include "retdec/fileformat/types/sec_seg/macho_section.h"
 
+namespace retdec {
 namespace fileformat {
 
 MachOSection::MachOSection() : segname(), align(0), reloff(0), nreloc(0),
@@ -141,3 +142,4 @@ void MachOSection::setReserved2(unsigned long long reserved2)
 }
 
 } // namespace fileformat
+} // namespace retdec

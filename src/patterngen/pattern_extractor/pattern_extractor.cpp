@@ -12,7 +12,7 @@
 #include "retdec/fileformat/types/symbol_table/elf_symbol.h"
 
 using namespace retdec::utils;
-using namespace fileformat;
+using namespace retdec::fileformat;
 
 constexpr LoadFlags loadFlags =
 	static_cast<LoadFlags>(NO_FILE_HASHES | NO_VERBOSE_HASHES);
@@ -43,6 +43,7 @@ bool isPic32Label(
 
 }
 
+namespace retdec {
 namespace fnc_patterns {
 namespace patterngen {
 
@@ -599,3 +600,4 @@ void PatternExtractor::addRulesToBuilder(
 
 } // namespace patterngen
 } // namespace fnc_patterns
+} // namespace retdec

@@ -102,11 +102,12 @@
 #include "retdec/utils/container.h"
 #include "retdec/utils/conversion.h"
 
-using namespace llvm_support;
+using namespace retdec::llvm_support;
 
 using retdec::utils::addToSet;
 using retdec::utils::toString;
 
+namespace retdec {
 namespace llvmir2hll {
 
 REGISTER_AT_FACTORY("c", C_HLL_WRITER_ID, HLLWriterFactory, CHLLWriter::create);
@@ -1974,3 +1975,4 @@ std::string CHLLWriter::genNameForUnnamedStruct(const StructTypeVector &usedStru
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

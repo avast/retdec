@@ -11,6 +11,7 @@
 #include "retdec/llvmir2hll/support/debug.h"
 #include "retdec/llvmir2hll/validator/validator.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 /**
@@ -90,3 +91,4 @@ void Validator::runValidation() {
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

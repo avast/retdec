@@ -6,6 +6,7 @@
 
 #include "retdec/fileformat/types/dotnet_headers/metadata_header.h"
 
+namespace retdec {
 namespace fileformat {
 
 /**
@@ -99,3 +100,4 @@ void MetadataHeader::setFlags(std::uint64_t metadataFlags)
 }
 
 } // namespace fileformat
+} // namespace retdec

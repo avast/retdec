@@ -16,6 +16,7 @@
 
 using namespace ::testing;
 
+namespace retdec {
 namespace llvmir2hll {
 namespace tests {
 
@@ -315,3 +316,4 @@ BuilderIsInvalidatedAfterBuild) {
 
 } // namespace tests
 } // namespace llvmir2hll
+} // namespace retdec

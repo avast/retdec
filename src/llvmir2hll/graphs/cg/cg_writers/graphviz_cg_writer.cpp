@@ -15,6 +15,7 @@
 
 using retdec::utils::toString;
 
+namespace retdec {
 namespace llvmir2hll {
 
 REGISTER_AT_FACTORY("dot", GRAPHVIZ_CG_WRITER_ID, CGWriterFactory,
@@ -165,3 +166,4 @@ std::string GraphvizCGWriter::getNodeLabelForFunc(ShPtr<Function> func) {
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

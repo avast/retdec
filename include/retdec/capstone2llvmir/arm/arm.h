@@ -10,6 +10,7 @@
 #include "retdec/capstone2llvmir/arm/arm_defs.h"
 #include "retdec/capstone2llvmir/capstone2llvmir.h"
 
+namespace retdec {
 namespace capstone2llvmir {
 
 class Capstone2LlvmIrTranslatorArm : public Capstone2LlvmIrTranslator
@@ -229,5 +230,6 @@ class Capstone2LlvmIrTranslatorArm : public Capstone2LlvmIrTranslator
 };
 
 } // namespace capstone2llvmir
+} // namespace retdec
 
 #endif

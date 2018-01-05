@@ -13,10 +13,11 @@
 #include "retdec/bin2llvmir/optimizations/idioms/idioms_gcc.h"
 #include "retdec/bin2llvmir/providers/config.h"
 
-using namespace llvm_support;
+using namespace retdec::llvm_support;
 using namespace llvm;
 using namespace PatternMatch;
 
+namespace retdec {
 namespace bin2llvmir {
 
 /**
@@ -621,3 +622,4 @@ Instruction * IdiomsGCC::exchangeCopysign(BasicBlock::iterator iter) const {
 }
 
 } // namespace bin2llvmir
+} // namespace retdec

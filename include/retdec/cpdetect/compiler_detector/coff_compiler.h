@@ -10,6 +10,7 @@
 #include "retdec/cpdetect/compiler_detector/compiler_detector.h"
 #include "retdec/fileformat/file_format/coff/coff_format.h"
 
+namespace retdec {
 namespace cpdetect {
 
 /**
@@ -18,9 +19,10 @@ namespace cpdetect {
 class CoffCompiler : public CompilerDetector
 {
 	public:
-		CoffCompiler(fileformat::CoffFormat &parser, DetectParams &params, ToolInformation &tools);
+		CoffCompiler(retdec::fileformat::CoffFormat &parser, DetectParams &params, ToolInformation &tools);
 };
 
 } // namespace cpdetect
+} // namespace retdec
 
 #endif

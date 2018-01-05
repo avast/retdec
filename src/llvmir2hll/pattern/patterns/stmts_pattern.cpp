@@ -7,6 +7,7 @@
 #include "retdec/llvmir2hll/ir/statement.h"
 #include "retdec/llvmir2hll/pattern/patterns/stmts_pattern.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 /**
@@ -91,3 +92,4 @@ ShPtr<StmtsPattern> StmtsPattern::create(ShPtr<Statement> stmt) {
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

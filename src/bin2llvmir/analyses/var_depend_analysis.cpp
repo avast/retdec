@@ -13,6 +13,7 @@
 
 using namespace llvm;
 
+namespace retdec {
 namespace bin2llvmir {
 
 /**
@@ -367,3 +368,4 @@ void VarDependAnalysis::Node::markAsSolvedAndNotVisited() {
 }
 
 } // namespace bin2llvmir
+} // namespace retdec

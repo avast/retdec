@@ -15,6 +15,7 @@ using retdec::utils::isComposedOnlyOfChars;
 using retdec::utils::isComposedOnlyOfStrings;
 using retdec::utils::toLower;
 
+namespace retdec {
 namespace llvmir2hll {
 
 /**
@@ -350,3 +351,4 @@ void ConstInt::accept(Visitor *v) {
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

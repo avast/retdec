@@ -13,6 +13,7 @@
 #include "retdec/ctypes/call_convention.h"
 #include "retdec/ctypes/type.h"
 
+namespace retdec {
 namespace ctypes {
 
 class Context;
@@ -88,5 +89,6 @@ class FunctionType : public Type
 };
 
 } // namespace ctypes
+} // namespace retdec
 
 #endif

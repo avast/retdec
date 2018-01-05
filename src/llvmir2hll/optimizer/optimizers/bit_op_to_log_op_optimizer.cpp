@@ -21,6 +21,7 @@
 #include "retdec/llvmir2hll/optimizer/optimizers/bit_op_to_log_op_optimizer.h"
 #include "retdec/llvmir2hll/support/debug.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 /**
@@ -315,3 +316,4 @@ void BitOpToLogOpOptimizer::tryOptimizeCond(ShPtr<Expression> expr) {
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

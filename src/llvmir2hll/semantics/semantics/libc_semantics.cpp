@@ -14,6 +14,7 @@
 #include "retdec/llvmir2hll/support/debug.h"
 #include "retdec/llvmir2hll/support/types.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 REGISTER_AT_FACTORY("libc", LIBC_SEMANTICS_ID, SemanticsFactory,
@@ -65,3 +66,4 @@ Maybe<IntStringMap> LibcSemantics::getSymbolicNamesForParam(
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

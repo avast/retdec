@@ -96,8 +96,9 @@ bool checkError(
 
 } // anonymous namespace
 
-namespace ar_extractor
-{
+
+namespace retdec {
+namespace ar_extractor {
 
 /**
  * Constructor.
@@ -478,3 +479,4 @@ bool ArchiveWrapper::getCount(
 }
 
 } // namespace ar_extractor
+} // namespace retdec

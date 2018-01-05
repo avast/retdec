@@ -26,9 +26,10 @@
 #include "retdec/llvm-support/utils.h"
 #include "retdec/bin2llvmir/utils/type.h"
 
-using namespace llvm_support;
+using namespace retdec::llvm_support;
 using namespace llvm;
 
+namespace retdec {
 namespace bin2llvmir {
 
 char InstOpt::ID = 0;
@@ -421,3 +422,4 @@ bool InstOpt::fixX86RepAnalysis()
 }
 
 } // namespace bin2llvmir
+} // namespace retdec

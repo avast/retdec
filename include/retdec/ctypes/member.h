@@ -10,6 +10,7 @@
 #include <memory>
 #include <string>
 
+namespace retdec {
 namespace ctypes {
 
 class Type;
@@ -34,5 +35,6 @@ class Member
 };
 
 } // namespace ctypes
+} // namespace retdec
 
 #endif

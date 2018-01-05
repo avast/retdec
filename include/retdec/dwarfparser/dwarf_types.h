@@ -17,8 +17,8 @@
 #include "retdec/dwarfparser/dwarf_locations.h"
 #include "retdec/dwarfparser/dwarf_utils.h"
 
-namespace dwarfparser
-{
+namespace retdec {
+namespace dwarfparser {
 
 // Extern forward declarations.
 class DwarfFile;
@@ -449,5 +449,6 @@ class DwarfTypeContainer : public DwarfBaseContainer<DwarfType>
 };
 
 } // namespace dwarfparser
+} // namespace retdec
 
 #endif

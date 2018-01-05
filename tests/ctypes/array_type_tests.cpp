@@ -14,6 +14,7 @@
 
 using namespace ::testing;
 
+namespace retdec {
 namespace ctypes {
 namespace tests {
 
@@ -109,3 +110,4 @@ IsArrayReturnsFalseOnNonArrayType)
 
 } // namespace tests
 } // namespace ctypes
+} // namespace retdec

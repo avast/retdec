@@ -7,6 +7,7 @@
 #include "retdec/llvmir2hll/support/debug.h"
 #include "retdec/llvmir2hll/support/visitor.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 /**
@@ -20,3 +21,4 @@ Visitor::Visitor() {}
 Visitor::~Visitor() {}
 
 } // namespace llvmir2hll
+} // namespace retdec

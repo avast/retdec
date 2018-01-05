@@ -9,6 +9,7 @@
 
 #include <string>
 
+namespace retdec {
 namespace fileformat {
 
 /**
@@ -47,5 +48,6 @@ class Export
 };
 
 } // namespace fileformat
+} // namespace retdec
 
 #endif

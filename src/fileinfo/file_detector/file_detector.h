@@ -37,11 +37,11 @@ class FileDetector : private retdec::utils::NonCopyable
 		/// @}
 	protected:
 		FileInformation &fileInfo;                           ///< information about file
-		cpdetect::DetectParams &cpParams;                   ///< parameters for detection of used compiler
+		retdec::cpdetect::DetectParams &cpParams;                   ///< parameters for detection of used compiler
 		retdec::config::Config *fileConfig;                 ///< configuration of input file
-		std::shared_ptr<fileformat::FileFormat> fileParser; ///< parser of input file
+		std::shared_ptr<retdec::fileformat::FileFormat> fileParser; ///< parser of input file
 		bool loaded;                                         ///< internal state of instance
-		fileformat::LoadFlags loadFlags;                    ///< load flags for configurable running
+		retdec::fileformat::LoadFlags loadFlags;                    ///< load flags for configurable running
 
 		/// @name Pure virtual detection methods
 		/// @{
@@ -49,15 +49,15 @@ class FileDetector : private retdec::utils::NonCopyable
 		virtual void detectArchitecture() = 0;
 		virtual void detectFileType() = 0;
 		virtual void getAdditionalInfo() = 0;
-		virtual cpdetect::CompilerDetector* createCompilerDetector() const = 0;
+		virtual retdec::cpdetect::CompilerDetector* createCompilerDetector() const = 0;
 		/// @}
 	public:
-		FileDetector(std::string pathToInputFile, FileInformation &finfo, cpdetect::DetectParams &searchPar, fileformat::LoadFlags loadFlags);
+		FileDetector(std::string pathToInputFile, FileInformation &finfo, retdec::cpdetect::DetectParams &searchPar, retdec::fileformat::LoadFlags loadFlags);
 		virtual ~FileDetector();
 
 		void setConfigFile(retdec::config::Config &config);
 		void getAllInformation();
-		const fileformat::FileFormat* getFileParser() const;
+		const retdec::fileformat::FileFormat* getFileParser() const;
 };
 
 } // namespace fileinfo

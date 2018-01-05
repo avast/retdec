@@ -6,6 +6,7 @@
 
 #include "retdec/llvmir2hll/semantics/semantics/impl_support/get_name_of_param.h"
 
+namespace retdec {
 namespace llvmir2hll {
 namespace semantics {
 
@@ -21,3 +22,4 @@ Maybe<std::string> getNameOfParamFromMap(const std::string &funcName,
 
 } // namespace semantics
 } // namespace llvmir2hll
+} // namespace retdec

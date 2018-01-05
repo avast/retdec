@@ -14,6 +14,7 @@
 #include "retdec/llvmir2hll/ir/variable.h"
 #include "retdec/llvmir2hll/support/debug.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 /**
@@ -61,3 +62,4 @@ void SpecialFPAnalysis::visit(ShPtr<ConstFloat> constant) {
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

@@ -20,11 +20,12 @@
 #include "retdec/bin2llvmir/utils/defs.h"
 #include "retdec/bin2llvmir/utils/instruction.h"
 
-using namespace llvm_support;
+using namespace retdec::llvm_support;
 using namespace llvm;
 
 #define debug_enabled false
 
+namespace retdec {
 namespace bin2llvmir {
 
 char ProviderInitialization::ID = 0;
@@ -117,3 +118,4 @@ bool ProviderInitialization::doFinalization(Module& m)
 }
 
 } // namespace bin2llvmir
+} // namespace retdec

@@ -13,6 +13,7 @@
 using namespace ::testing;
 using namespace llvm;
 
+namespace retdec {
 namespace bin2llvmir {
 namespace tests {
 
@@ -74,3 +75,4 @@ R"(^;;
 
 } // namespace tests
 } // namespace bin2llvmir
+} // namespace retdec

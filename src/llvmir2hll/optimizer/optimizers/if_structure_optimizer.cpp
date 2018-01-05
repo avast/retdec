@@ -15,6 +15,7 @@
 #include "retdec/llvmir2hll/support/statements_counter.h"
 #include "retdec/llvmir2hll/utils/ir.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 namespace {
@@ -269,3 +270,4 @@ bool IfStructureOptimizer::tryOptimization5(ShPtr<IfStmt> stmt) {
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

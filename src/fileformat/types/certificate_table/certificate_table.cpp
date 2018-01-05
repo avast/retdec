@@ -6,6 +6,7 @@
 
 #include "retdec/fileformat/types/certificate_table/certificate_table.h"
 
+namespace retdec {
 namespace fileformat {
 
 /**
@@ -147,3 +148,4 @@ bool CertificateTable::empty() const
 }
 
 } // namespace fileformat
+} // namespace retdec

@@ -16,12 +16,13 @@
 #define debug_enabled false
 #include "retdec/llvm-support/utils.h"
 
-using namespace llvm_support;
+using namespace retdec::llvm_support;
 using namespace retdec::utils;
-using namespace capstone2llvmir;
+using namespace retdec::capstone2llvmir;
 using namespace llvm;
-using namespace fileformat;
+using namespace retdec::fileformat;
 
+namespace retdec {
 namespace bin2llvmir {
 
 char Decoder::ID = 0;
@@ -470,7 +471,7 @@ void Decoder::initAllowedRangesWithConfig()
 			}
 		}
 
-		std::map<retdec::utils::Address, std::shared_ptr<const fileformat::Symbol>> symtab;
+		std::map<retdec::utils::Address, std::shared_ptr<const retdec::fileformat::Symbol>> symtab;
 		for (const auto* t : _image->getFileFormat()->getSymbolTables())
 		for (const auto& s : *t)
 		{
@@ -606,7 +607,7 @@ void Decoder::initJumpTargets()
 	// Code pointers.
 	//
 	LOG << "\tCode pointers:" << std::endl;
-	std::map<Address, std::pair<Address, const fileformat::SecSeg*>> codePointers;
+	std::map<Address, std::pair<Address, const retdec::fileformat::SecSeg*>> codePointers;
 	for (auto& seg : _image->getSegments())
 	{
 		Address start = seg->getAddress();
@@ -649,7 +650,7 @@ void Decoder::initJumpTargets()
 	{
 		Address from = p.first;
 		Address to = p.second.first;
-		const fileformat::SecSeg* fromSec = p.second.second;
+		const retdec::fileformat::SecSeg* fromSec = p.second.second;
 
 		bool twoBefore = codePointers.count(from - bsz)
 				&& codePointers.count(from - 2*bsz);
@@ -879,7 +880,7 @@ void Decoder::initJumpTargets()
 			m = addr % 2 || s->isThumbSymbol() ? CS_MODE_THUMB : CS_MODE_ARM;
 		}
 
-		if (s->getType() == fileformat::Symbol::Type::PUBLIC)
+		if (s->getType() == retdec::fileformat::Symbol::Type::PUBLIC)
 		{
 			_jumpTargets.push(_config, addr, JumpTarget::eType::SYMBOL_FUNCTION_PUBLIC, m, name);
 		}
@@ -2652,3 +2653,4 @@ cs_mode Decoder::determineMode(AsmInstruction ai, retdec::utils::Address target)
 }
 
 } // namespace bin2llvmir
+} // namespace retdec

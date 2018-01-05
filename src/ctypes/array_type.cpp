@@ -10,6 +10,7 @@
 #include "retdec/ctypes/context.h"
 #include "retdec/ctypes/visitor.h"
 
+namespace retdec {
 namespace ctypes {
 
 /// Sets unknown dimension's value.
@@ -90,3 +91,4 @@ void ArrayType::accept(Visitor *v) {
 }
 
 } // namespace ctypes
+} // namespace retdec

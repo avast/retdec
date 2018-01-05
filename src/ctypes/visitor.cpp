@@ -6,6 +6,7 @@
 
 #include "retdec/ctypes/visitor.h"
 
+namespace retdec {
 namespace ctypes {
 
 /**
@@ -19,3 +20,4 @@ Visitor::Visitor() = default;
 Visitor::~Visitor() = default;
 
 } // namespace ctypes
+} // namespace retdec

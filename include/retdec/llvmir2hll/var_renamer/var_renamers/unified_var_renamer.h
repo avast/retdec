@@ -13,6 +13,7 @@
 #include "retdec/llvmir2hll/support/smart_ptr.h"
 #include "retdec/llvmir2hll/var_renamer/var_renamer.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 class VarNameGen;
@@ -52,5 +53,6 @@ private:
 };
 
 } // namespace llvmir2hll
+} // namespace retdec
 
 #endif

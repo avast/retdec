@@ -20,10 +20,11 @@
 #define OPTIMIZATION_NAME "unreachable-funcs"
 #define DEBUG_TYPE OPTIMIZATION_NAME
 
-using namespace llvm_support;
+using namespace retdec::llvm_support;
 using namespace retdec::utils;
 using namespace llvm;
 
+namespace retdec {
 namespace bin2llvmir {
 
 namespace {
@@ -249,3 +250,4 @@ void UnreachableFuncs::removeFuncsFromModule(
 }
 
 } // namespace bin2llvmir
+} // namespace retdec

@@ -31,19 +31,19 @@ namespace {
 	const std::uint32_t FatHeaderArchOffsetOffset = 0x8; ///< Offset of architecture offset in the FAT header entry.
 	const std::uint32_t FatHeaderArchSizeOffset = 0xC;   ///< Offset of architecture size in the FAT header entry.
 
-	std::string archToName(fileformat::Architecture arch)
+	std::string archToName(retdec::fileformat::Architecture arch)
 	{
 		switch (arch)
 		{
-			case fileformat::Architecture::X86:
+			case retdec::fileformat::Architecture::X86:
 				return "x86";
-			case fileformat::Architecture::X86_64:
+			case retdec::fileformat::Architecture::X86_64:
 				return "x86-64";
-			case fileformat::Architecture::ARM:
+			case retdec::fileformat::Architecture::ARM:
 				return "ARM";
-			case fileformat::Architecture::POWERPC:
+			case retdec::fileformat::Architecture::POWERPC:
 				return "PowerPC";
-			case fileformat::Architecture::MIPS:
+			case retdec::fileformat::Architecture::MIPS:
 				return "MIPS";
 			default:
 				return "unknown";
@@ -62,7 +62,7 @@ namespace {
  * @param decompressor Associated decompressor with this unpacking stub.
  * @param metadata The UPX metadata associated with this unpacking stub.
  */
-template <int bits> MachOUpxStub<bits>::MachOUpxStub(loader::Image* inputFile, const UpxStubData* stubData,
+template <int bits> MachOUpxStub<bits>::MachOUpxStub(retdec::loader::Image* inputFile, const UpxStubData* stubData,
 		const DynamicBuffer& stubCapturedData, std::unique_ptr<Decompressor> decompressor, const UpxMetadata& metadata)
 	: UpxStub(inputFile, stubData, stubCapturedData, std::move(decompressor), metadata), _bitParser(nullptr)
 {
@@ -91,7 +91,7 @@ template <int bits> void MachOUpxStub<bits>::unpack(const std::string& outputFil
 	std::ifstream input(_file->getFileFormat()->getPathToFile(), std::ios::in | std::ios::binary);
 
 	auto fileFormat = _file->getFileFormatWptr().lock();
-	auto machoFormat = static_cast<fileformat::MachOFormat*>(fileFormat.get());
+	auto machoFormat = static_cast<retdec::fileformat::MachOFormat*>(fileFormat.get());
 	if (!machoFormat->isFatBinary())
 	{
 		unpack(input, output, 0, 0);
@@ -118,7 +118,7 @@ template <int bits> void MachOUpxStub<bits>::unpack(const std::string& outputFil
 			// This is not nice, but we have no other option. MachOUpxStub is templated class and therefore @c bits is set to 32 or 64 based on the bit width of the architecture.
 			// Universal Mach-O binaries may contain both 32 and 64 bits binaries. If we want to get correct values out of MachOUpxStubTraits we need to create new versions of these
 			//   stubs and run unpacking in them.
-			auto image = loader::createImage(fileFormat);
+			auto image = retdec::loader::createImage(fileFormat);
 			if (!image)
 				throw UnsupportedFileException();
 
@@ -238,7 +238,7 @@ template <int bits> void MachOUpxStub<bits>::unpack(std::ifstream& inputFile, st
 
 template <int bits> std::uint32_t MachOUpxStub<bits>::getFirstBlockOffset(std::ifstream& inputFile) const
 {
-	auto machoFormat = static_cast<fileformat::MachOFormat*>(_file->getFileFormat());
+	auto machoFormat = static_cast<retdec::fileformat::MachOFormat*>(_file->getFileFormat());
 
 	// This is possible first block offset. It is located right behind all load commands, but it is not guaranteed.
 	std::uint32_t firstBlockOffset = MachOUpxStubTraits<bits>::MachOHeaderSize + machoFormat->getSizeOfCommands();

@@ -9,6 +9,7 @@
 
 #include <string>
 
+namespace retdec {
 namespace cpdetect {
 
 /**
@@ -108,5 +109,6 @@ class Signature
 */
 
 } // namespace cpdetect
+} // namespace retdec
 
 #endif

@@ -11,6 +11,7 @@
 
 #include "retdec/fileformat/types/dynamic_table/dynamic_entry.h"
 
+namespace retdec {
 namespace fileformat {
 
 /**
@@ -49,5 +50,6 @@ class DynamicTable
 };
 
 } // namespace fileformat
+} // namespace retdec
 
 #endif

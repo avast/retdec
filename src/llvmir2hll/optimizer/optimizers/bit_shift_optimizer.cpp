@@ -18,6 +18,7 @@
 #include "retdec/llvmir2hll/optimizer/optimizers/bit_shift_optimizer.h"
 #include "retdec/llvmir2hll/support/debug.h"
 
+namespace retdec {
 namespace llvmir2hll {
 namespace {
 
@@ -153,3 +154,4 @@ void BitShiftOptimizer::visit(ShPtr<BitShrOpExpr> expr) {
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

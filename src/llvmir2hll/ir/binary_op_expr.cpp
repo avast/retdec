@@ -10,6 +10,7 @@
 #include "retdec/llvmir2hll/ir/unknown_type.h"
 #include "retdec/llvmir2hll/support/debug.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 /**
@@ -157,3 +158,4 @@ void BinaryOpExpr::update(ShPtr<Value> subject, ShPtr<Value> arg) {
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

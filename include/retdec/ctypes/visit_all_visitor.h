@@ -11,6 +11,7 @@
 
 #include "retdec/ctypes/visitor.h"
 
+namespace retdec {
 namespace ctypes {
 
 class Type;
@@ -53,5 +54,6 @@ class VisitAllVisitor: public Visitor
 };
 
 } // namespace ctypes
+} // namespace retdec
 
 #endif

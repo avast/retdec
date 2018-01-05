@@ -10,6 +10,7 @@
 
 using namespace PeLib;
 
+namespace retdec {
 namespace fileformat {
 
 /**
@@ -333,3 +334,4 @@ retdec::utils::RangeContainer<std::uint64_t> PeFormatParser64::getResourceDirect
 }
 
 } // namespace fileformat
+} // namespace retdec

@@ -10,6 +10,7 @@
 #include "retdec/cpdetect/compiler_detector/compiler_detector.h"
 #include "retdec/fileformat/file_format/intel_hex/intel_hex_format.h"
 
+namespace retdec {
 namespace cpdetect {
 
 /**
@@ -18,9 +19,10 @@ namespace cpdetect {
 class IntelHexCompiler : public CompilerDetector
 {
 	public:
-		IntelHexCompiler(fileformat::IntelHexFormat &parser, DetectParams &params, ToolInformation &tools);
+		IntelHexCompiler(retdec::fileformat::IntelHexFormat &parser, DetectParams &params, ToolInformation &tools);
 };
 
 } // namespace cpdetect
+} // namespace retdec
 
 #endif

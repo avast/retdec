@@ -18,9 +18,10 @@
 #define debug_enabled false
 #include "retdec/llvm-support/utils.h"
 
-using namespace llvm_support;
+using namespace retdec::llvm_support;
 using namespace llvm;
 
+namespace retdec {
 namespace bin2llvmir {
 
 char ControlFlow::ID = 0;
@@ -1444,3 +1445,4 @@ llvm::GlobalVariable* ControlFlow::getReturnObject()
 }
 
 } // namespace bin2llvmir
+} // namespace retdec

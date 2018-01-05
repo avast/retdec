@@ -30,6 +30,7 @@
 using retdec::utils::addToSet;
 using retdec::utils::isLowerThanCaseInsensitive;
 
+namespace retdec {
 namespace llvmir2hll {
 
 /**
@@ -719,3 +720,4 @@ void VarDefStmtOptimizer::clearAllRecords() {
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

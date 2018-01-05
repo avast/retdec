@@ -13,6 +13,7 @@
 #include "retdec/llvmir2hll/support/debug.h"
 #include "retdec/llvmir2hll/utils/ir.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 /**
@@ -85,3 +86,4 @@ bool RemoveUselessCastsOptimizer::tryOptimizationCase1(ShPtr<AssignStmt> stmt) {
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

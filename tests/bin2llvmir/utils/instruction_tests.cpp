@@ -14,6 +14,7 @@
 using namespace ::testing;
 using namespace llvm;
 
+namespace retdec {
 namespace bin2llvmir {
 namespace tests {
 
@@ -989,3 +990,4 @@ TEST_F(InstructionTests, splitFunctionOnReferencedBb)
 
 } // namespace tests
 } // namespace bin2llvmir
+} // namespace retdec

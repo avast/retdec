@@ -196,6 +196,7 @@
 
 /// @}
 
+namespace retdec {
 namespace llvmir2hll {
 
 /**
@@ -280,5 +281,6 @@ std::string dumpFuncGetTextRepr(T object) {
 /// @}
 
 } // namespace llvmir2hll
+} // namespace retdec
 
 #endif

@@ -7,6 +7,7 @@
 #include "retdec/fileformat/types/dotnet_headers/metadata_stream.h"
 #include "retdec/fileformat/types/dotnet_headers/metadata_tables.h"
 
+namespace retdec {
 namespace fileformat {
 
 /**
@@ -303,3 +304,4 @@ bool MetadataStream::hasTable(MetadataTableType tableType) const
 }
 
 } // namespace fileformat
+} // namespace retdec

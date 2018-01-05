@@ -9,6 +9,7 @@
 
 #include <vector>
 
+namespace retdec {
 namespace fileformat {
 
 /**
@@ -43,5 +44,6 @@ class ResourceTree
 };
 
 } // namespace fileformat
+} // namespace retdec
 
 #endif

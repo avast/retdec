@@ -12,6 +12,7 @@
 using namespace ::testing;
 using namespace llvm;
 
+namespace retdec {
 namespace capstone2llvmir {
 namespace tests {
 
@@ -5982,3 +5983,4 @@ TEST_P(Capstone2LlvmIrTranslatorMipsTests, MIPS_INS_NEGU)
 
 } // namespace tests
 } // namespace capstone2llvmir
+} // namespace retdec

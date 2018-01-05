@@ -6,6 +6,7 @@
 
 #include "retdec/fileformat/types/export_table/export.h"
 
+namespace retdec {
 namespace fileformat {
 
 /**
@@ -108,3 +109,4 @@ bool Export::hasEmptyName() const
 }
 
 } // namespace fileformat
+} // namespace retdec

@@ -32,6 +32,7 @@
 
 using namespace ::testing;
 
+namespace retdec {
 namespace llvmir2hll {
 namespace tests {
 
@@ -694,3 +695,4 @@ MarksUForLoopInitAsDefinitionWhenVarIsDefinedInInitPart) {
 
 } // namespace tests
 } // namespace llvmir2hll
+} // namespace retdec

@@ -11,6 +11,7 @@
 #include "retdec/llvmir2hll/support/headers_for_declared_funcs.h"
 #include "retdec/llvmir2hll/support/maybe.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 /**
@@ -49,3 +50,4 @@ bool HeadersForDeclaredFuncs::hasAssocHeader(ShPtr<Module> module,
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

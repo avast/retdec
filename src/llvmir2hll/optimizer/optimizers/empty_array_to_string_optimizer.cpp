@@ -11,6 +11,7 @@
 #include "retdec/llvmir2hll/optimizer/optimizers/empty_array_to_string_optimizer.h"
 #include "retdec/llvmir2hll/support/debug.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 /**
@@ -92,3 +93,4 @@ bool EmptyArrayToStringOptimizer::isEmptyArray(ShPtr<Expression> expr) {
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

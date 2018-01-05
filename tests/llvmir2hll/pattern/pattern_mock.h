@@ -11,6 +11,7 @@
 
 #include "retdec/llvmir2hll/pattern/pattern.h"
 
+namespace retdec {
 namespace llvmir2hll {
 namespace tests {
 
@@ -24,5 +25,6 @@ public:
 
 } // namespace tests
 } // namespace llvmir2hll
+} // namespace retdec
 
 #endif

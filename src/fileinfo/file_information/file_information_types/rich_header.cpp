@@ -7,7 +7,7 @@
 #include "fileinfo/file_information/file_information_types/rich_header.h"
 #include "fileinfo/file_information/file_information_types/type_conversions.h"
 
-using namespace fileformat;
+using namespace retdec::fileformat;
 
 namespace fileinfo {
 
@@ -113,7 +113,7 @@ std::string RichHeader::getRecordNumberOfUsesStr(std::size_t position) const
  * Set rich header data
  * @param richHeader Instance of class with original information about rich header
  */
-void RichHeader::setHeader(const fileformat::RichHeader *richHeader)
+void RichHeader::setHeader(const retdec::fileformat::RichHeader *richHeader)
 {
 	header = richHeader;
 }

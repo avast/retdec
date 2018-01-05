@@ -11,6 +11,7 @@
 
 #include "retdec/fileformat/types/relocation_table/relocation.h"
 
+namespace retdec {
 namespace fileformat {
 
 /**
@@ -57,5 +58,6 @@ class RelocationTable
 };
 
 } // namespace fileformat
+} // namespace retdec
 
 #endif

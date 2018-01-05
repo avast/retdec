@@ -22,6 +22,7 @@
 #include "retdec/llvmir2hll/ir/variable.h"
 #include "retdec/llvmir2hll/support/debug.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 namespace {
@@ -354,3 +355,4 @@ void CompoundOpManager::tryOptimizeWhenLeftOperandEqWithLhsOfAssignStmt(
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

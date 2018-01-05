@@ -8,6 +8,7 @@
 
 using namespace llvm;
 
+namespace retdec {
 namespace bin2llvmir {
 
 IdiomsAbstract::IdiomsAbstract():
@@ -110,3 +111,4 @@ bool IdiomsAbstract::isPowerOfTwoRepresentable(const ConstantInt *cnst) {
 }
 
 } // namespace bin2llvmir
+} // namespace retdec

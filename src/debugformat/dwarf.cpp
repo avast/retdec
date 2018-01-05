@@ -13,6 +13,7 @@
 #include "retdec/utils/string.h"
 #include "retdec/debugformat/debugformat.h"
 
+namespace retdec {
 namespace debugformat {
 
 void DebugFormat::loadDwarf()
@@ -52,7 +53,7 @@ void DebugFormat::loadDwarfGlobalVariables()
 
 		Dwarf_Addr address;
 		std::string n;
-		dwarfparser::DwarfLocationDesc::cLocType loc = gvar->getLocation(&n, &address, 1);
+		retdec::dwarfparser::DwarfLocationDesc::cLocType loc = gvar->getLocation(&n, &address, 1);
 		if (loc.isAddress())
 		{
 			std::string name = gvar->name.empty() ? "glob_var_" + retdec::utils::toHexString(address) : gvar->name;
@@ -169,7 +170,7 @@ void DebugFormat::loadDwarfFunctions()
  * @param type DWARF type.
  * @return Common type representation.
  */
-retdec::config::Type DebugFormat::loadDwarfType(dwarfparser::DwarfType* type)
+retdec::config::Type DebugFormat::loadDwarfType(retdec::dwarfparser::DwarfType* type)
 {
 	if (type == nullptr)
 	{
@@ -180,3 +181,4 @@ retdec::config::Type DebugFormat::loadDwarfType(dwarfparser::DwarfType* type)
 }
 
 } // namespace debugformat
+} // namespace retdec

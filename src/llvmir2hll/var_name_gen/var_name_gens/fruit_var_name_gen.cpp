@@ -13,6 +13,7 @@
 
 using retdec::utils::arraySize;
 
+namespace retdec {
 namespace llvmir2hll {
 
 REGISTER_AT_FACTORY("fruit", FRUIT_VAR_NAME_GEN_ID, VarNameGenFactory,
@@ -112,3 +113,4 @@ std::string FruitVarNameGen::getNextVarName() {
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

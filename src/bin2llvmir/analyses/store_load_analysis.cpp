@@ -15,6 +15,7 @@
 using namespace retdec::utils;
 using namespace llvm;
 
+namespace retdec {
 namespace bin2llvmir {
 
 /**
@@ -2123,3 +2124,4 @@ AnalysisInfo::ValInstSetMap::iterator AnalysisInfo::ValInstSetMap::
 }
 
 } // namespace bin2llvmir
+} // namespace retdec

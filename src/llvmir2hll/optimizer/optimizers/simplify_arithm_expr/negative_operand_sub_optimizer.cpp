@@ -12,6 +12,7 @@
 #include "retdec/llvmir2hll/ir/sub_op_expr.h"
 #include "retdec/llvmir2hll/optimizer/optimizers/simplify_arithm_expr/negative_operand_sub_optimizer.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 REGISTER_AT_FACTORY("NegativeOperand", NEGATIVE_OPERAND_SUB_OPTIMIZER_ID,
@@ -213,3 +214,4 @@ ShPtr<ConstFloat> NegativeOperandSubOptimizer::ifNegativeConstFloatReturnIt(
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

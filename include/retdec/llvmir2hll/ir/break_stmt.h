@@ -9,6 +9,7 @@
 
 #include "retdec/llvmir2hll/ir/statement.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 class Visitor;
@@ -43,5 +44,6 @@ private:
 };
 
 } // namespace llvmir2hll
+} // namespace retdec
 
 #endif

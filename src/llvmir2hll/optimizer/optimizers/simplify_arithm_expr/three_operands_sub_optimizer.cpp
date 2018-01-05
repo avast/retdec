@@ -24,6 +24,7 @@
 #include "retdec/llvmir2hll/optimizer/optimizers/simplify_arithm_expr/three_operands_sub_optimizer.h"
 #include "retdec/llvmir2hll/support/debug.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 namespace {
@@ -611,3 +612,4 @@ ShPtr<Expression> ThreeOperandsSubOptimizer::getResult(ShPtr<Expression> expr) c
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

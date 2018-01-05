@@ -11,6 +11,7 @@
 #include <string>
 #include <vector>
 
+namespace retdec {
 namespace fileformat {
 
 /**
@@ -83,5 +84,6 @@ class IntelHexTokenizer
 };
 
 } // namespace fileformat
+} // namespace retdec
 
 #endif

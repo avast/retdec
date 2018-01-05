@@ -14,6 +14,7 @@
 #include "retdec/bin2llvmir/providers/config.h"
 #include "retdec/bin2llvmir/providers/debugformat.h"
 
+namespace retdec {
 namespace bin2llvmir {
 
 /**
@@ -60,5 +61,6 @@ class StackAnalysis : public llvm::ModulePass
 };
 
 } // namespace bin2llvmir
+} // namespace retdec
 
 #endif

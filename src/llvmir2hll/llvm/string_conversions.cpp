@@ -14,6 +14,7 @@
 #include "retdec/llvmir2hll/llvm/string_conversions.h"
 #include "retdec/llvmir2hll/support/debug.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 namespace {
@@ -182,3 +183,4 @@ ShPtr<ConstString> getInitializerAsConstString(llvm::GlobalVariable *v) {
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

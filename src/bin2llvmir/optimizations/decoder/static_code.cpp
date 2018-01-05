@@ -18,7 +18,7 @@ using namespace fnc_patterns::stacofin;
 
 namespace {
 
-using namespace bin2llvmir;
+using namespace retdec::bin2llvmir;
 
 void selectSignaturesWithName(
 		const std::set<std::string>& src,
@@ -101,7 +101,7 @@ std::set<std::string> selectSignaturePaths(FileImage* image, Config* config)
 
 		std::size_t major = 0;
 		std::size_t minor = 0;
-		if (auto* pe = dynamic_cast<fileformat::PeFormat*>(
+		if (auto* pe = dynamic_cast<retdec::fileformat::PeFormat*>(
 				image->getFileFormat()))
 		{
 			major = pe->getMajorLinkerVersion();
@@ -330,6 +330,7 @@ void fixWeirdManglingOfPic32(std::string& name)
 
 } // namespace anon
 
+namespace retdec {
 namespace bin2llvmir {
 
 void Decoder::doStaticCodeRecognition()
@@ -428,3 +429,4 @@ void Decoder::doStaticCodeRecognition()
 }
 
 } // namespace bin2llvmir
+} // namespace retdec

@@ -18,6 +18,7 @@
 
 using namespace ::testing;
 
+namespace retdec {
 namespace llvmir2hll {
 namespace tests {
 
@@ -73,3 +74,4 @@ FunctionWithNullPointersUseThem) {
 
 } // namespace tests
 } // namespace llvmir2hll
+} // namespace retdec

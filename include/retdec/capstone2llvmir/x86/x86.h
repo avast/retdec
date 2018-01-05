@@ -14,6 +14,7 @@
 #include "retdec/capstone2llvmir/capstone2llvmir.h"
 #include "retdec/capstone2llvmir/x86/x86_defs.h"
 
+namespace retdec {
 namespace capstone2llvmir {
 
 class Capstone2LlvmIrTranslatorX86 : public Capstone2LlvmIrTranslator
@@ -426,5 +427,6 @@ class Capstone2LlvmIrTranslatorX86 : public Capstone2LlvmIrTranslator
 };
 
 } // namespace capstone2llvmir
+} // namespace retdec
 
 #endif

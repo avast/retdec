@@ -17,7 +17,7 @@ namespace fileinfo {
 class ImportTable
 {
 	private:
-		const fileformat::ImportTable *table;
+		const retdec::fileformat::ImportTable *table;
 	public:
 		ImportTable();
 		~ImportTable();
@@ -37,7 +37,7 @@ class ImportTable
 
 		/// @name Setters
 		/// @{
-		void setTable(const fileformat::ImportTable *importTable);
+		void setTable(const retdec::fileformat::ImportTable *importTable);
 		/// @}
 
 		/// @name Other methods

@@ -9,6 +9,7 @@
 #include "retdec/llvmir2hll/optimizer/func_optimizer.h"
 #include "retdec/llvmir2hll/support/debug.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 /**
@@ -58,3 +59,4 @@ void FuncOptimizer::runOnFunction(ShPtr<Function> func) {
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

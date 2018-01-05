@@ -12,9 +12,10 @@
 #include "retdec/loader/loader/intel_hex/intel_hex_image.h"
 #include "retdec/loader/utils/range.h"
 
+namespace retdec {
 namespace loader {
 
-IntelHexImage::IntelHexImage(const std::shared_ptr<fileformat::FileFormat>& fileFormat) : Image(fileFormat)
+IntelHexImage::IntelHexImage(const std::shared_ptr<retdec::fileformat::FileFormat>& fileFormat) : Image(fileFormat)
 {
 }
 
@@ -23,7 +24,7 @@ IntelHexImage::~IntelHexImage()
 }
 
 /**
- * Virtual method overridden from loader::Image, which is used in image factory.
+ * Virtual method overridden from retdec::loader::Image, which is used in image factory.
  * Loads the image using @c fileformat.
  *
  * @return True if loading was successful, otherwise false.
@@ -49,7 +50,7 @@ bool IntelHexImage::load()
 	return true;
 }
 
-Segment* IntelHexImage::addSegment(const fileformat::Section* section, std::uint64_t address, std::uint64_t memSize)
+Segment* IntelHexImage::addSegment(const retdec::fileformat::Section* section, std::uint64_t address, std::uint64_t memSize)
 {
 	llvm::StringRef sectionContent = section->getBytes();
 	auto dataSource = std::make_unique<SegmentDataSource>(sectionContent);
@@ -58,3 +59,4 @@ Segment* IntelHexImage::addSegment(const fileformat::Section* section, std::uint
 }
 
 } // namespace loader
+} // namespace retdec

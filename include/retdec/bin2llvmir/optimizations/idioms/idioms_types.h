@@ -7,6 +7,7 @@
 #ifndef RETDEC_BIN2LLVMIR_OPTIMIZATIONS_IDIOMS_IDIOMS_TYPES_H
 #define RETDEC_BIN2LLVMIR_OPTIMIZATIONS_IDIOMS_IDIOMS_TYPES_H
 
+namespace retdec {
 namespace bin2llvmir {
 
 /**
@@ -34,5 +35,6 @@ enum CC_arch {
 };
 
 } // namespace bin2llvmir
+} // namespace retdec
 
 #endif

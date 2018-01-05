@@ -7,6 +7,7 @@
 #include "retdec/llvmir2hll/llvm/llvmir2bir_converter.h"
 #include "retdec/llvmir2hll/support/debug.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 /**
@@ -38,3 +39,4 @@ void LLVMIR2BIRConverter::setOptionStrictFPUSemantics(bool strict) {
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

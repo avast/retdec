@@ -14,6 +14,7 @@
 
 using retdec::utils::addToMap;
 
+namespace retdec {
 namespace llvmir2hll {
 
 namespace {
@@ -253,3 +254,4 @@ void APICallSeqData::bindValuesFromArgs(ShPtr<CallExpr> call) {
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

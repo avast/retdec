@@ -19,6 +19,7 @@
 
 using retdec::utils::addToSet;
 
+namespace retdec {
 namespace llvmir2hll {
 
 /**
@@ -369,3 +370,4 @@ void UsedVarsVisitor::visit(ShPtr<ForLoopStmt> stmt) {
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

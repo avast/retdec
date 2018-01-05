@@ -11,6 +11,7 @@
 
 using namespace ::testing;
 
+namespace retdec {
 namespace ctypes {
 namespace tests {
 
@@ -36,3 +37,4 @@ IsVoidReturnsFalseOnNonVoidType)
 
 } // namespace tests
 } // namespace ctypes
+} // namespace retdec

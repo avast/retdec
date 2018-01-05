@@ -7,6 +7,7 @@
 #ifndef RETDEC_LLVMIR2HLL_SUPPORT_METADATABLE_H
 #define RETDEC_LLVMIR2HLL_SUPPORT_METADATABLE_H
 
+namespace retdec {
 namespace llvmir2hll {
 
 /**
@@ -57,5 +58,6 @@ private:
 };
 
 } // namespace llvmir2hll
+} // namespace retdec
 
 #endif

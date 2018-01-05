@@ -6,6 +6,7 @@
 
 #include "retdec/fileformat/types/dotnet_types/dotnet_field.h"
 
+namespace retdec {
 namespace fileformat {
 
 /**
@@ -45,3 +46,4 @@ bool DotnetField::isStatic() const
 }
 
 } // namespace fileformat
+} // namespace retdec

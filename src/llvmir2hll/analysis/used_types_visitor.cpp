@@ -30,6 +30,7 @@
 
 using retdec::utils::addToSet;
 
+namespace retdec {
 namespace llvmir2hll {
 
 /**
@@ -417,3 +418,4 @@ void UsedTypesVisitor::visit(ShPtr<UnknownType> type) {
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

@@ -13,6 +13,7 @@
 #include "retdec/llvmir2hll/ir/type.h"
 #include "retdec/llvmir2hll/support/smart_ptr.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 class Visitor;
@@ -59,5 +60,6 @@ private:
 };
 
 } // namespace llvmir2hll
+} // namespace retdec
 
 #endif

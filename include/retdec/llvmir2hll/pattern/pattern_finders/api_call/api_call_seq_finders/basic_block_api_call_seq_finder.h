@@ -11,6 +11,7 @@
 #include "retdec/llvmir2hll/pattern/pattern_finders/api_call/api_call_seq_finder.h"
 #include "retdec/llvmir2hll/support/smart_ptr.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 /**
@@ -55,5 +56,6 @@ private:
 };
 
 } // namespace llvmir2hll
+} // namespace retdec
 
 #endif

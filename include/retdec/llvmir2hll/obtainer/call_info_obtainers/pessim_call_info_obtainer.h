@@ -13,6 +13,7 @@
 #include "retdec/llvmir2hll/obtainer/call_info_obtainer.h"
 #include "retdec/llvmir2hll/support/smart_ptr.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 /**
@@ -88,5 +89,6 @@ private:
 };
 
 } // namespace llvmir2hll
+} // namespace retdec
 
 #endif

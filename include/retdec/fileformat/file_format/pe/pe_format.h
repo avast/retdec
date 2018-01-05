@@ -19,6 +19,7 @@
 #include "retdec/fileformat/types/dotnet_headers/user_string_stream.h"
 #include "retdec/fileformat/types/dotnet_types/dotnet_class.h"
 
+namespace retdec {
 namespace fileformat {
 
 /**
@@ -70,7 +71,7 @@ class PeFormat : public FileFormat
 		/// @{
 		bool verifySignature(PKCS7 *p7);
 		std::vector<std::tuple<const std::uint8_t*, std::size_t>> getDigestRanges() const;
-		std::string calculateDigest(crypto::HashAlgorithm hashType) const;
+		std::string calculateDigest(retdec::crypto::HashAlgorithm hashType) const;
 		/// @}
 
 		/// @name .NET methods
@@ -172,5 +173,6 @@ class PeFormat : public FileFormat
 };
 
 } // namespace fileformat
+} // namespace retdec
 
 #endif

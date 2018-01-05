@@ -12,7 +12,7 @@
 
 using namespace retdec::utils;
 using namespace PeLib;
-using namespace fileformat;
+using namespace retdec::fileformat;
 
 namespace fileinfo {
 
@@ -93,7 +93,7 @@ std::string getSymbolType(byte type)
  * @param pathToFile Path to PE binary file
  * @param loadFlags Load flags
  */
-PeWrapper::PeWrapper(std::string pathToFile, fileformat::LoadFlags loadFlags) : PeFormat(pathToFile, loadFlags), wrapperParser(nullptr)
+PeWrapper::PeWrapper(std::string pathToFile, retdec::fileformat::LoadFlags loadFlags) : PeFormat(pathToFile, loadFlags), wrapperParser(nullptr)
 {
 	switch(peClass)
 	{

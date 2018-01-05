@@ -9,6 +9,7 @@
 
 using namespace retdec::utils;
 
+namespace retdec {
 namespace fileformat {
 
 /**
@@ -406,3 +407,4 @@ void Symbol::invalidateLinkToSection()
 }
 
 } // namespace fileformat
+} // namespace retdec

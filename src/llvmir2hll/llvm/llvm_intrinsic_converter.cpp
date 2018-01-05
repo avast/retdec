@@ -19,6 +19,7 @@ using retdec::utils::endsWith;
 using retdec::utils::hasItem;
 using retdec::utils::startsWith;
 
+namespace retdec {
 namespace llvmir2hll {
 
 namespace {
@@ -259,3 +260,4 @@ void LLVMIntrinsicConverter::visit(ShPtr<CallExpr> expr) {
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

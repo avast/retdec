@@ -12,6 +12,7 @@
 
 #include "retdec/ctypes/type.h"
 
+namespace retdec {
 namespace ctypes {
 
 class Context;
@@ -49,5 +50,6 @@ class TypedefedType: public Type
 };
 
 } // namespace ctypes
+} // namespace retdec
 
 #endif

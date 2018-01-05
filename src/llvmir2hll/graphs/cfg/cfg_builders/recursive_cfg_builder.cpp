@@ -37,6 +37,7 @@
 
 using retdec::utils::hasItem;
 
+namespace retdec {
 namespace llvmir2hll {
 namespace {
 
@@ -601,3 +602,4 @@ void RecursiveCFGBuilder::visitForOrUForLoop(ShPtr<Statement> loop,
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

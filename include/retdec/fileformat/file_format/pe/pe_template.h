@@ -18,6 +18,7 @@
 #include "retdec/fileformat/types/sec_seg/pe_coff_section.h"
 #include "retdec/fileformat/types/sec_seg/section.h"
 
+namespace retdec {
 namespace fileformat {
 
 namespace
@@ -885,5 +886,6 @@ template<int bits> retdec::utils::RangeContainer<std::uint64_t> peResourceDirect
 }
 
 } // namespace fileformat
+} // namespace retdec
 
 #endif

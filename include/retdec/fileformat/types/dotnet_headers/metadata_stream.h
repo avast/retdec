@@ -14,6 +14,7 @@
 #include "retdec/fileformat/types/dotnet_headers/metadata_table.h"
 #include "retdec/fileformat/types/dotnet_headers/stream.h"
 
+namespace retdec {
 namespace fileformat {
 
 class MetadataStream : public Stream
@@ -62,5 +63,6 @@ class MetadataStream : public Stream
 };
 
 } // namespace fileformat
+} // namespace retdec
 
 #endif

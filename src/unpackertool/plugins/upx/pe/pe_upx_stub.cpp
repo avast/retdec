@@ -151,7 +151,7 @@ std::vector<UnfilterSignatureData> unfilterSignatures =
  * @param decompressor Associated decompressor with this unpacking stub.
  * @param metadata The UPX metadata associated with this unpacking stub.
  */
-template <int bits> PeUpxStub<bits>::PeUpxStub(loader::Image* inputFile, const UpxStubData* stubData, const DynamicBuffer& stubCapturedData,
+template <int bits> PeUpxStub<bits>::PeUpxStub(retdec::loader::Image* inputFile, const UpxStubData* stubData, const DynamicBuffer& stubCapturedData,
 		std::unique_ptr<Decompressor> decompressor, const UpxMetadata& metadata)
 	: UpxStub(inputFile, stubData, stubCapturedData, std::move(decompressor), metadata), _upx0Sect(nullptr),
 		_realEpAddress(0), _newPeFile(nullptr), _rvaShift(0), _exportsCompressed(false),
@@ -431,7 +431,7 @@ template <int bits> void PeUpxStub<bits>::readPackedFileILT(DynamicBuffer& ilt)
 {
 	// We don't use PeLib for reading ILT because it is going to populate impDir(), but we want to it to build it all ourselves manually
 	std::vector<std::uint8_t> iltBytes;
-	const loader::Segment* importsSection = _file->getSegmentFromAddress(_newPeFile->peHeader().getIddImportRva() + _newPeFile->peHeader().getImageBase());
+	const retdec::loader::Segment* importsSection = _file->getSegmentFromAddress(_newPeFile->peHeader().getIddImportRva() + _newPeFile->peHeader().getImageBase());
 
 	if (importsSection == nullptr)
 		throw ImportNamesNotFoundException();
@@ -855,7 +855,7 @@ template <int bits> void PeUpxStub<bits>::fixExports(const unpacker::DynamicBuff
 
 	// Calculate the offset of exports in UPX2 section
 	std::uint32_t exportsVa = _newPeFile->peHeader().rvaToVa(oldExportsRva);
-	const loader::Segment* exportsSection = _file->getSegmentFromAddress(exportsVa);
+	const retdec::loader::Segment* exportsSection = _file->getSegmentFromAddress(exportsVa);
 	if (exportsSection == nullptr)
 		throw InvalidDataDirectoryException("Exports");
 
@@ -978,7 +978,7 @@ template <int bits> void PeUpxStub<bits>::fixResources(const DynamicBuffer& unpa
 
 	// Read the contents of the resources
 	std::vector<std::uint8_t> uncompressedRsrcsBytes;
-	const loader::Segment* sect = _file->getSegmentFromAddress(uncompressedRsrcRva + imageBase);
+	const retdec::loader::Segment* sect = _file->getSegmentFromAddress(uncompressedRsrcRva + imageBase);
 	if (sect == nullptr)
 		throw InvalidDataDirectoryException("Resources");
 

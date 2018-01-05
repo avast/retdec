@@ -6,6 +6,7 @@
 
 #include "retdec/fileformat/types/rich_header/linker_info.h"
 
+namespace retdec {
 namespace fileformat {
 
 /**
@@ -97,3 +98,4 @@ void LinkerInfo::setNumberOfUses(unsigned long long linkerCount)
 }
 
 } // namespace fileformat
+} // namespace retdec

@@ -16,6 +16,7 @@
 
 using namespace ::testing;
 
+namespace retdec {
 namespace ctypes {
 namespace tests {
 
@@ -216,3 +217,4 @@ IsFunctionReturnsFalseOnNonFunctionType)
 
 } // namespace tests
 } // namespace ctypes
+} // namespace retdec

@@ -28,6 +28,7 @@
 #include "retdec/fileformat/types/symbol_table/macho_symbol.h"
 #include "retdec/fileformat/types/symbol_table/symbol_table.h"
 
+namespace retdec {
 namespace fileformat {
 
 /**
@@ -67,5 +68,6 @@ enum LoadFlags
 };
 
 } // namespace fileformat
+} // namespace retdec
 
 #endif

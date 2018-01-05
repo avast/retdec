@@ -10,6 +10,7 @@
 #include "retdec/cpdetect/compiler_detector/compiler_detector.h"
 #include "retdec/fileformat/file_format/elf/elf_format.h"
 
+namespace retdec {
 namespace cpdetect {
 
 /**
@@ -18,9 +19,10 @@ namespace cpdetect {
 class ElfCompiler : public CompilerDetector
 {
 	public:
-		ElfCompiler(fileformat::ElfFormat &parser, DetectParams &params, ToolInformation &tools);
+		ElfCompiler(retdec::fileformat::ElfFormat &parser, DetectParams &params, ToolInformation &tools);
 };
 
 } // namespace cpdetect
+} // namespace retdec
 
 #endif

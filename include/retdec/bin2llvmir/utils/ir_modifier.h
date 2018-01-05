@@ -12,6 +12,7 @@
 
 #include "retdec/bin2llvmir/providers/config.h"
 
+namespace retdec {
 namespace bin2llvmir {
 
 class IrModifier
@@ -49,5 +50,6 @@ class IrModifier
 };
 
 } // namespace bin2llvmir
+} // namespace retdec
 
 #endif

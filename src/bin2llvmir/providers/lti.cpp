@@ -24,6 +24,7 @@
 
 using namespace llvm;
 
+namespace retdec {
 namespace bin2llvmir {
 
 //
@@ -44,7 +45,7 @@ ToLlvmTypeVisitor::ToLlvmTypeVisitor(llvm::Module* m, Config* c) :
 ToLlvmTypeVisitor::~ToLlvmTypeVisitor() = default;
 
 void ToLlvmTypeVisitor::visit(
-		const std::shared_ptr<ctypes::ArrayType>& type)
+		const std::shared_ptr<retdec::ctypes::ArrayType>& type)
 {
 	type->getElementType()->accept(this);
 
@@ -59,13 +60,13 @@ void ToLlvmTypeVisitor::visit(
 }
 
 void ToLlvmTypeVisitor::visit(
-		const std::shared_ptr<ctypes::EnumType>& type)
+		const std::shared_ptr<retdec::ctypes::EnumType>& type)
 {
 	_type = getDefaultType(_module);
 }
 
 void ToLlvmTypeVisitor::visit(
-		const std::shared_ptr<ctypes::FloatingPointType>& type)
+		const std::shared_ptr<retdec::ctypes::FloatingPointType>& type)
 {
 	auto& ctx = _module->getContext();
 	switch (type->getBitWidth())
@@ -80,7 +81,7 @@ void ToLlvmTypeVisitor::visit(
 }
 
 void ToLlvmTypeVisitor::visit(
-		const std::shared_ptr<ctypes::FunctionType>& type)
+		const std::shared_ptr<retdec::ctypes::FunctionType>& type)
 {
 	type->getReturnType()->accept(this);
 	auto* ret = FunctionType::isValidReturnType(_type) ?
@@ -111,7 +112,7 @@ void ToLlvmTypeVisitor::visit(
 }
 
 void ToLlvmTypeVisitor::visit(
-		const std::shared_ptr<ctypes::IntegralType>& type)
+		const std::shared_ptr<retdec::ctypes::IntegralType>& type)
 {
 	auto tsz = type->getBitWidth();
 	assert(tsz);
@@ -120,7 +121,7 @@ void ToLlvmTypeVisitor::visit(
 }
 
 void ToLlvmTypeVisitor::visit(
-		const std::shared_ptr<ctypes::PointerType>& type)
+		const std::shared_ptr<retdec::ctypes::PointerType>& type)
 {
 	type->getPointedType()->accept(this);
 
@@ -130,7 +131,7 @@ void ToLlvmTypeVisitor::visit(
 }
 
 void ToLlvmTypeVisitor::visit(
-		const std::shared_ptr<ctypes::TypedefedType>& type)
+		const std::shared_ptr<retdec::ctypes::TypedefedType>& type)
 {
 	if (retdec::utils::containsCaseInsensitive(type->getName(), "wchar"))
 	{
@@ -159,25 +160,25 @@ void ToLlvmTypeVisitor::visit(
 }
 
 void ToLlvmTypeVisitor::visit(
-		const std::shared_ptr<ctypes::UnionType>& type)
+		const std::shared_ptr<retdec::ctypes::UnionType>& type)
 {
 	_type = getDefaultType(_module);
 }
 
 void ToLlvmTypeVisitor::visit(
-		const std::shared_ptr<ctypes::UnknownType>& type)
+		const std::shared_ptr<retdec::ctypes::UnknownType>& type)
 {
 	_type = getDefaultType(_module);
 }
 
 void ToLlvmTypeVisitor::visit(
-		const std::shared_ptr<ctypes::VoidType>& type)
+		const std::shared_ptr<retdec::ctypes::VoidType>& type)
 {
 	_type = Type::getVoidTy(_module->getContext());
 }
 
 void ToLlvmTypeVisitor::visit(
-		const std::shared_ptr<ctypes::StructType>& type)
+		const std::shared_ptr<retdec::ctypes::StructType>& type)
 {
 	std::string name = type->getName();
 	std::string prefix = "struct ";
@@ -228,14 +229,14 @@ Type* ToLlvmTypeVisitor::getLlvmType() const
 Lti::Lti(
 		llvm::Module* m,
 		Config* c,
-		loader::Image* objf)
+		retdec::loader::Image* objf)
 		:
 		_module(m),
 		_config(c),
 		_image(objf)
 {
-	_ltiModule = std::make_unique<ctypes::Module>(
-			std::make_shared<ctypes::Context>());
+	_ltiModule = std::make_unique<retdec::ctypes::Module>(
+			std::make_shared<retdec::ctypes::Context>());
 
 	_ltiParser = ctypesparser::JSONCTypesParser(
 			static_cast<unsigned>(c->getConfig().architecture.getBitSize()));
@@ -325,7 +326,7 @@ bool Lti::hasLtiFunction(const std::string& name)
 	return getLtiFunction(name) != nullptr;
 }
 
-std::shared_ptr<ctypes::Function> Lti::getLtiFunction(
+std::shared_ptr<retdec::ctypes::Function> Lti::getLtiFunction(
 		const std::string& name)
 {
 	return _ltiModule->getFunctionWithName(name);
@@ -348,7 +349,7 @@ llvm::FunctionType* Lti::getLlvmFunctionType(const std::string& name)
 	assert(ft);
 
 	// TODO: I do not like this, why does
-	// ctypes::FunctionType::isVarArg no work?
+	// retdec::ctypes::FunctionType::isVarArg no work?
 	std::string declaration = ltiFnc->getDeclaration();
 	if (declaration.find("...") != std::string::npos
 			&& !ft->isVarArg())
@@ -370,7 +371,7 @@ Lti::FunctionPair Lti::getPairFunctionFree(const std::string& n)
 	}
 	if (ltiFnc == nullptr)
 	{
-		std::shared_ptr<ctypes::Function> sp(nullptr);
+		std::shared_ptr<retdec::ctypes::Function> sp(nullptr);
 		return {nullptr, sp};
 	}
 	auto* ft = getLlvmFunctionType(name);
@@ -435,7 +436,7 @@ llvm::Function* Lti::getLlvmFunction(const std::string& name)
 	return getPairFunction(name).first;
 }
 
-llvm::Type* Lti::getLlvmType(std::shared_ptr<ctypes::Type> type)
+llvm::Type* Lti::getLlvmType(std::shared_ptr<retdec::ctypes::Type> type)
 {
 	ToLlvmTypeVisitor visitor(_module, _config);
 	type->accept(&visitor);
@@ -453,7 +454,7 @@ std::map<llvm::Module*, Lti> LtiProvider::_module2lti;
 Lti* LtiProvider::addLti(
 		llvm::Module* m,
 		Config* c,
-		loader::Image* objf)
+		retdec::loader::Image* objf)
 {
 	if (m == nullptr || c == nullptr || objf == nullptr)
 	{
@@ -482,3 +483,4 @@ void LtiProvider::clear()
 }
 
 } // namespace bin2llvmir
+} // namespace retdec

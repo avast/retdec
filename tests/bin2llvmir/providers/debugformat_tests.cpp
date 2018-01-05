@@ -12,10 +12,11 @@
 
 using namespace ::testing;
 using namespace llvm;
-using namespace debugformat;
-using namespace fileformat;
-using namespace loader;
+using namespace retdec::debugformat;
+using namespace retdec::fileformat;
+using namespace retdec::loader;
 
+namespace retdec {
 namespace bin2llvmir {
 namespace tests {
 
@@ -99,3 +100,4 @@ TEST_F(DebugFormatProviderTests, clearRemovesAllData)
 
 } // namespace tests
 } // namespace bin2llvmir
+} // namespace retdec

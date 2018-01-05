@@ -9,6 +9,7 @@
 
 #include <string>
 
+namespace retdec {
 namespace ctypes {
 
 /**
@@ -29,5 +30,6 @@ class HeaderFile
 };
 
 } // namespace ctypes
+} // namespace retdec
 
 #endif

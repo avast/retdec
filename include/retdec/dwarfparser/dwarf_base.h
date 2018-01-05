@@ -15,8 +15,8 @@
 #include <libdwarf/dwarf.h>
 #include <libdwarf/libdwarf.h>
 
-namespace dwarfparser
-{
+namespace retdec {
+namespace dwarfparser {
 
 // Extern forward declarations.
 class DwarfFile;
@@ -172,5 +172,6 @@ DwarfBaseElement* DwarfBaseContainer<T>::getElemByOffset(Dwarf_Off o)
 }
 
 } // namespace dwarfparser
+} // namespace retdec
 
 #endif

@@ -19,6 +19,7 @@ using retdec::utils::hasItem;
 using retdec::utils::removeItem;
 using retdec::utils::setDifference;
 
+namespace retdec {
 namespace llvmir2hll {
 
 /**
@@ -611,3 +612,4 @@ void Function::includeParamsIntoLocalVars() {
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

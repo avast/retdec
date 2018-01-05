@@ -35,6 +35,7 @@
 
 using namespace ::testing;
 
+namespace retdec {
 namespace llvmir2hll {
 namespace tests {
 
@@ -994,3 +995,4 @@ TrueOrFalseOptimized) {
 
 } // namespace tests
 } // namespace llvmir2hll
+} // namespace retdec

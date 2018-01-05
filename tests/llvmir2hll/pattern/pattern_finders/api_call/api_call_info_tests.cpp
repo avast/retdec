@@ -10,6 +10,7 @@
 
 using namespace ::testing;
 
+namespace retdec {
 namespace llvmir2hll {
 namespace tests {
 
@@ -270,3 +271,4 @@ IteratingOverParamBindsWorksCorrectly) {
 
 } // namespace tests
 } // namespace llvmir2hll
+} // namespace retdec

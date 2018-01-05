@@ -15,6 +15,7 @@
 
 using retdec::utils::hasItem;
 
+namespace retdec {
 namespace llvmir2hll {
 
 namespace {
@@ -106,3 +107,4 @@ FuncVector LibraryFuncsRemover::removeFuncs(ShPtr<Module> module) {
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

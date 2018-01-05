@@ -18,6 +18,7 @@
 
 using retdec::utils::startsWith;
 
+namespace retdec {
 namespace llvmir2hll {
 
 /**
@@ -187,3 +188,4 @@ void FuncsWithPrefixRemover::visit(ShPtr<VarDefStmt> stmt) {
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

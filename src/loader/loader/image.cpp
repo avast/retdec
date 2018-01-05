@@ -14,9 +14,10 @@
 
 using namespace retdec::utils;
 
+namespace retdec {
 namespace loader {
 
-Image::Image(const std::shared_ptr<fileformat::FileFormat>& fileFormat) : _fileFormat(fileFormat), _segments(),
+Image::Image(const std::shared_ptr<retdec::fileformat::FileFormat>& fileFormat) : _fileFormat(fileFormat), _segments(),
 	_baseAddress(0), _namelessSegNameGen("seg", '0', 4), _statusMessage()
 {
 }
@@ -61,36 +62,36 @@ bool Image::hasMixedEndianForDouble() const
 }
 
 /**
- * Returns the fileformat::FileFormat object associated with the loaded image,
+ * Returns the retdec::fileformat::FileFormat object associated with the loaded image,
  * which contains static information about the file.
  *
  * @return File format object.
  */
-fileformat::FileFormat* Image::getFileFormat()
+retdec::fileformat::FileFormat* Image::getFileFormat()
 {
 	return _fileFormat.get();
 }
 
 /**
- * Returns the fileformat::FileFormat object associated with the loaded image,
+ * Returns the retdec::fileformat::FileFormat object associated with the loaded image,
  * which contains static information about the file.
  *
  * @return File format object.
  */
-const fileformat::FileFormat* Image::getFileFormat() const
+const retdec::fileformat::FileFormat* Image::getFileFormat() const
 {
 	return _fileFormat.get();
 }
 
 /**
- * Returns the fileformat::FileFormat object associated with the loaded image as weak pointer,
+ * Returns the retdec::fileformat::FileFormat object associated with the loaded image as weak pointer,
  * which containers static information about the file.
  *
  * @return Weak pointer to file format object.
  */
-std::weak_ptr<fileformat::FileFormat> Image::getFileFormatWptr() const
+std::weak_ptr<retdec::fileformat::FileFormat> Image::getFileFormatWptr() const
 {
-	return std::weak_ptr<fileformat::FileFormat>(_fileFormat);
+	return std::weak_ptr<retdec::fileformat::FileFormat>(_fileFormat);
 }
 
 /**
@@ -481,3 +482,4 @@ const Segment* Image::_getSegmentFromAddress(std::uint64_t address) const
 }
 
 } // namespace loader
+} // namespace retdec

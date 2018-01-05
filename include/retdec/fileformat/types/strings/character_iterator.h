@@ -10,6 +10,7 @@
 #include <cctype>
 #include <iterator>
 
+namespace retdec {
 namespace fileformat {
 
 enum class CharacterEndianness
@@ -290,11 +291,12 @@ CharacterIterator<It> makeCharacterIterator(It itr, It first, It last, std::size
 }
 
 } // namespace fileformat
+} // namespace retdec
 
 namespace std {
 
 template <typename It>
-struct iterator_traits<fileformat::CharacterIterator<It>>
+struct iterator_traits<retdec::fileformat::CharacterIterator<It>>
 {
 	using difference_type = std::ptrdiff_t;
 	using value_type = char;

@@ -13,8 +13,8 @@
 
 using namespace std;
 
-namespace dwarfparser
-{
+namespace retdec {
+namespace dwarfparser {
 
 /**
  * @brief ctor.
@@ -344,3 +344,4 @@ bool DwarfLine::isBasicBlockBeg() const
 }
 
 } // namespace dwarfparser
+} // namespace retdec

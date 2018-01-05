@@ -24,11 +24,12 @@
 #include "retdec/llvm-support/diagnostics.h"
 #include "retdec/utils/container.h"
 
-using namespace llvm_support;
+using namespace retdec::llvm_support;
 
 using retdec::utils::clear;
 using retdec::utils::hasItem;
 
+namespace retdec {
 namespace llvmir2hll {
 
 namespace {
@@ -587,3 +588,4 @@ bool LLVMBranchInfo::isAccessibleImpl(llvm::BasicBlock *bb, llvm::BasicBlock *fr
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

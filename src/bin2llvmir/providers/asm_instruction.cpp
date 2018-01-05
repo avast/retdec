@@ -13,9 +13,10 @@
 #include "retdec/bin2llvmir/providers/config.h"
 #include "retdec/bin2llvmir/utils/type.h"
 
-using namespace llvm_support;
+using namespace retdec::llvm_support;
 using namespace llvm;
 
+namespace retdec {
 namespace bin2llvmir {
 
 std::vector<std::pair<const llvm::Module*, const llvm::GlobalVariable*>> AsmInstruction::_cache;
@@ -774,3 +775,4 @@ std::ostream& operator<<(std::ostream& out, const AsmInstruction& a)
 }
 
 } // namespace bin2llvmir
+} // namespace retdec

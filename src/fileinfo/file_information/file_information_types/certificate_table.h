@@ -17,7 +17,7 @@ namespace fileinfo {
 class CertificateTable
 {
 	private:
-		const fileformat::CertificateTable *table;
+		const retdec::fileformat::CertificateTable *table;
 	public:
 		CertificateTable();
 		~CertificateTable();
@@ -71,7 +71,7 @@ class CertificateTable
 
 		/// @name Setters
 		/// @{
-		void setTable(const fileformat::CertificateTable *certificateTable);
+		void setTable(const retdec::fileformat::CertificateTable *certificateTable);
 		/// @}
 
 		/// @name Other methods

@@ -15,6 +15,7 @@
 #include "retdec/llvmir2hll/support/singleton.h"
 #include "retdec/llvmir2hll/support/smart_ptr.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 class Validator;
@@ -34,5 +35,6 @@ using ValidatorFactory = Singleton<
 >;
 
 } // namespace llvmir2hll
+} // namespace retdec
 
 #endif

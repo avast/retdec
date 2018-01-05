@@ -14,11 +14,12 @@
 #include "retdec/bin2llvmir/optimizations/volatilize/volatilize.h"
 #include "retdec/bin2llvmir/utils/defs.h"
 
-using namespace llvm_support;
+using namespace retdec::llvm_support;
 using namespace llvm;
 
 #define debug_enabled false
 
+namespace retdec {
 namespace bin2llvmir {
 
 char Volatilize::ID = 0;
@@ -145,3 +146,4 @@ bool Volatilize::unvolatilize(Module& M)
 }
 
 } // namespace bin2llvmir
+} // namespace retdec

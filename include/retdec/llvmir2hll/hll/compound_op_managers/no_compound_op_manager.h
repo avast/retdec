@@ -10,6 +10,7 @@
 
 #include "retdec/llvmir2hll/hll/compound_op_manager.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 /**
@@ -27,5 +28,6 @@ public:
 };
 
 } // namespace llvmir2hll
+} // namespace retdec
 
 #endif

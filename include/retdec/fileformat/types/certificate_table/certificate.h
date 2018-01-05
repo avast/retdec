@@ -11,6 +11,7 @@
 
 #include <openssl/x509.h>
 
+namespace retdec {
 namespace fileformat {
 
 /**
@@ -81,5 +82,6 @@ class Certificate
 };
 
 } // namespace fileformat
+} // namespace retdec
 
 #endif

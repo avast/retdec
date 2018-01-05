@@ -9,6 +9,7 @@
 
 #include "retdec/bin2llvmir/optimizations/idioms/idioms_abstract.h"
 
+namespace retdec {
 namespace bin2llvmir {
 
 /**
@@ -29,5 +30,6 @@ protected:
 };
 
 } // namespace bin2llvmir
+} // namespace retdec
 
 #endif

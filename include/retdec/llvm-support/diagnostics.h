@@ -12,6 +12,7 @@
 
 #include <llvm/Support/raw_ostream.h>
 
+namespace retdec {
 namespace llvm_support {
 
 /// @name Internal (For Internal Use Only)
@@ -114,5 +115,6 @@ void printInfoMessage(const std::string &message, Args &&... args) {
 /// @}
 
 } // namespace llvm_support
+} // namespace retdec
 
 #endif

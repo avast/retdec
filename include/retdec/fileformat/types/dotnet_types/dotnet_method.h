@@ -13,6 +13,7 @@
 #include "retdec/fileformat/types/dotnet_types/dotnet_parameter.h"
 #include "retdec/fileformat/types/dotnet_types/dotnet_type.h"
 
+namespace retdec {
 namespace fileformat {
 
 /**
@@ -70,5 +71,6 @@ class DotnetMethod : public DotnetType
 };
 
 } // namespace fileformat
+} // namespace retdec
 
 #endif

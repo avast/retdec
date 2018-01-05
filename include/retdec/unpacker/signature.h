@@ -151,9 +151,9 @@ public:
 	uint64_t getSize() const;
 	uint64_t getCaptureSize() const;
 
-	bool match(const MatchSettings& settings, loader::Image* file) const;
+	bool match(const MatchSettings& settings, retdec::loader::Image* file) const;
 	bool match(const MatchSettings& settings, const DynamicBuffer& data) const;
-	bool match(const MatchSettings& settings, loader::Image* file, DynamicBuffer& captures) const;
+	bool match(const MatchSettings& settings, retdec::loader::Image* file, DynamicBuffer& captures) const;
 	bool match(const MatchSettings& settings, const DynamicBuffer& data, DynamicBuffer& captures) const;
 
 	Signature& operator =(const std::initializer_list<Signature::Byte>& initList);

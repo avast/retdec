@@ -9,6 +9,7 @@
 
 #include "retdec/fileformat/types/resource_table/resource_tree.h"
 
+namespace retdec {
 namespace fileformat {
 
 /**
@@ -175,3 +176,4 @@ void ResourceTree::dump(std::string &dumpTree) const
 }
 
 } // namespace fileformat
+} // namespace retdec

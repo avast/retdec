@@ -13,6 +13,7 @@
 #include "retdec/llvmir2hll/var_renamer/var_renamer_factory.h"
 #include "retdec/llvmir2hll/var_renamer/var_renamers/hungarian_var_renamer.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 REGISTER_AT_FACTORY("hungarian", HUNGARIAN_VAR_RENAMER_ID, VarRenamerFactory,
@@ -126,3 +127,4 @@ void HungarianVarRenamer::renameFuncLocalVar(ShPtr<Variable> var,
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

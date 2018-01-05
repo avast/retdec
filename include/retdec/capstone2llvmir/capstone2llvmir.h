@@ -21,6 +21,7 @@
 #include "retdec/utils/address.h"
 #include "retdec/capstone2llvmir/exceptions.h"
 
+namespace retdec {
 namespace capstone2llvmir {
 
 /**
@@ -416,5 +417,6 @@ class Capstone2LlvmIrTranslator
 };
 
 } // namespace capstone2llvmir
+} // namespace retdec
 
 #endif

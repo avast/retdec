@@ -34,6 +34,7 @@
 
 using retdec::utils::hasItem;
 
+namespace retdec {
 namespace llvmir2hll {
 
 namespace {
@@ -707,3 +708,4 @@ bool CopyPropagationOptimizer::shouldBeIncludedInDefUseChains(
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

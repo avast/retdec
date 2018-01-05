@@ -6,6 +6,7 @@
 
 #include "retdec/loader/utils/overlap_resolver.h"
 
+namespace retdec {
 namespace loader {
 
 /**
@@ -96,3 +97,4 @@ OverlapResolver::Result OverlapResolver::resolve(const retdec::utils::Range<std:
 }
 
 } // namespace loader
+} // namespace retdec

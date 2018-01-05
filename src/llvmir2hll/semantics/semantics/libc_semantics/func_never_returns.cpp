@@ -11,6 +11,7 @@
 
 using retdec::utils::hasItem;
 
+namespace retdec {
 namespace llvmir2hll {
 namespace semantics {
 namespace libc {
@@ -61,3 +62,4 @@ Maybe<bool> funcNeverReturns(const std::string &funcName) {
 } // namespace libc
 } // namespace semantics
 } // namespace llvmir2hll
+} // namespace retdec

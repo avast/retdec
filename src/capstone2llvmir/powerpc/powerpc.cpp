@@ -9,6 +9,7 @@
 
 #include "retdec/capstone2llvmir/powerpc/powerpc.h"
 
+namespace retdec {
 namespace capstone2llvmir {
 
 Capstone2LlvmIrTranslatorPowerpc::Capstone2LlvmIrTranslatorPowerpc(
@@ -2863,3 +2864,4 @@ void Capstone2LlvmIrTranslatorPowerpc::translateB(cs_insn* i, cs_ppc* pi, llvm::
 }
 
 } // namespace capstone2llvmir
+} // namespace retdec

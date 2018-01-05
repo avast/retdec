@@ -21,6 +21,7 @@
 
 using namespace ::testing;
 
+namespace retdec {
 namespace llvmir2hll {
 namespace tests {
 
@@ -397,3 +398,4 @@ DoNotOptimizeWhenAuxiliaryVariableIsExternal) {
 
 } // namespace tests
 } // namespace llvmir2hll
+} // namespace retdec

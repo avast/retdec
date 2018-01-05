@@ -9,6 +9,7 @@
 
 #include "retdec/bin2llvmir/optimizations/idioms/idioms_abstract.h"
 
+namespace retdec {
 namespace bin2llvmir {
 
 /**
@@ -20,5 +21,6 @@ class IdiomsOWatcom: virtual public IdiomsAbstract {
 };
 
 } // namespace bin2llvmir
+} // namespace retdec
 
 #endif

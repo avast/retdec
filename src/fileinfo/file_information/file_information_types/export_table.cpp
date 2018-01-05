@@ -74,7 +74,7 @@ std::string ExportTable::getExportOrdinalNumberStr(std::size_t position, std::io
  * Set export table data
  * @param exportTable Instance of class with original information about export table
  */
-void ExportTable::setTable(const fileformat::ExportTable *exportTable)
+void ExportTable::setTable(const retdec::fileformat::ExportTable *exportTable)
 {
 	table = exportTable;
 }

@@ -15,6 +15,7 @@
 #include "retdec/utils/value.h"
 #include "retdec/bin2llvmir/utils/defs.h"
 
+namespace retdec {
 namespace bin2llvmir {
 
 class Abi
@@ -134,5 +135,6 @@ class AbiProvider
 };
 
 } // namespace bin2llvmir
+} // namespace retdec
 
 #endif

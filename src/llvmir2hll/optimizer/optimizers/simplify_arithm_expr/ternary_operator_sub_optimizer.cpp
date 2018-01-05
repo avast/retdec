@@ -10,6 +10,7 @@
 #include "retdec/llvmir2hll/optimizer/optimizers/simplify_arithm_expr/ternary_operator_sub_optimizer.h"
 #include "retdec/llvmir2hll/support/debug.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 REGISTER_AT_FACTORY("TernaryOperator", TERNARY_OPERATOR_SUB_OPTIMIZER_ID,
@@ -64,3 +65,4 @@ void TernaryOperatorSubOptimizer::visit(ShPtr<TernaryOpExpr> expr) {
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

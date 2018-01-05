@@ -11,6 +11,7 @@
 #include "retdec/ctypes/module.h"
 #include "retdec/utils/container.h"
 
+namespace retdec {
 namespace ctypes {
 
 /**
@@ -63,3 +64,4 @@ std::shared_ptr<Context> Module::getContext() const
 }
 
 } // namespace ctypes
+} // namespace retdec

@@ -9,6 +9,7 @@
 #include "retdec/llvmir2hll/var_renamer/var_renamer_factory.h"
 #include "retdec/llvmir2hll/var_renamer/var_renamers/unified_var_renamer.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 REGISTER_AT_FACTORY("unified", UNIFIED_VAR_RENAMER_ID, VarRenamerFactory,
@@ -75,3 +76,4 @@ void UnifiedVarRenamer::renameFuncLocalVar(ShPtr<Variable> var,
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

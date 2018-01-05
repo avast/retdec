@@ -17,6 +17,7 @@
 using namespace retdec::utils;
 using namespace llvm;
 
+namespace retdec {
 namespace fileformat {
 
 /**
@@ -418,9 +419,9 @@ void Resource::load(const FileFormat *rOwner)
 
 	if (!(rOwner->getLoadFlags() & LoadFlags::NO_VERBOSE_HASHES))
 	{
-		crc32 = crypto::getCrc32(origBytes, bytes.size());
-		md5 = crypto::getMd5(origBytes, bytes.size());
-		sha256 = crypto::getSha256(origBytes, bytes.size());
+		crc32 = retdec::crypto::getCrc32(origBytes, bytes.size());
+		md5 = retdec::crypto::getMd5(origBytes, bytes.size());
+		sha256 = retdec::crypto::getSha256(origBytes, bytes.size());
 	}
 }
 
@@ -476,3 +477,4 @@ bool Resource::hasEmptyLanguage() const
 }
 
 } // namespace fileformat
+} // namespace retdec

@@ -15,6 +15,7 @@
 #include "retdec/bin2llvmir/providers/config.h"
 #include "retdec/bin2llvmir/providers/fileimage.h"
 
+namespace retdec {
 namespace bin2llvmir {
 
 class CfgFunctionDetection : public llvm::ModulePass
@@ -38,5 +39,6 @@ class CfgFunctionDetection : public llvm::ModulePass
 };
 
 } // namespace bin2llvmir
+} // namespace retdec
 
 #endif

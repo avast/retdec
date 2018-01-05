@@ -10,6 +10,7 @@
 
 using namespace ::testing;
 
+namespace retdec {
 namespace loader {
 namespace tests {
 
@@ -45,4 +46,5 @@ GetNextNameWorks) {
 }
 
 } // namespace loader
+} // namespace retdec
 } // namespace tests

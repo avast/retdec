@@ -16,8 +16,9 @@
 #include "retdec/fileformat/utils/conversions.h"
 
 using namespace retdec::utils;
-using namespace fileformat;
+using namespace retdec::fileformat;
 
+namespace retdec {
 namespace cpdetect {
 
 namespace
@@ -140,7 +141,7 @@ bool getDwarfLanguageString(Dwarf_Unsigned langCode, std::string &result)
  * @param symbol Input symbol
  * @return @c true if symbol is Go symbol, @c false otherwise
  */
-bool isGoFunction(const std::shared_ptr<fileformat::Symbol> &symbol)
+bool isGoFunction(const std::shared_ptr<retdec::fileformat::Symbol> &symbol)
 {
 	if(!symbol->isFunction())
 	{
@@ -157,7 +158,7 @@ bool isGoFunction(const std::shared_ptr<fileformat::Symbol> &symbol)
  * @param symbol Input symbol
  * @return @c true if symbol is rust symbol, @c false otherwise
  */
-bool isFunctionFromRust(const std::shared_ptr<fileformat::Symbol> &symbol)
+bool isFunctionFromRust(const std::shared_ptr<retdec::fileformat::Symbol> &symbol)
 {
 	if(!symbol->isFunction())
 	{
@@ -174,7 +175,7 @@ bool isFunctionFromRust(const std::shared_ptr<fileformat::Symbol> &symbol)
  * @param symbol Input symbol
  * @return @c true if symbol is GHC symbol, @c false otherwise
  */
-bool isSymbolFromGHC(const std::shared_ptr<fileformat::Symbol> &symbol)
+bool isSymbolFromGHC(const std::shared_ptr<retdec::fileformat::Symbol> &symbol)
 {
 	const auto offset = symbol->getName().find("base_GHC");
 	return offset == 0 || offset == 1;
@@ -226,7 +227,7 @@ std::string commentSectionNameByFormat(Format format)
  * @param searcher Signature parser
  * @param toolInfo Structure for save information about detected compilers or packers
  */
-Heuristics::Heuristics(fileformat::FileFormat &parser, Search &searcher, ToolInformation &toolInfo) :
+Heuristics::Heuristics(retdec::fileformat::FileFormat &parser, Search &searcher, ToolInformation &toolInfo) :
 	fileParser(parser), search(searcher), toolInfo(toolInfo), priorityLanguageIsSet(false),
 	canSearch(search.isFileLoaded() && search.isFileSupported())
 {
@@ -1251,3 +1252,4 @@ void Heuristics::getAllHeuristics()
 }
 
 } // namespace cpdetect
+} // namespace retdec

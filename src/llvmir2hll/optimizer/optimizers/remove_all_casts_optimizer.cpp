@@ -17,6 +17,7 @@
 #include "retdec/llvmir2hll/support/debug.h"
 #include "retdec/llvmir2hll/utils/ir.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 /**
@@ -81,3 +82,4 @@ void RemoveAllCastsOptimizer::removeCast(ShPtr<CastExpr> castExpr) {
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

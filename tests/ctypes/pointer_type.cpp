@@ -14,6 +14,7 @@
 
 using namespace ::testing;
 
+namespace retdec {
 namespace ctypes {
 namespace tests {
 
@@ -98,3 +99,4 @@ DefaultBitWidthIsZero)
 
 } // namespace tests
 } // namespace ctypes
+} // namespace retdec

@@ -14,6 +14,7 @@
 #include "retdec/capstone2llvmir/powerpc/powerpc.h"
 #include "retdec/capstone2llvmir/x86/x86.h"
 
+namespace retdec {
 namespace capstone2llvmir {
 
 Capstone2LlvmIrTranslator::Capstone2LlvmIrTranslator(
@@ -1246,3 +1247,4 @@ llvm::Type* Capstone2LlvmIrTranslator::getFloatTypeFromByteSize(unsigned sz)
 }
 
 } // namespace capstone2llvmir
+} // namespace retdec

@@ -17,12 +17,13 @@
 #include "retdec/llvm-support/diagnostics.h"
 #include "retdec/utils/container.h"
 
-using namespace llvm_support;
+using namespace retdec::llvm_support;
 
 using retdec::utils::hasItem;
 using retdec::utils::setDifference;
 using retdec::utils::setUnion;
 
+namespace retdec {
 namespace llvmir2hll {
 
 /**
@@ -441,3 +442,4 @@ void CallInfoObtainer::SCCComputer::visit(ShPtr<CG::CalledFuncs> calledFunc,
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

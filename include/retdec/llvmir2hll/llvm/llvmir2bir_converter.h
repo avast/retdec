@@ -19,6 +19,7 @@ class Pass;
 
 } // namespace llvm
 
+namespace retdec {
 namespace llvmir2hll {
 
 class Config;
@@ -80,5 +81,6 @@ protected:
 };
 
 } // namespace llvmir2hll
+} // namespace retdec
 
 #endif

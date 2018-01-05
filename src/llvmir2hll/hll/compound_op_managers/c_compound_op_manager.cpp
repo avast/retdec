@@ -7,6 +7,7 @@
 #include "retdec/llvmir2hll/hll/compound_op_managers/c_compound_op_manager.h"
 #include "retdec/llvmir2hll/ir/const_int.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 namespace {
@@ -95,3 +96,4 @@ void CCompoundOpManager::optimizeToCompoundOp(ShPtr<BitXorOpExpr> expr,
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

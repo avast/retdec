@@ -9,6 +9,7 @@
 #include "retdec/llvmir2hll/ir/module.h"
 #include "retdec/llvmir2hll/support/debug.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 REGISTER_AT_FACTORY("basic", BASIC_ALIAS_ANALYSIS_ID, AliasAnalysisFactory,
@@ -44,3 +45,4 @@ void BasicAliasAnalysis::init(ShPtr<Module> module) {
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

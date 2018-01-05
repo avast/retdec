@@ -15,6 +15,7 @@
 #include "retdec/llvmir2hll/var_name_gen/var_name_gen.h"
 #include "retdec/llvmir2hll/var_renamer/var_renamer.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 /**
@@ -32,5 +33,6 @@ using VarRenamerFactory = Singleton<
 >;
 
 } // namespace llvmir2hll
+} // namespace retdec
 
 #endif

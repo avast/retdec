@@ -7,6 +7,7 @@
 #ifndef RETDEC_FILEFORMAT_TYPES_RICH_HEADER_LINKER_INFO_H
 #define RETDEC_FILEFORMAT_TYPES_RICH_HEADER_LINKER_INFO_H
 
+namespace retdec {
 namespace fileformat {
 
 /**
@@ -41,5 +42,6 @@ class LinkerInfo
 };
 
 } // namespace fileformat
+} // namespace retdec
 
 #endif

@@ -9,6 +9,7 @@
 
 #include <memory>
 
+namespace retdec {
 namespace ctypes {
 
 class ArrayType;
@@ -48,5 +49,6 @@ class Visitor
 };
 
 } // namespace ctypes
+} // namespace retdec
 
 #endif

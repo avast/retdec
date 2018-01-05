@@ -11,6 +11,7 @@
 #include "retdec/fileformat/file_format/file_format.h"
 #include "retdec/fileformat/file_format/intel_hex/intel_hex_parser/intel_hex_parser.h"
 
+namespace retdec {
 namespace fileformat {
 
 /**
@@ -81,5 +82,6 @@ class IntelHexFormat : public FileFormat
 };
 
 } // namespace fileformat
+} // namespace retdec
 
 #endif

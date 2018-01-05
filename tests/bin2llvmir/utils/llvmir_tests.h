@@ -30,13 +30,14 @@
 #include "retdec/fileformat/file_format/raw_data/raw_data_format.h"
 #include "retdec/loader/loader.h"
 
+namespace retdec {
 namespace bin2llvmir {
 namespace tests {
 
 /**
  * Base class for all unit test classes which need to parse LLVM IR strings.
  */
-class LlvmIrTests : public llvm_support::tests::LlvmIrTests
+class LlvmIrTests : public retdec::llvm_support::tests::LlvmIrTests
 {
 	protected:
 		/**
@@ -59,7 +60,7 @@ class LlvmIrTests : public llvm_support::tests::LlvmIrTests
 		 */
 		virtual void SetUp() override
 		{
-			llvm_support::tests::LlvmIrTests::SetUp();
+			retdec::llvm_support::tests::LlvmIrTests::SetUp();
 			clearAllStaticData();
 		}
 
@@ -68,14 +69,14 @@ class LlvmIrTests : public llvm_support::tests::LlvmIrTests
 		 */
 		virtual void TearDown() override
 		{
-			llvm_support::tests::LlvmIrTests::TearDown();
+			retdec::llvm_support::tests::LlvmIrTests::TearDown();
 			clearAllStaticData();
 		}
 
-		std::shared_ptr<fileformat::RawDataFormat> createFormat()
+		std::shared_ptr<retdec::fileformat::RawDataFormat> createFormat()
 		{
 			std::stringstream emptyDummySs;
-			auto f = std::make_shared<fileformat::RawDataFormat>(
+			auto f = std::make_shared<retdec::fileformat::RawDataFormat>(
 					emptyDummySs);
 			if (f == nullptr)
 			{
@@ -85,11 +86,11 @@ class LlvmIrTests : public llvm_support::tests::LlvmIrTests
 			return f;
 		}
 
-		std::unique_ptr<loader::Image> loadFormat(
-				std::unique_ptr<fileformat::RawDataFormat> format)
+		std::unique_ptr<retdec::loader::Image> loadFormat(
+				std::unique_ptr<retdec::fileformat::RawDataFormat> format)
 		{
-			std::shared_ptr<fileformat::RawDataFormat> formatShared(std::move(format));
-			auto image = loader::createImage(formatShared);
+			std::shared_ptr<retdec::fileformat::RawDataFormat> formatShared(std::move(format));
+			auto image = retdec::loader::createImage(formatShared);
 			if (image == nullptr)
 			{
 					throw std::runtime_error("failed to load RawDataImage");
@@ -101,5 +102,6 @@ class LlvmIrTests : public llvm_support::tests::LlvmIrTests
 
 } // namespace tests
 } // namespace bin2llvmir
+} // namespace retdec
 
 #endif

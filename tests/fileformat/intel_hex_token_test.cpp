@@ -12,6 +12,7 @@
 
 using namespace ::testing;
 
+namespace retdec {
 namespace fileformat {
 namespace tests {
 
@@ -104,3 +105,4 @@ TEST_F(IntelHexTokenTests, InvalidChecksum)
 
 } // namespace tests
 } // namespace fileformat
+} // namespace retdec

@@ -7,6 +7,7 @@
 #ifndef RETDEC_CAPSTONE2LLVMIR_X86_X86_DEFS_H
 #define RETDEC_CAPSTONE2LLVMIR_X86_X86_DEFS_H
 
+namespace retdec {
 namespace capstone2llvmir {
 
 /**
@@ -128,5 +129,6 @@ enum x87_reg_tag
 };
 
 } // namespace capstone2llvmir
+} // namespace retdec
 
 #endif

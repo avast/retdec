@@ -11,6 +11,7 @@
 
 using namespace retdec::utils;
 
+namespace retdec {
 namespace fileformat {
 
 /**
@@ -149,3 +150,4 @@ void ElfSection::setArchByteSize(unsigned long long sArchByteSize)
 }
 
 } // namespace fileformat
+} // namespace retdec

@@ -11,6 +11,7 @@
 
 using namespace ::testing;
 
+namespace retdec {
 namespace llvmir2hll {
 namespace tests {
 
@@ -37,3 +38,4 @@ GetMessageReturnsMessagePassedToConstructor) {
 
 } // namespace tests
 } // namespace llvmir2hll
+} // namespace retdec

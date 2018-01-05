@@ -18,6 +18,7 @@ const char *PASS_NAME = "Global to local optimization";
 
 } // anonymous namespace
 
+namespace retdec {
 namespace bin2llvmir {
 
 // It is the address of the variable that matters, not the value, so we can
@@ -54,3 +55,4 @@ const char *GlobalToLocal::getPassName() const {
 }
 
 } // namespace bin2llvmir
+} // namespace retdec

@@ -13,6 +13,7 @@
 
 #include <llvm/ADT/StringRef.h>
 
+namespace retdec {
 namespace loader {
 
 class SegmentDataSource
@@ -39,5 +40,6 @@ private:
 };
 
 } // namespace loader
+} // namespace retdec
 
 #endif

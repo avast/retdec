@@ -9,6 +9,7 @@
 
 #include "retdec/demangler/igrams.h"
 
+namespace retdec {
 namespace demangler {
 
 extern cGram::igram_t internalGrammarStruct;
@@ -16,5 +17,6 @@ extern cIgram_msll* igram_msll;
 extern cIgram_gccll* igram_gccll;
 
 } // namespace demangler
+} // namespace retdec
 
 #endif

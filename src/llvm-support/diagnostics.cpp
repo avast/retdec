@@ -14,6 +14,7 @@
 
 using retdec::utils::getElapsedTime;
 
+namespace retdec {
 namespace llvm_support {
 
 namespace {
@@ -84,3 +85,4 @@ void printSubSubSubPhase(const std::string &phaseName, llvm::raw_ostream &stream
 }
 
 } // namespace llvm_support
+} // namespace retdec

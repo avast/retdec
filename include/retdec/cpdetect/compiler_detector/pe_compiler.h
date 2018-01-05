@@ -10,6 +10,7 @@
 #include "retdec/cpdetect/compiler_detector/compiler_detector.h"
 #include "retdec/fileformat/file_format/pe/pe_format.h"
 
+namespace retdec {
 namespace cpdetect {
 
 /**
@@ -18,9 +19,10 @@ namespace cpdetect {
 class PeCompiler : public CompilerDetector
 {
 	public:
-		PeCompiler(fileformat::PeFormat &parser, DetectParams &params, ToolInformation &tools);
+		PeCompiler(retdec::fileformat::PeFormat &parser, DetectParams &params, ToolInformation &tools);
 };
 
 } // namespace cpdetect
+} // namespace retdec
 
 #endif

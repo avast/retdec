@@ -13,6 +13,7 @@
 
 #include "retdec/loader/loader/image.h"
 
+namespace retdec {
 namespace loader {
 
 class ElfImage : public Image
@@ -26,22 +27,22 @@ class ElfImage : public Image
 	 */
 	struct SectionMapInfo
 	{
-		SectionMapInfo(const fileformat::Section* section_, std::uint64_t offset_, std::uint64_t size_) :
+		SectionMapInfo(const retdec::fileformat::Section* section_, std::uint64_t offset_, std::uint64_t size_) :
 			section(section_), offset(offset_), size(size_) {}
 
 		SectionMapInfo(const SectionMapInfo& mapInfo) :
 			section(mapInfo.section), offset(mapInfo.offset), size(mapInfo.size) {}
 
-		const fileformat::Section* section;
+		const retdec::fileformat::Section* section;
 		std::uint64_t offset;
 		std::uint64_t size;
 	};
 
-	using SectionList = std::vector<const fileformat::ElfSection*>;
-	using SegmentToSectionsTable = std::unordered_map<const fileformat::ElfSegment*, SectionList>;
+	using SectionList = std::vector<const retdec::fileformat::ElfSection*>;
+	using SegmentToSectionsTable = std::unordered_map<const retdec::fileformat::ElfSegment*, SectionList>;
 
 public:
-	ElfImage(const std::shared_ptr<fileformat::FileFormat>& fileFormat);
+	ElfImage(const std::shared_ptr<retdec::fileformat::FileFormat>& fileFormat);
 	virtual ~ElfImage();
 
 	virtual bool load() override;
@@ -49,15 +50,16 @@ public:
 protected:
 	bool loadExecutableFile();
 	bool loadRelocatableFile();
-	bool canLoadSections(const std::vector<fileformat::Section*>& sections) const;
+	bool canLoadSections(const std::vector<retdec::fileformat::Section*>& sections) const;
 	void fixBssSegments();
 	void applyRelocations();
-	void resolveRelocation(const fileformat::Relocation& rel, const fileformat::Symbol& sym);
+	void resolveRelocation(const retdec::fileformat::Relocation& rel, const retdec::fileformat::Symbol& sym);
 
 	SegmentToSectionsTable createSegmentToSectionsTable();
-	const Segment* addSegment(const fileformat::SecSeg* secSeg, std::uint64_t address, std::uint64_t memSize);
+	const Segment* addSegment(const retdec::fileformat::SecSeg* secSeg, std::uint64_t address, std::uint64_t memSize);
 };
 
 } // namespace loader
+} // namespace retdec
 
 #endif

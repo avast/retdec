@@ -12,8 +12,9 @@
 #include "retdec/fileformat/utils/other.h"
 
 using namespace retdec::utils;
-using namespace fileformat;
+using namespace retdec::fileformat;
 
+namespace retdec {
 namespace cpdetect {
 
 namespace
@@ -75,3 +76,4 @@ bool isFatalError(ReturnCode errorCode)
 }
 
 } // namespace cpdetect
+} // namespace retdec

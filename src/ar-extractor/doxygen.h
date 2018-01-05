@@ -1,6 +1,6 @@
 /**
  * @file src/ar-extractor/doxygen.h
- * @brief Doxygen documentation of the ar_extractor namespace.
+ * @brief Doxygen documentation of the retdec::ar_extractor namespace.
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */
 
@@ -8,4 +8,4 @@
 // present file.
 
 /// @file src/ar_extractor/doxygen.h
-/// @namespace ar_extractor Library for ar archive functions.
+/// @namespace retdec::ar_extractor Library for ar archive functions.

@@ -12,6 +12,7 @@
 
 using namespace retdec::utils;
 
+namespace retdec {
 namespace fileformat {
 
 /**
@@ -219,9 +220,9 @@ void ImportTable::computeHashes()
 	if (impHashBytes.empty())
 		return;
 
-	impHashCrc32 = crypto::getCrc32(impHashBytes.data(), impHashBytes.size());
-	impHashMd5 = crypto::getMd5(impHashBytes.data(), impHashBytes.size());
-	impHashSha256 = crypto::getSha256(impHashBytes.data(), impHashBytes.size());
+	impHashCrc32 = retdec::crypto::getCrc32(impHashBytes.data(), impHashBytes.size());
+	impHashMd5 = retdec::crypto::getMd5(impHashBytes.data(), impHashBytes.size());
+	impHashSha256 = retdec::crypto::getSha256(impHashBytes.data(), impHashBytes.size());
 }
 
 /**
@@ -453,3 +454,4 @@ void ImportTable::dumpLibrary(std::size_t libraryIndex, std::string &libraryDump
 }
 
 } // namespace fileformat
+} // namespace retdec

@@ -10,6 +10,7 @@
 #include "retdec/ctypes/pointer_type.h"
 #include "retdec/ctypes/visitor.h"
 
+namespace retdec {
 namespace ctypes {
 
 /**
@@ -71,3 +72,4 @@ void PointerType::accept(Visitor *v) {
 }
 
 } // namespace ctypes
+} // namespace retdec

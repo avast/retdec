@@ -50,6 +50,7 @@ using retdec::utils::startsWith;
 using retdec::utils::toHex;
 using retdec::utils::toString;
 
+namespace retdec {
 namespace llvmir2hll {
 
 namespace {
@@ -1508,3 +1509,4 @@ StringVector HLLWriter::getReadableClassNames(const StringVector &classes) const
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

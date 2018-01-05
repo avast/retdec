@@ -25,6 +25,7 @@ void dummyFunction(llvm::CallInst* inst)
 #define ID_FNC_PAIR(ID, FNC) \
 		{ID, [] (llvm::CallInst* c) { return FNC(c); }}
 
+namespace retdec {
 namespace bin2llvmir {
 namespace tests {
 
@@ -67,3 +68,4 @@ TEST_F(IdiomsLibgccTests, checkFunctionToActionMapNotMisorderedElementPassTheTes
 
 } // namespace tests
 } // namespace bin2llvmir
+} // namespace retdec

@@ -22,6 +22,7 @@ using retdec::utils::hasItem;
 using retdec::utils::mapHasKey;
 using retdec::utils::setIntersection;
 
+namespace retdec {
 namespace llvmir2hll {
 
 /**
@@ -347,3 +348,4 @@ bool UnneededGlobalVarsCFGTraversal::combineRetVals(bool /*origRetVal*/,
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

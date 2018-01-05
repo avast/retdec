@@ -15,6 +15,7 @@
 #include "retdec/bin2llvmir/optimizations/vtable/rtti_gcc.h"
 #include "retdec/bin2llvmir/optimizations/vtable/rtti_msvc.h"
 
+namespace retdec {
 namespace bin2llvmir {
 
 class RttiAnalysis
@@ -23,13 +24,13 @@ class RttiAnalysis
 		~RttiAnalysis();
 
 		ClassTypeInfo* parseGccRtti(
-				loader::Image* objfile,
+				retdec::loader::Image* objfile,
 				DataReferences* RA,
 				retdec::utils::Address rttiAddr);
 		void processGccRttis();
 
 		RTTICompleteObjectLocator* parseMsvcObjectLocator(
-				loader::Image* objfile,
+				retdec::loader::Image* objfile,
 				retdec::utils::Address rttiAddr);
 		void processMsvcRttis();
 
@@ -49,9 +50,10 @@ class RttiAnalysis
 		std::map<retdec::utils::Address, RTTIClassHierarchyDescriptor> msvcClassDescriptors;
 
 	private:
-		loader::Image *objf = nullptr;
+		retdec::loader::Image *objf = nullptr;
 };
 
 } // namespace bin2llvmir
+} // namespace retdec
 
 #endif

@@ -19,6 +19,7 @@
 #include "retdec/utils/address.h"
 #include "retdec/bin2llvmir/providers/config.h"
 
+namespace retdec {
 namespace bin2llvmir {
 
 class Definition;
@@ -89,5 +90,6 @@ llvm::Function* splitFunctionOn(
 void insertAtBegin(llvm::Instruction* li, llvm::BasicBlock* bb);
 
 } // namespace bin2llvmir
+} // namespace retdec
 
 #endif

@@ -8,6 +8,7 @@
 
 #include "retdec/demangler/stgrammars/gccll.h"
 
+namespace retdec {
 namespace demangler {
 
 /**
@@ -5164,3 +5165,4 @@ cGram::igram_t cIgram_gccll::getInternalGrammar() {
 }
 
 } // namespace demangler
+} // namespace retdec

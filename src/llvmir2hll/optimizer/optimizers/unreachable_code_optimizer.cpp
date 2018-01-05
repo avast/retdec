@@ -18,6 +18,7 @@
 #include "retdec/llvmir2hll/support/maybe.h"
 #include "retdec/llvmir2hll/support/unreachable_code_in_cfg_remover.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 /**
@@ -164,3 +165,4 @@ void UnreachableCodeOptimizer::visit(ShPtr<CallStmt> stmt) {
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

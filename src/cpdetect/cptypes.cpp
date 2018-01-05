@@ -6,6 +6,7 @@
 
 #include "retdec/cpdetect/cptypes.h"
 
+namespace retdec {
 namespace cpdetect {
 
 /**
@@ -464,3 +465,4 @@ std::string packedToString(Packed packed)
 }
 
 } // namespace cpdetect
+} // namespace retdec

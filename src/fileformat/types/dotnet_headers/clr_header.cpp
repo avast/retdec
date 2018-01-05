@@ -6,6 +6,7 @@
 
 #include "retdec/fileformat/types/dotnet_headers/clr_header.h"
 
+namespace retdec {
 namespace fileformat {
 
 /**
@@ -351,3 +352,4 @@ void CLRHeader::setPrecompileHeaderSize(std::uint64_t clrPrecompileHeaderSize)
 }
 
 } // namespace fileformat
+} // namespace retdec

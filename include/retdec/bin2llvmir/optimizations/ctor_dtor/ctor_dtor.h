@@ -17,6 +17,7 @@
 #include "retdec/bin2llvmir/optimizations/vtable/vtable.h"
 #include "retdec/bin2llvmir/providers/config.h"
 
+namespace retdec {
 namespace bin2llvmir {
 
 class CtorDtor : public llvm::ModulePass
@@ -118,5 +119,6 @@ CtorDtor::FunctionInfo CtorDtor::analyseFunctionCommon(T begin, T end)
 }
 
 } // namespace bin2llvmir
+} // namespace retdec
 
 #endif

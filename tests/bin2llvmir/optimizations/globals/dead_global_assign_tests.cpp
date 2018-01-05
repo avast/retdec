@@ -10,6 +10,7 @@
 using namespace ::testing;
 using namespace llvm;
 
+namespace retdec {
 namespace bin2llvmir {
 namespace tests {
 
@@ -3951,3 +3952,4 @@ TEST_F(DeadGlobalAssignTests, doNotRemoveUsedStore)
 
 } // namespace tests
 } // namespace bin2llvmir
+} // namespace retdec

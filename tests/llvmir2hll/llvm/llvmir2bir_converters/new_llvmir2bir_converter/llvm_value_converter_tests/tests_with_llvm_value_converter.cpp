@@ -16,6 +16,7 @@
 using namespace ::testing;
 using namespace std::string_literals;
 
+namespace retdec {
 namespace llvmir2hll {
 namespace tests {
 
@@ -80,3 +81,4 @@ AssertionResult TestsWithLLVMValueConverter::areTernaryOperandsInCorrectOrder(
 
 } // namespace tests
 } // namespace llvmir2hll
+} // namespace retdec

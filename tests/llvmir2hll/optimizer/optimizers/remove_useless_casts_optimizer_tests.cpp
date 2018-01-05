@@ -20,6 +20,7 @@
 
 using namespace ::testing;
 
+namespace retdec {
 namespace llvmir2hll {
 namespace tests {
 
@@ -188,3 +189,4 @@ Case1DotNotOptimizeIfRhsVarTypeMismatch) {
 
 } // namespace tests
 } // namespace llvmir2hll
+} // namespace retdec

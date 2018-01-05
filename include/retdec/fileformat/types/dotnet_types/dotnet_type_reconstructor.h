@@ -12,6 +12,7 @@
 #include "retdec/fileformat/types/dotnet_headers/string_stream.h"
 #include "retdec/fileformat/types/dotnet_types/dotnet_class.h"
 
+namespace retdec {
 namespace fileformat {
 
 class DotnetTypeReconstructor
@@ -70,5 +71,6 @@ class DotnetTypeReconstructor
 };
 
 } // namespace fileformat
+} // namespace retdec
 
 #endif

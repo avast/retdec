@@ -22,6 +22,7 @@
 
 using namespace ::testing;
 
+namespace retdec {
 namespace ctypes {
 namespace tests {
 
@@ -155,3 +156,4 @@ VisitVoidType)
 
 } // namespace tests
 } // namespace ctypes
+} // namespace retdec

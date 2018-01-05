@@ -11,8 +11,8 @@
 #include "fileinfo/file_detector/pe_detector.h"
 #include "fileinfo/file_detector/raw_data_detector.h"
 
-using namespace cpdetect;
-using namespace fileformat;
+using namespace retdec::cpdetect;
+using namespace retdec::fileformat;
 
 namespace fileinfo {
 
@@ -28,7 +28,7 @@ namespace fileinfo {
  * Pointer to detector is dynamically allocated and must be released (otherwise there is a memory leak).
  * If format of input file is not supported, function will return @c nullptr.
  */
-FileDetector* createFileDetector(std::string pathToInputFile, fileformat::Format fileFormat, FileInformation &finfo, cpdetect::DetectParams &searchPar, fileformat::LoadFlags loadFlags)
+FileDetector* createFileDetector(std::string pathToInputFile, retdec::fileformat::Format fileFormat, FileInformation &finfo, retdec::cpdetect::DetectParams &searchPar, retdec::fileformat::LoadFlags loadFlags)
 {
 	switch(fileFormat)
 	{

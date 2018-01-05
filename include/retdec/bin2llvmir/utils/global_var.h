@@ -18,6 +18,7 @@
 #include "retdec/debugformat/debugformat.h"
 #include "retdec/loader/loader.h"
 
+namespace retdec {
 namespace bin2llvmir {
 
 bool getGlobalInfoFromCryptoPatterns(
@@ -38,5 +39,6 @@ llvm::GlobalVariable* getGlobalVariable(
 		std::string name = "global_var");
 
 } // namespace bin2llvmir
+} // namespace retdec
 
 #endif

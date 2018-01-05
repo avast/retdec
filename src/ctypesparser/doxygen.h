@@ -9,4 +9,4 @@
 
 
 /// @file src/ctypesparser/doxygen.h
-/// @namespace ctypesparser Parser for C-types information from JSON to ctypes.
+/// @namespace retdec::ctypesparser Parser for C-types information from JSON to ctypes.

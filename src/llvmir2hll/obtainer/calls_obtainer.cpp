@@ -8,6 +8,7 @@
 #include "retdec/llvmir2hll/obtainer/calls_obtainer.h"
 #include "retdec/llvmir2hll/support/debug.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 /**
@@ -64,3 +65,4 @@ void CallsObtainer::visit(ShPtr<CallExpr> expr) {
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

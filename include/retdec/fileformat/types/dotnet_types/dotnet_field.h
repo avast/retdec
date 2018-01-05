@@ -12,6 +12,7 @@
 #include "retdec/fileformat/types/dotnet_types/dotnet_data_types.h"
 #include "retdec/fileformat/types/dotnet_types/dotnet_type.h"
 
+namespace retdec {
 namespace fileformat {
 
 /**
@@ -41,5 +42,6 @@ class DotnetField : public DotnetType
 };
 
 } // namespace fileformat
+} // namespace retdec
 
 #endif

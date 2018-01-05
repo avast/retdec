@@ -11,23 +11,25 @@
 
 #include "retdec/loader/loader/image.h"
 
+namespace retdec {
 namespace loader {
 
 class CoffImage : public Image
 {
 public:
-	CoffImage(const std::shared_ptr<fileformat::FileFormat>& fileFormat);
+	CoffImage(const std::shared_ptr<retdec::fileformat::FileFormat>& fileFormat);
 	virtual ~CoffImage();
 
 	virtual bool load() override;
 
 protected:
-	Segment* addSegment(const fileformat::Section* section, std::uint64_t address, std::uint64_t memSize);
+	Segment* addSegment(const retdec::fileformat::Section* section, std::uint64_t address, std::uint64_t memSize);
 
 	void applyRelocations();
-	void resolveRelocation(const fileformat::Relocation& rel, const fileformat::Symbol& sym);
+	void resolveRelocation(const retdec::fileformat::Relocation& rel, const retdec::fileformat::Symbol& sym);
 };
 
 } // namespace loader
+} // namespace retdec
 
 #endif

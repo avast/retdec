@@ -9,6 +9,7 @@
 
 #include <string>
 
+namespace retdec {
 namespace fileformat {
 
 /**
@@ -115,5 +116,6 @@ class Symbol
 };
 
 } // namespace fileformat
+} // namespace retdec
 
 #endif

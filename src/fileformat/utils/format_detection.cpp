@@ -22,6 +22,7 @@ using namespace llvm;
 using namespace llvm::object;
 using namespace PeLib;
 
+namespace retdec {
 namespace fileformat {
 
 namespace
@@ -257,3 +258,4 @@ Format detectFileFormat(const std::string &filePath, retdec::config::Config *con
 }
 
 } // namespace fileformat
+} // namespace retdec

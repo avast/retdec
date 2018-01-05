@@ -21,6 +21,7 @@ class Pass;
 
 } // namespace llvm
 
+namespace retdec {
 namespace llvmir2hll {
 
 /**
@@ -38,5 +39,6 @@ using LLVMIR2BIRConverterFactory = Singleton<
 >;
 
 } // namespace llvmir2hll
+} // namespace retdec
 
 #endif

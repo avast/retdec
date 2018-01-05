@@ -10,6 +10,7 @@
 #include "retdec/cpdetect/compiler_detector/heuristics/heuristics.h"
 #include "retdec/fileformat/file_format/elf/elf_format.h"
 
+namespace retdec {
 namespace cpdetect {
 
 /**
@@ -18,7 +19,7 @@ namespace cpdetect {
 class ElfHeuristics : public Heuristics
 {
 	private:
-		fileformat::ElfFormat &elfParser; ///< parser of input ELF file
+		retdec::fileformat::ElfFormat &elfParser; ///< parser of input ELF file
 
 		/// @name Detection methods
 		/// @{
@@ -34,10 +35,11 @@ class ElfHeuristics : public Heuristics
 		/// @}
 
 	public:
-		ElfHeuristics(fileformat::ElfFormat &parser, Search &searcher, ToolInformation &toolInfo);
+		ElfHeuristics(retdec::fileformat::ElfFormat &parser, Search &searcher, ToolInformation &toolInfo);
 		virtual ~ElfHeuristics() override;
 };
 
 } // namespace cpdetect
+} // namespace retdec
 
 #endif

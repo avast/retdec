@@ -26,12 +26,13 @@
 #include "retdec/bin2llvmir/utils/instruction.h"
 #include "retdec/bin2llvmir/utils/type.h"
 
-using namespace llvm_support;
+using namespace retdec::llvm_support;
 using namespace retdec::utils;
 using namespace llvm;
 
 #define debug_enabled false
 
+namespace retdec {
 namespace bin2llvmir {
 
 std::string priority2string(eSourcePriority p)
@@ -1465,3 +1466,4 @@ std::ostream& operator<<(std::ostream& out, const EquationEntry& ee)
 }
 
 } // namespace bin2llvmir
+} // namespace retdec

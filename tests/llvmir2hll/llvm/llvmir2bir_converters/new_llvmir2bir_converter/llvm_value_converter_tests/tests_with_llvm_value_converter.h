@@ -14,6 +14,7 @@
 
 using ::testing::AssertionResult;
 
+namespace retdec {
 namespace llvmir2hll {
 
 class BinaryOpExpr;
@@ -49,5 +50,6 @@ protected:
 
 } // namespace tests
 } // namespace llvmir2hll
+} // namespace retdec
 
 #endif

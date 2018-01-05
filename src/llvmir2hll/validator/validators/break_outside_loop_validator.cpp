@@ -13,6 +13,7 @@
 #include "retdec/llvmir2hll/validator/validator_factory.h"
 #include "retdec/llvmir2hll/validator/validators/break_outside_loop_validator.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 REGISTER_AT_FACTORY("BreakOutsideLoop", BREAK_OUTSIDE_LOOP_VALIDATOR_ID, ValidatorFactory,
@@ -62,3 +63,4 @@ void BreakOutsideLoopValidator::visit(ShPtr<ContinueStmt> stmt) {
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

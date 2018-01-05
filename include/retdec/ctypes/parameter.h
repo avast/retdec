@@ -11,6 +11,7 @@
 #include <set>
 #include <string>
 
+namespace retdec {
 namespace ctypes {
 
 class Annotation;
@@ -64,5 +65,6 @@ class Parameter
 };
 
 } // namespace ctypes
+} // namespace retdec
 
 #endif

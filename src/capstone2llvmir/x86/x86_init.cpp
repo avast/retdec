@@ -6,6 +6,7 @@
 
 #include "retdec/capstone2llvmir/x86/x86.h"
 
+namespace retdec {
 namespace capstone2llvmir {
 
 void Capstone2LlvmIrTranslatorX86::initializeRegNameMap()
@@ -1949,3 +1950,4 @@ Capstone2LlvmIrTranslatorX86::_i2fm =
 };
 
 } // namespace capstone2llvmir
+} // namespace retdec

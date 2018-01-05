@@ -19,6 +19,7 @@ class GlobalVariable;
 
 } // namespace llvm
 
+namespace retdec {
 namespace llvmir2hll {
 
 class ConstString;
@@ -37,5 +38,6 @@ ShPtr<ConstString> getInitializerAsConstString(llvm::GlobalVariable *v);
 /// @}
 
 } // namespace llvmir2hll
+} // namespace retdec
 
 #endif

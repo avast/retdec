@@ -9,6 +9,7 @@
 
 #include "retdec/llvmir2hll/ir/expression.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 /**
@@ -25,5 +26,6 @@ protected:
 };
 
 } // namespace llvmir2hll
+} // namespace retdec
 
 #endif

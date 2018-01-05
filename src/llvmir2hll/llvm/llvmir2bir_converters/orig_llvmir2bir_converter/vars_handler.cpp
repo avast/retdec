@@ -17,11 +17,12 @@
 #include "retdec/llvm-support/diagnostics.h"
 #include "retdec/utils/container.h"
 
-using namespace llvm_support;
+using namespace retdec::llvm_support;
 
 using retdec::utils::hasItem;
 using retdec::utils::mapGetValueOrDefault;
 
+namespace retdec {
 namespace llvmir2hll {
 
 /**
@@ -193,3 +194,4 @@ llvm::Type *VarsHandler::getAllocatedVarType(llvm::Value *var) const {
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

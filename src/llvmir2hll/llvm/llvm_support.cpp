@@ -25,6 +25,7 @@ using retdec::utils::hasItem;
 using retdec::utils::hasOnlyHexadecimalDigits;
 using retdec::utils::startsWith;
 
+namespace retdec {
 namespace llvmir2hll {
 
 // Definition and initialization of static data members.
@@ -299,3 +300,4 @@ bool LLVMSupport::isBasicBlockLabel(const std::string &str) {
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

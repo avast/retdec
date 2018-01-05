@@ -12,6 +12,7 @@
 
 #include "retdec/ctypes/visitable.h"
 
+namespace retdec {
 namespace ctypes {
 
 /**
@@ -47,5 +48,6 @@ class Type: public Visitable, public std::enable_shared_from_this<Type>
 };
 
 } // namespace ctypes
+} // namespace retdec
 
 #endif

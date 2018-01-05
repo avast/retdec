@@ -19,9 +19,10 @@
 #include "retdec/loader/utils/overlap_resolver.h"
 #include "retdec/loader/utils/range.h"
 
+namespace retdec {
 namespace loader {
 
-ElfImage::ElfImage(const std::shared_ptr<fileformat::FileFormat>& fileFormat) : Image(fileFormat)
+ElfImage::ElfImage(const std::shared_ptr<retdec::fileformat::FileFormat>& fileFormat) : Image(fileFormat)
 {
 }
 
@@ -30,7 +31,7 @@ ElfImage::~ElfImage()
 }
 
 /**
- * Virtual method overridden from loader::Image, which is used in image factory.
+ * Virtual method overridden from retdec::loader::Image, which is used in image factory.
  * Loads the image using @c fileformat.
  *
  * @return True if loading was successful, otherwise false.
@@ -69,13 +70,13 @@ bool ElfImage::load()
 
 bool ElfImage::loadExecutableFile()
 {
-	const auto* elfInputFile = static_cast<const fileformat::ElfFormat*>(getFileFormat());
+	const auto* elfInputFile = static_cast<const retdec::fileformat::ElfFormat*>(getFileFormat());
 	SegmentToSectionsTable segToSecsTable = createSegmentToSectionsTable();
 
 	const auto& segments = elfInputFile->getSegments();
 	for (const auto& segment : segments)
 	{
-		const auto* elfSegment = static_cast<const fileformat::ElfSegment*>(segment);
+		const auto* elfSegment = static_cast<const retdec::fileformat::ElfSegment*>(segment);
 
 		// Skip non PT_LOAD segments
 		if (elfSegment->getElfType() != PT_LOAD)
@@ -130,7 +131,7 @@ bool ElfImage::loadExecutableFile()
 
 bool ElfImage::loadRelocatableFile()
 {
-	const auto* elfInputFile = static_cast<const fileformat::ElfFormat*>(getFileFormat());
+	const auto* elfInputFile = static_cast<const retdec::fileformat::ElfFormat*>(getFileFormat());
 	const auto& sections = getFileFormat()->getSections();
 
 	// If sections are not loadable, we need to end here, no way to load this file
@@ -138,7 +139,7 @@ bool ElfImage::loadRelocatableFile()
 		return false;
 
 	// Do a reverse mapping, from section indices to symbols that link to that particular section.
-	std::unordered_map<std::uint32_t, std::vector<fileformat::Symbol*>> secIndexToSyms;
+	std::unordered_map<std::uint32_t, std::vector<retdec::fileformat::Symbol*>> secIndexToSyms;
 	for (auto& symbolTable : getFileFormat()->getSymbolTables())
 	{
 		for (auto& symbol : *symbolTable)
@@ -153,15 +154,15 @@ bool ElfImage::loadRelocatableFile()
 
 
 	// If none of the sections has SHF_ALLOC flag, then just try to load all SHT_PROGBITS and SHT_NOBITS sections.
-	std::function<bool(fileformat::ElfSection*)> canLoadSection = [](fileformat::ElfSection* elfSec) { return elfSec->getElfFlags() & SHF_ALLOC; };
-	if (!std::any_of(sections.begin(), sections.end(), [&canLoadSection](fileformat::Section* sec) { return canLoadSection(static_cast<fileformat::ElfSection*>(sec)); }))
+	std::function<bool(retdec::fileformat::ElfSection*)> canLoadSection = [](retdec::fileformat::ElfSection* elfSec) { return elfSec->getElfFlags() & SHF_ALLOC; };
+	if (!std::any_of(sections.begin(), sections.end(), [&canLoadSection](retdec::fileformat::Section* sec) { return canLoadSection(static_cast<retdec::fileformat::ElfSection*>(sec)); }))
 	{
-		canLoadSection = [](fileformat::ElfSection* elfSec) { return (elfSec->getElfType() == SHT_PROGBITS || elfSec->getElfType() == SHT_NOBITS); };
+		canLoadSection = [](retdec::fileformat::ElfSection* elfSec) { return (elfSec->getElfType() == SHT_PROGBITS || elfSec->getElfType() == SHT_NOBITS); };
 	}
 
 	for (auto& section : sections)
 	{
-		fileformat::ElfSection* elfSection = static_cast<fileformat::ElfSection*>(section);
+		retdec::fileformat::ElfSection* elfSection = static_cast<retdec::fileformat::ElfSection*>(section);
 
 		// This is the only thing we can rely on, even though it is not bullet proof solution
 		if (!canLoadSection(elfSection))
@@ -215,9 +216,9 @@ ElfImage::SegmentToSectionsTable ElfImage::createSegmentToSectionsTable()
 	if (!canLoadSections(sections))
 	{
 		std::for_each(segments.begin(), segments.end(),
-				[&segToSecsTable](fileformat::Segment* seg)
+				[&segToSecsTable](retdec::fileformat::Segment* seg)
 				{
-					const auto* elfSeg = static_cast<const fileformat::ElfSegment*>(seg);
+					const auto* elfSeg = static_cast<const retdec::fileformat::ElfSegment*>(seg);
 					if (elfSeg->getElfType() == PT_LOAD)
 						segToSecsTable[elfSeg].clear();
 				});
@@ -226,7 +227,7 @@ ElfImage::SegmentToSectionsTable ElfImage::createSegmentToSectionsTable()
 
 	for (const auto& seg : segments)
 	{
-		const auto* elfSeg = static_cast<const fileformat::ElfSegment*>(seg);
+		const auto* elfSeg = static_cast<const retdec::fileformat::ElfSegment*>(seg);
 
 		// Mapping only for PT_LOAD segments
 		if (elfSeg->getElfType() != PT_LOAD)
@@ -241,7 +242,7 @@ ElfImage::SegmentToSectionsTable ElfImage::createSegmentToSectionsTable()
 
 		for (const auto& sec : sections)
 		{
-			const fileformat::ElfSection* elfSec = static_cast<const fileformat::ElfSection*>(sec);
+			const retdec::fileformat::ElfSection* elfSec = static_cast<const retdec::fileformat::ElfSection*>(sec);
 
 			// Skip SHT_NULL sections, they just populate address space with bogus values
 			if (elfSec->getElfType() == SHT_NULL)
@@ -280,7 +281,7 @@ ElfImage::SegmentToSectionsTable ElfImage::createSegmentToSectionsTable()
 
 		// Sort sections by their starting virtual address
 		std::stable_sort(segToSecsTable[elfSeg].begin(), segToSecsTable[elfSeg].end(),
-				[](const fileformat::ElfSection* sec1, const fileformat::ElfSection* sec2)
+				[](const retdec::fileformat::ElfSection* sec1, const retdec::fileformat::ElfSection* sec2)
 				{
 					return (sec1->getAddress() < sec2->getAddress());
 				});
@@ -289,7 +290,7 @@ ElfImage::SegmentToSectionsTable ElfImage::createSegmentToSectionsTable()
 	return segToSecsTable;
 }
 
-const Segment* ElfImage::addSegment(const fileformat::SecSeg* secSeg, std::uint64_t address, std::uint64_t memSize)
+const Segment* ElfImage::addSegment(const retdec::fileformat::SecSeg* secSeg, std::uint64_t address, std::uint64_t memSize)
 {
 	std::unique_ptr<SegmentDataSource> dataSource;
 	if (!secSeg->isBss())
@@ -364,30 +365,30 @@ const Segment* ElfImage::addSegment(const fileformat::SecSeg* secSeg, std::uint6
 	return retSegment;
 }
 
-bool ElfImage::canLoadSections(const std::vector<fileformat::Section*>& sections) const
+bool ElfImage::canLoadSections(const std::vector<retdec::fileformat::Section*>& sections) const
 {
 	// First, filter out non-SHF_ALLOC sections
-	std::vector<fileformat::Section*> allocSections;
+	std::vector<retdec::fileformat::Section*> allocSections;
 	std::copy_if(sections.begin(), sections.end(), std::back_inserter(allocSections),
-			[](const fileformat::Section* sec)
+			[](const retdec::fileformat::Section* sec)
 			{
-				return (static_cast<const fileformat::ElfSection*>(sec)->getElfFlags() & SHF_ALLOC);
+				return (static_cast<const retdec::fileformat::ElfSection*>(sec)->getElfFlags() & SHF_ALLOC);
 			});
 
 	// If no SHF_ALLOC sections found, try to take all SHT_PROGBITS and SHT_NOBITS sections.
 	if (allocSections.empty())
 	{
 		std::copy_if(sections.begin(), sections.end(), std::back_inserter(allocSections),
-				[](const fileformat::Section* sec)
+				[](const retdec::fileformat::Section* sec)
 				{
-					return (static_cast<const fileformat::ElfSection*>(sec)->getElfType() == SHT_PROGBITS ||
-							static_cast<const fileformat::ElfSection*>(sec)->getElfType() == SHT_NOBITS);
+					return (static_cast<const retdec::fileformat::ElfSection*>(sec)->getElfType() == SHT_PROGBITS ||
+							static_cast<const retdec::fileformat::ElfSection*>(sec)->getElfType() == SHT_NOBITS);
 				});
 	}
 
 	// Check whether all sections to be loaded have address and offset set to 0. If not, we cannot load this file properly.
 	return !std::all_of(allocSections.begin(), allocSections.end(),
-			[](const fileformat::Section* sec)
+			[](const retdec::fileformat::Section* sec)
 			{
 				return (sec->getAddress() == 0 && sec->getOffset() == 0);
 			});
@@ -422,19 +423,19 @@ void ElfImage::fixBssSegments()
 			const auto& programHeaders = getFileFormat()->getSegments();
 			if (programHeaders.empty())
 			{
-				bssSegment->resize(static_cast<const fileformat::ElfSection*>(bssSegment->getSecSeg())->getElfAlign());
+				bssSegment->resize(static_cast<const retdec::fileformat::ElfSection*>(bssSegment->getSecSeg())->getElfAlign());
 			}
 			else
 			{
-				const fileformat::ElfSegment* programHeader = nullptr;
+				const retdec::fileformat::ElfSegment* programHeader = nullptr;
 				for (const auto& phdr : programHeaders)
 				{
 					// Only PT_LOAD segments
-					if (static_cast<const fileformat::ElfSegment*>(phdr)->getElfType() != PT_LOAD)
+					if (static_cast<const retdec::fileformat::ElfSegment*>(phdr)->getElfType() != PT_LOAD)
 						continue;
 
 					if (retdec::utils::Range<std::uint64_t>(phdr->getAddress(), phdr->getEndAddress()).contains(bssSegment->getAddress()))
-						programHeader = static_cast<const fileformat::ElfSegment*>(phdr);
+						programHeader = static_cast<const retdec::fileformat::ElfSegment*>(phdr);
 				}
 
 				// This BSS segment has size 0 for no apparent reason and should be kept its size
@@ -481,7 +482,7 @@ void ElfImage::applyRelocations()
 				continue;
 
 			// We are not able to handle EXTERN symbols relocation because they are not placed anywhere and it somehow causes problems in x86 decompilation
-			if (sym->getType() == fileformat::Symbol::Type::EXTERN)
+			if (sym->getType() == retdec::fileformat::Symbol::Type::EXTERN)
 				continue;
 
 			resolveRelocation(rel, *sym);
@@ -489,7 +490,7 @@ void ElfImage::applyRelocations()
 	}
 }
 
-void ElfImage::resolveRelocation(const fileformat::Relocation& rel, const fileformat::Symbol& sym)
+void ElfImage::resolveRelocation(const retdec::fileformat::Relocation& rel, const retdec::fileformat::Symbol& sym)
 {
 	unsigned long long symAddress;
 	if (!sym.getAddress(symAddress))
@@ -497,7 +498,7 @@ void ElfImage::resolveRelocation(const fileformat::Relocation& rel, const filefo
 
 	switch (getFileFormat()->getTargetArchitecture())
 	{
-		case fileformat::Architecture::X86:
+		case retdec::fileformat::Architecture::X86:
 		{
 			switch (rel.getType())
 			{
@@ -522,7 +523,7 @@ void ElfImage::resolveRelocation(const fileformat::Relocation& rel, const filefo
 			}
 			break;
 		}
-		case fileformat::Architecture::ARM:
+		case retdec::fileformat::Architecture::ARM:
 		{
 			switch (rel.getType())
 			{
@@ -551,9 +552,9 @@ void ElfImage::resolveRelocation(const fileformat::Relocation& rel, const filefo
 			}
 			break;
 		}
-		case fileformat::Architecture::MIPS:
+		case retdec::fileformat::Architecture::MIPS:
 		{
-			static const fileformat::Relocation* lastMipsHi16 = nullptr;
+			static const retdec::fileformat::Relocation* lastMipsHi16 = nullptr;
 
 			switch (rel.getType())
 			{
@@ -607,9 +608,9 @@ void ElfImage::resolveRelocation(const fileformat::Relocation& rel, const filefo
 			}
 			break;
 		}
-		case fileformat::Architecture::POWERPC:
+		case retdec::fileformat::Architecture::POWERPC:
 		{
-			static const fileformat::Relocation* lastPpcHi16 = nullptr;
+			static const retdec::fileformat::Relocation* lastPpcHi16 = nullptr;
 
 			switch (rel.getType())
 			{
@@ -676,3 +677,4 @@ void ElfImage::resolveRelocation(const fileformat::Relocation& rel, const filefo
 }
 
 } // namespace loader
+} // namespace retdec

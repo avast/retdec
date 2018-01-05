@@ -40,7 +40,7 @@ namespace {
  * @param decompressor Associated decompressor with this unpacking stub.
  * @param metadata The UPX metadata associated with this unpacking stub.
  */
-template <int bits> ElfUpxStub<bits>::ElfUpxStub(loader::Image* inputFile, const UpxStubData* stubData,
+template <int bits> ElfUpxStub<bits>::ElfUpxStub(retdec::loader::Image* inputFile, const UpxStubData* stubData,
 		const DynamicBuffer& stubCapturedData, std::unique_ptr<Decompressor> decompressor, const UpxMetadata& metadata)
 	: UpxStub(inputFile, stubData, stubCapturedData, std::move(decompressor), metadata)
 {
@@ -276,7 +276,7 @@ template <int bits> void ElfUpxStub<bits>::cleanup()
  */
 template <int bits> std::uint32_t ElfUpxStub<bits>::getFirstBlockOffset()
 {
-	auto elfFormat = static_cast<const fileformat::ElfFormat*>(_file->getFileFormat());
+	auto elfFormat = static_cast<const retdec::fileformat::ElfFormat*>(_file->getFileFormat());
 
 	// UPX data should begin at the end of ELF header
 	auto baseOffset = elfFormat->getSegmentTableOffset() + elfFormat->getSegmentTableSize();

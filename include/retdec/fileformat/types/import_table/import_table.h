@@ -11,6 +11,7 @@
 
 #include "retdec/fileformat/types/import_table/import.h"
 
+namespace retdec {
 namespace fileformat {
 
 /**
@@ -71,5 +72,6 @@ class ImportTable
 };
 
 } // namespace fileformat
+} // namespace retdec
 
 #endif

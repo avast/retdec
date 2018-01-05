@@ -17,6 +17,7 @@
 #include "retdec/bin2llvmir/optimizations/idioms/idioms_types.h"
 #include "retdec/bin2llvmir/providers/config.h"
 
+namespace retdec {
 namespace bin2llvmir {
 
 /**
@@ -41,5 +42,6 @@ private:
 };
 
 } // namespace bin2llvmir
+} // namespace retdec
 
 #endif

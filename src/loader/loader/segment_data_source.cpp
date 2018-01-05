@@ -9,6 +9,7 @@
 
 #include "retdec/loader/loader/segment_data_source.h"
 
+namespace retdec {
 namespace loader {
 
 SegmentDataSource::SegmentDataSource() : _data(nullptr, 0)
@@ -99,3 +100,4 @@ bool SegmentDataSource::saveData(std::uint64_t saveOffset, std::uint64_t saveSiz
 }
 
 } // namespace loader
+} // namespace retdec

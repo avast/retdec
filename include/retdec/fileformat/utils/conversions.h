@@ -13,6 +13,7 @@
 
 #include "retdec/fileformat/utils/other.h"
 
+namespace retdec {
 namespace fileformat {
 
 /**
@@ -44,5 +45,6 @@ std::ios_base& hexWithPrefix(std::ios_base &str);
 void separateStrings(std::string &str, std::vector<std::string> &words);
 
 } // namespace fileformat
+} // namespace retdec
 
 #endif

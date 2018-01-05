@@ -12,6 +12,7 @@
 
 #include "retdec/fileformat/types/symbol_table/symbol.h"
 
+namespace retdec {
 namespace fileformat {
 
 /**
@@ -68,5 +69,6 @@ class SymbolTable
 };
 
 } // namespace fileformat
+} // namespace retdec
 
 #endif

@@ -11,6 +11,7 @@
 using namespace retdec::utils;
 using namespace llvm::MachO;
 
+namespace retdec {
 namespace fileformat {
 
 /**
@@ -253,3 +254,4 @@ std::shared_ptr<Symbol> MachOSymbol::getAsSymbol() const
 }
 
 } // namespace fileformat
+} // namespace retdec

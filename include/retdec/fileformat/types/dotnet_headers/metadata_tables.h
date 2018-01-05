@@ -13,6 +13,7 @@
 #include "retdec/fileformat/file_format/file_format.h"
 #include "retdec/fileformat/types/dotnet_headers/metadata_stream.h"
 
+namespace retdec {
 namespace fileformat {
 
 //
@@ -1243,5 +1244,6 @@ struct GenericParamContstraint : public BaseRecord
 };
 
 } // namespace fileformat
+} // namespace retdec
 
 #endif

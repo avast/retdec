@@ -11,6 +11,7 @@
 #include "retdec/ctypes/visitor.h"
 #include "retdec/utils/container.h"
 
+namespace retdec {
 namespace ctypes {
 
 /**
@@ -171,3 +172,4 @@ void FunctionType::accept(Visitor *v) {
 }
 
 } // namespace ctypes
+} // namespace retdec

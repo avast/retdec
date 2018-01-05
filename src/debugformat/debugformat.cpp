@@ -12,6 +12,7 @@
 #include "retdec/utils/debug.h"
 #include "retdec/debugformat/debugformat.h"
 
+namespace retdec {
 namespace debugformat {
 
 DebugFormat::DebugFormat()
@@ -27,10 +28,10 @@ DebugFormat::DebugFormat()
  * @param imageBase Image base used in PDB initialization.
  */
 DebugFormat::DebugFormat(
-		loader::Image* inFile,
+		retdec::loader::Image* inFile,
 		const std::string& pdbFile,
 		SymbolTable* symtab,
-		demangler::CDemangler* demangler,
+		retdec::demangler::CDemangler* demangler,
 		unsigned long long imageBase)
 		:
 		_symtab(symtab),
@@ -39,7 +40,7 @@ DebugFormat::DebugFormat(
 {
 	_pdbFile = new pdbparser::PDBFile();
 	auto s = _pdbFile->load_pdb_file(pdbFile.c_str());
-	_dwarfFile = new dwarfparser::DwarfFile(_inFile->getFileFormat()->getPathToFile(), _inFile->getFileFormat());
+	_dwarfFile = new retdec::dwarfparser::DwarfFile(_inFile->getFileFormat()->getPathToFile(), _inFile->getFileFormat());
 
 	if (s == pdbparser::PDB_STATE_OK)
 	{
@@ -134,3 +135,4 @@ const retdec::config::Object* DebugFormat::getGlobalVar(
 }
 
 } // namespace debugformat
+} // namespace retdec

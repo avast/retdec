@@ -9,13 +9,15 @@
 
 #include "retdec/cpdetect/cptypes.h"
 
+namespace retdec {
 namespace cpdetect {
 
 std::string getErrorMessage(ReturnCode errorCode,
-		fileformat::Format format = fileformat::Format::UNKNOWN);
+		retdec::fileformat::Format format = retdec::fileformat::Format::UNKNOWN);
 
 bool isFatalError(ReturnCode errorCode);
 
 } // namespace cpdetect
+} // namespace retdec
 
 #endif

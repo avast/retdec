@@ -10,6 +10,7 @@
 using namespace ::testing;
 using namespace llvm;
 
+namespace retdec {
 namespace bin2llvmir {
 namespace tests {
 
@@ -508,3 +509,4 @@ class InstOptTests : public LlvmIrTests
 
 } // namespace tests
 } // namespace bin2llvmir
+} // namespace retdec

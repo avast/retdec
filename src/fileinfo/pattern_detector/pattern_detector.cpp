@@ -21,7 +21,7 @@ namespace fileinfo {
  * @param fparser Pointer to file parser
  * @param finfo Reference to information about input file
  */
-PatternDetector::PatternDetector(const fileformat::FileFormat *fparser, FileInformation &finfo) :
+PatternDetector::PatternDetector(const retdec::fileformat::FileFormat *fparser, FileInformation &finfo) :
 	fileParser(fparser), fileinfo(finfo)
 {
 

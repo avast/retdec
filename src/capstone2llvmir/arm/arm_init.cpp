@@ -6,6 +6,7 @@
 
 #include "retdec/capstone2llvmir/arm/arm.h"
 
+namespace retdec {
 namespace capstone2llvmir {
 
 void Capstone2LlvmIrTranslatorArm::initializeRegNameMap()
@@ -512,3 +513,4 @@ Capstone2LlvmIrTranslatorArm::_i2fm =
 };
 
 } // namespace capstone2llvmir
+} // namespace retdec

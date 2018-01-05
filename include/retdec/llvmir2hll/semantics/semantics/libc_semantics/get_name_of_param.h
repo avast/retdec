@@ -12,6 +12,7 @@
 
 #include "retdec/llvmir2hll/support/maybe.h"
 
+namespace retdec {
 namespace llvmir2hll {
 namespace semantics {
 namespace libc {
@@ -22,5 +23,6 @@ Maybe<std::string> getNameOfParam(const std::string &funcName,
 } // namespace libc
 } // namespace semantics
 } // namespace llvmir2hll
+} // namespace retdec
 
 #endif

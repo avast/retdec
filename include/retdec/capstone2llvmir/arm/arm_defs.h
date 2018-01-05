@@ -9,6 +9,7 @@
 
 #include <capstone/arm.h>
 
+namespace retdec {
 namespace capstone2llvmir {
 
 enum arm_reg_cpsr_flags
@@ -20,5 +21,6 @@ enum arm_reg_cpsr_flags
 };
 
 } // namespace capstone2llvmir
+} // namespace retdec
 
 #endif

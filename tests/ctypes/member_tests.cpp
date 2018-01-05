@@ -14,6 +14,7 @@
 
 using namespace ::testing;
 
+namespace retdec {
 namespace ctypes {
 namespace tests {
 
@@ -75,3 +76,4 @@ TwoMembersAreNotEqualWhenTypesDiffer)
 
 } // namespace tests
 } // namespace ctypes
+} // namespace retdec

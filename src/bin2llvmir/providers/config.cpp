@@ -16,10 +16,11 @@
 #include "retdec/bin2llvmir/utils/instruction.h"
 #include "retdec/bin2llvmir/utils/type.h"
 
-using namespace llvm_support;
+using namespace retdec::llvm_support;
 using namespace retdec::utils;
 using namespace llvm;
 
+namespace retdec {
 namespace bin2llvmir {
 
 //
@@ -328,7 +329,7 @@ retdec::config::Function* Config::insertFunction(
 
 	if (cf.getDemangledName().empty())
 	{
-		demangler::CDemangler* d = DemanglerProvider::getDemangler(_module);
+		retdec::demangler::CDemangler* d = DemanglerProvider::getDemangler(_module);
 		if (d)
 		{
 			auto s = d->demangleToString(fnc->getName());
@@ -352,7 +353,7 @@ retdec::config::Function* Config::renameFunction(
 
 	if (cf.getDemangledName().empty())
 	{
-		demangler::CDemangler* d = DemanglerProvider::getDemangler(_module);
+		retdec::demangler::CDemangler* d = DemanglerProvider::getDemangler(_module);
 		if (d)
 		{
 			auto s = d->demangleToString(fnc->getName());
@@ -712,3 +713,4 @@ void ConfigProvider::clear()
 }
 
 } // namespace bin2llvmir
+} // namespace retdec

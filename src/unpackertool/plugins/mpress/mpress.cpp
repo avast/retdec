@@ -110,7 +110,7 @@ public:
 	 */
 	virtual void prepare() override
 	{
-		_file = loader::createImage(getStartupArguments()->inputFile);
+		_file = retdec::loader::createImage(getStartupArguments()->inputFile);
 		if (!_file)
 			throw UnsupportedFileException();
 
@@ -118,7 +118,7 @@ public:
 			throw UnsupportedFileException();
 
 		// We currently don't support PE32+ as the decompiler doesn't support them anyways
-		if (static_cast<fileformat::PeFormat*>(_file->getFileFormat())->getPeClass() != PeLib::PEFILE32)
+		if (static_cast<retdec::fileformat::PeFormat*>(_file->getFileFormat())->getPeClass() != PeLib::PEFILE32)
 			throw UnsupportedFileException();
 
 		if (!_file->getEpSegment())
@@ -597,7 +597,7 @@ private:
 	void fixRelocations()
 	{
 		// We will only manipulate this section as all information are stored here
-		const loader::Segment* epSegment = _file->getEpSegment();
+		const retdec::loader::Segment* epSegment = _file->getEpSegment();
 
 		// Calculate the offset of EP in EP section
 		unsigned long long epAddress;
@@ -720,17 +720,17 @@ private:
 
 	void copySectionFromOriginalFile(std::uint32_t origSectIndex, const std::string& newFileName, std::uint32_t newSectIndex)
 	{
-		const loader::Segment* seg = _file->getSegment(origSectIndex);
+		const retdec::loader::Segment* seg = _file->getSegment(origSectIndex);
 		std::vector<std::uint8_t> bytes;
 		seg->getBytes(bytes);
 		_peFile->peHeader().writeSectionData(newFileName, newSectIndex, bytes);
 	}
 
-	std::unique_ptr<loader::Image> _file;
+	std::unique_ptr<retdec::loader::Image> _file;
 	PeLib::PeFile32* _peFile;
 	MpressUnpackerStub _unpackerStub;
 	MpressFixStub _fixStub;
-	const loader::Segment* _packedContentSect;
+	const retdec::loader::Segment* _packedContentSect;
 	std::uint32_t _addedSectionCount;
 
 	std::uint32_t _iatVa, _iatSize;

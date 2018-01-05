@@ -12,6 +12,7 @@
 
 #include "retdec/demangler/gparser.h"
 
+namespace retdec {
 namespace demangler {
 
 /**
@@ -41,5 +42,6 @@ public:
 };
 
 } // namespace demangler
+} // namespace retdec
 
 #endif

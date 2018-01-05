@@ -14,6 +14,7 @@
 #include "retdec/llvmir2hll/hll/hll_writer.h"
 #include "retdec/llvmir2hll/support/smart_ptr.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 class BracketManager;
@@ -192,5 +193,6 @@ private:
 };
 
 } // namespace llvmir2hll
+} // namespace retdec
 
 #endif

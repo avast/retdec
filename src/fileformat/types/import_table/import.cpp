@@ -6,6 +6,7 @@
 
 #include "retdec/fileformat/types/import_table/import.h"
 
+namespace retdec {
 namespace fileformat {
 
 /**
@@ -126,3 +127,4 @@ bool Import::hasEmptyName() const
 }
 
 } // namespace fileformat
+} // namespace retdec

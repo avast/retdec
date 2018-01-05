@@ -12,11 +12,13 @@
 
 #include "retdec/loader/loader/image.h"
 
+namespace retdec {
 namespace loader {
 
 std::unique_ptr<Image> createImage(const std::string& filePath, retdec::config::Config *config = nullptr);
-std::unique_ptr<Image> createImage(const std::shared_ptr<fileformat::FileFormat>& fileFormat);
+std::unique_ptr<Image> createImage(const std::shared_ptr<retdec::fileformat::FileFormat>& fileFormat);
 
 } // namespace loader
+} // namespace retdec
 
 #endif

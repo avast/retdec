@@ -81,6 +81,7 @@
 using retdec::utils::addToSet;
 using retdec::utils::hasItem;
 
+namespace retdec {
 namespace llvmir2hll {
 
 /**
@@ -1613,3 +1614,4 @@ void ValueAnalysis::visit(ShPtr<ConstStruct> constant) {
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

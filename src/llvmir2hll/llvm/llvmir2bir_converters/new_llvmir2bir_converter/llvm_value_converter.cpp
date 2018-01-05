@@ -31,6 +31,7 @@
 #include "retdec/llvmir2hll/llvm/string_conversions.h"
 #include "retdec/llvmir2hll/support/debug.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 /**
@@ -306,3 +307,4 @@ ShPtr<Type> LLVMValueConverter::determineVariableType(llvm::Value *value) {
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

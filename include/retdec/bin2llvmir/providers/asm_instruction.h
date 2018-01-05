@@ -15,6 +15,7 @@
 #include "retdec/utils/address.h"
 #include "retdec/utils/value.h"
 
+namespace retdec {
 namespace bin2llvmir {
 
 class Config;
@@ -357,5 +358,6 @@ class AsmInstruction
 };
 
 } // namespace bin2llvmir
+} // namespace retdec
 
 #endif

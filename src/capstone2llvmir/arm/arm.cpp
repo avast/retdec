@@ -9,6 +9,7 @@
 
 #include "retdec/capstone2llvmir/arm/arm.h"
 
+namespace retdec {
 namespace capstone2llvmir {
 
 Capstone2LlvmIrTranslatorArm::Capstone2LlvmIrTranslatorArm(
@@ -2482,3 +2483,4 @@ void Capstone2LlvmIrTranslatorArm::translateQuaternaryPseudoAsm4Args2Dsts(cs_ins
 }
 
 } // namespace capstone2llvmir
+} // namespace retdec

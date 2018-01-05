@@ -9,6 +9,7 @@
 
 #include "retdec/llvmir2hll/support/smart_ptr.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 /**
@@ -64,5 +65,6 @@ public:
 };
 
 } // namespace llvmir2hll
+} // namespace retdec
 
 #endif

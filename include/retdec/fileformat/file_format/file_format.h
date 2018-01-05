@@ -18,6 +18,7 @@
 #include "retdec/utils/non_copyable.h"
 #include "retdec/fileformat/fftypes.h"
 
+namespace retdec {
 namespace fileformat {
 
 /**
@@ -294,5 +295,6 @@ class FileFormat : public retdec::utils::ByteValueStorage, private retdec::utils
 };
 
 } // namespace fileformat
+} // namespace retdec
 
 #endif

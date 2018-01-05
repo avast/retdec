@@ -12,6 +12,7 @@
 
 #include <capstone/capstone.h>
 
+namespace retdec {
 namespace capstone2llvmir {
 
 static std::map<cs_arch, std::string> capstoneArchStringMap =
@@ -60,5 +61,6 @@ inline std::string capstoneModeToString(cs_mode m)
 }
 
 } // namespace capstone2llvmir
+} // namespace retdec
 
 #endif

@@ -10,9 +10,10 @@
 #include "retdec/utils/conversion.h"
 #include "retdec/loader/loader/segment.h"
 
+namespace retdec {
 namespace loader {
 
-Segment::Segment(const fileformat::SecSeg* secSeg, std::uint64_t address, std::uint64_t size, std::unique_ptr<SegmentDataSource>&& dataSource)
+Segment::Segment(const retdec::fileformat::SecSeg* secSeg, std::uint64_t address, std::uint64_t size, std::unique_ptr<SegmentDataSource>&& dataSource)
 	: _secSeg(secSeg), _address(address), _size(size), _dataSource(std::move(dataSource)), _name("")
 {
 }
@@ -31,7 +32,7 @@ Segment::~Segment()
  *
  * @return Associated section or segment. If no section or segment is associated, returns nullptr.
  */
-const fileformat::SecSeg* Segment::getSecSeg() const
+const retdec::fileformat::SecSeg* Segment::getSecSeg() const
 {
 	return _secSeg;
 }
@@ -301,3 +302,4 @@ void Segment::addNonDecodableRange(retdec::utils::Range<std::uint64_t> range)
 }
 
 } // namespace loader
+} // namespace retdec

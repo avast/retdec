@@ -13,6 +13,7 @@
 #include "retdec/llvmir2hll/support/visitors/ordered_all_visitor.h"
 #include "retdec/llvmir2hll/var_name_gen/var_name_gen.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 /**
@@ -153,5 +154,6 @@ private:
 };
 
 } // namespace llvmir2hll
+} // namespace retdec
 
 #endif

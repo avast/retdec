@@ -11,6 +11,7 @@
 #include <sstream>
 #include <stdexcept>
 
+namespace retdec {
 namespace llvmir_emul {
 
 /**
@@ -51,5 +52,6 @@ class LlvmIrEmulatorError : public LlvmIrEmulatorBaseError
 };
 
 } // llvmir_emul
+} // retdec
 
 #endif

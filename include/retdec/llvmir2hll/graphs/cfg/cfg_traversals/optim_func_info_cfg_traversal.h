@@ -14,6 +14,7 @@
 #include "retdec/llvmir2hll/obtainer/call_info_obtainers/optim_call_info_obtainer.h"
 #include "retdec/llvmir2hll/support/types.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 class CG;
@@ -92,5 +93,6 @@ private:
 };
 
 } // namespace llvmir2hll
+} // namespace retdec
 
 #endif

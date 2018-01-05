@@ -16,6 +16,7 @@
 
 //internal grammars
 
+namespace retdec {
 namespace demangler {
 
 /**
@@ -826,5 +827,6 @@ public:
 }; //class cGram
 
 } // namespace demangler
+} // namespace retdec
 
 #endif

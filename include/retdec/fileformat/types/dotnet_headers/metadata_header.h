@@ -9,6 +9,7 @@
 
 #include <string>
 
+namespace retdec {
 namespace fileformat {
 
 const std::uint64_t MetadataHeaderSignature = 0x424A5342;
@@ -45,5 +46,6 @@ class MetadataHeader
 };
 
 } // namespace fileformat
+} // namespace retdec
 
 #endif

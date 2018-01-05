@@ -20,6 +20,7 @@
 #include "retdec/llvmir2hll/optimizer/optimizers/simplify_arithm_expr/equal_operands_sub_optimizer.h"
 #include "retdec/llvmir2hll/support/debug.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 REGISTER_AT_FACTORY("EqualOperands", EQUAL_OPERANDS_SUB_OPTIMIZER_ID,
@@ -146,3 +147,4 @@ bool EqualOperandsSubOptimizer::isaConstIntOrIntTypeVariable(
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

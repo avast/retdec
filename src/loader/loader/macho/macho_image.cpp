@@ -7,9 +7,10 @@
 #include "retdec/fileformat/types/sec_seg/macho_section.h"
 #include "retdec/loader/loader/macho/macho_image.h"
 
+namespace retdec {
 namespace loader {
 
-MachOImage::MachOImage(const std::shared_ptr<fileformat::FileFormat>& fileFormat) : Image(fileFormat)
+MachOImage::MachOImage(const std::shared_ptr<retdec::fileformat::FileFormat>& fileFormat) : Image(fileFormat)
 {
 }
 
@@ -18,7 +19,7 @@ MachOImage::~MachOImage()
 }
 
 /**
- * Virtual method overridden from loader::Image, which is used in image factory.
+ * Virtual method overridden from retdec::loader::Image, which is used in image factory.
  * Loads the image using @c fileformat.
  *
  * @return True if loading was successful, otherwise false.
@@ -108,7 +109,7 @@ MachOImage::SegmentToSectionsTable MachOImage::mapSegmentsToSections() const
 	auto sections = getFileFormat()->getSections();
 	for (const auto& sec : sections)
 	{
-		auto machoSec = static_cast<const fileformat::MachOSection*>(sec);
+		auto machoSec = static_cast<const retdec::fileformat::MachOSection*>(sec);
 
 		// Every section should have its segment set, but skip the section if not.
 		SegmentToSectionsTable::iterator itr = segToSecTable.find(machoSec->getSegmentName());
@@ -122,7 +123,7 @@ MachOImage::SegmentToSectionsTable MachOImage::mapSegmentsToSections() const
 	return segToSecTable;
 }
 
-const Segment* MachOImage::addSegment(const fileformat::SecSeg* secSeg)
+const Segment* MachOImage::addSegment(const retdec::fileformat::SecSeg* secSeg)
 {
 	std::unique_ptr<SegmentDataSource> dataSource;
 	if (!secSeg->isBss())
@@ -139,3 +140,4 @@ const Segment* MachOImage::addSegment(const fileformat::SecSeg* secSeg)
 }
 
 } // namespace loader
+} // namespace retdec

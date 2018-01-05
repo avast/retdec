@@ -52,6 +52,7 @@
 
 using namespace llvm;
 
+namespace retdec {
 namespace llvmir_emul {
 
 namespace {
@@ -3387,3 +3388,4 @@ void LlvmIrEmulator::visitInstruction(llvm::Instruction& I)
 }
 
 } // llvmir_emul
+} // retdec

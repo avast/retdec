@@ -81,10 +81,11 @@
 #include "retdec/llvm-support/diagnostics.h"
 #include "retdec/utils/container.h"
 
-using namespace llvm_support;
+using namespace retdec::llvm_support;
 
 using retdec::utils::mapHasKey;
 
+namespace retdec {
 namespace llvmir2hll {
 namespace {
 
@@ -1403,3 +1404,4 @@ void LLVMConverter::setOptionStrictFPUSemantics(bool strict) {
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

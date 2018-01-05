@@ -6,6 +6,7 @@
 
 #include "retdec/llvmir2hll/semantics/semantics/impl_support/get_symbolic_names_for_param.h"
 
+namespace retdec {
 namespace llvmir2hll {
 namespace semantics {
 
@@ -28,3 +29,4 @@ Maybe<IntStringMap> getSymbolicNamesForParamFromMap(const std::string &funcName,
 
 } // namespace semantics
 } // namespace llvmir2hll
+} // namespace retdec

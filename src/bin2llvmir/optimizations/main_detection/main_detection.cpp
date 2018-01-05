@@ -16,10 +16,11 @@
 #define debug_enabled false
 #include "retdec/llvm-support/utils.h"
 
-using namespace llvm_support;
+using namespace retdec::llvm_support;
 using namespace retdec::utils;
 using namespace llvm;
 
+namespace retdec {
 namespace bin2llvmir {
 
 char MainDetection::ID = 0;
@@ -522,3 +523,4 @@ bool MainDetection::applyResult(retdec::utils::Address mainAddr)
 }
 
 } // namespace bin2llvmir
+} // namespace retdec

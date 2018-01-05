@@ -6,6 +6,7 @@
 
 #include "retdec/fileformat/types/dotnet_types/dotnet_parameter.h"
 
+namespace retdec {
 namespace fileformat {
 
 /**
@@ -27,3 +28,4 @@ void DotnetParameter::setDataType(std::unique_ptr<DotnetDataTypeBase>&& paramDat
 }
 
 } // namespace fileformat
+} // namespace retdec

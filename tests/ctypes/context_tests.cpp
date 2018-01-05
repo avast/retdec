@@ -18,6 +18,7 @@
 
 using namespace ::testing;
 
+namespace retdec {
 namespace ctypes {
 namespace tests {
 
@@ -163,3 +164,4 @@ AddNamedTypeKeepsFirstOne)
 
 } // namespace tests
 } // namespace ctypes
+} // namespace retdec

@@ -17,6 +17,7 @@
 using retdec::utils::hasItem;
 using retdec::utils::startsWith;
 
+namespace retdec {
 namespace llvmir2hll {
 
 /**
@@ -100,3 +101,4 @@ void LLVMIntrinsicsOptimizer::visit(ShPtr<CallStmt> stmt) {
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

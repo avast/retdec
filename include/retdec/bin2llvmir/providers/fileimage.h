@@ -16,6 +16,7 @@
 #include "retdec/bin2llvmir/providers/debugformat.h"
 #include "retdec/loader/loader/image.h"
 
+namespace retdec {
 namespace bin2llvmir {
 
 class DebugFormat;
@@ -29,17 +30,17 @@ class FileImage
 				Config* config);
 		FileImage(
 				llvm::Module* m,
-				const std::shared_ptr<fileformat::FileFormat>& ff,
+				const std::shared_ptr<retdec::fileformat::FileFormat>& ff,
 				Config* config);
 		FileImage(
 				llvm::Module* m,
-				std::unique_ptr<loader::Image> img,
+				std::unique_ptr<retdec::loader::Image> img,
 				Config* config);
 
 		bool isOk() const;
 
-		loader::Image* getImage();
-		fileformat::FileFormat* getFileFormat();
+		retdec::loader::Image* getImage();
+		retdec::fileformat::FileFormat* getFileFormat();
 
 	public:
 		llvm::ConstantInt* getConstantInt(
@@ -71,7 +72,7 @@ class FileImage
 				retdec::utils::Address addr = retdec::utils::Address::getUndef);
 
 	public:
-		const fileformat::Symbol* getPreferredSymbol(
+		const retdec::fileformat::Symbol* getPreferredSymbol(
 				retdec::utils::Address addr);
 
 	public:
@@ -79,7 +80,7 @@ class FileImage
 
 	private:
 		llvm::Module* _module = nullptr;
-		std::unique_ptr<loader::Image> _image;
+		std::unique_ptr<retdec::loader::Image> _image;
 };
 
 /**
@@ -101,7 +102,7 @@ class FileImageProvider
 				Config* config);
 		static FileImage* addFileImage(
 				llvm::Module* m,
-				const std::shared_ptr<fileformat::FileFormat>& ff,
+				const std::shared_ptr<retdec::fileformat::FileFormat>& ff,
 				Config* config);
 
 		static FileImage* getFileImage(
@@ -123,5 +124,6 @@ class FileImageProvider
 };
 
 } // namespace bin2llvmir
+} // namespace retdec
 
 #endif

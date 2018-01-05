@@ -11,6 +11,7 @@
 
 using namespace std;
 
+namespace retdec {
 namespace demangler {
 
 /**
@@ -89,3 +90,4 @@ void deleteIgrams(cGram* gParser) {
 }
 
 } // namespace demangler
+} // namespace retdec

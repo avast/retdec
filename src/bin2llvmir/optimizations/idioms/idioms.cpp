@@ -17,6 +17,7 @@
 
 using namespace llvm;
 
+namespace retdec {
 namespace bin2llvmir {
 
 struct GlobalOpt;
@@ -146,3 +147,4 @@ IdiomsAnalysis * Idioms::getCompilerAnalysis(Module &M)
 }
 
 } // namespace bin2llvmir
+} // namespace retdec

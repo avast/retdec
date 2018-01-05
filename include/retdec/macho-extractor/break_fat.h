@@ -12,6 +12,7 @@
 #include <llvm/Support/ErrorOr.h>
 #include <llvm/Support/MachO.h>
 
+namespace retdec {
 namespace macho_extractor {
 
 class BreakMachOUniversal
@@ -55,5 +56,6 @@ class BreakMachOUniversal
 };
 
 } // namespace macho_extractor
+} // namespace retdec
 
 #endif

@@ -10,6 +10,7 @@
 #include <string>
 #include <vector>
 
+namespace retdec {
 namespace cpdetect {
 
 /*
@@ -26,5 +27,6 @@ const std::set<std::string> EXTERNAL_DATABASE_SUFFIXES =
 };
 
 } // namespace cpdetect
+} // namespace retdec
 
 #endif

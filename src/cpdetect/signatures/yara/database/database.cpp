@@ -110,6 +110,7 @@
 #include "retdec/cpdetect/signatures/yara/database/x86/pe/packer/packer_70.h"
 #include "retdec/cpdetect/signatures/yara/database/x86/pe/packer/packer_71.h"
 
+namespace retdec {
 namespace cpdetect {
 
 namespace
@@ -414,3 +415,4 @@ const std::vector<const char*>* getX86Database()
 }
 
 } // namespace cpdetect
+} // namespace retdec

@@ -8,6 +8,7 @@
 #include "retdec/llvmir2hll/support/debug.h"
 #include "retdec/llvmir2hll/support/visitor.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 /**
@@ -78,3 +79,4 @@ void DivOpExpr::accept(Visitor *v) {
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

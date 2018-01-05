@@ -8,6 +8,7 @@
 #include "retdec/llvmir2hll/semantics/semantics_factory.h"
 #include "retdec/llvmir2hll/support/debug.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 REGISTER_AT_FACTORY("default", DEFAULT_SEMANTICS_ID, SemanticsFactory,
@@ -59,3 +60,4 @@ Maybe<IntStringMap> DefaultSemantics::getSymbolicNamesForParam(
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

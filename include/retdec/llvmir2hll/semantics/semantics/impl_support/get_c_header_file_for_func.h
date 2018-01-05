@@ -27,6 +27,7 @@
 		map[funcs[i]] = header; \
 	}
 
+namespace retdec {
 namespace llvmir2hll {
 namespace semantics {
 
@@ -35,5 +36,6 @@ Maybe<std::string> getCHeaderFileForFuncFromMap(const std::string &funcName,
 
 } // namespace semantics
 } // namespace llvmir2hll
+} // namespace retdec
 
 #endif

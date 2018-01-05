@@ -16,6 +16,7 @@
 
 #include "retdec/utils/non_copyable.h"
 
+namespace retdec {
 namespace ar_extractor {
 
 /**
@@ -73,5 +74,6 @@ class ArchiveWrapper : private retdec::utils::NonCopyable
 };
 
 } // namespace ar_extractor
+} // namespace retdec
 
 #endif

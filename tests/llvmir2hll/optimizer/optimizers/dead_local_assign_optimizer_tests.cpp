@@ -20,6 +20,7 @@
 
 using namespace ::testing;
 
+namespace retdec {
 namespace llvmir2hll {
 namespace tests {
 
@@ -328,3 +329,4 @@ DoNotOptimizeAssignmentIntoExternalVariable) {
 
 } // namespace tests
 } // namespace llvmir2hll
+} // namespace retdec

@@ -15,7 +15,7 @@ namespace fileinfo {
  * @param pathToFile Path to ELF binary file
  * @param loadFlags Load flags
  */
-ElfWrapper::ElfWrapper(std::string pathToFile, fileformat::LoadFlags loadFlags) : ElfFormat(pathToFile, loadFlags)
+ElfWrapper::ElfWrapper(std::string pathToFile, retdec::fileformat::LoadFlags loadFlags) : ElfFormat(pathToFile, loadFlags)
 {
 
 }

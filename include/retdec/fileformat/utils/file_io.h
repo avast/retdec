@@ -11,11 +11,13 @@
 #include <string>
 #include <vector>
 
+namespace retdec {
 namespace fileformat {
 
 bool readHexString(std::istream &fileStream, std::string &hexa, std::size_t start = 0, std::size_t desiredSize = 0);
 bool readPlainString(std::istream &fileStream, std::string &plain, std::size_t start = 0, std::size_t desiredSize = 0);
 
 } // namespace fileformat
+} // namespace retdec
 
 #endif

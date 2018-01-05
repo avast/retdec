@@ -9,6 +9,7 @@
 #include "retdec/ctypes/member.h"
 #include "retdec/utils/container.h"
 
+namespace retdec {
 namespace ctypes {
 
 /**
@@ -110,3 +111,4 @@ void CompositeType::setMembers(const Members &members)
 }
 
 } // namespace ctypes
+} // namespace retdec

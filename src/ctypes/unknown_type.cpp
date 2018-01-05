@@ -7,6 +7,7 @@
 #include "retdec/ctypes/unknown_type.h"
 #include "retdec/ctypes/visitor.h"
 
+namespace retdec {
 namespace ctypes {
 
 /**
@@ -41,3 +42,4 @@ void UnknownType::accept(Visitor *v) {
 }
 
 } // namespace ctypes
+} // namespace retdec

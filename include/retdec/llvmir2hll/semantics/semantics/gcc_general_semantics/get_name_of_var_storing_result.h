@@ -12,6 +12,7 @@
 
 #include "retdec/llvmir2hll/support/maybe.h"
 
+namespace retdec {
 namespace llvmir2hll {
 namespace semantics {
 namespace gcc_general {
@@ -21,5 +22,6 @@ Maybe<std::string> getNameOfVarStoringResult(const std::string &funcName);
 } // namespace gcc_general
 } // namespace semantics
 } // namespace llvmir2hll
+} // namespace retdec
 
 #endif

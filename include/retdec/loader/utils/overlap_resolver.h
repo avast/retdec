@@ -14,6 +14,7 @@
 #include "retdec/utils/range.h"
 #include "retdec/loader/utils/range.h"
 
+namespace retdec {
 namespace loader {
 
 /**
@@ -50,5 +51,6 @@ public:
 };
 
 } // namespace loader
+} // namespace retdec
 
 #endif

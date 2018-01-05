@@ -25,6 +25,7 @@ class UnreachableInst;
 
 } // namespace llvm
 
+namespace retdec {
 namespace llvmir2hll {
 
 class LabelsHandler;
@@ -70,5 +71,6 @@ private:
 };
 
 } // namespace llvmir2hll
+} // namespace retdec
 
 #endif

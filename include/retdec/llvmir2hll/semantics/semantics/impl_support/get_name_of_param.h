@@ -19,6 +19,7 @@
 #define ADD_PARAM_NAME(funcName, paramPos, paramName) \
 	funcParamNamesMap[FuncParamPosPair(funcName, paramPos)] = paramName;
 
+namespace retdec {
 namespace llvmir2hll {
 namespace semantics {
 
@@ -44,5 +45,6 @@ Maybe<std::string> getNameOfParamFromMap(const std::string &funcName,
 
 } // namespace semantics
 } // namespace llvmir2hll
+} // namespace retdec
 
 #endif

@@ -108,7 +108,7 @@ template <int bits> class PeUpxStub : public UpxStub
 	using PeLibFileType = typename PeUpxStubTraits<bits>::PeLibFileType;
 
 public:
-	PeUpxStub(loader::Image* inputFile, const UpxStubData* stubData, const unpacker::DynamicBuffer& stubCapturedData,
+	PeUpxStub(retdec::loader::Image* inputFile, const UpxStubData* stubData, const unpacker::DynamicBuffer& stubCapturedData,
 			std::unique_ptr<Decompressor> decompressor, const UpxMetadata& metadata);
 
 	virtual ~PeUpxStub() override;
@@ -124,7 +124,7 @@ public:
 	void setRealEpAddress(std::uint32_t realEpAddress);
 
 protected:
-	const loader::Segment* _upx0Sect;      ///< Pointer to section UPX0.
+	const retdec::loader::Segment* _upx0Sect;      ///< Pointer to section UPX0.
 	std::uint32_t _realEpAddress;                ///< The real entry point address.
 
 private:

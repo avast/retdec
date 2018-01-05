@@ -19,6 +19,7 @@
 
 #include "retdec/llvmir-emul/exceptions.h"
 
+namespace retdec {
 namespace llvmir_emul {
 
 /**
@@ -274,5 +275,6 @@ class LlvmIrEmulator : public llvm::InstVisitor<LlvmIrEmulator>
 };
 
 } // llvmir_emul
+} // retdec
 
 #endif

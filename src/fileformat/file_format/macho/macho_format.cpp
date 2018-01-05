@@ -16,6 +16,7 @@ using namespace llvm;
 using namespace llvm::MachO;
 using namespace llvm::object;
 
+namespace retdec {
 namespace fileformat {
 
 namespace
@@ -1574,3 +1575,4 @@ std::uint32_t MachOFormat::getChosenArchitectureOffset() const
 }
 
 } // namespace fileformat
+} // namespace retdec

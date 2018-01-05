@@ -16,6 +16,7 @@
 using namespace ::testing;
 using namespace llvm;
 
+namespace retdec {
 namespace bin2llvmir {
 namespace tests {
 
@@ -291,3 +292,4 @@ hasNoVolatileLoadTest) {
 
 } // namespace tests
 } // namespace bin2llvmir
+} // namespace retdec

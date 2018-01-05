@@ -8,6 +8,7 @@
 #include "retdec/llvmir2hll/support/debug.h"
 #include "retdec/llvmir2hll/support/visitor.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 /**
@@ -48,3 +49,4 @@ ShPtr<UnreachableStmt> UnreachableStmt::create() {
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

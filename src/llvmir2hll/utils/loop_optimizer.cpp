@@ -25,6 +25,7 @@
 
 using retdec::utils::hasItem;
 
+namespace retdec {
 namespace llvmir2hll {
 
 /**
@@ -248,3 +249,4 @@ ShPtr<IndVarInfo> getIndVarInfo(ShPtr<WhileLoopStmt> stmt) {
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

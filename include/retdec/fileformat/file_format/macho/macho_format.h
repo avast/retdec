@@ -15,6 +15,7 @@
 
 #include "retdec/fileformat/file_format/file_format.h"
 
+namespace retdec {
 namespace fileformat {
 
 /**
@@ -163,5 +164,6 @@ class MachOFormat : public FileFormat
 };
 
 } // namespace fileformat
+} // namespace retdec
 
 #endif

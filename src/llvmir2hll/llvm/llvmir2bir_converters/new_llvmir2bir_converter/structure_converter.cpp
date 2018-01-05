@@ -41,6 +41,7 @@ using namespace std::placeholders;
 using retdec::utils::hasItem;
 using retdec::utils::removeItem;
 
+namespace retdec {
 namespace llvmir2hll {
 
 namespace {
@@ -2431,3 +2432,4 @@ void StructureConverter::cleanUp() {
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

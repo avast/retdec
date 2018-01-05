@@ -15,6 +15,7 @@
 #include "retdec/bin2llvmir/analyses/symbolic_tree.h"
 #include "retdec/bin2llvmir/providers/config.h"
 
+namespace retdec {
 namespace bin2llvmir {
 
 class RegisterAnalysis : public llvm::ModulePass
@@ -54,5 +55,6 @@ class RegisterAnalysis : public llvm::ModulePass
 };
 
 } // namespace bin2llvmir
+} // namespace retdec
 
 #endif

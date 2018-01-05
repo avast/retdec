@@ -11,6 +11,7 @@
 #include "retdec/llvmir2hll/support/debug.h"
 #include "retdec/llvmir2hll/support/types.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 /**
@@ -103,3 +104,4 @@ bool NodesOfVarUseCFGTraversal::combineRetVals(bool origRetVal, bool newRetVal) 
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

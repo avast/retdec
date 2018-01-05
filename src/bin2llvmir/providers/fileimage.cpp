@@ -13,6 +13,7 @@
 
 using namespace llvm;
 
+namespace retdec {
 namespace bin2llvmir {
 
 //
@@ -28,7 +29,7 @@ FileImage::FileImage(
 		:
 		FileImage(
 				m,
-				loader::createImage(path, &config->getConfig()),
+				retdec::loader::createImage(path, &config->getConfig()),
 				config)
 {
 
@@ -36,12 +37,12 @@ FileImage::FileImage(
 
 FileImage::FileImage(
 		llvm::Module* m,
-		const std::shared_ptr<fileformat::FileFormat>& ff,
+		const std::shared_ptr<retdec::fileformat::FileFormat>& ff,
 		Config* config)
 		:
 		FileImage(
 				m,
-				loader::createImage(ff),
+				retdec::loader::createImage(ff),
 				config)
 {
 
@@ -49,7 +50,7 @@ FileImage::FileImage(
 
 FileImage::FileImage(
 		llvm::Module* m,
-		std::unique_ptr<loader::Image> img,
+		std::unique_ptr<retdec::loader::Image> img,
 		Config* config)
 		:
 		_module(m),
@@ -64,7 +65,7 @@ FileImage::FileImage(
 	}
 
 	_image->getFileFormat()->initFromConfig(config->getConfig());
-	if (auto* imgRaw = dynamic_cast<loader::RawDataImage*>(
+	if (auto* imgRaw = dynamic_cast<retdec::loader::RawDataImage*>(
 			_image.get()))
 	{
 		imgRaw->reload();
@@ -85,12 +86,12 @@ bool FileImage::isOk() const
 	return _image != nullptr;
 }
 
-loader::Image* FileImage::getImage()
+retdec::loader::Image* FileImage::getImage()
 {
 	return _image.get();
 }
 
-fileformat::FileFormat* FileImage::getFileFormat()
+retdec::fileformat::FileFormat* FileImage::getFileFormat()
 {
 	return _image->getFileFormat();
 }
@@ -531,7 +532,7 @@ llvm::Constant* FileImage::getConstant(
 }
 
 /**
- * There is a function fileformat::getSymbolTables()
+ * There is a function retdec::fileformat::getSymbolTables()
  * which gets the first symbol on a specified address.
  *
  * However, sometimes there are multiple symbols for one address.
@@ -540,10 +541,10 @@ llvm::Constant* FileImage::getConstant(
  * If there is only one symbol, it is simply returned.
  * If there is no symbol, @c nullptr is returned.
  */
-const fileformat::Symbol* FileImage::getPreferredSymbol(
+const retdec::fileformat::Symbol* FileImage::getPreferredSymbol(
 		retdec::utils::Address addr)
 {
-	std::set<const fileformat::Symbol*> syms;
+	std::set<const retdec::fileformat::Symbol*> syms;
 
 	for (const auto* t : _image->getFileFormat()->getSymbolTables())
 	for (const auto& s : *t)
@@ -560,7 +561,7 @@ const fileformat::Symbol* FileImage::getPreferredSymbol(
 		}
 	}
 
-	const fileformat::Symbol* ret = nullptr;
+	const retdec::fileformat::Symbol* ret = nullptr;
 
 	for (auto* s : syms)
 	{
@@ -624,7 +625,7 @@ FileImage* FileImageProvider::addFileImage(
  */
 FileImage* FileImageProvider::addFileImage(
 		llvm::Module* m,
-		const std::shared_ptr<fileformat::FileFormat>& ff,
+		const std::shared_ptr<retdec::fileformat::FileFormat>& ff,
 		Config* config)
 {
 	return addFileImage(m, FileImage(m, ff, config));
@@ -679,3 +680,4 @@ void FileImageProvider::clear()
 }
 
 } // namespace bin2llvmir
+} // namespace retdec

@@ -7,13 +7,14 @@
 #include "retdec/ctypes/context.h"
 #include "retdec/ctypesparser/ctypes_parser.h"
 
+namespace retdec {
 namespace ctypesparser {
 
 /**
 * @brief Creates new C-types parser.
 */
 CTypesParser::CTypesParser():
-	context(std::make_shared<ctypes::Context>()) {}
+	context(std::make_shared<retdec::ctypes::Context>()) {}
 
 /**
 * @brief Creates new C-types parser.
@@ -21,7 +22,8 @@ CTypesParser::CTypesParser():
 * @param defaultBitWidth BitWidth used for types that are not in typeWidths.
 */
 CTypesParser::CTypesParser(unsigned defaultBitWidth):
-	context(std::make_shared<ctypes::Context>()),
+	context(std::make_shared<retdec::ctypes::Context>()),
 	defaultBitWidth(defaultBitWidth) {}
 
 } // namespace ctypesparser
+} // namespace retdec

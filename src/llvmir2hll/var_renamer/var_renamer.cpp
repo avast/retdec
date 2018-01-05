@@ -23,6 +23,7 @@ using retdec::utils::hasItem;
 using retdec::utils::mapGetValueOrDefault;
 using retdec::utils::toString;
 
+namespace retdec {
 namespace llvmir2hll {
 
 /**
@@ -493,3 +494,4 @@ void VarRenamer::visit(ShPtr<Variable> var) {
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

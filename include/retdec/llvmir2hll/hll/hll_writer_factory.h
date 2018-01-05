@@ -17,6 +17,7 @@
 #include "retdec/llvmir2hll/support/singleton.h"
 #include "retdec/llvmir2hll/support/smart_ptr.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 class Module;
@@ -37,5 +38,6 @@ using HLLWriterFactory = Singleton<
 >;
 
 } // namespace llvmir2hll
+} // namespace retdec
 
 #endif

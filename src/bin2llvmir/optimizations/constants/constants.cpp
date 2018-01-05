@@ -29,10 +29,11 @@
 #include "retdec/llvm-support/utils.h"
 #include "retdec/bin2llvmir/utils/type.h"
 
-using namespace llvm_support;
+using namespace retdec::llvm_support;
 using namespace retdec::utils;
 using namespace llvm;
 
+namespace retdec {
 namespace bin2llvmir {
 
 char ConstantsAnalysis::ID = 0;
@@ -267,3 +268,4 @@ void ConstantsAnalysis::setPic32GpValue(ReachingDefinitionsAnalysis& RDA)
 }
 
 } // namespace bin2llvmir
+} // namespace retdec

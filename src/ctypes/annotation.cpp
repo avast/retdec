@@ -6,6 +6,7 @@
 
 #include "retdec/ctypes/annotation.h"
 
+namespace retdec {
 namespace ctypes {
 
 /**
@@ -50,3 +51,4 @@ const std::string &Annotation::getName() const
 }
 
 } // namespace ctypes
+} // namespace retdec

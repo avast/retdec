@@ -7,7 +7,7 @@
 #include "retdec/fileformat/utils/conversions.h"
 #include "fileinfo/file_presentation/getters/simple_getter/header_json_getter.h"
 
-using namespace fileformat;
+using namespace retdec::fileformat;
 
 namespace fileinfo {
 

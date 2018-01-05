@@ -8,6 +8,7 @@
 #include "retdec/llvmir2hll/support/debug.h"
 #include "retdec/llvmir2hll/support/visitor.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 /**
@@ -64,3 +65,4 @@ ShPtr<AddressOpExpr> AddressOpExpr::create(ShPtr<Expression> op) {
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

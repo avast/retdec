@@ -12,6 +12,7 @@
 
 #include "retdec/fileformat/types/dotnet_headers/stream.h"
 
+namespace retdec {
 namespace fileformat {
 
 class GuidStream : public Stream
@@ -36,5 +37,6 @@ class GuidStream : public Stream
 };
 
 } // namespace fileformat
+} // namespace retdec
 
 #endif

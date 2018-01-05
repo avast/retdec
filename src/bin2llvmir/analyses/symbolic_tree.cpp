@@ -18,11 +18,12 @@
 #include "retdec/bin2llvmir/providers/config.h"
 #include "retdec/bin2llvmir/utils/defs.h"
 
-using namespace llvm_support;
+using namespace retdec::llvm_support;
 using namespace llvm;
 
 #define debug_enabled false
 
+namespace retdec {
 namespace bin2llvmir {
 
 SymbolicTree::SymbolicTree(
@@ -659,3 +660,4 @@ void SymbolicTree::_getPostOrder(std::vector<SymbolicTree*>& res) const
 }
 
 } // namespace bin2llvmir
+} // namespace retdec

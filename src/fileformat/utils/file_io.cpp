@@ -11,6 +11,7 @@
 
 using namespace retdec::utils;
 
+namespace retdec {
 namespace fileformat {
 
 /**
@@ -60,3 +61,4 @@ bool readPlainString(std::istream &fileStream, std::string &plain, std::size_t s
 }
 
 } // namespace fileformat
+} // namespace retdec

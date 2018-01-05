@@ -7,6 +7,7 @@
 #include "retdec/llvmir2hll/ir/expression.h"
 #include "retdec/llvmir2hll/support/debug.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 /**
@@ -56,3 +57,4 @@ void Expression::replaceExpression(ShPtr<Expression> oldExpr,
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

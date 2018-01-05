@@ -10,6 +10,7 @@
 
 using namespace ::testing;
 
+namespace retdec {
 namespace bin2llvmir {
 namespace tests {
 
@@ -172,3 +173,4 @@ TEST_F(TypeConversionsTests, runInInstruction_replacesByInstruction)
 
 } // namespace tests
 } // namespace bin2llvmir
+} // namespace retdec

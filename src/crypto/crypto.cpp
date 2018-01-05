@@ -15,6 +15,7 @@
 #include "retdec/crypto/crypto.h"
 #include "retdec/utils/conversion.h"
 
+namespace retdec {
 namespace crypto {
 
 namespace {
@@ -126,3 +127,4 @@ std::string getSha256(const unsigned char *data, std::uint64_t length)
 }
 
 } // namespace crypto
+} // namespace retdec

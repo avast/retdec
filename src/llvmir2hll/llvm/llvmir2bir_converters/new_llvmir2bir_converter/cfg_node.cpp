@@ -14,6 +14,7 @@
 
 using retdec::utils::hasItem;
 
+namespace retdec {
 namespace llvmir2hll {
 
 /**
@@ -407,3 +408,4 @@ void CFGNode::debugPrint() const {
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

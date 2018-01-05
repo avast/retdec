@@ -21,8 +21,9 @@
 #include "retdec/llvmir2hll/utils/string.h"
 #include "retdec/llvm-support/diagnostics.h"
 
-using namespace llvm_support;
+using namespace retdec::llvm_support;
 
+namespace retdec {
 namespace llvmir2hll {
 
 namespace {
@@ -300,3 +301,4 @@ void NewLLVMIR2BIRConverter::makeFuncVariablesValid(ShPtr<Function> func) const 
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

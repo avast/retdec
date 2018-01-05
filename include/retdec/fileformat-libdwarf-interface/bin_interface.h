@@ -37,7 +37,7 @@ class BinInt
 		 * @param fileParser Parser of input file (optional).
 		 * @note Function which relocate a section is not used at the moment.
 		 */
-		BinInt(std::string fileName, fileformat::FileFormat *fileParser = nullptr) :
+		BinInt(std::string fileName, retdec::fileformat::FileFormat *fileParser = nullptr) :
 			m_fileName(fileName),
 			m_fileParser(fileParser),
 			m_parserInsteadOfPath(m_fileParser && m_fileParser->isInValidState()),
@@ -96,14 +96,14 @@ class BinInt
 		void dwarf_binint_object_access_init()
 		{
 			// Open input object file.
-			fileformat::FileFormat *objFile = nullptr;
+			retdec::fileformat::FileFormat *objFile = nullptr;
 			if(m_parserInsteadOfPath)
 			{
 				objFile = m_fileParser;
 			}
 			else
 			{
-				m_newParserPtr = fileformat::createFileFormat(m_fileName);
+				m_newParserPtr = retdec::fileformat::createFileFormat(m_fileName);
 				if(m_newParserPtr)
 				{
 					objFile = m_newParserPtr.get();
@@ -143,7 +143,7 @@ class BinInt
 				Dwarf_Obj_Access_Section* ret_scn,
 				int* error)
 		{
-			auto *obj = static_cast<fileformat::FileFormat*>(obj_in);
+			auto *obj = static_cast<retdec::fileformat::FileFormat*>(obj_in);
 
 			const auto *sec = obj->getSection(section_index);
 			if (!sec)
@@ -168,7 +168,7 @@ class BinInt
 		static Dwarf_Endianness dwarf_binint_object_access_get_byte_order(
 				void* obj_in)
 		{
-			auto *obj = static_cast<fileformat::FileFormat*>(obj_in);
+			auto *obj = static_cast<retdec::fileformat::FileFormat*>(obj_in);
 
 			if (obj->isLittleEndian())
 			{
@@ -196,7 +196,7 @@ class BinInt
 		static Dwarf_Small dwarf_binint_object_access_get_length_size(
 				void* obj_in)
 		{
-			auto *obj = static_cast<fileformat::FileFormat*>(obj_in);
+			auto *obj = static_cast<retdec::fileformat::FileFormat*>(obj_in);
 			return static_cast<Dwarf_Small>(obj->getBytesPerWord());
 		}
 
@@ -208,7 +208,7 @@ class BinInt
 		static Dwarf_Small dwarf_binint_object_access_get_pointer_size(
 				void* obj_in)
 		{
-			auto *obj = static_cast<fileformat::FileFormat*>(obj_in);
+			auto *obj = static_cast<retdec::fileformat::FileFormat*>(obj_in);
 			return static_cast<Dwarf_Small>(obj->getBytesPerWord());
 		}
 
@@ -220,7 +220,7 @@ class BinInt
 		static Dwarf_Unsigned dwarf_binint_object_access_get_section_count(
 				void * obj_in)
 		{
-			auto *obj = static_cast<fileformat::FileFormat*>(obj_in);
+			auto *obj = static_cast<retdec::fileformat::FileFormat*>(obj_in);
 			return obj->getNumberOfSections();
 		}
 
@@ -246,7 +246,7 @@ class BinInt
 			}
 			else
 			{
-				auto *obj = static_cast<fileformat::FileFormat*>(obj_in);
+				auto *obj = static_cast<retdec::fileformat::FileFormat*>(obj_in);
 				if (!obj || !section_data)
 				{
 					*error = DW_DLE_MDE;
@@ -315,8 +315,8 @@ class BinInt
 	//
 	private:
 		std::string m_fileName;
-		std::unique_ptr<fileformat::FileFormat> m_newParserPtr;
-		fileformat::FileFormat *m_fileParser;
+		std::unique_ptr<retdec::fileformat::FileFormat> m_newParserPtr;
+		retdec::fileformat::FileFormat *m_fileParser;
 		bool m_parserInsteadOfPath;
 		bool m_success;
 		Dwarf_Obj_Access_Interface *m_binInt;

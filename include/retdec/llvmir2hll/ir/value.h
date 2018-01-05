@@ -19,6 +19,7 @@
 #include "retdec/llvmir2hll/support/visitable.h"
 #include "retdec/utils/non_copyable.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 /**
@@ -84,5 +85,6 @@ std::ostream &operator<<(std::ostream &os, Value *value);
 /// @}
 
 } // namespace llvmir2hll
+} // namespace retdec
 
 #endif

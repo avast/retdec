@@ -18,6 +18,7 @@
 
 using retdec::utils::getValuesFromMap;
 
+namespace retdec {
 namespace llvmir2hll {
 
 /**
@@ -107,3 +108,4 @@ VarSet VariablesManager::getLocalVars() const {
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

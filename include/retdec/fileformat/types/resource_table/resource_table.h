@@ -11,6 +11,7 @@
 
 #include "retdec/fileformat/types/resource_table/resource.h"
 
+namespace retdec {
 namespace fileformat {
 
 /**
@@ -61,5 +62,6 @@ class ResourceTable
 };
 
 } // namespace fileformat
+} // namespace retdec
 
 #endif

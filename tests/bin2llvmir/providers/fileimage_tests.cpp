@@ -14,9 +14,10 @@
 
 using namespace ::testing;
 using namespace llvm;
-using namespace fileformat;
-using namespace loader;
+using namespace retdec::fileformat;
+using namespace retdec::loader;
 
+namespace retdec {
 namespace bin2llvmir {
 namespace tests {
 
@@ -331,7 +332,7 @@ TEST_F(FileImageTests, getConstantReadsCorrectValuesForStructureType)
 //
 //llvm::Constant* getConstant(
 //		llvm::Module* module,
-//		loader::Image* objf,
+//		retdec::loader::Image* objf,
 //		DebugFormat* dbgf,
 //		retdec::utils::Address addr)
 //
@@ -420,3 +421,4 @@ TEST_F(FileImageProviderTests, clearRemovesAllData)
 
 } // namespace tests
 } // namespace bin2llvmir
+} // namespace retdec

@@ -8,6 +8,7 @@
 #include "retdec/llvmir2hll/support/debug.h"
 #include "retdec/llvmir2hll/support/visitor.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 /**
@@ -70,3 +71,4 @@ void StringType::accept(Visitor *v) {
 std::map<std::size_t, ShPtr<StringType>> StringType::createdTypes;
 
 } // namespace llvmir2hll
+} // namespace retdec

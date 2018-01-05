@@ -74,6 +74,7 @@ const std::string JSON_void                 = "void";
 
 } // anonymous namespace
 
+namespace retdec {
 namespace ctypesparser {
 
 const rapidjson::Value &safeGetObject(const rapidjson::Value &val, const std::string &name)
@@ -208,12 +209,12 @@ void JSONCTypesParser::handleParsingFailure(const rapidjson::ParseResult &err) c
 *
 * Call convention is used when function itself does not specify its call convention.
 */
-std::unique_ptr<ctypes::Module> JSONCTypesParser::parse(
+std::unique_ptr<retdec::ctypes::Module> JSONCTypesParser::parse(
 	std::istream &stream,
 	const CTypesParser::TypeWidths &typeWidths,
-	const ctypes::CallConvention &callConvention)
+	const retdec::ctypes::CallConvention &callConvention)
 {
-	auto module = std::make_unique<ctypes::Module>(context);
+	auto module = std::make_unique<retdec::ctypes::Module>(context);
 	parseInto(stream, module, typeWidths, callConvention);
 	return module;
 }
@@ -233,9 +234,9 @@ std::unique_ptr<ctypes::Module> JSONCTypesParser::parse(
 */
 void JSONCTypesParser::parseInto(
 	std::istream &stream,
-	std::unique_ptr<ctypes::Module> &module,
+	std::unique_ptr<retdec::ctypes::Module> &module,
 	const CTypesParser::TypeWidths &typeWidths,
-	const ctypes::CallConvention &callConvention)
+	const retdec::ctypes::CallConvention &callConvention)
 {
 	assert(module && "violated precondition - module cannot be null");
 
@@ -290,7 +291,7 @@ std::unique_ptr<rapidjson::Document> JSONCTypesParser::parseJson(char *buffer) c
 */
 void JSONCTypesParser::parseJsonIntoModule(
 	const std::unique_ptr<rapidjson::Document> &root,
-	std::unique_ptr<ctypes::Module> &module)
+	std::unique_ptr<retdec::ctypes::Module> &module)
 {
 	// We need a clean context for each JSON because types may have different keys.
 	parserContext.clear();
@@ -326,7 +327,7 @@ void JSONCTypesParser::addTypesToMap(const rapidjson::Value &types)
 * @param funcName Name of function.
 * @param jsonFunction JSON representation of function.
 */
-std::shared_ptr<ctypes::Function> JSONCTypesParser::getOrParseFunction(
+std::shared_ptr<retdec::ctypes::Function> JSONCTypesParser::getOrParseFunction(
 	const std::string &funcName,
 	const rapidjson::Value &jsonFunction)
 {
@@ -345,26 +346,26 @@ std::shared_ptr<ctypes::Function> JSONCTypesParser::getOrParseFunction(
 * convention. This function should be called from getOrParseFunction(), where
 * function name is parsed from JSON.
 */
-std::shared_ptr<ctypes::Function> JSONCTypesParser::parseFunction(
+std::shared_ptr<retdec::ctypes::Function> JSONCTypesParser::parseFunction(
 	const rapidjson::Value &function,
 	const std::string &fName)
 {
 	std::string retTypeKey = safeGetString(function, JSON_ret_type);
-	std::shared_ptr<ctypes::Type> returnType = getOrParseType(retTypeKey);
+	std::shared_ptr<retdec::ctypes::Type> returnType = getOrParseType(retTypeKey);
 
 	auto parameters = parseParameters(safeGetArray(function, JSON_params));
 
 	auto varArgness = parseVarArgness(function);
-	ctypes::CallConvention callConv(parseCallConv(function));
+	retdec::ctypes::CallConvention callConv(parseCallConv(function));
 
-	auto newFunction = ctypes::Function::create(
+	auto newFunction = retdec::ctypes::Function::create(
 		context, fName, returnType, parameters, callConv, varArgness);
 
 	std::string fDecl = safeGetString(function, JSON_decl);
-	newFunction->setDeclaration(ctypes::FunctionDeclaration(fDecl));
+	newFunction->setDeclaration(retdec::ctypes::FunctionDeclaration(fDecl));
 
 	std::string fHeader = safeGetString(function, JSON_header);
-	newFunction->setHeaderFile(ctypes::HeaderFile(fHeader));
+	newFunction->setHeaderFile(retdec::ctypes::HeaderFile(fHeader));
 
 	return newFunction;
 }
@@ -374,10 +375,10 @@ std::shared_ptr<ctypes::Function> JSONCTypesParser::parseFunction(
 *
 * @param jsonParams JSON object representing function parameters.
 */
-ctypes::Function::Parameters JSONCTypesParser::parseParameters(
+retdec::ctypes::Function::Parameters JSONCTypesParser::parseParameters(
 	const rapidjson::Value &jsonParams)
 {
-	ctypes::Function::Parameters parameters;
+	retdec::ctypes::Function::Parameters parameters;
 
 	for (auto i = jsonParams.Begin(), e = jsonParams.End(); i != e; ++i)
 	{
@@ -391,12 +392,12 @@ ctypes::Function::Parameters JSONCTypesParser::parseParameters(
 *
 * @param param JSON object representing one function parameter.
 */
-ctypes::Parameter JSONCTypesParser::parseParameter(
+retdec::ctypes::Parameter JSONCTypesParser::parseParameter(
 	const rapidjson::Value &param)
 {
 	static const rapidjson::Value emptyAnnotation("");
 	std::string annotationStr = safeGetString(param, JSON_annotations, emptyAnnotation);
-	ctypes::Parameter::Annotations annots;
+	retdec::ctypes::Parameter::Annotations annots;
 
 	if (!annotationStr.empty())
 	{
@@ -406,20 +407,20 @@ ctypes::Parameter JSONCTypesParser::parseParameter(
 	std::string paramName = safeGetString(param, JSON_name);
 	std::string paramTypeKey = safeGetString(param, JSON_type);
 
-	return ctypes::Parameter(paramName, getOrParseType(paramTypeKey), annots);
+	return retdec::ctypes::Parameter(paramName, getOrParseType(paramTypeKey), annots);
 }
 
 /**
 * @brief Returns @c IsVarArg when @c function has varArg attribute
 *        set to @c true, @c IsNotVarArg otherwise.
 */
-ctypes::FunctionType::VarArgness JSONCTypesParser::parseVarArgness(
+retdec::ctypes::FunctionType::VarArgness JSONCTypesParser::parseVarArgness(
 	const rapidjson::Value &function) const
 {
 	static const rapidjson::Value defaultVarArg(rapidjson::Type::kFalseType);
 	return safeGetBool(function, JSON_vararg, defaultVarArg) ?
-		ctypes::FunctionType::VarArgness::IsVarArg :
-		ctypes::FunctionType::VarArgness::IsNotVarArg;
+		retdec::ctypes::FunctionType::VarArgness::IsVarArg :
+		retdec::ctypes::FunctionType::VarArgness::IsNotVarArg;
 }
 
 /**
@@ -441,26 +442,26 @@ std::string JSONCTypesParser::parseCallConv(
 *
 * Distinguish @c in, @c out and @c inout annotations, they all may be optional.
 */
-ctypes::Parameter::Annotations JSONCTypesParser::parseAnnotations(
+retdec::ctypes::Parameter::Annotations JSONCTypesParser::parseAnnotations(
 	const std::string &annot) const
 {
-	ctypes::Parameter::Annotations annotations;
+	retdec::ctypes::Parameter::Annotations annotations;
 	if (retdec::utils::contains(annot, "Inout"))
 	{
-		annotations.insert(ctypes::AnnotationInOut::create(context, annot));
+		annotations.insert(retdec::ctypes::AnnotationInOut::create(context, annot));
 	}
 	else if (retdec::utils::containsCaseInsensitive(annot, "out"))
 	{
-		annotations.insert(ctypes::AnnotationOut::create(context, annot));
+		annotations.insert(retdec::ctypes::AnnotationOut::create(context, annot));
 	}
 	else if (retdec::utils::containsCaseInsensitive(annot, "in"))
 	{
-		annotations.insert(ctypes::AnnotationIn::create(context, annot));
+		annotations.insert(retdec::ctypes::AnnotationIn::create(context, annot));
 	}
 
 	if (retdec::utils::contains(annot, "opt"))
 	{
-		annotations.insert(ctypes::AnnotationOptional::create(context, annot));
+		annotations.insert(retdec::ctypes::AnnotationOptional::create(context, annot));
 	}
 	return annotations;
 }
@@ -470,15 +471,15 @@ ctypes::Parameter::Annotations JSONCTypesParser::parseAnnotations(
 *
 * @param jsonFuncType JSON object representing one function type.
 */
-std::shared_ptr<ctypes::FunctionType> JSONCTypesParser::parseFunctionType(
+std::shared_ptr<retdec::ctypes::FunctionType> JSONCTypesParser::parseFunctionType(
 	const rapidjson::Value &jsonFuncType)
 {
 	auto retType = getOrParseType(safeGetString(jsonFuncType, JSON_ret_type));
 	auto params = parseFunctionTypeParameters(
 		safeGetArray(jsonFuncType, JSON_params));
 	auto varArgness = parseVarArgness(jsonFuncType);
-	ctypes::CallConvention callConv(parseCallConv(jsonFuncType));
-	return ctypes::FunctionType::create(context, retType, params, callConv, varArgness);
+	retdec::ctypes::CallConvention callConv(parseCallConv(jsonFuncType));
+	return retdec::ctypes::FunctionType::create(context, retType, params, callConv, varArgness);
 }
 
 /**
@@ -488,10 +489,10 @@ std::shared_ptr<ctypes::FunctionType> JSONCTypesParser::parseFunctionType(
 *
 * Ignores parameters' names.
 */
-ctypes::FunctionType::Parameters JSONCTypesParser::parseFunctionTypeParameters(
+retdec::ctypes::FunctionType::Parameters JSONCTypesParser::parseFunctionTypeParameters(
 	const rapidjson::Value &jsonParams)
 {
-	ctypes::FunctionType::Parameters params;
+	retdec::ctypes::FunctionType::Parameters params;
 	for (auto i = jsonParams.Begin(), e = jsonParams.End(); i != e; ++i)
 	{
 		params.emplace_back(getOrParseType(safeGetString(*i, JSON_type)));
@@ -504,7 +505,7 @@ ctypes::FunctionType::Parameters JSONCTypesParser::parseFunctionTypeParameters(
 *
 * @param typeKey Key of type stored in JSON types.
 */
-std::shared_ptr<ctypes::Type> JSONCTypesParser::getOrParseType(
+std::shared_ptr<retdec::ctypes::Type> JSONCTypesParser::getOrParseType(
 	const std::string &typeKey)
 {
 	auto cachedType = retdec::utils::mapGetValueOrDefault(parserContext, typeKey);
@@ -519,12 +520,12 @@ std::shared_ptr<ctypes::Type> JSONCTypesParser::getOrParseType(
 * Parsed types are stored in @c parserContext, so you should use @c
 * getOrParseType() method.
 */
-std::shared_ptr<ctypes::Type> JSONCTypesParser::parseType(
+std::shared_ptr<retdec::ctypes::Type> JSONCTypesParser::parseType(
 	const std::string &typeKey)
 {
 	const rapidjson::Value &jsonType = retdec::utils::mapGetValueOrDefault(typesMap, typeKey)->value;
 	std::string typeOfType = safeGetString(jsonType, JSON_type);
-	std::shared_ptr<ctypes::Type> parsedType;
+	std::shared_ptr<retdec::ctypes::Type> parsedType;
 
 	// To make the parsing as fast as possible, the types should be ordered by
 	// the number of their occurrences in our JSONS.
@@ -546,7 +547,7 @@ std::shared_ptr<ctypes::Type> JSONCTypesParser::parseType(
 	}
 	else if (typeOfType == JSON_void)
 	{
-		parsedType = ctypes::VoidType::create();
+		parsedType = retdec::ctypes::VoidType::create();
 	}
 	else if (typeOfType == JSON_function_type)
 	{
@@ -574,7 +575,7 @@ std::shared_ptr<ctypes::Type> JSONCTypesParser::parseType(
 	}
 	else
 	{
-		parsedType = ctypes::UnknownType::create();
+		parsedType = retdec::ctypes::UnknownType::create();
 	}
 
 	parserContext.emplace(typeKey, parsedType);
@@ -586,7 +587,7 @@ std::shared_ptr<ctypes::Type> JSONCTypesParser::parseType(
 *
 * @param type JSON object representing integral type.
 */
-std::shared_ptr<ctypes::Type> JSONCTypesParser::parseIntegralType(
+std::shared_ptr<retdec::ctypes::Type> JSONCTypesParser::parseIntegralType(
 	const rapidjson::Value &type)
 {
 	return getOrParseNamedType(type,
@@ -598,9 +599,9 @@ std::shared_ptr<ctypes::Type> JSONCTypesParser::parseIntegralType(
 				rapidjson::Value(this->getIntegralTypeBitWidth(typeName))
 			);
 			auto sign = retdec::utils::contains(typeName, "unsigned") ?
-				ctypes::IntegralType::Signess::Unsigned :
-				ctypes::IntegralType::Signess::Signed;
-			return ctypes::IntegralType::create(context, typeName, bitWidth, sign);
+				retdec::ctypes::IntegralType::Signess::Unsigned :
+				retdec::ctypes::IntegralType::Signess::Signed;
+			return retdec::ctypes::IntegralType::create(context, typeName, bitWidth, sign);
 		}
 	);
 }
@@ -610,7 +611,7 @@ std::shared_ptr<ctypes::Type> JSONCTypesParser::parseIntegralType(
 *
 * @param type JSON object representing floating point type.
 */
-std::shared_ptr<ctypes::Type> JSONCTypesParser::parseFloatingPointType(
+std::shared_ptr<retdec::ctypes::Type> JSONCTypesParser::parseFloatingPointType(
 	const rapidjson::Value &type)
 {
 	return getOrParseNamedType(type,
@@ -621,7 +622,7 @@ std::shared_ptr<ctypes::Type> JSONCTypesParser::parseFloatingPointType(
 				JSON_bit_width,
 				rapidjson::Value(this->getBitWidthOrDefault(typeName))
 			);
-			return ctypes::FloatingPointType::create(context, typeName, bitWidth);
+			return retdec::ctypes::FloatingPointType::create(context, typeName, bitWidth);
 		}
 	);
 }
@@ -690,18 +691,18 @@ unsigned JSONCTypesParser::getBitWidthOrDefault(const std::string &typeName) con
 *
 * @param jsonTypedef JSON object representing typedefed type.
 */
-std::shared_ptr<ctypes::Type> JSONCTypesParser::parseTypedefedType(
+std::shared_ptr<retdec::ctypes::Type> JSONCTypesParser::parseTypedefedType(
 	const rapidjson::Value &jsonTypedef)
 {
 	return getOrParseNamedType(jsonTypedef,
-		[&jsonTypedef, this](const std::string &typeName) -> std::shared_ptr<ctypes::Type>
+		[&jsonTypedef, this](const std::string &typeName) -> std::shared_ptr<retdec::ctypes::Type>
 		{
 			static std::vector<std::string> previousTypedefs;
-			std::shared_ptr<ctypes::Type> aliasedType;
+			std::shared_ptr<retdec::ctypes::Type> aliasedType;
 
 			if (retdec::utils::hasItem(previousTypedefs, typeName))
 			{
-				return ctypes::UnknownType::create();
+				return retdec::ctypes::UnknownType::create();
 			}
 			else
 			{
@@ -709,14 +710,14 @@ std::shared_ptr<ctypes::Type> JSONCTypesParser::parseTypedefedType(
 				std::string aliasedTypeKey = safeGetString(
 					jsonTypedef, JSON_typedefed_type);
 				aliasedType = (aliasedTypeKey == JSON_unknown_type) ?
-					ctypes::UnknownType::create() :
+					retdec::ctypes::UnknownType::create() :
 					this->getOrParseType(aliasedTypeKey);
 				if (typeName == previousTypedefs[0])
 				{   // returned from all nested types
 					previousTypedefs.clear();
 				}
 			}
-			return ctypes::TypedefedType::create(context, typeName, aliasedType);
+			return retdec::ctypes::TypedefedType::create(context, typeName, aliasedType);
 		}
 	);
 }
@@ -727,10 +728,10 @@ std::shared_ptr<ctypes::Type> JSONCTypesParser::parseTypedefedType(
 * @param jsonType Type to get/parse.
 * @param parseType Function to parse specific type (typedef, struct...).
 */
-std::shared_ptr<ctypes::Type> JSONCTypesParser::getOrParseNamedType(
+std::shared_ptr<retdec::ctypes::Type> JSONCTypesParser::getOrParseNamedType(
 	const rapidjson::Value &jsonType,
 	const std::function<
-		std::shared_ptr<ctypes::Type> (const std::string &typeName)
+		std::shared_ptr<retdec::ctypes::Type> (const std::string &typeName)
 	> &parseType
 )
 {
@@ -750,13 +751,13 @@ std::shared_ptr<ctypes::Type> JSONCTypesParser::getOrParseNamedType(
 * struct x { struct x *next; };
 * @endcode
 */
-std::shared_ptr<ctypes::Type> JSONCTypesParser::parseStruct(
+std::shared_ptr<retdec::ctypes::Type> JSONCTypesParser::parseStruct(
 	const rapidjson::Value &jsonStruct)
 {
 	return getOrParseNamedType(jsonStruct,
 		[&jsonStruct, this](const std::string &typeName)
 		{
-			auto newStruct = ctypes::StructType::create(context, typeName, {});
+			auto newStruct = retdec::ctypes::StructType::create(context, typeName, {});
 			newStruct->setMembers(
 				this->parseMembers(safeGetArray(jsonStruct, JSON_members))
 			);
@@ -777,13 +778,13 @@ std::shared_ptr<ctypes::Type> JSONCTypesParser::parseStruct(
 * union x { union x *next; };
 * @endcode
 */
-std::shared_ptr<ctypes::Type> JSONCTypesParser::parseUnion(
+std::shared_ptr<retdec::ctypes::Type> JSONCTypesParser::parseUnion(
 	const rapidjson::Value &jsonUnion)
 {
 	return getOrParseNamedType(jsonUnion,
 		[&jsonUnion, this](const std::string &typeName)
 		{
-			auto newUnion = ctypes::UnionType::create(context, typeName, {});
+			auto newUnion = retdec::ctypes::UnionType::create(context, typeName, {});
 			newUnion->setMembers(
 				this->parseMembers(safeGetArray(jsonUnion, JSON_members))
 			);
@@ -797,10 +798,10 @@ std::shared_ptr<ctypes::Type> JSONCTypesParser::parseUnion(
 *
 * @param jsonMembers JSON object representing composite type's members.
 */
-ctypes::CompositeType::Members JSONCTypesParser::parseMembers(
+retdec::ctypes::CompositeType::Members JSONCTypesParser::parseMembers(
 	const rapidjson::Value &jsonMembers)
 {
-	ctypes::CompositeType::Members members;
+	retdec::ctypes::CompositeType::Members members;
 	for (auto i = jsonMembers.Begin(), e = jsonMembers.End(); i != e; ++i)
 	{
 		std::string memberTypeKey = safeGetString(*i, JSON_type);
@@ -815,12 +816,12 @@ ctypes::CompositeType::Members JSONCTypesParser::parseMembers(
 *
 * @param jsonPointer JSON object representing pointer.
 */
-std::shared_ptr<ctypes::PointerType> JSONCTypesParser::parsePointer(
+std::shared_ptr<retdec::ctypes::PointerType> JSONCTypesParser::parsePointer(
 	const rapidjson::Value &jsonPointer)
 {
 	std::string pointedTypeKey = safeGetString(jsonPointer, JSON_pointed_type);
 	auto pointedType = getOrParseType(pointedTypeKey);
-	return ctypes::PointerType::create(context, pointedType, getBitWidthOrDefault("*"));
+	return retdec::ctypes::PointerType::create(context, pointedType, getBitWidthOrDefault("*"));
 }
 
 /**
@@ -828,14 +829,14 @@ std::shared_ptr<ctypes::PointerType> JSONCTypesParser::parsePointer(
 *
 * @param jsonArray JSON object representing array.
 */
-std::shared_ptr<ctypes::ArrayType> JSONCTypesParser::parseArray(
+std::shared_ptr<retdec::ctypes::ArrayType> JSONCTypesParser::parseArray(
 	const rapidjson::Value &jsonArray)
 {
 	std::string elementTypeKey = safeGetString(jsonArray, JSON_array_element);
 	auto elementType = getOrParseType(elementTypeKey);
 
 	auto dimensions = parseArrayDimensions(safeGetArray(jsonArray, JSON_array_dimensions));
-	return ctypes::ArrayType::create(context, elementType, dimensions);
+	return retdec::ctypes::ArrayType::create(context, elementType, dimensions);
 }
 
 /**
@@ -843,14 +844,14 @@ std::shared_ptr<ctypes::ArrayType> JSONCTypesParser::parseArray(
 *
 * @param jsonDimensions JSON array containing dimensions.
 */
-ctypes::ArrayType::Dimensions JSONCTypesParser::parseArrayDimensions(
+retdec::ctypes::ArrayType::Dimensions JSONCTypesParser::parseArrayDimensions(
 	const rapidjson::Value &jsonDimensions) const
 {
-	ctypes::ArrayType::Dimensions dimensions;
+	retdec::ctypes::ArrayType::Dimensions dimensions;
 
 	for (auto i = jsonDimensions.Begin(), e = jsonDimensions.End(); i != e; ++i)
 	{
-		dimensions.emplace_back(i->IsInt() ? i->GetInt() : ctypes::ArrayType::UNKNOWN_DIMENSION);
+		dimensions.emplace_back(i->IsInt() ? i->GetInt() : retdec::ctypes::ArrayType::UNKNOWN_DIMENSION);
 	}
 	return dimensions;
 }
@@ -860,14 +861,14 @@ ctypes::ArrayType::Dimensions JSONCTypesParser::parseArrayDimensions(
 *
 * @param jsonEnum JSON object representing enum.
 */
-std::shared_ptr<ctypes::Type> JSONCTypesParser::parseEnum(
+std::shared_ptr<retdec::ctypes::Type> JSONCTypesParser::parseEnum(
 	const rapidjson::Value &jsonEnum)
 {
 	return getOrParseNamedType(jsonEnum,
 		[&jsonEnum, this](const std::string &typeName)
 		{
 			auto values = this->parseEnumItems(safeGetArray(jsonEnum, JSON_enum_items));
-			return ctypes::EnumType::create(context, typeName, values);
+			return retdec::ctypes::EnumType::create(context, typeName, values);
 		}
 	);
 }
@@ -877,12 +878,12 @@ std::shared_ptr<ctypes::Type> JSONCTypesParser::parseEnum(
 *
 * @param jsonEnumItems JSON object representing enum values.
 */
-ctypes::EnumType::Values JSONCTypesParser::parseEnumItems(
+retdec::ctypes::EnumType::Values JSONCTypesParser::parseEnumItems(
 	const rapidjson::Value &jsonEnumItems) const
 {
-	static const auto defaultValue = rapidjson::Value(ctypes::EnumType::DEFAULT_VALUE);
+	static const auto defaultValue = rapidjson::Value(retdec::ctypes::EnumType::DEFAULT_VALUE);
 
-	ctypes::EnumType::Values values;
+	retdec::ctypes::EnumType::Values values;
 	for (auto i = jsonEnumItems.Begin(), e = jsonEnumItems.End(); i != e; ++i)
 	{
 		values.emplace_back(
@@ -894,3 +895,4 @@ ctypes::EnumType::Values JSONCTypesParser::parseEnumItems(
 }
 
 } // namespace ctypesparser
+} // namespace retdec

@@ -13,6 +13,7 @@
 
 using namespace ::testing;
 
+namespace retdec {
 namespace ctypes {
 namespace tests {
 
@@ -105,3 +106,4 @@ IsTypedefReturnsFalseOnNonTypedefedType)
 
 } // namespace tests
 } // namespace ctypes
+} // namespace retdec

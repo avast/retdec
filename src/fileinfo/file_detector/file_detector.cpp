@@ -13,8 +13,8 @@
 #include "retdec/loader/loader.h"
 
 using namespace retdec::utils;
-using namespace cpdetect;
-using namespace fileformat;
+using namespace retdec::cpdetect;
+using namespace retdec::fileformat;
 
 namespace fileinfo {
 
@@ -23,7 +23,7 @@ namespace fileinfo {
  *
  * Constructor in subclass must initialize members @a fileParser and @a loaded.
  */
-FileDetector::FileDetector(std::string pathToInputFile, FileInformation &finfo, cpdetect::DetectParams &searchPar, fileformat::LoadFlags loadFlags) :
+FileDetector::FileDetector(std::string pathToInputFile, FileInformation &finfo, retdec::cpdetect::DetectParams &searchPar, retdec::fileformat::LoadFlags loadFlags) :
 	fileInfo(finfo), cpParams(searchPar), fileConfig(nullptr), fileParser(nullptr), loaded(false), loadFlags(loadFlags)
 {
 	fileInfo.setPathToFile(pathToInputFile);
@@ -247,7 +247,7 @@ void FileDetector::getCertificates()
  */
 void FileDetector::getLoaderInfo()
 {
-	std::unique_ptr<loader::Image> image = loader::createImage(fileParser);
+	std::unique_ptr<retdec::loader::Image> image = retdec::loader::createImage(fileParser);
 	if(!image)
 	{
 		return;
@@ -289,7 +289,7 @@ void FileDetector::getLoaderInfo()
  */
 
 /**
- * @fn cpdetect::CompilerDetector* FileDetector::createCompilerDetector() const
+ * @fn retdec::cpdetect::CompilerDetector* FileDetector::createCompilerDetector() const
  * Factory for creating detector of compilers
  * @return Instance of compiler detector or nullptr if detection of compiler
  *    is not supported for actual file format
@@ -340,7 +340,7 @@ void FileDetector::getAllInformation()
  * Get pointer to file parser
  * @return Pointer to file parser
  */
-const fileformat::FileFormat* FileDetector::getFileParser() const
+const retdec::fileformat::FileFormat* FileDetector::getFileParser() const
 {
 	return fileParser.get();
 }

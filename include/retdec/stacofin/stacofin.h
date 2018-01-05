@@ -13,10 +13,11 @@
 
 #include "retdec/utils/address.h"
 
-namespace loader
-{
+namespace retdec {
+namespace loader {
 	class Image;
 } // namespace loader
+} // namespace retdec
 
 namespace fnc_patterns {
 namespace stacofin {
@@ -63,7 +64,7 @@ class Finder
 		/// @{
 		void clear();
 		void search(
-			const loader::Image &image,
+			const retdec::loader::Image &image,
 			const std::string &yaraFile);
 		/// @}
 

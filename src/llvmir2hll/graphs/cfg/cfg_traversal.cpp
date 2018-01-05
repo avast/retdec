@@ -11,6 +11,7 @@
 
 using retdec::utils::hasItem;
 
+namespace retdec {
 namespace llvmir2hll {
 
 /**
@@ -266,3 +267,4 @@ bool CFGTraversal::traverseNodePredecessors(ShPtr<CFG::Node> node) {
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

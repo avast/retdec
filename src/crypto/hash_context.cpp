@@ -10,6 +10,7 @@
 #include "retdec/utils/container.h"
 #include "retdec/utils/conversion.h"
 
+namespace retdec {
 namespace crypto {
 
 namespace {
@@ -102,3 +103,4 @@ std::string HashContext::getHash()
 }
 
 } // namespace crypto
+} // namespace retdec

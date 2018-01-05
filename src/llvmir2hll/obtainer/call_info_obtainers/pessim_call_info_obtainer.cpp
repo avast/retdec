@@ -11,6 +11,7 @@
 #include "retdec/llvmir2hll/obtainer/call_info_obtainers/pessim_call_info_obtainer.h"
 #include "retdec/llvmir2hll/support/debug.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 REGISTER_AT_FACTORY("pessim", PESSIM_CALL_INFO_OBTAINER_ID, CallInfoObtainerFactory,
@@ -149,3 +150,4 @@ ShPtr<FuncInfo> PessimCallInfoObtainer::getFuncInfo(ShPtr<Function> func) {
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

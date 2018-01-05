@@ -15,6 +15,7 @@
 #include "retdec/fileformat/types/dotnet_types/dotnet_property.h"
 #include "retdec/fileformat/types/dotnet_types/dotnet_type.h"
 
+namespace retdec {
 namespace fileformat {
 
 /**
@@ -88,5 +89,6 @@ class DotnetClass : public DotnetType
 };
 
 } // namespace fileformat
+} // namespace retdec
 
 #endif

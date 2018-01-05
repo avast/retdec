@@ -9,7 +9,7 @@
 #include "fileinfo/file_wrapper/macho_wrapper.h"
 
 using namespace llvm::MachO;
-using namespace fileformat;
+using namespace retdec::fileformat;
 
 namespace fileinfo {
 
@@ -18,7 +18,7 @@ namespace fileinfo {
  * @param pathToFile Path to MachO binary file
  * @param loadFlags Load flags
  */
-MachOWrapper::MachOWrapper(std::string pathToFile, fileformat::LoadFlags loadFlags) : MachOFormat(pathToFile, loadFlags)
+MachOWrapper::MachOWrapper(std::string pathToFile, retdec::fileformat::LoadFlags loadFlags) : MachOFormat(pathToFile, loadFlags)
 {
 
 }

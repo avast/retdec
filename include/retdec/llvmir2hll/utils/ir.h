@@ -9,6 +9,7 @@
 
 #include "retdec/llvmir2hll/support/types.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 class CastExpr;
@@ -55,5 +56,6 @@ void convertGlobalVarToLocalVarInFunc(ShPtr<Variable> var,
 /// @}
 
 } // namespace llvmir2hll
+} // namespace retdec
 
 #endif

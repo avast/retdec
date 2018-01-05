@@ -6,6 +6,7 @@
 
 #include "retdec/fileformat/types/dotnet_headers/user_string_stream.h"
 
+namespace retdec {
 namespace fileformat {
 
 /**
@@ -18,3 +19,4 @@ UserStringStream::UserStringStream(std::uint64_t streamOffset, std::uint64_t str
 }
 
 } // namespace fileformat
+} // namespace retdec

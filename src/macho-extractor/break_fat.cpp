@@ -31,6 +31,7 @@ constexpr auto AR_SIZE_SIZE = 10U;
 constexpr auto AR_HEADER_SIZE = 60U;
 }
 
+namespace retdec {
 namespace macho_extractor {
 
 /**
@@ -555,3 +556,4 @@ bool BreakMachOUniversal::extractArchiveForArchitecture(const std::string &macho
 }
 
 } // namespace macho_extractor
+} // namespace retdec

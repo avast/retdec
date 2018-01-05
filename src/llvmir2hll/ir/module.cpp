@@ -26,6 +26,7 @@ using retdec::utils::hasItem;
 using retdec::utils::mapGetValueOrDefault;
 using retdec::utils::mapHasKey;
 
+namespace retdec {
 namespace llvmir2hll {
 
 /**
@@ -892,3 +893,4 @@ std::string Module::getDetectedLanguage() const {
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

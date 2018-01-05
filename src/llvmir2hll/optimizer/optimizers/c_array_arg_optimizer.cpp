@@ -12,6 +12,7 @@
 #include "retdec/llvmir2hll/optimizer/optimizers/c_array_arg_optimizer.h"
 #include "retdec/llvmir2hll/support/debug.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 namespace {
@@ -83,3 +84,4 @@ void CArrayArgOptimizer::visit(ShPtr<CallExpr> expr) {
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

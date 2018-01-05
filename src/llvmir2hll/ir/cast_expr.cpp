@@ -7,6 +7,7 @@
 #include "retdec/llvmir2hll/ir/cast_expr.h"
 #include "retdec/llvmir2hll/support/debug.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 /**
@@ -88,3 +89,4 @@ void CastExpr::update(ShPtr<Value> subject, ShPtr<Value> arg) {
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

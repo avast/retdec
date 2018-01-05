@@ -13,6 +13,7 @@
 #include "retdec/llvmir2hll/ir/constant.h"
 #include "retdec/llvmir2hll/support/smart_ptr.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 class ConstInt;
@@ -42,7 +43,7 @@ public:
 	virtual ShPtr<Value> clone() override;
 
 	virtual bool isEqualTo(ShPtr<Value> otherValue) const override;
-	virtual ShPtr<llvmir2hll::Type> getType() const override;
+	virtual ShPtr<retdec::llvmir2hll::Type> getType() const override;
 	virtual void replace(ShPtr<Expression> oldExpr,
 		ShPtr<Expression> newExpr) override;
 
@@ -73,5 +74,6 @@ private:
 };
 
 } // namespace llvmir2hll
+} // namespace retdec
 
 #endif

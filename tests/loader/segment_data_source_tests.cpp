@@ -10,6 +10,7 @@
 
 using namespace ::testing;
 
+namespace retdec {
 namespace loader {
 namespace tests {
 
@@ -260,4 +261,5 @@ SaveDataWithCorrectOffsetAndSizeWorks) {
 }
 
 } // namespace loader
+} // namespace retdec
 } // namespace tests

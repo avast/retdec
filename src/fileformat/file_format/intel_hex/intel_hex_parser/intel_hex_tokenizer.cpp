@@ -12,6 +12,7 @@
 
 using namespace retdec::utils;
 
+namespace retdec {
 namespace fileformat {
 
 /**
@@ -219,3 +220,4 @@ bool IntelHexTokenizer::setInputStream(std::istream &inputStream)
 }
 
 } // namespace fileformat
+} // namespace retdec

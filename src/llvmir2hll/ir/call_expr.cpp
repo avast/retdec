@@ -12,6 +12,7 @@
 
 using retdec::utils::getNthItem;
 
+namespace retdec {
 namespace llvmir2hll {
 
 /**
@@ -290,3 +291,4 @@ void CallExpr::accept(Visitor *v) {
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

@@ -13,6 +13,7 @@
 
 #include <openssl/evp.h>
 
+namespace retdec {
 namespace crypto {
 
 enum class HashAlgorithm
@@ -42,6 +43,7 @@ private:
 	const EVP_MD* _currentAlgo; ///< Internal. Currently used message digest algorithm.
 };
 
-}
+} // namespace crypto
+} // namespace retdec
 
 #endif

@@ -23,9 +23,9 @@
 #include "fileinfo/pattern_detector/pattern_detector.h"
 
 using namespace retdec::utils;
-using namespace ar_extractor;
-using namespace cpdetect;
-using namespace fileformat;
+using namespace retdec::ar_extractor;
+using namespace retdec::cpdetect;
+using namespace retdec::fileformat;
 using namespace fileinfo;
 
 namespace

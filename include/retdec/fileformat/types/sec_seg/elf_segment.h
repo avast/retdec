@@ -9,6 +9,7 @@
 
 #include "retdec/fileformat/types/sec_seg/segment.h"
 
+namespace retdec {
 namespace fileformat {
 
 /**
@@ -39,5 +40,6 @@ class ElfSegment : public Segment
 };
 
 } // namespace fileformat
+} // namespace retdec
 
 #endif

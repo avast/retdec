@@ -12,6 +12,7 @@
 #include "retdec/cpdetect/compiler_detector/heuristics/heuristics.h"
 #include "retdec/cpdetect/compiler_detector/search/search.h"
 
+namespace retdec {
 namespace cpdetect {
 
 /**
@@ -20,7 +21,7 @@ namespace cpdetect {
 class CompilerDetector : private retdec::utils::NonCopyable
 {
 	private:
-		fileformat::FileFormat &fileParser;       ///< parser of input file
+		retdec::fileformat::FileFormat &fileParser;       ///< parser of input file
 		DetectParams &cpParams;                    ///< parameters for detection
 		std::vector<std::string> externalDatabase; ///< name of external files with rules
 
@@ -43,13 +44,13 @@ class CompilerDetector : private retdec::utils::NonCopyable
 		/// @}
 	protected:
 		ToolInformation &toolInfo;                        ///< results - detected tools
-		fileformat::Architecture targetArchitecture;     ///< target architecture of input file
+		retdec::fileformat::Architecture targetArchitecture;     ///< target architecture of input file
 		Search *search;                                   ///< class for search in signature
 		Heuristics *heuristics;                           ///< class for heuristics detection of used tool
 		const std::vector<const char*> *internalDatabase; ///< internal database of rules
 		std::set<std::string> externalSuffixes;           ///< suffixes for external database files
 	public:
-		CompilerDetector(fileformat::FileFormat &parser, DetectParams &params, ToolInformation &toolInfo);
+		CompilerDetector(retdec::fileformat::FileFormat &parser, DetectParams &params, ToolInformation &toolInfo);
 		virtual ~CompilerDetector() = 0;
 
 		/// @name Detection methods
@@ -59,5 +60,6 @@ class CompilerDetector : private retdec::utils::NonCopyable
 };
 
 } // namespace cpdetect
+} // namespace retdec
 
 #endif

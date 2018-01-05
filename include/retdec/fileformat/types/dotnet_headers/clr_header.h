@@ -9,6 +9,7 @@
 
 #include <cstdint>
 
+namespace retdec {
 namespace fileformat {
 
 /**
@@ -85,5 +86,6 @@ class CLRHeader
 };
 
 } // namespace fileformat
+} // namespace retdec
 
 #endif

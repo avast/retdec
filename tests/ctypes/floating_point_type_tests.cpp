@@ -14,6 +14,7 @@
 
 using namespace ::testing;
 
+namespace retdec {
 namespace ctypes {
 namespace tests {
 
@@ -60,3 +61,4 @@ IsFloatingPointReturnsFalseOnNonFloatingPointType)
 
 } // namespace tests
 } // namespace ctypes
+} // namespace retdec

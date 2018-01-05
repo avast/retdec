@@ -13,6 +13,7 @@
 
 using namespace ::testing;
 
+namespace retdec {
 namespace ctypes {
 namespace tests {
 
@@ -72,3 +73,4 @@ IsOptionalReturnsAlwaysFalse)
 
 } // namespace tests
 } // namespace ctypes
+} // namespace retdec

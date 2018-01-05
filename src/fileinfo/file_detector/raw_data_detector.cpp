@@ -7,8 +7,8 @@
 #include "retdec/fileformat/file_format/raw_data/raw_data_format.h"
 #include "fileinfo/file_detector/raw_data_detector.h"
 
-using namespace cpdetect;
-using namespace fileformat;
+using namespace retdec::cpdetect;
+using namespace retdec::fileformat;
 
 namespace fileinfo {
 
@@ -20,10 +20,10 @@ namespace fileinfo {
  * @param loadFlags Load flags
  */
 RawDataDetector::RawDataDetector(std::string pathToInputFile, FileInformation &finfo,
-	cpdetect::DetectParams &searchPar, fileformat::LoadFlags loadFlags) :
+	retdec::cpdetect::DetectParams &searchPar, retdec::fileformat::LoadFlags loadFlags) :
 	FileDetector(pathToInputFile, finfo, searchPar, loadFlags)
 {
-	fileParser = rawParser = std::make_shared<fileformat::RawDataFormat>(pathToInputFile, loadFlags);
+	fileParser = rawParser = std::make_shared<retdec::fileformat::RawDataFormat>(pathToInputFile, loadFlags);
 	loaded = fileParser->isInValidState();
 }
 
@@ -133,7 +133,7 @@ void RawDataDetector::getAdditionalInfo()
 	getSection();
 }
 
-cpdetect::CompilerDetector* RawDataDetector::createCompilerDetector() const
+retdec::cpdetect::CompilerDetector* RawDataDetector::createCompilerDetector() const
 {
 	if(cpParams.searchType == SearchType::EXACT_MATCH)
 	{

@@ -13,6 +13,7 @@
 
 #include "retdec/bin2llvmir/providers/config.h"
 
+namespace retdec {
 namespace bin2llvmir {
 
 class StackProtect : public llvm::ModulePass
@@ -37,5 +38,6 @@ class StackProtect : public llvm::ModulePass
 };
 
 } // namespace bin2llvmir
+} // namespace retdec
 
 #endif

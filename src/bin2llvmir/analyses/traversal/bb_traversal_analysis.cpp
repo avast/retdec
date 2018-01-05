@@ -12,6 +12,7 @@
 
 using namespace llvm;
 
+namespace retdec {
 namespace bin2llvmir {
 
 namespace {
@@ -162,3 +163,4 @@ BBTraversalAnalysis::Node *BBTraversalAnalysis::processBBNotInSCC(
 }
 
 } // namespace bin2llvmir
+} // namespace retdec

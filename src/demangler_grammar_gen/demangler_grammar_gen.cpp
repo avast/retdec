@@ -27,7 +27,7 @@ int main(int argc, char *argv[])
 		std::cout << argv[1] << std::endl;
 		std::cout << argv[2] << std::endl;
 
-		demangler::CDemangler dem(std::string(), false);
+		retdec::demangler::CDemangler dem(std::string(), false);
 		std::cout << dem.printError() << std::endl;
 		dem.createGrammar(argv[1], argv[2]);
 		std::cout << dem.printError() << std::endl;

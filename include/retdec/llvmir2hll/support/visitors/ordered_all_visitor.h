@@ -11,6 +11,7 @@
 #include "retdec/llvmir2hll/support/types.h"
 #include "retdec/llvmir2hll/support/visitor.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 /**
@@ -149,5 +150,6 @@ protected:
 };
 
 } // namespace llvmir2hll
+} // namespace retdec
 
 #endif

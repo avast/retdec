@@ -20,6 +20,7 @@ const std::string input = "0123456789";
 
 } // anonymous namespace
 
+namespace retdec {
 namespace fileformat {
 namespace tests {
 
@@ -93,3 +94,4 @@ TEST_F(RawDataFormatTests, TestInvalidEP)
 
 } // namespace tests
 } // namespace fileformat
+} // namespace retdec

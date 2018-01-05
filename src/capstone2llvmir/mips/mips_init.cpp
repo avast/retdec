@@ -6,6 +6,7 @@
 
 #include "retdec/capstone2llvmir/mips/mips.h"
 
+namespace retdec {
 namespace capstone2llvmir {
 
 void Capstone2LlvmIrTranslatorMips::initializeRegNameMap()
@@ -881,3 +882,4 @@ Capstone2LlvmIrTranslatorMips::_i2fm =
 };
 
 } // namespace capstone2llvmir
+} // namespace retdec

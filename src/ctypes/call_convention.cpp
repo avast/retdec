@@ -6,6 +6,7 @@
 
 #include "retdec/ctypes/call_convention.h"
 
+namespace retdec {
 namespace ctypes {
 
 /**
@@ -30,3 +31,4 @@ bool CallConvention::operator!=(const CallConvention &other) const
 }
 
 } // namespace ctypes
+} // namespace retdec

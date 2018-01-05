@@ -38,10 +38,11 @@
 #include "retdec/bin2llvmir/providers/asm_instruction.h"
 #include "retdec/bin2llvmir/utils/ir_modifier.h"
 
-using namespace llvm_support;
+using namespace retdec::llvm_support;
 using namespace retdec::utils;
 using namespace llvm;
 
+namespace retdec {
 namespace bin2llvmir {
 
 llvm::Value* getRoot(ReachingDefinitionsAnalysis& RDA, llvm::Value* i, bool first = true)
@@ -2227,3 +2228,4 @@ void DataFlowEntry::setArgumentTypes()
 }
 
 } // namespace bin2llvmir
+} // namespace retdec

@@ -9,6 +9,7 @@
 #include "retdec/llvmir2hll/ir/statement.h"
 #include "retdec/llvmir2hll/support/debug.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 /**
@@ -95,3 +96,4 @@ bool VarUseCFGTraversal::combineRetVals(bool origRetVal, bool newRetVal) const {
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

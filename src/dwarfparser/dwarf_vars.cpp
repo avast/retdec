@@ -13,8 +13,8 @@
 
 using namespace std;
 
-namespace dwarfparser
-{
+namespace retdec {
+namespace dwarfparser {
 
 /**
  * @brief ctor.
@@ -323,3 +323,4 @@ bool DwarfVar::isVolatile() const
 }
 
 } // namespace dwarfparser
+} // namespace retdec

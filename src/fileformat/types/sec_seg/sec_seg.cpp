@@ -18,6 +18,7 @@
 using namespace retdec::utils;
 using namespace llvm;
 
+namespace retdec {
 namespace fileformat {
 
 /**
@@ -44,9 +45,9 @@ SecSeg::~SecSeg()
 void SecSeg::computeHashes()
 {
 	const auto *hashData = reinterpret_cast<const unsigned char*>(bytes.data());
-	crc32 = crypto::getCrc32(hashData, bytes.size());
-	md5 = crypto::getMd5(hashData, bytes.size());
-	sha256 = crypto::getSha256(hashData, bytes.size());
+	crc32 = retdec::crypto::getCrc32(hashData, bytes.size());
+	md5 = retdec::crypto::getMd5(hashData, bytes.size());
+	sha256 = retdec::crypto::getSha256(hashData, bytes.size());
 }
 
 /**
@@ -695,3 +696,4 @@ bool SecSeg::operator<(const SecSeg &sOther) const
 }
 
 } // namespace fileformat
+} // namespace retdec

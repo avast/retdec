@@ -27,6 +27,7 @@
 using namespace ::testing;
 using namespace std::string_literals;
 
+namespace retdec {
 namespace llvmir2hll {
 namespace tests {
 
@@ -201,3 +202,4 @@ EmptyVarSetIsReturnedForNonEmptyVarsAfterReset) {
 
 } // namespace tests
 } // namespace llvmir2hll
+} // namespace retdec

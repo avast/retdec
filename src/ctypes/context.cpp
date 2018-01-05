@@ -13,6 +13,7 @@
 #include "retdec/ctypes/type.h"
 #include "retdec/utils/container.h"
 
+namespace retdec {
 namespace ctypes {
 
 /**
@@ -252,3 +253,4 @@ void Context::addAnnotation(const std::shared_ptr<Annotation> &annot)
 }
 
 } // namespace ctypes
+} // namespace retdec

@@ -32,6 +32,7 @@ using retdec::utils::addToSet;
 using retdec::utils::hasItem;
 using retdec::utils::setUnion;
 
+namespace retdec {
 namespace llvmir2hll {
 
 /**
@@ -527,3 +528,4 @@ void VarUsesVisitor::visit(ShPtr<UnreachableStmt> stmt) {
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

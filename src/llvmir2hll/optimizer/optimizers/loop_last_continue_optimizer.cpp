@@ -10,6 +10,7 @@
 #include "retdec/llvmir2hll/optimizer/optimizers/loop_last_continue_optimizer.h"
 #include "retdec/llvmir2hll/support/debug.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 /**
@@ -80,3 +81,4 @@ void LoopLastContinueOptimizer::tryToOptimize(ShPtr<Statement> stmt) {
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

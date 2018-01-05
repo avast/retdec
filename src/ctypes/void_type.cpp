@@ -7,6 +7,7 @@
 #include "retdec/ctypes/visitor.h"
 #include "retdec/ctypes/void_type.h"
 
+namespace retdec {
 namespace ctypes {
 
 /**
@@ -41,3 +42,4 @@ void VoidType::accept(Visitor *v) {
 }
 
 } // namespace ctypes
+} // namespace retdec

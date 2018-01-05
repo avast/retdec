@@ -11,6 +11,7 @@
 #include <memory>
 #include <vector>
 
+namespace retdec {
 namespace fileformat {
 
 const std::uint8_t Asn1TagMask_Class       = 0xC0;
@@ -150,5 +151,6 @@ private:
 };
 
 } // namespace fileformat
+} // namespace retdec
 
 #endif

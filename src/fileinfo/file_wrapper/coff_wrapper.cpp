@@ -6,7 +6,7 @@
 
 #include "fileinfo/file_wrapper/coff_wrapper.h"
 
-using namespace fileformat;
+using namespace retdec::fileformat;
 
 namespace fileinfo {
 
@@ -15,7 +15,7 @@ namespace fileinfo {
  * @param pathToFile Path to COFF binary file
  * @param loadFlags Load flags
  */
-CoffWrapper::CoffWrapper(std::string pathToFile, fileformat::LoadFlags loadFlags) : CoffFormat(pathToFile, loadFlags)
+CoffWrapper::CoffWrapper(std::string pathToFile, retdec::fileformat::LoadFlags loadFlags) : CoffFormat(pathToFile, loadFlags)
 {
 
 }

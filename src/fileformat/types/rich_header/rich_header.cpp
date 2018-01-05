@@ -9,6 +9,7 @@
 #include "retdec/fileformat/types/rich_header/rich_header.h"
 
 
+namespace retdec {
 namespace fileformat {
 
 /**
@@ -306,3 +307,4 @@ void RichHeader::dump(std::string &dumpHeader) const
 }
 
 } // namespace fileformat
+} // namespace retdec

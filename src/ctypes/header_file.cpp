@@ -6,6 +6,7 @@
 
 #include "retdec/ctypes/header_file.h"
 
+namespace retdec {
 namespace ctypes {
 
 /**
@@ -32,3 +33,4 @@ std::string HeaderFile::getName() const
 }
 
 } // namespace ctypes
+} // namespace retdec

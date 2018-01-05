@@ -12,10 +12,11 @@
 #include "retdec/cpdetect/settings.h"
 #include "retdec/cpdetect/utils/version_solver.h"
 
-using namespace fileformat;
+using namespace retdec::fileformat;
 using namespace retdec::utils;
 using namespace yaracpp;
 
+namespace retdec {
 namespace cpdetect {
 
 namespace
@@ -138,7 +139,7 @@ ToolType metaToTool(const std::string &toolMeta)
  *
  * Constructor in subclass must create members @a heuristics, @a internalDatabase and @a externalSuffixes
  */
-CompilerDetector::CompilerDetector(fileformat::FileFormat &parser, DetectParams &params, ToolInformation &toolInfo) :
+CompilerDetector::CompilerDetector(retdec::fileformat::FileFormat &parser, DetectParams &params, ToolInformation &toolInfo) :
 	fileParser(parser), cpParams(params), toolInfo(toolInfo), targetArchitecture(fileParser.getTargetArchitecture()),
 	search(new Search(fileParser)), heuristics(nullptr), internalDatabase(nullptr)
 {
@@ -489,3 +490,4 @@ ReturnCode CompilerDetector::getAllInformation()
 }
 
 } // namespace cpdetect
+} // namespace retdec

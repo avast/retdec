@@ -12,6 +12,7 @@
 #include "retdec/bin2llvmir/providers/fileimage.h"
 #include "retdec/debugformat/debugformat.h"
 
+namespace retdec {
 namespace bin2llvmir {
 
 class DebugFormat : public debugformat::DebugFormat
@@ -34,15 +35,15 @@ class DebugFormatProvider
 	private:
 		using SymbolTable = std::map<
 				retdec::utils::Address,
-				const fileformat::Symbol*>;
+				const retdec::fileformat::Symbol*>;
 
 	public:
 		static DebugFormat* addDebugFormat(
 				llvm::Module* m,
-				loader::Image* objf,
+				retdec::loader::Image* objf,
 				const std::string& pdbFile,
 				const retdec::utils::Address& imageBase,
-				demangler::CDemangler* demangler);
+				retdec::demangler::CDemangler* demangler);
 
 		static DebugFormat* getDebugFormat(llvm::Module* m);
 		static bool getDebugFormat(llvm::Module* m, DebugFormat*& df);
@@ -55,5 +56,6 @@ class DebugFormatProvider
 };
 
 } // namespace bin2llvmir
+} // namespace retdec
 
 #endif

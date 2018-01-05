@@ -11,6 +11,7 @@
 #include "retdec/llvmir2hll/validator/validator_factory.h"
 #include "retdec/llvmir2hll/validator/validators/no_global_var_def_validator.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 REGISTER_AT_FACTORY("NoGlobalVarDef", NO_GLOBAL_VAR_DEF_VALIDATOR_ID, ValidatorFactory,
@@ -47,3 +48,4 @@ void NoGlobalVarDefValidator::visit(ShPtr<VarDefStmt> stmt) {
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

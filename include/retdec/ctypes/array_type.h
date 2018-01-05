@@ -12,6 +12,7 @@
 
 #include "retdec/ctypes/type.h"
 
+namespace retdec {
 namespace ctypes {
 
 class Context;
@@ -52,5 +53,6 @@ class ArrayType: public Type
 };
 
 } // namespace ctypes
+} // namespace retdec
 
 #endif

@@ -9,6 +9,7 @@
 #include "retdec/llvmir2hll/ir/statement.h"
 #include "retdec/llvmir2hll/support/debug.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 /**
@@ -78,3 +79,4 @@ void GotoTargetAnalysis::visitStmt(ShPtr<Statement> stmt, bool visitSuccessors,
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

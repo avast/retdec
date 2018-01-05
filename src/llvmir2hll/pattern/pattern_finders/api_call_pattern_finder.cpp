@@ -18,6 +18,7 @@
 
 using retdec::utils::hasItem;
 
+namespace retdec {
 namespace llvmir2hll {
 
 REGISTER_AT_FACTORY("APICall", API_CALL_PATTERN_FINDER_ID,
@@ -212,3 +213,4 @@ PatternFinder::Patterns APICallPatternFinder::findPatterns(
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

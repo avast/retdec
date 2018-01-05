@@ -19,15 +19,15 @@
 
 using namespace std;
 
-namespace dwarfparser
-{
+namespace retdec {
+namespace dwarfparser {
 
 /**
  * @brief ctor -- create containers and load data from input file.
  * @param fileName Name of file to open.
  * @param fileParser Parser of input file (optional)
  */
-DwarfFile::DwarfFile(string fileName, fileformat::FileFormat *fileParser) :
+DwarfFile::DwarfFile(string fileName, retdec::fileformat::FileFormat *fileParser) :
 		m_CUs(this),
 		m_lines(this),
 		m_functions(this),
@@ -72,7 +72,7 @@ DwarfFile::~DwarfFile()
  * Binary interface is used to access input file at first.
  * If it fails standard ELF interface provided by libdwarf is used.
  */
-bool DwarfFile::loadFile(string fileName, fileformat::FileFormat *fileParser)
+bool DwarfFile::loadFile(string fileName, retdec::fileformat::FileFormat *fileParser)
 {
 	Dwarf_Handler errHand = nullptr;
 	Dwarf_Ptr errArg = nullptr;
@@ -710,3 +710,4 @@ void DwarfFile::initMapping(eDefaultMap m)
 }
 
 } // namespace dwarfparser
+} // namespace retdec

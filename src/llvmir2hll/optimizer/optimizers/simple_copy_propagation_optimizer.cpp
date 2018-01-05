@@ -32,6 +32,7 @@
 
 using retdec::utils::hasItem;
 
+namespace retdec {
 namespace llvmir2hll {
 
 /**
@@ -387,3 +388,4 @@ void SimpleCopyPropagationOptimizer::tryOptimizationCase2(
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

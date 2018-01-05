@@ -26,6 +26,7 @@
 
 using namespace ::testing;
 
+namespace retdec {
 namespace ctypesparser {
 namespace tests {
 
@@ -92,7 +93,7 @@ TEST_F(JSONCTypesParserTests,
 ParseIntoCrashesOnNullptrModule)
 {
 	std::stringstream stream;
-	std::unique_ptr<ctypes::Module> mod = nullptr;
+	std::unique_ptr<retdec::ctypes::Module> mod = nullptr;
 
 	EXPECT_DEATH(
 		parser.parseInto(stream, mod),
@@ -206,7 +207,7 @@ ParseIntoParsesFunctionsToPassedModule)
 			}
 		}
 	)");
-	auto module = std::make_unique<ctypes::Module>(std::make_shared<ctypes::Context>());
+	auto module = std::make_unique<retdec::ctypes::Module>(std::make_shared<retdec::ctypes::Context>());
 	parser.parseInto(json, module);
 }
 
@@ -238,7 +239,7 @@ ParseIntoWithExplicitTypeWidthsCorrectly)
 		}
 	)");
 	JSONCTypesParser::TypeWidths typeWidths{{"int", 32}, {"long", 64}};
-	auto module = std::make_unique<ctypes::Module>(std::make_shared<ctypes::Context>());
+	auto module = std::make_unique<retdec::ctypes::Module>(std::make_shared<retdec::ctypes::Context>());
 
 	parser.parseInto(json, module, typeWidths);
 	auto func = module->getFunctionWithName("ff");
@@ -472,7 +473,7 @@ ParsingUnsignedIntegralTypeTypeSetsCorrectSign)
 	auto retType = mod->getFunctionWithName("ff")->getReturnType();
 
 	ASSERT_TRUE(retType->isIntegral());
-	auto uLong = std::static_pointer_cast<ctypes::IntegralType>(retType);
+	auto uLong = std::static_pointer_cast<retdec::ctypes::IntegralType>(retType);
 
 	EXPECT_FALSE(uLong->isSigned());
 }
@@ -503,7 +504,7 @@ ParsingSignedIntegralTypeTypeSetsCorrectSign)
 	auto retType = mod->getFunctionWithName("ff")->getReturnType();
 
 	ASSERT_TRUE(retType->isIntegral());
-	auto sLong = std::static_pointer_cast<ctypes::IntegralType>(retType);
+	auto sLong = std::static_pointer_cast<retdec::ctypes::IntegralType>(retType);
 
 	EXPECT_TRUE(sLong->isSigned());
 }
@@ -755,7 +756,7 @@ ParseTypeReturnsUnknownTypeWhenTypeIsNotRecognized)
 	auto mod = parser.parse(json);
 	auto retType = mod->getFunctionWithName("ff")->getReturnType();
 
-	EXPECT_EQ(ctypes::UnknownType::create(), retType);
+	EXPECT_EQ(retdec::ctypes::UnknownType::create(), retType);
 }
 
 TEST_F(JSONCTypesParserTests,
@@ -804,11 +805,11 @@ ParsingFunctionTypeCorrectly)
 	auto paramType = mod->getFunctionWithName("ff")->getParameterType(1);
 
 	ASSERT_TRUE(paramType->isPointer());
-	auto ptrType = std::static_pointer_cast<ctypes::PointerType>(paramType);
+	auto ptrType = std::static_pointer_cast<retdec::ctypes::PointerType>(paramType);
 	auto pointedType = ptrType->getPointedType();
 
 	ASSERT_TRUE(pointedType->isFunction());
-	auto funcType = std::static_pointer_cast<ctypes::FunctionType>(pointedType);
+	auto funcType = std::static_pointer_cast<retdec::ctypes::FunctionType>(pointedType);
 
 	ASSERT_NE(nullptr, funcType);
 	EXPECT_EQ("int", funcType->getReturnType()->getName());
@@ -864,11 +865,11 @@ ParsingVarArgFunctionTypeCorrectly)
 	auto paramType = mod->getFunctionWithName("ff")->getParameterType(1);
 
 	ASSERT_TRUE(paramType->isPointer());
-	auto ptrType = std::static_pointer_cast<ctypes::PointerType>(paramType);
+	auto ptrType = std::static_pointer_cast<retdec::ctypes::PointerType>(paramType);
 	auto pointedType = ptrType->getPointedType();
 
 	ASSERT_TRUE(pointedType->isFunction());
-	auto funcType = std::static_pointer_cast<ctypes::FunctionType>(pointedType);
+	auto funcType = std::static_pointer_cast<retdec::ctypes::FunctionType>(pointedType);
 
 	ASSERT_NE(nullptr, funcType);
 	EXPECT_EQ("int", funcType->getReturnType()->getName());
@@ -902,7 +903,7 @@ ParsingVoidTypeCorrectly)
 	auto mod = parser.parse(json);
 	auto retType = mod->getFunctionWithName("ff")->getReturnType();
 
-	EXPECT_EQ(ctypes::VoidType::create(), retType);
+	EXPECT_EQ(retdec::ctypes::VoidType::create(), retType);
 }
 
 TEST_F(JSONCTypesParserTests,
@@ -975,8 +976,8 @@ ParsingArrayTypeCorrectly)
 	auto paramType = mod->getFunctionWithName("ff")->getParameter(1).getType();
 
 	ASSERT_TRUE(paramType->isArray());
-	auto arrayType = std::static_pointer_cast<ctypes::ArrayType>(paramType);
-	auto twoDimensions = ctypes::ArrayType::Dimensions{10, 1};
+	auto arrayType = std::static_pointer_cast<retdec::ctypes::ArrayType>(paramType);
+	auto twoDimensions = retdec::ctypes::ArrayType::Dimensions{10, 1};
 
 	ASSERT_NE(nullptr, arrayType);
 	EXPECT_EQ("int", arrayType->getElementType()->getName());
@@ -1021,10 +1022,10 @@ ParsingArrayWithUnknownDimensionsCorrectly)
 	auto paramType = mod->getFunctionWithName("ff")->getParameter(1).getType();
 
 	ASSERT_TRUE(paramType->isArray());
-	auto arrayType = std::static_pointer_cast<ctypes::ArrayType>(paramType);
+	auto arrayType = std::static_pointer_cast<retdec::ctypes::ArrayType>(paramType);
 
 	EXPECT_EQ(
-		ctypes::ArrayType::Dimensions(2, ctypes::ArrayType::UNKNOWN_DIMENSION),
+		retdec::ctypes::ArrayType::Dimensions(2, retdec::ctypes::ArrayType::UNKNOWN_DIMENSION),
 		arrayType->getDimensions()
 	);
 }
@@ -1066,7 +1067,7 @@ ParsingStructTypeCorrectly)
 	auto retType = mod->getFunctionWithName("ff")->getReturnType();
 
 	ASSERT_TRUE(retType->isStruct());
-	auto structType = std::static_pointer_cast<ctypes::StructType>(retType);
+	auto structType = std::static_pointer_cast<retdec::ctypes::StructType>(retType);
 
 	ASSERT_NE(nullptr, structType);
 	EXPECT_EQ("s", structType->getName());
@@ -1112,9 +1113,9 @@ ParsingStructWithPointerToSelfMemberCorrectly)
 	auto retType = mod->getFunctionWithName("ff")->getReturnType();
 
 	ASSERT_TRUE(retType->isStruct());
-	auto structType = std::static_pointer_cast<ctypes::StructType>(retType);
+	auto structType = std::static_pointer_cast<retdec::ctypes::StructType>(retType);
 	ASSERT_TRUE(structType->getMemberType(1)->isPointer());
-	auto structMember = std::static_pointer_cast<ctypes::PointerType>(
+	auto structMember = std::static_pointer_cast<retdec::ctypes::PointerType>(
 		structType->getMemberType(1));
 
 	EXPECT_EQ("s", structType->getName());
@@ -1160,7 +1161,7 @@ ParsingUnionTypeCorrectly)
 	auto retType = mod->getFunctionWithName("ff")->getReturnType();
 
 	ASSERT_TRUE(retType->isUnion());
-	auto unionType = std::static_pointer_cast<ctypes::UnionType>(retType);
+	auto unionType = std::static_pointer_cast<retdec::ctypes::UnionType>(retType);
 
 	ASSERT_NE(nullptr, unionType);
 	EXPECT_EQ("s", unionType->getName());
@@ -1202,7 +1203,7 @@ ParsingEnumTypeCorrectly)
 	auto retType = mod->getFunctionWithName("ff")->getReturnType();
 
 	ASSERT_TRUE(retType->isEnum());
-	auto enumType = std::static_pointer_cast<ctypes::EnumType>(retType);
+	auto enumType = std::static_pointer_cast<retdec::ctypes::EnumType>(retType);
 
 	EXPECT_EQ("e", enumType->getName());
 	EXPECT_EQ(1, enumType->getValueCount());
@@ -1243,9 +1244,9 @@ ParsingEnumWithUnknownValueSetsEnumDefaultValue)
 	auto retType = mod->getFunctionWithName("ff")->getReturnType();
 
 	ASSERT_TRUE(retType->isEnum());
-	auto enumType = std::static_pointer_cast<ctypes::EnumType>(retType);
+	auto enumType = std::static_pointer_cast<retdec::ctypes::EnumType>(retType);
 
-	EXPECT_EQ(ctypes::EnumType::DEFAULT_VALUE, enumType->getValue(1).getValue());
+	EXPECT_EQ(retdec::ctypes::EnumType::DEFAULT_VALUE, enumType->getValue(1).getValue());
 }
 
 TEST_F(JSONCTypesParserTests,
@@ -1273,7 +1274,7 @@ ParserSetsEmptyCallConventionToFunctionbyDefault)
 	auto mod = parser.parse(json);
 	auto func = mod->getFunctionWithName("ff");
 
-	EXPECT_EQ(ctypes::CallConvention(""), func->getCallConvention());
+	EXPECT_EQ(retdec::ctypes::CallConvention(""), func->getCallConvention());
 }
 
 TEST_F(JSONCTypesParserTests,
@@ -1299,10 +1300,10 @@ ParserPrefersCallConventionFromJsonToUserDefinedOne)
 		}
 	)");
 
-	auto mod = parser.parse(json, {}, ctypes::CallConvention("stdcall"));
+	auto mod = parser.parse(json, {}, retdec::ctypes::CallConvention("stdcall"));
 	auto func = mod->getFunctionWithName("ff");
 
-	EXPECT_EQ(ctypes::CallConvention("cdecl"), func->getCallConvention());
+	EXPECT_EQ(retdec::ctypes::CallConvention("cdecl"), func->getCallConvention());
 }
 
 TEST_F(JSONCTypesParserTests,
@@ -1327,10 +1328,10 @@ ParserSetsUserDefinedConventionWhenFunctionDoesNotHaveOne)
 		}
 	)");
 
-	auto mod = parser.parse(json, {}, ctypes::CallConvention("stdcall"));
+	auto mod = parser.parse(json, {}, retdec::ctypes::CallConvention("stdcall"));
 	auto func = mod->getFunctionWithName("ff");
 
-	EXPECT_EQ(ctypes::CallConvention("stdcall"), func->getCallConvention());
+	EXPECT_EQ(retdec::ctypes::CallConvention("stdcall"), func->getCallConvention());
 }
 
 TEST_F(JSONCTypesParserTests,
@@ -1355,11 +1356,11 @@ ParseIntoUsingCallConventionCorrectly)
 		}
 	)");
 
-	auto module = std::make_unique<ctypes::Module>(std::make_shared<ctypes::Context>());
-	parser.parseInto(json, module, {}, ctypes::CallConvention("fastcall"));
+	auto module = std::make_unique<retdec::ctypes::Module>(std::make_shared<retdec::ctypes::Context>());
+	parser.parseInto(json, module, {}, retdec::ctypes::CallConvention("fastcall"));
 	auto func = module->getFunctionWithName("ff");
 
-	EXPECT_EQ(ctypes::CallConvention("fastcall"), func->getCallConvention());
+	EXPECT_EQ(retdec::ctypes::CallConvention("fastcall"), func->getCallConvention());
 }
 
 TEST_F(JSONCTypesParserTests,
@@ -1390,14 +1391,14 @@ ParseIntoWithExplicitTypeWidthsAndCallConventionCorrectly)
 		}
 	)");
 	JSONCTypesParser::TypeWidths typeWidths{{"int", 32}, {"long", 64}};
-	auto module = std::make_unique<ctypes::Module>(std::make_shared<ctypes::Context>());
+	auto module = std::make_unique<retdec::ctypes::Module>(std::make_shared<retdec::ctypes::Context>());
 
-	parser.parseInto(json, module, typeWidths, ctypes::CallConvention("cdecl"));
+	parser.parseInto(json, module, typeWidths, retdec::ctypes::CallConvention("cdecl"));
 	auto func = module->getFunctionWithName("ff");
 
 	EXPECT_EQ(32, func->getReturnType()->getBitWidth());
 	EXPECT_EQ(32, func->getParameterType(1)->getBitWidth());
-	EXPECT_EQ(ctypes::CallConvention("cdecl"), func->getCallConvention());
+	EXPECT_EQ(retdec::ctypes::CallConvention("cdecl"), func->getCallConvention());
 }
 
 TEST_F(JSONCTypesParserTests,
@@ -1429,7 +1430,7 @@ ParseInAnnotationCorrectly)
 		}
 	)");
 
-	auto mod = parser.parse(json, {}, ctypes::CallConvention("stdcall"));
+	auto mod = parser.parse(json, {}, retdec::ctypes::CallConvention("stdcall"));
 	auto func = mod->getFunctionWithName("ff");
 	auto param = func->getParameter(1);
 
@@ -1465,7 +1466,7 @@ ParseOutAnnotationCorrectly)
 		}
 	)");
 
-	auto mod = parser.parse(json, {}, ctypes::CallConvention("stdcall"));
+	auto mod = parser.parse(json, {}, retdec::ctypes::CallConvention("stdcall"));
 	auto func = mod->getFunctionWithName("ff");
 	auto param = func->getParameter(1);
 
@@ -1501,7 +1502,7 @@ ParseInOutAnnotationCorrectly)
 		}
 	)");
 
-	auto mod = parser.parse(json, {}, ctypes::CallConvention("stdcall"));
+	auto mod = parser.parse(json, {}, retdec::ctypes::CallConvention("stdcall"));
 	auto func = mod->getFunctionWithName("ff");
 	auto param = func->getParameter(1);
 
@@ -1537,7 +1538,7 @@ ParseOptionalAnnotationCorrectly)
 		}
 	)");
 
-	auto mod = parser.parse(json, {}, ctypes::CallConvention("stdcall"));
+	auto mod = parser.parse(json, {}, retdec::ctypes::CallConvention("stdcall"));
 	auto func = mod->getFunctionWithName("ff");
 	auto param = func->getParameter(1);
 
@@ -1936,20 +1937,21 @@ ParsingCircularTypedefsBreaksLoopAndSetsTypedefToUnknownType)
 	)");
 
 	auto mod = parser.parse(json);
-	std::shared_ptr<ctypes::TypedefedType> retType =
-		std::static_pointer_cast<ctypes::TypedefedType>(
+	std::shared_ptr<retdec::ctypes::TypedefedType> retType =
+		std::static_pointer_cast<retdec::ctypes::TypedefedType>(
 			mod->getFunctionWithName("ff")->getReturnType()
 		);
-	std::shared_ptr<ctypes::TypedefedType> type2 =
-		std::static_pointer_cast<ctypes::TypedefedType>(retType->getAliasedType());
-	std::shared_ptr<ctypes::TypedefedType> type3 =
-		std::static_pointer_cast<ctypes::TypedefedType>(type2->getAliasedType());
+	std::shared_ptr<retdec::ctypes::TypedefedType> type2 =
+		std::static_pointer_cast<retdec::ctypes::TypedefedType>(retType->getAliasedType());
+	std::shared_ptr<retdec::ctypes::TypedefedType> type3 =
+		std::static_pointer_cast<retdec::ctypes::TypedefedType>(type2->getAliasedType());
 
-	EXPECT_EQ(ctypes::UnknownType::create(), retType->getRealType());
+	EXPECT_EQ(retdec::ctypes::UnknownType::create(), retType->getRealType());
 	EXPECT_EQ("MY_TYPE2", type2->getName());
 	EXPECT_EQ("MY_TYPE3", type3->getName());
-	EXPECT_EQ(ctypes::UnknownType::create(), type3->getAliasedType());
+	EXPECT_EQ(retdec::ctypes::UnknownType::create(), type3->getAliasedType());
 }
 
 } // namespace tests
 } // namespace ctypesparser
+} // namespace retdec

@@ -27,9 +27,9 @@ const string helpmsg =
  * @param argv Arguments.
  */
 int main(int argc, char *argv[]) {
-	demangler::CDemangler dem_gcc("gcc");
-	demangler::CDemangler dem_ms("ms");
-	demangler::CDemangler dem_borland("borland");
+	retdec::demangler::CDemangler dem_gcc("gcc");
+	retdec::demangler::CDemangler dem_ms("ms");
+	retdec::demangler::CDemangler dem_borland("borland");
 
 	string demangledGcc;
 	string demangledMs;

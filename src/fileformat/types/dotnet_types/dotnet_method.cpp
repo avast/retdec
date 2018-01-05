@@ -7,6 +7,7 @@
 #include "retdec/utils/string.h"
 #include "retdec/fileformat/types/dotnet_types/dotnet_method.h"
 
+namespace retdec {
 namespace fileformat {
 
 /**
@@ -203,3 +204,4 @@ void DotnetMethod::addGenericParameter(std::string&& genericParam)
 }
 
 } // namespace fileformat
+} // namespace retdec

@@ -10,6 +10,7 @@
 #include "retdec/capstone2llvmir/capstone2llvmir.h"
 #include "retdec/capstone2llvmir/powerpc/powerpc_defs.h"
 
+namespace retdec {
 namespace capstone2llvmir {
 
 class Capstone2LlvmIrTranslatorPowerpc : public Capstone2LlvmIrTranslator
@@ -215,5 +216,6 @@ class Capstone2LlvmIrTranslatorPowerpc : public Capstone2LlvmIrTranslator
 };
 
 } // namespace capstone2llvmir
+} // namespace retdec
 
 #endif

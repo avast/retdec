@@ -12,8 +12,8 @@
 #include <libdwarf/dwarf.h>
 #include <libdwarf/libdwarf.h>
 
-namespace dwarfparser
-{
+namespace retdec {
+namespace dwarfparser {
 
 class DwarfType;
 class DwarfLocationDesc;
@@ -72,5 +72,6 @@ class AttrProcessor
 };
 
 } // namespace dwarfparser
+} // namespace retdec
 
 #endif

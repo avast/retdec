@@ -10,6 +10,7 @@
 #include <memory>
 #include <string>
 
+namespace retdec {
 namespace ctypes {
 
 class Context;
@@ -39,5 +40,6 @@ class Annotation
 };
 
 } // namespace ctypes
+} // namespace retdec
 
 #endif

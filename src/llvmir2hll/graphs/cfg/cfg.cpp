@@ -18,6 +18,7 @@ using retdec::utils::hasItem;
 using retdec::utils::removeItem;
 using retdec::utils::toString;
 
+namespace retdec {
 namespace llvmir2hll {
 
 namespace {
@@ -1064,3 +1065,4 @@ void CFG::validateIngoingAndOutgoingEdges() {
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

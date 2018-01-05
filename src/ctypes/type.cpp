@@ -6,6 +6,7 @@
 
 #include "retdec/ctypes/type.h"
 
+namespace retdec {
 namespace ctypes {
 
 /**
@@ -81,3 +82,4 @@ bool Type::isVoid() const
 
 
 } // namespace ctypes
+} // namespace retdec

@@ -58,6 +58,7 @@
 
 using retdec::utils::mapGetValueOrDefault;
 
+namespace retdec {
 namespace llvmir2hll {
 
 /**
@@ -516,3 +517,4 @@ void BracketManager::visit(ShPtr<Variable> var) {
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

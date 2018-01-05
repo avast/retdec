@@ -18,6 +18,7 @@
 #include "llvmir2hll/semantics/semantics_mock.h"
 #include "retdec/llvmir2hll/support/types.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 class CallStmt;
@@ -78,5 +79,6 @@ protected:
 
 } // namespace tests
 } // namespace llvmir2hll
+} // namespace retdec
 
 #endif

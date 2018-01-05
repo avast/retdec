@@ -10,6 +10,7 @@
 #include "retdec/llvmir2hll/ir/binary_op_expr.h"
 #include "retdec/llvmir2hll/support/smart_ptr.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 class ConstInt;
@@ -48,5 +49,6 @@ private:
 };
 
 } // namespace llvmir2hll
+} // namespace retdec
 
 #endif

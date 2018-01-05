@@ -12,6 +12,7 @@
 using namespace ::testing;
 using namespace llvm;
 
+namespace retdec {
 namespace bin2llvmir {
 namespace tests {
 
@@ -25,3 +26,4 @@ class IrModifierTests: public LlvmIrTests
 
 } // namespace tests
 } // namespace bin2llvmir
+} // namespace retdec

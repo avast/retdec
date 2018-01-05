@@ -43,8 +43,8 @@
 #include "retdec/dwarfparser/dwarf_utils.h"
 #include "retdec/dwarfparser/dwarf_vars.h"
 
-namespace dwarfparser
-{
+namespace retdec {
+namespace dwarfparser {
 
 // Extern forward declarations.
 
@@ -61,7 +61,7 @@ class DwarfFile
 	// Public methods.
 	//
 	public:
-		DwarfFile(std::string fileName, fileformat::FileFormat *fileParser = nullptr);
+		DwarfFile(std::string fileName, retdec::fileformat::FileFormat *fileParser = nullptr);
 		~DwarfFile();
 		bool hasDwarfInfo();
 
@@ -80,7 +80,7 @@ class DwarfFile
 	// Private methods.
 	//
 	private:
-		bool loadFile(std::string fileName, fileformat::FileFormat *fileParser);
+		bool loadFile(std::string fileName, retdec::fileformat::FileFormat *fileParser);
 		void loadFileCUs();
 		void loadCUtree(Dwarf_Die die, DwarfBaseElement* parent, int lvl);
 		void loadDIE(Dwarf_Die die, DwarfBaseElement* &parent, int lvl);
@@ -138,5 +138,6 @@ class DwarfFile
 };
 
 } // namespace dwarfparser
+} // namespace retdec
 
 #endif

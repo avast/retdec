@@ -11,8 +11,9 @@
 #include "retdec/llvmir2hll/support/debug.h"
 #include "retdec/llvm-support/diagnostics.h"
 
-using namespace llvm_support;
+using namespace retdec::llvm_support;
 
+namespace retdec {
 namespace llvmir2hll {
 
 namespace {
@@ -64,3 +65,4 @@ void CLIPatternFinderRunner::printPatternInfo(const ShPtr<Pattern> &p) {
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

@@ -18,6 +18,7 @@ namespace yaramod {
 	class YaraFileBuilder;
 } // namespace yaramod
 
+namespace retdec {
 namespace fnc_patterns {
 namespace patterngen {
 
@@ -92,5 +93,6 @@ class SymbolPattern
 
 } // namespace patterngen
 } // namespace fnc_patterns
+} // namespace retdec
 
 #endif

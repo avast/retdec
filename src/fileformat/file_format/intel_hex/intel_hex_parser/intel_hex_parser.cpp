@@ -11,6 +11,7 @@
 
 using namespace retdec::utils;
 
+namespace retdec {
 namespace fileformat {
 
 /**
@@ -374,3 +375,4 @@ bool IntelHexParser::isHexadec(const std::string &vec)
 }
 
 } // namespace fileformat
+} // namespace retdec

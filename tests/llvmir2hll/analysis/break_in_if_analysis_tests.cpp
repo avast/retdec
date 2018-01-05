@@ -21,6 +21,7 @@
 
 using namespace ::testing;
 
+namespace retdec {
 namespace llvmir2hll {
 namespace tests {
 
@@ -165,3 +166,4 @@ BreakOutOfNestedStatementsAndWithGotoThatReferenceOutOfIfStatementBody) {
 
 } // namespace tests
 } // namespace llvmir2hll
+} // namespace retdec

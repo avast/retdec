@@ -21,7 +21,7 @@
  */
 
 using namespace retdec::utils;
-using namespace fnc_patterns::patterngen;
+using namespace retdec::fnc_patterns::patterngen;
 
 void printUsage(
 	std::ostream &outputStream)

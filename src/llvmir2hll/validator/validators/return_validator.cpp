@@ -12,6 +12,7 @@
 #include "retdec/llvmir2hll/validator/validator_factory.h"
 #include "retdec/llvmir2hll/validator/validators/return_validator.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 REGISTER_AT_FACTORY("Return", RETURN_VALIDATOR_ID, ValidatorFactory,
@@ -55,3 +56,4 @@ void ReturnValidator::visit(ShPtr<ReturnStmt> stmt) {
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

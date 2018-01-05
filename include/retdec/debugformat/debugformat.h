@@ -17,6 +17,7 @@
 #include "retdec/fileformat/fileformat.h"
 #include "retdec/loader/loader.h"
 
+namespace retdec {
 namespace debugformat {
 
 /**
@@ -25,15 +26,15 @@ namespace debugformat {
 class DebugFormat
 {
 	public:
-		using SymbolTable = std::map<retdec::utils::Address, const fileformat::Symbol*>;
+		using SymbolTable = std::map<retdec::utils::Address, const retdec::fileformat::Symbol*>;
 
 	public:
 		DebugFormat();
 		DebugFormat(
-				loader::Image* inFile,
+				retdec::loader::Image* inFile,
 				const std::string& pdbFile,
 				SymbolTable* symtab,
-				demangler::CDemangler* demangler,
+				retdec::demangler::CDemangler* demangler,
 				unsigned long long imageBase = 0);
 
 		retdec::config::Function* getFunction(retdec::utils::Address a);
@@ -52,7 +53,7 @@ class DebugFormat
 		void loadDwarfTypes();
 		void loadDwarfGlobalVariables();
 		void loadDwarfFunctions();
-		retdec::config::Type loadDwarfType(dwarfparser::DwarfType* type);
+		retdec::config::Type loadDwarfType(retdec::dwarfparser::DwarfType* type);
 
 		void loadSymtab();
 
@@ -62,13 +63,13 @@ class DebugFormat
 		/// Symbol table to read symbols from.
 		SymbolTable* _symtab = nullptr;
 		/// Underlying binary file representation.
-		loader::Image* _inFile = nullptr;
+		retdec::loader::Image* _inFile = nullptr;
 		/// Underlying PDB representation.
 		pdbparser::PDBFile* _pdbFile = nullptr;
 		/// Underlying DWARF representation.
-		dwarfparser::DwarfFile* _dwarfFile = nullptr;
+		retdec::dwarfparser::DwarfFile* _dwarfFile = nullptr;
 		/// Demangler.
-		demangler::CDemangler* _demangler = nullptr;
+		retdec::demangler::CDemangler* _demangler = nullptr;
 
 	public:
 		retdec::config::GlobalVarContainer globals;
@@ -78,5 +79,6 @@ class DebugFormat
 };
 
 } // namespace debugformat
+} // namespace retdec
 
 #endif

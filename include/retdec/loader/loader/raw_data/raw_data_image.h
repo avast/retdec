@@ -12,6 +12,7 @@
 
 #include "retdec/loader/loader/image.h"
 
+namespace retdec {
 namespace loader {
 
 /**
@@ -22,7 +23,7 @@ namespace loader {
 class RawDataImage : public Image
 {
 public:
-	RawDataImage(const std::shared_ptr<fileformat::FileFormat>& fileFormat);
+	RawDataImage(const std::shared_ptr<retdec::fileformat::FileFormat>& fileFormat);
 	virtual ~RawDataImage() override;
 
 	virtual bool load() override;
@@ -30,5 +31,6 @@ public:
 };
 
 } // namespace loader
+} // namespace retdec
 
 #endif

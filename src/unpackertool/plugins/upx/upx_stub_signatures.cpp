@@ -6,8 +6,8 @@
 
 #include "unpackertool/plugins/upx/upx_stub_signatures.h"
 
-using namespace fileformat;
-using namespace loader;
+using namespace retdec::fileformat;
+using namespace retdec::loader;
 using namespace unpacker;
 
 namespace unpackertool {
@@ -1740,7 +1740,7 @@ const UpxStubData* UpxStubSignatures::matchSignatures(Image* file, DynamicBuffer
 	Format format = file->getFileFormat()->getFileFormat();
 
 	// Find out whether file has entry point section or segment
-	const loader::Segment* epSeg = file->getEpSegment();
+	const retdec::loader::Segment* epSeg = file->getEpSegment();
 	if (epSeg == nullptr)
 		return nullptr;
 
@@ -1779,7 +1779,7 @@ const UpxStubData* UpxStubSignatures::matchSignatures(Image* file, DynamicBuffer
  * @return Pointer to valid UpxStubData structure containg all data about the unpacking stub in case of successful match, otherwise nullptr.
  */
 const UpxStubData* UpxStubSignatures::matchSignatures(const DynamicBuffer& data, DynamicBuffer& captureData,
-		fileformat::Architecture architecture /*= Architecture::UNKNOWN*/, fileformat::Format format /*= Format::UNKNOWN*/)
+		retdec::fileformat::Architecture architecture /*= Architecture::UNKNOWN*/, retdec::fileformat::Format format /*= Format::UNKNOWN*/)
 {
 	for (const UpxStubData& stubData : allStubs)
 	{

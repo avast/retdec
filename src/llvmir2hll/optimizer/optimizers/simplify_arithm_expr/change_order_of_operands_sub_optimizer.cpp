@@ -9,6 +9,7 @@
 #include "retdec/llvmir2hll/optimizer/optimizers/simplify_arithm_expr/change_order_of_operands_sub_optimizer.h"
 #include "retdec/llvmir2hll/support/debug.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 REGISTER_AT_FACTORY("ChangeOrderOfOperands", CHANGE_ORDER_OF_OPERANDS_SUB_OPTIMIZER_ID,
@@ -60,3 +61,4 @@ void ChangeOrderOfOperandsSubOptimizer::visit(ShPtr<MulOpExpr> expr) {
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

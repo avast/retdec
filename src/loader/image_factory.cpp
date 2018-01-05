@@ -14,11 +14,12 @@
 #include "retdec/loader/loader/pe/pe_image.h"
 #include "retdec/loader/loader/raw_data/raw_data_image.h"
 
+namespace retdec {
 namespace loader {
 
 namespace { // anonymous namespace
 
-std::unique_ptr<Image> createImageImpl(const std::shared_ptr<fileformat::FileFormat>& fileFormat)
+std::unique_ptr<Image> createImageImpl(const std::shared_ptr<retdec::fileformat::FileFormat>& fileFormat)
 {
 	if (!fileFormat || !fileFormat->isInValidState())
 		return nullptr;
@@ -26,22 +27,22 @@ std::unique_ptr<Image> createImageImpl(const std::shared_ptr<fileformat::FileFor
 	std::unique_ptr<Image> image;
 	switch (fileFormat->getFileFormat())
 	{
-		case fileformat::Format::PE:
+		case retdec::fileformat::Format::PE:
 			image = std::make_unique<PeImage>(fileFormat);
 			break;
-		case fileformat::Format::ELF:
+		case retdec::fileformat::Format::ELF:
 			image = std::make_unique<ElfImage>(fileFormat);
 			break;
-		case fileformat::Format::COFF:
+		case retdec::fileformat::Format::COFF:
 			image = std::make_unique<CoffImage>(fileFormat);
 			break;
-		case fileformat::Format::INTEL_HEX:
+		case retdec::fileformat::Format::INTEL_HEX:
 			image = std::make_unique<IntelHexImage>(fileFormat);
 			break;
-		case fileformat::Format::MACHO:
+		case retdec::fileformat::Format::MACHO:
 			image = std::make_unique<MachOImage>(fileFormat);
 			break;
-		case fileformat::Format::RAW_DATA:
+		case retdec::fileformat::Format::RAW_DATA:
 			image = std::make_unique<RawDataImage>(fileFormat);
 			break;
 		default:
@@ -68,8 +69,8 @@ std::unique_ptr<Image> createImageImpl(const std::shared_ptr<fileformat::FileFor
  */
 std::unique_ptr<Image> createImage(const std::string& filePath, retdec::config::Config *config)
 {
-	std::unique_ptr<fileformat::FileFormat> fileFormat = fileformat::createFileFormat(filePath, config);
-	std::shared_ptr<fileformat::FileFormat> fileFormatShared(std::move(fileFormat)); // Obtain ownership.
+	std::unique_ptr<retdec::fileformat::FileFormat> fileFormat = retdec::fileformat::createFileFormat(filePath, config);
+	std::shared_ptr<retdec::fileformat::FileFormat> fileFormatShared(std::move(fileFormat)); // Obtain ownership.
 	return createImageImpl(fileFormatShared);
 }
 
@@ -82,9 +83,10 @@ std::unique_ptr<Image> createImage(const std::string& filePath, retdec::config::
  *
  * @return Pointer to instance of Image class or @c nullptr if any error
  */
-std::unique_ptr<Image> createImage(const std::shared_ptr<fileformat::FileFormat>& fileFormat)
+std::unique_ptr<Image> createImage(const std::shared_ptr<retdec::fileformat::FileFormat>& fileFormat)
 {
 	return createImageImpl(fileFormat);
 }
 
 } // namespace loader
+} // namespace retdec

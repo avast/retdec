@@ -10,6 +10,7 @@
 #include <cstdint>
 #include <string>
 
+namespace retdec {
 namespace fileformat {
 
 /**
@@ -59,5 +60,6 @@ class DotnetType
 };
 
 } // namespace fileformat
+} // namespace retdec
 
 #endif

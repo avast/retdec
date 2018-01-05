@@ -14,12 +14,15 @@
 #include "retdec/patterngen/pattern_extractor/types/symbol_pattern.h"
 
 // Forward declarations.
+namespace retdec {
 namespace fileformat {
 	class FileFormat;
 	class Section;
 	class Symbol;
 } // namespace fileformat
+} // namespace retdec
 
+namespace retdec {
 namespace fnc_patterns {
 namespace patterngen {
 
@@ -29,7 +32,7 @@ namespace patterngen {
 class PatternExtractor
 {
 	private:
-		std::unique_ptr<fileformat::FileFormat> inputFile; ///< Parser.
+		std::unique_ptr<retdec::fileformat::FileFormat> inputFile; ///< Parser.
 
 		bool stateValid = false;           ///< Extractor state.
 		std::string errorMessage;          ///< Error message if invalid state.
@@ -48,13 +51,13 @@ class PatternExtractor
 		/// @{
 		bool processFile();
 		bool checkPPC64Sections();
-		std::vector<const fileformat::Symbol*> filterSymbols();
-		void processSymbol(const fileformat::Symbol *symbol);
-		void processSection(const fileformat::Section *section);
+		std::vector<const retdec::fileformat::Symbol*> filterSymbols();
+		void processSymbol(const retdec::fileformat::Symbol *symbol);
+		void processSection(const retdec::fileformat::Section *section);
 		void addSectionPatterns(
-			const fileformat::Section *section,
-			std::vector<const fileformat::Symbol *> &symbols);
-		void addPattern(const fileformat::Section *section,
+			const retdec::fileformat::Section *section,
+			std::vector<const retdec::fileformat::Symbol *> &symbols);
+		void addPattern(const retdec::fileformat::Section *section,
 			const std::string &name, const unsigned long long offset,
 			const unsigned long long size);
 		std::string getArchAsString();
@@ -86,5 +89,6 @@ class PatternExtractor
 
 } // namespace patterngen
 } // namespace fnc_patterns
+} // namespace retdec
 
 #endif

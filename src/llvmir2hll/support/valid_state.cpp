@@ -6,6 +6,7 @@
 
 #include "retdec/llvmir2hll/support/valid_state.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 /**
@@ -35,3 +36,4 @@ void ValidState::validateState() {
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

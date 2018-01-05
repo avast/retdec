@@ -50,6 +50,7 @@ std::string llvmObjToString(const llvm::Module* t)
 	return ss.str();
 }
 
+namespace retdec {
 namespace llvmir_emul {
 namespace tests {
 
@@ -350,5 +351,6 @@ class LlvmIrTests : public ::testing::Test
 
 } // namespace tests
 } // namespace llvmir_emul
+} // retdec
 
 #endif

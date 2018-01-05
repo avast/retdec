@@ -18,6 +18,7 @@
 #include "retdec/bin2llvmir/providers/lti.h"
 #include "retdec/bin2llvmir/utils/ir_modifier.h"
 
+namespace retdec {
 namespace bin2llvmir {
 
 class ControlFlow : public llvm::ModulePass
@@ -106,5 +107,6 @@ class ControlFlow : public llvm::ModulePass
 };
 
 } // namespace bin2llvmir
+} // namespace retdec
 
 #endif

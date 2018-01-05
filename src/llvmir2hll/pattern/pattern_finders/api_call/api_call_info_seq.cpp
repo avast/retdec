@@ -7,6 +7,7 @@
 #include "retdec/llvmir2hll/pattern/pattern_finders/api_call/api_call_info_seq.h"
 #include "retdec/llvmir2hll/support/debug.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 /**
@@ -102,3 +103,4 @@ APICallInfoSeq::iterator APICallInfoSeq::end() const {
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

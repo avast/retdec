@@ -15,6 +15,7 @@
 
 using namespace ::testing;
 
+namespace retdec {
 namespace ctypes {
 namespace tests {
 
@@ -130,3 +131,4 @@ SetMembersOverwritesPreviousMembers)
 
 } // namespace tests
 } // namespace ctypes
+} // namespace retdec

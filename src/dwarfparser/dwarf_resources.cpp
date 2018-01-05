@@ -10,8 +10,8 @@
 
 using namespace std;
 
-namespace dwarfparser
-{
+namespace retdec {
+namespace dwarfparser {
 
 /**
  * @brief Print contents of this class.
@@ -198,3 +198,4 @@ void DwarfResources::initMappingDefault(eDefaultMap m)
 }
 
 } // namespace dwarfparser
+} // namespace retdec

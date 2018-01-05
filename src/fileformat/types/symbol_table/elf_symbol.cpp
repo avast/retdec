@@ -6,6 +6,7 @@
 
 #include "retdec/fileformat/types/symbol_table/elf_symbol.h"
 
+namespace retdec {
 namespace fileformat {
 
 /**
@@ -79,3 +80,4 @@ void ElfSymbol::setElfOther(unsigned long long symbolElfOther)
 }
 
 } // namespace fileformat
+} // namespace retdec

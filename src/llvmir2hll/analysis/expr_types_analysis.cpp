@@ -27,6 +27,7 @@
 #include "retdec/llvmir2hll/ir/variable.h"
 #include "retdec/llvmir2hll/support/debug.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 /**
@@ -301,3 +302,4 @@ void ExprTypesAnalysis::visit(ShPtr<BitShrOpExpr> expr) {
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

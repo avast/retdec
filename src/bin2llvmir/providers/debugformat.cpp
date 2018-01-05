@@ -8,6 +8,7 @@
 
 using namespace llvm;
 
+namespace retdec {
 namespace bin2llvmir {
 
 //
@@ -33,10 +34,10 @@ std::map<Module*, DebugFormat> DebugFormatProvider::_module2debug;
  */
 DebugFormat* DebugFormatProvider::addDebugFormat(
 				llvm::Module* m,
-				loader::Image* objf,
+				retdec::loader::Image* objf,
 				const std::string& pdbFile,
 				const retdec::utils::Address& imageBase,
-				demangler::CDemangler* demangler)
+				retdec::demangler::CDemangler* demangler)
 {
 	if (objf == nullptr)
 	{
@@ -88,3 +89,4 @@ void DebugFormatProvider::clear()
 }
 
 } // namespace bin2llvmir
+} // namespace retdec

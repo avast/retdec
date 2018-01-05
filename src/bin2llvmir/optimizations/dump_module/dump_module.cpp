@@ -7,9 +7,10 @@
 #include "retdec/llvm-support/utils.h"
 #include "retdec/bin2llvmir/optimizations/dump_module/dump_module.h"
 
-using namespace llvm_support;
+using namespace retdec::llvm_support;
 using namespace llvm;
 
+namespace retdec {
 namespace bin2llvmir {
 
 char DumpModule::ID = 0;
@@ -34,3 +35,4 @@ bool DumpModule::runOnModule(Module& M)
 }
 
 } // namespace bin2llvmir
+} // namespace retdec

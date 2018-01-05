@@ -24,6 +24,7 @@ using retdec::utils::hasItem;
 using retdec::utils::setDifference;
 using retdec::utils::setIntersection;
 
+namespace retdec {
 namespace llvmir2hll {
 
 /**
@@ -400,3 +401,4 @@ bool OptimFuncInfoCFGTraversal::combineRetVals(bool /*origRetVal*/,
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

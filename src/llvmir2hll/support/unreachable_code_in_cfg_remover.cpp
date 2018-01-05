@@ -18,6 +18,7 @@
 
 using retdec::utils::hasItem;
 
+namespace retdec {
 namespace llvmir2hll {
 
 /**
@@ -137,3 +138,4 @@ void UnreachableCodeInCFGRemover::visitStmt(ShPtr<Statement> stmt,
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

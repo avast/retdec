@@ -31,10 +31,11 @@
 #include "retdec/llvm-support/diagnostics.h"
 #include "retdec/utils/container.h"
 
-using namespace llvm_support;
+using namespace retdec::llvm_support;
 
 using retdec::utils::clear;
 
+namespace retdec {
 namespace llvmir2hll {
 
 namespace {
@@ -817,3 +818,4 @@ void NonRecursiveCFGBuilder::visit(ShPtr<UnreachableStmt> stmt) {
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

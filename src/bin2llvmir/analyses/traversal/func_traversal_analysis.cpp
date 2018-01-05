@@ -11,6 +11,7 @@
 
 using namespace llvm;
 
+namespace retdec {
 namespace bin2llvmir {
 
 /**
@@ -150,3 +151,4 @@ FuncTraversalAnalysis::Node *FuncTraversalAnalysis::processFuncNotInSCC(
 }
 
 } // namespace bin2llvmir
+} // namespace retdec

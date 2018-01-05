@@ -7,6 +7,7 @@
 #include "retdec/utils/conversion.h"
 #include "retdec/fileformat/utils/asn1.h"
 
+namespace retdec {
 namespace fileformat {
 
 Asn1Item::Asn1Item(Asn1Type type, const std::vector<std::uint8_t>& data) : _type(type), _data(data)
@@ -265,3 +266,4 @@ void Asn1ContextSpecific::init()
 }
 
 } // namespace fileformat
+} // namespace retdec

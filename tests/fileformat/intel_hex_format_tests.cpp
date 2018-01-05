@@ -38,6 +38,7 @@ const std::string intel_hex_invalid_nl = ":04000005FFFF0001F80000";
 
 } // anonymous namespace
 
+namespace retdec {
 namespace fileformat {
 namespace tests {
 
@@ -154,3 +155,4 @@ TEST_F(IntelHexFormatTests, InvalidRecords)
 
 } // namespace tests
 } // namespace fileformat
+} // namespace retdec

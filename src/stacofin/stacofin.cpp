@@ -15,7 +15,7 @@
 
 using namespace retdec::utils;
 using namespace yaracpp;
-using namespace loader;
+using namespace retdec::loader;
 
 
 namespace fnc_patterns {

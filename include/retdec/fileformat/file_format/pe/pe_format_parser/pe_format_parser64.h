@@ -9,6 +9,7 @@
 
 #include "retdec/fileformat/file_format/pe/pe_format_parser/pe_format_parser.h"
 
+namespace retdec {
 namespace fileformat {
 
 class PeFormatParser64 : public PeFormatParser
@@ -82,5 +83,6 @@ class PeFormatParser64 : public PeFormatParser
 };
 
 } // namespace fileformat
+} // namespace retdec
 
 #endif

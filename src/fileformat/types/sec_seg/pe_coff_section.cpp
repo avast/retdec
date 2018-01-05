@@ -6,6 +6,7 @@
 
 #include "retdec/fileformat/types/sec_seg/pe_coff_section.h"
 
+namespace retdec {
 namespace fileformat {
 
 /**
@@ -35,3 +36,4 @@ void PeCoffSection::setPeCoffFlags(unsigned long long sPeCoffFlags)
 }
 
 } // namespace fileformat
+} // namespace retdec

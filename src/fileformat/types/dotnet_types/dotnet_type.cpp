@@ -9,6 +9,7 @@
 #include "retdec/utils/container.h"
 #include "retdec/fileformat/types/dotnet_types/dotnet_type.h"
 
+namespace retdec {
 namespace fileformat {
 
 namespace
@@ -29,3 +30,4 @@ const std::string& DotnetType::getVisibilityString() const
 }
 
 } // namespace fileformat
+} // namespace retdec

@@ -13,8 +13,8 @@
 #include "fileinfo/file_presentation/plain_presentation.h"
 
 using namespace retdec::utils;
-using namespace cpdetect;
-using namespace fileformat;
+using namespace retdec::cpdetect;
+using namespace retdec::fileformat;
 
 namespace fileinfo {
 

@@ -17,12 +17,13 @@
 #include "retdec/bin2llvmir/optimizations/stack_pointer_ops/stack_pointer_ops.h"
 #include "retdec/bin2llvmir/utils/defs.h"
 
-using namespace llvm_support;
+using namespace retdec::llvm_support;
 using namespace retdec::utils;
 using namespace llvm;
 
 #define debug_enabled false
 
+namespace retdec {
 namespace bin2llvmir {
 
 char StackPointerOpsRemove::ID = 0;
@@ -198,3 +199,4 @@ bool StackPointerOpsRemove::removePreservationStores()
 }
 
 } // namespace bin2llvmir
+} // namespace retdec

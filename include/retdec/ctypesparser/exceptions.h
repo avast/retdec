@@ -9,17 +9,19 @@
 
 #include "retdec/ctypes/exceptions.h"
 
+namespace retdec {
 namespace ctypesparser {
 
 /**
 * @brief A class for ctypesparser-related errors.
 */
-class CTypesParseError: public ctypes::CTypesError
+class CTypesParseError: public retdec::ctypes::CTypesError
 {
 	public:
-		using ctypes::CTypesError::CTypesError;
+		using retdec::ctypes::CTypesError::CTypesError;
 };
 
 } // namespace ctypesparser
+} // namespace retdec
 
 #endif

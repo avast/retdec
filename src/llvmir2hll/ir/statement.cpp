@@ -13,6 +13,7 @@
 
 using retdec::utils::toString;
 
+namespace retdec {
 namespace llvmir2hll {
 namespace {
 
@@ -782,3 +783,4 @@ bool Statement::containsJustGotosToCurrentStatement(const StmtSet &stmts) const 
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

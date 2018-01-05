@@ -10,6 +10,7 @@
 #include "retdec/fileformat/types/dotnet_types/dotnet_class.h"
 #include "retdec/fileformat/types/dotnet_types/dotnet_data_types.h"
 
+namespace retdec {
 namespace fileformat {
 
 std::string DotnetDataTypePtr::getText() const
@@ -109,3 +110,4 @@ std::string DotnetDataTypeCModOptional::getText() const
 }
 
 } // namespace fileformat
+} // namespace retdec

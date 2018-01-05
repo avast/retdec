@@ -12,6 +12,7 @@
 
 using namespace ::testing;
 
+namespace retdec {
 namespace ctypes {
 namespace tests {
 
@@ -36,3 +37,4 @@ DeafultConstructorCreatesEmptyCallConvention)
 
 } // namespace tests
 } // namespace ctypes
+} // namespace retdec

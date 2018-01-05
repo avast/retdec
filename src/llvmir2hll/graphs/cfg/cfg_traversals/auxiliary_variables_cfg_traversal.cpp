@@ -21,6 +21,7 @@ using retdec::utils::getKeysFromMap;
 using retdec::utils::hasItem;
 using retdec::utils::mapHasKey;
 
+namespace retdec {
 namespace llvmir2hll {
 
 /**
@@ -188,3 +189,4 @@ bool AuxiliaryVariablesCFGTraversal::combineRetVals(bool /*origRetVal*/,
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

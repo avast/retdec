@@ -13,7 +13,7 @@
 #include "retdec/fileformat/utils/file_io.h"
 
 using namespace retdec::utils;
-using namespace fileformat;
+using namespace retdec::fileformat;
 
 namespace
 {
@@ -31,12 +31,13 @@ const std::map<std::string, std::set<std::string>> dynamicLanguagesMap =
 
 } // anonymous namespace
 
+namespace retdec {
 namespace cpdetect {
 
 /**
  * Constructor
  */
-ElfHeuristics::ElfHeuristics(fileformat::ElfFormat &parser, Search &searcher, ToolInformation &toolInfo) :
+ElfHeuristics::ElfHeuristics(retdec::fileformat::ElfFormat &parser, Search &searcher, ToolInformation &toolInfo) :
 	Heuristics(parser, searcher, toolInfo), elfParser(parser)
 {
 
@@ -132,3 +133,4 @@ void ElfHeuristics::getFormatSpecificCompilerHeuristics()
 }
 
 } // namespace cpdetect
+} // namespace retdec

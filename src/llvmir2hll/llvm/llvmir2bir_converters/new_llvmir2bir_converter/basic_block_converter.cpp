@@ -20,6 +20,7 @@
 #include "retdec/llvmir2hll/llvm/llvmir2bir_converters/new_llvmir2bir_converter/llvm_value_converter.h"
 #include "retdec/llvmir2hll/llvm/llvmir2bir_converters/orig_llvmir2bir_converter/labels_handler.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 /**
@@ -218,3 +219,4 @@ ShPtr<Statement> BasicBlockConverter::generateAssignOfPrevValForInsertValueInst(
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

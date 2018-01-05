@@ -8,12 +8,13 @@
 #include "retdec/cpdetect/compiler_detector/intel_hex_compiler.h"
 #include "retdec/cpdetect/settings.h"
 
+namespace retdec {
 namespace cpdetect {
 
 /**
  * Constructor
  */
-IntelHexCompiler::IntelHexCompiler(fileformat::IntelHexFormat &parser, DetectParams &params, ToolInformation &tools) : CompilerDetector(parser, params, tools)
+IntelHexCompiler::IntelHexCompiler(retdec::fileformat::IntelHexFormat &parser, DetectParams &params, ToolInformation &tools) : CompilerDetector(parser, params, tools)
 {
 	heuristics = new Heuristics(parser, *search, toolInfo);
 	externalSuffixes = EXTERNAL_DATABASE_SUFFIXES;
@@ -21,3 +22,4 @@ IntelHexCompiler::IntelHexCompiler(fileformat::IntelHexFormat &parser, DetectPar
 }
 
 } // namespace cpdetect
+} // namespace retdec

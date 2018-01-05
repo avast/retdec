@@ -10,6 +10,7 @@
 #include "retdec/llvmir2hll/optimizer/optimizer.h"
 #include "retdec/llvmir2hll/support/smart_ptr.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 class Function;
@@ -75,5 +76,6 @@ protected:
 };
 
 } // namespace llvmir2hll
+} // namespace retdec
 
 #endif

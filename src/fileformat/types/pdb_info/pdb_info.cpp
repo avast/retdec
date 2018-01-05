@@ -8,6 +8,7 @@
 
 #include "retdec/fileformat/types/pdb_info/pdb_info.h"
 
+namespace retdec {
 namespace fileformat {
 
 /**
@@ -150,3 +151,4 @@ void PdbInfo::dump(std::string &dumpInfo) const
 }
 
 } // namespace fileformat
+} // namespace retdec

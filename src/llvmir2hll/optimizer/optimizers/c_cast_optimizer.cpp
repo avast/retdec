@@ -25,6 +25,7 @@
 #include "retdec/llvmir2hll/support/types.h"
 #include "retdec/llvmir2hll/utils/ir.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 /**
@@ -145,3 +146,4 @@ void CCastOptimizer::visit(ShPtr<ReturnStmt> stmt) {
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

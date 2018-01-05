@@ -23,6 +23,7 @@ using retdec::utils::hasItem;
 using retdec::utils::replaceCharsWithStrings;
 using retdec::utils::toString;
 
+namespace retdec {
 namespace llvmir2hll {
 
 REGISTER_AT_FACTORY("dot", GRAPHVIZ_CFG_WRITER_ID, CFGWriterFactory,
@@ -200,3 +201,4 @@ void GraphvizCFGWriter::emitStmt(ShPtr<Statement> stmt) {
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

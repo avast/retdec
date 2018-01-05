@@ -9,6 +9,7 @@
 
 using namespace retdec::utils;
 
+namespace retdec {
 namespace fileformat {
 
 /**
@@ -344,3 +345,4 @@ void SymbolTable::setName(const std::string& symbolTableName)
 }
 
 } // namespace fileformat
+} // namespace retdec

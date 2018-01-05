@@ -9,14 +9,15 @@
 #include "retdec/cpdetect/settings.h"
 #include "retdec/cpdetect/signatures/yara/database/database.h"
 
-using namespace fileformat;
+using namespace retdec::fileformat;
 
+namespace retdec {
 namespace cpdetect {
 
 /**
  * Constructor
  */
-MachOCompiler::MachOCompiler(fileformat::MachOFormat &parser, DetectParams &params, ToolInformation &tools) : CompilerDetector(parser, params, tools)
+MachOCompiler::MachOCompiler(retdec::fileformat::MachOFormat &parser, DetectParams &params, ToolInformation &tools) : CompilerDetector(parser, params, tools)
 {
 	heuristics = new MachOHeuristics(parser, *search, toolInfo);
 	externalSuffixes = EXTERNAL_DATABASE_SUFFIXES;
@@ -46,3 +47,4 @@ MachOCompiler::MachOCompiler(fileformat::MachOFormat &parser, DetectParams &para
 }
 
 } // namespace cpdetect
+} // namespace retdec

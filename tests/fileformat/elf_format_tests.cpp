@@ -34,6 +34,7 @@ const unsigned char elfBytes[] =
 
 } // anonymous namespace
 
+namespace retdec {
 namespace fileformat {
 namespace tests {
 
@@ -100,3 +101,4 @@ TEST_F(ElfFormatTests, DataInterpretationBig)
 
 } // namespace tests
 } // namespace fileformat
+} // namespace retdec

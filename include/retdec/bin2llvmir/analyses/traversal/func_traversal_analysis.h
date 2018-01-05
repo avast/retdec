@@ -11,6 +11,7 @@
 
 #include "retdec/bin2llvmir/analyses/traversal/traversal_analysis.h"
 
+namespace retdec {
 namespace bin2llvmir {
 
 /**
@@ -96,5 +97,6 @@ private:
 };
 
 } // namespace bin2llvmir
+} // namespace retdec
 
 #endif

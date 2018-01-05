@@ -12,6 +12,7 @@
 
 #include "retdec/ctypes/type.h"
 
+namespace retdec {
 namespace ctypes {
 
 class Context;
@@ -38,5 +39,6 @@ class FloatingPointType: public Type
 };
 
 } // namespace ctypes
+} // namespace retdec
 
 #endif

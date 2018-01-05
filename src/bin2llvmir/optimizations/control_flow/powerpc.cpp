@@ -16,6 +16,7 @@
 
 using namespace llvm;
 
+namespace retdec {
 namespace bin2llvmir {
 
 bool ControlFlow::runPowerpc()
@@ -92,3 +93,4 @@ bool ControlFlow::runPowerpcCall(AsmInstruction& ai)
 }
 
 } // namespace bin2llvmir
+} // namespace retdec

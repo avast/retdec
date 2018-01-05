@@ -15,6 +15,7 @@
 
 using namespace ::testing;
 
+namespace retdec {
 namespace llvmir2hll {
 namespace tests {
 
@@ -105,3 +106,4 @@ ExpressionOnTheRightHandSideOfGlobalVariableDefinitionIsCorrectlyReplaced) {
 
 } // namespace tests
 } // namespace llvmir2hll
+} // namespace retdec

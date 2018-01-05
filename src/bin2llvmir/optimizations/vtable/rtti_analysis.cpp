@@ -15,6 +15,7 @@ using namespace llvm;
 
 #define debug_enabled false
 
+namespace retdec {
 namespace bin2llvmir {
 
 RttiAnalysis::~RttiAnalysis()
@@ -26,7 +27,7 @@ RttiAnalysis::~RttiAnalysis()
 }
 
 ClassTypeInfo* RttiAnalysis::parseGccRtti(
-		loader::Image* objfile,
+		retdec::loader::Image* objfile,
 		DataReferences* RA,
 		Address rttiAddr)
 {
@@ -257,7 +258,7 @@ void RttiAnalysis::processGccRttis()
 }
 
 RTTICompleteObjectLocator* RttiAnalysis::parseMsvcObjectLocator(
-		loader::Image* objfile,
+		retdec::loader::Image* objfile,
 		Address rttiAddr)
 {
 	objf = objfile;
@@ -541,3 +542,4 @@ void RttiAnalysis::processMsvcRttis()
 }
 
 } // namespace bin2llvmir
+} // namespace retdec

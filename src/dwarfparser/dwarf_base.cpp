@@ -14,8 +14,8 @@
 
 using namespace std;
 
-namespace dwarfparser
-{
+namespace retdec {
+namespace dwarfparser {
 
 /**
  * @brief ctor.
@@ -61,3 +61,4 @@ Dwarf_Debug &DwarfBaseElement::getLibdwarfDebug() const
 }
 
 } // namespace dwarfparser
+} // namespace retdec

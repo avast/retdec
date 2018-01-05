@@ -20,6 +20,7 @@
 #include "retdec/llvmir2hll/utils/ir.h"
 #include "retdec/llvmir2hll/utils/loop_optimizer.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 /**
@@ -199,3 +200,4 @@ void WhileTrueToWhileCondOptimizer::visit(ShPtr<WhileLoopStmt> stmt) {
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

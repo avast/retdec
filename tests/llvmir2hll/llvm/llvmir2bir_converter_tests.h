@@ -21,6 +21,7 @@
 #include "llvmir2hll/semantics/semantics_mock.h"
 #include "retdec/llvmir2hll/support/smart_ptr.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 class LLVMIR2BIRConverter;
@@ -126,5 +127,6 @@ private:
 
 } // namespace tests
 } // namespace llvmir2hll
+} // namespace retdec
 
 #endif

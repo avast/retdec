@@ -10,6 +10,7 @@
 #include "retdec/llvmir2hll/ir/value.h"
 #include "retdec/llvmir2hll/support/smart_ptr.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 class Type;
@@ -57,5 +58,6 @@ protected:
 };
 
 } // namespace llvmir2hll
+} // namespace retdec
 
 #endif

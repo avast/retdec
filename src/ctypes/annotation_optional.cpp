@@ -9,6 +9,7 @@
 #include "retdec/ctypes/annotation_optional.h"
 #include "retdec/ctypes/context.h"
 
+namespace retdec {
 namespace ctypes {
 
 /**
@@ -40,3 +41,4 @@ bool AnnotationOptional::isOptional() const
 }
 
 } // namespace ctypes
+} // namespace retdec

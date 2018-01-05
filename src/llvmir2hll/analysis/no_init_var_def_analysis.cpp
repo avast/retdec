@@ -10,6 +10,7 @@
 #include "retdec/llvmir2hll/ir/var_def_stmt.h"
 #include "retdec/llvmir2hll/support/debug.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 NoInitVarDefAnalysis::NoInitVarDefAnalysis() {}
@@ -39,3 +40,4 @@ void NoInitVarDefAnalysis::visit(ShPtr<VarDefStmt> varDefStmt) {
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

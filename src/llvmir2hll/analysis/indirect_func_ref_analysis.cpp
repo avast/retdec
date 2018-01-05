@@ -14,6 +14,7 @@
 
 using retdec::utils::hasItem;
 
+namespace retdec {
 namespace llvmir2hll {
 
 /**
@@ -115,3 +116,4 @@ void IndirectFuncRefAnalysis::visit(ShPtr<Variable> var) {
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

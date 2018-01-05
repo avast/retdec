@@ -10,7 +10,7 @@
 #include "fileinfo/file_presentation/getters/iterative_getter/iterative_subtitle_getter/dynamic_sections_json_getter.h"
 
 using namespace retdec::utils;
-using namespace fileformat;
+using namespace retdec::fileformat;
 
 namespace fileinfo {
 

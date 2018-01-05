@@ -7,6 +7,7 @@
 #include "retdec/utils/string.h"
 #include "retdec/fileformat/types/dotnet_types/dotnet_class.h"
 
+namespace retdec {
 namespace fileformat {
 
 /**
@@ -311,3 +312,4 @@ void DotnetClass::addBaseType(std::unique_ptr<DotnetDataTypeBase>&& baseType)
 }
 
 } // namespace fileformat
+} // namespace retdec

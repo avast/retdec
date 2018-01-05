@@ -21,6 +21,7 @@
 using retdec::utils::addToSet;
 using retdec::utils::hasItem;
 
+namespace retdec {
 namespace llvmir2hll {
 
 namespace {
@@ -178,3 +179,4 @@ void UnreachableFuncsRemover::performRemoval() {
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

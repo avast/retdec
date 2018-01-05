@@ -7,6 +7,7 @@
 #include "retdec/cpdetect/signatures/avg/signature.h"
 #include "retdec/cpdetect/signatures/avg/signature_checker.h"
 
+namespace retdec {
 namespace cpdetect {
 
 /**
@@ -50,3 +51,4 @@ bool Signature::haveValidPattern() const
 }
 
 } // namespace cpdetect
+} // namespace retdec

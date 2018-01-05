@@ -14,6 +14,7 @@
 
 #include "retdec/utils/address.h"
 
+namespace retdec {
 namespace bin2llvmir {
 
 class Config
@@ -185,5 +186,6 @@ class ConfigProvider
 };
 
 } // namespace bin2llvmir
+} // namespace retdec
 
 #endif

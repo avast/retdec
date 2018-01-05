@@ -18,6 +18,7 @@
 using retdec::utils::addToSet;
 using retdec::utils::hasItem;
 
+namespace retdec {
 namespace llvmir2hll {
 
 namespace {
@@ -466,3 +467,4 @@ ShPtr<Variable> DefUseAnalysis::getDefVarInStmt(ShPtr<Statement> stmt) {
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

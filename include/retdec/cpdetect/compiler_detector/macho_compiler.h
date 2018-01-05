@@ -10,6 +10,7 @@
 #include "retdec/cpdetect/compiler_detector/compiler_detector.h"
 #include "retdec/fileformat/file_format/macho/macho_format.h"
 
+namespace retdec {
 namespace cpdetect {
 
 /**
@@ -18,9 +19,10 @@ namespace cpdetect {
 class MachOCompiler : public CompilerDetector
 {
 	public:
-		MachOCompiler(fileformat::MachOFormat &parser, DetectParams &params, ToolInformation &tools);
+		MachOCompiler(retdec::fileformat::MachOFormat &parser, DetectParams &params, ToolInformation &tools);
 };
 
 } // namespace cpdetect
+} // namespace retdec
 
 #endif

@@ -8,6 +8,7 @@
 #include "retdec/llvmir2hll/ir/module.h"
 #include "retdec/llvmir2hll/support/debug.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 /**
@@ -48,3 +49,4 @@ bool AliasAnalysis::isInitialized() const {
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

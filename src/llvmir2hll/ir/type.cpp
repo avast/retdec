@@ -7,6 +7,7 @@
 #include "retdec/llvmir2hll/ir/type.h"
 #include "retdec/llvmir2hll/support/debug.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 /**
@@ -20,3 +21,4 @@ Type::Type() {}
 Type::~Type() {}
 
 } // namespace llvmir2hll
+} // namespace retdec

@@ -7,6 +7,7 @@
 #include "retdec/llvmir2hll/support/debug.h"
 #include "retdec/llvmir2hll/var_name_gen/var_name_gen.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 /**
@@ -30,3 +31,4 @@ const std::string &VarNameGen::getPrefix() const {
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

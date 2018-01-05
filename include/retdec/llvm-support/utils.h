@@ -15,6 +15,7 @@
 #include <llvm/IR/Module.h>
 #include <llvm/Support/raw_ostream.h>
 
+namespace retdec {
 namespace llvm_support {
 
 /**
@@ -42,5 +43,6 @@ void dumpModuleToFile(const llvm::Module* m, const std::string fileName = "");
 llvm::Value* skipCasts(llvm::Value* val);
 
 } // namespace llvm_support
+} // namespace retdec
 
 #endif

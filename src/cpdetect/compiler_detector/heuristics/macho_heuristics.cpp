@@ -6,14 +6,15 @@
 
 #include "retdec/cpdetect/compiler_detector/heuristics/macho_heuristics.h"
 
-using namespace fileformat;
+using namespace retdec::fileformat;
 
+namespace retdec {
 namespace cpdetect {
 
 /**
  * Constructor
  */
-MachOHeuristics::MachOHeuristics(fileformat::MachOFormat &parser, Search &searcher, ToolInformation &toolInfo) :
+MachOHeuristics::MachOHeuristics(retdec::fileformat::MachOFormat &parser, Search &searcher, ToolInformation &toolInfo) :
 	Heuristics(parser, searcher, toolInfo)
 {
 
@@ -131,3 +132,4 @@ void MachOHeuristics::getFormatSpecificCompilerHeuristics()
 }
 
 } // namespace cpdetect
+} // namespace retdec

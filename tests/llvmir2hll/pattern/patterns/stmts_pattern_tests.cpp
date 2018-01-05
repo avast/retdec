@@ -24,6 +24,7 @@ using namespace ::testing;
 
 using retdec::utils::startsWith;
 
+namespace retdec {
 namespace llvmir2hll {
 namespace tests {
 
@@ -170,3 +171,4 @@ PrintTheResultForNonEmptyPatternStartsWithSpecifiedIndentationAndEndsWithNewLine
 
 } // namespace tests
 } // namespace llvmir2hll
+} // namespace retdec

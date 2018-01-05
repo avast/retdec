@@ -7,6 +7,7 @@
 #ifndef RETDEC_CAPSTONE2LLVMIR_MIPS_MIPS_DEFS_H
 #define RETDEC_CAPSTONE2LLVMIR_MIPS_MIPS_DEFS_H
 
+namespace retdec {
 namespace capstone2llvmir {
 
 /**
@@ -37,5 +38,6 @@ enum mips_reg_fpu_double
 };
 
 } // namespace capstone2llvmir
+} // namespace retdec
 
 #endif

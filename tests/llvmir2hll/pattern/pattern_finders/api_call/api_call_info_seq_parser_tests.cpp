@@ -10,6 +10,7 @@
 
 using namespace ::testing;
 
+namespace retdec {
 namespace llvmir2hll {
 namespace tests {
 
@@ -255,3 +256,4 @@ ParseOfInvalidRepresentationReturnsNothing) {
 
 } // namespace tests
 } // namespace llvmir2hll
+} // namespace retdec

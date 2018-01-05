@@ -10,6 +10,7 @@
 #include "retdec/cpdetect/compiler_detector/compiler_detector.h"
 #include "retdec/fileformat/file_format/raw_data/raw_data_format.h"
 
+namespace retdec {
 namespace cpdetect {
 
 /**
@@ -18,9 +19,10 @@ namespace cpdetect {
 class RawDataCompiler : public CompilerDetector
 {
 	public:
-		RawDataCompiler(fileformat::RawDataFormat &parser, DetectParams &params, ToolInformation &tools);
+		RawDataCompiler(retdec::fileformat::RawDataFormat &parser, DetectParams &params, ToolInformation &tools);
 };
 
 } // namespace cpdetect
+} // namespace retdec
 
 #endif

@@ -9,6 +9,7 @@
 
 using namespace retdec::utils;
 
+namespace retdec {
 namespace cpdetect {
 
 /**
@@ -45,3 +46,4 @@ bool isValidUnslashedPattern(const std::string &pattern)
 }
 
 } // namespace cpdetect
+} // namespace retdec

@@ -9,6 +9,7 @@
 #include "retdec/llvmir2hll/support/debug.h"
 #include "retdec/llvmir2hll/support/value_text_repr_visitor.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 namespace {
@@ -66,3 +67,4 @@ std::ostream &operator<<(std::ostream &os, Value *value) {
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

@@ -10,6 +10,7 @@
 
 using namespace ::testing;
 
+namespace retdec {
 namespace loader {
 namespace tests {
 
@@ -133,4 +134,5 @@ OverlapInMiddleWorks) {
 }
 
 } // namespace loader
+} // namespace retdec
 } // namespace tests

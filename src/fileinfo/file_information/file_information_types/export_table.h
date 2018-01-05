@@ -17,7 +17,7 @@ namespace fileinfo {
 class ExportTable
 {
 	private:
-		const fileformat::ExportTable *table;
+		const retdec::fileformat::ExportTable *table;
 	public:
 		ExportTable();
 		~ExportTable();
@@ -32,7 +32,7 @@ class ExportTable
 
 		/// @name Setters
 		/// @{
-		void setTable(const fileformat::ExportTable *exportTable);
+		void setTable(const retdec::fileformat::ExportTable *exportTable);
 		/// @}
 
 		/// @name Other methods

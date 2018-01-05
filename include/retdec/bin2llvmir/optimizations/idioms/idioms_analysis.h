@@ -32,6 +32,7 @@
 #endif // DEBUG_TYPE "idioms"
 #define DEBUG_TYPE "idioms"
 
+namespace retdec {
 namespace bin2llvmir {
 
 class IdiomsAnalysis:
@@ -60,5 +61,6 @@ private:
 };
 
 } // namespace bin2llvmir
+} // namespace retdec
 
 #endif

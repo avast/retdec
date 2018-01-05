@@ -14,10 +14,10 @@ namespace fileinfo {
 /**
  * Wrapper for parsing MachO files
  */
-class MachOWrapper : public fileformat::MachOFormat
+class MachOWrapper : public retdec::fileformat::MachOFormat
 {
 	public:
-		MachOWrapper(std::string pathToFile, fileformat::LoadFlags loadFlags);
+		MachOWrapper(std::string pathToFile, retdec::fileformat::LoadFlags loadFlags);
 		virtual ~MachOWrapper() override;
 
 		/// @name Detection methods

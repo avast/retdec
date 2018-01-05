@@ -27,6 +27,7 @@ class SwitchInst;
 
 } // namespace llvm
 
+namespace retdec {
 namespace llvmir2hll {
 
 class ConstInt;
@@ -137,5 +138,6 @@ private:
 };
 
 } // namespace llvmir2hll
+} // namespace retdec
 
 #endif

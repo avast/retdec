@@ -10,6 +10,7 @@
 #include <llvm/IR/Module.h>
 #include <llvm/Pass.h>
 
+namespace retdec {
 namespace bin2llvmir {
 
 class ProviderInitialization : public llvm::ModulePass
@@ -22,5 +23,6 @@ class ProviderInitialization : public llvm::ModulePass
 };
 
 } // namespace bin2llvmir
+} // namespace retdec
 
 #endif

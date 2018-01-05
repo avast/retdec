@@ -16,6 +16,7 @@ using retdec::utils::startsWith;
 using retdec::utils::toLower;
 using retdec::utils::trim;
 
+namespace retdec {
 namespace llvmir2hll {
 
 namespace {
@@ -259,3 +260,4 @@ void ConstFloat::accept(Visitor *v) {
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

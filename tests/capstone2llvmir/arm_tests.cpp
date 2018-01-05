@@ -12,6 +12,7 @@
 using namespace ::testing;
 using namespace llvm;
 
+namespace retdec {
 namespace capstone2llvmir {
 namespace tests {
 
@@ -4604,3 +4605,4 @@ TEST_P(Capstone2LlvmIrTranslatorArmTests, ARM_INS_BFI)
 
 } // namespace tests
 } // namespace capstone2llvmir
+} // namespace retdec

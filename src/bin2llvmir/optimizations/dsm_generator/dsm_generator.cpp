@@ -22,12 +22,13 @@
 #include "retdec/bin2llvmir/utils/defs.h"
 #include "retdec/bin2llvmir/utils/type.h"
 
-using namespace llvm_support;
+using namespace retdec::llvm_support;
 using namespace retdec::utils;
 using namespace llvm;
 
 #define debug_enabled false
 
+namespace retdec {
 namespace bin2llvmir {
 
 char DsmGenerator::ID = 0;
@@ -183,7 +184,7 @@ void DsmGenerator::generateCode(std::ostream& ret)
 }
 
 void DsmGenerator::generateCodeSeg(
-		const loader::Segment* seg,
+		const retdec::loader::Segment* seg,
 		std::ostream& ret)
 {
 	ret << "; section: " << seg->getName() << "\n";
@@ -438,7 +439,7 @@ void DsmGenerator::generateData(std::ostream& ret)
 }
 
 void DsmGenerator::generateDataSeg(
-		const loader::Segment* seg,
+		const retdec::loader::Segment* seg,
 		std::ostream& ret)
 {
 	ret << "; section: " << seg->getName() << "\n";
@@ -731,3 +732,4 @@ std::string DsmGenerator::getFunctionName(retdec::config::Function* f) const
 }
 
 } // namespace bin2llvmir
+} // namespace retdec

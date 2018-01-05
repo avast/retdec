@@ -7,5 +7,5 @@
 // As there is no better place to comment this namespace, we do this in the
 // present file.
 
-/// @namespace llvmir2hll::semantics::gcc_general Implementation of
+/// @namespace retdec::llvmir2hll::semantics::gcc_general Implementation of
 /// GCCGeneralSemantics.

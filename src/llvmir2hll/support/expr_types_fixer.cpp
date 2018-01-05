@@ -32,6 +32,7 @@
 #include "retdec/llvmir2hll/support/debug.h"
 #include "retdec/llvmir2hll/support/expr_types_fixer.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 /**
@@ -426,3 +427,4 @@ void ExprTypesFixer::visit(ShPtr<BitShrOpExpr> expr) {
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

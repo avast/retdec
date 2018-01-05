@@ -22,6 +22,7 @@
 
 using namespace ::testing;
 
+namespace retdec {
 namespace llvmir2hll {
 namespace tests {
 
@@ -239,3 +240,4 @@ VariableWhoseAddressIsNotTakenMayNotBePointed) {
 
 } // namespace tests
 } // namespace llvmir2hll
+} // namespace retdec

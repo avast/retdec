@@ -15,6 +15,7 @@
 using namespace retdec::utils;
 using namespace ELFIO;
 
+namespace retdec {
 namespace fileformat {
 
 namespace
@@ -2418,3 +2419,4 @@ unsigned long long ElfFormat::getBaseOffset() const
 }
 
 } // namespace fileformat
+} // namespace retdec

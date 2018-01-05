@@ -17,8 +17,8 @@ using namespace retdec::utils;
 using namespace llvm;
 using namespace llvm::COFF;
 using namespace PeLib;
-using namespace cpdetect;
-using namespace fileformat;
+using namespace retdec::cpdetect;
+using namespace retdec::fileformat;
 
 namespace fileinfo {
 
@@ -87,7 +87,7 @@ std::string getSymbolType(std::uint8_t type)
  * @param searchPar Parameters for detection of used compiler (or packer)
  * @param loadFlags Load flags
  */
-CoffDetector::CoffDetector(std::string pathToInputFile, FileInformation &finfo, cpdetect::DetectParams &searchPar, fileformat::LoadFlags loadFlags) :
+CoffDetector::CoffDetector(std::string pathToInputFile, FileInformation &finfo, retdec::cpdetect::DetectParams &searchPar, retdec::fileformat::LoadFlags loadFlags) :
 	FileDetector(pathToInputFile, finfo, searchPar, loadFlags)
 {
 	fileParser = coffParser = std::make_shared<CoffWrapper>(fileInfo.getPathToFile(), loadFlags);
@@ -520,7 +520,7 @@ void CoffDetector::getAdditionalInfo()
  * Pointer to detector is dynamically allocated and must be released (otherwise there is a memory leak)
  * More detailed description of this method is in the super class
  */
-cpdetect::CompilerDetector* CoffDetector::createCompilerDetector() const
+retdec::cpdetect::CompilerDetector* CoffDetector::createCompilerDetector() const
 {
 	return new CoffCompiler(*coffParser, cpParams, fileInfo.toolInfo);
 }

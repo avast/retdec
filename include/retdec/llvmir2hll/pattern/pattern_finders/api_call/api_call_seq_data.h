@@ -10,6 +10,7 @@
 #include "retdec/llvmir2hll/pattern/pattern_finders/api_call/api_call_info.h"
 #include "retdec/llvmir2hll/pattern/pattern_finders/api_call/api_call_info_seq.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 class Pattern;
@@ -70,5 +71,6 @@ private:
 };
 
 } // namespace llvmir2hll
+} // namespace retdec
 
 #endif

@@ -9,6 +9,7 @@
 
 #include <string>
 
+namespace retdec {
 namespace cpdetect {
 
 bool isSlashed(const std::string &pattern);
@@ -16,5 +17,6 @@ bool isValidSignaturePattern(const std::string &pattern);
 bool isValidUnslashedPattern(const std::string &pattern);
 
 } // namespace cpdetect
+} // namespace retdec
 
 #endif

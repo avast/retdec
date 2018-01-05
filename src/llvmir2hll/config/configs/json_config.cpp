@@ -19,6 +19,7 @@ using retdec::utils::hasItem;
 using retdec::utils::trim;
 using retdec::utils::unifyLineEnds;
 
+namespace retdec {
 namespace llvmir2hll {
 
 /**
@@ -477,3 +478,4 @@ StringSet JSONConfig::getOptsRunInFrontend() const {
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

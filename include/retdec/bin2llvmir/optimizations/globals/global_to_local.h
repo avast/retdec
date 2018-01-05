@@ -9,6 +9,7 @@
 
 #include "retdec/bin2llvmir/optimizations/globals/global_to_local_and_dead_global_assign.h"
 
+namespace retdec {
 namespace bin2llvmir {
 
 /**
@@ -106,5 +107,6 @@ public:
 };
 
 } // namespace bin2llvmir
+} // namespace retdec
 
 #endif

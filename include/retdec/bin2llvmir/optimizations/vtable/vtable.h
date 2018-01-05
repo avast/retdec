@@ -17,6 +17,7 @@
 #include "retdec/bin2llvmir/optimizations/vtable/rtti_analysis.h"
 #include "retdec/bin2llvmir/providers/config.h"
 
+namespace retdec {
 namespace bin2llvmir {
 
 /**
@@ -166,5 +167,6 @@ class VtableAnalysis : public llvm::ModulePass
 };
 
 } // namespace bin2llvmir
+} // namespace retdec
 
 #endif

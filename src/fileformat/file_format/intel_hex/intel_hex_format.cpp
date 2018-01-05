@@ -11,6 +11,7 @@
 
 using namespace retdec::utils;
 
+namespace retdec {
 namespace fileformat {
 
 /**
@@ -263,3 +264,4 @@ void IntelHexFormat::setBytesPerWord(std::size_t b)
 }
 
 } // namespace fileformat
+} // namespace retdec

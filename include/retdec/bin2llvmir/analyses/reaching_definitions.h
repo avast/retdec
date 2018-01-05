@@ -23,6 +23,7 @@
 #include "retdec/bin2llvmir/providers/config.h"
 #include "retdec/bin2llvmir/utils/defs.h"
 
+namespace retdec {
 namespace bin2llvmir {
 
 class Definition;
@@ -156,5 +157,6 @@ class ReachingDefinitionsAnalysis
 };
 
 } // namespace bin2llvmir
+} // namespace retdec
 
 #endif

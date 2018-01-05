@@ -10,6 +10,7 @@
 #include "retdec/llvmir2hll/support/smart_ptr.h"
 #include "retdec/llvmir2hll/support/visitors/ordered_all_visitor.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 /**
@@ -82,5 +83,6 @@ ShPtr<SplittedWhileTrueLoop> splitWhileTrueLoop(ShPtr<WhileLoopStmt> stmt);
 ShPtr<IndVarInfo> getIndVarInfo(ShPtr<WhileLoopStmt> stmt);
 
 } // namespace llvmir2hll
+} // namespace retdec
 
 #endif

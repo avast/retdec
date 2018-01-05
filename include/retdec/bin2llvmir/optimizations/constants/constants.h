@@ -21,6 +21,7 @@
 #include "retdec/bin2llvmir/providers/debugformat.h"
 #include "retdec/bin2llvmir/providers/fileimage.h"
 
+namespace retdec {
 namespace bin2llvmir {
 
 class ConstantsAnalysis : public llvm::ModulePass
@@ -48,5 +49,6 @@ class ConstantsAnalysis : public llvm::ModulePass
 };
 
 } // namespace bin2llvmir
+} // namespace retdec
 
 #endif

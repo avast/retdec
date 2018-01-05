@@ -16,10 +16,10 @@ namespace fileinfo {
 /**
  * Wrapper for parsing COFF files
  */
-class CoffWrapper : public fileformat::CoffFormat
+class CoffWrapper : public retdec::fileformat::CoffFormat
 {
 	public:
-		CoffWrapper(std::string pathToFile, fileformat::LoadFlags loadFlags);
+		CoffWrapper(std::string pathToFile, retdec::fileformat::LoadFlags loadFlags);
 		virtual ~CoffWrapper() override;
 
 		/// @name Detection methods

@@ -205,12 +205,12 @@ class ModulePassPrinter : public ModulePass
 			{
 				if (!llvmPassesNormalized.count(retdec::utils::toLower(LastPhase)))
 				{
-					llvm_support::printPhase(LlvmAggregatePhaseName);
+					retdec::llvm_support::printPhase(LlvmAggregatePhaseName);
 				}
 			}
 			else
 			{
-				llvm_support::printPhase(PhaseName);
+				retdec::llvm_support::printPhase(PhaseName);
 			}
 
 			// LastPhase gets updated every time.
@@ -398,7 +398,7 @@ int _main(int argc, char **argv)
 			std::inserter(llvmPassesNormalized, llvmPassesNormalized.end()),
 			retdec::utils::toLower);
 
-	llvm_support::printPhase("Initialization");
+	retdec::llvm_support::printPhase("Initialization");
 	initializeLlvmPasses();
 
 	cl::ParseCommandLineOptions(
@@ -485,7 +485,7 @@ int _main(int argc, char **argv)
 	Passes.run(*M);
 
 	// Declare success.
-	llvm_support::printPhase("Cleanup");
+	retdec::llvm_support::printPhase("Cleanup");
 	bcOut->keep();
 	llOut->keep();
 	return EXIT_SUCCESS;

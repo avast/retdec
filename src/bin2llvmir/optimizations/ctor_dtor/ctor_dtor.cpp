@@ -15,7 +15,7 @@
 #include "retdec/bin2llvmir/utils/defs.h"
 #include "retdec/bin2llvmir/utils/type.h"
 
-using namespace llvm_support;
+using namespace retdec::llvm_support;
 using namespace llvm;
 
 #define debug_enabled false
@@ -61,6 +61,7 @@ static const Value* goThroughCasts(const Value *v)
 	return v;
 }
 
+namespace retdec {
 namespace bin2llvmir {
 
 char CtorDtor::ID = 0;
@@ -372,3 +373,4 @@ void CtorDtor::propagateCtorDtor()
 }
 
 } // namespace bin2llvmir
+} // namespace retdec

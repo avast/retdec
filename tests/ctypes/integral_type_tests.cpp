@@ -14,6 +14,7 @@
 
 using namespace ::testing;
 
+namespace retdec {
 namespace ctypes {
 namespace tests {
 
@@ -82,3 +83,4 @@ IsIntegralReturnsFalseOnNonIntegralType)
 
 } // namespace tests
 } // namespace ctypes
+} // namespace retdec

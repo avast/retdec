@@ -17,6 +17,7 @@
 #include "retdec/llvmir2hll/optimizer/optimizers/simplify_arithm_expr/one_sub_optimizer.h"
 #include "retdec/llvmir2hll/support/debug.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 REGISTER_AT_FACTORY("One", ONE_SUB_OPTIMIZER_ID, SubOptimizerFactory,
@@ -181,3 +182,4 @@ bool OneSubOptimizer::isOpOne(ShPtr<Expression> expr) const {
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

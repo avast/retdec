@@ -13,6 +13,7 @@
 #include "retdec/llvmir2hll/support/visitors/ordered_all_visitor.h"
 #include "retdec/llvm-support/diagnostics.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 /**
@@ -50,7 +51,7 @@ protected:
 	void validationError(const std::string &warningMessage, Args &&... args) {
 		moduleIsCorrect = false;
 		if (printMessageOnError) {
-			llvm_support::printWarningMessage(warningMessage,
+			retdec::llvm_support::printWarningMessage(warningMessage,
 				std::forward<Args>(args)...);
 		}
 	}
@@ -74,5 +75,6 @@ private:
 };
 
 } // namespace llvmir2hll
+} // namespace retdec
 
 #endif

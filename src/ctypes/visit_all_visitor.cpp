@@ -19,6 +19,7 @@
 #include "retdec/ctypes/visit_all_visitor.h"
 #include "retdec/ctypes/void_type.h"
 
+namespace retdec {
 namespace ctypes {
 
 /**
@@ -150,3 +151,4 @@ bool VisitAllVisitor::makeAccessedAndCheckIfAccessed(const std::shared_ptr<Type>
 }
 
 } // namespace ctypes
+} // namespace retdec

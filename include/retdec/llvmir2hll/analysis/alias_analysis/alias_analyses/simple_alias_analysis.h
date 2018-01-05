@@ -14,6 +14,7 @@
 #include "retdec/llvmir2hll/support/types.h"
 #include "retdec/llvmir2hll/support/visitors/ordered_all_visitor.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 class Module;
@@ -76,5 +77,6 @@ private:
 };
 
 } // namespace llvmir2hll
+} // namespace retdec
 
 #endif

@@ -15,6 +15,7 @@
 
 #include "retdec/capstone2llvmir/capstone_utils.h"
 
+namespace retdec {
 namespace capstone2llvmir {
 
 /**
@@ -164,5 +165,6 @@ class Capstone2LlvmIrError : public Capstone2LlvmIrBaseError
 };
 
 } // namespace capstone2llvmir
+} // namespace retdec
 
 #endif

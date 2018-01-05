@@ -11,6 +11,7 @@
 
 #include "retdec/llvmir2hll/pattern/pattern_finder_runner.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 /**
@@ -38,5 +39,6 @@ private:
 };
 
 } // namespace llvmir2hll
+} // namespace retdec
 
 #endif

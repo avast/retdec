@@ -10,6 +10,7 @@
 #include "retdec/ctypes/typedefed_type.h"
 #include "retdec/ctypes/visitor.h"
 
+namespace retdec {
 namespace ctypes {
 
 /**
@@ -109,3 +110,4 @@ void TypedefedType::accept(Visitor *v) {
 }
 
 } // namespace ctypes
+} // namespace retdec

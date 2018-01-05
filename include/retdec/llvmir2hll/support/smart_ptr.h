@@ -10,6 +10,7 @@
 #include <cstddef>
 #include <memory>
 
+namespace retdec {
 namespace llvmir2hll {
 
 /// An alias for a shared pointer.
@@ -125,5 +126,6 @@ private:
 };
 
 } // namespace llvmir2hll
+} // namespace retdec
 
 #endif

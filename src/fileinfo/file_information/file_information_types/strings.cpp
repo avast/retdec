@@ -7,7 +7,7 @@
 #include "fileinfo/file_information/file_information_types/strings.h"
 #include "fileinfo/file_information/file_information_types/type_conversions.h"
 
-using namespace fileformat;
+using namespace retdec::fileformat;
 
 namespace fileinfo {
 
@@ -56,7 +56,7 @@ std::string Strings::getStringContent(std::size_t index) const
 	return strings->at(index).getContent();
 }
 
-void Strings::setStrings(const std::vector<fileformat::String> *detectedStrings)
+void Strings::setStrings(const std::vector<retdec::fileformat::String> *detectedStrings)
 {
 	strings = detectedStrings;
 }

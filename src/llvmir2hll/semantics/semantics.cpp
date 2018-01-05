@@ -7,6 +7,7 @@
 #include "retdec/llvmir2hll/semantics/semantics.h"
 #include "retdec/llvmir2hll/support/debug.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 /**
@@ -20,3 +21,4 @@ Semantics::Semantics() {}
 Semantics::~Semantics() {}
 
 } // namespace llvmir2hll
+} // namespace retdec

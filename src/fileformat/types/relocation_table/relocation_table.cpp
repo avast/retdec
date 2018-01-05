@@ -9,6 +9,7 @@
 
 using namespace retdec::utils;
 
+namespace retdec {
 namespace fileformat {
 
 /**
@@ -199,3 +200,4 @@ void RelocationTable::dump(std::string &dumpTable) const
 }
 
 } // namespace fileformat
+} // namespace retdec

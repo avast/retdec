@@ -17,7 +17,7 @@ namespace fileinfo {
 class RichHeader
 {
 	private:
-		const fileformat::RichHeader *header;
+		const retdec::fileformat::RichHeader *header;
 	public:
 		RichHeader();
 		~RichHeader();
@@ -36,7 +36,7 @@ class RichHeader
 
 		/// @name Setters
 		/// @{
-		void setHeader(const fileformat::RichHeader *richHeader);
+		void setHeader(const retdec::fileformat::RichHeader *richHeader);
 		/// @}
 
 		/// @name Other methods

@@ -11,7 +11,7 @@
 #include "fileinfo/file_presentation/getters/iterative_getter/iterative_distribution_getter/section_plain_getter.h"
 
 using namespace retdec::utils;
-using namespace fileformat;
+using namespace retdec::fileformat;
 
 namespace fileinfo {
 

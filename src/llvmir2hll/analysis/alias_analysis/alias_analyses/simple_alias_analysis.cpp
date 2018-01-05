@@ -18,6 +18,7 @@
 
 using retdec::utils::hasItem;
 
+namespace retdec {
 namespace llvmir2hll {
 
 REGISTER_AT_FACTORY("simple", SIMPLE_ALIAS_ANALYSIS_ID, AliasAnalysisFactory,
@@ -143,3 +144,4 @@ void SimpleAliasAnalysis::visit(ShPtr<AddressOpExpr> expr) {
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

@@ -6,6 +6,7 @@
 
 #include "retdec/fileformat/types/relocation_table/relocation.h"
 
+namespace retdec {
 namespace fileformat {
 
 /**
@@ -220,3 +221,4 @@ bool Relocation::hasEmptyName() const
 }
 
 } // namespace fileformat
+} // namespace retdec

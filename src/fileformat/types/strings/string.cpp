@@ -6,6 +6,7 @@
 
 #include "retdec/fileformat/types/strings/string.h"
 
+namespace retdec {
 namespace fileformat {
 
 StringType String::getType() const
@@ -86,3 +87,4 @@ bool String::operator!=(const String& rhs) const
 }
 
 } // namespace fileformat
+} // namespace retdec

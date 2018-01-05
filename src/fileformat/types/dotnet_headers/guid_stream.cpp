@@ -10,6 +10,7 @@
 
 #include "retdec/fileformat/types/dotnet_headers/guid_stream.h"
 
+namespace retdec {
 namespace fileformat {
 
 /**
@@ -101,3 +102,4 @@ void GuidStream::addGuids(const std::vector<std::uint8_t>& data)
 }
 
 } // namespace fileformat
+} // namespace retdec

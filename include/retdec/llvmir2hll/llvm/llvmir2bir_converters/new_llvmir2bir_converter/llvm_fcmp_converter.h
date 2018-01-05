@@ -17,6 +17,7 @@ class FCmpInst;
 
 } // namespace llvm
 
+namespace retdec {
 namespace llvmir2hll {
 
 class Expression;
@@ -52,5 +53,6 @@ private:
 };
 
 } // namespace llvmir2hll
+} // namespace retdec
 
 #endif

@@ -32,6 +32,7 @@ using retdec::utils::addToSet;
 using retdec::utils::arraySize;
 using retdec::utils::toString;
 
+namespace retdec {
 namespace llvmir2hll {
 
 namespace {
@@ -513,3 +514,4 @@ void ReadableVarRenamer::visit(ShPtr<Variable> var) {
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

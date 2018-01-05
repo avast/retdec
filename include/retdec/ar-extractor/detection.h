@@ -9,6 +9,7 @@
 
 #include <string>
 
+namespace retdec {
 namespace ar_extractor {
 
 bool isArchive(const std::string &path);
@@ -20,5 +21,6 @@ bool isNormalArchive(const std::string &path);
 bool isFatMachOArchive(const std::string &path);
 
 } // namespace ar_extractor
+} // namespace retdec
 
 #endif

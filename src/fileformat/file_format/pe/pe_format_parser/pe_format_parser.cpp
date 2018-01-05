@@ -6,6 +6,7 @@
 
 #include "retdec/fileformat/file_format/pe/pe_format_parser/pe_format_parser.h"
 
+namespace retdec {
 namespace fileformat {
 
 /**
@@ -246,3 +247,4 @@ PeFormatParser::~PeFormatParser()
  */
 
 } // namespace fileformat
+} // namespace retdec

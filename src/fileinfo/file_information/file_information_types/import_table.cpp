@@ -121,7 +121,7 @@ std::string ImportTable::getImportOrdinalNumberStr(std::size_t position, std::io
  * Set import table data
  * @param importTable Instance of class with original information about import table
  */
-void ImportTable::setTable(const fileformat::ImportTable *importTable)
+void ImportTable::setTable(const retdec::fileformat::ImportTable *importTable)
 {
 	table = importTable;
 }

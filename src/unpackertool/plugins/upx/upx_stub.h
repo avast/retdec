@@ -61,7 +61,7 @@ public:
 	UpxMetadata();
 	UpxMetadata(const UpxMetadata& metadata);
 
-	static UpxMetadata read(loader::Image* file);
+	static UpxMetadata read(retdec::loader::Image* file);
 	static std::uint8_t calcChecksum(const unpacker::DynamicBuffer& data);
 	static std::uint32_t getSizeOfVersion(std::uint8_t version);
 
@@ -106,13 +106,13 @@ private:
 class UpxStub : public unpacker::UnpackingStub
 {
 public:
-	UpxStub(loader::Image* inputFile, const UpxStubData* stubData, const unpacker::DynamicBuffer& stubCapturedData,
+	UpxStub(retdec::loader::Image* inputFile, const UpxStubData* stubData, const unpacker::DynamicBuffer& stubCapturedData,
 			std::unique_ptr<Decompressor> decompressor, const UpxMetadata& metadata);
 
 	virtual ~UpxStub() override;
 
-	static std::shared_ptr<UpxStub> createStub(loader::Image* file);
-	static std::shared_ptr<UpxStub> createStub(loader::Image* file, const unpacker::DynamicBuffer& stubBytes);
+	static std::shared_ptr<UpxStub> createStub(retdec::loader::Image* file);
+	static std::shared_ptr<UpxStub> createStub(retdec::loader::Image* file, const unpacker::DynamicBuffer& stubBytes);
 
 	UpxStubVersion getVersion() const;
 	const UpxStubData* getStubData() const;
@@ -133,7 +133,7 @@ protected:
 	UpxMetadata _metadata;                       ///< UPX metadata aka packheader.
 
 private:
-	static std::shared_ptr<UpxStub> _createStubImpl(loader::Image* file, const unpacker::DynamicBuffer* stubBytes);
+	static std::shared_ptr<UpxStub> _createStubImpl(retdec::loader::Image* file, const unpacker::DynamicBuffer* stubBytes);
 };
 
 } // namespace upx

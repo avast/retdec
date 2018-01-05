@@ -6,6 +6,7 @@
 
 #include "retdec/fileformat/types/dynamic_table/dynamic_entry.h"
 
+namespace retdec {
 namespace fileformat {
 
 /**
@@ -79,3 +80,4 @@ void DynamicEntry::setDescription(std::string entryDescription)
 }
 
 } // namespace fileformat
+} // namespace retdec

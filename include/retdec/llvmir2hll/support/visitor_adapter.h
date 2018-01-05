@@ -10,6 +10,7 @@
 #include "retdec/llvmir2hll/support/smart_ptr.h"
 #include "retdec/llvmir2hll/support/visitor.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 /**
@@ -108,5 +109,6 @@ public:
 };
 
 } // namespace llvmir2hll
+} // namespace retdec
 
 #endif

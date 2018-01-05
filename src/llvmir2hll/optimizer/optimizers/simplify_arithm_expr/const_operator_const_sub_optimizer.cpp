@@ -27,6 +27,7 @@
 #include "retdec/llvmir2hll/ir/value.h"
 #include "retdec/llvmir2hll/optimizer/optimizers/simplify_arithm_expr/const_operator_const_sub_optimizer.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 REGISTER_AT_FACTORY("ConstOperatorConst", CONST_OPERATOR_CONST_SUB_OPTIMIZER_ID,
@@ -182,3 +183,4 @@ void ConstOperatorConstSubOptimizer::tryOptimizeConstConstOperand(
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

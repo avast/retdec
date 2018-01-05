@@ -331,7 +331,7 @@ void assemble(ProgramOptions& po)
 	}
 }
 
-using namespace capstone2llvmir;
+using namespace retdec::capstone2llvmir;
 
 int main(int argc, char *argv[])
 {

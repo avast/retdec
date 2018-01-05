@@ -14,10 +14,10 @@ namespace fileinfo {
 /**
  * Wrapper for parsing ELF files
  */
-class ElfWrapper : public fileformat::ElfFormat
+class ElfWrapper : public retdec::fileformat::ElfFormat
 {
 	public:
-		ElfWrapper(std::string pathToFile, fileformat::LoadFlags loadFlags);
+		ElfWrapper(std::string pathToFile, retdec::fileformat::LoadFlags loadFlags);
 		virtual ~ElfWrapper() override;
 
 		/// @name Detection methods

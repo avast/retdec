@@ -59,6 +59,7 @@
 
 using namespace ::testing;
 
+namespace retdec {
 namespace llvmir2hll {
 namespace tests {
 
@@ -1099,3 +1100,4 @@ MoreComplicatedWithVarsTest) {
 
 } // namespace tests
 } // namespace llvmir2hll
+} // namespace retdec

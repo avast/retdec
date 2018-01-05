@@ -11,6 +11,7 @@
 #include "retdec/cpdetect/cptypes.h"
 #include "retdec/fileformat/file_format/file_format.h"
 
+namespace retdec {
 namespace cpdetect {
 
 /**
@@ -60,10 +61,10 @@ class Heuristics
 		/// @}
 
 	protected:
-		fileformat::FileFormat &fileParser;               ///< parser of input file
+		retdec::fileformat::FileFormat &fileParser;               ///< parser of input file
 		Search &search;                                    ///< class for search in signature (search engine)
 		ToolInformation &toolInfo;                         ///< results - detected tools
-		std::vector<const fileformat::Section*> sections; ///< information about file sections
+		std::vector<const retdec::fileformat::Section*> sections; ///< information about file sections
 		std::size_t noOfSections;                          ///< number of sections stored in @a sections
 		bool priorityLanguageIsSet;                        ///< @c true - original language is detected and detection of other languages is disabled
 		bool canSearch;                                    ///< @c true - we can use search engine
@@ -116,7 +117,7 @@ class Heuristics
 		/// @}
 
 	public:
-		Heuristics(fileformat::FileFormat &parser, Search &searcher, ToolInformation &toolInfo);
+		Heuristics(retdec::fileformat::FileFormat &parser, Search &searcher, ToolInformation &toolInfo);
 		virtual ~Heuristics();
 
 		/// @name Heuristics methods
@@ -126,5 +127,6 @@ class Heuristics
 };
 
 } // namespace cpdetect
+} // namespace retdec
 
 #endif

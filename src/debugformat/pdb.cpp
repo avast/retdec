@@ -12,6 +12,7 @@
 #include "retdec/utils/string.h"
 #include "retdec/debugformat/debugformat.h"
 
+namespace retdec {
 namespace debugformat {
 
 void DebugFormat::loadPdb()
@@ -168,3 +169,4 @@ retdec::config::Type DebugFormat::loadPdbType(pdbparser::PDBTypeDef* type)
 }
 
 } // namespace debugformat
+} // namespace retdec

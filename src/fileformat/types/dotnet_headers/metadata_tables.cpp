@@ -6,6 +6,7 @@
 
 #include "retdec/fileformat/types/dotnet_headers/metadata_tables.h"
 
+namespace retdec {
 namespace fileformat {
 
 template <>
@@ -312,3 +313,4 @@ std::uint32_t BaseRecord::getIndexSize<TypeDefOrMethodDef>(const MetadataStream*
 }
 
 } // namespace fileformat
+} // namespace retdec

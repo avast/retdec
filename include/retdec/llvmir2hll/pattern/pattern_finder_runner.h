@@ -11,6 +11,7 @@
 
 #include "retdec/llvmir2hll/pattern/pattern_finder.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 class Module;
@@ -53,5 +54,6 @@ protected:
 };
 
 } // namespace llvmir2hll
+} // namespace retdec
 
 #endif

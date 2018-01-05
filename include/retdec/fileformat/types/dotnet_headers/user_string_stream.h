@@ -9,6 +9,7 @@
 
 #include "retdec/fileformat/types/dotnet_headers/stream.h"
 
+namespace retdec {
 namespace fileformat {
 
 class UserStringStream : public Stream
@@ -18,5 +19,6 @@ class UserStringStream : public Stream
 };
 
 } // namespace fileformat
+} // namespace retdec
 
 #endif

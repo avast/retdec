@@ -13,6 +13,7 @@
 
 using namespace ::testing;
 
+namespace retdec {
 namespace llvmir2hll {
 namespace tests {
 
@@ -46,3 +47,4 @@ IsInitializedReturnsFalseWhenArrayIsUninitialized) {
 
 } // namespace tests
 } // namespace llvmir2hll
+} // namespace retdec

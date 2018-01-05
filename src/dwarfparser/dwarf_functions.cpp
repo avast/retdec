@@ -12,8 +12,8 @@
 
 using namespace std;
 
-namespace dwarfparser
-{
+namespace retdec {
+namespace dwarfparser {
 
 /**
  * @brief ctor.
@@ -319,3 +319,4 @@ DwarfLocationDesc::cLocType DwarfFunction::getFrameBase(string *n, Dwarf_Addr *a
 }
 
 } // namespace dwarfparser
+} // namespace retdec

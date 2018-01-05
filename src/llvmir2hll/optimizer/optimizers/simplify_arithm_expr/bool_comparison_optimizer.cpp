@@ -11,6 +11,7 @@
 #include "retdec/llvmir2hll/support/debug.h"
 #include "retdec/llvmir2hll/support/expression_negater.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 REGISTER_AT_FACTORY("BoolComparison", BOOL_COMPARISON_OPTIMIZER_ID,
@@ -129,3 +130,4 @@ void BoolComparisonSubOptimizer::replaceWithNegationOfFirstOperand(
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

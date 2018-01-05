@@ -17,9 +17,10 @@
 #define debug_enabled false
 #include "retdec/llvm-support/utils.h"
 
-using namespace llvm_support;
+using namespace retdec::llvm_support;
 using namespace llvm;
 
+namespace retdec {
 namespace bin2llvmir {
 
 char AsmInstructionRemover::ID = 0;
@@ -144,3 +145,4 @@ bool AsmInstructionRemover::renameTempVariables(llvm::Module& M)
 }
 
 } // namespace bin2llvmir
+} // namespace retdec

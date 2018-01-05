@@ -15,6 +15,7 @@
 #include "retdec/bin2llvmir/providers/config.h"
 #include "retdec/bin2llvmir/utils/defs.h"
 
+namespace retdec {
 namespace bin2llvmir {
 
 /**
@@ -164,5 +165,6 @@ private:
 };
 
 } // namespace bin2llvmir
+} // namespace retdec
 
 #endif

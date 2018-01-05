@@ -25,6 +25,7 @@
 using namespace retdec::utils;
 using namespace llvm;
 
+namespace retdec {
 namespace bin2llvmir {
 
 namespace {
@@ -1151,3 +1152,4 @@ bool GlobalToLocalAndDeadGlobalAssign::FuncInfo::isInFilteredLUses(
 }
 
 } // namespace bin2llvmir
+} // namespace retdec

@@ -36,6 +36,7 @@
 #include "retdec/llvmir2hll/support/smart_ptr.h"
 #include "retdec/llvmir2hll/support/statements_counter.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 /**
@@ -299,3 +300,4 @@ void StatementsCounter::visit(ShPtr<VoidType> type) {}
 void StatementsCounter::visit(ShPtr<UnknownType> type) {}
 
 } // namespace llvmir2hll
+} // namespace retdec

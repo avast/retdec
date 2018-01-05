@@ -13,6 +13,7 @@
 
 using namespace std;
 
+namespace retdec {
 namespace demangler {
 
 /**
@@ -80,3 +81,4 @@ void xreplace(string &source, const string &tobereplaced, const string &replacem
 }
 
 } // namespace demangler
+} // namespace retdec

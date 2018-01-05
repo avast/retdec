@@ -17,6 +17,7 @@
 #include <llvm/Analysis/CallGraph.h>
 #include <llvm/IR/Instruction.h>
 
+namespace retdec {
 namespace bin2llvmir {
 
 /// Vector of global variables.
@@ -96,5 +97,6 @@ class RegisterCouple
 	else std::cout
 
 } // namespace bin2llvmir
+} // namespace retdec
 
 #endif

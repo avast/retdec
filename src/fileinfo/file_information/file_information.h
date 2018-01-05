@@ -21,7 +21,7 @@ namespace fileinfo {
 class FileInformation
 {
 	private:
-		cpdetect::ReturnCode status;                  ///< return code
+		retdec::cpdetect::ReturnCode status;                  ///< return code
 		std::string filePath;                          ///< path to input file
 		std::string crc32;                             ///< CRC32 of input file
 		std::string md5;                               ///< MD5 of input file
@@ -29,7 +29,7 @@ class FileInformation
 		std::string secCrc32;                          ///< CRC32 of section table
 		std::string secMd5;                            ///< MD5 of section table
 		std::string secSha256;                         ///< SHA256 of section table
-		fileformat::Format fileFormatEnum;            ///< format of input file in enumeration representation
+		retdec::fileformat::Format fileFormatEnum;            ///< format of input file in enumeration representation
 		std::string fileFormat;                        ///< format of input file in string representation
 		std::string fileClass;                         ///< class of file
 		std::string fileType;                          ///< type of file (e.g. executable file)
@@ -58,7 +58,7 @@ class FileInformation
 		retdec::utils::Maybe<bool> signatureVerified; ///< indicates whether the signature is present and if it is verified
 		DotnetInfo dotnetInfo;                         ///< .NET information
 	public:
-		cpdetect::ToolInformation toolInfo; ///< detected tools
+		retdec::cpdetect::ToolInformation toolInfo; ///< detected tools
 		std::vector<std::string> messages;   ///< error, warning and other messages
 
 		FileInformation();
@@ -66,7 +66,7 @@ class FileInformation
 
 		/// @name Getters of own members
 		/// @{
-		cpdetect::ReturnCode getStatus() const;
+		retdec::cpdetect::ReturnCode getStatus() const;
 		std::string getPathToFile() const;
 		std::string getCrc32() const;
 		std::string getMd5() const;
@@ -74,7 +74,7 @@ class FileInformation
 		std::string getSectionTableCrc32() const;
 		std::string getSectionTableMd5() const;
 		std::string getSectionTableSha256() const;
-		fileformat::Format getFileFormatEnum() const;
+		retdec::fileformat::Format getFileFormatEnum() const;
 		std::string getFileFormat() const;
 		std::string getFileClass() const;
 		std::string getFileType() const;
@@ -419,8 +419,8 @@ class FileInformation
 		std::string getDotnetUserStringStreamSizeStr(std::ios_base &(* format)(std::ios_base &)) const;
 		const std::string& getDotnetModuleVersionId() const;
 		const std::string& getDotnetTypeLibId() const;
-		const std::vector<std::shared_ptr<fileformat::DotnetClass>>& getDotnetDefinedClassList() const;
-		const std::vector<std::shared_ptr<fileformat::DotnetClass>>& getDotnetImportedClassList() const;
+		const std::vector<std::shared_ptr<retdec::fileformat::DotnetClass>>& getDotnetDefinedClassList() const;
+		const std::vector<std::shared_ptr<retdec::fileformat::DotnetClass>>& getDotnetImportedClassList() const;
 		bool hasDotnetMetadataStream() const;
 		bool hasDotnetStringStream() const;
 		bool hasDotnetBlobStream() const;
@@ -431,7 +431,7 @@ class FileInformation
 
 		/// @name Setters
 		/// @{
-		void setStatus(cpdetect::ReturnCode state);
+		void setStatus(retdec::cpdetect::ReturnCode state);
 		void setPathToFile(const std::string &filepath);
 		void setCrc32(const std::string &fileCrc32);
 		void setMd5(const std::string &fileMd5);
@@ -439,7 +439,7 @@ class FileInformation
 		void setSectionTableCrc32(const std::string &sCrc32);
 		void setSectionTableMd5(const std::string &sMd5);
 		void setSectionTableSha256(const std::string &sSha256);
-		void setFileFormatEnum(fileformat::Format format);
+		void setFileFormatEnum(retdec::fileformat::Format format);
 		void setFileFormat(const std::string &fileformat);
 		void setFileClass(const std::string &fileclass);
 		void setFileType(const std::string &filetype);
@@ -479,16 +479,16 @@ class FileInformation
 		void setNumberOfDeclaredSymbolTables(unsigned long long noOfTables);
 		void setOverlayOffset(unsigned long long offset);
 		void setOverlaySize(unsigned long long size);
-		void setRichHeader(const fileformat::RichHeader *rHeader);
+		void setRichHeader(const retdec::fileformat::RichHeader *rHeader);
 		void setPdbType(const std::string &sType);
 		void setPdbPath(const std::string &sPath);
 		void setPdbGuid(const std::string &sGuid);
 		void setPdbAge(std::size_t sAge);
 		void setPdbTimeStamp(std::size_t sTimeStamp);
-		void setImportTable(const fileformat::ImportTable *sTable);
-		void setExportTable(const fileformat::ExportTable *sTable);
-		void setStrings(const std::vector<fileformat::String> *sStrings);
-		void setCertificateTable(const fileformat::CertificateTable *sTable);
+		void setImportTable(const retdec::fileformat::ImportTable *sTable);
+		void setExportTable(const retdec::fileformat::ExportTable *sTable);
+		void setStrings(const std::vector<retdec::fileformat::String> *sStrings);
+		void setCertificateTable(const retdec::fileformat::CertificateTable *sTable);
 		void setSignatureVerified(bool verified);
 		void setLoadedBaseAddress(unsigned long long baseAddress);
 		void setLoaderStatusMessage(const std::string& statusMessage);
@@ -502,8 +502,8 @@ class FileInformation
 		void setDotnetUserStringStreamInfo(std::uint64_t streamOffset, std::uint64_t streamSize);
 		void setDotnetModuleVersionId(const std::string& moduleVersionId);
 		void setDotnetTypeLibId(const std::string& typeLibId);
-		void setDotnetDefinedClassList(const std::vector<std::shared_ptr<fileformat::DotnetClass>>& dotnetClassList);
-		void setDotnetImportedClassList(const std::vector<std::shared_ptr<fileformat::DotnetClass>>& dotnetClassList);
+		void setDotnetDefinedClassList(const std::vector<std::shared_ptr<retdec::fileformat::DotnetClass>>& dotnetClassList);
+		void setDotnetImportedClassList(const std::vector<std::shared_ptr<retdec::fileformat::DotnetClass>>& dotnetClassList);
 		/// @}
 
 		/// @name Other methods
@@ -527,7 +527,7 @@ class FileInformation
 		void sortMalwarePatternMatches();
 		void addOtherPattern(Pattern &pattern);
 		void sortOtherPatternMatches();
-		void addTool(cpdetect::DetectResult &tool);
+		void addTool(retdec::cpdetect::DetectResult &tool);
 		void addLoadedSegment(const LoadedSegment& segment);
 		/// @}
 };

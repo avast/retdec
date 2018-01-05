@@ -9,6 +9,7 @@
 
 #include <string>
 
+namespace retdec {
 namespace fileformat {
 
 enum class StringType
@@ -56,5 +57,6 @@ class String
 };
 
 } // namespace fileformat
+} // namespace retdec
 
 #endif

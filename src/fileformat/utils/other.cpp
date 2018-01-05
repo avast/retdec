@@ -11,6 +11,7 @@
 
 using namespace retdec::utils;
 
+namespace retdec {
 namespace fileformat {
 
 namespace
@@ -99,3 +100,4 @@ std::vector<std::string> getSupportedArchitectures()
 }
 
 } // namespace fileformat
+} // namespace retdec

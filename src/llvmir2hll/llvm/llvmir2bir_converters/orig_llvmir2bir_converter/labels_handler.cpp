@@ -14,6 +14,7 @@
 
 using retdec::utils::hasItem;
 
+namespace retdec {
 namespace llvmir2hll {
 
 LabelsHandler::LabelsHandler() = default;
@@ -80,3 +81,4 @@ void LabelsHandler::markLabelAsUsed(const std::string &label) {
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

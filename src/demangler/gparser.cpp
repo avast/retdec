@@ -30,6 +30,7 @@
 
 using namespace std;
 
+namespace retdec {
 namespace demangler {
 
 /**
@@ -6070,10 +6071,10 @@ string cName::type_t::getLlvmTypePrivate() {
 	//TODO add support for named types, take modifiers (const, ppointer, reference) into account, etc.
 	//See "struct type_t" in demangler/gparser.h
 	switch (b) {
-		case demangler::cName::T_VOID: return "void";
-		case demangler::cName::T_FLOAT: return "float";
-		case demangler::cName::T_DOUBLE: return "double";
-		case demangler::cName::T_CHAR:
+		case retdec::demangler::cName::T_VOID: return "void";
+		case retdec::demangler::cName::T_FLOAT: return "float";
+		case retdec::demangler::cName::T_DOUBLE: return "double";
+		case retdec::demangler::cName::T_CHAR:
 			//pointer to char is a string
 			if (modifiers == "P") {
 				return "i8*";
@@ -6085,50 +6086,50 @@ string cName::type_t::getLlvmTypePrivate() {
 			break;
 
 		//char
-		case demangler::cName::T_SCHAR:
+		case retdec::demangler::cName::T_SCHAR:
 			return "i8";
 			break;
-		case demangler::cName::T_UCHAR:
+		case retdec::demangler::cName::T_UCHAR:
 			return "i8";
 			break;
 
 		//short int
-		case demangler::cName::T_SHORT:
+		case retdec::demangler::cName::T_SHORT:
 			return "i16";
 			break;
-		case demangler::cName::T_USHORT:
+		case retdec::demangler::cName::T_USHORT:
 			return "i16";
 			break;
 
 		//int
-		case demangler::cName::T_INT:
+		case retdec::demangler::cName::T_INT:
 			return "i32";
 			break;
-		case demangler::cName::T_UINT:
+		case retdec::demangler::cName::T_UINT:
 			return "i32";
 			break;
 
 		//long int (32-bit?)
-		case demangler::cName::T_LONG:
+		case retdec::demangler::cName::T_LONG:
 			return "i32";
 			break;
-		case demangler::cName::T_ULONG:
+		case retdec::demangler::cName::T_ULONG:
 			return "i32";
 			break;
 
 		//long long int (64-bit)
-		case demangler::cName::T_LONGLONG:
+		case retdec::demangler::cName::T_LONGLONG:
 			return "i64";
 			break;
-		case demangler::cName::T_ULONGLONG:
+		case retdec::demangler::cName::T_ULONGLONG:
 			return "i64";
 			break;
 
 		//int (128-bit)
-		case demangler::cName::T_INT128:
+		case retdec::demangler::cName::T_INT128:
 			return "i128";
 			break;
-		case demangler::cName::T_UINT128:
+		case retdec::demangler::cName::T_UINT128:
 			return "i128";
 			break;
 
@@ -6143,3 +6144,4 @@ string cName::type_t::getLlvmTypePrivate() {
 }
 
 } // namespace demangler
+} // namespace retdec

@@ -8,6 +8,7 @@
 
 using namespace llvm;
 
+namespace retdec {
 namespace bin2llvmir {
 
 RegisterCouple::RegisterCouple(
@@ -51,3 +52,4 @@ void RegisterCouple::setSecond(llvm::GlobalVariable* reg)
 }
 
 } // namespace bin2llvmir
+} // namespace retdec

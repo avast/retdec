@@ -38,7 +38,7 @@ public:
 	virtual void cleanup() override;
 
 private:
-	std::unique_ptr<loader::Image> _file; ///< Packed input file.
+	std::unique_ptr<retdec::loader::Image> _file; ///< Packed input file.
 	std::shared_ptr<UpxStub> _stub; ///< Correct version of unpacking stub.
 };
 

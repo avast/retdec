@@ -11,6 +11,7 @@
 #include "retdec/llvmir2hll/graphs/cfg/cfg_traversal.h"
 #include "retdec/llvmir2hll/support/types.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 class CFG;
@@ -54,5 +55,6 @@ private:
 };
 
 } // namespace llvmir2hll
+} // namespace retdec
 
 #endif

@@ -16,6 +16,7 @@
 using namespace ::testing;
 using namespace llvm;
 
+namespace retdec {
 namespace bin2llvmir {
 namespace tests {
 
@@ -182,3 +183,4 @@ CycleDependencyTwoCyclesTest) {
 
 } // namespace tests
 } // namespace bin2llvmir
+} // namespace retdec

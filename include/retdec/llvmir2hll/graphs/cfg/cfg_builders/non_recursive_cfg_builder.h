@@ -17,6 +17,7 @@
 #include "retdec/llvmir2hll/support/types.h"
 #include "retdec/llvmir2hll/support/visitor_adapter.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 class Expression;
@@ -158,5 +159,6 @@ private:
 };
 
 } // namespace llvmir2hll
+} // namespace retdec
 
 #endif

@@ -16,9 +16,10 @@
 
 using namespace retdec::utils;
 
+namespace retdec {
 namespace loader {
 
-PeImage::PeImage(const std::shared_ptr<fileformat::FileFormat>& fileFormat) : Image(fileFormat), _singleSegment(nullptr)
+PeImage::PeImage(const std::shared_ptr<retdec::fileformat::FileFormat>& fileFormat) : Image(fileFormat), _singleSegment(nullptr)
 {
 }
 
@@ -27,14 +28,14 @@ PeImage::~PeImage()
 }
 
 /**
- * Virtual method overridden from loader::Image, which is used in image factory.
+ * Virtual method overridden from retdec::loader::Image, which is used in image factory.
  * Loads the image using @c fileformat.
  *
  * @return True if loading was successful, otherwise false.
  */
 bool PeImage::load()
 {
-	const fileformat::PeFormat* peFormat = static_cast<const fileformat::PeFormat*>(getFileFormat());
+	const retdec::fileformat::PeFormat* peFormat = static_cast<const retdec::fileformat::PeFormat*>(getFileFormat());
 
 	// Load image base address from fileformat and store it into loader image
 	unsigned long long imageBase;
@@ -80,7 +81,7 @@ bool PeImage::load()
 	return true;
 }
 
-Segment* PeImage::addSegment(const fileformat::Section* section, std::uint64_t address, std::uint64_t memSize)
+Segment* PeImage::addSegment(const retdec::fileformat::Section* section, std::uint64_t address, std::uint64_t memSize)
 {
 	if (!canAddSegment(address, memSize))
 		return nullptr;
@@ -140,3 +141,4 @@ void PeImage::loadNonDecodableAddressRanges()
 }
 
 } // namespace loader
+} // namespace retdec

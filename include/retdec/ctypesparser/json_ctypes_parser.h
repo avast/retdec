@@ -15,6 +15,7 @@
 
 #include "retdec/ctypesparser/ctypes_parser.h"
 
+namespace retdec {
 namespace ctypesparser {
 
 /**
@@ -26,99 +27,99 @@ class JSONCTypesParser: public CTypesParser
 		JSONCTypesParser();
 		JSONCTypesParser(unsigned defaultBitWidth);
 
-		virtual std::unique_ptr<ctypes::Module> parse(
+		virtual std::unique_ptr<retdec::ctypes::Module> parse(
 			std::istream &stream,
 			const TypeWidths &typeWidths = {},
-			const ctypes::CallConvention &callConvention = ctypes::CallConvention()) override;
+			const retdec::ctypes::CallConvention &callConvention = retdec::ctypes::CallConvention()) override;
 		virtual void parseInto(
 			std::istream &stream,
-			std::unique_ptr<ctypes::Module> &module,
+			std::unique_ptr<retdec::ctypes::Module> &module,
 			const TypeWidths &typeWidths = {},
-			const ctypes::CallConvention &callConvention = ctypes::CallConvention()) override;
+			const retdec::ctypes::CallConvention &callConvention = retdec::ctypes::CallConvention()) override;
 
 	private:
 		std::string loadJson(std::istream &stream) const;
 		std::unique_ptr<rapidjson::Document> parseJson(char *buffer) const;
 		void parseJsonIntoModule(
 			const std::unique_ptr<rapidjson::Document> &root,
-			std::unique_ptr<ctypes::Module> &module);
+			std::unique_ptr<retdec::ctypes::Module> &module);
 		void addTypesToMap(const rapidjson::Value &types);
 
 		/// @name Parsing methods.
 		/// @{
 		void handleParsingFailure(const rapidjson::ParseResult &err) const;
-		std::shared_ptr<ctypes::Function> getOrParseFunction(
+		std::shared_ptr<retdec::ctypes::Function> getOrParseFunction(
 			const std::string &name,
 			const rapidjson::Value &jsonFunction
 		);
-		std::shared_ptr<ctypes::Function> parseFunction(
+		std::shared_ptr<retdec::ctypes::Function> parseFunction(
 			const rapidjson::Value &function,
 			const std::string &fName
 		);
-		ctypes::Function::Parameters parseParameters(
+		retdec::ctypes::Function::Parameters parseParameters(
 			const rapidjson::Value &jsonParams
 		);
-		ctypes::Parameter parseParameter(
+		retdec::ctypes::Parameter parseParameter(
 			const rapidjson::Value &param
 		);
-		ctypes::FunctionType::VarArgness parseVarArgness(
+		retdec::ctypes::FunctionType::VarArgness parseVarArgness(
 			const rapidjson::Value &function
 		) const;
 		std::string parseCallConv(
 			const rapidjson::Value &function
 		) const;
-		ctypes::Parameter::Annotations parseAnnotations(
+		retdec::ctypes::Parameter::Annotations parseAnnotations(
 			const std::string &annot
 		) const;
-		std::shared_ptr<ctypes::FunctionType> parseFunctionType(
+		std::shared_ptr<retdec::ctypes::FunctionType> parseFunctionType(
 			const rapidjson::Value &jsonFuncType
 		);
-		ctypes::FunctionType::Parameters parseFunctionTypeParameters(
+		retdec::ctypes::FunctionType::Parameters parseFunctionTypeParameters(
 			const rapidjson::Value &jsonParams
 		);
-		std::shared_ptr<ctypes::Type> getOrParseType(
+		std::shared_ptr<retdec::ctypes::Type> getOrParseType(
 			const std::string &typeKey
 		);
-		std::shared_ptr<ctypes::Type> parseType(
+		std::shared_ptr<retdec::ctypes::Type> parseType(
 			const std::string &typeKey
 		);
-		std::shared_ptr<ctypes::Type> parseIntegralType(
+		std::shared_ptr<retdec::ctypes::Type> parseIntegralType(
 			const rapidjson::Value &type
 		);
-		std::shared_ptr<ctypes::Type> parseFloatingPointType(
+		std::shared_ptr<retdec::ctypes::Type> parseFloatingPointType(
 			const rapidjson::Value &type
 		);
-		std::shared_ptr<ctypes::Type> parseTypedefedType(
+		std::shared_ptr<retdec::ctypes::Type> parseTypedefedType(
 			const rapidjson::Value &jsonTypedef
 		);
-		std::shared_ptr<ctypes::Type> parseStruct(
+		std::shared_ptr<retdec::ctypes::Type> parseStruct(
 			const rapidjson::Value &jsonStruct
 		);
-		std::shared_ptr<ctypes::Type> parseUnion(
+		std::shared_ptr<retdec::ctypes::Type> parseUnion(
 			const rapidjson::Value &jsonUnion
 		);
-		ctypes::CompositeType::Members parseMembers(
+		retdec::ctypes::CompositeType::Members parseMembers(
 			const rapidjson::Value &jsonMembers
 		);
-		std::shared_ptr<ctypes::PointerType> parsePointer(
+		std::shared_ptr<retdec::ctypes::PointerType> parsePointer(
 			const rapidjson::Value &jsonPointer
 		);
-		std::shared_ptr<ctypes::ArrayType> parseArray(
+		std::shared_ptr<retdec::ctypes::ArrayType> parseArray(
 			const rapidjson::Value &jsonArray
 		);
-		ctypes::ArrayType::Dimensions parseArrayDimensions(
+		retdec::ctypes::ArrayType::Dimensions parseArrayDimensions(
 			const rapidjson::Value &jsonDimensions
 		) const;
-		std::shared_ptr<ctypes::Type> parseEnum(
+		std::shared_ptr<retdec::ctypes::Type> parseEnum(
 			const rapidjson::Value &jsonEnum
 		);
-		ctypes::EnumType::Values parseEnumItems(
+		retdec::ctypes::EnumType::Values parseEnumItems(
 			const rapidjson::Value &jsonEnumItems
 		) const;
-		std::shared_ptr<ctypes::Type> getOrParseNamedType(
+		std::shared_ptr<retdec::ctypes::Type> getOrParseNamedType(
 			const rapidjson::Value &jsonType,
 			const std::function<
-				std::shared_ptr<ctypes::Type> (const std::string &typeName)
+				std::shared_ptr<retdec::ctypes::Type> (const std::string &typeName)
 			> &parseType
 		);
 		unsigned getIntegralTypeBitWidth(const std::string &type) const;
@@ -126,7 +127,7 @@ class JSONCTypesParser: public CTypesParser
 		/// @}
 
 	private:
-		using ParserContext = std::unordered_map<std::string, std::shared_ptr<ctypes::Type>>;
+		using ParserContext = std::unordered_map<std::string, std::shared_ptr<retdec::ctypes::Type>>;
 		using TypesMap = std::unordered_map<std::string, rapidjson::Value::ConstMemberIterator>;
 
 	private:
@@ -138,5 +139,6 @@ class JSONCTypesParser: public CTypesParser
 };
 
 } // namespace ctypesparser
+} // namespace retdec
 
 #endif

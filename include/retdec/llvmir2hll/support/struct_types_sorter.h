@@ -13,6 +13,7 @@
 #include "retdec/llvmir2hll/support/types.h"
 #include "retdec/utils/non_copyable.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 /**
@@ -27,5 +28,6 @@ public:
 };
 
 } // namespace llvmir2hll
+} // namespace retdec
 
 #endif

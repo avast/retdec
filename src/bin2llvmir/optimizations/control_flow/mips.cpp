@@ -17,6 +17,7 @@
 
 using namespace llvm;
 
+namespace retdec {
 namespace bin2llvmir {
 
 bool ControlFlow::runMips()
@@ -158,3 +159,4 @@ bool ControlFlow::runMipsDynamicStubPatter()
 }
 
 } // namespace bin2llvmir
+} // namespace retdec

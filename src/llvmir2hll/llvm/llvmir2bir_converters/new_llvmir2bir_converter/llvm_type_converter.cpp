@@ -18,6 +18,7 @@
 #include "retdec/llvmir2hll/llvm/llvmir2bir_converters/new_llvmir2bir_converter/llvm_type_converter.h"
 #include "retdec/llvmir2hll/support/debug.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 /**
@@ -160,3 +161,4 @@ ShPtr<FunctionType> LLVMTypeConverter::convert(const llvm::FunctionType *type) {
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

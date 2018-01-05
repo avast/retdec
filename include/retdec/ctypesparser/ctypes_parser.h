@@ -20,6 +20,7 @@
 #include "retdec/ctypes/parameter.h"
 #include "retdec/ctypesparser/exceptions.h"
 
+namespace retdec {
 namespace ctypes {
 
 class Context;
@@ -50,14 +51,14 @@ class CTypesParser
 	public:
 		virtual ~CTypesParser() = default;
 
-		virtual std::unique_ptr<ctypes::Module> parse(
+		virtual std::unique_ptr<retdec::ctypes::Module> parse(
 			std::istream &stream,
 			const TypeWidths &typeWidths = {},
-			const ctypes::CallConvention &callConvention = ctypes::CallConvention()) = 0;
+			const retdec::ctypes::CallConvention &callConvention = retdec::ctypes::CallConvention()) = 0;
 		virtual void parseInto(std::istream &stream,
-			std::unique_ptr<ctypes::Module> &module,
+			std::unique_ptr<retdec::ctypes::Module> &module,
 			const TypeWidths &typeWidths = {},
-			const ctypes::CallConvention &callConvention = ctypes::CallConvention()) = 0;
+			const retdec::ctypes::CallConvention &callConvention = retdec::ctypes::CallConvention()) = 0;
 
 	protected:
 		CTypesParser();
@@ -65,15 +66,16 @@ class CTypesParser
 
 	protected:
 		/// Container for already parsed functions, types.
-		std::shared_ptr<ctypes::Context> context;
+		std::shared_ptr<retdec::ctypes::Context> context;
 		/// C-types' bit widths.
 		TypeWidths typeWidths;
 		/// Bitwidth used for types not in @c typeWidths.
 		unsigned defaultBitWidth = 0;
 		/// Call convention used when JSON does not contain one.
-		ctypes::CallConvention defaultCallConv;
+		retdec::ctypes::CallConvention defaultCallConv;
 };
 
 } // namespace ctypesparser
+} // namespace retdec
 
 #endif

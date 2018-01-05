@@ -18,6 +18,7 @@
 #include "retdec/llvmir2hll/support/visitor.h"
 #include "retdec/utils/non_copyable.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 class BinaryOpExpr;
@@ -234,5 +235,6 @@ private:
 };
 
 } // namespace llvmir2hll
+} // namespace retdec
 
 #endif

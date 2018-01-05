@@ -6,6 +6,7 @@
 
 #include "retdec/fileformat/types/dotnet_headers/string_stream.h"
 
+namespace retdec {
 namespace fileformat {
 
 StringStream::StringStream(std::uint64_t streamOffset, std::uint64_t streamSize) : Stream(StreamType::String, streamOffset, streamSize)
@@ -49,3 +50,4 @@ void StringStream::addString(std::size_t offset, const std::string& string)
 }
 
 } // namespace fileformat
+} // namespace retdec

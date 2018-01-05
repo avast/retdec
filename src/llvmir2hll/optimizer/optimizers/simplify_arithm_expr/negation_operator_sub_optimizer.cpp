@@ -10,6 +10,7 @@
 #include "retdec/llvmir2hll/support/debug.h"
 #include "retdec/llvmir2hll/support/expression_negater.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 REGISTER_AT_FACTORY("NegationOperator", NEGATION_OPERATOR_SUB_OPTIMIZER_ID,
@@ -56,3 +57,4 @@ void NegationOperatorSubOptimizer::visit(ShPtr<NotOpExpr> expr) {
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

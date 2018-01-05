@@ -7,6 +7,7 @@
 #ifndef RETDEC_LLVMIR2HLL_SUPPORT_VISITABLE_H
 #define RETDEC_LLVMIR2HLL_SUPPORT_VISITABLE_H
 
+namespace retdec {
 namespace llvmir2hll {
 
 class Visitor;
@@ -42,5 +43,6 @@ protected:
 };
 
 } // namespace llvmir2hll
+} // namespace retdec
 
 #endif

@@ -12,6 +12,7 @@
 #include "retdec/llvmir2hll/analysis/alias_analysis/alias_analysis.h"
 #include "retdec/llvmir2hll/support/smart_ptr.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 class Module;
@@ -36,5 +37,6 @@ private:
 };
 
 } // namespace llvmir2hll
+} // namespace retdec
 
 #endif

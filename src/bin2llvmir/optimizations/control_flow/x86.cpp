@@ -17,9 +17,10 @@
 #define debug_enabled false
 #include "retdec/llvm-support/utils.h"
 
-using namespace llvm_support;
+using namespace retdec::llvm_support;
 using namespace llvm;
 
+namespace retdec {
 namespace bin2llvmir {
 
 bool ControlFlow::runX86()
@@ -301,3 +302,4 @@ bool ControlFlow::runX86JmpNopNopPattern()
 }
 
 } // namespace bin2llvmir
+} // namespace retdec

@@ -23,6 +23,7 @@
 #include "retdec/capstone2llvmir/capstone2llvmir.h"
 #include "retdec/capstone2llvmir/x86/x86.h"
 
+namespace retdec {
 namespace bin2llvmir {
 
 class Decoder : public llvm::ModulePass
@@ -367,5 +368,6 @@ class Decoder : public llvm::ModulePass
 };
 
 } // namespace bin2llvmir
+} // namespace retdec
 
 #endif

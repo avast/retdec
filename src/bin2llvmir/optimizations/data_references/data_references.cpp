@@ -15,13 +15,14 @@
 #include "retdec/bin2llvmir/providers/config.h"
 #include "retdec/bin2llvmir/utils/defs.h"
 
-using namespace llvm_support;
+using namespace retdec::llvm_support;
 using namespace retdec::utils;
 using namespace llvm;
-using namespace loader;
+using namespace retdec::loader;
 
 #define debug_enabled false
 
+namespace retdec {
 namespace bin2llvmir {
 
 //
@@ -162,3 +163,4 @@ DataReferences::ReferencedObject::ReferencedObject(Address a) :
 }
 
 } // namespace bin2llvmir
+} // namespace retdec

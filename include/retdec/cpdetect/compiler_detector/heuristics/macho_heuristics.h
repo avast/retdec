@@ -10,6 +10,7 @@
 #include "retdec/cpdetect/compiler_detector/heuristics/heuristics.h"
 #include "retdec/fileformat/file_format/macho/macho_format.h"
 
+namespace retdec {
 namespace cpdetect {
 
 /**
@@ -33,10 +34,11 @@ class MachOHeuristics : public Heuristics
 		/// @}
 
 	public:
-		MachOHeuristics(fileformat::MachOFormat &parser, Search &searcher, ToolInformation &toolInfo);
+		MachOHeuristics(retdec::fileformat::MachOFormat &parser, Search &searcher, ToolInformation &toolInfo);
 		virtual ~MachOHeuristics() override;
 };
 
 } // namespace cpdetect
+} // namespace retdec
 
 #endif

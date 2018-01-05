@@ -31,6 +31,7 @@
 
 using namespace ::testing;
 
+namespace retdec {
 namespace llvmir2hll {
 namespace tests {
 
@@ -1416,3 +1417,4 @@ OrOpExprWithFirstOpEqOpExprAndSecOpLtEqOpExprNotOptimized) {
 
 } // namespace tests
 } // namespace llvmir2hll
+} // namespace retdec

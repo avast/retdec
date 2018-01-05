@@ -23,6 +23,7 @@
 #include "retdec/bin2llvmir/analyses/reaching_definitions.h"
 #include "retdec/bin2llvmir/providers/fileimage.h"
 
+namespace retdec {
 namespace bin2llvmir {
 
 class SymbolicTree
@@ -88,5 +89,6 @@ class SymbolicTree
 };
 
 } // namespace bin2llvmir
+} // namespace retdec
 
 #endif

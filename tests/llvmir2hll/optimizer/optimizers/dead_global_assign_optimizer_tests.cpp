@@ -23,6 +23,7 @@
 
 using namespace ::testing;
 
+namespace retdec {
 namespace llvmir2hll {
 namespace tests {
 
@@ -417,3 +418,4 @@ DoNotOptimizeAssignmentIfVariableIsNotAlwaysModifiedBeforeReadInFuncCall) {
 
 } // namespace tests
 } // namespace llvmir2hll
+} // namespace retdec

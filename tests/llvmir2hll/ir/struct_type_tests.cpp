@@ -11,6 +11,7 @@
 
 using namespace ::testing;
 
+namespace retdec {
 namespace llvmir2hll {
 namespace tests {
 
@@ -69,3 +70,4 @@ getNameAfterCreateWithElementsReturnsCorrectName) {
 
 } // namespace tests
 } // namespace llvmir2hll
+} // namespace retdec

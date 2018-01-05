@@ -16,6 +16,7 @@
 using namespace retdec::utils;
 using namespace llvm;
 
+namespace retdec {
 namespace bin2llvmir {
 
 /**
@@ -297,3 +298,4 @@ const UsesAnalysis::UseInfo *UsesAnalysis::BBUses::getUseInfo(
 }
 
 } // namespace bin2llvmir
+} // namespace retdec

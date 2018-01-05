@@ -13,6 +13,7 @@
 #include "retdec/llvmir2hll/support/maybe.h"
 #include "retdec/llvmir2hll/support/types.h"
 
+namespace retdec {
 namespace llvmir2hll {
 namespace semantics {
 namespace libc {
@@ -23,5 +24,6 @@ Maybe<IntStringMap> getSymbolicNamesForParam(const std::string &funcName,
 } // namespace libc
 } // namespace semantics
 } // namespace llvmir2hll
+} // namespace retdec
 
 #endif

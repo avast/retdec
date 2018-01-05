@@ -29,7 +29,7 @@ UpxMetadata::UpxMetadata(const UpxMetadata& metadata) : _defined(metadata._defin
 	_packingMethod(metadata._packingMethod), _packedDataSize(metadata._packedDataSize),
 	_unpackedDataSize(metadata._unpackedDataSize), _filterId(metadata._filterId), _filterParam(metadata._filterParam) {}
 
-UpxMetadata UpxMetadata::read(loader::Image* file)
+UpxMetadata UpxMetadata::read(retdec::loader::Image* file)
 {
 	UpxMetadata metadata;
 
@@ -41,13 +41,13 @@ UpxMetadata UpxMetadata::read(loader::Image* file)
 	switch (file->getFileFormat()->getFileFormat())
 	{
 		// UPX metadata should be in the first 1024 bytes in PE
-		case fileformat::Format::PE:
+		case retdec::fileformat::Format::PE:
 		{
 			inputFile.seekg(0, std::ios::beg);
 			break;
 		}
 		// UPX metadata should be in the last 1024 bytes in ELF
-		case fileformat::Format::ELF:
+		case retdec::fileformat::Format::ELF:
 		{
 			// ELF does not use packing method.
 			usePackingMethod = false;
@@ -56,13 +56,13 @@ UpxMetadata UpxMetadata::read(loader::Image* file)
 			break;
 		}
 		// UPX metadata should be in the first 1024 bytes from the chosen architecture offset in Mach-O
-		case fileformat::Format::MACHO:
+		case retdec::fileformat::Format::MACHO:
 		{
 			// Mach-O does not use checksums and packing method.
 			useChecksum = false;
 			usePackingMethod = false;
 
-			auto machoFormat = static_cast<fileformat::MachOFormat*>(file->getFileFormat());
+			auto machoFormat = static_cast<retdec::fileformat::MachOFormat*>(file->getFileFormat());
 			inputFile.seekg(machoFormat->getChosenArchitectureOffset(), std::ios::beg);
 			break;
 		}
@@ -157,7 +157,7 @@ UpxStubVersion UpxMetadata::getStubVersion() const
  * @param decompressor Associated decompressor with this unpacking stub.
  * @param metadata The UPX metadata associated with this unpacking stub.
  */
-UpxStub::UpxStub(loader::Image* inputFile, const UpxStubData* stubData, const DynamicBuffer& stubCapturedData,
+UpxStub::UpxStub(retdec::loader::Image* inputFile, const UpxStubData* stubData, const DynamicBuffer& stubCapturedData,
 		std::unique_ptr<Decompressor> decompressor, const UpxMetadata& metadata)
 	: UnpackingStub(inputFile), _stubData(stubData), _stubCapturedData(stubCapturedData), _decompressor(std::move(decompressor)), _metadata(metadata)
 {
@@ -170,17 +170,17 @@ UpxStub::~UpxStub()
 {
 }
 
-std::shared_ptr<UpxStub> UpxStub::createStub(loader::Image* file)
+std::shared_ptr<UpxStub> UpxStub::createStub(retdec::loader::Image* file)
 {
 	return _createStubImpl(file, nullptr);
 }
 
-std::shared_ptr<UpxStub> UpxStub::createStub(loader::Image* file, const DynamicBuffer& stubBytes)
+std::shared_ptr<UpxStub> UpxStub::createStub(retdec::loader::Image* file, const DynamicBuffer& stubBytes)
 {
 	return _createStubImpl(file, &stubBytes);
 }
 
-std::shared_ptr<UpxStub> UpxStub::_createStubImpl(loader::Image* file, const unpacker::DynamicBuffer* stubBytes)
+std::shared_ptr<UpxStub> UpxStub::_createStubImpl(retdec::loader::Image* file, const unpacker::DynamicBuffer* stubBytes)
 {
 	UpxMetadata metadata = UpxMetadata::read(file);
 
@@ -281,33 +281,33 @@ std::shared_ptr<UpxStub> UpxStub::_createStubImpl(loader::Image* file, const unp
 	UpxStub* stub = nullptr;
 	switch (file->getFileFormat()->getFileFormat())
 	{
-		case fileformat::Format::ELF:
+		case retdec::fileformat::Format::ELF:
 		{
-			if (static_cast<fileformat::ElfFormat*>(file->getFileFormat())->getElfClass() == ELFCLASS32)
+			if (static_cast<retdec::fileformat::ElfFormat*>(file->getFileFormat())->getElfClass() == ELFCLASS32)
 				stub = new ElfUpxStub<32>(file, stubData, capturedData, std::move(decompressor), metadata);
 			else
 				stub = new ElfUpxStub<64>(file, stubData, capturedData, std::move(decompressor), metadata);
 			break;
 		}
-		case fileformat::Format::PE:
+		case retdec::fileformat::Format::PE:
 		{
-			if (static_cast<fileformat::PeFormat*>(file->getFileFormat())->getPeClass() == PeLib::PEFILE32)
+			if (static_cast<retdec::fileformat::PeFormat*>(file->getFileFormat())->getPeClass() == PeLib::PEFILE32)
 				stub = new PeUpxStub<32>(file, stubData, capturedData, std::move(decompressor), metadata);
 			else
 				stub = new PeUpxStub<64>(file, stubData, capturedData, std::move(decompressor), metadata);
 			break;
 		}
-		case fileformat::Format::MACHO:
+		case retdec::fileformat::Format::MACHO:
 		{
-			if (static_cast<fileformat::MachOFormat*>(file->getFileFormat())->is32Bit())
+			if (static_cast<retdec::fileformat::MachOFormat*>(file->getFileFormat())->is32Bit())
 				stub = new MachOUpxStub<32>(file, stubData, capturedData, std::move(decompressor), metadata);
 			else
 				stub = new MachOUpxStub<64>(file, stubData, capturedData, std::move(decompressor), metadata);
 			break;
 		}
-		case fileformat::Format::COFF:
-		case fileformat::Format::UNKNOWN:
-		case fileformat::Format::UNDETECTABLE:
+		case retdec::fileformat::Format::COFF:
+		case retdec::fileformat::Format::UNKNOWN:
+		case retdec::fileformat::Format::UNDETECTABLE:
 		default:
 			throw UnsupportedFileException();
 	}

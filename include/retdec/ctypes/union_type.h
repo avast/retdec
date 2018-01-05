@@ -12,6 +12,7 @@
 
 #include "retdec/ctypes/composite_type.h"
 
+namespace retdec {
 namespace ctypes {
 
 class Context;
@@ -41,5 +42,6 @@ class UnionType: public CompositeType
 };
 
 } // namespace ctypes
+} // namespace retdec
 
 #endif

@@ -23,7 +23,7 @@ class PatternDetector
 {
 	private:
 		using patternCategoriesIterator = std::vector<std::pair<std::string, std::set<std::string>>>::const_iterator;
-		const fileformat::FileFormat *fileParser;                             ///< parser of input file
+		const retdec::fileformat::FileFormat *fileParser;                             ///< parser of input file
 		FileInformation &fileinfo;                                             ///< information about input file
 		std::vector<std::pair<std::string, std::set<std::string>>> categories; ///< paths to YARA rules
 
@@ -41,7 +41,7 @@ class PatternDetector
 		void saveOtherRule(const yaracpp::YaraRule &rule);
 		/// @}
 	public:
-		PatternDetector(const fileformat::FileFormat *fparser, FileInformation &finfo);
+		PatternDetector(const retdec::fileformat::FileFormat *fparser, FileInformation &finfo);
 		~PatternDetector();
 
 		/// @name Detection methods

@@ -12,6 +12,7 @@
 
 using retdec::utils::getNthItem;
 
+namespace retdec {
 namespace llvmir2hll {
 
 /**
@@ -178,3 +179,4 @@ void FunctionType::accept(Visitor *v) {
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

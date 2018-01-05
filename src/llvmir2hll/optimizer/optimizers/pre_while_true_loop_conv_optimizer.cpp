@@ -22,6 +22,7 @@
 #include "retdec/llvmir2hll/utils/ir.h"
 #include "retdec/llvmir2hll/utils/loop_optimizer.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 /**
@@ -649,3 +650,4 @@ bool PreWhileTrueLoopConvOptimizer::tryOptimizationCase5(
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

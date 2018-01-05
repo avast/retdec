@@ -9,6 +9,7 @@
 
 #include "retdec/loader/utils/name_generator.h"
 
+namespace retdec {
 namespace loader {
 
 /**
@@ -48,3 +49,4 @@ std::string NameGenerator::getNextName()
 }
 
 } // namespace loader
+} // namespace retdec

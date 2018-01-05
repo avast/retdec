@@ -52,7 +52,7 @@ void UpxPlugin::init()
  */
 void UpxPlugin::prepare()
 {
-	_file = loader::createImage(getStartupArguments()->inputFile);
+	_file = retdec::loader::createImage(getStartupArguments()->inputFile);
 	if (!_file)
 		throw UnsupportedFileException();
 
@@ -60,7 +60,7 @@ void UpxPlugin::prepare()
 	// However, we want more specific errors if we can say for sure without creating the stub first.
 	switch (_file->getFileFormat()->getFileFormat())
 	{
-		case fileformat::Format::PE:
+		case retdec::fileformat::Format::PE:
 		{
 			// We do not support files that doesn't have EP section set
 			if (!_file->getEpSegment())
@@ -76,7 +76,7 @@ void UpxPlugin::prepare()
 
 			break;
 		}
-		case fileformat::Format::ELF:
+		case retdec::fileformat::Format::ELF:
 		{
 			// We need to have EP segment for unpacking
 			if (!_file->getEpSegment())
@@ -84,7 +84,7 @@ void UpxPlugin::prepare()
 
 			break;
 		}
-		case fileformat::Format::MACHO:
+		case retdec::fileformat::Format::MACHO:
 			break;
 		default:
 			throw UnsupportedFileException();

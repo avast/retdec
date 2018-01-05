@@ -12,6 +12,7 @@
 #include "retdec/demangler/stgrammars/gccll.h"
 #include "retdec/demangler/stgrammars/msll.h"
 
+namespace retdec {
 namespace demangler {
 
 bool initIgram(std::string gname, cGram* gParser);
@@ -19,5 +20,6 @@ bool initIgram(std::string gname, cGram* gParser);
 void deleteIgrams(cGram* gParser);
 
 } // namespace demangler
+} // namespace retdec
 
 #endif

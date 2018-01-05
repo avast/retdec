@@ -8,6 +8,7 @@
 #include "retdec/llvmir2hll/optimizer/optimizer.h"
 #include "retdec/llvmir2hll/support/debug.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 /**
@@ -77,3 +78,4 @@ void Optimizer::doOptimization() {}
 void Optimizer::doFinalization() {}
 
 } // namespace llvmir2hll
+} // namespace retdec

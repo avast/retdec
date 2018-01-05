@@ -11,6 +11,7 @@
 #include <string>
 #include <unordered_map>
 
+namespace retdec {
 namespace ctypes {
 
 class Context;
@@ -40,5 +41,6 @@ class Module
 };
 
 } // namespace ctypes
+} // namespace retdec
 
 #endif

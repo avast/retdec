@@ -14,6 +14,7 @@
 using namespace ::testing;
 using namespace llvm;
 
+namespace retdec {
 namespace capstone2llvmir {
 namespace tests {
 
@@ -10515,3 +10516,4 @@ TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_RDTSCP)
 
 } // namespace tests
 } // namespace capstone2llvmir
+} // namespace retdec

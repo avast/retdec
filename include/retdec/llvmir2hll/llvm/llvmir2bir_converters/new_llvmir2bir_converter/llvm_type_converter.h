@@ -23,6 +23,7 @@ class Type;
 
 } // namespace llvm
 
+namespace retdec {
 namespace llvmir2hll {
 
 class ArrayType;
@@ -52,5 +53,6 @@ private:
 };
 
 } // namespace llvmir2hll
+} // namespace retdec
 
 #endif

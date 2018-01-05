@@ -13,6 +13,7 @@
 
 using namespace ::testing;
 
+namespace retdec {
 namespace llvmir2hll {
 namespace tests {
 
@@ -34,3 +35,4 @@ OptimizerHasNonEmptyID) {
 
 } // namespace tests
 } // namespace llvmir2hll
+} // namespace retdec

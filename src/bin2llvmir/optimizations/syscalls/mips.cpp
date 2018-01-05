@@ -16,7 +16,7 @@
 #define debug_enabled false
 #include "retdec/llvm-support/utils.h"
 
-using namespace llvm_support;
+using namespace retdec::llvm_support;
 using namespace llvm;
 
 /*
@@ -241,6 +241,7 @@ std::map<uint64_t, std::string> mipsSyscalls =
 	{4264, "sys_clock_getres"},
 };
 
+namespace retdec {
 namespace bin2llvmir {
 
 /**
@@ -370,3 +371,4 @@ bool SyscallFixer::runMips()
 }
 
 } // namespace bin2llvmir
+} // namespace retdec

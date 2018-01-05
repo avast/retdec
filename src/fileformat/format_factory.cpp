@@ -12,6 +12,7 @@
 #include "retdec/fileformat/file_format/raw_data/raw_data_format.h"
 #include "retdec/fileformat/utils/format_detection.h"
 
+namespace retdec {
 namespace fileformat {
 
 /**
@@ -45,3 +46,4 @@ std::unique_ptr<FileFormat> createFileFormat(const std::string &filePath, retdec
 }
 
 } // namespace fileformat
+} // namespace retdec

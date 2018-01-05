@@ -10,10 +10,12 @@
 #include "retdec/config/config.h"
 #include "retdec/fileformat/fftypes.h"
 
+namespace retdec {
 namespace fileformat {
 
 Format detectFileFormat(const std::string &filePath, retdec::config::Config *config = nullptr);
 
 } // namespace fileformat
+} // namespace retdec
 
 #endif

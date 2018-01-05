@@ -6,6 +6,7 @@
 
 #include "retdec/fileformat/types/sec_seg/section.h"
 
+namespace retdec {
 namespace fileformat {
 
 /**
@@ -17,3 +18,4 @@ Section::Section() : SecSeg()
 }
 
 } // namespace fileformat
+} // namespace retdec

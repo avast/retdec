@@ -21,6 +21,7 @@
 #include "retdec/llvm-support/utils.h"
 #include "retdec/utils/string.h"
 
+namespace retdec {
 namespace llvm_support {
 namespace tests {
 
@@ -321,5 +322,6 @@ class LlvmIrTests : public ::testing::Test
 
 } // namespace tests
 } // namespace llvm_support
+} // namespace retdec
 
 #endif

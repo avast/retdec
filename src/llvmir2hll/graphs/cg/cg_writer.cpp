@@ -7,6 +7,7 @@
 #include "retdec/llvmir2hll/graphs/cg/cg_writer.h"
 #include "retdec/llvmir2hll/support/debug.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 /**
@@ -24,3 +25,4 @@ CGWriter::CGWriter(ShPtr<CG> cg, std::ostream &out):
 CGWriter::~CGWriter() {}
 
 } // namespace llvmir2hll
+} // namespace retdec

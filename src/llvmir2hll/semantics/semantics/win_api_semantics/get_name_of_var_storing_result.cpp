@@ -8,6 +8,7 @@
 #include "retdec/llvmir2hll/semantics/semantics/impl_support/get_name_of_var_storing_result.h"
 #include "retdec/llvmir2hll/semantics/semantics/win_api_semantics/get_name_of_var_storing_result.h"
 
+namespace retdec {
 namespace llvmir2hll {
 namespace semantics {
 namespace win_api {
@@ -98,3 +99,4 @@ Maybe<std::string> getNameOfVarStoringResult(const std::string &funcName) {
 } // namespace win_api
 } // namespace semantics
 } // namespace llvmir2hll
+} // namespace retdec

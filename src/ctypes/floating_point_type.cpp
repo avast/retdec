@@ -10,6 +10,7 @@
 #include "retdec/ctypes/floating_point_type.h"
 #include "retdec/ctypes/visitor.h"
 
+namespace retdec {
 namespace ctypes {
 
 /**
@@ -63,3 +64,4 @@ void FloatingPointType::accept(Visitor *v) {
 }
 
 } // namespace ctypes
+} // namespace retdec

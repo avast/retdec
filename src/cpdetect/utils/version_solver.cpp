@@ -12,6 +12,7 @@
 
 using namespace retdec::utils;
 
+namespace retdec {
 namespace cpdetect {
 
 namespace
@@ -124,3 +125,4 @@ bool compareVersions(const std::string &aVer, const std::string &bVer, int &resu
 }
 
 } // namespace cpdetect
+} // namespace retdec

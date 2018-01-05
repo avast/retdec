@@ -20,10 +20,11 @@
 #define debug_enabled false
 #include "retdec/llvm-support/utils.h"
 
-using namespace llvm_support;
+using namespace retdec::llvm_support;
 using namespace llvm;
 using namespace PatternMatch;
 
+namespace retdec {
 namespace bin2llvmir {
 
 char AdapterMethods::ID = 0;
@@ -215,3 +216,4 @@ void AdapterMethods::handleAdapter(Function* adapter, Function* target)
 }
 
 } // namespace bin2llvmir
+} // namespace retdec

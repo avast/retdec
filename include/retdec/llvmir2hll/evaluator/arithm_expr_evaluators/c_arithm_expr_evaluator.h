@@ -11,6 +11,7 @@
 
 #include "retdec/llvmir2hll/evaluator/arithm_expr_evaluator.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 /**
@@ -59,5 +60,6 @@ private:
 };
 
 } // namespace llvmir2hll
+} // namespace retdec
 
 #endif

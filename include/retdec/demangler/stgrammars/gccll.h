@@ -9,6 +9,7 @@
 
 #include "retdec/demangler/gparser.h"
 
+namespace retdec {
 namespace demangler {
 
 class cIgram_gccll {
@@ -22,4 +23,5 @@ public:
 };
 
 } // namespace demangler
+} // namespace retdec
 #endif

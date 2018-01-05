@@ -20,9 +20,10 @@
 #include "retdec/fileformat/utils/other.h"
 
 using namespace retdec::utils;
-using namespace fileformat;
+using namespace retdec::fileformat;
 using namespace std::string_literals;
 
+namespace retdec {
 namespace cpdetect {
 
 namespace
@@ -146,7 +147,7 @@ std::string getNullsoftManifestVersion(const std::string &manifest)
 /**
  * Constructor
  */
-PeHeuristics::PeHeuristics(fileformat::PeFormat &parser, Search &searcher, ToolInformation &toolInfo) :
+PeHeuristics::PeHeuristics(retdec::fileformat::PeFormat &parser, Search &searcher, ToolInformation &toolInfo) :
 	Heuristics(parser, searcher, toolInfo), peParser(parser)
 {
 
@@ -1311,3 +1312,4 @@ void PeHeuristics::getFormatSpecificCompilerHeuristics()
 }
 
 } // namespace cpdetect
+} // namespace retdec

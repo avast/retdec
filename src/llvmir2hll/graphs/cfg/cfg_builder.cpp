@@ -8,6 +8,7 @@
 #include "retdec/llvmir2hll/graphs/cfg/cfg_builder.h"
 #include "retdec/llvmir2hll/support/debug.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 /**
@@ -43,3 +44,4 @@ void CFGBuilder::initializeNewCFG(ShPtr<Function> func) {
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

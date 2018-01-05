@@ -8,6 +8,7 @@
 
 #include "retdec/fileformat/types/dynamic_table/dynamic_table.h"
 
+namespace retdec {
 namespace fileformat {
 
 /**
@@ -142,3 +143,4 @@ void DynamicTable::dump(std::string &dumpTable) const
 }
 
 } // namespace fileformat
+} // namespace retdec

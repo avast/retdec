@@ -9,6 +9,7 @@
 
 #include "retdec/llvmir2hll/optimizer/optimizers/simplify_arithm_expr/sub_optimizer.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 class ArithmExprEvaluator;
@@ -63,5 +64,6 @@ private:
 };
 
 } // namespace llvmir2hll
+} // namespace retdec
 
 #endif

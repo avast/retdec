@@ -12,6 +12,7 @@
 
 #define debug_enabled false
 
+namespace retdec {
 namespace bin2llvmir {
 
 //
@@ -114,3 +115,4 @@ std::string BaseClassTypeInfo::dump() const
 }
 
 } // namespace bin2llvmir
+} // namespace retdec

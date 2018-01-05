@@ -9,6 +9,7 @@
 
 #include <string>
 
+namespace retdec {
 namespace ctypes {
 
 /**
@@ -27,5 +28,6 @@ class FunctionDeclaration
 };
 
 } // namespace ctypes
+} // namespace retdec
 
 #endif

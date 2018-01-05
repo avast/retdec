@@ -10,6 +10,7 @@
 #include "retdec/bin2llvmir/optimizations/class_hierarchy/hierarchy.h"
 #include "retdec/bin2llvmir/providers/demangler.h"
 
+namespace retdec {
 namespace bin2llvmir {
 
 //
@@ -138,3 +139,4 @@ std::string ClassHierarchy::dump() const
 }
 
 } // namespace bin2llvmir
+} // namespace retdec

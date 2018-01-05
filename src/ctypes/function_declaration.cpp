@@ -6,6 +6,7 @@
 
 #include "retdec/ctypes/function_declaration.h"
 
+namespace retdec {
 namespace ctypes {
 
 /**
@@ -20,3 +21,4 @@ FunctionDeclaration::operator std::string() const
 }
 
 } // namespace ctypes
+} // namespace retdec

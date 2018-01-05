@@ -8,6 +8,7 @@
 
 #include "retdec/fileformat/types/sec_seg/elf_segment.h"
 
+namespace retdec {
 namespace fileformat {
 
 /**
@@ -73,3 +74,4 @@ void ElfSegment::setElfFlags(unsigned long long sElfFlags)
 }
 
 } // namespace fileformat
+} // namespace retdec

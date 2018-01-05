@@ -16,6 +16,7 @@ using ::testing::AssertionFailure;
 using ::testing::AssertionResult;
 using ::testing::AssertionSuccess;
 
+namespace retdec {
 namespace llvmir2hll {
 
 class Expression;
@@ -88,5 +89,6 @@ AssertionResult NewLLVMIR2BIRConverterBaseTests::isVarDef(
 
 } // namespace tests
 } // namespace llvmir2hll
+} // namespace retdec
 
 #endif

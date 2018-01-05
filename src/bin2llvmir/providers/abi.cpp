@@ -9,6 +9,7 @@
 
 using namespace llvm;
 
+namespace retdec {
 namespace bin2llvmir {
 
 //
@@ -706,3 +707,4 @@ void AbiProvider::clear()
 }
 
 } // namespace bin2llvmir
+} // namespace retdec

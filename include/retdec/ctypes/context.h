@@ -16,6 +16,7 @@
 #include "retdec/ctypes/array_type.h"
 #include "retdec/ctypes/function_type.h"
 
+namespace retdec {
 namespace ctypes {
 
 class Annotation;
@@ -110,5 +111,6 @@ class Context
 };
 
 } // namespace ctypes
+} // namespace retdec
 
 #endif

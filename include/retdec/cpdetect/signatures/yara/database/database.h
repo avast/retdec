@@ -9,6 +9,7 @@
 
 #include <vector>
 
+namespace retdec {
 namespace cpdetect {
 
 const std::vector<const char*>* getArmElfDatabase();
@@ -30,5 +31,6 @@ const std::vector<const char*>* getPowerPcDatabase();
 const std::vector<const char*>* getX86Database();
 
 } // namespace cpdetect
+} // namespace retdec
 
 #endif

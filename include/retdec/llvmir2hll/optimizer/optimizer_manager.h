@@ -13,6 +13,7 @@
 #include "retdec/llvm-support/diagnostics.h"
 #include "retdec/utils/non_copyable.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 class ArithmExprEvaluator;
@@ -88,5 +89,6 @@ private:
 };
 
 } // namespace llvmir2hll
+} // namespace retdec
 
 #endif

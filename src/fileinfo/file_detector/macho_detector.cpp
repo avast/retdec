@@ -15,8 +15,8 @@
 using namespace retdec::utils;
 using namespace llvm;
 using namespace llvm::object;
-using namespace cpdetect;
-using namespace fileformat;
+using namespace retdec::cpdetect;
+using namespace retdec::fileformat;
 
 namespace fileinfo {
 
@@ -27,7 +27,7 @@ namespace fileinfo {
  * @param searchPar Parameters for detection of used compiler (or packer)
  * @param loadFlags Load flags
  */
-MachODetector::MachODetector(std::string pathToInputFile, FileInformation &finfo, cpdetect::DetectParams &searchPar, fileformat::LoadFlags loadFlags) :
+MachODetector::MachODetector(std::string pathToInputFile, FileInformation &finfo, retdec::cpdetect::DetectParams &searchPar, retdec::fileformat::LoadFlags loadFlags) :
 	FileDetector(pathToInputFile, finfo, searchPar, loadFlags)
 {
 	fileParser = machoParser = std::make_shared<MachOWrapper>(fileInfo.getPathToFile(), loadFlags);
@@ -329,7 +329,7 @@ void MachODetector::getAdditionalInfo()
  * Pointer to detector is dynamically allocated and must be released (otherwise there is a memory leak)
  * More detailed description of this method is in the super class
  */
-cpdetect::CompilerDetector* MachODetector::createCompilerDetector() const
+retdec::cpdetect::CompilerDetector* MachODetector::createCompilerDetector() const
 {
 	return new MachOCompiler(*machoParser, cpParams, fileInfo.toolInfo);
 }

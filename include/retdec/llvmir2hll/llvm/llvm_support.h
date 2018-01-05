@@ -23,6 +23,7 @@ class Value;
 
 } // namespace llvm
 
+namespace retdec {
 namespace llvmir2hll {
 
 /**
@@ -67,5 +68,6 @@ private:
 };
 
 } // namespace llvmir2hll
+} // namespace retdec
 
 #endif

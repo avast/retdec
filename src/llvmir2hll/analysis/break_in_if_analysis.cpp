@@ -11,6 +11,7 @@
 #include "retdec/llvmir2hll/ir/statement.h"
 #include "retdec/llvmir2hll/support/debug.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 /**
@@ -61,3 +62,4 @@ void BreakInIfAnalysis::visit(ShPtr<GotoStmt> stmt) {
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

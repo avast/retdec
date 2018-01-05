@@ -35,6 +35,7 @@
 using retdec::utils::hasItem;
 using retdec::utils::isLowerThanCaseInsensitive;
 
+namespace retdec {
 namespace llvmir2hll {
 
 namespace {
@@ -536,3 +537,4 @@ void convertGlobalVarToLocalVarInFunc(ShPtr<Variable> var, ShPtr<Function> func,
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

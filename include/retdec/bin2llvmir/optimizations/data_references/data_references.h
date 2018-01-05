@@ -17,6 +17,7 @@
 #include "retdec/bin2llvmir/providers/config.h"
 #include "retdec/bin2llvmir/providers/fileimage.h"
 
+namespace retdec {
 namespace bin2llvmir {
 
 /**
@@ -45,7 +46,7 @@ class DataReferences : public llvm::ModulePass
 
 			public:
 				retdec::utils::Address addr;
-				const loader::Segment *seg = nullptr;
+				const retdec::loader::Segment *seg = nullptr;
 
 				llvm::Function *function = nullptr;
 				llvm::GlobalVariable *globalVar = nullptr;
@@ -72,5 +73,6 @@ class DataReferences : public llvm::ModulePass
 };
 
 } // namespace bin2llvmir
+} // namespace retdec
 
 #endif

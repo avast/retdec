@@ -11,6 +11,7 @@
 
 using namespace retdec::utils;
 
+namespace retdec {
 namespace fileformat {
 
 /**
@@ -351,3 +352,4 @@ void ResourceTable::dump(std::string &dumpTable) const
 }
 
 } // namespace fileformat
+} // namespace retdec

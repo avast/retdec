@@ -20,12 +20,13 @@
 #include "retdec/bin2llvmir/utils/defs.h"
 #include "retdec/bin2llvmir/utils/type.h"
 
-using namespace llvm_support;
+using namespace retdec::llvm_support;
 using namespace retdec::utils;
 using namespace llvm;
 
 #define debug_enabled false
 
+namespace retdec {
 namespace bin2llvmir {
 
 //
@@ -557,3 +558,4 @@ VtableItem::VtableItem(retdec::utils::Address a, llvm::Function* f) :
 }
 
 } // namespace bin2llvmir
+} // namespace retdec

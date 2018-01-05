@@ -9,6 +9,7 @@
 #include "retdec/llvmir2hll/pattern/pattern_finders/api_call/api_call_seq_finder.h"
 #include "retdec/llvmir2hll/support/debug.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 /**
@@ -36,3 +37,4 @@ APICallSeqFinder::APICallSeqFinder(ShPtr<ValueAnalysis> va,
 APICallSeqFinder::~APICallSeqFinder() {}
 
 } // namespace llvmir2hll
+} // namespace retdec

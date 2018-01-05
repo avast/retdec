@@ -13,6 +13,7 @@
 #include "retdec/llvmir2hll/support/maybe.h"
 #include "retdec/llvmir2hll/support/types.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 /**
@@ -79,5 +80,6 @@ private:
 };
 
 } // namespace llvmir2hll
+} // namespace retdec
 
 #endif

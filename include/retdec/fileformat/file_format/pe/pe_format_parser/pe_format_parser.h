@@ -12,6 +12,7 @@
 #include "retdec/utils/range.h"
 #include "retdec/fileformat/fftypes.h"
 
+namespace retdec {
 namespace fileformat {
 
 class FileFormat;
@@ -86,5 +87,6 @@ class PeFormatParser
 };
 
 } // namespace fileformat
+} // namespace retdec
 
 #endif

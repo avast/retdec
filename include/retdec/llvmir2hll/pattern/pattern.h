@@ -12,6 +12,7 @@
 #include "retdec/llvmir2hll/support/smart_ptr.h"
 #include "retdec/utils/non_copyable.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 /**
@@ -40,5 +41,6 @@ protected:
 };
 
 } // namespace llvmir2hll
+} // namespace retdec
 
 #endif

@@ -88,6 +88,7 @@ bool checkArchMagicAtOffset(
 
 } // anonymous namespace
 
+namespace retdec {
 namespace ar_extractor {
 
 /**
@@ -197,3 +198,4 @@ bool isFatMachOArchive(
 }
 
 } // namespace ar_extractor
+} // namespace retdec

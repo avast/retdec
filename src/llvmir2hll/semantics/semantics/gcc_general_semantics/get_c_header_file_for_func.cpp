@@ -8,6 +8,7 @@
 #include "retdec/llvmir2hll/semantics/semantics/gcc_general_semantics/get_c_header_file_for_func.h"
 #include "retdec/llvmir2hll/semantics/semantics/impl_support/get_c_header_file_for_func.h"
 
+namespace retdec {
 namespace llvmir2hll {
 namespace semantics {
 namespace gcc_general {
@@ -1975,3 +1976,4 @@ Maybe<std::string> getCHeaderFileForFunc(const std::string &funcName) {
 } // namespace gcc_general
 } // namespace semantics
 } // namespace llvmir2hll
+} // namespace retdec

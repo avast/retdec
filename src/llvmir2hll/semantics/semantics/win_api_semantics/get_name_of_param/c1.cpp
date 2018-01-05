@@ -6,6 +6,7 @@
 
 #include "retdec/llvmir2hll/semantics/semantics/win_api_semantics/get_name_of_param/c1.h"
 
+namespace retdec {
 namespace llvmir2hll {
 namespace semantics {
 namespace win_api {
@@ -1253,3 +1254,4 @@ void initFuncParamNamesMap_C1(FuncParamNamesMap &funcParamNamesMap) {
 } // namespace win_api
 } // namespace semantics
 } // namespace llvmir2hll
+} // namespace retdec

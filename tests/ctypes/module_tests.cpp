@@ -16,6 +16,7 @@
 
 using namespace ::testing;
 
+namespace retdec {
 namespace ctypes {
 namespace tests {
 
@@ -93,3 +94,4 @@ GetContextReturnsCorrectContext)
 
 } // namespace tests
 } // namespace ctypes
+} // namespace retdec

@@ -20,6 +20,7 @@ using retdec::utils::addToSet;
 using retdec::utils::hasItem;
 using retdec::utils::setIntersection;
 
+namespace retdec {
 namespace llvmir2hll {
 
 REGISTER_AT_FACTORY("optim", OPTIM_CALL_INFO_OBTAINER_ID, CallInfoObtainerFactory,
@@ -450,3 +451,4 @@ bool OptimCallInfoObtainer::hasChanged(const FuncInfoMap &oldInfo,
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

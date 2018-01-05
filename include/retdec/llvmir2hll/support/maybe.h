@@ -12,6 +12,7 @@
 
 #include "retdec/llvmir2hll/support/debug.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 /**
@@ -162,5 +163,6 @@ inline Maybe<T> Nothing() {
 }
 
 } // namespace llvmir2hll
+} // namespace retdec
 
 #endif

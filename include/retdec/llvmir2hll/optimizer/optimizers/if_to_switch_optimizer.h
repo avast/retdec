@@ -10,6 +10,7 @@
 #include "retdec/llvmir2hll/optimizer/func_optimizer.h"
 #include "retdec/llvmir2hll/support/maybe.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 class ValueAnalysis;
@@ -88,5 +89,6 @@ private:
 };
 
 } // namespace llvmir2hll
+} // namespace retdec
 
 #endif

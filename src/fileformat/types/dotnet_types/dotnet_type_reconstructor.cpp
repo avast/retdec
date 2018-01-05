@@ -13,6 +13,7 @@
 #include "retdec/fileformat/types/dotnet_types/dotnet_field.h"
 #include "retdec/fileformat/types/dotnet_types/dotnet_type_reconstructor.h"
 
+namespace retdec {
 namespace fileformat {
 
 namespace
@@ -1307,3 +1308,4 @@ const DotnetClass* DotnetTypeReconstructor::selectClass(const TypeDefOrRef& type
 }
 
 } // namespace fileformat
+} // namespace retdec

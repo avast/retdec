@@ -9,6 +9,7 @@
 #include "retdec/llvmir2hll/optimizer/optimizers/self_assign_optimizer.h"
 #include "retdec/llvmir2hll/support/debug.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 /**
@@ -40,3 +41,4 @@ void SelfAssignOptimizer::visit(ShPtr<AssignStmt> stmt) {
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

@@ -11,6 +11,7 @@
 #include "retdec/ctypes/struct_type.h"
 #include "retdec/ctypes/visitor.h"
 
+namespace retdec {
 namespace ctypes {
 
 /**
@@ -64,3 +65,4 @@ void StructType::accept(Visitor *v) {
 }
 
 } // namespace ctypes
+} // namespace retdec

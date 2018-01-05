@@ -10,6 +10,7 @@
 #include <string>
 #include <vector>
 
+namespace retdec {
 namespace fileformat {
 
 /**
@@ -65,5 +66,6 @@ class Relocation
 };
 
 } // namespace fileformat
+} // namespace retdec
 
 #endif

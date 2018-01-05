@@ -11,8 +11,8 @@
 
 using namespace std;
 
-namespace dwarfparser
-{
+namespace retdec {
+namespace dwarfparser {
 
 //
 // Taken from dwarfdump2/print_die.cpp
@@ -853,3 +853,4 @@ bool AttrProcessor::geti(Dwarf_Half attrCode, int& ret)
 }
 
 } // namespace dwarfparser
+} // namespace retdec

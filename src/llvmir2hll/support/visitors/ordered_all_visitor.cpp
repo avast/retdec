@@ -82,6 +82,7 @@
 
 using retdec::utils::hasItem;
 
+namespace retdec {
 namespace llvmir2hll {
 
 /**
@@ -610,3 +611,4 @@ bool OrderedAllVisitor::makeAccessedAndCheckIfAccessed(ShPtr<Type> type) {
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

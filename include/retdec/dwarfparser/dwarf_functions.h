@@ -12,8 +12,8 @@
 #include "retdec/dwarfparser/dwarf_base.h"
 #include "retdec/dwarfparser/dwarf_vars.h"
 
-namespace dwarfparser
-{
+namespace retdec {
+namespace dwarfparser {
 
 // Extern forward declarations.
 class DwarfFile;
@@ -75,5 +75,6 @@ class DwarfFunctionContainer : public DwarfBaseContainer<DwarfFunction>
 };
 
 } // namespace dwarfparser
+} // namespace retdec
 
 #endif

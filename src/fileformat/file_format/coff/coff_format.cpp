@@ -18,6 +18,7 @@ using namespace llvm::COFF;
 using namespace llvm::object;
 using namespace PeLib;
 
+namespace retdec {
 namespace fileformat {
 
 namespace
@@ -750,3 +751,4 @@ bool CoffFormat::is32BitArchitecture() const
 }
 
 } // namespace fileformat
+} // namespace retdec

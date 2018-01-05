@@ -10,6 +10,7 @@
 using namespace ::testing;
 using namespace llvm;
 
+namespace retdec {
 namespace llvmir_emul {
 namespace tests {
 
@@ -364,3 +365,4 @@ TEST_F(LlvmIrEmulatorTests, usingOf_x86_fp80_Type)
 
 } // tests
 } // llvmir_emul
+} // retdec

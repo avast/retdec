@@ -12,6 +12,7 @@
 #include "retdec/llvmir2hll/pattern/pattern_finders/api_call/api_call_info_seq_parser.h"
 #include "retdec/llvmir2hll/support/debug.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 namespace {
@@ -189,3 +190,4 @@ ShPtr<APICallInfoSeqParser> APICallInfoSeqParser::create() {
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

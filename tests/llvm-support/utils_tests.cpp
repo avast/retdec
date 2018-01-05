@@ -12,6 +12,7 @@
 using namespace ::testing;
 using namespace llvm;
 
+namespace retdec {
 namespace llvm_support {
 namespace tests {
 
@@ -72,3 +73,4 @@ TEST_F(UtilsTests, skipConstantExprsSkipsOneExpression)
 
 } // namespace tests
 } // namespace llvm_support
+} // namespace retdec
