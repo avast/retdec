@@ -7,7 +7,7 @@
 #include <llvm/IR/InstIterator.h>
 
 #include "capstone2llvmir/capstone2llvmir_tests.h"
-#include "capstone2llvmir/mips/mips.h"
+#include "retdec/capstone2llvmir/mips/mips.h"
 
 using namespace ::testing;
 using namespace llvm;

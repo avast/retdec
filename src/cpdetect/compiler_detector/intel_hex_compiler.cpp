@@ -4,9 +4,9 @@
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */
 
-#include "cpdetect/compiler_detector/heuristics/heuristics.h"
-#include "cpdetect/compiler_detector/intel_hex_compiler.h"
-#include "cpdetect/settings.h"
+#include "retdec/cpdetect/compiler_detector/heuristics/heuristics.h"
+#include "retdec/cpdetect/compiler_detector/intel_hex_compiler.h"
+#include "retdec/cpdetect/settings.h"
 
 namespace cpdetect {
 

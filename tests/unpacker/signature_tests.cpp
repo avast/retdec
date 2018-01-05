@@ -6,8 +6,8 @@
 
 #include <gtest/gtest.h>
 
-#include "unpacker/dynamic_buffer.h"
-#include "unpacker/signature.h"
+#include "retdec/unpacker/dynamic_buffer.h"
+#include "retdec/unpacker/signature.h"
 
 using namespace ::testing;
 

@@ -7,16 +7,16 @@
 #include <algorithm>
 #include <set>
 
-#include "llvmir2hll/graphs/cfg/cfg.h"
-#include "llvmir2hll/ir/empty_stmt.h"
-#include "llvmir2hll/ir/statement.h"
-#include "llvmir2hll/support/debug.h"
-#include "tl-cpputils/container.h"
-#include "tl-cpputils/conversion.h"
+#include "retdec/llvmir2hll/graphs/cfg/cfg.h"
+#include "retdec/llvmir2hll/ir/empty_stmt.h"
+#include "retdec/llvmir2hll/ir/statement.h"
+#include "retdec/llvmir2hll/support/debug.h"
+#include "retdec/utils/container.h"
+#include "retdec/utils/conversion.h"
 
-using tl_cpputils::hasItem;
-using tl_cpputils::removeItem;
-using tl_cpputils::toString;
+using retdec::utils::hasItem;
+using retdec::utils::removeItem;
+using retdec::utils::toString;
 
 namespace llvmir2hll {
 

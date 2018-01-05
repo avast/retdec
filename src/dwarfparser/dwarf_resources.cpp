@@ -6,7 +6,7 @@
 
 #include <iostream>
 
-#include "dwarfparser/dwarf_resources.h"
+#include "retdec/dwarfparser/dwarf_resources.h"
 
 using namespace std;
 

@@ -9,8 +9,8 @@
 #include <ostream>
 #include <vector>
 
-#include "tl-cpputils/filesystem_path.h"
-#include "patterngen/pattern_extractor/pattern_extractor.h"
+#include "retdec/utils/filesystem_path.h"
+#include "retdec/patterngen/pattern_extractor/pattern_extractor.h"
 #include "yaramod/yaramod.h"
 
 /**
@@ -20,7 +20,7 @@
  * Output is set of yara rules (http://yara.readthedocs.io/en/v3.5.0/).
  */
 
-using namespace tl_cpputils;
+using namespace retdec::utils;
 using namespace fnc_patterns::patterngen;
 
 void printUsage(

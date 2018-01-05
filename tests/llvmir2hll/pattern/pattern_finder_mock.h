@@ -11,7 +11,7 @@
 
 #include <gmock/gmock.h>
 
-#include "llvmir2hll/pattern/pattern_finder.h"
+#include "retdec/llvmir2hll/pattern/pattern_finder.h"
 
 namespace llvmir2hll {
 namespace tests {

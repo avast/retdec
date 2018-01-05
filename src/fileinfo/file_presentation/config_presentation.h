@@ -7,7 +7,7 @@
 #ifndef FILEINFO_FILE_PRESENTATION_CONFIG_PRESENTATION_H
 #define FILEINFO_FILE_PRESENTATION_CONFIG_PRESENTATION_H
 
-#include "retdec-config/config.h"
+#include "retdec/config/config.h"
 #include "fileinfo/file_presentation/file_presentation.h"
 
 namespace fileinfo {
@@ -16,7 +16,7 @@ class ConfigPresentation : public FilePresentation
 {
 	private:
 		std::string configFile;         ///< name of output file
-		retdec_config::Config outDoc; ///< representation of output file
+		retdec::config::Config outDoc; ///< representation of output file
 		bool stateIsValid;              ///< internal state of instance
 		std::string errorMessage;       ///< error message
 

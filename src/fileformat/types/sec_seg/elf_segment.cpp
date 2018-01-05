@@ -6,7 +6,7 @@
 
 #include <elfio/elf_types.hpp>
 
-#include "fileformat/types/sec_seg/elf_segment.h"
+#include "retdec/fileformat/types/sec_seg/elf_segment.h"
 
 namespace fileformat {
 

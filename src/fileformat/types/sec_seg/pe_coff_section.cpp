@@ -4,7 +4,7 @@
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */
 
-#include "fileformat/types/sec_seg/pe_coff_section.h"
+#include "retdec/fileformat/types/sec_seg/pe_coff_section.h"
 
 namespace fileformat {
 

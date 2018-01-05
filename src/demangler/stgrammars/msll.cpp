@@ -6,7 +6,7 @@
 
 #include <cstdlib>
 
-#include "demangler/stgrammars/msll.h"
+#include "retdec/demangler/stgrammars/msll.h"
 
 namespace demangler {
 

@@ -6,7 +6,7 @@
 
 #include <sstream>
 
-#include "fileformat/types/rich_header/rich_header.h"
+#include "retdec/fileformat/types/rich_header/rich_header.h"
 
 
 namespace fileformat {

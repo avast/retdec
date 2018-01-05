@@ -4,7 +4,7 @@
 * @copyright (c) 2017 Avast Software, licensed under the MIT license
 */
 
-#include "bin2llvmir/optimizations/param_return/param_return.h"
+#include "retdec/bin2llvmir/optimizations/param_return/param_return.h"
 #include "bin2llvmir/utils/llvmir_tests.h"
 
 using namespace ::testing;

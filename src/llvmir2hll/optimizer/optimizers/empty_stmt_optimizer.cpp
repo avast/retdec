@@ -4,9 +4,9 @@
 * @copyright (c) 2017 Avast Software, licensed under the MIT license
 */
 
-#include "llvmir2hll/ir/empty_stmt.h"
-#include "llvmir2hll/optimizer/optimizers/empty_stmt_optimizer.h"
-#include "llvmir2hll/support/debug.h"
+#include "retdec/llvmir2hll/ir/empty_stmt.h"
+#include "retdec/llvmir2hll/optimizer/optimizers/empty_stmt_optimizer.h"
+#include "retdec/llvmir2hll/support/debug.h"
 
 namespace llvmir2hll {
 

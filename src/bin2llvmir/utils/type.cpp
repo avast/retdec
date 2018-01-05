@@ -14,12 +14,12 @@
 #include <llvm/Support/SourceMgr.h>
 #include <llvm/Support/raw_ostream.h>
 
-#include "llvm-support/utils.h"
-#include "tl-cpputils/conversion.h"
-#include "tl-cpputils/string.h"
-#include "bin2llvmir/providers/config.h"
-#include "bin2llvmir/utils/instruction.h"
-#include "bin2llvmir/utils/type.h"
+#include "retdec/llvm-support/utils.h"
+#include "retdec/utils/conversion.h"
+#include "retdec/utils/string.h"
+#include "retdec/bin2llvmir/providers/config.h"
+#include "retdec/bin2llvmir/utils/instruction.h"
+#include "retdec/bin2llvmir/utils/type.h"
 
 using namespace llvm_support;
 using namespace llvm;
@@ -44,7 +44,7 @@ bool parseTypeList(
 	while (!list.empty())
 	{
 		size_t pos = 0;
-		if (tl_cpputils::findFirstInEmbeddedLists(
+		if (retdec::utils::findFirstInEmbeddedLists(
 				pos,
 				list,
 				',',
@@ -126,7 +126,7 @@ Value* changeObjectDeclarationType(
 		auto* ecgv = config->getConfigGlobalVariable(ogv);
 		if (ecgv)
 		{
-			retdec_config::Object cgv(
+			retdec::config::Object cgv(
 					ecgv->getName(),
 					ecgv->getStorage());
 			cgv.type.setLlvmIr(
@@ -169,7 +169,7 @@ llvm::Type* stringToLlvmTypeDefault(llvm::Module* m, const std::string& str)
  */
 Type* stringToLlvmType(LLVMContext& ctx, const std::string& str)
 {
-	std::string s = tl_cpputils::removeWhitespace(str);
+	std::string s = retdec::utils::removeWhitespace(str);
 
 	std::smatch match;
 
@@ -200,7 +200,7 @@ Type* stringToLlvmType(LLVMContext& ctx, const std::string& str)
 	else if (std::regex_match(s, match, regexInt))
 	{
 		unsigned intBits = 0;
-		if (tl_cpputils::strToNum(match[1], intBits) && intBits > 0)
+		if (retdec::utils::strToNum(match[1], intBits) && intBits > 0)
 		{
 			return Type::getIntNTy(ctx, intBits);
 		}
@@ -235,7 +235,7 @@ Type* stringToLlvmType(LLVMContext& ctx, const std::string& str)
 	else if (std::regex_match(s, match, regexArray))
 	{
 		unsigned n = 0;
-		if (tl_cpputils::strToNum(match[1], n))
+		if (retdec::utils::strToNum(match[1], n))
 		{
 			auto d = n > 0 ? n : 1;
 			auto* t = stringToLlvmType(ctx, match[2]);
@@ -256,7 +256,7 @@ Type* stringToLlvmType(LLVMContext& ctx, const std::string& str)
 	else if (std::regex_match(s, match, regexVector))
 	{
 		unsigned n = 0;
-		if (tl_cpputils::strToNum(match[1], n))
+		if (retdec::utils::strToNum(match[1], n))
 		{
 			auto* t = stringToLlvmType(ctx, match[2]);
 			return t == nullptr ?
@@ -1382,7 +1382,7 @@ std::vector<llvm::Type*> parseFormatString(
 		}
 	}
 
-	if (calledFnc && tl_cpputils::contains(calledFnc->getName(), "scan"))
+	if (calledFnc && retdec::utils::contains(calledFnc->getName(), "scan"))
 	{
 		for (size_t i = 0; i < ret.size(); ++i)
 		{

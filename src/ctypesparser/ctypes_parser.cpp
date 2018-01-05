@@ -4,8 +4,8 @@
 * @copyright (c) 2017 Avast Software, licensed under the MIT license
 */
 
-#include "ctypes/context.h"
-#include "ctypesparser/ctypes_parser.h"
+#include "retdec/ctypes/context.h"
+#include "retdec/ctypesparser/ctypes_parser.h"
 
 namespace ctypesparser {
 

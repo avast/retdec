@@ -12,16 +12,16 @@
 #include <llvm/Support/FileSystem.h>
 #include <llvm/Support/raw_ostream.h>
 
-#include "tl-cpputils/address.h"
-#include "tl-cpputils/conversion.h"
-#include "tl-cpputils/string.h"
+#include "retdec/utils/address.h"
+#include "retdec/utils/conversion.h"
+#include "retdec/utils/string.h"
 
-#include "capstone2llvmir/capstone2llvmir.h"
+#include "retdec/capstone2llvmir/capstone2llvmir.h"
 
 using namespace std;
 
 // byte ptr [0x12345678], 0x11
-vector<uint8_t> CODE = tl_cpputils::hexStringToBytes("80 05 78 56 34 12 11 00");
+vector<uint8_t> CODE = retdec::utils::hexStringToBytes("80 05 78 56 34 12 11 00");
 
 class ProgramOptions
 {
@@ -57,7 +57,7 @@ class ProgramOptions
 				else if (c == "-b")
 				{
 					_base = getParamOrDie(argc, argv, i);
-					if (!tl_cpputils::strToNum(_base, base, std::hex))
+					if (!retdec::utils::strToNum(_base, base, std::hex))
 					{
 						printHelpAndDie();
 					}
@@ -65,7 +65,7 @@ class ProgramOptions
 				else if (c == "-c")
 				{
 					_code = getParamOrDie(argc, argv, i);
-					code = tl_cpputils::hexStringToBytes(_code);
+					code = retdec::utils::hexStringToBytes(_code);
 				}
 				else if (c == "-t")
 				{
@@ -130,7 +130,7 @@ class ProgramOptions
 			cout << "Program Options:" << endl;
 			cout << "\t" << "arch   : " << arch << " (" << _arch << ")" << endl;
 			cout << "\t" << "base   : " << hex << base << " (" << _base << ")" << endl;
-			cout << "\t" << "code   : " << tl_cpputils::bytesToHexString(code) << " (" << _code << ")" << endl;
+			cout << "\t" << "code   : " << retdec::utils::bytesToHexString(code) << " (" << _code << ")" << endl;
 			cout << "\t" << "asm text : " << text << endl;
 			cout << "\t" << "b mode : " << hex << basicMode << " (" << _basicMode << ")" << endl;
 			cout << "\t" << "e mode : " << hex << extraMode << " (" << _extraMode << ")" << endl;
@@ -148,7 +148,7 @@ class ProgramOptions
 				"\t          Default value 0x1000.\n"
 				"\t-c code   Binary data to translate in hexadecimal format.\n"
 				"\t          E.g. \"0b 84 d1 a0 80 60 40\" or \"0b84d1a0806040\".\n"
-				"\t          Default value: \"" << tl_cpputils::bytesToHexString(CODE) << "\"\n"
+				"\t          Default value: \"" << retdec::utils::bytesToHexString(CODE) << "\"\n"
 				"\t-t asm    Assembly text to assemble, disassemble and dump.\n"
 				"\t          Most of the time, this is more convenient than -c option.\n"
 				"\t-m mode   Capstone basic mode to use.\n"

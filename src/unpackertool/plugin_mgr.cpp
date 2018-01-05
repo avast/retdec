@@ -7,13 +7,13 @@
 #include <iostream>
 #include <regex>
 
-#include "tl-cpputils/filesystem_path.h"
-#include "tl-cpputils/string.h"
-#include "unpacker/lib_loader.h"
-#include "unpacker/plugin.h"
+#include "retdec/utils/filesystem_path.h"
+#include "retdec/utils/string.h"
+#include "retdec/unpacker/lib_loader.h"
+#include "retdec/unpacker/plugin.h"
 #include "plugin_mgr.h"
 
-using namespace tl_cpputils;
+using namespace retdec::utils;
 
 namespace unpackertool {
 
@@ -113,7 +113,7 @@ void PluginMgr::loadPlugins(const std::string& dirPath)
 		else
 		{
 			// if PLUGIN_SUFFIX is at the end of the name of the file
-			if (tl_cpputils::endsWith(subpath->getPath(), PLUGIN_SUFFIX))
+			if (retdec::utils::endsWith(subpath->getPath(), PLUGIN_SUFFIX))
 				loadPlugin(subpath->getPath());
 		}
 	}

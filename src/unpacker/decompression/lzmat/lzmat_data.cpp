@@ -4,7 +4,7 @@
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */
 
-#include "unpacker/decompression/lzmat/lzmat_data.h"
+#include "retdec/unpacker/decompression/lzmat/lzmat_data.h"
 
 namespace unpacker {
 

@@ -4,5 +4,5 @@ set(BIN2PAT_SOURCES
 )
 
 add_executable(bin2pat ${BIN2PAT_SOURCES})
-target_link_libraries(bin2pat patterngen tl-cpputils yaramod)
+target_link_libraries(bin2pat patterngen retdec-utils yaramod)
 install(TARGETS bin2pat RUNTIME DESTINATION bin)

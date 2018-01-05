@@ -4,10 +4,10 @@
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */
 
-#include "tl-cpputils/string.h"
-#include "cpdetect/signatures/avg/signature_checker.h"
+#include "retdec/utils/string.h"
+#include "retdec/cpdetect/signatures/avg/signature_checker.h"
 
-using namespace tl_cpputils;
+using namespace retdec::utils;
 
 namespace cpdetect {
 

@@ -9,12 +9,12 @@
 #include <sstream>
 #include <vector>
 
-#include "tl-cpputils/file_io.h"
-#include "fileformat/fileformat.h"
-#include "loader/loader/pe/pe_image.h"
-#include "loader/utils/overlap_resolver.h"
+#include "retdec/utils/file_io.h"
+#include "retdec/fileformat/fileformat.h"
+#include "retdec/loader/loader/pe/pe_image.h"
+#include "retdec/loader/utils/overlap_resolver.h"
 
-using namespace tl_cpputils;
+using namespace retdec::utils;
 
 namespace loader {
 
@@ -112,10 +112,10 @@ Segment* PeImage::addSingleSegment(std::uint64_t address, std::vector<std::uint8
 
 bool PeImage::canAddSegment(std::uint64_t address, std::uint64_t memSize) const
 {
-	tl_cpputils::Range<std::uint64_t> newSegRange(address, memSize ? address + memSize - 1 : address);
+	retdec::utils::Range<std::uint64_t> newSegRange(address, memSize ? address + memSize - 1 : address);
 	for (const auto& seg : getSegments())
 	{
-		auto overlapResult = OverlapResolver::resolve(tl_cpputils::Range<std::uint64_t>(seg->getAddress(), seg->getEndAddress()), newSegRange);
+		auto overlapResult = OverlapResolver::resolve(retdec::utils::Range<std::uint64_t>(seg->getAddress(), seg->getEndAddress()), newSegRange);
 		if (overlapResult.getOverlap() != Overlap::None)
 			return false;
 	}

@@ -6,9 +6,9 @@
 
 #include <sstream>
 
-#include "demangler/demangler.h"
-#include "bin2llvmir/optimizations/class_hierarchy/hierarchy.h"
-#include "bin2llvmir/providers/demangler.h"
+#include "retdec/demangler/demangler.h"
+#include "retdec/bin2llvmir/optimizations/class_hierarchy/hierarchy.h"
+#include "retdec/bin2llvmir/providers/demangler.h"
 
 namespace bin2llvmir {
 
@@ -51,11 +51,11 @@ std::string Class::dump() const
 	return out.str();
 }
 
-retdec_config::Class Class::getConfigClass(
+retdec::config::Class Class::getConfigClass(
 		llvm::Module* m,
 		Config* config) const
 {
-	retdec_config::Class c(name);
+	retdec::config::Class c(name);
 
 	auto* demangler = DemanglerProvider::getDemangler(m);
 	if (demangler)

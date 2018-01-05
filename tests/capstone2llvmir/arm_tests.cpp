@@ -7,7 +7,7 @@
 #include <llvm/IR/InstIterator.h>
 
 #include "capstone2llvmir/capstone2llvmir_tests.h"
-#include "capstone2llvmir/arm/arm.h"
+#include "retdec/capstone2llvmir/arm/arm.h"
 
 using namespace ::testing;
 using namespace llvm;

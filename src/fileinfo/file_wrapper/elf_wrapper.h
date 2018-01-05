@@ -7,7 +7,7 @@
 #ifndef FILEINFO_FILE_WRAPPER_ELF_WRAPPER_H
 #define FILEINFO_FILE_WRAPPER_ELF_WRAPPER_H
 
-#include "fileformat/file_format/elf/elf_format.h"
+#include "retdec/fileformat/file_format/elf/elf_format.h"
 
 namespace fileinfo {
 

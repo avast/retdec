@@ -95,7 +95,7 @@ set(FILEINFO_SOURCES
 if(NOT TARGET fileinfo)
 
 	add_executable(fileinfo ${FILEINFO_SOURCES})
-	target_link_libraries(fileinfo loader ar-extractor fileformat cpdetect yaracpp tl-cpputils retdec-config jsoncpp tinyxml2)
+	target_link_libraries(fileinfo loader ar-extractor fileformat cpdetect yaracpp retdec-utils retdec-config jsoncpp tinyxml2)
 	target_include_directories(fileinfo PUBLIC ${PROJECT_SOURCE_DIR}/src/)
 	install(TARGETS fileinfo RUNTIME DESTINATION bin)
 

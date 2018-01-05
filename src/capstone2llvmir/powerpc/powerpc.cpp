@@ -7,7 +7,7 @@
 #include <iomanip>
 #include <iostream>
 
-#include "capstone2llvmir/powerpc/powerpc.h"
+#include "retdec/capstone2llvmir/powerpc/powerpc.h"
 
 namespace capstone2llvmir {
 

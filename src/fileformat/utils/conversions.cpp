@@ -6,7 +6,7 @@
 
 #include <algorithm>
 
-#include "fileformat/utils/conversions.h"
+#include "retdec/fileformat/utils/conversions.h"
 
 namespace fileformat {
 

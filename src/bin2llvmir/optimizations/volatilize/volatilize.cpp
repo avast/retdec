@@ -10,9 +10,9 @@
 #include <llvm/IR/Instruction.h>
 #include <llvm/IR/Instructions.h>
 
-#include "llvm-support/utils.h"
-#include "bin2llvmir/optimizations/volatilize/volatilize.h"
-#include "bin2llvmir/utils/defs.h"
+#include "retdec/llvm-support/utils.h"
+#include "retdec/bin2llvmir/optimizations/volatilize/volatilize.h"
+#include "retdec/bin2llvmir/utils/defs.h"
 
 using namespace llvm_support;
 using namespace llvm;

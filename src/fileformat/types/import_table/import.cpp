@@ -4,7 +4,7 @@
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */
 
-#include "fileformat/types/import_table/import.h"
+#include "retdec/fileformat/types/import_table/import.h"
 
 namespace fileformat {
 

@@ -7,10 +7,10 @@
 #ifndef BACKEND_BIR_LLVM_LLVMIR2BIR_CONVERTERS_TESTS_NEW_LLVMIR2BIR_CONVERTER_TESTS_BASE_TESTS_H
 #define BACKEND_BIR_LLVM_LLVMIR2BIR_CONVERTERS_TESTS_NEW_LLVMIR2BIR_CONVERTER_TESTS_BASE_TESTS_H
 
-#include "llvmir2hll/ir/var_def_stmt.h"
-#include "llvmir2hll/ir/variable.h"
+#include "retdec/llvmir2hll/ir/var_def_stmt.h"
+#include "retdec/llvmir2hll/ir/variable.h"
 #include "llvmir2hll/llvm/llvmir2bir_converter_tests.h"
-#include "llvmir2hll/support/smart_ptr.h"
+#include "retdec/llvmir2hll/support/smart_ptr.h"
 
 using ::testing::AssertionFailure;
 using ::testing::AssertionResult;

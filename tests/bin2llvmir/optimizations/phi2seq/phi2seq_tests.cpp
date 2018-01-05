@@ -6,7 +6,7 @@
 
 #include <gtest/gtest.h>
 
-#include "bin2llvmir/optimizations/phi2seq/phi2seq.h"
+#include "retdec/bin2llvmir/optimizations/phi2seq/phi2seq.h"
 #include "bin2llvmir/utils/llvmir_tests.h"
 
 using namespace ::testing;

@@ -10,13 +10,13 @@
 #include <llvm/IR/Instructions.h>
 #include <llvm/IR/Module.h>
 
-#include "llvm-support/utils.h"
-#include "bin2llvmir/optimizations/data_references/data_references.h"
-#include "bin2llvmir/providers/config.h"
-#include "bin2llvmir/utils/defs.h"
+#include "retdec/llvm-support/utils.h"
+#include "retdec/bin2llvmir/optimizations/data_references/data_references.h"
+#include "retdec/bin2llvmir/providers/config.h"
+#include "retdec/bin2llvmir/utils/defs.h"
 
 using namespace llvm_support;
-using namespace tl_cpputils;
+using namespace retdec::utils;
 using namespace llvm;
 using namespace loader;
 

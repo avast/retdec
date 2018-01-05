@@ -4,8 +4,8 @@
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */
 
-#include "tl-cpputils/string.h"
-#include "fileformat/types/dotnet_types/dotnet_class.h"
+#include "retdec/utils/string.h"
+#include "retdec/fileformat/types/dotnet_types/dotnet_class.h"
 
 namespace fileformat {
 
@@ -17,7 +17,7 @@ std::string DotnetClass::getGenericParametersString() const
 {
 	std::string repr;
 	if (!genericParameters.empty())
-		repr += '<' + tl_cpputils::joinStrings(genericParameters, ",") + '>';
+		repr += '<' + retdec::utils::joinStrings(genericParameters, ",") + '>';
 
 	return repr;
 }

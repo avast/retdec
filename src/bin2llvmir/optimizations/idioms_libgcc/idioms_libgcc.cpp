@@ -12,16 +12,16 @@
 #include <llvm/IR/Instruction.h>
 #include <llvm/IR/Instructions.h>
 
-#include "llvm-support/utils.h"
-#include "tl-cpputils/string.h"
-#include "bin2llvmir/analyses/reaching_definitions.h"
-#include "bin2llvmir/optimizations/idioms_libgcc/idioms_libgcc.h"
-#include "bin2llvmir/utils/defs.h"
-#include "bin2llvmir/utils/instruction.h"
-#include "bin2llvmir/utils/type.h"
+#include "retdec/llvm-support/utils.h"
+#include "retdec/utils/string.h"
+#include "retdec/bin2llvmir/analyses/reaching_definitions.h"
+#include "retdec/bin2llvmir/optimizations/idioms_libgcc/idioms_libgcc.h"
+#include "retdec/bin2llvmir/utils/defs.h"
+#include "retdec/bin2llvmir/utils/instruction.h"
+#include "retdec/bin2llvmir/utils/type.h"
 
 using namespace llvm_support;
-using namespace tl_cpputils;
+using namespace retdec::utils;
 using namespace llvm;
 
 #define debug_enabled false

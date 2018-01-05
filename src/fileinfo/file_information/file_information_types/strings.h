@@ -9,7 +9,7 @@
 
 #include <vector>
 
-#include "fileformat/types/strings/string.h"
+#include "retdec/fileformat/types/strings/string.h"
 
 namespace fileinfo {
 

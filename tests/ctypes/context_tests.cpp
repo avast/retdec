@@ -8,13 +8,13 @@
 
 #include <gtest/gtest.h>
 
-#include "ctypes/array_type.h"
-#include "ctypes/context.h"
-#include "ctypes/function.h"
-#include "ctypes/function_type.h"
-#include "ctypes/integral_type.h"
-#include "ctypes/parameter.h"
-#include "ctypes/pointer_type.h"
+#include "retdec/ctypes/array_type.h"
+#include "retdec/ctypes/context.h"
+#include "retdec/ctypes/function.h"
+#include "retdec/ctypes/function_type.h"
+#include "retdec/ctypes/integral_type.h"
+#include "retdec/ctypes/parameter.h"
+#include "retdec/ctypes/pointer_type.h"
 
 using namespace ::testing;
 

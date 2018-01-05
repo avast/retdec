@@ -4,7 +4,7 @@
 * @copyright (c) 2017 Avast Software, licensed under the MIT license
 */
 
-#include "bin2llvmir/optimizations/globals/dead_global_assign.h"
+#include "retdec/bin2llvmir/optimizations/globals/dead_global_assign.h"
 
 using namespace llvm;
 

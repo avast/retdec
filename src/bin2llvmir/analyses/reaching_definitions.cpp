@@ -18,15 +18,15 @@
 #include <llvm/IR/Instructions.h>
 #include <llvm/Support/raw_ostream.h>
 
-#include "tl-cpputils/time.h"
-#include "bin2llvmir/analyses/reaching_definitions.h"
-#include "bin2llvmir/providers/asm_instruction.h"
-#include "bin2llvmir/utils/instruction.h"
+#include "retdec/utils/time.h"
+#include "retdec/bin2llvmir/analyses/reaching_definitions.h"
+#include "retdec/bin2llvmir/providers/asm_instruction.h"
+#include "retdec/bin2llvmir/utils/instruction.h"
 #define debug_enabled false
-#include "llvm-support/utils.h"
+#include "retdec/llvm-support/utils.h"
 
 using namespace llvm_support;
-using namespace tl_cpputils;
+using namespace retdec::utils;
 using namespace llvm;
 
 namespace bin2llvmir {

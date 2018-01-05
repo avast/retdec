@@ -8,9 +8,9 @@
 #include <sstream>
 #include <vector>
 
-#include "fileformat/fileformat.h"
-#include "loader/loader/intel_hex/intel_hex_image.h"
-#include "loader/utils/range.h"
+#include "retdec/fileformat/fileformat.h"
+#include "retdec/loader/loader/intel_hex/intel_hex_image.h"
+#include "retdec/loader/utils/range.h"
 
 namespace loader {
 

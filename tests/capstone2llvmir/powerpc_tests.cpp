@@ -7,7 +7,7 @@
 #include <llvm/IR/InstIterator.h>
 
 #include "capstone2llvmir/capstone2llvmir_tests.h"
-#include "capstone2llvmir/powerpc/powerpc.h"
+#include "retdec/capstone2llvmir/powerpc/powerpc.h"
 
 using namespace ::testing;
 using namespace llvm;

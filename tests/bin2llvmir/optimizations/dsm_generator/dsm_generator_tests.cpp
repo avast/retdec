@@ -7,7 +7,7 @@
 #include <regex>
 #include <sstream>
 
-#include "bin2llvmir/optimizations/dsm_generator/dsm_generator.h"
+#include "retdec/bin2llvmir/optimizations/dsm_generator/dsm_generator.h"
 #include "bin2llvmir/utils/llvmir_tests.h"
 
 using namespace ::testing;

@@ -7,10 +7,10 @@
 #include <regex>
 #include <vector>
 
-#include "tl-cpputils/conversion.h"
-#include "cpdetect/utils/version_solver.h"
+#include "retdec/utils/conversion.h"
+#include "retdec/cpdetect/utils/version_solver.h"
 
-using namespace tl_cpputils;
+using namespace retdec::utils;
 
 namespace cpdetect {
 

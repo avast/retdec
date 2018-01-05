@@ -6,10 +6,10 @@
 
 #include <cassert>
 
-#include "ctypes/context.h"
-#include "ctypes/function.h"
-#include "ctypes/parameter.h"
-#include "tl-cpputils/container.h"
+#include "retdec/ctypes/context.h"
+#include "retdec/ctypes/function.h"
+#include "retdec/ctypes/parameter.h"
+#include "retdec/utils/container.h"
 
 namespace ctypes {
 
@@ -95,7 +95,7 @@ Function::Parameters::size_type Function::getParameterCount() const
 */
 const Parameter &Function::getParameter(Parameters::size_type n) const
 {
-	return tl_cpputils::getNthItem(parameters, n);
+	return retdec::utils::getNthItem(parameters, n);
 }
 
 /**

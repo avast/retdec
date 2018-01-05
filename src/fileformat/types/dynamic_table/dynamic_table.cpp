@@ -6,7 +6,7 @@
 
 #include <sstream>
 
-#include "fileformat/types/dynamic_table/dynamic_table.h"
+#include "retdec/fileformat/types/dynamic_table/dynamic_table.h"
 
 namespace fileformat {
 

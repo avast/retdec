@@ -7,7 +7,7 @@
 #include <iomanip>
 #include <iostream>
 
-#include "capstone2llvmir/x86/x86.h"
+#include "retdec/capstone2llvmir/x86/x86.h"
 
 namespace capstone2llvmir {
 

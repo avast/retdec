@@ -4,13 +4,13 @@
 * @copyright (c) 2017 Avast Software, licensed under the MIT license
 */
 
-#include "retdec-config/tool_info.h"
-#include "tl-cpputils/system.h"
-#include "bin2llvmir/providers/fileimage.h"
+#include "retdec/config/tool_info.h"
+#include "retdec/utils/system.h"
+#include "retdec/bin2llvmir/providers/fileimage.h"
 #include "bin2llvmir/utils/llvmir_tests.h"
-#include "fileformat/file_format/raw_data/raw_data_format.h"
-#include "loader/image_factory.h"
-#include "loader/loader/raw_data/raw_data_image.h"
+#include "retdec/fileformat/file_format/raw_data/raw_data_format.h"
+#include "retdec/loader/image_factory.h"
+#include "retdec/loader/loader/raw_data/raw_data_image.h"
 
 using namespace ::testing;
 using namespace llvm;
@@ -37,7 +37,7 @@ class FileImageTests: public LlvmIrTests
 //
 //llvm::Constant* getConstant(
 //		llvm::Type* type,
-//		tl_cpputils::Address addr)
+//		retdec::utils::Address addr)
 //
 
 TEST_F(FileImageTests, getConstantReadsCorrectValuesForI1)
@@ -211,7 +211,7 @@ TEST_F(FileImageTests, getConstantReadsCorrectValuesForFp128)
 TEST_F(FileImageTests, getConstantReadsCorrectValuesForLongDouble)
 {
 	auto format = createFormat();
-	if (tl_cpputils::systemHasLongDouble())
+	if (retdec::utils::systemHasLongDouble())
 	{
 		long double ld = 10.0;
 		auto ldPos = format->appendData(ld);
@@ -333,7 +333,7 @@ TEST_F(FileImageTests, getConstantReadsCorrectValuesForStructureType)
 //		llvm::Module* module,
 //		loader::Image* objf,
 //		DebugFormat* dbgf,
-//		tl_cpputils::Address addr)
+//		retdec::utils::Address addr)
 //
 
 TEST_F(FileImageTests, getConstantReadsDetectsAndReads32BitInteger)

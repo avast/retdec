@@ -5,11 +5,11 @@
 * @copyright (c) 2017 Avast Software, licensed under the MIT license
 */
 
-#include "llvmir2hll/semantics/semantics/libc_semantics/func_never_returns.h"
-#include "llvmir2hll/support/types.h"
-#include "tl-cpputils/container.h"
+#include "retdec/llvmir2hll/semantics/semantics/libc_semantics/func_never_returns.h"
+#include "retdec/llvmir2hll/support/types.h"
+#include "retdec/utils/container.h"
 
-using tl_cpputils::hasItem;
+using retdec::utils::hasItem;
 
 namespace llvmir2hll {
 namespace semantics {

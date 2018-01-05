@@ -4,7 +4,7 @@
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */
 
-#include "fileformat/file_format/raw_data/raw_data_format.h"
+#include "retdec/fileformat/file_format/raw_data/raw_data_format.h"
 #include "fileinfo/file_detector/raw_data_detector.h"
 
 using namespace cpdetect;

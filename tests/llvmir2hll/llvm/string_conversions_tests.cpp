@@ -6,7 +6,7 @@
 
 #include <gtest/gtest.h>
 
-#include "llvmir2hll/llvm/string_conversions.h"
+#include "retdec/llvmir2hll/llvm/string_conversions.h"
 
 using namespace ::testing;
 

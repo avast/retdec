@@ -4,12 +4,12 @@
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */
 
-#include "tl-cpputils/conversion.h"
-#include "tl-cpputils/file_io.h"
-#include "fileformat/utils/conversions.h"
-#include "fileformat/utils/file_io.h"
+#include "retdec/utils/conversion.h"
+#include "retdec/utils/file_io.h"
+#include "retdec/fileformat/utils/conversions.h"
+#include "retdec/fileformat/utils/file_io.h"
 
-using namespace tl_cpputils;
+using namespace retdec::utils;
 
 namespace fileformat {
 

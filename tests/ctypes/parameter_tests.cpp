@@ -8,13 +8,13 @@
 
 #include <gtest/gtest.h>
 
-#include "ctypes/annotation_in.h"
-#include "ctypes/annotation_inout.h"
-#include "ctypes/annotation_optional.h"
-#include "ctypes/annotation_out.h"
-#include "ctypes/context.h"
-#include "ctypes/integral_type.h"
-#include "ctypes/parameter.h"
+#include "retdec/ctypes/annotation_in.h"
+#include "retdec/ctypes/annotation_inout.h"
+#include "retdec/ctypes/annotation_optional.h"
+#include "retdec/ctypes/annotation_out.h"
+#include "retdec/ctypes/context.h"
+#include "retdec/ctypes/integral_type.h"
+#include "retdec/ctypes/parameter.h"
 
 using namespace ::testing;
 

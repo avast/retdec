@@ -7,7 +7,7 @@
 #include <algorithm>
 #include <iterator>
 
-#include "loader/loader/segment_data_source.h"
+#include "retdec/loader/loader/segment_data_source.h"
 
 namespace loader {
 

@@ -4,15 +4,15 @@
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */
 
-#include "fileformat/fileformat.h"
-#include "loader/image_factory.h"
-#include "loader/loader/coff/coff_image.h"
-#include "loader/loader/elf/elf_image.h"
-#include "loader/loader/image.h"
-#include "loader/loader/intel_hex/intel_hex_image.h"
-#include "loader/loader/macho/macho_image.h"
-#include "loader/loader/pe/pe_image.h"
-#include "loader/loader/raw_data/raw_data_image.h"
+#include "retdec/fileformat/fileformat.h"
+#include "retdec/loader/image_factory.h"
+#include "retdec/loader/loader/coff/coff_image.h"
+#include "retdec/loader/loader/elf/elf_image.h"
+#include "retdec/loader/loader/image.h"
+#include "retdec/loader/loader/intel_hex/intel_hex_image.h"
+#include "retdec/loader/loader/macho/macho_image.h"
+#include "retdec/loader/loader/pe/pe_image.h"
+#include "retdec/loader/loader/raw_data/raw_data_image.h"
 
 namespace loader {
 
@@ -66,7 +66,7 @@ std::unique_ptr<Image> createImageImpl(const std::shared_ptr<fileformat::FileFor
  *
  * @return Pointer to instance of Image class or @c nullptr if any error
  */
-std::unique_ptr<Image> createImage(const std::string& filePath, retdec_config::Config *config)
+std::unique_ptr<Image> createImage(const std::string& filePath, retdec::config::Config *config)
 {
 	std::unique_ptr<fileformat::FileFormat> fileFormat = fileformat::createFileFormat(filePath, config);
 	std::shared_ptr<fileformat::FileFormat> fileFormatShared(std::move(fileFormat)); // Obtain ownership.

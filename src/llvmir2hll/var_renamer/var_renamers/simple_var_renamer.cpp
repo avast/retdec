@@ -4,9 +4,9 @@
 * @copyright (c) 2017 Avast Software, licensed under the MIT license
 */
 
-#include "llvmir2hll/support/debug.h"
-#include "llvmir2hll/var_renamer/var_renamer_factory.h"
-#include "llvmir2hll/var_renamer/var_renamers/simple_var_renamer.h"
+#include "retdec/llvmir2hll/support/debug.h"
+#include "retdec/llvmir2hll/var_renamer/var_renamer_factory.h"
+#include "retdec/llvmir2hll/var_renamer/var_renamers/simple_var_renamer.h"
 
 namespace llvmir2hll {
 

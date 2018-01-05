@@ -5,5 +5,5 @@ set(PATTERNGEN_SOURCES
 )
 
 add_library(patterngen STATIC ${PATTERNGEN_SOURCES})
-target_link_libraries(patterngen fileformat tl-cpputils yaramod)
+target_link_libraries(patterngen fileformat retdec-utils yaramod)
 target_include_directories(patterngen PUBLIC ${PROJECT_SOURCE_DIR}/include/)

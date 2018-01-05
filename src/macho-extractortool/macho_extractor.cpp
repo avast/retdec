@@ -10,8 +10,8 @@
 #include <rapidjson/document.h>
 #include <rapidjson/prettywriter.h>
 
-#include "tl-cpputils/conversion.h"
-#include "macho-extractor/break_fat.h"
+#include "retdec/utils/conversion.h"
+#include "retdec/macho-extractor/break_fat.h"
 
 using namespace macho_extractor;
 using namespace rapidjson;
@@ -125,7 +125,7 @@ int handleArguments(std::vector<std::string> &args)
 			}
 			else
 			{
-				if(!tl_cpputils::strToNum(args[++i], indexVal, std::dec))
+				if(!retdec::utils::strToNum(args[++i], indexVal, std::dec))
 				{
 					std::cerr << "Error: option '--index' value is not a number!\n";
 					return 1;

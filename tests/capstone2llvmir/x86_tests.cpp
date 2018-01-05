@@ -9,7 +9,7 @@
 #include <llvm/IR/InstIterator.h>
 
 #include "capstone2llvmir/capstone2llvmir_tests.h"
-#include "capstone2llvmir/x86/x86.h"
+#include "retdec/capstone2llvmir/x86/x86.h"
 
 using namespace ::testing;
 using namespace llvm;

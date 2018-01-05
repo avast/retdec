@@ -6,12 +6,12 @@
 
 #include <cassert>
 
-#include "ctypes/annotation.h"
-#include "ctypes/context.h"
-#include "ctypes/function.h"
-#include "ctypes/pointer_type.h"
-#include "ctypes/type.h"
-#include "tl-cpputils/container.h"
+#include "retdec/ctypes/annotation.h"
+#include "retdec/ctypes/context.h"
+#include "retdec/ctypes/function.h"
+#include "retdec/ctypes/pointer_type.h"
+#include "retdec/ctypes/type.h"
+#include "retdec/utils/container.h"
 
 namespace ctypes {
 
@@ -22,7 +22,7 @@ namespace ctypes {
 */
 bool Context::hasFunctionWithName(const std::string &name) const
 {
-	return tl_cpputils::mapHasKey(functions, name);
+	return retdec::utils::mapHasKey(functions, name);
 }
 
 /**
@@ -32,7 +32,7 @@ bool Context::hasFunctionWithName(const std::string &name) const
 */
 std::shared_ptr<Function> Context::getFunctionWithName(const std::string &name) const
 {
-	return tl_cpputils::mapGetValueOrDefault(functions, name);
+	return retdec::utils::mapGetValueOrDefault(functions, name);
 }
 
 /**
@@ -64,7 +64,7 @@ bool Context::hasFunctionType(
 {
 	assert(returnType && "violated precondition - returnType cannot be null");
 
-	return tl_cpputils::mapHasKey(functionTypes, std::make_pair(returnType, parameters));
+	return retdec::utils::mapHasKey(functionTypes, std::make_pair(returnType, parameters));
 }
 
 /**
@@ -81,7 +81,7 @@ std::shared_ptr<FunctionType> Context::getFunctionType(
 {
 	assert(returnType && "violated precondition - returnType cannot be null");
 
-	return tl_cpputils::mapGetValueOrDefault(functionTypes, std::make_pair(returnType, parameters));
+	return retdec::utils::mapGetValueOrDefault(functionTypes, std::make_pair(returnType, parameters));
 }
 
 /**
@@ -106,7 +106,7 @@ void Context::addFunctionType(const std::shared_ptr<FunctionType> &functionType)
 */
 bool Context::hasNamedType(const std::string &name) const
 {
-	return tl_cpputils::mapHasKey(namedTypes, name);
+	return retdec::utils::mapHasKey(namedTypes, name);
 }
 
 /**
@@ -116,7 +116,7 @@ bool Context::hasNamedType(const std::string &name) const
 */
 std::shared_ptr<Type> Context::getNamedType(const std::string &name) const
 {
-	return tl_cpputils::mapGetValueOrDefault(namedTypes, name);
+	return retdec::utils::mapGetValueOrDefault(namedTypes, name);
 }
 
 /**
@@ -144,7 +144,7 @@ bool Context::hasPointerType(const std::shared_ptr<Type> &pointedType) const
 {
 	assert(pointedType && "violated precondition - pointedType cannot be null");
 
-	return tl_cpputils::mapHasKey(pointerTypes, pointedType);
+	return retdec::utils::mapHasKey(pointerTypes, pointedType);
 }
 
 /**
@@ -160,7 +160,7 @@ std::shared_ptr<PointerType> Context::getPointerType(
 {
 	assert(pointedType && "violated precondition - pointedType cannot be null");
 
-	return tl_cpputils::mapGetValueOrDefault(pointerTypes, pointedType);
+	return retdec::utils::mapGetValueOrDefault(pointerTypes, pointedType);
 }
 
 /**
@@ -189,7 +189,7 @@ bool Context::hasArrayType(const std::shared_ptr<Type> &elementType,
 {
 	assert(elementType && "violated precondition - elementType cannot be null");
 
-	return tl_cpputils::mapHasKey(arrayTypes, std::make_pair(elementType, dimensions));
+	return retdec::utils::mapHasKey(arrayTypes, std::make_pair(elementType, dimensions));
 }
 
 /**
@@ -205,7 +205,7 @@ std::shared_ptr<ArrayType> Context::getArrayType(const std::shared_ptr<Type> &el
 {
 	assert(elementType && "violated precondition - elementType cannot be null");
 
-	return tl_cpputils::mapGetValueOrDefault(arrayTypes, std::make_pair(elementType, dimensions));
+	return retdec::utils::mapGetValueOrDefault(arrayTypes, std::make_pair(elementType, dimensions));
 }
 
 /**
@@ -230,7 +230,7 @@ void Context::addArrayType(const std::shared_ptr<ArrayType> &arrayType)
 */
 bool Context::hasAnnotation(const std::string &name) const
 {
-	return tl_cpputils::mapHasKey(annotations, name);
+	return retdec::utils::mapHasKey(annotations, name);
 }
 
 /**
@@ -240,7 +240,7 @@ bool Context::hasAnnotation(const std::string &name) const
 */
 std::shared_ptr<Annotation> Context::getAnnotation(const std::string &name) const
 {
-	return tl_cpputils::mapGetValueOrDefault(annotations, name);
+	return retdec::utils::mapGetValueOrDefault(annotations, name);
 }
 
 /**

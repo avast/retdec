@@ -10,10 +10,10 @@
 #include <llvm/IR/Instruction.h>
 #include <llvm/IR/Instructions.h>
 
-#include "llvm-support/utils.h"
-#include "bin2llvmir/optimizations/ctor_dtor/ctor_dtor.h"
-#include "bin2llvmir/utils/defs.h"
-#include "bin2llvmir/utils/type.h"
+#include "retdec/llvm-support/utils.h"
+#include "retdec/bin2llvmir/optimizations/ctor_dtor/ctor_dtor.h"
+#include "retdec/bin2llvmir/utils/defs.h"
+#include "retdec/bin2llvmir/utils/type.h"
 
 using namespace llvm_support;
 using namespace llvm;
@@ -138,7 +138,7 @@ void CtorDtor::findPossibleCtorsDtors()
 			if (store == nullptr)
 				continue;
 
-			tl_cpputils::Address addr;
+			retdec::utils::Address addr;
 			const Value* v = goThroughCasts(store->getValueOperand());
 			if (auto* ci = dyn_cast<ConstantInt>(store->getValueOperand()))
 			{

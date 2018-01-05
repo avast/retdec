@@ -10,13 +10,13 @@
 #include <llvm/IR/Instructions.h>
 #include <llvm/IR/Operator.h>
 
-#include "tl-cpputils/string.h"
-#include "bin2llvmir/optimizations/control_flow/control_flow.h"
-#include "bin2llvmir/utils/type.h"
+#include "retdec/utils/string.h"
+#include "retdec/bin2llvmir/optimizations/control_flow/control_flow.h"
+#include "retdec/bin2llvmir/utils/type.h"
 #define debug_enabled false
-#include "llvm-support/utils.h"
+#include "retdec/llvm-support/utils.h"
 
-using namespace tl_cpputils;
+using namespace retdec::utils;
 using namespace llvm;
 
 namespace bin2llvmir {
@@ -189,7 +189,7 @@ bool ControlFlow::runArmCall(AsmInstruction& ai)
 			// 2.) if not computed, transform to call of variable.
 			continue;
 		}
-		tl_cpputils::Address target(ci->getZExtValue());
+		retdec::utils::Address target(ci->getZExtValue());
 
 		// TODO: see align comment up
 		// THUMB -> ARM (4 align)

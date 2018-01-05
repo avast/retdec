@@ -10,16 +10,16 @@
 
 #include <tinyxml2.h>
 
-#include "tl-cpputils/conversion.h"
-#include "tl-cpputils/string.h"
-#include "cpdetect/compiler_detector/heuristics/pe_heuristics.h"
-#include "cpdetect/settings.h"
-#include "cpdetect/signatures/avg/signature.h"
-#include "fileformat/utils/conversions.h"
-#include "fileformat/utils/file_io.h"
-#include "fileformat/utils/other.h"
+#include "retdec/utils/conversion.h"
+#include "retdec/utils/string.h"
+#include "retdec/cpdetect/compiler_detector/heuristics/pe_heuristics.h"
+#include "retdec/cpdetect/settings.h"
+#include "retdec/cpdetect/signatures/avg/signature.h"
+#include "retdec/fileformat/utils/conversions.h"
+#include "retdec/fileformat/utils/file_io.h"
+#include "retdec/fileformat/utils/other.h"
 
-using namespace tl_cpputils;
+using namespace retdec::utils;
 using namespace fileformat;
 using namespace std::string_literals;
 

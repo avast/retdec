@@ -4,13 +4,13 @@
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */
 
-#include "tl-cpputils/conversion.h"
-#include "tl-cpputils/string.h"
+#include "retdec/utils/conversion.h"
+#include "retdec/utils/string.h"
 #include "fileinfo/file_presentation/config_presentation.h"
 #include "fileinfo/file_presentation/getters/pattern_config_getter/pattern_config_getter.h"
 
-using namespace retdec_config;
-using namespace tl_cpputils;
+using namespace retdec::config;
+using namespace retdec::utils;
 using namespace cpdetect;
 using namespace fileformat;
 

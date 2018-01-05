@@ -7,7 +7,7 @@
 #ifndef FILEINFO_FILE_WRAPPER_PE_PE_WRAPPER_H
 #define FILEINFO_FILE_WRAPPER_PE_PE_WRAPPER_H
 
-#include "fileformat/file_format/pe/pe_format.h"
+#include "retdec/fileformat/file_format/pe/pe_format.h"
 #include "fileinfo/file_information/file_information_types/symbol_table/symbol.h"
 #include "fileinfo/file_wrapper/pe/pe_wrapper_parser/pe_wrapper_parser.h"
 

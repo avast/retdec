@@ -7,12 +7,12 @@
 #include <map>
 #include <set>
 
-#include "tl-cpputils/conversion.h"
-#include "tl-cpputils/string.h"
-#include "cpdetect/compiler_detector/heuristics/elf_heuristics.h"
-#include "fileformat/utils/file_io.h"
+#include "retdec/utils/conversion.h"
+#include "retdec/utils/string.h"
+#include "retdec/cpdetect/compiler_detector/heuristics/elf_heuristics.h"
+#include "retdec/fileformat/utils/file_io.h"
 
-using namespace tl_cpputils;
+using namespace retdec::utils;
 using namespace fileformat;
 
 namespace

@@ -8,7 +8,7 @@
 #include <iostream>
 #include <string>
 
-#include "demangler/demangler.h"
+#include "retdec/demangler/demangler.h"
 
 namespace demangler {
 

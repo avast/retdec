@@ -9,9 +9,9 @@
 
 #include <openssl/pem.h>
 
-#include "tl-cpputils/conversion.h"
-#include "fileformat/types/certificate_table/certificate.h"
-#include "fileformat/utils/conversions.h"
+#include "retdec/utils/conversion.h"
+#include "retdec/fileformat/types/certificate_table/certificate.h"
+#include "retdec/fileformat/utils/conversions.h"
 
 namespace fileformat {
 
@@ -241,7 +241,7 @@ void Certificate::loadSignatureAlgorithm()
 void Certificate::loadSerialNumber()
 {
 	if (auto sn = X509_get_serialNumber(certImpl))
-		tl_cpputils::bytesToHexString(sn->data, sn->length, serialNumber);
+		retdec::utils::bytesToHexString(sn->data, sn->length, serialNumber);
 }
 
 void Certificate::loadIssuerAndSubject()
@@ -276,8 +276,8 @@ void Certificate::calculateHashes()
 	SHA1(reinterpret_cast<const unsigned char*>(tmp.data()), tmp.size(), sha1Bytes.data());
 	SHA256(reinterpret_cast<const unsigned char*>(tmp.data()), tmp.size(), sha256Bytes.data());
 
-	tl_cpputils::bytesToHexString(sha1Bytes, sha1Digest);
-	tl_cpputils::bytesToHexString(sha256Bytes, sha256Digest);
+	retdec::utils::bytesToHexString(sha1Bytes, sha1Digest);
+	retdec::utils::bytesToHexString(sha256Bytes, sha256Digest);
 }
 
 /**

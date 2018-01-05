@@ -6,9 +6,9 @@
 
 #include <gtest/gtest.h>
 
-#include "llvmir2hll/ir/call_expr.h"
-#include "llvmir2hll/ir/int_type.h"
-#include "llvmir2hll/ir/variable.h"
+#include "retdec/llvmir2hll/ir/call_expr.h"
+#include "retdec/llvmir2hll/ir/int_type.h"
+#include "retdec/llvmir2hll/ir/variable.h"
 
 using namespace ::testing;
 

@@ -10,13 +10,13 @@
 #include <llvm/IR/Instructions.h>
 #include <llvm/IR/Operator.h>
 
-#include "bin2llvmir/optimizations/control_flow/control_flow.h"
-#include "bin2llvmir/providers/lti.h"
-#include "bin2llvmir/utils/global_var.h"
-#include "bin2llvmir/utils/ir_modifier.h"
-#include "bin2llvmir/utils/type.h"
+#include "retdec/bin2llvmir/optimizations/control_flow/control_flow.h"
+#include "retdec/bin2llvmir/providers/lti.h"
+#include "retdec/bin2llvmir/utils/global_var.h"
+#include "retdec/bin2llvmir/utils/ir_modifier.h"
+#include "retdec/bin2llvmir/utils/type.h"
 #define debug_enabled false
-#include "llvm-support/utils.h"
+#include "retdec/llvm-support/utils.h"
 
 using namespace llvm_support;
 using namespace llvm;
@@ -223,7 +223,7 @@ bool ControlFlow::toCall()
 	for (auto& p : _toCall)
 	{
 		CallInst* c = p.first;
-		tl_cpputils::Address target = p.second;
+		retdec::utils::Address target = p.second;
 		AsmInstruction ai(c);
 
 		LOG << std::endl << ai;
@@ -723,7 +723,7 @@ bool ControlFlow::runGenericBr(AsmInstruction& ai, llvm::CallInst* call)
 //				&& isa<AddOperator>(root.ops[0].ops[0].ops[0].value)) // switch.x86.mingw32-gcc-4.7.3.O0.g.ex
 		{
 			auto* tableAddrConst = cast<ConstantInt>(root.ops[0].ops[1].value);
-			tl_cpputils::Address tableAddr(tableAddrConst->getZExtValue());
+			retdec::utils::Address tableAddr(tableAddrConst->getZExtValue());
 
 			auto* mulValConst = cast<ConstantInt>(root.ops[0].ops[0].ops[1].value); // TODO: or shl const
 			auto* idx = cast<Instruction>(root.ops[0].ops[0].ops[0].value);
@@ -775,7 +775,7 @@ bool ControlFlow::runGenericBr(AsmInstruction& ai, llvm::CallInst* call)
 			}
 			assert(condBr);
 
-			tl_cpputils::Maybe<unsigned> tableSize;
+			retdec::utils::Maybe<unsigned> tableSize;
 
 			if (condBr->isConditional())
 			{
@@ -913,7 +913,7 @@ bool ControlFlow::runGenericBr(AsmInstruction& ai, llvm::CallInst* call)
 				auto* l = cast<LoadInst>(idxRoot.value);
 				auto* it = cast<IntegerType>(l->getType());
 				auto* ci = cast<ConstantInt>(idxRoot.ops[0].ops[1].value);
-				tl_cpputils::Address tableAddr2(ci->getZExtValue());
+				retdec::utils::Address tableAddr2(ci->getZExtValue());
 
 				// Switch index must not be the table offset.
 				// We have to use the original index.
@@ -1079,7 +1079,7 @@ bool ControlFlow::runGenericCondBr(AsmInstruction& ai, llvm::CallInst* call)
 				&& cast<Instruction>(root.ops[0].ops[0].ops[0].value)->getType()->isIntegerTy())
 		{
 			auto* tableAddrConst = cast<ConstantInt>(root.ops[0].ops[1].value);
-			tl_cpputils::Address tableAddr(tableAddrConst->getZExtValue());
+			retdec::utils::Address tableAddr(tableAddrConst->getZExtValue());
 
 			auto* mulValConst = cast<ConstantInt>(root.ops[0].ops[0].ops[1].value); // TODO: or shl const
 			auto* idx = cast<Instruction>(root.ops[0].ops[0].ops[0].value);
@@ -1104,7 +1104,7 @@ bool ControlFlow::runGenericCondBr(AsmInstruction& ai, llvm::CallInst* call)
 			}
 			assert(condBr);
 
-			tl_cpputils::Maybe<unsigned> tableSize;
+			retdec::utils::Maybe<unsigned> tableSize;
 			// TODO: common on ARM, jmp table in code -- we should remove such instructions.
 			// pattern is different than in unconditional jump + it is damaged -- true/false
 			// constants are computed before here.
@@ -1209,7 +1209,7 @@ llvm::ReturnInst* ControlFlow::transformToReturn(
 	return r;
 }
 
-llvm::Value* ControlFlow::getOrMakeFunction(tl_cpputils::Address addr)
+llvm::Value* ControlFlow::getOrMakeFunction(retdec::utils::Address addr)
 {
 	Value* ret = _config->getLlvmFunction(addr);
 
@@ -1229,7 +1229,7 @@ llvm::Value* ControlFlow::getOrMakeFunction(tl_cpputils::Address addr)
 	return ret;
 }
 
-llvm::Value* ControlFlow::makeFunction(tl_cpputils::Address addr)
+llvm::Value* ControlFlow::makeFunction(retdec::utils::Address addr)
 {
 	Value* ret = nullptr;
 

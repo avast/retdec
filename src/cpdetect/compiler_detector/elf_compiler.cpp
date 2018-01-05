@@ -4,10 +4,10 @@
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */
 
-#include "cpdetect/compiler_detector/elf_compiler.h"
-#include "cpdetect/compiler_detector/heuristics/elf_heuristics.h"
-#include "cpdetect/settings.h"
-#include "cpdetect/signatures/yara/database/database.h"
+#include "retdec/cpdetect/compiler_detector/elf_compiler.h"
+#include "retdec/cpdetect/compiler_detector/heuristics/elf_heuristics.h"
+#include "retdec/cpdetect/settings.h"
+#include "retdec/cpdetect/signatures/yara/database/database.h"
 
 using namespace fileformat;
 

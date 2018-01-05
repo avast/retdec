@@ -4,9 +4,9 @@
 * @copyright (c) 2017 Avast Software, licensed under the MIT license
 */
 
-#include "llvmir2hll/semantics/semantics/compound_semantics.h"
-#include "llvmir2hll/semantics/semantics_factory.h"
-#include "llvmir2hll/support/debug.h"
+#include "retdec/llvmir2hll/semantics/semantics/compound_semantics.h"
+#include "retdec/llvmir2hll/semantics/semantics_factory.h"
+#include "retdec/llvmir2hll/support/debug.h"
 
 namespace llvmir2hll {
 

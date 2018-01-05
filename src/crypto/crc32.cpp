@@ -9,7 +9,7 @@
 // and conform to the coding standards of the RetDec project.
 // !!!
 
-#include "crypto/crc32.h"
+#include "retdec/crypto/crc32.h"
 
 /// same as reset()
 CRC32::CRC32()

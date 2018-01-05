@@ -16,19 +16,19 @@
 #include <llvm/Support/SourceMgr.h>
 #include <llvm/Support/raw_ostream.h>
 
-#include "llvm-support/tests/llvmir_tests.h"
-#include "llvm-support/utils.h"
-#include "tl-cpputils/string.h"
-#include "bin2llvmir/providers/abi.h"
-#include "bin2llvmir/providers/asm_instruction.h"
-#include "bin2llvmir/providers/config.h"
-#include "bin2llvmir/providers/debugformat.h"
-#include "bin2llvmir/providers/demangler.h"
-#include "bin2llvmir/providers/fileimage.h"
-#include "bin2llvmir/providers/lti.h"
-#include "bin2llvmir/utils/instruction.h"
-#include "fileformat/file_format/raw_data/raw_data_format.h"
-#include "loader/loader.h"
+#include "retdec/llvm-support/tests/llvmir_tests.h"
+#include "retdec/llvm-support/utils.h"
+#include "retdec/utils/string.h"
+#include "retdec/bin2llvmir/providers/abi.h"
+#include "retdec/bin2llvmir/providers/asm_instruction.h"
+#include "retdec/bin2llvmir/providers/config.h"
+#include "retdec/bin2llvmir/providers/debugformat.h"
+#include "retdec/bin2llvmir/providers/demangler.h"
+#include "retdec/bin2llvmir/providers/fileimage.h"
+#include "retdec/bin2llvmir/providers/lti.h"
+#include "retdec/bin2llvmir/utils/instruction.h"
+#include "retdec/fileformat/file_format/raw_data/raw_data_format.h"
+#include "retdec/loader/loader.h"
 
 namespace bin2llvmir {
 namespace tests {

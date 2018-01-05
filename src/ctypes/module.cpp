@@ -6,10 +6,10 @@
 
 #include <cassert>
 
-#include "ctypes/context.h"
-#include "ctypes/function.h"
-#include "ctypes/module.h"
-#include "tl-cpputils/container.h"
+#include "retdec/ctypes/context.h"
+#include "retdec/ctypes/function.h"
+#include "retdec/ctypes/module.h"
+#include "retdec/utils/container.h"
 
 namespace ctypes {
 
@@ -24,7 +24,7 @@ Module::Module(const std::shared_ptr<Context> &context):
 */
 bool Module::hasFunctionWithName(const std::string &name) const
 {
-	return tl_cpputils::mapHasKey(functions, name);
+	return retdec::utils::mapHasKey(functions, name);
 }
 
 /**
@@ -34,7 +34,7 @@ bool Module::hasFunctionWithName(const std::string &name) const
 */
 std::shared_ptr<Function> Module::getFunctionWithName(const std::string &name) const
 {
-	return tl_cpputils::mapGetValueOrDefault(functions, name);
+	return retdec::utils::mapGetValueOrDefault(functions, name);
 }
 
 /**

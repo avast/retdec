@@ -5,8 +5,8 @@
 * @copyright (c) 2017 Avast Software, licensed under the MIT license
 */
 
-#include "llvmir2hll/semantics/semantics/impl_support/get_symbolic_names_for_param.h"
-#include "llvmir2hll/semantics/semantics/libc_semantics/get_symbolic_names_for_param.h"
+#include "retdec/llvmir2hll/semantics/semantics/impl_support/get_symbolic_names_for_param.h"
+#include "retdec/llvmir2hll/semantics/semantics/libc_semantics/get_symbolic_names_for_param.h"
 
 namespace llvmir2hll {
 namespace semantics {

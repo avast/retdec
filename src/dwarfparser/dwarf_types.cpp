@@ -11,9 +11,9 @@
 #include <libdwarf/dwarf.h>
 #include <libdwarf/libdwarf.h>
 
-#include "dwarfparser/dwarf_file.h"
-#include "dwarfparser/dwarf_types.h"
-#include "dwarfparser/dwarf_vars.h"
+#include "retdec/dwarfparser/dwarf_file.h"
+#include "retdec/dwarfparser/dwarf_types.h"
+#include "retdec/dwarfparser/dwarf_vars.h"
 
 using namespace std;
 

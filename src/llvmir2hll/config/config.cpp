@@ -4,7 +4,7 @@
 * @copyright (c) 2017 Avast Software, licensed under the MIT license
 */
 
-#include "llvmir2hll/config/config.h"
+#include "retdec/llvmir2hll/config/config.h"
 
 namespace llvmir2hll {
 

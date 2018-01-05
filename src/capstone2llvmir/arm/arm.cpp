@@ -7,7 +7,7 @@
 #include <iomanip>
 #include <iostream>
 
-#include "capstone2llvmir/arm/arm.h"
+#include "retdec/capstone2llvmir/arm/arm.h"
 
 namespace capstone2llvmir {
 

@@ -6,8 +6,8 @@
 
 #include <gtest/gtest.h>
 
-#include "llvmir2hll/config/config.h"
-#include "llvmir2hll/support/types.h"
+#include "retdec/llvmir2hll/config/config.h"
+#include "retdec/llvmir2hll/support/types.h"
 
 using namespace ::testing;
 

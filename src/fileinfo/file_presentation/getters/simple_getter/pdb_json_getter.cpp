@@ -4,12 +4,12 @@
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */
 
-#include "tl-cpputils/conversion.h"
-#include "tl-cpputils/string.h"
-#include "tl-cpputils/time.h"
+#include "retdec/utils/conversion.h"
+#include "retdec/utils/string.h"
+#include "retdec/utils/time.h"
 #include "fileinfo/file_presentation/getters/simple_getter/pdb_json_getter.h"
 
-using namespace tl_cpputils;
+using namespace retdec::utils;
 
 namespace fileinfo {
 

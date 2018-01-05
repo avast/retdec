@@ -11,7 +11,7 @@
 #include <string>
 #include <vector>
 
-#include "fileformat/types/dotnet_types/dotnet_class.h"
+#include "retdec/fileformat/types/dotnet_types/dotnet_class.h"
 
 namespace fileinfo {
 

@@ -7,17 +7,17 @@
 #include <cstddef>
 #include <vector>
 
-#include "llvmir2hll/support/debug.h"
-#include "llvmir2hll/utils/string.h"
-#include "tl-cpputils/conversion.h"
-#include "tl-cpputils/string.h"
+#include "retdec/llvmir2hll/support/debug.h"
+#include "retdec/llvmir2hll/utils/string.h"
+#include "retdec/utils/conversion.h"
+#include "retdec/utils/string.h"
 
-using tl_cpputils::hasOnlyDecimalDigits;
-using tl_cpputils::hasOnlyHexadecimalDigits;
-using tl_cpputils::split;
-using tl_cpputils::startsWith;
-using tl_cpputils::toHex;
-using tl_cpputils::toLower;
+using retdec::utils::hasOnlyDecimalDigits;
+using retdec::utils::hasOnlyHexadecimalDigits;
+using retdec::utils::split;
+using retdec::utils::startsWith;
+using retdec::utils::toHex;
+using retdec::utils::toLower;
 
 namespace llvmir2hll {
 

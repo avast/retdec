@@ -4,7 +4,7 @@
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */
 
-#include "cpdetect/cptypes.h"
+#include "retdec/cpdetect/cptypes.h"
 
 namespace cpdetect {
 

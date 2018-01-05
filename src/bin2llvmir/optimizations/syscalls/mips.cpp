@@ -8,13 +8,13 @@
 
 #include <llvm/IR/Constants.h>
 
-#include "llvm-support/utils.h"
-#include "bin2llvmir/optimizations/syscalls/syscalls.h"
-#include "bin2llvmir/providers/asm_instruction.h"
-#include "bin2llvmir/utils/defs.h"
-#include "bin2llvmir/utils/type.h"
+#include "retdec/llvm-support/utils.h"
+#include "retdec/bin2llvmir/optimizations/syscalls/syscalls.h"
+#include "retdec/bin2llvmir/providers/asm_instruction.h"
+#include "retdec/bin2llvmir/utils/defs.h"
+#include "retdec/bin2llvmir/utils/type.h"
 #define debug_enabled false
-#include "llvm-support/utils.h"
+#include "retdec/llvm-support/utils.h"
 
 using namespace llvm_support;
 using namespace llvm;

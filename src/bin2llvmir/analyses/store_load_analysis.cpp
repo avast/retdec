@@ -7,12 +7,12 @@
 #include <llvm/IR/CFG.h>
 #include <llvm/Support/raw_ostream.h>
 
-#include "tl-cpputils/container.h"
-#include "bin2llvmir/analyses/indirectly_called_funcs_analysis.h"
-#include "bin2llvmir/analyses/store_load_analysis.h"
-#include "bin2llvmir/utils/instruction.h"
+#include "retdec/utils/container.h"
+#include "retdec/bin2llvmir/analyses/indirectly_called_funcs_analysis.h"
+#include "retdec/bin2llvmir/analyses/store_load_analysis.h"
+#include "retdec/bin2llvmir/utils/instruction.h"
 
-using namespace tl_cpputils;
+using namespace retdec::utils;
 using namespace llvm;
 
 namespace bin2llvmir {

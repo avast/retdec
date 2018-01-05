@@ -67,7 +67,7 @@ set(FILEFORMAT_SOURCES
 if(NOT TARGET fileformat)
 
 	add_library(fileformat STATIC ${FILEFORMAT_SOURCES})
-	target_link_libraries(fileformat fileformat-crypto retdec-config tl-cpputils pelib elfio llvm)
+	target_link_libraries(fileformat fileformat-crypto retdec-config retdec-utils pelib elfio llvm)
 	target_include_directories(fileformat PUBLIC ${PROJECT_SOURCE_DIR}/include/)
 
 endif()

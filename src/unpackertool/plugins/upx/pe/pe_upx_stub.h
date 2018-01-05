@@ -10,8 +10,8 @@
 #include <unordered_set>
 
 #include "unpackertool/plugins/upx/upx_stub.h"
-#include "unpacker/dynamic_buffer.h"
-#include "unpacker/signature.h"
+#include "retdec/unpacker/dynamic_buffer.h"
+#include "retdec/unpacker/signature.h"
 
 namespace unpackertool {
 namespace upx {

@@ -6,8 +6,8 @@
 
 #include <cstdlib>
 
-#include "dwarfparser/dwarf_file.h"
-#include "dwarfparser/dwarf_utils.h"
+#include "retdec/dwarfparser/dwarf_file.h"
+#include "retdec/dwarfparser/dwarf_utils.h"
 
 using namespace std;
 

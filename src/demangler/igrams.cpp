@@ -6,8 +6,8 @@
 
 #include <cstdlib>
 
-#include "demangler/demglobal.h"
-#include "demangler/igrams.h"
+#include "retdec/demangler/demglobal.h"
+#include "retdec/demangler/igrams.h"
 
 using namespace std;
 

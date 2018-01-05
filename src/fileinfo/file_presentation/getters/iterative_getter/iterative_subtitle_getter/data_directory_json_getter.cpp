@@ -4,11 +4,11 @@
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */
 
-#include "tl-cpputils/conversion.h"
-#include "fileformat/utils/conversions.h"
+#include "retdec/utils/conversion.h"
+#include "retdec/fileformat/utils/conversions.h"
 #include "fileinfo/file_presentation/getters/iterative_getter/iterative_subtitle_getter/data_directory_json_getter.h"
 
-using namespace tl_cpputils;
+using namespace retdec::utils;
 using namespace fileformat;
 
 namespace fileinfo {

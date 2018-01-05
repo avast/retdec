@@ -12,5 +12,5 @@ set(DWARFPARSER_SOURCES
 )
 
 add_library(dwarfparser STATIC ${DWARFPARSER_SOURCES})
-target_link_libraries(dwarfparser fileformat tl-cpputils libdwarf)
+target_link_libraries(dwarfparser fileformat retdec-utils libdwarf)
 target_include_directories(dwarfparser PUBLIC ${PROJECT_SOURCE_DIR}/include/)

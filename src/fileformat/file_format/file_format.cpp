@@ -14,20 +14,20 @@
 
 #include <pelib/PeLibInc.h>
 
-#include "crypto/crypto.h"
-#include "tl-cpputils/conversion.h"
-#include "tl-cpputils/file_io.h"
-#include "tl-cpputils/string.h"
-#include "tl-cpputils/system.h"
-#include "fileformat/file_format/file_format.h"
-#include "fileformat/file_format/intel_hex/intel_hex_format.h"
-#include "fileformat/file_format/raw_data/raw_data_format.h"
-#include "fileformat/types/strings/character_iterator.h"
-#include "fileformat/utils/conversions.h"
-#include "fileformat/utils/file_io.h"
-#include "fileformat/utils/other.h"
+#include "retdec/crypto/crypto.h"
+#include "retdec/utils/conversion.h"
+#include "retdec/utils/file_io.h"
+#include "retdec/utils/string.h"
+#include "retdec/utils/system.h"
+#include "retdec/fileformat/file_format/file_format.h"
+#include "retdec/fileformat/file_format/intel_hex/intel_hex_format.h"
+#include "retdec/fileformat/file_format/raw_data/raw_data_format.h"
+#include "retdec/fileformat/types/strings/character_iterator.h"
+#include "retdec/fileformat/utils/conversions.h"
+#include "retdec/fileformat/utils/file_io.h"
+#include "retdec/fileformat/utils/other.h"
 
-using namespace tl_cpputils;
+using namespace retdec::utils;
 using namespace PeLib;
 
 namespace fileformat {
@@ -186,7 +186,7 @@ void FileFormat::initStream()
  * @param derivedPtr Pointer to derived FileFormat class
  * @param arch Architecture information
  */
-template<typename T> void FileFormat::initFormatArch(T derivedPtr, const retdec_config::Architecture &arch)
+template<typename T> void FileFormat::initFormatArch(T derivedPtr, const retdec::config::Architecture &arch)
 {
 	if(!derivedPtr)
 	{
@@ -349,7 +349,7 @@ void FileFormat::setLoadedBytes(std::vector<unsigned char> *lBytes)
  * Therefore, this method needs to be called to set these critical information.
  * @param config Config information
  */
-void FileFormat::initFromConfig(const retdec_config::Config& config)
+void FileFormat::initFromConfig(const retdec::config::Config& config)
 {
 	if(IntelHexFormat *ihex = dynamic_cast<IntelHexFormat*>(this))
 	{
@@ -1676,7 +1676,7 @@ bool FileFormat::isSignatureVerified() const
  * Get non-decodable address ranges.
  * @return Non-decodable address ranges.
  */
-const tl_cpputils::RangeContainer<std::uint64_t>& FileFormat::getNonDecodableAddressRanges() const
+const retdec::utils::RangeContainer<std::uint64_t>& FileFormat::getNonDecodableAddressRanges() const
 {
 	return nonDecodableRanges;
 }
@@ -1834,7 +1834,7 @@ const std::set<std::uint64_t> &FileFormat::getUnknownRelocations() const
  * @param e Endian - if specified it is forced, otherwise file's endian is used
  * @return Status of operation (@c true if all is OK, @c false otherwise)
  */
-bool FileFormat::getXByte(std::uint64_t address, std::uint64_t x, std::uint64_t &res, tl_cpputils::Endianness e) const
+bool FileFormat::getXByte(std::uint64_t address, std::uint64_t x, std::uint64_t &res, retdec::utils::Endianness e) const
 {
 	const auto *secSeg = getSectionOrSegmentFromAddress(address);
 	if(!secSeg || x * getByteLength() > sizeof(res) * CHAR_BIT)
@@ -1867,7 +1867,7 @@ bool FileFormat::getXBytes(std::uint64_t address, std::uint64_t x, std::vector<s
 	return secSeg && secSeg->getBytes(res, address - secSeg->getAddress(), x) && res.size() == x;
 }
 
-bool FileFormat::setXByte(std::uint64_t address, std::uint64_t x, std::uint64_t val, tl_cpputils::Endianness e/* = tl_cpputils::Endianness::UNKNOWN*/)
+bool FileFormat::setXByte(std::uint64_t address, std::uint64_t x, std::uint64_t val, retdec::utils::Endianness e/* = retdec::utils::Endianness::UNKNOWN*/)
 {
 	return false;
 }
@@ -1895,7 +1895,7 @@ bool FileFormat::isPointer(unsigned long long address)
  * @param e Endian - if specified it is forced, otherwise file's endian is used
  * @return Status of operation (@c true if all is OK, @c false otherwise)
  */
-bool FileFormat::get1ByteOffset(std::uint64_t offset, std::uint64_t &res, tl_cpputils::Endianness e) const
+bool FileFormat::get1ByteOffset(std::uint64_t offset, std::uint64_t &res, retdec::utils::Endianness e) const
 {
 	return getXByteOffset(offset, 1, res, e);
 }
@@ -1907,7 +1907,7 @@ bool FileFormat::get1ByteOffset(std::uint64_t offset, std::uint64_t &res, tl_cpp
  * @param e Endian - if specified it is forced, otherwise file's endian is used
  * @return Status of operation (@c true if all is OK, @c false otherwise)
  */
-bool FileFormat::get2ByteOffset(std::uint64_t offset, std::uint64_t &res, tl_cpputils::Endianness e) const
+bool FileFormat::get2ByteOffset(std::uint64_t offset, std::uint64_t &res, retdec::utils::Endianness e) const
 {
 	return getXByteOffset(offset, 2, res, e);
 }
@@ -1919,7 +1919,7 @@ bool FileFormat::get2ByteOffset(std::uint64_t offset, std::uint64_t &res, tl_cpp
  * @param e Endian - if specified it is forced, otherwise file's endian is used
  * @return Status of operation (@c true if all is OK, @c false otherwise)
  */
-bool FileFormat::get4ByteOffset(std::uint64_t offset, std::uint64_t &res, tl_cpputils::Endianness e) const
+bool FileFormat::get4ByteOffset(std::uint64_t offset, std::uint64_t &res, retdec::utils::Endianness e) const
 {
 	return getXByteOffset(offset, 4, res, e);
 }
@@ -1931,7 +1931,7 @@ bool FileFormat::get4ByteOffset(std::uint64_t offset, std::uint64_t &res, tl_cpp
  * @param e Endian - if specified it is forced, otherwise file's endian is used
  * @return Status of operation (@c true if all is OK, @c false otherwise)
  */
-bool FileFormat::get8ByteOffset(std::uint64_t offset, std::uint64_t &res, tl_cpputils::Endianness e) const
+bool FileFormat::get8ByteOffset(std::uint64_t offset, std::uint64_t &res, retdec::utils::Endianness e) const
 {
 	return getXByteOffset(offset, 8, res, e);
 }
@@ -1968,7 +1968,7 @@ bool FileFormat::get10ByteOffset(std::uint64_t offset, long double &res) const
  * @param e Endian - if specified it is forced, otherwise file's endian is used
  * @return Status of operation (@c true if all is OK, @c false otherwise)
  */
-bool FileFormat::getXByteOffset(std::uint64_t offset, std::uint64_t x, std::uint64_t &res, tl_cpputils::Endianness e) const
+bool FileFormat::getXByteOffset(std::uint64_t offset, std::uint64_t x, std::uint64_t &res, retdec::utils::Endianness e) const
 {
 	if(offset + x > getLoadedFileLength() || x * getByteLength() > sizeof(res) * CHAR_BIT)
 	{
@@ -2009,7 +2009,7 @@ bool FileFormat::getXBytesOffset(std::uint64_t offset, std::uint64_t x, std::vec
  * @param e Endian - if specified it is forced, otherwise file's endian is used
  * @return Status of operation (@c true if all is OK, @c false otherwise)
  */
-bool FileFormat::getWordOffset(std::uint64_t offset, std::uint64_t &res, tl_cpputils::Endianness e) const
+bool FileFormat::getWordOffset(std::uint64_t offset, std::uint64_t &res, retdec::utils::Endianness e) const
 {
 	return getXByteOffset(offset, getBytesPerWord(), res, e);
 }

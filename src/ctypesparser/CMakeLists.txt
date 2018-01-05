@@ -5,5 +5,5 @@ set(CTYPESPARSER_SOURCES
 )
 
 add_library(ctypesparser STATIC ${CTYPESPARSER_SOURCES})
-target_link_libraries(ctypesparser ctypes tl-cpputils rapidjson)
+target_link_libraries(ctypesparser ctypes retdec-utils rapidjson)
 target_include_directories(ctypesparser PUBLIC ${PROJECT_SOURCE_DIR}/include/)

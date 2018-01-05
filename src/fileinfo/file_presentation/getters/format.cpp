@@ -6,10 +6,10 @@
 
 #include <algorithm>
 
-#include "tl-cpputils/string.h"
+#include "retdec/utils/string.h"
 #include "fileinfo/file_presentation/getters/format.h"
 
-using namespace tl_cpputils;
+using namespace retdec::utils;
 
 namespace fileinfo {
 

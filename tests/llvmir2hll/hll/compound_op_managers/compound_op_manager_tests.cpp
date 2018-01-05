@@ -4,10 +4,10 @@
 * @copyright (c) 2017 Avast Software, licensed under the MIT license
 */
 
-#include "llvmir2hll/hll/compound_op_manager.h"
+#include "retdec/llvmir2hll/hll/compound_op_manager.h"
 #include "llvmir2hll/hll/compound_op_managers/compound_op_manager_tests.h"
-#include "llvmir2hll/ir/const_int.h"
-#include "llvmir2hll/ir/expression.h"
+#include "retdec/llvmir2hll/ir/const_int.h"
+#include "retdec/llvmir2hll/ir/expression.h"
 
 using namespace ::testing;
 

@@ -11,7 +11,7 @@
 #include <llvm/IR/IRBuilder.h>
 #include <llvm/IR/LLVMContext.h>
 
-#include "bin2llvmir/analyses/var_depend_analysis.h"
+#include "retdec/bin2llvmir/analyses/var_depend_analysis.h"
 
 using namespace ::testing;
 using namespace llvm;

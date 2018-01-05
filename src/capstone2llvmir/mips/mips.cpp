@@ -7,7 +7,7 @@
 #include <iomanip>
 #include <iostream>
 
-#include "capstone2llvmir/mips/mips.h"
+#include "retdec/capstone2llvmir/mips/mips.h"
 
 namespace capstone2llvmir {
 

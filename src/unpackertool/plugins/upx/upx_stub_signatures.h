@@ -7,10 +7,10 @@
 #ifndef UNPACKERTOOL_PLUGINS_UPX_UPX_STUB_SIGNATURES_H
 #define UNPACKERTOOL_PLUGINS_UPX_UPX_STUB_SIGNATURES_H
 
-#include "fileformat/fileformat.h"
-#include "loader/loader.h"
+#include "retdec/fileformat/fileformat.h"
+#include "retdec/loader/loader.h"
 #include "unpackertool/plugins/upx/upx_stub.h"
-#include "unpacker/signature.h"
+#include "retdec/unpacker/signature.h"
 
 namespace unpackertool {
 namespace upx {

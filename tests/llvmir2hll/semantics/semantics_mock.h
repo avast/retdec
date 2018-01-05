@@ -9,7 +9,7 @@
 
 #include <gmock/gmock.h>
 
-#include "llvmir2hll/semantics/semantics.h"
+#include "retdec/llvmir2hll/semantics/semantics.h"
 
 namespace llvmir2hll {
 namespace tests {

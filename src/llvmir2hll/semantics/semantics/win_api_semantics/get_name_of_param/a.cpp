@@ -4,7 +4,7 @@
 * @copyright (c) 2017 Avast Software, licensed under the MIT license
 */
 
-#include "llvmir2hll/semantics/semantics/win_api_semantics/get_name_of_param/a.h"
+#include "retdec/llvmir2hll/semantics/semantics/win_api_semantics/get_name_of_param/a.h"
 
 namespace llvmir2hll {
 namespace semantics {

@@ -8,11 +8,11 @@
 
 #include <tinyxml2.h>
 
-#include "fileformat/file_format/file_format.h"
+#include "retdec/fileformat/file_format/file_format.h"
 #include "fileinfo/file_detector/file_detector.h"
-#include "loader/loader.h"
+#include "retdec/loader/loader.h"
 
-using namespace tl_cpputils;
+using namespace retdec::utils;
 using namespace cpdetect;
 using namespace fileformat;
 
@@ -301,7 +301,7 @@ void FileDetector::getLoaderInfo()
  * by the user -- Intel HEX, raw data.
  * @param config Config.
  */
-void FileDetector::setConfigFile(retdec_config::Config &config)
+void FileDetector::setConfigFile(retdec::config::Config &config)
 {
 	fileConfig = &config;
 	fileParser->initFromConfig(config);

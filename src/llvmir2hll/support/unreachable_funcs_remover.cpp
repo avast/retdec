@@ -4,22 +4,22 @@
 * @copyright (c) 2017 Avast Software, licensed under the MIT license
 */
 
-#include "llvmir2hll/graphs/cg/cg.h"
-#include "llvmir2hll/graphs/cg/cg_builder.h"
-#include "llvmir2hll/ir/expression.h"
-#include "llvmir2hll/ir/function.h"
-#include "llvmir2hll/ir/global_var_def.h"
-#include "llvmir2hll/ir/module.h"
-#include "llvmir2hll/ir/statement.h"
-#include "llvmir2hll/ir/variable.h"
-#include "llvmir2hll/support/debug.h"
-#include "llvmir2hll/support/unreachable_funcs_remover.h"
-#include "llvmir2hll/support/visitors/ordered_all_visitor.h"
-#include "tl-cpputils/container.h"
-#include "tl-cpputils/non_copyable.h"
+#include "retdec/llvmir2hll/graphs/cg/cg.h"
+#include "retdec/llvmir2hll/graphs/cg/cg_builder.h"
+#include "retdec/llvmir2hll/ir/expression.h"
+#include "retdec/llvmir2hll/ir/function.h"
+#include "retdec/llvmir2hll/ir/global_var_def.h"
+#include "retdec/llvmir2hll/ir/module.h"
+#include "retdec/llvmir2hll/ir/statement.h"
+#include "retdec/llvmir2hll/ir/variable.h"
+#include "retdec/llvmir2hll/support/debug.h"
+#include "retdec/llvmir2hll/support/unreachable_funcs_remover.h"
+#include "retdec/llvmir2hll/support/visitors/ordered_all_visitor.h"
+#include "retdec/utils/container.h"
+#include "retdec/utils/non_copyable.h"
 
-using tl_cpputils::addToSet;
-using tl_cpputils::hasItem;
+using retdec::utils::addToSet;
+using retdec::utils::hasItem;
 
 namespace llvmir2hll {
 
@@ -29,7 +29,7 @@ namespace {
 * @brief Computer of indirectly called functions from a module.
 */
 class IndirectlyCalledFuncsComputer: private OrderedAllVisitor,
-		private tl_cpputils::NonCopyable {
+		private retdec::utils::NonCopyable {
 public:
 	/// Constructs a computer from the given module.
 	explicit IndirectlyCalledFuncsComputer(ShPtr<Module> module): module(module) {}

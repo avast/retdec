@@ -6,7 +6,7 @@
 
 #include <sstream>
 
-#include "fileformat/types/pdb_info/pdb_info.h"
+#include "retdec/fileformat/types/pdb_info/pdb_info.h"
 
 namespace fileformat {
 

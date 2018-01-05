@@ -8,8 +8,8 @@
 #include <iostream>
 #include <sstream>
 
-#include "dwarfparser/dwarf_file.h"
-#include "dwarfparser/dwarf_linenumbers.h"
+#include "retdec/dwarfparser/dwarf_file.h"
+#include "retdec/dwarfparser/dwarf_linenumbers.h"
 
 using namespace std;
 

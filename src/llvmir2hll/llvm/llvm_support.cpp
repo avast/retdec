@@ -14,16 +14,16 @@
 #include <llvm/IR/Instructions.h>
 #include <llvm/IR/Module.h>
 
-#include "llvmir2hll/llvm/llvm_support.h"
-#include "llvmir2hll/support/debug.h"
-#include "llvmir2hll/support/smart_ptr.h"
-#include "tl-cpputils/container.h"
-#include "tl-cpputils/conversion.h"
-#include "tl-cpputils/string.h"
+#include "retdec/llvmir2hll/llvm/llvm_support.h"
+#include "retdec/llvmir2hll/support/debug.h"
+#include "retdec/llvmir2hll/support/smart_ptr.h"
+#include "retdec/utils/container.h"
+#include "retdec/utils/conversion.h"
+#include "retdec/utils/string.h"
 
-using tl_cpputils::hasItem;
-using tl_cpputils::hasOnlyHexadecimalDigits;
-using tl_cpputils::startsWith;
+using retdec::utils::hasItem;
+using retdec::utils::hasOnlyHexadecimalDigits;
+using retdec::utils::startsWith;
 
 namespace llvmir2hll {
 

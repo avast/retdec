@@ -20,7 +20,7 @@ target_link_libraries(upx fileformat-headers)
 target_include_directories(upx PUBLIC ${PROJECT_SOURCE_DIR}/src/)
 # Plugin related libraries are linked to the plugin on Windows
 if(MSVC OR APPLE)
-	target_link_libraries(upx tl-cpputils unpacker)
+	target_link_libraries(upx retdec-utils unpacker)
 endif()
 install(TARGETS upx
 	LIBRARY DESTINATION bin/unpacker-plugins

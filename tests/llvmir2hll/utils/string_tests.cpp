@@ -8,7 +8,7 @@
 
 #include <gtest/gtest.h>
 
-#include "llvmir2hll/utils/string.h"
+#include "retdec/llvmir2hll/utils/string.h"
 
 using namespace ::testing;
 

@@ -6,7 +6,7 @@
 
 #include <cstdlib>
 
-#include "demangler/stgrammars/gccll.h"
+#include "retdec/demangler/stgrammars/gccll.h"
 
 namespace demangler {
 

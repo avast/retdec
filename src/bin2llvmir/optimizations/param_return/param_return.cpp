@@ -28,18 +28,18 @@
 #include <llvm/IR/Instruction.h>
 #include <llvm/IR/Instructions.h>
 
-#include "tl-cpputils/container.h"
-#include "tl-cpputils/string.h"
-#include "bin2llvmir/optimizations/param_return/param_return.h"
-#include "bin2llvmir/utils/instruction.h"
+#include "retdec/utils/container.h"
+#include "retdec/utils/string.h"
+#include "retdec/bin2llvmir/optimizations/param_return/param_return.h"
+#include "retdec/bin2llvmir/utils/instruction.h"
 #define debug_enabled false
-#include "llvm-support/utils.h"
-#include "bin2llvmir/utils/type.h"
-#include "bin2llvmir/providers/asm_instruction.h"
-#include "bin2llvmir/utils/ir_modifier.h"
+#include "retdec/llvm-support/utils.h"
+#include "retdec/bin2llvmir/utils/type.h"
+#include "retdec/bin2llvmir/providers/asm_instruction.h"
+#include "retdec/bin2llvmir/utils/ir_modifier.h"
 
 using namespace llvm_support;
-using namespace tl_cpputils;
+using namespace retdec::utils;
 using namespace llvm;
 
 namespace bin2llvmir {
@@ -432,7 +432,7 @@ void DataFlowEntry::filterSortArgLoads()
  */
 void CallEntry::filterLeaveOnlyContinuousStackOffsets(Config* _config)
 {
-	tl_cpputils::Maybe<int> prevOff;
+	retdec::utils::Maybe<int> prevOff;
 	auto it = possibleArgStores.begin();
 	while (it != possibleArgStores.end())
 	{
@@ -1350,7 +1350,7 @@ void DataFlowEntry::applyToIrOrdinary()
 		}
 		for (auto& p : calls2vals)
 		{
-			tl_cpputils::Maybe<int> stackOff;
+			retdec::utils::Maybe<int> stackOff;
 			if (_config->getConfig().architecture.isX86())
 			{
 				if (!p.second.empty())

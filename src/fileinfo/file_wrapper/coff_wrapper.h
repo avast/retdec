@@ -7,7 +7,7 @@
 #ifndef FILEINFO_FILE_WRAPPER_COFF_WRAPPER_H
 #define FILEINFO_FILE_WRAPPER_COFF_WRAPPER_H
 
-#include "fileformat/file_format/coff/coff_format.h"
+#include "retdec/fileformat/file_format/coff/coff_format.h"
 #include "fileinfo/file_information/file_information_types/file_section.h"
 #include "fileinfo/file_information/file_information_types/symbol_table/symbol.h"
 

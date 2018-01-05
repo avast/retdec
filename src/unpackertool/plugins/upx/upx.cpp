@@ -9,11 +9,11 @@
 #include <elfio/elfio.hpp>
 #include <pelib/PeLib.h>
 
-#include "loader/loader.h"
+#include "retdec/loader/loader.h"
 #include "unpackertool/plugins/upx/upx.h"
 #include "unpackertool/plugins/upx/upx_exceptions.h"
 #include "unpackertool/plugins/upx/upx_stub_signatures.h"
-#include "unpacker/unpacker_exception.h"
+#include "retdec/unpacker/unpacker_exception.h"
 
 using namespace unpacker;
 

@@ -6,7 +6,7 @@
 
 #include <string>
 
-#include "llvmir2hll/pattern/pattern_finder_runners/no_action_pattern_finder_runner.h"
+#include "retdec/llvmir2hll/pattern/pattern_finder_runners/no_action_pattern_finder_runner.h"
 
 namespace llvmir2hll {
 

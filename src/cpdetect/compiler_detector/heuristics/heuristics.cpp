@@ -6,16 +6,16 @@
 
 #include <regex>
 
-#include "fileformat-libdwarf-interface/bin_interface.h"
+#include "retdec/fileformat-libdwarf-interface/bin_interface.h"
 
-#include "tl-cpputils/container.h"
-#include "tl-cpputils/conversion.h"
-#include "tl-cpputils/string.h"
-#include "cpdetect/compiler_detector/heuristics/heuristics.h"
-#include "cpdetect/utils/version_solver.h"
-#include "fileformat/utils/conversions.h"
+#include "retdec/utils/container.h"
+#include "retdec/utils/conversion.h"
+#include "retdec/utils/string.h"
+#include "retdec/cpdetect/compiler_detector/heuristics/heuristics.h"
+#include "retdec/cpdetect/utils/version_solver.h"
+#include "retdec/fileformat/utils/conversions.h"
 
-using namespace tl_cpputils;
+using namespace retdec::utils;
 using namespace fileformat;
 
 namespace cpdetect {

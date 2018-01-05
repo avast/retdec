@@ -7,12 +7,12 @@
 #include <climits>
 #include <cstring>
 
-#include "tl-cpputils/conversion.h"
-#include "tl-cpputils/string.h"
-#include "tl-cpputils/system.h"
-#include "loader/loader/image.h"
+#include "retdec/utils/conversion.h"
+#include "retdec/utils/string.h"
+#include "retdec/utils/system.h"
+#include "retdec/loader/loader/image.h"
 
-using namespace tl_cpputils;
+using namespace retdec::utils;
 
 namespace loader {
 
@@ -351,7 +351,7 @@ bool Image::getXBytes(std::uint64_t address, std::uint64_t x, std::vector<std::u
 	return true;
 }
 
-bool Image::setXByte(std::uint64_t address, std::uint64_t x, std::uint64_t val, tl_cpputils::Endianness e/* = tl_cpputils::Endianness::UNKNOWN*/)
+bool Image::setXByte(std::uint64_t address, std::uint64_t x, std::uint64_t val, retdec::utils::Endianness e/* = retdec::utils::Endianness::UNKNOWN*/)
 {
 	const auto *seg = getSegmentFromAddress(address);
 	if (!seg || x * getByteLength() > sizeof(val) * CHAR_BIT)

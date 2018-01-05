@@ -155,6 +155,6 @@ set(LLVMIR2HLL_TESTS_SOURCES
 )
 
 add_executable(llvmir2hll-tests ${LLVMIR2HLL_TESTS_SOURCES})
-target_link_libraries(llvmir2hll-tests llvmir2hll tl-cpputils gmock_main)
+target_link_libraries(llvmir2hll-tests llvmir2hll retdec-utils gmock_main)
 target_include_directories(llvmir2hll-tests PUBLIC ${PROJECT_SOURCE_DIR}/tests/)
 install(TARGETS llvmir2hll-tests RUNTIME DESTINATION bin/unit-tests)

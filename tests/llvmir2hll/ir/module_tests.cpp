@@ -11,14 +11,14 @@
 #include <llvm/IR/Module.h>
 
 #include "llvmir2hll/config/config_mock.h"
-#include "llvmir2hll/ir/const_int.h"
-#include "llvmir2hll/ir/function.h"
-#include "llvmir2hll/ir/function_builder.h"
-#include "llvmir2hll/ir/int_type.h"
-#include "llvmir2hll/ir/module.h"
-#include "llvmir2hll/ir/variable.h"
+#include "retdec/llvmir2hll/ir/const_int.h"
+#include "retdec/llvmir2hll/ir/function.h"
+#include "retdec/llvmir2hll/ir/function_builder.h"
+#include "retdec/llvmir2hll/ir/int_type.h"
+#include "retdec/llvmir2hll/ir/module.h"
+#include "retdec/llvmir2hll/ir/variable.h"
 #include "llvmir2hll/semantics/semantics_mock.h"
-#include "llvmir2hll/support/types.h"
+#include "retdec/llvmir2hll/support/types.h"
 
 using namespace ::testing;
 using namespace std::string_literals;

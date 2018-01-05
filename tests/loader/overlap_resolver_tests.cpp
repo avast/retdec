@@ -6,7 +6,7 @@
 
 #include <gtest/gtest.h>
 
-#include "loader/utils/overlap_resolver.h"
+#include "retdec/loader/utils/overlap_resolver.h"
 
 using namespace ::testing;
 
@@ -17,8 +17,8 @@ class OverlapResolverTests : public Test {};
 
 TEST_F(OverlapResolverTests,
 NoOverlapWorks) {
-	tl_cpputils::Range<std::uint64_t> first(100, 199);
-	tl_cpputils::Range<std::uint64_t> second(200, 299);
+	retdec::utils::Range<std::uint64_t> first(100, 199);
+	retdec::utils::Range<std::uint64_t> second(200, 299);
 	auto result = OverlapResolver::resolve(first, second);
 
 	EXPECT_EQ(Overlap::None, result.getOverlap());
@@ -29,8 +29,8 @@ NoOverlapWorks) {
 
 TEST_F(OverlapResolverTests,
 FullOverlapWithHugeRangeWorks) {
-	tl_cpputils::Range<std::uint64_t> first(100, 199);
-	tl_cpputils::Range<std::uint64_t> second(0, 299);
+	retdec::utils::Range<std::uint64_t> first(100, 199);
+	retdec::utils::Range<std::uint64_t> second(0, 299);
 	auto result = OverlapResolver::resolve(first, second);
 
 	EXPECT_EQ(Overlap::Full, result.getOverlap());
@@ -40,8 +40,8 @@ FullOverlapWithHugeRangeWorks) {
 
 TEST_F(OverlapResolverTests,
 FullOverlapAtStartWorks) {
-	tl_cpputils::Range<std::uint64_t> first(100, 199);
-	tl_cpputils::Range<std::uint64_t> second(100, 299);
+	retdec::utils::Range<std::uint64_t> first(100, 199);
+	retdec::utils::Range<std::uint64_t> second(100, 299);
 	auto result = OverlapResolver::resolve(first, second);
 
 	EXPECT_EQ(Overlap::Full, result.getOverlap());
@@ -51,8 +51,8 @@ FullOverlapAtStartWorks) {
 
 TEST_F(OverlapResolverTests,
 FullOverlapAtEndWorks) {
-	tl_cpputils::Range<std::uint64_t> first(100, 199);
-	tl_cpputils::Range<std::uint64_t> second(0, 199);
+	retdec::utils::Range<std::uint64_t> first(100, 199);
+	retdec::utils::Range<std::uint64_t> second(0, 199);
 	auto result = OverlapResolver::resolve(first, second);
 
 	EXPECT_EQ(Overlap::Full, result.getOverlap());
@@ -62,8 +62,8 @@ FullOverlapAtEndWorks) {
 
 TEST_F(OverlapResolverTests,
 ExactFullOverlapWorks) {
-	tl_cpputils::Range<std::uint64_t> first(100, 199);
-	tl_cpputils::Range<std::uint64_t> second(100, 199);
+	retdec::utils::Range<std::uint64_t> first(100, 199);
+	retdec::utils::Range<std::uint64_t> second(100, 199);
 	auto result = OverlapResolver::resolve(first, second);
 
 	EXPECT_EQ(Overlap::Full, result.getOverlap());
@@ -73,63 +73,63 @@ ExactFullOverlapWorks) {
 
 TEST_F(OverlapResolverTests,
 OverlapOverStartWorks) {
-	tl_cpputils::Range<std::uint64_t> first(100, 199);
-	tl_cpputils::Range<std::uint64_t> second(50, 149);
+	retdec::utils::Range<std::uint64_t> first(100, 199);
+	retdec::utils::Range<std::uint64_t> second(50, 149);
 	auto result = OverlapResolver::resolve(first, second);
 
 	EXPECT_EQ(Overlap::OverStart, result.getOverlap());
 	EXPECT_EQ(2, result.getRanges().size());
 	EXPECT_EQ(second, result.getRanges()[0]);
-	EXPECT_EQ(tl_cpputils::Range<std::uint64_t>(150, 199), result.getRanges()[1]);
+	EXPECT_EQ(retdec::utils::Range<std::uint64_t>(150, 199), result.getRanges()[1]);
 }
 
 TEST_F(OverlapResolverTests,
 ExactOverlapOverStartWorks) {
-	tl_cpputils::Range<std::uint64_t> first(100, 199);
-	tl_cpputils::Range<std::uint64_t> second(100, 149);
+	retdec::utils::Range<std::uint64_t> first(100, 199);
+	retdec::utils::Range<std::uint64_t> second(100, 149);
 	auto result = OverlapResolver::resolve(first, second);
 
 	EXPECT_EQ(Overlap::OverStart, result.getOverlap());
 	EXPECT_EQ(2, result.getRanges().size());
 	EXPECT_EQ(second, result.getRanges()[0]);
-	EXPECT_EQ(tl_cpputils::Range<std::uint64_t>(150, 199), result.getRanges()[1]);
+	EXPECT_EQ(retdec::utils::Range<std::uint64_t>(150, 199), result.getRanges()[1]);
 }
 
 TEST_F(OverlapResolverTests,
 OverlapOverEndWorks) {
-	tl_cpputils::Range<std::uint64_t> first(100, 199);
-	tl_cpputils::Range<std::uint64_t> second(150, 249);
+	retdec::utils::Range<std::uint64_t> first(100, 199);
+	retdec::utils::Range<std::uint64_t> second(150, 249);
 	auto result = OverlapResolver::resolve(first, second);
 
 	EXPECT_EQ(Overlap::OverEnd, result.getOverlap());
 	EXPECT_EQ(2, result.getRanges().size());
-	EXPECT_EQ(tl_cpputils::Range<std::uint64_t>(100, 149), result.getRanges()[0]);
+	EXPECT_EQ(retdec::utils::Range<std::uint64_t>(100, 149), result.getRanges()[0]);
 	EXPECT_EQ(second, result.getRanges()[1]);
 }
 
 TEST_F(OverlapResolverTests,
 ExactOverlapOverEndWorks) {
-	tl_cpputils::Range<std::uint64_t> first(100, 199);
-	tl_cpputils::Range<std::uint64_t> second(199, 249);
+	retdec::utils::Range<std::uint64_t> first(100, 199);
+	retdec::utils::Range<std::uint64_t> second(199, 249);
 	auto result = OverlapResolver::resolve(first, second);
 
 	EXPECT_EQ(Overlap::OverEnd, result.getOverlap());
 	EXPECT_EQ(2, result.getRanges().size());
-	EXPECT_EQ(tl_cpputils::Range<std::uint64_t>(100, 198), result.getRanges()[0]);
+	EXPECT_EQ(retdec::utils::Range<std::uint64_t>(100, 198), result.getRanges()[0]);
 	EXPECT_EQ(second, result.getRanges()[1]);
 }
 
 TEST_F(OverlapResolverTests,
 OverlapInMiddleWorks) {
-	tl_cpputils::Range<std::uint64_t> first(100, 199);
-	tl_cpputils::Range<std::uint64_t> second(110, 169);
+	retdec::utils::Range<std::uint64_t> first(100, 199);
+	retdec::utils::Range<std::uint64_t> second(110, 169);
 	auto result = OverlapResolver::resolve(first, second);
 
 	EXPECT_EQ(Overlap::InMiddle, result.getOverlap());
 	EXPECT_EQ(3, result.getRanges().size());
-	EXPECT_EQ(tl_cpputils::Range<std::uint64_t>(100, 109), result.getRanges()[0]);
+	EXPECT_EQ(retdec::utils::Range<std::uint64_t>(100, 109), result.getRanges()[0]);
 	EXPECT_EQ(second, result.getRanges()[1]);
-	EXPECT_EQ(tl_cpputils::Range<std::uint64_t>(170, 199), result.getRanges()[2]);
+	EXPECT_EQ(retdec::utils::Range<std::uint64_t>(170, 199), result.getRanges()[2]);
 }
 
 } // namespace loader

@@ -12,11 +12,11 @@
 #include <llvm/IR/LLVMContext.h>
 #include <llvm/IR/Operator.h>
 
-#include "llvm-support/utils.h"
-#include "tl-cpputils/string.h"
-#include "bin2llvmir/analyses/symbolic_tree.h"
-#include "bin2llvmir/providers/config.h"
-#include "bin2llvmir/utils/defs.h"
+#include "retdec/llvm-support/utils.h"
+#include "retdec/utils/string.h"
+#include "retdec/bin2llvmir/analyses/symbolic_tree.h"
+#include "retdec/bin2llvmir/providers/config.h"
+#include "retdec/bin2llvmir/utils/defs.h"
 
 using namespace llvm_support;
 using namespace llvm;
@@ -589,10 +589,10 @@ std::string SymbolicTree::print(unsigned indent) const
 {
 	std::stringstream out;
 	if (Function* F = dyn_cast<Function>(value))
-		out << tl_cpputils::getIndentation(indent) << ">| "
+		out << retdec::utils::getIndentation(indent) << ">| "
 			<< F->getName().str() << std::endl;
 	else
-		out << tl_cpputils::getIndentation(indent) << ">| "
+		out << retdec::utils::getIndentation(indent) << ">| "
 			<< llvmObjToString(value) << std::endl;
 
 	++indent;

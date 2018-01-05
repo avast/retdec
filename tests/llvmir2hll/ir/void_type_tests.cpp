@@ -6,7 +6,7 @@
 
 #include <gtest/gtest.h>
 
-#include "llvmir2hll/ir/void_type.h"
+#include "retdec/llvmir2hll/ir/void_type.h"
 
 using namespace ::testing;
 

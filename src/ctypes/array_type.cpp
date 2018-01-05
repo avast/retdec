@@ -6,9 +6,9 @@
 
 #include <cassert>
 
-#include "ctypes/array_type.h"
-#include "ctypes/context.h"
-#include "ctypes/visitor.h"
+#include "retdec/ctypes/array_type.h"
+#include "retdec/ctypes/context.h"
+#include "retdec/ctypes/visitor.h"
 
 namespace ctypes {
 

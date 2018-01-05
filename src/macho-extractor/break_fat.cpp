@@ -11,11 +11,11 @@
 #include <rapidjson/document.h>
 #include <rapidjson/prettywriter.h>
 
-#include "tl-cpputils/conversion.h"
-#include "tl-cpputils/string.h"
-#include "macho-extractor/break_fat.h"
+#include "retdec/utils/conversion.h"
+#include "retdec/utils/string.h"
+#include "retdec/macho-extractor/break_fat.h"
 
-using namespace tl_cpputils;
+using namespace retdec::utils;
 using namespace llvm;
 using namespace llvm::MachO;
 using namespace llvm::object;

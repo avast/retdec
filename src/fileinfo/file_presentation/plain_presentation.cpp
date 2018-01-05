@@ -6,13 +6,13 @@
 
 #include <iostream>
 
-#include "tl-cpputils/string.h"
-#include "fileformat/utils/conversions.h"
+#include "retdec/utils/string.h"
+#include "retdec/fileformat/utils/conversions.h"
 #include "fileinfo/file_presentation/getters/format.h"
 #include "fileinfo/file_presentation/getters/plain_getters.h"
 #include "fileinfo/file_presentation/plain_presentation.h"
 
-using namespace tl_cpputils;
+using namespace retdec::utils;
 using namespace cpdetect;
 using namespace fileformat;
 

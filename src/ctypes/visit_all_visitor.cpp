@@ -4,20 +4,20 @@
 * @copyright (c) 2017 Avast Software, licensed under the MIT license
 */
 
-#include "ctypes/array_type.h"
-#include "ctypes/enum_type.h"
-#include "ctypes/floating_point_type.h"
-#include "ctypes/function_type.h"
-#include "ctypes/integral_type.h"
-#include "ctypes/member.h"
-#include "ctypes/pointer_type.h"
-#include "ctypes/struct_type.h"
-#include "ctypes/type.h"
-#include "ctypes/typedefed_type.h"
-#include "ctypes/union_type.h"
-#include "ctypes/unknown_type.h"
-#include "ctypes/visit_all_visitor.h"
-#include "ctypes/void_type.h"
+#include "retdec/ctypes/array_type.h"
+#include "retdec/ctypes/enum_type.h"
+#include "retdec/ctypes/floating_point_type.h"
+#include "retdec/ctypes/function_type.h"
+#include "retdec/ctypes/integral_type.h"
+#include "retdec/ctypes/member.h"
+#include "retdec/ctypes/pointer_type.h"
+#include "retdec/ctypes/struct_type.h"
+#include "retdec/ctypes/type.h"
+#include "retdec/ctypes/typedefed_type.h"
+#include "retdec/ctypes/union_type.h"
+#include "retdec/ctypes/unknown_type.h"
+#include "retdec/ctypes/visit_all_visitor.h"
+#include "retdec/ctypes/void_type.h"
 
 namespace ctypes {
 

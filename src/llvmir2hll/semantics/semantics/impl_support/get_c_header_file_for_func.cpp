@@ -4,7 +4,7 @@
 * @copyright (c) 2017 Avast Software, licensed under the MIT license
 */
 
-#include "llvmir2hll/semantics/semantics/impl_support/get_c_header_file_for_func.h"
+#include "retdec/llvmir2hll/semantics/semantics/impl_support/get_c_header_file_for_func.h"
 
 namespace llvmir2hll {
 namespace semantics {

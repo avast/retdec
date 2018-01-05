@@ -6,15 +6,15 @@
 
 #include <fstream>
 
-#include "tl-cpputils/alignment.h"
-#include "tl-cpputils/file_io.h"
-#include "fileformat/fileformat.h"
+#include "retdec/utils/alignment.h"
+#include "retdec/utils/file_io.h"
+#include "retdec/fileformat/fileformat.h"
 #include "unpackertool/plugins/upx/decompressors/decompressors.h"
 #include "unpackertool/plugins/upx/macho/macho_upx_stub.h"
 #include "unpackertool/plugins/upx/unfilter.h"
 #include "unpackertool/plugins/upx/upx.h"
 #include "unpackertool/plugins/upx/upx_exceptions.h"
-#include "unpacker/dynamic_buffer.h"
+#include "retdec/unpacker/dynamic_buffer.h"
 
 using namespace unpacker;
 
@@ -111,7 +111,7 @@ template <int bits> void MachOUpxStub<bits>::unpack(const std::string& outputFil
 			if (archIndex == 0)
 				offset = machoFormat->getChosenArchitectureOffset();
 			else
-				offset = tl_cpputils::alignUp(output.tellp(), 0x1000);
+				offset = retdec::utils::alignUp(output.tellp(), 0x1000);
 
 			this_plugin()->log("Unpacking architecture ", archToName(machoFormat->getTargetArchitecture()), " from universal Mach-O.");
 
@@ -137,8 +137,8 @@ template <int bits> void MachOUpxStub<bits>::unpack(const std::string& outputFil
 		output.seekp(0, std::ios::beg);
 
 		std::vector<std::uint8_t> fatHeaderBytes;
-		tl_cpputils::readFile(input, fatHeaderBytes, input.tellg(), FatHeaderEntriesOffset + archIndex * FatHeaderEntrySize);
-		DynamicBuffer fatHeader(fatHeaderBytes, tl_cpputils::Endianness::BIG);
+		retdec::utils::readFile(input, fatHeaderBytes, input.tellg(), FatHeaderEntriesOffset + archIndex * FatHeaderEntrySize);
+		DynamicBuffer fatHeader(fatHeaderBytes, retdec::utils::Endianness::BIG);
 
 		for (std::uint32_t i = 0; i < archIndex; ++i)
 		{
@@ -146,7 +146,7 @@ template <int bits> void MachOUpxStub<bits>::unpack(const std::string& outputFil
 			fatHeader.write<std::uint32_t>(offsetAndSize[i].second, FatHeaderEntriesOffset + FatHeaderArchSizeOffset + i * FatHeaderEntrySize);
 		}
 
-		tl_cpputils::writeFile(output, fatHeader.getBuffer());
+		retdec::utils::writeFile(output, fatHeader.getBuffer());
 	}
 
 	input.close();
@@ -184,7 +184,7 @@ template <int bits> void MachOUpxStub<bits>::unpack(std::ifstream& inputFile, st
 	// First read packed original Mach-O header and unpack it.
 	DynamicBuffer packedOriginalHeader = readNextBlock(inputFile);
 	DynamicBuffer originalHeaderData = unpackBlock(packedOriginalHeader);
-	tl_cpputils::writeFile(outputFile, originalHeaderData.getBuffer(), baseOutputOffset);
+	retdec::utils::writeFile(outputFile, originalHeaderData.getBuffer(), baseOutputOffset);
 
 	// Extract number of commands from the original header.
 	MachOHeaderType machoHeader;
@@ -229,7 +229,7 @@ template <int bits> void MachOUpxStub<bits>::unpack(std::ifstream& inputFile, st
 		DynamicBuffer unpackedData = unpackBlock(packedBlock);
 
 		// Segments are always written at the position of fileoff with first segment shifted by the specific offset.
-		tl_cpputils::writeFile(outputFile, unpackedData.getBuffer(), baseOutputOffset + command.fileoff + firstSegmentOffset);
+		retdec::utils::writeFile(outputFile, unpackedData.getBuffer(), baseOutputOffset + command.fileoff + firstSegmentOffset);
 
 		// Shift offset of the first segment will be reset after the first iteration so all other segments will have its original file offset.
 		firstSegmentOffset = 0;
@@ -245,7 +245,7 @@ template <int bits> std::uint32_t MachOUpxStub<bits>::getFirstBlockOffset(std::i
 
 	// Seek to the possible first block offset and read next 256 bytes.
 	std::vector<std::uint8_t> firstBlockBytes;
-	tl_cpputils::readFile(inputFile, firstBlockBytes, machoFormat->getChosenArchitectureOffset() + firstBlockOffset, 256);
+	retdec::utils::readFile(inputFile, firstBlockBytes, machoFormat->getChosenArchitectureOffset() + firstBlockOffset, 256);
 
 	// Find first non-zero byte.
 	auto itr = std::find_if(firstBlockBytes.begin(), firstBlockBytes.end(), [](std::uint8_t b) { return b != 0; });
@@ -261,7 +261,7 @@ template <int bits> DynamicBuffer MachOUpxStub<bits>::readNextBlock(std::ifstrea
 
 	// Read the block header.
 	std::vector<std::uint8_t> blockHeaderBytes;
-	tl_cpputils::readFile(inputFile, blockHeaderBytes, blockFilePos, PackedBlockHeaderSize);
+	retdec::utils::readFile(inputFile, blockHeaderBytes, blockFilePos, PackedBlockHeaderSize);
 	DynamicBuffer blockHeader(blockHeaderBytes, _file->getEndianness());
 
 	// Extract size of packed and unpacked data.
@@ -274,7 +274,7 @@ template <int bits> DynamicBuffer MachOUpxStub<bits>::readNextBlock(std::ifstrea
 
 	// Read the whole block as we know the size already.
 	std::vector<std::uint8_t> packedBlockBytes;
-	tl_cpputils::readFile(inputFile, packedBlockBytes, blockFilePos, PackedBlockHeaderSize + packedDataSize);
+	retdec::utils::readFile(inputFile, packedBlockBytes, blockFilePos, PackedBlockHeaderSize + packedDataSize);
 
 	return DynamicBuffer(packedBlockBytes, _file->getEndianness());
 }

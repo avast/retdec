@@ -29,6 +29,6 @@ set(BIN2LLVMIR_TESTS_SOURCES
 )
 
 add_executable(bin2llvmir-tests ${BIN2LLVMIR_TESTS_SOURCES})
-target_link_libraries(bin2llvmir-tests bin2llvmir tl-cpputils gmock_main)
+target_link_libraries(bin2llvmir-tests bin2llvmir retdec-utils gmock_main)
 target_include_directories(bin2llvmir-tests PUBLIC ${PROJECT_SOURCE_DIR}/tests/)
 install(TARGETS bin2llvmir-tests RUNTIME DESTINATION bin/unit-tests)

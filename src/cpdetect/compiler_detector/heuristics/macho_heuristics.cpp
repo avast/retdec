@@ -4,7 +4,7 @@
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */
 
-#include "cpdetect/compiler_detector/heuristics/macho_heuristics.h"
+#include "retdec/cpdetect/compiler_detector/heuristics/macho_heuristics.h"
 
 using namespace fileformat;
 

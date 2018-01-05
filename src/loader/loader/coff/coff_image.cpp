@@ -8,9 +8,9 @@
 #include <sstream>
 #include <vector>
 
-#include "fileformat/fileformat.h"
-#include "loader/loader/coff/coff_image.h"
-#include "loader/utils/range.h"
+#include "retdec/fileformat/fileformat.h"
+#include "retdec/loader/loader/coff/coff_image.h"
+#include "retdec/loader/utils/range.h"
 
 namespace loader {
 

@@ -6,9 +6,9 @@
 
 #include <cassert>
 
-#include "ctypes/context.h"
-#include "ctypes/typedefed_type.h"
-#include "ctypes/visitor.h"
+#include "retdec/ctypes/context.h"
+#include "retdec/ctypes/typedefed_type.h"
+#include "retdec/ctypes/visitor.h"
 
 namespace ctypes {
 

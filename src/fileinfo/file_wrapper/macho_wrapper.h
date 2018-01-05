@@ -7,7 +7,7 @@
 #ifndef FILEINFO_FILE_WRAPPER_MACHO_WRAPPER_H
 #define FILEINFO_FILE_WRAPPER_MACHO_WRAPPER_H
 
-#include "fileformat/file_format/macho/macho_format.h"
+#include "retdec/fileformat/file_format/macho/macho_format.h"
 
 namespace fileinfo {
 

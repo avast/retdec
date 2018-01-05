@@ -9,8 +9,8 @@
 #include <sstream>
 #include <vector>
 
-#include "fileformat/fileformat.h"
-#include "loader/loader/raw_data/raw_data_image.h"
+#include "retdec/fileformat/fileformat.h"
+#include "retdec/loader/loader/raw_data/raw_data_image.h"
 
 namespace loader {
 

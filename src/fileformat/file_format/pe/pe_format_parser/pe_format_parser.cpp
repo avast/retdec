@@ -4,7 +4,7 @@
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */
 
-#include "fileformat/file_format/pe/pe_format_parser/pe_format_parser.h"
+#include "retdec/fileformat/file_format/pe/pe_format_parser/pe_format_parser.h"
 
 namespace fileformat {
 

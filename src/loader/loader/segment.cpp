@@ -7,8 +7,8 @@
 #include <algorithm>
 #include <cstring>
 
-#include "tl-cpputils/conversion.h"
-#include "loader/loader/segment.h"
+#include "retdec/utils/conversion.h"
+#include "retdec/loader/loader/segment.h"
 
 namespace loader {
 
@@ -92,9 +92,9 @@ std::uint64_t Segment::getPhysicalSize() const
  *
  * @return Address range.
  */
-tl_cpputils::Range<std::uint64_t> Segment::getAddressRange() const
+retdec::utils::Range<std::uint64_t> Segment::getAddressRange() const
 {
-	return tl_cpputils::Range<std::uint64_t>(getAddress(), getEndAddress());
+	return retdec::utils::Range<std::uint64_t>(getAddress(), getEndAddress());
 }
 
 /**
@@ -102,9 +102,9 @@ tl_cpputils::Range<std::uint64_t> Segment::getAddressRange() const
  *
  * @return Address range.
  */
-tl_cpputils::Range<std::uint64_t> Segment::getPhysicalAddressRange() const
+retdec::utils::Range<std::uint64_t> Segment::getPhysicalAddressRange() const
 {
-	return tl_cpputils::Range<std::uint64_t>(getAddress(), getPhysicalEndAddress());
+	return retdec::utils::Range<std::uint64_t>(getAddress(), getPhysicalEndAddress());
 }
 
 /**
@@ -112,7 +112,7 @@ tl_cpputils::Range<std::uint64_t> Segment::getPhysicalAddressRange() const
  *
  * @return List of address ranges.
  */
-const tl_cpputils::RangeContainer<std::uint64_t>& Segment::getNonDecodableAddressRanges() const
+const retdec::utils::RangeContainer<std::uint64_t>& Segment::getNonDecodableAddressRanges() const
 {
 	return _nonDecodableRanges;
 }
@@ -226,7 +226,7 @@ bool Segment::getBits(std::string& result, std::uint64_t addressOffset, std::uin
 	if (!getBytes(bytes, addressOffset, bytesCount))
 		return false;
 
-	result = tl_cpputils::bytesToBits(bytes);
+	result = retdec::utils::bytesToBits(bytes);
 	return true;
 }
 
@@ -289,7 +289,7 @@ void Segment::shrink(std::uint64_t newAddress, std::uint64_t newSize)
  *
  * @param range Range to add.
  */
-void Segment::addNonDecodableRange(tl_cpputils::Range<std::uint64_t> range)
+void Segment::addNonDecodableRange(retdec::utils::Range<std::uint64_t> range)
 {
 	if (!range.contains(getAddress()) && !range.contains(getEndAddress()))
 		return;

@@ -14,10 +14,10 @@
 
 #include <elfio/elfio.hpp>
 
-#include "fileformat/fileformat.h"
-#include "loader/loader/elf/elf_image.h"
-#include "loader/utils/overlap_resolver.h"
-#include "loader/utils/range.h"
+#include "retdec/fileformat/fileformat.h"
+#include "retdec/loader/loader/elf/elf_image.h"
+#include "retdec/loader/utils/overlap_resolver.h"
+#include "retdec/loader/utils/range.h"
 
 namespace loader {
 
@@ -237,7 +237,7 @@ ElfImage::SegmentToSectionsTable ElfImage::createSegmentToSectionsTable()
 		std::uint64_t address = elfSeg->getAddress();
 		std::uint64_t fileOffset = elfSeg->getOffset();
 		std::uint64_t fileSize = elfSeg->getLoadedSize();
-		tl_cpputils::Range<std::uint64_t> segRange = tl_cpputils::Range<std::uint64_t>(address, address + (memSize ? memSize - 1 : 0));
+		retdec::utils::Range<std::uint64_t> segRange = retdec::utils::Range<std::uint64_t>(address, address + (memSize ? memSize - 1 : 0));
 
 		for (const auto& sec : sections)
 		{
@@ -266,7 +266,7 @@ ElfImage::SegmentToSectionsTable ElfImage::createSegmentToSectionsTable()
 			std::uint64_t start = elfSec->getAddress();
 			std::uint64_t end = elfSec->getAddress() + (elfSec->getLoadedSize() ? elfSec->getLoadedSize() - 1 : 0);
 
-			auto overlapResult = OverlapResolver::resolve(segRange, tl_cpputils::Range<std::uint64_t>(start, end));
+			auto overlapResult = OverlapResolver::resolve(segRange, retdec::utils::Range<std::uint64_t>(start, end));
 			switch (overlapResult.getOverlap())
 			{
 				// In case of no overlap, this section does not belong to the current segment, skip it
@@ -310,7 +310,7 @@ const Segment* ElfImage::addSegment(const fileformat::SecSeg* secSeg, std::uint6
 	std::vector<Segment*> segmentsToRemove;
 	for (const auto& segment : getSegments())
 	{
-		auto overlapResult = OverlapResolver::resolve(segment->getAddressRange(), tl_cpputils::Range<std::uint64_t>(start, end));
+		auto overlapResult = OverlapResolver::resolve(segment->getAddressRange(), retdec::utils::Range<std::uint64_t>(start, end));
 		switch (overlapResult.getOverlap())
 		{
 			// In case of no overlap, just do nothing.
@@ -323,14 +323,14 @@ const Segment* ElfImage::addSegment(const fileformat::SecSeg* secSeg, std::uint6
 			// Shrink existing segment using the second range from the result.
 			case Overlap::OverStart:
 			{
-				const tl_cpputils::Range<std::uint64_t>& newRange = overlapResult.getRanges()[1];
+				const retdec::utils::Range<std::uint64_t>& newRange = overlapResult.getRanges()[1];
 				segment->shrink(newRange.getStart(), newRange.getSize());
 				break;
 			}
 			// Shrink existing segment using the first range from the result.
 			case Overlap::OverEnd:
 			{
-				const tl_cpputils::Range<std::uint64_t>& newRange = overlapResult.getRanges()[0];
+				const retdec::utils::Range<std::uint64_t>& newRange = overlapResult.getRanges()[0];
 				segment->shrink(newRange.getStart(), newRange.getSize());
 				break;
 			}
@@ -338,8 +338,8 @@ const Segment* ElfImage::addSegment(const fileformat::SecSeg* secSeg, std::uint6
 			// Shrink the copied one with the third range from the result.
 			case Overlap::InMiddle:
 			{
-				const tl_cpputils::Range<std::uint64_t>& newRange1 = overlapResult.getRanges()[0];
-				const tl_cpputils::Range<std::uint64_t>& newRange2 = overlapResult.getRanges()[2];
+				const retdec::utils::Range<std::uint64_t>& newRange1 = overlapResult.getRanges()[0];
+				const retdec::utils::Range<std::uint64_t>& newRange2 = overlapResult.getRanges()[2];
 
 				auto segmentCopy = std::make_unique<Segment>(*segment.get());
 				segment->shrink(newRange1.getStart(), newRange1.getSize());
@@ -433,7 +433,7 @@ void ElfImage::fixBssSegments()
 					if (static_cast<const fileformat::ElfSegment*>(phdr)->getElfType() != PT_LOAD)
 						continue;
 
-					if (tl_cpputils::Range<std::uint64_t>(phdr->getAddress(), phdr->getEndAddress()).contains(bssSegment->getAddress()))
+					if (retdec::utils::Range<std::uint64_t>(phdr->getAddress(), phdr->getEndAddress()).contains(bssSegment->getAddress()))
 						programHeader = static_cast<const fileformat::ElfSegment*>(phdr);
 				}
 

@@ -4,7 +4,7 @@
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */
 
-#include "bin2llvmir/providers/demangler.h"
+#include "retdec/bin2llvmir/providers/demangler.h"
 
 using namespace llvm;
 
@@ -20,7 +20,7 @@ std::map<Module*, DemanglerProvider::Demangler> DemanglerProvider::_module2deman
  */
 demangler::CDemangler* DemanglerProvider::addDemangler(
 		llvm::Module* m,
-		const retdec_config::ToolInfoContainer& t)
+		const retdec::config::ToolInfoContainer& t)
 {
 	std::unique_ptr<demangler::CDemangler> d;
 

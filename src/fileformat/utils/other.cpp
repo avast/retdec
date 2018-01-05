@@ -6,10 +6,10 @@
 
 #include <map>
 
-#include "tl-cpputils/container.h"
-#include "fileformat/utils/other.h"
+#include "retdec/utils/container.h"
+#include "retdec/fileformat/utils/other.h"
 
-using namespace tl_cpputils;
+using namespace retdec::utils;
 
 namespace fileformat {
 

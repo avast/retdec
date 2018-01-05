@@ -6,9 +6,9 @@
 
 #include <llvm/ADT/StringExtras.h>
 
-#include "llvmir2hll/support/debug.h"
-#include "llvmir2hll/var_name_gen/var_name_gen_factory.h"
-#include "llvmir2hll/var_name_gen/var_name_gens/num_var_name_gen.h"
+#include "retdec/llvmir2hll/support/debug.h"
+#include "retdec/llvmir2hll/var_name_gen/var_name_gen_factory.h"
+#include "retdec/llvmir2hll/var_name_gen/var_name_gens/num_var_name_gen.h"
 
 namespace llvmir2hll {
 

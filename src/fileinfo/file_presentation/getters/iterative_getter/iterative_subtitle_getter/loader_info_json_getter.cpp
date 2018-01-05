@@ -4,9 +4,9 @@
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */
 
-#include "tl-cpputils/string.h"
-#include "fileformat/utils/conversions.h"
-#include "fileformat/utils/other.h"
+#include "retdec/utils/string.h"
+#include "retdec/fileformat/utils/conversions.h"
+#include "retdec/fileformat/utils/other.h"
 #include "fileinfo/file_presentation/getters/format.h"
 #include "fileinfo/file_presentation/getters/iterative_getter/iterative_subtitle_getter/loader_info_json_getter.h"
 
@@ -61,7 +61,7 @@ bool LoaderInfoJsonGetter::getRecord(std::size_t structIndex, std::size_t recInd
 	record.clear();
 	const LoadedSegment &segment = fileinfo.getLoadedSegment(recIndex);
 	record.push_back(segment.getIndexStr(std::dec));
-	record.push_back(tl_cpputils::replaceNonprintableChars(segment.getName()));
+	record.push_back(retdec::utils::replaceNonprintableChars(segment.getName()));
 	record.push_back(segment.getAddressStr(hexWithPrefix));
 	record.push_back(segment.getSizeStr(hexWithPrefix));
 

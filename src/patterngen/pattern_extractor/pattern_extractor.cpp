@@ -4,14 +4,14 @@
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */
 
-#include "tl-cpputils/conversion.h"
-#include "patterngen/pattern_extractor/pattern_extractor.h"
-#include "fileformat/file_format/elf/elf_format.h"
-#include "fileformat/file_format/file_format.h"
-#include "fileformat/format_factory.h"
-#include "fileformat/types/symbol_table/elf_symbol.h"
+#include "retdec/utils/conversion.h"
+#include "retdec/patterngen/pattern_extractor/pattern_extractor.h"
+#include "retdec/fileformat/file_format/elf/elf_format.h"
+#include "retdec/fileformat/file_format/file_format.h"
+#include "retdec/fileformat/format_factory.h"
+#include "retdec/fileformat/types/symbol_table/elf_symbol.h"
 
-using namespace tl_cpputils;
+using namespace retdec::utils;
 using namespace fileformat;
 
 constexpr LoadFlags loadFlags =

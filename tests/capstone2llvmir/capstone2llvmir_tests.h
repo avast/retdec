@@ -16,8 +16,8 @@
 #include <gtest/gtest.h>
 #include <keystone/keystone.h>
 
-#include "capstone2llvmir/capstone2llvmir.h"
-#include "llvmir-emul/llvmir_emul.h"
+#include "retdec/capstone2llvmir/capstone2llvmir.h"
+#include "retdec/llvmir-emul/llvmir_emul.h"
 
 /**
  * Print any LLVM object which implements @c print(llvm::raw_string_ostream&)

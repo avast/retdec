@@ -4,9 +4,9 @@
 * @copyright (c) 2017 Avast Software, licensed under the MIT license
 */
 
-#include "llvmir2hll/analysis/alias_analysis/alias_analysis.h"
-#include "llvmir2hll/ir/module.h"
-#include "llvmir2hll/support/debug.h"
+#include "retdec/llvmir2hll/analysis/alias_analysis/alias_analysis.h"
+#include "retdec/llvmir2hll/ir/module.h"
+#include "retdec/llvmir2hll/support/debug.h"
 
 namespace llvmir2hll {
 

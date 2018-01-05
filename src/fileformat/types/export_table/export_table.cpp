@@ -4,10 +4,10 @@
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */
 
-#include "tl-cpputils/conversion.h"
-#include "fileformat/types/export_table/export_table.h"
+#include "retdec/utils/conversion.h"
+#include "retdec/fileformat/types/export_table/export_table.h"
 
-using namespace tl_cpputils;
+using namespace retdec::utils;
 
 namespace fileformat {
 

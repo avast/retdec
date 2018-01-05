@@ -8,7 +8,7 @@
 
 #include <gtest/gtest.h>
 
-#include "ctypes/call_convention.h"
+#include "retdec/ctypes/call_convention.h"
 
 using namespace ::testing;
 

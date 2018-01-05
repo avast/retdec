@@ -4,10 +4,10 @@
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */
 
-#include "tl-cpputils/conversion.h"
+#include "retdec/utils/conversion.h"
 #include "fileinfo/file_presentation/getters/iterative_getter/iterative_distribution_getter/rich_header_plain_getter.h"
 
-using namespace tl_cpputils;
+using namespace retdec::utils;
 using namespace fileformat;
 
 namespace fileinfo {

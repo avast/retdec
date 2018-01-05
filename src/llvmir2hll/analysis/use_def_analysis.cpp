@@ -4,14 +4,14 @@
 * @copyright (c) 2017 Avast Software, licensed under the MIT license
 */
 
-#include "llvmir2hll/analysis/def_use_analysis.h"
-#include "llvmir2hll/analysis/use_def_analysis.h"
-#include "llvmir2hll/graphs/cfg/cfg_builder.h"
-#include "llvmir2hll/ir/function.h"
-#include "llvmir2hll/ir/module.h"
-#include "llvmir2hll/ir/statement.h"
-#include "llvmir2hll/ir/variable.h"
-#include "llvmir2hll/support/debug.h"
+#include "retdec/llvmir2hll/analysis/def_use_analysis.h"
+#include "retdec/llvmir2hll/analysis/use_def_analysis.h"
+#include "retdec/llvmir2hll/graphs/cfg/cfg_builder.h"
+#include "retdec/llvmir2hll/ir/function.h"
+#include "retdec/llvmir2hll/ir/module.h"
+#include "retdec/llvmir2hll/ir/statement.h"
+#include "retdec/llvmir2hll/ir/variable.h"
+#include "retdec/llvmir2hll/support/debug.h"
 
 namespace llvmir2hll {
 

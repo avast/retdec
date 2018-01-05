@@ -7,7 +7,7 @@
 #include <algorithm>
 #include <sstream>
 
-#include "fileformat/types/resource_table/resource_tree.h"
+#include "retdec/fileformat/types/resource_table/resource_tree.h"
 
 namespace fileformat {
 

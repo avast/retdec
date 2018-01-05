@@ -4,8 +4,8 @@
 * @copyright (c) 2017 Avast Software, licensed under the MIT license
 */
 
-#include "ctypes/visitor.h"
-#include "ctypes/void_type.h"
+#include "retdec/ctypes/visitor.h"
+#include "retdec/ctypes/void_type.h"
 
 namespace ctypes {
 

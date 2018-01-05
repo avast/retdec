@@ -9,8 +9,8 @@
 
 #include <memory>
 
-#include "loader/loader.h"
-#include "unpacker/plugin.h"
+#include "retdec/loader/loader.h"
+#include "retdec/unpacker/plugin.h"
 #include "unpackertool/plugins/upx/upx_stub.h"
 
 namespace unpackertool {

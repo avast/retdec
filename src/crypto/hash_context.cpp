@@ -6,15 +6,15 @@
 
 #include <unordered_map>
 
-#include "crypto/hash_context.h"
-#include "tl-cpputils/container.h"
-#include "tl-cpputils/conversion.h"
+#include "retdec/crypto/hash_context.h"
+#include "retdec/utils/container.h"
+#include "retdec/utils/conversion.h"
 
 namespace crypto {
 
 namespace {
 
-const std::unordered_map<HashAlgorithm, const EVP_MD*, tl_cpputils::EnumClassKeyHash> opensslAlgos =
+const std::unordered_map<HashAlgorithm, const EVP_MD*, retdec::utils::EnumClassKeyHash> opensslAlgos =
 {
 	{ HashAlgorithm::Sha1,   EVP_sha1()   },
 	{ HashAlgorithm::Sha256, EVP_sha256() },
@@ -97,7 +97,7 @@ std::string HashContext::getHash()
 		return {};
 
 	std::string ret;
-	tl_cpputils::bytesToHexString(hash, ret);
+	retdec::utils::bytesToHexString(hash, ret);
 	return ret;
 }
 

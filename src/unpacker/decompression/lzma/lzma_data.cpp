@@ -7,7 +7,7 @@
 
 #include <limits>
 
-#include "unpacker/decompression/lzma/lzma_data.h"
+#include "retdec/unpacker/decompression/lzma/lzma_data.h"
 
 namespace unpacker {
 

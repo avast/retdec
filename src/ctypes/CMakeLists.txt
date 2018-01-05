@@ -31,5 +31,5 @@ set(CTYPES_SOURCES
 )
 
 add_library(ctypes STATIC ${CTYPES_SOURCES})
-target_link_libraries(ctypes tl-cpputils)
+target_link_libraries(ctypes retdec-utils)
 target_include_directories(ctypes PUBLIC ${PROJECT_SOURCE_DIR}/include/)

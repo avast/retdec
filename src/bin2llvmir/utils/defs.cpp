@@ -4,7 +4,7 @@
 * @copyright (c) 2017 Avast Software, licensed under the MIT license
 */
 
-#include "bin2llvmir/utils/defs.h"
+#include "retdec/bin2llvmir/utils/defs.h"
 
 using namespace llvm;
 

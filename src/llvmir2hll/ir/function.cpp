@@ -4,20 +4,20 @@
 * @copyright (c) 2017 Avast Software, licensed under the MIT license
 */
 
-#include "llvmir2hll/ir/empty_stmt.h"
-#include "llvmir2hll/ir/function.h"
-#include "llvmir2hll/ir/int_type.h"
-#include "llvmir2hll/ir/statement.h"
-#include "llvmir2hll/ir/type.h"
-#include "llvmir2hll/ir/variable.h"
-#include "llvmir2hll/support/debug.h"
-#include "llvmir2hll/support/visitor.h"
-#include "tl-cpputils/container.h"
+#include "retdec/llvmir2hll/ir/empty_stmt.h"
+#include "retdec/llvmir2hll/ir/function.h"
+#include "retdec/llvmir2hll/ir/int_type.h"
+#include "retdec/llvmir2hll/ir/statement.h"
+#include "retdec/llvmir2hll/ir/type.h"
+#include "retdec/llvmir2hll/ir/variable.h"
+#include "retdec/llvmir2hll/support/debug.h"
+#include "retdec/llvmir2hll/support/visitor.h"
+#include "retdec/utils/container.h"
 
-using tl_cpputils::getNthItem;
-using tl_cpputils::hasItem;
-using tl_cpputils::removeItem;
-using tl_cpputils::setDifference;
+using retdec::utils::getNthItem;
+using retdec::utils::hasItem;
+using retdec::utils::removeItem;
+using retdec::utils::setDifference;
 
 namespace llvmir2hll {
 

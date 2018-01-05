@@ -4,13 +4,13 @@
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */
 
-#include "tl-cpputils/array.h"
-#include "tl-cpputils/conversion.h"
-#include "fileformat/types/symbol_table/elf_symbol.h"
-#include "fileformat/utils/other.h"
+#include "retdec/utils/array.h"
+#include "retdec/utils/conversion.h"
+#include "retdec/fileformat/types/symbol_table/elf_symbol.h"
+#include "retdec/fileformat/utils/other.h"
 #include "fileinfo/file_detector/elf_detector.h"
 
-using namespace tl_cpputils;
+using namespace retdec::utils;
 using namespace ELFIO;
 using namespace cpdetect;
 using namespace fileformat;

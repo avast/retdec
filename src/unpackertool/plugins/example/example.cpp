@@ -4,8 +4,8 @@
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */
 
-#include "unpacker/plugin.h"
-#include "unpacker/unpacker_exception.h"
+#include "retdec/unpacker/plugin.h"
+#include "retdec/unpacker/unpacker_exception.h"
 
 using namespace unpacker;
 

@@ -6,12 +6,12 @@
 
 #include <unordered_map>
 
-#include "tl-cpputils/container.h"
-#include "tl-cpputils/string.h"
-#include "cpdetect/errors.h"
-#include "fileformat/utils/other.h"
+#include "retdec/utils/container.h"
+#include "retdec/utils/string.h"
+#include "retdec/cpdetect/errors.h"
+#include "retdec/fileformat/utils/other.h"
 
-using namespace tl_cpputils;
+using namespace retdec::utils;
 using namespace fileformat;
 
 namespace cpdetect {
@@ -27,7 +27,7 @@ const std::string defaultError = "Error: Unknown error.";
 /**
  * Error messages of library
  */
-const std::unordered_map<ReturnCode, std::string, tl_cpputils::EnumClassKeyHash> errorMessages =
+const std::unordered_map<ReturnCode, std::string, retdec::utils::EnumClassKeyHash> errorMessages =
 {
 	{ ReturnCode::OK,                    "" },
 	{ ReturnCode::ARG,                   "Error: Invalid arguments." },

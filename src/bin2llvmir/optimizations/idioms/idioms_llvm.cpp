@@ -6,7 +6,7 @@
 
 #include <llvm/IR/PatternMatch.h>
 
-#include "bin2llvmir/optimizations/idioms/idioms_llvm.h"
+#include "retdec/bin2llvmir/optimizations/idioms/idioms_llvm.h"
 
 using namespace llvm;
 using namespace PatternMatch;

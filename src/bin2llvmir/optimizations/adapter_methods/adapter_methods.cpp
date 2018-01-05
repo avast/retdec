@@ -15,10 +15,10 @@
 #include <llvm/IR/Value.h>
 #include <llvm/Support/raw_ostream.h>
 
-#include "bin2llvmir/optimizations/adapter_methods/adapter_methods.h"
-#include "bin2llvmir/utils/defs.h"
+#include "retdec/bin2llvmir/optimizations/adapter_methods/adapter_methods.h"
+#include "retdec/bin2llvmir/utils/defs.h"
 #define debug_enabled false
-#include "llvm-support/utils.h"
+#include "retdec/llvm-support/utils.h"
 
 using namespace llvm_support;
 using namespace llvm;

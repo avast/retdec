@@ -14,13 +14,13 @@
 #include <llvm/IR/Instructions.h>
 
 #define debug_enabled false
-#include "tl-cpputils/string.h"
-#include "bin2llvmir/optimizations/stack_protect/stack_protect.h"
-#include "llvm-support/utils.h"
-#include "bin2llvmir/utils/type.h"
+#include "retdec/utils/string.h"
+#include "retdec/bin2llvmir/optimizations/stack_protect/stack_protect.h"
+#include "retdec/llvm-support/utils.h"
+#include "retdec/bin2llvmir/utils/type.h"
 
 using namespace llvm_support;
-using namespace tl_cpputils;
+using namespace retdec::utils;
 using namespace llvm;
 
 namespace bin2llvmir {

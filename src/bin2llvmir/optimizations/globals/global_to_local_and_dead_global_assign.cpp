@@ -13,16 +13,16 @@
 #include <llvm/Support/CommandLine.h>
 #include <llvm/Support/raw_ostream.h>
 
-#include "tl-cpputils/container.h"
-#include "bin2llvmir/analyses/uses_analysis.h"
-#include "bin2llvmir/optimizations/globals/dead_global_assign.h"
-#include "bin2llvmir/optimizations/globals/global_to_local.h"
-#include "bin2llvmir/optimizations/globals/global_to_local_and_dead_global_assign.h"
-#include "bin2llvmir/utils/instruction.h"
+#include "retdec/utils/container.h"
+#include "retdec/bin2llvmir/analyses/uses_analysis.h"
+#include "retdec/bin2llvmir/optimizations/globals/dead_global_assign.h"
+#include "retdec/bin2llvmir/optimizations/globals/global_to_local.h"
+#include "retdec/bin2llvmir/optimizations/globals/global_to_local_and_dead_global_assign.h"
+#include "retdec/bin2llvmir/utils/instruction.h"
 
 #define DEBUG_TYPE "global-to-local-and-dead-global-assign"
 
-using namespace tl_cpputils;
+using namespace retdec::utils;
 using namespace llvm;
 
 namespace bin2llvmir {
@@ -198,7 +198,7 @@ void addMappingOfLocalVarToGlobalVarInConfig(Config* config, const llvm::Functio
 		return;
 	}
 
-	retdec_config::Object localVar(localVarName, retdec_config::Storage::inRegister(globalVarName));
+	retdec::config::Object localVar(localVarName, retdec::config::Storage::inRegister(globalVarName));
 	f->locals.insert(localVar);
 }
 

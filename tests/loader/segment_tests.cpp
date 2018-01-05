@@ -6,7 +6,7 @@
 
 #include <gtest/gtest.h>
 
-#include "loader/loader/segment.h"
+#include "retdec/loader/loader/segment.h"
 
 using namespace ::testing;
 
@@ -115,7 +115,7 @@ TEST_F(SegmentTests,
 GetAddressRangeWorks) {
 	Segment seg(nullptr, 0x1000, 0x100, nullptr);
 
-	tl_cpputils::Range<std::uint64_t> range = seg.getAddressRange();
+	retdec::utils::Range<std::uint64_t> range = seg.getAddressRange();
 
 	EXPECT_EQ(0x1000, range.getStart());
 	EXPECT_EQ(0x10FF, range.getEnd());

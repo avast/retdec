@@ -8,10 +8,10 @@
 
 #include <gtest/gtest.h>
 
-#include "ctypes/context.h"
-#include "ctypes/member.h"
-#include "ctypes/union_type.h"
-#include "ctypes/void_type.h"
+#include "retdec/ctypes/context.h"
+#include "retdec/ctypes/member.h"
+#include "retdec/ctypes/union_type.h"
+#include "retdec/ctypes/void_type.h"
 
 using namespace ::testing;
 

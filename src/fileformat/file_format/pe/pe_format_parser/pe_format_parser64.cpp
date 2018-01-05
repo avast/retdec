@@ -4,9 +4,9 @@
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */
 
-#include "fileformat/file_format/file_format.h"
-#include "fileformat/file_format/pe/pe_format_parser/pe_format_parser64.h"
-#include "fileformat/file_format/pe/pe_template.h"
+#include "retdec/fileformat/file_format/file_format.h"
+#include "retdec/fileformat/file_format/pe/pe_format_parser/pe_format_parser64.h"
+#include "retdec/fileformat/file_format/pe/pe_template.h"
 
 using namespace PeLib;
 
@@ -312,22 +312,22 @@ unsigned long long PeFormatParser64::getSecurityDirSize() const
 	return peSecurityDirSize(peHeader);
 }
 
-tl_cpputils::RangeContainer<std::uint64_t> PeFormatParser64::getImportDirectoryOccupiedAddresses() const
+retdec::utils::RangeContainer<std::uint64_t> PeFormatParser64::getImportDirectoryOccupiedAddresses() const
 {
 	return peImportDirectoryOccupiedAddresses(peFile->impDir());
 }
 
-tl_cpputils::RangeContainer<std::uint64_t> PeFormatParser64::getExportDirectoryOccupiedAddresses() const
+retdec::utils::RangeContainer<std::uint64_t> PeFormatParser64::getExportDirectoryOccupiedAddresses() const
 {
 	return peExportDirectoryOccupiedAddresses(peFile->expDir());
 }
 
-tl_cpputils::RangeContainer<std::uint64_t> PeFormatParser64::getDebugDirectoryOccupiedAddresses() const
+retdec::utils::RangeContainer<std::uint64_t> PeFormatParser64::getDebugDirectoryOccupiedAddresses() const
 {
 	return peDebugDirectoryOccupiedAddresses(peFile->debugDir());
 }
 
-tl_cpputils::RangeContainer<std::uint64_t> PeFormatParser64::getResourceDirectoryOccupiedAddresses() const
+retdec::utils::RangeContainer<std::uint64_t> PeFormatParser64::getResourceDirectoryOccupiedAddresses() const
 {
 	return peResourceDirectoryOccupiedAddresses(peFile->resDir());
 }

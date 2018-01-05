@@ -4,13 +4,13 @@
 * @copyright (c) 2017 Avast Software, licensed under the MIT license
 */
 
-#include "llvmir2hll/pattern/pattern_finders/api_call/api_call_info.h"
-#include "llvmir2hll/support/debug.h"
-#include "tl-cpputils/container.h"
+#include "retdec/llvmir2hll/pattern/pattern_finders/api_call/api_call_info.h"
+#include "retdec/llvmir2hll/support/debug.h"
+#include "retdec/utils/container.h"
 
-using tl_cpputils::addToMap;
-using tl_cpputils::mapGetValueOrDefault;
-using tl_cpputils::mapHasKey;
+using retdec::utils::addToMap;
+using retdec::utils::mapGetValueOrDefault;
+using retdec::utils::mapHasKey;
 
 namespace llvmir2hll {
 

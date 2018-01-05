@@ -6,15 +6,15 @@
 
 #include <algorithm>
 
-#include "crypto/crypto.h"
-#include "tl-cpputils/conversion.h"
-#include "fileformat/file_format/file_format.h"
-#include "fileformat/types/resource_table/resource.h"
-#include "fileformat/utils/conversions.h"
-#include "fileformat/utils/file_io.h"
-#include "fileformat/utils/other.h"
+#include "retdec/crypto/crypto.h"
+#include "retdec/utils/conversion.h"
+#include "retdec/fileformat/file_format/file_format.h"
+#include "retdec/fileformat/types/resource_table/resource.h"
+#include "retdec/fileformat/utils/conversions.h"
+#include "retdec/fileformat/utils/file_io.h"
+#include "retdec/fileformat/utils/other.h"
 
-using namespace tl_cpputils;
+using namespace retdec::utils;
 using namespace llvm;
 
 namespace fileformat {

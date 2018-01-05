@@ -4,7 +4,7 @@
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */
 
-#include "fileformat/types/symbol_table/elf_symbol.h"
+#include "retdec/fileformat/types/symbol_table/elf_symbol.h"
 
 namespace fileformat {
 

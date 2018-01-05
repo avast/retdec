@@ -10,13 +10,13 @@
 #include <llvm/IR/LLVMContext.h>
 #include <llvm/Support/raw_ostream.h>
 
-#include "llvm-support/utils.h"
-#include "tl-cpputils/container.h"
-#include "tl-cpputils/string.h"
-#include "bin2llvmir/analyses/reaching_definitions.h"
-#include "bin2llvmir/providers/asm_instruction.h"
-#include "bin2llvmir/utils/instruction.h"
-#include "bin2llvmir/utils/type.h"
+#include "retdec/llvm-support/utils.h"
+#include "retdec/utils/container.h"
+#include "retdec/utils/string.h"
+#include "retdec/bin2llvmir/analyses/reaching_definitions.h"
+#include "retdec/bin2llvmir/providers/asm_instruction.h"
+#include "retdec/bin2llvmir/utils/instruction.h"
+#include "retdec/bin2llvmir/utils/type.h"
 
 using namespace llvm_support;
 using namespace llvm;
@@ -473,8 +473,8 @@ FunctionPair modifyFunction(
 		{
 			std::string n = i->getName();
 			assert(!n.empty());
-			auto s = retdec_config::Storage::undefined();
-			retdec_config::Object arg(n, s);
+			auto s = retdec::config::Storage::undefined();
+			retdec::config::Object arg(n, s);
 			if (argNames.size() > idx)
 			{
 				arg.setRealName(argNames[idx]);
@@ -487,7 +487,7 @@ FunctionPair modifyFunction(
 			//
 			if (i->getType()->isPointerTy()
 					&& i->getType()->getPointerElementType()->isIntegerTy()
-					&& tl_cpputils::contains(nf->getName(), "wprintf"))
+					&& retdec::utils::contains(nf->getName(), "wprintf"))
 			{
 				arg.type.setIsWideString(true);
 			}

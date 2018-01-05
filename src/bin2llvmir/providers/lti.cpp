@@ -7,20 +7,20 @@
 #include <fstream>
 #include <iostream>
 
-#include "ctypes/floating_point_type.h"
-#include "ctypes/function_type.h"
-#include "ctypes/integral_type.h"
-#include "ctypes/member.h"
-#include "ctypes/pointer_type.h"
-#include "ctypes/struct_type.h"
-#include "ctypes/typedefed_type.h"
-#include "ctypes/union_type.h"
-#include "ctypes/unknown_type.h"
-#include "ctypes/void_type.h"
-#include "llvm-support/utils.h"
-#include "tl-cpputils/string.h"
-#include "bin2llvmir/providers/lti.h"
-#include "bin2llvmir/utils/type.h"
+#include "retdec/ctypes/floating_point_type.h"
+#include "retdec/ctypes/function_type.h"
+#include "retdec/ctypes/integral_type.h"
+#include "retdec/ctypes/member.h"
+#include "retdec/ctypes/pointer_type.h"
+#include "retdec/ctypes/struct_type.h"
+#include "retdec/ctypes/typedefed_type.h"
+#include "retdec/ctypes/union_type.h"
+#include "retdec/ctypes/unknown_type.h"
+#include "retdec/ctypes/void_type.h"
+#include "retdec/llvm-support/utils.h"
+#include "retdec/utils/string.h"
+#include "retdec/bin2llvmir/providers/lti.h"
+#include "retdec/bin2llvmir/utils/type.h"
 
 using namespace llvm;
 
@@ -132,7 +132,7 @@ void ToLlvmTypeVisitor::visit(
 void ToLlvmTypeVisitor::visit(
 		const std::shared_ptr<ctypes::TypedefedType>& type)
 {
-	if (tl_cpputils::containsCaseInsensitive(type->getName(), "wchar"))
+	if (retdec::utils::containsCaseInsensitive(type->getName(), "wchar"))
 	{
 		// getDefaultWchartType()?
 		if (_config->getConfig().fileFormat.isElf())
@@ -181,7 +181,7 @@ void ToLlvmTypeVisitor::visit(
 {
 	std::string name = type->getName();
 	std::string prefix = "struct ";
-	if (tl_cpputils::startsWith(name, prefix))
+	if (retdec::utils::startsWith(name, prefix))
 	{
 		name.erase(0, prefix.length());
 	}
@@ -242,7 +242,7 @@ Lti::Lti(
 
 	for (auto& l : _config->getConfig().parameters.libraryTypeInfoPaths)
 	{
-		if (tl_cpputils::startsWith(tl_cpputils::stripDirs(l), "cstdlib"))
+		if (retdec::utils::startsWith(retdec::utils::stripDirs(l), "cstdlib"))
 		{
 			loadLtiFile(l);
 		}
@@ -252,24 +252,24 @@ Lti::Lti(
 
 	for (auto &l : _config->getConfig().parameters.libraryTypeInfoPaths)
 	{
-		auto fileName = tl_cpputils::stripDirs(l);
+		auto fileName = retdec::utils::stripDirs(l);
 
-		if (tl_cpputils::startsWith(fileName, "cstdlib"))
+		if (retdec::utils::startsWith(fileName, "cstdlib"))
 		{
 			continue;
 		}
 
-		if (tl_cpputils::startsWith(fileName, "windows")
+		if (retdec::utils::startsWith(fileName, "windows")
 				&& _config->getConfig().fileFormat.isPe())
 		{
 			loadLtiFile(l);
 		}
 		else if (winDriver
-				&& tl_cpputils::startsWith(fileName, "windrivers"))
+				&& retdec::utils::startsWith(fileName, "windrivers"))
 		{
 			loadLtiFile(l);
 		}
-		else if (tl_cpputils::startsWith(fileName, "linux")
+		else if (retdec::utils::startsWith(fileName, "linux")
 				&& (_config->getConfig().fileFormat.isElf()
 				|| _config->getConfig().fileFormat.isMacho()
 				|| _config->getConfig().fileFormat.isIntelHex()
@@ -277,7 +277,7 @@ Lti::Lti(
 		{
 			loadLtiFile(l);
 		}
-		else if (tl_cpputils::startsWith(fileName, "arm") &&
+		else if (retdec::utils::startsWith(fileName, "arm") &&
 				_config->getConfig().architecture.isArmOrThumb())
 		{
 			loadLtiFile(l);
@@ -312,7 +312,7 @@ void Lti::loadLtiFile(const std::string& filePath)
 	if (file)
 	{
 		std::string cc = "cdecl";
-		if (tl_cpputils::containsCaseInsensitive(filePath, "win"))
+		if (retdec::utils::containsCaseInsensitive(filePath, "win"))
 		{
 			cc = "stdcall";
 		}
@@ -365,7 +365,7 @@ Lti::FunctionPair Lti::getPairFunctionFree(const std::string& n)
 	auto ltiFnc = getLtiFunction(name);
 	if (ltiFnc == nullptr)
 	{
-		name = tl_cpputils::removeLeadingCharacter(name, '_');
+		name = retdec::utils::removeLeadingCharacter(name, '_');
 		ltiFnc = getLtiFunction(name);
 	}
 	if (ltiFnc == nullptr)

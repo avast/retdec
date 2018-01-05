@@ -6,11 +6,11 @@
 
 #include <algorithm>
 
-#include "tl-cpputils/address.h"
+#include "retdec/utils/address.h"
 #include "fileinfo/file_information/file_information.h"
 #include "fileinfo/file_information/file_information_types/type_conversions.h"
 
-using namespace tl_cpputils;
+using namespace retdec::utils;
 using namespace cpdetect;
 using namespace fileformat;
 

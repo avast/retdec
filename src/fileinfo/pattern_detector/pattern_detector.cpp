@@ -6,12 +6,12 @@
 
 #include <regex>
 
-#include "tl-cpputils/conversion.h"
-#include "tl-cpputils/filesystem_path.h"
-#include "tl-cpputils/string.h"
+#include "retdec/utils/conversion.h"
+#include "retdec/utils/filesystem_path.h"
+#include "retdec/utils/string.h"
 #include "fileinfo/pattern_detector/pattern_detector.h"
 
-using namespace tl_cpputils;
+using namespace retdec::utils;
 using namespace yaracpp;
 
 namespace fileinfo {

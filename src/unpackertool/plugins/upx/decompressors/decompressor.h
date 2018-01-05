@@ -10,7 +10,7 @@
 #include <cstdint>
 #include <memory>
 
-#include "unpacker/decompression/compressed_data.h"
+#include "retdec/unpacker/decompression/compressed_data.h"
 
 namespace unpacker {
 	class DynamicBuffer;

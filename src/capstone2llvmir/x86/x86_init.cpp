@@ -4,7 +4,7 @@
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */
 
-#include "capstone2llvmir/x86/x86.h"
+#include "retdec/capstone2llvmir/x86/x86.h"
 
 namespace capstone2llvmir {
 

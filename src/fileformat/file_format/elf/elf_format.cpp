@@ -6,13 +6,13 @@
 
 #include <map>
 
-#include "tl-cpputils/conversion.h"
-#include "tl-cpputils/string.h"
-#include "fileformat/file_format/elf/elf_format.h"
-#include "fileformat/types/symbol_table/elf_symbol.h"
-#include "fileformat/utils/conversions.h"
+#include "retdec/utils/conversion.h"
+#include "retdec/utils/string.h"
+#include "retdec/fileformat/file_format/elf/elf_format.h"
+#include "retdec/fileformat/types/symbol_table/elf_symbol.h"
+#include "retdec/fileformat/utils/conversions.h"
 
-using namespace tl_cpputils;
+using namespace retdec::utils;
 using namespace ELFIO;
 
 namespace fileformat {
@@ -2010,7 +2010,7 @@ void ElfFormat::loadInfoFromDynamicSegment()
 	loadInfoFromDynamicTables(noOfDynTables);
 }
 
-tl_cpputils::Endianness ElfFormat::getEndianness() const
+retdec::utils::Endianness ElfFormat::getEndianness() const
 {
 	switch(reader.get_encoding())
 	{

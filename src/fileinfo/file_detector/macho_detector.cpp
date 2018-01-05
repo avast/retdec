@@ -6,13 +6,13 @@
 
 #include <sstream>
 
-#include "tl-cpputils/array.h"
-#include "tl-cpputils/conversion.h"
-#include "fileformat/utils/conversions.h"
-#include "fileformat/utils/other.h"
+#include "retdec/utils/array.h"
+#include "retdec/utils/conversion.h"
+#include "retdec/fileformat/utils/conversions.h"
+#include "retdec/fileformat/utils/other.h"
 #include "fileinfo/file_detector/macho_detector.h"
 
-using namespace tl_cpputils;
+using namespace retdec::utils;
 using namespace llvm;
 using namespace llvm::object;
 using namespace cpdetect;

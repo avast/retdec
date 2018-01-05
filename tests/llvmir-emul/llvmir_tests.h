@@ -18,7 +18,7 @@
 #include <llvm/Support/SourceMgr.h>
 #include <llvm/Support/raw_ostream.h>
 
-#include "tl-cpputils/string.h"
+#include "retdec/utils/string.h"
 
 /**
  * Print any LLVM object which implements @c print(llvm::raw_string_ostream&)
@@ -95,12 +95,12 @@ class LlvmIrTests : public ::testing::Test
 			ASSERT_FALSE(verifyModule(*module))
 				<< "actual module is not valid:\n" << actualStr;
 
-			expectedStr = tl_cpputils::removeComments(expectedStr, ';');
-			actualStr = tl_cpputils::removeComments(actualStr, ';');
+			expectedStr = retdec::utils::removeComments(expectedStr, ';');
+			actualStr = retdec::utils::removeComments(actualStr, ';');
 
 			EXPECT_TRUE(
-				tl_cpputils::removeWhitespace(expectedStr) ==
-				tl_cpputils::removeWhitespace(actualStr)
+				retdec::utils::removeWhitespace(expectedStr) ==
+				retdec::utils::removeWhitespace(actualStr)
 			)
 			<< "expected:\n"
 			<< "=========\n" << expectedStr << "\n"

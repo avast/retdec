@@ -4,5 +4,5 @@ set(IDR2PAT_SOURCES
 )
 
 add_executable(idr2pat ${IDR2PAT_SOURCES})
-target_link_libraries(idr2pat tl-cpputils yaramod)
+target_link_libraries(idr2pat retdec-utils yaramod)
 install(TARGETS idr2pat RUNTIME DESTINATION bin)

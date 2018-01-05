@@ -6,10 +6,10 @@
 
 #include <sstream>
 
-#include "tl-cpputils/conversion.h"
-#include "fileformat/types/resource_table/resource_table.h"
+#include "retdec/utils/conversion.h"
+#include "retdec/fileformat/types/resource_table/resource_table.h"
 
-using namespace tl_cpputils;
+using namespace retdec::utils;
 
 namespace fileformat {
 

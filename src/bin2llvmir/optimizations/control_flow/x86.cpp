@@ -9,13 +9,13 @@
 #include <llvm/IR/Instruction.h>
 #include <llvm/IR/Instructions.h>
 
-#include "llvm-support/utils.h"
-#include "tl-cpputils/string.h"
-#include "bin2llvmir/optimizations/control_flow/control_flow.h"
-#include "bin2llvmir/utils/type.h"
+#include "retdec/llvm-support/utils.h"
+#include "retdec/utils/string.h"
+#include "retdec/bin2llvmir/optimizations/control_flow/control_flow.h"
+#include "retdec/bin2llvmir/utils/type.h"
 
 #define debug_enabled false
-#include "llvm-support/utils.h"
+#include "retdec/llvm-support/utils.h"
 
 using namespace llvm_support;
 using namespace llvm;
@@ -83,7 +83,7 @@ bool ControlFlow::runx86Call(AsmInstruction& ai)
 		}
 		auto* op = c->getArgOperand(0);
 
-		tl_cpputils::Address addr;
+		retdec::utils::Address addr;
 		if (auto* ci = dyn_cast<ConstantInt>(op))
 		{
 			addr = ci->getZExtValue();
@@ -101,7 +101,7 @@ bool ControlFlow::runx86Call(AsmInstruction& ai)
 			auto* pop = skipCasts(l->getPointerOperand());
 			if (auto* ci1 = dyn_cast<ConstantInt>(pop))
 			{
-				tl_cpputils::Address a = ci1->getZExtValue();
+				retdec::utils::Address a = ci1->getZExtValue();
 				auto* f1 = _config->getLlvmFunction(a);
 				auto* cf1 = _config->getConfigFunction(a);
 				auto* ci2 = _image->getConstantDefault(a);
@@ -140,7 +140,7 @@ bool ControlFlow::runx86Call(AsmInstruction& ai)
 	return false;
 }
 
-retdec_config::Function* callsDynamic(Config* _config, AsmInstruction ai)
+retdec::config::Function* callsDynamic(Config* _config, AsmInstruction ai)
 {
 	if (ai.getCapstoneInsn()->id != X86_INS_JMP)
 	{
@@ -172,8 +172,8 @@ bool handleDynamicFncCall(Config* _config, IrModifier& _irmodif, AsmInstruction 
 	{
 		LOG << startAi.getAddress() << " -> " << cf->getName() << " HAS FNC" << std::endl;
 
-		if (tl_cpputils::startsWith(n, "function_")
-				|| tl_cpputils::startsWith(n, "sub_"))
+		if (retdec::utils::startsWith(n, "function_")
+				|| retdec::utils::startsWith(n, "sub_"))
 		{
 			_irmodif.renameFunction(fnc, "_" + cf->getName());
 		}

@@ -9,10 +9,10 @@
 
 #include <memory>
 
-#include "loader/loader.h"
-#include "unpacker/plugin.h"
-#include "unpacker/dynamic_buffer.h"
-#include "unpacker/unpacking_stub.h"
+#include "retdec/loader/loader.h"
+#include "retdec/unpacker/plugin.h"
+#include "retdec/unpacker/dynamic_buffer.h"
+#include "retdec/unpacker/unpacking_stub.h"
 
 // Forward declaration
 namespace unpacker { class CompressedData; }

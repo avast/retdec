@@ -4,7 +4,7 @@
 * @copyright (c) 2017 Avast Software, licensed under the MIT license
 */
 
-#include "llvmir-emul/llvmir_emul.h"
+#include "retdec/llvmir-emul/llvmir_emul.h"
 #include "llvmir-emul/llvmir_tests.h"
 
 using namespace ::testing;

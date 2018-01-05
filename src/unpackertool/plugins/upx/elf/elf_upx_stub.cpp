@@ -9,16 +9,16 @@
 
 #include <elfio/elfio.hpp>
 
-#include "tl-cpputils/alignment.h"
-#include "tl-cpputils/file_io.h"
-#include "loader/loader.h"
+#include "retdec/utils/alignment.h"
+#include "retdec/utils/file_io.h"
+#include "retdec/loader/loader.h"
 #include "unpackertool/plugins/upx/decompressors/decompressors.h"
 #include "unpackertool/plugins/upx/elf/elf_upx_stub.h"
 #include "unpackertool/plugins/upx/unfilter.h"
 #include "unpackertool/plugins/upx/upx.h"
 #include "unpackertool/plugins/upx/upx_exceptions.h"
 #include "unpackertool/plugins/upx/upx_stub_signatures.h"
-#include "unpacker/dynamic_buffer.h"
+#include "retdec/unpacker/dynamic_buffer.h"
 
 using namespace unpacker;
 
@@ -74,7 +74,7 @@ template <int bits> void ElfUpxStub<bits>::unpack(const std::string& outputFile)
 	unpackBlock(originalHeaderData, firstBlockOffset, readPos);
 
 	std::fstream output(outputFile, std::ios::out | std::ios::trunc | std::ios::binary);
-	tl_cpputils::writeFile(output, originalHeaderData.getBuffer());
+	retdec::utils::writeFile(output, originalHeaderData.getBuffer());
 
 	// Load these data manually because of endianness independence
 	ElfHeaderType originalHeader;
@@ -108,7 +108,7 @@ template <int bits> void ElfUpxStub<bits>::unpack(const std::string& outputFile)
 		this_plugin()->log("Unpacking block at file offset 0x", std::hex, firstBlockOffset + readPos, std::dec, ".");
 		unpackBlock(unpackedData, firstBlockOffset + readPos, segReadPos, originalProgHeaders[i].p_filesz);
 
-		tl_cpputils::writeFile(output, unpackedData.getBuffer(), initialOffset + originalProgHeaders[i].p_offset);
+		retdec::utils::writeFile(output, unpackedData.getBuffer(), initialOffset + originalProgHeaders[i].p_offset);
 
 		initialOffset = 0;
 		readPos += segReadPos;
@@ -139,7 +139,7 @@ template <int bits> void ElfUpxStub<bits>::unpack(const std::string& outputFile)
 		AddressType possibleBlockSize = ep - readPos + firstBlockOffset;
 
 		std::vector<std::uint8_t> possibleBlockBytes;
-		tl_cpputils::readFile(additionalDataFile, possibleBlockBytes, readPos + firstBlockOffset, possibleBlockSize);
+		retdec::utils::readFile(additionalDataFile, possibleBlockBytes, readPos + firstBlockOffset, possibleBlockSize);
 
 		DynamicBuffer possibleBlock(possibleBlockBytes, _file->getFileFormat()->getEndianness());
 
@@ -172,7 +172,7 @@ template <int bits> void ElfUpxStub<bits>::unpack(const std::string& outputFile)
 		this_plugin()->log("Additional packed data detected at the end of the file.");
 
 		// These data are always at the offset which is aligned by 4
-		additionalDataPos = tl_cpputils::alignUp(_file->getEpSegment()->getSize(), 4);
+		additionalDataPos = retdec::utils::alignUp(_file->getEpSegment()->getSize(), 4);
 
 		// These data goes up to the end of the file
 		additionalDataSize = static_cast<AddressType>(_file->getFileFormat()->getLoadedFileLength() - additionalDataPos);
@@ -192,7 +192,7 @@ template <int bits> void ElfUpxStub<bits>::unpack(const std::string& outputFile)
 			" and have size of 0x", additionalDataSize, std::dec, ".");
 
 	std::vector<std::uint8_t> additionalDataBytes;
-	tl_cpputils::readFile(additionalDataFile, additionalDataBytes, additionalDataPos, additionalDataSize);
+	retdec::utils::readFile(additionalDataFile, additionalDataBytes, additionalDataPos, additionalDataSize);
 	additionalDataFile.close();
 
 	DynamicBuffer additionalData(additionalDataBytes, _file->getFileFormat()->getEndianness());
@@ -209,7 +209,7 @@ template <int bits> void ElfUpxStub<bits>::unpack(const std::string& outputFile)
 
 		this_plugin()->log("Unpacking block from additional data behind segment ", i, ".");
 		unpackBlock(unpackedData, additionalData, readPos);
-		tl_cpputils::writeFile(output, unpackedData.getBuffer(), originalProgHeaders[i].p_offset + originalProgHeaders[i].p_filesz);
+		retdec::utils::writeFile(output, unpackedData.getBuffer(), originalProgHeaders[i].p_offset + originalProgHeaders[i].p_filesz);
 
 		// Erase already unpacked data from additional data buffer
 		additionalData.erase(0, readPos);
@@ -224,7 +224,7 @@ template <int bits> void ElfUpxStub<bits>::unpack(const std::string& outputFile)
 		unpackBlock(unpackedData, additionalData, readPos);
 
 		output.seekp(0, std::ios::end);
-		tl_cpputils::writeFile(output, unpackedData.getBuffer(), output.tellp());
+		retdec::utils::writeFile(output, unpackedData.getBuffer(), output.tellp());
 
 		// Erase already unpacked data from additional data buffer
 		additionalData.erase(0, readPos);

@@ -8,12 +8,12 @@
 
 #include <pelib/PeLibInc.h>
 
-#include "tl-cpputils/array.h"
-#include "tl-cpputils/conversion.h"
-#include "fileformat/utils/other.h"
+#include "retdec/utils/array.h"
+#include "retdec/utils/conversion.h"
+#include "retdec/fileformat/utils/other.h"
 #include "fileinfo/file_detector/coff_detector.h"
 
-using namespace tl_cpputils;
+using namespace retdec::utils;
 using namespace llvm;
 using namespace llvm::COFF;
 using namespace PeLib;

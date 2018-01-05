@@ -8,7 +8,7 @@
 #include <iostream>
 #include <ostream>
 
-#include "tl-cpputils/filesystem_path.h"
+#include "retdec/utils/filesystem_path.h"
 #include "pat2yara/processing.h"
 #include "yaramod/builder/yara_file_builder.h"
 #include "yaramod/builder/yara_rule_builder.h"
@@ -18,7 +18,7 @@
  * Application for further processing of raw yara rules from bin2pat.
  */
 
-using namespace tl_cpputils;
+using namespace retdec::utils;
 using namespace yaramod;
 
 

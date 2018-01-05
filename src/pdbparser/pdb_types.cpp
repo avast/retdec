@@ -12,7 +12,7 @@
 #include <iostream>
 #include <sstream>
 
-#include "pdbparser/pdb_types.h"
+#include "retdec/pdbparser/pdb_types.h"
 
 using namespace std;
 

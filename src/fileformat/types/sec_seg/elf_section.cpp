@@ -6,10 +6,10 @@
 
 #include <elfio/elf_types.hpp>
 
-#include "tl-cpputils/math.h"
-#include "fileformat/types/sec_seg/elf_section.h"
+#include "retdec/utils/math.h"
+#include "retdec/fileformat/types/sec_seg/elf_section.h"
 
-using namespace tl_cpputils;
+using namespace retdec::utils;
 
 namespace fileformat {
 

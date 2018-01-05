@@ -17,11 +17,11 @@
 #include <llvm/IR/LLVMContext.h>
 #include <llvm/IR/Type.h>
 
-#include "llvmir2hll/ir/empty_stmt.h"
-#include "llvmir2hll/ir/statement.h"
+#include "retdec/llvmir2hll/ir/empty_stmt.h"
+#include "retdec/llvmir2hll/ir/statement.h"
 #include "llvmir2hll/ir/assertions.h"
-#include "llvmir2hll/llvm/llvmir2bir_converters/new_llvmir2bir_converter/cfg_node.h"
-#include "llvmir2hll/support/smart_ptr.h"
+#include "retdec/llvmir2hll/llvm/llvmir2bir_converters/new_llvmir2bir_converter/cfg_node.h"
+#include "retdec/llvmir2hll/support/smart_ptr.h"
 
 using namespace ::testing;
 using namespace std::string_literals;

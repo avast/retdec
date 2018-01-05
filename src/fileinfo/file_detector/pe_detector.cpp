@@ -6,12 +6,12 @@
 
 #include <sstream>
 
-#include "tl-cpputils/array.h"
-#include "tl-cpputils/time.h"
-#include "fileformat/utils/other.h"
+#include "retdec/utils/array.h"
+#include "retdec/utils/time.h"
+#include "retdec/fileformat/utils/other.h"
 #include "fileinfo/file_detector/pe_detector.h"
 
-using namespace tl_cpputils;
+using namespace retdec::utils;
 using namespace PeLib;
 using namespace cpdetect;
 using namespace fileformat;

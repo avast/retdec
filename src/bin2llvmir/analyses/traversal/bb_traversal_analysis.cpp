@@ -8,7 +8,7 @@
 #include <llvm/IR/CFG.h>
 #include <llvm/Support/raw_ostream.h>
 
-#include "bin2llvmir/analyses/traversal/bb_traversal_analysis.h"
+#include "retdec/bin2llvmir/analyses/traversal/bb_traversal_analysis.h"
 
 using namespace llvm;
 

@@ -10,8 +10,8 @@
 #include <vector>
 
 #include "unpackertool/plugins/upx/upx_stub.h"
-#include "unpacker/decompression/nrv/bit_parsers.h"
-#include "unpacker/dynamic_buffer.h"
+#include "retdec/unpacker/decompression/nrv/bit_parsers.h"
+#include "retdec/unpacker/dynamic_buffer.h"
 
 // Foroward declarations
 namespace ELFIO {

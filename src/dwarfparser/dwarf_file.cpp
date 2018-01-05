@@ -8,8 +8,8 @@
 #include <cstdlib>
 #include <fcntl.h>
 
-#include "tl-cpputils/os.h"
-#include "dwarfparser/dwarf_file.h"
+#include "retdec/utils/os.h"
+#include "retdec/dwarfparser/dwarf_file.h"
 
 #ifdef OS_WINDOWS
 	#include <io.h>

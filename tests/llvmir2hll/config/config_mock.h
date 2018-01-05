@@ -9,7 +9,7 @@
 
 #include <gmock/gmock.h>
 
-#include "llvmir2hll/config/config.h"
+#include "retdec/llvmir2hll/config/config.h"
 
 namespace llvmir2hll {
 namespace tests {

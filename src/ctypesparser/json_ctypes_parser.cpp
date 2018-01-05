@@ -11,29 +11,29 @@
 
 #include <rapidjson/error/en.h>
 
-#include "ctypes/annotation_in.h"
-#include "ctypes/annotation_inout.h"
-#include "ctypes/annotation_optional.h"
-#include "ctypes/annotation_out.h"
-#include "ctypes/context.h"
-#include "ctypes/floating_point_type.h"
-#include "ctypes/function_declaration.h"
-#include "ctypes/function_type.h"
-#include "ctypes/header_file.h"
-#include "ctypes/integral_type.h"
-#include "ctypes/member.h"
-#include "ctypes/module.h"
-#include "ctypes/parameter.h"
-#include "ctypes/pointer_type.h"
-#include "ctypes/struct_type.h"
-#include "ctypes/type.h"
-#include "ctypes/typedefed_type.h"
-#include "ctypes/union_type.h"
-#include "ctypes/unknown_type.h"
-#include "ctypes/void_type.h"
-#include "ctypesparser/json_ctypes_parser.h"
-#include "tl-cpputils/container.h"
-#include "tl-cpputils/string.h"
+#include "retdec/ctypes/annotation_in.h"
+#include "retdec/ctypes/annotation_inout.h"
+#include "retdec/ctypes/annotation_optional.h"
+#include "retdec/ctypes/annotation_out.h"
+#include "retdec/ctypes/context.h"
+#include "retdec/ctypes/floating_point_type.h"
+#include "retdec/ctypes/function_declaration.h"
+#include "retdec/ctypes/function_type.h"
+#include "retdec/ctypes/header_file.h"
+#include "retdec/ctypes/integral_type.h"
+#include "retdec/ctypes/member.h"
+#include "retdec/ctypes/module.h"
+#include "retdec/ctypes/parameter.h"
+#include "retdec/ctypes/pointer_type.h"
+#include "retdec/ctypes/struct_type.h"
+#include "retdec/ctypes/type.h"
+#include "retdec/ctypes/typedefed_type.h"
+#include "retdec/ctypes/union_type.h"
+#include "retdec/ctypes/unknown_type.h"
+#include "retdec/ctypes/void_type.h"
+#include "retdec/ctypesparser/json_ctypes_parser.h"
+#include "retdec/utils/container.h"
+#include "retdec/utils/string.h"
 
 namespace {
 
@@ -445,20 +445,20 @@ ctypes::Parameter::Annotations JSONCTypesParser::parseAnnotations(
 	const std::string &annot) const
 {
 	ctypes::Parameter::Annotations annotations;
-	if (tl_cpputils::contains(annot, "Inout"))
+	if (retdec::utils::contains(annot, "Inout"))
 	{
 		annotations.insert(ctypes::AnnotationInOut::create(context, annot));
 	}
-	else if (tl_cpputils::containsCaseInsensitive(annot, "out"))
+	else if (retdec::utils::containsCaseInsensitive(annot, "out"))
 	{
 		annotations.insert(ctypes::AnnotationOut::create(context, annot));
 	}
-	else if (tl_cpputils::containsCaseInsensitive(annot, "in"))
+	else if (retdec::utils::containsCaseInsensitive(annot, "in"))
 	{
 		annotations.insert(ctypes::AnnotationIn::create(context, annot));
 	}
 
-	if (tl_cpputils::contains(annot, "opt"))
+	if (retdec::utils::contains(annot, "opt"))
 	{
 		annotations.insert(ctypes::AnnotationOptional::create(context, annot));
 	}
@@ -507,7 +507,7 @@ ctypes::FunctionType::Parameters JSONCTypesParser::parseFunctionTypeParameters(
 std::shared_ptr<ctypes::Type> JSONCTypesParser::getOrParseType(
 	const std::string &typeKey)
 {
-	auto cachedType = tl_cpputils::mapGetValueOrDefault(parserContext, typeKey);
+	auto cachedType = retdec::utils::mapGetValueOrDefault(parserContext, typeKey);
 	return cachedType ? cachedType : parseType(typeKey);
 }
 
@@ -522,7 +522,7 @@ std::shared_ptr<ctypes::Type> JSONCTypesParser::getOrParseType(
 std::shared_ptr<ctypes::Type> JSONCTypesParser::parseType(
 	const std::string &typeKey)
 {
-	const rapidjson::Value &jsonType = tl_cpputils::mapGetValueOrDefault(typesMap, typeKey)->value;
+	const rapidjson::Value &jsonType = retdec::utils::mapGetValueOrDefault(typesMap, typeKey)->value;
 	std::string typeOfType = safeGetString(jsonType, JSON_type);
 	std::shared_ptr<ctypes::Type> parsedType;
 
@@ -597,7 +597,7 @@ std::shared_ptr<ctypes::Type> JSONCTypesParser::parseIntegralType(
 				JSON_bit_width,
 				rapidjson::Value(this->getIntegralTypeBitWidth(typeName))
 			);
-			auto sign = tl_cpputils::contains(typeName, "unsigned") ?
+			auto sign = retdec::utils::contains(typeName, "unsigned") ?
 				ctypes::IntegralType::Signess::Unsigned :
 				ctypes::IntegralType::Signess::Signed;
 			return ctypes::IntegralType::create(context, typeName, bitWidth, sign);
@@ -682,7 +682,7 @@ unsigned JSONCTypesParser::getIntegralTypeBitWidth(const std::string &type) cons
 */
 unsigned JSONCTypesParser::getBitWidthOrDefault(const std::string &typeName) const
 {
-	return tl_cpputils::mapGetValueOrDefault(typeWidths, typeName, defaultBitWidth);
+	return retdec::utils::mapGetValueOrDefault(typeWidths, typeName, defaultBitWidth);
 }
 
 /**
@@ -699,7 +699,7 @@ std::shared_ptr<ctypes::Type> JSONCTypesParser::parseTypedefedType(
 			static std::vector<std::string> previousTypedefs;
 			std::shared_ptr<ctypes::Type> aliasedType;
 
-			if (tl_cpputils::hasItem(previousTypedefs, typeName))
+			if (retdec::utils::hasItem(previousTypedefs, typeName))
 			{
 				return ctypes::UnknownType::create();
 			}

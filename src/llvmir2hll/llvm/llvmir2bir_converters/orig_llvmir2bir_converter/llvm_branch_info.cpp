@@ -11,23 +11,23 @@
 #include <llvm/IR/Instructions.h>
 #include <llvm/IR/Module.h>
 
-#include "llvmir2hll/ir/const_int.h"
-#include "llvmir2hll/ir/expression.h"
-#include "llvmir2hll/ir/module.h"
-#include "llvmir2hll/ir/statement.h"
-#include "llvmir2hll/ir/variable.h"
-#include "llvmir2hll/llvm/llvm_support.h"
-#include "llvmir2hll/llvm/llvmir2bir_converters/orig_llvmir2bir_converter/llvm_branch_info.h"
-#include "llvmir2hll/llvm/llvmir2bir_converters/orig_llvmir2bir_converter/llvm_converter.h"
-#include "llvmir2hll/llvm/llvmir2bir_converters/orig_llvmir2bir_converter/vars_handler.h"
-#include "llvmir2hll/support/debug.h"
-#include "llvm-support/diagnostics.h"
-#include "tl-cpputils/container.h"
+#include "retdec/llvmir2hll/ir/const_int.h"
+#include "retdec/llvmir2hll/ir/expression.h"
+#include "retdec/llvmir2hll/ir/module.h"
+#include "retdec/llvmir2hll/ir/statement.h"
+#include "retdec/llvmir2hll/ir/variable.h"
+#include "retdec/llvmir2hll/llvm/llvm_support.h"
+#include "retdec/llvmir2hll/llvm/llvmir2bir_converters/orig_llvmir2bir_converter/llvm_branch_info.h"
+#include "retdec/llvmir2hll/llvm/llvmir2bir_converters/orig_llvmir2bir_converter/llvm_converter.h"
+#include "retdec/llvmir2hll/llvm/llvmir2bir_converters/orig_llvmir2bir_converter/vars_handler.h"
+#include "retdec/llvmir2hll/support/debug.h"
+#include "retdec/llvm-support/diagnostics.h"
+#include "retdec/utils/container.h"
 
 using namespace llvm_support;
 
-using tl_cpputils::clear;
-using tl_cpputils::hasItem;
+using retdec::utils::clear;
+using retdec::utils::hasItem;
 
 namespace llvmir2hll {
 

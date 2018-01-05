@@ -4,11 +4,11 @@
 * @copyright (c) 2017 Avast Software, licensed under the MIT license
 */
 
-#include "bin2llvmir/providers/debugformat.h"
+#include "retdec/bin2llvmir/providers/debugformat.h"
 #include "bin2llvmir/utils/llvmir_tests.h"
-#include "fileformat/file_format/raw_data/raw_data_format.h"
-#include "loader/image_factory.h"
-#include "loader/loader/raw_data/raw_data_image.h"
+#include "retdec/fileformat/file_format/raw_data/raw_data_format.h"
+#include "retdec/loader/image_factory.h"
+#include "retdec/loader/loader/raw_data/raw_data_image.h"
 
 using namespace ::testing;
 using namespace llvm;

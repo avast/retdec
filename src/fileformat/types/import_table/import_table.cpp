@@ -4,13 +4,13 @@
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */
 
-#include "crypto/crypto.h"
-#include "tl-cpputils/container.h"
-#include "tl-cpputils/conversion.h"
-#include "tl-cpputils/string.h"
-#include "fileformat/types/import_table/import_table.h"
+#include "retdec/crypto/crypto.h"
+#include "retdec/utils/container.h"
+#include "retdec/utils/conversion.h"
+#include "retdec/utils/string.h"
+#include "retdec/fileformat/types/import_table/import_table.h"
 
-using namespace tl_cpputils;
+using namespace retdec::utils;
 
 namespace fileformat {
 

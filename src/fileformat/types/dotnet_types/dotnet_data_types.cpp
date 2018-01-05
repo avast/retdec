@@ -6,9 +6,9 @@
 
 #include <unordered_map>
 
-#include "tl-cpputils/conversion.h"
-#include "fileformat/types/dotnet_types/dotnet_class.h"
-#include "fileformat/types/dotnet_types/dotnet_data_types.h"
+#include "retdec/utils/conversion.h"
+#include "retdec/fileformat/types/dotnet_types/dotnet_class.h"
+#include "retdec/fileformat/types/dotnet_types/dotnet_data_types.h"
 
 namespace fileformat {
 
@@ -46,8 +46,8 @@ std::string DotnetDataTypeArray::getText() const
 		if (itr->first != 0 || itr->second != 0)
 		{
 			if (itr->first != 0)
-				dimStr += tl_cpputils::numToStr(itr->first) + "...";
-			dimStr += tl_cpputils::numToStr(itr->second);
+				dimStr += retdec::utils::numToStr(itr->first) + "...";
+			dimStr += retdec::utils::numToStr(itr->second);
 		}
 
 		repr += dimStr;

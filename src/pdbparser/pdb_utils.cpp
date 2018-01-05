@@ -7,8 +7,8 @@
 #include <cstdio>
 #include <cstdlib>
 
-#include "pdbparser/pdb_info.h"
-#include "pdbparser/pdb_utils.h"
+#include "retdec/pdbparser/pdb_info.h"
+#include "retdec/pdbparser/pdb_utils.h"
 
 namespace pdbparser {
 

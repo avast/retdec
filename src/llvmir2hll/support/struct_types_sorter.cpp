@@ -6,13 +6,13 @@
 
 #include <algorithm>
 
-#include "llvmir2hll/ir/array_type.h"
-#include "llvmir2hll/ir/struct_type.h"
-#include "llvmir2hll/support/debug.h"
-#include "llvmir2hll/support/struct_types_sorter.h"
-#include "tl-cpputils/container.h"
+#include "retdec/llvmir2hll/ir/array_type.h"
+#include "retdec/llvmir2hll/ir/struct_type.h"
+#include "retdec/llvmir2hll/support/debug.h"
+#include "retdec/llvmir2hll/support/struct_types_sorter.h"
+#include "retdec/utils/container.h"
 
-using tl_cpputils::hasItem;
+using retdec::utils::hasItem;
 
 namespace llvmir2hll {
 

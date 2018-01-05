@@ -4,7 +4,7 @@
 * @copyright (c) 2017 Avast Software, licensed under the MIT license
 */
 
-#include "llvmir2hll/hll/bracket_managers/no_bracket_manager.h"
+#include "retdec/llvmir2hll/hll/bracket_managers/no_bracket_manager.h"
 
 namespace llvmir2hll {
 

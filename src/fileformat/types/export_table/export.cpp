@@ -4,7 +4,7 @@
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */
 
-#include "fileformat/types/export_table/export.h"
+#include "retdec/fileformat/types/export_table/export.h"
 
 namespace fileformat {
 

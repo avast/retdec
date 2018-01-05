@@ -9,7 +9,7 @@
 #include <sstream>
 #include <string>
 
-#include "demangler/demtools.h"
+#include "retdec/demangler/demtools.h"
 
 using namespace std;
 

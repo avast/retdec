@@ -6,10 +6,10 @@
 
 #include <cassert>
 
-#include "tl-cpputils/conversion.h"
-#include "fileformat/file_format/intel_hex/intel_hex_parser/intel_hex_parser.h"
+#include "retdec/utils/conversion.h"
+#include "retdec/fileformat/file_format/intel_hex/intel_hex_parser/intel_hex_parser.h"
 
-using namespace tl_cpputils;
+using namespace retdec::utils;
 
 namespace fileformat {
 
@@ -110,7 +110,7 @@ bool IntelHexParser::parse()
  */
 void IntelHexParser::handleData(const IntelHexToken &token)
 {
-	tl_cpputils::Address address = 0;
+	retdec::utils::Address address = 0;
 	// 32bit mode
 	if(mode)
 	{

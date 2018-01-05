@@ -6,15 +6,15 @@
 
 #include <llvm/ADT/SmallVector.h>
 
-#include "llvmir2hll/ir/const_float.h"
-#include "llvmir2hll/ir/float_type.h"
-#include "llvmir2hll/support/debug.h"
-#include "llvmir2hll/support/visitor.h"
-#include "tl-cpputils/string.h"
+#include "retdec/llvmir2hll/ir/const_float.h"
+#include "retdec/llvmir2hll/ir/float_type.h"
+#include "retdec/llvmir2hll/support/debug.h"
+#include "retdec/llvmir2hll/support/visitor.h"
+#include "retdec/utils/string.h"
 
-using tl_cpputils::startsWith;
-using tl_cpputils::toLower;
-using tl_cpputils::trim;
+using retdec::utils::startsWith;
+using retdec::utils::toLower;
+using retdec::utils::trim;
 
 namespace llvmir2hll {
 

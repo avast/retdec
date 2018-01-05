@@ -6,7 +6,7 @@
 
 #include "fileinfo/file_presentation/getters/pattern_config_getter/pattern_config_getter.h"
 
-using namespace retdec_config;
+using namespace retdec::config;
 
 namespace fileinfo {
 
@@ -15,7 +15,7 @@ namespace fileinfo {
  * @param pFileinfo Information about detected patterns
  * @param pOutDoc Output config file
  */
-PatternConfigGetter::PatternConfigGetter(const FileInformation &pFileinfo, retdec_config::Config *pOutDoc) :
+PatternConfigGetter::PatternConfigGetter(const FileInformation &pFileinfo, retdec::config::Config *pOutDoc) :
 	fileinfo(pFileinfo), outDoc(pOutDoc), allocate(!pOutDoc), empty(true)
 {
 	if(allocate)
@@ -50,7 +50,7 @@ void PatternConfigGetter::process()
 		for(const auto &pattern : patterns)
 		{
 			empty = false;
-			auto conPattern = retdec_config::Pattern();
+			auto conPattern = retdec::config::Pattern();
 			conPattern.matches.clear();
 			conPattern.setName(pattern.getName());
 			conPattern.setDescription(pattern.getDescription());
@@ -79,7 +79,7 @@ void PatternConfigGetter::process()
 
 			for(const auto &match : pattern.getMatches())
 			{
-				auto cm = retdec_config::Pattern::Match();
+				auto cm = retdec::config::Pattern::Match();
 				unsigned long long res;
 				if(match.getOffset(res))
 				{

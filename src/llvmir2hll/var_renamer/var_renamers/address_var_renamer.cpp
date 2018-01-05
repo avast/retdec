@@ -7,12 +7,12 @@
 #include <algorithm>
 #include <cctype>
 
-#include "llvmir2hll/ir/variable.h"
-#include "llvmir2hll/support/debug.h"
-#include "llvmir2hll/utils/string.h"
-#include "llvmir2hll/var_name_gen/var_name_gens/num_var_name_gen.h"
-#include "llvmir2hll/var_renamer/var_renamer_factory.h"
-#include "llvmir2hll/var_renamer/var_renamers/address_var_renamer.h"
+#include "retdec/llvmir2hll/ir/variable.h"
+#include "retdec/llvmir2hll/support/debug.h"
+#include "retdec/llvmir2hll/utils/string.h"
+#include "retdec/llvmir2hll/var_name_gen/var_name_gens/num_var_name_gen.h"
+#include "retdec/llvmir2hll/var_renamer/var_renamer_factory.h"
+#include "retdec/llvmir2hll/var_renamer/var_renamers/address_var_renamer.h"
 
 namespace llvmir2hll {
 

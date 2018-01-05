@@ -7,7 +7,7 @@
 #ifndef FILEINFO_FILE_WRAPPER_PE_PE_TEMPLATE_H
 #define FILEINFO_FILE_WRAPPER_PE_PE_TEMPLATE_H
 
-#include "fileformat/file_format/pe/pe_template_aux.h"
+#include "retdec/fileformat/file_format/pe/pe_template_aux.h"
 #include "fileinfo/file_information/file_information_types/file_section.h"
 
 namespace fileinfo {

@@ -4,8 +4,8 @@
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */
 
-#include "fileformat/types/dotnet_headers/metadata_stream.h"
-#include "fileformat/types/dotnet_headers/metadata_tables.h"
+#include "retdec/fileformat/types/dotnet_headers/metadata_stream.h"
+#include "retdec/fileformat/types/dotnet_headers/metadata_tables.h"
 
 namespace fileformat {
 
@@ -299,7 +299,7 @@ BaseMetadataTable* MetadataStream::addMetadataTable(MetadataTableType tableType,
  */
 bool MetadataStream::hasTable(MetadataTableType tableType) const
 {
-	return tl_cpputils::mapHasKey(metadataTables, tableType);
+	return retdec::utils::mapHasKey(metadataTables, tableType);
 }
 
 } // namespace fileformat

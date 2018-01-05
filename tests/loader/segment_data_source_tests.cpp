@@ -6,7 +6,7 @@
 
 #include <gtest/gtest.h>
 
-#include "loader/loader/segment_data_source.h"
+#include "retdec/loader/loader/segment_data_source.h"
 
 using namespace ::testing;
 

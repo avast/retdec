@@ -11,10 +11,10 @@
 #include <llvm/Support/MachO.h>
 #include <llvm/Support/SwapByteOrder.h>
 
-#include "tl-cpputils/string.h"
-#include "ar-extractor/detection.h"
+#include "retdec/utils/string.h"
+#include "retdec/ar-extractor/detection.h"
 
-using namespace tl_cpputils;
+using namespace retdec::utils;
 using namespace llvm::MachO;
 
 namespace {

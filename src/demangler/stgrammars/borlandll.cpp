@@ -6,7 +6,7 @@
 
 #include <cstdlib>
 
-#include "demangler/stgrammars/borlandll.h"
+#include "retdec/demangler/stgrammars/borlandll.h"
 
 namespace demangler {
 

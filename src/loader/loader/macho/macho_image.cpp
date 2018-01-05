@@ -4,8 +4,8 @@
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */
 
-#include "fileformat/types/sec_seg/macho_section.h"
-#include "loader/loader/macho/macho_image.h"
+#include "retdec/fileformat/types/sec_seg/macho_section.h"
+#include "retdec/loader/loader/macho/macho_image.h"
 
 namespace loader {
 

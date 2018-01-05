@@ -4,10 +4,10 @@
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */
 
-#include "tl-cpputils/string.h"
-#include "fileformat/types/symbol_table/symbol.h"
+#include "retdec/utils/string.h"
+#include "retdec/fileformat/types/symbol_table/symbol.h"
 
-using namespace tl_cpputils;
+using namespace retdec::utils;
 
 namespace fileformat {
 

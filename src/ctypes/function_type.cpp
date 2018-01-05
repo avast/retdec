@@ -6,10 +6,10 @@
 
 #include <cassert>
 
-#include "ctypes/context.h"
-#include "ctypes/function_type.h"
-#include "ctypes/visitor.h"
-#include "tl-cpputils/container.h"
+#include "retdec/ctypes/context.h"
+#include "retdec/ctypes/function_type.h"
+#include "retdec/ctypes/visitor.h"
+#include "retdec/utils/container.h"
 
 namespace ctypes {
 
@@ -130,7 +130,7 @@ const FunctionType::Parameters &FunctionType::getParameters() const
 */
 std::shared_ptr<Type> FunctionType::getParameter(Parameters::size_type n) const
 {
-	return tl_cpputils::getNthItem(parameters, n);
+	return retdec::utils::getNthItem(parameters, n);
 }
 
 /**

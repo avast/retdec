@@ -4,8 +4,8 @@
 * @copyright (c) 2017 Avast Software, licensed under the MIT license
 */
 
-#include "llvmir2hll/pattern/pattern_finder_runner.h"
-#include "llvmir2hll/support/debug.h"
+#include "retdec/llvmir2hll/pattern/pattern_finder_runner.h"
+#include "retdec/llvmir2hll/support/debug.h"
 
 namespace llvmir2hll {
 

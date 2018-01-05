@@ -7,7 +7,7 @@
 #define UNPACKERTOOL_PLUGINS_UPX_DECOMPRESSORS_DECOMPRESSOR_NRV_H
 
 #include "unpackertool/plugins/upx/decompressors/decompressor.h"
-#include "unpacker/decompression/nrv/bit_parsers.h"
+#include "retdec/unpacker/decompression/nrv/bit_parsers.h"
 
 namespace unpackertool {
 namespace upx {

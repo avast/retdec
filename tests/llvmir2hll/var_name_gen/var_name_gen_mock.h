@@ -9,7 +9,7 @@
 
 #include <gmock/gmock.h>
 
-#include "llvmir2hll/var_name_gen/var_name_gen.h"
+#include "retdec/llvmir2hll/var_name_gen/var_name_gen.h"
 
 namespace llvmir2hll {
 namespace tests {

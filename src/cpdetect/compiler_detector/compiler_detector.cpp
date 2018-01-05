@@ -4,16 +4,16 @@
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */
 
-#include "tl-cpputils/conversion.h"
-#include "tl-cpputils/equality.h"
-#include "tl-cpputils/filesystem_path.h"
-#include "tl-cpputils/string.h"
-#include "cpdetect/compiler_detector/compiler_detector.h"
-#include "cpdetect/settings.h"
-#include "cpdetect/utils/version_solver.h"
+#include "retdec/utils/conversion.h"
+#include "retdec/utils/equality.h"
+#include "retdec/utils/filesystem_path.h"
+#include "retdec/utils/string.h"
+#include "retdec/cpdetect/compiler_detector/compiler_detector.h"
+#include "retdec/cpdetect/settings.h"
+#include "retdec/cpdetect/utils/version_solver.h"
 
 using namespace fileformat;
-using namespace tl_cpputils;
+using namespace retdec::utils;
 using namespace yaracpp;
 
 namespace cpdetect {

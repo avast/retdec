@@ -6,10 +6,10 @@
 
 #include <cassert>
 
-#include "ctypes/context.h"
-#include "ctypes/member.h"
-#include "ctypes/union_type.h"
-#include "ctypes/visitor.h"
+#include "retdec/ctypes/context.h"
+#include "retdec/ctypes/member.h"
+#include "retdec/ctypes/union_type.h"
+#include "retdec/ctypes/visitor.h"
 
 namespace ctypes {
 

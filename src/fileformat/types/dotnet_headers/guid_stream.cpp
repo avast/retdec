@@ -8,7 +8,7 @@
 #include <iomanip>
 #include <sstream>
 
-#include "fileformat/types/dotnet_headers/guid_stream.h"
+#include "retdec/fileformat/types/dotnet_headers/guid_stream.h"
 
 namespace fileformat {
 

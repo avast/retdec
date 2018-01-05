@@ -4,7 +4,7 @@
 * @copyright (c) 2017 Avast Software, licensed under the MIT license
 */
 
-#include "ctypes/call_convention.h"
+#include "retdec/ctypes/call_convention.h"
 
 namespace ctypes {
 

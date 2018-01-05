@@ -4,8 +4,8 @@
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */
 
-#include "fileformat/fftypes.h"
-#include "unpacker/decompression/nrv/nrv2d_data.h"
+#include "retdec/fileformat/fftypes.h"
+#include "retdec/unpacker/decompression/nrv/nrv2d_data.h"
 
 namespace unpacker {
 

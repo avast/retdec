@@ -7,7 +7,7 @@
 #include <cstring>
 #include <iostream>
 
-#include "demangler/demangler.h"
+#include "retdec/demangler/demangler.h"
 
 int main(int argc, char *argv[])
 {

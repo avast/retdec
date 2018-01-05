@@ -9,11 +9,11 @@
 #include <string>
 #include <vector>
 
-#include "tl-cpputils/filesystem_path.h"
-#include "stacofin/stacofin.h"
-#include "loader/image_factory.h"
+#include "retdec/utils/filesystem_path.h"
+#include "retdec/stacofin/stacofin.h"
+#include "retdec/loader/image_factory.h"
 
-using namespace tl_cpputils;
+using namespace retdec::utils;
 using namespace fnc_patterns::stacofin;
 using namespace loader;
 

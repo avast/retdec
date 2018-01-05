@@ -6,7 +6,7 @@
 
 #include <gtest/gtest.h>
 
-#include "llvmir2hll/semantics/semantics/libc_semantics.h"
+#include "retdec/llvmir2hll/semantics/semantics/libc_semantics.h"
 
 using namespace ::testing;
 

@@ -6,15 +6,15 @@
 
 #include <set>
 
-#include "tl-cpputils/container.h"
-#include "tl-cpputils/conversion.h"
-#include "tl-cpputils/string.h"
-#include "patterngen/pattern_extractor/types/symbol_pattern.h"
+#include "retdec/utils/container.h"
+#include "retdec/utils/conversion.h"
+#include "retdec/utils/string.h"
+#include "retdec/patterngen/pattern_extractor/types/symbol_pattern.h"
 #include "yaramod/builder/yara_expression_builder.h"
 #include "yaramod/builder/yara_file_builder.h"
 #include "yaramod/builder/yara_rule_builder.h"
 
-using namespace tl_cpputils;
+using namespace retdec::utils;
 using namespace yaramod;
 
 namespace fnc_patterns {

@@ -8,10 +8,10 @@
 
 #include <gtest/gtest.h>
 
-#include "fileformat/file_format/elf/elf_format.h"
+#include "retdec/fileformat/file_format/elf/elf_format.h"
 
 using namespace ::testing;
-using namespace tl_cpputils;
+using namespace retdec::utils;
 
 namespace {
 

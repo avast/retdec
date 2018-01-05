@@ -9,6 +9,6 @@ set(PAT2YARA_SOURCES
 )
 
 add_executable(pat2yara ${PAT2YARA_SOURCES})
-target_link_libraries(pat2yara patterngen tl-cpputils yaramod)
+target_link_libraries(pat2yara patterngen retdec-utils yaramod)
 target_include_directories(pat2yara PUBLIC ${PROJECT_SOURCE_DIR}/src/)
 install(TARGETS pat2yara RUNTIME DESTINATION bin)

@@ -6,9 +6,9 @@
 
 #include <gtest/gtest.h>
 
-#include "llvmir2hll/ir/empty_stmt.h"
+#include "retdec/llvmir2hll/ir/empty_stmt.h"
 #include "llvmir2hll/ir/tests_with_module.h"
-#include "llvmir2hll/optimizer/optimizers/remove_all_casts_optimizer.h"
+#include "retdec/llvmir2hll/optimizer/optimizers/remove_all_casts_optimizer.h"
 
 using namespace ::testing;
 

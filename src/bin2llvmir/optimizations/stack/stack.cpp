@@ -12,13 +12,13 @@
 #include <llvm/IR/Module.h>
 #include <llvm/IR/Operator.h>
 
-#include "bin2llvmir/analyses/reaching_definitions.h"
-#include "bin2llvmir/optimizations/stack/stack.h"
-#include "bin2llvmir/providers/asm_instruction.h"
-#include "bin2llvmir/utils/ir_modifier.h"
+#include "retdec/bin2llvmir/analyses/reaching_definitions.h"
+#include "retdec/bin2llvmir/optimizations/stack/stack.h"
+#include "retdec/bin2llvmir/providers/asm_instruction.h"
+#include "retdec/bin2llvmir/utils/ir_modifier.h"
 #define debug_enabled false
-#include "llvm-support/utils.h"
-#include "bin2llvmir/utils/type.h"
+#include "retdec/llvm-support/utils.h"
+#include "retdec/bin2llvmir/utils/type.h"
 
 using namespace llvm_support;
 using namespace llvm;
@@ -391,7 +391,7 @@ bool StackAnalysis::handleInstruction(
 	return true;
 }
 
-retdec_config::Object* StackAnalysis::getDebugStackVariable(
+retdec::config::Object* StackAnalysis::getDebugStackVariable(
 		llvm::Function* fnc,
 		SymbolicTree& root)
 {
@@ -406,7 +406,7 @@ retdec_config::Object* StackAnalysis::getDebugStackVariable(
 		return nullptr;
 	}
 
-	tl_cpputils::Maybe<int> baseOffset;
+	retdec::utils::Maybe<int> baseOffset;
 	if (auto* ci = dyn_cast_or_null<ConstantInt>(root.value))
 	{
 		baseOffset = ci->getSExtValue();

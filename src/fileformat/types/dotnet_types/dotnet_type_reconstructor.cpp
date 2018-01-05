@@ -6,12 +6,12 @@
 
 #include <iostream>
 
-#include "tl-cpputils/conversion.h"
-#include "tl-cpputils/string.h"
-#include "fileformat/types/dotnet_headers/metadata_tables.h"
-#include "fileformat/types/dotnet_types/dotnet_data_types.h"
-#include "fileformat/types/dotnet_types/dotnet_field.h"
-#include "fileformat/types/dotnet_types/dotnet_type_reconstructor.h"
+#include "retdec/utils/conversion.h"
+#include "retdec/utils/string.h"
+#include "retdec/fileformat/types/dotnet_headers/metadata_tables.h"
+#include "retdec/fileformat/types/dotnet_types/dotnet_data_types.h"
+#include "retdec/fileformat/types/dotnet_types/dotnet_field.h"
+#include "retdec/fileformat/types/dotnet_types/dotnet_type_reconstructor.h"
 
 namespace fileformat {
 
@@ -154,7 +154,7 @@ std::uint64_t extractGenericParamsCountAndFixClassName(std::string& className)
 	if (isGenericPos != std::string::npos)
 	{
 		// Obtain number of generic parameters
-		tl_cpputils::strToNum(className.substr(isGenericPos + 1), genericParamsCount);
+		retdec::utils::strToNum(className.substr(isGenericPos + 1), genericParamsCount);
 
 		// Remove `N part
 		className.erase(isGenericPos);
@@ -368,7 +368,7 @@ bool DotnetTypeReconstructor::reconstructGenericParameters()
 		std::string genericParamName;
 		if (!stringStream->getString(genericParam.name.getIndex(), genericParamName))
 			continue;
-		genericParamName = tl_cpputils::replaceNonprintableChars(genericParamName);
+		genericParamName = retdec::utils::replaceNonprintableChars(genericParamName);
 
 		// Generic parameter points either to TypeDef or MethodDef table depending on what it belongs to
 		MetadataTableType classOrMethod;
@@ -695,8 +695,8 @@ std::unique_ptr<DotnetClass> DotnetTypeReconstructor::createClassDefinition(cons
 	if (!stringStream->getString(typeDef->typeName.getIndex(), className) || !stringStream->getString(typeDef->typeNamespace.getIndex(), classNameSpace))
 		return nullptr;
 
-	className = tl_cpputils::replaceNonprintableChars(className);
-	classNameSpace = tl_cpputils::replaceNonprintableChars(classNameSpace);
+	className = retdec::utils::replaceNonprintableChars(className);
+	classNameSpace = retdec::utils::replaceNonprintableChars(classNameSpace);
 	auto genericParamsCount = extractGenericParamsCountAndFixClassName(className);
 
 	// Skip this special type, it seems to be used in C# binaries
@@ -729,8 +729,8 @@ std::unique_ptr<DotnetClass> DotnetTypeReconstructor::createClassReference(const
 	if (!stringStream->getString(typeRef->typeName.getIndex(), className) || !stringStream->getString(typeRef->typeNamespace.getIndex(), classNameSpace))
 		return nullptr;
 
-	className = tl_cpputils::replaceNonprintableChars(className);
-	classNameSpace = tl_cpputils::replaceNonprintableChars(classNameSpace);
+	className = retdec::utils::replaceNonprintableChars(className);
+	classNameSpace = retdec::utils::replaceNonprintableChars(classNameSpace);
 	auto genericParamsCount = extractGenericParamsCountAndFixClassName(className);
 
 	if (className.empty())
@@ -756,7 +756,7 @@ std::unique_ptr<DotnetField> DotnetTypeReconstructor::createField(const Field* f
 	if (!stringStream->getString(field->name.getIndex(), fieldName))
 		return nullptr;
 
-	fieldName = tl_cpputils::replaceNonprintableChars(fieldName);
+	fieldName = retdec::utils::replaceNonprintableChars(fieldName);
 	auto signature = blobStream->getElement(field->signature.getIndex());
 
 	if (signature.empty() || signature[0] != FieldSignature)
@@ -789,7 +789,7 @@ std::unique_ptr<DotnetProperty> DotnetTypeReconstructor::createProperty(const Pr
 	if (!stringStream->getString(property->name.getIndex(), propertyName))
 		return nullptr;
 
-	propertyName = tl_cpputils::replaceNonprintableChars(propertyName);
+	propertyName = retdec::utils::replaceNonprintableChars(propertyName);
 	auto signature = blobStream->getElement(property->type.getIndex());
 
 	if (signature.size() < 2 || (signature[0] & ~HasThis) != PropertySignature)
@@ -824,7 +824,7 @@ std::unique_ptr<DotnetMethod> DotnetTypeReconstructor::createMethod(const Method
 	if (!stringStream->getString(methodDef->name.getIndex(), methodName))
 		return nullptr;
 
-	methodName = tl_cpputils::replaceNonprintableChars(methodName);
+	methodName = retdec::utils::replaceNonprintableChars(methodName);
 	auto signature = blobStream->getElement(methodDef->signature.getIndex());
 
 	if (methodName.empty() || signature.empty())
@@ -889,7 +889,7 @@ std::unique_ptr<DotnetParameter> DotnetTypeReconstructor::createMethodParameter(
 	if (!stringStream->getString(param->name.getIndex(), paramName))
 		return nullptr;
 
-	paramName = tl_cpputils::replaceNonprintableChars(paramName);
+	paramName = retdec::utils::replaceNonprintableChars(paramName);
 	auto type = dataTypeFromSignature(signature, ownerClass, ownerMethod);
 	if (type == nullptr)
 		return nullptr;

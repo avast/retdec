@@ -7,7 +7,7 @@
 #include <iomanip>
 #include <sstream>
 
-#include "loader/utils/name_generator.h"
+#include "retdec/loader/utils/name_generator.h"
 
 namespace loader {
 

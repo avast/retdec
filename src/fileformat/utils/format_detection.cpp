@@ -13,11 +13,11 @@
 #include <llvm/Support/Host.h>
 #include <pelib/PeLib.h>
 
-#include "tl-cpputils/conversion.h"
-#include "tl-cpputils/string.h"
-#include "fileformat/utils/format_detection.h"
+#include "retdec/utils/conversion.h"
+#include "retdec/utils/string.h"
+#include "retdec/fileformat/utils/format_detection.h"
 
-using namespace tl_cpputils;
+using namespace retdec::utils;
 using namespace llvm;
 using namespace llvm::object;
 using namespace PeLib;
@@ -187,7 +187,7 @@ bool isStrangeFeedface(const std::string &filePath)
  * @param config Config is used to determine if the input is a raw binary
  * @return Detected file format in enumeration representation
  */
-Format detectFileFormat(const std::string &filePath, retdec_config::Config *config)
+Format detectFileFormat(const std::string &filePath, retdec::config::Config *config)
 {
 	std::ifstream stream(filePath, std::ifstream::in | std::ifstream::binary);
 	if(!stream.is_open())

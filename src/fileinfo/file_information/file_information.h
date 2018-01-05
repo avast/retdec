@@ -7,7 +7,7 @@
 #ifndef FILEINFO_FILE_INFORMATION_FILE_INFORMATION_H
 #define FILEINFO_FILE_INFORMATION_FILE_INFORMATION_H
 
-#include "cpdetect/cpdetect.h"
+#include "retdec/cpdetect/cpdetect.h"
 #include "fileinfo/file_information/file_information_types/file_information_types.h"
 
 namespace fileinfo {
@@ -55,7 +55,7 @@ class FileInformation
 		std::vector<Pattern> malwarePatterns;          ///< detected malware patterns
 		std::vector<Pattern> otherPatterns;            ///< other detected patterns
 		Strings strings;                               ///< detected strings
-		tl_cpputils::Maybe<bool> signatureVerified; ///< indicates whether the signature is present and if it is verified
+		retdec::utils::Maybe<bool> signatureVerified; ///< indicates whether the signature is present and if it is verified
 		DotnetInfo dotnetInfo;                         ///< .NET information
 	public:
 		cpdetect::ToolInformation toolInfo; ///< detected tools

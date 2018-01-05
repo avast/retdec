@@ -7,16 +7,16 @@
 #include <algorithm>
 #include <map>
 
-#include "llvmir2hll/ir/expression.h"
-#include "llvmir2hll/ir/global_var_def.h"
-#include "llvmir2hll/ir/variable.h"
-#include "llvmir2hll/support/debug.h"
-#include "llvmir2hll/support/global_vars_sorter.h"
-#include "llvmir2hll/support/visitors/ordered_all_visitor.h"
-#include "tl-cpputils/container.h"
-#include "tl-cpputils/non_copyable.h"
+#include "retdec/llvmir2hll/ir/expression.h"
+#include "retdec/llvmir2hll/ir/global_var_def.h"
+#include "retdec/llvmir2hll/ir/variable.h"
+#include "retdec/llvmir2hll/support/debug.h"
+#include "retdec/llvmir2hll/support/global_vars_sorter.h"
+#include "retdec/llvmir2hll/support/visitors/ordered_all_visitor.h"
+#include "retdec/utils/container.h"
+#include "retdec/utils/non_copyable.h"
 
-using tl_cpputils::hasItem;
+using retdec::utils::hasItem;
 
 namespace llvmir2hll {
 
@@ -26,7 +26,7 @@ namespace {
 * @brief Sorter of global variables according to their interdependencies.
 */
 class InterdependencySorter: private OrderedAllVisitor,
-		private tl_cpputils::NonCopyable {
+		private retdec::utils::NonCopyable {
 	friend class LessThanKey;
 
 private:

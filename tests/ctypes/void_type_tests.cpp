@@ -6,8 +6,8 @@
 
 #include <gtest/gtest.h>
 
-#include "ctypes/unknown_type.h"
-#include "ctypes/void_type.h"
+#include "retdec/ctypes/unknown_type.h"
+#include "retdec/ctypes/void_type.h"
 
 using namespace ::testing;
 

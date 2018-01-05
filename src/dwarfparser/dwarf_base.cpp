@@ -8,9 +8,9 @@
 #include <cstdlib>
 #include <sstream>
 
-#include "dwarfparser/dwarf_base.h"
-#include "dwarfparser/dwarf_file.h"
-#include "dwarfparser/dwarf_functions.h"
+#include "retdec/dwarfparser/dwarf_base.h"
+#include "retdec/dwarfparser/dwarf_file.h"
+#include "retdec/dwarfparser/dwarf_functions.h"
 
 using namespace std;
 

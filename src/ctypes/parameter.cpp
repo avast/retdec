@@ -4,9 +4,9 @@
 * @copyright (c) 2017 Avast Software, licensed under the MIT license
 */
 
-#include "ctypes/annotation.h"
-#include "ctypes/parameter.h"
-#include "ctypes/type.h"
+#include "retdec/ctypes/annotation.h"
+#include "retdec/ctypes/parameter.h"
+#include "retdec/ctypes/type.h"
 
 namespace ctypes {
 

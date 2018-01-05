@@ -10,7 +10,7 @@
 #include <limits>
 #include <vector>
 
-#include "tl-cpputils/conversion.h"
+#include "retdec/utils/conversion.h"
 
 namespace fileinfo {
 
@@ -29,11 +29,11 @@ template<typename N> std::string getNumberAsString(N number, std::ios_base &(* f
 {
 	if(!std::numeric_limits<N>::is_signed && number != std::numeric_limits<N>::max())
 	{
-		return tl_cpputils::numToStr(number, format);
+		return retdec::utils::numToStr(number, format);
 	}
 	else if(std::numeric_limits<N>::is_signed && number != std::numeric_limits<N>::min())
 	{
-		return tl_cpputils::numToStr(number, format);
+		return retdec::utils::numToStr(number, format);
 	}
 
 	return "";

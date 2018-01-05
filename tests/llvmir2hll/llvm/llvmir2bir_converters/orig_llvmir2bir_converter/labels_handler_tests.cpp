@@ -8,8 +8,8 @@
 #include <llvm/IR/BasicBlock.h>
 #include <llvm/IR/LLVMContext.h>
 
-#include "llvmir2hll/ir/empty_stmt.h"
-#include "llvmir2hll/llvm/llvmir2bir_converters/orig_llvmir2bir_converter/labels_handler.h"
+#include "retdec/llvmir2hll/ir/empty_stmt.h"
+#include "retdec/llvmir2hll/llvm/llvmir2bir_converters/orig_llvmir2bir_converter/labels_handler.h"
 
 using namespace ::testing;
 

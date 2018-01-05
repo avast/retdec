@@ -4,10 +4,10 @@
 * @copyright (c) 2017 Avast Software, licensed under the MIT license
 */
 
-#include "ctypes/composite_type.h"
-#include "ctypes/context.h"
-#include "ctypes/member.h"
-#include "tl-cpputils/container.h"
+#include "retdec/ctypes/composite_type.h"
+#include "retdec/ctypes/context.h"
+#include "retdec/ctypes/member.h"
+#include "retdec/utils/container.h"
 
 namespace ctypes {
 
@@ -69,7 +69,7 @@ CompositeType::Members::size_type CompositeType::getMemberCount() const
 */
 const Member &CompositeType::getMember(Members::size_type n) const
 {
-	return tl_cpputils::getNthItem(members, n);
+	return retdec::utils::getNthItem(members, n);
 }
 
 /**

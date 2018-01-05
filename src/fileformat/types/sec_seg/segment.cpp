@@ -4,7 +4,7 @@
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */
 
-#include "fileformat/types/sec_seg/segment.h"
+#include "retdec/fileformat/types/sec_seg/segment.h"
 
 namespace fileformat {
 

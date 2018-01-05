@@ -6,8 +6,8 @@
 
 #include <cassert>
 
-#include "ctypes/annotation_optional.h"
-#include "ctypes/context.h"
+#include "retdec/ctypes/annotation_optional.h"
+#include "retdec/ctypes/context.h"
 
 namespace ctypes {
 

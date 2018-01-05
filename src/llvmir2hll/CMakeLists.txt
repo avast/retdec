@@ -335,7 +335,7 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND CMAKE_CXX_COMPILER_VERSION VERSION_G
 endif()
 
 add_library(llvmir2hll STATIC ${LLVMIR2HLL_SOURCES})
-target_link_libraries(llvmir2hll retdec-config tl-cpputils llvm-support llvm)
+target_link_libraries(llvmir2hll retdec-config retdec-utils llvm-support llvm)
 target_include_directories(llvmir2hll PUBLIC ${PROJECT_SOURCE_DIR}/include/)
 
 # We need to compile source files with /bigobj to prevent the following

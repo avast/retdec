@@ -9,7 +9,7 @@
 #include <cstring>
 #include <sstream>
 
-#include "pdbparser/pdb_symbols.h"
+#include "retdec/pdbparser/pdb_symbols.h"
 
 using namespace std;
 

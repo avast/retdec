@@ -7,7 +7,7 @@
 #ifndef UNPACKERTOOL_PLUGINS_UPX_UPX_EXCEPTIONS_H
 #define UNPACKERTOOL_PLUGINS_UPX_UPX_EXCEPTIONS_H
 
-#include "unpacker/unpacker_exception.h"
+#include "retdec/unpacker/unpacker_exception.h"
 
 namespace unpackertool {
 namespace upx {

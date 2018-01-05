@@ -8,7 +8,7 @@
 
 #include <llvm/IR/PatternMatch.h>
 
-#include "bin2llvmir/optimizations/idioms/idioms_common.h"
+#include "retdec/bin2llvmir/optimizations/idioms/idioms_common.h"
 
 using namespace llvm;
 using namespace PatternMatch;

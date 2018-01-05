@@ -7,14 +7,14 @@
 #include <iostream>
 #include <memory>
 
-#include "tl-cpputils/filesystem_path.h"
-#include "cpdetect/cpdetect.h"
-#include "fileformat/fileformat.h"
+#include "retdec/utils/filesystem_path.h"
+#include "retdec/cpdetect/cpdetect.h"
+#include "retdec/fileformat/fileformat.h"
 #include "arg_handler.h"
-#include "unpacker/plugin.h"
+#include "retdec/unpacker/plugin.h"
 #include "plugin_mgr.h"
 
-using namespace tl_cpputils;
+using namespace retdec::utils;
 using namespace unpacker;
 using namespace unpackertool;
 

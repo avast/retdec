@@ -6,7 +6,7 @@
 
 #include <gtest/gtest.h>
 
-#include "bin2llvmir/utils/ir_modifier.h"
+#include "retdec/bin2llvmir/utils/ir_modifier.h"
 #include "bin2llvmir/utils/llvmir_tests.h"
 
 using namespace ::testing;

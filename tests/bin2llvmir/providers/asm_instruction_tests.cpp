@@ -6,7 +6,7 @@
 
 #include <gtest/gtest.h>
 
-#include "bin2llvmir/providers/asm_instruction.h"
+#include "retdec/bin2llvmir/providers/asm_instruction.h"
 #include "bin2llvmir/utils/llvmir_tests.h"
 
 using namespace ::testing;
@@ -263,7 +263,7 @@ TEST_F(AsmInstructionTests, AsmInstructionCtorInstructionConstructsValidIfInDiff
 }
 
 //
-// AsmInstruction(llvm::Module*, tl_cpputils::Address)
+// AsmInstruction(llvm::Module*, retdec::utils::Address)
 //
 
 TEST_F(AsmInstructionTests, AsmInstructionCtorAddressConstructsInvalidForNullptr)
@@ -1240,12 +1240,12 @@ TEST_F(AsmInstructionTests, insertBackSafeForTerminatorAsmInstruction)
 //	)";
 //
 //	EXPECT_TRUE(
-//			tl_cpputils::removeWhitespace(exp) ==
-//			tl_cpputils::removeWhitespace(a.dump()))
+//			retdec::utils::removeWhitespace(exp) ==
+//			retdec::utils::removeWhitespace(a.dump()))
 //			<< "expected: " << exp << "\nactual: " << a.dump() << "\n";
 //	EXPECT_TRUE(
-//			tl_cpputils::removeWhitespace(exp) ==
-//			tl_cpputils::removeWhitespace(ss.str()))
+//			retdec::utils::removeWhitespace(exp) ==
+//			retdec::utils::removeWhitespace(ss.str()))
 //			<< "expected: " << exp << "\nactual: " << ss.str() << "\n";
 //}
 //
@@ -1289,12 +1289,12 @@ TEST_F(AsmInstructionTests, insertBackSafeForTerminatorAsmInstruction)
 //	)";
 //
 //	EXPECT_TRUE(
-//			tl_cpputils::removeWhitespace(exp) ==
-//			tl_cpputils::removeWhitespace(a.dump()))
+//			retdec::utils::removeWhitespace(exp) ==
+//			retdec::utils::removeWhitespace(a.dump()))
 //			<< "expected: " << exp << "\nactual: " << a.dump() << "\n";
 //	EXPECT_TRUE(
-//			tl_cpputils::removeWhitespace(exp) ==
-//			tl_cpputils::removeWhitespace(ss.str()))
+//			retdec::utils::removeWhitespace(exp) ==
+//			retdec::utils::removeWhitespace(ss.str()))
 //			<< "expected: " << exp << "\nactual: " << ss.str() << "\n";
 //}
 

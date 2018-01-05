@@ -6,10 +6,10 @@
 
 #include <limits>
 
-#include "ctypes/context.h"
-#include "ctypes/enum_type.h"
-#include "ctypes/visitor.h"
-#include "tl-cpputils/container.h"
+#include "retdec/ctypes/context.h"
+#include "retdec/ctypes/enum_type.h"
+#include "retdec/ctypes/visitor.h"
+#include "retdec/utils/container.h"
 
 namespace ctypes {
 
@@ -103,7 +103,7 @@ EnumType::Values::size_type EnumType::getValueCount() const
 */
 const EnumType::Value &EnumType::getValue(Values::size_type n) const
 {
-	return tl_cpputils::getNthItem(values, n);
+	return retdec::utils::getNthItem(values, n);
 }
 
 /**

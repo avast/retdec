@@ -14,20 +14,20 @@
 #include <openssl/asn1.h>
 #include <openssl/x509.h>
 
-#include "tl-cpputils/container.h"
-#include "tl-cpputils/conversion.h"
-#include "tl-cpputils/scope_exit.h"
-#include "tl-cpputils/string.h"
-#include "fileformat/file_format/pe/pe_format.h"
-#include "fileformat/file_format/pe/pe_format_parser/pe_format_parser32.h"
-#include "fileformat/file_format/pe/pe_format_parser/pe_format_parser64.h"
-#include "fileformat/types/dotnet_headers/metadata_tables.h"
-#include "fileformat/types/dotnet_types/dotnet_type_reconstructor.h"
-#include "fileformat/utils/asn1.h"
-#include "fileformat/utils/conversions.h"
-#include "fileformat/utils/file_io.h"
+#include "retdec/utils/container.h"
+#include "retdec/utils/conversion.h"
+#include "retdec/utils/scope_exit.h"
+#include "retdec/utils/string.h"
+#include "retdec/fileformat/file_format/pe/pe_format.h"
+#include "retdec/fileformat/file_format/pe/pe_format_parser/pe_format_parser32.h"
+#include "retdec/fileformat/file_format/pe/pe_format_parser/pe_format_parser64.h"
+#include "retdec/fileformat/types/dotnet_headers/metadata_tables.h"
+#include "retdec/fileformat/types/dotnet_types/dotnet_type_reconstructor.h"
+#include "retdec/fileformat/utils/asn1.h"
+#include "retdec/fileformat/utils/conversions.h"
+#include "retdec/fileformat/utils/file_io.h"
 
-using namespace tl_cpputils;
+using namespace retdec::utils;
 using namespace PeLib;
 
 namespace fileformat {
@@ -1798,7 +1798,7 @@ void PeFormat::detectTypeLibId()
 			// Custom attributes contain one word 0x0001 at the beginning so we skip it,
 			// followed by length of the string, which is GUID we are looking for
 			auto length = typeLibData[2];
-			typeLibId = tl_cpputils::toLower(std::string(reinterpret_cast<const char*>(typeLibData.data() + 3), length));
+			typeLibId = retdec::utils::toLower(std::string(reinterpret_cast<const char*>(typeLibData.data() + 3), length));
 			if (!std::regex_match(typeLibId, guidRegex))
 			{
 				typeLibId.clear();
@@ -1882,7 +1882,7 @@ std::uint64_t PeFormat::detectPossibleMetadataHeaderAddress() const
 	return metadataHeaderFound ? address : 0;
 }
 
-tl_cpputils::Endianness PeFormat::getEndianness() const
+retdec::utils::Endianness PeFormat::getEndianness() const
 {
 	switch(formatParser->getMachineType())
 	{

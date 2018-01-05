@@ -4,7 +4,7 @@
 * @copyright (c) 2017 Avast Software, licensed under the MIT license
 */
 
-#include "bin2llvmir/optimizations/globals/global_to_local.h"
+#include "retdec/bin2llvmir/optimizations/globals/global_to_local.h"
 
 using namespace llvm;
 

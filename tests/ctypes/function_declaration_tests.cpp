@@ -8,7 +8,7 @@
 
 #include <gtest/gtest.h>
 
-#include "ctypes/function_declaration.h"
+#include "retdec/ctypes/function_declaration.h"
 
 using namespace ::testing;
 

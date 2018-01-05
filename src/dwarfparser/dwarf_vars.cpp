@@ -7,9 +7,9 @@
 #include <iomanip>
 #include <iostream>
 
-#include "dwarfparser/dwarf_file.h"
-#include "dwarfparser/dwarf_functions.h"
-#include "dwarfparser/dwarf_vars.h"
+#include "retdec/dwarfparser/dwarf_file.h"
+#include "retdec/dwarfparser/dwarf_functions.h"
+#include "retdec/dwarfparser/dwarf_vars.h"
 
 using namespace std;
 

@@ -8,9 +8,9 @@
 #include <iomanip>
 #include <string>
 
-#include "fileformat/file_format/raw_data/raw_data_format.h"
+#include "retdec/fileformat/file_format/raw_data/raw_data_format.h"
 
-using namespace tl_cpputils;
+using namespace retdec::utils;
 
 namespace fileformat {
 
@@ -79,7 +79,7 @@ bool RawDataFormat::isEntryPointValid() const
 	return false;
 }
 
-tl_cpputils::Endianness RawDataFormat::getEndianness() const
+retdec::utils::Endianness RawDataFormat::getEndianness() const
 {
 	return endianness;
 }

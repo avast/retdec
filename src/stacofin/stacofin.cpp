@@ -9,11 +9,11 @@
 #include <sstream>
 #include <string>
 
-#include "stacofin/stacofin.h"
+#include "retdec/stacofin/stacofin.h"
 #include "yaracpp/yara_detector/yara_detector.h"
-#include "loader/loader/image.h"
+#include "retdec/loader/loader/image.h"
 
-using namespace tl_cpputils;
+using namespace retdec::utils;
 using namespace yaracpp;
 using namespace loader;
 

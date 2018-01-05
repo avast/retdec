@@ -7,7 +7,7 @@
 #ifndef FILEINFO_FILE_INFORMATION_FILE_INFORMATION_TYPES_EXPORT_TABLE_H
 #define FILEINFO_FILE_INFORMATION_FILE_INFORMATION_TYPES_EXPORT_TABLE_H
 
-#include "fileformat/types/export_table/export_table.h"
+#include "retdec/fileformat/types/export_table/export_table.h"
 
 namespace fileinfo {
 

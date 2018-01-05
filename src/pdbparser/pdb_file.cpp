@@ -8,7 +8,7 @@
 #include <cstdlib>
 #include <cstring>
 
-#include "pdbparser/pdb_file.h"
+#include "retdec/pdbparser/pdb_file.h"
 
 using namespace std;
 

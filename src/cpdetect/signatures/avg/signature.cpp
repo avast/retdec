@@ -4,8 +4,8 @@
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */
 
-#include "cpdetect/signatures/avg/signature.h"
-#include "cpdetect/signatures/avg/signature_checker.h"
+#include "retdec/cpdetect/signatures/avg/signature.h"
+#include "retdec/cpdetect/signatures/avg/signature_checker.h"
 
 namespace cpdetect {
 

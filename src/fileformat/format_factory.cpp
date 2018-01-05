@@ -4,13 +4,13 @@
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */
 
-#include "fileformat/file_format/coff/coff_format.h"
-#include "fileformat/file_format/elf/elf_format.h"
-#include "fileformat/file_format/intel_hex/intel_hex_format.h"
-#include "fileformat/file_format/macho/macho_format.h"
-#include "fileformat/file_format/pe/pe_format.h"
-#include "fileformat/file_format/raw_data/raw_data_format.h"
-#include "fileformat/utils/format_detection.h"
+#include "retdec/fileformat/file_format/coff/coff_format.h"
+#include "retdec/fileformat/file_format/elf/elf_format.h"
+#include "retdec/fileformat/file_format/intel_hex/intel_hex_format.h"
+#include "retdec/fileformat/file_format/macho/macho_format.h"
+#include "retdec/fileformat/file_format/pe/pe_format.h"
+#include "retdec/fileformat/file_format/raw_data/raw_data_format.h"
+#include "retdec/fileformat/utils/format_detection.h"
 
 namespace fileformat {
 
@@ -23,7 +23,7 @@ namespace fileformat {
  *
  * If format of input file is not supported, function will return @c nullptr.
  */
-std::unique_ptr<FileFormat> createFileFormat(const std::string &filePath, retdec_config::Config *config, LoadFlags loadFlags)
+std::unique_ptr<FileFormat> createFileFormat(const std::string &filePath, retdec::config::Config *config, LoadFlags loadFlags)
 {
 	switch(detectFileFormat(filePath, config))
 	{

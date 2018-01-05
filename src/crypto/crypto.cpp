@@ -11,9 +11,9 @@
 #include <openssl/md5.h>
 #include <openssl/sha.h>
 
-#include "crypto/crc32.h"
-#include "crypto/crypto.h"
-#include "tl-cpputils/conversion.h"
+#include "retdec/crypto/crc32.h"
+#include "retdec/crypto/crypto.h"
+#include "retdec/utils/conversion.h"
 
 namespace crypto {
 
@@ -89,7 +89,7 @@ std::string getMd5(const unsigned char *data, std::uint64_t length)
 	MD5(data, length, digest.data());
 
 	std::string md5;
-	tl_cpputils::bytesToHexString(digest, md5, 0, 0, false);
+	retdec::utils::bytesToHexString(digest, md5, 0, 0, false);
 	return md5;
 }
 
@@ -105,7 +105,7 @@ std::string getSha1(const unsigned char *data, std::uint64_t length)
 	SHA1(data, length, digest.data());
 
 	std::string sha;
-	tl_cpputils::bytesToHexString(digest, sha, 0, 0, false);
+	retdec::utils::bytesToHexString(digest, sha, 0, 0, false);
 	return sha;
 }
 
@@ -121,7 +121,7 @@ std::string getSha256(const unsigned char *data, std::uint64_t length)
 	SHA256(data, length, digest.data());
 
 	std::string sha;
-	tl_cpputils::bytesToHexString(digest, sha, 0, 0, false);
+	retdec::utils::bytesToHexString(digest, sha, 0, 0, false);
 	return sha;
 }
 

@@ -11,11 +11,11 @@
 #include <rapidjson/document.h>
 #include <rapidjson/prettywriter.h>
 
-#include "tl-cpputils/filesystem_path.h"
-#include "ar-extractor/archive_wrapper.h"
-#include "ar-extractor/detection.h"
+#include "retdec/utils/filesystem_path.h"
+#include "retdec/ar-extractor/archive_wrapper.h"
+#include "retdec/ar-extractor/detection.h"
 
-using namespace tl_cpputils;
+using namespace retdec::utils;
 using namespace ar_extractor;
 using namespace rapidjson;
 

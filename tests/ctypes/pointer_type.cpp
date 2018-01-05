@@ -8,9 +8,9 @@
 
 #include <gtest/gtest.h>
 
-#include "ctypes/context.h"
-#include "ctypes/integral_type.h"
-#include "ctypes/pointer_type.h"
+#include "retdec/ctypes/context.h"
+#include "retdec/ctypes/integral_type.h"
+#include "retdec/ctypes/pointer_type.h"
 
 using namespace ::testing;
 

@@ -9,8 +9,8 @@
 #include <iostream>
 #include <sstream>
 
-#include "tl-cpputils/debug.h"
-#include "debugformat/debugformat.h"
+#include "retdec/utils/debug.h"
+#include "retdec/debugformat/debugformat.h"
 
 namespace debugformat {
 
@@ -77,11 +77,11 @@ void DebugFormat::loadSymtab()
 	{
 		std::string funcName = it->second->getNormalizedName();
 
-		retdec_config::Function nf(funcName);
+		retdec::config::Function nf(funcName);
 
 		nf.setDemangledName(_demangler->demangleToString(funcName));
 
-		tl_cpputils::Address addr = it->first;
+		retdec::utils::Address addr = it->first;
 		if (_inFile->getFileFormat()->isArm() && addr % 2 != 0)
 		{
 			addr -= 1;
@@ -121,14 +121,14 @@ void DebugFormat::loadSymtab()
 	}
 }
 
-retdec_config::Function* DebugFormat::getFunction(tl_cpputils::Address a)
+retdec::config::Function* DebugFormat::getFunction(retdec::utils::Address a)
 {
 	auto fIt = functions.find(a);
 	return fIt != functions.end() ? &fIt->second : nullptr;
 }
 
-const retdec_config::Object* DebugFormat::getGlobalVar(
-		tl_cpputils::Address a)
+const retdec::config::Object* DebugFormat::getGlobalVar(
+		retdec::utils::Address a)
 {
 	return globals.getObjectByAddress(a);
 }

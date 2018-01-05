@@ -4,7 +4,7 @@
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */
 
-#include "fileformat/types/dotnet_headers/clr_header.h"
+#include "retdec/fileformat/types/dotnet_headers/clr_header.h"
 
 namespace fileformat {
 

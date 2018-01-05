@@ -6,9 +6,9 @@
 
 #include <iostream>
 
-#include "llvm-support/utils.h"
-#include "bin2llvmir/optimizations/class_hierarchy/hierarchy_analysis.h"
-#include "bin2llvmir/utils/defs.h"
+#include "retdec/llvm-support/utils.h"
+#include "retdec/bin2llvmir/optimizations/class_hierarchy/hierarchy_analysis.h"
+#include "retdec/bin2llvmir/utils/defs.h"
 
 #define debug_enabled false
 

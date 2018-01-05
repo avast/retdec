@@ -7,9 +7,9 @@
 #include <gtest/gtest.h>
 #include <llvm/IR/Verifier.h>
 
-#include "bin2llvmir/utils/instruction.h"
+#include "retdec/bin2llvmir/utils/instruction.h"
 #include "bin2llvmir/utils/llvmir_tests.h"
-#include "bin2llvmir/utils/type.h"
+#include "retdec/bin2llvmir/utils/type.h"
 
 using namespace ::testing;
 using namespace llvm;

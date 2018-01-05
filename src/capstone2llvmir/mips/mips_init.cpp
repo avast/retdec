@@ -4,7 +4,7 @@
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */
 
-#include "capstone2llvmir/mips/mips.h"
+#include "retdec/capstone2llvmir/mips/mips.h"
 
 namespace capstone2llvmir {
 

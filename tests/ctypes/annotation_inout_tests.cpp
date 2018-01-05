@@ -8,8 +8,8 @@
 
 #include <gtest/gtest.h>
 
-#include "ctypes/annotation_inout.h"
-#include "ctypes/context.h"
+#include "retdec/ctypes/annotation_inout.h"
+#include "retdec/ctypes/context.h"
 
 using namespace ::testing;
 

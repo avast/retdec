@@ -8,11 +8,11 @@
 #include <iomanip>
 #include <sstream>
 
-#include "llvm-support/diagnostics.h"
-#include "tl-cpputils/conversion.h"
-#include "tl-cpputils/time.h"
+#include "retdec/llvm-support/diagnostics.h"
+#include "retdec/utils/conversion.h"
+#include "retdec/utils/time.h"
 
-using tl_cpputils::getElapsedTime;
+using retdec::utils::getElapsedTime;
 
 namespace llvm_support {
 

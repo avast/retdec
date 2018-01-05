@@ -4,7 +4,7 @@
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */
 
-#include "bin2llvmir/providers/debugformat.h"
+#include "retdec/bin2llvmir/providers/debugformat.h"
 
 using namespace llvm;
 
@@ -35,7 +35,7 @@ DebugFormat* DebugFormatProvider::addDebugFormat(
 				llvm::Module* m,
 				loader::Image* objf,
 				const std::string& pdbFile,
-				const tl_cpputils::Address& imageBase,
+				const retdec::utils::Address& imageBase,
 				demangler::CDemangler* demangler)
 {
 	if (objf == nullptr)

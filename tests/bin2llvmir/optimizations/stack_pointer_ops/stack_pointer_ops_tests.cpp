@@ -4,8 +4,8 @@
 * @copyright (c) 2017 Avast Software, licensed under the MIT license
 */
 
-#include "bin2llvmir/optimizations/stack_pointer_ops/stack_pointer_ops.h"
-#include "bin2llvmir/providers/config.h"
+#include "retdec/bin2llvmir/optimizations/stack_pointer_ops/stack_pointer_ops.h"
+#include "retdec/bin2llvmir/providers/config.h"
 #include "bin2llvmir/utils/llvmir_tests.h"
 
 using namespace ::testing;
@@ -52,8 +52,8 @@ TEST_F(StackPointerOpsRemoveTests, passRemovesAllStoresToStackRegistersEvenIfThe
 			ret void
 		}
 	)");
-	auto s = retdec_config::Storage::inRegister("esp");
-	auto r = retdec_config::Object("esp", s);
+	auto s = retdec::config::Storage::inRegister("esp");
+	auto r = retdec::config::Object("esp", s);
 	auto c = Config::empty(module.get());
 	c.getConfig().registers.insert(r);
 
@@ -83,8 +83,8 @@ TEST_F(StackPointerOpsRemoveTests, passKeepsAllStoresToNonStackPointerRegisters)
 			ret void
 		}
 	)");
-	auto s = retdec_config::Storage::inRegister("eax");
-	auto r = retdec_config::Object("eax", s);
+	auto s = retdec::config::Storage::inRegister("eax");
+	auto r = retdec::config::Object("eax", s);
 	auto c = Config::empty(module.get());
 	c.getConfig().registers.insert(r);
 

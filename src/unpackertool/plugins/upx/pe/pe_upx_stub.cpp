@@ -6,8 +6,8 @@
 
 #include <pelib/PeLib.h>
 
-#include "tl-cpputils/alignment.h"
-#include "tl-cpputils/file_io.h"
+#include "retdec/utils/alignment.h"
+#include "retdec/utils/file_io.h"
 #include "unpackertool/plugins/upx/decompressors/decompressors.h"
 #include "unpackertool/plugins/upx/pe/pe_upx_stub.h"
 #include "unpackertool/plugins/upx/unfilter.h"
@@ -15,7 +15,7 @@
 #include "unpackertool/plugins/upx/upx_exceptions.h"
 #include "unpackertool/plugins/upx/upx_stub_signatures.h"
 
-using namespace tl_cpputils;
+using namespace retdec::utils;
 using namespace unpacker;
 
 namespace unpackertool {
@@ -467,7 +467,7 @@ template <int bits> void PeUpxStub<bits>::fixSizeOfSections(const DynamicBuffer&
 	if (_newPeFile->peHeader().getVirtualSize(_upx0Sect->getSecSeg()->getIndex()) < unpackedData.getRealDataSize())
 	{
 		// Make sure the new size is section aligned
-		std::uint32_t newSize = tl_cpputils::alignUp(unpackedData.getRealDataSize(), _newPeFile->peHeader().getSectionAlignment());
+		std::uint32_t newSize = retdec::utils::alignUp(unpackedData.getRealDataSize(), _newPeFile->peHeader().getSectionAlignment());
 
 		diff = newSize - _newPeFile->peHeader().getVirtualSize(_upx0Sect->getSecSeg()->getIndex());
 
@@ -709,7 +709,7 @@ template <int bits> void PeUpxStub<bits>::fixImports(const DynamicBuffer& unpack
 	}
 
 	// Align the size of the impots to the file alignment to properly create the new section
-	std::uint32_t importSectSize = tl_cpputils::alignUp(_newPeFile->impDir().size(), _newPeFile->peHeader().getFileAlignment());
+	std::uint32_t importSectSize = retdec::utils::alignUp(_newPeFile->impDir().size(), _newPeFile->peHeader().getFileAlignment());
 
 	// Create the .imports section after all other sections with the ILT
 	_newPeFile->peHeader().addSection("gu_idata", importSectSize);
@@ -1102,7 +1102,7 @@ template <int bits> void PeUpxStub<bits>::fixCoffSymbolTable()
 		{
 			// Read whole COFF symbol table
 			std::ifstream inputFileHandle(_file->getFileFormat()->getPathToFile(), std::ios::binary | std::ios::in);
-			tl_cpputils::readFile(inputFileHandle, _coffSymbolTable, totalSectionSize, _file->getFileFormat()->getLoadedFileLength() - totalSectionSize);
+			retdec::utils::readFile(inputFileHandle, _coffSymbolTable, totalSectionSize, _file->getFileFormat()->getLoadedFileLength() - totalSectionSize);
 			inputFileHandle.close();
 
 			// Calculate the offset where to write COFF symbols in unpacked file by calculating raw sizes of all sections in unpacked file
@@ -1213,10 +1213,10 @@ template <int bits> void PeUpxStub<bits>::saveFile(const std::string& outputFile
 	// Write the unpacked content to the packed content section
 	// Use regular file as we will write more sections at once
 	std::fstream outputFileHandle(outputFile, std::ios::binary | std::ios::out | std::ios::in);
-	tl_cpputils::writeFile(outputFileHandle, unpackedData.getBuffer(), _newPeFile->peHeader().getPointerToRawData(_upx0Sect->getSecSeg()->getIndex()));
+	retdec::utils::writeFile(outputFileHandle, unpackedData.getBuffer(), _newPeFile->peHeader().getPointerToRawData(_upx0Sect->getSecSeg()->getIndex()));
 	// If there were COFF symbols in the original file, write them also to the new one
 	if (!_coffSymbolTable.empty())
-		tl_cpputils::writeFile(outputFileHandle, _coffSymbolTable, _newPeFile->peHeader().getPointerToSymbolTable());
+		retdec::utils::writeFile(outputFileHandle, _coffSymbolTable, _newPeFile->peHeader().getPointerToSymbolTable());
 	outputFileHandle.close();
 
 	// Write resources at the end, because they would be rewritten by unpackedData which have them zeroed
@@ -1237,11 +1237,11 @@ template <int bits> void PeUpxStub<bits>::saveFile(const std::string& outputFile
 		this_plugin()->log("Packed file has overlay with size of 0x", std::hex, overlaySize, std::dec, " bytes. Copying into unpacked file.");
 
 		std::fstream inputFileHandle(_file->getFileFormat()->getPathToFile(), std::ios::binary | std::ios::in);
-		tl_cpputils::readFile(inputFileHandle, overlay, _file->getFileFormat()->getDeclaredFileLength(), overlaySize);
+		retdec::utils::readFile(inputFileHandle, overlay, _file->getFileFormat()->getDeclaredFileLength(), overlaySize);
 
 		std::fstream outputFileHandle(outputFile, std::ios::binary | std::ios::out | std::ios::in);
 		outputFileHandle.seekp(0, std::ios::end);
-		tl_cpputils::writeFile(outputFileHandle, overlay, outputFileHandle.tellp());
+		retdec::utils::writeFile(outputFileHandle, overlay, outputFileHandle.tellp());
 	}
 }
 

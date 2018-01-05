@@ -4,7 +4,7 @@
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */
 
-#include "fileformat/utils/conversions.h"
+#include "retdec/fileformat/utils/conversions.h"
 #include "fileinfo/file_presentation/getters/simple_getter/header_plain_getter.h"
 
 using namespace fileformat;

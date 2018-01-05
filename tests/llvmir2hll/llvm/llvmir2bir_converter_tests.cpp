@@ -9,9 +9,9 @@
 #include <llvm/Support/MemoryBuffer.h>
 #include <llvm/Support/SourceMgr.h>
 
-#include "llvmir2hll/llvm/llvmir2bir_converter.h"
+#include "retdec/llvmir2hll/llvm/llvmir2bir_converter.h"
 #include "llvmir2hll/llvm/llvmir2bir_converter_tests.h"
-#include "llvmir2hll/support/debug.h"
+#include "retdec/llvmir2hll/support/debug.h"
 
 using namespace ::testing;
 

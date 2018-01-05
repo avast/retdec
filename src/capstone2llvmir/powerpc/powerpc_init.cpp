@@ -4,7 +4,7 @@
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */
 
-#include "capstone2llvmir/powerpc/powerpc.h"
+#include "retdec/capstone2llvmir/powerpc/powerpc.h"
 
 namespace capstone2llvmir {
 

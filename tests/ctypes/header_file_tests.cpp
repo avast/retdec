@@ -6,7 +6,7 @@
 
 #include <gtest/gtest.h>
 
-#include "ctypes/header_file.h"
+#include "retdec/ctypes/header_file.h"
 
 using namespace ::testing;
 

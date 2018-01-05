@@ -4,7 +4,7 @@
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */
 
-#include "fileformat/types/strings/string.h"
+#include "retdec/fileformat/types/strings/string.h"
 
 namespace fileformat {
 

@@ -7,16 +7,16 @@
 #include <algorithm>
 #include <map>
 
-#include "tl-cpputils/container.h"
-#include "tl-cpputils/conversion.h"
-#include "tl-cpputils/equality.h"
-#include "tl-cpputils/string.h"
-#include "cpdetect/compiler_detector/search/search.h"
-#include "cpdetect/signatures/avg/signature_checker.h"
-#include "fileformat/utils/conversions.h"
-#include "fileformat/utils/file_io.h"
+#include "retdec/utils/container.h"
+#include "retdec/utils/conversion.h"
+#include "retdec/utils/equality.h"
+#include "retdec/utils/string.h"
+#include "retdec/cpdetect/compiler_detector/search/search.h"
+#include "retdec/cpdetect/signatures/avg/signature_checker.h"
+#include "retdec/fileformat/utils/conversions.h"
+#include "retdec/fileformat/utils/file_io.h"
 
-using namespace tl_cpputils;
+using namespace retdec::utils;
 using namespace fileformat;
 
 namespace cpdetect {

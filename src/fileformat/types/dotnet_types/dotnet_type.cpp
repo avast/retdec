@@ -6,15 +6,15 @@
 
 #include <unordered_map>
 
-#include "tl-cpputils/container.h"
-#include "fileformat/types/dotnet_types/dotnet_type.h"
+#include "retdec/utils/container.h"
+#include "retdec/fileformat/types/dotnet_types/dotnet_type.h"
 
 namespace fileformat {
 
 namespace
 {
 
-const std::unordered_map<DotnetTypeVisibility, std::string, tl_cpputils::EnumClassKeyHash> visibilityStrings =
+const std::unordered_map<DotnetTypeVisibility, std::string, retdec::utils::EnumClassKeyHash> visibilityStrings =
 {
 	{ DotnetTypeVisibility::Public,    "public"    },
 	{ DotnetTypeVisibility::Protected, "protected" },

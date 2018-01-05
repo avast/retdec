@@ -4,10 +4,10 @@
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */
 
-#include "tl-cpputils/conversion.h"
-#include "fileformat/types/symbol_table/symbol_table.h"
+#include "retdec/utils/conversion.h"
+#include "retdec/fileformat/types/symbol_table/symbol_table.h"
 
-using namespace tl_cpputils;
+using namespace retdec::utils;
 
 namespace fileformat {
 

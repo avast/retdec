@@ -10,7 +10,7 @@ set(FILEFORMAT_TESTS_SOURCES
 if(NOT TARGET fileformat-tests)
 
 	add_executable(fileformat-tests ${FILEFORMAT_TESTS_SOURCES})
-	target_link_libraries(fileformat-tests fileformat tl-cpputils gmock_main)
+	target_link_libraries(fileformat-tests fileformat retdec-utils gmock_main)
 	install(TARGETS fileformat-tests RUNTIME DESTINATION bin/unit-tests)
 
 endif()

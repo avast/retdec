@@ -6,7 +6,7 @@
 
 #include <llvm/IR/PatternMatch.h>
 
-#include "bin2llvmir/optimizations/idioms/idioms_vstudio.h"
+#include "retdec/bin2llvmir/optimizations/idioms/idioms_vstudio.h"
 
 namespace bin2llvmir {
 

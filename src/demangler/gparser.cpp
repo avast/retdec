@@ -18,10 +18,10 @@
 #include <sstream>
 #include <string>
 
-#include "demangler/demglobal.h"
-#include "demangler/demtools.h"
-#include "demangler/gparser.h"
-#include "demangler/igrams.h"
+#include "retdec/demangler/demglobal.h"
+#include "retdec/demangler/demtools.h"
+#include "retdec/demangler/gparser.h"
+#include "retdec/demangler/igrams.h"
 
 // #define DEMANGLER_SUBDBG
 // #define DEMANGLER_IGRAM

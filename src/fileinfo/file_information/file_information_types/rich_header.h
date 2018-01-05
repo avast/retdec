@@ -7,7 +7,7 @@
 #ifndef FILEINFO_FILE_INFORMATION_FILE_INFORMATION_TYPES_RICH_HEADER_H
 #define FILEINFO_FILE_INFORMATION_FILE_INFORMATION_TYPES_RICH_HEADER_H
 
-#include "fileformat/types/rich_header/rich_header.h"
+#include "retdec/fileformat/types/rich_header/rich_header.h"
 
 namespace fileinfo {
 

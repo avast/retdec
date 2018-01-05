@@ -6,8 +6,8 @@
 
 #include <gtest/gtest.h>
 
-#include "llvm-support/tests/llvmir_tests.h"
-#include "llvm-support/utils.h"
+#include "retdec/llvm-support/tests/llvmir_tests.h"
+#include "retdec/llvm-support/utils.h"
 
 using namespace ::testing;
 using namespace llvm;

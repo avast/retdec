@@ -4,7 +4,7 @@
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */
 
-#include "fileformat/fileformat.h"
+#include "retdec/fileformat/fileformat.h"
 #include "unpackertool/plugins/upx/decompressors/decompressors.h"
 #include "unpackertool/plugins/upx/elf/elf_upx_stub.h"
 #include "unpackertool/plugins/upx/macho/macho_upx_stub.h"
@@ -13,8 +13,8 @@
 #include "unpackertool/plugins/upx/upx_exceptions.h"
 #include "unpackertool/plugins/upx/upx_stub.h"
 #include "unpackertool/plugins/upx/upx_stub_signatures.h"
-#include "unpacker/decompression/compressed_data.h"
-#include "unpacker/dynamic_buffer.h"
+#include "retdec/unpacker/decompression/compressed_data.h"
+#include "retdec/unpacker/dynamic_buffer.h"
 
 using namespace unpacker;
 

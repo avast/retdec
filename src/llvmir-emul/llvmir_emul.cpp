@@ -48,7 +48,7 @@
 #include <llvm/Support/raw_ostream.h>
 #include <llvm/Transforms/Instrumentation.h>
 
-#include "llvmir-emul/llvmir_emul.h"
+#include "retdec/llvmir-emul/llvmir_emul.h"
 
 using namespace llvm;
 

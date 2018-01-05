@@ -8,11 +8,11 @@
 #include <iomanip>
 #include <iostream>
 
-#include "capstone2llvmir/arm/arm.h"
-#include "capstone2llvmir/capstone2llvmir.h"
-#include "capstone2llvmir/mips/mips.h"
-#include "capstone2llvmir/powerpc/powerpc.h"
-#include "capstone2llvmir/x86/x86.h"
+#include "retdec/capstone2llvmir/arm/arm.h"
+#include "retdec/capstone2llvmir/capstone2llvmir.h"
+#include "retdec/capstone2llvmir/mips/mips.h"
+#include "retdec/capstone2llvmir/powerpc/powerpc.h"
+#include "retdec/capstone2llvmir/x86/x86.h"
 
 namespace capstone2llvmir {
 
@@ -459,7 +459,7 @@ llvm::StoreInst* Capstone2LlvmIrTranslator::generateSpecialAsm2LlvmInstr(
 		llvm::IRBuilder<>& irb,
 		cs_insn* i)
 {
-	tl_cpputils::Address a = i->address;
+	retdec::utils::Address a = i->address;
 	auto* gv = getAsm2LlvmMapGlobalVariable();
 	auto* ci = llvm::ConstantInt::get(gv->getValueType(), a, false);
 	auto* s = irb.CreateStore(ci, gv, true);
@@ -806,7 +806,7 @@ uint32_t Capstone2LlvmIrTranslator::getCapstoneRegister(llvm::GlobalVariable* gv
  */
 Capstone2LlvmIrTranslator::TranslationResult Capstone2LlvmIrTranslator::translate(
 		const std::vector<uint8_t>& bytes,
-		tl_cpputils::Address a,
+		retdec::utils::Address a,
 		llvm::IRBuilder<>& irb,
 		bool stopOnBranch)
 {

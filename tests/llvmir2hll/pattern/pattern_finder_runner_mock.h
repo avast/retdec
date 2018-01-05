@@ -9,8 +9,8 @@
 
 #include <gmock/gmock.h>
 
-#include "llvmir2hll/pattern/pattern_finder.h"
-#include "llvmir2hll/pattern/pattern_finder_runner.h"
+#include "retdec/llvmir2hll/pattern/pattern_finder.h"
+#include "retdec/llvmir2hll/pattern/pattern_finder_runner.h"
 
 namespace llvmir2hll {
 namespace tests {

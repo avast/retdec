@@ -13,11 +13,11 @@
 #include <rapidjson/document.h>
 #include <rapidjson/prettywriter.h>
 
-#include "tl-cpputils/filesystem_path.h"
-#include "tl-cpputils/string.h"
-#include "ar-extractor/archive_wrapper.h"
+#include "retdec/utils/filesystem_path.h"
+#include "retdec/utils/string.h"
+#include "retdec/ar-extractor/archive_wrapper.h"
 
-using namespace tl_cpputils;
+using namespace retdec::utils;
 using namespace llvm;
 using namespace llvm::object;
 using namespace rapidjson;

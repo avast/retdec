@@ -6,7 +6,7 @@
 
 #include <gtest/gtest.h>
 
-#include "loader/utils/name_generator.h"
+#include "retdec/loader/utils/name_generator.h"
 
 using namespace ::testing;
 

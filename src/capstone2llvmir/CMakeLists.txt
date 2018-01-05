@@ -12,5 +12,5 @@ set(CAPSTONE2LLVMIR_SOURCES
 )
 
 add_library(capstone2llvmir STATIC ${CAPSTONE2LLVMIR_SOURCES})
-target_link_libraries(capstone2llvmir tl-cpputils capstone llvm)
+target_link_libraries(capstone2llvmir retdec-utils capstone llvm)
 target_include_directories(capstone2llvmir PUBLIC ${PROJECT_SOURCE_DIR}/include/)

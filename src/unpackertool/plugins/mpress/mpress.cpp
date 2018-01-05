@@ -10,11 +10,11 @@
 
 #include <pelib/PeLib.h>
 
-#include "loader/loader.h"
-#include "unpacker/plugin.h"
-#include "unpacker/decompression/lzma/lzma_data.h"
-#include "unpacker/decompression/lzmat/lzmat_data.h"
-#include "unpacker/unpacker_exception.h"
+#include "retdec/loader/loader.h"
+#include "retdec/unpacker/plugin.h"
+#include "retdec/unpacker/decompression/lzma/lzma_data.h"
+#include "retdec/unpacker/decompression/lzmat/lzmat_data.h"
+#include "retdec/unpacker/unpacker_exception.h"
 
 #include "unpackertool/plugins/mpress/mpress_exceptions.h"
 

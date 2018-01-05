@@ -13,12 +13,12 @@
 #include <set>
 #include <vector>
 
-#include "tl-cpputils/conversion.h"
+#include "retdec/utils/conversion.h"
 #include "yaramod/builder/yara_expression_builder.h"
 #include "yaramod/builder/yara_hex_string_builder.h"
 #include "yaramod/builder/yara_rule_builder.h"
 
-using namespace tl_cpputils;
+using namespace retdec::utils;
 using namespace yaramod;
 
 /**

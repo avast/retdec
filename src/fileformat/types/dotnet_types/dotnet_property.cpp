@@ -4,8 +4,8 @@
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */
 
-#include "fileformat/types/dotnet_types/dotnet_data_types.h"
-#include "fileformat/types/dotnet_types/dotnet_property.h"
+#include "retdec/fileformat/types/dotnet_types/dotnet_data_types.h"
+#include "retdec/fileformat/types/dotnet_types/dotnet_property.h"
 
 namespace fileformat {
 

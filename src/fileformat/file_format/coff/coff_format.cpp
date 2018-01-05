@@ -9,10 +9,10 @@
 
 #include <pelib/PeLibInc.h>
 
-#include "tl-cpputils/string.h"
-#include "fileformat/file_format/coff/coff_format.h"
+#include "retdec/utils/string.h"
+#include "retdec/fileformat/file_format/coff/coff_format.h"
 
-using namespace tl_cpputils;
+using namespace retdec::utils;
 using namespace llvm;
 using namespace llvm::COFF;
 using namespace llvm::object;
@@ -463,7 +463,7 @@ bool CoffFormat::getRelocationMask(unsigned relType, std::vector<std::uint8_t> &
 	return false;
 }
 
-tl_cpputils::Endianness CoffFormat::getEndianness() const
+retdec::utils::Endianness CoffFormat::getEndianness() const
 {
 	switch(file->getMachine())
 	{

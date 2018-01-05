@@ -9,7 +9,7 @@ set(LOADER_TESTS_SOURCES
 if(NOT TARGET loader-tests)
 
 	add_executable(loader-tests ${LOADER_TESTS_SOURCES})
-	target_link_libraries(loader-tests loader tl-cpputils gmock_main)
+	target_link_libraries(loader-tests loader retdec-utils gmock_main)
 	install(TARGETS loader-tests RUNTIME DESTINATION bin/unit-tests)
 
 endif()

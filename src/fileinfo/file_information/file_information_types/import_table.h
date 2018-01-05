@@ -7,7 +7,7 @@
 #ifndef FILEINFO_FILE_INFORMATION_FILE_INFORMATION_TYPES_IMPORT_TABLE_H
 #define FILEINFO_FILE_INFORMATION_FILE_INFORMATION_TYPES_IMPORT_TABLE_H
 
-#include "fileformat/types/import_table/import_table.h"
+#include "retdec/fileformat/types/import_table/import_table.h"
 
 namespace fileinfo {
 

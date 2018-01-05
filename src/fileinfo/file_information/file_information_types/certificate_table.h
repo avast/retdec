@@ -7,7 +7,7 @@
 #ifndef FILEINFO_FILE_INFORMATION_FILE_INFORMATION_TYPES_CERTIFICATE_TABLE_H
 #define FILEINFO_FILE_INFORMATION_FILE_INFORMATION_TYPES_CERTIFICATE_TABLE_H
 
-#include "fileformat/types/certificate_table/certificate_table.h"
+#include "retdec/fileformat/types/certificate_table/certificate_table.h"
 
 namespace fileinfo {
 

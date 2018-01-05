@@ -6,12 +6,12 @@
 
 #include <system_error>
 
-#include "tl-cpputils/container.h"
-#include "tl-cpputils/conversion.h"
-#include "tl-cpputils/string.h"
-#include "fileformat/file_format/macho/macho_format.h"
+#include "retdec/utils/container.h"
+#include "retdec/utils/conversion.h"
+#include "retdec/utils/string.h"
+#include "retdec/fileformat/file_format/macho/macho_format.h"
 
-using namespace tl_cpputils;
+using namespace retdec::utils;
 using namespace llvm;
 using namespace llvm::MachO;
 using namespace llvm::object;
@@ -1247,7 +1247,7 @@ void MachOFormat::clearCommands()
 	symbols.clear();
 }
 
-tl_cpputils::Endianness MachOFormat::getEndianness() const
+retdec::utils::Endianness MachOFormat::getEndianness() const
 {
 	return isLittle ? Endianness::LITTLE : Endianness::BIG;
 }

@@ -12,7 +12,7 @@
 #include "unpackertool/plugins/upx/pe/pe_upx_stub.h"
 #include "unpackertool/plugins/upx/upx_exceptions.h"
 #include "unpackertool/plugins/upx/upx_stub.h"
-#include "unpacker/decompression/lzma/lzma_data.h"
+#include "retdec/unpacker/decompression/lzma/lzma_data.h"
 
 using namespace unpacker;
 

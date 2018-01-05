@@ -4,7 +4,7 @@
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */
 
-#include "fileformat/types/certificate_table/certificate_table.h"
+#include "retdec/fileformat/types/certificate_table/certificate_table.h"
 
 namespace fileformat {
 

@@ -6,7 +6,7 @@
 
 #include <gtest/gtest.h>
 
-#include "llvmir2hll/semantics/semantics/compound_semantics.h"
+#include "retdec/llvmir2hll/semantics/semantics/compound_semantics.h"
 #include "llvmir2hll/semantics/semantics_mock.h"
 
 using namespace ::testing;

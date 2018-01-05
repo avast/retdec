@@ -9,7 +9,7 @@
 
 #include <gmock/gmock.h>
 
-#include "llvmir2hll/analysis/alias_analysis/alias_analysis.h"
+#include "retdec/llvmir2hll/analysis/alias_analysis/alias_analysis.h"
 
 namespace llvmir2hll {
 namespace tests {

@@ -7,9 +7,9 @@
 #include <algorithm>
 #include <string>
 
-#include "fileformat/file_format/intel_hex/intel_hex_format.h"
+#include "retdec/fileformat/file_format/intel_hex/intel_hex_format.h"
 
-using namespace tl_cpputils;
+using namespace retdec::utils;
 
 namespace fileformat {
 
@@ -119,7 +119,7 @@ std::size_t IntelHexFormat::initSectionTableHashOffsets()
 	return 0;
 }
 
-tl_cpputils::Endianness IntelHexFormat::getEndianness() const
+retdec::utils::Endianness IntelHexFormat::getEndianness() const
 {
 	return endianness;
 }
@@ -248,7 +248,7 @@ void IntelHexFormat::setTargetArchitecture(Architecture a)
  * Set endianness
  * @param e Endianness
  */
-void IntelHexFormat::setEndianness(tl_cpputils::Endianness e)
+void IntelHexFormat::setEndianness(retdec::utils::Endianness e)
 {
 	endianness = e;
 }

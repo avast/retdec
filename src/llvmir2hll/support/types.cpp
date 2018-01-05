@@ -4,7 +4,7 @@
 * @copyright (c) 2017 Avast Software, licensed under the MIT license
 */
 
-#include "llvmir2hll/support/types.h"
+#include "retdec/llvmir2hll/support/types.h"
 
 namespace llvmir2hll {
 

@@ -18,7 +18,7 @@ set(LOADER_SOURCES
 if(NOT TARGET loader)
 
 	add_library(loader STATIC ${LOADER_SOURCES})
-	target_link_libraries(loader fileformat tl-cpputils)
+	target_link_libraries(loader fileformat retdec-utils)
 	target_include_directories(loader PUBLIC ${PROJECT_SOURCE_DIR}/include/)
 
 endif()

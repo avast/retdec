@@ -4,8 +4,8 @@
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */
 
-#include "llvm-support/utils.h"
-#include "bin2llvmir/optimizations/syscalls/syscalls.h"
+#include "retdec/llvm-support/utils.h"
+#include "retdec/bin2llvmir/optimizations/syscalls/syscalls.h"
 
 using namespace llvm_support;
 using namespace llvm;

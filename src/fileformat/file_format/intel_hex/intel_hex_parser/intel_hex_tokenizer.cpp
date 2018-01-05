@@ -6,11 +6,11 @@
 
 #include <cassert>
 
-#include "tl-cpputils/conversion.h"
-#include "fileformat/file_format/intel_hex/intel_hex_parser/intel_hex_parser.h"
-#include "fileformat/file_format/intel_hex/intel_hex_parser/intel_hex_tokenizer.h"
+#include "retdec/utils/conversion.h"
+#include "retdec/fileformat/file_format/intel_hex/intel_hex_parser/intel_hex_parser.h"
+#include "retdec/fileformat/file_format/intel_hex/intel_hex_parser/intel_hex_tokenizer.h"
 
-using namespace tl_cpputils;
+using namespace retdec::utils;
 
 namespace fileformat {
 

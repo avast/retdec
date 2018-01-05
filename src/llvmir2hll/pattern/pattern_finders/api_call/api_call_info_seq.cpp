@@ -4,8 +4,8 @@
 * @copyright (c) 2017 Avast Software, licensed under the MIT license
 */
 
-#include "llvmir2hll/pattern/pattern_finders/api_call/api_call_info_seq.h"
-#include "llvmir2hll/support/debug.h"
+#include "retdec/llvmir2hll/pattern/pattern_finders/api_call/api_call_info_seq.h"
+#include "retdec/llvmir2hll/support/debug.h"
 
 namespace llvmir2hll {
 

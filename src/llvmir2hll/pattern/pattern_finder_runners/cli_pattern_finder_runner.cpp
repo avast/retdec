@@ -6,10 +6,10 @@
 
 #include <string>
 
-#include "llvmir2hll/ir/statement.h"
-#include "llvmir2hll/pattern/pattern_finder_runners/cli_pattern_finder_runner.h"
-#include "llvmir2hll/support/debug.h"
-#include "llvm-support/diagnostics.h"
+#include "retdec/llvmir2hll/ir/statement.h"
+#include "retdec/llvmir2hll/pattern/pattern_finder_runners/cli_pattern_finder_runner.h"
+#include "retdec/llvmir2hll/support/debug.h"
+#include "retdec/llvm-support/diagnostics.h"
 
 using namespace llvm_support;
 

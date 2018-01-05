@@ -4,7 +4,7 @@
 * @copyright (c) 2017 Avast Software, licensed under the MIT license
 */
 
-#include "bin2llvmir/optimizations/idioms/idioms_borland.h"
+#include "retdec/bin2llvmir/optimizations/idioms/idioms_borland.h"
 
 namespace bin2llvmir {
 

@@ -6,7 +6,7 @@
 
 #include <gtest/gtest.h>
 
-#include "llvmir2hll/ir/const_bool.h"
+#include "retdec/llvmir2hll/ir/const_bool.h"
 
 using namespace ::testing;
 

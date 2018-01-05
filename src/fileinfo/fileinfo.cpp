@@ -9,12 +9,12 @@
 
 #include <llvm/Support/ErrorHandling.h>
 
-#include "tl-cpputils/conversion.h"
-#include "tl-cpputils/string.h"
-#include "ar-extractor/detection.h"
-#include "cpdetect/errors.h"
-#include "fileformat/utils/format_detection.h"
-#include "fileformat/utils/other.h"
+#include "retdec/utils/conversion.h"
+#include "retdec/utils/string.h"
+#include "retdec/ar-extractor/detection.h"
+#include "retdec/cpdetect/errors.h"
+#include "retdec/fileformat/utils/format_detection.h"
+#include "retdec/fileformat/utils/other.h"
 #include "fileinfo/file_detector/detector_factory.h"
 #include "fileinfo/file_detector/macho_detector.h"
 #include "fileinfo/file_presentation/config_presentation.h"
@@ -22,7 +22,7 @@
 #include "fileinfo/file_presentation/plain_presentation.h"
 #include "fileinfo/pattern_detector/pattern_detector.h"
 
-using namespace tl_cpputils;
+using namespace retdec::utils;
 using namespace ar_extractor;
 using namespace cpdetect;
 using namespace fileformat;
@@ -206,7 +206,7 @@ bool doParams(int argc, char **_argv, ProgParams &params)
 		for (auto& o : withArgs)
 		{
 			std::string start = (o.size() == 1 ? "-" : "--") + o + "=";
-			if (tl_cpputils::startsWith(a, start))
+			if (retdec::utils::startsWith(a, start))
 			{
 				argv.push_back(a.substr(0, start.size()-1));
 				argv.push_back(a.substr(start.size()));
@@ -358,18 +358,18 @@ int main(int argc, char* argv[])
 	}
 
 	bool useConfig = true;
-	retdec_config::Config config;
+	retdec::config::Config config;
 	if(params.generateConfigFile && !params.configFile.empty())
 	{
 		try
 		{
 			config.readJsonFile(params.configFile);
 		}
-		catch (const retdec_config::FileNotFoundException&)
+		catch (const retdec::config::FileNotFoundException&)
 		{
 			useConfig = false;
 		}
-		catch (const retdec_config::ParseException&)
+		catch (const retdec::config::ParseException&)
 		{
 			useConfig = false;
 		}

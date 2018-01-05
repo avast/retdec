@@ -8,9 +8,9 @@
 
 #include <gtest/gtest.h>
 
-#include "llvmir2hll/ir/const_int.h"
-#include "llvmir2hll/ir/const_symbol.h"
-#include "llvmir2hll/support/smart_ptr.h"
+#include "retdec/llvmir2hll/ir/const_int.h"
+#include "retdec/llvmir2hll/ir/const_symbol.h"
+#include "retdec/llvmir2hll/support/smart_ptr.h"
 
 using namespace ::testing;
 

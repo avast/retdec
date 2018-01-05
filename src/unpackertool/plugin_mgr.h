@@ -12,7 +12,7 @@
 #include <string>
 #include <vector>
 
-#include "tl-cpputils/os.h"
+#include "retdec/utils/os.h"
 #include "singleton.h"
 
 namespace unpackertool {

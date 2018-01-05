@@ -4,7 +4,7 @@
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */
 
-#include "fileformat/types/dynamic_table/dynamic_entry.h"
+#include "retdec/fileformat/types/dynamic_table/dynamic_entry.h"
 
 namespace fileformat {
 

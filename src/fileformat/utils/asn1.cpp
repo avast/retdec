@@ -4,8 +4,8 @@
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */
 
-#include "tl-cpputils/conversion.h"
-#include "fileformat/utils/asn1.h"
+#include "retdec/utils/conversion.h"
+#include "retdec/fileformat/utils/asn1.h"
 
 namespace fileformat {
 
@@ -157,7 +157,7 @@ std::string Asn1BitString::getString() const
 
 void Asn1BitString::init()
 {
-	tl_cpputils::bytesToHexString(getContentData(), _string);
+	retdec::utils::bytesToHexString(getContentData(), _string);
 }
 
 Asn1OctetString::Asn1OctetString(const std::vector<std::uint8_t>& data) : Asn1Item(Asn1Type::OctetString, data)
@@ -172,7 +172,7 @@ std::string Asn1OctetString::getString() const
 
 void Asn1OctetString::init()
 {
-	tl_cpputils::bytesToHexString(getContentData(), _string);
+	retdec::utils::bytesToHexString(getContentData(), _string);
 }
 
 Asn1Object::Asn1Object(const std::vector<std::uint8_t>& data) : Asn1Item(Asn1Type::Object, data)
@@ -198,8 +198,8 @@ void Asn1Object::init()
 
 	// First number from OID is stored as 40*X + Y where OID is 'X.Y'
 	auto first = contentData[0];
-	_identifier += tl_cpputils::numToStr(first / 40) + '.';
-	_identifier += tl_cpputils::numToStr(first % 40);
+	_identifier += retdec::utils::numToStr(first / 40) + '.';
+	_identifier += retdec::utils::numToStr(first % 40);
 	if (contentData.size() != 1)
 		_identifier += '.';
 
@@ -213,7 +213,7 @@ void Asn1Object::init()
 			continue;
 		}
 
-		_identifier += tl_cpputils::numToStr(subident);
+		_identifier += retdec::utils::numToStr(subident);
 		if (itr + 1 != contentData.end())
 			_identifier += '.';
 		subident = 0;

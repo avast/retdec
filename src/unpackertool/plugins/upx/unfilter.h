@@ -7,7 +7,7 @@
 #ifndef UNPACKERTOOL_PLUGINS_UPX_UNFILTER_H
 #define UNPACKERTOOL_PLUGINS_UPX_UNFILTER_H
 
-#include "unpacker/dynamic_buffer.h"
+#include "retdec/unpacker/dynamic_buffer.h"
 
 namespace unpackertool {
 namespace upx {
