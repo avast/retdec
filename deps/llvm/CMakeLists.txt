@@ -182,5 +182,5 @@ endif()
 
 # Set include directories.
 ExternalProject_Get_Property(llvm-project source_dir)
-target_include_directories(llvm SYSTEM INTERFACE ${source_dir}/src/include)
+target_include_directories(llvm SYSTEM INTERFACE ${source_dir}/include)
 target_include_directories(llvm SYSTEM INTERFACE ${binary_dir}/include)
