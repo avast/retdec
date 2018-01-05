@@ -10,7 +10,7 @@ if (NOT CMAKE_BUILD_TYPE)
 endif()
 
 set(CMAKE_CXX_STANDARD 14)
-set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
+set(CMAKE_INSTALL_RPATH "$ORIGIN/../lib")
 
 option(RETDEC_DOC "Build public API documentation (requires Doxygen)." OFF)
 option(RETDEC_TESTS "Build tests." OFF)
