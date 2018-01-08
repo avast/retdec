@@ -162,10 +162,10 @@ check_arguments()
 	fi
 
 	# Convert to absolute paths.
-	IN=$(readlink -f "$IN")
-	OUT=$(readlink -f "$OUT")
+	IN="$(readlink -f "$IN")"
+	OUT="$(readlink -f "$OUT")"
 	if [ -e "$PDB_FILE" ]; then
-		PDB_FILE=$(readlink -f "$PDB_FILE")
+		PDB_FILE="$(readlink -f "$PDB_FILE")"
 	fi
 
 	# Check that selected ranges are valid.
@@ -190,7 +190,7 @@ check_arguments()
 #
 print_warning_if_decompiling_bytecode()
 {
-	BYTECODE=$($CONFIGTOOL "$CONFIG" --read --bytecode)
+	BYTECODE=$("$CONFIGTOOL" "$CONFIG" --read --bytecode)
 	if [ "$BYTECODE" != "" ]; then
 		print_warning "Detected $BYTECODE bytecode, which cannot be decompiled by our machine-code decompiler. The decompilation result may be inaccurate."
 	fi
@@ -523,10 +523,10 @@ if [ "$MODE" = "bin" ]; then
 			echo ""
 			echo "##### Restoring static library with architecture family $ARCH..."
 			echo "RUN: $EXTRACT --family "$ARCH" --out "$OUT_ARCHIVE" "$IN""
-			if ! $EXTRACT --family "$ARCH" --out "$OUT_ARCHIVE" "$IN"; then
+			if ! "$EXTRACT" --family "$ARCH" --out "$OUT_ARCHIVE" "$IN"; then
 				# Architecture not supported
 				echo "Invalid --arch option \"$ARCH\". File contains these architecture families:"
-				$EXTRACT --list "$IN"
+				"$EXTRACT" --list "$IN"
 				cleanup
 				exit 1
 			fi
@@ -535,7 +535,7 @@ if [ "$MODE" = "bin" ]; then
 			echo ""
 			echo "##### Restoring best static library for decompilation..."
 			echo "RUN: $EXTRACT --best --out "$OUT_ARCHIVE" "$IN""
-			$EXTRACT --best --out "$OUT_ARCHIVE" "$IN"
+			"$EXTRACT" --best --out "$OUT_ARCHIVE" "$IN"
 		fi
 		IN="$OUT_ARCHIVE"
 	fi
@@ -621,7 +621,7 @@ if [ "$MODE" = "bin" ] || [ "$MODE" = "raw" ]; then
 
 	# Preprocess existing file or create a new, empty JSON file.
 	if [ -f "$CONFIG" ]; then
-		$CONFIGTOOL "$CONFIG" --preprocess
+		"$CONFIGTOOL" "$CONFIG" --preprocess
 	else
 		echo "{}" > "$CONFIG"
 	fi
@@ -630,18 +630,18 @@ if [ "$MODE" = "bin" ] || [ "$MODE" = "raw" ]; then
 	if [ "$MODE" = "raw" ]; then
 		[ ! "$ARCH" -o "$ARCH" = "unknown" -o "$ARCH" = "" ] && print_error_and_die "Option -a|--arch must be used with format $FORMAT"
 		[ ! "$ENDIAN" ] && print_error_and_die "Option -e|--endian must be used with format $FORMAT"
-		$CONFIGTOOL "$CONFIG" --write --format "raw"
-		$CONFIGTOOL "$CONFIG" --write --arch "$ARCH"
-		$CONFIGTOOL "$CONFIG" --write --bit-size 32
-		$CONFIGTOOL "$CONFIG" --write --file-class 32
-		$CONFIGTOOL "$CONFIG" --write --endian "$ENDIAN"
+		"$CONFIGTOOL" "$CONFIG" --write --format "raw"
+		"$CONFIGTOOL" "$CONFIG" --write --arch "$ARCH"
+		"$CONFIGTOOL" "$CONFIG" --write --bit-size 32
+		"$CONFIGTOOL" "$CONFIG" --write --file-class 32
+		"$CONFIGTOOL" "$CONFIG" --write --endian "$ENDIAN"
 
 		if [ "$RAW_ENTRY_POINT" ]; then
-			$CONFIGTOOL "$CONFIG" --write --entry-point "$RAW_ENTRY_POINT"
+			"$CONFIGTOOL" "$CONFIG" --write --entry-point "$RAW_ENTRY_POINT"
 		fi
 
 		if [ "$RAW_SECTION_VMA" ]; then
-			$CONFIGTOOL "$CONFIG" --write --section-vma "$RAW_SECTION_VMA"
+			"$CONFIGTOOL" "$CONFIG" --write --section-vma "$RAW_SECTION_VMA"
 		fi
 	fi
 
@@ -664,7 +664,7 @@ if [ "$MODE" = "bin" ] || [ "$MODE" = "raw" ]; then
 	echo "##### Gathering file information..."
 	echo "RUN: $FILEINFO ${FILEINFO_PARAMS[@]}"
 
-	$FILEINFO "${FILEINFO_PARAMS[@]}"
+	"$FILEINFO" "${FILEINFO_PARAMS[@]}"
 	FILEINFO_RC=$?
 
 	if [ "$FILEINFO_RC" -ne 0 ]; then
@@ -678,7 +678,7 @@ if [ "$MODE" = "bin" ] || [ "$MODE" = "raw" ]; then
 	## Unpacking.
 	##
 	UNPACK_PARAMS=(--extended-exit-codes --output "$OUT_UNPACKED" "$IN")
-	$UNPACK_SH "${UNPACK_PARAMS[@]}"
+	"$UNPACK_SH" "${UNPACK_PARAMS[@]}"
 	UNPACKER_RC=$?
 
 	check_whether_decompilation_should_be_forcefully_stopped "unpacker"
@@ -708,7 +708,7 @@ if [ "$MODE" = "bin" ] || [ "$MODE" = "raw" ]; then
 		echo "##### Gathering file information after unpacking..."
 		echo "RUN: $FILEINFO ${FILEINFO_PARAMS[@]}"
 
-		$FILEINFO "${FILEINFO_PARAMS[@]}"
+		"$FILEINFO" "${FILEINFO_PARAMS[@]}"
 		FILEINFO_RC=$?
 
 		if [ $FILEINFO_RC -ne 0 ]; then
@@ -722,29 +722,29 @@ if [ "$MODE" = "bin" ] || [ "$MODE" = "raw" ]; then
 
 	# Check whether the architecture was specified.
 	if [ "$ARCH" ]; then
-		$CONFIGTOOL "$CONFIG" --write --arch "$ARCH"
+		"$CONFIGTOOL" "$CONFIG" --write --arch "$ARCH"
 	else
 		# Get full name of the target architecture including comments in parentheses
-		ARCH_FULL=$($CONFIGTOOL "$CONFIG" --read --arch | awk '{print tolower($0)}')
+		ARCH_FULL=$("$CONFIGTOOL" "$CONFIG" --read --arch | awk '{print tolower($0)}')
 		# Strip comments in parentheses and all trailing whitespace
 		ARCH="$(echo ${ARCH_FULL%(*} | sed -e 's/^[[:space:]]*//')"
 	fi
 
 	# Check whether the file format was specified.
 	if [ "$FORMAT" ]; then
-		$CONFIGTOOL "$CONFIG" --write --format "$FORMAT"
+		"$CONFIGTOOL" "$CONFIG" --write --format "$FORMAT"
 	else
-		FORMAT=$($CONFIGTOOL "$CONFIG" --read --format | awk '{print tolower($1);}')
+		FORMAT=$("$CONFIGTOOL" "$CONFIG" --read --format | awk '{print tolower($1);}')
 	fi
 
 	# Intel HEX needs architecture to be specified
 	if [ "$FORMAT" = "ihex" ]; then
 		[ ! "$ARCH" -o "$ARCH" = "unknown" -o "$ARCH" = "" ] && print_error_and_die "Option -a|--arch must be used with format $FORMAT"
 		[ ! "$ENDIAN" ] && print_error_and_die "Option -e|--endian must be used with format $FORMAT"
-		$CONFIGTOOL "$CONFIG" --write --arch "$ARCH"
-		$CONFIGTOOL "$CONFIG" --write --bit-size 32
-		$CONFIGTOOL "$CONFIG" --write --file-class 32
-		$CONFIGTOOL "$CONFIG" --write --endian "$ENDIAN"
+		"$CONFIGTOOL" "$CONFIG" --write --arch "$ARCH"
+		"$CONFIGTOOL" "$CONFIG" --write --bit-size 32
+		"$CONFIGTOOL" "$CONFIG" --write --file-class 32
+		"$CONFIGTOOL" "$CONFIG" --write --endian "$ENDIAN"
 	fi
 
 	# Check whether the correct target architecture was specified.
@@ -761,7 +761,7 @@ if [ "$MODE" = "bin" ] || [ "$MODE" = "raw" ]; then
 
 	# Check file class (e.g. "ELF32", "ELF64"). At present, we can only decompile 32-bit files.
 	# Note: we prefer to report the "unsupported architecture" error (above) than this "generic" error.
-	FILECLASS=$($CONFIGTOOL "$CONFIG" --read --file-class)
+	FILECLASS=$("$CONFIGTOOL" "$CONFIG" --read --file-class)
 	if [ "$FILECLASS" != "16" ] && [ "$FILECLASS" != "32" ]; then
 		cleanup
 		print_error_and_die "Unsupported target format '${FORMAT^^}$FILECLASS'. Supported formats: ELF32, PE32, Intel HEX 32."
@@ -774,7 +774,7 @@ if [ "$MODE" = "bin" ] || [ "$MODE" = "raw" ]; then
 	if [ "$SIG_FORMAT" == "ihex" ] || [ "$SIG_FORMAT" == "raw" ]; then
 		SIG_FORMAT="elf"
 	fi
-	ENDIAN=$($CONFIGTOOL "$CONFIG" --read --endian)
+	ENDIAN=$("$CONFIGTOOL" "$CONFIG" --read --endian)
 	case "$ENDIAN" in
 		"little") SIG_ENDIAN="le" ;;
 		"big") SIG_ENDIAN="be" ;;
@@ -790,7 +790,7 @@ if [ "$MODE" = "bin" ] || [ "$MODE" = "raw" ]; then
 
 	# Decompile unreachable functions.
 	if [ "$KEEP_UNREACHABLE_FUNCS" ]; then
-		$CONFIGTOOL "$CONFIG" --write --keep-unreachable-funcs "true"
+		"$CONFIGTOOL" "$CONFIG" --write --keep-unreachable-funcs "true"
 	fi
 
 	# Get signatures from selected archives.
@@ -803,8 +803,8 @@ if [ "$MODE" = "bin" ] || [ "$MODE" = "raw" ]; then
 		echo "Extracting signatures from file '$LIB'"
 		CROP_ARCH_PATH=$(basename "$LIB" | LC_ALL=C sed -e 's/[^A-Za-z0-9_.-]/_/g')
 		SIG_OUT="$OUT.$CROP_ARCH_PATH.$l.yara"
-		if $SIG_FROM_LIB_SH "$LIB" --output "$SIG_OUT" &> "$DEV_NULL" ; then
-			$CONFIGTOOL "$CONFIG" --write --user-signature "$SIG_OUT"
+		if "$SIG_FROM_LIB_SH" "$LIB" --output "$SIG_OUT" &> "$DEV_NULL" ; then
+			"$CONFIGTOOL" "$CONFIG" --write --user-signature "$SIG_OUT"
 			SIGNATURES_TO_REMOVE+=("$SIG_OUT")
 		else
 			print_warning "Failed extracting signatures from file \"$LIB\""
@@ -812,48 +812,48 @@ if [ "$MODE" = "bin" ] || [ "$MODE" = "raw" ]; then
 	done
 
 	# Store paths of signature files into config for frontend.
-	[ "$DO_NOT_LOAD_STATIC_SIGNATURES" ] || $CONFIGTOOL "$CONFIG" --write --signatures "$SIGNATURES_DIR"
+	[ "$DO_NOT_LOAD_STATIC_SIGNATURES" ] || "$CONFIGTOOL" "$CONFIG" --write --signatures "$SIGNATURES_DIR"
 	# User provided signatures.
 	for i in "${TEMPORARY_SIGNATURES[@]}"; do
-		$CONFIGTOOL "$CONFIG" --write --user-signature "$i"
+		"$CONFIGTOOL" "$CONFIG" --write --user-signature "$i"
 	done
 
 	# Store paths of type files into config for frontend.
 	if [ -d "$GENERIC_TYPES_DIR" ]; then
-		$CONFIGTOOL "$CONFIG" --write --types "$GENERIC_TYPES_DIR"
+		"$CONFIGTOOL" "$CONFIG" --write --types "$GENERIC_TYPES_DIR"
 	fi
 
 	# Store path of directory with ORD files into config for frontend (note: only directory, not files themselves).
 	if [ -d "$ORDS_DIR" ]; then
-		$CONFIGTOOL "$CONFIG" --write --ords "$ORDS_DIR/"
+		"$CONFIGTOOL" "$CONFIG" --write --ords "$ORDS_DIR/"
 	fi
 
 	# Store paths to file with PDB debugging information into config for frontend.
 	if [ -e "$PDB_FILE" ]; then
-		$CONFIGTOOL "$CONFIG" --write --pdb-file "$PDB_FILE"
+		"$CONFIGTOOL" "$CONFIG" --write --pdb-file "$PDB_FILE"
 	fi
 
 	# Store file names of input and output into config for frontend.
-	$CONFIGTOOL "$CONFIG" --write --input-file "$IN"
-	$CONFIGTOOL "$CONFIG" --write --frontend-output-file "$OUT_FRONTEND_LL"
-	$CONFIGTOOL "$CONFIG" --write --output-file "$OUT"
+	"$CONFIGTOOL" "$CONFIG" --write --input-file "$IN"
+	"$CONFIGTOOL" "$CONFIG" --write --frontend-output-file "$OUT_FRONTEND_LL"
+	"$CONFIGTOOL" "$CONFIG" --write --output-file "$OUT"
 
 	# Store decode only selected parts flag.
 	if [ "$SELECTED_DECODE_ONLY" ]; then
-		$CONFIGTOOL "$CONFIG" --write --decode-only-selected "true"
+		"$CONFIGTOOL" "$CONFIG" --write --decode-only-selected "true"
 	else
-		$CONFIGTOOL "$CONFIG" --write --decode-only-selected "false"
+		"$CONFIGTOOL" "$CONFIG" --write --decode-only-selected "false"
 	fi
 
 	# Store selected functions or selected ranges into config for frontend.
 	if [ "$SELECTED_FUNCTIONS" ]; then
 		for f in "${SELECTED_FUNCTIONS[@]}"; do
-			$CONFIGTOOL "$CONFIG" --write --selected-func "$f"
+			"$CONFIGTOOL" "$CONFIG" --write --selected-func "$f"
 		done
 	fi
 	if [ "$SELECTED_RANGES" ]; then
 		for r in "${SELECTED_RANGES[@]}"; do
-			$CONFIGTOOL "$CONFIG" --write --selected-range "$r"
+			"$CONFIGTOOL" "$CONFIG" --write --selected-range "$r"
 		done
 	fi
 
@@ -888,7 +888,7 @@ if [ "$MODE" = "bin" ] || [ "$MODE" = "raw" ]; then
 	echo "##### Decompiling $IN into $OUT_BACKEND_BC..."
 	echo "RUN: $BIN2LLVMIR ${BIN2LLVMIR_PARAMS[@]} -o $OUT_BACKEND_BC"
 
-	$BIN2LLVMIR "${BIN2LLVMIR_PARAMS[@]}" -o "$OUT_BACKEND_BC"
+	"$BIN2LLVMIR" "${BIN2LLVMIR_PARAMS[@]}" -o "$OUT_BACKEND_BC"
 	BIN2LLVMIR_RC=$?
 
 	if [ "$BIN2LLVMIR_RC" -ne 0 ]; then
@@ -944,7 +944,7 @@ echo ""
 echo "##### Decompiling $OUT_BACKEND_BC into $OUT..."
 echo "RUN: $LLVMIR2HLL ${LLVMIR2HLL_PARAMS[@]}"
 
-$LLVMIR2HLL "${LLVMIR2HLL_PARAMS[@]}"
+"$LLVMIR2HLL" "${LLVMIR2HLL_PARAMS[@]}"
 LLVMIR2HLL_RC=$?
 
 if [ "$LLVMIR2HLL_RC" -ne 0 ]; then
@@ -986,7 +986,7 @@ sed -i '$ { /^$/ d}' "$OUT"
 ## Colorize output file.
 ##
 if [ "$COLOR_IDA" ]; then
-	$IDA_COLORIZER "$OUT" "$CONFIG"
+	"$IDA_COLORIZER" "$OUT" "$CONFIG"
 fi
 
 # Success!

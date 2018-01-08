@@ -39,7 +39,7 @@ for	arg in "$@"; do
 				DECOMPILE_ARCHIVE_SH_PARAMS+=(--json)
 			fi
 		done
-		$DECOMPILE_ARCHIVE_SH "${DECOMPILE_ARCHIVE_SH_PARAMS[@]}"
+		"$DECOMPILE_ARCHIVE_SH" "${DECOMPILE_ARCHIVE_SH_PARAMS[@]}"
 		exit $?
 	fi
 done
@@ -61,4 +61,4 @@ for var in "$@"; do
 	fi
 done
 
-$FILEINFO "${FILEINFO_PARAMS[@]}"
+"$FILEINFO" "${FILEINFO_PARAMS[@]}"

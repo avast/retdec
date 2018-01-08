@@ -64,8 +64,8 @@ check_arguments()
 	OUT=${OUT:="$IN"-unpacked}
 
 	# Convert to absolute paths.
-	IN=$(readlink -f "$IN")
-	OUT=$(readlink -f "$OUT")
+	IN="$(readlink -f "$IN")"
+	OUT="$(readlink -f "$OUT")"
 }
 
 #
@@ -100,7 +100,7 @@ try_to_unpack()
 	echo ""
 	echo "##### Trying to unpack $IN into $OUT by using generic unpacker..."
 	echo "RUN: $UNPACKER ${UNPACKER_PARAMS[@]}"
-	$UNPACKER "${UNPACKER_PARAMS[@]}"
+	"$UNPACKER" "${UNPACKER_PARAMS[@]}"
 	UNPACKER_RETCODE="$?"
 	if [ "$UNPACKER_RETCODE" = "$UNPACKER_EXIT_CODE_OK" ]; then
 		echo "##### Unpacking by using generic unpacker: successfully unpacked"
