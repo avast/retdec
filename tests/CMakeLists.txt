@@ -1,5 +1,5 @@
 
-set(CMAKE_INSTALL_RPATH "$ORIGIN/../../lib")
+set(RETDEC_TESTS_DIR "bin") 
 
 add_subdirectory(bin2llvmir)
 add_subdirectory(capstone2llvmir)

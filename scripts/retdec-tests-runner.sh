@@ -53,7 +53,7 @@ echo_colored() {
 run_unit_tests_in_dir() {
 	UNIT_TESTS_DIR="$1"
 	TESTS_FAILED="0"
-	for unit_test in $(find "$UNIT_TESTS_DIR" -type f -executable | grep -v '\.dll$' | sort); do
+	for unit_test in $(find "$UNIT_TESTS_DIR" -name "retdec-tests-*" -type f -executable | grep -v '\.sh$' | sort); do
 		echo ""
 		unit_test_name="$(sed 's/^.*\/bin\///' <<< "$unit_test")"
 		echo_colored "$unit_test_name" "yellow"
@@ -80,5 +80,5 @@ if [ ! -d "$UNIT_TESTS_DIR" ]; then
 	exit 1
 fi
 
-echo "Running all unit tests in $UNIT_TESTS_DIR..."
+echo "Running all unit tests in $UNIT_TESTS_DIR ..."
 run_unit_tests_in_dir "$UNIT_TESTS_DIR"

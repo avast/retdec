@@ -1,9 +1,9 @@
 
-set(LLVMIR_EMUL_TESTS_SOURCES
+set(RETDEC_TESTS_LLVMIR_EMUL_SOURCES
 	llvmir_emul_tests.cpp
 )
 
-add_executable(llvm-emul-tests ${LLVMIR_EMUL_TESTS_SOURCES})
-target_link_libraries(llvm-emul-tests retdec-utils llvmir-emul gmock_main)
-target_include_directories(llvm-emul-tests PUBLIC ${PROJECT_SOURCE_DIR}/tests/)
-install(TARGETS llvm-emul-tests RUNTIME DESTINATION bin/unit-tests)
+add_executable(retdec-tests-llvm-emul ${RETDEC_TESTS_LLVMIR_EMUL_SOURCES})
+target_link_libraries(retdec-tests-llvm-emul retdec-utils llvmir-emul gmock_main)
+target_include_directories(retdec-tests-llvm-emul PUBLIC ${PROJECT_SOURCE_DIR}/tests/)
+install(TARGETS retdec-tests-llvm-emul RUNTIME DESTINATION ${RETDEC_TESTS_DIR})

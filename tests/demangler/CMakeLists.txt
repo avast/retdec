@@ -1,14 +1,10 @@
 
-set(DEMANGLER_TESTS_SOURCES
+set(RETDEC_TESTS_DEMANGLER_SOURCES
 	borland_tests.cpp
 	gcc_tests.cpp
 	msvc_tests.cpp
 )
 
-if(NOT TARGET demangler-tests)
-
-	add_executable(demangler-tests ${DEMANGLER_TESTS_SOURCES})
-	target_link_libraries(demangler-tests demangler gmock_main)
-	install(TARGETS demangler-tests RUNTIME DESTINATION bin/unit-tests)
-
-endif()
+add_executable(retdec-tests-demangler ${RETDEC_TESTS_DEMANGLER_SOURCES})
+target_link_libraries(retdec-tests-demangler demangler gmock_main)
+install(TARGETS retdec-tests-demangler RUNTIME DESTINATION ${RETDEC_TESTS_DIR})

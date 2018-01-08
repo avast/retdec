@@ -1,10 +1,11 @@
+
 install(PROGRAMS "color-c.py" DESTINATION bin)
 install(PROGRAMS "config.sh" DESTINATION bin)
 install(PROGRAMS "decompile-all.sh" DESTINATION bin)
 install(PROGRAMS "decompile-archive.sh" DESTINATION bin)
 install(PROGRAMS "decompile.sh" DESTINATION bin)
 install(PROGRAMS "fileinfo.sh" DESTINATION bin)
-install(PROGRAMS "run-unit-tests.sh" DESTINATION bin)
+install(PROGRAMS "retdec-tests-runner.sh" DESTINATION bin)
 install(PROGRAMS "signature-from-library.sh" DESTINATION bin)
 install(PROGRAMS "unpack.sh" DESTINATION bin)
 install(PROGRAMS "utils.sh" DESTINATION bin)

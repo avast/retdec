@@ -1,5 +1,5 @@
 
-set(FILEFORMAT_TESTS_SOURCES
+set(RETDEC_TESTS_FILEFORMAT_SOURCES
 	elf_format_tests.cpp
 	intel_hex_format_20bit_tests.cpp
 	intel_hex_format_tests.cpp
@@ -7,10 +7,6 @@ set(FILEFORMAT_TESTS_SOURCES
 	raw_data_format_tests.cpp
 )
 
-if(NOT TARGET fileformat-tests)
-
-	add_executable(fileformat-tests ${FILEFORMAT_TESTS_SOURCES})
-	target_link_libraries(fileformat-tests fileformat retdec-utils gmock_main)
-	install(TARGETS fileformat-tests RUNTIME DESTINATION bin/unit-tests)
-
-endif()
+add_executable(retdec-tests-fileformat ${RETDEC_TESTS_FILEFORMAT_SOURCES})
+target_link_libraries(retdec-tests-fileformat fileformat retdec-utils gmock_main)
+install(TARGETS retdec-tests-fileformat RUNTIME DESTINATION ${RETDEC_TESTS_DIR})

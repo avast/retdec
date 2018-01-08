@@ -1,4 +1,5 @@
-set(LLVMIR2HLL_TESTS_SOURCES
+
+set(RETDEC_TESTS_LLVMIR2HLL_SOURCES
 	analysis/alias_analysis/alias_analyses/simple_alias_analysis_tests.cpp
 	analysis/break_in_if_analysis_tests.cpp
 	analysis/goto_target_analysis_tests.cpp
@@ -154,7 +155,7 @@ set(LLVMIR2HLL_TESTS_SOURCES
 	var_renamer/var_renamers/unified_var_renamer_tests.cpp
 )
 
-add_executable(llvmir2hll-tests ${LLVMIR2HLL_TESTS_SOURCES})
-target_link_libraries(llvmir2hll-tests llvmir2hll retdec-utils gmock_main)
-target_include_directories(llvmir2hll-tests PUBLIC ${PROJECT_SOURCE_DIR}/tests/)
-install(TARGETS llvmir2hll-tests RUNTIME DESTINATION bin/unit-tests)
+add_executable(retdec-tests-llvmir2hll ${RETDEC_TESTS_LLVMIR2HLL_SOURCES})
+target_link_libraries(retdec-tests-llvmir2hll llvmir2hll retdec-utils gmock_main)
+target_include_directories(retdec-tests-llvmir2hll PUBLIC ${PROJECT_SOURCE_DIR}/tests/)
+install(TARGETS retdec-tests-llvmir2hll RUNTIME DESTINATION ${RETDEC_TESTS_DIR})

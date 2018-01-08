@@ -1,4 +1,5 @@
-set(BIN2LLVMIR_TESTS_SOURCES
+
+set(RETDEC_TESTS_BIN2LLVMIR_SOURCES
 	analyses/reaching_definitions_tests.cpp
 	analyses/uses_analysis_tests.cpp
 	analyses/var_depend_analysis_tests.cpp
@@ -28,7 +29,7 @@ set(BIN2LLVMIR_TESTS_SOURCES
 	utils/type_tests.cpp
 )
 
-add_executable(bin2llvmir-tests ${BIN2LLVMIR_TESTS_SOURCES})
-target_link_libraries(bin2llvmir-tests bin2llvmir retdec-utils gmock_main)
-target_include_directories(bin2llvmir-tests PUBLIC ${PROJECT_SOURCE_DIR}/tests/)
-install(TARGETS bin2llvmir-tests RUNTIME DESTINATION bin/unit-tests)
+add_executable(retdec-tests-bin2llvmir ${RETDEC_TESTS_BIN2LLVMIR_SOURCES})
+target_link_libraries(retdec-tests-bin2llvmir bin2llvmir retdec-utils gmock_main)
+target_include_directories(retdec-tests-bin2llvmir PUBLIC ${PROJECT_SOURCE_DIR}/tests/)
+install(TARGETS retdec-tests-bin2llvmir RUNTIME DESTINATION ${RETDEC_TESTS_DIR})

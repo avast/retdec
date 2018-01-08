@@ -1,7 +1,8 @@
-set(LLVM_SUPPORT_TESTS_SOURCES
+
+set(RETDEC_TESTS_LLVM_SUPPORT_SOURCES
 	utils_tests.cpp
 )
 
-add_executable(llvm-support-tests ${LLVM_SUPPORT_TESTS_SOURCES})
-target_link_libraries(llvm-support-tests llvm-support gmock_main)
-install(TARGETS llvm-support-tests RUNTIME DESTINATION bin/unit-tests)
+add_executable(retdec-tests-llvm-support ${RETDEC_TESTS_LLVM_SUPPORT_SOURCES})
+target_link_libraries(retdec-tests-llvm-support llvm-support gmock_main)
+install(TARGETS retdec-tests-llvm-support RUNTIME DESTINATION ${RETDEC_TESTS_DIR})

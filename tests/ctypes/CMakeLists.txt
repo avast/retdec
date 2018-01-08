@@ -1,5 +1,5 @@
 
-set(CTYPES_TESTS_SOURCES
+set(RETDEC_TESTS_CTYPES_SOURCES
 	annotation_in_tests.cpp
 	annotation_inout_tests.cpp
 	annotation_optional_tests.cpp
@@ -27,6 +27,6 @@ set(CTYPES_TESTS_SOURCES
 	void_type_tests.cpp
 )
 
-add_executable(ctypes-tests ${CTYPES_TESTS_SOURCES})
-target_link_libraries(ctypes-tests ctypes gmock_main)
-install(TARGETS ctypes-tests RUNTIME DESTINATION bin/unit-tests)
+add_executable(retdec-tests-ctypes ${RETDEC_TESTS_CTYPES_SOURCES})
+target_link_libraries(retdec-tests-ctypes ctypes gmock_main)
+install(TARGETS retdec-tests-ctypes RUNTIME DESTINATION ${RETDEC_TESTS_DIR})

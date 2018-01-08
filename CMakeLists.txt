@@ -22,7 +22,6 @@ set(EP_PREFIX "${PROJECT_BINARY_DIR}/external")
 set_directory_properties(PROPERTIES EP_PREFIX "${EP_PREFIX}")
 
 set(DEPS_TESTS ${RETDEC_TESTS})
-include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/deps-config.cmake)
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/install-external.cmake)
 
 add_subdirectory(deps)

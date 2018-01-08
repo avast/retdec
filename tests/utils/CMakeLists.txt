@@ -1,5 +1,5 @@
 
-set(RETDEC_UTILS_TESTS_SOURCES
+set(RETDEC_TESTS_UTILS_SOURCES
 	address_tests.cpp
 	alignment_tests.cpp
 	array_tests.cpp
@@ -16,6 +16,6 @@ set(RETDEC_UTILS_TESTS_SOURCES
 	value_tests.cpp
 )
 
-add_executable(retdec-utils-tests ${RETDEC_UTILS_TESTS_SOURCES})
-target_link_libraries(retdec-utils-tests retdec-utils gmock_main)
-install(TARGETS retdec-utils-tests RUNTIME DESTINATION bin/unit-tests)
+add_executable(retdec-tests-utils ${RETDEC_TESTS_UTILS_SOURCES})
+target_link_libraries(retdec-tests-utils retdec-utils gmock_main)
+install(TARGETS retdec-tests-utils RUNTIME DESTINATION ${RETDEC_TESTS_DIR})

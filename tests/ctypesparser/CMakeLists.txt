@@ -1,8 +1,8 @@
 
-set(CTYPESPARSER_TESTS_SOURCES
+set(RETDEC_TESTS_CTYPESPARSER_SOURCES
 	json_ctypes_parser_tests.cpp
 )
 
-add_executable(ctypesparser-tests ${CTYPESPARSER_TESTS_SOURCES})
-target_link_libraries(ctypesparser-tests ctypesparser gmock_main)
-install(TARGETS ctypesparser-tests RUNTIME DESTINATION bin/unit-tests)
+add_executable(retdec-tests-ctypesparser ${RETDEC_TESTS_CTYPESPARSER_SOURCES})
+target_link_libraries(retdec-tests-ctypesparser ctypesparser gmock_main)
+install(TARGETS retdec-tests-ctypesparser RUNTIME DESTINATION ${RETDEC_TESTS_DIR})

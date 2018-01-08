@@ -6,7 +6,8 @@ include(ExternalProject)
 set(LIBDWARF_INSTALL_DIR "${PROJECT_BINARY_DIR}/external/libdwarf-project-install")
 
 ExternalProject_Add(libdwarf-project
-	URL https://github.com/avast-tl/libdwarf/archive/93754e7e12d858f94ff9b2339f3206e54cfbda27.zip
+	URL https://github.com/avast-tl/libdwarf/archive/bb920ecb8b6172359b4d57955a2670194d1f1f43.zip
+	URL_HASH SHA256=b28a6f9fc854d7e1dce84c892b522b9ae98b2d600f82d9f1cc10e470f926ab98
 	CMAKE_ARGS
 		# This does not work on MSVC, but may be useful on Linux.
 		-DCMAKE_BUILD_TYPE=Release
