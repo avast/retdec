@@ -8,7 +8,7 @@ set(PAT2YARA_SOURCES
 	utils.cpp
 )
 
-add_executable(pat2yara ${PAT2YARA_SOURCES})
-target_link_libraries(pat2yara patterngen retdec-utils yaramod)
-target_include_directories(pat2yara PUBLIC ${PROJECT_SOURCE_DIR}/src/)
-install(TARGETS pat2yara RUNTIME DESTINATION bin)
+add_executable(retdec-pat2yara ${PAT2YARA_SOURCES})
+target_link_libraries(retdec-pat2yara retdec-patterngen retdec-utils yaramod)
+target_include_directories(retdec-pat2yara PUBLIC ${PROJECT_SOURCE_DIR}/src/)
+install(TARGETS retdec-pat2yara RUNTIME DESTINATION bin)

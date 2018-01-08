@@ -156,6 +156,6 @@ set(RETDEC_TESTS_LLVMIR2HLL_SOURCES
 )
 
 add_executable(retdec-tests-llvmir2hll ${RETDEC_TESTS_LLVMIR2HLL_SOURCES})
-target_link_libraries(retdec-tests-llvmir2hll llvmir2hll retdec-utils gmock_main)
+target_link_libraries(retdec-tests-llvmir2hll retdec-llvmir2hll retdec-utils gmock_main)
 target_include_directories(retdec-tests-llvmir2hll PUBLIC ${PROJECT_SOURCE_DIR}/tests/)
 install(TARGETS retdec-tests-llvmir2hll RUNTIME DESTINATION ${RETDEC_TESTS_DIR})

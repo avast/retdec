@@ -3,7 +3,7 @@ set(STACOFINTOOL_SOURCES
 	stacofin.cpp
 )
 
-add_executable(stacofintool ${STACOFINTOOL_SOURCES})
-set_target_properties(stacofintool PROPERTIES OUTPUT_NAME "stacofin")
-target_link_libraries(stacofintool stacofin loader)
-install(TARGETS stacofintool RUNTIME DESTINATION bin)
+add_executable(retdec-stacofintool ${STACOFINTOOL_SOURCES})
+set_target_properties(retdec-stacofintool PROPERTIES OUTPUT_NAME "retdec-stacofin")
+target_link_libraries(retdec-stacofintool retdec-stacofin retdec-loader)
+install(TARGETS retdec-stacofintool RUNTIME DESTINATION bin)

@@ -30,6 +30,6 @@ set(CTYPES_SOURCES
 	void_type.cpp
 )
 
-add_library(ctypes STATIC ${CTYPES_SOURCES})
-target_link_libraries(ctypes retdec-utils)
-target_include_directories(ctypes PUBLIC ${PROJECT_SOURCE_DIR}/include/)
+add_library(retdec-ctypes STATIC ${CTYPES_SOURCES})
+target_link_libraries(retdec-ctypes retdec-utils)
+target_include_directories(retdec-ctypes PUBLIC ${PROJECT_SOURCE_DIR}/include/)

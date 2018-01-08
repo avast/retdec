@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-	color-c
+	retdec-color-c
 	~~~~~~~
 
 	Color given C file using the IDA pro tags.

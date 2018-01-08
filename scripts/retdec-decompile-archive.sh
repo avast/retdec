@@ -11,7 +11,7 @@
 SCRIPTPATH="$( cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P )"
 
 if [ -z "$DECOMPILER_UTILS" ]; then
-	DECOMPILER_UTILS="$SCRIPTPATH/utils.sh"
+	DECOMPILER_UTILS="$SCRIPTPATH/retdec-utils.sh"
 fi
 
 . "$DECOMPILER_UTILS"

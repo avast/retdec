@@ -8,5 +8,5 @@ set(RETDEC_TESTS_FILEFORMAT_SOURCES
 )
 
 add_executable(retdec-tests-fileformat ${RETDEC_TESTS_FILEFORMAT_SOURCES})
-target_link_libraries(retdec-tests-fileformat fileformat retdec-utils gmock_main)
+target_link_libraries(retdec-tests-fileformat retdec-fileformat retdec-utils gmock_main)
 install(TARGETS retdec-tests-fileformat RUNTIME DESTINATION ${RETDEC_TESTS_DIR})

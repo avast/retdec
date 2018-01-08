@@ -6,7 +6,7 @@
 SCRIPTPATH="$( cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P )"
 
 if [ -z "$DECOMPILER_CONFIG" ]; then
-	DECOMPILER_CONFIG="$SCRIPTPATH/config.sh"
+	DECOMPILER_CONFIG="$SCRIPTPATH/retdec-config.sh"
 fi
 
 . "$DECOMPILER_CONFIG"

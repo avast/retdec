@@ -15,10 +15,6 @@ set(LOADER_SOURCES
 	loader/elf/elf_image.cpp
 )
 
-if(NOT TARGET loader)
-
-	add_library(loader STATIC ${LOADER_SOURCES})
-	target_link_libraries(loader fileformat retdec-utils)
-	target_include_directories(loader PUBLIC ${PROJECT_SOURCE_DIR}/include/)
-
-endif()
+add_library(retdec-loader STATIC ${LOADER_SOURCES})
+target_link_libraries(retdec-loader retdec-fileformat retdec-utils)
+target_include_directories(retdec-loader PUBLIC ${PROJECT_SOURCE_DIR}/include/)

@@ -35,12 +35,12 @@ function(GetIncludeDirectories ret target)
     set(${ret} ${RESULT} PARENT_SCOPE)
 endfunction()
 
-# fileformat-headers target can be linked with targets to get fileformat's
+# retdec-fileformat-headers target can be linked with targets to get fileformat's
 # includes without actually linking fileformat's libraries.
-GetIncludeDirectories(FILEFORMAT_HEADERS fileformat)
-add_library(fileformat-headers INTERFACE)
-target_include_directories(fileformat-headers INTERFACE ${FILEFORMAT_HEADERS})
-add_dependencies(fileformat-headers fileformat)
+GetIncludeDirectories(FILEFORMAT_HEADERS retdec-fileformat)
+add_library(retdec-fileformat-headers INTERFACE)
+target_include_directories(retdec-fileformat-headers INTERFACE ${FILEFORMAT_HEADERS})
+add_dependencies(retdec-fileformat-headers retdec-fileformat)
 
 # Subdirectories.
 add_subdirectory(mpress)

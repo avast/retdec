@@ -9,5 +9,5 @@ set(DEMANGLER_SOURCES
 	stgrammars/msll.cpp
 )
 
-add_library(demangler STATIC ${DEMANGLER_SOURCES})
-target_include_directories(demangler PUBLIC ${PROJECT_SOURCE_DIR}/include/)
+add_library(retdec-demangler STATIC ${DEMANGLER_SOURCES})
+target_include_directories(retdec-demangler PUBLIC ${PROJECT_SOURCE_DIR}/include/)

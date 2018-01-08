@@ -5,10 +5,6 @@
 
 SCRIPTPATH="$( cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P )"
 
-if [ -z "$DECOMPILER_CONFIG" ]; then
-	DECOMPILER_CONFIG="./config.sh"
-fi
-
 ##
 ## Paths (everything has to be without the ending slash '/').
 ##
@@ -56,26 +52,26 @@ BIN2LLVMIR_PARAMS="$BIN2LLVMIR_PARAMS_DISABLES -inst-opt -verify $BIN2LLVMIR_VOL
 # The following options are useful during debugging of bin2llvmirl optimizations.
 #BIN2LLVMIR_PARAMS+="-print-after-all -debug-only=idioms -print-before=idioms -print-after=idioms"
 
-FILEINFO="$INSTALL_BIN_DIR/fileinfo"
+FILEINFO="$INSTALL_BIN_DIR/retdec-fileinfo"
 FILEINFO_EXTERNAL_YARA_PRIMARY_CRYPTO_DATABASES=(
 	"$INSTALL_SHARE_YARA_DIR/signsrch/signsrch.yara"
 )
 FILEINFO_EXTERNAL_YARA_EXTRA_CRYPTO_DATABASES=(
 	"$INSTALL_SHARE_YARA_DIR/signsrch/signsrch_regex.yara"
 )
-AR="$INSTALL_BIN_DIR/ar-extractor"
-BIN2PAT="$INSTALL_BIN_DIR/bin2pat"
-PAT2YARA="$INSTALL_BIN_DIR/pat2yara"
+AR="$INSTALL_BIN_DIR/retdec-ar-extractor"
+BIN2PAT="$INSTALL_BIN_DIR/retdec-bin2pat"
+PAT2YARA="$INSTALL_BIN_DIR/retdec-pat2yara"
 CONFIGTOOL="$INSTALL_BIN_DIR/retdec-config"
-EXTRACT="$INSTALL_BIN_DIR/macho-extractor"
-DECOMPILE_SH="$INSTALL_BIN_DIR/decompile.sh"
-DECOMPILE_ARCHIVE_SH="$INSTALL_BIN_DIR/decompile-archive.sh"
-SIG_FROM_LIB_SH="$INSTALL_BIN_DIR/signature-from-library.sh"
-UNPACK_SH="$INSTALL_BIN_DIR/unpack.sh"
-LLVMIR2HLL="$INSTALL_BIN_DIR/llvmir2hll"
-BIN2LLVMIR="$INSTALL_BIN_DIR/bin2llvmir"
-IDA_COLORIZER="$INSTALL_BIN_DIR/color-c.py"
-UNPACKER="$INSTALL_BIN_DIR/unpacker"
+EXTRACT="$INSTALL_BIN_DIR/retdec-macho-extractor"
+DECOMPILE_SH="$INSTALL_BIN_DIR/retdec-decompile.sh"
+DECOMPILE_ARCHIVE_SH="$INSTALL_BIN_DIR/retdec-decompile-archive.sh"
+SIG_FROM_LIB_SH="$INSTALL_BIN_DIR/retdec-signature-from-library.sh"
+UNPACK_SH="$INSTALL_BIN_DIR/retdec-unpack.sh"
+LLVMIR2HLL="$INSTALL_BIN_DIR/retdec-llvmir2hll"
+BIN2LLVMIR="$INSTALL_BIN_DIR/retdec-bin2llvmir"
+IDA_COLORIZER="$INSTALL_BIN_DIR/retdec-color-c.py"
+UNPACKER="$INSTALL_BIN_DIR/retdec-unpacker"
 
 DEV_NULL="/dev/null"
 

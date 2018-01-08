@@ -15,14 +15,14 @@ set(UPX_SOURCES
 	elf/elf_upx_stub.cpp
 )
 
-add_library(upx SHARED ${UPX_SOURCES})
-target_link_libraries(upx fileformat-headers)
-target_include_directories(upx PUBLIC ${PROJECT_SOURCE_DIR}/src/)
+add_library(retdec-upx SHARED ${UPX_SOURCES})
+target_link_libraries(retdec-upx retdec-fileformat-headers)
+target_include_directories(retdec-upx PUBLIC ${PROJECT_SOURCE_DIR}/src/)
 # Plugin related libraries are linked to the plugin on Windows
 if(MSVC OR APPLE)
-	target_link_libraries(upx retdec-utils unpacker)
+	target_link_libraries(retdec-upx retdec-utils retdec-unpacker)
 endif()
-install(TARGETS upx
+install(TARGETS retdec-upx
 	LIBRARY DESTINATION bin/unpacker-plugins
 	RUNTIME DESTINATION bin/unpacker-plugins
 )

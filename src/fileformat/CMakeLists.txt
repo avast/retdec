@@ -64,10 +64,6 @@ set(FILEFORMAT_SOURCES
 	file_format/elf/elf_format.cpp
 )
 
-if(NOT TARGET fileformat)
-
-	add_library(fileformat STATIC ${FILEFORMAT_SOURCES})
-	target_link_libraries(fileformat fileformat-crypto retdec-config retdec-utils pelib elfio llvm)
-	target_include_directories(fileformat PUBLIC ${PROJECT_SOURCE_DIR}/include/)
-
-endif()
+add_library(retdec-fileformat STATIC ${FILEFORMAT_SOURCES})
+target_link_libraries(retdec-fileformat retdec-fileformat-crypto retdec-config retdec-utils pelib elfio llvm)
+target_include_directories(retdec-fileformat PUBLIC ${PROJECT_SOURCE_DIR}/include/)

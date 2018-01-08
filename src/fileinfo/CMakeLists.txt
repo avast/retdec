@@ -92,11 +92,7 @@ set(FILEINFO_SOURCES
 	pattern_detector/pattern_detector.cpp
 )
 
-if(NOT TARGET fileinfo)
-
-	add_executable(fileinfo ${FILEINFO_SOURCES})
-	target_link_libraries(fileinfo loader ar-extractor fileformat cpdetect yaracpp retdec-utils retdec-config jsoncpp tinyxml2)
-	target_include_directories(fileinfo PUBLIC ${PROJECT_SOURCE_DIR}/src/)
-	install(TARGETS fileinfo RUNTIME DESTINATION bin)
-
-endif()
+add_executable(retdec-fileinfo ${FILEINFO_SOURCES})
+target_link_libraries(retdec-fileinfo retdec-loader retdec-ar-extractor retdec-fileformat retdec-cpdetect yaracpp retdec-utils retdec-config jsoncpp tinyxml2)
+target_include_directories(retdec-fileinfo PUBLIC ${PROJECT_SOURCE_DIR}/src/)
+install(TARGETS retdec-fileinfo RUNTIME DESTINATION bin)

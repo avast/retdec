@@ -11,6 +11,6 @@ set(CAPSTONE2LLVMIR_SOURCES
 	capstone2llvmir.cpp
 )
 
-add_library(capstone2llvmir STATIC ${CAPSTONE2LLVMIR_SOURCES})
-target_link_libraries(capstone2llvmir retdec-utils capstone llvm)
-target_include_directories(capstone2llvmir PUBLIC ${PROJECT_SOURCE_DIR}/include/)
+add_library(retdec-capstone2llvmir STATIC ${CAPSTONE2LLVMIR_SOURCES})
+target_link_libraries(retdec-capstone2llvmir retdec-utils capstone llvm)
+target_include_directories(retdec-capstone2llvmir PUBLIC ${PROJECT_SOURCE_DIR}/include/)

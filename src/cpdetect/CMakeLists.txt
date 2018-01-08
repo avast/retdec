@@ -125,10 +125,6 @@ set(CPDETECT_SOURCES
 	utils/version_solver.cpp
 )
 
-if(NOT TARGET cpdetect)
-
-	add_library(cpdetect STATIC ${CPDETECT_SOURCES})
-	target_link_libraries(cpdetect libdwarf fileformat yaracpp tinyxml2)
-	target_include_directories(cpdetect PUBLIC ${PROJECT_SOURCE_DIR}/include/)
-
-endif()
+add_library(retdec-cpdetect STATIC ${CPDETECT_SOURCES})
+target_link_libraries(retdec-cpdetect libdwarf retdec-fileformat yaracpp tinyxml2)
+target_include_directories(retdec-cpdetect PUBLIC ${PROJECT_SOURCE_DIR}/include/)

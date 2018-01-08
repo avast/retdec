@@ -4,10 +4,6 @@ set(AR_EXTRACTOR_SOURCES
 	detection.cpp
 )
 
-if(NOT TARGET ar-extractor)
-
-	add_library(ar-extractor STATIC ${AR_EXTRACTOR_SOURCES})
-	target_link_libraries(ar-extractor retdec-utils rapidjson llvm)
-	target_include_directories(ar-extractor PUBLIC ${PROJECT_SOURCE_DIR}/include/)
-
-endif()
+add_library(retdec-ar-extractor STATIC ${AR_EXTRACTOR_SOURCES})
+target_link_libraries(retdec-ar-extractor retdec-utils rapidjson llvm)
+target_include_directories(retdec-ar-extractor PUBLIC ${PROJECT_SOURCE_DIR}/include/)

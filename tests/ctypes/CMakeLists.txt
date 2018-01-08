@@ -28,5 +28,5 @@ set(RETDEC_TESTS_CTYPES_SOURCES
 )
 
 add_executable(retdec-tests-ctypes ${RETDEC_TESTS_CTYPES_SOURCES})
-target_link_libraries(retdec-tests-ctypes ctypes gmock_main)
+target_link_libraries(retdec-tests-ctypes retdec-ctypes gmock_main)
 install(TARGETS retdec-tests-ctypes RUNTIME DESTINATION ${RETDEC_TESTS_DIR})

@@ -1,3 +1,4 @@
+
 set(LLVMIR2HLL_SOURCES
 	analysis/alias_analysis/alias_analyses/basic_alias_analysis.cpp
 	analysis/alias_analysis/alias_analyses/simple_alias_analysis.cpp
@@ -334,9 +335,9 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND CMAKE_CXX_COMPILER_VERSION VERSION_G
 	)
 endif()
 
-add_library(llvmir2hll STATIC ${LLVMIR2HLL_SOURCES})
-target_link_libraries(llvmir2hll retdec-config retdec-utils llvm-support llvm)
-target_include_directories(llvmir2hll PUBLIC ${PROJECT_SOURCE_DIR}/include/)
+add_library(retdec-llvmir2hll STATIC ${LLVMIR2HLL_SOURCES})
+target_link_libraries(retdec-llvmir2hll retdec-config retdec-utils retdec-llvm-support llvm)
+target_include_directories(retdec-llvmir2hll PUBLIC ${PROJECT_SOURCE_DIR}/include/)
 
 # We need to compile source files with /bigobj to prevent the following
 # kind of an error:
@@ -344,5 +345,5 @@ target_include_directories(llvmir2hll PUBLIC ${PROJECT_SOURCE_DIR}/include/)
 #   fatal error C1128: number of sections exceeded object file format
 #                      limit: compile with /bigobj
 if(MSVC)
-	set_property(TARGET llvmir2hll APPEND_STRING PROPERTY COMPILE_FLAGS " /bigobj")
+	set_property(TARGET retdec-llvmir2hll APPEND_STRING PROPERTY COMPILE_FLAGS " /bigobj")
 endif()

@@ -19,10 +19,6 @@ set(RETDEC_CONFIG_SOURCES
 	vtables.cpp
 )
 	
-if(NOT TARGET retdec-config)
-	
-	add_library(retdec-config STATIC ${RETDEC_CONFIG_SOURCES})
-	target_link_libraries(retdec-config retdec-utils jsoncpp)
-	target_include_directories(retdec-config PUBLIC ${PROJECT_SOURCE_DIR}/include/)
-
-endif()
+add_library(retdec-config STATIC ${RETDEC_CONFIG_SOURCES})
+target_link_libraries(retdec-config retdec-utils jsoncpp)
+target_include_directories(retdec-config PUBLIC ${PROJECT_SOURCE_DIR}/include/)
