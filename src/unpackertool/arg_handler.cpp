@@ -9,6 +9,7 @@
 
 #include "arg_handler.h"
 
+namespace retdec {
 namespace unpackertool {
 
 /**
@@ -274,3 +275,4 @@ std::ostream& operator <<(std::ostream& out, const ArgHandler& handler)
 }
 
 } // namespace unpackertool
+} // namespace retdec

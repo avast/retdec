@@ -8,8 +8,9 @@
 
 #include "unpackertool/plugins/upx/unfilter.h"
 
-using namespace unpacker;
+using namespace retdec::unpacker;
 
+namespace retdec {
 namespace unpackertool {
 namespace upx {
 
@@ -407,3 +408,4 @@ void UnfilterD0::perform(DynamicBuffer& unpackedData, std::uint32_t filterParam,
 
 } // namespace upx
 } // namespace unpackertool
+} // namespace retdec

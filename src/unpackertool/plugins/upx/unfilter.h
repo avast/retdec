@@ -9,6 +9,7 @@
 
 #include "retdec/unpacker/dynamic_buffer.h"
 
+namespace retdec {
 namespace unpackertool {
 namespace upx {
 
@@ -36,9 +37,9 @@ struct Unfilter
 {
 	virtual ~Unfilter() {}
 
-	virtual void perform(unpacker::DynamicBuffer& unpackedData, std::uint32_t filterParam, std::uint32_t filterCount, std::uint32_t startOffset, std::uint32_t size) = 0;
+	virtual void perform(retdec::unpacker::DynamicBuffer& unpackedData, std::uint32_t filterParam, std::uint32_t filterCount, std::uint32_t startOffset, std::uint32_t size) = 0;
 
-	static bool run(unpacker::DynamicBuffer& unpackedData, std::uint32_t filterId, std::uint32_t filterParam, std::uint32_t filterCount = 0, std::uint32_t startOffset = 0, std::uint32_t size = 0);
+	static bool run(retdec::unpacker::DynamicBuffer& unpackedData, std::uint32_t filterId, std::uint32_t filterParam, std::uint32_t filterCount = 0, std::uint32_t startOffset = 0, std::uint32_t size = 0);
 };
 
 /**
@@ -48,7 +49,7 @@ struct Unfilter11 : public Unfilter
 {
 	virtual ~Unfilter11() override {}
 
-	virtual void perform(unpacker::DynamicBuffer& unpackedData, std::uint32_t filterParam, std::uint32_t filterCount, std::uint32_t startOffset, std::uint32_t size) override;
+	virtual void perform(retdec::unpacker::DynamicBuffer& unpackedData, std::uint32_t filterParam, std::uint32_t filterCount, std::uint32_t startOffset, std::uint32_t size) override;
 };
 
 /**
@@ -58,7 +59,7 @@ struct Unfilter16 : public Unfilter
 {
 	virtual ~Unfilter16() override {}
 
-	virtual void perform(unpacker::DynamicBuffer& unpackedData, std::uint32_t filterParam, std::uint32_t filterCount, std::uint32_t startOffset, std::uint32_t size) override;
+	virtual void perform(retdec::unpacker::DynamicBuffer& unpackedData, std::uint32_t filterParam, std::uint32_t filterCount, std::uint32_t startOffset, std::uint32_t size) override;
 };
 
 /**
@@ -68,7 +69,7 @@ struct Unfilter24 : public Unfilter
 {
 	virtual ~Unfilter24() override {}
 
-	virtual void perform(unpacker::DynamicBuffer& unpackedData, std::uint32_t filterParam, std::uint32_t filterCount, std::uint32_t startOffset, std::uint32_t size) override;
+	virtual void perform(retdec::unpacker::DynamicBuffer& unpackedData, std::uint32_t filterParam, std::uint32_t filterCount, std::uint32_t startOffset, std::uint32_t size) override;
 };
 
 /**
@@ -78,7 +79,7 @@ struct Unfilter26_46 : public Unfilter
 {
 	virtual ~Unfilter26_46() override {}
 
-	virtual void perform(unpacker::DynamicBuffer& unpackedData, std::uint32_t filterParam, std::uint32_t filterCount, std::uint32_t startOffset, std::uint32_t size) override;
+	virtual void perform(retdec::unpacker::DynamicBuffer& unpackedData, std::uint32_t filterParam, std::uint32_t filterCount, std::uint32_t startOffset, std::uint32_t size) override;
 };
 
 /**
@@ -88,7 +89,7 @@ struct Unfilter49 : public Unfilter
 {
 	virtual ~Unfilter49() override {}
 
-	virtual void perform(unpacker::DynamicBuffer& unpackedData, std::uint32_t filterParam, std::uint32_t filterCount, std::uint32_t startOffset, std::uint32_t size) override;
+	virtual void perform(retdec::unpacker::DynamicBuffer& unpackedData, std::uint32_t filterParam, std::uint32_t filterCount, std::uint32_t startOffset, std::uint32_t size) override;
 };
 
 /**
@@ -98,7 +99,7 @@ struct Unfilter50 : public Unfilter
 {
 	virtual ~Unfilter50() override {}
 
-	virtual void perform(unpacker::DynamicBuffer& unpackedData, std::uint32_t filterParam, std::uint32_t filterCount, std::uint32_t startOffset, std::uint32_t size) override;
+	virtual void perform(retdec::unpacker::DynamicBuffer& unpackedData, std::uint32_t filterParam, std::uint32_t filterCount, std::uint32_t startOffset, std::uint32_t size) override;
 };
 
 /**
@@ -108,10 +109,11 @@ struct UnfilterD0 : public Unfilter
 {
 	virtual ~UnfilterD0() override {}
 
-	virtual void perform(unpacker::DynamicBuffer& unpackedData, std::uint32_t filterParam, std::uint32_t filterCount, std::uint32_t startOffset, std::uint32_t size) override;
+	virtual void perform(retdec::unpacker::DynamicBuffer& unpackedData, std::uint32_t filterParam, std::uint32_t filterCount, std::uint32_t startOffset, std::uint32_t size) override;
 };
 
 } // namespace upx
 } // namespace unpackertool
+} // namespace retdec
 
 #endif

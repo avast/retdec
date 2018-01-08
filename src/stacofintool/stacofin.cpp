@@ -14,7 +14,7 @@
 #include "retdec/loader/image_factory.h"
 
 using namespace retdec::utils;
-using namespace fnc_patterns::stacofin;
+using namespace retdec::fnc_patterns::stacofin;
 using namespace retdec::loader;
 
 

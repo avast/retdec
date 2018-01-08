@@ -17,6 +17,7 @@
 	#include <dlfcn.h>
 #endif
 
+namespace retdec {
 namespace unpackertool {
 
 #ifdef OS_WINDOWS
@@ -131,5 +132,6 @@ public:
 };
 
 } // namespace unpackertool
+} // namespace retdec
 
 #endif

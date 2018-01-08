@@ -9,6 +9,7 @@
 
 #include "retdec/unpacker/unpacker_exception.h"
 
+namespace retdec {
 namespace unpackertool {
 namespace mpress {
 
@@ -17,7 +18,7 @@ namespace mpress {
  *
  * This exception should report unsupported file.
  */
-class PackedDataSectionNotFoundException : public unpacker::UnsupportedInputException
+class PackedDataSectionNotFoundException : public retdec::unpacker::UnsupportedInputException
 {
 public:
 	explicit PackedDataSectionNotFoundException() : UnsupportedInputException("Section with packed data not found.") {}
@@ -26,7 +27,7 @@ public:
 /**
  * Thrown when import hints are invalid.
  */
-class InvalidImportHintsException : public unpacker::FatalException
+class InvalidImportHintsException : public retdec::unpacker::FatalException
 {
 public:
 	explicit InvalidImportHintsException() : FatalException("Invalid import hints detected.") {}
@@ -35,7 +36,7 @@ public:
 /**
  * Thrown when unpacking stub is corrupted.
  */
-class CorruptedUnpackingStubException : public unpacker::FatalException
+class CorruptedUnpackingStubException : public retdec::unpacker::FatalException
 {
 public:
 	explicit CorruptedUnpackingStubException() : FatalException("Corrupted unpacking stub detected.") {}
@@ -43,5 +44,6 @@ public:
 
 } // namespace mpress
 } // namespace unpackertool
+} // namespace retdec
 
 #endif

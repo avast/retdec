@@ -15,8 +15,8 @@
 #include "plugin_mgr.h"
 
 using namespace retdec::utils;
-using namespace unpacker;
-using namespace unpackertool;
+using namespace retdec::unpacker;
+using namespace retdec::unpackertool;
 
 /**
  * Possible exit codes of the unpacker as program.

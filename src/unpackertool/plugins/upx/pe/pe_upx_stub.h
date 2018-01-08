@@ -13,6 +13,7 @@
 #include "retdec/unpacker/dynamic_buffer.h"
 #include "retdec/unpacker/signature.h"
 
+namespace retdec {
 namespace unpackertool {
 namespace upx {
 
@@ -25,7 +26,7 @@ namespace upx {
  */
 struct UnfilterSignatureData
 {
-	unpacker::Signature* signature; ///< Signature associated with the stub.
+	retdec::unpacker::Signature* signature; ///< Signature associated with the stub.
 	std::uint32_t filterId; ///< Used to store data specific for each type of stub.
 };
 
@@ -108,16 +109,16 @@ template <int bits> class PeUpxStub : public UpxStub
 	using PeLibFileType = typename PeUpxStubTraits<bits>::PeLibFileType;
 
 public:
-	PeUpxStub(retdec::loader::Image* inputFile, const UpxStubData* stubData, const unpacker::DynamicBuffer& stubCapturedData,
+	PeUpxStub(retdec::loader::Image* inputFile, const UpxStubData* stubData, const retdec::unpacker::DynamicBuffer& stubCapturedData,
 			std::unique_ptr<Decompressor> decompressor, const UpxMetadata& metadata);
 
 	virtual ~PeUpxStub() override;
 
 	virtual void unpack(const std::string& ouputFile) override;
 	virtual void setupPackingMethod(std::uint8_t packingMethod);
-	virtual void readUnpackingStub(unpacker::DynamicBuffer& unpackingStub);
-	virtual void readPackedData(unpacker::DynamicBuffer& packedData, bool trustMetadata);
-	virtual void decompress(unpacker::DynamicBuffer& packedData, unpacker::DynamicBuffer& unpackedData, bool trustMetadata);
+	virtual void readUnpackingStub(retdec::unpacker::DynamicBuffer& unpackingStub);
+	virtual void readPackedData(retdec::unpacker::DynamicBuffer& packedData, bool trustMetadata);
+	virtual void decompress(retdec::unpacker::DynamicBuffer& packedData, retdec::unpacker::DynamicBuffer& unpackedData, bool trustMetadata);
 	virtual void cleanup() override;
 
 	virtual std::uint32_t getRealEpAddress() const override;
@@ -129,28 +130,28 @@ protected:
 
 private:
 	void prepare();
-	void detectUnfilter(const unpacker::DynamicBuffer& unpackingStub);
-	void unpackData(unpacker::DynamicBuffer& unpackedData);
-	void readPackedFileILT(unpacker::DynamicBuffer& ilt);
-	void fixSizeOfSections(const unpacker::DynamicBuffer& unpackedData);
-	UpxExtraData parseExtraData(unpacker::DynamicBuffer& unpackedData, unpacker::DynamicBuffer& originalHeader);
-	void fixPeHeader(const unpacker::DynamicBuffer& originalHeader);
-	void unfilterData(unpacker::DynamicBuffer& unpackedData);
-	void fixImports(const unpacker::DynamicBuffer& unpackedData, const UpxExtraData& extraData, const unpacker::DynamicBuffer& ilt);
-	void fixRelocations(unpacker::DynamicBuffer& unpackedData, const UpxExtraData& extraData);
-	void fixTls(const unpacker::DynamicBuffer& originalHeader);
-	void fixOep(const unpacker::DynamicBuffer& originalHeader);
-	void fixExports(const unpacker::DynamicBuffer& originalHeader);
-	void fixLoadConfiguration(const unpacker::DynamicBuffer& originalHeader);
-	void fixResources(const unpacker::DynamicBuffer& unpackedData, const unpacker::DynamicBuffer& originalHeader);
-	void fixSectionHeaders(const unpacker::DynamicBuffer& originalHeader);
+	void detectUnfilter(const retdec::unpacker::DynamicBuffer& unpackingStub);
+	void unpackData(retdec::unpacker::DynamicBuffer& unpackedData);
+	void readPackedFileILT(retdec::unpacker::DynamicBuffer& ilt);
+	void fixSizeOfSections(const retdec::unpacker::DynamicBuffer& unpackedData);
+	UpxExtraData parseExtraData(retdec::unpacker::DynamicBuffer& unpackedData, retdec::unpacker::DynamicBuffer& originalHeader);
+	void fixPeHeader(const retdec::unpacker::DynamicBuffer& originalHeader);
+	void unfilterData(retdec::unpacker::DynamicBuffer& unpackedData);
+	void fixImports(const retdec::unpacker::DynamicBuffer& unpackedData, const UpxExtraData& extraData, const retdec::unpacker::DynamicBuffer& ilt);
+	void fixRelocations(retdec::unpacker::DynamicBuffer& unpackedData, const UpxExtraData& extraData);
+	void fixTls(const retdec::unpacker::DynamicBuffer& originalHeader);
+	void fixOep(const retdec::unpacker::DynamicBuffer& originalHeader);
+	void fixExports(const retdec::unpacker::DynamicBuffer& originalHeader);
+	void fixLoadConfiguration(const retdec::unpacker::DynamicBuffer& originalHeader);
+	void fixResources(const retdec::unpacker::DynamicBuffer& unpackedData, const retdec::unpacker::DynamicBuffer& originalHeader);
+	void fixSectionHeaders(const retdec::unpacker::DynamicBuffer& originalHeader);
 	void fixCoffSymbolTable();
 	void fixCertificates();
-	void cutHintsData(unpacker::DynamicBuffer& unpackedData, const UpxExtraData& extraData);
-	void saveFile(const std::string& outputFile, unpacker::DynamicBuffer& unpackedData);
+	void cutHintsData(retdec::unpacker::DynamicBuffer& unpackedData, const UpxExtraData& extraData);
+	void saveFile(const std::string& outputFile, retdec::unpacker::DynamicBuffer& unpackedData);
 
 	void loadResources(PeLib::ResourceNode* rootNode, std::uint32_t offset, std::uint32_t uncompressedRsrcRva, std::uint32_t compressedRsrcRva,
-			const unpacker::DynamicBuffer& uncompressedRsrcs, const unpacker::DynamicBuffer& unpackedData, std::unordered_set<std::uint32_t>& visitedNodes);
+			const retdec::unpacker::DynamicBuffer& uncompressedRsrcs, const retdec::unpacker::DynamicBuffer& unpackedData, std::unordered_set<std::uint32_t>& visitedNodes);
 	std::uint8_t getPackingMethod(bool trustMetadata) const;
 
 	PeLibFileType* _newPeFile;      ///< Unpacked output file.
@@ -168,6 +169,6 @@ private:
 
 } // namespace upx
 } // namespace unpackertool
-
+} // namespace retdec
 
 #endif

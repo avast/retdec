@@ -12,6 +12,7 @@
 
 #include "retdec/unpacker/dynamic_buffer.h"
 
+namespace retdec {
 namespace unpacker {
 
 /**
@@ -58,5 +59,6 @@ private:
 };
 
 } // namespace unpacker
+} // namespace retdec
 
 #endif

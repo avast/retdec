@@ -10,8 +10,9 @@
 #include "unpackertool/plugins/upx/pe/pe_upx_stub.h"
 #include "unpackertool/plugins/upx/upx_stub.h"
 
-using namespace unpacker;
+using namespace retdec::unpacker;
 
+namespace retdec {
 namespace unpackertool {
 namespace upx {
 
@@ -195,3 +196,4 @@ void DecompressorScrambler::decompress(PeUpxStub<64>* /*stub*/, DynamicBuffer& p
 
 } // namespace upx
 } // namespace unpackertool
+} // namespace retdec

@@ -1,6 +1,6 @@
 /**
  * @file patterns/stacofinl/doxygen.h
- * @brief Doxygen documentation of the stacofinl namespace.
+ * @brief Doxygen documentation of the retdec::stacofinl namespace.
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */
 

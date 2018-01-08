@@ -8,8 +8,9 @@
 
 using namespace retdec::fileformat;
 using namespace retdec::loader;
-using namespace unpacker;
+using namespace retdec::unpacker;
 
+namespace retdec {
 namespace unpackertool {
 namespace upx {
 
@@ -1801,3 +1802,4 @@ const UpxStubData* UpxStubSignatures::matchSignatures(const DynamicBuffer& data,
 
 } // namespace upx
 } // namespace unpackertool
+} // namespace retdec

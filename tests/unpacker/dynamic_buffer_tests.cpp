@@ -14,6 +14,7 @@
 using namespace ::testing;
 using namespace retdec::utils;
 
+namespace retdec {
 namespace unpacker {
 namespace tests {
 
@@ -371,4 +372,5 @@ ForEachReverseWorks) {
 }
 
 } // namespace unpacker
+} // namespace retdec
 } // namespace tests

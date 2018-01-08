@@ -8,6 +8,7 @@
 
 #include "unpackertool/plugins/upx/decompressors/decompressor_scrambler.h"
 
+namespace retdec {
 namespace unpackertool {
 namespace upx {
 
@@ -20,12 +21,13 @@ public:
 	DecompressorDirectJump();
 	virtual ~DecompressorDirectJump();
 
-	virtual void readUnpackingStub(PeUpxStub<32>* stub, unpacker::DynamicBuffer& unpackingStub) override;
+	virtual void readUnpackingStub(PeUpxStub<32>* stub, retdec::unpacker::DynamicBuffer& unpackingStub) override;
 
-	virtual void readUnpackingStub(PeUpxStub<64>* stub, unpacker::DynamicBuffer& unpackingStub) override;
+	virtual void readUnpackingStub(PeUpxStub<64>* stub, retdec::unpacker::DynamicBuffer& unpackingStub) override;
 };
 
 } // namespace upx
 } // namespace unpackertool
+} // namespace retdec
 
 #endif

@@ -11,6 +11,7 @@
 #include <sstream>
 #include <string>
 
+namespace retdec {
 namespace unpacker {
 
 /**
@@ -103,7 +104,7 @@ public:
 /**
  * Thrown when decompression algorithm fails to decompress the data.
  */
-class DecompressionFailedException : public unpacker::FatalException
+class DecompressionFailedException : public retdec::unpacker::FatalException
 {
 public:
 	DecompressionFailedException() : FatalException("Failed to decompress compressed data.") {}
@@ -114,7 +115,7 @@ public:
  *
  * This exception should report unsupported file.
  */
-class UnsupportedStubException : public unpacker::UnsupportedInputException
+class UnsupportedStubException : public retdec::unpacker::UnsupportedInputException
 {
 public:
 	UnsupportedStubException() : UnsupportedInputException("Unsupported unpacking stub detected.") {}
@@ -123,12 +124,13 @@ public:
 /**
  * Thrown if no entry point segment was found in the input file.
  */
-class NoEntryPointException : public unpacker::FatalException
+class NoEntryPointException : public retdec::unpacker::FatalException
 {
 public:
 	NoEntryPointException() : FatalException("No entry point segment found.") {}
 };
 
 } // namespace unpacker
+} // namespace retdec
 
 #endif

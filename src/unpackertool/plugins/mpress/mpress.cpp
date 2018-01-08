@@ -18,8 +18,9 @@
 
 #include "unpackertool/plugins/mpress/mpress_exceptions.h"
 
-using namespace unpacker;
+using namespace retdec::unpacker;
 
+namespace retdec {
 namespace unpackertool {
 namespace mpress {
 
@@ -742,3 +743,4 @@ REGISTER_PLUGIN(MpressPlugin)
 
 } // namespace mpress
 } // namespace unpackertool
+} // namespace retdec

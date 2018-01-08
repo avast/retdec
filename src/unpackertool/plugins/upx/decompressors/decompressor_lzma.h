@@ -8,6 +8,7 @@
 
 #include "unpackertool/plugins/upx/decompressors/decompressor.h"
 
+namespace retdec {
 namespace unpackertool {
 namespace upx {
 
@@ -21,29 +22,30 @@ public:
 	virtual ~DecompressorLzma();
 
 	virtual void setupPackingMethod(ElfUpxStub<32>* stub, std::uint8_t packingMethod) override;
-	virtual void decompress(ElfUpxStub<32>* stub, unpacker::DynamicBuffer& packedData, unpacker::DynamicBuffer& unpackedData) override;
+	virtual void decompress(ElfUpxStub<32>* stub, retdec::unpacker::DynamicBuffer& packedData, retdec::unpacker::DynamicBuffer& unpackedData) override;
 
 	virtual void setupPackingMethod(ElfUpxStub<64>* stub, std::uint8_t packingMethod) override;
-	virtual void decompress(ElfUpxStub<64>* stub, unpacker::DynamicBuffer& packedData, unpacker::DynamicBuffer& unpackedData) override;
+	virtual void decompress(ElfUpxStub<64>* stub, retdec::unpacker::DynamicBuffer& packedData, retdec::unpacker::DynamicBuffer& unpackedData) override;
 
 	virtual void setupPackingMethod(MachOUpxStub<32>* stub, std::uint8_t packingMethod) override;
-	virtual void decompress(MachOUpxStub<32>* stub, unpacker::DynamicBuffer& packedData, unpacker::DynamicBuffer& unpackedData) override;
+	virtual void decompress(MachOUpxStub<32>* stub, retdec::unpacker::DynamicBuffer& packedData, retdec::unpacker::DynamicBuffer& unpackedData) override;
 
 	virtual void setupPackingMethod(MachOUpxStub<64>* stub, std::uint8_t packingMethod) override;
-	virtual void decompress(MachOUpxStub<64>* stub, unpacker::DynamicBuffer& packedData, unpacker::DynamicBuffer& unpackedData) override;
+	virtual void decompress(MachOUpxStub<64>* stub, retdec::unpacker::DynamicBuffer& packedData, retdec::unpacker::DynamicBuffer& unpackedData) override;
 
 	virtual void setupPackingMethod(PeUpxStub<32>* stub, std::uint8_t packingMethod) override;
-	virtual void readUnpackingStub(PeUpxStub<32>* stub, unpacker::DynamicBuffer& unpackingStub) override;
-	virtual void readPackedData(PeUpxStub<32>* stub, unpacker::DynamicBuffer& packedData, bool trustMetadata) override;
-	virtual void decompress(PeUpxStub<32>* stub, unpacker::DynamicBuffer& packedData, unpacker::DynamicBuffer& unpackedData, bool trustMetadata) override;
+	virtual void readUnpackingStub(PeUpxStub<32>* stub, retdec::unpacker::DynamicBuffer& unpackingStub) override;
+	virtual void readPackedData(PeUpxStub<32>* stub, retdec::unpacker::DynamicBuffer& packedData, bool trustMetadata) override;
+	virtual void decompress(PeUpxStub<32>* stub, retdec::unpacker::DynamicBuffer& packedData, retdec::unpacker::DynamicBuffer& unpackedData, bool trustMetadata) override;
 
 	virtual void setupPackingMethod(PeUpxStub<64>* stub, std::uint8_t packingMethod) override;
-	virtual void readUnpackingStub(PeUpxStub<64>* stub, unpacker::DynamicBuffer& unpackingStub) override;
-	virtual void readPackedData(PeUpxStub<64>* stub, unpacker::DynamicBuffer& packedData, bool trustMetadata) override;
-	virtual void decompress(PeUpxStub<64>* stub, unpacker::DynamicBuffer& packedData, unpacker::DynamicBuffer& unpackedData, bool trustMetadata) override;
+	virtual void readUnpackingStub(PeUpxStub<64>* stub, retdec::unpacker::DynamicBuffer& unpackingStub) override;
+	virtual void readPackedData(PeUpxStub<64>* stub, retdec::unpacker::DynamicBuffer& packedData, bool trustMetadata) override;
+	virtual void decompress(PeUpxStub<64>* stub, retdec::unpacker::DynamicBuffer& packedData, retdec::unpacker::DynamicBuffer& unpackedData, bool trustMetadata) override;
 };
 
 } // namespace upx
 } // namespace unpackertool
+} // namespace retdec
 
 #endif

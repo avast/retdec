@@ -13,6 +13,7 @@
 #include "retdec/unpacker/decompression/nrv/bit_parsers.h"
 #include "retdec/unpacker/decompression/nrv/nrv_data.h"
 
+namespace retdec {
 namespace unpacker {
 
 class Nrv2dData : public NrvData
@@ -31,5 +32,6 @@ private:
 };
 
 } // namespace unpacker
+} // namespace retdec
 
 #endif

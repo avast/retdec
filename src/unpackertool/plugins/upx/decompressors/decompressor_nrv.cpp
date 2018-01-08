@@ -16,8 +16,9 @@
 #include "retdec/unpacker/decompression/nrv/nrv2d_data.h"
 #include "retdec/unpacker/decompression/nrv/nrv2e_data.h"
 
-using namespace unpacker;
+using namespace retdec::unpacker;
 
+namespace retdec {
 namespace unpackertool {
 namespace upx {
 
@@ -378,7 +379,7 @@ void DecompressorNrv::setupPackingMethod(std::uint8_t packingMethod)
 	}
 }
 
-void DecompressorNrv::decompress(unpacker::DynamicBuffer& packedData, unpacker::DynamicBuffer& unpackedData)
+void DecompressorNrv::decompress(retdec::unpacker::DynamicBuffer& packedData, retdec::unpacker::DynamicBuffer& unpackedData)
 {
 	if (_bitParser == nullptr)
 		throw FatalException("Unpacking NRV packed data without bit parser. Report this incident please.");
@@ -404,3 +405,4 @@ void DecompressorNrv::decompress(unpacker::DynamicBuffer& packedData, unpacker::
 
 } // namespace upx
 } // namespace unpackertool
+} // namespace retdec

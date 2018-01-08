@@ -13,6 +13,7 @@
 #include "retdec/unpacker/plugin.h"
 #include "unpackertool/plugins/upx/upx_stub.h"
 
+namespace retdec {
 namespace unpackertool {
 namespace upx {
 
@@ -46,5 +47,6 @@ MAKE_PLUGIN_SHARED(UpxPlugin)
 
 } // namespace upx
 } // namespace unpackertool
+} // namespace retdec
 
 #endif

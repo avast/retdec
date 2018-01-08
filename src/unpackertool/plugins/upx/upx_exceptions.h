@@ -9,6 +9,7 @@
 
 #include "retdec/unpacker/unpacker_exception.h"
 
+namespace retdec {
 namespace unpackertool {
 namespace upx {
 
@@ -20,7 +21,7 @@ namespace upx {
  *
  * This exception is fatal error during unpacking.
  */
-class InvalidBlockException : public unpacker::FatalException
+class InvalidBlockException : public retdec::unpacker::FatalException
 {
 public:
 	InvalidBlockException() : FatalException("Invalid packed block found.") {}
@@ -32,7 +33,7 @@ public:
  *
  * This exception should report unsupported file.
  */
-class UnsupportedPackingMethodException : public unpacker::UnsupportedInputException
+class UnsupportedPackingMethodException : public retdec::unpacker::UnsupportedInputException
 {
 public:
 	explicit UnsupportedPackingMethodException(std::uint32_t packingMethod)
@@ -49,7 +50,7 @@ public:
  *
  * This exception should report unsupported file.
  */
-class UnsupportedFilterException : public unpacker::UnsupportedInputException
+class UnsupportedFilterException : public retdec::unpacker::UnsupportedInputException
 {
 public:
 	explicit UnsupportedFilterException(std::uint32_t filterId) : UnsupportedInputException("Unsupported filter 0x", std::hex, filterId, std::dec, " detected.") {}
@@ -61,7 +62,7 @@ public:
  *
  * This exception is fatal error during unpacking.
  */
-class OriginalHeaderNotFoundException : public unpacker::FatalException
+class OriginalHeaderNotFoundException : public retdec::unpacker::FatalException
 {
 public:
 	OriginalHeaderNotFoundException() : FatalException("Original header not found in unpacked data.") {}
@@ -72,7 +73,7 @@ public:
  *
  * This exception is fatal error during unpacking.
  */
-class OriginalHeaderCorruptedException : public unpacker::FatalException
+class OriginalHeaderCorruptedException : public retdec::unpacker::FatalException
 {
 public:
 	OriginalHeaderCorruptedException() : FatalException("Original header contains corrupted data.") {}
@@ -83,7 +84,7 @@ public:
  *
  * This exception should report unsupported file.
  */
-class InvalidDataDirectoryException : public unpacker::UnsupportedInputException
+class InvalidDataDirectoryException : public retdec::unpacker::UnsupportedInputException
 {
 public:
 	InvalidDataDirectoryException(const std::string& directoryName) : UnsupportedInputException(directoryName, " data directory is corrupted.") {}
@@ -94,7 +95,7 @@ public:
  *
  * This exception is fatal error during unpacking.
  */
-class ImportNamesNotFoundException : public unpacker::FatalException
+class ImportNamesNotFoundException : public retdec::unpacker::FatalException
 {
 public:
 	ImportNamesNotFoundException() : FatalException("Import names for fixing imports not found.") {}
@@ -106,7 +107,7 @@ public:
  *
  * This exception is fatal error during unpacking.
  */
-class FileMemoryDumpedException : public unpacker::FatalException
+class FileMemoryDumpedException : public retdec::unpacker::FatalException
 {
 public:
 	FileMemoryDumpedException() : FatalException("File is probably unpacked by memory dumping and it is no longer valid UPX file.") {}
@@ -117,7 +118,7 @@ public:
  *
  * This exception is fatal error during unpacking.
  */
-class FirstBlockNotFoundException : public unpacker::FatalException
+class FirstBlockNotFoundException : public retdec::unpacker::FatalException
 {
 public:
 	FirstBlockNotFoundException() : FatalException("First packed block not found in the file.") {}
@@ -128,7 +129,7 @@ public:
  *
  * This exception is fatal error during unpacking.
  */
-class NotPackedWithUpxException : public unpacker::FatalException
+class NotPackedWithUpxException : public retdec::unpacker::FatalException
 {
 public:
 	NotPackedWithUpxException() : FatalException("File is not packed with UPX.") {}
@@ -136,5 +137,6 @@ public:
 
 } // namespace upx
 } // namespace unpackertool
+} // namespace retdec
 
 #endif

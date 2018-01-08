@@ -15,6 +15,7 @@
 
 using namespace retdec::utils;
 
+namespace retdec {
 namespace unpackertool {
 
 /**
@@ -164,3 +165,4 @@ PluginList PluginMgr::matchingPlugins(const std::string& packerName, const std::
 }
 
 } // namepsace unpackertool
+} // namepsace retdec

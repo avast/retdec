@@ -11,6 +11,7 @@
 
 using namespace ::testing;
 
+namespace retdec {
 namespace unpacker {
 namespace tests {
 
@@ -326,4 +327,5 @@ WildcardBitMatchWithCaptureWorks) {
 }
 
 } // namespace unpacker
+} // namespace retdec
 } // namespace tests

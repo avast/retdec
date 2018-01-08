@@ -7,4 +7,4 @@
 // As there is no better place to comment this namespace, we do this in the
 // present file.
 
-/// @namespace unpackertool::upx UPX unpacker.
+/// @namespace retdec::unpackertool::upx UPX unpacker.

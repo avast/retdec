@@ -16,8 +16,9 @@
 #include "retdec/unpacker/decompression/compressed_data.h"
 #include "retdec/unpacker/dynamic_buffer.h"
 
-using namespace unpacker;
+using namespace retdec::unpacker;
 
+namespace retdec {
 namespace unpackertool {
 namespace upx {
 
@@ -71,7 +72,7 @@ UpxMetadata UpxMetadata::read(retdec::loader::Image* file)
 	}
 
 	inputFile.read(reinterpret_cast<char*>(&dataBuffer[0]), 1024);
-	unpacker::DynamicBuffer data(dataBuffer, file->getFileFormat()->getEndianness());
+	retdec::unpacker::DynamicBuffer data(dataBuffer, file->getFileFormat()->getEndianness());
 
 	std::string pattern = "UPX!";
 	for (size_t i = 0; i < 1024 - pattern.length(); ++i)
@@ -80,7 +81,7 @@ UpxMetadata UpxMetadata::read(retdec::loader::Image* file)
 		if (needle == pattern)
 		{
 			std::uint32_t metadataSize = UpxMetadata::getSizeOfVersion(data.read<std::uint8_t>(static_cast<std::uint32_t>(i) + 4));
-			unpacker::DynamicBuffer metadataBuffer(data, static_cast<std::uint32_t>(i), metadataSize);
+			retdec::unpacker::DynamicBuffer metadataBuffer(data, static_cast<std::uint32_t>(i), metadataSize);
 
 			// Check whether calculated checksum and checksum in header matches
 			// This is the only way how we can validate the metadata
@@ -104,7 +105,7 @@ UpxMetadata UpxMetadata::read(retdec::loader::Image* file)
 	return metadata;
 }
 
-uint8_t UpxMetadata::calcChecksum(const unpacker::DynamicBuffer& data)
+uint8_t UpxMetadata::calcChecksum(const retdec::unpacker::DynamicBuffer& data)
 {
 	std::uint32_t sum = 0;
 	for (std::uint32_t i = 4; i < data.getRealDataSize() - 1; ++i)
@@ -180,7 +181,7 @@ std::shared_ptr<UpxStub> UpxStub::createStub(retdec::loader::Image* file, const 
 	return _createStubImpl(file, &stubBytes);
 }
 
-std::shared_ptr<UpxStub> UpxStub::_createStubImpl(retdec::loader::Image* file, const unpacker::DynamicBuffer* stubBytes)
+std::shared_ptr<UpxStub> UpxStub::_createStubImpl(retdec::loader::Image* file, const retdec::unpacker::DynamicBuffer* stubBytes)
 {
 	UpxMetadata metadata = UpxMetadata::read(file);
 
@@ -376,7 +377,7 @@ void UpxStub::setStubData(const UpxStubData* stubData)
 	_stubData = stubData;
 }
 
-void UpxStub::setStubCapturedData(const unpacker::DynamicBuffer& stubCapturedData)
+void UpxStub::setStubCapturedData(const retdec::unpacker::DynamicBuffer& stubCapturedData)
 {
 	_stubCapturedData = stubCapturedData;
 }
@@ -415,3 +416,4 @@ std::unique_ptr<Decompressor> UpxStub::decodePackingMethod(std::uint8_t packingM
 
 } // namespace upx
 } // namespace unpackertool
+} // namespace retdec

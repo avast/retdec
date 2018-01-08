@@ -6,6 +6,7 @@
 
 #include "retdec/unpacker/decompression/lzmat/lzmat_data.h"
 
+namespace retdec {
 namespace unpacker {
 
 LzmatData::LzmatData(const DynamicBuffer& buffer) : CompressedData(buffer)
@@ -195,3 +196,4 @@ uint16_t LzmatData::get16Bits(uint32_t pos, bool unaligned)
 }
 
 } // namespace unpacker
+} // namespace retdec

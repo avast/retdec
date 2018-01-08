@@ -8,6 +8,7 @@
 
 #include "retdec/unpacker/signature.h"
 
+namespace retdec {
 namespace unpacker {
 
 /**
@@ -445,3 +446,4 @@ bool operator !=(uint8_t lhs, const Signature::Byte& rhs)
 }
 
 } // namespace unpacker
+} // namespace retdec

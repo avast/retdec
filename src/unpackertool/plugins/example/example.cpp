@@ -7,8 +7,9 @@
 #include "retdec/unpacker/plugin.h"
 #include "retdec/unpacker/unpacker_exception.h"
 
-using namespace unpacker;
+using namespace retdec::unpacker;
 
+namespace retdec {
 namespace unpackertool {
 namespace example {
 
@@ -58,3 +59,4 @@ REGISTER_PLUGIN(ExamplePlugin)
 
 } // namespace example
 } // namespace unpackertool
+} // namespace retdec

@@ -7,4 +7,4 @@
 // As there is no better place to comment this namespace, we do this in the
 // present file.
 
-/// @namespace unpackertool::example Example of an unpacker plugin.
+/// @namespace retdec::unpackertool::example Example of an unpacker plugin.

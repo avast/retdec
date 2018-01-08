@@ -13,6 +13,7 @@
 #include "retdec/unpacker/decompression/nrv/bit_parsers.h"
 #include "retdec/unpacker/dynamic_buffer.h"
 
+namespace retdec {
 namespace unpackertool {
 namespace upx {
 
@@ -66,7 +67,7 @@ public:
 	using MachOHeaderType = typename MachOUpxStubTraits<bits>::MachOHeaderType;
 	using MachOSegmentCommandType = typename MachOUpxStubTraits<bits>::MachOSegmentCommandType;
 
-	MachOUpxStub(retdec::loader::Image* inputFile, const UpxStubData* stubData, const unpacker::DynamicBuffer& stubCapturedData,
+	MachOUpxStub(retdec::loader::Image* inputFile, const UpxStubData* stubData, const retdec::unpacker::DynamicBuffer& stubCapturedData,
 			std::unique_ptr<Decompressor> decompressor, const UpxMetadata& metadata);
 
 	virtual ~MachOUpxStub() override;
@@ -75,22 +76,23 @@ public:
 	virtual void cleanup() override;
 
 	void setupPackingMethod(std::uint8_t packingMethod);
-	void decompress(unpacker::DynamicBuffer& packedData, unpacker::DynamicBuffer& unpackedData);
+	void decompress(retdec::unpacker::DynamicBuffer& packedData, retdec::unpacker::DynamicBuffer& unpackedData);
 
 	void unpack(std::ifstream& inputFile, std::ofstream& outputFile, std::uint64_t baseInputOffset, std::uint64_t baseOutputOffset);
 
 protected:
 	std::uint32_t getFirstBlockOffset(std::ifstream& inputFile) const;
-	unpacker::DynamicBuffer readNextBlock(std::ifstream& inputFile);
-	unpacker::DynamicBuffer unpackBlock(unpacker::DynamicBuffer& packedBlock);
-	void unfilterBlock(const unpacker::DynamicBuffer& packedBlock, unpacker::DynamicBuffer& unpackedData);
+	retdec::unpacker::DynamicBuffer readNextBlock(std::ifstream& inputFile);
+	retdec::unpacker::DynamicBuffer unpackBlock(retdec::unpacker::DynamicBuffer& packedBlock);
+	void unfilterBlock(const retdec::unpacker::DynamicBuffer& packedBlock, retdec::unpacker::DynamicBuffer& unpackedData);
 
 private:
 	std::uint64_t _readPos;
-	std::unique_ptr<unpacker::BitParser> _bitParser;
+	std::unique_ptr<retdec::unpacker::BitParser> _bitParser;
 };
 
-} // namespace unpackertool
 } // namespace upx
+} // namespace unpackertool
+} // namespace retdec
 
 #endif

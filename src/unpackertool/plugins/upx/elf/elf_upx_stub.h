@@ -21,6 +21,7 @@ namespace ELFIO {
 	struct Elf64_Phdr;
 }
 
+namespace retdec {
 namespace unpackertool {
 namespace upx {
 
@@ -80,7 +81,7 @@ public:
 	using ElfHeaderType = typename ElfUpxStubTraits<bits>::ElfHeaderType;
 	using ProgHeaderType = typename ElfUpxStubTraits<bits>::ProgHeaderType;
 
-	ElfUpxStub(retdec::loader::Image* inputFile, const UpxStubData* stubData, const unpacker::DynamicBuffer& stubCapturedData,
+	ElfUpxStub(retdec::loader::Image* inputFile, const UpxStubData* stubData, const retdec::unpacker::DynamicBuffer& stubCapturedData,
 			std::unique_ptr<Decompressor> decompressor, const UpxMetadata& metadata);
 
 	virtual ~ElfUpxStub() override;
@@ -89,20 +90,21 @@ public:
 	virtual void cleanup() override;
 
 	void setupPackingMethod(std::uint8_t packingMethod);
-	void decompress(unpacker::DynamicBuffer& packedData, unpacker::DynamicBuffer& unpackedData);
+	void decompress(retdec::unpacker::DynamicBuffer& packedData, retdec::unpacker::DynamicBuffer& unpackedData);
 
 private:
 	std::uint32_t getFirstBlockOffset();
-	bool validBlock(const unpacker::DynamicBuffer& block);
-	void unpackBlock(unpacker::DynamicBuffer& unpackedData, AddressType fileOffset, AddressType& readFromBuffer, std::uint32_t sizeHint = 0);
-	void unpackBlock(unpacker::DynamicBuffer& unpackedData, unpacker::DynamicBuffer& packedBlock, AddressType& readFromBuffer, std::uint32_t sizeHint = 0);
+	bool validBlock(const retdec::unpacker::DynamicBuffer& block);
+	void unpackBlock(retdec::unpacker::DynamicBuffer& unpackedData, AddressType fileOffset, AddressType& readFromBuffer, std::uint32_t sizeHint = 0);
+	void unpackBlock(retdec::unpacker::DynamicBuffer& unpackedData, retdec::unpacker::DynamicBuffer& packedBlock, AddressType& readFromBuffer, std::uint32_t sizeHint = 0);
 	AddressType nextLoadSegmentGap(const std::vector<ProgHeaderType>& phdrs, std::uint32_t currentLoadSegmentIndex);
-	void unfilterBlock(const unpacker::DynamicBuffer& packedBlock, unpacker::DynamicBuffer& unpackedData);
+	void unfilterBlock(const retdec::unpacker::DynamicBuffer& packedBlock, retdec::unpacker::DynamicBuffer& unpackedData);
 
-	unpacker::BitParser* _bitParser; ///< Associated NRV bit parser.
+	retdec::unpacker::BitParser* _bitParser; ///< Associated NRV bit parser.
 };
 
-} // namespace unpackertool
 } // namespace upx
+} // namespace unpackertool
+} // namespace retdec
 
 #endif

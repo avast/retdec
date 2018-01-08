@@ -7,6 +7,7 @@
 #include "retdec/fileformat/fftypes.h"
 #include "retdec/unpacker/decompression/nrv/nrv2d_data.h"
 
+namespace retdec {
 namespace unpacker {
 
 Nrv2dData::Nrv2dData(const DynamicBuffer& buffer, BitParser* bitParser) : NrvData(buffer, bitParser)
@@ -124,3 +125,4 @@ bool Nrv2dData::decompress(DynamicBuffer& outputBuffer)
 }
 
 } // namespace unpacker
+} // namespace retdec

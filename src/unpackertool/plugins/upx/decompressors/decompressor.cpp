@@ -8,8 +8,9 @@
 #include "unpackertool/plugins/upx/upx.h"
 #include "unpackertool/plugins/upx/upx_exceptions.h"
 
-using namespace unpacker;
+using namespace retdec::unpacker;
 
+namespace retdec {
 namespace unpackertool {
 namespace upx {
 
@@ -65,3 +66,4 @@ void Decompressor::performDecompression(const std::weak_ptr<CompressedData>& com
 
 } // namespace upx
 } // namespace unpackertool
+} // namespace retdec

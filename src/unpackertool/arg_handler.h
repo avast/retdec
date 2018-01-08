@@ -11,6 +11,7 @@
 #include <string>
 #include <vector>
 
+namespace retdec {
 namespace unpackertool {
 
 /**
@@ -112,5 +113,6 @@ private:
 };
 
 } // namespace unpackertool
+} // namespace retdec
 
 #endif

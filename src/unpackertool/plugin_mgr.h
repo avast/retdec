@@ -15,6 +15,7 @@
 #include "retdec/utils/os.h"
 #include "singleton.h"
 
+namespace retdec {
 namespace unpackertool {
 
 #ifdef OS_WINDOWS
@@ -104,5 +105,6 @@ private:
 #define sPluginMgr      Singleton<PluginMgr>::instance()
 
 } // namespace unpackertool
+} // namespace retdec
 
 #endif

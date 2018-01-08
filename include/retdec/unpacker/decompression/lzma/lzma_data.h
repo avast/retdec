@@ -9,6 +9,7 @@
 
 #include "retdec/unpacker/decompression/compressed_data.h"
 
+namespace retdec {
 namespace unpacker {
 
 /**
@@ -67,5 +68,6 @@ private:
 };
 
 } // namespace unpacker
+} // namespace retdec
 
 #endif

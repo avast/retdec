@@ -14,7 +14,7 @@
 #include "retdec/stacofin/stacofin.h"
 
 using namespace retdec::utils;
-using namespace fnc_patterns::stacofin;
+using namespace retdec::fnc_patterns::stacofin;
 
 namespace {
 

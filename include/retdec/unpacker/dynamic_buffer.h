@@ -14,6 +14,7 @@
 
 #include "retdec/fileformat/fileformat.h"
 
+namespace retdec {
 namespace unpacker {
 
 /**
@@ -69,7 +70,7 @@ public:
 	 */
 	template <typename T> T read(uint32_t pos, retdec::utils::Endianness endianness = retdec::utils::Endianness::UNKNOWN) const
 	{
-		static_assert(std::is_integral<T>::value, "unpacker::DynamicBuffer::read can only accept integral types");
+		static_assert(std::is_integral<T>::value, "retdec::unpacker::DynamicBuffer::read can only accept integral types");
 
 		// In case of non-specified endianness, use the default one assigned to DynamicBuffer itself
 		if (endianness == retdec::utils::Endianness::UNKNOWN)
@@ -93,7 +94,7 @@ public:
 	 */
 	template <typename T> void write(const T& data, uint32_t pos, retdec::utils::Endianness endianness = retdec::utils::Endianness::UNKNOWN)
 	{
-		static_assert(std::is_integral<T>::value, "unpacker::DynamicBuffer::write can only accept integral types");
+		static_assert(std::is_integral<T>::value, "retdec::unpacker::DynamicBuffer::write can only accept integral types");
 
 		// In case of non-specified endianness, use the default one assigned to DynamicBuffer itself
 		if (endianness == retdec::utils::Endianness::UNKNOWN)
@@ -182,5 +183,6 @@ private:
 };
 
 } // namespace unpacker
+} // namespace retdec
 
 #endif

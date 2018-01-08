@@ -12,6 +12,7 @@
 #include "unpackertool/plugins/upx/upx_stub.h"
 #include "retdec/unpacker/signature.h"
 
+namespace retdec {
 namespace unpackertool {
 namespace upx {
 
@@ -22,7 +23,7 @@ struct UpxStubData
 {
 	retdec::fileformat::Architecture architecture; ///< Architecture this unpacking stub occures on.
 	retdec::fileformat::Format format; ///< File format this unpacking stub occures in.
-	unpacker::Signature* signature; ///< Signature of this unpacking stub.
+	retdec::unpacker::Signature* signature; ///< Signature of this unpacking stub.
 	UpxStubVersion version; ///< Version this unpacking stub associates with.
 	std::uint32_t size; ///< Size of the whole unpacking stub. Not used on ELF, only on PE.
 	std::uint32_t searchDistance; ///< In case of non-fixed position of the signature, this field is used for searching around EP offset with this distance.
@@ -39,7 +40,7 @@ struct UpxStubData
  *        0x00, 0x01, 0x02, ANY, CAP
  *    };
  *    @endcode
- * 2. Add signature into @ref allStubs. Provide right retdec::fileformat::Architecture, retdec::fileformat::FileFormat and unpacker::upx::UpxStubVersion.
+ * 2. Add signature into @ref allStubs. Provide right retdec::fileformat::Architecture, retdec::fileformat::FileFormat and retdec::unpacker::upx::UpxStubVersion.
  *    PE signature also require their whole size to be provided. ELF does not require this. If you signature is located at the variable offset from
  *    entry point, you also need to provide maximum search distance. See @ref UpxStubData for further details.
  *
@@ -53,8 +54,8 @@ public:
 	UpxStubSignatures(const UpxStubSignatures&) = delete;
 	~UpxStubSignatures();
 
-	static const UpxStubData* matchSignatures(retdec::loader::Image* file, unpacker::DynamicBuffer& captureData);
-	static const UpxStubData* matchSignatures(const unpacker::DynamicBuffer& data, unpacker::DynamicBuffer& captureData,
+	static const UpxStubData* matchSignatures(retdec::loader::Image* file, retdec::unpacker::DynamicBuffer& captureData);
+	static const UpxStubData* matchSignatures(const retdec::unpacker::DynamicBuffer& data, retdec::unpacker::DynamicBuffer& captureData,
 			retdec::fileformat::Architecture architecture = retdec::fileformat::Architecture::UNKNOWN, retdec::fileformat::Format format = retdec::fileformat::Format::UNKNOWN);
 
 private:
@@ -65,5 +66,6 @@ private:
 
 } // namespace upx
 } // namespace unpackertool
+} // namespace retdec
 
 #endif

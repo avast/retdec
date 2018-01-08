@@ -7,6 +7,7 @@
 #ifndef UNPACKERTOOL_SINGLETON_H
 #define UNPACKERTOOL_SINGLETON_H
 
+namespace retdec {
 namespace unpackertool {
 
 #define IS_SINGLETON(CLASS)         friend class Singleton<CLASS>;
@@ -41,5 +42,6 @@ private:
 };
 
 } // namespace unpackertool
+} // namespace retdec
 
 #endif

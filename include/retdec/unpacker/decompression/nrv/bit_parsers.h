@@ -10,6 +10,7 @@
 #include "retdec/fileformat/fftypes.h"
 #include "retdec/unpacker/dynamic_buffer.h"
 
+namespace retdec {
 namespace unpacker {
 
 class BitParser
@@ -99,5 +100,6 @@ public:
 };
 
 } // namespace unpacker
+} // namespace retdec
 
 #endif

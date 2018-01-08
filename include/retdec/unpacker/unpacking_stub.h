@@ -9,6 +9,8 @@
 
 #include <string>
 
+namespace retdec {
+
 // Forward declarations
 namespace loader { class Image; }
 namespace unpacker { class DynamicBuffer; }
@@ -27,7 +29,7 @@ public:
 	 *
 	 * @param file File to operate on.
 	 */
-	UnpackingStub(retdec::loader::Image* file) : _file(file) {}
+	UnpackingStub(loader::Image* file) : _file(file) {}
 
 	/**
 	 * Destructor.
@@ -51,14 +53,15 @@ public:
 	 *
 	 * @return The input file.
 	 */
-	retdec::loader::Image* getFile() { return _file; }
+	loader::Image* getFile() { return _file; }
 
 protected:
-	void setFile(retdec::loader::Image* file) { _file = file; }
+	void setFile(loader::Image* file) { _file = file; }
 
-	retdec::loader::Image* _file;
+	loader::Image* _file;
 };
 
 } // namespace unpacker
+} // namespace retdec
 
 #endif

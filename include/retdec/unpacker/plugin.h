@@ -14,6 +14,7 @@
 #include "retdec/unpacker/lib_loader.h"
 #include "retdec/unpacker/unpacker_exception.h"
 
+namespace retdec {
 namespace unpackertool {
 
 #ifdef _MSC_VER
@@ -156,12 +157,12 @@ public:
 			prepare();
 			unpack();
 		}
-		catch (const unpacker::FatalException& ex)
+		catch (const retdec::unpacker::FatalException& ex)
 		{
 			error(ex.getMessage());
 			_cachedExitCode = PLUGIN_EXIT_FAILED;
 		}
-		catch (const unpacker::UnsupportedInputException& ex)
+		catch (const retdec::unpacker::UnsupportedInputException& ex)
 		{
 			error(ex.getMessage());
 			_cachedExitCode = PLUGIN_EXIT_UNSUPPORTED;
@@ -262,5 +263,6 @@ private:
 };
 
 } // namespace unpackertool
+} // namespace retdec
 
 #endif

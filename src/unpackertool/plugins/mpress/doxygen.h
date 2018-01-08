@@ -7,4 +7,4 @@
 // As there is no better place to comment this namespace, we do this in the
 // present file.
 
-/// @namespace unpackertool::mpress MPRESS unpacker.
+/// @namespace retdec::unpackertool::mpress MPRESS unpacker.

@@ -14,8 +14,9 @@
 #include "unpackertool/plugins/upx/upx_stub.h"
 #include "retdec/unpacker/decompression/lzma/lzma_data.h"
 
-using namespace unpacker;
+using namespace retdec::unpacker;
 
+namespace retdec {
 namespace unpackertool {
 namespace upx {
 
@@ -360,3 +361,4 @@ void DecompressorLzma::decompress(PeUpxStub<64>* stub, DynamicBuffer& packedData
 
 } // namespace upx
 } // namespace unpackertool
+} // namespace retdec

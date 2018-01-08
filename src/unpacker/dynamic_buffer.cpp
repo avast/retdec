@@ -8,6 +8,7 @@
 
 using namespace retdec::utils;
 
+namespace retdec {
 namespace unpacker {
 
 /**
@@ -243,3 +244,4 @@ void DynamicBuffer::writeRepeatingByte(uint8_t byte, uint32_t pos, uint32_t repe
 }
 
 } // namespace unpacker
+} // namespace retdec

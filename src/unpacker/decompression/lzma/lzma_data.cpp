@@ -9,6 +9,7 @@
 
 #include "retdec/unpacker/decompression/lzma/lzma_data.h"
 
+namespace retdec {
 namespace unpacker {
 
 /**
@@ -429,3 +430,4 @@ bool LzmaData::checkProperties()
 }
 
 } // namespace unpacker
+} // namespace retdec
