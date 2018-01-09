@@ -106,7 +106,7 @@ template <int bits> void ElfUpxStub<bits>::unpack(const std::string& outputFile)
 		AddressType segReadPos;
 		DynamicBuffer unpackedData(_file->getFileFormat()->getEndianness());
 
-		this_plugin()->log("Unpacking block at file offset 0x", std::hex, firstBlockOffset + readPos, std::dec, ".");
+		upx_plugin->log("Unpacking block at file offset 0x", std::hex, firstBlockOffset + readPos, std::dec, ".");
 		unpackBlock(unpackedData, firstBlockOffset + readPos, segReadPos, originalProgHeaders[i].p_filesz);
 
 		retdec::utils::writeFile(output, unpackedData.getBuffer(), initialOffset + originalProgHeaders[i].p_offset);
@@ -170,7 +170,7 @@ template <int bits> void ElfUpxStub<bits>::unpack(const std::string& outputFile)
 
 	if (additionalDataBehindStub)
 	{
-		this_plugin()->log("Additional packed data detected at the end of the file.");
+		upx_plugin->log("Additional packed data detected at the end of the file.");
 
 		// These data are always at the offset which is aligned by 4
 		additionalDataPos = retdec::utils::alignUp(_file->getEpSegment()->getSize(), 4);
@@ -180,7 +180,7 @@ template <int bits> void ElfUpxStub<bits>::unpack(const std::string& outputFile)
 	}
 	else
 	{
-		this_plugin()->log("Additional packed data detected between LOAD segments.");
+		upx_plugin->log("Additional packed data detected between LOAD segments.");
 
 		// We just continue reading where we ended up
 		additionalDataPos = readPos + firstBlockOffset;
@@ -189,7 +189,7 @@ template <int bits> void ElfUpxStub<bits>::unpack(const std::string& outputFile)
 		additionalDataSize = ep - additionalDataPos;
 	}
 
-	this_plugin()->log("Additional data are at file offset 0x", std::hex, additionalDataPos,
+	upx_plugin->log("Additional data are at file offset 0x", std::hex, additionalDataPos,
 			" and have size of 0x", additionalDataSize, std::dec, ".");
 
 	std::vector<std::uint8_t> additionalDataBytes;
@@ -208,7 +208,7 @@ template <int bits> void ElfUpxStub<bits>::unpack(const std::string& outputFile)
 		// If there is, unpack data into the gap
 		DynamicBuffer unpackedData(_file->getFileFormat()->getEndianness());
 
-		this_plugin()->log("Unpacking block from additional data behind segment ", i, ".");
+		upx_plugin->log("Unpacking block from additional data behind segment ", i, ".");
 		unpackBlock(unpackedData, additionalData, readPos);
 		retdec::utils::writeFile(output, unpackedData.getBuffer(), originalProgHeaders[i].p_offset + originalProgHeaders[i].p_filesz);
 
@@ -221,7 +221,7 @@ template <int bits> void ElfUpxStub<bits>::unpack(const std::string& outputFile)
 	{
 		DynamicBuffer unpackedData(_file->getFileFormat()->getEndianness());
 
-		this_plugin()->log("Unpacking last block from additional data at the end of the file.");
+		upx_plugin->log("Unpacking last block from additional data at the end of the file.");
 		unpackBlock(unpackedData, additionalData, readPos);
 
 		output.seekp(0, std::ios::end);
@@ -486,7 +486,7 @@ template <int bits> void ElfUpxStub<bits>::unfilterBlock(const DynamicBuffer& pa
 	if (!ret)
 		throw UnsupportedFilterException(filterId);
 
-	this_plugin()->log("Unfiltering filter 0x", std::hex, static_cast<std::uint32_t>(filterId), std::dec, " with parameter ", static_cast<std::uint32_t>(filterParam), ".");
+	upx_plugin->log("Unfiltering filter 0x", std::hex, static_cast<std::uint32_t>(filterId), std::dec, " with parameter ", static_cast<std::uint32_t>(filterParam), ".");
 }
 
 // Explicit instantiation.

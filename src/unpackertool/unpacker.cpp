@@ -77,7 +77,7 @@ ExitCode unpackFile(const std::string& inputFile, const std::string& outputFile,
 	ExitCode ret = EXIT_CODE_NOTHING_TO_DO;
 	for (const auto& detectedPacker : detectedPackers)
 	{
-		PluginList plugins = sPluginMgr.matchingPlugins(detectedPacker.name, detectedPacker.versionInfo);
+		PluginList plugins = PluginMgr::matchingPlugins(detectedPacker.name, detectedPacker.versionInfo);
 
 		if (plugins.empty())
 		{
@@ -113,13 +113,6 @@ ExitCode processArgs(ArgHandler& handler, char argc, char** argv)
 		return EXIT_CODE_OK;
 	}
 
-	// First of all, load plugins
-	// If -d|--dir argument isn't specified, take the current path from argv[0]
-	std::string pluginsDir = FilesystemPath(argv[0]).getParentPath().append("/unpacker-plugins");
-	if (handler["dir"]->used)
-		pluginsDir = handler["dir"]->input;
-	sPluginMgr.loadPlugins(pluginsDir);
-
 	bool brute = handler["brute"]->used;
 
 	// -h|--help
@@ -132,16 +125,12 @@ ExitCode processArgs(ArgHandler& handler, char argc, char** argv)
 	{
 		std::cout << "List of available plugins:" << std::endl;
 
-		const PluginTable& plugins = sPluginMgr.plugins();
-		for (const auto& pluginPair : plugins)
+		for (const auto& plugin : PluginMgr::plugins)
 		{
-			for (const auto& plugin : pluginPair.second)
-			{
-				const Plugin::Info* info = plugin->getInfo();
-				std::cout << info->name << " " << info->pluginVersion
-					<< " for packer '" << info->name << " " << info->packerVersion
-					<< "' (" << info->author << ")" << std::endl;
-			}
+			const Plugin::Info* info = plugin->getInfo();
+			std::cout << info->name << " " << info->pluginVersion
+				<< " for packer '" << info->name << " " << info->packerVersion
+				<< "' (" << info->author << ")" << std::endl;
 		}
 	}
 	// PACKED_FILE [-o|--output FILE]
@@ -178,7 +167,7 @@ int main(int argc, char** argv)
 			"   -h|--help              Prints this help message.\n"
 			"\n"
 			"Listing group:\n"
-			"   -p|--plugins           Prints the list of all available plugins in the plugin directory.\n"
+			"   -p|--plugins           Prints the list of all available plugins.\n"
 			"\n"
 			"Unpacking group:\n"
 			"   PACKED_FILE            Specifies the packed file, which is needed to be unpacked.\n"
@@ -186,9 +175,6 @@ int main(int argc, char** argv)
 			"                          Default value is 'PACKED_FILE-unpacked'.\n"
 			"\n"
 			"Non-group optional arguments:\n"
-			"   -d|--dir DIR           Specifies the directory that contains all the plugins as DIR.\n"
-			"                          This directory is recursively searched. If no -d|--dir options is\n"
-			"                          specified, the default search path is /path/to/unpacker/unpacker-plugins/.\n"
 			"   -b|--brute             Tell unpacker to run plugins in the brute mode. Plugins may or may not\n"
 			"                          implement brute methods for unpacking. They can completely ignore this argument."
 	);
@@ -196,7 +182,6 @@ int main(int argc, char** argv)
 	handler.registerArg('h', "help", false);
 	handler.registerArg('o', "output", true);
 	handler.registerArg('p', "plugins", false);
-	handler.registerArg('d', "dir", true);
 	handler.registerArg('b', "brute", false);
 
 	return processArgs(handler, argc, argv);

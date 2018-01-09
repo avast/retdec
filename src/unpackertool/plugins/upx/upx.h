@@ -13,6 +13,8 @@
 #include "retdec/unpacker/plugin.h"
 #include "unpackertool/plugins/upx/upx_stub.h"
 
+#define upx_plugin plugin(retdec::unpackertool::upx::UpxPlugin)
+
 namespace retdec {
 namespace unpackertool {
 namespace upx {
@@ -33,7 +35,6 @@ public:
 	UpxPlugin();
 	virtual ~UpxPlugin();
 
-	virtual void init() override;
 	virtual void prepare() override;
 	virtual void unpack() override;
 	virtual void cleanup() override;
@@ -42,8 +43,6 @@ private:
 	std::unique_ptr<retdec::loader::Image> _file; ///< Packed input file.
 	std::shared_ptr<UpxStub> _stub; ///< Correct version of unpacking stub.
 };
-
-MAKE_PLUGIN_SHARED(UpxPlugin)
 
 } // namespace upx
 } // namespace unpackertool

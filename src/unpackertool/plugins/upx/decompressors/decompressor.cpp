@@ -40,9 +40,9 @@ void Decompressor::performDecompression(const std::weak_ptr<CompressedData>& com
 	auto compressedData = compressedDataWptr.lock();
 	if (!compressedData->decompress(unpackedData))
 	{
-		if (this_plugin()->getStartupArguments()->brute)
+		if (upx_plugin->getStartupArguments()->brute)
 		{
-			this_plugin()->log("Bruteforcing compressed data with XOR.");
+			upx_plugin->log("Bruteforcing compressed data with XOR.");
 
 			// If we failed, try to bruteforce the data with XOR
 			DynamicBuffer originalData = compressedData->getBuffer();
@@ -54,7 +54,7 @@ void Decompressor::performDecompression(const std::weak_ptr<CompressedData>& com
 
 				if (compressedData->decompress(unpackedData))
 				{
-					this_plugin()->log("Bruteforcing compressed data with XOR succeeded on XOR value 0x", std::hex, i, std::dec, ".");
+					upx_plugin->log("Bruteforcing compressed data with XOR succeeded on XOR value 0x", std::hex, i, std::dec, ".");
 					return;
 				}
 			}

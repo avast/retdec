@@ -21,13 +21,15 @@ namespace retdec {
 namespace unpackertool {
 namespace upx {
 
-REGISTER_PLUGIN(UpxPlugin)
-
 /**
  * Constructor.
  */
 UpxPlugin::UpxPlugin() : _file(), _stub()
 {
+	info.name          = "UPX";
+	info.pluginVersion = "1.0";
+	info.packerVersion = R"/(.*)/";
+	info.author        = "Marek Milkovic";
 }
 
 /**
@@ -35,17 +37,7 @@ UpxPlugin::UpxPlugin() : _file(), _stub()
  */
 UpxPlugin::~UpxPlugin()
 {
-}
-
-/**
- * Initialization of plugin providing @ref Plugin::Info data.
- */
-void UpxPlugin::init()
-{
-	info.name          = "UPX";
-	info.pluginVersion = "1.0";
-	info.packerVersion = R"/(.*)/";
-	info.author        = "Marek Milkovic";
+	cleanup();
 }
 
 /**

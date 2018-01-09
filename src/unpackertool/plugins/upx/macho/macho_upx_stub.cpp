@@ -99,7 +99,7 @@ template <int bits> void MachOUpxStub<bits>::unpack(const std::string& outputFil
 	}
 	else
 	{
-		this_plugin()->log("Unpacking universal Mach-O.");
+		upx_plugin->log("Unpacking universal Mach-O.");
 
 		std::vector<std::pair<std::uint32_t, std::uint32_t>> offsetAndSize;
 		std::uint32_t offset = 0;
@@ -114,7 +114,7 @@ template <int bits> void MachOUpxStub<bits>::unpack(const std::string& outputFil
 			else
 				offset = retdec::utils::alignUp(output.tellp(), 0x1000);
 
-			this_plugin()->log("Unpacking architecture ", archToName(machoFormat->getTargetArchitecture()), " from universal Mach-O.");
+			upx_plugin->log("Unpacking architecture ", archToName(machoFormat->getTargetArchitecture()), " from universal Mach-O.");
 
 			// This is not nice, but we have no other option. MachOUpxStub is templated class and therefore @c bits is set to 32 or 64 based on the bit width of the architecture.
 			// Universal Mach-O binaries may contain both 32 and 64 bits binaries. If we want to get correct values out of MachOUpxStubTraits we need to create new versions of these
@@ -180,7 +180,7 @@ template <int bits> void MachOUpxStub<bits>::unpack(std::ifstream& inputFile, st
 	// Move to the specific offset of the first packed block.
 	inputFile.seekg(baseInputOffset + getFirstBlockOffset(inputFile), std::ios::beg);
 
-	this_plugin()->log("Unpacking original Mach-O header.");
+	upx_plugin->log("Unpacking original Mach-O header.");
 
 	// First read packed original Mach-O header and unpack it.
 	DynamicBuffer packedOriginalHeader = readNextBlock(inputFile);
@@ -223,7 +223,7 @@ template <int bits> void MachOUpxStub<bits>::unpack(std::ifstream& inputFile, st
 		if (command.filesize == 0)
 			continue;
 
-		this_plugin()->log("Unpacking block of load segment command with file offset 0x", std::hex, command.fileoff,
+		upx_plugin->log("Unpacking block of load segment command with file offset 0x", std::hex, command.fileoff,
 				" and file size 0x", command.filesize, std::dec, ".");
 
 		DynamicBuffer packedBlock = readNextBlock(inputFile);
@@ -327,7 +327,7 @@ template <int bits> void MachOUpxStub<bits>::unfilterBlock(const DynamicBuffer& 
 	if (!ret)
 		throw UnsupportedFilterException(filterId);
 
-	this_plugin()->log("Unfiltering filter 0x", std::hex, static_cast<std::uint32_t>(filterId), std::dec, " with parameter ", static_cast<std::uint32_t>(filterParam), ".");
+	upx_plugin->log("Unfiltering filter 0x", std::hex, static_cast<std::uint32_t>(filterId), std::dec, " with parameter ", static_cast<std::uint32_t>(filterParam), ".");
 }
 
 // Explicit instantiation.

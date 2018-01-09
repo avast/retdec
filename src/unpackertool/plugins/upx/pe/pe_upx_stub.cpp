@@ -380,11 +380,11 @@ template <int bits> void PeUpxStub<bits>::detectUnfilter(const DynamicBuffer& un
 		_filterId = FILTER_NONE;
 		_filterCount = 0;
 		_filterParam = 0;
-		this_plugin()->log("No filter detected, or unknown filter present in the file.");
+		upx_plugin->log("No filter detected, or unknown filter present in the file.");
 		return;
 	}
 
-	this_plugin()->log("Detected filter 0x", std::hex, _filterId, " with parameter 0x", _filterParam, " based on ", detectionBasedOn, ".");
+	upx_plugin->log("Detected filter 0x", std::hex, _filterId, " with parameter 0x", _filterParam, " based on ", detectionBasedOn, ".");
 }
 
 template <int bits> void PeUpxStub<bits>::unpackData(DynamicBuffer& unpackedData)
@@ -420,7 +420,7 @@ template <int bits> void PeUpxStub<bits>::unpackData(DynamicBuffer& unpackedData
 		}
 	}
 
-	this_plugin()->log("Unpacked data based on ", tryAgain ? "UPX metadata." : "signature.");
+	upx_plugin->log("Unpacked data based on ", tryAgain ? "UPX metadata." : "signature.");
 }
 
 /**
@@ -574,7 +574,7 @@ template <int bits> UpxExtraData PeUpxStub<bits>::parseExtraData(retdec::unpacke
 		throw OriginalHeaderCorruptedException();
 
 	originalHeader = DynamicBuffer(unpackedData, originalHeaderOffset, sectionHeadersEnd);
-	this_plugin()->log("Original header found at address 0x", std::hex, originalHeaderOffset, std::dec, " in extra data.");
+	upx_plugin->log("Original header found at address 0x", std::hex, originalHeaderOffset, std::dec, " in extra data.");
 
 	// Extra data starts right after original PE header
 	std::uint32_t upxExtraDataOffset = originalHeaderOffset + sectionHeadersEnd;
@@ -587,7 +587,7 @@ template <int bits> UpxExtraData PeUpxStub<bits>::parseExtraData(retdec::unpacke
 	{
 		extraData.setImportsOffset(unpackedData.read<std::uint32_t>(upxExtraDataOffset));
 		upxExtraDataOffset += 8;
-		this_plugin()->log("Import hints address 0x", std::hex, extraData.getImportsOffset(), std::dec, " found in extra data.");
+		upx_plugin->log("Import hints address 0x", std::hex, extraData.getImportsOffset(), std::dec, " found in extra data.");
 	}
 
 	// If RVA in relocations directory is set (relocs RVA and size must be non-zero and RELOCS_STRIPPED flag cannot be set)
@@ -600,7 +600,7 @@ template <int bits> UpxExtraData PeUpxStub<bits>::parseExtraData(retdec::unpacke
 		extraData.setRelocationsOffset(unpackedData.read<std::uint32_t>(upxExtraDataOffset));
 		extraData.setRelocationsBigEndian(unpackedData.read<std::uint8_t>(upxExtraDataOffset + 4));
 		upxExtraDataOffset += 5;
-		this_plugin()->log("Relocations hints address 0x", std::hex, extraData.getRelocationsOffset(), std::dec, " found in extra data.");
+		upx_plugin->log("Relocations hints address 0x", std::hex, extraData.getRelocationsOffset(), std::dec, " found in extra data.");
 	}
 
 	return extraData;
@@ -800,7 +800,7 @@ template <int bits> void PeUpxStub<bits>::fixTls(const DynamicBuffer& originalHe
 	if (tlsRva >= _newPeFile->peHeader().getSizeOfImage())
 		throw InvalidDataDirectoryException("TLS");
 
-	this_plugin()->log("Original TLS directory found at RVA 0x", std::hex, tlsRva, " with size 0x", tlsSize, std::dec, ".");
+	upx_plugin->log("Original TLS directory found at RVA 0x", std::hex, tlsRva, " with size 0x", tlsSize, std::dec, ".");
 }
 
 /**
@@ -816,7 +816,7 @@ template <int bits> void PeUpxStub<bits>::fixOep(const DynamicBuffer& originalHe
 	_newPeFile->peHeader().setAddressOfEntryPoint(originalHeader.read<std::uint32_t>(0x28));
 	_newPeFile->peHeader().makeValid(_newPeFile->mzHeader().size());
 
-	this_plugin()->log("Original entry point address set to 0x", std::hex, _newPeFile->peHeader().getAddressOfEntryPoint(), std::dec, ".");
+	upx_plugin->log("Original entry point address set to 0x", std::hex, _newPeFile->peHeader().getAddressOfEntryPoint(), std::dec, ".");
 }
 
 /**
@@ -852,7 +852,7 @@ template <int bits> void PeUpxStub<bits>::fixExports(const retdec::unpacker::Dyn
 	if (exportsRva >= _newPeFile->peHeader().getSizeOfImage())
 		throw InvalidDataDirectoryException("Exports");
 
-	this_plugin()->log("Original exports directory found at RVA 0x", std::hex, exportsRva, " with size 0x", exportsSize, std::dec, ".");
+	upx_plugin->log("Original exports directory found at RVA 0x", std::hex, exportsRva, " with size 0x", exportsSize, std::dec, ".");
 
 	// Calculate the offset of exports in UPX2 section
 	std::uint32_t exportsVa = _newPeFile->peHeader().rvaToVa(oldExportsRva);
@@ -938,7 +938,7 @@ template <int bits> void PeUpxStub<bits>::fixLoadConfiguration(const DynamicBuff
 	if (loadConfigRva >= _newPeFile->peHeader().getSizeOfImage())
 		throw InvalidDataDirectoryException("Load configuration");
 
-	this_plugin()->log("Original load configuration directory found at RVA 0x", std::hex, loadConfigRva, " with size 0x", loadConfigSize, std::dec, ".");
+	upx_plugin->log("Original load configuration directory found at RVA 0x", std::hex, loadConfigRva, " with size 0x", loadConfigSize, std::dec, ".");
 }
 
 /**
@@ -973,7 +973,7 @@ template <int bits> void PeUpxStub<bits>::fixResources(const DynamicBuffer& unpa
 	if (compressedRsrcRva >= _newPeFile->peHeader().getSizeOfImage())
 		throw InvalidDataDirectoryException("Resources");
 
-	this_plugin()->log("Original resources directory found at RVA 0x", std::hex, compressedRsrcRva, " with size 0x", compressedRsrcSize, std::dec, ".");
+	upx_plugin->log("Original resources directory found at RVA 0x", std::hex, compressedRsrcRva, " with size 0x", compressedRsrcSize, std::dec, ".");
 
 	unsigned long long imageBase = _file->getBaseAddress();
 
@@ -1092,7 +1092,7 @@ template <int bits> void PeUpxStub<bits>::fixCoffSymbolTable()
 	// MinGW files use COFF symbols even though it shouldn't be used for EXEs
 	if (_newPeFile->peHeader().getPointerToSymbolTable() > 0) // Check whether COFF symbol table exists
 	{
-		this_plugin()->log("Detected COFF symbol table. Packed file may contain DWARF debug info.");
+		upx_plugin->log("Detected COFF symbol table. Packed file may contain DWARF debug info.");
 
 		// Calculate the starting offset of COFF symbols by calculating raw sizes of all sections in packed file
 		std::uint32_t totalSectionSize = _file->getSegment(0)->getSecSeg()->getOffset();
@@ -1114,7 +1114,7 @@ template <int bits> void PeUpxStub<bits>::fixCoffSymbolTable()
 			_newPeFile->peHeader().setPointerToSymbolTable(newSymbolTablePointer);
 		}
 		else
-			this_plugin()->log("Packed file seems to be truncated. Not copying DWARF debug info.");
+			upx_plugin->log("Packed file seems to be truncated. Not copying DWARF debug info.");
 	}
 }
 
@@ -1134,7 +1134,7 @@ template <int bits> void PeUpxStub<bits>::fixCertificates()
 	if (securityOffset == 0)
 		return;
 
-	this_plugin()->log("Original certificates directory found at offset 0x", std::hex, securityOffset, " with size 0x", securitySize, std::dec, ".");
+	upx_plugin->log("Original certificates directory found at offset 0x", std::hex, securityOffset, " with size 0x", securitySize, std::dec, ".");
 
 	// Calculate the offset of certificates in the overlay because certificates does not always begin
 	//   at the start of overlay.
@@ -1235,7 +1235,7 @@ template <int bits> void PeUpxStub<bits>::saveFile(const std::string& outputFile
 		std::uint32_t overlaySize = static_cast<std::uint32_t>(_file->getFileFormat()->getLoadedFileLength() - _file->getFileFormat()->getDeclaredFileLength());
 		std::vector<std::uint8_t> overlay(overlaySize);
 
-		this_plugin()->log("Packed file has overlay with size of 0x", std::hex, overlaySize, std::dec, " bytes. Copying into unpacked file.");
+		upx_plugin->log("Packed file has overlay with size of 0x", std::hex, overlaySize, std::dec, " bytes. Copying into unpacked file.");
 
 		std::fstream inputFileHandle(_file->getFileFormat()->getPathToFile(), std::ios::binary | std::ios::in);
 		retdec::utils::readFile(inputFileHandle, overlay, _file->getFileFormat()->getDeclaredFileLength(), overlaySize);

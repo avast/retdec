@@ -9,67 +9,18 @@
 
 #include <cctype>
 #include <map>
+#include <memory>
 #include <string>
 #include <vector>
 
-#include "retdec/utils/os.h"
-#include "singleton.h"
-
 namespace retdec {
 namespace unpackertool {
-
-#ifdef OS_WINDOWS
-#define PLUGIN_SUFFIX           "dll"
-#define PLUGIN_SUFFIX_LEN       3
-#else
-#define PLUGIN_SUFFIX           "so"
-#define PLUGIN_SUFFIX_LEN       2
-#endif
 
 #define WILDCARD_ALL_VERSIONS   ""
 
 class Plugin;
 
-/**
- * @brief Case-insensitive string comparison.
- *
- * The structure for case-insensitive string comparison.
- */
-struct IcaseStringCompare
-{
-	/**
-	 * Functor used as compare function.
-	 *
-	 * @param lhs Left-hand side of compare.
-	 * @param rhs Right-hand side of compare.
-	 *
-	 * @return True if the strings are case-insensitivelly equal, otherwise false.
-	 */
-	bool operator ()(const std::string& lhs, const std::string& rhs) const
-	{
-		if (lhs.length() < rhs.length())
-			return true;
-		else if (lhs.length() > rhs.length())
-			return false;
-		else
-		{
-			for (size_t i = 0; i < lhs.length(); ++i)
-			{
-				// Cast to unsigned char required because of MSVC assert
-				const unsigned char lc = lhs[i];
-				const unsigned char rc = rhs[i];
-				if (std::tolower(lc) != std::tolower(rc))
-					return std::tolower(lc) < std::tolower(rc);
-			}
-		}
-
-		return false;
-	}
-};
-
 using PluginList = std::vector<Plugin*>; ///< Type for list of plugins.
-using PluginTable = std::map<std::string, PluginList, IcaseStringCompare>; ///< Mapping of case-insensitive packer name to list of plugins.
-using CreatePluginFunc = Plugin* (*)(); ///< Type for plugin registration function.
 
 /**
  * @brief The manager of unpacking plugins.
@@ -85,24 +36,16 @@ using CreatePluginFunc = Plugin* (*)(); ///< Type for plugin registration functi
  */
 class PluginMgr
 {
-	IS_SINGLETON(PluginMgr)
 public:
-	~PluginMgr();
+	PluginMgr(const PluginMgr&) = delete;
 
-	bool loadPlugin(const std::string& path);
-	void loadPlugins(const std::string& dirPath);
+	static const PluginList plugins;
 
-	const PluginTable& plugins() const;
-	PluginList matchingPlugins(const std::string& packerName, const std::string& packerVersion) const;
+	static PluginList matchingPlugins(const std::string& packerName, const std::string& packerVersion);
 
 private:
-	PluginMgr();
-	PluginMgr(const PluginMgr&);
-	PluginMgr& operator =(const PluginMgr&);
-
-	PluginTable _plugins; ///< Table of registered plugins.
+	PluginMgr() = default;
 };
-#define sPluginMgr      Singleton<PluginMgr>::instance()
 
 } // namespace unpackertool
 } // namespace retdec

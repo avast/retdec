@@ -277,7 +277,7 @@ std::shared_ptr<UpxStub> UpxStub::_createStubImpl(retdec::loader::Image* file, c
 	else if (metadata.isDefined())
 		detectionBasedOn = "metadata";
 
-	this_plugin()->log("Detected ", compressionName, " unpacking stub based on ", detectionBasedOn, ".");
+	upx_plugin->log("Detected ", compressionName, " unpacking stub based on ", detectionBasedOn, ".");
 
 	UpxStub* stub = nullptr;
 	switch (file->getFileFormat()->getFileFormat())

@@ -8,38 +8,16 @@
 #define RETDEC_UNPACKER_PLUGIN_H
 
 #include <iostream>
+#include <memory>
 #include <sstream>
 #include <string>
 
-#include "retdec/unpacker/lib_loader.h"
 #include "retdec/unpacker/unpacker_exception.h"
+
+#define plugin(T) retdec::unpackertool::Plugin::instance<T>()
 
 namespace retdec {
 namespace unpackertool {
-
-#ifdef _MSC_VER
-#define REGISTER_PLUGIN_EXPORT_SPEC    __declspec(dllexport)
-#else
-#define REGISTER_PLUGIN_EXPORT_SPEC
-#endif
-
-#define EXPAND(id)                     #id
-#define MAKE_STRING(id)                EXPAND(id)
-
-#define REGISTER_PLUGIN_FUNCTION_ID    registerPlugin
-#define REGISTER_PLUGIN_FUNCTION_NAME  MAKE_STRING(REGISTER_PLUGIN_FUNCTION_ID)
-#define REGISTER_PLUGIN(PluginType) \
-	Plugin* _plugin = nullptr; \
-	extern "C" REGISTER_PLUGIN_EXPORT_SPEC Plugin* REGISTER_PLUGIN_FUNCTION_ID() { \
-		if (_plugin != nullptr) return _plugin; \
-		_plugin = new PluginType(); \
-		return _plugin; \
-	}
-#define MAKE_PLUGIN_SHARED(PluginType) \
-	extern "C" REGISTER_PLUGIN_EXPORT_SPEC Plugin* REGISTER_PLUGIN_FUNCTION_ID(); \
-	static inline PluginType* this_plugin() { \
-		return static_cast<PluginType*>(REGISTER_PLUGIN_FUNCTION_ID()); \
-	}
 
 /**
  * Exit code of the plugin from Plugin::unpack method.
@@ -61,15 +39,10 @@ enum PluginExitCode
  * 1. Create new folder for your plugin in unpackertool/plugins/ and add 'add_subdirectory(YOUR_PLUGIN)' into unpackertool/plugins/CMakeLists.txt.
  * 2. Create CMakeLists.txt in your new folder based on the template in unpackertool/plugins/example/ and uncomment install target.
  * 3. Subclass Plugin class while
- *      - Providing all data in init() method to info attribute (see @ref Plugin::Info).
+ *      - Providing all data constructor to info attribute (see @ref Plugin::Info).
  *      - Providing implementation of Plugin::prepare method.
  *      - Providing implementation of Plugin::unpack method.
  *      - Providing implementation of Plugin::cleanup method.
- * 4. Put macro REGISTER_PLUGIN(YOUR_PLUGIN_CLASS) below your Plugin class declaration.
- *      - In case your Plugin class declaration & definition are separated (*.cpp & *.h file), you have to put it into *.cpp file
- *      - In case you want to access your Plugin object from different parts of the code in your plugin, you have to separate your declaration & defintion
- *           and put MAKE_PLUGIN_SHARED(YOUR_PLUGIN_CLASS) into *.h file below your declaration. You can then use inlined function @c this_plugin()
- *           which is provided by the used macro.
  */
 class Plugin
 {
@@ -173,11 +146,6 @@ public:
 	}
 
 	/**
-	 * Pure virtual method that performs initialization of plugin after it is created.
-	 */
-	virtual void init() = 0;
-
-	/**
 	 * Pure virtual method that performs preparation of unpacking.
 	 */
 	virtual void prepare() = 0;
@@ -191,26 +159,6 @@ public:
 	 * Pure virtual method that performs freeing of all owned resources.
 	 */
 	virtual void cleanup() = 0;
-
-	/**
-	 * Gets the library handle.
-	 *
-	 * @return The loaded library handle.
-	 */
-	LibHandle getHandle()
-	{
-		return _libHandle;
-	}
-
-	/**
-	 * Sets the library handle.
-	 *
-	 * @param handle Handle of the loaded library.
-	 */
-	void setHandle(LibHandle handle)
-	{
-		_libHandle = handle;
-	}
 
 	/**
 	 * Prints the message on the standard output prepending the message with '[PLUGIN-NAME]'.
@@ -238,6 +186,19 @@ public:
 		Plugin::logImpl(std::cerr, "[ERROR] [", getInfo()->name, "] ", args...);
 	}
 
+	/**
+	 * Returns the instance of specific type of plugin. This should be the only way
+	 * how plugin instances are obtained.
+	 *
+	 * @return Plugin instance.
+	 */
+	template <typename T>
+	static T* instance()
+	{
+		static std::unique_ptr<T> pluginInstance = std::make_unique<T>();
+		return pluginInstance.get();
+	}
+
 protected:
 	Plugin() : _cachedExitCode(PLUGIN_EXIT_UNPACKED) {}
 	Plugin(const Plugin&);
@@ -247,7 +208,6 @@ protected:
 	Plugin::Arguments startupArgs; ///< Startup arguments of the plugin.
 
 private:
-	LibHandle _libHandle; ///< Handle of the library that represents this plugin.
 	PluginExitCode _cachedExitCode; ///< Cached exit code of the plugin for the unpacked file.
 
 	template <typename T, typename... Args> static void logImpl(std::ostream& out, const T& data, const Args&... args)
