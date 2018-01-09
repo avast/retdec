@@ -40,7 +40,7 @@ BIN2LLVMIR_VOLATILIZED_PASSES="-volatilize -instcombine -reassociate -volatilize
 # parameters beginning with -disable-* may be included only once, which is the
 # reason of splitting $BIN2LLVMIR_PARAMS into several parts.
 #
-# -unreachable-funcs is automatically removed in decompile.sh when the
+# -unreachable-funcs is automatically removed in decompilation script when the
 # -k/--keep-unreachable-funcs parameter is used.
 #
 # - We need to run -instcombine after -dead-global-assign to eliminate dead
@@ -64,10 +64,10 @@ BIN2PAT="$INSTALL_BIN_DIR/retdec-bin2pat"
 PAT2YARA="$INSTALL_BIN_DIR/retdec-pat2yara"
 CONFIGTOOL="$INSTALL_BIN_DIR/retdec-config"
 EXTRACT="$INSTALL_BIN_DIR/retdec-macho-extractor"
-DECOMPILE_SH="$INSTALL_BIN_DIR/retdec-decompile.sh"
-DECOMPILE_ARCHIVE_SH="$INSTALL_BIN_DIR/retdec-decompile-archive.sh"
-SIG_FROM_LIB_SH="$INSTALL_BIN_DIR/retdec-signature-from-library.sh"
-UNPACK_SH="$INSTALL_BIN_DIR/retdec-unpack.sh"
+DECOMPILE_SH="$INSTALL_BIN_DIR/retdec-decompiler.sh"
+DECOMPILE_ARCHIVE_SH="$INSTALL_BIN_DIR/retdec-archive-decompiler.sh"
+SIG_FROM_LIB_SH="$INSTALL_BIN_DIR/retdec-signature-from-library-creator.sh"
+UNPACK_SH="$INSTALL_BIN_DIR/retdec-unpacker.sh"
 LLVMIR2HLL="$INSTALL_BIN_DIR/retdec-llvmir2hll"
 BIN2LLVMIR="$INSTALL_BIN_DIR/retdec-bin2llvmir"
 IDA_COLORIZER="$INSTALL_BIN_DIR/retdec-color-c.py"

@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Runs decompile.sh with the given arguments over all files in the
+# Runs the decompilation script with the given arguments over all files in the
 # given static library.
 #
 # Requirements:
@@ -30,13 +30,13 @@ done
 ##
 ## Configuration.
 ##
-TIMEOUT=300 # Timeout for decompile.sh script.
+TIMEOUT=300 # Timeout for the decompilation script.
 
 ##
 ## Prints help to stream $1.
 ##
 print_help() {
-	echo "Runs decompile.sh with the given optional arguments over all files" > "$1"
+	echo "Runs the decompilation script with the given optional arguments over all files" > "$1"
 	echo "in the given static library or prints list of files in plain text" > "$1"
 	echo "with --plain argument or in JSON format with --json argument. You" > "$1"
 	echo "can pass arguments for decompilation after double-dash '--' argument." > "$1"
@@ -161,9 +161,9 @@ if [ "$LIST_MODE" ]; then
 fi
 
 ##
-## Run decompile.sh over all the found files.
+## Run the decompilation script over all the found files.
 ##
-echo -n "Running \`decompile-sh"
+echo -n "Running \`$DECOMPILE_SH"
 if [ "$DECOMPILE_SH_ARGS" != "" ]; then
 	echo -n "$DECOMPILE_SH_ARGS"
 fi

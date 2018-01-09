@@ -10,7 +10,7 @@
 #
 # Optional arguments:
 #    * desired name of unpacked file
-#    * use extended exit codes (mostly while executed via decompile.sh)
+#    * use extended exit codes
 #
 # Returns:
 #  0 successfully unpacked

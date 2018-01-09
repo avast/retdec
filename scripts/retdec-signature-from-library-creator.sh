@@ -13,7 +13,7 @@ fi
 ##
 print_help() {
 	echo -e "Create Yara rules file from static libraries." > "$1"
-	echo -e "Usage: signature-from-library.sh [OPTIONS] -o OUTPUT INPUT_1 [... INPUT_N]\n" > "$1"
+	echo -e "Usage: $0 [OPTIONS] -o OUTPUT INPUT_1 [... INPUT_N]\n" > "$1"
 	echo "Options:" > "$1"
 	echo "    -n --no-cleanup" > "$1"
 	echo "        Temporary .pat files will be kept." > "$1"
