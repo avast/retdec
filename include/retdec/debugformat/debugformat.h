@@ -47,7 +47,7 @@ class DebugFormat
 		void loadPdbTypes();
 		void loadPdbGlobalVariables();
 		void loadPdbFunctions();
-		retdec::config::Type loadPdbType(pdbparser::PDBTypeDef* type);
+		retdec::config::Type loadPdbType(retdec::pdbparser::PDBTypeDef* type);
 
 		void loadDwarf();
 		void loadDwarfTypes();
@@ -65,7 +65,7 @@ class DebugFormat
 		/// Underlying binary file representation.
 		retdec::loader::Image* _inFile = nullptr;
 		/// Underlying PDB representation.
-		pdbparser::PDBFile* _pdbFile = nullptr;
+		retdec::pdbparser::PDBFile* _pdbFile = nullptr;
 		/// Underlying DWARF representation.
 		retdec::dwarfparser::DwarfFile* _dwarfFile = nullptr;
 		/// Demangler.

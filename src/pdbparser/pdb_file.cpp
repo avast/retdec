@@ -12,8 +12,8 @@
 
 using namespace std;
 
-namespace pdbparser
-{
+namespace retdec {
+namespace pdbparser {
 
 // =================================================================
 // PUBLIC METHODS
@@ -528,3 +528,4 @@ void PDBFile::parse_sections(int image_base)
 }
 
 } // namespace pdbparser
+} // namespace retdec

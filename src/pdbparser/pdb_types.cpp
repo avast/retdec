@@ -16,6 +16,7 @@
 
 using namespace std;
 
+namespace retdec {
 namespace pdbparser {
 
 // =================================================================
@@ -1287,4 +1288,5 @@ PDBTypes::~PDBTypes(void)
 	}
 }
 
-}  // namespace pdbparser
+} // namespace pdbparser
+} // namespace retdec

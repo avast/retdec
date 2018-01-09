@@ -10,6 +10,7 @@
 #include "retdec/pdbparser/pdb_info.h"
 #include "retdec/pdbparser/pdb_utils.h"
 
+namespace retdec {
 namespace pdbparser {
 
 PDB_PBYTE RecordValue(PDB_PBYTE pbData, PDB_PDWORD pdValue)
@@ -91,4 +92,5 @@ void print_bytes(PDB_BYTE *data, int len)
 	}
 }
 
-}  // namespace pdbparser
+} // namespace pdbparser
+} // namespace retdec

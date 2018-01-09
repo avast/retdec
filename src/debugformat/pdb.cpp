@@ -78,7 +78,7 @@ void DebugFormat::loadPdbFunctions()
 		if (f.second == nullptr)
 			continue;
 
-		pdbparser::PDBFunction *pfnc = f.second;
+		retdec::pdbparser::PDBFunction *pfnc = f.second;
 
 		retdec::config::Function fnc(pfnc->getNameWithOverloadIndex());
 
@@ -106,13 +106,13 @@ void DebugFormat::loadPdbFunctions()
 		for (auto& a : pfnc->arguments)
 		{
 			retdec::config::Storage storage;
-			if (a.location == pdbparser::PDBLVLOC_REGISTER) // in register
+			if (a.location == retdec::pdbparser::PDBLVLOC_REGISTER) // in register
 			{
 				storage = retdec::config::Storage::inRegister(a.register_num);
 			}
 			else // in register-relative stack
 			{
-				auto num = a.location == pdbparser::PDBLVLOC_BPREL32 ? 22 /*CV_REG_EBP*/ : a.register_num;
+				auto num = a.location == retdec::pdbparser::PDBLVLOC_BPREL32 ? 22 /*CV_REG_EBP*/ : a.register_num;
 				storage = retdec::config::Storage::onStack(a.offset, num);
 			}
 
@@ -133,13 +133,13 @@ void DebugFormat::loadPdbFunctions()
 			}
 
 			retdec::config::Storage storage;
-			if (lv.location == pdbparser::PDBLVLOC_REGISTER) // in register
+			if (lv.location == retdec::pdbparser::PDBLVLOC_REGISTER) // in register
 			{
 				storage = retdec::config::Storage::inRegister(lv.register_num);
 			}
 			else  // in register-relative stack
 			{
-				auto num = lv.location == pdbparser::PDBLVLOC_BPREL32 ? 22 /*CV_REG_EBP*/ : lv.register_num;
+				auto num = lv.location == retdec::pdbparser::PDBLVLOC_BPREL32 ? 22 /*CV_REG_EBP*/ : lv.register_num;
 				storage = retdec::config::Storage::onStack(lv.offset, num);
 			}
 
@@ -158,7 +158,7 @@ void DebugFormat::loadPdbFunctions()
  * @param type PDB type.
  * @return Common type representation.
  */
-retdec::config::Type DebugFormat::loadPdbType(pdbparser::PDBTypeDef* type)
+retdec::config::Type DebugFormat::loadPdbType(retdec::pdbparser::PDBTypeDef* type)
 {
 	if (type == nullptr)
 	{

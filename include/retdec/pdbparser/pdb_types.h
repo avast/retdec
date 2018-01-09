@@ -12,6 +12,7 @@
 #include "retdec/pdbparser/pdb_info.h"
 #include "retdec/pdbparser/pdb_utils.h"
 
+namespace retdec {
 namespace pdbparser {
 
 // PDB type definition
@@ -634,6 +635,7 @@ class PDBTypes
 		PDBTypeDefNameMap types_byname;  // Map of fully defined types (key is type name)
 };
 
-}  // namespace pdbparser
+} // namespace pdbparser
+} // namespace retdec
 
 #endif

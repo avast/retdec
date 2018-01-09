@@ -13,6 +13,7 @@
 
 using namespace std;
 
+namespace retdec {
 namespace pdbparser {
 
 // =================================================================
@@ -847,4 +848,5 @@ void PDBSymbols::dump_symbol(PSYM Sym)
 	puts("");
 }
 
-}  // namespace pdbparser
+} // namespace pdbparser
+} // namespace retdec

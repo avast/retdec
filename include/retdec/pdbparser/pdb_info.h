@@ -9,6 +9,7 @@
 
 #include "retdec/pdbparser/pdb_utils.h"
 
+namespace retdec {
 namespace pdbparser {
 
 // pdb_info.h
@@ -3804,5 +3805,6 @@ typedef struct _LineInfoHeader
 // =================================================================
 
 } // namespace pdbparser
+} // namespace retdec
 
 #endif

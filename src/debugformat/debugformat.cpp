@@ -38,11 +38,11 @@ DebugFormat::DebugFormat(
 		_inFile(inFile),
 		_demangler(demangler)
 {
-	_pdbFile = new pdbparser::PDBFile();
+	_pdbFile = new retdec::pdbparser::PDBFile();
 	auto s = _pdbFile->load_pdb_file(pdbFile.c_str());
 	_dwarfFile = new retdec::dwarfparser::DwarfFile(_inFile->getFileFormat()->getPathToFile(), _inFile->getFileFormat());
 
-	if (s == pdbparser::PDB_STATE_OK)
+	if (s == retdec::pdbparser::PDB_STATE_OK)
 	{
 		LOG << "\n*** DebugFormat::DebugFormat(): PDB" << std::endl;
 		_pdbFile->initialize(imageBase);

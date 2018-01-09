@@ -11,6 +11,7 @@
 #include <string>
 #include <vector>
 
+namespace retdec {
 namespace pdbparser {
 
 // =================================================================
@@ -147,6 +148,7 @@ PDB_PBYTE RecordValue(PDB_PBYTE pbData, PDB_PDWORD pdValue);  // Get numeric val
 void print_dwords(PDB_DWORD *data, int len);  // Print list of dwords (hexadecomally)
 void print_bytes(PDB_BYTE *data, int len);  // Print list of bytes (hexadecomally)
 
-}  // namespace pdbparser
+} // namespace pdbparser
+} // namespace retdec
 
 #endif

@@ -12,6 +12,7 @@
 #include "retdec/pdbparser/pdb_types.h"
 #include "retdec/pdbparser/pdb_utils.h"
 
+namespace retdec {
 namespace pdbparser {
 
 // =================================================================
@@ -233,6 +234,7 @@ class PDBFile
 
 };
 
-}  // namespace pdbparser
+} // namespace pdbparser
+} // namespace retdec
 
 #endif
