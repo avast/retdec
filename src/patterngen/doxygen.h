@@ -7,4 +7,4 @@
 // As there is no better place to comment this namespace, we do this in the
 // present file.
 
-/// @namespace fnc_patterns::patterngenl A library for generating yara pattern files.
+/// @namespace retdec::patterngenl A library for generating yara pattern files.

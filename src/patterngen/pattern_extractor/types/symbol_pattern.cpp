@@ -18,7 +18,6 @@ using namespace retdec::utils;
 using namespace yaramod;
 
 namespace retdec {
-namespace fnc_patterns {
 namespace patterngen {
 
 /**
@@ -294,5 +293,4 @@ void SymbolPattern::addRuleToBuilder(
 }
 
 } // namespace patterngen
-} // namespace fnc_patterns
 } // namespace retdec

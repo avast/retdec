@@ -23,7 +23,6 @@ namespace fileformat {
 } // namespace retdec
 
 namespace retdec {
-namespace fnc_patterns {
 namespace patterngen {
 
 /**
@@ -88,7 +87,6 @@ class PatternExtractor
 };
 
 } // namespace patterngen
-} // namespace fnc_patterns
 } // namespace retdec
 
 #endif

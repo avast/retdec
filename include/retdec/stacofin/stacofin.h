@@ -18,7 +18,6 @@ namespace loader {
 	class Image;
 } // namespace loader
 
-namespace fnc_patterns {
 namespace stacofin {
 
 /**
@@ -83,7 +82,6 @@ class Finder
 };
 
 } // namespace stacofin
-} // namespace fnc_patterns
 } // namespace retdec
 
 #endif

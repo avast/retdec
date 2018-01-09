@@ -44,7 +44,6 @@ bool isPic32Label(
 }
 
 namespace retdec {
-namespace fnc_patterns {
 namespace patterngen {
 
 /**
@@ -599,5 +598,4 @@ void PatternExtractor::addRulesToBuilder(
 }
 
 } // namespace patterngen
-} // namespace fnc_patterns
 } // namespace retdec

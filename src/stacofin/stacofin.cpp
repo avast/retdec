@@ -18,7 +18,6 @@ using namespace yaracpp;
 using namespace retdec::loader;
 
 namespace retdec {
-namespace fnc_patterns {
 namespace stacofin {
 
 
@@ -200,5 +199,4 @@ void Finder::sort()
 }
 
 } // namespace stacofin
-} // namespace fnc_patterns
 } // namespace retdec

@@ -19,7 +19,6 @@ namespace yaramod {
 } // namespace yaramod
 
 namespace retdec {
-namespace fnc_patterns {
 namespace patterngen {
 
 using Meta = std::pair<std::string, std::string>;
@@ -92,7 +91,6 @@ class SymbolPattern
 };
 
 } // namespace patterngen
-} // namespace fnc_patterns
 } // namespace retdec
 
 #endif
