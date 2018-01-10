@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.6)
 
 include(ExternalProject)
 
-set(LIBDWARF_INSTALL_DIR "${PROJECT_BINARY_DIR}/external/libdwarf-project-install")
+set(LIBDWARF_INSTALL_DIR "${PROJECT_BINARY_DIR}/external/src/libdwarf-project-install")
 
 ExternalProject_Add(libdwarf-project
 	URL https://github.com/avast-tl/libdwarf/archive/bb920ecb8b6172359b4d57955a2670194d1f1f43.zip
