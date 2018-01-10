@@ -6,10 +6,6 @@ cmake_minimum_required(VERSION 3.6)
 
 project(LLVM CXX C)
 
-if(TARGET llvm-project)
-	return()
-endif()
-
 find_package(Threads REQUIRED)
 if(UNIX)
 	find_package(ZLIB REQUIRED)
