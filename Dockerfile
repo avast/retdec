@@ -29,7 +29,7 @@ RUN apt-get -y update && \
 	libtool
 
 USER retdec
-RUN git clone --recursive https://github.com/avast-tl/retdec && \
+RUN git clone https://github.com/avast-tl/retdec && \
 	cd retdec && \
 	mkdir build && \
 	cd build && \

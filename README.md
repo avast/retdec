@@ -161,8 +161,8 @@ Packages should be preferably installed via [Homebrew](https://brew.sh).
 
 **Warning: Currently, RetDec has to be installed into a clean, dedicated directory. Do NOT install it into `/usr`, `/usr/local`, etc. because our build system is not yet ready for system-wide installations. So, when running `cmake`, always set `-DCMAKE_INSTALL_PREFIX=<path>` to a directory that will be used just by RetDec. For more details, see [#12](https://github.com/avast-tl/retdec/issues/12).**
 
-* Recursively clone the repository (it contains submodules):
-  * `git clone --recursive https://github.com/avast-tl/retdec`
+* Clone the repository:
+  * `git clone https://github.com/avast-tl/retdec`
 * Linux:
   * `cd retdec`
   * `mkdir build && cd build`
@@ -194,7 +194,7 @@ You have to pass the following parameters to `cmake`:
 
 You can pass the following additional parameters to `cmake`:
 * `-DRETDEC_DOC=ON` to build with API documentation (requires Doxygen and Graphviz, disabled by default).
-* `-DRETDEC_TESTS=ON` to build with tests, including all the tests in dependency submodules (disabled by default).
+* `-DRETDEC_TESTS=ON` to build with tests (disabled by default).
 * `-DCMAKE_BUILD_TYPE=Debug` to build with debugging information, which is useful during development. By default, the project is built in the `Release` mode. This has no effect on Windows, but the same thing can be achieved by running `msbuild` with the `/p:Configuration=Debug` parameter.
 * `-DCMAKE_PROGRAM_PATH=<path>` to use Perl at `<path>` (probably useful only on Windows).
 
@@ -213,12 +213,7 @@ docker build -t retdec .
 
 This builds the container from the master branch of this repository.
 
-To build the container using the local copy of the repository, fully clone the repository:
-```
-git submodule update --init --recursive
-```
-
-Then, build the container using the development Dockerfile, `Dockerfile.dev`:
+To build the container using the local copy of the repository, use the development Dockerfile, `Dockerfile.dev`:
 ```
 docker build -t retdec:dev . -f Dockerfile.dev
 ```
