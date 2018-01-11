@@ -25,12 +25,11 @@ using PluginList = std::vector<Plugin*>; ///< Type for list of plugins.
 /**
  * @brief The manager of unpacking plugins.
  *
- * PluginMgr is singleton representing the plugin manager.
- * It loads and register the plugin. It can also find the
+ * PluginMgr is static representing the plugin manager.
+ * It stores all active plugins. It can also find the
  * matching plugins for the specified plugin packer and version.
- * Plugins are stored in the table where packer name is
- * case-insensitively mapped to the list of plugins that is
- * capable of unpacking this packer. Every plugin contains the
+ * Packer name is case-insesitively matched against packer specified
+ * in metadata of the plugin. Every plugin aso contains the
  * regular expression matching the version of packers it is
  * able to unpack.
  */

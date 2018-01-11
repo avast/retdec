@@ -7,55 +7,49 @@
 #include "retdec/unpacker/plugin.h"
 #include "retdec/unpacker/unpacker_exception.h"
 
+#include "unpackertool/plugins/example/example.h"
+
 using namespace retdec::unpacker;
 
 namespace retdec {
 namespace unpackertool {
 namespace example {
 
-class ExamplePlugin : public Plugin
+ExamplePlugin::ExamplePlugin()
 {
-public:
-	ExamplePlugin() {}
+	info.name = "Example Unpacker";
+	info.pluginVersion = "1.0";
+	info.packerVersion = "Example Version";
+	info.author = "Example Author";
+}
 
-	virtual ~ExamplePlugin() override {}
+ExamplePlugin::~ExamplePlugin()
+{
+	cleanup();
+}
 
-	/**
-	 * Initialization of plugin providing @ref Plugin::Info data.
-	 */
-	virtual void init() override
-	{
-		info.name = "Example Unpacker";
-		info.pluginVersion = "1.0";
-		info.packerVersion = "Example Version";
-		info.author = "Example Author";
-	}
+/**
+ * Performs preparation of unpacking.
+ */
+void ExamplePlugin::prepare()
+{
+	throw UnsupportedInputException("This is just an example plugin.");
+}
 
-	/**
-	 * Performs preparation of unpacking.
-	 */
-	virtual void prepare() override
-	{
-		throw UnsupportedInputException("This is just an example plugin.");
-	}
+/**
+ * Performs unpacking of inputFile into outputFile.
+ */
+void ExamplePlugin::unpack()
+{
+	throw UnsupportedInputException("This is just an example plugin.");
+}
 
-	/**
-	 * Performs unpacking of inputFile into outputFile.
-	 */
-	virtual void unpack() override
-	{
-		throw UnsupportedInputException("This is just an example plugin.");
-	}
-
-	/**
-	 * Performs freeing of all owned resources.
-	 */
-	virtual void cleanup() override
-	{
-	}
-};
-
-REGISTER_PLUGIN(ExamplePlugin)
+/**
+ * Performs freeing of all owned resources.
+ */
+void ExamplePlugin::cleanup()
+{
+}
 
 } // namespace example
 } // namespace unpackertool

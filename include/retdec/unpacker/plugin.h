@@ -37,12 +37,13 @@ enum PluginExitCode
  * own folder. These steps need to be followed to create a new plugin:
  *
  * 1. Create new folder for your plugin in unpackertool/plugins/ and add 'add_subdirectory(YOUR_PLUGIN)' into unpackertool/plugins/CMakeLists.txt.
- * 2. Create CMakeLists.txt in your new folder based on the template in unpackertool/plugins/example/ and uncomment install target.
+ * 2. Create CMakeLists.txt in your new folder based on the template in unpackertool/plugins/example/.
  * 3. Subclass Plugin class while
- *      - Providing all data constructor to info attribute (see @ref Plugin::Info).
+ *      - Providing all data in constructor to info attribute (see @ref Plugin::Info).
  *      - Providing implementation of Plugin::prepare method.
  *      - Providing implementation of Plugin::unpack method.
  *      - Providing implementation of Plugin::cleanup method.
+ * 4. Put @c Plugin<YOUR_PLUGIN_CLASS>::instance() into @c PluginMgr::plugins in unpackertool/plugin_mgr.cpp.
  */
 class Plugin
 {
