@@ -12,7 +12,6 @@ SCRIPTPATH="$( cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P )"
 # Paths relative from script path.
 INSTALL_BIN_DIR="$SCRIPTPATH"
 UNIT_TESTS_DIR="$INSTALL_BIN_DIR"
-UNPACKER_PLUGINS_DIR="$INSTALL_BIN_DIR/unpacker-plugins"
 INSTALL_SHARE_DIR="$INSTALL_BIN_DIR/../share/retdec"
 INSTALL_SUPPORT_DIR="$INSTALL_SHARE_DIR/support"
 INSTALL_SHARE_YARA_DIR="$INSTALL_SUPPORT_DIR/generic/yara_patterns"

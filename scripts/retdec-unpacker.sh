@@ -94,9 +94,7 @@ try_to_unpack()
 	# 3 Error with preprocessing of input file before unpacking.
 	local UNPACKER_EXIT_CODE_PREPROCESSING_ERROR=3
 
-	UNPACKER_PARAMS=(-d "$UNPACKER_PLUGINS_DIR")
-	UNPACKER_PARAMS+=(-o "$OUT")
-	UNPACKER_PARAMS+=("$IN")
+	UNPACKER_PARAMS=("$IN" -o "$OUT")
 	echo ""
 	echo "##### Trying to unpack $IN into $OUT by using generic unpacker..."
 	echo "RUN: $UNPACKER ${UNPACKER_PARAMS[@]}"
