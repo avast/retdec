@@ -45,10 +45,10 @@ Currently, we support only Windows (7 or later), Linux, and unofficially macOS.
 3. Now, you are all set to run the decompiler. To decompile a binary file named `test.exe`, run
 
     ```sh
-    bash $RETDEC_INSTALL_DIR/bin/decompile.sh test.exe
+    bash $RETDEC_INSTALL_DIR/bin/retdec-decompiler.sh test.exe
     ```
 
-   For more information, run `decompile.sh` with `--help`.
+   For more information, run `retdec-decompiler.sh` with `--help`.
 
 ### Linux
 
@@ -64,10 +64,10 @@ Currently, we support only Windows (7 or later), Linux, and unofficially macOS.
 3. Now, you are all set to run the decompiler. To decompile a binary file named `test.exe`, run
 
     ```sh
-    $RETDEC_INSTALL_DIR/bin/decompile.sh test.exe
+    $RETDEC_INSTALL_DIR/bin/retdec-decompiler.sh test.exe
     ```
 
-   For more information, run `decompile.sh` with `--help`.
+   For more information, run `retdec-decompiler.sh` with `--help`.
 
 ### macOS
 
@@ -86,10 +86,10 @@ Currently, we support only Windows (7 or later), Linux, and unofficially macOS.
 
     ```
     # /usr/local/bin/bash if installed via Homebrew
-    /path/to/gnu/bash $RETDEC_INSTALL_DIR/bin/decompile.sh test.exe
+    /path/to/gnu/bash $RETDEC_INSTALL_DIR/bin/retdec-decompiler.sh test.exe
     ```
 
-   For more information, run `decompile.sh` with `--help`.
+   For more information, run `retdec-decompiler.sh` with `--help`.
 
 ## Build and Installation
 
@@ -242,7 +242,7 @@ docker commit retdec_init retdec:initialized
 
 Run the decompiler:
 ```
-docker run --name retdec retdec:initialized decompile.sh /destination/path/of/binary
+docker run --name retdec retdec:initialized retdec-decompiler.sh /destination/path/of/binary
 ```
 
 Copy output back to host:
@@ -264,8 +264,8 @@ This repository contains the following tools:
 * `llvm2hlltool` -- frontend for the `llvmir2hll` library.
 
 This repository contains the following scripts:
-* `decompile.sh` -- the main decompilation script binding it all together. This is the tool to use for full binary-to-C decompilations.
-* Support scripts used by `decompile.sh`:
+* `retdec-decompiler.sh` -- the main decompilation script binding it all together. This is the tool to use for full binary-to-C decompilations.
+* Support scripts used by `retdec-decompiler.sh`:
   * `color-c.py` -- decorates output C sources with IDA color tags -- syntax highlighting for IDA.
   * `config.sh` -- decompiler's configuration file.
   * `decompile-archive.sh` -- decompiles objects in the given AR archive.
