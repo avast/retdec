@@ -13,8 +13,8 @@ if(NOT PYTHON_EXECUTABLE)
 endif()
 
 ExternalProject_Add(keystone-project
-	GIT_REPOSITORY https://github.com/avast-tl/keystone.git
-	GIT_TAG retdec
+	URL https://github.com/avast-tl/keystone/archive/4722974f58dbe878c805ce2b7c0a41cf6153903c.zip
+	URL_HASH SHA256=145c8bb836d2f06f845b5015b3eab350ae59d35a54052f00f5d26445172415fd
 	CMAKE_ARGS
 		# This does not work on MSVC, but may be useful on Linux.
 		-DCMAKE_BUILD_TYPE=Release

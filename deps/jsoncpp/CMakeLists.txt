@@ -11,8 +11,8 @@ if(CMAKE_CXX_COMPILER)
 endif()
 
 ExternalProject_Add(jsoncpp-project
-	GIT_REPOSITORY https://github.com/open-source-parsers/jsoncpp.git
-	GIT_TAG 1.8.3
+	URL https://github.com/open-source-parsers/jsoncpp/archive/1.8.3.zip
+	URL_HASH SHA256=b0827daa3040522d76c7efac900128ff3e500c718150db177c56dd937e6e4882
 	CMAKE_ARGS
 		# This does not work on MSVC, but may be useful on Linux.
 		-DCMAKE_BUILD_TYPE=Release

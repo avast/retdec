@@ -4,8 +4,8 @@ cmake_minimum_required(VERSION 3.6)
 include(ExternalProject)
 
 ExternalProject_Add(yaracpp-project
-	GIT_REPOSITORY https://github.com/avast-tl/yaracpp.git
-	GIT_TAG v1.0
+	URL https://github.com/avast-tl/yaracpp/archive/d5f782b89bedf6c0a0aa6b23aac73a0b25b64c1d.zip
+	URL_HASH SHA256=e7eb322b1ab2e42850288c2887944c574899efc803587c150f2371723a98e791
 	CMAKE_ARGS
 		# This does not work on MSVC, but may be useful on Linux.
 		-DCMAKE_BUILD_TYPE=Release

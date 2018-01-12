@@ -8,8 +8,8 @@ find_package(BISON REQUIRED)
 include(ExternalProject)
 
 ExternalProject_Add(yaramod-project
-	GIT_REPOSITORY https://github.com/avast-tl/yaramod.git
-	GIT_TAG v1.0
+	URL https://github.com/avast-tl/yaramod/archive/79e8fcc9ef5778a52c2ddb021d71416c65bd2a47.zip
+	URL_HASH SHA256=d584077c10fab795defaf7567106644da294d483686408a2a095118065894a7c
 	CMAKE_ARGS
 		# This does not work on MSVC, but may be useful on Linux.
 		-DCMAKE_BUILD_TYPE=Release

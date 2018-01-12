@@ -4,8 +4,8 @@ cmake_minimum_required(VERSION 3.6)
 include(ExternalProject)
 
 ExternalProject_Add(elfio-project
-	GIT_REPOSITORY https://github.com/avast-tl/elfio
-	GIT_TAG v1.0
+	URL https://github.com/avast-tl/elfio/archive/1677a88d902d0fa6a5a7a31dc4da45748bba0bde.zip
+	URL_HASH SHA256=a446b2751b177bde6c5bff5a3716a978918daba6f4953aeef3850036cb43fde7
 	CMAKE_ARGS
 		# This does not work on MSVC, but may be useful on Linux.
 		-DCMAKE_BUILD_TYPE=Release

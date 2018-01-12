@@ -8,8 +8,8 @@ if(MSVC)
 endif()
 
 ExternalProject_Add(tinyxml2-project
-	GIT_REPOSITORY https://github.com/leethomason/tinyxml2.git
-	GIT_TAG 5.0.1
+	URL https://github.com/leethomason/tinyxml2/archive/5.0.1.zip
+	URL_HASH SHA256=f74379e9c3942f539f2236cf0e57edd11f8da684dc3000ded77304c18b1dad1d
 	CMAKE_ARGS
 		# This does not work on MSVC, but may be useful on Linux.
 		-DCMAKE_BUILD_TYPE=Release
