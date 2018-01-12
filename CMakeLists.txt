@@ -8,11 +8,12 @@ if (NOT CMAKE_BUILD_TYPE)
 	set(CMAKE_BUILD_TYPE "${default_build_type}" CACHE STRING "Choose the type of build." FORCE)
 endif()
 
-set(CMAKE_CXX_STANDARD 14)
-set(CMAKE_INSTALL_RPATH "$ORIGIN/../lib")
-
 option(RETDEC_DOC "Build public API documentation (requires Doxygen)." OFF)
 option(RETDEC_TESTS "Build tests." OFF)
+
+set(CMAKE_CXX_STANDARD 14)
+
+set(CMAKE_INSTALL_RPATH "$ORIGIN/../lib")
 
 # Build all external projects in the same directory that is directly inside the
 # build directory. This reduces path lengths, which is important on Windows as
