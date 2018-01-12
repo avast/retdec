@@ -1,7 +1,5 @@
 cmake_minimum_required(VERSION 3.6)
 
-project(LLVM CXX C)
-
 find_package(Threads REQUIRED)
 if(UNIX)
 	find_package(ZLIB REQUIRED)
