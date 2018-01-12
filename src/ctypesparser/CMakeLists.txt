@@ -1,4 +1,3 @@
-
 set(CTYPESPARSER_SOURCES
 	ctypes_parser.cpp
 	json_ctypes_parser.cpp

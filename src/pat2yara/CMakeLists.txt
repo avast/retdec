@@ -1,4 +1,3 @@
-
 set(PAT2YARA_SOURCES
 	compare.cpp
 	logic.cpp

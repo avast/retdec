@@ -1,4 +1,3 @@
-
 set(DEMANGLER_GRAMMAR_GEN_SOURCES
 	demangler_grammar_gen.cpp
 )

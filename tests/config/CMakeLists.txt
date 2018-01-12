@@ -1,4 +1,3 @@
-
 set(RETDEC_TESTS_CONFIG_SOURCES
 	base_tests.cpp
 	classes_tests.cpp

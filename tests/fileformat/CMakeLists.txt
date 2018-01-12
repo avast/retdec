@@ -1,4 +1,3 @@
-
 set(RETDEC_TESTS_FILEFORMAT_SOURCES
 	elf_format_tests.cpp
 	intel_hex_format_20bit_tests.cpp

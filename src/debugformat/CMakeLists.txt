@@ -1,4 +1,3 @@
-
 set(DEBUGFORMAT_SOURCES
 	debugformat.cpp
 	dwarf.cpp

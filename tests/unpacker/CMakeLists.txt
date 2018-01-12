@@ -1,4 +1,3 @@
-
 set(RETDEC_TESTS_UNPACKER_SOURCES
 	dynamic_buffer_tests.cpp
 	signature_tests.cpp

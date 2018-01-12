@@ -1,4 +1,3 @@
-
 set(DEMANGLER_SOURCES
 	demangler.cpp
 	demtools.cpp

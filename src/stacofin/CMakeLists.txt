@@ -1,4 +1,3 @@
-
 set(STACOFIN_SOURCES
 	stacofin.cpp
 )

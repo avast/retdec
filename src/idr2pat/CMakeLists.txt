@@ -1,4 +1,3 @@
-
 set(IDR2PAT_SOURCES
 	idr2pat.cpp
 )

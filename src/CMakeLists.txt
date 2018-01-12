@@ -1,4 +1,3 @@
-
 add_subdirectory(ar-extractor)
 add_subdirectory(ar-extractortool)
 add_subdirectory(bin2llvmir)

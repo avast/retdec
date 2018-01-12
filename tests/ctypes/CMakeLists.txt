@@ -1,4 +1,3 @@
-
 set(RETDEC_TESTS_CTYPES_SOURCES
 	annotation_in_tests.cpp
 	annotation_inout_tests.cpp

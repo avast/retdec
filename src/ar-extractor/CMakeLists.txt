@@ -1,4 +1,3 @@
-
 set(AR_EXTRACTOR_SOURCES
 	archive_wrapper.cpp
 	detection.cpp

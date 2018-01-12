@@ -1,4 +1,3 @@
-
 set(CAPSTONE2LLVMIRTOOL_SOURCES
 	capstone2llvmir.cpp
 )

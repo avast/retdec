@@ -1,4 +1,3 @@
-
 set(BIN2PAT_SOURCES
 	bin2pat.cpp
 )

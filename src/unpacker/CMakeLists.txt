@@ -1,4 +1,3 @@
-
 set(UNPACKER_SOURCES
 	decompression/lzma/lzma_data.cpp
 	decompression/nrv/nrv2d_data.cpp

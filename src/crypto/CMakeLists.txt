@@ -1,4 +1,3 @@
-
 set(CRYPTO_SOURCES
 	crc32.cpp
 	crypto.cpp

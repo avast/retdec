@@ -1,4 +1,3 @@
-
 set(UNPACKERTOOL_SOURCES
 	arg_handler.cpp
 	unpacker.cpp

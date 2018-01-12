@@ -1,4 +1,3 @@
-
 set(FILEINFO_SOURCES
 	file_detector/coff_detector.cpp
 	file_detector/detector_factory.cpp

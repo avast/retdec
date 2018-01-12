@@ -1,4 +1,3 @@
-
 set(MACHO_EXTRACTOR_SOURCES
 	macho_extractor.cpp
 )

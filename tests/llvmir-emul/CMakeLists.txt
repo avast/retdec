@@ -1,4 +1,3 @@
-
 set(RETDEC_TESTS_LLVMIR_EMUL_SOURCES
 	llvmir_emul_tests.cpp
 )

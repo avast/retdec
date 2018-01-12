@@ -1,4 +1,3 @@
-
 set(RETDEC_TESTS_UTILS_SOURCES
 	address_tests.cpp
 	alignment_tests.cpp

@@ -1,4 +1,3 @@
-
 set(RETDEC_TESTS_LOADER_SOURCES
 	name_generator_tests.cpp
 	overlap_resolver_tests.cpp

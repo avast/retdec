@@ -1,4 +1,3 @@
-
 set(PDBPARSER_SOURCES
 	pdb_file.cpp
 	pdb_symbols.cpp

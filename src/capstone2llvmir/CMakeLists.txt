@@ -1,4 +1,3 @@
-
 set(CAPSTONE2LLVMIR_SOURCES
 	arm/arm_init.cpp
 	arm/arm.cpp

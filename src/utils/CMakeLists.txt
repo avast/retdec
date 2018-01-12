@@ -1,4 +1,3 @@
-
 set(RETDEC_UTILS_SOURCES
 	address.cpp
 	alignment.cpp

@@ -1,4 +1,3 @@
-
 set(FILEFORMAT_SOURCES
 	utils/format_detection.cpp
 	utils/conversions.cpp

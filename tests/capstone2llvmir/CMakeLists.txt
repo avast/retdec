@@ -1,4 +1,3 @@
-
 set(RETDEC_TESTS_CAPSTONE2LLVMIR_SOURCES
 	arm_tests.cpp
 	mips_tests.cpp

@@ -1,4 +1,3 @@
-
 set(PATTERNGEN_SOURCES
 	pattern_extractor/pattern_extractor.cpp
 	pattern_extractor/types/symbol_pattern.cpp

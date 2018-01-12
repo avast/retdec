@@ -1,4 +1,3 @@
-
 set(EXAMPLE_SOURCES
 	example.cpp
 )

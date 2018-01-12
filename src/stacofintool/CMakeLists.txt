@@ -1,4 +1,3 @@
-
 set(STACOFINTOOL_SOURCES
 	stacofin.cpp
 )

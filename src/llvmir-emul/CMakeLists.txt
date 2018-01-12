@@ -1,4 +1,3 @@
-
 set(LLVMIR_EMUL_SOURCES
 	llvmir_emul.cpp
 )

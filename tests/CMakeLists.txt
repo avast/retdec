@@ -1,5 +1,4 @@
-
-set(RETDEC_TESTS_DIR "bin") 
+set(RETDEC_TESTS_DIR "bin")
 
 add_subdirectory(bin2llvmir)
 add_subdirectory(capstone2llvmir)

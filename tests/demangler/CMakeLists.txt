@@ -1,4 +1,3 @@
-
 set(RETDEC_TESTS_DEMANGLER_SOURCES
 	borland_tests.cpp
 	gcc_tests.cpp

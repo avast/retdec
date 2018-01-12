@@ -1,4 +1,3 @@
-
 set(LOADER_SOURCES
 	utils/range.cpp
 	utils/overlap_resolver.cpp

@@ -1,5 +1,4 @@
 cmake_minimum_required(VERSION 3.6)
-
 project(retdec CXX)
 
 # Set the default build type to 'Release'.

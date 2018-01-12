@@ -1,4 +1,3 @@
-
 set(UPX_SOURCES
 	upx_stub_signatures.cpp
 	upx.cpp

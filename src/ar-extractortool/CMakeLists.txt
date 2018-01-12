@@ -1,4 +1,3 @@
-
 set(AR_EXTRACTOR_SOURCES
 	ar_extractor.cpp
 )

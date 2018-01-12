@@ -1,4 +1,3 @@
-
 set(RETDEC_TESTS_BIN2LLVMIR_SOURCES
 	analyses/reaching_definitions_tests.cpp
 	analyses/uses_analysis_tests.cpp

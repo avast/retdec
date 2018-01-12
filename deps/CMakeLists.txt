@@ -1,4 +1,3 @@
-
 if(MSVC)
 	set(DEBUG_DIR "Debug/")
 	set(RELEASE_DIR "Release/")

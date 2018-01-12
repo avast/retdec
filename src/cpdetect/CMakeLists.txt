@@ -1,4 +1,3 @@
-
 set(CPDETECT_SOURCES
 	compiler_detector/coff_compiler.cpp
 	compiler_detector/compiler_detector.cpp

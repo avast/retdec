@@ -1,4 +1,3 @@
-
 set(CTYPES_SOURCES
 	annotation.cpp
 	annotation_in.cpp

@@ -1,4 +1,3 @@
-
 set(RETDEC_CONFIGTOOL_SOURCES
 	configtool.cpp
 )

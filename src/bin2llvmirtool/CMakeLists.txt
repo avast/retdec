@@ -1,4 +1,3 @@
-
 set(BIN2LLVMIRTOOL_SOURCES
 	bin2llvmir.cpp
 )

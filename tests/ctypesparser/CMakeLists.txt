@@ -1,4 +1,3 @@
-
 set(RETDEC_TESTS_CTYPESPARSER_SOURCES
 	json_ctypes_parser_tests.cpp
 )

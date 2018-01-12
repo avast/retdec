@@ -1,4 +1,3 @@
-
 set(MPRESS_SOURCES
 	mpress.cpp
 )

@@ -1,4 +1,3 @@
-
 set(RETDEC_TESTS_LLVM_SUPPORT_SOURCES
 	utils_tests.cpp
 )

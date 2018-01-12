@@ -1,4 +1,3 @@
-
 install(PROGRAMS "retdec-color-c.py" DESTINATION bin)
 install(PROGRAMS "retdec-config.sh" DESTINATION bin)
 install(PROGRAMS "retdec-archive-decompiler.sh" DESTINATION bin)
