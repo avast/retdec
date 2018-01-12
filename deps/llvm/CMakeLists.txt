@@ -146,8 +146,8 @@ if(MSVC)
 endif()
 
 foreach(LLVM_LIB ${LLVM_LIB_LIST})
-	target_link_libraries(llvm INTERFACE debug     ${binary_dir}/${DEBUG_DIR}lib/${CMAKE_FIND_LIBRARY_PREFIXES}${LLVM_LIB}${CMAKE_STATIC_LIBRARY_SUFFIX})
-	target_link_libraries(llvm INTERFACE optimized ${binary_dir}/${RELEASE_DIR}lib/${CMAKE_FIND_LIBRARY_PREFIXES}${LLVM_LIB}${CMAKE_STATIC_LIBRARY_SUFFIX})
+	target_link_libraries(llvm INTERFACE debug     ${binary_dir}/${DEBUG_DIR}lib/${CMAKE_STATIC_LIBRARY_PREFIX}${LLVM_LIB}${CMAKE_STATIC_LIBRARY_SUFFIX})
+	target_link_libraries(llvm INTERFACE optimized ${binary_dir}/${RELEASE_DIR}lib/${CMAKE_STATIC_LIBRARY_PREFIX}${LLVM_LIB}${CMAKE_STATIC_LIBRARY_SUFFIX})
 endforeach(LLVM_LIB)
 
 if(CMAKE_THREAD_LIBS_INIT)

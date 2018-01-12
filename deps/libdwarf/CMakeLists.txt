@@ -28,11 +28,11 @@ add_dependencies(libdwarf libdwarf-project)
 target_include_directories(libdwarf SYSTEM INTERFACE ${source_dir}/libdwarf)
 
 if(MSVC)
-	target_link_libraries(libdwarf INTERFACE ${binary_dir}/libdwarf/libdwarf/$<CONFIGURATION>/${CMAKE_FIND_LIBRARY_PREFIXES}retdec-libdwarf.lib)
-	target_link_libraries(libdwarf INTERFACE ${binary_dir}/libelf/lib/$<CONFIGURATION>/${CMAKE_FIND_LIBRARY_PREFIXES}retdec-libelf.lib)
+	target_link_libraries(libdwarf INTERFACE ${binary_dir}/libdwarf/libdwarf/$<CONFIGURATION>/${CMAKE_STATIC_LIBRARY_PREFIX}retdec-libdwarf.lib)
+	target_link_libraries(libdwarf INTERFACE ${binary_dir}/libelf/lib/$<CONFIGURATION>/${CMAKE_STATIC_LIBRARY_PREFIX}retdec-libelf.lib)
 else() # Linux
-	target_link_libraries(libdwarf INTERFACE ${LIBDWARF_INSTALL_DIR}/lib/${CMAKE_FIND_LIBRARY_PREFIXES}retdec-libdwarf${CMAKE_SHARED_LIBRARY_SUFFIX})
-	target_link_libraries(libdwarf INTERFACE ${LIBDWARF_INSTALL_DIR}/lib/${CMAKE_FIND_LIBRARY_PREFIXES}retdec-libelf${CMAKE_SHARED_LIBRARY_SUFFIX})
+	target_link_libraries(libdwarf INTERFACE ${LIBDWARF_INSTALL_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}retdec-libdwarf${CMAKE_SHARED_LIBRARY_SUFFIX})
+	target_link_libraries(libdwarf INTERFACE ${LIBDWARF_INSTALL_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}retdec-libelf${CMAKE_SHARED_LIBRARY_SUFFIX})
 endif()
 
 if(MSVC)
