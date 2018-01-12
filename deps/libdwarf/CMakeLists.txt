@@ -1,5 +1,3 @@
-cmake_minimum_required(VERSION 3.6)
-
 include(ExternalProject)
 
 set(LIBDWARF_INSTALL_DIR "${PROJECT_BINARY_DIR}/external/src/libdwarf-project-install")

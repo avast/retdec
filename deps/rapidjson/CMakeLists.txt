@@ -1,5 +1,3 @@
-cmake_minimum_required(VERSION 3.6)
-
 include(ExternalProject)
 
 ExternalProject_Add(rapidjson-project

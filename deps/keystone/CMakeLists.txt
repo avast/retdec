@@ -1,5 +1,3 @@
-cmake_minimum_required(VERSION 3.6)
-
 include(ExternalProject)
 
 # Keystone requires python3, so we first check whether python3 is installed as
