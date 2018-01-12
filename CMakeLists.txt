@@ -13,7 +13,23 @@ option(RETDEC_TESTS "Build tests." OFF)
 
 set(CMAKE_CXX_STANDARD 14)
 
-set(CMAKE_INSTALL_RPATH "$ORIGIN/../lib")
+# On Linux and macOS, set RPATH relative to the origin of the installed
+# executables (i.e. relative to the bin directory). This allows us to move the
+# installation directory into a different location after installation, which is
+# useful e.g. when the installation is performed on one machine but we want to
+# run the executables on a different machine.
+#
+# On Windows, there is no need to set anything as DLLs are installed into the
+# bin directory, where they are automatically picked up by executables.
+#
+# For more details, see
+#  - https://github.com/avast-tl/retdec/issues/77
+#  - https://cmake.org/Wiki/CMake_RPATH_handling
+if(APPLE)
+	set(CMAKE_INSTALL_RPATH "@executable_path/../lib")
+elseif(UNIX)
+	set(CMAKE_INSTALL_RPATH "$ORIGIN/../lib")
+endif()
 
 # Build all external projects in the same directory that is directly inside the
 # build directory. This reduces path lengths, which is important on Windows as
