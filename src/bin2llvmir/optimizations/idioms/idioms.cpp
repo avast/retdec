@@ -6,17 +6,18 @@
 
 #include <iostream>
 
-#include "bin2llvmir/optimizations/idioms/idioms.h"
-#include "bin2llvmir/optimizations/idioms/idioms_borland.h"
-#include "bin2llvmir/optimizations/idioms/idioms_common.h"
-#include "bin2llvmir/optimizations/idioms/idioms_gcc.h"
-#include "bin2llvmir/optimizations/idioms/idioms_intel.h"
-#include "bin2llvmir/optimizations/idioms/idioms_llvm.h"
-#include "bin2llvmir/optimizations/idioms/idioms_owatcom.h"
-#include "bin2llvmir/optimizations/idioms/idioms_vstudio.h"
+#include "retdec/bin2llvmir/optimizations/idioms/idioms.h"
+#include "retdec/bin2llvmir/optimizations/idioms/idioms_borland.h"
+#include "retdec/bin2llvmir/optimizations/idioms/idioms_common.h"
+#include "retdec/bin2llvmir/optimizations/idioms/idioms_gcc.h"
+#include "retdec/bin2llvmir/optimizations/idioms/idioms_intel.h"
+#include "retdec/bin2llvmir/optimizations/idioms/idioms_llvm.h"
+#include "retdec/bin2llvmir/optimizations/idioms/idioms_owatcom.h"
+#include "retdec/bin2llvmir/optimizations/idioms/idioms_vstudio.h"
 
 using namespace llvm;
 
+namespace retdec {
 namespace bin2llvmir {
 
 struct GlobalOpt;
@@ -99,7 +100,7 @@ void Idioms::getAnalysisUsage(AnalysisUsage &AU) const
  * @return idioms collection
  *
  * TODO matula: Idiom analysis still has its own architecture and compiler representations.
- * It could/should use the representations from retdec-config.
+ * It could/should use the representations from retdec::config.
  */
 IdiomsAnalysis * Idioms::getCompilerAnalysis(Module &M)
 {
@@ -146,3 +147,4 @@ IdiomsAnalysis * Idioms::getCompilerAnalysis(Module &M)
 }
 
 } // namespace bin2llvmir
+} // namespace retdec

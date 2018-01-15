@@ -4,12 +4,13 @@
 * @copyright (c) 2017 Avast Software, licensed under the MIT license
 */
 
-#include "llvmir2hll/ir/function.h"
-#include "llvmir2hll/ir/statement.h"
-#include "llvmir2hll/ir/variable.h"
-#include "llvmir2hll/support/debug.h"
-#include "llvmir2hll/support/variable_replacer.h"
+#include "retdec/llvmir2hll/ir/function.h"
+#include "retdec/llvmir2hll/ir/statement.h"
+#include "retdec/llvmir2hll/ir/variable.h"
+#include "retdec/llvmir2hll/support/debug.h"
+#include "retdec/llvmir2hll/support/variable_replacer.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 /**
@@ -49,3 +50,4 @@ void VariableReplacer::visit(ShPtr<Variable> var) {
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

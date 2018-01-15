@@ -4,20 +4,21 @@
 * @copyright (c) 2017 Avast Software, licensed under the MIT license
 */
 
-#include "llvmir2hll/analysis/value_analysis.h"
-#include "llvmir2hll/ir/call_expr.h"
-#include "llvmir2hll/ir/module.h"
-#include "llvmir2hll/ir/variable.h"
-#include "llvmir2hll/obtainer/call_info_obtainer.h"
-#include "llvmir2hll/obtainer/calls_in_module_obtainer.h"
-#include "llvmir2hll/pattern/pattern_finder_factory.h"
-#include "llvmir2hll/pattern/pattern_finders/api_call_pattern_finder.h"
-#include "llvmir2hll/pattern/patterns/stmts_pattern.h"
-#include "llvmir2hll/support/debug.h"
-#include "tl-cpputils/container.h"
+#include "retdec/llvmir2hll/analysis/value_analysis.h"
+#include "retdec/llvmir2hll/ir/call_expr.h"
+#include "retdec/llvmir2hll/ir/module.h"
+#include "retdec/llvmir2hll/ir/variable.h"
+#include "retdec/llvmir2hll/obtainer/call_info_obtainer.h"
+#include "retdec/llvmir2hll/obtainer/calls_in_module_obtainer.h"
+#include "retdec/llvmir2hll/pattern/pattern_finder_factory.h"
+#include "retdec/llvmir2hll/pattern/pattern_finders/api_call_pattern_finder.h"
+#include "retdec/llvmir2hll/pattern/patterns/stmts_pattern.h"
+#include "retdec/llvmir2hll/support/debug.h"
+#include "retdec/utils/container.h"
 
-using tl_cpputils::hasItem;
+using retdec::utils::hasItem;
 
+namespace retdec {
 namespace llvmir2hll {
 
 REGISTER_AT_FACTORY("APICall", API_CALL_PATTERN_FINDER_ID,
@@ -212,3 +213,4 @@ PatternFinder::Patterns APICallPatternFinder::findPatterns(
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

@@ -9,12 +9,13 @@
 
 #include <gtest/gtest.h>
 
-#include "llvmir2hll/support/maybe.h"
-#include "llvmir2hll/support/smart_ptr.h"
+#include "retdec/llvmir2hll/support/maybe.h"
+#include "retdec/llvmir2hll/support/smart_ptr.h"
 
 using namespace ::testing;
 using namespace std::string_literals;
 
+namespace retdec {
 namespace llvmir2hll {
 namespace tests {
 
@@ -119,3 +120,4 @@ CallingOperatorArrowOnEmptyMaybeResultsInViolatedPrecondition) {
 
 } // namespace tests
 } // namespace llvmir2hll
+} // namespace retdec

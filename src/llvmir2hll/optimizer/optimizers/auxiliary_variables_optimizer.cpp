@@ -4,22 +4,23 @@
 * @copyright (c) 2017 Avast Software, licensed under the MIT license
 */
 
-#include "llvmir2hll/analysis/value_analysis.h"
-#include "llvmir2hll/graphs/cfg/cfg_traversals/auxiliary_variables_cfg_traversal.h"
-#include "llvmir2hll/graphs/cg/cg_builder.h"
-#include "llvmir2hll/ir/assign_stmt.h"
-#include "llvmir2hll/ir/function.h"
-#include "llvmir2hll/ir/statement.h"
-#include "llvmir2hll/ir/var_def_stmt.h"
-#include "llvmir2hll/ir/variable.h"
-#include "llvmir2hll/obtainer/call_info_obtainer.h"
-#include "llvmir2hll/optimizer/optimizers/auxiliary_variables_optimizer.h"
-#include "llvmir2hll/support/debug.h"
-#include "llvmir2hll/support/types.h"
-#include "tl-cpputils/container.h"
+#include "retdec/llvmir2hll/analysis/value_analysis.h"
+#include "retdec/llvmir2hll/graphs/cfg/cfg_traversals/auxiliary_variables_cfg_traversal.h"
+#include "retdec/llvmir2hll/graphs/cg/cg_builder.h"
+#include "retdec/llvmir2hll/ir/assign_stmt.h"
+#include "retdec/llvmir2hll/ir/function.h"
+#include "retdec/llvmir2hll/ir/statement.h"
+#include "retdec/llvmir2hll/ir/var_def_stmt.h"
+#include "retdec/llvmir2hll/ir/variable.h"
+#include "retdec/llvmir2hll/obtainer/call_info_obtainer.h"
+#include "retdec/llvmir2hll/optimizer/optimizers/auxiliary_variables_optimizer.h"
+#include "retdec/llvmir2hll/support/debug.h"
+#include "retdec/llvmir2hll/support/types.h"
+#include "retdec/utils/container.h"
 
-using tl_cpputils::hasItem;
+using retdec::utils::hasItem;
 
+namespace retdec {
 namespace llvmir2hll {
 
 /**
@@ -126,3 +127,4 @@ void AuxiliaryVariablesOptimizer::visit(ShPtr<VarDefStmt> stmt) {
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

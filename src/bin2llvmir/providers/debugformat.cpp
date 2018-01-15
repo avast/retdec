@@ -4,10 +4,11 @@
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */
 
-#include "bin2llvmir/providers/debugformat.h"
+#include "retdec/bin2llvmir/providers/debugformat.h"
 
 using namespace llvm;
 
+namespace retdec {
 namespace bin2llvmir {
 
 //
@@ -33,10 +34,10 @@ std::map<Module*, DebugFormat> DebugFormatProvider::_module2debug;
  */
 DebugFormat* DebugFormatProvider::addDebugFormat(
 				llvm::Module* m,
-				loader::Image* objf,
+				retdec::loader::Image* objf,
 				const std::string& pdbFile,
-				const tl_cpputils::Address& imageBase,
-				demangler::CDemangler* demangler)
+				const retdec::utils::Address& imageBase,
+				retdec::demangler::CDemangler* demangler)
 {
 	if (objf == nullptr)
 	{
@@ -88,3 +89,4 @@ void DebugFormatProvider::clear()
 }
 
 } // namespace bin2llvmir
+} // namespace retdec

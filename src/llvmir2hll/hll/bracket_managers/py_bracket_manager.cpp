@@ -6,9 +6,10 @@
 * @copyright (c) 2017 Avast Software, licensed under the MIT license
 */
 
-#include "llvmir2hll/hll/bracket_managers/py_bracket_manager.h"
-#include "llvmir2hll/hll/hll_writers/py_hll_writer.h"
+#include "retdec/llvmir2hll/hll/bracket_managers/py_bracket_manager.h"
+#include "retdec/llvmir2hll/hll/hll_writers/py_hll_writer.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 /**
@@ -89,3 +90,4 @@ PyBracketManager::ItemOfPrecTable PyBracketManager::precedenceTable[PREC_TABLE_S
 };
 
 } // namespace llvmir2hll
+} // namespace retdec

@@ -4,20 +4,21 @@
 * @copyright (c) 2017 Avast Software, licensed under the MIT license
 */
 
-#include "llvmir2hll/analysis/goto_target_analysis.h"
-#include "llvmir2hll/graphs/cfg/cfg.h"
-#include "llvmir2hll/graphs/cfg/cfg_builders/non_recursive_cfg_builder.h"
-#include "llvmir2hll/ir/empty_stmt.h"
-#include "llvmir2hll/ir/function.h"
-#include "llvmir2hll/ir/module.h"
-#include "llvmir2hll/ir/statement.h"
-#include "llvmir2hll/support/debug.h"
-#include "llvmir2hll/support/unreachable_code_in_cfg_remover.h"
-#include "llvmir2hll/utils/ir.h"
-#include "tl-cpputils/container.h"
+#include "retdec/llvmir2hll/analysis/goto_target_analysis.h"
+#include "retdec/llvmir2hll/graphs/cfg/cfg.h"
+#include "retdec/llvmir2hll/graphs/cfg/cfg_builders/non_recursive_cfg_builder.h"
+#include "retdec/llvmir2hll/ir/empty_stmt.h"
+#include "retdec/llvmir2hll/ir/function.h"
+#include "retdec/llvmir2hll/ir/module.h"
+#include "retdec/llvmir2hll/ir/statement.h"
+#include "retdec/llvmir2hll/support/debug.h"
+#include "retdec/llvmir2hll/support/unreachable_code_in_cfg_remover.h"
+#include "retdec/llvmir2hll/utils/ir.h"
+#include "retdec/utils/container.h"
 
-using tl_cpputils::hasItem;
+using retdec::utils::hasItem;
 
+namespace retdec {
 namespace llvmir2hll {
 
 /**
@@ -137,3 +138,4 @@ void UnreachableCodeInCFGRemover::visitStmt(ShPtr<Statement> stmt,
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

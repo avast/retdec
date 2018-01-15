@@ -6,19 +6,20 @@
 
 #include <sstream>
 
-#include "llvmir2hll/config/configs/json_config.h"
-#include "llvmir2hll/support/debug.h"
-#include "retdec-config/config.h"
-#include "tl-cpputils/container.h"
-#include "tl-cpputils/string.h"
+#include "retdec/llvmir2hll/config/configs/json_config.h"
+#include "retdec/llvmir2hll/support/debug.h"
+#include "retdec/config/config.h"
+#include "retdec/utils/container.h"
+#include "retdec/utils/string.h"
 
 using namespace std::string_literals;
 
-using tl_cpputils::addToSet;
-using tl_cpputils::hasItem;
-using tl_cpputils::trim;
-using tl_cpputils::unifyLineEnds;
+using retdec::utils::addToSet;
+using retdec::utils::hasItem;
+using retdec::utils::trim;
+using retdec::utils::unifyLineEnds;
 
+namespace retdec {
 namespace llvmir2hll {
 
 /**
@@ -27,23 +28,23 @@ namespace llvmir2hll {
 struct JSONConfig::Impl {
 	Impl();
 
-	const retdec_config::Object &getConfigGlobalVariableByNameOrEmptyVariable(
+	const retdec::config::Object &getConfigGlobalVariableByNameOrEmptyVariable(
 		const std::string &name) const;
-	const retdec_config::Object *getConfigRegisterByName(const std::string &name) const;
-	retdec_config::Function *getConfigFunctionByName(const std::string &name);
-	const retdec_config::Function *getConfigFunctionByName(const std::string &name) const;
-	const retdec_config::Function &getConfigFunctionByNameOrEmptyFunction(
+	const retdec::config::Object *getConfigRegisterByName(const std::string &name) const;
+	retdec::config::Function *getConfigFunctionByName(const std::string &name);
+	const retdec::config::Function *getConfigFunctionByName(const std::string &name) const;
+	const retdec::config::Function &getConfigFunctionByNameOrEmptyFunction(
 		const std::string &name) const;
-	const retdec_config::Class *getConfigClassByName(const std::string &name) const;
-	const retdec_config::Class &getConfigClassByNameOrEmptyClass(
+	const retdec::config::Class *getConfigClassByName(const std::string &name) const;
+	const retdec::config::Class &getConfigClassByNameOrEmptyClass(
 		const std::string &name) const;
-	std::string getNameOfRegister(const retdec_config::Object &reg) const;
+	std::string getNameOfRegister(const retdec::config::Object &reg) const;
 
 	/// Path to the config file (if any).
 	std::string path;
 
 	/// Underlying config.
-	retdec_config::Config config;
+	retdec::config::Config config;
 };
 
 /**
@@ -51,45 +52,45 @@ struct JSONConfig::Impl {
 */
 JSONConfig::Impl::Impl() = default;
 
-retdec_config::Function *JSONConfig::Impl::getConfigFunctionByName(
+retdec::config::Function *JSONConfig::Impl::getConfigFunctionByName(
 		const std::string &name) {
 	return config.functions.getFunctionByName(name);
 }
 
 // A const overload of getConfigFunctionByName().
-const retdec_config::Function *JSONConfig::Impl::getConfigFunctionByName(
+const retdec::config::Function *JSONConfig::Impl::getConfigFunctionByName(
 		const std::string &name) const {
 	return config.functions.getFunctionByName(name);
 }
 
-const retdec_config::Object &JSONConfig::Impl::getConfigGlobalVariableByNameOrEmptyVariable(
+const retdec::config::Object &JSONConfig::Impl::getConfigGlobalVariableByNameOrEmptyVariable(
 		const std::string &name) const {
-	static const retdec_config::Object emptyGlobalVariable(
+	static const retdec::config::Object emptyGlobalVariable(
 		"no-name",
-		retdec_config::Storage::undefined()
+		retdec::config::Storage::undefined()
 	);
 	auto g = config.globals.getObjectByName(name);
 	return g ? *g : emptyGlobalVariable;
 }
 
-const retdec_config::Object *JSONConfig::Impl::getConfigRegisterByName(
+const retdec::config::Object *JSONConfig::Impl::getConfigRegisterByName(
 		const std::string &name) const {
 	return config.registers.getObjectByName(name);
 }
 
-const retdec_config::Function &JSONConfig::Impl::getConfigFunctionByNameOrEmptyFunction(
+const retdec::config::Function &JSONConfig::Impl::getConfigFunctionByNameOrEmptyFunction(
 		const std::string &name) const {
-	static const retdec_config::Function emptyFunction(""s);
+	static const retdec::config::Function emptyFunction(""s);
 	auto f = getConfigFunctionByName(name);
 	return f ? *f : emptyFunction;
 }
 
-const retdec_config::Class *JSONConfig::Impl::getConfigClassByName(
+const retdec::config::Class *JSONConfig::Impl::getConfigClassByName(
 		const std::string &name) const {
 	return config.classes.getElementById(name);
 }
 
-std::string JSONConfig::Impl::getNameOfRegister(const retdec_config::Object &reg) const {
+std::string JSONConfig::Impl::getNameOfRegister(const retdec::config::Object &reg) const {
 	// Each register has a name set in its storage. However, this name may be
 	// just our internal LLVM IR name. To get the real name, we have to perform
 	// another check.
@@ -104,9 +105,9 @@ std::string JSONConfig::Impl::getNameOfRegister(const retdec_config::Object &reg
 	return !realName.empty() ? realName : name;
 }
 
-const retdec_config::Class &JSONConfig::Impl::getConfigClassByNameOrEmptyClass(
+const retdec::config::Class &JSONConfig::Impl::getConfigClassByNameOrEmptyClass(
 		const std::string &name) const {
-	static const retdec_config::Class emptyClass(""s);
+	static const retdec::config::Class emptyClass(""s);
 	auto c = getConfigClassByName(name);
 	return c ? *c : emptyClass;
 }
@@ -127,9 +128,9 @@ UPtr<JSONConfig> JSONConfig::fromFile(const std::string &path) {
 	config->impl->path = path;
 	try {
 		config->impl->config.readJsonFile(path);
-	} catch (const retdec_config::FileNotFoundException &ex) {
+	} catch (const retdec::config::FileNotFoundException &ex) {
 		throw JSONConfigFileNotFoundError(ex.what());
-	} catch (const retdec_config::Exception &ex) {
+	} catch (const retdec::config::Exception &ex) {
 		throw JSONConfigParsingError(ex.what());
 	}
 	return config;
@@ -145,7 +146,7 @@ UPtr<JSONConfig> JSONConfig::fromString(const std::string &str) {
 	auto config = UPtr<JSONConfig>(new JSONConfig());
 	try {
 		config->impl->config.readJsonString(str);
-	} catch (const retdec_config::Exception &ex) {
+	} catch (const retdec::config::Exception &ex) {
 		throw JSONConfigParsingError(ex.what());
 	}
 	return config;
@@ -477,3 +478,4 @@ StringSet JSONConfig::getOptsRunInFrontend() const {
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

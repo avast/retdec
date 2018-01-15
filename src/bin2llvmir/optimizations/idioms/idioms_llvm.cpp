@@ -6,11 +6,12 @@
 
 #include <llvm/IR/PatternMatch.h>
 
-#include "bin2llvmir/optimizations/idioms/idioms_llvm.h"
+#include "retdec/bin2llvmir/optimizations/idioms/idioms_llvm.h"
 
 using namespace llvm;
 using namespace PatternMatch;
 
+namespace retdec {
 namespace bin2llvmir {
 
 /**
@@ -176,3 +177,4 @@ Instruction * IdiomsLLVM::exchangeCompareSle(BasicBlock::iterator iter) const {
 }
 
 } // namespace bin2llvmir
+} // namespace retdec

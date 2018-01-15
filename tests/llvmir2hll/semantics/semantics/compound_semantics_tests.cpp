@@ -6,12 +6,13 @@
 
 #include <gtest/gtest.h>
 
-#include "llvmir2hll/semantics/semantics/compound_semantics.h"
+#include "retdec/llvmir2hll/semantics/semantics/compound_semantics.h"
 #include "llvmir2hll/semantics/semantics_mock.h"
 
 using namespace ::testing;
 using namespace std::string_literals;
 
+namespace retdec {
 namespace llvmir2hll {
 namespace tests {
 
@@ -372,3 +373,4 @@ GetSymbolicNamesForParamReturnsAnswerIfSecondSemanticsAddedByPrependKnowsTheAnsw
 
 } // namespace tests
 } // namespace llvmir2hll
+} // namespace retdec

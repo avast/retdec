@@ -6,14 +6,14 @@
 
 #include <iostream>
 
-#include "dwarfparser/dwarf_base.h"
-#include "dwarfparser/dwarf_file.h"
-#include "dwarfparser/dwarf_functions.h"
+#include "retdec/dwarfparser/dwarf_base.h"
+#include "retdec/dwarfparser/dwarf_file.h"
+#include "retdec/dwarfparser/dwarf_functions.h"
 
 using namespace std;
 
-namespace dwarfparser
-{
+namespace retdec {
+namespace dwarfparser {
 
 /**
  * @brief ctor.
@@ -319,3 +319,4 @@ DwarfLocationDesc::cLocType DwarfFunction::getFrameBase(string *n, Dwarf_Addr *a
 }
 
 } // namespace dwarfparser
+} // namespace retdec

@@ -7,17 +7,18 @@
 #include <llvm/ADT/Twine.h>
 #include <llvm/IR/Value.h>
 
-#include "llvmir2hll/ir/function.h"
-#include "llvmir2hll/ir/module.h"
-#include "llvmir2hll/ir/type.h"
-#include "llvmir2hll/ir/unknown_type.h"
-#include "llvmir2hll/ir/variable.h"
-#include "llvmir2hll/llvm/llvmir2bir_converters/new_llvmir2bir_converter/variables_manager.h"
-#include "llvmir2hll/var_name_gen/var_name_gens/num_var_name_gen.h"
-#include "tl-cpputils/container.h"
+#include "retdec/llvmir2hll/ir/function.h"
+#include "retdec/llvmir2hll/ir/module.h"
+#include "retdec/llvmir2hll/ir/type.h"
+#include "retdec/llvmir2hll/ir/unknown_type.h"
+#include "retdec/llvmir2hll/ir/variable.h"
+#include "retdec/llvmir2hll/llvm/llvmir2bir_converters/new_llvmir2bir_converter/variables_manager.h"
+#include "retdec/llvmir2hll/var_name_gen/var_name_gens/num_var_name_gen.h"
+#include "retdec/utils/container.h"
 
-using tl_cpputils::getValuesFromMap;
+using retdec::utils::getValuesFromMap;
 
+namespace retdec {
 namespace llvmir2hll {
 
 /**
@@ -107,3 +108,4 @@ VarSet VariablesManager::getLocalVars() const {
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

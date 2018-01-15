@@ -8,24 +8,25 @@
 
 #include <gtest/gtest.h>
 
-#include "llvmir2hll/ir/add_op_expr.h"
-#include "llvmir2hll/ir/assign_stmt.h"
-#include "llvmir2hll/ir/call_expr.h"
-#include "llvmir2hll/ir/call_stmt.h"
-#include "llvmir2hll/ir/const_int.h"
-#include "llvmir2hll/ir/deref_op_expr.h"
-#include "llvmir2hll/ir/expression.h"
-#include "llvmir2hll/ir/mul_op_expr.h"
-#include "llvmir2hll/ir/return_stmt.h"
-#include "llvmir2hll/ir/statement.h"
+#include "retdec/llvmir2hll/ir/add_op_expr.h"
+#include "retdec/llvmir2hll/ir/assign_stmt.h"
+#include "retdec/llvmir2hll/ir/call_expr.h"
+#include "retdec/llvmir2hll/ir/call_stmt.h"
+#include "retdec/llvmir2hll/ir/const_int.h"
+#include "retdec/llvmir2hll/ir/deref_op_expr.h"
+#include "retdec/llvmir2hll/ir/expression.h"
+#include "retdec/llvmir2hll/ir/mul_op_expr.h"
+#include "retdec/llvmir2hll/ir/return_stmt.h"
+#include "retdec/llvmir2hll/ir/statement.h"
 #include "llvmir2hll/ir/assertions.h"
-#include "llvmir2hll/llvm/llvmir2bir_converters/new_llvmir2bir_converter.h"
+#include "retdec/llvmir2hll/llvm/llvmir2bir_converters/new_llvmir2bir_converter.h"
 #include "llvmir2hll/llvm/llvmir2bir_converters/new_llvmir2bir_converter_tests/base_tests.h"
-#include "llvmir2hll/utils/ir.h"
+#include "retdec/llvmir2hll/utils/ir.h"
 
 using namespace ::testing;
 using namespace std::string_literals;
 
+namespace retdec {
 namespace llvmir2hll {
 namespace tests {
 
@@ -332,3 +333,4 @@ AssertionResult NewLLVMIR2BIRConverterBaseTests::isAssignOfMulExprToVar(
 
 } // namespace tests
 } // namespace llvmir2hll
+} // namespace retdec

@@ -9,17 +9,18 @@
 #include <llvm/IR/GlobalVariable.h>
 #include <llvm/IR/Module.h>
 
-#include "llvm-support/utils.h"
-#include "bin2llvmir/providers/asm_instruction.h"
-#include "bin2llvmir/providers/config.h"
-#include "bin2llvmir/providers/demangler.h"
-#include "bin2llvmir/utils/instruction.h"
-#include "bin2llvmir/utils/type.h"
+#include "retdec/llvm-support/utils.h"
+#include "retdec/bin2llvmir/providers/asm_instruction.h"
+#include "retdec/bin2llvmir/providers/config.h"
+#include "retdec/bin2llvmir/providers/demangler.h"
+#include "retdec/bin2llvmir/utils/instruction.h"
+#include "retdec/bin2llvmir/utils/type.h"
 
-using namespace llvm_support;
-using namespace tl_cpputils;
+using namespace retdec::llvm_support;
+using namespace retdec::utils;
 using namespace llvm;
 
+namespace retdec {
 namespace bin2llvmir {
 
 //
@@ -80,7 +81,7 @@ void Config::doFinalization()
 	}
 }
 
-retdec_config::Config& Config::getConfig()
+retdec::config::Config& Config::getConfig()
 {
 	return _configDB;
 }
@@ -91,33 +92,33 @@ llvm::Function* Config::getLlvmFunction(Address startAddr)
 	return fnc ? _module->getFunction(fnc->getName()) : nullptr;
 }
 
-tl_cpputils::Address Config::getFunctionAddress(
+retdec::utils::Address Config::getFunctionAddress(
 		const llvm::Function* fnc)
 {
-	retdec_config::Function* cf = getConfigFunction(fnc);
-	return cf ? cf->getStart() : tl_cpputils::Address();
+	retdec::config::Function* cf = getConfigFunction(fnc);
+	return cf ? cf->getStart() : retdec::utils::Address();
 }
 
-retdec_config::Function* Config::getConfigFunction(
+retdec::config::Function* Config::getConfigFunction(
 		const llvm::Function* fnc)
 {
 	return fnc ? _configDB.functions.getFunctionByName(fnc->getName()) : nullptr;
 }
 
-retdec_config::Function* Config::getConfigFunction(
-		tl_cpputils::Address startAddr)
+retdec::config::Function* Config::getConfigFunction(
+		retdec::utils::Address startAddr)
 {
 	return _configDB.functions.getFunctionByStartAddress(startAddr);
 }
 
-const retdec_config::Object* Config::getConfigGlobalVariable(
+const retdec::config::Object* Config::getConfigGlobalVariable(
 		const llvm::GlobalVariable* gv)
 {
 	return gv ? _configDB.globals.getObjectByName(gv->getName()) : nullptr;
 }
 
-const retdec_config::Object* Config::getConfigGlobalVariable(
-		tl_cpputils::Address address)
+const retdec::config::Object* Config::getConfigGlobalVariable(
+		retdec::utils::Address address)
 {
 	return _configDB.globals.getObjectByAddress(address);
 }
@@ -135,7 +136,7 @@ llvm::GlobalVariable* Config::getLlvmGlobalVariable(Address address)
  */
 llvm::GlobalVariable* Config::getLlvmGlobalVariable(
 		const std::string& name,
-		tl_cpputils::Address address)
+		retdec::utils::Address address)
 {
 	if (auto* gv = _module->getGlobalVariable(name))
 	{
@@ -151,12 +152,12 @@ llvm::GlobalVariable* Config::getLlvmGlobalVariable(
 	}
 }
 
-tl_cpputils::Address Config::getGlobalAddress(
+retdec::utils::Address Config::getGlobalAddress(
 		const llvm::GlobalVariable* gv)
 {
 	assert(gv);
 	auto* cgv = gv ? _configDB.globals.getObjectByName(gv->getName()) : nullptr;
-	return cgv ? cgv->getStorage().getAddress() : tl_cpputils::Address();
+	return cgv ? cgv->getStorage().getAddress() : retdec::utils::Address();
 }
 
 bool Config::isGlobalVariable(const llvm::Value* val)
@@ -165,7 +166,7 @@ bool Config::isGlobalVariable(const llvm::Value* val)
 	return getConfigGlobalVariable(gv) != nullptr;
 }
 
-const retdec_config::Object* Config::getConfigLocalVariable(
+const retdec::config::Object* Config::getConfigLocalVariable(
 		const llvm::Value* val)
 {
 	auto* a = dyn_cast_or_null<AllocaInst>(val);
@@ -182,7 +183,7 @@ const retdec_config::Object* Config::getConfigLocalVariable(
 	return cl && cl->getStorage().isUndefined() ? cl : nullptr;
 }
 
-retdec_config::Object* Config::getConfigStackVariable(
+retdec::config::Object* Config::getConfigStackVariable(
 		const llvm::Value* val)
 {
 	auto* a = dyn_cast_or_null<AllocaInst>(val);
@@ -195,7 +196,7 @@ retdec_config::Object* Config::getConfigStackVariable(
 	{
 		return nullptr;
 	}
-	auto* cl = const_cast<retdec_config::Object*>(
+	auto* cl = const_cast<retdec::config::Object*>(
 			cf->locals.getObjectByName(a->getName()));
 	return cl && cl->getStorage().isStack() ? cl : nullptr;
 }
@@ -246,25 +247,25 @@ bool Config::isStackVariable(const llvm::Value* val)
 	return getConfigStackVariable(val) != nullptr;
 }
 
-tl_cpputils::Maybe<int> Config::getStackVariableOffset(
+retdec::utils::Maybe<int> Config::getStackVariableOffset(
 		const llvm::Value* val)
 {
 	auto* sv = getConfigStackVariable(val);
 	return sv
-			? tl_cpputils::Maybe<int>(sv->getStorage().getStackOffset())
-			: tl_cpputils::Maybe<int>();
+			? retdec::utils::Maybe<int>(sv->getStorage().getStackOffset())
+			: retdec::utils::Maybe<int>();
 }
 
-retdec_config::Object* Config::insertGlobalVariable(
+retdec::config::Object* Config::insertGlobalVariable(
 		const llvm::GlobalVariable* gv,
-		tl_cpputils::Address address,
+		retdec::utils::Address address,
 		bool fromDebug,
 		const std::string& realName,
 		const std::string& cryptoDesc)
 {
-	retdec_config::Object cgv(
+	retdec::config::Object cgv(
 			gv->getName(),
-			retdec_config::Storage::inMemory(address));
+			retdec::config::Storage::inMemory(address));
 	cgv.setIsFromDebug(fromDebug);
 	cgv.setRealName(realName);
 	cgv.setCryptoDescription(cryptoDesc);
@@ -277,7 +278,7 @@ retdec_config::Object* Config::insertGlobalVariable(
 	return &p.first->second;
 }
 
-retdec_config::Object* Config::insertStackVariable(
+retdec::config::Object* Config::insertStackVariable(
 		const llvm::AllocaInst* sv,
 		int offset,
 		bool fromDebug)
@@ -297,9 +298,9 @@ retdec_config::Object* Config::insertStackVariable(
 		return nullptr;
 	}
 
-	retdec_config::Object local(
+	retdec::config::Object local(
 			sv->getName(),
-			retdec_config::Storage::onStack(offset));
+			retdec::config::Storage::onStack(offset));
 	local.setRealName(sv->getName());
 	local.setIsFromDebug(fromDebug);
 	local.type.setLlvmIr(llvmObjToString(sv->getType()));
@@ -308,10 +309,10 @@ retdec_config::Object* Config::insertStackVariable(
 	return &p.first->second;
 }
 
-retdec_config::Function* Config::insertFunction(
+retdec::config::Function* Config::insertFunction(
 		const llvm::Function* fnc,
-		tl_cpputils::Address start,
-		tl_cpputils::Address end,
+		retdec::utils::Address start,
+		retdec::utils::Address end,
 		bool fromDebug)
 {
 	std::string dm;
@@ -320,7 +321,7 @@ retdec_config::Function* Config::insertFunction(
 		dm = old->getDemangledName();
 	}
 
-	retdec_config::Function cf(fnc->getName());
+	retdec::config::Function cf(fnc->getName());
 	cf.setDemangledName(dm);
 	cf.setIsFromDebug(fromDebug);
 	cf.setStart(start);
@@ -328,7 +329,7 @@ retdec_config::Function* Config::insertFunction(
 
 	if (cf.getDemangledName().empty())
 	{
-		demangler::CDemangler* d = DemanglerProvider::getDemangler(_module);
+		retdec::demangler::CDemangler* d = DemanglerProvider::getDemangler(_module);
 		if (d)
 		{
 			auto s = d->demangleToString(fnc->getName());
@@ -343,16 +344,16 @@ retdec_config::Function* Config::insertFunction(
 	return &p.first->second;
 }
 
-retdec_config::Function* Config::renameFunction(
-		retdec_config::Function* fnc,
+retdec::config::Function* Config::renameFunction(
+		retdec::config::Function* fnc,
 		const std::string& name)
 {
-	retdec_config::Function cf = *fnc;
+	retdec::config::Function cf = *fnc;
 	cf.setName(name);
 
 	if (cf.getDemangledName().empty())
 	{
-		demangler::CDemangler* d = DemanglerProvider::getDemangler(_module);
+		retdec::demangler::CDemangler* d = DemanglerProvider::getDemangler(_module);
 		if (d)
 		{
 			auto s = d->demangleToString(fnc->getName());
@@ -368,17 +369,17 @@ retdec_config::Function* Config::renameFunction(
 	return &p.first->second;
 }
 
-const retdec_config::Object* Config::getConfigRegister(
+const retdec::config::Object* Config::getConfigRegister(
 		const llvm::Value* val)
 {
 	auto* gv = dyn_cast_or_null<GlobalVariable>(val);
 	return gv ? _configDB.registers.getObjectByName(gv->getName()) : nullptr;
 }
 
-tl_cpputils::Maybe<unsigned> Config::getConfigRegisterNumber(
+retdec::utils::Maybe<unsigned> Config::getConfigRegisterNumber(
 		const llvm::Value* val)
 {
-	tl_cpputils::Maybe<unsigned> undefVal;
+	retdec::utils::Maybe<unsigned> undefVal;
 	auto* r = getConfigRegister(val);
 	return r ? r->getStorage().getRegisterNumber() : undefVal;
 }
@@ -712,3 +713,4 @@ void ConfigProvider::clear()
 }
 
 } // namespace bin2llvmir
+} // namespace retdec

@@ -11,13 +11,14 @@
 #include <llvm/Support/SourceMgr.h>
 #include <llvm/Support/raw_ostream.h>
 
-#include "tl-cpputils/string.h"
+#include "retdec/utils/string.h"
 #include "bin2llvmir/utils/llvmir_tests.h"
-#include "bin2llvmir/utils/type.h"
+#include "retdec/bin2llvmir/utils/type.h"
 
 using namespace ::testing;
 using namespace llvm;
 
+namespace retdec {
 namespace bin2llvmir {
 namespace tests {
 
@@ -295,8 +296,8 @@ TEST_F(TypeTests, stringToLlvmTypeCreatesComplicatedType)
 	ros.str();
 
 	EXPECT_EQ(
-			tl_cpputils::removeWhitespace(str),
-			tl_cpputils::removeWhitespace(out));
+			retdec::utils::removeWhitespace(str),
+			retdec::utils::removeWhitespace(out));
 }
 
 TEST_F(TypeTests, stringToLlvmTypeReturnsAlreadyExistingTypeForStructureId)
@@ -732,3 +733,4 @@ TEST_F(TypeTests, parseFormatStringReturnsPointersIfCalledFunctionIsScanf)
 
 } // namespace tests
 } // namespace bin2llvmir
+} // namespace retdec

@@ -4,10 +4,11 @@
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */
 
-#include "bin2llvmir/optimizations/idioms/idioms_abstract.h"
+#include "retdec/bin2llvmir/optimizations/idioms/idioms_abstract.h"
 
 using namespace llvm;
 
+namespace retdec {
 namespace bin2llvmir {
 
 IdiomsAbstract::IdiomsAbstract():
@@ -110,3 +111,4 @@ bool IdiomsAbstract::isPowerOfTwoRepresentable(const ConstantInt *cnst) {
 }
 
 } // namespace bin2llvmir
+} // namespace retdec

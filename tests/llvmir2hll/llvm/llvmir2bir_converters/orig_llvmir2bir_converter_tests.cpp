@@ -6,16 +6,17 @@
 
 #include <gtest/gtest.h>
 
-#include "llvmir2hll/ir/const_int.h"
-#include "llvmir2hll/ir/int_type.h"
-#include "llvmir2hll/ir/module.h"
-#include "llvmir2hll/ir/variable.h"
-#include "llvmir2hll/llvm/llvmir2bir_converters/orig_llvmir2bir_converter.h"
+#include "retdec/llvmir2hll/ir/const_int.h"
+#include "retdec/llvmir2hll/ir/int_type.h"
+#include "retdec/llvmir2hll/ir/module.h"
+#include "retdec/llvmir2hll/ir/variable.h"
+#include "retdec/llvmir2hll/llvm/llvmir2bir_converters/orig_llvmir2bir_converter.h"
 #include "llvmir2hll/llvm/llvmir2bir_converter_tests.h"
-#include "llvmir2hll/support/smart_ptr.h"
+#include "retdec/llvmir2hll/support/smart_ptr.h"
 
 using namespace ::testing;
 
+namespace retdec {
 namespace llvmir2hll {
 namespace tests {
 
@@ -54,3 +55,4 @@ IntegralGlobalVariableWithInitializerIsConvertedCorrectly) {
 
 } // namespace tests
 } // namespace llvmir2hll
+} // namespace retdec

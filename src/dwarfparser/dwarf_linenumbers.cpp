@@ -8,13 +8,13 @@
 #include <iostream>
 #include <sstream>
 
-#include "dwarfparser/dwarf_file.h"
-#include "dwarfparser/dwarf_linenumbers.h"
+#include "retdec/dwarfparser/dwarf_file.h"
+#include "retdec/dwarfparser/dwarf_linenumbers.h"
 
 using namespace std;
 
-namespace dwarfparser
-{
+namespace retdec {
+namespace dwarfparser {
 
 /**
  * @brief ctor.
@@ -344,3 +344,4 @@ bool DwarfLine::isBasicBlockBeg() const
 }
 
 } // namespace dwarfparser
+} // namespace retdec

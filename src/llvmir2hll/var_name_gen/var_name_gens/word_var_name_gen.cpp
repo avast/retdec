@@ -6,13 +6,14 @@
 
 #include <llvm/ADT/StringExtras.h>
 
-#include "llvmir2hll/support/debug.h"
-#include "llvmir2hll/var_name_gen/var_name_gen_factory.h"
-#include "llvmir2hll/var_name_gen/var_name_gens/word_var_name_gen.h"
-#include "tl-cpputils/array.h"
+#include "retdec/llvmir2hll/support/debug.h"
+#include "retdec/llvmir2hll/var_name_gen/var_name_gen_factory.h"
+#include "retdec/llvmir2hll/var_name_gen/var_name_gens/word_var_name_gen.h"
+#include "retdec/utils/array.h"
 
-using tl_cpputils::arraySize;
+using retdec::utils::arraySize;
 
+namespace retdec {
 namespace llvmir2hll {
 
 REGISTER_AT_FACTORY("word", WORD_VAR_NAME_GEN_ID, VarNameGenFactory,
@@ -66,3 +67,4 @@ std::string WordVarNameGen::getNextVarName() {
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

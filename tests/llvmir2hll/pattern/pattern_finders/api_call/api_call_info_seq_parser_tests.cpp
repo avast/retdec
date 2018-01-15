@@ -6,10 +6,11 @@
 
 #include <gtest/gtest.h>
 
-#include "llvmir2hll/pattern/pattern_finders/api_call/api_call_info_seq_parser.h"
+#include "retdec/llvmir2hll/pattern/pattern_finders/api_call/api_call_info_seq_parser.h"
 
 using namespace ::testing;
 
+namespace retdec {
 namespace llvmir2hll {
 namespace tests {
 
@@ -255,3 +256,4 @@ ParseOfInvalidRepresentationReturnsNothing) {
 
 } // namespace tests
 } // namespace llvmir2hll
+} // namespace retdec

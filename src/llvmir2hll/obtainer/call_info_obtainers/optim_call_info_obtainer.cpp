@@ -4,22 +4,23 @@
 * @copyright (c) 2017 Avast Software, licensed under the MIT license
 */
 
-#include "llvmir2hll/graphs/cfg/cfg_traversals/optim_func_info_cfg_traversal.h"
-#include "llvmir2hll/graphs/cg/cg.h"
-#include "llvmir2hll/ir/call_expr.h"
-#include "llvmir2hll/ir/function.h"
-#include "llvmir2hll/ir/module.h"
-#include "llvmir2hll/ir/statement.h"
-#include "llvmir2hll/ir/variable.h"
-#include "llvmir2hll/obtainer/call_info_obtainer_factory.h"
-#include "llvmir2hll/obtainer/call_info_obtainers/optim_call_info_obtainer.h"
-#include "llvmir2hll/support/debug.h"
-#include "tl-cpputils/container.h"
+#include "retdec/llvmir2hll/graphs/cfg/cfg_traversals/optim_func_info_cfg_traversal.h"
+#include "retdec/llvmir2hll/graphs/cg/cg.h"
+#include "retdec/llvmir2hll/ir/call_expr.h"
+#include "retdec/llvmir2hll/ir/function.h"
+#include "retdec/llvmir2hll/ir/module.h"
+#include "retdec/llvmir2hll/ir/statement.h"
+#include "retdec/llvmir2hll/ir/variable.h"
+#include "retdec/llvmir2hll/obtainer/call_info_obtainer_factory.h"
+#include "retdec/llvmir2hll/obtainer/call_info_obtainers/optim_call_info_obtainer.h"
+#include "retdec/llvmir2hll/support/debug.h"
+#include "retdec/utils/container.h"
 
-using tl_cpputils::addToSet;
-using tl_cpputils::hasItem;
-using tl_cpputils::setIntersection;
+using retdec::utils::addToSet;
+using retdec::utils::hasItem;
+using retdec::utils::setIntersection;
 
+namespace retdec {
 namespace llvmir2hll {
 
 REGISTER_AT_FACTORY("optim", OPTIM_CALL_INFO_OBTAINER_ID, CallInfoObtainerFactory,
@@ -450,3 +451,4 @@ bool OptimCallInfoObtainer::hasChanged(const FuncInfoMap &oldInfo,
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

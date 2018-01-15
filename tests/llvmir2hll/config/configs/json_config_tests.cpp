@@ -6,11 +6,12 @@
 
 #include <gtest/gtest.h>
 
-#include "llvmir2hll/config/configs/json_config.h"
-#include "llvmir2hll/support/types.h"
+#include "retdec/llvmir2hll/config/configs/json_config.h"
+#include "retdec/llvmir2hll/support/types.h"
 
 using namespace ::testing;
 
+namespace retdec {
 namespace llvmir2hll {
 namespace tests {
 
@@ -1827,3 +1828,4 @@ GetOptsRunInFrontendReturnsCorrectValueWhenOptimizationsRun) {
 
 } // namespace tests
 } // namespace llvmir2hll
+} // namespace retdec

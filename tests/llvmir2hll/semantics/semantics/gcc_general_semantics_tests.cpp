@@ -6,10 +6,11 @@
 
 #include <gtest/gtest.h>
 
-#include "llvmir2hll/semantics/semantics/gcc_general_semantics.h"
+#include "retdec/llvmir2hll/semantics/semantics/gcc_general_semantics.h"
 
 using namespace ::testing;
 
+namespace retdec {
 namespace llvmir2hll {
 namespace tests {
 
@@ -121,3 +122,4 @@ GetSymbolicNamesForParamForUnknownFunctionsReturnsNoAnswer) {
 
 } // namespace tests
 } // namespace llvmir2hll
+} // namespace retdec

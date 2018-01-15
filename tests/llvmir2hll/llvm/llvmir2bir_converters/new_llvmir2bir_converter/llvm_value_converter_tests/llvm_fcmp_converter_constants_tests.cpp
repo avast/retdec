@@ -10,25 +10,26 @@
 #include <llvm/IR/InstrTypes.h>
 #include <llvm/IR/Instructions.h>
 
-#include "llvmir2hll/ir/and_op_expr.h"
-#include "llvmir2hll/ir/const_bool.h"
-#include "llvmir2hll/ir/eq_op_expr.h"
-#include "llvmir2hll/ir/expression.h"
-#include "llvmir2hll/ir/function.h"
-#include "llvmir2hll/ir/gt_eq_op_expr.h"
-#include "llvmir2hll/ir/gt_op_expr.h"
-#include "llvmir2hll/ir/lt_eq_op_expr.h"
-#include "llvmir2hll/ir/lt_op_expr.h"
-#include "llvmir2hll/ir/module.h"
-#include "llvmir2hll/ir/neq_op_expr.h"
-#include "llvmir2hll/ir/or_op_expr.h"
-#include "llvmir2hll/ir/return_stmt.h"
+#include "retdec/llvmir2hll/ir/and_op_expr.h"
+#include "retdec/llvmir2hll/ir/const_bool.h"
+#include "retdec/llvmir2hll/ir/eq_op_expr.h"
+#include "retdec/llvmir2hll/ir/expression.h"
+#include "retdec/llvmir2hll/ir/function.h"
+#include "retdec/llvmir2hll/ir/gt_eq_op_expr.h"
+#include "retdec/llvmir2hll/ir/gt_op_expr.h"
+#include "retdec/llvmir2hll/ir/lt_eq_op_expr.h"
+#include "retdec/llvmir2hll/ir/lt_op_expr.h"
+#include "retdec/llvmir2hll/ir/module.h"
+#include "retdec/llvmir2hll/ir/neq_op_expr.h"
+#include "retdec/llvmir2hll/ir/or_op_expr.h"
+#include "retdec/llvmir2hll/ir/return_stmt.h"
 #include "llvmir2hll/ir/assertions.h"
 #include "llvmir2hll/llvm/llvmir2bir_converters/new_llvmir2bir_converter_tests/base_tests.h"
-#include "llvmir2hll/support/smart_ptr.h"
+#include "retdec/llvmir2hll/support/smart_ptr.h"
 
 using namespace ::testing;
 
+namespace retdec {
 namespace llvmir2hll {
 namespace tests {
 
@@ -407,3 +408,4 @@ FCmpTrueInstructionIsConvertedCorrectly) {
 
 } // namespace tests
 } // namespace llvmir2hll
+} // namespace retdec

@@ -10,10 +10,11 @@
 #include <llvm/IR/LLVMContext.h>
 
 #include "llvmir2hll/ir/tests_with_module.h"
-#include "llvmir2hll/support/smart_ptr.h"
+#include "retdec/llvmir2hll/support/smart_ptr.h"
 
 using ::testing::AssertionResult;
 
+namespace retdec {
 namespace llvmir2hll {
 
 class BinaryOpExpr;
@@ -49,5 +50,6 @@ protected:
 
 } // namespace tests
 } // namespace llvmir2hll
+} // namespace retdec
 
 #endif

@@ -11,24 +11,25 @@
 #include <llvm/IR/GlobalVariable.h>
 #include <llvm/IR/Type.h>
 
-#include "llvmir2hll/ir/array_type.h"
-#include "llvmir2hll/ir/const_array.h"
-#include "llvmir2hll/ir/const_bool.h"
-#include "llvmir2hll/ir/const_float.h"
-#include "llvmir2hll/ir/const_int.h"
-#include "llvmir2hll/ir/const_null_pointer.h"
-#include "llvmir2hll/ir/const_string.h"
-#include "llvmir2hll/ir/const_struct.h"
-#include "llvmir2hll/ir/expression.h"
-#include "llvmir2hll/ir/pointer_type.h"
-#include "llvmir2hll/ir/struct_type.h"
-#include "llvmir2hll/llvm/llvmir2bir_converters/new_llvmir2bir_converter/llvm_constant_converter.h"
-#include "llvmir2hll/llvm/llvmir2bir_converters/new_llvmir2bir_converter/llvm_instruction_converter.h"
-#include "llvmir2hll/llvm/llvmir2bir_converters/new_llvmir2bir_converter/llvm_type_converter.h"
-#include "llvmir2hll/llvm/llvmir2bir_converters/new_llvmir2bir_converter/llvm_value_converter.h"
-#include "llvmir2hll/llvm/string_conversions.h"
-#include "llvmir2hll/support/debug.h"
+#include "retdec/llvmir2hll/ir/array_type.h"
+#include "retdec/llvmir2hll/ir/const_array.h"
+#include "retdec/llvmir2hll/ir/const_bool.h"
+#include "retdec/llvmir2hll/ir/const_float.h"
+#include "retdec/llvmir2hll/ir/const_int.h"
+#include "retdec/llvmir2hll/ir/const_null_pointer.h"
+#include "retdec/llvmir2hll/ir/const_string.h"
+#include "retdec/llvmir2hll/ir/const_struct.h"
+#include "retdec/llvmir2hll/ir/expression.h"
+#include "retdec/llvmir2hll/ir/pointer_type.h"
+#include "retdec/llvmir2hll/ir/struct_type.h"
+#include "retdec/llvmir2hll/llvm/llvmir2bir_converters/new_llvmir2bir_converter/llvm_constant_converter.h"
+#include "retdec/llvmir2hll/llvm/llvmir2bir_converters/new_llvmir2bir_converter/llvm_instruction_converter.h"
+#include "retdec/llvmir2hll/llvm/llvmir2bir_converters/new_llvmir2bir_converter/llvm_type_converter.h"
+#include "retdec/llvmir2hll/llvm/llvmir2bir_converters/new_llvmir2bir_converter/llvm_value_converter.h"
+#include "retdec/llvmir2hll/llvm/string_conversions.h"
+#include "retdec/llvmir2hll/support/debug.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 namespace {
@@ -382,3 +383,4 @@ ShPtr<LLVMValueConverter> LLVMConstantConverter::getConverter() {
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

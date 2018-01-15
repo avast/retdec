@@ -7,20 +7,21 @@
 #include <gtest/gtest.h>
 
 #include "llvmir2hll/analysis/tests_with_value_analysis.h"
-#include "llvmir2hll/analysis/value_analysis.h"
-#include "llvmir2hll/ir/call_expr.h"
-#include "llvmir2hll/ir/call_stmt.h"
+#include "retdec/llvmir2hll/analysis/value_analysis.h"
+#include "retdec/llvmir2hll/ir/call_expr.h"
+#include "retdec/llvmir2hll/ir/call_stmt.h"
 #include "llvmir2hll/ir/tests_with_module.h"
-#include "llvmir2hll/ir/variable.h"
-#include "llvmir2hll/obtainer/call_info_obtainer.h"
+#include "retdec/llvmir2hll/ir/variable.h"
+#include "retdec/llvmir2hll/obtainer/call_info_obtainer.h"
 #include "llvmir2hll/obtainer/call_info_obtainer_mock.h"
-#include "llvmir2hll/pattern/pattern_finder_factory.h"
-#include "llvmir2hll/pattern/pattern_finders/api_call_pattern_finder.h"
-#include "llvmir2hll/pattern/patterns/stmts_pattern.h"
-#include "llvmir2hll/support/types.h"
+#include "retdec/llvmir2hll/pattern/pattern_finder_factory.h"
+#include "retdec/llvmir2hll/pattern/pattern_finders/api_call_pattern_finder.h"
+#include "retdec/llvmir2hll/pattern/patterns/stmts_pattern.h"
+#include "retdec/llvmir2hll/support/types.h"
 
 using namespace ::testing;
 
+namespace retdec {
 namespace llvmir2hll {
 namespace tests {
 
@@ -148,3 +149,4 @@ WhenThereAreMoreAPICallsAsStatementsPatternsContainingTheseStatementsAreReturned
 
 } // namespace tests
 } // namespace llvmir2hll
+} // namespace retdec

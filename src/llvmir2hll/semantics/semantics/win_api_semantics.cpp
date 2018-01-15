@@ -4,16 +4,17 @@
 * @copyright (c) 2017 Avast Software, licensed under the MIT license
 */
 
-#include "llvmir2hll/semantics/semantics/win_api_semantics.h"
-#include "llvmir2hll/semantics/semantics/win_api_semantics/func_never_returns.h"
-#include "llvmir2hll/semantics/semantics/win_api_semantics/get_c_header_file_for_func.h"
-#include "llvmir2hll/semantics/semantics/win_api_semantics/get_name_of_param.h"
-#include "llvmir2hll/semantics/semantics/win_api_semantics/get_name_of_var_storing_result.h"
-#include "llvmir2hll/semantics/semantics/win_api_semantics/get_symbolic_names_for_param.h"
-#include "llvmir2hll/semantics/semantics_factory.h"
-#include "llvmir2hll/support/debug.h"
-#include "llvmir2hll/support/types.h"
+#include "retdec/llvmir2hll/semantics/semantics/win_api_semantics.h"
+#include "retdec/llvmir2hll/semantics/semantics/win_api_semantics/func_never_returns.h"
+#include "retdec/llvmir2hll/semantics/semantics/win_api_semantics/get_c_header_file_for_func.h"
+#include "retdec/llvmir2hll/semantics/semantics/win_api_semantics/get_name_of_param.h"
+#include "retdec/llvmir2hll/semantics/semantics/win_api_semantics/get_name_of_var_storing_result.h"
+#include "retdec/llvmir2hll/semantics/semantics/win_api_semantics/get_symbolic_names_for_param.h"
+#include "retdec/llvmir2hll/semantics/semantics_factory.h"
+#include "retdec/llvmir2hll/support/debug.h"
+#include "retdec/llvmir2hll/support/types.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 REGISTER_AT_FACTORY("win-api", WIN_API_SEMANTICS_ID, SemanticsFactory,
@@ -61,3 +62,4 @@ Maybe<IntStringMap> WinAPISemantics::getSymbolicNamesForParam(
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

@@ -9,12 +9,13 @@
 */
 
 #include "../lib/Transforms/Scalar/SimplifyCFGPass.cpp"
-#include "bin2llvmir/optimizations/unreachable_funcs/unreachable_funcs.h"
+#include "retdec/bin2llvmir/optimizations/unreachable_funcs/unreachable_funcs.h"
 #include "bin2llvmir/utils/llvmir_tests.h"
 
 using namespace ::testing;
 using namespace llvm;
 
+namespace retdec {
 namespace bin2llvmir {
 namespace tests {
 
@@ -128,3 +129,4 @@ TEST_F(CFGSimplifyPassTests, unreachableBasicBlocksRemove)
 
 } // namespace tests
 } // namespace bin2llvmir
+} // namespace retdec

@@ -8,15 +8,15 @@
 #include <llvm/IR/InstIterator.h>
 #include <llvm/IR/Operator.h>
 
-#include "tl-cpputils/string.h"
-#include "bin2llvmir/optimizations/register/register.h"
-#include "bin2llvmir/providers/asm_instruction.h"
-#include "bin2llvmir/utils/defs.h"
+#include "retdec/utils/string.h"
+#include "retdec/bin2llvmir/optimizations/register/register.h"
+#include "retdec/bin2llvmir/providers/asm_instruction.h"
+#include "retdec/bin2llvmir/utils/defs.h"
 #define debug_enabled false
-#include "llvm-support/utils.h"
-#include "bin2llvmir/utils/type.h"
+#include "retdec/llvm-support/utils.h"
+#include "retdec/bin2llvmir/utils/type.h"
 
-using namespace llvm_support;
+using namespace retdec::llvm_support;
 using namespace llvm;
 
 namespace {
@@ -44,6 +44,7 @@ std::map<std::pair<std::string, unsigned>, std::string> RegClassNum2Name =
 
 } // anonymous namespace
 
+namespace retdec {
 namespace bin2llvmir {
 
 char RegisterAnalysis::ID = 0;
@@ -168,7 +169,7 @@ bool RegisterAnalysis::x86FpuAnalysis()
 	{
 		LOG << f.getName().str() << std::endl;
 
-		tl_cpputils::NonIterableSet<BasicBlock*> seenBbs;
+		retdec::utils::NonIterableSet<BasicBlock*> seenBbs;
 		for (auto& bb : f)
 		{
 			int topVal = 0;
@@ -179,7 +180,7 @@ bool RegisterAnalysis::x86FpuAnalysis()
 }
 
 bool RegisterAnalysis::x86FpuAnalysisBb(
-		tl_cpputils::NonIterableSet<llvm::BasicBlock*>& seenBbs,
+		retdec::utils::NonIterableSet<llvm::BasicBlock*>& seenBbs,
 		llvm::BasicBlock* bb,
 		int topVal)
 {
@@ -297,12 +298,12 @@ bool RegisterAnalysis::x86FpuAnalysisBb(
 
 bool RegisterAnalysis::isRegisterStoreFunction(llvm::Function* f)
 {
-	return f ? tl_cpputils::startsWith(f->getName(), _regStoreFncName): false;
+	return f ? retdec::utils::startsWith(f->getName(), _regStoreFncName): false;
 }
 
 bool RegisterAnalysis::isRegisterLoadFunction(llvm::Function* f)
 {
-	return f ? tl_cpputils::startsWith(f->getName(), _regLoadFncName): false;
+	return f ? retdec::utils::startsWith(f->getName(), _regLoadFncName): false;
 }
 
 llvm::CallInst* RegisterAnalysis::isRegisterStoreFunctionCall(llvm::Value* val)
@@ -341,3 +342,4 @@ llvm::GlobalVariable* RegisterAnalysis::getLlvmRegister(
 }
 
 } // namespace bin2llvmir
+} // namespace retdec

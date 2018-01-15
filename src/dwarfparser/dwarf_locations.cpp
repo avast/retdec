@@ -10,13 +10,13 @@
 #include <libdwarf/dwarf.h>
 #include <libdwarf/libdwarf.h>
 
-#include "dwarfparser/dwarf_file.h"
-#include "dwarfparser/dwarf_locations.h"
+#include "retdec/dwarfparser/dwarf_file.h"
+#include "retdec/dwarfparser/dwarf_locations.h"
 
 using namespace std;
 
-namespace dwarfparser
-{
+namespace retdec {
+namespace dwarfparser {
 
 /**
  * @brief ctor.
@@ -1063,3 +1063,4 @@ DwarfLocationDesc::evaluateExpression(Expression &expr, string *retN,
 }
 
 } // namespace dwarfparser
+} // namespace retdec

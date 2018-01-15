@@ -4,12 +4,13 @@
 * @copyright (c) 2017 Avast Software, licensed under the MIT license
 */
 
-#include "llvmir2hll/analysis/no_init_var_def_analysis.h"
-#include "llvmir2hll/ir/function.h"
-#include "llvmir2hll/ir/module.h"
-#include "llvmir2hll/ir/var_def_stmt.h"
-#include "llvmir2hll/support/debug.h"
+#include "retdec/llvmir2hll/analysis/no_init_var_def_analysis.h"
+#include "retdec/llvmir2hll/ir/function.h"
+#include "retdec/llvmir2hll/ir/module.h"
+#include "retdec/llvmir2hll/ir/var_def_stmt.h"
+#include "retdec/llvmir2hll/support/debug.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 NoInitVarDefAnalysis::NoInitVarDefAnalysis() {}
@@ -39,3 +40,4 @@ void NoInitVarDefAnalysis::visit(ShPtr<VarDefStmt> varDefStmt) {
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

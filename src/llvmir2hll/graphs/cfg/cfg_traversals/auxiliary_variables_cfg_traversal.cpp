@@ -4,23 +4,24 @@
 * @copyright (c) 2017 Avast Software, licensed under the MIT license
 */
 
-#include "llvmir2hll/analysis/value_analysis.h"
-#include "llvmir2hll/graphs/cfg/cfg_traversals/auxiliary_variables_cfg_traversal.h"
-#include "llvmir2hll/graphs/cg/cg.h"
-#include "llvmir2hll/ir/assign_stmt.h"
-#include "llvmir2hll/ir/function.h"
-#include "llvmir2hll/ir/module.h"
-#include "llvmir2hll/ir/var_def_stmt.h"
-#include "llvmir2hll/ir/variable.h"
-#include "llvmir2hll/obtainer/call_info_obtainer.h"
-#include "llvmir2hll/support/debug.h"
-#include "llvmir2hll/utils/ir.h"
-#include "tl-cpputils/container.h"
+#include "retdec/llvmir2hll/analysis/value_analysis.h"
+#include "retdec/llvmir2hll/graphs/cfg/cfg_traversals/auxiliary_variables_cfg_traversal.h"
+#include "retdec/llvmir2hll/graphs/cg/cg.h"
+#include "retdec/llvmir2hll/ir/assign_stmt.h"
+#include "retdec/llvmir2hll/ir/function.h"
+#include "retdec/llvmir2hll/ir/module.h"
+#include "retdec/llvmir2hll/ir/var_def_stmt.h"
+#include "retdec/llvmir2hll/ir/variable.h"
+#include "retdec/llvmir2hll/obtainer/call_info_obtainer.h"
+#include "retdec/llvmir2hll/support/debug.h"
+#include "retdec/llvmir2hll/utils/ir.h"
+#include "retdec/utils/container.h"
 
-using tl_cpputils::getKeysFromMap;
-using tl_cpputils::hasItem;
-using tl_cpputils::mapHasKey;
+using retdec::utils::getKeysFromMap;
+using retdec::utils::hasItem;
+using retdec::utils::mapHasKey;
 
+namespace retdec {
 namespace llvmir2hll {
 
 /**
@@ -188,3 +189,4 @@ bool AuxiliaryVariablesCFGTraversal::combineRetVals(bool /*origRetVal*/,
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

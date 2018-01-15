@@ -4,14 +4,15 @@
 * @copyright (c) 2017 Avast Software, licensed under the MIT license
 */
 
-#include "llvmir2hll/ir/function_type.h"
-#include "llvmir2hll/ir/void_type.h"
-#include "llvmir2hll/support/debug.h"
-#include "llvmir2hll/support/visitor.h"
-#include "tl-cpputils/container.h"
+#include "retdec/llvmir2hll/ir/function_type.h"
+#include "retdec/llvmir2hll/ir/void_type.h"
+#include "retdec/llvmir2hll/support/debug.h"
+#include "retdec/llvmir2hll/support/visitor.h"
+#include "retdec/utils/container.h"
 
-using tl_cpputils::getNthItem;
+using retdec::utils::getNthItem;
 
+namespace retdec {
 namespace llvmir2hll {
 
 /**
@@ -178,3 +179,4 @@ void FunctionType::accept(Visitor *v) {
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

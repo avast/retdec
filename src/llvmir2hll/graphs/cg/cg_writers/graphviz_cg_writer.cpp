@@ -4,17 +4,18 @@
 * @copyright (c) 2017 Avast Software, licensed under the MIT license
 */
 
-#include "llvmir2hll/graphs/cg/cg.h"
-#include "llvmir2hll/graphs/cg/cg_writer_factory.h"
-#include "llvmir2hll/graphs/cg/cg_writers/graphviz_cg_writer.h"
-#include "llvmir2hll/ir/function.h"
-#include "llvmir2hll/ir/module.h"
-#include "llvmir2hll/support/debug.h"
-#include "llvmir2hll/utils/graphviz.h"
-#include "tl-cpputils/conversion.h"
+#include "retdec/llvmir2hll/graphs/cg/cg.h"
+#include "retdec/llvmir2hll/graphs/cg/cg_writer_factory.h"
+#include "retdec/llvmir2hll/graphs/cg/cg_writers/graphviz_cg_writer.h"
+#include "retdec/llvmir2hll/ir/function.h"
+#include "retdec/llvmir2hll/ir/module.h"
+#include "retdec/llvmir2hll/support/debug.h"
+#include "retdec/llvmir2hll/utils/graphviz.h"
+#include "retdec/utils/conversion.h"
 
-using tl_cpputils::toString;
+using retdec::utils::toString;
 
+namespace retdec {
 namespace llvmir2hll {
 
 REGISTER_AT_FACTORY("dot", GRAPHVIZ_CG_WRITER_ID, CGWriterFactory,
@@ -165,3 +166,4 @@ std::string GraphvizCGWriter::getNodeLabelForFunc(ShPtr<Function> func) {
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

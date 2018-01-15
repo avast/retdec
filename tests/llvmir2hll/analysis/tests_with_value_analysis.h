@@ -11,8 +11,8 @@
 #include <gtest/gtest.h>
 
 #include "llvmir2hll/analysis/alias_analysis/alias_analysis_mock.h"
-#include "llvmir2hll/analysis/value_analysis.h"
-#include "llvmir2hll/support/smart_ptr.h"
+#include "retdec/llvmir2hll/analysis/value_analysis.h"
+#include "retdec/llvmir2hll/support/smart_ptr.h"
 
 /**
 * @brief Instantiates AliasAnalysisMock, AliasAnalysis, and ValueAnalysis using

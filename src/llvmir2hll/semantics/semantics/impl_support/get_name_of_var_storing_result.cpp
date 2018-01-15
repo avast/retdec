@@ -4,8 +4,9 @@
 * @copyright (c) 2017 Avast Software, licensed under the MIT license
 */
 
-#include "llvmir2hll/semantics/semantics/impl_support/get_name_of_var_storing_result.h"
+#include "retdec/llvmir2hll/semantics/semantics/impl_support/get_name_of_var_storing_result.h"
 
+namespace retdec {
 namespace llvmir2hll {
 namespace semantics {
 
@@ -21,3 +22,4 @@ Maybe<std::string> getNameOfVarStoringResultFromMap(const std::string &funcName,
 
 } // namespace semantics
 } // namespace llvmir2hll
+} // namespace retdec

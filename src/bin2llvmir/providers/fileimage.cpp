@@ -4,15 +4,16 @@
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */
 
-#include "tl-cpputils/string.h"
-#include "bin2llvmir/providers/fileimage.h"
-#include "bin2llvmir/utils/global_var.h"
-#include "bin2llvmir/utils/type.h"
-#include "loader/image_factory.h"
-#include "loader/loader/raw_data/raw_data_image.h"
+#include "retdec/utils/string.h"
+#include "retdec/bin2llvmir/providers/fileimage.h"
+#include "retdec/bin2llvmir/utils/global_var.h"
+#include "retdec/bin2llvmir/utils/type.h"
+#include "retdec/loader/image_factory.h"
+#include "retdec/loader/loader/raw_data/raw_data_image.h"
 
 using namespace llvm;
 
+namespace retdec {
 namespace bin2llvmir {
 
 //
@@ -28,7 +29,7 @@ FileImage::FileImage(
 		:
 		FileImage(
 				m,
-				loader::createImage(path, &config->getConfig()),
+				retdec::loader::createImage(path, &config->getConfig()),
 				config)
 {
 
@@ -36,12 +37,12 @@ FileImage::FileImage(
 
 FileImage::FileImage(
 		llvm::Module* m,
-		const std::shared_ptr<fileformat::FileFormat>& ff,
+		const std::shared_ptr<retdec::fileformat::FileFormat>& ff,
 		Config* config)
 		:
 		FileImage(
 				m,
-				loader::createImage(ff),
+				retdec::loader::createImage(ff),
 				config)
 {
 
@@ -49,7 +50,7 @@ FileImage::FileImage(
 
 FileImage::FileImage(
 		llvm::Module* m,
-		std::unique_ptr<loader::Image> img,
+		std::unique_ptr<retdec::loader::Image> img,
 		Config* config)
 		:
 		_module(m),
@@ -64,7 +65,7 @@ FileImage::FileImage(
 	}
 
 	_image->getFileFormat()->initFromConfig(config->getConfig());
-	if (auto* imgRaw = dynamic_cast<loader::RawDataImage*>(
+	if (auto* imgRaw = dynamic_cast<retdec::loader::RawDataImage*>(
 			_image.get()))
 	{
 		imgRaw->reload();
@@ -85,19 +86,19 @@ bool FileImage::isOk() const
 	return _image != nullptr;
 }
 
-loader::Image* FileImage::getImage()
+retdec::loader::Image* FileImage::getImage()
 {
 	return _image.get();
 }
 
-fileformat::FileFormat* FileImage::getFileFormat()
+retdec::fileformat::FileFormat* FileImage::getFileFormat()
 {
 	return _image->getFileFormat();
 }
 
 ConstantInt* FileImage::getConstantInt(
 		IntegerType* t,
-		tl_cpputils::Address addr)
+		retdec::utils::Address addr)
 {
 	if (addr.isUndefined())
 	{
@@ -109,17 +110,17 @@ ConstantInt* FileImage::getConstantInt(
 	return _image->getXByte(addr, s, v) ? ConstantInt::get(t, v) : nullptr;
 }
 
-llvm::ConstantInt* FileImage::getConstantDefault(tl_cpputils::Address addr)
+llvm::ConstantInt* FileImage::getConstantDefault(retdec::utils::Address addr)
 {
 	return getConstantInt(getDefaultType(_module), addr);
 }
 
-llvm::Constant* FileImage::getConstantHalf(tl_cpputils::Address addr)
+llvm::Constant* FileImage::getConstantHalf(retdec::utils::Address addr)
 {
 	return getConstantFloat(addr);
 }
 
-llvm::Constant* FileImage::getConstantFloat(tl_cpputils::Address addr)
+llvm::Constant* FileImage::getConstantFloat(retdec::utils::Address addr)
 {
 	if (addr.isUndefined())
 	{
@@ -131,7 +132,7 @@ llvm::Constant* FileImage::getConstantFloat(tl_cpputils::Address addr)
 	return _image->getFloat(addr, v) ? ConstantFP::get(t, v) : nullptr;
 }
 
-llvm::Constant* FileImage::getConstantDouble(tl_cpputils::Address addr)
+llvm::Constant* FileImage::getConstantDouble(retdec::utils::Address addr)
 {
 	if (addr.isUndefined())
 	{
@@ -143,7 +144,7 @@ llvm::Constant* FileImage::getConstantDouble(tl_cpputils::Address addr)
 	return _image->getDouble(addr, v) ? ConstantFP::get(t, v) : nullptr;
 }
 
-llvm::Constant* FileImage::getConstantLongDouble(tl_cpputils::Address addr)
+llvm::Constant* FileImage::getConstantLongDouble(retdec::utils::Address addr)
 {
 	if (addr.isUndefined())
 	{
@@ -158,7 +159,7 @@ llvm::Constant* FileImage::getConstantLongDouble(tl_cpputils::Address addr)
 	return b ? ConstantFP::get(t, StringRef(ss.str().c_str())) : nullptr;
 }
 
-llvm::Constant* FileImage::getConstantCharPointer(tl_cpputils::Address addr)
+llvm::Constant* FileImage::getConstantCharPointer(retdec::utils::Address addr)
 {
 	if (addr.isUndefined())
 	{
@@ -195,7 +196,7 @@ llvm::Constant* FileImage::getConstantCharPointer(tl_cpputils::Address addr)
 }
 
 llvm::Constant* FileImage::getConstantCharArrayNice(
-		tl_cpputils::Address addr)
+		retdec::utils::Address addr)
 {
 	if (addr.isUndefined())
 	{
@@ -203,7 +204,7 @@ llvm::Constant* FileImage::getConstantCharArrayNice(
 	}
 
 	std::string str;
-	if (_image->getNTBS(addr, str) && tl_cpputils::isNiceString(str, 1.0))
+	if (_image->getNTBS(addr, str) && retdec::utils::isNiceString(str, 1.0))
 	{
 		return ConstantDataArray::getString(_module->getContext(), str);
 	}
@@ -220,7 +221,7 @@ llvm::Constant* FileImage::getConstantCharArrayNice(
  */
 llvm::Constant* FileImage::getConstantPointer(
 		llvm::PointerType* type,
-		tl_cpputils::Address addr)
+		retdec::utils::Address addr)
 {
 	if (addr.isUndefined())
 	{
@@ -242,7 +243,7 @@ llvm::Constant* FileImage::getConstantPointer(
 
 llvm::Constant* FileImage::getConstantStruct(
 		llvm::StructType* type,
-		tl_cpputils::Address addr)
+		retdec::utils::Address addr)
 {
 	size_t offset = 0;
 	std::vector<Constant*> vc;
@@ -264,7 +265,7 @@ llvm::Constant* FileImage::getConstantStruct(
 
 llvm::Constant* FileImage::getConstantArray(
 		llvm::ArrayType* type,
-		tl_cpputils::Address addr)
+		retdec::utils::Address addr)
 {
 	std::vector<Constant*> vc;
 	size_t offset = 0;
@@ -309,7 +310,7 @@ llvm::Constant* FileImage::getConstantArray(
  */
 llvm::Constant* FileImage::getConstant(
 		llvm::Type* type,
-		tl_cpputils::Address addr,
+		retdec::utils::Address addr,
 		bool wideString)
 {
 	Constant* c = nullptr;
@@ -419,7 +420,7 @@ llvm::Constant* FileImage::getConstant(
 llvm::Constant* FileImage::getConstant(
 		Config* config,
 		DebugFormat* dbgf,
-		tl_cpputils::Address addr)
+		retdec::utils::Address addr)
 {
 	if (addr.isUndefined())
 	{
@@ -459,7 +460,7 @@ llvm::Constant* FileImage::getConstant(
 			//
 			if (auto* cf = config->getConfigFunction(val))
 			{
-				if (!tl_cpputils::contains(cf->getName(), "unknown_"))
+				if (!retdec::utils::contains(cf->getName(), "unknown_"))
 				{
 					break;
 				}
@@ -518,7 +519,7 @@ llvm::Constant* FileImage::getConstant(
 		// Simple Value::setName() does not work on Constant.
 		c->setValueName(ValueName::Create("wide-string"));
 	}
-	else if (!seg && _image->getNTBS(addr, str) && tl_cpputils::isNiceString(str, 1.0) && str.size() >= 2)
+	else if (!seg && _image->getNTBS(addr, str) && retdec::utils::isNiceString(str, 1.0) && str.size() >= 2)
 	{
 		c = ConstantDataArray::getString(ctx, str);
 	}
@@ -531,7 +532,7 @@ llvm::Constant* FileImage::getConstant(
 }
 
 /**
- * There is a function fileformat::getSymbolTables()
+ * There is a function retdec::fileformat::getSymbolTables()
  * which gets the first symbol on a specified address.
  *
  * However, sometimes there are multiple symbols for one address.
@@ -540,10 +541,10 @@ llvm::Constant* FileImage::getConstant(
  * If there is only one symbol, it is simply returned.
  * If there is no symbol, @c nullptr is returned.
  */
-const fileformat::Symbol* FileImage::getPreferredSymbol(
-		tl_cpputils::Address addr)
+const retdec::fileformat::Symbol* FileImage::getPreferredSymbol(
+		retdec::utils::Address addr)
 {
-	std::set<const fileformat::Symbol*> syms;
+	std::set<const retdec::fileformat::Symbol*> syms;
 
 	for (const auto* t : _image->getFileFormat()->getSymbolTables())
 	for (const auto& s : *t)
@@ -560,7 +561,7 @@ const fileformat::Symbol* FileImage::getPreferredSymbol(
 		}
 	}
 
-	const fileformat::Symbol* ret = nullptr;
+	const retdec::fileformat::Symbol* ret = nullptr;
 
 	for (auto* s : syms)
 	{
@@ -624,7 +625,7 @@ FileImage* FileImageProvider::addFileImage(
  */
 FileImage* FileImageProvider::addFileImage(
 		llvm::Module* m,
-		const std::shared_ptr<fileformat::FileFormat>& ff,
+		const std::shared_ptr<retdec::fileformat::FileFormat>& ff,
 		Config* config)
 {
 	return addFileImage(m, FileImage(m, ff, config));
@@ -679,3 +680,4 @@ void FileImageProvider::clear()
 }
 
 } // namespace bin2llvmir
+} // namespace retdec

@@ -6,14 +6,15 @@
 
 #include <gtest/gtest.h>
 
-#include "llvmir2hll/ir/array_type.h"
-#include "llvmir2hll/ir/pointer_type.h"
-#include "llvmir2hll/ir/struct_type.h"
-#include "llvmir2hll/support/struct_types_sorter.h"
-#include "llvmir2hll/support/types.h"
+#include "retdec/llvmir2hll/ir/array_type.h"
+#include "retdec/llvmir2hll/ir/pointer_type.h"
+#include "retdec/llvmir2hll/ir/struct_type.h"
+#include "retdec/llvmir2hll/support/struct_types_sorter.h"
+#include "retdec/llvmir2hll/support/types.h"
 
 using namespace ::testing;
 
+namespace retdec {
 namespace llvmir2hll {
 namespace tests {
 
@@ -194,3 +195,4 @@ FiveStructTypesWithSomeDependenciesAreProperlySortedByNameAndByDependencies) {
 
 } // namespace tests
 } // namespace llvmir2hll
+} // namespace retdec

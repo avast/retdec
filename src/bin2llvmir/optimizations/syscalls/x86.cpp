@@ -8,13 +8,13 @@
 
 #include <llvm/IR/Constants.h>
 
-#include "llvm-support/utils.h"
-#include "bin2llvmir/optimizations/syscalls/syscalls.h"
-#include "bin2llvmir/providers/asm_instruction.h"
-#include "bin2llvmir/utils/defs.h"
-#include "bin2llvmir/utils/type.h"
+#include "retdec/llvm-support/utils.h"
+#include "retdec/bin2llvmir/optimizations/syscalls/syscalls.h"
+#include "retdec/bin2llvmir/providers/asm_instruction.h"
+#include "retdec/bin2llvmir/utils/defs.h"
+#include "retdec/bin2llvmir/utils/type.h"
 
-using namespace llvm_support;
+using namespace retdec::llvm_support;
 using namespace llvm;
 
 #define debug_enabled false
@@ -431,6 +431,7 @@ std::map<uint64_t, std::string> x86SocketSyscalls =
 	{20, "sendmmsg"} // SYS_SENDMMSG -- sys_sendmmsg(2)
 };
 
+namespace retdec {
 namespace bin2llvmir {
 
 bool SyscallFixer::x86TransformToDummySyscall(AsmInstruction& ai)
@@ -614,3 +615,4 @@ bool SyscallFixer::runX86()
 }
 
 } // namespace bin2llvmir
+} // namespace retdec

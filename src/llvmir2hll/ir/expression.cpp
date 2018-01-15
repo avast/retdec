@@ -4,9 +4,10 @@
 * @copyright (c) 2017 Avast Software, licensed under the MIT license
 */
 
-#include "llvmir2hll/ir/expression.h"
-#include "llvmir2hll/support/debug.h"
+#include "retdec/llvmir2hll/ir/expression.h"
+#include "retdec/llvmir2hll/support/debug.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 /**
@@ -56,3 +57,4 @@ void Expression::replaceExpression(ShPtr<Expression> oldExpr,
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

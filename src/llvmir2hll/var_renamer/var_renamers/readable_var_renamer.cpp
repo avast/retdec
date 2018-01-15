@@ -4,34 +4,35 @@
 * @copyright (c) 2017 Avast Software, licensed under the MIT license
 */
 
-#include "llvmir2hll/ir/assign_stmt.h"
-#include "llvmir2hll/ir/call_expr.h"
-#include "llvmir2hll/ir/for_loop_stmt.h"
-#include "llvmir2hll/ir/function.h"
-#include "llvmir2hll/ir/module.h"
-#include "llvmir2hll/ir/return_stmt.h"
-#include "llvmir2hll/ir/statement.h"
-#include "llvmir2hll/ir/var_def_stmt.h"
-#include "llvmir2hll/ir/variable.h"
-#include "llvmir2hll/semantics/semantics.h"
-#include "llvmir2hll/support/debug.h"
-#include "llvmir2hll/support/maybe.h"
-#include "llvmir2hll/support/statements_counter.h"
-#include "llvmir2hll/support/types.h"
-#include "llvmir2hll/utils/ir.h"
-#include "llvmir2hll/var_name_gen/var_name_gens/num_var_name_gen.h"
-#include "llvmir2hll/var_renamer/var_renamer_factory.h"
-#include "llvmir2hll/var_renamer/var_renamers/readable_var_renamer.h"
-#include "tl-cpputils/array.h"
-#include "tl-cpputils/container.h"
-#include "tl-cpputils/conversion.h"
+#include "retdec/llvmir2hll/ir/assign_stmt.h"
+#include "retdec/llvmir2hll/ir/call_expr.h"
+#include "retdec/llvmir2hll/ir/for_loop_stmt.h"
+#include "retdec/llvmir2hll/ir/function.h"
+#include "retdec/llvmir2hll/ir/module.h"
+#include "retdec/llvmir2hll/ir/return_stmt.h"
+#include "retdec/llvmir2hll/ir/statement.h"
+#include "retdec/llvmir2hll/ir/var_def_stmt.h"
+#include "retdec/llvmir2hll/ir/variable.h"
+#include "retdec/llvmir2hll/semantics/semantics.h"
+#include "retdec/llvmir2hll/support/debug.h"
+#include "retdec/llvmir2hll/support/maybe.h"
+#include "retdec/llvmir2hll/support/statements_counter.h"
+#include "retdec/llvmir2hll/support/types.h"
+#include "retdec/llvmir2hll/utils/ir.h"
+#include "retdec/llvmir2hll/var_name_gen/var_name_gens/num_var_name_gen.h"
+#include "retdec/llvmir2hll/var_renamer/var_renamer_factory.h"
+#include "retdec/llvmir2hll/var_renamer/var_renamers/readable_var_renamer.h"
+#include "retdec/utils/array.h"
+#include "retdec/utils/container.h"
+#include "retdec/utils/conversion.h"
 
 using namespace std::string_literals;
 
-using tl_cpputils::addToSet;
-using tl_cpputils::arraySize;
-using tl_cpputils::toString;
+using retdec::utils::addToSet;
+using retdec::utils::arraySize;
+using retdec::utils::toString;
 
+namespace retdec {
 namespace llvmir2hll {
 
 namespace {
@@ -513,3 +514,4 @@ void ReadableVarRenamer::visit(ShPtr<Variable> var) {
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

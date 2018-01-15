@@ -4,10 +4,11 @@
 * @copyright (c) 2017 Avast Software, licensed under the MIT license
 */
 
-#include "llvmir2hll/ir/address_op_expr.h"
-#include "llvmir2hll/support/debug.h"
-#include "llvmir2hll/support/visitor.h"
+#include "retdec/llvmir2hll/ir/address_op_expr.h"
+#include "retdec/llvmir2hll/support/debug.h"
+#include "retdec/llvmir2hll/support/visitor.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 /**
@@ -64,3 +65,4 @@ ShPtr<AddressOpExpr> AddressOpExpr::create(ShPtr<Expression> op) {
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

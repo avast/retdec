@@ -10,10 +10,11 @@
 #include <llvm/IR/DerivedTypes.h>
 #include <llvm/IR/GlobalVariable.h>
 
-#include "llvmir2hll/ir/const_string.h"
-#include "llvmir2hll/llvm/string_conversions.h"
-#include "llvmir2hll/support/debug.h"
+#include "retdec/llvmir2hll/ir/const_string.h"
+#include "retdec/llvmir2hll/llvm/string_conversions.h"
+#include "retdec/llvmir2hll/support/debug.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 namespace {
@@ -182,3 +183,4 @@ ShPtr<ConstString> getInitializerAsConstString(llvm::GlobalVariable *v) {
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

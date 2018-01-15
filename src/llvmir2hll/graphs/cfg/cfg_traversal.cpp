@@ -4,13 +4,14 @@
 * @copyright (c) 2017 Avast Software, licensed under the MIT license
 */
 
-#include "llvmir2hll/graphs/cfg/cfg_traversal.h"
-#include "llvmir2hll/ir/empty_stmt.h"
-#include "llvmir2hll/support/debug.h"
-#include "tl-cpputils/container.h"
+#include "retdec/llvmir2hll/graphs/cfg/cfg_traversal.h"
+#include "retdec/llvmir2hll/ir/empty_stmt.h"
+#include "retdec/llvmir2hll/support/debug.h"
+#include "retdec/utils/container.h"
 
-using tl_cpputils::hasItem;
+using retdec::utils::hasItem;
 
+namespace retdec {
 namespace llvmir2hll {
 
 /**
@@ -266,3 +267,4 @@ bool CFGTraversal::traverseNodePredecessors(ShPtr<CFG::Node> node) {
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

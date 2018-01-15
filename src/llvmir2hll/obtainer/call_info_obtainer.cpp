@@ -6,23 +6,24 @@
 
 #include <cstddef>
 
-#include "llvmir2hll/analysis/value_analysis.h"
-#include "llvmir2hll/graphs/cfg/cfg_builders/non_recursive_cfg_builder.h"
-#include "llvmir2hll/ir/call_expr.h"
-#include "llvmir2hll/ir/function.h"
-#include "llvmir2hll/ir/module.h"
-#include "llvmir2hll/ir/variable.h"
-#include "llvmir2hll/obtainer/call_info_obtainer.h"
-#include "llvmir2hll/support/debug.h"
-#include "llvm-support/diagnostics.h"
-#include "tl-cpputils/container.h"
+#include "retdec/llvmir2hll/analysis/value_analysis.h"
+#include "retdec/llvmir2hll/graphs/cfg/cfg_builders/non_recursive_cfg_builder.h"
+#include "retdec/llvmir2hll/ir/call_expr.h"
+#include "retdec/llvmir2hll/ir/function.h"
+#include "retdec/llvmir2hll/ir/module.h"
+#include "retdec/llvmir2hll/ir/variable.h"
+#include "retdec/llvmir2hll/obtainer/call_info_obtainer.h"
+#include "retdec/llvmir2hll/support/debug.h"
+#include "retdec/llvm-support/diagnostics.h"
+#include "retdec/utils/container.h"
 
-using namespace llvm_support;
+using namespace retdec::llvm_support;
 
-using tl_cpputils::hasItem;
-using tl_cpputils::setDifference;
-using tl_cpputils::setUnion;
+using retdec::utils::hasItem;
+using retdec::utils::setDifference;
+using retdec::utils::setUnion;
 
+namespace retdec {
 namespace llvmir2hll {
 
 /**
@@ -441,3 +442,4 @@ void CallInfoObtainer::SCCComputer::visit(ShPtr<CG::CalledFuncs> calledFunc,
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

@@ -9,13 +9,14 @@
 #include <llvm/IR/Instruction.h>
 #include <llvm/IR/Instructions.h>
 
-#include "bin2llvmir/optimizations/control_flow/control_flow.h"
-#include "bin2llvmir/utils/type.h"
+#include "retdec/bin2llvmir/optimizations/control_flow/control_flow.h"
+#include "retdec/bin2llvmir/utils/type.h"
 #define debug_enabled false
-#include "llvm-support/utils.h"
+#include "retdec/llvm-support/utils.h"
 
 using namespace llvm;
 
+namespace retdec {
 namespace bin2llvmir {
 
 bool ControlFlow::runPowerpc()
@@ -92,3 +93,4 @@ bool ControlFlow::runPowerpcCall(AsmInstruction& ai)
 }
 
 } // namespace bin2llvmir
+} // namespace retdec

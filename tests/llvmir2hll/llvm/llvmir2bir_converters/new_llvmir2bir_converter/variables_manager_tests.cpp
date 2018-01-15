@@ -15,18 +15,19 @@
 #include <llvm/IR/LLVMContext.h>
 #include <llvm/IR/Type.h>
 
-#include "llvmir2hll/ir/int_type.h"
+#include "retdec/llvmir2hll/ir/int_type.h"
 #include "llvmir2hll/ir/assertions.h"
 #include "llvmir2hll/ir/tests_with_module.h"
-#include "llvmir2hll/ir/variable.h"
-#include "llvmir2hll/ir/void_type.h"
-#include "llvmir2hll/llvm/llvmir2bir_converters/new_llvmir2bir_converter/variables_manager.h"
-#include "llvmir2hll/support/smart_ptr.h"
-#include "llvmir2hll/support/types.h"
+#include "retdec/llvmir2hll/ir/variable.h"
+#include "retdec/llvmir2hll/ir/void_type.h"
+#include "retdec/llvmir2hll/llvm/llvmir2bir_converters/new_llvmir2bir_converter/variables_manager.h"
+#include "retdec/llvmir2hll/support/smart_ptr.h"
+#include "retdec/llvmir2hll/support/types.h"
 
 using namespace ::testing;
 using namespace std::string_literals;
 
+namespace retdec {
 namespace llvmir2hll {
 namespace tests {
 
@@ -201,3 +202,4 @@ EmptyVarSetIsReturnedForNonEmptyVarsAfterReset) {
 
 } // namespace tests
 } // namespace llvmir2hll
+} // namespace retdec

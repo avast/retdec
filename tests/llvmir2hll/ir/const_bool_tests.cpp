@@ -6,10 +6,11 @@
 
 #include <gtest/gtest.h>
 
-#include "llvmir2hll/ir/const_bool.h"
+#include "retdec/llvmir2hll/ir/const_bool.h"
 
 using namespace ::testing;
 
+namespace retdec {
 namespace llvmir2hll {
 namespace tests {
 
@@ -56,3 +57,4 @@ IsFalseForFalseConstBoolReturnsTrue) {
 
 } // namespace tests
 } // namespace llvmir2hll
+} // namespace retdec

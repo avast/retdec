@@ -6,38 +6,39 @@
 
 #include <gtest/gtest.h>
 
-#include "llvmir2hll/ir/add_op_expr.h"
-#include "llvmir2hll/ir/assign_stmt.h"
-#include "llvmir2hll/ir/break_stmt.h"
-#include "llvmir2hll/ir/call_expr.h"
-#include "llvmir2hll/ir/call_stmt.h"
-#include "llvmir2hll/ir/const_bool.h"
-#include "llvmir2hll/ir/const_int.h"
-#include "llvmir2hll/ir/continue_stmt.h"
-#include "llvmir2hll/ir/empty_stmt.h"
-#include "llvmir2hll/ir/eq_op_expr.h"
-#include "llvmir2hll/ir/for_loop_stmt.h"
-#include "llvmir2hll/ir/function.h"
-#include "llvmir2hll/ir/goto_stmt.h"
-#include "llvmir2hll/ir/gt_eq_op_expr.h"
-#include "llvmir2hll/ir/if_stmt.h"
-#include "llvmir2hll/ir/int_type.h"
-#include "llvmir2hll/ir/lt_op_expr.h"
-#include "llvmir2hll/ir/module.h"
-#include "llvmir2hll/ir/neq_op_expr.h"
-#include "llvmir2hll/ir/return_stmt.h"
-#include "llvmir2hll/ir/switch_stmt.h"
+#include "retdec/llvmir2hll/ir/add_op_expr.h"
+#include "retdec/llvmir2hll/ir/assign_stmt.h"
+#include "retdec/llvmir2hll/ir/break_stmt.h"
+#include "retdec/llvmir2hll/ir/call_expr.h"
+#include "retdec/llvmir2hll/ir/call_stmt.h"
+#include "retdec/llvmir2hll/ir/const_bool.h"
+#include "retdec/llvmir2hll/ir/const_int.h"
+#include "retdec/llvmir2hll/ir/continue_stmt.h"
+#include "retdec/llvmir2hll/ir/empty_stmt.h"
+#include "retdec/llvmir2hll/ir/eq_op_expr.h"
+#include "retdec/llvmir2hll/ir/for_loop_stmt.h"
+#include "retdec/llvmir2hll/ir/function.h"
+#include "retdec/llvmir2hll/ir/goto_stmt.h"
+#include "retdec/llvmir2hll/ir/gt_eq_op_expr.h"
+#include "retdec/llvmir2hll/ir/if_stmt.h"
+#include "retdec/llvmir2hll/ir/int_type.h"
+#include "retdec/llvmir2hll/ir/lt_op_expr.h"
+#include "retdec/llvmir2hll/ir/module.h"
+#include "retdec/llvmir2hll/ir/neq_op_expr.h"
+#include "retdec/llvmir2hll/ir/return_stmt.h"
+#include "retdec/llvmir2hll/ir/switch_stmt.h"
 #include "llvmir2hll/ir/assertions.h"
-#include "llvmir2hll/ir/var_def_stmt.h"
-#include "llvmir2hll/ir/variable.h"
-#include "llvmir2hll/ir/while_loop_stmt.h"
+#include "retdec/llvmir2hll/ir/var_def_stmt.h"
+#include "retdec/llvmir2hll/ir/variable.h"
+#include "retdec/llvmir2hll/ir/while_loop_stmt.h"
 #include "llvmir2hll/llvm/llvmir2bir_converters/new_llvmir2bir_converter_tests/base_tests.h"
-#include "llvmir2hll/support/smart_ptr.h"
-#include "llvmir2hll/utils/ir.h"
+#include "retdec/llvmir2hll/support/smart_ptr.h"
+#include "retdec/llvmir2hll/utils/ir.h"
 
 using namespace ::testing;
 using namespace std::string_literals;
 
+namespace retdec {
 namespace llvmir2hll {
 namespace tests {
 
@@ -4638,3 +4639,4 @@ SwitchInLoopWithDefaultClauseAndWithAllClausesTerminatedByBreakIsConvertedCorrec
 
 } // namespace tests
 } // namespace llvmir2hll
+} // namespace retdec

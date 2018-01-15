@@ -4,21 +4,22 @@
 * @copyright (c) 2017 Avast Software, licensed under the MIT license
 */
 
-#include "llvmir2hll/analysis/written_into_globals_visitor.h"
-#include "llvmir2hll/ir/array_index_op_expr.h"
-#include "llvmir2hll/ir/assign_stmt.h"
-#include "llvmir2hll/ir/deref_op_expr.h"
-#include "llvmir2hll/ir/for_loop_stmt.h"
-#include "llvmir2hll/ir/function.h"
-#include "llvmir2hll/ir/module.h"
-#include "llvmir2hll/ir/struct_index_op_expr.h"
-#include "llvmir2hll/ir/var_def_stmt.h"
-#include "llvmir2hll/ir/variable.h"
-#include "llvmir2hll/support/debug.h"
-#include "tl-cpputils/container.h"
+#include "retdec/llvmir2hll/analysis/written_into_globals_visitor.h"
+#include "retdec/llvmir2hll/ir/array_index_op_expr.h"
+#include "retdec/llvmir2hll/ir/assign_stmt.h"
+#include "retdec/llvmir2hll/ir/deref_op_expr.h"
+#include "retdec/llvmir2hll/ir/for_loop_stmt.h"
+#include "retdec/llvmir2hll/ir/function.h"
+#include "retdec/llvmir2hll/ir/module.h"
+#include "retdec/llvmir2hll/ir/struct_index_op_expr.h"
+#include "retdec/llvmir2hll/ir/var_def_stmt.h"
+#include "retdec/llvmir2hll/ir/variable.h"
+#include "retdec/llvmir2hll/support/debug.h"
+#include "retdec/utils/container.h"
 
-using tl_cpputils::hasItem;
+using retdec::utils::hasItem;
 
+namespace retdec {
 namespace llvmir2hll {
 
 /**
@@ -112,3 +113,4 @@ void WrittenIntoGlobalsVisitor::visit(ShPtr<ForLoopStmt> stmt) {
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

@@ -4,14 +4,15 @@
 * @copyright (c) 2017 Avast Software, licensed under the MIT license
 */
 
-#include "llvmir2hll/ir/add_op_expr.h"
-#include "llvmir2hll/ir/const_float.h"
-#include "llvmir2hll/ir/const_int.h"
-#include "llvmir2hll/ir/expression.h"
-#include "llvmir2hll/ir/sub_op_expr.h"
-#include "llvmir2hll/optimizer/optimizers/simplify_arithm_expr/sub_optimizer.h"
-#include "llvmir2hll/support/debug.h"
+#include "retdec/llvmir2hll/ir/add_op_expr.h"
+#include "retdec/llvmir2hll/ir/const_float.h"
+#include "retdec/llvmir2hll/ir/const_int.h"
+#include "retdec/llvmir2hll/ir/expression.h"
+#include "retdec/llvmir2hll/ir/sub_op_expr.h"
+#include "retdec/llvmir2hll/optimizer/optimizers/simplify_arithm_expr/sub_optimizer.h"
+#include "retdec/llvmir2hll/support/debug.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 /**
@@ -87,3 +88,4 @@ bool SubOptimizer::isConstFloatOrConstInt (ShPtr<Expression> expr) const {
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

@@ -6,10 +6,11 @@
 
 #include <gtest/gtest.h>
 
-#include "llvmir2hll/ir/unknown_type.h"
+#include "retdec/llvmir2hll/ir/unknown_type.h"
 
 using namespace ::testing;
 
+namespace retdec {
 namespace llvmir2hll {
 namespace tests {
 
@@ -29,3 +30,4 @@ CreateAlwaysReturnsSameInstance) {
 
 } // namespace tests
 } // namespace llvmir2hll
+} // namespace retdec

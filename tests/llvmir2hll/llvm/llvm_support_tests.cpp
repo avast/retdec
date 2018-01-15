@@ -8,10 +8,11 @@
 
 #include <gtest/gtest.h>
 
-#include "llvmir2hll/llvm/llvm_support.h"
+#include "retdec/llvmir2hll/llvm/llvm_support.h"
 
 using namespace ::testing;
 
+namespace retdec {
 namespace llvmir2hll {
 namespace tests {
 
@@ -52,3 +53,4 @@ IsLLVMBasicBlockLabelIsNotLabel) {
 
 } // namespace tests
 } // namespace llvmir2hll
+} // namespace retdec

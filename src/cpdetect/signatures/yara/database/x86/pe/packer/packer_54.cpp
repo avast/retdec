@@ -1,0 +1,269 @@
+/**
+ * @file src/cpdetect/signatures/yara/database/x86/pe/packer/packer_54.cpp
+ * @brief Database of signatures.
+ * @copyright (c) 2017 Avast Software, licensed under the MIT license
+ */
+
+const char *x86PePacker_54 =
+R"x86_pe_packer(
+rule rule_1472_UNSORTED_PACKER {
+	meta:
+		tool = "P"
+		name = "UNSORTED PACKER"
+		pattern = "9C68????00007?1?810424????????90810424C3"
+	strings:
+		$1 = { 9C 68 ?? ?? 00 00 7? 1? 81 04 24 ?? ?? ?? ?? 90 81 04 24 C3 }
+	condition:
+		for any of them : ( $ at pe.entry_point )
+}
+rule rule_1473_UNSORTED_PACKER {
+	meta:
+		tool = "P"
+		name = "UNSORTED PACKER"
+		pattern = "9C68????00007?1?8104241F??????????810424C20000"
+	strings:
+		$1 = { 9C 68 ?? ?? 00 00 7? 1? 81 04 24 1F ?? ?? ?? ?? ?? 81 04 24 C2 00 00 }
+	condition:
+		for any of them : ( $ at pe.entry_point )
+}
+rule rule_1474_UNSORTED_PACKER {
+	meta:
+		tool = "P"
+		name = "UNSORTED PACKER"
+		pattern = "FCB8????????B9????????81F9????????750681C1270000003001C1C0034181F9????????75E4"
+	strings:
+		$1 = { FC B8 ?? ?? ?? ?? B9 ?? ?? ?? ?? 81 F9 ?? ?? ?? ?? 75 06 81 C1 27 00 00 00 30 01 C1 C0 03 41 81 F9 ?? ?? ?? ?? 75 E4 }
+	condition:
+		for any of them : ( $ at pe.entry_point )
+}
+rule rule_1475_Upack {
+	meta:
+		tool = "P"
+		name = "Upack"
+		pattern = "813A0000000200000000"
+	strings:
+		$1 = { 81 3A 00 00 00 02 00 00 00 00 }
+	condition:
+		for any of them : ( $ at pe.entry_point )
+}
+rule rule_1476_Upack {
+	meta:
+		tool = "P"
+		name = "Upack"
+		version = "0.10 - 0.11"
+		pattern = "BE????????AD8BF895A533C033C9AB48ABF7D8B1??F3ABC1E0??B5??F3ABAD509751AD87F5588D54865CFFD5725A2C??73??B0??3C??72022C??500FB65FFFC1E3??B3??8D1C5B8D????????????B0??67E3298BD72B560C8A2A33D284E90F95C652FEC68AD08D1493FFD5"
+	strings:
+		$1 = { BE ?? ?? ?? ?? AD 8B F8 95 A5 33 C0 33 C9 AB 48 AB F7 D8 B1 ?? F3 AB C1 E0 ?? B5 ?? F3 AB AD 50 97 51 AD 87 F5 58 8D 54 86 5C FF D5 72 5A 2C ?? 73 ?? B0 ?? 3C ?? 72 02 2C ?? 50 0F B6 5F FF C1 E3 ?? B3 ?? 8D 1C 5B 8D ?? ?? ?? ?? ?? ?? B0 ?? 67 E3 29 8B D7 2B 56 0C 8A 2A 33 D2 84 E9 0F 95 C6 52 FE C6 8A D0 8D 14 93 FF D5 }
+	condition:
+		for any of them : ( $ at pe.entry_point )
+}
+rule rule_1477_Upack {
+	meta:
+		tool = "P"
+		name = "Upack"
+		version = "0.10 - 0.12"
+		pattern = "BE????????AD8BF895A533C033C9AB48ABF7D8B104F3ABC1E00AB5??F3ABAD509751AD87F5588D54865CFFD5725A2C037302B0003C0772022C03500FB65FFFC1E3??B3008D1C5B8D9C9E0C100000B00167E3298BD72B560C8A2A33D284E90F95C652FEC68AD08D1493FFD55A9F12C0D0E9740E9E1AF274E4B40033C9B501FF55CC33C9E9DF0000008B5E0C83C230FFD5735083C230FFD5721B83C230FFD5722B3C07B0097202B00B508BC72B460CB1808A00EBCF83C260FFD5875E10730D83C230FFD5875E147303875E183C07B0087202B00B50538D967C070000FF55D05B91EB773C07B0077202B00A50875E10875E14895E188D96C40B0000FF55D0"
+	strings:
+		$1 = { BE ?? ?? ?? ?? AD 8B F8 95 A5 33 C0 33 C9 AB 48 AB F7 D8 B1 04 F3 AB C1 E0 0A B5 ?? F3 AB AD 50 97 51 AD 87 F5 58 8D 54 86 5C FF D5 72 5A 2C 03 73 02 B0 00 3C 07 72 02 2C 03 50 0F B6 5F FF C1 E3 ?? B3 00 8D 1C 5B 8D 9C 9E 0C 10 00 00 B0 01 67 E3 29 8B D7 2B 56 0C 8A 2A 33 D2 84 E9 0F 95 C6 52 FE C6 8A D0 8D 14 93 FF D5 5A 9F 12 C0 D0 E9 74 0E 9E 1A F2 74 E4 B4 00 33 C9 B5 01 FF 55 CC 33 C9 E9 DF 00 00 00 8B 5E 0C 83 C2 30 FF D5 73 50 83 C2 30 FF D5 72 1B 83 C2 30 FF D5 72 2B 3C 07 B0 09 72 02 B0 0B 50 8B C7 2B 46 0C B1 80 8A 00 EB CF 83 C2 60 FF D5 87 5E 10 73 0D 83 C2 30 FF D5 87 5E 14 73 03 87 5E 18 3C 07 B0 08 72 02 B0 0B 50 53 8D 96 7C 07 00 00 FF 55 D0 5B 91 EB 77 3C 07 B0 07 72 02 B0 0A 50 87 5E 10 87 5E 14 89 5E 18 8D 96 C4 0B 00 00 FF 55 D0 }
+	condition:
+		for any of them : ( $ at pe.entry_point )
+}
+rule rule_1478_UPack {
+	meta:
+		tool = "P"
+		name = "UPack"
+		version = "0.11"
+		pattern = "BE48014000AD8BF895A533C033C9AB48ABF7D8B104F3ABC1E00AB51CF3ABAD509751AD87F5588D54865CFFD5725A2C037302B0003C0772022C03500FB65FFFC1E303B3008D1C5B8D9C9E0C100000B00167E3298BD7"
+	strings:
+		$1 = { BE 48 01 40 00 AD 8B F8 95 A5 33 C0 33 C9 AB 48 AB F7 D8 B1 04 F3 AB C1 E0 0A B5 1C F3 AB AD 50 97 51 AD 87 F5 58 8D 54 86 5C FF D5 72 5A 2C 03 73 02 B0 00 3C 07 72 02 2C 03 50 0F B6 5F FF C1 E3 03 B3 00 8D 1C 5B 8D 9C 9E 0C 10 00 00 B0 01 67 E3 29 8B D7 }
+	condition:
+		for any of them : ( $ at pe.entry_point )
+}
+rule rule_1479_Upack {
+	meta:
+		tool = "P"
+		name = "Upack"
+		version = "0.12b"
+		pattern = "BE48014000AD??????A5??C033C9??????????????F3AB????0A????????AD509751??87F5588D54865C??D572??????????????????????????????B65FFFC1"
+	strings:
+		$1 = { BE 48 01 40 00 AD ?? ?? ?? A5 ?? C0 33 C9 ?? ?? ?? ?? ?? ?? ?? F3 AB ?? ?? 0A ?? ?? ?? ?? AD 50 97 51 ?? 87 F5 58 8D 54 86 5C ?? D5 72 ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? B6 5F FF C1 }
+	condition:
+		for any of them : ( $ at pe.entry_point )
+}
+rule rule_1480_Upack {
+	meta:
+		tool = "P"
+		name = "Upack"
+		version = "0.2b"
+		pattern = "BE8801????AD8BF895A533C033"
+	strings:
+		$1 = { BE 88 01 ?? ?? AD 8B F8 95 A5 33 C0 33 }
+	condition:
+		for any of them : ( $ at pe.entry_point )
+}
+rule rule_1481_Upack {
+	meta:
+		tool = "P"
+		name = "Upack"
+		version = "0.20"
+		pattern = "BE????????AD8BF895A533C033C9AB48ABF7D8B104F3ABC1E00A????F3ABAD509751588D54855CFF16725A2C037302B0003C0772022C03500FB65FFFC1????B3008D1C5B8D9C9D0C100000B00167E3298BD72B550C8A2A33D284E90F95C652FEC68AD08D1493FF165A9F12C0D0E9740E9E1AF274E4B40033C9B501FF560833C9E9070100008B5D0C83C230FF16735383C230FF16721B83C230FF16722B3C07B0097202B00B508BC72B450CB1808A00EBCF83C260FF16875D10730D83C230FF16875D147303875D183C07B0087202B00B50538D957C070000FF560C5B91E99C000000"
+	strings:
+		$1 = { BE ?? ?? ?? ?? AD 8B F8 95 A5 33 C0 33 C9 AB 48 AB F7 D8 B1 04 F3 AB C1 E0 0A ?? ?? F3 AB AD 50 97 51 58 8D 54 85 5C FF 16 72 5A 2C 03 73 02 B0 00 3C 07 72 02 2C 03 50 0F B6 5F FF C1 ?? ?? B3 00 8D 1C 5B 8D 9C 9D 0C 10 00 00 B0 01 67 E3 29 8B D7 2B 55 0C 8A 2A 33 D2 84 E9 0F 95 C6 52 FE C6 8A D0 8D 14 93 FF 16 5A 9F 12 C0 D0 E9 74 0E 9E 1A F2 74 E4 B4 00 33 C9 B5 01 FF 56 08 33 C9 E9 07 01 00 00 8B 5D 0C 83 C2 30 FF 16 73 53 83 C2 30 FF 16 72 1B 83 C2 30 FF 16 72 2B 3C 07 B0 09 72 02 B0 0B 50 8B C7 2B 45 0C B1 80 8A 00 EB CF 83 C2 60 FF 16 87 5D 10 73 0D 83 C2 30 FF 16 87 5D 14 73 03 87 5D 18 3C 07 B0 08 72 02 B0 0B 50 53 8D 95 7C 07 00 00 FF 56 0C 5B 91 E9 9C 00 00 00 }
+	condition:
+		for any of them : ( $ at pe.entry_point )
+}
+rule rule_1482_Upack {
+	meta:
+		tool = "P"
+		name = "Upack"
+		version = "0.20"
+		pattern = "E90602000033C95E870EE3F42BF18BDEAD2BD8AD03C35097AD91F3A55EAD5691011EADE2FB"
+	strings:
+		$1 = { E9 06 02 00 00 33 C9 5E 87 0E E3 F4 2B F1 8B DE AD 2B D8 AD 03 C3 50 97 AD 91 F3 A5 5E AD 56 91 01 1E AD E2 FB }
+	condition:
+		for any of them : ( $ at pe.entry_point )
+}
+rule rule_1483_Upack {
+	meta:
+		tool = "P"
+		name = "Upack"
+		version = "0.21"
+		pattern = "BE????????AD8BF8????????33C0AB48ABF7D859F3ABC1E00A????F3ABAD509751588D54855CFF16725A2C037302B0003C0772022C03500FB65FFF??????B3008D1C5B8D9C9D0C100000B00167E3298BD72B550C8A2A33D284E90F95C652FEC68AD08D1493FF165A9F12C0D0E9740E9E1AF274E4B40033C9B501FF560833C9E9070100008B5D0C83C230FF16735383C230FF16721B83C230FF16722B3C07B0097202B00B508BC72B450CB1808A00EBCF83C260FF16875D10730D83C230FF16875D147303875D183C07B0087202B00B50538D957C070000FF560C5B91E99C000000"
+	strings:
+		$1 = { BE ?? ?? ?? ?? AD 8B F8 ?? ?? ?? ?? 33 C0 AB 48 AB F7 D8 59 F3 AB C1 E0 0A ?? ?? F3 AB AD 50 97 51 58 8D 54 85 5C FF 16 72 5A 2C 03 73 02 B0 00 3C 07 72 02 2C 03 50 0F B6 5F FF ?? ?? ?? B3 00 8D 1C 5B 8D 9C 9D 0C 10 00 00 B0 01 67 E3 29 8B D7 2B 55 0C 8A 2A 33 D2 84 E9 0F 95 C6 52 FE C6 8A D0 8D 14 93 FF 16 5A 9F 12 C0 D0 E9 74 0E 9E 1A F2 74 E4 B4 00 33 C9 B5 01 FF 56 08 33 C9 E9 07 01 00 00 8B 5D 0C 83 C2 30 FF 16 73 53 83 C2 30 FF 16 72 1B 83 C2 30 FF 16 72 2B 3C 07 B0 09 72 02 B0 0B 50 8B C7 2B 45 0C B1 80 8A 00 EB CF 83 C2 60 FF 16 87 5D 10 73 0D 83 C2 30 FF 16 87 5D 14 73 03 87 5D 18 3C 07 B0 08 72 02 B0 0B 50 53 8D 95 7C 07 00 00 FF 56 0C 5B 91 E9 9C 00 00 00 }
+	condition:
+		for any of them : ( $ at pe.entry_point )
+}
+rule rule_1484_Upack {
+	meta:
+		tool = "P"
+		name = "Upack"
+		version = "0.22b - 0.23b"
+		pattern = "??????????????AD8BF85995F3A5ADB5??F3ABAD509751588D54855CFF1672??2C037302B0003C0772022C03500FB65FFFC1E3??B3008D1C5B8D9C9D0C100000"
+	strings:
+		$1 = { ?? ?? ?? ?? ?? ?? ?? AD 8B F8 59 95 F3 A5 AD B5 ?? F3 AB AD 50 97 51 58 8D 54 85 5C FF 16 72 ?? 2C 03 73 02 B0 00 3C 07 72 02 2C 03 50 0F B6 5F FF C1 E3 ?? B3 00 8D 1C 5B 8D 9C 9D 0C 10 00 00 }
+	condition:
+		for any of them : ( $ at pe.entry_point )
+}
+rule rule_1485_Upack {
+	meta:
+		tool = "P"
+		name = "Upack"
+		version = "0.24 - 0.31"
+		pattern = "BE????????AD8BF895AD91F3A5AD????F3ABAD509751588D54855CFF1672572C037302B0003C0772022C03500FB65FFF??????B3008D1C5B8D9C9D0C100000B001E3298BD72B550C8A2A33D284E90F95C652FEC68AD08D1493FF165A9F12C0D0E9740E9E1AF274E4B40033C9B501FF560833C9FF6624B1308B5D0C03D1FF16734B03D1FF16721903D1FF1672293C07B0097202B00B508BC72B450C8A00FF662083C260FF16875D10730C03D1FF16875D147303875D183C07B0087202B00B50538BD5035614FF560C5B91FF663C07B0077202B00A50875D10875D14895D188BD5035618FF560C6A035950483BC172028BC1C1E006B1408D9C857C030000FF56043C048BD8725F33DBD1E813DB48439143D3E380F9058D949D7C010000762E80E90433C08B5500D16D088B120FCA2B550403C03B550872078B550840015504FF5610"
+	strings:
+		$1 = { BE ?? ?? ?? ?? AD 8B F8 95 AD 91 F3 A5 AD ?? ?? F3 AB AD 50 97 51 58 8D 54 85 5C FF 16 72 57 2C 03 73 02 B0 00 3C 07 72 02 2C 03 50 0F B6 5F FF ?? ?? ?? B3 00 8D 1C 5B 8D 9C 9D 0C 10 00 00 B0 01 E3 29 8B D7 2B 55 0C 8A 2A 33 D2 84 E9 0F 95 C6 52 FE C6 8A D0 8D 14 93 FF 16 5A 9F 12 C0 D0 E9 74 0E 9E 1A F2 74 E4 B4 00 33 C9 B5 01 FF 56 08 33 C9 FF 66 24 B1 30 8B 5D 0C 03 D1 FF 16 73 4B 03 D1 FF 16 72 19 03 D1 FF 16 72 29 3C 07 B0 09 72 02 B0 0B 50 8B C7 2B 45 0C 8A 00 FF 66 20 83 C2 60 FF 16 87 5D 10 73 0C 03 D1 FF 16 87 5D 14 73 03 87 5D 18 3C 07 B0 08 72 02 B0 0B 50 53 8B D5 03 56 14 FF 56 0C 5B 91 FF 66 3C 07 B0 07 72 02 B0 0A 50 87 5D 10 87 5D 14 89 5D 18 8B D5 03 56 18 FF 56 0C 6A 03 59 50 48 3B C1 72 02 8B C1 C1 E0 06 B1 40 8D 9C 85 7C 03 00 00 FF 56 04 3C 04 8B D8 72 5F 33 DB D1 E8 13 DB 48 43 91 43 D3 E3 80 F9 05 8D 94 9D 7C 01 00 00 76 2E 80 E9 04 33 C0 8B 55 00 D1 6D 08 8B 12 0F CA 2B 55 04 03 C0 3B 55 08 72 07 8B 55 08 40 01 55 04 FF 56 10 }
+	condition:
+		for any of them : ( $ at pe.entry_point )
+}
+rule rule_1486_Upack {
+	meta:
+		tool = "P"
+		name = "Upack"
+		version = "0.24a - 0.28a"
+		pattern = "BE88014000AD????95AD91F3A5AD"
+	strings:
+		$1 = { BE 88 01 40 00 AD ?? ?? 95 AD 91 F3 A5 AD }
+	condition:
+		for any of them : ( $ at pe.entry_point )
+}
+rule rule_1487_Upack {
+	meta:
+		tool = "P"
+		name = "Upack"
+		version = "0.24b"
+		pattern = "BE88014000AD8BF895AD91F3A5ADB5??F3ABAD509751588D54855CFF1672572C037302B0003C0772022C03500FB65FFFC1E3??B3008D1C5B8D9C9D0C100000B0"
+	strings:
+		$1 = { BE 88 01 40 00 AD 8B F8 95 AD 91 F3 A5 AD B5 ?? F3 AB AD 50 97 51 58 8D 54 85 5C FF 16 72 57 2C 03 73 02 B0 00 3C 07 72 02 2C 03 50 0F B6 5F FF C1 E3 ?? B3 00 8D 1C 5B 8D 9C 9D 0C 10 00 00 B0 }
+	condition:
+		for any of them : ( $ at pe.entry_point )
+}
+rule rule_1488_Upack {
+	meta:
+		tool = "P"
+		name = "Upack"
+		version = "0.29b - 0.31b"
+		pattern = "BE8801????AD8BF895AD91F3A5ADB5??F3"
+	strings:
+		$1 = { BE 88 01 ?? ?? AD 8B F8 95 AD 91 F3 A5 AD B5 ?? F3 }
+	condition:
+		for any of them : ( $ at pe.entry_point )
+}
+rule rule_1489_Upack {
+	meta:
+		tool = "P"
+		name = "Upack"
+		version = "0.29b"
+		pattern = "E9????????42794477696E6740000000504500004C0102????????????????????????????????????????29"
+	strings:
+		$1 = { E9 ?? ?? ?? ?? 42 79 44 77 69 6E 67 40 00 00 00 50 45 00 00 4C 01 02 ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? 29 }
+	condition:
+		for any of them : ( $ at pe.entry_point )
+}
+rule rule_1490_Upack {
+	meta:
+		tool = "P"
+		name = "Upack"
+		version = "0.29"
+		pattern = "BE8801????AD8BF895AD91F3A5ADB5??F3ABAD509751588D54855CFF1672572C037302B0003C0772022C03500FB65FFFC1E3"
+	strings:
+		$1 = { BE 88 01 ?? ?? AD 8B F8 95 AD 91 F3 A5 AD B5 ?? F3 AB AD 50 97 51 58 8D 54 85 5C FF 16 72 57 2C 03 73 02 B0 00 3C 07 72 02 2C 03 50 0F B6 5F FF C1 E3 }
+	condition:
+		for any of them : ( $ at pe.entry_point )
+}
+rule rule_1491_Upack {
+	meta:
+		tool = "P"
+		name = "Upack"
+		version = "0.30b"
+		pattern = "E9????????42794477696E6740000000504500004C0102????????????????????????????????????????30"
+	strings:
+		$1 = { E9 ?? ?? ?? ?? 42 79 44 77 69 6E 67 40 00 00 00 50 45 00 00 4C 01 02 ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? 30 }
+	condition:
+		for any of them : ( $ at pe.entry_point )
+}
+rule rule_1492_Upack {
+	meta:
+		tool = "P"
+		name = "Upack"
+		version = "0.31b"
+		pattern = "E9????????42794477696E6740000000504500004C0102????????????????????????????????????????31"
+	strings:
+		$1 = { E9 ?? ?? ?? ?? 42 79 44 77 69 6E 67 40 00 00 00 50 45 00 00 4C 01 02 ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? 31 }
+	condition:
+		for any of them : ( $ at pe.entry_point )
+}
+rule rule_1493_Upack {
+	meta:
+		tool = "P"
+		name = "Upack"
+		version = "0.32b"
+		pattern = "E9????????42794477696E6740000000504500004C0102????????????????????????????????????????32"
+	strings:
+		$1 = { E9 ?? ?? ?? ?? 42 79 44 77 69 6E 67 40 00 00 00 50 45 00 00 4C 01 02 ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? 32 }
+	condition:
+		for any of them : ( $ at pe.entry_point )
+}
+rule rule_1494_Upack {
+	meta:
+		tool = "P"
+		name = "Upack"
+		version = "0.32"
+		pattern = "BE????????????????????????????????????????????8D54855CFF1672572C037302????3C0772022C03500FB65FFF??????????8D1C5B8D9C9D0C100000B001E3298B??????????????????????????????????????????FF165A9F12C0D0E9740E??????????????????B501FF5608????FF6624B1308B5D0C03D1FF16734B03D1FF16721903D1FF1672293C07B0097202B00B508BC72B450C8A00FF662083C260FF16875D10730C03D1FF16875D147303875D183C07B0087202B00B50538BD5035614FF560C5B91FF663C07B0077202B00A50875D10875D14895D188BD5035618FF560C6A035950483BC172028BC1C1E006B1408D9C857C030000FF56043C048BD8725F????D1E813DB48439143D3E380F9058D949D7C010000762E80E904????8B5500D16D088B120FCA2B550403C03B550872078B550840015504FF5610E2E0"
+	strings:
+		$1 = { BE ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? 8D 54 85 5C FF 16 72 57 2C 03 73 02 ?? ?? 3C 07 72 02 2C 03 50 0F B6 5F FF ?? ?? ?? ?? ?? 8D 1C 5B 8D 9C 9D 0C 10 00 00 B0 01 E3 29 8B ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? FF 16 5A 9F 12 C0 D0 E9 74 0E ?? ?? ?? ?? ?? ?? ?? ?? ?? B5 01 FF 56 08 ?? ?? FF 66 24 B1 30 8B 5D 0C 03 D1 FF 16 73 4B 03 D1 FF 16 72 19 03 D1 FF 16 72 29 3C 07 B0 09 72 02 B0 0B 50 8B C7 2B 45 0C 8A 00 FF 66 20 83 C2 60 FF 16 87 5D 10 73 0C 03 D1 FF 16 87 5D 14 73 03 87 5D 18 3C 07 B0 08 72 02 B0 0B 50 53 8B D5 03 56 14 FF 56 0C 5B 91 FF 66 3C 07 B0 07 72 02 B0 0A 50 87 5D 10 87 5D 14 89 5D 18 8B D5 03 56 18 FF 56 0C 6A 03 59 50 48 3B C1 72 02 8B C1 C1 E0 06 B1 40 8D 9C 85 7C 03 00 00 FF 56 04 3C 04 8B D8 72 5F ?? ?? D1 E8 13 DB 48 43 91 43 D3 E3 80 F9 05 8D 94 9D 7C 01 00 00 76 2E 80 E9 04 ?? ?? 8B 55 00 D1 6D 08 8B 12 0F CA 2B 55 04 03 C0 3B 55 08 72 07 8B 55 08 40 01 55 04 FF 56 10 E2 E0 }
+	condition:
+		for any of them : ( $ at pe.entry_point )
+}
+rule rule_1495_Upack {
+	meta:
+		tool = "P"
+		name = "Upack"
+		version = "0.33b - 0.34b"
+		pattern = "????????59F3A583C8FF8BDFAB40AB40"
+	strings:
+		$1 = { ?? ?? ?? ?? 59 F3 A5 83 C8 FF 8B DF AB 40 AB 40 }
+	condition:
+		for any of them : ( $ at pe.entry_point )
+}
+)x86_pe_packer";

@@ -4,14 +4,15 @@
 * @copyright (c) 2017 Avast Software, licensed under the MIT license
 */
 
-#include "llvmir2hll/semantics/semantics/compound_semantics.h"
-#include "llvmir2hll/semantics/semantics/compound_semantics_builder.h"
-#include "llvmir2hll/semantics/semantics_factory.h"
-#include "llvmir2hll/support/debug.h"
-#include "llvm-support/diagnostics.h"
+#include "retdec/llvmir2hll/semantics/semantics/compound_semantics.h"
+#include "retdec/llvmir2hll/semantics/semantics/compound_semantics_builder.h"
+#include "retdec/llvmir2hll/semantics/semantics_factory.h"
+#include "retdec/llvmir2hll/support/debug.h"
+#include "retdec/llvm-support/diagnostics.h"
 
-using namespace llvm_support;
+using namespace retdec::llvm_support;
 
+namespace retdec {
 namespace llvmir2hll {
 
 /**
@@ -46,3 +47,4 @@ ShPtr<CompoundSemantics> CompoundSemanticsBuilder::build(
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

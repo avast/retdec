@@ -10,16 +10,17 @@
 #include <llvm/IR/Instructions.h>
 #include <llvm/IR/Operator.h>
 
-#include "bin2llvmir/analyses/symbolic_tree.h"
-#include "bin2llvmir/optimizations/cond_branch_opt/cond_branch_opt.h"
-#include "bin2llvmir/providers/asm_instruction.h"
+#include "retdec/bin2llvmir/analyses/symbolic_tree.h"
+#include "retdec/bin2llvmir/optimizations/cond_branch_opt/cond_branch_opt.h"
+#include "retdec/bin2llvmir/providers/asm_instruction.h"
 #define debug_enabled false
-#include "llvm-support/utils.h"
-#include "bin2llvmir/utils/type.h"
+#include "retdec/llvm-support/utils.h"
+#include "retdec/bin2llvmir/utils/type.h"
 
-using namespace llvm_support;
+using namespace retdec::llvm_support;
 using namespace llvm;
 
+namespace retdec {
 namespace bin2llvmir {
 
 char CondBranchOpt::ID = 0;
@@ -1237,3 +1238,4 @@ if (doExit)
 }
 
 } // namespace bin2llvmir
+} // namespace retdec

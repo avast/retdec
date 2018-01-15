@@ -4,11 +4,12 @@
 * @copyright (c) 2017 Avast Software, licensed under the MIT license
 */
 
-#include "llvmir2hll/ir/assign_stmt.h"
-#include "llvmir2hll/ir/expression.h"
-#include "llvmir2hll/optimizer/optimizers/self_assign_optimizer.h"
-#include "llvmir2hll/support/debug.h"
+#include "retdec/llvmir2hll/ir/assign_stmt.h"
+#include "retdec/llvmir2hll/ir/expression.h"
+#include "retdec/llvmir2hll/optimizer/optimizers/self_assign_optimizer.h"
+#include "retdec/llvmir2hll/support/debug.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 /**
@@ -40,3 +41,4 @@ void SelfAssignOptimizer::visit(ShPtr<AssignStmt> stmt) {
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

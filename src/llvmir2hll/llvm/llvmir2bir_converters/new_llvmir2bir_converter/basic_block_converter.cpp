@@ -7,19 +7,20 @@
 #include <llvm/IR/BasicBlock.h>
 #include <llvm/IR/Instructions.h>
 
-#include "llvmir2hll/ir/assign_stmt.h"
-#include "llvmir2hll/ir/call_expr.h"
-#include "llvmir2hll/ir/call_stmt.h"
-#include "llvmir2hll/ir/empty_stmt.h"
-#include "llvmir2hll/ir/expression.h"
-#include "llvmir2hll/ir/return_stmt.h"
-#include "llvmir2hll/ir/unreachable_stmt.h"
-#include "llvmir2hll/ir/variable.h"
-#include "llvmir2hll/llvm/llvm_support.h"
-#include "llvmir2hll/llvm/llvmir2bir_converters/new_llvmir2bir_converter/basic_block_converter.h"
-#include "llvmir2hll/llvm/llvmir2bir_converters/new_llvmir2bir_converter/llvm_value_converter.h"
-#include "llvmir2hll/llvm/llvmir2bir_converters/orig_llvmir2bir_converter/labels_handler.h"
+#include "retdec/llvmir2hll/ir/assign_stmt.h"
+#include "retdec/llvmir2hll/ir/call_expr.h"
+#include "retdec/llvmir2hll/ir/call_stmt.h"
+#include "retdec/llvmir2hll/ir/empty_stmt.h"
+#include "retdec/llvmir2hll/ir/expression.h"
+#include "retdec/llvmir2hll/ir/return_stmt.h"
+#include "retdec/llvmir2hll/ir/unreachable_stmt.h"
+#include "retdec/llvmir2hll/ir/variable.h"
+#include "retdec/llvmir2hll/llvm/llvm_support.h"
+#include "retdec/llvmir2hll/llvm/llvmir2bir_converters/new_llvmir2bir_converter/basic_block_converter.h"
+#include "retdec/llvmir2hll/llvm/llvmir2bir_converters/new_llvmir2bir_converter/llvm_value_converter.h"
+#include "retdec/llvmir2hll/llvm/llvmir2bir_converters/orig_llvmir2bir_converter/labels_handler.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 /**
@@ -218,3 +219,4 @@ ShPtr<Statement> BasicBlockConverter::generateAssignOfPrevValForInsertValueInst(
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

@@ -5,37 +5,38 @@
 * @copyright (c) 2017 Avast Software, licensed under the MIT license
 */
 
-#include "llvmir2hll/semantics/semantics/impl_support/get_name_of_param.h"
-#include "llvmir2hll/semantics/semantics/win_api_semantics/get_name_of_param.h"
-#include "llvmir2hll/semantics/semantics/win_api_semantics/get_name_of_param/a.h"
-#include "llvmir2hll/semantics/semantics/win_api_semantics/get_name_of_param/b.h"
-#include "llvmir2hll/semantics/semantics/win_api_semantics/get_name_of_param/c1.h"
-#include "llvmir2hll/semantics/semantics/win_api_semantics/get_name_of_param/c2.h"
-#include "llvmir2hll/semantics/semantics/win_api_semantics/get_name_of_param/d.h"
-#include "llvmir2hll/semantics/semantics/win_api_semantics/get_name_of_param/e.h"
-#include "llvmir2hll/semantics/semantics/win_api_semantics/get_name_of_param/f.h"
-#include "llvmir2hll/semantics/semantics/win_api_semantics/get_name_of_param/g1.h"
-#include "llvmir2hll/semantics/semantics/win_api_semantics/get_name_of_param/g2.h"
-#include "llvmir2hll/semantics/semantics/win_api_semantics/get_name_of_param/h.h"
-#include "llvmir2hll/semantics/semantics/win_api_semantics/get_name_of_param/i.h"
-#include "llvmir2hll/semantics/semantics/win_api_semantics/get_name_of_param/j.h"
-#include "llvmir2hll/semantics/semantics/win_api_semantics/get_name_of_param/k.h"
-#include "llvmir2hll/semantics/semantics/win_api_semantics/get_name_of_param/l.h"
-#include "llvmir2hll/semantics/semantics/win_api_semantics/get_name_of_param/m.h"
-#include "llvmir2hll/semantics/semantics/win_api_semantics/get_name_of_param/n.h"
-#include "llvmir2hll/semantics/semantics/win_api_semantics/get_name_of_param/o.h"
-#include "llvmir2hll/semantics/semantics/win_api_semantics/get_name_of_param/p.h"
-#include "llvmir2hll/semantics/semantics/win_api_semantics/get_name_of_param/q.h"
-#include "llvmir2hll/semantics/semantics/win_api_semantics/get_name_of_param/r.h"
-#include "llvmir2hll/semantics/semantics/win_api_semantics/get_name_of_param/s.h"
-#include "llvmir2hll/semantics/semantics/win_api_semantics/get_name_of_param/t.h"
-#include "llvmir2hll/semantics/semantics/win_api_semantics/get_name_of_param/u.h"
-#include "llvmir2hll/semantics/semantics/win_api_semantics/get_name_of_param/v.h"
-#include "llvmir2hll/semantics/semantics/win_api_semantics/get_name_of_param/w.h"
-#include "llvmir2hll/semantics/semantics/win_api_semantics/get_name_of_param/x.h"
-#include "llvmir2hll/semantics/semantics/win_api_semantics/get_name_of_param/y.h"
-#include "llvmir2hll/semantics/semantics/win_api_semantics/get_name_of_param/z.h"
+#include "retdec/llvmir2hll/semantics/semantics/impl_support/get_name_of_param.h"
+#include "retdec/llvmir2hll/semantics/semantics/win_api_semantics/get_name_of_param.h"
+#include "retdec/llvmir2hll/semantics/semantics/win_api_semantics/get_name_of_param/a.h"
+#include "retdec/llvmir2hll/semantics/semantics/win_api_semantics/get_name_of_param/b.h"
+#include "retdec/llvmir2hll/semantics/semantics/win_api_semantics/get_name_of_param/c1.h"
+#include "retdec/llvmir2hll/semantics/semantics/win_api_semantics/get_name_of_param/c2.h"
+#include "retdec/llvmir2hll/semantics/semantics/win_api_semantics/get_name_of_param/d.h"
+#include "retdec/llvmir2hll/semantics/semantics/win_api_semantics/get_name_of_param/e.h"
+#include "retdec/llvmir2hll/semantics/semantics/win_api_semantics/get_name_of_param/f.h"
+#include "retdec/llvmir2hll/semantics/semantics/win_api_semantics/get_name_of_param/g1.h"
+#include "retdec/llvmir2hll/semantics/semantics/win_api_semantics/get_name_of_param/g2.h"
+#include "retdec/llvmir2hll/semantics/semantics/win_api_semantics/get_name_of_param/h.h"
+#include "retdec/llvmir2hll/semantics/semantics/win_api_semantics/get_name_of_param/i.h"
+#include "retdec/llvmir2hll/semantics/semantics/win_api_semantics/get_name_of_param/j.h"
+#include "retdec/llvmir2hll/semantics/semantics/win_api_semantics/get_name_of_param/k.h"
+#include "retdec/llvmir2hll/semantics/semantics/win_api_semantics/get_name_of_param/l.h"
+#include "retdec/llvmir2hll/semantics/semantics/win_api_semantics/get_name_of_param/m.h"
+#include "retdec/llvmir2hll/semantics/semantics/win_api_semantics/get_name_of_param/n.h"
+#include "retdec/llvmir2hll/semantics/semantics/win_api_semantics/get_name_of_param/o.h"
+#include "retdec/llvmir2hll/semantics/semantics/win_api_semantics/get_name_of_param/p.h"
+#include "retdec/llvmir2hll/semantics/semantics/win_api_semantics/get_name_of_param/q.h"
+#include "retdec/llvmir2hll/semantics/semantics/win_api_semantics/get_name_of_param/r.h"
+#include "retdec/llvmir2hll/semantics/semantics/win_api_semantics/get_name_of_param/s.h"
+#include "retdec/llvmir2hll/semantics/semantics/win_api_semantics/get_name_of_param/t.h"
+#include "retdec/llvmir2hll/semantics/semantics/win_api_semantics/get_name_of_param/u.h"
+#include "retdec/llvmir2hll/semantics/semantics/win_api_semantics/get_name_of_param/v.h"
+#include "retdec/llvmir2hll/semantics/semantics/win_api_semantics/get_name_of_param/w.h"
+#include "retdec/llvmir2hll/semantics/semantics/win_api_semantics/get_name_of_param/x.h"
+#include "retdec/llvmir2hll/semantics/semantics/win_api_semantics/get_name_of_param/y.h"
+#include "retdec/llvmir2hll/semantics/semantics/win_api_semantics/get_name_of_param/z.h"
 
+namespace retdec {
 namespace llvmir2hll {
 namespace semantics {
 namespace win_api {
@@ -112,3 +113,4 @@ Maybe<std::string> getNameOfParam(const std::string &funcName,
 } // namespace win_api
 } // namespace semantics
 } // namespace llvmir2hll
+} // namespace retdec

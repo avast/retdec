@@ -4,37 +4,38 @@
 * @copyright (c) 2017 Avast Software, licensed under the MIT license
 */
 
-#include "llvmir2hll/analysis/used_vars_visitor.h"
-#include "llvmir2hll/ir/address_op_expr.h"
-#include "llvmir2hll/ir/assign_stmt.h"
-#include "llvmir2hll/ir/call_expr.h"
-#include "llvmir2hll/ir/call_stmt.h"
-#include "llvmir2hll/ir/cast_expr.h"
-#include "llvmir2hll/ir/const_bool.h"
-#include "llvmir2hll/ir/deref_op_expr.h"
-#include "llvmir2hll/ir/empty_stmt.h"
-#include "llvmir2hll/ir/for_loop_stmt.h"
-#include "llvmir2hll/ir/function.h"
-#include "llvmir2hll/ir/module.h"
-#include "llvmir2hll/ir/not_op_expr.h"
-#include "llvmir2hll/ir/return_stmt.h"
-#include "llvmir2hll/ir/statement.h"
-#include "llvmir2hll/ir/switch_stmt.h"
-#include "llvmir2hll/ir/ufor_loop_stmt.h"
-#include "llvmir2hll/ir/unreachable_stmt.h"
-#include "llvmir2hll/ir/var_def_stmt.h"
-#include "llvmir2hll/ir/variable.h"
-#include "llvmir2hll/ir/while_loop_stmt.h"
-#include "llvmir2hll/obtainer/calls_obtainer.h"
-#include "llvmir2hll/support/debug.h"
-#include "llvmir2hll/support/variable_replacer.h"
-#include "llvmir2hll/utils/ir.h"
-#include "tl-cpputils/container.h"
-#include "tl-cpputils/string.h"
+#include "retdec/llvmir2hll/analysis/used_vars_visitor.h"
+#include "retdec/llvmir2hll/ir/address_op_expr.h"
+#include "retdec/llvmir2hll/ir/assign_stmt.h"
+#include "retdec/llvmir2hll/ir/call_expr.h"
+#include "retdec/llvmir2hll/ir/call_stmt.h"
+#include "retdec/llvmir2hll/ir/cast_expr.h"
+#include "retdec/llvmir2hll/ir/const_bool.h"
+#include "retdec/llvmir2hll/ir/deref_op_expr.h"
+#include "retdec/llvmir2hll/ir/empty_stmt.h"
+#include "retdec/llvmir2hll/ir/for_loop_stmt.h"
+#include "retdec/llvmir2hll/ir/function.h"
+#include "retdec/llvmir2hll/ir/module.h"
+#include "retdec/llvmir2hll/ir/not_op_expr.h"
+#include "retdec/llvmir2hll/ir/return_stmt.h"
+#include "retdec/llvmir2hll/ir/statement.h"
+#include "retdec/llvmir2hll/ir/switch_stmt.h"
+#include "retdec/llvmir2hll/ir/ufor_loop_stmt.h"
+#include "retdec/llvmir2hll/ir/unreachable_stmt.h"
+#include "retdec/llvmir2hll/ir/var_def_stmt.h"
+#include "retdec/llvmir2hll/ir/variable.h"
+#include "retdec/llvmir2hll/ir/while_loop_stmt.h"
+#include "retdec/llvmir2hll/obtainer/calls_obtainer.h"
+#include "retdec/llvmir2hll/support/debug.h"
+#include "retdec/llvmir2hll/support/variable_replacer.h"
+#include "retdec/llvmir2hll/utils/ir.h"
+#include "retdec/utils/container.h"
+#include "retdec/utils/string.h"
 
-using tl_cpputils::hasItem;
-using tl_cpputils::isLowerThanCaseInsensitive;
+using retdec::utils::hasItem;
+using retdec::utils::isLowerThanCaseInsensitive;
 
+namespace retdec {
 namespace llvmir2hll {
 
 namespace {
@@ -536,3 +537,4 @@ void convertGlobalVarToLocalVarInFunc(ShPtr<Variable> var, ShPtr<Function> func,
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

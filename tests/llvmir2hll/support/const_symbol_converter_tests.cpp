@@ -6,25 +6,26 @@
 
 #include <gtest/gtest.h>
 
-#include "llvmir2hll/ir/bit_or_op_expr.h"
-#include "llvmir2hll/ir/call_expr.h"
-#include "llvmir2hll/ir/call_stmt.h"
-#include "llvmir2hll/ir/const_int.h"
-#include "llvmir2hll/ir/const_null_pointer.h"
-#include "llvmir2hll/ir/const_symbol.h"
-#include "llvmir2hll/ir/empty_stmt.h"
-#include "llvmir2hll/ir/ext_cast_expr.h"
-#include "llvmir2hll/ir/function.h"
-#include "llvmir2hll/ir/function_builder.h"
-#include "llvmir2hll/ir/int_type.h"
-#include "llvmir2hll/ir/pointer_type.h"
+#include "retdec/llvmir2hll/ir/bit_or_op_expr.h"
+#include "retdec/llvmir2hll/ir/call_expr.h"
+#include "retdec/llvmir2hll/ir/call_stmt.h"
+#include "retdec/llvmir2hll/ir/const_int.h"
+#include "retdec/llvmir2hll/ir/const_null_pointer.h"
+#include "retdec/llvmir2hll/ir/const_symbol.h"
+#include "retdec/llvmir2hll/ir/empty_stmt.h"
+#include "retdec/llvmir2hll/ir/ext_cast_expr.h"
+#include "retdec/llvmir2hll/ir/function.h"
+#include "retdec/llvmir2hll/ir/function_builder.h"
+#include "retdec/llvmir2hll/ir/int_type.h"
+#include "retdec/llvmir2hll/ir/pointer_type.h"
 #include "llvmir2hll/ir/tests_with_module.h"
-#include "llvmir2hll/ir/variable.h"
-#include "llvmir2hll/support/const_symbol_converter.h"
-#include "llvmir2hll/support/types.h"
+#include "retdec/llvmir2hll/ir/variable.h"
+#include "retdec/llvmir2hll/support/const_symbol_converter.h"
+#include "retdec/llvmir2hll/support/types.h"
 
 using namespace ::testing;
 
+namespace retdec {
 namespace llvmir2hll {
 namespace tests {
 
@@ -198,3 +199,4 @@ ChangeNullPointerConstantWhenThereIsDirectMappingZeroToConstSymbol) {
 
 } // namespace tests
 } // namespace llvmir2hll
+} // namespace retdec

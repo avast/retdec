@@ -6,13 +6,13 @@
 
 #include <cstdlib>
 
-#include "dwarfparser/dwarf_file.h"
-#include "dwarfparser/dwarf_utils.h"
+#include "retdec/dwarfparser/dwarf_file.h"
+#include "retdec/dwarfparser/dwarf_utils.h"
 
 using namespace std;
 
-namespace dwarfparser
-{
+namespace retdec {
+namespace dwarfparser {
 
 //
 // Taken from dwarfdump2/print_die.cpp
@@ -853,3 +853,4 @@ bool AttrProcessor::geti(Dwarf_Half attrCode, int& ret)
 }
 
 } // namespace dwarfparser
+} // namespace retdec

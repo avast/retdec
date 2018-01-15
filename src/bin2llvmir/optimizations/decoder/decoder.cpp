@@ -9,19 +9,20 @@
 
 #include <llvm/IR/InstIterator.h>
 
-#include "tl-cpputils/conversion.h"
-#include "tl-cpputils/string.h"
-#include "bin2llvmir/optimizations/decoder/decoder.h"
-#include "bin2llvmir/utils/defs.h"
+#include "retdec/utils/conversion.h"
+#include "retdec/utils/string.h"
+#include "retdec/bin2llvmir/optimizations/decoder/decoder.h"
+#include "retdec/bin2llvmir/utils/defs.h"
 #define debug_enabled false
-#include "llvm-support/utils.h"
+#include "retdec/llvm-support/utils.h"
 
-using namespace llvm_support;
-using namespace tl_cpputils;
-using namespace capstone2llvmir;
+using namespace retdec::llvm_support;
+using namespace retdec::utils;
+using namespace retdec::capstone2llvmir;
 using namespace llvm;
-using namespace fileformat;
+using namespace retdec::fileformat;
 
+namespace retdec {
 namespace bin2llvmir {
 
 char Decoder::ID = 0;
@@ -179,12 +180,12 @@ void Decoder::initRangesAndTargets()
 	removeZeroSequences(_alternativeRanges);
 }
 
-void Decoder::removeZeroSequences(tl_cpputils::AddressRangeContainer& rs)
+void Decoder::removeZeroSequences(retdec::utils::AddressRangeContainer& rs)
 {
 	LOG << "\n" << "removeZeroSequences():" << std::endl;
 
 	static unsigned minSequence = 0x50; // TODO: Maybe should be smaller.
-	tl_cpputils::AddressRangeContainer toRemove;
+	retdec::utils::AddressRangeContainer toRemove;
 
 	for (auto& range : rs)
 	{
@@ -470,7 +471,7 @@ void Decoder::initAllowedRangesWithConfig()
 			}
 		}
 
-		std::map<tl_cpputils::Address, std::shared_ptr<const fileformat::Symbol>> symtab;
+		std::map<retdec::utils::Address, std::shared_ptr<const retdec::fileformat::Symbol>> symtab;
 		for (const auto* t : _image->getFileFormat()->getSymbolTables())
 		for (const auto& s : *t)
 		{
@@ -505,7 +506,7 @@ void Decoder::initAllowedRangesWithConfig()
 		{
 			auto& s = sIt->second;
 
-			tl_cpputils::Address start = sIt->first;
+			retdec::utils::Address start = sIt->first;
 			if (start.isUndefined())
 			{
 				continue;
@@ -524,7 +525,7 @@ void Decoder::initAllowedRangesWithConfig()
 				--sIt;
 			}
 
-			tl_cpputils::Address end = start + size;
+			retdec::utils::Address end = start + size;
 			std::string name = s->getNormalizedName();
 
 			// Exact name match.
@@ -606,7 +607,7 @@ void Decoder::initJumpTargets()
 	// Code pointers.
 	//
 	LOG << "\tCode pointers:" << std::endl;
-	std::map<Address, std::pair<Address, const fileformat::SecSeg*>> codePointers;
+	std::map<Address, std::pair<Address, const retdec::fileformat::SecSeg*>> codePointers;
 	for (auto& seg : _image->getSegments())
 	{
 		Address start = seg->getAddress();
@@ -649,7 +650,7 @@ void Decoder::initJumpTargets()
 	{
 		Address from = p.first;
 		Address to = p.second.first;
-		const fileformat::SecSeg* fromSec = p.second.second;
+		const retdec::fileformat::SecSeg* fromSec = p.second.second;
 
 		bool twoBefore = codePointers.count(from - bsz)
 				&& codePointers.count(from - 2*bsz);
@@ -723,7 +724,7 @@ void Decoder::initJumpTargets()
 	if (isArmOrThumb())
 	{
 		LOG << "\tARM after function references:" << std::endl;
-		tl_cpputils::AddressRangeContainer dataRanges;
+		retdec::utils::AddressRangeContainer dataRanges;
 		for (auto& seg : _image->getSegments())
 		{
 			if (auto* sec = seg->getSecSeg())
@@ -805,7 +806,7 @@ void Decoder::initJumpTargets()
 	LOG << "\tConfig:" << std::endl;
 	for (auto& p : _config->getConfig().functions)
 	{
-		retdec_config::Function& f = p.second;
+		retdec::config::Function& f = p.second;
 		if (f.getStart().isUndefined())
 		{
 			continue;
@@ -865,7 +866,7 @@ void Decoder::initJumpTargets()
 		{
 			continue;
 		}
-		tl_cpputils::Address addr = a;
+		retdec::utils::Address addr = a;
 		if (addr.isUndefined())
 		{
 			continue;
@@ -879,7 +880,7 @@ void Decoder::initJumpTargets()
 			m = addr % 2 || s->isThumbSymbol() ? CS_MODE_THUMB : CS_MODE_ARM;
 		}
 
-		if (s->getType() == fileformat::Symbol::Type::PUBLIC)
+		if (s->getType() == retdec::fileformat::Symbol::Type::PUBLIC)
 		{
 			_jumpTargets.push(_config, addr, JumpTarget::eType::SYMBOL_FUNCTION_PUBLIC, m, name);
 		}
@@ -896,7 +897,7 @@ void Decoder::initJumpTargets()
 	{
 		for (const auto &exp : *exTbl)
 		{
-			tl_cpputils::Address addr = exp.getAddress();
+			retdec::utils::Address addr = exp.getAddress();
 			if (addr.isUndefined())
 			{
 				continue;
@@ -924,7 +925,7 @@ void Decoder::initJumpTargets()
 	{
 		for (const auto &imp : *impTbl)
 		{
-			tl_cpputils::Address addr = imp.getAddress();
+			retdec::utils::Address addr = imp.getAddress();
 			if (addr.isUndefined())
 			{
 				continue;
@@ -948,7 +949,7 @@ void Decoder::initJumpTargets()
 			{
 				auto libN = impTbl->getLibrary(imp.getLibraryIndex());
 				std::transform(libN.begin(), libN.end(), libN.begin(), ::tolower);
-				tl_cpputils::removeSuffix(libN, ".dll");
+				retdec::utils::removeSuffix(libN, ".dll");
 
 				unsigned long long ord;
 				const bool ordValid = imp.getOrdinalNumber(ord);
@@ -1006,7 +1007,7 @@ void Decoder::initJumpTargets()
 	{
 		for (const auto& p : _debug->functions)
 		{
-			tl_cpputils::Address addr = p.first;
+			retdec::utils::Address addr = p.first;
 			if (addr.isUndefined())
 			{
 				continue;
@@ -1749,11 +1750,11 @@ else if ((_config->getConfig().architecture.isPpc() || isArmOrThumb())
 		{
 			if (_config->getConfig().isIda())
 			{
-				f->setName(tl_cpputils::appendHexRet("sub", start));
+				f->setName(retdec::utils::appendHexRet("sub", start));
 			}
 			else
 			{
-				f->setName(tl_cpputils::appendHexRet("function", start));
+				f->setName(retdec::utils::appendHexRet("function", start));
 			}
 		}
 
@@ -1880,7 +1881,7 @@ else if ((_config->getConfig().architecture.isPpc() || isArmOrThumb())
  * e.g. fnc start 00401E5A vs 00401E5C in 87aa7cdd066541293ffd6761e07b3dad
  * from bugs.1046.Test.
  */
-bool Decoder::looksLikeValidJumpTarget(tl_cpputils::Address addr)
+bool Decoder::looksLikeValidJumpTarget(retdec::utils::Address addr)
 {
 	if (addr.isUndefined()
 			|| (!_allowedRanges.contains(addr) && !_alternativeRanges.contains(addr)))
@@ -2157,12 +2158,12 @@ void Decoder::initEnvironmentRegisters()
 				regNum = _c2l->getCapstoneRegister(&gv);
 			}
 
-			auto s = retdec_config::Storage::inRegister(
+			auto s = retdec::config::Storage::inRegister(
 					gv.getName(),
 					regNum,
 					"");
 
-			retdec_config::Object cr(gv.getName(), s);
+			retdec::config::Object cr(gv.getName(), s);
 			cr.type.setLlvmIr(llvmObjToString(gv.getValueType()));
 			cr.setRealName(gv.getName());
 			_config->getConfig().registers.insert(cr);
@@ -2243,7 +2244,7 @@ std::ostream& operator<<(std::ostream &out, const Decoder::JumpTargets& jts)
 	return out;
 }
 
-tl_cpputils::Address Decoder::getJumpTarget(llvm::Value* val)
+retdec::utils::Address Decoder::getJumpTarget(llvm::Value* val)
 {
 	if (auto* ci = dyn_cast<ConstantInt>(val))
 	{
@@ -2428,7 +2429,7 @@ void Decoder::findDelphiFunctionTable()
 		return;
 	}
 
-	tl_cpputils::Address tableAddr;
+	retdec::utils::Address tableAddr;
 	cs_x86& d = insn->detail->x86;
 	if (insn->id == X86_INS_MOV
 			&& d.op_count == 2
@@ -2447,7 +2448,7 @@ void Decoder::findDelphiFunctionTable()
 
 	cs_free(insn, 1);
 
-	tl_cpputils::Address tableAddrEnd = tableAddr;
+	retdec::utils::Address tableAddrEnd = tableAddr;
 
 	LOG << "Delphi function table @ " << tableAddr << std::endl;
 
@@ -2457,7 +2458,7 @@ void Decoder::findDelphiFunctionTable()
 	std::size_t entrySize = 0;
 	while ((currentCi = _image->getConstantDefault(currentAddr)))
 	{
-		tl_cpputils::Address currentVal = currentCi->getZExtValue();
+		retdec::utils::Address currentVal = currentCi->getZExtValue();
 
 		if (currentVal.isUndefined()
 				|| currentVal == 0
@@ -2626,7 +2627,7 @@ cs_mode Decoder::getUnknownMode() const
 	return CS_MODE_BIG_ENDIAN;
 }
 
-cs_mode Decoder::determineMode(AsmInstruction ai, tl_cpputils::Address target) const
+cs_mode Decoder::determineMode(AsmInstruction ai, retdec::utils::Address target) const
 {
 	if (target.isUndefined())
 	{
@@ -2652,3 +2653,4 @@ cs_mode Decoder::determineMode(AsmInstruction ai, tl_cpputils::Address target) c
 }
 
 } // namespace bin2llvmir
+} // namespace retdec

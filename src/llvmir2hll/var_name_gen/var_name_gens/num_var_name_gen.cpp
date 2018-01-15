@@ -6,10 +6,11 @@
 
 #include <llvm/ADT/StringExtras.h>
 
-#include "llvmir2hll/support/debug.h"
-#include "llvmir2hll/var_name_gen/var_name_gen_factory.h"
-#include "llvmir2hll/var_name_gen/var_name_gens/num_var_name_gen.h"
+#include "retdec/llvmir2hll/support/debug.h"
+#include "retdec/llvmir2hll/var_name_gen/var_name_gen_factory.h"
+#include "retdec/llvmir2hll/var_name_gen/var_name_gens/num_var_name_gen.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 REGISTER_AT_FACTORY("num", NUM_VAR_NAME_GEN_ID, VarNameGenFactory,
@@ -61,3 +62,4 @@ std::string NumVarNameGen::getNextVarName() {
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

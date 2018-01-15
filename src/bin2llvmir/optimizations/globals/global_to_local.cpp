@@ -4,7 +4,7 @@
 * @copyright (c) 2017 Avast Software, licensed under the MIT license
 */
 
-#include "bin2llvmir/optimizations/globals/global_to_local.h"
+#include "retdec/bin2llvmir/optimizations/globals/global_to_local.h"
 
 using namespace llvm;
 
@@ -18,6 +18,7 @@ const char *PASS_NAME = "Global to local optimization";
 
 } // anonymous namespace
 
+namespace retdec {
 namespace bin2llvmir {
 
 // It is the address of the variable that matters, not the value, so we can
@@ -54,3 +55,4 @@ const char *GlobalToLocal::getPassName() const {
 }
 
 } // namespace bin2llvmir
+} // namespace retdec

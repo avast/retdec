@@ -4,7 +4,7 @@
 * @copyright (c) 2017 Avast Software, licensed under the MIT license
 */
 
-#include "bin2llvmir/optimizations/idioms_libgcc/idioms_libgcc.h"
+#include "retdec/bin2llvmir/optimizations/idioms_libgcc/idioms_libgcc.h"
 #include "bin2llvmir/utils/llvmir_tests.h"
 
 using namespace ::testing;
@@ -25,6 +25,7 @@ void dummyFunction(llvm::CallInst* inst)
 #define ID_FNC_PAIR(ID, FNC) \
 		{ID, [] (llvm::CallInst* c) { return FNC(c); }}
 
+namespace retdec {
 namespace bin2llvmir {
 namespace tests {
 
@@ -67,3 +68,4 @@ TEST_F(IdiomsLibgccTests, checkFunctionToActionMapNotMisorderedElementPassTheTes
 
 } // namespace tests
 } // namespace bin2llvmir
+} // namespace retdec

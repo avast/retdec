@@ -8,14 +8,15 @@
 #include <llvm/ADT/APFloat.h>
 #include <llvm/IR/Constants.h>
 
-#include "llvmir2hll/ir/const_float.h"
-#include "llvmir2hll/ir/expression.h"
-#include "llvmir2hll/llvm/llvmir2bir_converters/new_llvmir2bir_converter/llvm_value_converter.h"
+#include "retdec/llvmir2hll/ir/const_float.h"
+#include "retdec/llvmir2hll/ir/expression.h"
+#include "retdec/llvmir2hll/llvm/llvmir2bir_converters/new_llvmir2bir_converter/llvm_value_converter.h"
 #include "llvmir2hll/llvm/llvmir2bir_converters/new_llvmir2bir_converter/llvm_value_converter_tests/tests_with_llvm_value_converter.h"
-#include "llvmir2hll/support/smart_ptr.h"
+#include "retdec/llvmir2hll/support/smart_ptr.h"
 
 using namespace ::testing;
 
+namespace retdec {
 namespace llvmir2hll {
 namespace tests {
 
@@ -98,3 +99,4 @@ NonZeroPPC_FP128ConstantIsConvertedCorrectly) {
 
 } // namespace tests
 } // namespace llvmir2hll
+} // namespace retdec

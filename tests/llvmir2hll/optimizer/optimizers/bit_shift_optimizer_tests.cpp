@@ -6,23 +6,24 @@
 
 #include <gtest/gtest.h>
 
-#include "llvmir2hll/ir/add_op_expr.h"
-#include "llvmir2hll/ir/bit_shl_op_expr.h"
-#include "llvmir2hll/ir/bit_shr_op_expr.h"
-#include "llvmir2hll/ir/const_int.h"
-#include "llvmir2hll/ir/div_op_expr.h"
-#include "llvmir2hll/ir/expression.h"
-#include "llvmir2hll/ir/float_type.h"
-#include "llvmir2hll/ir/int_type.h"
-#include "llvmir2hll/ir/module.h"
-#include "llvmir2hll/ir/mul_op_expr.h"
-#include "llvmir2hll/ir/return_stmt.h"
+#include "retdec/llvmir2hll/ir/add_op_expr.h"
+#include "retdec/llvmir2hll/ir/bit_shl_op_expr.h"
+#include "retdec/llvmir2hll/ir/bit_shr_op_expr.h"
+#include "retdec/llvmir2hll/ir/const_int.h"
+#include "retdec/llvmir2hll/ir/div_op_expr.h"
+#include "retdec/llvmir2hll/ir/expression.h"
+#include "retdec/llvmir2hll/ir/float_type.h"
+#include "retdec/llvmir2hll/ir/int_type.h"
+#include "retdec/llvmir2hll/ir/module.h"
+#include "retdec/llvmir2hll/ir/mul_op_expr.h"
+#include "retdec/llvmir2hll/ir/return_stmt.h"
 #include "llvmir2hll/ir/tests_with_module.h"
-#include "llvmir2hll/ir/variable.h"
-#include "llvmir2hll/optimizer/optimizers/bit_shift_optimizer.h"
+#include "retdec/llvmir2hll/ir/variable.h"
+#include "retdec/llvmir2hll/optimizer/optimizers/bit_shift_optimizer.h"
 
 using namespace ::testing;
 
+namespace retdec {
 namespace llvmir2hll {
 namespace tests {
 
@@ -493,3 +494,4 @@ SecondOperandIsVariableRightArithmeticalShiftNotOptimized) {
 
 } // namespace tests
 } // namespace llvmir2hll
+} // namespace retdec

@@ -7,13 +7,14 @@
 #include <gtest/gtest.h>
 
 #include "llvmir2hll/analysis/tests_with_value_analysis.h"
-#include "llvmir2hll/evaluator/arithm_expr_evaluators/strict_arithm_expr_evaluator.h"
-#include "llvmir2hll/ir/empty_stmt.h"
+#include "retdec/llvmir2hll/evaluator/arithm_expr_evaluators/strict_arithm_expr_evaluator.h"
+#include "retdec/llvmir2hll/ir/empty_stmt.h"
 #include "llvmir2hll/ir/tests_with_module.h"
-#include "llvmir2hll/optimizer/optimizers/while_true_to_for_loop_optimizer.h"
+#include "retdec/llvmir2hll/optimizer/optimizers/while_true_to_for_loop_optimizer.h"
 
 using namespace ::testing;
 
+namespace retdec {
 namespace llvmir2hll {
 namespace tests {
 
@@ -60,3 +61,4 @@ InEmptyBodyThereIsNothingToOptimize) {
 
 } // namespace tests
 } // namespace llvmir2hll
+} // namespace retdec

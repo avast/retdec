@@ -6,10 +6,11 @@
 
 #include <gtest/gtest.h>
 
-#include "llvmir2hll/llvm/string_conversions.h"
+#include "retdec/llvmir2hll/llvm/string_conversions.h"
 
 using namespace ::testing;
 
+namespace retdec {
 namespace llvmir2hll {
 namespace tests {
 
@@ -20,3 +21,4 @@ class StringConversionsTests: public Test {};
 
 } // namespace tests
 } // namespace llvmir2hll
+} // namespace retdec

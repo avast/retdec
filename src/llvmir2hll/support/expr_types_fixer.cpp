@@ -6,32 +6,33 @@
 
 #include <cstddef>
 
-#include "llvmir2hll/analysis/expr_types_analysis.h"
-#include "llvmir2hll/ir/assign_stmt.h"
-#include "llvmir2hll/ir/bit_cast_expr.h"
-#include "llvmir2hll/ir/bit_shl_op_expr.h"
-#include "llvmir2hll/ir/bit_shr_op_expr.h"
-#include "llvmir2hll/ir/call_expr.h"
-#include "llvmir2hll/ir/const_int.h"
-#include "llvmir2hll/ir/div_op_expr.h"
-#include "llvmir2hll/ir/expression.h"
-#include "llvmir2hll/ir/ext_cast_expr.h"
-#include "llvmir2hll/ir/function.h"
-#include "llvmir2hll/ir/global_var_def.h"
-#include "llvmir2hll/ir/gt_eq_op_expr.h"
-#include "llvmir2hll/ir/gt_op_expr.h"
-#include "llvmir2hll/ir/int_to_fp_cast_expr.h"
-#include "llvmir2hll/ir/int_type.h"
-#include "llvmir2hll/ir/lt_eq_op_expr.h"
-#include "llvmir2hll/ir/lt_op_expr.h"
-#include "llvmir2hll/ir/mod_op_expr.h"
-#include "llvmir2hll/ir/module.h"
-#include "llvmir2hll/ir/type.h"
-#include "llvmir2hll/ir/var_def_stmt.h"
-#include "llvmir2hll/ir/variable.h"
-#include "llvmir2hll/support/debug.h"
-#include "llvmir2hll/support/expr_types_fixer.h"
+#include "retdec/llvmir2hll/analysis/expr_types_analysis.h"
+#include "retdec/llvmir2hll/ir/assign_stmt.h"
+#include "retdec/llvmir2hll/ir/bit_cast_expr.h"
+#include "retdec/llvmir2hll/ir/bit_shl_op_expr.h"
+#include "retdec/llvmir2hll/ir/bit_shr_op_expr.h"
+#include "retdec/llvmir2hll/ir/call_expr.h"
+#include "retdec/llvmir2hll/ir/const_int.h"
+#include "retdec/llvmir2hll/ir/div_op_expr.h"
+#include "retdec/llvmir2hll/ir/expression.h"
+#include "retdec/llvmir2hll/ir/ext_cast_expr.h"
+#include "retdec/llvmir2hll/ir/function.h"
+#include "retdec/llvmir2hll/ir/global_var_def.h"
+#include "retdec/llvmir2hll/ir/gt_eq_op_expr.h"
+#include "retdec/llvmir2hll/ir/gt_op_expr.h"
+#include "retdec/llvmir2hll/ir/int_to_fp_cast_expr.h"
+#include "retdec/llvmir2hll/ir/int_type.h"
+#include "retdec/llvmir2hll/ir/lt_eq_op_expr.h"
+#include "retdec/llvmir2hll/ir/lt_op_expr.h"
+#include "retdec/llvmir2hll/ir/mod_op_expr.h"
+#include "retdec/llvmir2hll/ir/module.h"
+#include "retdec/llvmir2hll/ir/type.h"
+#include "retdec/llvmir2hll/ir/var_def_stmt.h"
+#include "retdec/llvmir2hll/ir/variable.h"
+#include "retdec/llvmir2hll/support/debug.h"
+#include "retdec/llvmir2hll/support/expr_types_fixer.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 /**
@@ -426,3 +427,4 @@ void ExprTypesFixer::visit(ShPtr<BitShrOpExpr> expr) {
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

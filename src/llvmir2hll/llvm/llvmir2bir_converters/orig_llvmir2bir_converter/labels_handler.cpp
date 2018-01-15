@@ -6,14 +6,15 @@
 
 #include <llvm/IR/BasicBlock.h>
 
-#include "llvmir2hll/ir/statement.h"
-#include "llvmir2hll/llvm/llvm_support.h"
-#include "llvmir2hll/llvm/llvmir2bir_converters/orig_llvmir2bir_converter/labels_handler.h"
-#include "llvmir2hll/utils/string.h"
-#include "tl-cpputils/container.h"
+#include "retdec/llvmir2hll/ir/statement.h"
+#include "retdec/llvmir2hll/llvm/llvm_support.h"
+#include "retdec/llvmir2hll/llvm/llvmir2bir_converters/orig_llvmir2bir_converter/labels_handler.h"
+#include "retdec/llvmir2hll/utils/string.h"
+#include "retdec/utils/container.h"
 
-using tl_cpputils::hasItem;
+using retdec::utils::hasItem;
 
+namespace retdec {
 namespace llvmir2hll {
 
 LabelsHandler::LabelsHandler() = default;
@@ -80,3 +81,4 @@ void LabelsHandler::markLabelAsUsed(const std::string &label) {
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

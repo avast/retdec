@@ -6,19 +6,19 @@
 
 #include <iostream>
 
-#include "tl-cpputils/filesystem_path.h"
-#include "tl-cpputils/string.h"
-#include "bin2llvmir/optimizations/decoder/decoder.h"
-#include "bin2llvmir/utils/defs.h"
+#include "retdec/utils/filesystem_path.h"
+#include "retdec/utils/string.h"
+#include "retdec/bin2llvmir/optimizations/decoder/decoder.h"
+#include "retdec/bin2llvmir/utils/defs.h"
 #define debug_enabled false
-#include "stacofin/stacofin.h"
+#include "retdec/stacofin/stacofin.h"
 
-using namespace tl_cpputils;
-using namespace fnc_patterns::stacofin;
+using namespace retdec::utils;
+using namespace retdec::stacofin;
 
 namespace {
 
-using namespace bin2llvmir;
+using namespace retdec::bin2llvmir;
 
 void selectSignaturesWithName(
 		const std::set<std::string>& src,
@@ -71,7 +71,7 @@ void selectSignaturesWithNames(
 
 std::set<std::string> selectSignaturePaths(FileImage* image, Config* config)
 {
-	const retdec_config::Config& c = config->getConfig();
+	const retdec::config::Config& c = config->getConfig();
 
 	std::set<std::string> sigs;
 
@@ -101,7 +101,7 @@ std::set<std::string> selectSignaturePaths(FileImage* image, Config* config)
 
 		std::size_t major = 0;
 		std::size_t minor = 0;
-		if (auto* pe = dynamic_cast<fileformat::PeFormat*>(
+		if (auto* pe = dynamic_cast<retdec::fileformat::PeFormat*>(
 				image->getFileFormat()))
 		{
 			major = pe->getMajorLinkerVersion();
@@ -321,7 +321,7 @@ void fixWeirdManglingOfPic32(std::string& name)
 	{
 		name = name.substr(0, name.find("_fF"));
 	}
-	else if (tl_cpputils::endsWith(name, "_s"))
+	else if (retdec::utils::endsWith(name, "_s"))
 	{
 		name.pop_back();
 		name.pop_back();
@@ -330,6 +330,7 @@ void fixWeirdManglingOfPic32(std::string& name)
 
 } // namespace anon
 
+namespace retdec {
 namespace bin2llvmir {
 
 void Decoder::doStaticCodeRecognition()
@@ -354,7 +355,7 @@ void Decoder::doStaticCodeRecognition()
 
 	LOG << "\n" << "Detected functions:" << std::endl;
 
-	std::map<tl_cpputils::Address, std::map<std::string, tl_cpputils::AddressRange>> sfncs;
+	std::map<retdec::utils::Address, std::map<std::string, retdec::utils::AddressRange>> sfncs;
 
 	for (auto& f : codeFinder.accessDectedFunctions())
 	{
@@ -409,7 +410,7 @@ void Decoder::doStaticCodeRecognition()
 		LOG << "\t" << f.address << " @ " << n << " (" << f.names.front()
 				<< "), sz = " << f.size << std::endl;
 
-		tl_cpputils::AddressRange range(f.address, f.address + f.size - 1);
+		retdec::utils::AddressRange range(f.address, f.address + f.size - 1);
 
 		auto& sc = sfncs[f.address];
 		sc[n] = range;
@@ -428,3 +429,4 @@ void Decoder::doStaticCodeRecognition()
 }
 
 } // namespace bin2llvmir
+} // namespace retdec

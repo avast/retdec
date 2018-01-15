@@ -11,15 +11,16 @@
 #include <llvm/IR/Instruction.h>
 #include <llvm/IR/Instructions.h>
 
-#include "bin2llvmir/optimizations/asm_inst_remover/asm_inst_remover.h"
-#include "bin2llvmir/providers/asm_instruction.h"
-#include "bin2llvmir/utils/defs.h"
+#include "retdec/bin2llvmir/optimizations/asm_inst_remover/asm_inst_remover.h"
+#include "retdec/bin2llvmir/providers/asm_instruction.h"
+#include "retdec/bin2llvmir/utils/defs.h"
 #define debug_enabled false
-#include "llvm-support/utils.h"
+#include "retdec/llvm-support/utils.h"
 
-using namespace llvm_support;
+using namespace retdec::llvm_support;
 using namespace llvm;
 
+namespace retdec {
 namespace bin2llvmir {
 
 char AsmInstructionRemover::ID = 0;
@@ -144,3 +145,4 @@ bool AsmInstructionRemover::renameTempVariables(llvm::Module& M)
 }
 
 } // namespace bin2llvmir
+} // namespace retdec

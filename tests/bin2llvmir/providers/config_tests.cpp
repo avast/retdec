@@ -4,12 +4,13 @@
 * @copyright (c) 2017 Avast Software, licensed under the MIT license
 */
 
-#include "bin2llvmir/providers/config.h"
+#include "retdec/bin2llvmir/providers/config.h"
 #include "bin2llvmir/utils/llvmir_tests.h"
 
 using namespace ::testing;
 using namespace llvm;
 
+namespace retdec {
 namespace bin2llvmir {
 namespace tests {
 
@@ -40,7 +41,7 @@ TEST_F(ConfigTests, getConfigFunctionGetsExistingFunction)
 	)");
 	Function* llvmFnc = getFunctionByName("fnc");
 	auto config = Config::empty(module.get());
-	auto p = config.getConfig().functions.insert(retdec_config::Function("fnc"));
+	auto p = config.getConfig().functions.insert(retdec::config::Function("fnc"));
 	auto* configFnc1 = config.getConfigFunction(llvmFnc);
 
 	EXPECT_NE(nullptr, configFnc1);
@@ -56,7 +57,7 @@ TEST_F(ConfigTests, getConfigFunctionReturnsNullptrIfFunctionNotFound)
 	)");
 	Function* llvmFnc = getFunctionByName("fnc");
 	auto config = Config::empty(module.get());
-	auto p = config.getConfig().functions.insert(retdec_config::Function("f"));
+	auto p = config.getConfig().functions.insert(retdec::config::Function("f"));
 	auto* configFnc1 = config.getConfigFunction(llvmFnc);
 
 	EXPECT_EQ(nullptr, configFnc1);
@@ -76,7 +77,7 @@ TEST_F(ConfigTests, getLlvmFunctionGetsExistingFunction)
 	)");
 	Function* llvmFnc1 = getFunctionByName("fnc");
 	auto config = Config::empty(module.get());
-	auto configFnc = retdec_config::Function("fnc");
+	auto configFnc = retdec::config::Function("fnc");
 	configFnc.setStart(0x1234);
 	config.getConfig().functions.insert(configFnc);
 	Function* llvmFnc2 = config.getLlvmFunction(0x1234);
@@ -93,7 +94,7 @@ TEST_F(ConfigTests, getLlvmFunctionReturnsNullptrIfFunctionNotFound)
 	)");
 	Function* llvmFnc1 = getFunctionByName("fnc");
 	auto config = Config::empty(module.get());
-	auto configFnc = retdec_config::Function("fnc");
+	auto configFnc = retdec::config::Function("fnc");
 	configFnc.setStart(0x1234);
 	config.getConfig().functions.insert(configFnc);
 	Function* llvmFnc2 = config.getLlvmFunction(0x5678);
@@ -115,7 +116,7 @@ TEST_F(ConfigTests, getFunctionAddressReturnsDefinedAddressIfFunctionFound)
 	)");
 	Function* llvmFnc = getFunctionByName("fnc");
 	auto config = Config::empty(module.get());
-	auto configFnc = retdec_config::Function("fnc");
+	auto configFnc = retdec::config::Function("fnc");
 	configFnc.setStart(0x1234);
 	config.getConfig().functions.insert(configFnc);
 	auto addr = config.getFunctionAddress(llvmFnc);
@@ -132,7 +133,7 @@ TEST_F(ConfigTests, getFunctionAddressReturnsUndefinedAddressIfFunctionNotFound)
 	)");
 	Function* llvmFnc = getFunctionByName("fnc");
 	auto config = Config::empty(module.get());
-	auto configFnc = retdec_config::Function("f");
+	auto configFnc = retdec::config::Function("f");
 	configFnc.setStart(0x1234);
 	config.getConfig().functions.insert(configFnc);
 	auto addr = config.getFunctionAddress(llvmFnc);
@@ -220,8 +221,8 @@ TEST_F(ConfigTests, getConfigRegisterReturnsConfigRegisterIfItExists)
 		@r = global i1 0
 	)");
 	auto* llvmReg = getGlobalByName("r");
-	auto s = retdec_config::Storage::inRegister("r");
-	auto r = retdec_config::Object("r", s);
+	auto s = retdec::config::Storage::inRegister("r");
+	auto r = retdec::config::Object("r", s);
 	auto config = Config::empty(module.get());
 	auto p = config.getConfig().registers.insert(r);
 	auto* configReg = config.getConfigRegister(llvmReg);
@@ -236,8 +237,8 @@ TEST_F(ConfigTests, getConfigRegisterReturnsNullptrIfItRegisterNotFound)
 		@r = global i1 0
 	)");
 	auto* llvmReg = getGlobalByName("r");
-	auto s = retdec_config::Storage::inRegister("reg");
-	auto r = retdec_config::Object("reg", s);
+	auto s = retdec::config::Storage::inRegister("reg");
+	auto r = retdec::config::Object("reg", s);
 	auto config = Config::empty(module.get());
 	config.getConfig().registers.insert(r);
 	auto* configReg = config.getConfigRegister(llvmReg);
@@ -255,8 +256,8 @@ TEST_F(ConfigTests, getConfigRegisterNumberReturnDefinedValueIfItExists)
 		@r = global i1 0
 	)");
 	auto* llvmReg = getGlobalByName("r");
-	auto s = retdec_config::Storage::inRegister("r", 123, "class");
-	auto r = retdec_config::Object("r", s);
+	auto s = retdec::config::Storage::inRegister("r", 123, "class");
+	auto r = retdec::config::Object("r", s);
 	auto config = Config::empty(module.get());
 	config.getConfig().registers.insert(r);
 	auto regNum = config.getConfigRegisterNumber(llvmReg);
@@ -271,8 +272,8 @@ TEST_F(ConfigTests, getConfigRegisterNumberReturnUndefinedValueIfItDoesNotExist)
 		@r = global i1 0
 	)");
 	auto* llvmReg = getGlobalByName("r");
-	auto s = retdec_config::Storage::inRegister("r");
-	auto r = retdec_config::Object("r", s);
+	auto s = retdec::config::Storage::inRegister("r");
+	auto r = retdec::config::Object("r", s);
 	auto config = Config::empty(module.get());
 	config.getConfig().registers.insert(r);
 	auto regNum = config.getConfigRegisterNumber(llvmReg);
@@ -290,8 +291,8 @@ TEST_F(ConfigTests, getConfigRegisterClassReturnsClassIfItExists)
 		@r = global i1 0
 	)");
 	auto* llvmReg = getGlobalByName("r");
-	auto s = retdec_config::Storage::inRegister("r", 123, "class");
-	auto r = retdec_config::Object("r", s);
+	auto s = retdec::config::Storage::inRegister("r", 123, "class");
+	auto r = retdec::config::Object("r", s);
 	auto config = Config::empty(module.get());
 	config.getConfig().registers.insert(r);
 	auto regClass = config.getConfigRegisterClass(llvmReg);
@@ -305,8 +306,8 @@ TEST_F(ConfigTests, getConfigRegisterClassReturnsEmptyStringIfClassNotSet)
 		@r = global i1 0
 	)");
 	auto* llvmReg = getGlobalByName("r");
-	auto s = retdec_config::Storage::inRegister("r");
-	auto r = retdec_config::Object("r", s);
+	auto s = retdec::config::Storage::inRegister("r");
+	auto r = retdec::config::Object("r", s);
 	auto config = Config::empty(module.get());
 	config.getConfig().registers.insert(r);
 	auto regClass = config.getConfigRegisterClass(llvmReg);
@@ -324,8 +325,8 @@ TEST_F(ConfigTests, getLlvmRegisterReturnsRegisterIfItExists)
 		@___eax = global i1 0
 	)");
 	auto* llvmReg = getGlobalByName("___eax");
-	auto s = retdec_config::Storage::inRegister("eax", 0, "gpr");
-	auto r = retdec_config::Object("___eax", s);
+	auto s = retdec::config::Storage::inRegister("eax", 0, "gpr");
+	auto r = retdec::config::Object("___eax", s);
 	r.setRealName("eax");
 	auto config = Config::empty(module.get());
 	config.getConfig().registers.insert(r);
@@ -341,8 +342,8 @@ TEST_F(ConfigTests, getLlvmRegisterReturnsNullptrRegisterIfItDoesNotExist)
 		@___eax = global i1 0
 	)");
 	auto* llvmReg = getGlobalByName("___eax");
-	auto s = retdec_config::Storage::inRegister("eax", 0, "gpr");
-	auto r = retdec_config::Object("___eax", s);
+	auto s = retdec::config::Storage::inRegister("eax", 0, "gpr");
+	auto r = retdec::config::Object("___eax", s);
 	r.setRealName("eax");
 	auto config = Config::empty(module.get());
 	config.getConfig().registers.insert(r);
@@ -361,8 +362,8 @@ TEST_F(ConfigTests, isRegisterReturnsTrueForRegister)
 	parseInput(R"(
 		@r = global i32 0
 	)");
-	auto s = retdec_config::Storage::inRegister("r");
-	auto r = retdec_config::Object("r", s);
+	auto s = retdec::config::Storage::inRegister("r");
+	auto r = retdec::config::Object("r", s);
 	auto config = Config::empty(module.get());
 	config.getConfig().registers.insert(r);
 	Value* v = getValueByName("r");
@@ -402,8 +403,8 @@ TEST_F(ConfigTests, isFlagRegisterReturnsTrueForFlagRegister)
 	parseInput(R"(
 		@r = global i1 0
 	)");
-	auto s = retdec_config::Storage::inRegister("r");
-	auto r = retdec_config::Object("r", s);
+	auto s = retdec::config::Storage::inRegister("r");
+	auto r = retdec::config::Object("r", s);
 	auto config = Config::empty(module.get());
 	config.getConfig().registers.insert(r);
 	Value* v = getValueByName("r");
@@ -422,8 +423,8 @@ TEST_F(ConfigTests, isFlagRegisterReturnFalseForNonflagRegistersAndAllOtherObjec
 			ret void
 		}
 	)");
-	auto s = retdec_config::Storage::inRegister("r2");
-	auto r = retdec_config::Object("r2", s);
+	auto s = retdec::config::Storage::inRegister("r2");
+	auto r = retdec::config::Object("r2", s);
 	auto config = Config::empty(module.get());
 	config.getConfig().registers.insert(r);
 	Value* r1 = getValueByName("r1");
@@ -455,14 +456,14 @@ TEST_F(ConfigTests, isStackPointerRegisterReturnsTrueForStackPointerRegisters)
 	Value* r1L = getValueByName("r1");
 	Value* spL = getValueByName("sp");
 
-	auto espS = retdec_config::Storage::inRegister("esp");
-	auto esp = retdec_config::Object("esp", espS);
+	auto espS = retdec::config::Storage::inRegister("esp");
+	auto esp = retdec::config::Object("esp", espS);
 
-	auto r1S = retdec_config::Storage::inRegister("r1");
-	auto r1 = retdec_config::Object("r1", r1S);
+	auto r1S = retdec::config::Storage::inRegister("r1");
+	auto r1 = retdec::config::Object("r1", r1S);
 
-	auto spS = retdec_config::Storage::inRegister("sp");
-	auto sp = retdec_config::Object("sp", spS);
+	auto spS = retdec::config::Storage::inRegister("sp");
+	auto sp = retdec::config::Object("sp", spS);
 
 	auto config = Config::empty(module.get());
 	config.getConfig().registers.insert(esp);
@@ -485,8 +486,8 @@ TEST_F(ConfigTests, isStackPointerRegisterReturnsFalseForAllNonStackPointerRegis
 			ret void
 		}
 	)");
-	auto s = retdec_config::Storage::inRegister("r");
-	auto cr = retdec_config::Object("r", s);
+	auto s = retdec::config::Storage::inRegister("r");
+	auto cr = retdec::config::Object("r", s);
 	auto config = Config::empty(module.get());
 	config.getConfig().registers.insert(cr);
 	Value* r = getValueByName("r");
@@ -519,8 +520,8 @@ TEST_F(ConfigTests, isStackPointerRegisterReturnsFalseForAllNonStackPointerRegis
 //		@eax = global i1 0
 //	)");
 //	auto* llvmReg = getGlobalByName("eax");
-//	auto s = retdec_config::Storage::inRegister("eax", 123, "gpr");
-//	auto r = retdec_config::Object("eax", s);
+//	auto s = retdec::config::Storage::inRegister("eax", 123, "gpr");
+//	auto r = retdec::config::Object("eax", s);
 //	auto config = Config::empty(module.get());
 //	config.getConfig().registers.insert(r);
 //	config.getConfig().architecture.setIsX86();
@@ -557,8 +558,8 @@ TEST_F(ConfigTests, isStackPointerRegisterReturnsFalseForAllNonStackPointerRegis
 //		@r = global i1 0
 //	)");
 //	auto* llvmReg = getGlobalByName("r");
-//	auto s = retdec_config::Storage::inRegister("r", 123, "fpuregs_s");
-//	auto r = retdec_config::Object("r", s);
+//	auto s = retdec::config::Storage::inRegister("r", 123, "fpuregs_s");
+//	auto r = retdec::config::Object("r", s);
 //	auto config = Config::empty(module.get());
 //	config.getConfig().registers.insert(r);
 //	config.getConfig().architecture.setIsMips();
@@ -588,8 +589,8 @@ TEST_F(ConfigTests, getConfigGlobalVariableGetsExistingGlobalVariable)
 	)");
 	GlobalVariable* llvmGv = getGlobalByName("gv");
 	auto config = Config::empty(module.get());
-	auto s = retdec_config::Storage::inMemory(0x1234);
-	auto cgv = retdec_config::Object("gv", s);
+	auto s = retdec::config::Storage::inMemory(0x1234);
+	auto cgv = retdec::config::Object("gv", s);
 	auto p = config.getConfig().globals.insert(cgv);
 	auto* configGv1 = config.getConfigGlobalVariable(llvmGv);
 
@@ -604,8 +605,8 @@ TEST_F(ConfigTests, getConfigGlobalVariableReturnsNullptrIfGlobalVariableNotFoun
 	)");
 	GlobalVariable* llvmGv = getGlobalByName("gv");
 	auto config = Config::empty(module.get());
-	auto s = retdec_config::Storage::inMemory(0x1234);
-	auto cgv = retdec_config::Object("global", s);
+	auto s = retdec::config::Storage::inMemory(0x1234);
+	auto cgv = retdec::config::Object("global", s);
 	auto p = config.getConfig().globals.insert(cgv);
 	auto* configGv1 = config.getConfigGlobalVariable(llvmGv);
 
@@ -624,8 +625,8 @@ TEST_F(ConfigTests, getLlvmGlobalVariableGetsExistingGlobalVariable)
 	)");
 	GlobalVariable* llvmGv = getGlobalByName("gv");
 	auto config = Config::empty(module.get());
-	auto s = retdec_config::Storage::inMemory(0x1234);
-	auto cgv = retdec_config::Object("gv", s);
+	auto s = retdec::config::Storage::inMemory(0x1234);
+	auto cgv = retdec::config::Object("gv", s);
 	config.getConfig().globals.insert(cgv);
 	GlobalVariable* gv1 = config.getLlvmGlobalVariable(0x1234);
 	GlobalVariable* gv2 = config.getLlvmGlobalVariable("bad name", 0x1234);
@@ -646,8 +647,8 @@ TEST_F(ConfigTests, getLlvmGlobalVariableReturnNullptrIfGlobalVariableNotFound)
 	)");
 	GlobalVariable* llvmGv = getGlobalByName("gv");
 	auto config = Config::empty(module.get());
-	auto s = retdec_config::Storage::inMemory(0x5678);
-	auto cgv = retdec_config::Object("global", s);
+	auto s = retdec::config::Storage::inMemory(0x5678);
+	auto cgv = retdec::config::Object("global", s);
 	config.getConfig().globals.insert(cgv);
 	GlobalVariable* gv1 = config.getLlvmGlobalVariable(0x1234);
 	GlobalVariable* gv2 = config.getLlvmGlobalVariable("bad name", 0x1234);
@@ -668,8 +669,8 @@ TEST_F(ConfigTests, getGlobalAddressReturnsDefinedAddressForKnownGlobals)
 	)");
 	GlobalVariable* llvmGv = getGlobalByName("gv");
 	auto config = Config::empty(module.get());
-	auto s = retdec_config::Storage::inMemory(0x1234);
-	auto cgv = retdec_config::Object("gv", s);
+	auto s = retdec::config::Storage::inMemory(0x1234);
+	auto cgv = retdec::config::Object("gv", s);
 	config.getConfig().globals.insert(cgv);
 	auto addr = config.getGlobalAddress(llvmGv);
 
@@ -683,8 +684,8 @@ TEST_F(ConfigTests, getGlobalAddressReturnsUndefinedAddressForUnknownGlobals)
 	)");
 	GlobalVariable* llvmGv = getGlobalByName("gv");
 	auto config = Config::empty(module.get());
-	auto s = retdec_config::Storage::inMemory(0x1234);
-	auto cgv = retdec_config::Object("global", s);
+	auto s = retdec::config::Storage::inMemory(0x1234);
+	auto cgv = retdec::config::Object("global", s);
 	config.getConfig().globals.insert(cgv);
 	auto addr = config.getGlobalAddress(llvmGv);
 
@@ -705,9 +706,9 @@ TEST_F(ConfigTests, getConfigLocalVariableFindsLocalVariables)
 	)");
 	auto* llvmLv = getValueByName("local");
 	auto config = Config::empty(module.get());
-	auto s = retdec_config::Storage::undefined();
-	auto clv = retdec_config::Object("local", s);
-	auto cf = retdec_config::Function("fnc");
+	auto s = retdec::config::Storage::undefined();
+	auto clv = retdec::config::Object("local", s);
+	auto cf = retdec::config::Function("fnc");
 	cf.locals.insert(clv);
 	config.getConfig().functions.insert(cf);
 	auto* cclv = config.getConfigLocalVariable(llvmLv);
@@ -731,9 +732,9 @@ TEST_F(ConfigTests, getConfigLocalVariableDoesNotFindNonLocalVariables)
 	auto* llvmLv = getValueByName("local");
 	auto* llvmSv = getValueByName("stack");
 	auto config = Config::empty(module.get());
-	auto s = retdec_config::Storage::onStack(4);
-	auto cSv = retdec_config::Object("stack", s);
-	auto cf = retdec_config::Function("fnc");
+	auto s = retdec::config::Storage::onStack(4);
+	auto cSv = retdec::config::Object("stack", s);
+	auto cf = retdec::config::Function("fnc");
 	cf.locals.insert(cSv);
 	config.getConfig().functions.insert(cf);
 
@@ -758,9 +759,9 @@ TEST_F(ConfigTests, getConfigStackVariableFindsStackVariables)
 	)");
 	auto* llvmSv = getValueByName("stack");
 	auto config = Config::empty(module.get());
-	auto s = retdec_config::Storage::onStack(4);
-	auto cSv = retdec_config::Object("stack", s);
-	auto cf = retdec_config::Function("fnc");
+	auto s = retdec::config::Storage::onStack(4);
+	auto cSv = retdec::config::Object("stack", s);
+	auto cf = retdec::config::Function("fnc");
 	cf.locals.insert(cSv);
 	config.getConfig().functions.insert(cf);
 	auto* ccSv = config.getConfigStackVariable(llvmSv);
@@ -787,9 +788,9 @@ TEST_F(ConfigTests, getConfigStackVariableDoesNotFindNonStackVariables)
 	auto* llvmLv = getValueByName("local");
 	auto* llvmSv = getValueByName("stack");
 	auto config = Config::empty(module.get());
-	auto s = retdec_config::Storage::undefined();
-	auto cLv = retdec_config::Object("local", s);
-	auto cf = retdec_config::Function("fnc");
+	auto s = retdec::config::Storage::undefined();
+	auto cLv = retdec::config::Object("local", s);
+	auto cf = retdec::config::Function("fnc");
 	cf.locals.insert(cLv);
 	config.getConfig().functions.insert(cf);
 
@@ -818,9 +819,9 @@ TEST_F(ConfigTests, getLlvmStackVariableFindsStackVariable)
 	auto* llvmFnc = getFunctionByName("fnc");
 	auto* llvmSv = getValueByName("stack");
 	auto config = Config::empty(module.get());
-	auto s = retdec_config::Storage::onStack(8);
-	auto cSv = retdec_config::Object("stack", s);
-	auto cf = retdec_config::Function("fnc");
+	auto s = retdec::config::Storage::onStack(8);
+	auto cSv = retdec::config::Object("stack", s);
+	auto cf = retdec::config::Function("fnc");
 	cf.locals.insert(cSv);
 	config.getConfig().functions.insert(cf);
 	auto* sv = config.getLlvmStackVariable(llvmFnc, 8);
@@ -839,9 +840,9 @@ TEST_F(ConfigTests, getLlvmStackVariableReturnsNullptrWhenStackVariableNotFound)
 	)");
 	auto* llvmFnc = getFunctionByName("fnc");
 	auto config = Config::empty(module.get());
-	auto s = retdec_config::Storage::onStack(8);
-	auto cSv = retdec_config::Object("stack", s);
-	auto cf = retdec_config::Function("fnc");
+	auto s = retdec::config::Storage::onStack(8);
+	auto cSv = retdec::config::Object("stack", s);
+	auto cf = retdec::config::Function("fnc");
 	cf.locals.insert(cSv);
 	config.getConfig().functions.insert(cf);
 
@@ -866,9 +867,9 @@ TEST_F(ConfigTests, getStackVariableOffsetReturnsDefinedValueForStacks)
 	)");
 	auto* llvmSv = getValueByName("stack");
 	auto config = Config::empty(module.get());
-	auto s = retdec_config::Storage::onStack(4);
-	auto cSv = retdec_config::Object("stack", s);
-	auto cf = retdec_config::Function("fnc");
+	auto s = retdec::config::Storage::onStack(4);
+	auto cSv = retdec::config::Object("stack", s);
+	auto cf = retdec::config::Function("fnc");
 	cf.locals.insert(cSv);
 	config.getConfig().functions.insert(cf);
 	auto off = config.getStackVariableOffset(llvmSv);
@@ -1078,3 +1079,4 @@ TEST_F(ConfigProviderTests, clearRemovesAllData)
 
 } // namespace tests
 } // namespace bin2llvmir
+} // namespace retdec

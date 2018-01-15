@@ -6,30 +6,31 @@
 
 #include <limits>
 
-#include "llvmir2hll/analysis/no_init_var_def_analysis.h"
-#include "llvmir2hll/analysis/value_analysis.h"
-#include "llvmir2hll/ir/assign_op_expr.h"
-#include "llvmir2hll/ir/assign_stmt.h"
-#include "llvmir2hll/ir/float_type.h"
-#include "llvmir2hll/ir/for_loop_stmt.h"
-#include "llvmir2hll/ir/function.h"
-#include "llvmir2hll/ir/if_stmt.h"
-#include "llvmir2hll/ir/int_type.h"
-#include "llvmir2hll/ir/pointer_type.h"
-#include "llvmir2hll/ir/switch_stmt.h"
-#include "llvmir2hll/ir/ufor_loop_stmt.h"
-#include "llvmir2hll/ir/var_def_stmt.h"
-#include "llvmir2hll/ir/variable.h"
-#include "llvmir2hll/ir/while_loop_stmt.h"
-#include "llvmir2hll/optimizer/optimizers/var_def_stmt_optimizer.h"
-#include "llvmir2hll/support/debug.h"
-#include "llvmir2hll/support/types.h"
-#include "tl-cpputils/container.h"
-#include "tl-cpputils/string.h"
+#include "retdec/llvmir2hll/analysis/no_init_var_def_analysis.h"
+#include "retdec/llvmir2hll/analysis/value_analysis.h"
+#include "retdec/llvmir2hll/ir/assign_op_expr.h"
+#include "retdec/llvmir2hll/ir/assign_stmt.h"
+#include "retdec/llvmir2hll/ir/float_type.h"
+#include "retdec/llvmir2hll/ir/for_loop_stmt.h"
+#include "retdec/llvmir2hll/ir/function.h"
+#include "retdec/llvmir2hll/ir/if_stmt.h"
+#include "retdec/llvmir2hll/ir/int_type.h"
+#include "retdec/llvmir2hll/ir/pointer_type.h"
+#include "retdec/llvmir2hll/ir/switch_stmt.h"
+#include "retdec/llvmir2hll/ir/ufor_loop_stmt.h"
+#include "retdec/llvmir2hll/ir/var_def_stmt.h"
+#include "retdec/llvmir2hll/ir/variable.h"
+#include "retdec/llvmir2hll/ir/while_loop_stmt.h"
+#include "retdec/llvmir2hll/optimizer/optimizers/var_def_stmt_optimizer.h"
+#include "retdec/llvmir2hll/support/debug.h"
+#include "retdec/llvmir2hll/support/types.h"
+#include "retdec/utils/container.h"
+#include "retdec/utils/string.h"
 
-using tl_cpputils::addToSet;
-using tl_cpputils::isLowerThanCaseInsensitive;
+using retdec::utils::addToSet;
+using retdec::utils::isLowerThanCaseInsensitive;
 
+namespace retdec {
 namespace llvmir2hll {
 
 /**
@@ -719,3 +720,4 @@ void VarDefStmtOptimizer::clearAllRecords() {
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

@@ -7,17 +7,18 @@
 #include <llvm/IR/DerivedTypes.h>
 #include <llvm/IR/Type.h>
 
-#include "llvmir2hll/ir/array_type.h"
-#include "llvmir2hll/ir/float_type.h"
-#include "llvmir2hll/ir/function_type.h"
-#include "llvmir2hll/ir/int_type.h"
-#include "llvmir2hll/ir/pointer_type.h"
-#include "llvmir2hll/ir/struct_type.h"
-#include "llvmir2hll/ir/unknown_type.h"
-#include "llvmir2hll/ir/void_type.h"
-#include "llvmir2hll/llvm/llvmir2bir_converters/new_llvmir2bir_converter/llvm_type_converter.h"
-#include "llvmir2hll/support/debug.h"
+#include "retdec/llvmir2hll/ir/array_type.h"
+#include "retdec/llvmir2hll/ir/float_type.h"
+#include "retdec/llvmir2hll/ir/function_type.h"
+#include "retdec/llvmir2hll/ir/int_type.h"
+#include "retdec/llvmir2hll/ir/pointer_type.h"
+#include "retdec/llvmir2hll/ir/struct_type.h"
+#include "retdec/llvmir2hll/ir/unknown_type.h"
+#include "retdec/llvmir2hll/ir/void_type.h"
+#include "retdec/llvmir2hll/llvm/llvmir2bir_converters/new_llvmir2bir_converter/llvm_type_converter.h"
+#include "retdec/llvmir2hll/support/debug.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 /**
@@ -160,3 +161,4 @@ ShPtr<FunctionType> LLVMTypeConverter::convert(const llvm::FunctionType *type) {
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

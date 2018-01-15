@@ -9,13 +9,13 @@
 #include <libdwarf/dwarf.h>
 #include <libdwarf/libdwarf.h>
 
-#include "dwarfparser/dwarf_cu.h"
-#include "dwarfparser/dwarf_file.h"
+#include "retdec/dwarfparser/dwarf_cu.h"
+#include "retdec/dwarfparser/dwarf_file.h"
 
 using namespace std;
 
-namespace dwarfparser
-{
+namespace retdec {
+namespace dwarfparser {
 
 /**
  * @brief ctor.
@@ -203,3 +203,4 @@ void DwarfCU::dump() const
 }
 
 } // namespace dwarfparser
+} // namespace retdec

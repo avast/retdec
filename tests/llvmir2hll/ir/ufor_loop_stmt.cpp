@@ -6,12 +6,13 @@
 
 #include <gtest/gtest.h>
 
-#include "llvmir2hll/ir/const_int.h"
-#include "llvmir2hll/ir/empty_stmt.h"
-#include "llvmir2hll/ir/ufor_loop_stmt.h"
+#include "retdec/llvmir2hll/ir/const_int.h"
+#include "retdec/llvmir2hll/ir/empty_stmt.h"
+#include "retdec/llvmir2hll/ir/ufor_loop_stmt.h"
 
 using namespace ::testing;
 
+namespace retdec {
 namespace llvmir2hll {
 namespace tests {
 
@@ -100,3 +101,4 @@ IsInitDefinitionReturnsTrueWhenMarkedAsDefinition) {
 
 } // namespace tests
 } // namespace llvmir2hll
+} // namespace retdec

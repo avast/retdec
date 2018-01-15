@@ -6,10 +6,11 @@
 
 #include <gtest/gtest.h>
 
-#include "llvmir2hll/semantics/semantics/default_semantics.h"
+#include "retdec/llvmir2hll/semantics/semantics/default_semantics.h"
 
 using namespace ::testing;
 
+namespace retdec {
 namespace llvmir2hll {
 namespace tests {
 
@@ -73,3 +74,4 @@ GetSymbolicNamesForParamAlwaysReturnsNothing) {
 
 } // namespace tests
 } // namespace llvmir2hll
+} // namespace retdec

@@ -4,13 +4,14 @@
 * @copyright (c) 2017 Avast Software, licensed under the MIT license
 */
 
-#include "llvmir2hll/ir/function.h"
-#include "llvmir2hll/ir/module.h"
-#include "llvmir2hll/semantics/semantics.h"
-#include "llvmir2hll/support/debug.h"
-#include "llvmir2hll/support/headers_for_declared_funcs.h"
-#include "llvmir2hll/support/maybe.h"
+#include "retdec/llvmir2hll/ir/function.h"
+#include "retdec/llvmir2hll/ir/module.h"
+#include "retdec/llvmir2hll/semantics/semantics.h"
+#include "retdec/llvmir2hll/support/debug.h"
+#include "retdec/llvmir2hll/support/headers_for_declared_funcs.h"
+#include "retdec/llvmir2hll/support/maybe.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 /**
@@ -49,3 +50,4 @@ bool HeadersForDeclaredFuncs::hasAssocHeader(ShPtr<Module> module,
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

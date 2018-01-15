@@ -4,15 +4,16 @@
 * @copyright (c) 2017 Avast Software, licensed under the MIT license
 */
 
-#include "llvmir2hll/analysis/value_analysis.h"
-#include "llvmir2hll/graphs/cfg/cfg_traversals/no_var_def_cfg_traversal.h"
-#include "llvmir2hll/ir/statement.h"
-#include "llvmir2hll/support/debug.h"
-#include "tl-cpputils/container.h"
+#include "retdec/llvmir2hll/analysis/value_analysis.h"
+#include "retdec/llvmir2hll/graphs/cfg/cfg_traversals/no_var_def_cfg_traversal.h"
+#include "retdec/llvmir2hll/ir/statement.h"
+#include "retdec/llvmir2hll/support/debug.h"
+#include "retdec/utils/container.h"
 
-using tl_cpputils::hasItem;
-using tl_cpputils::shareSomeItem;
+using retdec::utils::hasItem;
+using retdec::utils::shareSomeItem;
 
+namespace retdec {
 namespace llvmir2hll {
 
 /**
@@ -99,3 +100,4 @@ bool NoVarDefCFGTraversal::combineRetVals(bool origRetVal, bool newRetVal) const
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

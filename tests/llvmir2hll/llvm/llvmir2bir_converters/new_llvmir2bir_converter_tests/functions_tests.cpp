@@ -6,18 +6,19 @@
 
 #include <gtest/gtest.h>
 
-#include "llvmir2hll/ir/function.h"
-#include "llvmir2hll/ir/int_type.h"
-#include "llvmir2hll/ir/module.h"
-#include "llvmir2hll/ir/pointer_type.h"
-#include "llvmir2hll/ir/variable.h"
-#include "llvmir2hll/ir/void_type.h"
+#include "retdec/llvmir2hll/ir/function.h"
+#include "retdec/llvmir2hll/ir/int_type.h"
+#include "retdec/llvmir2hll/ir/module.h"
+#include "retdec/llvmir2hll/ir/pointer_type.h"
+#include "retdec/llvmir2hll/ir/variable.h"
+#include "retdec/llvmir2hll/ir/void_type.h"
 #include "llvmir2hll/llvm/llvmir2bir_converters/new_llvmir2bir_converter_tests/base_tests.h"
-#include "llvmir2hll/support/smart_ptr.h"
+#include "retdec/llvmir2hll/support/smart_ptr.h"
 
 using namespace ::testing;
 using namespace std::string_literals;
 
+namespace retdec {
 namespace llvmir2hll {
 namespace tests {
 
@@ -181,3 +182,4 @@ LocalVariableWithInvalidIdentifierNameHasValidIdentifierNameAfterConversion) {
 
 } // namespace tests
 } // namespace llvmir2hll
+} // namespace retdec

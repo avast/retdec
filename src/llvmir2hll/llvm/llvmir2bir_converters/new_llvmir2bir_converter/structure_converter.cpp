@@ -13,34 +13,35 @@
 #include <llvm/IR/Instructions.h>
 #include <llvm/Pass.h>
 
-#include "llvmir2hll/ir/assign_stmt.h"
-#include "llvmir2hll/ir/break_stmt.h"
-#include "llvmir2hll/ir/const_bool.h"
-#include "llvmir2hll/ir/const_int.h"
-#include "llvmir2hll/ir/continue_stmt.h"
-#include "llvmir2hll/ir/empty_stmt.h"
-#include "llvmir2hll/ir/for_loop_stmt.h"
-#include "llvmir2hll/ir/goto_stmt.h"
-#include "llvmir2hll/ir/if_stmt.h"
-#include "llvmir2hll/ir/lt_op_expr.h"
-#include "llvmir2hll/ir/switch_stmt.h"
-#include "llvmir2hll/ir/variable.h"
-#include "llvmir2hll/ir/while_loop_stmt.h"
-#include "llvmir2hll/llvm/llvm_support.h"
-#include "llvmir2hll/llvm/llvmir2bir_converters/new_llvmir2bir_converter/basic_block_converter.h"
-#include "llvmir2hll/llvm/llvmir2bir_converters/new_llvmir2bir_converter/llvm_value_converter.h"
-#include "llvmir2hll/llvm/llvmir2bir_converters/new_llvmir2bir_converter/structure_converter.h"
-#include "llvmir2hll/llvm/llvmir2bir_converters/orig_llvmir2bir_converter/labels_handler.h"
-#include "llvmir2hll/support/debug.h"
-#include "llvmir2hll/support/expression_negater.h"
-#include "llvmir2hll/utils/ir.h"
-#include "tl-cpputils/container.h"
+#include "retdec/llvmir2hll/ir/assign_stmt.h"
+#include "retdec/llvmir2hll/ir/break_stmt.h"
+#include "retdec/llvmir2hll/ir/const_bool.h"
+#include "retdec/llvmir2hll/ir/const_int.h"
+#include "retdec/llvmir2hll/ir/continue_stmt.h"
+#include "retdec/llvmir2hll/ir/empty_stmt.h"
+#include "retdec/llvmir2hll/ir/for_loop_stmt.h"
+#include "retdec/llvmir2hll/ir/goto_stmt.h"
+#include "retdec/llvmir2hll/ir/if_stmt.h"
+#include "retdec/llvmir2hll/ir/lt_op_expr.h"
+#include "retdec/llvmir2hll/ir/switch_stmt.h"
+#include "retdec/llvmir2hll/ir/variable.h"
+#include "retdec/llvmir2hll/ir/while_loop_stmt.h"
+#include "retdec/llvmir2hll/llvm/llvm_support.h"
+#include "retdec/llvmir2hll/llvm/llvmir2bir_converters/new_llvmir2bir_converter/basic_block_converter.h"
+#include "retdec/llvmir2hll/llvm/llvmir2bir_converters/new_llvmir2bir_converter/llvm_value_converter.h"
+#include "retdec/llvmir2hll/llvm/llvmir2bir_converters/new_llvmir2bir_converter/structure_converter.h"
+#include "retdec/llvmir2hll/llvm/llvmir2bir_converters/orig_llvmir2bir_converter/labels_handler.h"
+#include "retdec/llvmir2hll/support/debug.h"
+#include "retdec/llvmir2hll/support/expression_negater.h"
+#include "retdec/llvmir2hll/utils/ir.h"
+#include "retdec/utils/container.h"
 
 using namespace std::placeholders;
 
-using tl_cpputils::hasItem;
-using tl_cpputils::removeItem;
+using retdec::utils::hasItem;
+using retdec::utils::removeItem;
 
+namespace retdec {
 namespace llvmir2hll {
 
 namespace {
@@ -2431,3 +2432,4 @@ void StructureConverter::cleanUp() {
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

@@ -4,23 +4,24 @@
 * @copyright (c) 2017 Avast Software, licensed under the MIT license
 */
 
-#include "llvmir2hll/evaluator/arithm_expr_evaluator_factory.h"
-#include "llvmir2hll/evaluator/arithm_expr_evaluators/c_arithm_expr_evaluator.h"
-#include "llvmir2hll/ir/binary_op_expr.h"
-#include "llvmir2hll/ir/bit_cast_expr.h"
-#include "llvmir2hll/ir/div_op_expr.h"
-#include "llvmir2hll/ir/ext_cast_expr.h"
-#include "llvmir2hll/ir/float_type.h"
-#include "llvmir2hll/ir/fp_to_int_cast_expr.h"
-#include "llvmir2hll/ir/int_to_fp_cast_expr.h"
-#include "llvmir2hll/ir/int_type.h"
-#include "llvmir2hll/ir/mod_op_expr.h"
-#include "llvmir2hll/ir/trunc_cast_expr.h"
-#include "llvmir2hll/ir/type.h"
-#include "llvmir2hll/pattern/pattern_finders/api_call/api_call_info.h"
-#include "llvmir2hll/support/debug.h"
-#include "llvmir2hll/support/types.h"
+#include "retdec/llvmir2hll/evaluator/arithm_expr_evaluator_factory.h"
+#include "retdec/llvmir2hll/evaluator/arithm_expr_evaluators/c_arithm_expr_evaluator.h"
+#include "retdec/llvmir2hll/ir/binary_op_expr.h"
+#include "retdec/llvmir2hll/ir/bit_cast_expr.h"
+#include "retdec/llvmir2hll/ir/div_op_expr.h"
+#include "retdec/llvmir2hll/ir/ext_cast_expr.h"
+#include "retdec/llvmir2hll/ir/float_type.h"
+#include "retdec/llvmir2hll/ir/fp_to_int_cast_expr.h"
+#include "retdec/llvmir2hll/ir/int_to_fp_cast_expr.h"
+#include "retdec/llvmir2hll/ir/int_type.h"
+#include "retdec/llvmir2hll/ir/mod_op_expr.h"
+#include "retdec/llvmir2hll/ir/trunc_cast_expr.h"
+#include "retdec/llvmir2hll/ir/type.h"
+#include "retdec/llvmir2hll/pattern/pattern_finders/api_call/api_call_info.h"
+#include "retdec/llvmir2hll/support/debug.h"
+#include "retdec/llvmir2hll/support/types.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 namespace {
@@ -439,3 +440,4 @@ void CArithmExprEvaluator::resolveOverflowForAPFloat(
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

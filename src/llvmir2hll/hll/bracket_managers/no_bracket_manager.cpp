@@ -4,8 +4,9 @@
 * @copyright (c) 2017 Avast Software, licensed under the MIT license
 */
 
-#include "llvmir2hll/hll/bracket_managers/no_bracket_manager.h"
+#include "retdec/llvmir2hll/hll/bracket_managers/no_bracket_manager.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 /**
@@ -58,3 +59,4 @@ bool NoBracketManager::isOperatorSupported(Operators currentOperator) {
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

@@ -14,23 +14,24 @@
 #include <llvm/IR/Type.h>
 #include <llvm/IR/Value.h>
 
-#include "llvmir2hll/ir/address_op_expr.h"
-#include "llvmir2hll/ir/call_expr.h"
-#include "llvmir2hll/ir/const_string.h"
-#include "llvmir2hll/ir/deref_op_expr.h"
-#include "llvmir2hll/ir/expression.h"
-#include "llvmir2hll/ir/module.h"
-#include "llvmir2hll/ir/unknown_type.h"
-#include "llvmir2hll/ir/variable.h"
-#include "llvmir2hll/llvm/llvm_support.h"
-#include "llvmir2hll/llvm/llvmir2bir_converters/new_llvmir2bir_converter/llvm_constant_converter.h"
-#include "llvmir2hll/llvm/llvmir2bir_converters/new_llvmir2bir_converter/llvm_instruction_converter.h"
-#include "llvmir2hll/llvm/llvmir2bir_converters/new_llvmir2bir_converter/llvm_type_converter.h"
-#include "llvmir2hll/llvm/llvmir2bir_converters/new_llvmir2bir_converter/llvm_value_converter.h"
-#include "llvmir2hll/llvm/llvmir2bir_converters/new_llvmir2bir_converter/variables_manager.h"
-#include "llvmir2hll/llvm/string_conversions.h"
-#include "llvmir2hll/support/debug.h"
+#include "retdec/llvmir2hll/ir/address_op_expr.h"
+#include "retdec/llvmir2hll/ir/call_expr.h"
+#include "retdec/llvmir2hll/ir/const_string.h"
+#include "retdec/llvmir2hll/ir/deref_op_expr.h"
+#include "retdec/llvmir2hll/ir/expression.h"
+#include "retdec/llvmir2hll/ir/module.h"
+#include "retdec/llvmir2hll/ir/unknown_type.h"
+#include "retdec/llvmir2hll/ir/variable.h"
+#include "retdec/llvmir2hll/llvm/llvm_support.h"
+#include "retdec/llvmir2hll/llvm/llvmir2bir_converters/new_llvmir2bir_converter/llvm_constant_converter.h"
+#include "retdec/llvmir2hll/llvm/llvmir2bir_converters/new_llvmir2bir_converter/llvm_instruction_converter.h"
+#include "retdec/llvmir2hll/llvm/llvmir2bir_converters/new_llvmir2bir_converter/llvm_type_converter.h"
+#include "retdec/llvmir2hll/llvm/llvmir2bir_converters/new_llvmir2bir_converter/llvm_value_converter.h"
+#include "retdec/llvmir2hll/llvm/llvmir2bir_converters/new_llvmir2bir_converter/variables_manager.h"
+#include "retdec/llvmir2hll/llvm/string_conversions.h"
+#include "retdec/llvmir2hll/support/debug.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 /**
@@ -306,3 +307,4 @@ ShPtr<Type> LLVMValueConverter::determineVariableType(llvm::Value *value) {
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

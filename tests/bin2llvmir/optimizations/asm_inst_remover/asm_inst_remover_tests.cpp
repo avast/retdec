@@ -4,12 +4,13 @@
 * @copyright (c) 2017 Avast Software, licensed under the MIT license
 */
 
-#include "bin2llvmir/optimizations/asm_inst_remover/asm_inst_remover.h"
+#include "retdec/bin2llvmir/optimizations/asm_inst_remover/asm_inst_remover.h"
 #include "bin2llvmir/utils/llvmir_tests.h"
 
 using namespace ::testing;
 using namespace llvm;
 
+namespace retdec {
 namespace bin2llvmir {
 namespace tests {
 
@@ -59,8 +60,8 @@ TEST_F(AsmInstructionRemoverTests, passRemovesEverythingRelatedToLlvmToAsmMappin
 		!llvmToAsmGlobalVariableName = !{ !0 }
 	)");
 	auto* gv = getGlobalByName("specialGv");
-	auto s = retdec_config::Storage::inRegister("esp");
-	auto r = retdec_config::Object("esp", s);
+	auto s = retdec::config::Storage::inRegister("esp");
+	auto r = retdec::config::Object("esp", s);
 	auto c = Config::empty(module.get());
 	c.setLlvmToAsmGlobalVariable(gv);
 
@@ -82,3 +83,4 @@ TEST_F(AsmInstructionRemoverTests, passRemovesEverythingRelatedToLlvmToAsmMappin
 
 } // namespace tests
 } // namespace bin2llvmir
+} // namespace retdec

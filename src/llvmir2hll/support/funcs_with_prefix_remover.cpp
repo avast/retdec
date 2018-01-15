@@ -4,20 +4,21 @@
 * @copyright (c) 2017 Avast Software, licensed under the MIT license
 */
 
-#include "llvmir2hll/ir/assign_stmt.h"
-#include "llvmir2hll/ir/call_expr.h"
-#include "llvmir2hll/ir/call_stmt.h"
-#include "llvmir2hll/ir/function.h"
-#include "llvmir2hll/ir/module.h"
-#include "llvmir2hll/ir/statement.h"
-#include "llvmir2hll/ir/var_def_stmt.h"
-#include "llvmir2hll/ir/variable.h"
-#include "llvmir2hll/support/debug.h"
-#include "llvmir2hll/support/funcs_with_prefix_remover.h"
-#include "tl-cpputils/string.h"
+#include "retdec/llvmir2hll/ir/assign_stmt.h"
+#include "retdec/llvmir2hll/ir/call_expr.h"
+#include "retdec/llvmir2hll/ir/call_stmt.h"
+#include "retdec/llvmir2hll/ir/function.h"
+#include "retdec/llvmir2hll/ir/module.h"
+#include "retdec/llvmir2hll/ir/statement.h"
+#include "retdec/llvmir2hll/ir/var_def_stmt.h"
+#include "retdec/llvmir2hll/ir/variable.h"
+#include "retdec/llvmir2hll/support/debug.h"
+#include "retdec/llvmir2hll/support/funcs_with_prefix_remover.h"
+#include "retdec/utils/string.h"
 
-using tl_cpputils::startsWith;
+using retdec::utils::startsWith;
 
+namespace retdec {
 namespace llvmir2hll {
 
 /**
@@ -187,3 +188,4 @@ void FuncsWithPrefixRemover::visit(ShPtr<VarDefStmt> stmt) {
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

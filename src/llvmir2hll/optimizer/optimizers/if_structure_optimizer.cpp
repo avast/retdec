@@ -4,17 +4,18 @@
 * @copyright (c) 2017 Avast Software, licensed under the MIT license
 */
 
-#include "llvmir2hll/ir/expression.h"
-#include "llvmir2hll/ir/if_stmt.h"
-#include "llvmir2hll/ir/not_op_expr.h"
-#include "llvmir2hll/ir/or_op_expr.h"
-#include "llvmir2hll/ir/statement.h"
-#include "llvmir2hll/optimizer/optimizers/if_structure_optimizer.h"
-#include "llvmir2hll/support/debug.h"
-#include "llvmir2hll/support/expression_negater.h"
-#include "llvmir2hll/support/statements_counter.h"
-#include "llvmir2hll/utils/ir.h"
+#include "retdec/llvmir2hll/ir/expression.h"
+#include "retdec/llvmir2hll/ir/if_stmt.h"
+#include "retdec/llvmir2hll/ir/not_op_expr.h"
+#include "retdec/llvmir2hll/ir/or_op_expr.h"
+#include "retdec/llvmir2hll/ir/statement.h"
+#include "retdec/llvmir2hll/optimizer/optimizers/if_structure_optimizer.h"
+#include "retdec/llvmir2hll/support/debug.h"
+#include "retdec/llvmir2hll/support/expression_negater.h"
+#include "retdec/llvmir2hll/support/statements_counter.h"
+#include "retdec/llvmir2hll/utils/ir.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 namespace {
@@ -269,3 +270,4 @@ bool IfStructureOptimizer::tryOptimization5(ShPtr<IfStmt> stmt) {
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

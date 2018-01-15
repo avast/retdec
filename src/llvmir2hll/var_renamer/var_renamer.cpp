@@ -6,23 +6,24 @@
 
 #include <cctype>
 
-#include "llvmir2hll/ir/function.h"
-#include "llvmir2hll/ir/global_var_def.h"
-#include "llvmir2hll/ir/module.h"
-#include "llvmir2hll/ir/statement.h"
-#include "llvmir2hll/ir/variable.h"
-#include "llvmir2hll/support/debug.h"
-#include "llvmir2hll/support/types.h"
-#include "llvmir2hll/utils/ir.h"
-#include "llvmir2hll/utils/string.h"
-#include "llvmir2hll/var_renamer/var_renamer.h"
-#include "tl-cpputils/container.h"
-#include "tl-cpputils/conversion.h"
+#include "retdec/llvmir2hll/ir/function.h"
+#include "retdec/llvmir2hll/ir/global_var_def.h"
+#include "retdec/llvmir2hll/ir/module.h"
+#include "retdec/llvmir2hll/ir/statement.h"
+#include "retdec/llvmir2hll/ir/variable.h"
+#include "retdec/llvmir2hll/support/debug.h"
+#include "retdec/llvmir2hll/support/types.h"
+#include "retdec/llvmir2hll/utils/ir.h"
+#include "retdec/llvmir2hll/utils/string.h"
+#include "retdec/llvmir2hll/var_renamer/var_renamer.h"
+#include "retdec/utils/container.h"
+#include "retdec/utils/conversion.h"
 
-using tl_cpputils::hasItem;
-using tl_cpputils::mapGetValueOrDefault;
-using tl_cpputils::toString;
+using retdec::utils::hasItem;
+using retdec::utils::mapGetValueOrDefault;
+using retdec::utils::toString;
 
+namespace retdec {
 namespace llvmir2hll {
 
 /**
@@ -493,3 +494,4 @@ void VarRenamer::visit(ShPtr<Variable> var) {
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

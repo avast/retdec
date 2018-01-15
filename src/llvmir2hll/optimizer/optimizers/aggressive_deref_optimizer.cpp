@@ -4,15 +4,16 @@
 * @copyright (c) 2017 Avast Software, licensed under the MIT license
 */
 
-#include "llvmir2hll/ir/assign_stmt.h"
-#include "llvmir2hll/ir/deref_op_expr.h"
-#include "llvmir2hll/ir/int_type.h"
-#include "llvmir2hll/ir/var_def_stmt.h"
-#include "llvmir2hll/ir/variable.h"
-#include "llvmir2hll/optimizer/optimizers/aggressive_deref_optimizer.h"
-#include "llvmir2hll/support/debug.h"
-#include "llvmir2hll/utils/ir.h"
+#include "retdec/llvmir2hll/ir/assign_stmt.h"
+#include "retdec/llvmir2hll/ir/deref_op_expr.h"
+#include "retdec/llvmir2hll/ir/int_type.h"
+#include "retdec/llvmir2hll/ir/var_def_stmt.h"
+#include "retdec/llvmir2hll/ir/variable.h"
+#include "retdec/llvmir2hll/optimizer/optimizers/aggressive_deref_optimizer.h"
+#include "retdec/llvmir2hll/support/debug.h"
+#include "retdec/llvmir2hll/utils/ir.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 /**
@@ -76,3 +77,4 @@ void AggressiveDerefOptimizer::visit(ShPtr<VarDefStmt> stmt) {
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

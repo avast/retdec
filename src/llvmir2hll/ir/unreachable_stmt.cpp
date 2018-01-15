@@ -4,10 +4,11 @@
 * @copyright (c) 2017 Avast Software, licensed under the MIT license
 */
 
-#include "llvmir2hll/ir/unreachable_stmt.h"
-#include "llvmir2hll/support/debug.h"
-#include "llvmir2hll/support/visitor.h"
+#include "retdec/llvmir2hll/ir/unreachable_stmt.h"
+#include "retdec/llvmir2hll/support/debug.h"
+#include "retdec/llvmir2hll/support/visitor.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 /**
@@ -48,3 +49,4 @@ ShPtr<UnreachableStmt> UnreachableStmt::create() {
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

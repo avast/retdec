@@ -9,21 +9,22 @@
 #include <gtest/gtest.h>
 #include <llvm/Support/raw_ostream.h>
 
-#include "llvmir2hll/ir/empty_stmt.h"
-#include "llvmir2hll/ir/expression.h"
-#include "llvmir2hll/ir/function.h"
-#include "llvmir2hll/ir/function_builder.h"
-#include "llvmir2hll/ir/return_stmt.h"
-#include "llvmir2hll/ir/statement.h"
-#include "llvmir2hll/ir/void_type.h"
-#include "llvmir2hll/pattern/patterns/stmts_pattern.h"
-#include "llvmir2hll/support/types.h"
-#include "tl-cpputils/string.h"
+#include "retdec/llvmir2hll/ir/empty_stmt.h"
+#include "retdec/llvmir2hll/ir/expression.h"
+#include "retdec/llvmir2hll/ir/function.h"
+#include "retdec/llvmir2hll/ir/function_builder.h"
+#include "retdec/llvmir2hll/ir/return_stmt.h"
+#include "retdec/llvmir2hll/ir/statement.h"
+#include "retdec/llvmir2hll/ir/void_type.h"
+#include "retdec/llvmir2hll/pattern/patterns/stmts_pattern.h"
+#include "retdec/llvmir2hll/support/types.h"
+#include "retdec/utils/string.h"
 
 using namespace ::testing;
 
-using tl_cpputils::startsWith;
+using retdec::utils::startsWith;
 
+namespace retdec {
 namespace llvmir2hll {
 namespace tests {
 
@@ -170,3 +171,4 @@ PrintTheResultForNonEmptyPatternStartsWithSpecifiedIndentationAndEndsWithNewLine
 
 } // namespace tests
 } // namespace llvmir2hll
+} // namespace retdec

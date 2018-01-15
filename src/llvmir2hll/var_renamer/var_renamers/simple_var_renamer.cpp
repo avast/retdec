@@ -4,10 +4,11 @@
 * @copyright (c) 2017 Avast Software, licensed under the MIT license
 */
 
-#include "llvmir2hll/support/debug.h"
-#include "llvmir2hll/var_renamer/var_renamer_factory.h"
-#include "llvmir2hll/var_renamer/var_renamers/simple_var_renamer.h"
+#include "retdec/llvmir2hll/support/debug.h"
+#include "retdec/llvmir2hll/var_renamer/var_renamer_factory.h"
+#include "retdec/llvmir2hll/var_renamer/var_renamers/simple_var_renamer.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 REGISTER_AT_FACTORY("simple", SIMPLE_VAR_RENAMER_ID, VarRenamerFactory,
@@ -43,3 +44,4 @@ std::string SimpleVarRenamer::getId() const {
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

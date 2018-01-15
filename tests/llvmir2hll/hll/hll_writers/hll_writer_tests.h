@@ -14,6 +14,7 @@
 
 #include "llvmir2hll/ir/tests_with_module.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 class HLLWriter;
@@ -44,5 +45,6 @@ protected:
 
 } // namespace tests
 } // namespace llvmir2hll
+} // namespace retdec
 
 #endif

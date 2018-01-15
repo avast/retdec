@@ -7,26 +7,27 @@
 #include <gtest/gtest.h>
 
 #include "llvmir2hll/analysis/tests_with_value_analysis.h"
-#include "llvmir2hll/ir/add_op_expr.h"
-#include "llvmir2hll/ir/array_index_op_expr.h"
-#include "llvmir2hll/ir/assign_stmt.h"
-#include "llvmir2hll/ir/break_stmt.h"
-#include "llvmir2hll/ir/call_expr.h"
-#include "llvmir2hll/ir/const_int.h"
-#include "llvmir2hll/ir/continue_stmt.h"
-#include "llvmir2hll/ir/deref_op_expr.h"
-#include "llvmir2hll/ir/eq_op_expr.h"
-#include "llvmir2hll/ir/if_stmt.h"
-#include "llvmir2hll/ir/int_type.h"
-#include "llvmir2hll/ir/module.h"
-#include "llvmir2hll/ir/return_stmt.h"
-#include "llvmir2hll/ir/switch_stmt.h"
+#include "retdec/llvmir2hll/ir/add_op_expr.h"
+#include "retdec/llvmir2hll/ir/array_index_op_expr.h"
+#include "retdec/llvmir2hll/ir/assign_stmt.h"
+#include "retdec/llvmir2hll/ir/break_stmt.h"
+#include "retdec/llvmir2hll/ir/call_expr.h"
+#include "retdec/llvmir2hll/ir/const_int.h"
+#include "retdec/llvmir2hll/ir/continue_stmt.h"
+#include "retdec/llvmir2hll/ir/deref_op_expr.h"
+#include "retdec/llvmir2hll/ir/eq_op_expr.h"
+#include "retdec/llvmir2hll/ir/if_stmt.h"
+#include "retdec/llvmir2hll/ir/int_type.h"
+#include "retdec/llvmir2hll/ir/module.h"
+#include "retdec/llvmir2hll/ir/return_stmt.h"
+#include "retdec/llvmir2hll/ir/switch_stmt.h"
 #include "llvmir2hll/ir/tests_with_module.h"
-#include "llvmir2hll/ir/variable.h"
-#include "llvmir2hll/optimizer/optimizers/if_to_switch_optimizer.h"
+#include "retdec/llvmir2hll/ir/variable.h"
+#include "retdec/llvmir2hll/optimizer/optimizers/if_to_switch_optimizer.h"
 
 using namespace ::testing;
 
+namespace retdec {
 namespace llvmir2hll {
 namespace tests {
 
@@ -758,3 +759,4 @@ SimpleSubstituteIfToSwitchLastStmtIsContinueStmtOptimize) {
 
 } // namespace tests
 } // namespace llvmir2hll
+} // namespace retdec

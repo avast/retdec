@@ -4,23 +4,24 @@
 * @copyright (c) 2017 Avast Software, licensed under the MIT license
 */
 
-#include "ctypes/floating_point_type.h"
-#include "ctypes/function_type.h"
-#include "ctypes/integral_type.h"
-#include "ctypes/member.h"
-#include "ctypes/pointer_type.h"
-#include "ctypes/struct_type.h"
-#include "ctypes/typedefed_type.h"
-#include "ctypes/union_type.h"
-#include "ctypes/unknown_type.h"
-#include "ctypes/void_type.h"
-#include "bin2llvmir/providers/lti.h"
+#include "retdec/ctypes/floating_point_type.h"
+#include "retdec/ctypes/function_type.h"
+#include "retdec/ctypes/integral_type.h"
+#include "retdec/ctypes/member.h"
+#include "retdec/ctypes/pointer_type.h"
+#include "retdec/ctypes/struct_type.h"
+#include "retdec/ctypes/typedefed_type.h"
+#include "retdec/ctypes/union_type.h"
+#include "retdec/ctypes/unknown_type.h"
+#include "retdec/ctypes/void_type.h"
+#include "retdec/bin2llvmir/providers/lti.h"
 #include "bin2llvmir/utils/llvmir_tests.h"
-#include "bin2llvmir/utils/type.h"
+#include "retdec/bin2llvmir/utils/type.h"
 
 using namespace ::testing;
 using namespace llvm;
 
+namespace retdec {
 namespace bin2llvmir {
 namespace tests {
 
@@ -37,7 +38,7 @@ class ToLlvmTypeVisitorTests: public LlvmIrTests
 {
 	public:
 		ToLlvmTypeVisitorTests() :
-			ctx(std::make_shared<ctypes::Context>()),
+			ctx(std::make_shared<retdec::ctypes::Context>()),
 			config(Config::empty(module.get())),
 			visitor(module.get(), &config)
 		{
@@ -45,16 +46,16 @@ class ToLlvmTypeVisitorTests: public LlvmIrTests
 		}
 
 	public:
-		std::shared_ptr<ctypes::Context> ctx;
+		std::shared_ptr<retdec::ctypes::Context> ctx;
 		Config config;
 		ToLlvmTypeVisitor visitor;
 };
 
 TEST_F(ToLlvmTypeVisitorTests, convertArrayType)
 {
-	ctypes::ArrayType::Dimensions dim = {10, 20};
-	auto i32 = ctypes::IntegralType::create(ctx, "int", 32);
-	auto type = ctypes::ArrayType::create(ctx, i32, dim);
+	retdec::ctypes::ArrayType::Dimensions dim = {10, 20};
+	auto i32 = retdec::ctypes::IntegralType::create(ctx, "int", 32);
+	auto type = retdec::ctypes::ArrayType::create(ctx, i32, dim);
 	type->accept(&visitor);
 
 	auto* ref = ArrayType::get(
@@ -67,9 +68,9 @@ TEST_F(ToLlvmTypeVisitorTests, convertArrayType)
 
 TEST_F(ToLlvmTypeVisitorTests, convertArrayTypeInvalid)
 {
-	ctypes::ArrayType::Dimensions dim = {10};
-	auto v = ctypes::VoidType::create();
-	auto type = ctypes::ArrayType::create(ctx, v, dim);
+	retdec::ctypes::ArrayType::Dimensions dim = {10};
+	auto v = retdec::ctypes::VoidType::create();
+	auto type = retdec::ctypes::ArrayType::create(ctx, v, dim);
 	type->accept(&visitor);
 
 	auto* ref = ArrayType::get(
@@ -80,12 +81,12 @@ TEST_F(ToLlvmTypeVisitorTests, convertArrayTypeInvalid)
 
 TEST_F(ToLlvmTypeVisitorTests, convertEnumType)
 {
-	ctypes::EnumType::Values vals =
+	retdec::ctypes::EnumType::Values vals =
 	{
-			ctypes::EnumType::Value("e0", 0),
-			ctypes::EnumType::Value("e1", 1)
+			retdec::ctypes::EnumType::Value("e0", 0),
+			retdec::ctypes::EnumType::Value("e1", 1)
 	};
-	auto type = ctypes::EnumType::create(ctx, "TestEnum", vals);
+	auto type = retdec::ctypes::EnumType::create(ctx, "TestEnum", vals);
 	type->accept(&visitor);
 
 	EXPECT_EQ(Type::getInt32Ty(context), visitor.getLlvmType());
@@ -93,7 +94,7 @@ TEST_F(ToLlvmTypeVisitorTests, convertEnumType)
 
 TEST_F(ToLlvmTypeVisitorTests, convertHalfType)
 {
-	auto type = ctypes::FloatingPointType::create(ctx, "half", 16);
+	auto type = retdec::ctypes::FloatingPointType::create(ctx, "half", 16);
 	type->accept(&visitor);
 
 	EXPECT_EQ(Type::getHalfTy(context), visitor.getLlvmType());
@@ -101,7 +102,7 @@ TEST_F(ToLlvmTypeVisitorTests, convertHalfType)
 
 TEST_F(ToLlvmTypeVisitorTests, convertFloatType)
 {
-	auto type = ctypes::FloatingPointType::create(ctx, "float", 32);
+	auto type = retdec::ctypes::FloatingPointType::create(ctx, "float", 32);
 	type->accept(&visitor);
 
 	EXPECT_EQ(Type::getFloatTy(context), visitor.getLlvmType());
@@ -109,7 +110,7 @@ TEST_F(ToLlvmTypeVisitorTests, convertFloatType)
 
 TEST_F(ToLlvmTypeVisitorTests, convertDoubleType)
 {
-	auto type = ctypes::FloatingPointType::create(ctx, "double", 64);
+	auto type = retdec::ctypes::FloatingPointType::create(ctx, "double", 64);
 	type->accept(&visitor);
 
 	EXPECT_EQ(Type::getDoubleTy(context), visitor.getLlvmType());
@@ -117,7 +118,7 @@ TEST_F(ToLlvmTypeVisitorTests, convertDoubleType)
 
 TEST_F(ToLlvmTypeVisitorTests, convertFp80Type)
 {
-	auto type = ctypes::FloatingPointType::create(ctx, "fp80", 80);
+	auto type = retdec::ctypes::FloatingPointType::create(ctx, "fp80", 80);
 	type->accept(&visitor);
 
 	EXPECT_EQ(Type::getX86_FP80Ty(context), visitor.getLlvmType());
@@ -125,7 +126,7 @@ TEST_F(ToLlvmTypeVisitorTests, convertFp80Type)
 
 TEST_F(ToLlvmTypeVisitorTests, convertFp128Type)
 {
-	auto type = ctypes::FloatingPointType::create(ctx, "fp128", 128);
+	auto type = retdec::ctypes::FloatingPointType::create(ctx, "fp128", 128);
 	type->accept(&visitor);
 
 	EXPECT_EQ(Type::getFP128Ty(context), visitor.getLlvmType());
@@ -133,7 +134,7 @@ TEST_F(ToLlvmTypeVisitorTests, convertFp128Type)
 
 TEST_F(ToLlvmTypeVisitorTests, convertOddFloatingPointType)
 {
-	auto type = ctypes::FloatingPointType::create(ctx, "offFp", 54);
+	auto type = retdec::ctypes::FloatingPointType::create(ctx, "offFp", 54);
 	type->accept(&visitor);
 
 	EXPECT_EQ(Type::getFloatTy(context), visitor.getLlvmType());
@@ -141,10 +142,10 @@ TEST_F(ToLlvmTypeVisitorTests, convertOddFloatingPointType)
 
 TEST_F(ToLlvmTypeVisitorTests, convertFunctionType)
 {
-	auto i32 = ctypes::IntegralType::create(ctx, "int", 32);
-	auto f = ctypes::FloatingPointType::create(ctx, "float", 32);
-	ctypes::FunctionType::Parameters ps = {i32, i32};
-	auto type = ctypes::FunctionType::create(ctx, f, ps);
+	auto i32 = retdec::ctypes::IntegralType::create(ctx, "int", 32);
+	auto f = retdec::ctypes::FloatingPointType::create(ctx, "float", 32);
+	retdec::ctypes::FunctionType::Parameters ps = {i32, i32};
+	auto type = retdec::ctypes::FunctionType::create(ctx, f, ps);
 	type->accept(&visitor);
 
 	auto* li32 = Type::getInt32Ty(context);
@@ -159,15 +160,15 @@ TEST_F(ToLlvmTypeVisitorTests, convertFunctionType)
 
 TEST_F(ToLlvmTypeVisitorTests, convertFunctionVarargType)
 {
-	auto i32 = ctypes::IntegralType::create(ctx, "int", 32);
-	auto f = ctypes::FloatingPointType::create(ctx, "float", 32);
-	ctypes::FunctionType::Parameters ps = {i32, i32};
-	auto type = ctypes::FunctionType::create(
+	auto i32 = retdec::ctypes::IntegralType::create(ctx, "int", 32);
+	auto f = retdec::ctypes::FloatingPointType::create(ctx, "float", 32);
+	retdec::ctypes::FunctionType::Parameters ps = {i32, i32};
+	auto type = retdec::ctypes::FunctionType::create(
 			ctx,
 			f,
 			ps,
-			ctypes::CallConvention(),
-			ctypes::FunctionType::VarArgness::IsVarArg);
+			retdec::ctypes::CallConvention(),
+			retdec::ctypes::FunctionType::VarArgness::IsVarArg);
 	type->accept(&visitor);
 
 	auto* li32 = Type::getInt32Ty(context);
@@ -182,7 +183,7 @@ TEST_F(ToLlvmTypeVisitorTests, convertFunctionVarargType)
 
 TEST_F(ToLlvmTypeVisitorTests, convertInt32Type)
 {
-	auto type = ctypes::IntegralType::create(ctx, "int32", 32);
+	auto type = retdec::ctypes::IntegralType::create(ctx, "int32", 32);
 	type->accept(&visitor);
 
 	EXPECT_EQ(Type::getInt32Ty(context), visitor.getLlvmType());
@@ -190,7 +191,7 @@ TEST_F(ToLlvmTypeVisitorTests, convertInt32Type)
 
 TEST_F(ToLlvmTypeVisitorTests, convertInt64Type)
 {
-	auto type = ctypes::IntegralType::create(ctx, "int64", 64);
+	auto type = retdec::ctypes::IntegralType::create(ctx, "int64", 64);
 	type->accept(&visitor);
 
 	EXPECT_EQ(Type::getInt64Ty(context), visitor.getLlvmType());
@@ -198,7 +199,7 @@ TEST_F(ToLlvmTypeVisitorTests, convertInt64Type)
 
 TEST_F(ToLlvmTypeVisitorTests, convertIntNType)
 {
-	auto type = ctypes::IntegralType::create(ctx, "int64", 35);
+	auto type = retdec::ctypes::IntegralType::create(ctx, "int64", 35);
 	type->accept(&visitor);
 
 	EXPECT_EQ(Type::getIntNTy(context, 35), visitor.getLlvmType());
@@ -206,8 +207,8 @@ TEST_F(ToLlvmTypeVisitorTests, convertIntNType)
 
 TEST_F(ToLlvmTypeVisitorTests, convertPointerType)
 {
-	auto i32 = ctypes::IntegralType::create(ctx, "int", 32);
-	auto type = ctypes::PointerType::create(ctx, i32);
+	auto i32 = retdec::ctypes::IntegralType::create(ctx, "int", 32);
+	auto type = retdec::ctypes::PointerType::create(ctx, i32);
 	type->accept(&visitor);
 
 	auto* li32 = Type::getInt32Ty(context);
@@ -217,8 +218,8 @@ TEST_F(ToLlvmTypeVisitorTests, convertPointerType)
 
 TEST_F(ToLlvmTypeVisitorTests, convertPointerTypeInvalid)
 {
-	auto v = ctypes::VoidType::create();
-	auto type = ctypes::PointerType::create(ctx, v);
+	auto v = retdec::ctypes::VoidType::create();
+	auto type = retdec::ctypes::PointerType::create(ctx, v);
 	type->accept(&visitor);
 
 	auto* d = getDefaultType(module.get());
@@ -228,8 +229,8 @@ TEST_F(ToLlvmTypeVisitorTests, convertPointerTypeInvalid)
 
 TEST_F(ToLlvmTypeVisitorTests, convertTypedefType)
 {
-	auto d = ctypes::FloatingPointType::create(ctx, "double", 64);
-	auto type = ctypes::TypedefedType::create(ctx, "typedef", d);
+	auto d = retdec::ctypes::FloatingPointType::create(ctx, "double", 64);
+	auto type = retdec::ctypes::TypedefedType::create(ctx, "typedef", d);
 	type->accept(&visitor);
 
 	EXPECT_EQ(Type::getDoubleTy(context), visitor.getLlvmType());
@@ -237,8 +238,8 @@ TEST_F(ToLlvmTypeVisitorTests, convertTypedefType)
 
 TEST_F(ToLlvmTypeVisitorTests, convertTypedefBoolType)
 {
-	auto i32 = ctypes::IntegralType::create(ctx, "int", 32);
-	auto type = ctypes::TypedefedType::create(ctx, "BOOL", i32);
+	auto i32 = retdec::ctypes::IntegralType::create(ctx, "int", 32);
+	auto type = retdec::ctypes::TypedefedType::create(ctx, "BOOL", i32);
 	type->accept(&visitor);
 
 	EXPECT_EQ(Type::getInt1Ty(context), visitor.getLlvmType());
@@ -247,8 +248,8 @@ TEST_F(ToLlvmTypeVisitorTests, convertTypedefBoolType)
 TEST_F(ToLlvmTypeVisitorTests, convertTypedefWcharElfType)
 {
 	config.getConfig().fileFormat.setIsElf();
-	auto i32 = ctypes::IntegralType::create(ctx, "int", 32);
-	auto type = ctypes::TypedefedType::create(ctx, "wchar", i32);
+	auto i32 = retdec::ctypes::IntegralType::create(ctx, "int", 32);
+	auto type = retdec::ctypes::TypedefedType::create(ctx, "wchar", i32);
 	type->accept(&visitor);
 
 	EXPECT_EQ(Type::getInt32Ty(context), visitor.getLlvmType());
@@ -257,8 +258,8 @@ TEST_F(ToLlvmTypeVisitorTests, convertTypedefWcharElfType)
 TEST_F(ToLlvmTypeVisitorTests, convertTypedefWcharPeType)
 {
 	config.getConfig().fileFormat.setIsPe();
-	auto i32 = ctypes::IntegralType::create(ctx, "int", 32);
-	auto type = ctypes::TypedefedType::create(ctx, "wchar", i32);
+	auto i32 = retdec::ctypes::IntegralType::create(ctx, "int", 32);
+	auto type = retdec::ctypes::TypedefedType::create(ctx, "wchar", i32);
 	type->accept(&visitor);
 
 	EXPECT_EQ(Type::getInt16Ty(context), visitor.getLlvmType());
@@ -267,8 +268,8 @@ TEST_F(ToLlvmTypeVisitorTests, convertTypedefWcharPeType)
 TEST_F(ToLlvmTypeVisitorTests, convertTypedefWcharOtherType)
 {
 	config.getConfig().fileFormat.setIsIntelHex();
-	auto i32 = ctypes::IntegralType::create(ctx, "int", 32);
-	auto type = ctypes::TypedefedType::create(ctx, "wchar", i32);
+	auto i32 = retdec::ctypes::IntegralType::create(ctx, "int", 32);
+	auto type = retdec::ctypes::TypedefedType::create(ctx, "wchar", i32);
 	type->accept(&visitor);
 
 	EXPECT_EQ(Type::getInt16Ty(context), visitor.getLlvmType());
@@ -276,14 +277,14 @@ TEST_F(ToLlvmTypeVisitorTests, convertTypedefWcharOtherType)
 
 TEST_F(ToLlvmTypeVisitorTests, convertUnionType)
 {
-	auto i32 = ctypes::IntegralType::create(ctx, "int", 32);
-	auto d = ctypes::FloatingPointType::create(ctx, "double", 64);
-	ctypes::CompositeType::Members mems =
+	auto i32 = retdec::ctypes::IntegralType::create(ctx, "int", 32);
+	auto d = retdec::ctypes::FloatingPointType::create(ctx, "double", 64);
+	retdec::ctypes::CompositeType::Members mems =
 	{
-			ctypes::Member("m0", i32),
-			ctypes::Member("m1", d)
+			retdec::ctypes::Member("m0", i32),
+			retdec::ctypes::Member("m1", d)
 	};
-	auto type = ctypes::UnionType::create(ctx, "TestUnion", mems);
+	auto type = retdec::ctypes::UnionType::create(ctx, "TestUnion", mems);
 	type->accept(&visitor);
 
 	EXPECT_EQ(Type::getInt32Ty(context), visitor.getLlvmType());
@@ -291,7 +292,7 @@ TEST_F(ToLlvmTypeVisitorTests, convertUnionType)
 
 TEST_F(ToLlvmTypeVisitorTests, convertUnknownType)
 {
-	auto type = ctypes::UnknownType::create();
+	auto type = retdec::ctypes::UnknownType::create();
 	type->accept(&visitor);
 
 	EXPECT_EQ(Type::getInt32Ty(context), visitor.getLlvmType());
@@ -299,7 +300,7 @@ TEST_F(ToLlvmTypeVisitorTests, convertUnknownType)
 
 TEST_F(ToLlvmTypeVisitorTests, convertVoidType)
 {
-	auto type = ctypes::VoidType::create();
+	auto type = retdec::ctypes::VoidType::create();
 	type->accept(&visitor);
 
 	EXPECT_EQ(Type::getVoidTy(context), visitor.getLlvmType());
@@ -307,14 +308,14 @@ TEST_F(ToLlvmTypeVisitorTests, convertVoidType)
 
 TEST_F(ToLlvmTypeVisitorTests, convertStructureType)
 {
-	auto i32 = ctypes::IntegralType::create(ctx, "int", 32);
-	auto d = ctypes::FloatingPointType::create(ctx, "double", 64);
-	ctypes::CompositeType::Members mems =
+	auto i32 = retdec::ctypes::IntegralType::create(ctx, "int", 32);
+	auto d = retdec::ctypes::FloatingPointType::create(ctx, "double", 64);
+	retdec::ctypes::CompositeType::Members mems =
 	{
-			ctypes::Member("m0", i32),
-			ctypes::Member("m1", d)
+			retdec::ctypes::Member("m0", i32),
+			retdec::ctypes::Member("m1", d)
 	};
-	auto type = ctypes::StructType::create(ctx, "TestStruct", mems);
+	auto type = retdec::ctypes::StructType::create(ctx, "TestStruct", mems);
 	type->accept(&visitor);
 
 	auto* res = dyn_cast<StructType>(visitor.getLlvmType());
@@ -335,12 +336,12 @@ TEST_F(ToLlvmTypeVisitorTests, convertStructureType)
 
 TEST_F(ToLlvmTypeVisitorTests, convertStructureTypeInvalid)
 {
-	auto v = ctypes::VoidType::create();
-	ctypes::CompositeType::Members mems =
+	auto v = retdec::ctypes::VoidType::create();
+	retdec::ctypes::CompositeType::Members mems =
 	{
-			ctypes::Member("m0", v)
+			retdec::ctypes::Member("m0", v)
 	};
-	auto type = ctypes::StructType::create(ctx, "TestStruct", mems);
+	auto type = retdec::ctypes::StructType::create(ctx, "TestStruct", mems);
 	type->accept(&visitor);
 
 	auto* res = dyn_cast<StructType>(visitor.getLlvmType());
@@ -351,10 +352,10 @@ TEST_F(ToLlvmTypeVisitorTests, convertStructureTypeInvalid)
 
 TEST_F(ToLlvmTypeVisitorTests, convertRecursiveStructPtrStruct)
 {
-	ctypes::CompositeType::Members mems;
-	auto type = ctypes::StructType::create(ctx, "TestStruct", mems);
-	auto pType = ctypes::PointerType::create(ctx, type);
-	mems.push_back(ctypes::Member("m0", pType));
+	retdec::ctypes::CompositeType::Members mems;
+	auto type = retdec::ctypes::StructType::create(ctx, "TestStruct", mems);
+	auto pType = retdec::ctypes::PointerType::create(ctx, type);
+	mems.push_back(retdec::ctypes::Member("m0", pType));
 	type->setMembers(mems);
 
 	type->accept(&visitor);
@@ -393,3 +394,4 @@ class LtiProviderTests: public LlvmIrTests
 
 } // namespace tests
 } // namespace bin2llvmir
+} // namespace retdec

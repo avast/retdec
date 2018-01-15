@@ -4,19 +4,20 @@
 * @copyright (c) 2017 Avast Software, licensed under the MIT license
 */
 
-#include "llvmir2hll/analysis/value_analysis.h"
-#include "llvmir2hll/ir/binary_op_expr.h"
-#include "llvmir2hll/ir/const_float.h"
-#include "llvmir2hll/ir/const_int.h"
-#include "llvmir2hll/ir/empty_stmt.h"
-#include "llvmir2hll/ir/for_loop_stmt.h"
-#include "llvmir2hll/ir/if_stmt.h"
-#include "llvmir2hll/ir/variable.h"
-#include "llvmir2hll/ir/while_loop_stmt.h"
-#include "llvmir2hll/optimizer/optimizers/if_before_loop_optimizer.h"
-#include "llvmir2hll/support/debug.h"
-#include "llvmir2hll/utils/ir.h"
+#include "retdec/llvmir2hll/analysis/value_analysis.h"
+#include "retdec/llvmir2hll/ir/binary_op_expr.h"
+#include "retdec/llvmir2hll/ir/const_float.h"
+#include "retdec/llvmir2hll/ir/const_int.h"
+#include "retdec/llvmir2hll/ir/empty_stmt.h"
+#include "retdec/llvmir2hll/ir/for_loop_stmt.h"
+#include "retdec/llvmir2hll/ir/if_stmt.h"
+#include "retdec/llvmir2hll/ir/variable.h"
+#include "retdec/llvmir2hll/ir/while_loop_stmt.h"
+#include "retdec/llvmir2hll/optimizer/optimizers/if_before_loop_optimizer.h"
+#include "retdec/llvmir2hll/support/debug.h"
+#include "retdec/llvmir2hll/utils/ir.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 /**
@@ -219,3 +220,4 @@ bool IfBeforeLoopOptimizer::tryOptimizationCase2(ShPtr<IfStmt> stmt) {
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

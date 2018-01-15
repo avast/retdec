@@ -9,9 +9,10 @@
 #include <iostream>
 #include <sstream>
 
-#include "tl-cpputils/debug.h"
-#include "debugformat/debugformat.h"
+#include "retdec/utils/debug.h"
+#include "retdec/debugformat/debugformat.h"
 
+namespace retdec {
 namespace debugformat {
 
 DebugFormat::DebugFormat()
@@ -27,21 +28,21 @@ DebugFormat::DebugFormat()
  * @param imageBase Image base used in PDB initialization.
  */
 DebugFormat::DebugFormat(
-		loader::Image* inFile,
+		retdec::loader::Image* inFile,
 		const std::string& pdbFile,
 		SymbolTable* symtab,
-		demangler::CDemangler* demangler,
+		retdec::demangler::CDemangler* demangler,
 		unsigned long long imageBase)
 		:
 		_symtab(symtab),
 		_inFile(inFile),
 		_demangler(demangler)
 {
-	_pdbFile = new pdbparser::PDBFile();
+	_pdbFile = new retdec::pdbparser::PDBFile();
 	auto s = _pdbFile->load_pdb_file(pdbFile.c_str());
-	_dwarfFile = new dwarfparser::DwarfFile(_inFile->getFileFormat()->getPathToFile(), _inFile->getFileFormat());
+	_dwarfFile = new retdec::dwarfparser::DwarfFile(_inFile->getFileFormat()->getPathToFile(), _inFile->getFileFormat());
 
-	if (s == pdbparser::PDB_STATE_OK)
+	if (s == retdec::pdbparser::PDB_STATE_OK)
 	{
 		LOG << "\n*** DebugFormat::DebugFormat(): PDB" << std::endl;
 		_pdbFile->initialize(imageBase);
@@ -77,11 +78,11 @@ void DebugFormat::loadSymtab()
 	{
 		std::string funcName = it->second->getNormalizedName();
 
-		retdec_config::Function nf(funcName);
+		retdec::config::Function nf(funcName);
 
 		nf.setDemangledName(_demangler->demangleToString(funcName));
 
-		tl_cpputils::Address addr = it->first;
+		retdec::utils::Address addr = it->first;
 		if (_inFile->getFileFormat()->isArm() && addr % 2 != 0)
 		{
 			addr -= 1;
@@ -121,16 +122,17 @@ void DebugFormat::loadSymtab()
 	}
 }
 
-retdec_config::Function* DebugFormat::getFunction(tl_cpputils::Address a)
+retdec::config::Function* DebugFormat::getFunction(retdec::utils::Address a)
 {
 	auto fIt = functions.find(a);
 	return fIt != functions.end() ? &fIt->second : nullptr;
 }
 
-const retdec_config::Object* DebugFormat::getGlobalVar(
-		tl_cpputils::Address a)
+const retdec::config::Object* DebugFormat::getGlobalVar(
+		retdec::utils::Address a)
 {
 	return globals.getObjectByAddress(a);
 }
 
 } // namespace debugformat
+} // namespace retdec

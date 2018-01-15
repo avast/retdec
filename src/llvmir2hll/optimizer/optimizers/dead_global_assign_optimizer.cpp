@@ -4,24 +4,25 @@
 * @copyright (c) 2017 Avast Software, licensed under the MIT license
 */
 
-#include "llvmir2hll/analysis/value_analysis.h"
-#include "llvmir2hll/graphs/cfg/cfg.h"
-#include "llvmir2hll/graphs/cfg/cfg_builders/non_recursive_cfg_builder.h"
-#include "llvmir2hll/graphs/cfg/cfg_traversals/modified_before_read_cfg_traversal.h"
-#include "llvmir2hll/graphs/cg/cg.h"
-#include "llvmir2hll/graphs/cg/cg_builder.h"
-#include "llvmir2hll/ir/assign_stmt.h"
-#include "llvmir2hll/ir/function.h"
-#include "llvmir2hll/ir/module.h"
-#include "llvmir2hll/ir/variable.h"
-#include "llvmir2hll/obtainer/call_info_obtainer.h"
-#include "llvmir2hll/optimizer/optimizers/dead_global_assign_optimizer.h"
-#include "llvmir2hll/support/debug.h"
-#include "llvmir2hll/utils/ir.h"
-#include "tl-cpputils/container.h"
+#include "retdec/llvmir2hll/analysis/value_analysis.h"
+#include "retdec/llvmir2hll/graphs/cfg/cfg.h"
+#include "retdec/llvmir2hll/graphs/cfg/cfg_builders/non_recursive_cfg_builder.h"
+#include "retdec/llvmir2hll/graphs/cfg/cfg_traversals/modified_before_read_cfg_traversal.h"
+#include "retdec/llvmir2hll/graphs/cg/cg.h"
+#include "retdec/llvmir2hll/graphs/cg/cg_builder.h"
+#include "retdec/llvmir2hll/ir/assign_stmt.h"
+#include "retdec/llvmir2hll/ir/function.h"
+#include "retdec/llvmir2hll/ir/module.h"
+#include "retdec/llvmir2hll/ir/variable.h"
+#include "retdec/llvmir2hll/obtainer/call_info_obtainer.h"
+#include "retdec/llvmir2hll/optimizer/optimizers/dead_global_assign_optimizer.h"
+#include "retdec/llvmir2hll/support/debug.h"
+#include "retdec/llvmir2hll/utils/ir.h"
+#include "retdec/utils/container.h"
 
-using tl_cpputils::hasItem;
+using retdec::utils::hasItem;
 
+namespace retdec {
 namespace llvmir2hll {
 
 /**
@@ -126,3 +127,4 @@ void DeadGlobalAssignOptimizer::visit(ShPtr<AssignStmt> stmt) {
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

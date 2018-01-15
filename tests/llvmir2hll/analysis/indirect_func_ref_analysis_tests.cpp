@@ -6,20 +6,21 @@
 
 #include <gtest/gtest.h>
 
-#include "llvmir2hll/analysis/indirect_func_ref_analysis.h"
-#include "llvmir2hll/ir/bit_cast_expr.h"
-#include "llvmir2hll/ir/call_expr.h"
-#include "llvmir2hll/ir/call_stmt.h"
-#include "llvmir2hll/ir/function_builder.h"
-#include "llvmir2hll/ir/int_type.h"
+#include "retdec/llvmir2hll/analysis/indirect_func_ref_analysis.h"
+#include "retdec/llvmir2hll/ir/bit_cast_expr.h"
+#include "retdec/llvmir2hll/ir/call_expr.h"
+#include "retdec/llvmir2hll/ir/call_stmt.h"
+#include "retdec/llvmir2hll/ir/function_builder.h"
+#include "retdec/llvmir2hll/ir/int_type.h"
 #include "llvmir2hll/ir/tests_with_module.h"
-#include "llvmir2hll/ir/var_def_stmt.h"
-#include "llvmir2hll/ir/variable.h"
-#include "llvmir2hll/support/types.h"
-#include "tl-cpputils/container.h"
+#include "retdec/llvmir2hll/ir/var_def_stmt.h"
+#include "retdec/llvmir2hll/ir/variable.h"
+#include "retdec/llvmir2hll/support/types.h"
+#include "retdec/utils/container.h"
 
 using namespace ::testing;
 
+namespace retdec {
 namespace llvmir2hll {
 namespace tests {
 
@@ -214,3 +215,4 @@ PreconditionFailsWhenModuleIsNull) {
 
 } // namespace tests
 } // namespace llvmir2hll
+} // namespace retdec

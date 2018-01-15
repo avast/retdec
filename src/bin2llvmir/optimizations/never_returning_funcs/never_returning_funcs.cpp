@@ -9,14 +9,15 @@
 #include <llvm/IR/LLVMContext.h>
 #include <llvm/Transforms/Utils/BasicBlockUtils.h>
 
-#include "bin2llvmir/optimizations/never_returning_funcs/never_returning_funcs.h"
-#include "bin2llvmir/providers/config.h"
+#include "retdec/bin2llvmir/optimizations/never_returning_funcs/never_returning_funcs.h"
+#include "retdec/bin2llvmir/providers/config.h"
 
 #define OPTIMIZATION_NAME "never-returning-funcs"
 #define DEBUG_TYPE OPTIMIZATION_NAME
 
 using namespace llvm;
 
+namespace retdec {
 namespace bin2llvmir {
 
 namespace {
@@ -408,3 +409,4 @@ bool NeverReturningFuncs::neverReturns(const Function *func) {
 }
 
 } // namespace bin2llvmir
+} // namespace retdec

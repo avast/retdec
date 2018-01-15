@@ -6,20 +6,21 @@
 
 #include <gtest/gtest.h>
 
-#include "llvmir2hll/ir/call_expr.h"
-#include "llvmir2hll/ir/call_stmt.h"
-#include "llvmir2hll/ir/empty_stmt.h"
-#include "llvmir2hll/ir/function.h"
-#include "llvmir2hll/ir/int_type.h"
+#include "retdec/llvmir2hll/ir/call_expr.h"
+#include "retdec/llvmir2hll/ir/call_stmt.h"
+#include "retdec/llvmir2hll/ir/empty_stmt.h"
+#include "retdec/llvmir2hll/ir/function.h"
+#include "retdec/llvmir2hll/ir/int_type.h"
 #include "llvmir2hll/ir/tests_with_module.h"
-#include "llvmir2hll/ir/var_def_stmt.h"
-#include "llvmir2hll/ir/variable.h"
-#include "llvmir2hll/ir/void_type.h"
-#include "llvmir2hll/support/library_funcs_remover.h"
-#include "llvmir2hll/support/types.h"
+#include "retdec/llvmir2hll/ir/var_def_stmt.h"
+#include "retdec/llvmir2hll/ir/variable.h"
+#include "retdec/llvmir2hll/ir/void_type.h"
+#include "retdec/llvmir2hll/support/library_funcs_remover.h"
+#include "retdec/llvmir2hll/support/types.h"
 
 using namespace ::testing;
 
+namespace retdec {
 namespace llvmir2hll {
 namespace tests {
 
@@ -197,3 +198,4 @@ DefinedFunctionsFromIncludedHeadersAreTurnedIntoDeclarations) {
 
 } // namespace tests
 } // namespace llvmir2hll
+} // namespace retdec

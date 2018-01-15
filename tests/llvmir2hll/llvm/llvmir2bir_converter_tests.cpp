@@ -9,12 +9,13 @@
 #include <llvm/Support/MemoryBuffer.h>
 #include <llvm/Support/SourceMgr.h>
 
-#include "llvmir2hll/llvm/llvmir2bir_converter.h"
+#include "retdec/llvmir2hll/llvm/llvmir2bir_converter.h"
 #include "llvmir2hll/llvm/llvmir2bir_converter_tests.h"
-#include "llvmir2hll/support/debug.h"
+#include "retdec/llvmir2hll/support/debug.h"
 
 using namespace ::testing;
 
+namespace retdec {
 namespace llvmir2hll {
 namespace tests {
 
@@ -96,3 +97,4 @@ UPtr<llvm::Module> LLVMIR2BIRConverterTests::parseLLVMIR(const std::string &code
 
 } // namespace tests
 } // namespace llvmir2hll
+} // namespace retdec

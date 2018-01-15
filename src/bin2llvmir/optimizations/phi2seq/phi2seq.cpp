@@ -10,11 +10,12 @@
 #include <llvm/Support/raw_ostream.h>
 #include <llvm/Transforms/Scalar.h>
 
-#include "bin2llvmir/optimizations/phi2seq/phi2seq.h"
-#include "bin2llvmir/providers/config.h"
+#include "retdec/bin2llvmir/optimizations/phi2seq/phi2seq.h"
+#include "retdec/bin2llvmir/providers/config.h"
 
 using namespace llvm;
 
+namespace retdec {
 namespace bin2llvmir {
 
 namespace {
@@ -335,3 +336,4 @@ void PHI2Seq::orderDependentPHINodes(BasicBlock &bb, const VarDependAnalysis::
 }
 
 } // namespace bin2llvmir
+} // namespace retdec

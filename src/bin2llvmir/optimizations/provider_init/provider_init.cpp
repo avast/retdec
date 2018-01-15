@@ -8,23 +8,24 @@
 
 #include <llvm/Support/CommandLine.h>
 
-#include "llvm-support/utils.h"
-#include "bin2llvmir/optimizations/provider_init/provider_init.h"
-#include "bin2llvmir/providers/abi.h"
-#include "bin2llvmir/providers/asm_instruction.h"
-#include "bin2llvmir/providers/config.h"
-#include "bin2llvmir/providers/debugformat.h"
-#include "bin2llvmir/providers/demangler.h"
-#include "bin2llvmir/providers/fileimage.h"
-#include "bin2llvmir/providers/lti.h"
-#include "bin2llvmir/utils/defs.h"
-#include "bin2llvmir/utils/instruction.h"
+#include "retdec/llvm-support/utils.h"
+#include "retdec/bin2llvmir/optimizations/provider_init/provider_init.h"
+#include "retdec/bin2llvmir/providers/abi.h"
+#include "retdec/bin2llvmir/providers/asm_instruction.h"
+#include "retdec/bin2llvmir/providers/config.h"
+#include "retdec/bin2llvmir/providers/debugformat.h"
+#include "retdec/bin2llvmir/providers/demangler.h"
+#include "retdec/bin2llvmir/providers/fileimage.h"
+#include "retdec/bin2llvmir/providers/lti.h"
+#include "retdec/bin2llvmir/utils/defs.h"
+#include "retdec/bin2llvmir/utils/instruction.h"
 
-using namespace llvm_support;
+using namespace retdec::llvm_support;
 using namespace llvm;
 
 #define debug_enabled false
 
+namespace retdec {
 namespace bin2llvmir {
 
 char ProviderInitialization::ID = 0;
@@ -117,3 +118,4 @@ bool ProviderInitialization::doFinalization(Module& m)
 }
 
 } // namespace bin2llvmir
+} // namespace retdec

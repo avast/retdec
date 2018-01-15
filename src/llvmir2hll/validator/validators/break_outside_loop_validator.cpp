@@ -5,14 +5,15 @@
 * @copyright (c) 2017 Avast Software, licensed under the MIT license
 */
 
-#include "llvmir2hll/ir/break_stmt.h"
-#include "llvmir2hll/ir/continue_stmt.h"
-#include "llvmir2hll/ir/function.h"
-#include "llvmir2hll/support/debug.h"
-#include "llvmir2hll/utils/ir.h"
-#include "llvmir2hll/validator/validator_factory.h"
-#include "llvmir2hll/validator/validators/break_outside_loop_validator.h"
+#include "retdec/llvmir2hll/ir/break_stmt.h"
+#include "retdec/llvmir2hll/ir/continue_stmt.h"
+#include "retdec/llvmir2hll/ir/function.h"
+#include "retdec/llvmir2hll/support/debug.h"
+#include "retdec/llvmir2hll/utils/ir.h"
+#include "retdec/llvmir2hll/validator/validator_factory.h"
+#include "retdec/llvmir2hll/validator/validators/break_outside_loop_validator.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 REGISTER_AT_FACTORY("BreakOutsideLoop", BREAK_OUTSIDE_LOOP_VALIDATOR_ID, ValidatorFactory,
@@ -62,3 +63,4 @@ void BreakOutsideLoopValidator::visit(ShPtr<ContinueStmt> stmt) {
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

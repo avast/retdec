@@ -6,10 +6,11 @@
 
 #include <gtest/gtest.h>
 
-#include "llvmir2hll/pattern/pattern_finders/api_call/api_call_info_seq.h"
+#include "retdec/llvmir2hll/pattern/pattern_finders/api_call/api_call_info_seq.h"
 
 using namespace ::testing;
 
+namespace retdec {
 namespace llvmir2hll {
 namespace tests {
 
@@ -187,3 +188,4 @@ IteratingOverInformationWorksCorrectly) {
 
 } // namespace tests
 } // namespace llvmir2hll
+} // namespace retdec

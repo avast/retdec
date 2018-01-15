@@ -4,34 +4,35 @@
 * @copyright (c) 2017 Avast Software, licensed under the MIT license
 */
 
-#include "llvmir2hll/analysis/var_uses_visitor.h"
-#include "llvmir2hll/ir/assign_stmt.h"
-#include "llvmir2hll/ir/break_stmt.h"
-#include "llvmir2hll/ir/call_stmt.h"
-#include "llvmir2hll/ir/continue_stmt.h"
-#include "llvmir2hll/ir/empty_stmt.h"
-#include "llvmir2hll/ir/for_loop_stmt.h"
-#include "llvmir2hll/ir/function.h"
-#include "llvmir2hll/ir/global_var_def.h"
-#include "llvmir2hll/ir/goto_stmt.h"
-#include "llvmir2hll/ir/if_stmt.h"
-#include "llvmir2hll/ir/module.h"
-#include "llvmir2hll/ir/return_stmt.h"
-#include "llvmir2hll/ir/statement.h"
-#include "llvmir2hll/ir/switch_stmt.h"
-#include "llvmir2hll/ir/ufor_loop_stmt.h"
-#include "llvmir2hll/ir/unreachable_stmt.h"
-#include "llvmir2hll/ir/var_def_stmt.h"
-#include "llvmir2hll/ir/variable.h"
-#include "llvmir2hll/ir/while_loop_stmt.h"
-#include "llvmir2hll/support/debug.h"
-#include "llvmir2hll/support/smart_ptr.h"
-#include "tl-cpputils/container.h"
+#include "retdec/llvmir2hll/analysis/var_uses_visitor.h"
+#include "retdec/llvmir2hll/ir/assign_stmt.h"
+#include "retdec/llvmir2hll/ir/break_stmt.h"
+#include "retdec/llvmir2hll/ir/call_stmt.h"
+#include "retdec/llvmir2hll/ir/continue_stmt.h"
+#include "retdec/llvmir2hll/ir/empty_stmt.h"
+#include "retdec/llvmir2hll/ir/for_loop_stmt.h"
+#include "retdec/llvmir2hll/ir/function.h"
+#include "retdec/llvmir2hll/ir/global_var_def.h"
+#include "retdec/llvmir2hll/ir/goto_stmt.h"
+#include "retdec/llvmir2hll/ir/if_stmt.h"
+#include "retdec/llvmir2hll/ir/module.h"
+#include "retdec/llvmir2hll/ir/return_stmt.h"
+#include "retdec/llvmir2hll/ir/statement.h"
+#include "retdec/llvmir2hll/ir/switch_stmt.h"
+#include "retdec/llvmir2hll/ir/ufor_loop_stmt.h"
+#include "retdec/llvmir2hll/ir/unreachable_stmt.h"
+#include "retdec/llvmir2hll/ir/var_def_stmt.h"
+#include "retdec/llvmir2hll/ir/variable.h"
+#include "retdec/llvmir2hll/ir/while_loop_stmt.h"
+#include "retdec/llvmir2hll/support/debug.h"
+#include "retdec/llvmir2hll/support/smart_ptr.h"
+#include "retdec/utils/container.h"
 
-using tl_cpputils::addToSet;
-using tl_cpputils::hasItem;
-using tl_cpputils::setUnion;
+using retdec::utils::addToSet;
+using retdec::utils::hasItem;
+using retdec::utils::setUnion;
 
+namespace retdec {
 namespace llvmir2hll {
 
 /**
@@ -527,3 +528,4 @@ void VarUsesVisitor::visit(ShPtr<UnreachableStmt> stmt) {
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

@@ -4,22 +4,23 @@
 * @copyright (c) 2017 Avast Software, licensed under the MIT license
 */
 
-#include "llvmir2hll/evaluator/arithm_expr_evaluator.h"
-#include "llvmir2hll/ir/add_op_expr.h"
-#include "llvmir2hll/ir/bit_and_op_expr.h"
-#include "llvmir2hll/ir/bit_or_op_expr.h"
-#include "llvmir2hll/ir/bit_xor_op_expr.h"
-#include "llvmir2hll/ir/const_float.h"
-#include "llvmir2hll/ir/const_int.h"
-#include "llvmir2hll/ir/div_op_expr.h"
-#include "llvmir2hll/ir/expression.h"
-#include "llvmir2hll/ir/mod_op_expr.h"
-#include "llvmir2hll/ir/mul_op_expr.h"
-#include "llvmir2hll/ir/neg_op_expr.h"
-#include "llvmir2hll/ir/sub_op_expr.h"
-#include "llvmir2hll/optimizer/optimizers/simplify_arithm_expr/zero_sub_optimizer.h"
-#include "llvmir2hll/support/debug.h"
+#include "retdec/llvmir2hll/evaluator/arithm_expr_evaluator.h"
+#include "retdec/llvmir2hll/ir/add_op_expr.h"
+#include "retdec/llvmir2hll/ir/bit_and_op_expr.h"
+#include "retdec/llvmir2hll/ir/bit_or_op_expr.h"
+#include "retdec/llvmir2hll/ir/bit_xor_op_expr.h"
+#include "retdec/llvmir2hll/ir/const_float.h"
+#include "retdec/llvmir2hll/ir/const_int.h"
+#include "retdec/llvmir2hll/ir/div_op_expr.h"
+#include "retdec/llvmir2hll/ir/expression.h"
+#include "retdec/llvmir2hll/ir/mod_op_expr.h"
+#include "retdec/llvmir2hll/ir/mul_op_expr.h"
+#include "retdec/llvmir2hll/ir/neg_op_expr.h"
+#include "retdec/llvmir2hll/ir/sub_op_expr.h"
+#include "retdec/llvmir2hll/optimizer/optimizers/simplify_arithm_expr/zero_sub_optimizer.h"
+#include "retdec/llvmir2hll/support/debug.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 REGISTER_AT_FACTORY("Zero", ZERO_SUB_OPTIMIZER_ID, SubOptimizerFactory,
@@ -204,3 +205,4 @@ bool ZeroSubOptimizer::isOpZero(ShPtr<Expression> expr) const {
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

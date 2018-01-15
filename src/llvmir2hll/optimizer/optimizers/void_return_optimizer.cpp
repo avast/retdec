@@ -4,18 +4,19 @@
 * @copyright (c) 2017 Avast Software, licensed under the MIT license
 */
 
-#include "llvmir2hll/ir/assign_stmt.h"
-#include "llvmir2hll/ir/call_stmt.h"
-#include "llvmir2hll/ir/for_loop_stmt.h"
-#include "llvmir2hll/ir/if_stmt.h"
-#include "llvmir2hll/ir/return_stmt.h"
-#include "llvmir2hll/ir/switch_stmt.h"
-#include "llvmir2hll/ir/ufor_loop_stmt.h"
-#include "llvmir2hll/ir/var_def_stmt.h"
-#include "llvmir2hll/ir/while_loop_stmt.h"
-#include "llvmir2hll/optimizer/optimizers/void_return_optimizer.h"
-#include "llvmir2hll/support/debug.h"
+#include "retdec/llvmir2hll/ir/assign_stmt.h"
+#include "retdec/llvmir2hll/ir/call_stmt.h"
+#include "retdec/llvmir2hll/ir/for_loop_stmt.h"
+#include "retdec/llvmir2hll/ir/if_stmt.h"
+#include "retdec/llvmir2hll/ir/return_stmt.h"
+#include "retdec/llvmir2hll/ir/switch_stmt.h"
+#include "retdec/llvmir2hll/ir/ufor_loop_stmt.h"
+#include "retdec/llvmir2hll/ir/var_def_stmt.h"
+#include "retdec/llvmir2hll/ir/while_loop_stmt.h"
+#include "retdec/llvmir2hll/optimizer/optimizers/void_return_optimizer.h"
+#include "retdec/llvmir2hll/support/debug.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 /**
@@ -136,3 +137,4 @@ void VoidReturnOptimizer::visit(ShPtr<UForLoopStmt> stmt) {
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

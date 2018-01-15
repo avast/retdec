@@ -9,8 +9,9 @@
 
 #include <gmock/gmock.h>
 
-#include "llvmir2hll/pattern/pattern_finders/api_call/api_call_seq_finder.h"
+#include "retdec/llvmir2hll/pattern/pattern_finders/api_call/api_call_seq_finder.h"
 
+namespace retdec {
 namespace llvmir2hll {
 namespace tests {
 
@@ -30,5 +31,6 @@ public:
 
 } // namespace tests
 } // namespace llvmir2hll
+} // namespace retdec
 
 #endif

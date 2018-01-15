@@ -7,15 +7,16 @@
 #include <llvm/IR/Constants.h>
 #include <llvm/IR/InstIterator.h>
 
-#include "llvm-support/utils.h"
-#include "tl-cpputils/container.h"
-#include "bin2llvmir/providers/asm_instruction.h"
-#include "bin2llvmir/providers/config.h"
-#include "bin2llvmir/utils/type.h"
+#include "retdec/llvm-support/utils.h"
+#include "retdec/utils/container.h"
+#include "retdec/bin2llvmir/providers/asm_instruction.h"
+#include "retdec/bin2llvmir/providers/config.h"
+#include "retdec/bin2llvmir/utils/type.h"
 
-using namespace llvm_support;
+using namespace retdec::llvm_support;
 using namespace llvm;
 
+namespace retdec {
 namespace bin2llvmir {
 
 std::vector<std::pair<const llvm::Module*, const llvm::GlobalVariable*>> AsmInstruction::_cache;
@@ -85,7 +86,7 @@ AsmInstruction::AsmInstruction(llvm::Function* f)
 	}
 }
 
-AsmInstruction::AsmInstruction(llvm::Module* m, tl_cpputils::Address addr)
+AsmInstruction::AsmInstruction(llvm::Module* m, retdec::utils::Address addr)
 {
 	if (m == nullptr)
 	{
@@ -212,10 +213,10 @@ const llvm::GlobalVariable* AsmInstruction::getLlvmToAsmGlobalVariable(
 	return gv;
 }
 
-tl_cpputils::Address AsmInstruction::getInstructionAddress(
+retdec::utils::Address AsmInstruction::getInstructionAddress(
 		llvm::Instruction* inst)
 {
-	tl_cpputils::Address ret;
+	retdec::utils::Address ret;
 	AsmInstruction ai(inst);
 	if (ai.isValid())
 	{
@@ -324,7 +325,7 @@ std::size_t AsmInstruction::getByteSize() const
 	return getCapstoneInsn()->size;
 }
 
-tl_cpputils::Address AsmInstruction::getAddress() const
+retdec::utils::Address AsmInstruction::getAddress() const
 {
 	assert(isValid());
 	auto* ci = dyn_cast<ConstantInt>(_llvmToAsmInstr->getValueOperand());
@@ -332,7 +333,7 @@ tl_cpputils::Address AsmInstruction::getAddress() const
 	return ci->getZExtValue();
 }
 
-tl_cpputils::Address AsmInstruction::getEndAddress() const
+retdec::utils::Address AsmInstruction::getEndAddress() const
 {
 	assert(isValid());
 	return getAddress() + getByteSize();
@@ -344,7 +345,7 @@ std::size_t AsmInstruction::getBitSize() const
 	return getByteSize() * 8;
 }
 
-bool AsmInstruction::contains(tl_cpputils::Address addr) const
+bool AsmInstruction::contains(retdec::utils::Address addr) const
 {
 	return isValid() ? getAddress() <= addr && addr <= getEndAddress() : false;
 }
@@ -354,10 +355,10 @@ llvm::StoreInst* AsmInstruction::getLlvmToAsmInstruction() const
 	return _llvmToAsmInstr;
 }
 
-tl_cpputils::Maybe<unsigned> AsmInstruction::getLatency() const
+retdec::utils::Maybe<unsigned> AsmInstruction::getLatency() const
 {
 	assert(false && "AsmInstruction::getLatency() not implemented.");
-	tl_cpputils::Maybe<unsigned> ret;
+	retdec::utils::Maybe<unsigned> ret;
 	return ret;
 }
 
@@ -442,7 +443,7 @@ bool AsmInstruction::instructionsCanBeErased()
 {
 	auto bbs = getBasicBlocks();
 
-	tl_cpputils::NonIterableSet<const Value*> seen;
+	retdec::utils::NonIterableSet<const Value*> seen;
 	for (auto it = rbegin(), e = rend(); it != e; ++it)
 	{
 		auto* i = &(*it);
@@ -774,3 +775,4 @@ std::ostream& operator<<(std::ostream& out, const AsmInstruction& a)
 }
 
 } // namespace bin2llvmir
+} // namespace retdec

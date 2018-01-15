@@ -9,14 +9,15 @@
 #include <llvm/IR/Instruction.h>
 #include <llvm/IR/Instructions.h>
 
-#include "tl-cpputils/string.h"
-#include "bin2llvmir/optimizations/control_flow/control_flow.h"
-#include "bin2llvmir/utils/type.h"
+#include "retdec/utils/string.h"
+#include "retdec/bin2llvmir/optimizations/control_flow/control_flow.h"
+#include "retdec/bin2llvmir/utils/type.h"
 #define debug_enabled false
-#include "llvm-support/utils.h"
+#include "retdec/llvm-support/utils.h"
 
 using namespace llvm;
 
+namespace retdec {
 namespace bin2llvmir {
 
 bool ControlFlow::runMips()
@@ -139,7 +140,7 @@ bool ControlFlow::runMipsDynamicStubPatter()
 			continue;
 		}
 		if (!(lti->hasLtiFunction(fnc.getName())
-				|| lti->hasLtiFunction(tl_cpputils::removeLeadingCharacter(fnc.getName(), '_'))))
+				|| lti->hasLtiFunction(retdec::utils::removeLeadingCharacter(fnc.getName(), '_'))))
 		{
 			continue;
 		}
@@ -158,3 +159,4 @@ bool ControlFlow::runMipsDynamicStubPatter()
 }
 
 } // namespace bin2llvmir
+} // namespace retdec

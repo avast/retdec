@@ -4,32 +4,33 @@
 * @copyright (c) 2017 Avast Software, licensed under the MIT license
 */
 
-#include "llvmir2hll/analysis/used_types_visitor.h"
-#include "llvmir2hll/ir/array_type.h"
-#include "llvmir2hll/ir/bit_cast_expr.h"
-#include "llvmir2hll/ir/ext_cast_expr.h"
-#include "llvmir2hll/ir/float_type.h"
-#include "llvmir2hll/ir/fp_to_int_cast_expr.h"
-#include "llvmir2hll/ir/function.h"
-#include "llvmir2hll/ir/function_type.h"
-#include "llvmir2hll/ir/global_var_def.h"
-#include "llvmir2hll/ir/int_to_fp_cast_expr.h"
-#include "llvmir2hll/ir/int_to_ptr_cast_expr.h"
-#include "llvmir2hll/ir/int_type.h"
-#include "llvmir2hll/ir/module.h"
-#include "llvmir2hll/ir/pointer_type.h"
-#include "llvmir2hll/ir/ptr_to_int_cast_expr.h"
-#include "llvmir2hll/ir/string_type.h"
-#include "llvmir2hll/ir/struct_type.h"
-#include "llvmir2hll/ir/trunc_cast_expr.h"
-#include "llvmir2hll/ir/unknown_type.h"
-#include "llvmir2hll/ir/variable.h"
-#include "llvmir2hll/ir/void_type.h"
-#include "llvmir2hll/support/debug.h"
-#include "tl-cpputils/container.h"
+#include "retdec/llvmir2hll/analysis/used_types_visitor.h"
+#include "retdec/llvmir2hll/ir/array_type.h"
+#include "retdec/llvmir2hll/ir/bit_cast_expr.h"
+#include "retdec/llvmir2hll/ir/ext_cast_expr.h"
+#include "retdec/llvmir2hll/ir/float_type.h"
+#include "retdec/llvmir2hll/ir/fp_to_int_cast_expr.h"
+#include "retdec/llvmir2hll/ir/function.h"
+#include "retdec/llvmir2hll/ir/function_type.h"
+#include "retdec/llvmir2hll/ir/global_var_def.h"
+#include "retdec/llvmir2hll/ir/int_to_fp_cast_expr.h"
+#include "retdec/llvmir2hll/ir/int_to_ptr_cast_expr.h"
+#include "retdec/llvmir2hll/ir/int_type.h"
+#include "retdec/llvmir2hll/ir/module.h"
+#include "retdec/llvmir2hll/ir/pointer_type.h"
+#include "retdec/llvmir2hll/ir/ptr_to_int_cast_expr.h"
+#include "retdec/llvmir2hll/ir/string_type.h"
+#include "retdec/llvmir2hll/ir/struct_type.h"
+#include "retdec/llvmir2hll/ir/trunc_cast_expr.h"
+#include "retdec/llvmir2hll/ir/unknown_type.h"
+#include "retdec/llvmir2hll/ir/variable.h"
+#include "retdec/llvmir2hll/ir/void_type.h"
+#include "retdec/llvmir2hll/support/debug.h"
+#include "retdec/utils/container.h"
 
-using tl_cpputils::addToSet;
+using retdec::utils::addToSet;
 
+namespace retdec {
 namespace llvmir2hll {
 
 /**
@@ -417,3 +418,4 @@ void UsedTypesVisitor::visit(ShPtr<UnknownType> type) {
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

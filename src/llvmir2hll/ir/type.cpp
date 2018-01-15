@@ -4,9 +4,10 @@
 * @copyright (c) 2017 Avast Software, licensed under the MIT license
 */
 
-#include "llvmir2hll/ir/type.h"
-#include "llvmir2hll/support/debug.h"
+#include "retdec/llvmir2hll/ir/type.h"
+#include "retdec/llvmir2hll/support/debug.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 /**
@@ -20,3 +21,4 @@ Type::Type() {}
 Type::~Type() {}
 
 } // namespace llvmir2hll
+} // namespace retdec

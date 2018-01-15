@@ -7,30 +7,31 @@
 #include <gtest/gtest.h>
 
 #include "llvmir2hll/analysis/tests_with_value_analysis.h"
-#include "llvmir2hll/graphs/cfg/cfg.h"
-#include "llvmir2hll/graphs/cfg/cfg_builders/non_recursive_cfg_builder.h"
-#include "llvmir2hll/graphs/cfg/cfg_traversals/lhs_rhs_uses_cfg_traversal.h"
-#include "llvmir2hll/graphs/cg/cg.h"
-#include "llvmir2hll/graphs/cg/cg_builder.h"
-#include "llvmir2hll/ir/array_index_op_expr.h"
-#include "llvmir2hll/ir/assign_stmt.h"
-#include "llvmir2hll/ir/call_expr.h"
-#include "llvmir2hll/ir/call_stmt.h"
-#include "llvmir2hll/ir/const_int.h"
-#include "llvmir2hll/ir/deref_op_expr.h"
-#include "llvmir2hll/ir/function_builder.h"
-#include "llvmir2hll/ir/if_stmt.h"
-#include "llvmir2hll/ir/int_type.h"
-#include "llvmir2hll/ir/pointer_type.h"
-#include "llvmir2hll/ir/return_stmt.h"
+#include "retdec/llvmir2hll/graphs/cfg/cfg.h"
+#include "retdec/llvmir2hll/graphs/cfg/cfg_builders/non_recursive_cfg_builder.h"
+#include "retdec/llvmir2hll/graphs/cfg/cfg_traversals/lhs_rhs_uses_cfg_traversal.h"
+#include "retdec/llvmir2hll/graphs/cg/cg.h"
+#include "retdec/llvmir2hll/graphs/cg/cg_builder.h"
+#include "retdec/llvmir2hll/ir/array_index_op_expr.h"
+#include "retdec/llvmir2hll/ir/assign_stmt.h"
+#include "retdec/llvmir2hll/ir/call_expr.h"
+#include "retdec/llvmir2hll/ir/call_stmt.h"
+#include "retdec/llvmir2hll/ir/const_int.h"
+#include "retdec/llvmir2hll/ir/deref_op_expr.h"
+#include "retdec/llvmir2hll/ir/function_builder.h"
+#include "retdec/llvmir2hll/ir/if_stmt.h"
+#include "retdec/llvmir2hll/ir/int_type.h"
+#include "retdec/llvmir2hll/ir/pointer_type.h"
+#include "retdec/llvmir2hll/ir/return_stmt.h"
 #include "llvmir2hll/ir/tests_with_module.h"
-#include "llvmir2hll/ir/var_def_stmt.h"
-#include "llvmir2hll/ir/variable.h"
-#include "llvmir2hll/obtainer/call_info_obtainers/optim_call_info_obtainer.h"
-#include "llvmir2hll/support/types.h"
+#include "retdec/llvmir2hll/ir/var_def_stmt.h"
+#include "retdec/llvmir2hll/ir/variable.h"
+#include "retdec/llvmir2hll/obtainer/call_info_obtainers/optim_call_info_obtainer.h"
+#include "retdec/llvmir2hll/support/types.h"
 
 using namespace ::testing;
 
+namespace retdec {
 namespace llvmir2hll {
 namespace tests {
 
@@ -782,3 +783,4 @@ NoUsesWhenThereIsFunctionCallAfterOrigStmtThatModifiesRhs) {
 
 } // namespace tests
 } // namespace llvmir2hll
+} // namespace retdec

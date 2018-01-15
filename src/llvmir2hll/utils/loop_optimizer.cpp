@@ -4,27 +4,28 @@
 * @copyright (c) 2017 Avast Software, licensed under the MIT license
 */
 
-#include "llvmir2hll/analysis/used_vars_visitor.h"
-#include "llvmir2hll/ir/assign_stmt.h"
-#include "llvmir2hll/ir/break_stmt.h"
-#include "llvmir2hll/ir/const_bool.h"
-#include "llvmir2hll/ir/empty_stmt.h"
-#include "llvmir2hll/ir/expression.h"
-#include "llvmir2hll/ir/for_loop_stmt.h"
-#include "llvmir2hll/ir/if_stmt.h"
-#include "llvmir2hll/ir/return_stmt.h"
-#include "llvmir2hll/ir/statement.h"
-#include "llvmir2hll/ir/var_def_stmt.h"
-#include "llvmir2hll/ir/variable.h"
-#include "llvmir2hll/ir/while_loop_stmt.h"
-#include "llvmir2hll/support/debug.h"
-#include "llvmir2hll/support/types.h"
-#include "llvmir2hll/utils/ir.h"
-#include "llvmir2hll/utils/loop_optimizer.h"
-#include "tl-cpputils/container.h"
+#include "retdec/llvmir2hll/analysis/used_vars_visitor.h"
+#include "retdec/llvmir2hll/ir/assign_stmt.h"
+#include "retdec/llvmir2hll/ir/break_stmt.h"
+#include "retdec/llvmir2hll/ir/const_bool.h"
+#include "retdec/llvmir2hll/ir/empty_stmt.h"
+#include "retdec/llvmir2hll/ir/expression.h"
+#include "retdec/llvmir2hll/ir/for_loop_stmt.h"
+#include "retdec/llvmir2hll/ir/if_stmt.h"
+#include "retdec/llvmir2hll/ir/return_stmt.h"
+#include "retdec/llvmir2hll/ir/statement.h"
+#include "retdec/llvmir2hll/ir/var_def_stmt.h"
+#include "retdec/llvmir2hll/ir/variable.h"
+#include "retdec/llvmir2hll/ir/while_loop_stmt.h"
+#include "retdec/llvmir2hll/support/debug.h"
+#include "retdec/llvmir2hll/support/types.h"
+#include "retdec/llvmir2hll/utils/ir.h"
+#include "retdec/llvmir2hll/utils/loop_optimizer.h"
+#include "retdec/utils/container.h"
 
-using tl_cpputils::hasItem;
+using retdec::utils::hasItem;
 
+namespace retdec {
 namespace llvmir2hll {
 
 /**
@@ -248,3 +249,4 @@ ShPtr<IndVarInfo> getIndVarInfo(ShPtr<WhileLoopStmt> stmt) {
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

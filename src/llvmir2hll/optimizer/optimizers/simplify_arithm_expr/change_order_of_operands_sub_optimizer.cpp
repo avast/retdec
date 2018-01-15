@@ -4,11 +4,12 @@
 * @copyright (c) 2017 Avast Software, licensed under the MIT license
 */
 
-#include "llvmir2hll/evaluator/arithm_expr_evaluator.h"
-#include "llvmir2hll/ir/mul_op_expr.h"
-#include "llvmir2hll/optimizer/optimizers/simplify_arithm_expr/change_order_of_operands_sub_optimizer.h"
-#include "llvmir2hll/support/debug.h"
+#include "retdec/llvmir2hll/evaluator/arithm_expr_evaluator.h"
+#include "retdec/llvmir2hll/ir/mul_op_expr.h"
+#include "retdec/llvmir2hll/optimizer/optimizers/simplify_arithm_expr/change_order_of_operands_sub_optimizer.h"
+#include "retdec/llvmir2hll/support/debug.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 REGISTER_AT_FACTORY("ChangeOrderOfOperands", CHANGE_ORDER_OF_OPERANDS_SUB_OPTIMIZER_ID,
@@ -60,3 +61,4 @@ void ChangeOrderOfOperandsSubOptimizer::visit(ShPtr<MulOpExpr> expr) {
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

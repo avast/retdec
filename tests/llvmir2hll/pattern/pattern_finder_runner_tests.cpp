@@ -7,15 +7,16 @@
 #include <gtest/gtest.h>
 
 #include "llvmir2hll/analysis/tests_with_value_analysis.h"
-#include "llvmir2hll/analysis/value_analysis.h"
+#include "retdec/llvmir2hll/analysis/value_analysis.h"
 #include "llvmir2hll/ir/tests_with_module.h"
-#include "llvmir2hll/obtainer/call_info_obtainer.h"
+#include "retdec/llvmir2hll/obtainer/call_info_obtainer.h"
 #include "llvmir2hll/obtainer/call_info_obtainer_mock.h"
 #include "llvmir2hll/pattern/pattern_finder_mock.h"
 #include "llvmir2hll/pattern/pattern_finder_runner_mock.h"
 
 using namespace ::testing;
 
+namespace retdec {
 namespace llvmir2hll {
 namespace tests {
 
@@ -112,3 +113,4 @@ RunWithTwoPatternFinderAndNullModuleResultsIntoViolatedPrecondition) {
 
 } // namespace tests
 } // namespace llvmir2hll
+} // namespace retdec

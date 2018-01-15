@@ -11,14 +11,14 @@
 #include <libdwarf/dwarf.h>
 #include <libdwarf/libdwarf.h>
 
-#include "dwarfparser/dwarf_file.h"
-#include "dwarfparser/dwarf_types.h"
-#include "dwarfparser/dwarf_vars.h"
+#include "retdec/dwarfparser/dwarf_file.h"
+#include "retdec/dwarfparser/dwarf_types.h"
+#include "retdec/dwarfparser/dwarf_vars.h"
 
 using namespace std;
 
-namespace dwarfparser
-{
+namespace retdec {
+namespace dwarfparser {
 
 /*
  * =============================================================================
@@ -1458,3 +1458,4 @@ DwarfVolatileType::DwarfVolatileType(DwarfTypeContainer *prnt, Dwarf_Off o) :
 }
 
 } // namespace dwarfparser
+} // namespace retdec

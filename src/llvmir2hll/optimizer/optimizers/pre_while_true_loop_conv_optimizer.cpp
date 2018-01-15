@@ -4,24 +4,25 @@
 * @copyright (c) 2017 Avast Software, licensed under the MIT license
 */
 
-#include "llvmir2hll/analysis/value_analysis.h"
-#include "llvmir2hll/analysis/var_uses_visitor.h"
-#include "llvmir2hll/ir/and_op_expr.h"
-#include "llvmir2hll/ir/assign_stmt.h"
-#include "llvmir2hll/ir/call_expr.h"
-#include "llvmir2hll/ir/call_stmt.h"
-#include "llvmir2hll/ir/expression.h"
-#include "llvmir2hll/ir/if_stmt.h"
-#include "llvmir2hll/ir/or_op_expr.h"
-#include "llvmir2hll/ir/return_stmt.h"
-#include "llvmir2hll/ir/var_def_stmt.h"
-#include "llvmir2hll/ir/variable.h"
-#include "llvmir2hll/ir/while_loop_stmt.h"
-#include "llvmir2hll/optimizer/optimizers/pre_while_true_loop_conv_optimizer.h"
-#include "llvmir2hll/support/debug.h"
-#include "llvmir2hll/utils/ir.h"
-#include "llvmir2hll/utils/loop_optimizer.h"
+#include "retdec/llvmir2hll/analysis/value_analysis.h"
+#include "retdec/llvmir2hll/analysis/var_uses_visitor.h"
+#include "retdec/llvmir2hll/ir/and_op_expr.h"
+#include "retdec/llvmir2hll/ir/assign_stmt.h"
+#include "retdec/llvmir2hll/ir/call_expr.h"
+#include "retdec/llvmir2hll/ir/call_stmt.h"
+#include "retdec/llvmir2hll/ir/expression.h"
+#include "retdec/llvmir2hll/ir/if_stmt.h"
+#include "retdec/llvmir2hll/ir/or_op_expr.h"
+#include "retdec/llvmir2hll/ir/return_stmt.h"
+#include "retdec/llvmir2hll/ir/var_def_stmt.h"
+#include "retdec/llvmir2hll/ir/variable.h"
+#include "retdec/llvmir2hll/ir/while_loop_stmt.h"
+#include "retdec/llvmir2hll/optimizer/optimizers/pre_while_true_loop_conv_optimizer.h"
+#include "retdec/llvmir2hll/support/debug.h"
+#include "retdec/llvmir2hll/utils/ir.h"
+#include "retdec/llvmir2hll/utils/loop_optimizer.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 /**
@@ -649,3 +650,4 @@ bool PreWhileTrueLoopConvOptimizer::tryOptimizationCase5(
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

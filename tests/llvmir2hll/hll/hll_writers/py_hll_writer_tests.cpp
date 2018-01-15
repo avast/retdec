@@ -6,19 +6,20 @@
 
 #include <gtest/gtest.h>
 
-#include "llvmir2hll/hll/hll_writers/py_hll_writer.h"
+#include "retdec/llvmir2hll/hll/hll_writers/py_hll_writer.h"
 #include "llvmir2hll/hll/hll_writers/hll_writer_tests.h"
-#include "llvmir2hll/ir/call_expr.h"
-#include "llvmir2hll/ir/call_stmt.h"
-#include "llvmir2hll/ir/const_string.h"
-#include "llvmir2hll/ir/function.h"
-#include "llvmir2hll/ir/variable.h"
-#include "tl-cpputils/string.h"
+#include "retdec/llvmir2hll/ir/call_expr.h"
+#include "retdec/llvmir2hll/ir/call_stmt.h"
+#include "retdec/llvmir2hll/ir/const_string.h"
+#include "retdec/llvmir2hll/ir/function.h"
+#include "retdec/llvmir2hll/ir/variable.h"
+#include "retdec/utils/string.h"
 
 using namespace ::testing;
 
-using tl_cpputils::contains;
+using retdec::utils::contains;
 
+namespace retdec {
 namespace llvmir2hll {
 namespace tests {
 
@@ -99,3 +100,4 @@ EmitsWideStringLiteralAs8BitStringLiteral) {
 
 } // namespace tests
 } // namespace llvmir2hll
+} // namespace retdec

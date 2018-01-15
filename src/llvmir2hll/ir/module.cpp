@@ -6,26 +6,27 @@
 
 #include <algorithm>
 
-#include "llvmir2hll/config/config.h"
-#include "llvmir2hll/ir/empty_stmt.h"
-#include "llvmir2hll/ir/expression.h"
-#include "llvmir2hll/ir/function.h"
-#include "llvmir2hll/ir/global_var_def.h"
-#include "llvmir2hll/ir/module.h"
-#include "llvmir2hll/ir/statement.h"
-#include "llvmir2hll/ir/variable.h"
-#include "llvmir2hll/semantics/semantics.h"
-#include "llvmir2hll/support/debug.h"
-#include "llvmir2hll/support/maybe.h"
-#include "tl-cpputils/container.h"
-#include "tl-cpputils/string.h"
+#include "retdec/llvmir2hll/config/config.h"
+#include "retdec/llvmir2hll/ir/empty_stmt.h"
+#include "retdec/llvmir2hll/ir/expression.h"
+#include "retdec/llvmir2hll/ir/function.h"
+#include "retdec/llvmir2hll/ir/global_var_def.h"
+#include "retdec/llvmir2hll/ir/module.h"
+#include "retdec/llvmir2hll/ir/statement.h"
+#include "retdec/llvmir2hll/ir/variable.h"
+#include "retdec/llvmir2hll/semantics/semantics.h"
+#include "retdec/llvmir2hll/support/debug.h"
+#include "retdec/llvmir2hll/support/maybe.h"
+#include "retdec/utils/container.h"
+#include "retdec/utils/string.h"
 
-using tl_cpputils::FilterIterator;
-using tl_cpputils::filterTo;
-using tl_cpputils::hasItem;
-using tl_cpputils::mapGetValueOrDefault;
-using tl_cpputils::mapHasKey;
+using retdec::utils::FilterIterator;
+using retdec::utils::filterTo;
+using retdec::utils::hasItem;
+using retdec::utils::mapGetValueOrDefault;
+using retdec::utils::mapHasKey;
 
+namespace retdec {
 namespace llvmir2hll {
 
 /**
@@ -214,7 +215,7 @@ const llvm::Module *Module::getLLVMModule() const {
 * @param[in] stripDirs Strips all directories from the identifier (if any).
 */
 std::string Module::getIdentifier(bool stripDirs) const {
-	return stripDirs ? tl_cpputils::stripDirs(identifier) : identifier;
+	return stripDirs ? retdec::utils::stripDirs(identifier) : identifier;
 }
 
 /**
@@ -892,3 +893,4 @@ std::string Module::getDetectedLanguage() const {
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

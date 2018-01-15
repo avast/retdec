@@ -4,10 +4,11 @@
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */
 
-#include "bin2llvmir/optimizations/idioms/idioms_analysis.h"
+#include "retdec/bin2llvmir/optimizations/idioms/idioms_analysis.h"
 
 using namespace llvm;
 
+namespace retdec {
 namespace bin2llvmir {
 
 /*
@@ -297,3 +298,4 @@ bool IdiomsAnalysis::analyse(llvm::Function & f, llvm::Pass * p, int (IdiomsAnal
 }
 
 } // namespace bin2llvmir
+} // namespace retdec

@@ -6,11 +6,12 @@
 
 #include <gtest/gtest.h>
 
-#include "llvmir2hll/ir/string_type.h"
-#include "llvmir2hll/support/debug.h"
+#include "retdec/llvmir2hll/ir/string_type.h"
+#include "retdec/llvmir2hll/support/debug.h"
 
 using namespace ::testing;
 
+namespace retdec {
 namespace llvmir2hll {
 namespace tests {
 
@@ -85,3 +86,4 @@ GetCharSizeReturnsCorrectValue) {
 
 } // namespace tests
 } // namespace llvmir2hll
+} // namespace retdec

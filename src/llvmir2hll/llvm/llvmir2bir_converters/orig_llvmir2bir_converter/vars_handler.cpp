@@ -8,20 +8,21 @@
 #include <llvm/IR/Value.h>
 #include <llvm/Support/ErrorHandling.h>
 
-#include "llvmir2hll/ir/function.h"
-#include "llvmir2hll/ir/module.h"
-#include "llvmir2hll/ir/unknown_type.h"
-#include "llvmir2hll/ir/variable.h"
-#include "llvmir2hll/llvm/llvmir2bir_converters/orig_llvmir2bir_converter/vars_handler.h"
-#include "llvmir2hll/support/debug.h"
-#include "llvm-support/diagnostics.h"
-#include "tl-cpputils/container.h"
+#include "retdec/llvmir2hll/ir/function.h"
+#include "retdec/llvmir2hll/ir/module.h"
+#include "retdec/llvmir2hll/ir/unknown_type.h"
+#include "retdec/llvmir2hll/ir/variable.h"
+#include "retdec/llvmir2hll/llvm/llvmir2bir_converters/orig_llvmir2bir_converter/vars_handler.h"
+#include "retdec/llvmir2hll/support/debug.h"
+#include "retdec/llvm-support/diagnostics.h"
+#include "retdec/utils/container.h"
 
-using namespace llvm_support;
+using namespace retdec::llvm_support;
 
-using tl_cpputils::hasItem;
-using tl_cpputils::mapGetValueOrDefault;
+using retdec::utils::hasItem;
+using retdec::utils::mapGetValueOrDefault;
 
+namespace retdec {
 namespace llvmir2hll {
 
 /**
@@ -193,3 +194,4 @@ llvm::Type *VarsHandler::getAllocatedVarType(llvm::Value *var) const {
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

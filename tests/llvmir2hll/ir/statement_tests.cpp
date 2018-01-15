@@ -6,18 +6,19 @@
 
 #include <gtest/gtest.h>
 
-#include "llvmir2hll/ir/break_stmt.h"
-#include "llvmir2hll/ir/const_bool.h"
-#include "llvmir2hll/ir/continue_stmt.h"
-#include "llvmir2hll/ir/empty_stmt.h"
-#include "llvmir2hll/ir/goto_stmt.h"
-#include "llvmir2hll/ir/if_stmt.h"
-#include "llvmir2hll/ir/return_stmt.h"
-#include "llvmir2hll/ir/statement.h"
+#include "retdec/llvmir2hll/ir/break_stmt.h"
+#include "retdec/llvmir2hll/ir/const_bool.h"
+#include "retdec/llvmir2hll/ir/continue_stmt.h"
+#include "retdec/llvmir2hll/ir/empty_stmt.h"
+#include "retdec/llvmir2hll/ir/goto_stmt.h"
+#include "retdec/llvmir2hll/ir/if_stmt.h"
+#include "retdec/llvmir2hll/ir/return_stmt.h"
+#include "retdec/llvmir2hll/ir/statement.h"
 #include "llvmir2hll/ir/tests_with_module.h"
 
 using namespace ::testing;
 
+namespace retdec {
 namespace llvmir2hll {
 namespace tests {
 
@@ -233,3 +234,4 @@ IsStatementInStatementsReturnsFalseWhenStatementIsInNestedBlock) {
 
 } // namespace tests
 } // namespace llvmir2hll
+} // namespace retdec

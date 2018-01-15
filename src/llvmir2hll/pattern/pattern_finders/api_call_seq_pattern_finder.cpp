@@ -6,28 +6,29 @@
 
 #include <map>
 
-#include "llvmir2hll/analysis/value_analysis.h"
-#include "llvmir2hll/ir/call_expr.h"
-#include "llvmir2hll/ir/function.h"
-#include "llvmir2hll/ir/module.h"
-#include "llvmir2hll/ir/statement.h"
-#include "llvmir2hll/ir/variable.h"
-#include "llvmir2hll/obtainer/call_info_obtainer.h"
-#include "llvmir2hll/obtainer/calls_in_module_obtainer.h"
-#include "llvmir2hll/pattern/pattern_finder_factory.h"
-#include "llvmir2hll/pattern/pattern_finders/api_call/api_call_info.h"
-#include "llvmir2hll/pattern/pattern_finders/api_call/api_call_info_seq.h"
-#include "llvmir2hll/pattern/pattern_finders/api_call/api_call_info_seq_parser.h"
-#include "llvmir2hll/pattern/pattern_finders/api_call/api_call_seq_finder.h"
-#include "llvmir2hll/pattern/pattern_finders/api_call/api_call_seq_finders/basic_block_api_call_seq_finder.h"
-#include "llvmir2hll/pattern/pattern_finders/api_call_seq_pattern_finder.h"
-#include "llvmir2hll/pattern/patterns/stmts_pattern.h"
-#include "llvmir2hll/support/debug.h"
-#include "llvmir2hll/utils/ir.h"
-#include "llvm-support/diagnostics.h"
+#include "retdec/llvmir2hll/analysis/value_analysis.h"
+#include "retdec/llvmir2hll/ir/call_expr.h"
+#include "retdec/llvmir2hll/ir/function.h"
+#include "retdec/llvmir2hll/ir/module.h"
+#include "retdec/llvmir2hll/ir/statement.h"
+#include "retdec/llvmir2hll/ir/variable.h"
+#include "retdec/llvmir2hll/obtainer/call_info_obtainer.h"
+#include "retdec/llvmir2hll/obtainer/calls_in_module_obtainer.h"
+#include "retdec/llvmir2hll/pattern/pattern_finder_factory.h"
+#include "retdec/llvmir2hll/pattern/pattern_finders/api_call/api_call_info.h"
+#include "retdec/llvmir2hll/pattern/pattern_finders/api_call/api_call_info_seq.h"
+#include "retdec/llvmir2hll/pattern/pattern_finders/api_call/api_call_info_seq_parser.h"
+#include "retdec/llvmir2hll/pattern/pattern_finders/api_call/api_call_seq_finder.h"
+#include "retdec/llvmir2hll/pattern/pattern_finders/api_call/api_call_seq_finders/basic_block_api_call_seq_finder.h"
+#include "retdec/llvmir2hll/pattern/pattern_finders/api_call_seq_pattern_finder.h"
+#include "retdec/llvmir2hll/pattern/patterns/stmts_pattern.h"
+#include "retdec/llvmir2hll/support/debug.h"
+#include "retdec/llvmir2hll/utils/ir.h"
+#include "retdec/llvm-support/diagnostics.h"
 
-using namespace llvm_support;
+using namespace retdec::llvm_support;
 
+namespace retdec {
 namespace llvmir2hll {
 
 REGISTER_AT_FACTORY("APICallSeq", API_CALL_SEQ_PATTERN_FINDER_ID,
@@ -1154,3 +1155,4 @@ PatternFinder::Patterns APICallSeqPatternFinder::findPatterns(
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

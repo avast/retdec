@@ -1,0 +1,11 @@
+##########################################
+#
+# Makefile
+#
+##########################################
+
+#
+# !!! THIS IS NOT USED, ONLY SOURCES ARE ADDED TO APPLICATION COMPILATION.
+# !!! WHEN I TRIED TO CREATE .a FROM INTERFACE THE SAME CODE THAT WORKED
+# !!! BEFORE CAUSED SEG FAULT.
+#

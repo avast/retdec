@@ -6,12 +6,13 @@
 
 #include <gtest/gtest.h>
 
-#include "llvmir2hll/ir/const_string.h"
-#include "llvmir2hll/ir/string_type.h"
+#include "retdec/llvmir2hll/ir/const_string.h"
+#include "retdec/llvmir2hll/ir/string_type.h"
 
 using namespace ::testing;
 using namespace std::string_literals;
 
+namespace retdec {
 namespace llvmir2hll {
 namespace tests {
 
@@ -190,3 +191,4 @@ IsEqualToReturnsFalseWhenConstantsHaveDifferentCharSizes) {
 
 } // namespace tests
 } // namespace llvmir2hll
+} // namespace retdec

@@ -18,21 +18,22 @@
 #include <llvm/IR/Instructions.h>
 #include <llvm/Support/raw_ostream.h>
 
-#include "tl-cpputils/string.h"
-#include "tl-cpputils/time.h"
-#include "bin2llvmir/analyses/symbolic_tree.h"
-#include "bin2llvmir/optimizations/constants/constants.h"
-#include "bin2llvmir/providers/asm_instruction.h"
-#include "bin2llvmir/utils/global_var.h"
-#include "bin2llvmir/utils/instruction.h"
+#include "retdec/utils/string.h"
+#include "retdec/utils/time.h"
+#include "retdec/bin2llvmir/analyses/symbolic_tree.h"
+#include "retdec/bin2llvmir/optimizations/constants/constants.h"
+#include "retdec/bin2llvmir/providers/asm_instruction.h"
+#include "retdec/bin2llvmir/utils/global_var.h"
+#include "retdec/bin2llvmir/utils/instruction.h"
 #define debug_enabled false
-#include "llvm-support/utils.h"
-#include "bin2llvmir/utils/type.h"
+#include "retdec/llvm-support/utils.h"
+#include "retdec/bin2llvmir/utils/type.h"
 
-using namespace llvm_support;
-using namespace tl_cpputils;
+using namespace retdec::llvm_support;
+using namespace retdec::utils;
 using namespace llvm;
 
+namespace retdec {
 namespace bin2llvmir {
 
 char ConstantsAnalysis::ID = 0;
@@ -267,3 +268,4 @@ void ConstantsAnalysis::setPic32GpValue(ReachingDefinitionsAnalysis& RDA)
 }
 
 } // namespace bin2llvmir
+} // namespace retdec

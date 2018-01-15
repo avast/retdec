@@ -7,23 +7,24 @@
 #include <fstream>
 #include <iostream>
 
-#include "ctypes/floating_point_type.h"
-#include "ctypes/function_type.h"
-#include "ctypes/integral_type.h"
-#include "ctypes/member.h"
-#include "ctypes/pointer_type.h"
-#include "ctypes/struct_type.h"
-#include "ctypes/typedefed_type.h"
-#include "ctypes/union_type.h"
-#include "ctypes/unknown_type.h"
-#include "ctypes/void_type.h"
-#include "llvm-support/utils.h"
-#include "tl-cpputils/string.h"
-#include "bin2llvmir/providers/lti.h"
-#include "bin2llvmir/utils/type.h"
+#include "retdec/ctypes/floating_point_type.h"
+#include "retdec/ctypes/function_type.h"
+#include "retdec/ctypes/integral_type.h"
+#include "retdec/ctypes/member.h"
+#include "retdec/ctypes/pointer_type.h"
+#include "retdec/ctypes/struct_type.h"
+#include "retdec/ctypes/typedefed_type.h"
+#include "retdec/ctypes/union_type.h"
+#include "retdec/ctypes/unknown_type.h"
+#include "retdec/ctypes/void_type.h"
+#include "retdec/llvm-support/utils.h"
+#include "retdec/utils/string.h"
+#include "retdec/bin2llvmir/providers/lti.h"
+#include "retdec/bin2llvmir/utils/type.h"
 
 using namespace llvm;
 
+namespace retdec {
 namespace bin2llvmir {
 
 //
@@ -44,7 +45,7 @@ ToLlvmTypeVisitor::ToLlvmTypeVisitor(llvm::Module* m, Config* c) :
 ToLlvmTypeVisitor::~ToLlvmTypeVisitor() = default;
 
 void ToLlvmTypeVisitor::visit(
-		const std::shared_ptr<ctypes::ArrayType>& type)
+		const std::shared_ptr<retdec::ctypes::ArrayType>& type)
 {
 	type->getElementType()->accept(this);
 
@@ -59,13 +60,13 @@ void ToLlvmTypeVisitor::visit(
 }
 
 void ToLlvmTypeVisitor::visit(
-		const std::shared_ptr<ctypes::EnumType>& type)
+		const std::shared_ptr<retdec::ctypes::EnumType>& type)
 {
 	_type = getDefaultType(_module);
 }
 
 void ToLlvmTypeVisitor::visit(
-		const std::shared_ptr<ctypes::FloatingPointType>& type)
+		const std::shared_ptr<retdec::ctypes::FloatingPointType>& type)
 {
 	auto& ctx = _module->getContext();
 	switch (type->getBitWidth())
@@ -80,7 +81,7 @@ void ToLlvmTypeVisitor::visit(
 }
 
 void ToLlvmTypeVisitor::visit(
-		const std::shared_ptr<ctypes::FunctionType>& type)
+		const std::shared_ptr<retdec::ctypes::FunctionType>& type)
 {
 	type->getReturnType()->accept(this);
 	auto* ret = FunctionType::isValidReturnType(_type) ?
@@ -111,7 +112,7 @@ void ToLlvmTypeVisitor::visit(
 }
 
 void ToLlvmTypeVisitor::visit(
-		const std::shared_ptr<ctypes::IntegralType>& type)
+		const std::shared_ptr<retdec::ctypes::IntegralType>& type)
 {
 	auto tsz = type->getBitWidth();
 	assert(tsz);
@@ -120,7 +121,7 @@ void ToLlvmTypeVisitor::visit(
 }
 
 void ToLlvmTypeVisitor::visit(
-		const std::shared_ptr<ctypes::PointerType>& type)
+		const std::shared_ptr<retdec::ctypes::PointerType>& type)
 {
 	type->getPointedType()->accept(this);
 
@@ -130,9 +131,9 @@ void ToLlvmTypeVisitor::visit(
 }
 
 void ToLlvmTypeVisitor::visit(
-		const std::shared_ptr<ctypes::TypedefedType>& type)
+		const std::shared_ptr<retdec::ctypes::TypedefedType>& type)
 {
-	if (tl_cpputils::containsCaseInsensitive(type->getName(), "wchar"))
+	if (retdec::utils::containsCaseInsensitive(type->getName(), "wchar"))
 	{
 		// getDefaultWchartType()?
 		if (_config->getConfig().fileFormat.isElf())
@@ -159,29 +160,29 @@ void ToLlvmTypeVisitor::visit(
 }
 
 void ToLlvmTypeVisitor::visit(
-		const std::shared_ptr<ctypes::UnionType>& type)
+		const std::shared_ptr<retdec::ctypes::UnionType>& type)
 {
 	_type = getDefaultType(_module);
 }
 
 void ToLlvmTypeVisitor::visit(
-		const std::shared_ptr<ctypes::UnknownType>& type)
+		const std::shared_ptr<retdec::ctypes::UnknownType>& type)
 {
 	_type = getDefaultType(_module);
 }
 
 void ToLlvmTypeVisitor::visit(
-		const std::shared_ptr<ctypes::VoidType>& type)
+		const std::shared_ptr<retdec::ctypes::VoidType>& type)
 {
 	_type = Type::getVoidTy(_module->getContext());
 }
 
 void ToLlvmTypeVisitor::visit(
-		const std::shared_ptr<ctypes::StructType>& type)
+		const std::shared_ptr<retdec::ctypes::StructType>& type)
 {
 	std::string name = type->getName();
 	std::string prefix = "struct ";
-	if (tl_cpputils::startsWith(name, prefix))
+	if (retdec::utils::startsWith(name, prefix))
 	{
 		name.erase(0, prefix.length());
 	}
@@ -228,21 +229,21 @@ Type* ToLlvmTypeVisitor::getLlvmType() const
 Lti::Lti(
 		llvm::Module* m,
 		Config* c,
-		loader::Image* objf)
+		retdec::loader::Image* objf)
 		:
 		_module(m),
 		_config(c),
 		_image(objf)
 {
-	_ltiModule = std::make_unique<ctypes::Module>(
-			std::make_shared<ctypes::Context>());
+	_ltiModule = std::make_unique<retdec::ctypes::Module>(
+			std::make_shared<retdec::ctypes::Context>());
 
 	_ltiParser = ctypesparser::JSONCTypesParser(
 			static_cast<unsigned>(c->getConfig().architecture.getBitSize()));
 
 	for (auto& l : _config->getConfig().parameters.libraryTypeInfoPaths)
 	{
-		if (tl_cpputils::startsWith(tl_cpputils::stripDirs(l), "cstdlib"))
+		if (retdec::utils::startsWith(retdec::utils::stripDirs(l), "cstdlib"))
 		{
 			loadLtiFile(l);
 		}
@@ -252,24 +253,24 @@ Lti::Lti(
 
 	for (auto &l : _config->getConfig().parameters.libraryTypeInfoPaths)
 	{
-		auto fileName = tl_cpputils::stripDirs(l);
+		auto fileName = retdec::utils::stripDirs(l);
 
-		if (tl_cpputils::startsWith(fileName, "cstdlib"))
+		if (retdec::utils::startsWith(fileName, "cstdlib"))
 		{
 			continue;
 		}
 
-		if (tl_cpputils::startsWith(fileName, "windows")
+		if (retdec::utils::startsWith(fileName, "windows")
 				&& _config->getConfig().fileFormat.isPe())
 		{
 			loadLtiFile(l);
 		}
 		else if (winDriver
-				&& tl_cpputils::startsWith(fileName, "windrivers"))
+				&& retdec::utils::startsWith(fileName, "windrivers"))
 		{
 			loadLtiFile(l);
 		}
-		else if (tl_cpputils::startsWith(fileName, "linux")
+		else if (retdec::utils::startsWith(fileName, "linux")
 				&& (_config->getConfig().fileFormat.isElf()
 				|| _config->getConfig().fileFormat.isMacho()
 				|| _config->getConfig().fileFormat.isIntelHex()
@@ -277,7 +278,7 @@ Lti::Lti(
 		{
 			loadLtiFile(l);
 		}
-		else if (tl_cpputils::startsWith(fileName, "arm") &&
+		else if (retdec::utils::startsWith(fileName, "arm") &&
 				_config->getConfig().architecture.isArmOrThumb())
 		{
 			loadLtiFile(l);
@@ -312,7 +313,7 @@ void Lti::loadLtiFile(const std::string& filePath)
 	if (file)
 	{
 		std::string cc = "cdecl";
-		if (tl_cpputils::containsCaseInsensitive(filePath, "win"))
+		if (retdec::utils::containsCaseInsensitive(filePath, "win"))
 		{
 			cc = "stdcall";
 		}
@@ -325,7 +326,7 @@ bool Lti::hasLtiFunction(const std::string& name)
 	return getLtiFunction(name) != nullptr;
 }
 
-std::shared_ptr<ctypes::Function> Lti::getLtiFunction(
+std::shared_ptr<retdec::ctypes::Function> Lti::getLtiFunction(
 		const std::string& name)
 {
 	return _ltiModule->getFunctionWithName(name);
@@ -348,7 +349,7 @@ llvm::FunctionType* Lti::getLlvmFunctionType(const std::string& name)
 	assert(ft);
 
 	// TODO: I do not like this, why does
-	// ctypes::FunctionType::isVarArg no work?
+	// retdec::ctypes::FunctionType::isVarArg no work?
 	std::string declaration = ltiFnc->getDeclaration();
 	if (declaration.find("...") != std::string::npos
 			&& !ft->isVarArg())
@@ -365,12 +366,12 @@ Lti::FunctionPair Lti::getPairFunctionFree(const std::string& n)
 	auto ltiFnc = getLtiFunction(name);
 	if (ltiFnc == nullptr)
 	{
-		name = tl_cpputils::removeLeadingCharacter(name, '_');
+		name = retdec::utils::removeLeadingCharacter(name, '_');
 		ltiFnc = getLtiFunction(name);
 	}
 	if (ltiFnc == nullptr)
 	{
-		std::shared_ptr<ctypes::Function> sp(nullptr);
+		std::shared_ptr<retdec::ctypes::Function> sp(nullptr);
 		return {nullptr, sp};
 	}
 	auto* ft = getLlvmFunctionType(name);
@@ -435,7 +436,7 @@ llvm::Function* Lti::getLlvmFunction(const std::string& name)
 	return getPairFunction(name).first;
 }
 
-llvm::Type* Lti::getLlvmType(std::shared_ptr<ctypes::Type> type)
+llvm::Type* Lti::getLlvmType(std::shared_ptr<retdec::ctypes::Type> type)
 {
 	ToLlvmTypeVisitor visitor(_module, _config);
 	type->accept(&visitor);
@@ -453,7 +454,7 @@ std::map<llvm::Module*, Lti> LtiProvider::_module2lti;
 Lti* LtiProvider::addLti(
 		llvm::Module* m,
 		Config* c,
-		loader::Image* objf)
+		retdec::loader::Image* objf)
 {
 	if (m == nullptr || c == nullptr || objf == nullptr)
 	{
@@ -482,3 +483,4 @@ void LtiProvider::clear()
 }
 
 } // namespace bin2llvmir
+} // namespace retdec

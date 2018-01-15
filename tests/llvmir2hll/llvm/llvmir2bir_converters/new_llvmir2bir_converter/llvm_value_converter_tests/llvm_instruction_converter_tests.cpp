@@ -14,39 +14,40 @@
 #include <llvm/IR/LLVMContext.h>
 #include <llvm/IR/Type.h>
 
-#include "llvmir2hll/ir/add_op_expr.h"
-#include "llvmir2hll/ir/bit_and_op_expr.h"
-#include "llvmir2hll/ir/bit_cast_expr.h"
-#include "llvmir2hll/ir/bit_or_op_expr.h"
-#include "llvmir2hll/ir/bit_shl_op_expr.h"
-#include "llvmir2hll/ir/bit_shr_op_expr.h"
-#include "llvmir2hll/ir/bit_xor_op_expr.h"
-#include "llvmir2hll/ir/div_op_expr.h"
-#include "llvmir2hll/ir/eq_op_expr.h"
-#include "llvmir2hll/ir/expression.h"
-#include "llvmir2hll/ir/ext_cast_expr.h"
-#include "llvmir2hll/ir/fp_to_int_cast_expr.h"
-#include "llvmir2hll/ir/gt_eq_op_expr.h"
-#include "llvmir2hll/ir/gt_op_expr.h"
-#include "llvmir2hll/ir/int_to_fp_cast_expr.h"
-#include "llvmir2hll/ir/int_to_ptr_cast_expr.h"
-#include "llvmir2hll/ir/lt_eq_op_expr.h"
-#include "llvmir2hll/ir/lt_op_expr.h"
-#include "llvmir2hll/ir/mod_op_expr.h"
-#include "llvmir2hll/ir/mul_op_expr.h"
-#include "llvmir2hll/ir/neq_op_expr.h"
-#include "llvmir2hll/ir/ptr_to_int_cast_expr.h"
-#include "llvmir2hll/ir/sub_op_expr.h"
-#include "llvmir2hll/ir/ternary_op_expr.h"
+#include "retdec/llvmir2hll/ir/add_op_expr.h"
+#include "retdec/llvmir2hll/ir/bit_and_op_expr.h"
+#include "retdec/llvmir2hll/ir/bit_cast_expr.h"
+#include "retdec/llvmir2hll/ir/bit_or_op_expr.h"
+#include "retdec/llvmir2hll/ir/bit_shl_op_expr.h"
+#include "retdec/llvmir2hll/ir/bit_shr_op_expr.h"
+#include "retdec/llvmir2hll/ir/bit_xor_op_expr.h"
+#include "retdec/llvmir2hll/ir/div_op_expr.h"
+#include "retdec/llvmir2hll/ir/eq_op_expr.h"
+#include "retdec/llvmir2hll/ir/expression.h"
+#include "retdec/llvmir2hll/ir/ext_cast_expr.h"
+#include "retdec/llvmir2hll/ir/fp_to_int_cast_expr.h"
+#include "retdec/llvmir2hll/ir/gt_eq_op_expr.h"
+#include "retdec/llvmir2hll/ir/gt_op_expr.h"
+#include "retdec/llvmir2hll/ir/int_to_fp_cast_expr.h"
+#include "retdec/llvmir2hll/ir/int_to_ptr_cast_expr.h"
+#include "retdec/llvmir2hll/ir/lt_eq_op_expr.h"
+#include "retdec/llvmir2hll/ir/lt_op_expr.h"
+#include "retdec/llvmir2hll/ir/mod_op_expr.h"
+#include "retdec/llvmir2hll/ir/mul_op_expr.h"
+#include "retdec/llvmir2hll/ir/neq_op_expr.h"
+#include "retdec/llvmir2hll/ir/ptr_to_int_cast_expr.h"
+#include "retdec/llvmir2hll/ir/sub_op_expr.h"
+#include "retdec/llvmir2hll/ir/ternary_op_expr.h"
 #include "llvmir2hll/ir/assertions.h"
-#include "llvmir2hll/ir/trunc_cast_expr.h"
-#include "llvmir2hll/ir/variable.h"
-#include "llvmir2hll/llvm/llvmir2bir_converters/new_llvmir2bir_converter/llvm_value_converter.h"
+#include "retdec/llvmir2hll/ir/trunc_cast_expr.h"
+#include "retdec/llvmir2hll/ir/variable.h"
+#include "retdec/llvmir2hll/llvm/llvmir2bir_converters/new_llvmir2bir_converter/llvm_value_converter.h"
 #include "llvmir2hll/llvm/llvmir2bir_converters/new_llvmir2bir_converter/llvm_value_converter_tests/tests_with_llvm_value_converter.h"
-#include "llvmir2hll/support/smart_ptr.h"
+#include "retdec/llvmir2hll/support/smart_ptr.h"
 
 using namespace ::testing;
 
+namespace retdec {
 namespace llvmir2hll {
 namespace tests {
 
@@ -571,3 +572,4 @@ SelectInstructionIsConvertedCorrectly) {
 
 } // namespace tests
 } // namespace llvmir2hll
+} // namespace retdec

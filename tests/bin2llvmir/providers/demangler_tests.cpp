@@ -4,13 +4,14 @@
 * @copyright (c) 2017 Avast Software, licensed under the MIT license
 */
 
-#include "retdec-config/tool_info.h"
-#include "bin2llvmir/providers/demangler.h"
+#include "retdec/config/tool_info.h"
+#include "retdec/bin2llvmir/providers/demangler.h"
 #include "bin2llvmir/utils/llvmir_tests.h"
 
 using namespace ::testing;
 using namespace llvm;
 
+namespace retdec {
 namespace bin2llvmir {
 namespace tests {
 
@@ -24,13 +25,13 @@ class DemanglerProviderTests: public LlvmIrTests
 
 TEST_F(DemanglerProviderTests, addDemanglerAddsDemanglerForModule)
 {
-	retdec_config::ToolInfo tool;
+	retdec::config::ToolInfo tool;
 	tool.setIsGcc();
-	retdec_config::ToolInfoContainer tools;
+	retdec::config::ToolInfoContainer tools;
 	tools.insert(tool);
 	auto* r1 = DemanglerProvider::addDemangler(module.get(), tools);
 	auto* r2 = DemanglerProvider::getDemangler(module.get());
-	demangler::CDemangler* r3 = nullptr;
+	retdec::demangler::CDemangler* r3 = nullptr;
 	bool b = DemanglerProvider::getDemangler(module.get(), r3);
 
 	EXPECT_NE(nullptr, r1);
@@ -41,14 +42,14 @@ TEST_F(DemanglerProviderTests, addDemanglerAddsDemanglerForModule)
 
 TEST_F(DemanglerProviderTests, getDemanglerReturnsNullptrForUnknownModule)
 {
-	retdec_config::ToolInfo tool;
+	retdec::config::ToolInfo tool;
 	tool.setIsGcc();
-	retdec_config::ToolInfoContainer tools;
+	retdec::config::ToolInfoContainer tools;
 	tools.insert(tool);
 	DemanglerProvider::addDemangler(module.get(), tools);
 	parseInput(""); // creates a different module
 	auto* r1 = DemanglerProvider::getDemangler(module.get());
-	demangler::CDemangler* r2 = nullptr;
+	retdec::demangler::CDemangler* r2 = nullptr;
 	bool b = DemanglerProvider::getDemangler(module.get(), r2);
 
 	EXPECT_EQ(nullptr, r1);
@@ -58,9 +59,9 @@ TEST_F(DemanglerProviderTests, getDemanglerReturnsNullptrForUnknownModule)
 
 TEST_F(DemanglerProviderTests, addedDemanglerWorks)
 {
-	retdec_config::ToolInfo tool;
+	retdec::config::ToolInfo tool;
 	tool.setIsGcc();
-	retdec_config::ToolInfoContainer tools;
+	retdec::config::ToolInfoContainer tools;
 	tools.insert(tool);
 	parseInput(R"(
 		define void @_ZN9wikipedia7article8print_toERSo() {
@@ -76,9 +77,9 @@ TEST_F(DemanglerProviderTests, addedDemanglerWorks)
 
 TEST_F(DemanglerProviderTests, clearRemovesAllData)
 {
-	retdec_config::ToolInfo tool;
+	retdec::config::ToolInfo tool;
 	tool.setIsGcc();
-	retdec_config::ToolInfoContainer tools;
+	retdec::config::ToolInfoContainer tools;
 	tools.insert(tool);
 	DemanglerProvider::addDemangler(module.get(), tools);
 	auto* r1 = DemanglerProvider::getDemangler(module.get());
@@ -91,3 +92,4 @@ TEST_F(DemanglerProviderTests, clearRemovesAllData)
 
 } // namespace tests
 } // namespace bin2llvmir
+} // namespace retdec

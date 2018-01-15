@@ -6,15 +6,16 @@
 
 #include <gtest/gtest.h>
 
-#include "llvmir2hll/ir/assign_op_expr.h"
-#include "llvmir2hll/ir/assign_stmt.h"
-#include "llvmir2hll/ir/const_int.h"
-#include "llvmir2hll/ir/int_type.h"
+#include "retdec/llvmir2hll/ir/assign_op_expr.h"
+#include "retdec/llvmir2hll/ir/assign_stmt.h"
+#include "retdec/llvmir2hll/ir/const_int.h"
+#include "retdec/llvmir2hll/ir/int_type.h"
 #include "llvmir2hll/ir/assertions.h"
-#include "llvmir2hll/ir/variable.h"
+#include "retdec/llvmir2hll/ir/variable.h"
 
 using namespace ::testing;
 
+namespace retdec {
 namespace llvmir2hll {
 namespace tests {
 
@@ -43,3 +44,4 @@ AsExpressionReturnsCorrectExpression) {
 
 } // namespace tests
 } // namespace llvmir2hll
+} // namespace retdec

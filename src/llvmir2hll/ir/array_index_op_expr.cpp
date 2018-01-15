@@ -4,13 +4,14 @@
 * @copyright (c) 2017 Avast Software, licensed under the MIT license
 */
 
-#include "llvmir2hll/ir/array_index_op_expr.h"
-#include "llvmir2hll/ir/array_type.h"
-#include "llvmir2hll/ir/pointer_type.h"
-#include "llvmir2hll/ir/unknown_type.h"
-#include "llvmir2hll/support/debug.h"
-#include "llvmir2hll/support/visitor.h"
+#include "retdec/llvmir2hll/ir/array_index_op_expr.h"
+#include "retdec/llvmir2hll/ir/array_type.h"
+#include "retdec/llvmir2hll/ir/pointer_type.h"
+#include "retdec/llvmir2hll/ir/unknown_type.h"
+#include "retdec/llvmir2hll/support/debug.h"
+#include "retdec/llvmir2hll/support/visitor.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 /**
@@ -104,3 +105,4 @@ void ArrayIndexOpExpr::accept(Visitor *v) {
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

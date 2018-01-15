@@ -12,17 +12,18 @@
 #include <llvm/IR/Instruction.h>
 #include <llvm/IR/Instructions.h>
 
-#include "llvm-support/utils.h"
-#include "tl-cpputils/string.h"
-#include "bin2llvmir/optimizations/stack_pointer_ops/stack_pointer_ops.h"
-#include "bin2llvmir/utils/defs.h"
+#include "retdec/llvm-support/utils.h"
+#include "retdec/utils/string.h"
+#include "retdec/bin2llvmir/optimizations/stack_pointer_ops/stack_pointer_ops.h"
+#include "retdec/bin2llvmir/utils/defs.h"
 
-using namespace llvm_support;
-using namespace tl_cpputils;
+using namespace retdec::llvm_support;
+using namespace retdec::utils;
 using namespace llvm;
 
 #define debug_enabled false
 
+namespace retdec {
 namespace bin2llvmir {
 
 char StackPointerOpsRemove::ID = 0;
@@ -198,3 +199,4 @@ bool StackPointerOpsRemove::removePreservationStores()
 }
 
 } // namespace bin2llvmir
+} // namespace retdec

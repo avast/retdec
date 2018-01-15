@@ -4,8 +4,10 @@
 * @copyright (c) 2017 Avast Software, licensed under the MIT license
 */
 
-#include "bin2llvmir/optimizations/idioms/idioms_owatcom.h"
+#include "retdec/bin2llvmir/optimizations/idioms/idioms_owatcom.h"
 
+namespace retdec {
 namespace bin2llvmir {
 
 } // namespace bin2llvmir
+} // namespace retdec

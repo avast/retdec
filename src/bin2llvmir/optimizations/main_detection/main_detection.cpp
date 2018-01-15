@@ -8,18 +8,19 @@
 
 #include <llvm/IR/Operator.h>
 
-#include "tl-cpputils/string.h"
-#include "bin2llvmir/optimizations/main_detection/main_detection.h"
-#include "bin2llvmir/providers/asm_instruction.h"
-#include "bin2llvmir/utils/defs.h"
-#include "bin2llvmir/utils/ir_modifier.h"
+#include "retdec/utils/string.h"
+#include "retdec/bin2llvmir/optimizations/main_detection/main_detection.h"
+#include "retdec/bin2llvmir/providers/asm_instruction.h"
+#include "retdec/bin2llvmir/utils/defs.h"
+#include "retdec/bin2llvmir/utils/ir_modifier.h"
 #define debug_enabled false
-#include "llvm-support/utils.h"
+#include "retdec/llvm-support/utils.h"
 
-using namespace llvm_support;
-using namespace tl_cpputils;
+using namespace retdec::llvm_support;
+using namespace retdec::utils;
 using namespace llvm;
 
+namespace retdec {
 namespace bin2llvmir {
 
 char MainDetection::ID = 0;
@@ -104,7 +105,7 @@ bool MainDetection::skipAnalysis()
 			|| _config->getConfig().fileType.isShared();
 }
 
-tl_cpputils::Address MainDetection::getFromFunctionNames()
+retdec::utils::Address MainDetection::getFromFunctionNames()
 {
 	// Order is important: first -> highest priority, last -> lowest  priority.
 	std::vector<std::string> names = {"main", "_main", "wmain", "WinMain"};
@@ -112,7 +113,7 @@ tl_cpputils::Address MainDetection::getFromFunctionNames()
 
 	for (auto& p : _config->getConfig().functions)
 	{
-		retdec_config::Function& f = p.second;
+		retdec::config::Function& f = p.second;
 		auto it = std::find(names.begin(), names.end(), f.getName());
 		if (it != names.end())
 		{
@@ -127,7 +128,7 @@ tl_cpputils::Address MainDetection::getFromFunctionNames()
 	return ret.first;
 }
 
-tl_cpputils::Address MainDetection::getFromContext()
+retdec::utils::Address MainDetection::getFromContext()
 {
 	Address mainAddr;
 
@@ -143,7 +144,7 @@ tl_cpputils::Address MainDetection::getFromContext()
 
 		if (epSeg)
 		{
-			tl_cpputils::Address addr = epSeg->getAddress() + 0x10;
+			retdec::utils::Address addr = epSeg->getAddress() + 0x10;
 
 			auto ai = AsmInstruction(_module, addr);
 			auto pai = ai.getPrev();
@@ -371,7 +372,7 @@ tl_cpputils::Address MainDetection::getFromContext()
 /**
  * TODO: maybe add wrapper handling as in other functions.
  */
-tl_cpputils::Address MainDetection::getFromEntryPointOffset(int offset)
+retdec::utils::Address MainDetection::getFromEntryPointOffset(int offset)
 {
 	Address mainAddr;
 	Address ep = _config->getConfig().getEntryPoint();
@@ -389,7 +390,7 @@ tl_cpputils::Address MainDetection::getFromEntryPointOffset(int offset)
  * Try to find main call at _CrtSetCheckCount + 0x2B.
  * Detect if main is called through wrapper.
  */
-tl_cpputils::Address MainDetection::getFromCrtSetCheckCount()
+retdec::utils::Address MainDetection::getFromCrtSetCheckCount()
 {
 	Address mainAddr;
 	auto* f = _module->getFunction("_CrtSetCheckCount");
@@ -439,7 +440,7 @@ tl_cpputils::Address MainDetection::getFromCrtSetCheckCount()
  * Try to find main call at InterlockedExchange + 0x46.
  * Detect if main is called through wrapper.
  */
-tl_cpputils::Address MainDetection::getFromInterlockedExchange()
+retdec::utils::Address MainDetection::getFromInterlockedExchange()
 {
 	Address mainAddr;
 	auto* f = _module->getFunction("InterlockedExchange");
@@ -485,7 +486,7 @@ tl_cpputils::Address MainDetection::getFromInterlockedExchange()
 	return mainAddr;
 }
 
-bool MainDetection::applyResult(tl_cpputils::Address mainAddr)
+bool MainDetection::applyResult(retdec::utils::Address mainAddr)
 {
 	if (mainAddr.isUndefined())
 	{
@@ -499,8 +500,8 @@ bool MainDetection::applyResult(tl_cpputils::Address mainAddr)
 	if (auto* f = _config->getLlvmFunction(mainAddr))
 	{
 		std::string n = f->getName();
-		if (tl_cpputils::startsWith(n, "function_")
-				|| tl_cpputils::startsWith(n, "sub_"))
+		if (retdec::utils::startsWith(n, "function_")
+				|| retdec::utils::startsWith(n, "sub_"))
 		{
 			irmodif.renameFunction(f, "main");
 			changed = true;
@@ -522,3 +523,4 @@ bool MainDetection::applyResult(tl_cpputils::Address mainAddr)
 }
 
 } // namespace bin2llvmir
+} // namespace retdec

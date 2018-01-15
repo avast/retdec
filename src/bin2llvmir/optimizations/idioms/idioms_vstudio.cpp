@@ -6,8 +6,9 @@
 
 #include <llvm/IR/PatternMatch.h>
 
-#include "bin2llvmir/optimizations/idioms/idioms_vstudio.h"
+#include "retdec/bin2llvmir/optimizations/idioms/idioms_vstudio.h"
 
+namespace retdec {
 namespace bin2llvmir {
 
 /**
@@ -58,3 +59,4 @@ llvm::Instruction * IdiomsVStudio::exchangeOrMinusOneAssign(llvm::BasicBlock::it
 }
 
 } // namespace bin2llvmir
+} // namespace retdec

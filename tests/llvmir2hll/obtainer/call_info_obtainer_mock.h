@@ -9,9 +9,10 @@
 
 #include <gmock/gmock.h>
 
-#include "llvmir2hll/obtainer/call_info_obtainer.h"
-#include "llvmir2hll/support/smart_ptr.h"
+#include "retdec/llvmir2hll/obtainer/call_info_obtainer.h"
+#include "retdec/llvmir2hll/support/smart_ptr.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 class CallExpr;
@@ -67,6 +68,7 @@ public:
 
 } // namespace tests
 } // namespace llvmir2hll
+} // namespace retdec
 
 /**
 * @brief Instantiates CallInfoObtainerMock.

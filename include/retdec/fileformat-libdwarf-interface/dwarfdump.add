@@ -1,0 +1,57 @@
+#
+#  This file contains code that needs to be added to dwarfdump2
+#  to enable inputs in our format.
+#  It needs to be modified manually because new versions might change
+#  original dawrfdump.cc and automatic patch may screw it up.
+#
+
+
+// Add include.
+// Simple or with more complex path -- depends on make settings.
+//
+#include "bin_interface.h"
+
+
+// Make sure input files will be further processed in main().
+//
+
+// replace
+                /* not a 64-bit obj either! */
+                /* dwarfdump is quiet when not an object */
+// with
+            	process_one_file(elf, file_name, archive, &config_file_data);
+// or just always call process_one_file.
+
+
+// Add bin-interface to process_one_file().
+//
+
+// add
+				Dwarf_Handler errHand = 0;
+				Dwarf_Ptr errArg = 0;
+
+				BinInt *binInt = new BinInt(file_name);
+				if (binInt->success())
+				{
+					dres = dwarf_object_init(binInt->getInt(),
+							errHand, errArg, &dbg, &err);
+
+					// Input file has no DWARF information.
+					if (dres == DW_DLV_NO_ENTRY)
+					{
+						cout <<"No DWARF information present in " << file_name <<endl;
+						return 0;
+					}
+					// Something went wrong.
+					else if(dres != DW_DLV_OK)
+					{
+						delete binInt;
+
+						print_error(dbg, "dwarf_object_init", dres, err);
+					}
+				}
+				else
+				{ ... }
+// before
+				dres = dwarf_elf_init(elf, DW_DLC_READ, NULL, NULL, &dbg, &err);
+// and make sure whole ELF loading is in the else { ... } branch.

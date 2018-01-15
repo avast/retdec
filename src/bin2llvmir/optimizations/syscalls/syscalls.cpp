@@ -4,12 +4,13 @@
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */
 
-#include "llvm-support/utils.h"
-#include "bin2llvmir/optimizations/syscalls/syscalls.h"
+#include "retdec/llvm-support/utils.h"
+#include "retdec/bin2llvmir/optimizations/syscalls/syscalls.h"
 
-using namespace llvm_support;
+using namespace retdec::llvm_support;
 using namespace llvm;
 
+namespace retdec {
 namespace bin2llvmir {
 
 char SyscallFixer::ID = 0;
@@ -75,3 +76,4 @@ bool SyscallFixer::run()
 }
 
 } // namespace bin2llvmir
+} // namespace retdec

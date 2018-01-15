@@ -9,8 +9,9 @@
 
 #include <gmock/gmock.h>
 
-#include "llvmir2hll/support/observer.h"
+#include "retdec/llvmir2hll/support/observer.h"
 
+namespace retdec {
 namespace llvmir2hll {
 namespace tests {
 
@@ -44,5 +45,6 @@ public:
 
 } // namespace tests
 } // namespace llvmir2hll
+} // namespace retdec
 
 #endif

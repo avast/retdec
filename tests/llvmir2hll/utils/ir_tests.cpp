@@ -6,17 +6,18 @@
 
 #include <gtest/gtest.h>
 
-#include "llvmir2hll/ir/address_op_expr.h"
-#include "llvmir2hll/ir/const_bool.h"
-#include "llvmir2hll/ir/deref_op_expr.h"
-#include "llvmir2hll/ir/empty_stmt.h"
-#include "llvmir2hll/ir/int_type.h"
-#include "llvmir2hll/ir/variable.h"
-#include "llvmir2hll/ir/while_loop_stmt.h"
-#include "llvmir2hll/utils/ir.h"
+#include "retdec/llvmir2hll/ir/address_op_expr.h"
+#include "retdec/llvmir2hll/ir/const_bool.h"
+#include "retdec/llvmir2hll/ir/deref_op_expr.h"
+#include "retdec/llvmir2hll/ir/empty_stmt.h"
+#include "retdec/llvmir2hll/ir/int_type.h"
+#include "retdec/llvmir2hll/ir/variable.h"
+#include "retdec/llvmir2hll/ir/while_loop_stmt.h"
+#include "retdec/llvmir2hll/utils/ir.h"
 
 using namespace ::testing;
 
+namespace retdec {
 namespace llvmir2hll {
 namespace tests {
 
@@ -99,3 +100,4 @@ IsWhileTrueLoopReturnsFalseForNonWhileTrueLoop) {
 
 } // namespace tests
 } // namespace llvmir2hll
+} // namespace retdec

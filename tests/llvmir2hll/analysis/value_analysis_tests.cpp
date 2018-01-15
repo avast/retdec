@@ -8,24 +8,24 @@
 #include <gtest/gtest.h>
 
 #include "llvmir2hll/analysis/alias_analysis/alias_analysis_mock.h"
-#include "llvmir2hll/analysis/value_analysis.h"
-#include "llvmir2hll/ir/address_op_expr.h"
-#include "llvmir2hll/ir/array_index_op_expr.h"
-#include "llvmir2hll/ir/array_type.h"
-#include "llvmir2hll/ir/assign_stmt.h"
-#include "llvmir2hll/ir/call_expr.h"
-#include "llvmir2hll/ir/call_stmt.h"
-#include "llvmir2hll/ir/const_int.h"
-#include "llvmir2hll/ir/deref_op_expr.h"
-#include "llvmir2hll/ir/int_type.h"
-#include "llvmir2hll/ir/pointer_type.h"
-#include "llvmir2hll/ir/return_stmt.h"
-#include "llvmir2hll/ir/struct_index_op_expr.h"
-#include "llvmir2hll/ir/struct_type.h"
+#include "retdec/llvmir2hll/analysis/value_analysis.h"
+#include "retdec/llvmir2hll/ir/address_op_expr.h"
+#include "retdec/llvmir2hll/ir/array_index_op_expr.h"
+#include "retdec/llvmir2hll/ir/array_type.h"
+#include "retdec/llvmir2hll/ir/assign_stmt.h"
+#include "retdec/llvmir2hll/ir/call_expr.h"
+#include "retdec/llvmir2hll/ir/call_stmt.h"
+#include "retdec/llvmir2hll/ir/const_int.h"
+#include "retdec/llvmir2hll/ir/deref_op_expr.h"
+#include "retdec/llvmir2hll/ir/int_type.h"
+#include "retdec/llvmir2hll/ir/pointer_type.h"
+#include "retdec/llvmir2hll/ir/return_stmt.h"
+#include "retdec/llvmir2hll/ir/struct_index_op_expr.h"
+#include "retdec/llvmir2hll/ir/struct_type.h"
 #include "llvmir2hll/ir/tests_with_module.h"
-#include "llvmir2hll/ir/var_def_stmt.h"
-#include "llvmir2hll/ir/variable.h"
-#include "llvmir2hll/support/types.h"
+#include "retdec/llvmir2hll/ir/var_def_stmt.h"
+#include "retdec/llvmir2hll/ir/variable.h"
+#include "retdec/llvmir2hll/support/types.h"
 
 /**
 * @brief Instantiates AliasAnalysisMock, AliasAnalysis, and ValueAnalysis using
@@ -69,6 +69,7 @@
 
 using namespace ::testing;
 
+namespace retdec {
 namespace llvmir2hll {
 namespace tests {
 
@@ -1225,3 +1226,4 @@ DelegationOfMethodsToAliasAnalysis) {
 
 } // namespace tests
 } // namespace llvmir2hll
+} // namespace retdec

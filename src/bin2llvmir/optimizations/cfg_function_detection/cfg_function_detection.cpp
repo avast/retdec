@@ -14,17 +14,18 @@
 #include <llvm/IR/Instructions.h>
 
 #define debug_enabled false
-#include "tl-cpputils/string.h"
-#include "tl-cpputils/time.h"
-#include "bin2llvmir/optimizations/cfg_function_detection/cfg_function_detection.h"
-#include "llvm-support/utils.h"
-#include "bin2llvmir/utils/type.h"
-#include "bin2llvmir/utils/ir_modifier.h"
+#include "retdec/utils/string.h"
+#include "retdec/utils/time.h"
+#include "retdec/bin2llvmir/optimizations/cfg_function_detection/cfg_function_detection.h"
+#include "retdec/llvm-support/utils.h"
+#include "retdec/bin2llvmir/utils/type.h"
+#include "retdec/bin2llvmir/utils/ir_modifier.h"
 
-using namespace llvm_support;
-using namespace tl_cpputils;
+using namespace retdec::llvm_support;
+using namespace retdec::utils;
 using namespace llvm;
 
+namespace retdec {
 namespace bin2llvmir {
 
 char CfgFunctionDetection::ID = 0;
@@ -104,7 +105,7 @@ llvm::Instruction* CfgFunctionDetection::isPotentialSplitInstruction(
 {
 	Instruction* ret = dyn_cast<TerminatorInst>(i);
 
-	static tl_cpputils::NonIterableSet<std::string> exitFncs =
+	static retdec::utils::NonIterableSet<std::string> exitFncs =
 	{
 		"exit", "_exit", "ExitThread", "abort", "longjmp", "_Exit",
 		"quick_exit", "thrd_exit", "ExitProcess"
@@ -325,7 +326,7 @@ bool CfgFunctionDetection::runOne()
 	}
 
 	LOG << "\nSPLIT ON THESE:" << std::endl;
-	LOG << "====================>" << tl_cpputils::getElapsedTime() << std::endl;
+	LOG << "====================>" << retdec::utils::getElapsedTime() << std::endl;
 	for (auto rIt = newFncs.rbegin(), e = newFncs.rend(); rIt != e; ++rIt) // ok
 //	for (auto& ai : newFncs) // bad -- slow, we are pushing bb to split before us, it looks like LLVM is not good at bb splice.
 //  x86-elf-6c3a2e29e618e3f17c1b32425f6fee52
@@ -352,3 +353,4 @@ bool CfgFunctionDetection::runOne()
 }
 
 } // namespace bin2llvmir
+} // namespace retdec

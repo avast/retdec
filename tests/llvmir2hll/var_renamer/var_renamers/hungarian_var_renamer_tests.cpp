@@ -6,20 +6,21 @@
 
 #include <gtest/gtest.h>
 
-#include "llvmir2hll/ir/call_expr.h"
-#include "llvmir2hll/ir/call_stmt.h"
-#include "llvmir2hll/ir/float_type.h"
-#include "llvmir2hll/ir/int_type.h"
-#include "llvmir2hll/ir/pointer_type.h"
+#include "retdec/llvmir2hll/ir/call_expr.h"
+#include "retdec/llvmir2hll/ir/call_stmt.h"
+#include "retdec/llvmir2hll/ir/float_type.h"
+#include "retdec/llvmir2hll/ir/int_type.h"
+#include "retdec/llvmir2hll/ir/pointer_type.h"
 #include "llvmir2hll/ir/tests_with_module.h"
-#include "llvmir2hll/ir/var_def_stmt.h"
-#include "llvmir2hll/ir/variable.h"
-#include "llvmir2hll/utils/ir.h"
+#include "retdec/llvmir2hll/ir/var_def_stmt.h"
+#include "retdec/llvmir2hll/ir/variable.h"
+#include "retdec/llvmir2hll/utils/ir.h"
 #include "llvmir2hll/var_renamer/tests_with_var_name_gen_and_var_renamer.h"
-#include "llvmir2hll/var_renamer/var_renamers/hungarian_var_renamer.h"
+#include "retdec/llvmir2hll/var_renamer/var_renamers/hungarian_var_renamer.h"
 
 using namespace ::testing;
 
+namespace retdec {
 namespace llvmir2hll {
 namespace tests {
 
@@ -370,3 +371,4 @@ WhenUseDebugNamesIsFalseDoNotUseDebugNames) {
 
 } // namespace tests
 } // namespace llvmir2hll
+} // namespace retdec

@@ -9,14 +9,15 @@
 #include <llvm/IR/PatternMatch.h>
 #include <llvm/Transforms/Utils/BasicBlockUtils.h>
 
-#include "llvm-support/utils.h"
-#include "bin2llvmir/optimizations/idioms/idioms_gcc.h"
-#include "bin2llvmir/providers/config.h"
+#include "retdec/llvm-support/utils.h"
+#include "retdec/bin2llvmir/optimizations/idioms/idioms_gcc.h"
+#include "retdec/bin2llvmir/providers/config.h"
 
-using namespace llvm_support;
+using namespace retdec::llvm_support;
 using namespace llvm;
 using namespace PatternMatch;
 
+namespace retdec {
 namespace bin2llvmir {
 
 /**
@@ -293,10 +294,10 @@ Instruction * IdiomsGCC::exchangeFloatAbs(BasicBlock::iterator iter) const {
 	// Add this new idiom function to config.
 	if (getConfig())
 	{
-		retdec_config::Function cf("fabsf");
+		retdec::config::Function cf("fabsf");
 		cf.setIsIdiom();
 		cf.returnType.setLlvmIr("float");
-		retdec_config::Object p("a1", retdec_config::Storage::undefined());
+		retdec::config::Object p("a1", retdec::config::Storage::undefined());
 		p.type.setLlvmIr("float");
 		cf.parameters.insert(p);
 		getConfig()->getConfig().functions.insert(cf);
@@ -560,12 +561,12 @@ Instruction * IdiomsGCC::exchangeCopysign(BasicBlock::iterator iter) const {
 	// Add this new idiom function to config.
 	if (getConfig())
 	{
-		retdec_config::Function cf("copysignf");
+		retdec::config::Function cf("copysignf");
 		cf.setIsIdiom();
 		cf.returnType.setLlvmIr("float");
-		retdec_config::Object p1("a1", retdec_config::Storage::undefined());
+		retdec::config::Object p1("a1", retdec::config::Storage::undefined());
 		p1.type.setLlvmIr("float");
-		retdec_config::Object p2("a2", retdec_config::Storage::undefined());
+		retdec::config::Object p2("a2", retdec::config::Storage::undefined());
 		p2.type.setLlvmIr("float");
 		cf.parameters.insert(p1);
 		cf.parameters.insert(p2);
@@ -621,3 +622,4 @@ Instruction * IdiomsGCC::exchangeCopysign(BasicBlock::iterator iter) const {
 }
 
 } // namespace bin2llvmir
+} // namespace retdec

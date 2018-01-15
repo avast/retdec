@@ -6,11 +6,12 @@
 
 #include <gtest/gtest.h>
 
-#include "bin2llvmir/optimizations/phi2seq/phi2seq.h"
+#include "retdec/bin2llvmir/optimizations/phi2seq/phi2seq.h"
 #include "bin2llvmir/utils/llvmir_tests.h"
 
 using namespace ::testing;
 
+namespace retdec {
 namespace bin2llvmir {
 namespace tests {
 
@@ -996,3 +997,4 @@ TEST_F(PHI2SeqTests, testOrderNoDependency01)
 
 } // namespace tests
 } // namespace bin2llvmir
+} // namespace retdec

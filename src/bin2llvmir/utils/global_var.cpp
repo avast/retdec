@@ -4,14 +4,15 @@
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */
 
-#include "llvm-support/utils.h"
-#include "tl-cpputils/string.h"
-#include "bin2llvmir/providers/config.h"
-#include "bin2llvmir/utils/global_var.h"
-#include "bin2llvmir/utils/type.h"
+#include "retdec/llvm-support/utils.h"
+#include "retdec/utils/string.h"
+#include "retdec/bin2llvmir/providers/config.h"
+#include "retdec/bin2llvmir/utils/global_var.h"
+#include "retdec/bin2llvmir/utils/type.h"
 
 using namespace llvm;
 
+namespace retdec {
 namespace bin2llvmir {
 
 namespace {
@@ -28,7 +29,7 @@ Constant* detectGlobalVariableInitializerCycle(
 		GlobalVariable* gv,
 		Constant* c,
 		FileImage* objf,
-		tl_cpputils::Address addr)
+		retdec::utils::Address addr)
 {
 	if (gv == nullptr || c == nullptr || objf == nullptr || addr.isUndefined())
 	{
@@ -64,7 +65,7 @@ bool globalVariableCanBeCreated(
 		Module* module,
 		Config* config,
 		FileImage* objf,
-		tl_cpputils::Address &addr,
+		retdec::utils::Address &addr,
 		bool strict = false)
 {
 	if (module == nullptr || objf == nullptr || addr.isUndefined())
@@ -99,7 +100,7 @@ bool globalVariableCanBeCreated(
 	auto* fnc = config->getLlvmFunction(addr);
 	if (fnc || (seg && seg->getSecSeg() && seg->getSecSeg()->isCode()))
 	{
-		if (!(objf->getImage()->getNTBS(addr, str) && tl_cpputils::isNiceString(str, 1.0)))
+		if (!(objf->getImage()->getNTBS(addr, str) && retdec::utils::isNiceString(str, 1.0)))
 		{
 			uint64_t val = 0;
 			if (objf->getImage()->getWord(addr, val))
@@ -147,7 +148,7 @@ bool globalVariableCanBeCreated(
 bool getGlobalInfoFromCryptoPatterns(
 		Module* module,
 		Config* config,
-		tl_cpputils::Address addr,
+		retdec::utils::Address addr,
 		std::string& name,
 		std::string& description,
 		Type*& type)
@@ -195,7 +196,7 @@ bool getGlobalInfoFromCryptoPatterns(
 			}
 			auto d = elemCount > 0 ? elemCount : 1;
 			type = ArrayType::get(elemType, d);
-			name = tl_cpputils::appendHexRet(p.getName() + "_at", addr);
+			name = retdec::utils::appendHexRet(p.getName() + "_at", addr);
 			description = p.getDescription();
 
 			return true;
@@ -230,7 +231,7 @@ GlobalVariable* getGlobalVariable(
 		Config* config,
 		FileImage* objf,
 		DebugFormat* dbgf,
-		tl_cpputils::Address addr,
+		retdec::utils::Address addr,
 		bool strict,
 		std::string name)
 {
@@ -239,7 +240,7 @@ GlobalVariable* getGlobalVariable(
 		return nullptr;
 	}
 
-	tl_cpputils::appendHex(name, addr);
+	retdec::utils::appendHex(name, addr);
 
 	if (auto* gv = config->getLlvmGlobalVariable(name, addr))
 	{
@@ -346,3 +347,4 @@ GlobalVariable* getGlobalVariable(
 }
 
 } // namespace bin2llvmir
+} // namespace retdec

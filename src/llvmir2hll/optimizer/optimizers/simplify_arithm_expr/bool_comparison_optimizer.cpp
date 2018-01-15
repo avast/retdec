@@ -4,13 +4,14 @@
 * @copyright (c) 2017 Avast Software, licensed under the MIT license
 */
 
-#include "llvmir2hll/ir/eq_op_expr.h"
-#include "llvmir2hll/ir/neq_op_expr.h"
-#include "llvmir2hll/optimizer/optimizers/simplify_arithm_expr/bool_comparison_optimizer.h"
-#include "llvmir2hll/optimizer/optimizers/simplify_arithm_expr/sub_optimizer_factory.h"
-#include "llvmir2hll/support/debug.h"
-#include "llvmir2hll/support/expression_negater.h"
+#include "retdec/llvmir2hll/ir/eq_op_expr.h"
+#include "retdec/llvmir2hll/ir/neq_op_expr.h"
+#include "retdec/llvmir2hll/optimizer/optimizers/simplify_arithm_expr/bool_comparison_optimizer.h"
+#include "retdec/llvmir2hll/optimizer/optimizers/simplify_arithm_expr/sub_optimizer_factory.h"
+#include "retdec/llvmir2hll/support/debug.h"
+#include "retdec/llvmir2hll/support/expression_negater.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 REGISTER_AT_FACTORY("BoolComparison", BOOL_COMPARISON_OPTIMIZER_ID,
@@ -129,3 +130,4 @@ void BoolComparisonSubOptimizer::replaceWithNegationOfFirstOperand(
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

@@ -9,38 +9,39 @@
 
 #include <gtest/gtest.h>
 
-#include "llvmir2hll/graphs/cfg/cfg.h"
-#include "llvmir2hll/graphs/cfg/cfg_builders/non_recursive_cfg_builder.h"
-#include "llvmir2hll/graphs/cfg/cfg_writer.h"
-#include "llvmir2hll/graphs/cfg/cfg_writers/graphviz_cfg_writer.h"
-#include "llvmir2hll/ir/and_op_expr.h"
-#include "llvmir2hll/ir/assign_stmt.h"
-#include "llvmir2hll/ir/break_stmt.h"
-#include "llvmir2hll/ir/const_bool.h"
-#include "llvmir2hll/ir/const_int.h"
-#include "llvmir2hll/ir/continue_stmt.h"
-#include "llvmir2hll/ir/empty_stmt.h"
-#include "llvmir2hll/ir/eq_op_expr.h"
-#include "llvmir2hll/ir/for_loop_stmt.h"
-#include "llvmir2hll/ir/goto_stmt.h"
-#include "llvmir2hll/ir/gt_op_expr.h"
-#include "llvmir2hll/ir/if_stmt.h"
-#include "llvmir2hll/ir/int_type.h"
-#include "llvmir2hll/ir/lt_eq_op_expr.h"
-#include "llvmir2hll/ir/neq_op_expr.h"
-#include "llvmir2hll/ir/return_stmt.h"
-#include "llvmir2hll/ir/switch_stmt.h"
+#include "retdec/llvmir2hll/graphs/cfg/cfg.h"
+#include "retdec/llvmir2hll/graphs/cfg/cfg_builders/non_recursive_cfg_builder.h"
+#include "retdec/llvmir2hll/graphs/cfg/cfg_writer.h"
+#include "retdec/llvmir2hll/graphs/cfg/cfg_writers/graphviz_cfg_writer.h"
+#include "retdec/llvmir2hll/ir/and_op_expr.h"
+#include "retdec/llvmir2hll/ir/assign_stmt.h"
+#include "retdec/llvmir2hll/ir/break_stmt.h"
+#include "retdec/llvmir2hll/ir/const_bool.h"
+#include "retdec/llvmir2hll/ir/const_int.h"
+#include "retdec/llvmir2hll/ir/continue_stmt.h"
+#include "retdec/llvmir2hll/ir/empty_stmt.h"
+#include "retdec/llvmir2hll/ir/eq_op_expr.h"
+#include "retdec/llvmir2hll/ir/for_loop_stmt.h"
+#include "retdec/llvmir2hll/ir/goto_stmt.h"
+#include "retdec/llvmir2hll/ir/gt_op_expr.h"
+#include "retdec/llvmir2hll/ir/if_stmt.h"
+#include "retdec/llvmir2hll/ir/int_type.h"
+#include "retdec/llvmir2hll/ir/lt_eq_op_expr.h"
+#include "retdec/llvmir2hll/ir/neq_op_expr.h"
+#include "retdec/llvmir2hll/ir/return_stmt.h"
+#include "retdec/llvmir2hll/ir/switch_stmt.h"
 #include "llvmir2hll/ir/tests_with_module.h"
-#include "llvmir2hll/ir/unreachable_stmt.h"
-#include "llvmir2hll/ir/var_def_stmt.h"
-#include "llvmir2hll/ir/variable.h"
-#include "llvmir2hll/ir/while_loop_stmt.h"
-#include "tl-cpputils/container.h"
+#include "retdec/llvmir2hll/ir/unreachable_stmt.h"
+#include "retdec/llvmir2hll/ir/var_def_stmt.h"
+#include "retdec/llvmir2hll/ir/variable.h"
+#include "retdec/llvmir2hll/ir/while_loop_stmt.h"
+#include "retdec/utils/container.h"
 
 using namespace ::testing;
 
-using tl_cpputils::hasItem;
+using retdec::utils::hasItem;
 
+namespace retdec {
 namespace llvmir2hll {
 namespace tests {
 
@@ -56,7 +57,7 @@ namespace {
 */
 void emitCFG(ShPtr<CFG> CFGToEmit) {
 	std::ofstream out("cfgTest.dot");
-	ShPtr<llvmir2hll::CFGWriter> writer(GraphvizCFGWriter::create(CFGToEmit, out,
+	ShPtr<retdec::llvmir2hll::CFGWriter> writer(GraphvizCFGWriter::create(CFGToEmit, out,
 		false));
 	writer->emitCFG();
 }
@@ -253,7 +254,7 @@ OneNodeWithSimpleConnectionWithEntryAndExitNode) {
 	refCFG->addEdge(nodeA, refCFG->getExitNode());
 
 	// Check difference.
-	ShPtr<llvmir2hll::CFGBuilder> cfgBuilder(llvmir2hll::NonRecursiveCFGBuilder::create());
+	ShPtr<retdec::llvmir2hll::CFGBuilder> cfgBuilder(retdec::llvmir2hll::NonRecursiveCFGBuilder::create());
 	ShPtr<CFG> compCFG(cfgBuilder->getCFG(testFunc));
 	checkEquivalenceOfCFGs(compCFG, refCFG);
 
@@ -308,7 +309,7 @@ OneNodeWithSimpleConnectionWithEntryAndExitNodeButContainsEmptyStmt) {
 	refCFG->addEdge(nodeA, refCFG->getExitNode());
 
 	// Check difference.
-	ShPtr<llvmir2hll::CFGBuilder> cfgBuilder(llvmir2hll::NonRecursiveCFGBuilder::create());
+	ShPtr<retdec::llvmir2hll::CFGBuilder> cfgBuilder(retdec::llvmir2hll::NonRecursiveCFGBuilder::create());
 	ShPtr<CFG> compCFG(cfgBuilder->getCFG(testFunc));
 	checkEquivalenceOfCFGs(compCFG, refCFG);
 
@@ -363,7 +364,7 @@ OneNodeWithSimpleConnectionWithEntryAndExitNodeButContainsReturnInTheMiddleNode)
 	refCFG->addEdge(nodeA, refCFG->getExitNode());
 
 	// Check difference.
-	ShPtr<llvmir2hll::CFGBuilder> cfgBuilder(llvmir2hll::NonRecursiveCFGBuilder::create());
+	ShPtr<retdec::llvmir2hll::CFGBuilder> cfgBuilder(retdec::llvmir2hll::NonRecursiveCFGBuilder::create());
 	ShPtr<CFG> compCFG(cfgBuilder->getCFG(testFunc));
 	checkEquivalenceOfCFGs(compCFG, refCFG);
 
@@ -417,7 +418,7 @@ OneNodeWithSimpleConnectionWithEntryAndExitNodeContainsUnreachableStmt) {
 	refCFG->addEdge(nodeA, refCFG->getExitNode());
 
 	// Check difference.
-	ShPtr<llvmir2hll::CFGBuilder> cfgBuilder(llvmir2hll::NonRecursiveCFGBuilder::create());
+	ShPtr<retdec::llvmir2hll::CFGBuilder> cfgBuilder(retdec::llvmir2hll::NonRecursiveCFGBuilder::create());
 	ShPtr<CFG> compCFG(cfgBuilder->getCFG(testFunc));
 	checkEquivalenceOfCFGs(compCFG, refCFG);
 
@@ -500,7 +501,7 @@ CFGCreatedForSimpleIfStmtWithoutElseClause) {
 	refCFG->addEdge(nodeAfterIf, refCFG->getExitNode());
 
 	// Check difference.
-	ShPtr<llvmir2hll::CFGBuilder> cfgBuilder(llvmir2hll::NonRecursiveCFGBuilder::create());
+	ShPtr<retdec::llvmir2hll::CFGBuilder> cfgBuilder(retdec::llvmir2hll::NonRecursiveCFGBuilder::create());
 	ShPtr<CFG> compCFG(cfgBuilder->getCFG(testFunc));
 	checkEquivalenceOfCFGs(compCFG, refCFG);
 
@@ -598,7 +599,7 @@ CFGCreatedForIfStmtWithNestedIfStmtWithElseClause) {
 	refCFG->addEdge(nodeAfterIfA, refCFG->getExitNode());
 
 	// Check difference.
-	ShPtr<llvmir2hll::CFGBuilder> cfgBuilder(llvmir2hll::NonRecursiveCFGBuilder::create());
+	ShPtr<retdec::llvmir2hll::CFGBuilder> cfgBuilder(retdec::llvmir2hll::NonRecursiveCFGBuilder::create());
 	ShPtr<CFG> compCFG(cfgBuilder->getCFG(testFunc));
 	checkEquivalenceOfCFGs(compCFG, refCFG);
 
@@ -732,7 +733,7 @@ CFGCreatedForIfStmtWithNestedIfStmtWithElseClauseAndElseIfClause) {
 	refCFG->addEdge(nodeIfA, refCFG->getExitNode(), ltEqOpExprA);
 
 	// Check difference.
-	ShPtr<llvmir2hll::CFGBuilder> cfgBuilder(llvmir2hll::NonRecursiveCFGBuilder::create());
+	ShPtr<retdec::llvmir2hll::CFGBuilder> cfgBuilder(retdec::llvmir2hll::NonRecursiveCFGBuilder::create());
 	ShPtr<CFG> compCFG(cfgBuilder->getCFG(testFunc));
 	checkEquivalenceOfCFGs(compCFG, refCFG);
 
@@ -815,7 +816,7 @@ CFGCreatedForSimpleWhileLoop) {
 	refCFG->addEdge(nodeAfterWhile, refCFG->getExitNode());
 
 	// Check difference.
-	ShPtr<llvmir2hll::CFGBuilder> cfgBuilder(llvmir2hll::NonRecursiveCFGBuilder::create());
+	ShPtr<retdec::llvmir2hll::CFGBuilder> cfgBuilder(retdec::llvmir2hll::NonRecursiveCFGBuilder::create());
 	ShPtr<CFG> compCFG(cfgBuilder->getCFG(testFunc));
 	checkEquivalenceOfCFGs(compCFG, refCFG);
 
@@ -913,7 +914,7 @@ CFGCreatedForWhileInWhileLoop) {
 	refCFG->addEdge(nodeAfterWhile, refCFG->getExitNode());
 
 	// Check difference.
-	ShPtr<llvmir2hll::CFGBuilder> cfgBuilder(llvmir2hll::NonRecursiveCFGBuilder::create());
+	ShPtr<retdec::llvmir2hll::CFGBuilder> cfgBuilder(retdec::llvmir2hll::NonRecursiveCFGBuilder::create());
 	ShPtr<CFG> compCFG(cfgBuilder->getCFG(testFunc));
 	checkEquivalenceOfCFGs(compCFG, refCFG);
 
@@ -1016,7 +1017,7 @@ CFGCreatedForWhileLoopWithIfStmtAndBreakInside) {
 	refCFG->addEdge(nodeAfterWhile, refCFG->getExitNode());
 
 	// Check difference.
-	ShPtr<llvmir2hll::CFGBuilder> cfgBuilder(llvmir2hll::NonRecursiveCFGBuilder::create());
+	ShPtr<retdec::llvmir2hll::CFGBuilder> cfgBuilder(retdec::llvmir2hll::NonRecursiveCFGBuilder::create());
 	ShPtr<CFG> compCFG(cfgBuilder->getCFG(testFunc));
 	checkEquivalenceOfCFGs(compCFG, refCFG);
 
@@ -1109,7 +1110,7 @@ CFGCreatedForWhileLoopWithNestedWhileTrueLoop) {
 	refCFG->addEdge(nodeAfterWhileA, refCFG->getExitNode());
 
 	// Check difference.
-	ShPtr<llvmir2hll::CFGBuilder> cfgBuilder(llvmir2hll::NonRecursiveCFGBuilder::create());
+	ShPtr<retdec::llvmir2hll::CFGBuilder> cfgBuilder(retdec::llvmir2hll::NonRecursiveCFGBuilder::create());
 	ShPtr<CFG> compCFG(cfgBuilder->getCFG(testFunc));
 	checkEquivalenceOfCFGs(compCFG, refCFG);
 
@@ -1181,7 +1182,7 @@ CFGCreatedForSimpleWhileTrueLoop) {
 	refCFG->addEdge(nodeWhileBody, nodeWhileTrue);
 
 	// Check difference.
-	ShPtr<llvmir2hll::CFGBuilder> cfgBuilder(llvmir2hll::NonRecursiveCFGBuilder::create());
+	ShPtr<retdec::llvmir2hll::CFGBuilder> cfgBuilder(retdec::llvmir2hll::NonRecursiveCFGBuilder::create());
 	ShPtr<CFG> compCFG(cfgBuilder->getCFG(testFunc));
 	checkEquivalenceOfCFGs(compCFG, refCFG);
 
@@ -1264,7 +1265,7 @@ CFGCreatedForSimpleForLoop) {
 	refCFG->addEdge(nodeAfterFor, refCFG->getExitNode());
 
 	// Check difference.
-	ShPtr<llvmir2hll::CFGBuilder> cfgBuilder(llvmir2hll::NonRecursiveCFGBuilder::create());
+	ShPtr<retdec::llvmir2hll::CFGBuilder> cfgBuilder(retdec::llvmir2hll::NonRecursiveCFGBuilder::create());
 	ShPtr<CFG> compCFG(cfgBuilder->getCFG(testFunc));
 	checkEquivalenceOfCFGs(compCFG, refCFG);
 
@@ -1362,7 +1363,7 @@ CFGCreatedForForInForLoop) {
 	refCFG->addEdge(nodeAfterFor, refCFG->getExitNode());
 
 	// Check difference.
-	ShPtr<llvmir2hll::CFGBuilder> cfgBuilder(llvmir2hll::NonRecursiveCFGBuilder::create());
+	ShPtr<retdec::llvmir2hll::CFGBuilder> cfgBuilder(retdec::llvmir2hll::NonRecursiveCFGBuilder::create());
 	ShPtr<CFG> compCFG(cfgBuilder->getCFG(testFunc));
 	checkEquivalenceOfCFGs(compCFG, refCFG);
 
@@ -1465,7 +1466,7 @@ CFGCreatedForForLoopWithIfStmtAndContinueInside) {
 	refCFG->addEdge(nodeAfterFor, refCFG->getExitNode());
 
 	// Check difference.
-	ShPtr<llvmir2hll::CFGBuilder> cfgBuilder(llvmir2hll::NonRecursiveCFGBuilder::create());
+	ShPtr<retdec::llvmir2hll::CFGBuilder> cfgBuilder(retdec::llvmir2hll::NonRecursiveCFGBuilder::create());
 	ShPtr<CFG> compCFG(cfgBuilder->getCFG(testFunc));
 	checkEquivalenceOfCFGs(compCFG, refCFG);
 
@@ -1568,7 +1569,7 @@ CFGCreatedForForLoopWithIfStmtAndReturnInside) {
 	refCFG->addEdge(nodeAfterFor, refCFG->getExitNode());
 
 	// Check difference.
-	ShPtr<llvmir2hll::CFGBuilder> cfgBuilder(llvmir2hll::NonRecursiveCFGBuilder::create());
+	ShPtr<retdec::llvmir2hll::CFGBuilder> cfgBuilder(retdec::llvmir2hll::NonRecursiveCFGBuilder::create());
 	ShPtr<CFG> compCFG(cfgBuilder->getCFG(testFunc));
 	checkEquivalenceOfCFGs(compCFG, refCFG);
 
@@ -1684,7 +1685,7 @@ CFGCreatedForSimpleSwitchStatementWithDefaultClause) {
 	refCFG->addEdge(nodeAfterSwitch, refCFG->getExitNode());
 
 	// Check difference.
-	ShPtr<llvmir2hll::CFGBuilder> cfgBuilder(llvmir2hll::NonRecursiveCFGBuilder::create());
+	ShPtr<retdec::llvmir2hll::CFGBuilder> cfgBuilder(retdec::llvmir2hll::NonRecursiveCFGBuilder::create());
 	ShPtr<CFG> compCFG(cfgBuilder->getCFG(testFunc));
 	checkEquivalenceOfCFGs(compCFG, refCFG);
 
@@ -1787,7 +1788,7 @@ CFGCreatedForSimpleSwitchStatementWithoutDefaultClause) {
 	refCFG->addEdge(nodeAfterSwitch, refCFG->getExitNode());
 
 	// Check difference.
-	ShPtr<llvmir2hll::CFGBuilder> cfgBuilder(llvmir2hll::NonRecursiveCFGBuilder::create());
+	ShPtr<retdec::llvmir2hll::CFGBuilder> cfgBuilder(retdec::llvmir2hll::NonRecursiveCFGBuilder::create());
 	ShPtr<CFG> compCFG(cfgBuilder->getCFG(testFunc));
 	checkEquivalenceOfCFGs(compCFG, refCFG);
 
@@ -1898,7 +1899,7 @@ CFGCreatedForSimpleSwitchStatementWithDefaultClauseWithoutBreakStmts) {
 	refCFG->addEdge(nodeAfterSwitch, refCFG->getExitNode());
 
 	// Check difference.
-	ShPtr<llvmir2hll::CFGBuilder> cfgBuilder(llvmir2hll::NonRecursiveCFGBuilder::create());
+	ShPtr<retdec::llvmir2hll::CFGBuilder> cfgBuilder(retdec::llvmir2hll::NonRecursiveCFGBuilder::create());
 	ShPtr<CFG> compCFG(cfgBuilder->getCFG(testFunc));
 	checkEquivalenceOfCFGs(compCFG, refCFG);
 
@@ -2023,7 +2024,7 @@ CFGCreatedForSwitchStatementWithNestedSwitchStmtWithDefaultClause) {
 	refCFG->addEdge(nodeAfterSwitchA, refCFG->getExitNode());
 
 	// Check difference.
-	ShPtr<llvmir2hll::CFGBuilder> cfgBuilder(llvmir2hll::NonRecursiveCFGBuilder::create());
+	ShPtr<retdec::llvmir2hll::CFGBuilder> cfgBuilder(retdec::llvmir2hll::NonRecursiveCFGBuilder::create());
 	ShPtr<CFG> compCFG(cfgBuilder->getCFG(testFunc));
 	checkEquivalenceOfCFGs(compCFG, refCFG);
 
@@ -2099,7 +2100,7 @@ CFGCreatedForSimpleGotoJumpBackward) {
 	refCFG->addEdge(targetGotoNode, targetGotoNode);
 
 	// Check difference.
-	ShPtr<llvmir2hll::CFGBuilder> cfgBuilder(llvmir2hll::NonRecursiveCFGBuilder::create());
+	ShPtr<retdec::llvmir2hll::CFGBuilder> cfgBuilder(retdec::llvmir2hll::NonRecursiveCFGBuilder::create());
 	ShPtr<CFG> compCFG(cfgBuilder->getCFG(testFunc));
 	checkEquivalenceOfCFGs(compCFG, refCFG);
 
@@ -2172,7 +2173,7 @@ CFGCreatedForSimpleGotoJumpForward) {
 	refCFG->addEdge(targetGotoNode, refCFG->getExitNode());
 
 	// Check difference.
-	ShPtr<llvmir2hll::CFGBuilder> cfgBuilder(llvmir2hll::NonRecursiveCFGBuilder::create());
+	ShPtr<retdec::llvmir2hll::CFGBuilder> cfgBuilder(retdec::llvmir2hll::NonRecursiveCFGBuilder::create());
 	ShPtr<CFG> compCFG(cfgBuilder->getCFG(testFunc));
 	checkEquivalenceOfCFGs(compCFG, refCFG);
 
@@ -2267,7 +2268,7 @@ CFGCreatedForTwoGotoJumpBackwardFromIfStmt) {
 	refCFG->addEdge(nodeElseBody, targetGotoNode);
 
 	// Check difference.
-	ShPtr<llvmir2hll::CFGBuilder> cfgBuilder(llvmir2hll::NonRecursiveCFGBuilder::create());
+	ShPtr<retdec::llvmir2hll::CFGBuilder> cfgBuilder(retdec::llvmir2hll::NonRecursiveCFGBuilder::create());
 	ShPtr<CFG> compCFG(cfgBuilder->getCFG(testFunc));
 	checkEquivalenceOfCFGs(compCFG, refCFG);
 
@@ -2362,7 +2363,7 @@ CFGCreatedForTwoGotoJumpForwardFromIfStmt) {
 	refCFG->addEdge(targetGotoNode, refCFG->getExitNode());
 
 	// Check difference.
-	ShPtr<llvmir2hll::CFGBuilder> cfgBuilder(llvmir2hll::NonRecursiveCFGBuilder::create());
+	ShPtr<retdec::llvmir2hll::CFGBuilder> cfgBuilder(retdec::llvmir2hll::NonRecursiveCFGBuilder::create());
 	ShPtr<CFG> compCFG(cfgBuilder->getCFG(testFunc));
 	checkEquivalenceOfCFGs(compCFG, refCFG);
 
@@ -2450,7 +2451,7 @@ CFGCreatedForTwoGotoOneJumpForwardSecondOneBackwardFromIfStmt) {
 	refCFG->addEdge(nodeIfAlsoSecondGotoTarget, refCFG->getExitNode(), ltEqOpExpr);
 
 	// Check difference.
-	ShPtr<llvmir2hll::CFGBuilder> cfgBuilder(llvmir2hll::NonRecursiveCFGBuilder::create());
+	ShPtr<retdec::llvmir2hll::CFGBuilder> cfgBuilder(retdec::llvmir2hll::NonRecursiveCFGBuilder::create());
 	ShPtr<CFG> compCFG(cfgBuilder->getCFG(testFunc));
 	checkEquivalenceOfCFGs(compCFG, refCFG);
 
@@ -2540,7 +2541,7 @@ CFGCreatedForGotoToGotoForwardJumps) {
 	refCFG->addEdge(targetGotoNode, refCFG->getExitNode());
 
 	// Check difference.
-	ShPtr<llvmir2hll::CFGBuilder> cfgBuilder(llvmir2hll::NonRecursiveCFGBuilder::create());
+	ShPtr<retdec::llvmir2hll::CFGBuilder> cfgBuilder(retdec::llvmir2hll::NonRecursiveCFGBuilder::create());
 	ShPtr<CFG> compCFG(cfgBuilder->getCFG(testFunc));
 	checkEquivalenceOfCFGs(compCFG, refCFG);
 
@@ -2631,7 +2632,7 @@ CFGCreatedForWhileWithGotoJumpForward) {
 	refCFG->addEdge(targetGotoNode, refCFG->getExitNode());
 
 	// Check difference.
-	ShPtr<llvmir2hll::CFGBuilder> cfgBuilder(llvmir2hll::NonRecursiveCFGBuilder::create());
+	ShPtr<retdec::llvmir2hll::CFGBuilder> cfgBuilder(retdec::llvmir2hll::NonRecursiveCFGBuilder::create());
 	ShPtr<CFG> compCFG(cfgBuilder->getCFG(testFunc));
 	checkEquivalenceOfCFGs(compCFG, refCFG);
 
@@ -2713,7 +2714,7 @@ CFGCreatedForGotoJumpToBodyOfWhile) {
 	refCFG->addEdge(nodeWhileBody, nodeWhile);
 
 	// Check difference.
-	ShPtr<llvmir2hll::CFGBuilder> cfgBuilder(llvmir2hll::NonRecursiveCFGBuilder::create());
+	ShPtr<retdec::llvmir2hll::CFGBuilder> cfgBuilder(retdec::llvmir2hll::NonRecursiveCFGBuilder::create());
 	ShPtr<CFG> compCFG(cfgBuilder->getCFG(testFunc));
 	checkEquivalenceOfCFGs(compCFG, refCFG);
 
@@ -2795,7 +2796,7 @@ CFGCreatedForGotoJumpToWhile) {
 	refCFG->addEdge(nodeWhileBody, nodeWhile);
 
 	// Check difference.
-	ShPtr<llvmir2hll::CFGBuilder> cfgBuilder(llvmir2hll::NonRecursiveCFGBuilder::create());
+	ShPtr<retdec::llvmir2hll::CFGBuilder> cfgBuilder(retdec::llvmir2hll::NonRecursiveCFGBuilder::create());
 	ShPtr<CFG> compCFG(cfgBuilder->getCFG(testFunc));
 	checkEquivalenceOfCFGs(compCFG, refCFG);
 
@@ -2807,3 +2808,4 @@ CFGCreatedForGotoJumpToWhile) {
 
 } // namespace tests
 } // namespace llvmir2hll
+} // namespace retdec

@@ -10,12 +10,13 @@
 #include <llvm/IR/LLVMContext.h>
 #include <llvm/IR/Module.h>
 
-#include "bin2llvmir/analyses/uses_analysis.h"
-#include "bin2llvmir/utils/defs.h"
+#include "retdec/bin2llvmir/analyses/uses_analysis.h"
+#include "retdec/bin2llvmir/utils/defs.h"
 
 using namespace ::testing;
 using namespace llvm;
 
+namespace retdec {
 namespace bin2llvmir {
 namespace tests {
 
@@ -291,3 +292,4 @@ hasNoVolatileLoadTest) {
 
 } // namespace tests
 } // namespace bin2llvmir
+} // namespace retdec

@@ -11,15 +11,16 @@
 #include <llvm/IR/Instruction.h>
 #include <llvm/IR/Instructions.h>
 
-#include "tl-cpputils/container.h"
-#include "bin2llvmir/optimizations/select_functions/select_functions.h"
-#include "bin2llvmir/utils/defs.h"
+#include "retdec/utils/container.h"
+#include "retdec/bin2llvmir/optimizations/select_functions/select_functions.h"
+#include "retdec/bin2llvmir/utils/defs.h"
 #define debug_enabled false
-#include "llvm-support/utils.h"
+#include "retdec/llvm-support/utils.h"
 
-using namespace llvm_support;
+using namespace retdec::llvm_support;
 using namespace llvm;
 
+namespace retdec {
 namespace bin2llvmir {
 
 char SelectFunctions::ID = 0;
@@ -95,12 +96,12 @@ bool SelectFunctions::run(Module& M)
 		}
 		else
 		{
-			tl_cpputils::AddressRange fncRange;
+			retdec::utils::AddressRange fncRange;
 			if (cf->getStart().isDefined()
 					&& cf->getEnd().isDefined()
 					&& cf->getStart() <= cf->getEnd())
 			{
-				fncRange = tl_cpputils::AddressRange(
+				fncRange = retdec::utils::AddressRange(
 						cf->getStart(),
 						cf->getEnd());
 			}
@@ -156,7 +157,7 @@ bool SelectFunctions::run(Module& M)
  */
 bool SelectFunctions::findNotReturningFunctions(llvm::Module& M)
 {
-	tl_cpputils::NonIterableSet<std::string> exitFncs =
+	retdec::utils::NonIterableSet<std::string> exitFncs =
 	{
 		"exit", "_exit", "ExitThread", "abort", "longjmp", "_Exit",
 		"quick_exit", "thrd_exit", "ExitProcess"
@@ -169,7 +170,7 @@ bool SelectFunctions::findNotReturningFunctions(llvm::Module& M)
 			continue;
 		}
 
-		tl_cpputils::NonIterableSet<BasicBlock*> seen;
+		retdec::utils::NonIterableSet<BasicBlock*> seen;
 		auto* bb = &(f.front());
 		while (bb && seen.hasNot(bb))
 		{
@@ -205,3 +206,4 @@ bool SelectFunctions::findNotReturningFunctions(llvm::Module& M)
 }
 
 } // namespace bin2llvmir
+} // namespace retdec

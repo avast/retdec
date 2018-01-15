@@ -6,12 +6,13 @@
 
 #include <gtest/gtest.h>
 
-#include "llvmir2hll/ir/global_var_def.h"
-#include "llvmir2hll/ir/int_type.h"
-#include "llvmir2hll/ir/variable.h"
+#include "retdec/llvmir2hll/ir/global_var_def.h"
+#include "retdec/llvmir2hll/ir/int_type.h"
+#include "retdec/llvmir2hll/ir/variable.h"
 
 using namespace ::testing;
 
+namespace retdec {
 namespace llvmir2hll {
 namespace tests {
 
@@ -44,3 +45,4 @@ DefinesExternalVarReturnsFalseIfGlobalVarIsInternal) {
 
 } // namespace tests
 } // namespace llvmir2hll
+} // namespace retdec

@@ -9,6 +9,7 @@
 
 #include <gtest/gtest.h>
 
+namespace retdec {
 namespace llvmir2hll {
 namespace tests {
 
@@ -26,5 +27,6 @@ protected:
 
 } // namespace tests
 } // namespace llvmir2hll
+} // namespace retdec
 
 #endif

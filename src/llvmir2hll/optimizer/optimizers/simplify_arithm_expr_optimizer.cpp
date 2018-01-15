@@ -4,32 +4,33 @@
 * @copyright (c) 2017 Avast Software, licensed under the MIT license
 */
 
-#include "llvmir2hll/ir/add_op_expr.h"
-#include "llvmir2hll/ir/bit_and_op_expr.h"
-#include "llvmir2hll/ir/bit_or_op_expr.h"
-#include "llvmir2hll/ir/bit_xor_op_expr.h"
-#include "llvmir2hll/ir/constant.h"
-#include "llvmir2hll/ir/div_op_expr.h"
-#include "llvmir2hll/ir/eq_op_expr.h"
-#include "llvmir2hll/ir/function.h"
-#include "llvmir2hll/ir/global_var_def.h"
-#include "llvmir2hll/ir/gt_eq_op_expr.h"
-#include "llvmir2hll/ir/gt_op_expr.h"
-#include "llvmir2hll/ir/if_stmt.h"
-#include "llvmir2hll/ir/lt_eq_op_expr.h"
-#include "llvmir2hll/ir/lt_op_expr.h"
-#include "llvmir2hll/ir/mod_op_expr.h"
-#include "llvmir2hll/ir/module.h"
-#include "llvmir2hll/ir/mul_op_expr.h"
-#include "llvmir2hll/ir/neq_op_expr.h"
-#include "llvmir2hll/ir/not_op_expr.h"
-#include "llvmir2hll/ir/or_op_expr.h"
-#include "llvmir2hll/ir/sub_op_expr.h"
-#include "llvmir2hll/ir/ternary_op_expr.h"
-#include "llvmir2hll/optimizer/optimizers/simplify_arithm_expr_optimizer.h"
-#include "llvmir2hll/support/debug.h"
-#include "llvmir2hll/support/types.h"
+#include "retdec/llvmir2hll/ir/add_op_expr.h"
+#include "retdec/llvmir2hll/ir/bit_and_op_expr.h"
+#include "retdec/llvmir2hll/ir/bit_or_op_expr.h"
+#include "retdec/llvmir2hll/ir/bit_xor_op_expr.h"
+#include "retdec/llvmir2hll/ir/constant.h"
+#include "retdec/llvmir2hll/ir/div_op_expr.h"
+#include "retdec/llvmir2hll/ir/eq_op_expr.h"
+#include "retdec/llvmir2hll/ir/function.h"
+#include "retdec/llvmir2hll/ir/global_var_def.h"
+#include "retdec/llvmir2hll/ir/gt_eq_op_expr.h"
+#include "retdec/llvmir2hll/ir/gt_op_expr.h"
+#include "retdec/llvmir2hll/ir/if_stmt.h"
+#include "retdec/llvmir2hll/ir/lt_eq_op_expr.h"
+#include "retdec/llvmir2hll/ir/lt_op_expr.h"
+#include "retdec/llvmir2hll/ir/mod_op_expr.h"
+#include "retdec/llvmir2hll/ir/module.h"
+#include "retdec/llvmir2hll/ir/mul_op_expr.h"
+#include "retdec/llvmir2hll/ir/neq_op_expr.h"
+#include "retdec/llvmir2hll/ir/not_op_expr.h"
+#include "retdec/llvmir2hll/ir/or_op_expr.h"
+#include "retdec/llvmir2hll/ir/sub_op_expr.h"
+#include "retdec/llvmir2hll/ir/ternary_op_expr.h"
+#include "retdec/llvmir2hll/optimizer/optimizers/simplify_arithm_expr_optimizer.h"
+#include "retdec/llvmir2hll/support/debug.h"
+#include "retdec/llvmir2hll/support/types.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 /**
@@ -187,3 +188,4 @@ void SimplifyArithmExprOptimizer::createSubOptimizers(ShPtr<ArithmExprEvaluator>
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

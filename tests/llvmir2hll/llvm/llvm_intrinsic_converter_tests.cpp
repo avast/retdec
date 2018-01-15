@@ -7,10 +7,11 @@
 #include <gtest/gtest.h>
 
 #include "llvmir2hll/ir/tests_with_module.h"
-#include "llvmir2hll/llvm/llvm_intrinsic_converter.h"
+#include "retdec/llvmir2hll/llvm/llvm_intrinsic_converter.h"
 
 using namespace ::testing;
 
+namespace retdec {
 namespace llvmir2hll {
 namespace tests {
 
@@ -59,3 +60,4 @@ LLVMFabs128IsConvertedIntoFabslFromMathH) {
 
 } // namespace tests
 } // namespace llvmir2hll
+} // namespace retdec

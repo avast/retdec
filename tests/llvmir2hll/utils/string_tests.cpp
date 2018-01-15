@@ -8,10 +8,11 @@
 
 #include <gtest/gtest.h>
 
-#include "llvmir2hll/utils/string.h"
+#include "retdec/llvmir2hll/utils/string.h"
 
 using namespace ::testing;
 
+namespace retdec {
 namespace llvmir2hll {
 namespace tests {
 
@@ -110,3 +111,4 @@ GetOffsetFromNameDoesNotHaveOffset) {
 
 } // namespace tests
 } // namespace llvmir2hll
+} // namespace retdec

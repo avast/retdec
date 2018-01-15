@@ -8,11 +8,12 @@
 
 #include "llvmir2hll/analysis/tests_with_value_analysis.h"
 #include "llvmir2hll/ir/tests_with_module.h"
-#include "llvmir2hll/obtainer/call_info_obtainers/optim_call_info_obtainer.h"
-#include "llvmir2hll/optimizer/optimizers/global_to_local_optimizer.h"
+#include "retdec/llvmir2hll/obtainer/call_info_obtainers/optim_call_info_obtainer.h"
+#include "retdec/llvmir2hll/optimizer/optimizers/global_to_local_optimizer.h"
 
 using namespace ::testing;
 
+namespace retdec {
 namespace llvmir2hll {
 namespace tests {
 
@@ -34,3 +35,4 @@ OptimizerHasNonEmptyID) {
 
 } // namespace tests
 } // namespace llvmir2hll
+} // namespace retdec

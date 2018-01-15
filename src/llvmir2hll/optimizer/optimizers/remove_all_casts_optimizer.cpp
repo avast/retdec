@@ -4,19 +4,20 @@
 * @copyright (c) 2017 Avast Software, licensed under the MIT license
 */
 
-#include "llvmir2hll/ir/bit_cast_expr.h"
-#include "llvmir2hll/ir/cast_expr.h"
-#include "llvmir2hll/ir/ext_cast_expr.h"
-#include "llvmir2hll/ir/fp_to_int_cast_expr.h"
-#include "llvmir2hll/ir/int_to_fp_cast_expr.h"
-#include "llvmir2hll/ir/int_to_ptr_cast_expr.h"
-#include "llvmir2hll/ir/module.h"
-#include "llvmir2hll/ir/ptr_to_int_cast_expr.h"
-#include "llvmir2hll/ir/trunc_cast_expr.h"
-#include "llvmir2hll/optimizer/optimizers/remove_all_casts_optimizer.h"
-#include "llvmir2hll/support/debug.h"
-#include "llvmir2hll/utils/ir.h"
+#include "retdec/llvmir2hll/ir/bit_cast_expr.h"
+#include "retdec/llvmir2hll/ir/cast_expr.h"
+#include "retdec/llvmir2hll/ir/ext_cast_expr.h"
+#include "retdec/llvmir2hll/ir/fp_to_int_cast_expr.h"
+#include "retdec/llvmir2hll/ir/int_to_fp_cast_expr.h"
+#include "retdec/llvmir2hll/ir/int_to_ptr_cast_expr.h"
+#include "retdec/llvmir2hll/ir/module.h"
+#include "retdec/llvmir2hll/ir/ptr_to_int_cast_expr.h"
+#include "retdec/llvmir2hll/ir/trunc_cast_expr.h"
+#include "retdec/llvmir2hll/optimizer/optimizers/remove_all_casts_optimizer.h"
+#include "retdec/llvmir2hll/support/debug.h"
+#include "retdec/llvmir2hll/utils/ir.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 /**
@@ -81,3 +82,4 @@ void RemoveAllCastsOptimizer::removeCast(ShPtr<CastExpr> castExpr) {
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

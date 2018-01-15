@@ -6,11 +6,12 @@
 
 #include <gtest/gtest.h>
 
-#include "llvmir2hll/ir/const_int.h"
-#include "llvmir2hll/ir/return_stmt.h"
+#include "retdec/llvmir2hll/ir/const_int.h"
+#include "retdec/llvmir2hll/ir/return_stmt.h"
 
 using namespace ::testing;
 
+namespace retdec {
 namespace llvmir2hll {
 namespace tests {
 
@@ -40,3 +41,4 @@ HasRetValReturnsTrueIfReturnStatementHasReturnValue) {
 
 } // namespace tests
 } // namespace llvmir2hll
+} // namespace retdec

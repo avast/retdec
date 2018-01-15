@@ -4,12 +4,13 @@
 * @copyright (c) 2017 Avast Software, licensed under the MIT license
 */
 
-#include "bin2llvmir/optimizations/volatilize/volatilize.h"
+#include "retdec/bin2llvmir/optimizations/volatilize/volatilize.h"
 #include "bin2llvmir/utils/llvmir_tests.h"
 
 using namespace ::testing;
 using namespace llvm;
 
+namespace retdec {
 namespace bin2llvmir {
 namespace tests {
 
@@ -100,3 +101,4 @@ TEST_F(VolatilizeTests, KeepAlreadyVolatileLoadsAndStoresVolatile)
 
 } // namespace tests
 } // namespace bin2llvmir
+} // namespace retdec

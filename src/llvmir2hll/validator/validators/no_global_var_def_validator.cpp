@@ -4,13 +4,14 @@
 * @copyright (c) 2017 Avast Software, licensed under the MIT license
 */
 
-#include "llvmir2hll/ir/function.h"
-#include "llvmir2hll/ir/module.h"
-#include "llvmir2hll/ir/var_def_stmt.h"
-#include "llvmir2hll/support/debug.h"
-#include "llvmir2hll/validator/validator_factory.h"
-#include "llvmir2hll/validator/validators/no_global_var_def_validator.h"
+#include "retdec/llvmir2hll/ir/function.h"
+#include "retdec/llvmir2hll/ir/module.h"
+#include "retdec/llvmir2hll/ir/var_def_stmt.h"
+#include "retdec/llvmir2hll/support/debug.h"
+#include "retdec/llvmir2hll/validator/validator_factory.h"
+#include "retdec/llvmir2hll/validator/validators/no_global_var_def_validator.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 REGISTER_AT_FACTORY("NoGlobalVarDef", NO_GLOBAL_VAR_DEF_VALIDATOR_ID, ValidatorFactory,
@@ -47,3 +48,4 @@ void NoGlobalVarDefValidator::visit(ShPtr<VarDefStmt> stmt) {
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

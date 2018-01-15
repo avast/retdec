@@ -17,18 +17,19 @@
 #include <llvm/IR/Instruction.h>
 #include <llvm/IR/Instructions.h>
 
-#include "tl-cpputils/string.h"
-#include "bin2llvmir/optimizations/inst_opt/inst_opt.h"
-#include "bin2llvmir/providers/asm_instruction.h"
-#include "bin2llvmir/utils/defs.h"
-#include "bin2llvmir/utils/instruction.h"
+#include "retdec/utils/string.h"
+#include "retdec/bin2llvmir/optimizations/inst_opt/inst_opt.h"
+#include "retdec/bin2llvmir/providers/asm_instruction.h"
+#include "retdec/bin2llvmir/utils/defs.h"
+#include "retdec/bin2llvmir/utils/instruction.h"
 #define debug_enabled false
-#include "llvm-support/utils.h"
-#include "bin2llvmir/utils/type.h"
+#include "retdec/llvm-support/utils.h"
+#include "retdec/bin2llvmir/utils/type.h"
 
-using namespace llvm_support;
+using namespace retdec::llvm_support;
 using namespace llvm;
 
+namespace retdec {
 namespace bin2llvmir {
 
 char InstOpt::ID = 0;
@@ -421,3 +422,4 @@ bool InstOpt::fixX86RepAnalysis()
 }
 
 } // namespace bin2llvmir
+} // namespace retdec

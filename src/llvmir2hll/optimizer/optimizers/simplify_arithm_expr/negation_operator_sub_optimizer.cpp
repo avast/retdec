@@ -4,12 +4,13 @@
 * @copyright (c) 2017 Avast Software, licensed under the MIT license
 */
 
-#include "llvmir2hll/evaluator/arithm_expr_evaluator.h"
-#include "llvmir2hll/ir/not_op_expr.h"
-#include "llvmir2hll/optimizer/optimizers/simplify_arithm_expr/negation_operator_sub_optimizer.h"
-#include "llvmir2hll/support/debug.h"
-#include "llvmir2hll/support/expression_negater.h"
+#include "retdec/llvmir2hll/evaluator/arithm_expr_evaluator.h"
+#include "retdec/llvmir2hll/ir/not_op_expr.h"
+#include "retdec/llvmir2hll/optimizer/optimizers/simplify_arithm_expr/negation_operator_sub_optimizer.h"
+#include "retdec/llvmir2hll/support/debug.h"
+#include "retdec/llvmir2hll/support/expression_negater.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 REGISTER_AT_FACTORY("NegationOperator", NEGATION_OPERATOR_SUB_OPTIMIZER_ID,
@@ -56,3 +57,4 @@ void NegationOperatorSubOptimizer::visit(ShPtr<NotOpExpr> expr) {
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

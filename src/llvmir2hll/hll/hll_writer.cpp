@@ -8,48 +8,49 @@
 #include <cstddef>
 #include <sstream>
 
-#include "llvmir2hll/hll/bracket_manager.h"
-#include "llvmir2hll/hll/hll_writer.h"
-#include "llvmir2hll/ir/array_type.h"
-#include "llvmir2hll/ir/binary_op_expr.h"
-#include "llvmir2hll/ir/call_expr.h"
-#include "llvmir2hll/ir/const_array.h"
-#include "llvmir2hll/ir/const_int.h"
-#include "llvmir2hll/ir/const_symbol.h"
-#include "llvmir2hll/ir/float_type.h"
-#include "llvmir2hll/ir/function.h"
-#include "llvmir2hll/ir/global_var_def.h"
-#include "llvmir2hll/ir/int_type.h"
-#include "llvmir2hll/ir/module.h"
-#include "llvmir2hll/ir/pointer_type.h"
-#include "llvmir2hll/ir/statement.h"
-#include "llvmir2hll/ir/string_type.h"
-#include "llvmir2hll/ir/struct_type.h"
-#include "llvmir2hll/ir/unary_op_expr.h"
-#include "llvmir2hll/ir/variable.h"
-#include "llvmir2hll/llvm/llvm_support.h"
-#include "llvmir2hll/support/debug.h"
-#include "llvmir2hll/support/global_vars_sorter.h"
-#include "llvmir2hll/support/smart_ptr.h"
-#include "llvmir2hll/utils/ir.h"
-#include "llvmir2hll/utils/string.h"
-#include "tl-cpputils/container.h"
-#include "tl-cpputils/conversion.h"
-#include "tl-cpputils/string.h"
-#include "tl-cpputils/time.h"
+#include "retdec/llvmir2hll/hll/bracket_manager.h"
+#include "retdec/llvmir2hll/hll/hll_writer.h"
+#include "retdec/llvmir2hll/ir/array_type.h"
+#include "retdec/llvmir2hll/ir/binary_op_expr.h"
+#include "retdec/llvmir2hll/ir/call_expr.h"
+#include "retdec/llvmir2hll/ir/const_array.h"
+#include "retdec/llvmir2hll/ir/const_int.h"
+#include "retdec/llvmir2hll/ir/const_symbol.h"
+#include "retdec/llvmir2hll/ir/float_type.h"
+#include "retdec/llvmir2hll/ir/function.h"
+#include "retdec/llvmir2hll/ir/global_var_def.h"
+#include "retdec/llvmir2hll/ir/int_type.h"
+#include "retdec/llvmir2hll/ir/module.h"
+#include "retdec/llvmir2hll/ir/pointer_type.h"
+#include "retdec/llvmir2hll/ir/statement.h"
+#include "retdec/llvmir2hll/ir/string_type.h"
+#include "retdec/llvmir2hll/ir/struct_type.h"
+#include "retdec/llvmir2hll/ir/unary_op_expr.h"
+#include "retdec/llvmir2hll/ir/variable.h"
+#include "retdec/llvmir2hll/llvm/llvm_support.h"
+#include "retdec/llvmir2hll/support/debug.h"
+#include "retdec/llvmir2hll/support/global_vars_sorter.h"
+#include "retdec/llvmir2hll/support/smart_ptr.h"
+#include "retdec/llvmir2hll/utils/ir.h"
+#include "retdec/llvmir2hll/utils/string.h"
+#include "retdec/utils/container.h"
+#include "retdec/utils/conversion.h"
+#include "retdec/utils/string.h"
+#include "retdec/utils/time.h"
 
 using namespace std::string_literals;
 
-using tl_cpputils::getCurrentDate;
-using tl_cpputils::getCurrentTime;
-using tl_cpputils::getCurrentYear;
-using tl_cpputils::hasItem;
-using tl_cpputils::joinStrings;
-using tl_cpputils::split;
-using tl_cpputils::startsWith;
-using tl_cpputils::toHex;
-using tl_cpputils::toString;
+using retdec::utils::getCurrentDate;
+using retdec::utils::getCurrentTime;
+using retdec::utils::getCurrentYear;
+using retdec::utils::hasItem;
+using retdec::utils::joinStrings;
+using retdec::utils::split;
+using retdec::utils::startsWith;
+using retdec::utils::toHex;
+using retdec::utils::toString;
 
+namespace retdec {
 namespace llvmir2hll {
 
 namespace {
@@ -1508,3 +1509,4 @@ StringVector HLLWriter::getReadableClassNames(const StringVector &classes) const
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

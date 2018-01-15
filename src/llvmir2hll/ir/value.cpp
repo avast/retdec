@@ -4,11 +4,12 @@
 * @copyright (c) 2017 Avast Software, licensed under the MIT license
 */
 
-#include "llvmir2hll/ir/statement.h"
-#include "llvmir2hll/ir/value.h"
-#include "llvmir2hll/support/debug.h"
-#include "llvmir2hll/support/value_text_repr_visitor.h"
+#include "retdec/llvmir2hll/ir/statement.h"
+#include "retdec/llvmir2hll/ir/value.h"
+#include "retdec/llvmir2hll/support/debug.h"
+#include "retdec/llvmir2hll/support/value_text_repr_visitor.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 namespace {
@@ -66,3 +67,4 @@ std::ostream &operator<<(std::ostream &os, Value *value) {
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

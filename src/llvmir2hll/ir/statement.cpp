@@ -4,15 +4,16 @@
 * @copyright (c) 2017 Avast Software, licensed under the MIT license
 */
 
-#include "llvmir2hll/ir/empty_stmt.h"
-#include "llvmir2hll/ir/goto_stmt.h"
-#include "llvmir2hll/ir/statement.h"
-#include "llvmir2hll/llvm/llvm_support.h"
-#include "llvmir2hll/support/debug.h"
-#include "tl-cpputils/conversion.h"
+#include "retdec/llvmir2hll/ir/empty_stmt.h"
+#include "retdec/llvmir2hll/ir/goto_stmt.h"
+#include "retdec/llvmir2hll/ir/statement.h"
+#include "retdec/llvmir2hll/llvm/llvm_support.h"
+#include "retdec/llvmir2hll/support/debug.h"
+#include "retdec/utils/conversion.h"
 
-using tl_cpputils::toString;
+using retdec::utils::toString;
 
+namespace retdec {
 namespace llvmir2hll {
 namespace {
 
@@ -782,3 +783,4 @@ bool Statement::containsJustGotosToCurrentStatement(const StmtSet &stmts) const 
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

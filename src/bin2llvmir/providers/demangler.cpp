@@ -4,10 +4,11 @@
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */
 
-#include "bin2llvmir/providers/demangler.h"
+#include "retdec/bin2llvmir/providers/demangler.h"
 
 using namespace llvm;
 
+namespace retdec {
 namespace bin2llvmir {
 
 std::map<Module*, DemanglerProvider::Demangler> DemanglerProvider::_module2demangler;
@@ -18,27 +19,27 @@ std::map<Module*, DemanglerProvider::Demangler> DemanglerProvider::_module2deman
  * @return Created and added demangler or @c nullptr if something went wrong
  *         and it was not successfully created.
  */
-demangler::CDemangler* DemanglerProvider::addDemangler(
+retdec::demangler::CDemangler* DemanglerProvider::addDemangler(
 		llvm::Module* m,
-		const retdec_config::ToolInfoContainer& t)
+		const retdec::config::ToolInfoContainer& t)
 {
-	std::unique_ptr<demangler::CDemangler> d;
+	std::unique_ptr<retdec::demangler::CDemangler> d;
 
 	if (t.isGcc())
 	{
-		d = demangler::CDemangler::createGcc();
+		d = retdec::demangler::CDemangler::createGcc();
 	}
 	else if (t.isMsvc())
 	{
-		d = demangler::CDemangler::createMs();
+		d = retdec::demangler::CDemangler::createMs();
 	}
 	else if (t.isBorland())
 	{
-		d = demangler::CDemangler::createBorland();
+		d = retdec::demangler::CDemangler::createBorland();
 	}
 	else
 	{
-		d = demangler::CDemangler::createGcc();
+		d = retdec::demangler::CDemangler::createGcc();
 	}
 
 	auto p = _module2demangler.insert(std::make_pair(m, std::move(d)));
@@ -50,7 +51,7 @@ demangler::CDemangler* DemanglerProvider::addDemangler(
  * @return Get demangler associated with the given module @a m or @c nullptr
  *         if there is no associated demangler.
  */
-demangler::CDemangler* DemanglerProvider::getDemangler(llvm::Module* m)
+retdec::demangler::CDemangler* DemanglerProvider::getDemangler(llvm::Module* m)
 {
 	auto f = _module2demangler.find(m);
 	return f != _module2demangler.end() ? f->second.get() : nullptr;
@@ -66,7 +67,7 @@ demangler::CDemangler* DemanglerProvider::getDemangler(llvm::Module* m)
  */
 bool DemanglerProvider::getDemangler(
 		llvm::Module* m,
-		demangler::CDemangler*& d)
+		retdec::demangler::CDemangler*& d)
 {
 	d = getDemangler(m);
 	return d != nullptr;
@@ -81,3 +82,4 @@ void DemanglerProvider::clear()
 }
 
 } // namespace bin2llvmir
+} // namespace retdec

@@ -11,18 +11,19 @@
 #include <llvm/IR/Instruction.h>
 #include <llvm/IR/Instructions.h>
 
-#include "llvm-support/utils.h"
-#include "tl-cpputils/string.h"
-#include "bin2llvmir/optimizations/local_vars/local_vars.h"
-#include "bin2llvmir/utils/defs.h"
-#include "bin2llvmir/utils/instruction.h"
+#include "retdec/llvm-support/utils.h"
+#include "retdec/utils/string.h"
+#include "retdec/bin2llvmir/optimizations/local_vars/local_vars.h"
+#include "retdec/bin2llvmir/utils/defs.h"
+#include "retdec/bin2llvmir/utils/instruction.h"
 
-using namespace llvm_support;
-using namespace tl_cpputils;
+using namespace retdec::llvm_support;
+using namespace retdec::utils;
 using namespace llvm;
 
 #define debug_enabled false
 
+namespace retdec {
 namespace bin2llvmir {
 
 char LocalVars::ID = 0;
@@ -144,3 +145,4 @@ bool LocalVars::runOnModule(Module& M)
 }
 
 } // namespace bin2llvmir
+} // namespace retdec

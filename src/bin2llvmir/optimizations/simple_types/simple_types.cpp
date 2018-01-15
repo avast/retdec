@@ -17,21 +17,22 @@
 #include <llvm/IR/LLVMContext.h>
 #include <llvm/Support/raw_ostream.h>
 
-#include "llvm-support/utils.h"
-#include "tl-cpputils/time.h"
-#include "bin2llvmir/analyses/reaching_definitions.h"
-#include "bin2llvmir/optimizations/simple_types/simple_types.h"
-#include "bin2llvmir/providers/asm_instruction.h"
-#include "bin2llvmir/utils/defs.h"
-#include "bin2llvmir/utils/instruction.h"
-#include "bin2llvmir/utils/type.h"
+#include "retdec/llvm-support/utils.h"
+#include "retdec/utils/time.h"
+#include "retdec/bin2llvmir/analyses/reaching_definitions.h"
+#include "retdec/bin2llvmir/optimizations/simple_types/simple_types.h"
+#include "retdec/bin2llvmir/providers/asm_instruction.h"
+#include "retdec/bin2llvmir/utils/defs.h"
+#include "retdec/bin2llvmir/utils/instruction.h"
+#include "retdec/bin2llvmir/utils/type.h"
 
-using namespace llvm_support;
-using namespace tl_cpputils;
+using namespace retdec::llvm_support;
+using namespace retdec::utils;
 using namespace llvm;
 
 #define debug_enabled false
 
+namespace retdec {
 namespace bin2llvmir {
 
 std::string priority2string(eSourcePriority p)
@@ -1465,3 +1466,4 @@ std::ostream& operator<<(std::ostream& out, const EquationEntry& ee)
 }
 
 } // namespace bin2llvmir
+} // namespace retdec

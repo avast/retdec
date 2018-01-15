@@ -4,11 +4,12 @@
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */
 
-#include "bin2llvmir/providers/abi.h"
-#include "bin2llvmir/utils/type.h"
+#include "retdec/bin2llvmir/providers/abi.h"
+#include "retdec/bin2llvmir/utils/type.h"
 
 using namespace llvm;
 
+namespace retdec {
 namespace bin2llvmir {
 
 //
@@ -17,7 +18,7 @@ namespace bin2llvmir {
 //=============================================================================
 //
 
-Abi Abi::armCdecl(llvm::Module* m, retdec_config::Architecture& a)
+Abi Abi::armCdecl(llvm::Module* m, retdec::config::Architecture& a)
 {
 	auto& ctx = m->getContext();
 
@@ -25,7 +26,7 @@ Abi Abi::armCdecl(llvm::Module* m, retdec_config::Architecture& a)
 	ret._module = m;
 	ret._arch = a;
 	ret._defaultType = getDefaultType(ret._module);
-	ret._cc = retdec_config::CallingConvention::initCdecl();
+	ret._cc = retdec::config::CallingConvention::initCdecl();
 	ret._defaultAlignType = ret._defaultType;
 	ret._stackDirection = eStackDirection::RIGHT_2_LEFT;
 	ret._stackPointer = ret._module->getNamedGlobal("sp");
@@ -77,7 +78,7 @@ Abi Abi::armCdecl(llvm::Module* m, retdec_config::Architecture& a)
 	return ret;
 }
 
-Abi Abi::ppcCdecl(llvm::Module* m, retdec_config::Architecture& a)
+Abi Abi::ppcCdecl(llvm::Module* m, retdec::config::Architecture& a)
 {
 	auto& ctx = m->getContext();
 
@@ -85,7 +86,7 @@ Abi Abi::ppcCdecl(llvm::Module* m, retdec_config::Architecture& a)
 	ret._module = m;
 	ret._arch = a;
 	ret._defaultType = getDefaultType(ret._module);
-	ret._cc = retdec_config::CallingConvention::initCdecl();
+	ret._cc = retdec::config::CallingConvention::initCdecl();
 	ret._defaultAlignType = ret._defaultType;
 	ret._stackDirection = eStackDirection::RIGHT_2_LEFT;
 	ret._stackPointer = ret._module->getNamedGlobal("r1");
@@ -127,7 +128,7 @@ Abi Abi::ppcCdecl(llvm::Module* m, retdec_config::Architecture& a)
 	return ret;
 }
 
-Abi Abi::x86Cdecl(llvm::Module* m, retdec_config::Architecture& a)
+Abi Abi::x86Cdecl(llvm::Module* m, retdec::config::Architecture& a)
 {
 	auto& ctx = m->getContext();
 
@@ -135,7 +136,7 @@ Abi Abi::x86Cdecl(llvm::Module* m, retdec_config::Architecture& a)
 	ret._module = m;
 	ret._arch = a;
 	ret._defaultType = getDefaultType(ret._module);
-	ret._cc = retdec_config::CallingConvention::initCdecl();
+	ret._cc = retdec::config::CallingConvention::initCdecl();
 	ret._defaultAlignType = ret._defaultType;
 	ret._stackDirection = eStackDirection::RIGHT_2_LEFT;
 	ret._stackPointer = ret._module->getNamedGlobal("esp");
@@ -165,12 +166,12 @@ Abi Abi::x86Cdecl(llvm::Module* m, retdec_config::Architecture& a)
 	return ret;
 }
 
-Abi Abi::x86Fastcall(llvm::Module* m, retdec_config::Architecture& a)
+Abi Abi::x86Fastcall(llvm::Module* m, retdec::config::Architecture& a)
 {
 	auto& ctx = m->getContext();
 	auto ret = x86Cdecl(m, a);
 
-	ret._cc = retdec_config::CallingConvention::initFastcall();
+	ret._cc = retdec::config::CallingConvention::initFastcall();
 
 	std::vector<RegisterCouple> i32Args =
 	{
@@ -184,14 +185,14 @@ Abi Abi::x86Fastcall(llvm::Module* m, retdec_config::Architecture& a)
 	return ret;
 }
 
-Abi Abi::x86Stdcall(llvm::Module* m, retdec_config::Architecture& a)
+Abi Abi::x86Stdcall(llvm::Module* m, retdec::config::Architecture& a)
 {
 	auto ret = x86Cdecl(m, a);
-	ret._cc = retdec_config::CallingConvention::initStdcall();
+	ret._cc = retdec::config::CallingConvention::initStdcall();
 	return ret;
 }
 
-Abi Abi::mipsCdecl(llvm::Module* m, retdec_config::Architecture& a)
+Abi Abi::mipsCdecl(llvm::Module* m, retdec::config::Architecture& a)
 {
 	auto& ctx = m->getContext();
 
@@ -199,7 +200,7 @@ Abi Abi::mipsCdecl(llvm::Module* m, retdec_config::Architecture& a)
 	ret._module = m;
 	ret._arch = a;
 	ret._defaultType = getDefaultType(ret._module);
-	ret._cc = retdec_config::CallingConvention::initCdecl();
+	ret._cc = retdec::config::CallingConvention::initCdecl();
 	ret._defaultAlignType = ret._defaultType;
 	ret._stackDirection = eStackDirection::RIGHT_2_LEFT;
 	ret._stackPointer = ret._module->getNamedGlobal("sp");
@@ -267,7 +268,7 @@ Abi Abi::mipsCdecl(llvm::Module* m, retdec_config::Architecture& a)
 	return ret;
 }
 
-Abi Abi::mipsLlvmCdecl(llvm::Module* m, retdec_config::Architecture& a)
+Abi Abi::mipsLlvmCdecl(llvm::Module* m, retdec::config::Architecture& a)
 {
 	auto& ctx = m->getContext();
 	auto ret = mipsCdecl(m, a);
@@ -277,12 +278,12 @@ Abi Abi::mipsLlvmCdecl(llvm::Module* m, retdec_config::Architecture& a)
 	return ret;
 }
 
-Abi Abi::mipsPic32Cdecl(llvm::Module* m, retdec_config::Architecture& a)
+Abi Abi::mipsPic32Cdecl(llvm::Module* m, retdec::config::Architecture& a)
 {
 	return mipsLlvmCdecl(m, a);
 }
 
-Abi Abi::mipsPspCdecl(llvm::Module* m, retdec_config::Architecture& a)
+Abi Abi::mipsPspCdecl(llvm::Module* m, retdec::config::Architecture& a)
 {
 	auto& ctx = m->getContext();
 	auto ret = mipsCdecl(m, a);
@@ -343,17 +344,17 @@ Abi Abi::mipsPspCdecl(llvm::Module* m, retdec_config::Architecture& a)
 	return ret;
 }
 
-const retdec_config::Architecture& Abi::getArchitecture() const
+const retdec::config::Architecture& Abi::getArchitecture() const
 {
 	return _arch;
 }
 
-const retdec_config::CallingConvention& Abi::getCallingConvention() const
+const retdec::config::CallingConvention& Abi::getCallingConvention() const
 {
 	return _cc;
 }
 
-tl_cpputils::Maybe<size_t> Abi::getAlignedBitSize(llvm::Type* type) const
+retdec::utils::Maybe<size_t> Abi::getAlignedBitSize(llvm::Type* type) const
 {
 	if (type->getPrimitiveSizeInBits() > _defaultType->getPrimitiveSizeInBits())
 	{
@@ -404,7 +405,7 @@ llvm::GlobalVariable* Abi::getStackPointer() const
 /**
  * @return Stack offset where function's parameters start.
  */
-tl_cpputils::Maybe<int> Abi::getParameterStartStackOffset() const
+retdec::utils::Maybe<int> Abi::getParameterStartStackOffset() const
 {
 	return _parameterStartOffset;
 }
@@ -412,7 +413,7 @@ tl_cpputils::Maybe<int> Abi::getParameterStartStackOffset() const
 /**
  * @return Alignment of function's parameters on stack.
  */
-tl_cpputils::Maybe<int> Abi::getParameterStackAlignment() const
+retdec::utils::Maybe<int> Abi::getParameterStackAlignment() const
 {
 	return _parameterStackAlignment;
 }
@@ -447,7 +448,7 @@ llvm::GlobalVariable* Abi::getReturnAddressRegister() const
  * @return @c Offset on stack where function's return address is stored.
  *         This may net be set -- check @c Maybe before use.
  */
-tl_cpputils::Maybe<int> Abi::getReturnAddressStackOffset() const
+retdec::utils::Maybe<int> Abi::getReturnAddressStackOffset() const
 {
 	return _returnAddressStackOffset;
 }
@@ -552,8 +553,8 @@ int Abi::getArgumentStackOffset(llvm::Type* type) const
 
 ModuleAbis::ModuleAbis(
 		llvm::Module* module,
-		const retdec_config::Architecture& arch,
-		const retdec_config::ToolInfoContainer& tools,
+		const retdec::config::Architecture& arch,
+		const retdec::config::ToolInfoContainer& tools,
 		const std::vector<std::string>& abis)
 {
 	_module = module;
@@ -564,25 +565,25 @@ ModuleAbis::ModuleAbis(
 	if (_arch.isX86())
 	{
 		_abis.emplace(
-				retdec_config::CallingConvention::initCdecl(),
+				retdec::config::CallingConvention::initCdecl(),
 				Abi::x86Cdecl(_module, _arch));
 		_abis.emplace(
-				retdec_config::CallingConvention::initFastcall(),
+				retdec::config::CallingConvention::initFastcall(),
 				Abi::x86Fastcall(_module, _arch));
 		_abis.emplace(
-				retdec_config::CallingConvention::initStdcall(),
+				retdec::config::CallingConvention::initStdcall(),
 				Abi::x86Stdcall(_module, _arch));
 	}
 	else if (_arch.isArmOrThumb())
 	{
 		_abis.emplace(
-				retdec_config::CallingConvention::initCdecl(),
+				retdec::config::CallingConvention::initCdecl(),
 				Abi::armCdecl(_module, _arch));
 	}
 	else if (_arch.isPpc())
 	{
 		_abis.emplace(
-				retdec_config::CallingConvention::initCdecl(),
+				retdec::config::CallingConvention::initCdecl(),
 				Abi::ppcCdecl(_module, _arch));
 	}
 	else if (_arch.isMipsOrPic32() || tools.isPic32())
@@ -590,37 +591,37 @@ ModuleAbis::ModuleAbis(
 		if (tools.isPspGcc())
 		{
 			_abis.emplace(
-					retdec_config::CallingConvention::initCdecl(),
+					retdec::config::CallingConvention::initCdecl(),
 					Abi::mipsPspCdecl(_module, _arch));
 		}
 		else if (tools.isLlvm())
 		{
 			_abis.emplace(
-					retdec_config::CallingConvention::initCdecl(),
+					retdec::config::CallingConvention::initCdecl(),
 					Abi::mipsLlvmCdecl(_module, _arch));
 		}
 		else if (arch.isPic32() || tools.isPic32())
 		{
 			_abis.emplace(
-					retdec_config::CallingConvention::initCdecl(),
+					retdec::config::CallingConvention::initCdecl(),
 					Abi::mipsPic32Cdecl(_module, _arch));
 		}
 		else
 		{
 			_abis.emplace(
-					retdec_config::CallingConvention::initCdecl(),
+					retdec::config::CallingConvention::initCdecl(),
 					Abi::mipsCdecl(_module, _arch));
 		}
 	}
 }
 
-Abi* ModuleAbis::getAbi(retdec_config::CallingConvention cc)
+Abi* ModuleAbis::getAbi(retdec::config::CallingConvention cc)
 {
 	auto f = _abis.find(cc);
 	return f != _abis.end() ? &f->second : nullptr;
 }
 
-bool ModuleAbis::getAbi(retdec_config::CallingConvention cc, Abi*& abi)
+bool ModuleAbis::getAbi(retdec::config::CallingConvention cc, Abi*& abi)
 {
 	abi = getAbi(cc);
 	return abi != nullptr;
@@ -636,8 +637,8 @@ std::map<llvm::Module*, ModuleAbis> AbiProvider::_module2abis;
 
 ModuleAbis* AbiProvider::addAbis(
 		llvm::Module* module,
-		const retdec_config::Architecture& arch,
-		const retdec_config::ToolInfoContainer& tools,
+		const retdec::config::Architecture& arch,
+		const retdec::config::ToolInfoContainer& tools,
 		const std::vector<std::string>& abis)
 {
 	auto p = _module2abis.emplace(module, ModuleAbis(module, arch, tools, abis));
@@ -674,7 +675,7 @@ bool AbiProvider::getAbis(llvm::Module* module, ModuleAbis*& abis)
  */
 Abi* AbiProvider::getAbi(
 		llvm::Module* module,
-		retdec_config::CallingConvention cc)
+		retdec::config::CallingConvention cc)
 {
 	auto* ma = getAbis(module);
 	return ma ? ma->getAbi(cc) : nullptr;
@@ -690,7 +691,7 @@ Abi* AbiProvider::getAbi(
  */
 bool AbiProvider::getAbi(
 		llvm::Module* module,
-		retdec_config::CallingConvention cc,
+		retdec::config::CallingConvention cc,
 		Abi*& abi)
 {
 	abi = getAbi(module, cc);
@@ -706,3 +707,4 @@ void AbiProvider::clear()
 }
 
 } // namespace bin2llvmir
+} // namespace retdec

@@ -8,12 +8,13 @@
 #include <iomanip>
 #include <sstream>
 
-#include "llvm-support/diagnostics.h"
-#include "tl-cpputils/conversion.h"
-#include "tl-cpputils/time.h"
+#include "retdec/llvm-support/diagnostics.h"
+#include "retdec/utils/conversion.h"
+#include "retdec/utils/time.h"
 
-using tl_cpputils::getElapsedTime;
+using retdec::utils::getElapsedTime;
 
+namespace retdec {
 namespace llvm_support {
 
 namespace {
@@ -84,3 +85,4 @@ void printSubSubSubPhase(const std::string &phaseName, llvm::raw_ostream &stream
 }
 
 } // namespace llvm_support
+} // namespace retdec

@@ -6,25 +6,26 @@
 
 #include <string>
 
-#include "llvmir2hll/ir/assign_stmt.h"
-#include "llvmir2hll/ir/call_expr.h"
-#include "llvmir2hll/ir/cast_expr.h"
-#include "llvmir2hll/ir/expression.h"
-#include "llvmir2hll/ir/float_type.h"
-#include "llvmir2hll/ir/function.h"
-#include "llvmir2hll/ir/int_type.h"
-#include "llvmir2hll/ir/module.h"
-#include "llvmir2hll/ir/return_stmt.h"
-#include "llvmir2hll/ir/statement.h"
-#include "llvmir2hll/ir/type.h"
-#include "llvmir2hll/ir/var_def_stmt.h"
-#include "llvmir2hll/ir/variable.h"
-#include "llvmir2hll/optimizer/optimizers/c_cast_optimizer.h"
-#include "llvmir2hll/support/debug.h"
-#include "llvmir2hll/support/smart_ptr.h"
-#include "llvmir2hll/support/types.h"
-#include "llvmir2hll/utils/ir.h"
+#include "retdec/llvmir2hll/ir/assign_stmt.h"
+#include "retdec/llvmir2hll/ir/call_expr.h"
+#include "retdec/llvmir2hll/ir/cast_expr.h"
+#include "retdec/llvmir2hll/ir/expression.h"
+#include "retdec/llvmir2hll/ir/float_type.h"
+#include "retdec/llvmir2hll/ir/function.h"
+#include "retdec/llvmir2hll/ir/int_type.h"
+#include "retdec/llvmir2hll/ir/module.h"
+#include "retdec/llvmir2hll/ir/return_stmt.h"
+#include "retdec/llvmir2hll/ir/statement.h"
+#include "retdec/llvmir2hll/ir/type.h"
+#include "retdec/llvmir2hll/ir/var_def_stmt.h"
+#include "retdec/llvmir2hll/ir/variable.h"
+#include "retdec/llvmir2hll/optimizer/optimizers/c_cast_optimizer.h"
+#include "retdec/llvmir2hll/support/debug.h"
+#include "retdec/llvmir2hll/support/smart_ptr.h"
+#include "retdec/llvmir2hll/support/types.h"
+#include "retdec/llvmir2hll/utils/ir.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 /**
@@ -145,3 +146,4 @@ void CCastOptimizer::visit(ShPtr<ReturnStmt> stmt) {
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

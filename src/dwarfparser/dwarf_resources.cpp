@@ -6,12 +6,12 @@
 
 #include <iostream>
 
-#include "dwarfparser/dwarf_resources.h"
+#include "retdec/dwarfparser/dwarf_resources.h"
 
 using namespace std;
 
-namespace dwarfparser
-{
+namespace retdec {
+namespace dwarfparser {
 
 /**
  * @brief Print contents of this class.
@@ -198,3 +198,4 @@ void DwarfResources::initMappingDefault(eDefaultMap m)
 }
 
 } // namespace dwarfparser
+} // namespace retdec

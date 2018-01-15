@@ -12,8 +12,9 @@
 #include <llvm/IR/Value.h>
 #include <llvm/Support/Casting.h>
 
-#include "llvm-support/utils.h"
+#include "retdec/llvm-support/utils.h"
 
+namespace retdec {
 namespace llvm_support {
 
 /**
@@ -85,3 +86,4 @@ llvm::Value* skipCasts(llvm::Value* val)
 }
 
 } // namespace llvm_support
+} // namespace retdec

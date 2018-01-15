@@ -12,12 +12,13 @@
 #include <llvm/IR/Module.h>
 
 #include "llvmir2hll/config/config_mock.h"
-#include "llvmir2hll/ir/function.h"
-#include "llvmir2hll/ir/module.h"
-#include "llvmir2hll/ir/statement.h"
+#include "retdec/llvmir2hll/ir/function.h"
+#include "retdec/llvmir2hll/ir/module.h"
+#include "retdec/llvmir2hll/ir/statement.h"
 #include "llvmir2hll/semantics/semantics_mock.h"
-#include "llvmir2hll/support/types.h"
+#include "retdec/llvmir2hll/support/types.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 class CallStmt;
@@ -78,5 +79,6 @@ protected:
 
 } // namespace tests
 } // namespace llvmir2hll
+} // namespace retdec
 
 #endif

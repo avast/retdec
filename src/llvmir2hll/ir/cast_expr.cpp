@@ -4,9 +4,10 @@
 * @copyright (c) 2017 Avast Software, licensed under the MIT license
 */
 
-#include "llvmir2hll/ir/cast_expr.h"
-#include "llvmir2hll/support/debug.h"
+#include "retdec/llvmir2hll/ir/cast_expr.h"
+#include "retdec/llvmir2hll/support/debug.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 /**
@@ -88,3 +89,4 @@ void CastExpr::update(ShPtr<Value> subject, ShPtr<Value> arg) {
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

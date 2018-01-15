@@ -6,11 +6,12 @@
 
 #include <gtest/gtest.h>
 
-#include "llvmir2hll/ir/int_type.h"
-#include "llvmir2hll/ir/struct_type.h"
+#include "retdec/llvmir2hll/ir/int_type.h"
+#include "retdec/llvmir2hll/ir/struct_type.h"
 
 using namespace ::testing;
 
+namespace retdec {
 namespace llvmir2hll {
 namespace tests {
 
@@ -69,3 +70,4 @@ getNameAfterCreateWithElementsReturnsCorrectName) {
 
 } // namespace tests
 } // namespace llvmir2hll
+} // namespace retdec

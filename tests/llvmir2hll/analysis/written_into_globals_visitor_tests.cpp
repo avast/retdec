@@ -6,27 +6,28 @@
 
 #include <gtest/gtest.h>
 
-#include "llvmir2hll/analysis/written_into_globals_visitor.h"
-#include "llvmir2hll/ir/add_op_expr.h"
-#include "llvmir2hll/ir/array_index_op_expr.h"
-#include "llvmir2hll/ir/array_type.h"
-#include "llvmir2hll/ir/assign_stmt.h"
-#include "llvmir2hll/ir/const_int.h"
-#include "llvmir2hll/ir/deref_op_expr.h"
-#include "llvmir2hll/ir/empty_stmt.h"
-#include "llvmir2hll/ir/for_loop_stmt.h"
-#include "llvmir2hll/ir/int_type.h"
-#include "llvmir2hll/ir/lt_op_expr.h"
-#include "llvmir2hll/ir/pointer_type.h"
-#include "llvmir2hll/ir/return_stmt.h"
-#include "llvmir2hll/ir/struct_index_op_expr.h"
-#include "llvmir2hll/ir/struct_type.h"
+#include "retdec/llvmir2hll/analysis/written_into_globals_visitor.h"
+#include "retdec/llvmir2hll/ir/add_op_expr.h"
+#include "retdec/llvmir2hll/ir/array_index_op_expr.h"
+#include "retdec/llvmir2hll/ir/array_type.h"
+#include "retdec/llvmir2hll/ir/assign_stmt.h"
+#include "retdec/llvmir2hll/ir/const_int.h"
+#include "retdec/llvmir2hll/ir/deref_op_expr.h"
+#include "retdec/llvmir2hll/ir/empty_stmt.h"
+#include "retdec/llvmir2hll/ir/for_loop_stmt.h"
+#include "retdec/llvmir2hll/ir/int_type.h"
+#include "retdec/llvmir2hll/ir/lt_op_expr.h"
+#include "retdec/llvmir2hll/ir/pointer_type.h"
+#include "retdec/llvmir2hll/ir/return_stmt.h"
+#include "retdec/llvmir2hll/ir/struct_index_op_expr.h"
+#include "retdec/llvmir2hll/ir/struct_type.h"
 #include "llvmir2hll/ir/tests_with_module.h"
-#include "llvmir2hll/ir/variable.h"
-#include "llvmir2hll/support/types.h"
+#include "retdec/llvmir2hll/ir/variable.h"
+#include "retdec/llvmir2hll/support/types.h"
 
 using namespace ::testing;
 
+namespace retdec {
 namespace llvmir2hll {
 namespace tests {
 
@@ -260,3 +261,4 @@ DereferencingGlobalDoesNotCountAsAWrittenIntoVariable) {
 
 } // namespace tests
 } // namespace llvmir2hll
+} // namespace retdec

@@ -4,17 +4,18 @@
 * @copyright (c) 2017 Avast Software, licensed under the MIT license
 */
 
-#include "llvmir2hll/analysis/value_analysis.h"
-#include "llvmir2hll/graphs/cfg/cfg.h"
-#include "llvmir2hll/ir/call_expr.h"
-#include "llvmir2hll/ir/statement.h"
-#include "llvmir2hll/obtainer/call_info_obtainer.h"
-#include "llvmir2hll/pattern/pattern_finders/api_call/api_call_seq_data.h"
-#include "llvmir2hll/pattern/pattern_finders/api_call/api_call_seq_finders/basic_block_api_call_seq_finder.h"
-#include "llvmir2hll/pattern/patterns/stmts_pattern.h"
-#include "llvmir2hll/support/debug.h"
-#include "llvmir2hll/utils/ir.h"
+#include "retdec/llvmir2hll/analysis/value_analysis.h"
+#include "retdec/llvmir2hll/graphs/cfg/cfg.h"
+#include "retdec/llvmir2hll/ir/call_expr.h"
+#include "retdec/llvmir2hll/ir/statement.h"
+#include "retdec/llvmir2hll/obtainer/call_info_obtainer.h"
+#include "retdec/llvmir2hll/pattern/pattern_finders/api_call/api_call_seq_data.h"
+#include "retdec/llvmir2hll/pattern/pattern_finders/api_call/api_call_seq_finders/basic_block_api_call_seq_finder.h"
+#include "retdec/llvmir2hll/pattern/patterns/stmts_pattern.h"
+#include "retdec/llvmir2hll/support/debug.h"
+#include "retdec/llvmir2hll/utils/ir.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 /**
@@ -62,3 +63,4 @@ BasicBlockAPICallSeqFinder::Patterns BasicBlockAPICallSeqFinder::findPatterns(
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

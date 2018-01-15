@@ -8,15 +8,16 @@
 
 #include <llvm/IR/InstIterator.h>
 
-#include "llvm-support/utils.h"
-#include "tl-cpputils/string.h"
-#include "bin2llvmir/providers/asm_instruction.h"
-#include "bin2llvmir/utils/instruction.h"
-#include "bin2llvmir/utils/ir_modifier.h"
-#include "bin2llvmir/utils/type.h"
+#include "retdec/llvm-support/utils.h"
+#include "retdec/utils/string.h"
+#include "retdec/bin2llvmir/providers/asm_instruction.h"
+#include "retdec/bin2llvmir/utils/instruction.h"
+#include "retdec/bin2llvmir/utils/ir_modifier.h"
+#include "retdec/bin2llvmir/utils/type.h"
 
 using namespace llvm;
 
+namespace retdec {
 namespace bin2llvmir {
 
 IrModifier::IrModifier()
@@ -36,7 +37,7 @@ IrModifier::FunctionPair IrModifier::renameFunction(
 		const std::string& fncName)
 {
 	auto* cf = _config->getConfigFunction(fnc);
-	auto n = tl_cpputils::normalizeNamePrefix(fncName);
+	auto n = retdec::utils::normalizeNamePrefix(fncName);
 	if (n == fnc->getName())
 	{
 		return {fnc, cf};
@@ -56,7 +57,7 @@ IrModifier::FunctionPair IrModifier::renameFunction(
 
 IrModifier::FunctionPair IrModifier::splitFunctionOn(
 		llvm::Instruction* inst,
-		tl_cpputils::Address start,
+		retdec::utils::Address start,
 		const std::string& fncName)
 {
 	auto* cf = _config->getConfigFunction(inst->getFunction());
@@ -65,7 +66,7 @@ IrModifier::FunctionPair IrModifier::splitFunctionOn(
 	std::string n = fncName;
 	if (n.empty())
 	{
-		n = tl_cpputils::appendHexRet("function", start);
+		n = retdec::utils::appendHexRet("function", start);
 	}
 
 	Function* oldFnc = inst->getFunction();
@@ -80,11 +81,11 @@ IrModifier::FunctionPair IrModifier::splitFunctionOn(
 		}
 	}
 
-	auto* fnc = bin2llvmir::splitFunctionOn(inst, tl_cpputils::normalizeNamePrefix(n));
+	auto* fnc = bin2llvmir::splitFunctionOn(inst, retdec::utils::normalizeNamePrefix(n));
 	auto* ncf = _config->insertFunction(fnc, start, cf->getEnd());
 	cf->setEnd(start-1);
 
-	std::string bbName = tl_cpputils::appendHexRet("dec_label_pc", start);
+	std::string bbName = retdec::utils::appendHexRet("dec_label_pc", start);
 	fnc->front().setName(bbName);
 
 //==============================================================================
@@ -612,7 +613,7 @@ IrModifier::FunctionPair IrModifier::splitFunctionOn(
 }
 
 IrModifier::FunctionPair IrModifier::addFunction(
-		tl_cpputils::Address start,
+		retdec::utils::Address start,
 		const std::string& fncName)
 {
 	FunctionType* voidT = FunctionType::get(
@@ -622,13 +623,13 @@ IrModifier::FunctionPair IrModifier::addFunction(
 	std::string n = fncName;
 	if (n.empty())
 	{
-		n = tl_cpputils::appendHexRet("function", start);
+		n = retdec::utils::appendHexRet("function", start);
 	}
 
 	auto* fnc = Function::Create(
 			voidT,
 			GlobalValue::ExternalLinkage,
-			tl_cpputils::normalizeNamePrefix(n),
+			retdec::utils::normalizeNamePrefix(n),
 			_module);
 
 	auto* cf = _config->insertFunction(fnc, start, start);
@@ -637,9 +638,9 @@ IrModifier::FunctionPair IrModifier::addFunction(
 }
 
 IrModifier::FunctionPair IrModifier::addFunctionUnknown(
-		tl_cpputils::Address start)
+		retdec::utils::Address start)
 {
-	std::string n = tl_cpputils::appendHexRet("unknown", start);
+	std::string n = retdec::utils::appendHexRet("unknown", start);
 	return addFunction(start, n);
 }
 
@@ -690,3 +691,4 @@ IrModifier::StackPair IrModifier::getStackVariable(
 }
 
 } // namespace bin2llvmir
+} // namespace retdec

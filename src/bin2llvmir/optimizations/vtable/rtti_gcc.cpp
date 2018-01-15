@@ -7,11 +7,12 @@
 #include <iostream>
 #include <sstream>
 
-#include "bin2llvmir/optimizations/vtable/rtti_gcc.h"
-#include "bin2llvmir/utils/defs.h"
+#include "retdec/bin2llvmir/optimizations/vtable/rtti_gcc.h"
+#include "retdec/bin2llvmir/utils/defs.h"
 
 #define debug_enabled false
 
+namespace retdec {
 namespace bin2llvmir {
 
 //
@@ -114,3 +115,4 @@ std::string BaseClassTypeInfo::dump() const
 }
 
 } // namespace bin2llvmir
+} // namespace retdec

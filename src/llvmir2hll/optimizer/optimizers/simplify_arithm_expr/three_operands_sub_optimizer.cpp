@@ -4,26 +4,27 @@
 * @copyright (c) 2017 Avast Software, licensed under the MIT license
 */
 
-#include "llvmir2hll/evaluator/arithm_expr_evaluator.h"
-#include "llvmir2hll/ir/add_op_expr.h"
-#include "llvmir2hll/ir/bit_xor_op_expr.h"
-#include "llvmir2hll/ir/const_float.h"
-#include "llvmir2hll/ir/const_int.h"
-#include "llvmir2hll/ir/eq_op_expr.h"
-#include "llvmir2hll/ir/expression.h"
-#include "llvmir2hll/ir/gt_eq_op_expr.h"
-#include "llvmir2hll/ir/gt_op_expr.h"
-#include "llvmir2hll/ir/lt_eq_op_expr.h"
-#include "llvmir2hll/ir/lt_op_expr.h"
-#include "llvmir2hll/ir/neg_op_expr.h"
-#include "llvmir2hll/ir/neq_op_expr.h"
-#include "llvmir2hll/ir/not_op_expr.h"
-#include "llvmir2hll/ir/or_op_expr.h"
-#include "llvmir2hll/ir/sub_op_expr.h"
-#include "llvmir2hll/ir/variable.h"
-#include "llvmir2hll/optimizer/optimizers/simplify_arithm_expr/three_operands_sub_optimizer.h"
-#include "llvmir2hll/support/debug.h"
+#include "retdec/llvmir2hll/evaluator/arithm_expr_evaluator.h"
+#include "retdec/llvmir2hll/ir/add_op_expr.h"
+#include "retdec/llvmir2hll/ir/bit_xor_op_expr.h"
+#include "retdec/llvmir2hll/ir/const_float.h"
+#include "retdec/llvmir2hll/ir/const_int.h"
+#include "retdec/llvmir2hll/ir/eq_op_expr.h"
+#include "retdec/llvmir2hll/ir/expression.h"
+#include "retdec/llvmir2hll/ir/gt_eq_op_expr.h"
+#include "retdec/llvmir2hll/ir/gt_op_expr.h"
+#include "retdec/llvmir2hll/ir/lt_eq_op_expr.h"
+#include "retdec/llvmir2hll/ir/lt_op_expr.h"
+#include "retdec/llvmir2hll/ir/neg_op_expr.h"
+#include "retdec/llvmir2hll/ir/neq_op_expr.h"
+#include "retdec/llvmir2hll/ir/not_op_expr.h"
+#include "retdec/llvmir2hll/ir/or_op_expr.h"
+#include "retdec/llvmir2hll/ir/sub_op_expr.h"
+#include "retdec/llvmir2hll/ir/variable.h"
+#include "retdec/llvmir2hll/optimizer/optimizers/simplify_arithm_expr/three_operands_sub_optimizer.h"
+#include "retdec/llvmir2hll/support/debug.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 namespace {
@@ -611,3 +612,4 @@ ShPtr<Expression> ThreeOperandsSubOptimizer::getResult(ShPtr<Expression> expr) c
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

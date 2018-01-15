@@ -6,12 +6,13 @@
 
 #include <cstdint>
 
-#include "llvmir2hll/ir/const_int.h"
-#include "llvmir2hll/ir/struct_type.h"
-#include "llvmir2hll/support/debug.h"
-#include "llvmir2hll/support/visitor.h"
-#include "tl-cpputils/conversion.h"
+#include "retdec/llvmir2hll/ir/const_int.h"
+#include "retdec/llvmir2hll/ir/struct_type.h"
+#include "retdec/llvmir2hll/support/debug.h"
+#include "retdec/llvmir2hll/support/visitor.h"
+#include "retdec/utils/conversion.h"
 
+namespace retdec {
 namespace llvmir2hll {
 
 /**
@@ -93,3 +94,4 @@ void StructType::accept(Visitor *v) {
 }
 
 } // namespace llvmir2hll
+} // namespace retdec

@@ -4,12 +4,13 @@
 * @copyright (c) 2017 Avast Software, licensed under the MIT license
 */
 
-#include "llvm-support/utils.h"
-#include "bin2llvmir/optimizations/type_conversions/type_conversions.h"
+#include "retdec/llvm-support/utils.h"
+#include "retdec/bin2llvmir/optimizations/type_conversions/type_conversions.h"
 #include "bin2llvmir/utils/llvmir_tests.h"
 
 using namespace ::testing;
 
+namespace retdec {
 namespace bin2llvmir {
 namespace tests {
 
@@ -172,3 +173,4 @@ TEST_F(TypeConversionsTests, runInInstruction_replacesByInstruction)
 
 } // namespace tests
 } // namespace bin2llvmir
+} // namespace retdec

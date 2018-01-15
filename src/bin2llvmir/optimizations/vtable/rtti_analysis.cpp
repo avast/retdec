@@ -6,15 +6,16 @@
 
 #include <iostream>
 
-#include "tl-cpputils/string.h"
-#include "bin2llvmir/optimizations/vtable/rtti_analysis.h"
-#include "bin2llvmir/utils/defs.h"
+#include "retdec/utils/string.h"
+#include "retdec/bin2llvmir/optimizations/vtable/rtti_analysis.h"
+#include "retdec/bin2llvmir/utils/defs.h"
 
-using namespace tl_cpputils;
+using namespace retdec::utils;
 using namespace llvm;
 
 #define debug_enabled false
 
+namespace retdec {
 namespace bin2llvmir {
 
 RttiAnalysis::~RttiAnalysis()
@@ -26,7 +27,7 @@ RttiAnalysis::~RttiAnalysis()
 }
 
 ClassTypeInfo* RttiAnalysis::parseGccRtti(
-		loader::Image* objfile,
+		retdec::loader::Image* objfile,
 		DataReferences* RA,
 		Address rttiAddr)
 {
@@ -74,7 +75,7 @@ ClassTypeInfo* RttiAnalysis::parseGccRtti(
 		LOG << "\t[FAILED] name @ " << nameAddr <<  std::endl << std::endl;
 		return nullptr;
 	}
-	if (tl_cpputils::hasNonprintableChars(name))
+	if (retdec::utils::hasNonprintableChars(name))
 	{
 		LOG << "\t[FAILED] name unprintable = " << name
 			<<  std::endl << std::endl;
@@ -257,7 +258,7 @@ void RttiAnalysis::processGccRttis()
 }
 
 RTTICompleteObjectLocator* RttiAnalysis::parseMsvcObjectLocator(
-		loader::Image* objfile,
+		retdec::loader::Image* objfile,
 		Address rttiAddr)
 {
 	objf = objfile;
@@ -336,7 +337,7 @@ RTTICompleteObjectLocator* RttiAnalysis::parseMsvcObjectLocator(
 }
 
 RTTITypeDescriptor* RttiAnalysis::parseMsvcTypeDescriptor(
-		tl_cpputils::Address typeDescriptorAddr)
+		retdec::utils::Address typeDescriptorAddr)
 {
 	auto findTd = msvcTypeDescriptors.find(typeDescriptorAddr);
 	if (findTd != msvcTypeDescriptors.end())
@@ -363,7 +364,7 @@ RTTITypeDescriptor* RttiAnalysis::parseMsvcTypeDescriptor(
 		LOG << "\t[FAILED] name @ " << addr <<  std::endl << std::endl;
 		return nullptr;
 	}
-	if (tl_cpputils::hasNonprintableChars(name))
+	if (retdec::utils::hasNonprintableChars(name))
 	{
 		LOG << "\t[FAILED] name unprintable = " << name
 			<< std::endl << std::endl;
@@ -387,7 +388,7 @@ RTTITypeDescriptor* RttiAnalysis::parseMsvcTypeDescriptor(
 }
 
 RTTIClassHierarchyDescriptor* RttiAnalysis::parseMsvcClassDescriptor(
-		tl_cpputils::Address classDescriptorAddr)
+		retdec::utils::Address classDescriptorAddr)
 {
 	auto findCd = msvcClassDescriptors.find(classDescriptorAddr);
 	if (findCd != msvcClassDescriptors.end())
@@ -464,7 +465,7 @@ RTTIClassHierarchyDescriptor* RttiAnalysis::parseMsvcClassDescriptor(
 }
 
 RTTIBaseClassDescriptor* RttiAnalysis::parseMsvcBaseClassDescriptor(
-		tl_cpputils::Address baseDescriptorAddr)
+		retdec::utils::Address baseDescriptorAddr)
 {
 	auto findBcd = msvcBaseClassDescriptors.find(baseDescriptorAddr);
 	if (findBcd != msvcBaseClassDescriptors.end())
@@ -541,3 +542,4 @@ void RttiAnalysis::processMsvcRttis()
 }
 
 } // namespace bin2llvmir
+} // namespace retdec

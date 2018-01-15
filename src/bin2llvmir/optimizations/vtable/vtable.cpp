@@ -14,18 +14,19 @@
 #include <llvm/IR/Module.h>
 #include <llvm/Support/raw_ostream.h>
 
-#include "llvm-support/utils.h"
-#include "bin2llvmir/optimizations/vtable/vtable.h"
-#include "bin2llvmir/providers/fileimage.h"
-#include "bin2llvmir/utils/defs.h"
-#include "bin2llvmir/utils/type.h"
+#include "retdec/llvm-support/utils.h"
+#include "retdec/bin2llvmir/optimizations/vtable/vtable.h"
+#include "retdec/bin2llvmir/providers/fileimage.h"
+#include "retdec/bin2llvmir/utils/defs.h"
+#include "retdec/bin2llvmir/utils/type.h"
 
-using namespace llvm_support;
-using namespace tl_cpputils;
+using namespace retdec::llvm_support;
+using namespace retdec::utils;
 using namespace llvm;
 
 #define debug_enabled false
 
+namespace retdec {
 namespace bin2llvmir {
 
 //
@@ -346,7 +347,7 @@ const VtableAnalysis::VtableMap& VtableAnalysis::getVtableMap() const
 /**
  * @return Vtable on address @p a or nullptr if not found.
  */
-Vtable* VtableAnalysis::getVtableOnAddress(tl_cpputils::Address a) const
+Vtable* VtableAnalysis::getVtableOnAddress(retdec::utils::Address a) const
 {
 	auto fIt = vtableMap.find(a);
 	return (fIt != vtableMap.end()) ? (fIt->second) : (nullptr);
@@ -441,13 +442,13 @@ void VtableAnalysis::setVtablesToConfig()
 	{
 		auto& vt = p.second;
 
-		retdec_config::Vtable confVt(vt->vtableAddress);
+		retdec::config::Vtable confVt(vt->vtableAddress);
 		confVt.setName(vt->getName());
 
-		tl_cpputils::Address itemAddr = vt->vtableAddress;
+		retdec::utils::Address itemAddr = vt->vtableAddress;
 		for (auto& item : vt->virtualFncAddresses)
 		{
-			retdec_config::VtableItem confItem(itemAddr);
+			retdec::config::VtableItem confItem(itemAddr);
 			confItem.setTargetFunctionAddress(item.address);
 			if (item.function)
 				confItem.setTargetFunctionName(item.function->getName().str());
@@ -458,9 +459,9 @@ void VtableAnalysis::setVtablesToConfig()
 
 		config->getConfig().vtables.insert(confVt);
 
-		retdec_config::Object cg(
+		retdec::config::Object cg(
 				vt->global->getName(),
-				retdec_config::Storage::inMemory(vt->vtableAddress)
+				retdec::config::Storage::inMemory(vt->vtableAddress)
 		);
 		cg.setIsFromDebug(true);
 		config->getConfig().globals.insert(cg);
@@ -549,7 +550,7 @@ std::ostream& operator<<(std::ostream &out, const VtableMsvc &v)
 //=============================================================================
 //
 
-VtableItem::VtableItem(tl_cpputils::Address a, llvm::Function* f) :
+VtableItem::VtableItem(retdec::utils::Address a, llvm::Function* f) :
 		address(a),
 		function(f)
 {
@@ -557,3 +558,4 @@ VtableItem::VtableItem(tl_cpputils::Address a, llvm::Function* f) :
 }
 
 } // namespace bin2llvmir
+} // namespace retdec

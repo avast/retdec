@@ -7,12 +7,13 @@
 #include <gtest/gtest.h>
 
 #include "llvmir2hll/analysis/tests_with_value_analysis.h"
-#include "llvmir2hll/ir/empty_stmt.h"
+#include "retdec/llvmir2hll/ir/empty_stmt.h"
 #include "llvmir2hll/ir/tests_with_module.h"
-#include "llvmir2hll/optimizer/optimizers/if_before_loop_optimizer.h"
+#include "retdec/llvmir2hll/optimizer/optimizers/if_before_loop_optimizer.h"
 
 using namespace ::testing;
 
+namespace retdec {
 namespace llvmir2hll {
 namespace tests {
 
@@ -48,3 +49,4 @@ InEmptyBodyThereIsNothingToOptimize) {
 
 } // namespace tests
 } // namespace llvmir2hll
+} // namespace retdec

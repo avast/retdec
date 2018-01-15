@@ -4,20 +4,21 @@
 * @copyright (c) 2017 Avast Software, licensed under the MIT license
 */
 
-#include "llvmir2hll/hll/hll_writer.h"
-#include "llvmir2hll/hll/hll_writers/c_hll_writer.h"
+#include "retdec/llvmir2hll/hll/hll_writer.h"
+#include "retdec/llvmir2hll/hll/hll_writers/c_hll_writer.h"
 #include "llvmir2hll/hll/hll_writers/hll_writer_tests.h"
-#include "llvmir2hll/ir/int_type.h"
+#include "retdec/llvmir2hll/ir/int_type.h"
 #include "llvmir2hll/ir/tests_with_module.h"
-#include "llvmir2hll/ir/variable.h"
-#include "llvmir2hll/support/maybe.h"
-#include "llvmir2hll/support/types.h"
-#include "tl-cpputils/string.h"
+#include "retdec/llvmir2hll/ir/variable.h"
+#include "retdec/llvmir2hll/support/maybe.h"
+#include "retdec/llvmir2hll/support/types.h"
+#include "retdec/utils/string.h"
 
 using namespace ::testing;
 
-using tl_cpputils::contains;
+using retdec::utils::contains;
 
+namespace retdec {
 namespace llvmir2hll {
 namespace tests {
 
@@ -217,3 +218,4 @@ EmitsDetectedCryptoPatternsInCommentWhenAvailable) {
 
 } // namespace tests
 } // namespace llvmir2hll
+} // namespace retdec

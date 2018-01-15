@@ -8,13 +8,13 @@
 
 #include <llvm/IR/Constants.h>
 
-#include "llvm-support/utils.h"
-#include "bin2llvmir/optimizations/syscalls/syscalls.h"
-#include "bin2llvmir/providers/asm_instruction.h"
-#include "bin2llvmir/utils/defs.h"
-#include "bin2llvmir/utils/type.h"
+#include "retdec/llvm-support/utils.h"
+#include "retdec/bin2llvmir/optimizations/syscalls/syscalls.h"
+#include "retdec/bin2llvmir/providers/asm_instruction.h"
+#include "retdec/bin2llvmir/utils/defs.h"
+#include "retdec/bin2llvmir/utils/type.h"
 
-using namespace llvm_support;
+using namespace retdec::llvm_support;
 using namespace llvm;
 
 #define debug_enabled false
@@ -403,6 +403,7 @@ std::map<uint64_t, std::string> armSyscalls =
 	{375, "setns"}
 };
 
+namespace retdec {
 namespace bin2llvmir {
 
 /**
@@ -546,3 +547,4 @@ bool SyscallFixer::runArm()
 }
 
 } // namespace bin2llvmir
+} // namespace retdec

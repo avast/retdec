@@ -9,16 +9,17 @@
 #include <llvm/IR/PatternMatch.h>
 #include <llvm/Support/raw_ostream.h>
 
-#include "llvm-support/utils.h"
-#include "bin2llvmir/optimizations/type_conversions/type_conversions.h"
-#include "bin2llvmir/utils/defs.h"
+#include "retdec/llvm-support/utils.h"
+#include "retdec/bin2llvmir/optimizations/type_conversions/type_conversions.h"
+#include "retdec/bin2llvmir/utils/defs.h"
 
-using namespace llvm_support;
+using namespace retdec::llvm_support;
 using namespace llvm;
 using namespace PatternMatch;
 
 #define debug_enabled false
 
+namespace retdec {
 namespace bin2llvmir {
 
 char TypeConversions::ID = 0;
@@ -283,3 +284,4 @@ bool TypeConversions::replaceByShortcut(
 }
 
 } // namespace bin2llvmir
+} // namespace retdec
