@@ -10,6 +10,7 @@ endif()
 
 option(RETDEC_DOC "Build public API documentation (requires Doxygen)." OFF)
 option(RETDEC_TESTS "Build tests." OFF)
+option(RETDEC_DEV_TOOLS "Build dev tools." OFF)
 
 set(CMAKE_CXX_STANDARD 14)
 

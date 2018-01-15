@@ -197,6 +197,7 @@ You have to pass the following parameters to `cmake`:
 You can pass the following additional parameters to `cmake`:
 * `-DRETDEC_DOC=ON` to build with API documentation (requires Doxygen and Graphviz, disabled by default).
 * `-DRETDEC_TESTS=ON` to build with tests (disabled by default).
+* `-DRETDEC_DEV_TOOLS=ON` to build with development tools (disabled by default).
 * `-DCMAKE_BUILD_TYPE=Debug` to build with debugging information, which is useful during development. By default, the project is built in the `Release` mode. This has no effect on Windows, but the same thing can be achieved by running `cmake --build .` with the `--config Debug` parameter.
 * `-DCMAKE_PROGRAM_PATH=<path>` to use Perl at `<path>` (probably useful only on Windows).
 
