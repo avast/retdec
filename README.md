@@ -167,7 +167,8 @@ Packages should be preferably installed via [Homebrew](https://brew.sh).
   * `cd retdec`
   * `mkdir build && cd build`
   * `cmake .. -DCMAKE_INSTALL_PREFIX=<path>`
-  * `make && make install`
+  * `make -jN` (`N` is the number of CPU cores to use for parallel build)
+  * `make install`
 * Windows:
   * Open a command prompt (e.g. `C:\msys64\msys2_shell.cmd` from [MSYS2](https://github.com/avast-tl/retdec/wiki/Windows-Environment))
   * `cd retdec`
@@ -186,7 +187,8 @@ Packages should be preferably installed via [Homebrew](https://brew.sh).
     export PATH="/usr/local/opt/flex/bin:/usr/local/opt/bison/bin:$PATH"
     ```
   * `cmake .. -DCMAKE_INSTALL_PREFIX=<path>`
-  * `make && make install`
+  * `make -jN` (`N` is the number of CPU cores to use for parallel build)
+  * `make install`
 
 You have to pass the following parameters to `cmake`:
 * `-DCMAKE_INSTALL_PREFIX=<path>` to set the installation path to `<path>`.
