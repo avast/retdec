@@ -2,8 +2,8 @@
 
 # dev
 
-* Enhancement: Prefix all the installed binaries and scripts with `retdec-`. Rename some tools to make names more uniform.
-* Enhancement: Get rid of all git submodules. Move sources of all RetDec related repositories to this main repository. Get 3rd party dependencies using CMake external projects.
+* Enhancement: Prefixed all the installed binaries and scripts with `retdec-` ([#70](https://github.com/avast-tl/retdec/issues/70)). Also, some tools were renamed to make their names more uniform.
+* Enhancement: Got rid of all git submodules ([#92](https://github.com/avast-tl/retdec/issues/92), [#93](https://github.com/avast-tl/retdec/issues/93)). Moved sources of all RetDec-related repositories to this main repository. Third-party dependencies are downloaded and built via CMake's external projects.
 * Enhancement: Added community support for building and running RetDec inside Docker ([#60](https://github.com/avast-tl/retdec/pull/60)).
 * Enhancement: Decrease the default timeout when downloading the support package during installation ([#6](https://github.com/avast-tl/retdec/pull/6)).
 * Enhancement: Any shell can be used to install the decompiler, not just Bash.
