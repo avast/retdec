@@ -159,7 +159,7 @@ Packages should be preferably installed via [Homebrew](https://brew.sh).
 
 ### Process
 
-**Warning: Currently, RetDec has to be installed into a clean, dedicated directory. Do NOT install it into `/usr`, `/usr/local`, etc. because our build system is not yet ready for system-wide installations. So, when running `cmake`, always set `-DCMAKE_INSTALL_PREFIX=<path>` to a directory that will be used just by RetDec. For more details, see [#12](https://github.com/avast-tl/retdec/issues/12).**
+Note: Although RetDec now supports system-wide installation, we recommend installing it locally into a designated directory. When running `cmake`, set `-DCMAKE_INSTALL_PREFIX=<path>` to a directory that will be used by RetDec (e.g. `$HOME/projects/retdec-install` on Linux and macOS, and `C:\projects\retdec-install` on Windows).
 
 * Clone the repository:
   * `git clone https://github.com/avast-tl/retdec`
