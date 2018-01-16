@@ -2,6 +2,7 @@
 
 # dev
 
+* Enhancement: Added support for a system-wide installation ([#94](https://github.com/avast-tl/retdec/issues/94)).
 * Enhancement: Prefixed all the installed binaries and scripts with `retdec-` ([#70](https://github.com/avast-tl/retdec/issues/70)). Also, some tools were renamed to make their names more uniform.
 * Enhancement: Got rid of all git submodules ([#92](https://github.com/avast-tl/retdec/issues/92), [#93](https://github.com/avast-tl/retdec/issues/93)). Moved sources of all RetDec-related repositories to this main repository. Third-party dependencies are downloaded and built via CMake's external projects.
 * Enhancement: Set a proper `rpath` during installation on Linux and macOS ([#77](https://github.com/avast-tl/retdec/issues/77)). This allows us to move the installation directory after the installation into another location.
