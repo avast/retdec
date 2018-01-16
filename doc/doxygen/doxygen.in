@@ -810,7 +810,7 @@ WARN_FORMAT            = "$file:$line: $text"
 # messages should be written. If left blank the output is written to standard
 # error (stderr).
 
-WARN_LOGFILE           =
+WARN_LOGFILE           = "@DOXYGEN_LOG@"
 
 #---------------------------------------------------------------------------
 # Configuration options related to the input files

@@ -3,11 +3,12 @@ find_package(Doxygen REQUIRED)
 # Variables.
 set(DOXYGEN_CFG_IN "doxygen.in")
 set(DOXYGEN_CFG "${CMAKE_CURRENT_BINARY_DIR}/doxygen.cfg")
+set(DOXYGEN_LOG "${CMAKE_CURRENT_BINARY_DIR}/doxygen.log")
 # The trailing '/' after html is significant.
 set(DOXYGEN_OUTPUT_DIR "${CMAKE_CURRENT_BINARY_DIR}/html/")
 
 # Properly configure the Doxygen configuration file.
-set(DOXYGEN_WARNINGS "NO")
+set(DOXYGEN_WARNINGS "YES")
 set(DOXYGEN_EXTRACT_PRIVATE "YES")
 set(DOXYGEN_EXTRACT_LOCAL_CLASSES "YES")
 set(DOXYGEN_INTERNAL_DOCS "YES")
