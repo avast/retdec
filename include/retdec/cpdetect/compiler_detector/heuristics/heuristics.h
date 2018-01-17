@@ -22,8 +22,6 @@ class Heuristics
 	private:
 		/// @name Sections heuristics
 		/// @{
-		void getMewSectionHeuristics();
-		void getNsPackSectionHeuristics();
 		void getSectionHeuristics();
 		/// @}
 

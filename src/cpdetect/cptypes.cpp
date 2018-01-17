@@ -329,6 +329,7 @@ void ToolInformation::setToolTypeVariables(ToolType toolType)
 			installertDetected = true;
 			break;
 
+		case ToolType::OTHER:
 		case ToolType::UNKNOWN:
 			/* fall-thru */
 
@@ -430,6 +431,9 @@ std::string toolTypeToString(ToolType toolType)
 
 		case ToolType::LINKER:
 			return "linker";
+
+		case ToolType::OTHER:
+			return "other tool";
 
 		case ToolType::UNKNOWN:
 			/* fall-thru */

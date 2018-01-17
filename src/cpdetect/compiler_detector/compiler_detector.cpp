@@ -26,7 +26,9 @@ namespace
 {
 
 /**
- * Auxiliary function for compilers sort
+ * Auxiliary function for sorting of compilers
+ *
+ * Warning: sort function requires strict weak ordering!
  */
 bool compareForSort(const DetectResult &a, const DetectResult &b)
 {

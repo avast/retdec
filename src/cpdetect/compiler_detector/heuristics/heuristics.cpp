@@ -414,62 +414,6 @@ std::size_t Heuristics::findSectionNameStart(const std::string &sectionName) con
 }
 
 /**
- * Try to detect MEW packer
- */
-void Heuristics::getMewSectionHeuristics()
-{
-	auto source = DetectionMethod::SECTION_TABLE_H;
-	auto strength = DetectionStrength::MEDIUM;
-
-	std::string version;
-	if(noOfSections == 2)
-	{
-		if(startsWith(sections[0]->getName(), "MEWF"))
-		{
-			version = "11 SE 1.x";
-		}
-		else if(sections[0]->getName() == ".data" && sections[1]->getName() == ".decode")
-		{
-			version = "11 SE 1.x";
-		}
-	}
-
-	if(!version.empty())
-	{
-		addPacker(source, strength, "MEW", version);
-	}
-}
-
-/**
- * Try to detect NsPack packer
- */
-void Heuristics::getNsPackSectionHeuristics()
-{
-	auto source = DetectionMethod::SECTION_TABLE_H;
-	auto strength = DetectionStrength::MEDIUM;
-
-	if(noOfSections && (sections[0]->getName() == "nsp0" || sections[0]->getName() == ".nsp0"))
-	{
-		const auto namePrefix = sections[0]->getName().substr(0, sections[0]->getName().length() - 1);
-		std::size_t counter = 0;
-
-		for(std::size_t i = 1; i < noOfSections; ++i)
-		{
-			if(sections[i]->getName() != (namePrefix + numToStr(i)))
-			{
-				if(++counter > 1)
-				{
-					return;
-				}
-			}
-		}
-
-		auto version = sections[0]->getName() == "nsp0" ? "2.x" : "3.x";
-		addPacker(source, strength, "NsPack", version);
-	}
-}
-
-/**
  * Try to detect tools by section names
  */
 void Heuristics::getSectionHeuristics()
@@ -482,251 +426,31 @@ void Heuristics::getSectionHeuristics()
 		return;
 	}
 
-	const auto maxSectionIndex = noOfSections - 1;
-	const auto firstName = sections[0]->getName();
-	const auto lastName = sections[maxSectionIndex]->getName();
-	unsigned long long sameName = 0;
-
-	/// @todo use log search for section names - map maybe?
-
-	std::string name, version;
-	if(firstName == ".Upack" || firstName == ".ByDwing")
-	{
-		name = "Upack";
-	}
-	else if(lastName == "PEPACK!!")
-	{
-		name = "PE-PACK";
-	}
-	else if(lastName == ".WWP32")
-	{
-		name = "WWPack32";
-	}
-	else if(lastName == "yC" || lastName == ".y0da" || lastName == ".yP")
-	{
-		name = "yoda's Crypter";
-	}
-	else if(lastName == "lamecryp")
-	{
-		name = "LameCrypt";
-	}
-	else if(firstName == "pec1" && toolInfo.entryPointSection && toolInfo.epSection.getName() == "pec2" &&
-			toolInfo.epSection.getIndex() == 1)
-	{
-		name = "PECompact";
-		version = "1.xx";
-	}
-	else if(toolInfo.entryPointSection && toolInfo.epSection.getName() == "ExeS" &&
-			toolInfo.epSection.getSizeInFile() == 0xD9F && startsWith(toolInfo.epBytes, "EB00EB"))
-	{
-		name = "EXE Stealth";
-		version = "2.72 - 2.73";
-	}
-	else if(toolInfo.entryPointSection && toolInfo.epSection.getIndex() < maxSectionIndex &&
-			toolInfo.epSection.getName() == ".aspack" &&
-			sections[toolInfo.epSection.getIndex() + 1]->getName() == ".adata")
-	{
-		name = "ASPack";
-	}
-	else if(toolInfo.entryPointSection && toolInfo.epSection.getName() == "TheHyper")
-	{
-		name = "TheHyper's protector";
-	}
-	else if(toolInfo.entryPointSection && startsWith(toolInfo.epSection.getName(), "Themida"))
-	{
-		name = "Themida";
-	}
-	else if(noOfSections > 2 && lastName == ".data" && sections[maxSectionIndex - 1]->getName() == ".data" &&
-			findSectionName("") == noOfSections - 2)
-	{
-		name = "ASProtect";
-	}
-	else if(noOfSections > 1 && lastName == "pebundle" && sections[maxSectionIndex - 1]->getName() == "pebundle")
-	{
-		name = "PEBundle";
-	}
-	else if(noOfSections > 2 && firstName == "UPX0" && sections[1]->getName() == "UPX1" &&
-			(sections[2]->getName() == "UPX2" || sections[2]->getName() == ".rsrc"))
-	{
-		name = "UPX";
-	}
-	else if(findSectionName(".petite") == 1)
-	{
-		name = "Petite";
-	}
-	else if(findSectionName(".pklstb") == 1)
-	{
-		name = "PKLite";
-	}
-	else if(findSectionName("krypton") == 1 && findSectionName("YADO") >= 1)
-	{
-		name = "Krypton";
-	}
-	else if(findSectionName("NFO") == noOfSections)
-	{
-		name = "NFO";
-	}
-	else if((sameName = findSectionName("PELOCKnt")) && (sameName >= noOfSections - 2 || noOfSections < 2))
-	{
-		name = "PELock";
-		version = "NT";
-	}
-	else if((sameName = findSectionName(".pelock")) && sameName >= noOfSections - 1)
-	{
-		name = "PELock";
-		version = "1.x";
-	}
-	else if(findSectionName(".MPRESS1") == 1 && findSectionName(".MPRESS2") == 1)
-	{
-		name = "MPRESS";
-	}
-	else if(findSectionName(".dyamarC") == 1 && findSectionName(".dyamarD") == 1)
-	{
-		name = "DYAMAR";
-	}
-	else if(findSectionName("hmimys") == 1)
-	{
-		name = "hmimys";
-	}
-	else if(findSectionName(".securom") == 1)
-	{
-		name = "SecuROM";
-	}
-	else if(findSectionName(".HP.init") == 1)
-	{
-		addCompiler(source, strength, "HP C++");
-		addLanguage("C++");
-		return;
-	}
-	else if(findSectionName(".debug-ghc-link-info") == 1)
-	{
-		addCompiler(source, strength, "GHC");
-		addPriorityLanguage("Haskell");
-		return;
-	}
-	else if(findSectionName(".note.go.buildid"))
-	{
-		addCompiler(source, strength, "gc");
-		addPriorityLanguage("Go");
-		return;
-	}
-	else if(findSectionName(".go_export"))
+	// Compiler detections
+	if(findSectionName(".go_export"))
 	{
 		addCompiler(source, strength, "gccgo");
 		addPriorityLanguage("Go");
-		return;
 	}
-	else if(findSectionName(".gosymtab")|| findSectionName(".gopclntab"))
+	if(findSectionName(".note.go.buildid"))
+	{
+		addCompiler(source, strength, "gc");
+		addPriorityLanguage("Go");
+	}
+	if(findSectionName(".gosymtab") || findSectionName(".gopclntab"))
 	{
 		addPriorityLanguage("Go");
-		return;
 	}
-	else if(noOfSections >= 2 && findSectionName("BitArts") == noOfSections - 1)
+	if(findSectionName(".debug-ghc-link-info"))
 	{
-		name = "Crunch/PE";
+		addCompiler(source, strength, "GHC");
+		addPriorityLanguage("Haskell");
 	}
-	else if(findSectionName("kkrunchy") == 1 && noOfSections == 1)
+	if(findSectionName(".HP.init"))
 	{
-		name = "kkrunchy";
+		addCompiler(source, strength, "HP C++");
+		addLanguage("C++");
 	}
-	else if(findSectionName(".neolit") == 1 || findSectionName(".neolite") == 1)
-	{
-		name = "NeoLite";
-	}
-	else if(noOfSections == 2 && (sections[0]->getName() == ".packed" || sections[1]->getName() == ".RLPack"))
-	{
-		name = "RLPack";
-	}
-	else if(findSectionName("RCryptor") == 1 || findSectionName(".RCrypt") == 1)
-	{
-		name = "RCryptor";
-	}
-	else if(lastName == ".taz")
-	{
-		name = "PESpin";
-	}
-	else if(lastName == "_winzip_")
-	{
-		name = "WinZip Self-Extractor";
-	}
-	else if(lastName == ".ccg")
-	{
-		name = "CCG packer";
-	}
-	else if(findSectionName(".boom") >= 1)
-	{
-		name = "The Boomerang";
-	}
-	else if(findSectionName("DAStub") >= 1)
-	{
-		name = "DAStub Dragon Armor Protector";
-	}
-	else if(findSectionName("!EPack") >= 1)
-	{
-		name = "EPack";
-	}
-	else if(noOfSections >= 2 && sections[maxSectionIndex - 1]->getName() == ".gentee")
-	{
-		name = "Gentee";
-	}
-	else if(findSectionName(".MaskPE") >= 1)
-	{
-		name = "MaskPE";
-	}
-	else if(findSectionName(".perplex") >= 1)
-	{
-		name = "Perplex PE Protector";
-	}
-	else if(findSectionName("ProCrypt") >= 1)
-	{
-		name = "ProCrypt";
-	}
-	else if(lastName == ".rmnet")
-	{
-		name = "Ramnit";
-	}
-	else if(findSectionName(".seau") >= 1)
-	{
-		name = "SeauSFX";
-	}
-	else if(findSectionName(".spack") >= 1)
-	{
-		name = "Simple Pack";
-	}
-	else if(lastName == ".svkp")
-	{
-		name = "SVKProtector";
-	}
-	else if(noOfSections >= 2 && sections[maxSectionIndex - 1]->getName() == ".tsustub" && lastName == ".tsuarch")
-	{
-		name = "TSULoader";
-	}
-	else if(findSectionName(".charmve") >= 1 || findSectionName(".pinclie") >= 1)
-	{
-		name = "PIN tool";
-	}
-	else if(findSectionName(".mackt") >= 1)
-	{
-		name = "ImpREC reconstructed";
-	}
-	else if(findSectionName(".winapi") >= 1)
-	{
-		name = "API Override tool";
-	}
-	else if(noOfSections == 2 && firstName == ".rsrc" && lastName == "coderpub")
-	{
-		// https://coder.pub/2014/08/pe-file-packer-step-by-step-2-packing/
-		name = "DxPack";
-	}
-
-	if (!name.empty())
-	{
-		addPacker(source, strength, name, version);
-		return;
-	}
-
-	getMewSectionHeuristics();
-	getNsPackSectionHeuristics();
 }
 
 /**
