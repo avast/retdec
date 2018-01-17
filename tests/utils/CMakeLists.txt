@@ -2,6 +2,7 @@ set(RETDEC_TESTS_UTILS_SOURCES
 	address_tests.cpp
 	alignment_tests.cpp
 	array_tests.cpp
+	binary_path_tests.cpp
 	byte_value_storage_tests.cpp
 	const_tests.cpp
 	container_tests.cpp
