@@ -17,29 +17,60 @@ namespace cpdetect {
 /**
  * Constructor
  */
-ElfCompiler::ElfCompiler(retdec::fileformat::ElfFormat &parser, DetectParams &params, ToolInformation &tools) : CompilerDetector(parser, params, tools)
+ElfCompiler::ElfCompiler(
+		fileformat::ElfFormat &parser, DetectParams &params, ToolInformation &tools)
+	: CompilerDetector(parser, params, tools)
 {
 	heuristics = new ElfHeuristics(parser, *search, toolInfo);
 	externalSuffixes = EXTERNAL_DATABASE_SUFFIXES;
+
+	retdec::utils::FilesystemPath path(pathToShared);
+	path.append(YARA_RULES_PATH + "elf/");
+	auto bitWidth = parser.getWordLength();
+
 	switch(targetArchitecture)
 	{
 		case Architecture::X86:
+			path.append("x86.yarac");
+			break;
+
 		case Architecture::X86_64:
-			internalDatabase = getX86ElfDatabase();
+			path.append("x64.yarac");
 			break;
+
 		case Architecture::ARM:
-			internalDatabase = getArmElfDatabase();
+			if (bitWidth == 32) {
+				path.append("arm.yarac");
+			}
+			else {
+				path.append("arm64.yarac");
+			}
 			break;
-		case Architecture::POWERPC:
-			internalDatabase = getPowerPcElfDatabase();
-			break;
+
 		case Architecture::MIPS:
-			internalDatabase = getMipsElfDatabase();
+			if (bitWidth == 32) {
+				path.append("mips.yarac");
+			}
+			else {
+				path.append("mips64.yarac");
+			}
 			break;
-		default:
-			internalDatabase = nullptr;
+
+		case Architecture::POWERPC:
+			if (bitWidth == 32) {
+				path.append("ppc.yarac");
+			}
+			else {
+				path.append("ppc64.yarac");
+			}
+			break;
+	}
+
+	if (path.isFile()) {
+		internalPaths.emplace_back(path.getPath());
 	}
 }
 
 } // namespace cpdetect
 } // namespace retdec
+

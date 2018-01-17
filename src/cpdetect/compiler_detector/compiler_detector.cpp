@@ -5,12 +5,15 @@
  */
 
 #include "retdec/utils/conversion.h"
+#include "retdec/utils/binary_path.h"
 #include "retdec/utils/equality.h"
 #include "retdec/utils/filesystem_path.h"
 #include "retdec/utils/string.h"
 #include "retdec/cpdetect/compiler_detector/compiler_detector.h"
 #include "retdec/cpdetect/settings.h"
 #include "retdec/cpdetect/utils/version_solver.h"
+
+#include <iostream>
 
 using namespace retdec::fileformat;
 using namespace retdec::utils;
@@ -141,7 +144,7 @@ ToolType metaToTool(const std::string &toolMeta)
  */
 CompilerDetector::CompilerDetector(retdec::fileformat::FileFormat &parser, DetectParams &params, ToolInformation &toolInfo) :
 	fileParser(parser), cpParams(params), toolInfo(toolInfo), targetArchitecture(fileParser.getTargetArchitecture()),
-	search(new Search(fileParser)), heuristics(nullptr), internalDatabase(nullptr)
+	search(new Search(fileParser)), heuristics(nullptr), pathToShared(getThisBinaryDirectoryPath())
 {
 
 }
@@ -275,17 +278,12 @@ ReturnCode CompilerDetector::getAllSignatures()
 {
 	YaraDetector yara;
 
-	yara.addRules("import \"pe\"");
-	yara.addRules("import \"elf\"");
-	yara.addRules("import \"macho\"");
-
-	if(cpParams.internal && internalDatabase)
+	// Add internal paths.
+	for(const auto &ruleFile : internalPaths)
 	{
-		for(const auto *rules : *internalDatabase)
-		{
-			yara.addRules(rules);
-		}
+		yara.addRuleFile(ruleFile);
 	}
+
 	if(cpParams.external && getExternalDatabases())
 	{
 		for(const auto &item : externalDatabase)

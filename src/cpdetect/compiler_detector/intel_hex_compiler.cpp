@@ -14,11 +14,14 @@ namespace cpdetect {
 /**
  * Constructor
  */
-IntelHexCompiler::IntelHexCompiler(retdec::fileformat::IntelHexFormat &parser, DetectParams &params, ToolInformation &tools) : CompilerDetector(parser, params, tools)
+IntelHexCompiler::IntelHexCompiler(
+		fileformat::IntelHexFormat &parser, DetectParams &params, ToolInformation &tools)
+	: CompilerDetector(parser, params, tools)
 {
 	heuristics = new Heuristics(parser, *search, toolInfo);
 	externalSuffixes = EXTERNAL_DATABASE_SUFFIXES;
-	internalDatabase = nullptr;
+
+	/// @todo We should probably use same aproach as in raw data decompilation.
 }
 
 } // namespace cpdetect

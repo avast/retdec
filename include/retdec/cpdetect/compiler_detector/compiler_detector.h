@@ -7,6 +7,7 @@
 #ifndef RETDEC_CPDETECT_COMPILER_DETECTOR_COMPILER_DETECTOR_H
 #define RETDEC_CPDETECT_COMPILER_DETECTOR_COMPILER_DETECTOR_H
 
+#include "retdec/utils/filesystem_path.h"
 #include "retdec/utils/non_copyable.h"
 #include "yaracpp/yara_detector/yara_detector.h"
 #include "retdec/cpdetect/compiler_detector/heuristics/heuristics.h"
@@ -43,11 +44,13 @@ class CompilerDetector : private retdec::utils::NonCopyable
 		ReturnCode getAllCompilers();
 		/// @}
 	protected:
+		std::vector<std::string> internalPaths;     ///< internal database of rules
+		retdec::utils::FilesystemPath pathToShared; ///< path to shared folder
+
 		ToolInformation &toolInfo;                        ///< results - detected tools
 		retdec::fileformat::Architecture targetArchitecture;     ///< target architecture of input file
 		Search *search;                                   ///< class for search in signature
 		Heuristics *heuristics;                           ///< class for heuristics detection of used tool
-		const std::vector<const char*> *internalDatabase; ///< internal database of rules
 		std::set<std::string> externalSuffixes;           ///< suffixes for external database files
 	public:
 		CompilerDetector(retdec::fileformat::FileFormat &parser, DetectParams &params, ToolInformation &toolInfo);
