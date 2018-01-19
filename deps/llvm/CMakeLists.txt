@@ -28,8 +28,8 @@ if(NOT PYTHON_EXECUTABLE)
 endif()
 
 ExternalProject_Add(llvm-project
-	SOURCE_DIR /home/peter/retdec-github/llvm
-#	URL https://github.com/avast-tl/llvm/archive/e7431aa1980227e15caf296bd1a8da85aa5706f4.zip
+#	SOURCE_DIR /home/peter/retdec-github/llvm
+	URL https://github.com/avast-tl/llvm/archive/ea2e5ded0a2ce31cbb52b32cd93446cbd2e7c8cc.zip
 #	URL_HASH SHA256=d30752a7cd23597cf54513b6ea69fa8c1311c631bd7bbfc816737249664443e9
 #	DOWNLOAD_NAME llvm.zip
 	CMAKE_ARGS
