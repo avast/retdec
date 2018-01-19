@@ -107,7 +107,9 @@ if (NOT TARGET openssl)
 		BUILD_COMMAND
 			${OPENSSL_MAKE}
 		INSTALL_COMMAND
-			${OPENSSL_MAKE} install
+			# Install only the software parts (libraries and includes), not
+			# e.g. documentation and manual pages.
+			${OPENSSL_MAKE} install_sw
 		LOG_DOWNLOAD 1
 		LOG_BUILD 1
 		LOG_CONFIGURE 1
