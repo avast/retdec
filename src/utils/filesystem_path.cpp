@@ -5,6 +5,7 @@
  */
 
 #include <string>
+#include <iterator>
 
 #include "retdec/utils/filesystem_path.h"
 #include "retdec/utils/os.h"
@@ -148,7 +149,7 @@ public:
 		if (FindFirstFile(_path.c_str(), &ffd) == reinterpret_cast<HANDLE>(-1))
 			return false;
 
-		return _isDirectoryffd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY;
+		return ffd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY;
 	}
 
 	virtual bool isAbsolute() override
