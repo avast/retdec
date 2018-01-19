@@ -7,6 +7,8 @@ ExternalProject_Add(elfio-project
 	CMAKE_ARGS
 		# This does not work on MSVC, but may be useful on Linux.
 		-DCMAKE_BUILD_TYPE=Release
+	# Disable the configure step - header only.
+	CONFIGURE_COMMAND ""
 	# Disable the build step.
 	BUILD_COMMAND ""
 	# Disable the update step.
