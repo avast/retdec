@@ -10,8 +10,8 @@ if(CMAKE_CXX_COMPILER)
 endif()
 
 ExternalProject_Add(googletest
-	URL https://github.com/google/googletest/archive/5490beb0602eab560fa3969a4410e11d94bf12af.zip
-	URL_HASH SHA256=fb94ea2c653f239fb57e423afef372ebb5e019418af58f8bb2ce946679a6187b
+	URL https://github.com/google/googletest/archive/051053054df6d2dbedd5f572ae288f2f82a289b7.zip
+	URL_HASH SHA256=77c1945377d936787d7a0630f9dd9825c327657530d7ae02915cc271ecdcb1c7
 	DOWNLOAD_NAME googletest.zip
 	CMAKE_ARGS
 		# This does not work on MSVC, but is useful on Linux.
