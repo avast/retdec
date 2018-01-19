@@ -67,6 +67,11 @@ ExternalProject_Add(llvm-project
 		#                     need to also link the tinfo library.
 		-DLLVM_ENABLE_TERMINFO=YES
 
+		# Disable build of unnecessary LLVM parts.
+		-DLLVM_BUILD_TOOLS=OFF
+		-DLLVM_BUILD_UTILS=OFF
+		-DLLVM_BUILD_RUNTIME=OFF
+
 	# Disable the installation right after build (we want to install the
 	# needed libraries and tools manually).
 	INSTALL_COMMAND ""
