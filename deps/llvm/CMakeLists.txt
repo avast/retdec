@@ -130,7 +130,6 @@ set(LLVM_LIB_LIST
 	LLVMCore
 	LLVMMC
 	LLVMObject
-	LLVMMCDisassembler
 	LLVMProfileData
 	LLVMPasses
 	LLVMLinker
