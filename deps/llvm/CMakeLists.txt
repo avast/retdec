@@ -122,7 +122,6 @@ set(LLVM_LIB_LIST
 	LLVMVectorize
 	LLVMMCParser
 	LLVMCodeGen
-	LLVMObjCARCOpts
 	LLVMScalarOpts
 	LLVMTransformUtils
 	LLVMAnalysis
