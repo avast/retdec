@@ -12,6 +12,7 @@ endif()
 ExternalProject_Add(googletest
 	URL https://github.com/google/googletest/archive/5490beb0602eab560fa3969a4410e11d94bf12af.zip
 	URL_HASH SHA256=fb94ea2c653f239fb57e423afef372ebb5e019418af58f8bb2ce946679a6187b
+	DOWNLOAD_NAME googletest.zip
 	CMAKE_ARGS
 		# This does not work on MSVC, but is useful on Linux.
 		-DCMAKE_BUILD_TYPE=Release

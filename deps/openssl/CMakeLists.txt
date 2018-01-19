@@ -82,6 +82,7 @@ set(OPENSSL_INSTALL_DIR    "${OPENSSL_PREFIX}/src/openssl-install")
 set(OPENSSL_VERSION        "1.1.0f")
 set(OPENSSL_URL            "https://www.openssl.org/source/openssl-${OPENSSL_VERSION}.tar.gz")
 set(OPENSSL_ARCHIVE_SHA256 "12f746f3f2493b2f39da7ecf63d7ee19c6ac9ec6a4fcd8c229da8a522cb12765")
+set(OPENSSL_DOWNLOAD_NAME  "openssl.tar.gz")
 
 set(OPENSSL_CONFIGURE_OPTIONS
 	no-shared
@@ -96,6 +97,7 @@ if (NOT TARGET openssl)
 		PREFIX ${OPENSSL_PREFIX}
 		URL ${OPENSSL_URL}
 		URL_HASH SHA256=${OPENSSL_ARCHIVE_SHA256}
+		DOWNLOAD_NAME ${OPENSSL_DOWNLOAD_NAME}
 		CONFIGURE_COMMAND
 			${PERL_EXECUTABLE}
 			${OPENSSL_SRC_DIR}/Configure

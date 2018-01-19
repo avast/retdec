@@ -3,6 +3,7 @@ include(ExternalProject)
 ExternalProject_Add(yaracpp-project
 	URL https://github.com/avast-tl/yaracpp/archive/v1.0.1.zip
 	URL_HASH SHA256=2252ba7cfd9b190d3e260a741bbd2abc0fbd7c0422eb13d878278a89016c4fda
+	DOWNLOAD_NAME yaracpp.zip
 	CMAKE_ARGS
 		# This does not work on MSVC, but may be useful on Linux.
 		-DCMAKE_BUILD_TYPE=Release

@@ -7,6 +7,7 @@ include(ExternalProject)
 ExternalProject_Add(yaramod-project
 	URL https://github.com/avast-tl/yaramod/archive/v1.0.1.zip
 	URL_HASH SHA256=20793f99bd1a22e9b743400653d54790a48457ef0ae1cf8f089a1bf3bf38f339
+	DOWNLOAD_NAME yaramod.zip
 	CMAKE_ARGS
 		# This does not work on MSVC, but may be useful on Linux.
 		-DCMAKE_BUILD_TYPE=Release

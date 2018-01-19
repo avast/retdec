@@ -3,6 +3,7 @@ include(ExternalProject)
 ExternalProject_Add(capstone-project
 	URL https://github.com/avast-tl/capstone/archive/27c713fe4f6eaf9721785932d850b6291a6073fe.zip
 	URL_HASH SHA256=4d8d0461d7d5737893253698cd0b6d0d64545c1a74b166e8b1d823156a3109cb
+	DOWNLOAD_NAME capstone.zip
 	CMAKE_ARGS
 		# This does not work on MSVC, but may be useful on Linux.
 		-DCMAKE_BUILD_TYPE=Release
