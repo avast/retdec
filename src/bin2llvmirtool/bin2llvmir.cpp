@@ -35,7 +35,6 @@
 #include <llvm/IRReader/IRReader.h>
 #include <llvm/InitializePasses.h>
 #include <llvm/LinkAllIR.h>
-#include <llvm/LinkAllPasses.h>
 #include <llvm/MC/SubtargetFeature.h>
 #include <llvm/Support/Debug.h>
 #include <llvm/Support/FileSystem.h>
