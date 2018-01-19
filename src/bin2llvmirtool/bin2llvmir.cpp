@@ -272,9 +272,6 @@ static inline void addPassWithoutVerification(
  */
 void initializeLlvmPasses()
 {
-	InitializeAllTargets();
-	InitializeAllTargetMCs();
-	InitializeAllAsmPrinters();
 	// Initialize passes
 	PassRegistry &Registry = *PassRegistry::getPassRegistry();
 	initializeCore(Registry);

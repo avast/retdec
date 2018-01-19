@@ -109,9 +109,6 @@ set(LLVM_LIB_LIST
 	LLVMOrcJIT
 	LLVMExecutionEngine
 	LLVMRuntimeDyld
-	LLVMX86CodeGen
-	LLVMX86AsmParser
-	LLVMX86Disassembler
 	LLVMBitWriter
 	LLVMIRReader
 	LLVMInstrumentation
@@ -120,17 +117,13 @@ set(LLVM_LIB_LIST
 	LLVMipo
 	LLVMAsmPrinter
 	LLVMSelectionDAG
-	LLVMX86Desc
 	LLVMAsmParser
 	LLVMBitReader
 	LLVMVectorize
 	LLVMMCParser
 	LLVMCodeGen
-	LLVMX86AsmPrinter
-	LLVMX86Info
 	LLVMObjCARCOpts
 	LLVMScalarOpts
-	LLVMX86Utils
 	LLVMTransformUtils
 	LLVMAnalysis
 	LLVMTarget
@@ -139,7 +132,6 @@ set(LLVM_LIB_LIST
 	LLVMObject
 	LLVMMCDisassembler
 	LLVMProfileData
-	LLVMDebugInfoCodeView
 	LLVMPasses
 	LLVMLinker
 	LLVMInstCombine
