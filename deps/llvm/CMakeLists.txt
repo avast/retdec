@@ -111,7 +111,6 @@ set(LLVM_LIB_LIST
 	LLVMRuntimeDyld
 	LLVMBitWriter
 	LLVMIRReader
-	LLVMInstrumentation
 	LLVMObject
 	LLVMSupport
 	LLVMipo
