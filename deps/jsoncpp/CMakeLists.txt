@@ -19,6 +19,11 @@ ExternalProject_Add(jsoncpp-project
 		# compiler, which may result in link errors.
 		"${CMAKE_C_COMPILER_OPTION}"
 		"${CMAKE_CXX_COMPILER_OPTION}"
+		# Disable unused options.
+		-DJSONCPP_WITH_TESTS=OFF
+		-DJSONCPP_WITH_POST_BUILD_UNITTEST=OFF
+		-DJSONCPP_WITH_PKGCONFIG_SUPPORT=OFF
+		-DBUILD_SHARED_LIBS=OFF
 	# Disable the update step.
 	UPDATE_COMMAND ""
 	# Disable the install step.
