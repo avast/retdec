@@ -104,18 +104,13 @@ add_library(llvm INTERFACE)
 add_dependencies(llvm llvm-project)
 
 set(LLVM_LIB_LIST
-	LLVMInterpreter
-	LLVMMCJIT
-	LLVMOrcJIT
-	LLVMExecutionEngine
-	LLVMRuntimeDyld
 	LLVMBitWriter
 	LLVMIRReader
 	LLVMObject
 	LLVMSupport
 	LLVMipo
-	LLVMAsmPrinter
-	LLVMSelectionDAG
+	LLVMAsmPrinter #
+	LLVMSelectionDAG #
 	LLVMAsmParser
 	LLVMBitReader
 	LLVMVectorize
