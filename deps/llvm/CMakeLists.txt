@@ -109,8 +109,6 @@ set(LLVM_LIB_LIST
 	LLVMObject
 	LLVMSupport
 	LLVMipo
-	LLVMAsmPrinter #
-	LLVMSelectionDAG #
 	LLVMAsmParser
 	LLVMBitReader
 	LLVMVectorize
