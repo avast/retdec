@@ -3,6 +3,7 @@ include(ExternalProject)
 ExternalProject_Add(tinyxml2-project
 	URL https://github.com/leethomason/tinyxml2/archive/cc1745b552dd12bb1297a99f82044f83b06729e0.zip
 	URL_HASH SHA256=de255ce39ba1efe20cbffdebd3eea2d08f1269d03440a4fd60e142b0481c3f00
+	DOWNLOAD_NAME tinyxml2.zip
 	CMAKE_ARGS
 		# This does not work on MSVC, but may be useful on Linux.
 		-DCMAKE_BUILD_TYPE=Release
