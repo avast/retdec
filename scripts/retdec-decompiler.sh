@@ -3,10 +3,10 @@
 # The script decompiles the given file into the selected target high-level language.
 #
 
-SCRIPTPATH="$( cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P )"
+SCRIPT_DIR="$( cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P )"
 
 if [ -z "$DECOMPILER_UTILS" ]; then
-	DECOMPILER_UTILS="$SCRIPTPATH/retdec-utils.sh"
+	DECOMPILER_UTILS="$SCRIPT_DIR/retdec-utils.sh"
 fi
 
 . "$DECOMPILER_UTILS"

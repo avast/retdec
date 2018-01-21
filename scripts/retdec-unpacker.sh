@@ -26,10 +26,10 @@ RET_UNPACKER_FAILED=4
 # 10 other errors
 #RET_OTHER_ERRORS=10
 
-SCRIPTPATH="$( cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P )"
+SCRIPT_DIR="$( cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P )"
 
 if [ -z "$DECOMPILER_UTILS" ]; then
-	DECOMPILER_UTILS="$SCRIPTPATH/retdec-utils.sh"
+	DECOMPILER_UTILS="$SCRIPT_DIR/retdec-utils.sh"
 fi
 
 . "$DECOMPILER_UTILS"

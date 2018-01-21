@@ -3,10 +3,10 @@
 # Compilation and decompilation utility functions.
 #
 
-SCRIPTPATH="$( cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P )"
+SCRIPT_DIR="$( cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P )"
 
 if [ -z "$DECOMPILER_CONFIG" ]; then
-	DECOMPILER_CONFIG="$SCRIPTPATH/retdec-config.sh"
+	DECOMPILER_CONFIG="$SCRIPT_DIR/retdec-config.sh"
 fi
 
 . "$DECOMPILER_CONFIG"
