@@ -64,8 +64,8 @@ check_arguments()
 	OUT=${OUT:="$IN"-unpacked}
 
 	# Convert to absolute paths.
-	IN="$(readlink -f "$IN")"
-	OUT="$(readlink -f "$OUT")"
+	IN="$(get_realpath "$IN")"
+	OUT="$(get_realpath "$OUT")"
 }
 
 #

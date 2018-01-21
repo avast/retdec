@@ -97,7 +97,7 @@ if [ -z "$OUT_PATH" ]; then
 	die_with_error_and_cleanup "option -o|--output is compulsory"
 else
 	FILE_PATH="$OUT_PATH"
-	DIR="$(dirname "$(readlink -f "$FILE_PATH")")"
+	DIR="$(dirname "$(get_realpath "$FILE_PATH")")"
 	DIR_PATH=$(mktemp -d "$DIR/XXXXXXXXX")
 fi
 

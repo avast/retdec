@@ -162,10 +162,10 @@ check_arguments()
 	fi
 
 	# Convert to absolute paths.
-	IN="$(readlink -f "$IN")"
-	OUT="$(readlink -f "$OUT")"
+	IN="$(get_realpath "$IN")"
+	OUT="$(get_realpath "$OUT")"
 	if [ -e "$PDB_FILE" ]; then
-		PDB_FILE="$(readlink -f "$PDB_FILE")"
+		PDB_FILE="$(get_realpath "$PDB_FILE")"
 	fi
 
 	# Check that selected ranges are valid.
