@@ -1,6 +1,6 @@
 #!/bin/bash
 
-SCRIPT_DIR="$( cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P )"
+SCRIPT_DIR="$(dirname "$(readlink -e "$0")")"
 
 if [ -z "$DECOMPILER_UTILS" ]; then
 	DECOMPILER_UTILS="$SCRIPT_DIR/retdec-utils.sh"

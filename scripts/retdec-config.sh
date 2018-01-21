@@ -3,7 +3,7 @@
 # Decompiler's configuration. This file should be included in every decompilation script.
 #
 
-SCRIPT_DIR="$( cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P )"
+SCRIPT_DIR="$(dirname "$(readlink -e "$0")")"
 
 ##
 ## Paths (everything has to be without the ending slash '/').
