@@ -74,7 +74,9 @@ fi
 
 # Compute hash of the downloaded archive.
 echo "Verfifying archive's checksum ..."
-SHA256SUM=$(sha256sum "$SUPPORT_DIR/$ARCH_NAME" | cut -d' ' -f1)
+SHA256SUM_COMMAND=sha256sum
+command -v gsha256sum >&/dev/null && SHA256SUM_COMMAND=gsha256sum
+SHA256SUM=$($SHA256SUM_COMMAND "$SUPPORT_DIR/$ARCH_NAME" | cut -d' ' -f1)
 SHA256SUM_RC=$?
 if [ "$SHA256SUM_RC" -ne 0 ]; then
 	echo "ERROR: sha256sum failed"
