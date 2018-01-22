@@ -1,5 +1,12 @@
 include(ExternalProject)
 
+if(CMAKE_C_COMPILER)
+	set(CMAKE_C_COMPILER_OPTION "-DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}")
+endif()
+if(CMAKE_CXX_COMPILER)
+	set(CMAKE_CXX_COMPILER_OPTION "-DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}")
+endif()
+
 # Keystone requires python3, so we first check whether python3 is installed as
 # "python3", and if not, we suppose that `python` runs python3.
 # Python is used to generate LLVMBuild.cmake file. Python2 generates this file
@@ -19,6 +26,11 @@ ExternalProject_Add(keystone-project
 		# Force python version set in this cmake file.
 		-DPYTHON_EXECUTABLE=${PYTHON_EXECUTABLE}
 		-DKEYSTONE_BUILD_STATIC_RUNTIME=OFF
+		# Force the use of the same compiler as used to build the top-level
+		# project. Otherwise, the external project may pick up a different
+		# compiler, which may result in link errors.
+		"${CMAKE_C_COMPILER_OPTION}"
+		"${CMAKE_CXX_COMPILER_OPTION}"
 	# Disable the update step.
 	UPDATE_COMMAND ""
 	# Disable the install step.

@@ -1,5 +1,12 @@
 include(ExternalProject)
 
+if(CMAKE_C_COMPILER)
+	set(CMAKE_C_COMPILER_OPTION "-DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}")
+endif()
+if(CMAKE_CXX_COMPILER)
+	set(CMAKE_CXX_COMPILER_OPTION "-DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}")
+endif()
+
 ExternalProject_Add(yaracpp-project
 	URL https://github.com/avast-tl/yaracpp/archive/v1.0.1.zip
 	URL_HASH SHA256=2252ba7cfd9b190d3e260a741bbd2abc0fbd7c0422eb13d878278a89016c4fda
@@ -7,6 +14,11 @@ ExternalProject_Add(yaracpp-project
 	CMAKE_ARGS
 		# This does not work on MSVC, but may be useful on Linux.
 		-DCMAKE_BUILD_TYPE=Release
+		# Force the use of the same compiler as used to build the top-level
+		# project. Otherwise, the external project may pick up a different
+		# compiler, which may result in link errors.
+		"${CMAKE_C_COMPILER_OPTION}"
+		"${CMAKE_CXX_COMPILER_OPTION}"
 	# Disable the update step.
 	UPDATE_COMMAND ""
 	# Disable the install step.
