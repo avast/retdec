@@ -2,11 +2,7 @@
 find_package(OpenSSL QUIET 1.0.1)
 if(OPENSSL_FOUND)
 	add_library(openssl-crypto INTERFACE)
-	target_include_directories(openssl-crypto SYSTEM INTERFACE "${OPENSSL_INCLUDE_DIR}")
-	target_link_libraries(openssl-crypto INTERFACE "${OPENSSL_LIBRARIES}")
-	if(MSVC)
-		target_link_libraries(openssl-crypto INTERFACE ws2_32 gdi32 advapi32 crypt32 user32)
-	endif()
+	target_link_libraries(openssl-crypto INTERFACE OpenSSL::Crypto)
 	return()
 endif()
 
@@ -146,5 +142,5 @@ if (NOT TARGET openssl)
 		target_link_libraries(openssl-crypto INTERFACE ws2_32 gdi32 advapi32 crypt32 user32)
 	endif()
 	add_dependencies(openssl-crypto openssl)
-
+	
 endif()
