@@ -3,14 +3,14 @@
 # Decompiler's configuration. This file should be included in every decompilation script.
 #
 
-SCRIPTPATH="$( cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P )"
+SCRIPT_DIR="$(dirname "$(readlink -e "$0")")"
 
 ##
 ## Paths (everything has to be without the ending slash '/').
 ##
 
 # Paths relative from script path.
-INSTALL_BIN_DIR="$SCRIPTPATH"
+INSTALL_BIN_DIR="$SCRIPT_DIR"
 UNIT_TESTS_DIR="$INSTALL_BIN_DIR"
 INSTALL_SHARE_DIR="$INSTALL_BIN_DIR/../share/retdec"
 INSTALL_SUPPORT_DIR="$INSTALL_SHARE_DIR/support"

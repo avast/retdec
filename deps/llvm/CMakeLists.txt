@@ -3,6 +3,13 @@ if(UNIX)
 	find_package(ZLIB REQUIRED)
 endif()
 
+if(CMAKE_C_COMPILER)
+	set(CMAKE_C_COMPILER_OPTION "-DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}")
+endif()
+if(CMAKE_CXX_COMPILER)
+	set(CMAKE_CXX_COMPILER_OPTION "-DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}")
+endif()
+
 # Set the default build type to 'Release'
 if (NOT CMAKE_BUILD_TYPE)
 	set(default_build_type "Release")
@@ -72,6 +79,12 @@ ExternalProject_Add(llvm-project
 		-DLLVM_BUILD_TOOLS=OFF
 		-DLLVM_BUILD_UTILS=OFF
 		-DLLVM_BUILD_RUNTIME=OFF
+		
+		# Force the use of the same compiler as used to build the top-level
+		# project. Otherwise, the external project may pick up a different
+		# compiler, which may result in link errors.
+		"${CMAKE_C_COMPILER_OPTION}"
+		"${CMAKE_CXX_COMPILER_OPTION}"
 
 	# Disable the installation right after build (we want to install the
 	# needed libraries and tools manually).

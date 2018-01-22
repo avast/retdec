@@ -1,5 +1,12 @@
 include(ExternalProject)
 
+if(CMAKE_C_COMPILER)
+	set(CMAKE_C_COMPILER_OPTION "-DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}")
+endif()
+if(CMAKE_CXX_COMPILER)
+	set(CMAKE_CXX_COMPILER_OPTION "-DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}")
+endif()
+
 ExternalProject_Add(capstone-project
 	URL https://github.com/avast-tl/capstone/archive/27c713fe4f6eaf9721785932d850b6291a6073fe.zip
 	URL_HASH SHA256=4d8d0461d7d5737893253698cd0b6d0d64545c1a74b166e8b1d823156a3109cb
@@ -24,7 +31,12 @@ ExternalProject_Add(capstone-project
 		-DCAPSTONE_SYSZ_SUPPORT=OFF
 		-DCAPSTONE_XCORE_SUPPORT=OFF
 		-DCAPSTONE_TMS320C64X_SUPPORT=OFF
-		-DCAPSTONE_M680X_SUPPORT=OFF		
+		-DCAPSTONE_M680X_SUPPORT=OFF
+		# Force the use of the same compiler as used to build the top-level
+		# project. Otherwise, the external project may pick up a different
+		# compiler, which may result in link errors.
+		"${CMAKE_C_COMPILER_OPTION}"
+		"${CMAKE_CXX_COMPILER_OPTION}"
 	# Disable the update step.
 	UPDATE_COMMAND ""
 	# Disable the install step.

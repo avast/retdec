@@ -3,10 +3,10 @@
 # The script decompiles the given file into the selected target high-level language.
 #
 
-SCRIPTPATH="$( cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P )"
+SCRIPT_DIR="$(dirname "$(readlink -e "$0")")"
 
 if [ -z "$DECOMPILER_UTILS" ]; then
-	DECOMPILER_UTILS="$SCRIPTPATH/retdec-utils.sh"
+	DECOMPILER_UTILS="$SCRIPT_DIR/retdec-utils.sh"
 fi
 
 . "$DECOMPILER_UTILS"
@@ -162,10 +162,10 @@ check_arguments()
 	fi
 
 	# Convert to absolute paths.
-	IN="$(readlink -f "$IN")"
-	OUT="$(readlink -f "$OUT")"
+	IN="$(get_realpath "$IN")"
+	OUT="$(get_realpath "$OUT")"
 	if [ -e "$PDB_FILE" ]; then
-		PDB_FILE="$(readlink -f "$PDB_FILE")"
+		PDB_FILE="$(get_realpath "$PDB_FILE")"
 	fi
 
 	# Check that selected ranges are valid.

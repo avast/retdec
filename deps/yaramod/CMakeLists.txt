@@ -4,6 +4,13 @@ find_package(BISON REQUIRED)
 
 include(ExternalProject)
 
+if(CMAKE_C_COMPILER)
+	set(CMAKE_C_COMPILER_OPTION "-DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}")
+endif()
+if(CMAKE_CXX_COMPILER)
+	set(CMAKE_CXX_COMPILER_OPTION "-DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}")
+endif()
+
 ExternalProject_Add(yaramod-project
 	URL https://github.com/avast-tl/yaramod/archive/v1.0.1.zip
 	URL_HASH SHA256=20793f99bd1a22e9b743400653d54790a48457ef0ae1cf8f089a1bf3bf38f339
@@ -11,6 +18,11 @@ ExternalProject_Add(yaramod-project
 	CMAKE_ARGS
 		# This does not work on MSVC, but may be useful on Linux.
 		-DCMAKE_BUILD_TYPE=Release
+		# Force the use of the same compiler as used to build the top-level
+		# project. Otherwise, the external project may pick up a different
+		# compiler, which may result in link errors.
+		"${CMAKE_C_COMPILER_OPTION}"
+		"${CMAKE_CXX_COMPILER_OPTION}"
 	# Disable the update step.
 	UPDATE_COMMAND ""
 	# Disable the install step.
