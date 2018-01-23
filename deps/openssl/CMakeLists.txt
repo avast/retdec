@@ -1,10 +1,11 @@
 
-find_package(OpenSSL QUIET 1.0.1)
+find_package(OpenSSL 1.0.1)
 if(OPENSSL_FOUND)
 	add_library(openssl-crypto INTERFACE)
 	target_link_libraries(openssl-crypto INTERFACE OpenSSL::Crypto)
 	return()
 endif()
+message(STATUS "  --> OpenSSL will be built as an external project")
 
 find_package(Perl REQUIRED)
 
@@ -142,5 +143,5 @@ if (NOT TARGET openssl)
 		target_link_libraries(openssl-crypto INTERFACE ws2_32 gdi32 advapi32 crypt32 user32)
 	endif()
 	add_dependencies(openssl-crypto openssl)
-	
+
 endif()
