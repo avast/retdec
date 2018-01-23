@@ -10,8 +10,8 @@ if(CMAKE_CXX_COMPILER)
 endif()
 
 ExternalProject_Add(googletest
-	URL https://github.com/google/googletest/archive/5490beb0602eab560fa3969a4410e11d94bf12af.zip
-	URL_HASH SHA256=fb94ea2c653f239fb57e423afef372ebb5e019418af58f8bb2ce946679a6187b
+	URL https://github.com/google/googletest/archive/83fa0cb17dad47a1d905526dcdddb5b96ed189d2.zip
+	URL_HASH SHA256=3b7cf6bfd1fdec3204933b4c0419c010e89b2409dcd8cbc1ac6a78aab058e2b0
 	DOWNLOAD_NAME googletest.zip
 	CMAKE_ARGS
 		# This does not work on MSVC, but is useful on Linux.
@@ -57,17 +57,20 @@ add_dependencies(gtest googletest)
 add_library(gtest_main INTERFACE)
 target_link_libraries(gtest_main INTERFACE debug ${binary_dir}/googlemock/gtest/${DEBUG_DIR}${CMAKE_STATIC_LIBRARY_PREFIX}gtest_main${DEBUG_LIB_SUFFIX}${CMAKE_STATIC_LIBRARY_SUFFIX} ${CMAKE_THREAD_LIBS_INIT})
 target_link_libraries(gtest_main INTERFACE optimized ${binary_dir}/googlemock/gtest/${RELEASE_DIR}${CMAKE_STATIC_LIBRARY_PREFIX}gtest_main${CMAKE_STATIC_LIBRARY_SUFFIX} ${CMAKE_THREAD_LIBS_INIT})
+target_link_libraries(gtest_main INTERFACE gtest)
 target_include_directories(gtest_main SYSTEM INTERFACE ${GTEST_INCLUDE_DIR})
 add_dependencies(gtest_main googletest)
 
 add_library(gmock INTERFACE)
 target_link_libraries(gmock INTERFACE debug ${binary_dir}/googlemock/${DEBUG_DIR}${CMAKE_STATIC_LIBRARY_PREFIX}gmock${DEBUG_LIB_SUFFIX}${CMAKE_STATIC_LIBRARY_SUFFIX} ${CMAKE_THREAD_LIBS_INIT})
 target_link_libraries(gmock INTERFACE optimized ${binary_dir}/googlemock/${RELEASE_DIR}${CMAKE_STATIC_LIBRARY_PREFIX}gmock${CMAKE_STATIC_LIBRARY_SUFFIX} ${CMAKE_THREAD_LIBS_INIT})
+target_link_libraries(gmock INTERFACE gtest)
 target_include_directories(gmock SYSTEM INTERFACE ${GTEST_INCLUDE_DIR} ${GMOCK_INCLUDE_DIR})
 add_dependencies(gmock googletest)
 
 add_library(gmock_main INTERFACE)
 target_link_libraries(gmock_main INTERFACE debug ${binary_dir}/googlemock/${DEBUG_DIR}${CMAKE_STATIC_LIBRARY_PREFIX}gmock_main${DEBUG_LIB_SUFFIX}${CMAKE_STATIC_LIBRARY_SUFFIX} ${CMAKE_THREAD_LIBS_INIT})
 target_link_libraries(gmock_main INTERFACE optimized ${binary_dir}/googlemock/${RELEASE_DIR}${CMAKE_STATIC_LIBRARY_PREFIX}gmock_main${CMAKE_STATIC_LIBRARY_SUFFIX} ${CMAKE_THREAD_LIBS_INIT})
+target_link_libraries(gmock_main INTERFACE gmock)
 target_include_directories(gmock_main SYSTEM INTERFACE ${GTEST_INCLUDE_DIR} ${GMOCK_INCLUDE_DIR})
 add_dependencies(gmock_main googletest)
