@@ -85,20 +85,17 @@ std::string getCurrentYear() {
 * @brief Returns date in human readable form.
 * @param tm Timestamp for conversion.
 */
-std::string timestampToDate(std::tm *tm)
-{
-	if(!tm) {
+std::string timestampToDate(std::tm *tm) {
+	if (!tm) {
 		return "";
 	}
 	const auto conDate = getDate(tm);
 	const auto conTime = getTime(tm);
 	if (conDate.empty() && conTime.empty()) {
 		return "";
-	}
-	else if (conDate.empty()) {
+	} else if (conDate.empty()) {
 		return conTime;
-	}
-	else if (conTime.empty()) {
+	} else if (conTime.empty()) {
 		return conDate;
 	}
 
