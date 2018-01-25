@@ -13,9 +13,13 @@ namespace cpdetect {
 
 /**
  * Constructor
+ * @param parser Parser of input file
+ * @param searcher Signature search engine
+ * @param toolInfo Structure for information about detected tools
  */
-MachOHeuristics::MachOHeuristics(retdec::fileformat::MachOFormat &parser, Search &searcher, ToolInformation &toolInfo) :
-	Heuristics(parser, searcher, toolInfo)
+MachOHeuristics::MachOHeuristics(
+		MachOFormat &parser, Search &searcher, ToolInformation &toolInfo)
+	: Heuristics(parser, searcher, toolInfo)
 {
 
 }
@@ -36,7 +40,7 @@ void MachOHeuristics::getUpxHeuristic()
 	auto source = DetectionMethod::STRING_SEARCH_H;
 	auto strength = DetectionStrength::MEDIUM;
 
-	if(search.hasString("UPX!", 0, 0x400))
+	if (search.hasString("UPX!", 0, 0x400))
 	{
 		addPacker(source, strength, "UPX", getUpxVersion());
 	}

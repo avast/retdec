@@ -28,8 +28,8 @@ class Heuristics
 		/// @name Comment sections heuristics
 		/// @{
 		bool parseGccComment(const std::string &record);
-		bool parseOpen64Comment(const std::string &record);
 		bool parseGhcComment(const std::string &record);
+		bool parseOpen64Comment(const std::string &record);
 		void getCommentSectionsHeuristics();
 		/// @}
 
@@ -59,21 +59,29 @@ class Heuristics
 		/// @}
 
 	protected:
-		retdec::fileformat::FileFormat &fileParser;               ///< parser of input file
-		Search &search;                                    ///< class for search in signature (search engine)
-		ToolInformation &toolInfo;                         ///< results - detected tools
-		std::vector<const retdec::fileformat::Section*> sections; ///< information about file sections
-		std::size_t noOfSections;                          ///< number of sections stored in @a sections
-		bool priorityLanguageIsSet;                        ///< @c true - original language is detected and detection of other languages is disabled
-		bool canSearch;                                    ///< @c true - we can use search engine
+		Search &search; ///< signature search engine
+		bool canSearch; ///< @c true if we can use search engine
 
-		std::map<std::string, std::size_t> sectionNameMap;
+		retdec::fileformat::FileFormat &fileParser; ///< input file parser
+		ToolInformation &toolInfo;                  ///< results - detected tools
+
+		std::vector<const retdec::fileformat::Section*> sections; ///< section information
+		std::map<std::string, std::size_t> sectionNameMap;        ///< section name counts
+		std::size_t noOfSections;                                 ///< section count
+
+		/**
+		 * If @c true original language is detected with high reliability.
+		 * This disables further detection of used programming languages.
+		 */
+		bool priorityLanguageIsSet = false;
+
 
 		/// @name Auxiliary methods
 		/// @{
 		std::string getUpxVersion();
-		const DetectResult* isDetected(const std::string &name,
-			const DetectionStrength minStrength = DetectionStrength::LOW);
+		const DetectResult* isDetected(
+				const std::string &name,
+				const DetectionStrength minStrength = DetectionStrength::LOW);
 		/// @}
 
 		/// @name Virtual methods
@@ -84,28 +92,38 @@ class Heuristics
 
 		/// @name Add heuristic detection methods
 		/// @{
-		void addCompiler(DetectionMethod source, DetectionStrength strength, const std::string &name,
-			const std::string &version = "", const std::string &extra = "");
-		void addLinker(DetectionMethod source, DetectionStrength strength, const std::string &name,
-			const std::string &version = "", const std::string &extra = "");
-		void addInstaller(DetectionMethod source, DetectionStrength strength, const std::string &name,
-			const std::string &version = "", const std::string &extra = "");
-		void addPacker(DetectionMethod source, DetectionStrength strength, const std::string &name,
-			const std::string &version = "", const std::string &extra = "");
+		void addCompiler(
+				DetectionMethod source, DetectionStrength strength, const std::string &name,
+				const std::string &version = "", const std::string &extra = "");
+		void addLinker(
+				DetectionMethod source, DetectionStrength strength, const std::string &name,
+				const std::string &version = "", const std::string &extra = "");
+		void addInstaller(
+				DetectionMethod source, DetectionStrength strength, const std::string &name,
+				const std::string &version = "", const std::string &extra = "");
+		void addPacker(
+				DetectionMethod source, DetectionStrength strength, const std::string &name,
+				const std::string &version = "", const std::string &extra = "");
 		/// @}
 
 		/// @name Add signature detection methods
 		/// @{
-		void addCompiler(std::size_t matchNibbles, std::size_t totalNibbles, const std::string &name,
-			const std::string &version = "", const std::string &extra = "");
-		void addPacker(std::size_t matchNibbles, std::size_t totalNibbles, const std::string &name,
-			const std::string &version = "", const std::string &extra = "");
+		void addCompiler(
+				std::size_t matchNibbles, std::size_t totalNibbles, const std::string &name,
+				const std::string &version = "", const std::string &extra = "");
+		void addPacker(
+				std::size_t matchNibbles, std::size_t totalNibbles, const std::string &name,
+				const std::string &version = "", const std::string &extra = "");
 		/// @}
 
 		/// @name Add language methods
 		/// @{
-		void addLanguage(const std::string &name, const std::string &extraInfo = "", bool isBytecode = false);
-		void addPriorityLanguage(const std::string &name, const std::string &extraInfo = "", bool isBytecode = false);
+		void addLanguage(
+				const std::string &name, const std::string &extraInfo = "",
+				bool isBytecode = false);
+		void addPriorityLanguage(
+				const std::string &name, const std::string &extraInfo = "",
+				bool isBytecode = false);
 		/// @}
 
 		/// @name Other methods
@@ -115,7 +133,9 @@ class Heuristics
 		/// @}
 
 	public:
-		Heuristics(retdec::fileformat::FileFormat &parser, Search &searcher, ToolInformation &toolInfo);
+		Heuristics(
+				retdec::fileformat::FileFormat &parser, Search &searcher,
+				ToolInformation &toolInfo);
 		virtual ~Heuristics();
 
 		/// @name Heuristics methods

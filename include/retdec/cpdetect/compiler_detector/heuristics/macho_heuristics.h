@@ -34,7 +34,9 @@ class MachOHeuristics : public Heuristics
 		/// @}
 
 	public:
-		MachOHeuristics(retdec::fileformat::MachOFormat &parser, Search &searcher, ToolInformation &toolInfo);
+		MachOHeuristics(
+				retdec::fileformat::MachOFormat &parser, Search &searcher,
+				ToolInformation &toolInfo);
 		virtual ~MachOHeuristics() override;
 };
 
