@@ -168,9 +168,15 @@ public:
 
 	virtual std::string getAbsolutePath() override
 	{
+#ifdef PATH_MAX
 		char absolutePath[PATH_MAX] = { '\0' };
 		if (realpath(_path.c_str(), absolutePath) == nullptr)
 			return {};
+#else
+		char* absolutePathStr = realpath(_path.c_str(), nullptr);
+		std::string absolutePath = absolutePathStr;
+		free(absolutePathStr);
+#endif
 
 		return absolutePath;
 	}
