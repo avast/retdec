@@ -9,6 +9,7 @@
 
 #include "retdec/utils/filesystem_path.h"
 #include "retdec/utils/os.h"
+#include "retdec/utils/scope_exit.h"
 #include "retdec/utils/string.h"
 #include "retdec/utils/value.h"
 
@@ -174,8 +175,10 @@ public:
 			return {};
 #else
 		char* absolutePathStr = realpath(_path.c_str(), nullptr);
+		SCOPE_EXIT {
+			free(absolutePathStr);
+		};
 		std::string absolutePath = absolutePathStr;
-		free(absolutePathStr);
 #endif
 
 		return absolutePath;
@@ -185,15 +188,13 @@ public:
 	{
 		// dirname() can modify the path provided in parameter, so we need to make copy
 		char* copyPathStr = new char[_path.length() + 1];
+		SCOPE_EXIT {
+			delete[] copyPathStr;
+		};
 		strcpy(copyPathStr, _path.c_str());
 
 		// get the parent directory by calling dirname()
-		char* parentPathStr = dirname(copyPathStr);
-
-		// copy the parent path into the string, so we can free the memory
-		auto parentPath = std::string{parentPathStr};
-		delete[] copyPathStr;
-		return parentPath;
+		return dirname(copyPathStr);
 	}
 
 	virtual bool subpathsInDirectory(std::vector<std::string>& subpaths) override
