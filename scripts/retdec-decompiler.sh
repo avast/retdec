@@ -245,8 +245,7 @@ PARSED_OPTIONS=$(getopt -o "$GETOPT_SHORTOPT" -l "$GETOPT_LONGOPT" -n "$SCRIPT_N
 
 eval set -- "$PARSED_OPTIONS"
 
-while true ;
-do
+while true; do
 	case "$1" in
 	-a|--arch)						# Target architecture.
 		[ "$ARCH" ] && print_error_and_die "Duplicate option: -a|--arch"
@@ -497,10 +496,7 @@ done
 check_arguments
 
 if [ "$MODE" = "raw" ]; then
-
-	##
-	## Default values and initialization.
-	##
+	# Default values and initialization.
 	OUT_RAW_EXECUTABLE="$IN"
 
 	# Entry point for THUMB must be odd.
@@ -513,7 +509,6 @@ fi
 
 # Check for archives.
 if [ "$MODE" = "bin" ]; then
-
 	# Check for archives packed in Mach-O Universal Binaries.
 	echo "##### Checking if file is a Mach-O Universal static library..."
 	echo "RUN: $EXTRACT --list $IN"
@@ -937,9 +932,7 @@ if [ "$BACKEND_EMIT_CFG" ]; then
 	[ "$BACKEND_CFG_TEST" ] && LLVMIR2HLL_PARAMS+=(--backend-cfg-test)
 fi
 
-##
-## Decompile the optimized IR code.
-##
+# Decompile the optimized IR code.
 echo ""
 echo "##### Decompiling $OUT_BACKEND_BC into $OUT..."
 echo "RUN: $LLVMIR2HLL ${LLVMIR2HLL_PARAMS[@]}"
@@ -957,9 +950,8 @@ check_whether_decompilation_should_be_forcefully_stopped "llvmir2hll"
 GRAPH_FORMAT=${GRAPH_FORMAT:=png}
 BACKEND_CG_CONVERSION=${BACKEND_CG_CONVERSION:=auto}
 BACKEND_CFG_CONVERSION=${BACKEND_CFG_CONVERSION:=auto}
-##
-## Convert .dot graphs to desired format.
-##
+
+# Convert .dot graphs to desired format.
 if [[ ( "$BACKEND_EMIT_CG" && "$BACKEND_CG_CONVERSION" = "auto" ) ||
 		( "$BACKEND_EMIT_CFG" && "$BACKEND_CFG_CONVERSION" = "auto" ) ]]; then
 	echo ""
@@ -982,9 +974,7 @@ fi
 sed -i 's/[ \t]*$//' "$OUT"
 sed -i '$ { /^$/ d}' "$OUT"
 
-##
-## Colorize output file.
-##
+# Colorize output file.
 if [ "$COLOR_IDA" ]; then
 	"$IDA_COLORIZER" "$OUT" "$CONFIG"
 fi
