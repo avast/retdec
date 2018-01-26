@@ -275,7 +275,6 @@ void initializeLlvmPasses()
 	PassRegistry &Registry = *PassRegistry::getPassRegistry();
 	initializeCore(Registry);
 	initializeScalarOpts(Registry);
-	initializeVectorization(Registry);
 	initializeIPO(Registry);
 	initializeAnalysis(Registry);
 	initializeTransformUtils(Registry);

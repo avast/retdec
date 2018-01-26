@@ -119,11 +119,11 @@ set(LLVM_LIB_LIST
 	LLVMBitWriter
 	LLVMIRReader
 	LLVMObject
+	LLVMInstCombine
 	LLVMSupport
 	LLVMipo
 	LLVMAsmParser
 	LLVMBitReader
-	LLVMVectorize
 	LLVMMCParser
 	LLVMCodeGen
 	LLVMScalarOpts
@@ -133,11 +133,7 @@ set(LLVM_LIB_LIST
 	LLVMCore
 	LLVMMC
 	LLVMObject
-	LLVMProfileData
 	LLVMPasses
-	LLVMLinker
-	LLVMInstCombine
-	LLVMSupport
 )
 
 if(MSVC)
