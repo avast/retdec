@@ -2,6 +2,8 @@
 
 # dev
 
+* Enhancement: Speeded up build by skipping compilation of unnecessary dependencies (e.g. unused LLVM libraries, tools, and examples).
+* Enhancement: OpenSSL is now automatically built only if it is not found in your system.
 * Enhancement: Added support for a system-wide installation ([#94](https://github.com/avast-tl/retdec/issues/94)).
 * Enhancement: Prefixed all the installed binaries and scripts with `retdec-` ([#70](https://github.com/avast-tl/retdec/issues/70)). Also, some tools were renamed to make their names more uniform.
 * Enhancement: Got rid of all git submodules ([#92](https://github.com/avast-tl/retdec/issues/92), [#93](https://github.com/avast-tl/retdec/issues/93)). Moved sources of all RetDec-related repositories to this main repository. Third-party dependencies are downloaded and built via CMake's external projects. This allows us to have e.g. only a single copy of LLVM ([#14](https://github.com/avast-tl/retdec/issues/14)) and not require a recursive clone ([#48](https://github.com/avast-tl/retdec/issues/48), [#68](https://github.com/avast-tl/retdec/issues/68), [#72](https://github.com/avast-tl/retdec/issues/72)).
