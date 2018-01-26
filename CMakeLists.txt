@@ -38,6 +38,34 @@ endif()
 set(EP_PREFIX "${PROJECT_BINARY_DIR}/external")
 set_directory_properties(PROPERTIES EP_PREFIX "${EP_PREFIX}")
 
+# Compilation warnings.
+if(MSVC)
+	# For the moment, suppress all warnings when building with MSVC on Windows
+	# because there are too many warnings that clutter the build output (#106).
+	# We should investigate the warnings, fix them, and then enable their
+	# emission (e.g. by replacing /W0 with /W3 in the code below).
+	if(CMAKE_CXX_FLAGS MATCHES "/W[0-4]")
+		string(REGEX REPLACE "/W[0-4]" "/W0" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+	else()
+		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W0")
+	endif()
+elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR
+		CMAKE_CXX_COMPILER_ID STREQUAL "Clang" OR
+		CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang")
+	# Enable standard warnings.
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra")
+
+	# Enable additional warnings that are not included in -Wall and -Wextra.
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wcast-align")
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wcast-qual")
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wswitch-default")
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wuninitialized")
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wold-style-cast")
+
+	# Disable warnings that produce more headaches than use.
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unused-parameter")
+endif()
+
 set(DEPS_TESTS ${RETDEC_TESTS})
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/install-external.cmake)
 
