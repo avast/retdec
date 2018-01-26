@@ -80,15 +80,18 @@ script:
   - cd ..
   - rm -rf build
   # Run unit tests.
-  - /usr/local/bin/bash retdec-install/bin/retdec-tests-runner.sh
+  - if [ "$TRAVIS_OS_NAME" = "osx" ]; then /usr/local/bin/bash retdec-install/bin/retdec-tests-runner.sh; fi
+  - if [ "$TRAVIS_OS_NAME" = "linux" ]; then ./retdec-install/bin/retdec-tests-runner.sh; fi
   # Run decompilation script.
-  - /usr/local/bin/bash retdec-install/bin/retdec-decompiler.sh --help
+  - if [ "$TRAVIS_OS_NAME" = "osx" ]; then /usr/local/bin/bash retdec-install/bin/retdec-decompiler.sh --help; fi
+  - if [ "$TRAVIS_OS_NAME" = "linux" ]; then ./retdec-install/bin/retdec-decompiler.sh --help; fi
   # Run simple decompilation.
   - echo -e '#include <stdio.h>\n#include <stdlib.h>\nint main()\n{\n  printf("hello world\\n");\n  return 0;\n}\n' > hello-orig.c
   - cat hello-orig.c
   - gcc -m32 -o hello hello-orig.c
   - ./hello
-  - /usr/local/bin/bash retdec-install/bin/retdec-decompiler.sh hello
+  - if [ "$TRAVIS_OS_NAME" = "osx" ]; then /usr/local/bin/bash retdec-install/bin/retdec-decompiler.sh hello; fi
+  - if [ "$TRAVIS_OS_NAME" = "linux" ]; then ./retdec-install/bin/retdec-decompiler.sh hello; fi
   - cat hello.c
   - grep "int main(int argc, char \*\* argv)" hello.c
 
