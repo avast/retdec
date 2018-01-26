@@ -19,6 +19,8 @@ ExternalProject_Add(elfio-project
 		# compiler, which may result in link errors.
 		"${CMAKE_C_COMPILER_OPTION}"
 		"${CMAKE_CXX_COMPILER_OPTION}"
+	# Disable the configure step - header only.
+	CONFIGURE_COMMAND ""
 	# Disable the build step.
 	BUILD_COMMAND ""
 	# Disable the update step.

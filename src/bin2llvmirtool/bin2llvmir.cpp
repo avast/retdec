@@ -35,7 +35,6 @@
 #include <llvm/IRReader/IRReader.h>
 #include <llvm/InitializePasses.h>
 #include <llvm/LinkAllIR.h>
-#include <llvm/LinkAllPasses.h>
 #include <llvm/MC/SubtargetFeature.h>
 #include <llvm/Support/Debug.h>
 #include <llvm/Support/FileSystem.h>
@@ -272,34 +271,16 @@ static inline void addPassWithoutVerification(
  */
 void initializeLlvmPasses()
 {
-	InitializeAllTargets();
-	InitializeAllTargetMCs();
-	InitializeAllAsmPrinters();
 	// Initialize passes
 	PassRegistry &Registry = *PassRegistry::getPassRegistry();
 	initializeCore(Registry);
 	initializeScalarOpts(Registry);
-	initializeObjCARCOpts(Registry);
 	initializeVectorization(Registry);
 	initializeIPO(Registry);
 	initializeAnalysis(Registry);
 	initializeTransformUtils(Registry);
 	initializeInstCombine(Registry);
-	initializeInstrumentation(Registry);
 	initializeTarget(Registry);
-	// For codegen passes, only passes that do IR to IR transformation are
-	// supported.
-	initializeCodeGenPreparePass(Registry);
-	initializeAtomicExpandPass(Registry);
-	initializeRewriteSymbolsPass(Registry);
-	initializeWinEHPreparePass(Registry);
-	initializeDwarfEHPreparePass(Registry);
-	initializeSafeStackPass(Registry);
-	initializeSjLjEHPreparePass(Registry);
-	initializePreISelIntrinsicLoweringLegacyPassPass(Registry);
-	initializeGlobalMergePass(Registry);
-	initializeInterleavedAccessPass(Registry);
-	initializeUnreachableBlockElimLegacyPassPass(Registry);
 }
 
 /**

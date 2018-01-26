@@ -6,18 +6,6 @@
 
 #include <iostream>
 
-#include <llvm/ADT/StringExtras.h>
-#include <llvm/ADT/Triple.h>
-#include <llvm/Bitcode/ReaderWriter.h>
-#include <llvm/CodeGen/LinkAllCodegenComponents.h>
-#include <llvm/ExecutionEngine/GenericValue.h>
-#include <llvm/ExecutionEngine/Interpreter.h>
-#include <llvm/ExecutionEngine/JITEventListener.h>
-#include <llvm/ExecutionEngine/MCJIT.h>
-#include <llvm/ExecutionEngine/ObjectCache.h>
-#include <llvm/ExecutionEngine/Orc/OrcRemoteTargetClient.h>
-#include <llvm/ExecutionEngine/OrcMCJITReplacement.h>
-#include <llvm/ExecutionEngine/SectionMemoryManager.h>
 #include <llvm/IR/CallSite.h>
 #include <llvm/IR/GetElementPtrTypeIterator.h>
 #include <llvm/IR/IRBuilder.h>
@@ -26,9 +14,6 @@
 #include <llvm/IR/Module.h>
 #include <llvm/IR/Type.h>
 #include <llvm/IR/TypeBuilder.h>
-#include <llvm/IRReader/IRReader.h>
-#include <llvm/Object/Archive.h>
-#include <llvm/Object/ObjectFile.h>
 #include <llvm/Support/CommandLine.h>
 #include <llvm/Support/Debug.h>
 #include <llvm/Support/DynamicLibrary.h>
@@ -46,7 +31,6 @@
 #include <llvm/Support/SourceMgr.h>
 #include <llvm/Support/TargetSelect.h>
 #include <llvm/Support/raw_ostream.h>
-#include <llvm/Transforms/Instrumentation.h>
 
 #include "retdec/llvmir-emul/llvmir_emul.h"
 

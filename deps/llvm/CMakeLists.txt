@@ -35,9 +35,10 @@ if(NOT PYTHON_EXECUTABLE)
 endif()
 
 ExternalProject_Add(llvm-project
-	URL https://github.com/avast-tl/llvm/archive/e7431aa1980227e15caf296bd1a8da85aa5706f4.zip
-	URL_HASH SHA256=d30752a7cd23597cf54513b6ea69fa8c1311c631bd7bbfc816737249664443e9
-	DOWNLOAD_NAME llvm.zip
+#	SOURCE_DIR /home/peter/retdec-github/llvm
+	URL https://github.com/avast-tl/llvm/archive/ea2e5ded0a2ce31cbb52b32cd93446cbd2e7c8cc.zip
+#	URL_HASH SHA256=d30752a7cd23597cf54513b6ea69fa8c1311c631bd7bbfc816737249664443e9
+#	DOWNLOAD_NAME llvm.zip
 	CMAKE_ARGS
 		# Force a release build (we don't need to debug LLVM).
 		# This has no effect on Windows with MSVC, but is useful on Linux.
@@ -74,6 +75,11 @@ ExternalProject_Add(llvm-project
 		#                     need to also link the tinfo library.
 		-DLLVM_ENABLE_TERMINFO=YES
 
+		# Disable build of unnecessary LLVM parts.
+		-DLLVM_BUILD_TOOLS=OFF
+		-DLLVM_BUILD_UTILS=OFF
+		-DLLVM_BUILD_RUNTIME=OFF
+		
 		# Force the use of the same compiler as used to build the top-level
 		# project. Otherwise, the external project may pick up a different
 		# compiler, which may result in link errors.
@@ -111,43 +117,24 @@ add_library(llvm INTERFACE)
 add_dependencies(llvm llvm-project)
 
 set(LLVM_LIB_LIST
-	LLVMInterpreter
-	LLVMMCJIT
-	LLVMRuntimeDyld
-	LLVMOrcJIT
-	LLVMExecutionEngine
-	LLVMRuntimeDyld
-	LLVMX86CodeGen
-	LLVMX86AsmParser
-	LLVMX86Disassembler
 	LLVMBitWriter
 	LLVMIRReader
-	LLVMInstrumentation
 	LLVMObject
 	LLVMSupport
 	LLVMipo
-	LLVMAsmPrinter
-	LLVMSelectionDAG
-	LLVMX86Desc
 	LLVMAsmParser
 	LLVMBitReader
 	LLVMVectorize
 	LLVMMCParser
 	LLVMCodeGen
-	LLVMX86AsmPrinter
-	LLVMX86Info
-	LLVMObjCARCOpts
 	LLVMScalarOpts
-	LLVMX86Utils
 	LLVMTransformUtils
 	LLVMAnalysis
 	LLVMTarget
 	LLVMCore
 	LLVMMC
 	LLVMObject
-	LLVMMCDisassembler
 	LLVMProfileData
-	LLVMDebugInfoCodeView
 	LLVMPasses
 	LLVMLinker
 	LLVMInstCombine
