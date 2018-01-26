@@ -30,7 +30,6 @@ test_script:
   # Test that install is movable and that it does not need build directory.
   - cmd: mv install ../retdec-install
   - cmd: cd ..
-  - cmd: rm -rf build
   # Run unit tests.
   - cmd: C:\msys64\usr\bin\bash.exe retdec-install\bin\retdec-tests-runner.sh
   # Run decompilation script.
