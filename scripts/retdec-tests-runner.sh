@@ -11,6 +11,13 @@ fi
 . "$DECOMPILER_CONFIG"
 
 #
+# First argument can be verbose.
+#
+if [ "$1" = "-v" ] || [ "$1" = "--verbose" ]; then
+	VERBOSE=1
+fi
+
+#
 # Emits a colored version of the given message to the standard output (without
 # a new line).
 #
@@ -58,8 +65,12 @@ run_unit_tests_in_dir() {
 		unit_test_name="$(sed 's/^.*\/bin\///' <<< "$unit_test")"
 		echo_colored "$unit_test_name" "yellow"
 		echo ""
-		$unit_test --gtest_color=yes | grep -v "RUN\|OK\|----------\|==========" |\
-			grep -v "^$" | grep -v "Running main() from gmock_main.cc"
+		if [ "$VERBOSE" ]; then
+			$unit_test --gtest_color=yes
+		else
+			$unit_test --gtest_color=yes | grep -v "RUN\|OK\|----------\|==========" |\
+				grep -v "^$" | grep -v "Running main() from gmock_main.cc"
+		fi
 		RC=${PIPESTATUS[0]}
 		if [ "$RC" != "0" ]; then
 			TESTS_FAILED="1"
