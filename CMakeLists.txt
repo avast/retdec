@@ -66,7 +66,6 @@ elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unused-parameter")
 endif()
 
-set(DEPS_TESTS ${RETDEC_TESTS})
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/install-external.cmake)
 
 add_subdirectory(deps)
