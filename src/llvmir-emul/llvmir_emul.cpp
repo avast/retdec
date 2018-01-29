@@ -3055,10 +3055,9 @@ void LlvmIrEmulator::visitCallInst(llvm::CallInst& I)
 	if (cf && cf->isDeclaration() && cf->isIntrinsic() &&
 			cf->getIntrinsicID() != Intrinsic::fabs) // can not lower fabs
 	{
-		auto iId = cf->getIntrinsicID();
-		assert(iId != Intrinsic::vastart
-				&& iId != Intrinsic::vaend
-				&& iId != Intrinsic::vacopy);
+		assert(cf->getIntrinsicID() != Intrinsic::vastart
+				&& cf->getIntrinsicID() != Intrinsic::vaend
+				&& cf->getIntrinsicID() != Intrinsic::vacopy);
 
 		BasicBlock::iterator me(&I);
 		BasicBlock *Parent = I.getParent();
