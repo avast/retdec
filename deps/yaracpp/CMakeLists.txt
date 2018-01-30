@@ -22,6 +22,9 @@ set(YARA_DIR          ${binary_dir}/deps/yara/src/yara)
 set(YARA_INCLUDE_DIR  ${YARA_DIR}/libyara/include)
 set(YARA_LIBRARY_NAME "libyara")
 
+# Add yarac path for yara rules compilation.
+set(YARAC_PATH ${YARA_DIR}/yarac CACHE STRING "Path to yarac binary" FORCE)
+
 if(MSVC)
 	if(CMAKE_SIZEOF_VOID_P EQUAL 8)
 		set(YARA_LIBRARY_NAME "${YARA_LIBRARY_NAME}64")
