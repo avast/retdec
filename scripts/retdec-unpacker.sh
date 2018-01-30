@@ -26,10 +26,10 @@ RET_UNPACKER_FAILED=4
 # 10 other errors
 #RET_OTHER_ERRORS=10
 
-SCRIPTPATH="$( cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P )"
+SCRIPT_DIR="$(dirname "$(readlink -e "$0")")"
 
 if [ -z "$DECOMPILER_UTILS" ]; then
-	DECOMPILER_UTILS="$SCRIPTPATH/retdec-utils.sh"
+	DECOMPILER_UTILS="$SCRIPT_DIR/retdec-utils.sh"
 fi
 
 . "$DECOMPILER_UTILS"
@@ -64,8 +64,8 @@ check_arguments()
 	OUT=${OUT:="$IN"-unpacked}
 
 	# Convert to absolute paths.
-	IN="$(readlink -f "$IN")"
-	OUT="$(readlink -f "$OUT")"
+	IN="$(get_realpath "$IN")"
+	OUT="$(get_realpath "$OUT")"
 }
 
 #

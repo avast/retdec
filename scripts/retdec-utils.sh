@@ -3,13 +3,33 @@
 # Compilation and decompilation utility functions.
 #
 
-SCRIPTPATH="$( cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P )"
+SCRIPT_DIR="$(dirname "$(readlink -e "$0")")"
 
 if [ -z "$DECOMPILER_CONFIG" ]; then
-	DECOMPILER_CONFIG="$SCRIPTPATH/retdec-config.sh"
+	DECOMPILER_CONFIG="$SCRIPT_DIR/retdec-config.sh"
 fi
 
 . "$DECOMPILER_CONFIG"
+
+#
+# Prints the real, physical location of a directory or file, relative or
+# absolute.
+# 1 argument is needed
+#
+get_realpath()
+{
+	local input_path="$1"
+	# Use cygpath.exe on cygwin, due to cygwins virtual folder mountpoints
+	# (i.e., "/cygdrive/c/foo/bar" becomes "c:/foo/bar").
+	# cygpath args:
+	#   -m -- mixed mode, that is, forward slashes, instead of backward slashes
+	#   -a -- absolute path (regardless if input is relative or not)
+	if [[ "$(uname -s)" == *CYGWIN* ]]; then
+		cygpath -ma "$input_path"
+	else
+		readlink -f "$input_path"
+	fi
+}
 
 #
 # Print error message to stderr and die.

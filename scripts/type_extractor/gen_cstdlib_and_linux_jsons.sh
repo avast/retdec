@@ -70,7 +70,7 @@ FILES_FILTER=${FILES_FILTER:${#SEP}}
 #
 # Paths.
 #
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")"; pwd -P)"
+SCRIPT_DIR="$(dirname "$(readlink -e "$0")")"
 SCRIPT_NAME="$(basename "$SCRIPT_NAME")"
 EXTRACTOR="$SCRIPT_DIR/extract_types.py"
 MERGER="$SCRIPT_DIR/merge_jsons.py"

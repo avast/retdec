@@ -3,6 +3,13 @@ if(UNIX)
 	find_package(ZLIB REQUIRED)
 endif()
 
+if(CMAKE_C_COMPILER)
+	set(CMAKE_C_COMPILER_OPTION "-DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}")
+endif()
+if(CMAKE_CXX_COMPILER)
+	set(CMAKE_CXX_COMPILER_OPTION "-DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}")
+endif()
+
 # Set the default build type to 'Release'
 if (NOT CMAKE_BUILD_TYPE)
 	set(default_build_type "Release")
@@ -28,8 +35,9 @@ if(NOT PYTHON_EXECUTABLE)
 endif()
 
 ExternalProject_Add(llvm-project
-	URL https://github.com/avast-tl/llvm/archive/e7431aa1980227e15caf296bd1a8da85aa5706f4.zip
-	URL_HASH SHA256=d30752a7cd23597cf54513b6ea69fa8c1311c631bd7bbfc816737249664443e9
+	URL https://github.com/avast-tl/llvm/archive/257248365d034351e164aae04060f0d8f4c5b1f1.zip
+	URL_HASH SHA256=0088e715fd92d9670398514791563f1efc727d5a81b5cac8830c7e746ab26c06
+	DOWNLOAD_NAME llvm.zip
 	CMAKE_ARGS
 		# Force a release build (we don't need to debug LLVM).
 		# This has no effect on Windows with MSVC, but is useful on Linux.
@@ -66,6 +74,17 @@ ExternalProject_Add(llvm-project
 		#                     need to also link the tinfo library.
 		-DLLVM_ENABLE_TERMINFO=YES
 
+		# Disable build of unnecessary LLVM parts.
+		-DLLVM_BUILD_TOOLS=OFF
+		-DLLVM_BUILD_UTILS=OFF
+		-DLLVM_BUILD_RUNTIME=OFF
+
+		# Force the use of the same compiler as used to build the top-level
+		# project. Otherwise, the external project may pick up a different
+		# compiler, which may result in link errors.
+		"${CMAKE_C_COMPILER_OPTION}"
+		"${CMAKE_CXX_COMPILER_OPTION}"
+
 	# Disable the installation right after build (we want to install the
 	# needed libraries and tools manually).
 	INSTALL_COMMAND ""
@@ -97,47 +116,24 @@ add_library(llvm INTERFACE)
 add_dependencies(llvm llvm-project)
 
 set(LLVM_LIB_LIST
-	LLVMInterpreter
-	LLVMMCJIT
-	LLVMRuntimeDyld
-	LLVMOrcJIT
-	LLVMExecutionEngine
-	LLVMRuntimeDyld
-	LLVMX86CodeGen
-	LLVMX86AsmParser
-	LLVMX86Disassembler
 	LLVMBitWriter
 	LLVMIRReader
-	LLVMInstrumentation
 	LLVMObject
+	LLVMInstCombine
 	LLVMSupport
 	LLVMipo
-	LLVMAsmPrinter
-	LLVMSelectionDAG
-	LLVMX86Desc
 	LLVMAsmParser
 	LLVMBitReader
-	LLVMVectorize
 	LLVMMCParser
 	LLVMCodeGen
-	LLVMX86AsmPrinter
-	LLVMX86Info
-	LLVMObjCARCOpts
 	LLVMScalarOpts
-	LLVMX86Utils
 	LLVMTransformUtils
 	LLVMAnalysis
 	LLVMTarget
 	LLVMCore
 	LLVMMC
 	LLVMObject
-	LLVMMCDisassembler
-	LLVMProfileData
-	LLVMDebugInfoCodeView
 	LLVMPasses
-	LLVMLinker
-	LLVMInstCombine
-	LLVMSupport
 )
 
 if(MSVC)

@@ -1,0 +1,107 @@
+language: cpp
+
+cache: ccache
+
+matrix:
+  fast_finish: true
+  include:
+    - os: linux
+      dist: trusty
+      compiler: gcc-4.9
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - build-essential
+            - gcc-4.8-multilib
+            - gcc-4.9
+            - g++-4.9
+            - cmake
+            - perl
+            - python3
+            - flex
+            - bison
+            - autoconf
+            - automake
+            - libtool
+            - pkg-config
+            - m4
+            - coreutils
+            - zlib1g-dev
+            - libtinfo-dev
+            - wget
+            - bc
+            - upx
+            - openssl
+      env:
+        - MATRIX_EVAL="CC=gcc-4.9 && CXX=g++-4.9 && NPROC=$(nproc)"
+        # We need this so that ccache does not cause compilation errors.
+        # e.g. retdec/tests/utils/string_tests.cpp:276:2: error: stray '\' in program
+        - CCACHE_CPP2=true
+
+    - os: osx
+      osx_image: xcode8.3
+      env:
+        - MATRIX_EVAL="NPROC=$(sysctl -n hw.physicalcpu)"
+        - CCACHE_CPP2=true
+
+install:
+  # We need to install newer versions of Flex and Bison on MacOS X.
+  - if [ "$TRAVIS_OS_NAME" = "osx" ]; then brew install flex bison; fi
+  # ccache is not installed on OS X.
+  - if [ "$TRAVIS_OS_NAME" = "osx" ]; then brew install ccache; fi
+  # gnu-getopt
+  - if [ "$TRAVIS_OS_NAME" = "osx" ]; then brew install gnu-getopt; fi
+  # bash 4
+  - if [ "$TRAVIS_OS_NAME" = "osx" ]; then brew install bash; fi
+
+before_script:
+  - eval "${MATRIX_EVAL}"
+  # We need to use newer versions of Flex and Bison on MacOS X (the ones from Homebrew).
+  - if [ "$TRAVIS_OS_NAME" = "osx" ]; then export CMAKE_INCLUDE_PATH="/usr/local/opt/flex/include"; fi
+  - if [ "$TRAVIS_OS_NAME" = "osx" ]; then export CMAKE_LIBRARY_PATH="/usr/local/opt/flex/lib;/usr/local/opt/bison/lib"; fi
+  - if [ "$TRAVIS_OS_NAME" = "osx" ]; then export PATH="/usr/local/opt/flex/bin:/usr/local/opt/bison/bin:$PATH"; fi
+  # Coreutils.
+  - if [ "$TRAVIS_OS_NAME" = "osx" ]; then export PATH="$(brew --prefix coreutils)/libexec/gnubin:$PATH"; fi
+  - if [ "$TRAVIS_OS_NAME" = "osx" ]; then ln -s /usr/local/bin/greadlink /usr/local/bin/readlink; fi
+  - if [ "$TRAVIS_OS_NAME" = "osx" ]; then export PATH="/usr/local/opt/gnu-getopt/bin:$PATH"; fi
+  # We need to add ccache before everything else in PATH.
+  - if [ "$TRAVIS_OS_NAME" = "osx" ]; then export PATH="/usr/local/opt/ccache/libexec:$PATH"; fi
+
+script:
+  - mkdir build && cd build
+  # We use "-O0" to speed-up build.
+  # "-O0" causes segfaults in LLVM if we do not use "-DNDEBUG" as well.
+  - cmake -DCMAKE_CXX_FLAGS_RELEASE="-O0 -DNDEBUG" -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="$(pwd)/install" -DRETDEC_TESTS=ON -DRETDEC_DEV_TOOLS=ON ..
+  - time make install -j $NPROC
+  # Test that install is movable and that it does not need build directory.
+  - mv install ../retdec-install
+  - cd ..
+  - rm -rf build
+  # Run unit tests.
+  - if [ "$TRAVIS_OS_NAME" = "osx" ]; then /usr/local/bin/bash retdec-install/bin/retdec-tests-runner.sh; fi
+  - if [ "$TRAVIS_OS_NAME" = "linux" ]; then ./retdec-install/bin/retdec-tests-runner.sh; fi
+  # Run decompilation script.
+  - if [ "$TRAVIS_OS_NAME" = "osx" ]; then /usr/local/bin/bash retdec-install/bin/retdec-decompiler.sh --help; fi
+  - if [ "$TRAVIS_OS_NAME" = "linux" ]; then ./retdec-install/bin/retdec-decompiler.sh --help; fi
+  # Run simple decompilation.
+  - echo -e '#include <stdio.h>\n#include <stdlib.h>\nint main()\n{\n  printf("hello world\\n");\n  return 0;\n}\n' > hello-orig.c
+  - cat hello-orig.c
+  - gcc -m32 -o hello hello-orig.c
+  - ./hello
+  - if [ "$TRAVIS_OS_NAME" = "osx" ]; then /usr/local/bin/bash retdec-install/bin/retdec-decompiler.sh hello; fi
+  - if [ "$TRAVIS_OS_NAME" = "linux" ]; then ./retdec-install/bin/retdec-decompiler.sh hello; fi
+  - cat hello.c
+  - grep "int main(int argc, char \*\* argv)" hello.c
+
+branches:
+  only:
+    # Pushes and PRs to the master branch.
+    - master
+    # Version tags.
+    - /^v?\d+\.\d+.*$/
+
+notifications:
+  email:
+    on_success: never

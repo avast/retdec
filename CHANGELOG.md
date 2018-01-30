@@ -2,10 +2,12 @@
 
 # dev
 
+* Enhancement: Speeded up build by skipping compilation of unnecessary dependencies (e.g. unused LLVM libraries, tools, and examples).
+* Enhancement: OpenSSL is now automatically built only if it is not found in your system.
 * Enhancement: Added support for a system-wide installation ([#94](https://github.com/avast-tl/retdec/issues/94)).
 * Enhancement: Prefixed all the installed binaries and scripts with `retdec-` ([#70](https://github.com/avast-tl/retdec/issues/70)). Also, some tools were renamed to make their names more uniform.
 * Enhancement: Got rid of all git submodules ([#92](https://github.com/avast-tl/retdec/issues/92), [#93](https://github.com/avast-tl/retdec/issues/93)). Moved sources of all RetDec-related repositories to this main repository. Third-party dependencies are downloaded and built via CMake's external projects. This allows us to have e.g. only a single copy of LLVM ([#14](https://github.com/avast-tl/retdec/issues/14)) and not require a recursive clone ([#48](https://github.com/avast-tl/retdec/issues/48), [#68](https://github.com/avast-tl/retdec/issues/68), [#72](https://github.com/avast-tl/retdec/issues/72)).
-* Enhancement: Set a proper `rpath` during installation on Linux and macOS ([#77](https://github.com/avast-tl/retdec/issues/77)). This allows us to move the installation directory after the installation into another location.
+* Enhancement: Set a proper `rpath` during installation on Linux and macOS ([#77](https://github.com/avast-tl/retdec/issues/77), [#100](https://github.com/avast-tl/retdec/issues/100)). This allows us to move the installation directory after the installation into another location.
 * Enhancement: Added community support for building and running RetDec inside Docker ([#60](https://github.com/avast-tl/retdec/pull/60)).
 * Enhancement: Decrease the default timeout when downloading the support package during installation ([#6](https://github.com/avast-tl/retdec/pull/6)).
 * Enhancement: Any shell can be used to install the decompiler, not just Bash.
@@ -22,6 +24,7 @@
 * Fix: When installing the decompiler, do not remove the entire `share` directory ([#12](https://github.com/avast-tl/retdec/issues/12)).
 * Fix: Improve OS type detection when installing the decompiler.
 * Fix: Remove useless OS type detection when running decompilations ([#10](https://github.com/avast-tl/retdec/issues/10)).
+* Fix: Filesystem path in utils now returns correct information when it is appended with another path.
 
 # v3.0 (2017-12-13)
 

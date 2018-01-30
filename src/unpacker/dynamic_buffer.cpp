@@ -82,7 +82,7 @@ DynamicBuffer::~DynamicBuffer()
  *
  * @param rhs Right hand side of the operator.
  *
- * @return The new DynamicBuffer opbject.
+ * @return The new DynamicBuffer object.
  */
 DynamicBuffer& DynamicBuffer::operator =(DynamicBuffer rhs)
 {
