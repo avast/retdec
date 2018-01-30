@@ -35,20 +35,23 @@ set(YARA_DIR          ${binary_dir}/deps/yara/src/yara)
 set(YARA_INCLUDE_DIR  ${YARA_DIR}/libyara/include)
 set(YARA_LIBRARY_NAME "libyara")
 
-# Add yarac path for yara rules compilation.
-set(YARAC_PATH ${YARA_DIR}/yarac CACHE STRING "Path to yarac binary" FORCE)
-
 if(MSVC)
 	if(CMAKE_SIZEOF_VOID_P EQUAL 8)
 		set(YARA_LIBRARY_NAME "${YARA_LIBRARY_NAME}64")
+		set(YARAC_NAME "yarac64.exe" CACHE STRING "Yarac binary name" FORCE)
 	else()
 		set(YARA_LIBRARY_NAME "${YARA_LIBRARY_NAME}32")
+		set(YARAC_NAME "yarac32.exe" CACHE STRING "Yarac binary name" FORCE)
 	endif()
 
 	set(YARA_WIN_DIR       ${YARA_DIR}/windows/vs2015)
 	set(YARA_LIBRARY_DIR   ${YARA_WIN_DIR}/libyara/$<CONFIGURATION>)
+	# Add yarac directory path for rules compilation - path will be completed later.
+	set(YARAC_DIR ${YARA_WIN_DIR} CACHE STRING "Path to yarac directory" FORCE)
 else()
 	set(YARA_LIBRARY_DIR   ${YARA_DIR}/libyara/.libs)
+	# Add yarac path for yara rules compilation.
+	set(YARAC_PATH ${YARA_DIR}/yarac CACHE STRING "Path to yarac binary" FORCE)
 endif()
 
 # Add libraries.
