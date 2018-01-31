@@ -258,7 +258,7 @@ while true; do
 		shift 2;;
 	-f|--format)					# Executable file format.
 		[ "$FORMAT" ] && print_error_and_die "Duplicate option: -f|--format"
-		[ "$2" != "elf" -a "$2" != "pe" -a "$2" != "ihex" -a "$2" != "macho" ] && print_error_and_die "Unsupported target format '$2'. Supported formats: ELF, PE, Intel HEX, Mach-O."
+		[ "$2" != "elf" -a "$2" != "pe" -a "$2" != "ihex" -a "$2" != "macho" ] && print_error_and_die "Unsupported target format '$2'. Supported formats: elf, pe, ihex, macho."
 		FORMAT="$2"
 		shift 2;;
 	-h|--help) 					# Help.
@@ -759,7 +759,7 @@ if [ "$MODE" = "bin" ] || [ "$MODE" = "raw" ]; then
 	FILECLASS=$("$CONFIGTOOL" "$CONFIG" --read --file-class)
 	if [ "$FILECLASS" != "16" ] && [ "$FILECLASS" != "32" ]; then
 		cleanup
-		print_error_and_die "Unsupported target format '${FORMAT^^}$FILECLASS'. Supported formats: ELF32, PE32, Intel HEX 32."
+		print_error_and_die "Unsupported target format '${FORMAT^^}$FILECLASS'. Supported formats: ELF32, PE32, Intel HEX 32, Mach-O 32."
 	fi
 
 	# Set path to statically linked code signatures.
