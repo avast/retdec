@@ -11,7 +11,7 @@ if(CMAKE_CXX_COMPILER)
 endif()
 
 # Set the default build type to 'Release'
-if (NOT CMAKE_BUILD_TYPE)
+if(NOT CMAKE_BUILD_TYPE)
 	set(default_build_type "Release")
 	message(STATUS "Setting build type to '${default_build_type}' as none was specified.")
 	set(CMAKE_BUILD_TYPE "${default_build_type}" CACHE STRING "Choose the type of build." FORCE)
@@ -155,7 +155,7 @@ if(UNIX)
 	target_link_libraries(llvm INTERFACE debug     ${ZLIB_LIBRARIES} dl)
 	target_link_libraries(llvm INTERFACE optimized ${ZLIB_LIBRARIES} dl)
 
-	if (NOT APPLE)
+	if(NOT APPLE)
 		target_link_libraries(llvm INTERFACE debug     rt tinfo)
 		target_link_libraries(llvm INTERFACE optimized rt tinfo)
 	else()

@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.6)
 project(retdec C CXX)
 
 # Set the default build type to 'Release'.
-if (NOT CMAKE_BUILD_TYPE)
+if(NOT CMAKE_BUILD_TYPE)
 	set(default_build_type "Release")
 	message(STATUS "Setting build type to '${default_build_type}' as none was specified.")
 	set(CMAKE_BUILD_TYPE "${default_build_type}" CACHE STRING "Choose the type of build." FORCE)
@@ -13,6 +13,8 @@ option(RETDEC_TESTS "Build tests." OFF)
 option(RETDEC_DEV_TOOLS "Build dev tools." OFF)
 
 set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
 
 # On Linux and macOS, set RPATH relative to the origin of the installed
 # executables (i.e. relative to the bin directory). This allows us to move the

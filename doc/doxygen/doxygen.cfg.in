@@ -2,7 +2,7 @@
 ## The following variables are use from CMake automatically:
 ##   PROJECT_NAME           = "@CMAKE_PROJECT_NAME@"
 ##   OUTPUT_DIRECTORY       = "@CMAKE_CURRENT_BINARY_DIR@"
-## 
+##
 ## The following variables may be set via CMake configuration:
 ##   WARNINGS               = @DOXYGEN_WARNINGS@
 ##   EXTRACT_PRIVATE        = @DOXYGEN_EXTRACT_PRIVATE@

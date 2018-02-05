@@ -2,6 +2,7 @@
 
 # dev
 
+* Enhancement: Build with `-std=c++14` instead of `-std=gnu++14` with GCC on Linux ([#76](https://github.com/avast-tl/retdec/issues/76)).
 * Enhancement: Speeded up build by skipping compilation of unnecessary dependencies (e.g. unused LLVM libraries, tools, and examples).
 * Enhancement: OpenSSL is now automatically built only if it is not found in your system.
 * Enhancement: Added support for a system-wide installation ([#94](https://github.com/avast-tl/retdec/issues/94)).

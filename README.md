@@ -1,7 +1,7 @@
 # RetDec
 
 [![Travis CI build status](https://travis-ci.org/avast-tl/retdec.svg?branch=master)](https://travis-ci.org/avast-tl/retdec)
-[![AppVeyor build status](https://ci.appveyor.com/api/projects/status/github/avast-tl/retdec?branch=master&svg=true)](https://ci.appveyor.com/project/avast-tl/retdec)
+[![AppVeyor build status](https://ci.appveyor.com/api/projects/status/github/avast-tl/retdec?branch=master&svg=true)](https://ci.appveyor.com/project/avast-tl/retdec?branch=master)
 
 [RetDec](https://retdec.com/) is a retargetable machine-code decompiler based on [LLVM](https://llvm.org/).
 

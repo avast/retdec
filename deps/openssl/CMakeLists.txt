@@ -100,48 +100,44 @@ set(OPENSSL_CONFIGURE_OPTIONS
 	--openssldir=${OPENSSL_INSTALL_DIR}
 )
 
-if (NOT TARGET openssl)
+ExternalProject_Add(openssl
+	PREFIX ${OPENSSL_PREFIX}
+	URL ${OPENSSL_URL}
+	URL_HASH SHA256=${OPENSSL_ARCHIVE_SHA256}
+	DOWNLOAD_NAME ${OPENSSL_DOWNLOAD_NAME}
+	CONFIGURE_COMMAND
+		${PERL_EXECUTABLE}
+		${OPENSSL_SRC_DIR}/Configure
+		${OPENSSL_CONFIGURE_OPTIONS}
+		${OPENSSL_CONFIGURE_ARCH}
+	BUILD_IN_SOURCE 1
+	BUILD_COMMAND
+		${OPENSSL_MAKE}
+	INSTALL_COMMAND
+		# Install only the software parts (libraries and includes), not
+		# e.g. documentation and manual pages.
+		${OPENSSL_MAKE} install_sw
+	LOG_DOWNLOAD 1
+	LOG_BUILD 1
+	LOG_CONFIGURE 1
+	LOG_INSTALL 1
+)
 
-	ExternalProject_Add(openssl
-		PREFIX ${OPENSSL_PREFIX}
-		URL ${OPENSSL_URL}
-		URL_HASH SHA256=${OPENSSL_ARCHIVE_SHA256}
-		DOWNLOAD_NAME ${OPENSSL_DOWNLOAD_NAME}
-		CONFIGURE_COMMAND
-			${PERL_EXECUTABLE}
-			${OPENSSL_SRC_DIR}/Configure
-			${OPENSSL_CONFIGURE_OPTIONS}
-			${OPENSSL_CONFIGURE_ARCH}
-		BUILD_IN_SOURCE 1
-		BUILD_COMMAND
-			${OPENSSL_MAKE}
-		INSTALL_COMMAND
-			# Install only the software parts (libraries and includes), not
-			# e.g. documentation and manual pages.
-			${OPENSSL_MAKE} install_sw
-		LOG_DOWNLOAD 1
-		LOG_BUILD 1
-		LOG_CONFIGURE 1
-		LOG_INSTALL 1
-	)
+set(OPENSSL_INCLUDES
+	"${OPENSSL_INSTALL_DIR}/include"
+	PARENT_SCOPE
+)
 
-	set(OPENSSL_INCLUDES
-		"${OPENSSL_INSTALL_DIR}/include"
-		PARENT_SCOPE
-	)
+set(OPENSSL_LIBRARIES
+	"${OPENSSL_INSTALL_DIR}/lib/libssl${CMAKE_STATIC_LIBRARY_SUFFIX}"
+	"${OPENSSL_INSTALL_DIR}/lib/libcrypto${CMAKE_STATIC_LIBRARY_SUFFIX}"
+	PARENT_SCOPE
+)
 
-	set(OPENSSL_LIBRARIES
-		"${OPENSSL_INSTALL_DIR}/lib/libssl${CMAKE_STATIC_LIBRARY_SUFFIX}"
-		"${OPENSSL_INSTALL_DIR}/lib/libcrypto${CMAKE_STATIC_LIBRARY_SUFFIX}"
-		PARENT_SCOPE
-	)
-
-	add_library(openssl-crypto INTERFACE)
-	target_include_directories(openssl-crypto SYSTEM INTERFACE "${OPENSSL_INSTALL_DIR}/include")
-	target_link_libraries(openssl-crypto INTERFACE "${OPENSSL_INSTALL_DIR}/lib/libcrypto${CMAKE_STATIC_LIBRARY_SUFFIX}")
-	if(MSVC)
-		target_link_libraries(openssl-crypto INTERFACE ws2_32 gdi32 advapi32 crypt32 user32)
-	endif()
-	add_dependencies(openssl-crypto openssl)
-
+add_library(openssl-crypto INTERFACE)
+target_include_directories(openssl-crypto SYSTEM INTERFACE "${OPENSSL_INSTALL_DIR}/include")
+target_link_libraries(openssl-crypto INTERFACE "${OPENSSL_INSTALL_DIR}/lib/libcrypto${CMAKE_STATIC_LIBRARY_SUFFIX}")
+if(MSVC)
+	target_link_libraries(openssl-crypto INTERFACE ws2_32 gdi32 advapi32 crypt32 user32)
 endif()
+add_dependencies(openssl-crypto openssl)

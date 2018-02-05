@@ -1,7 +1,7 @@
 find_package(Doxygen REQUIRED)
 
 # Variables.
-set(DOXYGEN_CFG_IN "doxygen.in")
+set(DOXYGEN_CFG_IN "doxygen.cfg.in")
 set(DOXYGEN_CFG "${CMAKE_CURRENT_BINARY_DIR}/doxygen.cfg")
 set(DOXYGEN_LOG "${CMAKE_CURRENT_BINARY_DIR}/doxygen.log")
 # The trailing '/' after html is significant.
