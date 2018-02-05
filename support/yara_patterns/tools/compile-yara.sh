@@ -56,7 +56,7 @@ fi
 # Convert from Windows to Unix path on Windows.
 case "$(uname -s)" in
 	*Windows*|*CYGWIN*|*MINGW*|*MSYS*)
- 		CC="$(echo "/$CC" | sed -e 's/\\/\//g' -e 's/://')"
+		CC="$(echo "/$CC" | sed -e 's/\\/\//g' -e 's/://')"
 		SRC="$(echo "/$SRC" | sed -e 's/\\/\//g' -e 's/://')"
 		OUT="$(echo "/$OUT" | sed -e 's/\\/\//g' -e 's/://')"
 		;;
