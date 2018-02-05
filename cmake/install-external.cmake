@@ -7,9 +7,8 @@ install(CODE "
 	if(INSTALL_SHARE_RES)
 		message(FATAL_ERROR \"RetDec share directory installation FAILED\")
 	endif()
-	if(${MSVC})
+	if(MSVC)
 		execute_process(
-			COMMAND sh \"${CMAKE_SOURCE_DIR}/cmake/compile-yara.sh\" \"${YARAC_DIR}/\${CMAKE_INSTALL_CONFIG_NAME}/${YARAC_NAME}\" \"${CMAKE_SOURCE_DIR}\" \"${CMAKE_INSTALL_PREFIX}\"
 			COMMAND sh \"${CMAKE_SOURCE_DIR}/cmake/compile-yara.sh\" \"${YARAC_DIR}/\${CMAKE_INSTALL_CONFIG_NAME}/${YARAC_NAME}\" \"${CMAKE_SOURCE_DIR}\" \"${CMAKE_INSTALL_PREFIX}\"
 			RESULT_VARIABLE COMPILE_YARA_RES
 		)
