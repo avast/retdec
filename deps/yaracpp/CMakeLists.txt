@@ -46,7 +46,7 @@ if(MSVC)
 
 	set(YARA_WIN_DIR       ${YARA_DIR}/windows/vs2015)
 	set(YARA_LIBRARY_DIR   ${YARA_WIN_DIR}/libyara/$<CONFIGURATION>)
-	set(YARAC_PATH         ${YARA_WIN_DIR}/$<CONFIGURATION>/yarac)
+	set(YARAC_PATH         ${YARA_WIN_DIR}/$<CONFIGURATION>/${YARAC_NAME})
 else()
 	set(YARA_LIBRARY_DIR   ${YARA_DIR}/libyara/.libs)
 	set(YARAC_PATH         ${YARA_DIR}/yarac)
