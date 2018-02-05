@@ -150,8 +150,9 @@ ToolInformation::~ToolInformation()
  * @param version Version of detected compiler
  * @param extra Extra information about compiler
  */
-void ToolInformation::addTool(DetectionMethod source, DetectionStrength strength, ToolType toolType,
-	const std::string &name, const std::string &version, const std::string &extra)
+void ToolInformation::addTool(
+		DetectionMethod source, DetectionStrength strength, ToolType toolType,
+		const std::string &name, const std::string &version, const std::string &extra)
 {
 	DetectResult compiler;
 	compiler.source = source;
@@ -162,8 +163,6 @@ void ToolInformation::addTool(DetectionMethod source, DetectionStrength strength
 	compiler.versionInfo = version;
 	compiler.additionalInfo = extra;
 	detectedTools.push_back(compiler);
-
-	setToolTypeVariables(toolType);
 }
 
 /**
@@ -177,8 +176,9 @@ void ToolInformation::addTool(DetectionMethod source, DetectionStrength strength
  *
  * This method implies DetectionMethod::SIGNATURE. Strength is computed.
  */
-void ToolInformation::addTool(std::size_t matchNibbles, std::size_t totalNibbles, ToolType toolType,
-	const std::string &name, const std::string &version, const std::string &extra)
+void ToolInformation::addTool(
+		std::size_t matchNibbles, std::size_t totalNibbles, ToolType toolType,
+		const std::string &name, const std::string &version, const std::string &extra)
 {
 	DetectResult compiler;
 	compiler.source = DetectionMethod::SIGNATURE;
@@ -203,8 +203,6 @@ void ToolInformation::addTool(std::size_t matchNibbles, std::size_t totalNibbles
 	compiler.versionInfo = version;
 	compiler.additionalInfo = extra;
 	detectedTools.push_back(compiler);
-
-	setToolTypeVariables(toolType);
 }
 
 /**
@@ -305,38 +303,6 @@ Packed ToolInformation::isPacked() const
 	}
 }
 
-/**
- * Set tool type variables
- * @param toolType type of detected tool
- */
-void ToolInformation::setToolTypeVariables(ToolType toolType)
-{
-	switch (toolType)
-	{
-		case ToolType::COMPILER:
-			compilerDetected = true;
-			break;
-
-		case ToolType::PACKER:
-			packerDetected = true;
-			break;
-
-		case ToolType::LINKER:
-			linkerDetected = true;
-			break;
-
-		case ToolType::INSTALLER:
-			installertDetected = true;
-			break;
-
-		case ToolType::OTHER:
-		case ToolType::UNKNOWN:
-			/* fall-thru */
-
-		default:
-			break;
-	}
-}
 
 /**
  * Constructor of Similarity structure

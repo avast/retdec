@@ -19,13 +19,13 @@ namespace cpdetect {
  * Create instance of CompilerDetector class
  * @param parser Parser of input file
  * @param params Parameters for compiler detection
- * @param toolInfo Into this parameter are stored detected compilers and (or) packers
+ * @param toolInfo Into this parameter are stored detected tools
  * @return Pointer to instance of CompilerDetector class or @c nullptr if any error
  *
  * If format of input file is not supported, function will return @c nullptr.
  */
-std::unique_ptr<CompilerDetector> createCompilerDetector(retdec::fileformat::FileFormat &parser,
-		DetectParams &params, ToolInformation &toolInfo)
+std::unique_ptr<CompilerDetector> createCompilerDetector(
+		retdec::fileformat::FileFormat &parser, DetectParams &params, ToolInformation &toolInfo)
 {
 	CoffFormat *coff = dynamic_cast<CoffFormat*>(&parser);
 	ElfFormat *elf = dynamic_cast<ElfFormat*>(&parser);

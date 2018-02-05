@@ -30,16 +30,45 @@ const std::string defaultError = "Error: Unknown error.";
  */
 const std::unordered_map<ReturnCode, std::string, retdec::utils::EnumClassKeyHash> errorMessages =
 {
-	{ ReturnCode::OK,                    "" },
-	{ ReturnCode::ARG,                   "Error: Invalid arguments." },
-	{ ReturnCode::FILE_NOT_EXIST,        "Error: The input file probably not exist or it is incorrect." },
-	{ ReturnCode::FILE_PROBLEM,          "Error: Problem occurred during processing the input file." },
-	{ ReturnCode::UNKNOWN_FORMAT,        "Error: File format of the input file is not supported." },
-	{ ReturnCode::FORMAT_PARSER_PROBLEM, "Error: Failed to parse the input file (it is probably corrupted)."},
-	{ ReturnCode::MACHO_AR_DETECTED,     "Error: File is a fat Mach-O binary with archives. Extract objects before using fileinfo." },
-	{ ReturnCode::ARCHIVE_DETECTED,      "Error: File is an archive. Use some archive tool (llvm-ar or similar)." },
-	{ ReturnCode::ENTRY_POINT_DETECTION, "Warning: Invalid address of entry point." },
-	{ ReturnCode::UNKNOWN_CP,            "Warning: Unknown compiler or packer." }
+	{
+		ReturnCode::OK,
+		""
+	},
+	{
+		ReturnCode::ARG,
+		"Error: Invalid arguments." },
+	{
+		ReturnCode::FILE_NOT_EXIST,
+		"Error: The input file probably not exist or it is incorrect."
+	},
+	{
+		ReturnCode::FILE_PROBLEM,
+		"Error: Problem occurred during processing the input file."
+	},
+	{
+		ReturnCode::UNKNOWN_FORMAT,
+		"Error: File format of the input file is not supported."
+	},
+	{
+		ReturnCode::FORMAT_PARSER_PROBLEM,
+		"Error: Failed to parse the input file (it is probably corrupted)."
+	},
+	{
+		ReturnCode::MACHO_AR_DETECTED,
+		"Error: File is a fat Mach-O binary with archives. Extract objects before using fileinfo."
+	},
+	{
+		ReturnCode::ARCHIVE_DETECTED,
+		"Error: File is an archive. Use some archive tool (llvm-ar or similar)."
+	},
+	{
+		ReturnCode::ENTRY_POINT_DETECTION,
+		"Warning: Invalid address of entry point."
+	},
+	{
+		ReturnCode::UNKNOWN_CP,
+		"Warning: Unknown compiler or packer."
+	}
 };
 
 } // anonymous namespace

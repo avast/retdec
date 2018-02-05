@@ -14,8 +14,8 @@
 namespace retdec {
 namespace cpdetect {
 
-std::unique_ptr<CompilerDetector> createCompilerDetector(retdec::fileformat::FileFormat &parser,
-		DetectParams &params, ToolInformation &toolInfo);
+std::unique_ptr<CompilerDetector> createCompilerDetector(
+        retdec::fileformat::FileFormat &parser, DetectParams &params, ToolInformation &toolInfo);
 
 } // namespace cpdetect
 } // namespace retdec

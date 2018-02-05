@@ -12,7 +12,8 @@
 namespace retdec {
 namespace cpdetect {
 
-std::string getErrorMessage(ReturnCode errorCode,
+std::string getErrorMessage(
+		ReturnCode errorCode,
 		retdec::fileformat::Format format = retdec::fileformat::Format::UNKNOWN);
 
 bool isFatalError(ReturnCode errorCode);
