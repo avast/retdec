@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 #
 # Compile and install tool signatures.
 # Usage: compile-yara.sh yarac-path source-path install-path

@@ -46,13 +46,23 @@ if(MSVC)
 
 	set(YARA_WIN_DIR       ${YARA_DIR}/windows/vs2015)
 	set(YARA_LIBRARY_DIR   ${YARA_WIN_DIR}/libyara/$<CONFIGURATION>)
-	# Add yarac directory path for rules compilation - path will be completed later.
-	set(YARAC_DIR ${YARA_WIN_DIR} CACHE STRING "Path to yarac directory" FORCE)
+	set(YARAC_PATH         ${YARA_WIN_DIR}/$<CONFIGURATION>/yarac)
 else()
 	set(YARA_LIBRARY_DIR   ${YARA_DIR}/libyara/.libs)
-	# Add yarac path for yara rules compilation.
-	set(YARAC_PATH ${YARA_DIR}/yarac CACHE STRING "Path to yarac binary" FORCE)
+	set(YARAC_PATH         ${YARA_DIR}/yarac)
 endif()
+
+# Compile YARA rules for tools detection.
+set(YARA_COMPILE_SH ${CMAKE_SOURCE_DIR}/support/yara_patterns/tools/compile-yara.sh)
+install(CODE "
+	execute_process(
+		COMMAND sh \"${YARA_COMPILE_SH}\" \"${YARAC_PATH}\" \"${CMAKE_SOURCE_DIR}\" \"${CMAKE_INSTALL_PREFIX}\"
+		RESULT_VARIABLE COMPILE_YARA_RES
+	)
+	if(COMPILE_YARA_RES)
+		message(FATAL_ERROR \"YARA tool signatures compilation FAILED\")
+	endif()
+")
 
 # Add libraries.
 add_library(yaracpp INTERFACE)
