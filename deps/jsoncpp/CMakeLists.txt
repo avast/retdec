@@ -10,6 +10,7 @@ endif()
 ExternalProject_Add(jsoncpp-project
 	URL https://github.com/open-source-parsers/jsoncpp/archive/1.8.4.zip
 	URL_HASH SHA256=2979436dbd4c48a3284dca9fa8f212298425ba3920ed6bacdda8905a94b111a8
+	DOWNLOAD_NAME jsoncpp.zip
 	CMAKE_ARGS
 		# This does not work on MSVC, but may be useful on Linux.
 		-DCMAKE_BUILD_TYPE=Release
@@ -18,6 +19,11 @@ ExternalProject_Add(jsoncpp-project
 		# compiler, which may result in link errors.
 		"${CMAKE_C_COMPILER_OPTION}"
 		"${CMAKE_CXX_COMPILER_OPTION}"
+		# Disable unused options.
+		-DJSONCPP_WITH_TESTS=OFF
+		-DJSONCPP_WITH_POST_BUILD_UNITTEST=OFF
+		-DJSONCPP_WITH_PKGCONFIG_SUPPORT=OFF
+		-DBUILD_SHARED_LIBS=OFF
 	# Disable the update step.
 	UPDATE_COMMAND ""
 	# Disable the install step.

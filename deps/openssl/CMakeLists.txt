@@ -1,3 +1,12 @@
+
+find_package(OpenSSL 1.0.1)
+if(OPENSSL_FOUND)
+	add_library(openssl-crypto INTERFACE)
+	target_link_libraries(openssl-crypto INTERFACE OpenSSL::Crypto)
+	return()
+endif()
+message(STATUS "  --> OpenSSL will be built as an external project")
+
 find_package(Perl REQUIRED)
 
 include(ExternalProject)
@@ -82,6 +91,7 @@ set(OPENSSL_INSTALL_DIR    "${OPENSSL_PREFIX}/src/openssl-install")
 set(OPENSSL_VERSION        "1.1.0f")
 set(OPENSSL_URL            "https://www.openssl.org/source/openssl-${OPENSSL_VERSION}.tar.gz")
 set(OPENSSL_ARCHIVE_SHA256 "12f746f3f2493b2f39da7ecf63d7ee19c6ac9ec6a4fcd8c229da8a522cb12765")
+set(OPENSSL_DOWNLOAD_NAME  "openssl.tar.gz")
 
 set(OPENSSL_CONFIGURE_OPTIONS
 	no-shared
@@ -96,6 +106,7 @@ if (NOT TARGET openssl)
 		PREFIX ${OPENSSL_PREFIX}
 		URL ${OPENSSL_URL}
 		URL_HASH SHA256=${OPENSSL_ARCHIVE_SHA256}
+		DOWNLOAD_NAME ${OPENSSL_DOWNLOAD_NAME}
 		CONFIGURE_COMMAND
 			${PERL_EXECUTABLE}
 			${OPENSSL_SRC_DIR}/Configure
@@ -105,7 +116,9 @@ if (NOT TARGET openssl)
 		BUILD_COMMAND
 			${OPENSSL_MAKE}
 		INSTALL_COMMAND
-			${OPENSSL_MAKE} install
+			# Install only the software parts (libraries and includes), not
+			# e.g. documentation and manual pages.
+			${OPENSSL_MAKE} install_sw
 		LOG_DOWNLOAD 1
 		LOG_BUILD 1
 		LOG_CONFIGURE 1

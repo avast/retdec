@@ -5,9 +5,11 @@
  */
 
 #include <string>
+#include <iterator>
 
 #include "retdec/utils/filesystem_path.h"
 #include "retdec/utils/os.h"
+#include "retdec/utils/scope_exit.h"
 #include "retdec/utils/string.h"
 #include "retdec/utils/value.h"
 
@@ -27,26 +29,13 @@ namespace utils {
 class FilesystemPathImpl
 {
 public:
-	FilesystemPathImpl(const std::string& path)
-		: _path(), _parentPath(), _subpaths(), _exists(), _isFile(), _isDirectory(), _isAbsolute()
+	FilesystemPathImpl(const std::string& path) : _path()
 	{
 		changePath(path);
 	}
 
-	FilesystemPathImpl(const FilesystemPathImpl& rhs)
-		: _path(rhs._path), _parentPath(rhs._parentPath), _subpaths(rhs._subpaths), _exists(rhs._exists),
-		_isFile(rhs._isFile), _isDirectory(rhs._isDirectory), _isAbsolute(rhs._isAbsolute) {}
+	FilesystemPathImpl(const FilesystemPathImpl& rhs) : _path(rhs._path) {}
 	virtual ~FilesystemPathImpl() = default;
-
-	void reset()
-	{
-		_parentPath = {};
-		_subpaths = {};
-		_exists = {};
-		_isFile = {};
-		_isDirectory = {};
-		_isAbsolute = {};
-	}
 
 	/**
 	 * Returns the path.
@@ -67,7 +56,6 @@ public:
 	 */
 	void changePath(std::string path)
 	{
-		reset();
 		std::replace(path.begin(), path.end(), '/', pathSeparator);
 		_path = endsWith(path, pathSeparator) ? path.substr(0, path.length() - 1) : path;
 	}
@@ -84,9 +72,6 @@ public:
 
 protected:
 	std::string _path;
-	Maybe<std::string> _absolutePath, _parentPath;
-	Maybe<std::vector<std::string>> _subpaths;
-	Maybe<bool> _exists, _isFile, _isDirectory, _isAbsolute;
 };
 
 #ifdef OS_WINDOWS
@@ -100,41 +85,26 @@ public:
 
 	virtual std::string getAbsolutePath() override
 	{
-		if (_absolutePath.isDefined())
-			return _absolutePath;
-
 		char absolutePath[MAX_PATH] = { '\0' };
 		if (GetFullPathName(_path.c_str(), MAX_PATH, absolutePath, nullptr) == 0)
 			return {};
 
-		_absolutePath = std::string(absolutePath);
-		return _absolutePath;
+		return absolutePath;
 	}
 
 	virtual std::string getParentPath() override
 	{
-		if (_parentPath.isDefined())
-			return _parentPath;
-
 		// PathRemoveFileSpec() supports only MAX_PATH long paths and modify its parameter
 		char parentPathStr[MAX_PATH] = { '\0' };
 		strncpy(parentPathStr, _path.c_str(), MAX_PATH - 1);
 
 		PathRemoveFileSpec(parentPathStr);
-
-		_parentPath = std::string(parentPathStr);
-		return _parentPath;
+		return parentPathStr;
 	}
 
 	virtual bool subpathsInDirectory(std::vector<std::string>& subpaths) override
 	{
 		using namespace std::string_literals;
-
-		if (_subpaths.isDefined())
-		{
-			subpaths = _subpaths.getValue();
-			return true;
-		}
 
 		WIN32_FIND_DATA ffd;
 
@@ -145,10 +115,7 @@ public:
 		subpaths.clear();
 		HANDLE hFnd = FindFirstFile(examineDir.c_str(), &ffd);
 		if (hFnd == reinterpret_cast<HANDLE>(-1))
-		{
-			_subpaths = std::vector<std::string>{};
 			return false;
-		}
 
 		do
 		{
@@ -164,55 +131,31 @@ public:
 			subpaths.emplace_back(newPath);
 		} while (FindNextFile(hFnd, &ffd));
 
-		_subpaths = subpaths;
 		return true;
 	}
 
 	virtual bool exists() override
 	{
-		if (_exists.isDefined())
-			return _exists;
-
-		_exists = PathFileExists(_path.c_str());
-		return _exists;
+		return PathFileExists(_path.c_str());
 	}
 
 	virtual bool isFile() override
 	{
-		if (_isFile.isDefined())
-			return _isFile;
-
-		isDirectory();
-		return _isFile;
+		return !isDirectory();
 	}
 
 	virtual bool isDirectory() override
 	{
-		if (_isDirectory.isDefined())
-			return _isDirectory;
-
 		WIN32_FIND_DATA ffd;
 		if (FindFirstFile(_path.c_str(), &ffd) == reinterpret_cast<HANDLE>(-1))
-		{
-			_exists = false;
-			_isDirectory = false;
-			_isFile = false;
 			return false;
-		}
 
-		_exists = true;
-		_isDirectory = ffd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY;
-		_isFile = !_isDirectory;
-		return _isDirectory;
+		return ffd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY;
 	}
 
 	virtual bool isAbsolute() override
 	{
-		if (_isAbsolute.isDefined())
-			return _isAbsolute;
-
-		_isAbsolute = !PathIsRelative(_path.c_str());
-		return _isAbsolute;
+		return !PathIsRelative(_path.c_str());
 	}
 };
 #else
@@ -226,43 +169,36 @@ public:
 
 	virtual std::string getAbsolutePath() override
 	{
-		if (_absolutePath.isDefined())
-			return _absolutePath;
-
+#ifdef PATH_MAX
 		char absolutePath[PATH_MAX] = { '\0' };
 		if (realpath(_path.c_str(), absolutePath) == nullptr)
 			return {};
+#else
+		char* absolutePathStr = realpath(_path.c_str(), nullptr);
+		SCOPE_EXIT {
+			free(absolutePathStr);
+		};
+		std::string absolutePath = absolutePathStr;
+#endif
 
-		_absolutePath = std::string(absolutePath);
-		return _absolutePath;
+		return absolutePath;
 	}
 
 	virtual std::string getParentPath() override
 	{
-		if (_parentPath.isDefined())
-			return _parentPath;
-
 		// dirname() can modify the path provided in parameter, so we need to make copy
 		char* copyPathStr = new char[_path.length() + 1];
+		SCOPE_EXIT {
+			delete[] copyPathStr;
+		};
 		strcpy(copyPathStr, _path.c_str());
 
 		// get the parent directory by calling dirname()
-		char* parentPathStr = dirname(copyPathStr);
-
-		// copy the parent path into the string, so we can free the memory
-		_parentPath = std::string(parentPathStr);
-		delete[] copyPathStr;
-		return _parentPath;
+		return dirname(copyPathStr);
 	}
 
 	virtual bool subpathsInDirectory(std::vector<std::string>& subpaths) override
 	{
-		if (_subpaths.isDefined())
-		{
-			subpaths = _subpaths.getValue();
-			return true;
-		}
-
 		subpaths.clear();
 		DIR* dir = opendir(_path.c_str());
 		if (dir == nullptr)
@@ -284,46 +220,27 @@ public:
 		}
 		closedir(dir);
 
-		_subpaths = subpaths;
 		return true;
 	}
 
 	virtual bool exists() override
 	{
-		if (_exists.isDefined())
-			return _exists;
-
-		isDirectory();
-		return _exists;
+		struct stat st;
+		return stat(_path.c_str(), &st) != 0;
 	}
 
 	virtual bool isFile() override
 	{
-		if (_isFile.isDefined())
-			return _isFile;
-
-		isDirectory();
-		return _isFile;
+		return !isDirectory();
 	}
 
 	virtual bool isDirectory() override
 	{
-		if (_isDirectory.isDefined())
-			return _isDirectory;
-
 		struct stat st;
 		if (stat(_path.c_str(), &st) != 0)
-		{
-			_exists = false;
-			_isDirectory = false;
-			_isFile = false;
 			return false;
-		}
 
-		_exists = true;
-		_isDirectory = S_ISDIR(st.st_mode);
-		_isFile = S_ISREG(st.st_mode);
-		return _isDirectory;
+		return S_ISDIR(st.st_mode);
 	}
 
 	virtual bool isAbsolute() override
@@ -528,11 +445,10 @@ void FilesystemPath::loadSubpaths() const
 	if (!_impl->subpathsInDirectory(subpaths))
 		return;
 
-	for (const auto& subpath : subpaths)
-	{
-		auto fsSubpath = std::make_unique<FilesystemPath>(subpath);
-		_subpaths.push_back(std::move(fsSubpath));
-	}
+	std::transform(subpaths.begin(), subpaths.end(), std::back_inserter(_subpaths),
+			[](const auto& subpath) {
+				return std::make_unique<FilesystemPath>(subpath);
+			});
 
 	_subpathsLoaded = true;
 }
