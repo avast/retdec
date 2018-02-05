@@ -68,6 +68,13 @@ endif()
 
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/install-external.cmake)
 
+# Tools detection rules compilation.
+if(MSVC)
+	include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/compile-yara-win.cmake)
+else()
+	include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/compile-yara.cmake)
+endif()
+
 add_subdirectory(deps)
 if(RETDEC_DOC)
 	add_subdirectory(doc)
