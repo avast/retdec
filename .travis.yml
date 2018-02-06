@@ -66,26 +66,26 @@ before_script:
   - if [ "$TRAVIS_OS_NAME" = "osx" ]; then export PATH="$(brew --prefix coreutils)/libexec/gnubin:$PATH"; fi
   - if [ "$TRAVIS_OS_NAME" = "osx" ]; then ln -s /usr/local/bin/greadlink /usr/local/bin/readlink; fi
   - if [ "$TRAVIS_OS_NAME" = "osx" ]; then export PATH="/usr/local/opt/gnu-getopt/bin:$PATH"; fi
-  # We need to add ccache before everything else in PATH.
+  # We need to add ccache before everything else into PATH.
   - if [ "$TRAVIS_OS_NAME" = "osx" ]; then export PATH="/usr/local/opt/ccache/libexec:$PATH"; fi
 
 script:
   - mkdir build && cd build
-  # We use "-O0" to speed-up build.
+  # We use "-O0" to speed up the build.
   # "-O0" causes segfaults in LLVM if we do not use "-DNDEBUG" as well.
   - cmake -DCMAKE_CXX_FLAGS_RELEASE="-O0 -DNDEBUG" -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="$(pwd)/install" -DRETDEC_TESTS=ON -DRETDEC_DEV_TOOLS=ON ..
   - time make install -j $NPROC
-  # Test that install is movable and that it does not need build directory.
+  # Check that install is movable and that it does not need the build directory.
   - mv install ../retdec-install
   - cd ..
   - rm -rf build
   # Run unit tests.
   - if [ "$TRAVIS_OS_NAME" = "osx" ]; then /usr/local/bin/bash retdec-install/bin/retdec-tests-runner.sh; fi
   - if [ "$TRAVIS_OS_NAME" = "linux" ]; then ./retdec-install/bin/retdec-tests-runner.sh; fi
-  # Run decompilation script.
+  # Run the decompilation script.
   - if [ "$TRAVIS_OS_NAME" = "osx" ]; then /usr/local/bin/bash retdec-install/bin/retdec-decompiler.sh --help; fi
   - if [ "$TRAVIS_OS_NAME" = "linux" ]; then ./retdec-install/bin/retdec-decompiler.sh --help; fi
-  # Run simple decompilation.
+  # Run a simple decompilation.
   - echo -e '#include <stdio.h>\n#include <stdlib.h>\nint main()\n{\n  printf("hello world\\n");\n  return 0;\n}\n' > hello-orig.c
   - cat hello-orig.c
   - gcc -m32 -o hello hello-orig.c
