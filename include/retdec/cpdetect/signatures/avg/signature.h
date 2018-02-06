@@ -26,7 +26,9 @@ class Signature
 		unsigned endOffset;     ///< end offset of pattern
 
 		Signature();
-		Signature(std::string sName, std::string sVersion, std::string sPattern, std::string sAdditional = "", unsigned sStart = 0, unsigned sEnd = 0);
+		Signature(
+				std::string sName, std::string sVersion, std::string sPattern,
+				std::string sAdditional = "", unsigned sStart = 0, unsigned sEnd = 0);
 		~Signature();
 
 		bool haveValidPattern() const;

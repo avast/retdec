@@ -7,7 +7,6 @@
 #include "retdec/cpdetect/compiler_detector/heuristics/pe_heuristics.h"
 #include "retdec/cpdetect/compiler_detector/pe_compiler.h"
 #include "retdec/cpdetect/settings.h"
-#include "retdec/cpdetect/signatures/yara/database/database.h"
 
 using namespace retdec::fileformat;
 
@@ -39,16 +38,22 @@ PeCompiler::PeCompiler(
 			break;
 
 		case Architecture::ARM:
-			if (bitWidth == 32) {
+			if (bitWidth == 32)
+			{
 				path.append("arm.yarac");
 			}
-			else {
+			else
+			{
 				// There are no 64-bit ARM signatures for now.
 			}
 			break;
+
+		default:
+			break;
 	}
 
-	if (path.isFile()) {
+	if (path.isFile())
+	{
 		internalPaths.emplace_back(path.getPath());
 	}
 }

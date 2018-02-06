@@ -7,7 +7,6 @@
 #include "retdec/cpdetect/compiler_detector/heuristics/macho_heuristics.h"
 #include "retdec/cpdetect/compiler_detector/macho_compiler.h"
 #include "retdec/cpdetect/settings.h"
-#include "retdec/cpdetect/signatures/yara/database/database.h"
 
 using namespace retdec::fileformat;
 
@@ -30,8 +29,10 @@ MachOCompiler::MachOCompiler(
 
 	if (parser.isFatBinary())
 	{
-		for (auto it = path.begin(), end = path.end(); it != end; it++) {
-			if (it->isFile()) {
+		for (auto it = path.begin(), end = path.end(); it != end; it++)
+		{
+			if (it->isFile())
+			{
 				internalPaths.emplace_back(it->getPath());
 			}
 		}
@@ -49,25 +50,33 @@ MachOCompiler::MachOCompiler(
 				break;
 
 			case Architecture::ARM:
-				if (bitWidth == 32) {
+				if (bitWidth == 32)
+				{
 					path.append("arm.yarac");
 				}
-				else {
+				else
+				{
 					// There are no 64-bit ARM signatures for now.
 				}
 				break;
 
 			case Architecture::POWERPC:
-				if (bitWidth == 32) {
+				if (bitWidth == 32)
+				{
 					path.append("ppc.yarac");
 				}
-				else {
+				else
+				{
 					path.append("ppc64.yarac");
 				}
 				break;
+
+			default:
+				break;
 		}
 
-		if (path.isFile()) {
+		if (path.isFile())
+		{
 			internalPaths.emplace_back(path.getPath());
 		}
 	}

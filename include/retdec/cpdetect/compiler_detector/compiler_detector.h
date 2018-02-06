@@ -22,9 +22,9 @@ namespace cpdetect {
 class CompilerDetector : private retdec::utils::NonCopyable
 {
 	private:
-		retdec::fileformat::FileFormat &fileParser;       ///< parser of input file
-		DetectParams &cpParams;                    ///< parameters for detection
-		std::vector<std::string> externalDatabase; ///< name of external files with rules
+		retdec::fileformat::FileFormat &fileParser; ///< parser of input file
+		DetectParams &cpParams;                     ///< parameters for detection
+		std::vector<std::string> externalDatabase;  ///< name of external files with rules
 
 		/// @name External databases parsing
 		/// @{
@@ -43,17 +43,20 @@ class CompilerDetector : private retdec::utils::NonCopyable
 		ReturnCode getAllSignatures();
 		ReturnCode getAllCompilers();
 		/// @}
-	protected:
-		std::vector<std::string> internalPaths;     ///< internal database of rules
-		retdec::utils::FilesystemPath pathToShared; ///< path to shared folder
 
-		ToolInformation &toolInfo;                        ///< results - detected tools
-		retdec::fileformat::Architecture targetArchitecture;     ///< target architecture of input file
-		Search *search;                                   ///< class for search in signature
-		Heuristics *heuristics;                           ///< class for heuristics detection of used tool
-		std::set<std::string> externalSuffixes;           ///< suffixes for external database files
+	protected:
+		ToolInformation &toolInfo;                           ///< results - detected tools
+		retdec::fileformat::Architecture targetArchitecture; ///< target architecture of input file
+		Search *search;                                      ///< class for signature search
+		Heuristics *heuristics;                              ///< class for heuristics detections
+		std::vector<std::string> internalPaths;              ///< internal rule database files
+		retdec::utils::FilesystemPath pathToShared;          ///< path to shared folder
+		std::set<std::string> externalSuffixes;              ///< external database file suffixes
+
 	public:
-		CompilerDetector(retdec::fileformat::FileFormat &parser, DetectParams &params, ToolInformation &toolInfo);
+		CompilerDetector(
+				retdec::fileformat::FileFormat &parser, DetectParams &params,
+				ToolInformation &toolInfo);
 		virtual ~CompilerDetector() = 0;
 
 		/// @name Detection methods

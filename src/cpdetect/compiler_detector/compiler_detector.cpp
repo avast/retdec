@@ -32,7 +32,7 @@ namespace
  */
 bool compareForSort(const DetectResult &a, const DetectResult &b)
 {
-	if(a.strength == b.strength)
+	if (a.strength == b.strength)
 	{
 		if (a.source == DetectionMethod::SIGNATURE && a.source == b.source)
 		{
@@ -144,9 +144,11 @@ ToolType metaToTool(const std::string &toolMeta)
  *
  * Constructor in subclass must create members @a heuristics, @a internalDatabase and @a externalSuffixes
  */
-CompilerDetector::CompilerDetector(retdec::fileformat::FileFormat &parser, DetectParams &params, ToolInformation &toolInfo) :
-	fileParser(parser), cpParams(params), toolInfo(toolInfo), targetArchitecture(fileParser.getTargetArchitecture()),
-	search(new Search(fileParser)), heuristics(nullptr), pathToShared(getThisBinaryDirectoryPath())
+CompilerDetector::CompilerDetector(
+		retdec::fileformat::FileFormat &parser, DetectParams &params, ToolInformation &toolInfo)
+	: fileParser(parser), cpParams(params), toolInfo(toolInfo),
+		targetArchitecture(fileParser.getTargetArchitecture()), search(new Search(fileParser)),
+		heuristics(nullptr), pathToShared(getThisBinaryDirectoryPath())
 {
 
 }
@@ -170,9 +172,9 @@ bool CompilerDetector::getExternalDatabases()
 	auto result = false;
 
 	// iterating over all files in directory
-	for(const auto *subpath : thisDir)
+	for (const auto *subpath : thisDir)
 	{
-		if(subpath->isFile() && std::any_of(externalSuffixes.begin(), externalSuffixes.end(),
+		if (subpath->isFile() && std::any_of(externalSuffixes.begin(), externalSuffixes.end(),
 			[&] (const auto &suffix)
 			{
 				return endsWith(subpath->getPath(), suffix);
@@ -197,12 +199,13 @@ void CompilerDetector::removeCompilersWithLessSimilarity(double refRatio)
 {
 	double actRatio;
 
-	for(std::size_t i = 0, e = toolInfo.detectedTools.size(); i < e; ++i)
+	for (std::size_t i = 0, e = toolInfo.detectedTools.size(); i < e; ++i)
 	{
-		if(toolInfo.detectedTools[i].source == DetectionMethod::SIGNATURE)
+		if (toolInfo.detectedTools[i].source == DetectionMethod::SIGNATURE)
 		{
-			actRatio = static_cast<double>(toolInfo.detectedTools[i].agreeCount) / toolInfo.detectedTools[i].impCount;
-			if(actRatio + std::numeric_limits<double>::epsilon() * std::abs(actRatio) < refRatio)
+			actRatio = static_cast<double>(toolInfo.detectedTools[i].agreeCount)
+					/ toolInfo.detectedTools[i].impCount;
+			if (actRatio + std::numeric_limits<double>::epsilon() * std::abs(actRatio) < refRatio)
 			{
 				toolInfo.detectedTools.erase(toolInfo.detectedTools.begin() + i);
 				--i;
@@ -221,20 +224,20 @@ void CompilerDetector::removeUnusedCompilers()
 	std::size_t lastBeneficial = 0;
 	auto removeFlag = false;
 
-	for(std::size_t i = 0; i < noOfCompilers; ++i)
+	for (std::size_t i = 0; i < noOfCompilers; ++i)
 	{
-		if(toolInfo.isReliableResult(i))
+		if (toolInfo.isReliableResult(i))
 		{
 			lastBeneficial = i;
 			removeFlag = true;
 		}
 	}
 
-	if(removeFlag)
+	if (removeFlag)
 	{
-		for(std::size_t i = lastBeneficial + 1; i < noOfCompilers; ++i)
+		for (std::size_t i = lastBeneficial + 1; i < noOfCompilers; ++i)
 		{
-			if(toolInfo.detectedTools[i].source < DetectionMethod::SIGNATURE)
+			if (toolInfo.detectedTools[i].source < DetectionMethod::SIGNATURE)
 			{
 				toolInfo.detectedTools.erase(toolInfo.detectedTools.begin() + i);
 				--i;
@@ -243,15 +246,18 @@ void CompilerDetector::removeUnusedCompilers()
 		}
 	}
 
-	for(std::size_t i = 0; i < noOfCompilers; ++i)
+	for (std::size_t i = 0; i < noOfCompilers; ++i)
 	{
 		const auto &first = toolInfo.detectedTools[i];
 
-		for(std::size_t j = i + 1; j < noOfCompilers; ++j)
+		for (std::size_t j = i + 1; j < noOfCompilers; ++j)
 		{
 			const auto &second = toolInfo.detectedTools[j];
-			if(first.name == second.name && (first.versionInfo == second.versionInfo || second.versionInfo.empty()) &&
-				(first.additionalInfo == second.additionalInfo || second.additionalInfo.empty()))
+			if (first.name == second.name
+					&& (first.versionInfo == second.versionInfo
+						|| second.versionInfo.empty())
+					&& (first.additionalInfo == second.additionalInfo
+						|| second.additionalInfo.empty()))
 			{
 				toolInfo.detectedTools.erase(toolInfo.detectedTools.begin() + j);
 				--j;
@@ -281,14 +287,14 @@ ReturnCode CompilerDetector::getAllSignatures()
 	YaraDetector yara;
 
 	// Add internal paths.
-	for(const auto &ruleFile : internalPaths)
+	for (const auto &ruleFile : internalPaths)
 	{
 		yara.addRuleFile(ruleFile);
 	}
 
-	if(cpParams.external && getExternalDatabases())
+	if (cpParams.external && getExternalDatabases())
 	{
-		for(const auto &item : externalDatabase)
+		for (const auto &item : externalDatabase)
 		{
 			yara.addRuleFile(item);
 		}
@@ -298,19 +304,20 @@ ReturnCode CompilerDetector::getAllSignatures()
 	const auto &detected = yara.getDetectedRules();
 	const auto &undetected = yara.getUndetectedRules();
 	auto result = false;
-	if(cpParams.searchType == SearchType::EXACT_MATCH || (cpParams.searchType == SearchType::MOST_SIMILAR && !detected.empty()))
+	if (cpParams.searchType == SearchType::EXACT_MATCH
+			|| (cpParams.searchType == SearchType::MOST_SIMILAR && !detected.empty()))
 	{
-		for(const auto &rule : detected)
+		for (const auto &rule : detected)
 		{
 			const auto *match = rule.getFirstMatch();
 			const auto *nameMeta = rule.getMeta("name");
 			const auto *patternMeta = rule.getMeta("pattern");
-			if(!match || !nameMeta || !patternMeta)
+			if (!match || !nameMeta || !patternMeta)
 			{
 				continue;
 			}
 			const auto nibbles = search->countImpNibbles(patternMeta->getStringValue());
-			if(nibbles)
+			if (nibbles)
 			{
 				result = true;
 				const auto *toolMeta = rule.getMeta("tool");
@@ -334,18 +341,18 @@ ReturnCode CompilerDetector::getAllSignatures()
 	Similarity sim;
 	double maxRatio = 0.0;
 
-	for(const auto &rules : {detected, undetected})
+	for (const auto &rules : {detected, undetected})
 	{
-		for(const auto &rule : rules)
+		for (const auto &rule : rules)
 		{
 			const auto *nameMeta = rule.getMeta("name");
 			auto *patternMeta = rule.getMeta("pattern");
-			if(!nameMeta || !patternMeta)
+			if (!nameMeta || !patternMeta)
 			{
 				continue;
 			}
 			auto pattern = patternMeta->getStringValue();
-			while(endsWith(pattern,  ";"))
+			while (endsWith(pattern,  ";"))
 			{
 				pattern.pop_back();
 			}
@@ -354,10 +361,10 @@ ReturnCode CompilerDetector::getAllSignatures()
 			const auto *versionMeta = rule.getMeta("version");
 			const auto *commentMeta = rule.getMeta("comment");
 			commentMeta = commentMeta ? commentMeta : rule.getMeta("extra");
-			if(match)
+			if (match)
 			{
 				const auto nibbles = search->countImpNibbles(pattern);
-				if(nibbles)
+				if (nibbles)
 				{
 					result = true;
 					maxRatio = 1.0;
@@ -369,14 +376,14 @@ ReturnCode CompilerDetector::getAllSignatures()
 
 			std::size_t base = 0;
 			const auto *absoluteStartMeta = rule.getMeta("absoluteStart");
-			if(absoluteStartMeta)
+			if (absoluteStartMeta)
 			{
-				if(!strToNum(absoluteStartMeta->getStringValue(), base))
+				if (!strToNum(absoluteStartMeta->getStringValue(), base))
 				{
 					continue;
 				}
 			}
-			else if(toolInfo.entryPointOffset)
+			else if (toolInfo.entryPointOffset)
 			{
 				base = toolInfo.epOffset;
 			}
@@ -388,18 +395,20 @@ ReturnCode CompilerDetector::getAllSignatures()
 			std::size_t startShift = 0, endShift = 0;
 			const auto *startMeta = rule.getMeta("start");
 			const auto *endMeta = rule.getMeta("end");
-			if(startMeta)
+			if (startMeta)
 			{
 				startShift = startMeta->getIntValue();
 			}
-			if(endMeta)
+			if (endMeta)
 			{
 				endShift = endMeta->getIntValue();
 			}
 			const auto start = base + startShift;
 			const auto end = base + endShift + fileParser.bytesFromNibblesRounded(pattern.length()) - 1;
-			if(search->areaSimilarity(pattern, sim, start, end) && (cpParams.searchType == SearchType::SIM_LIST ||
-				(cpParams.searchType == SearchType::MOST_SIMILAR && sim.ratio >= maxRatio)))
+			if (search->areaSimilarity(pattern, sim, start, end)
+					&& (cpParams.searchType == SearchType::SIM_LIST
+						|| (cpParams.searchType == SearchType::MOST_SIMILAR
+							&& sim.ratio >= maxRatio)))
 			{
 				result = true;
 				maxRatio = sim.ratio;
@@ -409,7 +418,7 @@ ReturnCode CompilerDetector::getAllSignatures()
 		}
 	}
 
-	if(cpParams.searchType == SearchType::MOST_SIMILAR)
+	if (cpParams.searchType == SearchType::MOST_SIMILAR)
 	{
 		removeCompilersWithLessSimilarity(maxRatio);
 	}
@@ -427,25 +436,25 @@ ReturnCode CompilerDetector::getAllCompilers()
 	getAllHeuristics();
 	std::sort(toolInfo.detectedTools.begin(), toolInfo.detectedTools.end(), compareForSort);
 	removeUnusedCompilers();
-	if(toolInfo.detectedLanguages.empty())
+	if (toolInfo.detectedLanguages.empty())
 	{
-		for(const auto &item : toolInfo.detectedTools)
+		for (const auto &item : toolInfo.detectedTools)
 		{
-			if(!item.isReliable())
+			if (!item.isReliable())
 			{
 				continue;
 			}
 
 			const auto name = toLower(item.name);
-			if(contains(name, ".net"))
+			if (contains(name, ".net"))
 			{
 				toolInfo.addLanguage("CIL/.NET", "", true);
 			}
 		}
 	}
 
-	const bool isSomethingDetected = toolInfo.detectedTools.size() || toolInfo.detectedLanguages.size();
-	return (status == ReturnCode::UNKNOWN_CP && isSomethingDetected) ? ReturnCode::OK : status;
+	const bool isDetecteion = toolInfo.detectedTools.size() || toolInfo.detectedLanguages.size();
+	return (status == ReturnCode::UNKNOWN_CP && isDetecteion) ? ReturnCode::OK : status;
 }
 
 /**
@@ -456,7 +465,7 @@ ReturnCode CompilerDetector::getAllCompilers()
  */
 ReturnCode CompilerDetector::getAllInformation()
 {
-	if(!fileParser.isInValidState())
+	if (!fileParser.isInValidState())
 	{
 		return ReturnCode::FILE_PROBLEM;
 	}
@@ -465,20 +474,21 @@ ReturnCode CompilerDetector::getAllInformation()
 	toolInfo.entryPointAddress = fileParser.getEpAddress(toolInfo.epAddress);
 	toolInfo.entryPointOffset = fileParser.getEpOffset(toolInfo.epOffset);
 	const bool invalidEntryPoint = !toolInfo.entryPointAddress || !toolInfo.entryPointOffset;
-	if(!fileParser.getHexEpBytes(toolInfo.epBytes, EP_BYTES_SIZE) && !invalidEntryPoint && !fileParser.isInValidState())
+	if (!fileParser.getHexEpBytes(toolInfo.epBytes, EP_BYTES_SIZE)
+			&& !invalidEntryPoint && !fileParser.isInValidState())
 	{
 		return ReturnCode::FILE_PROBLEM;
 	}
 
 	const auto *epSec = fileParser.getEpSection();
 	toolInfo.entryPointSection = epSec;
-	if(epSec)
+	if (epSec)
 	{
 		toolInfo.epSection = Section(*epSec);
 	}
 
 	auto status = getAllCompilers();
-	if(invalidEntryPoint)
+	if (invalidEntryPoint)
 	{
 		if (fileParser.isExecutable() || toolInfo.entryPointAddress || toolInfo.entryPointSection)
 		{

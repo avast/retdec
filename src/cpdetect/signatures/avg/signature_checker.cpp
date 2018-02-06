@@ -31,8 +31,9 @@ bool isValidSignaturePattern(const std::string &pattern)
 {
 	const std::string bodyChars = "0123456789ABCDEF-\?/";
 	const std::string allChars = bodyChars + ';';
-	return isComposedOnlyOfChars(pattern, allChars) && containsAnyOfChars(pattern, bodyChars) &&
-		pattern.length() && pattern.find(';') >= pattern.length() - 1;
+	return isComposedOnlyOfChars(pattern, allChars)
+			&& containsAnyOfChars(pattern, bodyChars)
+			&& pattern.find(';') >= pattern.length() - 1;
 }
 
 /**

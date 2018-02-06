@@ -7,7 +7,6 @@
 #include "retdec/cpdetect/compiler_detector/elf_compiler.h"
 #include "retdec/cpdetect/compiler_detector/heuristics/elf_heuristics.h"
 #include "retdec/cpdetect/settings.h"
-#include "retdec/cpdetect/signatures/yara/database/database.h"
 
 using namespace retdec::fileformat;
 
@@ -63,6 +62,9 @@ ElfCompiler::ElfCompiler(
 			else {
 				path.append("ppc64.yarac");
 			}
+			break;
+
+		default:
 			break;
 	}
 

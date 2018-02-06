@@ -7,7 +7,6 @@
 #include "retdec/cpdetect/compiler_detector/heuristics/heuristics.h"
 #include "retdec/cpdetect/compiler_detector/raw_data_compiler.h"
 #include "retdec/cpdetect/settings.h"
-#include "retdec/cpdetect/signatures/yara/database/database.h"
 
 using namespace retdec::fileformat;
 
@@ -47,44 +46,56 @@ RawDataCompiler::RawDataCompiler(
 			break;
 
 		case Architecture::ARM:
-			if (bitWidth == 32) {
+			if (bitWidth == 32)
+			{
 				pathPe.append("arm.yarac");
 				pathElf.append("arm.yarac");
 				pathMacho.append("arm.yarac");
 			}
-			else {
+			else
+			{
 				pathElf.append("arm64.yarac");
 			}
 			break;
 
 		case Architecture::POWERPC:
-			if (bitWidth == 32) {
+			if (bitWidth == 32)
+			{
 				pathElf.append("ppc.yarac");
 				pathMacho.append("ppc.yarac");
 			}
-			else {
+			else
+			{
 				pathElf.append("ppc64.yarac");
 				pathMacho.append("ppc64.yarac");
 			}
 			break;
 
 		case Architecture::MIPS:
-			if (bitWidth == 32) {
+			if (bitWidth == 32)
+			{
 				pathElf.append("mips.yarac");
 			}
-			else {
+			else
+			{
 				pathElf.append("mips64.yarac");
 			}
 			break;
+
+		default:
+			break;
 	}
 
-	if (pathPe.isFile()) {
+	if (pathPe.isFile())
+	{
 		internalPaths.emplace_back(pathPe.getPath());
 	}
-	if (pathElf.isFile()) {
+	if (pathElf.isFile())
+	{
 		internalPaths.emplace_back(pathElf.getPath());
 	}
-	if (pathMacho.isFile()) {
+	if (pathMacho.isFile())
+	{
 		internalPaths.emplace_back(pathMacho.getPath());
 	}
 }
