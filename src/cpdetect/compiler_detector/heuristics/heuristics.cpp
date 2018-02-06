@@ -646,7 +646,7 @@ bool Heuristics::parseTmsProducer(const std::string &producer)
 
 	std::string version;
 	getVersion(producer, version);
-	addCompiler(source, strength, "Texas Instruments C/C++ Compiler (TMS470)", version);
+	addCompiler(source, strength, "Texas Instruments C/C++", version, "for TMS470");
 	return true;
 }
 
