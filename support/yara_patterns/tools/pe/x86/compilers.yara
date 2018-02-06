@@ -1599,8 +1599,7 @@ rule gcclike_uv_03 {
 rule gcclike_uv_04 {
 	meta:
 		tool = "C"
-		name = "GCC"
-		extra = "GCC or similar"
+		name = "GCC or similar"
 		pattern = "5589E583EC"
 	strings:
 		$1 = { 55 89 E5 83 EC }
