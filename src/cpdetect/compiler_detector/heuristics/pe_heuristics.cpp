@@ -1111,14 +1111,21 @@ void PeHeuristics::getLinkerVersionHeuristic()
 	}
 
 	// Add more info if we are sure that binary is MSVC
-	if (const auto* detection = isDetected("MSVC"))
+	if (isDetected("MSVC", DetectionStrength::MEDIUM))
 	{
 		// MSVC version is same as linker except for v14.1
 		auto msvcVersion = linkerVersion == "14.1" ? "15.0" : linkerVersion;
-		if (endsWith(detection->versionInfo, "(Debug)"))
+
+		// Detect possible debug version
+		for (const auto tool : toolInfo.detectedTools)
 		{
-			// Check for debug keyword in previous detection.
-			msvcVersion += " (Debug)";
+			// Check for debug keyword in signature detections
+			if (tool.isCompiler() && tool.name == "MSVC"
+					&& contains(tool.versionInfo, "debug"))
+			{
+				msvcVersion += " debug";
+				break;
+			}
 		}
 
 		studioVersion = "Visual Studio " + studioVersion;
