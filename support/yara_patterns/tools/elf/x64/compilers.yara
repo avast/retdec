@@ -41,6 +41,21 @@ rule gcc_472
 		$1 at elf.entry_point
 }
 
+rule tcc_0_9_26
+{
+	meta:
+		tool = "C"
+		name = "Tiny C Compiler"
+		version = "0.9.26"
+		source = "Made by Retdec Team"
+		pattern = "31ED4989D15E4889E24883E4F0505449C7C0?0??0?0848C7C1?0??0?0848C7C7????0?08E8?7??0?00F490904883EC08488B05?9??0?004885C07402FFD04883C408C3554889E54881EC?00?0000"
+	strings:
+		$1 = { 31 ED 49 89 D1 5E 48 89 E2 48 83 E4 F0 50 54 49 C7 C0 ?0 ?? 0? 08 48 C7 C1 ?0 ?? 0? 08 48 C7 C7 ?? ?? 0? 08 E8 ?7 ?? 0? 00 F4 90 90 48 83 EC 08 48 8B 05 ?9 ?? 0? 00 48 85 C0 74 02 FF D0 48 83 C4 08 C3 55 48 89 E5 48 81 EC ?0 0? 00 00 }
+	condition:
+		$1 at elf.entry_point
+}
+
+
 rule gc_1
 {
 	meta:
