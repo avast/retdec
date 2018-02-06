@@ -13,7 +13,6 @@
 #include "retdec/cpdetect/settings.h"
 #include "retdec/cpdetect/utils/version_solver.h"
 
-#include <iostream>
 
 using namespace retdec::fileformat;
 using namespace retdec::utils;
@@ -26,7 +25,54 @@ namespace
 {
 
 /**
- * Auxiliary function for sorting of compilers
+ * Decide better detection by version or extra information
+ *
+ * @param a first detection
+ * @param b second detection
+ * @param result @c true if first detection is better, @c false otherwise
+ * @return @c true if @p result is defined, @c false otherwise
+ *
+ * Warning: sort function requires strict weak ordering!
+ */
+bool compareExtraInfo(const DetectResult &a, const DetectResult &b, bool &result)
+{
+	// Check by version
+	if (!a.versionInfo.empty() && b.versionInfo.empty())
+	{
+		// Prefer detection with version
+		result = true;
+		return true;
+	}
+	if (a.versionInfo.empty() && !b.versionInfo.empty())
+	{
+		// Prefer detection with version
+		result = false;
+		return true;
+	}
+
+	// Check by extra info
+	if (!a.additionalInfo.empty() && b.additionalInfo.empty())
+	{
+		// Prefer detection with extra info
+		result = true;
+		return true;
+	}
+	if (a.additionalInfo.empty() && !b.additionalInfo.empty())
+	{
+		// Prefer detection with extra info
+		result = false;
+		return true;
+	}
+
+	return false;
+}
+
+/**
+ * Decide better detection
+ *
+ * @param a first detection
+ * @param b second detection
+ * @return @c true if first detection is better, @c false otherwise
  *
  * Warning: sort function requires strict weak ordering!
  */
@@ -44,20 +90,9 @@ bool compareForSort(const DetectResult &a, const DetectResult &b)
 				if (isShorterPrefixOfCaseInsensitive(a.name, b.name)
 						&& a.impCount == b.impCount)
 				{
-					// Equaly strong detections for one compiler
-					if (!a.versionInfo.empty() && b.versionInfo.empty())
-					{
-						// Prefer detection with version
-						return true;
-					}
-					if (a.versionInfo.empty() && !b.versionInfo.empty())
-					{
-						// Prefer detection with version
-						return false;
-					}
-
-					// Equaly strong detections - use additional information
-					return a.additionalInfo.length() > b.additionalInfo.length();
+					// Decide by version or extra information
+					bool compRes = false;
+					return compareExtraInfo(a, b, compRes) ? compRes : false;
 				}
 				else
 				{
@@ -85,22 +120,11 @@ bool compareForSort(const DetectResult &a, const DetectResult &b)
 		// If both are same compilers with same detection strength
 		if (isShorterPrefixOfCaseInsensitive(a.name, b.name))
 		{
-			// Equaly strong detections for one compiler
-			if (!a.versionInfo.empty() && b.versionInfo.empty())
+			// Decide by version or extra information
+			bool compRes = false;
+			if (compareExtraInfo(a, b, compRes))
 			{
-				// Prefer detection with version
-				return true;
-			}
-			if (a.versionInfo.empty() && !b.versionInfo.empty())
-			{
-				// Prefer detection with version
-				return false;
-			}
-
-			// If at least one detection has version
-			if (!a.additionalInfo.empty() || !b.additionalInfo.empty())
-			{
-				return a.additionalInfo.length() > b.additionalInfo.length();
+				return compRes;
 			}
 		}
 
