@@ -59,10 +59,9 @@ class Heuristics
 		/// @}
 
 	protected:
-		Search &search; ///< signature search engine
-		bool canSearch; ///< @c true if we can use search engine
-
 		retdec::fileformat::FileFormat &fileParser; ///< input file parser
+		Search &search;                             ///< signature search engine
+		bool canSearch;                             ///< @c true if we can use search engine
 		ToolInformation &toolInfo;                  ///< results - detected tools
 
 		std::vector<const retdec::fileformat::Section*> sections; ///< section information
