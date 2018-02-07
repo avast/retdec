@@ -171,14 +171,14 @@ struct ToolInformation
 	std::vector<DetectResult> detectedTools;        ///< detected tools (compilers, packers...)
 	std::vector<DetectLanguage> detectedLanguages;  ///< detected programming language(s)
 
-	bool entryPointOffset;           ///< @c false if file has no has no or invalid EP offset
+	bool entryPointOffset = false;   ///< @c false if file has no has no or invalid EP offset
 	unsigned long long epOffset;     ///< entry point offset
 
-	bool entryPointAddress;          ///< @c false if file has no has no or invalid EP address
+	bool entryPointAddress = false;  ///< @c false if file has no has no or invalid EP address
 	unsigned long long epAddress;    ///< entry point address
 	unsigned long long imageBase;    ///< image base address
 
-	bool entryPointSection;                 ///< @c false if file has no or invalid EP section
+	bool entryPointSection = false;         ///< @c false if file has no or invalid EP section
 	retdec::fileformat::Section epSection;  ///< entry point section
 	std::string epBytes;                    ///< hexadecimal representation of entry point bytes
 

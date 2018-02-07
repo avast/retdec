@@ -124,11 +124,10 @@ DetectLanguage::~DetectLanguage()
 /**
  * Constructor of CompilerInformation structure
  */
-ToolInformation::ToolInformation() : entryPointOffset(false),
-	entryPointAddress(false), entryPointSection(false),
-	imageBase(std::numeric_limits<unsigned long long>::max()),
-	epAddress(std::numeric_limits<unsigned long long>::max()),
-	epOffset(std::numeric_limits<unsigned long long>::max())
+ToolInformation::ToolInformation()
+	: epOffset(std::numeric_limits<unsigned long long>::max()),
+		epAddress(std::numeric_limits<unsigned long long>::max()),
+		imageBase(std::numeric_limits<unsigned long long>::max())
 {
 
 }
