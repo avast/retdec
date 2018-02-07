@@ -2054,7 +2054,7 @@ rule msvc_uv_04 {
 		name = "MSVC"
 		pattern = "8B442408"
 	strings:
-		$1 = { 8B  44 24 08 }
+		$1 = { 8B 44 24 08 }
 	condition:
 		$1 at pe.entry_point
 }
@@ -2065,7 +2065,7 @@ rule msvc_uv_05 {
 		name = "MSVC"
 		pattern = "8B44240C"
 	strings:
-		$1 = { 8B  44  24 0C }
+		$1 = { 8B 44 24 0C }
 	condition:
 		$1 at pe.entry_point
 }
@@ -2076,7 +2076,7 @@ rule msvc_uv_06 {
 		name = "MSVC"
 		pattern = "8B4C2404"
 	strings:
-		$1 = { 8B  4C  24  04 }
+		$1 = { 8B 4C 24 04 }
 	condition:
 		$1 at pe.entry_point
 }
@@ -2087,7 +2087,7 @@ rule msvc_uv_07 {
 		name = "MSVC"
 		pattern = "8B4C2408"
 	strings:
-		$1 = { 8B  4C  24  08 }
+		$1 = { 8B 4C 24 08 }
 	condition:
 		$1 at pe.entry_point
 }
@@ -2098,7 +2098,7 @@ rule msvc_uv_08 {
 		name = "MSVC"
 		pattern = "8B4C240C"
 	strings:
-		$1 = { 8B  4C  24  0C  }
+		$1 = { 8B 4C 24 0C }
 	condition:
 		$1 at pe.entry_point
 }
