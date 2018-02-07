@@ -254,9 +254,24 @@ std::string PeHeuristics::getUpxAdditionalInfo(std::size_t metadataPos)
  */
 void PeHeuristics::getGoHeuristics()
 {
-	const auto* section = fileParser.getSection(".text");
-	if (section && section->getBytes(0, 15) ==  "\xFF Go build ID: ")
+	auto source = DetectionMethod::STRING_SEARCH_H;
+
+	const Section* section = fileParser.getSection(".text");
+	if (!section)
 	{
+		return;
+	}
+
+	const auto goString = "\xFF Go build ID: ";
+	if (section->getBytes(0, 15) == goString)
+	{
+		addCompiler(source, DetectionStrength::MEDIUM, "gc");
+		addLanguage("Go");
+	}
+	else if (search.hasStringInSection(goString, section))
+	{
+		// Go build ID not on start of section
+		addCompiler(source, DetectionStrength::LOW, "gc");
 		addLanguage("Go");
 	}
 }
