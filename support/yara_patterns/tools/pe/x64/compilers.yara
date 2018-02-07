@@ -112,6 +112,19 @@ rule aut2exe_33143 {
 		$1 at 0x400
 }
 
+rule msvc_general
+{
+	meta:
+		tool = "C"
+		name = "MSVC"
+		source = "Made by RetDec Team"
+		pattern = "4883EC28E8????00004883C428E9??FEFFFFCCCC"
+	strings:
+		$1 = { 48 83 EC 28 E8 ?? ?? 00 00 48 83 C4 28 E9 ?? FE FF FF CC CC }
+	condition:
+		$1 at pe.entry_point
+}
+
 rule gc
 {
 	meta:
