@@ -1117,13 +1117,8 @@ void PeHeuristics::getLinkerVersionHeuristic()
 		return;
 	}
 
-	// Detected linker is always added
+	// Add linker
 	addLinker(source, strength, "Microsoft Linker", linkerVersion);
-	if (peParser.isDotNet() || peParser.isPackedDotNet())
-	{
-		// Do not continue if MSIL is detected
-		return;
-	}
 
 	// Add more info if we are sure that binary is MSVC
 	if (isDetected("MSVC", DetectionStrength::MEDIUM))
@@ -1145,7 +1140,12 @@ void PeHeuristics::getLinkerVersionHeuristic()
 
 		studioVersion = "Visual Studio " + studioVersion;
 		addCompiler(source, strength, "MSVC", msvcVersion, studioVersion);
-		addLanguage("C++");
+
+		// Do not add language if MSIL is detected
+		if (!peParser.isDotNet() && !peParser.isPackedDotNet())
+		{
+			addLanguage("C++");
+		}
 	}
 }
 
