@@ -27,8 +27,11 @@ Signature::Signature() : startOffset(0), endOffset(0)
  * @param sStart Start offset of pattern
  * @param sEnd End offset of pattern
  */
-Signature::Signature(std::string sName, std::string sVersion, std::string sPattern, std::string sAdditional, unsigned sStart, unsigned sEnd) :
-	name(sName), version(sVersion), pattern(sPattern), additional(sAdditional), startOffset(sStart), endOffset(sEnd)
+Signature::Signature(
+		std::string sName, std::string sVersion, std::string sPattern, std::string sAdditional,
+		unsigned sStart, unsigned sEnd)
+	: name(sName), version(sVersion), pattern(sPattern), additional(sAdditional),
+		startOffset(sStart), endOffset(sEnd)
 {
 
 }

@@ -35,7 +35,9 @@ class ElfHeuristics : public Heuristics
 		/// @}
 
 	public:
-		ElfHeuristics(retdec::fileformat::ElfFormat &parser, Search &searcher, ToolInformation &toolInfo);
+		ElfHeuristics(
+				retdec::fileformat::ElfFormat &parser, Search &searcher,
+				ToolInformation &toolInfo);
 		virtual ~ElfHeuristics() override;
 };
 

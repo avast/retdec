@@ -7,7 +7,6 @@
 #include "retdec/cpdetect/compiler_detector/heuristics/pe_heuristics.h"
 #include "retdec/cpdetect/compiler_detector/pe_compiler.h"
 #include "retdec/cpdetect/settings.h"
-#include "retdec/cpdetect/signatures/yara/database/database.h"
 
 using namespace retdec::fileformat;
 
@@ -17,27 +16,45 @@ namespace cpdetect {
 /**
  * Constructor
  */
-PeCompiler::PeCompiler(retdec::fileformat::PeFormat &parser, DetectParams &params, ToolInformation &tools) : CompilerDetector(parser, params, tools)
+PeCompiler::PeCompiler(
+		fileformat::PeFormat &parser, DetectParams &params, ToolInformation &tools)
+	: CompilerDetector(parser, params, tools)
 {
 	heuristics = new PeHeuristics(parser, *search, toolInfo);
 	externalSuffixes = EXTERNAL_DATABASE_SUFFIXES;
+
+	retdec::utils::FilesystemPath path(pathToShared);
+	path.append(YARA_RULES_PATH + "pe/");
+	auto bitWidth = parser.getWordLength();
+
 	switch(targetArchitecture)
 	{
 		case Architecture::X86:
+			path.append("x86.yarac");
+			break;
+
 		case Architecture::X86_64:
-			internalDatabase = getX86PeDatabase();
+			path.append("x64.yarac");
 			break;
+
 		case Architecture::ARM:
-			internalDatabase = getArmPeDatabase();
+			if (bitWidth == 32)
+			{
+				path.append("arm.yarac");
+			}
+			else
+			{
+				// There are no 64-bit ARM signatures for now.
+			}
 			break;
-		case Architecture::POWERPC:
-			internalDatabase = getPowerPcPeDatabase();
-			break;
-		case Architecture::MIPS:
-			internalDatabase = getMipsPeDatabase();
-			break;
+
 		default:
-			internalDatabase = nullptr;
+			break;
+	}
+
+	if (path.isFile())
+	{
+		internalPaths.emplace_back(path.getPath());
 	}
 }
 

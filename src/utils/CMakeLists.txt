@@ -2,6 +2,7 @@ set(RETDEC_UTILS_SOURCES
 	address.cpp
 	alignment.cpp
 	byte_value_storage.cpp
+	binary_path.cpp
 	conversion.cpp
 	file_io.cpp
 	filesystem_path.cpp
@@ -12,10 +13,12 @@ set(RETDEC_UTILS_SOURCES
 )
 
 add_library(retdec-utils STATIC ${RETDEC_UTILS_SOURCES})
+target_link_libraries(retdec-utils whereami)
 if(MSVC)
-	target_link_libraries(retdec-utils shlwapi) # shlwapi.dll for PathRemoveFileSpec()
+	target_link_libraries(retdec-utils whereami shlwapi) # shlwapi.dll for PathRemoveFileSpec()
 endif()
 target_include_directories(retdec-utils PUBLIC ${PROJECT_SOURCE_DIR}/include/)
+target_include_directories(retdec-utils PUBLIC ${PROJECT_SOURCE_DIR}/deps/)
 
 # Disable the min() and max() macros to prevent errors when using e.g.
 # std::numeric_limits<...>::max()

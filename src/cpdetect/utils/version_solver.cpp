@@ -31,7 +31,7 @@ std::size_t separateVersions(const std::string &version, std::vector<std::string
 	res.clear();
 	std::size_t actPos, lastPos = 0;
 
-	while((actPos = version.find('.', lastPos)) != std::string::npos)
+	while ((actPos = version.find('.', lastPos)) != std::string::npos)
 	{
 		res.push_back(version.substr(lastPos, actPos - lastPos));
 		lastPos = actPos + 1;
@@ -57,7 +57,7 @@ std::size_t separateVersions(const std::string &version, std::vector<std::string
 bool getVersion(const std::string &input, std::string &result)
 {
 	std::smatch match;
-	if(regex_search(input, match, std::regex("([0-9]+\\.)+[0-9]+")))
+	if (regex_search(input, match, std::regex("([0-9]+\\.)+[0-9]+")))
 	{
 		result = match.str();
 		return true;
@@ -80,7 +80,7 @@ bool getVersion(const std::string &input, std::string &result)
 bool compareVersions(const std::string &aVer, const std::string &bVer, int &result)
 {
 	std::string tmp;
-	if(!getVersion(aVer, tmp) || tmp != aVer || !getVersion(bVer, tmp) || tmp != bVer)
+	if (!getVersion(aVer, tmp) || tmp != aVer || !getVersion(bVer, tmp) || tmp != bVer)
 	{
 		return false;
 	}
@@ -90,29 +90,29 @@ bool compareVersions(const std::string &aVer, const std::string &bVer, int &resu
 	const auto ver2Len = separateVersions(bVer, ver2);
 	std::size_t a = 0, b = 0;
 
-	for(std::size_t i = 0, e = std::min(ver1Len, ver2Len); i < e; ++i)
+	for (std::size_t i = 0, e = std::min(ver1Len, ver2Len); i < e; ++i)
 	{
-		if(!strToNum(ver1[i], a) || !strToNum(ver2[i], b))
+		if (!strToNum(ver1[i], a) || !strToNum(ver2[i], b))
 		{
 			return false;
 		}
-		else if(a > b)
+		else if (a > b)
 		{
 			result = 1;
 			return true;
 		}
-		else if(a < b)
+		else if (a < b)
 		{
 			result = -1;
 			return true;
 		}
 	}
 
-	if(ver1Len > ver2Len)
+	if (ver1Len > ver2Len)
 	{
 		result = 1;
 	}
-	else if(ver2Len > ver1Len)
+	else if (ver2Len > ver1Len)
 	{
 		result = -1;
 	}

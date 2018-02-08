@@ -21,6 +21,9 @@ class PeHeuristics : public Heuristics
 	private:
 		retdec::fileformat::PeFormat &peParser; ///< parser of input PE file
 
+		std::size_t declaredLength; ///< declared length of file
+		std::size_t loadedLength;   ///< actual loaded length of file
+
 		/// @name Auxiliary methods
 		/// @{
 		std::string getEnigmaVersion();
@@ -50,13 +53,7 @@ class PeHeuristics : public Heuristics
 		void getActiveDeliveryHeuristics();
 		void getAdeptProtectorHeuristics();
 		void getCodeLockHeuristics();
-		void getPhoenixHeuristics();
-		void getAssemblyInvokeHeuristics();
-		void getCliSecureHeuristics();
-		void getReNetPackHeuristics();
-		void getDotNetZHeuristics();
-		void getDotNetSpiderHeuristics();
-		void getDotNetShrinkHeuristics();
+		void getNetHeuristic();
 		void getExcelsiorHeuristics();
 		void getVmProtectHeuristics();
 		void getBorlandDelphiHeuristics();
@@ -68,15 +65,23 @@ class PeHeuristics : public Heuristics
 		void getRdataHeuristic();
 		void getNullsoftHeuristic();
 		void getManifestHeuristic();
+		void getSevenZipHeuristics();
+		void getMewSectionHeuristics();
+		void getNsPackSectionHeuristics();
+		void getPeSectionHeuristics();
 		/// @}
+
 	protected:
 		/// @name Virtual methods
 		/// @{
 		virtual void getFormatSpecificCompilerHeuristics() override;
 		virtual void getFormatSpecificLanguageHeuristics() override;
 		/// @}
+
 	public:
-		PeHeuristics(retdec::fileformat::PeFormat &parser, Search &searcher, ToolInformation &toolInfo);
+		PeHeuristics(
+				retdec::fileformat::PeFormat &parser, Search &searcher,
+				ToolInformation &toolInfo);
 		virtual ~PeHeuristics() override;
 };
 

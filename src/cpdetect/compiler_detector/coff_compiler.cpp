@@ -14,11 +14,12 @@ namespace cpdetect {
 /**
  * Constructor
  */
-CoffCompiler::CoffCompiler(retdec::fileformat::CoffFormat &parser, DetectParams &params, ToolInformation &tools) : CompilerDetector(parser, params, tools)
+CoffCompiler::CoffCompiler(
+		retdec::fileformat::CoffFormat &parser, DetectParams &params, ToolInformation &tools)
+	: CompilerDetector(parser, params, tools)
 {
 	heuristics = new Heuristics(parser, *search, toolInfo);
 	externalSuffixes = EXTERNAL_DATABASE_SUFFIXES;
-	internalDatabase = nullptr;
 }
 
 } // namespace cpdetect

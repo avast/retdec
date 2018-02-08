@@ -54,6 +54,7 @@ const std::map<std::string, std::string> delphiVersionMap =
  * Delphi compiler version identification strings with version offset
  *
  * Order matters for iPhone strings, we have to look first for longer.
+ * If string is found at position x, version is placed at x + offset.
  */
 const std::vector<std::pair<std::string, std::size_t>> delphiStrings =
 {
@@ -137,13 +138,13 @@ bool getDwarfLanguageString(Dwarf_Unsigned langCode, std::string &result)
 }
 
 /**
- * Is the given symbol a function from the Go language
+ * Is the given symbol a function from the Go language?
  * @param symbol Input symbol
  * @return @c true if symbol is Go symbol, @c false otherwise
  */
 bool isGoFunction(const std::shared_ptr<retdec::fileformat::Symbol> &symbol)
 {
-	if(!symbol->isFunction())
+	if (!symbol->isFunction())
 	{
 		// Ignore data and other symbols
 		return false;
@@ -158,9 +159,9 @@ bool isGoFunction(const std::shared_ptr<retdec::fileformat::Symbol> &symbol)
  * @param symbol Input symbol
  * @return @c true if symbol is rust symbol, @c false otherwise
  */
-bool isFunctionFromRust(const std::shared_ptr<retdec::fileformat::Symbol> &symbol)
+bool isRustFunction(const std::shared_ptr<retdec::fileformat::Symbol> &symbol)
 {
-	if(!symbol->isFunction())
+	if (!symbol->isFunction())
 	{
 		// Ignore data and other symbols
 		return false;
@@ -171,18 +172,18 @@ bool isFunctionFromRust(const std::shared_ptr<retdec::fileformat::Symbol> &symbo
 }
 
 /**
- * Is the given symbol from the GHC?
+ * Is the given symbol from the GHC Haskell?
  * @param symbol Input symbol
  * @return @c true if symbol is GHC symbol, @c false otherwise
  */
-bool isSymbolFromGHC(const std::shared_ptr<retdec::fileformat::Symbol> &symbol)
+bool isGhcSymbol(const std::shared_ptr<retdec::fileformat::Symbol> &symbol)
 {
 	const auto offset = symbol->getName().find("base_GHC");
 	return offset == 0 || offset == 1;
 }
 
 /**
- * Convert Embarcadero Delphi version to extra information
+ * Convert Embarcadero Delphi version to text extra information
  * @param version compiler version
  * @return extra info
  */
@@ -224,20 +225,21 @@ std::string commentSectionNameByFormat(Format format)
 /**
  * Constructor
  * @param parser Parser of input file
- * @param searcher Signature parser
- * @param toolInfo Structure for save information about detected compilers or packers
+ * @param searcher Signature search engine
+ * @param toolInfo Structure for information about detected tools
  */
-Heuristics::Heuristics(retdec::fileformat::FileFormat &parser, Search &searcher, ToolInformation &toolInfo) :
-	fileParser(parser), search(searcher), toolInfo(toolInfo), priorityLanguageIsSet(false),
-	canSearch(search.isFileLoaded() && search.isFileSupported())
+Heuristics::Heuristics(
+		retdec::fileformat::FileFormat &parser, Search &searcher, ToolInformation &toolInfo)
+	: fileParser(parser), search(searcher), toolInfo(toolInfo)
 {
+	canSearch = search.isFileLoaded() && search.isFileSupported();
+
 	const auto secCounter = fileParser.getNumberOfSections();
 	sections.reserve(secCounter);
-
-	for(std::size_t i = 0; i < secCounter; ++i)
+	for (std::size_t i = 0; i < secCounter; ++i)
 	{
 		const auto *fsec = fileParser.getSection(i);
-		if(fsec)
+		if (fsec)
 		{
 			sections.push_back(fsec);
 
@@ -268,8 +270,9 @@ Heuristics::~Heuristics()
  * @param version Version of detected compiler
  * @param extra Extra information about compiler
  */
-void Heuristics::addCompiler(DetectionMethod source, DetectionStrength strength,
-		const std::string &name, const std::string &version, const std::string &extra)
+void Heuristics::addCompiler(
+		DetectionMethod source, DetectionStrength strength, const std::string &name,
+		const std::string &version, const std::string &extra)
 {
 	toolInfo.addTool(source, strength, ToolType::COMPILER, name, version, extra);
 }
@@ -282,8 +285,9 @@ void Heuristics::addCompiler(DetectionMethod source, DetectionStrength strength,
  * @param version Version of detected linker
  * @param extra Extra information about linker
  */
-void Heuristics::addLinker(DetectionMethod source, DetectionStrength strength,
-		const std::string &name, const std::string &version, const std::string &extra)
+void Heuristics::addLinker(
+		DetectionMethod source, DetectionStrength strength, const std::string &name,
+		const std::string &version, const std::string &extra)
 {
 	toolInfo.addTool(source, strength, ToolType::LINKER, name, version, extra);
 }
@@ -296,8 +300,9 @@ void Heuristics::addLinker(DetectionMethod source, DetectionStrength strength,
  * @param version Version of detected installer
  * @param extra Extra information about installer
  */
-void Heuristics::addInstaller(DetectionMethod source, DetectionStrength strength,
-		const std::string &name, const std::string &version, const std::string &extra)
+void Heuristics::addInstaller(
+		DetectionMethod source, DetectionStrength strength, const std::string &name,
+		const std::string &version, const std::string &extra)
 {
 	toolInfo.addTool(source, strength, ToolType::INSTALLER, name, version, extra);
 }
@@ -310,8 +315,9 @@ void Heuristics::addInstaller(DetectionMethod source, DetectionStrength strength
  * @param version Version of detected packer
  * @param extra Extra information about packer
  */
-void Heuristics::addPacker(DetectionMethod source, DetectionStrength strength,
-		const std::string& name, const std::string& version, const std::string& extra)
+void Heuristics::addPacker(
+		DetectionMethod source, DetectionStrength strength, const std::string &name,
+		const std::string& version, const std::string& extra)
 {
 	toolInfo.addTool(source, strength, ToolType::PACKER, name, version, extra);
 }
@@ -326,8 +332,9 @@ void Heuristics::addPacker(DetectionMethod source, DetectionStrength strength,
  *
  * This method implies DetectResultSource::SIGNATURE. Strength is computed.
  */
-void Heuristics::addCompiler(std::size_t matchNibbles, std::size_t totalNibbles,
-		const std::string &name, const std::string &version, const std::string &extra)
+void Heuristics::addCompiler(
+		std::size_t matchNibbles, std::size_t totalNibbles, const std::string &name,
+		const std::string &version, const std::string &extra)
 {
 	toolInfo.addTool(matchNibbles, totalNibbles, ToolType::COMPILER, name, version, extra);
 }
@@ -342,8 +349,9 @@ void Heuristics::addCompiler(std::size_t matchNibbles, std::size_t totalNibbles,
  *
  * This method implies DetectResultSource::SIGNATURE. Strength is computed.
  */
-void Heuristics::addPacker(std::size_t matchNibbles, std::size_t totalNibbles,
-		const std::string &name, const std::string &version, const std::string &extra)
+void Heuristics::addPacker(
+		std::size_t matchNibbles, std::size_t totalNibbles, const std::string &name,
+		const std::string &version, const std::string &extra)
 {
 	toolInfo.addTool(matchNibbles, totalNibbles, ToolType::PACKER, name, version, extra);
 }
@@ -354,9 +362,10 @@ void Heuristics::addPacker(std::size_t matchNibbles, std::size_t totalNibbles,
  * @param extraInfo Additional information about language
  * @param isBytecode @c true if detected language is bytecode, @c false otherwise
  */
-void Heuristics::addLanguage(const std::string &name, const std::string &extraInfo, bool isBytecode)
+void Heuristics::addLanguage(
+		const std::string &name, const std::string &extraInfo, bool isBytecode)
 {
-	if(priorityLanguageIsSet)
+	if (priorityLanguageIsSet)
 	{
 		return;
 	}
@@ -365,15 +374,17 @@ void Heuristics::addLanguage(const std::string &name, const std::string &extraIn
 }
 
 /**
- * Add information about detected language, remove previously detected languages
- *    and avoid detection of other languages
+ * Add information about detected programming language
  * @param name Name of detected programming language
  * @param extraInfo Additional information about language
  * @param isBytecode @c true if detected language is bytecode, @c false otherwise
+ *
+ * This removes previously detected languages and prevents further detections
  */
-void Heuristics::addPriorityLanguage(const std::string &name, const std::string &extraInfo, bool isBytecode)
+void Heuristics::addPriorityLanguage(
+		const std::string &name, const std::string &extraInfo, bool isBytecode)
 {
-	if(priorityLanguageIsSet)
+	if (priorityLanguageIsSet)
 	{
 		return;
 	}
@@ -394,7 +405,7 @@ std::size_t Heuristics::findSectionName(const std::string &sectionName) const
 }
 
 /**
- * Get number of sections which name starts with @a sectionName
+ * Get number of sections with name starting with @a sectionName
  * @param sectionName Required section name
  * @return Number of sections which have name equal to @a sectionName
  */
@@ -414,62 +425,6 @@ std::size_t Heuristics::findSectionNameStart(const std::string &sectionName) con
 }
 
 /**
- * Try to detect MEW packer
- */
-void Heuristics::getMewSectionHeuristics()
-{
-	auto source = DetectionMethod::SECTION_TABLE_H;
-	auto strength = DetectionStrength::MEDIUM;
-
-	std::string version;
-	if(noOfSections == 2)
-	{
-		if(startsWith(sections[0]->getName(), "MEWF"))
-		{
-			version = "11 SE 1.x";
-		}
-		else if(sections[0]->getName() == ".data" && sections[1]->getName() == ".decode")
-		{
-			version = "11 SE 1.x";
-		}
-	}
-
-	if(!version.empty())
-	{
-		addPacker(source, strength, "MEW", version);
-	}
-}
-
-/**
- * Try to detect NsPack packer
- */
-void Heuristics::getNsPackSectionHeuristics()
-{
-	auto source = DetectionMethod::SECTION_TABLE_H;
-	auto strength = DetectionStrength::MEDIUM;
-
-	if(noOfSections && (sections[0]->getName() == "nsp0" || sections[0]->getName() == ".nsp0"))
-	{
-		const auto namePrefix = sections[0]->getName().substr(0, sections[0]->getName().length() - 1);
-		std::size_t counter = 0;
-
-		for(std::size_t i = 1; i < noOfSections; ++i)
-		{
-			if(sections[i]->getName() != (namePrefix + numToStr(i)))
-			{
-				if(++counter > 1)
-				{
-					return;
-				}
-			}
-		}
-
-		auto version = sections[0]->getName() == "nsp0" ? "2.x" : "3.x";
-		addPacker(source, strength, "NsPack", version);
-	}
-}
-
-/**
  * Try to detect tools by section names
  */
 void Heuristics::getSectionHeuristics()
@@ -477,256 +432,36 @@ void Heuristics::getSectionHeuristics()
 	auto source = DetectionMethod::SECTION_TABLE_H;
 	auto strength = DetectionStrength::HIGH;
 
-	if(!noOfSections)
+	if (!noOfSections)
 	{
 		return;
 	}
 
-	const auto maxSectionIndex = noOfSections - 1;
-	const auto firstName = sections[0]->getName();
-	const auto lastName = sections[maxSectionIndex]->getName();
-	unsigned long long sameName = 0;
-
-	/// @todo use log search for section names - map maybe?
-
-	std::string name, version;
-	if(firstName == ".Upack" || firstName == ".ByDwing")
-	{
-		name = "Upack";
-	}
-	else if(lastName == "PEPACK!!")
-	{
-		name = "PE-PACK";
-	}
-	else if(lastName == ".WWP32")
-	{
-		name = "WWPack32";
-	}
-	else if(lastName == "yC" || lastName == ".y0da" || lastName == ".yP")
-	{
-		name = "yoda's Crypter";
-	}
-	else if(lastName == "lamecryp")
-	{
-		name = "LameCrypt";
-	}
-	else if(firstName == "pec1" && toolInfo.entryPointSection && toolInfo.epSection.getName() == "pec2" &&
-			toolInfo.epSection.getIndex() == 1)
-	{
-		name = "PECompact";
-		version = "1.xx";
-	}
-	else if(toolInfo.entryPointSection && toolInfo.epSection.getName() == "ExeS" &&
-			toolInfo.epSection.getSizeInFile() == 0xD9F && startsWith(toolInfo.epBytes, "EB00EB"))
-	{
-		name = "EXE Stealth";
-		version = "2.72 - 2.73";
-	}
-	else if(toolInfo.entryPointSection && toolInfo.epSection.getIndex() < maxSectionIndex &&
-			toolInfo.epSection.getName() == ".aspack" &&
-			sections[toolInfo.epSection.getIndex() + 1]->getName() == ".adata")
-	{
-		name = "ASPack";
-	}
-	else if(toolInfo.entryPointSection && toolInfo.epSection.getName() == "TheHyper")
-	{
-		name = "TheHyper's protector";
-	}
-	else if(toolInfo.entryPointSection && startsWith(toolInfo.epSection.getName(), "Themida"))
-	{
-		name = "Themida";
-	}
-	else if(noOfSections > 2 && lastName == ".data" && sections[maxSectionIndex - 1]->getName() == ".data" &&
-			findSectionName("") == noOfSections - 2)
-	{
-		name = "ASProtect";
-	}
-	else if(noOfSections > 1 && lastName == "pebundle" && sections[maxSectionIndex - 1]->getName() == "pebundle")
-	{
-		name = "PEBundle";
-	}
-	else if(noOfSections > 2 && firstName == "UPX0" && sections[1]->getName() == "UPX1" &&
-			(sections[2]->getName() == "UPX2" || sections[2]->getName() == ".rsrc"))
-	{
-		name = "UPX";
-	}
-	else if(findSectionName(".petite") == 1)
-	{
-		name = "Petite";
-	}
-	else if(findSectionName(".pklstb") == 1)
-	{
-		name = "PKLite";
-	}
-	else if(findSectionName("krypton") == 1 && findSectionName("YADO") >= 1)
-	{
-		name = "Krypton";
-	}
-	else if(findSectionName("NFO") == noOfSections)
-	{
-		name = "NFO";
-	}
-	else if((sameName = findSectionName("PELOCKnt")) && (sameName >= noOfSections - 2 || noOfSections < 2))
-	{
-		name = "PELock";
-		version = "NT";
-	}
-	else if((sameName = findSectionName(".pelock")) && sameName >= noOfSections - 1)
-	{
-		name = "PELock";
-		version = "1.x";
-	}
-	else if(findSectionName(".MPRESS1") == 1 && findSectionName(".MPRESS2") == 1)
-	{
-		name = "MPRESS";
-	}
-	else if(findSectionName(".dyamarC") == 1 && findSectionName(".dyamarD") == 1)
-	{
-		name = "DYAMAR";
-	}
-	else if(findSectionName("hmimys") == 1)
-	{
-		name = "hmimys";
-	}
-	else if(findSectionName(".securom") == 1)
-	{
-		name = "SecuROM";
-	}
-	else if(findSectionName(".HP.init") == 1)
-	{
-		addCompiler(source, strength, "HP C++");
-		addLanguage("C++");
-		return;
-	}
-	else if(findSectionName(".debug-ghc-link-info") == 1)
-	{
-		addCompiler(source, strength, "GHC");
-		addPriorityLanguage("Haskell");
-		return;
-	}
-	else if(findSectionName(".note.go.buildid"))
-	{
-		addCompiler(source, strength, "gc");
-		addPriorityLanguage("Go");
-		return;
-	}
-	else if(findSectionName(".go_export"))
+	// Compiler detections
+	if (findSectionName(".go_export"))
 	{
 		addCompiler(source, strength, "gccgo");
 		addPriorityLanguage("Go");
-		return;
 	}
-	else if(findSectionName(".gosymtab")|| findSectionName(".gopclntab"))
+	if (findSectionName(".note.go.buildid"))
+	{
+		addCompiler(source, strength, "gc");
+		addPriorityLanguage("Go");
+	}
+	if (findSectionName(".gosymtab") || findSectionName(".gopclntab"))
 	{
 		addPriorityLanguage("Go");
-		return;
 	}
-	else if(noOfSections >= 2 && findSectionName("BitArts") == noOfSections - 1)
+	if (findSectionName(".debug-ghc-link-info"))
 	{
-		name = "Crunch/PE";
+		addCompiler(source, strength, "GHC");
+		addPriorityLanguage("Haskell");
 	}
-	else if(findSectionName("kkrunchy") == 1 && noOfSections == 1)
+	if (findSectionName(".HP.init"))
 	{
-		name = "kkrunchy";
+		addCompiler(source, strength, "HP C++");
+		addLanguage("C++");
 	}
-	else if(findSectionName(".neolit") == 1 || findSectionName(".neolite") == 1)
-	{
-		name = "NeoLite";
-	}
-	else if(noOfSections == 2 && (sections[0]->getName() == ".packed" || sections[1]->getName() == ".RLPack"))
-	{
-		name = "RLPack";
-	}
-	else if(findSectionName("RCryptor") == 1 || findSectionName(".RCrypt") == 1)
-	{
-		name = "RCryptor";
-	}
-	else if(lastName == ".taz")
-	{
-		name = "PESpin";
-	}
-	else if(lastName == "_winzip_")
-	{
-		name = "WinZip Self-Extractor";
-	}
-	else if(lastName == ".ccg")
-	{
-		name = "CCG packer";
-	}
-	else if(findSectionName(".boom") >= 1)
-	{
-		name = "The Boomerang";
-	}
-	else if(findSectionName("DAStub") >= 1)
-	{
-		name = "DAStub Dragon Armor Protector";
-	}
-	else if(findSectionName("!EPack") >= 1)
-	{
-		name = "EPack";
-	}
-	else if(noOfSections >= 2 && sections[maxSectionIndex - 1]->getName() == ".gentee")
-	{
-		name = "Gentee";
-	}
-	else if(findSectionName(".MaskPE") >= 1)
-	{
-		name = "MaskPE";
-	}
-	else if(findSectionName(".perplex") >= 1)
-	{
-		name = "Perplex PE Protector";
-	}
-	else if(findSectionName("ProCrypt") >= 1)
-	{
-		name = "ProCrypt";
-	}
-	else if(lastName == ".rmnet")
-	{
-		name = "Ramnit";
-	}
-	else if(findSectionName(".seau") >= 1)
-	{
-		name = "SeauSFX";
-	}
-	else if(findSectionName(".spack") >= 1)
-	{
-		name = "Simple Pack";
-	}
-	else if(lastName == ".svkp")
-	{
-		name = "SVKProtector";
-	}
-	else if(noOfSections >= 2 && sections[maxSectionIndex - 1]->getName() == ".tsustub" && lastName == ".tsuarch")
-	{
-		name = "TSULoader";
-	}
-	else if(findSectionName(".charmve") >= 1 || findSectionName(".pinclie") >= 1)
-	{
-		name = "PIN tool";
-	}
-	else if(findSectionName(".mackt") >= 1)
-	{
-		name = "ImpREC reconstructed";
-	}
-	else if(findSectionName(".winapi") >= 1)
-	{
-		name = "API Override tool";
-	}
-	else if(noOfSections == 2 && firstName == ".rsrc" && lastName == "coderpub")
-	{
-		// https://coder.pub/2014/08/pe-file-packer-step-by-step-2-packing/
-		name = "DxPack";
-	}
-
-	if (!name.empty())
-	{
-		addPacker(source, strength, name, version);
-		return;
-	}
-
-	getMewSectionHeuristics();
-	getNsPackSectionHeuristics();
 }
 
 /**
@@ -736,60 +471,23 @@ void Heuristics::getSectionHeuristics()
  */
 bool Heuristics::parseGccComment(const std::string &record)
 {
-	/** @todo rework this later, very unreliable */
-
 	auto source = DetectionMethod::COMMENT_H;
 	auto strength = DetectionStrength::LOW;
 
 	const std::string prefix = "GCC: ";
-	if(!startsWith(record, prefix))
+	if (!startsWith(record, prefix))
 	{
 		return false;
 	}
 
 	std::string version;
-	if(getVersion(std::regex_replace(record, std::regex("\\([^\\)]+\\)"), ""), version))
+	if (getVersion(std::regex_replace(record, std::regex("\\([^\\)]+\\)"), ""), version))
 	{
 		addCompiler(source, strength, "GCC", version);
 		return true;
 	}
 
 	return false;
-}
-
-/**
- * Parse Open64 record from comment section
- * @param record Record from comment section
- * @return @c true if Open64 was detected, @c false otherwise
- */
-bool Heuristics::parseOpen64Comment(const std::string &record)
-{
-	auto source = DetectionMethod::COMMENT_H;
-	auto strength = DetectionStrength::LOW;
-
-	const std::string prefix = "#Open64 Compiler Version ";
-	const auto prefixLen = prefix.length();
-	if(!startsWith(record, prefix))
-	{
-		return false;
-	}
-
-	const std::string separator = " : ";
-	const auto separatorLen = separator.length();
-	const auto pos = record.find(separator, prefixLen);
-	if(pos == std::string::npos)
-	{
-		return false;
-	}
-
-	std::string additionalInfo;
-	if(pos + separatorLen < record.length())
-	{
-		additionalInfo = record.substr(pos + separatorLen);
-	}
-	std::string version = record.substr(prefixLen, pos - prefixLen);
-	addCompiler(source, strength, "Open64", version, additionalInfo);
-	return true;
 }
 
 /**
@@ -808,7 +506,7 @@ bool Heuristics::parseGhcComment(const std::string &record)
 	}
 
 	const std::string version = record.substr(4);
-	if(std::regex_match(version, std::regex("[[:digit:]]+.[[:digit:]]+.[[:digit:]]+")))
+	if (std::regex_match(version, std::regex("[[:digit:]]+.[[:digit:]]+.[[:digit:]]+")))
 	{
 		// Check for prior methods results
 		if (isDetected("GHC"))
@@ -826,15 +524,50 @@ bool Heuristics::parseGhcComment(const std::string &record)
 }
 
 /**
- * Try detect used compiler based on content of comment sections
+ * Parse Open64 record from comment section
+ * @param record Record from comment section
+ * @return @c true if Open64 was detected, @c false otherwise
+ */
+bool Heuristics::parseOpen64Comment(const std::string &record)
+{
+	auto source = DetectionMethod::COMMENT_H;
+	auto strength = DetectionStrength::LOW;
+
+	const std::string prefix = "#Open64 Compiler Version ";
+	const auto prefixLen = prefix.length();
+	if (!startsWith(record, prefix))
+	{
+		return false;
+	}
+
+	const std::string separator = " : ";
+	const auto separatorLen = separator.length();
+	const auto pos = record.find(separator, prefixLen);
+	if (pos == std::string::npos)
+	{
+		return false;
+	}
+
+	std::string additionalInfo;
+	if (pos + separatorLen < record.length())
+	{
+		additionalInfo = record.substr(pos + separatorLen);
+	}
+	std::string version = record.substr(prefixLen, pos - prefixLen);
+	addCompiler(source, strength, "Open64", version, additionalInfo);
+	return true;
+}
+
+/**
+ * Try to detect used compiler based on content of comment sections
  * @return @c true if used compiler was successfully detected, @c false otherwise
  */
 void Heuristics::getCommentSectionsHeuristics()
 {
-	for(const auto *sec : fileParser.getSections({".comment", ".rdata"}))
+	for (const auto *sec : fileParser.getSections({".comment", ".rdata"}))
 	{
 		std::string secContent;
-		if(!sec || !sec->getString(secContent))
+		if (!sec || !sec->getString(secContent))
 		{
 			continue;
 		}
@@ -842,9 +575,9 @@ void Heuristics::getCommentSectionsHeuristics()
 		std::vector<std::string> records;
 		separateStrings(secContent, records);
 
-		for(const auto &item : records)
+		for (const auto &item : records)
 		{
-			parseGccComment(item) || parseOpen64Comment(item) || parseGhcComment(item);
+			parseGccComment(item) || parseGhcComment(item) || parseOpen64Comment(item);
 		}
 	}
 }
@@ -862,7 +595,7 @@ bool Heuristics::parseGccProducer(const std::string &producer)
 	const auto cpp = startsWith(producer, "GNU C++");
 	const auto c = !cpp && startsWith(producer, "GNU C");
 	const auto fortran = startsWith(producer, "GNU Fortran");
-	if(!c && !cpp && !fortran)
+	if (!c && !cpp && !fortran)
 	{
 		return false;
 	}
@@ -885,7 +618,7 @@ bool Heuristics::parseClangProducer(const std::string &producer)
 	auto source = DetectionMethod::DWARF_DEBUG_H;
 	auto strength = DetectionStrength::MEDIUM;
 
-	if(!contains(producer, "clang"))
+	if (!contains(producer, "clang"))
 	{
 		return false;
 	}
@@ -906,19 +639,19 @@ bool Heuristics::parseTmsProducer(const std::string &producer)
 	auto source = DetectionMethod::DWARF_DEBUG_H;
 	auto strength = DetectionStrength::MEDIUM;
 
-	if(!startsWith(producer, "TMS470 C/C++"))
+	if (!startsWith(producer, "TMS470 C/C++"))
 	{
 		return false;
 	}
 
 	std::string version;
 	getVersion(producer, version);
-	addCompiler(source, strength, "Texas Instruments C/C++ Compiler (TMS470)", version);
+	addCompiler(source, strength, "Texas Instruments C/C++", version, "for TMS470");
 	return true;
 }
 
 /**
- * Try detect compiler based on DWARF debugging information
+ * Try to detect compiler based on DWARF debugging information
  */
 void Heuristics::getDwarfInfo()
 {
@@ -969,8 +702,8 @@ void Heuristics::getDwarfInfo()
 	{
 		Dwarf_Die cuDie = nullptr;
 
-		// CU have single sibling - CU DIE.
-		// nullptr - descriptor of first die in CU.
+		// CU have single sibling - CU DIE
+		// nullptr - descriptor of first die in CU
 		if (dwarf_siblingof_b(dbg, nullptr, is_info, &cuDie, &err) != DW_DLV_OK)
 		{
 			return;
@@ -991,12 +724,9 @@ void Heuristics::getDwarfInfo()
 				&& name)
 		{
 			std::string producer = name;
-			if (parseGccProducer(producer)
+			parseGccProducer(producer)
 					|| parseClangProducer(producer)
-					|| parseTmsProducer(producer))
-			{
-				// ok
-			}
+					|| parseTmsProducer(producer);
 		}
 
 		Dwarf_Unsigned language;
@@ -1030,8 +760,8 @@ void Heuristics::getDwarfInfo()
 	{
 		for (std::size_t i = 0; i < noOfLanguages; ++i)
 		{
-			addLanguage(languages[i], numToStr(modulesCounter[i]) + " module"
-					+ (modulesCounter[i] > 1 ? "s" : ""));
+			addLanguage(languages[i], numToStr(modulesCounter[i])
+						+ " module" + (modulesCounter[i] > 1 ? "s" : ""));
 		}
 	}
 
@@ -1071,7 +801,7 @@ std::string Heuristics::getEmbarcaderoVersion()
 			if (offset != std::string::npos)
 			{
 				auto version = content.substr(startOffset + offset, 4);
-				if(std::regex_match(version, std::regex("[[:digit:]]+.[[:digit:]]")))
+				if (std::regex_match(version, std::regex("[[:digit:]]+.[[:digit:]]")))
 				{
 					return version;
 				}
@@ -1121,7 +851,7 @@ void Heuristics::getEmbarcaderoHeuristics()
 }
 
 /**
- * Try to detect compilers by specifc symbol names
+ * Try to detect compilers by specific symbol names
  */
 void Heuristics::getSymbolHeuristic()
 {
@@ -1136,9 +866,9 @@ void Heuristics::getSymbolHeuristic()
 	{
 		for (auto it = symbolTable->begin(), e = symbolTable->end(); it < e; ++it)
 		{
+			ghcCount += isGhcSymbol(*it) ? 1 : 0;
 			goCount += isGoFunction(*it) ? 1 : 0;
-			ghcCount += isSymbolFromGHC(*it) ? 1 : 0;
-			rustCount += isFunctionFromRust(*it) ? 1 : 0;
+			rustCount += isRustFunction(*it) ? 1 : 0;
 
 			if (goCount > MINIMUM_GO_FUNCTIONS)
 			{
@@ -1188,7 +918,8 @@ void Heuristics::getCommonLanguageHeuristics()
  * @param minStrength Minimal strength of used method
  * @return pointer to detection if compiler is detected, @b nullptr otherwise
  */
-const DetectResult* Heuristics::isDetected(const std::string &name, const DetectionStrength minStrength)
+const DetectResult* Heuristics::isDetected(
+		const std::string &name, const DetectionStrength minStrength)
 {
 	for (const auto &detection : toolInfo.detectedTools)
 	{
@@ -1207,14 +938,14 @@ const DetectResult* Heuristics::isDetected(const std::string &name, const Detect
  */
 std::string Heuristics::getUpxVersion()
 {
-	if(fileParser.isElf() || fileParser.isMacho())
+	if (fileParser.isElf() || fileParser.isMacho())
 	{
 		// format: $Id: UPX x.xx
 		const std::string pattern = "$Id: UPX ";
 		const auto &content = search.getPlainString();
 		const auto pos = content.find(pattern);
 		const std::size_t versionLen = 4;
-		if(pos <= content.length() - pattern.length() - versionLen)
+		if (pos <= content.length() - pattern.length() - versionLen)
 		{
 			return content.substr(pos + pattern.length(), versionLen);
 		}

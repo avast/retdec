@@ -38,15 +38,31 @@ set(YARA_LIBRARY_NAME "libyara")
 if(MSVC)
 	if(CMAKE_SIZEOF_VOID_P EQUAL 8)
 		set(YARA_LIBRARY_NAME "${YARA_LIBRARY_NAME}64")
+		set(YARAC_NAME "yarac64.exe" CACHE STRING "Yarac binary name" FORCE)
 	else()
 		set(YARA_LIBRARY_NAME "${YARA_LIBRARY_NAME}32")
+		set(YARAC_NAME "yarac32.exe" CACHE STRING "Yarac binary name" FORCE)
 	endif()
 
 	set(YARA_WIN_DIR       ${YARA_DIR}/windows/vs2015)
 	set(YARA_LIBRARY_DIR   ${YARA_WIN_DIR}/libyara/$<CONFIGURATION>)
+	set(YARAC_PATH         ${YARA_WIN_DIR}/\${CMAKE_INSTALL_CONFIG_NAME}/${YARAC_NAME})
 else()
 	set(YARA_LIBRARY_DIR   ${YARA_DIR}/libyara/.libs)
+	set(YARAC_PATH         ${YARA_DIR}/yarac)
 endif()
+
+# Compile YARA rules for tools detection.
+set(YARA_COMPILE_SH ${CMAKE_SOURCE_DIR}/support/yara_patterns/tools/compile-yara.sh)
+install(CODE "
+	execute_process(
+		COMMAND sh \"${YARA_COMPILE_SH}\" \"${YARAC_PATH}\" \"${CMAKE_SOURCE_DIR}\" \"${CMAKE_INSTALL_PREFIX}\"
+		RESULT_VARIABLE COMPILE_YARA_RES
+	)
+	if(COMPILE_YARA_RES)
+		message(FATAL_ERROR \"YARA tool signatures compilation FAILED\")
+	endif()
+")
 
 # Add libraries.
 add_library(yaracpp INTERFACE)
