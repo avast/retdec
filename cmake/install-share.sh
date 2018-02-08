@@ -14,8 +14,8 @@ fi
 VERSION_FILE_NAME="version.txt"
 ARCH_SUFFIX="tar.xz"
 
-SHA256SUM_REF="4ecbe72d38d6e95f057c5d18c79e25b5340265416687368ce7e5fd1ebb744b32"
-VERSION="2017-12-15"
+SHA256SUM_REF="b54ba07e2f28143c9afe34a9d5b4114fb61f3c1175b9807caced471fec82001e"
+VERSION="2018-02-08"
 
 ###############################################################################
 
