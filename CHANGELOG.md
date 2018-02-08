@@ -2,6 +2,7 @@
 
 # dev
 
+* Enhancement: Better detection of tools - new signatures and heuristics. YARA signatures are compiled now.
 * Enhancement: Add Travis and Appveyor continuous integration builds ([#2](https://github.com/avast-tl/retdec/issues/2)).
 * Enhancement: Build with `-std=c++14` instead of `-std=gnu++14` with GCC on Linux ([#76](https://github.com/avast-tl/retdec/issues/76)).
 * Enhancement: Speeded up build by skipping compilation of unnecessary dependencies (e.g. unused LLVM libraries, tools, and examples).
