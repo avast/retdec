@@ -144,6 +144,7 @@ const std::map<unsigned, const std::vector<std::uint8_t>*> x86RelocationMap =
 	{40, &ALL_NONE},
 	{41, &ALL_DWORD},
 	{42, &ALL_DWORD},
+	{43, &ALL_DWORD},
 	{250, &ALL_NONE},
 	{251, &ALL_NONE}
 };
