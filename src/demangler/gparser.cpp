@@ -3010,7 +3010,6 @@ string cGram::subanalyze(const string input, cGram::errcode *err) {
 							showsubs(substitutions);
 #endif
 
-							//Fix of the bug #914
 							unsigned tempPos = b36toint(current_sub_id);
 							if ((tempPos+1) >= substitutions.size()) {
 								errString = string("") + "cGram::subanalyze: Syntax error: Non-existent substitution " + current_sub_id + ".";

@@ -306,7 +306,7 @@ DoNotOptimizeAssignmentIntoExternalVariable) {
 	//
 	// def test():
 	//     a = 1  (VarDefStmt, where 'a' is external and comes from a volatile
-	//             store, see #1146)
+	//             store)
 	//
 	ShPtr<Variable> varA(Variable::create("a", IntType::create(16)));
 	varA->markAsExternal();

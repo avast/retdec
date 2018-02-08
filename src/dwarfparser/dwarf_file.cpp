@@ -303,7 +303,7 @@ void DwarfFile::loadDIE(Dwarf_Die die, DwarfBaseElement* &parent, int lvl)
 	DwarfBaseElement* parentElement = parent;
 	parent = nullptr;
 
-	// DIE name -- unused, but without it there is a SEG FAULT for some reason, see #1027.
+	// DIE name -- unused, but without it there is a SEG FAULT for some reason.
 	//
 	char *dieName = nullptr;
 	bool localname = false;

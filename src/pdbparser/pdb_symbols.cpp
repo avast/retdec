@@ -127,7 +127,6 @@ bool PDBFunction::parse_symbol(PDBGeneralSymbol *symbol, PDBTypes *types, PDBSym
 			type_index = func_sym->typind;
 			type_def = reinterpret_cast<PDBTypeFunction *>(types->get_type_by_index(type_index));
 
-			// #1471
 			if (type_def == nullptr || type_def->type_class != PDBTYPE_FUNCTION)
 			{
 				return false;
@@ -314,7 +313,6 @@ void PDBSymbols::parse_symbols(void)
 					new_function = new PDBFunction(m);  // Create new function
 					new_function->parse_symbol(symbol, types, this);
 
-					// #1471
 					if (new_function == nullptr || new_function->type_def == nullptr || new_function->type_def->type_class != PDBTYPE_FUNCTION)
 					{
 						delete new_function;

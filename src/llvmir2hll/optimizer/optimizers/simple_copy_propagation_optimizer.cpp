@@ -124,7 +124,7 @@ void SimpleCopyPropagationOptimizer::tryOptimization(ShPtr<Statement> stmt) {
 
 	if (lhsVar->isExternal()) {
 		// We do not want to optimize external variables (used in a volatile
-		// load/store, see #1146).
+		// load/store).
 		return;
 	}
 

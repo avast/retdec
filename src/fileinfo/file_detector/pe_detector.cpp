@@ -403,7 +403,7 @@ void PeDetector::detectArchitecture()
 			result = "ARM (little endian)";
 			break;
 		case PELIB_IMAGE_FILE_MACHINE_THUMB:
-			// "ARM or THUMB (interworking)"; see bug #523
+			// "ARM or THUMB (interworking)";
 			result = "ARM";
 			break;
 		case PELIB_IMAGE_FILE_MACHINE_ARMNT:

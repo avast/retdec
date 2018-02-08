@@ -325,8 +325,7 @@ DoNotOptimizeIfLhsIsExternalVariable) {
 	// Set-up the module.
 	//
 	// void test() {
-	//     a = b;    // a is 'external' and comes from a volatile store, see
-	//               // #1146).
+	//     a = b;    // a is 'external' and comes from a volatile store
 	//     return a;
 	// }
 	//

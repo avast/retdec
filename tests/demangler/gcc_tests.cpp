@@ -50,7 +50,7 @@ TEST_F(GccDemanglerTests, DoNotDemangleCppClassNamesWhenCharacterCountIsBad)
 
 TEST_F(GccDemanglerTests, DoNotDemangleCppClassNamesWhenTheyDoNotMatchRegex)
 {
-	DEM_EQ("enc_vad_21363218732487324784rufdekdfbnerwquie2r6732", ""); // #1495
+	DEM_EQ("enc_vad_21363218732487324784rufdekdfbnerwquie2r6732", "");
 	DEM_EQ(" 7Polygon", ""); // std::regex_match
 	DEM_EQ("7Polygon ", ""); // std::regex_match
 	DEM_EQ(" 7Polygon ", ""); // std::regex_match

@@ -407,7 +407,7 @@ namespace retdec {
 namespace bin2llvmir {
 
 /**
- * Sample in #730 8A5C:
+ * Sample 8A5C:
  * 160d8:       ea00043b        b       0x171cc
  * 160dc:       ef900026        svc     0x00900026
  * 160e0:       ea000439        b       0x171cc

@@ -104,7 +104,7 @@ OptimizeNoAssignStmtOneUseEvenIfLhsVarIsExternal) {
 	// Add a body to the testing function:
 	//
 	//   a = 1  (VarDefStmt, where 'a' is an 'external' variable comming from a
-	//           volatile load/store, see #1146)
+	//           volatile load/store)
 	//   b = a  (VarDefStmt)
 	//   return b
 	//
@@ -361,7 +361,7 @@ DoNotOptimizeWhenAuxiliaryVariableIsExternal) {
 	//
 	//   a = 1  (VarDefStmt)
 	//   b = a  (VarDefStmt, where 'b' is an 'external' variable comming from a
-	//           volatile load/store, see #1146)
+	//           volatile load/store)
 	//   return b
 	//
 	ShPtr<Variable> varA(Variable::create("a", IntType::create(16)));

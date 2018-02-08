@@ -377,7 +377,7 @@ ShPtr<Function> ReadableVarRenamer::getDeclaredFunc(ShPtr<CallExpr> expr) const 
 */
 ShPtr<Variable> ReadableVarRenamer::getVarFromCallArg(ShPtr<Expression> arg) const {
 	// Motivation: For example, the given function call is present when
-	// decompiling file enc_1_.exe from #1457:
+	// decompiling file enc_1_.exe:
 	//
 	//     GetSystemTimeAsFileTime((struct FILETIME *)&v1);
 	//

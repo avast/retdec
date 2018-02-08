@@ -87,7 +87,7 @@ bool DeadLocalAssignOptimizer::canBeOptimized(ShPtr<Variable> var,
 		}
 
 		// We do not want to optimize external variables (used in a volatile
-		// load/store, see #1146).
+		// load/store).
 		if (var->isExternal()) {
 			return false;
 		}

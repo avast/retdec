@@ -268,7 +268,7 @@ bool ArchiveWrapper::extract(
 
 	/**
 	 * @todo In writeFile function call, separator is added to path, this may
-	 * or may not work on Windows OS. Fix this once issue #1908 is resolved.
+	 * or may not work on Windows OS.
 	 */
 
 	// Map for non-unique names - counts number of name occurrences.

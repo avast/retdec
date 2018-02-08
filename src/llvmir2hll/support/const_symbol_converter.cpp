@@ -44,7 +44,7 @@ ShPtr<ConstInt> getArgAsConstInt(ShPtr<Expression> arg) {
 	//
 	//     signal(SIGSTOP, SIG_IGN);
 	//
-	// TODO Is this valid under all circumstances? See #726.
+	// TODO Is this valid under all circumstances?
 	ShPtr<Expression> argWithoutCasts(skipCasts(arg));
 
 	// Treat the null pointer as zero (0). In this way, we can convert, e.g.,

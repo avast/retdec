@@ -261,7 +261,7 @@ bool IdiomsAnalysis::doAnalysis(Function & f, Pass * p) {
 										"IdiomsLLVM::exchangeCompareEq");
 
 	#if 0
-			/* We do not recognize this well, see #546 */
+			/* We do not recognize this well */
 			change_made |= analyse(bb, &IdiomsLLVM::exchangeCompareNeq,
 										"IdiomsLLVM::exchangeCompareNeq");
 	#endif

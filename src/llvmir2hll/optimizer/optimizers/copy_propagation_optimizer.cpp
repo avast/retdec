@@ -234,7 +234,7 @@ void CopyPropagationOptimizer::performOptimization() {
 
 	// For each def-use chain...
 	// We have to iterate over an ordered DU chain to make the optimization
-	// deterministic (#1386).
+	// deterministic.
 	for (const auto &du : ordered(ducs->du)) {
 		// Currently, the optimizer is unable to optimize cases when there is
 		// more than one use. If this is the case, skip the chain to make the
@@ -272,7 +272,7 @@ void CopyPropagationOptimizer::performOptimization() {
 
 	// Remove statements that are to be removed and update the CFG.
 	// We have to iterate over ordered statements to make the optimization
-	// deterministic (#1386).
+	// deterministic.
 	for (const auto &stmt : ordered(toRemoveStmtsPreserveCalls)) {
 		// Since there may be function calls in the statement, we have to
 		// preserve them. Therefore, we store the result of
@@ -368,8 +368,7 @@ void CopyPropagationOptimizer::handleCaseEmptyUses(ShPtr<Statement> stmt,
 		return;
 	}
 
-	// Do not optimize external variables (used in a volatile load/store, see
-	// #1146).
+	// Do not optimize external variables (used in a volatile load/store).
 	if (stmtLhsVar->isExternal()) {
 		return;
 	}
@@ -423,8 +422,7 @@ void CopyPropagationOptimizer::handleCaseSingleUse(ShPtr<Statement> stmt,
 		return;
 	}
 
-	// Do not optimize external variables (used in a volatile load/store, see
-	// #1146).
+	// Do not optimize external variables (used in a volatile load/store).
 	if (stmtLhsVar->isExternal()) {
 		return;
 	}
@@ -698,8 +696,7 @@ bool CopyPropagationOptimizer::shouldBeIncludedInDefUseChains(
 		return false;
 	}
 
-	// Do not optimize external variables (used in a volatile load/store, see
-	// #1146).
+	// Do not optimize external variables (used in a volatile load/store).
 	if (var->isExternal()) {
 		return false;
 	}

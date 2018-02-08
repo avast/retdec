@@ -194,7 +194,7 @@ while [  "$CONTINUE" = "1" ]; do
 		IN="$OUT"
 	else
 		# Remove the temporary file, just in case some of the unpackers crashed
-		# during unpacking and left it on the disk (e.g. upx, see #1669).
+		# during unpacking and left it on the disk (e.g. upx).
 		rm -f "$OUT.tmp"
 		CONTINUE=0
 	fi

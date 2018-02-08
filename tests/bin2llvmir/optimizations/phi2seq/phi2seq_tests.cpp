@@ -456,7 +456,6 @@ TEST_F(PHI2SeqTests, cycleVarDepend06)
 {
 	parseInput(R"(
 		; Testing cycle variable dependency. Two cycles with same predecessor block. Block with cycle doesn't have successor on its own.
-		; This test was created for testing the problem #1055.
 
 		@.str = private unnamed_addr constant [20 x i8] c"Argument %d %d %d:\0A\00", align 1
 

@@ -502,7 +502,7 @@ TEST_F(UnreachableFuncsTests, mainOnlyDeclaration)
 	parseInput(R"(
 		; When the main function is just a declaration (i.e. it has no body), behave
 		; like there is no main function. This is needed when decompiling shared
-		; libraries containing an import of main (see #1387).
+		; libraries containing an import of main.
 
 		; Can't be optimized (see above).
 		define void @func() {

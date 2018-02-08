@@ -157,8 +157,7 @@ bool UnreachableFuncs::optimizationCanRun() const {
 	}
 
 	// The main function has to be a definition, not just a declaration. This
-	// is needed when decompiling shared libraries containing an import of main
-	// (see #1387).
+	// is needed when decompiling shared libraries containing an import of main.
 	if (mainFunc->isDeclaration()) {
 		return false;
 	}

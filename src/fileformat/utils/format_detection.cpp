@@ -168,7 +168,6 @@ bool isStrangeFeedface(const std::string &filePath)
 			}
 		}
 
-		// See #1912 for detailed information on this condition
 		if (ints[0] == 0xfeedface && ints[1] == 0x10 && ints[2] == 0x02)
 		{
 			// Maximal valid Mach-O value is 0x0b but 0x10 will be safer and

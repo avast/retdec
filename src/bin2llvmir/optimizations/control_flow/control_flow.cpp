@@ -565,7 +565,7 @@ bool ControlFlow::runGenericBr(AsmInstruction& ai, llvm::CallInst* call)
 
 		SymbolicTree root(_RDA, call->getArgOperand(0));
 
-		// PIC code, see #1066.
+		// PIC code.
 		// User code is calling stub in .plt.
 		// Stub in .plt is computing jmp address (address of import).
 		// 4-form_grabber-b794ce9e.so.elf, .plt:00001BE0 ___ctype_toupper_loc:

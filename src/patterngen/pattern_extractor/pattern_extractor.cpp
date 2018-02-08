@@ -192,7 +192,7 @@ bool PatternExtractor::processFile()
 
 
 /**
- * Check if we can use this 64-bit PowerPC file (issue #1892).
+ * Check if we can use this 64-bit PowerPC file.
  *
  * Problem is there is only one '.opd' section common for all code sections.
  * This is problem if multiple code sections are present because we do not know

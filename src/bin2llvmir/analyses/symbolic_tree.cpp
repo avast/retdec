@@ -95,7 +95,7 @@ SymbolicTree& SymbolicTree::operator=(SymbolicTree&& other)
 		value = other.value;
 		user = other.user;
 		// Do NOT use `ops = std::move(other.ops);` to allow use like
-		// `*this = ops[0];`. Use std::swap() instead. See #1581.
+		// `*this = ops[0];`. Use std::swap() instead.
 		std::swap(ops, other.ops);
 		_failed = other._failed;
 	}

@@ -45,7 +45,7 @@ public:
 
 	/// A def-use chain (see [ItC]).
 	// Implementation note: we have to use std::vector instead of std::map to
-	// make the chain deterministic (#1386).
+	// make the chain deterministic.
 	using DefUseChain = std::vector<std::pair<StmtVarPair, StmtSet>>;
 
 public:

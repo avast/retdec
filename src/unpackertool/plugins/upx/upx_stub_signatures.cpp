@@ -1226,7 +1226,7 @@ Signature ppcElfNrv2eSignature =
 };
 
 // Modified UPX stubs
-// psyb0t - MIPS Little-endian ELF (#1255)
+// psyb0t - MIPS Little-endian ELF
 Signature psyb0t_mipsLeElfNrv2bSignature =
 {
 	0xE0, 0x00, 0x11, 0x04, // BAL <Routine for creating memory regions>
@@ -1239,7 +1239,7 @@ Signature psyb0t_mipsLeElfNrv2bSignature =
 	0xC2, 0x77, 0x09, 0x00 // SRL $t6, $t1, 31
 };
 
-// lshttpd - x86 ELF (#1255)
+// lshttpd - x86 ELF
 Signature lshttpd_x86ElfLzmaSignature =
 {
 	0xE8, 0x8E, 0x0C, 0x00, 0x00, // CALL <Routine for creating memory regions>

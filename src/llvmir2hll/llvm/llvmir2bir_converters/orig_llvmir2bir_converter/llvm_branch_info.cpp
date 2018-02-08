@@ -34,7 +34,7 @@ namespace llvmir2hll {
 
 namespace {
 
-// To produce deterministic results (#1386), we need to order the basic blocks
+// To produce deterministic results, we need to order the basic blocks
 // by their name.
 struct ByNameComparator {
 	bool operator()(const llvm::BasicBlock *b1, const llvm::BasicBlock *b2) const {

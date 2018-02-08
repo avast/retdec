@@ -630,14 +630,14 @@ bool HLLWriter::emitFunction(ShPtr<Function> func) {
 	emitModuleNameForFuncIfAvailable(func);
 	emitAddressRangeForFuncIfAvailable(func);
 	emitLineRangeForFuncIfAvailable(func);
-	// TODO Disable emission of wrapper info until #1399 is solved.
+	// TODO Disable emission of wrapper info until #189 is solved.
 	// emitWrapperInfoForFuncIfAvailable(func);
 	emitClassInfoIfAvailable(func);
 	emitDemangledNameIfAvailable(func);
 	emitDetectedCryptoPatternsForFuncIfAvailable(func);
 	emitLLVMIRFixerWarningForFuncIfAny(func);
 	// The comment HAS to be put as the LAST info, right before the function's
-	// signature. IDA plugin relies on that (#1645).
+	// signature. IDA plugin relies on that.
 	emitCommentIfAvailable(func);
 
 	func->accept(this);

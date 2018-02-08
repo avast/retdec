@@ -396,7 +396,7 @@ bool ByteValueStorage::getDouble(std::uint64_t address, double& res) const
 		}
 	}
 	// 2.33 (0x4002a3d7 0a3d70a4) in data section as: a4703d0a d7a30240.
-	// New ARM compilers from #960 is also generating this kind of double constants.
+	// New ARM compilers are also generating this kind of double constants.
 	// We are not sure, what part of binary determines which kind of double constants are used.
 	// Currently we use new kind for ARMs > version 5.
 	// To find relevant info, google: "ARM double mixed endian".

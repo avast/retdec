@@ -245,8 +245,8 @@ void OptimizerManager::optimize(ShPtr<Module> m) {
 	// WhileTrueToForLoopOptimizer should be run before
 	// WhileTrueToWhileCondOptimizer.
 	run<WhileTrueToForLoopOptimizer>(m, va, arithmExprEvaluator);
-	// TODO The WhileTrueToUForLoopOptimizer does nothing at the moment (see
-	//      commit a5f4988 and #1358), so it makes no sense to run it.
+	// TODO The WhileTrueToUForLoopOptimizer does nothing at the moment, so it
+	//      makes no sense to run it.
 	#if 0
 	// WhileTrueToUForLoopOptimizer should be run after
 	// WhileTrueToForLoopOptimizer (WhileTrueToForLoopOptimizer may produce

@@ -180,7 +180,7 @@ DoNotEliminateAssignStmtWhenVariableIsExternal) {
 	// Set-up the module.
 	//
 	// void test() {
-	//     d = 1; (d is 'external' and comes from a volatile store, see #1146)
+	//     d = 1; (d is 'external' and comes from a volatile store)
 	// }
 	//
 	ShPtr<Variable> varD(Variable::create("d", IntType::create(32)));

@@ -89,7 +89,7 @@ ShPtr<Type> Variable::getType() const {
 *  - Internal variables correspond to variables that either have 'internal
 *    linkage' in LLVM IR or are ordinary local variables.
 *  - External variables correspond to variables that either have 'external
-*    linkage' or are used in a volatile load/store operation (see #1146).
+*    linkage' or are used in a volatile load/store operation.
 *
 * By default, variables are created as internal variables. To make them
 * external, call @c markAsExternal().

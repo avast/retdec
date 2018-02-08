@@ -552,7 +552,7 @@ bool GlobalToLocalOptimizer::globalVarMayBeRemovedAsUnused(ShPtr<Variable> var) 
 	// Note: Even though we do not optimize external global variables, we want
 	//       to remove them if they are not used anywhere in the module. If we
 	//       did not do that, all such external global variables would remain
-	//       in the source code. See #1166 for an example.
+	//       in the source code.
 
 	return true;
 }

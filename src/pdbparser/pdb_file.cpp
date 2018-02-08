@@ -360,7 +360,7 @@ char *PDBFile::extract_stream(PDB_DWORD *pages, int num_pages)
  */
 PDBFileState PDBFile::load_pdb_v200(void)
 {
-	//TODO - add support for PDB version 2.00 #1270
+	//TODO - add support for PDB version 2.00
 	return PDB_STATE_UNSUPPORTED_VERSION;
 }
 

@@ -1476,7 +1476,7 @@ Instruction * IdiomsMagicDivMod::magicSignedDiv8neg(BasicBlock::iterator iter) c
  */
 Instruction * IdiomsMagicDivMod::signedMod1(BasicBlock::iterator iter) const {
 	/*
-	 * Derivation tree (ARM/ELF, idiom based on #943):
+	 * Derivation tree (ARM/ELF):
 	 *
 	 *                                       add
 	 *                                        /\

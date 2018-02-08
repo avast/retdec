@@ -1053,7 +1053,7 @@ void CHLLWriter::visit(ShPtr<IntType> type) {
 	}
 
 	// Emit 8-bit integers as chars, not as int8_t/uint8_t, because char is
-	// more readable. See #1150 for more details.
+	// more readable.
 	if (type->getSize() == 8) {
 		if (type->isUnsigned()) {
 			out << "unsigned ";
