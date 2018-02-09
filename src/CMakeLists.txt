@@ -30,6 +30,7 @@ add_subdirectory(stacofintool)
 add_subdirectory(unpacker)
 add_subdirectory(unpackertool)
 add_subdirectory(utils)
+add_subdirectory(getsig)
 
 if(RETDEC_TESTS)
 	add_subdirectory(llvmir-emul)
