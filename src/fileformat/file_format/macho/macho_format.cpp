@@ -177,7 +177,7 @@ bool MachOFormat::constructFatMachO()
 			return false;
 		}
 		auto firstData = reinterpret_cast<const char*>(getBytesData() + firstObj->getOffset());
-		if (std::strncmp("!<arch>", firstData, sizeof("!<arch>") - 1) == 0)
+		if (std::strncmp("!<arch>", firstData, 7) == 0)
 		{
 			isStaticLib = true;
 			return false;
