@@ -37,7 +37,7 @@ const std::string thinMagic = "!<thin>";
  *
  * Size is same for both thin and normal archives.
  */
-constexpr std::size_t arMagicSize = sizeof("!<arch>");
+constexpr std::size_t arMagicSize = 7;
 
 /**
  * What portion of file will be loaded at start for Mach-O archives detection.
@@ -79,11 +79,11 @@ bool checkArchMagicAtOffset(
 {
 	// Load bytes at given offset.
 	inputStream.seekg(offset);
-	char arStart[arMagicSize] = {};
+	char arStart[arMagicSize + 1] = {};
 	inputStream.read(arStart, arMagicSize);
 
 	// Check if it is archive.
-	return startsWith(arStart, archMagic) || startsWith(arStart, thinMagic);
+	return arStart == archMagic || arStart == thinMagic;
 }
 
 } // anonymous namespace
@@ -103,10 +103,10 @@ bool isArchive(
 {
 	std::ifstream inputFile(path, std::ifstream::binary);
 	if (inputFile) {
-		char start[arMagicSize] = {};
+		char start[arMagicSize + 1] = {};
 		inputFile.read(start, arMagicSize);
 
-		return startsWith(start, archMagic) || startsWith(start, thinMagic);
+		return start == archMagic || start == thinMagic;
 	}
 
 	return false;
@@ -125,10 +125,10 @@ bool isThinArchive(
 {
 	std::ifstream inputFile(path, std::ifstream::binary);
 	if (inputFile) {
-		char start[arMagicSize] = {};
+		char start[arMagicSize + 1] = {};
 		inputFile.read(start, arMagicSize);
 
-		return startsWith(start, thinMagic);
+		return start == thinMagic;
 	}
 
 	return false;
@@ -147,10 +147,10 @@ bool isNormalArchive(
 {
 	std::ifstream inputFile(path, std::ifstream::binary);
 	if (inputFile) {
-		char start[arMagicSize] = {};
+		char start[arMagicSize + 1] = {};
 		inputFile.read(start, arMagicSize);
 
-		return startsWith(start, archMagic);
+		return start == archMagic;
 	}
 
 	return false;
