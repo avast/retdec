@@ -2,7 +2,7 @@
 
 # dev
 
-* Enhancement: References to ticket numbers from our internal issue tracking systems were replaced by short descriptions in `retdec-regression-tests` repository ([commit](https://github.com/avast-tl/retdec-regression-tests/commit/bcbab21ad57d084136ce5ffc8a1d6325c2cf792b)).
+* Enhancement: References to ticket numbers from our internal issue tracking system were replaced by short descriptions in the `retdec-regression-tests` repository ([retdec-regression-tests #1](https://github.com/avast-tl/retdec-regression-tests/issues/1)).
 * Enhancement: Added a missing license for the `retdec-support` repository ([retdec-support #1](https://github.com/avast-tl/retdec-support/issues/1)).
 * Enhancement: Better detection of tools: new signatures and heuristics. YARA signatures are compiled now.
 * Enhancement: Added Travis and Appveyor continuous integration builds ([#2](https://github.com/avast-tl/retdec/issues/2)).
