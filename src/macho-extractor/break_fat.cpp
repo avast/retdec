@@ -40,15 +40,14 @@ namespace macho_extractor {
  *
  * Verify success with isValid() function
  */
-BreakMachOUniversal::BreakMachOUniversal(const std::string &filePath) : filePath(filePath),
-	fileBuffer(MemoryBuffer::getFile(Twine(filePath)))
+BreakMachOUniversal::BreakMachOUniversal(const std::string &filePath)
+	: filePath(filePath), fileBuffer(MemoryBuffer::getFile(Twine(filePath)))
 {
 	if(fileBuffer && !fileBuffer.getError())
 	{
 		auto object = MachOUniversalBinary::create(fileBuffer.get()->getMemBufferRef());
 		if(!object)
 		{
-			// Call consumeError in case of error to "handle" it
 			// Unhandled errors cause abort()
 			consumeError(object.takeError());
 			valid = false;
@@ -56,8 +55,7 @@ BreakMachOUniversal::BreakMachOUniversal(const std::string &filePath) : filePath
 		else
 		{
 			fatFile = std::move(object.get());
-			// Check if file contains static libraries.
-			valid = isStaticLibrary();
+			valid = true;
 		}
 	}
 	else
@@ -73,29 +71,6 @@ BreakMachOUniversal::~BreakMachOUniversal()
 {
 }
 
-/**
- * Check if input binary contains static libraries
- * @return @c true if file contains static libraries, @c false otherwise
- */
-bool BreakMachOUniversal::isStaticLibrary()
-{
-	if(!fatFile->getNumberOfObjects())
-	{
-		// No objects!
-		return false;
-	}
-
-	auto result = fatFile->begin_objects()->getAsArchive();
-	if(!result)
-	{
-		// Call consumeError in case of error to "handle" it
-		// Unhandled errors cause abort()
-		consumeError(result.takeError());
-		return false;
-	}
-
-	return true;
-}
 
 /**
  * BreakMachOUniversal::isSupported
