@@ -515,6 +515,23 @@ int main(int argc, char** argv) {
 	const auto rule = getYaraRule(createSignature(contents), format, options);
 	std::cout << rule;
 
+	if (!options.outputFile.empty())
+	{
+		std::ofstream outStream(options.outputFile, std::ofstream::app);
+		if (outStream)
+		{
+			outStream << "\n" << rule << "\n";
+			if (!outStream.good())
+			{
+				return printError("could not write to output file");
+			}
+		}
+		else
+		{
+			return printError("could not open output file");
+		}
+	}
+
 	return 0;
 }
 
