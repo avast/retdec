@@ -28,7 +28,6 @@ class BreakMachOUniversal
 		/// @brief Auxiliary methods
 		/// @{
 		bool isStaticLibrary();
-		bool isSupported(std::uint32_t cpuType);
 		const char* getFileBufferStart();
 		bool getByArchFamily(std::uint32_t cpuType, llvm::object::MachOUniversalBinary::object_iterator &res);
 		bool extract(llvm::object::MachOUniversalBinary::object_iterator &object, const std::string &outPath);

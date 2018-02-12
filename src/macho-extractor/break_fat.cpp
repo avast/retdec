@@ -98,25 +98,6 @@ bool BreakMachOUniversal::isStaticLibrary()
 }
 
 /**
- * BreakMachOUniversal::isSupported
- * @param cpuType Mach-O specific CPU type constant
- * @return @c true is architecture is supported by decompiler, @c false otherwise
- */
-bool BreakMachOUniversal::isSupported(std::uint32_t cpuType)
-{
-	switch(cpuType)
-	{
-		case CPU_TYPE_ARM:
-		case CPU_TYPE_I386:
-		case CPU_TYPE_POWERPC:
-			return true;
-		default:
-			return false;
-	}
-	return false;
-}
-
-/**
  * Get file memory buffer start
  * @return Pointer to file memory buffer start
  */
@@ -279,19 +260,18 @@ bool BreakMachOUniversal::listArchitectures(std::ostream &output, bool withObjec
 	}
 
 	unsigned archIndex = 0;
-	output << "Index\tName\tFamily\tSupported\n";
+	output << "Index\tName\tFamily\n";
 	for(auto i = fatFile->begin_objects(), e = fatFile->end_objects(); i != e; ++i)
 	{
 		if(isStatic && withObjects && archIndex != 0)
 		{
 			output << "\n\n";
-			output << "Index\tName\tFamily\tSupported\n";
+			output << "Index\tName\tFamily\n";
 		}
 
 		output << std::to_string(archIndex++) << "\t";
 		output << i->getArchTypeName() << "\t";
-		output << cpuTypeToString(i->getCPUType()) << "\t";
-		isSupported(i->getCPUType()) ? output << "yes\n" : output << "no\n";
+		output << cpuTypeToString(i->getCPUType()) << "\n";
 
 		if(isStatic && withObjects)
 		{
@@ -350,7 +330,6 @@ bool BreakMachOUniversal::listArchitecturesJson(std::ostream &output, bool withO
 		arch.AddMember("index", archIndex++, allocator);
 		arch.AddMember("name", Value(i->getArchTypeName().c_str(), allocator).Move(), allocator);
 		arch.AddMember("cpuFamily", Value(cpuTypeToString(i->getCPUType()).c_str(), allocator).Move(), allocator);
-		arch.AddMember("supported", isSupported(i->getCPUType()), allocator);
 
 		if(isStatic && withObjects)
 		{
