@@ -511,8 +511,15 @@ int main(int argc, char** argv) {
 		return printError("no valid data collected");
 	}
 
+	// create signature
+	const auto signature = createSignature(contents);
+	if (signature.empty())
+	{
+		return printError("no common data found for input files");
+	}
+
 	// create detection rule
-	const auto rule = getYaraRule(createSignature(contents), format, options);
+	const auto rule = getYaraRule(signature, format, options);
 	std::cout << rule;
 
 	if (!options.outputFile.empty())
