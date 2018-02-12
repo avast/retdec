@@ -310,7 +310,7 @@ bool BreakMachOUniversal::listArchitectures(std::ostream &output, bool withObjec
 	// Write warning when --object option is used on non-archive target.
 	if (!isStatic && withObjects)
 	{
-		std::cerr << "Warning: input file is not archive! (--objects)\n";
+		std::cerr << "Warning: input file is not an archive! (--objects)\n";
 	}
 
 	return output.good();
@@ -366,7 +366,7 @@ bool BreakMachOUniversal::listArchitecturesJson(std::ostream &output, bool withO
 	// Write warning when --object option is used on non-archive target.
 	if (!isStatic && withObjects)
 	{
-		outDoc.AddMember("warning", "input file is not archive! (--objects)", allocator);
+		outDoc.AddMember("warning", "input file is not an archive! (--objects)", allocator);
 	}
 
 	outDoc.AddMember("architectures", architectures, allocator);
