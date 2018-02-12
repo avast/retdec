@@ -4,6 +4,7 @@
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */
 
+#include <cctype>
 #include <iostream>
 #include <vector>
 
