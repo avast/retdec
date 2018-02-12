@@ -19,12 +19,15 @@ class BreakMachOUniversal
 {
 	private:
 		bool valid = false;
+		bool isStatic = false;
+
 		std::string filePath;
 		std::unique_ptr<llvm::object::MachOUniversalBinary> fatFile;
 		llvm::ErrorOr<std::unique_ptr<llvm::MemoryBuffer>> fileBuffer;
 
 		/// @brief Auxiliary methods
 		/// @{
+		bool isStaticLibrary();
 		bool isSupported(std::uint32_t cpuType);
 		const char* getFileBufferStart();
 		bool getByArchFamily(std::uint32_t cpuType, llvm::object::MachOUniversalBinary::object_iterator &res);

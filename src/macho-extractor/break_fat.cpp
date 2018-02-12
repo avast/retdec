@@ -4,6 +4,7 @@
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */
 
+#include <iostream>
 #include <fstream>
 
 #include <llvm/Support/MachO.h>
@@ -55,6 +56,7 @@ BreakMachOUniversal::BreakMachOUniversal(const std::string &filePath)
 		else
 		{
 			fatFile = std::move(object.get());
+			isStatic = isStaticLibrary();
 			valid = true;
 		}
 	}
@@ -71,6 +73,29 @@ BreakMachOUniversal::~BreakMachOUniversal()
 {
 }
 
+/**
+ * Check if input binary contains static libraries
+ * @return @c true if file contains static libraries, @c false otherwise
+ */
+bool BreakMachOUniversal::isStaticLibrary()
+{
+	if(!fatFile->getNumberOfObjects())
+	{
+		// No objects!
+		return false;
+	}
+
+	auto result = fatFile->begin_objects()->getAsArchive();
+	if(!result)
+	{
+		// Call consumeError in case of error to "handle" it
+		// Unhandled errors cause abort()
+		consumeError(result.takeError());
+		return false;
+	}
+
+	return true;
+}
 
 /**
  * BreakMachOUniversal::isSupported
@@ -257,7 +282,7 @@ bool BreakMachOUniversal::listArchitectures(std::ostream &output, bool withObjec
 	output << "Index\tName\tFamily\tSupported\n";
 	for(auto i = fatFile->begin_objects(), e = fatFile->end_objects(); i != e; ++i)
 	{
-		if(withObjects && archIndex != 0)
+		if(isStatic && withObjects && archIndex != 0)
 		{
 			output << "\n\n";
 			output << "Index\tName\tFamily\tSupported\n";
@@ -268,7 +293,7 @@ bool BreakMachOUniversal::listArchitectures(std::ostream &output, bool withObjec
 		output << cpuTypeToString(i->getCPUType()) << "\t";
 		isSupported(i->getCPUType()) ? output << "yes\n" : output << "no\n";
 
-		if(withObjects)
+		if(isStatic && withObjects)
 		{
 			std::vector<std::string> objNames;
 			if(!getObjectNamesForArchive(i->getOffset(), i->getSize(), objNames))
@@ -290,6 +315,13 @@ bool BreakMachOUniversal::listArchitectures(std::ostream &output, bool withObjec
 			}
 		}
 	}
+
+	// Write warning when --object option is used on non-archive target.
+	if (!isStatic && withObjects)
+	{
+		std::cerr << "Warning: input file is not archive! (--objects)\n";
+	}
+
 	return output.good();
 }
 
@@ -320,7 +352,7 @@ bool BreakMachOUniversal::listArchitecturesJson(std::ostream &output, bool withO
 		arch.AddMember("cpuFamily", Value(cpuTypeToString(i->getCPUType()).c_str(), allocator).Move(), allocator);
 		arch.AddMember("supported", isSupported(i->getCPUType()), allocator);
 
-		if(withObjects)
+		if(isStatic && withObjects)
 		{
 			std::vector<std::string> objNames;
 			if(!getObjectNamesForArchive(i->getOffset(), i->getSize(), objNames))
@@ -340,6 +372,13 @@ bool BreakMachOUniversal::listArchitecturesJson(std::ostream &output, bool withO
 		}
 		architectures.PushBack(arch, allocator);
 	}
+
+	// Write warning when --object option is used on non-archive target.
+	if (!isStatic && withObjects)
+	{
+		outDoc.AddMember("warning", "input file is not archive! (--objects)", allocator);
+	}
+
 	outDoc.AddMember("architectures", architectures, allocator);
 
 	StringBuffer outBuffer;
