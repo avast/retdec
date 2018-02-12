@@ -75,6 +75,7 @@ int handleArguments(std::vector<std::string> &args)
 	bool listOnly = false;
 	bool jsonOut = false;
 	bool withObjects = false;
+	bool isArchiveVerif = false;
 
 	for(std::size_t i = 0; i < args.size(); ++i)
 	{
@@ -83,7 +84,11 @@ int handleArguments(std::vector<std::string> &args)
 			printHelp();
 			return 0;
 		}
-		if(args[i] == "--out")
+		else if(args[i] == "--check-archive")
+		{
+			isArchiveVerif = true;
+		}
+		else if(args[i] == "--out")
 		{
 			if(i + 1 >= args.size())
 			{
@@ -181,8 +186,21 @@ int handleArguments(std::vector<std::string> &args)
 	BreakMachOUniversal binary(inputFile);
 	if(!binary.isValid())
 	{
-		printError("file is not valid Mach-O Universal static library", jsonOut);
+		printError("file is not valid Mach-O Universal binary", jsonOut);
 		return 2;
+	}
+
+	// Check only for static archives
+	if(isArchiveVerif)
+	{
+		if(binary.isStaticLibrary())
+		{
+			std::cout << "Input file is a static library.\n";
+			return 0;
+		}
+
+		std::cout << "Input file is NOT a static library.\n";
+		return 3;
 	}
 
 	// List mode

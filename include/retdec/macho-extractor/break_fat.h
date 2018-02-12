@@ -27,7 +27,7 @@ class BreakMachOUniversal
 
 		/// @brief Auxiliary methods
 		/// @{
-		bool isStaticLibrary();
+		bool isArchive();
 		const char* getFileBufferStart();
 		bool getByArchFamily(std::uint32_t cpuType, llvm::object::MachOUniversalBinary::object_iterator &res);
 		bool extract(llvm::object::MachOUniversalBinary::object_iterator &object, const std::string &outPath);
@@ -42,6 +42,7 @@ class BreakMachOUniversal
 		/// @brief Information methods
 		/// @{
 		bool isValid();
+		bool isStaticLibrary();
 		bool listArchitectures(std::ostream &output, bool withObjects = false);
 		bool listArchitecturesJson(std::ostream &output, bool withObjects = false);
 		/// @}

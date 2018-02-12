@@ -216,7 +216,7 @@ is_macho_archive()
 		return 1
 	fi
 
-	"$EXTRACT" --list "$1" &> "$DEV_NULL"
+	"$EXTRACT" --check-archive "$1" &> "$DEV_NULL"
 }
 
 #

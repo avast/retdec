@@ -56,7 +56,7 @@ BreakMachOUniversal::BreakMachOUniversal(const std::string &filePath)
 		else
 		{
 			fatFile = std::move(object.get());
-			isStatic = isStaticLibrary();
+			isStatic = isArchive();
 			valid = true;
 		}
 	}
@@ -77,7 +77,7 @@ BreakMachOUniversal::~BreakMachOUniversal()
  * Check if input binary contains static libraries
  * @return @c true if file contains static libraries, @c false otherwise
  */
-bool BreakMachOUniversal::isStaticLibrary()
+bool BreakMachOUniversal::isArchive()
 {
 	if(!fatFile->getNumberOfObjects())
 	{
@@ -237,6 +237,7 @@ std::string BreakMachOUniversal::cpuTypeToString(std::uint32_t cpuType)
 	}
 }
 
+
 /**
  * Verify state of instance after construction
  * @return @c true if file was read successfully, @c false otherwise
@@ -244,6 +245,16 @@ std::string BreakMachOUniversal::cpuTypeToString(std::uint32_t cpuType)
 bool BreakMachOUniversal::isValid()
 {
 	return valid;
+}
+
+
+/**
+ * Check if input binary contains static library
+ * @return @c true if file fat Mach-O with static library, @c false otherwise
+ */
+bool BreakMachOUniversal::isStaticLibrary()
+{
+	return isStatic;
 }
 
 /**
