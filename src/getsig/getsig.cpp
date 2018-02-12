@@ -5,11 +5,11 @@
  */
 
 #include <iostream>
-#include <getopt.h>
 #include <vector>
 
 #include "retdec/fileformat/format_factory.h"
 #include "retdec/utils/conversion.h"
+#include "retdec/utils/string.h"
 
 using namespace retdec::fileformat;
 using namespace retdec::utils;
@@ -26,27 +26,35 @@ void printUsage()
 	"Usage: getsig [OPTIONS] FILE1 [FILE2 ...]\n\n"
 	"General:\n"
 	"  -h --help              Print this message.\n\n"
-	"Type of tool:\n"
-	"  -p --packer            Set tool type to packer.\n"
-	"  -c --compiler          Set tool type to compiler.\n"
-	"  -i --installer         Set tool type to installer.\n\n"
-	"  Tool type will be set to 'U' (unknown) if no option is used.\n\n"
-	"Other rule options:\n"
-	"  -n=NAME     --name=NAME\n"
+	"Rule options:\n"
+	"  -r --rule-name NAME\n"
+	"    Set name of rule. Default value is 'unknown'.\n\n"
+	"  -n --name NAME\n"
 	"    Set name of tool. Default value is 'unknown'.\n\n"
-	"  -v=VERSION  --version=VERSION\n"
+	"  -v --version VERSION\n"
 	"    Set version of tool. Attribute is omitted if not specified.\n\n"
-	"  -e=INFO     --extra=INFO\n"
-	"    Set extra information. Attribute is omitted if not specified\n\n"
+	"  -e --extra INFO\n"
+	"    Set extra information. Attribute is omitted if not specified.\n\n"
+	"  -l --language NAME\n"
+	"    Set language information. Attribute is omitted if not specified.\n\n"
+	"  -b --bytecode\n"
+	"    Set language type to bytecode.\n\n"
+	"  -p --packer\n"
+	"    Set tool type to packer.\n\n"
+	"  -c --compiler\n"
+	"    Set tool type to compiler.\n\n"
+	"  -i --installer\n"
+	"    Set tool type to installer.\n\n"
+	"  Tool type will be set to 'U' (unknown) if no option is used.\n\n"
 	"Search options:\n"
-	"  -s=NUMBER   --size=NUMBER\n"
+	"  -s --size NUMBER\n"
 	"    Use NUMBER of bytes to create signature. NUMBER must be decimal\n"
 	"    number. Default value is 100 bytes.\n\n"
-	"  -o=OFFSET   --offset=OFFSET\n"
+	"  -o --offset OFFSET\n"
 	"    Specify starting offset for signature creation. OFFSET must be\n"
 	"    hexadecimal number. Default value is entry point offset.\n\n"
 	"Output options:\n"
-	"  -a=FILENAME --add=FILENAME, \n"
+	"  -a --add FILENAME, \n"
 	"    Append signature to FILENAME file.\n\n";
 }
 
@@ -102,21 +110,22 @@ void printWarning(
 
 
 /**
- * Get value of application argument
- * @param value value of argument as pointer to char
- * @param result string for storing the result
+ * Fetch parameter value or die with error message.
+ * @param argv vector with arguments
+ * @param i index of argument
+ * @return argument value
  */
-void getArgumentValue(
-		const char* value,
-		std::string& result)
+std::string getParamOrDie(std::vector<std::string> &argv, std::size_t &i)
 {
-	if (value)
+	if (argv.size() > i + 1)
 	{
-		result = static_cast<std::string>(value);
-		if (!result.empty() && result[0] == '=')
-		{
-			result.erase(0, 1);
-		}
+		return argv[++i];
+	}
+	else
+	{
+		std::cerr << "Error: missing argument value.\n\n";
+		printUsage();
+		exit(1);
 	}
 }
 
@@ -124,13 +133,13 @@ void getArgumentValue(
 /**
  * Process parameters
  * @param argc number of program parameters
- * @param argv vector of program parameters
+ * @param _argv array of program parameters
  * @param options structure for storing information
  * @return @c true if processing was completed successfully, @c false otherwise
  */
 bool doParams(
 		int argc,
-		char** argv,
+		char** _argv,
 		Options& options)
 {
 	if (argc < 2)
@@ -138,86 +147,123 @@ bool doParams(
 		printUsage();
 		exit(EXIT_SUCCESS);
 	}
-	else if (!argv)
+	else if (!_argv)
 	{
 		return false;
 	}
 
-	const struct option longopts[] =
+	std::set<std::string> withArgs =
 	{
-		{ "help",       no_argument,         nullptr,  'h'    },
-		{ "packer",     no_argument,         nullptr,  'p'    },
-		{ "compiler",   no_argument,         nullptr,  'c'    },
-		{ "installer",  no_argument,         nullptr,  'i'    },
-		{ "size",       required_argument,   nullptr,  's'    },
-		{ "offset",     required_argument,   nullptr,  'o'    },
-		{ "name",       required_argument,   nullptr,  'n'    },
-		{ "version",    required_argument,   nullptr,  'v'    },
-		{ "extra",      required_argument,   nullptr,  'e'    },
-		{ "add",        required_argument,   nullptr,  'a'    },
-		{ nullptr,      no_argument,         nullptr,   0     }
+		"r",    "rule-name",
+		"n",    "name",
+		"v",    "version",
+		"e",    "extra",
+		"l",    "language",
+		"s",    "size",
+		"o",    "offset",
+		"a",    "add",
+		"source"
 	};
 
-	int opt;
-	std::string argument;
-	while ((opt = getopt_long(argc, argv, "hpcis:o:n:v:e:a:", longopts, nullptr)) != -1)
+	std::vector<std::string> argv;
+	for (int i = 1; i < argc; ++i)
 	{
-		switch(opt)
+		std::string a = _argv[i];
+
+		bool added = false;
+		for (auto& o : withArgs)
 		{
-			case 'h':
-				printUsage();
-				exit(EXIT_SUCCESS);
-
-			case 'p':
-			case 'c':
-				/* fall-thru */
-			case 'i':
-				options.type = std::toupper(opt);
+			std::string start = (o.size() == 1 ? "-" : "--") + o + "=";
+			if (retdec::utils::startsWith(a, start))
+			{
+				argv.push_back(a.substr(0, start.size()-1));
+				argv.push_back(a.substr(start.size()));
+				added = true;
 				break;
+			}
+		}
+		if (added)
+		{
+			continue;
+		}
 
-			case 'o':
-				getArgumentValue(optarg, argument);
-				if (!strToNum(argument, options.offset, std::hex))
-				{
-					return false;
-				}
-				options.isOffset = true;
-				break;
+		argv.push_back(a);
+	}
 
-			case 's':
-				getArgumentValue(optarg, argument);
-				if (!strToNum(argument, options.size) || options.size < 1)
-				{
-					return false;
-				}
-				break;
+	for (std::size_t i = 0; i < argv.size(); ++i)
+	{
+		std::string c = argv[i];
 
-			case 'n':
-				getArgumentValue(optarg, options.name);
-				break;
-
-			case 'v':
-				getArgumentValue(optarg, options.version);
-				break;
-
-			case 'e':
-				getArgumentValue(optarg, options.extra);
-				break;
-
-			case 'a':
-				getArgumentValue(optarg, options.outputFile);
-				break;
-
-			default:
+		if (c == "-h" || c == "--help")
+		{
+			printUsage();
+			exit(EXIT_SUCCESS);
+		}
+		else if (c == "-b" || c == "--bytecode")
+		{
+			options.bytecode = true;
+		}
+		else if (c == "-p" || c == "-c" || c == "-i")
+		{
+			options.type = std::toupper(c[1]);
+		}
+		else if (c == "--packer"
+				|| c == "--compiler"
+				|| c == "--installer")
+		{
+			options.type = std::toupper(c[2]);
+		}
+		else if (c == "-o" || c == "--offset")
+		{
+			const auto arg = getParamOrDie(argv, i);
+			if (!strToNum(arg, options.offset, std::hex))
+			{
 				return false;
+			}
+			options.isOffset = true;
+		}
+		else if (c == "-s" || c == "--size")
+		{
+			const auto arg = getParamOrDie(argv, i);
+			if (!strToNum(arg, options.size) || options.size < 1)
+			{
+				return false;
+			}
+		}
+		else if (c == "-r" || c == "--rule-name")
+		{
+			options.rule = getParamOrDie(argv, i);
+		}
+		else if (c == "-n" || c == "--name")
+		{
+			options.name = getParamOrDie(argv, i);
+		}
+		else if (c == "-v" || c == "--version")
+		{
+			options.version = getParamOrDie(argv, i);
+		}
+		else if (c == "-e" || c == "--extra")
+		{
+			options.extra = getParamOrDie(argv, i);
+		}
+		else if (c == "-l" || c == "--language")
+		{
+			options.language = getParamOrDie(argv, i);
+		}
+		else if (c == "-a" || c == "--add")
+		{
+			options.outputFile = getParamOrDie(argv, i);
+		}
+		else if (c == "--source")
+		{
+			options.source = getParamOrDie(argv, i);
+		}
+		else
+		{
+			options.input.push_back(c);
 		}
 	}
 
-	while (argc - optind)
-	{
-		// All other arguments are considered input files.
-		options.input.push_back(static_cast<std::string>(argv[optind++]));
-	}
 	return !options.input.empty();
 }
 
@@ -408,6 +454,7 @@ std::string getYaraRule(
 
 	return out.str();
 }
+
 
 int main(int argc, char** argv) {
 
