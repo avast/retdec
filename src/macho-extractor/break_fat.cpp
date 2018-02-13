@@ -24,13 +24,67 @@ using namespace llvm::sys;
 using namespace rapidjson;
 
 namespace {
+
 constexpr auto AR_NAME_OFFSET = 0U;
 constexpr auto AR_SIZE_OFFSET = 48U;
 
 constexpr auto AR_NAME_SIZE = 16U;
 constexpr auto AR_SIZE_SIZE = 10U;
 constexpr auto AR_HEADER_SIZE = 60U;
+
+
+/**
+ * Returns name of architecture as valid --family option value
+ * @param cpuType Mach-O specific CPU number
+ * @return name of valid --arch option value
+ */
+std::string cpuTypeToString(
+		std::uint32_t cpuType)
+{
+	switch(cpuType)
+	{
+		case CPU_TYPE_ARM:
+			return "arm";
+		case CPU_TYPE_I386:
+			return "x86";
+		case CPU_TYPE_POWERPC:
+			return "powerpc";
+		case CPU_TYPE_ARM64:
+			return "arm64";
+		case CPU_TYPE_X86_64:
+			return "x86-64";
+		case CPU_TYPE_POWERPC64:
+			return "powerpc64";
+		case CPU_TYPE_SPARC:
+			return "sparc";
+		case CPU_TYPE_MC98000:
+			return "mc98000";
+		default:
+			return "unknown";
+	}
 }
+
+
+/**
+ * Return LLVM name of architecture
+ * @param it object iterator
+ * @return LLVM architecture name
+ *
+ * Function returns RetDec name if LLVM function fails to provide name.
+ */
+std::string getArchName(
+		MachOUniversalBinary::object_iterator &it)
+{
+	std::string result = it->getArchTypeName();
+	if(result.empty())
+	{
+		result = cpuTypeToString(it->getCPUType());
+	}
+
+	return result;
+}
+
+} // anonymous namespace
 
 namespace retdec {
 namespace macho_extractor {
@@ -207,36 +261,6 @@ bool BreakMachOUniversal::getObjectNamesForArchive(std::uintptr_t archOffset,
 	return true;
 }
 
-/**
- * Returns name of architecture as valid --family option value
- * @param cpuType Mach-O specific CPU number
- * @return Name of valid --arch option value
- */
-std::string BreakMachOUniversal::cpuTypeToString(std::uint32_t cpuType)
-{
-	switch(cpuType)
-	{
-		case CPU_TYPE_ARM:
-			return "arm";
-		case CPU_TYPE_I386:
-			return "x86";
-		case CPU_TYPE_POWERPC:
-			return "powerpc";
-		case CPU_TYPE_ARM64:
-			return "arm64";
-		case CPU_TYPE_X86_64:
-			return "x86-64";
-		case CPU_TYPE_POWERPC64:
-			return "powerpc64";
-		case CPU_TYPE_SPARC:
-			return "sparc";
-		case CPU_TYPE_MC98000:
-			return "mc98000";
-		default:
-			return "unknown";
-	}
-}
-
 
 /**
  * Verify state of instance after construction
@@ -281,7 +305,7 @@ bool BreakMachOUniversal::listArchitectures(std::ostream &output, bool withObjec
 		}
 
 		output << std::to_string(archIndex++) << "\t";
-		output << i->getArchTypeName() << "\t";
+		output << getArchName(i) << "\t";
 		output << cpuTypeToString(i->getCPUType()) << "\n";
 
 		if(isStatic && withObjects)
@@ -339,7 +363,7 @@ bool BreakMachOUniversal::listArchitecturesJson(std::ostream &output, bool withO
 		Value arch(kObjectType);
 		Value objects(kArrayType);
 		arch.AddMember("index", archIndex++, allocator);
-		arch.AddMember("name", Value(i->getArchTypeName().c_str(), allocator).Move(), allocator);
+		arch.AddMember("name", Value(getArchName(i).c_str(), allocator).Move(), allocator);
 		arch.AddMember("cpuFamily", Value(cpuTypeToString(i->getCPUType()).c_str(), allocator).Move(), allocator);
 
 		if(isStatic && withObjects)
@@ -395,7 +419,7 @@ bool BreakMachOUniversal::extractAllArchives()
 	{
 		// Object within Mach-O Universal Binary are not named
 		// Name will be created from architecture and file name
-		std::string arch = i->getArchTypeName();
+		std::string arch = getArchName(i);
 		// Print files
 		std::ofstream output(path::filename(filePath).str() + "." + arch + ".a", std::ios::binary);
 		if(!output.is_open())
@@ -548,7 +572,7 @@ bool BreakMachOUniversal::extractArchiveForArchitecture(const std::string &macho
 
 	for(auto i = fatFile->begin_objects(), e = fatFile->end_objects(); i != e; ++i)
 	{
-		std::string archName = i->getArchTypeName();
+		std::string archName = getArchName(i);
 		if(archName != machoArchName)
 		{
 			// Not desired architecture.

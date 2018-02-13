@@ -32,7 +32,6 @@ class BreakMachOUniversal
 		bool getByArchFamily(std::uint32_t cpuType, llvm::object::MachOUniversalBinary::object_iterator &res);
 		bool extract(llvm::object::MachOUniversalBinary::object_iterator &object, const std::string &outPath);
 		bool getObjectNamesForArchive(std::uintptr_t archOffset , std::size_t archSize, std::vector<std::string> &result);
-		std::string cpuTypeToString(std::uint32_t cpuType);
 		/// @}
 
 	public:
