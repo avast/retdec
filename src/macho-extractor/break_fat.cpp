@@ -12,26 +12,26 @@
 #include <rapidjson/document.h>
 #include <rapidjson/prettywriter.h>
 
+#include "retdec/macho-extractor/break_fat.h"
 #include "retdec/utils/conversion.h"
 #include "retdec/utils/string.h"
-#include "retdec/macho-extractor/break_fat.h"
 
-using namespace retdec::utils;
 using namespace llvm;
 using namespace llvm::MachO;
 using namespace llvm::object;
 using namespace llvm::sys;
 using namespace rapidjson;
+using namespace retdec::utils;
 
 namespace {
 
 constexpr auto AR_NAME_OFFSET = 0U;
-constexpr auto AR_SIZE_OFFSET = 48U;
-
 constexpr auto AR_NAME_SIZE = 16U;
-constexpr auto AR_SIZE_SIZE = 10U;
-constexpr auto AR_HEADER_SIZE = 60U;
 
+constexpr auto AR_SIZE_OFFSET = 48U;
+constexpr auto AR_SIZE_SIZE = 10U;
+
+constexpr auto AR_HEADER_SIZE = 60U;
 
 /**
  * Returns name of architecture as valid --family option value
@@ -91,16 +91,18 @@ namespace macho_extractor {
 
 /**
  * BreakMachOUniversal constructor
- * @param filePath Path to input file
+ * @param filePath path to input file
  *
- * Verify success with isValid() function
+ * Verify success with isValid() function.
  */
-BreakMachOUniversal::BreakMachOUniversal(const std::string &filePath)
-	: filePath(filePath), fileBuffer(MemoryBuffer::getFile(Twine(filePath)))
+BreakMachOUniversal::BreakMachOUniversal(
+		const std::string &filePath)
+	: path(filePath), buffer(MemoryBuffer::getFile(Twine(filePath)))
 {
-	if(fileBuffer && !fileBuffer.getError())
+	if(buffer && !buffer.getError())
 	{
-		auto object = MachOUniversalBinary::create(fileBuffer.get()->getMemBufferRef());
+		auto object = MachOUniversalBinary::create(
+						buffer.get()->getMemBufferRef());
 		if(!object)
 		{
 			// Unhandled errors cause abort()
@@ -109,7 +111,7 @@ BreakMachOUniversal::BreakMachOUniversal(const std::string &filePath)
 		}
 		else
 		{
-			fatFile = std::move(object.get());
+			file = std::move(object.get());
 			isStatic = isArchive();
 			valid = true;
 		}
@@ -120,6 +122,7 @@ BreakMachOUniversal::BreakMachOUniversal(const std::string &filePath)
 	}
 }
 
+
 /**
  * BreakMachOUniversal destructor
  */
@@ -127,19 +130,20 @@ BreakMachOUniversal::~BreakMachOUniversal()
 {
 }
 
+
 /**
  * Check if input binary contains static libraries
  * @return @c true if file contains static libraries, @c false otherwise
  */
 bool BreakMachOUniversal::isArchive()
 {
-	if(!fatFile->getNumberOfObjects())
+	if(!file->getNumberOfObjects())
 	{
 		// No objects!
 		return false;
 	}
 
-	auto result = fatFile->begin_objects()->getAsArchive();
+	auto result = file->begin_objects()->getAsArchive();
 	if(!result)
 	{
 		// Call consumeError in case of error to "handle" it
@@ -151,24 +155,28 @@ bool BreakMachOUniversal::isArchive()
 	return true;
 }
 
+
 /**
  * Get file memory buffer start
- * @return Pointer to file memory buffer start
+ * @return pointer to file memory buffer start
  */
 const char *BreakMachOUniversal::getFileBufferStart()
 {
-	return fileBuffer.get()->getBufferStart();
+	return buffer.get()->getBufferStart();
 }
+
 
 /**
  * Get Mach-O Universal object iterator by architecture
  * @param cpuType Mach-O specific CPU type constant
- * @param res Resulting iterator
- * @return @c true if object with selected CPU type was found, @c false otherwise
+ * @param res reference for storing result
+ * @return @c true if object with @p cpuType was found, @c false otherwise
  */
-bool BreakMachOUniversal::getByArchFamily(std::uint32_t cpuType, MachOUniversalBinary::object_iterator &res)
+bool BreakMachOUniversal::getByArchFamily(
+		std::uint32_t cpuType,
+		MachOUniversalBinary::object_iterator &res)
 {
-	for(auto i = fatFile->begin_objects(), e = fatFile->end_objects(); i != e; ++i)
+	for(auto i = file->begin_objects(), e = file->end_objects(); i != e; ++i)
 	{
 		if(cpuType == i->getCPUType())
 		{
@@ -180,54 +188,62 @@ bool BreakMachOUniversal::getByArchFamily(std::uint32_t cpuType, MachOUniversalB
 	return false;
 }
 
+
 /**
- * Extract object pointed by iterator
- * @param object Object iterator
- * @param outPath Output file path
- * @return @c true if archive was created successfully, @c false otherwise
+ * Extract object by iterator
+ * @param it object iterator
+ * @param outPath output file path
+ * @return @c true if object was created successfully, @c false otherwise
  */
-bool BreakMachOUniversal::extract(MachOUniversalBinary::object_iterator &object, const std::string &outPath)
+bool BreakMachOUniversal::extract(
+		MachOUniversalBinary::object_iterator &it,
+		const std::string &outPath)
 {
 	std::ofstream output(outPath, std::ios::binary);
-	if(!output.is_open())
+	if(output)
 	{
-		return false;
+		output.write(getFileBufferStart() + it->getOffset(), it->getSize());
+		return output.good();
 	}
-	if(!output.write(getFileBufferStart() + object->getOffset(), object->getSize()))
-	{
-		return false;
-	}
-	return true;
+
+	return false;
 }
+
 
 /**
  * Get file names of objects stored in archive
- * @param archOffset Start of archive in Mach-O Universal Binary
- * @param archSize Size of archive in Mach-O Universal Binary
- * @param result Vector with names
+ * @param archOffset start of archive in Mach-O Universal Binary
+ * @param archSize size of archive in Mach-O Universal Binary
+ * @param result vector with names
  * @return @c true if names were retrieved successfully, @c false otherwise
  *
- * Actual LLVM implementation is problematic but changed a lot in newer versions,
- * so in future, it may be possible to remove this function and use getAsArchive
- * function and llvm::Archive interface instead.
+ * Actual LLVM implementation is problematic but changed a lot in newer
+ * versions, so in future, it may be possible to remove this function and use
+ * getAsArchive function and llvm::Archive interface instead.
  *
- * Function is fit only for Apple OS (BSD) archive variant.
+ * Function is fit only for Apple OS (BSD) archive variant used in Mach-O.
  */
-bool BreakMachOUniversal::getObjectNamesForArchive(std::uintptr_t archOffset,
-						std::size_t archSize, std::vector<std::string> &result)
+bool BreakMachOUniversal::getObjectNamesForArchive(
+		std::uintptr_t archOffset,
+		std::size_t archSize,
+		std::vector<std::string> &result)
 {
 	result.clear();
-	const char* buffStart = getFileBufferStart();
+	const char* buff = getFileBufferStart();
 
 	// Add 8 bytes to skip arch signature
-	std::uintptr_t offset = archOffset + 8;
-	std::uintptr_t endOffset = offset + archSize - AR_HEADER_SIZE;
+	std::uintptr_t start = archOffset + 8;
+	std::uintptr_t end = start + archSize - AR_HEADER_SIZE;
 
-	while(offset < endOffset)
+	while(start < end)
 	{
 		// Archive attributes in header are stored as ASCII text
-		std::string nameStr = trim(std::string(buffStart + offset + AR_NAME_OFFSET, AR_NAME_SIZE), " ");
-		std::string sizeStr = trim(std::string(buffStart + offset + AR_SIZE_OFFSET, AR_SIZE_SIZE), " ");
+		std::string nameStr = trim(std::string(
+									buff + start + AR_NAME_OFFSET,
+									AR_NAME_SIZE), " ");
+		std::string sizeStr = trim(std::string(
+									buff + start + AR_SIZE_OFFSET,
+									AR_SIZE_SIZE), " ");
 
 		// Get size
 		std::uint64_t size = 0;
@@ -240,14 +256,15 @@ bool BreakMachOUniversal::getObjectNamesForArchive(std::uintptr_t archOffset,
 		if(startsWith(nameStr, longNameMagic))
 		{
 			// Cut '#1/' a convert to number
-			std::string nameSizeStr = nameStr.substr(strlen(longNameMagic), std::string::npos);
+			std::string nameSizeStr = nameStr.substr(strlen(longNameMagic),
+													std::string::npos);
 			std::uint64_t nameSize = 0;
 			if(!strToNum(nameSizeStr, nameSize, std::dec))
 			{
 				return false;
 			}
-			nameStr = std::string(buffStart + offset + AR_HEADER_SIZE, nameSize);
-			// Name is sometimes aligned with trailing zeroes
+			nameStr = std::string(buff + start + AR_HEADER_SIZE, nameSize);
+			// Name is sometimes aligned with trailing zeros
 			nameStr = std::string(nameStr.c_str());
 		}
 
@@ -256,8 +273,9 @@ bool BreakMachOUniversal::getObjectNamesForArchive(std::uintptr_t archOffset,
 		{
 			result.push_back(nameStr);
 		}
-		offset += AR_HEADER_SIZE + size;
+		start += AR_HEADER_SIZE + size;
 	}
+
 	return true;
 }
 
@@ -274,29 +292,32 @@ bool BreakMachOUniversal::isValid()
 
 /**
  * Check if input binary contains static library
- * @return @c true if file fat Mach-O with static library, @c false otherwise
+ * @return @c true if file is fat Mach-O static library, @c false otherwise
  */
 bool BreakMachOUniversal::isStaticLibrary()
 {
 	return isStatic;
 }
 
+
 /**
- * List architectures
- * @param output Stream to print result to
- * @param withObjects @c true when archives content is to be included
- * @return @c true if file was read successfully, @c false otherwise
+ * List all architectures contained in fat Mach-O
+ * @param output stream to print result to
+ * @param withObjects @c true when archive content is to be included
+ * @return @c true if all actions were successful, @c false otherwise
  */
-bool BreakMachOUniversal::listArchitectures(std::ostream &output, bool withObjects)
+bool BreakMachOUniversal::listArchitectures(
+		std::ostream &output,
+		bool withObjects)
 {
-	if (!fatFile)
+	if(!file)
 	{
 		return false;
 	}
 
 	unsigned archIndex = 0;
 	output << "Index\tName\tFamily\n";
-	for(auto i = fatFile->begin_objects(), e = fatFile->end_objects(); i != e; ++i)
+	for(auto i = file->begin_objects(), e = file->end_objects(); i != e; ++i)
 	{
 		if(isStatic && withObjects && archIndex != 0)
 		{
@@ -304,27 +325,27 @@ bool BreakMachOUniversal::listArchitectures(std::ostream &output, bool withObjec
 			output << "Index\tName\tFamily\n";
 		}
 
-		output << std::to_string(archIndex++) << "\t";
+		output << archIndex++ << "\t";
 		output << getArchName(i) << "\t";
 		output << cpuTypeToString(i->getCPUType()) << "\n";
 
 		if(isStatic && withObjects)
 		{
-			std::vector<std::string> objNames;
-			if(!getObjectNamesForArchive(i->getOffset(), i->getSize(), objNames))
+			std::vector<std::string> names;
+			if(!getObjectNamesForArchive(i->getOffset(), i->getSize(), names))
 			{
 				return false;
 			}
 
-			if(objNames.empty())
+			if(names.empty())
 			{
 				output << "\n\tEmpty archive.\n";
 				continue;
 			}
-			output << "\n\tIndex\tName\n";
 
+			output << "\n\tIndex\tName\n";
 			unsigned childIndex = 0;
-			for(const auto &name : objNames)
+			for(const auto &name : names)
 			{
 				output << "\t" << childIndex++ << "\t" << name << "\n";
 			}
@@ -332,7 +353,7 @@ bool BreakMachOUniversal::listArchitectures(std::ostream &output, bool withObjec
 	}
 
 	// Write warning when --object option is used on non-archive target.
-	if (!isStatic && withObjects)
+	if(!isStatic && withObjects)
 	{
 		std::cerr << "Warning: input file is not an archive! (--objects)\n";
 	}
@@ -340,15 +361,18 @@ bool BreakMachOUniversal::listArchitectures(std::ostream &output, bool withObjec
 	return output.good();
 }
 
+
 /**
- * List architectures in JSON format
- * @param output Stream to print result to
- * @param withObjects @c true when archives content is to be included
- * @return @c true if file was read successfully, @c false otherwise
+ * List all architectures contained in fat Mach-O in JSON format
+ * @param output stream to print result to
+ * @param withObjects @c true when archive content is to be included
+ * @return @c true if all actions were successful, @c false otherwise
  */
-bool BreakMachOUniversal::listArchitecturesJson(std::ostream &output, bool withObjects)
+bool BreakMachOUniversal::listArchitecturesJson(
+		std::ostream &output,
+		bool withObjects)
 {
-	if (!fatFile)
+	if(!file)
 	{
 		return false;
 	}
@@ -358,27 +382,39 @@ bool BreakMachOUniversal::listArchitecturesJson(std::ostream &output, bool withO
 	Value architectures(kArrayType);
 
 	unsigned archIndex = 0;
-	for(auto i = fatFile->begin_objects(), e = fatFile->end_objects(); i != e; ++i)
+	for(auto i = file->begin_objects(), e = file->end_objects(); i != e; ++i)
 	{
 		Value arch(kObjectType);
 		Value objects(kArrayType);
+
+		auto name = getArchName(i);
+		auto family = cpuTypeToString(i->getCPUType());
 		arch.AddMember("index", archIndex++, allocator);
-		arch.AddMember("name", Value(getArchName(i).c_str(), allocator).Move(), allocator);
-		arch.AddMember("cpuFamily", Value(cpuTypeToString(i->getCPUType()).c_str(), allocator).Move(), allocator);
+		arch.AddMember(
+					"name",
+					Value(name.c_str(), allocator).Move(),
+					allocator);
+		arch.AddMember(
+					"cpuFamily",
+					Value(family.c_str(), allocator).Move(),
+					allocator);
 
 		if(isStatic && withObjects)
 		{
-			std::vector<std::string> objNames;
-			if(!getObjectNamesForArchive(i->getOffset(), i->getSize(), objNames))
+			std::vector<std::string> names;
+			if(!getObjectNamesForArchive(i->getOffset(), i->getSize(), names))
 			{
 				return false;
 			}
 
 			unsigned childIndex = 0;
-			for(const auto &name : objNames)
+			for(const auto &name : names)
 			{
 				Value obj(kObjectType);
-				obj.AddMember("name", Value(name.c_str(), allocator).Move(), allocator);
+				obj.AddMember(
+							"name",
+							Value(name.c_str(), allocator).Move(),
+							allocator);
 				obj.AddMember("index", childIndex++, allocator);
 				objects.PushBack(obj, allocator);
 			}
@@ -388,9 +424,11 @@ bool BreakMachOUniversal::listArchitecturesJson(std::ostream &output, bool withO
 	}
 
 	// Write warning when --object option is used on non-archive target.
-	if (!isStatic && withObjects)
+	if(!isStatic && withObjects)
 	{
-		outDoc.AddMember("warning", "input file is not an archive! (--objects)", allocator);
+		outDoc.AddMember(
+					"warning", "input file is not an archive! (--objects)",
+					allocator);
 	}
 
 	outDoc.AddMember("architectures", architectures, allocator);
@@ -403,25 +441,26 @@ bool BreakMachOUniversal::listArchitecturesJson(std::ostream &output, bool withO
 	return output.good();
 }
 
+
 /**
  * Extract all archives, simulates ar x behavior
- * @return @c true if all files were extracted successfully, @c false otherwise
+ * @return @c true if extraction was successful, @c false otherwise
  */
 bool BreakMachOUniversal::extractAllArchives()
 {
-	if (!fatFile)
+	if(!file)
 	{
 		return false;
 	}
 
 	const char *bytes = getFileBufferStart();
-	for(auto i = fatFile->begin_objects(), e = fatFile->end_objects(); i != e; ++i)
+	for(auto i = file->begin_objects(), e = file->end_objects(); i != e; ++i)
 	{
 		// Object within Mach-O Universal Binary are not named
-		// Name will be created from architecture and file name
-		std::string arch = getArchName(i);
-		// Print files
-		std::ofstream output(path::filename(filePath).str() + "." + arch + ".a", std::ios::binary);
+		auto fpath = path::filename(path).str() + "." + getArchName(i);
+		fpath += isStatic ? ".a" : "";
+
+		std::ofstream output(fpath, std::ios::binary);
 		if(!output.is_open())
 		{
 			return false;
@@ -434,76 +473,85 @@ bool BreakMachOUniversal::extractAllArchives()
 	return true;
 }
 
+
 /**
  * Extract archive with best architecture for decompilation
- * @param outPath Output file path
+ * @param outPath output file path
+ * @return @c true if extraction was successful, @c false otherwise
  */
-bool BreakMachOUniversal::extractBestArchive(const std::string &outPath)
+bool BreakMachOUniversal::extractBestArchive(
+		const std::string &outPath)
 {
-	if (!fatFile)
+	if(!file)
 	{
 		return false;
 	}
 
-	auto obj = fatFile->begin_objects();
-	if(getByArchFamily(CPU_TYPE_X86, obj) || getByArchFamily(CPU_TYPE_ARM, obj) || getByArchFamily(CPU_TYPE_POWERPC, obj))
+	auto obj = file->begin_objects();
+	if(getByArchFamily(CPU_TYPE_X86, obj)
+			|| getByArchFamily(CPU_TYPE_ARM, obj)
+			|| getByArchFamily(CPU_TYPE_POWERPC, obj))
 	{
 		return extract(obj, outPath);
 	}
-	else
-	{
-		// If none of above, just pick first.
-		return extract(obj, outPath);
-	}
+
+	// If none of above, just pick first.
+	return extract(obj, outPath);
 }
 
+
 /**
- * Extract archive on selected index
- * @param index Index of archive to extract
- * @param outPath Output file path
- * @return @c true on success, @c false otherwise
+ * Extract archive with selected index
+ * @param index index of archive to extract
+ * @param outPath output file path
+ * @return @c true if extraction was successful, @c false otherwise
  */
-bool BreakMachOUniversal::extractArchiveWithIndex(unsigned index, const std::string &outPath)
+bool BreakMachOUniversal::extractArchiveWithIndex(
+		unsigned index,
+		const std::string &outPath)
 {
-	if(!fatFile || index >= fatFile->getNumberOfObjects())
+	if(!file || index >= file->getNumberOfObjects())
 	{
 		return false;
 	}
 
 	unsigned idx = 0;
-	for(auto i = fatFile->begin_objects(), e = fatFile->end_objects(); i != e; ++i)
+	for(auto i = file->begin_objects(), e = file->end_objects(); i != e; ++i)
 	{
-		if(index != idx++)
+		if(index == idx++)
 		{
-			continue;
+			return extract(i, outPath);
 		}
-		return extract(i, outPath);
 	}
+
 	return false;
 }
 
+
 /**
  * Extract archive by architecture family
- * @param archFamilyName String with family name
- * @param outPath Path to output file
- * @return @c true on success, @c false otherwise
+ * @param familyName  family name
+ * @param outPath path to output file
+ * @return @c true if extraction was successful, @c false otherwise
  */
-bool BreakMachOUniversal::extractArchiveForFamily(const std::string &archFamilyName, const std::string &outPath)
+bool BreakMachOUniversal::extractArchiveForFamily(
+		const std::string &familyName,
+		const std::string &outPath)
 {
-	if (!fatFile)
+	if(!file)
 	{
 		return false;
 	}
 
-	auto obj = fatFile->begin_objects();
-	if(archFamilyName == "x86")
+	auto obj = file->begin_objects();
+	if(familyName == "x86")
 	{
 		if(getByArchFamily(CPU_TYPE_X86, obj))
 		{
 			return extract(obj, outPath);
 		}
 	}
-	else if(archFamilyName == "arm" || archFamilyName == "thumb")
+	else if(familyName == "arm" || familyName == "thumb")
 	{
 		// Same family
 		if(getByArchFamily(CPU_TYPE_ARM, obj))
@@ -511,75 +559,76 @@ bool BreakMachOUniversal::extractArchiveForFamily(const std::string &archFamilyN
 			return extract(obj, outPath);
 		}
 	}
-	else if(archFamilyName == "powerpc")
+	else if(familyName == "powerpc")
 	{
 		if(getByArchFamily(CPU_TYPE_POWERPC, obj))
 		{
 			return extract(obj, outPath);
 		}
 	}
-	if(archFamilyName == "x86-64")
+	else if(familyName == "x86-64")
 	{
 		if(getByArchFamily(CPU_TYPE_X86_64, obj))
 		{
 			return extract(obj, outPath);
 		}
 	}
-	else if(archFamilyName == "arm64")
+	else if(familyName == "arm64")
 	{
 		if(getByArchFamily(CPU_TYPE_ARM64, obj))
 		{
 			return extract(obj, outPath);
 		}
 	}
-	else if(archFamilyName == "powerpc64")
+	else if(familyName == "powerpc64")
 	{
 		if(getByArchFamily(CPU_TYPE_POWERPC64, obj))
 		{
 			return extract(obj, outPath);
 		}
 	}
-	else if(archFamilyName == "sparc")
+	else if(familyName == "sparc")
 	{
 		if(getByArchFamily(CPU_TYPE_SPARC, obj))
 		{
 			return extract(obj, outPath);
 		}
 	}
-	else if(archFamilyName == "mc98000")
+	else if(familyName == "mc98000")
 	{
 		if(getByArchFamily(CPU_TYPE_MC98000, obj))
 		{
 			return extract(obj, outPath);
 		}
 	}
-	// Not supported by Mach-O format
+
 	return false;
 }
+
 
 /**
  * Extract archive by architecture
  * @param machoArchName Mach-O specific architecture string
- * @param outPath Path to output file
- * @return @c true on success, @c false otherwise
+ * @param outPath path to output file
+ * @return @c true if extraction was successful, @c false otherwise
  */
-bool BreakMachOUniversal::extractArchiveForArchitecture(const std::string &machoArchName, const std::string &outPath)
+bool BreakMachOUniversal::extractArchiveForArchitecture(
+		const std::string &machoArchName,
+		const std::string &outPath)
 {
-	if (!fatFile)
+	if(!file)
 	{
 		return false;
 	}
 
-	for(auto i = fatFile->begin_objects(), e = fatFile->end_objects(); i != e; ++i)
+	for(auto i = file->begin_objects(), e = file->end_objects(); i != e; ++i)
 	{
-		std::string archName = getArchName(i);
-		if(archName != machoArchName)
+		if(machoArchName == getArchName(i))
 		{
-			// Not desired architecture.
-			continue;
+			return extract(i, outPath);
 		}
-		return extract(i, outPath);
 	}
+
 	return false;
 }
 
