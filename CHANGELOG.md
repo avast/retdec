@@ -2,7 +2,8 @@
 
 # dev
 
-* New Feature: added retdec-getsig - tool for creating signatures of packers, compilers and other tools.
+* New Feature: Added `retdec-getsig` - tool for creating signatures of packers, compilers and other tools.
+* Enhancement: Tool `retdec-macho-extractor` can now extract object from non-archive Mach-O universal binaries. 
 * Enhancement: References to ticket numbers from our internal issue tracking system were replaced by short descriptions in the `retdec-regression-tests` repository ([retdec-regression-tests #1](https://github.com/avast-tl/retdec-regression-tests/issues/1)).
 * Enhancement: Added a missing license for the `retdec-support` repository ([retdec-support #1](https://github.com/avast-tl/retdec-support/issues/1)).
 * Enhancement: Better detection of tools: new signatures and heuristics. YARA signatures are compiled now.
