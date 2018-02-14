@@ -51,7 +51,7 @@ void printUsage()
 	"  --check-archive\n"
 	"    Writes info about the binary being static library or not. Returns\n"
 	"    zero if it is an archive, non-zero value otherwise. This option\n"
-	"    --json option.\n\n"
+	"    ignores --json option.\n\n"
 	"Output options:\n\n"
 	"  -o --out PATH\n"
 	"    Output will be written to the PATH.\n\n";
