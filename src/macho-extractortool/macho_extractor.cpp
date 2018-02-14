@@ -65,7 +65,8 @@ void printUsage()
  * @return argument value
  */
 std::string getParamOrDie(
-		std::vector<std::string> &argv, std::size_t &i)
+		std::vector<std::string> &argv,
+		std::size_t &i)
 {
 	if (argv.size() > i + 1)
 	{
@@ -80,7 +81,14 @@ std::string getParamOrDie(
 }
 
 
-void printError(const std::string &message, bool isJson = false)
+/**
+ * Print error message
+ * @param message error message
+ * @param isJson if @c true use JSON format
+ */
+void printError(
+		const std::string &message,
+		bool isJson = false)
 {
 	if(isJson)
 	{
@@ -100,6 +108,11 @@ void printError(const std::string &message, bool isJson = false)
 	}
 }
 
+/**
+ * Parse arguments
+ * @param args vector with arguments
+ * @return program return value
+ */
 int handleArguments(
 		std::vector<std::string> &args)
 {
