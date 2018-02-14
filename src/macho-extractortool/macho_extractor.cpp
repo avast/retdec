@@ -5,12 +5,14 @@
  */
 
 #include <iostream>
+#include <set>
 
 #include <llvm/Support/FileSystem.h>
 #include <rapidjson/document.h>
 #include <rapidjson/prettywriter.h>
 
 #include "retdec/utils/conversion.h"
+#include "retdec/utils/string.h"
 #include "retdec/macho-extractor/break_fat.h"
 
 using namespace retdec::macho_extractor;
@@ -20,22 +22,63 @@ namespace {
 
 enum class Mode { All, Best, Arch, Family, Index };
 
-void printHelp()
+void printUsage()
 {
-	std::cerr << "\nExtract static libraries from Mach-O Universal Binaries\n";
-	std::cerr << "extract [OPTIONS] INPUT\n\n";
-	std::cerr << "Options:\n";
-	std::cerr << "--all\t\tExtract all archives (default)\n";
-	std::cerr << "--best\t\tExtract best archive for decompilation\n";
-	std::cerr << "--family name\tExtract archive with selected architecture family [arm|x86|powerpc]\n";
-	std::cerr << "--arch name\tExtract archive with selected architecture\n";
-	std::cerr << "--index number\tExtract archive with selected index\n";
-	std::cerr << "--out path\tOutput file\n";
-	std::cerr << "--list\t\tList target architectures and quit\n";
-	std::cerr << "--json\t\tList target architectures in JSON format and quit\n";
-	std::cerr << "--objects\tAdd list of objects to architectures list\n\n";
-	std::cerr << "For list of supported values for family or arch run in --list or --json mode.\n";
+	std::cerr <<
+	"\nExtract objects from Mach-O Universal Binaries.\n"
+	"Usage: retdec-macho-extractor [OPTIONS] FILE\n\n"
+	"Extraction options:\n\n"
+	"  --all\n"
+	"    Extract all objects from binary (default action).\n\n"
+	"  -b --best\n"
+	"    Extract the best binary for decompilation in the RetDec.\n\n"
+	"  -a --arch NAME\n"
+	"    Extract the binary with selected LLVM architecture name.\n\n"
+	"  -f --family NAME\n"
+	"    Extract the binary with selected architecture family.\n\n"
+	"  -i --index INDEX\n"
+	"    Extract the binary with selected zero-based index.\n\n"
+	"  To see list of supported values for family or architecture\n"
+	"  options run application in --list or --json mode.\n\n"
+	"List options:\n\n"
+	"  -l --list\n"
+	"    List target architectures and quit.\n\n"
+	"  -j --json\n"
+	"    List target architectures in JSON format and quit.\n\n"
+	"  --objects\n"
+	"    Add list of objects to the list of architectures.This option\n"
+	"    implies --list option. This option works only with archives.\n\n"
+	"  --check-archive\n"
+	"    Writes info about the binary being static library or not. Returns\n"
+	"    zero if it is an archive, non-zero value otherwise. This option\n"
+	"    --json option.\n\n"
+	"Output options:\n\n"
+	"  -o --out PATH\n"
+	"    Output will be written to the PATH.\n\n";
 }
+
+
+/**
+ * Fetch parameter value or die with error message.
+ * @param argv vector with arguments
+ * @param i index of argument
+ * @return argument value
+ */
+std::string getParamOrDie(
+		std::vector<std::string> &argv, std::size_t &i)
+{
+	if (argv.size() > i + 1)
+	{
+		return argv[++i];
+	}
+	else
+	{
+		std::cerr << "Error: missing argument value.\n\n";
+		printUsage();
+		exit(1);
+	}
+}
+
 
 void printError(const std::string &message, bool isJson = false)
 {
@@ -57,133 +100,138 @@ void printError(const std::string &message, bool isJson = false)
 	}
 }
 
-int handleArguments(std::vector<std::string> &args)
+int handleArguments(
+		std::vector<std::string> &args)
 {
 	if(args.size() < 1)
 	{
-		printHelp();
+		printUsage();
 		std::cerr << "Error: not enough arguments!\n";
 		return 1;
 	}
 
-	std::string archVal;
-	std::string familyVal;
-	std::string inputFile;
-	std::string outputFile;
-	unsigned indexVal = 0;
+	std::string arch;
+	std::string family;
+	unsigned index = 0;
+
+	std::string inFile;
+	std::string outFile;
+
 	Mode mode = Mode::All;
 	bool listOnly = false;
 	bool jsonOut = false;
-	bool withObjects = false;
+	bool addObjects = false;
 	bool isArchiveVerif = false;
 
-	for(std::size_t i = 0; i < args.size(); ++i)
+	std::set<std::string> withArgs =
 	{
-		if(args[i] == "--help" || args[i] == "-h")
+		"i",    "index",
+		"a",    "arch",
+		"f",    "family",
+		"o",    "out"
+	};
+
+	std::vector<std::string> argv;
+	for (const auto& a : args)
+	{
+		bool added = false;
+		for (auto& o : withArgs)
 		{
-			printHelp();
+			std::string start = (o.size() == 1 ? "-" : "--") + o + "=";
+			if (retdec::utils::startsWith(a, start))
+			{
+				argv.push_back(a.substr(0, start.size()-1));
+				argv.push_back(a.substr(start.size()));
+				added = true;
+				break;
+			}
+		}
+		if (added)
+		{
+			continue;
+		}
+
+		argv.push_back(a);
+	}
+
+	for(std::size_t i = 0; i < argv.size(); ++i)
+	{
+		std::string& c = argv[i];
+
+		if(c == "-h" || c == "--help")
+		{
+			printUsage();
 			return 0;
 		}
-		else if(args[i] == "--check-archive")
+		else if(c == "--check-archive")
 		{
 			isArchiveVerif = true;
 		}
-		else if(args[i] == "--out")
+		else if(c == "-o" || c == "--out")
 		{
-			if(i + 1 >= args.size())
-			{
-				std::cerr << "Error: option '--out' needs value!\n";
-				return 1;
-			}
-			else
-			{
-				outputFile = args[++i];
-			}
+			outFile = getParamOrDie(argv, i);
 		}
-		else if(args[i] == "--list")
+		else if(c == "-l" || c == "--list")
 		{
 			listOnly = true;
 		}
-		else if(args[i] == "--json")
+		else if(c == "-j" || c == "--json")
 		{
 			listOnly = jsonOut = true;
 		}
-		else if(args[i] == "--objects")
+		else if(c == "--objects")
 		{
-			listOnly = withObjects = true;
+			listOnly = addObjects = true;
 		}
-		else if(args[i] == "--all")
+		else if(c == "--all")
 		{
 			mode = Mode::All;
 		}
-		else if(args[i] == "--best")
+		else if(c == "-b" || c == "--best")
 		{
 			mode = Mode::Best;
 		}
-		else if(args[i] == "--index")
+		else if(c == "-i" || c == "--index")
 		{
 			mode = Mode::Index;
-			if(i + 1 >= args.size())
+			const auto arg = getParamOrDie(argv, i);
+			if(!retdec::utils::strToNum(arg, index))
 			{
-				std::cerr << "Error: option '--index' needs value!\n";
+				printError("invalid '--index' option value!", jsonOut);
 				return 1;
 			}
-			else
-			{
-				if(!retdec::utils::strToNum(args[++i], indexVal, std::dec))
-				{
-					std::cerr << "Error: option '--index' value is not a number!\n";
-					return 1;
-				}
-			}
 		}
-		else if(args[i] == "--arch")
+		else if(c == "-a" || c == "--arch")
 		{
 			mode = Mode::Arch;
-			if(i + 1 >= args.size())
-			{
-				std::cerr << "Error: option '--arch' needs value!\n";
-				return 1;
-			}
-			else
-			{
-				archVal = args[++i];
-			}
+			arch = getParamOrDie(argv, i);
 		}
-		else if(args[i] == "--family")
+		else if(c == "-f" || c == "--family")
 		{
 			mode = Mode::Family;
-			if(i + 1 >= args.size())
-			{
-				std::cerr << "Error: option '--family' needs value!\n";
-				return 1;
-			}
-			else
-			{
-				familyVal = args[++i];
-			}
+			family = getParamOrDie(argv, i);
 		}
 		else
 		{
-			if(llvm::sys::fs::is_regular_file(llvm::Twine(args[i])))
+			if(llvm::sys::fs::is_regular_file(llvm::Twine(c)))
 			{
-				inputFile = args[i];
+				inFile = c;
 			}
 			else
 			{
-				std::cerr << "Error: invalid argument '" << args[i] << "'.\n";
+				printError("invalid argument '" + args[i] + "'", jsonOut);
 				return 1;
 			}
 		}
 	}
 
 	// Load input file
-	if(inputFile.empty())
+	if(inFile.empty())
 	{
 		printError("no input file", jsonOut);
 		return 2;
 	}
-	BreakMachOUniversal binary(inputFile);
+	BreakMachOUniversal binary(inFile);
 	if(!binary.isValid())
 	{
 		printError("file is not valid Mach-O Universal binary", jsonOut);
@@ -208,18 +256,18 @@ int handleArguments(std::vector<std::string> &args)
 	{
 		if(jsonOut)
 		{
-			return binary.listArchitecturesJson(std::cout, withObjects) ? 0 : 1;
+			return binary.listArchitecturesJson(std::cout, addObjects) ? 0 : 1;
 		}
 		else
 		{
-			return binary.listArchitectures(std::cout, withObjects) ? 0 : 1;
+			return binary.listArchitectures(std::cout, addObjects) ? 0 : 1;
 		}
 	}
 
 	// Set default name if no name was given
-	if(outputFile.empty())
+	if(outFile.empty())
 	{
-		outputFile = inputFile + ".picked.a";
+		outFile = inFile + ".a";
 	}
 
 	// Extract
@@ -228,19 +276,19 @@ int handleArguments(std::vector<std::string> &args)
 		case Mode::All:
 			return binary.extractAllArchives() ? 0 : 1;
 		case Mode::Best:
-			return binary.extractBestArchive(outputFile) ? 0 : 1;
+			return binary.extractBestArchive(outFile) ? 0 : 1;
 		case Mode::Family:
-			return binary.extractArchiveForFamily(familyVal, outputFile) ? 0 : 1;
+			return binary.extractArchiveForFamily(family, outFile) ? 0 : 1;
 		case Mode::Arch:
-			return binary.extractArchiveForArchitecture(archVal, outputFile) ? 0 : 1;
+			return binary.extractArchiveForArchitecture(arch, outFile) ? 0 : 1;
 		case Mode::Index:
-			return binary.extractArchiveWithIndex(indexVal, outputFile) ? 0 : 1;
+			return binary.extractArchiveWithIndex(index, outFile) ? 0 : 1;
 		default:
 			return 1;
 	}
 }
 
-} // namespace Anonymous
+} // anonymous namespace
 
 int main(int argc, char **argv)
 {
