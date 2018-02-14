@@ -66,18 +66,18 @@ skip_commits:
     - LICENSE
     - LICENSE-THIRD-PARTY
     # All .gitignore files within repository.
-    - **/.gitignore
+    - '**/.gitignore'
     # All *.md files within repository.
-    - **/*.md
+    - '**/*.md'
     # All README files within repository.
-    - **/README
-    - **/README.txt
-    - **/readme
-    - **/readme.txt
+    - '**/README'
+    - '**/README.txt'
+    - '**/readme'
+    - '**/readme.txt'
     # All files within doc directory, recursive.
-    - doc/**/*
+    - doc/
     # All files within scripts/type_extractor directory, recursive.
-    - scripts/type_extractor/**/*
+    - scripts/type_extractor/
 
 notifications:
   - provider: Email
