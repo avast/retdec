@@ -49,6 +49,36 @@ test_script:
   - cmd: cat hello.c
   - cmd: grep "int main(int argc, char \*\* argv)" hello.c
 
+branches:
+  only:
+    # Pushes and PRs to the master branch.
+    - master
+    # Version tags.
+    - /^v?\d+\.\d+.*$/
+
+skip_commits:
+  files:
+    # Exact files.
+    - .travis.yml
+    - CITATION
+    - Dockerfile
+    - Dockerfile.dev
+    - LICENSE
+    - LICENSE-THIRD-PARTY
+    # All .gitignore files within repository.
+    - **/.gitignore
+    # All *.md files within repository.
+    - **/*.md
+    # All README files within repository.
+    - **/README
+    - **/README.txt
+    - **/readme
+    - **/readme.txt
+    # All files within doc directory, recursive.
+    - doc/**/*
+    # All files within scripts/type_extractor directory, recursive.
+    - scripts/type_extractor/**/*
+
 notifications:
   - provider: Email
     to:
