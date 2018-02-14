@@ -36,7 +36,8 @@ const std::unordered_map<ReturnCode, std::string, retdec::utils::EnumClassKeyHas
 	},
 	{
 		ReturnCode::ARG,
-		"Error: Invalid arguments." },
+		"Error: Invalid arguments."
+	},
 	{
 		ReturnCode::FILE_NOT_EXIST,
 		"Error: The input file probably not exist or it is incorrect."
