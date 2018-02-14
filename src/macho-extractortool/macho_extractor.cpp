@@ -280,7 +280,8 @@ int handleArguments(
 	// Set default name if no name was given
 	if(outFile.empty())
 	{
-		outFile = inFile + ".a";
+		outFile = inFile + ".extracted";
+		outFile += binary.isStaticLibrary() ? ".a" : "";
 	}
 
 	// Extract
