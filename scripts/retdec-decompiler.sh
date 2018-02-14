@@ -22,9 +22,10 @@ print_help()
 	echo "    $0 [ options ] file"
 	echo ""
 	echo "Options:"
-	echo "    -a name,   --arch name                            Specify target architecture [mips|pic32|arm|thumb|powerpc|x86] (default: x86)."
-	echo "    -e name,   --endian name                          Specify target endianness [little|big] (default: little). Not all combinations are supported."
-	echo "    -f name,   --format name                          Specify object file format [elf|pe|ihex|macho] (default: pe)."
+	echo "    -a name,   --arch name                            Specify target architecture [mips|pic32|arm|thumb|powerpc|x86] (default: autodetected)."
+	echo "                                                      Required if it cannot be autodetected from the input (e.g. raw mode, Intel HEX)."
+	echo "    -e name,   --endian name                          Specify target endianness [little|big] (default: autodetected)."
+	echo "                                                      Required if it cannot be autodetected from the input (e.g. raw mode, Intel HEX)."
 	echo "    -h,        --help                                 Print this help message."
 	echo "    -k         --keep-unreachable-funcs               Keep functions that are unreachable from the main function."
 	echo "    -l string, --target-language string               Target high-level language [c|py] (default: c)."
@@ -76,8 +77,8 @@ print_help()
 	echo "               --no-default-static-signatures         No default signatures for statically linked code analysis are loaded (options static-code-sigfile/archive are still available)."
 }
 SCRIPT_NAME=$0
-GETOPT_SHORTOPT="a:e:f:hkl:m:o:p:"
-GETOPT_LONGOPT="arch:,format:,help,keep-unreachable-funcs,target-language:,mode:,output:,pdb:,backend-aggressive-opts,backend-arithm-expr-evaluator:,backend-call-info-obtainer:,backend-cfg-test,backend-disabled-opts:,backend-emit-cfg,backend-emit-cg,backend-cg-conversion:,backend-cfg-conversion:,backend-enabled-opts:,backend-find-patterns:,backend-force-module-name:,backend-keep-all-brackets,backend-keep-library-funcs,backend-llvmir2bir-converter:,backend-no-compound-operators,backend-no-debug,backend-no-debug-comments,backend-no-opts,backend-no-symbolic-names,backend-no-time-varying-info,backend-no-var-renaming,backend-semantics,backend-strict-fpu-semantics,backend-var-renamer:,cleanup,graph-format:,raw-entry-point:,raw-section-vma:,endian:,select-decode-only,select-functions:,select-ranges:,fileinfo-verbose,fileinfo-use-all-external-patterns,config:,color-for-ida,no-config,stop-after:,static-code-sigfile:,static-code-archive:,no-default-static-signatures,ar-name:,ar-index:"
+GETOPT_SHORTOPT="a:e:hkl:m:o:p:"
+GETOPT_LONGOPT="arch:,help,keep-unreachable-funcs,target-language:,mode:,output:,pdb:,backend-aggressive-opts,backend-arithm-expr-evaluator:,backend-call-info-obtainer:,backend-cfg-test,backend-disabled-opts:,backend-emit-cfg,backend-emit-cg,backend-cg-conversion:,backend-cfg-conversion:,backend-enabled-opts:,backend-find-patterns:,backend-force-module-name:,backend-keep-all-brackets,backend-keep-library-funcs,backend-llvmir2bir-converter:,backend-no-compound-operators,backend-no-debug,backend-no-debug-comments,backend-no-opts,backend-no-symbolic-names,backend-no-time-varying-info,backend-no-var-renaming,backend-semantics,backend-strict-fpu-semantics,backend-var-renamer:,cleanup,graph-format:,raw-entry-point:,raw-section-vma:,endian:,select-decode-only,select-functions:,select-ranges:,fileinfo-verbose,fileinfo-use-all-external-patterns,config:,color-for-ida,no-config,stop-after:,static-code-sigfile:,static-code-archive:,no-default-static-signatures,ar-name:,ar-index:"
 
 #
 # Check proper combination of input arguments.
@@ -102,7 +103,6 @@ check_arguments()
 	# Print warning message about unsupported combinations of options.
 	if [ "$MODE" = "ll" ]; then
 		[ "$ARCH" ] && print_warning "Option -a|--arch is not used in mode $MODE"
-		[ "$FORMAT" ] && print_warning "Option -f|--format is not used in mode $MODE"
 		[ "$PDB_FILE" ] && print_warning "Option -p|--pdb is not used in mode $MODE"
 		[ "$CONFIG_DB" = "" ] && [ ! "$NO_CONFIG" ] && print_error_and_die "Option --config or --no-config must be specified in mode $MODE"
 	elif [ "$MODE" = "raw" ]; then
@@ -117,15 +117,6 @@ check_arguments()
 		if ! is_number "$RAW_SECTION_VMA";then
 			print_error_and_die "Value in option --raw-section-vma must be decimal (e.g. 123) or hexadecimal value (e.g. 0x123)"
 		fi
-		# Warnings -- bad combinations of arguments, but not critical.
-		[ "$FORMAT" ] && print_warning "Option -f|--format is not used in mode $MODE"
-	fi
-
-	# Intel HEX format needs architecture and endian to be specified.
-	if [ "$FORMAT" = "ihex" ]; then
-		[ ! "$ARCH" ] && print_error_and_die "Option -a|--arch must be used with format $FORMAT"
-		[ "$MODE" = "bin" ] && [ ! "$ENDIAN" ] && print_error_and_die "Option -e|--endian must be used with format $FORMAT and mode $MODE"
-		[ "$ARCH" != "mips" ] && [ "$ARCH" != "pic32" ] && print_error_and_die "Format $FORMAT can be used only with mips and pic32 architectures"
 	fi
 
 	# Archive decompilation errors.
@@ -255,11 +246,6 @@ while true; do
 	-e|--endian)				# Endian.
 		[ "$ENDIAN" ] && print_error_and_die "Duplicate option: -e|--endian"
 		ENDIAN="$2"
-		shift 2;;
-	-f|--format)					# Executable file format.
-		[ "$FORMAT" ] && print_error_and_die "Duplicate option: -f|--format"
-		[ "$2" != "elf" -a "$2" != "pe" -a "$2" != "ihex" -a "$2" != "macho" ] && print_error_and_die "Unsupported target format '$2'. Supported formats: elf, pe, ihex, macho."
-		FORMAT="$2"
 		shift 2;;
 	-h|--help) 					# Help.
 		print_help
@@ -623,8 +609,8 @@ if [ "$MODE" = "bin" ] || [ "$MODE" = "raw" ]; then
 
 	# Raw data needs architecture, endianess and optionaly sections's vma and entry point to be specified.
 	if [ "$MODE" = "raw" ]; then
-		[ ! "$ARCH" -o "$ARCH" = "unknown" -o "$ARCH" = "" ] && print_error_and_die "Option -a|--arch must be used with format $FORMAT"
-		[ ! "$ENDIAN" ] && print_error_and_die "Option -e|--endian must be used with format $FORMAT"
+		[ ! "$ARCH" -o "$ARCH" = "unknown" -o "$ARCH" = "" ] && print_error_and_die "Option -a|--arch must be used with mode $MODE"
+		[ ! "$ENDIAN" ] && print_error_and_die "Option -e|--endian must be used with mode $MODE"
 		"$CONFIGTOOL" "$CONFIG" --write --format "raw"
 		"$CONFIGTOOL" "$CONFIG" --write --arch "$ARCH"
 		"$CONFIGTOOL" "$CONFIG" --write --bit-size 32
@@ -725,12 +711,8 @@ if [ "$MODE" = "bin" ] || [ "$MODE" = "raw" ]; then
 		ARCH="$(echo ${ARCH_FULL%(*} | sed -e 's/^[[:space:]]*//')"
 	fi
 
-	# Check whether the file format was specified.
-	if [ "$FORMAT" ]; then
-		"$CONFIGTOOL" "$CONFIG" --write --format "$FORMAT"
-	else
-		FORMAT=$("$CONFIGTOOL" "$CONFIG" --read --format | awk '{print tolower($1);}')
-	fi
+	# Get object file format.
+	FORMAT=$("$CONFIGTOOL" "$CONFIG" --read --format | awk '{print tolower($1);}')
 
 	# Intel HEX needs architecture to be specified
 	if [ "$FORMAT" = "ihex" ]; then
