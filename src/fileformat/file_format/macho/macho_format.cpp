@@ -384,7 +384,7 @@ void MachOFormat::handleScatteredRelocation(std::uint32_t firstDword, Relocation
 	unsigned rLength = (firstDword & 0x30000000) >> 28;
 	unsigned rAddress = firstDword & 0x00FFFFFF;
 
-	if (rType == GENERIC_RELOC_PAIR)
+	if ((is32 || isPowerPc()) && rType == GENERIC_RELOC_PAIR)
 	{
 		// Ignore pair relocations
 		return;
@@ -424,7 +424,7 @@ void MachOFormat::handleRelocation(std::uint32_t firstDword, std::uint32_t secon
 	unsigned rExtern = isLittle ? (secondDword & 0x08000000) >> 27 : (secondDword & 0x00000010) >> 4;
 	unsigned rLength =  isLittle ? (secondDword & 0x06000000) >> 25 : (secondDword & 0x00000060) >> 5;
 
-	if (rType == GENERIC_RELOC_PAIR)
+	if ((is32 || isPowerPc()) && rType == GENERIC_RELOC_PAIR)
 	{
 		// Ignore pair relocations
 		return;
