@@ -626,8 +626,8 @@ bool JsonPresentation::present()
 
 	presentIterativeSubtitle(root, StringsJsonGetter(fileinfo));
 
-	StyledWriter writer;
-	std::cout << writer.write(root);
+	StreamWriterBuilder builder;
+	std::cout << writeString(builder, root) << std::endl;
 	return true;
 }
 

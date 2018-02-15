@@ -10,6 +10,8 @@
 #include "retdec/utils/string.h"
 #include "retdec/utils/time.h"
 
+using namespace Json;
+
 namespace {
 
 const std::string JSON_ida               = "ida";
@@ -178,8 +180,8 @@ std::string Config::generateJsonString() const
 	root[JSON_classes]        = classes.getJsonValue();
 	root[JSON_patterns]       = patterns.getJsonValue();
 
-	Json::StyledWriter writer;
-	return writer.write(root);
+	StreamWriterBuilder builder;
+	return writeString(builder, root);
 }
 
 /**
