@@ -7,6 +7,7 @@
 #include "retdec/utils/conversion.h"
 #include "retdec/patterngen/pattern_extractor/pattern_extractor.h"
 #include "retdec/fileformat/file_format/elf/elf_format.h"
+#include "retdec/fileformat/file_format/macho/macho_format.h"
 #include "retdec/fileformat/file_format/file_format.h"
 #include "retdec/fileformat/format_factory.h"
 #include "retdec/fileformat/types/symbol_table/elf_symbol.h"
@@ -140,6 +141,13 @@ bool PatternExtractor::processFile()
 	if (!inputFile) {
 		errorMessage = "not supported file format or damaged input file";
 		return false;
+	}
+
+	if (auto* macho = dynamic_cast<MachOFormat*>(inputFile.get())) {
+		if (macho->isFatBinary()) {
+			errorMessage = "fat Mach-O binary - use retdec-macho-extractor";
+			return false;
+		}
 	}
 
 	if (!inputFile->isObjectFile()) {
