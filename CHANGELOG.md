@@ -20,6 +20,7 @@
 * Enhancement: Any shell can be used to install the decompiler, not just Bash.
 * Enhancement: Added unofficial support for macOS build ([#7](https://github.com/avast-tl/retdec/issues/7)).
 * Enhancement: Allow 32b versions of `bin2llvmir` and `llvmir2hll` on Windows access more memory ([#7](https://github.com/avast-tl/retdec/issues/73)).
+* Fix: Valid Mach-O x64 relocations are no longer ignored.
 * Fix: Only a single copy of LLVM (and all other components) is kept ([#14](https://github.com/avast-tl/retdec/issues/14)).
 * Fix: RetDec works even if it is installed to a directory which have whitespaces in its path.
 * Fix: Reduced the length of build paths to external projects ([#61](https://github.com/avast-tl/retdec/issues/61)).
