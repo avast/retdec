@@ -39,6 +39,7 @@ public:
 	retdec::utils::Range<std::uint64_t> getAddressRange() const;
 	retdec::utils::Range<std::uint64_t> getPhysicalAddressRange() const;
 	const retdec::utils::RangeContainer<std::uint64_t>& getNonDecodableAddressRanges() const;
+	std::pair<const std::uint8_t*, std::uint64_t> getRawData() const;
 
 	bool hasName() const;
 	const std::string& getName() const;

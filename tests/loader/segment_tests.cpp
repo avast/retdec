@@ -381,6 +381,28 @@ ShrinkWithAddressWithinRangeButInvalidSizeForbiddenWorks) {
 	EXPECT_EQ(expected, loaded);
 }
 
+TEST_F(SegmentTests,
+GetRawDataWorks) {
+	std::vector<std::uint8_t> mockFileData = { 0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16 };
+
+	Segment seg(nullptr, 0x1000, 0x100, makeDataSource(mockFileData));
+
+	auto rawData = seg.getRawData();
+
+	EXPECT_EQ(mockFileData.data(), rawData.first);
+	EXPECT_EQ(7, rawData.second);
+}
+
+TEST_F(SegmentTests,
+GetRawDataWithNoDataSegmentWorks) {
+	Segment seg(nullptr, 0x1000, 0x100, nullptr);
+
+	auto rawData = seg.getRawData();
+
+	EXPECT_EQ(nullptr, rawData.first);
+	EXPECT_EQ(0, rawData.second);
+}
+
 } // namespace loader
 } // namespace retdec
 } // namespace tests

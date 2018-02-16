@@ -71,6 +71,8 @@ public:
 	const Segment* getSegmentFromAddress(std::uint64_t address) const;
 	const Segment* getEpSegment();
 
+	std::pair<const std::uint8_t*, std::uint64_t> getRawSegmentData(std::uint64_t address) const;
+
 	const std::string& getStatusMessage() const;
 
 protected:
