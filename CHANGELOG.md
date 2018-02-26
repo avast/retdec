@@ -21,6 +21,7 @@
 * Enhancement: Added unofficial support for macOS build ([#7](https://github.com/avast-tl/retdec/issues/7)).
 * Enhancement: Allow 32b versions of `bin2llvmir` and `llvmir2hll` on Windows access more memory ([#7](https://github.com/avast-tl/retdec/issues/73)).
 * Enhancement: Added method in `loader::Image` to obtain segment content as raw data pointer.
+* Fix: Fix LLVM (and therefore RetDec) build on systems with architecture other than x86 ([llvm #3](https://github.com/avast-tl/llvm/issues/3)).
 * Fix: Valid Mach-O x64 relocations are no longer ignored.
 * Fix: Only a single copy of LLVM (and all other components) is kept ([#14](https://github.com/avast-tl/retdec/issues/14)).
 * Fix: RetDec works even if it is installed to a directory which have whitespaces in its path.
