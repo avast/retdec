@@ -192,21 +192,35 @@ std::string Config::generateJsonString() const
 void Config::readJsonString(const std::string& json)
 {
 	Json::Value root;
-	Json::Reader reader;
-	bool parsingSuccessful = reader.parse( json, root );
-	if ( !parsingSuccessful || root.isNull() || !root.isObject() )
+	std::string errs;
+
+	std::istringstream input(json);
+	Json::CharReaderBuilder rbuilder;
+	bool success = Json::parseFromStream(rbuilder, input, &root, &errs);
+	if (!success || root.isNull() || !root.isObject() )
 	{
 		std::string errMsg = "Failed to parse configuration";
 		std::size_t line = 0;
 		std::size_t column = 0;
 
-		auto errs = reader.getStructuredErrors();
 		if (!errs.empty())
 		{
-			errMsg = errs.front().message;
-			auto loc = retdec::utils::getLineAndColumnFromPosition(json, errs.front().offset_start);
-			line = loc.first;
-			column = loc.second;
+			const auto posNL = errs.find('\n');
+			const auto posLine = errs.find("Line");
+			const auto posColumn = errs.find("Column");
+
+			if (posNL != std::string::npos
+					&& posLine != std::string::npos
+					&& posColumn != std::string::npos)
+			{
+				// Get error postion from message
+				line = std::stoul(errs.substr(posLine + 5));
+				column = std::stoul(errs.substr(posColumn + 7));
+
+				// Get error description from message
+				auto message = errs.substr(posNL + 1);
+				errMsg = retdec::utils::trim(message, " .\r\n");
+			}
 		}
 
 		throw ParseException(errMsg, line, column);
