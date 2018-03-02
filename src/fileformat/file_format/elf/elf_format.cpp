@@ -1159,7 +1159,11 @@ ELFIO::section* ElfFormat::addStringTable(ELFIO::section *dynamicSection, const 
 			stringTable->set_addr_align(seg->get_align());
 			if(strTabSize + (strTabAddr - strTabSeg->getAddress()) <= strTabSeg->getSizeInFile())
 			{
-				stringTable->set_data(seg->get_data() + (strTabAddr - strTabSeg->getAddress()), strTabSize);
+				const auto* data = seg->get_data();
+				if(data)
+				{
+					stringTable->set_data(seg->get_data() + (strTabAddr - strTabSeg->getAddress()), strTabSize);
+				}
 			}
 			else if(reader.get_istream())
 			{
