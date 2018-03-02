@@ -300,6 +300,29 @@ const Segment* Image::getEpSegment()
 }
 
 /**
+ * Returns raw segment data together with its size. Caller should never access beyond
+ * `pointer + size` (including). Size is calculated from the physical size of the segment.
+ * Returns pair of null pointer and 0 in case of an error.
+ *
+ * @param address Address to start from.
+ *
+ * @return Raw data pointer and size.
+ */
+std::pair<const std::uint8_t*, std::uint64_t> Image::getRawSegmentData(std::uint64_t address) const
+{
+	auto segment = getSegmentFromAddress(address);
+	if (!segment)
+		return { nullptr, 0 };
+
+	auto offset = address - segment->getAddress();
+	auto rawData = segment->getRawData();
+	if (!rawData.first || offset > rawData.second)
+		return { nullptr, 0 };
+
+	return { rawData.first + offset, rawData.second - offset };
+}
+
+/**
  * Get integer (@a x bytes) located at provided address using the specified endian or default file endian
  *
  * @param address Address to get integer from

@@ -2,8 +2,8 @@
 
 # dev
 
-* New Feature: Added `retdec-getsig` - tool for creating signatures of packers, compilers and other tools.
-* Enhancement: Tool `retdec-macho-extractor` can now extract objects from non-archive Mach-O universal binaries. 
+* New Feature: Added a new tool: `retdec-getsig`. It can be used for creating signatures of packers, compilers, and other tools.
+* Enhancement: Tool `retdec-macho-extractor` can now extract objects from non-archive Mach-O universal binaries ([#125](https://github.com/avast-tl/retdec/issues/125)).
 * Enhancement: References to ticket numbers from our internal issue tracking system were replaced by short descriptions in the `retdec-regression-tests` repository ([retdec-regression-tests #1](https://github.com/avast-tl/retdec-regression-tests/issues/1)).
 * Enhancement: Added a missing license for the `retdec-support` repository ([retdec-support #1](https://github.com/avast-tl/retdec-support/issues/1)).
 * Enhancement: Better detection of tools: new signatures and heuristics. YARA signatures are compiled now.
@@ -20,6 +20,9 @@
 * Enhancement: Any shell can be used to install the decompiler, not just Bash.
 * Enhancement: Added unofficial support for macOS build ([#7](https://github.com/avast-tl/retdec/issues/7)).
 * Enhancement: Allow 32b versions of `bin2llvmir` and `llvmir2hll` on Windows access more memory ([#7](https://github.com/avast-tl/retdec/issues/73)).
+* Enhancement: Added method in `loader::Image` to obtain segment content as raw data pointer.
+* Fix: Fix LLVM (and therefore RetDec) build on systems with architecture other than x86 ([llvm #3](https://github.com/avast-tl/llvm/issues/3)).
+* Fix: Valid Mach-O x64 relocations are no longer ignored.
 * Fix: Only a single copy of LLVM (and all other components) is kept ([#14](https://github.com/avast-tl/retdec/issues/14)).
 * Fix: RetDec works even if it is installed to a directory which have whitespaces in its path.
 * Fix: Reduced the length of build paths to external projects ([#61](https://github.com/avast-tl/retdec/issues/61)).

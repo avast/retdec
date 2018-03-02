@@ -119,6 +119,17 @@ const retdec::utils::RangeContainer<std::uint64_t>& Segment::getNonDecodableAddr
 }
 
 /**
+ * Returns the raw data of the segment in its size. Returns null pointer and 0 for segments
+ * without any source of phyiscal data.
+ *
+ * @return Raw data pointer and size.
+ */
+std::pair<const std::uint8_t*, std::uint64_t> Segment::getRawData() const
+{
+	return _dataSource ? std::make_pair(_dataSource->getData(), getPhysicalSize()) : std::make_pair(nullptr, 0) ;
+}
+
+/**
  * Returns whether the segment is named segment.
  *
  * @return True if set, otherwise false.
