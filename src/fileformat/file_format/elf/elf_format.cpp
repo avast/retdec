@@ -2002,6 +2002,11 @@ void ElfFormat::loadInfoFromDynamicSegment()
 			continue;
 		}
 
+		if(seg->get_offset() + seg->get_file_size() > getFileLength())
+		{
+			continue;
+		}
+
 		seg->load(*reader.get_istream(), seg->get_offset(), seg->get_file_size());
 		auto *dynamic = writer.sections.add("dynamic_" + numToStr(++noOfDynTables));
 		dynamic->set_type(SHT_DYNAMIC);
