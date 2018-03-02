@@ -650,7 +650,7 @@ void ElfDetector::getDynamicSection(const ELFIO::section *sec)
 	{
 		dynamic->get_entry(i, tag, dynValue, str);
 		dynamicEntry.setValue(dynValue);
-		dynamicEntry.setDescription(str);
+		dynamicEntry.setDescription(replaceNonprintableChars(str));
 		dynamicEntry.setType(getDynamicEntryType(tag));
 		dynamicEntry.clearFlagsDescriptors();
 		if(tag == DT_FLAGS)
