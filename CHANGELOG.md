@@ -21,6 +21,8 @@
 * Enhancement: Added unofficial support for macOS build ([#7](https://github.com/avast-tl/retdec/issues/7)).
 * Enhancement: Allow 32b versions of `bin2llvmir` and `llvmir2hll` on Windows access more memory ([#7](https://github.com/avast-tl/retdec/issues/73)).
 * Enhancement: Added method in `loader::Image` to obtain segment content as raw data pointer.
+* Fix: Non-printable characters in ELF .dynamic section output are now replaced with hexadecimal codes. ([#82](https://github.com/avast-tl/retdec/issues/82)).
+* Fix: Fix for several segmentation faults in ELF parsing module ([#89](https://github.com/avast-tl/retdec/issues/89)).
 * Fix: Added a workaround for a GCC 5 compilation bug ([#231](https://github.com/avast-tl/retdec/issues/231)).
 * Fix: Fix LLVM (and therefore RetDec) build on systems with architecture other than x86 ([llvm #3](https://github.com/avast-tl/llvm/issues/3)).
 * Fix: Valid Mach-O x64 relocations are no longer ignored.
