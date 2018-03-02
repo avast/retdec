@@ -1970,11 +1970,15 @@ void ElfFormat::loadInfoFromDynamicTables(std::size_t noOfTables)
 		loadSymbols(&writer, symAccessor, symTab);
 		delete symAccessor;
 
-		auto *got = addGlobalOffsetTable(sec, *dynTab);
-		if(got)
+		// MIPS specific analysis
+		if(isMips() && symbolTables.size())
 		{
-			auto *symbols = symbolTables.back();
-			loadSymbols(*symbols, *dynTab, *got);
+			auto *got = addGlobalOffsetTable(sec, *dynTab);
+			if(got)
+			{
+				auto *symbols = symbolTables.back();
+				loadSymbols(*symbols, *dynTab, *got);
+			}
 		}
 	}
 }
