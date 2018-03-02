@@ -1159,7 +1159,11 @@ ELFIO::section* ElfFormat::addStringTable(ELFIO::section *dynamicSection, const 
 			stringTable->set_addr_align(seg->get_align());
 			if(strTabSize + (strTabAddr - strTabSeg->getAddress()) <= strTabSeg->getSizeInFile())
 			{
-				stringTable->set_data(seg->get_data() + (strTabAddr - strTabSeg->getAddress()), strTabSize);
+				const auto* data = seg->get_data();
+				if(data)
+				{
+					stringTable->set_data(seg->get_data() + (strTabAddr - strTabSeg->getAddress()), strTabSize);
+				}
 			}
 			else if(reader.get_istream())
 			{
@@ -1970,11 +1974,15 @@ void ElfFormat::loadInfoFromDynamicTables(std::size_t noOfTables)
 		loadSymbols(&writer, symAccessor, symTab);
 		delete symAccessor;
 
-		auto *got = addGlobalOffsetTable(sec, *dynTab);
-		if(got)
+		// MIPS specific analysis
+		if(isMips() && symbolTables.size())
 		{
-			auto *symbols = symbolTables.back();
-			loadSymbols(*symbols, *dynTab, *got);
+			auto *got = addGlobalOffsetTable(sec, *dynTab);
+			if(got)
+			{
+				auto *symbols = symbolTables.back();
+				loadSymbols(*symbols, *dynTab, *got);
+			}
 		}
 	}
 }
@@ -1990,6 +1998,11 @@ void ElfFormat::loadInfoFromDynamicSegment()
 	{
 		auto *seg = reader.segments[i];
 		if(!seg || seg->get_type() != PT_DYNAMIC || !reader.get_istream())
+		{
+			continue;
+		}
+
+		if(seg->get_offset() + seg->get_file_size() > getFileLength())
 		{
 			continue;
 		}
