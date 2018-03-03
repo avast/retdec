@@ -28,10 +28,10 @@ compileFiles()
 
 	# Check for errors in output - yarac returns 0 when it should not.
 	case "$ERR_OUT" in
-  *error*)
-    printErrorAndDie "yarac failed during compilation of file $1"
-    ;;
-esac
+		*error*)
+			printErrorAndDie "yarac failed during compilation of file $1"
+			;;
+	esac
 }
 
 ###############################################################################
