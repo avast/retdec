@@ -1,3 +1,8 @@
+/*
+ * YARA rules for ARM Mach-O compiler detection.
+ * Copyright (c) 2017 Avast Software, licensed under the MIT license
+ */
+
 import "macho"
 
 rule xcode_ios_sdk_01

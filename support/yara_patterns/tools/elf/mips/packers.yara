@@ -1,3 +1,8 @@
+/*
+ * YARA rules for MIPS ELF packer detection.
+ * Copyright (c) 2017 Avast Software, licensed under the MIT license
+ */
+
 import "elf"
 
 rule upx_303_le

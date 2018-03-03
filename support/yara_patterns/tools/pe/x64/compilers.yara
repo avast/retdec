@@ -1,3 +1,8 @@
+/*
+ * YARA rules for x64 PE compiler detection.
+ * Copyright (c) 2017 Avast Software, licensed under the MIT license
+ */
+
 import "pe"
 
 rule aut2exe_3300 {

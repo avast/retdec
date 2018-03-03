@@ -1,3 +1,8 @@
+/*
+ * YARA rules for PowerPC Mach-O compiler detection.
+ * Copyright (c) 2017 Avast Software, licensed under the MIT license
+ */
+
 import "macho"
 
 rule xcode_osx_sdk_01 {

@@ -1,3 +1,9 @@
+/*
+ * YARA rules for ARM PE compiler detection.
+ * Copyright (c) 2017 Avast Software, licensed under the MIT license
+ */
+
+
 import "pe"
 
 rule mingw_gcc_440

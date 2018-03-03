@@ -1,3 +1,8 @@
+/*
+ * YARA rules for x86 PE installer detection.
+ * Copyright (c) 2017 Avast Software, licensed under the MIT license
+ */
+
 import "pe"
 
 rule arc_sfx {

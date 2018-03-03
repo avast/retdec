@@ -1,3 +1,8 @@
+/*
+ * YARA rules for ARM Mach-O packer detection.
+ * Copyright (c) 2017 Avast Software, licensed under the MIT license
+ */
+
 import "macho"
 
 rule upx_391_lzma

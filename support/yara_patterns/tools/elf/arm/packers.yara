@@ -1,3 +1,8 @@
+/*
+ * YARA rules for ARM ELF packer detection.
+ * Copyright (c) 2017 Avast Software, licensed under the MIT license
+ */
+
 import "elf"
 
 rule upx_391_lzma

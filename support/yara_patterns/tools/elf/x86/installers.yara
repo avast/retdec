@@ -1,9 +1,14 @@
+/*
+ * YARA rules for x86 ELF installer detection.
+ * Copyright (c) 2017 Avast Software, licensed under the MIT license
+ */
+
 import "elf"
 
 rule p7zip_904
 {
 	meta:
-    tool = "I"
+		tool = "I"
 		name = "p7zip SFX"
 		source = "Made by RetDec Team"
 		pattern = "31ED5E89E183E4F050545268?0??090868????0408515668????0?08E8??FDFFFFF489F65589E583EC1453E8000000005B81C3????0?008B83??02000085C07402FFD05BC9C389F690909090909090905589E583EC08833D?C??0?0800753EEB12A1?8"

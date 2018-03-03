@@ -1,3 +1,8 @@
+/*
+ * YARA rules for x86 ELF compiler detection.
+ * Copyright (c) 2017 Avast Software, licensed under the MIT license
+ */
+
 import "elf"
 
 rule gcc_android_ndk_r8_01

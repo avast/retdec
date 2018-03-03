@@ -1,3 +1,8 @@
+/*
+ * YARA rules for 64-bit PowerPC ELF compiler detection.
+ * Copyright (c) 2017 Avast Software, licensed under the MIT license
+ */
+
 import "elf"
 
 rule gc_1
