@@ -50,6 +50,16 @@ echo_colored() {
 }
 
 #
+# Prints paths to all unit tests in the given directory.
+#
+# 1 string argument is needed:
+#     $1 path to the directory with unit tests
+#
+unit_tests_in_dir() {
+	find "$1" -name "retdec-tests-*" -type f -executable | grep -v '\.sh$' | sort
+}
+
+#
 # Runs all unit tests in the given directory.
 #
 # 1 string argument is needed:
@@ -60,7 +70,7 @@ echo_colored() {
 run_unit_tests_in_dir() {
 	UNIT_TESTS_DIR="$1"
 	TESTS_FAILED="0"
-	for unit_test in $(find "$UNIT_TESTS_DIR" -name "retdec-tests-*" -type f -executable | grep -v '\.sh$' | sort); do
+	for unit_test in $(unit_tests_in_dir "$UNIT_TESTS_DIR"); do
 		echo ""
 		unit_test_name="$(sed 's/^.*\/bin\///' <<< "$unit_test")"
 		echo_colored "$unit_test_name" "yellow"
