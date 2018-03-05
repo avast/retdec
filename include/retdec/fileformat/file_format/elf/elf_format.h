@@ -11,6 +11,7 @@
 
 #include <elfio/elfio.hpp>
 
+#include "retdec/fileformat/types/note_section/elf_notes.h"
 #include "retdec/fileformat/file_format/file_format.h"
 
 namespace retdec {
@@ -121,6 +122,7 @@ class ElfFormat : public FileFormat
 		/// @name Other methods
 		/// @{
 		unsigned long long getBaseOffset() const;
+		std::vector<ElfNotes> getNotes() const;
 		/// @}
 };
 
