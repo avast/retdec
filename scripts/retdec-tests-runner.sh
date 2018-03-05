@@ -83,6 +83,7 @@ unit_tests_in_dir() {
 run_unit_tests_in_dir() {
 	UNIT_TESTS_DIR="$1"
 	TESTS_FAILED="0"
+	TESTS_RUN="0"
 	for unit_test in $(unit_tests_in_dir "$UNIT_TESTS_DIR"); do
 		echo ""
 		unit_test_name="$(sed 's/^.*\/bin\///' <<< "$unit_test")"
@@ -102,8 +103,13 @@ run_unit_tests_in_dir() {
 				echo_colored "FAILED (return code $RC)\n" "red"
 			fi
 		fi
+		TESTS_RUN="1"
 	done
-	[ "$TESTS_FAILED" = "1" ] && return 1 || return 0
+	if [ "$TESTS_FAILED" = "1" ] || [ "$TESTS_RUN" = "0" ]; then
+		return 1
+	else
+		return 0
+	fi
 }
 
 #
