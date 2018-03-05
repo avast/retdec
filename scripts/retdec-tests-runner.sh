@@ -50,6 +50,29 @@ echo_colored() {
 }
 
 #
+# Prints paths to all unit tests in the given directory.
+#
+# 1 string argument is needed:
+#     $1 path to the directory with unit tests
+#
+unit_tests_in_dir() {
+	# On macOS, find does not support the '-executable' parameter (#238).
+	# Therefore, on macOS, we have to use '-perm +111'. To explain, + means
+	# "any of these bits" and 111 is the octal representation for the
+	# executable bit on owner, group, and other. Unfortunately, we cannot use
+	# '-perm +111' on all systems because find on Linux/MSYS2 does not support
+	# +. It supports only /, but this is not supported by find on macOS...
+	# Hence, we need an if.
+	# Note: $OSTYPE below is a Bash variable.
+	if [[ "$OSTYPE" == "darwin"* ]]; then
+		EXECUTABLE_FLAG="-perm +111"
+	else
+		EXECUTABLE_FLAG="-executable"
+	fi
+	find "$1" -name "retdec-tests-*" -type f $EXECUTABLE_FLAG | grep -v '\.sh$' | sort
+}
+
+#
 # Runs all unit tests in the given directory.
 #
 # 1 string argument is needed:
@@ -60,7 +83,8 @@ echo_colored() {
 run_unit_tests_in_dir() {
 	UNIT_TESTS_DIR="$1"
 	TESTS_FAILED="0"
-	for unit_test in $(find "$UNIT_TESTS_DIR" -name "retdec-tests-*" -type f -executable | grep -v '\.sh$' | sort); do
+	TESTS_RUN="0"
+	for unit_test in $(unit_tests_in_dir "$UNIT_TESTS_DIR"); do
 		echo ""
 		unit_test_name="$(sed 's/^.*\/bin\///' <<< "$unit_test")"
 		echo_colored "$unit_test_name" "yellow"
@@ -79,8 +103,13 @@ run_unit_tests_in_dir() {
 				echo_colored "FAILED (return code $RC)\n" "red"
 			fi
 		fi
+		TESTS_RUN="1"
 	done
-	[ "$TESTS_FAILED" = "1" ] && return 1 || return 0
+	if [ "$TESTS_FAILED" = "1" ] || [ "$TESTS_RUN" = "0" ]; then
+		return 1
+	else
+		return 0
+	fi
 }
 
 #
