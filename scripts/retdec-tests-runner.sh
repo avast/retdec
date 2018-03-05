@@ -56,7 +56,20 @@ echo_colored() {
 #     $1 path to the directory with unit tests
 #
 unit_tests_in_dir() {
-	find "$1" -name "retdec-tests-*" -type f -executable | grep -v '\.sh$' | sort
+	# On macOS, find does not support the '-executable' parameter (#238).
+	# Therefore, on macOS, we have to use '-perm +111'. To explain, + means
+	# "any of these bits" and 111 is the octal representation for the
+	# executable bit on owner, group, and other. Unfortunately, we cannot use
+	# '-perm +111' on all systems because find on Linux/MSYS2 does not support
+	# +. It supports only /, but this is not supported by find on macOS...
+	# Hence, we need an if.
+	# Note: $OSTYPE below is a Bash variable.
+	if [[ "$OSTYPE" == "darwin"* ]]; then
+		EXECUTABLE_FLAG="-perm +111"
+	else
+		EXECUTABLE_FLAG="-executable"
+	fi
+	find "$1" -name "retdec-tests-*" -type f $EXECUTABLE_FLAG | grep -v '\.sh$' | sort
 }
 
 #
