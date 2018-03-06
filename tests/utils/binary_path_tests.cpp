@@ -25,7 +25,7 @@ class ThisBinaryPathTests: public Test {};
 
 TEST_F(ThisBinaryPathTests,
 CorrectBinaryPathDetection) {
-	//EXPECT_TRUE(getThisBinaryPath().exists());
+	EXPECT_TRUE(getThisBinaryPath().exists());
 	EXPECT_TRUE(getThisBinaryPath().isFile());
 }
 
@@ -35,7 +35,7 @@ CorrectBinaryPathDetection) {
 
 TEST_F(ThisBinaryPathTests,
 CorrectBinaryDirPathDetection) {
-	//EXPECT_TRUE(getThisBinaryDirectoryPath().exists());
+	EXPECT_TRUE(getThisBinaryDirectoryPath().exists());
 	EXPECT_TRUE(getThisBinaryDirectoryPath().isDirectory());
 }
 

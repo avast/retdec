@@ -226,7 +226,7 @@ public:
 	virtual bool exists() override
 	{
 		struct stat st;
-		return stat(_path.c_str(), &st) != 0;
+		return stat(_path.c_str(), &st) == 0;
 	}
 
 	virtual bool isFile() override
