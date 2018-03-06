@@ -22,6 +22,33 @@ namespace
 
 const unsigned long long ELF_32_FLAGS_SIZE = 32, ELF_64_FLAGS_SIZE = 64;
 
+// GNU note map
+const std::map<std::size_t, std::string> noteMapGNU =
+{
+	{1, "ABI version tag"},
+	{3, "unique build ID "},
+	{4, "gold version"}
+	/// @todo incomplete
+};
+
+// CORE note map
+const std::map<std::size_t, std::string> noteMapCore =
+{
+	{1, "prstatus struct"},
+	{2, "fpregset struct"},
+	{3, "prpsinfo struct"},
+	{4, "task struct"},
+	{6, "Elfxx_auxv_t"},
+	{0x46e62b7f, "user_xfpregs_struct"}
+};
+
+// LINUX note map
+const std::map<std::size_t, std::string> noteMapLinux =
+{
+
+};
+
+
 /**
  * Detect of segment type
  * @param segment File segment
@@ -394,11 +421,22 @@ std::string getNoteDescription(const std::string& owner, const std::size_t& type
 {
 	if(owner.empty())
 	{
-		return "(system reserved empty note)";
+		return "system reserved empty note";
 	}
 
-	/// @todo
-	return "(unknown " + owner + " note)";
+	// Default value if we cannot interpret type
+	const std::string unknown = "unknown " + owner + " note";
+
+	if(owner == "GNU")
+	{
+		return mapGetValueOrDefault(noteMapGNU, unknown);
+	}
+	else if(owner == "CORE")
+	{
+		return mapGetValueOrDefault(noteMapCore, unknow);
+	}
+
+	return unknown;
 }
 
 } // anonymous namespace
