@@ -9,43 +9,6 @@
 namespace retdec {
 namespace fileformat {
 
-
-/**
- * Set type of note
- * @param type note type
- */
-void ElfNote::setType(const std::size_t& type)
-{
-	this->type = type;
-}
-
-/**
- * Set name (owner) of note
- * @param name note name
- */
-void ElfNote::setName(const std::string& name)
-{
-	this->name = name;
-}
-
-/**
- * Get name of note owner
- * @return owner name or empty string if name is missing
- */
-std::string ElfNote::getName() const
-{
-	return name;
-}
-
-/**
- * Get type of note
- * @return type of note
- */
-std::size_t ElfNote::getType() const
-{
-	return type;
-}
-
 /**
  * Check if note is system reserved empty note
  * @return @c true if note is empty, @c false otherwise
@@ -55,9 +18,8 @@ bool ElfNote::isEmptyNote() const
 	return name.empty();
 }
 
-
 /**
- * Ctor
+ * Constructor
  * @param assocSecSeg pointer to associated section or segment
  */
 ElfNotes::ElfNotes(const SecSeg* assocSecSeg) : secSeg(assocSecSeg)
@@ -65,14 +27,23 @@ ElfNotes::ElfNotes(const SecSeg* assocSecSeg) : secSeg(assocSecSeg)
 }
 
 /**
- * Dtor
+ * Destructor
  */
 ElfNotes::~ElfNotes()
 {
 }
 
 /**
- * Add one note entry
+ * Add one note entry (move)
+ * @param note note entry
+ */
+void ElfNotes::addNote(ElfNote&& note)
+{
+	notes.emplace_back(std::move(note));
+}
+
+/**
+ * Add one note entry (copy)
  * @param note note entry
  */
 void ElfNotes::addNote(const ElfNote& note)
@@ -87,15 +58,6 @@ void ElfNotes::addNote(const ElfNote& note)
 std::vector<ElfNote> ElfNotes::getNotes() const
 {
 	return notes;
-}
-
-/**
- * Get name of section (only sections have name)
- * @return section name or empty string if name is missing
- */
-std::string ElfNotes::getSectionName() const
-{
-	return secSeg->getName();
 }
 
 /**
@@ -114,6 +76,15 @@ std::size_t ElfNotes::getSecSegOffset() const
 std::size_t ElfNotes::getSecSegLength() const
 {
 	return secSeg->getSizeInFile();
+}
+
+/**
+ * Get name of section (only sections have name)
+ * @return section name or empty string if name is missing
+ */
+std::string ElfNotes::getSectionName() const
+{
+	return secSeg->getName();
 }
 
 /**

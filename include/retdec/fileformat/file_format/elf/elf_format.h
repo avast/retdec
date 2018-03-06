@@ -66,7 +66,8 @@ class ElfFormat : public FileFormat
 		void loadSegments();
 		void loadInfoFromDynamicTables(std::size_t noOfTables);
 		void loadInfoFromDynamicSegment();
-		void loadNotes(ElfNotes &result) const;
+		void loadNotesFromSecSeg(ElfNotes &notes) const;
+		void loadNotes();
 		/// @}
 	protected:
 		int elfClass;        ///< class of input ELF file
@@ -123,7 +124,6 @@ class ElfFormat : public FileFormat
 		/// @name Other methods
 		/// @{
 		unsigned long long getBaseOffset() const;
-		std::vector<ElfNotes> getNotes() const;
 		/// @}
 };
 

@@ -58,6 +58,7 @@ class FileFormat : public retdec::utils::ByteValueStorage, private retdec::utils
 		std::vector<DynamicTable*> dynamicTables;                         ///< tables with dynamic records
 		std::vector<unsigned char> bytes;                                 ///< content of file as bytes
 		std::vector<String> strings;                                      ///< detected strings
+		std::vector<ElfNotes> notes;                                      ///< notes found in ELF file
 		std::set<std::uint64_t> unknownRelocs;                            ///< unknown relocations
 		ImportTable *importTable;                                         ///< table of imports
 		ExportTable *exportTable;                                         ///< table of exports

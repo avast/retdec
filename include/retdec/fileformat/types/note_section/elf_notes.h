@@ -20,27 +20,19 @@ namespace fileformat {
  */
 class ElfNote
 {
-    private:
-        std::size_t type;   ///< owner specific type
-        std::string name;   ///< interpreted name (owner)
+	public:
+		std::string name; ///< interpreted name (owner)
+		std::size_t type; ///< owner specific type
 
-    public:
-        /// Setters
-        /// @{
-        void setType(const std::size_t& type);
-        void setName(const std::string& name);
-        /// @}
+		// Type must be combined with name to tell how to interpret data
 
-        /// Getters
-        /// @{
-        std::string getName() const;
-        std::size_t getType() const;
-        /// @}
+		std::size_t dataOffset; ///< file offset of data
+		std::size_t dataLength; ///< length of note
 
-        /// Query methods
-        /// @{
-        bool isEmptyNote() const;
-        /// @}
+		/// Query methods
+		/// @{
+		bool isEmptyNote() const;
+		/// @}
 };
 
 /**
@@ -48,35 +40,36 @@ class ElfNote
  */
 class ElfNotes
 {
-    private:
-        const SecSeg* secSeg;       ///< associated section or segment
-        std::vector<ElfNote> notes; ///< notes in segment or section
+	private:
+		const SecSeg* secSeg;       ///< associated section or segment
+		std::vector<ElfNote> notes; ///< notes in segment or section
 
-    public:
-        /// Ctors and dtors
-        /// @{
-        ElfNotes(const SecSeg* assocSecSeg);
-        ~ElfNotes();
-        /// @}
+	public:
+		/// Constructors and destructor
+		/// @{
+		ElfNotes(const SecSeg* assocSecSeg);
+		~ElfNotes();
+		/// @}
 
-        /// Notes methods
-        /// @{
-        void addNote(const ElfNote& note);
-        std::vector<ElfNote> getNotes() const;
-        /// @}
+		/// Add notes
+		/// @{
+		void addNote(ElfNote&& note);
+		void addNote(const ElfNote& note);
+		/// @}
 
-        /// Getters
-        /// @{
-        std::string getSectionName() const;
-        std::size_t getSecSegOffset() const;
-        std::size_t getSecSegLength() const;
-        /// @}
+		/// Getters
+		/// @{
+		std::vector<ElfNote> getNotes() const;
+		std::size_t getSecSegOffset() const;
+		std::size_t getSecSegLength() const;
+		std::string getSectionName() const;
+		/// @}
 
-        /// Query methods
-        /// @{
-        bool isNamedSection() const;
-        bool isEmpty() const;
-        /// @}
+		/// Query methods
+		/// @{
+		bool isNamedSection() const;
+		bool isEmpty() const;
+		/// @}
 };
 
 
