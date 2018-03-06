@@ -2027,6 +2027,74 @@ void ElfFormat::loadInfoFromDynamicSegment()
 	loadInfoFromDynamicTables(noOfDynTables);
 }
 
+/**
+ * Load notes from given PT_NOTE segment or SHT_NOTE section
+ * @param notes ElfNotes structure to load
+ */
+void ElfFormat::loadNotes(ElfNotes& notes) const
+{
+	const std::size_t offset = notes.getSecSegOffset();
+	const std::size_t size = notes.getSecSegLength();
+	if(!offset || !size)
+	{
+		return;
+	}
+
+	const auto endianess = getEndianness();
+	// Specification for ELF64 files claims that entry size should be 8 bytes
+	// but every 64-bit ELF file analyzed had only 4 byte long entries.
+	const auto entrySize = 4;
+
+	std::size_t currOff = offset;
+	while(currOff < offset + size)
+	{
+		// Get name size
+		std::uint64_t nameSize = 0;
+		if(!getXByteOffset(currOff, entrySize, nameSize, endianess))
+		{
+			break;
+		}
+		currOff += entrySize;
+
+		// Get description size
+		std::uint64_t descSize = 0;
+		if(!getXByteOffset(currOff, entrySize, descSize, endianess))
+		{
+			break;
+		}
+		currOff += entrySize;
+
+		// Get note type
+		std::uint64_t type = 0;
+		if(!getXByteOffset(currOff, entrySize, type, endianess))
+		{
+			break;
+		}
+		currOff += entrySize;
+
+		// Get owner name stored as C string
+		std::string name;
+		if(!getString(name, currOff, nameSize - 1))
+		{
+			break;
+		}
+
+		// Move offset behind name - aligned to 4 bytes
+		auto mod = nameSize % entrySize;
+		currOff += nameSize + (mod ? 4 - mod : 0);
+
+		// Move offset behind description - aligned to 4 bytes
+		mod = descSize % entrySize;
+		currOff += descSize + (mod ? 4 - mod : 0);
+
+		ElfNote note;
+		note.setName(name);
+		note.setType(type);
+		notes.addNote(note);
+	}
+
+}
+
 retdec::utils::Endianness ElfFormat::getEndianness() const
 {
 	switch(reader.get_encoding())
@@ -2435,156 +2503,48 @@ unsigned long long ElfFormat::getBaseOffset() const
 }
 
 /**
- * Get notes from ELF note section or segment
+ * Get notes from ELF note sections or segments
  * @return vector of ElfNotes objects
  */
 std::vector<ElfNotes> ElfFormat::getNotes() const
 {
 	std::vector<ElfNotes> result;
 
-	const auto endianess = getEndianness();
-	const auto entrySize = 4;
-
-	for (const Section* sec : sections)
+	// Check sections first as they contain additional useful information
+	for(const Section* sec : sections)
 	{
 		auto section = static_cast<const ElfSection*>(sec);
 		if(section->getElfType() == SHT_NOTE)
 		{
-			const std::size_t offset = section->getOffset();
-			const std::size_t size = section->getSizeInFile();
-			if (!offset || !size)
-			{
-				continue;
-			}
-
 			ElfNotes notes(section);
-			std::size_t currOff = offset;
-			while (currOff < offset + size)
+			loadNotes(notes);
+			if(!notes.isEmpty())
 			{
-				// Get name size
-				std::uint64_t nameSize = 0;
-				if(!getXByteOffset(currOff, entrySize, nameSize, endianess))
-				{
-					break;
-				}
-				currOff += entrySize;
-
-				// Get description size
-				std::uint64_t descSize = 0;
-				if(!getXByteOffset(currOff, entrySize, descSize, endianess))
-				{
-					break;
-				}
-				currOff += entrySize;
-
-				// Get note type
-				std::uint64_t type = 0;
-				if(!getXByteOffset(currOff, entrySize, type, endianess))
-				{
-					break;
-				}
-				currOff += entrySize;
-
-				// Get owner name stored as C string
-				std::string name;
-				if(!getString(name, currOff, nameSize))
-				{
-					break;
-				}
-
-
-				// Move offset behind name - aligned to 4 bytes
-				auto modulus = nameSize % entrySize;
-				currOff += nameSize + (modulus ? 4 - modulus : 0);
-
-				// Move offset behind description - aligned to 4 bytes
-				modulus = nameSize % entrySize;
-				currOff += descSize + (descSize % entrySize ? 4 : 0);
-
-				ElfNote note;
-				note.setName(name);
-				note.setType(type);
-				notes.addNote(note);
+				result.emplace_back(notes);
 			}
-
-			result.emplace_back(notes);
 		}
 	}
 
-/// @todo generalize this, almost same code
-	for (const Segment* sec : segments)
+	// Go to segments only if there are no sections or no information was
+	// loaded because SHT_NOTE sections should overlap with PT_NOTE segments
+	if(!result.empty())
 	{
-		auto segment = static_cast<const ElfSegment*>(sec);
+		return result;
+	}
+
+	// Check segments aswell as kernel core dumps do not create sections
+	for(const Segment* seg : segments)
+	{
+		auto segment = static_cast<const ElfSegment*>(seg);
 		if(segment->getElfType() == PT_NOTE)
 		{
-			const std::size_t offset = segment->getOffset();
-			const std::size_t size = segment->getSizeInFile();
-			if (!offset || !size)
-			{
-				continue;
-			}
-
 			ElfNotes notes(segment);
-			std::size_t currOff = offset;
-			while (currOff < offset + size)
+			loadNotes(notes);
+			if(!notes.isEmpty())
 			{
-				// Get name size
-				std::uint64_t nameSize = 0;
-				if(!getXByteOffset(currOff, entrySize, nameSize, endianess))
-				{
-					break;
-				}
-				currOff += entrySize;
-
-				// Get description size
-				std::uint64_t descSize = 0;
-				if(!getXByteOffset(currOff, entrySize, descSize, endianess))
-				{
-					break;
-				}
-				currOff += entrySize;
-
-				// Get note type
-				std::uint64_t type = 0;
-				if(!getXByteOffset(currOff, entrySize, type, endianess))
-				{
-					break;
-				}
-				currOff += entrySize;
-
-				// Get owner name stored as C string
-				std::string name;
-				if(!getString(name, currOff, nameSize))
-				{
-					break;
-				}
-
-				// Move offset behind name - aligned to 4 bytes
-				auto modulus = nameSize % entrySize;
-				currOff += nameSize + (modulus ? 4 - modulus : 0);
-
-				// Move offset behind description - aligned to 4 bytes
-				modulus = nameSize % entrySize;
-				currOff += descSize + (descSize % entrySize ? 4 : 0);
-
-				ElfNote note;
-				note.setName(name);
-				note.setType(type);
-				notes.addNote(note);
+				result.emplace_back(notes);
 			}
-
-			result.emplace_back(notes);
 		}
-	}
-
-	for (const ElfNotes& notes : result) {
-		std::cout << "sectionname: " << notes.getSectionName() << " " <<
-				std::hex  << notes.getSecSegOffset() << " " << notes.getSecSegLength() << "\n";
-		for(const ElfNote& note : notes.getNotes()) {
-			std::cout << "owner: " << note.getName() << "\n"
-				<< "type: " << std::hex << note.getType() << "\n\n";
-		}
-		std::cout << "\n";
 	}
 
 	return result;

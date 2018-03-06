@@ -125,6 +125,15 @@ bool ElfNotes::isNamedSection() const
 	return !secSeg->getName().empty();
 }
 
+/**
+ * Check if object contains any notes
+ * @return @c true if object contains any notes, @c false otherwise
+ */
+bool ElfNotes::isEmpty() const
+{
+	return notes.empty();
+}
+
 
 } // namespace fileformat
 } // namespace retdec

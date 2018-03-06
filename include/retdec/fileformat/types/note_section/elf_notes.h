@@ -75,6 +75,7 @@ class ElfNotes
         /// Query methods
         /// @{
         bool isNamedSection() const;
+        bool isEmpty() const;
         /// @}
 };
 

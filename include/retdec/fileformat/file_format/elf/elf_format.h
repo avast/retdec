@@ -66,6 +66,7 @@ class ElfFormat : public FileFormat
 		void loadSegments();
 		void loadInfoFromDynamicTables(std::size_t noOfTables);
 		void loadInfoFromDynamicSegment();
+		void loadNotes(ElfNotes &result) const;
 		/// @}
 	protected:
 		int elfClass;        ///< class of input ELF file
