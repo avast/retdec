@@ -384,6 +384,23 @@ Relocation createRelocation(const std::string &name, std::uint64_t offset,
 	return relocation;
 }
 
+/**
+ * Get string description of note
+ * @param owner owner of note
+ * @param type type of note
+ * @return string note description
+ */
+std::string getNoteDescription(const std::string& owner, const std::size_t& type)
+{
+	if(owner.empty())
+	{
+		return "(system reserved empty note)";
+	}
+
+	/// @todo
+	return "(unknown " + owner + " note)";
+}
+
 } // anonymous namespace
 
 /**
@@ -754,6 +771,36 @@ void ElfDetector::getSections()
 			default:
 				break;
 		}
+	}
+}
+
+/**
+ * Get information about notes
+ */
+void ElfDetector::getNotes()
+{
+	for(const auto& notes : elfParser->getElfNotes())
+	{
+		fileinfo::ElfNotes result;
+		result.setSecSegOffset(notes.getSecSegOffset());
+		result.setSecSegLength(notes.getSecSegLength());
+		if(notes.isNamedSection())
+		{
+			result.setSectionName(notes.getSectionName());
+		}
+
+		for(const auto& note : notes.getNotes())
+		{
+			ElfNoteEntry entry;
+			entry.owner = note.name;
+			entry.type = note.type;
+			entry.dataOffset = note.dataOffset;
+			entry.dataLength = note.dataLength;
+			entry.description = getNoteDescription(entry.owner, entry.type);
+			result.addNoteEntry(entry);
+		}
+
+		fileInfo.addElfNotes(result);
 	}
 }
 
@@ -1420,6 +1467,7 @@ void ElfDetector::getAdditionalInfo()
 	getSegments();
 	getSections();
 	getSymbolTable();
+	getNotes();
 }
 
 /**

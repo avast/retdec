@@ -51,6 +51,7 @@ class FileInformation
 		std::vector<SymbolTable> symbolTables;         ///< symbol tables
 		std::vector<RelocationTable> relocationTables; ///< relocation tables
 		std::vector<DynamicSection> dynamicSections;   ///< information about dynamic sections
+		std::vector<ElfNotes> elfNotes;                ///< information about ELF sections
 		std::vector<Pattern> cryptoPatterns;           ///< detected crypto patterns
 		std::vector<Pattern> malwarePatterns;          ///< detected malware patterns
 		std::vector<Pattern> otherPatterns;            ///< other detected patterns
@@ -383,6 +384,11 @@ class FileInformation
 		std::string isSignatureVerifiedStr(const std::string& t = "true", const std::string& f = "false") const;
 		/// @}
 
+		/// @name Getter of @a elfNotes
+		/// @{
+		const std::vector<ElfNotes>& getElfNotes() const;
+		/// @}
+
 		/// @name Getters of @a compilerOrPackerInfo
 		/// @{
 		std::size_t getNumberOfDetectedCompilers() const;
@@ -529,6 +535,7 @@ class FileInformation
 		void sortOtherPatternMatches();
 		void addTool(retdec::cpdetect::DetectResult &tool);
 		void addLoadedSegment(const LoadedSegment& segment);
+		void addElfNotes(ElfNotes &notes);
 		/// @}
 };
 

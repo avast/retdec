@@ -1822,6 +1822,15 @@ const std::vector<String>& FileFormat::getStrings() const
 	return strings;
 }
 
+/**
+ * Get all detected notes
+ * @return Reference to notes
+ */
+const std::vector<ElfNotes>&FileFormat::getElfNotes() const
+{
+	return notes;
+}
+
 const std::set<std::uint64_t> &FileFormat::getUnknownRelocations() const
 {
 	return unknownRelocs;

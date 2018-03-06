@@ -2612,6 +2612,15 @@ std::string FileInformation::isSignatureVerifiedStr(const std::string& t, const 
 }
 
 /**
+ * Get ELF notes
+ * @return vector with ELF notes
+ */
+const std::vector<ElfNotes>& FileInformation::getElfNotes() const
+{
+	return elfNotes;
+}
+
+/**
  * Get number of detected compilers or packers
  * @return Number of detected compilers or packers
  */
@@ -3800,6 +3809,15 @@ void FileInformation::addTool(DetectResult &tool)
 void FileInformation::addLoadedSegment(const LoadedSegment& segment)
 {
 	loaderInfo.addLoadedSegment(segment);
+}
+
+/**
+ * Add ELF notes
+ * @param notes Loaded ELF notes
+ */
+void FileInformation::addElfNotes(ElfNotes& notes)
+{
+	elfNotes.emplace_back(notes);
 }
 
 } // namespace fileinfo

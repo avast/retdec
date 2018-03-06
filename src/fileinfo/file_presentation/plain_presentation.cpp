@@ -627,6 +627,21 @@ void PlainPresentation::presentDotnetClasses() const
 	}
 }
 
+/**
+ * Present ELF notes
+ */
+void PlainPresentation::presentNotes() const
+{
+	auto& notes = fileinfo.getElfNotes();
+	if(notes.empty())
+	{
+		return;
+	}
+
+	presentIterativeDistribution(ElfNotesPlainGetter(fileinfo), explanatory);
+	/// @todo present other note section stuff
+}
+
 bool PlainPresentation::present()
 {
 	std::cout << "Input file               : " << fileinfo.getPathToFile() << "\n";
@@ -675,6 +690,8 @@ bool PlainPresentation::present()
 		presentIterativeDistribution(RelocationTablesPlainGetter(fileinfo), explanatory);
 		presentIterativeDistribution(DynamicSectionsPlainGetter(fileinfo), explanatory);
 		presentIterativeDistribution(ResourcePlainGetter(fileinfo), explanatory);
+
+		presentNotes();
 
 		auto manifest = fileinfo.getManifest();
 		if(!manifest.empty())

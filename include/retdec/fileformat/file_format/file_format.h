@@ -232,6 +232,7 @@ class FileFormat : public retdec::utils::ByteValueStorage, private retdec::utils
 		const unsigned char* getBytesData() const;
 		const unsigned char* getLoadedBytesData() const;
 		const std::vector<String>& getStrings() const;
+		const std::vector<ElfNotes>& getElfNotes() const;
 		const std::set<std::uint64_t>& getUnknownRelocations() const;
 		/// @}
 
