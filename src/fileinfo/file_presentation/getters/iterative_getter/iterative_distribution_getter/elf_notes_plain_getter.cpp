@@ -15,7 +15,7 @@ namespace fileinfo {
 namespace
 {
 
-const std::size_t headerDistArr[] = {6, 12, 14, 14, 10, 30};
+const std::size_t headerDistArr[] = {5, 12, 14, 14, 8, 30};
 
 const std::string headerNameArr[] = {
 	"i", "owner", "type", "offset", "size", "description"
@@ -83,11 +83,11 @@ std::size_t ElfNotesPlainGetter::getBasicInfo(
 	auto notes = fileinfo.getElfNotes()[structIndex];
 	if(notes.isNamedSection())
 	{
-		desc.push_back("Name         : ");
+		desc.push_back("Name        : ");
 		info.push_back(replaceNonprintableChars(notes.getSectionName()));
 	}
-	desc.push_back("File offset  : ");
-	desc.push_back("Size in file : ");
+	desc.push_back("File offset : ");
+	desc.push_back("Size in file: ");
 	info.push_back(toHex(notes.getSecSegOffset(), true));
 	info.push_back(numToStr(notes.getSecSegLength()));
 
