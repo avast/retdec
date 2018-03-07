@@ -25,29 +25,193 @@ const unsigned long long ELF_32_FLAGS_SIZE = 32, ELF_64_FLAGS_SIZE = 64;
 // GNU note map
 const std::map<std::size_t, std::string> noteMapGNU =
 {
-	{1, "ABI version tag"},
-	{3, "unique build ID "},
-	{4, "gold version"}
-	/// @todo incomplete
+	{0x001, "NT_GNU_ABI_TAG"},
+	{0x002, "NT_GNU_HWCAP"},
+	{0x003, "NT_GNU_BUILD_ID"},
+	{0x004, "NT_GNU_GOLD_VERSION"},
+	{0x005, "NT_GNU_PROPERTY_TYPE_0"},
+	//
+	{0x100, "NT_GNU_BUILD_ATTRIBUTE_OPEN"},
+	{0x101, "NT_GNU_BUILD_ATTRIBUTE_FUNC"}
 };
 
 // CORE note map
 const std::map<std::size_t, std::string> noteMapCore =
 {
-	{1, "prstatus struct"},
-	{2, "fpregset struct"},
-	{3, "prpsinfo struct"},
-	{4, "task struct"},
-	{6, "Elfxx_auxv_t"},
-	{0x46e62b7f, "user_xfpregs_struct"}
+	{0x001, "NT_PRSTATUS"},
+	{0x002, "NT_FPREGSET"},
+	{0x003, "NT_PRPSINFO"},
+	{0x004, "NT_TASKSTRUCT"},
+	{0x006, "NT_AUXV"},
+	//
+	{0x00a, "NT_PSTATUS"},
+	{0x00c, "NT_FPREGS"},
+	{0x00d, "NT_PSINFO"},
+	{0x010, "NT_LWPSTATUS"},
+	{0x011, "NT_LWPSINFO"},
+	{0x012, "NT_WIN32PSTATUS"},
+	//
+	{0x46494c45, "NT_FILE"},
+	{0x46e62b7f, "NT_PRXFPREG"},
+	{0x53494749, "NT_SIGINFO"}
 };
 
 // LINUX note map
 const std::map<std::size_t, std::string> noteMapLinux =
 {
-
+	{0x003, "NT_STAPSDT"},
+	//
+	{0x00a, "NT_PSTATUS"},
+	{0x00c, "NT_FPREGS"},
+	{0x00d, "NT_PSINFO"},
+	{0x010, "NT_LWPSTATUS"},
+	{0x012, "NT_LWPSINFO"},
+	{0x013, "NT_WIN32PSTATUS"},
+	//
+	{0x100, "NT_PPC_VMX"},
+	{0x102, "NT_PPC_VSX"},
+	{0x103, "NT_PPC_TAR"},
+	{0x104, "NT_PPC_PPR"},
+	{0x105, "NT_PPC_DSCR"},
+	{0x106, "NT_PPC_EBB"},
+	{0x107, "NT_PPC_PMU"},
+	{0x108, "NT_PPC_TM_CGPR"},
+	{0x109, "NT_PPC_TM_CFPR"},
+	{0x10a, "NT_PPC_TM_CVMX"},
+	{0x10b, "NT_PPC_TM_CVSX"},
+	{0x10c, "NT_PPC_TM_SPR"},
+	{0x10d, "NT_PPC_TM_CTAR"},
+	{0x10e, "NT_PPC_TM_CPPR"},
+	{0x10f, "NT_PPC_TM_CDSCR"},
+	//
+	{0x200, "NT_386_TLS"},
+	{0x201, "NT_386_IOPERM"},
+	{0x202, "NT_X86_XSTATE"},
+	//
+	{0x300, "NT_S390_HIGH_GPRS"},
+	{0x301, "NT_S390_TIMER"},
+	{0x302, "NT_S390_TODCMP"},
+	{0x303, "NT_S390_TODPREG"},
+	{0x304, "NT_S390_CTRS"},
+	{0x305, "NT_S390_PREFIX"},
+	{0x306, "NT_S390_LAST_BREAK"},
+	{0x307, "NT_S390_SYSTEM_CALL"},
+	{0x308, "NT_S390_TDB"},
+	{0x309, "NT_S390_VXRS_LOW"},
+	{0x30a, "NT_S390_VXRS_HIGH"},
+	{0x30b, "NT_S390_GS_CB"},
+	{0x30c, "NT_S390_GS_BC"},
+	//
+	{0x400, "NT_ARM_VFP"},
+	{0x402, "NT_ARM_TLS"},
+	{0x403, "NT_ARM_HW_BREAK"},
+	{0x404, "NT_ARM_HW_WATCH"},
+	{0x405, "NT_ARM_SVE"},
+	//
+	{0x500, "NT_METAG_CBUF"},
+	{0x501, "NT_METAG_RPIPE"},
+	{0x502, "NT_METAG_TLS"},
+	//
+	{0x46494c45, "NT_FILE"},
+	{0x46e62b7f, "NT_PRXFPREG"},
+	{0x53494749, "NT_SIGINFO"}
 };
 
+// FreeBSD note map for exe files
+const std::map<std::size_t, std::string> noteMapFreeBSD =
+{
+	{0x001, "NT_FREEBSD_ABI_TAG"},
+	{0x002, "NT_FREEBSD_NOINIT_TAG"},
+	{0x003, "NT_FREEBSD_ARCH_TAG"}
+};
+
+// FreeBSD note map for core files
+const std::map<std::size_t, std::string> noteMapFreeBSDCore =
+{
+	{0x001, "NT_PRSTATUS"},
+	{0x002, "NT_FPREGSET"},
+	{0x003, "NT_PRPSINFO"},
+	{0x007, "NT_THRMISC"},
+	{0x008, "NT_PROCSTAT_PROC"},
+	{0x009, "NT_PROCSTAT_FILES"},
+	{0x00a, "NT_PROCSTAT_VMMAP"},
+	{0x00b, "NT_PROCSTAT_GROUPS"},
+	{0x00c, "NT_PROCSTAT_UMASK"},
+	{0x00d, "NT_PROCSTAT_RLIMIT"},
+	{0x00e, "NT_PROCSTAT_OSREL"},
+	{0x00f, "NT_PROCSTAT_PSSTRINGS"},
+	{0x010, "NT_PROCSTAT_AUXV"},
+	{0x011, "NT_PTLWPINFO"},
+	//
+	{0x100, "NT_PPC_VMX"},
+	//
+	{0x202, "NT_X86_XSTATE"}
+};
+
+// OpenBSD note map
+const std::map<std::size_t, std::string> noteMapOpenBSD =
+{
+	{0x001, "NT_OPENBSD_IDENT"},
+	//
+	{0x00a, "NT_OPENBSD_PROCINFO"},
+	{0x00b, "NT_OPENBSD_AUXV"},
+	//
+	{0x014, "NT_OPENBSD_REGS"},
+	{0x015, "NT_OPENBSD_FPREGS"},
+	{0x016, "NT_OPENBSD_XFPREGS"},
+	{0x017, "NT_OPENBSD_WCOOKIE"}
+};
+
+// NetBSD note map
+const std::map<std::size_t, std::string> noteMapNetBSD =
+{
+	{0x001, "NT_NETBSD_IDENT"},
+	{0x002, "NT_NETBSD_EMULATION"},
+	//
+	{0x005, "NT_NETBSD_MARCH"},
+	{0x006, "NT_NETBSD_CMODEL"},
+};
+
+// NetBSD note map for core files
+const std::map<std::size_t, std::string> noteMapNetBSDCore =
+{
+	{0x001, "NT_NETBSDCORE_PROCINFO"},
+	{0x020, "NT_NETBSDCORE_FIRSTMACH"},
+};
+
+// NetBSD Pax note map
+const std::map<std::size_t, std::string> noteMapNetBSDPax =
+{
+	{0x002, "NT_NETBSD_PAX_NOMPROTECT"},
+	{0x003, "NT_NETBSD_PAX"},
+	{0x004, "NT_NETBSD_PAX_GUARD"},
+	//
+	{0x008, "NT_NETBSD_PAX_NOGUARD"},
+	//
+	{0x010, "NT_NETBSD_PAX_ASLR"},
+	//
+	{0x020, "NT_NETBSD_PAX_NOASLR"},
+};
+
+// Xen note map
+const std::map<std::size_t, std::string> noteMapXen =
+{
+	{0x000, "XEN_ELFNOTE_INFO"},
+	{0x001, "XEN_ELFNOTE_ENTRY"},
+	{0x002, "XEN_ELFNOTE_HYPERCALL_PAGE"},
+	{0x003, "XEN_ELFNOTE_VIRT_BASE"},
+	{0x004, "XEN_ELFNOTE_PADDR_OFFSET"},
+	{0x005, "XEN_ELFNOTE_XEN_VERSION"},
+	{0x006, "XEN_ELFNOTE_GUEST_OS"},
+	{0x007, "XEN_ELFNOTE_GUEST_VERSION"},
+	{0x008, "XEN_ELFNOTE_LOADER"},
+	{0x009, "XEN_ELFNOTE_PAE_MODE"},
+	{0x00a, "XEN_ELFNOTE_FEATURES"},
+	{0x00b, "XEN_ELFNOTE_BSD_SYMTAB"},
+	{0x00c, "XEN_ELFNOTE_HV_START_LOW"},
+	{0x00d, "XEN_ELFNOTE_L1_MFN_VALID"},
+	{0x00e, "XEN_ELFNOTE_SUSPEND_CANCEL"},
+};
 
 /**
  * Detect of segment type
@@ -415,9 +579,11 @@ Relocation createRelocation(const std::string &name, std::uint64_t offset,
  * Get string description of note
  * @param owner owner of note
  * @param type type of note
+ * @param isCore set to @c true if file is core file
  * @return string note description
  */
-std::string getNoteDescription(const std::string& owner, const std::size_t& type)
+std::string getNoteDescription(
+		const std::string& owner, const std::size_t& type, bool isCore)
 {
 	if(owner.empty())
 	{
@@ -429,13 +595,58 @@ std::string getNoteDescription(const std::string& owner, const std::size_t& type
 
 	if(owner == "GNU")
 	{
-		return mapGetValueOrDefault(noteMapGNU, unknown);
+		return mapGetValueOrDefault(noteMapGNU, type, unknown);
 	}
 	else if(owner == "CORE")
 	{
-		return mapGetValueOrDefault(noteMapCore, unknow);
+		return mapGetValueOrDefault(noteMapCore, type, unknown);
+	}
+	else if(owner == "LINUX")
+	{
+		return mapGetValueOrDefault(noteMapLinux, type, unknown);
+	}
+	else if(owner == "Android")
+	{
+		/// @todo
+	}
+	else if(owner == "stapsdt" && type == 0x03)
+	{
+		return "NT_STAPSDT";
+	}
+	else if(owner == "STU" && type == 0x01)
+	{
+		return "NT_SPU";
+	}
+	else if(owner == "FreeBSD")
+	{
+		if(isCore)
+		{
+			return mapGetValueOrDefault(noteMapFreeBSDCore, type, unknown);
+		}
+		return mapGetValueOrDefault(noteMapFreeBSD, type, unknown);
+	}
+	else if(owner == "NetBSD")
+	{
+		return mapGetValueOrDefault(noteMapNetBSD, type, unknown);
+	}
+	else if(owner == "PaX")
+	{
+		return mapGetValueOrDefault(noteMapNetBSDPax, type, unknown);
+	}
+	else if(startsWith(owner, "NetBSD-CORE"))
+	{
+		return mapGetValueOrDefault(noteMapNetBSDCore, type, unknown);
+	}
+	else if(startsWith(owner, "OpenBSD"))
+	{
+		return mapGetValueOrDefault(noteMapOpenBSD, type, unknown);
+	}
+	else if(owner == "Xen")
+	{
+		return mapGetValueOrDefault(noteMapXen, type, unknown);
 	}
 
+	/// @todo other unknown owners: csr, thi, osi, gpr, fpr
 	return unknown;
 }
 
@@ -817,6 +1028,7 @@ void ElfDetector::getSections()
  */
 void ElfDetector::getNotes()
 {
+	const bool isCore = elfParser->getTypeOfFile() == ET_CORE;
 	for(const auto& notes : elfParser->getElfNotes())
 	{
 		fileinfo::ElfNotes result;
@@ -834,7 +1046,7 @@ void ElfDetector::getNotes()
 			entry.type = note.type;
 			entry.dataOffset = note.dataOffset;
 			entry.dataLength = note.dataLength;
-			entry.description = getNoteDescription(entry.owner, entry.type);
+			entry.description = getNoteDescription(entry.owner, entry.type, isCore);
 			result.addNoteEntry(entry);
 		}
 
