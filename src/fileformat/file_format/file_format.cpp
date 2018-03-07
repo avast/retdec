@@ -654,26 +654,26 @@ bool FileFormat::haveReadOnlyDataOnAddress(unsigned long long address) const
 
 /**
  * Get number of bits in one nibble
- * @return Number of bits in one nibble or zero if this feature is not
- *    supported for target architecture of input file.
- *
- * Supported architectures are defined as enumeration type Architecture.
+ * @return Number of bits in one nibble
+ * @note This assumes architectures with 8-bit bytes and may break if some
+ *    exotic architecture is encountered.
  */
 std::size_t FileFormat::getNibbleLength() const
 {
-	return isUnknownArch() ? 0 : 4;
+	//return isUnknownArch() ? 0 : 4;
+	return 4;
 }
 
 /**
  * Get number of bits in one byte
- * @return Number of bits in one byte or zero if this feature is not
- *    supported for target architecture of input file.
- *
- * Supported architectures are defined as enumeration type Architecture.
+ * @return Number of bits in one byte
+ * @note This assumes architectures with 8-bit bytes and may break if some
+ *    exotic architecture is encountered.
  */
 std::size_t FileFormat::getByteLength() const
 {
-	return isUnknownArch() ? 0 : 8;
+	//return isUnknownArch() ? 0 : 8;
+	return 8;
 }
 
 /**
