@@ -2073,7 +2073,7 @@ void ElfFormat::loadNotesFromSecSeg(ElfNotes& notes) const
 
 		// Get owner name stored as C string
 		std::string name;
-		if(!getString(name, currOff, nameSize - 1))
+		if(!getString(name, currOff, nameSize))
 		{
 			break;
 		}
@@ -2090,7 +2090,7 @@ void ElfFormat::loadNotesFromSecSeg(ElfNotes& notes) const
 		mod = descSize % entrySize;
 		currOff += descSize + (mod ? entrySize - mod : 0);
 
-		note.name = name;
+		note.name = name.c_str(); // Trim trailing zero from some owners
 		note.type = type;
 		notes.addNote(note);
 	}
