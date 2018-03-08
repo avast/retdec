@@ -169,14 +169,14 @@ const std::map<std::size_t, std::string> noteMapNetBSD =
 	{0x002, "NT_NETBSD_EMULATION"},
 	//
 	{0x005, "NT_NETBSD_MARCH"},
-	{0x006, "NT_NETBSD_CMODEL"},
+	{0x006, "NT_NETBSD_CMODEL"}
 };
 
 // NetBSD note map for core files
 const std::map<std::size_t, std::string> noteMapNetBSDCore =
 {
 	{0x001, "NT_NETBSDCORE_PROCINFO"},
-	{0x020, "NT_NETBSDCORE_FIRSTMACH"},
+	{0x020, "NT_NETBSDCORE_FIRSTMACH"}
 };
 
 // NetBSD Pax note map
@@ -190,7 +190,7 @@ const std::map<std::size_t, std::string> noteMapNetBSDPax =
 	//
 	{0x010, "NT_NETBSD_PAX_ASLR"},
 	//
-	{0x020, "NT_NETBSD_PAX_NOASLR"},
+	{0x020, "NT_NETBSD_PAX_NOASLR"}
 };
 
 // Xen note map
@@ -210,7 +210,7 @@ const std::map<std::size_t, std::string> noteMapXen =
 	{0x00b, "XEN_ELFNOTE_BSD_SYMTAB"},
 	{0x00c, "XEN_ELFNOTE_HV_START_LOW"},
 	{0x00d, "XEN_ELFNOTE_L1_MFN_VALID"},
-	{0x00e, "XEN_ELFNOTE_SUSPEND_CANCEL"},
+	{0x00e, "XEN_ELFNOTE_SUSPEND_CANCEL"}
 };
 
 // HP note map
