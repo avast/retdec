@@ -213,6 +213,19 @@ const std::map<std::size_t, std::string> noteMapXen =
 	{0x00e, "XEN_ELFNOTE_SUSPEND_CANCEL"},
 };
 
+// HP note map
+const std::map<std::size_t, std::string> noteMapHP =
+{
+	{0x001, "NT_HP_COMPILER"},
+	{0x002, "NT_HP_COPYRIGHT"},
+	{0x003, "NT_HP_VERSION"},
+	{0x004, "NT_HP_SRCFILE_INFO"},
+	{0x005, "NT_HP_LINKER"},
+	{0x006, "NT_HP_INSTRUMENTED"},
+	{0x007, "NT_HP_UX_OPTIONS"}
+};
+
+
 /**
  * Detect of segment type
  * @param segment File segment
@@ -605,9 +618,9 @@ std::string getNoteDescription(
 	{
 		return mapGetValueOrDefault(noteMapLinux, type, unknown);
 	}
-	else if(owner == "Android")
+	else if(owner == "Android" && type == 0x01)
 	{
-		/// @todo
+		return "ABI_NOTETYPE";
 	}
 	else if(owner == "stapsdt" && type == 0x03)
 	{
@@ -644,6 +657,10 @@ std::string getNoteDescription(
 	else if(owner == "Xen")
 	{
 		return mapGetValueOrDefault(noteMapXen, type, unknown);
+	}
+	else if(owner == "HP")
+	{
+		return mapGetValueOrDefault(noteMapHP, type, unknown);
 	}
 
 	/// @todo other unknown owners: csr, thi, osi, gpr, fpr

@@ -2105,7 +2105,9 @@ void ElfFormat::loadNotes()
 	for(const Section* sec : sections)
 	{
 		auto section = static_cast<const ElfSection*>(sec);
-		if(section->getElfType() == SHT_NOTE)
+		// For some reason Android uses SHT_PROGBITS for notes
+		if(section->getElfType() == SHT_NOTE
+				|| section->getName() == ".note.android.ident")
 		{
 			ElfNotes res(section);
 			loadNotesFromSecSeg(res);
