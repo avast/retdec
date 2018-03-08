@@ -225,6 +225,26 @@ const std::map<std::size_t, std::string> noteMapHP =
 	{0x007, "NT_HP_UX_OPTIONS"}
 };
 
+// IA-64 VMS note map
+const std::map<std::size_t, std::string> noteMapIA64 =
+{
+	{0x001, "NT_VMS_MHD"},
+	{0x002, "NT_VMS_LNM"},
+	{0x003, "NT_VMS_SRC"},
+	{0x004, "NT_VMS_TITLE"},
+	{0x005, "NT_VMS_EIDC"},
+	{0x006, "NT_VMS_FPMODE"},
+	//
+	{0x065, "NT_VMS_LINKTIME"},
+	{0x066, "NT_VMS_IMGNAM"},
+	{0x067, "NT_VMS_IMGID"},
+	{0x068, "NT_VMS_LINKID"},
+	{0x069, "NT_VMS_IMGBID"},
+	{0x06a, "NT_VMS_GSTNAM"},
+	{0x06b, "NT_VMS_ORIG_DYN"},
+	{0x06c, "NT_VMS_PATCHTIME"}
+};
+
 
 /**
  * Detect of segment type
@@ -661,6 +681,10 @@ std::string getNoteDescription(
 	else if(owner == "HP")
 	{
 		return mapGetValueOrDefault(noteMapHP, type, unknown);
+	}
+	else if(owner == "IPF/VMS")
+	{
+		return mapGetValueOrDefault(noteMapIA64, type, unknown);
 	}
 
 	/// @todo other unknown owners: csr, thi, osi, gpr, fpr
