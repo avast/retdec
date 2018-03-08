@@ -113,7 +113,7 @@ bool ElfNotesPlainGetter::loadRecord(
 	record.push_back(toHex(note.type, true, 8));
 	record.push_back(toHex(note.dataOffset, true, 8));
 	record.push_back(numToStr(note.dataLength));
-	record.push_back(note.description);
+	record.push_back(replaceNonprintableChars(note.description));
 
 	return true;
 }
