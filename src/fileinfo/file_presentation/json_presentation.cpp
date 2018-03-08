@@ -459,6 +459,52 @@ void JsonPresentation::presentDotnetInfo(Json::Value &root) const
 }
 
 /**
+ * Present ELF notes
+ * @param root Parent node in output document
+ */
+void JsonPresentation::presentElfNotes(Json::Value& root) const
+{
+	Value jNotesArr;
+	for(const auto& notes : fileinfo.getElfNotes())
+	{
+		Value jNotes;
+
+		if(notes.isNamedSection())
+		{
+			jNotes["name"] = replaceNonprintableChars(notes.getSectionName());
+		}
+		if(notes.isMalformed())
+		{
+			jNotes["warning"] = notes.getErrorMessage();
+		}
+
+		jNotes["size"] = notes.getSecSegLength();
+		jNotes["offset"] = notes.getSecSegOffset();
+		jNotes["numberOfNotes"] = notes.getNotes().size();
+
+		Value jNoteArr;
+		std::size_t idx = 0;
+		for(const auto& note : notes.getNotes())
+		{
+			Value jNote;
+
+			jNote["index"] = idx++;
+			jNote["owner"] = replaceNonprintableChars(note.owner);
+			jNote["type"] = note.type;
+			jNote["dataSize"] = note.dataLength;
+			jNote["dataOffset"] = note.dataOffset;
+			jNote["description"] = replaceNonprintableChars(note.description);
+			jNoteArr.append(jNote);
+		}
+
+		jNotes["noteEntries"] = jNoteArr;
+		jNotesArr.append(jNotes);
+	}
+
+	root["elfNotes"] = jNotesArr;
+}
+
+/**
  * Present information about flags
  * @param root Parent node in output document
  * @param title Flags title
@@ -614,6 +660,7 @@ bool JsonPresentation::present()
 		{
 			root["manifest"] = replaceNonasciiChars(manifest);
 		}
+		presentElfNotes(root);
 		presentLoaderInfo(root);
 		presentPatterns(root);
 		presentCertificateAttributes(root);
