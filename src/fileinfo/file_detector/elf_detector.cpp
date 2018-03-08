@@ -626,7 +626,7 @@ std::string getNoteDescription(
 	{
 		return "NT_STAPSDT";
 	}
-	else if(owner == "STU" && type == 0x01)
+	else if(owner == "SPU/" && type == 0x01)
 	{
 		return "NT_SPU";
 	}
