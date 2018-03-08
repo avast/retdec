@@ -86,6 +86,11 @@ std::size_t ElfNotesPlainGetter::getBasicInfo(
 		desc.push_back("Name        : ");
 		info.push_back(replaceNonprintableChars(notes.getSectionName()));
 	}
+	if(notes.isMalformed())
+	{
+		desc.push_back("Warning     : ");
+		info.push_back(notes.getErrorMessage());
+	}
 	desc.push_back("File offset : ");
 	desc.push_back("Size in file: ");
 	info.push_back(toHex(notes.getSecSegOffset(), true));

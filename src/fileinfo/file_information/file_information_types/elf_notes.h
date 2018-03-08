@@ -36,6 +36,7 @@ class ElfNotes
 		std::string sectionName;
 		std::size_t secSegOffset;
 		std::size_t secSegLength;
+		std::string errorMessage;
 		std::vector<ElfNoteEntry> notes;
 
 	public:
@@ -48,12 +49,14 @@ class ElfNotes
 		std::size_t getSecSegOffset() const;
 		std::size_t getSecSegLength() const;
 		std::size_t getNumberOfNotes() const;
+		const std::string& getErrorMessage() const;
 		const std::vector<ElfNoteEntry>& getNotes() const;
 		/// @}
 
 		/// @name Query methods
 		/// @{
 		bool isNamedSection() const;
+		bool isMalformed() const;
 		/// @}
 
 		/// @name Setters
@@ -61,6 +64,7 @@ class ElfNotes
 		void setSectionName(const std::string& name);
 		void setSecSegOffset(const std::size_t& offset);
 		void setSecSegLength(const std::size_t& length);
+		void setErrorMessage(const std::string& message);
 		void addNoteEntry(const ElfNoteEntry& noteEntry);
 		/// @}
 };

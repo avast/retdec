@@ -2045,20 +2045,21 @@ void ElfFormat::loadNotesFromSecSeg(ElfNotes& notes) const
 	const auto entrySize = 4;
 
 	std::size_t currOff = offset;
-	while(currOff < offset + size)
+	std::size_t maxOff = offset + size;
+	while(currOff < maxOff)
 	{
-		// Get name size
 		std::uint64_t nameSize = 0;
 		if(!getXByteOffset(currOff, entrySize, nameSize, endianess))
 		{
+			notes.setMalformed("could not read name size");
 			break;
 		}
 		currOff += entrySize;
 
-		// Get description size
 		std::uint64_t descSize = 0;
 		if(!getXByteOffset(currOff, entrySize, descSize, endianess))
 		{
+			notes.setMalformed("could not read description size");
 			break;
 		}
 		currOff += entrySize;
@@ -2067,9 +2068,16 @@ void ElfFormat::loadNotesFromSecSeg(ElfNotes& notes) const
 		std::uint64_t type = 0;
 		if(!getXByteOffset(currOff, entrySize, type, endianess))
 		{
+			notes.setMalformed("could not read type");
 			break;
 		}
 		currOff += entrySize;
+
+		if(currOff + nameSize > maxOff)
+		{
+			notes.setMalformed("name size too big");
+			break;
+		}
 
 		// Get owner name stored as C string
 		std::string name;
@@ -2081,6 +2089,12 @@ void ElfFormat::loadNotesFromSecSeg(ElfNotes& notes) const
 		// Move offset behind name - aligned to entry size
 		auto mod = nameSize % entrySize;
 		currOff += nameSize + (mod ? entrySize - mod : 0);
+
+		if(currOff + descSize > maxOff)
+		{
+			notes.setMalformed("data size too big");
+			break;
+		}
 
 		ElfNote note;
 		note.dataOffset = currOff;

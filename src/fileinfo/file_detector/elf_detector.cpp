@@ -1082,6 +1082,19 @@ void ElfDetector::getNotes()
 			result.setSectionName(notes.getSectionName());
 		}
 
+		if(notes.isMalformed())
+		{
+			std::string errorMessage = notes.getErrorMessage();
+			if(errorMessage.empty())
+			{
+				errorMessage = "malformed notes found";
+			}
+			result.setErrorMessage(errorMessage);
+
+			// ELF parser stops after first invalid note so it is safe to load
+			// notes loaded before corrupted note.
+		}
+
 		for(const auto& note : notes.getNotes())
 		{
 			ElfNoteEntry entry;

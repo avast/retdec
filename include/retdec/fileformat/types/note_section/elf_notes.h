@@ -44,11 +44,19 @@ class ElfNotes
 		const SecSeg* secSeg;       ///< associated section or segment
 		std::vector<ElfNote> notes; ///< notes in segment or section
 
+		bool malformed = false; ///< set to @c true if notes are malformed
+		std::string error;      ///< possible error message
+
 	public:
 		/// Constructors and destructor
 		/// @{
 		ElfNotes(const SecSeg* assocSecSeg);
 		~ElfNotes();
+		/// @}
+
+		/// Setters
+		/// @{
+		void setMalformed(const std::string& message = "corrupted note");
 		/// @}
 
 		/// Add notes
@@ -60,6 +68,7 @@ class ElfNotes
 		/// Getters
 		/// @{
 		std::vector<ElfNote> getNotes() const;
+		std::string getErrorMessage() const;
 		std::size_t getSecSegOffset() const;
 		std::size_t getSecSegLength() const;
 		std::string getSectionName() const;
@@ -68,6 +77,7 @@ class ElfNotes
 		/// Query methods
 		/// @{
 		bool isNamedSection() const;
+		bool isMalformed() const;
 		bool isEmpty() const;
 		/// @}
 };

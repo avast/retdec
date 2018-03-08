@@ -34,6 +34,16 @@ ElfNotes::~ElfNotes()
 }
 
 /**
+ * Set malformed bit for notes
+ * @param message optional error message
+ */
+void ElfNotes::setMalformed(const std::string& message)
+{
+	malformed = true;
+	error = "malformed - " + message;
+}
+
+/**
  * Add one note entry (move)
  * @param note note entry
  */
@@ -58,6 +68,15 @@ void ElfNotes::addNote(const ElfNote& note)
 std::vector<ElfNote> ElfNotes::getNotes() const
 {
 	return notes;
+}
+
+/**
+ * Get error message for malformed binaries
+ * @return error message or empty string if notes are not malformed
+ */
+std::string ElfNotes::getErrorMessage() const
+{
+	return error;
 }
 
 /**
@@ -94,6 +113,15 @@ std::string ElfNotes::getSectionName() const
 bool ElfNotes::isNamedSection() const
 {
 	return !secSeg->getName().empty();
+}
+
+/**
+ * Check if notes are malformed
+ * @return @c true if notes are malformed, @c false otherwise
+ */
+bool ElfNotes::isMalformed() const
+{
+	return malformed;
 }
 
 /**

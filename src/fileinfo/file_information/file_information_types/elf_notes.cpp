@@ -34,6 +34,11 @@ std::size_t ElfNotes::getNumberOfNotes() const
 	return notes.size();
 }
 
+const std::string&ElfNotes::getErrorMessage() const
+{
+	return errorMessage;
+}
+
 const std::vector<ElfNoteEntry>& ElfNotes::getNotes() const
 {
 	return notes;
@@ -44,7 +49,12 @@ bool ElfNotes::isNamedSection() const
 	return !sectionName.empty();
 }
 
-void ElfNotes::setSectionName(const std::__cxx11::string& name)
+bool ElfNotes::isMalformed() const
+{
+	return !errorMessage.empty();
+}
+
+void ElfNotes::setSectionName(const std::string& name)
 {
 	sectionName = name;
 }
@@ -57,6 +67,11 @@ void ElfNotes::setSecSegOffset(const std::size_t& offset)
 void ElfNotes::setSecSegLength(const std::size_t& length)
 {
 	secSegLength = length;
+}
+
+void ElfNotes::setErrorMessage(const std::string& message)
+{
+	errorMessage = message;
 }
 
 void ElfNotes::addNoteEntry(const ElfNoteEntry& noteEntry)
