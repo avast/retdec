@@ -593,18 +593,18 @@ Relocation createRelocation(const std::string &name, std::uint64_t offset,
  * @param owner owner of note
  * @param type type of note
  * @param isCore set to @c true if file is core file
- * @return string note description
+ * @return string note description or empty string if unknown
  */
 std::string getNoteDescription(
 		const std::string& owner, const std::size_t& type, bool isCore)
 {
 	if(owner.empty())
 	{
-		return "system reserved empty note";
+		return "(system reserved empty note)";
 	}
 
 	// Default value if we cannot interpret type
-	const std::string unknown = "unknown " + owner + " note";
+	const std::string unknown;
 
 	if(owner == "GNU")
 	{
@@ -1045,6 +1045,8 @@ void ElfDetector::getSections()
  */
 void ElfDetector::getNotes()
 {
+	bool reportedUnk = false; // Set to true if unknown note was reported
+
 	const bool isCore = elfParser->getTypeOfFile() == ET_CORE;
 	for(const auto& notes : elfParser->getElfNotes())
 	{
@@ -1063,7 +1065,20 @@ void ElfDetector::getNotes()
 			entry.type = note.type;
 			entry.dataOffset = note.dataOffset;
 			entry.dataLength = note.dataLength;
-			entry.description = getNoteDescription(entry.owner, entry.type, isCore);
+
+			auto desc = getNoteDescription(entry.owner, entry.type, isCore);
+			if(desc.empty())
+			{
+				desc = "(unknown " + entry.owner + " note)";
+				if(!reportedUnk)
+				{
+					reportedUnk = true;
+					fileInfo.messages.emplace_back(
+						"Warning: Unknown note type found.");
+				}
+			}
+			entry.description = desc;
+
 			result.addNoteEntry(entry);
 		}
 
