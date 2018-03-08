@@ -83,18 +83,20 @@ std::size_t ElfNotesPlainGetter::getBasicInfo(
 	auto notes = fileinfo.getElfNotes()[structIndex];
 	if(notes.isNamedSection())
 	{
-		desc.push_back("Name        : ");
+		desc.push_back("Name           : ");
 		info.push_back(replaceNonprintableChars(notes.getSectionName()));
 	}
 	if(notes.isMalformed())
 	{
-		desc.push_back("Warning     : ");
+		desc.push_back("Warning        : ");
 		info.push_back(notes.getErrorMessage());
 	}
-	desc.push_back("File offset : ");
-	desc.push_back("Size in file: ");
+	desc.push_back("File offset    : ");
+	desc.push_back("Size in file   : ");
+	desc.push_back("Number of notes: ");
 	info.push_back(toHex(notes.getSecSegOffset(), true));
 	info.push_back(numToStr(notes.getSecSegLength()));
+	info.push_back(numToStr(notes.getNotes().size()));
 
 	return info.size();
 }
