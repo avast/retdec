@@ -1,11 +1,11 @@
 /**
  * @file src/fileinfo/file_presentation/getters/iterative_getter/iterative_distribution_getter/elf_notes_plain_getter.cpp
- * @brief Methods of RelocationTablesPlainGetter class.
+ * @brief Methods of ElfNotesPlainGetter class.
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */
 
-#include "retdec/utils/conversion.h"
 #include "fileinfo/file_presentation/getters/iterative_getter/iterative_distribution_getter/elf_notes_plain_getter.h"
+#include "retdec/utils/conversion.h"
 
 using namespace retdec::utils;
 using namespace retdec::fileformat;

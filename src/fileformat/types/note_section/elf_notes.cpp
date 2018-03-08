@@ -13,7 +13,7 @@ namespace fileformat {
  * Check if note is system reserved empty note
  * @return @c true if note is empty, @c false otherwise
  */
-bool ElfNote::isEmptyNote() const
+bool ElfNoteEntry::isEmptyNote() const
 {
 	return name.empty();
 }
@@ -47,7 +47,7 @@ void ElfNotes::setMalformed(const std::string& message)
  * Add one note entry (move)
  * @param note note entry
  */
-void ElfNotes::addNote(ElfNote&& note)
+void ElfNotes::addNote(ElfNoteEntry&& note)
 {
 	notes.emplace_back(std::move(note));
 }
@@ -56,7 +56,7 @@ void ElfNotes::addNote(ElfNote&& note)
  * Add one note entry (copy)
  * @param note note entry
  */
-void ElfNotes::addNote(const ElfNote& note)
+void ElfNotes::addNote(const ElfNoteEntry& note)
 {
 	notes.emplace_back(note);
 }
@@ -65,7 +65,7 @@ void ElfNotes::addNote(const ElfNote& note)
  * Get notes for segment or section
  * @return vector of notes
  */
-std::vector<ElfNote> ElfNotes::getNotes() const
+std::vector<ElfNoteEntry> ElfNotes::getNotes() const
 {
 	return notes;
 }

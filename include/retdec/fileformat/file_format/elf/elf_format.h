@@ -11,8 +11,8 @@
 
 #include <elfio/elfio.hpp>
 
-#include "retdec/fileformat/types/note_section/elf_notes.h"
 #include "retdec/fileformat/file_format/file_format.h"
+#include "retdec/fileformat/types/note_section/elf_notes.h"
 
 namespace retdec {
 namespace fileformat {
@@ -66,7 +66,7 @@ class ElfFormat : public FileFormat
 		void loadSegments();
 		void loadInfoFromDynamicTables(std::size_t noOfTables);
 		void loadInfoFromDynamicSegment();
-		void loadNotesFromSecSeg(ElfNotes &notes) const;
+		void loadNoteSecSeg(ElfNotes &notes) const;
 		void loadNotes();
 		/// @}
 	protected:

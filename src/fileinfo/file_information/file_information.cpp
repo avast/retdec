@@ -3714,6 +3714,15 @@ void FileInformation::addDynamicSection(DynamicSection &section)
 }
 
 /**
+ * Add ELF notes
+ * @param notes Loaded ELF notes
+ */
+void FileInformation::addElfNotes(ElfNotes& notes)
+{
+	elfNotes.push_back(notes);
+}
+
+/**
  * Add crypto pattern
  * @param pattern Crypto pattern
  */
@@ -3809,15 +3818,6 @@ void FileInformation::addTool(DetectResult &tool)
 void FileInformation::addLoadedSegment(const LoadedSegment& segment)
 {
 	loaderInfo.addLoadedSegment(segment);
-}
-
-/**
- * Add ELF notes
- * @param notes Loaded ELF notes
- */
-void FileInformation::addElfNotes(ElfNotes& notes)
-{
-	elfNotes.emplace_back(notes);
 }
 
 } // namespace fileinfo

@@ -1,6 +1,6 @@
 /**
  * @file src/fileinfo/file_presentation/getters/iterative_getter/iterative_distribution_getter/elf_notes_plain_getter.h
- * @brief Definition of RelocationTablesPlainGetter class.
+ * @brief Definition of ElfNotesPlainGetter class.
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */
 

@@ -18,7 +18,7 @@ namespace fileformat {
 /**
  * Class for one ELF note section or segment entry
  */
-class ElfNote
+class ElfNoteEntry
 {
 	public:
 		std::string name; ///< interpreted name (owner)
@@ -26,10 +26,10 @@ class ElfNote
 
 		// Type must be combined with name to tell how to interpret data
 
-		std::size_t dataOffset; ///< file offset of data
-		std::size_t dataLength; ///< length of note
+		std::size_t dataOffset; ///< file offset of note data
+		std::size_t dataLength; ///< length of note data
 
-		/// Query methods
+		/// @name Query methods
 		/// @{
 		bool isEmptyNote() const;
 		/// @}
@@ -41,40 +41,40 @@ class ElfNote
 class ElfNotes
 {
 	private:
-		const SecSeg* secSeg;       ///< associated section or segment
-		std::vector<ElfNote> notes; ///< notes in segment or section
+		const SecSeg* secSeg;            ///< associated section or segment
+		std::vector<ElfNoteEntry> notes; ///< notes in segment or section
 
 		bool malformed = false; ///< set to @c true if notes are malformed
 		std::string error;      ///< possible error message
 
 	public:
-		/// Constructors and destructor
+		/// @name  Constructors and destructor
 		/// @{
 		ElfNotes(const SecSeg* assocSecSeg);
 		~ElfNotes();
 		/// @}
 
-		/// Setters
+		/// @name Setters
 		/// @{
 		void setMalformed(const std::string& message = "corrupted note");
 		/// @}
 
-		/// Add notes
+		/// @name Add notes
 		/// @{
-		void addNote(ElfNote&& note);
-		void addNote(const ElfNote& note);
+		void addNote(ElfNoteEntry&& note);
+		void addNote(const ElfNoteEntry& note);
 		/// @}
 
-		/// Getters
+		/// @name Getters
 		/// @{
-		std::vector<ElfNote> getNotes() const;
+		std::vector<ElfNoteEntry> getNotes() const;
 		std::string getErrorMessage() const;
 		std::size_t getSecSegOffset() const;
 		std::size_t getSecSegLength() const;
 		std::string getSectionName() const;
 		/// @}
 
-		/// Query methods
+		/// @name Query methods
 		/// @{
 		bool isNamedSection() const;
 		bool isMalformed() const;

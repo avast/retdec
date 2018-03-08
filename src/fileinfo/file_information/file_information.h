@@ -526,6 +526,7 @@ class FileInformation
 		void addSymbolTable(SymbolTable &table);
 		void addRelocationTable(RelocationTable &table);
 		void addDynamicSection(DynamicSection &section);
+		void addElfNotes(ElfNotes &notes);
 		void addCryptoPattern(Pattern &pattern);
 		void removeRedundantCryptoRules();
 		void sortCryptoPatternMatches();
@@ -535,7 +536,6 @@ class FileInformation
 		void sortOtherPatternMatches();
 		void addTool(retdec::cpdetect::DetectResult &tool);
 		void addLoadedSegment(const LoadedSegment& segment);
-		void addElfNotes(ElfNotes &notes);
 		/// @}
 };
 

@@ -2030,7 +2030,7 @@ void ElfFormat::loadInfoFromDynamicSegment()
  * Load notes from PT_NOTE segment or SHT_NOTE section
  * @param notes ElfNotes structure
  */
-void ElfFormat::loadNotesFromSecSeg(ElfNotes& notes) const
+void ElfFormat::loadNoteSecSeg(ElfNotes& notes) const
 {
 	const std::size_t offset = notes.getSecSegOffset();
 	const std::size_t size = notes.getSecSegLength();
@@ -2051,7 +2051,7 @@ void ElfFormat::loadNotesFromSecSeg(ElfNotes& notes) const
 		std::uint64_t nameSize = 0;
 		if(!getXByteOffset(currOff, entrySize, nameSize, endianess))
 		{
-			notes.setMalformed("could not read name size");
+			notes.setMalformed("could not read note owner size");
 			break;
 		}
 		currOff += entrySize;
@@ -2059,7 +2059,7 @@ void ElfFormat::loadNotesFromSecSeg(ElfNotes& notes) const
 		std::uint64_t descSize = 0;
 		if(!getXByteOffset(currOff, entrySize, descSize, endianess))
 		{
-			notes.setMalformed("could not read description size");
+			notes.setMalformed("could not read note description size");
 			break;
 		}
 		currOff += entrySize;
@@ -2068,14 +2068,14 @@ void ElfFormat::loadNotesFromSecSeg(ElfNotes& notes) const
 		std::uint64_t type = 0;
 		if(!getXByteOffset(currOff, entrySize, type, endianess))
 		{
-			notes.setMalformed("could not read type");
+			notes.setMalformed("could not read note type");
 			break;
 		}
 		currOff += entrySize;
 
 		if(currOff + nameSize > maxOff)
 		{
-			notes.setMalformed("name size too big");
+			notes.setMalformed("note owner size too big");
 			break;
 		}
 
@@ -2092,11 +2092,11 @@ void ElfFormat::loadNotesFromSecSeg(ElfNotes& notes) const
 
 		if(currOff + descSize > maxOff)
 		{
-			notes.setMalformed("data size too big");
+			notes.setMalformed("note data size too big");
 			break;
 		}
 
-		ElfNote note;
+		ElfNoteEntry note;
 		note.dataOffset = currOff;
 		note.dataLength = descSize;
 
@@ -2104,7 +2104,7 @@ void ElfFormat::loadNotesFromSecSeg(ElfNotes& notes) const
 		mod = descSize % entrySize;
 		currOff += descSize + (mod ? entrySize - mod : 0);
 
-		note.name = name.c_str(); // Trim trailing zero from some owners
+		note.name = name.c_str(); // Trims trailing zero if present
 		note.type = type;
 		notes.addNote(note);
 	}
@@ -2124,7 +2124,7 @@ void ElfFormat::loadNotes()
 				|| section->getName() == ".note.android.ident")
 		{
 			ElfNotes res(section);
-			loadNotesFromSecSeg(res);
+			loadNoteSecSeg(res);
 			if(!res.isEmpty())
 			{
 				notes.emplace_back(std::move(res));
@@ -2146,7 +2146,7 @@ void ElfFormat::loadNotes()
 		if(segment->getElfType() == PT_NOTE)
 		{
 			ElfNotes res(segment);
-			loadNotesFromSecSeg(res);
+			loadNoteSecSeg(res);
 			if(!res.isEmpty())
 			{
 				notes.emplace_back(std::move(res));
