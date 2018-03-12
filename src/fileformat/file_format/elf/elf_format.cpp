@@ -756,9 +756,11 @@ const std::map<unsigned, const std::vector<std::uint8_t>*> arm64RelocationMap =
 	{1032, &ALL_QWORD}
 };
 
-// ELF note types
+// Useful ELF note types
 
+constexpr std::size_t NT_PRSTATUS = 0x00000001;
 constexpr std::size_t NT_FILE = 0x46494c45;
+
 
 
 /**
@@ -2219,6 +2221,64 @@ void ElfFormat::loadCoreFileMap(std::size_t offset, std::size_t size)
 }
 
 /**
+ * Load register values from core file
+ * @param offset offset off NT_PRSTATUS note data
+ * @param size size of NT_PRSTATUS note data
+ *
+ * This function expects only data from non-malformed notes to avoid multiple
+ * offset sanity checks. Make sure this is not used with malformed notes!
+ */
+void ElfFormat::loadCoreRegs(std::size_t offset, std::size_t size)
+{
+	// Skip straight to GP registers
+	std::size_t currOff = offset + (elfClass == ELFCLASS32 ? 0x48 : 0x70);
+	std::size_t maxOff = offset + size;
+
+	// Get register characteristics for architecture
+	std::size_t regSize = 0;
+	std::vector<std::string> regNames;
+	switch(getTargetArchitecture())
+	{
+		// Order of registers must agree with arch. specific prstatus struct
+		case Architecture::X86:
+			regSize = 4;
+			regNames = {
+				"ebx", "ecx", "edx", "esi", "edi", "ebp", "eax", "ds", "es",
+				"fs", "gs", "eax_o", "eip", "cs", "eflags", "esp", "ss"
+			};
+			break;
+
+		case Architecture::X86_64:
+			regSize = 8;
+			regNames = {
+				"r15", "r14", "r13", "r12", "rbp", "rbx", "r11", "r10", "r9",
+				"r8", "rax", "rcx", "rdx", "rsi", "rdi", "rax_o", "rip", "cs",
+				"eflags", "rsp", "ss", "fs_b", "gs_b", "ds", "es", "fs", "gs"
+			};
+			break;
+
+		case Architecture::UNKNOWN:
+			/* fall-thru */
+
+		default:
+			return;
+	}
+
+	if(currOff + regNames.size() * regSize > maxOff)
+	{
+		return;
+	}
+
+	// Load all registers
+	std::uint64_t value = 0;
+	for(const auto& name : regNames) {
+		getXByteOffset(currOff, regSize, value, getEndianness());
+		currOff += regSize;
+		elfCoreInfo->addRegisterEntry(name, value);
+	}
+}
+
+/**
  * Load information from core files that we can read
  */
 void ElfFormat::loadCoreInfo()
@@ -2243,10 +2303,11 @@ void ElfFormat::loadCoreInfo()
 				switch(entry.type)
 				{
 					case NT_FILE:
-						loadCoreFileMap(entry.dataOffset,entry.dataLength);
+						loadCoreFileMap(entry.dataOffset, entry.dataLength);
 						break;
 
-					/// @todo rest of the CORE info if useful
+					case NT_PRSTATUS:
+						loadCoreRegs(entry.dataOffset, entry.dataLength);
 
 					default:
 						break;
@@ -2257,7 +2318,7 @@ void ElfFormat::loadCoreInfo()
 		}
 	}
 
-	//elfCoreInfo->dump(std::cout);
+	elfCoreInfo->dump(std::cout);
 }
 
 retdec::utils::Endianness ElfFormat::getEndianness() const

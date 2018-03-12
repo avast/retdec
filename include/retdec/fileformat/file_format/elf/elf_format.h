@@ -69,6 +69,7 @@ class ElfFormat : public FileFormat
 		void loadNoteSecSeg(ElfNotes &notes) const;
 		void loadNotes();
 		void loadCoreFileMap(std::size_t offset, std::size_t size);
+		void loadCoreRegs(std::size_t offset, std::size_t size);
 		void loadCoreInfo();
 		/// @}
 	protected:

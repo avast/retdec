@@ -16,6 +16,7 @@
 namespace retdec {
 namespace fileformat {
 
+
 /**
  * Entry for one mapped file in NT_FILE note
  */
@@ -34,15 +35,26 @@ class FileMapEntry
 class ElfCoreInfo
 {
 	private:
-		std::size_t pageSize;              ///< used page size
+		std::uint64_t pageSize;            ///< used page size
 		std::vector<FileMapEntry> fileMap; ///< parsed NT_FILE note
 
-		//std::map<std::string, std::uint64_t> registers;
+		std::map<std::string, std::uint64_t> registers; ///< registers state
 
 	public:
+		/// @name Setters
+		/// @{
+		void setPageSize(const std::uint64_t& size);
 		void addFileMapEntry(const FileMapEntry& entry);
-		void setPageSize(const std::size_t& size);
+		void addRegisterEntry(
+				const std::string& rName,
+				const std::uint64_t& rVaue);
+		/// @}
 
+		/// @name Getters
+		/// @{
+		std::uint64_t getPageSize() const;
+		const std::vector<FileMapEntry>& getFileMap() const;
+		/// @}
 
 		/// @name Helper methods
 		/// @{
