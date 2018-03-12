@@ -756,6 +756,10 @@ const std::map<unsigned, const std::vector<std::uint8_t>*> arm64RelocationMap =
 	{1032, &ALL_QWORD}
 };
 
+// ELF note types
+
+constexpr std::size_t NT_FILE = 0x46494c45;
+
 
 /**
  * Get type of symbol
@@ -1093,6 +1097,7 @@ void ElfFormat::initStructures()
 	computeSectionTableHashes();
 	loadStrings();
 	loadNotes(); // must be done after sections and segments
+	loadCoreInfo(); // must be done after notes
 }
 
 std::size_t ElfFormat::initSectionTableHashOffsets()
@@ -2153,6 +2158,106 @@ void ElfFormat::loadNotes()
 			}
 		}
 	}
+}
+
+/**
+ * Load file map from core file
+ * @param offset offset off NT_FILE note data
+ * @param size size of NT_FILE note data
+ *
+ * This function expects only data from non-malformed notes to avoid multiple
+ * offset sanity checks. Make sure this is not used with malformed notes!
+ */
+void ElfFormat::loadCoreFileMap(std::size_t offset, std::size_t size)
+{
+	const auto endianness = getEndianness();
+	// As I have only two 32-bit MIPS samples from lldb test repository,
+	// this MIPS condition may be wrong.
+	const auto entrySize = isMips() ? 8 : elfClass == ELFCLASS32 ? 4 : 8;
+
+	std::size_t currOff = offset;
+	std::size_t maxOff = offset + size;
+
+	if(currOff + 2 * entrySize > maxOff)
+	{
+		return;
+	}
+
+	std::uint64_t count;
+	getXByteOffset(currOff, entrySize, count, endianness);
+	currOff += entrySize;
+
+	std::uint64_t pageSize;
+	getXByteOffset(currOff, entrySize, pageSize, endianness);
+	currOff += entrySize;
+
+	// We will use this to extract strings so we have to retype to signed type
+	const char* data = reinterpret_cast<const char*>(getLoadedBytes().data());
+	std::size_t pathOff = currOff + 3 * entrySize * count;
+
+	for(std::size_t i = 0; i < count; ++i)
+	{
+		if(pathOff > maxOff)
+		{
+			return;
+		}
+
+		FileMapEntry entry;
+		getXByteOffset(currOff, entrySize, entry.startAddr, endianness);
+		currOff += entrySize;
+		getXByteOffset(currOff, entrySize, entry.endAddr, endianness);
+		currOff += entrySize;
+		getXByteOffset(currOff, entrySize, entry.pageOffset, endianness);
+		currOff += entrySize;
+
+		// Paths are stored as zero delimited strings after address table
+		entry.filePath = data + pathOff;
+		pathOff += entry.filePath.size() + 1;
+
+		elfCoreInfo->addFileMapEntry(entry);
+	}
+}
+
+/**
+ * Load information from core files that we can read
+ */
+void ElfFormat::loadCoreInfo()
+{
+	elfCoreInfo = new ElfCoreInfo;
+	if(!elfCoreInfo)
+	{
+		return;
+	}
+
+	for(const auto& noteSeg : notes)
+	{
+		if(noteSeg.isMalformed())
+		{
+			continue;
+		}
+
+		for(const ElfNoteEntry& entry : noteSeg.getNotes())
+		{
+			if(entry.name == "CORE")
+			{
+				switch(entry.type)
+				{
+					case NT_FILE:
+						loadCoreFileMap(entry.dataOffset,entry.dataLength);
+						break;
+
+					/// @todo rest of the CORE info if useful
+
+					default:
+						break;
+				}
+			}
+
+			/// @todo LINUX info if useful
+		}
+	}
+
+	//elfCoreInfo->dump(std::cout);
 }
 
 retdec::utils::Endianness ElfFormat::getEndianness() const

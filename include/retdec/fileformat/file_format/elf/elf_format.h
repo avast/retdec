@@ -68,6 +68,8 @@ class ElfFormat : public FileFormat
 		void loadInfoFromDynamicSegment();
 		void loadNoteSecSeg(ElfNotes &notes) const;
 		void loadNotes();
+		void loadCoreFileMap(std::size_t offset, std::size_t size);
+		void loadCoreInfo();
 		/// @}
 	protected:
 		int elfClass;        ///< class of input ELF file

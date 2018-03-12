@@ -67,6 +67,7 @@ class FileFormat : public retdec::utils::ByteValueStorage, private retdec::utils
 		RichHeader *richHeader;                                           ///< rich header
 		PdbInfo *pdbInfo;                                                 ///< information about related PDB debug file
 		CertificateTable *certificateTable;                               ///< table of certificates
+		ElfCoreInfo *elfCoreInfo;                                         ///< information about core file structures
 		Format fileFormat;                                                ///< format of input file
 		bool stateIsValid;                                                ///< internal state of instance
 		std::vector<std::pair<std::size_t, std::size_t>> secHashInfo;     ///< information for calculation of section table hash
