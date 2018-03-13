@@ -761,7 +761,39 @@ const std::map<unsigned, const std::vector<std::uint8_t>*> arm64RelocationMap =
 constexpr std::size_t NT_PRSTATUS = 0x00000001;
 constexpr std::size_t NT_FILE = 0x46494c45;
 
+// Various architecture registers
 
+const std::vector<std::string> x86Regs {
+	"ebx", "ecx", "edx", "esi", "edi", "ebp", "eax", "ds", "es", "fs", "gs",
+	"eax_o", "eip", "cs", "eflags", "esp", "ss"
+};
+
+const std::vector<std::string> armRegs {
+	"r0", "r1", "r2", "r3", "r4", "r5", "r6", "r7", "r8", "r9", "r10", "r11",
+	"r12", "sp", "lr", "pc", "cpsr"
+};
+
+const std::vector<std::string> x64Regs {
+	"r15", "r14", "r13", "r12", "rbp", "rbx", "r11", "r10", "r9", "r8", "rax",
+	"rcx", "rdx", "rsi", "rdi", "rax_o", "rip", "cs", "rflags", "rsp", "ss",
+	"fs_b", "gs_b", "ds", "es", "fs", "gs"
+};
+
+const std::vector<std::string> aarch64Regs {
+	"x0", "x1", "x2", "x3", "x4", "x5", "x6", "x7", "x8", "x9", "x10", "x11",
+	"x12", "x13", "x14", "x15", "x16", "x17", "x18", "x19", "x20", "x21",
+	"x22", "x23", "x24", "x25","x26", "x27", "x28", "x29", "x30", "sp", "pc",
+	"pstate"
+};
+
+// Names are same for both 32 and 64 bit PowerPC architectures
+const std::vector<std::string> ppcRegs {
+	"r0", "r1", "r2", "r3", "r4", "r5", "r6", "r7", "r8", "r9", "r10", "r11",
+	"r12", "r13", "r14", "r15", "r16", "r17", "r18", "r19", "r20", "r21",
+	"r22", "r23", "r24", "r25","r26", "r27", "r28", "r29", "r30", "r31",
+	"pc", "msr", "r3_o", "ctr", "lr", "xer", "cr", "softe", "trap", "dar",
+	"dsisr", "result"
+};
 
 /**
  * Get type of symbol
@@ -2235,48 +2267,30 @@ void ElfFormat::loadCoreRegs(std::size_t offset, std::size_t size)
 	std::size_t maxOff = offset + size;
 
 	// Get register characteristics for architecture
-	std::size_t regSize = 0;
+	std::size_t regSize = elfClass == ELFCLASS32 ? 4 : 8;
 	std::vector<std::string> regNames;
 	switch(getTargetArchitecture())
 	{
 		// Order of registers must agree with arch. specific prstatus struct
 		case Architecture::X86:
-			regSize = 4;
-			regNames = {
-				"ebx", "ecx", "edx", "esi", "edi", "ebp", "eax", "ds", "es",
-				"fs", "gs", "eax_o", "eip", "cs", "eflags", "esp", "ss"
-			};
+			regNames = x86Regs;
 			break;
 
 		case Architecture::X86_64:
-			regSize = 8;
-			regNames = {
-				"r15", "r14", "r13", "r12", "rbp", "rbx", "r11", "r10", "r9",
-				"r8", "rax", "rcx", "rdx", "rsi", "rdi", "rax_o", "rip", "cs",
-				"rflags", "rsp", "ss", "fs_b", "gs_b", "ds", "es", "fs", "gs"
-			};
+			regNames = x64Regs;
 			break;
 
 		case Architecture::ARM:
-			if(elfClass == ELFCLASS32)
-			{
-				regSize = 4;
-				regNames = {
-					"r0", "r1", "r2", "r3", "r4", "r5", "r6", "r7", "r8", "r9",
-					"r10", "r11", "r12", "sp", "lr", "pc", "cpsr"
-				};
-			}
-			else
-			{
-				regSize = 8;
-				regNames = {
-					"x0", "x1", "x2", "x3", "x4", "x5", "x6", "x7", "x8", "x9",
-					"x10", "x11", "x12", "x13", "x14", "x15", "x16", "x17",
-					"x18", "x19", "x20", "x21", "x22", "x23", "x24", "x25",
-					"x26", "x27", "x28", "x29", "x30", "sp", "pc", "pstate"
-				};
-			}
+			regNames = elfClass == ELFCLASS32 ? armRegs : aarch64Regs;
 			break;
+
+		case Architecture::POWERPC:
+			// Names should be same for both 32 and 64 bit PowerPC
+			regNames = ppcRegs;
+			break;
+
+		case Architecture::MIPS:
+			// I did not manage to find register descriptions for MIPS
 
 		case Architecture::UNKNOWN:
 			/* fall-thru */
