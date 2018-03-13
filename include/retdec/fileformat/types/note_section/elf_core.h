@@ -16,6 +16,7 @@
 namespace retdec {
 namespace fileformat {
 
+using RegisterMap = std::map<std::string, std::uint64_t>;
 
 /**
  * Entry for one mapped file in NT_FILE note
@@ -30,24 +31,44 @@ class FileMapEntry
 };
 
 /**
+ * Class representing one NT_PRSTATUS note
+ *
+ * @note This structure is far from complete but we will add support only for
+ * things we can use somehow for decompilation purposes.
+ */
+class PrStatusInfo
+{
+	public:
+		std::uint64_t pid;     ///< process ID
+		std::uint64_t ppid;    ///< parent process ID
+		RegisterMap registers; ///< registers state
+};
+
+/**
  * Class for representing information from core files
  */
 class ElfCoreInfo
 {
 	private:
+		// NT_FILE
 		std::uint64_t pageSize;            ///< used page size
-		std::vector<FileMapEntry> fileMap; ///< parsed NT_FILE note
+		std::vector<FileMapEntry> fileMap; ///< parsed file map
 
-		std::map<std::string, std::uint64_t> registers; ///< registers state
+		// NT_PRSTATUS
+		std::vector<PrStatusInfo> prstatusInfos; ///< prstatus structures
+
+		// NT_PRPSINFO
+		std::string appName; ///< original application name
+		std::string cmdLine; ///< command line
 
 	public:
 		/// @name Setters
 		/// @{
 		void setPageSize(const std::uint64_t& size);
 		void addFileMapEntry(const FileMapEntry& entry);
-		void addRegisterEntry(
-				const std::string& rName,
-				const std::uint64_t& rVaue);
+		void addPrStatusInfo(const PrStatusInfo& info);
+		void setAppName(const std::string& name);
+		void setCmdLine(const std::string& line);
 		/// @}
 
 		/// @name Getters

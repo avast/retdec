@@ -9,7 +9,6 @@
 namespace retdec {
 namespace fileformat {
 
-
 /**
  * Add one entry to core file map
  * @param entry map entry
@@ -20,15 +19,30 @@ void ElfCoreInfo::addFileMapEntry(const FileMapEntry& entry)
 }
 
 /**
- * Add one entry to register map
- * @param rName name of register
- * @param rVaue value of register
+ * Add one prstatus struct
+ * @param info prstatus struct entry
  */
-void ElfCoreInfo::addRegisterEntry(
-		const std::string& rName,
-		const uint64_t& rVaue)
+void ElfCoreInfo::addPrStatusInfo(const PrStatusInfo& info)
 {
-	registers.emplace(rName, rVaue);
+	prstatusInfos.emplace_back(info);
+}
+
+/**
+ * Set name off original application
+ * @param name name of application
+ */
+void ElfCoreInfo::setAppName(const std::string& name)
+{
+	appName = name;
+}
+
+/**
+ * Set original command line string
+ * @param line command line
+ */
+void ElfCoreInfo::setCmdLine(const std::string& line)
+{
+	cmdLine = line;
 }
 
 /**
@@ -80,15 +94,29 @@ void ElfCoreInfo::dump(std::ostream& outStream)
 		}
 	}
 
-	if(!registers.empty())
+	if(!prstatusInfos.empty())
 	{
-		outStream << "Registers info \n";
-		for(const auto& entry : registers)
+		outStream << "Prstatus info \n";
+		for(const auto& info : prstatusInfos)
 		{
 			outStream
-				<< "Name  : " << entry.first << "\t"
-				<< "Value : 0x" << std::hex << entry.second << "\n";
+				<< "PID  : " << std::dec << info.pid << "\n"
+				<< "PPID : " << info.ppid << "\n"
+				<< "Registers info: \n";
+			for(const auto& entry : info.registers)
+			{
+				outStream
+					<< "Name  : " << entry.first << "\t"
+					<< "Value : 0x" << std::hex << entry.second << "\n";
+			}
 		}
+	}
+
+	if(!appName.empty() || !cmdLine.empty())
+	{
+		outStream << "Prpsinfo info \n";
+		outStream << "Name : " << appName << "\n";
+		outStream << "Line : " << cmdLine << "\n";
 	}
 }
 

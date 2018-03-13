@@ -759,6 +759,7 @@ const std::map<unsigned, const std::vector<std::uint8_t>*> arm64RelocationMap =
 // Useful ELF note types
 
 constexpr std::size_t NT_PRSTATUS = 0x00000001;
+constexpr std::size_t NT_PRPSINFO = 0x00000003;
 constexpr std::size_t NT_FILE = 0x46494c45;
 
 // Various architecture registers
@@ -2253,20 +2254,34 @@ void ElfFormat::loadCoreFileMap(std::size_t offset, std::size_t size)
 }
 
 /**
- * Load register values from core file
+ * Load prstatus info struct from core file
  * @param offset offset off NT_PRSTATUS note data
  * @param size size of NT_PRSTATUS note data
  *
  * This function expects only data from non-malformed notes to avoid multiple
  * offset sanity checks. Make sure this is not used with malformed notes!
  */
-void ElfFormat::loadCoreRegs(std::size_t offset, std::size_t size)
+void ElfFormat::loadCorePrStat(std::size_t offset, std::size_t size)
 {
-	// Skip straight to GP registers
-	std::size_t currOff = offset + (elfClass == ELFCLASS32 ? 0x48 : 0x70);
-	std::size_t maxOff = offset + size;
+	PrStatusInfo info;
+	const auto endianness = getEndianness();
 
-	// Get register characteristics for architecture
+	// Skip to pid and ppid value
+	std::size_t currOff = offset + (elfClass == ELFCLASS32 ? 0x18 : 0x20);
+	std::size_t maxOff = offset + size;
+	if(currOff + 8 > maxOff)
+	{
+		return;
+	}
+
+	// Load process IDs
+	get4ByteOffset(currOff, info.pid, endianness);
+	get4ByteOffset(currOff + 4, info.ppid, endianness);
+
+	// Skip to GP registers (offsets are from start)
+	currOff = offset + (elfClass == ELFCLASS32 ? 0x48 : 0x70);
+
+	// Get register characteristics for specific architecture
 	std::size_t regSize = elfClass == ELFCLASS32 ? 4 : 8;
 	std::vector<std::string> regNames;
 	switch(getTargetArchitecture())
@@ -2304,13 +2319,41 @@ void ElfFormat::loadCoreRegs(std::size_t offset, std::size_t size)
 		return;
 	}
 
-	// Load all registers
+	// Load registers for process
 	std::uint64_t value = 0;
-	for(const auto& name : regNames) {
-		getXByteOffset(currOff, regSize, value, getEndianness());
+	for(const auto& name : regNames)
+	{
+		getXByteOffset(currOff, regSize, value, endianness);
 		currOff += regSize;
-		elfCoreInfo->addRegisterEntry(name, value);
+		info.registers.emplace(name, value);
 	}
+
+	// Store process info
+	elfCoreInfo->addPrStatusInfo(info);
+}
+
+/**
+ * Load prpsinfo info struct from core file
+ * @param offset offset off NT_PRPSINFO note data
+ * @param size size of NT_PRPSINFO note data
+ *
+ * This function expects only data from non-malformed notes to avoid multiple
+ * offset sanity checks. Make sure this is not used with malformed notes!
+ */
+void ElfFormat::loadCorePrPsInfo(std::size_t offset, std::size_t size)
+{
+	std::size_t currOff = offset + (elfClass == ELFCLASS32 ? 0x1c : 0x28);
+	if(currOff + 16 + 80 < offset + size)
+	{
+		return;
+	}
+
+	std::string res;
+	getString(res, currOff, 16);
+	elfCoreInfo->setAppName(res.c_str());
+
+	getString(res, currOff + 16, 80);
+	elfCoreInfo->setCmdLine(res.c_str());
 }
 
 /**
@@ -2342,14 +2385,16 @@ void ElfFormat::loadCoreInfo()
 						break;
 
 					case NT_PRSTATUS:
-						loadCoreRegs(entry.dataOffset, entry.dataLength);
+						loadCorePrStat(entry.dataOffset, entry.dataLength);
+						break;
+
+					case NT_PRPSINFO:
+						loadCorePrPsInfo(entry.dataOffset, entry.dataLength);
 
 					default:
 						break;
 				}
 			}
-
-			/// @todo LINUX info if useful
 		}
 	}
 
