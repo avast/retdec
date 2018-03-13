@@ -2257,6 +2257,27 @@ void ElfFormat::loadCoreRegs(std::size_t offset, std::size_t size)
 			};
 			break;
 
+		case Architecture::ARM:
+			if(elfClass == ELFCLASS32)
+			{
+				regSize = 4;
+				regNames = {
+					"r0", "r1", "r2", "r3", "r4", "r5", "r6", "r7", "r8", "r9",
+					"r10", "r11", "r12", "sp", "lr", "pc", "cpsr"
+				};
+			}
+			else
+			{
+				regSize = 8;
+				regNames = {
+					"x0", "x1", "x2", "x3", "x4", "x5", "x6", "x7", "x8", "x9",
+					"x10", "x11", "x12", "x13", "x14", "x15", "x16", "x17",
+					"x18", "x19", "x20", "x21", "x22", "x23", "x24", "x25",
+					"x26", "x27", "x28", "x29", "x30", "sp", "pc", "pstate"
+				};
+			}
+			break;
+
 		case Architecture::UNKNOWN:
 			/* fall-thru */
 
