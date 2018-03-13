@@ -1227,7 +1227,7 @@ ELFIO::section* ElfFormat::addSymbolTable(ELFIO::section *dynamicSection, const 
 		if(seg)
 		{
 			symbolTable->set_addr_align(seg->get_align());
-			if(symTabSize + (symTabAddr - symTabSeg->getAddress()) <= symTabSeg->getSizeInFile())
+			if(seg->get_data() && symTabSize + (symTabAddr - symTabSeg->getAddress()) <= symTabSeg->getSizeInFile())
 			{
 				symbolTable->set_data(seg->get_data() + (symTabAddr - symTabSeg->getAddress()), static_cast<Elf_Word>(symTabSize));
 			}
