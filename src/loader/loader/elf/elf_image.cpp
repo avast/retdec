@@ -238,7 +238,15 @@ ElfImage::SegmentToSectionsTable ElfImage::createSegmentToSectionsTable()
 		std::uint64_t address = elfSeg->getAddress();
 		std::uint64_t fileOffset = elfSeg->getOffset();
 		std::uint64_t fileSize = elfSeg->getLoadedSize();
-		retdec::utils::Range<std::uint64_t> segRange = retdec::utils::Range<std::uint64_t>(address, address + (memSize ? memSize - 1 : 0));
+		std::uint64_t endAddress = address + (memSize ? memSize - 1 : 0);
+
+		if (address > endAddress)
+		{
+			// Invalid data - return only partially loaded map
+			return segToSecsTable;
+		}
+
+		retdec::utils::Range<std::uint64_t> segRange = retdec::utils::Range<std::uint64_t>(address, endAddress);
 
 		for (const auto& sec : sections)
 		{
