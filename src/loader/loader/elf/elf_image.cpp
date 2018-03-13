@@ -302,6 +302,12 @@ const Segment* ElfImage::addSegment(const retdec::fileformat::SecSeg* secSeg, st
 	std::uint64_t start = address;
 	std::uint64_t end = memSize ? address + memSize - 1 : address;
 
+	if (start > end)
+	{
+		// This may happen with some broken binaries and may lead to abort
+		return nullptr;
+	}
+
 	// Because we iterate over getSegments() here, we cannot afford to modify it during loop, it would break iterators.
 	// We need to store what to add and remove and do it after the loop.
 	// For removeList, we cannot use unique_ptr because we would move ownership of the object (segment) to removeList and
