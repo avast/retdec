@@ -2253,7 +2253,7 @@ void ElfFormat::loadCoreRegs(std::size_t offset, std::size_t size)
 			regNames = {
 				"r15", "r14", "r13", "r12", "rbp", "rbx", "r11", "r10", "r9",
 				"r8", "rax", "rcx", "rdx", "rsi", "rdi", "rax_o", "rip", "cs",
-				"eflags", "rsp", "ss", "fs_b", "gs_b", "ds", "es", "fs", "gs"
+				"rflags", "rsp", "ss", "fs_b", "gs_b", "ds", "es", "fs", "gs"
 			};
 			break;
 
