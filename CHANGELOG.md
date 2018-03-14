@@ -3,6 +3,7 @@
 # dev
 
 * New Feature: Added a new tool: `retdec-getsig`. It can be used for creating signatures of packers, compilers, and other tools.
+* Enhancement: RetDec imphash is now compatible with YARA/pefile imphash. ([#246](https://github.com/avast-tl/retdec/issues/246)).
 * Enhancement: Tool `retdec-macho-extractor` can now extract objects from non-archive Mach-O universal binaries ([#125](https://github.com/avast-tl/retdec/issues/125)).
 * Enhancement: References to ticket numbers from our internal issue tracking system were replaced by short descriptions in the `retdec-regression-tests` repository ([retdec-regression-tests #1](https://github.com/avast-tl/retdec-regression-tests/issues/1)).
 * Enhancement: Added a missing license for the `retdec-support` repository ([retdec-support #1](https://github.com/avast-tl/retdec-support/issues/1)).
@@ -21,6 +22,8 @@
 * Enhancement: Added unofficial support for macOS build ([#7](https://github.com/avast-tl/retdec/issues/7)).
 * Enhancement: Allow 32b versions of `bin2llvmir` and `llvmir2hll` on Windows access more memory ([#7](https://github.com/avast-tl/retdec/issues/73)).
 * Enhancement: Added method in `loader::Image` to obtain segment content as raw data pointer.
+* Fix: Fixed infinite loop in COFF word length detection for rare cases ([#242](https://github.com/avast-tl/retdec/issues/242)).
+* Fix: Fixed several ELF bugs causing crashes ([#239](https://github.com/avast-tl/retdec/issues/239), [#240](https://github.com/avast-tl/retdec/issues/240), [#241](https://github.com/avast-tl/retdec/issues/241)). 
 * Fix: Fixed unit-tests discovery in `retdec-tests-runner.sh` on macOS ([#238](https://github.com/avast-tl/retdec/issues/238)).
 * Fix: Non-printable characters in ELF .dynamic section output are now replaced with hexadecimal codes. ([#82](https://github.com/avast-tl/retdec/issues/82)).
 * Fix: Fix for several segmentation faults in ELF parsing module ([#89](https://github.com/avast-tl/retdec/issues/89)).
