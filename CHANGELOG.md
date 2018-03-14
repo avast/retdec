@@ -3,6 +3,7 @@
 # dev
 
 * New Feature: Added a new tool: `retdec-getsig`. It can be used for creating signatures of packers, compilers, and other tools.
+* Enhancement: RetDec imphash is now compatible with YARA/pefile imphash. ([#246](https://github.com/avast-tl/retdec/issues/246)).
 * Enhancement: Tool `retdec-macho-extractor` can now extract objects from non-archive Mach-O universal binaries ([#125](https://github.com/avast-tl/retdec/issues/125)).
 * Enhancement: References to ticket numbers from our internal issue tracking system were replaced by short descriptions in the `retdec-regression-tests` repository ([retdec-regression-tests #1](https://github.com/avast-tl/retdec-regression-tests/issues/1)).
 * Enhancement: Added a missing license for the `retdec-support` repository ([retdec-support #1](https://github.com/avast-tl/retdec-support/issues/1)).
