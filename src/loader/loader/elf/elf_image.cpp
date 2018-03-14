@@ -238,7 +238,15 @@ ElfImage::SegmentToSectionsTable ElfImage::createSegmentToSectionsTable()
 		std::uint64_t address = elfSeg->getAddress();
 		std::uint64_t fileOffset = elfSeg->getOffset();
 		std::uint64_t fileSize = elfSeg->getLoadedSize();
-		retdec::utils::Range<std::uint64_t> segRange = retdec::utils::Range<std::uint64_t>(address, address + (memSize ? memSize - 1 : 0));
+		std::uint64_t endAddress = address + (memSize ? memSize - 1 : 0);
+
+		if (address > endAddress)
+		{
+			// Invalid data - return only partially loaded map
+			return segToSecsTable;
+		}
+
+		retdec::utils::Range<std::uint64_t> segRange = retdec::utils::Range<std::uint64_t>(address, endAddress);
 
 		for (const auto& sec : sections)
 		{
@@ -301,6 +309,12 @@ const Segment* ElfImage::addSegment(const retdec::fileformat::SecSeg* secSeg, st
 
 	std::uint64_t start = address;
 	std::uint64_t end = memSize ? address + memSize - 1 : address;
+
+	if (start > end)
+	{
+		// This may happen with some broken binaries and may lead to abort
+		return nullptr;
+	}
 
 	// Because we iterate over getSegments() here, we cannot afford to modify it during loop, it would break iterators.
 	// We need to store what to add and remove and do it after the loop.
