@@ -266,13 +266,11 @@ const std::map<std::size_t, std::string> auxVecMap =
 	{0x0f, "AT_PLATFORM"},
 	{0x10, "AT_HWCAP"},
 	{0x11, "AT_CLKTCK"},
-	//
-	{0x12, "RESERVED"},
-	{0x13, "RESERVED"},
-	{0x14, "RESERVED"},
-	{0x15, "RESERVED"},
-	{0x16, "RESERVED"},
-	//
+	{0x12, "AT_FPUCW"},
+	{0x13, "AT_DCACHEBSIZE"},
+	{0x14, "AT_ICACHEBSIZE"},
+	{0x15, "AT_UCACHEBSIZE"},
+	{0x16, "AT_IGNOREPPC"},
 	{0x17, "AT_SECURE"},
 	{0x18, "AT_BASE_PLATFORM"},
 	{0x19, "AT_RANDOM"},
@@ -280,7 +278,30 @@ const std::map<std::size_t, std::string> auxVecMap =
 	//
 	{0x1f, "AT_EXECFN"},
 	{0x20, "AT_SYSINFO"},
-	{0x21, "AT_SYSINFO_EHDR"}
+	{0x21, "AT_SYSINFO_EHDR"},
+	{0x22, "AT_L1I_CACHESHAPE"},
+	{0x23, "AT_L1D_CACHESHAPE"},
+	{0x24, "AT_L2_CACHESHAPE"},
+	{0x25, "AT_L3_CACHESHAPE"},
+	//
+	{0x7d0, "AT_SUN_UID"},
+	{0x7d1, "AT_SUN_RUID"},
+	{0x7d2, "AT_SUN_GID"},
+	{0x7d3, "AT_SUN_RGID"},
+	{0x7d4, "AT_SUN_LDELF"},
+	{0x7d5, "AT_SUN_LDSHDR"},
+	{0x7d6, "AT_SUN_LDNAME"},
+	{0x7d7, "AT_SUN_LPAGESZ"},
+	{0x7d8, "AT_SUN_PLATFORM"},
+	{0x7d9, "AT_SUN_HWCAP"},
+	{0x7da, "AT_SUN_IFLUSH"},
+	{0x7db, "AT_SUN_CPU"},
+	{0x7dc, "AT_SUN_EMUL_ENTRY"},
+	{0x7dd, "AT_SUN_EMUL_EXECFD"},
+	{0x7de, "AT_SUN_EXECNAME"},
+	{0x7df, "AT_SUN_MMU"},
+	{0x7e0, "AT_SUN_LDDATA"},
+	{0x7e1, "AT_SUN_AUXFLAGS"}
 };
 
 

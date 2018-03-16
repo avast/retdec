@@ -15,7 +15,7 @@ namespace fileinfo {
 namespace
 {
 
-const std::size_t headerDistArr[] = {5, 18, 18};
+const std::size_t headerDistArr[] = {5, 22, 18};
 const std::string headerNameArr[] = {"i", "name", "value"};
 const std::string headerDescArr[] = {"index", "name", "value"};
 
