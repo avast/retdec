@@ -19,6 +19,15 @@ void ElfCoreInfo::addFileMapEntry(const FileMapEntry& entry)
 }
 
 /**
+ * Add one aux. vector entry
+ * @param entry vector entry
+ */
+void ElfCoreInfo::addAuxVectorEntry(const AuxVectorEntry& entry)
+{
+	auxVector.emplace_back(entry);
+}
+
+/**
  * Add one prstatus struct
  * @param info prstatus struct entry
  */
@@ -117,6 +126,17 @@ void ElfCoreInfo::dump(std::ostream& outStream)
 		outStream << "Prpsinfo info \n";
 		outStream << "Name : " << appName << "\n";
 		outStream << "Line : " << cmdLine << "\n";
+	}
+
+	if(!auxVector.empty())
+	{
+		outStream << "Auxf info (" << auxVector.size() << ")\n";
+		for(const auto& entry : auxVector)
+		{
+			outStream
+				<< "Name  : " << entry.first << "\t"
+				<< "Value : " << entry.second << "\n";
+		}
 	}
 }
 

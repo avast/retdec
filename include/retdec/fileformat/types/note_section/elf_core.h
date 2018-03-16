@@ -17,6 +17,7 @@ namespace retdec {
 namespace fileformat {
 
 using RegisterMap = std::map<std::string, std::uint64_t>;
+using AuxVectorEntry = std::pair<std::uint64_t, std::uint64_t>;
 
 /**
  * Entry for one mapped file in NT_FILE note
@@ -61,11 +62,15 @@ class ElfCoreInfo
 		std::string appName; ///< original application name
 		std::string cmdLine; ///< command line
 
+		// NT_AUXV
+		std::vector<AuxVectorEntry> auxVector; /// auxiliary vector
+
 	public:
 		/// @name Setters
 		/// @{
 		void setPageSize(const std::uint64_t& size);
 		void addFileMapEntry(const FileMapEntry& entry);
+		void addAuxVectorEntry(const AuxVectorEntry& entry);
 		void addPrStatusInfo(const PrStatusInfo& info);
 		void setAppName(const std::string& name);
 		void setCmdLine(const std::string& line);

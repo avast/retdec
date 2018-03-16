@@ -760,6 +760,7 @@ const std::map<unsigned, const std::vector<std::uint8_t>*> arm64RelocationMap =
 
 constexpr std::size_t NT_PRSTATUS = 0x00000001;
 constexpr std::size_t NT_PRPSINFO = 0x00000003;
+constexpr std::size_t NT_AUXV = 0x00000006;
 constexpr std::size_t NT_FILE = 0x46494c45;
 
 // Various architecture registers
@@ -2357,6 +2358,32 @@ void ElfFormat::loadCorePrPsInfo(std::size_t offset, std::size_t size)
 }
 
 /**
+ * Load info from auxiliary vector
+ * @param offset offset off NT_AUXV note data
+ * @param size size of NT_AUXV note data
+ *
+ * This function expects only data from non-malformed notes to avoid multiple
+ * offset sanity checks. Make sure this is not used with malformed notes!
+ */
+void ElfFormat::loadCoreAuxvInfo(std::size_t offset, std::size_t size)
+{
+	const auto endianness = getEndianness();
+	const auto entrySize = elfClass == ELFCLASS32 ? 4 : 8;
+
+	std::size_t maxOff = offset + size;
+	while(offset < maxOff)
+	{
+		AuxVectorEntry entry;
+		getXByteOffset(offset, entrySize, entry.first, endianness);
+		offset += entrySize;
+		getXByteOffset(offset, entrySize, entry.second, endianness);
+		offset += entrySize;
+
+		elfCoreInfo->addAuxVectorEntry(entry);
+	}
+}
+
+/**
  * Load information from core files that we can read
  */
 void ElfFormat::loadCoreInfo()
@@ -2390,6 +2417,11 @@ void ElfFormat::loadCoreInfo()
 
 					case NT_PRPSINFO:
 						loadCorePrPsInfo(entry.dataOffset, entry.dataLength);
+						break;
+
+					case NT_AUXV:
+						loadCoreAuxvInfo(entry.dataOffset, entry.dataLength);
+						break;
 
 					default:
 						break;
