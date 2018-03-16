@@ -7,13 +7,24 @@
 #ifndef FILEINFO_FILE_INFORMATION_FILE_INFORMATION_TYPES_ELF_CORE_H
 #define FILEINFO_FILE_INFORMATION_FILE_INFORMATION_TYPES_ELF_CORE_H
 
+#include <string>
 #include <vector>
-
-#include "retdec/fileformat/types/note_section/elf_core.h"
 
 namespace fileinfo {
 
-using AuxVectorEntry = std::pair<std::string, std::size_t>;
+using AuxVectorEntry = std::pair<std::string, std::uint64_t>;
+
+/**
+ * One entry in file map.
+ */
+class FileMapEntry
+{
+	public:
+		std::uint64_t address;
+		std::uint64_t size;
+		std::uint64_t page;
+		std::string path;
+};
 
 
 /**
@@ -23,6 +34,7 @@ class ElfCore
 {
 	private:
 		std::vector<AuxVectorEntry> auxVec;
+		std::vector<FileMapEntry> fileMap;
 
 	public:
 		ElfCore();
@@ -31,18 +43,21 @@ class ElfCore
 		/// @name Queries
 		/// @{
 		bool hasAuxVector() const;
+		bool hasFileMap() const;
 		/// @}
 
 		/// @name Getters
 		/// @{
 		const std::vector<AuxVectorEntry>& getAuxVector() const;
+		const std::vector<FileMapEntry>& getFileMap() const;
 		/// @}
 
 		/// @name Setters
 		/// @{
+		void addFileMapEntry(const FileMapEntry& entry);
 		void addAuxVectorEntry(
 				const std::string& name,
-				const std::size_t& value);
+				const std::uint64_t& value);
 		/// @}
 };
 

@@ -529,6 +529,7 @@ class FileInformation
 		void addRelocationTable(RelocationTable &table);
 		void addDynamicSection(DynamicSection &section);
 		void addElfNotes(ElfNotes &notes);
+		void addFileMapEntry(const FileMapEntry& entry);
 		void addAuxVectorEntry(const std::string& name, std::size_t value);
 		void addCryptoPattern(Pattern &pattern);
 		void removeRedundantCryptoRules();

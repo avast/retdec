@@ -1188,6 +1188,7 @@ void ElfDetector::getNotes()
 void ElfDetector::getCoreInfo()
 {
 	const auto* coreInfo = elfParser->getElfCoreInfo();
+
 	for(const auto& entry : coreInfo->getAuxVector())
 	{
 		auto name = mapGetValueOrDefault(auxVecMap, entry.first, "");
@@ -1196,6 +1197,16 @@ void ElfDetector::getCoreInfo()
 			name = "UNKNOWN " + toString(entry.first);
 		}
 		fileInfo.addAuxVectorEntry(name, entry.second);
+	}
+
+	for(const auto& entry : coreInfo->getFileMap())
+	{
+		fileinfo::FileMapEntry fEntry;
+		fEntry.address = entry.startAddr;
+		fEntry.size = entry.endAddr - entry.startAddr;
+		fEntry.page = entry.pageOffset;
+		fEntry.path = entry.filePath;
+		fileInfo.addFileMapEntry(fEntry);
 	}
 }
 

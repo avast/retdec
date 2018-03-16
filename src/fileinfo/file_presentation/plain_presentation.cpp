@@ -652,6 +652,10 @@ void PlainPresentation::presentCore() const
 	{
 		presentIterativeDistribution(ElfAuxVPlainGetter(fileinfo), explanatory);
 	}
+	if(core.hasFileMap())
+	{
+		presentIterativeDistribution(ElfCoreMapPlainGetter(fileinfo), explanatory);
+	}
 }
 
 

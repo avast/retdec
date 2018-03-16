@@ -3731,6 +3731,11 @@ void FileInformation::addElfNotes(ElfNotes& notes)
 	elfNotes.push_back(notes);
 }
 
+void FileInformation::addFileMapEntry(const FileMapEntry& entry)
+{
+	elfCoreInfo.addFileMapEntry(entry);
+}
+
 void FileInformation::addAuxVectorEntry(const std::string& name, std::size_t value)
 {
 	elfCoreInfo.addAuxVectorEntry(name, value);

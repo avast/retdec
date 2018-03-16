@@ -6,8 +6,6 @@
 
 #include "fileinfo/file_information/file_information_types/elf_core.h"
 
-using namespace retdec::fileformat;
-
 namespace fileinfo {
 
 ElfCore::ElfCore()
@@ -19,14 +17,29 @@ bool ElfCore::hasAuxVector() const
 	return !auxVec.empty();
 }
 
+bool ElfCore::hasFileMap() const
+{
+	return !fileMap.empty();
+}
+
 const std::vector<AuxVectorEntry>& ElfCore::getAuxVector() const
 {
 	return auxVec;
 }
 
+const std::vector<FileMapEntry>& ElfCore::getFileMap() const
+{
+	return fileMap;
+}
+
+void ElfCore::addFileMapEntry(const FileMapEntry& entry)
+{
+	fileMap.emplace_back(entry);
+}
+
 void ElfCore::addAuxVectorEntry(
 		const std::string& name,
-		const std::size_t& value)
+		const std::uint64_t& value)
 {
 	auxVec.emplace_back(name, value);
 }
