@@ -204,6 +204,7 @@ class FileFormat : public retdec::utils::ByteValueStorage, private retdec::utils
 		const RichHeader* getRichHeader() const;
 		const PdbInfo* getPdbInfo() const;
 		const CertificateTable* getCertificateTable() const;
+		const ElfCoreInfo* getElfCoreInfo() const;
 		const Symbol* getSymbol(const std::string &name) const;
 		const Symbol* getSymbol(unsigned long long address) const;
 		const Relocation* getRelocation(const std::string &name) const;

@@ -639,8 +639,21 @@ void PlainPresentation::presentNotes() const
 	}
 
 	presentIterativeDistribution(ElfNotesPlainGetter(fileinfo), explanatory);
-	/// @todo present other note section stuff
+	presentCore();
 }
+
+/**
+ * Present ELF core
+ */
+void PlainPresentation::presentCore() const
+{
+	const auto& core = fileinfo.getElfCoreInfo();
+	if(core.hasAuxVector())
+	{
+		presentIterativeDistribution(ElfAuxVPlainGetter(fileinfo), explanatory);
+	}
+}
+
 
 bool PlainPresentation::present()
 {

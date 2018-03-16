@@ -44,6 +44,7 @@ class FileInformation
 		ExportTable exportTable;                       ///< information about exports
 		ResourceTable resourceTable;                   ///< information about resources in input file
 		CertificateTable certificateTable;             ///< information about certificates
+		ElfCore elfCoreInfo;                           ///< information about ELF core files
 		LoaderInfo loaderInfo;                         ///< information about loaded image
 		std::vector<DataDirectory> directories;        ///< information about data directories
 		std::vector<FileSegment> segments;             ///< information about segments in file
@@ -384,9 +385,10 @@ class FileInformation
 		std::string isSignatureVerifiedStr(const std::string& t = "true", const std::string& f = "false") const;
 		/// @}
 
-		/// @name Getter of @a elfNotes
+		/// @name Getter of @a elfNotes and associtated structures
 		/// @{
 		const std::vector<ElfNotes>& getElfNotes() const;
+		const ElfCore& getElfCoreInfo() const;
 		/// @}
 
 		/// @name Getters of @a compilerOrPackerInfo
@@ -527,6 +529,7 @@ class FileInformation
 		void addRelocationTable(RelocationTable &table);
 		void addDynamicSection(DynamicSection &section);
 		void addElfNotes(ElfNotes &notes);
+		void addAuxVectorEntry(const std::string& name, std::size_t value);
 		void addCryptoPattern(Pattern &pattern);
 		void removeRedundantCryptoRules();
 		void sortCryptoPatternMatches();

@@ -1512,6 +1512,15 @@ const CertificateTable* FileFormat::getCertificateTable() const
 }
 
 /**
+ * Get information about ELF core file
+ * @return Pointer to ELF core info of @c nullptr if file has no certificates
+ */
+const ElfCoreInfo* FileFormat::getElfCoreInfo() const
+{
+	return elfCoreInfo;
+}
+
+/**
  * Get symbol with name @a name
  * @param name Name of symbol to get
  * @return Pointer to symbol with name @a name or @c nullptr if such symbol is not found

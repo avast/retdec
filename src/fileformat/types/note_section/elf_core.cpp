@@ -82,6 +82,15 @@ const std::vector<FileMapEntry>& ElfCoreInfo::getFileMap() const
 }
 
 /**
+ * Get auxiliary vector
+ * @return auxiliary vector
+ */
+const std::vector<AuxVectorEntry>&ElfCoreInfo::getAuxVector() const
+{
+	return auxVector;
+}
+
+/**
  * Dump CORE file info
  * @param outStream target output stream
  */

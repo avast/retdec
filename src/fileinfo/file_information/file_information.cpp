@@ -2621,6 +2621,15 @@ const std::vector<ElfNotes>& FileInformation::getElfNotes() const
 }
 
 /**
+ * Get ELF core info
+ * @return ELF core info
+ */
+const ElfCore& FileInformation::getElfCoreInfo() const
+{
+	return elfCoreInfo;
+}
+
+/**
  * Get number of detected compilers or packers
  * @return Number of detected compilers or packers
  */
@@ -3720,6 +3729,11 @@ void FileInformation::addDynamicSection(DynamicSection &section)
 void FileInformation::addElfNotes(ElfNotes& notes)
 {
 	elfNotes.push_back(notes);
+}
+
+void FileInformation::addAuxVectorEntry(const std::string& name, std::size_t value)
+{
+	elfCoreInfo.addAuxVectorEntry(name, value);
 }
 
 /**

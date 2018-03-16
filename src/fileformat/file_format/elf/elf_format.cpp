@@ -2430,7 +2430,7 @@ void ElfFormat::loadCoreInfo()
 		}
 	}
 
-	elfCoreInfo->dump(std::cout);
+	//elfCoreInfo->dump(std::cout); // Debug output
 }
 
 retdec::utils::Endianness ElfFormat::getEndianness() const

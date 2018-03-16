@@ -80,6 +80,7 @@ class ElfCoreInfo
 		/// @{
 		std::uint64_t getPageSize() const;
 		const std::vector<FileMapEntry>& getFileMap() const;
+		const std::vector<AuxVectorEntry>& getAuxVector() const;
 		/// @}
 
 		/// @name Helper methods
