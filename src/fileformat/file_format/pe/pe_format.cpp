@@ -1288,7 +1288,7 @@ std::vector<std::tuple<const std::uint8_t*, std::size_t>> PeFormat::getDigestRan
 
 	// To prevent crashes on unordinary binaries, we need to sort these offsets (together with sizes, but they are unimportant for sorting)
 	// Usually, checksum is first, then security directory header and then security directory
-	// There are few binaries where this ordered is not followed
+	// There are a few binaries where this order is not followed
 	std::vector<std::pair<std::size_t, std::size_t>> offsets = { std::make_pair(checksumFileOffset, 4), std::make_pair(secDirFileOffset, 8), std::make_pair(secDirOffset, secDirSize) };
 	std::sort(offsets.begin(), offsets.end(), [](const auto& lhs, const auto& rhs) {
 			return lhs.first < rhs.first;
@@ -1313,7 +1313,7 @@ std::vector<std::tuple<const std::uint8_t*, std::size_t>> PeFormat::getDigestRan
 		lastOffset = offset.first + offset.second;
 	}
 
-	// Finish off the data if the last offset didn't end at the end of of all data
+	// Finish off the data if the last offset didn't end at the end of all data
 	if (lastOffset != bytes.size())
 		result.emplace_back(bytes.data() + lastOffset, bytes.size() - lastOffset);
 
