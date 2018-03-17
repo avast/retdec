@@ -975,8 +975,6 @@ void PeFormat::loadCertificates()
 		return;
 	}
 
-	signatureVerified = verifySignature(p7);
-
 	// Find signer of the application and store its serial number.
 	X509 *signerCert = nullptr;
 	X509 *counterSignerCert = nullptr;
@@ -1020,6 +1018,12 @@ void PeFormat::loadCertificates()
 		BIO_free(bio);
 		return;
 	}
+
+	// Now that we know there is at least a signer or counter-signer, we can
+	// verify the signature. Do not try to verify the signature before
+	// verifying that there is at least a signer or counter-signer as 'p7' is
+	// empty in that case (#87).
+	signatureVerified = verifySignature(p7);
 
 	// Create hash table with key-value pair as subject-X509 certificate so we can easily lookup certificates by their subject name
 	std::unordered_map<std::string, X509*> subjectToCert;
