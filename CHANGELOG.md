@@ -22,6 +22,7 @@
 * Enhancement: Added unofficial support for macOS build ([#7](https://github.com/avast-tl/retdec/issues/7)).
 * Enhancement: Allow 32b versions of `bin2llvmir` and `llvmir2hll` on Windows access more memory ([#7](https://github.com/avast-tl/retdec/issues/73)).
 * Enhancement: Added method in `loader::Image` to obtain segment content as raw data pointer.
+* Fix: Fixed `retdec-fileinfo` crashes when verifying digital signature of PE files ([#87](https://github.com/avast-tl/retdec/issues/87)).
 * Fix: Fixed infinite loop in COFF word length detection for rare cases ([#242](https://github.com/avast-tl/retdec/issues/242)).
 * Fix: Fixed several ELF bugs causing crashes ([#239](https://github.com/avast-tl/retdec/issues/239), [#240](https://github.com/avast-tl/retdec/issues/240), [#241](https://github.com/avast-tl/retdec/issues/241)).
 * Fix: Fixed unit-tests discovery in `retdec-tests-runner.sh` on macOS ([#238](https://github.com/avast-tl/retdec/issues/238)).
