@@ -57,6 +57,12 @@ static const std::unordered_map<std::string, std::uint8_t> attrTable =
 	{ "emailAddress",        ATTRIBUTE_EMAIL_ADDRESS },
 };
 
+template <typename T, typename Deleter>
+decltype(auto) managedPtr(T* ptr, Deleter deleter)
+{
+	return std::unique_ptr<T, Deleter>(ptr, deleter);
+}
+
 void assignAttribute(Certificate::Attributes *attributes, const std::string &key, const std::string &value)
 {
 	auto itr = attrTable.find(key);
@@ -158,10 +164,18 @@ std::string parsePublicKey(BIO *bio)
 	return key;
 }
 
-template <typename T, typename Deleter>
-decltype(auto) managedPtr(T* ptr, Deleter deleter)
+std::string parseDateTime(ASN1_TIME* dateTime)
 {
-	return std::unique_ptr<T, Deleter>(ptr, deleter);
+	if (ASN1_TIME_check(dateTime) == 0)
+		return {};
+
+	auto memBio = managedPtr(BIO_new(BIO_s_mem()), &BIO_free);
+	ASN1_TIME_print(memBio.get(), dateTime);
+
+	BUF_MEM* bioMemPtr;
+	BIO_ctrl(memBio.get(), BIO_C_GET_BUF_MEM_PTR, 0, reinterpret_cast<char*>(&bioMemPtr));
+
+	return std::string(bioMemPtr->data, bioMemPtr->length);
 }
 
 } // anonymous namespace
@@ -193,20 +207,8 @@ void Certificate::load()
 
 void Certificate::loadValidity()
 {
-	std::vector<char> tmp(50);
-	auto memBio = managedPtr(BIO_new(BIO_s_mem()), &BIO_free);
-
-	ASN1_TIME_print(memBio.get(), X509_get_notBefore(certImpl));
-	BIO_gets(memBio.get(), tmp.data(), 50);
-	validSince = tmp.data();
-
-	if(BIO_reset(memBio.get()) != 1)
-	{
-		return;
-	}
-	ASN1_TIME_print(memBio.get(), X509_get_notAfter(certImpl));
-	BIO_gets(memBio.get(), tmp.data(), 50);
-	validUntil = tmp.data();
+	validSince = parseDateTime(X509_get_notBefore(certImpl));
+	validUntil = parseDateTime(X509_get_notAfter(certImpl));
 }
 
 void Certificate::loadPublicKey()
