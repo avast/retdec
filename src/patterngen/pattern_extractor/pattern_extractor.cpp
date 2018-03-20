@@ -212,7 +212,7 @@ bool PatternExtractor::processFile()
 bool PatternExtractor::checkPPC64Sections()
 {
 	// Check if there is a '.opd' section and multiple code sections.
-	if (const auto section = inputFile->getSection(".opd")) {
+	if (inputFile->getSection(".opd")) {
 		std::size_t counter = 0;
 		for (const Section *section : inputFile->getSections()) {
 			if (section->isCode()) {
