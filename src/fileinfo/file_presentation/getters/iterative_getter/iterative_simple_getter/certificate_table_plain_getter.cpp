@@ -90,11 +90,11 @@ bool CertificateTablePlainGetter::getRecord(std::size_t structIndex, std::size_t
 	}
 
 	record.clear();
-	record.push_back(fileinfo.getCertificateSubjectCommonName(recIndex));
-	record.push_back(fileinfo.getCertificateSubjectOrganization(recIndex));
+	record.push_back(replaceNonprintableChars(fileinfo.getCertificateSubjectCommonName(recIndex)));
+	record.push_back(replaceNonprintableChars(fileinfo.getCertificateSubjectOrganization(recIndex)));
 	record.push_back(fileinfo.getCertificateSubjectRawStr(recIndex));
-	record.push_back(fileinfo.getCertificateIssuerCommonName(recIndex));
-	record.push_back(fileinfo.getCertificateIssuerOrganization(recIndex));
+	record.push_back(replaceNonprintableChars(fileinfo.getCertificateIssuerCommonName(recIndex)));
+	record.push_back(replaceNonprintableChars(fileinfo.getCertificateIssuerOrganization(recIndex)));
 	record.push_back(fileinfo.getCertificateIssuerRawStr(recIndex));
 	record.push_back(fileinfo.getCertificatePublicKeyAlgorithm(recIndex));
 	record.push_back(fileinfo.getCertificateSignatureAlgorithm(recIndex));
