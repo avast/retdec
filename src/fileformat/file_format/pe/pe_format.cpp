@@ -1210,6 +1210,10 @@ void PeFormat::loadDotnetHeaders()
  */
 bool PeFormat::verifySignature(PKCS7 *p7)
 {
+	// At first, verify that there are data in place where Microsoft Code Signing should be present
+	if (!p7->d.sign->contents->d.other)
+		return false;
+
 	// We need this because PKCS7_verify() looks up algorithms and without this, tables are empty
 	OpenSSL_add_all_algorithms();
 	SCOPE_EXIT {
