@@ -44,7 +44,7 @@
 * Fix: Remove useless OS type detection when running decompilations ([#10](https://github.com/avast-tl/retdec/issues/10)).
 * Fix: Filesystem path in utils now returns correct information when it is appended with another path.
 * Fix: Plain output of `fileinfo` now escapes non-printable characters in subject/issuer name/organization of PE certificates ([#253](https://github.com/avast-tl/retdec/issues/253)).
-* Fix: Invalid dates are now longer shown in the output of `fileinfo` ([#251](https://github.com/avast-tl/retdec/issues/251)).
+* Fix: Invalid dates are no longer shown in the output of `fileinfo` ([#251](https://github.com/avast-tl/retdec/issues/251)).
 
 # v3.0 (2017-12-13)
 
