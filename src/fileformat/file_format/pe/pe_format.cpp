@@ -1303,22 +1303,30 @@ std::vector<std::tuple<const std::uint8_t*, std::size_t>> PeFormat::getDigestRan
 		});
 
 	std::size_t lastOffset = 0;
-	for (auto& offset : offsets)
+	for (auto& offsetSize : offsets)
 	{
-		// This offset is completely covered by the last offset so ignore it
-		if (offset.first + offset.second <= lastOffset)
+		// If the length of the range is bigger than the amount of data we have available, then sanitize the length
+		if (offsetSize.second > bytes.size())
+			offsetSize.second = bytes.size();
+
+		// If the range overlaps the end of the file, then sanitize the length
+		if (offsetSize.first + offsetSize.second > bytes.size())
+			offsetSize.second = bytes.size() - offsetSize.first;
+
+		// This offsetSize is completely covered by the last offset so ignore it
+		if (offsetSize.first + offsetSize.second <= lastOffset)
 			continue;
 
-		// This offset is partially covered by the last offset, so shrink it
-		// Shrunk offset begins where the last offset ended
-		if (offset.first <= lastOffset)
+		// This offsetSize is partially covered by the last offset, so shrink it
+		// Shrunk offsetSize begins where the last offset ended
+		if (offsetSize.first <= lastOffset)
 		{
-			offset.second = lastOffset - offset.first;
-			offset.first = lastOffset;
+			offsetSize.second = lastOffset - offsetSize.first;
+			offsetSize.first = lastOffset;
 		}
 
-		result.emplace_back(bytes.data() + lastOffset, offset.first - lastOffset);
-		lastOffset = offset.first + offset.second;
+		result.emplace_back(bytes.data() + lastOffset, offsetSize.first - lastOffset);
+		lastOffset = offsetSize.first + offsetSize.second;
 	}
 
 	// Finish off the data if the last offset didn't end at the end of all data
