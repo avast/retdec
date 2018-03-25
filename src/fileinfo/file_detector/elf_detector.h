@@ -32,6 +32,7 @@ class ElfDetector : public FileDetector
 		void getDynamicSection(const ELFIO::section *sec);
 		void getSections();
 		void getNotes();
+		void getCoreInfo();
 		/// @}
 	protected:
 		/// @name Detection methods

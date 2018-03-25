@@ -245,6 +245,65 @@ const std::map<std::size_t, std::string> noteMapIA64 =
 	{0x06c, "NT_VMS_PATCHTIME"}
 };
 
+// Auxiliary vector name map
+const std::map<std::size_t, std::string> auxVecMap =
+{
+	{0x00, "AT_NULL"},
+	{0x01, "AT_IGNORE"},
+	{0x02, "AT_EXECFD"},
+	{0x03, "AT_PHDR"},
+	{0x04, "AT_PHENT"},
+	{0x05, "AT_PHNUM"},
+	{0x06, "AT_PAGESZ"},
+	{0x07, "AT_BASE"},
+	{0x08, "AT_FLAGS"},
+	{0x09, "AT_ENTRY"},
+	{0x0a, "AT_NOTELF"},
+	{0x0b, "AT_UID"},
+	{0x0c, "AT_EUID"},
+	{0x0d, "AT_GID"},
+	{0x0e, "AT_EGID"},
+	{0x0f, "AT_PLATFORM"},
+	{0x10, "AT_HWCAP"},
+	{0x11, "AT_CLKTCK"},
+	{0x12, "AT_FPUCW"},
+	{0x13, "AT_DCACHEBSIZE"},
+	{0x14, "AT_ICACHEBSIZE"},
+	{0x15, "AT_UCACHEBSIZE"},
+	{0x16, "AT_IGNOREPPC"},
+	{0x17, "AT_SECURE"},
+	{0x18, "AT_BASE_PLATFORM"},
+	{0x19, "AT_RANDOM"},
+	{0x1a, "AT_HWCAP2"},
+	//
+	{0x1f, "AT_EXECFN"},
+	{0x20, "AT_SYSINFO"},
+	{0x21, "AT_SYSINFO_EHDR"},
+	{0x22, "AT_L1I_CACHESHAPE"},
+	{0x23, "AT_L1D_CACHESHAPE"},
+	{0x24, "AT_L2_CACHESHAPE"},
+	{0x25, "AT_L3_CACHESHAPE"},
+	//
+	{0x7d0, "AT_SUN_UID"},
+	{0x7d1, "AT_SUN_RUID"},
+	{0x7d2, "AT_SUN_GID"},
+	{0x7d3, "AT_SUN_RGID"},
+	{0x7d4, "AT_SUN_LDELF"},
+	{0x7d5, "AT_SUN_LDSHDR"},
+	{0x7d6, "AT_SUN_LDNAME"},
+	{0x7d7, "AT_SUN_LPAGESZ"},
+	{0x7d8, "AT_SUN_PLATFORM"},
+	{0x7d9, "AT_SUN_HWCAP"},
+	{0x7da, "AT_SUN_IFLUSH"},
+	{0x7db, "AT_SUN_CPU"},
+	{0x7dc, "AT_SUN_EMUL_ENTRY"},
+	{0x7dd, "AT_SUN_EMUL_EXECFD"},
+	{0x7de, "AT_SUN_EXECNAME"},
+	{0x7df, "AT_SUN_MMU"},
+	{0x7e0, "AT_SUN_LDDATA"},
+	{0x7e1, "AT_SUN_AUXFLAGS"}
+};
+
 
 /**
  * Detect of segment type
@@ -1124,6 +1183,34 @@ void ElfDetector::getNotes()
 }
 
 /**
+ * Get information about core file
+ */
+void ElfDetector::getCoreInfo()
+{
+	const auto* coreInfo = elfParser->getElfCoreInfo();
+
+	for(const auto& entry : coreInfo->getAuxVector())
+	{
+		auto name = mapGetValueOrDefault(auxVecMap, entry.first, "");
+		if(name.empty())
+		{
+			name = "UNKNOWN " + toString(entry.first);
+		}
+		fileInfo.addAuxVectorEntry(name, entry.second);
+	}
+
+	for(const auto& entry : coreInfo->getFileMap())
+	{
+		fileinfo::FileMapEntry fEntry;
+		fEntry.address = entry.startAddr;
+		fEntry.size = entry.endAddr - entry.startAddr;
+		fEntry.page = entry.pageOffset;
+		fEntry.path = entry.filePath;
+		fileInfo.addFileMapEntry(fEntry);
+	}
+}
+
+/**
  * Get information about operating system or ABI extension
  */
 void ElfDetector::getOsAbiInfo()
@@ -1787,6 +1874,7 @@ void ElfDetector::getAdditionalInfo()
 	getSections();
 	getSymbolTable();
 	getNotes();
+	getCoreInfo();
 }
 
 /**

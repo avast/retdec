@@ -156,6 +156,7 @@ void FileFormat::init()
 	richHeader = nullptr;
 	pdbInfo = nullptr;
 	certificateTable = nullptr;
+	elfCoreInfo = nullptr;
 	fileFormat = Format::UNDETECTABLE;
 	stateIsValid = readFile(fileStream, bytes) && stateIsValid;
 	if (getLoadFlags() & LoadFlags::NO_FILE_HASHES)
@@ -245,6 +246,7 @@ void FileFormat::clear()
 	delete richHeader;
 	delete pdbInfo;
 	delete certificateTable;
+	delete elfCoreInfo;
 
 	for(auto *item : sections)
 	{
@@ -1507,6 +1509,15 @@ const PdbInfo* FileFormat::getPdbInfo() const
 const CertificateTable* FileFormat::getCertificateTable() const
 {
 	return certificateTable;
+}
+
+/**
+ * Get information about ELF core file
+ * @return Pointer to ELF core info of @c nullptr if file has no certificates
+ */
+const ElfCoreInfo* FileFormat::getElfCoreInfo() const
+{
+	return elfCoreInfo;
 }
 
 /**

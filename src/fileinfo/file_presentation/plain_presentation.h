@@ -31,6 +31,7 @@ class PlainPresentation : public FilePresentation
 		void presentPatterns(const std::string &title, const std::vector<Pattern> &patterns);
 		void presentDotnetClasses() const;
 		void presentNotes() const;
+		void presentCore() const;
 		/// @}
 	public:
 		PlainPresentation(FileInformation &fileinfo_, bool verbose_, bool explanatory_);

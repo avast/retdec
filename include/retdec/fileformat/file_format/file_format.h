@@ -67,6 +67,7 @@ class FileFormat : public retdec::utils::ByteValueStorage, private retdec::utils
 		RichHeader *richHeader;                                           ///< rich header
 		PdbInfo *pdbInfo;                                                 ///< information about related PDB debug file
 		CertificateTable *certificateTable;                               ///< table of certificates
+		ElfCoreInfo *elfCoreInfo;                                         ///< information about core file structures
 		Format fileFormat;                                                ///< format of input file
 		bool stateIsValid;                                                ///< internal state of instance
 		std::vector<std::pair<std::size_t, std::size_t>> secHashInfo;     ///< information for calculation of section table hash
@@ -203,6 +204,7 @@ class FileFormat : public retdec::utils::ByteValueStorage, private retdec::utils
 		const RichHeader* getRichHeader() const;
 		const PdbInfo* getPdbInfo() const;
 		const CertificateTable* getCertificateTable() const;
+		const ElfCoreInfo* getElfCoreInfo() const;
 		const Symbol* getSymbol(const std::string &name) const;
 		const Symbol* getSymbol(unsigned long long address) const;
 		const Relocation* getRelocation(const std::string &name) const;
