@@ -1279,7 +1279,7 @@ ELFIO::section* ElfFormat::addRelocationTable(ELFIO::section *dynamicSection, co
 		if(seg)
 		{
 			relocationTable->set_addr_align(seg->get_align());
-			if(info.size + (info.address - relSeg->getAddress()) <= relSeg->getSizeInFile())
+			if(seg->get_data() && info.size + (info.address - relSeg->getAddress()) <= relSeg->getSizeInFile())
 			{
 				relocationTable->set_data(seg->get_data() + (info.address - relSeg->getAddress()), info.size);
 			}
