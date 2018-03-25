@@ -512,7 +512,7 @@ std::size_t CoffFormat::getBytesPerWord() const
 		case PELIB_IMAGE_FILE_MACHINE_R3000_LITTLE:
 			return 4;
 		case PELIB_IMAGE_FILE_MACHINE_R4000:
-			return is32BitArchitecture() ? 4 : 8;
+			return getFileFlags() & IMAGE_FILE_32BIT_MACHINE ? 4 : 8;
 		case PELIB_IMAGE_FILE_MACHINE_R10000:
 			return 8;
 		case PELIB_IMAGE_FILE_MACHINE_WCEMIPSV2:
@@ -535,7 +535,7 @@ std::size_t CoffFormat::getBytesPerWord() const
 		// Architecture::POWERPC
 		case PELIB_IMAGE_FILE_MACHINE_POWERPC:
 		case PELIB_IMAGE_FILE_MACHINE_POWERPCFP:
-			return is32BitArchitecture() ? 4 : 8;
+			return getFileFlags() & IMAGE_FILE_32BIT_MACHINE ? 4 : 8;
 
 		// unsupported architecture
 		default:
