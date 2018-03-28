@@ -13,7 +13,7 @@
 #include "retdec/utils/string.h"
 #include "retdec/bin2llvmir/optimizations/decoder/decoder.h"
 #include "retdec/bin2llvmir/utils/defs.h"
-#define debug_enabled true
+#define debug_enabled false
 #include "retdec/llvm-support/utils.h"
 
 using namespace retdec::llvm_support;
