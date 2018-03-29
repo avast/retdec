@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 #
 # The script tries to unpack the given executable file by using any
 # of the supported unpackers, which are at present:

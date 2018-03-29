@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 #
 # Decompiler's configuration. This file should be included in every decompilation script.
 #

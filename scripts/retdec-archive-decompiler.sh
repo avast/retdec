@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 #
 # Runs the decompilation script with the given arguments over all files in the
 # given static library.
