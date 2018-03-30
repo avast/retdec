@@ -26,7 +26,18 @@ RET_UNPACKER_FAILED=4
 # 10 other errors
 #RET_OTHER_ERRORS=10
 
-SCRIPT_DIR="$(dirname "$(readlink -e "$0")")"
+# On macOS, we want the GNU version of 'readlink', which is available under
+# 'greadlink':
+gnureadlink()
+{
+	if hash greadlink 2> /dev/null; then
+		greadlink "$@"
+	else
+		readlink "$@"
+	fi
+}
+
+SCRIPT_DIR="$(dirname "$(gnureadlink -e "$0")")"
 
 if [ -z "$DECOMPILER_UTILS" ]; then
 	DECOMPILER_UTILS="$SCRIPT_DIR/retdec-utils.sh"
