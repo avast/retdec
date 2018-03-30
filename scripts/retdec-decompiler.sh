@@ -964,9 +964,10 @@ fi
 # Remove trailing whitespace and the last redundant empty new line from the
 # generated output (if any). It is difficult to do this in the back-end, so we
 # do it here.
-# Note: When modifying the command below, ensure that it works also on macOS as
-#       its sed differs from the GNU sed.
-sed -e :a -e '/^\n*$/{$d;N;};/\n$/ba' -e 's/[[:space:]]*$//' -i'' -- "$OUT"
+# Note: Do not use the -i flag (in-place replace) as there is apparently no way
+#       of getting sed -i to work consistently on both MacOS and Linux.
+sed -e :a -e '/^\n*$/{$d;N;};/\n$/ba' -e 's/[[:space:]]*$//' < "$OUT" > "$OUT.tmp"
+mv "$OUT.tmp" "$OUT"
 
 # Colorize output file.
 if [ "$COLOR_IDA" ]; then
