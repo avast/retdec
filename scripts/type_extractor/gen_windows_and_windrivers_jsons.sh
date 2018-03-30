@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 #
 # Generates JSON files from includes in Windows SDK and Windows Drivers Kit.
 #

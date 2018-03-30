@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 #
 # The script decompiles the given file into the selected target high-level language.
 #

@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 #
 # Generates 1 JSON for C standard library and 1 for other C header files in
 # /usr/include.
