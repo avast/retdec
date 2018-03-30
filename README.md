@@ -80,16 +80,16 @@ Currently, we support only Windows (7 or later), Linux, and unofficially macOS.
 
 2. After you have built the decompiler, you will need to install the following packages:
 
-    * [Bash](https://www.gnu.org/software/bash/) (version >= 4)
+    * [Bash](https://www.gnu.org/software/bash/) (version >= 4; has to be before the default `bash` 3.2 in your `PATH`)
     * [UPX](https://upx.github.io/)
     * [Graphviz](http://www.graphviz.org/)
-    * [GNU getopt](https://www.gnu.org/software/libc/manual/html_node/Getopt.html) -- should be first in `PATH`
+    * [GNU coreutils](https://www.gnu.org/software/coreutils) (ensure that you have `$(brew --prefix coreutils)/libexec/gnubin` in your `PATH`)
+    * [GNU getopt](https://www.gnu.org/software/libc/manual/html_node/Getopt.html) (has to be before the default `getopt` in your `PATH`)
 
 3. Now, you are all set to run the decompiler. To decompile a binary file named `test.exe`, run
 
     ```
-    # /usr/local/bin/bash if installed via Homebrew
-    /path/to/gnu/bash $RETDEC_INSTALL_DIR/bin/retdec-decompiler.sh test.exe
+    $RETDEC_INSTALL_DIR/bin/retdec-decompiler.sh test.exe
     ```
 
    For more information, run `retdec-decompiler.sh` with `--help`.
@@ -156,7 +156,6 @@ Packages should be preferably installed via [Homebrew](https://brew.sh).
 * [Bison](https://www.gnu.org/software/bison/) (version >= 3.0)
 * [Flex](https://www.gnu.org/software/flex/) (version >= 2.6)
 * [autotools](https://en.wikipedia.org/wiki/GNU_Build_System) ([autoconf](https://www.gnu.org/software/autoconf/autoconf.html), [automake](https://www.gnu.org/software/automake/), and [libtool](https://www.gnu.org/software/libtool/))
-* [coreutils](https://www.gnu.org/software/coreutils) (ensure that you have `$(brew --prefix coreutils)/libexec/gnubin` in your `PATH`)
 * [wget](https://www.gnu.org/software/wget/)
 * Optional: [Doxygen](http://www.stack.nl/~dimitri/doxygen/) and [Graphviz](http://www.graphviz.org/) for generating API documentation
 
