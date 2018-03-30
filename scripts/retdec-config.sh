@@ -3,7 +3,18 @@
 # Decompiler's configuration. This file should be included in every decompilation script.
 #
 
-SCRIPT_DIR="$(dirname "$(readlink -e "$0")")"
+# On macOS, we want the GNU version of 'readlink', which is available under
+# 'greadlink':
+gnureadlink()
+{
+	if hash greadlink 2> /dev/null; then
+		greadlink "$@"
+	else
+		readlink "$@"
+	fi
+}
+
+SCRIPT_DIR="$(dirname "$(gnureadlink -e "$0")")"
 
 ##
 ## Paths (everything has to be without the ending slash '/').

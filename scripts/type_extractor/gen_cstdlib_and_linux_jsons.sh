@@ -4,6 +4,17 @@
 # /usr/include.
 #
 
+# On macOS, we want the GNU version of 'readlink', which is available under
+# 'greadlink':
+gnureadlink()
+{
+	if hash greadlink 2> /dev/null; then
+		greadlink "$@"
+	else
+		readlink "$@"
+	fi
+}
+
 #
 # C standard library headers.
 #
@@ -70,7 +81,7 @@ FILES_FILTER=${FILES_FILTER:${#SEP}}
 #
 # Paths.
 #
-SCRIPT_DIR="$(dirname "$(readlink -e "$0")")"
+SCRIPT_DIR="$(dirname "$(gnureadlink -e "$0")")"
 SCRIPT_NAME="$(basename "$SCRIPT_NAME")"
 EXTRACTOR="$SCRIPT_DIR/extract_types.py"
 MERGER="$SCRIPT_DIR/merge_jsons.py"
