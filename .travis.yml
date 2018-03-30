@@ -64,7 +64,6 @@ before_script:
   - if [ "$TRAVIS_OS_NAME" = "osx" ]; then export PATH="/usr/local/opt/flex/bin:/usr/local/opt/bison/bin:$PATH"; fi
   # Coreutils.
   - if [ "$TRAVIS_OS_NAME" = "osx" ]; then export PATH="$(brew --prefix coreutils)/libexec/gnubin:$PATH"; fi
-  - if [ "$TRAVIS_OS_NAME" = "osx" ]; then ln -s /usr/local/bin/greadlink /usr/local/bin/readlink; fi
   - if [ "$TRAVIS_OS_NAME" = "osx" ]; then export PATH="/usr/local/opt/gnu-getopt/bin:$PATH"; fi
   # We need to add ccache before everything else into PATH.
   - if [ "$TRAVIS_OS_NAME" = "osx" ]; then export PATH="/usr/local/opt/ccache/libexec:$PATH"; fi
