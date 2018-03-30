@@ -23,6 +23,7 @@
 * Enhancement: Added unofficial support for macOS build ([#7](https://github.com/avast-tl/retdec/issues/7)).
 * Enhancement: Allow 32b versions of `bin2llvmir` and `llvmir2hll` on Windows access more memory ([#7](https://github.com/avast-tl/retdec/issues/73)).
 * Enhancement: Added method in `loader::Image` to obtain segment content as raw data pointer.
+* Fix: When running RetDec on macOS, `greadlink` is now used instead of `readlink`. This fixes runtime errors of the form `readlink: illegal option -- e`.
 * Fix: `retdec-decompiler.sh` on macOS no longer requires the GNU version of `sed` ([#257](https://github.com/avast-tl/retdec/issues/257)).
 * Fix: `#!/usr/bin/env bash` is now used instead of `#!/bin/bash` to run our scripts ([#258](https://github.com/avast-tl/retdec/issues/258)).
 * Fix: Fixed `retdec-fileinfo` crashes when verifying digital signature of PE files ([#87](https://github.com/avast-tl/retdec/issues/87)).
