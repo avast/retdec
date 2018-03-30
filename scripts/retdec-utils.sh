@@ -3,7 +3,18 @@
 # Compilation and decompilation utility functions.
 #
 
-SCRIPT_DIR="$(dirname "$(readlink -e "$0")")"
+# On macOS, we want the GNU version of 'readlink', which is available under
+# 'greadlink':
+gnureadlink()
+{
+	if hash greadlink 2> /dev/null; then
+		greadlink "$@"
+	else
+		readlink "$@"
+	fi
+}
+
+SCRIPT_DIR="$(dirname "$(gnureadlink -e "$0")")"
 
 if [ -z "$DECOMPILER_CONFIG" ]; then
 	DECOMPILER_CONFIG="$SCRIPT_DIR/retdec-config.sh"
@@ -27,7 +38,7 @@ get_realpath()
 	if [[ "$(uname -s)" == *CYGWIN* ]]; then
 		cygpath -ma "$input_path"
 	else
-		readlink -f "$input_path"
+		gnureadlink -f "$input_path"
 	fi
 }
 
