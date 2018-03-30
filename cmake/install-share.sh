@@ -14,7 +14,7 @@ fi
 VERSION_FILE_NAME="version.txt"
 ARCH_SUFFIX="tar.xz"
 
-SHA256SUM_REF="b54ba07e2f28143c9afe34a9d5b4114fb61f3c1175b9807caced471fec82001e"
+SHA256HASH_REF="b54ba07e2f28143c9afe34a9d5b4114fb61f3c1175b9807caced471fec82001e"
 VERSION="2018-02-08"
 
 ###############################################################################
@@ -72,19 +72,32 @@ if [ "$WGET_RC" -ne 0 ]; then
 	exit 1
 fi
 
+sha256hash()
+{
+	# To compute the SHA-256 hash, try several alternatives, based on what
+	# command is available on the system.
+	if command -v gsha256sum >/dev/null 2>&1; then
+		gsha256sum "$@"
+	elif command -v shasum >/dev/null 2>&1; then
+		shasum -a 256 "$@"
+	else
+		sha256sum "$@"
+	fi
+}
+
 # Compute hash of the downloaded archive.
 echo "Verfifying archive's checksum ..."
-SHA256SUM=$(sha256sum "$SUPPORT_DIR/$ARCH_NAME" | cut -d' ' -f1)
-SHA256SUM_RC=$?
-if [ "$SHA256SUM_RC" -ne 0 ]; then
-	echo "ERROR: sha256sum failed"
+SHA256HASH=$(sha256hash "$SUPPORT_DIR/$ARCH_NAME" | cut -d' ' -f1)
+SHA256HASH_RC=$?
+if [ "$SHA256HASH_RC" -ne 0 ]; then
+	echo "ERROR: failed to compute the SHA-256 hash of the archive"
 	cleanup
 	exit 1
 fi
 
 # Check that hash is ok.
-if [ "$SHA256SUM" != "$SHA256SUM_REF" ]; then
-	echo "ERROR: hash check failed"
+if [ "$SHA256HASH" != "$SHA256HASH_REF" ]; then
+	echo "ERROR: downloaded archive is invalid (SHA-256 hash check failed)"
 	cleanup
 	exit 1
 fi
@@ -94,7 +107,7 @@ echo "Unpacking archive ..."
 tar xf "$SUPPORT_DIR/$ARCH_NAME" "--directory=$SUPPORT_DIR" > /dev/null 2>&1
 UNPACK_RC=$?
 if [ "$UNPACK_RC" -ne 0 ]; then
-	echo "ERROR: unpacking failed"
+	echo "ERROR: failed to unpack the archive"
 	cleanup
 	exit 1
 fi
