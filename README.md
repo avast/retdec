@@ -156,7 +156,7 @@ Packages should be preferably installed via [Homebrew](https://brew.sh).
 * [Bison](https://www.gnu.org/software/bison/) (version >= 3.0)
 * [Flex](https://www.gnu.org/software/flex/) (version >= 2.6)
 * [autotools](https://en.wikipedia.org/wiki/GNU_Build_System) ([autoconf](https://www.gnu.org/software/autoconf/autoconf.html), [automake](https://www.gnu.org/software/automake/), and [libtool](https://www.gnu.org/software/libtool/))
-* [coreutils](https://www.gnu.org/software/coreutils) (ensure that you have `$(brew --prefix coreutils)/libexec/gnubin` in your `PATH`)
+* [coreutils](https://www.gnu.org/software/coreutils)
 * [wget](https://www.gnu.org/software/wget/)
 * Optional: [Doxygen](http://www.stack.nl/~dimitri/doxygen/) and [Graphviz](http://www.graphviz.org/) for generating API documentation
 
