@@ -84,7 +84,3 @@ IDA_COLORIZER="$INSTALL_BIN_DIR/retdec-color-c.py"
 UNPACKER="$INSTALL_BIN_DIR/retdec-unpacker"
 
 DEV_NULL="/dev/null"
-
-# An alternative to the `time` shell builtin that provides more information. It
-# is used in night tests to get the running time and used memory of a command.
-TIME="/usr/bin/time -v"
