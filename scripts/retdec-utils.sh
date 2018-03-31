@@ -22,6 +22,17 @@ fi
 
 . "$DECOMPILER_CONFIG"
 
+# On macOS, 'timeout' from GNU coreutils is by default available under
+# 'gtimeout'.
+gnutimeout()
+{
+	if hash gtimeout 2> /dev/null; then
+		gtimeout "$@"
+	else
+		timeout "$@"
+	fi
+}
+
 #
 # Prints the real, physical location of a directory or file, relative or
 # absolute.

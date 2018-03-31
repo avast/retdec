@@ -3,10 +3,6 @@
 # Runs the decompilation script with the given arguments over all files in the
 # given static library.
 #
-# Requirements:
-#  - bash
-#  - the `timeout` command
-#
 
 # On macOS, we want the GNU version of 'readlink', which is available under
 # 'greadlink':
@@ -26,17 +22,6 @@ if [ -z "$DECOMPILER_UTILS" ]; then
 fi
 
 . "$DECOMPILER_UTILS"
-
-##
-## Check that all script requirements are satisfied.
-##
-for CMD in "timeout"; do
-	command -v $CMD > /dev/null 2>&1 || {
-		echo "error: The \`$CMD\` command is required but it is not" \
-			"available. Aborting." >&2
-		exit 1
-	}
-done
 
 ##
 ## Configuration.
@@ -187,7 +172,7 @@ for ((INDEX=0; INDEX<FILE_COUNT; INDEX++)); do
 
 	# We have to use indexes instead of names because archives can contain multiple files with same name.
 	LOG_FILE="$LIBRARY_PATH.file_$FILE_INDEX.log.verbose"                                                    # Do not escape!
-	timeout $TIMEOUT "$DECOMPILE_SH" --ar-index="$INDEX" -o "$LIBRARY_PATH.file_$FILE_INDEX" "$LIBRARY_PATH" $DECOMPILE_SH_ARGS > "$LOG_FILE" 2>&1
+	gnutimeout $TIMEOUT "$DECOMPILE_SH" --ar-index="$INDEX" -o "$LIBRARY_PATH.file_$FILE_INDEX" "$LIBRARY_PATH" $DECOMPILE_SH_ARGS > "$LOG_FILE" 2>&1
 	RC=$?
 
 	# Print status.
