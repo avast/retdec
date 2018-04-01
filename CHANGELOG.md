@@ -23,6 +23,7 @@
 * Enhancement: Added unofficial support for macOS build ([#7](https://github.com/avast-tl/retdec/issues/7)).
 * Enhancement: Allow 32b versions of `bin2llvmir` and `llvmir2hll` on Windows access more memory ([#7](https://github.com/avast-tl/retdec/issues/73)).
 * Enhancement: Added method in `loader::Image` to obtain segment content as raw data pointer.
+* Fix: Fixed ordering of detected tools (e.g. compilers and packers) on systems whose `std::sort()` is not stable ([#262](https://github.com/avast-tl/retdec/issues/262)).
 * Fix: When running RetDec on macOS, `gtimeout` is now used instead of `timeout` ([#260](https://github.com/avast-tl/retdec/issues/260)). This fixes the following runtime error when running `retdec-archive-decompiler.sh`: `The `timeout` command is required but it is not available`.
 * Fix: When running RetDec on macOS, `greadlink` is now used instead of `readlink`. This fixes runtime errors of the form `readlink: illegal option -- e`.
 * Fix: `retdec-decompiler.sh` on macOS no longer requires the GNU version of `sed` ([#257](https://github.com/avast-tl/retdec/issues/257)).
