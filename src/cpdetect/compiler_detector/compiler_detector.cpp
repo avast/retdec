@@ -458,7 +458,7 @@ ReturnCode CompilerDetector::getAllCompilers()
 {
 	const auto status = getAllSignatures();
 	getAllHeuristics();
-	std::sort(toolInfo.detectedTools.begin(), toolInfo.detectedTools.end(), compareForSort);
+	std::stable_sort(toolInfo.detectedTools.begin(), toolInfo.detectedTools.end(), compareForSort);
 	removeUnusedCompilers();
 	if (toolInfo.detectedLanguages.empty())
 	{
