@@ -42,15 +42,15 @@ for	arg in "$@"; do
 
 		# The input file is an archive, so use the archive decompilation script
 		# instead of fileinfo.
-		DECOMPILE_ARCHIVE_SH_PARAMS=("$IN" --list)
+		ARCHIVE_DECOMPILER_SH_PARAMS=("$IN" --list)
 		# When a JSON output was requested (any of the parameters is
 		# -j/--json), forward it to the archive decompilation script.
 		for	arg in "$@"; do
 			if [ "$arg" = "-j" ] || [ "$arg" = "--json" ]; then
-				DECOMPILE_ARCHIVE_SH_PARAMS+=(--json)
+				ARCHIVE_DECOMPILER_SH_PARAMS+=(--json)
 			fi
 		done
-		"$DECOMPILE_ARCHIVE_SH" "${DECOMPILE_ARCHIVE_SH_PARAMS[@]}"
+		"$ARCHIVE_DECOMPILER_SH" "${ARCHIVE_DECOMPILER_SH_PARAMS[@]}"
 		exit $?
 	fi
 done
