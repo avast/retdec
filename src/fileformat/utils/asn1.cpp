@@ -4,6 +4,8 @@
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */
 
+#include <cassert>
+
 #include "retdec/utils/conversion.h"
 #include "retdec/fileformat/utils/asn1.h"
 
@@ -245,6 +247,7 @@ void Asn1Sequence::init()
 		if (element == nullptr)
 			return;
 
+		assert(element->getLength() <= contentData.size() && "https://github.com/avast-tl/retdec/issues/256");
 		contentData.erase(contentData.begin(), contentData.begin() + element->getLength());
 		_elements.push_back(std::move(element));
 	}
