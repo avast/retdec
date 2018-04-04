@@ -8,11 +8,13 @@
 #define RETDEC_UTILS_OS_H
 
 // Obtain the used operating system. Currently, we only distinguish between
-// Windows and UNIX.
+// Windows, macOS, and Linux.
 #if defined(__WIN) || defined(_WIN32) || defined(__WIN32__) || defined(__CYGWIN__)
 	#define OS_WINDOWS
+#elif defined(__APPLE__)
+	#define OS_MACOS
 #else
-	#define OS_UNIX
+	#define OS_LINUX
 #endif
 
 #endif
