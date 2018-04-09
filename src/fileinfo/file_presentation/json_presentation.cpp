@@ -464,8 +464,14 @@ void JsonPresentation::presentDotnetInfo(Json::Value &root) const
  */
 void JsonPresentation::presentElfNotes(Json::Value& root) const
 {
+	auto& noteSection = fileinfo.getElfNotes();
+	if(noteSection.empty())
+	{
+		return;
+	}
+
 	Value jNotesArr;
-	for(const auto& notes : fileinfo.getElfNotes())
+	for(const auto& notes : noteSection)
 	{
 		Value jNotes;
 
