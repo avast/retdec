@@ -85,6 +85,8 @@
 #include "retdec/llvmir2hll/var_renamer/var_renamer_factory.h"
 #include "retdec/llvm-support/diagnostics.h"
 #include "retdec/utils/container.h"
+#include "retdec/utils/conversion.h"
+#include "retdec/utils/memory.h"
 #include "retdec/utils/string.h"
 
 using namespace llvm;
@@ -92,7 +94,10 @@ using namespace llvm;
 using retdec::llvmir2hll::ShPtr;
 using retdec::utils::hasItem;
 using retdec::utils::joinStrings;
+using retdec::utils::limitSystemMemory;
+using retdec::utils::limitSystemMemoryToHalfOfTotalSystemMemory;
 using retdec::utils::split;
+using retdec::utils::strToNum;
 
 namespace {
 
@@ -240,6 +245,18 @@ cl::opt<bool> StrictFPUSemantics("strict-fpu-semantics",
 		"This option may result into more correct code, although slightly less readable."),
 	cl::init(false));
 
+// Does not work with std::size_t or std::uint64_t (passing -max-memory=100
+// fails with "Cannot find option named '100'!"), so we have to use unsigned
+// long long, which should be 64b.
+cl::opt<unsigned long long> MaxMemoryLimit("max-memory",
+	cl::desc("Limit maximal memory to the given number of bytes (0 means no limit)."),
+	cl::init(0));
+
+static cl::opt<bool>
+MaxMemoryLimitHalfRAM("max-memory-half-ram",
+	cl::desc("Limit maximal memory to half of system RAM."),
+	cl::init(false));
+
 cl::opt<std::string> InputFilename(cl::Positional,
 	cl::desc("<input bitcode>"),
 	cl::init("-"));
@@ -327,6 +344,7 @@ private:
 	}
 
 	bool initialize(Module &m);
+	bool limitMaximalMemoryIfRequested();
 	void createSemantics();
 	void createSemanticsFromParameter();
 	void createSemanticsFromLLVMIR();
@@ -417,6 +435,7 @@ Decompiler::Decompiler(raw_pwrite_stream &out):
 
 bool Decompiler::runOnModule(Module &m) {
 	if (Debug) retdec::llvm_support::printPhase("initialization");
+
 	bool decompilationShouldContinue = initialize(m);
 	if (!decompilationShouldContinue) {
 		return false;
@@ -517,6 +536,12 @@ bool Decompiler::runOnModule(Module &m) {
 bool Decompiler::initialize(Module &m) {
 	llvmModule = &m;
 
+	// Maximal memory limitation.
+	bool memoryLimitationSucceeded = limitMaximalMemoryIfRequested();
+	if (!memoryLimitationSucceeded) {
+		return false;
+	}
+
 	// Instantiate the requested HLL writer and make sure it exists. We need to
 	// explicitly specify template parameters because raw_pwrite_stream has
 	// a private copy constructor, so it needs to be passed by reference.
@@ -604,6 +629,31 @@ bool Decompiler::initialize(Module &m) {
 	}
 
 	// Everything went OK.
+	return true;
+}
+
+/**
+* @brief Limits the maximal memory of the tool based on the command-line
+*        parameters.
+*/
+bool Decompiler::limitMaximalMemoryIfRequested() {
+	if (MaxMemoryLimitHalfRAM) {
+		auto limitationSucceeded = limitSystemMemoryToHalfOfTotalSystemMemory();
+		if (!limitationSucceeded) {
+			retdec::llvm_support::printErrorMessage(
+				"Failed to limit maximal memory to half of system RAM."
+			);
+			return false;
+		}
+	} else if (MaxMemoryLimit > 0) {
+		auto limitationSucceeded = limitSystemMemory(MaxMemoryLimit);
+		if (!limitationSucceeded) {
+			retdec::llvm_support::printErrorMessage(
+				"Failed to limit maximal memory to " + std::to_string(MaxMemoryLimit) + "."
+			);
+		}
+	}
+
 	return true;
 }
 
