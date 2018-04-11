@@ -7,6 +7,7 @@ set(RETDEC_UTILS_SOURCES
 	file_io.cpp
 	filesystem_path.cpp
 	math.cpp
+	memory.cpp
 	string.cpp
 	system.cpp
 	time.cpp

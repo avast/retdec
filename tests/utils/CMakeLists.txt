@@ -9,6 +9,7 @@ set(RETDEC_TESTS_UTILS_SOURCES
 	conversion_tests.cpp
 	filter_iterator_tests.cpp
 	math_tests.cpp
+	memory_tests.cpp
 	range_tests.cpp
 	scope_exit_tests.cpp
 	string_tests.cpp
