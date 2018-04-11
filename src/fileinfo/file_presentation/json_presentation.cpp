@@ -518,7 +518,8 @@ void JsonPresentation::presentElfNotes(Json::Value& root) const
 		Value jAuxInfo;
 		someCoreInfo =  true;
 
-		for(const auto& auxEntry : core.getAuxVector())
+		const auto& auxVec = core.getAuxVector();
+		for(const auto& auxEntry : auxVec)
 		{
 			Value jAuxEntry;
 			jAuxEntry["name"] = auxEntry.first;
@@ -526,6 +527,7 @@ void JsonPresentation::presentElfNotes(Json::Value& root) const
 			jAuxInfo.append(jAuxEntry);
 		}
 
+		jCoreInfo["numberOfAuxVectorEntries"] = auxVec.size();
 		jCoreInfo["auxVector"] = jAuxInfo;
 	}
 	if(core.hasFileMap())
@@ -533,7 +535,8 @@ void JsonPresentation::presentElfNotes(Json::Value& root) const
 		Value jMapInfo;
 		someCoreInfo =  true;
 
-		for(const auto& mapEntry : core.getFileMap())
+		const auto& fileMap = core.getFileMap();
+		for(const auto& mapEntry : fileMap)
 		{
 			Value jMapEntry;
 			jMapEntry["address"] = mapEntry.address;
@@ -543,6 +546,7 @@ void JsonPresentation::presentElfNotes(Json::Value& root) const
 			jMapInfo.append(jMapEntry);
 		}
 
+		jCoreInfo["numberOfFileMapEntries"] = fileMap.size();
 		jCoreInfo["fileMap"] = jMapInfo;
 	}
 
