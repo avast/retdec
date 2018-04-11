@@ -53,6 +53,8 @@
 #include <llvm/Transforms/Utils/Cloning.h>
 
 #include "retdec/llvm-support/diagnostics.h"
+#include "retdec/utils/memory.h"
+#include "retdec/utils/conversion.h"
 #include "retdec/utils/string.h"
 
 using namespace llvm;
@@ -68,6 +70,19 @@ PassList(cl::desc("Optimizations available:"));
 static cl::opt<std::string>
 OutputFilename("o", cl::desc("Output filename"),
 		cl::value_desc("filename"));
+
+// Does not work with std::size_t or std::uint64_t (passing -max-memory=100
+// fails with "Cannot find option named '100'!"), so we have to use unsigned
+// long long, which should be 64b.
+static cl::opt<unsigned long long>
+MaxMemoryLimit("max-memory",
+		cl::desc("Limit maximal memory to the given number of bytes (0 means no limit)."),
+		cl::init(0));
+
+static cl::opt<bool>
+MaxMemoryLimitHalfRAM("max-memory-half-ram",
+		cl::desc("Limit maximal memory to half of system RAM."),
+		cl::init(false));
 
 static cl::opt<bool>
 NoVerify("disable-verify", cl::desc("Do not run the verifier"), cl::Hidden);
@@ -267,6 +282,31 @@ static inline void addPassWithoutVerification(
 }
 
 /**
+* Limits the maximal memory of the tool based on the command-line parameters.
+*/
+void limitMaximalMemoryIfRequested()
+{
+	if (MaxMemoryLimitHalfRAM)
+	{
+		auto limitationSucceeded = retdec::utils::limitSystemMemoryToHalfOfTotalSystemMemory();
+		if (!limitationSucceeded)
+		{
+			throw std::runtime_error("failed to limit maximal memory to half of system RAM");
+		}
+	}
+	else if (MaxMemoryLimit > 0)
+	{
+		auto limitationSucceeded = retdec::utils::limitSystemMemory(MaxMemoryLimit);
+		if (!limitationSucceeded)
+		{
+			throw std::runtime_error(
+				"failed to limit maximal memory to " + std::to_string(MaxMemoryLimit)
+			);
+		}
+	}
+}
+
+/**
  * Call a bunch of LLVM initialization functions, same as the original opt.
  */
 void initializeLlvmPasses()
@@ -386,6 +426,8 @@ int _main(int argc, char **argv)
 			argv,
 			// Program overview.
 			"binary -> llvm .bc modular decompiler and optimizer\n");
+
+	limitMaximalMemoryIfRequested();
 
 	LLVMContext Context;
 	std::unique_ptr<Module> M = createLlvmModule(Context);

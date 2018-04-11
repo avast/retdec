@@ -17,4 +17,9 @@
 	#define OS_LINUX
 #endif
 
+// It is also useful to know whether the operating system is POSIX compliant.
+#if defined(OS_MACOS) || defined(OS_LINUX)
+	#define OS_POSIX
+#endif
+
 #endif
