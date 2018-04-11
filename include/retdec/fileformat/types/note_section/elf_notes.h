@@ -38,7 +38,7 @@ class ElfNoteEntry
 /**
  * Class describing one ELF note section or segment
  */
-class ElfNotes
+class ElfNoteSecSeg
 {
 	private:
 		const SecSeg* secSeg;            ///< associated section or segment
@@ -50,8 +50,8 @@ class ElfNotes
 	public:
 		/// @name  Constructors and destructor
 		/// @{
-		ElfNotes(const SecSeg* assocSecSeg);
-		~ElfNotes();
+		ElfNoteSecSeg(const SecSeg* assocSecSeg);
+		~ElfNoteSecSeg();
 		/// @}
 
 		/// @name Setters

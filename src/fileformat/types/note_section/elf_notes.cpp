@@ -22,14 +22,14 @@ bool ElfNoteEntry::isEmptyNote() const
  * Constructor
  * @param assocSecSeg pointer to associated section or segment
  */
-ElfNotes::ElfNotes(const SecSeg* assocSecSeg) : secSeg(assocSecSeg)
+ElfNoteSecSeg::ElfNoteSecSeg(const SecSeg* assocSecSeg) : secSeg(assocSecSeg)
 {
 }
 
 /**
  * Destructor
  */
-ElfNotes::~ElfNotes()
+ElfNoteSecSeg::~ElfNoteSecSeg()
 {
 }
 
@@ -37,7 +37,7 @@ ElfNotes::~ElfNotes()
  * Set malformed bit for notes
  * @param message optional error message
  */
-void ElfNotes::setMalformed(const std::string& message)
+void ElfNoteSecSeg::setMalformed(const std::string& message)
 {
 	malformed = true;
 	error = "malformed - " + message;
@@ -47,7 +47,7 @@ void ElfNotes::setMalformed(const std::string& message)
  * Add one note entry (move)
  * @param note note entry
  */
-void ElfNotes::addNote(ElfNoteEntry&& note)
+void ElfNoteSecSeg::addNote(ElfNoteEntry&& note)
 {
 	notes.emplace_back(std::move(note));
 }
@@ -56,7 +56,7 @@ void ElfNotes::addNote(ElfNoteEntry&& note)
  * Add one note entry (copy)
  * @param note note entry
  */
-void ElfNotes::addNote(const ElfNoteEntry& note)
+void ElfNoteSecSeg::addNote(const ElfNoteEntry& note)
 {
 	notes.emplace_back(note);
 }
@@ -65,7 +65,7 @@ void ElfNotes::addNote(const ElfNoteEntry& note)
  * Get notes for segment or section
  * @return vector of notes
  */
-std::vector<ElfNoteEntry> ElfNotes::getNotes() const
+std::vector<ElfNoteEntry> ElfNoteSecSeg::getNotes() const
 {
 	return notes;
 }
@@ -74,7 +74,7 @@ std::vector<ElfNoteEntry> ElfNotes::getNotes() const
  * Get error message for malformed binaries
  * @return error message or empty string if notes are not malformed
  */
-std::string ElfNotes::getErrorMessage() const
+std::string ElfNoteSecSeg::getErrorMessage() const
 {
 	return error;
 }
@@ -83,7 +83,7 @@ std::string ElfNotes::getErrorMessage() const
  * Get file offset of section or segment
  * @return file offset
  */
-std::size_t ElfNotes::getSecSegOffset() const
+std::size_t ElfNoteSecSeg::getSecSegOffset() const
 {
 	return secSeg->getOffset();
 }
@@ -92,7 +92,7 @@ std::size_t ElfNotes::getSecSegOffset() const
  * Get length of section or segment in file
  * @return size in file
  */
-std::size_t ElfNotes::getSecSegLength() const
+std::size_t ElfNoteSecSeg::getSecSegLength() const
 {
 	return secSeg->getSizeInFile();
 }
@@ -101,7 +101,7 @@ std::size_t ElfNotes::getSecSegLength() const
  * Get name of section (only sections have name)
  * @return section name or empty string if name is missing
  */
-std::string ElfNotes::getSectionName() const
+std::string ElfNoteSecSeg::getSectionName() const
 {
 	return secSeg->getName();
 }
@@ -110,7 +110,7 @@ std::string ElfNotes::getSectionName() const
  * Check if notes belong to named section
  * @return @c true if notes belong to named section, @c false otherwise
  */
-bool ElfNotes::isNamedSection() const
+bool ElfNoteSecSeg::isNamedSection() const
 {
 	return !secSeg->getName().empty();
 }
@@ -119,7 +119,7 @@ bool ElfNotes::isNamedSection() const
  * Check if notes are malformed
  * @return @c true if notes are malformed, @c false otherwise
  */
-bool ElfNotes::isMalformed() const
+bool ElfNoteSecSeg::isMalformed() const
 {
 	return malformed;
 }
@@ -128,7 +128,7 @@ bool ElfNotes::isMalformed() const
  * Check if object contains any notes
  * @return @c true if object contains any notes, @c false otherwise
  */
-bool ElfNotes::isEmpty() const
+bool ElfNoteSecSeg::isEmpty() const
 {
 	return notes.empty();
 }

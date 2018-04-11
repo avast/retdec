@@ -1131,7 +1131,7 @@ void ElfDetector::getNotes()
 	bool reportedUnk = false; // Set to true if unknown note was reported
 
 	const bool isCore = elfParser->getTypeOfFile() == ET_CORE;
-	for(const auto& notes : elfParser->getElfNotes())
+	for(const auto& notes : elfParser->getElfNoteSecSegs())
 	{
 		fileinfo::ElfNotes result;
 		result.setSecSegOffset(notes.getSecSegOffset());

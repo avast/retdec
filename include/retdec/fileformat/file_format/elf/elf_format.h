@@ -66,7 +66,7 @@ class ElfFormat : public FileFormat
 		void loadSegments();
 		void loadInfoFromDynamicTables(std::size_t noOfTables);
 		void loadInfoFromDynamicSegment();
-		void loadNoteSecSeg(ElfNotes &notes) const;
+		void loadNoteSecSeg(ElfNoteSecSeg &noteSecSegs) const;
 		void loadNotes();
 		void loadCoreFileMap(std::size_t offset, std::size_t size);
 		void loadCorePrStat(std::size_t offset, std::size_t size);

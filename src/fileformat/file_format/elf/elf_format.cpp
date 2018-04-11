@@ -2071,7 +2071,7 @@ void ElfFormat::loadInfoFromDynamicSegment()
  * Load notes from PT_NOTE segment or SHT_NOTE section
  * @param notes ElfNotes structure
  */
-void ElfFormat::loadNoteSecSeg(ElfNotes& notes) const
+void ElfFormat::loadNoteSecSeg(ElfNoteSecSeg& notes) const
 {
 	const std::size_t offset = notes.getSecSegOffset();
 	const std::size_t size = notes.getSecSegLength();
@@ -2164,18 +2164,18 @@ void ElfFormat::loadNotes()
 		if(section->getElfType() == SHT_NOTE
 				|| section->getName() == ".note.android.ident")
 		{
-			ElfNotes res(section);
+			ElfNoteSecSeg res(section);
 			loadNoteSecSeg(res);
 			if(!res.isEmpty())
 			{
-				notes.emplace_back(std::move(res));
+				noteSecSegs.emplace_back(std::move(res));
 			}
 		}
 	}
 
 	// Go to segments only if there are no sections or no information was
 	// loaded because SHT_NOTE sections must overlap with PT_NOTE segments
-	if(!notes.empty())
+	if(!noteSecSegs.empty())
 	{
 		return;
 	}
@@ -2186,11 +2186,11 @@ void ElfFormat::loadNotes()
 		auto segment = static_cast<const ElfSegment*>(seg);
 		if(segment->getElfType() == PT_NOTE)
 		{
-			ElfNotes res(segment);
+			ElfNoteSecSeg res(segment);
 			loadNoteSecSeg(res);
 			if(!res.isEmpty())
 			{
-				notes.emplace_back(std::move(res));
+				noteSecSegs.emplace_back(std::move(res));
 			}
 		}
 	}
@@ -2394,7 +2394,7 @@ void ElfFormat::loadCoreInfo()
 		return;
 	}
 
-	for(const auto& noteSeg : notes)
+	for(const auto& noteSeg : noteSecSegs)
 	{
 		if(noteSeg.isMalformed())
 		{
