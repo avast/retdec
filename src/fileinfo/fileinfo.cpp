@@ -87,9 +87,6 @@ void fatalErrorHandler(void *user_data, const std::string& /*reason*/, bool /*ge
 
 	fileinfo->setStatus(ReturnCode::FORMAT_PARSER_PROBLEM);
 
-	//auto message = "Error: " + reason;
-	//fileinfo->messages.push_back(message);
-
 	if(params->plainText)
 	{
 		PlainPresentation(*fileinfo, params->verbose, params->explanatory).present();
