@@ -32,6 +32,8 @@ BasicPlainGetter::~BasicPlainGetter()
 
 std::size_t BasicPlainGetter::loadInformation(std::vector<std::string> &desc, std::vector<std::string> &info) const
 {
+    const char * loaderErrorUserFriendly = fileinfo.getLoaderErrorInfo().loaderErrorUserFriendly;
+
 	desc.clear();
 	info.clear();
 
@@ -41,7 +43,12 @@ std::size_t BasicPlainGetter::loadInformation(std::vector<std::string> &desc, st
 	desc.push_back("File format              : ");
 	desc.push_back("File class               : ");
 	desc.push_back("File type                : ");
-	desc.push_back("Architecture             : ");
+
+    // Save the title for loader error (if there was a loader error detected)
+    if(loaderErrorUserFriendly != nullptr)
+        desc.push_back("Loader error             : ");
+
+    desc.push_back("Architecture             : ");
 	desc.push_back("Endianness               : ");
 	desc.push_back("Image base address       : ");
 	desc.push_back("Entry point address      : ");
@@ -56,7 +63,12 @@ std::size_t BasicPlainGetter::loadInformation(std::vector<std::string> &desc, st
 	info.push_back(fileinfo.getFileFormat());
 	info.push_back(fileinfo.getFileClass());
 	info.push_back(fileinfo.getFileType());
-	info.push_back(fileinfo.getTargetArchitecture());
+
+    // Save the text loader error
+    if(loaderErrorUserFriendly != nullptr)
+        info.push_back(loaderErrorUserFriendly);
+
+    info.push_back(fileinfo.getTargetArchitecture());
 	info.push_back(fileinfo.getEndianness());
 	info.push_back(fileinfo.getImageBaseStr(hexWithPrefix));
 	info.push_back(fileinfo.getEpAddressStr(hexWithPrefix));

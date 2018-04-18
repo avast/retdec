@@ -2300,6 +2300,21 @@ std::size_t PeFormat::getDeclaredNumberOfDataDirectories() const
 }
 
 /**
+* Get the error code that Windows loader would report
+* @return Windows loader error code
+*/
+std::size_t PeFormat::getLoaderErrorInfo(retdec::fileformat::LoaderErrorInfo & ldrErrInfo) const
+{
+    PeLib::LoaderError ldrError = file->loaderError();
+
+    ldrErrInfo.loaderErrorCode = (std::uint32_t)ldrError;
+    ldrErrInfo.loaderError = getLoaderErrorString(ldrError, false);
+    ldrErrInfo.loaderErrorUserFriendly = getLoaderErrorString(ldrError, true);
+
+    return ldrErrInfo.loaderErrorCode;
+ }
+
+/**
  * Get class of PE file
  * @return PeLib::PEFILE32 if file is 32-bit PE file, PeLib::PEFILE64 if file is
  *    64-bit PE file or any other value otherwise

@@ -23,6 +23,7 @@ class JsonPresentation : public FilePresentation
 		/// @name Auxiliary presentation methods
 		/// @{
 		void presentErrors(Json::Value &root) const;
+        void presentLoaderError(Json::Value &root) const;
 		void presentCompiler(Json::Value &root) const;
 		void presentLanguages(Json::Value &root) const;
 		void presentRichHeader(Json::Value &root) const;

@@ -22,6 +22,21 @@ namespace retdec {
 namespace fileformat {
 
 /**
+* LoaderErrorInfo - common structure that contains loader error code, error message and user-friendly error message
+*/
+
+struct LoaderErrorInfo
+{
+    LoaderErrorInfo() : loaderErrorCode(0), loaderErrorType(0), loaderError(nullptr), loaderErrorUserFriendly(nullptr)
+    {}
+
+    std::uint32_t loaderErrorCode:24;           // Loader error code, cast to uint32_t
+    std::uint32_t loaderErrorType:8;            // Loader error code source (0 - PE loader). To be extended for ELF, Mach-O etc.
+    const char * loaderError;
+    const char * loaderErrorUserFriendly;
+};
+
+/**
  * FileFormat - abstract class for parsing files
  */
 class FileFormat : public retdec::utils::ByteValueStorage, private retdec::utils::NonCopyable

@@ -35,12 +35,19 @@ PeImage::~PeImage()
  */
 bool PeImage::load()
 {
-	const retdec::fileformat::PeFormat* peFormat = static_cast<const retdec::fileformat::PeFormat*>(getFileFormat());
+    const retdec::fileformat::PeFormat* peFormat = static_cast<const retdec::fileformat::PeFormat*>(getFileFormat());
+    retdec::fileformat::LoaderErrorInfo ldrErrInfo;
 
 	// Load image base address from fileformat and store it into loader image
 	unsigned long long imageBase;
 	peFormat->getImageBaseAddress(imageBase);
 	setBaseAddress(imageBase);
+
+    // Propagate the loader error info
+    if (peFormat->getLoaderErrorInfo(ldrErrInfo) != 0)
+    {
+        setLoaderErrorInfo(ldrErrInfo);
+    }
 
 	const auto& sections = peFormat->getSections();
 	for (const auto& section : sections)

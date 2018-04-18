@@ -421,7 +421,17 @@ const std::string& Image::getStatusMessage() const
 
 void Image::setStatusMessage(const std::string& message)
 {
-	_statusMessage = message;
+    _statusMessage = message;
+}
+
+const retdec::fileformat::LoaderErrorInfo & Image::getLoaderErrorInfo() const
+{
+    return _ldrErrInfo;
+}
+
+void Image::setLoaderErrorInfo(const retdec::fileformat::LoaderErrorInfo & ldrErrInfo)
+{
+    _ldrErrInfo = ldrErrInfo;
 }
 
 Segment* Image::insertSegment(std::unique_ptr<Segment> segment)

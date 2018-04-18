@@ -37,7 +37,7 @@ class FileInformation
 		std::string endianness;                        ///< endianness
 		std::string manifest;                          ///< XML manifest
 		std::string compactManifest;                   ///< compact version of XML manifest
-		FileHeader header;                             ///< file header
+        FileHeader header;                             ///< file header
 		RichHeader richHeader;                         ///< rich header
 		PdbInfo pdbInfo;                               ///< information about related PDB file
 		ImportTable importTable;                       ///< information about imports
@@ -55,7 +55,7 @@ class FileInformation
 		std::vector<Pattern> malwarePatterns;          ///< detected malware patterns
 		std::vector<Pattern> otherPatterns;            ///< other detected patterns
 		Strings strings;                               ///< detected strings
-		retdec::utils::Maybe<bool> signatureVerified; ///< indicates whether the signature is present and if it is verified
+		retdec::utils::Maybe<bool> signatureVerified;  ///< indicates whether the signature is present and if it is verified
 		DotnetInfo dotnetInfo;                         ///< .NET information
 	public:
 		retdec::cpdetect::ToolInformation toolInfo; ///< detected tools
@@ -400,7 +400,8 @@ class FileInformation
 		std::string getNumberOfLoadedSegmentsStr(std::ios_base &(* format)(std::ios_base &)) const;
 		const LoadedSegment& getLoadedSegment(std::size_t index) const;
 		const std::string& getLoaderStatusMessage() const;
-		/// @}
+        const retdec::fileformat::LoaderErrorInfo & getLoaderErrorInfo() const;
+        /// @}
 
 		/// @name Getters of @a dotnetInfo
 		/// @{
@@ -492,7 +493,8 @@ class FileInformation
 		void setSignatureVerified(bool verified);
 		void setLoadedBaseAddress(unsigned long long baseAddress);
 		void setLoaderStatusMessage(const std::string& statusMessage);
-		void setDotnetUsed(bool set);
+        void setLoaderErrorInfo(const retdec::fileformat::LoaderErrorInfo & ldrErrInfo);
+        void setDotnetUsed(bool set);
 		void setDotnetRuntimeVersion(std::uint64_t majorVersion, std::uint64_t minorVersion);
 		void setDotnetMetadataHeaderAddress(std::uint64_t address);
 		void setDotnetMetadataStreamInfo(std::uint64_t streamOffset, std::uint64_t streamSize);

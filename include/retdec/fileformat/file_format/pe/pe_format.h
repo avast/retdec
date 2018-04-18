@@ -147,7 +147,8 @@ class PeFormat : public FileFormat
 		std::size_t getSizeOfHeapCommit() const;
 		std::size_t getNumberOfDataDirectories() const;
 		std::size_t getDeclaredNumberOfDataDirectories() const;
-		int getPeClass() const;
+        std::size_t getLoaderErrorInfo(retdec::fileformat::LoaderErrorInfo & ldrErrInfo) const;
+        int getPeClass() const;
 		bool isDotNet() const;
 		bool isPackedDotNet() const;
 		bool isVisualBasic(unsigned long long &version) const;
