@@ -10,6 +10,7 @@
 #include <llvm/Support/ErrorHandling.h>
 
 #include "retdec/utils/conversion.h"
+#include "retdec/utils/memory.h"
 #include "retdec/utils/string.h"
 #include "retdec/ar-extractor/detection.h"
 #include "retdec/cpdetect/errors.h"
@@ -48,6 +49,8 @@ struct ProgParams
 	std::set<std::string> yaraMalwarePaths; ///< paths to YARA malware rules
 	std::set<std::string> yaraCryptoPaths;  ///< paths to YARA crypto rules
 	std::set<std::string> yaraOtherPaths;   ///< paths to YARA other rules
+	std::size_t maxMemory;                  ///< maximal memory
+	bool maxMemoryHalfRAM;                  ///< limit maximal memory to half of system RAM
 	LoadFlags loadFlags;                    ///< load flags for `fileformat`
 
 	ProgParams() : searchMode(SearchType::EXACT_MATCH),
@@ -57,6 +60,8 @@ struct ProgParams
 					verbose(false),
 					explanatory(false),
 					generateConfigFile(false),
+					maxMemory(0),
+					maxMemoryHalfRAM(false),
 					loadFlags(LoadFlags::NONE) {}
 };
 
@@ -81,9 +86,6 @@ void fatalErrorHandler(void *user_data, const std::string& /*reason*/, bool /*ge
 	FileInformation *fileinfo = static_cast<ErrorHandlerInfo*>(user_data)->fileinfo;
 
 	fileinfo->setStatus(ReturnCode::FORMAT_PARSER_PROBLEM);
-
-	//auto message = "Error: " + reason;
-	//fileinfo->messages.push_back(message);
 
 	if(params->plainText)
 	{
@@ -158,7 +160,13 @@ void printHelp()
 				<< "\n"
 				<< "Options for specifying configuration file:\n"
 				<< "    --config=file, -c=file\n"
-				<< "                          Set path and name of the config which will be (re)generated.\n";
+				<< "                          Set path and name of the config which will be (re)generated.\n"
+				<< "\n"
+				<< "Options for limiting maximal memory:\n"
+				<< "    --max-memory=N\n"
+				<< "                          Limit maximal memory to N bytes (0 means no limit).\n"
+				<< "    --max-memory-half-ram\n"
+				<< "                          Limit maximal memory to half of system RAM.\n";
 }
 
 std::string getParamOrDie(std::vector<std::string> &argv, std::size_t &i)
@@ -197,7 +205,7 @@ bool doParams(int argc, char **_argv, ProgParams &params)
 	std::vector<std::string> argv;
 
 	std::set<std::string> withArgs = {"malware", "m", "crypto", "C", "other",
-			"o", "config", "c", "no-hashes"};
+			"o", "config", "c", "no-hashes", "max-memory"};
 	for (int i = 1; i < argc; ++i)
 	{
 		std::string a = _argv[i];
@@ -289,6 +297,18 @@ bool doParams(int argc, char **_argv, ProgParams &params)
 		{
 			params.yaraOtherPaths.insert(getParamOrDie(argv, i));
 		}
+		else if (c == "--max-memory")
+		{
+			auto maxMemoryString = getParamOrDie(argv, i);
+			auto conversionSucceeded = strToNum(maxMemoryString, params.maxMemory);
+			if (!conversionSucceeded) {
+				return false;
+			}
+		}
+		else if (c == "--max-memory-half-ram")
+		{
+			params.maxMemoryHalfRAM = true;
+		}
 		else if (c == "--no-hashes")
 		{
 			std::string value;
@@ -339,6 +359,24 @@ bool doParams(int argc, char **_argv, ProgParams &params)
 	return true;
 }
 
+/**
+* Limits the maximal memory of the tool based on the command-line parameters.
+*/
+void limitMaximalMemoryIfRequested(const ProgParams& params)
+{
+	// Ignore errors as there is no easy way of reporting them at this
+	// point (in a way that would work both with --plain and --json).
+	// We have at least regression tests for this.
+	if(params.maxMemoryHalfRAM)
+	{
+		limitSystemMemoryToHalfOfTotalSystemMemory();
+	}
+	else if(params.maxMemory > 0)
+	{
+		limitSystemMemory(params.maxMemory);
+	}
+}
+
 } // anonymous namespace
 
 /**
@@ -356,6 +394,8 @@ int main(int argc, char* argv[])
 		printHelp();
 		return static_cast<int>(ReturnCode::ARG);
 	}
+
+	limitMaximalMemoryIfRequested(params);
 
 	bool useConfig = true;
 	retdec::config::Config config;
