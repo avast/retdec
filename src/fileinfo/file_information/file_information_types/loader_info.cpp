@@ -88,7 +88,7 @@ const std::string& LoaderInfo::getStatusMessage() const
 
 const retdec::fileformat::LoaderErrorInfo & LoaderInfo::getLoaderErrorInfo() const
 {
-    return _ldrErrInfo;
+	return _ldrErrInfo;
 }
 
 void LoaderInfo::setBaseAddress(unsigned long long baseAddress)
@@ -103,7 +103,7 @@ void LoaderInfo::setStatusMessage(const std::string& statusMessage)
 
 void LoaderInfo::setLoaderErrorInfo(const retdec::fileformat::LoaderErrorInfo & ldrErrInfo)
 {
-    _ldrErrInfo = ldrErrInfo;
+	_ldrErrInfo = ldrErrInfo;
 }
 
 void LoaderInfo::addLoadedSegment(const LoadedSegment& segment)
