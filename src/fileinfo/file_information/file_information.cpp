@@ -2722,7 +2722,7 @@ const std::string& FileInformation::getLoaderStatusMessage() const
 */
 const retdec::fileformat::LoaderErrorInfo & FileInformation::getLoaderErrorInfo() const
 {
-    return loaderInfo.getLoaderErrorInfo();
+	return loaderInfo.getLoaderErrorInfo();
 }
 
 /**
@@ -3498,7 +3498,7 @@ void FileInformation::setLoaderStatusMessage(const std::string& statusMessage)
 */
 void FileInformation::setLoaderErrorInfo(const retdec::fileformat::LoaderErrorInfo & ldrErrInfo)
 {
-    loaderInfo.setLoaderErrorInfo(ldrErrInfo);
+	loaderInfo.setLoaderErrorInfo(ldrErrInfo);
 }
 
 /**

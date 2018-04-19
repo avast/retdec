@@ -267,11 +267,11 @@ void FileDetector::getLoaderInfo()
 		fileInfo.setLoaderStatusMessage(image->getStatusMessage());
 	}
 
-    const retdec::fileformat::LoaderErrorInfo & ldrErrInfo = image->getLoaderErrorInfo();
-    if (ldrErrInfo.loaderErrorCode != 0)
-    {
-        fileInfo.setLoaderErrorInfo(ldrErrInfo);
-    }
+	auto ldrErrInfo = image->getLoaderErrorInfo();
+	if (ldrErrInfo.loaderErrorCode != 0)
+	{
+		fileInfo.setLoaderErrorInfo(ldrErrInfo);
+	}
 }
 
 /**

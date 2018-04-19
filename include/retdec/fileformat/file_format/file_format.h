@@ -27,13 +27,12 @@ namespace fileformat {
 
 struct LoaderErrorInfo
 {
-    LoaderErrorInfo() : loaderErrorCode(0), loaderErrorType(0), loaderError(nullptr), loaderErrorUserFriendly(nullptr)
-    {}
+	LoaderErrorInfo() : loaderErrorCode(0), loaderError(nullptr), loaderErrorUserFriendly(nullptr)
+	{}
 
-    std::uint32_t loaderErrorCode:24;           // Loader error code, cast to uint32_t
-    std::uint32_t loaderErrorType:8;            // Loader error code source (0 - PE loader). To be extended for ELF, Mach-O etc.
-    const char * loaderError;
-    const char * loaderErrorUserFriendly;
+	std::uint32_t loaderErrorCode;				// Loader error code, cast to uint32_t
+	const char * loaderError;
+	const char * loaderErrorUserFriendly;
 };
 
 /**
@@ -82,6 +81,7 @@ class FileFormat : public retdec::utils::ByteValueStorage, private retdec::utils
 		PdbInfo *pdbInfo;                                                 ///< information about related PDB debug file
 		CertificateTable *certificateTable;                               ///< table of certificates
 		Format fileFormat;                                                ///< format of input file
+		LoaderErrorInfo _ldrErrInfo;									  ///< loader error (e.g. Windows loader error for PE files)
 		bool stateIsValid;                                                ///< internal state of instance
 		std::vector<std::pair<std::size_t, std::size_t>> secHashInfo;     ///< information for calculation of section table hash
 		retdec::utils::Maybe<bool> signatureVerified;                    ///< indicates whether the signature is present and also verified
@@ -143,7 +143,9 @@ class FileFormat : public retdec::utils::ByteValueStorage, private retdec::utils
 		virtual std::size_t getByteLength() const override;
 		virtual std::size_t getWordLength() const override;
 		virtual std::size_t getNumberOfNibblesInByte() const override;
+
 		/// @}
+		const LoaderErrorInfo & getLoaderErrorInfo() const;
 
 		/// @name Detection methods
 		/// @{

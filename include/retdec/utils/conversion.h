@@ -205,47 +205,24 @@ template<typename N> void bytesToHexString(const N *data, std::size_t dataSize, 
 		size = (size == 0 || offset + size > dataSize) ? dataSize - offset : size;
 	}
 
-    // Sample: 4A2A008CF1AEE9BA49D8D1DAA22D8E868365ACE633823D464478239F27ED4F18
-    // Tool: redec-fileinfo.exe, Debug, x64, data = image, dataSize = 0xE1BC00
-    // This code takes 0.106 seconds to convert (measured in VS 2015 IDE)
-    const char * intToHex = uppercase ? "0123456789ABCDEF" : "0123456789abcdef";
-    char * hexString = new char[(size * 2) + 1];
-    if (hexString != nullptr)
-    {
-        char * hexStringPtr = hexString;
+	// Sample: 4A2A008CF1AEE9BA49D8D1DAA22D8E868365ACE633823D464478239F27ED4F18
+	// Tool: redec-fileinfo.exe, Debug, x64, data = image, dataSize = 0xE1BC00
+	// Optimized: This code now takes 0.106 seconds to convert (measured in VS 2015 IDE)
+	// (down from about 40 seconds)
+	const char * intToHex = uppercase ? "0123456789ABCDEF" : "0123456789abcdef";
+	std::size_t hexIndex = 0;
 
-        // Convert to hexa byte-by-byte. No reallocations
-        for (std::size_t i = 0; i < size; ++i, hexStringPtr += 2)
-        {
-            std::uint8_t oneByte = data[offset + i];
+	// Reserve the necessary space for the hexa string
+	result.resize(size * 2);
 
-            hexStringPtr[0] = intToHex[(oneByte >> 0x04) & 0x0F];
-            hexStringPtr[1] = intToHex[(oneByte >> 0x00) & 0x0F];
-        }
-
-        // Assign the hexa string to the result
-        hexStringPtr[0] = 0;
-        result = hexString;
-
-        // Free the working string
-        delete[] hexString;
-    }
-
-/*
-    // Sample: 4A2A008CF1AEE9BA49D8D1DAA22D8E868365ACE633823D464478239F27ED4F18
-    // Tool: redec-fileinfo.exe, Debug, x64, data = image, dataSize = 0xE1BC00
-    // This code takes 40 seconds to convert (measured in VS 2015 IDE)
-    result.clear();
-	result.reserve(size * 2);
-	std::ostringstream oStr;
-
-	for(std::size_t i = 0; i < size; ++i)
+	// Convert to hexa byte-by-byte. No reallocations
+	for (std::size_t i = 0; i < size; ++i, hexIndex += 2)
 	{
-		byteToHexString(oStr, data[offset + i], uppercase);
-	}
+		std::uint8_t oneByte = data[offset + i];
 
-	result = oStr.str();
-*/
+		result[hexIndex + 0] = intToHex[(oneByte >> 0x04) & 0x0F];
+		result[hexIndex + 1] = intToHex[(oneByte >> 0x00) & 0x0F];
+	}
 }
 
 /**

@@ -131,18 +131,18 @@ void JsonPresentation::presentErrors(Json::Value &root) const
 */
 void JsonPresentation::presentLoaderError(Json::Value &root) const
 {
-    const retdec::fileformat::LoaderErrorInfo & ldrErrInfo = fileinfo.getLoaderErrorInfo();
+	auto ldrErrInfo = fileinfo.getLoaderErrorInfo();
 
-    if (ldrErrInfo.loaderErrorCode != 0)
-    {
-        Json::Value loaderErrorNode;
+	if (ldrErrInfo.loaderErrorCode != 0)
+	{
+		Json::Value loaderErrorNode;
 
-        loaderErrorNode["code"] = ldrErrInfo.loaderErrorCode;
-        loaderErrorNode["code_text"] = ldrErrInfo.loaderError;
-        loaderErrorNode["description"] = ldrErrInfo.loaderErrorUserFriendly;
+		loaderErrorNode["code"] = ldrErrInfo.loaderErrorCode;
+		loaderErrorNode["code_text"] = ldrErrInfo.loaderError;
+		loaderErrorNode["description"] = ldrErrInfo.loaderErrorUserFriendly;
 
-        root["loaderError"] = loaderErrorNode;
-    }
+		root["loaderError"] = loaderErrorNode;
+	}
 }
 
 /**
@@ -590,7 +590,7 @@ bool JsonPresentation::present()
 	Value root, jEp;
 	root["inputFile"] = fileinfo.getPathToFile();
 	presentErrors(root);
-    presentLoaderError(root);
+	presentLoaderError(root);
 	presentSimple(BasicJsonGetter(fileinfo), root);
 	if(presentSimple(EntryPointJsonGetter(fileinfo), jEp))
 	{

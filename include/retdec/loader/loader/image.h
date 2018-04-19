@@ -74,7 +74,7 @@ public:
 	std::pair<const std::uint8_t*, std::uint64_t> getRawSegmentData(std::uint64_t address) const;
 
 	const std::string& getStatusMessage() const;
-    const retdec::fileformat::LoaderErrorInfo & getLoaderErrorInfo() const;
+	const retdec::fileformat::LoaderErrorInfo & getLoaderErrorInfo() const;
 
 protected:
 	Segment* insertSegment(std::unique_ptr<Segment> segment);
@@ -83,7 +83,6 @@ protected:
 	void sortSegments();
 
 	void setStatusMessage(const std::string& message);
-    void setLoaderErrorInfo(const retdec::fileformat::LoaderErrorInfo & ldrErrInfo);
 
 private:
 	const Segment* _getSegment(std::size_t index) const;
@@ -95,7 +94,6 @@ private:
 	std::vector<std::unique_ptr<Segment>> _segments;
 	std::uint64_t _baseAddress;
 	NameGenerator _namelessSegNameGen;
-    retdec::fileformat::LoaderErrorInfo _ldrErrInfo;
 	std::string _statusMessage;
 };
 

@@ -306,6 +306,18 @@ PeFormat::~PeFormat()
 }
 
 /**
+* Init information from PE loader
+*/
+void PeFormat::initLoaderErrorInfo()
+{
+	PeLib::LoaderError ldrError = file->loaderError();
+
+	_ldrErrInfo.loaderErrorCode = static_cast<std::uint32_t>(ldrError);
+	_ldrErrInfo.loaderError = getLoaderErrorString(ldrError, false);
+	_ldrErrInfo.loaderErrorUserFriendly = getLoaderErrorString(ldrError, true);
+}
+
+/**
  * Init internal structures
  */
 void PeFormat::initStructures()
@@ -332,6 +344,10 @@ void PeFormat::initStructures()
 			file->readResourceDirectory();
 			file->readSecurityDirectory();
 			file->readComHeaderDirectory();
+
+			// Fill-in the loader error info from PE file
+			initLoaderErrorInfo();
+
 			mzHeader = file->mzHeader();
 			switch((peClass = getFileType(filePath)))
 			{
@@ -2298,21 +2314,6 @@ std::size_t PeFormat::getDeclaredNumberOfDataDirectories() const
 {
 	return formatParser->getDeclaredNumberOfDataDirectories();
 }
-
-/**
-* Get the error code that Windows loader would report
-* @return Windows loader error code
-*/
-std::size_t PeFormat::getLoaderErrorInfo(retdec::fileformat::LoaderErrorInfo & ldrErrInfo) const
-{
-    PeLib::LoaderError ldrError = file->loaderError();
-
-    ldrErrInfo.loaderErrorCode = (std::uint32_t)ldrError;
-    ldrErrInfo.loaderError = getLoaderErrorString(ldrError, false);
-    ldrErrInfo.loaderErrorUserFriendly = getLoaderErrorString(ldrError, true);
-
-    return ldrErrInfo.loaderErrorCode;
- }
 
 /**
  * Get class of PE file
