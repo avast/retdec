@@ -39,7 +39,7 @@ class LoaderInfo
 		std::string _statusMessage;
 		retdec::fileformat::LoaderErrorInfo _ldrErrInfo;
 
-public:
+	public:
 		LoaderInfo();
 		~LoaderInfo();
 

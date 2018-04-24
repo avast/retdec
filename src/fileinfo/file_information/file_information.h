@@ -37,7 +37,7 @@ class FileInformation
 		std::string endianness;                        ///< endianness
 		std::string manifest;                          ///< XML manifest
 		std::string compactManifest;                   ///< compact version of XML manifest
-	    FileHeader header;                             ///< file header
+		FileHeader header;                             ///< file header
 		RichHeader richHeader;                         ///< rich header
 		PdbInfo pdbInfo;                               ///< information about related PDB file
 		ImportTable importTable;                       ///< information about imports
@@ -400,7 +400,7 @@ class FileInformation
 		std::string getNumberOfLoadedSegmentsStr(std::ios_base &(* format)(std::ios_base &)) const;
 		const LoadedSegment& getLoadedSegment(std::size_t index) const;
 		const std::string& getLoaderStatusMessage() const;
-	    const retdec::fileformat::LoaderErrorInfo & getLoaderErrorInfo() const;
+		const retdec::fileformat::LoaderErrorInfo & getLoaderErrorInfo() const;
 	    /// @}
 
 		/// @name Getters of @a dotnetInfo
