@@ -493,7 +493,7 @@ class FileInformation
 		void setSignatureVerified(bool verified);
 		void setLoadedBaseAddress(unsigned long long baseAddress);
 		void setLoaderStatusMessage(const std::string& statusMessage);
-	    void setLoaderErrorInfo(const retdec::fileformat::LoaderErrorInfo & ldrErrInfo);
+		void setLoaderErrorInfo(const retdec::fileformat::LoaderErrorInfo & ldrErrInfo);
 		void setDotnetUsed(bool set);
 		void setDotnetRuntimeVersion(std::uint64_t majorVersion, std::uint64_t minorVersion);
 		void setDotnetMetadataHeaderAddress(std::uint64_t address);
