@@ -579,7 +579,7 @@ template<int bits> bool peDelayImport(const PeLib::PeHeaderT<bits> &peHeader,
 	import.setAddress(peImageBase(peHeader) + function->address.Value);
 	import.setLibraryIndex(fileIndex);
 	import.invalidateOrdinalNumber();
-	if(library->ordinalNumbersAreValid())
+	if(library->ordinalNumbersAreValid() && function->hint != 0)
 	{
 		import.setOrdinalNumber(function->hint);
 	}

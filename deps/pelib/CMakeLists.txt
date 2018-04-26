@@ -8,8 +8,7 @@ if(CMAKE_CXX_COMPILER)
 endif()
 
 ExternalProject_Add(pelib-project
-	URL https://github.com/avast-tl/pelib/archive/574de5912f7e07e981ef079639fb003aaa7490b5.zip
-#	URL https://github.com/avast-tl/pelib/archive/19f9a34c0dd10657303e15f7a9d03de9d177e6be.zip
+	URL https://github.com/avast-tl/pelib/archive/master.zip
 	DOWNLOAD_NAME pelib.zip
 	CMAKE_ARGS
 		# This does not work on MSVC, but may be useful on Linux.
