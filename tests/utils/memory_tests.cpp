@@ -7,6 +7,7 @@
 #include <gtest/gtest.h>
 
 #include "retdec/utils/memory.h"
+#include "retdec/utils/os.h"
 
 using namespace ::testing;
 
@@ -55,6 +56,15 @@ TEST_F(MemoryTests,
 LimitSystemMemoryReturnsFalseWhenLimitIsZero) {
 	ASSERT_FALSE(limitSystemMemory(0));
 }
+
+#ifdef OS_WINDOWS
+TEST_F(MemoryTests,
+LimitSystemMemoryReturnsFalseOnWindowsWhenLimitIsBelowPageSize) {
+	// SetInformationJobObject() requires the limit to be at least page size
+	// (e.g. 4 kB = 4096 bytes). If the limit is lower, it will fail.
+	ASSERT_FALSE(limitSystemMemory(100/*bytes*/));
+}
+#endif
 
 TEST_F(MemoryTests,
 LimitSystemMemoryToHalfOfTotalSystemMemoryReturnsTrue) {
