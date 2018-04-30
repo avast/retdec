@@ -1,6 +1,6 @@
 /**
  * @file src/fileinfo/file_presentation/getters/iterative_getter/iterative_distribution_getter/elf_core_map_plain_getter.h
- * @brief Definition of ElfNotesPlainGetter class.
+ * @brief Definition of ElfCoreMapPlainGetter class.
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */
 
@@ -12,13 +12,14 @@
 namespace fileinfo {
 
 /**
- * Getter for relocation tables
+ * Getter for core file mapping
  */
 class ElfCoreMapPlainGetter : public IterativeDistributionGetter
 {
 	protected:
 		virtual bool loadRecord(
-				std::size_t structIndex, std::size_t recIndex,
+				std::size_t structIndex,
+				std::size_t recIndex,
 				std::vector<std::string> &record) override;
 
 	public:
@@ -26,11 +27,13 @@ class ElfCoreMapPlainGetter : public IterativeDistributionGetter
 		virtual ~ElfCoreMapPlainGetter() override;
 
 		virtual std::size_t getBasicInfo(
-				std::size_t structIndex, std::vector<std::string> &desc,
+				std::size_t structIndex,
+				std::vector<std::string> &desc,
 				std::vector<std::string> &info) const override;
 
 		virtual bool getFlagDescriptors(
-				std::size_t structIndex, std::vector<std::string> &desc,
+				std::size_t structIndex,
+				std::vector<std::string> &desc,
 				std::vector<std::string> &abbv) const override;
 };
 

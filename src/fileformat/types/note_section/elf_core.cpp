@@ -85,7 +85,7 @@ const std::vector<FileMapEntry>& ElfCoreInfo::getFileMap() const
  * Get auxiliary vector
  * @return auxiliary vector
  */
-const std::vector<AuxVectorEntry>&ElfCoreInfo::getAuxVector() const
+const std::vector<AuxVectorEntry>& ElfCoreInfo::getAuxVector() const
 {
 	return auxVector;
 }

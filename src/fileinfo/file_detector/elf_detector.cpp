@@ -1131,19 +1131,19 @@ void ElfDetector::getNotes()
 	bool reportedUnk = false; // Set to true if unknown note was reported
 
 	const bool isCore = elfParser->getTypeOfFile() == ET_CORE;
-	for(const auto& notes : elfParser->getElfNoteSecSegs())
+	for(const auto& noteSecSeg : elfParser->getElfNoteSecSegs())
 	{
 		fileinfo::ElfNotes result;
-		result.setSecSegOffset(notes.getSecSegOffset());
-		result.setSecSegLength(notes.getSecSegLength());
-		if(notes.isNamedSection())
+		result.setSecSegOffset(noteSecSeg.getSecSegOffset());
+		result.setSecSegLength(noteSecSeg.getSecSegLength());
+		if(noteSecSeg.isNamedSection())
 		{
-			result.setSectionName(notes.getSectionName());
+			result.setSectionName(noteSecSeg.getSectionName());
 		}
 
-		if(notes.isMalformed())
+		if(noteSecSeg.isMalformed())
 		{
-			std::string errorMessage = notes.getErrorMessage();
+			std::string errorMessage = noteSecSeg.getErrorMessage();
 			if(errorMessage.empty())
 			{
 				errorMessage = "malformed notes found";
@@ -1154,7 +1154,7 @@ void ElfDetector::getNotes()
 			// notes loaded before corrupted note.
 		}
 
-		for(const auto& note : notes.getNotes())
+		for(const auto& note : noteSecSeg.getNotes())
 		{
 			ElfNoteEntry entry;
 			entry.owner = note.name;

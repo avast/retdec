@@ -1,6 +1,6 @@
 /**
- * @file src/fileinfo/file_presentation/getters/iterative_getter/iterative_distribution_getter/elf_notes_plain_getter.cpp
- * @brief Methods of ElfNotesPlainGetter class.
+ * @file src/fileinfo/file_presentation/getters/iterative_getter/iterative_distribution_getter/elf_auxv_plain_getter.cpp
+ * @brief Methods of ElfAuxVPlainGetter class.
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */
 
@@ -100,7 +100,8 @@ bool ElfAuxVPlainGetter::loadRecord(
 }
 
 bool ElfAuxVPlainGetter::getFlagDescriptors(
-		std::size_t structIndex, std::vector<std::string> &desc,
+		std::size_t structIndex,
+		std::vector<std::string> &desc,
 		std::vector<std::string> &abbv) const
 {
 	if(structIndex >= numberOfStructures)

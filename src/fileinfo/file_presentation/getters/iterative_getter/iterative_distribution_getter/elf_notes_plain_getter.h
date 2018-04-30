@@ -12,13 +12,14 @@
 namespace fileinfo {
 
 /**
- * Getter for relocation tables
+ * Getter for ELF notes
  */
 class ElfNotesPlainGetter : public IterativeDistributionGetter
 {
 	protected:
 		virtual bool loadRecord(
-				std::size_t structIndex, std::size_t recIndex,
+				std::size_t structIndex,
+				std::size_t recIndex,
 				std::vector<std::string> &record) override;
 
 	public:
@@ -26,11 +27,13 @@ class ElfNotesPlainGetter : public IterativeDistributionGetter
 		virtual ~ElfNotesPlainGetter() override;
 
 		virtual std::size_t getBasicInfo(
-				std::size_t structIndex, std::vector<std::string> &desc,
+				std::size_t structIndex,
+				std::vector<std::string> &desc,
 				std::vector<std::string> &info) const override;
 
 		virtual bool getFlagDescriptors(
-				std::size_t structIndex, std::vector<std::string> &desc,
+				std::size_t structIndex,
+				std::vector<std::string> &desc,
 				std::vector<std::string> &abbv) const override;
 };
 

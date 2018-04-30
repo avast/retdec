@@ -69,7 +69,8 @@ ElfNotesPlainGetter::~ElfNotesPlainGetter()
 }
 
 std::size_t ElfNotesPlainGetter::getBasicInfo(
-		std::size_t structIndex, std::vector<std::string> &desc,
+		std::size_t structIndex,
+		std::vector<std::string> &desc,
 		std::vector<std::string> &info) const
 {
 	if(structIndex >= numberOfStructures)
@@ -102,7 +103,8 @@ std::size_t ElfNotesPlainGetter::getBasicInfo(
 }
 
 bool ElfNotesPlainGetter::loadRecord(
-		std::size_t structIndex, std::size_t recIndex,
+		std::size_t structIndex,
+		std::size_t recIndex,
 		std::vector<std::string> &record)
 {
 	if(structIndex >= numberOfStructures
