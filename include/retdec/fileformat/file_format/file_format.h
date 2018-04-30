@@ -30,7 +30,7 @@ struct LoaderErrorInfo
 	LoaderErrorInfo() : loaderErrorCode(0), loaderError(nullptr), loaderErrorUserFriendly(nullptr)
 	{}
 
-	std::uint32_t loaderErrorCode;				// Loader error code, cast to uint32_t
+	std::uint32_t loaderErrorCode;               // Loader error code, cast to uint32_t
 	const char * loaderError;
 	const char * loaderErrorUserFriendly;
 };
@@ -81,11 +81,11 @@ class FileFormat : public retdec::utils::ByteValueStorage, private retdec::utils
 		PdbInfo *pdbInfo;                                                 ///< information about related PDB debug file
 		CertificateTable *certificateTable;                               ///< table of certificates
 		Format fileFormat;                                                ///< format of input file
-		LoaderErrorInfo _ldrErrInfo;									  ///< loader error (e.g. Windows loader error for PE files)
+		LoaderErrorInfo _ldrErrInfo;                                      ///< loader error (e.g. Windows loader error for PE files)
 		bool stateIsValid;                                                ///< internal state of instance
 		std::vector<std::pair<std::size_t, std::size_t>> secHashInfo;     ///< information for calculation of section table hash
-		retdec::utils::Maybe<bool> signatureVerified;                    ///< indicates whether the signature is present and also verified
-		retdec::utils::RangeContainer<std::uint64_t> nonDecodableRanges; ///< Address ranges which should not be decoded for instructions.
+		retdec::utils::Maybe<bool> signatureVerified;                     ///< indicates whether the signature is present and also verified
+		retdec::utils::RangeContainer<std::uint64_t> nonDecodableRanges;  ///< Address ranges which should not be decoded for instructions.
 
 		/// @name Clear methods
 		/// @{
