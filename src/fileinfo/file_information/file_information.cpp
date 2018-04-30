@@ -2612,6 +2612,24 @@ std::string FileInformation::isSignatureVerifiedStr(const std::string& t, const 
 }
 
 /**
+ * Get ELF notes
+ * @return vector with ELF notes
+ */
+const std::vector<ElfNotes>& FileInformation::getElfNotes() const
+{
+	return elfNotes;
+}
+
+/**
+ * Get ELF core info
+ * @return ELF core info
+ */
+const ElfCore& FileInformation::getElfCoreInfo() const
+{
+	return elfCoreInfo;
+}
+
+/**
  * Get number of detected compilers or packers
  * @return Number of detected compilers or packers
  */
@@ -3702,6 +3720,25 @@ void FileInformation::addRelocationTable(RelocationTable &table)
 void FileInformation::addDynamicSection(DynamicSection &section)
 {
 	dynamicSections.push_back(section);
+}
+
+/**
+ * Add ELF notes
+ * @param notes Loaded ELF notes
+ */
+void FileInformation::addElfNotes(ElfNotes& notes)
+{
+	elfNotes.push_back(notes);
+}
+
+void FileInformation::addFileMapEntry(const FileMapEntry& entry)
+{
+	elfCoreInfo.addFileMapEntry(entry);
+}
+
+void FileInformation::addAuxVectorEntry(const std::string& name, std::size_t value)
+{
+	elfCoreInfo.addAuxVectorEntry(name, value);
 }
 
 /**

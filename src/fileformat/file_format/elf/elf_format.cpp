@@ -756,6 +756,46 @@ const std::map<unsigned, const std::vector<std::uint8_t>*> arm64RelocationMap =
 	{1032, &ALL_QWORD}
 };
 
+// Useful ELF note types
+
+constexpr std::size_t NT_PRSTATUS = 0x00000001;
+constexpr std::size_t NT_PRPSINFO = 0x00000003;
+constexpr std::size_t NT_AUXV = 0x00000006;
+constexpr std::size_t NT_FILE = 0x46494c45;
+
+// Various architecture registers
+
+const std::vector<std::string> x86Regs {
+	"ebx", "ecx", "edx", "esi", "edi", "ebp", "eax", "ds", "es", "fs", "gs",
+	"eax_o", "eip", "cs", "eflags", "esp", "ss"
+};
+
+const std::vector<std::string> armRegs {
+	"r0", "r1", "r2", "r3", "r4", "r5", "r6", "r7", "r8", "r9", "r10", "r11",
+	"r12", "sp", "lr", "pc", "cpsr"
+};
+
+const std::vector<std::string> x64Regs {
+	"r15", "r14", "r13", "r12", "rbp", "rbx", "r11", "r10", "r9", "r8", "rax",
+	"rcx", "rdx", "rsi", "rdi", "rax_o", "rip", "cs", "rflags", "rsp", "ss",
+	"fs_b", "gs_b", "ds", "es", "fs", "gs"
+};
+
+const std::vector<std::string> aarch64Regs {
+	"x0", "x1", "x2", "x3", "x4", "x5", "x6", "x7", "x8", "x9", "x10", "x11",
+	"x12", "x13", "x14", "x15", "x16", "x17", "x18", "x19", "x20", "x21",
+	"x22", "x23", "x24", "x25","x26", "x27", "x28", "x29", "x30", "sp", "pc",
+	"pstate"
+};
+
+// Names are same for both 32 and 64 bit PowerPC architectures
+const std::vector<std::string> ppcRegs {
+	"r0", "r1", "r2", "r3", "r4", "r5", "r6", "r7", "r8", "r9", "r10", "r11",
+	"r12", "r13", "r14", "r15", "r16", "r17", "r18", "r19", "r20", "r21",
+	"r22", "r23", "r24", "r25","r26", "r27", "r28", "r29", "r30", "r31",
+	"pc", "msr", "r3_o", "ctr", "lr", "xer", "cr", "softe", "trap", "dar",
+	"dsisr", "result"
+};
 
 /**
  * Get type of symbol
@@ -1092,6 +1132,8 @@ void ElfFormat::initStructures()
 	}
 	computeSectionTableHashes();
 	loadStrings();
+	loadNotes(); // must be done after sections and segments
+	loadCoreInfo(); // must be done after notes
 }
 
 std::size_t ElfFormat::initSectionTableHashOffsets()
@@ -2023,6 +2065,372 @@ void ElfFormat::loadInfoFromDynamicSegment()
 	}
 
 	loadInfoFromDynamicTables(noOfDynTables);
+}
+
+/**
+ * Load notes from PT_NOTE segment or SHT_NOTE section
+ * @param notes ElfNotes structure
+ */
+void ElfFormat::loadNoteSecSeg(ElfNoteSecSeg& notes) const
+{
+	const std::size_t offset = notes.getSecSegOffset();
+	const std::size_t size = notes.getSecSegLength();
+	if(!offset || !size)
+	{
+		return;
+	}
+
+	const auto endianess = getEndianness();
+	// Specification for 64-bit files claims that entry size should be 8 bytes
+	// but every 64-bit ELF file analyzed had only 4 byte long entries.
+	const auto entrySize = 4;
+
+	std::size_t currOff = offset;
+	std::size_t maxOff = offset + size;
+	while(currOff < maxOff)
+	{
+		std::uint64_t nameSize = 0;
+		if(!getXByteOffset(currOff, entrySize, nameSize, endianess))
+		{
+			notes.setMalformed("could not read note owner size");
+			break;
+		}
+		currOff += entrySize;
+
+		std::uint64_t descSize = 0;
+		if(!getXByteOffset(currOff, entrySize, descSize, endianess))
+		{
+			notes.setMalformed("could not read note description size");
+			break;
+		}
+		currOff += entrySize;
+
+		// Get note type
+		std::uint64_t type = 0;
+		if(!getXByteOffset(currOff, entrySize, type, endianess))
+		{
+			notes.setMalformed("could not read note type");
+			break;
+		}
+		currOff += entrySize;
+
+		if(currOff + nameSize > maxOff)
+		{
+			notes.setMalformed("note owner size too big");
+			break;
+		}
+
+		// Get owner name stored as C string
+		std::string name;
+		if(!getString(name, currOff, nameSize))
+		{
+			break;
+		}
+
+		// Move offset behind name - aligned to entry size
+		auto mod = nameSize % entrySize;
+		currOff += nameSize + (mod ? entrySize - mod : 0);
+
+		if(currOff + descSize > maxOff)
+		{
+			notes.setMalformed("note data size too big");
+			break;
+		}
+
+		ElfNoteEntry note;
+		note.dataOffset = currOff;
+		note.dataLength = descSize;
+
+		// Move offset behind description - aligned to entry size
+		mod = descSize % entrySize;
+		currOff += descSize + (mod ? entrySize - mod : 0);
+
+		note.name = name.c_str(); // Trims trailing zero if present
+		note.type = type;
+		notes.addNote(note);
+	}
+}
+
+/**
+ * Load notes from ELF note sections or segments
+ */
+void ElfFormat::loadNotes()
+{
+	// Check sections first as they contain more information
+	for(const Section* sec : sections)
+	{
+		auto section = static_cast<const ElfSection*>(sec);
+		// For some reason Android uses SHT_PROGBITS for notes
+		if(section->getElfType() == SHT_NOTE
+				|| section->getName() == ".note.android.ident")
+		{
+			ElfNoteSecSeg res(section);
+			loadNoteSecSeg(res);
+			if(!res.isEmpty())
+			{
+				noteSecSegs.emplace_back(std::move(res));
+			}
+		}
+	}
+
+	// Go to segments only if there are no sections or no information was
+	// loaded because SHT_NOTE sections must overlap with PT_NOTE segments
+	if(!noteSecSegs.empty())
+	{
+		return;
+	}
+
+	// Check segments - kernel core dumps do not create sections
+	for(const Segment* seg : segments)
+	{
+		auto segment = static_cast<const ElfSegment*>(seg);
+		if(segment->getElfType() == PT_NOTE)
+		{
+			ElfNoteSecSeg res(segment);
+			loadNoteSecSeg(res);
+			if(!res.isEmpty())
+			{
+				noteSecSegs.emplace_back(std::move(res));
+			}
+		}
+	}
+}
+
+/**
+ * Load file map from core file
+ * @param offset offset off NT_FILE note data
+ * @param size size of NT_FILE note data
+ *
+ * This function expects only data from non-malformed notes to avoid multiple
+ * offset sanity checks. Make sure this is not used with malformed notes!
+ */
+void ElfFormat::loadCoreFileMap(std::size_t offset, std::size_t size)
+{
+	const auto endianness = getEndianness();
+	// As I have only two 32-bit MIPS samples from lldb test repository,
+	// this MIPS condition may be wrong.
+	const auto entrySize = isMips() ? 8 : elfClass == ELFCLASS32 ? 4 : 8;
+
+	std::size_t currOff = offset;
+	std::size_t maxOff = offset + size;
+
+	if(currOff + 2 * entrySize > maxOff)
+	{
+		return;
+	}
+
+	std::uint64_t count;
+	getXByteOffset(currOff, entrySize, count, endianness);
+	currOff += entrySize;
+
+	std::uint64_t pageSize;
+	getXByteOffset(currOff, entrySize, pageSize, endianness);
+	currOff += entrySize;
+
+	// We will use this to extract strings so we have to retype to signed type
+	const char* data = reinterpret_cast<const char*>(getLoadedBytes().data());
+	std::size_t pathOff = currOff + 3 * entrySize * count;
+
+	for(std::size_t i = 0; i < count; ++i)
+	{
+		if(pathOff > maxOff)
+		{
+			return;
+		}
+
+		FileMapEntry entry;
+		getXByteOffset(currOff, entrySize, entry.startAddr, endianness);
+		currOff += entrySize;
+		getXByteOffset(currOff, entrySize, entry.endAddr, endianness);
+		currOff += entrySize;
+		getXByteOffset(currOff, entrySize, entry.pageOffset, endianness);
+		currOff += entrySize;
+
+		// Paths are stored as zero delimited strings after address table
+		entry.filePath = data + pathOff;
+		pathOff += entry.filePath.size() + 1;
+
+		elfCoreInfo->addFileMapEntry(entry);
+	}
+}
+
+/**
+ * Load prstatus info struct from core file
+ * @param offset offset off NT_PRSTATUS note data
+ * @param size size of NT_PRSTATUS note data
+ *
+ * This function expects only data from non-malformed notes to avoid multiple
+ * offset sanity checks. Make sure this is not used with malformed notes!
+ */
+void ElfFormat::loadCorePrStat(std::size_t offset, std::size_t size)
+{
+	PrStatusInfo info;
+	const auto endianness = getEndianness();
+
+	// Skip to pid and ppid value
+	std::size_t currOff = offset + (elfClass == ELFCLASS32 ? 0x18 : 0x20);
+	std::size_t maxOff = offset + size;
+	if(currOff + 8 > maxOff)
+	{
+		return;
+	}
+
+	// Load process IDs
+	get4ByteOffset(currOff, info.pid, endianness);
+	get4ByteOffset(currOff + 4, info.ppid, endianness);
+
+	// Skip to GP registers (offsets are from start)
+	currOff = offset + (elfClass == ELFCLASS32 ? 0x48 : 0x70);
+
+	// Get register characteristics for specific architecture
+	std::size_t regSize = elfClass == ELFCLASS32 ? 4 : 8;
+	std::vector<std::string> regNames;
+	switch(getTargetArchitecture())
+	{
+		// Order of registers must agree with arch. specific prstatus struct
+		case Architecture::X86:
+			regNames = x86Regs;
+			break;
+
+		case Architecture::X86_64:
+			regNames = x64Regs;
+			break;
+
+		case Architecture::ARM:
+			regNames = elfClass == ELFCLASS32 ? armRegs : aarch64Regs;
+			break;
+
+		case Architecture::POWERPC:
+			// Names should be same for both 32 and 64 bit PowerPC
+			regNames = ppcRegs;
+			break;
+
+		case Architecture::MIPS:
+			// I did not manage to find register descriptions for MIPS
+
+		case Architecture::UNKNOWN:
+			/* fall-thru */
+
+		default:
+			return;
+	}
+
+	if(currOff + regNames.size() * regSize > maxOff)
+	{
+		return;
+	}
+
+	// Load registers for process
+	std::uint64_t value = 0;
+	for(const auto& name : regNames)
+	{
+		getXByteOffset(currOff, regSize, value, endianness);
+		currOff += regSize;
+		info.registers.emplace(name, value);
+	}
+
+	// Store process info
+	elfCoreInfo->addPrStatusInfo(info);
+}
+
+/**
+ * Load prpsinfo info struct from core file
+ * @param offset offset off NT_PRPSINFO note data
+ * @param size size of NT_PRPSINFO note data
+ *
+ * This function expects only data from non-malformed notes to avoid multiple
+ * offset sanity checks. Make sure this is not used with malformed notes!
+ */
+void ElfFormat::loadCorePrPsInfo(std::size_t offset, std::size_t size)
+{
+	std::size_t currOff = offset + (elfClass == ELFCLASS32 ? 0x1c : 0x28);
+	if(currOff + 16 + 80 < offset + size)
+	{
+		return;
+	}
+
+	std::string res;
+	getString(res, currOff, 16);
+	elfCoreInfo->setAppName(res.c_str());
+
+	getString(res, currOff + 16, 80);
+	elfCoreInfo->setCmdLine(res.c_str());
+}
+
+/**
+ * Load info from auxiliary vector
+ * @param offset offset off NT_AUXV note data
+ * @param size size of NT_AUXV note data
+ *
+ * This function expects only data from non-malformed notes to avoid multiple
+ * offset sanity checks. Make sure this is not used with malformed notes!
+ */
+void ElfFormat::loadCoreAuxvInfo(std::size_t offset, std::size_t size)
+{
+	const auto endianness = getEndianness();
+	const auto entrySize = elfClass == ELFCLASS32 ? 4 : 8;
+
+	std::size_t maxOff = offset + size;
+	while(offset < maxOff)
+	{
+		AuxVectorEntry entry;
+		getXByteOffset(offset, entrySize, entry.first, endianness);
+		offset += entrySize;
+		getXByteOffset(offset, entrySize, entry.second, endianness);
+		offset += entrySize;
+
+		elfCoreInfo->addAuxVectorEntry(entry);
+	}
+}
+
+/**
+ * Load information from core files that we can read
+ */
+void ElfFormat::loadCoreInfo()
+{
+	elfCoreInfo = new ElfCoreInfo;
+	if(!elfCoreInfo)
+	{
+		return;
+	}
+
+	for(const auto& noteSeg : noteSecSegs)
+	{
+		if(noteSeg.isMalformed())
+		{
+			continue;
+		}
+
+		for(const ElfNoteEntry& entry : noteSeg.getNotes())
+		{
+			if(entry.name == "CORE")
+			{
+				switch(entry.type)
+				{
+					case NT_FILE:
+						loadCoreFileMap(entry.dataOffset, entry.dataLength);
+						break;
+
+					case NT_PRSTATUS:
+						loadCorePrStat(entry.dataOffset, entry.dataLength);
+						break;
+
+					case NT_PRPSINFO:
+						loadCorePrPsInfo(entry.dataOffset, entry.dataLength);
+						break;
+
+					case NT_AUXV:
+						loadCoreAuxvInfo(entry.dataOffset, entry.dataLength);
+						break;
+
+					default:
+						break;
+				}
+			}
+		}
+	}
+
+	//elfCoreInfo->dump(std::cout); // Debug output
 }
 
 retdec::utils::Endianness ElfFormat::getEndianness() const

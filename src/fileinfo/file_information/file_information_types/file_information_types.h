@@ -11,6 +11,8 @@
 #include "fileinfo/file_information/file_information_types/data_directory.h"
 #include "fileinfo/file_information/file_information_types/dotnet_info.h"
 #include "fileinfo/file_information/file_information_types/dynamic_section/dynamic_section.h"
+#include "fileinfo/file_information/file_information_types/elf_core.h"
+#include "fileinfo/file_information/file_information_types/elf_notes.h"
 #include "fileinfo/file_information/file_information_types/export_table.h"
 #include "fileinfo/file_information/file_information_types/file_header.h"
 #include "fileinfo/file_information/file_information_types/file_section.h"

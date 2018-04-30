@@ -459,6 +459,104 @@ void JsonPresentation::presentDotnetInfo(Json::Value &root) const
 }
 
 /**
+ * Present ELF notes
+ * @param root Parent node in output document
+ */
+void JsonPresentation::presentElfNotes(Json::Value& root) const
+{
+	auto& noteSection = fileinfo.getElfNotes();
+	if(noteSection.empty())
+	{
+		return;
+	}
+
+	Value jNotesArr;
+	for(const auto& notes : noteSection)
+	{
+		Value jNotes;
+
+		if(notes.isNamedSection())
+		{
+			jNotes["name"] = replaceNonprintableChars(notes.getSectionName());
+		}
+		if(notes.isMalformed())
+		{
+			jNotes["warning"] = notes.getErrorMessage();
+		}
+
+		jNotes["size"] = notes.getSecSegLength();
+		jNotes["offset"] = notes.getSecSegOffset();
+		jNotes["numberOfNotes"] = notes.getNotes().size();
+
+		Value jNoteArr;
+		std::size_t idx = 0;
+		for(const auto& note : notes.getNotes())
+		{
+			Value jNote;
+
+			jNote["index"] = idx++;
+			jNote["owner"] = replaceNonprintableChars(note.owner);
+			jNote["type"] = note.type;
+			jNote["dataSize"] = note.dataLength;
+			jNote["dataOffset"] = note.dataOffset;
+			jNote["description"] = replaceNonprintableChars(note.description);
+			jNoteArr.append(jNote);
+		}
+
+		jNotes["noteEntries"] = jNoteArr;
+		jNotesArr.append(jNotes);
+	}
+
+	root["elfNotes"] = jNotesArr;
+
+	Value jCoreInfo;
+	auto someCoreInfo = false;
+
+	const auto& core = fileinfo.getElfCoreInfo();
+	if(core.hasAuxVector())
+	{
+		Value jAuxInfo;
+		someCoreInfo =  true;
+
+		const auto& auxVec = core.getAuxVector();
+		for(const auto& auxEntry : auxVec)
+		{
+			Value jAuxEntry;
+			jAuxEntry["name"] = auxEntry.first;
+			jAuxEntry["value"] = auxEntry.second;
+			jAuxInfo.append(jAuxEntry);
+		}
+
+		jCoreInfo["numberOfAuxVectorEntries"] = auxVec.size();
+		jCoreInfo["auxVector"] = jAuxInfo;
+	}
+	if(core.hasFileMap())
+	{
+		Value jMapInfo;
+		someCoreInfo =  true;
+
+		const auto& fileMap = core.getFileMap();
+		for(const auto& mapEntry : fileMap)
+		{
+			Value jMapEntry;
+			jMapEntry["address"] = mapEntry.address;
+			jMapEntry["size"] = mapEntry.size;
+			jMapEntry["page"] = mapEntry.page;
+			jMapEntry["path"] = replaceNonprintableChars(mapEntry.path);
+			jMapInfo.append(jMapEntry);
+		}
+
+		jCoreInfo["numberOfFileMapEntries"] = fileMap.size();
+		jCoreInfo["fileMap"] = jMapInfo;
+	}
+
+	if(someCoreInfo)
+	{
+		root["elfCore"] = jCoreInfo;
+	}
+}
+
+/**
  * Present information about flags
  * @param root Parent node in output document
  * @param title Flags title
@@ -614,6 +712,7 @@ bool JsonPresentation::present()
 		{
 			root["manifest"] = replaceNonasciiChars(manifest);
 		}
+		presentElfNotes(root);
 		presentLoaderInfo(root);
 		presentPatterns(root);
 		presentCertificateAttributes(root);

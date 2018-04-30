@@ -14,6 +14,8 @@
 #include "retdec/fileformat/types/dynamic_table/dynamic_table.h"
 #include "retdec/fileformat/types/export_table/export_table.h"
 #include "retdec/fileformat/types/import_table/import_table.h"
+#include "retdec/fileformat/types/note_section/elf_notes.h"
+#include "retdec/fileformat/types/note_section/elf_core.h"
 #include "retdec/fileformat/types/pdb_info/pdb_info.h"
 #include "retdec/fileformat/types/relocation_table/relocation_table.h"
 #include "retdec/fileformat/types/resource_table/resource_table.h"

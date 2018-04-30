@@ -44,6 +44,7 @@ class FileInformation
 		ExportTable exportTable;                       ///< information about exports
 		ResourceTable resourceTable;                   ///< information about resources in input file
 		CertificateTable certificateTable;             ///< information about certificates
+		ElfCore elfCoreInfo;                           ///< information about ELF core files
 		LoaderInfo loaderInfo;                         ///< information about loaded image
 		std::vector<DataDirectory> directories;        ///< information about data directories
 		std::vector<FileSegment> segments;             ///< information about segments in file
@@ -51,6 +52,7 @@ class FileInformation
 		std::vector<SymbolTable> symbolTables;         ///< symbol tables
 		std::vector<RelocationTable> relocationTables; ///< relocation tables
 		std::vector<DynamicSection> dynamicSections;   ///< information about dynamic sections
+		std::vector<ElfNotes> elfNotes;                ///< information about ELF sections
 		std::vector<Pattern> cryptoPatterns;           ///< detected crypto patterns
 		std::vector<Pattern> malwarePatterns;          ///< detected malware patterns
 		std::vector<Pattern> otherPatterns;            ///< other detected patterns
@@ -383,6 +385,12 @@ class FileInformation
 		std::string isSignatureVerifiedStr(const std::string& t = "true", const std::string& f = "false") const;
 		/// @}
 
+		/// @name Getter of @a elfNotes and associtated structures
+		/// @{
+		const std::vector<ElfNotes>& getElfNotes() const;
+		const ElfCore& getElfCoreInfo() const;
+		/// @}
+
 		/// @name Getters of @a compilerOrPackerInfo
 		/// @{
 		std::size_t getNumberOfDetectedCompilers() const;
@@ -520,6 +528,9 @@ class FileInformation
 		void addSymbolTable(SymbolTable &table);
 		void addRelocationTable(RelocationTable &table);
 		void addDynamicSection(DynamicSection &section);
+		void addElfNotes(ElfNotes &notes);
+		void addFileMapEntry(const FileMapEntry& entry);
+		void addAuxVectorEntry(const std::string& name, std::size_t value);
 		void addCryptoPattern(Pattern &pattern);
 		void removeRedundantCryptoRules();
 		void sortCryptoPatternMatches();

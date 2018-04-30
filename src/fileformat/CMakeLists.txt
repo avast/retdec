@@ -49,6 +49,8 @@ set(FILEFORMAT_SOURCES
 	types/dynamic_table/dynamic_entry.cpp
 	types/dynamic_table/dynamic_table.cpp
 	types/strings/string.cpp
+	types/note_section/elf_notes.cpp
+	types/note_section/elf_core.cpp
 	file_format/pe/pe_format_parser/pe_format_parser64.cpp
 	file_format/pe/pe_format_parser/pe_format_parser.cpp
 	file_format/pe/pe_format_parser/pe_format_parser32.cpp
