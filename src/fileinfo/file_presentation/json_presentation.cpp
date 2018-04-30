@@ -484,9 +484,9 @@ void JsonPresentation::presentElfNotes(Json::Value& root) const
 			jNotes["warning"] = notes.getErrorMessage();
 		}
 
-		jNotes["size"] = notes.getSecSegLength();
-		jNotes["offset"] = notes.getSecSegOffset();
-		jNotes["numberOfNotes"] = notes.getNotes().size();
+		jNotes["size"] = static_cast<std::uint64_t>(notes.getSecSegLength());
+		jNotes["offset"] = static_cast<std::uint64_t>(notes.getSecSegOffset());
+		jNotes["numberOfNotes"] = static_cast<std::uint64_t>(notes.getNotes().size());
 
 		Value jNoteArr;
 		std::size_t idx = 0;
@@ -494,11 +494,11 @@ void JsonPresentation::presentElfNotes(Json::Value& root) const
 		{
 			Value jNote;
 
-			jNote["index"] = idx++;
+			jNote["index"] = static_cast<std::uint64_t>(idx++);
 			jNote["owner"] = replaceNonprintableChars(note.owner);
-			jNote["type"] = note.type;
-			jNote["dataSize"] = note.dataLength;
-			jNote["dataOffset"] = note.dataOffset;
+			jNote["type"] = static_cast<std::uint64_t>(note.type);
+			jNote["dataSize"] = static_cast<std::uint64_t>(note.dataLength);
+			jNote["dataOffset"] = static_cast<std::uint64_t>(note.dataOffset);
 			jNote["description"] = replaceNonprintableChars(note.description);
 			jNoteArr.append(jNote);
 		}
@@ -527,7 +527,7 @@ void JsonPresentation::presentElfNotes(Json::Value& root) const
 			jAuxInfo.append(jAuxEntry);
 		}
 
-		jCoreInfo["numberOfAuxVectorEntries"] = auxVec.size();
+		jCoreInfo["numberOfAuxVectorEntries"] = static_cast<std::uint64_t>(auxVec.size());
 		jCoreInfo["auxVector"] = jAuxInfo;
 	}
 	if(core.hasFileMap())
@@ -546,7 +546,7 @@ void JsonPresentation::presentElfNotes(Json::Value& root) const
 			jMapInfo.append(jMapEntry);
 		}
 
-		jCoreInfo["numberOfFileMapEntries"] = fileMap.size();
+		jCoreInfo["numberOfFileMapEntries"] = static_cast<std::uint64_t>(fileMap.size());
 		jCoreInfo["fileMap"] = jMapInfo;
 	}
 
