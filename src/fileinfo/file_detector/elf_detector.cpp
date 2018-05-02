@@ -304,6 +304,18 @@ const std::map<std::size_t, std::string> auxVecMap =
 	{0x7e1, "AT_SUN_AUXFLAGS"}
 };
 
+// NT_GNU_ABI_TAG OS map
+const std::map<std::size_t, std::string> abiOsMap =
+{
+	{0x00, "Linux"},
+	{0x01, "Hurd"},
+	{0x02, "Sun Solaris"},
+	{0x03, "FreeBSD"},
+	{0x04, "NetBSD"},
+	{0x05, "Syllable"},
+	{0x06, "NaCl"}
+};
+
 
 /**
  * Detect of segment type
@@ -1290,6 +1302,30 @@ void ElfDetector::getOsAbiInfoNote()
 
 	for(const auto& noteSecSeg : elfParser->getElfNoteSecSegs())
 	{
+		if(noteSecSeg.isMalformed())
+		{
+			continue;
+		}
+
+		for(const auto& note : noteSecSeg.getNotes())
+		{
+			if(note.name == "GNU" && note.type == 0x001)
+			{
+				std::uint64_t os, major, minor, patch;
+				elfParser->get4ByteOffset(note.dataOffset, os);
+				elfParser->get4ByteOffset(note.dataOffset + 4, major);
+				elfParser->get4ByteOffset(note.dataOffset + 8, minor);
+				elfParser->get4ByteOffset(note.dataOffset + 12, patch);
+
+				std::stringstream ss;
+				ss << major << '.' << minor << '.' << patch;
+
+				fileInfo.setOsAbi(mapGetValueOrDefault(abiOsMap, os, "GNU"));
+				fileInfo.setOsAbiVersion(ss.str());
+				return;
+			}
+		}
+
 		// Special Android case
 		if(noteSecSeg.getSectionName() == ".note.android.ident")
 		{
