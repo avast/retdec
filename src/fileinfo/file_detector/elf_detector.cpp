@@ -1210,13 +1210,15 @@ void ElfDetector::getCoreInfo()
 	}
 }
 
+
 /**
  * Get information about operating system or ABI extension
  */
 void ElfDetector::getOsAbiInfo()
 {
 	std::string abi;
-	const unsigned long long osAbi = elfParser->getOsOrAbi(), abiVersion = elfParser->getOsOrAbiVersion();
+	const auto osAbi = elfParser->getOsOrAbi();
+	const auto abiVersion = elfParser->getOsOrAbiVersion();
 	switch(osAbi)
 	{
 		case ELFOSABI_NONE:
@@ -1274,6 +1276,36 @@ void ElfDetector::getOsAbiInfo()
 	}
 	fileInfo.setOsAbi(abi);
 	fileInfo.setOsAbiVersion(numToStr(abiVersion));
+}
+
+/**
+ * Get information about operating system or ABI extension from note section
+ */
+void ElfDetector::getOsAbiInfoNote()
+{
+	if(elfParser->getOsOrAbi() != ELFOSABI_NONE)
+	{
+		return;
+	}
+
+	for(const auto& noteSecSeg : elfParser->getElfNoteSecSegs())
+	{
+		// Special Android case
+		if(noteSecSeg.getSectionName() == ".note.android.ident")
+		{
+			const auto& notes = noteSecSeg.getNotes();
+			if(!notes.empty())
+			{
+				std::uint64_t result;
+				if(elfParser->get4ByteOffset(notes[0].dataOffset, result))
+				{
+					fileInfo.setOsAbi("Android");
+					fileInfo.setOsAbiVersion(numToStr(result));
+					return;
+				}
+			}
+		}
+	}
 }
 
 void ElfDetector::detectFileClass()
@@ -1869,6 +1901,7 @@ void ElfDetector::getAdditionalInfo()
 	getFileVersion();
 	getFileHeaderInfo();
 	getOsAbiInfo();
+	getOsAbiInfoNote();
 	getFlags();
 	getSegments();
 	getSections();
