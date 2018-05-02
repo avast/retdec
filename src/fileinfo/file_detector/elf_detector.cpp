@@ -1295,8 +1295,9 @@ void ElfDetector::getOsAbiInfo()
  */
 void ElfDetector::getOsAbiInfoNote()
 {
-	if(elfParser->getOsOrAbi() != ELFOSABI_NONE)
+	if(elfParser->getOsOrAbiVersion())
 	{
+		// Prefer info from above function
 		return;
 	}
 
@@ -1321,6 +1322,24 @@ void ElfDetector::getOsAbiInfoNote()
 				ss << major << '.' << minor << '.' << patch;
 
 				fileInfo.setOsAbi(mapGetValueOrDefault(abiOsMap, os, "GNU"));
+				fileInfo.setOsAbiVersion(ss.str());
+				return;
+			}
+
+			if(note.name == "FreeBSD" && note.type == 0x001)
+			{
+				std::uint64_t abiVersion, major, minor, patch;
+				elfParser->get4ByteOffset(note.dataOffset, abiVersion);
+
+				// Version 1003514 means 10.03.514
+				major = abiVersion / 100000;
+				minor = abiVersion % 100000 / 1000;
+				patch = abiVersion % 1000;
+
+				std::stringstream ss;
+				ss << major << '.' << minor << '.' << patch;
+
+				fileInfo.setOsAbi("FreeBSD");
 				fileInfo.setOsAbiVersion(ss.str());
 				return;
 			}
