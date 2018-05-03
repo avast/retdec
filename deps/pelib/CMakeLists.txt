@@ -9,7 +9,7 @@ endif()
 
 ExternalProject_Add(pelib-project
 	URL https://github.com/avast-tl/pelib/archive/8ee59d45ee11124174301111367cd5eaeb0a7733.zip
-	URL_HASH SHA256=197322958879dc96f87a55a2d7bb9118611657f44a3686082b5b6b5df2fd51f0
+	URL_HASH SHA256=309d29f9e729d76de5ab4f2a6fb37a999257d3e3aa88ff99cb1195c2c6be8da0
 	DOWNLOAD_NAME pelib.zip
 	CMAKE_ARGS
 		# This does not work on MSVC, but may be useful on Linux.
