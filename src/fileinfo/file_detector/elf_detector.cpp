@@ -1222,7 +1222,6 @@ void ElfDetector::getCoreInfo()
 	}
 }
 
-
 /**
  * Get information about operating system or ABI extension
  */
@@ -1264,10 +1263,10 @@ void ElfDetector::getOsAbiInfo()
 			abi = "Novell Modesto";
 			break;
 		case ELFOSABI_OPENBSD:
-			abi = "Open BSD";
+			abi = "OpenBSD";
 			break;
 		case ELFOSABI_OPENVMS:
-			abi = "Open VMS";
+			abi = "OpenVMS";
 			break;
 		case ELFOSABI_NSK:
 			abi = "Hewlett-Packard Non-Stop Kernel";
@@ -1276,7 +1275,13 @@ void ElfDetector::getOsAbiInfo()
 			abi = "Amiga Research OS";
 			break;
 		case ELFOSABI_FENIXOS:
-			abi = "The FenixOS highly scalable multi-core OS";
+			abi = "FenixOS";
+			break;
+		case ELFOSABI_CLOUDABI:
+			abi = "Nuxi CloudABI";
+			break;
+		case ELFOSABI_OPENVOS:
+			abi = "Stratus Technologies OpenVOS";
 			break;
 		default:
 			break;
