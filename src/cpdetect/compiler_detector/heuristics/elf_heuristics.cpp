@@ -72,6 +72,38 @@ void ElfHeuristics::getUpxHeuristics()
 }
 
 /**
+ * Try to detect tools from note section
+ */
+void ElfHeuristics::getNoteHeuristics()
+{
+	auto source = DetectionMethod::NOTE_H;
+	auto strength = DetectionStrength::MEDIUM;
+
+	for (const auto& noteSecSeg : elfParser.getElfNoteSecSegs())
+	{
+		if (noteSecSeg.isMalformed())
+		{
+			continue;
+		}
+
+		for (const auto& note : noteSecSeg.getNotes())
+		{
+			if (note.name == "GNU" && note.type == 0x004)
+			{
+				std::string res;
+				elfParser.getString(res, note.dataOffset, note.dataLength);
+
+				if (startsWith(res, "gold"))
+				{
+					const auto pos = res.find(' ');
+					addLinker(source, strength, "gold", res.substr(pos + 1));
+				}
+			}
+		}
+	}
+}
+
+/**
  * Try to detect Borland Kylix
  */
 void ElfHeuristics::getBorlandKylixHeuristics()
@@ -135,6 +167,7 @@ void ElfHeuristics::getDynamicEntriesHeuristics()
 void ElfHeuristics::getFormatSpecificCompilerHeuristics()
 {
 	getUpxHeuristics();
+	getNoteHeuristics();
 	getBorlandKylixHeuristics();
 	getDynamicEntriesHeuristics();
 }

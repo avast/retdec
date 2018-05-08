@@ -24,6 +24,7 @@ class ElfHeuristics : public Heuristics
 		/// @name Detection methods
 		/// @{
 		void getUpxHeuristics();
+		void getNoteHeuristics();
 		void getBorlandKylixHeuristics();
 		void getDynamicEntriesHeuristics();
 		/// @}
