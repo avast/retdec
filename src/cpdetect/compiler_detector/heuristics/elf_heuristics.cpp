@@ -99,6 +99,12 @@ void ElfHeuristics::getNoteHeuristics()
 					addLinker(source, strength, "gold", res.substr(pos + 1));
 				}
 			}
+
+			if (note.name == "HP" && note.type == 0x001)
+			{
+				addCompiler(source, strength, "HP C++");
+				addLanguage("C++");
+			}
 		}
 	}
 }
