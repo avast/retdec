@@ -2735,6 +2735,15 @@ const std::string& FileInformation::getLoaderStatusMessage() const
 }
 
 /**
+* Gets loader error message.
+* @return The error message of the loader.
+*/
+const retdec::fileformat::LoaderErrorInfo & FileInformation::getLoaderErrorInfo() const
+{
+	return loaderInfo.getLoaderErrorInfo();
+}
+
+/**
  * Checks whether .NET information are used.
  * @return @c true if it is used, otherwise @c false/
  */
@@ -3499,6 +3508,15 @@ void FileInformation::setLoadedBaseAddress(unsigned long long baseAddress)
 void FileInformation::setLoaderStatusMessage(const std::string& statusMessage)
 {
 	loaderInfo.setStatusMessage(statusMessage);
+}
+
+/**
+* Sets loader error message.
+* @param statusMessage The loader error message.
+*/
+void FileInformation::setLoaderErrorInfo(const retdec::fileformat::LoaderErrorInfo & ldrErrInfo)
+{
+	loaderInfo.setLoaderErrorInfo(ldrErrInfo);
 }
 
 /**

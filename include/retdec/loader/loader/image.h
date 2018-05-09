@@ -74,6 +74,7 @@ public:
 	std::pair<const std::uint8_t*, std::uint64_t> getRawSegmentData(std::uint64_t address) const;
 
 	const std::string& getStatusMessage() const;
+	const retdec::fileformat::LoaderErrorInfo & getLoaderErrorInfo() const;
 
 protected:
 	Segment* insertSegment(std::unique_ptr<Segment> segment);

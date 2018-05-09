@@ -424,6 +424,11 @@ void Image::setStatusMessage(const std::string& message)
 	_statusMessage = message;
 }
 
+const retdec::fileformat::LoaderErrorInfo & Image::getLoaderErrorInfo() const
+{
+	return getFileFormat()->getLoaderErrorInfo();
+}
+
 Segment* Image::insertSegment(std::unique_ptr<Segment> segment)
 {
 	_segments.push_back(std::move(segment));

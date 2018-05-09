@@ -44,6 +44,7 @@ class PeFormat : public FileFormat
 
 		/// @name Initialization methods
 		/// @{
+		void initLoaderErrorInfo();
 		void initStructures();
 		/// @}
 
@@ -147,6 +148,7 @@ class PeFormat : public FileFormat
 		std::size_t getSizeOfHeapCommit() const;
 		std::size_t getNumberOfDataDirectories() const;
 		std::size_t getDeclaredNumberOfDataDirectories() const;
+
 		int getPeClass() const;
 		bool isDotNet() const;
 		bool isPackedDotNet() const;
