@@ -306,6 +306,18 @@ PeFormat::~PeFormat()
 }
 
 /**
+* Init information from PE loader
+*/
+void PeFormat::initLoaderErrorInfo()
+{
+	PeLib::LoaderError ldrError = file->loaderError();
+
+	_ldrErrInfo.loaderErrorCode = static_cast<std::uint32_t>(ldrError);
+	_ldrErrInfo.loaderError = getLoaderErrorString(ldrError, false);
+	_ldrErrInfo.loaderErrorUserFriendly = getLoaderErrorString(ldrError, true);
+}
+
+/**
  * Init internal structures
  */
 void PeFormat::initStructures()
@@ -332,6 +344,10 @@ void PeFormat::initStructures()
 			file->readResourceDirectory();
 			file->readSecurityDirectory();
 			file->readComHeaderDirectory();
+
+			// Fill-in the loader error info from PE file
+			initLoaderErrorInfo();
+
 			mzHeader = file->mzHeader();
 			switch((peClass = getFileType(filePath)))
 			{

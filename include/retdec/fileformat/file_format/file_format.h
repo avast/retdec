@@ -22,6 +22,20 @@ namespace retdec {
 namespace fileformat {
 
 /**
+* LoaderErrorInfo - common structure that contains loader error code, error message and user-friendly error message
+*/
+
+struct LoaderErrorInfo
+{
+	LoaderErrorInfo() : loaderErrorCode(0), loaderError(nullptr), loaderErrorUserFriendly(nullptr)
+	{}
+
+	std::uint32_t loaderErrorCode;               // Loader error code, cast to uint32_t
+	const char * loaderError;
+	const char * loaderErrorUserFriendly;
+};
+
+/**
  * FileFormat - abstract class for parsing files
  */
 class FileFormat : public retdec::utils::ByteValueStorage, private retdec::utils::NonCopyable
@@ -69,10 +83,11 @@ class FileFormat : public retdec::utils::ByteValueStorage, private retdec::utils
 		CertificateTable *certificateTable;                               ///< table of certificates
 		ElfCoreInfo *elfCoreInfo;                                         ///< information about core file structures
 		Format fileFormat;                                                ///< format of input file
+		LoaderErrorInfo _ldrErrInfo;                                      ///< loader error (e.g. Windows loader error for PE files)
 		bool stateIsValid;                                                ///< internal state of instance
 		std::vector<std::pair<std::size_t, std::size_t>> secHashInfo;     ///< information for calculation of section table hash
-		retdec::utils::Maybe<bool> signatureVerified;                    ///< indicates whether the signature is present and also verified
-		retdec::utils::RangeContainer<std::uint64_t> nonDecodableRanges; ///< Address ranges which should not be decoded for instructions.
+		retdec::utils::Maybe<bool> signatureVerified;                     ///< indicates whether the signature is present and also verified
+		retdec::utils::RangeContainer<std::uint64_t> nonDecodableRanges;  ///< Address ranges which should not be decoded for instructions.
 
 		/// @name Clear methods
 		/// @{
@@ -130,7 +145,9 @@ class FileFormat : public retdec::utils::ByteValueStorage, private retdec::utils
 		virtual std::size_t getByteLength() const override;
 		virtual std::size_t getWordLength() const override;
 		virtual std::size_t getNumberOfNibblesInByte() const override;
+
 		/// @}
+		const LoaderErrorInfo & getLoaderErrorInfo() const;
 
 		/// @name Detection methods
 		/// @{

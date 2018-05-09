@@ -245,8 +245,16 @@ void FileDetector::getCertificates()
 /**
  * Get loader information
  */
+
 void FileDetector::getLoaderInfo()
 {
+	// Propagate loader error no matter if the Image pointer will be created or not
+	auto ldrErrInfo = getFileParser()->getLoaderErrorInfo();
+	if (ldrErrInfo.loaderErrorCode != 0)
+	{
+		fileInfo.setLoaderErrorInfo(ldrErrInfo);
+	}
+
 	std::unique_ptr<retdec::loader::Image> image = retdec::loader::createImage(fileParser);
 	if(!image)
 	{

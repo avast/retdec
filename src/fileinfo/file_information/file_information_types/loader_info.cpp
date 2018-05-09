@@ -4,6 +4,7 @@
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */
 
+#include "retdec/fileformat/file_format/file_format.h"
 #include "fileinfo/file_information/file_information_types/loader_info.h"
 #include "fileinfo/file_information/file_information_types/type_conversions.h"
 
@@ -85,6 +86,11 @@ const std::string& LoaderInfo::getStatusMessage() const
 	return _statusMessage;
 }
 
+const retdec::fileformat::LoaderErrorInfo & LoaderInfo::getLoaderErrorInfo() const
+{
+	return _ldrErrInfo;
+}
+
 void LoaderInfo::setBaseAddress(unsigned long long baseAddress)
 {
 	_baseAddress = baseAddress;
@@ -93,6 +99,11 @@ void LoaderInfo::setBaseAddress(unsigned long long baseAddress)
 void LoaderInfo::setStatusMessage(const std::string& statusMessage)
 {
 	_statusMessage = statusMessage;
+}
+
+void LoaderInfo::setLoaderErrorInfo(const retdec::fileformat::LoaderErrorInfo & ldrErrInfo)
+{
+	_ldrErrInfo = ldrErrInfo;
 }
 
 void LoaderInfo::addLoadedSegment(const LoadedSegment& segment)

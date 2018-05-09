@@ -117,7 +117,7 @@ bool isAddressFromRegion(const SecSeg *actualRegion, const SecSeg *newRegion, st
  * @param loadFlags Load flags
  */
 FileFormat::FileFormat(std::istream &inputStream, LoadFlags loadFlags) : loadedBytes(&bytes),
-	loadFlags(loadFlags), fileStream(inputStream)
+	loadFlags(loadFlags), fileStream(inputStream), _ldrErrInfo()
 {
 	stateIsValid = !inputStream.fail();
 	init();
@@ -129,7 +129,7 @@ FileFormat::FileFormat(std::istream &inputStream, LoadFlags loadFlags) : loadedB
  * @param loadFlags Load flags
  */
 FileFormat::FileFormat(std::string pathToFile, LoadFlags loadFlags) : loadedBytes(&bytes),
-	loadFlags(loadFlags), filePath(pathToFile), fileStream(auxStream)
+	loadFlags(loadFlags), filePath(pathToFile), fileStream(auxStream), _ldrErrInfo()
 {
 	auxStream.open(filePath, std::ifstream::binary);
 	stateIsValid = auxStream.is_open();
@@ -700,6 +700,15 @@ std::size_t FileFormat::getWordLength() const
 std::size_t FileFormat::getNumberOfNibblesInByte() const
 {
 	return !getNibbleLength() ? 0 : !(getByteLength() % getNibbleLength()) ? getByteLength() / getNibbleLength() : 0;
+}
+
+/**
+* Get reference to the loader error info
+* @return The LoaderErrorInfo structire
+*/
+const LoaderErrorInfo & FileFormat::getLoaderErrorInfo() const
+{
+	return _ldrErrInfo;
 }
 
 /**
