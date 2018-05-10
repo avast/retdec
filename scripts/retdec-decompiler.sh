@@ -91,7 +91,7 @@ print_help()
 }
 SCRIPT_NAME=$0
 GETOPT_SHORTOPT="a:e:hkl:m:o:p:"
-GETOPT_LONGOPT="arch:,help,keep-unreachable-funcs,target-language:,mode:,output:,pdb:,backend-aggressive-opts,backend-arithm-expr-evaluator:,backend-call-info-obtainer:,backend-cfg-test,backend-disabled-opts:,backend-emit-cfg,backend-emit-cg,backend-cg-conversion:,backend-cfg-conversion:,backend-enabled-opts:,backend-find-patterns:,backend-force-module-name:,backend-keep-all-brackets,backend-keep-library-funcs,backend-llvmir2bir-converter:,backend-no-compound-operators,backend-no-debug,backend-no-debug-comments,backend-no-opts,backend-no-symbolic-names,backend-no-time-varying-info,backend-no-var-renaming,backend-semantics,backend-strict-fpu-semantics,backend-var-renamer:,cleanup,graph-format:,raw-entry-point:,raw-section-vma:,endian:,select-decode-only,select-functions:,select-ranges:,fileinfo-verbose,fileinfo-use-all-external-patterns,config:,color-for-ida,no-config,stop-after:,static-code-sigfile:,static-code-archive:,no-default-static-signatures,ar-name:,ar-index:,max-memory:,no-memory-limit"
+GETOPT_LONGOPT="arch:,help,keep-unreachable-funcs,target-language:,mode:,output:,pdb:,backend-aggressive-opts,backend-arithm-expr-evaluator:,backend-call-info-obtainer:,backend-cfg-test,backend-disabled-opts:,backend-emit-cfg,backend-emit-cg,backend-cg-conversion:,backend-cfg-conversion:,backend-enabled-opts:,backend-find-patterns:,backend-force-module-name:,backend-keep-all-brackets,backend-keep-library-funcs,backend-llvmir2bir-converter:,backend-no-compound-operators,backend-no-debug,backend-no-debug-comments,backend-no-opts,backend-no-symbolic-names,backend-no-time-varying-info,backend-no-var-renaming,backend-semantics,backend-strict-fpu-semantics,backend-var-renamer:,cleanup,graph-format:,raw-entry-point:,raw-section-vma:,endian:,select-decode-only,select-functions:,select-ranges:,fileinfo-verbose,fileinfo-use-all-external-patterns,generate-log,config:,color-for-ida,no-config,stop-after:,static-code-sigfile:,static-code-archive:,no-default-static-signatures,ar-name:,ar-index:,max-memory:,no-memory-limit"
 
 #
 # Check proper combination of input arguments.
@@ -213,6 +213,7 @@ print_warning_if_decompiling_bytecode()
 check_whether_decompilation_should_be_forcefully_stopped()
 {
 	if [ "$STOP_AFTER" = "$1" ]; then
+		[ "$GENERATE_LOG" ] && generate_log
 		cleanup
 		echo ""
 		echo "#### Forced stop due to '--stop-after $STOP_AFTER'..."
@@ -238,7 +239,275 @@ cleanup()
 		rm -f "$OUT_RESTORED"			# Archive support
 		rm -f "$OUT_ARCHIVE"			# Archive support (Macho-O Universal)
 		rm -f "${SIGNATURES_TO_REMOVE[@]}"	# Signatures generated from archives
+		[ "$TOOL_LOG_FILE" ] && rm -f "$TOOL_LOG_FILE"
 	fi
+}
+
+#
+# An alternative to the `time` shell builtin that provides more information. It
+# is used in decompilation log to get the running time and used memory of a command.
+#
+TIME="/usr/bin/time -v"
+TIMEOUT=300
+
+#
+# Parses the given return code and output from a tool that was run through
+# `/usr/bin/time -v` and prints the return code to be stored into the log.
+#
+# Parameters:
+#
+#    - $1: return code from `/usr/bin/time`
+#    - $2: combined output from the tool and `/usr/bin/time -v`
+#
+# This function has to be called for every tool that is run through
+# `/usr/bin/time`. The reason is that when a tool is run without
+# `/usr/bin/time` and it e.g. segfaults, shell returns 139, but when it is run
+# through `/usr/bin/time`, it returns 11 (139 - 128). If this is the case, this
+# function prints 139 instead of 11 to make the return codes of all tools
+# consistent.
+#
+get_tool_rc()
+{
+	ORIGINAL_RC="$1"
+	OUTPUT="$2"
+
+	SIGNAL_REGEX="Command terminated by signal ([0-9]*)"
+	if [[ "$OUTPUT" =~ $SIGNAL_REGEX ]]; then
+		SIGNAL_NUM="${BASH_REMATCH[1]}"
+		RC="$((SIGNAL_NUM + 128))"
+	else
+		RC="$ORIGINAL_RC"
+	fi
+
+	# We want to be able to distinguish assertions and memory-insufficiency
+	# errors. The problem is that both assertions and memory-insufficiency
+	# errors make the program exit with return code 134. We solve this by
+	# replacing 134 with 135 (SIBGUS, 7) when there is 'std::bad_alloc' in the
+	# output. So, 134 will mean abort (assertion error) and 135 will mean
+	# memory-insufficiency error.
+	if [ "$RC" = "134" ]; then
+		if [[ $OUTPUT =~ std::bad_alloc ]]; then
+			RC="135"
+		fi
+	fi
+
+	echo "$RC"
+}
+
+#
+# Parses the given output ($1) from a tool that was run through
+# `/usr/bin/time -v` and prints the running time in seconds.
+#
+get_tool_runtime()
+{
+	# The output from `/usr/bin/time -v` looks like this:
+	#
+	#    [..] (output from the tool)
+	#        Command being timed: "tool"
+	#        User time (seconds): 0.04
+	#        System time (seconds): 0.00
+	#        [..] (other data)
+	#
+	# We combine the user and system times into a single time in seconds.
+	USER_TIME_F=$(egrep 'User time \(seconds\):' <<< "$1" | cut -d: -f2)
+	SYSTEM_TIME_F=$(egrep 'System time \(seconds\):' <<< "$1" | cut -d: -f2)
+	RUNTIME_F=$(echo $USER_TIME_F + $SYSTEM_TIME_F | bc)
+	# Convert the runtime from float to int (http://unix.stackexchange.com/a/89843).
+	# By adding 1, we make sure that the runtime is at least one second. This
+	# also takes care of proper rounding (we want to round runtime 1.1 to 2).
+	echo "($RUNTIME_F + 1)/1" | bc
+}
+
+#
+# Parses the given output ($1) from a tool that was run through
+# `/usr/bin/time -v` and prints the memory usage in MB.
+#
+get_tool_memory_usage()
+{
+	# The output from `/usr/bin/time -v` looks like this:
+	#
+	#    [..] (output from the tool)
+	#        Command being timed: "tool"
+	#        [..] (other data)
+	#        Maximum resident set size (kbytes): 1808
+	#        [..] (other data)
+	#
+	# We want the value of "resident set size" (RSS), which we convert from KB
+	# to MB. If the resulting value is less than 1 MB, round it to 1 MB.
+	RSS_KB=$(egrep 'Maximum resident set size \(kbytes\):' <<< "$1" | cut -d: -f2)
+	RSS_MB=$(($RSS_KB / 1024))
+	echo "$(($RSS_MB > 0 ? $RSS_MB : 1))"
+}
+
+#
+# Prints the actual output of a tool that was run through `/usr/bin/time -v`.
+# The parameter ($1) is the combined output from the tool and `/usr/bin/time -v`.
+#
+get_tool_output()
+{
+	# The output from `/usr/bin/time -v` looks either like this (success):
+	#
+	#    [..] (output from the tool)
+	#        Command being timed: "tool"
+	#        [..] (other data)
+	#
+	# or like this (when there was an error):
+	#
+	#    [..] (output from the tool)
+	#        Command exited with non-zero status X
+	#        [..] (other data)
+	#
+	# Remove everything after and including "Command..."
+	# (http://stackoverflow.com/a/5227429/2580955).
+	sed -n '/Command being timed:/q;p' <<< "$1" | \
+		sed -n '/Command exited with non-zero status/q;p'
+}
+
+#
+# Prints an escaped version of the given text so it can be inserted into JSON.
+#
+# Parameters:
+#   - $1 Text to be escaped.
+#
+json_escape() {
+	# We need to escape backslashes (\), double quotes ("), and replace new lines with '\n'.
+	echo "$1" | sed 's/\\/\\\\/g' | sed 's/"/\\"/g' | sed '{:q;N;s/\n/\\n/g;t q}'
+}
+
+#
+# Removes color codes from the given text ($1).
+#
+remove_colors()
+{
+	sed -r "s/\x1b[^m]*m//g" <<< "$1"
+}
+
+#
+# Platform-independent alternative to `ulimit -t` or `timeout`.
+# Based on http://www.bashcookbook.com/bashinfo/source/bash-4.0/examples/scripts/timeout3
+# 1 argument is needed - PID
+# Returns - 1 if number of arguments is incorrect
+#           0 otherwise
+#
+timed_kill()
+{
+	if [ "$#" != "1" ]; then
+		return 1
+	fi
+	local PID=$1					# PID of the target process
+	local PROCESS_NAME="$(ps -p $PID -o comm --no-heading)"
+	if [ "$PROCESS_NAME" = "time" ]; then
+		# The program is run through `/usr/bin/time`, so get the PID of the
+		# child process (the actual program). Otherwise, if we killed
+		# `/usr/bin/time`, we would obtain no output from it (user time, memory
+		# usage etc.).
+		PID=$(ps --ppid $PID -o pid --no-heading | head -n1)
+	fi
+
+	if [ -z "$TIMEOUT" ]; then
+		TIMEOUT=300
+	fi
+	declare -i timeout=$TIMEOUT
+	((t = timeout))
+	while ((t > 0)); do
+		sleep 1
+		kill -0 "$PID" > "$DEV_NULL" 2> "$DEV_NULL" || exit 0
+		((t = t-1))
+	done
+	kill_tree "$PID" SIGKILL > "$DEV_NULL" 2> "$DEV_NULL"
+}
+
+#
+# Kill process and all its children.
+# Based on http://stackoverflow.com/questions/392022/best-way-to-kill-all-child-processes/3211182#3211182
+# 2 arguments are needed - PID of process to kill + signal type
+# Returns - 1 if number of arguments is incorrect
+#           0 otherwise
+#
+kill_tree() {
+	if [ "$#" != "1" ] && [ "$#" != "2" ]; then
+		return 1
+	fi
+	local _pid=$1
+	local _sig=${2:-TERM}
+	kill -stop "$_pid" # needed to stop quickly forking parent from producing child between child killing and parent killing
+	for _child in $(ps -o pid --no-headers --ppid "$_pid"); do
+		kill_tree "$_child" "$_sig"
+	done
+	kill -"$_sig" "$_pid"
+}
+
+#
+# Generate a MD5 checksum from a given string ($1).
+#
+string_to_md5()
+{
+	echo -n "$1" | md5sum | awk '{print $1}'
+}
+
+#
+#
+#
+generate_log()
+{
+	LOG_FILE="$OUT.decompilation.log"
+	LOG_DECOMPILATION_END_DATE=$(date +%s)
+
+	LOG_FILEINFO_OUTPUT="$(json_escape "$LOG_FILEINFO_OUTPUT")"
+	LOG_UNPACKER_OUTPUT="$(json_escape "$LOG_UNPACKER_OUTPUT")"
+	LOG_BIN2LLVMIR_OUTPUT="$(remove_colors "$LOG_BIN2LLVMIR_OUTPUT")"
+	LOG_BIN2LLVMIR_OUTPUT="$(json_escape "$LOG_BIN2LLVMIR_OUTPUT")"
+	LOG_LLVMIR2HLL_OUTPUT="$(remove_colors "$LOG_LLVMIR2HLL_OUTPUT")"
+	LOG_LLVMIR2HLL_OUTPUT="$(json_escape "$LOG_LLVMIR2HLL_OUTPUT")"
+
+	log_structure='{
+	"input_file" : "%s",
+	"pdb_file" : "%s",
+	"start_date" : "%s",
+	"end_date" : "%s",
+	"mode" : "%s",
+	"arch" : "%s",
+	"format" : "%s",
+	"fileinfo_rc" : "%s",
+	"unpacker_rc" : "%s",
+	"bin2llvmir_rc" : "%s",
+	"llvmir2hll_rc" : "%s",
+	"fileinfo_output" : "%s",
+	"unpacker_output" : "%s",
+	"bin2llvmir_output" : "%s",
+	"llvmir2hll_output" : "%s",
+	"fileinfo_runtime" : "%s",
+	"bin2llvmir_runtime" : "%s",
+	"llvmir2hll_runtime" : "%s",
+	"fileinfo_memory" : "%s",
+	"bin2llvmir_memory" : "%s",
+	"llvmir2hll_memory" : "%s"
+}
+'
+
+	printf "$log_structure" \
+		"$IN" \
+		"$PDB_FILE" \
+		"$LOG_DECOMPILATION_START_DATE" \
+		"$LOG_DECOMPILATION_END_DATE" \
+		"$MODE" \
+		"$ARCH" \
+		"$FORMAT" \
+		"$LOG_FILEINFO_RC" \
+		"$LOG_UNPACKER_RC" \
+		"$LOG_BIN2LLVMIR_RC" \
+		"$LOG_LLVMIR2HLL_RC" \
+		"$LOG_FILEINFO_OUTPUT" \
+		"$LOG_UNPACKER_OUTPUT" \
+		"$LOG_BIN2LLVMIR_OUTPUT" \
+		"$LOG_LLVMIR2HLL_OUTPUT" \
+		"$LOG_FILEINFO_RUNTIME" \
+		"$LOG_BIN2LLVMIR_RUNTIME" \
+		"$LOG_LLVMIR2HLL_RUNTIME" \
+		"$LOG_FILEINFO_MEMORY" \
+		"$LOG_BIN2LLVMIR_MEMORY" \
+		"$LOG_LLVMIR2HLL_MEMORY" \
+	> "$LOG_FILE"
 }
 
 # Check script arguments.
@@ -491,6 +760,14 @@ while true; do
 		[ "$MAX_MEMORY" ] && print_error_and_die "Clashing options: --max-memory and --no-memory-limit"
 		NO_MEMORY_LIMIT=1
 		shift;;
+    # Intentionally undocumented option.
+    # Used only for internal testing.
+    # NOT guaranteed it works everywhere (systems other than our internal test machines).
+	--generate-log)
+		[ "$GENERATE_LOG" ] && print_error_and_die "Duplicate option: --generate-log"
+		GENERATE_LOG=1
+		NO_MEMORY_LIMIT=1
+		shift;;
 	--)								# Input file.
 		if [ $# -eq 2 ]; then
 			IN="$2"
@@ -507,6 +784,18 @@ done
 # Check arguments and set default values for unset options.
 check_arguments
 
+# Initialize variables used by logging.
+if [ "$GENERATE_LOG" ]; then
+	LOG_DECOMPILATION_START_DATE=$(date +%s)
+	# Put the tool log file and tmp file into /tmp because it uses tmpfs. This means that
+	# the data are stored in RAM instead on the disk, which should provide faster access.
+	TMP_DIR="/tmp/decompiler_log"
+	mkdir -p "$TMP_DIR"
+	FILE_MD5=$(string_to_md5 "$OUT")
+	TOOL_LOG_FILE="$TMP_DIR/$FILE_MD5".tool
+fi
+
+# Raw.
 if [ "$MODE" = "raw" ]; then
 	# Default values and initialization.
 	OUT_RAW_EXECUTABLE="$IN"
@@ -678,10 +967,21 @@ if [ "$MODE" = "bin" ] || [ "$MODE" = "raw" ]; then
 	echo "##### Gathering file information..."
 	echo "RUN: $FILEINFO ${FILEINFO_PARAMS[@]}"
 
-	"$FILEINFO" "${FILEINFO_PARAMS[@]}"
-	FILEINFO_RC=$?
+	if [ "$GENERATE_LOG" ]; then
+		FILEINFO_AND_TIME_OUTPUT="$($TIME "$FILEINFO" "${FILEINFO_PARAMS[@]}" 2>&1)"
+		FILEINFO_RC=$?
+		LOG_FILEINFO_RC=$(get_tool_rc "$FILEINFO_RC" "$FILEINFO_AND_TIME_OUTPUT")
+		LOG_FILEINFO_RUNTIME=$(get_tool_runtime "$FILEINFO_AND_TIME_OUTPUT")
+		LOG_FILEINFO_MEMORY=$(get_tool_memory_usage "$FILEINFO_AND_TIME_OUTPUT")
+		LOG_FILEINFO_OUTPUT="$(get_tool_output "$FILEINFO_AND_TIME_OUTPUT")"
+		echo "$LOG_FILEINFO_OUTPUT"
+	else
+		"$FILEINFO" "${FILEINFO_PARAMS[@]}"
+		FILEINFO_RC=$?
+	fi
 
 	if [ "$FILEINFO_RC" -ne 0 ]; then
+		[ "$GENERATE_LOG" ] && generate_log
 		cleanup
 		# The error message has been already reported by fileinfo in stderr.
 		print_error_and_die
@@ -692,8 +992,15 @@ if [ "$MODE" = "bin" ] || [ "$MODE" = "raw" ]; then
 	## Unpacking.
 	##
 	UNPACK_PARAMS=(--extended-exit-codes --output "$OUT_UNPACKED" "$IN")
-	"$UNPACK_SH" "${UNPACK_PARAMS[@]}"
-	UNPACKER_RC=$?
+
+	if [ "$GENERATE_LOG" ]; then
+		LOG_UNPACKER_OUTPUT="$($UNPACK_SH "${UNPACK_PARAMS[@]}" 2>&1)"
+		UNPACKER_RC=$?
+		LOG_UNPACKER_RC=$UNPACKER_RC
+	else
+		"$UNPACK_SH" "${UNPACK_PARAMS[@]}"
+		UNPACKER_RC=$?
+	fi
 
 	check_whether_decompilation_should_be_forcefully_stopped "unpacker"
 
@@ -729,10 +1036,23 @@ if [ "$MODE" = "bin" ] || [ "$MODE" = "raw" ]; then
 		echo "##### Gathering file information after unpacking..."
 		echo "RUN: $FILEINFO ${FILEINFO_PARAMS[@]}"
 
-		"$FILEINFO" "${FILEINFO_PARAMS[@]}"
-		FILEINFO_RC=$?
+		if [ "$GENERATE_LOG" ]; then
+			FILEINFO_AND_TIME_OUTPUT="$($TIME "$FILEINFO" "${FILEINFO_PARAMS[@]}" 2>&1)"
+			FILEINFO_RC=$?
+			LOG_FILEINFO_RC=$(get_tool_rc "$FILEINFO_RC" "$FILEINFO_AND_TIME_OUTPUT")
+			FILEINFO_RUNTIME=$(get_tool_runtime "$FILEINFO_AND_TIME_OUTPUT")
+			LOG_FILEINFO_RUNTIME=$(($LOG_FILEINFO_RUNTIME + $FILEINFO_RUNTIME))
+			FILEINFO_MEMORY=$(get_tool_memory_usage "$FILEINFO_AND_TIME_OUTPUT")
+			LOG_FILEINFO_MEMORY=$((($LOG_FILEINFO_MEMORY + $FILEINFO_MEMORY) / 2))
+			LOG_FILEINFO_OUTPUT="$(get_tool_output "$FILEINFO_AND_TIME_OUTPUT")"
+			echo "$LOG_FILEINFO_OUTPUT"
+		else
+			"$FILEINFO" "${FILEINFO_PARAMS[@]}"
+			FILEINFO_RC=$?
+		fi
 
 		if [ $FILEINFO_RC -ne 0 ]; then
+			[ "$GENERATE_LOG" ] && generate_log
 			cleanup
 			# The error message has been already reported by fileinfo in stderr.
 			print_error_and_die
@@ -772,6 +1092,7 @@ if [ "$MODE" = "bin" ] || [ "$MODE" = "raw" ]; then
 	elif [ "$ARCH" = "powerpc" -o "$ARCH" = "mips" -o "$ARCH" = "pic32" ]; then
 		: # nothing
 	else
+		[ "$GENERATE_LOG" ] && generate_log
 		cleanup
 		print_error_and_die "Unsupported target architecture '${ARCH^^}'. Supported architectures: Intel x86, ARM, ARM+Thumb, MIPS, PIC32, PowerPC."
 	fi
@@ -780,6 +1101,7 @@ if [ "$MODE" = "bin" ] || [ "$MODE" = "raw" ]; then
 	# Note: we prefer to report the "unsupported architecture" error (above) than this "generic" error.
 	FILECLASS=$("$CONFIGTOOL" "$CONFIG" --read --file-class)
 	if [ "$FILECLASS" != "16" ] && [ "$FILECLASS" != "32" ]; then
+		[ "$GENERATE_LOG" ] && generate_log
 		cleanup
 		print_error_and_die "Unsupported target format '${FORMAT^^}$FILECLASS'. Supported formats: ELF32, PE32, Intel HEX 32, Mach-O 32."
 	fi
@@ -913,10 +1235,25 @@ if [ "$MODE" = "bin" ] || [ "$MODE" = "raw" ]; then
 	echo "##### Decompiling $IN into $OUT_BACKEND_BC..."
 	echo "RUN: $BIN2LLVMIR ${BIN2LLVMIR_PARAMS[@]} -o $OUT_BACKEND_BC"
 
-	"$BIN2LLVMIR" "${BIN2LLVMIR_PARAMS[@]}" -o "$OUT_BACKEND_BC"
-	BIN2LLVMIR_RC=$?
+	if [ "$GENERATE_LOG" ]; then
+		$TIME "$BIN2LLVMIR" "${BIN2LLVMIR_PARAMS[@]}" -o "$OUT_BACKEND_BC" > "$TOOL_LOG_FILE" 2>&1 &
+		PID=$!
+		timed_kill "$PID" &
+		wait "$PID" &> "$DEV_NULL"
+		BIN2LLVMIR_RC=$?
+		BIN2LLVMIR_AND_TIME_OUTPUT="$(cat "$TOOL_LOG_FILE")"
+		LOG_BIN2LLVMIR_RC=$(get_tool_rc "$BIN2LLVMIR_RC" "$BIN2LLVMIR_AND_TIME_OUTPUT")
+		LOG_BIN2LLVMIR_RUNTIME=$(get_tool_runtime "$BIN2LLVMIR_AND_TIME_OUTPUT")
+		LOG_BIN2LLVMIR_MEMORY=$(get_tool_memory_usage "$BIN2LLVMIR_AND_TIME_OUTPUT")
+		LOG_BIN2LLVMIR_OUTPUT="$(get_tool_output "$BIN2LLVMIR_AND_TIME_OUTPUT")"
+		echo -n "$LOG_BIN2LLVMIR_OUTPUT"
+	else
+		"$BIN2LLVMIR" "${BIN2LLVMIR_PARAMS[@]}" -o "$OUT_BACKEND_BC"
+		BIN2LLVMIR_RC=$?
+	fi
 
 	if [ "$BIN2LLVMIR_RC" -ne 0 ]; then
+		[ "$GENERATE_LOG" ] && generate_log
 		cleanup
 		print_error_and_die "Decompilation to LLVM IR failed"
 	fi
@@ -974,10 +1311,28 @@ echo ""
 echo "##### Decompiling $OUT_BACKEND_BC into $OUT..."
 echo "RUN: $LLVMIR2HLL ${LLVMIR2HLL_PARAMS[@]}"
 
-"$LLVMIR2HLL" "${LLVMIR2HLL_PARAMS[@]}"
-LLVMIR2HLL_RC=$?
+if [ "$GENERATE_LOG" ]; then
+	$TIME "$LLVMIR2HLL" "${LLVMIR2HLL_PARAMS[@]}" > "$TOOL_LOG_FILE" 2>&1 &
+	PID=$!
+	timed_kill "$PID" &
+	wait "$PID" &> "$DEV_NULL"
+	LLVMIR2HLL_RC=$?
+	LLVMIR2HLL_AND_TIME_OUTPUT="$(cat "$TOOL_LOG_FILE")"
+	LOG_LLVMIR2HLL_RC=$(get_tool_rc "$LLVMIR2HLL_RC" "$LLVMIR2HLL_AND_TIME_OUTPUT")
+	LOG_LLVMIR2HLL_RUNTIME=$(get_tool_runtime "$LLVMIR2HLL_AND_TIME_OUTPUT")
+	LOG_LLVMIR2HLL_MEMORY=$(get_tool_memory_usage "$LLVMIR2HLL_AND_TIME_OUTPUT")
+	LOG_LLVMIR2HLL_OUTPUT="$(get_tool_output "$LLVMIR2HLL_AND_TIME_OUTPUT")"
+	echo "$LOG_LLVMIR2HLL_OUTPUT"
+
+	# Wait a bit to ensure that all the memory that has been assigned to the tool was released.
+	sleep 0.1
+else
+	"$LLVMIR2HLL" "${LLVMIR2HLL_PARAMS[@]}"
+	LLVMIR2HLL_RC=$?
+fi
 
 if [ "$LLVMIR2HLL_RC" -ne 0 ]; then
+	[ "$GENERATE_LOG" ] && generate_log
 	cleanup
 	print_error_and_die "Decompilation of file '$OUT_BACKEND_BC' failed"
 fi
@@ -1017,6 +1372,9 @@ mv "$OUT.tmp" "$OUT"
 if [ "$COLOR_IDA" ]; then
 	"$IDA_COLORIZER" "$OUT" "$CONFIG"
 fi
+
+# Store the information about the decompilation into the JSON file.
+[ "$GENERATE_LOG" ] && generate_log
 
 # Success!
 cleanup
