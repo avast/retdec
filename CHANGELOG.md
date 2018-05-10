@@ -2,6 +2,7 @@
 
 # dev
 
+* New Feature: `retdec-fileinfo` is now able to detect when a PE file is corrupted and cannot be loaded ([#281](https://github.com/avast-tl/retdec/pull/281)).
 * New Feature: Added a new tool: `retdec-getsig`. It can be used for creating signatures of packers, compilers, and other tools.
 * Enhancement: Speeded up RetDec rebuild and installation by disabling forced reconfiguration of LLVM ([#294](https://github.com/avast-tl/retdec/pull/294)).
 * Enhancement: Improved support for analysis of ELF [core files](http://www.gabriel.urdhr.fr/2015/05/29/core-file/) by `retdec-fileinfo` ([#142](https://github.com/avast-tl/retdec/issues/142)).
@@ -26,6 +27,8 @@
 * Enhancement: Added unofficial support for macOS build ([#7](https://github.com/avast-tl/retdec/issues/7)).
 * Enhancement: Allow 32b versions of `bin2llvmir` and `llvmir2hll` on Windows access more memory ([#7](https://github.com/avast-tl/retdec/issues/73)).
 * Enhancement: Added method in `loader::Image` to obtain segment content as raw data pointer.
+* Fix: Fixed parsing of PE files having corrupted import tables ([#101](https://github.com/avast-tl/retdec/issues/101)).
+* Fix: Fixed parsing of delayed imports by ordinals in PE files ([#282](https://github.com/avast-tl/retdec/issues/282)).
 * Fix: Fixed ordering of detected tools (e.g. compilers and packers) on systems whose `std::sort()` is not stable ([#262](https://github.com/avast-tl/retdec/issues/262)).
 * Fix: When running RetDec on macOS, `gtimeout` is now used instead of `timeout` ([#260](https://github.com/avast-tl/retdec/issues/260)). This fixes the following runtime error when running `retdec-archive-decompiler.sh`: `The `timeout` command is required but it is not available`.
 * Fix: When running RetDec on macOS, `greadlink` is now used instead of `readlink`. This fixes runtime errors of the form `readlink: illegal option -- e`.
