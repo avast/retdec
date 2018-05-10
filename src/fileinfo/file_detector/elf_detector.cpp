@@ -304,6 +304,18 @@ const std::map<std::size_t, std::string> auxVecMap =
 	{0x7e1, "AT_SUN_AUXFLAGS"}
 };
 
+// NT_GNU_ABI_TAG OS map
+const std::map<std::size_t, std::string> abiOsMap =
+{
+	{0x00, "Linux"},
+	{0x01, "Hurd"},
+	{0x02, "Sun Solaris"},
+	{0x03, "FreeBSD"},
+	{0x04, "NetBSD"},
+	{0x05, "Syllable"},
+	{0x06, "NaCl"}
+};
+
 
 /**
  * Detect of segment type
@@ -1216,7 +1228,8 @@ void ElfDetector::getCoreInfo()
 void ElfDetector::getOsAbiInfo()
 {
 	std::string abi;
-	const unsigned long long osAbi = elfParser->getOsOrAbi(), abiVersion = elfParser->getOsOrAbiVersion();
+	const auto osAbi = elfParser->getOsOrAbi();
+	const auto abiVersion = elfParser->getOsOrAbiVersion();
 	switch(osAbi)
 	{
 		case ELFOSABI_NONE:
@@ -1250,10 +1263,10 @@ void ElfDetector::getOsAbiInfo()
 			abi = "Novell Modesto";
 			break;
 		case ELFOSABI_OPENBSD:
-			abi = "Open BSD";
+			abi = "OpenBSD";
 			break;
 		case ELFOSABI_OPENVMS:
-			abi = "Open VMS";
+			abi = "OpenVMS";
 			break;
 		case ELFOSABI_NSK:
 			abi = "Hewlett-Packard Non-Stop Kernel";
@@ -1262,7 +1275,13 @@ void ElfDetector::getOsAbiInfo()
 			abi = "Amiga Research OS";
 			break;
 		case ELFOSABI_FENIXOS:
-			abi = "The FenixOS highly scalable multi-core OS";
+			abi = "FenixOS";
+			break;
+		case ELFOSABI_CLOUDABI:
+			abi = "Nuxi CloudABI";
+			break;
+		case ELFOSABI_OPENVOS:
+			abi = "Stratus Technologies OpenVOS";
 			break;
 		default:
 			break;
@@ -1274,6 +1293,79 @@ void ElfDetector::getOsAbiInfo()
 	}
 	fileInfo.setOsAbi(abi);
 	fileInfo.setOsAbiVersion(numToStr(abiVersion));
+}
+
+/**
+ * Get information about operating system or ABI extension from note section
+ */
+void ElfDetector::getOsAbiInfoNote()
+{
+	if(elfParser->getOsOrAbiVersion())
+	{
+		// Prefer info from above function
+		return;
+	}
+
+	for(const auto& noteSecSeg : elfParser->getElfNoteSecSegs())
+	{
+		if(noteSecSeg.isMalformed())
+		{
+			continue;
+		}
+
+		for(const auto& note : noteSecSeg.getNotes())
+		{
+			if(note.name == "GNU" && note.type == 0x001)
+			{
+				std::uint64_t os, major, minor, patch;
+				elfParser->get4ByteOffset(note.dataOffset, os);
+				elfParser->get4ByteOffset(note.dataOffset + 4, major);
+				elfParser->get4ByteOffset(note.dataOffset + 8, minor);
+				elfParser->get4ByteOffset(note.dataOffset + 12, patch);
+
+				std::stringstream ss;
+				ss << major << '.' << minor << '.' << patch;
+
+				fileInfo.setOsAbi(mapGetValueOrDefault(abiOsMap, os, "GNU"));
+				fileInfo.setOsAbiVersion(ss.str());
+				return;
+			}
+
+			if(note.name == "FreeBSD" && note.type == 0x001)
+			{
+				std::uint64_t abiVersion, major, minor, patch;
+				elfParser->get4ByteOffset(note.dataOffset, abiVersion);
+
+				// Version 1003514 means 10.03.514
+				major = abiVersion / 100000;
+				minor = abiVersion % 100000 / 1000;
+				patch = abiVersion % 1000;
+
+				std::stringstream ss;
+				ss << major << '.' << minor << '.' << patch;
+
+				fileInfo.setOsAbi("FreeBSD");
+				fileInfo.setOsAbiVersion(ss.str());
+				return;
+			}
+		}
+
+		// Special Android case
+		if(noteSecSeg.getSectionName() == ".note.android.ident")
+		{
+			const auto& notes = noteSecSeg.getNotes();
+			if(!notes.empty())
+			{
+				std::uint64_t result;
+				if(elfParser->get4ByteOffset(notes[0].dataOffset, result))
+				{
+					fileInfo.setOsAbi("Android");
+					fileInfo.setOsAbiVersion(numToStr(result));
+					return;
+				}
+			}
+		}
+	}
 }
 
 void ElfDetector::detectFileClass()
@@ -1869,6 +1961,7 @@ void ElfDetector::getAdditionalInfo()
 	getFileVersion();
 	getFileHeaderInfo();
 	getOsAbiInfo();
+	getOsAbiInfoNote();
 	getFlags();
 	getSegments();
 	getSections();

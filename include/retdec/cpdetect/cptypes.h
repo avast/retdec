@@ -60,6 +60,7 @@ enum class DetectionMethod
 	STRING_SEARCH_H,     ///< specific strings
 	DYNAMIC_ENTRIES_H,   ///< .dynamic section
 	COMMENT_H,           ///< .comment section
+	NOTE_H,              ///< .note section
 	MANIFEST_H,          ///< manifest resource
 	OTHER_H              ///< other heuristic
 };

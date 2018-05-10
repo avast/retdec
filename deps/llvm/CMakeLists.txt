@@ -90,25 +90,6 @@ ExternalProject_Add(llvm-project
 	INSTALL_COMMAND ""
 )
 
-# Forces a configure step for the given external project.
-# The configure step for external projects is needed to (1) detect source-file
-# changes and (2) fix infinite recursion of 'make' after a terminated build.
-macro(force_configure_step target)
-	# This solution is based on
-	# http://comments.gmane.org/gmane.comp.programming.tools.cmake.user/43024
-	ExternalProject_Add_Step(${target} force-configure
-		COMMAND ${CMAKE_COMMAND} -E echo "Force configure of ${target}"
-		DEPENDEES update
-		DEPENDERS configure
-		ALWAYS 1
-	)
-endmacro()
-
-# We need to force the configuration step for LLVM. Otherwise, if we changed
-# LLVM sources, they would not be rebuilt. This also fixes infinite recursion
-# when running make after an interrupted LLVM build.
-force_configure_step(llvm-project)
-
 # Add libraries.
 ExternalProject_Get_Property(llvm-project binary_dir)
 

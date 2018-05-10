@@ -37,6 +37,8 @@ class LoaderInfo
 		unsigned long long _baseAddress;
 		std::vector<LoadedSegment> _loadedSegments;
 		std::string _statusMessage;
+		retdec::fileformat::LoaderErrorInfo _ldrErrInfo;
+
 	public:
 		LoaderInfo();
 		~LoaderInfo();
@@ -48,12 +50,14 @@ class LoaderInfo
 		unsigned long long getNumberOfLoadedSegments() const;
 		const LoadedSegment& getLoadedSegment(unsigned long long index) const;
 		const std::string& getStatusMessage() const;
+		const retdec::fileformat::LoaderErrorInfo & getLoaderErrorInfo() const;
 		/// @}
 
 		/// @name Setters
 		/// @{
 		void setBaseAddress(unsigned long long baseAddress);
 		void setStatusMessage(const std::string& statusMessage);
+		void setLoaderErrorInfo(const retdec::fileformat::LoaderErrorInfo & ldrErrInfo);
 		/// @}
 
 		/// @name Other methods

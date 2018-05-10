@@ -24,6 +24,7 @@ class ElfDetector : public FileDetector
 		/// @{
 		void getFileVersion();
 		void getFileHeaderInfo();
+		void getOsAbiInfoNote();
 		void getOsAbiInfo();
 		void getFlags();
 		void getSegments();

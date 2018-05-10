@@ -126,6 +126,26 @@ void JsonPresentation::presentErrors(Json::Value &root) const
 }
 
 /**
+* Present information about Windows PE loader error
+* @param root Parent node in output document
+*/
+void JsonPresentation::presentLoaderError(Json::Value &root) const
+{
+	auto ldrErrInfo = fileinfo.getLoaderErrorInfo();
+
+	if (ldrErrInfo.loaderErrorCode != 0)
+	{
+		Json::Value loaderErrorNode;
+
+		loaderErrorNode["code"] = ldrErrInfo.loaderErrorCode;
+		loaderErrorNode["code_text"] = ldrErrInfo.loaderError;
+		loaderErrorNode["description"] = ldrErrInfo.loaderErrorUserFriendly;
+
+		root["loaderError"] = loaderErrorNode;
+	}
+}
+
+/**
  * Present information about detected compilers and packers
  * @param root Parent node in output document
  */
@@ -668,6 +688,7 @@ bool JsonPresentation::present()
 	Value root, jEp;
 	root["inputFile"] = fileinfo.getPathToFile();
 	presentErrors(root);
+	presentLoaderError(root);
 	presentSimple(BasicJsonGetter(fileinfo), root);
 	if(presentSimple(EntryPointJsonGetter(fileinfo), jEp))
 	{

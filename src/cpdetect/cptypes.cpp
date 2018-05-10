@@ -363,6 +363,9 @@ std::string detectionMetodToString(DetectionMethod method)
 		case DetectionMethod::COMMENT_H:
 			return ".comment section heuristic";
 
+		case DetectionMethod::NOTE_H:
+			return ".note section heuristic";
+
 		case DetectionMethod::MANIFEST_H:
 			return "manifest heuristic";
 
