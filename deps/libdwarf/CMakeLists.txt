@@ -17,7 +17,6 @@ ExternalProject_Add(libdwarf-project
 		# This does not work on MSVC, but may be useful on Linux.
 		-DCMAKE_BUILD_TYPE=Release
 		-DCMAKE_INSTALL_PREFIX=${LIBDWARF_INSTALL_DIR}
-		-DLIBDWARF_INSTALL_TO_UNITTESTS=${RETDEC_TESTS}
 		# Force the use of the same compiler as used to build the top-level
 		# project. Otherwise, the external project may pick up a different
 		# compiler, which may result in link errors.
