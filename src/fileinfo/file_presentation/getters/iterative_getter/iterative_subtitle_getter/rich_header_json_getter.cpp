@@ -52,10 +52,12 @@ std::size_t RichHeaderJsonGetter::getBasicInfo(std::size_t structIndex, std::vec
 	desc.push_back("key");
 	desc.push_back("signature");
 	desc.push_back("numberOfRecords");
+	desc.push_back("rawBytes");
 	info.push_back(fileinfo.getRichHeaderOffsetStr(hexWithPrefix));
 	info.push_back(fileinfo.getRichHeaderKeyStr(hexWithPrefix));
 	info.push_back(toLower(fileinfo.getRichHeaderSignature()));
 	info.push_back(numToStr(fileinfo.getNumberOfStoredRecordsInRichHeader()));
+	info.push_back(replaceNonprintableChars(fileinfo.getRichHeaderRawBytesStr()));
 
 	return info.size();
 }
