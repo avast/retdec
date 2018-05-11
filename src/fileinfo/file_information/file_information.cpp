@@ -763,6 +763,16 @@ std::string FileInformation::getRichHeaderRecordNumberOfUsesStr(std::size_t posi
 }
 
 /**
+ * Get rich header raw bytes as string
+ * @return Raw bytes of rich header as string
+ */
+std::string FileInformation::getRichHeaderRawBytesStr() const
+{
+	auto rawBytes = richHeader.getRawBytes();
+	return std::string{rawBytes.begin(), rawBytes.end()};
+}
+
+/**
  * Find out if there are any records in rich header
  * @return @c true if rich header is not empty, @c false otherwise
  */

@@ -32,6 +32,7 @@ class RichHeader
 		std::string getRecordMinorVersionStr(std::size_t position) const;
 		std::string getRecordBuildVersionStr(std::size_t position) const;
 		std::string getRecordNumberOfUsesStr(std::size_t position) const;
+		std::vector<std::uint8_t> getRawBytes() const;
 		/// @}
 
 		/// @name Setters

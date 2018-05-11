@@ -110,6 +110,15 @@ std::string RichHeader::getRecordNumberOfUsesStr(std::size_t position) const
 }
 
 /**
+ * Get raw bytes
+ * @return Raw bytes of rich header.
+ */
+std::vector<std::uint8_t> RichHeader::getRawBytes() const
+{
+	return header ? header->getBytes() : std::vector<std::uint8_t>{};
+}
+
+/**
  * Set rich header data
  * @param richHeader Instance of class with original information about rich header
  */

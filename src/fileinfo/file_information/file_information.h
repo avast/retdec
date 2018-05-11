@@ -148,6 +148,7 @@ class FileInformation
 		std::string getRichHeaderRecordMinorVersionStr(std::size_t position) const;
 		std::string getRichHeaderRecordBuildVersionStr(std::size_t position) const;
 		std::string getRichHeaderRecordNumberOfUsesStr(std::size_t position) const;
+		std::string getRichHeaderRawBytesStr() const;
 		bool hasRichHeaderRecords() const;
 		/// @}
 

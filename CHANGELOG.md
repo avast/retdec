@@ -28,6 +28,7 @@
 * Enhancement: Added unofficial support for macOS build ([#7](https://github.com/avast-tl/retdec/issues/7)).
 * Enhancement: Allow 32b versions of `bin2llvmir` and `llvmir2hll` on Windows access more memory ([#7](https://github.com/avast-tl/retdec/issues/73)).
 * Enhancement: Added method in `loader::Image` to obtain segment content as raw data pointer.
+* Enhancement: `retdec-fileinfo` now prints raw bytes of Rich Header in JSON output. ([#288](https://github.com/avast-tl/retdec/issues/288)).
 * Fix: Fixed parsing of PE files having corrupted import tables ([#101](https://github.com/avast-tl/retdec/issues/101)).
 * Fix: Fixed parsing of delayed imports by ordinals in PE files ([#282](https://github.com/avast-tl/retdec/issues/282)).
 * Fix: Fixed ordering of detected tools (e.g. compilers and packers) on systems whose `std::sort()` is not stable ([#262](https://github.com/avast-tl/retdec/issues/262)).
