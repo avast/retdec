@@ -498,7 +498,7 @@ ReturnCode CompilerDetector::getAllInformation()
 	toolInfo.entryPointAddress = fileParser.getEpAddress(toolInfo.epAddress);
 	toolInfo.entryPointOffset = fileParser.getEpOffset(toolInfo.epOffset);
 	const bool invalidEntryPoint = !toolInfo.entryPointAddress || !toolInfo.entryPointOffset;
-	if (!fileParser.getHexEpBytes(toolInfo.epBytes, EP_BYTES_SIZE)
+	if (!fileParser.getHexEpBytes(toolInfo.epBytes, cpParams.epBytesCount)
 			&& !invalidEntryPoint && !fileParser.isInValidState())
 	{
 		return ReturnCode::FILE_PROBLEM;
