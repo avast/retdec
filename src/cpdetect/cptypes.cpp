@@ -12,8 +12,8 @@ namespace cpdetect {
 /**
  * Constructor of DetectParams structure
  */
-DetectParams::DetectParams(SearchType searchType_, bool internal_, bool external_) :
-		searchType(searchType_), internal(internal_), external(external_)
+DetectParams::DetectParams(SearchType searchType_, bool internal_, bool external_, std::size_t epBytesCount_) :
+		searchType(searchType_), internal(internal_), external(external_), epBytesCount(epBytesCount_)
 {
 
 }

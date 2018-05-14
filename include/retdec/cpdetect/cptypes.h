@@ -10,6 +10,7 @@
 #include <limits>
 #include <vector>
 
+#include "retdec/cpdetect/settings.h"
 #include "retdec/fileformat/fftypes.h"
 
 namespace retdec {
@@ -110,7 +111,9 @@ struct DetectParams
 	bool internal;  ///< use of internal signature database
 	bool external;  ///< use of external signature database
 
-	DetectParams(SearchType searchType_, bool internal_, bool external_);
+	std::size_t epBytesCount;
+
+	DetectParams(SearchType searchType_, bool internal_, bool external_, std::size_t epBytesCount_ = EP_BYTES_SIZE);
 	~DetectParams();
 };
 

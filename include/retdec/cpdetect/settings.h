@@ -7,6 +7,7 @@
 #ifndef RETDEC_CPDETECT_SETTINGS_H
 #define RETDEC_CPDETECT_SETTINGS_H
 
+#include <set>
 #include <string>
 #include <vector>
 

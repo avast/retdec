@@ -14,6 +14,7 @@
 #include "retdec/utils/string.h"
 #include "retdec/ar-extractor/detection.h"
 #include "retdec/cpdetect/errors.h"
+#include "retdec/cpdetect/settings.h"
 #include "retdec/fileformat/utils/format_detection.h"
 #include "retdec/fileformat/utils/other.h"
 #include "fileinfo/file_detector/detector_factory.h"
@@ -51,6 +52,7 @@ struct ProgParams
 	std::set<std::string> yaraOtherPaths;   ///< paths to YARA other rules
 	std::size_t maxMemory;                  ///< maximal memory
 	bool maxMemoryHalfRAM;                  ///< limit maximal memory to half of system RAM
+	std::size_t epBytesCount;               ///< number of bytes to load from entry point
 	LoadFlags loadFlags;                    ///< load flags for `fileformat`
 
 	ProgParams() : searchMode(SearchType::EXACT_MATCH),
@@ -62,6 +64,7 @@ struct ProgParams
 					generateConfigFile(false),
 					maxMemory(0),
 					maxMemoryHalfRAM(false),
+					epBytesCount(EP_BYTES_SIZE),
 					loadFlags(LoadFlags::NONE) {}
 };
 
@@ -147,16 +150,19 @@ void printHelp()
 				<< "    --plain, -p           Print output as plain text.\n"
 				<< "    --json, -j            Print output in JSON format.\n"
 				<< "\n"
+				<< "Options for specifying properties to load from the file:\n"
+				<< "    --strings, -S         Load strings in the input file and print them.\n"
+				<< "    --no-hashes[=all|file|verbose]\n"
+				<< "                          Do not print and calculate hashes.\n"
+				<< "                          Either all hashes or only file/verbose hashes.\n"
+				<< "                          All assumed if no argument specified.\n"
+				<< "    --ep-bytes=N          Number of bytes to load from entry point. (Default: " << EP_BYTES_SIZE << ")\n"
+				<< "\n"
 				<< "Other options for specifying output:\n"
 				<< "    --verbose, -v         Print more information about input file.\n"
 				<< "                          Without this parameter program print only\n"
 				<< "                          basic information.\n"
 				<< "    --explanatory, -X     Print explanatory notes (only in plain text output).\n"
-				<< "    --strings, -S         Print information about strings.\n"
-				<< "    --no-hashes[=all|file|verbose]\n"
-				<< "                          Do not print and calculate hashes.\n"
-				<< "                          Either all hashes or only file/verbose hashes.\n"
-				<< "                          All assumed if no argument specified.\n"
 				<< "\n"
 				<< "Options for specifying configuration file:\n"
 				<< "    --config=file, -c=file\n"
@@ -205,7 +211,7 @@ bool doParams(int argc, char **_argv, ProgParams &params)
 	std::vector<std::string> argv;
 
 	std::set<std::string> withArgs = {"malware", "m", "crypto", "C", "other",
-			"o", "config", "c", "no-hashes", "max-memory"};
+			"o", "config", "c", "no-hashes", "max-memory", "ep-bytes"};
 	for (int i = 1; i < argc; ++i)
 	{
 		std::string a = _argv[i];
@@ -341,6 +347,12 @@ bool doParams(int argc, char **_argv, ProgParams &params)
 				}
 			}
 		}
+		else if (c == "--ep-bytes")
+		{
+			auto epBytesCountString = getParamOrDie(argv, i);
+			if (!strToNum(epBytesCountString, params.epBytesCount))
+				return false;
+		}
 		else if (params.filePath.empty())
 		{
 			params.filePath = argv[i];
@@ -415,7 +427,7 @@ int main(int argc, char* argv[])
 		}
 	}
 
-	DetectParams searchPar(params.searchMode, params.internalDatabase, params.externalDatabase);
+	DetectParams searchPar(params.searchMode, params.internalDatabase, params.externalDatabase, params.epBytesCount);
 	const auto fileFormat = detectFileFormat(params.filePath, useConfig ? &config : nullptr);
 	FileInformation fileinfo;
 	FileDetector *fileDetector = nullptr;

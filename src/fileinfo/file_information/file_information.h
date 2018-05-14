@@ -21,7 +21,7 @@ namespace fileinfo {
 class FileInformation
 {
 	private:
-		retdec::cpdetect::ReturnCode status;                  ///< return code
+		retdec::cpdetect::ReturnCode status;           ///< return code
 		std::string filePath;                          ///< path to input file
 		std::string crc32;                             ///< CRC32 of input file
 		std::string md5;                               ///< MD5 of input file
@@ -29,7 +29,7 @@ class FileInformation
 		std::string secCrc32;                          ///< CRC32 of section table
 		std::string secMd5;                            ///< MD5 of section table
 		std::string secSha256;                         ///< SHA256 of section table
-		retdec::fileformat::Format fileFormatEnum;            ///< format of input file in enumeration representation
+		retdec::fileformat::Format fileFormatEnum;     ///< format of input file in enumeration representation
 		std::string fileFormat;                        ///< format of input file in string representation
 		std::string fileClass;                         ///< class of file
 		std::string fileType;                          ///< type of file (e.g. executable file)

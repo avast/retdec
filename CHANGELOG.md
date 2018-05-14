@@ -4,6 +4,7 @@
 
 * New Feature: `retdec-fileinfo` is now able to detect when a PE file is corrupted and cannot be loaded ([#281](https://github.com/avast-tl/retdec/pull/281)).
 * New Feature: Added a new tool: `retdec-getsig`. It can be used for creating signatures of packers, compilers, and other tools.
+* New Feature: Number of bytes read from entry point by `retdec-fileinfo` is now configurable with `--ep-bytes` option.
 * Enhancement: Speeded up RetDec rebuild and installation by disabling forced reconfiguration of LLVM ([#294](https://github.com/avast-tl/retdec/pull/294)).
 * Enhancement: Added new OS/ABI and tool detections for ELF files ([#244](https://github.com/avast-tl/retdec/issues/244)).
 * Enhancement: Improved support for analysis of ELF [core files](http://www.gabriel.urdhr.fr/2015/05/29/core-file/) by `retdec-fileinfo` ([#142](https://github.com/avast-tl/retdec/issues/142)).
