@@ -15,6 +15,7 @@
 #include "retdec/fileformat/types/dotnet_headers/clr_header.h"
 #include "retdec/fileformat/types/export_table/export.h"
 #include "retdec/fileformat/types/import_table/import.h"
+#include "retdec/fileformat/types/import_table/pe_import.h"
 #include "retdec/fileformat/types/sec_seg/pe_coff_section.h"
 #include "retdec/fileformat/types/sec_seg/section.h"
 
@@ -497,21 +498,20 @@ template<int bits> bool peDelayImportedLibraryFileName(const PeLib::DelayImportD
  * Get information about import
  * @param peHeader Parser of PE header
  * @param peImports Parser of PE import directory
- * @param import Into this parameter is stored information about selected import
  * @param fileIndex Index of selected library (indexed from 0)
  * @param importIndex Index of selected import (indexed from 0)
  * @return @c true if index of library and index of import are valid, @c false otherwise
  *
- * If function returns @c false, @a import is left unchanged.
+ * If function returns info about import, or @c nullptr if invalid import is requested.
  */
-template<int bits> bool peImport(const PeLib::PeHeaderT<bits> &peHeader,
-	const PeLib::ImportDirectory<bits> &peImports, Import &import,
+template<int bits> std::unique_ptr<Import> peImport(const PeLib::PeHeaderT<bits> &peHeader,
+	const PeLib::ImportDirectory<bits> &peImports,
 	unsigned long long fileIndex, unsigned long long importIndex)
 {
 	if(fileIndex >= peNumberOfImportedLibraries(peImports) ||
 		importIndex >= peImports.getNumberOfFunctions(fileIndex, PeLib::OLDDIR))
 	{
-		return false;
+		return nullptr;
 	}
 
 	auto isOrdinalNumberValid = true;
@@ -534,57 +534,58 @@ template<int bits> bool peImport(const PeLib::PeHeaderT<bits> &peHeader,
 		}
 	}
 
+	auto import = std::make_unique<PeImport>(PeImportFlag::None);
 	if(isOrdinalNumberValid)
 	{
-		import.setOrdinalNumber(ordinalNumber);
+		import->setOrdinalNumber(ordinalNumber);
 	}
 	else
 	{
-		import.invalidateOrdinalNumber();
+		import->invalidateOrdinalNumber();
 	}
-	import.setName(peImports.getFunctionName(fileIndex, importIndex, PeLib::OLDDIR));
-	import.setAddress(peImageBase(peHeader) + peImports.getFirstThunk(fileIndex, PeLib::OLDDIR) + importIndex * (bits / 8));
-	import.setLibraryIndex(fileIndex);
-	return true;
+	import->setName(peImports.getFunctionName(fileIndex, importIndex, PeLib::OLDDIR));
+	import->setAddress(peImageBase(peHeader) + peImports.getFirstThunk(fileIndex, PeLib::OLDDIR) + importIndex * (bits / 8));
+	import->setLibraryIndex(fileIndex);
+	return import;
 }
 
 /**
  * Get information about delay import
  * @param peHeader Parser of PE header
  * @param delay Parser of PE delay import directory
- * @param import Into this parameter is stored information about selected delay import
  * @param fileIndex Index of selected library (indexed from 0)
  * @param importIndex Index of selected delay import (indexed from 0)
  * @return @c true if index of library and index of delay import are valid, @c false otherwise
  *
- * If function returns @c false, @a import is left unchanged.
+ * If function returns info about delayed import, or @c nullptr if invalid import is requested.
  */
-template<int bits> bool peDelayImport(const PeLib::PeHeaderT<bits> &peHeader,
-	const PeLib::DelayImportDirectory<bits> &delay, Import &import,
+template<int bits> std::unique_ptr<Import> peDelayImport(const PeLib::PeHeaderT<bits> &peHeader,
+	const PeLib::DelayImportDirectory<bits> &delay,
 	unsigned long long fileIndex, unsigned long long importIndex)
 {
 	const auto *library = delay.getFile(fileIndex);
 	if(!library)
 	{
-		return false;
+		return nullptr;
 	}
 
 	const auto *function = library->getFunction(importIndex);
 	if(!function)
 	{
-		return false;
+		return nullptr;
 	}
 
-	import.setName(function->fname);
-	import.setAddress(peImageBase(peHeader) + function->address.Value);
-	import.setLibraryIndex(fileIndex);
-	import.invalidateOrdinalNumber();
+	auto import = std::make_unique<PeImport>(PeImportFlag::Delayed);
+	import->setName(function->fname);
+	import->setAddress(peImageBase(peHeader) + function->address.Value);
+	import->setLibraryIndex(fileIndex);
+	import->invalidateOrdinalNumber();
 	if(library->ordinalNumbersAreValid() && function->hint != 0)
 	{
-		import.setOrdinalNumber(function->hint);
+		import->setOrdinalNumber(function->hint);
 	}
 
-	return true;
+	return import;
 }
 
 /**

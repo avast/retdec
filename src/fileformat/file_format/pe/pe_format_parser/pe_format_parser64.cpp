@@ -228,14 +228,14 @@ bool PeFormatParser64::getDelayImportedLibraryFileName(unsigned long long index,
 	return peDelayImportedLibraryFileName(peFile->delayImports(), fileName, index);
 }
 
-bool PeFormatParser64::getImport(unsigned long long fileIndex, unsigned long long importIndex, Import &import) const
+std::unique_ptr<Import> PeFormatParser64::getImport(unsigned long long fileIndex, unsigned long long importIndex) const
 {
-	return peImport(peHeader, peFile->impDir(), import, fileIndex, importIndex);
+	return peImport(peHeader, peFile->impDir(), fileIndex, importIndex);
 }
 
-bool PeFormatParser64::getDelayImport(unsigned long long fileIndex, unsigned long long importIndex, Import &import) const
+std::unique_ptr<Import> PeFormatParser64::getDelayImport(unsigned long long fileIndex, unsigned long long importIndex) const
 {
-	return peDelayImport(peHeader, peFile->delayImports(), import, fileIndex, importIndex);
+	return peDelayImport(peHeader, peFile->delayImports(), fileIndex, importIndex);
 }
 
 unsigned long long PeFormatParser64::getNumberOfExportedFunctions() const

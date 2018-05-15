@@ -175,12 +175,12 @@ void MachOSymbol::setAllValues(const llvm::MachO::nlist_64 &nList, const llvm::S
  * Get MachOSymbol as Import type
  * @return Import
  */
-Import MachOSymbol::getAsImport() const
+std::unique_ptr<Import> MachOSymbol::getAsImport() const
 {
-	Import importSym;
-	importSym.setName(name);
-	importSym.setLibraryIndex(GET_LIBRARY_ORDINAL(description) - 1);
-	importSym.invalidateOrdinalNumber();
+	auto importSym = std::make_unique<Import>();
+	importSym->setName(name);
+	importSym->setLibraryIndex(GET_LIBRARY_ORDINAL(description) - 1);
+	importSym->invalidateOrdinalNumber();
 	return importSym;
 }
 

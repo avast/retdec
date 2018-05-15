@@ -45,6 +45,7 @@ class Import
 
 		/// @name Other methods
 		/// @{
+		virtual bool isUsedForImphash() const;
 		void invalidateOrdinalNumber();
 		bool hasEmptyName() const;
 		/// @}

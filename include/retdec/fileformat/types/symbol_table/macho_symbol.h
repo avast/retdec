@@ -56,7 +56,7 @@ class MachOSymbol
 
 		/// @name Interpretation methods
 		/// @{
-		Import getAsImport() const;
+		std::unique_ptr<Import> getAsImport() const;
 		Export getAsExport() const;
 		std::shared_ptr<Symbol> getAsSymbol() const;
 		/// @}

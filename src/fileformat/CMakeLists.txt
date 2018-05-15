@@ -22,6 +22,7 @@ set(FILEFORMAT_SOURCES
 	types/rich_header/linker_info.cpp
 	types/import_table/import.cpp
 	types/import_table/import_table.cpp
+	types/import_table/pe_import.cpp
 	types/export_table/export.cpp
 	types/export_table/export_table.cpp
 	types/relocation_table/relocation_table.cpp

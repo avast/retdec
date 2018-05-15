@@ -239,11 +239,10 @@ PeFormatParser::~PeFormatParser()
  */
 
 /**
- * @fn bool PeFormatParser::getImport(unsigned long long fileIndex, unsigned long long importIndex, Import &import) const
+ * @fn std::unique_ptr<Import> PeFormatParser::getImport(unsigned long long fileIndex, unsigned long long importIndex) const
  * @param fileIndex Index of selected library (indexed from 0)
  * @param importIndex Index of selected import in selected library (indexed from 0)
- * @param import Into this parameter is stored information about import
- * @return @c true if index of library and index of import are valid, @c false otherwise
+ * @return Newly created import if index of library and index of import are valid, @c nullptr otherwise
  */
 
 } // namespace fileformat
