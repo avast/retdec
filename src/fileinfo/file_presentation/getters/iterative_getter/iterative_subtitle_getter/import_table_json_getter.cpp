@@ -30,6 +30,8 @@ ImportTableJsonGetter::ImportTableJsonGetter(FileInformation &fileInfo) : Iterat
 	commonHeaderElements.push_back("libraryName");
 	commonHeaderElements.push_back("ordinalNumber");
 	commonHeaderElements.push_back("address");
+	if (fileinfo.getFileFormatEnum() == Format::PE)
+		commonHeaderElements.push_back("delayed");
 }
 
 /**
@@ -75,6 +77,8 @@ bool ImportTableJsonGetter::getRecord(std::size_t structIndex, std::size_t recIn
 	record.push_back(replaceNonprintableChars(fileinfo.getImportLibraryName(recIndex)));
 	record.push_back(fileinfo.getImportOrdinalNumberStr(recIndex, std::dec));
 	record.push_back(fileinfo.getImportAddressStr(recIndex, hexWithPrefix));
+	if (fileinfo.getFileFormatEnum() == Format::PE)
+		record.push_back(static_cast<const PeImport*>(fileinfo.getImport(recIndex))->isDelayed() ? "true" : "false");
 
 	return true;
 }

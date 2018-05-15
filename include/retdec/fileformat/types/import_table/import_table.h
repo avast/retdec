@@ -7,6 +7,7 @@
 #ifndef RETDEC_FILEFORMAT_TYPES_IMPORT_TABLE_IMPORT_TABLE_H
 #define RETDEC_FILEFORMAT_TYPES_IMPORT_TABLE_IMPORT_TABLE_H
 
+#include <memory>
 #include <vector>
 
 #include "retdec/fileformat/types/import_table/import.h"
@@ -20,13 +21,13 @@ namespace fileformat {
 class ImportTable
 {
 	private:
-		using importsIterator = std::vector<Import>::const_iterator;
-		std::vector<std::string> libraries;      ///< name of libraries
-		std::vector<Import> imports;             ///< stored imports
-		std::vector<unsigned char> impHashBytes; ///< bytes for calculation of imphash
-		std::string impHashCrc32;                ///< imphash CRC32
-		std::string impHashMd5;                  ///< imphash MD5
-		std::string impHashSha256;               ///< imphash SHA256
+		using importsIterator = std::vector<std::unique_ptr<Import>>::const_iterator;
+		std::vector<std::string> libraries;           ///< name of libraries
+		std::vector<std::unique_ptr<Import>> imports; ///< stored imports
+		std::vector<unsigned char> impHashBytes;      ///< bytes for calculation of imphash
+		std::string impHashCrc32;                     ///< imphash CRC32
+		std::string impHashMd5;                       ///< imphash MD5
+		std::string impHashSha256;                    ///< imphash SHA256
 	public:
 		ImportTable();
 		~ImportTable();
@@ -58,7 +59,7 @@ class ImportTable
 		void computeHashes();
 		void clear();
 		void addLibrary(std::string name);
-		void addImport(const Import &import);
+		void addImport(std::unique_ptr<Import>&& import);
 		bool hasLibraries() const;
 		bool hasLibrary(const std::string &name) const;
 		bool hasLibraryCaseInsensitive(const std::string &name) const;

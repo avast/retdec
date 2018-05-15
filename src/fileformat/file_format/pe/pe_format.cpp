@@ -671,7 +671,6 @@ void PeFormat::loadSymbols()
 void PeFormat::loadImports()
 {
 	std::string libname;
-	Import import;
 
 	for(std::size_t i = 0; formatParser->getImportedLibraryFileName(i, libname); ++i)
 	{
@@ -681,9 +680,11 @@ void PeFormat::loadImports()
 		}
 		importTable->addLibrary(libname);
 
-		for(std::size_t j = 0; formatParser->getImport(i, j, import); ++j)
+		std::size_t index = 0;
+		while (auto import = formatParser->getImport(i, index))
 		{
-			importTable->addImport(import);
+			importTable->addImport(std::move(import));
+			index++;
 		}
 	}
 
@@ -695,10 +696,12 @@ void PeFormat::loadImports()
 		}
 		importTable->addLibrary(libname);
 
-		for(std::size_t j = 0; formatParser->getDelayImport(i, j, import); ++j)
+		std::size_t index = 0;
+		while (auto import = formatParser->getDelayImport(i, index))
 		{
-			import.setLibraryIndex(importTable->getNumberOfLibraries() - 1);
-			importTable->addImport(import);
+			import->setLibraryIndex(importTable->getNumberOfLibraries() - 1);
+			importTable->addImport(std::move(import));
+			index++;
 		}
 	}
 

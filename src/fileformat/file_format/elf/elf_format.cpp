@@ -1661,7 +1661,6 @@ void ElfFormat::loadSymbols(const ELFIO::elfio *file, const ELFIO::symbol_sectio
 	}
 
 	auto *symtab = new SymbolTable();
-	Import import;
 	Export newExport;
 	std::string name;
 	Elf_Half link = 0;
@@ -1695,7 +1694,6 @@ void ElfFormat::loadSymbols(const ELFIO::elfio *file, const ELFIO::symbol_sectio
 			// Ignore first STN_UNDEF STT_NOTYPE symbol when considering imports
 			if(link == SHN_UNDEF && i != 0)
 			{
-				import.setName(name);
 				if(!importTable)
 				{
 					importTable = new ImportTable();
@@ -1705,13 +1703,17 @@ void ElfFormat::loadSymbols(const ELFIO::elfio *file, const ELFIO::symbol_sectio
 				std::set<std::pair<std::string, unsigned long long>> addresses(keyIter.first, keyIter.second);
 				for(const auto &address : addresses)
 				{
-					import.setAddress(address.second);
-					importTable->addImport(import);
+					auto import = std::make_unique<Import>();
+					import->setName(name);
+					import->setAddress(address.second);
+					importTable->addImport(std::move(import));
 				}
 				if(keyIter.first == keyIter.second && getSectionFromAddress(value))
 				{
-					import.setAddress(value);
-					importTable->addImport(import);
+					auto import = std::make_unique<Import>();
+					import->setName(name);
+					import->setAddress(value);
+					importTable->addImport(std::move(import));
 				}
 			}
 		}

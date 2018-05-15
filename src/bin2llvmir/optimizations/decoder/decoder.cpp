@@ -925,7 +925,7 @@ void Decoder::initJumpTargets()
 	{
 		for (const auto &imp : *impTbl)
 		{
-			retdec::utils::Address addr = imp.getAddress();
+			retdec::utils::Address addr = imp->getAddress();
 			if (addr.isUndefined())
 			{
 				continue;
@@ -944,15 +944,15 @@ void Decoder::initJumpTargets()
 			highestImport = std::max(highestImport, addr);
 			++importNum;
 
-			std::string n = imp.getName();
+			std::string n = imp->getName();
 			if (n.empty())
 			{
-				auto libN = impTbl->getLibrary(imp.getLibraryIndex());
+				auto libN = impTbl->getLibrary(imp->getLibraryIndex());
 				std::transform(libN.begin(), libN.end(), libN.begin(), ::tolower);
 				retdec::utils::removeSuffix(libN, ".dll");
 
 				unsigned long long ord;
-				const bool ordValid = imp.getOrdinalNumber(ord);
+				const bool ordValid = imp->getOrdinalNumber(ord);
 				if (ordValid)
 				{
 					n = getFunctionNameFromLibAndOrd(libN, ord);
@@ -973,7 +973,7 @@ void Decoder::initJumpTargets()
 			}
 			std::string name = normalizeNamePrefix(n);
 
-			LOG << "\t\timport: " << imp.getName() << " @ " << addr << std::endl;
+			LOG << "\t\timport: " << imp->getName() << " @ " << addr << std::endl;
 
 			if (isArmOrThumb())
 			{

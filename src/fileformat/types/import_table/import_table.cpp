@@ -614,7 +614,7 @@ std::size_t ImportTable::getNumberOfImportsInLibrary(std::size_t libraryIndex) c
 	{
 		for(const auto &imp : imports)
 		{
-			if(imp.getLibraryIndex() == libraryIndex)
+			if(imp->getLibraryIndex() == libraryIndex)
 			{
 				++result;
 			}
@@ -708,7 +708,7 @@ std::string ImportTable::getLibrary(std::size_t libraryIndex) const
  */
 const Import* ImportTable::getImport(std::size_t importIndex) const
 {
-	return (importIndex < getNumberOfImports()) ? &imports[importIndex] : nullptr;
+	return (importIndex < getNumberOfImports()) ? imports[importIndex].get() : nullptr;
 }
 
 /**
@@ -720,9 +720,9 @@ const Import* ImportTable::getImport(const std::string &name) const
 {
 	for(const auto &i : imports)
 	{
-		if(i.getName() == name)
+		if(i->getName() == name)
 		{
-			return &i;
+			return i.get();
 		}
 	}
 
@@ -738,9 +738,9 @@ const Import* ImportTable::getImportOnAddress(unsigned long long address) const
 {
 	for(const auto &i : imports)
 	{
-		if(i.getAddress() == address)
+		if(i->getAddress() == address)
 		{
-			return &i;
+			return i.get();
 		}
 	}
 
@@ -770,8 +770,51 @@ ImportTable::importsIterator ImportTable::end() const
  */
 void ImportTable::computeHashes()
 {
-	if (impHashBytes.empty())
-		return;
+	std::vector<std::uint8_t> impHashBytes;
+	for (const auto& import : imports)
+	{
+		if(!import->isUsedForImphash())
+		{
+			continue;
+		}
+
+		auto libName = toLower(getLibrary(import->getLibraryIndex()));
+		auto funcName = toLower(import->getName());
+
+		// YARA compatible name lookup
+		if(funcName.empty())
+		{
+			unsigned long long ord;
+			if(import->getOrdinalNumber(ord))
+			{
+				funcName = toLower(ordLookUp(libName, ord));
+			}
+		}
+
+		// Cut common suffixes
+		if(endsWith(libName, ".ocx")
+				|| endsWith(libName, ".sys")
+				|| endsWith(libName, ".dll"))
+		{
+			libName.erase(libName.length() - 4, 4);
+		}
+
+		if(libName.empty() || funcName.empty())
+		{
+			continue;
+		}
+
+		// Yara adds comma if there are multiple imports
+		if(!impHashBytes.empty())
+		{
+			impHashBytes.push_back(static_cast<unsigned char>(','));
+		}
+
+		for(const auto c : std::string(libName + "." + funcName))
+		{
+			impHashBytes.push_back(static_cast<unsigned char>(c));
+		}
+	}
 
 	impHashCrc32 = retdec::crypto::getCrc32(impHashBytes.data(), impHashBytes.size());
 	impHashMd5 = retdec::crypto::getMd5(impHashBytes.data(), impHashBytes.size());
@@ -807,47 +850,9 @@ void ImportTable::addLibrary(std::string name)
  * Add import
  * @param import Import which will be added
  */
-void ImportTable::addImport(const Import &import)
+void ImportTable::addImport(std::unique_ptr<Import>&& import)
 {
-	imports.push_back(import);
-
-	// Get lowercase import name and library name
-	auto funcName = toLower(import.getName());
-	auto libName = toLower(getLibrary(import.getLibraryIndex()));
-
-	// YARA compatible name lookup
-	if(funcName.empty())
-	{
-		unsigned long long ord;
-		if(import.getOrdinalNumber(ord))
-		{
-			funcName = toLower(ordLookUp(libName, ord));
-		}
-	}
-
-	// Cut common suffixes
-	if(endsWith(libName, ".ocx")
-			|| endsWith(libName, ".sys")
-			|| endsWith(libName, ".dll"))
-	{
-		libName.erase(libName.length() - 4, 4);
-	}
-
-	if(libName.empty() || funcName.empty())
-	{
-		return;
-	}
-
-	// Yara adds comma if there are multiple imports
-	if(!impHashBytes.empty())
-	{
-		impHashBytes.push_back(static_cast<unsigned char>(','));
-	}
-
-	for(const auto c : std::string(libName + "." + funcName))
-	{
-		impHashBytes.push_back(static_cast<unsigned char>(c));
-	}
+	imports.push_back(std::move(import));
 }
 
 /**
@@ -968,10 +973,10 @@ void ImportTable::dump(std::string &dumpTable) const
 
 		for(const auto &imp : imports)
 		{
-			ret << "; " << std::hex << imp.getName() << " (addr: " << imp.getAddress() <<
-				", ord: " << std::dec << (imp.getOrdinalNumber(aux) ? numToStr(aux, std::dec) : "-") <<
-				", libId: " << (imp.getLibraryIndex() < getNumberOfLibraries() ?
-				numToStr(imp.getLibraryIndex(), std::dec) : "-") << ")\n";
+			ret << "; " << std::hex << imp->getName() << " (addr: " << imp->getAddress() <<
+				", ord: " << std::dec << (imp->getOrdinalNumber(aux) ? numToStr(aux, std::dec) : "-") <<
+				", libId: " << (imp->getLibraryIndex() < getNumberOfLibraries() ?
+				numToStr(imp->getLibraryIndex(), std::dec) : "-") << ")\n";
 		}
 	}
 
@@ -996,7 +1001,7 @@ void ImportTable::dumpLibrary(std::size_t libraryIndex, std::string &libraryDump
 
 	for(std::size_t i = 0, e = imports.size(); i < e; ++i)
 	{
-		if(imports[i].getLibraryIndex() == libraryIndex)
+		if(imports[i]->getLibraryIndex() == libraryIndex)
 		{
 			indexes.push_back(i);
 		}
@@ -1013,9 +1018,9 @@ void ImportTable::dumpLibrary(std::size_t libraryIndex, std::string &libraryDump
 
 		for(const auto &i : indexes)
 		{
-			ret << "; " << std::hex << imports[i].getName() << " (addr: " << imports[i].getAddress() <<
-				", ord: " << std::dec << (imports[i].getOrdinalNumber(aux) ? numToStr(aux, std::dec) : "-") <<
-				", libId: " << imports[i].getLibraryIndex() << ")\n";
+			ret << "; " << std::hex << imports[i]->getName() << " (addr: " << imports[i]->getAddress() <<
+				", ord: " << std::dec << (imports[i]->getOrdinalNumber(aux) ? numToStr(aux, std::dec) : "-") <<
+				", libId: " << imports[i]->getLibraryIndex() << ")\n";
 		}
 	}
 

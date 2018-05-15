@@ -71,6 +71,16 @@ std::string ImportTable::getImphashSha256() const
 }
 
 /**
+ * Get import
+ * @param position Index of selected import from table (indexed from 0)
+ * @return Import
+ */
+const retdec::fileformat::Import* ImportTable::getImport(std::size_t position) const
+{
+	return table ? table->getImport(position) : nullptr;
+}
+
+/**
  * Get import name
  * @param position Index of selected import from table (indexed from 0)
  * @return Import name

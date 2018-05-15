@@ -107,6 +107,16 @@ void Import::setOrdinalNumber(unsigned long long importOrdinalNumber)
 }
 
 /**
+ * Virtual method which indicates whether import should be used
+ * for calculating imphash.
+ * @return `true` if should be used, otherwise `false`.
+ */
+bool Import::isUsedForImphash() const
+{
+	return true;
+}
+
+/**
  * Invalidate ordinal number of import
  *
  * Instance method @a getOrdinalNumber() returns @c false after invocation of
