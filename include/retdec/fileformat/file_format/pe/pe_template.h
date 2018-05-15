@@ -504,7 +504,7 @@ template<int bits> bool peDelayImportedLibraryFileName(const PeLib::DelayImportD
  *
  * If function returns info about import, or @c nullptr if invalid import is requested.
  */
-template<int bits> std::unique_ptr<Import> peImport(const PeLib::PeHeaderT<bits> &peHeader,
+template<int bits> std::unique_ptr<PeImport> peImport(const PeLib::PeHeaderT<bits> &peHeader,
 	const PeLib::ImportDirectory<bits> &peImports,
 	unsigned long long fileIndex, unsigned long long importIndex)
 {
@@ -559,7 +559,7 @@ template<int bits> std::unique_ptr<Import> peImport(const PeLib::PeHeaderT<bits>
  *
  * If function returns info about delayed import, or @c nullptr if invalid import is requested.
  */
-template<int bits> std::unique_ptr<Import> peDelayImport(const PeLib::PeHeaderT<bits> &peHeader,
+template<int bits> std::unique_ptr<PeImport> peDelayImport(const PeLib::PeHeaderT<bits> &peHeader,
 	const PeLib::DelayImportDirectory<bits> &delay,
 	unsigned long long fileIndex, unsigned long long importIndex)
 {

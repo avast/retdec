@@ -62,8 +62,8 @@ class PeFormatParser
 		virtual bool getDataDirectoryAbsolute(unsigned long long index, unsigned long long &absAddr, unsigned long long &size) const = 0;
 		virtual bool getImportedLibraryFileName(unsigned long long index, std::string &fileName) const = 0;
 		virtual bool getDelayImportedLibraryFileName(unsigned long long index, std::string &fileName) const = 0;
-		virtual std::unique_ptr<Import> getImport(unsigned long long fileIndex, unsigned long long importIndex) const = 0;
-		virtual std::unique_ptr<Import> getDelayImport(unsigned long long fileIndex, unsigned long long importIndex) const = 0;
+		virtual std::unique_ptr<PeImport> getImport(unsigned long long fileIndex, unsigned long long importIndex) const = 0;
+		virtual std::unique_ptr<PeImport> getDelayImport(unsigned long long fileIndex, unsigned long long importIndex) const = 0;
 		virtual unsigned long long getNumberOfExportedFunctions() const = 0;
 		virtual bool getExportedFunction(unsigned long long index, Export& exportedFunction) const = 0;
 		virtual unsigned long long getNumberOfDebugEntries() const = 0;
