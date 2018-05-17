@@ -4,7 +4,7 @@
 
 * New Feature: `retdec-fileinfo` is now able to detect when a PE file is corrupted and cannot be loaded ([#281](https://github.com/avast-tl/retdec/pull/281)).
 * New Feature: Added a new tool: `retdec-getsig`. It can be used for creating signatures of packers, compilers, and other tools.
-* New Feature: Number of bytes read from entry point by `retdec-fileinfo` is now configurable with `--ep-bytes` option.
+* New Feature: The number of bytes read from the input file's entry point by `retdec-fileinfo` is now configurable with the `--ep-bytes` option.
 * Enhancement: Speeded up RetDec rebuild and installation by disabling forced reconfiguration of LLVM ([#294](https://github.com/avast-tl/retdec/pull/294)).
 * Enhancement: Added new OS/ABI and tool detections for ELF files ([#244](https://github.com/avast-tl/retdec/issues/244)).
 * Enhancement: Improved support for analysis of ELF [core files](http://www.gabriel.urdhr.fr/2015/05/29/core-file/) by `retdec-fileinfo` ([#142](https://github.com/avast-tl/retdec/issues/142)).
@@ -28,9 +28,9 @@
 * Enhancement: Any shell can be used to install the decompiler, not just Bash.
 * Enhancement: Added unofficial support for macOS build ([#7](https://github.com/avast-tl/retdec/issues/7)).
 * Enhancement: Allow 32b versions of `bin2llvmir` and `llvmir2hll` on Windows access more memory ([#7](https://github.com/avast-tl/retdec/issues/73)).
-* Enhancement: Added method in `loader::Image` to obtain segment content as raw data pointer.
-* Enhancement: `retdec-fileinfo` now prints raw bytes of Rich Header in JSON output. ([#288](https://github.com/avast-tl/retdec/issues/288)).
-* Enhancement: Delayed imports in PE files are now distinguished from non-delayed imports in `retdec-fileinfo` output by boolean value. ([#287](https://github.com/avast-tl/retdec/issues/288)).
+* Enhancement: Added a method in `loader::Image` to obtain segment content as a raw data pointer.
+* Enhancement: `retdec-fileinfo` now prints raw bytes of Rich Header in the JSON format. ([#288](https://github.com/avast-tl/retdec/issues/288)).
+* Enhancement: Delayed imports in PE files are now distinguished from non-delayed imports in the output from `retdec-fileinfo` by a boolean flag. ([#287](https://github.com/avast-tl/retdec/issues/288)).
 * Fix: Fixed parsing of PE files having corrupted import tables ([#101](https://github.com/avast-tl/retdec/issues/101)).
 * Fix: Fixed parsing of delayed imports by ordinals in PE files ([#282](https://github.com/avast-tl/retdec/issues/282)).
 * Fix: Fixed ordering of detected tools (e.g. compilers and packers) on systems whose `std::sort()` is not stable ([#262](https://github.com/avast-tl/retdec/issues/262)).
@@ -63,7 +63,7 @@
 * Fix: Invalid dates are no longer shown in the output of `fileinfo` ([#251](https://github.com/avast-tl/retdec/issues/251)).
 * Fix: Fixed crash of `fileinfo` when accessing slightly corrupted security directory ([#255](https://github.com/avast-tl/retdec/issues/255), [#250](https://github.com/avast-tl/retdec/issues/250)).
 * Fix: Delayed imports are now ignored when calculating imphash for PE files. ([#287](https://github.com/avast-tl/retdec/issues/287)).
-* Fix: Imphash for Mach-O binaries is now always generated even if commands for library loading are not ordered. ([#285](https://github.com/avast-tl/retdec/issues/287)).
+* Fix: Import-table hashes for Mach-O binaries are now always generated even if commands for library loading are not ordered. ([#285](https://github.com/avast-tl/retdec/issues/287)).
 
 # v3.0 (2017-12-13)
 
