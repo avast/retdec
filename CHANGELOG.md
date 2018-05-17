@@ -64,6 +64,7 @@
 * Fix: Fixed crash of `fileinfo` when accessing slightly corrupted security directory ([#255](https://github.com/avast-tl/retdec/issues/255), [#250](https://github.com/avast-tl/retdec/issues/250)).
 * Fix: Delayed imports are now ignored when calculating imphash for PE files. ([#287](https://github.com/avast-tl/retdec/issues/287)).
 * Fix: Import-table hashes for Mach-O binaries are now always generated even if commands for library loading are not ordered. ([#285](https://github.com/avast-tl/retdec/issues/287)).
+* Fix: OpenSSL can now be built on ARM architectures (Linux and Windows) and other non-recognized architectures (Linux only) ([#299](https://github.com/avast-tl/retdec/issues/299)).
 
 # v3.0 (2017-12-13)
 
