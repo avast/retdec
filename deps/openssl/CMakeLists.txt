@@ -14,6 +14,7 @@ include(ProcessorCount)
 
 ProcessorCount(CPUS)
 
+# Detect architecture.
 if("${CMAKE_SYSTEM_PROCESSOR}" STREQUAL "x86_64" OR "${CMAKE_SYSTEM_PROCESSOR}" STREQUAL "AMD64")
 	set(ARCH_X64 1)
 elseif("${CMAKE_SYSTEM_PROCESSOR}" STREQUAL "x86")
@@ -32,11 +33,10 @@ else()
 		set(ARCH_GENERIC32 1)
 	elseif(CMAKE_SIZEOF_VOID_P EQUAL 8)
 		set(ARCH_GENERIC64 1)
-	else()
-		message(FATAL_ERROR "Unsupported architecture. Supported: x86, x86-64, ARM, generic 32-bit, generic 64-bit.")
 	endif()
 endif()
 
+# Detect OS.
 if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
 	set(OS_WINDOWS 1)
 elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux")
@@ -47,6 +47,7 @@ else()
 	message(FATAL_ERROR "Unsupported system. Supported: Windows, Linux, macOS.")
 endif()
 
+# Detect compiler.
 if(OS_WINDOWS)
 	if(MSVC)
 		set(COMPILER_MSVC 1)
@@ -67,6 +68,7 @@ elseif(OS_DARWIN)
 	endif()
 endif()
 
+# Prepare configuration option for OpenSSL.
 if(OS_WINDOWS)
 	if(COMPILER_MSVC)
 		set(OPENSSL_MAKE "nmake")
@@ -110,6 +112,11 @@ elseif(OS_DARWIN)
 	elseif(ARCH_X64)
 		set(OPENSSL_CONFIGURE_ARCH "darwin64-x86_64-cc")
 	endif()
+endif()
+
+# Unrecognized architecture.
+if(NOT DEFINED OPENSSL_CONFIGURE_ARCH)
+	message(FATAL_ERROR "Unsupported architecture. Supported: x86, x86-64, ARM, generic 32-bit (Linux only), generic 64-bit (Linux only).")
 endif()
 
 set(OPENSSL_PREFIX         "${CMAKE_CURRENT_BINARY_DIR}/openssl")
