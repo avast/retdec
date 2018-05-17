@@ -4,6 +4,6 @@ set(CRYPTO_SOURCES
 	hash_context.cpp
 )
 
-add_library(retdec-fileformat-crypto STATIC ${CRYPTO_SOURCES})
-target_link_libraries(retdec-fileformat-crypto retdec-utils openssl-crypto)
-target_include_directories(retdec-fileformat-crypto PUBLIC ${PROJECT_SOURCE_DIR}/include/)
+add_library(retdec-crypto STATIC ${CRYPTO_SOURCES})
+target_link_libraries(retdec-crypto retdec-utils openssl-crypto)
+target_include_directories(retdec-crypto PUBLIC ${PROJECT_SOURCE_DIR}/include/)
