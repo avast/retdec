@@ -63,7 +63,7 @@
 * Fix: Plain output of `fileinfo` now escapes non-printable characters in subject/issuer name/organization of PE certificates ([#253](https://github.com/avast-tl/retdec/issues/253)).
 * Fix: Invalid dates are no longer shown in the output of `fileinfo` ([#251](https://github.com/avast-tl/retdec/issues/251)).
 * Fix: Fixed crash of `fileinfo` when accessing slightly corrupted security directory ([#255](https://github.com/avast-tl/retdec/issues/255), [#250](https://github.com/avast-tl/retdec/issues/250)).
-* Fix: Delayed imports are now ignored when calculating imphash for PE files. ([#287](https://github.com/avast-tl/retdec/issues/287)).
+* Fix: Delayed imports are now ignored when calculating import-table hashes for PE files. ([#287](https://github.com/avast-tl/retdec/issues/287)).
 * Fix: Import-table hashes for Mach-O binaries are now always generated even if commands for library loading are not ordered. ([#285](https://github.com/avast-tl/retdec/issues/287)).
 * Fix: OpenSSL can now be built on ARM architectures (Linux and Windows) and other non-recognized architectures (Linux only) ([#299](https://github.com/avast-tl/retdec/issues/299)).
 
