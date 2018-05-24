@@ -224,31 +224,15 @@ docker build -t retdec:dev . -f Dockerfile.dev
 ```
 
 ### Run Container
-
-To decompile a binary, create a container to upload the binary to:
+If your `uid` is not 1000, make sure the folder accessible for retdec
 ```
-docker create --name retdec_init retdec
+chmod 0777 /path/to/local/folder
 ```
-
-Upload the binary (note the destination directory should be a directory with read/write permissions, such as `/home/retdec/`):
-```
-docker cp <file> retdec_init:/destination/path/of/binary
-```
-
-Commit the copied files into the container image:
-```
-docker commit retdec_init retdec:initialized
-```
-
 Run the decompiler:
 ```
-docker run --name retdec retdec:initialized retdec-decompiler.sh /destination/path/of/binary
+docker run --rm -v /path/to/local/folder:/destination retdec retdec-decompiler.sh /destination/binary
 ```
-
-Copy output back to host:
-```
-docker cp retdec:/destination/path/of/binary.c /path/to/save/file
-```
+Output files will be generated to same folder of binary
 
 ## Repository Overview
 
