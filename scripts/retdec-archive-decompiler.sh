@@ -172,7 +172,7 @@ for ((INDEX=0; INDEX<FILE_COUNT; INDEX++)); do
 
 	# We have to use indexes instead of names because archives can contain multiple files with same name.
 	LOG_FILE="$LIBRARY_PATH.file_$FILE_INDEX.log.verbose"                                                    # Do not escape!
-	gnutimeout $TIMEOUT "$DECOMPILER_SH" --ar-index="$INDEX" -o "$LIBRARY_PATH.file_$FILE_INDEX" "$LIBRARY_PATH" $DECOMPILER_SH_ARGS > "$LOG_FILE" 2>&1
+	gnutimeout $TIMEOUT "$DECOMPILER_SH" --ar-index="$INDEX" -o "$LIBRARY_PATH.file_$FILE_INDEX.c" "$LIBRARY_PATH" $DECOMPILER_SH_ARGS > "$LOG_FILE" 2>&1
 	RC=$?
 
 	# Print status.
