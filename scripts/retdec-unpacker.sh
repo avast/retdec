@@ -59,6 +59,8 @@ print_help()
 	echo "    -h,        --help                 Print this help message."
 	echo "    -e,        --extended-exit-codes  Use more granular exit codes than just 0/1."
 	echo "    -o FILE,   --output FILE          Output file (default: file-unpacked)."
+	echo "               --max-memory N         Limit the maximal memory of retdec-unpacker to N bytes."
+	echo "               --max-memory-half-ram  Limit the maximal memory of retdec-unpacker to half of system RAM."
 }
 
 #
@@ -106,6 +108,11 @@ try_to_unpack()
 	local UNPACKER_EXIT_CODE_PREPROCESSING_ERROR=3
 
 	UNPACKER_PARAMS=("$IN" -o "$OUT")
+	if [ ! -z "$MAX_MEMORY" ]; then
+		UNPACKER_PARAMS+=(--max-memory "$MAX_MEMORY")
+	elif [ ! -z "$MAX_MEMORY_HALF_RAM" ]; then
+		UNPACKER_PARAMS+=(--max-memory-half-ram)
+	fi
 	echo ""
 	echo "##### Trying to unpack $IN into $OUT by using generic unpacker..."
 	echo "RUN: $UNPACKER ${UNPACKER_PARAMS[@]}"
@@ -157,7 +164,7 @@ try_to_unpack()
 
 SCRIPT_NAME=$0
 GETOPT_SHORTOPT="eho:"
-GETOPT_LONGOPT="extended-exit-codes,help,output:"
+GETOPT_LONGOPT="extended-exit-codes,help,output:,max-memory:,max-memory-half-ram"
 
 # Check script arguments.
 PARSED_OPTIONS=$(getopt -o "$GETOPT_SHORTOPT" -l "$GETOPT_LONGOPT" -n "$SCRIPT_NAME" -- "$@")
@@ -179,6 +186,19 @@ while true; do
 	-o|--output)					# Output file.
 		[ "$OUT" ] && print_error_and_die "Duplicate option: -o|--output"
 		OUT="$2"
+		shift 2;;
+	--max-memory-half-ram)
+		[ "$MAX_MEMORY_HALF_RAM" ] && print_error_and_die "Duplicate option: --max-memory-half-ram"
+		[ "$MAX_MEMORY" ] && print_error_and_die "Clashing options: --max-memory-half-ram and --max-memory"
+		MAX_MEMORY_HALF_RAM="1"
+		shift;;
+	--max-memory)
+		[ "$MAX_MEMORY" ] && print_error_and_die "Duplicate option: --max-memory"
+		[ "$MAX_MEMORY_HALF_RAM" ] && print_error_and_die "Clashing options: --max-memory and --max-memory-half-ram"
+		MAX_MEMORY="$2"
+		if [[ ! "$MAX_MEMORY" =~ ^[0-9]+$ ]]; then
+			print_error_and_die "Invalid value for --max-memory: $MAX_MEMORY (expected a positive integer)"
+		fi
 		shift 2;;
 	--)								# Input file.
 		if [ $# -eq 2 ]; then
