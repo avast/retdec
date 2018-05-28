@@ -4,10 +4,13 @@
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */
 
+#include <cstddef>
 #include <iostream>
 #include <memory>
 
+#include "retdec/utils/conversion.h"
 #include "retdec/utils/filesystem_path.h"
+#include "retdec/utils/memory.h"
 #include "retdec/cpdetect/cpdetect.h"
 #include "retdec/fileformat/fileformat.h"
 #include "arg_handler.h"
@@ -26,7 +29,8 @@ enum ExitCode
 	EXIT_CODE_OK = 0, ///< Unpacker ended successfully.
 	EXIT_CODE_NOTHING_TO_DO, ///< There was not found matching plugin.
 	EXIT_CODE_UNPACKING_FAILED, ///< At least one plugin failed at the unpacking of the file.
-	EXIT_CODE_PREPROCESSING_ERROR ///< Error with preprocessing of input file before unpacking.
+	EXIT_CODE_PREPROCESSING_ERROR, ///< Error with preprocessing of input file before unpacking.
+	EXIT_CODE_MEMORY_LIMIT_ERROR ///< There was an error when setting the memory limit.
 };
 
 bool detectPackers(const std::string& inputFile, std::vector<retdec::cpdetect::DetectResult>& detectedPackers)
@@ -115,6 +119,39 @@ ExitCode processArgs(ArgHandler& handler, char argc, char** argv)
 
 	bool brute = handler["brute"]->used;
 
+	// --max-memory N
+	if (handler["max-memory"]->used)
+	{
+		auto maxMemoryLimitStr = handler["max-memory"]->input;
+
+		std::size_t maxMemoryLimit = 0;
+		auto conversionSucceeded = strToNum(maxMemoryLimitStr, maxMemoryLimit);
+		if (!conversionSucceeded)
+		{
+			std::cerr << "Invalid value for --max-memory: '"
+				<< maxMemoryLimitStr << "'!\n";
+			return EXIT_CODE_MEMORY_LIMIT_ERROR;
+		}
+
+		auto limitingSucceeded = limitSystemMemory(maxMemoryLimit);
+		if (!limitingSucceeded)
+		{
+			std::cerr << "Failed to limit memory to "
+				<< maxMemoryLimitStr << " bytes!\n";
+			return EXIT_CODE_MEMORY_LIMIT_ERROR;
+		}
+	}
+	// --max-memory-half-ram
+	else if (handler["max-memory-half-ram"]->used)
+	{
+		auto limitingSucceeded = limitSystemMemoryToHalfOfTotalSystemMemory();
+		if (!limitingSucceeded)
+		{
+			std::cerr << "Failed to limit memory to half of system RAM!\n";
+			return EXIT_CODE_MEMORY_LIMIT_ERROR;
+		}
+	}
+
 	// -h|--help
 	if (handler["help"]->used)
 	{
@@ -176,13 +213,17 @@ int main(int argc, char** argv)
 			"\n"
 			"Non-group optional arguments:\n"
 			"   -b|--brute             Tell unpacker to run plugins in the brute mode. Plugins may or may not\n"
-			"                          implement brute methods for unpacking. They can completely ignore this argument."
+			"                          implement brute methods for unpacking. They can completely ignore this argument.\n"
+			"   --max-memory N         Limit maximal memory to N bytes.\n"
+			"   --max-memory-half-ram  Limit maximal memory to half of system RAM."
 	);
 
 	handler.registerArg('h', "help", false);
 	handler.registerArg('o', "output", true);
 	handler.registerArg('p', "plugins", false);
 	handler.registerArg('b', "brute", false);
+	handler.registerArg('m', "max-memory", true);
+	handler.registerArg('M', "max-memory-half-ram", false);
 
 	return processArgs(handler, argc, argv);
 }

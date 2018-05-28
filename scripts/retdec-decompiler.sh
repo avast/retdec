@@ -86,8 +86,8 @@ print_help()
 	echo "               --static-code-sigfile path             Adds additional signature file for static code detection."
 	echo "               --static-code-archive path             Adds additional signature file for static code detection from given archive."
 	echo "               --no-default-static-signatures         No default signatures for statically linked code analysis are loaded (options static-code-sigfile/archive are still available)."
-	echo "               --max-memory bytes                     Limits the maximal memory of fileinfo, bin2llvmir, and llvmir2hll into the given number of bytes."
-	echo "               --no-memory-limit                      Disables the default memory limit (half of system RAM) of fileinfo, bin2llvmir, and llvmir2hll."
+	echo "               --max-memory bytes                     Limits the maximal memory of fileinfo, unpacker, bin2llvmir, and llvmir2hll into the given number of bytes."
+	echo "               --no-memory-limit                      Disables the default memory limit (half of system RAM) of fileinfo, unpacker, bin2llvmir, and llvmir2hll."
 }
 SCRIPT_NAME=$0
 GETOPT_SHORTOPT="a:e:hkl:m:o:p:"
@@ -986,6 +986,13 @@ if [ "$MODE" = "bin" ] || [ "$MODE" = "raw" ]; then
 	## Unpacking.
 	##
 	UNPACK_PARAMS=(--extended-exit-codes --output "$OUT_UNPACKED" "$IN")
+	if [ ! -z "$MAX_MEMORY" ]; then
+		UNPACK_PARAMS+=(--max-memory "$MAX_MEMORY")
+	elif [ -z "$NO_MEMORY_LIMIT" ]; then
+		# By default, we want to limit the memory of retdec-unpacker into half
+		# of system RAM to prevent potential black screens on Windows (#270).
+		UNPACK_PARAMS+=(--max-memory-half-ram)
+	fi
 
 	if [ "$GENERATE_LOG" ]; then
 		LOG_UNPACKER_OUTPUT="$($UNPACK_SH "${UNPACK_PARAMS[@]}" 2>&1)"
