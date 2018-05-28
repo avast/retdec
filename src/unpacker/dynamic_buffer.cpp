@@ -136,7 +136,7 @@ Endianness DynamicBuffer::getEndianness() const
 }
 
 /**
- * Gets the size of the data that are acutally written to the buffer.
+ * Gets the size of the data that are actually written to the buffer.
  * This cannot be greater than the capacity of the buffer.
  *
  * @return The size of the written data to the buffer.
