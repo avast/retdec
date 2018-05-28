@@ -209,30 +209,31 @@ Docker support is maintained by community. If something does not work for you or
 
 ### Build Image
 
-Building in Docker does not require installation of required libraries locally. This is a good option for trying out RetDec without setting up the whole build toolchain.
+Building in Docker does not require installation of the required libraries locally. This is a good option for trying out RetDec without setting up the whole build toolchain.
 
-To build the RetDec docker image, run
+To build the RetDec Docker image, run
 ```
 docker build -t retdec .
 ```
 
-This builds the container from the master branch of this repository.
+This builds the image from the master branch of this repository.
 
-To build the container using the local copy of the repository, use the development Dockerfile, `Dockerfile.dev`:
+To build the image using the local copy of the repository, use the development Dockerfile, `Dockerfile.dev`:
 ```
 docker build -t retdec:dev . -f Dockerfile.dev
 ```
 
 ### Run Container
-If your `uid` is not 1000, make sure the folder accessible for retdec
+
+If your `uid` is not 1000, make sure that the directory containing your input binary files is accessible for RetDec:
 ```
-chmod 0777 /path/to/local/folder
+chmod 0777 /path/to/local/directory
 ```
-Run the decompiler:
+Now, you can run the decompiler inside a container:
 ```
-docker run --rm -v /path/to/local/folder:/destination retdec retdec-decompiler.sh /destination/binary
+docker run --rm -v /path/to/local/directory:/destination retdec retdec-decompiler.sh /destination/binary
 ```
-Output files will be generated to same folder of binary
+Output files will be generated to the same directory (e.g. `/path/to/local/directory`).
 
 ## Repository Overview
 
