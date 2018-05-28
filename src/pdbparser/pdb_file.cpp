@@ -43,11 +43,11 @@ PDBFileState PDBFile::load_pdb_file(const char *filename)
 	fseek(fp, 0, SEEK_SET);
 	pdb_file_data = new char[pdb_file_size]; // Allocate memory
 	size_t result = fread(pdb_file_data,1,pdb_file_size,fp); // Read the file
+	fclose(fp);
 	if (result != pdb_file_size)
 	{
 		return PDB_STATE_ERR_FILE_OPEN;
 	}
-	fclose(fp);
 
 	// Get the version of PDB file and parse it
 	pdb_header = reinterpret_cast<PDB_HEADER *>(pdb_file_data);
