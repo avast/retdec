@@ -22,7 +22,7 @@ namespace utils {
 */
 void sleep(unsigned seconds) {
 	#ifdef OS_WINDOWS
-		// The Windows version expects the number in miliseconds.
+		// The Windows version expects the number in milliseconds.
 		::Sleep(seconds * 1000);
 	#else
 		::sleep(seconds);
