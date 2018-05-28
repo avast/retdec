@@ -1,7 +1,7 @@
 /**
  * @file include/retdec/pdbparser/pdb_utils.h
  * @brief Utils
- * @copyright AVG Technologies s.r.o, All Rights Reserved
+ * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */
 
 #ifndef RETDEC_PDBPARSER_PDB_UTILS_H

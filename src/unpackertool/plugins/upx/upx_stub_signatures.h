@@ -1,7 +1,7 @@
 /**
  * @file src/unpackertool/plugins/upx/upx_stub_signatures.h
  * @brief UPX stub signatures declarations.
- * @copyright AVG Technologies s.r.o, All Rights Reserve
+ * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */
 
 #ifndef UNPACKERTOOL_PLUGINS_UPX_UPX_STUB_SIGNATURES_H

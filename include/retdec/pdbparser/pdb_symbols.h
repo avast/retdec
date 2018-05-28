@@ -1,7 +1,7 @@
 /**
  * @file include/retdec/pdbparser/pdb_symbols.h
  * @brief Symbols
- * @copyright AVG Technologies s.r.o, All Rights Reserved
+ * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */
 
 #ifndef RETDEC_PDBPARSER_PDB_SYMBOLS_H
