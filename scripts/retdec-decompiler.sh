@@ -235,7 +235,6 @@ cleanup()
 		fi
 		rm -f "$OUT_BACKEND_BC"
 		rm -f "$OUT_BACKEND_LL"
-		rm -f "$OUT_RAW_EXECUTABLE"		# Mode "raw"
 		rm -f "$OUT_RESTORED"			# Archive support
 		rm -f "$OUT_ARCHIVE"			# Archive support (Macho-O Universal)
 		rm -f "${SIGNATURES_TO_REMOVE[@]}"	# Signatures generated from archives
@@ -797,14 +796,9 @@ fi
 
 # Raw.
 if [ "$MODE" = "raw" ]; then
-	# Default values and initialization.
-	OUT_RAW_EXECUTABLE="$IN"
-
 	# Entry point for THUMB must be odd.
 	[ "$ARCH" = "thumb" ] && [ $((RAW_ENTRY_POINT % 2)) -eq 0 ] && RAW_ENTRY_POINT=$((RAW_ENTRY_POINT+1))
 
-	# Enable binary decompilation.
-	IN="$OUT_RAW_EXECUTABLE"
 	KEEP_UNREACHABLE_FUNCS=1
 fi
 
