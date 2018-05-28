@@ -137,7 +137,7 @@ void PDBFile::initialize(int image_base)
 
 /**
  * Saves all streams into separate files.
- * File names consist of input pdb file name and extension .xxx as stream number
+ * File names consist of input PDB file name and extension .xxx as stream number
  * Can be called after load_pdb_file() was executed
  * @return Operation was successful
  */
