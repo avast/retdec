@@ -9,15 +9,5 @@
 namespace retdec {
 namespace utils {
 
-/**
- * Does the provided file exist?
- * @param file Path to the file.
- */
-bool fileExists(const std::string& file)
-{
-	std::ifstream f(file);
-	return f.good();
-}
-
 } // namespace utils
 } // namespace retdec

@@ -17,16 +17,6 @@ namespace retdec {
 namespace demangler {
 
 /**
- * @brief Function which finds out whether a file exists.
- * @param filename Name of the file to be checked.
- * @return Boolean value determining whether the file exists or not.
- */
-bool fileExists(const std::string &filename) {
-	ifstream ifile(filename);
-	return ifile.is_open();
-}
-
-/**
  * @brief Initializes a sdate_t to default values.
  * @param x sdate_t to be initialized..
  */

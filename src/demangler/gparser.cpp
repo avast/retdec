@@ -18,6 +18,7 @@
 #include <sstream>
 #include <string>
 
+#include "retdec/utils/filesystem_path.h"
 #include "retdec/demangler/demglobal.h"
 #include "retdec/demangler/demtools.h"
 #include "retdec/demangler/gparser.h"
@@ -29,6 +30,7 @@
 #define BSUBMAX 40 //max size of parameter substitution vector
 
 using namespace std;
+using namespace retdec::utils;
 
 namespace retdec {
 namespace demangler {
@@ -1928,11 +1930,11 @@ cGram::errcode cGram::generateIgrammar(const string inputfilename, const string 
 	errcode retvalue = ERROR_OK;
 
 	//if the output files already exist, end with error. overwriting is not allowed
-	if (fileExists("stgrammars/"+outputname+"ll.cpp")) {
+	if (FilesystemPath("stgrammars/"+outputname+"ll.cpp").exists()) {
 		errString = string("") + "Igrammar file " + "stgrammars/"+outputname+"ll.cpp" + " already exists.";
 		return ERROR_FILE;
 	}
-	if (fileExists("stgrammars/"+outputname+"ll.h")) {
+	if (FilesystemPath("stgrammars/"+outputname+"ll.h").exists()) {
 		errString = string("") + "Igrammar file " + "stgrammars/"+outputname+"ll.h" + " already exists.";
 		return ERROR_FILE;
 	}

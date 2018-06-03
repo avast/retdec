@@ -192,8 +192,6 @@ template <typename N> bool writeFile(const std::string& fileName, const std::vec
 	return ret;
 }
 
-bool fileExists(const std::string& file);
-
 } // namespace utils
 } // namespace retdec
 
