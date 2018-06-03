@@ -388,14 +388,15 @@ void PeFormat::initStructures()
 		stateIsValid = false;
 	}
 
-	if(stateIsValid)
-	{
-		fileFormat = Format::PE;
-		loadRichHeader();
-		loadSections();
-		loadSymbols();
-		loadImports();
-		loadExports();
+
+    if(stateIsValid)
+    {
+        fileFormat = Format::PE;
+        loadRichHeader();
+        loadSections();
+        loadSymbols();
+        loadImports();
+        loadExports();
 		loadPdbInfo();
 		loadResources();
 		loadCertificates();
@@ -707,7 +708,7 @@ void PeFormat::loadImports()
 
 	loadImpHash();
 
-	for (auto&& addressRange : formatParser->getImportDirectoryOccupiedAddresses())
+	for(auto&& addressRange : formatParser->getImportDirectoryOccupiedAddresses())
 	{
 		nonDecodableRanges.addRange(std::move(addressRange));
 	}
@@ -732,6 +733,8 @@ void PeFormat::loadExports()
 		}
 		exportTable->addExport(newExport);
 	}
+
+    loadExpHash();
 
 	for (auto&& addressRange : formatParser->getExportDirectoryOccupiedAddresses())
 	{

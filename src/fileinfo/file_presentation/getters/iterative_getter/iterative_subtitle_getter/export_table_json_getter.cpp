@@ -50,9 +50,15 @@ std::size_t ExportTableJsonGetter::getBasicInfo(std::size_t structIndex, std::ve
 	info.clear();
 
 	desc.push_back("numberOfExports");
-	info.push_back(numToStr(fileinfo.getNumberOfStoredExports()));
+    desc.push_back("crc32");
+    desc.push_back("md5");
+    desc.push_back("sha256");
+    info.push_back(numToStr(fileinfo.getNumberOfStoredExports()));
+    info.push_back(fileinfo.getImphashCrc32());
+    info.push_back(fileinfo.getImphashMd5());
+    info.push_back(fileinfo.getImphashSha256());
 
-	return info.size();
+    return info.size();
 }
 
 bool ExportTableJsonGetter::getRecord(std::size_t structIndex, std::size_t recIndex, std::vector<std::string> &record) const

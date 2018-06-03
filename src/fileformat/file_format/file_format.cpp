@@ -451,12 +451,25 @@ void FileFormat::loadStrings(StringType type, std::size_t charSize, const SecSeg
  */
 void FileFormat::loadImpHash()
 {
-	if (!importTable || (loadFlags & LoadFlags::NO_VERBOSE_HASHES))
-	{
-		return;
-	}
+    if (!importTable || (loadFlags & LoadFlags::NO_VERBOSE_HASHES))
+    {
+        return;
+    }
 
-	importTable->computeHashes();
+    importTable->computeHashes();
+}
+
+/**
+ * Loads exphash from export table.
+ */
+void FileFormat::loadExpHash()
+{
+    if (!exportTable || (loadFlags & LoadFlags::NO_VERBOSE_HASHES))
+    {
+        return;
+    }
+
+    exportTable->computeHashes();
 }
 
 /**

@@ -35,6 +35,33 @@ std::size_t ExportTable::getNumberOfExports() const
 }
 
 /**
+ * Get exphash as CRC32
+ * @return Exphash as CRC32
+ */
+std::string ExportTable::getExphashCrc32() const
+{
+	return table ? table->getExphashCrc32() : "";
+}
+
+/**
+ * Get exphash as MD5
+ * @return Exphash as MD5
+ */
+std::string ExportTable::getExphashMd5() const
+{
+	return table ? table->getExphashMd5() : "";
+}
+
+/**
+ * Get exphash as SHA256
+ * @return Exphash as SHA256
+ */
+std::string ExportTable::getExphashSha256() const
+{
+	return table ? table->getExphashSha256() : "";
+}
+
+/**
  * Get export name
  * @param position Index of selected export from table (indexed from 0)
  * @return Export name

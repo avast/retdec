@@ -24,7 +24,6 @@ class ImportTable
 		using importsIterator = std::vector<std::unique_ptr<Import>>::const_iterator;
 		std::vector<std::string> libraries;           ///< name of libraries
 		std::vector<std::unique_ptr<Import>> imports; ///< stored imports
-		std::vector<unsigned char> impHashBytes;      ///< bytes for calculation of imphash
 		std::string impHashCrc32;                     ///< imphash CRC32
 		std::string impHashMd5;                       ///< imphash MD5
 		std::string impHashSha256;                    ///< imphash SHA256
