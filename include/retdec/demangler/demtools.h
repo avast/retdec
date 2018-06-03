@@ -24,8 +24,6 @@ struct sdate_t {
 	unsigned int s = 0;
 };
 
-bool fileExists(const std::string &filename);
-
 void initSdate_t(sdate_t &x);
 
 sdate_t genTimeStruct();
