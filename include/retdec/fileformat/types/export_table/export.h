@@ -42,7 +42,7 @@ class Export
 
 		/// @name Other methods
 		/// @{
-        virtual bool isUsedForImphash() const;
+		virtual bool isUsedForExphash() const;
 		void invalidateOrdinalNumber();
 		bool hasEmptyName() const;
 		/// @}

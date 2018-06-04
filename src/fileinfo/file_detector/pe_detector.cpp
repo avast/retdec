@@ -37,8 +37,8 @@ const unsigned long long PE_16_FLAGS_SIZE = 16;
 PeDetector::PeDetector(std::string pathToInputFile, FileInformation &finfo, retdec::cpdetect::DetectParams &searchPar, retdec::fileformat::LoadFlags loadFlags) :
 	FileDetector(pathToInputFile, finfo, searchPar, loadFlags)
 {
-    fileParser = peParser = std::make_shared<PeWrapper>(fileInfo.getPathToFile(), loadFlags);
-    loaded = peParser->isInValidState();
+	fileParser = peParser = std::make_shared<PeWrapper>(fileInfo.getPathToFile(), loadFlags);
+	loaded = peParser->isInValidState();
 }
 
 /**

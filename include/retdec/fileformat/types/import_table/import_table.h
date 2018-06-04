@@ -38,9 +38,9 @@ class ImportTable
 		std::size_t getNumberOfImportsInLibrary(std::size_t libraryIndex) const;
 		std::size_t getNumberOfImportsInLibrary(const std::string &name) const;
 		std::size_t getNumberOfImportsInLibraryCaseInsensitive(const std::string &name) const;
-		std::string getImphashCrc32() const;
-		std::string getImphashMd5() const;
-		std::string getImphashSha256() const;
+		const std::string& getImphashCrc32() const;
+		const std::string& getImphashMd5() const;
+		const std::string& getImphashSha256() const;
 		std::string getLibrary(std::size_t libraryIndex) const;
 		const Import* getImport(std::size_t importIndex) const;
 		const Import* getImport(const std::string &name) const;

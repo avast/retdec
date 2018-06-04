@@ -58,15 +58,15 @@ std::size_t ExportTablePlainGetter::getBasicInfo(std::size_t structIndex, std::v
 	info.clear();
 
 	desc.push_back("Number of exports: ");
-    desc.push_back("CRC32            : ");
-    desc.push_back("MD5              : ");
-    desc.push_back("SHA256           : ");
-    info.push_back(numToStr(fileinfo.getNumberOfStoredExports()));
-    info.push_back(fileinfo.getExphashCrc32());
-    info.push_back(fileinfo.getExphashMd5());
-    info.push_back(fileinfo.getExphashSha256());
+	desc.push_back("CRC32            : ");
+	desc.push_back("MD5              : ");
+	desc.push_back("SHA256           : ");
+	info.push_back(numToStr(fileinfo.getNumberOfStoredExports()));
+	info.push_back(fileinfo.getExphashCrc32());
+	info.push_back(fileinfo.getExphashMd5());
+	info.push_back(fileinfo.getExphashSha256());
 
-    return info.size();
+	return info.size();
 }
 
 bool ExportTablePlainGetter::loadRecord(std::size_t structIndex, std::size_t recIndex, std::vector<std::string> &record)

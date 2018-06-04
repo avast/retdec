@@ -668,7 +668,7 @@ std::size_t ImportTable::getNumberOfImportsInLibraryCaseInsensitive(const std::s
  * Get imphash as CRC32
  * @return Imphash as CRC32
  */
-std::string ImportTable::getImphashCrc32() const
+const std::string& ImportTable::getImphashCrc32() const
 {
 	return impHashCrc32;
 }
@@ -677,7 +677,7 @@ std::string ImportTable::getImphashCrc32() const
  * Get imphash as MD5
  * @return Imphash as MD5
  */
-std::string ImportTable::getImphashMd5() const
+const std::string& ImportTable::getImphashMd5() const
 {
 	return impHashMd5;
 }
@@ -686,7 +686,7 @@ std::string ImportTable::getImphashMd5() const
  * Get imphash as SHA256
  * @return Imphash as SHA256
  */
-std::string ImportTable::getImphashSha256() const
+const std::string& ImportTable::getImphashSha256() const
 {
 	return impHashSha256;
 }
@@ -826,7 +826,6 @@ void ImportTable::computeHashes()
  */
 void ImportTable::clear()
 {
-	impHashBytes.clear();
 	libraries.clear();
 	imports.clear();
 	impHashCrc32.clear();

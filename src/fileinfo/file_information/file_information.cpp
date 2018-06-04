@@ -949,7 +949,7 @@ std::size_t FileInformation::getNumberOfStoredExports() const
  */
 std::string FileInformation::getExphashCrc32() const
 {
-    return exportTable.getExphashCrc32();
+	return exportTable.getExphashCrc32();
 }
 
 /**
@@ -958,7 +958,7 @@ std::string FileInformation::getExphashCrc32() const
  */
 std::string FileInformation::getExphashMd5() const
 {
-    return exportTable.getExphashMd5();
+	return exportTable.getExphashMd5();
 }
 
 /**
@@ -967,7 +967,7 @@ std::string FileInformation::getExphashMd5() const
  */
 std::string FileInformation::getExphashSha256() const
 {
-    return exportTable.getExphashSha256();
+	return exportTable.getExphashSha256();
 }
 
 /**
