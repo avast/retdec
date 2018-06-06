@@ -8,8 +8,8 @@ if(CMAKE_CXX_COMPILER)
 endif()
 
 ExternalProject_Add(yaracpp-project
-	URL https://github.com/avast-tl/yaracpp/archive/cd4d7e47f21cda6022cd22d6314cdeb3b0c1dc15.zip
-	URL_HASH SHA256=79d8df7ee7bd10fa7e61f57d25ae44d618dcd5c3c2a3900baa0e73e2b5d4d451
+	URL https://github.com/avast-tl/yaracpp/archive/b92bde0e59e3b75bc445227e04b71105771dee8b.zip
+	URL_HASH SHA256=c8282c51dcc71535cf39b9416dbc5576ed26477234c02f4294e25cdbdda75574
 	DOWNLOAD_NAME yaracpp.zip
 	CMAKE_ARGS
 		# This does not work on MSVC, but may be useful on Linux.
