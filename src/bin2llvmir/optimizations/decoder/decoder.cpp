@@ -204,7 +204,7 @@ void Decoder::decodeJumpTarget(const JumpTarget& jt)
 	}
 	LOG << "\t\t" << "found range = " << *range << std::endl;
 
-	auto bytes = _image->getImage()->getRawSegmentData(start);
+	ByteData bytes = _image->getImage()->getRawSegmentData(start);
 	if (bytes.first == nullptr)
 	{
 		LOG << "\t\t" << "found no data -> skip" << std::endl;

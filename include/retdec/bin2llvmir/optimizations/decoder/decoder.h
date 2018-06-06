@@ -53,7 +53,7 @@ class Decoder : public llvm::ModulePass
 				Abi* a);
 
 	private:
-		using ByteData = typename std::pair<const std::uint8_t*, std::uint64_t>;
+		using ByteData = typename std::pair<const std::uint8_t*, std::size_t>;
 
 	private:
 		bool runCatcher();

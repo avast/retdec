@@ -803,7 +803,7 @@ bool isAddInsn_mips(csh ce, cs_insn* i)
 utils::Address StaticCodeAnalysis::getAddressFromRef_mips(utils::Address ref)
 {
 	uint64_t addr = ref;
-	auto data = _image->getImage()->getRawSegmentData(ref);
+	ByteData data = _image->getImage()->getRawSegmentData(ref);
 	if (!cs_disasm_iter(_ce, &data.first, &data.second, &addr, _ceInsn))
 	{
 		return Address();
@@ -915,7 +915,7 @@ utils::Address StaticCodeAnalysis::getAddressFromRef_arm(utils::Address ref)
 	// Try to disassemble the reference data into instruction.
 	//
 	uint64_t addr = ref;
-	auto data = _image->getImage()->getRawSegmentData(ref);
+	ByteData data = _image->getImage()->getRawSegmentData(ref);
 	if (cs_disasm_iter(_ce, &data.first, &data.second, &addr, _ceInsn))
 	{
 		auto& arm = _ceInsn->detail->arm;
@@ -981,7 +981,7 @@ utils::Address StaticCodeAnalysis::getAddressFromRef_ppc(utils::Address ref)
 	// Try to disassemble the reference data into instruction.
 	//
 	uint64_t addr = ref;
-	auto data = _image->getImage()->getRawSegmentData(ref);
+	ByteData data = _image->getImage()->getRawSegmentData(ref);
 	if (cs_disasm_iter(_ce, &data.first, &data.second, &addr, _ceInsn))
 	{
 		auto& ppc = _ceInsn->detail->ppc;
@@ -1140,7 +1140,7 @@ void StaticCodeAnalysis::checkRef_x86(StaticCodeFunction::Reference& ref)
 	}
 
 	uint64_t addr = ref.target;
-	auto bytes = _image->getImage()->getRawSegmentData(ref.target);
+	ByteData bytes = _image->getImage()->getRawSegmentData(ref.target);
 	if (cs_disasm_iter(_ce, &bytes.first, &bytes.second, &addr, _ceInsn))
 	{
 		auto& x86 = _ceInsn->detail->x86;

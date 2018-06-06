@@ -91,6 +91,9 @@ class StaticCodeAnalysis
 		const DetectedFunctionsPtrMap& getConfirmedDetections() const;
 
 	private:
+		using ByteData = typename std::pair<const std::uint8_t*, std::size_t>;
+
+	private:
 		void solveReferences();
 
 		utils::Address getAddressFromRef(utils::Address ref);
