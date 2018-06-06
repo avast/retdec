@@ -59,7 +59,6 @@ public:
 	MOCK_CONST_METHOD0(getDetectedCompilerOrPacker, std::string ());
 	MOCK_CONST_METHOD0(getDetectedLanguage, std::string ());
 	MOCK_CONST_METHOD0(getSelectedButNotFoundFuncs, StringSet ());
-	MOCK_CONST_METHOD0(getOptsRunInFrontend, StringSet ());
 };
 
 } // namespace tests

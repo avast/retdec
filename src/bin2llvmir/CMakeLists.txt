@@ -1,4 +1,6 @@
 set(BIN2LLVMIR_SOURCES
+	analyses/static_code/static_code.cpp
+	analyses/ctor_dtor.cpp
 	analyses/indirectly_called_funcs_analysis.cpp
 	analyses/reachable_funcs_analysis.cpp
 	analyses/reaching_definitions.cpp
@@ -9,22 +11,23 @@ set(BIN2LLVMIR_SOURCES
 	analyses/traversal/traversal_analysis.cpp
 	analyses/uses_analysis.cpp
 	analyses/var_depend_analysis.cpp
-	optimizations/adapter_methods/adapter_methods.cpp
 	optimizations/asm_inst_remover/asm_inst_remover.cpp
-	optimizations/cfg_function_detection/cfg_function_detection.cpp
 	optimizations/class_hierarchy/hierarchy.cpp
 	optimizations/class_hierarchy/hierarchy_analysis.cpp
 	optimizations/cond_branch_opt/cond_branch_opt.cpp
 	optimizations/constants/constants.cpp
-	optimizations/control_flow/arm.cpp
-	optimizations/control_flow/control_flow.cpp
-	optimizations/control_flow/mips.cpp
-	optimizations/control_flow/powerpc.cpp
-	optimizations/control_flow/x86.cpp
-	optimizations/ctor_dtor/ctor_dtor.cpp
-	optimizations/data_references/data_references.cpp
+	optimizations/decoder/arm.cpp
+	optimizations/decoder/bbs.cpp
+	optimizations/decoder/decoder_ranges.cpp
+	optimizations/decoder/decoder_init.cpp
 	optimizations/decoder/decoder.cpp
-	optimizations/decoder/static_code.cpp
+	optimizations/decoder/functions.cpp
+	optimizations/decoder/ir_modifications.cpp
+	optimizations/decoder/jump_targets.cpp
+	optimizations/decoder/mips.cpp
+	optimizations/decoder/patterns.cpp
+	optimizations/decoder/powerpc.cpp
+	optimizations/decoder/x86.cpp
 	optimizations/dsm_generator/dsm_generator.cpp
 	optimizations/dump_module/dump_module.cpp
 	optimizations/globals/dead_global_assign.cpp
@@ -42,10 +45,10 @@ set(BIN2LLVMIR_SOURCES
 	optimizations/idioms/idioms_owatcom.cpp
 	optimizations/idioms/idioms_vstudio.cpp
 	optimizations/idioms_libgcc/idioms_libgcc.cpp
+	optimizations/inst_opt/inst_opt_pass.cpp
 	optimizations/inst_opt/inst_opt.cpp
 	optimizations/local_vars/local_vars.cpp
 	optimizations/main_detection/main_detection.cpp
-	optimizations/never_returning_funcs/never_returning_funcs.cpp
 	optimizations/param_return/param_return.cpp
 	optimizations/phi2seq/phi2seq.cpp
 	optimizations/provider_init/provider_init.cpp
@@ -54,32 +57,30 @@ set(BIN2LLVMIR_SOURCES
 	optimizations/simple_types/simple_types.cpp
 	optimizations/stack/stack.cpp
 	optimizations/stack_pointer_ops/stack_pointer_ops.cpp
-	optimizations/stack_protect/stack_protect.cpp
+	optimizations/value_protect/value_protect.cpp
 	optimizations/syscalls/arm.cpp
 	optimizations/syscalls/mips.cpp
 	optimizations/syscalls/syscalls.cpp
 	optimizations/syscalls/x86.cpp
-	optimizations/type_conversions/type_conversions.cpp
 	optimizations/unreachable_funcs/unreachable_funcs.cpp
-	optimizations/volatilize/volatilize.cpp
-	optimizations/vtable/rtti_analysis.cpp
-	optimizations/vtable/rtti_gcc.cpp
-	optimizations/vtable/rtti_msvc.cpp
-	optimizations/vtable/vtable.cpp
-	providers/abi.cpp
+	providers/abi/abi.cpp
+	providers/abi/arm.cpp
+	providers/abi/mips.cpp
+	providers/abi/powerpc.cpp
+	providers/abi/x86.cpp
 	providers/asm_instruction.cpp
 	providers/config.cpp
 	providers/debugformat.cpp
 	providers/demangler.cpp
 	providers/fileimage.cpp
 	providers/lti.cpp
-	utils/defs.cpp
-	utils/global_var.cpp
-	utils/instruction.cpp
+	providers/names.cpp
+	utils/capstone.cpp
+	utils/debug.cpp
 	utils/ir_modifier.cpp
-	utils/type.cpp
+	utils/llvm.cpp
 )
 
 add_library(retdec-bin2llvmir STATIC ${BIN2LLVMIR_SOURCES})
-target_link_libraries(retdec-bin2llvmir retdec-ctypesparser retdec-loader retdec-fileformat retdec-debugformat retdec-config retdec-demangler retdec-capstone2llvmir retdec-stacofin retdec-llvm-support llvm)
+target_link_libraries(retdec-bin2llvmir retdec-ctypesparser retdec-rtti-finder retdec-loader retdec-fileformat retdec-debugformat retdec-config retdec-demangler retdec-capstone2llvmir retdec-stacofin retdec-llvm-support llvm)
 target_include_directories(retdec-bin2llvmir PUBLIC ${PROJECT_SOURCE_DIR}/include/)

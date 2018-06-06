@@ -30,7 +30,6 @@ class ConstantsAnalysis : public llvm::ModulePass
 		static char ID;
 		ConstantsAnalysis();
 		virtual bool runOnModule(llvm::Module& M) override;
-		virtual void getAnalysisUsage(llvm::AnalysisUsage& AU) const override;
 
 	private:
 		void checkForGlobalInInstruction(
@@ -39,7 +38,6 @@ class ConstantsAnalysis : public llvm::ModulePass
 				llvm::Value* val,
 				bool storeValue = false);
 		void tagFunctionsWithUsedCryptoGlobals();
-		void setPic32GpValue(ReachingDefinitionsAnalysis& RDA);
 
 	private:
 		llvm::Module * m_module = nullptr;

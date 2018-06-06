@@ -70,8 +70,8 @@ public:
 	llvm::BasicBlock *getNextBBInSCC();
 
 private:
-	Node *processBBsInSCC(const BBVec &sccBBs, Node *prevNode);
-	Node *processBBNotInSCC(const BBVec &sccBBs, Node *prevNode);
+	Node *processBBsInSCC(const std::vector<llvm::BasicBlock*> &sccBBs, Node *prevNode);
+	Node *processBBNotInSCC(const std::vector<llvm::BasicBlock*> &sccBBs, Node *prevNode);
 
 	void print();
 };

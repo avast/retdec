@@ -113,7 +113,7 @@ Segment* PeImage::addSingleSegment(std::uint64_t address, std::vector<std::uint8
 
 bool PeImage::canAddSegment(std::uint64_t address, std::uint64_t memSize) const
 {
-	retdec::utils::Range<std::uint64_t> newSegRange(address, memSize ? address + memSize - 1 : address);
+	retdec::utils::Range<std::uint64_t> newSegRange(address, memSize ? address + memSize : address + 1);
 	for (const auto& seg : getSegments())
 	{
 		auto overlapResult = OverlapResolver::resolve(retdec::utils::Range<std::uint64_t>(seg->getAddress(), seg->getEndAddress()), newSegRange);
@@ -129,9 +129,9 @@ void PeImage::loadNonDecodableAddressRanges()
 	auto ranges = getFileFormat()->getNonDecodableAddressRanges();
 	for (const auto& range : ranges)
 	{
-		auto rebasedRange = range;
-		rebasedRange.setStart(getBaseAddress() + range.getStart());
-		rebasedRange.setEnd(getBaseAddress() + range.getEnd());
+		Range<uint64_t> rebasedRange(
+				getBaseAddress() + range.getStart(),
+				getBaseAddress() + range.getEnd());
 
 		for (auto& seg : getSegments())
 		{

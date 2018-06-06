@@ -8,8 +8,6 @@
 #ifndef RETDEC_BIN2LLVMIR_OPTIMIZATIONS_SELECT_FUNCTIONS_SELECT_FUNCTIONS_H
 #define RETDEC_BIN2LLVMIR_OPTIMIZATIONS_SELECT_FUNCTIONS_SELECT_FUNCTIONS_H
 
-#include <set>
-
 #include <llvm/IR/Module.h>
 #include <llvm/Pass.h>
 
@@ -27,7 +25,6 @@ class SelectFunctions : public llvm::ModulePass
 		bool runOnModuleCustom(llvm::Module& M, Config* c);
 
 	private:
-		bool findNotReturningFunctions(llvm::Module& M);
 		bool run(llvm::Module& M);
 
 	private:

@@ -174,6 +174,10 @@ void LLVMIntrinsicConverter::convertIntrinsicFuncName(ShPtr<Function> func) {
 	else if (startsWith(funcName, "llvm.trap")) {
 		renameIntrinsicFunc(func, "abort");
 	}
+	// llvm.copysign
+	else if (startsWith(funcName, "llvm.copysign")) {
+		renameFloatIntrinsicFunc(func, "copysign");
+	}
 }
 
 /**

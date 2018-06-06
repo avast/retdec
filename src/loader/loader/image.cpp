@@ -406,12 +406,22 @@ bool Image::setXBytes(std::uint64_t address, const std::vector<std::uint8_t>& va
 /**
  * Find out, if there is a pointer (valid address) on the provided address
  * @param address Address to check
+ * @param pointer If not @c nullptr, and there is a pointer on @p address, then
+ *                set the pointer value to where this parameter points.
  * @return @c True if pointer on address, @c false otherwise
  */
-bool Image::isPointer(std::uint64_t address)
+bool Image::isPointer(std::uint64_t address, std::uint64_t* pointer) const
 {
 	std::uint64_t val = 0;
-	return getWord(address, val) && hasDataOnAddress(val);
+	if (getWord(address, val) && hasDataOnAddress(val))
+	{
+		if (pointer)
+		{
+			*pointer = val;
+		}
+		return true;
+	}
+	return false;
 }
 
 const std::string& Image::getStatusMessage() const

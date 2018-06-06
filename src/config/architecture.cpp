@@ -32,17 +32,17 @@ namespace retdec {
 namespace config {
 
 bool Architecture::isArmOrThumb() const { return isArm() || isThumb(); }
-bool Architecture::isPic32() const      { return isArch(ARCH_PIC32); }
-bool Architecture::isArm() const        { return isArch(ARCH_ARM); }
-bool Architecture::isThumb() const      { return isArch(ARCH_THUMB); }
-bool Architecture::isX86() const        { return isArch(ARCH_x86); }
-bool Architecture::isX86_16() const     { return isArch(ARCH_x86) && getBitSize() == 16; }
-bool Architecture::isX86_32() const     { return isArch(ARCH_x86) && getBitSize() == 32; }
-bool Architecture::isX86_64() const     { return isArch(ARCH_x86) && getBitSize() == 64; }
-bool Architecture::isPpc() const        { return isArch(ARCH_PPC); }
+bool Architecture::isPic32() const      { return isArch(eArch::PIC32); }
+bool Architecture::isArm() const        { return isArch(eArch::ARM); }
+bool Architecture::isThumb() const      { return isArch(eArch::THUMB); }
+bool Architecture::isX86() const        { return isArch(eArch::X86); }
+bool Architecture::isX86_16() const     { return isX86() && getBitSize() == 16; }
+bool Architecture::isX86_32() const     { return isX86() && getBitSize() == 32; }
+bool Architecture::isX86_64() const     { return isX86() && getBitSize() == 64; }
+bool Architecture::isPpc() const        { return isArch(eArch::PPC); }
 bool Architecture::isKnown() const      { return !isUnknown(); }
-bool Architecture::isUnknown() const    { return !(isArmOrThumb() || isMips() || isPic32() || isX86() || isPpc()); }
-bool Architecture::isMips() const       { return isArch(ARCH_MIPS); }
+bool Architecture::isUnknown() const    { return isArch(eArch::UNKNOWN); }
+bool Architecture::isMips() const       { return isArch(eArch::MIPS); }
 bool Architecture::isMipsOrPic32() const{ return isMips() || isPic32(); }
 
 /**
@@ -56,18 +56,28 @@ bool Architecture::isArch(const std::string& a) const
 	return retdec::utils::containsCaseInsensitive(_name, a);
 }
 
+bool Architecture::isArch(eArch a) const
+{
+	return _arch == a;
+}
+
 bool Architecture::isEndianLittle() const  { return _endian == E_LITTLE; }
 bool Architecture::isEndianBig() const     { return _endian == E_BIG; }
 bool Architecture::isEndianUnknown() const { return _endian == E_UNKNOWN; }
 bool Architecture::isEndianKnown() const   { return !isEndianUnknown(); }
 
-void Architecture::setIsUnknown() { _name = ARCH_UNKNOWN; }
-void Architecture::setIsMips()    { _name = ARCH_MIPS; }
-void Architecture::setIsArm()     { _name = ARCH_ARM; }
-void Architecture::setIsThumb()   { _name = ARCH_THUMB; }
-void Architecture::setIsX86()     { _name = ARCH_x86; }
-void Architecture::setIsPpc()     { _name = ARCH_PPC; }
-void Architecture::setIsPic32()   { _name = ARCH_PIC32; }
+void Architecture::setIsUnknown() { setName(ARCH_UNKNOWN); }
+void Architecture::setIsMips()    { setName(ARCH_MIPS); }
+void Architecture::setIsPic32()   { setName(ARCH_PIC32); }
+void Architecture::setIsArm()     { setName(ARCH_ARM); }
+void Architecture::setIsThumb()   { setName(ARCH_THUMB); }
+void Architecture::setIsX86()     { setName(ARCH_x86); }
+void Architecture::setIsPpc()     { setName(ARCH_PPC); }
+
+void Architecture::setIsEndianLittle()           { _endian = E_LITTLE; }
+void Architecture::setIsEndianBig()              { _endian = E_BIG; }
+void Architecture::setIsEndianUnknown()          { _endian = E_UNKNOWN; }
+void Architecture::setBitSize(unsigned bs)       { _bitSize = bs; }
 
 unsigned Architecture::getBitSize() const  { return _bitSize; }
 
@@ -84,11 +94,43 @@ std::string Architecture::getName() const
 	return _name.empty() ? ARCH_UNKNOWN : _name;
 }
 
-void Architecture::setName(const std::string& n) { _name = n; }
-void Architecture::setIsEndianLittle()           { _endian = E_LITTLE; }
-void Architecture::setIsEndianBig()              { _endian = E_BIG; }
-void Architecture::setIsEndianUnknown()          { _endian = E_UNKNOWN; }
-void Architecture::setBitSize(unsigned bs)       { _bitSize = bs; }
+void Architecture::setName(const std::string& n)
+{
+	_name = n;
+	setArch();
+}
+
+void Architecture::setArch()
+{
+	if (retdec::utils::containsCaseInsensitive(_name, ARCH_UNKNOWN))
+	{
+		_arch = eArch::UNKNOWN;
+	}
+	else if (retdec::utils::containsCaseInsensitive(_name, ARCH_MIPS))
+	{
+		_arch = eArch::MIPS;
+	}
+	else if (retdec::utils::containsCaseInsensitive(_name, ARCH_PIC32))
+	{
+		_arch = eArch::PIC32;
+	}
+	else if (retdec::utils::containsCaseInsensitive(_name, ARCH_ARM))
+	{
+		_arch = eArch::ARM;
+	}
+	else if (retdec::utils::containsCaseInsensitive(_name, ARCH_THUMB))
+	{
+		_arch = eArch::THUMB;
+	}
+	else if (retdec::utils::containsCaseInsensitive(_name, ARCH_x86))
+	{
+		_arch = eArch::X86;
+	}
+	else if (retdec::utils::containsCaseInsensitive(_name, ARCH_PPC))
+	{
+		_arch = eArch::PPC;
+	}
+}
 
 /**
  * Returns JSON object (associative array) holding architecture information.

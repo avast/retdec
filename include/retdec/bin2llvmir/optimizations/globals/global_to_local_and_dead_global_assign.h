@@ -13,7 +13,7 @@
 
 #include "retdec/bin2llvmir/analyses/store_load_analysis.h"
 #include "retdec/bin2llvmir/providers/config.h"
-#include "retdec/bin2llvmir/utils/defs.h"
+#include "retdec/bin2llvmir/utils/debug.h"
 
 namespace retdec {
 namespace bin2llvmir {
@@ -65,20 +65,20 @@ private:
 
 		llvm::Function &getFunc();
 		bool filterUsesThatCannotBeOptimizedReturnIfChanged(
-			InstSet &lUsesNotToOptimize,
-			InstSet &rUsesNotToOptimize);
+			std::set<llvm::Instruction*> &lUsesNotToOptimize,
+			std::set<llvm::Instruction*> &rUsesNotToOptimize);
 		void findPatterns();
 		bool hasPattern(llvm::Value &globValue,
-			const InstSet &lastLUses);
+			const std::set<llvm::Instruction*> &lastLUses);
 		llvm::Instruction *findBeginfOfPattern(llvm::Value &globValue,
 			llvm::Instruction &endInst);
 		void savePatterns(llvm::Instruction &rUse,
-			const InstSet &lUses);
+			const std::set<llvm::Instruction*> &lUses);
 		void convertGlobsToLocs(bool deadGlobalAssign);
 		void removeDeadGlobalAssigns();
 		void convertGlobToLocUseInOneFunc(llvm::GlobalVariable &glob);
 		void removePatternInsts();
-		void addExtRUsesToNotToOptimize(InstSet &notToOptimize);
+		void addExtRUsesToNotToOptimize(std::set<llvm::Instruction*> &notToOptimize);
 		void addFilteredRUse(llvm::Instruction &rUse);
 		void addFilteredLUse(llvm::Instruction &lUse);
 		bool isInFilteredLUses(llvm::Instruction &lUse);
@@ -93,11 +93,11 @@ private:
 		llvm::Value *getLocVarFor(llvm::Value &glob);
 		std::string getLocalVarNameFor(llvm::Value &globValue);
 		bool canBeOptimized(llvm::Instruction &lUse, llvm::Function &func,
-			const InstSet &rUses,
-			const InstSet &rUsesNotToOptimize);
+			const std::set<llvm::Instruction*> &rUses,
+			const std::set<llvm::Instruction*> &rUsesNotToOptimize);
 		bool isPartOfPattern(llvm::Instruction &inst);
 		void replaceGlobToLocInInsts(llvm::Value &from, llvm::Value &to,
-			llvm::Instruction &lUse, const InstSet &rUses);
+			llvm::Instruction &lUse, const std::set<llvm::Instruction*> &rUses);
 		llvm::Instruction *getFirstNonAllocaInst(llvm::BasicBlock &bb);
 
 	private:
@@ -111,7 +111,7 @@ private:
 		StoreLoadAnalysis &storeLoadAnalysis;
 
 		/// Contains instructions that create patterns.
-		InstSet patternInsts;
+		std::set<llvm::Instruction*> patternInsts;
 
 		/// Saves filtered left uses in function.
 		AnalysisInfo::ValInstSetMap filteredLUses;
@@ -124,7 +124,6 @@ private:
 	using FuncFuncInfoMap = std::map<llvm::Function *, FuncInfo *>;
 
 private:
-	void addMetadata(llvm::Module &module);
 	void solveIndirectCallsAndNotAggressive();
 	void solveNotAggressive();
 	void solveLUsesForIndirectCalls();
@@ -133,19 +132,19 @@ private:
 		const AnalysisInfo::ValInstSetMap &extRUses);
 	void filterUsesThatCannotBeOptimized();
 	bool goThroughFuncsInfoFilterAndReturnIfChanged(
-		InstSet &lUsesNotToOptimize,
-		InstSet &rUsesNotToOptimize);
+		std::set<llvm::Instruction*> &lUsesNotToOptimize,
+		std::set<llvm::Instruction*> &rUsesNotToOptimize);
 	void doOptimization(llvm::Module &module,
-		const GlobVarSet &globsToOptimize);
+		const std::set<llvm::GlobalVariable*> &globsToOptimize);
 	void createInfoForAllFuncs(llvm::Module &module);
 	void removePatternInsts();
-	void convertGlobsToLocUseInOneFunc(const GlobVarSet &globs);
+	void convertGlobsToLocUseInOneFunc(const std::set<llvm::GlobalVariable*> &globs);
 	bool hasSomeLUseForFuncOutOfModule(llvm::GlobalVariable &glob);
 	void removeGlobsWithoutUse(llvm::Module::GlobalListType &globs);
 	void addFilteredLUse(llvm::Instruction &lUse);
 	void addFilteredRUse(llvm::Instruction &rUse);
-	void addFilteredLUses(const InstSet &lUses);
-	void addFilteredRUses(const InstSet &rUses);
+	void addFilteredLUses(const std::set<llvm::Instruction*> &lUses);
+	void addFilteredRUses(const std::set<llvm::Instruction*> &rUses);
 	bool wasSomethingOptimized();
 	FuncInfo &getFuncInfoFor(llvm::Function &func);
 
@@ -156,12 +155,10 @@ private:
 	StoreLoadAnalysis storeLoadAnalysis;
 
 	/// Contains filtered right uses that can't be optimized.
-	InstSet rUsesNotToOptimize;
+	std::set<llvm::Instruction*> rUsesNotToOptimize;
 
 	/// Mapping of a function to its info.
 	FuncFuncInfoMap funcInfoMap;
-
-	Config* config = nullptr;
 };
 
 } // namespace bin2llvmir

@@ -10514,6 +10514,30 @@ TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_RDTSCP)
 	});
 }
 
+//
+// TODO:
+// X86_INS_STOSB, X86_INS_STOSW, X86_INS_STOSD, X86_INS_STOSQ
+// + REP prefix variants
+//
+
+//
+// TODO:
+// X86_INS_MOVSB, X86_INS_MOVSW, X86_INS_MOVSD, X86_INS_MOVSQ
+// + REP prefix variants
+//
+
+//
+// TODO
+// X86_INS_SCASB, X86_INS_SCASW, X86_INS_SCASD, X86_INS_SCASQ
+// + REP prefix variants
+//
+
+//
+// TODO
+// X86_INS_CMPSB, X86_INS_CMPSW, X86_INS_CMPSD, X86_INS_CMPSQ
+// + REP prefix variants
+//
+
 } // namespace tests
 } // namespace capstone2llvmir
 } // namespace retdec

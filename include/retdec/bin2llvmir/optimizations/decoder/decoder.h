@@ -7,21 +7,32 @@
 #ifndef RETDEC_BIN2LLVMIR_OPTIMIZATIONS_DECODER_DECODER_H
 #define RETDEC_BIN2LLVMIR_OPTIMIZATIONS_DECODER_DECODER_H
 
+#include <map>
 #include <queue>
 #include <sstream>
 
+#include <llvm/IR/CFG.h>
 #include <llvm/IR/Function.h>
+#include <llvm/IR/InstIterator.h>
 #include <llvm/IR/Module.h>
 #include <llvm/Pass.h>
+#include <llvm/Transforms/Utils/BasicBlockUtils.h>
 
 #include "retdec/utils/address.h"
+#include "retdec/bin2llvmir/analyses/reaching_definitions.h"
+#include "retdec/bin2llvmir/analyses/static_code/static_code.h"
+#include "retdec/bin2llvmir/analyses/symbolic_tree.h"
+#include "retdec/bin2llvmir/providers/abi/abi.h"
 #include "retdec/bin2llvmir/providers/asm_instruction.h"
 #include "retdec/bin2llvmir/providers/config.h"
 #include "retdec/bin2llvmir/providers/debugformat.h"
 #include "retdec/bin2llvmir/providers/fileimage.h"
+#include "retdec/bin2llvmir/providers/names.h"
+#include "retdec/bin2llvmir/optimizations/decoder/decoder_debug.h"
+#include "retdec/bin2llvmir/optimizations/decoder/decoder_ranges.h"
+#include "retdec/bin2llvmir/optimizations/decoder/jump_targets.h"
 #include "retdec/bin2llvmir/utils/ir_modifier.h"
 #include "retdec/capstone2llvmir/capstone2llvmir.h"
-#include "retdec/capstone2llvmir/x86/x86.h"
 
 namespace retdec {
 namespace bin2llvmir {
@@ -31,340 +42,293 @@ class Decoder : public llvm::ModulePass
 	public:
 		static char ID;
 		Decoder();
+		~Decoder();
 		virtual bool runOnModule(llvm::Module& m) override;
 		bool runOnModuleCustom(
 				llvm::Module& m,
 				Config* c,
 				FileImage* o,
-				DebugFormat* d);
+				DebugFormat* d,
+				NameContainer* n,
+				Abi* a);
 
-	public:
-		class JumpTarget
-		{
-			public:
-				/**
-				 * Jump target type and its priority. Lower number -> higher
-				 * priority.
-				 */
-				enum class eType
-				{
-					ENTRY_POINT = 0,
-					DELAY_SLOT,
-					CONTROL_FLOW,
-					SELECTED_RANGE_START,
-					CONFIG_FUNCTION,
-//					STATICALLY_LINKED_FUNCTION, // TODO: remove from here?
-					DEBUG_FUNCTION,
-					IMPORT_FUNCTION,
-					EXPORT_FUNCTION,
-					SYMBOL_FUNCTION_PUBLIC, // better than PRIVATE, and other.
-					SYMBOL_FUNCTION,
-					STATICALLY_LINKED_FUNCTION,
-					DELPHI_FNC_TABLE_FUNCTION,
-					CODE_POINTER_FROM_DATA,
-					CODE_POINTER_FROM_OTHER,
-					SECTION_START,
-				};
-
-			public:
-				JumpTarget() {} // just so it can be used in std::map.
-				JumpTarget(
-						Config* conf,
-						retdec::utils::Address a,
-						eType t,
-						cs_mode m,
-						retdec::utils::Address f = retdec::utils::Address::getUndef,
-						const std::string& n = "")
-						:
-						address(a),
-						from(f),
-						type(t),
-						mode(m)
-				{
-					setName(n);
-
-					if (conf->getConfig().architecture.isArmOrThumb())
-					{
-						if (address % 2)
-						{
-							mode = CS_MODE_THUMB;
-							--address;
-						}
-					}
-				}
-
-				bool operator<(const JumpTarget& o) const
-				{
-					if (type == o.type)
-					{
-						return address < o.address;
-					}
-					else
-					{
-						return type < o.type;
-					}
-				}
-
-				bool createFunction() const
-				{
-					return type == eType::SECTION_START
-							|| type == eType::ENTRY_POINT
-							|| type == eType::CONFIG_FUNCTION
-							|| type == eType::DEBUG_FUNCTION
-							|| type == eType::SYMBOL_FUNCTION
-							|| type == eType::SYMBOL_FUNCTION_PUBLIC
-							|| type == eType::EXPORT_FUNCTION
-							|| type == eType::IMPORT_FUNCTION
-							|| type == eType::STATICALLY_LINKED_FUNCTION
-							|| type == eType::SELECTED_RANGE_START
-							|| type == eType::DELPHI_FNC_TABLE_FUNCTION
-							;
-				}
-
-				bool hasName() const
-				{
-					return !name.empty();
-				}
-
-				std::string getName(Config* config = nullptr) const
-				{
-					return config && config->isPic32()
-							? fixWeirdManglingOfPic32(name)
-							: name;
-				}
-
-				void setName(const std::string& n) const
-				{
-					name = n;
-				}
-
-				friend std::ostream& operator<<(std::ostream &out, const JumpTarget& jt);
-
-				bool isKnownMode() const
-				{
-					return !isUnknownMode();
-				}
-				bool isUnknownMode() const
-				{
-					return mode == CS_MODE_BIG_ENDIAN;
-				}
-
-			private:
-				std::string fixWeirdManglingOfPic32(const std::string& n) const
-				{
-					std::string name = n;
-					if (name.empty()) return name;
-
-					if (name.find("_d") == 0)
-					{
-						name = name.substr(2);
-					}
-					else if (name[0] == '_')
-					{
-						name = name.substr(1);
-					}
-
-					if (name.empty()) return name;
-
-					if (name.find("_cd") != std::string::npos)
-					{
-						name = name.substr(0, name.find("_cd"));
-					}
-					else if (name.find("_eE") != std::string::npos)
-					{
-						name = name.substr(0, name.find("_eE"));
-					}
-					else if (name.find("_fF") != std::string::npos)
-					{
-						name = name.substr(0, name.find("_fF"));
-					}
-					else if (retdec::utils::endsWith(name, "_s"))
-					{
-						name.pop_back();
-						name.pop_back();
-					}
-					return name;
-				}
-
-			public:
-				retdec::utils::Address address;
-				/// If jump target is code pointer, this is an address where
-				/// it was found;
-				retdec::utils::Address from;
-				eType type;
-				cs_mode mode = CS_MODE_BIG_ENDIAN;
-
-			private:
-				mutable std::string name;
-		};
-
-		class JumpTargets
-		{
-			friend std::ostream& operator<<(std::ostream &out, const JumpTargets& jts);
-			public:
-				void push(const JumpTarget& jt)
-				{
-					if (jt.address.isDefined())
-					{
-						_data.insert(jt);
-					}
-				}
-
-				void push(
-						Config* c,
-						retdec::utils::Address a,
-						JumpTarget::eType t,
-						cs_mode m)
-				{
-					if (a.isDefined())
-					{
-						_data.insert(JumpTarget(c, a, t, m));
-					}
-				}
-
-				void push(
-						Config* c,
-						retdec::utils::Address a,
-						JumpTarget::eType t,
-						cs_mode m,
-						retdec::utils::Address f)
-				{
-					if (a.isDefined())
-					{
-						_data.insert(JumpTarget(c, a, t, m, f));
-					}
-				}
-
-				void push(
-						Config* c,
-						retdec::utils::Address a,
-						JumpTarget::eType t,
-						cs_mode m,
-						const std::string name)
-				{
-					if (a.isDefined())
-					{
-						_data.insert(JumpTarget(c, a, t, m, retdec::utils::Address::getUndef, name));
-					}
-				}
-
-				std::size_t size() const
-				{
-					return _data.size();
-				}
-
-				void clear()
-				{
-					_data.clear();
-				}
-
-				bool empty()
-				{
-					return _data.empty();
-				}
-
-				const JumpTarget& top()
-				{
-					return *_data.begin();
-				}
-
-				void pop()
-				{
-					_poped.insert(top().address);
-					_data.erase(top());
-				}
-
-				bool wasAlreadyPoped(JumpTarget& ct) const
-				{
-					return _poped.count(ct.address);
-				}
-
-				auto begin()
-				{
-					return _data.begin();
-				}
-				auto end()
-				{
-					return _data.end();
-				}
-
-			public:
-				std::set<JumpTarget> _data;
-				std::set<retdec::utils::Address> _poped;
-		};
+	private:
+		using ByteData = typename std::pair<const std::uint8_t*, std::uint64_t>;
 
 	private:
 		bool runCatcher();
 		bool run();
-		void checkIfSomethingDecoded();
 
-		bool initTranslator();
+	// Initializations.
+	//
+	private:
+		void initTranslator();
+		void initDryRunCsInstruction();
 		void initEnvironment();
 		void initEnvironmentAsm2LlvmMapping();
 		void initEnvironmentPseudoFunctions();
 		void initEnvironmentRegisters();
-
-		void initRangesAndTargets();
+		void initRanges();
 		void initAllowedRangesWithSegments();
 		void initAllowedRangesWithConfig();
 		void initJumpTargets();
-		void initJumpTargetsWithStaticCode();
-		void removeZeroSequences(retdec::utils::AddressRangeContainer& rs);
+		void initJumpTargetsConfig();
+		void initJumpTargetsEntryPoint();
+		void initJumpTargetsImports();
+		void initJumpTargetsExports();
+		void initJumpTargetsDebug();
+		void initJumpTargetsSymbols();
+		void initConfigFunctions();
+		void initStaticCode();
+		void initVtables();
 
-		void doDecoding();
-		bool looksLikeValidJumpTarget(retdec::utils::Address addr);
+	private:
+		void decode();
+		bool getJumpTarget(JumpTarget& jt);
+		void decodeJumpTarget(const JumpTarget& jt);
+		std::size_t decodeJumpTargetDryRun(
+				const JumpTarget& jt,
+				ByteData bytes,
+				bool strict = false);
+		cs_mode determineMode(cs_insn* insn, utils::Address& target);
+		capstone2llvmir::Capstone2LlvmIrTranslator::TranslationResultOne
+				translate(
+						ByteData& bytes,
+						utils::Address& addr,
+						llvm::IRBuilder<>& irb);
 
-		void doStaticCodeRecognition();
+		bool getJumpTargetsFromInstruction(
+				utils::Address addr,
+				capstone2llvmir::Capstone2LlvmIrTranslator::TranslationResultOne& tr,
+				uint64_t& rangeSize);
+		utils::Address getJumpTarget(
+				utils::Address addr,
+				llvm::CallInst* branchCall,
+				llvm::Value* val);
+		bool getJumpTargetSwitch(
+				utils::Address addr,
+				llvm::CallInst* branchCall,
+				llvm::Value* val,
+				SymbolicTree& st);
+		bool instructionBreaksBasicBlock(
+				utils::Address addr,
+				capstone2llvmir::Capstone2LlvmIrTranslator::TranslationResultOne& tr);
+		void handleDelaySlotTypical(
+				utils::Address& addr,
+				capstone2llvmir::Capstone2LlvmIrTranslator::TranslationResultOne& res,
+				ByteData& bytes,
+				llvm::IRBuilder<>& irb);
+		void handleDelaySlotLikely(
+				utils::Address& addr,
+				capstone2llvmir::Capstone2LlvmIrTranslator::TranslationResultOne& res,
+				ByteData& bytes,
+				llvm::IRBuilder<>& irb);
 
-		retdec::utils::Address getJumpTarget(llvm::Value* val);
 
-		void findDelphiFunctionTable();
+		void resolvePseudoCalls();
+		void finalizePseudoCalls();
 
-		bool fixMainName();
-		std::string getFunctionNameFromLibAndOrd(
-				const std::string& libName,
-				int ord);
-		bool loadOrds(const std::string& libName);
-		void removeStaticallyLinkedFunctions();
-		void hackDeleteKnownLinkedFunctions();
+	// Basic block related methods.
+	//
+	private:
+		utils::Address getBasicBlockAddress(llvm::BasicBlock* b);
+		utils::Address getBasicBlockEndAddress(llvm::BasicBlock* b);
+		utils::Address getBasicBlockAddressAfter(utils::Address a);
+		llvm::BasicBlock* getBasicBlockAtAddress(utils::Address a);
+		llvm::BasicBlock* getBasicBlockBeforeAddress(utils::Address a);
+		llvm::BasicBlock* getBasicBlockAfterAddress(utils::Address a);
+		llvm::BasicBlock* getBasicBlockContainingAddress(utils::Address a);
+		llvm::BasicBlock* createBasicBlock(
+				utils::Address a,
+				llvm::Function* f,
+				llvm::BasicBlock* insertAfter = nullptr);
+		void addBasicBlock(utils::Address a, llvm::BasicBlock* b);
 
-		void fixMipsDelaySlots();
+		std::map<utils::Address, llvm::BasicBlock*> _addr2bb;
+		std::map<llvm::BasicBlock*, utils::Address> _bb2addr;
 
-		bool isArmOrThumb() const;
-		cs_mode getUnknownMode() const;
-		cs_mode determineMode(AsmInstruction ai, retdec::utils::Address target) const;
+	// Function related methods.
+	//
+	private:
+		utils::Address getFunctionAddress(llvm::Function* f);
+		utils::Address getFunctionEndAddress(llvm::Function* f);
+		utils::Address getFunctionAddressAfter(utils::Address a);
+		llvm::Function* getFunctionAtAddress(utils::Address a);
+		llvm::Function* getFunctionBeforeAddress(utils::Address a);
+		llvm::Function* getFunctionAfterAddress(utils::Address a);
+		llvm::Function* getFunctionContainingAddress(utils::Address a);
+		llvm::Function* createFunction(
+				utils::Address a,
+				bool declaration = false);
+		void addFunction(utils::Address a, llvm::Function* f);
+		void addFunctionSize(llvm::Function* f, utils::Maybe<std::size_t> sz);
 
+		std::map<utils::Address, llvm::Function*> _addr2fnc;
+		std::map<llvm::Function*, utils::Address> _fnc2addr;
+		// Function sizes from debug info/symbol table/config/etc.
+		// Used to prevent function splitting.
+		//
+		// TODO: Potential overlaps are not handled.
+		// E.g. ack.arm.gnuarmgcc-4.4.1.O0.g.elf:
+		// __floatundidf @ 0x1645c : size = 128
+		// __floatdidf   @ 0x16470 : size = 108
+		// It looks like there is one function in another.
+		//
+		std::map<llvm::Function*, std::size_t> _fnc2sz;
+
+	// Pattern recognition methods.
+	//
+	private:
+		bool patternsRecognize();
+		bool patternTerminatingCalls();
+		bool patternStaticallyLinked();
+
+	// x86 specifix.
+	//
+	private:
+		std::size_t decodeJumpTargetDryRun_x86(
+				const JumpTarget& jt,
+				ByteData bytes,
+				bool strict = false);
+
+	// ARM specific.
+	//
+	private:
+		std::size_t decodeJumpTargetDryRun_arm(
+				const JumpTarget& jt,
+				ByteData bytes,
+				bool strict = false);
+		std::size_t decodeJumpTargetDryRun_arm(
+				const JumpTarget& jt,
+				ByteData bytes,
+				cs_mode mode,
+				std::size_t &decodedSz,
+				bool strict = false);
+		void patternsPseudoCall_arm(llvm::CallInst*& call, AsmInstruction& pAi);
+		cs_mode determineMode_arm(cs_insn* insn, utils::Address& target);
+
+	// MIPS specific.
+	//
+	private:
+		bool disasm_mips(
+				csh ce,
+				cs_mode m,
+				ByteData& bytes,
+				uint64_t& a,
+				cs_insn* i);
+		std::size_t decodeJumpTargetDryRun_mips(
+				const JumpTarget& jt,
+				ByteData bytes,
+				bool strict = false);
+		void initializeGpReg_mips();
+
+	// PowerPC specific.
+	//
+	private:
+		std::size_t decodeJumpTargetDryRun_ppc(
+				const JumpTarget& jt,
+				ByteData bytes,
+				bool strict = false);
+
+	// IR modifications.
+	//
+	private:
+		llvm::CallInst* transformToCall(
+				llvm::CallInst* pseudo,
+				llvm::Function* callee);
+		llvm::CallInst* transformToCondCall(
+				llvm::CallInst* pseudo,
+				llvm::Value* cond,
+				llvm::Function* callee,
+				llvm::BasicBlock* falseBb);
+		llvm::ReturnInst* transformToReturn(llvm::CallInst* pseudo);
+		llvm::BranchInst* transformToBranch(
+				llvm::CallInst* pseudo,
+				llvm::BasicBlock* branchee);
+		llvm::BranchInst* transformToCondBranch(
+				llvm::CallInst* pseudo,
+				llvm::Value* cond,
+				llvm::BasicBlock* trueBb,
+				llvm::BasicBlock* falseBb);
+		llvm::SwitchInst* transformToSwitch(
+				llvm::CallInst* pseudo,
+				llvm::Value* val,
+				llvm::BasicBlock* defaultBb,
+				const std::vector<llvm::BasicBlock*>& cases);
+
+		llvm::GlobalVariable* getCallReturnObject();
+
+		void getOrCreateCallTarget(
+				utils::Address addr,
+				llvm::Function*& tFnc,
+				llvm::BasicBlock*& tBb);
+		void getOrCreateBranchTarget(
+				utils::Address addr,
+				llvm::BasicBlock*& tBb,
+				llvm::Function*& tFnc,
+				llvm::Instruction* from);
+
+		bool canSplitFunctionOn(llvm::BasicBlock* bb);
+		bool canSplitFunctionOn(
+				utils::Address addr,
+				llvm::BasicBlock* bb,
+				std::set<llvm::BasicBlock*>& newFncStarts);
+		llvm::Function* splitFunctionOn(utils::Address addr);
+		llvm::Function* splitFunctionOn(utils::Address addr, llvm::BasicBlock* bb);
+
+	// Data.
+	//
 	private:
 		llvm::Module* _module = nullptr;
 		Config* _config = nullptr;
 		FileImage* _image = nullptr;
 		DebugFormat* _debug = nullptr;
+		NameContainer* _names = nullptr;
+		Llvm2CapstoneMap* _llvm2capstone = nullptr;
+		Abi* _abi = nullptr;
+
+		ReachingDefinitionsAnalysis _RDA;
 
 		std::unique_ptr<capstone2llvmir::Capstone2LlvmIrTranslator> _c2l;
+		cs_insn* _dryCsInsn = nullptr;
 
-		const std::string _asm2llvmGv = "_asm_program_counter";
-		const std::string _asm2llvmMd = "llvmToAsmGlobalVariableName";
-		const std::string _callFunction = "__pseudo_call";
-		const std::string _returnFunction = "__pseudo_return";
-		const std::string _branchFunction = "__pseudo_branch";
-		const std::string _condBranchFunction = "__pseudo_cond_branch";
+		llvm::IRBuilder<>* _irb;
 
-		std::map<retdec::utils::Address, std::pair<std::string, retdec::utils::AddressRange>> _staticCode;
-		retdec::utils::AddressRangeContainer _allowedRanges;
-		retdec::utils::AddressRangeContainer _alternativeRanges;
-		retdec::utils::AddressRangeContainer _processedRanges;
+		RangesToDecode _ranges;
 		JumpTargets _jumpTargets;
 
-		std::size_t decodingChunk = 0x50;
+		std::set<utils::Address> _imports;
+		std::set<utils::Address> _exports;
+		std::set<utils::Address> _symbols;
+		std::map<utils::Address, const config::Function*> _debugFncs;
+		std::set<utils::Address> _staticFncs;
+		std::set<utils::Address> _vtableFncs;
+		std::set<llvm::Function*> _terminatingFncs;
+		llvm::Function* _entryPointFunction = nullptr;
+		/// Start of all recognized jump tables.
+		/// TODO: use this to check that one table does not use labels from
+		/// another.
+		/// TODO: maybe we should also remove/fix cond branches to default
+		/// labels before switches (this was done in the original cfg
+		/// implementation. However, if we do it too soon, it will cause
+		/// diff problems when comparing to IDA cfg dumps). We could do it
+		/// after.
+		/// Btw, we already have diff problem because default label is added to
+		/// switch -> it has one more succ then cond branch in IDA (if default
+		/// label is not in jump table).
+		std::map<utils::Address, std::set<llvm::SwitchInst*>> _switchTableStarts;
 
-		std::map<llvm::Function*, std::pair<retdec::utils::Address, retdec::utils::Address>> _functions;
+		std::map<llvm::CallInst*, llvm::Instruction*> _pseudoCalls;
 
-		/// <ordinal number, function name>
-		using OrdMap = std::map<int, std::string>;
-		/// <library name without suffix ".dll", map with ordinals>
-		std::map<std::string, OrdMap> _dllOrds;
+		// We create helper BBs (without name and address) to handle MIPS
+		// likely branches. For convenience, we map them to real BBs they will
+		// eventually jump to.
+		std::map<llvm::BasicBlock*, llvm::BasicBlock*> _likelyBb2Target;
 
-		cs_mode _currentMode;
+		// TODO: remove, solve better.
+		bool _switchGenerated = false;
+
+		bool _somethingDecoded = false;
 };
 
 } // namespace bin2llvmir

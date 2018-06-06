@@ -54,7 +54,7 @@ std::uint64_t Segment::getAddress() const
  */
 std::uint64_t Segment::getEndAddress() const
 {
-	return getSize() ? getAddress() + getSize() - 1 : getAddress();
+	return getSize() ? getAddress() + getSize() : getAddress() + 1;
 }
 
 /**
@@ -64,7 +64,7 @@ std::uint64_t Segment::getEndAddress() const
  */
 std::uint64_t Segment::getPhysicalEndAddress() const
 {
-	return getPhysicalSize() ? getAddress() + getPhysicalSize() - 1 : getAddress();
+	return getPhysicalSize() ? getAddress() + getPhysicalSize() : getAddress() + 1;
 }
 
 /**
@@ -168,7 +168,7 @@ void Segment::setName(const std::string& name)
  */
 bool Segment::containsAddress(std::uint64_t address) const
 {
-	return ((getAddress() <= address) && (address <= getEndAddress()));
+	return ((getAddress() <= address) && (address < getEndAddress()));
 }
 
 /**
@@ -303,11 +303,13 @@ void Segment::shrink(std::uint64_t newAddress, std::uint64_t newSize)
  */
 void Segment::addNonDecodableRange(retdec::utils::Range<std::uint64_t> range)
 {
-	if (!range.contains(getAddress()) && !range.contains(getEndAddress()))
+	retdec::utils::Range<std::uint64_t> secRange(getAddress(), getPhysicalEndAddress());
+	if (!secRange.overlaps(range))
 		return;
 
-	range.setStart(std::max(range.getStart(), getAddress()));
-	range.setEnd(std::min(range.getEnd(), getPhysicalEndAddress()));
+	range.setStartEnd(
+			std::max(range.getStart(), secRange.getStart()),
+			std::min(range.getEnd(), secRange.getEnd()));
 
 	_nonDecodableRanges.addRange(std::move(range));
 }

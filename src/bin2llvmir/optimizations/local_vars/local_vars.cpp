@@ -4,27 +4,40 @@
 * @copyright (c) 2017 Avast Software, licensed under the MIT license
 */
 
-#include <cassert>
-#include <iomanip>
-#include <iostream>
-
 #include <llvm/IR/Instruction.h>
 #include <llvm/IR/Instructions.h>
+#include <llvm/IR/InstIterator.h>
 
-#include "retdec/llvm-support/utils.h"
-#include "retdec/utils/string.h"
+#include "retdec/bin2llvmir/analyses/reaching_definitions.h"
 #include "retdec/bin2llvmir/optimizations/local_vars/local_vars.h"
-#include "retdec/bin2llvmir/utils/defs.h"
-#include "retdec/bin2llvmir/utils/instruction.h"
+#include "retdec/bin2llvmir/providers/abi/abi.h"
+#include "retdec/bin2llvmir/utils/llvm.h"
+#include "retdec/bin2llvmir/utils/debug.h"
+#define debug_enabled false
+#include "retdec/bin2llvmir/utils/ir_modifier.h"
+#include "retdec/utils/string.h"
 
-using namespace retdec::llvm_support;
 using namespace retdec::utils;
 using namespace llvm;
 
-#define debug_enabled false
-
 namespace retdec {
 namespace bin2llvmir {
+
+bool canBeLocalized(
+		const Definition* def,
+		std::set<llvm::Instruction*>& uses)
+{
+	uses.clear();
+	for (auto* u : def->uses)
+	{
+		if (u->defs.size() > 1)
+		{
+			return false;
+		}
+		uses.insert(u->use);
+	}
+	return !def->uses.empty();
+}
 
 char LocalVars::ID = 0;
 
@@ -41,40 +54,39 @@ LocalVars::LocalVars() :
 
 }
 
-void LocalVars::getAnalysisUsage(AnalysisUsage &AU) const
-{
-
-}
-
 /**
  * @return @c True if al least one instruction was (un)volatilized.
  *         @c False otherwise.
  */
 bool LocalVars::runOnModule(Module& M)
 {
-	if (!ConfigProvider::getConfig(&M, config))
+	Abi* abi = nullptr;
+	if (!AbiProvider::getAbi(&M, abi))
 	{
 		LOG << "[ABORT] config file is not available\n";
 		return false;
 	}
 
 	ReachingDefinitionsAnalysis RDA;
-	RDA.runOnModule(M, config);
+	RDA.runOnModule(M, abi);
 
-	for (auto &F : M.getFunctionList())
-	for (auto &B : F)
-	for (auto &I : B)
+	std::set<llvm::Instruction*> uses;
+
+	for (Function &F : M)
+	for (auto it = inst_begin(&F), eIt = inst_end(&F); it != eIt; ++it)
 	{
+		Instruction& I = *it;
+
 		if (CallInst* call = dyn_cast<CallInst>(&I))
 		{
-			if (isIndirectCall(call))
+			if (call->getCalledFunction() == nullptr)
 			{
 				continue;
 			}
 
 			for (auto& a : call->arg_operands())
 			{
-				auto* aa = dyn_cast_or_null<Instruction>(skipCasts(a));
+				auto* aa = dyn_cast_or_null<Instruction>(llvm_utils::skipCasts(a));
 				if (aa == nullptr)
 				{
 					continue;
@@ -86,57 +98,18 @@ bool LocalVars::runOnModule(Module& M)
 				}
 				auto* d = *use->defs.begin();
 				if (a->getType()->isFloatingPointTy()
-						&& !d->getSource()->getType()->isFloatingPointTy())
+						&& !d->getSource()->getType()->isFloatingPointTy()
+						&& canBeLocalized(d, uses))
 				{
-					localizeDefinition(d);
+					IrModifier::localize(d->def, uses, false);
 				}
-				else if (config->isRegister(d->getSource()))
+				// Not necessary to pass all regression tests,
+				// but it gives a slight speeds-up.
+				else if (abi->isRegister(d->getSource())
+						&& canBeLocalized(d, uses))
 				{
-					localizeDefinition(d);
+					IrModifier::localize(d->def, uses, false);
 				}
-			}
-		}
-		else if (ReturnInst* ret = dyn_cast<ReturnInst>(&I))
-		{
-			auto* a = skipCasts(ret->getReturnValue());
-			if (a == nullptr)
-				continue;
-			if (auto* l = dyn_cast<LoadInst>(a))
-			{
-				auto* use = RDA.getUse(l);
-				if (use == nullptr || use->defs.size() != 1)
-				{
-					continue;
-				}
-				auto* d = *use->defs.begin();
-				if (!config->isRegister(d->getSource()))
-				{
-					continue;
-				}
-				localizeDefinition(d);
-			}
-		}
-		else if (StoreInst* s = dyn_cast<StoreInst>(&I))
-		{
-			if (!config->isRegister(s->getPointerOperand()))
-			{
-				continue;
-			}
-
-			auto* d = RDA.getDef(s);
-			if (d == nullptr)
-			{
-				continue;
-			}
-
-			auto* vo = skipCasts(s->getValueOperand());
-			if (isa<CallInst>(vo))
-			{
-				localizeDefinition(d);
-			}
-			else if (isa<Argument>(vo))
-			{
-				localizeDefinition(d);
 			}
 		}
 	}

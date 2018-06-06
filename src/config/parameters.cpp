@@ -23,7 +23,6 @@ const std::string JSON_frontendFunctions        = "frontendFunctions";
 const std::string JSON_selectedNotFoundFncs     = "selectedNotFoundFncs";
 const std::string JSON_selectedRanges           = "selectedRanges";
 const std::string JSON_selectedInteresting      = "selectedInteresting";
-const std::string JSON_completedFrontendPasses  = "completedFrontendPasses";
 
 } // anonymous namespace
 
@@ -149,7 +148,6 @@ Json::Value Parameters::getJsonValue() const
 	params[JSON_selectedFunctions]        = getJsonStringValueVisit(selectedFunctions);
 	params[JSON_frontendFunctions]        = getJsonStringValueVisit(frontendFunctions);
 	params[JSON_selectedNotFoundFncs]     = getJsonStringValueVisit(selectedNotFoundFunctions);
-	params[JSON_completedFrontendPasses]  = getJsonStringValueVisit(completedFrontendPasses);
 
 	return params;
 }
@@ -181,7 +179,6 @@ void Parameters::readJsonValue(const Json::Value& val)
 	readJsonStringValueVisit(selectedFunctions, val[JSON_selectedFunctions]);
 	readJsonStringValueVisit(frontendFunctions, val[JSON_frontendFunctions]);
 	readJsonStringValueVisit(selectedNotFoundFunctions, val[JSON_selectedNotFoundFncs]);
-	readJsonStringValueVisit(completedFrontendPasses, val[JSON_completedFrontendPasses]);
 }
 
 } // namespace config

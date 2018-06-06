@@ -8,12 +8,8 @@
 #ifndef RETDEC_BIN2LLVMIR_OPTIMIZATIONS_ASM_INST_REMOVER_ASM_INST_REMOVER_H
 #define RETDEC_BIN2LLVMIR_OPTIMIZATIONS_ASM_INST_REMOVER_ASM_INST_REMOVER_H
 
-#include <set>
-
 #include <llvm/IR/Module.h>
 #include <llvm/Pass.h>
-
-#include "retdec/bin2llvmir/providers/config.h"
 
 namespace retdec {
 namespace bin2llvmir {
@@ -24,14 +20,10 @@ class AsmInstructionRemover : public llvm::ModulePass
 		static char ID;
 		AsmInstructionRemover();
 		virtual bool runOnModule(llvm::Module& M) override;
-		bool runOnModuleCustom(llvm::Module& M, Config* c);
+		bool runOnModuleCustom(llvm::Module& M);
 
 	private:
 		bool run(llvm::Module& M);
-		bool renameTempVariables(llvm::Module& M);
-
-	private:
-		Config* _config = nullptr;
 };
 
 } // namespace bin2llvmir

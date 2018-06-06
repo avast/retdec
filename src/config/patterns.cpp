@@ -229,8 +229,8 @@ Json::Value Pattern::Match::getJsonValue() const
 {
 	Json::Value match;
 
-	if (isOffsetDefined())    match[JSON_offset] = getOffset().getValue();
-	if (isAddressDefined())   match[JSON_address] = getAddress().getValue();
+	if (isOffsetDefined())    match[JSON_offset] = toJsonValue(getOffset());
+	if (isAddressDefined())   match[JSON_address] = toJsonValue(getAddress());
 	if (isSizeDefined())      match[JSON_size] = getSize().getValue();
 	if (isEntrySizeDefined()) match[JSON_entrySize] = getEntrySize().getValue();
 

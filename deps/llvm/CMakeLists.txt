@@ -35,8 +35,8 @@ if(NOT PYTHON_EXECUTABLE)
 endif()
 
 ExternalProject_Add(llvm-project
-	URL https://github.com/avast-tl/llvm/archive/753e703b185f07f6f85c8ca474a65f4a965371b1.zip
-	URL_HASH SHA256=8aad769359475b7d828cf15b00864ab913631f142e4d1b4e2b147fbb5e5a6e9f
+	URL https://github.com/avast-tl/llvm/archive/1e54671ef5fcbb4b9e121178493b5b91ed10809c.zip
+	URL_HASH SHA256=d085e880c12308d1af7acc737c533569430377e68faf2242a01f4f246601694b
 	DOWNLOAD_NAME llvm.zip
 	CMAKE_ARGS
 		# Force a release build (we don't need to debug LLVM).

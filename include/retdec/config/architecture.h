@@ -68,9 +68,6 @@ class Architecture
 		void readJsonValue(const Json::Value& val);
 
 	private:
-		bool isArch(const std::string& a) const;
-
-	private:
 		enum eEndian
 		{
 			E_UNKNOWN,
@@ -78,10 +75,27 @@ class Architecture
 			E_BIG
 		};
 
+		enum class eArch
+		{
+			UNKNOWN,
+			MIPS,
+			PIC32,
+			ARM,
+			THUMB,
+			X86,
+			PPC,
+		};
+
+	private:
+		bool isArch(const std::string& a) const;
+		bool isArch(eArch a) const;
+		void setArch();
+
 	private:
 		std::string _name;
 		unsigned _bitSize = 32;
 		eEndian _endian = E_UNKNOWN;
+		eArch _arch = eArch::UNKNOWN;
 };
 
 } // namespace config

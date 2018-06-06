@@ -347,11 +347,6 @@ public:
 	*/
 	virtual StringSet getSelectedButNotFoundFuncs() const = 0;
 
-	/**
-	* @brief Returns a set of optimizations that have run in the front-end.
-	*/
-	virtual StringSet getOptsRunInFrontend() const = 0;
-
 	/// @}
 };
 

@@ -286,7 +286,7 @@ unsigned long long SecSeg::getOffset() const
 unsigned long long SecSeg::getEndOffset() const
 {
 	const auto size = getSizeInFile();
-	return size ? getOffset() + size - 1 : getOffset();
+	return size ? getOffset() + size : getOffset() + 1;
 }
 
 /**
@@ -328,7 +328,7 @@ unsigned long long SecSeg::getEndAddress() const
 		size = getSizeInFile();
 	}
 
-	return size ? getAddress() + size - 1 : getAddress();
+	return size ? getAddress() + size : getAddress() + 1;
 }
 
 /**
@@ -683,7 +683,7 @@ bool SecSeg::hasEmptyName() const
  */
 bool SecSeg::belong(unsigned long long sAddress) const
 {
-	return sAddress >= getAddress() && sAddress <= getEndAddress();
+	return sAddress >= getAddress() && sAddress < getEndAddress();
 }
 
 /**

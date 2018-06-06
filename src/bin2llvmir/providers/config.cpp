@@ -9,14 +9,12 @@
 #include <llvm/IR/GlobalVariable.h>
 #include <llvm/IR/Module.h>
 
-#include "retdec/llvm-support/utils.h"
 #include "retdec/bin2llvmir/providers/asm_instruction.h"
 #include "retdec/bin2llvmir/providers/config.h"
 #include "retdec/bin2llvmir/providers/demangler.h"
-#include "retdec/bin2llvmir/utils/instruction.h"
-#include "retdec/bin2llvmir/utils/type.h"
+#include "retdec/bin2llvmir/utils/debug.h"
+#include "retdec/bin2llvmir/utils/llvm.h"
 
-using namespace retdec::llvm_support;
 using namespace retdec::utils;
 using namespace llvm;
 
@@ -49,7 +47,13 @@ Config Config::fromFile(llvm::Module* m, const std::string& path)
 
 	for (auto& s : config.getConfig().structures)
 	{
-		stringToLlvmType(m->getContext(), s.getLlvmIr());
+		llvm_utils::stringToLlvmType(m->getContext(), s.getLlvmIr());
+	}
+
+	// TODO: needed?
+	if (config.getConfig().tools.isPic32())
+	{
+		config.getConfig().architecture.setIsPic32();
 	}
 
 	return config;
@@ -63,7 +67,13 @@ Config Config::fromJsonString(llvm::Module* m, const std::string& json)
 
 	for (auto& s : config.getConfig().structures)
 	{
-		stringToLlvmType(m->getContext(), s.getLlvmIr());
+		llvm_utils::stringToLlvmType(m->getContext(), s.getLlvmIr());
+	}
+
+	// TODO: needed?
+	if (config.getConfig().tools.isPic32())
+	{
+		config.getConfig().architecture.setIsPic32();
 	}
 
 	return config;
@@ -82,6 +92,11 @@ void Config::doFinalization()
 }
 
 retdec::config::Config& Config::getConfig()
+{
+	return _configDB;
+}
+
+const retdec::config::Config& Config::getConfig() const
 {
 	return _configDB;
 }
@@ -287,9 +302,7 @@ retdec::config::Object* Config::insertStackVariable(
 
 	if (cf == nullptr)
 	{
-		std::cout << llvmObjToString(sv) << std::endl;
-		std::cout << sv->getFunction()->getName().str() << std::endl;
-		exit(1);
+		assert(false);
 	}
 
 	assert(cf);
@@ -324,8 +337,7 @@ retdec::config::Function* Config::insertFunction(
 	retdec::config::Function cf(fnc->getName());
 	cf.setDemangledName(dm);
 	cf.setIsFromDebug(fromDebug);
-	cf.setStart(start);
-	cf.setEnd(end);
+	cf.setStartEnd(start, end);
 
 	if (cf.getDemangledName().empty())
 	{
@@ -384,16 +396,6 @@ retdec::utils::Maybe<unsigned> Config::getConfigRegisterNumber(
 	return r ? r->getStorage().getRegisterNumber() : undefVal;
 }
 
-/**
- * TODO: Not used anywhere, do we want this with Capstone?
- */
-std::string Config::getConfigRegisterClass(
-		const llvm::Value* val)
-{
-	auto* r = getConfigRegister(val);
-	return r ? r->getStorage().getRegisterClass() : std::string();
-}
-
 llvm::GlobalVariable* Config::getLlvmRegister(
 		const std::string& name)
 {
@@ -412,7 +414,8 @@ bool Config::isRegister(const llvm::Value* val)
  */
 bool Config::isFlagRegister(const llvm::Value* val)
 {
-	return isRegister(val) && isBoolType(val->getType()->getPointerElementType());
+	return isRegister(val)
+			&& val->getType()->getPointerElementType()->isIntegerTy(1);
 }
 
 /**
@@ -442,7 +445,7 @@ bool Config::isGeneralPurposeRegister(const llvm::Value* val)
 	{
 		return false;
 	}
-	if (isPic32() || getConfig().architecture.isMips())
+	if (getConfig().architecture.isMipsOrPic32())
 	{
 		// TODO
 //		return r->getStorage().getRegisterClass() == "gpregs";
@@ -489,69 +492,14 @@ bool Config::isFloatingPointRegister(const llvm::Value* val)
 		return false;
 	}
 
-	if (isMipsOrPic32())
+	if (getConfig().architecture.isMipsOrPic32())
 	{
 		return gv->getValueType()->isFloatingPointTy();
-//		return r->getStorage().getRegisterClass() == "fpuregs_s"
-//				|| r->getStorage().getRegisterClass() == "fpuregs_d";
 	}
 	else
 	{
 		return false;
 	}
-}
-
-/**
- * @return @c True if value @a val is an artificial function added by frontend.
- *         @c False otherwise.
- */
-bool Config::isFrontendFunction(const llvm::Value* val)
-{
-	return val ? _configDB.parameters.isFrontendFunction(val->getName()) : false;
-}
-
-/**
- * @return @c True if value @a val is a call of an artificial function added
- *         by frontend. @c False otherwise.
- */
-bool Config::isFrontendFunctionCall(const llvm::Value* val)
-{
-	auto* call = dyn_cast_or_null<CallInst>(val);
-	return call ? isFrontendFunction(call->getCalledValue()) : false;
-}
-
-/**
- * @return @c True if architecture is Pic32, @c false otherwise.
- */
-bool Config::isPic32() const
-{
-	return _configDB.architecture.isPic32() || _configDB.tools.isPic32();
-}
-
-bool Config::isMipsOrPic32() const
-{
-	return  _configDB.architecture.isMips() || isPic32();
-}
-
-bool Config::isLlvmToAsmGlobalVariable(const llvm::Value* gv) const
-{
-	return gv == getLlvmToAsmGlobalVariable();
-}
-
-bool Config::isLlvmToAsmInstruction(const llvm::Value* inst) const
-{
-	auto* s = dyn_cast_or_null<StoreInst>(inst);
-	return s ? isLlvmToAsmGlobalVariable(s->getPointerOperand()) : false;
-}
-
-llvm::GlobalVariable* Config::getLlvmToAsmGlobalVariable() const
-{
-	return _asm2llvmGv;
-}
-
-void Config::setLlvmToAsmGlobalVariable(llvm::GlobalVariable* gv)
-{
-	_asm2llvmGv = gv;
 }
 
 /**
@@ -570,6 +518,12 @@ llvm::GlobalVariable* Config::getGlobalDummy()
 		assert(_globalDummy);
 	}
 	return _globalDummy;
+}
+
+utils::FilesystemPath Config::getOutputDirectory()
+{
+	FilesystemPath fsp(getConfig().parameters.getOutputFile());
+	return fsp.getParentPath();
 }
 
 void Config::setLlvmCallPseudoFunction(llvm::Function* f)
@@ -659,6 +613,72 @@ llvm::CallInst* Config::isLlvmAnyUncondBranchPseudoFunctionCall(llvm::Value* c)
 	if (auto* cc = isLlvmReturnPseudoFunctionCall(c)) return cc;
 	if (auto* cc = isLlvmBranchPseudoFunctionCall(c)) return cc;
 	return nullptr;
+}
+
+/**
+ * Get crypto pattern information for address \p addr - fill \p name,
+ * \p description, and \p type, if there is a pattern on address.
+ * \return \c True if pattern was found, \c false otherwise.
+ */
+bool Config::getCryptoPattern(
+		retdec::utils::Address addr,
+		std::string& name,
+		std::string& description,
+		llvm::Type*& type) const
+{
+	for (auto& p : getConfig().patterns)
+	{
+		if (!p.isTypeCrypto())
+		{
+			continue;
+		}
+
+		for (auto& m : p.matches)
+		{
+			if (m.getAddress() != addr || !m.isSizeDefined())
+			{
+				continue;
+			}
+
+			unsigned elemCount = m.getSize();
+			Type* elemType = Type::getInt8Ty(_module->getContext());
+
+			if (m.isEntrySizeDefined())
+			{
+				elemCount /= m.getEntrySize();
+				if (m.isTypeFloatingPoint() && m.getEntrySize() == 8)
+				{
+					elemType = Type::getDoubleTy(_module->getContext());
+				}
+				else if (m.isTypeFloatingPoint() && m.getEntrySize() == 2)
+				{
+					elemType = Type::getHalfTy(_module->getContext());
+				}
+				else if (m.isTypeFloatingPoint() && m.getEntrySize() == 10)
+				{
+					elemType = Type::getX86_FP80Ty(_module->getContext());
+				}
+				else if (m.isTypeFloatingPoint())
+				{
+					elemType = Type::getFloatTy(_module->getContext());
+				}
+				else // integral || unknown
+				{
+					elemType = Type::getIntNTy(
+							_module->getContext(),
+							m.getEntrySize() * 8);
+				}
+			}
+			auto d = elemCount > 0 ? elemCount : 1;
+			type = ArrayType::get(elemType, d);
+			name = retdec::utils::appendHexRet(p.getName() + "_at", addr);
+			description = p.getDescription();
+
+			return true;
+		}
+	}
+
+	return false;
 }
 
 //

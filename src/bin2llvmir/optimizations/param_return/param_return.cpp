@@ -31,14 +31,11 @@
 #include "retdec/utils/container.h"
 #include "retdec/utils/string.h"
 #include "retdec/bin2llvmir/optimizations/param_return/param_return.h"
-#include "retdec/bin2llvmir/utils/instruction.h"
 #define debug_enabled false
-#include "retdec/llvm-support/utils.h"
-#include "retdec/bin2llvmir/utils/type.h"
+#include "retdec/bin2llvmir/utils/llvm.h"
 #include "retdec/bin2llvmir/providers/asm_instruction.h"
 #include "retdec/bin2llvmir/utils/ir_modifier.h"
 
-using namespace retdec::llvm_support;
 using namespace retdec::utils;
 using namespace llvm;
 
@@ -58,7 +55,7 @@ llvm::Value* getRoot(ReachingDefinitionsAnalysis& RDA, llvm::Value* i, bool firs
 	}
 	seen.insert(i);
 
-	i = skipCasts(i);
+	i = llvm_utils::skipCasts(i);
 	if (auto* ii = dyn_cast<Instruction>(i))
 	{
 		if (auto* u = RDA.getUse(ii))
@@ -122,6 +119,7 @@ bool ParamReturn::runOnModule(Module& m)
 {
 	_module = &m;
 	_config = ConfigProvider::getConfig(_module);
+	_abi = AbiProvider::getAbi(_module);
 	_image = FileImageProvider::getFileImage(_module);
 	_dbgf = DebugFormatProvider::getDebugFormat(_module);
 	_lti = LtiProvider::getLti(_module);
@@ -131,12 +129,14 @@ bool ParamReturn::runOnModule(Module& m)
 bool ParamReturn::runOnModuleCustom(
 		llvm::Module& m,
 		Config* c,
+		Abi* abi,
 		FileImage* img,
 		DebugFormat* dbgf,
 		Lti* lti)
 {
 	_module = &m;
 	_config = c;
+	_abi = abi;
 	_image = img;
 	_dbgf = dbgf;
 	_lti = lti;
@@ -151,7 +151,7 @@ bool ParamReturn::run()
 		return false;
 	}
 
-	_RDA.runOnModule(*_module, _config);
+	_RDA.runOnModule(*_module, AbiProvider::getAbi(_module));
 
 //dumpModuleToFile(_module);
 
@@ -190,6 +190,7 @@ void ParamReturn::collectAllCalls()
 								_module,
 								_RDA,
 								_config,
+								_abi,
 								_image,
 								_dbgf,
 								_lti,
@@ -223,6 +224,7 @@ void ParamReturn::collectAllCalls()
 							_module,
 							_RDA,
 							_config,
+							_abi,
 							_image,
 							_dbgf,
 							_lti,
@@ -439,7 +441,7 @@ void CallEntry::filterLeaveOnlyContinuousStackOffsets(Config* _config)
 	{
 		auto* s = *it;
 		auto off = _config->getStackVariableOffset(s->getPointerOperand());
-		auto* val = skipCasts(s->getValueOperand());
+		auto* val = llvm_utils::skipCasts(s->getValueOperand());
 
 		int gap = 8;
 //		int gap = 4;
@@ -584,6 +586,7 @@ DataFlowEntry::DataFlowEntry(
 		llvm::Module* m,
 		ReachingDefinitionsAnalysis& rda,
 		Config* c,
+		Abi* abi,
 		FileImage* img,
 		DebugFormat* dbg,
 		Lti* lti,
@@ -592,6 +595,7 @@ DataFlowEntry::DataFlowEntry(
 		_module(m),
 		_RDA(rda),
 		_config(c),
+		_abi(abi),
 		_image(img),
 		_lti(lti),
 		called(v)
@@ -1124,7 +1128,7 @@ void DataFlowEntry::callsFilterCommonRegisters()
 	static std::vector<std::string> regNames;
 	if (regNames.empty())
 	{
-		if (_config->isMipsOrPic32())
+		if (_config->getConfig().architecture.isMipsOrPic32())
 		{
 			if (_config->getConfig().tools.isPspGcc())
 			{
@@ -1305,7 +1309,7 @@ void DataFlowEntry::applyToIrOrdinary()
 				retVal = _config->getLlvmRegister("rax");
 			}
 		}
-		else if (_config->isMipsOrPic32())
+		else if (_config->getConfig().architecture.isMipsOrPic32())
 		{
 			retVal = _config->getLlvmRegister("v0");
 		}
@@ -1404,7 +1408,7 @@ void DataFlowEntry::applyToIrOrdinary()
 							p.second.push_back(l);
 						}
 					}
-					else if (_config->isMipsOrPic32())
+					else if (_config->getConfig().architecture.isMipsOrPic32())
 					{
 						if (idx < mipsNames.size())
 						{
@@ -1443,8 +1447,8 @@ void DataFlowEntry::applyToIrOrdinary()
 		}
 
 		auto* oldType = fnc->getType();
-		auto* newFnc = modifyFunction(
-				_config,
+		IrModifier irm(_module, _config);
+		auto* newFnc = irm.modifyFunction(
 				fnc,
 				retType,
 				argTypes,
@@ -1477,7 +1481,7 @@ void DataFlowEntry::applyToIrOrdinary()
 			}
 
 			auto* ret = fnc ? fnc->getReturnType() : call->getType();
-			modifyCallInst(call, ret, loads);
+			IrModifier::modifyCallInst(call, ret, loads);
 		}
 	}
 }
@@ -1531,12 +1535,12 @@ void DataFlowEntry::applyToIrVariadic()
 		//
 		auto* wrapCall = isSimpleWrapper(calledFnc);
 		auto* wrapFnc = wrapCall ? wrapCall->getCalledFunction() : calledFnc;
-		std::vector<llvm::Type*> ttypes = parseFormatString(
+		std::vector<llvm::Type*> ttypes = llvm_utils::parseFormatString(
 				_module,
 				ce.formatStr,
 				wrapFnc);
 
-		if (_config->isPic32())
+		if (_config->getConfig().architecture.isPic32())
 		{
 			for (size_t i = 0; i < ttypes.size(); ++i)
 			{
@@ -1561,7 +1565,7 @@ void DataFlowEntry::applyToIrVariadic()
 		for (Type* t : types)
 		{
 			LOG << "\ttype : " << llvmObjToString(t) << std::endl;
-			int sz = static_cast<int>(getTypeByteSizeInBinary(_module, t));
+			int sz = static_cast<int>(_abi->getTypeByteSize(t));
 			sz = sz > 4 ? 8 : 4;
 
 			if (_config->getConfig().architecture.isX86())
@@ -1621,7 +1625,7 @@ void DataFlowEntry::applyToIrVariadic()
 					off += sz;
 				}
 			}
-			else if (_config->isPic32())
+			else if (_config->getConfig().architecture.isPic32())
 			{
 				if (aIdx < mipsNames.size())
 				{
@@ -1711,7 +1715,7 @@ void DataFlowEntry::applyToIrVariadic()
 
 			if (types.size() > idx)
 			{
-				l = convertValueToType(l, types[idx], ce.call);
+				l = IrModifier::convertValueToType(l, types[idx], ce.call);
 			}
 
 			loads.push_back(l);
@@ -1739,7 +1743,7 @@ void DataFlowEntry::applyToIrVariadic()
 			retVal = _config->getLlvmRegister("rax");
 		}
 	}
-	else if (_config->isMipsOrPic32())
+	else if (_config->getConfig().architecture.isMipsOrPic32())
 	{
 		retVal = _config->getLlvmRegister("v0");
 	}
@@ -1763,8 +1767,8 @@ void DataFlowEntry::applyToIrVariadic()
 	auto* fnc = getFunction();
 	auto* oldType = fnc->getType();
 
-	auto* newFnc = modifyFunction(
-			_config,
+	IrModifier irm(_module, _config);
+	auto* newFnc = irm.modifyFunction(
 			fnc,
 			retType,
 			argTypes,
@@ -1819,7 +1823,7 @@ void DataFlowEntry::connectWrappers()
 	unsigned i = 0;
 	for (auto& a : fnc->getArgumentList())
 	{
-		auto* conv = convertValueToType(&a, wrappedCall->getArgOperand(i)->getType(), wrappedCall);
+		auto* conv = IrModifier::convertValueToType(&a, wrappedCall->getArgOperand(i)->getType(), wrappedCall);
 		wrappedCall->setArgOperand(i++, conv);
 	}
 
@@ -1861,12 +1865,12 @@ void DataFlowEntry::connectWrappers()
 			}
 			else
 			{
-				auto* conv = convertValueToType(a, wrappedFnc->getFunctionType()->getParamType(i++), c);
+				auto* conv = IrModifier::convertValueToType(a, wrappedFnc->getFunctionType()->getParamType(i++), c);
 				args.push_back(conv);
 			}
 		}
 		auto* nc = CallInst::Create(wrappedFnc, args, "", c);
-		auto* resConv = convertValueToTypeAfter(nc, c->getType(), nc);
+		auto* resConv = IrModifier::convertValueToTypeAfter(nc, c->getType(), nc);
 		c->replaceAllUsesWith(resConv);
 		c->eraseFromParent();
 	}
@@ -2052,7 +2056,7 @@ void DataFlowEntry::setTypeFromExtraInfo()
 	{
 		for (auto& a : dbgFnc->parameters)
 		{
-			auto* t = stringToLlvmTypeDefault(_module, a.type.getLlvmIr());
+			auto* t = llvm_utils::stringToLlvmTypeDefault(_module, a.type.getLlvmIr());
 			argTypes.push_back(t);
 			argNames.push_back(a.getName());
 		}
@@ -2060,7 +2064,7 @@ void DataFlowEntry::setTypeFromExtraInfo()
 		{
 			isVarArg = true;
 		}
-		retType = stringToLlvmTypeDefault(
+		retType = llvm_utils::stringToLlvmTypeDefault(
 				_module,
 				dbgFnc->returnType.getLlvmIr());
 		typeSet = true;
@@ -2071,7 +2075,7 @@ void DataFlowEntry::setTypeFromExtraInfo()
 	{
 		for (auto& a : configFnc->parameters)
 		{
-			auto* t = stringToLlvmTypeDefault(_module, a.type.getLlvmIr());
+			auto* t = llvm_utils::stringToLlvmTypeDefault(_module, a.type.getLlvmIr());
 			argTypes.push_back(t);
 			argNames.push_back(a.getName());
 
@@ -2091,7 +2095,7 @@ void DataFlowEntry::setTypeFromExtraInfo()
 		{
 			isVarArg = true;
 		}
-		retType = stringToLlvmTypeDefault(
+		retType = llvm_utils::stringToLlvmTypeDefault(
 				_module,
 				configFnc->returnType.getLlvmIr());
 		if (!argTypes.empty())
@@ -2180,7 +2184,7 @@ void DataFlowEntry::setReturnType()
 			retVal = _config->getLlvmRegister("eax");
 		}
 	}
-	else if (_config->isMipsOrPic32())
+	else if (_config->getConfig().architecture.isMipsOrPic32())
 	{
 		retVal = _config->getLlvmRegister("v0");
 	}
@@ -2205,7 +2209,7 @@ void DataFlowEntry::setArgumentTypes()
 		argTypes.insert(
 				argTypes.end(),
 				argLoads.size(),
-				getDefaultType(_module));
+				Abi::getDefaultType(_module));
 	}
 	else
 	{
@@ -2223,7 +2227,7 @@ void DataFlowEntry::setArgumentTypes()
 		argTypes.insert(
 				argTypes.end(),
 				ce->possibleArgStores.size(),
-				getDefaultType(_module));
+				Abi::getDefaultType(_module));
 	}
 }
 

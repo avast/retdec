@@ -11,13 +11,13 @@
 #include "retdec/utils/string.h"
 #include "retdec/bin2llvmir/optimizations/register/register.h"
 #include "retdec/bin2llvmir/providers/asm_instruction.h"
-#include "retdec/bin2llvmir/utils/defs.h"
+#include "retdec/bin2llvmir/utils/debug.h"
 #define debug_enabled false
-#include "retdec/llvm-support/utils.h"
-#include "retdec/bin2llvmir/utils/type.h"
+#include "retdec/bin2llvmir/utils/ir_modifier.h"
+#include "retdec/bin2llvmir/utils/llvm.h"
 
-using namespace retdec::llvm_support;
 using namespace llvm;
+using namespace retdec::bin2llvmir::llvm_utils;
 
 namespace {
 
@@ -121,6 +121,17 @@ bool getTopVal(
 	{
 		auto* ci = cast<ConstantInt>(cast<AddOperator>(val)->getOperand(1));
 		int tmp = topVal + ci->getSExtValue();
+		LOG << "\t\t" << ai.getAddress() << std::dec << " @ " << topVal
+				<< " + " << ci->getSExtValue() << " = " << tmp << std::endl;
+		topVal = tmp;
+	}
+	else if (isa<SubOperator>(val)
+			&& isa<LoadInst>(skipCasts(cast<SubOperator>(val)->getOperand(0)))
+			&& cast<LoadInst>(skipCasts(cast<SubOperator>(val)->getOperand(0)))->getPointerOperand() == top
+			&& isa<ConstantInt>(cast<SubOperator>(val)->getOperand(1)))
+	{
+		auto* ci = cast<ConstantInt>(cast<SubOperator>(val)->getOperand(1));
+		int tmp = topVal - ci->getSExtValue();
 		LOG << "\t\t" << ai.getAddress() << std::dec << " @ " << topVal
 				<< " + " << ci->getSExtValue() << " = " << tmp << std::endl;
 		topVal = tmp;
@@ -255,7 +266,7 @@ bool RegisterAnalysis::x86FpuAnalysisBb(
 
 			auto* reg = getLlvmRegister(regClass, regNum);
 			auto* l = new LoadInst(reg, "", c);
-			auto* conv = convertValueToType(l, c->getType(), c);
+			auto* conv = IrModifier::convertValueToType(l, c->getType(), c);
 
 			c->replaceAllUsesWith(conv);
 			c->eraseFromParent();

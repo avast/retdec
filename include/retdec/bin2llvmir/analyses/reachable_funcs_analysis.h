@@ -10,8 +10,7 @@
 #include <string>
 
 #include <llvm/ADT/SCCIterator.h>
-
-#include "retdec/bin2llvmir/utils/defs.h"
+#include <llvm/Analysis/CallGraph.h>
 
 namespace retdec {
 namespace bin2llvmir {
@@ -27,17 +26,17 @@ public:
 
 	std::string getName() const { return "ReachableFuncsAnalysis"; }
 
-	static FuncSet getReachableDefinedFuncsFor(llvm::Function &func,
+	static std::set<llvm::Function*> getReachableDefinedFuncsFor(llvm::Function &func,
 		llvm::Module &module, llvm::CallGraph &callGraph);
-	static FuncSet getGloballyReachableFuncsFor(llvm::Module &module);
+	static std::set<llvm::Function*> getGloballyReachableFuncsFor(llvm::Module &module);
 
 private:
-	FuncSet getDirectlyReachableDefinedFuncsFor(
-		const FuncSet &funcs, llvm::CallGraph &callGraph) const;
-	FuncSet getDirectlyReachableDefinedFuncsFor(
+	std::set<llvm::Function*> getDirectlyReachableDefinedFuncsFor(
+		const std::set<llvm::Function*> &funcs, llvm::CallGraph &callGraph) const;
+	std::set<llvm::Function*> getDirectlyReachableDefinedFuncsFor(
 		llvm::CallGraphNode &reachableFrom) const;
-	FuncSet getIndirectlyReachableDefinedFuncsFor(
-		const FuncSet &funcs, llvm::Module &module) const;
+	std::set<llvm::Function*> getIndirectlyReachableDefinedFuncsFor(
+		const std::set<llvm::Function*> &funcs, llvm::Module &module) const;
 };
 
 } // namespace bin2llvmir

@@ -55,7 +55,7 @@ void MachODetector::getEntryPoint()
 
 		for(auto sec : fileParser->getSections())
 		{
-			if(sec->getAddress() <= res && res <= sec->getEndAddress())
+			if(sec->getAddress() <= res && res < sec->getEndAddress())
 			{
 				fileInfo.toolInfo.epSection = *sec;
 				fileInfo.toolInfo.entryPointSection = true;

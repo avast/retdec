@@ -30,7 +30,7 @@ InitializationWorks) {
 	seg.setName("segment0");
 
 	EXPECT_EQ(0x1000, seg.getAddress());
-	EXPECT_EQ(0x11FF, seg.getEndAddress());
+	EXPECT_EQ(0x1200, seg.getEndAddress());
 	EXPECT_EQ(0x200, seg.getSize());
 	EXPECT_EQ("segment0", seg.getName());
 }
@@ -43,7 +43,7 @@ CopyInitializationWorks) {
 	Segment copy(seg);
 
 	EXPECT_EQ(0x1000, copy.getAddress());
-	EXPECT_EQ(0x11FF, copy.getEndAddress());
+	EXPECT_EQ(0x1200, copy.getEndAddress());
 	EXPECT_EQ(0x200, copy.getSize());
 	EXPECT_EQ("segment0", copy.getName());
 }
@@ -59,7 +59,7 @@ TEST_F(SegmentTests,
 GetEndAddressWorks) {
 	Segment seg(nullptr, 0x1000, 0x200, nullptr);
 
-	EXPECT_EQ(0x11FF, seg.getEndAddress());
+	EXPECT_EQ(0x1200, seg.getEndAddress());
 }
 
 TEST_F(SegmentTests,
@@ -68,14 +68,14 @@ GetPhysicalEndAddressWorks) {
 
 	Segment seg(nullptr, 0x1000, 0x100, makeDataSource(mockFileData));
 
-	EXPECT_EQ(0x1006, seg.getPhysicalEndAddress());
+	EXPECT_EQ(0x1007, seg.getPhysicalEndAddress());
 }
 
 TEST_F(SegmentTests,
 GetPhysicalEndAddressInPureVirtualSegmentWorks) {
 	Segment seg(nullptr, 0x1000, 0x100, nullptr);
 
-	EXPECT_EQ(0x1000, seg.getPhysicalEndAddress());
+	EXPECT_EQ(0x1001, seg.getPhysicalEndAddress());
 }
 
 TEST_F(SegmentTests,
@@ -119,7 +119,7 @@ GetAddressRangeWorks) {
 	retdec::utils::Range<std::uint64_t> range = seg.getAddressRange();
 
 	EXPECT_EQ(0x1000, range.getStart());
-	EXPECT_EQ(0x10FF, range.getEnd());
+	EXPECT_EQ(0x1100, range.getEnd());
 }
 
 TEST_F(SegmentTests,

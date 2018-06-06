@@ -178,7 +178,6 @@ public:
 	std::string getDetectedCompilerOrPacker() const;
 	std::string getDetectedLanguage() const;
 	StringSet getSelectedButNotFoundFuncs() const;
-	StringSet getOptsRunInFrontend() const;
 	/// @}
 
 private:

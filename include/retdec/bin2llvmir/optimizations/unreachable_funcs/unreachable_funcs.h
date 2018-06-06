@@ -7,11 +7,11 @@
 #ifndef RETDEC_BIN2LLVMIR_OPTIMIZATIONS_UNREACHABLE_FUNCS_UNREACHABLE_FUNCS_H
 #define RETDEC_BIN2LLVMIR_OPTIMIZATIONS_UNREACHABLE_FUNCS_UNREACHABLE_FUNCS_H
 
-#include <llvm/IR/InstVisitor.h>
+#include <llvm/Analysis/CallGraph.h>
+#include <llvm/IR/Module.h>
 #include <llvm/Pass.h>
 
 #include "retdec/bin2llvmir/providers/config.h"
-#include "retdec/bin2llvmir/utils/defs.h"
 
 namespace retdec {
 namespace bin2llvmir {
@@ -27,39 +27,28 @@ namespace bin2llvmir {
 * }
 * @endcode
 */
-class UnreachableFuncs: public llvm::ModulePass {
-public:
-	static char ID;
-	UnreachableFuncs();
+class UnreachableFuncs: public llvm::ModulePass
+{
+	public:
+		static char ID;
+		UnreachableFuncs();
+		virtual void getAnalysisUsage(llvm::AnalysisUsage& au) const override;
+		virtual bool runOnModule(llvm::Module& m) override;
+		bool runOnModuleCustom(llvm::Module& m, Config* c);
 
-	virtual bool runOnModule(llvm::Module &module) override;
-	virtual void getAnalysisUsage(llvm::AnalysisUsage &au) const override;
+	private:
+		bool run();
+		void getFuncsThatCannotBeOptimized(
+				std::set<llvm::Function*>& funcsThatCannotBeOptimized);
+		void removeFuncsThatCanBeOptimized(
+				const std::set<llvm::Function*>& funcsThatCannotBeOptimized);
 
-	static const char *getName() { return NAME; }
-
-private:
-	void initializeMainFunc(llvm::Module &module);
-	bool optimizationCanRun() const;
-	FuncSet getReachableFuncs(llvm::Function &startFunc,
-		llvm::Module &module) const;
-	void removeFuncsThatCanBeOptimized(
-		const FuncSet &funcsThatCannotBeOptimized,
-		llvm::Module &module) const;
-	FuncSet getFuncsThatCannotBeOptimized(
-		const FuncSet &reachableFuncs, llvm::Module &module) const;
-	FuncSet getFuncsThatCanBeOptimized(
-		const FuncSet funcsThatCannotBeOptimized,
-		llvm::Module &module) const;
-	void removeFuncsFromModule(const FuncSet &funcsToRemove) const;
-
-private:
-	/// Name of the optimization.
-	static const char *NAME;
-
-	/// The main function.
-	llvm::Function *mainFunc;
-
-	Config* config = nullptr;
+	private:
+		llvm::Module* module = nullptr;
+		Config* config = nullptr;
+		llvm::CallGraph* callGraph = nullptr;
+		llvm::Function *mainFunc = nullptr;
+		unsigned NumFuncsRemoved = 0;
 };
 
 } // namespace bin2llvmir

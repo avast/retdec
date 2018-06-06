@@ -59,7 +59,7 @@ public:
 	bool hasDataInitializedOnAddress(std::uint64_t address) const;
 	bool hasReadOnlyDataOnAddress(std::uint64_t address) const;
 	bool hasSegmentOnAddress(std::uint64_t address) const;
-	bool isPointer(std::uint64_t address);
+	bool isPointer(std::uint64_t address, std::uint64_t* pointer = nullptr) const;
 
 	Segment* getSegment(std::size_t index);
 	Segment* getSegment(const std::string& name);

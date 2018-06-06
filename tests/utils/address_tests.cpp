@@ -36,6 +36,58 @@ TEST_F(AddressTests, InitializedAddressIsDefined)
 	EXPECT_TRUE(a.isDefined());
 }
 
+TEST_F(AddressTests, stringCtorPrefixHexa)
+{
+	Address a("0x1234");
+	EXPECT_FALSE(a.isUndefined());
+	EXPECT_TRUE(a.isDefined());
+	EXPECT_EQ(0x1234, a.getValue());
+}
+
+TEST_F(AddressTests, stringCtorNoPrefixDecimal)
+{
+	Address a("1234");
+	EXPECT_FALSE(a.isUndefined());
+	EXPECT_TRUE(a.isDefined());
+	EXPECT_EQ(1234, a.getValue());
+}
+
+TEST_F(AddressTests, stringCtorBadIsUndefined1)
+{
+	Address a("");
+	EXPECT_TRUE(a.isUndefined());
+}
+
+TEST_F(AddressTests, stringCtorBadIsUndefined2)
+{
+	Address a("0x");
+	EXPECT_TRUE(a.isUndefined());
+}
+
+TEST_F(AddressTests, stringCtorBadIsUndefined3)
+{
+	Address a("jak55");
+	EXPECT_TRUE(a.isUndefined());
+}
+
+TEST_F(AddressTests, stringCtorBadIsUndefined4)
+{
+	Address a("55jak");
+	EXPECT_TRUE(a.isUndefined());
+}
+
+TEST_F(AddressTests, stringCtorBadIsUndefined5)
+{
+	Address a("0xjak55");
+	EXPECT_TRUE(a.isUndefined());
+}
+
+TEST_F(AddressTests, stringCtorBadIsUndefined6)
+{
+	Address a("0x55 jak");
+	EXPECT_TRUE(a.isUndefined());
+}
+
 TEST_F(AddressTests, AssignmentWorks)
 {
 	unsigned val = 1234;
@@ -150,7 +202,7 @@ TEST_F(AddressRangeTests, ContainsWorks)
 	EXPECT_TRUE( p.contains( start ) );
 	EXPECT_TRUE( p.contains( (start+end)/2 ) );
 	EXPECT_TRUE( p.contains( end-1 ) );
-	EXPECT_TRUE( p.contains( end ) );
+	EXPECT_FALSE( p.contains( end ) );
 	EXPECT_FALSE( p.contains( end+1 ) );
 }
 
@@ -293,8 +345,8 @@ TEST_F(AddressRangeContainerTests, InsertRangeMergeBordering)
 {
 	AddressRangeContainer c;
 
-	c.insert(0x6, 0x15);
-	c.insert(0x0, 0x5);
+	c.insert(0x6, 0x16);
+	c.insert(0x0, 0x6);
 	c.insert(0x16, 0x100);
 
 	EXPECT_EQ(1, c.size()) << c;
@@ -341,8 +393,8 @@ TEST_F(AddressRangeContainerTests, containsGetRange)
 	EXPECT_EQ(AddressRange(0x10, 0x20), *c.getRange(0x10));
 	EXPECT_TRUE(c.contains(0x15));
 	EXPECT_EQ(AddressRange(0x10, 0x20), *c.getRange(0x15));
-	EXPECT_TRUE(c.contains(0x20));
-	EXPECT_EQ(AddressRange(0x10, 0x20), *c.getRange(0x20));
+	EXPECT_TRUE(c.contains(0x19));
+	EXPECT_EQ(AddressRange(0x10, 0x20), *c.getRange(0x19));
 	EXPECT_TRUE(c.contains(0x30));
 	EXPECT_EQ(AddressRange(0x30, 0x40), *c.getRange(0x30));
 
@@ -414,8 +466,8 @@ TEST_F(AddressRangeContainerTests, RemovedRangeFullyInNewExistingRange)
 
 	EXPECT_EQ(4, c.size()) << c;
 	EXPECT_TRUE(c.containsExact(AddressRange(0x0, 0x5))) << c;
-	EXPECT_TRUE(c.containsExact(AddressRange(0x10, 0x1f))) << c;
-	EXPECT_TRUE(c.containsExact(AddressRange(0x41, 0x60))) << c;
+	EXPECT_TRUE(c.containsExact(AddressRange(0x10, 0x20))) << c;
+	EXPECT_TRUE(c.containsExact(AddressRange(0x40, 0x60))) << c;
 	EXPECT_TRUE(c.containsExact(AddressRange(0x100, 0x500))) << c;
 }
 
@@ -430,8 +482,8 @@ TEST_F(AddressRangeContainerTests, RemovedRangeFullyInNewExistingRangeLeave1Rang
 
 	EXPECT_EQ(4, c.size()) << c;
 	EXPECT_TRUE(c.containsExact(AddressRange(0x0, 0x5))) << c;
-	EXPECT_TRUE(c.containsExact(AddressRange(0x10, 0x10))) << c;
-	EXPECT_TRUE(c.containsExact(AddressRange(0x60, 0x60))) << c;
+	EXPECT_TRUE(c.containsExact(AddressRange(0x10, 0x11))) << c;
+	EXPECT_TRUE(c.containsExact(AddressRange(0x5f, 0x60))) << c;
 	EXPECT_TRUE(c.containsExact(AddressRange(0x100, 0x500))) << c;
 }
 
@@ -442,7 +494,7 @@ TEST_F(AddressRangeContainerTests, RemoveRangeFromStart)
 	c.insert(0x10, 0x40);
 	c.insert(0x100, 0x500); // should not be affected
 
-	c.remove(0x10, 0x1f);
+	c.remove(0x10, 0x20);
 
 	EXPECT_EQ(3, c.size()) << c;
 	EXPECT_TRUE(c.containsExact(AddressRange(0x0, 0x5))) << c;
@@ -461,7 +513,7 @@ TEST_F(AddressRangeContainerTests, RemoveRangeFromStartLeave1Range)
 
 	EXPECT_EQ(3, c.size()) << c;
 	EXPECT_TRUE(c.containsExact(AddressRange(0x0, 0x5))) << c;
-	EXPECT_TRUE(c.containsExact(AddressRange(0x40, 0x40))) << c;
+	EXPECT_TRUE(c.containsExact(AddressRange(0x3f, 0x40))) << c;
 	EXPECT_TRUE(c.containsExact(AddressRange(0x100, 0x500))) << c;
 }
 
@@ -472,7 +524,7 @@ TEST_F(AddressRangeContainerTests, RemoveRangeFromEnd)
 	c.insert(0x10, 0x40);
 	c.insert(0x100, 0x500); // should not be affected
 
-	c.remove(0x21, 0x40);
+	c.remove(0x20, 0x40);
 
 	EXPECT_EQ(3, c.size()) << c;
 	EXPECT_TRUE(c.containsExact(AddressRange(0x0, 0x5))) << c;
@@ -491,7 +543,7 @@ TEST_F(AddressRangeContainerTests, RemoveRangeFromEndLeave1Range)
 
 	EXPECT_EQ(3, c.size()) << c;
 	EXPECT_TRUE(c.containsExact(AddressRange(0x0, 0x5))) << c;
-	EXPECT_TRUE(c.containsExact(AddressRange(0x10, 0x10))) << c;
+	EXPECT_TRUE(c.containsExact(AddressRange(0x10, 0x11))) << c;
 	EXPECT_TRUE(c.containsExact(AddressRange(0x100, 0x500))) << c;
 }
 
@@ -508,8 +560,8 @@ TEST_F(AddressRangeContainerTests, RemoveRangeMultipleOutside)
 
 	EXPECT_EQ(4, c.size()) << c;
 	EXPECT_TRUE(c.containsExact(AddressRange(0x0, 0x5))) << c;
-	EXPECT_TRUE(c.containsExact(AddressRange(0x10, 0x15))) << c;
-	EXPECT_TRUE(c.containsExact(AddressRange(0x65, 0x70))) << c;
+	EXPECT_TRUE(c.containsExact(AddressRange(0x10, 0x16))) << c;
+	EXPECT_TRUE(c.containsExact(AddressRange(0x64, 0x70))) << c;
 	EXPECT_TRUE(c.containsExact(AddressRange(0x100, 0x500))) << c;
 }
 
@@ -527,6 +579,20 @@ TEST_F(AddressRangeContainerTests, RemoveRangeMultipleInside)
 	EXPECT_EQ(2, c.size()) << c;
 	EXPECT_TRUE(c.containsExact(AddressRange(0x0, 0x5))) << c;
 	EXPECT_TRUE(c.containsExact(AddressRange(0x100, 0x500))) << c;
+}
+
+TEST_F(AddressRangeContainerTests, RemoveAndGetRange)
+{
+	AddressRangeContainer c;
+	c.insert(0x0, 0x100);
+
+	c.remove(0x0, 0x50);
+
+	EXPECT_EQ(1, c.size()) << c;
+	EXPECT_TRUE(c.containsExact(AddressRange(0x50, 0x100))) << c;
+	EXPECT_EQ(AddressRange(0x50, 0x100), *c.getRange(0x50));
+	EXPECT_EQ(AddressRange(0x50, 0x100), *c.getRange(0x60));
+	EXPECT_EQ(AddressRange(0x50, 0x100), *c.getRange(0xff));
 }
 
 } // namespace tests

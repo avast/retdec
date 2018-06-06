@@ -7,6 +7,7 @@
 #include <cassert>
 
 #include <llvm/ADT/Statistic.h>
+#include <llvm/Analysis/CallGraph.h>
 #include <llvm/Analysis/CallGraphSCCPass.h>
 #include <llvm/IR/CFG.h>
 #include <llvm/IR/GlobalVariable.h>
@@ -18,7 +19,6 @@
 #include "retdec/bin2llvmir/optimizations/globals/dead_global_assign.h"
 #include "retdec/bin2llvmir/optimizations/globals/global_to_local.h"
 #include "retdec/bin2llvmir/optimizations/globals/global_to_local_and_dead_global_assign.h"
-#include "retdec/bin2llvmir/utils/instruction.h"
 
 #define DEBUG_TYPE "global-to-local-and-dead-global-assign"
 
@@ -128,8 +128,8 @@ bool globalVarCanBeOptimized(GlobalVariable &glob) {
 *
 * @return Global variables that can be optimized.
 */
-GlobVarSet getGlobsToOptimize(Module::GlobalListType &globs) {
-	GlobVarSet globsToOptimize;
+std::set<llvm::GlobalVariable*> getGlobsToOptimize(Module::GlobalListType &globs) {
+	std::set<llvm::GlobalVariable*> globsToOptimize;
 	for (GlobalVariable &glob : globs) {
 		if (globalVarCanBeOptimized(glob)) {
 			globsToOptimize.insert(&glob);
@@ -140,20 +140,20 @@ GlobVarSet getGlobsToOptimize(Module::GlobalListType &globs) {
 }
 
 /**
-* @brief Find if all instructions in @a instSet have same first operand.
+* @brief Find if all instructions in @a std::set<llvm::Instruction*> have same first operand.
 *
-* If @a instSet is empty than nothing to analyze so return @c false.
+* If @a std::set<llvm::Instruction*> is empty than nothing to analyze so return @c false.
 *
 * @return @c true if all instructions have same first operand, otherwise
 *         @c false.
 */
-bool hasSameFirstOp(const InstSet &instSet) {
-	if (instSet.empty()) {
+bool hasSameFirstOp(const std::set<llvm::Instruction*> &insnSet) {
+	if (insnSet.empty()) {
 		return false;
 	}
 
-	Value *value((*instSet.begin())->getOperand(0));
-	for (Instruction *inst : instSet) {
+	Value *value((*insnSet.begin())->getOperand(0));
+	for (Instruction *inst : insnSet) {
 		if (inst->getOperand(0) != value) {
 			return false;
 		}
@@ -161,18 +161,18 @@ bool hasSameFirstOp(const InstSet &instSet) {
 	return true;
 }
 /**
-* @brief Returns @c true if all instructions in @a instSet are in same function
+* @brief Returns @c true if all instructions in @a std::set<llvm::Instruction*> are in same function
 *        otherwise @c false.
 *
-* If @a instSet is empty than nothing to analyze so return @c false.
+* If @a std::set<llvm::Instruction*> is empty than nothing to analyze so return @c false.
 */
-bool isInstsInSameFunc(const InstSet &instSet) {
-	if (instSet.empty()) {
+bool isInstsInSameFunc(const std::set<llvm::Instruction*> &insnSet) {
+	if (insnSet.empty()) {
 		return false;
 	}
 
-	Function *func((*instSet.begin())->getFunction());
-	for (Instruction *inst : instSet) {
+	Function *func((*insnSet.begin())->getFunction());
+	for (Instruction *inst : insnSet) {
 		if (func != inst->getFunction()) {
 			return false;
 		}
@@ -279,11 +279,7 @@ bool GlobalToLocalAndDeadGlobalAssign::runOnModule(Module &module) {
 	assert(globalToLocal ^ deadGlobalAssign &&
 		"Both -global-to-local and -dead-global-assign cannot run as one optimization.");
 
-	config = ConfigProvider::getConfig(&module);
-
-	addMetadata(module);
-
-	GlobVarSet globsToOptimize(getGlobsToOptimize(module.getGlobalList()));
+	std::set<llvm::GlobalVariable*> globsToOptimize(getGlobsToOptimize(module.getGlobalList()));
 	if (globsToOptimize.empty()) {
 		// Try to optimize variables without use.
 		removeGlobsWithoutUse(module.getGlobalList());
@@ -304,24 +300,6 @@ bool GlobalToLocalAndDeadGlobalAssign::runOnModule(Module &module) {
 	doOptimization(module, globsToOptimize);
 
 	return wasSomethingOptimized();
-}
-
-/**
-* @brief Adds metadata to @a module for this optimization.
-*/
-void GlobalToLocalAndDeadGlobalAssign::addMetadata(Module &module) {
-	if (config) {
-		if (globalToLocal) {
-			config->getConfig().parameters.completedFrontendPasses.insert(
-				GlobalToLocal::getPassArg()
-			);
-		}
-		if (deadGlobalAssign) {
-			config->getConfig().parameters.completedFrontendPasses.insert(
-				DeadGlobalAssign::getPassArg()
-			);
-		}
-	}
 }
 
 /**
@@ -452,7 +430,7 @@ void GlobalToLocalAndDeadGlobalAssign::goThroughLastLUsesAndSolveIndirectCalls(
 * @brief Filter in contained info instructions that can't be optimized.
 */
 void GlobalToLocalAndDeadGlobalAssign::filterUsesThatCannotBeOptimized() {
-	InstSet lUsesNotToOptimize;
+	std::set<llvm::Instruction*> lUsesNotToOptimize;
 	while (goThroughFuncsInfoFilterAndReturnIfChanged(lUsesNotToOptimize,
 			rUsesNotToOptimize)) {
 		// Do nothing, just keep iterating.
@@ -477,7 +455,7 @@ void GlobalToLocalAndDeadGlobalAssign::filterUsesThatCannotBeOptimized() {
 *         otherwise @c false.
 */
 bool GlobalToLocalAndDeadGlobalAssign::goThroughFuncsInfoFilterAndReturnIfChanged(
-		InstSet &lUsesNotToOptimize, InstSet &rUsesNotToOptimize) {
+		std::set<llvm::Instruction*> &lUsesNotToOptimize, std::set<llvm::Instruction*> &rUsesNotToOptimize) {
 	bool changed(false);
 	for (auto &item : funcInfoMap) {
 		item.second->addExtRUsesToNotToOptimize(rUsesNotToOptimize);
@@ -499,7 +477,7 @@ bool GlobalToLocalAndDeadGlobalAssign::goThroughFuncsInfoFilterAndReturnIfChange
 * @param[in, out] notToOptimize We add to this.
 */
 void GlobalToLocalAndDeadGlobalAssign::FuncInfo::addExtRUsesToNotToOptimize(
-		InstSet &notToOptimize) {
+		std::set<llvm::Instruction*> &notToOptimize) {
 	for (auto i = storeLoadAnalysis.extRUses_begin(func),
 			e = storeLoadAnalysis.extRUses_end(func); i != e; ++i) {
 		addToSet(i->second, notToOptimize);
@@ -512,7 +490,7 @@ void GlobalToLocalAndDeadGlobalAssign::FuncInfo::addExtRUsesToNotToOptimize(
 *
 */
 void GlobalToLocalAndDeadGlobalAssign::doOptimization(Module &module,
-		const GlobVarSet &globsToOptimize) {
+		const std::set<llvm::GlobalVariable*> &globsToOptimize) {
 	for (auto &item : funcInfoMap) {
 		if (globalToLocal) {
 			item.second->findPatterns();
@@ -551,7 +529,7 @@ void GlobalToLocalAndDeadGlobalAssign::doOptimization(Module &module,
 * for which we assign value 2.
 */
 void GlobalToLocalAndDeadGlobalAssign::convertGlobsToLocUseInOneFunc(
-		const GlobVarSet &globs) {
+		const std::set<llvm::GlobalVariable*> &globs) {
 	for (GlobalVariable *glob : globs) {
 		if (!UsesAnalysis::hasUsesOnlyInOneFunc(*glob)) {
 			continue;
@@ -632,7 +610,7 @@ void GlobalToLocalAndDeadGlobalAssign::addFilteredRUse(Instruction &rUse) {
 /**
 * @brief Adds filtered left uses @a lUses.
 */
-void GlobalToLocalAndDeadGlobalAssign::addFilteredLUses(const InstSet &lUses) {
+void GlobalToLocalAndDeadGlobalAssign::addFilteredLUses(const std::set<llvm::Instruction*> &lUses) {
 	for (Instruction *lUse : lUses) {
 		addFilteredLUse(*lUse);
 	}
@@ -641,7 +619,7 @@ void GlobalToLocalAndDeadGlobalAssign::addFilteredLUses(const InstSet &lUses) {
 /**
 * @brief Adds filtered right uses @a rUses.
 */
-void GlobalToLocalAndDeadGlobalAssign::addFilteredRUses(const InstSet &rUses) {
+void GlobalToLocalAndDeadGlobalAssign::addFilteredRUses(const std::set<llvm::Instruction*> &rUses) {
 	for (Instruction *rUse : rUses) {
 		addFilteredRUse(*rUse);
 	}
@@ -702,7 +680,7 @@ Function &GlobalToLocalAndDeadGlobalAssign::FuncInfo::getFunc() {
 */
 bool GlobalToLocalAndDeadGlobalAssign::FuncInfo::
 		filterUsesThatCannotBeOptimizedReturnIfChanged(
-			InstSet &lUsesNotToOptimize, InstSet &rUsesNotToOptimize) {
+			std::set<llvm::Instruction*> &lUsesNotToOptimize, std::set<llvm::Instruction*> &rUsesNotToOptimize) {
 	bool changed(false);
 	for (auto i = storeLoadAnalysis.rUsesForLUse_begin(func),
 			e = storeLoadAnalysis.rUsesForLUse_end(func); i != e; ++i) {
@@ -731,8 +709,8 @@ bool GlobalToLocalAndDeadGlobalAssign::FuncInfo::
 * @param[in] rUsesNotToOptimize Sets of right uses that can't be optimized.
 */
 bool GlobalToLocalAndDeadGlobalAssign::FuncInfo::canBeOptimized(
-		Instruction &lUse, Function &func, const InstSet &rUses,
-		const InstSet &rUsesNotToOptimize) {
+		Instruction &lUse, Function &func, const std::set<llvm::Instruction*> &rUses,
+		const std::set<llvm::Instruction*> &rUsesNotToOptimize) {
 	if (isInFilteredLUses(lUse)) {
 		// We know, that we don't want to optimize this left use.
 		return false;
@@ -822,7 +800,7 @@ void GlobalToLocalAndDeadGlobalAssign::FuncInfo::findPatterns() {
 * @param[in] lastLUses Last left uses for @a globValue.
 */
 bool GlobalToLocalAndDeadGlobalAssign::FuncInfo::hasPattern(Value &globValue,
-		const InstSet &lastLUses) {
+		const std::set<llvm::Instruction*> &lastLUses) {
 	if (lastLUses.empty()) {
 		return false;
 	}
@@ -865,7 +843,7 @@ bool GlobalToLocalAndDeadGlobalAssign::FuncInfo::hasPattern(Value &globValue,
 		return false;
 	}
 
-	InstSet uses(lastLUses.begin(), lastLUses.end());
+	std::set<llvm::Instruction*> uses(lastLUses.begin(), lastLUses.end());
 	uses.insert(loadInst);
 	if (UsesAnalysis::hasValueUsesExcept(*loadInst, uses)) {
 		// Checks if tmp is not used in another place.
@@ -875,7 +853,7 @@ bool GlobalToLocalAndDeadGlobalAssign::FuncInfo::hasPattern(Value &globValue,
 		return false;
 	}
 
-	if (filteredRUses.hasExcept(globValue, InstSet{loadInst})) {
+	if (filteredRUses.hasExcept(globValue, std::set<llvm::Instruction*>{loadInst})) {
 		// We know that some right use can't be optimized in this function.
 		// So we can remove pattern.
 		return false;
@@ -915,7 +893,7 @@ Instruction *GlobalToLocalAndDeadGlobalAssign::FuncInfo::findBeginfOfPattern(
 * @param[in] lUses Set of assigns @c tmp to global variable.
 */
 void GlobalToLocalAndDeadGlobalAssign::FuncInfo::savePatterns(Instruction &rUse,
-		const InstSet &lUses) {
+		const std::set<llvm::Instruction*> &lUses) {
 	patternInsts.insert(&rUse);
 	addToSet(lUses, patternInsts);
 }
@@ -981,7 +959,7 @@ void GlobalToLocalAndDeadGlobalAssign::FuncInfo::convertGlobsToLocs(
 *        variable @a to.
 */
 void GlobalToLocalAndDeadGlobalAssign::FuncInfo::replaceGlobToLocInInsts(
-		Value &from, Value &to, Instruction &lUse, const InstSet &rUses) {
+		Value &from, Value &to, Instruction &lUse, const std::set<llvm::Instruction*> &rUses) {
 	lUse.replaceUsesOfWith(&from, &to);
 	for (Instruction *rUse : rUses) {
 		rUse->replaceUsesOfWith(&from, &to);
@@ -1032,7 +1010,7 @@ void GlobalToLocalAndDeadGlobalAssign::FuncInfo::convertGlobToLocUseInOneFunc(
 
 	// Need to save it into set because replacing uses while iterating through
 	// these uses causes problems.
-	InstSet toReplace;
+	std::set<llvm::Instruction*> toReplace;
 	for (auto i = glob.user_begin(), e = glob.user_end(); i != e; ++i) {
 		Instruction *inst(dyn_cast<Instruction>(*i));
 		assert(inst && "Not supported instruction.");

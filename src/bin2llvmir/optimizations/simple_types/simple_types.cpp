@@ -17,16 +17,15 @@
 #include <llvm/IR/LLVMContext.h>
 #include <llvm/Support/raw_ostream.h>
 
-#include "retdec/llvm-support/utils.h"
+#include "retdec/bin2llvmir/utils/llvm.h"
 #include "retdec/utils/time.h"
 #include "retdec/bin2llvmir/analyses/reaching_definitions.h"
 #include "retdec/bin2llvmir/optimizations/simple_types/simple_types.h"
+#include "retdec/bin2llvmir/providers/abi/abi.h"
 #include "retdec/bin2llvmir/providers/asm_instruction.h"
-#include "retdec/bin2llvmir/utils/defs.h"
-#include "retdec/bin2llvmir/utils/instruction.h"
-#include "retdec/bin2llvmir/utils/type.h"
+#include "retdec/bin2llvmir/utils/debug.h"
+#include "retdec/bin2llvmir/utils/ir_modifier.h"
 
-using namespace retdec::llvm_support;
 using namespace retdec::utils;
 using namespace llvm;
 
@@ -88,7 +87,7 @@ bool SimpleTypesAnalysis::runOnModule(Module& M)
 
 	if (first)
 	{
-		RDA.runOnModule(M, config);
+		RDA.runOnModule(M, AbiProvider::getAbi(&M));
 		buildEqSets(M);
 		buildEquations();
 		eqSets.propagate(module);
@@ -101,6 +100,8 @@ bool SimpleTypesAnalysis::runOnModule(Module& M)
 	else
 	{
 		instToErase.clear();
+
+		IrModifier irModif(module, config);
 
 		std::vector<GlobalVariable*> gvs;
 		for (auto& glob : M.getGlobalList())
@@ -155,17 +156,17 @@ bool SimpleTypesAnalysis::runOnModule(Module& M)
 
 							if (isWide)
 							{
-								changeObjectType(config, objf, module, glob, ce->getType(), nullptr, &instToErase, false, isWide);
+								irModif.changeObjectType(objf, glob, ce->getType(), nullptr, &instToErase, false, isWide);
 								done = true;
 								break;
 							}
 
-							if (!isStringArrayPointeType(glob->getType()) && isCharPointerType(ce->getType()))
+							if (!llvm_utils::isStringArrayPointeType(glob->getType()) && llvm_utils::isCharPointerType(ce->getType()))
 							{
 								auto* c = objf->getConstantCharArrayNice(cgv->getStorage().getAddress());
 								if (c)
 								{
-									changeObjectType(config, objf, module, glob, c->getType(), c, &instToErase);
+									irModif.changeObjectType(objf, glob, c->getType(), c, &instToErase);
 									done = true;
 									break;
 								}
@@ -201,7 +202,7 @@ bool SimpleTypesAnalysis::runOnModule(Module& M)
 
 					if (isWide)
 					{
-						changeObjectType(config, objf, module, glob, glob->getType()->getPointerElementType(), nullptr, &instToErase, false, isWide);
+						irModif.changeObjectType(objf, glob, glob->getType()->getPointerElementType(), nullptr, &instToErase, false, isWide);
 						done = true;
 						break;
 					}
@@ -665,7 +666,7 @@ void SimpleTypesAnalysis::processUse(llvm::Value* current, Value* u, std::queue<
 		{
 			for (auto& tmp : call->arg_operands())
 			{
-				if (tmp == current && tmp->getType() != getDefaultType(module))
+				if (tmp == current && tmp->getType() != Abi::getDefaultType(module))
 				{
 					eqSet.insert(tmp->getType(), eSourcePriority::PRIORITY_LTI);
 					break;
@@ -736,7 +737,7 @@ void EqSetContainer::apply(
 		llvm::Module* module,
 		Config* config,
 		FileImage* objf,
-		UnorderedInstSet& instToErase)
+		std::unordered_set<llvm::Instruction*>& instToErase)
 {
 	for (auto& eq : eqSets)
 	{
@@ -841,7 +842,7 @@ void EqSet::insert(llvm::Type* t, eSourcePriority p)
  */
 Type* EqSet::getHigherPriorityType(llvm::Module* module, Type* t1, Type* t2)
 {
-	UnorderedTypeSet seen;
+	std::unordered_set<llvm::Type*> seen;
 	return getHigherPriorityTypePrivate(module, t1, t2, seen);
 }
 
@@ -860,7 +861,7 @@ llvm::Type* EqSet::getHigherPriorityTypePrivate(
 		llvm::Module* module,
 		llvm::Type* t1,
 		llvm::Type* t2,
-		UnorderedTypeSet& seen)
+		std::unordered_set<llvm::Type*>& seen)
 {
 	if (seen.count(t1) || seen.count(t2))
 	{
@@ -896,7 +897,7 @@ llvm::Type* EqSet::getHigherPriorityTypePrivate(
 	}
 	else if (t1->isPointerTy())
 	{
-		if (t1 == getDefaultPointerType(module) && t2->isFloatingPointTy())
+		if (t1 == Abi::getDefaultPointerType(module) && t2->isFloatingPointTy())
 		{
 			return t2;
 		}
@@ -907,7 +908,7 @@ llvm::Type* EqSet::getHigherPriorityTypePrivate(
 	}
 	else if (t2->isPointerTy())
 	{
-		if (t2 == getDefaultPointerType(module) && t1->isFloatingPointTy())
+		if (t2 == Abi::getDefaultPointerType(module) && t1->isFloatingPointTy())
 		{
 			return t1;
 		}
@@ -1090,7 +1091,7 @@ llvm::Type* EqSet::getHigherPriorityTypePrivate(
 	{
 		auto sz1 = module->getDataLayout().getTypeSizeInBits(t1);
 		auto sz2 = module->getDataLayout().getTypeSizeInBits(t2);
-		auto defSz = getDefaultType(module)->getBitWidth();
+		auto defSz = Abi::getDefaultType(module)->getBitWidth();
 
 		if (sz1 == defSz)
 		{
@@ -1220,7 +1221,7 @@ void EqSet::apply(
 		llvm::Module* module,
 		Config* config,
 		FileImage* objf,
-		UnorderedInstSet& instToErase)
+		std::unordered_set<llvm::Instruction*>& instToErase)
 {
 	if (valSet.empty())
 		return;
@@ -1229,6 +1230,7 @@ void EqSet::apply(
 
 	static auto &conf = config->getConfig();
 
+	IrModifier irModif(module, config);
 	for (auto& vs : valSet)
 	{
 		if (!(isa<AllocaInst>(vs.value) || isa<GlobalVariable>(vs.value) || isa<Argument>(vs.value)))
@@ -1261,7 +1263,7 @@ void EqSet::apply(
 
 		LOG << "\t" << vs << "  ==>  " << llvmObjToString(masterType.type) << std::endl;
 
-		changeObjectType(config, objf, module, vs.value, masterType.type, nullptr, &instToErase);
+		irModif.changeObjectType(objf, vs.value, masterType.type, nullptr, &instToErase);
 	}
 
 	LOG << "\napply END   " << id << " =============================\n";

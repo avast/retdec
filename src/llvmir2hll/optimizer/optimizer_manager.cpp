@@ -19,13 +19,11 @@
 #include "retdec/llvmir2hll/optimizer/optimizers/c_cast_optimizer.h"
 #include "retdec/llvmir2hll/optimizer/optimizers/copy_propagation_optimizer.h"
 #include "retdec/llvmir2hll/optimizer/optimizers/dead_code_optimizer.h"
-#include "retdec/llvmir2hll/optimizer/optimizers/dead_global_assign_optimizer.h"
 #include "retdec/llvmir2hll/optimizer/optimizers/dead_local_assign_optimizer.h"
 #include "retdec/llvmir2hll/optimizer/optimizers/deref_address_optimizer.h"
 #include "retdec/llvmir2hll/optimizer/optimizers/deref_to_array_index_optimizer.h"
 #include "retdec/llvmir2hll/optimizer/optimizers/empty_array_to_string_optimizer.h"
 #include "retdec/llvmir2hll/optimizer/optimizers/empty_stmt_optimizer.h"
-#include "retdec/llvmir2hll/optimizer/optimizers/global_to_local_optimizer.h"
 #include "retdec/llvmir2hll/optimizer/optimizers/if_before_loop_optimizer.h"
 #include "retdec/llvmir2hll/optimizer/optimizers/if_structure_optimizer.h"
 #include "retdec/llvmir2hll/optimizer/optimizers/if_to_switch_optimizer.h"
@@ -38,7 +36,6 @@
 #include "retdec/llvmir2hll/optimizer/optimizers/self_assign_optimizer.h"
 #include "retdec/llvmir2hll/optimizer/optimizers/simple_copy_propagation_optimizer.h"
 #include "retdec/llvmir2hll/optimizer/optimizers/simplify_arithm_expr_optimizer.h"
-#include "retdec/llvmir2hll/optimizer/optimizers/unreachable_code_optimizer.h"
 #include "retdec/llvmir2hll/optimizer/optimizers/unused_global_var_optimizer.h"
 #include "retdec/llvmir2hll/optimizer/optimizers/var_def_for_loop_optimizer.h"
 #include "retdec/llvmir2hll/optimizer/optimizers/var_def_stmt_optimizer.h"
@@ -91,35 +88,6 @@ StringSet trimOptimizerSuffix(const StringSet &opts) {
 } // anonymous namespace
 
 /**
-* @brief Has an equivalent of back-end @c Optimization run in the front-end?
-*/
-template<typename Optimization>
-bool OptimizerManager::hasRunInFrontend() {
-	// By default, return false. True can be returned only from
-	// specializations.
-	return false;
-}
-
-// Note: The template specializations have to appear here, before the
-//       implementation of optimize(). Otherwise, we get an "explicit
-//       specialization after instantiation" error.
-
-template<>
-bool OptimizerManager::hasRunInFrontend<GlobalToLocalOptimizer>() {
-	return hasItem(frontendRunOpts, "global-to-local");
-}
-
-template<>
-bool OptimizerManager::hasRunInFrontend<DeadGlobalAssignOptimizer>() {
-	return hasItem(frontendRunOpts, "dead-global-assign");
-}
-
-template<>
-bool OptimizerManager::hasRunInFrontend<UnreachableCodeOptimizer>() {
-	return hasItem(frontendRunOpts, "never-returning-funcs");
-}
-
-/**
 * @brief Constructs a new optimizer manager.
 *
 * @param[in] enabledOpts Names of optimizations. No other optimizations than
@@ -161,7 +129,7 @@ OptimizerManager::OptimizerManager(const StringSet &enabledOpts,
 		hllWriter(hllWriter), va(va), cio(cio),
 		arithmExprEvaluator(arithmExprEvaluator),
 		enableAggressiveOpts(enableAggressiveOpts), enableDebug(enableDebug),
-		recoverFromOutOfMemory(true), frontendRunOpts(), backendRunOpts() {
+		recoverFromOutOfMemory(true), backendRunOpts() {
 			PRECONDITION_NON_NULL(hllWriter);
 			PRECONDITION_NON_NULL(va);
 			PRECONDITION_NON_NULL(cio);
@@ -183,11 +151,6 @@ void OptimizerManager::optimize(ShPtr<Module> m) {
 	//
 	// Of course, if some optimization depend on another one, the order is
 	// clear.
-
-	// We don't have to run some optimizations that already run in the
-	// front-end, such as optimizations of global variables. To this end, we
-	// need to know which optimization run in the front-end.
-	frontendRunOpts = m->getOptsRunInFrontend();
 
 	//
 	// Perform initial, HLL-dependent optimizations.
@@ -215,17 +178,13 @@ void OptimizerManager::optimize(ShPtr<Module> m) {
 	run<AggressiveGlobalToLocalOptimizer>(m);
 
 	// Data-flow optimizations.
-	// GlobalToLocalOptimizer should be run before CopyPropagationOptimizer.
-	runUnlessRunInFrontend<GlobalToLocalOptimizer>(m, va, cio);
 	// The following optimizations should be run before CopyPropagation to
 	// speed it up.
-	runUnlessRunInFrontend<DeadGlobalAssignOptimizer>(m, va, cio);
 	run<UnusedGlobalVarOptimizer>(m);
 	run<DeadLocalAssignOptimizer>(m, va);
 	run<SimpleCopyPropagationOptimizer>(m, va, cio);
 	run<CopyPropagationOptimizer>(m, va, cio);
-	// AuxiliaryVariablesOptimizer should be run after GlobalToLocalOptimizer
-	// and CopyPropagationOptimizer.
+	// AuxiliaryVariablesOptimizer should be run after CopyPropagationOptimizer.
 	run<AuxiliaryVariablesOptimizer>(m, va, cio);
 
 	// SimplifyArithmExprOptimizer should be run before loop optimizations.
@@ -258,9 +217,6 @@ void OptimizerManager::optimize(ShPtr<Module> m) {
 	#endif
 	run<WhileTrueToWhileCondOptimizer>(m);
 	run<IfBeforeLoopOptimizer>(m, va);
-	// Unreachable code should be removed after all structural optimizations to
-	// make sure that none of them appends something to unreachable statements.
-	runUnlessRunInFrontend<UnreachableCodeOptimizer>(m, va);
 
 	// The second part of removal of non-compound statements.
 	run<LLVMIntrinsicsOptimizer>(m);
@@ -279,11 +235,6 @@ void OptimizerManager::optimize(ShPtr<Module> m) {
 	// output. However, do this only if an optimization different than
 	// CopyPropagation was run; otherwise, it makes no sense to run it again.
 	if (shouldSecondCopyPropagationBeRun()) {
-		// GlobalToLocalOptimizer should be run before CopyPropagationOptimizer.
-		runUnlessRunInFrontend<GlobalToLocalOptimizer>(m, va, cio);
-		// Dead{Global,Local}AssignOptimizer should be run before
-		// CopyPropagationOptimizer to speed it up.
-		runUnlessRunInFrontend<DeadGlobalAssignOptimizer>(m, va, cio);
 		run<UnusedGlobalVarOptimizer>(m);
 		run<DeadLocalAssignOptimizer>(m, va);
 		run<SimpleCopyPropagationOptimizer>(m, va, cio);
@@ -438,20 +389,6 @@ void OptimizerManager::run(ShPtr<Module> m, Args &&... args) {
 	auto optimizer = std::make_shared<Optimization>(m,
 		std::forward<Args>(args)...);
 	runOptimizerProvidedItShouldBeRun(optimizer);
-}
-
-/**
-* @brief Runs the given optimization provided that it has not run in the
-*        front-end.
-*
-* See @c run() for more details.
-*/
-template<typename Optimization, typename... Args>
-void OptimizerManager::runUnlessRunInFrontend(ShPtr<Module> m,
-		Args &&... args) {
-	if (!hasRunInFrontend<Optimization>()) {
-		run<Optimization>(m, std::forward<Args>(args)...);
-	}
 }
 
 } // namespace llvmir2hll

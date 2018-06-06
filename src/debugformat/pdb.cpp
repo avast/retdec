@@ -82,8 +82,7 @@ void DebugFormat::loadPdbFunctions()
 
 		retdec::config::Function fnc(pfnc->getNameWithOverloadIndex());
 
-		fnc.setStart(pfnc->address);
-		fnc.setEnd(pfnc->address + pfnc->length);
+		fnc.setStartEnd(pfnc->address, pfnc->address + pfnc->length);
 		fnc.setSourceFileName(_pdbFile->get_module_name(pfnc->module_index));
 
 		auto* sym = _inFile->getFileFormat()->getSymbol(pfnc->address + 1);

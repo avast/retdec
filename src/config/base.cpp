@@ -6,6 +6,12 @@
 
 #include "retdec/config/base.h"
 
+//
+//=============================================================================
+// Safe (check type and throw exception) JSON value loading methods
+//=============================================================================
+//
+
 #define SAFE_TEMPLATE(val, name, defaultValue, isF, asF, valStr)      \
 	auto x = (name.empty()) ? (val) : (val.get(name, defaultValue));  \
 	if (x.isF())                                                      \
@@ -52,11 +58,12 @@ Json::Value::UInt safeGetUint(
 	SAFE_TEMPLATE(val, name, defaultValue, isUInt, asUInt, "an uint");
 }
 
-Json::Value::UInt64 safeGetAddress(
+retdec::utils::Address safeGetAddress(
 		const Json::Value& val,
 		const std::string& name)
 {
-	return safeGetUint64(val, name, retdec::utils::Address::getUndef);
+	std::string strVal = safeGetString(val, name, "");
+	return retdec::utils::Address(strVal);
 }
 
 Json::Value::UInt64 safeGetUint64(
@@ -90,6 +97,23 @@ bool safeGetBool(
 {
 	SAFE_TEMPLATE(val, name, defaultValue, isBool, asBool, "a bool");
 }
+
+//
+//=============================================================================
+// Conversions to JSON values.
+//=============================================================================
+//
+
+std::string toJsonValue(retdec::utils::Address a)
+{
+	return a.isDefined() ? a.toHexPrefixString() : std::string();
+}
+
+//
+//=============================================================================
+// Helper methods
+//=============================================================================
+//
 
 /**
  * Reads array of JSON objects into elements of the provided string container.

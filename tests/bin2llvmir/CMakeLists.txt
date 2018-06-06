@@ -7,14 +7,12 @@ set(RETDEC_TESTS_BIN2LLVMIR_SOURCES
 	optimizations/globals/dead_global_assign_tests.cpp
 	optimizations/globals/global_to_local.cpp
 	optimizations/idioms_libgcc/idioms_libgcc_tests.cpp
+	optimizations/inst_opt/inst_opt_pass_tests.cpp
 	optimizations/inst_opt/inst_opt_tests.cpp
-	optimizations/never_returning_funcs/never_returning_funcs_tests.cpp
 	optimizations/param_return/param_return_tests.cpp
 	optimizations/phi2seq/phi2seq_tests.cpp
 	optimizations/stack_pointer_ops/stack_pointer_ops_tests.cpp
-	optimizations/type_conversions/type_conversions_tests.cpp
 	optimizations/unreachable_funcs/unreachable_funcs_tests.cpp
-	optimizations/volatilize/volatilize_tests.cpp
 	providers/asm_instruction_tests.cpp
 	providers/config_tests.cpp
 	providers/debugformat_tests.cpp
@@ -22,10 +20,9 @@ set(RETDEC_TESTS_BIN2LLVMIR_SOURCES
 	providers/fileimage_tests.cpp
 	providers/lti_tests.cpp
 	utils/instcombine_tests.cpp
-	utils/instruction_tests.cpp
 	utils/ir_modifier_tests.cpp
+	utils/llvm_tests.cpp
 	utils/simplifycfg_tests.cpp
-	utils/type_tests.cpp
 )
 
 add_executable(retdec-tests-bin2llvmir ${RETDEC_TESTS_BIN2LLVMIR_SOURCES})

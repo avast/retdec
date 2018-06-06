@@ -57,9 +57,6 @@ class VarUsesVisitor;
 * @endcode
 * provided that @c a is non-global.
 *
-* GlobalToLocalOptimizer should be run before this optimization for better
-* results.
-*
 * Instances of this class have reference object semantics.
 *
 * This is a concrete optimizer which should not be subclassed.

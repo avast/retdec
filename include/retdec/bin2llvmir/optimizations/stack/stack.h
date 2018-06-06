@@ -11,16 +11,13 @@
 #include <llvm/Pass.h>
 
 #include "retdec/bin2llvmir/analyses/symbolic_tree.h"
+#include "retdec/bin2llvmir/providers/abi/abi.h"
 #include "retdec/bin2llvmir/providers/config.h"
 #include "retdec/bin2llvmir/providers/debugformat.h"
 
 namespace retdec {
 namespace bin2llvmir {
 
-/**
- * TODO:
- * At the moment, this is very similar to ConstantsAnalysis -> merge together.
- */
 class StackAnalysis : public llvm::ModulePass
 {
 	public:
@@ -30,25 +27,16 @@ class StackAnalysis : public llvm::ModulePass
 		bool runOnModuleCustom(
 				llvm::Module& m,
 				Config* c,
+				Abi* abi,
 				DebugFormat* dbgf = nullptr);
 
 	private:
-		struct ReplaceItem
-		{
-			llvm::Instruction* inst;
-			llvm::Value* from;
-			llvm::AllocaInst* to;
-		};
-
-	private:
 		bool run();
-		bool runOnFunction(ReachingDefinitionsAnalysis& RDA, llvm::Function* f);
-		bool handleInstruction(
+		void handleInstruction(
 				ReachingDefinitionsAnalysis& RDA,
 				llvm::Instruction* inst,
 				llvm::Value* val,
 				llvm::Type* type,
-				std::list<ReplaceItem>& _replaceItems,
 				std::map<llvm::Value*, llvm::Value*>& val2val);
 		retdec::config::Object* getDebugStackVariable(
 				llvm::Function* fnc,
@@ -57,6 +45,7 @@ class StackAnalysis : public llvm::ModulePass
 	private:
 		llvm::Module* _module = nullptr;
 		Config* _config = nullptr;
+		Abi* _abi = nullptr;
 		DebugFormat* _dbgf = nullptr;
 };
 

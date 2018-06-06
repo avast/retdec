@@ -60,7 +60,7 @@ IsGlobalVarStoringWideStringReturnsTrueWhenVarIsGlobalAndStoresWideString) {
 				"name": "g",
 				"storage": {
 					"type": "global",
-					"value": 1000
+					"value": "1000"
 				},
 				"type": {
 					"llvmIr": "i32*",
@@ -93,7 +93,7 @@ GetRegisterForGlobalVarReturnsEmptyStringWhenGlobalVarHasNoRegisterNameAttached)
 				"realName": "my_g",
 				"storage": {
 					"type": "global",
-					"value": 1
+					"value": "1"
 				}
 			}
 		]
@@ -140,7 +140,7 @@ GetDetectedCryptoPatternForGlobalVarReturnsEmptyStringWhenGlobalVarHasNoCryptoPa
 				"realName": "my_g",
 				"storage": {
 					"type": "global",
-					"value": 1
+					"value": "1"
 				}
 			}
 		]
@@ -159,7 +159,7 @@ GetDetectedCryptoPatternForGlobalVarReturnsCorrectValueWhenGlobalVarHasCryptoPat
 				"realName": "my_g",
 				"storage": {
 					"type": "global",
-					"value": 1
+					"value": "1"
 				}
 			}
 		]
@@ -322,7 +322,7 @@ GetAddressRangeForFuncReturnsNoAddressRangeWhenFuncDoesNotHaveCompleteAddressRan
 		"functions": [
 			{
 				"name": "my_func",
-				"startAddr": 0
+				"startAddr": "0"
 			}
 		]
 	})");
@@ -336,8 +336,8 @@ GetAddressRangeForFuncReturnsCorrectRangeWhenFuncHasCompleteAddressRange) {
 		"functions": [
 			{
 				"name": "my_func",
-				"startAddr": 0,
-				"endAddr": 20
+				"startAddr": "0",
+				"endAddr": "20"
 			}
 		]
 	})");
@@ -362,7 +362,7 @@ GetLineRangeForFuncReturnsNoLineRangeWhenFuncDoesNotHaveCompleteLineRange) {
 		"functions": [
 			{
 				"name": "my_func",
-				"startLine": 1
+				"startLine": "1"
 			}
 		]
 	})");
@@ -376,8 +376,8 @@ GetLineRangeForFuncReturnsCorrectRangeWhenFuncHasCompleteLineRange) {
 		"functions": [
 			{
 				"name": "my_func",
-				"startLine": 1,
-				"endLine": 10
+				"startLine": "1",
+				"endLine": "10"
 			}
 		]
 	})");
@@ -1284,7 +1284,7 @@ IsDebugInfoAvailableReturnsTrueWhenGlobalVariableHasNameAssignedFromDebugInfo) {
 				"isFromDebug": true,
 				"storage": {
 					"type": "global",
-					"value": 0
+					"value": "0"
 				}
 			}
 		]
@@ -1319,8 +1319,8 @@ IsDebugInfoAvailableReturnsTrueWhenLineNumbersAreAvailable) {
 		"functions": [
 			{
 				"name": "my_func",
-				"startLine": 1,
-				"endLine": 10
+				"startLine": "1",
+				"endLine": "10"
 			}
 		]
 	})");
@@ -1429,7 +1429,7 @@ GetDebugNameForGlobalVarReturnsEmptyStringWhenGlobalVariableDoesNotExist) {
 				"realName": "h",
 				"storage": {
 					"type": "global",
-					"value": 1
+					"value": "1"
 				}
 			}
 		]
@@ -1448,7 +1448,7 @@ GetDebugNameForGlobalVarReturnsEmptyStringWhenGlobalVariableIsNotFromDebugInfo) 
 				"realName": "g",
 				"storage": {
 					"type": "global",
-					"value": 4227076
+					"value": "4227076"
 				}
 			}
 		]
@@ -1467,7 +1467,7 @@ GetDebugNameForGlobalVarReturnsCorrectValueWhenGlobalVarHasAssignedDebugName) {
 				"realName": "g",
 				"storage": {
 					"type": "global",
-					"value": 4227076
+					"value": "4227076"
 				}
 			}
 		]
@@ -1795,34 +1795,6 @@ GetSelectedButNotFoundFuncsReturnsCorrectValueWhenSuchFuncsExist) {
 	ASSERT_EQ(
 		StringSet({"func1", "func2"}),
 		config->getSelectedButNotFoundFuncs()
-	);
-}
-
-//
-// getOptsRunInFrontend()
-//
-
-TEST_F(JSONConfigTests,
-GetOptsRunInFrontendReturnsEmptySetWhenNoOptimizationsRun) {
-	auto config = JSONConfig::empty();
-
-	ASSERT_EQ(StringSet(), config->getOptsRunInFrontend());
-}
-
-TEST_F(JSONConfigTests,
-GetOptsRunInFrontendReturnsCorrectValueWhenOptimizationsRun) {
-	auto config = JSONConfig::fromString(R"({
-		"decompParams": {
-			"completedFrontendPasses": [
-				"opt1",
-				"opt2"
-			]
-		}
-	})");
-
-	ASSERT_EQ(
-		StringSet({"opt1", "opt2"}),
-		config->getOptsRunInFrontend()
 	);
 }
 

@@ -14,9 +14,8 @@ namespace bin2llvmir {
 IdiomsAbstract::IdiomsAbstract():
 	m_arch(ARCH_ANY), m_compiler(CC_ANY), m_module(nullptr) {}
 
-void IdiomsAbstract::init(llvm::Module * M,  Config* c, CC_compiler cc, CC_arch arch) {
+void IdiomsAbstract::init(llvm::Module * M, CC_compiler cc, CC_arch arch) {
 	m_compiler = cc;
-	m_config = c;
 	m_arch = arch;
 	m_module = M;
 }

@@ -84,16 +84,6 @@ bool Idioms::runOnFunction(Function & f) {
 }
 
 /**
- * Info about idiom analysis passe dependency
- *
- * @param AU AnalysisUsage
- */
-void Idioms::getAnalysisUsage(AnalysisUsage &AU) const
-{
-
-}
-
-/**
  * Get instance of idioms collection used depending on compiler
  *
  * @param M Module used
@@ -143,7 +133,7 @@ IdiomsAnalysis * Idioms::getCompilerAnalysis(Module &M)
 	}
 
 	// Return initialized instruction idioms analyser.
-	return new IdiomsAnalysis(&M, m_config, i_cc, i_arch);
+	return new IdiomsAnalysis(&M, i_cc, i_arch);
 }
 
 } // namespace bin2llvmir

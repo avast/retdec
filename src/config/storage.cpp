@@ -167,7 +167,7 @@ Json::Value Storage::getJsonValue() const
 	if (isMemory())
 	{
 		obj[JSON_type] = typeStrings[ static_cast<size_t>(eType::GLOBAL) ];
-		obj[JSON_value] = getAddress().getValue();
+		obj[JSON_value] = toJsonValue(getAddress());
 	}
 	else if (isRegister())
 	{

@@ -16,6 +16,7 @@
 #include <llvm/Pass.h>
 
 #include "retdec/bin2llvmir/analyses/reaching_definitions.h"
+#include "retdec/bin2llvmir/providers/abi/abi.h"
 #include "retdec/bin2llvmir/providers/config.h"
 #include "retdec/bin2llvmir/providers/debugformat.h"
 #include "retdec/bin2llvmir/providers/fileimage.h"
@@ -61,6 +62,7 @@ class DataFlowEntry
 				llvm::Module* m,
 				ReachingDefinitionsAnalysis& rda,
 				Config* c,
+				Abi* abi,
 				FileImage* img,
 				DebugFormat* dbg,
 				Lti* lti,
@@ -95,7 +97,6 @@ class DataFlowEntry
 		void setReturnType();
 		void setArgumentTypes();
 
-	//
 		void filterRegistersArgLoads();
 		void filterSortArgLoads();
 
@@ -105,8 +106,10 @@ class DataFlowEntry
 		llvm::Module* _module = nullptr;
 		ReachingDefinitionsAnalysis& _RDA;
 		Config* _config = nullptr;
+		Abi* _abi = nullptr;
 		FileImage* _image = nullptr;
 		Lti* _lti = nullptr;
+
 		llvm::Value* called = nullptr;
 		retdec::config::Function* configFnc = nullptr;
 		retdec::config::Function* dbgFnc = nullptr;
@@ -139,6 +142,7 @@ class ParamReturn : public llvm::ModulePass
 		bool runOnModuleCustom(
 				llvm::Module& m,
 				Config* c,
+				Abi* abi,
 				FileImage* img = nullptr,
 				DebugFormat* dbgf = nullptr,
 				Lti* lti = nullptr);
@@ -161,6 +165,7 @@ class ParamReturn : public llvm::ModulePass
 	private:
 		llvm::Module* _module = nullptr;
 		Config* _config = nullptr;
+		Abi* _abi = nullptr;
 		FileImage* _image = nullptr;
 		DebugFormat* _dbgf = nullptr;
 		Lti* _lti = nullptr;

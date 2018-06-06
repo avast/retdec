@@ -4,12 +4,23 @@
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */
 
-#include "retdec/capstone2llvmir/x86/x86.h"
+#include "capstone2llvmir/x86/x86_impl.h"
 
 namespace retdec {
 namespace capstone2llvmir {
 
-void Capstone2LlvmIrTranslatorX86::initializeRegNameMap()
+//
+//==============================================================================
+// Pure virtual methods from Capstone2LlvmIrTranslator_impl
+//==============================================================================
+//
+
+void Capstone2LlvmIrTranslatorX86_impl::initializeArchSpecific()
+{
+	initializeRegistersParentMap();
+}
+
+void Capstone2LlvmIrTranslatorX86_impl::initializeRegNameMap()
 {
 	std::map<uint32_t, std::string> r2n =
 	{
@@ -89,150 +100,7 @@ void Capstone2LlvmIrTranslatorX86::initializeRegNameMap()
 	_reg2name = std::move(r2n);
 }
 
-void Capstone2LlvmIrTranslatorX86::initializeArchSpecific()
-{
-	initializeRegistersParentMap();
-}
-
-void Capstone2LlvmIrTranslatorX86::initializeRegistersParentMapToSelf(
-		const std::vector<x86_reg>& rs)
-{
-	for (auto r : rs)
-	{
-		assert(r < _reg2parentMap.size());
-		_reg2parentMap[r] = r;
-	}
-}
-
-void Capstone2LlvmIrTranslatorX86::initializeRegistersParentMapToOther(
-		const std::vector<x86_reg>& rs,
-		x86_reg other)
-{
-	for (auto r : rs)
-	{
-		assert(r < _reg2parentMap.size());
-		_reg2parentMap[r] = other;
-	}
-}
-
-void Capstone2LlvmIrTranslatorX86::initializeRegistersParentMap()
-{
-	initializeRegistersParentMapCommon();
-
-	switch (_origBasicMode)
-	{
-		case CS_MODE_16: initializeRegistersParentMap16(); break;
-		case CS_MODE_32: initializeRegistersParentMap32(); break;
-		case CS_MODE_64: initializeRegistersParentMap64(); break;
-		default:
-		{
-			throw Capstone2LlvmIrError("Unhandled mode in "
-					"initializeRegistersParentMap().");
-			break;
-		}
-	}
-}
-
-/**
- * Set mapping for registers that are their own parents.
- */
-void Capstone2LlvmIrTranslatorX86::initializeRegistersParentMapCommon()
-{
-	initializeRegistersParentMapToSelf({
-			// Segment registers.
-			X86_REG_SS, X86_REG_CS, X86_REG_DS, X86_REG_ES, X86_REG_FS,
-			X86_REG_GS,
-			// Debug registers.
-			X86_REG_DR0, X86_REG_DR1, X86_REG_DR2, X86_REG_DR3, X86_REG_DR4,
-			X86_REG_DR5, X86_REG_DR6, X86_REG_DR7,
-			// x87 FPU Data registers.
-			X86_REG_ST0, X86_REG_ST1, X86_REG_ST2, X86_REG_ST3, X86_REG_ST4,
-			X86_REG_ST5, X86_REG_ST6, X86_REG_ST7,
-			// Control registers.
-			X86_REG_CR0, X86_REG_CR1, X86_REG_CR2, X86_REG_CR3, X86_REG_CR4,
-			X86_REG_CR5, X86_REG_CR6, X86_REG_CR7, X86_REG_CR8, X86_REG_CR9,
-			X86_REG_CR10, X86_REG_CR11, X86_REG_CR12, X86_REG_CR13,
-			X86_REG_CR14, X86_REG_CR15,
-	});
-}
-
-void Capstone2LlvmIrTranslatorX86::initializeRegistersParentMap16()
-{
-	// Last element in vector is its own parent.
-	std::vector<std::vector<x86_reg>> rss =
-	{
-			{X86_REG_AH, X86_REG_AL, X86_REG_AX},
-			{X86_REG_CH, X86_REG_CL, X86_REG_CX},
-			{X86_REG_DH, X86_REG_DL, X86_REG_DX},
-			{X86_REG_BH, X86_REG_BL, X86_REG_BX},
-			{X86_REG_SPL, X86_REG_SP},
-			{X86_REG_BPL, X86_REG_BP},
-			{X86_REG_SIL, X86_REG_SI},
-			{X86_REG_DIL, X86_REG_DI},
-			{X86_REG_IP},
-	};
-
-	for (std::vector<x86_reg>& rs : rss)
-	{
-		initializeRegistersParentMapToOther(rs, rs.back());
-	}
-}
-
-void Capstone2LlvmIrTranslatorX86::initializeRegistersParentMap32()
-{
-	// Last element in vector is its own parent.
-	std::vector<std::vector<x86_reg>> rss =
-	{
-			{X86_REG_AH, X86_REG_AL, X86_REG_AX, X86_REG_EAX},
-			{X86_REG_CH, X86_REG_CL, X86_REG_CX, X86_REG_ECX},
-			{X86_REG_DH, X86_REG_DL, X86_REG_DX, X86_REG_EDX},
-			{X86_REG_BH, X86_REG_BL, X86_REG_BX, X86_REG_EBX},
-			{X86_REG_SPL, X86_REG_SP, X86_REG_ESP},
-			{X86_REG_BPL, X86_REG_BP, X86_REG_EBP},
-			{X86_REG_SIL, X86_REG_SI, X86_REG_ESI},
-			{X86_REG_DIL, X86_REG_DI, X86_REG_EDI},
-			{X86_REG_IP, X86_REG_EIP},
-			{X86_REG_EIZ},
-	};
-
-	for (std::vector<x86_reg>& rs : rss)
-	{
-		initializeRegistersParentMapToOther(rs, rs.back());
-	}
-}
-
-void Capstone2LlvmIrTranslatorX86::initializeRegistersParentMap64()
-{
-	// Last element in vector is its own parent.
-	std::vector<std::vector<x86_reg>> rss =
-	{
-			{X86_REG_AH, X86_REG_AL, X86_REG_AX, X86_REG_EAX, X86_REG_RAX},
-			{X86_REG_CH, X86_REG_CL, X86_REG_CX, X86_REG_ECX, X86_REG_RCX},
-			{X86_REG_DH, X86_REG_DL, X86_REG_DX, X86_REG_EDX, X86_REG_RDX},
-			{X86_REG_BH, X86_REG_BL, X86_REG_BX, X86_REG_EBX, X86_REG_RBX},
-			{X86_REG_SPL, X86_REG_SP, X86_REG_ESP, X86_REG_RSP},
-			{X86_REG_BPL, X86_REG_BP, X86_REG_EBP, X86_REG_RBP},
-			{X86_REG_SIL, X86_REG_SI, X86_REG_ESI, X86_REG_RSI},
-			{X86_REG_DIL, X86_REG_DI, X86_REG_EDI, X86_REG_RDI},
-			{X86_REG_IP, X86_REG_EIP, X86_REG_RIP},
-			{X86_REG_EIZ, X86_REG_RIZ},
-			{X86_REG_R8B, X86_REG_R8W, X86_REG_R8D, X86_REG_R8},
-			{X86_REG_R9B, X86_REG_R9W, X86_REG_R9D, X86_REG_R9},
-			{X86_REG_R10B, X86_REG_R10W, X86_REG_R10D, X86_REG_R10},
-			{X86_REG_R11B, X86_REG_R11W, X86_REG_R11D, X86_REG_R11},
-			{X86_REG_R12B, X86_REG_R12W, X86_REG_R12D, X86_REG_R12},
-			{X86_REG_R13B, X86_REG_R13W, X86_REG_R13D, X86_REG_R13},
-			{X86_REG_R14B, X86_REG_R14W, X86_REG_R14D, X86_REG_R14},
-			{X86_REG_R15B, X86_REG_R15W, X86_REG_R15D, X86_REG_R15}
-	};
-
-	for (std::vector<x86_reg>& rs : rss)
-	{
-		initializeRegistersParentMapToOther(rs, rs.back());
-	}
-}
-
-void Capstone2LlvmIrTranslatorX86::initializeRegTypeMap()
+void Capstone2LlvmIrTranslatorX86_impl::initializeRegTypeMap()
 {
 	auto* i1 = llvm::IntegerType::getInt1Ty(_module->getContext());
 	auto* i2 = llvm::IntegerType::getIntNTy(_module->getContext(), 2);
@@ -432,38 +300,247 @@ void Capstone2LlvmIrTranslatorX86::initializeRegTypeMap()
 	_reg2type = std::move(r2t);
 }
 
+void Capstone2LlvmIrTranslatorX86_impl::initializePseudoCallInstructionIDs()
+{
+	_callInsnIds =
+	{
+			X86_INS_CALL,
+			X86_INS_LCALL,
+	};
+
+	_returnInsnIds =
+	{
+			X86_INS_RET,
+			X86_INS_RETF,
+			X86_INS_RETFQ
+	};
+
+	_branchInsnIds =
+	{
+			X86_INS_JMP,
+			X86_INS_LJMP,
+	};
+
+	_condBranchInsnIds =
+	{
+			X86_INS_JCXZ,
+			X86_INS_JECXZ,
+			X86_INS_JRCXZ,
+			//
+			X86_INS_LOOP,
+			X86_INS_LOOPE,
+			X86_INS_LOOPNE,
+			//
+			X86_INS_JAE,
+			X86_INS_JA,
+			X86_INS_JBE,
+			X86_INS_JB,
+			X86_INS_JE,
+			X86_INS_JGE,
+			X86_INS_JG,
+			X86_INS_JLE,
+			X86_INS_JL,
+			X86_INS_JNE,
+			X86_INS_JNO,
+			X86_INS_JNP,
+			X86_INS_JNS,
+			X86_INS_JO,
+			X86_INS_JP,
+			X86_INS_JS,
+	};
+
+	_controlFlowInsnIds =
+	{
+			// Currently, all instructions can be categorized based on their
+			// IDs alone.
+	};
+}
+
+//
+//==============================================================================
+// x86-specific methods.
+//==============================================================================
+//
+
+void Capstone2LlvmIrTranslatorX86_impl::initializeRegistersParentMapToSelf(
+		const std::vector<x86_reg>& rs)
+{
+	for (auto r : rs)
+	{
+		assert(r < _reg2parentMap.size());
+		_reg2parentMap[r] = r;
+	}
+}
+
+void Capstone2LlvmIrTranslatorX86_impl::initializeRegistersParentMapToOther(
+		const std::vector<x86_reg>& rs,
+		x86_reg other)
+{
+	for (auto r : rs)
+	{
+		assert(r < _reg2parentMap.size());
+		_reg2parentMap[r] = other;
+	}
+}
+
+void Capstone2LlvmIrTranslatorX86_impl::initializeRegistersParentMap()
+{
+	initializeRegistersParentMapCommon();
+
+	switch (_origBasicMode)
+	{
+		case CS_MODE_16: initializeRegistersParentMap16(); break;
+		case CS_MODE_32: initializeRegistersParentMap32(); break;
+		case CS_MODE_64: initializeRegistersParentMap64(); break;
+		default:
+		{
+			throw Capstone2LlvmIrError("Unhandled mode in "
+					"initializeRegistersParentMap().");
+			break;
+		}
+	}
+}
+
+/**
+ * Set mapping for registers that are their own parents.
+ */
+void Capstone2LlvmIrTranslatorX86_impl::initializeRegistersParentMapCommon()
+{
+	initializeRegistersParentMapToSelf({
+			// Segment registers.
+			X86_REG_SS, X86_REG_CS, X86_REG_DS, X86_REG_ES, X86_REG_FS,
+			X86_REG_GS,
+			// Debug registers.
+			X86_REG_DR0, X86_REG_DR1, X86_REG_DR2, X86_REG_DR3, X86_REG_DR4,
+			X86_REG_DR5, X86_REG_DR6, X86_REG_DR7,
+			// x87 FPU Data registers.
+			X86_REG_ST0, X86_REG_ST1, X86_REG_ST2, X86_REG_ST3, X86_REG_ST4,
+			X86_REG_ST5, X86_REG_ST6, X86_REG_ST7,
+			// Control registers.
+			X86_REG_CR0, X86_REG_CR1, X86_REG_CR2, X86_REG_CR3, X86_REG_CR4,
+			X86_REG_CR5, X86_REG_CR6, X86_REG_CR7, X86_REG_CR8, X86_REG_CR9,
+			X86_REG_CR10, X86_REG_CR11, X86_REG_CR12, X86_REG_CR13,
+			X86_REG_CR14, X86_REG_CR15,
+	});
+}
+
+void Capstone2LlvmIrTranslatorX86_impl::initializeRegistersParentMap16()
+{
+	// Last element in vector is its own parent.
+	std::vector<std::vector<x86_reg>> rss =
+	{
+			{X86_REG_AH, X86_REG_AL, X86_REG_AX},
+			{X86_REG_CH, X86_REG_CL, X86_REG_CX},
+			{X86_REG_DH, X86_REG_DL, X86_REG_DX},
+			{X86_REG_BH, X86_REG_BL, X86_REG_BX},
+			{X86_REG_SPL, X86_REG_SP},
+			{X86_REG_BPL, X86_REG_BP},
+			{X86_REG_SIL, X86_REG_SI},
+			{X86_REG_DIL, X86_REG_DI},
+			{X86_REG_IP},
+	};
+
+	for (std::vector<x86_reg>& rs : rss)
+	{
+		initializeRegistersParentMapToOther(rs, rs.back());
+	}
+}
+
+void Capstone2LlvmIrTranslatorX86_impl::initializeRegistersParentMap32()
+{
+	// Last element in vector is its own parent.
+	std::vector<std::vector<x86_reg>> rss =
+	{
+			{X86_REG_AH, X86_REG_AL, X86_REG_AX, X86_REG_EAX},
+			{X86_REG_CH, X86_REG_CL, X86_REG_CX, X86_REG_ECX},
+			{X86_REG_DH, X86_REG_DL, X86_REG_DX, X86_REG_EDX},
+			{X86_REG_BH, X86_REG_BL, X86_REG_BX, X86_REG_EBX},
+			{X86_REG_SPL, X86_REG_SP, X86_REG_ESP},
+			{X86_REG_BPL, X86_REG_BP, X86_REG_EBP},
+			{X86_REG_SIL, X86_REG_SI, X86_REG_ESI},
+			{X86_REG_DIL, X86_REG_DI, X86_REG_EDI},
+			{X86_REG_IP, X86_REG_EIP},
+			{X86_REG_EIZ},
+	};
+
+	for (std::vector<x86_reg>& rs : rss)
+	{
+		initializeRegistersParentMapToOther(rs, rs.back());
+	}
+}
+
+void Capstone2LlvmIrTranslatorX86_impl::initializeRegistersParentMap64()
+{
+	// Last element in vector is its own parent.
+	std::vector<std::vector<x86_reg>> rss =
+	{
+			{X86_REG_AH, X86_REG_AL, X86_REG_AX, X86_REG_EAX, X86_REG_RAX},
+			{X86_REG_CH, X86_REG_CL, X86_REG_CX, X86_REG_ECX, X86_REG_RCX},
+			{X86_REG_DH, X86_REG_DL, X86_REG_DX, X86_REG_EDX, X86_REG_RDX},
+			{X86_REG_BH, X86_REG_BL, X86_REG_BX, X86_REG_EBX, X86_REG_RBX},
+			{X86_REG_SPL, X86_REG_SP, X86_REG_ESP, X86_REG_RSP},
+			{X86_REG_BPL, X86_REG_BP, X86_REG_EBP, X86_REG_RBP},
+			{X86_REG_SIL, X86_REG_SI, X86_REG_ESI, X86_REG_RSI},
+			{X86_REG_DIL, X86_REG_DI, X86_REG_EDI, X86_REG_RDI},
+			{X86_REG_IP, X86_REG_EIP, X86_REG_RIP},
+			{X86_REG_EIZ, X86_REG_RIZ},
+			{X86_REG_R8B, X86_REG_R8W, X86_REG_R8D, X86_REG_R8},
+			{X86_REG_R9B, X86_REG_R9W, X86_REG_R9D, X86_REG_R9},
+			{X86_REG_R10B, X86_REG_R10W, X86_REG_R10D, X86_REG_R10},
+			{X86_REG_R11B, X86_REG_R11W, X86_REG_R11D, X86_REG_R11},
+			{X86_REG_R12B, X86_REG_R12W, X86_REG_R12D, X86_REG_R12},
+			{X86_REG_R13B, X86_REG_R13W, X86_REG_R13D, X86_REG_R13},
+			{X86_REG_R14B, X86_REG_R14W, X86_REG_R14D, X86_REG_R14},
+			{X86_REG_R15B, X86_REG_R15W, X86_REG_R15D, X86_REG_R15}
+	};
+
+	for (std::vector<x86_reg>& rs : rss)
+	{
+		initializeRegistersParentMapToOther(rs, rs.back());
+	}
+}
+
+//
+//==============================================================================
+// Instruction translation map initialization.
+//==============================================================================
+//
+
 std::map<
 	std::size_t,
-	void (Capstone2LlvmIrTranslatorX86::*)(cs_insn* i, cs_x86*, llvm::IRBuilder<>&)>
-Capstone2LlvmIrTranslatorX86::_i2fm =
+	void (Capstone2LlvmIrTranslatorX86_impl::*)(
+			cs_insn* i,
+			cs_x86*,
+			llvm::IRBuilder<>&)>
+Capstone2LlvmIrTranslatorX86_impl::_i2fm =
 {
 		{X86_INS_INVALID, nullptr},
 
-		{X86_INS_AAA, &Capstone2LlvmIrTranslatorX86::translateAaa},
-		{X86_INS_AAD, &Capstone2LlvmIrTranslatorX86::translateAad},
-		{X86_INS_AAM, &Capstone2LlvmIrTranslatorX86::translateAam},
-		{X86_INS_AAS, &Capstone2LlvmIrTranslatorX86::translateAaa},
-		{X86_INS_FABS, &Capstone2LlvmIrTranslatorX86::translateFabs},
-		{X86_INS_ADC, &Capstone2LlvmIrTranslatorX86::translateAdc},
-		{X86_INS_ADCX, &Capstone2LlvmIrTranslatorX86::translateAdc},
-		{X86_INS_ADD, &Capstone2LlvmIrTranslatorX86::translateAdd},
+		{X86_INS_AAA, &Capstone2LlvmIrTranslatorX86_impl::translateAaa},
+		{X86_INS_AAD, &Capstone2LlvmIrTranslatorX86_impl::translateAad},
+		{X86_INS_AAM, &Capstone2LlvmIrTranslatorX86_impl::translateAam},
+		{X86_INS_AAS, &Capstone2LlvmIrTranslatorX86_impl::translateAaa},
+		{X86_INS_FABS, &Capstone2LlvmIrTranslatorX86_impl::translateFabs},
+		{X86_INS_ADC, &Capstone2LlvmIrTranslatorX86_impl::translateAdc},
+		{X86_INS_ADCX, &Capstone2LlvmIrTranslatorX86_impl::translateAdc},
+		{X86_INS_ADD, &Capstone2LlvmIrTranslatorX86_impl::translateAdd},
 		{X86_INS_ADDPD, nullptr},
 		{X86_INS_ADDPS, nullptr},
 		{X86_INS_ADDSD, nullptr},
 		{X86_INS_ADDSS, nullptr},
 		{X86_INS_ADDSUBPD, nullptr},
 		{X86_INS_ADDSUBPS, nullptr},
-		{X86_INS_FADD, &Capstone2LlvmIrTranslatorX86::translateFadd},
-		{X86_INS_FIADD, &Capstone2LlvmIrTranslatorX86::translateFadd},
-		{X86_INS_FADDP, &Capstone2LlvmIrTranslatorX86::translateFadd},
-		{X86_INS_ADOX, &Capstone2LlvmIrTranslatorX86::translateAdc},
+		{X86_INS_FADD, &Capstone2LlvmIrTranslatorX86_impl::translateFadd},
+		{X86_INS_FIADD, &Capstone2LlvmIrTranslatorX86_impl::translateFadd},
+		{X86_INS_FADDP, &Capstone2LlvmIrTranslatorX86_impl::translateFadd},
+		{X86_INS_ADOX, &Capstone2LlvmIrTranslatorX86_impl::translateAdc},
 		{X86_INS_AESDECLAST, nullptr},
 		{X86_INS_AESDEC, nullptr},
 		{X86_INS_AESENCLAST, nullptr},
 		{X86_INS_AESENC, nullptr},
 		{X86_INS_AESIMC, nullptr},
 		{X86_INS_AESKEYGENASSIST, nullptr},
-		{X86_INS_AND, &Capstone2LlvmIrTranslatorX86::translateAnd},
+		{X86_INS_AND, &Capstone2LlvmIrTranslatorX86_impl::translateAnd},
 		{X86_INS_ANDN, nullptr},
 		{X86_INS_ANDNPD, nullptr},
 		{X86_INS_ANDNPS, nullptr},
@@ -485,70 +562,70 @@ Capstone2LlvmIrTranslatorX86::_i2fm =
 		{X86_INS_BLSIC, nullptr},
 		{X86_INS_BLSMSK, nullptr},
 		{X86_INS_BLSR, nullptr},
-		{X86_INS_BOUND, &Capstone2LlvmIrTranslatorX86::translateBound},
-		{X86_INS_BSF, &Capstone2LlvmIrTranslatorX86::translateBsf},
-		{X86_INS_BSR, &Capstone2LlvmIrTranslatorX86::translateBsf},
-		{X86_INS_BSWAP, &Capstone2LlvmIrTranslatorX86::translateBswap},
-		{X86_INS_BT, &Capstone2LlvmIrTranslatorX86::translateBt},
-		{X86_INS_BTC, &Capstone2LlvmIrTranslatorX86::translateBtc},
-		{X86_INS_BTR, &Capstone2LlvmIrTranslatorX86::translateBtr},
-		{X86_INS_BTS, &Capstone2LlvmIrTranslatorX86::translateBts},
+		{X86_INS_BOUND, &Capstone2LlvmIrTranslatorX86_impl::translateBound},
+		{X86_INS_BSF, &Capstone2LlvmIrTranslatorX86_impl::translateBsf},
+		{X86_INS_BSR, &Capstone2LlvmIrTranslatorX86_impl::translateBsf},
+		{X86_INS_BSWAP, &Capstone2LlvmIrTranslatorX86_impl::translateBswap},
+		{X86_INS_BT, &Capstone2LlvmIrTranslatorX86_impl::translateBt},
+		{X86_INS_BTC, &Capstone2LlvmIrTranslatorX86_impl::translateBtc},
+		{X86_INS_BTR, &Capstone2LlvmIrTranslatorX86_impl::translateBtr},
+		{X86_INS_BTS, &Capstone2LlvmIrTranslatorX86_impl::translateBts},
 		{X86_INS_BZHI, nullptr},
-		{X86_INS_CALL, &Capstone2LlvmIrTranslatorX86::translateCall},
-		{X86_INS_CBW, &Capstone2LlvmIrTranslatorX86::translateCbw},
-		{X86_INS_CDQ, &Capstone2LlvmIrTranslatorX86::translateCdq},
-		{X86_INS_CDQE, &Capstone2LlvmIrTranslatorX86::translateCdqe},
-		{X86_INS_FCHS, &Capstone2LlvmIrTranslatorX86::translateFchs},
+		{X86_INS_CALL, &Capstone2LlvmIrTranslatorX86_impl::translateCall},
+		{X86_INS_CBW, &Capstone2LlvmIrTranslatorX86_impl::translateCbw},
+		{X86_INS_CDQ, &Capstone2LlvmIrTranslatorX86_impl::translateCdq},
+		{X86_INS_CDQE, &Capstone2LlvmIrTranslatorX86_impl::translateCdqe},
+		{X86_INS_FCHS, &Capstone2LlvmIrTranslatorX86_impl::translateFchs},
 		{X86_INS_CLAC, nullptr},
-		{X86_INS_CLC, &Capstone2LlvmIrTranslatorX86::translateClc},
-		{X86_INS_CLD, &Capstone2LlvmIrTranslatorX86::translateCld},
+		{X86_INS_CLC, &Capstone2LlvmIrTranslatorX86_impl::translateClc},
+		{X86_INS_CLD, &Capstone2LlvmIrTranslatorX86_impl::translateCld},
 		{X86_INS_CLFLUSH, nullptr},
 		{X86_INS_CLFLUSHOPT, nullptr},
 		{X86_INS_CLGI, nullptr},
-		{X86_INS_CLI, &Capstone2LlvmIrTranslatorX86::translateCli},
+		{X86_INS_CLI, &Capstone2LlvmIrTranslatorX86_impl::translateCli},
 		{X86_INS_CLTS, nullptr},
 		{X86_INS_CLWB, nullptr},
-		{X86_INS_CMC, &Capstone2LlvmIrTranslatorX86::translateCmc},
-		{X86_INS_CMOVA, &Capstone2LlvmIrTranslatorX86::translateCMovCc},
-		{X86_INS_CMOVAE, &Capstone2LlvmIrTranslatorX86::translateCMovCc},
-		{X86_INS_CMOVB, &Capstone2LlvmIrTranslatorX86::translateCMovCc},
-		{X86_INS_CMOVBE, &Capstone2LlvmIrTranslatorX86::translateCMovCc},
+		{X86_INS_CMC, &Capstone2LlvmIrTranslatorX86_impl::translateCmc},
+		{X86_INS_CMOVA, &Capstone2LlvmIrTranslatorX86_impl::translateCMovCc},
+		{X86_INS_CMOVAE, &Capstone2LlvmIrTranslatorX86_impl::translateCMovCc},
+		{X86_INS_CMOVB, &Capstone2LlvmIrTranslatorX86_impl::translateCMovCc},
+		{X86_INS_CMOVBE, &Capstone2LlvmIrTranslatorX86_impl::translateCMovCc},
 		{X86_INS_FCMOVBE, nullptr},
 		{X86_INS_FCMOVB, nullptr},
-		{X86_INS_CMOVE, &Capstone2LlvmIrTranslatorX86::translateCMovCc},
+		{X86_INS_CMOVE, &Capstone2LlvmIrTranslatorX86_impl::translateCMovCc},
 		{X86_INS_FCMOVE, nullptr},
-		{X86_INS_CMOVG, &Capstone2LlvmIrTranslatorX86::translateCMovCc},
-		{X86_INS_CMOVGE, &Capstone2LlvmIrTranslatorX86::translateCMovCc},
-		{X86_INS_CMOVL, &Capstone2LlvmIrTranslatorX86::translateCMovCc},
-		{X86_INS_CMOVLE, &Capstone2LlvmIrTranslatorX86::translateCMovCc},
+		{X86_INS_CMOVG, &Capstone2LlvmIrTranslatorX86_impl::translateCMovCc},
+		{X86_INS_CMOVGE, &Capstone2LlvmIrTranslatorX86_impl::translateCMovCc},
+		{X86_INS_CMOVL, &Capstone2LlvmIrTranslatorX86_impl::translateCMovCc},
+		{X86_INS_CMOVLE, &Capstone2LlvmIrTranslatorX86_impl::translateCMovCc},
 		{X86_INS_FCMOVNBE, nullptr},
 		{X86_INS_FCMOVNB, nullptr},
-		{X86_INS_CMOVNE, &Capstone2LlvmIrTranslatorX86::translateCMovCc},
+		{X86_INS_CMOVNE, &Capstone2LlvmIrTranslatorX86_impl::translateCMovCc},
 		{X86_INS_FCMOVNE, nullptr},
-		{X86_INS_CMOVNO, &Capstone2LlvmIrTranslatorX86::translateCMovCc},
-		{X86_INS_CMOVNP, &Capstone2LlvmIrTranslatorX86::translateCMovCc},
+		{X86_INS_CMOVNO, &Capstone2LlvmIrTranslatorX86_impl::translateCMovCc},
+		{X86_INS_CMOVNP, &Capstone2LlvmIrTranslatorX86_impl::translateCMovCc},
 		{X86_INS_FCMOVNU, nullptr},
-		{X86_INS_CMOVNS, &Capstone2LlvmIrTranslatorX86::translateCMovCc},
-		{X86_INS_CMOVO, &Capstone2LlvmIrTranslatorX86::translateCMovCc},
-		{X86_INS_CMOVP, &Capstone2LlvmIrTranslatorX86::translateCMovCc},
+		{X86_INS_CMOVNS, &Capstone2LlvmIrTranslatorX86_impl::translateCMovCc},
+		{X86_INS_CMOVO, &Capstone2LlvmIrTranslatorX86_impl::translateCMovCc},
+		{X86_INS_CMOVP, &Capstone2LlvmIrTranslatorX86_impl::translateCMovCc},
 		{X86_INS_FCMOVU, nullptr},
-		{X86_INS_CMOVS, &Capstone2LlvmIrTranslatorX86::translateCMovCc},
-		{X86_INS_CMP, &Capstone2LlvmIrTranslatorX86::translateSub},
-		{X86_INS_CMPSB, &Capstone2LlvmIrTranslatorX86::translateCompareString},
-		{X86_INS_CMPSQ, &Capstone2LlvmIrTranslatorX86::translateCompareString},
-		{X86_INS_CMPSW, &Capstone2LlvmIrTranslatorX86::translateCompareString},
-		{X86_INS_CMPXCHG16B, &Capstone2LlvmIrTranslatorX86::translateCmpxchg16b},
-		{X86_INS_CMPXCHG, &Capstone2LlvmIrTranslatorX86::translateCmpxchg},
-		{X86_INS_CMPXCHG8B, &Capstone2LlvmIrTranslatorX86::translateCmpxchg8b},
+		{X86_INS_CMOVS, &Capstone2LlvmIrTranslatorX86_impl::translateCMovCc},
+		{X86_INS_CMP, &Capstone2LlvmIrTranslatorX86_impl::translateSub},
+		{X86_INS_CMPSB, &Capstone2LlvmIrTranslatorX86_impl::translateCompareString},
+		{X86_INS_CMPSQ, &Capstone2LlvmIrTranslatorX86_impl::translateCompareString},
+		{X86_INS_CMPSW, &Capstone2LlvmIrTranslatorX86_impl::translateCompareString},
+		{X86_INS_CMPXCHG16B, &Capstone2LlvmIrTranslatorX86_impl::translateCmpxchg16b},
+		{X86_INS_CMPXCHG, &Capstone2LlvmIrTranslatorX86_impl::translateCmpxchg},
+		{X86_INS_CMPXCHG8B, &Capstone2LlvmIrTranslatorX86_impl::translateCmpxchg8b},
 		{X86_INS_COMISD, nullptr},
 		{X86_INS_COMISS, nullptr},
-		{X86_INS_FCOMP, &Capstone2LlvmIrTranslatorX86::translateFucomPop},
-		{X86_INS_FCOMIP, &Capstone2LlvmIrTranslatorX86::translateFucomPop},
-		{X86_INS_FCOMI, &Capstone2LlvmIrTranslatorX86::translateFucomPop},
-		{X86_INS_FCOM, &Capstone2LlvmIrTranslatorX86::translateFucomPop},
-		{X86_INS_FCOS, &Capstone2LlvmIrTranslatorX86::translateFcos},
-		{X86_INS_CPUID, &Capstone2LlvmIrTranslatorX86::translateCpuid},
-		{X86_INS_CQO, &Capstone2LlvmIrTranslatorX86::translateCqo},
+		{X86_INS_FCOMP, &Capstone2LlvmIrTranslatorX86_impl::translateFucomPop},
+		{X86_INS_FCOMIP, &Capstone2LlvmIrTranslatorX86_impl::translateFucomPop},
+		{X86_INS_FCOMI, &Capstone2LlvmIrTranslatorX86_impl::translateFucomPop},
+		{X86_INS_FCOM, &Capstone2LlvmIrTranslatorX86_impl::translateFucomPop},
+		{X86_INS_FCOS, &Capstone2LlvmIrTranslatorX86_impl::translateFcos},
+		{X86_INS_CPUID, &Capstone2LlvmIrTranslatorX86_impl::translateCpuid},
+		{X86_INS_CQO, &Capstone2LlvmIrTranslatorX86_impl::translateCqo},
 		{X86_INS_CRC32, nullptr},
 		{X86_INS_CVTDQ2PD, nullptr},
 		{X86_INS_CVTDQ2PS, nullptr},
@@ -566,68 +643,68 @@ Capstone2LlvmIrTranslatorX86::_i2fm =
 		{X86_INS_CVTTPS2DQ, nullptr},
 		{X86_INS_CVTTSD2SI, nullptr},
 		{X86_INS_CVTTSS2SI, nullptr},
-		{X86_INS_CWD, &Capstone2LlvmIrTranslatorX86::translateCwd},
-		{X86_INS_CWDE, &Capstone2LlvmIrTranslatorX86::translateCwde},
-		{X86_INS_DAA, &Capstone2LlvmIrTranslatorX86::translateDaaDas},
-		{X86_INS_DAS, &Capstone2LlvmIrTranslatorX86::translateDaaDas},
+		{X86_INS_CWD, &Capstone2LlvmIrTranslatorX86_impl::translateCwd},
+		{X86_INS_CWDE, &Capstone2LlvmIrTranslatorX86_impl::translateCwde},
+		{X86_INS_DAA, &Capstone2LlvmIrTranslatorX86_impl::translateDaaDas},
+		{X86_INS_DAS, &Capstone2LlvmIrTranslatorX86_impl::translateDaaDas},
 		{X86_INS_DATA16, nullptr},
-		{X86_INS_DEC, &Capstone2LlvmIrTranslatorX86::translateDec},
-		{X86_INS_DIV, &Capstone2LlvmIrTranslatorX86::translateDiv},
+		{X86_INS_DEC, &Capstone2LlvmIrTranslatorX86_impl::translateDec},
+		{X86_INS_DIV, &Capstone2LlvmIrTranslatorX86_impl::translateDiv},
 		{X86_INS_DIVPD, nullptr},
 		{X86_INS_DIVPS, nullptr},
-		{X86_INS_FDIVR, &Capstone2LlvmIrTranslatorX86::translateFdivr},
-		{X86_INS_FIDIVR, &Capstone2LlvmIrTranslatorX86::translateFdivr},
-		{X86_INS_FDIVRP, &Capstone2LlvmIrTranslatorX86::translateFdivr},
+		{X86_INS_FDIVR, &Capstone2LlvmIrTranslatorX86_impl::translateFdivr},
+		{X86_INS_FIDIVR, &Capstone2LlvmIrTranslatorX86_impl::translateFdivr},
+		{X86_INS_FDIVRP, &Capstone2LlvmIrTranslatorX86_impl::translateFdivr},
 		{X86_INS_DIVSD, nullptr},
 		{X86_INS_DIVSS, nullptr},
-		{X86_INS_FDIV, &Capstone2LlvmIrTranslatorX86::translateFdiv},
-		{X86_INS_FIDIV, &Capstone2LlvmIrTranslatorX86::translateFdiv},
-		{X86_INS_FDIVP, &Capstone2LlvmIrTranslatorX86::translateFdiv},
+		{X86_INS_FDIV, &Capstone2LlvmIrTranslatorX86_impl::translateFdiv},
+		{X86_INS_FIDIV, &Capstone2LlvmIrTranslatorX86_impl::translateFdiv},
+		{X86_INS_FDIVP, &Capstone2LlvmIrTranslatorX86_impl::translateFdiv},
 		{X86_INS_DPPD, nullptr},
 		{X86_INS_DPPS, nullptr},
-		{X86_INS_RET, &Capstone2LlvmIrTranslatorX86::translateRet},
+		{X86_INS_RET, &Capstone2LlvmIrTranslatorX86_impl::translateRet},
 		{X86_INS_ENCLS, nullptr},
 		{X86_INS_ENCLU, nullptr},
-		{X86_INS_ENTER, &Capstone2LlvmIrTranslatorX86::translateEnter},
+		{X86_INS_ENTER, &Capstone2LlvmIrTranslatorX86_impl::translateEnter},
 		{X86_INS_EXTRACTPS, nullptr},
 		{X86_INS_EXTRQ, nullptr},
 		{X86_INS_F2XM1, nullptr},
-		{X86_INS_LCALL, &Capstone2LlvmIrTranslatorX86::translateLcall},
-		{X86_INS_LJMP, &Capstone2LlvmIrTranslatorX86::translateLjmp},
+		{X86_INS_LCALL, &Capstone2LlvmIrTranslatorX86_impl::translateLcall},
+		{X86_INS_LJMP, &Capstone2LlvmIrTranslatorX86_impl::translateLjmp},
 		{X86_INS_FBLD, nullptr},
 		{X86_INS_FBSTP, nullptr},
-		{X86_INS_FCOMPP, &Capstone2LlvmIrTranslatorX86::translateFucomPop},
-		{X86_INS_FDECSTP, &Capstone2LlvmIrTranslatorX86::translateFdecstp},
+		{X86_INS_FCOMPP, &Capstone2LlvmIrTranslatorX86_impl::translateFucomPop},
+		{X86_INS_FDECSTP, &Capstone2LlvmIrTranslatorX86_impl::translateFdecstp},
 		{X86_INS_FEMMS, nullptr},
 		{X86_INS_FFREE, nullptr},
-		{X86_INS_FICOM, &Capstone2LlvmIrTranslatorX86::translateFucomPop},
-		{X86_INS_FICOMP, &Capstone2LlvmIrTranslatorX86::translateFucomPop},
-		{X86_INS_FINCSTP, &Capstone2LlvmIrTranslatorX86::translateFincstp},
-		{X86_INS_FLDCW, &Capstone2LlvmIrTranslatorX86::translateFldcw},
-		{X86_INS_FLDENV, &Capstone2LlvmIrTranslatorX86::translateFldenv},
-		{X86_INS_FLDL2E, &Capstone2LlvmIrTranslatorX86::translateFloadConstant},
-		{X86_INS_FLDL2T, &Capstone2LlvmIrTranslatorX86::translateFloadConstant},
-		{X86_INS_FLDLG2, &Capstone2LlvmIrTranslatorX86::translateFloadConstant},
-		{X86_INS_FLDLN2, &Capstone2LlvmIrTranslatorX86::translateFloadConstant},
-		{X86_INS_FLDPI, &Capstone2LlvmIrTranslatorX86::translateFloadConstant},
+		{X86_INS_FICOM, &Capstone2LlvmIrTranslatorX86_impl::translateFucomPop},
+		{X86_INS_FICOMP, &Capstone2LlvmIrTranslatorX86_impl::translateFucomPop},
+		{X86_INS_FINCSTP, &Capstone2LlvmIrTranslatorX86_impl::translateFincstp},
+		{X86_INS_FLDCW, &Capstone2LlvmIrTranslatorX86_impl::translateFldcw},
+		{X86_INS_FLDENV, &Capstone2LlvmIrTranslatorX86_impl::translateFldenv},
+		{X86_INS_FLDL2E, &Capstone2LlvmIrTranslatorX86_impl::translateFloadConstant},
+		{X86_INS_FLDL2T, &Capstone2LlvmIrTranslatorX86_impl::translateFloadConstant},
+		{X86_INS_FLDLG2, &Capstone2LlvmIrTranslatorX86_impl::translateFloadConstant},
+		{X86_INS_FLDLN2, &Capstone2LlvmIrTranslatorX86_impl::translateFloadConstant},
+		{X86_INS_FLDPI, &Capstone2LlvmIrTranslatorX86_impl::translateFloadConstant},
 		{X86_INS_FNCLEX, nullptr},
-		{X86_INS_FNINIT, &Capstone2LlvmIrTranslatorX86::translateFninit},
-		{X86_INS_FNOP, &Capstone2LlvmIrTranslatorX86::translateNop},
-		{X86_INS_FNSTCW, &Capstone2LlvmIrTranslatorX86::translateFnstcw},
-		{X86_INS_FNSTSW, &Capstone2LlvmIrTranslatorX86::translateFnstsw},
+		{X86_INS_FNINIT, &Capstone2LlvmIrTranslatorX86_impl::translateFninit},
+		{X86_INS_FNOP, &Capstone2LlvmIrTranslatorX86_impl::translateNop},
+		{X86_INS_FNSTCW, &Capstone2LlvmIrTranslatorX86_impl::translateFnstcw},
+		{X86_INS_FNSTSW, &Capstone2LlvmIrTranslatorX86_impl::translateFnstsw},
 		{X86_INS_FPATAN, nullptr},
 		{X86_INS_FPREM, nullptr},
 		{X86_INS_FPREM1, nullptr},
 		{X86_INS_FPTAN, nullptr},
 		{X86_INS_FFREEP, nullptr},
-		{X86_INS_FRNDINT, &Capstone2LlvmIrTranslatorX86::translateFrndint},
+		{X86_INS_FRNDINT, &Capstone2LlvmIrTranslatorX86_impl::translateFrndint},
 		{X86_INS_FRSTOR, nullptr},
 		{X86_INS_FNSAVE, nullptr},
 		{X86_INS_FSCALE, nullptr},
 		{X86_INS_FSETPM, nullptr},
-		{X86_INS_FSINCOS, &Capstone2LlvmIrTranslatorX86::translateFsincos},
-		{X86_INS_FNSTENV, &Capstone2LlvmIrTranslatorX86::translateFnstenv},
-		{X86_INS_FXAM, &Capstone2LlvmIrTranslatorX86::translateFxam},
+		{X86_INS_FSINCOS, &Capstone2LlvmIrTranslatorX86_impl::translateFsincos},
+		{X86_INS_FNSTENV, &Capstone2LlvmIrTranslatorX86_impl::translateFnstenv},
+		{X86_INS_FXAM, &Capstone2LlvmIrTranslatorX86_impl::translateFxam},
 		{X86_INS_FXRSTOR, nullptr},
 		{X86_INS_FXRSTOR64, nullptr},
 		{X86_INS_FXSAVE, nullptr},
@@ -646,23 +723,23 @@ Capstone2LlvmIrTranslatorX86::_i2fm =
 		{X86_INS_GETSEC, nullptr},
 		{X86_INS_HADDPD, nullptr},
 		{X86_INS_HADDPS, nullptr},
-		{X86_INS_HLT, &Capstone2LlvmIrTranslatorX86::translateHlt},
+		{X86_INS_HLT, &Capstone2LlvmIrTranslatorX86_impl::translateHlt},
 		{X86_INS_HSUBPD, nullptr},
 		{X86_INS_HSUBPS, nullptr},
-		{X86_INS_IDIV, &Capstone2LlvmIrTranslatorX86::translateDiv},
-		{X86_INS_FILD, &Capstone2LlvmIrTranslatorX86::translateFld},
-		{X86_INS_IMUL, &Capstone2LlvmIrTranslatorX86::translateImul},
+		{X86_INS_IDIV, &Capstone2LlvmIrTranslatorX86_impl::translateDiv},
+		{X86_INS_FILD, &Capstone2LlvmIrTranslatorX86_impl::translateFld},
+		{X86_INS_IMUL, &Capstone2LlvmIrTranslatorX86_impl::translateImul},
 		{X86_INS_IN, nullptr},
-		{X86_INS_INC, &Capstone2LlvmIrTranslatorX86::translateInc},
-		{X86_INS_INSB, &Capstone2LlvmIrTranslatorX86::translateIns},
+		{X86_INS_INC, &Capstone2LlvmIrTranslatorX86_impl::translateInc},
+		{X86_INS_INSB, &Capstone2LlvmIrTranslatorX86_impl::translateIns},
 		{X86_INS_INSERTPS, nullptr},
 		{X86_INS_INSERTQ, nullptr},
-		{X86_INS_INSD, &Capstone2LlvmIrTranslatorX86::translateIns},
-		{X86_INS_INSW, &Capstone2LlvmIrTranslatorX86::translateIns},
-		{X86_INS_INT, &Capstone2LlvmIrTranslatorX86::translateInt},
-		{X86_INS_INT1, &Capstone2LlvmIrTranslatorX86::translateInt1},
-		{X86_INS_INT3, &Capstone2LlvmIrTranslatorX86::translateInt3},
-		{X86_INS_INTO, &Capstone2LlvmIrTranslatorX86::translateInto},
+		{X86_INS_INSD, &Capstone2LlvmIrTranslatorX86_impl::translateIns},
+		{X86_INS_INSW, &Capstone2LlvmIrTranslatorX86_impl::translateIns},
+		{X86_INS_INT, &Capstone2LlvmIrTranslatorX86_impl::translateInt},
+		{X86_INS_INT1, &Capstone2LlvmIrTranslatorX86_impl::translateInt1},
+		{X86_INS_INT3, &Capstone2LlvmIrTranslatorX86_impl::translateInt3},
+		{X86_INS_INTO, &Capstone2LlvmIrTranslatorX86_impl::translateInto},
 		{X86_INS_INVD, nullptr},
 		{X86_INS_INVEPT, nullptr},
 		{X86_INS_INVLPG, nullptr},
@@ -673,8 +750,8 @@ Capstone2LlvmIrTranslatorX86::_i2fm =
 		{X86_INS_IRETD, nullptr},
 		{X86_INS_IRETQ, nullptr},
 		{X86_INS_FISTTP, nullptr},
-		{X86_INS_FIST, &Capstone2LlvmIrTranslatorX86::translateFist},
-		{X86_INS_FISTP, &Capstone2LlvmIrTranslatorX86::translateFist},
+		{X86_INS_FIST, &Capstone2LlvmIrTranslatorX86_impl::translateFist},
+		{X86_INS_FISTP, &Capstone2LlvmIrTranslatorX86_impl::translateFist},
 		{X86_INS_UCOMISD, nullptr},
 		{X86_INS_UCOMISS, nullptr},
 		{X86_INS_VCOMISD, nullptr},
@@ -691,26 +768,26 @@ Capstone2LlvmIrTranslatorX86::_i2fm =
 		{X86_INS_VCVTUSI2SS, nullptr},
 		{X86_INS_VUCOMISD, nullptr},
 		{X86_INS_VUCOMISS, nullptr},
-		{X86_INS_JAE, &Capstone2LlvmIrTranslatorX86::translateJCc},
-		{X86_INS_JA, &Capstone2LlvmIrTranslatorX86::translateJCc},
-		{X86_INS_JBE, &Capstone2LlvmIrTranslatorX86::translateJCc},
-		{X86_INS_JB, &Capstone2LlvmIrTranslatorX86::translateJCc},
-		{X86_INS_JCXZ, &Capstone2LlvmIrTranslatorX86::translateJecxz},
-		{X86_INS_JECXZ, &Capstone2LlvmIrTranslatorX86::translateJecxz},
-		{X86_INS_JE, &Capstone2LlvmIrTranslatorX86::translateJCc},
-		{X86_INS_JGE, &Capstone2LlvmIrTranslatorX86::translateJCc},
-		{X86_INS_JG, &Capstone2LlvmIrTranslatorX86::translateJCc},
-		{X86_INS_JLE, &Capstone2LlvmIrTranslatorX86::translateJCc},
-		{X86_INS_JL, &Capstone2LlvmIrTranslatorX86::translateJCc},
-		{X86_INS_JMP, &Capstone2LlvmIrTranslatorX86::translateJmp},
-		{X86_INS_JNE, &Capstone2LlvmIrTranslatorX86::translateJCc},
-		{X86_INS_JNO, &Capstone2LlvmIrTranslatorX86::translateJCc},
-		{X86_INS_JNP, &Capstone2LlvmIrTranslatorX86::translateJCc},
-		{X86_INS_JNS, &Capstone2LlvmIrTranslatorX86::translateJCc},
-		{X86_INS_JO, &Capstone2LlvmIrTranslatorX86::translateJCc},
-		{X86_INS_JP, &Capstone2LlvmIrTranslatorX86::translateJCc},
-		{X86_INS_JRCXZ, &Capstone2LlvmIrTranslatorX86::translateJecxz},
-		{X86_INS_JS, &Capstone2LlvmIrTranslatorX86::translateJCc},
+		{X86_INS_JAE, &Capstone2LlvmIrTranslatorX86_impl::translateJCc},
+		{X86_INS_JA, &Capstone2LlvmIrTranslatorX86_impl::translateJCc},
+		{X86_INS_JBE, &Capstone2LlvmIrTranslatorX86_impl::translateJCc},
+		{X86_INS_JB, &Capstone2LlvmIrTranslatorX86_impl::translateJCc},
+		{X86_INS_JCXZ, &Capstone2LlvmIrTranslatorX86_impl::translateJecxz},
+		{X86_INS_JECXZ, &Capstone2LlvmIrTranslatorX86_impl::translateJecxz},
+		{X86_INS_JE, &Capstone2LlvmIrTranslatorX86_impl::translateJCc},
+		{X86_INS_JGE, &Capstone2LlvmIrTranslatorX86_impl::translateJCc},
+		{X86_INS_JG, &Capstone2LlvmIrTranslatorX86_impl::translateJCc},
+		{X86_INS_JLE, &Capstone2LlvmIrTranslatorX86_impl::translateJCc},
+		{X86_INS_JL, &Capstone2LlvmIrTranslatorX86_impl::translateJCc},
+		{X86_INS_JMP, &Capstone2LlvmIrTranslatorX86_impl::translateJmp},
+		{X86_INS_JNE, &Capstone2LlvmIrTranslatorX86_impl::translateJCc},
+		{X86_INS_JNO, &Capstone2LlvmIrTranslatorX86_impl::translateJCc},
+		{X86_INS_JNP, &Capstone2LlvmIrTranslatorX86_impl::translateJCc},
+		{X86_INS_JNS, &Capstone2LlvmIrTranslatorX86_impl::translateJCc},
+		{X86_INS_JO, &Capstone2LlvmIrTranslatorX86_impl::translateJCc},
+		{X86_INS_JP, &Capstone2LlvmIrTranslatorX86_impl::translateJCc},
+		{X86_INS_JRCXZ, &Capstone2LlvmIrTranslatorX86_impl::translateJecxz},
+		{X86_INS_JS, &Capstone2LlvmIrTranslatorX86_impl::translateJCc},
 		{X86_INS_KANDB, nullptr},
 		{X86_INS_KANDD, nullptr},
 		{X86_INS_KANDNB, nullptr},
@@ -752,40 +829,40 @@ Capstone2LlvmIrTranslatorX86::_i2fm =
 		{X86_INS_KXORD, nullptr},
 		{X86_INS_KXORQ, nullptr},
 		{X86_INS_KXORW, nullptr},
-		{X86_INS_LAHF, &Capstone2LlvmIrTranslatorX86::translateLahf},
+		{X86_INS_LAHF, &Capstone2LlvmIrTranslatorX86_impl::translateLahf},
 		{X86_INS_LAR, nullptr},
 		{X86_INS_LDDQU, nullptr},
 		{X86_INS_LDMXCSR, nullptr},
-		{X86_INS_LDS, &Capstone2LlvmIrTranslatorX86::translateLoadFarPtr},
-		{X86_INS_FLDZ, &Capstone2LlvmIrTranslatorX86::translateFloadConstant},
-		{X86_INS_FLD1, &Capstone2LlvmIrTranslatorX86::translateFloadConstant},
-		{X86_INS_FLD, &Capstone2LlvmIrTranslatorX86::translateFld},
-		{X86_INS_LEA, &Capstone2LlvmIrTranslatorX86::translateLea},
-		{X86_INS_LEAVE, &Capstone2LlvmIrTranslatorX86::translateLeave},
-		{X86_INS_LES, &Capstone2LlvmIrTranslatorX86::translateLoadFarPtr},
+		{X86_INS_LDS, &Capstone2LlvmIrTranslatorX86_impl::translateLoadFarPtr},
+		{X86_INS_FLDZ, &Capstone2LlvmIrTranslatorX86_impl::translateFloadConstant},
+		{X86_INS_FLD1, &Capstone2LlvmIrTranslatorX86_impl::translateFloadConstant},
+		{X86_INS_FLD, &Capstone2LlvmIrTranslatorX86_impl::translateFld},
+		{X86_INS_LEA, &Capstone2LlvmIrTranslatorX86_impl::translateLea},
+		{X86_INS_LEAVE, &Capstone2LlvmIrTranslatorX86_impl::translateLeave},
+		{X86_INS_LES, &Capstone2LlvmIrTranslatorX86_impl::translateLoadFarPtr},
 		{X86_INS_LFENCE, nullptr},
-		{X86_INS_LFS, &Capstone2LlvmIrTranslatorX86::translateLoadFarPtr},
+		{X86_INS_LFS, &Capstone2LlvmIrTranslatorX86_impl::translateLoadFarPtr},
 		{X86_INS_LGDT, nullptr},
-		{X86_INS_LGS, &Capstone2LlvmIrTranslatorX86::translateLoadFarPtr},
+		{X86_INS_LGS, &Capstone2LlvmIrTranslatorX86_impl::translateLoadFarPtr},
 		{X86_INS_LIDT, nullptr},
 		{X86_INS_LLDT, nullptr},
 		{X86_INS_LMSW, nullptr},
-		{X86_INS_OR, &Capstone2LlvmIrTranslatorX86::translateOr},
-		{X86_INS_SUB, &Capstone2LlvmIrTranslatorX86::translateSub},
-		{X86_INS_XOR, &Capstone2LlvmIrTranslatorX86::translateXor},
-		{X86_INS_LODSB, &Capstone2LlvmIrTranslatorX86::translateLoadString},
-		{X86_INS_LODSD, &Capstone2LlvmIrTranslatorX86::translateLoadString},
-		{X86_INS_LODSQ, &Capstone2LlvmIrTranslatorX86::translateLoadString},
-		{X86_INS_LODSW, &Capstone2LlvmIrTranslatorX86::translateLoadString},
-		{X86_INS_LOOP, &Capstone2LlvmIrTranslatorX86::translateLoop},
-		{X86_INS_LOOPE, &Capstone2LlvmIrTranslatorX86::translateLoop},
-		{X86_INS_LOOPNE, &Capstone2LlvmIrTranslatorX86::translateLoop},
-		{X86_INS_RETF, &Capstone2LlvmIrTranslatorX86::translateRet},
-		{X86_INS_RETFQ, &Capstone2LlvmIrTranslatorX86::translateRet},
+		{X86_INS_OR, &Capstone2LlvmIrTranslatorX86_impl::translateOr},
+		{X86_INS_SUB, &Capstone2LlvmIrTranslatorX86_impl::translateSub},
+		{X86_INS_XOR, &Capstone2LlvmIrTranslatorX86_impl::translateXor},
+		{X86_INS_LODSB, &Capstone2LlvmIrTranslatorX86_impl::translateLoadString},
+		{X86_INS_LODSD, &Capstone2LlvmIrTranslatorX86_impl::translateLoadString},
+		{X86_INS_LODSQ, &Capstone2LlvmIrTranslatorX86_impl::translateLoadString},
+		{X86_INS_LODSW, &Capstone2LlvmIrTranslatorX86_impl::translateLoadString},
+		{X86_INS_LOOP, &Capstone2LlvmIrTranslatorX86_impl::translateLoop},
+		{X86_INS_LOOPE, &Capstone2LlvmIrTranslatorX86_impl::translateLoop},
+		{X86_INS_LOOPNE, &Capstone2LlvmIrTranslatorX86_impl::translateLoop},
+		{X86_INS_RETF, &Capstone2LlvmIrTranslatorX86_impl::translateRet},
+		{X86_INS_RETFQ, &Capstone2LlvmIrTranslatorX86_impl::translateRet},
 		{X86_INS_LSL, nullptr},
-		{X86_INS_LSS, &Capstone2LlvmIrTranslatorX86::translateLoadFarPtr},
+		{X86_INS_LSS, &Capstone2LlvmIrTranslatorX86_impl::translateLoadFarPtr},
 		{X86_INS_LTR, nullptr},
-		{X86_INS_XADD, &Capstone2LlvmIrTranslatorX86::translateAdd},
+		{X86_INS_XADD, &Capstone2LlvmIrTranslatorX86_impl::translateAdd},
 		{X86_INS_LZCNT, nullptr},
 		{X86_INS_MASKMOVDQU, nullptr},
 		{X86_INS_MAXPD, nullptr},
@@ -887,8 +964,8 @@ Capstone2LlvmIrTranslatorX86::_i2fm =
 		{X86_INS_PXOR, nullptr},
 		{X86_INS_MONITOR, nullptr},
 		{X86_INS_MONTMUL, nullptr},
-		{X86_INS_MOV, &Capstone2LlvmIrTranslatorX86::translateMov},
-		{X86_INS_MOVABS, &Capstone2LlvmIrTranslatorX86::translateMov},
+		{X86_INS_MOV, &Capstone2LlvmIrTranslatorX86_impl::translateMov},
+		{X86_INS_MOVABS, &Capstone2LlvmIrTranslatorX86_impl::translateMov},
 		{X86_INS_MOVBE, nullptr},
 		{X86_INS_MOVDDUP, nullptr},
 		{X86_INS_MOVDQA, nullptr},
@@ -908,36 +985,36 @@ Capstone2LlvmIrTranslatorX86::_i2fm =
 		{X86_INS_MOVNTPS, nullptr},
 		{X86_INS_MOVNTSD, nullptr},
 		{X86_INS_MOVNTSS, nullptr},
-		{X86_INS_MOVSB, &Capstone2LlvmIrTranslatorX86::translateMoveString},
-		{X86_INS_MOVSD, &Capstone2LlvmIrTranslatorX86::translateMoveString},
+		{X86_INS_MOVSB, &Capstone2LlvmIrTranslatorX86_impl::translateMoveString},
+		{X86_INS_MOVSD, &Capstone2LlvmIrTranslatorX86_impl::translateMoveString},
 		{X86_INS_MOVSHDUP, nullptr},
 		{X86_INS_MOVSLDUP, nullptr},
-		{X86_INS_MOVSQ, &Capstone2LlvmIrTranslatorX86::translateMoveString},
+		{X86_INS_MOVSQ, &Capstone2LlvmIrTranslatorX86_impl::translateMoveString},
 		{X86_INS_MOVSS, nullptr},
-		{X86_INS_MOVSW, &Capstone2LlvmIrTranslatorX86::translateMoveString},
-		{X86_INS_MOVSX, &Capstone2LlvmIrTranslatorX86::translateMov},
-		{X86_INS_MOVSXD, &Capstone2LlvmIrTranslatorX86::translateMov},
+		{X86_INS_MOVSW, &Capstone2LlvmIrTranslatorX86_impl::translateMoveString},
+		{X86_INS_MOVSX, &Capstone2LlvmIrTranslatorX86_impl::translateMov},
+		{X86_INS_MOVSXD, &Capstone2LlvmIrTranslatorX86_impl::translateMov},
 		{X86_INS_MOVUPD, nullptr},
 		{X86_INS_MOVUPS, nullptr},
-		{X86_INS_MOVZX, &Capstone2LlvmIrTranslatorX86::translateMov},
+		{X86_INS_MOVZX, &Capstone2LlvmIrTranslatorX86_impl::translateMov},
 		{X86_INS_MPSADBW, nullptr},
-		{X86_INS_MUL, &Capstone2LlvmIrTranslatorX86::translateMul},
+		{X86_INS_MUL, &Capstone2LlvmIrTranslatorX86_impl::translateMul},
 		{X86_INS_MULPD, nullptr},
 		{X86_INS_MULPS, nullptr},
 		{X86_INS_MULSD, nullptr},
 		{X86_INS_MULSS, nullptr},
 		{X86_INS_MULX, nullptr},
-		{X86_INS_FMUL, &Capstone2LlvmIrTranslatorX86::translateFmul},
-		{X86_INS_FIMUL, &Capstone2LlvmIrTranslatorX86::translateFmul},
-		{X86_INS_FMULP, &Capstone2LlvmIrTranslatorX86::translateFmul},
+		{X86_INS_FMUL, &Capstone2LlvmIrTranslatorX86_impl::translateFmul},
+		{X86_INS_FIMUL, &Capstone2LlvmIrTranslatorX86_impl::translateFmul},
+		{X86_INS_FMULP, &Capstone2LlvmIrTranslatorX86_impl::translateFmul},
 		{X86_INS_MWAIT, nullptr},
-		{X86_INS_NEG, &Capstone2LlvmIrTranslatorX86::translateNeg},
-		{X86_INS_NOP, &Capstone2LlvmIrTranslatorX86::translateNop},
-		{X86_INS_NOT, &Capstone2LlvmIrTranslatorX86::translateNot},
+		{X86_INS_NEG, &Capstone2LlvmIrTranslatorX86_impl::translateNeg},
+		{X86_INS_NOP, &Capstone2LlvmIrTranslatorX86_impl::translateNop},
+		{X86_INS_NOT, &Capstone2LlvmIrTranslatorX86_impl::translateNot},
 		{X86_INS_OUT, nullptr},
-		{X86_INS_OUTSB, &Capstone2LlvmIrTranslatorX86::translateOuts},
-		{X86_INS_OUTSD, &Capstone2LlvmIrTranslatorX86::translateOuts},
-		{X86_INS_OUTSW, &Capstone2LlvmIrTranslatorX86::translateOuts},
+		{X86_INS_OUTSB, &Capstone2LlvmIrTranslatorX86_impl::translateOuts},
+		{X86_INS_OUTSD, &Capstone2LlvmIrTranslatorX86_impl::translateOuts},
+		{X86_INS_OUTSW, &Capstone2LlvmIrTranslatorX86_impl::translateOuts},
 		{X86_INS_PACKUSDW, nullptr},
 		{X86_INS_PAUSE, nullptr},
 		{X86_INS_PAVGUSB, nullptr},
@@ -1004,13 +1081,13 @@ Capstone2LlvmIrTranslatorX86::_i2fm =
 		{X86_INS_PMULDQ, nullptr},
 		{X86_INS_PMULHRW, nullptr},
 		{X86_INS_PMULLD, nullptr},
-		{X86_INS_POP, &Capstone2LlvmIrTranslatorX86::translatePop},
-		{X86_INS_POPAW, &Capstone2LlvmIrTranslatorX86::translatePopa}, // X86_INS_POPAW == POPA
-		{X86_INS_POPAL, &Capstone2LlvmIrTranslatorX86::translatePopa}, // X86_INS_POPAL == POPAD
+		{X86_INS_POP, &Capstone2LlvmIrTranslatorX86_impl::translatePop},
+		{X86_INS_POPAW, &Capstone2LlvmIrTranslatorX86_impl::translatePopa}, // X86_INS_POPAW == POPA
+		{X86_INS_POPAL, &Capstone2LlvmIrTranslatorX86_impl::translatePopa}, // X86_INS_POPAL == POPAD
 		{X86_INS_POPCNT, nullptr},
-		{X86_INS_POPF, &Capstone2LlvmIrTranslatorX86::translatePopEflags},
-		{X86_INS_POPFD, &Capstone2LlvmIrTranslatorX86::translatePopEflags},
-		{X86_INS_POPFQ, &Capstone2LlvmIrTranslatorX86::translatePopEflags},
+		{X86_INS_POPF, &Capstone2LlvmIrTranslatorX86_impl::translatePopEflags},
+		{X86_INS_POPFD, &Capstone2LlvmIrTranslatorX86_impl::translatePopEflags},
+		{X86_INS_POPFQ, &Capstone2LlvmIrTranslatorX86_impl::translatePopEflags},
 		{X86_INS_PREFETCH, nullptr},
 		{X86_INS_PREFETCHNTA, nullptr},
 		{X86_INS_PREFETCHT0, nullptr},
@@ -1026,26 +1103,26 @@ Capstone2LlvmIrTranslatorX86::_i2fm =
 		{X86_INS_PTEST, nullptr},
 		{X86_INS_PUNPCKHQDQ, nullptr},
 		{X86_INS_PUNPCKLQDQ, nullptr},
-		{X86_INS_PUSH, &Capstone2LlvmIrTranslatorX86::translatePush},
-		{X86_INS_PUSHAW, &Capstone2LlvmIrTranslatorX86::translatePusha}, // X86_INS_PUSHAW = PUSHA
-		{X86_INS_PUSHAL, &Capstone2LlvmIrTranslatorX86::translatePusha}, // X86_INS_PUSHAL = PUSHAD
-		{X86_INS_PUSHF, &Capstone2LlvmIrTranslatorX86::translatePushEflags},
-		{X86_INS_PUSHFD, &Capstone2LlvmIrTranslatorX86::translatePushEflags},
-		{X86_INS_PUSHFQ, &Capstone2LlvmIrTranslatorX86::translatePushEflags},
-		{X86_INS_RCL, &Capstone2LlvmIrTranslatorX86::translateRcl},
+		{X86_INS_PUSH, &Capstone2LlvmIrTranslatorX86_impl::translatePush},
+		{X86_INS_PUSHAW, &Capstone2LlvmIrTranslatorX86_impl::translatePusha}, // X86_INS_PUSHAW = PUSHA
+		{X86_INS_PUSHAL, &Capstone2LlvmIrTranslatorX86_impl::translatePusha}, // X86_INS_PUSHAL = PUSHAD
+		{X86_INS_PUSHF, &Capstone2LlvmIrTranslatorX86_impl::translatePushEflags},
+		{X86_INS_PUSHFD, &Capstone2LlvmIrTranslatorX86_impl::translatePushEflags},
+		{X86_INS_PUSHFQ, &Capstone2LlvmIrTranslatorX86_impl::translatePushEflags},
+		{X86_INS_RCL, &Capstone2LlvmIrTranslatorX86_impl::translateRcl},
 		{X86_INS_RCPPS, nullptr},
 		{X86_INS_RCPSS, nullptr},
-		{X86_INS_RCR, &Capstone2LlvmIrTranslatorX86::translateRcr},
+		{X86_INS_RCR, &Capstone2LlvmIrTranslatorX86_impl::translateRcr},
 		{X86_INS_RDFSBASE, nullptr},
 		{X86_INS_RDGSBASE, nullptr},
 		{X86_INS_RDMSR, nullptr},
 		{X86_INS_RDPMC, nullptr},
 		{X86_INS_RDRAND, nullptr},
 		{X86_INS_RDSEED, nullptr},
-		{X86_INS_RDTSC, &Capstone2LlvmIrTranslatorX86::translateRdtsc},
-		{X86_INS_RDTSCP, &Capstone2LlvmIrTranslatorX86::translateRdtscp},
-		{X86_INS_ROL, &Capstone2LlvmIrTranslatorX86::translateRol},
-		{X86_INS_ROR, &Capstone2LlvmIrTranslatorX86::translateRor},
+		{X86_INS_RDTSC, &Capstone2LlvmIrTranslatorX86_impl::translateRdtsc},
+		{X86_INS_RDTSCP, &Capstone2LlvmIrTranslatorX86_impl::translateRdtscp},
+		{X86_INS_ROL, &Capstone2LlvmIrTranslatorX86_impl::translateRol},
+		{X86_INS_ROR, &Capstone2LlvmIrTranslatorX86_impl::translateRor},
 		{X86_INS_RORX, nullptr},
 		{X86_INS_ROUNDPD, nullptr},
 		{X86_INS_ROUNDPS, nullptr},
@@ -1054,32 +1131,32 @@ Capstone2LlvmIrTranslatorX86::_i2fm =
 		{X86_INS_RSM, nullptr},
 		{X86_INS_RSQRTPS, nullptr},
 		{X86_INS_RSQRTSS, nullptr},
-		{X86_INS_SAHF, &Capstone2LlvmIrTranslatorX86::translateSahf},
-		{X86_INS_SAL, &Capstone2LlvmIrTranslatorX86::translateShiftLeft},
-		{X86_INS_SALC, &Capstone2LlvmIrTranslatorX86::translateSalc},
-		{X86_INS_SAR, &Capstone2LlvmIrTranslatorX86::translateShiftRight},
+		{X86_INS_SAHF, &Capstone2LlvmIrTranslatorX86_impl::translateSahf},
+		{X86_INS_SAL, &Capstone2LlvmIrTranslatorX86_impl::translateShiftLeft},
+		{X86_INS_SALC, &Capstone2LlvmIrTranslatorX86_impl::translateSalc},
+		{X86_INS_SAR, &Capstone2LlvmIrTranslatorX86_impl::translateShiftRight},
 		{X86_INS_SARX, nullptr},
-		{X86_INS_SBB, &Capstone2LlvmIrTranslatorX86::translateSbb},
-		{X86_INS_SCASB, &Capstone2LlvmIrTranslatorX86::translateScanString},
-		{X86_INS_SCASD, &Capstone2LlvmIrTranslatorX86::translateScanString},
-		{X86_INS_SCASQ, &Capstone2LlvmIrTranslatorX86::translateScanString},
-		{X86_INS_SCASW, &Capstone2LlvmIrTranslatorX86::translateScanString},
-		{X86_INS_SETAE, &Capstone2LlvmIrTranslatorX86::translateSetCc},
-		{X86_INS_SETA, &Capstone2LlvmIrTranslatorX86::translateSetCc},
-		{X86_INS_SETBE, &Capstone2LlvmIrTranslatorX86::translateSetCc},
-		{X86_INS_SETB, &Capstone2LlvmIrTranslatorX86::translateSetCc},
-		{X86_INS_SETE, &Capstone2LlvmIrTranslatorX86::translateSetCc},
-		{X86_INS_SETGE, &Capstone2LlvmIrTranslatorX86::translateSetCc},
-		{X86_INS_SETG, &Capstone2LlvmIrTranslatorX86::translateSetCc},
-		{X86_INS_SETLE, &Capstone2LlvmIrTranslatorX86::translateSetCc},
-		{X86_INS_SETL, &Capstone2LlvmIrTranslatorX86::translateSetCc},
-		{X86_INS_SETNE, &Capstone2LlvmIrTranslatorX86::translateSetCc},
-		{X86_INS_SETNO, &Capstone2LlvmIrTranslatorX86::translateSetCc},
-		{X86_INS_SETNP, &Capstone2LlvmIrTranslatorX86::translateSetCc},
-		{X86_INS_SETNS, &Capstone2LlvmIrTranslatorX86::translateSetCc},
-		{X86_INS_SETO, &Capstone2LlvmIrTranslatorX86::translateSetCc},
-		{X86_INS_SETP, &Capstone2LlvmIrTranslatorX86::translateSetCc},
-		{X86_INS_SETS, &Capstone2LlvmIrTranslatorX86::translateSetCc},
+		{X86_INS_SBB, &Capstone2LlvmIrTranslatorX86_impl::translateSbb},
+		{X86_INS_SCASB, &Capstone2LlvmIrTranslatorX86_impl::translateScanString},
+		{X86_INS_SCASD, &Capstone2LlvmIrTranslatorX86_impl::translateScanString},
+		{X86_INS_SCASQ, &Capstone2LlvmIrTranslatorX86_impl::translateScanString},
+		{X86_INS_SCASW, &Capstone2LlvmIrTranslatorX86_impl::translateScanString},
+		{X86_INS_SETAE, &Capstone2LlvmIrTranslatorX86_impl::translateSetCc},
+		{X86_INS_SETA, &Capstone2LlvmIrTranslatorX86_impl::translateSetCc},
+		{X86_INS_SETBE, &Capstone2LlvmIrTranslatorX86_impl::translateSetCc},
+		{X86_INS_SETB, &Capstone2LlvmIrTranslatorX86_impl::translateSetCc},
+		{X86_INS_SETE, &Capstone2LlvmIrTranslatorX86_impl::translateSetCc},
+		{X86_INS_SETGE, &Capstone2LlvmIrTranslatorX86_impl::translateSetCc},
+		{X86_INS_SETG, &Capstone2LlvmIrTranslatorX86_impl::translateSetCc},
+		{X86_INS_SETLE, &Capstone2LlvmIrTranslatorX86_impl::translateSetCc},
+		{X86_INS_SETL, &Capstone2LlvmIrTranslatorX86_impl::translateSetCc},
+		{X86_INS_SETNE, &Capstone2LlvmIrTranslatorX86_impl::translateSetCc},
+		{X86_INS_SETNO, &Capstone2LlvmIrTranslatorX86_impl::translateSetCc},
+		{X86_INS_SETNP, &Capstone2LlvmIrTranslatorX86_impl::translateSetCc},
+		{X86_INS_SETNS, &Capstone2LlvmIrTranslatorX86_impl::translateSetCc},
+		{X86_INS_SETO, &Capstone2LlvmIrTranslatorX86_impl::translateSetCc},
+		{X86_INS_SETP, &Capstone2LlvmIrTranslatorX86_impl::translateSetCc},
+		{X86_INS_SETS, &Capstone2LlvmIrTranslatorX86_impl::translateSetCc},
 		{X86_INS_SFENCE, nullptr},
 		{X86_INS_SGDT, nullptr},
 		{X86_INS_SHA1MSG1, nullptr},
@@ -1089,16 +1166,16 @@ Capstone2LlvmIrTranslatorX86::_i2fm =
 		{X86_INS_SHA256MSG1, nullptr},
 		{X86_INS_SHA256MSG2, nullptr},
 		{X86_INS_SHA256RNDS2, nullptr},
-		{X86_INS_SHL, &Capstone2LlvmIrTranslatorX86::translateShiftLeft},
-		{X86_INS_SHLD, &Capstone2LlvmIrTranslatorX86::translateShld},
+		{X86_INS_SHL, &Capstone2LlvmIrTranslatorX86_impl::translateShiftLeft},
+		{X86_INS_SHLD, &Capstone2LlvmIrTranslatorX86_impl::translateShld},
 		{X86_INS_SHLX, nullptr},
-		{X86_INS_SHR, &Capstone2LlvmIrTranslatorX86::translateShiftRight},
-		{X86_INS_SHRD, &Capstone2LlvmIrTranslatorX86::translateShrd},
+		{X86_INS_SHR, &Capstone2LlvmIrTranslatorX86_impl::translateShiftRight},
+		{X86_INS_SHRD, &Capstone2LlvmIrTranslatorX86_impl::translateShrd},
 		{X86_INS_SHRX, nullptr},
 		{X86_INS_SHUFPD, nullptr},
 		{X86_INS_SHUFPS, nullptr},
 		{X86_INS_SIDT, nullptr},
-		{X86_INS_FSIN, &Capstone2LlvmIrTranslatorX86::translateFsin},
+		{X86_INS_FSIN, &Capstone2LlvmIrTranslatorX86_impl::translateFsin},
 		{X86_INS_SKINIT, nullptr},
 		{X86_INS_SLDT, nullptr},
 		{X86_INS_SMSW, nullptr},
@@ -1106,49 +1183,49 @@ Capstone2LlvmIrTranslatorX86::_i2fm =
 		{X86_INS_SQRTPS, nullptr},
 		{X86_INS_SQRTSD, nullptr},
 		{X86_INS_SQRTSS, nullptr},
-		{X86_INS_FSQRT, &Capstone2LlvmIrTranslatorX86::translateFsqrt},
+		{X86_INS_FSQRT, &Capstone2LlvmIrTranslatorX86_impl::translateFsqrt},
 		{X86_INS_STAC, nullptr},
-		{X86_INS_STC, &Capstone2LlvmIrTranslatorX86::translateStc},
-		{X86_INS_STD, &Capstone2LlvmIrTranslatorX86::translateStd},
+		{X86_INS_STC, &Capstone2LlvmIrTranslatorX86_impl::translateStc},
+		{X86_INS_STD, &Capstone2LlvmIrTranslatorX86_impl::translateStd},
 		{X86_INS_STGI, nullptr},
 		{X86_INS_STI, nullptr},
 		{X86_INS_STMXCSR, nullptr},
-		{X86_INS_STOSB, &Capstone2LlvmIrTranslatorX86::translateStoreString},
-		{X86_INS_STOSD, &Capstone2LlvmIrTranslatorX86::translateStoreString},
-		{X86_INS_STOSQ, &Capstone2LlvmIrTranslatorX86::translateStoreString},
-		{X86_INS_STOSW, &Capstone2LlvmIrTranslatorX86::translateStoreString},
+		{X86_INS_STOSB, &Capstone2LlvmIrTranslatorX86_impl::translateStoreString},
+		{X86_INS_STOSD, &Capstone2LlvmIrTranslatorX86_impl::translateStoreString},
+		{X86_INS_STOSQ, &Capstone2LlvmIrTranslatorX86_impl::translateStoreString},
+		{X86_INS_STOSW, &Capstone2LlvmIrTranslatorX86_impl::translateStoreString},
 		{X86_INS_STR, nullptr},
-		{X86_INS_FST, &Capstone2LlvmIrTranslatorX86::translateFst},
-		{X86_INS_FSTP, &Capstone2LlvmIrTranslatorX86::translateFst},
+		{X86_INS_FST, &Capstone2LlvmIrTranslatorX86_impl::translateFst},
+		{X86_INS_FSTP, &Capstone2LlvmIrTranslatorX86_impl::translateFst},
 		{X86_INS_FSTPNCE, nullptr},
-		{X86_INS_FXCH, &Capstone2LlvmIrTranslatorX86::translateFxch},
+		{X86_INS_FXCH, &Capstone2LlvmIrTranslatorX86_impl::translateFxch},
 		{X86_INS_SUBPD, nullptr},
 		{X86_INS_SUBPS, nullptr},
-		{X86_INS_FSUBR, &Capstone2LlvmIrTranslatorX86::translateFsubr},
-		{X86_INS_FISUBR, &Capstone2LlvmIrTranslatorX86::translateFsubr},
-		{X86_INS_FSUBRP, &Capstone2LlvmIrTranslatorX86::translateFsubr},
+		{X86_INS_FSUBR, &Capstone2LlvmIrTranslatorX86_impl::translateFsubr},
+		{X86_INS_FISUBR, &Capstone2LlvmIrTranslatorX86_impl::translateFsubr},
+		{X86_INS_FSUBRP, &Capstone2LlvmIrTranslatorX86_impl::translateFsubr},
 		{X86_INS_SUBSD, nullptr},
 		{X86_INS_SUBSS, nullptr},
-		{X86_INS_FSUB, &Capstone2LlvmIrTranslatorX86::translateFsub},
-		{X86_INS_FISUB, &Capstone2LlvmIrTranslatorX86::translateFsub},
-		{X86_INS_FSUBP, &Capstone2LlvmIrTranslatorX86::translateFsub},
+		{X86_INS_FSUB, &Capstone2LlvmIrTranslatorX86_impl::translateFsub},
+		{X86_INS_FISUB, &Capstone2LlvmIrTranslatorX86_impl::translateFsub},
+		{X86_INS_FSUBP, &Capstone2LlvmIrTranslatorX86_impl::translateFsub},
 		{X86_INS_SWAPGS, nullptr},
 		{X86_INS_SYSCALL, nullptr},
 		{X86_INS_SYSENTER, nullptr},
 		{X86_INS_SYSEXIT, nullptr},
 		{X86_INS_SYSRET, nullptr},
 		{X86_INS_T1MSKC, nullptr},
-		{X86_INS_TEST, &Capstone2LlvmIrTranslatorX86::translateAnd},
-		{X86_INS_UD2, &Capstone2LlvmIrTranslatorX86::translateNop},
-		{X86_INS_FTST, &Capstone2LlvmIrTranslatorX86::translateFucomPop},
+		{X86_INS_TEST, &Capstone2LlvmIrTranslatorX86_impl::translateAnd},
+		{X86_INS_UD2, &Capstone2LlvmIrTranslatorX86_impl::translateNop},
+		{X86_INS_FTST, &Capstone2LlvmIrTranslatorX86_impl::translateFucomPop},
 		{X86_INS_TZCNT, nullptr},
 		{X86_INS_TZMSK, nullptr},
-		{X86_INS_FUCOMIP, &Capstone2LlvmIrTranslatorX86::translateFucomPop},
-		{X86_INS_FUCOMI, &Capstone2LlvmIrTranslatorX86::translateFucomPop},
-		{X86_INS_FUCOMPP, &Capstone2LlvmIrTranslatorX86::translateFucomPop},
-		{X86_INS_FUCOMP, &Capstone2LlvmIrTranslatorX86::translateFucomPop},
-		{X86_INS_FUCOM, &Capstone2LlvmIrTranslatorX86::translateFucomPop},
-		{X86_INS_UD2B, &Capstone2LlvmIrTranslatorX86::translateNop},
+		{X86_INS_FUCOMIP, &Capstone2LlvmIrTranslatorX86_impl::translateFucomPop},
+		{X86_INS_FUCOMI, &Capstone2LlvmIrTranslatorX86_impl::translateFucomPop},
+		{X86_INS_FUCOMPP, &Capstone2LlvmIrTranslatorX86_impl::translateFucomPop},
+		{X86_INS_FUCOMP, &Capstone2LlvmIrTranslatorX86_impl::translateFucomPop},
+		{X86_INS_FUCOM, &Capstone2LlvmIrTranslatorX86_impl::translateFucomPop},
+		{X86_INS_UD2B, &Capstone2LlvmIrTranslatorX86_impl::translateNop},
 		{X86_INS_UNPCKHPD, nullptr},
 		{X86_INS_UNPCKHPS, nullptr},
 		{X86_INS_UNPCKLPD, nullptr},
@@ -1731,7 +1808,7 @@ Capstone2LlvmIrTranslatorX86::_i2fm =
 		{X86_INS_VUNPCKLPS, nullptr},
 		{X86_INS_VZEROALL, nullptr},
 		{X86_INS_VZEROUPPER, nullptr},
-		{X86_INS_WAIT, &Capstone2LlvmIrTranslatorX86::translateWait},
+		{X86_INS_WAIT, &Capstone2LlvmIrTranslatorX86_impl::translateWait},
 		{X86_INS_WBINVD, nullptr},
 		{X86_INS_WRFSBASE, nullptr},
 		{X86_INS_WRGSBASE, nullptr},
@@ -1739,7 +1816,7 @@ Capstone2LlvmIrTranslatorX86::_i2fm =
 		{X86_INS_XABORT, nullptr},
 		{X86_INS_XACQUIRE, nullptr},
 		{X86_INS_XBEGIN, nullptr},
-		{X86_INS_XCHG, &Capstone2LlvmIrTranslatorX86::translateXchg},
+		{X86_INS_XCHG, &Capstone2LlvmIrTranslatorX86_impl::translateXchg},
 		{X86_INS_XCRYPTCBC, nullptr},
 		{X86_INS_XCRYPTCFB, nullptr},
 		{X86_INS_XCRYPTCTR, nullptr},
@@ -1747,7 +1824,7 @@ Capstone2LlvmIrTranslatorX86::_i2fm =
 		{X86_INS_XCRYPTOFB, nullptr},
 		{X86_INS_XEND, nullptr},
 		{X86_INS_XGETBV, nullptr},
-		{X86_INS_XLATB, &Capstone2LlvmIrTranslatorX86::translateXlatb},
+		{X86_INS_XLATB, &Capstone2LlvmIrTranslatorX86_impl::translateXlatb},
 		{X86_INS_XRELEASE, nullptr},
 		{X86_INS_XRSTOR, nullptr},
 		{X86_INS_XRSTOR64, nullptr},
@@ -1766,8 +1843,8 @@ Capstone2LlvmIrTranslatorX86::_i2fm =
 		{X86_INS_XSHA256, nullptr},
 		{X86_INS_XSTORE, nullptr},
 		{X86_INS_XTEST, nullptr},
-		{X86_INS_FDISI8087_NOP, &Capstone2LlvmIrTranslatorX86::translateNop},
-		{X86_INS_FENI8087_NOP, &Capstone2LlvmIrTranslatorX86::translateNop},
+		{X86_INS_FDISI8087_NOP, &Capstone2LlvmIrTranslatorX86_impl::translateNop},
+		{X86_INS_FENI8087_NOP, &Capstone2LlvmIrTranslatorX86_impl::translateNop},
 
 		// pseudo instructions
 		{X86_INS_CMPSS, nullptr},
@@ -1780,7 +1857,7 @@ Capstone2LlvmIrTranslatorX86::_i2fm =
 		{X86_INS_CMPNLESS, nullptr},
 		{X86_INS_CMPORDSS, nullptr},
 
-		{X86_INS_CMPSD, &Capstone2LlvmIrTranslatorX86::translateCompareString},
+		{X86_INS_CMPSD, &Capstone2LlvmIrTranslatorX86_impl::translateCompareString},
 		{X86_INS_CMPEQSD, nullptr},
 		{X86_INS_CMPLTSD, nullptr},
 		{X86_INS_CMPLESD, nullptr},

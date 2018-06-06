@@ -1222,7 +1222,8 @@ if [ "$MODE" = "bin" ] || [ "$MODE" = "raw" ]; then
 		CONFIG="$CONFIG_DB"
 	fi
 
-	BIN2LLVMIR_PARAMS=(-provider-init -config-path "$CONFIG" -decoder $BIN2LLVMIR_PARAMS)
+	BIN2LLVMIR_PARAMS=($BIN2LLVMIR_PARAMS)
+	BIN2LLVMIR_PARAMS+=(-config-path "$CONFIG")
 
 	if [ ! -z "$MAX_MEMORY" ]; then
 		BIN2LLVMIR_PARAMS+=(-max-memory "$MAX_MEMORY")
@@ -1279,7 +1280,6 @@ LLVMIR2HLL_PARAMS=(-target-hll="$HLL" -var-renamer="$BACKEND_VAR_RENAMER" -var-n
 [ -z "$BACKEND_NO_DEBUG" ] && LLVMIR2HLL_PARAMS+=(-enable-debug)
 [ -z "$BACKEND_NO_DEBUG_COMMENTS" ] && LLVMIR2HLL_PARAMS+=(-emit-debug-comments)
 [ "$CONFIG" ] && LLVMIR2HLL_PARAMS+=(-config-path="$CONFIG")
-[ "$KEEP_UNREACHABLE_FUNCS" ] && LLVMIR2HLL_PARAMS+=(-keep-unreachable-funcs)
 [ "$BACKEND_SEMANTICS" ] && LLVMIR2HLL_PARAMS+=(-semantics "$BACKEND_SEMANTICS")
 [ "$BACKEND_ENABLED_OPTS" ] && LLVMIR2HLL_PARAMS+=(-enabled-opts="$BACKEND_ENABLED_OPTS")
 [ "$BACKEND_DISABLED_OPTS" ] && LLVMIR2HLL_PARAMS+=(-disabled-opts="$BACKEND_DISABLED_OPTS")

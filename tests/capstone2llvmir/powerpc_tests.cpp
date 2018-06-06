@@ -5163,7 +5163,8 @@ TEST_P(Capstone2LlvmIrTranslatorPowerpcTests, PPC_INS_BLR_lt_cr0_true)
 	EXPECT_NO_REGISTERS_STORED();
 	EXPECT_NO_MEMORY_LOADED_STORED();
 	EXPECT_JUST_VALUES_CALLED({
-		{_translator->getCondBranchFunction(), {true, 0x100004bc}},
+//		{_translator->getCondBranchFunction(), {true, 0x100004bc}},
+		{_translator->getReturnFunction(), {0x100004bc}},
 	});
 }
 
@@ -5182,9 +5183,11 @@ TEST_P(Capstone2LlvmIrTranslatorPowerpcTests, PPC_INS_BLR_lt_cr0_false)
 	EXPECT_JUST_REGISTERS_LOADED({PPC_REG_LR, PPC_REG_CR0_LT});
 	EXPECT_NO_REGISTERS_STORED();
 	EXPECT_NO_MEMORY_LOADED_STORED();
-	EXPECT_JUST_VALUES_CALLED({
-		{_translator->getCondBranchFunction(), {false, 0x100004bc}},
-	});
+// TODO: We cannot check this, because it is in always false branch.
+//	EXPECT_JUST_VALUES_CALLED({
+//		{_translator->getCondBranchFunction(), {false, 0x100004bc}},
+//		{_translator->getReturnFunction(), {0x100004bc}},
+//	});
 }
 
 // PPC_BC_LT, op0 = PPC_OP_REG = cr4
@@ -5203,7 +5206,8 @@ TEST_P(Capstone2LlvmIrTranslatorPowerpcTests, PPC_INS_BLR_lt_cr4_true)
 	EXPECT_NO_REGISTERS_STORED();
 	EXPECT_NO_MEMORY_LOADED_STORED();
 	EXPECT_JUST_VALUES_CALLED({
-		{_translator->getCondBranchFunction(), {true, 0x100004bc}},
+//		{_translator->getCondBranchFunction(), {true, 0x100004bc}},
+		{_translator->getReturnFunction(), {0x100004bc}},
 	});
 }
 
@@ -5222,9 +5226,9 @@ TEST_P(Capstone2LlvmIrTranslatorPowerpcTests, PPC_INS_BLR_lt_cr4_false)
 	EXPECT_JUST_REGISTERS_LOADED({PPC_REG_LR, PPC_REG_CR4_LT});
 	EXPECT_NO_REGISTERS_STORED();
 	EXPECT_NO_MEMORY_LOADED_STORED();
-	EXPECT_JUST_VALUES_CALLED({
-		{_translator->getCondBranchFunction(), {false, 0x100004bc}},
-	});
+//	EXPECT_JUST_VALUES_CALLED({
+//		{_translator->getCondBranchFunction(), {false, 0x100004bc}},
+//	});
 }
 
 //
@@ -5375,7 +5379,8 @@ TEST_P(Capstone2LlvmIrTranslatorPowerpcTests, PPC_INS_BLRL_lt_cr0_true)
 	});
 	EXPECT_NO_MEMORY_LOADED_STORED();
 	EXPECT_JUST_VALUES_CALLED({
-		{_translator->getCondBranchFunction(), {true, 0x100004bc}},
+//		{_translator->getCondBranchFunction(), {true, 0x100004bc}},
+		{_translator->getReturnFunction(), {0x100004bc}},
 	});
 }
 
@@ -5396,9 +5401,9 @@ TEST_P(Capstone2LlvmIrTranslatorPowerpcTests, PPC_INS_BLRL_lt_cr0_false)
 		{PPC_REG_LR, 0x10000514},
 	});
 	EXPECT_NO_MEMORY_LOADED_STORED();
-	EXPECT_JUST_VALUES_CALLED({
-		{_translator->getCondBranchFunction(), {false, 0x100004bc}},
-	});
+//	EXPECT_JUST_VALUES_CALLED({
+//		{_translator->getCondBranchFunction(), {false, 0x100004bc}},
+//	});
 }
 
 // PPC_BC_LT, op0 = PPC_OP_REG = cr4
@@ -5419,7 +5424,8 @@ TEST_P(Capstone2LlvmIrTranslatorPowerpcTests, PPC_INS_BLRL_lt_cr4_true)
 	});
 	EXPECT_NO_MEMORY_LOADED_STORED();
 	EXPECT_JUST_VALUES_CALLED({
-		{_translator->getCondBranchFunction(), {true, 0x100004bc}},
+//		{_translator->getCondBranchFunction(), {true, 0x100004bc}},
+		{_translator->getReturnFunction(), {0x100004bc}},
 	});
 }
 
@@ -5440,9 +5446,9 @@ TEST_P(Capstone2LlvmIrTranslatorPowerpcTests, PPC_INS_BLRL_lt_cr4_false)
 		{PPC_REG_LR, 0x10000514},
 	});
 	EXPECT_NO_MEMORY_LOADED_STORED();
-	EXPECT_JUST_VALUES_CALLED({
-		{_translator->getCondBranchFunction(), {false, 0x100004bc}},
-	});
+//	EXPECT_JUST_VALUES_CALLED({
+//		{_translator->getCondBranchFunction(), {false, 0x100004bc}},
+//	});
 }
 
 //
@@ -5707,7 +5713,8 @@ TEST_P(Capstone2LlvmIrTranslatorPowerpcTests, PPC_INS_BTLR_lt_cr4_true)
 	EXPECT_NO_REGISTERS_STORED();
 	EXPECT_NO_MEMORY_LOADED_STORED();
 	EXPECT_JUST_VALUES_CALLED({
-		{_translator->getCondBranchFunction(), {true, 0x100004bc}},
+//		{_translator->getCondBranchFunction(), {true, 0x100004bc}},
+		{_translator->getReturnFunction(), {0x100004bc}},
 	});
 }
 
@@ -5726,9 +5733,9 @@ TEST_P(Capstone2LlvmIrTranslatorPowerpcTests, PPC_INS_BTLR_lt_cr4_false)
 	EXPECT_JUST_REGISTERS_LOADED({PPC_REG_LR, PPC_REG_CR4_LT});
 	EXPECT_NO_REGISTERS_STORED();
 	EXPECT_NO_MEMORY_LOADED_STORED();
-	EXPECT_JUST_VALUES_CALLED({
-		{_translator->getCondBranchFunction(), {false, 0x100004bc}},
-	});
+//	EXPECT_JUST_VALUES_CALLED({
+//		{_translator->getCondBranchFunction(), {false, 0x100004bc}},
+//	});
 }
 
 //
@@ -5897,7 +5904,8 @@ TEST_P(Capstone2LlvmIrTranslatorPowerpcTests, PPC_INS_BTLRL_lt_cr4_true)
 	});
 	EXPECT_NO_MEMORY_LOADED_STORED();
 	EXPECT_JUST_VALUES_CALLED({
-		{_translator->getCondBranchFunction(), {true, 0x100004bc}},
+//		{_translator->getCondBranchFunction(), {true, 0x100004bc}},
+		{_translator->getReturnFunction(), {0x100004bc}},
 	});
 }
 
@@ -5918,9 +5926,9 @@ TEST_P(Capstone2LlvmIrTranslatorPowerpcTests, PPC_INS_BTLRL_lt_cr4_false)
 		{PPC_REG_LR, 0x10000514},
 	});
 	EXPECT_NO_MEMORY_LOADED_STORED();
-	EXPECT_JUST_VALUES_CALLED({
-		{_translator->getCondBranchFunction(), {false, 0x100004bc}},
-	});
+//	EXPECT_JUST_VALUES_CALLED({
+//		{_translator->getCondBranchFunction(), {false, 0x100004bc}},
+//	});
 }
 
 //
@@ -6178,7 +6186,8 @@ TEST_P(Capstone2LlvmIrTranslatorPowerpcTests, PPC_INS_BDNZLR_nonzero)
 	});
 	EXPECT_NO_MEMORY_LOADED_STORED();
 	EXPECT_JUST_VALUES_CALLED({
-		{_translator->getCondBranchFunction(), {true, 0x100004bc}},
+//		{_translator->getCondBranchFunction(), {true, 0x100004bc}},
+		{_translator->getReturnFunction(), {0x100004bc}},
 	});
 }
 
@@ -6198,9 +6207,9 @@ TEST_P(Capstone2LlvmIrTranslatorPowerpcTests, PPC_INS_BDNZLR_zero)
 		{PPC_REG_CTR, 0},
 	});
 	EXPECT_NO_MEMORY_LOADED_STORED();
-	EXPECT_JUST_VALUES_CALLED({
-		{_translator->getCondBranchFunction(), {false, 0x100004bc}},
-	});
+//	EXPECT_JUST_VALUES_CALLED({
+//		{_translator->getCondBranchFunction(), {false, 0x100004bc}},
+//	});
 }
 
 //
@@ -6327,7 +6336,8 @@ TEST_P(Capstone2LlvmIrTranslatorPowerpcTests, PPC_INS_BDNZLRL_nonzero)
 	});
 	EXPECT_NO_MEMORY_LOADED_STORED();
 	EXPECT_JUST_VALUES_CALLED({
-		{_translator->getCondBranchFunction(), {true, 0x100004bc}},
+//		{_translator->getCondBranchFunction(), {true, 0x100004bc}},
+		{_translator->getReturnFunction(), {0x100004bc}},
 	});
 }
 
@@ -6348,9 +6358,9 @@ TEST_P(Capstone2LlvmIrTranslatorPowerpcTests, PPC_INS_BDNZLRL_zero)
 		{PPC_REG_LR, 0x10000514},
 	});
 	EXPECT_NO_MEMORY_LOADED_STORED();
-	EXPECT_JUST_VALUES_CALLED({
-		{_translator->getCondBranchFunction(), {false, 0x100004bc}},
-	});
+//	EXPECT_JUST_VALUES_CALLED({
+//		{_translator->getCondBranchFunction(), {false, 0x100004bc}},
+//	});
 }
 
 //
@@ -6471,9 +6481,9 @@ TEST_P(Capstone2LlvmIrTranslatorPowerpcTests, PPC_INS_BDZLR_nonzero)
 		{PPC_REG_CTR, 9},
 	});
 	EXPECT_NO_MEMORY_LOADED_STORED();
-	EXPECT_JUST_VALUES_CALLED({
-		{_translator->getCondBranchFunction(), {false, 0x100004bc}},
-	});
+//	EXPECT_JUST_VALUES_CALLED({
+//		{_translator->getCondBranchFunction(), {false, 0x100004bc}},
+//	});
 }
 
 TEST_P(Capstone2LlvmIrTranslatorPowerpcTests, PPC_INS_BDZLR_zero)
@@ -6493,7 +6503,8 @@ TEST_P(Capstone2LlvmIrTranslatorPowerpcTests, PPC_INS_BDZLR_zero)
 	});
 	EXPECT_NO_MEMORY_LOADED_STORED();
 	EXPECT_JUST_VALUES_CALLED({
-		{_translator->getCondBranchFunction(), {true, 0x100004bc}},
+//		{_translator->getCondBranchFunction(), {true, 0x100004bc}},
+		{_translator->getReturnFunction(), {0x100004bc}},
 	});
 }
 
@@ -6620,9 +6631,9 @@ TEST_P(Capstone2LlvmIrTranslatorPowerpcTests, PPC_INS_BDZLRL_nonzero)
 		{PPC_REG_LR, 0x10000514},
 	});
 	EXPECT_NO_MEMORY_LOADED_STORED();
-	EXPECT_JUST_VALUES_CALLED({
-		{_translator->getCondBranchFunction(), {false, 0x100004bc}},
-	});
+//	EXPECT_JUST_VALUES_CALLED({
+//		{_translator->getCondBranchFunction(), {false, 0x100004bc}},
+//	});
 }
 
 TEST_P(Capstone2LlvmIrTranslatorPowerpcTests, PPC_INS_BDZLRL_zero)
@@ -6643,7 +6654,7 @@ TEST_P(Capstone2LlvmIrTranslatorPowerpcTests, PPC_INS_BDZLRL_zero)
 	});
 	EXPECT_NO_MEMORY_LOADED_STORED();
 	EXPECT_JUST_VALUES_CALLED({
-		{_translator->getCondBranchFunction(), {true, 0x100004bc}},
+		{_translator->getReturnFunction(), {0x100004bc}},
 	});
 }
 
@@ -6948,7 +6959,7 @@ TEST_P(Capstone2LlvmIrTranslatorPowerpcTests, PPC_INS_BDNZTLR_nonzero_true_cr4)
 	});
 	EXPECT_NO_MEMORY_LOADED_STORED();
 	EXPECT_JUST_VALUES_CALLED({
-		{_translator->getCondBranchFunction(), {true, 0x100004bc}},
+		{_translator->getReturnFunction(), {0x100004bc}},
 	});
 }
 
@@ -6970,9 +6981,9 @@ TEST_P(Capstone2LlvmIrTranslatorPowerpcTests, PPC_INS_BDNZTLR_nonzero_false_cr4)
 		{PPC_REG_CTR, 9},
 	});
 	EXPECT_NO_MEMORY_LOADED_STORED();
-	EXPECT_JUST_VALUES_CALLED({
-		{_translator->getCondBranchFunction(), {false, 0x100004bc}},
-	});
+//	EXPECT_JUST_VALUES_CALLED({
+//		{_translator->getCondBranchFunction(), {false, 0x100004bc}},
+//	});
 }
 
 // op0 = ppc_op_crx, op1 = PPC_OP_IMM = target
@@ -6993,9 +7004,10 @@ TEST_P(Capstone2LlvmIrTranslatorPowerpcTests, PPC_INS_BDNZTLR_zero_true_cr4)
 		{PPC_REG_CTR, 0},
 	});
 	EXPECT_NO_MEMORY_LOADED_STORED();
-	EXPECT_JUST_VALUES_CALLED({
-		{_translator->getCondBranchFunction(), {false, 0x100004bc}},
-	});
+	EXPECT_NO_VALUE_CALLED();
+//	EXPECT_JUST_VALUES_CALLED({
+//		{_translator->getCondBranchFunction(), {false, 0x100004bc}},
+//	});
 }
 
 // op0 = ppc_op_crx, op1 = PPC_OP_IMM = target
@@ -7016,9 +7028,10 @@ TEST_P(Capstone2LlvmIrTranslatorPowerpcTests, PPC_INS_BDNZTLR_zero_false_cr4)
 		{PPC_REG_CTR, 0},
 	});
 	EXPECT_NO_MEMORY_LOADED_STORED();
-	EXPECT_JUST_VALUES_CALLED({
-		{_translator->getCondBranchFunction(), {false, 0x100004bc}},
-	});
+	EXPECT_NO_VALUE_CALLED();
+//	EXPECT_JUST_VALUES_CALLED({
+//		{_translator->getCondBranchFunction(), {false, 0x100004bc}},
+//	});
 }
 
 //
@@ -7243,7 +7256,7 @@ TEST_P(Capstone2LlvmIrTranslatorPowerpcTests, PPC_INS_BDNZTLRL_nonzero_true_cr4)
 	});
 	EXPECT_NO_MEMORY_LOADED_STORED();
 	EXPECT_JUST_VALUES_CALLED({
-		{_translator->getCondBranchFunction(), {true, 0x100004bc}},
+		{_translator->getReturnFunction(), {0x100004bc}},
 	});
 }
 
@@ -7266,9 +7279,10 @@ TEST_P(Capstone2LlvmIrTranslatorPowerpcTests, PPC_INS_BDNZTLRL_nonzero_false_cr4
 		{PPC_REG_LR, 0x10000514},
 	});
 	EXPECT_NO_MEMORY_LOADED_STORED();
-	EXPECT_JUST_VALUES_CALLED({
-		{_translator->getCondBranchFunction(), {false, 0x100004bc}},
-	});
+	EXPECT_NO_VALUE_CALLED();
+//	EXPECT_JUST_VALUES_CALLED({
+//		{_translator->getCondBranchFunction(), {false, 0x100004bc}},
+//	});
 }
 
 // op0 = ppc_op_crx, op1 = PPC_OP_IMM = target
@@ -7290,9 +7304,10 @@ TEST_P(Capstone2LlvmIrTranslatorPowerpcTests, PPC_INS_BDNZTLRL_zero_true_cr4)
 		{PPC_REG_LR, 0x10000514},
 	});
 	EXPECT_NO_MEMORY_LOADED_STORED();
-	EXPECT_JUST_VALUES_CALLED({
-		{_translator->getCondBranchFunction(), {false, 0x100004bc}},
-	});
+	EXPECT_NO_VALUE_CALLED();
+//	EXPECT_JUST_VALUES_CALLED({
+//		{_translator->getCondBranchFunction(), {false, 0x100004bc}},
+//	});
 }
 
 // op0 = ppc_op_crx, op1 = PPC_OP_IMM = target
@@ -7314,9 +7329,10 @@ TEST_P(Capstone2LlvmIrTranslatorPowerpcTests, PPC_INS_BDNZTLRL_zero_false_cr4)
 		{PPC_REG_LR, 0x10000514},
 	});
 	EXPECT_NO_MEMORY_LOADED_STORED();
-	EXPECT_JUST_VALUES_CALLED({
-		{_translator->getCondBranchFunction(), {false, 0x100004bc}},
-	});
+	EXPECT_NO_VALUE_CALLED();
+//	EXPECT_JUST_VALUES_CALLED({
+//		{_translator->getCondBranchFunction(), {false, 0x100004bc}},
+//	});
 }
 
 //
@@ -7830,9 +7846,10 @@ TEST_P(Capstone2LlvmIrTranslatorPowerpcTests, PPC_INS_BDNZFLRL_nonzero_true_cr4)
 		{PPC_REG_LR, 0x10000514},
 	});
 	EXPECT_NO_MEMORY_LOADED_STORED();
-	EXPECT_JUST_VALUES_CALLED({
-		{_translator->getCondBranchFunction(), {false, 0x100004bc}},
-	});
+	EXPECT_NO_VALUE_CALLED();
+//	EXPECT_JUST_VALUES_CALLED({
+//		{_translator->getCondBranchFunction(), {false, 0x100004bc}},
+//	});
 }
 
 // op0 = ppc_op_crx, op1 = PPC_OP_IMM = target
@@ -7855,7 +7872,7 @@ TEST_P(Capstone2LlvmIrTranslatorPowerpcTests, PPC_INS_BDNZFLRL_nonzero_false_cr4
 	});
 	EXPECT_NO_MEMORY_LOADED_STORED();
 	EXPECT_JUST_VALUES_CALLED({
-		{_translator->getCondBranchFunction(), {true, 0x100004bc}},
+		{_translator->getReturnFunction(), {0x100004bc}},
 	});
 }
 
@@ -7878,9 +7895,10 @@ TEST_P(Capstone2LlvmIrTranslatorPowerpcTests, PPC_INS_BDNZFLRL_zero_true_cr4)
 		{PPC_REG_LR, 0x10000514},
 	});
 	EXPECT_NO_MEMORY_LOADED_STORED();
-	EXPECT_JUST_VALUES_CALLED({
-		{_translator->getCondBranchFunction(), {false, 0x100004bc}},
-	});
+	EXPECT_NO_VALUE_CALLED();
+//	EXPECT_JUST_VALUES_CALLED({
+//		{_translator->getCondBranchFunction(), {false, 0x100004bc}},
+//	});
 }
 
 // op0 = ppc_op_crx, op1 = PPC_OP_IMM = target
@@ -7902,9 +7920,10 @@ TEST_P(Capstone2LlvmIrTranslatorPowerpcTests, PPC_INS_BDNZFLRL_zero_false_cr4)
 		{PPC_REG_LR, 0x10000514},
 	});
 	EXPECT_NO_MEMORY_LOADED_STORED();
-	EXPECT_JUST_VALUES_CALLED({
-		{_translator->getCondBranchFunction(), {false, 0x100004bc}},
-	});
+	EXPECT_NO_VALUE_CALLED();
+//	EXPECT_JUST_VALUES_CALLED({
+//		{_translator->getCondBranchFunction(), {false, 0x100004bc}},
+//	});
 }
 
 //
@@ -8119,9 +8138,10 @@ TEST_P(Capstone2LlvmIrTranslatorPowerpcTests, PPC_INS_BDZTLR_nonzero_true_cr4)
 		{PPC_REG_CTR, 9},
 	});
 	EXPECT_NO_MEMORY_LOADED_STORED();
-	EXPECT_JUST_VALUES_CALLED({
-		{_translator->getCondBranchFunction(), {false, 0x100004bc}},
-	});
+	EXPECT_NO_VALUE_CALLED();
+//	EXPECT_JUST_VALUES_CALLED({
+//		{_translator->getCondBranchFunction(), {false, 0x100004bc}},
+//	});
 }
 
 // op0 = ppc_op_crx, op1 = PPC_OP_IMM = target
@@ -8142,9 +8162,10 @@ TEST_P(Capstone2LlvmIrTranslatorPowerpcTests, PPC_INS_BDZTLR_nonzero_false_cr4)
 		{PPC_REG_CTR, 9},
 	});
 	EXPECT_NO_MEMORY_LOADED_STORED();
-	EXPECT_JUST_VALUES_CALLED({
-		{_translator->getCondBranchFunction(), {false, 0x100004bc}},
-	});
+	EXPECT_NO_VALUE_CALLED();
+//	EXPECT_JUST_VALUES_CALLED({
+//		{_translator->getCondBranchFunction(), {false, 0x100004bc}},
+//	});
 }
 
 // op0 = ppc_op_crx, op1 = PPC_OP_IMM = target
@@ -8166,7 +8187,7 @@ TEST_P(Capstone2LlvmIrTranslatorPowerpcTests, PPC_INS_BDZTLR_zero_true_cr4)
 	});
 	EXPECT_NO_MEMORY_LOADED_STORED();
 	EXPECT_JUST_VALUES_CALLED({
-		{_translator->getCondBranchFunction(), {true, 0x100004bc}},
+		{_translator->getReturnFunction(), {0x100004bc}},
 	});
 }
 
@@ -8188,9 +8209,10 @@ TEST_P(Capstone2LlvmIrTranslatorPowerpcTests, PPC_INS_BDZTLR_zero_false_cr4)
 		{PPC_REG_CTR, 0},
 	});
 	EXPECT_NO_MEMORY_LOADED_STORED();
-	EXPECT_JUST_VALUES_CALLED({
-		{_translator->getCondBranchFunction(), {false, 0x100004bc}},
-	});
+	EXPECT_NO_VALUE_CALLED();
+//	EXPECT_JUST_VALUES_CALLED({
+//		{_translator->getCondBranchFunction(), {false, 0x100004bc}},
+//	});
 }
 
 //
@@ -8414,9 +8436,10 @@ TEST_P(Capstone2LlvmIrTranslatorPowerpcTests, PPC_INS_BDZTLRL_nonzero_true_cr4)
 		{PPC_REG_LR, 0x10000514},
 	});
 	EXPECT_NO_MEMORY_LOADED_STORED();
-	EXPECT_JUST_VALUES_CALLED({
-		{_translator->getCondBranchFunction(), {false, 0x100004bc}},
-	});
+	EXPECT_NO_VALUE_CALLED();
+//	EXPECT_JUST_VALUES_CALLED({
+//		{_translator->getCondBranchFunction(), {false, 0x100004bc}},
+//	});
 }
 
 // op0 = ppc_op_crx, op1 = PPC_OP_IMM = target
@@ -8438,9 +8461,10 @@ TEST_P(Capstone2LlvmIrTranslatorPowerpcTests, PPC_INS_BDZTLRL_nonzero_false_cr4)
 		{PPC_REG_LR, 0x10000514},
 	});
 	EXPECT_NO_MEMORY_LOADED_STORED();
-	EXPECT_JUST_VALUES_CALLED({
-		{_translator->getCondBranchFunction(), {false, 0x100004bc}},
-	});
+	EXPECT_NO_VALUE_CALLED();
+//	EXPECT_JUST_VALUES_CALLED({
+//		{_translator->getCondBranchFunction(), {false, 0x100004bc}},
+//	});
 }
 
 // op0 = ppc_op_crx, op1 = PPC_OP_IMM = target
@@ -8463,7 +8487,7 @@ TEST_P(Capstone2LlvmIrTranslatorPowerpcTests, PPC_INS_BDZTLRL_zero_true_cr4)
 	});
 	EXPECT_NO_MEMORY_LOADED_STORED();
 	EXPECT_JUST_VALUES_CALLED({
-		{_translator->getCondBranchFunction(), {true, 0x100004bc}},
+		{_translator->getReturnFunction(), {0x100004bc}},
 	});
 }
 
@@ -8486,9 +8510,10 @@ TEST_P(Capstone2LlvmIrTranslatorPowerpcTests, PPC_INS_BDZTLRL_zero_false_cr4)
 		{PPC_REG_LR, 0x10000514},
 	});
 	EXPECT_NO_MEMORY_LOADED_STORED();
-	EXPECT_JUST_VALUES_CALLED({
-		{_translator->getCondBranchFunction(), {false, 0x100004bc}},
-	});
+	EXPECT_NO_VALUE_CALLED();
+//	EXPECT_JUST_VALUES_CALLED({
+//		{_translator->getCondBranchFunction(), {false, 0x100004bc}},
+//	});
 }
 
 //
@@ -8703,9 +8728,10 @@ TEST_P(Capstone2LlvmIrTranslatorPowerpcTests, PPC_INS_BDZFLR_nonzero_true_cr4)
 		{PPC_REG_CTR, 9},
 	});
 	EXPECT_NO_MEMORY_LOADED_STORED();
-	EXPECT_JUST_VALUES_CALLED({
-		{_translator->getCondBranchFunction(), {false, 0x100004bc}},
-	});
+	EXPECT_NO_VALUE_CALLED();
+//	EXPECT_JUST_VALUES_CALLED({
+//		{_translator->getCondBranchFunction(), {false, 0x100004bc}},
+//	});
 }
 
 // op0 = ppc_op_crx, op1 = PPC_OP_IMM = target
@@ -8726,9 +8752,10 @@ TEST_P(Capstone2LlvmIrTranslatorPowerpcTests, PPC_INS_BDZFLR_nonzero_false_cr4)
 		{PPC_REG_CTR, 9},
 	});
 	EXPECT_NO_MEMORY_LOADED_STORED();
-	EXPECT_JUST_VALUES_CALLED({
-		{_translator->getCondBranchFunction(), {false, 0x100004bc}},
-	});
+	EXPECT_NO_VALUE_CALLED();
+//	EXPECT_JUST_VALUES_CALLED({
+//		{_translator->getCondBranchFunction(), {false, 0x100004bc}},
+//	});
 }
 
 // op0 = ppc_op_crx, op1 = PPC_OP_IMM = target
@@ -8749,9 +8776,10 @@ TEST_P(Capstone2LlvmIrTranslatorPowerpcTests, PPC_INS_BDZFLR_zero_true_cr4)
 		{PPC_REG_CTR, 0},
 	});
 	EXPECT_NO_MEMORY_LOADED_STORED();
-	EXPECT_JUST_VALUES_CALLED({
-		{_translator->getCondBranchFunction(), {false, 0x100004bc}},
-	});
+	EXPECT_NO_VALUE_CALLED();
+//	EXPECT_JUST_VALUES_CALLED({
+//		{_translator->getCondBranchFunction(), {false, 0x100004bc}},
+//	});
 }
 
 // op0 = ppc_op_crx, op1 = PPC_OP_IMM = target
@@ -8773,7 +8801,7 @@ TEST_P(Capstone2LlvmIrTranslatorPowerpcTests, PPC_INS_BDZFLR_zero_false_cr4)
 	});
 	EXPECT_NO_MEMORY_LOADED_STORED();
 	EXPECT_JUST_VALUES_CALLED({
-		{_translator->getCondBranchFunction(), {true, 0x100004bc}},
+		{_translator->getReturnFunction(), {0x100004bc}},
 	});
 }
 
@@ -8998,9 +9026,10 @@ TEST_P(Capstone2LlvmIrTranslatorPowerpcTests, PPC_INS_BDZFLRL_nonzero_true_cr4)
 		{PPC_REG_LR, 0x10000514},
 	});
 	EXPECT_NO_MEMORY_LOADED_STORED();
-	EXPECT_JUST_VALUES_CALLED({
-		{_translator->getCondBranchFunction(), {false, 0x100004bc}},
-	});
+	EXPECT_NO_VALUE_CALLED();
+//	EXPECT_JUST_VALUES_CALLED({
+//		{_translator->getCondBranchFunction(), {false, 0x100004bc}},
+//	});
 }
 
 // op0 = ppc_op_crx, op1 = PPC_OP_IMM = target
@@ -9022,9 +9051,10 @@ TEST_P(Capstone2LlvmIrTranslatorPowerpcTests, PPC_INS_BDZFLRL_nonzero_false_cr4)
 		{PPC_REG_LR, 0x10000514},
 	});
 	EXPECT_NO_MEMORY_LOADED_STORED();
-	EXPECT_JUST_VALUES_CALLED({
-		{_translator->getCondBranchFunction(), {false, 0x100004bc}},
-	});
+	EXPECT_NO_VALUE_CALLED();
+//	EXPECT_JUST_VALUES_CALLED({
+//		{_translator->getCondBranchFunction(), {false, 0x100004bc}},
+//	});
 }
 
 // op0 = ppc_op_crx, op1 = PPC_OP_IMM = target
@@ -9046,9 +9076,10 @@ TEST_P(Capstone2LlvmIrTranslatorPowerpcTests, PPC_INS_BDZFLRL_zero_true_cr4)
 		{PPC_REG_LR, 0x10000514},
 	});
 	EXPECT_NO_MEMORY_LOADED_STORED();
-	EXPECT_JUST_VALUES_CALLED({
-		{_translator->getCondBranchFunction(), {false, 0x100004bc}},
-	});
+	EXPECT_NO_VALUE_CALLED();
+//	EXPECT_JUST_VALUES_CALLED({
+//		{_translator->getCondBranchFunction(), {false, 0x100004bc}},
+//	});
 }
 
 // op0 = ppc_op_crx, op1 = PPC_OP_IMM = target
@@ -9071,7 +9102,7 @@ TEST_P(Capstone2LlvmIrTranslatorPowerpcTests, PPC_INS_BDZFLRL_zero_false_cr4)
 	});
 	EXPECT_NO_MEMORY_LOADED_STORED();
 	EXPECT_JUST_VALUES_CALLED({
-		{_translator->getCondBranchFunction(), {true, 0x100004bc}},
+		{_translator->getReturnFunction(), {0x100004bc}},
 	});
 }
 

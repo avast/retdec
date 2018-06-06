@@ -11,35 +11,34 @@
 #include <llvm/Pass.h>
 
 #include "retdec/bin2llvmir/optimizations/class_hierarchy/hierarchy.h"
-#include "retdec/bin2llvmir/optimizations/ctor_dtor/ctor_dtor.h"
-#include "retdec/bin2llvmir/optimizations/vtable/vtable.h"
+#include "retdec/bin2llvmir/analyses/ctor_dtor.h"
 #include "retdec/bin2llvmir/providers/config.h"
+#include "retdec/bin2llvmir/providers/fileimage.h"
 
 namespace retdec {
 namespace bin2llvmir {
 
-/**
- *
- */
 class ClassHierarchyAnalysis : public llvm::ModulePass
 {
 	public:
 		static char ID;
 		ClassHierarchyAnalysis();
 		virtual bool runOnModule(llvm::Module& M) override;
-		virtual void getAnalysisUsage(llvm::AnalysisUsage &AU) const override;
 
 		void processRttiGcc();
 		void processRttiMsvc();
-		void processVtablesGcc(std::map<ClassTypeInfo*, Class*> &rtti2class);
-		void processVtablesMsvc(std::map<RTTITypeDescriptor*, Class*> &rtti2class);
+		void processVtablesGcc(std::map<const rtti_finder::ClassTypeInfo*, Class*> &rtti2class);
+		void processVtablesMsvc(std::map<const rtti_finder::RTTITypeDescriptor*, Class*> &rtti2class);
 		void processCtorsDtors();
 
 		void setToConfig(llvm::Module* m) const;
 
 	private:
-		ClassHierarchy classHierarchy;
 		Config* config = nullptr;
+		FileImage* image = nullptr;
+
+		CtorDtor ctorDtor;
+		ClassHierarchy classHierarchy;
 };
 
 } // namespace bin2llvmir

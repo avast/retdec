@@ -50,7 +50,7 @@ void FuncTraversalAnalysis::doFuncsAnalysis(CallGraph &callGraph) {
 	Node *prevNode = nullptr;
 	for (scc_iterator<CallGraphNode *> i = scc_begin(startNode),
 			e = scc_end(startNode); i != e; ++i) {
-		const CallGraphNodeVec &callNodesVec(*i);
+		const std::vector<llvm::CallGraphNode*> &callNodesVec(*i);
 		if (callNodesVec.size() > 1) {
 			// We have strongly connected component. This means recursion.
 			prevNode = processFuncsInSCC(callNodesVec, prevNode);
@@ -110,7 +110,7 @@ Function *FuncTraversalAnalysis::getNextFuncInSCC() {
 * @return Created node which is the last in linked list.
 */
 FuncTraversalAnalysis::Node *FuncTraversalAnalysis::processFuncsInSCC(
-		const CallGraphNodeVec &callNodesVec, Node *prevNode) {
+		const std::vector<llvm::CallGraphNode*> &callNodesVec, Node *prevNode) {
 	Node *firstSCCNode(nullptr);
 	Node *newNode(nullptr);
 	for (CallGraphNode *callGraphNode : callNodesVec) {
@@ -143,7 +143,7 @@ FuncTraversalAnalysis::Node *FuncTraversalAnalysis::processFuncsInSCC(
 * @return Created node which is the last in linked list.
 */
 FuncTraversalAnalysis::Node *FuncTraversalAnalysis::processFuncNotInSCC(
-		const CallGraphNodeVec &callNodesVec, Node *prevNode) {
+		const std::vector<llvm::CallGraphNode*> &callNodesVec, Node *prevNode) {
 	Node *newNode = Node::createNodeNotInSCC(
 		*(*callNodesVec.begin())->getFunction());
 	solveConnectionWithNextNode(prevNode, newNode);

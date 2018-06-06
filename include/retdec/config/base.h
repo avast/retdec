@@ -40,7 +40,7 @@ Json::Value::UInt safeGetUint(
 		const std::string& name = "",
 		Json::Value::UInt defaultValue = 0);
 
-Json::Value::UInt64 safeGetAddress(
+retdec::utils::Address safeGetAddress(
 		const Json::Value& val,
 		const std::string& name = "");
 
@@ -63,6 +63,14 @@ bool safeGetBool(
 		const Json::Value& val,
 		const std::string& name = "",
 		bool defaultValue = false);
+
+//
+//=============================================================================
+// Conversions to JSON values.
+//=============================================================================
+//
+
+std::string toJsonValue(retdec::utils::Address a);
 
 //
 //=============================================================================
@@ -94,14 +102,8 @@ class AddressRangeJson : public retdec::utils::AddressRange
 
 			if (getStart().isDefined() && getEnd().isDefined())
 			{
-//				pair["start"] = static_cast<Json::Value::UInt64>(getStart().getValue());
-//				pair["end"] = static_cast<Json::Value::UInt64>(getEnd().getValue());
-
-//				pair["start"] = static_cast<uint64_t>(getStart().getValue());
-//				pair["end"] = static_cast<uint64_t>(getEnd().getValue());
-
-				pair["start"] = getStart().getValue();
-				pair["end"] = getEnd().getValue();
+				pair["start"] = toJsonValue(getStart());
+				pair["end"] = toJsonValue(getEnd());
 			}
 
 			return pair;
@@ -118,8 +120,9 @@ class AddressRangeJson : public retdec::utils::AddressRange
 				return;
 			}
 
-			setStart(safeGetAddress(val, "start"));
-			setEnd(safeGetAddress(val, "end"));
+			setStartEnd(
+					safeGetAddress(val, "start"),
+					safeGetAddress(val, "end"));
 		}
 };
 

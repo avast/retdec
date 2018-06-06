@@ -47,7 +47,7 @@ std::string Class::dump() const
 
 	out << "\tvtables      :" << std::endl;
 	for (auto* vt : virtualFunctionTables)
-		out << "\t\t" << vt->getName() << std::endl;
+		out << "\t\t" << vt->vtableAddress << std::endl;
 
 	return out.str();
 }
@@ -106,7 +106,7 @@ retdec::config::Class Class::getConfigClass(
 
 	for (auto* vt : virtualFunctionTables)
 	{
-		c.virtualTables.insert(vt->getName());
+		c.virtualTables.insert(names::generateVtableName(vt->vtableAddress));
 	}
 
 	return c;

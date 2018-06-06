@@ -15,6 +15,7 @@
 #include "retdec/utils/address.h"
 #include "retdec/bin2llvmir/providers/config.h"
 #include "retdec/bin2llvmir/providers/fileimage.h"
+#include "retdec/bin2llvmir/providers/names.h"
 
 namespace retdec {
 namespace bin2llvmir {
@@ -28,11 +29,13 @@ class MainDetection : public llvm::ModulePass
 		bool runOnModuleCustom(
 				llvm::Module& m,
 				Config* c,
-				FileImage* img = nullptr);
+				FileImage* img = nullptr,
+				NameContainer* names = nullptr);
 
 	private:
 		bool run();
 		bool skipAnalysis();
+		void removeStaticallyLinked();
 		retdec::utils::Address getFromFunctionNames();
 		retdec::utils::Address getFromContext();
 		retdec::utils::Address getFromEntryPointOffset(int offset);
@@ -45,6 +48,7 @@ class MainDetection : public llvm::ModulePass
 		llvm::Module* _module = nullptr;
 		Config* _config = nullptr;
 		FileImage* _image = nullptr;
+		NameContainer* _names = nullptr;
 };
 
 } // namespace bin2llvmir

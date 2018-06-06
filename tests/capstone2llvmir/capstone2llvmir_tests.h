@@ -216,6 +216,11 @@ class Capstone2LlvmIrTranslatorTests : public ::testing::Test
 			initKeystoneEngine();
 			initCapstone2LlvmIrTranslator(); // Generate environment to module.
 			initLlvmEmulator(); // Loads up the environment for emulation.
+
+			_translator->getCallFunction()->setName("__pseudo_call");
+			_translator->getReturnFunction()->setName("__pseudo_return");
+			_translator->getBranchFunction()->setName("__pseudo_branch");
+			_translator->getCondBranchFunction()->setName("__pseudo_cond_branch");
 		}
 
 	// Implemented here.
@@ -279,7 +284,7 @@ class Capstone2LlvmIrTranslatorTests : public ::testing::Test
 			auto* ret = irb.CreateRetVoid();
 			irb.SetInsertPoint(ret);
 
-			_translator->translate(asmBytes, addr, irb);
+			_translator->translate(asmBytes.data(), asmBytes.size(), addr, irb);
 
 			return f;
 		}

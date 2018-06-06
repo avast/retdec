@@ -1,425 +1,475 @@
 /**
-* @file src/bin2llvmir/optimizations/inst_opt/inst_opt.cpp
-* @brief Instruction optimizations which we want to do ourselves.
-* @copyright (c) 2017 Avast Software, licensed under the MIT license
-*/
+ * @file src/bin2llvmir/optimizations/inst_opt/inst_opt.cpp
+ * @brief Optimize a single LLVM instruction.
+ * @copyright (c) 2017 Avast Software, licensed under the MIT license
+ */
 
-#include <cassert>
-#include <iomanip>
-#include <iostream>
-#include <set>
-#include <sstream>
-#include <string>
-#include <vector>
+#include <llvm/IR/PatternMatch.h>
 
-#include <llvm/IR/Constants.h>
-#include <llvm/IR/InstIterator.h>
-#include <llvm/IR/Instruction.h>
-#include <llvm/IR/Instructions.h>
-
-#include "retdec/utils/string.h"
 #include "retdec/bin2llvmir/optimizations/inst_opt/inst_opt.h"
-#include "retdec/bin2llvmir/providers/asm_instruction.h"
-#include "retdec/bin2llvmir/utils/defs.h"
-#include "retdec/bin2llvmir/utils/instruction.h"
-#define debug_enabled false
-#include "retdec/llvm-support/utils.h"
-#include "retdec/bin2llvmir/utils/type.h"
 
-using namespace retdec::llvm_support;
 using namespace llvm;
+using namespace PatternMatch;
 
 namespace retdec {
 namespace bin2llvmir {
+namespace inst_opt {
 
-char InstOpt::ID = 0;
-
-static RegisterPass<InstOpt> X(
-		"inst-opt",
-		"Assembly instruction optimization",
-		false, // Only looks at CFG
-		false // Analysis Pass
-);
-
-InstOpt::InstOpt() :
-		ModulePass(ID)
+/**
+ * x = add y, 0
+ *   =>
+ * x = y
+ *
+ * x = add 0, y
+ *   =>
+ * x = y
+ */
+bool addZero(llvm::Instruction* insn)
 {
+	Value* val;
+	uint64_t zero;
 
+	if (!(match(insn, m_Add(m_Value(val), m_ConstantInt(zero)))
+			|| match(insn, m_Add(m_ConstantInt(zero), m_Value(val)))))
+	{
+		return false;
+	}
+	if (zero != 0)
+	{
+		return false;
+	}
+
+	insn->replaceAllUsesWith(val);
+	insn->eraseFromParent();
+	return true;
 }
 
-bool InstOpt::runOnModule(Module& m)
+/**
+ * x = sub y, 0
+ *   =>
+ * x = use y
+ */
+bool subZero(llvm::Instruction* insn)
 {
-	_module = &m;
-	_config = ConfigProvider::getConfig(_module);
-	removeInstructionNames();
-	return run();
+	uint64_t zero;
+
+	if (!match(insn, m_Sub(m_Value(), m_ConstantInt(zero))))
+	{
+		return false;
+	}
+	if (zero != 0)
+	{
+		return false;
+	}
+
+	insn->replaceAllUsesWith(insn->getOperand(0));
+	insn->eraseFromParent();
+	return true;
 }
 
-bool InstOpt::runOnModuleCustom(llvm::Module& m, Config* c)
+/**
+ * a = trunc i32 val to i8
+ * b = zext i8 a to i32
+ *   =>
+ * b = and i32 val, 255
+ *
+ * a = trunc i32 val to i16
+ * b = zext i16 a to i32
+ *   =>
+ * b = and i32 val, 65535
+ */
+bool truncZext(llvm::Instruction* insn)
 {
-	_module = &m;
-	_config = c;
-	return run();
+	Value* val;
+
+	if (!match(insn, m_ZExt(m_Trunc(m_Value(val)))))
+	{
+		return false;
+	}
+	auto* zext = cast<ZExtInst>(insn);
+	auto* trunc = cast<TruncInst>(zext->getOperand(0));
+	Instruction* a = nullptr;
+
+	if (trunc->getSrcTy()->isIntegerTy(32)
+		&& trunc->getDestTy()->isIntegerTy(8)
+		&& zext->getSrcTy()->isIntegerTy(8)
+		&& zext->getDestTy()->isIntegerTy(32))
+	{
+		a = BinaryOperator::CreateAnd(
+				val,
+				ConstantInt::get(val->getType(), 255),
+				"",
+				zext);
+	}
+	else if (trunc->getSrcTy()->isIntegerTy(32)
+			&& trunc->getDestTy()->isIntegerTy(16)
+			&& zext->getSrcTy()->isIntegerTy(16)
+			&& zext->getDestTy()->isIntegerTy(32))
+	{
+		a = BinaryOperator::CreateAnd(
+				val,
+				ConstantInt::get(val->getType(), 65535),
+				"",
+				zext);
+	}
+	if (a == nullptr)
+	{
+		return false;
+	}
+
+	a->takeName(zext);
+	zext->replaceAllUsesWith(a);
+	zext->eraseFromParent();
+	if (trunc->user_empty())
+	{
+		trunc->eraseFromParent();
+	}
+
+	return true;
 }
 
-bool InstOpt::run()
+/**
+ * a = xor x, x
+ *   =>
+ * a = 0
+ */
+bool xorXX(llvm::Instruction* insn)
+{
+	Value* op0;
+	Value* op1;
+
+	if (!(match(insn, m_Xor(m_Value(op0), m_Value(op1)))
+			&& op0 == op1))
+	{
+		return false;
+	}
+
+	insn->replaceAllUsesWith(ConstantInt::get(insn->getType(), 0));
+	insn->eraseFromParent();
+
+	return true;
+}
+
+/**
+ * a = load x
+ * b = load x
+ * c = xor a, b
+ *   =>
+ * c = 0
+ */
+bool xorLoadXX(llvm::Instruction* insn)
+{
+	Instruction* i1;
+	Instruction* i2;
+
+	if (!(match(insn, m_Xor(m_Instruction(i1), m_Instruction(i2)))
+			&& isa<LoadInst>(i1)
+			&& isa<LoadInst>(i2)))
+	{
+		return false;
+	}
+	LoadInst* l1 = cast<LoadInst>(i1);
+	LoadInst* l2 = cast<LoadInst>(i2);
+	if (l1->getPointerOperand() != l2->getPointerOperand())
+	{
+		return false;
+	}
+
+	insn->replaceAllUsesWith(ConstantInt::get(insn->getType(), 0));
+	insn->eraseFromParent();
+	if (l1->user_empty())
+	{
+		l1->eraseFromParent();
+	}
+	if (l2 != l1 && l2->user_empty())
+	{
+		l2->eraseFromParent();
+	}
+
+	return true;
+}
+
+/**
+ * a = or x, x
+ *   =>
+ * a = x
+ *
+ * a = and x, x
+ *   =>
+ * a = x
+ */
+bool orAndXX(llvm::Instruction* insn)
+{
+	Value* op0;
+	Value* op1;
+
+	if (!(match(insn, m_Or(m_Value(op0), m_Value(op1)))
+			|| match(insn, m_And(m_Value(op0), m_Value(op1)))))
+	{
+		return false;
+	}
+	if (op0 != op1)
+	{
+		return false;
+	}
+
+	insn->replaceAllUsesWith(op0);
+	insn->eraseFromParent();
+
+	return true;
+}
+
+/**
+ * a = load x
+ * b = load x
+ * c = or a, b
+ *   =>
+ * c = 0
+ *
+ * a = load x
+ * b = load x
+ * c = and a, b
+ *   =>
+ * c = 0
+ */
+bool orAndLoadXX(llvm::Instruction* insn)
+{
+	Instruction* i1;
+	Instruction* i2;
+
+	if (!(match(insn, m_Or(m_Instruction(i1), m_Instruction(i2)))
+			|| match(insn, m_And(m_Instruction(i1), m_Instruction(i2)))))
+	{
+		return false;
+	}
+	LoadInst* l1 = dyn_cast<LoadInst>(i1);
+	LoadInst* l2 = dyn_cast<LoadInst>(i2);
+	if (l1 == nullptr
+			|| l2 == nullptr
+			|| l1->getPointerOperand() != l2->getPointerOperand())
+	{
+		return false;
+	}
+
+	insn->replaceAllUsesWith(l1);
+	insn->eraseFromParent();
+	if (l2->user_empty())
+	{
+		l2->eraseFromParent();
+	}
+
+	return true;
+}
+
+/**
+ * a = xor i1 x, y
+ *   =>
+ * a = icmp ne i1 x, y
+ */
+bool xor_i1(llvm::Instruction* insn)
+{
+	Value* op0;
+	Value* op1;
+
+	if (!(match(insn, m_Xor(m_Value(op0), m_Value(op1)))
+			&& insn->getType()->isIntegerTy(1)))
+	{
+		return false;
+	}
+
+	auto* cmp = CmpInst::Create(
+			Instruction::ICmp,
+			ICmpInst::ICMP_NE,
+			op0,
+			op1,
+			"",
+			insn);
+	cmp->takeName(insn);
+	insn->replaceAllUsesWith(cmp);
+	insn->eraseFromParent();
+
+	return true;
+}
+
+/**
+ * a = and i1 x, y
+ *   =>
+ * a = icmp eq i1 x, y
+ */
+bool and_i1(llvm::Instruction* insn)
+{
+	Value* op0;
+	Value* op1;
+
+	if (!(match(insn, m_And(m_Value(op0), m_Value(op1)))
+			&& insn->getType()->isIntegerTy(1)))
+	{
+		return false;
+	}
+
+	auto* cmp = CmpInst::Create(
+			Instruction::ICmp,
+			ICmpInst::ICMP_EQ,
+			op0,
+			op1,
+			"",
+			insn);
+	cmp->takeName(insn);
+	insn->replaceAllUsesWith(cmp);
+	insn->eraseFromParent();
+
+	return true;
+}
+
+/**
+ * a = add x, c1
+ * b = add a, c2
+ *   =>
+ * b = add x, (c1 + c2)
+ */
+bool addSequence(llvm::Instruction* insn)
+{
+	Value* val;
+	ConstantInt* c1;
+	ConstantInt* c2;
+
+	if (!(match(insn, m_Add(
+			m_Add(m_Value(val), m_ConstantInt(c1)),
+			m_ConstantInt(c2)))))
+	{
+		return false;
+	}
+
+	Instruction* secondAdd = cast<Instruction>(insn->getOperand(0));
+	insn->setOperand(0, val);
+	insn->setOperand(1, ConstantInt::get(insn->getType(), c1->getValue() + c2->getValue()));
+
+	if (secondAdd->user_empty())
+	{
+		secondAdd->eraseFromParent();
+	}
+
+	return true;
+}
+
+/**
+ * cast1 int/fp/ptr to ...
+ * ...
+ * cast2 ... to int/fp/ptr
+ *   =>
+ * cast int/fp/ptr to int/fp/ptr
+ */
+llvm::Value* castSequence(llvm::CastInst* cast1, llvm::CastInst* cast2)
+{
+	auto* src = cast1->getOperand(0);
+	auto* srcTy = cast1->getSrcTy();
+	auto* dstTy = cast2->getDestTy();
+
+	Value* v = nullptr;
+
+	// int -> cast -> cast -> int
+	if (srcTy->isIntegerTy() && dstTy->isIntegerTy())
+	{
+		bool sign = cast1->getOpcode() == Instruction::SIToFP
+				|| cast2->getOpcode() == Instruction::FPToSI;
+		v = srcTy != dstTy
+				? CastInst::CreateIntegerCast(src, dstTy, sign, "", cast2)
+				: src;
+	}
+	// ptr -> cast -> cast -> ptr
+	else if (srcTy->isPointerTy() && dstTy->isPointerTy())
+	{
+		v = srcTy != dstTy
+				? CastInst::CreatePointerCast(src, dstTy, "", cast2)
+				: src;
+	}
+	// float -> cast -> cast -> float
+	else if (srcTy->isFloatingPointTy() && dstTy->isFloatingPointTy())
+	{
+		v = srcTy != dstTy
+				? CastInst::CreateFPCast(src, dstTy, "", cast2)
+				: src;
+	}
+	else
+	{
+		return nullptr;
+	}
+
+	cast2->replaceAllUsesWith(v);
+	cast2->eraseFromParent();
+	if (cast1->user_empty())
+	{
+		cast1->eraseFromParent();
+	}
+	return v;
+}
+
+/**
+ * Find cast sequnces to try to optimize.
+ */
+llvm::Value* castSequenceFinder(llvm::Value* insn)
+{
+	auto* cast2 = dyn_cast<CastInst>(insn);
+	auto* cast1 = cast2 ? dyn_cast<CastInst>(cast2->getOperand(0)) : nullptr;
+
+	while (cast1)
+	{
+		if (auto* v = castSequence(cast1, cast2))
+		{
+			return v;
+		}
+		cast1 = dyn_cast<CastInst>(cast1->getOperand(0));
+	}
+
+	return nullptr;
+}
+
+/**
+ * Apply cast optimization repeatedly until it can not be applied anymore.
+ */
+bool castSequenceWrapper(llvm::Instruction* insn)
 {
 	bool changed = false;
-
-	changed |= fixX86RepAnalysis();
-	changed |= runGeneralOpts();
-
+	Value* v = insn;
+	while (v)
+	{
+		v = castSequenceFinder(v);
+		changed |= v != nullptr;
+	}
 	return changed;
 }
 
 /**
- * TODO: Instruction names in LLVM IR slow down all the optimizations.
- * The new capstone2llvmir decoder does not generate names, so maybe we can
- * remove this code.
+ * Order here is important.
+ * More specific patterns must go first, more general later.
  */
-void InstOpt::removeInstructionNames()
+std::vector<bool (*)(llvm::Instruction*)> optimizations =
 {
-	for (auto& f : _module->getFunctionList())
-	{
-		auto it = inst_begin(f);
-		auto e = inst_end(f);
-		while (it != e)
-		{
-			Instruction* i = &(*it);
-			++it;
+		&addZero,
+		&subZero,
+		&truncZext,
+		&xorLoadXX,
+		&xorXX,
+		&xor_i1,
+		&and_i1,
+		&orAndLoadXX,
+		&orAndXX,
+		&addSequence,
+		&castSequenceWrapper,
+};
 
-			if (i->hasName())
-			{
-				i->setName(Twine());
-			}
+bool optimize(llvm::Instruction* insn)
+{
+	for (auto& f : optimizations)
+	{
+		if (f(insn))
+		{
+			return true;
 		}
 	}
+	return false;
 }
 
-bool InstOpt::runGeneralOpts()
-{
-	bool changed = false;
-
-	for (auto& F : _module->getFunctionList())
-	{
-		for (auto ai = AsmInstruction(&F); ai.isValid(); ai = ai.getNext())
-		{
-			std::set<Instruction*> toErase;
-
-			for (auto& i : ai)
-			{
-				if (!isa<BinaryOperator>(i))
-				{
-					continue;
-				}
-
-				auto* op0 = dyn_cast<LoadInst>(i.getOperand(0));
-				auto* op1 = dyn_cast<LoadInst>(i.getOperand(1));
-				if (!(op0 && op1 && op0->getPointerOperand() == op1->getPointerOperand()))
-				{
-					continue;
-				}
-				AsmInstruction op0Asm(op0);
-				AsmInstruction op1Asm(op1);
-				if ((op0Asm != op1Asm) || (op0Asm != ai))
-				{
-					continue;
-				}
-
-				if (i.getOpcode() == Instruction::Xor)
-				{
-					i.replaceAllUsesWith(ConstantInt::get(i.getType(), 0));
-					toErase.insert(&i);
-					op1->replaceAllUsesWith(op0);
-					toErase.insert(op1);
-					changed = true;
-				}
-				else if (i.getOpcode() == Instruction::Or
-						|| i.getOpcode() == Instruction::And)
-				{
-					i.replaceAllUsesWith(op0);
-					toErase.insert(&i);
-					op1->replaceAllUsesWith(op0);
-					toErase.insert(op1);
-					changed = true;
-				}
-			}
-
-			for (auto* i : toErase)
-			{
-				i->eraseFromParent();
-				changed = true;
-			}
-		}
-	}
-
-	return changed;
-}
-
-bool InstOpt::fixX86RepAnalysis()
-{
-	if (_config == nullptr || !_config->getConfig().architecture.isX86())
-	{
-		return false;
-	}
-
-	bool changed = false;
-	auto& ctx = _module->getContext();
-
-	auto* eax = _config->getLlvmRegister("eax");
-	auto* edi = _config->getLlvmRegister("edi");
-	auto* ecx = _config->getLlvmRegister("ecx");
-	auto* esi = _config->getLlvmRegister("esi");
-	auto* zf = _config->getLlvmRegister("zf");
-	if (!eax || !edi || !ecx || !esi || !zf)
-	{
-		LOG << "[ABORT] register not found" << std::endl;
-		return false;
-	}
-
-	for (auto& F : _module->getFunctionList())
-	{
-		for (auto ai = AsmInstruction(&F); ai.isValid(); ai = ai.getNext())
-		{
-			cs_insn* capstoneI = ai.getCapstoneInsn();
-			cs_x86* xi = &capstoneI->detail->x86;
-
-			if ((capstoneI->id == X86_INS_STOSB
-					|| capstoneI->id == X86_INS_STOSW
-					|| capstoneI->id == X86_INS_STOSD)
-					&& xi->prefix[0] == X86_PREFIX_REP)
-			{
-				std::vector<Type*> params = {
-						getVoidPointerType(ctx),
-						Type::getInt32Ty(ctx),
-						getDefaultType(_module)};
-				FunctionType* ft = FunctionType::get(
-						getVoidPointerType(ctx),
-						params,
-						false);
-
-				// TODO: Many functions are created in the new decoder, but
-				// their types are not set at the moment.
-				// Therefore, if memset is created, it does not have the type
-				// needed here. Right now, we create new memset variant,
-				// but it would be better if decoder created fncs with good
-				// types, so it can be used here directly.
-				// TODO: the same for all other functions.
-				//
-				static Function* fnc = nullptr;
-				if (fnc == nullptr)
-				{
-					fnc = _module->getFunction("memset");
-					if (fnc == nullptr || fnc->getFunctionType() != ft)
-					{
-						fnc = Function::Create(
-								ft,
-								GlobalValue::ExternalLinkage,
-								"_memset",
-								_module);
-					}
-				}
-
-				if (fnc == nullptr || fnc->getFunctionType() != ft)
-				{
-					continue;
-				}
-
-				if (!ai.eraseInstructions())
-				{
-					continue;
-				}
-
-				std::vector<Value*> args;
-				auto* l0 = ai.insertBackSafe(new LoadInst(edi));
-				auto* l1 = ai.insertBackSafe(new LoadInst(eax));
-				auto* l2 = ai.insertBackSafe(new LoadInst(ecx));
-				args.push_back(convertValueToTypeAfter(l0, params[0], l2));
-				args.push_back(convertValueToTypeAfter(l1, params[1], l2));
-				args.push_back(convertValueToTypeAfter(l2, params[2], l2));
-				auto* call = ai.insertBackSafe(CallInst::Create(fnc, args));
-				auto* conv = convertValueToTypeAfter(
-						call,
-						ecx->getType()->getElementType(),
-						call);
-				ai.insertBackSafe(new StoreInst(conv, ecx));
-
-				changed = true;
-			}
-			if ((capstoneI->id == X86_INS_CMPSB
-					|| capstoneI->id == X86_INS_CMPSW
-					|| capstoneI->id == X86_INS_CMPSD)
-					&& xi->prefix[0] == X86_PREFIX_REP)
-			{
-				std::vector<Type*> params = {
-						getCharPointerType(ctx),
-						getCharPointerType(ctx),
-						getDefaultType(_module)};
-				FunctionType* ft = FunctionType::get(
-						Type::getInt32Ty(ctx),
-						params,
-						false);
-
-				static Function* fnc = nullptr;
-				if (fnc == nullptr)
-				{
-					fnc = _module->getFunction("strncmp");
-					if (fnc == nullptr || fnc->getFunctionType() != ft)
-					{
-						fnc = Function::Create(
-								ft,
-								GlobalValue::ExternalLinkage,
-								"_strncmp",
-								_module);
-					}
-				}
-
-				if (fnc == nullptr || fnc->getFunctionType() != ft)
-				{
-					continue;
-				}
-
-				if (!ai.eraseInstructions())
-				{
-					continue;
-				}
-
-				std::vector<Value*> args;
-				auto* l0 = ai.insertBackSafe(new LoadInst(esi));
-				auto* l1 = ai.insertBackSafe(new LoadInst(edi));
-				auto* l2 = ai.insertBackSafe(new LoadInst(ecx));
-				args.push_back(convertValueToTypeAfter(l0, params[0], l2));
-				args.push_back(convertValueToTypeAfter(l1, params[1], l2));
-				args.push_back(convertValueToTypeAfter(l2, params[2], l2));
-				auto* call = ai.insertBackSafe(CallInst::Create(fnc, args));
-				auto* conv = convertValueToTypeAfter(
-						call,
-						ecx->getType()->getElementType(),
-						call);
-				ai.insertBackSafe(new StoreInst(conv, ecx));
-				auto* trunc = ai.insertBackSafe(CastInst::CreateTruncOrBitCast(
-						conv,
-						Type::getInt1Ty(ctx)));
-				auto* xorOp = ai.insertBackSafe(BinaryOperator::CreateXor(
-						trunc,
-						ConstantInt::get(trunc->getType(), 1)));
-				ai.insertBackSafe(new StoreInst(xorOp, zf));
-
-				changed = true;
-			}
-			if ((capstoneI->id == X86_INS_MOVSB
-					|| capstoneI->id == X86_INS_MOVSW
-					|| capstoneI->id == X86_INS_MOVSD)
-					&& xi->prefix[0] == X86_PREFIX_REP)
-			{
-				std::vector<Type*> params = {
-						getVoidPointerType(ctx),
-						getVoidPointerType(ctx),
-						getDefaultType(_module)};
-				FunctionType* ft = FunctionType::get(
-						getVoidPointerType(ctx),
-						params,
-						false);
-
-				static Function* fnc = nullptr;
-				if (fnc == nullptr)
-				{
-					fnc = _module->getFunction("memcpy");
-					if (fnc == nullptr || fnc->getFunctionType() != ft)
-					{
-						fnc = Function::Create(
-								ft,
-								GlobalValue::ExternalLinkage,
-								"_memcpy",
-								_module);
-					}
-				}
-
-				if (fnc == nullptr || fnc->getFunctionType() != ft)
-				{
-					continue;
-				}
-
-				if (!ai.eraseInstructions())
-				{
-					continue;
-				}
-
-				std::vector<Value*> args;
-				auto* l0 = ai.insertBackSafe(new LoadInst(edi));
-				auto* l1 = ai.insertBackSafe(new LoadInst(esi));
-				auto* l2 = ai.insertBackSafe(new LoadInst(ecx));
-				args.push_back(convertValueToTypeAfter(l0, params[0], l2));
-				args.push_back(convertValueToTypeAfter(l1, params[1], l2));
-				args.push_back(convertValueToTypeAfter(l2, params[2], l2));
-				auto* call = ai.insertBackSafe(CallInst::Create(fnc, args));
-				auto* conv = convertValueToTypeAfter(
-						call,
-						ecx->getType()->getElementType(),
-						call);
-				ai.insertBackSafe(new StoreInst(conv, ecx));
-
-				changed = true;
-			}
-			if ((capstoneI->id == X86_INS_SCASB
-					|| capstoneI->id == X86_INS_SCASW
-					|| capstoneI->id == X86_INS_SCASD)
-					&& xi->prefix[0] == X86_PREFIX_REPNE)
-			{
-				std::vector<Type*> params = {
-						getCharPointerType(ctx)};
-				FunctionType* ft = FunctionType::get(
-						getDefaultType(_module),
-						params,
-						false);
-
-				static Function* fnc = nullptr;
-				if (fnc == nullptr)
-				{
-					fnc = _module->getFunction("strlen");
-					if (fnc == nullptr || fnc->getFunctionType() != ft)
-					{
-						fnc = Function::Create(
-								ft,
-								GlobalValue::ExternalLinkage,
-								"_strlen",
-								_module);
-					}
-				}
-
-				if (fnc == nullptr || fnc->getFunctionType() != ft)
-				{
-					continue;
-				}
-
-				if (!ai.eraseInstructions())
-				{
-					continue;
-				}
-
-				std::vector<Value*> args;
-				auto* l0 = ai.insertBackSafe(new LoadInst(edi));
-				args.push_back(convertValueToTypeAfter(l0, params[0], l0));
-				auto* call = ai.insertBackSafe(CallInst::Create(fnc, args));
-				auto* mul = ai.insertBackSafe(BinaryOperator::CreateMul(
-						call,
-						ConstantInt::get(call->getType(), -1, true)));
-				auto* add = ai.insertBackSafe(BinaryOperator::CreateSub(
-						mul,
-						ConstantInt::get(mul->getType(), 2)));
-				auto* conv = convertValueToTypeAfter(
-						add,
-						ecx->getType()->getElementType(),
-						add);
-				ai.insertBackSafe(new StoreInst(conv, ecx));
-
-				changed = true;
-			}
-		}
-	}
-
-	return changed;
-}
-
+} // namespace inst_opt
 } // namespace bin2llvmir
 } // namespace retdec

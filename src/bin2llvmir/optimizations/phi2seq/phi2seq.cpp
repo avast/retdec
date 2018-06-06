@@ -11,7 +11,6 @@
 #include <llvm/Transforms/Scalar.h>
 
 #include "retdec/bin2llvmir/optimizations/phi2seq/phi2seq.h"
-#include "retdec/bin2llvmir/providers/config.h"
 
 using namespace llvm;
 
@@ -52,12 +51,6 @@ void PHI2Seq::getAnalysisUsage(AnalysisUsage& au) const {
 }
 
 bool PHI2Seq::runOnFunction(Function &func) {
-	auto* c = ConfigProvider::getConfig(func.getParent());
-	if (c)
-	{
-		c->getConfig().parameters.completedFrontendPasses.insert(getName());
-	}
-
 	// Iterate through basic blocks.
 	for (BasicBlock &bb : func) {
 		orderDependentPHINodesAndSolveCycles(bb);

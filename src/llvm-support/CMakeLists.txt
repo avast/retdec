@@ -1,6 +1,5 @@
 set(LLVM_SUPPORT_SOURCES
 	diagnostics.cpp
-	utils.cpp
 )
 
 add_library(retdec-llvm-support STATIC ${LLVM_SUPPORT_SOURCES})

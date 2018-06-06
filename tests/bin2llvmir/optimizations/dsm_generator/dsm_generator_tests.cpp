@@ -38,12 +38,12 @@ TEST_F(DsmGeneratorTests, testHeaderGeneration)
 			"name" : "arm"
 		}
 	})");
+	auto abi = AbiProvider::addAbi(module.get(), &c);
 	auto format = createFormat();
 	auto image = FileImage(module.get(), std::move(format), &c);
-	ASSERT_TRUE(image.isOk());
 
 	std::stringstream ret;
-	bool b = pass.runOnModuleCustom(*module, &c, &image, ret);
+	bool b = pass.runOnModuleCustom(*module, &c, &image, abi, ret);
 
 	std::string ref =
 R"(^;;

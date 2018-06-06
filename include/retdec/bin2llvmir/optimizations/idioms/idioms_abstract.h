@@ -12,7 +12,6 @@
 #include <llvm/IR/Module.h>
 
 #include "retdec/bin2llvmir/optimizations/idioms/idioms_types.h"
-#include "retdec/bin2llvmir/providers/config.h"
 
 namespace retdec {
 namespace bin2llvmir {
@@ -25,17 +24,15 @@ private:
 	CC_arch m_arch;
 	CC_compiler m_compiler;
 	llvm::Module * m_module;
-	Config* m_config = nullptr;
 
 protected:
 	IdiomsAbstract();
 
-	void init(llvm::Module * M, Config* c, CC_compiler cc, CC_arch arch);
+	void init(llvm::Module * M, CC_compiler cc, CC_arch arch);
 
 	CC_compiler getCompiler() const { return m_compiler; }
 	CC_arch getArch() const { return m_arch; }
 	llvm::Module * getModule() const { return m_module; }
-	Config * getConfig() const { return m_config; }
 
 	virtual bool doAnalysis(llvm::Function &, llvm::Pass *) = 0;
 	virtual ~IdiomsAbstract() {}

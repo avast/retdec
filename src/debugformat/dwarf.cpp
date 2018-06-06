@@ -105,8 +105,7 @@ void DebugFormat::loadDwarfFunctions()
 		retdec::config::Function dif(name);
 		dif.setDemangledName(demangledName);
 
-		dif.setStart(df->lowAddr);
-		dif.setEnd(df->highAddr - 1);
+		dif.setStartEnd(df->lowAddr, df->highAddr);
 		dif.setSourceFileName(df->file);
 		dif.setIsVariadic(df->isVariadic);
 		dif.returnType = loadDwarfType(df->type);

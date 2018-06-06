@@ -9,13 +9,12 @@
 
 #include <list>
 #include <map>
+#include <set>
 #include <string>
 #include <vector>
 
 #include <llvm/IR/BasicBlock.h>
 #include <llvm/IR/Instructions.h>
-
-#include "retdec/bin2llvmir/utils/defs.h"
 
 namespace retdec {
 namespace bin2llvmir {
@@ -39,7 +38,7 @@ public:
 	*/
 	struct BBVecOfPHINodes {
 		/**
-		* @brief Constructs a new @c BBVecOfPHINodes.
+		* @brief Constructs a new @c std::vector<llvm::BasicBlock*>OfPHINodes.
 		*
 		* @param[in] bb Basic block that identifies PHI nodes in @a vecOfPHINodes.
 		* @param[in] vecOfPHINodes Vector of PHI nodes.
@@ -111,7 +110,7 @@ private:
 			Node *succ;
 
 			/// Basic block that characterize successor.
-			BBSet incBBs;
+			std::set<llvm::BasicBlock*> incBBs;
 		};
 
 		/// Mapping a string to successor.

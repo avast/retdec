@@ -8,23 +8,20 @@
 
 #include <llvm/IR/Constants.h>
 
-#include "retdec/llvm-support/utils.h"
 #include "retdec/bin2llvmir/optimizations/syscalls/syscalls.h"
 #include "retdec/bin2llvmir/providers/asm_instruction.h"
-#include "retdec/bin2llvmir/utils/defs.h"
-#include "retdec/bin2llvmir/utils/type.h"
 
-using namespace retdec::llvm_support;
 using namespace llvm;
-
-#define debug_enabled false
 
 /**
  * From /usr/include/asm/unistd_32.h
  * Note: x86 and x86_64 have different ABIs, therefore different syscall tables.
  * For x86_64 see /usr/include/asm/unistd_64.h.
+ *
+ * TODO: windows, 64-bit, Itanium, etc.:
+ * https://w3challs.com/syscalls
  */
-std::map<uint64_t, std::string> x86Syscalls =
+std::map<uint64_t, std::string> syscalls_x86_linux_32 =
 {
 	{0, "restart_syscall"},
 	{1, "exit"},
@@ -434,184 +431,79 @@ std::map<uint64_t, std::string> x86SocketSyscalls =
 namespace retdec {
 namespace bin2llvmir {
 
-bool SyscallFixer::x86TransformToDummySyscall(AsmInstruction& ai)
-{
-	ai.eraseInstructions();
-
-	auto* next = ai.getLlvmToAsmInstruction()->getNextNode();
-	assert(next);
-
-	auto* aType = Type::getInt32Ty(_module->getContext());
-	std::string dummyName = "int80_syscall";
-	static Function* lf = nullptr;
-	if (lf == nullptr)
-	{
-		std::vector<Type*> params = {aType};
-
-		auto ft = FunctionType::get(
-				Type::getInt32Ty(_module->getContext()),
-				params,
-				false);
-
-		lf = Function::Create(
-				ft,
-				GlobalValue::ExternalLinkage,
-				dummyName,
-				_module);
-		auto* cf = _config->insertFunction(lf);
-		assert(cf);
-		cf->setDeclarationString("int " + lf->getName().str() + "(int sysCallCode);");
-		cf->setIsSyscall();
-	}
-
-	std::vector<Value*> args;
-	auto* r = _module->getNamedGlobal("eax");
-	assert(r);
-	auto* l = new LoadInst(r, "", next);
-	args.push_back(convertValueToType(l, aType, next));
-
-	auto* call = CallInst::Create(lf, args, "", next);
-	LOG << "\t===> " << llvmObjToString(call) << std::endl;
-
-	auto* conv = convertValueToType(
-			call,
-			r->getType()->getElementType(),
-			next);
-	auto* s = new StoreInst(conv, r, next);
-	LOG << "\t===> " << llvmObjToString(s) << std::endl;
-
-	return true;
-}
-
 bool SyscallFixer::runX86()
 {
-	for (auto& F : _module->getFunctionList())
+	if (_config->getConfig().fileFormat.isElf32())
 	{
-		auto ai = AsmInstruction(&F);
-		for (; ai.isValid(); ai = ai.getNext())
-		{
-			cs_insn* capstoneI = ai.getCapstoneInsn();
-			if (capstoneI->id != X86_INS_INT)
-			{
-				continue;
-			}
-
-			uint64_t intCode = 0;
-			if (!_image->getImage()->get1Byte(ai.getAddress()+1, intCode) || intCode != 0x80)
-			{
-				continue;
-			}
-			LOG << "x86 syscall @ " << ai.getAddress() << ", code = " << std::hex << intCode << std::endl;
-
-			StoreInst* eaxStore = nullptr;
-			Instruction* it = ai.getLlvmToAsmInstruction()->getPrevNode();
-			for (; it != nullptr; it = it->getPrevNode())
-			{
-				if (auto* s = dyn_cast<StoreInst>(it))
-				{
-					auto* r = s->getPointerOperand();
-					if (_config->isRegister(r) && r->getName() == "eax")
-					{
-						eaxStore = s;
-						break;
-					}
-				}
-			}
-
-			if (eaxStore == nullptr || !isa<ConstantInt>(eaxStore->getValueOperand()))
-			{
-				x86TransformToDummySyscall(ai);
-				continue;
-			}
-
-			auto* ci = cast<ConstantInt>(eaxStore->getValueOperand());
-			LOG << "\teax store    : " << llvmObjToString(eaxStore) << std::endl;
-			LOG << "\tsyscall code : " << std::dec << ci->getZExtValue() << std::endl;
-
-			std::string callName;
-			auto fit = x86Syscalls.find(ci->getZExtValue());
-			if (fit == x86Syscalls.end())
-			{
-				x86TransformToDummySyscall(ai);
-				continue;
-			}
-			else
-			{
-				callName = fit->second;
-				LOG << "\tsyscall name : " << callName << std::endl;
-			}
-
-			auto* lf = _module->getFunction(callName);
-			if (lf)
-			{
-				LOG << "\thave function in LLVM IR" << std::endl;
-			}
-			else
-			{
-				LOG << "\tno function in LLVM IR" << std::endl;
-
-				lf = _lti->getLlvmFunction(callName);
-				if (lf)
-				{
-					LOG << "\tfunction in LTI: " << llvmObjToString(lf) << std::endl;
-				}
-				else
-				{
-					LOG << "\tno function in LTI" << std::endl;
-				}
-			}
-
-			ai.eraseInstructions();
-
-			if (lf == nullptr)
-			{
-				x86TransformToDummySyscall(ai);
-				continue;
-			}
-
-			auto* cf = _config->getConfigFunction(lf);
-			cf->setIsSyscall();
-
-			auto* next = ai.getLlvmToAsmInstruction()->getNextNode();
-			assert(next);
-			std::vector<std::string> x86Names = {"ebx", "ecx", "edx", "esi", "edi", "ebp"};
-
-			auto rIt = x86Names.begin();
-			std::vector<Value*> args;
-			for (auto& a : lf->args())
-			{
-				if (rIt != x86Names.end())
-				{
-					auto* r = _module->getNamedGlobal(*rIt);
-					assert(r);
-					auto* l = new LoadInst(r, "", next);
-					args.push_back(convertValueToType(l, a.getType(), next));
-					++rIt;
-				}
-				else
-				{
-					auto* ci = ConstantInt::get(getDefaultType(_module), 0);
-					args.push_back(convertConstantToType(ci, a.getType()));
-				}
-			}
-			auto* call = CallInst::Create(lf, args, "", next);
-			LOG << "\t===> " << llvmObjToString(call) << std::endl;
-
-			if (!lf->getReturnType()->isVoidTy())
-			{
-				auto* r = _module->getNamedGlobal("eax");
-				assert(r);
-				auto* conv = convertValueToType(
-						call,
-						r->getType()->getElementType(),
-						next);
-				auto* s = new StoreInst(conv, r, next);
-				LOG << "\t===> " << llvmObjToString(s) << std::endl;
-			}
-		}
+		return runX86_linux_32();
 	}
 
 	return false;
+}
+
+bool SyscallFixer::runX86_linux_32()
+{
+	bool changed = false;
+	for (Function& F : *_module)
+	{
+		for (auto ai = AsmInstruction(&F); ai.isValid(); ai = ai.getNext())
+		{
+			changed |= runX86_linux_32(ai);
+		}
+	}
+	return changed;
+}
+
+/**
+ * TODO: X86_INS_SYSCALL???
+ * https://www.felixcloutier.com/x86/SYSCALL.html
+ */
+bool SyscallFixer::runX86_linux_32(AsmInstruction ai)
+{
+	auto* x86Asm = ai.getCapstoneInsn();
+	if (x86Asm == nullptr || x86Asm->id != X86_INS_INT)
+	{
+		return false;
+	}
+
+	// Find interupt ID.
+	//
+	auto& detail = x86Asm->detail->x86;
+	if (detail.op_count != 1
+			|| detail.operands[0].type != X86_OP_IMM
+			|| detail.operands[0].imm != 0x80)
+	{
+		LOG << "\tbad interupt id" << std::endl;
+		return false;
+	}
+	LOG << "x86 syscall @ " << ai.getAddress() << std::endl;
+
+	// Find syscall ID.
+	//
+	auto* syscallIdReg = _abi->getSyscallIdRegister();
+	StoreInst* store = nullptr;
+	Instruction* it = ai.getLlvmToAsmInstruction()->getPrevNode();
+	for (; it != nullptr; it = it->getPrevNode())
+	{
+		if (auto* s = dyn_cast<StoreInst>(it))
+		{
+			if (s->getPointerOperand() == syscallIdReg)
+			{
+				store = s;
+				break;
+			}
+		}
+	}
+	if (store == nullptr || !isa<ConstantInt>(store->getValueOperand()))
+	{
+		LOG << "\tsyscall code not found" << std::endl;
+		return false;
+	}
+	uint64_t code = cast<ConstantInt>(store->getValueOperand())->getZExtValue();
+	LOG << "\tcode instruction: " << llvmObjToString(store) << std::endl;
+	LOG << "\tcode : " << std::dec << code << std::endl;
+
+	return transform(ai, code, syscalls_x86_linux_32);
 }
 
 } // namespace bin2llvmir

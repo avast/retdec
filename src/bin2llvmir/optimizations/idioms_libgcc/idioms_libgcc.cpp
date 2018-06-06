@@ -4,33 +4,33 @@
 * @copyright (c) 2017 Avast Software, licensed under the MIT license
 */
 
-#include <cassert>
-#include <iomanip>
 #include <iostream>
+#include <functional>
 
-#include <llvm/IR/Constants.h>
+#include <llvm/IR/InstIterator.h>
 #include <llvm/IR/Instruction.h>
 #include <llvm/IR/Instructions.h>
 
-#include "retdec/llvm-support/utils.h"
 #include "retdec/utils/string.h"
 #include "retdec/bin2llvmir/analyses/reaching_definitions.h"
 #include "retdec/bin2llvmir/optimizations/idioms_libgcc/idioms_libgcc.h"
-#include "retdec/bin2llvmir/utils/defs.h"
-#include "retdec/bin2llvmir/utils/instruction.h"
-#include "retdec/bin2llvmir/utils/type.h"
+#include "retdec/bin2llvmir/utils/llvm.h"
+#include "retdec/bin2llvmir/utils/debug.h"
+#include "retdec/bin2llvmir/utils/ir_modifier.h"
 
-using namespace retdec::llvm_support;
 using namespace retdec::utils;
 using namespace llvm;
 
 #define debug_enabled false
 
-#define ID_FNC_PAIR(ID, FNC) \
-		{ID, [this] (llvm::CallInst* c) { return this->_impl->FNC(c); }}
-
 namespace retdec {
 namespace bin2llvmir {
+
+//
+//==============================================================================
+// IdiomsLibgccImpl
+//==============================================================================
+//
 
 class IdiomsLibgccImpl
 {
@@ -44,21 +44,10 @@ class IdiomsLibgccImpl
 		llvm::GlobalVariable* res1Single = nullptr;
 		llvm::GlobalVariable* res1Double = nullptr;
 
-		std::set<llvm::Value*> _usesToLocalize;
-
-		Config* config = nullptr;
-
 	public:
-		std::set<llvm::Instruction*> _storesToRemove;
-		std::set<llvm::Instruction*> _callsToRemove;
+		bool testArchAndInitialize(config::Architecture& arch, Abi* abi);
 
-		void setConfig(Config* c);
-
-		bool testArchAndInitialize(llvm::Module* module);
-
-		bool isSomethingToLocalize() const;
-
-		void localize(ReachingDefinitionsAnalysis& RDA);
+		void localize(llvm::Value* v);
 
 		void log(
 				llvm::Instruction* orig,
@@ -214,46 +203,41 @@ class IdiomsLibgccImpl
 
 }; // IdiomsLibgccImpl
 
-void IdiomsLibgccImpl::setConfig(Config* c)
-{
-	config = c;
-	assert(config);
-}
-
 /**
  * @return @c True if analysis should continue, @c false if there is nothing
  *         to do for the current architecture.
  */
-bool IdiomsLibgccImpl::testArchAndInitialize(llvm::Module* module)
+bool IdiomsLibgccImpl::testArchAndInitialize(
+		config::Architecture& arch,
+		Abi* abi)
 {
-	auto& arch = config->getConfig().architecture;
 	if (arch.isArmOrThumb())
 	{
-		op0Single = module->getNamedGlobal("r0");
-		op0Double = module->getNamedGlobal("r0"); // + r1
-		op1Single = module->getNamedGlobal("r1");
-		op1Double = module->getNamedGlobal("r2"); // + r3
-		res0Single = module->getNamedGlobal("r0");
-		res0Double = module->getNamedGlobal("r0"); // + r1
-		res1Single = module->getNamedGlobal("r1");
-		res1Double = module->getNamedGlobal("r2"); // + r3
+		op0Single = abi->getRegister(ARM_REG_R0);
+		op0Double = abi->getRegister(ARM_REG_R0); // + r1
+		op1Single = abi->getRegister(ARM_REG_R1);
+		op1Double = abi->getRegister(ARM_REG_R2); // + r3
+		res0Single = abi->getRegister(ARM_REG_R0);
+		res0Double = abi->getRegister(ARM_REG_R0); // + r1
+		res1Single = abi->getRegister(ARM_REG_R1);
+		res1Double = abi->getRegister(ARM_REG_R2); // + r3
 	}
-	else if (config->isPic32())
+	else if (arch.isPic32())
 	{
-		op0Single = module->getNamedGlobal("a0");
-		op0Double = module->getNamedGlobal("a0"); // + a1
-		op1Single = module->getNamedGlobal("a1");
-		op1Double = module->getNamedGlobal("a2"); // + a3
+		op0Single = abi->getRegister(MIPS_REG_A0);
+		op0Double = abi->getRegister(MIPS_REG_A0); // + a1
+		op1Single = abi->getRegister(MIPS_REG_A1);
+		op1Double = abi->getRegister(MIPS_REG_A2); // + a3
 
-//		res0Single = module->getNamedGlobal("a0");
-//		res0Double = module->getNamedGlobal("a0"); // + a1
-//		res1Single = module->getNamedGlobal("a1");
-//		res1Double = module->getNamedGlobal("a2"); // + a3
+//		res0Single = abi->getRegister(MIPS_REG_A0);
+//		res0Double = abi->getRegister(MIPS_REG_A0); // + a1
+//		res1Single = abi->getRegister(MIPS_REG_A1);
+//		res1Double = abi->getRegister(MIPS_REG_A2); // + a3
 
-		res0Single = module->getNamedGlobal("v0");
-		res0Double = module->getNamedGlobal("v0"); // + a1
-		res1Single = module->getNamedGlobal("v1");
-		res1Double = module->getNamedGlobal("v1"); // + a3
+		res0Single = abi->getRegister(MIPS_REG_V0);
+		res0Double = abi->getRegister(MIPS_REG_V0); // + a1
+		res1Single = abi->getRegister(MIPS_REG_V1);
+		res1Double = abi->getRegister(MIPS_REG_V1); // + a3
 	}
 	else
 	{
@@ -262,23 +246,23 @@ bool IdiomsLibgccImpl::testArchAndInitialize(llvm::Module* module)
 	return true;
 }
 
-bool IdiomsLibgccImpl::isSomethingToLocalize() const
+void IdiomsLibgccImpl::localize(llvm::Value* v)
 {
-	return !_usesToLocalize.empty();
-}
-
-void IdiomsLibgccImpl::localize(ReachingDefinitionsAnalysis& RDA)
-{
-	for (auto* u : _usesToLocalize)
+	Instruction* i = dyn_cast<Instruction>(llvm_utils::skipCasts(v));
+	if (i == nullptr)
 	{
-		auto* i = dyn_cast<Instruction>(skipCasts(u));
-		auto& defs = RDA.defsFromUse(i);
-		if (defs.size() == 1)
-		{
-			Instruction* d = (*defs.begin())->def;
-			localizeDefinition(RDA, d);
-		}
+		return;
 	}
+
+	auto defs = ReachingDefinitionsAnalysis::defsFromUse_onDemand(i);
+	if (defs.size() != 1)
+	{
+		return;
+	}
+	auto* def = dyn_cast<StoreInst>(*defs.begin());
+
+	auto uses = ReachingDefinitionsAnalysis::usesFromDef_onDemand(def);
+	IrModifier::localize(def, uses);
 }
 
 void IdiomsLibgccImpl::log(
@@ -290,18 +274,6 @@ void IdiomsLibgccImpl::log(
 	{
 		LOG << "\t" << llvmObjToString(n) << std::endl;
 	}
-}
-
-void IdiomsLibgccImpl::replaceResultUses(llvm::CallInst* c, llvm::Instruction* r)
-{
-	for (auto* u : c->users())
-	{
-		auto* s = dyn_cast<StoreInst>(u);
-		assert(s);
-		_storesToRemove.insert(s);
-	}
-
-	_callsToRemove.insert(c);
 }
 
 template<>
@@ -319,14 +291,14 @@ llvm::Value* IdiomsLibgccImpl::getOp0<float>(llvm::CallInst* call)
 {
 	auto* t = Type::getFloatTy(call->getContext());
 	auto* l = new llvm::LoadInst(op0Single, "", call);
-	return convertValueToType(l, t, call);
+	return IrModifier::convertValueToType(l, t, call);
 }
 template<>
 llvm::Value* IdiomsLibgccImpl::getOp0<double>(llvm::CallInst* call)
 {
 	auto* t = Type::getDoubleTy(call->getContext());
 	auto* l = new llvm::LoadInst(op0Double, "", call);
-	return convertValueToType(l, t, call);
+	return IrModifier::convertValueToType(l, t, call);
 }
 
 template<>
@@ -344,71 +316,98 @@ llvm::Value* IdiomsLibgccImpl::getOp1<float>(llvm::CallInst* call)
 {
 	auto* t = Type::getFloatTy(call->getContext());
 	auto* l = new llvm::LoadInst(op1Single, "", call);
-	return convertValueToType(l, t, call);
+	return IrModifier::convertValueToType(l, t, call);
 }
 template<>
 llvm::Value* IdiomsLibgccImpl::getOp1<double>(llvm::CallInst* call)
 {
 	auto* t = Type::getDoubleTy(call->getContext());
 	auto* l = new llvm::LoadInst(op1Double, "", call);
-	return convertValueToType(l, t, call);
+	return IrModifier::convertValueToType(l, t, call);
 }
 
 template<>
-llvm::Value* IdiomsLibgccImpl::getRes0<std::int32_t>(llvm::CallInst* call, llvm::Value* res)
+llvm::Value* IdiomsLibgccImpl::getRes0<std::int32_t>(
+		llvm::CallInst* call,
+		llvm::Value* res)
 {
-	auto* c = convertValueToType(res, res0Single->getType()->getElementType(), call);
+	auto* c = IrModifier::convertValueToType(
+			res,
+			res0Single->getType()->getElementType(),
+			call);
 	return new llvm::StoreInst(c, res0Single, call);
 }
 template<>
-llvm::Value* IdiomsLibgccImpl::getRes0<std::int64_t>(llvm::CallInst* call, llvm::Value* res)
+llvm::Value* IdiomsLibgccImpl::getRes0<std::int64_t>(
+		llvm::CallInst* call,
+		llvm::Value* res)
 {
-	auto* c = convertValueToType(res, res0Double->getType()->getElementType(), call);
+	auto* c = IrModifier::convertValueToType(
+			res,
+			res0Double->getType()->getElementType(),
+			call);
 	return new llvm::StoreInst(c, res0Double, call);
 }
 template<>
-llvm::Value* IdiomsLibgccImpl::getRes0<float>(llvm::CallInst* call, llvm::Value* res)
+llvm::Value* IdiomsLibgccImpl::getRes0<float>(
+		llvm::CallInst* call,
+		llvm::Value* res)
 {
-	auto* c = convertValueToType(res, res0Single->getType()->getElementType(), call);
+	auto* c = IrModifier::convertValueToType(
+			res,
+			res0Single->getType()->getElementType(),
+			call);
 	return new llvm::StoreInst(c, res0Single, call);
 }
 template<>
-llvm::Value* IdiomsLibgccImpl::getRes0<double>(llvm::CallInst* call, llvm::Value* res)
+llvm::Value* IdiomsLibgccImpl::getRes0<double>(
+		llvm::CallInst* call,
+		llvm::Value* res)
 {
-	auto* m = call->getModule();
 	auto* resType = res0Double->getType()->getElementType();
-
-	// New conversion:
-	// double -> float -> i32
-	// Old conversion:
-	// double -> i64 -> i32
-	// Problem was that the old one caused integer trunc & ext when register
-	// was localized -> 32 bit shift left & right -> 100000000 * X / 100000000.
-	//
-	if (getTypeBitSizeInBinary(m, resType) == 32)
-	{
-		auto* c1 = convertValueToType(res, Type::getFloatTy(m->getContext()), call);
-		auto* c2 = convertValueToType(c1, resType, call);
-		return new llvm::StoreInst(c2, res0Double, call);
-	}
-	else
-	{
-		auto* c = convertValueToType(res, resType, call);
-		return new llvm::StoreInst(c, res0Double, call);
-	}
+	auto* c = IrModifier::convertValueToType(res, resType, call);
+	return new llvm::StoreInst(c, res0Double, call);
 }
 
 template<>
-llvm::Value* IdiomsLibgccImpl::getRes1<std::int32_t>(llvm::CallInst* call, llvm::Value* res)
+llvm::Value* IdiomsLibgccImpl::getRes1<std::int32_t>(
+		llvm::CallInst* call,
+		llvm::Value* res)
 {
-	auto* c = convertValueToType(res, res1Single->getType()->getElementType(), call);
+	auto* c = IrModifier::convertValueToType(
+			res,
+			res1Single->getType()->getElementType(),
+			call);
 	return new llvm::StoreInst(c, res1Single, call);
 }
 template<>
-llvm::Value* IdiomsLibgccImpl::getRes1<std::int64_t>(llvm::CallInst* call, llvm::Value* res)
+llvm::Value* IdiomsLibgccImpl::getRes1<std::int64_t>(
+		llvm::CallInst* call,
+		llvm::Value* res)
 {
-	auto* c = convertValueToType(res, res1Double->getType()->getElementType(), call);
+	auto* c = IrModifier::convertValueToType(
+			res,
+			res1Double->getType()->getElementType(),
+			call);
 	return new llvm::StoreInst(c, res1Double, call);
+}
+
+void IdiomsLibgccImpl::replaceResultUses(llvm::CallInst* c, llvm::Instruction* r)
+{
+	for (auto it = c->user_begin(), end = c->user_end(); it != end;)
+	{
+		auto* s = dyn_cast<StoreInst>(*it);
+		assert(s);
+		++it;
+		if (s)
+		{
+			s->eraseFromParent();
+		}
+	}
+	if (c->user_empty())
+	{
+		c->eraseFromParent();
+	}
 }
 
 /**
@@ -430,6 +429,7 @@ void IdiomsLibgccImpl::aeabi_idivmod(llvm::CallInst* inst)
 	auto* s1 = getRes1<N>(inst, r1);
 
 	log(inst, {l0, l1, r0, r1, s0, s1});
+
 	replaceResultUses(inst, r0);
 }
 
@@ -662,8 +662,8 @@ void IdiomsLibgccImpl::addf(llvm::CallInst* inst)
 	log(inst, {l0, l1, r0, s0});
 	replaceResultUses(inst, r0);
 
-	_usesToLocalize.insert(l0);
-	_usesToLocalize.insert(l1);
+	localize(l0);
+	localize(l1);
 }
 
 /**
@@ -683,8 +683,8 @@ void IdiomsLibgccImpl::divf(llvm::CallInst* inst)
 	log(inst, {l0, l1, r0, s0});
 	replaceResultUses(inst, r0);
 
-	_usesToLocalize.insert(l0);
-	_usesToLocalize.insert(l1);
+	localize(l0);
+	localize(l1);
 }
 
 /**
@@ -704,8 +704,8 @@ void IdiomsLibgccImpl::mulf(llvm::CallInst* inst)
 	log(inst, {l0, l1, r0, s0});
 	replaceResultUses(inst, r0);
 
-	_usesToLocalize.insert(l0);
-	_usesToLocalize.insert(l1);
+	localize(l0);
+	localize(l1);
 }
 
 /**
@@ -725,8 +725,8 @@ void IdiomsLibgccImpl::subf(llvm::CallInst* inst)
 	log(inst, {l0, l1, r0, s0});
 	replaceResultUses(inst, r0);
 
-	_usesToLocalize.insert(l0);
-	_usesToLocalize.insert(l1);
+	localize(l0);
+	localize(l1);
 }
 
 /**
@@ -746,8 +746,8 @@ void IdiomsLibgccImpl::subrf(llvm::CallInst* inst)
 	log(inst, {l0, l1, r0, s0});
 	replaceResultUses(inst, r0);
 
-	_usesToLocalize.insert(l0);
-	_usesToLocalize.insert(l1);
+	localize(l0);
+	localize(l1);
 }
 
 /**
@@ -968,7 +968,7 @@ void IdiomsLibgccImpl::double2float(llvm::CallInst* inst)
 template<typename N>
 void IdiomsLibgccImpl::cmpf(llvm::CallInst* inst, bool revert)
 {
-	auto* t = getDefaultType(inst->getModule());
+	auto* t = Abi::getDefaultType(inst->getModule());
 	auto* l0 = getOp0<N>(inst);
 	auto* l1 = getOp1<N>(inst);
 	if (revert)
@@ -1048,7 +1048,7 @@ void IdiomsLibgccImpl::lef(llvm::CallInst* inst)
 template<typename N>
 void IdiomsLibgccImpl::cmpdi2(llvm::CallInst* inst)
 {
-	auto* t = getDefaultType(inst->getModule());
+	auto* t = Abi::getDefaultType(inst->getModule());
 	auto* l0 = getOp0<N>(inst);
 	auto* l1 = getOp1<N>(inst);
 	auto* a = new ICmpInst(inst, CmpInst::ICMP_SGT, l0, l1);
@@ -1083,7 +1083,7 @@ void IdiomsLibgccImpl::cmpdi2(llvm::CallInst* inst)
 template<typename N>
 void IdiomsLibgccImpl::ucmpdi2(llvm::CallInst* inst)
 {
-	auto* t = getDefaultType(inst->getModule());
+	auto* t = Abi::getDefaultType(inst->getModule());
 	auto* l0 = getOp0<N>(inst);
 	auto* l1 = getOp1<N>(inst);
 	auto* a = new ICmpInst(inst, CmpInst::ICMP_UGT, l0, l1);
@@ -1122,7 +1122,7 @@ void IdiomsLibgccImpl::ucmpdi2(llvm::CallInst* inst)
 template<typename N>
 void IdiomsLibgccImpl::eqf(llvm::CallInst* inst)
 {
-	auto* t = getDefaultType(inst->getModule());
+	auto* t = Abi::getDefaultType(inst->getModule());
 	auto* l0 = getOp0<N>(inst);
 	auto* l1 = getOp1<N>(inst);
 	auto* a = new FCmpInst(inst, CmpInst::FCMP_OEQ, l0, l1);
@@ -1154,7 +1154,7 @@ void IdiomsLibgccImpl::eqf(llvm::CallInst* inst)
 template<typename N>
 void IdiomsLibgccImpl::gtf(llvm::CallInst* inst, bool reverse)
 {
-	auto* t = getDefaultType(inst->getModule());
+	auto* t = Abi::getDefaultType(inst->getModule());
 	auto* l0 = getOp0<N>(inst);
 	auto* l1 = getOp1<N>(inst);
 	auto* a = new FCmpInst(inst, CmpInst::FCMP_OGT, l0, l1);
@@ -1185,7 +1185,7 @@ void IdiomsLibgccImpl::ltf(llvm::CallInst* inst)
 template<typename N>
 void IdiomsLibgccImpl::nef(llvm::CallInst* inst)
 {
-	auto* t = getDefaultType(inst->getModule());
+	auto* t = Abi::getDefaultType(inst->getModule());
 	auto* l0 = getOp0<N>(inst);
 	auto* l1 = getOp1<N>(inst);
 	auto* a = new FCmpInst(inst, CmpInst::FCMP_ONE, l0, l1);
@@ -1215,7 +1215,7 @@ void IdiomsLibgccImpl::nef(llvm::CallInst* inst)
 template<typename N>
 void IdiomsLibgccImpl::cmpge(llvm::CallInst* inst, bool reverse)
 {
-	auto* t = getDefaultType(inst->getModule());
+	auto* t = Abi::getDefaultType(inst->getModule());
 	auto* l0 = getOp0<N>(inst);
 	auto* l1 = getOp1<N>(inst);
 	auto* a = reverse ?
@@ -1239,6 +1239,15 @@ void IdiomsLibgccImpl::rcmpge(llvm::CallInst* inst)
 	return cmpge<N>(inst, true);
 }
 
+//
+//==============================================================================
+// IdiomsLibgcc
+//==============================================================================
+//
+
+#define ID_FNC_PAIR(ID, FNC) \
+		{ID, [this] (llvm::CallInst* c) { return this->_impl->FNC(c); }}
+
 char IdiomsLibgcc::ID = 0;
 
 static RegisterPass<IdiomsLibgcc> X(
@@ -1247,6 +1256,35 @@ static RegisterPass<IdiomsLibgcc> X(
 		false, // Only looks at CFG
 		false // Analysis Pass
 );
+
+/**
+ * Check the given container for element ordering problems.
+ * Entries in the container are tried to be applied from first to last.
+ * Function ID of any element can not be contained in any later element,
+ * otherwise later would never be applied.
+ * @param fnc2action This method could access @c _fnc2action directly, but
+ *                   we want to unit test it with custom container.
+ * @return @c True if problem in map found, @c false otherwise.
+ * @note Method is static so it can be easily used in unit tests.
+ */
+bool IdiomsLibgcc::checkFunctionToActionMap(const Fnc2Action& fnc2action)
+{
+	for (auto it = fnc2action.begin(); it != fnc2action.end(); ++it)
+	{
+		auto next = it;
+		++next;
+		while (next != fnc2action.end())
+		{
+			if (contains(next->first, it->first))
+			{
+				LOG << it->first << " in " << next->first << std::endl;
+				return true;
+			}
+			++next;
+		}
+	}
+	return false;
+}
 
 IdiomsLibgcc::IdiomsLibgcc() :
 		ModulePass(ID),
@@ -1401,119 +1439,55 @@ IdiomsLibgcc::IdiomsLibgcc() :
 	assert(!checkFunctionToActionMap(_fnc2action));
 }
 
-/**
- * Check the given container for element ordering problems.
- * Entries in the container are tried to be applied from first to last.
- * Function ID of any element can not be contained in any later element,
- * otherwise later would never be applied.
- * @param fnc2action This method could access @c _fnc2action directly, but
- *                   we want to unit test it with custom container.
- * @return @c True if problem in map found, @c false otherwise.
- * @note Method is static so it can be easily used in unit tests.
- */
-bool IdiomsLibgcc::checkFunctionToActionMap(const Fnc2Action& fnc2action)
-{
-	for (auto it = fnc2action.begin(); it != fnc2action.end(); ++it)
-	{
-		auto next = it;
-		++next;
-		while (next != fnc2action.end())
-		{
-			if (contains(next->first, it->first))
-			{
-				LOG << it->first << " in " << next->first << std::endl;
-				return true;
-			}
-			++next;
-		}
-	}
-	return false;
-}
-
-void IdiomsLibgcc::getAnalysisUsage(AnalysisUsage &AU) const
-{
-
-}
-
-/**
- * @return @c True if al least one instruction was (un)volatilized.
- *         @c False otherwise.
- */
 bool IdiomsLibgcc::runOnModule(Module& M)
 {
 	_module = &M;
-
-	if (!ConfigProvider::getConfig(_module, _config))
-	{
-		LOG << "[ABORT] config file is not available\n";
-		return false;
-	}
-	_impl->setConfig(_config);
-
-	if (!_impl->testArchAndInitialize(_module))
-	{
-		return false;
-	}
-
-	bool changed = handleInstructions();
-
-	if (_impl->isSomethingToLocalize())
-	{
-		ReachingDefinitionsAnalysis RDA;
-		RDA.runOnModule(*_module, _config);
-		_impl->localize(RDA);
-	}
-//	for (auto* i : _impl->_storesToRemove)
-//	{
-//		i->eraseFromParent();
-//	}
-	for (auto* i : _impl->_callsToRemove)
-	{
-		// TODO: i have no idea why there are still some uses, why erasing
-		// stores in _storesToRemove did not erase them, but whatever, just
-		// erase it again to be sure.
-		//
-		std::set<StoreInst*> toRemove;
-		for (auto* u : i->users())
-		{
-			auto* s = dyn_cast<StoreInst>(u);
-			assert(s);
-			toRemove.insert(s);
-		}
-
-		for (auto* s : toRemove)
-		{
-			s->eraseFromParent();
-		}
-		i->eraseFromParent();
-	}
-
-	return changed;
+	_config = ConfigProvider::getConfig(_module);
+	_abi = AbiProvider::getAbi(_module);
+	return run();
 }
 
-bool IdiomsLibgcc::handleInstructions()
+bool IdiomsLibgcc::runOnModuleCustom(llvm::Module& M, Config* c, Abi* abi)
 {
-	bool changed = false;
-	for (auto& F : _module->getFunctionList())
-	for (auto& B : F)
-	{
-		auto it = B.begin();
-		while (it != B.end())
-		{
-			// We need to move to the next instruction before optimizing
-			// (potentially removing) the current instruction. Otherwise,
-			// the iterator would become invalid.
-			//
-			auto* inst = &(*it);
-			++it;
+	_module = &M;
+	_config = c;
+	_abi = abi;
+	return run();
+}
 
-			changed |= handleInstruction(inst);
-		}
+bool IdiomsLibgcc::run()
+{
+	if (_config == nullptr || _abi == nullptr)
+	{
+		return false;
 	}
+
+	if (!_impl->testArchAndInitialize(_config->getConfig().architecture, _abi))
+	{
+		return false;
+	}
+
+	bool changed = false;
+
+	for (Function& f : *_module)
+	for (auto it = inst_begin(&f), eIt = inst_end(&f); it != eIt;)
+	{
+		Instruction* insn = &*it;
+		++it;
+		// Move to the next call. Other instructions might get removed by
+		// analuzing this call.
+		while (it != eIt && !isa<CallInst>(*it))
+		{
+			++it;
+		}
+
+		changed |= runInstruction(insn);
+	}
+
 	return changed;
 }
 
-bool IdiomsLibgcc::handleInstruction(llvm::Instruction* inst)
+bool IdiomsLibgcc::runInstruction(llvm::Instruction* inst)
 {
 	CallInst* call = dyn_cast<CallInst>(inst);
 	if (call == nullptr || call->getCalledFunction() == nullptr)

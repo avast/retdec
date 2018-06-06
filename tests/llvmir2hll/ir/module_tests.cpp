@@ -893,19 +893,6 @@ GetSelectedButNotFoundFuncsReturnsCorrectValue) {
 	ASSERT_EQ(SELECTED_BUT_NOT_FOUND_FUNCS, module->getSelectedButNotFoundFuncs());
 }
 
-//
-// getOptsRunInFrontend()
-//
-
-TEST_F(ModuleTests,
-GetOptsRunInFrontendReturnsCorrectValue) {
-	auto OPTS_RUN_IN_FRONTEND = StringSet({"opt1", "opt2"});
-	EXPECT_CALL(*configMock, getOptsRunInFrontend())
-		.WillOnce(Return(OPTS_RUN_IN_FRONTEND));
-
-	ASSERT_EQ(OPTS_RUN_IN_FRONTEND, module->getOptsRunInFrontend());
-}
-
 } // namespace tests
 } // namespace llvmir2hll
 } // namespace retdec

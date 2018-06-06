@@ -1,6 +1,6 @@
 /**
  * @file include/retdec/bin2llvmir/optimizations/dump_module/dump_module.h
- * @brief This is a utility debug pass that only dumps the module into LLVM IR.
+ * @brief An utility debug pass that dumps the module into a file.
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */
 

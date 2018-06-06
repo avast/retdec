@@ -47,12 +47,6 @@ private:
 	template<typename Optimization, typename... Args>
 	void run(ShPtr<Module> m, Args &&... args);
 
-	template<typename Optimization, typename... Args>
-	void runUnlessRunInFrontend(ShPtr<Module> m, Args &&... args);
-
-	template<typename Optimization>
-	bool hasRunInFrontend();
-
 private:
 	/// No other optimization than these will be run.
 	const StringSet enabledOpts;
@@ -80,9 +74,6 @@ private:
 
 	/// Should we recover from out-of-memory errors during optimizations?
 	bool recoverFromOutOfMemory;
-
-	/// Set of frontend-end optimizations that were run.
-	StringSet frontendRunOpts;
 
 	/// List of our optimizations that were run.
 	StringSet backendRunOpts;

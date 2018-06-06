@@ -68,7 +68,7 @@ void BBTraversalAnalysis::doBBsAnalysis(Function &func) {
 	Node *prevNode = nullptr;
 	for (scc_iterator<Function *> i = scc_begin(&func), e = scc_end(&func);
 			i != e; ++i) {
-		const BBVec &sccBBs(*i);
+		const std::vector<llvm::BasicBlock*> &sccBBs(*i);
 		if (sccBBs.size() > 1) {
 			// We have strongly connected component. This means cycle basic
 			// basic block dependency.
@@ -123,7 +123,7 @@ llvm::BasicBlock *BBTraversalAnalysis::getNextBBInSCC() {
 * @return Created node which is the last in linked list.
 */
 BBTraversalAnalysis::Node *BBTraversalAnalysis::processBBsInSCC(
-		const BBVec &sccBBs, Node *prevNode) {
+		const std::vector<llvm::BasicBlock*> &sccBBs, Node *prevNode) {
 	Node *firstSCCNode(nullptr);
 	Node *newNode(nullptr);
 	// Go through all basic blocks in SCC and create nodes for them.
@@ -156,7 +156,7 @@ BBTraversalAnalysis::Node *BBTraversalAnalysis::processBBsInSCC(
 * @return Created node which is the last in linked list.
 */
 BBTraversalAnalysis::Node *BBTraversalAnalysis::processBBNotInSCC(
-		const BBVec &sccBBs, Node *prevNode) {
+		const std::vector<llvm::BasicBlock*> &sccBBs, Node *prevNode) {
 	Node *newNode = Node::createNodeNotInSCC(**sccBBs.begin());
 	solveConnectionWithNextNode(prevNode, newNode);
 	return newNode;

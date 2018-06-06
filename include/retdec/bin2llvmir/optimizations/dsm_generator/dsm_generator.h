@@ -12,10 +12,10 @@
 #include <llvm/IR/Module.h>
 #include <llvm/Pass.h>
 
+#include "retdec/bin2llvmir/providers/abi/abi.h"
 #include "retdec/bin2llvmir/providers/asm_instruction.h"
 #include "retdec/bin2llvmir/providers/config.h"
 #include "retdec/bin2llvmir/providers/fileimage.h"
-#include "retdec/bin2llvmir/utils/instruction.h"
 
 namespace retdec {
 namespace bin2llvmir {
@@ -30,6 +30,7 @@ class DsmGenerator : public llvm::ModulePass
 				llvm::Module& m,
 				Config* c,
 				FileImage* objf,
+				Abi* abi,
 				std::ostream& ret);
 
 	private:
@@ -77,6 +78,8 @@ class DsmGenerator : public llvm::ModulePass
 		llvm::Module* _module = nullptr;
 		Config* _config = nullptr;
 		FileImage* _objf = nullptr;
+		Abi* _abi = nullptr;
+
 		std::size_t _longestInst = 0;
 		std::size_t _longestAddr = 0;
 		std::map<retdec::utils::Address, retdec::config::Function*> _addr2fnc;

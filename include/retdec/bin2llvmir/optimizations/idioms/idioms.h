@@ -33,7 +33,6 @@ public:
 	virtual bool doInitialization(llvm::Module & M) override;
 	virtual bool doFinalization(llvm::Module & M) override;
 
-	virtual void getAnalysisUsage(llvm::AnalysisUsage & AU) const override;
 	IdiomsAnalysis * getCompilerAnalysis(llvm::Module & M);
 
 private:

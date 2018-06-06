@@ -22,7 +22,9 @@ class Address
 	public:
 		Address();
 		Address(uint64_t a);
+		explicit Address(const std::string &a);
 		operator uint64_t() const;
+		explicit operator bool() const;
 
 		Address& operator++();
 		Address operator++(int);
@@ -97,16 +99,16 @@ class AddressRangeContainer
 		void remove(const AddressRange &r);
 		void remove(const Address& s, const Address& e);
 
-		bool contains(Address addr);
-		const AddressRange* getRange(Address addr);
-		bool containsExact(AddressRange r);
+		bool contains(Address addr) const;
+		bool containsExact(AddressRange r) const;
+		const AddressRange* getRange(Address addr) const;
 
 		friend std::ostream& operator<<(
 				std::ostream &out,
 				const AddressRangeContainer &r);
 
 	private:
-		std::set<AddressRange> ranges;
+		std::set<AddressRange> _ranges;
 };
 
 } // namespace utils

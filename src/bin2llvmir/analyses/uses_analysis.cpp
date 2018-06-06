@@ -4,14 +4,11 @@
 * @copyright (c) 2017 Avast Software, licensed under the MIT license
 */
 
-#include <set>
-
 #include <llvm/IR/Instructions.h>
 #include <llvm/Support/raw_ostream.h>
 
 #include "retdec/utils/container.h"
 #include "retdec/bin2llvmir/analyses/uses_analysis.h"
-#include "retdec/bin2llvmir/utils/instruction.h"
 
 using namespace retdec::utils;
 using namespace llvm;
@@ -90,7 +87,7 @@ UsesAnalysis::~UsesAnalysis() {
 *
 * @param[in] globs Global variables of which uses are processing.
 */
-void UsesAnalysis::doUsesAnalysis(const GlobVarSet &globs) {
+void UsesAnalysis::doUsesAnalysis(const std::set<llvm::GlobalVariable*> &globs) {
 	// If analysis was run before than now is need to clear everything.
 	clear();
 
@@ -121,12 +118,12 @@ const UsesAnalysis::UseInfo *UsesAnalysis::getUseInfo(
 }
 
 /**
-* @brief Checks if exists some another uses except uses in @a instSet for
+* @brief Checks if exists some another uses except uses in @a std::set<llvm::Instruction*> for
 *        @a value.
 *
 * @return @c true if has more uses, otherwise @c false.
 */
-bool UsesAnalysis::hasValueUsesExcept(Value &value, const InstSet &instSet) {
+bool UsesAnalysis::hasValueUsesExcept(Value &value, const std::set<llvm::Instruction*> &instSet) {
 	for (auto i = value.user_begin(), e = value.user_end(); i != e; ++i) {
 		Instruction *inst(dyn_cast<Instruction>(*i));
 		if (!inst) {

@@ -58,9 +58,6 @@ class Parameters
 		std::set<std::string> abiPaths;
 		std::set<std::string> frontendFunctions;
 
-		/// Names of all completed frontend passes.
-		std::set<std::string> completedFrontendPasses;
-
 		/// Functions' names which were selected by the user through
 		/// selective decompilation.
 		std::set<std::string> selectedFunctions;

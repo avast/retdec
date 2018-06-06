@@ -6,8 +6,7 @@
 
 #include "retdec/utils/string.h"
 #include "retdec/bin2llvmir/providers/fileimage.h"
-#include "retdec/bin2llvmir/utils/global_var.h"
-#include "retdec/bin2llvmir/utils/type.h"
+#include "retdec/bin2llvmir/utils/ir_modifier.h"
 #include "retdec/loader/image_factory.h"
 #include "retdec/loader/loader/raw_data/raw_data_image.h"
 
@@ -59,9 +58,7 @@ FileImage::FileImage(
 	if (_image == nullptr)
 	{
 		_image.reset();
-		// && !path.empty() ???
 		throw std::runtime_error("Failed to load input file");
-		return;
 	}
 
 	_image->getFileFormat()->initFromConfig(config->getConfig());
@@ -79,21 +76,30 @@ FileImage::FileImage(
 		throw std::runtime_error("Missing basic info about input file"
 				" -> there can be no decompilation");
 	}
+
+	if (config->getConfig().tools.isMsvc())
+	{
+		_rtti.findMsvc(getImage());
+	}
+	else
+	{
+		_rtti.findGcc(getImage());
+	}
 }
 
-bool FileImage::isOk() const
-{
-	return _image != nullptr;
-}
-
-retdec::loader::Image* FileImage::getImage()
+retdec::loader::Image* FileImage::getImage() const
 {
 	return _image.get();
 }
 
-retdec::fileformat::FileFormat* FileImage::getFileFormat()
+retdec::fileformat::FileFormat* FileImage::getFileFormat() const
 {
 	return _image->getFileFormat();
+}
+
+const retdec::rtti_finder::RttiFinder& FileImage::getRtti() const
+{
+	return _rtti;
 }
 
 ConstantInt* FileImage::getConstantInt(
@@ -106,13 +112,13 @@ ConstantInt* FileImage::getConstantInt(
 	}
 
 	std::uint64_t v = 0;
-	auto s = getTypeByteSizeInBinary(_module, t);
+	auto s = Abi::getTypeByteSize(_module, t);
 	return _image->getXByte(addr, s, v) ? ConstantInt::get(t, v) : nullptr;
 }
 
 llvm::ConstantInt* FileImage::getConstantDefault(retdec::utils::Address addr)
 {
-	return getConstantInt(getDefaultType(_module), addr);
+	return getConstantInt(Abi::getDefaultType(_module), addr);
 }
 
 llvm::Constant* FileImage::getConstantHalf(retdec::utils::Address addr)
@@ -185,9 +191,9 @@ llvm::Constant* FileImage::getConstantCharPointer(retdec::utils::Address addr)
 				GlobalValue::ExternalLinkage,
 				sc);
 
-		return convertConstantToType(
+		return IrModifier::convertConstantToType(
 				gv,
-				getCharPointerType(_module->getContext()));
+				llvm_utils::getCharPointerType(_module->getContext()));
 	}
 	else
 	{
@@ -214,11 +220,6 @@ llvm::Constant* FileImage::getConstantCharArrayNice(
 	}
 }
 
-/**
- * TODO: we should get existing or create a new global variable
- * on referenced address (if valid). Then we could probably return this
- * global var as constant
- */
 llvm::Constant* FileImage::getConstantPointer(
 		llvm::PointerType* type,
 		retdec::utils::Address addr)
@@ -231,7 +232,7 @@ llvm::Constant* FileImage::getConstantPointer(
 	std::uint64_t v = 0;
 	if (_image->getWord(addr, v))
 	{
-		auto* dt = getDefaultType(_module);
+		auto* dt = Abi::getDefaultType(_module);
 		auto* ci = ConstantInt::get(dt, v);
 		return ConstantExpr::getIntToPtr(ci, type);;
 	}
@@ -256,7 +257,7 @@ llvm::Constant* FileImage::getConstantStruct(
 		if (ec == nullptr)
 			return nullptr;
 
-		offset += getTypeByteSizeInBinary(_module, e);
+		offset += Abi::getTypeByteSize(_module, e);
 		vc.push_back(ec);
 	}
 
@@ -271,7 +272,7 @@ llvm::Constant* FileImage::getConstantArray(
 	size_t offset = 0;
 	auto elemNum = type->getNumElements();
 	auto* elemType = type->getElementType();
-	auto elemSize = getTypeByteSizeInBinary(_module, elemType);
+	auto elemSize = Abi::getTypeByteSize(_module, elemType);
 
 	for (std::size_t i = 0; i < elemNum; ++i)
 	{
@@ -313,12 +314,11 @@ llvm::Constant* FileImage::getConstant(
 		retdec::utils::Address addr,
 		bool wideString)
 {
-	Constant* c = nullptr;
-
 	if (addr.isUndefined())
 	{
 		return nullptr;
 	}
+	Constant* c = nullptr;
 
 	if (wideString)
 	{
@@ -371,7 +371,7 @@ llvm::Constant* FileImage::getConstant(
 	{
 		c = getConstantLongDouble(addr);
 	}
-	else if (isCharPointerType(type))
+	else if (llvm_utils::isCharPointerType(type))
 	{
 		c = getConstantCharPointer(addr);
 	}
@@ -400,7 +400,7 @@ llvm::Constant* FileImage::getConstant(
 	}
 
 	// Make extra sure the returned constant's type is the same as expected.
-	return convertConstantToType(c, type);
+	return IrModifier::convertConstantToType(c, type);
 }
 
 /**
@@ -438,9 +438,15 @@ llvm::Constant* FileImage::getConstant(
 	std::uint64_t val = 0;
 	auto res = _image->getWord(addr, val);
 	auto* seg = res ? _image->getSegmentFromAddress(val) : nullptr;
-	//    if (res && config && config->getLlvmFunction(val) == nullptr && seg && seg->getSecSeg() && !seg->getSecSeg()->isCode())
 	auto* srcSeg = _image->getSegmentFromAddress(addr);
-	if (res && config && config->getLlvmFunction(val) == nullptr && seg && seg->getSecSeg() && !seg->getSecSeg()->isCode() && srcSeg && !srcSeg->getSecSeg()->isCode())
+	if (res
+			&& config
+			&& config->getLlvmFunction(val) == nullptr
+			&& seg
+			&& seg->getSecSeg()
+			&& !seg->getSecSeg()->isCode()
+			&& srcSeg
+			&& !srcSeg->getSecSeg()->isCode())
 	{
 		std::vector<Constant*> refGvs;
 		while (1)
@@ -466,14 +472,15 @@ llvm::Constant* FileImage::getConstant(
 				}
 			}
 
-			auto* newGv = getGlobalVariable(_module, config, this, dbgf, val);
+			IrModifier irm(_module, config);
+			auto* newGv = irm.getGlobalVariable(this, dbgf, val);
 			if (newGv == nullptr)
 			{
 				break;
 			}
 
 			refGvs.push_back(newGv);
-			addr += getDefaultTypeByteSize(_module);
+			addr += Abi::getTypeByteSize(_module, Abi::getDefaultType(_module));
 
 			static auto& conf = config->getConfig();
 			if (conf.globals.getObjectByAddress(addr))
@@ -486,7 +493,8 @@ llvm::Constant* FileImage::getConstant(
 		{
 			c = refGvs.front();
 		}
-		else if (refGvs.size() > 1 && isStringArrayPointeType(refGvs.front()->getType()))
+		else if (refGvs.size() > 1
+				&& llvm_utils::isStringArrayPointeType(refGvs.front()->getType()))
 		{
 			auto* at = ArrayType::get(
 					PointerType::get(Type::getInt8Ty(ctx), 0),
@@ -494,16 +502,18 @@ llvm::Constant* FileImage::getConstant(
 
 			std::vector<Constant*> av2;
 			for (auto* c : refGvs)
-				av2.push_back(convertConstantToType(
+				av2.push_back(IrModifier::convertConstantToType(
 						c,
 						PointerType::get(Type::getInt8Ty(ctx), 0)) );
 
 			c = ConstantArray::get(at, ArrayRef<Constant*>(av2));
 		}
 	}
-	// for-simple.c -a x86 -f elf -c gcc -C -O0, 8049b7c -- in 2 sections -- .data + .bss
+	// for-simple.c -a x86 -f elf -c gcc -O0, 8049b7c -- in both .data & .bss
 	// the same for any array -- all data in single section
-	else if (!seg && _image->getNTWSNice(addr, wcharSize, wideStr) && wideStr.size() >= 3)
+	else if (!seg
+			&& _image->getNTWSNice(addr, wcharSize, wideStr)
+			&& wideStr.size() >= 3)
 	{
 		if (wcharSize == 2)
 		{
@@ -519,80 +529,48 @@ llvm::Constant* FileImage::getConstant(
 		// Simple Value::setName() does not work on Constant.
 		c->setValueName(ValueName::Create("wide-string"));
 	}
-	else if (!seg && _image->getNTBS(addr, str) && retdec::utils::isNiceString(str, 1.0) && str.size() >= 2)
+	else if (!seg
+			&& _image->getNTBS(addr, str)
+			&& retdec::utils::isNiceString(str, 1.0)
+			&& str.size() >= 2)
 	{
 		c = ConstantDataArray::getString(ctx, str);
 	}
 	else
 	{
-		c = getConstantInt(getDefaultType(_module), addr);
+		c = getConstantInt(Abi::getDefaultType(_module), addr);
 	}
 
 	return c;
 }
 
-/**
- * There is a function retdec::fileformat::getSymbolTables()
- * which gets the first symbol on a specified address.
- *
- * However, sometimes there are multiple symbols for one address.
- * E.g. ".text" and "_scanf". This function tries to decide which one is
- * preferred and return it.
- * If there is only one symbol, it is simply returned.
- * If there is no symbol, @c nullptr is returned.
- */
-const retdec::fileformat::Symbol* FileImage::getPreferredSymbol(
-		retdec::utils::Address addr)
+bool FileImage::isImportTerminating(
+		const fileformat::ImportTable* impTbl,
+		const fileformat::Import* imp) const
 {
-	std::set<const retdec::fileformat::Symbol*> syms;
+	std::string name = imp->getName();
 
-	for (const auto* t : _image->getFileFormat()->getSymbolTables())
-	for (const auto& s : *t)
+	// TODO: safer
+//	if (getFileFormat()->isPe() || getFileFormat()->isCoff())
+//	{
+//		auto libN = impTbl->getLibrary(imp->getLibraryIndex());
+//		return (libN == "msvcrt.dll" && name == "exit")
+//				|| (libN == "msvcrt.dll" && name == "abort");
+//	}
+//	else if (getFileFormat()->isElf())
+//	{
+//		return name == "exit"
+//				|| name == "abort";
+//	}
+
+	// TODO: same for statically linked code.
+	// TODO: are these all? maybe search for some more complete list.
+	retdec::utils::NonIterableSet<std::string> exitFncs =
 	{
-		unsigned long long a = 0;
-		if (!s->getRealAddress(a))
-		{
-			continue;
-		}
-
-		if (addr == a)
-		{
-			syms.insert(s.get());
-		}
-	}
-
-	const retdec::fileformat::Symbol* ret = nullptr;
-
-	for (auto* s : syms)
-	{
-		const auto& retName = ret->getName();
-		const auto& sName = s->getName();
-		if (ret == nullptr
-				|| retName.empty()
-				|| retName.front() == '.'
-				|| sName.empty()
-				|| sName.front() == '_')
-		{
-			ret = s;
-		}
-	}
-
-	// TODO: direct config provider usage + ugly statis.
-	//
-	static bool lowered = false;
-	auto* c = ConfigProvider::getConfig(_module);
-	if (c && ret == nullptr && c->getConfig().architecture.isArmOrThumb())
-	{
-		if (!lowered)
-		{
-			lowered = true;
-			ret = getPreferredSymbol(addr - 1);
-			lowered = false;
-			return ret;
-		}
-	}
-
-	return ret;
+		"exit", "_exit", "ExitThread", "abort", "longjmp", "_Exit",
+		"quick_exit", "thrd_exit", "ExitProcess"
+	};
+	return exitFncs.has(name);
 }
 
 //
@@ -635,11 +613,6 @@ FileImage* FileImageProvider::addFileImage(
 		llvm::Module* m,
 		FileImage img)
 {
-	if (!img.isOk())
-	{
-		return nullptr;
-	}
-
 	auto p = _module2image.emplace(m, std::move(img));
 	return &p.first->second;
 }

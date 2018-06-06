@@ -7,12 +7,14 @@
 #ifndef RETDEC_BIN2LLVMIR_ANALYSES_STORE_LOAD_ANALYSIS_H
 #define RETDEC_BIN2LLVMIR_ANALYSES_STORE_LOAD_ANALYSIS_H
 
+#include <set>
+
+#include <llvm/IR/Instructions.h>
 #include <llvm/IR/Module.h>
 
 #include "retdec/bin2llvmir/analyses/traversal/bb_traversal_analysis.h"
 #include "retdec/bin2llvmir/analyses/traversal/func_traversal_analysis.h"
 #include "retdec/bin2llvmir/analyses/uses_analysis.h"
-#include "retdec/bin2llvmir/utils/defs.h"
 
 namespace retdec {
 namespace bin2llvmir {
@@ -37,7 +39,7 @@ public:
 	class ValInstSetMap {
 	private:
 		/// Mapping of a value to instruction set.
-		using Storage = std::map<llvm::Value *, InstSet>;
+		using Storage = std::map<llvm::Value *, std::set<llvm::Instruction*>>;
 
 	private:
 		/// Storage for this class.
@@ -61,9 +63,9 @@ public:
 		~ValInstSetMap();
 
 		void addInst(llvm::Value &value, llvm::Instruction &inst);
-		void addInsts(llvm::Value &value, const InstSet &instSet);
+		void addInsts(llvm::Value &value, const std::set<llvm::Instruction*> &instSet);
 		void addFrom(const ValInstSetMap &toAdd);
-		void appendInstsFor(llvm::Value &value, InstSet &instSet);
+		void appendInstsFor(llvm::Value &value, std::set<llvm::Instruction*> &instSet);
 		void clear();
 		bool empty();
 		bool isDifferentFrom(const ValInstSetMap &toDiff);
@@ -71,7 +73,7 @@ public:
 		bool isIn(llvm::Value &value, llvm::Instruction &inst);
 		llvm::Instruction *getInstFor(llvm::Value &leftOp,
 			llvm::Value &rightOp);
-		bool hasExcept(llvm::Value &value, const InstSet &except);
+		bool hasExcept(llvm::Value &value, const std::set<llvm::Instruction*> &except);
 		void tryToRemoveValue(llvm::Value &value);
 		iterator find(llvm::Value &value) const;
 
@@ -82,7 +84,7 @@ public:
 	using extRUses_iterator = ValInstSetMap::iterator;
 
 	/// Not go through global variables constant iterator.
-	using notGoThrough_iterator = ValSet::const_iterator;
+	using notGoThrough_iterator = std::set<llvm::Value*>::const_iterator;
 
 	/// Last left uses constant iterator.
 	using lastLUses_iterator = ValInstSetMap::iterator;
@@ -115,7 +117,7 @@ public:
 	bool isInExtRUses(llvm::Value &value);
 	llvm::Instruction *getInstFromExtRUses(llvm::Value &leftOp,
 		llvm::Value &rightOp);
-	void appendFromExtRUses(llvm::Value &value, InstSet &instSet);
+	void appendFromExtRUses(llvm::Value &value, std::set<llvm::Instruction*> &instSet);
 	void copyExtRUses(ValInstSetMap &toCopy);
 	void removeValFromExtRUses(llvm::Value &value);
 	void clearExtRUses();
@@ -129,7 +131,7 @@ public:
 	void replaceExceptLastLUses(const AnalysisInfo toReplace);
 	bool emptyNotGoThrough();
 	void addLastLUse(llvm::Value &value, llvm::Instruction &inst);
-	void addLastLUses(llvm::Value &value, const InstSet &instSet);
+	void addLastLUses(llvm::Value &value, const std::set<llvm::Instruction*> &instSet);
 	bool areLastLUsesDiff(const AnalysisInfo &toDiff);
 	bool emptyLastLUses();
 	void addGlobForIndirectCalls(llvm::Value &value);
@@ -154,16 +156,16 @@ private:
 	ValInstSetMap extRUses;
 
 	/// Not go through global variables.
-	ValSet notGoThrough;
+	std::set<llvm::Value*> notGoThrough;
 
 	/// Last left uses.
 	ValInstSetMap lastLUses;
 
 	/// Global variables for indirect calls.
-	ValSet globsForIndirectCalls;
+	std::set<llvm::Value*> globsForIndirectCalls;
 
 	/// Global variables for calls of functions defined out of module.
-	ValSet globsForCallsForFuncsOutOfModule;
+	std::set<llvm::Value*> globsForCallsForFuncsOutOfModule;
 };
 
 /**
@@ -261,7 +263,7 @@ public:
 	///   - @c i->first is the left use,
 	///   - @c i->second is the set of right uses that can be reached with left
 	///        use.
-	using rUsesForLUse_iterator = InstInstSetMap::const_iterator;
+	using rUsesForLUse_iterator = std::map<llvm::Instruction*, std::set<llvm::Instruction*>>::const_iterator;
 
 	/// Extended right uses constant iterator.
 	///   - @c i->first is the global variable for extended right uses,
@@ -276,10 +278,10 @@ public:
 
 	/// Constant iterator for left uses that can reach call of functions defined
 	/// out of module.
-	using lUsesOutFunc_iterator = InstSet::const_iterator;
+	using lUsesOutFunc_iterator = std::set<llvm::Instruction*>::const_iterator;
 
 	/// Constant iterator for left uses that can reach indirect call.
-	using lUsesIndir_iterator = InstSet::const_iterator;
+	using lUsesIndir_iterator = std::set<llvm::Instruction*>::const_iterator;
 
 	/// Constant iterator for extended right uses that can reach indirect call.
 	/// Attributes (@c i is an iterator):
@@ -331,7 +333,7 @@ public:
 	extRUsesIndir_iterator extRUsesIndir_end() const;
 	/// @}
 
-	void doAnalysis(llvm::Module &module, GlobVarSet &globs,
+	void doAnalysis(llvm::Module &module, std::set<llvm::GlobalVariable*> &globs,
 		llvm::CallGraph &callGraph, bool funcsOutOfModule);
 	bool isInLUsesForFuncOutOfModule(llvm::StoreInst &inst);
 	bool hasSomeRUseEffectOutOfFunc(llvm::Value &globValue,
@@ -339,7 +341,7 @@ public:
 	bool isInNotGoThrough(llvm::Value &globValue, llvm::Function &func);
 	llvm::Instruction *getInstFromExtRUses(llvm::Value &leftOp,
 		llvm::Value &rightOp, llvm::Function &func);
-	InstSet getRUsesForLUse(llvm::Instruction &lUse);
+	std::set<llvm::Instruction*> getRUsesForLUse(llvm::Instruction &lUse);
 
 	void printFuncInfos();
 	void printFuncInfo(llvm::Function &func);
@@ -351,7 +353,7 @@ private:
 	class BBInfo {
 	public:
 		/// Ordered instructions constant iterator.
-		using ordInsts_iterator = InstVec::const_iterator;
+		using ordInsts_iterator = std::vector<llvm::Instruction*>::const_iterator;
 
 	public:
 		BBInfo(llvm::BasicBlock &bb);
@@ -366,11 +368,11 @@ private:
 		llvm::BasicBlock &getBB();
 		void addIndirectCall(llvm::CallInst &callInst);
 		void addCallForFuncOutOfModule(llvm::CallInst &callInst);
-		void addAllGlobsToNotGoThrough(const GlobVarSet &globs);
+		void addAllGlobsToNotGoThrough(const std::set<llvm::GlobalVariable*> &globs);
 		void addAllGlobsToGlobsForIndirectCall(
-			const GlobVarSet &globs);
+			const std::set<llvm::GlobalVariable*> &globs);
 		void addAllGlobsToGlobsForCallsForFuncsOutOfModule(
-			const GlobVarSet &globs);
+			const std::set<llvm::GlobalVariable*> &globs);
 		void tryToAddInstToOrderedList(llvm::Instruction &inst);
 		void clearExtRUses();
 		void clearGlobsForIndirectCalls();
@@ -406,7 +408,7 @@ private:
 		bool changedInfo;
 
 		/// Saves order of useful instructions in basic block.
-		InstVec orderedInstVec;
+		std::vector<llvm::Instruction*> orderedInstVec;
 	};
 
 	/**
@@ -437,8 +439,8 @@ private:
 
 		llvm::Function &getFunc();
 		void addInRUsesForLUse(llvm::Instruction &lUse,
-			const InstSet &rUse);
-		InstSet getRUsesForLUse(llvm::Instruction &lUse);
+			const std::set<llvm::Instruction*> &rUse);
+		std::set<llvm::Instruction*> getRUsesForLUse(llvm::Instruction &lUse);
 		bool isBBVisited(llvm::BasicBlock &bb);
 		llvm::Instruction *getInstFromExtRUses(llvm::Value &leftOp,
 			llvm::Value &rightOp);
@@ -469,13 +471,13 @@ private:
 
 		// Right uses for left use are saved in function where left use occur.
 		/// Mapping of right uses for left use.
-		InstInstSetMap rUsesForLUse;
+		std::map<llvm::Instruction*, std::set<llvm::Instruction*>> rUsesForLUse;
 
 		/// Signalizes if this function was analyzed before.
 		bool isAnalyzedFunc;
 
 		/// Visited basic blocks for this function.
-		BBSet visitedBBs;
+		std::set<llvm::BasicBlock*> visitedBBs;
 	};
 
 	/// Mapping of a function to function info.
@@ -517,18 +519,18 @@ private:
 	void processGlobsForIndirectCallAfterFuncCall(const AnalysisInfo &calledFuncInfo);
 	void processCallsForFuncOutOfModuleAfterFuncCall(
 		const AnalysisInfo &calledFuncInfo);
-	void addInRUsesForLUses(const InstSet &lUses,
-		const InstSet &rUses);
+	void addInRUsesForLUses(const std::set<llvm::Instruction*> &lUses,
+		const std::set<llvm::Instruction*> &rUses);
 	void addInRUsesForLUse(llvm::Instruction &lUse,
-		const InstSet &rUses);
-	void addInLUsesForIndirectCalls(const InstSet &lUses);
-	void addInLUsesForFuncsOutOfModule(const InstSet &lUses);
+		const std::set<llvm::Instruction*> &rUses);
+	void addInLUsesForIndirectCalls(const std::set<llvm::Instruction*> &lUses);
+	void addInLUsesForFuncsOutOfModule(const std::set<llvm::Instruction*> &lUses);
 	void addToLastLUsesWithCheck(const AnalysisInfo &toAdd);
 	void processLUse(llvm::Value &globValue, llvm::Instruction &lUse);
 	void solveIndirectCallsForLUses(llvm::Value &globValue,
-		const InstSet &lUses);
+		const std::set<llvm::Instruction*> &lUses);
 	void solveCallsForFuncsOutOfModuleForLUses(llvm::Value &globValue,
-		const InstSet &lUses);
+		const std::set<llvm::Instruction*> &lUses);
 	void tryToAddLastLUse(llvm::Value &globValue, llvm::Instruction &lUse);
 	void setCurrBBInfo(llvm::BasicBlock &bb);
 	void setCurrFuncInfo(llvm::Function &func);
@@ -553,19 +555,19 @@ private:
 	bool countWithFuncsOutOfModule;
 
 	/// Functions that are in module.
-	FuncVec funcsInModule;
+	std::vector<llvm::Function*> funcsInModule;
 
 	/// Global variables that can be optimized.
-	GlobVarSet globsToAnalyze;
+	std::set<llvm::GlobalVariable*> globsToAnalyze;
 
 	/// Left uses that can reach indirect call.
-	InstSet lUsesForIndirectCall;
+	std::set<llvm::Instruction*> lUsesForIndirectCall;
 
 	/// Extended right uses that can reach indirect call.
 	FuncValInstSetMap extRUsesForIndirectCall;
 
 	/// Left uses that can reach functions defined out of module.
-	InstSet lUsesForFuncsOutOfModule;
+	std::set<llvm::Instruction*> lUsesForFuncsOutOfModule;
 
 	/// Mapping of a function to its info.
 	FuncFuncInfoMap funcInfoMap;

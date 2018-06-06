@@ -10,7 +10,6 @@
 #include "retdec/utils/container.h"
 #include "retdec/bin2llvmir/analyses/indirectly_called_funcs_analysis.h"
 #include "retdec/bin2llvmir/analyses/store_load_analysis.h"
-#include "retdec/bin2llvmir/utils/instruction.h"
 
 using namespace retdec::utils;
 using namespace llvm;
@@ -123,7 +122,7 @@ StoreLoadAnalysis::~StoreLoadAnalysis() {
 * @param[in] funcsOutOfModule Signalizes if analysis have to count with
 *            functions defined out of module.
 */
-void StoreLoadAnalysis::doAnalysis(Module &module, GlobVarSet &globs,
+void StoreLoadAnalysis::doAnalysis(Module &module, std::set<llvm::GlobalVariable*> &globs,
 		CallGraph &callGraph, bool funcsOutOfModule) {
 	// If analysis was run before than now is need to clear everything.
 	clear();
@@ -221,7 +220,7 @@ bool StoreLoadAnalysis::isInNotGoThrough(Value &globValue, Function &func) {
 * @par Preconditions
 *  - @a lUse have to be analyzed..
 */
-InstSet StoreLoadAnalysis::getRUsesForLUse(Instruction &lUse) {
+std::set<llvm::Instruction*> StoreLoadAnalysis::getRUsesForLUse(Instruction &lUse) {
 	return getFuncInfoFor(*lUse.getFunction()).getRUsesForLUse(lUse);
 
 }
@@ -516,7 +515,7 @@ bool StoreLoadAnalysis::isNeedToProcessBB(BasicBlock &bb, bool isBBVisited) {
 */
 void StoreLoadAnalysis::addInfoFromSuccBBsFor(BasicBlock &bb,
 		bool isVisitedBB) {
-	BBSet visitedSuccs;
+	std::set<llvm::BasicBlock*> visitedSuccs;
 	bool hasToIntersect(false);
 	for (auto i = succ_begin(&bb), e = succ_end(&bb); i != e; ++i) {
 		if (hasItem(visitedSuccs, *i)) {
@@ -693,7 +692,7 @@ void StoreLoadAnalysis::processCalledFuncInfo(
 * @brief Solves indirect call for @a callInst.
 */
 void StoreLoadAnalysis::solveIndirectCall(CallInst &callInst) {
-	FuncSet funcs(IndirectlyCalledFuncsAnalysis::getFuncsForIndirectCall(
+	std::set<llvm::Function*> funcs(IndirectlyCalledFuncsAnalysis::getFuncsForIndirectCall(
 		callInst, funcsInModule));
 	AnalysisInfo::ValInstSetMap extRUses;
 	currBBInfo->bbInfo->copyExtRUses(extRUses);
@@ -750,7 +749,7 @@ void StoreLoadAnalysis::processExtRUsesAfterFuncCall(
 			// x = g
 			// In this situation is need to add extended right use for store
 			// g = 2.
-			InstSet rUses;
+			std::set<llvm::Instruction*> rUses;
 			currBBInfo->bbInfo->appendFromExtRUses(*i->first, rUses);
 			addInRUsesForLUses(i->second, rUses);
 		} else {
@@ -824,8 +823,8 @@ void StoreLoadAnalysis::processCallsForFuncOutOfModuleAfterFuncCall(
 * @param[in] lUses Left uses.
 * @param[in, out] rUses Right uses to add.
 */
-void StoreLoadAnalysis::addInRUsesForLUses(const InstSet &lUses,
-		const InstSet &rUses) {
+void StoreLoadAnalysis::addInRUsesForLUses(const std::set<llvm::Instruction*> &lUses,
+		const std::set<llvm::Instruction*> &rUses) {
 	for (Instruction *lUse : lUses) {
 		addInRUsesForLUse(*lUse, rUses);
 	}
@@ -834,7 +833,7 @@ void StoreLoadAnalysis::addInRUsesForLUses(const InstSet &lUses,
 /**
 * @brief Adds @a lUses that can reach the indirect call.
 */
-void StoreLoadAnalysis::addInLUsesForIndirectCalls(const InstSet &lUses) {
+void StoreLoadAnalysis::addInLUsesForIndirectCalls(const std::set<llvm::Instruction*> &lUses) {
 	addToSet(lUses, lUsesForIndirectCall);
 }
 
@@ -842,7 +841,7 @@ void StoreLoadAnalysis::addInLUsesForIndirectCalls(const InstSet &lUses) {
 * @brief Adds @a lUses into left uses that can reach call of functions defined
 *        out of module.
 */
-void StoreLoadAnalysis::addInLUsesForFuncsOutOfModule(const InstSet &lUses) {
+void StoreLoadAnalysis::addInLUsesForFuncsOutOfModule(const std::set<llvm::Instruction*> &lUses) {
 	addToSet(lUses, lUsesForFuncsOutOfModule);
 }
 
@@ -853,7 +852,7 @@ void StoreLoadAnalysis::addInLUsesForFuncsOutOfModule(const InstSet &lUses) {
 * @a lUse in parent function for this instruction.
 */
 void StoreLoadAnalysis::addInRUsesForLUse(Instruction &lUse,
-		const InstSet &rUses) {
+		const std::set<llvm::Instruction*> &rUses) {
 	getFuncInfoFor(*lUse.getFunction()).addInRUsesForLUse(lUse, rUses);
 }
 
@@ -887,12 +886,12 @@ void StoreLoadAnalysis::addToLastLUsesWithCheck(const AnalysisInfo &toAdd) {
 */
 void StoreLoadAnalysis::processLUse(Value &globValue, Instruction &lUse) {
 	// Connect right uses with left use.
-	InstSet rUses;
+	std::set<llvm::Instruction*> rUses;
 	currBBInfo->bbInfo->appendFromExtRUses(globValue, rUses);
-	addInRUsesForLUses(InstSet{&lUse}, rUses);
+	addInRUsesForLUses(std::set<llvm::Instruction*>{&lUse}, rUses);
 
-	solveIndirectCallsForLUses(globValue, InstSet{&lUse});
-	solveCallsForFuncsOutOfModuleForLUses(globValue, InstSet{&lUse});
+	solveIndirectCallsForLUses(globValue, std::set<llvm::Instruction*>{&lUse});
+	solveCallsForFuncsOutOfModuleForLUses(globValue, std::set<llvm::Instruction*>{&lUse});
 
 	// We found store for saved extended right uses. Now we don't want to
 	// propagate these extended right uses.
@@ -914,7 +913,7 @@ void StoreLoadAnalysis::processLUse(Value &globValue, Instruction &lUse) {
 * @param[in] lUses Left uses
 */
 void StoreLoadAnalysis::solveIndirectCallsForLUses(Value &globValue,
-		const InstSet &lUses) {
+		const std::set<llvm::Instruction*> &lUses) {
 	if (currBBInfo->bbInfo->isInGlobsForIndirectCalls(globValue)) {
 		// We connect this global variable with left use. We don't want to
 		// spread it to next basic blocks.
@@ -932,7 +931,7 @@ void StoreLoadAnalysis::solveIndirectCallsForLUses(Value &globValue,
 * @param[in] lUses Left uses
 */
 void StoreLoadAnalysis::solveCallsForFuncsOutOfModuleForLUses(Value &globValue,
-		const InstSet &lUses) {
+		const std::set<llvm::Instruction*> &lUses) {
 	if (currBBInfo->bbInfo->isInGlobsForCallsForFuncsOutOfModule(globValue)) {
 		// We connect this global variable with left use. We don't want to
 		// spread it to next basic blocks.
@@ -1159,7 +1158,7 @@ Function &StoreLoadAnalysis::FuncInfo::getFunc() {
 * Appends @a rUses for @a lUse that can be reached from this @a lUse.
 */
 void StoreLoadAnalysis::FuncInfo::addInRUsesForLUse(llvm::Instruction &lUse,
-		const InstSet &rUses) {
+		const std::set<llvm::Instruction*> &rUses) {
 	auto it(rUsesForLUse.find(&lUse));
 	if (it == rUsesForLUse.end()) {
 		rUsesForLUse[&lUse] = rUses;
@@ -1174,7 +1173,7 @@ void StoreLoadAnalysis::FuncInfo::addInRUsesForLUse(llvm::Instruction &lUse,
 * @par Preconditions
 *  - @a lUse have to be analyzed..
 */
-InstSet StoreLoadAnalysis::FuncInfo::getRUsesForLUse(Instruction &lUse) {
+std::set<llvm::Instruction*> StoreLoadAnalysis::FuncInfo::getRUsesForLUse(Instruction &lUse) {
 	auto it(rUsesForLUse.find(&lUse));
 	assert(it != rUsesForLUse.end() && "This left use was not analyzed.");
 	return it->second;
@@ -1396,7 +1395,7 @@ void StoreLoadAnalysis::BBInfo::addCallForFuncOutOfModule(CallInst &callInst) {
 * @brief Adds @a globs to not go through.
 */
 void StoreLoadAnalysis::BBInfo::addAllGlobsToNotGoThrough(
-		const GlobVarSet &globs) {
+		const std::set<llvm::GlobalVariable*> &globs) {
 	for (GlobalVariable *glob : globs) {
 		bbInfo->addNotGoThrough(*glob);
 	}
@@ -1406,7 +1405,7 @@ void StoreLoadAnalysis::BBInfo::addAllGlobsToNotGoThrough(
 * @brief Adds @a globs to global variables for indirect call.
 */
 void StoreLoadAnalysis::BBInfo::addAllGlobsToGlobsForIndirectCall(
-		const GlobVarSet &globs) {
+		const std::set<llvm::GlobalVariable*> &globs) {
 	for (GlobalVariable *glob : globs) {
 		bbInfo->addGlobForIndirectCalls(*glob);
 	}
@@ -1417,7 +1416,7 @@ void StoreLoadAnalysis::BBInfo::addAllGlobsToGlobsForIndirectCall(
 *        module.
 */
 void StoreLoadAnalysis::BBInfo::addAllGlobsToGlobsForCallsForFuncsOutOfModule(
-		const GlobVarSet &globs) {
+		const std::set<llvm::GlobalVariable*> &globs) {
 	for (GlobalVariable *glob : globs) {
 		bbInfo->addToGlobsForCallsForFuncsOutOfModule(*glob);
 	}
@@ -1646,13 +1645,13 @@ Instruction *AnalysisInfo::getInstFromExtRUses(Value &leftOp, Value &rightOp) {
 }
 
 /**
-* @brief Appends to @a instSet from extended right uses. What is appended is
+* @brief Appends to @a std::set<llvm::Instruction*> from extended right uses. What is appended is
 *        specified by @a value.
 *
 * @param[in, out] value What is appended is specified by this value.
-* @param[in] instSet To this set is appended instructions.
+* @param[in] std::set<llvm::Instruction*> To this set is appended instructions.
 */
-void AnalysisInfo::appendFromExtRUses(Value &value, InstSet &instSet) {
+void AnalysisInfo::appendFromExtRUses(Value &value, std::set<llvm::Instruction*> &instSet) {
 	extRUses.appendInstsFor(value, instSet);
 }
 
@@ -1779,7 +1778,7 @@ void AnalysisInfo::addLastLUse(Value &value, Instruction &inst) {
 /**
 * @brief Adds from @a instSet to last left uses specified by @a value.
 */
-void AnalysisInfo::addLastLUses(Value &value, const InstSet &instSet) {
+void AnalysisInfo::addLastLUses(Value &value, const std::set<llvm::Instruction*> &instSet) {
 	lastLUses.addInsts(value, instSet);
 }
 
@@ -2001,7 +2000,7 @@ void AnalysisInfo::ValInstSetMap::clear() {
 * @param[in] except Set with instructions to except compare.
 */
 bool AnalysisInfo::ValInstSetMap::hasExcept(Value &value,
-		const InstSet &except) {
+		const std::set<llvm::Instruction*> &except) {
 	auto it(find(value));
 	if (it == end()) {
 		return false;
@@ -2040,10 +2039,10 @@ void AnalysisInfo::ValInstSetMap::addInst(Value &value, Instruction &inst) {
 }
 
 /**
-* @brief Adds instructions from @a instSet and map them by @a value.
+* @brief Adds instructions from @a std::set<llvm::Instruction*> and map them by @a value.
 */
 void AnalysisInfo::ValInstSetMap::addInsts(Value &value,
-		const InstSet &instSet) {
+		const std::set<llvm::Instruction*> &instSet) {
 	// Do not bother checking whether storage[&value] exists because if not,
 	// storage[&value] automatically creates an empty set for us. This
 	// significantly speeds up running time on big files.
@@ -2060,13 +2059,13 @@ void AnalysisInfo::ValInstSetMap::addFrom(const ValInstSetMap &toAdd) {
 }
 
 /**
-* @brief Finds instructions for @a value and appends its into @a instSet.
+* @brief Finds instructions for @a value and appends its into @a std::set<llvm::Instruction*>.
 *
 * @param[in] value For this value we find instructions.
-* @param[in, out] instSet We append to this set.
+* @param[in, out] std::set<llvm::Instruction*> We append to this set.
 */
 void AnalysisInfo::ValInstSetMap::appendInstsFor(Value &value,
-		InstSet& instSet) {
+		std::set<llvm::Instruction*>& instSet) {
 	auto it(storage.find(&value));
 	if (it != storage.end()) {
 		addToSet(it->second, instSet);

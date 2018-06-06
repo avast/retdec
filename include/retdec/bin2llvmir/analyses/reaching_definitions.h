@@ -20,8 +20,8 @@
 #include <llvm/ADT/SmallPtrSet.h>
 #include <llvm/IR/Module.h>
 
-#include "retdec/bin2llvmir/providers/config.h"
-#include "retdec/bin2llvmir/utils/defs.h"
+#include "retdec/bin2llvmir/providers/abi/abi.h"
+#include "retdec/bin2llvmir/utils/debug.h"
 
 namespace retdec {
 namespace bin2llvmir {
@@ -37,9 +37,6 @@ using BBEntrySet = std::unordered_set<BasicBlockEntry*>;
 
 using DefSet = std::unordered_set<Definition*>;
 using UseSet = std::unordered_set<Use*>;
-// TODO: it looks like this is running faster, but it often seqfault
-//using DefSet = llvm::SmallPtrSet<Definition*, 32>;
-//using UseSet = llvm::SmallPtrSet<Use*, 32>;
 
 using DefVector = std::vector<Definition>;
 using UseVector = std::vector<Use>;
@@ -53,7 +50,9 @@ class Definition
 		llvm::Value* getSource();
 
 	public:
+		/// Definition instruction -- store or alloca.
 		llvm::Instruction* def;
+		/// Defined value -- store's pointer operand or alloca itself.
 		llvm::Value* src;
 		UseSet uses;
 };
@@ -67,7 +66,9 @@ class Use
 		bool isUndef() const;
 
 	public:
+		/// Use instruction -- load or call.
 		llvm::Instruction* use;
+		/// Used value -- load's pointer operand, call's argument operand.
 		llvm::Value* src;
 		DefSet defs;
 };
@@ -101,7 +102,7 @@ class BasicBlockEntry
 		// defsIn is union of prevBBs' defsOuts
 		DefSet defsOut;
 		DefSet genDefs;
-		UnorderedValSet killDefs;
+		std::unordered_set<llvm::Value*> killDefs;
 
 		bool changed = false;
 
@@ -115,15 +116,17 @@ class ReachingDefinitionsAnalysis
 	public:
 		bool runOnModule(
 				llvm::Module& M,
-				Config* c = nullptr,
+				Abi* abi = nullptr,
 				bool trackFlagRegs = false);
 		bool runOnFunction(
 				llvm::Function& F,
-				Config* c = nullptr,
+				Abi* abi = nullptr,
 				bool trackFlagRegs = false);
 		void clear();
 		bool wasRun() const;
 
+	// Full instance interface.
+	//
 	public:
 		const DefSet& defsFromUse(const llvm::Instruction* I) const;
 		const UseSet& usesFromDef(const llvm::Instruction* I) const;
@@ -133,6 +136,14 @@ class ReachingDefinitionsAnalysis
 		friend std::ostream& operator<<(
 				std::ostream& out,
 				const ReachingDefinitionsAnalysis& rda);
+
+	// On-demand static interface.
+	//
+	public:
+		static std::set<llvm::Instruction*> defsFromUse_onDemand(
+				llvm::Instruction* I);
+		static std::set<llvm::Instruction*> usesFromDef_onDemand(
+				llvm::Instruction* I);
 
 	private:
 		void run();
@@ -147,13 +158,10 @@ class ReachingDefinitionsAnalysis
 
 	private:
 		std::map<const llvm::Function*, std::map<const llvm::BasicBlock*, BasicBlockEntry>> bbMap;
-//		std::map<const llvm::BasicBlock*, BasicBlockEntry> bbMap;
 		bool _trackFlagRegs = false;
 		const llvm::GlobalVariable* _specialGlobal = nullptr;
 		bool _run = false;
-
-	public:
-		Config* _config = nullptr;
+		Abi* _abi = nullptr;
 };
 
 } // namespace bin2llvmir

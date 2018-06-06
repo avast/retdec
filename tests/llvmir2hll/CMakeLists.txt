@@ -80,13 +80,11 @@ set(RETDEC_TESTS_LLVMIR2HLL_SOURCES
 	optimizer/optimizers/c_array_arg_optimizer_tests.cpp
 	optimizer/optimizers/copy_propagation_optimizer_tests.cpp
 	optimizer/optimizers/dead_code_optimizer_tests.cpp
-	optimizer/optimizers/dead_global_assign_optimizer_tests.cpp
 	optimizer/optimizers/dead_local_assign_optimizer_tests.cpp
 	optimizer/optimizers/deref_address_optimizer_tests.cpp
 	optimizer/optimizers/deref_to_array_index_optimizer_tests.cpp
 	optimizer/optimizers/empty_array_to_string_optimizer_tests.cpp
 	optimizer/optimizers/empty_stmt_optimizer_tests.cpp
-	optimizer/optimizers/global_to_local_optimizer_tests.cpp
 	optimizer/optimizers/if_before_loop_optimizer_tests.cpp
 	optimizer/optimizers/if_structure_optimizer_tests.cpp
 	optimizer/optimizers/if_to_switch_optimizer_tests.cpp
@@ -109,7 +107,6 @@ set(RETDEC_TESTS_LLVMIR2HLL_SOURCES
 	optimizer/optimizers/simplify_arithm_expr/three_operands_sub_optimizer_tests.cpp
 	optimizer/optimizers/simplify_arithm_expr/zero_sub_optimizer_tests.cpp
 	optimizer/optimizers/simplify_arithm_expr_optimizer_tests.cpp
-	optimizer/optimizers/unreachable_code_optimizer_tests.cpp
 	optimizer/optimizers/unused_global_var_optimizer_tests.cpp
 	optimizer/optimizers/var_def_for_loop_optimizer_tests.cpp
 	optimizer/optimizers/var_def_stmt_optimizer_tests.cpp
@@ -140,7 +137,6 @@ set(RETDEC_TESTS_LLVMIR2HLL_SOURCES
 	support/maybe_tests.cpp
 	support/struct_types_sorter_tests.cpp
 	support/unreachable_code_in_cfg_remover_tests.cpp
-	support/unreachable_funcs_remover_tests.cpp
 	utils/ir_tests.cpp
 	utils/string_tests.cpp
 	validator/validators/break_outside_loop_validator_tests.cpp

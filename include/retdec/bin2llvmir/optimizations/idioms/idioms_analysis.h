@@ -45,9 +45,9 @@ class IdiomsAnalysis:
 	public IdiomsOWatcom,
 	public IdiomsVStudio  {
 public:
-	IdiomsAnalysis(llvm::Module * M, Config* c, CC_compiler cc, CC_arch arch)
+	IdiomsAnalysis(llvm::Module * M, CC_compiler cc, CC_arch arch)
 	{
-		init(M, c, cc, arch);
+		init(M, cc, arch);
 	}
 	virtual bool doAnalysis(llvm::Function & f, llvm::Pass * p) override;
 

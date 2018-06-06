@@ -473,9 +473,5 @@ StringSet JSONConfig::getSelectedButNotFoundFuncs() const {
 	return impl->config.parameters.selectedNotFoundFunctions;
 }
 
-StringSet JSONConfig::getOptsRunInFrontend() const {
-	return impl->config.parameters.completedFrontendPasses;
-}
-
 } // namespace llvmir2hll
 } // namespace retdec

@@ -12,9 +12,11 @@
 #include <llvm/IR/Value.h>
 
 #include "retdec/utils/address.h"
+#include "retdec/bin2llvmir/providers/abi/abi.h"
 #include "retdec/bin2llvmir/providers/config.h"
 #include "retdec/bin2llvmir/providers/debugformat.h"
 #include "retdec/loader/loader/image.h"
+#include "retdec/rtti-finder/rtti_finder.h"
 
 namespace retdec {
 namespace bin2llvmir {
@@ -23,6 +25,8 @@ class DebugFormat;
 
 class FileImage
 {
+	// Ctors.
+	//
 	public:
 		FileImage(
 				llvm::Module* m,
@@ -37,11 +41,8 @@ class FileImage
 				std::unique_ptr<retdec::loader::Image> img,
 				Config* config);
 
-		bool isOk() const;
-
-		retdec::loader::Image* getImage();
-		retdec::fileformat::FileFormat* getFileFormat();
-
+	// Constant getters - get LLVM constant from the given address.
+	//
 	public:
 		llvm::ConstantInt* getConstantInt(
 				llvm::IntegerType* t,
@@ -71,16 +72,35 @@ class FileImage
 				DebugFormat* dbgf = nullptr,
 				retdec::utils::Address addr = retdec::utils::Address::getUndef);
 
+	// Miscellaneous
+	//
 	public:
-		const retdec::fileformat::Symbol* getPreferredSymbol(
-				retdec::utils::Address addr);
+		bool isImportTerminating(
+				const fileformat::ImportTable* impTbl,
+				const fileformat::Import* imp) const;
 
+	// Image getters.
+	//
 	public:
+		retdec::loader::Image* getImage() const;
 		auto& getSegments() const { return _image->getSegments(); }
 
+	// FileFormat getters.
+	//
+	public:
+		retdec::fileformat::FileFormat* getFileFormat() const;
+
+	// Other getters.
+	//
+	public:
+		const retdec::rtti_finder::RttiFinder& getRtti() const;
+
+	// Private data.
+	//
 	private:
 		llvm::Module* _module = nullptr;
 		std::unique_ptr<retdec::loader::Image> _image;
+		retdec::rtti_finder::RttiFinder _rtti;
 };
 
 /**

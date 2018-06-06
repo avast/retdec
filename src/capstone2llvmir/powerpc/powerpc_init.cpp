@@ -4,12 +4,18 @@
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */
 
-#include "retdec/capstone2llvmir/powerpc/powerpc.h"
+#include "capstone2llvmir/powerpc/powerpc_impl.h"
 
 namespace retdec {
 namespace capstone2llvmir {
 
-void Capstone2LlvmIrTranslatorPowerpc::initializeArchSpecific()
+//
+//==============================================================================
+// Pure virtual methods from Capstone2LlvmIrTranslator_impl
+//==============================================================================
+//
+
+void Capstone2LlvmIrTranslatorPowerpc_impl::initializeArchSpecific()
 {
 	std::map<uint32_t, std::string> r2n =
 	{
@@ -57,12 +63,12 @@ void Capstone2LlvmIrTranslatorPowerpc::initializeArchSpecific()
 	_reg2name = std::move(r2n);
 }
 
-void Capstone2LlvmIrTranslatorPowerpc::initializeRegNameMap()
+void Capstone2LlvmIrTranslatorPowerpc_impl::initializeRegNameMap()
 {
 	// Nothing.
 }
 
-void Capstone2LlvmIrTranslatorPowerpc::initializeRegTypeMap()
+void Capstone2LlvmIrTranslatorPowerpc_impl::initializeRegTypeMap()
 {
 	auto* i1 = llvm::IntegerType::getInt1Ty(_module->getContext());
 	auto* i4 = llvm::IntegerType::getIntNTy(_module->getContext(), 4);
@@ -370,46 +376,168 @@ void Capstone2LlvmIrTranslatorPowerpc::initializeRegTypeMap()
 	_reg2type = std::move(r2t);
 }
 
+void Capstone2LlvmIrTranslatorPowerpc_impl::initializePseudoCallInstructionIDs()
+{
+	_callInsnIds =
+	{
+			// On PowerPC, it is hard to tell what the branch instruction
+			// actually do without very complex analysis. See:
+			// Capstone2LlvmIrTranslatorPowerpc_impl::translateB
+	};
+
+	_returnInsnIds =
+	{
+			// On PowerPC, it is hard to tell what the branch instruction
+			// actually do without very complex analysis. See:
+			// Capstone2LlvmIrTranslatorPowerpc_impl::translateB
+	};
+
+	_branchInsnIds =
+	{
+			// On PowerPC, it is hard to tell what the branch instruction
+			// actually do without very complex analysis. See:
+			// Capstone2LlvmIrTranslatorPowerpc_impl::translateB
+	};
+
+	_condBranchInsnIds =
+	{
+			// On PowerPC, it is hard to tell what the branch instruction
+			// actually do without very complex analysis. See:
+			// Capstone2LlvmIrTranslatorPowerpc_impl::translateB
+	};
+
+	_controlFlowInsnIds =
+	{
+			 PPC_INS_B,
+			 PPC_INS_BA,
+			 PPC_INS_BL,
+			 PPC_INS_BLA,
+
+			 PPC_INS_BC,
+			 PPC_INS_BCA,
+			 PPC_INS_BCLR,
+			 PPC_INS_BCCTR,
+			 PPC_INS_BCL,
+			 PPC_INS_BCLA,
+			 PPC_INS_BCLRL,
+			 PPC_INS_BCCTRL,
+
+			 PPC_INS_BLR,
+			 PPC_INS_BCTR,
+			 PPC_INS_BLRL,
+			 PPC_INS_BCTRL,
+
+			 PPC_INS_BT,
+			 PPC_INS_BTA,
+			 PPC_INS_BTLR,
+			 PPC_INS_BTCTR,
+			 PPC_INS_BTL,
+			 PPC_INS_BTLA,
+			 PPC_INS_BTLRL,
+			 PPC_INS_BTCTRL,
+
+			 PPC_INS_BF,
+			 PPC_INS_BFA,
+			 PPC_INS_BFLR,
+			 PPC_INS_BFCTR,
+			 PPC_INS_BFL,
+			 PPC_INS_BFLA,
+			 PPC_INS_BFLRL,
+			 PPC_INS_BFCTRL,
+
+			 PPC_INS_BDNZ,
+			 PPC_INS_BDNZA,
+			 PPC_INS_BDNZLR,
+			 PPC_INS_BDNZL,
+			 PPC_INS_BDNZLA,
+			 PPC_INS_BDNZLRL,
+
+			 PPC_INS_BDNZT,
+			 PPC_INS_BDNZTA,
+			 PPC_INS_BDNZTLR,
+			 PPC_INS_BDNZTL,
+			 PPC_INS_BDNZTLA,
+			 PPC_INS_BDNZTLRL,
+
+			 PPC_INS_BDNZF,
+			 PPC_INS_BDNZFA,
+//			 PPC_INS_BDNZFLR,
+			 PPC_INS_BDNZFL,
+			 PPC_INS_BDNZFLA,
+			 PPC_INS_BDNZFLRL,
+
+			 PPC_INS_BDZ,
+			 PPC_INS_BDZA,
+			 PPC_INS_BDZLR,
+			 PPC_INS_BDZL,
+			 PPC_INS_BDZLA,
+			 PPC_INS_BDZLRL,
+
+			 PPC_INS_BDZT,
+			 PPC_INS_BDZTA,
+			 PPC_INS_BDZTLR,
+			 PPC_INS_BDZTL,
+			 PPC_INS_BDZTLA,
+			 PPC_INS_BDZTLRL,
+
+			 PPC_INS_BDZF,
+			 PPC_INS_BDZFA,
+			 PPC_INS_BDZFLR,
+			 PPC_INS_BDZFL,
+			 PPC_INS_BDZFLA,
+			 PPC_INS_BDZFLRL,
+	};
+}
+
+//
+//==============================================================================
+// Instruction translation map initialization.
+//==============================================================================
+//
+
 std::map<
 	std::size_t,
-	void (Capstone2LlvmIrTranslatorPowerpc::*)(cs_insn* i, cs_ppc*, llvm::IRBuilder<>&)>
-Capstone2LlvmIrTranslatorPowerpc::_i2fm =
+	void (Capstone2LlvmIrTranslatorPowerpc_impl::*)(
+			cs_insn* i,
+			cs_ppc*,
+			llvm::IRBuilder<>&)>
+Capstone2LlvmIrTranslatorPowerpc_impl::_i2fm =
 {
 		{PPC_INS_INVALID, nullptr},
 
-		{PPC_INS_ADD, &Capstone2LlvmIrTranslatorPowerpc::translateAdd},
-		{PPC_INS_ADDC, &Capstone2LlvmIrTranslatorPowerpc::translateAddc},
-		{PPC_INS_ADDE, &Capstone2LlvmIrTranslatorPowerpc::translateAdde},
-		{PPC_INS_ADDI, &Capstone2LlvmIrTranslatorPowerpc::translateAdd},
-		{PPC_INS_ADDIC, &Capstone2LlvmIrTranslatorPowerpc::translateAddc},
-		{PPC_INS_ADDIS, &Capstone2LlvmIrTranslatorPowerpc::translateAddis},
-		{PPC_INS_ADDME, &Capstone2LlvmIrTranslatorPowerpc::translateAddme},
-		{PPC_INS_ADDZE, &Capstone2LlvmIrTranslatorPowerpc::translateAddze},
-		{PPC_INS_AND, &Capstone2LlvmIrTranslatorPowerpc::translateAnd},
-		{PPC_INS_ANDC, &Capstone2LlvmIrTranslatorPowerpc::translateAndc},
-		{PPC_INS_ANDIS, &Capstone2LlvmIrTranslatorPowerpc::translateAndis},
-		{PPC_INS_ANDI, &Capstone2LlvmIrTranslatorPowerpc::translateAnd},
+		{PPC_INS_ADD, &Capstone2LlvmIrTranslatorPowerpc_impl::translateAdd},
+		{PPC_INS_ADDC, &Capstone2LlvmIrTranslatorPowerpc_impl::translateAddc},
+		{PPC_INS_ADDE, &Capstone2LlvmIrTranslatorPowerpc_impl::translateAdde},
+		{PPC_INS_ADDI, &Capstone2LlvmIrTranslatorPowerpc_impl::translateAdd},
+		{PPC_INS_ADDIC, &Capstone2LlvmIrTranslatorPowerpc_impl::translateAddc},
+		{PPC_INS_ADDIS, &Capstone2LlvmIrTranslatorPowerpc_impl::translateAddis},
+		{PPC_INS_ADDME, &Capstone2LlvmIrTranslatorPowerpc_impl::translateAddme},
+		{PPC_INS_ADDZE, &Capstone2LlvmIrTranslatorPowerpc_impl::translateAddze},
+		{PPC_INS_AND, &Capstone2LlvmIrTranslatorPowerpc_impl::translateAnd},
+		{PPC_INS_ANDC, &Capstone2LlvmIrTranslatorPowerpc_impl::translateAndc},
+		{PPC_INS_ANDIS, &Capstone2LlvmIrTranslatorPowerpc_impl::translateAndis},
+		{PPC_INS_ANDI, &Capstone2LlvmIrTranslatorPowerpc_impl::translateAnd},
 		{PPC_INS_ATTN, nullptr},
 		{PPC_INS_BRINC, nullptr},
 		{PPC_INS_CMPB, nullptr},
-		{PPC_INS_CMPD, &Capstone2LlvmIrTranslatorPowerpc::translateCmp},
-		{PPC_INS_CMPDI, &Capstone2LlvmIrTranslatorPowerpc::translateCmp},
-		{PPC_INS_CMPLD, &Capstone2LlvmIrTranslatorPowerpc::translateCmp},
-		{PPC_INS_CMPLDI, &Capstone2LlvmIrTranslatorPowerpc::translateCmp},
-		{PPC_INS_CMPLW, &Capstone2LlvmIrTranslatorPowerpc::translateCmp},
-		{PPC_INS_CMPLWI, &Capstone2LlvmIrTranslatorPowerpc::translateCmp},
-		{PPC_INS_CMPW, &Capstone2LlvmIrTranslatorPowerpc::translateCmp},
-		{PPC_INS_CMPWI, &Capstone2LlvmIrTranslatorPowerpc::translateCmp},
+		{PPC_INS_CMPD, &Capstone2LlvmIrTranslatorPowerpc_impl::translateCmp},
+		{PPC_INS_CMPDI, &Capstone2LlvmIrTranslatorPowerpc_impl::translateCmp},
+		{PPC_INS_CMPLD, &Capstone2LlvmIrTranslatorPowerpc_impl::translateCmp},
+		{PPC_INS_CMPLDI, &Capstone2LlvmIrTranslatorPowerpc_impl::translateCmp},
+		{PPC_INS_CMPLW, &Capstone2LlvmIrTranslatorPowerpc_impl::translateCmp},
+		{PPC_INS_CMPLWI, &Capstone2LlvmIrTranslatorPowerpc_impl::translateCmp},
+		{PPC_INS_CMPW, &Capstone2LlvmIrTranslatorPowerpc_impl::translateCmp},
+		{PPC_INS_CMPWI, &Capstone2LlvmIrTranslatorPowerpc_impl::translateCmp},
 		{PPC_INS_CNTLZD, nullptr},
-		{PPC_INS_CNTLZW, &Capstone2LlvmIrTranslatorPowerpc::translateCntlzw},
-		{PPC_INS_CREQV, &Capstone2LlvmIrTranslatorPowerpc::translateCrModifTernary},
-		{PPC_INS_CRXOR, &Capstone2LlvmIrTranslatorPowerpc::translateCrModifTernary},
-		{PPC_INS_CRAND, &Capstone2LlvmIrTranslatorPowerpc::translateCrModifTernary},
-		{PPC_INS_CRANDC, &Capstone2LlvmIrTranslatorPowerpc::translateCrModifTernary},
-		{PPC_INS_CRNAND, &Capstone2LlvmIrTranslatorPowerpc::translateCrModifTernary},
-		{PPC_INS_CRNOR, &Capstone2LlvmIrTranslatorPowerpc::translateCrModifTernary},
-		{PPC_INS_CROR, &Capstone2LlvmIrTranslatorPowerpc::translateCrModifTernary},
-		{PPC_INS_CRORC, &Capstone2LlvmIrTranslatorPowerpc::translateCrModifTernary},
+		{PPC_INS_CNTLZW, &Capstone2LlvmIrTranslatorPowerpc_impl::translateCntlzw},
+		{PPC_INS_CREQV, &Capstone2LlvmIrTranslatorPowerpc_impl::translateCrModifTernary},
+		{PPC_INS_CRXOR, &Capstone2LlvmIrTranslatorPowerpc_impl::translateCrModifTernary},
+		{PPC_INS_CRAND, &Capstone2LlvmIrTranslatorPowerpc_impl::translateCrModifTernary},
+		{PPC_INS_CRANDC, &Capstone2LlvmIrTranslatorPowerpc_impl::translateCrModifTernary},
+		{PPC_INS_CRNAND, &Capstone2LlvmIrTranslatorPowerpc_impl::translateCrModifTernary},
+		{PPC_INS_CRNOR, &Capstone2LlvmIrTranslatorPowerpc_impl::translateCrModifTernary},
+		{PPC_INS_CROR, &Capstone2LlvmIrTranslatorPowerpc_impl::translateCrModifTernary},
+		{PPC_INS_CRORC, &Capstone2LlvmIrTranslatorPowerpc_impl::translateCrModifTernary},
 		{PPC_INS_DCBA, nullptr},
 		{PPC_INS_DCBF, nullptr},
 		{PPC_INS_DCBI, nullptr},
@@ -421,15 +549,15 @@ Capstone2LlvmIrTranslatorPowerpc::_i2fm =
 		{PPC_INS_DCCCI, nullptr},
 		{PPC_INS_DIVD, nullptr},
 		{PPC_INS_DIVDU, nullptr},
-		{PPC_INS_DIVW, &Capstone2LlvmIrTranslatorPowerpc::translateDivw},
-		{PPC_INS_DIVWU, &Capstone2LlvmIrTranslatorPowerpc::translateDivw},
+		{PPC_INS_DIVW, &Capstone2LlvmIrTranslatorPowerpc_impl::translateDivw},
+		{PPC_INS_DIVWU, &Capstone2LlvmIrTranslatorPowerpc_impl::translateDivw},
 		{PPC_INS_DSS, nullptr},
 		{PPC_INS_DSSALL, nullptr},
 		{PPC_INS_DST, nullptr},
 		{PPC_INS_DSTST, nullptr},
 		{PPC_INS_DSTSTT, nullptr},
 		{PPC_INS_DSTT, nullptr},
-		{PPC_INS_EQV, &Capstone2LlvmIrTranslatorPowerpc::translateEqv},
+		{PPC_INS_EQV, &Capstone2LlvmIrTranslatorPowerpc_impl::translateEqv},
 		{PPC_INS_EVABS, nullptr},
 		{PPC_INS_EVADDIW, nullptr},
 		{PPC_INS_EVADDSMIAAW, nullptr},
@@ -601,9 +729,9 @@ Capstone2LlvmIrTranslatorPowerpc::_i2fm =
 		{PPC_INS_EVSUBFW, nullptr},
 		{PPC_INS_EVSUBIFW, nullptr},
 		{PPC_INS_EVXOR, nullptr},
-		{PPC_INS_EXTSB, &Capstone2LlvmIrTranslatorPowerpc::translateExtendSign},
-		{PPC_INS_EXTSH, &Capstone2LlvmIrTranslatorPowerpc::translateExtendSign},
-		{PPC_INS_EXTSW, &Capstone2LlvmIrTranslatorPowerpc::translateExtendSign},
+		{PPC_INS_EXTSB, &Capstone2LlvmIrTranslatorPowerpc_impl::translateExtendSign},
+		{PPC_INS_EXTSH, &Capstone2LlvmIrTranslatorPowerpc_impl::translateExtendSign},
+		{PPC_INS_EXTSW, &Capstone2LlvmIrTranslatorPowerpc_impl::translateExtendSign},
 		{PPC_INS_EIEIO, nullptr},
 		{PPC_INS_FABS, nullptr},
 		{PPC_INS_FADD, nullptr},
@@ -655,12 +783,12 @@ Capstone2LlvmIrTranslatorPowerpc::_i2fm =
 		{PPC_INS_ISEL, nullptr},
 		{PPC_INS_ISYNC, nullptr},
 
-		{PPC_INS_LA, &Capstone2LlvmIrTranslatorPowerpc::translateAdd},
-		{PPC_INS_LBZ, &Capstone2LlvmIrTranslatorPowerpc::translateLoad},
+		{PPC_INS_LA, &Capstone2LlvmIrTranslatorPowerpc_impl::translateAdd},
+		{PPC_INS_LBZ, &Capstone2LlvmIrTranslatorPowerpc_impl::translateLoad},
 		{PPC_INS_LBZCIX, nullptr},
-		{PPC_INS_LBZU, &Capstone2LlvmIrTranslatorPowerpc::translateLoad},
-		{PPC_INS_LBZUX, &Capstone2LlvmIrTranslatorPowerpc::translateLoadIndexed},
-		{PPC_INS_LBZX, &Capstone2LlvmIrTranslatorPowerpc::translateLoadIndexed},
+		{PPC_INS_LBZU, &Capstone2LlvmIrTranslatorPowerpc_impl::translateLoad},
+		{PPC_INS_LBZUX, &Capstone2LlvmIrTranslatorPowerpc_impl::translateLoadIndexed},
+		{PPC_INS_LBZX, &Capstone2LlvmIrTranslatorPowerpc_impl::translateLoadIndexed},
 		{PPC_INS_LD, nullptr},
 		{PPC_INS_LDARX, nullptr},
 		{PPC_INS_LDBRX, nullptr},
@@ -678,18 +806,18 @@ Capstone2LlvmIrTranslatorPowerpc::_i2fm =
 		{PPC_INS_LFSU, nullptr},
 		{PPC_INS_LFSUX, nullptr},
 		{PPC_INS_LFSX, nullptr},
-		{PPC_INS_LHA, &Capstone2LlvmIrTranslatorPowerpc::translateLoad},
-		{PPC_INS_LHAU, &Capstone2LlvmIrTranslatorPowerpc::translateLoad},
-		{PPC_INS_LHAUX, &Capstone2LlvmIrTranslatorPowerpc::translateLoadIndexed},
-		{PPC_INS_LHAX, &Capstone2LlvmIrTranslatorPowerpc::translateLoadIndexed},
-		{PPC_INS_LHBRX, &Capstone2LlvmIrTranslatorPowerpc::translateLhbrx},
-		{PPC_INS_LHZ, &Capstone2LlvmIrTranslatorPowerpc::translateLoad},
+		{PPC_INS_LHA, &Capstone2LlvmIrTranslatorPowerpc_impl::translateLoad},
+		{PPC_INS_LHAU, &Capstone2LlvmIrTranslatorPowerpc_impl::translateLoad},
+		{PPC_INS_LHAUX, &Capstone2LlvmIrTranslatorPowerpc_impl::translateLoadIndexed},
+		{PPC_INS_LHAX, &Capstone2LlvmIrTranslatorPowerpc_impl::translateLoadIndexed},
+		{PPC_INS_LHBRX, &Capstone2LlvmIrTranslatorPowerpc_impl::translateLhbrx},
+		{PPC_INS_LHZ, &Capstone2LlvmIrTranslatorPowerpc_impl::translateLoad},
 		{PPC_INS_LHZCIX, nullptr},
-		{PPC_INS_LHZU, &Capstone2LlvmIrTranslatorPowerpc::translateLoad},
-		{PPC_INS_LHZUX, &Capstone2LlvmIrTranslatorPowerpc::translateLoadIndexed},
-		{PPC_INS_LHZX, &Capstone2LlvmIrTranslatorPowerpc::translateLoadIndexed},
-		{PPC_INS_LI, &Capstone2LlvmIrTranslatorPowerpc::translateLi},
-		{PPC_INS_LIS, &Capstone2LlvmIrTranslatorPowerpc::translateLis},
+		{PPC_INS_LHZU, &Capstone2LlvmIrTranslatorPowerpc_impl::translateLoad},
+		{PPC_INS_LHZUX, &Capstone2LlvmIrTranslatorPowerpc_impl::translateLoadIndexed},
+		{PPC_INS_LHZX, &Capstone2LlvmIrTranslatorPowerpc_impl::translateLoadIndexed},
+		{PPC_INS_LI, &Capstone2LlvmIrTranslatorPowerpc_impl::translateLi},
+		{PPC_INS_LIS, &Capstone2LlvmIrTranslatorPowerpc_impl::translateLis},
 		{PPC_INS_LMW, nullptr},
 		{PPC_INS_LSWI, nullptr},
 		{PPC_INS_LVEBX, nullptr},
@@ -703,63 +831,63 @@ Capstone2LlvmIrTranslatorPowerpc::_i2fm =
 		{PPC_INS_LWARX, nullptr},
 		{PPC_INS_LWAUX, nullptr},
 		{PPC_INS_LWAX, nullptr},
-		{PPC_INS_LWBRX, &Capstone2LlvmIrTranslatorPowerpc::translateLwbrx},
-		{PPC_INS_LWZ, &Capstone2LlvmIrTranslatorPowerpc::translateLoad},
+		{PPC_INS_LWBRX, &Capstone2LlvmIrTranslatorPowerpc_impl::translateLwbrx},
+		{PPC_INS_LWZ, &Capstone2LlvmIrTranslatorPowerpc_impl::translateLoad},
 		{PPC_INS_LWZCIX, nullptr},
-		{PPC_INS_LWZU, &Capstone2LlvmIrTranslatorPowerpc::translateLoad},
-		{PPC_INS_LWZUX, &Capstone2LlvmIrTranslatorPowerpc::translateLoadIndexed},
-		{PPC_INS_LWZX, &Capstone2LlvmIrTranslatorPowerpc::translateLoadIndexed},
+		{PPC_INS_LWZU, &Capstone2LlvmIrTranslatorPowerpc_impl::translateLoad},
+		{PPC_INS_LWZUX, &Capstone2LlvmIrTranslatorPowerpc_impl::translateLoadIndexed},
+		{PPC_INS_LWZX, &Capstone2LlvmIrTranslatorPowerpc_impl::translateLoadIndexed},
 
 		{PPC_INS_LXSDX, nullptr},
 		{PPC_INS_LXVD2X, nullptr},
 		{PPC_INS_LXVDSX, nullptr},
 		{PPC_INS_LXVW4X, nullptr},
 		{PPC_INS_MBAR, nullptr},
-		{PPC_INS_MCRF, &Capstone2LlvmIrTranslatorPowerpc::translateMcrf},
+		{PPC_INS_MCRF, &Capstone2LlvmIrTranslatorPowerpc_impl::translateMcrf},
 		{PPC_INS_MCRFS, nullptr},
-		{PPC_INS_MFCR, &Capstone2LlvmIrTranslatorPowerpc::translateMfcr},
-		{PPC_INS_MFCTR, &Capstone2LlvmIrTranslatorPowerpc::translateMfctr},
+		{PPC_INS_MFCR, &Capstone2LlvmIrTranslatorPowerpc_impl::translateMfcr},
+		{PPC_INS_MFCTR, &Capstone2LlvmIrTranslatorPowerpc_impl::translateMfctr},
 		{PPC_INS_MFDCR, nullptr},
 		{PPC_INS_MFFS, nullptr},
-		{PPC_INS_MFLR, &Capstone2LlvmIrTranslatorPowerpc::translateMflr},
+		{PPC_INS_MFLR, &Capstone2LlvmIrTranslatorPowerpc_impl::translateMflr},
 		{PPC_INS_MFMSR, nullptr},
 		{PPC_INS_MFOCRF, nullptr},
-		{PPC_INS_MFSPR, &Capstone2LlvmIrTranslatorPowerpc::translateMfspr},
+		{PPC_INS_MFSPR, &Capstone2LlvmIrTranslatorPowerpc_impl::translateMfspr},
 		{PPC_INS_MFSR, nullptr},
 		{PPC_INS_MFSRIN, nullptr},
 		{PPC_INS_MFTB, nullptr},
 		{PPC_INS_MFVSCR, nullptr},
 		{PPC_INS_MSYNC, nullptr},
-		{PPC_INS_MTCRF, &Capstone2LlvmIrTranslatorPowerpc::translateMtcrf},
-		{PPC_INS_MTCTR, &Capstone2LlvmIrTranslatorPowerpc::translateMtctr},
+		{PPC_INS_MTCRF, &Capstone2LlvmIrTranslatorPowerpc_impl::translateMtcrf},
+		{PPC_INS_MTCTR, &Capstone2LlvmIrTranslatorPowerpc_impl::translateMtctr},
 		{PPC_INS_MTDCR, nullptr},
 		{PPC_INS_MTFSB0, nullptr},
 		{PPC_INS_MTFSB1, nullptr},
 		{PPC_INS_MTFSF, nullptr},
 		{PPC_INS_MTFSFI, nullptr},
-		{PPC_INS_MTLR, &Capstone2LlvmIrTranslatorPowerpc::translateMtlr},
+		{PPC_INS_MTLR, &Capstone2LlvmIrTranslatorPowerpc_impl::translateMtlr},
 		{PPC_INS_MTMSR, nullptr},
 		{PPC_INS_MTMSRD, nullptr},
 		{PPC_INS_MTOCRF, nullptr},
-		{PPC_INS_MTSPR, &Capstone2LlvmIrTranslatorPowerpc::translateMtspr},
+		{PPC_INS_MTSPR, &Capstone2LlvmIrTranslatorPowerpc_impl::translateMtspr},
 		{PPC_INS_MTSR, nullptr},
 		{PPC_INS_MTSRIN, nullptr},
 		{PPC_INS_MTVSCR, nullptr},
 		{PPC_INS_MULHD, nullptr},
 		{PPC_INS_MULHDU, nullptr},
-		{PPC_INS_MULHW, &Capstone2LlvmIrTranslatorPowerpc::translateMulhw},
-		{PPC_INS_MULHWU, &Capstone2LlvmIrTranslatorPowerpc::translateMulhw},
+		{PPC_INS_MULHW, &Capstone2LlvmIrTranslatorPowerpc_impl::translateMulhw},
+		{PPC_INS_MULHWU, &Capstone2LlvmIrTranslatorPowerpc_impl::translateMulhw},
 		{PPC_INS_MULLD, nullptr},
-		{PPC_INS_MULLI, &Capstone2LlvmIrTranslatorPowerpc::translateMullw},
-		{PPC_INS_MULLW, &Capstone2LlvmIrTranslatorPowerpc::translateMullw},
-		{PPC_INS_NAND, &Capstone2LlvmIrTranslatorPowerpc::translateNand},
-		{PPC_INS_NEG, &Capstone2LlvmIrTranslatorPowerpc::translateNeg},
-		{PPC_INS_NOP, &Capstone2LlvmIrTranslatorPowerpc::translateNop},
-		{PPC_INS_ORI, &Capstone2LlvmIrTranslatorPowerpc::translateOr},
-		{PPC_INS_NOR, &Capstone2LlvmIrTranslatorPowerpc::translateNor},
-		{PPC_INS_OR, &Capstone2LlvmIrTranslatorPowerpc::translateOr},
-		{PPC_INS_ORC, &Capstone2LlvmIrTranslatorPowerpc::translateOrc},
-		{PPC_INS_ORIS, &Capstone2LlvmIrTranslatorPowerpc::translateOris},
+		{PPC_INS_MULLI, &Capstone2LlvmIrTranslatorPowerpc_impl::translateMullw},
+		{PPC_INS_MULLW, &Capstone2LlvmIrTranslatorPowerpc_impl::translateMullw},
+		{PPC_INS_NAND, &Capstone2LlvmIrTranslatorPowerpc_impl::translateNand},
+		{PPC_INS_NEG, &Capstone2LlvmIrTranslatorPowerpc_impl::translateNeg},
+		{PPC_INS_NOP, &Capstone2LlvmIrTranslatorPowerpc_impl::translateNop},
+		{PPC_INS_ORI, &Capstone2LlvmIrTranslatorPowerpc_impl::translateOr},
+		{PPC_INS_NOR, &Capstone2LlvmIrTranslatorPowerpc_impl::translateNor},
+		{PPC_INS_OR, &Capstone2LlvmIrTranslatorPowerpc_impl::translateOr},
+		{PPC_INS_ORC, &Capstone2LlvmIrTranslatorPowerpc_impl::translateOrc},
+		{PPC_INS_ORIS, &Capstone2LlvmIrTranslatorPowerpc_impl::translateOris},
 		{PPC_INS_POPCNTD, nullptr},
 		{PPC_INS_POPCNTW, nullptr},
 		{PPC_INS_QVALIGNI, nullptr},
@@ -891,27 +1019,27 @@ Capstone2LlvmIrTranslatorPowerpc::_i2fm =
 		{PPC_INS_RLDICL, nullptr},
 		{PPC_INS_RLDICR, nullptr},
 		{PPC_INS_RLDIMI, nullptr},
-		{PPC_INS_RLWIMI, &Capstone2LlvmIrTranslatorPowerpc::translateRotateComplex5op},
-		{PPC_INS_RLWINM, &Capstone2LlvmIrTranslatorPowerpc::translateRotateComplex5op},
-		{PPC_INS_RLWNM, &Capstone2LlvmIrTranslatorPowerpc::translateRotateComplex5op},
+		{PPC_INS_RLWIMI, &Capstone2LlvmIrTranslatorPowerpc_impl::translateRotateComplex5op},
+		{PPC_INS_RLWINM, &Capstone2LlvmIrTranslatorPowerpc_impl::translateRotateComplex5op},
+		{PPC_INS_RLWNM, &Capstone2LlvmIrTranslatorPowerpc_impl::translateRotateComplex5op},
 		{PPC_INS_SC, nullptr},
 		{PPC_INS_SLBIA, nullptr},
 		{PPC_INS_SLBIE, nullptr},
 		{PPC_INS_SLBMFEE, nullptr},
 		{PPC_INS_SLBMTE, nullptr},
 		{PPC_INS_SLD, nullptr},
-		{PPC_INS_SLW, &Capstone2LlvmIrTranslatorPowerpc::translateShiftLeft},
+		{PPC_INS_SLW, &Capstone2LlvmIrTranslatorPowerpc_impl::translateShiftLeft},
 		{PPC_INS_SRAD, nullptr},
 		{PPC_INS_SRADI, nullptr},
-		{PPC_INS_SRAW, &Capstone2LlvmIrTranslatorPowerpc::translateSraw},
-		{PPC_INS_SRAWI, &Capstone2LlvmIrTranslatorPowerpc::translateSraw},
+		{PPC_INS_SRAW, &Capstone2LlvmIrTranslatorPowerpc_impl::translateSraw},
+		{PPC_INS_SRAWI, &Capstone2LlvmIrTranslatorPowerpc_impl::translateSraw},
 		{PPC_INS_SRD, nullptr},
-		{PPC_INS_SRW, &Capstone2LlvmIrTranslatorPowerpc::translateShiftRight},
-		{PPC_INS_STB, &Capstone2LlvmIrTranslatorPowerpc::translateStore},
+		{PPC_INS_SRW, &Capstone2LlvmIrTranslatorPowerpc_impl::translateShiftRight},
+		{PPC_INS_STB, &Capstone2LlvmIrTranslatorPowerpc_impl::translateStore},
 		{PPC_INS_STBCIX, nullptr},
-		{PPC_INS_STBU, &Capstone2LlvmIrTranslatorPowerpc::translateStore},
-		{PPC_INS_STBUX, &Capstone2LlvmIrTranslatorPowerpc::translateStoreIndexed},
-		{PPC_INS_STBX, &Capstone2LlvmIrTranslatorPowerpc::translateStoreIndexed},
+		{PPC_INS_STBU, &Capstone2LlvmIrTranslatorPowerpc_impl::translateStore},
+		{PPC_INS_STBUX, &Capstone2LlvmIrTranslatorPowerpc_impl::translateStoreIndexed},
+		{PPC_INS_STBX, &Capstone2LlvmIrTranslatorPowerpc_impl::translateStoreIndexed},
 		{PPC_INS_STD, nullptr},
 		{PPC_INS_STDBRX, nullptr},
 		{PPC_INS_STDCIX, nullptr},
@@ -928,12 +1056,12 @@ Capstone2LlvmIrTranslatorPowerpc::_i2fm =
 		{PPC_INS_STFSU, nullptr},
 		{PPC_INS_STFSUX, nullptr},
 		{PPC_INS_STFSX, nullptr},
-		{PPC_INS_STH, &Capstone2LlvmIrTranslatorPowerpc::translateStore},
-		{PPC_INS_STHBRX, &Capstone2LlvmIrTranslatorPowerpc::translateStoreReverseIndexed},
+		{PPC_INS_STH, &Capstone2LlvmIrTranslatorPowerpc_impl::translateStore},
+		{PPC_INS_STHBRX, &Capstone2LlvmIrTranslatorPowerpc_impl::translateStoreReverseIndexed},
 		{PPC_INS_STHCIX, nullptr},
-		{PPC_INS_STHU, &Capstone2LlvmIrTranslatorPowerpc::translateStore},
-		{PPC_INS_STHUX, &Capstone2LlvmIrTranslatorPowerpc::translateStoreIndexed},
-		{PPC_INS_STHX, &Capstone2LlvmIrTranslatorPowerpc::translateStoreIndexed},
+		{PPC_INS_STHU, &Capstone2LlvmIrTranslatorPowerpc_impl::translateStore},
+		{PPC_INS_STHUX, &Capstone2LlvmIrTranslatorPowerpc_impl::translateStoreIndexed},
+		{PPC_INS_STHX, &Capstone2LlvmIrTranslatorPowerpc_impl::translateStoreIndexed},
 		{PPC_INS_STMW, nullptr},
 		{PPC_INS_STSWI, nullptr},
 		{PPC_INS_STVEBX, nullptr},
@@ -941,22 +1069,22 @@ Capstone2LlvmIrTranslatorPowerpc::_i2fm =
 		{PPC_INS_STVEWX, nullptr},
 		{PPC_INS_STVX, nullptr},
 		{PPC_INS_STVXL, nullptr},
-		{PPC_INS_STW, &Capstone2LlvmIrTranslatorPowerpc::translateStore},
-		{PPC_INS_STWBRX, &Capstone2LlvmIrTranslatorPowerpc::translateStoreReverseIndexed},
+		{PPC_INS_STW, &Capstone2LlvmIrTranslatorPowerpc_impl::translateStore},
+		{PPC_INS_STWBRX, &Capstone2LlvmIrTranslatorPowerpc_impl::translateStoreReverseIndexed},
 		{PPC_INS_STWCIX, nullptr},
 		{PPC_INS_STWCX, nullptr},
-		{PPC_INS_STWU, &Capstone2LlvmIrTranslatorPowerpc::translateStore},
-		{PPC_INS_STWUX, &Capstone2LlvmIrTranslatorPowerpc::translateStoreIndexed},
-		{PPC_INS_STWX, &Capstone2LlvmIrTranslatorPowerpc::translateStoreIndexed},
+		{PPC_INS_STWU, &Capstone2LlvmIrTranslatorPowerpc_impl::translateStore},
+		{PPC_INS_STWUX, &Capstone2LlvmIrTranslatorPowerpc_impl::translateStoreIndexed},
+		{PPC_INS_STWX, &Capstone2LlvmIrTranslatorPowerpc_impl::translateStoreIndexed},
 		{PPC_INS_STXSDX, nullptr},
 		{PPC_INS_STXVD2X, nullptr},
 		{PPC_INS_STXVW4X, nullptr},
-		{PPC_INS_SUBF, &Capstone2LlvmIrTranslatorPowerpc::translateSubf},
-		{PPC_INS_SUBFC, &Capstone2LlvmIrTranslatorPowerpc::translateSubfc},
-		{PPC_INS_SUBFE, &Capstone2LlvmIrTranslatorPowerpc::translateSubfe},
-		{PPC_INS_SUBFIC, &Capstone2LlvmIrTranslatorPowerpc::translateSubfc},
-		{PPC_INS_SUBFME, &Capstone2LlvmIrTranslatorPowerpc::translateSubfme},
-		{PPC_INS_SUBFZE, &Capstone2LlvmIrTranslatorPowerpc::translateSubfze},
+		{PPC_INS_SUBF, &Capstone2LlvmIrTranslatorPowerpc_impl::translateSubf},
+		{PPC_INS_SUBFC, &Capstone2LlvmIrTranslatorPowerpc_impl::translateSubfc},
+		{PPC_INS_SUBFE, &Capstone2LlvmIrTranslatorPowerpc_impl::translateSubfe},
+		{PPC_INS_SUBFIC, &Capstone2LlvmIrTranslatorPowerpc_impl::translateSubfc},
+		{PPC_INS_SUBFME, &Capstone2LlvmIrTranslatorPowerpc_impl::translateSubfme},
+		{PPC_INS_SUBFZE, &Capstone2LlvmIrTranslatorPowerpc_impl::translateSubfze},
 		{PPC_INS_SYNC, nullptr},
 		{PPC_INS_TD, nullptr},
 		{PPC_INS_TDI, nullptr},
@@ -1147,9 +1275,9 @@ Capstone2LlvmIrTranslatorPowerpc::_i2fm =
 		{PPC_INS_WAIT, nullptr},
 		{PPC_INS_WRTEE, nullptr},
 		{PPC_INS_WRTEEI, nullptr},
-		{PPC_INS_XOR, &Capstone2LlvmIrTranslatorPowerpc::translateXor},
-		{PPC_INS_XORI, &Capstone2LlvmIrTranslatorPowerpc::translateXor},
-		{PPC_INS_XORIS, &Capstone2LlvmIrTranslatorPowerpc::translateXoris},
+		{PPC_INS_XOR, &Capstone2LlvmIrTranslatorPowerpc_impl::translateXor},
+		{PPC_INS_XORI, &Capstone2LlvmIrTranslatorPowerpc_impl::translateXor},
+		{PPC_INS_XORIS, &Capstone2LlvmIrTranslatorPowerpc_impl::translateXoris},
 		{PPC_INS_XSABSDP, nullptr},
 		{PPC_INS_XSADDDP, nullptr},
 		{PPC_INS_XSCMPODP, nullptr},
@@ -1284,14 +1412,14 @@ Capstone2LlvmIrTranslatorPowerpc::_i2fm =
 		{PPC_INS_XXSPLTW, nullptr},
 
 		// extra & alias instructions
-		{PPC_INS_SLWI, &Capstone2LlvmIrTranslatorPowerpc::translateSlwi},
-		{PPC_INS_SRWI, &Capstone2LlvmIrTranslatorPowerpc::translateSrwi},
+		{PPC_INS_SLWI, &Capstone2LlvmIrTranslatorPowerpc_impl::translateSlwi},
+		{PPC_INS_SRWI, &Capstone2LlvmIrTranslatorPowerpc_impl::translateSrwi},
 		{PPC_INS_SLDI, nullptr},
 
-		{PPC_INS_CRSET, &Capstone2LlvmIrTranslatorPowerpc::translateCrSetClr},
-		{PPC_INS_CRCLR, &Capstone2LlvmIrTranslatorPowerpc::translateCrSetClr},
-		{PPC_INS_CRNOT, &Capstone2LlvmIrTranslatorPowerpc::translateCrNotMove},
-		{PPC_INS_CRMOVE, &Capstone2LlvmIrTranslatorPowerpc::translateCrNotMove},
+		{PPC_INS_CRSET, &Capstone2LlvmIrTranslatorPowerpc_impl::translateCrSetClr},
+		{PPC_INS_CRCLR, &Capstone2LlvmIrTranslatorPowerpc_impl::translateCrSetClr},
+		{PPC_INS_CRNOT, &Capstone2LlvmIrTranslatorPowerpc_impl::translateCrNotMove},
+		{PPC_INS_CRMOVE, &Capstone2LlvmIrTranslatorPowerpc_impl::translateCrNotMove},
 
 		{PPC_INS_MFBR0, nullptr},
 		{PPC_INS_MFBR1, nullptr},
@@ -1327,7 +1455,7 @@ Capstone2LlvmIrTranslatorPowerpc::_i2fm =
 		{PPC_INS_MFASR, nullptr},
 		{PPC_INS_MFPVR, nullptr},
 		{PPC_INS_MFTBU, nullptr},
-		{PPC_INS_MTCR, &Capstone2LlvmIrTranslatorPowerpc::translateMtcr},
+		{PPC_INS_MTCR, &Capstone2LlvmIrTranslatorPowerpc_impl::translateMtcr},
 		{PPC_INS_MTBR0, nullptr},
 		{PPC_INS_MTBR1, nullptr},
 		{PPC_INS_MTBR2, nullptr},
@@ -1359,16 +1487,16 @@ Capstone2LlvmIrTranslatorPowerpc::_i2fm =
 		{PPC_INS_MTESR, nullptr},
 		{PPC_INS_MTSPEFSCR, nullptr},
 		{PPC_INS_MTTCR, nullptr},
-		{PPC_INS_NOT, &Capstone2LlvmIrTranslatorPowerpc::translateNot},
-		{PPC_INS_MR, &Capstone2LlvmIrTranslatorPowerpc::translateMr},
+		{PPC_INS_NOT, &Capstone2LlvmIrTranslatorPowerpc_impl::translateNot},
+		{PPC_INS_MR, &Capstone2LlvmIrTranslatorPowerpc_impl::translateMr},
 		{PPC_INS_ROTLD, nullptr},
 		{PPC_INS_ROTLDI, nullptr},
 		{PPC_INS_CLRLDI, nullptr},
-		{PPC_INS_ROTLWI, &Capstone2LlvmIrTranslatorPowerpc::translateRotlw},
-		{PPC_INS_CLRLWI, &Capstone2LlvmIrTranslatorPowerpc::translateClrlwi},
-		{PPC_INS_ROTLW, &Capstone2LlvmIrTranslatorPowerpc::translateRotlw},
-		{PPC_INS_SUB, &Capstone2LlvmIrTranslatorPowerpc::translateSubf},
-		{PPC_INS_SUBC, &Capstone2LlvmIrTranslatorPowerpc::translateSubfc},
+		{PPC_INS_ROTLWI, &Capstone2LlvmIrTranslatorPowerpc_impl::translateRotlw},
+		{PPC_INS_CLRLWI, &Capstone2LlvmIrTranslatorPowerpc_impl::translateClrlwi},
+		{PPC_INS_ROTLW, &Capstone2LlvmIrTranslatorPowerpc_impl::translateRotlw},
+		{PPC_INS_SUB, &Capstone2LlvmIrTranslatorPowerpc_impl::translateSubf},
+		{PPC_INS_SUBC, &Capstone2LlvmIrTranslatorPowerpc_impl::translateSubfc},
 		{PPC_INS_LWSYNC, nullptr},
 		{PPC_INS_PTESYNC, nullptr},
 		{PPC_INS_TDLT, nullptr},
@@ -1433,94 +1561,94 @@ Capstone2LlvmIrTranslatorPowerpc::_i2fm =
 		//
 
 		// Basic unconditional.
-		{PPC_INS_B, &Capstone2LlvmIrTranslatorPowerpc::translateB},
-		{PPC_INS_BA, &Capstone2LlvmIrTranslatorPowerpc::translateB},
-		{PPC_INS_BL, &Capstone2LlvmIrTranslatorPowerpc::translateB},
-		{PPC_INS_BLA, &Capstone2LlvmIrTranslatorPowerpc::translateB},
+		{PPC_INS_B, &Capstone2LlvmIrTranslatorPowerpc_impl::translateB},
+		{PPC_INS_BA, &Capstone2LlvmIrTranslatorPowerpc_impl::translateB},
+		{PPC_INS_BL, &Capstone2LlvmIrTranslatorPowerpc_impl::translateB},
+		{PPC_INS_BLA, &Capstone2LlvmIrTranslatorPowerpc_impl::translateB},
 
 		// Basic conditional.
-		{PPC_INS_BC, &Capstone2LlvmIrTranslatorPowerpc::translateB},
-		{PPC_INS_BCA, &Capstone2LlvmIrTranslatorPowerpc::translateB},
-		{PPC_INS_BCLR, &Capstone2LlvmIrTranslatorPowerpc::translateB},
-		{PPC_INS_BCCTR, &Capstone2LlvmIrTranslatorPowerpc::translateB},
-		{PPC_INS_BCL, &Capstone2LlvmIrTranslatorPowerpc::translateB},
-		{PPC_INS_BCLA, &Capstone2LlvmIrTranslatorPowerpc::translateB},
-		{PPC_INS_BCLRL, &Capstone2LlvmIrTranslatorPowerpc::translateB},
-		{PPC_INS_BCCTRL, &Capstone2LlvmIrTranslatorPowerpc::translateB},
+		{PPC_INS_BC, &Capstone2LlvmIrTranslatorPowerpc_impl::translateB},
+		{PPC_INS_BCA, &Capstone2LlvmIrTranslatorPowerpc_impl::translateB},
+		{PPC_INS_BCLR, &Capstone2LlvmIrTranslatorPowerpc_impl::translateB},
+		{PPC_INS_BCCTR, &Capstone2LlvmIrTranslatorPowerpc_impl::translateB},
+		{PPC_INS_BCL, &Capstone2LlvmIrTranslatorPowerpc_impl::translateB},
+		{PPC_INS_BCLA, &Capstone2LlvmIrTranslatorPowerpc_impl::translateB},
+		{PPC_INS_BCLRL, &Capstone2LlvmIrTranslatorPowerpc_impl::translateB},
+		{PPC_INS_BCCTRL, &Capstone2LlvmIrTranslatorPowerpc_impl::translateB},
 
 		// Branch unconditionally.
-		{PPC_INS_BLR, &Capstone2LlvmIrTranslatorPowerpc::translateB},
-		{PPC_INS_BCTR, &Capstone2LlvmIrTranslatorPowerpc::translateB},
-		{PPC_INS_BLRL, &Capstone2LlvmIrTranslatorPowerpc::translateB},
-		{PPC_INS_BCTRL, &Capstone2LlvmIrTranslatorPowerpc::translateB},
+		{PPC_INS_BLR, &Capstone2LlvmIrTranslatorPowerpc_impl::translateB},
+		{PPC_INS_BCTR, &Capstone2LlvmIrTranslatorPowerpc_impl::translateB},
+		{PPC_INS_BLRL, &Capstone2LlvmIrTranslatorPowerpc_impl::translateB},
+		{PPC_INS_BCTRL, &Capstone2LlvmIrTranslatorPowerpc_impl::translateB},
 
 		// Branch if condition true.
-		{PPC_INS_BT, &Capstone2LlvmIrTranslatorPowerpc::translateB},
-		{PPC_INS_BTA, &Capstone2LlvmIrTranslatorPowerpc::translateB},
-		{PPC_INS_BTLR, &Capstone2LlvmIrTranslatorPowerpc::translateB},
-		{PPC_INS_BTCTR, &Capstone2LlvmIrTranslatorPowerpc::translateB},
-		{PPC_INS_BTL, &Capstone2LlvmIrTranslatorPowerpc::translateB},
-		{PPC_INS_BTLA, &Capstone2LlvmIrTranslatorPowerpc::translateB},
-		{PPC_INS_BTLRL, &Capstone2LlvmIrTranslatorPowerpc::translateB},
-		{PPC_INS_BTCTRL, &Capstone2LlvmIrTranslatorPowerpc::translateB},
+		{PPC_INS_BT, &Capstone2LlvmIrTranslatorPowerpc_impl::translateB},
+		{PPC_INS_BTA, &Capstone2LlvmIrTranslatorPowerpc_impl::translateB},
+		{PPC_INS_BTLR, &Capstone2LlvmIrTranslatorPowerpc_impl::translateB},
+		{PPC_INS_BTCTR, &Capstone2LlvmIrTranslatorPowerpc_impl::translateB},
+		{PPC_INS_BTL, &Capstone2LlvmIrTranslatorPowerpc_impl::translateB},
+		{PPC_INS_BTLA, &Capstone2LlvmIrTranslatorPowerpc_impl::translateB},
+		{PPC_INS_BTLRL, &Capstone2LlvmIrTranslatorPowerpc_impl::translateB},
+		{PPC_INS_BTCTRL, &Capstone2LlvmIrTranslatorPowerpc_impl::translateB},
 
 		// Branch if condition false.
-		{PPC_INS_BF, &Capstone2LlvmIrTranslatorPowerpc::translateB},
-		{PPC_INS_BFA, &Capstone2LlvmIrTranslatorPowerpc::translateB},
-		{PPC_INS_BFLR, &Capstone2LlvmIrTranslatorPowerpc::translateB},
-		{PPC_INS_BFCTR, &Capstone2LlvmIrTranslatorPowerpc::translateB},
-		{PPC_INS_BFL, &Capstone2LlvmIrTranslatorPowerpc::translateB},
-		{PPC_INS_BFLA, &Capstone2LlvmIrTranslatorPowerpc::translateB},
-		{PPC_INS_BFLRL, &Capstone2LlvmIrTranslatorPowerpc::translateB},
-		{PPC_INS_BFCTRL, &Capstone2LlvmIrTranslatorPowerpc::translateB},
+		{PPC_INS_BF, &Capstone2LlvmIrTranslatorPowerpc_impl::translateB},
+		{PPC_INS_BFA, &Capstone2LlvmIrTranslatorPowerpc_impl::translateB},
+		{PPC_INS_BFLR, &Capstone2LlvmIrTranslatorPowerpc_impl::translateB},
+		{PPC_INS_BFCTR, &Capstone2LlvmIrTranslatorPowerpc_impl::translateB},
+		{PPC_INS_BFL, &Capstone2LlvmIrTranslatorPowerpc_impl::translateB},
+		{PPC_INS_BFLA, &Capstone2LlvmIrTranslatorPowerpc_impl::translateB},
+		{PPC_INS_BFLRL, &Capstone2LlvmIrTranslatorPowerpc_impl::translateB},
+		{PPC_INS_BFCTRL, &Capstone2LlvmIrTranslatorPowerpc_impl::translateB},
 
 		// Decrement CTR, branch if CTR != 0
-		{PPC_INS_BDNZ, &Capstone2LlvmIrTranslatorPowerpc::translateB},
-		{PPC_INS_BDNZA, &Capstone2LlvmIrTranslatorPowerpc::translateB},
-		{PPC_INS_BDNZL, &Capstone2LlvmIrTranslatorPowerpc::translateB},
-		{PPC_INS_BDNZLA, &Capstone2LlvmIrTranslatorPowerpc::translateB},
-		{PPC_INS_BDNZLR, &Capstone2LlvmIrTranslatorPowerpc::translateB},
-		{PPC_INS_BDNZLRL, &Capstone2LlvmIrTranslatorPowerpc::translateB},
+		{PPC_INS_BDNZ, &Capstone2LlvmIrTranslatorPowerpc_impl::translateB},
+		{PPC_INS_BDNZA, &Capstone2LlvmIrTranslatorPowerpc_impl::translateB},
+		{PPC_INS_BDNZL, &Capstone2LlvmIrTranslatorPowerpc_impl::translateB},
+		{PPC_INS_BDNZLA, &Capstone2LlvmIrTranslatorPowerpc_impl::translateB},
+		{PPC_INS_BDNZLR, &Capstone2LlvmIrTranslatorPowerpc_impl::translateB},
+		{PPC_INS_BDNZLRL, &Capstone2LlvmIrTranslatorPowerpc_impl::translateB},
 		// Decrement CTR, branch if CTR != 0 & cond true
-		{PPC_INS_BDNZT, &Capstone2LlvmIrTranslatorPowerpc::translateB},
-		{PPC_INS_BDNZTA, &Capstone2LlvmIrTranslatorPowerpc::translateB},
-		{PPC_INS_BDNZTLR, &Capstone2LlvmIrTranslatorPowerpc::translateB},
-		{PPC_INS_BDNZTL, &Capstone2LlvmIrTranslatorPowerpc::translateB},
-		{PPC_INS_BDNZTLA, &Capstone2LlvmIrTranslatorPowerpc::translateB},
-		{PPC_INS_BDNZTLRL, &Capstone2LlvmIrTranslatorPowerpc::translateB},
+		{PPC_INS_BDNZT, &Capstone2LlvmIrTranslatorPowerpc_impl::translateB},
+		{PPC_INS_BDNZTA, &Capstone2LlvmIrTranslatorPowerpc_impl::translateB},
+		{PPC_INS_BDNZTLR, &Capstone2LlvmIrTranslatorPowerpc_impl::translateB},
+		{PPC_INS_BDNZTL, &Capstone2LlvmIrTranslatorPowerpc_impl::translateB},
+		{PPC_INS_BDNZTLA, &Capstone2LlvmIrTranslatorPowerpc_impl::translateB},
+		{PPC_INS_BDNZTLRL, &Capstone2LlvmIrTranslatorPowerpc_impl::translateB},
 		// Decrement CTR, branch if CTR != 0 & cond false
-		{PPC_INS_BDNZF, &Capstone2LlvmIrTranslatorPowerpc::translateB},
-		{PPC_INS_BDNZFA, &Capstone2LlvmIrTranslatorPowerpc::translateB},
+		{PPC_INS_BDNZF, &Capstone2LlvmIrTranslatorPowerpc_impl::translateB},
+		{PPC_INS_BDNZFA, &Capstone2LlvmIrTranslatorPowerpc_impl::translateB},
 		// TODO: Where is bdnzflr? Report Capstone bug?
-		{PPC_INS_BDNZFL, &Capstone2LlvmIrTranslatorPowerpc::translateB},
-		{PPC_INS_BDNZFLA, &Capstone2LlvmIrTranslatorPowerpc::translateB},
-		{PPC_INS_BDNZFLRL, &Capstone2LlvmIrTranslatorPowerpc::translateB},
+		{PPC_INS_BDNZFL, &Capstone2LlvmIrTranslatorPowerpc_impl::translateB},
+		{PPC_INS_BDNZFLA, &Capstone2LlvmIrTranslatorPowerpc_impl::translateB},
+		{PPC_INS_BDNZFLRL, &Capstone2LlvmIrTranslatorPowerpc_impl::translateB},
 
 		// Decrement CTR, branch if CTR == 0
 		//
-		{PPC_INS_BDZ, &Capstone2LlvmIrTranslatorPowerpc::translateB},
-		{PPC_INS_BDZA, &Capstone2LlvmIrTranslatorPowerpc::translateB},
-		{PPC_INS_BDZLR, &Capstone2LlvmIrTranslatorPowerpc::translateB},
-		{PPC_INS_BDZL, &Capstone2LlvmIrTranslatorPowerpc::translateB},
-		{PPC_INS_BDZLA, &Capstone2LlvmIrTranslatorPowerpc::translateB},
-		{PPC_INS_BDZLRL, &Capstone2LlvmIrTranslatorPowerpc::translateB},
+		{PPC_INS_BDZ, &Capstone2LlvmIrTranslatorPowerpc_impl::translateB},
+		{PPC_INS_BDZA, &Capstone2LlvmIrTranslatorPowerpc_impl::translateB},
+		{PPC_INS_BDZLR, &Capstone2LlvmIrTranslatorPowerpc_impl::translateB},
+		{PPC_INS_BDZL, &Capstone2LlvmIrTranslatorPowerpc_impl::translateB},
+		{PPC_INS_BDZLA, &Capstone2LlvmIrTranslatorPowerpc_impl::translateB},
+		{PPC_INS_BDZLRL, &Capstone2LlvmIrTranslatorPowerpc_impl::translateB},
 		// Decrement CTR, branch if CTR == 0 & cond true
-		{PPC_INS_BDZT, &Capstone2LlvmIrTranslatorPowerpc::translateB},
-		{PPC_INS_BDZTA, &Capstone2LlvmIrTranslatorPowerpc::translateB},
-		{PPC_INS_BDZTLR, &Capstone2LlvmIrTranslatorPowerpc::translateB},
-		{PPC_INS_BDZTL, &Capstone2LlvmIrTranslatorPowerpc::translateB},
-		{PPC_INS_BDZTLA, &Capstone2LlvmIrTranslatorPowerpc::translateB},
-		{PPC_INS_BDZTLRL, &Capstone2LlvmIrTranslatorPowerpc::translateB},
+		{PPC_INS_BDZT, &Capstone2LlvmIrTranslatorPowerpc_impl::translateB},
+		{PPC_INS_BDZTA, &Capstone2LlvmIrTranslatorPowerpc_impl::translateB},
+		{PPC_INS_BDZTLR, &Capstone2LlvmIrTranslatorPowerpc_impl::translateB},
+		{PPC_INS_BDZTL, &Capstone2LlvmIrTranslatorPowerpc_impl::translateB},
+		{PPC_INS_BDZTLA, &Capstone2LlvmIrTranslatorPowerpc_impl::translateB},
+		{PPC_INS_BDZTLRL, &Capstone2LlvmIrTranslatorPowerpc_impl::translateB},
 		// Decrement CTR, branch if CTR == 0 & cond false
-		{PPC_INS_BDZF, &Capstone2LlvmIrTranslatorPowerpc::translateB},
-		{PPC_INS_BDZFA, &Capstone2LlvmIrTranslatorPowerpc::translateB},
-		{PPC_INS_BDZFLR, &Capstone2LlvmIrTranslatorPowerpc::translateB},
-		{PPC_INS_BDZFL, &Capstone2LlvmIrTranslatorPowerpc::translateB},
-		{PPC_INS_BDZFLA, &Capstone2LlvmIrTranslatorPowerpc::translateB},
-		{PPC_INS_BDZFLRL, &Capstone2LlvmIrTranslatorPowerpc::translateB},
+		{PPC_INS_BDZF, &Capstone2LlvmIrTranslatorPowerpc_impl::translateB},
+		{PPC_INS_BDZFA, &Capstone2LlvmIrTranslatorPowerpc_impl::translateB},
+		{PPC_INS_BDZFLR, &Capstone2LlvmIrTranslatorPowerpc_impl::translateB},
+		{PPC_INS_BDZFL, &Capstone2LlvmIrTranslatorPowerpc_impl::translateB},
+		{PPC_INS_BDZFLA, &Capstone2LlvmIrTranslatorPowerpc_impl::translateB},
+		{PPC_INS_BDZFLRL, &Capstone2LlvmIrTranslatorPowerpc_impl::translateB},
 
 		// TODO: What is this? It is not in specification. Is it even branch?
-		{PPC_INS_BCT, nullptr}, // &Capstone2LlvmIrTranslatorPowerpc::translateASSERT
+		{PPC_INS_BCT, nullptr}, // &Capstone2LlvmIrTranslatorPowerpc_impl::translateASSERT
 };
 
 } // namespace capstone2llvmir

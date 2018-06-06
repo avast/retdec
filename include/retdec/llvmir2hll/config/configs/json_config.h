@@ -112,7 +112,6 @@ public:
 	virtual std::string getDetectedCompilerOrPacker() const override;
 	virtual std::string getDetectedLanguage() const override;
 	virtual StringSet getSelectedButNotFoundFuncs() const override;
-	virtual StringSet getOptsRunInFrontend() const override;
 	/// @}
 
 private:

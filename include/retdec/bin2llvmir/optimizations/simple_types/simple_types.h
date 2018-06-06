@@ -19,7 +19,7 @@
 #include <llvm/Pass.h>
 
 #include "retdec/bin2llvmir/providers/fileimage.h"
-#include "retdec/bin2llvmir/utils/defs.h"
+#include "retdec/bin2llvmir/utils/debug.h"
 
 namespace retdec {
 namespace bin2llvmir {
@@ -140,7 +140,7 @@ class EqSet
 				llvm::Module* module,
 				Config* config,
 				FileImage* objf,
-				UnorderedInstSet& instToErase);
+				std::unordered_set<llvm::Instruction*>& instToErase);
 
 		friend std::ostream& operator<<(std::ostream& out, const EqSet& eq);
 
@@ -153,7 +153,7 @@ class EqSet
 				llvm::Module* module,
 				llvm::Type* t1,
 				llvm::Type* t2,
-				UnorderedTypeSet& seen);
+				std::unordered_set<llvm::Type*>& seen);
 
 	public:
 		/// Each instance gets its own unique ID for debug print purposes.
@@ -183,7 +183,7 @@ class EqSetContainer
 				llvm::Module* module,
 				Config* config,
 				FileImage* objf,
-				UnorderedInstSet& valsToErase);
+				std::unordered_set<llvm::Instruction*>& valsToErase);
 
 		friend std::ostream& operator<<(std::ostream& out, const EqSetContainer& eqs);
 
@@ -227,7 +227,7 @@ class SimpleTypesAnalysis : public llvm::ModulePass
 		Config* config = nullptr;
 		FileImage* objf = nullptr;
 
-		UnorderedInstSet instToErase;
+		std::unordered_set<llvm::Instruction*> instToErase;
 };
 
 } // namespace bin2llvmir

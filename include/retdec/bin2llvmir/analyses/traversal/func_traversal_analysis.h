@@ -88,9 +88,9 @@ public:
 	llvm::Function *getNextFuncInSCC();
 
 private:
-	Node *processFuncsInSCC(const CallGraphNodeVec &callNodesVec,
+	Node *processFuncsInSCC(const std::vector<llvm::CallGraphNode*> &callNodesVec,
 		Node *prevNode);
-	Node *processFuncNotInSCC(const CallGraphNodeVec &callNodesVec,
+	Node *processFuncNotInSCC(const std::vector<llvm::CallGraphNode*> &callNodesVec,
 		Node *prevNode);
 
 	void print();

@@ -159,7 +159,7 @@ class ProgramOptions
 				"\t          Possible values: little, big, micro, mclass, v8, v9.\n"
 				"\t          Default value: little.\n"
 				"\t-o out    Output file name where LLVM IR will be generated.\n"
-				"\t          Default value: x86-decoder-out.ll\n";
+				"\t          Default value: stdout\n";
 
 			exit(0);
 		}
@@ -171,7 +171,7 @@ class ProgramOptions
 		string text;
 		cs_mode basicMode = CS_MODE_32;
 		cs_mode extraMode = CS_MODE_LITTLE_ENDIAN;
-		string outFile = "x86-decoder-out.ll";
+		string outFile = "-"; // "-" == stdout for llvm::raw_fd_ostream.
 
 	private:
 		string _programName = "capstone2llvmir";
@@ -365,7 +365,7 @@ int main(int argc, char *argv[])
 				&module,
 				po.basicMode,
 				po.extraMode);
-		c2l->translate(po.code, po.base, irb);
+		c2l->translate(po.code.data(), po.code.size(), po.base, irb);
 	}
 	catch (const Capstone2LlvmIrBaseError& e)
 	{

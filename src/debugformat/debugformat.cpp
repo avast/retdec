@@ -100,7 +100,7 @@ void DebugFormat::loadSymtab()
 			++itNext;
 			if (itNext != _symtab->end())
 			{
-				nf.setEnd(itNext->first - 1);
+				nf.setEnd(itNext->first);
 			}
 			else
 			{

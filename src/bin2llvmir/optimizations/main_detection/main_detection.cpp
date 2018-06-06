@@ -8,15 +8,13 @@
 
 #include <llvm/IR/Operator.h>
 
-#include "retdec/utils/string.h"
 #include "retdec/bin2llvmir/optimizations/main_detection/main_detection.h"
 #include "retdec/bin2llvmir/providers/asm_instruction.h"
-#include "retdec/bin2llvmir/utils/defs.h"
-#include "retdec/bin2llvmir/utils/ir_modifier.h"
+#include "retdec/bin2llvmir/utils/debug.h"
 #define debug_enabled false
-#include "retdec/llvm-support/utils.h"
+#include "retdec/bin2llvmir/utils/ir_modifier.h"
+#include "retdec/bin2llvmir/utils/llvm.h"
 
-using namespace retdec::llvm_support;
 using namespace retdec::utils;
 using namespace llvm;
 
@@ -43,58 +41,61 @@ bool MainDetection::runOnModule(llvm::Module& m)
 	_module = &m;
 	_config = ConfigProvider::getConfig(_module);
 	_image = FileImageProvider::getFileImage(_module);
+	_names = NamesProvider::getNames(_module);
 	return run();
 }
 
 bool MainDetection::runOnModuleCustom(
 		llvm::Module& m,
 		Config* c,
-		FileImage* img)
+		FileImage* img,
+		NameContainer* names)
 {
 	_module = &m;
 	_config = c;
 	_image = img;
+	_names = names;
 	return run();
 }
 
 bool MainDetection::run()
 {
-	if (_config == nullptr)
+	if (_config == nullptr || _image == nullptr || _names == nullptr)
 	{
-		LOG << "[ABORT] config file is not available\n";
 		return false;
 	}
-
 	if (skipAnalysis())
 	{
+		removeStaticallyLinked();
 		return false;
 	}
 
 	bool changed = false;
 	Address mainAddr;
 
-	if (mainAddr.isUndefined())
+	if (auto* mf = _module->getFunction("main"))
 	{
-		mainAddr = getFromFunctionNames();
+		if (auto* cf = _config->getConfigFunction(mf))
+		{
+			mainAddr = cf->getStart();
+		}
 	}
 	if (mainAddr.isUndefined())
 	{
 		mainAddr = getFromContext();
 	}
-
-	changed = applyResult(mainAddr);
-
-	// Delete statically linked functions bodies only after main detection run.
-	// TODO: This is not ideal here, very random, move main detection to decoding?
-	// and delete linked bodies right after they have been found?
-	for (auto& f : _module->functions())
+	if (mainAddr.isUndefined())
 	{
-		auto* cf = _config->getConfigFunction(&f);
-		if (cf && cf->isStaticallyLinked())
-		{
-			f.deleteBody();
-		}
+		mainAddr = getFromFunctionNames();
 	}
+
+	if (!(_config->getConfig().isIda()
+			&& _config->getConfig().parameters.isSomethingSelected()))
+	{
+		changed = applyResult(mainAddr);
+	}
+
+	removeStaticallyLinked();
 
 	return changed;
 }
@@ -103,6 +104,24 @@ bool MainDetection::skipAnalysis()
 {
 	return _config->getConfig().getMainAddress().isDefined()
 			|| _config->getConfig().fileType.isShared();
+}
+
+/**
+ * Delete statically linked functions bodies only after main detection run.
+ * TODO: This is not ideal here, very random, move main detection to decoding?
+ * and delete linked bodies right after they have been found?
+ * TODO: do this when shared?
+ */
+void MainDetection::removeStaticallyLinked()
+{
+	for (Function& f : _module->functions())
+	{
+		auto* cf = _config->getConfigFunction(&f);
+		if (cf && cf->isStaticallyLinked())
+		{
+			f.deleteBody();
+		}
+	}
 }
 
 retdec::utils::Address MainDetection::getFromFunctionNames()
@@ -137,7 +156,7 @@ retdec::utils::Address MainDetection::getFromContext()
 	// it should not screw other compilers.
 	//
 	if (_config->getConfig().fileFormat.isIntelHex()
-			&& _config->isMipsOrPic32() && _image)
+			&& _config->getConfig().architecture.isMipsOrPic32() && _image)
 	{
 		auto* epSeg = _image->getImage()->getSegmentFromAddress(
 				_config->getConfig().getEntryPoint());
@@ -276,11 +295,21 @@ retdec::utils::Address MainDetection::getFromContext()
 				}
 			}
 		}
-		else if (_config->isMipsOrPic32())
+		else if (_config->getConfig().architecture.isMipsOrPic32())
 		{
 			if (tools.isPspGcc() && major == 4 && minor == 3)
 			{
 				if (auto ai = AsmInstruction(_module, 0x8900218))
+				{
+					auto* c = ai.getInstructionFirst<CallInst>();
+					if (c && c->getCalledFunction())
+					{
+						mainAddr = _config->getFunctionAddress(
+								c->getCalledFunction());
+					}
+				}
+				// TODO: delay slots one insn farther
+				if (auto ai = AsmInstruction(_module, 0x890021c))
 				{
 					auto* c = ai.getInstructionFirst<CallInst>();
 					if (c && c->getCalledFunction())
@@ -500,24 +529,17 @@ bool MainDetection::applyResult(retdec::utils::Address mainAddr)
 	if (auto* f = _config->getLlvmFunction(mainAddr))
 	{
 		std::string n = f->getName();
-		if (retdec::utils::startsWith(n, "function_")
-				|| retdec::utils::startsWith(n, "sub_"))
+		if (n != "main")
 		{
 			irmodif.renameFunction(f, "main");
+			_names->addNameForAddress(
+					mainAddr,
+					"main",
+					Name::eType::HIGHEST_PRIORITY);
 			changed = true;
 		}
 	}
-	else if (auto ai = AsmInstruction(_module, mainAddr))
-	{
-		LOG << "\t" << "for main"
-				<< " @ " << ai.getAddress() << std::endl;
-
-		irmodif.splitFunctionOn(
-				ai.getLlvmToAsmInstruction(),
-				ai.getAddress(),
-				"main");
-		changed = true;
-	}
+	// AsmInstruction(_module, mainAddr) -> split?
 
 	return changed;
 }

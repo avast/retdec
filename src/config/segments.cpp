@@ -50,8 +50,8 @@ Json::Value Segment::getJsonValue() const
 
 	if (!getName().empty()) seg[JSON_name] = getName();
 	if (!getComment().empty()) seg[JSON_comment] = getComment();
-	if (getStart().isDefined()) seg[JSON_startAddr] = getStart().getValue();
-	if (getEnd().isDefined()) seg[JSON_endAddr] = getEnd().getValue();
+	if (getStart().isDefined()) seg[JSON_startAddr] = toJsonValue(getStart());
+	if (getEnd().isDefined()) seg[JSON_endAddr] = toJsonValue(getEnd());
 
 	return seg;
 }

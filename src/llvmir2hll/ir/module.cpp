@@ -876,14 +876,6 @@ StringSet Module::getSelectedButNotFoundFuncs() const {
 }
 
 /**
-* @brief Returns a set of optimizations that run in the front-end.
-*        not found.
-*/
-StringSet Module::getOptsRunInFrontend() const {
-	return config->getOptsRunInFrontend();
-}
-
-/**
 * @brief Returns the detected language.
 *
 * If there is no detected language, it returns the empty string.

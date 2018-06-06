@@ -9,11 +9,9 @@
 #include <llvm/IR/PatternMatch.h>
 #include <llvm/Transforms/Utils/BasicBlockUtils.h>
 
-#include "retdec/llvm-support/utils.h"
 #include "retdec/bin2llvmir/optimizations/idioms/idioms_gcc.h"
-#include "retdec/bin2llvmir/providers/config.h"
+#include "retdec/bin2llvmir/utils/llvm.h"
 
-using namespace retdec::llvm_support;
 using namespace llvm;
 using namespace PatternMatch;
 
@@ -285,23 +283,10 @@ Instruction * IdiomsGCC::exchangeFloatAbs(BasicBlock::iterator iter) const {
 	if (*cnst->getValue().getRawData() != 0x7FFFFFFF)
 		return nullptr;
 
-	Value * fun = M->getOrInsertFunction("fabsf",
-							Type::getFloatTy(Context),
-							Type::getFloatTy(Context),
-							nullptr);
-
-	// TODO: use some method to do this
-	// Add this new idiom function to config.
-	if (getConfig())
-	{
-		retdec::config::Function cf("fabsf");
-		cf.setIsIdiom();
-		cf.returnType.setLlvmIr("float");
-		retdec::config::Object p("a1", retdec::config::Storage::undefined());
-		p.type.setLlvmIr("float");
-		cf.parameters.insert(p);
-		getConfig()->getConfig().functions.insert(cf);
-	}
+	auto* fun = llvm::Intrinsic::getDeclaration(
+			M,
+			llvm::Intrinsic::fabs,
+			Type::getFloatTy(Context));
 
 	// Arguments have to be casted to float
 	if (dl.getTypeSizeInBits(op_x->getType()) != dl.getTypeSizeInBits(Type::getFloatTy(Context)))
@@ -518,7 +503,7 @@ Instruction * IdiomsGCC::exchangeCopysign(BasicBlock::iterator iter) const {
 			&& ! match(op_and1, m_And(m_ConstantInt(cnst1), m_Value(op_a))))
 	{
 		// left hand side of or is (fabsf(A)?
-		op_and1 = skipCasts(op_and1);
+		op_and1 = llvm_utils::skipCasts(op_and1);
 		if (isa<CallInst>(op_and1)
 				&& cast<CallInst>(op_and1)->getCalledFunction()
 				&& cast<CallInst>(op_and1)->getCalledFunction()->getIntrinsicID() == Intrinsic::fabs)
@@ -551,27 +536,10 @@ Instruction * IdiomsGCC::exchangeCopysign(BasicBlock::iterator iter) const {
 	if (*cnst2->getValue().getRawData() != second_cnst)
 		return nullptr;
 
-	Value * fun = M->getOrInsertFunction("copysignf",
-							Type::getFloatTy(Context),
-							Type::getFloatTy(Context),
-							Type::getFloatTy(Context),
-							nullptr);
-
-	// TODO: use some method to do this
-	// Add this new idiom function to config.
-	if (getConfig())
-	{
-		retdec::config::Function cf("copysignf");
-		cf.setIsIdiom();
-		cf.returnType.setLlvmIr("float");
-		retdec::config::Object p1("a1", retdec::config::Storage::undefined());
-		p1.type.setLlvmIr("float");
-		retdec::config::Object p2("a2", retdec::config::Storage::undefined());
-		p2.type.setLlvmIr("float");
-		cf.parameters.insert(p1);
-		cf.parameters.insert(p2);
-		getConfig()->getConfig().functions.insert(cf);
-	}
+	auto* fun = llvm::Intrinsic::getDeclaration(
+			M,
+			llvm::Intrinsic::copysign,
+			Type::getFloatTy(Context));
 
 	// Arguments have to be casted to float
 

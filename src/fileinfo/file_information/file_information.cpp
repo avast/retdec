@@ -34,7 +34,7 @@ bool isSubpattern(const Pattern &a, const Pattern &b)
 		{
 			continue;
 		}
-		aCont.insert(AddressRange(res1, res1 + res2 - 1));
+		aCont.insert(AddressRange(res1, res1 + res2));
 	}
 
 	if(aCont.empty())
@@ -50,7 +50,7 @@ bool isSubpattern(const Pattern &a, const Pattern &b)
 		{
 			continue;
 		}
-		auto bRange = AddressRange(res1, res1 + res2 - 1);
+		auto bRange = AddressRange(res1, res1 + res2);
 		if(std::none_of(aCont.begin(), aCont.end(),
 			[&] (const auto &aRange)
 			{

@@ -69,20 +69,20 @@ OverlapResolver::Result OverlapResolver::resolve(const retdec::utils::Range<std:
 	// Check whether start of the second range is in the first range but end is not.
 	if ((startInRange && !endInRange) || (startInRange && endDiff == 0))
 	{
-		retdec::utils::Range<std::uint64_t> newRange = retdec::utils::Range<std::uint64_t>(first.getStart(), second.getStart() - 1);
+		retdec::utils::Range<std::uint64_t> newRange = retdec::utils::Range<std::uint64_t>(first.getStart(), second.getStart());
 		return Result(Overlap::OverEnd, { newRange, second });
 	}
 	// Check whether end of the second range is in the first range but start is not.
 	else if ((!startInRange && endInRange) || (startDiff == 0 && endInRange))
 	{
-		retdec::utils::Range<std::uint64_t> newRange = retdec::utils::Range<std::uint64_t>(second.getEnd() + 1, first.getEnd());
+		retdec::utils::Range<std::uint64_t> newRange = retdec::utils::Range<std::uint64_t>(second.getEnd(), first.getEnd());
 		return Result(Overlap::OverStart, { second, newRange });
 	}
 	// Check whether both the start and the end of the second range are in the first range.
 	else if (startInRange && endInRange)
 	{
-		retdec::utils::Range<std::uint64_t> newRange1 = retdec::utils::Range<std::uint64_t>(first.getStart(), second.getStart() - 1);
-		retdec::utils::Range<std::uint64_t> newRange2 = retdec::utils::Range<std::uint64_t>(second.getEnd() + 1, first.getEnd());
+		retdec::utils::Range<std::uint64_t> newRange1 = retdec::utils::Range<std::uint64_t>(first.getStart(), second.getStart());
+		retdec::utils::Range<std::uint64_t> newRange2 = retdec::utils::Range<std::uint64_t>(second.getEnd(), first.getEnd());
 		return Result(Overlap::InMiddle, { newRange1, second, newRange2 });
 	}
 

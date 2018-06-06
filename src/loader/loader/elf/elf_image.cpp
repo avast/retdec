@@ -238,7 +238,7 @@ ElfImage::SegmentToSectionsTable ElfImage::createSegmentToSectionsTable()
 		std::uint64_t address = elfSeg->getAddress();
 		std::uint64_t fileOffset = elfSeg->getOffset();
 		std::uint64_t fileSize = elfSeg->getLoadedSize();
-		std::uint64_t endAddress = address + (memSize ? memSize - 1 : 0);
+		std::uint64_t endAddress = address + (memSize ? memSize : 1);
 
 		if (address > endAddress)
 		{
@@ -273,7 +273,7 @@ ElfImage::SegmentToSectionsTable ElfImage::createSegmentToSectionsTable()
 				continue;
 
 			std::uint64_t start = elfSec->getAddress();
-			std::uint64_t end = elfSec->getAddress() + (elfSec->getLoadedSize() ? elfSec->getLoadedSize() - 1 : 0);
+			std::uint64_t end = elfSec->getAddress() + (elfSec->getLoadedSize() ? elfSec->getLoadedSize() : 1);
 
 			auto overlapResult = OverlapResolver::resolve(segRange, retdec::utils::Range<std::uint64_t>(start, end));
 			switch (overlapResult.getOverlap())
@@ -308,7 +308,7 @@ const Segment* ElfImage::addSegment(const retdec::fileformat::SecSeg* secSeg, st
 	}
 
 	std::uint64_t start = address;
-	std::uint64_t end = memSize ? address + memSize - 1 : address;
+	std::uint64_t end = memSize ? address + memSize : address + 1;
 
 	if (start > end)
 	{

@@ -14,15 +14,9 @@
 #include <llvm/IR/Instruction.h>
 #include <llvm/IR/Instructions.h>
 
-#include "retdec/llvm-support/utils.h"
-#include "retdec/utils/conversion.h"
-#include "retdec/utils/string.h"
 #include "retdec/utils/time.h"
 #include "retdec/bin2llvmir/optimizations/dsm_generator/dsm_generator.h"
-#include "retdec/bin2llvmir/utils/defs.h"
-#include "retdec/bin2llvmir/utils/type.h"
 
-using namespace retdec::llvm_support;
 using namespace retdec::utils;
 using namespace llvm;
 
@@ -57,9 +51,9 @@ bool DsmGenerator::runOnModule(Module& m)
 	_config = ConfigProvider::getConfig(_module);
 	if (_config == nullptr)
 	{
-		LOG << "[ABORT] config file is not available\n";
 		return false;
 	}
+	_abi = AbiProvider::getAbi(_module);
 
 	// New output name.
 	//
@@ -108,25 +102,21 @@ bool DsmGenerator::runOnModuleCustom(
 		llvm::Module& m,
 		Config* c,
 		FileImage* objf,
+		Abi* abi,
 		std::ostream& ret)
 {
 	_module = &m;
 	_config = c;
 	_objf = objf;
+	_abi = abi;
 	run(ret);
 	return false;
 }
 
 void DsmGenerator::run(std::ostream& ret)
 {
-	if (_config == nullptr)
+	if (_config == nullptr || _objf == nullptr || _abi == nullptr)
 	{
-		LOG << "[ABORT] config file is not available\n";
-		return;
-	}
-	if (_objf == nullptr)
-	{
-		LOG << "[ABORT] file image is not available\n";
 		return;
 	}
 
@@ -190,19 +180,19 @@ void DsmGenerator::generateCodeSeg(
 	ret << "; section: " << seg->getName() << "\n";
 
 	Address addr;
-	for (addr = seg->getAddress(); addr <= seg->getEndAddress(); )
+	for (addr = seg->getAddress(); addr < seg->getEndAddress(); )
 	{
 		auto fIt = _addr2fnc.find(addr);
 		auto* f = fIt != _addr2fnc.end() ? fIt->second : nullptr;
 		if (f)
 		{
 			generateFunction(f, ret);
-			addr = f->getEnd() > addr ? f->getEnd() + 1 : addr + 1;
+			addr = f->getEnd() > addr ? f->getEnd() : Address(addr + 1);
 			continue;
 		}
 
 		Address nextFncAddr = addr;
-		while (nextFncAddr <= seg->getEndAddress())
+		while (nextFncAddr < seg->getEndAddress())
 		{
 			if (_addr2fnc.count(nextFncAddr))
 			{
@@ -211,7 +201,7 @@ void DsmGenerator::generateCodeSeg(
 			++nextFncAddr;
 		}
 
-		Address last = nextFncAddr-1; // TODO
+		Address last = nextFncAddr;
 		ret << "; data inside code section at "
 				<< addr.toHexPrefixString() << " -- "
 				<< last.toHexPrefixString() << "\n";
@@ -267,7 +257,7 @@ void DsmGenerator::generateFunction(
 					<< next.getAddress().toHexPrefixString() << "\n";
 			generateDataRange(ai.getEndAddress(), next.getAddress(), ret);
 		}
-		else if (next.isInvalid() && ai.getEndAddress() < (fnc->getEnd() + 1))
+		else if (next.isInvalid() && ai.getEndAddress() < fnc->getEnd())
 		{
 			Address end = fnc->getEnd() + 1;
 			ret << "; data inside code section at "
@@ -320,7 +310,21 @@ std::string DsmGenerator::processInstructionDsm(AsmInstruction& ai)
 {
 	std::string ret = ai.getDsm();
 
-	if (auto* c = ai.getInstructionFirst<CallInst>())
+	// Ugly and potentially dangerous hack for MIPS.
+	// Because of delay slots, branches are in different (next) instructions.
+	// The problem is, what if there are some calls, branches, that were not
+	// created with delays slots?
+	//
+	AsmInstruction tmpAi = ai;
+	if (_config->getConfig().architecture.isMipsOrPic32())
+	{
+		if (AsmInstruction nextAi = tmpAi.getNext())
+		{
+			tmpAi = nextAi;
+		}
+	}
+
+	if (auto* c = tmpAi.getInstructionFirst<CallInst>()) // ai
 	{
 		if (auto* f = c->getCalledFunction())
 		{
@@ -331,7 +335,7 @@ std::string DsmGenerator::processInstructionDsm(AsmInstruction& ai)
 			}
 		}
 	}
-	else if (auto* br = ai.getInstructionFirst<BranchInst>())
+	else if (auto* br = tmpAi.getInstructionFirst<BranchInst>()) // ai
 	{
 		bool ok = true;
 		auto* falseDestUse = br->isConditional() ? br->op_end() - 2 : nullptr;
@@ -340,7 +344,7 @@ std::string DsmGenerator::processInstructionDsm(AsmInstruction& ai)
 		{
 			auto* falseDestI = &falseDestBb->front();
 			AsmInstruction falseDestAi(falseDestI);
-			if (falseDestAi == ai)
+			if (falseDestAi == tmpAi) // ai
 			{
 				ok = false;
 			}
@@ -356,7 +360,7 @@ std::string DsmGenerator::processInstructionDsm(AsmInstruction& ai)
 			ok = false;
 		}
 
-		if (ok && trueDestAi.isValid() && trueDestAi != ai)
+		if (ok && trueDestAi.isValid() && trueDestAi != tmpAi) // ai
 		{
 			auto* trueDestFnc = trueDestI->getFunction();
 			auto addr = _config->getFunctionAddress(trueDestFnc);
@@ -481,7 +485,7 @@ void DsmGenerator::generateDataRange(
 				addr += sz;
 			}
 
-			auto sz = getTypeByteSizeInBinary(_module, init->getType());
+			auto sz = _abi->getTypeByteSize(init->getType());
 			generateData(ret, addr, sz, val);
 			addr += sz;
 		}
@@ -712,7 +716,7 @@ std::string DsmGenerator::getString(
 		{
 			str.pop_back();
 		}
-		size_t sz = getTypeBitSizeInBinary(_module, cda->getElementType());
+		size_t sz = _abi->getTypeBitSize(cda->getElementType());
 		ret = "L\"" + asEscapedCString(str, sz) + "\"";
 	}
 

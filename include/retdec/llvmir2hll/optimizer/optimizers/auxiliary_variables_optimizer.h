@@ -31,8 +31,7 @@ class ValueAnalysis;
 * @c lime is an auxiliary variable and @c v1 is the original value for @c v1.
 * Usually, @c v1 is a variable with an assigned name from debug information.
 *
-* This optimization should be run after GlobalToLocalOptimizer and
-* CopyPropagationOptimizer.
+* This optimization should be run after CopyPropagationOptimizer.
 *
 * Instances of this class have reference object semantics. This is a concrete
 * optimizer which should not be subclassed.

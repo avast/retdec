@@ -17,10 +17,8 @@
 #include "retdec/ctypes/union_type.h"
 #include "retdec/ctypes/unknown_type.h"
 #include "retdec/ctypes/void_type.h"
-#include "retdec/llvm-support/utils.h"
 #include "retdec/utils/string.h"
 #include "retdec/bin2llvmir/providers/lti.h"
-#include "retdec/bin2llvmir/utils/type.h"
 
 using namespace llvm;
 
@@ -39,7 +37,7 @@ ToLlvmTypeVisitor::ToLlvmTypeVisitor(llvm::Module* m, Config* c) :
 {
 	assert(_module);
 	assert(_config);
-	_type = getDefaultType(_module);
+	_type = Abi::getDefaultType(_module);
 }
 
 ToLlvmTypeVisitor::~ToLlvmTypeVisitor() = default;
@@ -53,7 +51,7 @@ void ToLlvmTypeVisitor::visit(
 	for (auto it = dims.rbegin(); it != dims.rend(); ++it)
 	{
 		auto* t = ArrayType::isValidElementType(_type) ?
-				_type : getDefaultType(_module);
+				_type : Abi::getDefaultType(_module);
 		auto d = *it > 0 ? *it : 1;
 		_type = ArrayType::get(t, d);
 	}
@@ -62,7 +60,7 @@ void ToLlvmTypeVisitor::visit(
 void ToLlvmTypeVisitor::visit(
 		const std::shared_ptr<retdec::ctypes::EnumType>& type)
 {
-	_type = getDefaultType(_module);
+	_type = Abi::getDefaultType(_module);
 }
 
 void ToLlvmTypeVisitor::visit(
@@ -85,7 +83,7 @@ void ToLlvmTypeVisitor::visit(
 {
 	type->getReturnType()->accept(this);
 	auto* ret = FunctionType::isValidReturnType(_type) ?
-			_type : getDefaultType(_module);
+			_type : Abi::getDefaultType(_module);
 
 	std::vector<Type*> params;
 	params.reserve(type->getParameterCount());
@@ -100,7 +98,7 @@ void ToLlvmTypeVisitor::visit(
 		else
 		{
 			auto* t = FunctionType::isValidArgumentType(_type) ?
-					_type : getDefaultType(_module);
+					_type : Abi::getDefaultType(_module);
 			params.push_back(t);
 		}
 	}
@@ -116,7 +114,7 @@ void ToLlvmTypeVisitor::visit(
 {
 	auto tsz = type->getBitWidth();
 	assert(tsz);
-	auto sz = tsz ? tsz : getDefaultType(_module)->getBitWidth();
+	auto sz = tsz ? tsz : Abi::getDefaultType(_module)->getBitWidth();
 	_type = Type::getIntNTy(_module->getContext(), sz);
 }
 
@@ -126,7 +124,7 @@ void ToLlvmTypeVisitor::visit(
 	type->getPointedType()->accept(this);
 
 	auto* t = PointerType::isValidElementType(_type) ?
-			_type : getDefaultType(_module);
+			_type : Abi::getDefaultType(_module);
 	_type = PointerType::get(t, 0);
 }
 
@@ -162,13 +160,13 @@ void ToLlvmTypeVisitor::visit(
 void ToLlvmTypeVisitor::visit(
 		const std::shared_ptr<retdec::ctypes::UnionType>& type)
 {
-	_type = getDefaultType(_module);
+	_type = Abi::getDefaultType(_module);
 }
 
 void ToLlvmTypeVisitor::visit(
 		const std::shared_ptr<retdec::ctypes::UnknownType>& type)
 {
-	_type = getDefaultType(_module);
+	_type = Abi::getDefaultType(_module);
 }
 
 void ToLlvmTypeVisitor::visit(
@@ -202,7 +200,7 @@ void ToLlvmTypeVisitor::visit(
 		i->getType()->accept(this);
 
 		auto* t = StructType::isValidElementType(_type) ?
-				_type : getDefaultType(_module);
+				_type : Abi::getDefaultType(_module);
 		elems.push_back(t);
 	}
 	if (elems.empty())
@@ -348,8 +346,6 @@ llvm::FunctionType* Lti::getLlvmFunctionType(const std::string& name)
 	auto* ft = dyn_cast<FunctionType>(getLlvmType(ltiFnc->getType()));
 	assert(ft);
 
-	// TODO: I do not like this, why does
-	// retdec::ctypes::FunctionType::isVarArg no work?
 	std::string declaration = ltiFnc->getDeclaration();
 	if (declaration.find("...") != std::string::npos
 			&& !ft->isVarArg())

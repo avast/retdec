@@ -1,13 +1,13 @@
 /**
  * @file src/bin2llvmir/optimizations/dump_module/dump_module.cpp
- * @brief This is a utility debug pass that only dumps the module into LLVM IR.
+ * @brief An utility debug pass that dumps the module into a file.
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */
 
-#include "retdec/llvm-support/utils.h"
 #include "retdec/bin2llvmir/optimizations/dump_module/dump_module.h"
+#include "retdec/bin2llvmir/providers/config.h"
+#include "retdec/bin2llvmir/utils/debug.h"
 
-using namespace retdec::llvm_support;
 using namespace llvm;
 
 namespace retdec {
@@ -17,7 +17,7 @@ char DumpModule::ID = 0;
 
 static RegisterPass<DumpModule> X(
 		"dump-module",
-		"Module to LLVM IR file dumping",
+		"Module to LLVM IR file dumper",
 		 false, // Only looks at CFG
 		 false // Analysis Pass
 );
@@ -30,7 +30,8 @@ DumpModule::DumpModule() :
 
 bool DumpModule::runOnModule(Module& M)
 {
-	dumpModuleToFile(&M);
+	auto* c = ConfigProvider::getConfig(&M);
+	dumpModuleToFile(&M, c->getOutputDirectory());
 	return false;
 }
 

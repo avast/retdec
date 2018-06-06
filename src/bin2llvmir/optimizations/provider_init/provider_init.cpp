@@ -8,22 +8,18 @@
 
 #include <llvm/Support/CommandLine.h>
 
-#include "retdec/llvm-support/utils.h"
 #include "retdec/bin2llvmir/optimizations/provider_init/provider_init.h"
-#include "retdec/bin2llvmir/providers/abi.h"
+#include "retdec/bin2llvmir/analyses/symbolic_tree.h"
+#include "retdec/bin2llvmir/providers/abi/abi.h"
 #include "retdec/bin2llvmir/providers/asm_instruction.h"
 #include "retdec/bin2llvmir/providers/config.h"
 #include "retdec/bin2llvmir/providers/debugformat.h"
 #include "retdec/bin2llvmir/providers/demangler.h"
 #include "retdec/bin2llvmir/providers/fileimage.h"
 #include "retdec/bin2llvmir/providers/lti.h"
-#include "retdec/bin2llvmir/utils/defs.h"
-#include "retdec/bin2llvmir/utils/instruction.h"
+#include "retdec/bin2llvmir/providers/names.h"
 
-using namespace retdec::llvm_support;
 using namespace llvm;
-
-#define debug_enabled false
 
 namespace retdec {
 namespace bin2llvmir {
@@ -56,54 +52,50 @@ bool ProviderInitialization::runOnModule(Module& m)
 {
 	static bool firstRun = true;
 	std::string confPath = ConfigPath;
-	if (firstRun && !confPath.empty())
+	if (!firstRun || confPath.empty())
 	{
-		LOG << "first run" << std::endl;
-
-		auto* c = ConfigProvider::addConfigFile(&m, confPath);
-		assert(c);
-		if (c == nullptr)
-		{
-			return false;
-		}
-
-		auto* d = DemanglerProvider::addDemangler(
-				&m,
-				c->getConfig().tools);
-		if (d == nullptr)
-		{
-			return false;
-		}
-
-		auto* f = FileImageProvider::addFileImage(
-				&m,
-				c->getConfig().getInputFile(),
-				c);
-		if (f == nullptr)
-		{
-			return false;
-		}
-
-		DebugFormatProvider::addDebugFormat(
-				&m,
-				f->getImage(),
-				c->getConfig().getPdbInputFile(),
-				c->getConfig().getImageBase(),
-				d);
-
-		LtiProvider::addLti(
-				&m,
-				c,
-				f->getImage());
-
-		AsmInstruction::clear();
-
-		firstRun = false;
+		return false;
 	}
-	else
+
+	auto* c = ConfigProvider::addConfigFile(&m, confPath);
+	if (c == nullptr)
 	{
-		LOG << "not the first run" << std::endl;
+		return false;
 	}
+
+	auto* abi = AbiProvider::addAbi(&m, c);
+	SymbolicTree::setAbi(abi);
+	SymbolicTree::setConfig(c);
+
+	auto* d = DemanglerProvider::addDemangler(&m, c->getConfig().tools);
+	if (d == nullptr)
+	{
+		return false;
+	}
+
+	auto* f = FileImageProvider::addFileImage(
+			&m,
+			c->getConfig().getInputFile(),
+			c);
+	if (f == nullptr)
+	{
+		return false;
+	}
+
+	auto* debug = DebugFormatProvider::addDebugFormat(
+			&m,
+			f->getImage(),
+			c->getConfig().getPdbInputFile(),
+			c->getConfig().getImageBase(),
+			d);
+
+	auto* lti = LtiProvider::addLti(&m, c, f->getImage());
+
+	NamesProvider::addNames(&m, c, debug, f, d, lti);
+
+	AsmInstruction::clear();
+
+	firstRun = false;
 
 	return false;
 }

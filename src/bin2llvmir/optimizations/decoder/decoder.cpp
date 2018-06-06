@@ -4,22 +4,21 @@
 * @copyright (c) 2017 Avast Software, licensed under the MIT license
 */
 
-#include <iostream>
-#include <map>
+#include <json/json.h>
 
-#include <llvm/IR/InstIterator.h>
+#include <llvm/IR/Dominators.h>
+#include <llvm/IR/PatternMatch.h>
 
 #include "retdec/utils/conversion.h"
 #include "retdec/utils/string.h"
 #include "retdec/bin2llvmir/optimizations/decoder/decoder.h"
-#include "retdec/bin2llvmir/utils/defs.h"
-#define debug_enabled false
-#include "retdec/llvm-support/utils.h"
+#include "retdec/bin2llvmir/utils/llvm.h"
+#include "retdec/bin2llvmir/utils/capstone.h"
 
-using namespace retdec::llvm_support;
 using namespace retdec::utils;
 using namespace retdec::capstone2llvmir;
 using namespace llvm;
+using namespace llvm::PatternMatch;
 using namespace retdec::fileformat;
 
 namespace retdec {
@@ -40,12 +39,23 @@ Decoder::Decoder() :
 
 }
 
+Decoder::~Decoder()
+{
+	if (_dryCsInsn)
+	{
+		cs_free(_dryCsInsn, 1);
+	}
+}
+
 bool Decoder::runOnModule(Module& m)
 {
 	_module = &m;
 	_config = ConfigProvider::getConfig(_module);
 	_image = FileImageProvider::getFileImage(_module);
 	_debug = DebugFormatProvider::getDebugFormat(_module);
+	_names = NamesProvider::getNames(_module);
+	_abi = AbiProvider::getAbi(_module);
+	_llvm2capstone = &AsmInstruction::getLlvmToCapstoneInsnMap(_module);
 	return runCatcher();
 }
 
@@ -53,24 +63,35 @@ bool Decoder::runOnModuleCustom(
 		llvm::Module& m,
 		Config* c,
 		FileImage* o,
-		DebugFormat* d)
+		DebugFormat* d,
+		NameContainer* n,
+		Abi* a)
 {
 	_module = &m;
 	_config = c;
 	_image = o;
 	_debug = d;
+	_names = n;
+	_abi = a;
+	_llvm2capstone = &AsmInstruction::getLlvmToCapstoneInsnMap(_module);
 	return runCatcher();
 }
 
 bool Decoder::runCatcher()
 {
+	// TODO: here, we shoudl catch only the most severe capstone2llvmir
+	// problems which prevents us from using it.
+	// Other problems (e.g. throws in instruction translating like unxpected
+	// number of operands) should get their own special exception types
+	// and should be catched lower and possibly ignored.
+	//
 	try
 	{
 		return run();
 	}
 	catch (const Capstone2LlvmIrBaseError& e)
 	{
-		LOG << "[capstone2llvmir] " << e.what() << std::endl;
+		LOG << "[capstone2llvmir]: " << e.what() << std::endl;
 		return false;
 	}
 }
@@ -83,2573 +104,1519 @@ bool Decoder::run()
 		return false;
 	}
 
-	if (initTranslator())
+	initTranslator();
+	initDryRunCsInstruction();
+	initEnvironment();
+	initRanges();
+	initJumpTargets();
+
+	LOG << _ranges << std::endl;
+	LOG << _jumpTargets << std::endl;
+
+	decode();
+
+	if (debug_enabled)
 	{
-		LOG << "[ABORT] Unable to create Capstone 2 LLVM translator.\n";
-		return false;
+		dumpModuleToFile(_module, _config->getOutputDirectory());
 	}
 
-	initEnvironment();
-	initRangesAndTargets();
+	resolvePseudoCalls();
+	patternsRecognize();
+	finalizePseudoCalls();
 
-	doStaticCodeRecognition();
-	//TODO - moved after init, because next rewrites SYMBOL_FUNCTION.
-	initJumpTargetsWithStaticCode();
+	if (debug_enabled)
+	{
+		dumpControFlowToJson(_module, _config->getOutputDirectory());
+		dumpModuleToFile(_module, _config->getOutputDirectory());
+	}
 
-	LOG << std::endl;
-	LOG << "Allowed ranges:" << std::endl;
-	LOG << _allowedRanges << std::endl;
-	LOG << std::endl;
-	LOG << "Alternative ranges:" << std::endl;
-	LOG << _alternativeRanges << std::endl;
-	LOG << "Jump targets:" << std::endl;
-	LOG << _jumpTargets << std::endl;
-	LOG << std::endl;
+	initConfigFunctions();
 
-	doDecoding();
-	checkIfSomethingDecoded();
+	if (debug_enabled)
+	{
+		dumpModuleToFile(_module, _config->getOutputDirectory());
+	}
 
-	fixMainName();
+	initializeGpReg_mips();
 
-	removeStaticallyLinkedFunctions();
-	hackDeleteKnownLinkedFunctions();
-
-//dumpModuleToFile(_module);
-
-	fixMipsDelaySlots();
-
-//dumpModuleToFile(_module);
-
-	return true;
+	return false;
 }
 
-void Decoder::checkIfSomethingDecoded()
+void Decoder::decode()
 {
-	bool hasSomeInsn = false;
-	for (Function& f : _module->getFunctionList())
+	LOG << "\n" << "decode():" << std::endl;
+
+	JumpTarget jt;
+	while (getJumpTarget(jt))
 	{
-		AsmInstruction ai(&f);
-		if (ai.isValid())
-		{
-			hasSomeInsn = true;
-			break;
-		}
+		LOG << "\t" << "processing : " << jt << std::endl;
+		decodeJumpTarget(jt);
 	}
-	if (!hasSomeInsn)
+
+	if (!_somethingDecoded)
 	{
 		throw std::runtime_error("No instructions were decoded");
 	}
 }
 
-void Decoder::initRangesAndTargets()
+bool Decoder::getJumpTarget(JumpTarget& jt)
 {
-	LOG << "\n initRangesAndTargets():" << std::endl;
-
-	if (_config->getConfig().parameters.isSomethingSelected())
+	if (!_jumpTargets.empty())
 	{
-		initAllowedRangesWithConfig();
+		jt = _jumpTargets.top();
+		_jumpTargets.pop();
+		return true;
 	}
-
-	if (!_config->getConfig().parameters.isSelectedDecodeOnly())
+	else if (!_ranges.primaryEmpty())
 	{
-		initAllowedRangesWithSegments();
+		jt = JumpTarget(
+				_ranges.primaryFront().getStart(),
+				JumpTarget::eType::LEFTOVER,
+				_c2l->getBasicMode(),
+				Address());
+		return true;
 	}
-
-	initJumpTargets();
-	findDelphiFunctionTable();
-
-	// TODO: This will screw decoding of 2 exotic tests, but removed ranges
-	// look ok -- should be removed:
-	// extra.features.avg-exotic-pe.TestOnlyEp (F8EEE82B5150B75D4B176CD9804C9F2B.ex)
-	// extra.features.avg-exotic-pe.Test_05e86f02582da7e1103b53b6136c1e62
-	//
-	for (auto& seg : _image->getSegments())
-	{
-		auto& rc = seg->getNonDecodableAddressRanges();
-		for (auto& r : rc)
-		{
-			if (!r.contains(_config->getConfig().getEntryPoint()))
-			{
-				_allowedRanges.remove(r.getStart(), r.getEnd());
-				_alternativeRanges.remove(r.getStart(), r.getEnd());
-			}
-		}
-	}
-
-	removeZeroSequences(_allowedRanges);
-	removeZeroSequences(_alternativeRanges);
+	return false;
 }
 
-void Decoder::removeZeroSequences(retdec::utils::AddressRangeContainer& rs)
+void Decoder::decodeJumpTarget(const JumpTarget& jt)
 {
-	LOG << "\n" << "removeZeroSequences():" << std::endl;
-
-	static unsigned minSequence = 0x50; // TODO: Maybe should be smaller.
-	retdec::utils::AddressRangeContainer toRemove;
-
-	for (auto& range : rs)
+	const Address start = jt.getAddress();
+	if (start.isUndefined())
 	{
-		Address start = range.getStart();
-		Address end = range.getEnd();
-		uint64_t size = range.getSize();
-
-		uint64_t iter = 0;
-		Address zeroStart;
-		uint64_t byte = 0;
-		Address addr;
-
-		while (iter < size)
-		{
-			addr = start + iter;
-			if (_image->getImage()->get1Byte(addr, byte))
-			{
-				if (byte == 0)
-				{
-					if (zeroStart.isUndefined())
-					{
-						zeroStart = addr;
-					}
-				}
-				else
-				{
-					// +8 -> first few zeroes might be a part of some
-					// instruction. only somewhere after them might the real
-					// sequence start. if we remove them, we make instruction
-					// undecodable.
-					//
-					if (zeroStart.isDefined()
-							&& zeroStart + 8 < addr
-							&& addr - zeroStart >= minSequence)
-					{
-						toRemove.insert(zeroStart+8, addr-1);
-					}
-					zeroStart = Address::getUndef;
-				}
-
-				iter += 1;
-			}
-			else
-			{
-				if (zeroStart.isDefined()
-						&& zeroStart + 8 < end
-						&& end - zeroStart >= minSequence)
-				{
-					toRemove.insert(zeroStart + 8, end);
-				}
-				break;
-			}
-		}
-
-		if (iter >= size
-				&& byte == 0
-				&& zeroStart.isDefined()
-				&& zeroStart + 8 < addr
-				&& addr - zeroStart >= minSequence)
-		{
-			toRemove.insert(zeroStart + 8, addr-1);
-		}
-	}
-
-	for (auto& range : toRemove)
-	{
-		LOG << "\t" << range << std::endl;
-		rs.remove(range);
-	}
-}
-
-void Decoder::initJumpTargetsWithStaticCode()
-{
-	// TODO: Hack, we are hitting main with some other functions on PSP MIPS.
-	// Should be solved by using references.
-	for (auto& jt : _jumpTargets)
-	{
-		if (jt.getName() == "main")
-		{
-			_staticCode.erase(jt.address);
-		}
-		if (jt.type == JumpTarget::eType::SELECTED_RANGE_START)
-		{
-			_staticCode.erase(jt.address);
-		}
-	}
-
-	for (auto& p : _staticCode)
-	{
-		Address start = p.first;
-		Address end = p.second.second.getEnd();
-		std::string name = p.second.first;
-
-		cs_mode m = _currentMode;
-		if (isArmOrThumb())
-		{
-			// TODO: We do not really know what mode to use.
-			// Even THUMB functions are physically on even addresses in binary.
-			// Only their symbols, etc., have odd addresses, but statically
-			// linked code finds physical fncs at even addresses.
-			// If possible, we should find out what kind of signatures were hit
-			// use that. At the moment, we always set ARM, but there are THUMB
-			// signature files in the new statically linked code.
-			m = CS_MODE_ARM;
-		}
-
-		LOG << "\t\tstatically linked: " << name << " @ " << start << std::endl;
-		_jumpTargets.push(_config, start, JumpTarget::eType::STATICALLY_LINKED_FUNCTION, m, name);
-
-		Address next = end + 1;
-		LOG << "\t\tafter statically linked: " << name << " @ " << end << std::endl;
-		_jumpTargets.push(_config, next, JumpTarget::eType::SYMBOL_FUNCTION, m);
-	}
-}
-
-void Decoder::initAllowedRangesWithSegments()
-{
-	LOG << "\n initAllowedRangesWithSegments():" << std::endl;
-
-	bool isDotNet = _config->getConfig().languages.hasLanguage(".NET");
-	auto* epSeg = _image->getImage()->getEpSegment();
-
-	for (auto& seg : _image->getSegments())
-	{
-		auto* sec = seg->getSecSeg();
-		Address start = seg->getAddress();
-		Address end = seg->getPhysicalEndAddress();
-
-		LOG << "\t" << seg->getName() << " @ " << start << " -- "
-				<< end << std::endl;
-
-		if (start == end)
-		{
-			LOG << "\t\tsize == 0 -> skipped" << std::endl;
-			continue;
-		}
-
-		if (seg.get() != epSeg && sec)
-		{
-			if (auto* s = dynamic_cast<const PeCoffSection*>(sec))
-			{
-				if (s->getPeCoffFlags() & PeLib::PELIB_IMAGE_SCN_MEM_DISCARDABLE)
-				{
-					LOG << "\t\t" << "PeLib::PELIB_IMAGE_SCN_MEM_DISCARDABLE"
-							" -> skipped" << std::endl;
-					continue;
-				}
-			}
-		}
-
-		if (sec)
-		{
-			switch (sec->getType())
-			{
-				case SecSeg::Type::CODE:
-					if (isDotNet)
-					{
-						LOG << "\t\tcode section && .NET -> alternative ranges"
-								<< std::endl;
-						_alternativeRanges.insert(start, end);
-					}
-					else
-					{
-						LOG << "\t\tcode section -> allowed ranges"
-								<< std::endl;
-						_allowedRanges.insert(start, end);
-					}
-					break;
-				case SecSeg::Type::DATA:
-					LOG << "\t\tdata section -> alternative ranges"
-							<< std::endl;
-					_alternativeRanges.insert(start, end);
-					break;
-				case SecSeg::Type::CODE_DATA:
-					LOG << "\t\tcode/data section -> alternative ranges"
-							<< std::endl;
-					_alternativeRanges.insert(start, end);
-					break;
-				case SecSeg::Type::CONST_DATA:
-					if (seg.get() == epSeg)
-					{
-						LOG << "\t\tconst data section == ep seg "
-								"-> alternative ranges" << std::endl;
-						_alternativeRanges.insert(start, end);
-					}
-					else
-					{
-						LOG << "\t\tconst data section -> alternative ranges"
-								<< std::endl;
-						continue;
-					}
-					break;
-				case SecSeg::Type::UNDEFINED_SEC_SEG:
-					LOG << "\t\tundef section -> alternative ranges"
-							<< std::endl;
-					_alternativeRanges.insert(start, end);
-					break;
-				case SecSeg::Type::BSS:
-					LOG << "\t\tbss section -> skipped" << std::endl;
-					continue;
-				case SecSeg::Type::DEBUG:
-					LOG << "\t\tdebug section -> skipped" << std::endl;
-					continue;
-				case SecSeg::Type::INFO:
-					LOG << "\t\tinfo section -> skipped" << std::endl;
-					continue;
-				default:
-					assert(false && "unhandled section type");
-					continue;
-			}
-		}
-		else if (seg.get() == epSeg)
-		{
-			LOG << "\t\tno underlying section or segment && ep seg "
-					"-> alternative ranges" << std::endl;
-			_alternativeRanges.insert(start, end);
-		}
-		else
-		{
-			LOG << "\t\tno underlying section or segment -> skipped"
-					<< std::endl;
-			continue;
-		}
-	}
-}
-
-void Decoder::initAllowedRangesWithConfig()
-{
-	LOG << "\n initAllowedRangesWithConfig():" << std::endl;
-
-	std::set<std::string> foundFs;
-
-	if (!_config->getConfig().parameters.isSelectedDecodeOnly())
-	{
-		LOG << "\tnot selected decode only -> skipped" << std::endl;
+		LOG << "\t\t" << "unknown target address -> skip" << std::endl;
 		return;
 	}
 
-	for (auto &p : _config->getConfig().parameters.selectedRanges)
+	bool alternative = false;
+	auto* range = _ranges.getPrimary(start);
+	if (range == nullptr && jt.getType() < JumpTarget::eType::LEFTOVER)
 	{
-		LOG << "\tadd selected range @ " << p << std::endl;
-		_allowedRanges.insert(p.getStart(), p.getEnd());
-		LOG << "\tadd selected range jump target: " << p.getStart() << std::endl;
+		range = _ranges.getAlternative(start);
+		alternative = true;
+	}
+	if (range == nullptr)
+	{
+		LOG << "\t\t" << "found no range -> skip" << std::endl;
+		// TODO: arm-pe-ff7e029f2539e37ee590a3cb029762b6
+		_ranges.remove(start, start + 1);
+		return;
+	}
+	LOG << "\t\t" << "found range = " << *range << std::endl;
 
-		auto m = _currentMode;
-		// TODO: What to do here? Do we known from config what kind of code we
-		// should decode?
-
-		_jumpTargets.push(_config, p.getStart(), JumpTarget::eType::SELECTED_RANGE_START, m);
+	auto bytes = _image->getImage()->getRawSegmentData(start);
+	if (bytes.first == nullptr)
+	{
+		LOG << "\t\t" << "found no data -> skip" << std::endl;
+		_ranges.remove(start, start + 1);
+		return;
 	}
 
-	auto& selectedFs = _config->getConfig().parameters.selectedFunctions;
+	auto toRangeEnd = range->getEnd() - start;
 
-	if (!selectedFs.empty())
+	bytes.second = toRangeEnd < bytes.second ? toRangeEnd : bytes.second;
+
+	if (jt.hasSize() && jt.getSize() < bytes.second)
 	{
-		for (auto& dfp : _debug->functions)
+		bytes.second = jt.getSize();
+	}
+	if (auto nextBbAddr = getBasicBlockAddressAfter(start))
+	{
+		auto sz = nextBbAddr - start;
+		bytes.second = sz < bytes.second ? sz : bytes.second;
+	}
+	else if (auto nextFncAddr = getFunctionAddressAfter(start))
+	{
+		auto sz = nextFncAddr - start;
+		bytes.second = sz < bytes.second ? sz : bytes.second;
+	}
+
+	bool useAlt = alternative
+			&& jt.getType() > JumpTarget::eType::CONTROL_FLOW_RETURN_TARGET
+			&& jt.getType() != JumpTarget::eType::ENTRY_POINT;
+	bool useStrict = _ranges.isStrict() && !useAlt;
+
+	if (jt.getType() == JumpTarget::eType::LEFTOVER
+			|| useAlt)
+	{
+		if (auto skipSz = decodeJumpTargetDryRun(jt, bytes, useStrict))
 		{
-			auto& df = dfp.second;
-			auto fIt = selectedFs.find(df.getName());
-			if (fIt == selectedFs.end())
-			{
-				fIt = selectedFs.find(df.getDemangledName());
-			}
+			AddressRange sr(start, start+skipSz);
+			LOG << "\t\t" << "dry run failed -> skip range = " << sr
+					<< std::endl;
+			_ranges.remove(sr);
+			return;
+		}
+	}
 
-			if (fIt != selectedFs.end())
-			{
-				Address start = df.getStart();
-				Address end = df.getEnd();
-
-				_allowedRanges.insert(start, end-1);
-				LOG << "\tadd selected range jump target: " << start << std::endl;
-
-				auto m = _currentMode;
-				// TODO: What to do here? Do we known from config what kind of
-				// code we should decode?
-
-				_jumpTargets.push(_config, start, JumpTarget::eType::SELECTED_RANGE_START, m);
-
-				foundFs.insert(*fIt);
-
-				LOG << "\thit in debug functions -- " << *fIt << " @ " << start
-						<< " -- " << end << std::endl;
-			}
+	BasicBlock* bb = getBasicBlockAtAddress(start);
+	if (bb == nullptr)
+	{
+		if (jt.getType() != JumpTarget::eType::LEFTOVER)
+		{
+			LOG << "\t\t" << "found no bb for jt -> skip" << std::endl;
+			return;
 		}
 
-		std::map<retdec::utils::Address, std::shared_ptr<const retdec::fileformat::Symbol>> symtab;
-		for (const auto* t : _image->getFileFormat()->getSymbolTables())
-		for (const auto& s : *t)
+		BasicBlock* tBb = nullptr;
+		Function* tFnc = nullptr;
+		getOrCreateCallTarget(start, tFnc, tBb);
+		if (tFnc && !tFnc->empty())
 		{
-			unsigned long long a = 0;
-			if (!s->getRealAddress(a))
-			{
-				continue;
-			}
+			bb = &tFnc->front();
+		}
+		// Function can not be split, use BB. This BB does not have predecessor,
+		// which is not ideal, but it might happen.
+		//
+		else if (tBb)
+		{
+			bb = tBb;
+		}
+		else
+		{
+			return;
+		}
+	}
+	assert(bb && bb->getTerminator());
+	IRBuilder<> irb(bb->getTerminator());
+	_irb = &irb;
 
-			auto fIt = symtab.find(a);
-			if (fIt == symtab.end())
+	if (_c2l->getBasicMode() != jt.getMode())
+	{
+		_c2l->modifyBasicMode(jt.getMode());
+		LOG << "\t\t" << "switch mode -> "
+				<< (jt.getMode() == CS_MODE_THUMB ? " (thumb)" : "(arm)")
+				<< std::endl;
+	}
+
+	Address addr = start;
+	bool bbEnd = false;
+	do
+	{
+		LOG << "\t\t\t" << "translating = " << addr << std::endl;
+
+		Address oldAddr = addr;
+		auto res = translate(bytes, addr, irb);
+
+		if (res.failed() || res.llvmInsn == nullptr)
+		{
+			if (auto* bb = getBasicBlockAtAddress(addr))
 			{
-				symtab.emplace(a, s);
+				if (bb->getParent() == irb.GetInsertBlock()->getParent()
+						&& bb != irb.GetInsertBlock())
+				{
+					auto* br = irb.CreateBr(bb);
+					assert(br->getNextNode() == br->getParent()->getTerminator());
+					br->getNextNode()->eraseFromParent();
+					LOG << "\t\t" << "translation ended -> reached BB @ "
+							<< addr << std::endl;
+				}
 			}
 			else
 			{
-				if (selectedFs.count(fIt->second->getName())
-						|| selectedFs.count(fIt->second->getNormalizedName())
-						|| selectedFs.count(removeLeadingCharacter(fIt->second->getName(), '_'))
-						||  selectedFs.count(removeLeadingCharacter(fIt->second->getNormalizedName(), '_')))
-				{
-					// name in map is the name we are searching for.
-				}
-				else
-				{
-					symtab[a] = s;
-				}
+				LOG << "\t\t" << "translation failed" << std::endl;
 			}
+			break;
 		}
+		_somethingDecoded = true;
 
-		for (auto sIt = symtab.begin(); sIt != symtab.end(); ++sIt)
-		{
-			auto& s = sIt->second;
+		_llvm2capstone->emplace(res.llvmInsn, res.capstoneInsn);
 
-			retdec::utils::Address start = sIt->first;
-			if (start.isUndefined())
-			{
-				continue;
-			}
+		bbEnd |= getJumpTargetsFromInstruction(oldAddr, res, bytes.second);
+		bbEnd |= instructionBreaksBasicBlock(oldAddr, res);
 
-			unsigned long long size = 0;
-			if (!s->getSize(size))
-			{
-				++sIt;
-				if (sIt == symtab.end())
-				{
-					--sIt;
-					continue;
-				}
-				size = sIt->first - start;
-				--sIt;
-			}
+		handleDelaySlotTypical(addr, res, bytes, irb);
+		handleDelaySlotLikely(addr, res, bytes, irb);
+	}
+	while (!bbEnd);
 
-			retdec::utils::Address end = start + size;
-			std::string name = s->getNormalizedName();
+	auto end = addr > start ? addr : Address(start+1);
+	_ranges.remove(start, end);
+	LOG << "\t\tdecoded range = " << AddressRange(start, end) << std::endl;
+}
 
-			// Exact name match.
-			auto fIt = selectedFs.find(name);
+capstone2llvmir::Capstone2LlvmIrTranslator::TranslationResultOne
+Decoder::translate(ByteData& bytes, utils::Address& addr, llvm::IRBuilder<>& irb)
+{
+	auto res = _c2l->translateOne(bytes.first, bytes.second, addr, irb);
 
-			// Without leading '_' name match.
-			if (fIt == selectedFs.end())
-			{
-				auto tmp1 = removeLeadingCharacter(name, '_');
-				for (fIt = selectedFs.begin(); fIt != selectedFs.end(); ++fIt)
-				{
-					std::string tmp2 = removeLeadingCharacter(*fIt, '_');
-
-					if (tmp1 == tmp2)
-						break;
-				}
-			}
-
-			if (fIt != selectedFs.end() && foundFs.find(*fIt) == foundFs.end())
-			{
-				_allowedRanges.insert(start, end-1);
-				LOG << "\tadd selected range jump target: " << start << std::endl;
-
-				auto m = _currentMode;
-				// TODO: What to do here? Do we known from config what kind of
-				// code we should decode?
-
-				_jumpTargets.push(_config, start, JumpTarget::eType::SELECTED_RANGE_START, m);
-
-				foundFs.insert(*fIt);
-
-				LOG << "\thit in symbol table -- " << *fIt << " @ " << start
-						<< " -- " << end << std::endl;
-			}
-		}
+	// MIPS 64-bit mode can decompile more instructions than the 32-bit mode.
+	// When 32-bit mode is used, some 32-bit instructions that IDA handles fail
+	// to disassemble.
+	// But we cannot always use 64-bit mode, because some other (FPU)
+	// instructions are disassembled differently. Try to swtich modes only if
+	// translations fails.
+	//
+	if (_config->getConfig().architecture.isMipsOrPic32()
+			&& (_c2l->getBasicMode() & CS_MODE_MIPS32)
+			&& res.failed())
+	{
+		_c2l->modifyBasicMode(CS_MODE_MIPS64);
+		res = _c2l->translateOne(bytes.first, bytes.second, addr, irb);
+		_c2l->modifyBasicMode(CS_MODE_MIPS32);
 	}
 
-	// Find out which selected functions have not been found.
-	//
-	auto &sbnf = _config->getConfig().parameters.selectedNotFoundFunctions;
-	std::set_difference(
-			selectedFs.begin(), selectedFs.end(),
-			foundFs.begin(), foundFs.end(),
-			std::inserter(sbnf, sbnf.end())
-	);
+	return res;
+}
 
-	auto* plt = _image->getImage()->getSegment(".plt");
-	if (!_allowedRanges.empty() && plt)
+/**
+ * Check if the given jump targets and bytes can/should be decoded.
+ * \return The number of bytes to skip from decoding. If zero, then dry run was
+ *         ok and decoding of this chunk can proceed. If non-zero, remove the
+ *         number of bytes from ranges to decode.
+ */
+std::size_t Decoder::decodeJumpTargetDryRun(
+		const JumpTarget& jt,
+		std::pair<const std::uint8_t*, std::uint64_t> bytes,
+		bool strict)
+{
+	// Architecture-specific dry runs.
+	//
+	if (_config->getConfig().architecture.isX86())
 	{
-		_allowedRanges.insert(plt->getAddress(), plt->getPhysicalEndAddress()-1);
+		return decodeJumpTargetDryRun_x86(jt, bytes, strict);
+	}
+	else if (_config->getConfig().architecture.isArmOrThumb())
+	{
+		return decodeJumpTargetDryRun_arm(jt, bytes, strict);
+	}
+	else if (_config->getConfig().architecture.isMipsOrPic32())
+	{
+		return decodeJumpTargetDryRun_mips(jt, bytes, strict);
+	}
+	else if (_config->getConfig().architecture.isPpc())
+	{
+		return decodeJumpTargetDryRun_ppc(jt, bytes, strict);
+	}
+	else
+	{
+		assert(false);
+	}
+
+	// Common dry run.
+	//
+	return false;
+}
+
+cs_mode Decoder::determineMode(cs_insn* insn, utils::Address& target)
+{
+	if (_config->getConfig().architecture.isArmOrThumb())
+	{
+		return determineMode_arm(insn, target);
+	}
+	else
+	{
+		return _c2l->getBasicMode();
 	}
 }
 
-void Decoder::initJumpTargets()
+bool Decoder::instructionBreaksBasicBlock(
+		utils::Address addr,
+		capstone2llvmir::Capstone2LlvmIrTranslator::TranslationResultOne& tr)
 {
-	LOG << "\n initJumpTargets():" << std::endl;
-
-	auto m = _currentMode;
-	auto bsz = _config->getConfig().architecture.getByteSize();
-
-	// Sections/segments.
+	// On x86 halt may get generated to end the entry point function:
+	// https://stackoverflow.com/questions/5213466/why-does-gcc-place-a-halt-instruction-in-programs-after-the-call-to-main
+	// The check could be stricter - nop follows, all paths to halt, etc.
 	//
-	LOG << "\tSections:" << std::endl;
-	for (auto& s : _image->getSegments())
+	if (_config->getConfig().architecture.isX86()
+			&& tr.llvmInsn->getFunction() == _entryPointFunction
+			&& tr.capstoneInsn->id == X86_INS_HLT)
 	{
-		LOG << "\t\tsection: " << s->getName() << " @ "
-				<< std::hex << s->getAddress() << std::endl;
+		auto* ui = new UnreachableInst(_module->getContext());
+		ReplaceInstWithInst(&*_irb->GetInsertPoint(), ui);
+		_irb->SetInsertPoint(ui);
+		return true;
+	}
+	// TODO: terminating syscalls.
 
-		// TODO: We do not know what kind of code is at the start of the
-		// section.
-		if (isArmOrThumb())
-		{
-			m = getUnknownMode();
-		}
+	return false;
+}
 
-		_jumpTargets.push(_config, s->getAddress(), JumpTarget::eType::SECTION_START, m);
+/**
+ * @return @c True if this instruction ends basic block, @c false otherwise.
+ */
+bool Decoder::getJumpTargetsFromInstruction(
+		utils::Address addr,
+		capstone2llvmir::Capstone2LlvmIrTranslator::TranslationResultOne& tr,
+		uint64_t& rangeSize)
+{
+	CallInst*& pCall = tr.branchCall;
+	auto nextAddr = addr + tr.size;
+
+	if (_config->getConfig().architecture.isArmOrThumb())
+	{
+		AsmInstruction ai(tr.llvmInsn);
+		patternsPseudoCall_arm(pCall, ai);
 	}
 
-	// Code pointers.
+	BasicBlock* tBb = nullptr;
+	Function* tFnc = nullptr;
+
+	_switchGenerated = false;
+
+	// Function call -> insert target (if computed).
 	//
-	LOG << "\tCode pointers:" << std::endl;
-	std::map<Address, std::pair<Address, const retdec::fileformat::SecSeg*>> codePointers;
-	for (auto& seg : _image->getSegments())
+	if (_c2l->isCallFunctionCall(pCall))
 	{
-		Address start = seg->getAddress();
-		Address end = seg->getPhysicalEndAddress();
+		auto t = getJumpTarget(addr, pCall, pCall->getArgOperand(0));
+		// TOOD: sometimes we want to enable calls (and other branches) to zero.
 
-		for (Address a = start; a < end; a += bsz)
+		if (t || (t == 0 && AsmInstruction(_module, 0)))
 		{
-			if (auto* ci = _image->getConstantDefault(a))
+			// TODO: found in x86 macho:
+			//__text:00001EE6    sub     esp, 1Ch
+			//__text:00001EE9    call    $+5         (target = 0x1EEE)
+			//__text:00001EEE    pop     ecx
+			if (t == nextAddr)
 			{
-				Address val = ci->getZExtValue();
-				if (_allowedRanges.contains(val))
-				{
-					codePointers[a] = std::make_pair(val, seg->getSecSeg());
-				}
-
-				// PowerPC style references:
-				// 1000b158 (addr): ffff9148 (data) -> reference to 100042a0 (target)
-				// target = address + signed(data)
-				// 100042a0 = 1000b158 + ffff9148
-				// TODO: Does this have something to do with some strange PPC
-				// insns? Something like EA computing using this pattern?
-				// If so, is it modeled ok? Are we able to compute this kind
-				// of targets in control flow computation?
-				//
-				if (_config->getConfig().architecture.isPpc()
-						&& bsz == 4)
-				{
-					Address target = a + static_cast<int32_t>(val);
-					if (_allowedRanges.contains(target))
-					{
-						codePointers[a] = std::make_pair(target, seg->getSecSeg());
-					}
-				}
+				return false;
 			}
-		}
-	}
-
-	AddressRange cpr;
-	for (auto& p : codePointers)
-	{
-		Address from = p.first;
-		Address to = p.second.first;
-		const retdec::fileformat::SecSeg* fromSec = p.second.second;
-
-		bool twoBefore = codePointers.count(from - bsz)
-				&& codePointers.count(from - 2*bsz);
-		bool twoAfter = codePointers.count(from + bsz)
-				&& codePointers.count(from + 2*bsz);
-		bool beforeAfter = codePointers.count(from - bsz)
-				&& codePointers.count(from + bsz);
-		bool continuous = twoBefore || twoAfter || beforeAfter;
-		if ((fromSec && fromSec->isDataOnly()) || continuous)
-		{
-			LOG << "\t\t" << from << " -> " << to << " from DATA" << std::endl;
-
-			// TODO: We do not know what kind of code is at the start of the
-			// section.
-			if (isArmOrThumb())
+			//.text:08001EE1    call    near ptr loc_8001EE1+1
+			//.text:08001EE6    cmp     ebx, esi
+			if (addr < t && t < nextAddr)
 			{
-				m = to % 2 ? CS_MODE_THUMB : getUnknownMode();
+				return false;
+			}
+
+			auto m = determineMode(tr.capstoneInsn, t);
+			getOrCreateCallTarget(t, tFnc, tBb);
+
+			if (tFnc)
+			{
+				transformToCall(pCall, tFnc);
+			}
+			else if (tBb
+					&& tBb->getParent() == pCall->getFunction()
+					&& tBb->getPrevNode())
+			{
+				// TODO
+				transformToBranch(pCall, tBb);
+
+				_jumpTargets.push(
+						t,
+						JumpTarget::eType::CONTROL_FLOW_BR_TRUE,
+						m,
+						addr);
+				LOG << "\t\t" << "call @ " << addr << " -> " << t << std::endl;
+				return true;
+			}
+			else
+			{
+// TODO: defer call solution to later? after all possible branches are solved?
+// often, it is possible to split function here, but later it would not be,
+// possible. Then, after such split, more splits are needed for those branches
+// thet would make the initial split impossible -> problem, we can not
+// transform them.
+//				assert(false);
+				return false;
 			}
 
 			_jumpTargets.push(
-					_config,
-					to,
-					JumpTarget::eType::CODE_POINTER_FROM_DATA,
-					m,
-					from);
-		}
-		else
-		{
-			// TODO: do not create at all, it is poped and skipped, but
-			// marked as popped and because of it other targets with the same
-			// address are also skipped.
-			//
-//			LOG << "\t\t" << from << " -> " << to << " from CODE" << std::endl;
-//
-//			_jumpTargets.push(
-//					to,
-//					JumpTarget::eType::CODE_POINTER_FROM_OTHER,
-//					from);
-		}
+					t,
+					JumpTarget::eType::CONTROL_FLOW_CALL_TARGET,
+					determineMode(tr.capstoneInsn, t),
+					addr);
+			LOG << "\t\t" << "call @ " << addr << " -> " << t << std::endl;
 
-		if (cpr.getStart().isUndefined())
-		{
-			cpr.setStart(from);
-			cpr.setEnd(from + bsz - 1);
-		}
-		else if (cpr.getEnd() + 1 == from) // ane after another
-		{
-			cpr.setEnd(from + bsz - 1);
-		}
-		else if (cpr.getEnd() + 1 + bsz >= from
-				&& cpr.getSize() >= (2*bsz)
-				&& codePointers.count(from + bsz)) // gap <= default arch size
-		{
-			cpr.setEnd(from + bsz - 1);
-		}
-		else
-		{
-			if (cpr.getSize() > (2*bsz))
+			// The created function might be in range that we are currently
+			// decoding -> if so, trim range size.
+			if (nextAddr <= t && t < nextAddr + rangeSize)
 			{
-				LOG << "\t\tremove from allowed ranges = " << cpr << std::endl;
-				_allowedRanges.remove(cpr);
+				rangeSize = t - nextAddr;
 			}
 
-			cpr.setStart(from);
-			cpr.setEnd(from + bsz - 1);
-		}
-	}
-
-	// References after ARM functions.
-	//
-	if (isArmOrThumb())
-	{
-		LOG << "\tARM after function references:" << std::endl;
-		retdec::utils::AddressRangeContainer dataRanges;
-		for (auto& seg : _image->getSegments())
-		{
-			if (auto* sec = seg->getSecSeg())
+			if (tFnc && _terminatingFncs.count(tFnc))
 			{
-				if (sec->isSomeData())
-				{
-					dataRanges.insert(seg->getAddress(), seg->getPhysicalEndAddress());
-				}
-				else if (sec->isBss())
-				{
-					dataRanges.insert(seg->getAddress(), seg->getEndAddress());
-				}
-			}
-		}
-
-		std::set<Address> worklist;
-		for (auto& r : _allowedRanges)
-		{
-			for (Address a = r.getStart(); a < r.getEnd(); a += bsz)
-			{
-				if (auto* ci = _image->getConstantDefault(a))
-				{
-					Address val = ci->getZExtValue();
-					if (dataRanges.contains(val) || _allowedRanges.contains(val) || val == 0)
-					{
-						worklist.insert(a);
-					}
-				}
-			}
-		}
-
-		Address start;
-		Address end;
-		for (auto a : worklist)
-		{
-			if (start.isUndefined())
-			{
-				start = a;
-				end = a;
-			}
-			else if (a == end + bsz)
-			{
-				end = a;
-			}
-			// Jump over one missing entry.
-			else if (a == (end + 2*bsz))
-			{
-				end = a;
-			}
-			else
-			{
-				if (end - start >= 2*bsz) // 2*bsz -> 3 entries, e.g. 8358 - 8350 -> 8350, 8354, 8358
-				{
-					_allowedRanges.remove(start, end + bsz - 1);
-
-					_jumpTargets.push(
-							_config,
-							end + bsz,
-							JumpTarget::eType::CODE_POINTER_FROM_DATA,
-							getUnknownMode());
-
-					LOG << "\n\t\t" << "removed range: " << start << " -- " << end << std::endl;
-					LOG << "\t\t" << "added target @ " << end + bsz << std::endl;
-				}
-
-				start = a;
-				end = a;
-			}
-		}
-	}
-
-	// Config.
-	// TODO: If object file is decompiled, these functions are probably off.
-	// See tools.idaplugin.bugs.1706-archives.TestDecompileAll (msvc-factorial-obj.coff).
-	// First _factorial() is created at 0x0 from config entry from here.
-	// Second _factorial() (renamed by LLVM to _factorial.1()) is later created
-	// at decompiled section and renamed based on relocation.
-	//
-	LOG << "\tConfig:" << std::endl;
-	for (auto& p : _config->getConfig().functions)
-	{
-		retdec::config::Function& f = p.second;
-		if (f.getStart().isUndefined())
-		{
-			continue;
-		}
-
-		LOG << "\t\tfunction: " << f.getName() << " @ " << f.getStart()
-				<< std::endl;
-
-		if (isArmOrThumb())
-		{
-			m = f.isThumb() ? CS_MODE_THUMB : CS_MODE_ARM;
-		}
-
-		_jumpTargets.push(_config, f.getStart(), JumpTarget::eType::CONFIG_FUNCTION, m, f.getName());
-	}
-	if (_config->getConfig().isIda())
-	{
-		return;
-	}
-
-	// Entry point.
-	//
-	LOG << "\tEntry point:" << std::endl;
-	auto ep = _config->getConfig().getEntryPoint();
-	if (ep.isDefined())
-	{
-		LOG << "\t\t ep @ " << ep << std::endl;
-
-		if (isArmOrThumb())
-		{
-			m = ep % 2 ? CS_MODE_THUMB : CS_MODE_ARM;
-		}
-
-		_jumpTargets.push(_config, ep, JumpTarget::eType::ENTRY_POINT, m, "entry_point");
-	}
-
-	// TODO: Delphi function table.
-	// Parsing in function_detection is using decoded ASM, so we can not do it
-	// here. Either do the same thing here, but without relying on ASM, or
-	// handle this after entry point is decoded, or maybe this will not be
-	// necessary -- if there are code pointers in the table, they should be
-	// collected by general code pointers finding algorithm (but it would be
-	// still better to parse the table for added semantics).
-
-	// Symbols.
-	//
-	LOG << "\tSymbols:" << std::endl;
-	for (const auto* t : _image->getFileFormat()->getSymbolTables())
-	for (const auto& s : *t)
-	{
-		if (!s->isFunction())
-		{
-			continue;
-		}
-		unsigned long long a = 0;
-		if (!s->getRealAddress(a))
-		{
-			continue;
-		}
-		retdec::utils::Address addr = a;
-		if (addr.isUndefined())
-		{
-			continue;
-		}
-		std::string name = s->getName();
-
-		LOG << "\t\tsymbol: " << s->getName() << " @ " << addr << std::endl;
-
-		if (isArmOrThumb())
-		{
-			m = addr % 2 || s->isThumbSymbol() ? CS_MODE_THUMB : CS_MODE_ARM;
-		}
-
-		if (s->getType() == retdec::fileformat::Symbol::Type::PUBLIC)
-		{
-			_jumpTargets.push(_config, addr, JumpTarget::eType::SYMBOL_FUNCTION_PUBLIC, m, name);
-		}
-		else
-		{
-			_jumpTargets.push(_config, addr, JumpTarget::eType::SYMBOL_FUNCTION, m, name);
-		}
-	}
-
-	// Exports.
-	//
-	LOG << "\tExports:" << std::endl;
-	if (auto *exTbl = _image->getFileFormat()->getExportTable())
-	{
-		for (const auto &exp : *exTbl)
-		{
-			retdec::utils::Address addr = exp.getAddress();
-			if (addr.isUndefined())
-			{
-				continue;
-			}
-			std::string name = normalizeNamePrefix(exp.getName());
-
-			LOG << "\t\texport: " << exp.getName() << " @ " << addr << std::endl;
-
-			if (isArmOrThumb())
-			{
-				m = addr % 2 ? CS_MODE_THUMB : CS_MODE_ARM;
-			}
-
-			_jumpTargets.push(_config, addr, JumpTarget::eType::EXPORT_FUNCTION, m, name);
-		}
-	}
-
-	// Imports.
-	//
-	Address lowestImport;
-	Address highestImport;
-	std::size_t importNum = 0;
-	LOG << "\tImports:" << std::endl;
-	if (auto* impTbl = _image->getFileFormat()->getImportTable())
-	{
-		for (const auto &imp : *impTbl)
-		{
-			retdec::utils::Address addr = imp->getAddress();
-			if (addr.isUndefined())
-			{
-				continue;
-			}
-
-			if (lowestImport.isUndefined())
-			{
-				lowestImport = addr;
-			}
-			if (highestImport.isUndefined())
-			{
-				highestImport = addr;
-			}
-
-			lowestImport = std::min(lowestImport, addr);
-			highestImport = std::max(highestImport, addr);
-			++importNum;
-
-			std::string n = imp->getName();
-			if (n.empty())
-			{
-				auto libN = impTbl->getLibrary(imp->getLibraryIndex());
-				std::transform(libN.begin(), libN.end(), libN.begin(), ::tolower);
-				retdec::utils::removeSuffix(libN, ".dll");
-
-				unsigned long long ord;
-				const bool ordValid = imp->getOrdinalNumber(ord);
-				if (ordValid)
-				{
-					n = getFunctionNameFromLibAndOrd(libN, ord);
-				}
-				if (n.empty())
-				{
-					auto& confGlobs = _config->getConfig().globals;
-					if (auto glob = confGlobs.getObjectByAddress(addr))
-					{
-						n = glob->getName();
-					}
-
-					if (n.empty())
-					{
-						n = "imported_function_ord_" + std::to_string(ord);
-					}
-				}
-			}
-			std::string name = normalizeNamePrefix(n);
-
-			LOG << "\t\timport: " << imp->getName() << " @ " << addr << std::endl;
-
-			if (isArmOrThumb())
-			{
-				m = addr % 2 ? CS_MODE_THUMB : CS_MODE_ARM;
-			}
-
-			_jumpTargets.push(_config, addr, JumpTarget::eType::IMPORT_FUNCTION, m, name);
-		}
-	}
-	if (lowestImport.isDefined() && highestImport.isDefined() && importNum > 0)
-	{
-		std::size_t byteSize = _config->getConfig().architecture.getByteSize();
-		Address afterImports = highestImport + byteSize;
-		std::size_t sizeImports = afterImports - lowestImport;
-		if (sizeImports / importNum <= (byteSize+1))
-		{
-			if (isArmOrThumb())
-			{
-				m = getUnknownMode();
-			}
-
-			_jumpTargets.push(_config, afterImports, JumpTarget::eType::SECTION_START, m);
-			// TODO: maybe remove import table range from decoding ranges?
-		}
-	}
-
-	// Debug.
-	//
-	LOG << "\tDebug:" << std::endl;
-	if (_debug)
-	{
-		for (const auto& p : _debug->functions)
-		{
-			retdec::utils::Address addr = p.first;
-			if (addr.isUndefined())
-			{
-				continue;
-			}
-			auto& f = p.second;
-
-			LOG << "\t\tdebug: " << f.getName() << " @ " << addr << std::endl;
-
-			// TODO: I have no idea if debug functions are also odd if THUMB.
-			if (isArmOrThumb())
-			{
-				m = addr % 2 || f.isThumb() ? CS_MODE_THUMB : CS_MODE_ARM;
-			}
-
-			_jumpTargets.push(_config, addr, JumpTarget::eType::DEBUG_FUNCTION, m, f.getName());
-		}
-	}
-
-	// TODO: Config selection.
-	// It will probably be the best to add start of selected ranges at the
-	// time of their selection into ranges to decode.
-	//
-	// TODO: Abundant-O0-g.ex, large chunks of code pointers, Delphi strings,
-	// and other data. Recognize somehow and remove from decoding.
-	//
-}
-
-void Decoder::doDecoding()
-{
-	LOG << "\n doDecoding()" << std::endl;
-
-// TODO: Added for ARM, it may screw up some other arch, so it is hacked to work
-// only on ARM. It is designed to give original names to jump targets with higher
-// priority, e.g. import fnc gets name "malloc", symbol gets name "_malloc".
-// Solve it better when all tests pass.
-std::set<std::string> seenNames;
-	std::map<Address, JumpTarget> orderedJts;
-	for (const JumpTarget& jt : _jumpTargets)
-	{
-		if (jt.createFunction())
-		{
-			auto fIt = orderedJts.find(jt.address);
-			if (fIt == orderedJts.end())
-			{
-if (_config->getConfig().architecture.isArmOrThumb())
-{
-	if (jt.hasName() && seenNames.count(jt.getName()))
-	{
-		jt.setName("_" + jt.getName(_config));
-	}
-	seenNames.insert(jt.getName(_config));
-}
-
-				orderedJts.emplace(jt.address, jt);
-			}
-			else if ((!fIt->second.hasName()
-					|| fIt->second.type == JumpTarget::eType::ENTRY_POINT)
-					&& jt.hasName())
-			{
-if (_config->getConfig().architecture.isArmOrThumb())
-{
-	if (jt.hasName() && seenNames.count(jt.getName()))
-	{
-		jt.setName("_" + jt.getName(_config));
-	}
-	seenNames.insert(jt.getName(_config));
-}
-
-				fIt->second.setName(jt.getName(_config));
-			}
-		}
-	}
-
-	Instruction* anyInsn = nullptr;
-	std::map<Address, std::pair<Function*, JumpTarget::eType>> functions;
-	std::map<Function*, std::string> fncNames;
-	std::set<Address> seen;
-	// todo: maybe create one more function @ 0x0, if empty at the end,
-	// remove it, else rename it to the lowest address.
-	for (auto& p : orderedJts)
-	{
-		auto& jt = p.second;
-
-		if (jt.createFunction())
-		{
-			if (seen.count(jt.address))
-			{
-				continue;
-			}
-
-			seen.insert(jt.address);
-
-			std::string realName = jt.getName(_config);
-
-			auto* f = llvm::Function::Create(
-					llvm::FunctionType::get(
-							llvm::Type::getInt32Ty(_module->getContext()),
-							false),
-					llvm::GlobalValue::ExternalLinkage,
-					realName,
-					_module);
-			llvm::BasicBlock::Create(_module->getContext(), "entry", f);
-			llvm::IRBuilder<> irb(&f->front());
-			anyInsn = irb.CreateRet(llvm::ConstantInt::get(f->getReturnType(), 0));
-
-			functions[jt.address] = std::make_pair(f, jt.type);
-
-			if (jt.hasName())
-			{
-				fncNames[f] = realName;
-			}
-		}
-	}
-	if (functions.count(0x0) == 0)
-	{
-		auto* f = llvm::Function::Create(
-				llvm::FunctionType::get(
-						llvm::Type::getInt32Ty(_module->getContext()),
-						false),
-				llvm::GlobalValue::ExternalLinkage,
-				"",
-				_module);
-		llvm::BasicBlock::Create(_module->getContext(), "entry", f);
-		llvm::IRBuilder<> irb(&f->front());
-		anyInsn = irb.CreateRet(llvm::ConstantInt::get(f->getReturnType(), 0));
-
-		functions[0x0] = std::make_pair(f, JumpTarget::eType::SECTION_START);
-	}
-	if (anyInsn == nullptr)
-	{
-		return;
-	}
-
-	llvm::IRBuilder<> irb(anyInsn);
-
-	Address lowest;
-	Address highest;
-
-	std::map<Address, std::pair<AsmInstruction, AsmInstruction>> instrMap;
-
-	while (!_jumpTargets.empty())
-	{
-		JumpTarget jt = _jumpTargets.top();
-		LOG << "\tprocessing : " << jt << std::endl;
-
-		// TODO: je to potrebne? processed range su odstranene z allowed/alternative.
-		if (_jumpTargets.wasAlreadyPoped(jt))
-		{
-			LOG << "\t\ttarget with the same address was already processed "
-					"-> skipped" << std::endl;
-			_jumpTargets.pop();
-			continue;
-		}
-		_jumpTargets.pop();
-
-		if (jt.from.isDefined() && _processedRanges.contains(jt.from))
-		{
-			LOG << "\t\ttarget was created from address that was decoded as "
-					"code -> skipped" << std::endl;
-			continue;
-		}
-
-		// It is not safe to use these pointers when static code is not decoded.
-		//
-		if (jt.type == JumpTarget::eType::CODE_POINTER_FROM_OTHER)
-		{
-			LOG << "\t\tcode pointers from other jump targets are skipped at "
-					"the moment -> skipped" << std::endl;
-			continue;
-		}
-
-		Address start = jt.address;
-		bool inAlternativeRanges = false;
-		auto* range = _allowedRanges.getRange(start);
-		if (range == nullptr
-				&& (jt.type == JumpTarget::eType::CONTROL_FLOW
-						|| jt.type == JumpTarget::eType::DELAY_SLOT
-						|| jt.type == JumpTarget::eType::ENTRY_POINT
-						|| jt.type == JumpTarget::eType::SELECTED_RANGE_START
-						|| jt.type == JumpTarget::eType::CONFIG_FUNCTION
-						|| jt.type == JumpTarget::eType::DEBUG_FUNCTION
-						|| jt.type == JumpTarget::eType::EXPORT_FUNCTION
-						|| jt.type == JumpTarget::eType::SYMBOL_FUNCTION
-						|| jt.type == JumpTarget::eType::SYMBOL_FUNCTION_PUBLIC))
-		{
-			range = _alternativeRanges.getRange(start);
-			inAlternativeRanges = true;
-			if (range)
-			{
-				LOG << "\t\tfound alternative range : " << *range << std::endl;
-			}
-		}
-		else if (range)
-		{
-			LOG << "\t\tfound allowed range : " << *range << std::endl;
-		}
-		if (range == nullptr)
-		{
-			LOG << "\t\tfound no range -> skipped " << std::endl;
-			continue;
-		}
-
-		Address nextFncStart;
-		Function* f = nullptr;
-		auto it = functions.upper_bound(start);
-		if (it == functions.begin())
-		{
-			assert(false && "create function at 0x0");
-		}
-		else if (it != functions.end())
-		{
-			nextFncStart = it->first;
-			--it;
-			f = it->second.first;
-		}
-		else
-		{
-			f = functions.rbegin()->second.first;
-		}
-		assert(f);
-
-		std::size_t size = decodingChunk;
-		if (start + size > range->getEnd())
-		{
-			size = range->getEnd() - start + 1;
-		}
-		if (nextFncStart.isDefined() && start + size >= nextFncStart)
-		{
-			size = nextFncStart - start;
-		}
-if (jt.type == JumpTarget::eType::DELAY_SLOT)
-{
-	size = 4;
-}
-
-		std::vector<std::uint8_t> code;
-		std::vector<std::uint64_t> tmp;
-		_image->getImage()->get1ByteArray(start, tmp, size);
-		std::copy(tmp.begin(), tmp.end(), std::back_inserter(code)); // TODO: no copy -> slow
-
-		LOG << "\t\tsize to decode : " << size << " vs. " << code.size() << std::endl;
-
-cs_mode modeAround = CS_MODE_BIG_ENDIAN;
-
-		auto fIt = instrMap.upper_bound(start);
-		if (fIt == instrMap.end())
-		{
-			irb.SetInsertPoint(&f->back().back());
-			LOG << "\t\tinserting after bb : " << f->back().getName().str() << std::endl;
-if (isArmOrThumb())
-{
-	if (auto backAi = AsmInstruction(&f->back().back()))
-	{
-		modeAround = backAi.isThumb() ? CS_MODE_THUMB : CS_MODE_ARM;
-		LOG << "===========> MODE AROUND #1 THUMB: " << backAi.isThumb() << std::endl;
-	}
-}
-		}
-		else
-		{
-			Instruction* insn = fIt->second.first.getLlvmToAsmInstruction();
-			if (insn->getFunction() == f)
-			{
-				irb.SetInsertPoint(insn);
-				LOG << "\t\tinserting before instr @ "
-						<< fIt->second.first.getAddress()
-						<< std::endl;
-if (isArmOrThumb())
-{
-	if (auto backAi = AsmInstruction(insn))
-	{
-		modeAround = backAi.isThumb() ? CS_MODE_THUMB : CS_MODE_ARM;
-		LOG << "===========> MODE AROUND #2 THUMB: " << backAi.isThumb() << std::endl;
-	}
-}
-			}
-			else
-			{
-				irb.SetInsertPoint(&f->back().back());
-				LOG << "\t\tinserting after bb : " << f->back().getName().str() << std::endl;
-if (isArmOrThumb())
-{
-	if (auto backAi = AsmInstruction(&f->back().back()))
-	{
-		modeAround = backAi.isThumb() ? CS_MODE_THUMB : CS_MODE_ARM;
-		LOG << "===========> MODE AROUND #3 THUMB: " << backAi.isThumb() << std::endl;
-	}
-}
-			}
-		}
-		LOG << "\t\tinserting in fnc   : " << f->getName().str() << std::endl;
-
-if (isArmOrThumb())
-{
-	if (jt.isUnknownMode())
-	{
-		cs_mode mm = modeAround != getUnknownMode() ? modeAround : CS_MODE_ARM;
-
-LOG << "===========> SWITCH MODE #1 " << _currentMode << " -> " << mm << std::endl;
-
-		// TODO: What here?
-		_c2l->modifyBasicMode(mm);
-		_currentMode = mm;
-	}
-	else if (jt.mode != _currentMode)
-	{
-LOG << "===========> SWITCH MODE #2 " << _currentMode << " -> " << jt.mode << std::endl;
-
-		_c2l->modifyBasicMode(jt.mode);
-		_currentMode = jt.mode;
-	}
-}
-
-		auto tRes = _c2l->translate(code, start, irb, true);
-		if (tRes.failed())
-		{
-			LOG << "\t\ttranslation failed" << std::endl;
-			continue;
-		}
-
-		// start + size = start of next, we want end of this, therefore -1.
-		AddressRange tRange(start, start + tRes.size - 1);
-		AsmInstruction first(tRes.first);
-		AsmInstruction last(tRes.last);
-		CallInst* termCall = tRes.branchCall;
-
-		LOG << "\t\ttranslated : " << tRange << std::endl;
-		LOG << "\t\tfirst      : " << first.getAddress() << std::endl;
-		LOG << "\t\tlast       : " << last.getAddress() << std::endl;
-		LOG << "\t\tbranch call: " << llvmObjToString(termCall) << std::endl;
-
-		_processedRanges.insert(tRange);
-		if (inAlternativeRanges)
-		{
-			_alternativeRanges.remove(tRange);
-			LOG << "\t\tremoved from alternative: " << tRange << std::endl;
-		}
-		else
-		{
-			_allowedRanges.remove(tRange);
-			LOG << "\t\tremoved from allowed    : " << tRange << std::endl;
-		}
-
-		instrMap[tRange.getStart()] = {first, last};
-
-		lowest = lowest.isUndefined() ? tRange.getStart() : std::min(lowest, tRange.getStart());
-		highest = highest.isUndefined() ? tRange.getEnd() : std::max(highest, tRange.getEnd());
-
-		// TODO: analyze decoded instructions for clues about other jump targets.
-		// Right now we analyze only push instruction, but there might be more.
-		//
-		if (_config->getConfig().architecture.isX86())
-		for (auto ai = first; ; ai = ai.getNext())
-		{
-			cs_insn* capstoneI = ai.getCapstoneInsn();
-			cs_x86* xi = &capstoneI->detail->x86;
-			Address imm;
-			if (capstoneI->id == X86_INS_PUSH
-					&& xi->op_count == 1
-					&& xi->operands[0].type == X86_OP_IMM)
-			{
-				imm = xi->operands[0].imm;
-			}
-			else if (capstoneI->id == X86_INS_MOV
-					&& xi->op_count == 2
-					&& xi->operands[1].type == X86_OP_IMM)
-			{
-				imm = xi->operands[1].imm;
-			}
-
-			if (looksLikeValidJumpTarget(imm))
-			{
-				_jumpTargets.push(
-						_config,
-						imm,
-						JumpTarget::eType::CODE_POINTER_FROM_DATA,
-						_currentMode);
-
-				LOG << "\t\tpush code pointer @ " << ai.getAddress()
-						<< " -> " << std::hex << imm
-						<< std::endl;
-			}
-
-			if (ai == last)
-			{
-				break;
-			}
-		}
-
-		if (_config->isMipsOrPic32())
-		for (auto next = first; next.isValid(); next = next.getNext())
-		{
-			cs_insn* nextC = next.getCapstoneInsn();
-			cs_mips* nextM = &nextC->detail->mips;
-
-			if (!(nextC->id == MIPS_INS_ADDIU
-					&& nextM->op_count == 3
-					&& nextM->operands[0].type == MIPS_OP_REG
-					&& nextM->operands[1].type == MIPS_OP_REG
-					&& nextM->operands[0].reg == nextM->operands[1].reg
-					&& nextM->operands[2].type == MIPS_OP_IMM))
-			{
-				continue;
-			}
-
-			GlobalVariable* loadedReg = _c2l->getRegister(nextM->operands[1].reg);
-			if (loadedReg == nullptr)
-			{
-				continue;
-			}
-
-			unsigned cntr = 4;
-			auto ai = next.getPrev();
-			while (ai.isValid())
-			{
-				if (ai.storesValue(loadedReg))
-				{
-					break;
-				}
-				ai = ai.getPrev();
-				--cntr;
-				if (cntr == 0)
-				{
-					ai = AsmInstruction();
-					break;
-				}
-			}
-			if (ai.isInvalid())
-			{
-				continue;
-			}
-
-			cs_insn* aiC = ai.getCapstoneInsn();
-			cs_mips* aiM = &aiC->detail->mips;
-
-			// lui $a0, 0x40
-			// ...
-			// addiu $a0, $a0, 0x7c4
-			//
-			if (aiC->id == MIPS_INS_LUI
-					&& aiM->op_count == 2
-					&& aiM->operands[0].type == MIPS_OP_REG
-					&& aiM->operands[1].type == MIPS_OP_IMM
-					&& nextM->operands[1].reg == aiM->operands[0].reg)
-			{
-				int64_t hi = aiM->operands[1].imm << 16;
-				int64_t lo = nextM->operands[2].imm;
-				Address target = hi | lo;
-
-				// TODO: there should be more checks that target is ok,
-				// probably looksLikeValidJumpTarget() for mips.
-				if (((_allowedRanges.contains(target) && target % 4 == 0)
-						|| (_alternativeRanges.contains(target) && target % 4 == 0))
-						&& looksLikeValidJumpTarget(target))
-				{
-					_jumpTargets.push(
-							_config,
-							target,
-							JumpTarget::eType::CONTROL_FLOW,
-							_currentMode);
-
-					LOG << "\t\tpush code pointer @ " << ai.getAddress()
-							<< " -> " << target << std::endl;
-				}
-			}
-
-			if (next == last)
-			{
-				break;
-			}
-		}
-
-		if (isArmOrThumb())
-		{
-			auto prevLast = last.getPrev();
-			if (prevLast)
-			{
-				for (auto& i : prevLast)
-				{
-					if (StoreInst* s = dyn_cast<StoreInst>(&i))
-					{
-						// Next insn address is stored to LR before jump
-						// -> add next to jump targets.
-						// TODO: Maybe we do not need branch to do this ->
-						// all values stored to LR could be jump targets?
-						//
-						if (_config->isRegister(s->getPointerOperand())
-								&& s->getPointerOperand()->getName() == "lr"
-								&& isa<ConstantInt>(s->getValueOperand())
-								&& cast<ConstantInt>(s->getValueOperand())->getZExtValue() == last.getAddress() + last.getByteSize() )
-						{
-							auto next = tRange.getEnd() + 1;
-							_jumpTargets.push(_config, next, JumpTarget::eType::CONTROL_FLOW, _currentMode);
-						}
-					}
-				}
-			}
-
-			for (auto ai = first; ; ai = ai.getNext())
-			{
-				cs_insn* aiC = ai.getCapstoneInsn();
-				cs_arm* aiM = &aiC->detail->arm;
-				Address imm;
-				if (aiC->id == ARM_INS_LDR
-						&& aiM->op_count == 2
-						&& aiM->operands[0].type == ARM_OP_REG
-						&& aiM->operands[0].reg >= ARM_REG_R0
-						&& aiM->operands[0].reg <= ARM_REG_R12
-						&& aiM->operands[1].type == ARM_OP_MEM
-						&& aiM->operands[1].shift.type == ARM_SFT_INVALID
-						&& aiM->operands[1].mem.base == ARM_REG_PC
-						&& aiM->operands[1].mem.index == ARM_REG_INVALID
-						&& aiM->operands[1].mem.lshift == 0
-						&& aiM->operands[1].mem.scale == 1)
-				{
-					unsigned pcOff = ai.isThumb() ? 4 : 8;
-					Address addr = ai.getAddress() + pcOff + aiM->operands[1].mem.disp;
-					if (auto* ci = _image->getConstantDefault(addr))
-					{
-						imm = ci->getZExtValue();
-					}
-				}
-
-				if (looksLikeValidJumpTarget(imm))
-				{
-					_jumpTargets.push(
-							_config,
-							imm,
-							JumpTarget::eType::CODE_POINTER_FROM_DATA,
-							_currentMode);
-
-					LOG << "\t\tpush code pointer @ " << ai.getAddress()
-							<< " -> " << std::hex << imm
-							<< std::endl;
-				}
-
-				if (ai == last)
-				{
-					break;
-				}
-			}
-		}
-
-		cs_insn* lastCs = last.getCapstoneInsn();
-
-		if (jt.type == JumpTarget::eType::DELAY_SLOT)
-		{
-			auto next = tRange.getEnd() + 1;
-			if (looksLikeValidJumpTarget(next))
-			{
-				_jumpTargets.push(
-						_config,
-						next,
-						JumpTarget::eType::CONTROL_FLOW,
-						_currentMode);
-
-				LOG << "\t\tpush code pointer after delay slot @ " << last.getAddress()
-						<< " -> " << std::hex << next
-						<< std::endl;
-			}
-		}
-		// Function call -> insert target (if computed) and next (call should
-		// return).
-		// TODO: do not insert next if called function is terminating.
-		//       e.g. _exit() call @ 08048737 in x86-elf-f6fecb4c80d6c46e3dce02b0d68fc69f
-		//       e.g. call sub_4019FC @ 004020AF in 87aa7cdd066541293ffd6761e07b3dad
-		//
-		else if (_c2l->isCallFunctionCall(tRes.branchCall))
-		{
-			auto target = getJumpTarget(tRes.branchCall->getArgOperand(0));
-			auto next = tRange.getEnd() + 1;
-			_jumpTargets.push(_config, target, JumpTarget::eType::CONTROL_FLOW, determineMode(last, target));
-			_jumpTargets.push(_config, next, JumpTarget::eType::CONTROL_FLOW, _currentMode);
-
-			LOG << "\t\tcall function call -> " << target << " (target)"
-					<< " -> " << next << " (next)" << std::endl;
-		}
-		// Return call -> insert target (if computed, probably will not be, but
-		// it does not matter, return targets are not that important).
-		// Next is not inserted, flow does not continue after return.
-		//
-		else if (_c2l->isReturnFunctionCall(tRes.branchCall))
-		{
-			auto target = getJumpTarget(tRes.branchCall->getArgOperand(0));
-
-			auto m = _currentMode;
-			if (isArmOrThumb())
-			{
-				m = getUnknownMode();
-			}
-
-			_jumpTargets.push(_config, target, JumpTarget::eType::CONTROL_FLOW, m);
-
-			LOG << "\t\treturn function call -> " << target << std::endl;
-
-			auto next = tRange.getEnd() + 1;
-if (_c2l->hasDelaySlot(lastCs->id))
-{
-	_jumpTargets.push(_config, next, JumpTarget::eType::DELAY_SLOT, _currentMode);
-}
-else if (tRes.inCondition)
-{
-	_jumpTargets.push(_config, next, JumpTarget::eType::CONTROL_FLOW, _currentMode);
-}
-			else if (looksLikeValidJumpTarget(next))
-			{
-				auto m = _currentMode;
-				if (isArmOrThumb())
-				{
-					m = getUnknownMode();
-				}
-
-				_jumpTargets.push(
-						_config,
-						next,
-						JumpTarget::eType::CODE_POINTER_FROM_DATA, m);
-
-				LOG << "\t\tpush code pointer after return @ " << last.getAddress()
-						<< " -> " << std::hex << next
-						<< std::endl;
-			}
-		}
-		// Unconditional branch call -> insert target (if computed).
-		// Next is not inserted, flow does not continue after unconditional
-		// branch.
-		//
-		else if (_c2l->isBranchFunctionCall(tRes.branchCall))
-		{
-			auto target = getJumpTarget(tRes.branchCall->getArgOperand(0));
-			_jumpTargets.push(_config, target, JumpTarget::eType::CONTROL_FLOW, determineMode(last, target));
-
-auto next = tRange.getEnd() + 1;
-if (_c2l->hasDelaySlot(lastCs->id))
-{
-	_jumpTargets.push(_config, next, JumpTarget::eType::DELAY_SLOT, _currentMode);
-}
-else if (tRes.inCondition)
-{
-	_jumpTargets.push(_config, next, JumpTarget::eType::CONTROL_FLOW, _currentMode);
-}
-else if ((_config->getConfig().architecture.isPpc() || isArmOrThumb())
-		&& looksLikeValidJumpTarget(next))
-{
-	auto m = _currentMode;
-	if (isArmOrThumb())
-	{
-		m = getUnknownMode();
-	}
-
-	_jumpTargets.push(
-			_config,
-			next,
-			JumpTarget::eType::CODE_POINTER_FROM_DATA, m);
-
-	LOG << "\t\tpush code pointer after return @ " << last.getAddress()
-			<< " -> " << std::hex << next
-			<< std::endl;
-}
-
-			LOG << "\t\tbranch function call -> " << target << std::endl;
-		}
-		// Conditional branch -> insert target (if computed) and next (flow
-		// may or may not jump/continue after).
-		//
-		else if (_c2l->isCondBranchFunctionCall(tRes.branchCall))
-		{
-			auto target = getJumpTarget(tRes.branchCall->getArgOperand(1));
-			auto next = tRange.getEnd() + 1;
-			_jumpTargets.push(_config, target, JumpTarget::eType::CONTROL_FLOW, determineMode(last, target));
-			_jumpTargets.push(_config, next, JumpTarget::eType::CONTROL_FLOW, _currentMode);
-
-			LOG << "\t\tcond function call -> " << target << " (target)"
-					<< " || " << next << " (next)" << std::endl;
-		}
-		// There is no control flow changing pseudofunction -> continue at the
-		// next instruction.
-		//
-		else if (tRes.branchCall == nullptr)
-		{
-			auto next = tRange.getEnd() + 1;
-			_jumpTargets.push(_config, next, JumpTarget::eType::CONTROL_FLOW, _currentMode);
-			LOG << "\t\tno control flow change -> " << next << " (next)"
-					<< std::endl;
-		}
-	}
-
-	LOG << "\nProcessed ranges:" << std::endl;
-	LOG << _processedRanges << std::endl;
-	LOG << "\nAllowed ranges:" << std::endl;
-	LOG << _allowedRanges << std::endl;
-	LOG << std::endl;
-	LOG << "\nAlternative ranges:" << std::endl;
-	LOG << _alternativeRanges << std::endl;
-
-	for (auto& p : functions)
-	{
-		Address a = p.first;
-		Function* f = p.second.first;
-		JumpTarget::eType t = p.second.second;
-
-		if (t == JumpTarget::eType::SECTION_START
-				&& f->user_empty()
-				&& &f->front().front() == &f->back().back())
-		{
-			f->eraseFromParent();
-			continue;
-		}
-
-		AsmInstruction firstAi(&f->front().front());
-		AsmInstruction lastAi(&f->back().back());
-
-//		Address start = firstAi.isValid() ? firstAi.getAddress() : a;
-		Address start = a;
-		if (t == JumpTarget::eType::CONTROL_FLOW
-				|| t == JumpTarget::eType::DELAY_SLOT
-				|| t == JumpTarget::eType::CODE_POINTER_FROM_DATA
-				|| t == JumpTarget::eType::CODE_POINTER_FROM_OTHER
-				|| t == JumpTarget::eType::SECTION_START)
-		{
-			start = firstAi.isValid() ? firstAi.getAddress() : a;
-		}
-
-		Address end = lastAi.isValid()
-				? Address(lastAi.getAddress() + lastAi.getByteSize() - 1) // TODO: getEndAddress() should do start + size - 1
-				: start;
-
-		if (f->getName().empty() || f->getName() == "entry_point") // TODO: entry point nicer
-		{
-			// This gets names even from non-function symbols that were not used
-			// as jump targets.
-			//
-			if (auto* sym = _image->getPreferredSymbol(start))
-			{
-				f->setName(sym->getName());
-				fncNames[f] = sym->getName();
-			}
-		}
-
-		if (f->getName().empty())
-		{
-			if (_config->getConfig().isIda())
-			{
-				f->setName(retdec::utils::appendHexRet("sub", start));
-			}
-			else
-			{
-				f->setName(retdec::utils::appendHexRet("function", start));
-			}
-		}
-
-		if (&f->front().front() == &f->back().back())
-		{
-			f->deleteBody();
-		}
-
-		// Probably from IDA. Maybe check if the end address (and other info?)
-		// is the same and update?
-		//
-		if (auto* cf = _config->getConfigFunction(start))
-		{
-			cf = _config->renameFunction(cf, f->getName());
-			cf->setEnd(end);
-
-			// If we have IDA functions, but nothing was selected, then we are
-			// doing full decompilation via IDA -> tag functions as static and
-			// remove their bodies.
-			if (!_config->getConfig().parameters.isSomethingSelected())
-			{
-				auto slIt = _staticCode.find(a);
-				if (slIt != _staticCode.end())
-				{
-					cf->setIsStaticallyLinked();
-				}
-			}
-
-			continue;
-		}
-
-		auto* cf = _config->insertFunction(f, start, end);
-		switch (t)
-		{
-			case JumpTarget::eType::DEBUG_FUNCTION:
-			{
-				cf->setIsFromDebug(true);
-				break;
-			}
-			case JumpTarget::eType::IMPORT_FUNCTION:
-			{
-				cf->setIsDynamicallyLinked();
-
-				// TODO: prev val 8, why is it here? is the limit important?
-				unsigned magic = isArmOrThumb() ? 16 : 8;
-				if (cf->getSize() <= magic)
-				{
-					// TODO: This is no good, at this moment, not all functions
-					// are detected -- they might split later -- so deleting
-					// thi body may delete some other function. It should solve
-					// by itselft when whole control flow is here.
-					f->deleteBody();
-				}
-				break;
-			}
-			default:
-			{
-				break;
-			}
-		}
-
-		auto slIt = _staticCode.find(a);
-		if (slIt != _staticCode.end())
-		{
-			cf->setIsStaticallyLinked();
-		}
-
-		auto dfIt = _debug->functions.find(a);
-		if (dfIt != _debug->functions.end())
-		{
-			auto& df = dfIt->second;
-			cf->setIsFromDebug(true);
-			cf->setStartLine(df.getStartLine());
-			cf->setEndLine(df.getEndLine());
-			cf->setSourceFileName(df.getSourceFileName());
-		}
-
-		auto nfIt = fncNames.find(f);
-		if (nfIt != fncNames.end() && f->getName() != nfIt->second)
-		{
-			cf->setRealName(nfIt->second);
-		}
-	}
-}
-
-// Operand is pointer to allowed ranges, but it does not have
-// to point to code. Right now, we check that there is
-// "push ebp" at the target location.
-// TODO: "push ebp" may not be unuque enough, maybe use
-// "push ebp ; mov ebp, esp"
-// TODO: functions may start with other instructions than
-// "push ebp", maybe try to decode the target, or add more
-// common patterns.
-// TODO: not only fnc addresses might get pushed, there might be
-// any other code at the pushed address. e.g.:
-// 5f = pop ebp
-// e9 ... || eb ... = jmp ...
-// we definitely need some better approach than enumerating
-// valid start bytes of some random instruction.
-// The problem is, that nearly anything can be decoded to valid
-// instruction on x86.
-//
-/**
- * TODO: the best thing here would probably be to get capstone engine from
- * translator and use it to decode some part from the address.
- * Then do some inteligent decision making if the decoded part is ok, or we
- * just decoded some data.
- * e.g.:
- *   - exclude strings/wide strings
- *   - address (or decoded range) should not be loaded or written (it can be
- *   pushed -- pointer to it)
- *   - it should end with some control flow transfer (ret, jmp, br, ...), not
- *     because some data could not be decoded.
- *     Maybe even hlt, exit(), etc, see 0x08056410 and 0x08056418 in 00A2 from
- *     bugs.761.Test
- *   - it should contain reasonable instructions (e.g. push/pop/mov,...), but
- *     it is hard to determine what is reasonable
- *   - maybe do full translation, analyze LLVM and remove it if not good instead
- *     of doing it on an assembly level?
- *   - many genuine code (function) pointer pushes are before calls - parameters
- *
- * TODO: take alignment (NOPS) into acount, not only true NOPS, but also pseudo
- * NOPs like 'mov eax, eax'.
- * e.g. fnc start 00401E5A vs 00401E5C in 87aa7cdd066541293ffd6761e07b3dad
- * from bugs.1046.Test.
- */
-bool Decoder::looksLikeValidJumpTarget(retdec::utils::Address addr)
-{
-	if (addr.isUndefined()
-			|| (!_allowedRanges.contains(addr) && !_alternativeRanges.contains(addr)))
-	{
-		return false;
-	}
-
-	if (!_config->isMipsOrPic32() && !_allowedRanges.contains(addr))
-	{
-		return false;
-	}
-
-	auto* chars = dyn_cast_or_null<ConstantDataSequential>(
-			_image->getConstantCharArrayNice(addr));
-	if (chars && chars->getNumElements() > 3)
-	{
-		return false;
-	}
-
-	std::vector<std::uint64_t> wchars;
-	unsigned wcharSize = _image->getFileFormat()->isElf() ? 4 : 2;
-	if (_image->getImage()->getNTWSNice(addr, wcharSize, wchars)
-			&& wchars.size() > 2)
-	{
-		return false;
-	}
-
-	uint64_t byte = 0;
-
-	if (_config->getConfig().architecture.isX86())
-	if (_image->getImage()->get1Byte(addr, byte)
-			&& (byte == 0x55 // push ebp
-					|| byte == 0x68 // push immX
-					|| byte == 0x56 // pop esi
-					|| byte == 0x53 // pop ebx
-					|| byte == 0x57 // pop edi
-					|| byte == 0x5d // pop ebp
-					|| byte == 0x8b // mov
-					|| byte == 0xb8 // mov
-					|| byte == 0x83 // sub
-					|| byte == 0xff // jmp
-					|| byte == 0xe9 // start of call
-					|| byte == 0xeb))  // start of call
-//					|| byte == 0x6a)) // 6a 00 == push 0
-	{
-		return true;
-	}
-
-	// TODO: Make it stricter, fist instruction should be something known:
-	// e.g. "addiu $sp. X", "lui $gp, X", "lui $a0, 0x43".
-	//
-	if (_config->isMipsOrPic32())
-	{
-		static const unsigned insnNum = 4;
-		std::vector<std::uint8_t> code;
-		std::vector<std::uint64_t> tmp;
-		_image->getImage()->get1ByteArray(addr, tmp, insnNum*4);
-		std::copy(tmp.begin(), tmp.end(), std::back_inserter(code)); // TODO: no copy -> slow
-		auto& engine = _c2l->getCapstoneEngine();
-		cs_insn* insn = nullptr;
-		const uint8_t* c = code.data();
-		size_t count = cs_disasm(engine, c, code.size(), addr, 0, &insn);
-		if (count > 0)
-		{
-			cs_free(insn, count);
-		}
-		if (count == insnNum) // all data were successfully disassembled into instructions.
-		{
-			return true;
-		}
-		else if (_c2l->getBasicMode() == CS_MODE_MIPS32)
-		{
-			insn = nullptr;
-			_c2l->modifyBasicMode(CS_MODE_MIPS64);
-			count = cs_disasm(engine, c, code.size(), addr, 0, &insn);
-			_c2l->modifyBasicMode(CS_MODE_MIPS32);
-			if (count > 0)
-			{
-				cs_free(insn, count);
-			}
-			if (count == insnNum) // all data were successfully disassembled into instructions.
-			{
+				auto* ui = new UnreachableInst(_module->getContext());
+				ReplaceInstWithInst(&*_irb->GetInsertPoint(), ui);
+				_irb->SetInsertPoint(ui);
 				return true;
 			}
 		}
 	}
-	// Make it stricter, fist instruction should be something known:
-	// e.g. "mflr r0", " stwu r1, X"
+	// Return -> break flow, do not try to compute target.
 	//
-	if (_config->getConfig().architecture.isPpc())
+	else if (_c2l->isReturnFunctionCall(pCall))
 	{
-		static const unsigned insnNum = 4;
-		std::vector<std::uint8_t> code;
-		std::vector<std::uint64_t> tmp;
-		_image->getImage()->get1ByteArray(addr, tmp, insnNum*4);
-		std::copy(tmp.begin(), tmp.end(), std::back_inserter(code)); // TODO: no copy -> slow
-		auto& engine = _c2l->getCapstoneEngine();
-		cs_insn* insn = nullptr;
-		const uint8_t* c = code.data();
-		size_t count = cs_disasm(engine, c, code.size(), addr, 0, &insn);
-		if (count > 0)
+		transformToReturn(pCall);
+		if (auto* cond = _c2l->isInConditionReturnFunctionCall(pCall))
 		{
-			cs_free(insn, count);
-		}
-		if (count == insnNum) // all data were successfully disassembled into instructions.
-		{
-			return true;
-		}
-	}
+			// Name the block and assign an address to it -> keep up with IDA.
+			auto* nextBb = cond->getSuccessor(1);
 
-	if (_config->getConfig().architecture.isArmOrThumb())
-	{
-		static const unsigned insnNum = 4;
-		std::vector<std::uint8_t> code;
-		std::vector<std::uint64_t> tmp;
-		_image->getImage()->get1ByteArray(addr, tmp, insnNum*4);
-		std::copy(tmp.begin(), tmp.end(), std::back_inserter(code)); // TODO: no copy -> slow
-		auto& engine = _c2l->getCapstoneEngine();
-		cs_insn* insn = nullptr;
-		const uint8_t* c = code.data();
-		size_t count = cs_disasm(engine, c, code.size(), addr, 0, &insn);
-		if (count > 0)
-		{
-			cs_free(insn, count);
-		}
-		if (count == insnNum) // all data were successfully disassembled into instructions.
-		{
-			return true;
-		}
-	}
-
-	return false;
-}
-
-bool Decoder::initTranslator()
-{
-	auto& a = _config->getConfig().architecture;
-
-	cs_arch arch = CS_ARCH_ALL;
-	cs_mode basicMode = CS_MODE_LITTLE_ENDIAN;
-	cs_mode extraMode = a.isEndianBig()
-			? CS_MODE_BIG_ENDIAN
-			: CS_MODE_LITTLE_ENDIAN;
-
-	if (a.isX86())
-	{
-		arch = CS_ARCH_X86;
-		basicMode = CS_MODE_32; // default
-
-		auto bitSz = _config->getConfig().architecture.getBitSize();
-		if (bitSz == 16)
-		{
-			basicMode = CS_MODE_16;
-		}
-		else if (bitSz == 32)
-		{
-			basicMode = CS_MODE_32;
-		}
-		else if (bitSz == 64)
-		{
-			basicMode = CS_MODE_64;
-		}
-	}
-	else if (_config->getConfig().architecture.isMipsOrPic32())
-	{
-		arch = CS_ARCH_MIPS;
-		basicMode = CS_MODE_MIPS32; // default
-
-		auto bitSz = _config->getConfig().architecture.getBitSize();
-		if (bitSz == 32)
-		{
-			basicMode = CS_MODE_MIPS32;
-		}
-		else if (bitSz == 64)
-		{
-			basicMode = CS_MODE_MIPS64;
-		}
-	}
-	else if (_config->getConfig().architecture.isPpc())
-	{
-		arch = CS_ARCH_PPC;
-		basicMode = CS_MODE_32; // default
-
-		auto bitSz = _config->getConfig().architecture.getBitSize();
-		if (bitSz == 32)
-		{
-			basicMode = CS_MODE_32;
-		}
-		else if (bitSz == 64)
-		{
-			basicMode = CS_MODE_64;
-		}
-	}
-	else if (_config->getConfig().architecture.isArmOrThumb()
-			&& _config->getConfig().architecture.getBitSize() == 32)
-	{
-		arch = CS_ARCH_ARM;
-		basicMode = CS_MODE_ARM;
-	}
-
-	_c2l = Capstone2LlvmIrTranslator::createArch(
-			arch,
-			_module,
-			basicMode,
-			extraMode);
-	_currentMode = basicMode;
-	return false;
-}
-
-/**
- * After decoding is done, we need to set some things to config, LLVM module,
- * etc. to initialize bin2llvmirl and decompiler environment so that they know
- * what is what.
- */
-void Decoder::initEnvironment()
-{
-	initEnvironmentAsm2LlvmMapping();
-	initEnvironmentPseudoFunctions();
-	initEnvironmentRegisters();
-}
-
-void Decoder::initEnvironmentAsm2LlvmMapping()
-{
-	auto* a2lGv = _c2l->getAsm2LlvmMapGlobalVariable();
-	a2lGv->setName(_asm2llvmGv);
-
-	_config->setLlvmToAsmGlobalVariable(a2lGv);
-
-	auto* nmd = _module->getOrInsertNamedMetadata(_asm2llvmMd);
-	auto* mdString = MDString::get(_module->getContext(), a2lGv->getName());
-	auto* mdn = MDNode::get(_module->getContext(), {mdString});
-	nmd->addOperand(mdn);
-}
-
-void Decoder::initEnvironmentPseudoFunctions()
-{
-	auto* cf = _c2l->getCallFunction();
-	cf->setName(_callFunction);
-	_config->setLlvmCallPseudoFunction(cf);
-
-	auto* rf = _c2l->getReturnFunction();
-	rf->setName(_returnFunction);
-	_config->setLlvmReturnPseudoFunction(rf);
-
-	auto* bf = _c2l->getBranchFunction();
-	bf->setName(_branchFunction);
-	_config->setLlvmBranchPseudoFunction(bf);
-
-	auto* cbf = _c2l->getCondBranchFunction();
-	cbf->setName(_condBranchFunction);
-	_config->setLlvmCondBranchPseudoFunction(cbf);
-
-	if (auto* c2lX86 = dynamic_cast<Capstone2LlvmIrTranslatorX86*>(_c2l.get()))
-	{
-		c2lX86->getX87DataLoadFunction()->setName("__frontend_reg_load.fpr");
-		c2lX86->getX87TagLoadFunction()->setName("__frontend_reg_load.fpu_tag");
-
-		c2lX86->getX87DataStoreFunction()->setName("__frontend_reg_store.fpr");
-		c2lX86->getX87TagStoreFunction()->setName("__frontend_reg_store.fpu_tag");
-	}
-}
-
-void Decoder::initEnvironmentRegisters()
-{
-	for (GlobalVariable& gv : _module->getGlobalList())
-	{
-		if (_c2l->isRegister(&gv))
-		{
-			// TODO: this is used in param ordering, and maybe other places.
-			// x86 was working without it, but it may not cause problems.
-			unsigned regNum = 0;
-			if (!_config->getConfig().architecture.isX86())
+			auto* nBb = getBasicBlockAtAddress(nextAddr);
+			auto* oldSucc = cond->getSuccessor(1);
+			if (nBb && oldSucc->getParent() == nBb->getParent())
 			{
-				regNum = _c2l->getCapstoneRegister(&gv);
+				oldSucc->replaceAllUsesWith(nBb);
+				oldSucc->eraseFromParent();
+			}
+			else
+			{
+				nextBb->setName(names::generateBasicBlockName(nextAddr));
+				addBasicBlock(nextAddr, nextBb);
 			}
 
-			auto s = retdec::config::Storage::inRegister(
-					gv.getName(),
-					regNum,
-					"");
-
-			retdec::config::Object cr(gv.getName(), s);
-			cr.type.setLlvmIr(llvmObjToString(gv.getValueType()));
-			cr.setRealName(gv.getName());
-			_config->getConfig().registers.insert(cr);
-		}
-	}
-}
-
-std::ostream& operator<<(std::ostream &out, const Decoder::JumpTarget& jt)
-{
-	std::string t;
-	switch (jt.type)
-	{
-		case Decoder::JumpTarget::eType::ENTRY_POINT:
-			t = "entry point";
-			break;
-		case Decoder::JumpTarget::eType::DELAY_SLOT:
-			t = "delay slot";
-			break;
-		case Decoder::JumpTarget::eType::CONTROL_FLOW:
-			t = "control flow";
-			break;
-		case Decoder::JumpTarget::eType::SELECTED_RANGE_START:
-			t = "selected range start";
-			break;
-		case Decoder::JumpTarget::eType::CONFIG_FUNCTION:
-			t = "config function";
-			break;
-		case Decoder::JumpTarget::eType::DEBUG_FUNCTION:
-			t = "debug function";
-			break;
-		case Decoder::JumpTarget::eType::SYMBOL_FUNCTION_PUBLIC:
-			t = "symbol function public";
-			break;
-		case Decoder::JumpTarget::eType::SYMBOL_FUNCTION:
-			t = "symbol function";
-			break;
-		case Decoder::JumpTarget::eType::DELPHI_FNC_TABLE_FUNCTION:
-			t = "delphi fnc table function";
-			break;
-		case Decoder::JumpTarget::eType::EXPORT_FUNCTION:
-			t = "export function";
-			break;
-		case Decoder::JumpTarget::eType::IMPORT_FUNCTION:
-			t = "import function";
-			break;
-		case Decoder::JumpTarget::eType::STATICALLY_LINKED_FUNCTION:
-			t = "statically linked function";
-			break;
-		case Decoder::JumpTarget::eType::CODE_POINTER_FROM_DATA:
-			t = "code pointer from data";
-			break;
-		case Decoder::JumpTarget::eType::CODE_POINTER_FROM_OTHER:
-			t = "code pointer from code";
-			break;
-		case Decoder::JumpTarget::eType::SECTION_START:
-			t = "section start";
-			break;
-		default:
-			assert(false && "unknown type");
-			t = "unknown";
-			break;
-	}
-
-	out << jt.address << " (" << t << ")";
-	if (jt.hasName())
-	{
-		out << ", name = " << jt.getName();
-	}
-	return out;
-}
-
-std::ostream& operator<<(std::ostream &out, const Decoder::JumpTargets& jts)
-{
-	for (auto& jt : jts._data)
-	{
-		out << jt << std::endl;
-	}
-	return out;
-}
-
-retdec::utils::Address Decoder::getJumpTarget(llvm::Value* val)
-{
-	if (auto* ci = dyn_cast<ConstantInt>(val))
-	{
-		return ci->getZExtValue();
-	}
-	return Address::getUndef;
-}
-
-bool Decoder::fixMainName() // TODO: modify right away, do not rename
-{
-	if (_config->getConfig().isIda())
-	{
-		return false;
-	}
-
-	IrModifier _irmodif(_module, _config);
-	if (_module->getFunction("main") == nullptr)
-	{
-		if (auto* m = _module->getFunction("_main"))
-		{
-			_irmodif.renameFunction(m, "main");
-			return true;
-		}
-		else if (auto* m = _module->getFunction("wmain"))
-		{
-			_irmodif.renameFunction(m, "main");
-			return true;
-		}
-	}
-	return false;
-}
-
-void Decoder::removeStaticallyLinkedFunctions()
-{
-	// TODO: These functions need to be kept until main detection pass.
-	// Main detection needs to run after control flow pass, because it needs
-	// pseudo call instructions transformed to call instructions.
-	// Merge control flow pass with decoding and move main detection right after it
-	// so that all statically linked functions may be removed as soon as possible.
-	//
-	std::set<std::string> protectedLinked = {
-			"__CrtSetReportHookW2",
-			"_CrtSetCheckCount",
-			"InterlockedExchange",
-			"___tmainCRTStartup",
-			"_WinMainCRTStartup",
-			"WinMainCRTStartup",
-	};
-	for (Function& f : _module->functions())
-	{
-		if (protectedLinked.count(f.getName()))
-		{
-			continue;
-		}
-
-		auto* cf = _config->getConfigFunction(&f);
-		if (cf && cf->isStaticallyLinked())
-		{
-			f.deleteBody();
-		}
-	}
-}
-
-void Decoder::hackDeleteKnownLinkedFunctions()
-{
-	for (Function& f : _module->getFunctionList())
-	{
-		std::string n = f.getName();
-		if (n == "printf" || n == "scanf" || n == "strlen" || n == "strcmp")
-		{
-			f.deleteBody();
-			auto* cff = _config->getConfigFunction(&f);
-			if (cff && !cff->isDynamicallyLinked())
-			{
-				cff->setIsStaticallyLinked();
-			}
-		}
-	}
-}
-
-std::string Decoder::getFunctionNameFromLibAndOrd(
-		const std::string& libName,
-		int ord)
-{
-	auto it = _dllOrds.find(libName);
-	if (it == _dllOrds.end())
-	{
-		if (!loadOrds(libName))
-		{
-			return std::string();
+			return false;
 		}
 		else
 		{
-			it = _dllOrds.find(libName);
+			return true;
+		}
+	}
+	// Unconditional branch -> insert target (if computed).
+	//
+	else if (_c2l->isBranchFunctionCall(pCall))
+	{
+		if (auto t = getJumpTarget(addr, pCall, pCall->getArgOperand(0)))
+		{
+			//.text:08001EE1    call    near ptr loc_8001EE1+1
+			//.text:08001EE6    cmp     ebx, esi
+			if (addr < t && t < nextAddr)
+			{
+				return false;
+			}
+			if (nextAddr <= t && t < nextAddr + rangeSize)
+			{
+				rangeSize = t - nextAddr;
+			}
+
+			auto m = determineMode(tr.capstoneInsn, t);
+
+			getOrCreateBranchTarget(t, tBb, tFnc, pCall);
+			if (tBb
+					&& tBb->getParent() == pCall->getFunction()
+					&& tBb->getPrevNode()) // can not be first in function
+			{
+				transformToBranch(pCall, tBb);
+			}
+			else if (tFnc)
+			{
+				transformToCall(pCall, tFnc);
+			}
+
+			// TODO: if target was from load of import addr, do not add it,
+			// add everywhere, make this somehow better.
+			if (_imports.count(t) == 0)
+			{
+				_jumpTargets.push(
+						t,
+						JumpTarget::eType::CONTROL_FLOW_BR_TRUE,
+						m,
+						addr);
+			}
+			LOG << "\t\t" << "br @ " << addr << " -> "	<< t << std::endl;
+		}
+
+		if (_switchGenerated)
+		{
+			return true;
+		}
+
+		if (auto* cond = _c2l->isInConditionBranchFunctionCall(pCall))
+		{
+			// Name the block and assign an address to it -> keep up with IDA.
+			auto nextAddr = addr + tr.size;
+			auto* nextBb = cond->getSuccessor(1);
+
+			auto* nBb = getBasicBlockAtAddress(nextAddr);
+			if (nBb && nBb->getParent() == cond->getFunction())
+			{
+				auto* oldSucc = cond->getSuccessor(1);
+				oldSucc->replaceAllUsesWith(nBb);
+				oldSucc->eraseFromParent();
+			}
+			else
+			{
+				nextBb->setName(names::generateBasicBlockName(nextAddr));
+				addBasicBlock(nextAddr, nextBb);
+			}
+
+			// Break the flow if BB in which pseudo call is continues to the
+			// false branch of cond br.
+			auto* bodyBb = pCall->getParent();
+			auto* tBr = dyn_cast<BranchInst>(bodyBb->getTerminator());
+			if (tBr
+					&& tBr->isUnconditional()
+					&& tBr->getSuccessor(0) == cond->getSuccessor(1))
+			{
+				ReturnInst::Create(
+						pCall->getModule()->getContext(),
+						UndefValue::get(pCall->getFunction()->getReturnType()),
+						tBr);
+				tBr->eraseFromParent();
+			}
+			return false;
+		}
+		else
+		{
+			return true;
+		}
+	}
+	// Conditional branch -> insert target (if computed), and next (flow
+	// may or may not jump/continue after).
+	//
+	else if (_c2l->isCondBranchFunctionCall(pCall))
+	{
+		auto nextAddr = addr + tr.size;
+		// Right now, delay slots are only in architectures with fixed
+		// instruction size (more specifically, only in MIPS).
+		// Therefore, we can multiply current instruction size with number of
+		// instructions in the delay slot to get its size.
+		// If this changes, we will have to modify this -> create nextAddr
+		// target only after delay slot instructions are decoded and we know
+		// their sizes.
+		//
+		nextAddr += _c2l->getDelaySlot(tr.capstoneInsn->id) * tr.size;
+
+		if (auto t = getJumpTarget(addr, pCall, pCall->getArgOperand(1)))
+		{
+			//.text:08001EE1    call    near ptr loc_8001EE1+1
+			//.text:08001EE6    cmp     ebx, esi
+			if (addr < t && t < nextAddr)
+			{
+				return false;
+			}
+
+			auto m = determineMode(tr.capstoneInsn, t);
+			getOrCreateBranchTarget(t, tBb, tFnc, pCall);
+
+			BasicBlock* tBbN = nullptr;
+			Function* tFncN = nullptr;
+			getOrCreateBranchTarget(nextAddr, tBbN, tFncN, pCall);
+
+			if (tBb && tBbN
+					&& tBb->getParent() == tBbN->getParent()
+					&& tBb->getParent() == pCall->getFunction()
+					&& tBb->getPrevNode()) // is not first in fnct, first -> call
+			{
+				transformToCondBranch(pCall, pCall->getOperand(0), tBb, tBbN);
+			}
+			else if (tFnc && tBbN
+					&& tBbN->getParent() == pCall->getFunction())
+			{
+				transformToCondCall(pCall, pCall->getOperand(0), tFnc, tBbN);
+			}
+			else if (tBb && tBbN
+					&& tBb->getParent() != pCall->getFunction()
+					&& tBbN->getParent() == pCall->getFunction())
+			{
+				// TODO: In the end, not now, transform to conditional jump out.
+				return false;
+			}
+			else
+			{
+				// TODO: deal with this
+				return false;
+			}
+
+			_jumpTargets.push(
+					t,
+					JumpTarget::eType::CONTROL_FLOW_BR_TRUE,
+					m,
+					addr);
+			LOG << "\t\t" << "cond br @ " << addr << " -> (true) "
+					<< t << std::endl;
+
+			// There is no need to break BB and its decoding if target was not
+			// found.
+			//
+			_jumpTargets.push(
+					nextAddr,
+					JumpTarget::eType::CONTROL_FLOW_BR_FALSE,
+					_c2l->getBasicMode(),
+					addr);
+			LOG << "\t\t" << "cond br @ " << addr << " -> (false) "
+					<< nextAddr << std::endl;
+
+			return true;
+		}
+	}
+	// Analyze ordinary (not control flow) instruction.
+	// TODO: maybe move to a separate function.
+	//
+	else
+	{
+		AsmInstruction ai(tr.llvmInsn);
+		for (auto& i : ai)
+		{
+			// Skip ranges from which there are loads.
+			// Mostly for ARM where there are data references after functions
+			// in .text section.
+			// We do not use Symbolic tree here, since control flow is not fully
+			// reconstructed - matching only constants is safe and should be
+			// enough for most cases.
+			//
+			if (auto* l = dyn_cast<LoadInst>(&i))
+			{
+				SymbolicTree st(_RDA, l->getPointerOperand(), nullptr, 8);
+				st.simplifyNode();
+
+				if (auto* ci = dyn_cast<ConstantInt>(st.value))
+				{
+					Address t(ci->getZExtValue());
+					auto sz = _abi->getTypeByteSize(l->getType());
+					AddressRange r(t, t+sz);
+					_ranges.remove(r);
+
+					// Trim currently decoding range size if needed.
+					auto nextAddr = addr + tr.size;
+					if (nextAddr < t && t < nextAddr + rangeSize)
+					{
+						rangeSize = t - nextAddr;
+					}
+
+					LOG << "\t\t\t\t" << "skip " << r << std::endl;
+				}
+			}
 		}
 	}
 
-	const OrdMap& ords = it->second;
-	auto ordIt = ords.find(ord);
-	if (ordIt != ords.end())
+	if (_switchGenerated)
 	{
-		return ordIt->second;
+		return true;
 	}
 
-	return std::string();
+	return false;
 }
 
-bool Decoder::loadOrds(const std::string& libName)
+utils::Address Decoder::getJumpTarget(
+		utils::Address addr,
+		llvm::CallInst* branchCall,
+		llvm::Value* val)
 {
-	std::string dir = _config->getConfig().parameters.getOrdinalNumbersDirectory();
-	std::string filePath = dir + "/" + libName + ".ord";
+	SymbolicTree st(_RDA, val, nullptr, 20);
 
-	std::ifstream inputFile;
-	inputFile.open(filePath);
-	if (!inputFile)
+	// TODO: better implementation.
+	// PIC code.
+	// User code is calling stub in .plt.
+	// Stub in .plt is computing jmp address (address of import).
+	// 4-form_grabber-b794ce9e.so.elf, .plt:00001BE0 ___ctype_toupper_loc:
+	//   %u1_1be0 = load i32, i32* @ebx
+	//   %u2_1be0 = add i32 %u1_1be0, %u0_1be0
+	//   %u3_1be0 = load i32, i32* %u2_1be0
+	//   call void @__pseudo_br(i32 %u3_1be0)
+	// We do not know the value in @ebx. This should be .got.plt section
+	// start -> fix value in symbolic tree before simplification.
+	//
+	auto* plt = _image->getFileFormat()->getSectionFromAddress(addr);
+	if (plt && plt->getName() == ".plt")
+	{
+		// TODO: do not find this all over again every time.
+		auto* gotplt = _image->getFileFormat()->getSection(".got.plt");
+		if (gotplt)
+		{
+			auto gotpltAddr = gotplt->getAddress();
+			for (auto* n : st.getPostOrder())
+			{
+				if (_config->isGeneralPurposeRegister(n->value))
+				{
+					n->value = ConstantInt::get(
+							_abi->getDefaultType(),
+							gotpltAddr);
+				}
+			}
+		}
+	}
+
+	st.simplifyNode();
+
+	if (auto* ci = dyn_cast<ConstantInt>(st.value))
+	{
+		return ci->getZExtValue();
+	}
+
+	// If there is load, at first try imports.
+	if (isa<LoadInst>(st.value)
+			&& st.ops.size() == 1
+			&& isa<ConstantInt>(st.ops[0].value))
+	{
+		auto* ci = dyn_cast<ConstantInt>(st.ops[0].value);
+		Address t = ci->getZExtValue();
+		if (_imports.count(t))
+		{
+			return t;
+		}
+	}
+	// TODO: Some nicer, more general solution?
+	// ARM:
+	// printf:
+	//     116FC 00 C0 9F E5    LDR R12, =__imp_printf
+	//     11700 00 F0 9C E5    LDR PC, [R12]
+	// tree:
+	//>|   %3 = load i32, i32* %2
+	//		>|   %0 = load i32, i32* inttoptr (i32 71428 to i32*)
+	//				>| i32 71428
+	//
+	// solveMemoryLoads() and simplifyNode() combo will solve both loads
+	// -> we can not check for imports.
+	//
+	if (isa<LoadInst>(st.value)
+			&& st.ops.size() == 1
+			&& isa<LoadInst>(st.ops[0].value)
+			&& st.ops[0].ops.size() == 1
+			&& isa<ConstantInt>(st.ops[0].ops[0].value))
+	{
+		auto* ptr = dyn_cast<ConstantInt>(st.ops[0].ops[0].value);
+		if (auto* ci = _image->getConstantDefault(ptr->getZExtValue()))
+		{
+			Address t = ci->getZExtValue();
+			if (_imports.count(t))
+			{
+				return t;
+			}
+		}
+	}
+
+	// Try to recognize switch pattern.
+	// getJumpTargetSwitch() doesn't return target to the caller, it takes care
+	// of everything - pseudo to switch transform, jump target creation, ...
+	// We just need to return from this function if it succeeds.
+	//
+	if (getJumpTargetSwitch(addr, branchCall, val, st))
+	{
+		return Address::getUndef;
+	}
+
+	// TOOD: ugly hack - recognize MIPS import stub functions.
+	// We compute more than we should here -> solve load and jump to _PROCEDURE_LINKAGE_TABLE_.
+	// IDA will either change the loaded word to point to synthetic import section,
+	// or marks it as ?? ?? ?? ?? so it can not be used. We read _PROCEDURE_LINKAGE_TABLE_ address.
+	// Can we use relocations, or something to mark these pointer not to be used.
+	// Problem, this is also used in ihex, where there is even less info.
+	//
+	if (_config->getConfig().architecture.isMipsOrPic32())
+	{
+		AsmInstruction ai1(_module, addr);
+		AsmInstruction ai2 = ai1.getPrev();
+		AsmInstruction ai3 = ai2.getPrev();
+		AsmInstruction ai4 = ai3.getPrev();
+		if (ai4.isInvalid()
+				&& ai1.isValid() && ai1.getDsm() == "jr $t9"
+				&& ai2.isValid() && ai2.getCapstoneInsn()->id == MIPS_INS_LW
+				&& ai3.isValid() && ai3.getCapstoneInsn()->id == MIPS_INS_LUI)
+		{
+			return Address::getUndef;
+		}
+	}
+
+	// If there are loads, try to solve them.
+	st.solveMemoryLoads(_image);
+	st.simplifyNode();
+
+// TODO: doing this will solve more, also it will screw up integration.ack.Test_2015_ThumbGccElf
+	if (getJumpTargetSwitch(addr, branchCall, val, st))
+	{
+		return Address::getUndef;
+	}
+
+	if (auto* ci = dyn_cast<ConstantInt>(st.value))
+	{
+		return ci->getZExtValue();
+	}
+
+	return Address::getUndef;
+}
+
+/**
+ * \return \c True if switch recognized, \c false otherwise.
+ */
+bool Decoder::getJumpTargetSwitch(
+		utils::Address addr,
+		llvm::CallInst* branchCall,
+		llvm::Value* val,
+		SymbolicTree& st)
+{
+	unsigned archByteSz =  _config->getConfig().architecture.getByteSize();
+
+	// Pattern:
+	//>|   %55 = load i32, i32* %54
+	//		>|   %53 = add i32 Addr, %52
+	//				>|   %52 = mul i32 %51, 4
+	//						>| idx
+	//						>| i32 4
+	//				>| i32 tableAddr
+	if (!(isa<LoadInst>(st.value) // load
+			&& st.ops.size() == 1
+			&& isa<AddOperator>(st.ops[0].value) // add
+			&& st.ops[0].ops.size() == 2
+			&& (isa<MulOperator>(st.ops[0].ops[0].value) // mul
+					|| isa<ShlOperator>(st.ops[0].ops[0].value)) // shl
+			&& st.ops[0].ops[0].ops.size() == 2
+			&& isa<ConstantInt>(st.ops[0].ops[0].ops[1].value)
+			&& isa<ConstantInt>(st.ops[0].ops[1].value))) // table address
 	{
 		return false;
 	}
 
-	std::string line;
-	OrdMap ordMap;
-	while (!getline(inputFile, line).eof())
+	bool usesMul = isa<MulOperator>(st.ops[0].ops[0].value);
+	bool usesShl = isa<ShlOperator>(st.ops[0].ops[0].value);
+	auto* mulShlCi = cast<ConstantInt>(st.ops[0].ops[0].ops[1].value);
+	if (!((usesMul && mulShlCi->getZExtValue() == archByteSz)
+			|| (usesShl
+					&& static_cast<uint64_t>(1 << mulShlCi->getZExtValue()) == archByteSz)))
 	{
-		std::stringstream ordDecl(line);
+		return false;
+	}
 
-		int ord = -1;
-		std::string funcName;
-		ordDecl >> ord >> funcName;
-		if (ord >= 0)
+	Address tableAddr = cast<ConstantInt>(st.ops[0].ops[1].value)->getZExtValue();
+	Value* idx = cast<Instruction>(st.ops[0].ops[0].value)->getOperand(0);
+
+	LOG << "\t\t" << "switch @ " << addr << std::endl;
+	LOG << "\t\t\t" << "table addr @ " << tableAddr << std::endl;
+
+	// Default target.
+	//
+	Address defAddr;
+	BranchInst* brToSwitch = nullptr; // TODO: i don't like how this is used
+	Value* brToSwitchCondVal = nullptr;
+	auto* thisBb = branchCall->getParent();
+
+	Address thisBbAddr = getBasicBlockAddress(thisBb);
+	for (auto* p : predecessors(thisBb))
+	{
+		auto* br = dyn_cast<BranchInst>(p->getTerminator());
+		if (br && br->isConditional())
 		{
-			ordMap[ord] = funcName;
+			brToSwitch = br;
+
+			Address falseAddr = getBasicBlockAddress(br->getSuccessor(1));
+			Address trueAddr = getBasicBlockAddress(br->getSuccessor(0));
+
+			// Branching over this BB -> true branching to default case.
+			if (falseAddr.isDefined() && thisBbAddr == falseAddr)
+			{
+				defAddr = trueAddr;
+				brToSwitchCondVal = ConstantInt::getFalse(_module->getContext());
+				LOG << "\t\t\t\t" << "default: branching over -> "
+						<< defAddr << std::endl;
+			}
+			// Branching to this BB -> false branching to default case.
+			else if (trueAddr.isDefined() && thisBbAddr == trueAddr)
+			{
+				defAddr = falseAddr;
+				brToSwitchCondVal = ConstantInt::getTrue(_module->getContext());
+				LOG << "\t\t\t\t" << "default: branching to -> "
+						<< defAddr << std::endl;
+			}
+
+			break;
 		}
 	}
-	inputFile.close();
-	_dllOrds.emplace(libName, ordMap);
+
+	// ARM:
+	// 90C0 03 F1 9F 97    LDRLS PC, [PC,R3,LSL#2] ; switch jump
+	// 90C4 18 01 00 EA    B     loc_952C ; jumptable 000090C0 default cas
+	//
+	// Pseudo call itself is conditional -> next is default.
+	//
+	BranchInst* armCondBr = nullptr;
+	auto* cond = _c2l->isInConditionBranchFunctionCall(branchCall);
+	if (cond && thisBb == cond->getSuccessor(0))
+	{
+		// TODO: use known current insn size, not AsmInstruction() -> slow.
+		brToSwitch = nullptr;
+		defAddr = addr + AsmInstruction(branchCall).getByteSize();
+		armCondBr = cond;
+	}
+
+	// TODO:
+	// ARM:
+	// 8AB8 00 D8    BHI def_8D4A ; jumptable 00008D4A default case
+	// 8ABA 43 E1    B   loc_8D44
+	// ...
+	// 8D44 loc_8D44:
+	//               switch
+	//
+	if (defAddr.isUndefined()
+			|| (armCondBr == nullptr
+					&& (brToSwitch == nullptr || brToSwitchCondVal == nullptr)))
+	{
+		LOG << "\t\t\t" << "no default target -> skip" << std::endl;
+		// TODO: detected labels still should become jump targets.
+		// problem, we don't know the jump target type -> they can be functions,
+		// not just branch targets.
+		// e.g. 04023A3 @ call ds:___CTOR_LIST__[ebx*4]
+		return false;
+	}
+	else
+	{
+		LOG << "\t\t\t" << "default label @ " << defAddr << std::endl;
+	}
+
+	// Jump table size.
+	// maybe we could check that compared value is indeed index value.
+	//
+	unsigned tableSize = 0;
+if (brToSwitch)
+{
+	SymbolicTree stCond(_RDA, brToSwitch->getCondition());
+	stCond.simplifyNode();
+
+	auto levelOrd = stCond.getLevelOrder();
+	for (SymbolicTree* n : levelOrd)
+	{
+		// x86:
+		//>|   %331 = or i1 %329, %330
+		//		>|   %317 = icmp ult i8 %312, 90
+		//				>|   %296 = sub i32 %295, 32
+		//				>| i8 90
+		//		>|   %322 = icmp eq i8 %313, 0
+		//				>|   %313 = sub i8 %312, 90
+		//						>|   %312 = trunc i32 %311 to i8
+		//						>| i8 90
+		//				>| i8 0
+		if (isa<BinaryOperator>(n->value)
+				&& cast<BinaryOperator>(n->value)->getOpcode()
+						== Instruction::Or
+				&& n->ops.size() == 2
+				&& isa<ICmpInst>(n->ops[0].value)
+				&& cast<ICmpInst>(n->ops[0].value)->getPredicate()
+						== ICmpInst::ICMP_ULT
+				&& n->ops[0].ops.size() == 2
+				&& isa<ConstantInt>(n->ops[0].ops[1].value)
+				&& isa<ICmpInst>(n->ops[1].value)
+				&& cast<ICmpInst>(n->ops[1].value)->getPredicate()
+						== ICmpInst::ICMP_EQ
+				&& n->ops[1].ops.size() == 2
+				&& isa<ConstantInt>(n->ops[1].ops[1].value)
+				&& cast<ConstantInt>(n->ops[1].ops[1].value)->isZero())
+		{
+			auto* ci = cast<ConstantInt>(n->ops[0].ops[1].value);
+			tableSize = ci->getZExtValue() + 1;
+			LOG << "\t\t\t" << "table size (1) = " << tableSize << std::endl;
+			break;
+		}
+		// mips (???):
+		//>|   %319 = icmp ne i32 %318, 0
+		//		>|   %316 = icmp ult i32 %315, 121
+		//				>|   %314 = and i32 %313, 255
+		//				>| i32 121
+		//		>| i32 0
+		else if (isa<ICmpInst>(n->value)
+				&& cast<ICmpInst>(n->value)->getPredicate()
+						== ICmpInst::ICMP_NE
+				&& isa<ICmpInst>(n->ops[0].value)
+				&& cast<ICmpInst>(n->ops[0].value)->getPredicate()
+						== ICmpInst::ICMP_ULT
+				&& isa<ConstantInt>(n->ops[0].ops[1].value)
+				&& !cast<ConstantInt>(n->ops[0].ops[1].value)->isZero()
+				&& isa<ConstantInt>(n->ops[1].value)
+				&& cast<ConstantInt>(n->ops[1].value)->isZero())
+		{
+			auto* ci = cast<ConstantInt>(n->ops[0].ops[1].value);
+			tableSize = ci->getZExtValue();
+			LOG << "\t\t\t" << "table size (2) = " << tableSize << std::endl;
+			break;
+		}
+		// TODO: apply this only if it si branching over?
+		// TODO: apply prev (very similar to this) only if branching to?
+		// mips (branching over):
+		//>|   %33 = icmp ne i32 %32, 0
+		//		>|   %22 = icmp ult i32 %20, %21
+		//				>| i32 8
+		//				>|   %19 = add i32 %18, -20
+		//		>| i32 0
+		else if (isa<ICmpInst>(n->value)
+				&& cast<ICmpInst>(n->value)->getPredicate()
+						== ICmpInst::ICMP_NE
+				&& isa<ICmpInst>(n->ops[0].value)
+				&& cast<ICmpInst>(n->ops[0].value)->getPredicate()
+						== ICmpInst::ICMP_ULT
+				&& isa<ConstantInt>(n->ops[0].ops[0].value)
+				&& !cast<ConstantInt>(n->ops[0].ops[0].value)->isZero()
+				&& isa<ConstantInt>(n->ops[1].value)
+				&& cast<ConstantInt>(n->ops[1].value)->isZero())
+		{
+			auto* ci = cast<ConstantInt>(n->ops[0].ops[0].value);
+			tableSize = ci->getZExtValue();
+			LOG << "\t\t\t" << "table size (2.5) = " << tableSize << std::endl;
+			break;
+		}
+		// mips:
+		//>|   %524 = icmp eq i32 %523, 0
+		//		>|   %449 = icmp ult i32 %448, 5
+		//				>| i32 3
+		//				>| i32 5
+		//		>| i32 0
+		else if (isa<ICmpInst>(n->value)
+				&& cast<ICmpInst>(n->value)->getPredicate()
+						== ICmpInst::ICMP_EQ
+				&& isa<ICmpInst>(n->ops[0].value)
+				&& cast<ICmpInst>(n->ops[0].value)->getPredicate()
+						== ICmpInst::ICMP_ULT
+				&& isa<ConstantInt>(n->ops[0].ops[1].value)
+				&& !cast<ConstantInt>(n->ops[0].ops[1].value)->isZero()
+				&& isa<ConstantInt>(n->ops[1].value)
+				&& cast<ConstantInt>(n->ops[1].value)->isZero())
+		{
+			auto* ci = cast<ConstantInt>(n->ops[0].ops[1].value);
+			tableSize = ci->getZExtValue();
+			LOG << "\t\t\t" << "table size (3) = " << tableSize << std::endl;
+			break;
+		}
+	}
+}
+
+	// integration.current.switch.TestEXE (switch-test-msvc-O0.ex)
+	// Two jump tables.
+	//
+	std::vector<unsigned> idxs;
+	unsigned maxIdx = 0;
+	SymbolicTree idxRoot(_RDA, idx);
+	idxRoot.simplifyNode();
+	if (_config->getConfig().architecture.isX86()
+			&& tableSize
+			&& isa<LoadInst>(idxRoot.value)
+			&& cast<LoadInst>(idxRoot.value)->getType()->isIntegerTy()
+			&& idxRoot.ops.size() == 1
+			&& isa<AddOperator>(idxRoot.ops[0].value)
+			&& idxRoot.ops[0].ops.size() == 2
+			&& isa<Instruction>(idxRoot.ops[0].ops[0].value)
+			&& cast<Instruction>(idxRoot.ops[0].ops[0].value)->getType()->isIntegerTy()
+			&& isa<ConstantInt>(idxRoot.ops[0].ops[1].value))
+	{
+		auto* l = cast<LoadInst>(idxRoot.value);
+		auto* it = cast<IntegerType>(l->getType());
+		auto* ci = cast<ConstantInt>(idxRoot.ops[0].ops[1].value);
+		retdec::utils::Address tableAddr2(ci->getZExtValue());
+
+		LOG << "\t\t\t" << "second table addr @ " << tableAddr2 << std::endl;
+
+		// Switch index must not be the table offset.
+		// We have to use the original index.
+		idx = cast<Instruction>(idxRoot.ops[0].ops[0].value);
+
+		while (true)
+		{
+			auto* ci = _image->getConstantInt(it, tableAddr2);
+			if (ci == nullptr)
+			{
+				break;
+			}
+			// A safer condition to end this would be to track constant
+			// (second table size) used in comparison in instruction
+			// before the cond jmp instruction.
+			unsigned idx = ci->getZExtValue();
+			if (tableSize > 0 && idxs.size() == tableSize)
+			{
+				break;
+			}
+
+			LOG << "\t\t\t\t" << idx << std::endl;
+
+			maxIdx = idx > maxIdx ? idx : maxIdx;
+			idxs.push_back(idx);
+			tableAddr2 += _abi->getTypeByteSize(ci->getType());
+		}
+	}
+
+	// Get targets from jump table.
+	//
+	LOG << "\t\t\t" << "table labels:" << std::endl;
+	std::vector<Address> cases;
+	Address tableItemAddr = tableAddr;
+	Address nextTableAddr;
+	auto swTblIt = _switchTableStarts.upper_bound(tableAddr);
+	if (swTblIt != _switchTableStarts.end())
+	{
+		nextTableAddr = swTblIt->first;
+	}
+	while (true)
+	{
+		auto* ci = _image->getImage()->isPointer(tableItemAddr)
+				? _image->getConstantDefault(tableItemAddr)
+				: nullptr;
+		if (ci == nullptr)
+		{
+			break;
+		}
+
+		Address item = ci->getZExtValue();
+		LOG << "\t\t\t\t" << item << " @ " << tableItemAddr << std::endl;
+
+		tableItemAddr += archByteSz;
+		cases.push_back(item);
+
+		if (tableSize > 0 && cases.size() == tableSize)
+		{
+			break;
+		}
+		// idx from zero, there can be one more item than max idx number.
+		if (maxIdx > 0 && cases.size() > maxIdx)
+		{
+			break;
+		}
+		if (nextTableAddr.isUndefined() && tableItemAddr >= nextTableAddr)
+		{
+			break;
+		}
+	}
+	if (cases.empty())
+	{
+		LOG << "\t\t\t" << "no targets @ " << tableAddr << " -> skip"
+				<< std::endl;
+		return false;
+	}
+	Address tableAddrEnd = tableItemAddr;
+
+	// Put together two tables.
+	//
+	if (!idxs.empty())
+	{
+		std::vector<Address> tmp = std::move(cases);
+		cases.clear();
+
+		for (auto& i : idxs)
+		{
+			if (tmp.size() > i)
+			{
+				cases.push_back(tmp[i]);
+			}
+		}
+	}
+
+	//
+	//
+	std::vector<BasicBlock*> casesBbs;
+	for (auto c : cases)
+	{
+		BasicBlock* tBb = nullptr;
+		Function* tFnc = nullptr;
+		// TODO: do not split functions here.
+		// if case in another function, do not use it - it may belong to another
+		// switch table.
+		getOrCreateBranchTarget(c, tBb, tFnc, branchCall);
+		if (tBb && tBb->getParent() == branchCall->getFunction())
+		{
+			casesBbs.push_back(tBb);
+		}
+		else
+		{
+			return false;
+		}
+	}
+
+	Function* tFnc = nullptr;
+	BasicBlock* defBb = nullptr;
+	// TODO: do not split functions here
+	getOrCreateBranchTarget(defAddr, defBb, tFnc, branchCall);
+	if (defBb == nullptr
+			|| defBb->getParent() != branchCall->getFunction())
+	{
+		assert(false);
+		return false;
+	}
+
+	auto* sw = transformToSwitch(branchCall, idx, defBb, casesBbs);
+
+	// TODO: create only for those that were transformed to BBs.
+	for (auto c : cases)
+	{
+		_jumpTargets.push(
+				c,
+				JumpTarget::eType::CONTROL_FLOW_SWITCH_CASE,
+				_c2l->getBasicMode(), // mode should not change here
+				addr);
+		LOG << "\t\t" << "switch -> (case) " << c << std::endl;
+	}
+
+	_jumpTargets.push(
+			defAddr,
+			JumpTarget::eType::CONTROL_FLOW_SWITCH_CASE,
+			_c2l->getBasicMode(), // mode should bot change here
+			addr);
+	LOG << "\t\t" << "switch -> (default) " << defAddr << std::endl;
+
+	_ranges.remove(tableAddr, tableAddrEnd);
+
+	_switchTableStarts[tableAddr].insert(sw);
+	_switchGenerated = true;
+
+	if (brToSwitch && brToSwitchCondVal)
+	{
+		brToSwitch->setCondition(brToSwitchCondVal);
+	}
+
+	if (armCondBr)
+	{
+		BranchInst::Create(armCondBr->getSuccessor(0), armCondBr);
+		auto* rmSucc = armCondBr->getSuccessor(1);
+		armCondBr->eraseFromParent();
+		rmSucc->eraseFromParent();
+	}
 
 	return true;
 }
 
-void Decoder::findDelphiFunctionTable()
+/**
+ * ; ASM branch insn
+ * ; ASM delay slot insn
+ *
+ * ==>
+ *
+ * ; ASM branch insn
+ *     LLVM IR body without branch
+ * ; ASM delay slot insn
+ *     LLVM IR body
+ *     branch from prev insn
+ */
+void Decoder::handleDelaySlotTypical(
+		utils::Address& addr,
+		capstone2llvmir::Capstone2LlvmIrTranslator::TranslationResultOne& res,
+		ByteData& bytes,
+		llvm::IRBuilder<>& irb)
 {
-	Address ep = _config->getConfig().getEntryPoint();
-	if (ep.isUndefined())
-	{
-		return;
-	}
-	if (!_config->getConfig().tools.isDelphi()
-			|| !_config->getConfig().architecture.isX86())
+	if (!_c2l->hasDelaySlotTypical(res.capstoneInsn->id))
 	{
 		return;
 	}
 
-	const csh& engine = _c2l->getCapstoneEngine();
+	assert(res.branchCall);
+	assert(_c2l->getDelaySlot(res.capstoneInsn->id));
+	assert(_c2l->getDelaySlot(res.capstoneInsn->id) == 1);
 
-	std::vector<std::uint8_t> code;
-	std::vector<std::uint64_t> tmp;
-	_image->getImage()->get1ByteArray(ep, tmp, 0x20);
-	std::copy(tmp.begin(), tmp.end(), std::back_inserter(code));  // TODO: no copy -> slow
+	auto* oldIp = res.branchCall->getParent()->getTerminator();
 
-	size_t size = code.size();
-	const uint8_t* bytes = code.data();
-	uint64_t address = ep;
-	cs_insn* insn = cs_malloc(engine);
-	unsigned cntr = 0;
-
-	bool reached = false;
-	while (cs_disasm_iter(engine, &bytes, &size, &address, insn))
+	irb.SetInsertPoint(res.branchCall);
+	std::size_t sz = _c2l->getDelaySlot(res.capstoneInsn->id);
+	for (std::size_t i = 0; i < sz; ++i)
 	{
-		if (++cntr == 4)
-		{
-			reached = true;
-			break;
-		}
-	}
-	if (!reached)
-	{
-		return;
-	}
-
-	if (insn == nullptr || insn->detail == nullptr)
-	{
-		return;
-	}
-
-	retdec::utils::Address tableAddr;
-	cs_x86& d = insn->detail->x86;
-	if (insn->id == X86_INS_MOV
-			&& d.op_count == 2
-			&& d.operands[0].type == X86_OP_REG
-			&& (d.operands[0].reg == X86_REG_EAX
-					|| d.operands[0].reg == X86_REG_RAX)
-			&& d.operands[1].type == X86_OP_IMM)
-	{
-		tableAddr = d.operands[1].imm;
-	}
-
-	if (tableAddr.isUndefined())
-	{
-		return;
-	}
-
-	cs_free(insn, 1);
-
-	retdec::utils::Address tableAddrEnd = tableAddr;
-
-	LOG << "Delphi function table @ " << tableAddr << std::endl;
-
-	auto* tableSeg = _image->getImage()->getSegmentFromAddress(tableAddr);
-	auto currentAddr = tableAddr;
-	ConstantInt* currentCi = nullptr;
-	std::size_t entrySize = 0;
-	while ((currentCi = _image->getConstantDefault(currentAddr)))
-	{
-		retdec::utils::Address currentVal = currentCi->getZExtValue();
-
-		if (currentVal.isUndefined()
-				|| currentVal == 0
-				|| _image->getImage()->getSegmentFromAddress(currentAddr) != tableSeg)
+		auto r = translate(bytes, addr, irb);
+		if (r.failed() || r.llvmInsn == nullptr)
 		{
 			break;
 		}
-		tableAddrEnd = currentAddr;
-
-		LOG << "\t" << currentAddr << " -> " << currentVal << std::endl;
-		_jumpTargets.push(_config, currentVal, JumpTarget::eType::DELPHI_FNC_TABLE_FUNCTION, _currentMode);
-
-		entrySize = currentCi->getBitWidth() / 8;
-		currentAddr += entrySize;
+		_llvm2capstone->emplace(r.llvmInsn, r.capstoneInsn);
 	}
 
-	if (tableAddrEnd > tableAddr)
-	{
-		tableAddrEnd += entrySize - 1;
-		AddressRange r(tableAddr, tableAddrEnd);
-		_allowedRanges.remove(r);
-		_alternativeRanges.remove(r);
-	}
-
-	LOG << "====> END @ " << tableAddrEnd << std::endl;
+	irb.SetInsertPoint(oldIp);
 }
 
-void Decoder::fixMipsDelaySlots()
+/**
+ *     br cond, target_true, target_false
+ *     delay_slot_likely_insn
+ *
+ * ==>
+ *
+ *     br cond, ds_likely_bb, target_false
+ *  ds_likely_bb:
+ *     delay_slot_likely_insn
+ *     br target_true
+ *  target_false:
+ *     ...
+ */
+void Decoder::handleDelaySlotLikely(
+		utils::Address& addr,
+		capstone2llvmir::Capstone2LlvmIrTranslator::TranslationResultOne& res,
+		ByteData& bytes,
+		llvm::IRBuilder<>& irb)
 {
-	if (!_config->isMipsOrPic32())
+	if (!_c2l->hasDelaySlotLikely(res.capstoneInsn->id))
 	{
 		return;
 	}
 
-	for (Function& F : _module->getFunctionList())
-	for (auto ai = AsmInstruction(&F); ai.isValid(); ai = ai.getNext())
+	assert(res.branchCall);
+	assert(_c2l->getDelaySlot(res.capstoneInsn->id));
+	assert(_c2l->getDelaySlot(res.capstoneInsn->id) == 1);
+
+	assert(isa<BranchInst>(res.branchCall->getNextNode()));
+	assert(cast<BranchInst>(res.branchCall->getNextNode())->isConditional());
+
+	// TODO: This assumes that the pseudo cond branch was solved and cond
+	// branch created, but we should handle likely ds even if it was not.
+	//
+	auto* br = cast<BranchInst>(res.branchCall->getNextNode());
+	if (br && br->isConditional())
 	{
-		cs_insn* ci = ai.getCapstoneInsn();
-		std::size_t ds = _c2l->getDelaySlot(ci->id);
+		auto* nextBb = br->getParent()->getNextNode();
+		auto* newBb = BasicBlock::Create(
+				_module->getContext(),
+				"",
+				br->getFunction(),
+				nextBb);
 
-		if (ds) // && _c2l->hasDelaySlotTypical(ci->id)) // TODO
+		auto* target = br->getSuccessor(0);
+		br->setSuccessor(0, newBb);
+		auto* newTerm = BranchInst::Create(target, newBb);
+		irb.SetInsertPoint(newTerm);
+
+		std::size_t sz = _c2l->getDelaySlot(res.capstoneInsn->id);
+		for (std::size_t i = 0; i < sz; ++i)
 		{
-			auto next = ai.getNext();
-			if (next.isInvalid())
+			auto res = translate(bytes, addr, irb);
+			if (res.failed() || res.llvmInsn == nullptr)
 			{
-				continue;
+				break;
 			}
-			if (_c2l->hasDelaySlot(next.getCapstoneInsn()->id))
+			_llvm2capstone->emplace(res.llvmInsn, res.capstoneInsn);
+		}
+
+		_likelyBb2Target.emplace(newBb, target);
+	}
+}
+
+void Decoder::resolvePseudoCalls()
+{
+	// TODO: fix point algorithm that tries to re-solve all solved and unsolved
+	// pseudo calls?
+	// - the same result -> ok, nothing
+	// - no result -> revert transformation
+	// - new result -> new transformation
+	// This will not be easy. Can fixpoint even be reached? Reverts, etc. are
+	// hard and ugly.
+
+	for (Function& f : *_module)
+	for (BasicBlock& b : f)
+	for (auto i = b.begin(), e = b.end(); i != e;)
+	{
+		CallInst* pseudo = dyn_cast<CallInst>(&*i);
+		++i;
+		if (pseudo == nullptr)
+		{
+			continue;
+		}
+		if (!_c2l->isCallFunctionCall(pseudo)
+				&& !_c2l->isReturnFunctionCall(pseudo)
+				&& !_c2l->isBranchFunctionCall(pseudo)
+				&& !_c2l->isCondBranchFunctionCall(pseudo))
+		{
+			continue;
+		}
+
+		Instruction* real = pseudo->getNextNode();
+		if (real == nullptr)
+		{
+			continue;
+		}
+		++i;
+
+		// TODO: fix calls, maybe we could create the calls for the first time
+		// here.
+		//
+		if (_c2l->isCallFunctionCall(pseudo)
+				&& isa<CallInst>(real))
+		{
+			Address t = getJumpTarget(
+					AsmInstruction::getInstructionAddress(real),
+					pseudo,
+					pseudo->getArgOperand(0));
+
+			if (t.isUndefined())
 			{
-				ai = next;
-				continue;
+				++i;
+				auto* st = cast<StoreInst>(*real->user_begin());
+				st->eraseFromParent();
+				real->eraseFromParent();
 			}
+		}
+	}
+}
 
-			// TODO: This is not perfect. There could be more BBs in AIs, but
-			// not branches?
-			// Thre could be more pseudo branches in the first AI.
-			//
-			auto* brAi = ai.getInstructionFirst<BranchInst>();
-			auto* brNext = next.getInstructionFirst<BranchInst>();
-			if (brNext == nullptr)
+void Decoder::finalizePseudoCalls()
+{
+	for (auto& f : *_module)
+	for (auto& b : f)
+	for (auto i = b.begin(), e = b.end(); i != e;)
+	{
+		CallInst* pseudo = dyn_cast<CallInst>(&*i);
+		++i;
+		if (pseudo == nullptr)
+		{
+			continue;
+		}
+		if (!_c2l->isCallFunctionCall(pseudo)
+				&& !_c2l->isReturnFunctionCall(pseudo)
+				&& !_c2l->isBranchFunctionCall(pseudo)
+				&& !_c2l->isCondBranchFunctionCall(pseudo))
+		{
+			continue;
+		}
+
+		Instruction* it = pseudo->getPrevNode();
+		pseudo->eraseFromParent();
+
+		bool mipsFirstAsmInstr = true;
+		while (it)
+		{
+			if (AsmInstruction::isLlvmToAsmInstruction(it))
 			{
-				bool done = false;
-				for (auto rit = ai.rbegin(); rit != ai.rend(); ++rit)
+				if (_config->getConfig().architecture.isMipsOrPic32()
+						&& mipsFirstAsmInstr)
 				{
-					Instruction& ri = *rit;
-					if (_config->isLlvmAnyBranchPseudoFunctionCall(&ri))
-					{
-						auto* first = &ri;
-						auto is = next.getInstructions();
-						auto* term = next.getBasicBlock()->getTerminator();
-						for (Instruction* i : is)
-						{
-							if (i != term)
-							{
-								i->moveBefore(first);
-							}
-						}
-
-						done = true;
-						break;
-					}
-				}
-				if (done)
-				{
-					continue;
-				}
-
-				auto* first = ai.front();
-				if (first == nullptr)
-				{
-					first = next.getLlvmToAsmInstruction();
-				}
-				auto is = next.getInstructions();
-				auto* term = next.getBasicBlock()->getTerminator();
-				for (Instruction* i : is)
-				{
-					if (i != term)
-					{
-						i->moveBefore(first);
-					}
-				}
-			}
-			else if (brAi == nullptr)
-			{
-				Instruction* first = nullptr;
-				if (auto next2 = next.getNext())
-				{
-					first = next2.getLlvmToAsmInstruction();
+					mipsFirstAsmInstr = false;
 				}
 				else
 				{
-					first = next.back();
-				}
-
-				bool done = false;
-				for (auto rit = ai.rbegin(); rit != ai.rend(); ++rit)
-				{
-					Instruction& ri = *rit;
-					if (_config->isLlvmAnyBranchPseudoFunctionCall(&ri))
-					{
-						ri.moveBefore(first);
-
-						done = true;
-						break;
-					}
-				}
-				if (done)
-				{
-					continue;
-				}
-
-				auto is = ai.getInstructions();
-				auto* term = ai.getBasicBlock()->getTerminator();
-				for (Instruction* i : is)
-				{
-					if (i != term)
-					{
-						i->moveBefore(first);
-					}
+					break;
 				}
 			}
-			else
+
+			auto* i = it;
+			it = it->getPrevNode();
+
+			// Return address store to stack in x86 calls.
+			//
+			if (_config->getConfig().architecture.isX86()
+					&& (_c2l->isCallFunctionCall(pseudo)
+							|| _c2l->isReturnFunctionCall(pseudo)))
+			if (auto* st = dyn_cast<StoreInst>(i))
 			{
-				// TODO: we can not move instructions with branches -> BBs.
+				if (_config->isStackPointerRegister(st->getPointerOperand())
+						|| isa<ConstantInt>(st->getValueOperand()))
+				{
+					st->eraseFromParent();
+				}
+			}
+
+			// Return address store to register in MIPS calls.
+			//
+			if (_config->getConfig().architecture.isMipsOrPic32()
+					&& _c2l->isCallFunctionCall(pseudo))
+			if (auto* st = dyn_cast<StoreInst>(i))
+			{
+				if (_c2l->isRegister(st->getPointerOperand())
+						&& st->getPointerOperand()->getName() == "ra")
+				{
+					st->eraseFromParent();
+				}
+			}
+
+			// Return address store to register in MIPS calls.
+			// TODO: what about other possible LR stores? e.g. see
+			// patternsPseudoCall_arm().
+			//
+			if (_config->getConfig().architecture.isArmOrThumb()
+					&& _c2l->isCallFunctionCall(pseudo))
+			if (auto* st = dyn_cast<StoreInst>(i))
+			{
+				if (_c2l->isRegister(st->getPointerOperand())
+						&& st->getPointerOperand()->getName() == "lr")
+				{
+					st->eraseFromParent();
+				}
+			}
+
+			// TOOD: again, other possible stores && r32 stores.
+			//
+			if (_config->getConfig().architecture.isPpc()
+					&& _c2l->isCallFunctionCall(pseudo))
+			if (auto* st = dyn_cast<StoreInst>(i))
+			{
+				if (_c2l->isRegister(st->getPointerOperand())
+						&& st->getPointerOperand()->getName() == "lr")
+				{
+					st->eraseFromParent();
+				}
+			}
+
+			if (!i->getType()->isVoidTy() && i->use_empty())
+			{
+				i->eraseFromParent();
 			}
 		}
-		else if (ds && _c2l->hasDelaySlotLikely(ci->id))
-		{
-//			std::cout << "likely DS  @ " << ai.getAddress() << "  <====================" << std::endl;
-			// TODO: move to
-		}
-		else if (ds)
-		{
-			assert(false && "unhandled delay slot type");
-		}
 	}
-}
-
-bool Decoder::isArmOrThumb() const
-{
-	return _config->getConfig().architecture.isArmOrThumb();
-}
-
-cs_mode Decoder::getUnknownMode() const
-{
-	return CS_MODE_BIG_ENDIAN;
-}
-
-cs_mode Decoder::determineMode(AsmInstruction ai, retdec::utils::Address target) const
-{
-	if (target.isUndefined())
-	{
-		return _currentMode; // whatever, this can not be used anyway.
-	}
-	if (!isArmOrThumb())
-	{
-		return _currentMode;
-	}
-
-	auto* cs = ai.getCapstoneInsn();
-
-	// Mode is not switched.
-	//
-	if (cs->id != ARM_INS_BX && cs->id != ARM_INS_BLX)
-	{
-		return _currentMode;
-	}
-
-	auto m = target % 2 ? CS_MODE_THUMB : CS_MODE_ARM;
-
-	return m;
 }
 
 } // namespace bin2llvmir

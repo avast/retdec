@@ -1,14 +1,11 @@
 /**
  * @file include/retdec/capstone2llvmir/powerpc/powerpc_defs.h
- * @brief Definitions for PowerPC implementation of @c Capstone2LlvmIrTranslator.
+ * @brief Additional (on top of Capstone) definitions for PowerPC translator.
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */
 
 #ifndef RETDEC_CAPSTONE2LLVMIR_POWERPC_POWERPC_DEFS_H
 #define RETDEC_CAPSTONE2LLVMIR_POWERPC_POWERPC_DEFS_H
-
-namespace retdec {
-namespace capstone2llvmir {
 
 enum ppc_reg_cr_flags
 {
@@ -64,8 +61,5 @@ enum ppc_cr_types
 	PPC_CR_EQ,
 	PPC_CR_SO,
 };
-
-} // namespace capstone2llvmir
-} // namespace retdec
 
 #endif

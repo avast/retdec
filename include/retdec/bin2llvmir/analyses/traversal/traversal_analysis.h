@@ -9,8 +9,6 @@
 
 #include <llvm/IR/Value.h>
 
-#include "retdec/bin2llvmir/utils/defs.h"
-
 namespace retdec {
 namespace bin2llvmir {
 

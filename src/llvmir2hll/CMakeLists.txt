@@ -32,7 +32,6 @@ set(LLVMIR2HLL_SOURCES
 	graphs/cfg/cfg_traversals/no_var_def_cfg_traversal.cpp
 	graphs/cfg/cfg_traversals/nodes_of_var_use_cfg_traversal.cpp
 	graphs/cfg/cfg_traversals/optim_func_info_cfg_traversal.cpp
-	graphs/cfg/cfg_traversals/unneeded_global_vars_cfg_traversal.cpp
 	graphs/cfg/cfg_traversals/var_def_cfg_traversal.cpp
 	graphs/cfg/cfg_traversals/var_use_cfg_traversal.cpp
 	graphs/cfg/cfg_writer.cpp
@@ -169,13 +168,11 @@ set(LLVMIR2HLL_SOURCES
 	optimizer/optimizers/c_cast_optimizer.cpp
 	optimizer/optimizers/copy_propagation_optimizer.cpp
 	optimizer/optimizers/dead_code_optimizer.cpp
-	optimizer/optimizers/dead_global_assign_optimizer.cpp
 	optimizer/optimizers/dead_local_assign_optimizer.cpp
 	optimizer/optimizers/deref_address_optimizer.cpp
 	optimizer/optimizers/deref_to_array_index_optimizer.cpp
 	optimizer/optimizers/empty_array_to_string_optimizer.cpp
 	optimizer/optimizers/empty_stmt_optimizer.cpp
-	optimizer/optimizers/global_to_local_optimizer.cpp
 	optimizer/optimizers/if_before_loop_optimizer.cpp
 	optimizer/optimizers/if_structure_optimizer.cpp
 	optimizer/optimizers/if_to_switch_optimizer.cpp
@@ -199,7 +196,6 @@ set(LLVMIR2HLL_SOURCES
 	optimizer/optimizers/simplify_arithm_expr/three_operands_sub_optimizer.cpp
 	optimizer/optimizers/simplify_arithm_expr/zero_sub_optimizer.cpp
 	optimizer/optimizers/simplify_arithm_expr_optimizer.cpp
-	optimizer/optimizers/unreachable_code_optimizer.cpp
 	optimizer/optimizers/unused_global_var_optimizer.cpp
 	optimizer/optimizers/var_def_for_loop_optimizer.cpp
 	optimizer/optimizers/var_def_stmt_optimizer.cpp
@@ -285,7 +281,6 @@ set(LLVMIR2HLL_SOURCES
 	support/struct_types_sorter.cpp
 	support/types.cpp
 	support/unreachable_code_in_cfg_remover.cpp
-	support/unreachable_funcs_remover.cpp
 	support/valid_state.cpp
 	support/value_text_repr_visitor.cpp
 	support/variable_replacer.cpp

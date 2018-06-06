@@ -11,7 +11,7 @@
 #include <llvm/IR/Module.h>
 
 #include "retdec/bin2llvmir/analyses/uses_analysis.h"
-#include "retdec/bin2llvmir/utils/defs.h"
+#include "retdec/bin2llvmir/utils/debug.h"
 
 using namespace ::testing;
 using namespace llvm;
@@ -87,7 +87,7 @@ GetUseInfoLeftUseTest) {
 	// Creating input of test is in constructor of this test class.
 	StoreInst *storeInst(new StoreInst(ConstantInt::get(
 		Type::getInt32Ty(context), 1, true), glob, bbInFunc1));
-	GlobVarSet globs{glob};
+	std::set<llvm::GlobalVariable*> globs{glob};
 	usesAnalysis.doUsesAnalysis(globs);
 
 	const UsesAnalysis::UseInfo *info(usesAnalysis.getUseInfo(*bbInFunc1,
@@ -113,7 +113,7 @@ GetUseInfoRightUseTest) {
 
 	// Creating input of test is in constructor of this test class.
 	LoadInst *loadInst(new LoadInst(glob, "x", bbInFunc1));
-	GlobVarSet globs{glob};
+	std::set<llvm::GlobalVariable*> globs{glob};
 	usesAnalysis.doUsesAnalysis(globs);
 
 	const UsesAnalysis::UseInfo *info(usesAnalysis.getUseInfo(*bbInFunc1,
@@ -176,7 +176,7 @@ hasValueUsesExceptTest) {
 
 	// Creating the main part of test is in constructor of this test class.
 	new LoadInst(glob, "x", bbInFunc1);
-	InstSet exceptSet{new LoadInst(glob, "x", bbInFunc1)};
+	std::set<llvm::Instruction*> exceptSet{new LoadInst(glob, "x", bbInFunc1)};
 
 	EXPECT_TRUE(UsesAnalysis::hasValueUsesExcept(*glob, exceptSet)) <<
 		"expected that global variable has some another uses except that"
@@ -195,7 +195,7 @@ hasNotValueUsesExceptTest) {
 	//
 
 	// Creating the main part of test is in constructor of this test class.
-	InstSet exceptSet{new LoadInst(glob, "x", bbInFunc1)};
+	std::set<llvm::Instruction*> exceptSet{new LoadInst(glob, "x", bbInFunc1)};
 
 	EXPECT_FALSE(UsesAnalysis::hasValueUsesExcept(*glob, exceptSet)) <<
 		"expected that global variable has only uses that are in given set. \n";

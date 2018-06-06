@@ -160,10 +160,10 @@ std::string Config::generateJsonString() const
 	if (!getUnpackedInputFile().empty()) root[JSON_unpackedInputFile] = getUnpackedInputFile();
 	if (!getPdbInputFile().empty()) root[JSON_pdbInputFile] = getPdbInputFile();
 	if (!getFrontendVersion().empty()) root[JSON_frontendVersion] = getFrontendVersion();
-	if (getEntryPoint().isDefined()) root[JSON_entryPoint] = getEntryPoint().getValue();
-	if (getMainAddress().isDefined()) root[JSON_mainAddress] = getMainAddress().getValue();
-	if (getSectionVMA().isDefined()) root[JSON_sectionVMA] = getSectionVMA().getValue();
-	if (getImageBase().isDefined()) root[JSON_imageBase] = getImageBase().getValue();
+	if (getEntryPoint().isDefined()) root[JSON_entryPoint] = toJsonValue(getEntryPoint());
+	if (getMainAddress().isDefined()) root[JSON_mainAddress] = toJsonValue(getMainAddress());
+	if (getSectionVMA().isDefined()) root[JSON_sectionVMA] = toJsonValue(getSectionVMA());
+	if (getImageBase().isDefined()) root[JSON_imageBase] = toJsonValue(getImageBase());
 
 	root[JSON_parameters]     = parameters.getJsonValue();
 	root[JSON_architecture]   = architecture.getJsonValue();
