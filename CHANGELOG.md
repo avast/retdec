@@ -68,6 +68,7 @@
 * Fix: Import-table hashes for Mach-O binaries are now always generated even if commands for library loading are not ordered ([#285](https://github.com/avast-tl/retdec/issues/287)).
 * Fix: OpenSSL can now be built on ARM architectures (Linux and Windows) and other non-recognized architectures (Linux only) ([#299](https://github.com/avast-tl/retdec/issues/299)).
 * Fix: Decompilation in raw mode (`--mode raw`) no longer removes the original input file when cleanup option is used (`--cleanup`) ([#309](https://github.com/avast-tl/retdec/issues/309)).
+* Fix: Retdec can now be cross-compiled ([yaracpp #2](https://github.com/avast-tl/yaracpp/pull/2)).
 
 # v3.0 (2017-12-13)
 
