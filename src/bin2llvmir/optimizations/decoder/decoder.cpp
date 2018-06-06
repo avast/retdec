@@ -367,7 +367,7 @@ Decoder::translate(ByteData& bytes, utils::Address& addr, llvm::IRBuilder<>& irb
  */
 std::size_t Decoder::decodeJumpTargetDryRun(
 		const JumpTarget& jt,
-		std::pair<const std::uint8_t*, std::uint64_t> bytes,
+		ByteData bytes,
 		bool strict)
 {
 	// Architecture-specific dry runs.
@@ -438,7 +438,7 @@ bool Decoder::instructionBreaksBasicBlock(
 bool Decoder::getJumpTargetsFromInstruction(
 		utils::Address addr,
 		capstone2llvmir::Capstone2LlvmIrTranslator::TranslationResultOne& tr,
-		uint64_t& rangeSize)
+		std::size_t& rangeSize)
 {
 	CallInst*& pCall = tr.branchCall;
 	auto nextAddr = addr + tr.size;
