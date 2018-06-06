@@ -68,7 +68,7 @@ TemplatePair getTemplatePair(
  * @return private empty rule with architecture information only
  */
 std::unique_ptr<Rule> createArchitectureRule(
-	const std::unique_ptr<yaramod::Rule> &rule)
+	const yaramod::Rule* rule)
 {
 	YaraRuleBuilder builder;
 	builder.withName("architecture");

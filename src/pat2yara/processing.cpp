@@ -171,7 +171,7 @@ void processFiles(
 		if (firstFile) {
 			auto &originalRules = yaraFile->getRules();
 			if (!originalRules.empty()) {
-				fileBuilder.withRule(createArchitectureRule(originalRules[0]));
+				fileBuilder.withRule(createArchitectureRule(originalRules[0].get()));
 				firstFile = false;
 			}
 		}
