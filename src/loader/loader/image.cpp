@@ -308,7 +308,7 @@ const Segment* Image::getEpSegment()
  *
  * @return Raw data pointer and size.
  */
-std::pair<const std::uint8_t*, std::uint64_t> Image::getRawSegmentData(std::uint64_t address) const
+std::pair<const std::uint8_t*, std::size_t> Image::getRawSegmentData(std::uint64_t address) const
 {
 	auto segment = getSegmentFromAddress(address);
 	if (!segment)
