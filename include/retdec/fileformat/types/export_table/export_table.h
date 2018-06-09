@@ -21,10 +21,10 @@ class ExportTable
 {
 	private:
 		using exportsIterator = std::vector<Export>::const_iterator;
-		std::vector<Export> exports;				///< stored exports
-		std::string expHashCrc32;					///< exphash CRC32
-		std::string expHashMd5;						///< exphash MD5
-		std::string expHashSha256;					///< exphash SHA256
+		std::vector<Export> exports;                ///< stored exports
+		std::string expHashCrc32;                   ///< exphash CRC32
+		std::string expHashMd5;                     ///< exphash MD5
+		std::string expHashSha256;                  ///< exphash SHA256
 	public:
 		ExportTable();
 		~ExportTable();
