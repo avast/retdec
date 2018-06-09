@@ -697,7 +697,6 @@ void MachOFormat::loadDylibCommand(const llvm::object::MachOObjectFile::LoadComm
  */
 void MachOFormat::symtabCommand()
 {
-	auto *symbolTable = new SymbolTable();
 	auto command = file->getSymtabLoadCommand();
 	const char *strPtr = fileBuffer.get()->getBufferStart() + command.stroff + chosenArchOffset;
 	const char *endPtr = chosenArchSize ? fileBuffer.get()->getBufferStart() + chosenArchOffset + chosenArchSize : fileBuffer.get()->getBufferEnd();
@@ -706,6 +705,7 @@ void MachOFormat::symtabCommand()
 		return;
 	}
 
+	auto *symbolTable = new SymbolTable();
 	llvm::StringRef strTable = llvm::StringRef(strPtr, endPtr - strPtr);
 	const char *ptr = fileBuffer.get()->getBufferStart() + command.symoff + chosenArchOffset;
 
