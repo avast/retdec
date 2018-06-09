@@ -117,7 +117,7 @@ bool VtableItem::operator<(const VtableItem& o) const
  */
 bool VtableItem::operator==(const VtableItem& o) const
 {
-	return getAddress() == getAddress();
+	return getAddress() == o.getAddress();
 }
 
 //
@@ -201,7 +201,7 @@ bool Vtable::operator<(const Vtable& o) const
  */
 bool Vtable::operator==(const Vtable& o) const
 {
-	return getAddress() == getAddress();
+	return getAddress() == o.getAddress();
 }
 
 //
