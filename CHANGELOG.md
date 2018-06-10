@@ -2,6 +2,8 @@
 
 # dev
 
+* Fix: Fixed a memory leak when parsing Mach-O files ([#331](https://github.com/avast-tl/retdec/pull/331)).
+
 # v3.1 (2018-06-07)
 
 * New Feature: `retdec-fileinfo` is now able to detect when a PE file is corrupted and cannot be loaded ([#281](https://github.com/avast-tl/retdec/pull/281)).
