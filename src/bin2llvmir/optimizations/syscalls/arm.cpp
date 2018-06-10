@@ -121,7 +121,7 @@ std::map<uint64_t, std::string> syscalls_arm_linux_32 =
 	{98, "profil"}, // 98 was sys_profil
 	{99, "statfs"},
 	{100, "fstatfs"},
-	{109, "ioperm"}, // 101 was sys_ioperm
+	{101, "ioperm"}, // 101 was sys_ioperm
 	{102, "socketcall"},
 	{103, "syslog"},
 	{104, "setitimer"},
