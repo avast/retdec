@@ -57,6 +57,12 @@ DebugFormat::DebugFormat(
 	loadSymtab();
 }
 
+DebugFormat::~DebugFormat()
+{
+	delete _pdbFile;
+	delete _dwarfFile;
+}
+
 /**
  * @return @c True if debug info was loaded successfully from PDB or DWARF.
  *         @c False otherwise.

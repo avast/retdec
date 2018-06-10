@@ -36,6 +36,7 @@ class DebugFormat
 				SymbolTable* symtab,
 				retdec::demangler::CDemangler* demangler,
 				unsigned long long imageBase = 0);
+		~DebugFormat();
 
 		retdec::config::Function* getFunction(retdec::utils::Address a);
 		const retdec::config::Object* getGlobalVar(retdec::utils::Address a);
