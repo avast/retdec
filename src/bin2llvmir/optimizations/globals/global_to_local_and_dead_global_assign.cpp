@@ -566,7 +566,7 @@ void GlobalToLocalAndDeadGlobalAssign::removeGlobsWithoutUse(
 	auto it(globs.begin());
 	while (it != globs.end()) {
 		if (UsesAnalysis::hasNoUse(*it)) {
-			NumGlobalDeclDeleted++;
+			++NumGlobalDeclDeleted;
 			globs.erase(it++);
 		} else {
 			++it;
@@ -915,7 +915,7 @@ void GlobalToLocalAndDeadGlobalAssign::FuncInfo::removeDeadGlobalAssigns() {
 		}
 
 		if (i->second.empty()) {
-			NumDeadGlobalAssign++;
+			++NumDeadGlobalAssign;
 			i->first->eraseFromParent();
 		}
 	}
@@ -1091,7 +1091,7 @@ Value *GlobalToLocalAndDeadGlobalAssign::FuncInfo::getLocVarFor(
 		globValue.getName()
 	);
 	convertedGlobsToLoc[globValue.getName()] = allocaInst;
-	CreatedLocVars++;
+	++CreatedLocVars;
 
 	return allocaInst;
 }

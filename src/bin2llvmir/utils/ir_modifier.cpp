@@ -632,7 +632,7 @@ GlobalVariable* IrModifier::getGlobalVariable(
 			t = cryptoType;
 			c = objf->getConstant(t, addr);
 			name = cryptoName;
-			realName = cryptoName;
+			realName = std::move(cryptoName);
 			isFromDebug = true;
 		}
 	}
@@ -1213,7 +1213,7 @@ IrModifier::FunctionPair IrModifier::modifyFunction(
 	while (uIt != fnc->user_end())
 	{
 		Value* u = *uIt;
-		uIt++;
+		++uIt;
 
 		if (CallInst* call = dyn_cast<CallInst>(u))
 		{

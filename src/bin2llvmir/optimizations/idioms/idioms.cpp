@@ -59,8 +59,7 @@ bool Idioms::doInitialization(Module &M) {
  * @return always true
  */
 bool Idioms::doFinalization(Module &M) {
-	if (m_idioms)
-		delete m_idioms;
+	delete m_idioms;
 
 	return true;
 }
