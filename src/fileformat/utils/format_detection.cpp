@@ -111,7 +111,6 @@ bool isCoff(const std::string &filePath, const std::string &header)
 	return !errorCode && it.isValidMachineCode(static_cast<PELIB_IMAGE_FILE_MACHINE>(coff.getMachine()));
 }
 
-
 /**
  * Check if file is Java class
  * @param filePath Path to input file
@@ -145,7 +144,6 @@ bool isJava(const std::string &filePath)
 
 	return false;
 }
-
 
 /**
  * Check if file is strange format with Mach-O magic.

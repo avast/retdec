@@ -385,7 +385,6 @@ bool Capstone2LlvmIrTranslator_impl<CInsn, CInsnOp>::isControlFlowInstruction(
 			|| isCondBranchInstruction(i);
 }
 
-
 template <typename CInsn, typename CInsnOp>
 bool Capstone2LlvmIrTranslator_impl<CInsn, CInsnOp>::isCallInstruction(
 		cs_insn& i) const

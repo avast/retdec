@@ -82,8 +82,6 @@ class ElfNoteSecSeg
 		/// @}
 };
 
-
-
 } // namespace fileformat
 } // namespace retdec
 

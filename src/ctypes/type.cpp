@@ -80,6 +80,5 @@ bool Type::isVoid() const
 	return false;
 }
 
-
 } // namespace ctypes
 } // namespace retdec

@@ -316,7 +316,6 @@ const std::map<std::size_t, std::string> abiOsMap =
 	{0x06, "NaCl"}
 };
 
-
 /**
  * Detect of segment type
  * @param segment File segment

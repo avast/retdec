@@ -302,7 +302,6 @@ Packed ToolInformation::isPacked() const
 	}
 }
 
-
 /**
  * Constructor of Similarity structure
  */

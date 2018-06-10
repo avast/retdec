@@ -47,7 +47,6 @@ class RawDataFormatTests : public Test
 		std::stringstream inputstream;
 };
 
-
 TEST_F(RawDataFormatTests, CorrectLoading)
 {
 	EXPECT_EQ(true, parser->isInValidState());

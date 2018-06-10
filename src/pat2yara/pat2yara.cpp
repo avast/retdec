@@ -21,7 +21,6 @@
 using namespace retdec::utils;
 using namespace yaramod;
 
-
 /**
  * Print application usage.
  *
@@ -66,7 +65,6 @@ int dieWithError(
 	return 1;
 }
 
-
 /**
  * Prints warning to standard error output.
  *
@@ -77,7 +75,6 @@ void printWarning(
 {
 	std::cerr << "Warning: " << message << "\n";
 }
-
 
 /**
  * Converts passed argument to size value.
@@ -101,7 +98,6 @@ bool argumentToSize(
 
 	return false;
 }
-
 
 /**
  * Process program inputs.

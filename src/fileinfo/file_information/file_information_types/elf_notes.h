@@ -26,7 +26,6 @@ class ElfNoteEntry
 		std::string description;
 };
 
-
 /**
  * Class for ELF notes
  */

@@ -72,10 +72,7 @@ class RuleRelations
 		std::vector<yaramod::Rule*> alternatives;
 };
 
-
 std::vector<RuleRelations> getRuleRelationsFromRules(
 	const std::vector<std::unique_ptr<yaramod::Rule>> &rules);
-
-
 
 #endif

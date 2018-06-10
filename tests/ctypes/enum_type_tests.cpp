@@ -111,7 +111,6 @@ ConstEndIteratorPointsPastLastValue)
 	EXPECT_EQ(newE->getValue(1), *(--newE->value_end()));
 }
 
-
 TEST_F(EnumTypeTests,
 GetNthValueReturnsCorrectValue)
 {
@@ -174,7 +173,6 @@ IsEnumReturnsFalseOnNonEnumType)
 {
 	EXPECT_FALSE(IntegralType::create(context, "int", 32)->isEnum());
 }
-
 
 } // namespace tests
 } // namespace ctypes

@@ -67,7 +67,6 @@ TEST_F(ParamReturnTests, x86PtrCallBasicFunctionality)
 
 	pass.runOnModuleCustom(*module, &config, abi);
 
-
 	std::string exp = R"(
 		@r = global i32 0
 		define void @fnc() {

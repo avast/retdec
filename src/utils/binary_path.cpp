@@ -31,7 +31,6 @@ std::string getStringThisBinaryPath(
 
 } // anonymous namespace
 
-
 namespace retdec {
 namespace utils {
 

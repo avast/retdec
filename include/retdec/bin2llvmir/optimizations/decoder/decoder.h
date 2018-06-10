@@ -124,7 +124,6 @@ class Decoder : public llvm::ModulePass
 				ByteData& bytes,
 				llvm::IRBuilder<>& irb);
 
-
 		void resolvePseudoCalls();
 		void finalizePseudoCalls();
 

@@ -223,7 +223,6 @@ std::string detectionMetodToString(DetectionMethod method);
 std::string toolTypeToString(ToolType toolType);
 std::string packedToString(Packed packed);
 
-
 } // namespace cpdetect
 } // namespace retdec
 

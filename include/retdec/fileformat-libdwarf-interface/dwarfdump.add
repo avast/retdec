@@ -5,12 +5,10 @@
 #  original dawrfdump.cc and automatic patch may screw it up.
 #
 
-
 // Add include.
 // Simple or with more complex path -- depends on make settings.
 //
 #include "bin_interface.h"
-
 
 // Make sure input files will be further processed in main().
 //
@@ -21,7 +19,6 @@
 // with
             	process_one_file(elf, file_name, archive, &config_file_data);
 // or just always call process_one_file.
-
 
 // Add bin-interface to process_one_file().
 //

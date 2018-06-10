@@ -76,7 +76,6 @@ bool PatternExtractor::isPic32DataObjectOnlyFile()
 	return true;
 }
 
-
 /**
  * Process PIC32 DATA OBJECT only file.
  */
@@ -107,7 +106,6 @@ void PatternExtractor::processPic32DataObjectOnly()
 		}
 	}
 
-
 	// Filter symbols on same address.
 	auto newEnd = std::unique(functionLabels.begin(), functionLabels.end(),
 		[](auto* f, auto* o) {
@@ -131,7 +129,6 @@ void PatternExtractor::processPic32DataObjectOnly()
 	// Add patterns.
 	addSectionPatterns(codeSec, functionLabels);
 }
-
 
 /**
  * Process loaded file.
@@ -198,7 +195,6 @@ bool PatternExtractor::processFile()
 	return true;
 }
 
-
 /**
  * Check if we can use this 64-bit PowerPC file.
  *
@@ -227,7 +223,6 @@ bool PatternExtractor::checkPPC64Sections()
 	// No '.opd' section.
 	return true;
 }
-
 
 /**
  * Filter symbols so that only first symbol for given address is used.
@@ -398,7 +393,6 @@ void PatternExtractor::processSection(const Section *section)
 	addSectionPatterns(section, symbols);
 }
 
-
 /**
  * Add new patterns.
  *
@@ -440,7 +434,6 @@ void PatternExtractor::addSectionPatterns(
 			endAddress - startAddress);
 	}
 }
-
 
 /**
  * Creates and stores one pattern from given symbol information.

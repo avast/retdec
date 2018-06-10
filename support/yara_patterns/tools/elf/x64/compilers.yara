@@ -60,7 +60,6 @@ rule tcc_0_9_26
 		$1 at elf.entry_point
 }
 
-
 rule gc_1
 {
 	meta:

@@ -109,7 +109,6 @@ bool LLVMSupport::isInlinableInst(const llvm::Instruction *i) {
 	//         store i32 0, i32* @var, align 4
 	//         ret i32 %result
 
-
 	// Always inline GEP instructions (this fixes several problems with invalid
 	// generated code for structure/array indexing; e.g. when the same index
 	// computed by a GEP instruction is used more than once.

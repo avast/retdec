@@ -2108,7 +2108,6 @@ rule arm_protector {
 		$1 at pe.entry_point
 }
 
-
 rule armadillo_uv {
 	meta:
 		tool = "P"
@@ -9292,7 +9291,6 @@ rule nx_pe_packer_10 {
 		$1 at pe.entry_point
 }
 
-
 rule obsidium_10059f {
 	meta:
 		tool = "P"
@@ -11660,7 +11658,6 @@ rule pespin_1330 {
 		$1 at pe.entry_point
 }
 
-
 rule pestuboep_1x_01 {
 	meta:
 		tool = "P"
@@ -12408,7 +12405,6 @@ rule qryptor_uv_03 {
 	condition:
 		$1 at pe.entry_point
 }
-
 
 rule riscs_process_patcher_14 {
 	meta:
@@ -15077,7 +15073,6 @@ rule upack_024_031 {
 	condition:
 		$1 at pe.entry_point
 }
-
 
 rule upack_024b {
 	meta:
@@ -17951,7 +17946,6 @@ rule yodas_protector_10b {
 	condition:
 		$1 at pe.entry_point
 }
-
 
 rule yodas_protector_101 {
 	meta:

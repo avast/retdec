@@ -1122,7 +1122,6 @@ void PeFormat::loadCertificates()
 	BIO_free(bio);
 }
 
-
 /**
  * Load .NET headers.
  */

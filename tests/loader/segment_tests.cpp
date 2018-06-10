@@ -255,7 +255,6 @@ SetBytesPartiallyOutOfBoundsWorks) {
 	EXPECT_EQ(expected, loaded);
 }
 
-
 TEST_F(SegmentTests,
 GetBitsWorks) {
 	std::vector<std::uint8_t> mockFileData = { 0xAB, 0xCD, 0xEF };

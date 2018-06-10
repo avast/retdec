@@ -13,7 +13,6 @@
 #include "retdec/cpdetect/settings.h"
 #include "retdec/cpdetect/utils/version_solver.h"
 
-
 using namespace retdec::fileformat;
 using namespace retdec::utils;
 using namespace yaracpp;

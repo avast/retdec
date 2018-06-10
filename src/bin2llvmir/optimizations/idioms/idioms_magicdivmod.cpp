@@ -1433,7 +1433,6 @@ Instruction * IdiomsMagicDivMod::magicSignedDiv8(BasicBlock::iterator iter, bool
 		return div;
 }
 
-
 /**
  * Wrapper of magicSignedDiv8 for positive values.
  *

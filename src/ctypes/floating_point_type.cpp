@@ -58,7 +58,6 @@ bool FloatingPointType::isFloatingPoint() const
 	return true;
 }
 
-
 void FloatingPointType::accept(Visitor *v) {
 	v->visit(std::static_pointer_cast<FloatingPointType>(shared_from_this()));
 }

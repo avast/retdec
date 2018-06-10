@@ -17,7 +17,6 @@ using namespace retdec::utils;
 using namespace retdec::stacofin;
 using namespace retdec::loader;
 
-
 /**
  * Print usage.
  */
@@ -26,7 +25,6 @@ void printUsage()
 	std::cout << "\nStatic code detection tool.\n"
 		<< "Usage: stacofin -b BINARY_FILE YARA_FILE [YARA_FILE ...]\n\n";
 }
-
 
 /**
  * Print error message and return non-zero value.
@@ -40,7 +38,6 @@ int printError(
 	std::cerr << "Error: " << errorMessage << "\n";
 	return 1;
 }
-
 
 /**
  * Convert reference pairs to string.
@@ -58,7 +55,6 @@ std::string referencesToString(
 
 	return result;
 }
-
 
 /**
  * Print results for debug purposes.
@@ -85,7 +81,6 @@ void printDetectionsDebug(
 		}
 	}
 }
-
 
 /**
  * Print results.
@@ -115,7 +110,6 @@ void printDetections(
 		}
 	}
 }
-
 
 /**
  * Do actions according to command line arguments.

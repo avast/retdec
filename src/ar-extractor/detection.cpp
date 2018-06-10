@@ -46,7 +46,6 @@ constexpr std::size_t arMagicSize = 7;
  */
 constexpr std::size_t fatLoadSize = sizeof(fat_header) + sizeof(fat_arch_64);
 
-
 /**
  * Byte order swap of structure if necessary.
  *
@@ -63,7 +62,6 @@ inline void swapStructByteOrderIfNecessary(
 		llvm::MachO::swapStruct(structure);
 	}
 }
-
 
 /**
  * Check for archive magic string in Mach-O file.
@@ -112,7 +110,6 @@ bool isArchive(
 	return false;
 }
 
-
 /**
  * Check if file is a thin archive.
  *
@@ -134,7 +131,6 @@ bool isThinArchive(
 	return false;
 }
 
-
 /**
  * Check if file is a normal (not thin) archive.
  *
@@ -155,7 +151,6 @@ bool isNormalArchive(
 
 	return false;
 }
-
 
 /**
  * Check if file is a Mach-O Universal Binary archive.

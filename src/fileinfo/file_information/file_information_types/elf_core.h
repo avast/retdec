@@ -26,7 +26,6 @@ class FileMapEntry
 		std::string path;
 };
 
-
 /**
  * Class for ELF core files
  */

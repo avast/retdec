@@ -17,13 +17,11 @@ CRC32::CRC32()
 	reset();
 }
 
-
 /// restart
 void CRC32::reset()
 {
 	m_hash = 0;
 }
-
 
 namespace
 {
@@ -335,7 +333,6 @@ namespace
 #endif
 }
 
-
 /// add arbitrary number of bytes
 void CRC32::add(const void* data, size_t numBytes)
 {
@@ -379,7 +376,6 @@ void CRC32::add(const void* data, size_t numBytes)
 	m_hash = ~crc;
 }
 
-
 /// return latest hash as 8 hex characters
 std::string CRC32::getHash()
 {
@@ -403,7 +399,6 @@ std::string CRC32::getHash()
 	return hashBuffer;
 }
 
-
 /// return latest hash as bytes
 void CRC32::getHash(unsigned char buffer[CRC32::HashBytes])
 {
@@ -413,7 +408,6 @@ void CRC32::getHash(unsigned char buffer[CRC32::HashBytes])
 	buffer[3] =  m_hash        & 0xFF;
 }
 
-
 /// compute CRC32 of a memory block
 std::string CRC32::operator()(const void* data, size_t numBytes)
 {
@@ -421,7 +415,6 @@ std::string CRC32::operator()(const void* data, size_t numBytes)
 	add(data, numBytes);
 	return getHash();
 }
-
 
 /// compute CRC32 of a string, excluding final zero
 std::string CRC32::operator()(const std::string& text)

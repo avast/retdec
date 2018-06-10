@@ -1010,7 +1010,6 @@ bool HLLWriter::emitLineRangeForFuncIfAvailable(ShPtr<Function> func) {
 	return true;
 }
 
-
 /**
 * @brief Emits wrapper-related information for the given function (if
 *        available).

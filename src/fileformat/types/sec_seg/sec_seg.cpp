@@ -512,7 +512,6 @@ void SecSeg::setSizeOfOneEntry(unsigned long long sEntrySize)
 	entrySizeIsValid = true;
 }
 
-
 /**
  * Set @c true if the section or segment will appear in the memory image of a process,
  *    @c false otherwise

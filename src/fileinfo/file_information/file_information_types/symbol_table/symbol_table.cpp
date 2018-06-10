@@ -7,7 +7,6 @@
 #include "fileinfo/file_information/file_information_types/symbol_table/symbol_table.h"
 #include "fileinfo/file_information/file_information_types/type_conversions.h"
 
-
 namespace fileinfo {
 
 /**

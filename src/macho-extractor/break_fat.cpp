@@ -64,7 +64,6 @@ std::string cpuTypeToString(
 	}
 }
 
-
 /**
  * Return LLVM name of architecture
  * @param it object iterator
@@ -122,14 +121,12 @@ BreakMachOUniversal::BreakMachOUniversal(
 	}
 }
 
-
 /**
  * BreakMachOUniversal destructor
  */
 BreakMachOUniversal::~BreakMachOUniversal()
 {
 }
-
 
 /**
  * Check if input binary contains static libraries
@@ -155,7 +152,6 @@ bool BreakMachOUniversal::isArchive()
 	return true;
 }
 
-
 /**
  * Get file memory buffer start
  * @return pointer to file memory buffer start
@@ -164,7 +160,6 @@ const char *BreakMachOUniversal::getFileBufferStart()
 {
 	return buffer.get()->getBufferStart();
 }
-
 
 /**
  * Get Mach-O Universal object iterator by architecture
@@ -188,7 +183,6 @@ bool BreakMachOUniversal::getByArchFamily(
 	return false;
 }
 
-
 /**
  * Extract object by iterator
  * @param it object iterator
@@ -208,7 +202,6 @@ bool BreakMachOUniversal::extract(
 
 	return false;
 }
-
 
 /**
  * Get file names of objects stored in archive
@@ -279,7 +272,6 @@ bool BreakMachOUniversal::getObjectNamesForArchive(
 	return true;
 }
 
-
 /**
  * Verify state of instance after construction
  * @return @c true if file was read successfully, @c false otherwise
@@ -289,7 +281,6 @@ bool BreakMachOUniversal::isValid()
 	return valid;
 }
 
-
 /**
  * Check if input binary contains static library
  * @return @c true if file is fat Mach-O static library, @c false otherwise
@@ -298,7 +289,6 @@ bool BreakMachOUniversal::isStaticLibrary()
 {
 	return isStatic;
 }
-
 
 /**
  * List all architectures contained in fat Mach-O
@@ -360,7 +350,6 @@ bool BreakMachOUniversal::listArchitectures(
 
 	return output.good();
 }
-
 
 /**
  * List all architectures contained in fat Mach-O in JSON format
@@ -441,7 +430,6 @@ bool BreakMachOUniversal::listArchitecturesJson(
 	return output.good();
 }
 
-
 /**
  * Extract all archives, simulates ar x behavior
  * @return @c true if extraction was successful, @c false otherwise
@@ -473,7 +461,6 @@ bool BreakMachOUniversal::extractAllArchives()
 	return true;
 }
 
-
 /**
  * Extract archive with best architecture for decompilation
  * @param outPath output file path
@@ -498,7 +485,6 @@ bool BreakMachOUniversal::extractBestArchive(
 	// If none of above, just pick first.
 	return extract(obj, outPath);
 }
-
 
 /**
  * Extract archive with selected index
@@ -526,7 +512,6 @@ bool BreakMachOUniversal::extractArchiveWithIndex(
 
 	return false;
 }
-
 
 /**
  * Extract archive by architecture family
@@ -604,7 +589,6 @@ bool BreakMachOUniversal::extractArchiveForFamily(
 
 	return false;
 }
-
 
 /**
  * Extract archive by architecture

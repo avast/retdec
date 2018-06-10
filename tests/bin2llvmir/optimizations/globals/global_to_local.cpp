@@ -961,7 +961,6 @@ TEST_F(GlobalToLocalTests, indirectCall01)
 		bb1:                                              ; preds = %bb
 		  br label %bb5
 
-
 		bb3:                                              ; preds = %bb
 		  br label %bb5
 
@@ -1218,7 +1217,6 @@ TEST_F(GlobalToLocalTests, indirectCall03)
 
 		bb1:                                              ; preds = %bb
 		  br label %bb5
-
 
 		bb3:                                              ; preds = %bb
 		  br label %bb5

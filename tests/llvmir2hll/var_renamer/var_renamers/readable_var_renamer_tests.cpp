@@ -104,7 +104,6 @@ DoNotRenameFunctionsInCalls) {
 	EXPECT_EQ("test", cast<Variable>(testCallExpr->getCalledExpr())->getName());
 }
 
-
 TEST_F(ReadableVarRenamerTests,
 GlobalVariablesGetCorrectlyRenamed) {
 	// Set-up the module.

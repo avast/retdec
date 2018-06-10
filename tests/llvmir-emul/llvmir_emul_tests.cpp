@@ -359,7 +359,6 @@ TEST_F(LlvmIrEmulatorTests, usingOf_x86_fp80_Type)
 	emu.setGlobalVariableValue(st1, st1Val);
 	emu.runFunction(f);
 
-
 	EXPECT_DOUBLE_EQ(3.0, emu.getGlobalVariableValue(st0).DoubleVal);
 }
 

@@ -196,7 +196,6 @@ ParametersOfFunctionDeclarationGetCorrectlyRenamed) {
 	EXPECT_EQ("p_a2", var2->getName());
 }
 
-
 TEST_F(HungarianVarRenamerTests,
 FunctionLocalVariablesGetCorrectlyRenamed) {
 	// Set-up the module.

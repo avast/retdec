@@ -41,7 +41,6 @@ TemplatePair getTemplatePair(
 	const auto first = name.find_first_of('<');
 	const auto last = name.find_last_of('>');
 
-
 	if (first == std::string::npos || last == std::string::npos) {
 		// Simple non-template function.
 		return TemplatePair(name, "");
@@ -58,7 +57,6 @@ TemplatePair getTemplatePair(
 }
 
 } // anonymous namespace
-
 
 /**
  * Create architecture rule from another rule.
@@ -94,7 +92,6 @@ std::unique_ptr<Rule> createArchitectureRule(
 
 	return builder.get();
 }
-
 
 /**
  * Create log-file rule from another rule.
@@ -136,7 +133,6 @@ std::unique_ptr<Rule> createLogRule(
 	return ruleBuilder.get();
 }
 
-
 /**
  * Create new HexString with limited size.
  *
@@ -165,7 +161,6 @@ std::shared_ptr<HexString> cutHexString(
 	return hexString;
 }
 
-
 /**
  * Cut string before limit but on whitespace.
  *
@@ -192,7 +187,6 @@ std::string cutStringWhitespace(
 	// Cut on position of last within limit.
 	return inputString.substr(0, last);
 }
-
 
 /**
  * Add necessary meta attributes to new rule builder.

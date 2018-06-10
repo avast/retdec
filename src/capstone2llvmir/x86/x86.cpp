@@ -669,7 +669,6 @@ llvm::Value* Capstone2LlvmIrTranslatorX86_impl::loadRegister(
 		throw Capstone2LlvmIrError("Capstone2LlvmIrTranslatorX86_impl() unhandled reg.");
 	}
 
-
 	llvm::Value* ret = nullptr;
 	if (pr == X86_REG_RIP
 			|| pr == X86_REG_EIP

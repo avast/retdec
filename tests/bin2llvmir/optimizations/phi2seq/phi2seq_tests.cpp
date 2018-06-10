@@ -58,7 +58,6 @@ TEST_F(PHI2SeqTests, cycleVarDepend01)
 		  %3 = icmp eq i32 %A, 3
 		  br i1 %3, label %._exitnode , label %.lr.ph
 
-
 		._exitnode:                                      ; preds = %.lr.ph
 		  ret i32 0
 		}
@@ -228,7 +227,6 @@ TEST_F(PHI2SeqTests, cycleVarDepend03)
 		  %5 = icmp eq i32 %D, 3
 		  br i1 %5, label %._exitnode , label %.lr.second
 
-
 		._exitnode:                                      ; preds = %.nextSec
 		  ret i32 0
 		}
@@ -319,7 +317,6 @@ TEST_F(PHI2SeqTests, cycleVarDepend04)
 		.sec:                                      ; preds = %.next
 		  %4 = icmp eq i32 %A, 3
 		  br i1 %4, label %._exitnode , label %.lr.ph
-
 
 		._exitnode:                                      ; preds = %.next
 		  ret i32 0
@@ -619,7 +616,6 @@ TEST_F(PHI2SeqTests, nonCycleAndCycleVarDepend01)
 		.next:                                      ; preds = %.lr.ph
 		  %3 = icmp eq i32 %A, 3
 		  br i1 %3, label %._exitnode , label %.lr.ph
-
 
 		._exitnode:                                      ; preds = %.next
 		  ret i32 0

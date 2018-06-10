@@ -149,6 +149,5 @@ void ElfCoreInfo::dump(std::ostream& outStream)
 	}
 }
 
-
 } // namespace fileformat
 } // namespace retdec

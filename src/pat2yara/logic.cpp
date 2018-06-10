@@ -37,7 +37,6 @@ std::size_t getPureInformationSize(
 	return nibbleCount / 2;
 }
 
-
 /**
  * Check if pattern has enough pure information.
  *
@@ -67,7 +66,6 @@ bool hasEnoughPureInformation(
 	return count >= minimum;
 }
 
-
 /**
  * Get HexString size in bytes.
  *
@@ -81,7 +79,6 @@ std::size_t getHexStringSize(
 	// Convert size from nibbles to bytes.
 	return pattern->getLength() / 2;
 }
-
 
 /**
  * Get number of trailing NOP instructions used to align functions.
@@ -121,7 +118,6 @@ std::size_t getTrailingNopSize(
 	return counter;
 }
 
-
 /**
  * Get number of named relocations.
  *
@@ -144,7 +140,6 @@ std::size_t getNamedRelocationCount(
 	// There are two spaces for every entry except for the last one.
 	return refs.empty() ? 0 : spaceCount / 2 + 1;
 }
-
 
 /**
  * Check if this rule should be removed because of its name.

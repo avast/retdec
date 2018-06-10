@@ -562,7 +562,6 @@ std::string ordLookUp(const std::string& libName, const std::size_t& ordNum)
 	return res.empty() ? "ord" + std::to_string(ordNum) : res;
 }
 
-
 } // anonymous namespace
 
 namespace retdec {
@@ -844,7 +843,6 @@ void ImportTable::addLibrary(std::string name)
 {
 	libraries.push_back(name);
 }
-
 
 /**
  * Add import

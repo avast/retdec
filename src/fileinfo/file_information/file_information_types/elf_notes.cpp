@@ -79,6 +79,4 @@ void ElfNotes::addNoteEntry(const ElfNoteEntry& noteEntry)
 	notes.emplace_back(noteEntry);
 }
 
-
-
 } // namespace fileinfo

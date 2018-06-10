@@ -963,7 +963,6 @@ DwarfLocationDesc::evaluateExpression(Expression &expr, string *retN,
 				break;
 			}
 
-
 		//
 		// Control Flow Operations.
 		// TODO - not implemented at all right now.
@@ -1049,7 +1048,6 @@ DwarfLocationDesc::evaluateExpression(Expression &expr, string *retN,
 
 		} // switch
 	} // for
-
 
 	if (mystack.empty())
 	{

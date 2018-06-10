@@ -53,7 +53,6 @@ TEST_F(IntelHexTokenTests, ChecksumValid)
 	EXPECT_EQ(true, token.checksumValid);
 }
 
-
 TEST_F(IntelHexTokenTests, InvalidData)
 {
 	// Alter byteCount

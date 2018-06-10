@@ -434,7 +434,6 @@ cGram::errcode cGram::getgrammar(const string filename) {
 	//rule numbering starts at 1
 	unsigned int rulenum = 1;
 
-
 	while (retvalue == ERROR_OK) {
 		//if reached end of line or file, check whether current state is final
 		if (eof() || lf()) {
@@ -2237,7 +2236,6 @@ bool cGram::issub(string candidate,vector<string> & vec) {
 		return true;
 	}
 
-
 	for(vector<string>::iterator i=vec.begin(); i != vec.end(); ++i) {
 		if (candidate == (*i)) {
 			retvalue = true;
@@ -2451,7 +2449,6 @@ string cGram::subanalyze(const string input, cGram::errcode *err) {
 					}
 				}
 
-
 				//semantic action
 				switch (current_rule.s) {
 					//do nothing
@@ -2603,7 +2600,6 @@ string cGram::subanalyze(const string input, cGram::errcode *err) {
 						current_param_modifiers.clear();
 						current_name.clear();
 						builtin = false;
-
 
 						break;
 
@@ -3275,8 +3271,6 @@ string cGram::subanalyze(const string input, cGram::errcode *err) {
 						pexpr = false;
 						break;
 
-
-
 					//else do nothing
 					default:
 						break;
@@ -3302,11 +3296,6 @@ string cGram::subanalyze(const string input, cGram::errcode *err) {
 		current_input = current_retvalue;
 	}
 	retvalue = current_retvalue;
-
-
-
-
-
 
 #ifdef DEMANGLER_SUBDBG
 	showsubs(substitutions);
@@ -3350,7 +3339,6 @@ cGram::errcode cGram::analyze(string input, cName & pName) {
 	stack<vector<cName::name_t>> name_substitution_stack;
 	stack<vector<cName::type_t>> type_substitution_stack;
 	stack<bool> btypesub_stack;
-
 
 	//current unqualified name
 	cName::name_t current_unq_name;
@@ -3560,8 +3548,6 @@ cGram::errcode cGram::analyze(string input, cName & pName) {
 					current_param.n.clear();
 					current_param.b = cName::T_ELLIPSIS;
 					break;
-
-
 
 				//set operator type
 				case SA_SETOPNW:

@@ -536,7 +536,6 @@ bool ByteValueStorage::setDouble(std::uint64_t address, double val)
 	return setXBytes(address, bytes);
 }
 
-
 /**
  * Get NTBS (null-terminated byte string) from specified address
  *

@@ -152,7 +152,6 @@ bool ElfImage::loadRelocatableFile()
 		}
 	}
 
-
 	// If none of the sections has SHF_ALLOC flag, then just try to load all SHT_PROGBITS and SHT_NOBITS sections.
 	std::function<bool(retdec::fileformat::ElfSection*)> canLoadSection = [](retdec::fileformat::ElfSection* elfSec) { return elfSec->getElfFlags() & SHF_ALLOC; };
 	if (!std::any_of(sections.begin(), sections.end(), [&canLoadSection](retdec::fileformat::Section* sec) { return canLoadSection(static_cast<retdec::fileformat::ElfSection*>(sec)); }))

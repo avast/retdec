@@ -934,7 +934,6 @@ DwarfClassType::DwarfClassType(DwarfTypeContainer *prnt, Dwarf_Off o) :
 	dataType = DwarfType::CLASS;
 }
 
-
 /**
  * @brief Load class specific attributes.
  * @param ap Reference to helper class providing access to attributes.

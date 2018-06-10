@@ -133,6 +133,5 @@ bool ElfNoteSecSeg::isEmpty() const
 	return notes.empty();
 }
 
-
 } // namespace fileformat
 } // namespace retdec

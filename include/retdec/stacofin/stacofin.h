@@ -26,7 +26,6 @@ namespace stacofin {
 using References = std::vector<std::pair<std::size_t, std::string>>;
 using CoveredCode = retdec::utils::AddressRangeContainer;
 
-
 /**
  * Structure representing one detected function.
  */
@@ -47,7 +46,6 @@ struct DetectedFunction
 		void setReferences(const std::string &refsString);
 		/// @}
 };
-
 
 /**
  * Finder implementation using Yara.

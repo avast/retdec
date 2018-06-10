@@ -658,7 +658,6 @@ void PlainPresentation::presentCore() const
 	}
 }
 
-
 bool PlainPresentation::present()
 {
 	std::cout << "Input file               : " << fileinfo.getPathToFile() << "\n";

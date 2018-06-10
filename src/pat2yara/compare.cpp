@@ -13,7 +13,6 @@ using namespace yaramod;
 
 namespace {
 
-
 /**
  * Compare references.
  *
@@ -38,7 +37,6 @@ bool compareReferences(
 	// References are equal or one is prefix of the other.
 	return true;
 }
-
 
 /**
  * Compare two rules by their references.
@@ -65,7 +63,6 @@ bool compareRuleByReferences(
 	return compareReferences(firstMeta->getValue().getPureText(),
 		otherMeta->getValue().getPureText());
 }
-
 
 /**
  * Compare two patterns in static code detection context.
@@ -111,7 +108,6 @@ bool comparePatterns(
 	return true;
 }
 
-
 /**
  * Compare two rules by their pattern.
  *
@@ -145,7 +141,6 @@ bool compareRuleByPatterns(
 	return comparePatterns(firstPattern, otherPattern);
 }
 
-
 /**
  * Compare rules by names.
  *
@@ -171,7 +166,6 @@ bool compareNames(
 	const auto &other = otherMeta->getValue().getPureText();
 	return first == other;
 }
-
 
 /**
  * Sort names prediacate.
@@ -199,7 +193,6 @@ bool sortNamesPredicate(
 
 } // anonymous namespace
 
-
 /**
  * Constructor.
  * @param rule base rule
@@ -208,7 +201,6 @@ RuleRelations::RuleRelations(
 	Rule* rule) : rule(rule)
 {
 }
-
 
 /**
  * Get base rule.
@@ -220,7 +212,6 @@ Rule* RuleRelations::getRule() const
 	return rule;
 }
 
-
 /**
  * Get equals.
  *
@@ -230,7 +221,6 @@ std::vector<Rule*> RuleRelations::getEquals() const
 {
 	return equals;
 }
-
 
 /**
  * Get alternatives.
@@ -242,7 +232,6 @@ std::vector<Rule*> RuleRelations::getAlternatives() const
 	return alternatives;
 }
 
-
 /**
  * Check whether rule has any equals.
  *
@@ -253,7 +242,6 @@ bool RuleRelations::hasEquals() const
 	return !equals.empty();
 }
 
-
 /**
  * Check whether rule has any alternatives.
  *
@@ -263,7 +251,6 @@ bool RuleRelations::hasAlternatives() const
 {
 	return !alternatives.empty();
 }
-
 
 /**
  * Check whether rule is equal.
@@ -279,7 +266,6 @@ bool RuleRelations::isEqual(
 		&& compareRuleByReferences(rule, otherRule);
 }
 
-
 /**
  * Check whether rule is alternative.
  *
@@ -294,7 +280,6 @@ bool RuleRelations::isAlternative(
 		&& !compareRuleByReferences(rule, otherRule);
 }
 
-
 /**
  * Check whether rule is related.
  *
@@ -307,7 +292,6 @@ bool RuleRelations::isEqualOrAlternative(
 {
 	return compareRuleByPatterns(rule, otherRule);
 }
-
 
 /**
  * Filter out duplicates in alternatives.
@@ -323,7 +307,6 @@ void RuleRelations::makeAlternativesUniq()
 
 	alternatives.resize(std::distance(alternatives.begin(), it));
 }
-
 
 /**
  * Add new relation for rule.
@@ -354,7 +337,6 @@ bool RuleRelations::add(
 
 	return false;
 }
-
 
 /**
  * Create vector of relations from rules.

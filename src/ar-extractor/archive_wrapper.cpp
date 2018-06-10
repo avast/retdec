@@ -42,7 +42,6 @@ std::string fixName(
 	return name;
 }
 
-
 /**
  * Write single file.
  *
@@ -73,7 +72,6 @@ bool writeFile(
 	return false;
 }
 
-
 /**
  * Check for errors.
  *
@@ -95,7 +93,6 @@ bool checkError(
 }
 
 } // anonymous namespace
-
 
 namespace retdec {
 namespace ar_extractor {
@@ -130,7 +127,6 @@ ArchiveWrapper::ArchiveWrapper(
 	succes = getCount(objectCount, errorMessage);
 }
 
-
 /**
  * Get number of objects.
  *
@@ -140,7 +136,6 @@ std::size_t ArchiveWrapper::getNumberOfObjects() const
 {
 	return objectCount;
 }
-
 
 /**
  * Check whether archive is thin archive.
@@ -152,7 +147,6 @@ bool ArchiveWrapper::isThinArchive() const
 	return archive->isThin();
 }
 
-
 /**
  * Check whether archive is empty.
  *
@@ -162,7 +156,6 @@ bool ArchiveWrapper::isEmptyArchive() const
 {
 	return objectCount == 0;
 }
-
 
 /**
  * Get list of object file names in plain-text.
@@ -195,7 +188,6 @@ bool ArchiveWrapper::getPlainTextList(
 
 	return false;
 }
-
 
 /**
  * Get list of object file names in JSON format.
@@ -243,7 +235,6 @@ bool ArchiveWrapper::getJsonList(
 
 	return false;
 }
-
 
 /**
  * Extract all object files.
@@ -305,7 +296,6 @@ bool ArchiveWrapper::extract(
 	return !checkError(error, errorMessage);
 }
 
-
 /**
  * Extract object file by its name.
  *
@@ -359,7 +349,6 @@ bool ArchiveWrapper::extractByName(
 	errorMessage = "Could not find desired file";
 	return false;
 }
-
 
 /**
  * Extract object file by its index.
@@ -418,7 +407,6 @@ bool ArchiveWrapper::extractByIndex(
 	return false;
 }
 
-
 /**
  * Get names of all object files in archive.
  *
@@ -451,7 +439,6 @@ bool ArchiveWrapper::getNames(
 
 	return !checkError(error, errorMessage);
 }
-
 
 /**
  * Get object count.

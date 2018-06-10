@@ -71,7 +71,6 @@ class IntelHexFormatTests : public Test
 		std::stringstream ihexStream;
 };
 
-
 TEST_F(IntelHexFormatTests, CorrectParsing)
 {
 	EXPECT_EQ(true, parser->isInValidState());

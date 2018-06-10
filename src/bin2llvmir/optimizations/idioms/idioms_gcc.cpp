@@ -421,7 +421,6 @@ int IdiomsGCC::exchangeCondBitShiftDivMultiBB(Function & f, Pass * pass) const {
 							if (static_cast<int32_t>(*cnst->getValue().getRawData()) != -2)
 								continue;
 
-
 							if (! match(op_add2, m_Add(m_Value(op_v1), m_Value(op_v2))))
 								continue;
 
@@ -473,8 +472,6 @@ int IdiomsGCC::exchangeCondBitShiftDivMultiBB(Function & f, Pass * pass) const {
 
 	return num_idioms;
 }
-
-
 
 /**
  * Exchange X = ((A & 0x7FFFFFFF) | (B & 0x80000000)) with copysignf(A, B)

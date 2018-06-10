@@ -34,7 +34,6 @@ const std::string T_INSTALLER = "installer";
 const std::string T_PACKER = "packer";
 const std::string T_UNKNOWN = "unknown";
 
-
 } // anonymous namespace
 
 namespace retdec {

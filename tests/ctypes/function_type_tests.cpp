@@ -176,7 +176,6 @@ CallConventionIsEmptyByDefault)
 	EXPECT_EQ(CallConvention(""), newType->getCallConvention());
 }
 
-
 TEST_F(FunctionTypeTests,
 IsVarArgReturnsTrueForVarArgFunctionType)
 {

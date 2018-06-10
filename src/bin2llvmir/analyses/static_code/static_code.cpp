@@ -1101,7 +1101,6 @@ void StaticCodeAnalysis::checkRef(StaticCodeFunction::Reference& ref)
 		// other ...?
 	}
 
-
 	// Reference into section with reference name set to some object name.
 	// This must be the last check, because it can hit anything.
 	//

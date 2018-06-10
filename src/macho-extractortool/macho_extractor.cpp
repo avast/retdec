@@ -57,7 +57,6 @@ void printUsage()
 	"    Output will be written to the PATH.\n\n";
 }
 
-
 /**
  * Fetch parameter value or die with error message.
  * @param argv vector with arguments
@@ -79,7 +78,6 @@ std::string getParamOrDie(
 		exit(1);
 	}
 }
-
 
 /**
  * Print error message

@@ -126,7 +126,6 @@ const std::map<unsigned, const std::vector<std::uint8_t>*> arm64RelocationMap =
 	{0x10, &ALL_DWORD},
 };
 
-
 /**
  * Get type of section
  * @param secName Name of section

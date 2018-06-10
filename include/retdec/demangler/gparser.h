@@ -209,7 +209,6 @@ public:
 		MST_ENUM
 	};
 
-
 	/**
 	 * @brief Structure of an unqualified name.
 	 * @param un String which holds the name.
@@ -358,7 +357,6 @@ public:
 		GE_TERM = 0,
 		GE_NONTERM
 	};
-
 
 	/**
 	 * @brief Structure of a grammar element.
@@ -732,7 +730,6 @@ public:
 	static const fsmstate fsm_final[];
 	static const gelem_t T_EOF;
 
-
 	bool internalGrammar = false;
 	std::string compiler;
 
@@ -750,7 +747,6 @@ public:
 	std::string newIG_ruleaddrs;
 	std::string newIG_ruleelements;
 	std::string newIG_llst;
-
 
 	/*
 	 * Variables for parsed external grammar

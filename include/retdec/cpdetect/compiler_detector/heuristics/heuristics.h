@@ -74,7 +74,6 @@ class Heuristics
 		 */
 		bool priorityLanguageIsSet = false;
 
-
 		/// @name Auxiliary methods
 		/// @{
 		std::string getUpxVersion();

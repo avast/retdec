@@ -405,7 +405,6 @@ void StructureConverter::detectBackEdges(ShPtr<CFGNode> cfg) const {
 bool StructureConverter::reduceCFG(ShPtr<CFGNode> cfg) {
 	PRECONDITION_NON_NULL(cfg);
 
-
 	return BFSTraverse(cfg, [this](const auto &node) {
 		return this->inspectCFGNode(node);
 	});

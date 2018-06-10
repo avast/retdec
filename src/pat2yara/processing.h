@@ -21,7 +21,6 @@ namespace yaramod
 
 } // namespace yaramod
 
-
 /**
  * Structure to keep information about user options.
  */
@@ -42,7 +41,6 @@ struct ProcessingOptions
 
 		bool validate(std::string &error);
 };
-
 
 void processFiles(
 	yaramod::YaraFileBuilder &fileBuilder,

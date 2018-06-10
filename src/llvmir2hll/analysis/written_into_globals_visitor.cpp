@@ -59,7 +59,6 @@ VarSet WrittenIntoGlobalsVisitor::getWrittenIntoGlobals(ShPtr<Function> func,
 	return visitor->writtenIntoGlobals;
 }
 
-
 void WrittenIntoGlobalsVisitor::visit(ShPtr<Variable> var) {
 	if (writing && hasItem(globalVars, var)) {
 		writtenIntoGlobals.insert(var);

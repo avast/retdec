@@ -234,7 +234,6 @@ FirstOpIsNegativeConstFloatAddOptimized) {
 	EXPECT_TRUE(f.compare(outOp2->getValue()));
 }
 
-
 TEST_F(NegativeOperandSubOptimizerTests,
 FirstOpIsNegOpExprAddOptimized) {
 	// return -b(NegOpExpr) + a;

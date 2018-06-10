@@ -2048,7 +2048,6 @@ std::size_t FileInformation::getNumberOfStoredSymbolsInTable(std::size_t positio
 	return symbolTables[position].getNumberOfStoredSymbols();
 }
 
-
 /**
  * Get number of symbols stored in symbol table
  * @param position Position of table in internal list of symbol tables (0..x)
@@ -2061,7 +2060,6 @@ std::string FileInformation::getNumberOfDeclaredSymbolsInTableStr(std::size_t po
 {
 	return symbolTables[position].getNumberOfDeclaredSymbolsStr();
 }
-
 
 /**
  * Get name of symbol table

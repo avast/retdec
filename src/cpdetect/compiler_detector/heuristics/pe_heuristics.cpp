@@ -114,7 +114,6 @@ bool findAutoIt(const std::string &content)
 	return offset != std::string::npos && regex_match(content.substr(offset, 8), regExp);
 }
 
-
 /**
  * Try to find NSIS version in manifest
  * @param manifest PE file manifest
@@ -1213,7 +1212,6 @@ void PeHeuristics::getNullsoftHeuristic()
 		}
 	}
 }
-
 
 /**
  * Search manifest for possible tool clues

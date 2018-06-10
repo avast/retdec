@@ -7,6 +7,5 @@
 // As there is no better place to comment this namespace, we do this in the
 // present file.
 
-
 /// @file src/ctypesparser/doxygen.h
 /// @namespace retdec::ctypesparser Parser for C-types information from JSON to ctypes.

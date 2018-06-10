@@ -255,7 +255,6 @@ ConstIntConstIntDiffBitWidthSubNotOptimized) {
 
 	optimizer->tryOptimize(returnStmt->getRetVal());
 
-
 	ShPtr<SubOpExpr> outSubOpExpr(cast<SubOpExpr>(returnStmt->getRetVal()));
 	ASSERT_TRUE(outSubOpExpr) <<
 		"expected `SubOpExpr`, "
@@ -383,7 +382,6 @@ ConstIntConstIntDivOptimized) {
 	ShPtr<ReturnStmt> returnStmt(ReturnStmt::create(returnExpr));
 
 	optimizer->tryOptimize(returnStmt->getRetVal());
-
 
 	ShPtr<ConstInt> outConstInt(cast<ConstInt>(returnStmt->getRetVal()));
 	ASSERT_TRUE(outConstInt) <<

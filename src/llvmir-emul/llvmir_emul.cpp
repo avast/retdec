@@ -3121,7 +3121,6 @@ unsigned getShiftAmount(
 	return (NextPowerOf2(valueWidth-1) - 1) & orgShiftAmount;
 }
 
-
 void LlvmIrEmulator::visitShl(llvm::BinaryOperator& I)
 {
 	LocalExecutionContext& ec = _ecStack.back();

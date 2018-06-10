@@ -97,7 +97,6 @@ void OneSubOptimizer::visit(ShPtr<BitXorOpExpr> expr) {
 		}
 	}
 
-
 	if (isConstIntOne(expr->getSecondOperand())) {
 		// Optimization like "(a == b) ^ 1" -> optimized to "a != b" or
 		// optimization like someCasts(a == b) ^ 1 -> optimized to "a != b."
