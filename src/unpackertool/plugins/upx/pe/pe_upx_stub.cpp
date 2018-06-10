@@ -4,6 +4,9 @@
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */
 
+#include <algorithm>
+#include <cstring>
+
 #include <pelib/PeLib.h>
 
 #include "retdec/utils/alignment.h"
@@ -1031,7 +1034,14 @@ template <int bits> void PeUpxStub<bits>::fixSectionHeaders(const DynamicBuffer&
 
 		// Parse the information about the section
 		std::string sectionName = originalHeader.readString(readPos, PeLib::PELIB_IMAGE_SIZEOF_SHORT_NAME);
-		strncpy(reinterpret_cast<char*>(newSectionHeader.Name), sectionName.c_str(), PeLib::PELIB_IMAGE_SIZEOF_SHORT_NAME);
+		// PE section names should have a fixed size of PELIB_IMAGE_SIZEOF_SHORT_NAME bytes.
+		// However, for safety reasons, ensure that there are that many bytes. If not,
+		// copy just what is available so we do not overflow the buffer.
+		const auto sectionNameSize = std::min(
+			static_cast<std::string::size_type>(PeLib::PELIB_IMAGE_SIZEOF_SHORT_NAME),
+			sectionName.size()
+		);
+		std::memcpy(newSectionHeader.Name, sectionName.data(), sectionNameSize);
 
 		// Other information about the sections are not needed so we will just skip them
 		newSectionHeader.VirtualSize        = originalHeader.read<std::uint32_t>(readPos + 8);
