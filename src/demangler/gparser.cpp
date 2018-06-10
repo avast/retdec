@@ -923,7 +923,7 @@ void * cGram::copynametpl(void * src) {
 				all_ok = false;
 				break;
 			}
-			temp_expr = static_cast<bool *>(i->value);
+			*(static_cast<bool*>(temp_expr)) = *static_cast<bool *>(i->value);
 			temp_type = *i;
 			temp_type.value = temp_expr;
 			temp_expr = nullptr;
