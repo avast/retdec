@@ -118,11 +118,11 @@ bool ValueData::operator==(const ValueData &other) const {
 		dirAllVars == other.dirAllVars &&
 		dirNumOfVarUses == other.dirNumOfVarUses &&
 		mayBeReadVars == other.mayBeReadVars &&
-		mayBeWrittenVars == mayBeWrittenVars &&
-		mayBeAccessedVars == mayBeAccessedVars &&
+		mayBeWrittenVars == other.mayBeWrittenVars &&
+		mayBeAccessedVars == other.mayBeAccessedVars &&
 		mustBeReadVars == other.mustBeReadVars &&
-		mustBeWrittenVars == mustBeWrittenVars &&
-		mustBeAccessedVars == mustBeAccessedVars &&
+		mustBeWrittenVars == other.mustBeWrittenVars &&
+		mustBeAccessedVars == other.mustBeAccessedVars &&
 		calls == other.calls &&
 		addressTakenVars == other.addressTakenVars &&
 		containsDerefs == other.containsDerefs &&
