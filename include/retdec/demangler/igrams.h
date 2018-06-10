@@ -15,7 +15,7 @@
 namespace retdec {
 namespace demangler {
 
-bool initIgram(std::string gname, cGram* gParser);
+bool initIgram(const std::string& gname, cGram* gParser);
 
 void deleteIgrams(cGram* gParser);
 

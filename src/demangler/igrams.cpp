@@ -30,7 +30,7 @@ cIgram_borlandll* igram_borlandll = nullptr; //Borland
  * @return Was the initialisation successful?
  * @retval false Grammar with the specified name was not found.
  */
-bool initIgram(string gname, cGram* gParser) {
+bool initIgram(const string& gname, cGram* gParser) {
 	bool retvalue = false;
 
 	//Microsoft Visual C++ (msll)

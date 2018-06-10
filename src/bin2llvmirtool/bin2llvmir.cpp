@@ -205,7 +205,7 @@ class ModulePassPrinter : public ModulePass
 		static std::string LastPhase;
 
 	public:
-		ModulePassPrinter(const std::string phaseName) :
+		ModulePassPrinter(const std::string& phaseName) :
 				ModulePass(ID),
 				PhaseName(phaseName),
 				PassName("ModulePass Printer: " + PhaseName)

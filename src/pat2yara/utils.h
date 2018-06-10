@@ -29,6 +29,6 @@ std::string getName(
 	const yaramod::Rule *rule);
 
 std::string collectNames(
-	const std::vector<yaramod::Rule*> rules);
+	const std::vector<yaramod::Rule*>& rules);
 
 #endif

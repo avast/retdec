@@ -59,7 +59,7 @@ std::string getName(
  * @return string with names of input rules
  */
 std::string collectNames(
-	const std::vector<Rule*> rules)
+	const std::vector<Rule*>& rules)
 {
 	std::set<std::string> names;
 	for (const Rule* rule : rules) {
