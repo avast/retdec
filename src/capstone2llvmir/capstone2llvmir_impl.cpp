@@ -170,6 +170,7 @@ Capstone2LlvmIrTranslator_impl<CInsn, CInsnOp>::translate(
 			return res;
 		}
 
+		cs_free(insn, 1); // release previously allocated memory
 		insn = cs_malloc(_handle);
 
 		// TODO: hack, solve better.
