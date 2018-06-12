@@ -19,6 +19,10 @@ def parse_args():
                                                  ' double-dash -- argument.',
                                      formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
+    parser.add_argument("file",
+                        metavar='FILE',
+                        help='File to analyze.')
+
     parser.add_argument("--plain",
                         dest="plain_format",
                         help="print list of files in plain text")
@@ -35,9 +39,6 @@ def parse_args():
                         nargs='+',
                         dest="arg_list",
                         help="args passed to the decompiler")
-
-    parser.add_argument("file",
-                        help="path")
 
     return parser.parse_args()
 
@@ -67,14 +68,13 @@ class ArchiveDecompiler:
             # exit(1)
         else:
             # Otherwise print in plain text.
-            Utils.print_error_and_die(error)
+            Utils.print_error(error)
 
     def _cleanup(self):
         """Cleans up all temporary files.
         No arguments accepted.
         """
-        if os.path.exists(self.tmp_archive):
-            Utils.remove_forced(self.tmp_archive)
+        Utils.remove_forced(self.tmp_archive)
 
     def _check_arguments(self):
 
@@ -83,7 +83,7 @@ class ArchiveDecompiler:
 
         if self.args.plain_format:
             if self.use_json_format:
-                Utils.print_error_and_die('Arguments --plain and --json are mutually exclusive.')
+                Utils.print_error('Arguments --plain and --json are mutually exclusive.')
                 return False
             else:
                 self.enable_list_mode = True
@@ -91,7 +91,7 @@ class ArchiveDecompiler:
 
         if self.args.json_format:
             if self.args.args.plain_format:
-                Utils.print_error_and_die('Arguments --plain and --json are mutually exclusive.')
+                Utils.print_error('Arguments --plain and --json are mutually exclusive.')
                 return False
             else:
                 self.enable_list_mode = True
@@ -102,7 +102,7 @@ class ArchiveDecompiler:
 
         if self.args.file:
             if not (os.path.isfile(self.args.file)):
-                Utils.print_error_and_die('Input %s is not a valid file.' % self.args.file)
+                Utils.print_error('Input %s is not a valid file.' % self.args.file)
                 return False
 
             self.library_path = self.args.file

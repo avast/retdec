@@ -31,6 +31,10 @@ def parse_args():
     parser = argparse.ArgumentParser(description=__doc__,
                                      formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
+    parser.add_argument('input',
+                        metavar='FILE',
+                        help='The input file.')
+
     parser.add_argument('-e', '--extended-exit-codes',
                         dest='extended_exit_codes',
                         action='store_true',
@@ -49,10 +53,6 @@ def parse_args():
                         dest='max_memory_half_ram',
                         action='store_true',
                         help='Limit the maximal memory of retdec-unpacker to half of system RAM.')
-
-    parser.add_argument('input',
-                        metavar='FILE',
-                        help='The input file.')
 
     return parser.parse_args()
 
@@ -87,11 +87,11 @@ class Unpacker:
 
         # Check whether the input file was specified.
         if self.args.input is None:
-            Utils.print_error_and_die('No input file was specified')
+            Utils.print_error('No input file was specified')
             return False
 
         if not os.access(self.args.input, os.R_OK):
-            Utils.print_error_and_die('The input file %s does not exist or is not readable' % self.args.input)
+            Utils.print_error('The input file %s does not exist or is not readable' % self.args.input)
             return False
 
         # Conditional initialization.
@@ -106,7 +106,7 @@ class Unpacker:
                 if max_memory > 0:
                     return True
             except ValueError:
-                Utils.print_error_and_die(
+                Utils.print_error(
                     'Invalid value for --max-memory: %s (expected a positive integer)' % self.args.max_memory)
                 return False
 

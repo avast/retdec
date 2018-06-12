@@ -164,12 +164,13 @@ class Utils:
 
     @staticmethod
     def remove_forced(path):
-        for n in os.listdir(path):
-            p = os.path.join(path, n)
-            if os.path.isdir(p):
-                shutil.rmtree(p)
-            else:
-                os.unlink(p)
+        if os.path.exists(path):
+            for n in os.listdir(path):
+                p = os.path.join(path, n)
+                if os.path.isdir(p):
+                    shutil.rmtree(p)
+                else:
+                    os.unlink(p)
 
     @staticmethod
     def is_windows():
@@ -184,7 +185,7 @@ class Utils:
         return str(pathlib.Path(path).resolve())
 
     @staticmethod
-    def print_error_and_die(error):
+    def print_error(error):
         """Print error message to stderr and die.
         1 argument is needed
         Returns - 1 if number of arguments is incorrect
@@ -192,7 +193,7 @@ class Utils:
         # if error is None:
         #    sys.exit(1)
 
-        sys.stderr.write('Error: %s' % error)
+        print('Error: %s' % error, file=sys.stdout)
         # sys.exit(1)
 
     @staticmethod

@@ -24,6 +24,10 @@ def parse_args():
         formatter_class=argparse.RawDescriptionHelpFormatter
     )
 
+    parser.add_argument('file',
+                        metavar='FILE',
+                        help='File to analyze.')
+
     parser.add_argument('-j', '--json',
                         dest='json',
                         action='store_true',
@@ -33,10 +37,6 @@ def parse_args():
                         dest='external_patterns',
                         action='store_true',
                         help='Should use external patterns')
-
-    parser.add_argument('file',
-                        metavar='FILE',
-                        help='File to analyze.')
 
     return parser.parse_args()
 

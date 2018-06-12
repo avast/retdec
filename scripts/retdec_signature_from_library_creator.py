@@ -69,10 +69,9 @@ class SigFromLib:
 
         # Cleanup.
         if not self.args.no_cleanup:
-            if os.path.exists(self.tmp_dir_path):
-                Utils.remove_forced(self.tmp_dir_path)
+            Utils.remove_forced(self.tmp_dir_path)
 
-        Utils.print_error_and_die(message + '.')
+        Utils.print_error(message + '.')
 
     def _check_arguments(self):
 
@@ -175,5 +174,4 @@ if __name__ == '__main__':
     args = parse_args()
 
     sig = SigFromLib(args)
-
     sys.exit(sig.run())
