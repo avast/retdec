@@ -7,12 +7,11 @@ import hashlib
 import os
 import shutil
 import sys
-from tarfile import TarFile, TarError
+import tarfile
+import urllib
 from urllib import request, error
 
 # Check arguments.
-import urllib
-
 if len(sys.argv) != 2:
     print('ERROR: Unexpected number of arguments.')
     sys.exit(1)
@@ -56,7 +55,7 @@ if os.path.exists(support_dir):
     # Version file exists.
     if os.path.isfile(os.path.join(support_dir, version_filename)):
         with open(os.path.join(support_dir, version_filename)) as version_file:
-            version_from_file = version_file.read()
+            version_from_file = version_file.read().split('\n')[0]
 
         if version == version_from_file:
             print('%s already exists, version is ok' % support_dir)
@@ -67,17 +66,14 @@ if os.path.exists(support_dir):
     cleanup()
 
 # Make sure destination directory exists.
-os.mkdir(support_dir)
+os.makedirs(support_dir, exist_ok=True)
 
 # Get archive using wget.
 arch_url = 'https://github.com/avast-tl/retdec-support/releases/download/%s/%s' % (version, arch_name)
 print('Downloading archive from %s ...' % arch_url)
 
 try:
-    response = urllib.request.urlopen(arch_url, timeout=10)
-    content = response.read()
-    with open(arch_path, 'w') as f:
-        f.write(content)
+    urllib.request.urlretrieve(arch_url, arch_path)
 except (error.HTTPError, error.URLError):
     print('ERROR: download failed')
     cleanup()
@@ -105,10 +101,10 @@ if sha256hash != sha256hash_ref:
 
 # Unpack archive.
 print('Unpacking archive ...')
-with TarFile(arch_path) as tar:
+with tarfile.open(arch_path) as tar:
     try:
         tar.extractall(support_dir)
-    except TarError:
+    except tarfile.ExtractError:
         print('ERROR: failed to unpack the archive')
         cleanup()
         sys.exit(1)
