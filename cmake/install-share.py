@@ -8,7 +8,7 @@ import os
 import shutil
 import sys
 import tarfile
-import urllib
+import urllib.request
 
 # Check arguments.
 if len(sys.argv) != 2:
@@ -72,8 +72,8 @@ arch_url = 'https://github.com/avast-tl/retdec-support/releases/download/%s/%s' 
 print('Downloading archive from %s ...' % arch_url)
 
 try:
-    urllib.urlretrieve(arch_url, arch_path)
-except IOError:
+    urllib.request.urlretrieve(arch_url, arch_path)
+except (urllib.request.HTTPError, urllib.request.URLError):
     print('ERROR: download failed')
     cleanup()
     sys.exit(1)
