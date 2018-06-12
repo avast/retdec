@@ -8,8 +8,7 @@ import os
 import shutil
 import sys
 import tarfile
-import urllib
-from urllib import request, error
+import urllib.request
 
 # Check arguments.
 if len(sys.argv) != 2:
@@ -68,13 +67,13 @@ if os.path.exists(support_dir):
 # Make sure destination directory exists.
 os.makedirs(support_dir, exist_ok=True)
 
-# Get archive using wget.
+# Download archive
 arch_url = 'https://github.com/avast-tl/retdec-support/releases/download/%s/%s' % (version, arch_name)
 print('Downloading archive from %s ...' % arch_url)
 
 try:
     urllib.request.urlretrieve(arch_url, arch_path)
-except (error.HTTPError, error.URLError):
+except (urllib.request.HTTPError, urllib.request.URLError):
     print('ERROR: download failed')
     cleanup()
     sys.exit(1)
