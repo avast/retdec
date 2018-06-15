@@ -69,7 +69,7 @@ class SigFromLib:
 
         # Cleanup.
         if not self.args.no_cleanup:
-            Utils.remove_forced(self.tmp_dir_path)
+            Utils.remove_dir_forced(self.tmp_dir_path)
 
         Utils.print_error(message + '.')
 
@@ -165,7 +165,7 @@ class SigFromLib:
 
         # Do cleanup.
         if not self.args.no_cleanup:
-            Utils.remove_forced(self.tmp_dir_path)
+            Utils.remove_dir_forced(self.tmp_dir_path)
 
         return result
 

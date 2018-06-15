@@ -74,7 +74,7 @@ class ArchiveDecompiler:
         """Cleans up all temporary files.
         No arguments accepted.
         """
-        Utils.remove_forced(self.tmp_archive)
+        Utils.remove_dir_forced(self.tmp_archive)
 
     def _check_arguments(self):
 

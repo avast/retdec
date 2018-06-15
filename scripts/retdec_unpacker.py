@@ -1,4 +1,4 @@
-#! /usr/bin/env python3
+#!/usr/bin/env python3
 
 """
 The script tries to unpack the given executable file by using any
@@ -27,11 +27,11 @@ from retdec_utils import CmdRunner
 from retdec_utils import Utils
 
 
-def parse_args():
+def parse_args(_args):
     parser = argparse.ArgumentParser(description=__doc__,
                                      formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
-    parser.add_argument('input',
+    parser.add_argument('file',
                         metavar='FILE',
                         help='The input file.')
 
@@ -54,7 +54,7 @@ def parse_args():
                         action='store_true',
                         help='Limit the maximal memory of retdec-unpacker to half of system RAM.')
 
-    return parser.parse_args()
+    return parser.parse_args(_args)
 
 
 class Unpacker:
@@ -77,7 +77,7 @@ class Unpacker:
     UNPACKER_EXIT_CODE_PREPROCESSING_ERROR = 3
 
     def __init__(self, _args):
-        self.args = _args
+        self.args = parse_args(_args)
         self.input = ''
         self.output = ''
 
@@ -86,17 +86,17 @@ class Unpacker:
         """
 
         # Check whether the input file was specified.
-        if self.args.input is None:
+        if self.args.file is None:
             Utils.print_error('No input file was specified')
             return False
 
-        if not os.access(self.args.input, os.R_OK):
-            Utils.print_error('The input file %s does not exist or is not readable' % self.args.input)
+        if not os.access(self.args.file, os.R_OK):
+            Utils.print_error('The input file %s does not exist or is not readable' % self.args.file)
             return False
 
         # Conditional initialization.
         if not self.args.output:
-            self.output = self.args.input + '-unpacked'
+            self.output = self.args.file + '-unpacked'
         else:
             self.output = self.args.output
 
@@ -111,8 +111,8 @@ class Unpacker:
                 return False
 
         # Convert to absolute paths.
-        self.input = Utils.get_realpath(self.args.input)
-        self.output = Utils.get_realpath(self.output)
+        self.input = os.path.abspath(self.args.file) #Utils.get_realpath(self.args.input)
+        self.output = os.path.abspath(self.output) #Utils.get_realpath(self.output)
 
         return True
 

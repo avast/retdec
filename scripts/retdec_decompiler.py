@@ -16,7 +16,7 @@ from datetime import date
 from pathlib import Path
 
 import retdec_config as config
-from retdec_utils import Utils, CmdRunner
+from retdec_utils import Utils, CmdRunner, TimeMeasuredProcess
 from retdec_signature_from_library_creator import SigFromLib
 from retdec_unpacker import Unpacker
 
@@ -58,6 +58,7 @@ def parse_args():
     parser.add_argument('-m', '--mode',
                         dest='mode',
                         metavar='MODE',
+                        default='bin',
                         choices=['bin', 'll', 'raw'],
                         help='Force the type of decompilation mode [bin|ll|raw]'
                              '(default: ll if input\'s suffix is \'.ll\', bin otherwise).')
@@ -65,7 +66,6 @@ def parse_args():
     parser.add_argument('-o', '--output',
                         dest='output',
                         metavar='FILE',
-                        default='file.ext',
                         help='Output file.')
 
     parser.add_argument('-p', '--pdb',
@@ -200,7 +200,7 @@ def parse_args():
                         help='Used renamer of variables [address|hungarian|readable|simple|unified]')
 
     parser.add_argument('--cleanup',
-                        dest='self.cleanup',
+                        dest='cleanup',
                         help='Removes temporary files created during the decompilation.')
 
     parser.add_argument('--color-for-ida',
@@ -245,12 +245,12 @@ def parse_args():
                         help='Decode only selected parts (functions/ranges). Faster decompilation, but worse results.')
 
     parser.add_argument('--select-functions',
-                        dest='select_functions',
+                        dest='selected_ranges',
                         metavar='FUNCS',
                         help='Specify a comma separated list of functions to decompile (example: fnc1,fnc2,fnc3).')
 
     parser.add_argument('--select-ranges',
-                        dest='select_ranges',
+                        dest='selected_ranges',
                         metavar='RANGES',
                         help='Specify a comma separated list of ranges to decompile '
                              '(example: 0x100-0x200,0x300-0x400,0x500-0x600).')
@@ -294,6 +294,7 @@ class Decompiler:
         self.output = ''
         self.config = ''
 
+        self.arch = ''
         self.out_unpacked = ''
         self.out_frontend_ll = ''
         self.out_frontend_bc = ''
@@ -319,7 +320,7 @@ class Decompiler:
         # Try to detect desired decompilation mode if not set by user.
         # We cannot detect 'raw' mode because it overlaps with 'bin' (at least not based on extension).
         if not self.args.mode:
-            if Path(self.args.input).suffix == 'll':
+            if self.args.input.endswith('ll'):
                 # Suffix .ll
                 self.args.mode = 'll'
             else:
@@ -367,48 +368,49 @@ class Decompiler:
             if self.args.ar_index:
                 Utils.print_warning('Option --ar-index is not used in mode ' + self.args.mode)
 
+        fname = ''
         if not self.args.output:
             # No output file was given, so use the default one.
-            (iname, ext) = os.path.splitext(self.input)
-
-            if ext == 'll':
+            fname = self.args.input
+            if fname.endswith('ll'):
                 # Suffix .ll
-                self.output = iname + '.' + self.args.hll
-            elif ext == 'exe':
+                self.output = fname[:-2] + self.args.hll
+            elif fname.endswith('exe'):
                 # Suffix .exe
-                self.output = iname + '.' + self.args.hll
-            elif ext == 'elf':
+                self.output = fname[:-3] + self.args.hll
+                print('Output is: ' + self.output)
+            elif fname.endswith('elf'):
                 # Suffix .elf
-                self.output = iname + '.' + self.args.hll
-            elif ext == 'ihex':
+                self.output = fname[:-3] + self.args.hll
+            elif fname.endswith('ihex'):
                 # Suffix .ihex
-                self.output = iname + '.' + self.args.hll
-            elif ext == 'macho':
+                self.output = fname[:-4] + self.args.hll
+            elif fname.endswith('macho'):
                 # Suffix .macho
-                self.output = iname + '.' + self.args.hll
+                self.output = fname[:-5] + self.args.hll
             else:
                 self.output = self.output + PICKED_FILE + '.' + self.args.hll
 
-            # If the output file name matches the input file name, we have to change the
-            # output file name. Otherwise, the input file gets overwritten.
-            if self.input == self.output:
-                self.output = iname + '.out.' + self.args.hll
+        # If the output file name matches the input file name, we have to change the
+        # output file name. Otherwise, the input file gets overwritten.
+        if self.args.input == self.output:
+            self.output = fname + '.out.' + self.args.hll
 
-            # Convert to absolute paths.
-            self.input = Utils.get_realpath(self.args.input)
-            self.output = Utils.get_realpath(self.args.output)
+        # Convert to absolute paths.
+        self.input = os.path.abspath(self.args.input) #Utils.get_realpath(self.args.input)
+        self.output = os.path.abspath(self.output) #Utils.get_realpath(self.output)
 
-            if os.path.exists(self.args.pdb):
-                self.args.pdb = Utils.get_realpath(self.args.pdb)
+        if self.args.pdb and os.path.exists(self.args.pdb):
+            self.args.pdb = Utils.get_realpath(self.args.pdb)
 
-            # Check that selected ranges are valid.
-            if self.args.selected_ranges:
-                for r in self.args.selected_ranges:
-                    # Check if valid range.
-                    if not Utils.is_range(r):
-                        Utils.print_error(
-                            'Range %s in option --select-ranges is not a valid decimal (e.g. 123-456) or hexadecimal '
-                            '(e.g. 0x123-0xabc) range.' % r)
+        # Check that selected ranges are valid.
+        if self.args.selected_ranges:
+            for r in self.args.selected_ranges:
+                # Check if valid range.
+                if not Utils.is_range(r):
+                    Utils.print_error(
+                        'Range %s in option --select-ranges is not a valid decimal (e.g. 123-456) or hexadecimal '
+                        '(e.g. 0x123-0xabc) range.' % r)
 
             # Check if first <= last.
             ranges = self.args.selected_ranges.split('-')
@@ -417,6 +419,9 @@ class Decompiler:
                 Utils.print_error(
                     'Range \'%s\' in option --select-ranges is not a valid range: '
                     'second address must be greater or equal than the first one.' % ranges)
+
+        if self.args.arch:
+            self.arch = self.args.arch
 
     def print_warning_if_decompiling_bytecode(self):
         """Prints a warning if we are decompiling bytecode."""
@@ -453,48 +458,31 @@ class Decompiler:
     def cleanup(self):
         """Cleanup working directory"""
 
-        if self.args.self.cleanup:
-            Utils.remove_forced(self.out_unpacked)
-            Utils.remove_forced(self.out_frontend_ll)
-            Utils.remove_forced(self.out_frontend_bc)
+        if self.args.cleanup:
+            Utils.remove_dir_forced(self.out_unpacked)
+            Utils.remove_dir_forced(self.out_frontend_ll)
+            Utils.remove_dir_forced(self.out_frontend_bc)
 
             if self.config != self.args.config:
-                Utils.remove_forced(self.config)
+                Utils.remove_dir_forced(self.config)
 
-            Utils.remove_forced(self.out_backend_bc)
-            Utils.remove_forced(self.out_backend_ll)
-            Utils.remove_forced(self.out_restored)
+            Utils.remove_dir_forced(self.out_backend_bc)
+            Utils.remove_dir_forced(self.out_backend_ll)
+            Utils.remove_dir_forced(self.out_restored)
 
             # Archive support
-            Utils.remove_forced(self.out_archive)
+            Utils.remove_dir_forced(self.out_archive)
 
             # Archive support (Macho-O Universal)
             for sig in self.signatures_to_remove:
-                Utils.remove_forced(sig)
+                Utils.remove_dir_forced(sig)
 
             # Signatures generated from archives
             if self.TOOL_LOG_FILE:
-                Utils.remove_forced(self.TOOL_LOG_FILE)
+                Utils.remove_dir_forced(self.TOOL_LOG_FILE)
 
     def generate_log(self):
-        global LOG_DECOMPILATION_END_DATE
-        global LOG_FILEINFO_OUTPUT
-        global LOG_UNPACKER_OUTPUT
-        global LOG_BIN2LLVMIR_OUTPUT
-        global LOG_LLVMIR2HLL_OUTPUT
-        global LOG_DECOMPILATION_START_DATE
-        global FORMAT
-        global LOG_FILEINFO_RC
-        global LOG_UNPACKER_RC
-        global LOG_BIN2LLVMIR_RC
-        global LOG_LLVMIR2HLL_RC
-        global LOG_FILEINFO_RUNTIME
-        global LOG_BIN2LLVMIR_RUNTIME
-        global LOG_LLVMIR2HLL_RUNTIME
-        global LOG_FILEINFO_MEMORY
-        global LOG_BIN2LLVMIR_MEMORY
-        global LOG_LLVMIR2HLL_MEMORY
-
+        """
         LOG_FILE = self.output + '.decompilation.log'
         LOG_DECOMPILATION_END_DATE = time.strftime('%S')
 
@@ -522,6 +510,7 @@ class Decompiler:
             LOG_FILEINFO_OUTPUT, LOG_UNPACKER_OUTPUT, LOG_BIN2LLVMIR_OUTPUT, LOG_LLVMIR2HLL_OUTPUT,
             LOG_FILEINFO_RUNTIME, LOG_BIN2LLVMIR_RUNTIME, LOG_LLVMIR2HLL_RUNTIME, LOG_FILEINFO_MEMORY,
             LOG_BIN2LLVMIR_MEMORY, LOG_LLVMIR2HLL_MEMORY))
+        """
 
     #
     # Parses the given return code and output from a tool that was run through
@@ -565,52 +554,9 @@ class Decompiler:
 
     #
     # Parses the given output ($1) from a tool that was run through
-    # `/usr/bin/time -v` and prints the running time in seconds.
-    #
-    def get_tool_runtime(self, output):
-        global USER_TIME_F
-        global SYSTEM_TIME_F
-        global RUNTIME_F
-
-        # The output from `/usr/bin/time -v` looks like this:
-        #
-        #    [..] (output from the tool)
-        #        Command being timed: 'tool'
-        #        User time (seconds): 0.04
-        #        System time (seconds): 0.00
-        #        [..] (other data)
-        #
-        # We combine the user and system times into a single time in seconds.
-        USER_TIME_F = os.popen('egrep \'User time \\(seconds\\').read().rstrip('\n') + ': <<< ' + (
-            output) + ' | cut -d: -f2)'
-
-        SYSTEM_TIME_F = os.popen('egrep \'System time \\(seconds\\').read().rstrip('\n') + ': <<< ' + (
-            output) + ' | cut -d: -f2)'
-        RUNTIME_F = os.popen('echo ' + USER_TIME_F + '  +  ' + SYSTEM_TIME_F + ' | bc').read().rstrip('\n')
-        # Convert the runtime from float to int (http://unix.stackexchange.com/a/89843).
-        # By adding 1, we make sure that the runtime is at least one second. This
-        # also takes care of proper rounding (we want to round runtime 1.1 to 2).
-        _rc0 = _rcr2, _rcw2 = os.pipe()
-        if os.fork():
-            os.close(_rcw2)
-            os.dup2(_rcr2, 0)
-            subprocess.call(['bc'], shell=True)
-        else:
-            os.close(_rcr2)
-            os.dup2(_rcw2, 1)
-            print('(' + RUNTIME_F + '  +  1)/1')
-            # sys.exit(0)
-
-        return RUNTIME_F
-
-    #
-    # Parses the given output ($1) from a tool that was run through
     # `/usr/bin/time -v` and prints the memory usage in MB.
     #
     def get_tool_memory_usage(self, tool):
-        global RSS_KB
-        global RSS_MB
-
         """The output from `/usr/bin/time -v` looks like this:
 
             [..] (output from the tool)
@@ -622,47 +568,11 @@ class Decompiler:
         We want the value of 'resident set size' (RSS), which we convert from KB
         to MB. If the resulting value is less than 1 MB, round it to 1 MB.
         """
-        RSS_KB = os.popen('egrep \'Maximum resident set size \\(kbytes\\').read().rstrip('\n') + ': <<< ' + (
-            tool) + ' | cut -d: -f2)'
+        _, _, tail = tool.partition('Maximum resident set size (kbytes): ')
+        rss_kb = tail.split(' ')[0]
+        rss_mb = (rss_kb / 1024)
 
-        RSS_MB = (RSS_KB // 1024)
-        print((RSS_MB if (RSS_MB > 0) else 1))
-
-        return RSS_MB
-
-    #
-    # Prints the actual output of a tool that was run through `/usr/bin/time -v`.
-    # The parameter ($1) is the combined output from the tool and `/usr/bin/time -v`.
-    #
-    def get_tool_output(self, output):
-        # The output from `/usr/bin/time -v` looks either like this (success):
-        #
-        #    [..] (output from the tool)
-        #        Command being timed: 'tool'
-        #        [..] (other data)
-        #
-        # or like this (when there was an error):
-        #
-        #    [..] (output from the tool)
-        #        Command exited with non-zero status X
-        #        [..] (other data)
-        #
-        # Remove everything after and including 'Command...'
-        # (http://stackoverflow.com/a/5227429/2580955).
-        _rcr1, _rcw1 = os.pipe()
-        if os.fork():
-            os.close(_rcw1)
-            os.dup2(_rcr1, 0)
-            subprocess.call(['sed', '-n', '/Command exited with non-zero status/q;p'], shell=True)
-        else:
-            os.close(_rcr1)
-            os.dup2(_rcw1, 1)
-            _rc0 = subprocess.Popen('sed' + ' ' + '-n' + ' ' + '/Command being timed:/q;p', shell=True,
-                                    stdin=subprocess.PIPE)
-            _rc0.communicate(output + '\n')
-
-            return _rc0.wait()
-            # sys.exit(0)
+        return rss_mb if (rss_mb > 0) else 1
 
     #
     # Prints an escaped version of the given text so it can be inserted into JSON.
@@ -691,9 +601,7 @@ class Decompiler:
                   0 otherwise
         """
 
-        global TIMEOUT
-        global timeout
-
+        """
         PID = pid
         # PID of the target process
         PROCESS_NAME = os.popen('ps -p ' + PID + ' -o comm --no-heading').read().rstrip('\n')
@@ -705,11 +613,7 @@ class Decompiler:
             # usage etc.).
             PID = os.popen('ps --ppid ' + PID + ' -o pid --no-heading | head -n1').read().rstrip('\n')
 
-        if not TIMEOUT:
-            TIMEOUT = 300
-
-        timeout = TIMEOUT
-        t = timeout
+        t = self.timeout
 
         while t > 0:
             time.sleep(1)
@@ -723,6 +627,7 @@ class Decompiler:
         subprocess.call(['kill_tree', PID, 'SIGKILL'], shell=True, stdout=subprocess.DEVNULL,
                         stderr=subprocess.DEVNULL)
 
+        """
         return 0
 
     #
@@ -761,7 +666,7 @@ class Decompiler:
 
         # Initialize variables used by logging.
         if self.args.generate_log:
-            LOG_DECOMPILATION_START_DATE = time.strftime('%s')  # os.popen('date  + %s').read().rstrip('\n')
+            log_decompilation_start_date = time.strftime('%s')  # os.popen('date  + %s').read().rstrip('\n')
             # Put the tool log file and tmp file into /tmp because it uses tmpfs. This means that
             # the data are stored in RAM instead on the disk, which should provide faster access.
             tmp_dir = '/tmp/decompiler_log'
@@ -786,18 +691,17 @@ class Decompiler:
 
             if Utils.is_macho_archive(self.input):
                 out_archive = self.output + '.a'
-                if self.args.arch:
+                if self.arch:
                     print()
                     print('##### Restoring static library with architecture family ' + self.args.arch + '...')
                     print(
                         'RUN: ' + config.EXTRACT + ' --family ' + self.args.arch + ' --out ' + out_archive + ' ' + self.input)
-                    if (
-                            not subprocess.call(
-                                [config.EXTRACT, '--family', self.args.arch, '--out', out_archive, self.input],
-                                shell=True)):
+                    if (not subprocess.call(
+                            [config.EXTRACT, '--family', self.args.arch, '--out', out_archive, self.input],
+                            shell=True)):
                         # Architecture not supported
-                        print(
-                            'Invalid --arch option \'' + self.args.arch + '\'. File contains these architecture families:')
+                        print('Invalid --arch option \'' + self.args.arch +
+                              '\'. File contains these architecture families:')
                         subprocess.call([config.EXTRACT, '--list', self.input], shell=True)
                         self.cleanup()
                         sys.exit(1)
@@ -807,6 +711,7 @@ class Decompiler:
                     print('##### Restoring best static library for decompilation...')
                     print('RUN: ' + config.EXTRACT + ' --best --out ' + out_archive + ' ' + self.input)
                     subprocess.call([config.EXTRACT, '--best', '--out', out_archive, self.input], shell=True)
+
                 self.input = out_archive
 
             print()
@@ -820,17 +725,20 @@ class Decompiler:
                 if Utils.has_thin_archive_signature(self.input):
                     self.cleanup()
                     Utils.print_error('File is a thin archive and cannot be decompiled.')
+                    return
 
                 # Check if our tools can handle it.
                 if not Utils.is_valid_archive(self.input):
                     self.cleanup()
                     Utils.print_error('The input archive has invalid format.')
+                    return
 
                 # Get and check number of objects.
                 arch_object_count = Utils.archive_object_count(self.input)
                 if arch_object_count <= 0:
                     self.cleanup()
                     Utils.print_error('The input archive is empty.')
+                    return
 
                 # Prepare object output path.
                 out_restored = self.output + '.restored'
@@ -847,12 +755,15 @@ class Decompiler:
                         valid_index = (arch_object_count - 1)
 
                         if valid_index != 0:
-                            Utils.print_error('File on index \'' + (
-                                self.args.ar_index) + '\' was not found in the input archive. Valid indexes are 0-' + (
+                            Utils.print_error('File on index \'' + self.args.ar_index
+                                              + '\' was not found in the input archive. Valid indexes are 0-' + (
                                                   valid_index) + '.')
+                            return
                         else:
-                            Utils.print_error('File on index \'' + (
-                                self.args.ar_index) + '\' was not found in the input archive. The only valid index is 0.')
+                            Utils.print_error('File on index \'' + self.args.ar_index +
+                                              '\' was not found in the input archive. The only valid index is 0.')
+                            return
+
                     self.input = out_restored
                 elif self.args.ar_name:
                     print()
@@ -890,8 +801,10 @@ class Decompiler:
             self.out_frontend_bc = out_frontend + '.bc'
             self.config = self.output + '.json'
 
+            print('Name is: ' + self.config)
+
             if self.config != self.args.config:
-                Utils.remove_forced(self.config)
+                Utils.remove_file_forced(self.config)
 
             if self.args.config:
                 shutil.copyfile(self.args.config, self.config)
@@ -900,15 +813,18 @@ class Decompiler:
             if os.path.isfile(self.config):
                 subprocess.call([config.CONFIGTOOL, self.config, '--preprocess'], shell=True)
             else:
-                print('{}', file=open(self.config, 'wb'))
+                with open(self.config, 'w') as f:
+                    f.write('{}')
 
             # Raw data needs architecture, endianess and optionaly sections's vma and entry point to be specified.
             if self.args.mode == 'raw':
                 if not self.args.arch or self.args.arch == 'unknown' or self.args.arch == '':
                     Utils.print_error('Option -a|--arch must be used with mode ' + self.args.mode)
+                    return
 
                 if not self.args.endian:
                     Utils.print_error('Option -e|--endian must be used with mode ' + self.args.mode)
+                    return
 
                 subprocess.call([config.CONFIGTOOL, self.config, '--write', '--format', 'raw'], shell=True)
                 subprocess.call([config.CONFIGTOOL, self.config, '--write', '--arch', self.args.arch], shell=True)
@@ -922,9 +838,8 @@ class Decompiler:
                         shell=True)
 
                 if self.args.raw_section_vma:
-                    subprocess.call(
-                        [config.CONFIGTOOL, self.config, '--write', '--section-vma', self.args.raw_section_vma],
-                        shell=True)
+                    subprocess.call([config.CONFIGTOOL, self.config, '--write', '--section-vma',
+                                     self.args.raw_section_vma], shell=True)
 
             #
             # Call fileinfo to create an initial config file.
@@ -952,19 +867,20 @@ class Decompiler:
             print('##### Gathering file information...')
             print('RUN: ' + config.FILEINFO + ' ' + ' '.join(fileinfo_params))
 
-            if self.args.generate_log != '':
-                FILEINFO_AND_TIME_OUTPUT = os.popen(TIME + ' \'' + config.FILEINFO + '\' \''
-                                                    + ' '.join(fileinfo_params) + '\' 2>&1').read().rstrip('\n')
+            fileinfo_rc = 0
 
-                fileinfo_rc = 0  # _rc0 #TODO use fileinfo rc
-                LOG_FILEINFO_RC = self.get_tool_rc(fileinfo_rc, FILEINFO_AND_TIME_OUTPUT)
+            if self.args.generate_log:
+                """
+                tcmd = TimeMeasuredProcess()
+                LOG_FILEINFO_OUTPUT, fileinfo_rc, LOG_FILEINFO_RUNTIME = \
+                    tcmd.run_cmd([config.FILEINFO] + fileinfo_params)
 
-                LOG_FILEINFO_RUNTIME = self.get_tool_runtime(FILEINFO_AND_TIME_OUTPUT)
-                LOG_FILEINFO_MEMORY = self.get_tool_memory_usage(FILEINFO_AND_TIME_OUTPUT)
-                LOG_FILEINFO_OUTPUT = self.get_tool_output(FILEINFO_AND_TIME_OUTPUT)
+                LOG_FILEINFO_MEMORY = self.get_tool_memory_usage(LOG_FILEINFO_OUTPUT)
                 print(LOG_FILEINFO_OUTPUT)
+                """
+                pass
             else:
-                fileinfo_rc = subprocess.call([config.FILEINFO, ' '.join(fileinfo_params)], shell=True)
+                fileinfo_rc = subprocess.call([config.FILEINFO] + fileinfo_params, shell=True)
 
             if fileinfo_rc != 0:
                 if self.args.generate_log:
@@ -1030,21 +946,26 @@ class Decompiler:
                 print('RUN: ' + config.FILEINFO + ' ' + ' '.join(fileinfo_params))
 
                 if self.args.generate_log:
+                    """
                     FILEINFO_AND_TIME_OUTPUT = os.popen(
                         TIME + ' \'' + config.FILEINFO + '\' \'' + ' '.join(fileinfo_params) + '\' 2>&1').read().rstrip(
                         '\n')
 
                     fileinfo_rc = 0  # _rc0
 
-                    LOG_FILEINFO_RC = self.get_tool_rc(fileinfo_rc, FILEINFO_AND_TIME_OUTPUT)
-                    FILEINFO_RUNTIME = self.get_tool_runtime(FILEINFO_AND_TIME_OUTPUT)
+                    tcmd = TimeMeasuredProcess()
+                    LOG_FILEINFO_OUTPUT, fileinfo_rc, LOG_FILEINFO_RUNTIME = \
+                        tcmd.run_cmd([config.FILEINFO] + fileinfo_params)
+
                     LOG_FILEINFO_RUNTIME = (LOG_FILEINFO_RUNTIME + FILEINFO_RUNTIME)
                     FILEINFO_MEMORY = self.get_tool_memory_usage(FILEINFO_AND_TIME_OUTPUT)
                     LOG_FILEINFO_MEMORY = (LOG_FILEINFO_MEMORY + FILEINFO_MEMORY) / 2
                     LOG_FILEINFO_OUTPUT = self.get_tool_output(FILEINFO_AND_TIME_OUTPUT)
                     print(LOG_FILEINFO_OUTPUT)
+                    """
+                    pass
                 else:
-                    fileinfo_rc = subprocess.call([config.FILEINFO, ' '.join(fileinfo_params)], shell=True)
+                    fileinfo_rc = subprocess.call([config.FILEINFO] + fileinfo_params, shell=True)
 
                 if fileinfo_rc != 0:
                     if self.args.generate_log:
@@ -1061,38 +982,38 @@ class Decompiler:
                 subprocess.call([config.CONFIGTOOL, self.config, '--write', '--arch', self.args.arch], shell=True)
             else:
                 # Get full name of the target architecture including comments in parentheses
-                ARCH_FULL = os.popen(
-                    '\'' + config.CONFIGTOOL + '\' \'' + self.config + '\' --read --arch | awk \'{print tolower($0').read().rstrip(
-                    '\n')
+                arch_full = os.popen(config.CONFIGTOOL + ' ' + self.config + ' --read --arch').read().rstrip('\n')
+                arch_full = arch_full.lower()
 
                 # Strip comments in parentheses and all trailing whitespace
                 # todo (ARCH_FULL % (*) what is this
-                self.args.arch = ARCH_FULL  # os.popen('echo ' + (ARCH_FULL % (*) + ' | sed -e s / ^ [[: space:]] * // \'').read().rstrip('\n')
+                self.arch = arch_full  # os.popen('echo ' + (ARCH_FULL % (*) + ' | sed -e s / ^ [[: space:]] * // \'').read().rstrip('\n')
 
             # Get object file format.
-            FORMAT = os.popen(
-                '\'' + config.CONFIGTOOL + '\' \'' + self.config + '\' --read --format | awk \'{print tolower($1').read().rstrip(
-                '\n')
+            format = os.popen(config.CONFIGTOOL + ' ' + self.config + ' --read --format').read().rstrip('\n')
+            format = format.lower()
 
             # Intel HEX needs architecture to be specified
-            if FORMAT == 'ihex':
-                if not self.args.arch or self.args.arch == 'unknown':
-                    Utils.print_error('Option -a|--arch must be used with format ' + FORMAT)
+            if format == 'ihex':
+                if not self.arch or self.arch == 'unknown':
+                    Utils.print_error('Option -a|--arch must be used with format ' + format)
+                    return
 
                 if not self.args.endian:
-                    Utils.print_error('Option -e|--endian must be used with format ' + FORMAT)
+                    Utils.print_error('Option -e|--endian must be used with format ' + format)
+                    return
 
-                subprocess.call([config.CONFIGTOOL, self.config, '--write', '--arch', self.args.arch], shell=True)
+                subprocess.call([config.CONFIGTOOL, self.config, '--write', '--arch', self.arch], shell=True)
                 subprocess.call([config.CONFIGTOOL, self.config, '--write', '--bit-size', '32'], shell=True)
                 subprocess.call([config.CONFIGTOOL, self.config, '--write', '--file-class', '32'], shell=True)
                 subprocess.call([config.CONFIGTOOL, self.config, '--write', '--endian', self.args.endian], shell=True)
 
             # Check whether the correct target architecture was specified.
-            if self.args.arch == 'arm' or self.args.arch == 'thumb':
+            if self.arch == 'arm' or self.arch == 'thumb':
                 ords_dir = config.ARM_ORDS_DIR
-            elif self.args.arch == 'x86':
+            elif self.arch == 'x86':
                 ords_dir = config.X86_ORDS_DIR
-            elif self.args.arch == 'powerpc' or self.args.arch == 'mips' or self.args.arch == 'pic32':
+            elif self.arch == 'powerpc' or self.arch == 'mips' or self.arch == 'pic32':
                 pass
             else:
                 # nothing
@@ -1101,7 +1022,8 @@ class Decompiler:
 
                     self.cleanup()
                     Utils.print_error(
-                        'Unsupported target architecture %s. Supported architectures: Intel x86, ARM, ARM + Thumb, MIPS, PIC32, PowerPC.' % self.args.arch)
+                        'Unsupported target architecture %s. Supported architectures: Intel x86, ARM, ARM + Thumb, MIPS, PIC32, PowerPC.' % self.arch)
+                    return
 
             # Check file class (e.g. 'ELF32', 'ELF64'). At present, we can only decompile 32-bit files.
             # Note: we prefer to report the 'unsupported architecture' error (above) than this 'generic' error.
@@ -1115,12 +1037,14 @@ class Decompiler:
 
                 self.cleanup()
                 Utils.print_error(
-                    'Unsupported target format '' + (FORMAT^^) + (FILECLASS) + ''. Supported formats: ELF32, PE32, Intel HEX 32, Mach-O 32.')
+                    'Unsupported target format \'%s%s\'. Supported formats: ELF32, PE32, Intel HEX 32, Mach-O 32.' % (
+                    format, fileclass))
+                return
 
             # Set path to statically linked code signatures.
             #
             # TODO: Using ELF for IHEX is ok, but for raw, we probably should somehow decide between ELF and PE, or use both, for RAW.
-            sig_format = FORMAT
+            sig_format = format
 
             if sig_format == 'ihex' or sig_format == 'raw':
                 sig_format = 'elf'
@@ -1135,12 +1059,12 @@ class Decompiler:
             else:
                 sig_endian = ''
 
-            sig_arch = self.args.arch
+            sig_arch = self.arch
 
             if sig_arch == 'pic32':
                 sig_arch = 'mips'
 
-            signatures_dir = os.path.join(config.GENERIC_SIGNATURES_DIR, sig_format, fileclass, sig_endian)
+            signatures_dir = os.path.join(config.GENERIC_SIGNATURES_DIR, sig_format, fileclass, sig_endian, sig_arch)
             # SIGNATURES_DIR = config.GENERIC_SIGNATURES_DIR + '/' + SIG_FORMAT + '/' + FILECLASS + '/' + SIG_ENDIAN + '/' + (
             #    SIG_ARCH)
 
@@ -1151,31 +1075,32 @@ class Decompiler:
                 subprocess.call([config.CONFIGTOOL, self.config, '--write', '--keep-unreachable-funcs', 'true'],
                                 shell=True)
 
-            # Get signatures from selected archives.
-            if len(self.args.static_code_archive) > 0:
-                print()
-                print('##### Extracting signatures from selected archives...')
+            if self.args.static_code_archive is not None:
+                # Get signatures from selected archives.
+                if len(self.args.static_code_archive) > 0:
+                    print()
+                    print('##### Extracting signatures from selected archives...')
 
-            lib_index = 0
-            for lib in self.args.static_code_archive:
+                lib_index = 0
+                for lib in self.args.static_code_archive:
 
-                print('Extracting signatures from file \'%s\'', lib)
-                CROP_ARCH_PATH = os.popen(
-                    'basename \'' + lib + '\' | LC_ALL=C sed -e \'s/[^A-Za-z0-9_.-]/_/g\'').read().rstrip('\n')
-                sig_out = self.output + '.' + CROP_ARCH_PATH + '.' + lib_index + '.yara'
+                    print('Extracting signatures from file \'%s\'', lib)
+                    CROP_ARCH_PATH = os.popen(
+                        'basename \'' + lib + '\' | LC_ALL=C sed -e \'s/[^A-Za-z0-9_.-]/_/g\'').read().rstrip('\n')
+                    sig_out = self.output + '.' + CROP_ARCH_PATH + '.' + lib_index + '.yara'
 
-                # if (subprocess.call(config.SIG_FROM_LIB + ' ' + lib + ' ' + '--output' + ' ' + SIG_OUT, shell=True,
-                #                    stderr=subprocess.STDOUT, stdout=subprocess.DEVNULL)):
-                # Call sig from lib tool
-                sig_from_lib = SigFromLib([lib, '--output ' + sig_out])
-                if sig_from_lib.run():
-                    subprocess.call([config.CONFIGTOOL, self.config, '--write', '--user-signature', sig_out],
-                                    shell=True)
-                    signatures_to_remove = [sig_out]
-                else:
-                    Utils.print_warning('Failed extracting signatures from file \'' + lib + '\'')
+                    # if (subprocess.call(config.SIG_FROM_LIB + ' ' + lib + ' ' + '--output' + ' ' + SIG_OUT, shell=True,
+                    #                    stderr=subprocess.STDOUT, stdout=subprocess.DEVNULL)):
+                    # Call sig from lib tool
+                    sig_from_lib = SigFromLib([lib, '--output ' + sig_out])
+                    if sig_from_lib.run():
+                        subprocess.call([config.CONFIGTOOL, self.config, '--write', '--user-signature', sig_out],
+                                        shell=True)
+                        self.signatures_to_remove = [sig_out]
+                    else:
+                        Utils.print_warning('Failed extracting signatures from file \'' + lib + '\'')
 
-                lib_index += 1
+                    lib_index += 1
 
             # Store paths of signature files into config for frontend.
             if not self.args.no_default_static_signatures:
@@ -1234,18 +1159,17 @@ class Decompiler:
             if self.out_frontend_ll == out_backend + '.ll':
                 out_backend = self.output + '.backend.backend'
 
-            out_backend_bc = out_backend + '.bc'
-            OUT_BACKEND_LL = out_backend + '.ll'
+            self.out_backend_bc = out_backend + '.bc'
+            self.out_backend_ll = out_backend + '.ll'
 
-            bin2llvmir_params = []
             ##
             ## Decompile the binary into LLVM IR.
             ##
+            bin2llvmir_params = config.BIN2LLVMIR_PARAMS
+
             if self.args.keep_unreachable_funcs:
                 # Prevent bin2llvmir from removing unreachable functions.
-                bin2llvmir_params = os.popen(
-                    'sed \' s / -unreachable-funcs * // g\' <<< \'' + config.BIN2LLVMIR_PARAMS + '\'').read().rstrip(
-                    '\n')
+                bin2llvmir_params.remove('-unreachable-funcs')
 
             if not self.config and self.args.config:
                 self.config = self.args.config
@@ -1259,16 +1183,19 @@ class Decompiler:
                 bin2llvmir_params.append('-max-memory-half-ram')
 
             print()
-            print('##### Decompiling ' + self.input + ' into ' + out_backend_bc + '...')
-            print('RUN: ' + config.BIN2LLVMIR + ' ' + ' '.join(bin2llvmir_params) + ' -o ' + out_backend_bc)
+            print('##### Decompiling ' + self.input + ' into ' + self.out_backend_bc + '...')
+            print('RUN: ' + config.BIN2LLVMIR + ' ' + ' '.join(bin2llvmir_params) + ' -o ' + self.out_backend_bc)
+
+            bin2llvmir_rc = 0
 
             if self.args.generate_log:
+                """
                 PID = 0
                 bin2llvmir_rc = 0
 
                 def thread1():
-                    subprocess.call([TIME, config.BIN2LLVMIR, ' '.join(bin2llvmir_params), '-o', ' '.join(
-                        out_backend_bc)], shell=True, stdout=open(tool_log_file, 'wb'), stderr=subprocess.STDOUT)
+                    subprocess.call([TIME, config.BIN2LLVMIR, ' '.join(bin2llvmir_params), '-o',
+                        self.out_backend_bc], shell=True, stdout=open(tool_log_file, 'wb'), stderr=subprocess.STDOUT)
 
                     threading.Thread(target=thread1).start()
 
@@ -1289,9 +1216,11 @@ class Decompiler:
                 LOG_BIN2LLVMIR_MEMORY = self.get_tool_memory_usage(BIN2LLVMIR_AND_TIME_OUTPUT)
                 LOG_BIN2LLVMIR_OUTPUT = self.get_tool_output(BIN2LLVMIR_AND_TIME_OUTPUT)
                 print(LOG_BIN2LLVMIR_OUTPUT, end='')
+                """
             else:
-                bin2llvmir_rc = subprocess.call([config.BIN2LLVMIR, ' '.join(bin2llvmir_params), '-o', out_backend_bc],
-                                                shell=True)
+                bin2llvmir_rc = subprocess.call(
+                    [config.BIN2LLVMIR, ' '.join(bin2llvmir_params), '-o', self.out_backend_bc],
+                    shell=True)
 
             if bin2llvmir_rc != 0:
                 if self.args.generate_log:
@@ -1306,7 +1235,7 @@ class Decompiler:
 
         # LL mode goes straight to backend.
         if self.args.mode == 'll':
-            out_backend_bc = self.input
+            self.out_backend_bc = self.input
             self.config = self.args.config
 
         # Create parameters for the $LLVMIR2HLL call.
@@ -1315,7 +1244,7 @@ class Decompiler:
                                  self.args.backend_call_info_obtainer), '-arithm-expr-evaluator=' + (
                                  self.args.backend_arithm_expr_evaluator), '-validate-module',
                              '-llvmir2bir-converter=' + (
-                                 self.args.backend_llvmir2bir_converter), '-o', self.output, out_backend_bc]
+                                 self.args.backend_llvmir2bir_converter), '-o', self.output, self.out_backend_bc]
 
         if self.args.backend_no_debug:
             llvmir2hll_params.append('-enable-debug')
@@ -1386,10 +1315,13 @@ class Decompiler:
 
         # Decompile the optimized IR code.
         print()
-        print('##### Decompiling ' + out_backend_bc + ' into ' + self.output + '...')
+        print('##### Decompiling ' + self.out_backend_bc + ' into ' + self.output + '...')
         print('RUN: ' + config.LLVMIR2HLL + ' ' + ' '.join(llvmir2hll_params))
 
+        llvmir2hll_rc = 0
+
         if self.args.generate_log:
+            """
             PID = 0
 
             def thread3():
@@ -1418,15 +1350,16 @@ class Decompiler:
             print(LOG_LLVMIR2HLL_OUTPUT)
             # Wait a bit to ensure that all the memory that has been assigned to the tool was released.
             time.sleep(0.1)
+            """
         else:
-            llvmir2hll_rc = subprocess.call([config.LLVMIR2HLL, ' '.join(llvmir2hll_params)], shell=True)
+            llvmir2hll_rc = subprocess.call([config.LLVMIR2HLL] + llvmir2hll_params, shell=True)
 
         if llvmir2hll_rc != 0:
             if self.args.generate_log:
                 self.generate_log()
 
             self.cleanup()
-            Utils.print_error('Decompilation of file %s failed' % out_backend_bc)
+            Utils.print_error('Decompilation of file %s failed' % self.out_backend_bc)
 
             self.check_whether_decompilation_should_be_forcefully_stopped('llvmir2hll')
 
@@ -1457,11 +1390,13 @@ class Decompiler:
         # Note: Do not use the -i flag (in-place replace) as there is apparently no way
         #       of getting sed -i to work consistently on both MacOS and Linux.
         # TODO
-        _rc4 = subprocess.call(
-            'sed' + ' ' + '-e' + ' ' + ':a' + ' ' + '-e' + ' ' + '/^\\n*$/{$d;N;};/\\n$/ba' + ' ' + '-e' + ' ' + 's/[[:space:]]*$//',
-            shell=True, stdin=open(self.output, 'rb'), stdout=open(self.output + '.tmp', 'wb'))
+        with open(self.output, 'r') as file:
+            new = [line.rstrip() for line in file]
 
-        shutil.move(self.output + '.tmp', self.output)
+        with open(self.output, 'w') as fh:
+            [fh.write('%s\n' % line) for line in new]
+
+        # shutil.move(self.output + '.tmp', self.output)
 
         # Colorize output file.
         if self.args.color_for_ida:

@@ -9,6 +9,7 @@ import shutil
 import signal
 import subprocess
 import sys
+from timeit import Timer
 
 import retdec_config as config
 
@@ -160,15 +161,43 @@ class _WindowsProcess(subprocess.Popen):
         subprocess.call(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
 
+class TimeMeasuredProcess:
+
+    def __init__(self):
+        self.output = ''
+        self.rc = 0
+
+    def run_cmd(self, args):
+        """
+
+        :param args:
+        :return: (output, return_code, time)
+        """
+
+        def runProcess():
+            cmd = CmdRunner()
+
+            self.output, self.rc, _ = cmd.run_cmd(args)
+
+        t = Timer(runProcess)
+
+        return self.output, self.rc, t.timeit(1)
+
+
 class Utils:
 
     @staticmethod
-    def remove_forced(path):
+    def remove_file_forced(file):
+        if os.path.exists(file):
+            os.remove(file)
+
+    @staticmethod
+    def remove_dir_forced(path):
         if os.path.exists(path):
             for n in os.listdir(path):
                 p = os.path.join(path, n)
                 if os.path.isdir(p):
-                    shutil.rmtree(p)
+                    shutil.rmtree(p, ignore_errors=True)
                 else:
                     os.unlink(p)
 
@@ -309,7 +338,7 @@ class Utils:
                   1 if file is not archive
         """
         return subprocess.call([config.EXTRACT, '--check-archive', path], shell=True,
-                               stderr=subprocess.STDOUT, stdout=None)
+                               stderr=subprocess.STDOUT, stdout=subprocess.DEVNULL) != 2
 
     @staticmethod
     def is_decimal_number(num):
