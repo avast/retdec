@@ -8,7 +8,6 @@ import hashlib
 import os
 import re
 import shutil
-import subprocess
 import sys
 import time
 
@@ -164,22 +163,27 @@ def parse_args():
 
     parser.add_argument('--backend-no-debug-comments',
                         dest='backend_no_debug_comments',
+                        action='store_true',
                         help='Disables the emission of debug comments in the generated code.')
 
     parser.add_argument('--backend-no-opts',
                         dest='backend_no_opts',
+                        action='store_true',
                         help='Disables backend optimizations.')
 
     parser.add_argument('--backend-no-symbolic-names',
                         dest='backend_no_symbolic_names',
+                        action='store_true',
                         help='Disables the conversion of constant arguments to their symbolic names.')
 
     parser.add_argument('--backend-no-time-varying-info',
                         dest='backend_no_time_varying_info',
+                        action='store_true',
                         help='Do not emit time-varying information, like dates.')
 
     parser.add_argument('--backend-no-var-renaming',
                         dest='backend_no_var_renaming',
+                        action='store_true',
                         help='Disables renaming of variables in the backend.')
 
     parser.add_argument('--backend-semantics',
@@ -188,6 +192,7 @@ def parse_args():
 
     parser.add_argument('--backend-strict-fpu-semantics',
                         dest='backend_strict_fpu_semantics',
+                        action='store_true',
                         help='Disables backend optimizations.')
 
     parser.add_argument('--backend-var-renamer',
@@ -199,10 +204,12 @@ def parse_args():
 
     parser.add_argument('--cleanup',
                         dest='cleanup',
+                        action='store_true',
                         help='Removes temporary files created during the decompilation.')
 
     parser.add_argument('--color-for-ida',
                         dest='color_for_ida',
+                        action='store_true',
                         help='Put IDA Pro color tags to output C file.')
 
     parser.add_argument('--config',
@@ -211,14 +218,17 @@ def parse_args():
 
     parser.add_argument('--no-config',
                         dest='no_config',
+                        action='store_true',
                         help='State explicitly that config file is not to be used.')
 
     parser.add_argument('--fileinfo-verbose',
                         dest='fileinfo_verbose',
+                        action='store_true',
                         help='Print all detected information about input file.')
 
     parser.add_argument('--fileinfo-use-all-external-patterns',
                         dest='fileinfo_use_all_external_patterns',
+                        action='store_true',
                         help='Use all detection rules from external YARA databases.')
 
     parser.add_argument('--graph-format',
@@ -240,6 +250,7 @@ def parse_args():
 
     parser.add_argument('--select-decode-only',
                         dest='selected_decode_only',
+                        action='store_true',
                         help='Decode only selected parts (functions/ranges). Faster decompilation, but worse results.')
 
     parser.add_argument('--select-functions',
@@ -270,6 +281,7 @@ def parse_args():
 
     parser.add_argument('--no-default-static-signatures',
                         dest='no_default_static_signatures',
+                        action='store_true',
                         help='No default signatures for statically linked code analysis are loaded '
                              '(options static-code-sigfile/archive are still available).')
 
@@ -280,6 +292,7 @@ def parse_args():
 
     parser.add_argument('--no-memory-limit',
                         dest='no_memory_limit',
+                        action='store_true',
                         help='Disables the default memory limit (half of system RAM) of fileinfo, '
                              'unpacker, bin2llvmir, and llvmir2hll.')
 
@@ -469,6 +482,8 @@ class Decompiler:
             print()
             print('#### Forced stop due to  - -stop - after %s...' % self.args.stop_after)
             # sys.exit(0)
+            return True
+        return False
 
     def cleanup(self):
         """Cleanup working directory"""
@@ -679,7 +694,7 @@ class Decompiler:
         cmd = CmdRunner()
         # Check arguments and set default values for unset options.
         if not self.check_arguments():
-            return
+            return 1
 
         # Initialize variables used by logging.
         if self.args.generate_log:
@@ -713,21 +728,23 @@ class Decompiler:
                     print('##### Restoring static library with architecture family ' + self.args.arch + '...')
                     print(
                         'RUN: ' + config.EXTRACT + ' --family ' + self.args.arch + ' --out ' + out_archive + ' ' + self.input)
-                    if (not subprocess.call(
-                            [config.EXTRACT, '--family', self.args.arch, '--out', out_archive, self.input],
-                            shell=True)):
+
+                    _, extract_rc, _ = cmd.run_cmd(
+                        [config.EXTRACT, '--family', self.args.arch, '--out', out_archive, self.input])
+                    if not extract_rc:
                         # Architecture not supported
                         print('Invalid --arch option \'' + self.args.arch +
                               '\'. File contains these architecture families:')
-                        subprocess.call([config.EXTRACT, '--list', self.input], shell=True)
+                        cmd.run_cmd([config.EXTRACT, '--list', self.input])
                         self.cleanup()
-                        sys.exit(1)
+                        # sys.exit(1)
+                        return 1
                 else:
                     # Pick best architecture
                     print()
                     print('##### Restoring best static library for decompilation...')
                     print('RUN: ' + config.EXTRACT + ' --best --out ' + out_archive + ' ' + self.input)
-                    subprocess.call([config.EXTRACT, '--best', '--out', out_archive, self.input], shell=True)
+                    cmd.run_cmd([config.EXTRACT, '--best', '--out', out_archive, self.input])
 
                 self.input = out_archive
 
@@ -742,20 +759,20 @@ class Decompiler:
                 if Utils.has_thin_archive_signature(self.input):
                     self.cleanup()
                     Utils.print_error('File is a thin archive and cannot be decompiled.')
-                    return
+                    return 1
 
                 # Check if our tools can handle it.
                 if not Utils.is_valid_archive(self.input):
                     self.cleanup()
                     Utils.print_error('The input archive has invalid format.')
-                    return
+                    return 1
 
                 # Get and check number of objects.
                 arch_object_count = Utils.archive_object_count(self.input)
                 if arch_object_count <= 0:
                     self.cleanup()
                     Utils.print_error('The input archive is empty.')
-                    return
+                    return 1
 
                 # Prepare object output path.
                 out_restored = self.output + '.restored'
@@ -775,11 +792,11 @@ class Decompiler:
                             Utils.print_error('File on index \'' + self.args.ar_index
                                               + '\' was not found in the input archive. Valid indexes are 0-' + (
                                                   valid_index) + '.')
-                            return
+                            return 1
                         else:
                             Utils.print_error('File on index \'' + self.args.ar_index +
                                               '\' was not found in the input archive. The only valid index is 0.')
-                            return
+                            return 1
 
                     self.input = out_restored
                 elif self.args.ar_name:
@@ -791,6 +808,8 @@ class Decompiler:
                     if not Utils.archive_get_by_name(self.input, self.args.ar_name, out_restored):
                         self.cleanup()
                         Utils.print_error('File named %s was not found in the input archive.' % self.args.ar_name)
+                        return 1
+
                     self.input = out_restored
                 else:
                     # Print list of files.
@@ -799,7 +818,7 @@ class Decompiler:
 
                     Utils.archive_list_numbered_content(self.input)
                     self.cleanup()
-                    sys.exit(1)
+                    return 1
             else:
                 if self.args.ar_name:
                     Utils.print_warning('Option --ar-name can be used only with archives.')
@@ -826,35 +845,32 @@ class Decompiler:
 
             # Preprocess existing file or create a new, empty JSON file.
             if os.path.isfile(self.config):
-                subprocess.call([config.CONFIGTOOL, self.config, '--preprocess'], shell=True)
+                cmd.run_cmd([config.CONFIGTOOL, self.config, '--preprocess'])
             else:
                 with open(self.config, 'w') as f:
                     f.write('{}')
 
             # Raw data needs architecture, endianess and optionaly sections's vma and entry point to be specified.
             if self.args.mode == 'raw':
-                if not self.args.arch or self.args.arch == 'unknown' or self.args.arch == '':
+                if not self.arch or self.arch == 'unknown' or self.arch == '':
                     Utils.print_error('Option -a|--arch must be used with mode ' + self.args.mode)
-                    return
+                    return 1
 
                 if not self.args.endian:
                     Utils.print_error('Option -e|--endian must be used with mode ' + self.args.mode)
-                    return
+                    return 1
 
-                subprocess.call([config.CONFIGTOOL, self.config, '--write', '--format', 'raw'], shell=True)
-                subprocess.call([config.CONFIGTOOL, self.config, '--write', '--arch', self.args.arch], shell=True)
-                subprocess.call([config.CONFIGTOOL, self.config, '--write', '--bit-size', '32'], shell=True)
-                subprocess.call([config.CONFIGTOOL, self.config, '--write', '--file-class', '32'], shell=True)
-                subprocess.call([config.CONFIGTOOL, self.config, '--write', '--endian', self.args.endian], shell=True)
+                cmd.run_cmd([config.CONFIGTOOL, self.config, '--write', '--format', 'raw'])
+                cmd.run_cmd([config.CONFIGTOOL, self.config, '--write', '--arch', self.arch])
+                cmd.run_cmd([config.CONFIGTOOL, self.config, '--write', '--bit-size', '32'])
+                cmd.run_cmd([config.CONFIGTOOL, self.config, '--write', '--file-class', '32'])
+                cmd.run_cmd([config.CONFIGTOOL, self.config, '--write', '--endian', self.args.endian])
 
                 if self.args.raw_entry_point:
-                    subprocess.call(
-                        [config.CONFIGTOOL, self.config, '--write', '--entry-point', self.args.raw_entry_point],
-                        shell=True)
+                    cmd.run_cmd([config.CONFIGTOOL, self.config, '--write', '--entry-point', self.args.raw_entry_point])
 
                 if self.args.raw_section_vma:
-                    subprocess.call([config.CONFIGTOOL, self.config, '--write', '--section-vma',
-                                     self.args.raw_section_vma], shell=True)
+                    cmd.run_cmd([config.CONFIGTOOL, self.config, '--write', '--section-vma', self.args.raw_section_vma])
 
             #
             # Call fileinfo to create an initial config file.
@@ -905,8 +921,10 @@ class Decompiler:
                 self.cleanup()
                 # The error message has been already reported by fileinfo in stderr.
                 Utils.print_error('')
+                return 1
 
-            self.check_whether_decompilation_should_be_forcefully_stopped('fileinfo')
+            if self.check_whether_decompilation_should_be_forcefully_stopped('fileinfo'):
+                return 0
 
             ##
             ## Unpacking.
@@ -928,14 +946,17 @@ class Decompiler:
             else:
                 _, unpacker_rc = unpacker.unpack_all()
 
-                self.check_whether_decompilation_should_be_forcefully_stopped('unpacker')
+                if self.check_whether_decompilation_should_be_forcefully_stopped('unpacker'):
+                    return 0
 
             # RET_UNPACK_OK=0
             # RET_UNPACKER_NOTHING_TO_DO_OTHERS_OK=1
             # RET_NOTHING_TO_DO=2
             # RET_UNPACKER_FAILED_OTHERS_OK=3
             # RET_UNPACKER_FAILED=4
-            if unpacker_rc == 0 or unpacker_rc == 1 or unpacker_rc == 3:
+            if unpacker_rc == Unpacker.RET_UNPACK_OK or unpacker_rc == Unpacker.RET_UNPACKER_NOTHING_TO_DO_OTHERS_OK \
+                    or unpacker_rc == Unpacker.RET_UNPACKER_FAILED_OTHERS_OK:
+
                 # Successfully unpacked -> re-run fileinfo to obtain fresh information.
                 self.input = self.out_unpacked
                 fileinfo_params = ['-c', self.config, '--similarity', self.input, '--no-hashes=all']
@@ -991,15 +1012,16 @@ class Decompiler:
                     self.cleanup()
                     # The error message has been already reported by fileinfo in stderr.
                     Utils.print_error('')
+                    return 1
 
                 self.print_warning_if_decompiling_bytecode()
 
             # Check whether the architecture was specified.
-            if self.args.arch:
-                cmd.run_cmd([config.CONFIGTOOL, self.config, '--write', '--arch', self.args.arch])
+            if self.arch:
+                cmd.run_cmd([config.CONFIGTOOL, self.config, '--write', '--arch', self.arch])
             else:
                 # Get full name of the target architecture including comments in parentheses
-                arch_full = os.popen(config.CONFIGTOOL + ' ' + self.config + ' --read --arch').read().rstrip('\n')
+                arch_full, _, _ = cmd.run_cmd([config.CONFIGTOOL, self.config, '--read', '--arch'])
                 arch_full = arch_full.lower()
 
                 # Strip comments in parentheses and all trailing whitespace
@@ -1012,11 +1034,11 @@ class Decompiler:
             if fileformat in ['ihex']:
                 if not self.arch or self.arch == 'unknown':
                     Utils.print_error('Option -a|--arch must be used with format ' + fileformat)
-                    return
+                    return 1
 
                 if not self.args.endian:
                     Utils.print_error('Option -e|--endian must be used with format ' + fileformat)
-                    return
+                    return 1
 
                 cmd.run_cmd([config.CONFIGTOOL, self.config, '--write', '--arch', self.arch])
                 cmd.run_cmd([config.CONFIGTOOL, self.config, '--write', '--bit-size', '32'])
@@ -1037,8 +1059,9 @@ class Decompiler:
 
                 self.cleanup()
                 Utils.print_error(
-                    'Unsupported target architecture %s. Supported architectures: Intel x86, ARM, ARM + Thumb, MIPS, PIC32, PowerPC.' % self.arch)
-                return
+                    'Unsupported target architecture %s. Supported architectures: Intel x86, ARM, ARM + Thumb, MIPS, PIC32, PowerPC.'
+                    % self.arch)
+                return 1
 
             # Check file class (e.g. 'ELF32', 'ELF64'). At present, we can only decompile 32-bit files.
             # Note: we prefer to report the 'unsupported architecture' error (above) than this 'generic' error.
@@ -1052,6 +1075,7 @@ class Decompiler:
                 Utils.print_error(
                     'Unsupported target format \'%s%s\'. Supported formats: ELF32, PE32, Intel HEX 32, Mach-O 32.' % (
                         format, fileclass))
+                return 1
 
             # Set path to statically linked code signatures.
             #
@@ -1062,7 +1086,6 @@ class Decompiler:
                 sig_format = 'elf'
 
             endian_result, _, _ = cmd.run_cmd([config.CONFIGTOOL, self.config, '--read', '--endian'])
-            # ENDIAN = os.popen(config.CONFIGTOOL + ' ' + CONFIG + ' --read --endian').read().rstrip('\n')
 
             if endian_result == 'little':
                 sig_endian = 'le'
@@ -1071,9 +1094,10 @@ class Decompiler:
             else:
                 if self.args.generate_log:
                     self.generate_log()
+
                 self.cleanup()
                 Utils.print_error('Cannot determine endiannesss.')
-                return
+                return 1
 
             sig_arch = self.arch
 
@@ -1081,8 +1105,6 @@ class Decompiler:
                 sig_arch = 'mips'
 
             signatures_dir = os.path.join(config.GENERIC_SIGNATURES_DIR, sig_format, fileclass, sig_endian, sig_arch)
-            # SIGNATURES_DIR = config.GENERIC_SIGNATURES_DIR + '/' + SIG_FORMAT + '/' + FILECLASS + '/' + SIG_ENDIAN + '/' + (
-            #    SIG_ARCH)
 
             self.print_warning_if_decompiling_bytecode()
 
@@ -1100,12 +1122,13 @@ class Decompiler:
                 for lib in self.args.static_code_archive:
 
                     print('Extracting signatures from file \'%s\'', lib)
-                    CROP_ARCH_PATH, _, _ = cmd.run_cmd(
+                    # TODO replace command
+                    crop_arch_path, _, _ = cmd.run_cmd(
                         'basename \'' + lib + '\' | LC_ALL=C sed -e \'s/[^A-Za-z0-9_.-]/_/g\'')
-                    sig_out = self.output + '.' + CROP_ARCH_PATH + '.' + lib_index + '.yara'
+                    sig_out = self.output + '.' + crop_arch_path + '.' + lib_index + '.yara'
 
                     # Call sig from lib tool
-                    sig_from_lib = SigFromLib([lib, '--output ' + sig_out])
+                    sig_from_lib = SigFromLib([lib, '--output', sig_out])
                     if sig_from_lib.run():
                         cmd.run_cmd([config.CONFIGTOOL, self.config, '--write', '--user-signature', sig_out])
                         self.signatures_to_remove.append(sig_out)
@@ -1122,6 +1145,7 @@ class Decompiler:
             if self.args.static_code_sigfile:
                 for i in self.args.static_code_sigfile:
                     cmd.run_cmd([config.CONFIGTOOL, self.config, '--write', '--user-signature', i])
+
             # Store paths of type files into config for frontend.
             # TODO doesnt even exist in sh except here
             # if os.path.isdir(GENERIC_TYPES_DIR):
@@ -1129,7 +1153,7 @@ class Decompiler:
 
             # Store path of directory with ORD files into config for frontend (note: only directory, not files themselves).
             if os.path.isdir(ords_dir):
-                cmd.run_cmd([config.CONFIGTOOL, self.config, '--write', '--ords', ords_dir + '/'])
+                cmd.run_cmd([config.CONFIGTOOL, self.config, '--write', '--ords', ords_dir + os.path.sep])
 
             # Store paths to file with PDB debugging information into config for frontend.
             if self.args.pdb and os.path.exists(self.args.pdb):
@@ -1171,9 +1195,9 @@ class Decompiler:
             self.out_backend_bc = out_backend + '.bc'
             self.out_backend_ll = out_backend + '.ll'
 
-            ##
-            ## Decompile the binary into LLVM IR.
-            ##
+            #
+            # Decompile the binary into LLVM IR.
+            #
             bin2llvmir_params = config.BIN2LLVMIR_PARAMS
 
             if self.args.keep_unreachable_funcs:
@@ -1239,7 +1263,8 @@ class Decompiler:
                 Utils.print_error('Decompilation to LLVM IR failed')
                 return
 
-            self.check_whether_decompilation_should_be_forcefully_stopped('bin2llvmir')
+            if self.check_whether_decompilation_should_be_forcefully_stopped('bin2llvmir'):
+                return 0
 
         # modes 'bin' || 'raw'
 
@@ -1371,9 +1396,10 @@ class Decompiler:
 
             self.cleanup()
             Utils.print_error('Decompilation of file %s failed' % self.out_backend_bc)
-            return
+            return 1
 
-        self.check_whether_decompilation_should_be_forcefully_stopped('llvmir2hll')
+        if self.check_whether_decompilation_should_be_forcefully_stopped('llvmir2hll'):
+            return 0
 
         # Convert .dot graphs to desired format.
         if ((self.args.backend_emit_cg and self.args.backend_cg_conversion == 'auto') or (
@@ -1815,9 +1841,11 @@ class Decompiler:
                 break
         """
 
+        return 0
+
 
 if __name__ == '__main__':
     args = parse_args()
 
     decompiler = Decompiler(args)
-    decompiler.decompile()
+    sys.exit(decompiler.decompile())
