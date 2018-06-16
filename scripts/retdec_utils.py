@@ -21,7 +21,7 @@ class CmdRunner:
     """A runner of external commands."""
 
     def run_cmd(self, cmd, input=b'', timeout=None, input_encoding='utf-8',
-                output_encoding='utf-8', strip_shell_colors=True):
+                output_encoding='utf-8', strip_shell_colors=True, stdout=subprocess.STDOUT):
         """Runs the given command (synchronously).
 
         :param list cmd: Command to be run as a list of arguments (strings).
@@ -74,15 +74,15 @@ class CmdRunner:
         try:
             p = self.start(cmd)
             output, _ = p.communicate(input, timeout)
-            return decode(output), p.returncode, False
+            return decode(output).rstrip(), p.returncode, False
         except subprocess.TimeoutExpired:
             # Kill the process, along with all its child processes.
             p.kill()
             # Finish the communication to obtain the output.
             output, _ = p.communicate()
-            return decode(output), p.returncode, True
+            return decode(output).rstrip(), p.returncode, True
 
-    def start(self, cmd, discard_output=False):
+    def start(self, cmd, discard_output=False, stdout=subprocess.STDOUT):
         """Starts the given command and returns a handler to it.
 
         :param list cmd: Command to be run as a list of arguments (strings).
@@ -100,7 +100,7 @@ class CmdRunner:
             args=cmd,
             stdin=subprocess.PIPE,
             stdout=subprocess.DEVNULL if discard_output else subprocess.PIPE,
-            stderr=subprocess.DEVNULL if discard_output else subprocess.STDOUT
+            stderr=subprocess.DEVNULL if discard_output else stdout
         )
         if Utils.is_windows():
             return _WindowsProcess(**kwargs)
