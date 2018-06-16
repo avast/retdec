@@ -171,7 +171,7 @@ class SigFromLib:
 
 
 if __name__ == '__main__':
-    args = parse_args()
+    args = parse_args(sys.argv)
 
     sig = SigFromLib(args)
     sys.exit(sig.run())

@@ -98,7 +98,7 @@ class ArchiveDecompiler:
                 self.use_json_format = True
 
         if self.args.arg_list:
-            self.decompiler_sh_args = ' '.join(self.args.arg_list)
+            self.decompiler_sh_args = self.args.arg_list
 
         if self.args.file:
             if not (os.path.isfile(self.args.file)):
@@ -162,8 +162,8 @@ class ArchiveDecompiler:
         # Run the decompilation script over all the found files.
         print('Running \`%s' % config.DECOMPILER_SH, end='')
 
-        if self.decompiler_sh_args != '':
-            print(self.decompiler_sh_args, end='')
+        if self.decompiler_sh_args:
+            print(' '.join(self.decompiler_sh_args), end='')
 
         print('\` over %d files with timeout %d s. (run \`kill %d \` to terminate this script)...' % (
             self.file_count, self.timeout, os.getpid()), file=sys.stderr)
@@ -179,7 +179,7 @@ class ArchiveDecompiler:
             # Do not escape!
             output, _, timeouted = cmd.run_cmd([config.DECOMPILER_SH, '--ar-index=' + str(i), '-o',
                                                 self.library_path + '.file_' + str(file_index) + '.c',
-                                                self.library_path, self.decompiler_sh_args], timeout=self.timeout)
+                                                self.library_path, *self.decompiler_sh_args], timeout=self.timeout)
 
             with open(log_file, 'wb') as f:
                 f.write(output)
@@ -194,7 +194,7 @@ class ArchiveDecompiler:
 
 
 if __name__ == '__main__':
-    args = parse_args()
+    args = parse_args(sys.argv)
 
     archive_decompiler = ArchiveDecompiler(args)
     archive_decompiler.decompile_archive()
