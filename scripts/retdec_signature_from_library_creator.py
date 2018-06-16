@@ -14,7 +14,7 @@ import retdec_config as config
 from retdec_utils import Utils
 
 
-def parse_args():
+def parse_args(_args):
     parser = argparse.ArgumentParser(description=__doc__,
                                      formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
@@ -53,12 +53,12 @@ def parse_args():
                         action='store_true',
                         help='Stop after bin2pat.')
 
-    return parser.parse_args()
+    return parser.parse_args(_args)
 
 
 class SigFromLib:
     def __init__(self, _args):
-        self.args = _args
+        self.args = parse_args(_args)
         self.ignore_nop = ''
         self.file_path = ''
         self.tmp_dir_path = ''

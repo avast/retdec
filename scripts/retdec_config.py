@@ -45,11 +45,11 @@ BIN2LLVMIR_LLVM_PASSES_ONLY = ['-instcombine', '-tbaa', '-targetlibinfo', '-basi
                               '-lower-expect', '-targetlibinfo', '-tbaa', '-basicaa', '-globalopt', '-mem2reg', '-instcombine',
                               '-simplifycfg', '-basiccg', '-domtree', '-early-cse', '-lazy-value-info', '-jump-threading',
                               '-correlated-propagation', '-simplifycfg', '-instcombine', '-simplifycfg', '-reassociate', '-domtree',
-                              '-loops -loop-simplify', '-lcssa', '-loop-rotate', '-licm', '-lcssa', '-instcombine', '-scalar-evolution',
+                              '-loops', '-loop-simplify', '-lcssa', '-loop-rotate', '-licm', '-lcssa', '-instcombine', '-scalar-evolution',
                               '-loop-simplifycfg', '-loop-simplify', '-aa', '-loop-accesses', '-loop-load-elim', '-lcssa', '-indvars',
                               '-loop-idiom', '-loop-deletion', '-memdep', '-gvn', '-memdep', '-sccp', '-instcombine', '-lazy-value-info',
                               '-jump-threading', '-correlated-propagation', '-domtree', '-memdep', '-dse', '-dce', '-bdce', '-adce', '-die',
-                              '-simplifycfg -instcombine -strip-dead-prototypes -globaldce -constmerge -constprop'
+                              '-simplifycfg', '-instcombine', '-strip-dead-prototypes', '-globaldce', '-constmerge', '-constprop',
                               '-instnamer', '-domtree', '-instcombine']
 
 BIN2LLVMIR_PARAMS = ['-provider-init', '-decoder', '-verify', '-main-detection', '-idioms-libgcc', '-inst-opt', '-register',

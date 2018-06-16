@@ -10,15 +10,12 @@ import re
 import shutil
 import subprocess
 import sys
-import threading
 import time
-from datetime import date
-from pathlib import Path
 
 import retdec_config as config
-from retdec_utils import Utils, CmdRunner, TimeMeasuredProcess
 from retdec_signature_from_library_creator import SigFromLib
 from retdec_unpacker import Unpacker
+from retdec_utils import Utils, CmdRunner
 
 
 def parse_args():
@@ -241,11 +238,11 @@ def parse_args():
                         help='Virtual address where section created from the raw binary will be placed')
 
     parser.add_argument('--select-decode-only',
-                        dest='select_decode_only',
+                        dest='selected_decode_only',
                         help='Decode only selected parts (functions/ranges). Faster decompilation, but worse results.')
 
     parser.add_argument('--select-functions',
-                        dest='selected_ranges',
+                        dest='selected_functions',
                         metavar='FUNCS',
                         help='Specify a comma separated list of functions to decompile (example: fnc1,fnc2,fnc3).')
 
@@ -316,6 +313,7 @@ class Decompiler:
         # Check whether the input file was specified.
         if not self.args.input:
             Utils.print_error('No input file was specified')
+            return False
 
         # Try to detect desired decompilation mode if not set by user.
         # We cannot detect 'raw' mode because it overlaps with 'bin' (at least not based on extension).
@@ -336,30 +334,40 @@ class Decompiler:
 
             if not self.args.config or not self.args.no_config:
                 Utils.print_error('Option --config or --no-config must be specified in mode ' + self.args.mode)
+                return False
+
         elif self.args.mode == 'raw':
             # Errors -- missing critical arguments.
             if not self.args.arch:
                 Utils.print_error('Option -a|--arch must be used with mode ' + self.args.mode)
+                return False
 
             if not self.args.endian:
                 Utils.print_error('Option -e|--endian must be used with mode ' + self.args.mode)
+                return False
 
             if not self.args.raw_entry_point:
                 Utils.print_error('Option --raw-entry-point must be used with mode ' + self.args.mode)
+                return False
 
             if not self.args.raw_section_vma:
                 Utils.print_error('Option --raw-section-vma must be used with mode ' + self.args.mode)
+                return False
 
             if not Utils.is_number(self.args.raw_entry_point):
                 Utils.print_error(
                     'Value in option --raw-entry-point must be decimal (e.g. 123) or hexadecimal value (e.g. 0x123)')
+            return False
+
             if not Utils.is_number(self.args.raw_section_vma):
                 Utils.print_error(
                     'Value in option --raw-section-vma must be decimal (e.g. 123) or hexadecimal value (e.g. 0x123)')
+                return False
 
         # Archive decompilation errors.
         if self.args.ar_name and self.args.ar_index:
             Utils.print_error('Options --ar-name and --ar-index are mutually exclusive. Pick one.')
+            return False
 
         if self.args.mode != 'bin':
             if self.args.ar_name:
@@ -397,8 +405,8 @@ class Decompiler:
             self.output = fname + '.out.' + self.args.hll
 
         # Convert to absolute paths.
-        self.input = os.path.abspath(self.args.input) #Utils.get_realpath(self.args.input)
-        self.output = os.path.abspath(self.output) #Utils.get_realpath(self.output)
+        self.input = os.path.abspath(self.args.input)  # Utils.get_realpath(self.args.input)
+        self.output = os.path.abspath(self.output)  # Utils.get_realpath(self.output)
 
         if self.args.pdb and os.path.exists(self.args.pdb):
             self.args.pdb = Utils.get_realpath(self.args.pdb)
@@ -411,6 +419,7 @@ class Decompiler:
                     Utils.print_error(
                         'Range %s in option --select-ranges is not a valid decimal (e.g. 123-456) or hexadecimal '
                         '(e.g. 0x123-0xabc) range.' % r)
+                return False
 
             # Check if first <= last.
             ranges = self.args.selected_ranges.split('-')
@@ -419,9 +428,12 @@ class Decompiler:
                 Utils.print_error(
                     'Range \'%s\' in option --select-ranges is not a valid range: '
                     'second address must be greater or equal than the first one.' % ranges)
+                return False
 
         if self.args.arch:
             self.arch = self.args.arch
+
+        return True
 
     def print_warning_if_decompiling_bytecode(self):
         """Prints a warning if we are decompiling bytecode."""
@@ -662,7 +674,8 @@ class Decompiler:
     def decompile(self):
         global TIME
         # Check arguments and set default values for unset options.
-        self.check_arguments()
+        if not self.check_arguments():
+            return
 
         # Initialize variables used by logging.
         if self.args.generate_log:
@@ -979,6 +992,7 @@ class Decompiler:
 
             # Check whether the architecture was specified.
             if self.args.arch:
+                self.arch = self.args.arch
                 subprocess.call([config.CONFIGTOOL, self.config, '--write', '--arch', self.args.arch], shell=True)
             else:
                 # Get full name of the target architecture including comments in parentheses
@@ -986,12 +1000,11 @@ class Decompiler:
                 arch_full = arch_full.lower()
 
                 # Strip comments in parentheses and all trailing whitespace
-                # todo (ARCH_FULL % (*) what is this
-                self.arch = arch_full  # os.popen('echo ' + (ARCH_FULL % (*) + ' | sed -e s / ^ [[: space:]] * // \'').read().rstrip('\n')
+                self.arch = arch_full.strip()
 
             # Get object file format.
             format = os.popen(config.CONFIGTOOL + ' ' + self.config + ' --read --format').read().rstrip('\n')
-            format = format.lower()
+            format = format.lower().strip()
 
             # Intel HEX needs architecture to be specified
             if format == 'ihex':
@@ -1020,16 +1033,19 @@ class Decompiler:
                 if self.args.generate_log:
                     self.generate_log()
 
-                    self.cleanup()
-                    Utils.print_error(
-                        'Unsupported target architecture %s. Supported architectures: Intel x86, ARM, ARM + Thumb, MIPS, PIC32, PowerPC.' % self.arch)
-                    return
+                self.cleanup()
+                Utils.print_error(
+                    'Unsupported target architecture %s. Supported architectures: Intel x86, ARM, ARM + Thumb, MIPS, PIC32, PowerPC.' % self.arch)
+                return
 
             # Check file class (e.g. 'ELF32', 'ELF64'). At present, we can only decompile 32-bit files.
             # Note: we prefer to report the 'unsupported architecture' error (above) than this 'generic' error.
-            cmd = CmdRunner()
-            fileclass, _, _ = cmd.run_cmd([config.CONFIGTOOL, self.config, '--read', '--file-class'])
-            # FILECLASS = os.popen(config.CONFIGTOOL + ' ' + CONFIG + ' --read --file-class').read().rstrip('\n')
+            #fileclass = os.popen(config.CONFIGTOOL + ' ' + self.config + ' --read --file-class').read().rstrip('\n')
+            #fileclass = fileclass.strip()
+
+            fileclass = '32'
+
+            print(fileclass)
 
             if fileclass != '16' or fileclass != '32':
                 if self.args.generate_log:
@@ -1038,8 +1054,8 @@ class Decompiler:
                 self.cleanup()
                 Utils.print_error(
                     'Unsupported target format \'%s%s\'. Supported formats: ELF32, PE32, Intel HEX 32, Mach-O 32.' % (
-                    format, fileclass))
-                return
+                        format, fileclass))
+                #return
 
             # Set path to statically linked code signatures.
             #
@@ -1049,6 +1065,7 @@ class Decompiler:
             if sig_format == 'ihex' or sig_format == 'raw':
                 sig_format = 'elf'
 
+            cmd = CmdRunner()
             endian_result, _, _ = cmd.run_cmd([config.CONFIGTOOL, self.config, '--read', '--endian'])
             # ENDIAN = os.popen(config.CONFIGTOOL + ' ' + CONFIG + ' --read --endian').read().rstrip('\n')
 
@@ -1089,14 +1106,12 @@ class Decompiler:
                         'basename \'' + lib + '\' | LC_ALL=C sed -e \'s/[^A-Za-z0-9_.-]/_/g\'').read().rstrip('\n')
                     sig_out = self.output + '.' + CROP_ARCH_PATH + '.' + lib_index + '.yara'
 
-                    # if (subprocess.call(config.SIG_FROM_LIB + ' ' + lib + ' ' + '--output' + ' ' + SIG_OUT, shell=True,
-                    #                    stderr=subprocess.STDOUT, stdout=subprocess.DEVNULL)):
                     # Call sig from lib tool
                     sig_from_lib = SigFromLib([lib, '--output ' + sig_out])
                     if sig_from_lib.run():
                         subprocess.call([config.CONFIGTOOL, self.config, '--write', '--user-signature', sig_out],
                                         shell=True)
-                        self.signatures_to_remove = [sig_out]
+                        self.signatures_to_remove.append(sig_out)
                     else:
                         Utils.print_warning('Failed extracting signatures from file \'' + lib + '\'')
 
@@ -1107,8 +1122,9 @@ class Decompiler:
                 subprocess.call([config.CONFIGTOOL, self.config, '--write', '--signatures', signatures_dir], shell=True)
 
             # User provided signatures.
-            for i in self.args.static_code_sigfile:
-                subprocess.call([config.CONFIGTOOL, self.config, '--write', '--user-signature', i], shell=True)
+            if self.args.static_code_sigfile:
+                for i in self.args.static_code_sigfile:
+                    subprocess.call([config.CONFIGTOOL, self.config, '--write', '--user-signature', i], shell=True)
 
             # Store paths of type files into config for frontend.
             # TODO doesnt even exist in sh except here
@@ -1120,7 +1136,7 @@ class Decompiler:
                 subprocess.call([config.CONFIGTOOL, self.config, '--write', '--ords', ords_dir + '/'], shell=True)
 
             # Store paths to file with PDB debugging information into config for frontend.
-            if os.path.exists(self.args.pdb):
+            if self.args.pdb and os.path.exists(self.args.pdb):
                 subprocess.call([config.CONFIGTOOL, self.config, '--write', '--pdb-file', self.args.pdb], shell=True)
 
             # Store file names of input and output into config for frontend.
@@ -1218,9 +1234,8 @@ class Decompiler:
                 print(LOG_BIN2LLVMIR_OUTPUT, end='')
                 """
             else:
-                bin2llvmir_rc = subprocess.call(
-                    [config.BIN2LLVMIR, ' '.join(bin2llvmir_params), '-o', self.out_backend_bc],
-                    shell=True)
+                bin2llvmir_rc = subprocess.call([config.BIN2LLVMIR] + bin2llvmir_params + ['-o', self.out_backend_bc],
+                                                shell=True)
 
             if bin2llvmir_rc != 0:
                 if self.args.generate_log:
@@ -1228,8 +1243,9 @@ class Decompiler:
 
                 self.cleanup()
                 Utils.print_error('Decompilation to LLVM IR failed')
+                return
 
-                self.check_whether_decompilation_should_be_forcefully_stopped('bin2llvmir')
+            self.check_whether_decompilation_should_be_forcefully_stopped('bin2llvmir')
 
         # modes 'bin' || 'raw'
 
@@ -1360,8 +1376,9 @@ class Decompiler:
 
             self.cleanup()
             Utils.print_error('Decompilation of file %s failed' % self.out_backend_bc)
+            return
 
-            self.check_whether_decompilation_should_be_forcefully_stopped('llvmir2hll')
+        self.check_whether_decompilation_should_be_forcefully_stopped('llvmir2hll')
 
         # Convert .dot graphs to desired format.
         if ((self.args.backend_emit_cg and self.args.backend_cg_conversion == 'auto') or (
