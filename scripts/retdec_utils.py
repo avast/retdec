@@ -206,32 +206,17 @@ class Utils:
         return sys.platform in ('win32', 'msys')
 
     @staticmethod
-    def get_realpath(path):
-        """Prints the real, physical location of a directory or file, relative or
-        absolute.
-        1 argument is needed
-        """
-        return str(pathlib.Path(path).resolve())
-
-    @staticmethod
     def print_error(error):
-        """Print error message to stderr and die.
+        """Print error message to stderr.
         1 argument is needed
         Returns - 1 if number of arguments is incorrect
         """
-        # if error is None:
-        #    sys.exit(1)
-
         print('Error: %s' % error, file=sys.stdout)
-        # sys.exit(1)
 
     @staticmethod
     def print_warning(warning):
         """Print warning message to stderr.
         """
-        if warning is None:
-            return
-
         sys.stderr.write('Warning: %s' % warning)
 
     @staticmethod
@@ -275,7 +260,10 @@ class Utils:
         1 argument is needed - file path
         Returns - 1 if error occurred
         """
-        return subprocess.call([config.AR, path, '--object-count'], shell=True)
+        cmd = CmdRunner()
+        output, rc, _ = cmd.run_cmd([config.AR, path, '--object-count'])
+
+        return int(output) if rc == 0 else 1
 
     @staticmethod
     def archive_list_content(path):
@@ -283,7 +271,9 @@ class Utils:
         1 argument is needed - file path
         Returns - 1 if number of arguments is incorrect
         """
-        return subprocess.call([config.AR, path, '--list', '--no-numbers'], shell=True)
+        cmd = CmdRunner()
+        output, _, _ = cmd.run_cmd([config.AR, path, '--list', '--no-numbers'])
+        print(output)
 
     @staticmethod
     def archive_list_numbered_content(path):
@@ -292,7 +282,9 @@ class Utils:
         Returns - 1 if number of arguments is incorrect
         """
         print('Index\tName')
-        return subprocess.call([config.AR, path, '--list'], shell=True)
+        cmd = CmdRunner()
+        output, _, _ = cmd.run_cmd([config.AR, path, '--list'])
+        print(output)
 
     @staticmethod
     def archive_list_numbered_content_json(path):
@@ -300,7 +292,9 @@ class Utils:
         1 argument is needed - file path
         Returns - 1 if number of arguments is incorrect
         """
-        return subprocess.call([config.AR, path, '--list', '--json'], shell=True)
+        cmd = CmdRunner()
+        output, _, _ = cmd.run_cmd([config.AR, path, '--list', '--json'])
+        print(output)
 
     @staticmethod
     def archive_get_by_name(path, name, output):
@@ -347,8 +341,7 @@ class Utils:
             Returns - 0 if string is a valid decimal number.
                       1 otherwise
         """
-        regex = '^[0-9]+$'
-        if re.search(regex, str(num)):
+        if re.search('^[0-9]+$', str(num)):
             return True
         else:
             return False
@@ -360,8 +353,7 @@ class Utils:
             Returns - 0 if string is a valid hexadecimal number.
                       1 otherwise
         """
-        regex = '^0x[0-9a-fA-F]+$'
-        if re.search(regex, str(num)):
+        if re.search('^0x[0-9a-fA-F]+$', str(num)):
             return True
         else:
             return False
@@ -388,8 +380,7 @@ class Utils:
             Returns - 0 if string is a valid decimal range.
                       1 otherwise
         """
-        regex = '^[0-9]+-[0-9]+$'
-        if re.search(regex, str(num)):
+        if re.search('^[0-9]+-[0-9]+$', str(num)):
             return True
         else:
             return False
@@ -401,8 +392,7 @@ class Utils:
             Returns - 0 if string is a valid hexadecimal range
                       1 otherwise
         """
-        regex = '^0x[0-9a-fA-F]+-0x[0-9a-fA-F]+$'
-        if re.search(regex, str(num)):
+        if re.search('^0x[0-9a-fA-F]+-0x[0-9a-fA-F]+$', str(num)):
             return True
         else:
             return False

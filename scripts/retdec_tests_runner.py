@@ -100,7 +100,7 @@ def run_unit_tests_in_dir(path):
 
 
 if not os.path.isdir(config.UNIT_TESTS_DIR):
-    '''Run all binaries in unit test dir.'''
+    """Run all binaries in unit test dir."""
 
     sys.stderr.write('error: no unit tests found in %s' % config.UNIT_TESTS_DIR)
     sys.exit(1)

@@ -365,7 +365,7 @@ class Decompiler:
                 return False
 
         if self.args.selected_ranges:
-            self.selected_ranges = self.args.selected_ranges.split(',')
+            self.selected_ranges = self.args.selected_ranges.strip().split(',')
             self.args.keep_unreachable_funcs = True
 
             # Check that selected ranges are valid.
@@ -375,19 +375,19 @@ class Decompiler:
                     Utils.print_error(
                         'Range %s in option --select-ranges is not a valid decimal (e.g. 123-456) or hexadecimal '
                         '(e.g. 0x123-0xabc) range.' % r)
-                return False
+                    return False
 
-            # Check if first <= last.
-            ranges = self.selected_ranges.split('-')
-            # parser line into array
-            if int(ranges[0]) > int(ranges[1]):
-                Utils.print_error(
-                    'Range \'%s\' in option --select-ranges is not a valid range: '
-                    'second address must be greater or equal than the first one.' % ranges)
-                return False
+                # Check if first <= last.
+                ranges = r.split('-')
+                # parser line into array
+                if int(ranges[0]) > int(ranges[1]):
+                    Utils.print_error(
+                        'Range \'%s\' in option --select-ranges is not a valid range: '
+                        'second address must be greater or equal than the first one.' % ranges)
+                    return False
 
         if self.args.selected_functions:
-            self.selected_functions = self.args.selected_functions.split(',')
+            self.selected_functions = self.args.selected_functions.strip().split(',')
             self.args.keep_unreachable_funcs = True
 
         if self.args.no_config:
@@ -406,6 +406,8 @@ class Decompiler:
             if not os.access(self.args.pdb, os.R_OK):
                 Utils.print_error('The input PDB file \'%s\' does not exist or is not readable' % self.args.pdb)
                 return False
+
+            self.args.pdb = os.path.abspath(self.args.pdb)
 
         # Try to detect desired decompilation mode if not set by user.
         # We cannot detect 'raw' mode because it overlaps with 'bin' (at least not based on extension).
@@ -449,7 +451,7 @@ class Decompiler:
             if not Utils.is_number(self.args.raw_entry_point):
                 Utils.print_error(
                     'Value in option --raw-entry-point must be decimal (e.g. 123) or hexadecimal value (e.g. 0x123)')
-            return False
+                return False
 
             if not Utils.is_number(self.args.raw_section_vma):
                 Utils.print_error(
@@ -468,40 +470,36 @@ class Decompiler:
             if self.args.ar_index:
                 Utils.print_warning('Option --ar-index is not used in mode ' + self.args.mode)
 
-        fname = ''
         if not self.args.output:
             # No output file was given, so use the default one.
-            fname = self.args.input
-            if fname.endswith('ll'):
+            input_name = self.args.input
+            if input_name.endswith('ll'):
                 # Suffix .ll
-                self.output = fname[:-2] + self.args.hll
-            elif fname.endswith('exe'):
+                self.output = input_name[:-2] + self.args.hll
+            elif input_name.endswith('exe'):
                 # Suffix .exe
-                self.output = fname[:-3] + self.args.hll
+                self.output = input_name[:-3] + self.args.hll
                 print('Output is: ' + self.output)
-            elif fname.endswith('elf'):
+            elif input_name.endswith('elf'):
                 # Suffix .elf
-                self.output = fname[:-3] + self.args.hll
-            elif fname.endswith('ihex'):
+                self.output = input_name[:-3] + self.args.hll
+            elif input_name.endswith('ihex'):
                 # Suffix .ihex
-                self.output = fname[:-4] + self.args.hll
-            elif fname.endswith('macho'):
+                self.output = input_name[:-4] + self.args.hll
+            elif input_name.endswith('macho'):
                 # Suffix .macho
-                self.output = fname[:-5] + self.args.hll
+                self.output = input_name[:-5] + self.args.hll
             else:
                 self.output = self.output + PICKED_FILE + '.' + self.args.hll
 
         # If the output file name matches the input file name, we have to change the
         # output file name. Otherwise, the input file gets overwritten.
         if self.args.input == self.output:
-            self.output = fname + '.out.' + self.args.hll
+            self.output = self.args.input + '.out.' + self.args.hll
 
         # Convert to absolute paths.
-        self.input = os.path.abspath(self.args.input)  # Utils.get_realpath(self.args.input)
-        self.output = os.path.abspath(self.output)  # Utils.get_realpath(self.output)
-
-        if self.args.pdb and os.path.exists(self.args.pdb):
-            self.args.pdb = Utils.get_realpath(self.args.pdb)
+        self.input = os.path.abspath(self.args.input)
+        self.output = os.path.abspath(self.output)
 
         if self.args.arch:
             self.arch = self.args.arch
@@ -523,11 +521,8 @@ class Decompiler:
     def check_whether_decompilation_should_be_forcefully_stopped(self, tool_name):
         """Checks whether the decompilation should be forcefully stopped because of the
         --stop-after parameter. If so, self.cleanup is run and the script exits with 0.
-
         Arguments:
-
           $1 Name of the tool.
-
         The function expects the $STOP_AFTER variable to be set.
         """
 
@@ -538,7 +533,6 @@ class Decompiler:
             self.cleanup()
             print()
             print('#### Forced stop due to  - -stop - after %s...' % self.args.stop_after)
-            # sys.exit(0)
             return True
         return False
 

@@ -117,7 +117,7 @@ class ArchiveDecompiler:
 
         # Check arguments
         if not self._check_arguments():
-            return
+            return 1
 
         # Check for archives packed in Mach-O Universal Binaries.
         if Utils.is_macho_archive(self.library_path):
@@ -126,7 +126,7 @@ class ArchiveDecompiler:
                     subprocess.call([config.EXTRACT, '--objects', '--json', self.library_path], shell=True)
                 else:
                     subprocess.call([config.EXTRACT, '--objects', self.library_path], shell=True)
-                # sys.exit(1)
+                return 1
 
             self.tmp_archive = self.library_path + '.a'
             subprocess.call([config.EXTRACT, '--best', '--out', self.tmp_archive, self.library_path], shell=True)
@@ -135,19 +135,19 @@ class ArchiveDecompiler:
         # Check for thin archives.
         if Utils.has_thin_archive_signature(self.library_path) == 0:
             self._print_error_plain_or_json('File is a thin archive and cannot be decompiled.')
-            return
+            return 1
 
         # Check if file is archive
         if not Utils.is_valid_archive(self.library_path):
             self._print_error_plain_or_json('File is not supported archive or is not readable.')
-            return
+            return 1
 
         # Check number of files.
         self.file_count = Utils.archive_object_count(self.library_path)
 
         if self.file_count <= 0:
             self._print_error_plain_or_json('No files found in archive.')
-            return
+            return 1
 
         # List only mode.
         if self.enable_list_mode:
@@ -157,7 +157,7 @@ class ArchiveDecompiler:
                 Utils.archive_list_numbered_content(self.library_path)
 
             self._cleanup()
-            # sys.exit(0)
+            return 0
 
         # Run the decompilation script over all the found files.
         print('Running \`%s' % config.DECOMPILER_SH, end='')
@@ -190,13 +190,11 @@ class ArchiveDecompiler:
                 print('[OK]')
 
         self._cleanup()
-        # sys.exit(0)
+        return 0
 
 
 if __name__ == '__main__':
     args = parse_args(sys.argv)
 
     archive_decompiler = ArchiveDecompiler(args)
-    archive_decompiler.decompile_archive()
-
-    sys.exit(0)
+    sys.exit(archive_decompiler.decompile_archive())
