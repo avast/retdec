@@ -266,6 +266,7 @@ def parse_args():
 
     parser.add_argument('--stop-after',
                         dest='stop_after',
+                        choices=['fileinfo', 'unpacker', 'bin2llvmir', 'llvmir2hll'],
                         help='Stop the decompilation after the given tool '
                              '(supported tools: fileinfo, unpacker, bin2llvmir, llvmir2hll).')
 
@@ -306,6 +307,8 @@ class Decompiler:
         self.input = ''
         self.output = ''
         self.config = ''
+        self.selected_ranges = []
+        self.selected_functions = []
 
         self.arch = ''
         self.out_unpacked = ''
@@ -330,6 +333,79 @@ class Decompiler:
         if not self.args.input:
             Utils.print_error('No input file was specified')
             return False
+
+        if not os.access(self.args.input, os.R_OK):
+            Utils.print_error('The input file \'%s\' does not exist or is not readable' % self.args.input)
+            return False
+
+        if self.args.max_memory:
+            if self.args.no_memory_limit:
+                Utils.print_error('Clashing options: --max-memory and --no-memory-limit')
+                return False
+
+            try:
+                max_memory = int(self.args.max_memory)
+                if max_memory > 0:
+                    return True
+            except ValueError:
+                Utils.print_error(
+                    'Invalid value for --max-memory: %s (expected a positive integer)' % self.args.max_memory)
+                return False
+
+        if self.args.static_code_archive:
+            # User provided archive to create signature file from.
+            if not os.path.isfile(self.args.static_code_archive):
+                Utils.print_error('Invalid archive file \'%s\'' % self.args.static_code_archive)
+                return False
+
+        if self.args.static_code_sigfile:
+            # User provided signature file.
+            if not os.path.isfile(self.args.static_code_sigfile):
+                Utils.print_error('Invalid .yara file \'%s\'' % self.args.static_code_sigfile)
+                return False
+
+        if self.args.selected_ranges:
+            self.selected_ranges = self.args.selected_ranges.split(',')
+            self.args.keep_unreachable_funcs = True
+
+            # Check that selected ranges are valid.
+            for r in self.selected_ranges:
+                # Check if valid range.
+                if not Utils.is_range(r):
+                    Utils.print_error(
+                        'Range %s in option --select-ranges is not a valid decimal (e.g. 123-456) or hexadecimal '
+                        '(e.g. 0x123-0xabc) range.' % r)
+                return False
+
+            # Check if first <= last.
+            ranges = self.selected_ranges.split('-')
+            # parser line into array
+            if int(ranges[0]) > int(ranges[1]):
+                Utils.print_error(
+                    'Range \'%s\' in option --select-ranges is not a valid range: '
+                    'second address must be greater or equal than the first one.' % ranges)
+                return False
+
+        if self.args.selected_functions:
+            self.selected_functions = self.args.selected_functions.split(',')
+            self.args.keep_unreachable_funcs = True
+
+        if self.args.no_config:
+            if self.args.config:
+                Utils.print_error('Option --no-config can not be used with option --config')
+                return False
+
+        if self.args.config:
+            if not os.access(self.args.config, os.R_OK):
+                Utils.print_error(
+                    'The input JSON configuration file '' + (CONFIG_DB) + '' does not exist or is not readable')
+                return False
+
+        if self.args.pdb:
+            # File containing PDB debug information.
+            if not os.access(self.args.pdb, os.R_OK):
+                Utils.print_error('The input PDB file \'%s\' does not exist or is not readable' % self.args.pdb)
+                return False
 
         # Try to detect desired decompilation mode if not set by user.
         # We cannot detect 'raw' mode because it overlaps with 'bin' (at least not based on extension).
@@ -426,25 +502,6 @@ class Decompiler:
 
         if self.args.pdb and os.path.exists(self.args.pdb):
             self.args.pdb = Utils.get_realpath(self.args.pdb)
-
-        # Check that selected ranges are valid.
-        if self.args.selected_ranges:
-            for r in self.args.selected_ranges:
-                # Check if valid range.
-                if not Utils.is_range(r):
-                    Utils.print_error(
-                        'Range %s in option --select-ranges is not a valid decimal (e.g. 123-456) or hexadecimal '
-                        '(e.g. 0x123-0xabc) range.' % r)
-                return False
-
-            # Check if first <= last.
-            ranges = self.args.selected_ranges.split('-')
-            # parser line into array
-            if int(ranges[0]) > int(ranges[1]):
-                Utils.print_error(
-                    'Range \'%s\' in option --select-ranges is not a valid range: '
-                    'second address must be greater or equal than the first one.' % ranges)
-                return False
 
         if self.args.arch:
             self.arch = self.args.arch
@@ -623,64 +680,6 @@ class Decompiler:
         res = re.compile(r's/\x1b[^m]*m//g')
         return res.sub('', text)
 
-    def timed_kill(self, pid):
-        """Platform-independent alternative to `ulimit -t` or `timeout`.
-        Based on http://www.bashcookbook.com/bashinfo/source/bash-4.0/examples/scripts/timeout3
-        1 argument is needed - PID
-        Returns - 1 if number of arguments is incorrect
-                  0 otherwise
-        """
-
-        """
-        PID = pid
-        # PID of the target process
-        PROCESS_NAME = os.popen('ps -p ' + PID + ' -o comm --no-heading').read().rstrip('\n')
-
-        if PROCESS_NAME == 'time':
-            # The program is run through `/usr/bin/time`, so get the PID of the
-            # child process (the actual program). Otherwise, if we killed
-            # `/usr/bin/time`, we would obtain no output from it (user time, memory
-            # usage etc.).
-            PID = os.popen('ps --ppid ' + PID + ' -o pid --no-heading | head -n1').read().rstrip('\n')
-
-        t = self.timeout
-
-        while t > 0:
-            time.sleep(1)
-
-            if not subprocess.call(['kill', '-0', PID], shell=True, stdout=subprocess.DEVNULL,
-                                   stderr=subprocess.DEVNULL):
-                exit(0)
-
-            t = t - 1
-
-        subprocess.call(['kill_tree', PID, 'SIGKILL'], shell=True, stdout=subprocess.DEVNULL,
-                        stderr=subprocess.DEVNULL)
-
-        """
-        return 0
-
-    #
-    # Kill process and all its children.
-    # Based on http://stackoverflow.com/questions/392022/best-way-to-kill-all-child-processes/3211182#3211182
-    # 2 arguments are needed - PID of process to kill  +  signal type
-    # Returns - 1 if number of arguments is incorrect
-    #           0 otherwise
-    #
-    def kill_tree(self, pid, signal_type):
-        """ TODO implement
-        _pid = pid
-        _sig = Expand.colonMinus('2', 'TERM')
-        _rc0 = subprocess.call(['kill', '-stop', Expand.underbar() + 'pid'], shell=True)
-
-        # needed to stop quickly forking parent from producing child between child killing and parent killing
-        for _child in os.popen('ps -o pid --no-headers --ppid \'' + Expand.underbar() + 'pid\'').read().rstrip('\n'):
-            kill_tree(Expand.underbar() + 'child', Expand.underbar() + 'sig')
-        _rc0 = subprocess.call(['kill', '-' + Expand.underbar() + 'sig', Expand.underbar() + 'pid'], shell=True)
-        """
-
-        return 0
-
     def string_to_md5(self, string):
         """Generate a MD5 checksum from a given string.
         """
@@ -690,8 +689,8 @@ class Decompiler:
         return m.hexdigest()
 
     def decompile(self):
-        global TIME
         cmd = CmdRunner()
+
         # Check arguments and set default values for unset options.
         if not self.check_arguments():
             return 1
@@ -711,9 +710,10 @@ class Decompiler:
         # Raw.
         if self.args.mode == 'raw':
             # Entry point for THUMB must be odd.
-            if self.args.arch == 'thumb' or (self.args.raw_entry_point % 2) != 0:
-                self.args.keep_unreachable_funcs = 1
-                # RAW_ENTRY_POINT = (RAW_ENTRY_POINT + 1)
+            if self.args.arch == 'thumb' or (self.args.raw_entry_point % 2) == 0:
+                self.args.raw_entry_point = (self.args.raw_entry_point + 1)
+
+            self.args.keep_unreachable_funcs = True
 
         # Check for archives.
         if self.args.mode == 'bin':
@@ -781,8 +781,8 @@ class Decompiler:
                 if self.args.ar_index:
                     print()
                     print('##### Restoring object file on index '' + (self.args.ar_index) + '' from archive...')
-                    print(
-                        'RUN: ' + config.AR + ' ' + self.input + ' --index ' + self.args.ar_index + ' --output ' + out_restored)
+                    print('RUN: ' + config.AR + ' ' + self.input + ' --index ' + self.args.ar_index + ' --output '
+                          + out_restored)
 
                     if not Utils.archive_get_by_index(self.input, self.args.ar_index, out_restored):
                         self.cleanup()
@@ -802,8 +802,8 @@ class Decompiler:
                 elif self.args.ar_name:
                     print()
                     print('##### Restoring object file with name '' + (self.args.ar_name) + '' from archive...')
-                    print(
-                        'RUN: ' + config.AR + ' ' + self.input + ' --name ' + self.args.ar_name + ' --output ' + out_restored)
+                    print('RUN: ' + config.AR + ' ' + self.input + ' --name ' + self.args.ar_name + ' --output '
+                          + out_restored)
 
                     if not Utils.archive_get_by_name(self.input, self.args.ar_name, out_restored):
                         self.cleanup()
@@ -813,8 +813,8 @@ class Decompiler:
                     self.input = out_restored
                 else:
                     # Print list of files.
-                    print('Please select file to decompile with either \' --ar-index = n\'')
-                    print('or \' --ar-name = string\' option. Archive contains these files:')
+                    print('Please select file to decompile with either \' --ar-index=n\'')
+                    print('or \' --ar-name=string\' option. Archive contains these files:')
 
                     Utils.archive_list_numbered_content(self.input)
                     self.cleanup()
@@ -828,11 +828,11 @@ class Decompiler:
 
                 print('Not an archive, going to the next step.')
 
-        if self.args.mode == 'bin' or self.args.mode == 'raw':
+        if self.args.mode in ['bin', 'raw']:
             # Assignment of other used variables.
             name = os.path.splitext(self.output)[0]
-            self.out_unpacked = name + '-unpacked'
             out_frontend = self.output + '.frontend'
+            self.out_unpacked = name + '-unpacked'
             self.out_frontend_ll = out_frontend + '.ll'
             self.out_frontend_bc = out_frontend + '.bc'
             self.config = self.output + '.json'
@@ -842,6 +842,7 @@ class Decompiler:
 
             if self.args.config:
                 shutil.copyfile(self.args.config, self.config)
+                self.config = os.path.abspath(self.args.config)
 
             # Preprocess existing file or create a new, empty JSON file.
             if os.path.isfile(self.config):
@@ -965,11 +966,11 @@ class Decompiler:
                     fileinfo_params = ['-c', self.config, '--similarity', '--verbose', self.input]
 
                 for pd in config.FILEINFO_EXTERNAL_YARA_PRIMARY_CRYPTO_DATABASES:
-                    fileinfo_params.extend(['--crypto ', pd])
+                    fileinfo_params.extend(['--crypto', pd])
 
                 if self.args.fileinfo_use_all_external_patterns:
                     for ed in config.FILEINFO_EXTERNAL_YARA_EXTRA_CRYPTO_DATABASES:
-                        fileinfo_params.extend(['--crypto ', ed])
+                        fileinfo_params.extend(['--crypto', ed])
 
                 if self.args.max_memory:
                     fileinfo_params.extend(['--max-memory', self.args.max_memory])
@@ -1446,400 +1447,6 @@ class Decompiler:
         self.cleanup()
         print()
         print('##### Done!')
-
-        """
-        while True:
-
-            if (sys.argv[1]) == '-a' or (sys.argv[1]) == '--arch':
-                # Target architecture.
-                if (self.args.arch) != '':
-                    subprocess.call(['print_error', 'Duplicate option: -a|--arch'], shell=True)
-                if (sys.argv[
-                           2]) != 'mips' os.path.exists((sys.argv[2])) '!='  '-a' (sys.argv[2]) != 'arm' os.path.exists((sys.argv[2])) '!='  '-a' (sys.argv[2]) != 'powerpc' os.path.exists((sys.argv[2]))'!=' != '':
-                    subprocess.call(['print_error',
-                                     'Unsupported target architecture '' + (sys.argv[2]) + ''. Supported architectures: Intel x86, ARM, ARM + Thumb, MIPS, PIC32, PowerPC.'],
-                                    shell=True)
-                self.args.arch = sys.argv[2]
-                subprocess.call(['shift', '2'], shell=True)
-            elif (sys.argv[1]) == '-e' or (sys.argv[1]) == '--endian':
-                # Endian.
-                if ENDIAN != '':
-                    utils.print_error('Duplicate option: -e|--endian')
-                ENDIAN = sys.argv[2]
-                subprocess.call(['shift', '2'], shell=True)
-            elif (sys.argv[1]) == '-h' or (sys.argv[1]) == '--help':
-                # Help.
-                print_help()
-                exit(0)
-            elif (sys.argv[1]) == '-k' or (sys.argv[1]) == '--keep-unreachable-funcs':
-                # Keep unreachable functions.
-                # Do not check if this parameter is a duplicate because when both
-                # --select-ranges or --select--functions and -k is specified, the
-                # decompilation fails.
-                self.args.keep_unreachable_funcs = 1
-                subprocess.call(['shift'], shell=True)
-            elif (sys.argv[1]) == '-l' or (sys.argv[1]) == '--target-language':
-                # Target language.
-                if (HLL) != '':
-                    utils.print_error('Duplicate option: -l|--target-language')
-                if (sys.argv[2]) != 'c' and os.path.exists((sys.argv[2])) != '':
-                    utils.print_error('Unsupported target language '' + (sys.argv[2]) + ''. Supported languages: C, Python.')
-                HLL = sys.argv[2]
-                subprocess.call(['shift', '2'], shell=True)
-            elif (sys.argv[1]) == '-m' or (sys.argv[1]) == '--mode':
-                # Decompilation mode.
-                if (MODE) != '':
-                    utils.print_error('Duplicate option: -m|--mode')
-                if (sys.argv[2]) != 'bin' os.path.exists((sys.argv[2])) '!='  '-a' (sys.argv[2]) != 'raw':
-                    utils.print_error('Unsupported decompilation mode '' + (sys.argv[2]) + ''. Supported modes: bin, ll, raw.')
-                MODE = sys.argv[2]
-                subprocess.call(['shift', '2'], shell=True)
-            elif (sys.argv[1]) == '-o' or (sys.argv[1]) == '--output':
-                # Output file.
-                if (OUT) != '':
-                    subprocess.call(['print_error', 'Duplicate option: -o|--output'], shell=True)
-                OUT = sys.argv[2]
-                subprocess.call(['shift', '2'], shell=True)
-            elif (sys.argv[1]) == '-p' or (sys.argv[1]) == '--pdb':
-                # File containing PDB debug information.
-                if (self.args.pdb) != '':
-                    subprocess.call(['print_error', 'Duplicate option: -p|--pdb'], shell=True)
-                self.args.pdb = sys.argv[2]
-                if not os.access, R_OK) ):
-                    subprocess.call(
-                        ['print_error', 'The input PDB file '' + (self.args.pdb) + '' does not exist or is not readable'],
-                        shell=True)
-                subprocess.call(['shift', '2'], shell=True)
-            elif (sys.argv[1]) == '--backend-aggressive-opts':
-                # Enable aggressive optimizations.
-                if (self.args.backend_aggressive_opts) != '':
-                    subprocess.call(['print_error', 'Duplicate option: --backend-aggressive-opts'], shell=True)
-                self.args.backend_aggressive_opts = 1
-                subprocess.call(['shift'], shell=True)
-            elif (sys.argv[1]) == '--backend-arithm-expr-evaluator':
-                # Name of the evaluator of arithmetical expressions.
-                if (self.args.backend_arithm_expr_evaluator) != '':
-                    subprocess.call(['print_error', 'Duplicate option: --backend-arithm-expr-evaluator'], shell=True)
-                self.args.backend_arithm_expr_evaluator = sys.argv[2]
-                subprocess.call(['shift', '2'], shell=True)
-            elif (sys.argv[1]) == '--backend-call-info-obtainer':
-                # Name of the obtainer of information about function calls.
-                if (self.args.backend_call_info_obtainer) != '':
-                    subprocess.call(['print_error', 'Duplicate option: --backend-call-info-obtainer'], shell=True)
-                self.args.backend_call_info_obtainer = sys.argv[2]
-                subprocess.call(['shift', '2'], shell=True)
-            elif (sys.argv[1]) == '--backend-cfg-test':
-                # Unify the labels in the emitted CFG.
-                if (self.args.backend_cfg_test) != '':
-                    subprocess.call(['print_error', 'Duplicate option: --backend-cfg-test'], shell=True)
-                self.args.backend_cfg_test = 1
-                subprocess.call(['shift'], shell=True)
-            elif (sys.argv[1]) == '--backend-disabled-opts':
-                # List of disabled optimizations in the backend.
-                if (self.args.backend_disabled_opts) != '':
-                    subprocess.call(['print_error', 'Duplicate option: --backend-disabled-opts'], shell=True)
-                self.args.backend_disabled_opts = sys.argv[2]
-                subprocess.call(['shift', '2'], shell=True)
-            elif (sys.argv[1]) == '--backend-emit-cfg':
-                # Emit a CFG of each function in the backend IR.
-                if (self.args.backend_emit_cfg) != '':
-                    subprocess.call(['print_error', 'Duplicate option: --backend-emit-cfg'], shell=True)
-                self.args.backend_emit_cfg = 1
-                subprocess.call(['shift'], shell=True)
-            elif (sys.argv[1]) == '--backend-emit-cg':
-                # Emit a CG of the decompiled module in the backend IR.
-                if (self.args.backend_emit_cg) != '':
-                    subprocess.call(['print_error', 'Duplicate option: --backend-emit-cg'], shell=True)
-                self.args.backend_emit_cg = 1
-                subprocess.call(['shift'], shell=True)
-            elif (sys.argv[1]) == '--backend-cg-conversion':
-                # Should the CG from the backend be converted automatically into the desired format?.
-                if (self.args.backend_cg_conversion) != '':
-                    subprocess.call(['print_error', 'Duplicate option: --backend-cg-conversion'], shell=True)
-                if (sys.argv[2]) != 'auto' os.path.exists((sys.argv[2]))'!=' != '':
-                    subprocess.call(['print_error',
-                                     'Unsupported CG conversion mode '' + (sys.argv[2]) + ''. Supported modes: auto, manual.'],
-                                    shell=True)
-                self.args.backend_cg_conversion = sys.argv[2]
-                subprocess.call(['shift', '2'], shell=True)
-            elif (sys.argv[1]) == '--backend-cfg-conversion':
-                # Should CFGs from the backend be converted automatically into the desired format?.
-                if (self.args.backend_cfg_conversion) != '':
-                    subprocess.call(['print_error', 'Duplicate option: --backend-cfg-conversion'], shell=True)
-                if (sys.argv[2]) != 'auto' os.path.exists((sys.argv[2]))'!=' != '':
-                    subprocess.call(['print_error',
-                                     'Unsupported CFG conversion mode '' + (sys.argv[2]) + ''. Supported modes: auto, manual.'],
-                                    shell=True)
-                self.args.backend_cfg_conversion = sys.argv[2]
-                subprocess.call(['shift', '2'], shell=True)
-            elif (sys.argv[1]) == '--backend-enabled-opts':
-                # List of enabled optimizations in the backend.
-                if (self.args.backend_enabled_opts) != '':
-                    subprocess.call(['print_error', 'Duplicate option: --backend-enabled-opts'], shell=True)
-                self.args.backend_enabled_opts = sys.argv[2]
-                subprocess.call(['shift', '2'], shell=True)
-            elif ((sys.argv[1]) == '--backend-find-patterns'):
-                # Try to find patterns.
-                if (self.args.backend_find_patterns) != '':
-                    subprocess.call(['print_error', 'Duplicate option: --backend-find-patterns'], shell=True)
-                self.args.backend_find_patterns = sys.argv[2]
-                subprocess.call(['shift', '2'], shell=True)
-            elif ((sys.argv[1]) == '--backend-force-module-name'):
-                # Force the module's name in the backend.
-                if (self.args.backend_force_module_name) != '':
-                    subprocess.call(['print_error', 'Duplicate option: --backend-force-module-name'], shell=True)
-                self.args.backend_force_module_name = sys.argv[2]
-                subprocess.call(['shift', '2'], shell=True)
-            elif ((sys.argv[1]) == '--backend-keep-all-brackets'):
-                # Keep all brackets.
-                if (self.args.backend_keep_all_brackets) != '':
-                    subprocess.call(['print_error', 'Duplicate option: --backend-keep-all-brackets'], shell=True)
-                self.args.backend_keep_all_brackets = 1
-                subprocess.call(['shift'], shell=True)
-            elif ((sys.argv[1]) == '--backend-keep-library-funcs'):
-                # Keep library functions.
-                if (self.args.backend_keep_library_funcs) != '':
-                    subprocess.call(['print_error', 'Duplicate option: --backend-keep-library-funcs'], shell=True)
-                self.args.backend_keep_library_funcs = 1
-                subprocess.call(['shift'], shell=True)
-            elif ((sys.argv[1]) == '--backend-llvmir2bir-converter'):
-                # Name of the converter of LLVM IR to BIR.
-                if (self.args.backend_llvmir2bir_converter) != '':
-                    subprocess.call(['print_error', 'Duplicate option: --backend-llvmir2bir-converter'], shell=True)
-                self.args.backend_llvmir2bir_converter = sys.argv[2]
-                subprocess.call(['shift', '2'], shell=True)
-            elif ((sys.argv[1]) == '--backend-no-compound-operators'):
-                # Do not use compound operators.
-                if (self.args.backend_no_compound_operators) != '':
-                    subprocess.call(['print_error', 'Duplicate option: --backend-no-compound-operators'], shell=True)
-                self.args.backend_no_compound_operators = 1
-                subprocess.call(['shift'], shell=True)
-            elif ((sys.argv[1]) == '--backend-no-debug'):
-                # Emission of debug messages.
-                if (self.args.backend_no_debug) != '':
-                    subprocess.call(['print_error', 'Duplicate option: --backend-no-debug'], shell=True)
-                self.args.backend_no_debug = 1
-                subprocess.call(['shift'], shell=True)
-            elif ((sys.argv[1]) == '--backend-no-debug-comments'):
-                # Emission of debug comments.
-                if (self.args.backend_no_debug_comments) != '':
-                    subprocess.call(['print_error', 'Duplicate option: --backend-no-debug-comments'], shell=True)
-                self.args.backend_no_debug_comments = 1
-                subprocess.call(['shift'], shell=True)
-            elif ((sys.argv[1]) == '--backend-no-opts'):
-                # Disable backend optimizations.
-                if (self.args.backend_no_opts) != '':
-                    subprocess.call(['print_error', 'Duplicate option: --backend-no-opts'], shell=True)
-                self.args.backend_no_opts = 1
-                subprocess.call(['shift'], shell=True)
-            elif ((sys.argv[1]) == '--backend-no-symbolic-names'):
-                # Disable the conversion of constant arguments.
-                if (self.args.backend_no_symbolic_names) != '':
-                    subprocess.call(['print_error', 'Duplicate option: --backend-no-symbolic-names'], shell=True)
-                self.args.backend_no_symbolic_names = 1
-                subprocess.call(['shift'], shell=True)
-            elif ((sys.argv[1]) == '--backend-no-time-varying-info'):
-                # Do not emit any time-varying information.
-                if (self.args.backend_no_time_varying_info) != '':
-                    subprocess.call(['print_error', 'Duplicate option: --backend-no-time-varying-info'], shell=True)
-                self.args.backend_no_time_varying_info = 1
-                subprocess.call(['shift'], shell=True)
-            elif ((sys.argv[1]) == '--backend-no-var-renaming'):
-                # Disable renaming of variables in the backend.
-                if (self.args.backend_no_var_renaming) != '':
-                    subprocess.call(['print_error', 'Duplicate option: --backend-no-var-renaming'], shell=True)
-                self.args.backend_no_var_renaming = 1
-                subprocess.call(['shift'], shell=True)
-            elif ((sys.argv[1]) == '--backend-semantics'):
-                # The used semantics in the backend.
-                if (self.args.backend_semantics) != '':
-                    subprocess.call(['print_error', 'Duplicate option: --backend-semantics'], shell=True)
-                self.args.backend_semantics = sys.argv[2]
-                subprocess.call(['shift', '2'], shell=True)
-            elif ((sys.argv[1]) == '--backend-strict-fpu-semantics'):
-                # Use strict FPU semantics in the backend.
-                if (self.args.backend_strict_fpu_semantics) != '':
-                    subprocess.call(['print_error', 'Duplicate option: --backend-strict-fpu-semantics'], shell=True)
-                self.args.backend_strict_fpu_semantics = 1
-                subprocess.call(['shift'], shell=True)
-            elif ((sys.argv[1]) == '--backend-var-renamer'):
-                # Used renamer of variable names.
-                if (self.args.backend_var_renamer) != '':
-                    subprocess.call(['print_error', 'Duplicate option: --backend-var-renamer'], shell=True)
-                if (sys.argv[
-                           2]) != 'address' os.path.exists((sys.argv[2])) '!='  '-a' (sys.argv[2]) != 'readable' os.path.exists((sys.argv[2])) '!='  '-a' (sys.argv[2]) != 'unified':
-                    subprocess.call(['print_error',
-                                     'Unsupported variable renamer '' + (sys.argv[2]) + ''. Supported renamers: address, hungarian, readable, simple, unified.'],
-                                    shell=True)
-                self.args.backend_var_renamer = sys.argv[2]
-                subprocess.call(['shift', '2'], shell=True)
-            elif ((sys.argv[1]) == '--raw-entry-point'):
-                # Entry point address for binary created from raw data.
-                if (RAW_ENTRY_POINT) != '':
-                    subprocess.call(['print_error', 'Duplicate option: --raw-entry-point'], shell=True)
-                RAW_ENTRY_POINT = sys.argv[2]
-                # RAW_ENTRY_POINT='$(($2))'  # evaluate hex address - probably not needed
-                subprocess.call(['shift', '2'], shell=True)
-            elif ((sys.argv[1]) == '--raw-section-vma'):
-                # Virtual memory address for section created from raw data.
-                if (RAW_SECTION_VMA) != '':
-                    subprocess.call(['print_error', 'Duplicate option: --raw-section-vma'], shell=True)
-                RAW_SECTION_VMA = sys.argv[2]
-                # RAW_SECTION_VMA='$(($2))'  # evaluate hex address - probably not needed
-                subprocess.call(['shift', '2'], shell=True)
-            elif ((sys.argv[1]) == '--self.cleanup'):
-                # Cleanup.
-                if (CLEANUP) != '':
-                    subprocess.call(['print_error', 'Duplicate option: --self.cleanup'], shell=True)
-                CLEANUP = 1
-                subprocess.call(['shift'], shell=True)
-            elif ((sys.argv[1]) == '--color-for-ida'):
-                if (self.args.color_for_ida) != '':
-                    subprocess.call(['print_error', 'Duplicate option: --color-for-ida'], shell=True)
-                self.args.color_for_ida = 1
-                subprocess.call(['shift'], shell=True)
-            elif ((sys.argv[1]) == '--config'):
-                if (CONFIG_DB) != '':
-                    subprocess.call(['print_error', 'Duplicate option: --config'], shell=True)
-                if (NO_CONFIG) != '':
-                    subprocess.call(['print_error', 'Option --config can not be used with option --no-config'],
-                                    shell=True)
-                CONFIG_DB = sys.argv[2]
-                if (not os.access((CONFIG_DB), R_OK) ):
-                    subprocess.call(['print_error',
-                                     'The input JSON configuration file '' + (CONFIG_DB) + '' does not exist or is not readable'],
-                                    shell=True)
-                subprocess.call(['shift', '2'], shell=True)
-            elif ((sys.argv[1]) == '--no-config'):
-                if (NO_CONFIG) != '':
-                    subprocess.call(['print_error', 'Duplicate option: --no-config'], shell=True)
-                if (CONFIG_DB) != '':
-                    subprocess.call(['print_error', 'Option --no-config can not be used with option --config'],
-                                    shell=True)
-                NO_CONFIG = 1
-                subprocess.call(['shift'], shell=True)
-            elif ((sys.argv[1]) == '--graph-format'):
-                # Format of graph files.
-                if (self.args.graph_format) != '':
-                    subprocess.call(['print_error', 'Duplicate option: --graph-format'], shell=True)
-                if (sys.argv[2]) != 'pdf' os.path.exists((sys.argv[2])) '!='  '-a' (sys.argv[2]) != 'svg':
-                    subprocess.call(['print_error',
-                                     'Unsupported graph format '' + (sys.argv[2]) + ''. Supported formats: pdf, png, svg.'],
-                                    shell=True)
-                self.args.graph_format = sys.argv[2]
-                subprocess.call(['shift', '2'], shell=True)
-            elif ((sys.argv[1]) == '--select-decode-only'):
-                if (self.args.selected_decode_only) != '':
-                    subprocess.call(['print_error', 'Duplicate option: --select-decode-only'], shell=True)
-                self.args.selected_decode_only = 1
-                subprocess.call(['shift'], shell=True)
-            elif ((sys.argv[1]) == '--select-functions'):
-                # List of selected functions.
-                if (self.args.selected_functions) != '':
-                    subprocess.call(['print_error', 'Duplicate option: --select-functions'], shell=True)
-                IFS').setValue(',')
-                # parser line into array
-                self.args.keep_unreachable_funcs = 1
-                subprocess.call(['shift', '2'], shell=True)
-            elif ((sys.argv[1]) == '--select-ranges'):
-                # List of selected ranges.
-                if (self.args.selected_ranges) != '':
-                    subprocess.call(['print_error', 'Duplicate option: --select-ranges'], shell=True)
-                self.args.selected_ranges = sys.argv[2]
-                IFS').setValue(',')
-                # parser line into array
-                self.args.keep_unreachable_funcs = 1
-                subprocess.call(['shift', '2'], shell=True)
-            elif ((sys.argv[1]) == '--stop-after'):
-                # Stop decompilation after the given tool.
-                if (STOP_AFTER) != '':
-                    subprocess.call(['print_error', 'Duplicate option: --stop-after'], shell=True)
-                STOP_AFTER = sys.argv[2]
-                if (not re.search('^(fileinfo|unpacker|bin2llvmir|llvmir2hll)' + '$', (STOP_AFTER))):
-                    subprocess.call(['print_error', 'Unsupported tool '' + (STOP_AFTER) + '' for --stop-after'],
-                                    shell=True)
-                subprocess.call(['shift', '2'], shell=True)
-            elif ((sys.argv[1]) == '--static-code-sigfile'):
-                # User provided signature file.
-                if not os.path.isfile((sys.argv[2])):
-                    subprocess.call(['print_error', 'Invalid .yara file '' + (sys.argv[2]) + '''], shell=True)
-                self.args.static_code_sigfile').setValue('(' + (sys.argv[2]) + ')')
-                subprocess.call(['shift', '2'], shell=True)
-            elif ((sys.argv[1]) == '--static-code-archive'):
-                # User provided archive to create signature file from.
-                if not os.path.isfile((sys.argv[2])):
-                    subprocess.call(['print_error', 'Invalid archive file '' + (sys.argv[2]) + '''], shell=True)
-                self.args.static_code_archive').setValue('(' + (sys.argv[2]) + ')')
-                subprocess.call(['shift', '2'], shell=True)
-            elif ((sys.argv[1]) == '--no-default-static-signatures'):
-                self.args.no_default_static_signatures = 1
-                subprocess.call(['shift'], shell=True)
-            elif ((sys.argv[1]) == '--fileinfo-verbose'):
-                # Enable --verbose mode in fileinfo.
-                if (self.args.fileinfo_verbose) != '':
-                    subprocess.call(['print_error', 'Duplicate option: --fileinfo-verbose'], shell=True)
-                self.args.fileinfo_verbose = 1
-                subprocess.call(['shift'], shell=True)
-            elif ((sys.argv[1]) == '--fileinfo-use-all-external-patterns'):
-                if (FILEINFO_USE_ALL_EXTERNAL_PATTERNS) != '':
-                    subprocess.call(['print_error', 'Duplicate option: --fileinfo-use-all-external-patterns'],
-                                    shell=True)
-                FILEINFO_USE_ALL_EXTERNAL_PATTERNS = 1
-                subprocess.call(['shift'], shell=True)
-            elif ((sys.argv[1]) == '--ar-name'):
-                # Archive decompilation by name.
-                if (self.args.ar_name) != '':
-                    subprocess.call(['print_error', 'Duplicate option: --ar-name'], shell=True)
-                self.args.ar_name = sys.argv[2]
-                subprocess.call(['shift', '2'], shell=True)
-            elif ((sys.argv[1]) == '--ar-index'):
-                # Archive decompilation by index.
-                if (self.args.ar_index) != '':
-                    subprocess.call(['print_error', 'Duplicate option: --ar-index'], shell=True)
-                self.args.ar_index = sys.argv[2]
-                subprocess.call(['shift', '2'], shell=True)
-            elif ((sys.argv[1]) == '--max-memory'):
-                if (self.args.max_memory) != '':
-                    subprocess.call(['print_error', 'Duplicate option: --max-memory'], shell=True)
-                if (self.args.no_memory_limit) != '':
-                    subprocess.call(['print_error', 'Clashing options: --max-memory and --no-memory-limit'], shell=True)
-                self.args.max_memory = sys.argv[2]
-                if (not re.search(Str(Glob('^[0-9] + ' + '$')), (self.args.max_memory))):
-                    subprocess.call(['print_error',
-                                     'Invalid value for --max-memory: ' + (self.args.max_memory) + ' (expected a positive integer)'],
-                                    shell=True)
-                subprocess.call(['shift', '2'], shell=True)
-            elif ((sys.argv[1]) == '--no-memory-limit'):
-                if (self.args.no_memory_limit) != '':
-                    subprocess.call(['print_error', 'Duplicate option: --no-memory-limit'], shell=True)
-                if (self.args.max_memory) != '':
-                    subprocess.call(['print_error', 'Clashing options: --max-memory and --no-memory-limit'], shell=True)
-                self.args.no_memory_limit = 1
-                subprocess.call(['shift'], shell=True)
-            elif ((sys.argv[1]) == '--generate-log'):
-                # Intentionally undocumented option.
-                # Used only for internal testing.
-                # NOT guaranteed it works everywhere (systems other than our internal test machines).
-                if (self.args.generate_log) != '':
-                    subprocess.call(['print_error', 'Duplicate option: --generate-log'], shell=True)
-                self.args.generate_log = 1
-                self.args.no_memory_limit = 1
-                subprocess.call(['shift'], shell=True)
-            elif ((sys.argv[1]) == '--'):
-                # Input file.
-                if (Expand.hash() == 2):
-                    IN = sys.argv[2]
-                    if (not os.access((IN), R_OK) ):
-                        subprocess.call(
-                            ['print_error', 'The input file '' + (IN) + '' does not exist or is not readable'],
-                            shell=True)
-                elif (Expand.hash() > 2):
-                    # Invalid options.
-                    subprocess.call(
-                        ['print_error', 'Invalid options: '' + (sys.argv[2]) + '', '' + (sys.argv[3]) + '' ...'],
-                        shell=True)
-                break
-        """
 
         return 0
 
