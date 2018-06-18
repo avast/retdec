@@ -941,9 +941,7 @@ class Decompiler:
 
             # RET_UNPACK_OK=0
             # RET_UNPACKER_NOTHING_TO_DO_OTHERS_OK=1
-            # RET_NOTHING_TO_DO=2
             # RET_UNPACKER_FAILED_OTHERS_OK=3
-            # RET_UNPACKER_FAILED=4
             if unpacker_rc == Unpacker.RET_UNPACK_OK or unpacker_rc == Unpacker.RET_UNPACKER_NOTHING_TO_DO_OTHERS_OK \
                     or unpacker_rc == Unpacker.RET_UNPACKER_FAILED_OTHERS_OK:
 
@@ -1400,26 +1398,29 @@ class Decompiler:
             print('##### Converting .dot files to the desired format...')
 
         if self.args.backend_emit_cg and self.args.backend_cg_conversion == 'auto':
-            print(
-                'RUN: dot -T' + self.args.graph_format + ' ' + self.output + '.cg.dot > ' + self.output + '.cg.' + self.args.graph_format)
+            if Utils.tool_exists('dot'):
+                print('RUN: dot -T' + self.args.graph_format + ' ' + self.output + '.cg.dot > ' + self.output + '.cg.'
+                      + self.args.graph_format)
 
-            cmd.run_cmd(['dot', '-T' + self.args.graph_format, self.output + '.cg.dot'],
-                        stdout=open(self.output + '.cg.' + self.args.graph_format, 'wb'))
+                cmd.run_cmd(['dot', '-T' + self.args.graph_format, self.output + '.cg.dot'],
+                            stdout=open(self.output + '.cg.' + self.args.graph_format, 'wb'))
+            else:
+                print('Please install \'Graphviz\' to generate graphics.')
 
         if self.args.backend_emit_cfg and self.args.backend_cfg_conversion == 'auto':
-            for cfg in glob.glob(self.output + '.cfg.*.dot'):
-                print('RUN: dot -T' + self.args.graph_format + ' ' + cfg + ' > ' + (
-                        os.path.splitext(cfg)[0] + '.' + self.args.graph_format))
+            if Utils.tool_exists('dot'):
+                for cfg in glob.glob(self.output + '.cfg.*.dot'):
+                    print('RUN: dot -T' + self.args.graph_format + ' ' + cfg + ' > ' + (
+                            os.path.splitext(cfg)[0] + '.' + self.args.graph_format))
 
-                cmd.run_cmd(['dot', '-T' + self.args.graph_format, cfg],
-                            stdout=open((os.path.splitext(cfg)[0]) + '.' + self.args.graph_format, 'wb'))
+                    cmd.run_cmd(['dot', '-T' + self.args.graph_format, cfg],
+                                stdout=open((os.path.splitext(cfg)[0]) + '.' + self.args.graph_format, 'wb'))
+            else:
+                print('Please install \'Graphviz\' to generate graphics.')
 
         # Remove trailing whitespace and the last redundant empty new line from the
         # generated output (if any). It is difficult to do this in the back-end, so we
         # do it here.
-        # Note: Do not use the -i flag (in-place replace) as there is apparently no way
-        #       of getting sed -i to work consistently on both MacOS and Linux.
-        # TODO
         with open(self.output, 'r') as file:
             new = [line.rstrip() for line in file]
 

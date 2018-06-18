@@ -76,7 +76,7 @@ def run_unit_tests_in_dir(path):
         print()
 
         # TODO verbose support
-        return_code = subprocess.call([unit_test, '--gtest_color=yes'], shell=True)
+        return_code = subprocess.call([os.path.abspath(unit_test), '--gtest_color=yes'], shell=True)
 
         if return_code != 0:
             tests_failed = True

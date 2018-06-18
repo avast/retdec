@@ -187,6 +187,10 @@ class TimeMeasuredProcess:
 class Utils:
 
     @staticmethod
+    def tool_exists(tool_name):
+        return shutil.which(tool_name) is not None
+
+    @staticmethod
     def remove_file_forced(file):
         if os.path.exists(file):
             os.remove(file)
@@ -223,36 +227,34 @@ class Utils:
     def has_archive_signature(path):
         """Check if file has any ar signature.
         1 argument is needed - file path
-        Returns - 0 if file has ar signature
-                  1 if number of arguments is incorrect
-                  2 no signature
+        Returns - True if file has ar signature
+                  False no signature
         """
-        if subprocess.call([config.AR, path, '--arch-magic'], shell=True):
-            return 0
-        return 2
+        ret = subprocess.call([config.AR, path, '--arch-magic'], shell=True)
+        return ret == 0
 
     @staticmethod
     def has_thin_archive_signature(path):
         """Check if file has thin ar signature.
         1 argument is needed - file path
-        Returns - 0 if file has thin ar signature
-                  1 if number of arguments is incorrect
-                  2 no signature
+        Returns - True if file has thin ar signature
+                  False no signature
         """
-        if subprocess.call([config.AR, path, '--thin-magic'], shell=True):
-            return 0
-        return 2
+        ret = subprocess.call([config.AR, path, '--thin-magic'], shell=True)
+        return ret == 0
 
     @staticmethod
     def is_valid_archive(path):
         """Check if file is an archive we can work with.
         1 argument is needed - file path
-        Returns - 0 if file is valid archive
-                  1 if file is invalid archive
+        Returns - True if file is valid archive
+                  False if file is invalid archive
         """
         # We use our own messages so throw original output away.
-        return subprocess.call([config.AR, path, '--valid'], shell=True, stderr=subprocess.STDOUT,
-                               stdout=None)
+        ret = subprocess.call([config.AR, path, '--valid'], shell=True, stderr=subprocess.STDOUT,
+                              stdout=None)
+
+        return ret == 0
 
     @staticmethod
     def archive_object_count(path):
@@ -328,14 +330,13 @@ class Utils:
     def is_macho_archive(path):
         """Check if file is Mach-O universal binary with archives.
         1 argument is needed - file path
-        Returns - 0 if file is archive
-                  1 if file is not archive
+        Returns - True if file is archive
+                  False if file is not archive
         """
         ret = subprocess.call([config.EXTRACT, '--check-archive', path], shell=True,
-                               stderr=subprocess.STDOUT, stdout=subprocess.DEVNULL)
-        print('Is macho archive returend: ' + str(ret))
+                              stderr=subprocess.STDOUT, stdout=subprocess.DEVNULL)
 
-        return ret != 2
+        return ret == 0
 
     @staticmethod
     def is_decimal_number(num):

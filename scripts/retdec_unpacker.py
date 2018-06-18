@@ -145,7 +145,7 @@ class Unpacker:
             # UNPACKER_EXIT_CODE_PREPROCESSING_ERROR
             print('##### Unpacking by using generic unpacker: failed')
 
-        if not Utils.is_windows():
+        if Utils.tool_exists('upx'):
             # Do not return -> try the next unpacker
             # Try to unpack via UPX
             print()
@@ -168,7 +168,7 @@ class Unpacker:
                 # not upx-packed
                 print('##### Unpacking by using UPX: nothing to do')
         else:
-            print('##### UPX not available on Windows')
+            print('##### \'upx\' not available: nothing to do')
 
         # Do not return -> try the next unpacker
         # Return.
