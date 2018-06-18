@@ -213,7 +213,7 @@ def parse_args():
                         help='Put IDA Pro color tags to output C file.')
 
     parser.add_argument('--config',
-                        dest='config',
+                        dest='config_db',
                         help='Specify JSON decompilation configuration file.')
 
     parser.add_argument('--no-config',
@@ -391,14 +391,14 @@ class Decompiler:
             self.args.keep_unreachable_funcs = True
 
         if self.args.no_config:
-            if self.args.config:
+            if self.args.config_db:
                 Utils.print_error('Option --no-config can not be used with option --config')
                 return False
 
-        if self.args.config:
-            if not os.access(self.args.config, os.R_OK):
+        if self.args.config_db:
+            if not os.access(self.args.config_db, os.R_OK):
                 Utils.print_error(
-                    'The input JSON configuration file '' + (CONFIG_DB) + '' does not exist or is not readable')
+                    'The input JSON configuration file \'%s\' does not exist or is not readable' % self.args.config_db)
                 return False
 
         if self.args.pdb:
@@ -426,7 +426,7 @@ class Decompiler:
             if self.args.pdb:
                 Utils.print_warning('Option -p|--pdb is not used in mode ' + self.args.mode)
 
-            if not self.args.config or not self.args.no_config:
+            if not self.args.config_db or not self.args.no_config:
                 Utils.print_error('Option --config or --no-config must be specified in mode ' + self.args.mode)
                 return False
 
@@ -479,7 +479,6 @@ class Decompiler:
             elif input_name.endswith('exe'):
                 # Suffix .exe
                 self.output = input_name[:-3] + self.args.hll
-                print('Output is: ' + self.output)
             elif input_name.endswith('elf'):
                 # Suffix .elf
                 self.output = input_name[:-3] + self.args.hll
@@ -544,7 +543,7 @@ class Decompiler:
             Utils.remove_dir_forced(self.out_frontend_ll)
             Utils.remove_dir_forced(self.out_frontend_bc)
 
-            if self.config != self.args.config:
+            if self.config != self.args.config_db:
                 Utils.remove_dir_forced(self.config)
 
             Utils.remove_dir_forced(self.out_backend_bc)
@@ -695,9 +694,7 @@ class Decompiler:
             # Put the tool log file and tmp file into /tmp because it uses tmpfs. This means that
             # the data are stored in RAM instead on the disk, which should provide faster access.
             tmp_dir = '/tmp/decompiler_log'
-
             os.makedirs(tmp_dir, exist_ok=True)
-
             file_md5 = self.string_to_md5(self.output)
             tool_log_file = tmp_dir + '/' + file_md5 + '.tool'
 
@@ -793,6 +790,7 @@ class Decompiler:
                             return 1
 
                     self.input = out_restored
+                # Pick object by name
                 elif self.args.ar_name:
                     print()
                     print('##### Restoring object file with name '' + (self.args.ar_name) + '' from archive...')
@@ -831,12 +829,11 @@ class Decompiler:
             self.out_frontend_bc = out_frontend + '.bc'
             self.config = self.output + '.json'
 
-            if self.config != self.args.config:
+            if self.config != self.args.config_db:
                 Utils.remove_file_forced(self.config)
 
-            if self.args.config:
-                shutil.copyfile(self.args.config, self.config)
-                self.config = os.path.abspath(self.args.config)
+            if self.args.config_db:
+                shutil.copyfile(self.args.config_db, self.config)
 
             # Preprocess existing file or create a new, empty JSON file.
             if os.path.isfile(self.config):
@@ -873,7 +870,7 @@ class Decompiler:
             fileinfo_params = ['-c', self.config, '--similarity', self.input, '--no-hashes=all']
 
             if self.args.fileinfo_verbose:
-                fileinfo_params.extend(['-c', self.config, '--similarity', '--verbose', self.input])
+                fileinfo_params = ['-c', self.config, '--similarity', '--verbose', self.input]
 
             for par in config.FILEINFO_EXTERNAL_YARA_PRIMARY_CRYPTO_DATABASES:
                 fileinfo_params.extend(['--crypto', par])
@@ -921,9 +918,9 @@ class Decompiler:
             if self.check_whether_decompilation_should_be_forcefully_stopped('fileinfo'):
                 return 0
 
-            ##
-            ## Unpacking.
-            ##
+            #
+            # Unpacking.
+            #
             unpack_params = ['--extended-exit-codes', '--output', self.out_unpacked, self.input]
 
             if self.args.max_memory:
@@ -941,8 +938,8 @@ class Decompiler:
             else:
                 _, unpacker_rc = unpacker.unpack_all()
 
-                if self.check_whether_decompilation_should_be_forcefully_stopped('unpacker'):
-                    return 0
+            if self.check_whether_decompilation_should_be_forcefully_stopped('unpacker'):
+                return 0
 
             # RET_UNPACK_OK=0
             # RET_UNPACKER_NOTHING_TO_DO_OTHERS_OK=1
@@ -1024,6 +1021,7 @@ class Decompiler:
 
             # Get object file format.
             fileformat, _, _ = cmd.run_cmd([config.CONFIGTOOL, self.config, '--read', '--format'])
+            fileformat = fileformat.lower()
 
             # Intel HEX needs architecture to be specified
             if fileformat in ['ihex']:
@@ -1040,6 +1038,7 @@ class Decompiler:
                 cmd.run_cmd([config.CONFIGTOOL, self.config, '--write', '--file-class', '32'])
                 cmd.run_cmd([config.CONFIGTOOL, self.config, '--write', '--endian', self.args.endian])
 
+            ords_dir = ''
             # Check whether the correct target architecture was specified.
             if self.arch in ['arm', 'thumb']:
                 ords_dir = config.ARM_ORDS_DIR
@@ -1053,9 +1052,8 @@ class Decompiler:
                     self.generate_log()
 
                 self.cleanup()
-                Utils.print_error(
-                    'Unsupported target architecture %s. Supported architectures: Intel x86, ARM, ARM + Thumb, MIPS, PIC32, PowerPC.'
-                    % self.arch)
+                Utils.print_error('Unsupported target architecture %s. Supported architectures: '
+                                  'Intel x86, ARM, ARM + Thumb, MIPS, PIC32, PowerPC.' % self.arch)
                 return 1
 
             # Check file class (e.g. 'ELF32', 'ELF64'). At present, we can only decompile 32-bit files.
@@ -1074,7 +1072,8 @@ class Decompiler:
 
             # Set path to statically linked code signatures.
             #
-            # TODO: Using ELF for IHEX is ok, but for raw, we probably should somehow decide between ELF and PE, or use both, for RAW.
+            # TODO: Using ELF for IHEX is ok, but for raw, we probably should somehow decide between ELF and PE,
+            # or use both, for RAW.
             sig_format = fileformat
 
             if sig_format in ['ihex', 'raw']:
@@ -1107,7 +1106,7 @@ class Decompiler:
             if self.args.keep_unreachable_funcs:
                 cmd.run_cmd([config.CONFIGTOOL, self.config, '--write', '--keep-unreachable-funcs', 'true'])
 
-            if self.args.static_code_archive is not None:
+            if self.args.static_code_archive:
                 # Get signatures from selected archives.
                 if len(self.args.static_code_archive) > 0:
                     print()
@@ -1146,12 +1145,13 @@ class Decompiler:
             # if os.path.isdir(GENERIC_TYPES_DIR):
             #    subprocess.call([config.CONFIGTOOL, CONFIG, '--write', '--types', GENERIC_TYPES_DIR], shell=True)
 
-            # Store path of directory with ORD files into config for frontend (note: only directory, not files themselves).
+            # Store path of directory with ORD files into config for frontend (note: only directory,
+            # not files themselves).
             if os.path.isdir(ords_dir):
                 cmd.run_cmd([config.CONFIGTOOL, self.config, '--write', '--ords', ords_dir + os.path.sep])
 
             # Store paths to file with PDB debugging information into config for frontend.
-            if self.args.pdb and os.path.exists(self.args.pdb):
+            if self.args.pdb:
                 cmd.run_cmd([config.CONFIGTOOL, self.config, '--write', '--pdb-file', self.args.pdb])
 
             # Store file names of input and output into config for frontend.
@@ -1199,9 +1199,10 @@ class Decompiler:
                 # Prevent bin2llvmir from removing unreachable functions.
                 bin2llvmir_params.remove('-unreachable-funcs')
 
-            if not self.config and self.args.config:
-                self.config = self.args.config
-                bin2llvmir_params.extend(['-config-path', self.config])
+            if self.config == '' and self.args.config_db:
+                self.config = self.args.config_db
+
+            bin2llvmir_params.extend(['-config-path', self.config])
 
             if self.args.max_memory:
                 bin2llvmir_params.extend(['-max-memory', self.args.max_memory])
@@ -1246,8 +1247,8 @@ class Decompiler:
                 print(LOG_BIN2LLVMIR_OUTPUT, end='')
                 """
             else:
-                bin22llvmir_out, bin2llvmir_rc, _ = cmd.run_cmd(
-                    [config.BIN2LLVMIR, *bin2llvmir_params, '-o', self.out_backend_bc])
+                bin22llvmir_out, bin2llvmir_rc, _ = cmd.run_cmd([config.BIN2LLVMIR, *bin2llvmir_params, '-o',
+                                                                 self.out_backend_bc])
                 print(bin22llvmir_out)
 
             if bin2llvmir_rc != 0:
@@ -1256,17 +1257,16 @@ class Decompiler:
 
                 self.cleanup()
                 Utils.print_error('Decompilation to LLVM IR failed')
-                return
+                return 1
 
             if self.check_whether_decompilation_should_be_forcefully_stopped('bin2llvmir'):
                 return 0
-
         # modes 'bin' || 'raw'
 
         # LL mode goes straight to backend.
         if self.args.mode == 'll':
             self.out_backend_bc = self.input
-            self.config = self.args.config
+            self.config = self.args.config_db
 
         # Create parameters for the $LLVMIR2HLL call.
         llvmir2hll_params = ['-target-hll=' + self.args.hll, '-var-renamer=' + self.args.backend_var_renamer,
@@ -1276,14 +1276,14 @@ class Decompiler:
                              '-llvmir2bir-converter=' + self.args.backend_llvmir2bir_converter, '-o', self.output,
                              self.out_backend_bc]
 
-        if self.args.backend_no_debug:
+        if not self.args.backend_no_debug:
             llvmir2hll_params.append('-enable-debug')
 
-        if self.args.backend_no_debug_comments:
+        if not self.args.backend_no_debug_comments:
             llvmir2hll_params.append('-emit-debug-comments')
 
-        if self.args.config:
-            llvmir2hll_params.append('-config-path=' + self.args.config)
+        if self.config:
+            llvmir2hll_params.append('-config-path=' + self.config)
 
         if self.args.backend_semantics:
             llvmir2hll_params.extend(['-semantics', self.args.backend_semantics])
