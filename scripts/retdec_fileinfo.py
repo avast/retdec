@@ -1,4 +1,4 @@
-#! /usr/bin/env python3
+#!/usr/bin/env python3
 
 """When analyzing an archive, use the archive decompilation script `--list` instead of
 `fileinfo` because fileinfo is currently unable to analyze archives.
@@ -54,8 +54,8 @@ if __name__ == '__main__':
         if args.json:
             archive_decompiler_args.append('--json')
 
-        res = ArchiveDecompiler(archive_decompiler_args).decompile_archive()
-        sys.exit(res)
+        decompiler = ArchiveDecompiler(archive_decompiler_args)
+        sys.exit(decompiler.decompile_archive())
 
     # We are not analyzing an archive, so proceed to fileinfo.
     fileinfo_params = [args.file]
@@ -67,4 +67,4 @@ if __name__ == '__main__':
         for par in config.FILEINFO_EXTERNAL_YARA_EXTRA_CRYPTO_DATABASES:
             fileinfo_params.extend(['--crypto', par])
 
-    subprocess.call([config.FILEINFO] + fileinfo_params, shell=True)
+    subprocess.call([config.FILEINFO, *fileinfo_params], shell=True)

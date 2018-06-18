@@ -1,4 +1,4 @@
-#! /usr/bin/env python3
+#!/usr/bin/env python3
 
 """Decompiles the given file into the selected target high-level language."""
 

@@ -130,6 +130,7 @@ class SigFromLib:
 
             if result != 0:
                 self.print_error_and_cleanup('utility bin2pat failed when processing %s' % lib_path)
+                return 1
 
             # Remove extracted objects continuously.
             if not self.args.no_cleanup:
@@ -142,26 +143,26 @@ class SigFromLib:
                 for d in object_dirs:
                     if os.path.exists(d):
                         shutil.rmtree(d)
-            # sys.exit(0)
-            return 1
+            return 0
 
         # Create final .yara file from .pat files.
         if self.args.logfile:
             result = subprocess.call(
-                [config.PAT2YARA] + pattern_files + ['--min-pure', str(self.args.min_pure), '-o', self.file_path, '-l',
-                                                     self.file_path + '.log', self.ignore_nop,
-                                                     str(self.args.ignore_nops)],
+                [config.PAT2YARA, *pattern_files, '--min-pure', str(self.args.min_pure), '-o', self.file_path, '-l',
+                 self.file_path + '.log', self.ignore_nop,
+                 str(self.args.ignore_nops)],
                 shell=True)
 
             if result != 0:
                 self.print_error_and_cleanup('utility pat2yara failed')
         else:
             result = subprocess.call(
-                [config.PAT2YARA] + pattern_files + ['--min-pure', str(self.args.min_pure), '-o', self.file_path,
-                                                     self.ignore_nop, str(self.args.ignore_nops)], shell=True)
+                [config.PAT2YARA, *pattern_files, '--min-pure', str(self.args.min_pure), '-o', self.file_path,
+                 self.ignore_nop, str(self.args.ignore_nops)], shell=True)
 
             if result != 0:
                 self.print_error_and_cleanup('utility pat2yara failed')
+                return 1
 
         # Do cleanup.
         if not self.args.no_cleanup:

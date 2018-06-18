@@ -1,4 +1,4 @@
-#! /usr/bin/env python3
+#!/usr/bin/env python3
 
 import argparse
 import os
@@ -65,7 +65,6 @@ class ArchiveDecompiler:
             print('{')
             print('    \'error\' : \'' + message + '\'')
             print('}')
-            # exit(1)
         else:
             # Otherwise print in plain text.
             Utils.print_error(error)
@@ -101,7 +100,7 @@ class ArchiveDecompiler:
             self.decompiler_sh_args = self.args.arg_list
 
         if self.args.file:
-            if not (os.path.isfile(self.args.file)):
+            if not os.path.isfile(self.args.file):
                 Utils.print_error('Input %s is not a valid file.' % self.args.file)
                 return False
 
@@ -160,7 +159,7 @@ class ArchiveDecompiler:
             return 0
 
         # Run the decompilation script over all the found files.
-        print('Running \`%s' % config.DECOMPILER_SH, end='')
+        print('Running \`%s' % config.DECOMPILER, end='')
 
         if self.decompiler_sh_args:
             print(' '.join(self.decompiler_sh_args), end='')
@@ -177,7 +176,7 @@ class ArchiveDecompiler:
             log_file = self.library_path + '.file_' + str(file_index) + '.log.verbose'
 
             # Do not escape!
-            output, _, timeouted = cmd.run_cmd([config.DECOMPILER_SH, '--ar-index=' + str(i), '-o',
+            output, _, timeouted = cmd.run_cmd([config.DECOMPILER, '--ar-index=' + str(i), '-o',
                                                 self.library_path + '.file_' + str(file_index) + '.c',
                                                 self.library_path, *self.decompiler_sh_args], timeout=self.timeout)
 

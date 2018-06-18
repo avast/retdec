@@ -106,13 +106,13 @@ class Unpacker:
                 if max_memory > 0:
                     return True
             except ValueError:
-                Utils.print_error(
-                    'Invalid value for --max-memory: %s (expected a positive integer)' % self.args.max_memory)
+                Utils.print_error('Invalid value for --max-memory: %s (expected a positive integer)'
+                                  % self.args.max_memory)
                 return False
 
         # Convert to absolute paths.
-        self.input = os.path.abspath(self.args.file) #Utils.get_realpath(self.args.input)
-        self.output = os.path.abspath(self.output) #Utils.get_realpath(self.output)
+        self.input = os.path.abspath(self.args.file)
+        self.output = os.path.abspath(self.output)
 
         return True
 
