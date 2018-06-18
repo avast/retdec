@@ -44,19 +44,11 @@ def unit_tests_in_dir(path):
         $1 path to the directory with unit tests
     """
 
-    """On macOS, find does not support the '-executable' parameter (#238).
-    Therefore, on macOS, we have to use '-perm +111'. To explain, + means
-    'any of these bits' and 111 is the octal representation for the
-    executable bit on owner, group, and other. Unfortunately, we cannot use
-    '-perm +111' on all systems because find on Linux/MSYS2 does not support
-    +. It supports only /, but this is not supported by find on macOS...
-    Hence, we need an if.
-    """
-
     tests = []
 
     for file in os.listdir(path):
-        if file.startswith('retdec-tests-'):
+        file_name = os.path.basename(file)
+        if file_name.startswith('retdec-tests-'):
             tests.append(file)
 
     tests.sort()
@@ -78,10 +70,9 @@ def run_unit_tests_in_dir(path):
 
     for unit_test in unit_tests_in_dir(path):
         print()
-        unit_test_name = os.popen('sed \'s/^.*/bin///' << '\'' + unit_test + '\'').read().rstrip('\n')
+        unit_test_name = os.path.basename(unit_test)
         print_colored(unit_test_name, 'yellow')
         print()
-
 
         # TODO verbose support
         return_code = subprocess.call([unit_test, '--gtest_color=yes'], shell=True)
