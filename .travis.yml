@@ -81,18 +81,15 @@ script:
   - cd ..
   - rm -rf build
   # Run unit tests.
-  - if [ "$TRAVIS_OS_NAME" = "osx" ]; then /usr/local/bin/bash retdec-install/bin/retdec-tests-runner.sh; fi
-  - if [ "$TRAVIS_OS_NAME" = "linux" ]; then ./retdec-install/bin/retdec-tests-runner.sh; fi
+  - python3 retdec-install/bin/retdec_tests_runner.py; fi
   # Run the decompilation script.
-  - if [ "$TRAVIS_OS_NAME" = "osx" ]; then /usr/local/bin/bash retdec-install/bin/retdec-decompiler.sh --help; fi
-  - if [ "$TRAVIS_OS_NAME" = "linux" ]; then ./retdec-install/bin/retdec-decompiler.sh --help; fi
+  - python3 retdec-install/bin/retdec_decompiler.py --help; fi
   # Run a simple decompilation.
   - echo -e '#include <stdio.h>\n#include <stdlib.h>\nint main()\n{\n  printf("hello world\\n");\n  return 0;\n}\n' > hello-orig.c
   - cat hello-orig.c
   - gcc -m32 -o hello hello-orig.c
   - ./hello
-  - if [ "$TRAVIS_OS_NAME" = "osx" ]; then /usr/local/bin/bash retdec-install/bin/retdec-decompiler.sh hello; fi
-  - if [ "$TRAVIS_OS_NAME" = "linux" ]; then ./retdec-install/bin/retdec-decompiler.sh hello; fi
+  - python3 retdec-install/bin/retdec_decompiler.py hello; fi
   - cat hello.c
   - grep "int main(int argc, char \*\* argv)" hello.c
 
