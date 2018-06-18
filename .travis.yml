@@ -56,7 +56,7 @@ install:
   # bash 4
   - if [ "$TRAVIS_OS_NAME" = "osx" ]; then brew install bash; fi
   # python 3
-  - if [ "$TRAVIS_OS_NAME" = "osx" ]; then brew install python3; fi
+  - if [ "$TRAVIS_OS_NAME" = "osx" ]; then brew upgrade python; fi
   
 before_script:
   - eval "${MATRIX_EVAL}"
