@@ -81,15 +81,15 @@ script:
   - cd ..
   - rm -rf build
   # Run unit tests.
-  - python3 retdec-install/bin/retdec_tests_runner.py
+  - python3 /retdec-install/bin/retdec_tests_runner.py
   # Run the decompilation script.
-  - python3 retdec-install/bin/retdec_decompiler.py --help
+  - python3 /retdec-install/bin/retdec_decompiler.py --help
   # Run a simple decompilation.
   - echo -e '#include <stdio.h>\n#include <stdlib.h>\nint main()\n{\n  printf("hello world\\n");\n  return 0;\n}\n' > hello-orig.c
   - cat hello-orig.c
   - gcc -m32 -o hello hello-orig.c
   - ./hello
-  - python3 retdec-install/bin/retdec_decompiler.py hello
+  - python3 /retdec-install/bin/retdec_decompiler.py hello
   - cat hello.c
   - grep "int main(int argc, char \*\* argv)" hello.c
 
