@@ -327,8 +327,6 @@ class Decompiler:
         """Check proper combination of input arguments.
             """
 
-        global PICKED_FILE
-
         # Check whether the input file was specified.
         if not self.args.input:
             Utils.print_error('No input file was specified')
@@ -489,7 +487,7 @@ class Decompiler:
                 # Suffix .macho
                 self.output = input_name[:-5] + self.args.hll
             else:
-                self.output = self.output + PICKED_FILE + '.' + self.args.hll
+                self.output = self.args.input + '.' + self.args.hll
 
         # If the output file name matches the input file name, we have to change the
         # output file name. Otherwise, the input file gets overwritten.
