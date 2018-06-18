@@ -1141,9 +1141,8 @@ class Decompiler:
                     cmd.run_cmd([config.CONFIGTOOL, self.config, '--write', '--user-signature', i])
 
             # Store paths of type files into config for frontend.
-            # TODO doesnt even exist in sh except here
-            # if os.path.isdir(GENERIC_TYPES_DIR):
-            #    subprocess.call([config.CONFIGTOOL, CONFIG, '--write', '--types', GENERIC_TYPES_DIR], shell=True)
+            if os.path.isdir(config.GENERIC_TYPES_DIR):
+                cmd.run_cmd([config.CONFIGTOOL, self.config, '--write', '--types', config.GENERIC_TYPES_DIR])
 
             # Store path of directory with ORD files into config for frontend (note: only directory,
             # not files themselves).
