@@ -9,10 +9,11 @@ import subprocess
 import retdec_config as config
 
 """First argument can be verbose."""
-if sys.argv[1] == '-v' or sys.argv[1] == '--verbose':
-    verbose = True
-else:
-    verbose = False
+if len(sys.argv) > 1:
+    if sys.argv[1] in ['-v', '--verbose']:
+        verbose = True
+    else:
+        verbose = False
 
 
 def print_colored(message, color):

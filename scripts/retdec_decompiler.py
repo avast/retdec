@@ -712,11 +712,12 @@ class Decompiler:
 
             if Utils.is_macho_archive(self.input):
                 out_archive = self.output + '.a'
-                if self.arch:
+                if self.args.arch:
                     print()
                     print('##### Restoring static library with architecture family ' + self.args.arch + '...')
                     print(
-                        'RUN: ' + config.EXTRACT + ' --family ' + self.args.arch + ' --out ' + out_archive + ' ' + self.input)
+                        'RUN: ' + config.EXTRACT + ' --family ' + self.args.arch + ' --out ' + out_archive + ' '
+                        + self.input)
 
                     _, extract_rc, _ = cmd.run_cmd(
                         [config.EXTRACT, '--family', self.args.arch, '--out', out_archive, self.input])
@@ -726,7 +727,6 @@ class Decompiler:
                               '\'. File contains these architecture families:')
                         cmd.run_cmd([config.EXTRACT, '--list', self.input])
                         self.cleanup()
-                        # sys.exit(1)
                         return 1
                 else:
                     # Pick best architecture

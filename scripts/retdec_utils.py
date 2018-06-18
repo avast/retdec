@@ -331,8 +331,11 @@ class Utils:
         Returns - 0 if file is archive
                   1 if file is not archive
         """
-        return subprocess.call([config.EXTRACT, '--check-archive', path], shell=True,
-                               stderr=subprocess.STDOUT, stdout=subprocess.DEVNULL) != 2
+        ret = subprocess.call([config.EXTRACT, '--check-archive', path], shell=True,
+                               stderr=subprocess.STDOUT, stdout=subprocess.DEVNULL)
+        print('Is macho archive returend: ' + str(ret))
+
+        return ret != 2
 
     @staticmethod
     def is_decimal_number(num):
