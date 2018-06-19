@@ -561,24 +561,24 @@ class Decompiler:
         """Cleanup working directory"""
 
         if self.args.cleanup:
-            Utils.remove_dir_forced(self.out_unpacked)
-            Utils.remove_dir_forced(self.out_frontend_ll)
-            Utils.remove_dir_forced(self.out_frontend_bc)
+            Utils.remove_file_forced(self.out_unpacked)
+            Utils.remove_file_forced(self.out_frontend_ll)
+            Utils.remove_file_forced(self.out_frontend_bc)
 
             if self.config_file != self.args.config_db:
-                Utils.remove_dir_forced(self.config_file)
+                Utils.remove_file_forced(self.config_file)
 
-            Utils.remove_dir_forced(self.out_backend_bc)
-            Utils.remove_dir_forced(self.out_backend_ll)
+            Utils.remove_file_forced(self.out_backend_bc)
+            Utils.remove_file_forced(self.out_backend_ll)
 
             # Archive support
-            Utils.remove_dir_forced(self.out_restored)
+            Utils.remove_file_forced(self.out_restored)
             # Archive support (Macho-O Universal)
-            Utils.remove_dir_forced(self.out_archive)
+            Utils.remove_file_forced(self.out_archive)
 
             # Signatures generated from archives
             for sig in self.signatures_to_remove:
-                Utils.remove_dir_forced(sig)
+                Utils.remove_file_forced(sig)
 
     def _generate_log(self):
         log_file = self.output_file + '.decompilation.log'
@@ -1110,7 +1110,7 @@ class Decompiler:
                 # Prevent bin2llvmir from removing unreachable functions.
                 bin2llvmir_params.remove('-unreachable-funcs')
 
-            if self.config_file == '' and self.args.config_db:
+            if self.config_file == '' or not self.config_file and self.args.config_db:
                 self.config_file = self.args.config_db
 
             bin2llvmir_params.extend(['-config-path', self.config_file])
@@ -1294,7 +1294,7 @@ class Decompiler:
 
         # Colorize output file.
         if self.args.color_for_ida:
-            cmd.run_cmd([config.IDA_COLORIZER, self.output_file, self.config_file])
+            cmd.run_cmd([sys.executable, config.IDA_COLORIZER, self.output_file, self.config_file])
 
         # Store the information about the decompilation into the JSON file.
         if self.args.generate_log:
