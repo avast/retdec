@@ -192,7 +192,7 @@ class Unpacker:
             if return_code == self.RET_UNPACK_OK or return_code == self.RET_UNPACKER_NOTHING_TO_DO_OTHERS_OK \
                     or return_code == self.RET_UNPACKER_FAILED_OTHERS_OK:
                 res_rc = return_code
-                res_out += output
+                res_out = output
 
                 shutil.move(tmp_output, self.output)
                 self.input = self.output
@@ -203,7 +203,7 @@ class Unpacker:
                     os.remove(tmp_output)
                 break
 
-        return res_out, return_code if res_rc == -1 else res_rc
+        return (res_out, return_code) if res_rc == -1 else ('', res_rc)
 
 
 if __name__ == '__main__':

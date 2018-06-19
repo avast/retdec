@@ -9,6 +9,7 @@ import os
 import re
 import shutil
 import sys
+import tempfile
 import time
 
 import retdec_config as config
@@ -71,6 +72,7 @@ def parse_args(_args):
 
     parser.add_argument('--generate-log',
                         dest='generate_log',
+                        action='store_true',
                         help='Generate log')
 
     parser.add_argument('--ar-index',
@@ -312,6 +314,7 @@ class Decompiler:
         self.signatures_to_remove = []
         self.arch = ''
         self.mode = ''
+        self.format = ''
         self.pdb_file = ''
 
         self.out_unpacked = ''
@@ -322,6 +325,27 @@ class Decompiler:
         self.out_restored = ''
         self.out_archive = ''
         self.tool_log_file = ''
+
+        self.log_decompilation_start_date = ''
+
+        self.log_fileinfo_rc = 0
+        self.log_fileinfo_time = 0
+        self.LOG_FILEINFO_MEMORY = 0
+        self.log_fileinfo_output = ''
+        self.log_fileinfo_memory = 0
+
+        self.log_unpacker_output = ''
+        self.log_unpacker_rc = 0
+
+        self.log_bin2llvmir_rc = 0
+        self.log_bin2llvmir_time = 0
+        self.log_bin2llvmir_memory = 0
+        self.log_bin2llvmir_output = ''
+
+        self.log_llvmir2hll_rc = 0
+        self.log_llvmir2hll_time = 0
+        self.log_llvmir2hll_memory = 0
+        self.log_llvmir2hll_output = ''
 
     def check_arguments(self):
         """Check proper combination of input arguments.
@@ -561,115 +585,37 @@ class Decompiler:
                 Utils.remove_dir_forced(self.tool_log_file)
 
     def generate_log(self):
-        """
-        LOG_FILE = self.output + '.decompilation.log'
-        LOG_DECOMPILATION_END_DATE = time.strftime('%S')
+        log_file = self.output_file + '.decompilation.log'
+        log_decompilation_end_date = str(int(time.time()))
 
-        LOG_FILEINFO_OUTPUT = self.json_escape(LOG_FILEINFO_OUTPUT)
-        LOG_UNPACKER_OUTPUT = self.json_escape(LOG_UNPACKER_OUTPUT)
-        LOG_BIN2LLVMIR_OUTPUT = self.remove_colors(LOG_BIN2LLVMIR_OUTPUT)
-        LOG_BIN2LLVMIR_OUTPUT = self.json_escape(LOG_BIN2LLVMIR_OUTPUT)
-        LOG_LLVMIR2HLL_OUTPUT = self.remove_colors(LOG_LLVMIR2HLL_OUTPUT)
-        LOG_LLVMIR2HLL_OUTPUT = self.json_escape(LOG_LLVMIR2HLL_OUTPUT)
+        self.log_fileinfo_output = self.json_escape(self.log_fileinfo_output)
+        self.log_unpacker_output = self.json_escape(self.log_unpacker_output)
+        self.log_bin2llvmir_output = self.json_escape(self.log_bin2llvmir_output)
+        self.log_llvmir2hll_output = self.json_escape(self.log_llvmir2hll_output)
 
-        log_structure = '{\n\t\'input_file\' : \'%s\',\n\t\'pdb_file\' : \'%s\',\n\t\'start_date\' :' \
-                        ' \'%s\',\n\t\'end_date\' : \'%s\',\n\t\'mode\' : \'%s\',\n\t\'arch\' : \'%s\',\n\t\'format\'' \
-                        ' : \'%s\',\n\t\'fileinfo_rc\' : \'%s\',\n\t\'unpacker_rc\' : \'%s\',\n\t\'bin2llvmir_rc\'' \
-                        ' : \'%s\',\n\t\'llvmir2hll_rc\' : \'%s\',\n\t\'fileinfo_output\' :' \
-                        ' \'%s\',\n\t\'unpacker_output\' : \'%s\',\n\t\'bin2llvmir_output\' :' \
-                        ' \'%s\',\n\t\'llvmir2hll_output\' : \'%s\',\n\t\'fileinfo_runtime\' :' \
-                        ' \'%s\',\n\t\'bin2llvmir_runtime\' : \'%s\',\n\t\'llvmir2hll_runtime\' :' \
-                        ' \'%s\',\n\t\'fileinfo_memory\' : \'%s\',\n\t\'bin2llvmir_memory\' :' \
-                        ' \'%s\',\n\t\'llvmir2hll_memory\' : \'%s\'\n}\n'
+        log_structure = '{\n\t\"input_file\" : \"%s\",\n\t\"pdb_file\" : \"%s\",\n\t\"start_date\" : \"%s\",\n\t\"' \
+                        'end_date\" : \"%s\",\n\t\"mode\" : \"%s\",\n\t\"arch\" : \"%s\",\n\t\"format\" : \"%s\",\n\t\"' \
+                        'fileinfo_rc\" : \"%s\",\n\t\"unpacker_rc\" : \"%s\",\n\t\"bin2llvmir_rc\" : \"%s\",\n\t\"' \
+                        'llvmir2hll_rc\" : \"%s\",\n\t\"fileinfo_output\" : \"%s\",\n\t\"unpacker_output\" : \"%s\",' \
+                        '\n\t\"bin2llvmir_output\" : \"%s\",\n\t\"llvmir2hll_output\" : \"%s\",\n\t\"fileinfo_runtime\"' \
+                        ' : \"%s\",\n\t\"bin2llvmir_runtime\" : \"%s\",\n\t\"llvmir2hll_runtime\" : \"%s\",\n\t\"' \
+                        'fileinfo_memory\" : \"%s\",\n\t\"bin2llvmir_memory\" : \"%s\",\n\t\"llvmir2hll_memory\"' \
+                        ' : \"%s\"\n}\n'
 
-        print(log_structure % (
-            self.input, self.pdb_file, LOG_DECOMPILATION_START_DATE, LOG_DECOMPILATION_END_DATE, self.mode,
-            self.args.arch,
-            FORMAT, LOG_FILEINFO_RC, LOG_UNPACKER_RC, LOG_BIN2LLVMIR_RC, LOG_LLVMIR2HLL_RC,
-            LOG_FILEINFO_OUTPUT, LOG_UNPACKER_OUTPUT, LOG_BIN2LLVMIR_OUTPUT, LOG_LLVMIR2HLL_OUTPUT,
-            LOG_FILEINFO_RUNTIME, LOG_BIN2LLVMIR_RUNTIME, LOG_LLVMIR2HLL_RUNTIME, LOG_FILEINFO_MEMORY,
-            LOG_BIN2LLVMIR_MEMORY, LOG_LLVMIR2HLL_MEMORY))
-        """
+        json_string = log_structure % (
+            self.input_file, self.pdb_file, self.log_decompilation_start_date, log_decompilation_end_date, self.mode,
+            self.arch, self.format, self.log_fileinfo_rc, self.log_unpacker_rc, self.log_bin2llvmir_rc,
+            self.log_llvmir2hll_rc, self.log_fileinfo_output, self.log_unpacker_output, self.log_bin2llvmir_output,
+            self.log_llvmir2hll_output, self.log_fileinfo_time, self.log_bin2llvmir_time, self.log_llvmir2hll_time,
+            self.log_fileinfo_memory, self.log_bin2llvmir_memory, self.log_llvmir2hll_memory)
 
-    #
-    # Parses the given return code and output from a tool that was run through
-    # `/usr/bin/time -v` and prints the return code to be stored into the log.
-    #
-    # Parameters:
-    #
-    #    - $1: return code from `/usr/bin/time`
-    #    - $2: combined output from the tool and `/usr/bin/time -v`
-    #
-    # This function has to be called for every tool that is run through
-    # `/usr/bin/time`. The reason is that when a tool is run without
-    # `/usr/bin/time` and it e.g. segfaults, shell returns 139, but when it is run
-    # through `/usr/bin/time`, it returns 11 (139 - 128). If this is the case, this
-    # function prints 139 instead of 11 to make the return codes of all tools
-    # consistent.
-    #
-    def get_tool_rc(self, return_code, output):
-        global BASH_REMATCH
-        global RC
+        with open(log_file, 'w+') as f:
+            f.write(json_string)
+        # print(json_string, file=open(log_file, 'w+'))
 
-        orig_rc = return_code
-        signal_regex = 'Command terminated by signal ([0-9]*)'
-
-        if re.search(signal_regex, output):
-            signal_num = BASH_REMATCH[1]
-            RC = signal_num + 128
-        else:
-            RC = orig_rc
-            # We want to be able to distinguish assertions and memory-insufficiency
-            # errors. The problem is that both assertions and memory-insufficiency
-            # errors make the program exit with return code 134. We solve this by
-            # replacing 134 with 135 (SIBGUS, 7) when there is 'std::bad_alloc' in the
-            # output. So, 134 will mean abort (assertion error) and 135 will mean
-            # memory-insufficiency error.
-            if RC == 134 or re.search('std::bad_alloc', output):
-                RC = 135
-            print(RC)
-
-        return RC
-
-    #
-    # Parses the given output ($1) from a tool that was run through
-    # `/usr/bin/time -v` and prints the memory usage in MB.
-    #
-    def get_tool_memory_usage(self, tool):
-        """The output from `/usr/bin/time -v` looks like this:
-
-            [..] (output from the tool)
-                Command being timed: 'tool'
-                [..] (other data)
-                Maximum resident set size (kbytes): 1808
-                [..] (other data)
-
-        We want the value of 'resident set size' (RSS), which we convert from KB
-        to MB. If the resulting value is less than 1 MB, round it to 1 MB.
-        """
-        _, _, tail = tool.partition('Maximum resident set size (kbytes): ')
-        rss_kb = tail.split(' ')[0]
-        rss_mb = (rss_kb / 1024)
-
-        return rss_mb if (rss_mb > 0) else 1
-
-    #
-    # Prints an escaped version of the given text so it can be inserted into JSON.
-    #
-    # Parameters:
-    #   - $1 Text to be escaped.
-    #
-    def json_escape(self, text):
-        # We need to escape backslashes (\), double quotes ('), and replace new lines with '\n'.
-        return re.escape(text)
-
-    def remove_colors(self, text):
-        """Removes color codes from the given text ($1).
-        """
-        # _rc0 = subprocess.Popen('sed' + ' ' + '-r' + ' ' + 's/\x1b[^m]*m//g', shell=True, stdin=subprocess.PIPE)
-
-        res = re.compile(r's/\x1b[^m]*m//g')
-        return res.sub('', text)
+    def json_escape(self, string):
+        # TODO
+        return string.rstrip('\r\n').replace('\n', r'\n')
 
     def string_to_md5(self, string):
         """Generate a MD5 checksum from a given string.
@@ -688,13 +634,14 @@ class Decompiler:
 
         # Initialize variables used by logging.
         if self.args.generate_log:
-            log_decompilation_start_date = time.strftime('%s')  # os.popen('date  + %s').read().rstrip('\n')
+            self.log_decompilation_start_date = str(int(time.time()))
             # Put the tool log file and tmp file into /tmp because it uses tmpfs. This means that
             # the data are stored in RAM instead on the disk, which should provide faster access.
-            tmp_dir = '/tmp/decompiler_log'
+            tmp_dir = os.path.join(tempfile.gettempdir(), 'decompiler_log')
             os.makedirs(tmp_dir, exist_ok=True)
-            file_md5 = self.string_to_md5(self.output_file)
-            tool_log_file = tmp_dir + '/' + file_md5 + '.tool'
+            with open(self.output_file, 'r', encoding='utf-8') as f:
+                file_md5 = '123456'  # self.string_to_md5(f.read())
+                self.tool_log_file = os.path.join(tmp_dir, file_md5 + '.tool')
 
         # Raw.
         if self.mode == 'raw':
@@ -893,15 +840,10 @@ class Decompiler:
             fileinfo_rc = 0
 
             if self.args.generate_log:
-                """
-                tcmd = TimeMeasuredProcess()
-                LOG_FILEINFO_OUTPUT, fileinfo_rc, LOG_FILEINFO_RUNTIME = \
-                    tcmd.run_cmd([config.FILEINFO] + fileinfo_params)
+                self.log_fileinfo_memory, self.log_fileinfo_time, self.log_fileinfo_output, self.log_fileinfo_rc = \
+                    cmd.run_measured_cmd([config.FILEINFO, *fileinfo_params])
 
-                LOG_FILEINFO_MEMORY = self.get_tool_memory_usage(LOG_FILEINFO_OUTPUT)
-                print(LOG_FILEINFO_OUTPUT)
-                """
-                pass
+                print(self.log_fileinfo_output)
             else:
                 fileinfo, fileinfo_rc, _ = cmd.run_cmd([config.FILEINFO, *fileinfo_params])
                 print(fileinfo)
@@ -933,8 +875,9 @@ class Decompiler:
             unpacker = Unpacker(unpack_params)
             if self.args.generate_log:
                 # we should get the output from the unpacker tool
-                log_unpacker_output, unpacker_rc = unpacker.unpack_all()
-                LOG_UNPACKER_RC = unpacker_rc
+                self.log_unpacker_output, self.log_unpacker_rc = unpacker.unpack_all()
+
+                unpacker_rc = self.log_unpacker_rc
             else:
                 _, unpacker_rc = unpacker.unpack_all()
 
@@ -973,24 +916,14 @@ class Decompiler:
                 print('RUN: ' + config.FILEINFO + ' ' + ' '.join(fileinfo_params))
 
                 if self.args.generate_log:
-                    """
-                    FILEINFO_AND_TIME_OUTPUT = os.popen(
-                        TIME + ' \'' + config.FILEINFO + '\' \'' + ' '.join(fileinfo_params) + '\' 2>&1').read().rstrip(
-                        '\n')
+                    fileinfo_memory, fileinfo_time, self.log_fileinfo_output, self.log_fileinfo_rc \
+                        = cmd.run_measured_cmd([config.FILEINFO, *fileinfo_params])
 
-                    fileinfo_rc = 0  # _rc0
+                    fileinfo_rc = self.log_fileinfo_rc
+                    self.log_fileinfo_time += fileinfo_time
+                    self.log_fileinfo_memory = (self.log_fileinfo_memory + fileinfo_memory) / 2
 
-                    tcmd = TimeMeasuredProcess()
-                    LOG_FILEINFO_OUTPUT, fileinfo_rc, LOG_FILEINFO_RUNTIME = \
-                        tcmd.run_cmd([config.FILEINFO] + fileinfo_params)
-
-                    LOG_FILEINFO_RUNTIME = (LOG_FILEINFO_RUNTIME + FILEINFO_RUNTIME)
-                    FILEINFO_MEMORY = self.get_tool_memory_usage(FILEINFO_AND_TIME_OUTPUT)
-                    LOG_FILEINFO_MEMORY = (LOG_FILEINFO_MEMORY + FILEINFO_MEMORY) / 2
-                    LOG_FILEINFO_OUTPUT = self.get_tool_output(FILEINFO_AND_TIME_OUTPUT)
-                    print(LOG_FILEINFO_OUTPUT)
-                    """
-                    pass
+                    print(self.log_fileinfo_output)
                 else:
                     fileinfo, fileinfo_rc, _ = cmd.run_cmd([config.FILEINFO, *fileinfo_params])
                     print(fileinfo)
@@ -1018,17 +951,17 @@ class Decompiler:
                 self.arch = arch_full.strip()
 
             # Get object file format.
-            fileformat, _, _ = cmd.run_cmd([config.CONFIGTOOL, self.config_file, '--read', '--format'])
-            fileformat = fileformat.lower()
+            self.format, _, _ = cmd.run_cmd([config.CONFIGTOOL, self.config_file, '--read', '--format'])
+            self.format = self.format.lower()
 
             # Intel HEX needs architecture to be specified
-            if fileformat in ['ihex']:
+            if self.format in ['ihex']:
                 if not self.arch or self.arch == 'unknown':
-                    Utils.print_error('Option -a|--arch must be used with format ' + fileformat)
+                    Utils.print_error('Option -a|--arch must be used with format ' + self.format)
                     return 1
 
                 if not self.args.endian:
-                    Utils.print_error('Option -e|--endian must be used with format ' + fileformat)
+                    Utils.print_error('Option -e|--endian must be used with format ' + self.format)
                     return 1
 
                 cmd.run_cmd([config.CONFIGTOOL, self.config_file, '--write', '--arch', self.arch])
@@ -1072,7 +1005,7 @@ class Decompiler:
             #
             # TODO: Using ELF for IHEX is ok, but for raw, we probably should somehow decide between ELF and PE,
             # or use both, for RAW.
-            sig_format = fileformat
+            sig_format = self.format
 
             if sig_format in ['ihex', 'raw']:
                 sig_format = 'elf'
@@ -1213,37 +1146,13 @@ class Decompiler:
             print('##### Decompiling ' + self.input_file + ' into ' + self.out_backend_bc + '...')
             print('RUN: ' + config.BIN2LLVMIR + ' ' + ' '.join(bin2llvmir_params) + ' -o ' + self.out_backend_bc)
 
-            bin2llvmir_rc = 0
-
             if self.args.generate_log:
-                """
-                PID = 0
-                bin2llvmir_rc = 0
+                self.log_bin2llvmir_memory, self.log_bin2llvmir_time, self.log_bin2llvmir_output, \
+                self.log_bin2llvmir_rc = cmd.run_measured_cmd([config.BIN2LLVMIR, *bin2llvmir_params, '-o',
+                                                               self.out_backend_bc], out=open(self.tool_log_file, 'w'))
 
-                def thread1():
-                    subprocess.call([TIME, config.BIN2LLVMIR, ' '.join(bin2llvmir_params), '-o',
-                        self.out_backend_bc], shell=True, stdout=open(tool_log_file, 'wb'), stderr=subprocess.STDOUT)
-
-                    threading.Thread(target=thread1).start()
-
-                    PID = 0  # TODO $! Expand.exclamation()
-
-                def thread2():
-                    self.timed_kill(PID)
-
-                threading.Thread(target=thread2).start()
-
-                # subprocess.call(['wait', PID], shell=True, stderr=subprocess.STDOUT, stdout=subprocess.DEVNULL)
-                os.kill(PID, 0)
-
-                bin2llvmir_rc = 0  # TODO use rc _rc2
-                BIN2LLVMIR_AND_TIME_OUTPUT = os.popen('cat \'' + tool_log_file + '\'').read().rstrip('\n')
-                LOG_BIN2LLVMIR_RC = self.get_tool_rc(bin2llvmir_rc, BIN2LLVMIR_AND_TIME_OUTPUT)
-                LOG_BIN2LLVMIR_RUNTIME = self.get_tool_runtime(BIN2LLVMIR_AND_TIME_OUTPUT)
-                LOG_BIN2LLVMIR_MEMORY = self.get_tool_memory_usage(BIN2LLVMIR_AND_TIME_OUTPUT)
-                LOG_BIN2LLVMIR_OUTPUT = self.get_tool_output(BIN2LLVMIR_AND_TIME_OUTPUT)
-                print(LOG_BIN2LLVMIR_OUTPUT, end='')
-                """
+                bin2llvmir_rc = self.log_bin2llvmir_rc
+                print(self.log_bin2llvmir_output)
             else:
                 bin22llvmir_out, bin2llvmir_rc, _ = cmd.run_cmd([config.BIN2LLVMIR, *bin2llvmir_params, '-o',
                                                                  self.out_backend_bc])
@@ -1346,39 +1255,13 @@ class Decompiler:
         print('##### Decompiling ' + self.out_backend_bc + ' into ' + self.output_file + '...')
         print('RUN: ' + config.LLVMIR2HLL + ' ' + ' '.join(llvmir2hll_params))
 
-        llvmir2hll_rc = 0
-
         if self.args.generate_log:
-            """
-            PID = 0
+            self.log_llvmir2hll_memory, self.log_llvmir2hll_time, self.log_llvmir2hll_output, \
+            self.log_llvmir2hll_rc = cmd.run_measured_cmd([config.LLVMIR2HLL, *llvmir2hll_params],
+                                                          out=open(self.tool_log_file, 'a'))
 
-            def thread3():
-                subprocess.call([TIME, config.LLVMIR2HLL] + llvmir2hll_params, shell=True, stdout=open(
-                    tool_log_file, 'wb'), stderr=subprocess.STDOUT)
-
-                threading.Thread(target=thread3).start()
-
-                PID = 0  # TODO Expand.exclamation()
-
-                def thread4():
-                    self.timed_kill(PID)
-
-            threading.Thread(target=self.thread4).start()
-
-            os.kill(PID, 0)
-            # subprocess.call(['wait', PID], shell=True, stderr=subprocess.STDOUT, stdout=subprocess.DEVNULL)
-
-            llvmir2hll_rc = 0  # use rc _rc4
-            LLVMIR2HLL_AND_TIME_OUTPUT = os.popen('cat \'' + tool_log_file + '\'').read().rstrip('\n')
-            LOG_LLVMIR2HLL_RC = self.get_tool_rc(llvmir2hll_rc, LLVMIR2HLL_AND_TIME_OUTPUT)
-            LOG_LLVMIR2HLL_RUNTIME = self.get_tool_runtime(LLVMIR2HLL_AND_TIME_OUTPUT)
-            LOG_LLVMIR2HLL_MEMORY = self.get_tool_memory_usage(LLVMIR2HLL_AND_TIME_OUTPUT)
-            LOG_LLVMIR2HLL_OUTPUT = self.get_tool_output(LLVMIR2HLL_AND_TIME_OUTPUT)
-
-            print(LOG_LLVMIR2HLL_OUTPUT)
-            # Wait a bit to ensure that all the memory that has been assigned to the tool was released.
-            time.sleep(0.1)
-            """
+            llvmir2hll_rc = self.log_llvmir2hll_rc
+            print(self.log_llvmir2hll_output)
         else:
             llvmir2hll_out, llvmir2hll_rc, _ = cmd.run_cmd([config.LLVMIR2HLL, *llvmir2hll_params])
             print(llvmir2hll_out)

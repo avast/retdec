@@ -9,7 +9,7 @@ import shutil
 import signal
 import subprocess
 import sys
-from timeit import Timer
+import time
 
 import retdec_config as config
 
@@ -57,6 +57,25 @@ class CmdRunner:
         If the timeout expires before the command finishes, the value of `output`
         is the command's output generated up to the timeout.
         """
+        _, output, return_code, timeouted = self._run_cmd(cmd, input, timeout, input_encoding, output_encoding,
+                                                          strip_shell_colors, stdout)
+
+        return output, return_code, timeouted
+
+    def run_measured_cmd(self, args, out=subprocess.STDOUT):
+        cmd = CmdRunner()
+
+        start = time.time()
+        p, output, rc, timeouted = cmd._run_cmd(args, stdout=out)
+        elapsed = time.time() - start
+
+        # TODO get memory usage from process
+        memory = 0
+
+        return memory, elapsed, output, rc
+
+    def _run_cmd(self, cmd, input=b'', timeout=None, input_encoding='utf-8',
+                 output_encoding='utf-8', strip_shell_colors=True, stdout=subprocess.STDOUT):
 
         def decode(output):
             if output_encoding is not None:
@@ -74,13 +93,13 @@ class CmdRunner:
         try:
             p = self.start(cmd)
             output, _ = p.communicate(input, timeout)
-            return decode(output).rstrip(), p.returncode, False
+            return p, decode(output).rstrip(), p.returncode, False
         except subprocess.TimeoutExpired:
             # Kill the process, along with all its child processes.
             p.kill()
             # Finish the communication to obtain the output.
             output, _ = p.communicate()
-            return decode(output).rstrip(), p.returncode, True
+            return p, decode(output).rstrip(), p.returncode, True
 
     def start(self, cmd, discard_output=False, stdout=subprocess.STDOUT):
         """Starts the given command and returns a handler to it.
@@ -159,29 +178,6 @@ class _WindowsProcess(subprocess.Popen):
         # http://mackeblog.blogspot.cz/2012/05/killing-subprocesses-on-windows-in.html
         cmd = ['taskkill', '/F', '/T', '/PID', str(self.pid)]
         subprocess.call(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-
-
-class TimeMeasuredProcess:
-
-    def __init__(self):
-        self.output = ''
-        self.rc = 0
-
-    def run_cmd(self, args):
-        """
-
-        :param args:
-        :return: (output, return_code, time)
-        """
-
-        def runProcess():
-            cmd = CmdRunner()
-
-            self.output, self.rc, _ = cmd.run_cmd(args)
-
-        t = Timer(runProcess)
-
-        return self.output, self.rc, t.timeit(1)
 
 
 class Utils:
