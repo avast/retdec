@@ -346,7 +346,7 @@ class Decompiler:
         self.log_llvmir2hll_memory = 0
         self.log_llvmir2hll_output = ''
 
-    def check_arguments(self):
+    def _check_arguments(self):
         """Check proper combination of input arguments.
         """
 
@@ -529,7 +529,7 @@ class Decompiler:
 
         return True
 
-    def print_warning_if_decompiling_bytecode(self):
+    def _print_warning_if_decompiling_bytecode(self):
         """Prints a warning if we are decompiling bytecode."""
 
         cmd = CmdRunner()
@@ -539,7 +539,7 @@ class Decompiler:
             Utils.print_warning('Detected %s bytecode, which cannot be decompiled by our machine-code decompiler.'
                                 ' The decompilation result may be inaccurate.' % bytecode)
 
-    def check_whether_decompilation_should_be_forcefully_stopped(self, tool_name):
+    def _check_whether_decompilation_should_be_forcefully_stopped(self, tool_name):
         """Checks whether the decompilation should be forcefully stopped because of the
         --stop-after parameter. If so, cleanup is run and the script exits with 0.
         Arguments:
@@ -549,15 +549,15 @@ class Decompiler:
 
         if self.args.stop_after == tool_name:
             if self.args.generate_log:
-                self.generate_log()
+                self._generate_log()
 
-            self.cleanup()
+            self._cleanup()
             print()
             print('#### Forced stop due to  - -stop - after %s...' % self.args.stop_after)
             return True
         return False
 
-    def cleanup(self):
+    def _cleanup(self):
         """Cleanup working directory"""
 
         if self.args.cleanup:
@@ -580,14 +580,14 @@ class Decompiler:
             for sig in self.signatures_to_remove:
                 Utils.remove_dir_forced(sig)
 
-    def generate_log(self):
+    def _generate_log(self):
         log_file = self.output_file + '.decompilation.log'
         log_decompilation_end_date = str(int(time.time()))
 
-        self.log_fileinfo_output = self.json_escape(self.log_fileinfo_output)
-        self.log_unpacker_output = self.json_escape(self.log_unpacker_output)
-        self.log_bin2llvmir_output = self.json_escape(self.log_bin2llvmir_output)
-        self.log_llvmir2hll_output = self.json_escape(self.log_llvmir2hll_output)
+        self.log_fileinfo_output = self._json_escape(self.log_fileinfo_output)
+        self.log_unpacker_output = self._json_escape(self.log_unpacker_output)
+        self.log_bin2llvmir_output = self._json_escape(self.log_bin2llvmir_output)
+        self.log_llvmir2hll_output = self._json_escape(self.log_llvmir2hll_output)
 
         log_structure = '{\n\t\"input_file\" : \"%s\",\n\t\"pdb_file\" : \"%s\",\n\t\"start_date\" : \"%s\",\n\t\"' \
                         'end_date\" : \"%s\",\n\t\"mode\" : \"%s\",\n\t\"arch\" : \"%s\",\n\t\"format\" : \"%s\",\n\t\"' \
@@ -608,7 +608,7 @@ class Decompiler:
         with open(log_file, 'w+') as f:
             f.write(json_string)
 
-    def json_escape(self, string):
+    def _json_escape(self, string):
         # TODO
         return string.rstrip('\r\n').replace('\n', r'\n')
 
@@ -616,7 +616,7 @@ class Decompiler:
         cmd = CmdRunner()
 
         # Check arguments and set default values for unset options.
-        if not self.check_arguments():
+        if not self._check_arguments():
             return 1
 
         # Initialize variables used by logging.
@@ -653,7 +653,7 @@ class Decompiler:
                         print('Invalid --arch option \'' + self.args.arch +
                               '\'. File contains these architecture families:')
                         cmd.run_cmd([config.EXTRACT, '--list', self.input_file])
-                        self.cleanup()
+                        self._cleanup()
                         return 1
                 else:
                     # Pick best architecture
@@ -673,20 +673,20 @@ class Decompiler:
 
                 # Check for thin signature.
                 if Utils.has_thin_archive_signature(self.input_file):
-                    self.cleanup()
+                    self._cleanup()
                     Utils.print_error('File is a thin archive and cannot be decompiled.')
                     return 1
 
                 # Check if our tools can handle it.
                 if not Utils.is_valid_archive(self.input_file):
-                    self.cleanup()
+                    self._cleanup()
                     Utils.print_error('The input archive has invalid format.')
                     return 1
 
                 # Get and check number of objects.
                 arch_object_count = Utils.archive_object_count(self.input_file)
                 if arch_object_count <= 0:
-                    self.cleanup()
+                    self._cleanup()
                     Utils.print_error('The input archive is empty.')
                     return 1
 
@@ -701,7 +701,7 @@ class Decompiler:
                           + out_restored)
 
                     if not Utils.archive_get_by_index(self.input_file, self.args.ar_index, out_restored):
-                        self.cleanup()
+                        self._cleanup()
                         valid_index = (arch_object_count - 1)
 
                         if valid_index != 0:
@@ -723,7 +723,7 @@ class Decompiler:
                           + out_restored)
 
                     if not Utils.archive_get_by_name(self.input_file, self.args.ar_name, out_restored):
-                        self.cleanup()
+                        self._cleanup()
                         Utils.print_error('File named %s was not found in the input archive.' % self.args.ar_name)
                         return 1
 
@@ -734,7 +734,7 @@ class Decompiler:
                     print('or \' --ar-name=string\' option. Archive contains these files:')
 
                     Utils.archive_list_numbered_content(self.input_file)
-                    self.cleanup()
+                    self._cleanup()
                     return 1
             else:
                 if self.args.ar_name:
@@ -830,14 +830,14 @@ class Decompiler:
 
             if fileinfo_rc != 0:
                 if self.args.generate_log:
-                    self.generate_log()
+                    self._generate_log()
 
-                self.cleanup()
+                self._cleanup()
                 # The error message has been already reported by fileinfo in stderr.
                 Utils.print_error('')
                 return 1
 
-            if self.check_whether_decompilation_should_be_forcefully_stopped('fileinfo'):
+            if self._check_whether_decompilation_should_be_forcefully_stopped('fileinfo'):
                 return 0
 
             #
@@ -861,7 +861,7 @@ class Decompiler:
             else:
                 _, unpacker_rc = unpacker.unpack_all()
 
-            if self.check_whether_decompilation_should_be_forcefully_stopped('unpacker'):
+            if self._check_whether_decompilation_should_be_forcefully_stopped('unpacker'):
                 return 0
 
             # RET_UNPACK_OK=0
@@ -910,14 +910,14 @@ class Decompiler:
 
                 if fileinfo_rc != 0:
                     if self.args.generate_log:
-                        self.generate_log()
+                        self._generate_log()
 
-                    self.cleanup()
+                    self._cleanup()
                     # The error message has been already reported by fileinfo in stderr.
                     Utils.print_error('')
                     return 1
 
-                self.print_warning_if_decompiling_bytecode()
+                self._print_warning_if_decompiling_bytecode()
 
             # Check whether the architecture was specified.
             if self.arch:
@@ -960,9 +960,9 @@ class Decompiler:
             else:
                 # nothing
                 if self.args.generate_log:
-                    self.generate_log()
+                    self._generate_log()
 
-                self.cleanup()
+                self._cleanup()
                 Utils.print_error('Unsupported target architecture %s. Supported architectures: '
                                   'Intel x86, ARM, ARM + Thumb, MIPS, PIC32, PowerPC.' % self.arch)
                 return 1
@@ -973,9 +973,9 @@ class Decompiler:
 
             if fileclass not in ['16', '32']:
                 if self.args.generate_log:
-                    self.generate_log()
+                    self._generate_log()
 
-                self.cleanup()
+                self._cleanup()
                 Utils.print_error(
                     'Unsupported target format \'%s%s\'. Supported formats: ELF32, PE32, Intel HEX 32, Mach-O 32.' % (
                         format, fileclass))
@@ -998,9 +998,9 @@ class Decompiler:
                 sig_endian = 'be'
             else:
                 if self.args.generate_log:
-                    self.generate_log()
+                    self._generate_log()
 
-                self.cleanup()
+                self._cleanup()
                 Utils.print_error('Cannot determine endiannesss.')
                 return 1
 
@@ -1011,7 +1011,7 @@ class Decompiler:
 
             signatures_dir = os.path.join(config.GENERIC_SIGNATURES_DIR, sig_format, fileclass, sig_endian, sig_arch)
 
-            self.print_warning_if_decompiling_bytecode()
+            self._print_warning_if_decompiling_bytecode()
 
             # Decompile unreachable functions.
             if self.args.keep_unreachable_funcs:
@@ -1140,13 +1140,13 @@ class Decompiler:
 
             if bin2llvmir_rc != 0:
                 if self.args.generate_log:
-                    self.generate_log()
+                    self._generate_log()
 
-                self.cleanup()
+                self._cleanup()
                 Utils.print_error('Decompilation to LLVM IR failed')
                 return 1
 
-            if self.check_whether_decompilation_should_be_forcefully_stopped('bin2llvmir'):
+            if self._check_whether_decompilation_should_be_forcefully_stopped('bin2llvmir'):
                 return 0
         # modes 'bin' || 'raw'
 
@@ -1247,13 +1247,13 @@ class Decompiler:
 
         if llvmir2hll_rc != 0:
             if self.args.generate_log:
-                self.generate_log()
+                self._generate_log()
 
-            self.cleanup()
+            self._cleanup()
             Utils.print_error('Decompilation of file %s failed' % self.out_backend_bc)
             return 1
 
-        if self.check_whether_decompilation_should_be_forcefully_stopped('llvmir2hll'):
+        if self._check_whether_decompilation_should_be_forcefully_stopped('llvmir2hll'):
             return 0
 
         # Convert .dot graphs to desired format.
@@ -1298,10 +1298,10 @@ class Decompiler:
 
         # Store the information about the decompilation into the JSON file.
         if self.args.generate_log:
-            self.generate_log()
+            self._generate_log()
 
         # Success!
-        self.cleanup()
+        self._cleanup()
         print()
         print('##### Done!')
 
@@ -1309,5 +1309,5 @@ class Decompiler:
 
 
 if __name__ == '__main__':
-    decompiler = Decompiler(sys.argv)
+    decompiler = Decompiler(sys.argv[1:])
     sys.exit(decompiler.decompile())

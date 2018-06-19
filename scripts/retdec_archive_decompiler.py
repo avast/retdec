@@ -11,7 +11,7 @@ from retdec_utils import Utils
 from retdec_utils import CmdRunner
 
 
-def parse_args(_args):
+def parse_args(args):
     parser = argparse.ArgumentParser(description='Runs the decompilation script with the given optional arguments over'
                                                  ' all files in the given static library or prints list of files in'
                                                  ' plain text with --plain argument or in JSON format with'
@@ -40,7 +40,7 @@ def parse_args(_args):
                         dest="arg_list",
                         help="args passed to the decompiler")
 
-    return parser.parse_args(_args)
+    return parser.parse_args(args)
 
 
 class ArchiveDecompiler:
@@ -193,5 +193,5 @@ class ArchiveDecompiler:
 
 
 if __name__ == '__main__':
-    archive_decompiler = ArchiveDecompiler(sys.argv)
+    archive_decompiler = ArchiveDecompiler(sys.argv[1:])
     sys.exit(archive_decompiler.decompile_archive())

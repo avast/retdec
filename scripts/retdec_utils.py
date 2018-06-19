@@ -58,7 +58,7 @@ class CmdRunner:
         is the command's output generated up to the timeout.
         """
         _, output, return_code, timeouted = self._run_cmd(cmd, input, timeout, input_encoding, output_encoding,
-                                                          strip_shell_colors, stdout)
+                                                          strip_shell_colors, False, stdout)
 
         return output, return_code, timeouted
 
@@ -66,16 +66,13 @@ class CmdRunner:
         cmd = CmdRunner()
 
         start = time.time()
-        p, output, rc, timeouted = cmd._run_cmd(args, stdout=out)
+        memory, output, rc, timeouted = cmd._run_cmd(args, track_memory=True, stdout=out)
         elapsed = time.time() - start
 
-        # TODO get memory usage from process
-        memory = 0
-
-        return memory, elapsed, output, rc
+        return memory, int(elapsed), output, rc
 
     def _run_cmd(self, cmd, input=b'', timeout=None, input_encoding='utf-8',
-                 output_encoding='utf-8', strip_shell_colors=True, stdout=subprocess.STDOUT):
+                 output_encoding='utf-8', strip_shell_colors=True, track_memory=False, stdout=subprocess.STDOUT):
 
         def decode(output):
             if output_encoding is not None:
@@ -90,10 +87,19 @@ class CmdRunner:
         if not isinstance(input, bytes):
             input = input.encode(input_encoding)
 
+        memory = 0
         try:
             p = self.start(cmd)
+            if track_memory:
+                try:
+                    import psutil
+                    proc = psutil.Process(p.pid)
+                    memory = int(proc.memory_info().rss / float(1 << 20))
+                except ImportError:
+                    memory = 0
+
             output, _ = p.communicate(input, timeout)
-            return p, decode(output).rstrip(), p.returncode, False
+            return memory, decode(output).rstrip(), p.returncode, False
         except subprocess.TimeoutExpired:
             # Kill the process, along with all its child processes.
             p.kill()
