@@ -207,8 +207,6 @@ class Unpacker:
 
 
 if __name__ == '__main__':
-    args = parse_args(sys.argv)
-
-    unpacker = Unpacker(args)
+    unpacker = Unpacker(sys.argv)
     _, rc = unpacker.unpack_all()
     sys.exit(rc)

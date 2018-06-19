@@ -193,7 +193,5 @@ class ArchiveDecompiler:
 
 
 if __name__ == '__main__':
-    args = parse_args(sys.argv)
-
-    archive_decompiler = ArchiveDecompiler(args)
+    archive_decompiler = ArchiveDecompiler(sys.argv)
     sys.exit(archive_decompiler.decompile_archive())

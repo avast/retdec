@@ -81,7 +81,7 @@ class SigFromLib:
                 return False
 
         self.file_path = self.args.output
-        dir_name = os.path.dirname(Utils.get_realpath(self.file_path))
+        dir_name = os.path.dirname(os.path.abspath(self.file_path))
         self.tmp_dir_path = os.path.join(dir_name, 'XXXXXXXXX')
 
         if self.args.ignore_nops:
@@ -172,7 +172,5 @@ class SigFromLib:
 
 
 if __name__ == '__main__':
-    args = parse_args(sys.argv)
-
-    sig = SigFromLib(args)
+    sig = SigFromLib(sys.argv)
     sys.exit(sig.run())
