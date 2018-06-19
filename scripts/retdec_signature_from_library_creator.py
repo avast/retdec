@@ -104,12 +104,12 @@ class SigFromLib:
                 continue
 
             # Get library name for .pat file.
-            lib_name = Path(lib_path).resolve().stem
+            lib_name = os.path.splitext(lib_path)[0]
 
             # Create sub-directory for object files.
             object_dir = os.path.join(self.tmp_dir_path, lib_name) + '-objects'
             object_dirs = [object_dir]
-            os.makedirs(object_dir)
+            os.makedirs(object_dir, exist_ok=True)
 
             # Extract all files to temporary folder.
             subprocess.call([config.AR, lib_path, '--extract', '--output', object_dir], shell=True)
@@ -126,7 +126,7 @@ class SigFromLib:
             # Extract patterns from library.
             pattern_file = os.path.join(self.tmp_dir_path, lib_name) + '.pat'
             pattern_files = [pattern_file]
-            result = subprocess.call([config.BIN2PAT, '-o', pattern_file] + objects, shell=True)
+            result = subprocess.call([config.BIN2PAT, '-o', pattern_file, *objects], shell=True)
 
             if result != 0:
                 self.print_error_and_cleanup('utility bin2pat failed when processing %s' % lib_path)

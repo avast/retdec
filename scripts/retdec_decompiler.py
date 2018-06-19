@@ -4,12 +4,9 @@
 
 import argparse
 import glob
-import hashlib
 import os
-import re
 import shutil
 import sys
-import tempfile
 import time
 
 import retdec_config as config
@@ -18,7 +15,7 @@ from retdec_unpacker import Unpacker
 from retdec_utils import Utils, CmdRunner
 
 
-def parse_args(_args):
+def parse_args(args):
     parser = argparse.ArgumentParser(description=__doc__,
                                      formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
@@ -101,6 +98,7 @@ def parse_args(_args):
 
     parser.add_argument('--backend-cfg-test',
                         dest='backend_cfg_test',
+                        action='store_true',
                         help='Unifies the labels of all nodes in the emitted CFG (this has to be used in tests).')
 
     parser.add_argument('--backend-disabled-opts',
@@ -110,10 +108,12 @@ def parse_args(_args):
 
     parser.add_argument('--backend-emit-cfg',
                         dest='backend_emit_cfg',
+                        action='store_true',
                         help='Emits a CFG for each function in the backend IR (in the .dot format).')
 
     parser.add_argument('--backend-emit-cg',
                         dest='backend_emit_cg',
+                        action='store_true',
                         help='Emits a CG for the decompiled module in the backend IR (in the .dot format).')
 
     parser.add_argument('--backend-cg-conversion',
@@ -143,10 +143,12 @@ def parse_args(_args):
 
     parser.add_argument('--backend-keep-all-brackets',
                         dest='backend_keep_all_brackets',
+                        action='store_true',
                         help='Keeps all brackets in the generated code.')
 
     parser.add_argument('--backend-keep-library-funcs',
                         dest='backend_keep_library_funcs',
+                        action='store_true',
                         help='Keep functions from standard libraries.')
 
     parser.add_argument('--backend-llvmir2bir-converter',
@@ -157,6 +159,7 @@ def parse_args(_args):
 
     parser.add_argument('--backend-no-compound-operators',
                         dest='backend_no_compound_operators',
+                        action='store_true',
                         help='Do not emit compound operators (like +=) instead of assignments.')
 
     parser.add_argument('--backend-no-debug',
@@ -298,13 +301,12 @@ def parse_args(_args):
                         help='Disables the default memory limit (half of system RAM) of fileinfo, '
                              'unpacker, bin2llvmir, and llvmir2hll.')
 
-    return parser.parse_args()
+    return parser.parse_args(args)
 
 
 class Decompiler:
-    def __init__(self, _args):
-        self.args = parse_args(_args)
-        self.timeout = 300
+    def __init__(self, args):
+        self.args = parse_args(args)
 
         self.input_file = ''
         self.output_file = ''
@@ -324,13 +326,10 @@ class Decompiler:
         self.out_backend_ll = ''
         self.out_restored = ''
         self.out_archive = ''
-        self.tool_log_file = ''
 
         self.log_decompilation_start_date = ''
-
         self.log_fileinfo_rc = 0
         self.log_fileinfo_time = 0
-        self.LOG_FILEINFO_MEMORY = 0
         self.log_fileinfo_output = ''
         self.log_fileinfo_memory = 0
 
@@ -349,7 +348,7 @@ class Decompiler:
 
     def check_arguments(self):
         """Check proper combination of input arguments.
-            """
+        """
 
         # Check whether the input file was specified.
         if self.args.input:
@@ -571,18 +570,15 @@ class Decompiler:
 
             Utils.remove_dir_forced(self.out_backend_bc)
             Utils.remove_dir_forced(self.out_backend_ll)
-            Utils.remove_dir_forced(self.out_restored)
 
             # Archive support
+            Utils.remove_dir_forced(self.out_restored)
+            # Archive support (Macho-O Universal)
             Utils.remove_dir_forced(self.out_archive)
 
-            # Archive support (Macho-O Universal)
+            # Signatures generated from archives
             for sig in self.signatures_to_remove:
                 Utils.remove_dir_forced(sig)
-
-            # Signatures generated from archives
-            if self.tool_log_file:
-                Utils.remove_dir_forced(self.tool_log_file)
 
     def generate_log(self):
         log_file = self.output_file + '.decompilation.log'
@@ -611,19 +607,10 @@ class Decompiler:
 
         with open(log_file, 'w+') as f:
             f.write(json_string)
-        # print(json_string, file=open(log_file, 'w+'))
 
     def json_escape(self, string):
         # TODO
         return string.rstrip('\r\n').replace('\n', r'\n')
-
-    def string_to_md5(self, string):
-        """Generate a MD5 checksum from a given string.
-        """
-        m = hashlib.md5()
-        m.update(string)
-
-        return m.hexdigest()
 
     def decompile(self):
         cmd = CmdRunner()
@@ -635,13 +622,6 @@ class Decompiler:
         # Initialize variables used by logging.
         if self.args.generate_log:
             self.log_decompilation_start_date = str(int(time.time()))
-            # Put the tool log file and tmp file into /tmp because it uses tmpfs. This means that
-            # the data are stored in RAM instead on the disk, which should provide faster access.
-            tmp_dir = os.path.join(tempfile.gettempdir(), 'decompiler_log')
-            os.makedirs(tmp_dir, exist_ok=True)
-            with open(self.output_file, 'r', encoding='utf-8') as f:
-                file_md5 = '123456'  # self.string_to_md5(f.read())
-                self.tool_log_file = os.path.join(tmp_dir, file_md5 + '.tool')
 
         # Raw.
         if self.mode == 'raw':
@@ -1149,7 +1129,7 @@ class Decompiler:
             if self.args.generate_log:
                 self.log_bin2llvmir_memory, self.log_bin2llvmir_time, self.log_bin2llvmir_output, \
                 self.log_bin2llvmir_rc = cmd.run_measured_cmd([config.BIN2LLVMIR, *bin2llvmir_params, '-o',
-                                                               self.out_backend_bc], out=open(self.tool_log_file, 'w'))
+                                                               self.out_backend_bc])
 
                 bin2llvmir_rc = self.log_bin2llvmir_rc
                 print(self.log_bin2llvmir_output)
@@ -1257,8 +1237,7 @@ class Decompiler:
 
         if self.args.generate_log:
             self.log_llvmir2hll_memory, self.log_llvmir2hll_time, self.log_llvmir2hll_output, \
-            self.log_llvmir2hll_rc = cmd.run_measured_cmd([config.LLVMIR2HLL, *llvmir2hll_params],
-                                                          out=open(self.tool_log_file, 'a'))
+            self.log_llvmir2hll_rc = cmd.run_measured_cmd([config.LLVMIR2HLL, *llvmir2hll_params])
 
             llvmir2hll_rc = self.log_llvmir2hll_rc
             print(self.log_llvmir2hll_output)
@@ -1285,22 +1264,22 @@ class Decompiler:
 
         if self.args.backend_emit_cg and self.args.backend_cg_conversion == 'auto':
             if Utils.tool_exists('dot'):
-                print('RUN: dot -T' + self.args.graph_format + ' ' + self.output_file + '.cg.dot > ' + self.output_file
+                print('RUN: dot -T' + self.args.graph_format + ' ' + self.output_file + '.cg.dot -o ' + self.output_file
                       + '.cg.' + self.args.graph_format)
 
-                cmd.run_cmd(['dot', '-T' + self.args.graph_format, self.output_file + '.cg.dot'],
-                            stdout=open(self.output_file + '.cg.' + self.args.graph_format, 'wb'))
+                cmd.run_cmd(['dot', '-T' + self.args.graph_format, self.output_file + '.cg.dot', '-o',
+                             self.output_file + '.cg.' + self.args.graph_format])
             else:
                 print('Please install \'Graphviz\' to generate graphics.')
 
         if self.args.backend_emit_cfg and self.args.backend_cfg_conversion == 'auto':
             if Utils.tool_exists('dot'):
                 for cfg in glob.glob(self.output_file + '.cfg.*.dot'):
-                    print('RUN: dot -T' + self.args.graph_format + ' ' + cfg + ' > ' + (
+                    print('RUN: dot -T' + self.args.graph_format + ' ' + cfg + ' -o ' + (
                             os.path.splitext(cfg)[0] + '.' + self.args.graph_format))
 
-                    cmd.run_cmd(['dot', '-T' + self.args.graph_format, cfg],
-                                stdout=open((os.path.splitext(cfg)[0]) + '.' + self.args.graph_format, 'wb'))
+                    cmd.run_cmd(['dot', '-T' + self.args.graph_format, cfg, '-o',
+                                 os.path.splitext(cfg)[0] + '.' + self.args.graph_format])
             else:
                 print('Please install \'Graphviz\' to generate graphics.')
 
