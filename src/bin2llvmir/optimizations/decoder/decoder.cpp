@@ -1421,13 +1421,7 @@ void Decoder::handleDelaySlotLikely(
 	assert(_c2l->getDelaySlot(res.capstoneInsn->id));
 	assert(_c2l->getDelaySlot(res.capstoneInsn->id) == 1);
 
-	assert(isa<BranchInst>(res.branchCall->getNextNode()));
-	assert(cast<BranchInst>(res.branchCall->getNextNode())->isConditional());
-
-	// TODO: This assumes that the pseudo cond branch was solved and cond
-	// branch created, but we should handle likely ds even if it was not.
-	//
-	auto* br = cast<BranchInst>(res.branchCall->getNextNode());
+	auto* br = dyn_cast<BranchInst>(res.branchCall->getNextNode());
 	if (br && br->isConditional())
 	{
 		auto* nextBb = br->getParent()->getNextNode();
@@ -1454,6 +1448,11 @@ void Decoder::handleDelaySlotLikely(
 		}
 
 		_likelyBb2Target.emplace(newBb, target);
+	}
+	else
+	{
+		// TODO: This assumes that the pseudo cond branch was solved and cond
+		// branch created, but we should handle likely ds even if it was not.
 	}
 }
 
