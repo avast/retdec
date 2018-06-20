@@ -84,12 +84,13 @@ def parse_args(args):
 
     parser.add_argument('--backend-aggressive-opts',
                         dest='backend_aggressive_opts',
+                        action='store_true',
                         help='Enables aggressive optimizations.')
 
     parser.add_argument('--backend-arithm-expr-evaluator',
                         dest='backend_arithm_expr_evaluator',
                         default='c',
-                        help='Name of the used evaluator of arithmetical expressions .')
+                        help='Name of the used evaluator of arithmetical expressions.')
 
     parser.add_argument('--backend-call-info-obtainer',
                         dest='backend_call_info_obtainer',
