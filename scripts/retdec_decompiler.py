@@ -52,7 +52,6 @@ def parse_args(args):
     parser.add_argument('-m', '--mode',
                         dest='mode',
                         metavar='MODE',
-                        default='bin',
                         choices=['bin', 'll', 'raw'],
                         help='Force the type of decompilation mode [bin|ll|raw]'
                              '(default: ll if input\'s suffix is \'.ll\', bin otherwise).')
@@ -1028,9 +1027,8 @@ class Decompiler:
                 for lib in self.args.static_code_archive:
 
                     print('Extracting signatures from file \'%s\'', lib)
-                    # TODO replace command
-                    crop_arch_path, _, _ = cmd.run_cmd(
-                        'basename \'' + lib + '\' | LC_ALL=C sed -e \'s/[^A-Za-z0-9_.-]/_/g\'')
+                    # TODO replace command: LC_ALL=C sed -e 's/[^A-Za-z0-9_.-]/_/g'
+                    crop_arch_path = os.path.basename(lib)
                     sig_out = self.output_file + '.' + crop_arch_path + '.' + lib_index + '.yara'
 
                     # Call sig from lib tool
@@ -1149,6 +1147,7 @@ class Decompiler:
 
             if self._check_whether_decompilation_should_be_forcefully_stopped('bin2llvmir'):
                 return 0
+
         # modes 'bin' || 'raw'
 
         # LL mode goes straight to backend.
@@ -1156,7 +1155,7 @@ class Decompiler:
             self.out_backend_bc = self.input_file
             self.config_file = self.args.config_db
 
-        # Create parameters for the $LLVMIR2HLL call.
+        # Create parameters for the llvmir2hll call.
         llvmir2hll_params = ['-target-hll=' + self.args.hll, '-var-renamer=' + self.args.backend_var_renamer,
                              '-var-name-gen=fruit', '-var-name-gen-prefix=',
                              '-call-info-obtainer=' + self.args.backend_call_info_obtainer,
