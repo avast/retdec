@@ -929,7 +929,7 @@ class Decompiler:
                 arch_full = arch_full.lower()
 
                 # Strip comments in parentheses and all trailing whitespace
-                self.arch = arch_full.strip()
+                self.arch = arch_full.split(' ')[0]
 
             # Get object file format.
             self.format, _, _ = cmd.run_cmd([config.CONFIGTOOL, self.config_file, '--read', '--format'])
