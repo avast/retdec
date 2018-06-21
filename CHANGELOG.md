@@ -2,6 +2,7 @@
 
 # dev
 
+* Fix: Fixed aborts due to assertions during decoding of some MIPS binaries ([#335](https://github.com/avast-tl/retdec/issues/335)).
 * Fix: Fixed a memory leak when parsing Mach-O files ([#331](https://github.com/avast-tl/retdec/pull/331)).
 
 # v3.1 (2018-06-07)
