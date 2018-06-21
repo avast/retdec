@@ -42,7 +42,7 @@ def print_colored(message, color):
 def unit_tests_in_dir(path):
     """Prints paths to all unit tests in the given directory.
     1 string argument is needed:
-        $1 path to the directory with unit tests
+        path-path to the directory with unit tests
     """
 
     tests = []
@@ -61,7 +61,7 @@ def run_unit_tests_in_dir(path):
     """Runs all unit tests in the given directory.
     1 string argument is needed:
 
-        $1 path to the directory with unit tests
+        path - path to the directory with unit tests
 
     Returns 0 if all tests passed, 1 otherwise.
     """
