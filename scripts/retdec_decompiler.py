@@ -553,7 +553,7 @@ class Decompiler:
 
             self._cleanup()
             print()
-            print('#### Forced stop due to  - -stop - after %s...' % self.args.stop_after)
+            print('#### Forced stop due to  \'--stop-after %s\'...' % self.args.stop_after)
             return True
         return False
 

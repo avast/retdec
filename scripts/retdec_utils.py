@@ -1,9 +1,8 @@
-#! /usr/bin/env python3
+#!/usr/bin/env python3
 
 """Compilation and decompilation utility functions.
 """
 import os
-import pathlib
 import re
 import shutil
 import signal
@@ -21,7 +20,7 @@ class CmdRunner:
     """A runner of external commands."""
 
     def run_cmd(self, cmd, input=b'', timeout=None, input_encoding='utf-8',
-                output_encoding='utf-8', strip_shell_colors=True, stdout=subprocess.STDOUT):
+                output_encoding='utf-8', strip_shell_colors=True):
         """Runs the given command (synchronously).
 
         :param list cmd: Command to be run as a list of arguments (strings).
@@ -58,21 +57,26 @@ class CmdRunner:
         is the command's output generated up to the timeout.
         """
         _, output, return_code, timeouted = self._run_cmd(cmd, input, timeout, input_encoding, output_encoding,
-                                                          strip_shell_colors, False, stdout)
+                                                          strip_shell_colors, False)
 
         return output, return_code, timeouted
 
-    def run_measured_cmd(self, args, out=subprocess.STDOUT):
+    def run_measured_cmd(self, command):
+        """Runs the given command (synchronously) and measure its time and memory.
+        :param list command: Command to be run as a list of arguments (strings).
+
+        :returns: A quadruple (`memory`, `elapsed_time`, `output`, `return_code`).
+        """
         cmd = CmdRunner()
 
         start = time.time()
-        memory, output, rc, timeouted = cmd._run_cmd(args, track_memory=True, stdout=out)
+        memory, output, rc, _ = cmd._run_cmd(command, track_memory=True)
         elapsed = time.time() - start
 
         return memory, int(elapsed), output, rc
 
     def _run_cmd(self, cmd, input=b'', timeout=None, input_encoding='utf-8',
-                 output_encoding='utf-8', strip_shell_colors=True, track_memory=False, stdout=subprocess.STDOUT):
+                 output_encoding='utf-8', strip_shell_colors=True, track_memory=False):
 
         def decode(output):
             if output_encoding is not None:
@@ -105,7 +109,7 @@ class CmdRunner:
             p.kill()
             # Finish the communication to obtain the output.
             output, _ = p.communicate()
-            return p, decode(output).rstrip(), p.returncode, True
+            return memory, decode(output).rstrip(), p.returncode, True
 
     def start(self, cmd, discard_output=False, stdout=subprocess.STDOUT):
         """Starts the given command and returns a handler to it.
@@ -113,6 +117,8 @@ class CmdRunner:
         :param list cmd: Command to be run as a list of arguments (strings).
         :param bool discard_output: Should the output be discarded instead of
                                     being buffered so it can be obtained later?
+        :param int stdout: If discard_output is True, errors will be redirectected
+                                    to the stdout param.
 
         :returns: A handler to the started command (``subprocess.Popen``).
 
@@ -214,8 +220,6 @@ class Utils:
     @staticmethod
     def print_error(error):
         """Print error message to stderr.
-        1 argument is needed
-        Returns - 1 if number of arguments is incorrect
         """
         print('Error: %s' % error, file=sys.stdout)
 
@@ -273,7 +277,6 @@ class Utils:
     def archive_list_content(path):
         """Print content of archive.
         1 argument is needed - file path
-        Returns - 1 if number of arguments is incorrect
         """
         cmd = CmdRunner()
         output, _, _ = cmd.run_cmd([config.AR, path, '--list', '--no-numbers'])
@@ -283,7 +286,6 @@ class Utils:
     def archive_list_numbered_content(path):
         """Print numbered content of archive.
         1 argument is needed - file path
-        Returns - 1 if number of arguments is incorrect
         """
         print('Index\tName')
         cmd = CmdRunner()
@@ -294,7 +296,6 @@ class Utils:
     def archive_list_numbered_content_json(path):
         """Print numbered content of archive in JSON format.
         1 argument is needed - file path
-        Returns - 1 if number of arguments is incorrect
         """
         cmd = CmdRunner()
         output, _, _ = cmd.run_cmd([config.AR, path, '--list', '--json'])
@@ -306,14 +307,11 @@ class Utils:
         3 arguments are needed - path to the archive
                                - name of the file
                                - output path
-        Returns - 1 if number of arguments is incorrect
-                - 2 if error occurred
         """
-        if not subprocess.call([config.AR, path, '--name', name, '--output', output],
-                               shell=True, stderr=subprocess.STDOUT, stdout=None):
-            return 2
+        ret = subprocess.call([config.AR, path, '--name', name, '--output', output],
+                              shell=True, stderr=subprocess.STDOUT, stdout=None)
 
-        return 1
+        return ret != 2
 
     @staticmethod
     def archive_get_by_index(archive, index, output):
@@ -321,12 +319,10 @@ class Utils:
         3 arguments are needed - path to the archive
                                - index of the file
                                - output path
-        Returns - 1 if number of arguments is incorrect
-                - 2 if error occurred
         """
-        if not subprocess.call([config.AR, archive, '--index', index, '--output', output],
-                               shell=True, stderr=subprocess.STDOUT, stdout=None):
-            return 2
+        ret = subprocess.call([config.AR, archive, '--index', index, '--output', output],
+                              shell=True, stderr=subprocess.STDOUT, stdout=None)
+        return ret != 2
 
     @staticmethod
     def is_macho_archive(path):
