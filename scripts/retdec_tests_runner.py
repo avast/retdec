@@ -7,6 +7,7 @@ import os
 import subprocess
 
 import retdec_config as config
+from retdec_utils import CmdRunner
 
 """First argument can be verbose."""
 if len(sys.argv) > 1:
@@ -76,7 +77,9 @@ def run_unit_tests_in_dir(path):
         print()
 
         # TODO verbose support
-        return_code = subprocess.call([os.path.abspath(unit_test), '--gtest_color=yes'], shell=True)
+        cmd = CmdRunner()
+        output, return_code, _ = cmd.run_cmd([unit_test, '--gtest_color=yes'])
+        print(output)
 
         if return_code != 0:
             tests_failed = True
