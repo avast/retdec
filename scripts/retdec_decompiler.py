@@ -419,8 +419,8 @@ class Decompiler:
 
         if self.args.config_db:
             if not os.access(self.args.config_db, os.R_OK):
-                Utils.print_error(
-                    'The input JSON configuration file \'%s\' does not exist or is not readable' % self.args.config_db)
+                Utils.print_error('The input JSON configuration file \'%s\' does not exist or is not readable'
+                                  % self.args.config_db)
                 return False
 
         if self.args.pdb:
@@ -544,7 +544,7 @@ class Decompiler:
         --stop-after parameter. If so, cleanup is run and the script exits with 0.
         Arguments:
           tool_name Name of the tool.
-        The function expects the $STOP_AFTER variable to be set.
+        The function expects the self.args.stop_after variable to be set.
         """
 
         if self.args.stop_after == tool_name:
@@ -696,7 +696,7 @@ class Decompiler:
                 # Pick object by index.
                 if self.args.ar_index:
                     print()
-                    print('##### Restoring object file on index '' + (self.args.ar_index) + '' from archive...')
+                    print('##### Restoring object file on index \'%s\' from archive...' % self.args.ar_index)
                     print('RUN: ' + config.AR + ' ' + self.input_file + ' --index ' + self.args.ar_index + ' --output '
                           + out_restored)
 
@@ -718,7 +718,7 @@ class Decompiler:
                 # Pick object by name
                 elif self.args.ar_name:
                     print()
-                    print('##### Restoring object file with name '' + (self.args.ar_name) + '' from archive...')
+                    print('##### Restoring object file with name \'%s\' from archive...' % self.args.ar_name)
                     print('RUN: ' + config.AR + ' ' + self.input_file + ' --name ' + self.args.ar_name + ' --output '
                           + out_restored)
 
