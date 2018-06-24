@@ -194,6 +194,9 @@ class FileInformation
 		std::string getResourceCrc32(std::size_t index) const;
 		std::string getResourceMd5(std::size_t index) const;
 		std::string getResourceSha256(std::size_t index) const;
+		std::string getResourceIconhashCrc32() const;
+		std::string getResourceIconhashMd5() const;
+		std::string getResourceIconhashSha256() const;
 		std::string getResourceName(std::size_t index) const;
 		std::string getResourceType(std::size_t index) const;
 		std::string getResourceLanguage(std::size_t index) const;
@@ -203,6 +206,7 @@ class FileInformation
 		std::string getResourceSublanguageIdStr(std::size_t index, std::ios_base &(* format)(std::ios_base &)) const;
 		std::string getResourceOffsetStr(std::size_t index, std::ios_base &(* format)(std::ios_base &)) const;
 		std::string getResourceSizeStr(std::size_t index, std::ios_base &(* format)(std::ios_base &)) const;
+		bool hasResourceTableRecords() const;
 		/// @}
 
 		/// @name Getters of @a certificateTable
@@ -501,6 +505,7 @@ class FileInformation
 		void setPdbTimeStamp(std::size_t sTimeStamp);
 		void setImportTable(const retdec::fileformat::ImportTable *sTable);
 		void setExportTable(const retdec::fileformat::ExportTable *sTable);
+		void setResourceTable(const retdec::fileformat::ResourceTable *sTable);
 		void setStrings(const std::vector<retdec::fileformat::String> *sStrings);
 		void setCertificateTable(const retdec::fileformat::CertificateTable *sTable);
 		void setSignatureVerified(bool verified);
@@ -527,8 +532,6 @@ class FileInformation
 		void clearFileFlagsDescriptors();
 		void addDllFlagsDescriptor(std::string descriptor, std::string abbreviation);
 		void clearDllFlagsDescriptors();
-		void addResource(Resource &resource);
-		void clearResources();
 		void addDataDirectory(DataDirectory &dataDirectory);
 		void addSegment(FileSegment &fileSegment);
 		void addSection(FileSection &fileSection);

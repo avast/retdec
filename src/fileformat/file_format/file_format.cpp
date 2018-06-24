@@ -473,6 +473,21 @@ void FileFormat::loadExpHash()
 }
 
 /**
+ * Loads iconhash from resource table.
+ */
+void FileFormat::loadResourceIconHash()
+{
+	if (!resourceTable || (loadFlags & LoadFlags::NO_VERBOSE_HASHES))
+	{
+		return;
+	}
+
+	resourceTable->computeIconHashes(this);
+}
+
+
+
+/**
  * Getter for state of instance
  * @return @c true if all is OK, @c false otherwise
  */

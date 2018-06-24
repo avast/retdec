@@ -951,6 +951,8 @@ void PeFormat::loadResources()
 		}
 	}
 
+	loadResourceIconHash();
+
 	for (auto&& addressRange : formatParser->getResourceDirectoryOccupiedAddresses())
 	{
 		nonDecodableRanges.addRange(std::move(addressRange));
