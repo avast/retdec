@@ -529,7 +529,9 @@ bool MainDetection::applyResult(retdec::utils::Address mainAddr)
 	if (auto* f = _config->getLlvmFunction(mainAddr))
 	{
 		std::string n = f->getName();
-		if (n != "main")
+		// TODO: better, we want to know it is main, but we do not want to
+		// rename it if it is from IDA (and maybe never).
+		if (n != "main" && ! _config->getConfig().isIda())
 		{
 			irmodif.renameFunction(f, "main");
 			_names->addNameForAddress(
