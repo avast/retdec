@@ -188,7 +188,7 @@ Note: Although RetDec now supports a system-wide installation ([#94](https://git
   * `make install`
 
 You have to pass the following parameters to `cmake`:
-* `-DCMAKE_INSTALL_PREFIX=<path>` to set the installation path to `<path>`.
+* `-DCMAKE_INSTALL_PREFIX=<path>` to set the installation path to `<path>`. Quote the path if you are using backslashes on Windows (e.g. `-DCMAKE_INSTALL_PREFIX="C:\retdec"`).
 * (Windows only) `-G<generator>` is `-G"Visual Studio 14 2015"` for 32-bit build using Visual Studio 2015, or `-G"Visual Studio 14 2015 Win64"` for 64-bit build using Visual Studio 2015. Later versions of Visual Studio may be used.
 
 You can pass the following additional parameters to `cmake`:
