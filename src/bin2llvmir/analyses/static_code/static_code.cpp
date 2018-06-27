@@ -719,8 +719,7 @@ utils::Address StaticCodeAnalysis::getAddressFromRef_x86(utils::Address ref)
 	}
 	else if (absOk && relOk)
 	{
-		// both ok, what now?
-		assert(false);
+		// both ok, what now? prefer absolute address.
 		return absAddr;
 	}
 	else
