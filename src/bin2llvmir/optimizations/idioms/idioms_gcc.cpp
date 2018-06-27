@@ -407,15 +407,15 @@ int IdiomsGCC::exchangeCondBitShiftDivMultiBB(Function & f, Pass * pass) const {
 						for (BasicBlock::iterator k = (*m).begin(); k != (*m).end() && ! end; ++k){
 							op_add = &cast<Value>(*k);
 
-							if (! match(op_add, m_Add(m_Value(op_or), m_ConstantInt(cnst))) &&
-								! match(op_add, m_Add(m_ConstantInt(cnst), m_Value(op_or))))
+							if (! match(op_add, m_Add(m_Value(op_or), m_ConstantInt(cnst)))
+									&& ! match(op_add, m_Add(m_ConstantInt(cnst), m_Value(op_or))))
 								continue;
 
 							if (static_cast<int32_t>(*cnst->getValue().getRawData()) != 1)
 								continue;
 
-							if (! match(op_or, m_Or(m_Value(op_add2), m_ConstantInt(cnst))) &&
-								! match(op_or, m_Or(m_ConstantInt(cnst), m_Value(op_add2))))
+							if (! match(op_or, m_Or(m_Value(op_add2), m_ConstantInt(cnst)))
+									&& ! match(op_or, m_Or(m_ConstantInt(cnst), m_Value(op_add2))))
 								continue;
 
 							if (static_cast<int32_t>(*cnst->getValue().getRawData()) != -2)
