@@ -187,8 +187,6 @@ std::map<uint64_t, std::string> syscalls_mips_linux =
 	{4160, "sched_setscheduler"},
 	{4161, "sched_getscheduler"},
 	{4162, "sched_yield"},
-	{4161, "sched_getscheduler"},
-	{4162, "sched_yield"},
 	{4163, "sched_get_priority_max"},
 	{4164, "sched_get_priority_min"},
 	{4165, "sched_rr_get_interval"},

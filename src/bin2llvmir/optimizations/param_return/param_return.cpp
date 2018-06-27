@@ -1119,7 +1119,7 @@ void DataFlowEntry::callsFilterCommonRegisters()
 				regs.begin(),
 				regs.end(),
 				std::inserter(intersect, intersect.begin()));
-		commonRegs = intersect;
+		commonRegs = std::move(intersect);
 	}
 
 	// If common contains r3, then it should also contain r2, r1, and r0.
@@ -2213,8 +2213,7 @@ void DataFlowEntry::setArgumentTypes()
 	}
 	else
 	{
-		CallEntry* ce = nullptr;
-		ce = &calls.front();
+		CallEntry* ce = &calls.front();
 		for (auto& c : calls)
 		{
 			if (!c.possibleArgStores.empty())

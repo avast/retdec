@@ -415,7 +415,7 @@ int IdiomsGCC::exchangeCondBitShiftDivMultiBB(Function & f, Pass * pass) const {
 								continue;
 
 							if (! match(op_or, m_Or(m_Value(op_add2), m_ConstantInt(cnst)))
-								 && ! match(op_or, m_Or(m_Value(op_add2), m_ConstantInt(cnst))))
+									&& ! match(op_or, m_Or(m_ConstantInt(cnst), m_Value(op_add2))))
 								continue;
 
 							if (static_cast<int32_t>(*cnst->getValue().getRawData()) != -2)

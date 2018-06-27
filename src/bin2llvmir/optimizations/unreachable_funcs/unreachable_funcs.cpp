@@ -193,7 +193,7 @@ void UnreachableFuncs::removeFuncsThatCanBeOptimized(
 	for (auto it = module->begin(), e = module->end(); it != e;)
 	{
 		llvm::Function& func = *it;
-		it++;
+		++it;
 
 		if (!hasItem(funcsThatCannotBeOptimized, &func))
 		{
