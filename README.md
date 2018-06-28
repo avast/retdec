@@ -24,7 +24,7 @@ Features:
 * Output in two high-level languages: C and a Python-like language.
 * Generation of call graphs, control-flow graphs, and various statistics.
 
-For more information, check out our:
+For more information, check out our
 * [Wiki](https://github.com/avast-tl/retdec/wiki) (in progress)
 * Botconf 2017 talk: [slides](https://retdec.com/web/files/publications/retdec-slides-botconf-2017.pdf), [video](https://www.youtube.com/watch?v=HHFvtt5b6yY)
 * [Publications](https://retdec.com/publications/)
