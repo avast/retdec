@@ -772,7 +772,6 @@ void DataFlowEntry::addCall(llvm::CallInst* call)
 void DataFlowEntry::addCallArgs(llvm::CallInst* call, CallEntry& ce)
 {
 	NonIterableSet<Value*> disqualifiedValues;
-	unsigned maxUsedRegNum = 0;
 	auto* b = call->getParent();
 	Instruction* prev = call;
 	std::set<BasicBlock*> seen;
@@ -846,18 +845,6 @@ void DataFlowEntry::addCallArgs(llvm::CallInst* call, CallEntry& ce)
 				ce.possibleArgStores.push_back(store);
 				disqualifiedValues.insert(ptr);
 				disqualifiedValues.insert(store);
-
-				if (_abi->isGeneralPurposeRegister(ptr)
-						|| (_config->getConfig().architecture.isMipsOrPic32()
-								&& _abi->isRegister(ptr)
-								&& ptr->getType()->isFloatingPointTy()))
-				{
-					auto rn = _config->getConfigRegisterNumber(ptr);
-					if (rn.isDefined() && rn > maxUsedRegNum)
-					{
-						maxUsedRegNum = rn;
-					}
-				}
 			}
 		}
 	}
