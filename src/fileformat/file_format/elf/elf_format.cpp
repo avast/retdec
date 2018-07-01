@@ -1744,6 +1744,7 @@ void ElfFormat::loadSymbols(const ELFIO::elfio *file, const ELFIO::symbol_sectio
 	}
 
 	loadImpHash();
+	loadExpHash();
 }
 
 /**

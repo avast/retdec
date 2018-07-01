@@ -6,6 +6,7 @@
 
 #include <sstream>
 
+#include "retdec/crypto/crypto.h"
 #include "retdec/utils/conversion.h"
 #include "retdec/fileformat/types/resource_table/resource_table.h"
 
@@ -196,6 +197,33 @@ const Resource* ResourceTable::getResourceWithLanguage(std::size_t rId) const
 }
 
 /**
+ * Get iconhash as CRC32
+ * @return Iconhash as CRC32
+ */
+const std::string& ResourceTable::getResourceIconhashCrc32() const
+{
+	return iconHashCrc32;
+}
+
+/**
+ * Get iconhash as MD5
+ * @return Iconhash as MD5
+ */
+const std::string& ResourceTable::getResourceIconhashMd5() const
+{
+	return iconHashMd5;
+}
+
+/**
+ * Get iconhash as SHA256
+ * @return Iconhash as SHA256
+ */
+const std::string& ResourceTable::getResourceIconhashSha256() const
+{
+	return iconHashSha256;
+}
+
+/**
  * Get begin iterator
  * @return Begin iterator
  */
@@ -211,6 +239,76 @@ ResourceTable::resourcesIterator ResourceTable::begin() const
 ResourceTable::resourcesIterator ResourceTable::end() const
 {
 	return table.end();
+}
+
+/**
+ * Compute icon hashes - CRC32, MD5, SHA256.
+ * @param rOwner Pointer to input file
+ */
+void ResourceTable::computeIconHashes(const FileFormat *rOwner)
+{
+	std::vector<Resource *> iconsWithName;
+	std::vector<Resource *> iconsWithId;
+	std::vector<std::uint8_t> iconHashBytes;
+
+	for(auto& resource : table)
+	{
+		if(!resource.isUsedForIconhash() || resource.getType() != "Icon")
+		{
+			continue;
+		}
+
+		if(resource.hasValidName())
+		{
+			iconsWithName.push_back(&resource);
+		}
+		else if (resource.hasValidId())
+		{
+			iconsWithId.push_back(&resource);
+		}
+	}
+
+	std::sort(iconsWithName.begin(), iconsWithName.end(),
+		[](const Resource *r1, const Resource *r2) -> bool
+		{
+			return r1->getName() < r2->getName();
+		}
+	);
+
+	std::sort(iconsWithId.begin(), iconsWithId.end(),
+		[](const Resource *r1, const Resource *r2) -> bool
+		{
+			std::size_t id1, id2;
+			r1->getNameId(id1);
+			r2->getNameId(id2);
+
+			return id1 < id2;
+		}
+	);
+
+	for(auto icon : iconsWithName)
+	{
+		if(!icon->isLoaded())
+		{
+			icon->load(rOwner);
+		}
+
+		icon->getBytesPushBack(iconHashBytes);
+	}
+
+	for(auto icon : iconsWithId)
+	{
+		if(!icon->isLoaded())
+		{
+			icon->load(rOwner);
+		}
+
+		icon->getBytesPushBack(iconHashBytes);
+	}
+
+	iconHashCrc32 = retdec::crypto::getCrc32(iconHashBytes.data(), iconHashBytes.size());
+	iconHashMd5 = retdec::crypto::getMd5(iconHashBytes.data(), iconHashBytes.size());
+	iconHashSha256 = retdec::crypto::getSha256(iconHashBytes.data(), iconHashBytes.size());
 }
 
 /**

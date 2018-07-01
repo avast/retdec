@@ -227,7 +227,7 @@ bool Resource::getBits(std::string &sResult) const
  */
 bool Resource::getBytes(std::vector<unsigned char> &sResult, std::size_t sOffset, std::size_t sSize) const
 {
-	if(sOffset >= bytes.size())
+	if(!loaded || sOffset >= bytes.size())
 	{
 		return false;
 	}
@@ -235,6 +235,27 @@ bool Resource::getBytes(std::vector<unsigned char> &sResult, std::size_t sOffset
 	sSize = getRealSizeInRegion(sOffset, sSize, bytes.size());
 	sResult.reserve(sSize);
 	sResult.assign(bytes.begin() + sOffset, bytes.begin() + sOffset + sSize);
+	return loaded;
+}
+
+/**
+ * Get content of resource as bytes and push back the result
+ * @param sResult Read bytes in integer representation
+ * @param sOffset First byte of the resource data to be loaded (0 means
+ *    first byte of resource data)
+ * @param sSize Number of bytes for read. If this parameter is set to zero,
+ *    method will read all bytes from @a sOffset until end of resource data.
+ * @return @c true if operation went OK, @c false otherwise
+ */
+bool Resource::getBytesPushBack(std::vector<unsigned char> &sResult, std::size_t sOffset, std::size_t sSize) const
+{
+	if(!loaded || sOffset >= bytes.size())
+	{
+		return false;
+	}
+
+	sSize = getRealSizeInRegion(sOffset, sSize, bytes.size());
+	sResult.insert(sResult.end(), bytes.begin() + sOffset, bytes.begin() + sOffset + sSize);
 	return loaded;
 }
 
@@ -352,6 +373,43 @@ void Resource::setSublanguageId(std::size_t rId)
 {
 	sublanguageId = rId;
 	sublanguageIdIsValid = true;
+}
+
+/**
+ * A method which indicates whether resource is loaded.
+ * @return `true` if it is, otherwise `false`.
+ */
+bool Resource::isLoaded() const
+{
+	return loaded;
+}
+
+/**
+ * A method which indicates whether name is valid.
+ * @return `true` if it is, otherwise `false`.
+ */
+bool Resource::hasValidName() const
+{
+	return !name.empty();
+}
+
+/**
+ * A method which indicates whether ID is valid.
+ * @return `true` if it is, otherwise `false`.
+ */
+bool Resource::hasValidId() const
+{
+	return nameIdIsValid;
+}
+
+/**
+ * A method which indicates whether resource should be used
+ * for calculating iconhash.
+ * @return `true` if should be used, otherwise `false`.
+ */
+bool Resource::isUsedForIconhash() const
+{
+	return true;
 }
 
 /**

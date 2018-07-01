@@ -42,6 +42,7 @@ class Export
 
 		/// @name Other methods
 		/// @{
+		virtual bool isUsedForExphash() const;
 		void invalidateOrdinalNumber();
 		bool hasEmptyName() const;
 		/// @}

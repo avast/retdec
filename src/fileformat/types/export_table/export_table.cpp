@@ -4,6 +4,8 @@
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */
 
+#include "retdec/crypto/crypto.h"
+#include "retdec/utils/string.h"
 #include "retdec/utils/conversion.h"
 #include "retdec/fileformat/types/export_table/export_table.h"
 
@@ -35,6 +37,33 @@ ExportTable::~ExportTable()
 std::size_t ExportTable::getNumberOfExports() const
 {
 	return exports.size();
+}
+
+/**
+ * Get exphash as CRC32
+ * @return Exphash as CRC32
+ */
+const std::string& ExportTable::getExphashCrc32() const
+{
+	return expHashCrc32;
+}
+
+/**
+ * Get exphash as MD5
+ * @return Exphash as MD5
+ */
+const std::string& ExportTable::getExphashMd5() const
+{
+	return expHashMd5;
+}
+
+/**
+ * Get exphash as SHA256
+ * @return Exphash as SHA256
+ */
+const std::string& ExportTable::getExphashSha256() const
+{
+	return expHashSha256;
 }
 
 /**
@@ -99,6 +128,60 @@ ExportTable::exportsIterator ExportTable::begin() const
 ExportTable::exportsIterator ExportTable::end() const
 {
 	return exports.end();
+}
+
+/**
+ * Compute export hashes - CRC32, MD5, SHA256.
+ */
+void ExportTable::computeHashes()
+{
+	std::vector<std::string> funcNames;
+	std::vector<std::uint8_t> expHashBytes;
+
+	for(const auto& newExport : exports)
+	{
+		if(!newExport.isUsedForExphash())
+		{
+			continue;
+		}
+
+		auto funcName = toLower(newExport.getName());
+
+		// convert ordinal to export name
+		if(funcName.empty())
+		{
+			unsigned long long ord;
+			if(newExport.getOrdinalNumber(ord))
+			{
+				funcName = toLower("ord" + std::to_string(ord));
+			}
+		}
+
+		if(!funcName.empty())
+		{
+			funcNames.push_back(funcName);
+		}
+	}
+
+	std::sort(funcNames.begin(), funcNames.end());
+
+	for(const auto& funcName : funcNames)
+	{
+		// Yara adds comma if there are multiple imports
+		if(!expHashBytes.empty())
+		{
+			expHashBytes.push_back(static_cast<std::uint8_t>(','));
+		}
+
+		for(const auto c : std::string(funcName))
+		{
+			expHashBytes.push_back(static_cast<std::uint8_t>(c));
+		}
+	}
+
+	expHashCrc32 = retdec::crypto::getCrc32(expHashBytes.data(), expHashBytes.size());
+	expHashMd5 = retdec::crypto::getMd5(expHashBytes.data(), expHashBytes.size());
+	expHashSha256 = retdec::crypto::getSha256(expHashBytes.data(), expHashBytes.size());
 }
 
 /**

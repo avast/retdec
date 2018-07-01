@@ -944,6 +944,33 @@ std::size_t FileInformation::getNumberOfStoredExports() const
 }
 
 /**
+ * Get exphash as CRC32
+ * @return Exphash as CRC32
+ */
+std::string FileInformation::getExphashCrc32() const
+{
+	return exportTable.getExphashCrc32();
+}
+
+/**
+ * Get exphash as MD5
+ * @return Exphash as MD5
+ */
+std::string FileInformation::getExphashMd5() const
+{
+	return exportTable.getExphashMd5();
+}
+
+/**
+ * Get exphash as SHA256
+ * @return Exphash as SHA256
+ */
+std::string FileInformation::getExphashSha256() const
+{
+	return exportTable.getExphashSha256();
+}
+
+/**
  * Get export name
  * @param position Index of selected export (indexed from 0)
  * @return Name of selected export
@@ -1021,6 +1048,33 @@ std::string FileInformation::getResourceMd5(std::size_t index) const
 std::string FileInformation::getResourceSha256(std::size_t index) const
 {
 	return resourceTable.getResourceSha256(index);
+}
+
+/**
+ * Get iconhash as CRC32
+ * @return ResourceIconhash as CRC32
+ */
+std::string FileInformation::getResourceIconhashCrc32() const
+{
+	return resourceTable.getResourceIconhashCrc32();
+}
+
+/**
+ * Get iconhash as MD5
+ * @return ResourceIconhash as MD5
+ */
+std::string FileInformation::getResourceIconhashMd5() const
+{
+	return resourceTable.getResourceIconhashMd5();
+}
+
+/**
+ * Get iconhash as SHA256
+ * @return ResourceIconhash as SHA256
+ */
+std::string FileInformation::getResourceIconhashSha256() const
+{
+	return resourceTable.getResourceIconhashSha256();
 }
 
 /**
@@ -1117,6 +1171,15 @@ std::string FileInformation::getResourceOffsetStr(std::size_t index, std::ios_ba
 std::string FileInformation::getResourceSizeStr(std::size_t index, std::ios_base &(* format)(std::ios_base &)) const
 {
 	return resourceTable.getResourceSizeStr(index, format);
+}
+
+/**
+ * Find out if there are any records in resource table
+ * @return @c true if resource table is not empty, @c false otherwise
+ */
+bool FileInformation::hasResourceTableRecords() const
+{
+	return resourceTable.hasRecords();
 }
 
 /**
@@ -3484,6 +3547,15 @@ void FileInformation::setExportTable(const retdec::fileformat::ExportTable *sTab
 }
 
 /**
+ * Set resource table
+ * @param sTable Information about resource table
+ */
+void FileInformation::setResourceTable(const retdec::fileformat::ResourceTable *sTable)
+{
+	resourceTable.setTable(sTable);
+}
+
+/**
  * Set pointer to detected strings
  * @param sStrings Pointer to detected strings
  */
@@ -3685,23 +3757,6 @@ void FileInformation::addDllFlagsDescriptor(std::string descriptor, std::string 
 void FileInformation::clearDllFlagsDescriptors()
 {
 	header.clearDllFlagsDescriptors();
-}
-
-/**
- * Add resource to resource table
- * @param resource Resource to add
- */
-void FileInformation::addResource(Resource &resource)
-{
-	resourceTable.addResource(resource);
-}
-
-/**
- * Delete all resources from resource table
- */
-void FileInformation::clearResources()
-{
-	resourceTable.clearResources();
 }
 
 /**

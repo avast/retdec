@@ -89,6 +89,16 @@ void Export::setOrdinalNumber(unsigned long long exportOrdinalNumber)
 }
 
 /**
+ * Virtual method which indicates whether export should be used
+ * for calculating exphash.
+ * @return `true` if should be used, otherwise `false`.
+ */
+bool Export::isUsedForExphash() const
+{
+	return true;
+}
+
+/**
  * Invalidate ordinal number of export
  *
  * Instance method @a getOrdinalNumber() returns @c false after invocation of

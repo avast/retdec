@@ -460,6 +460,34 @@ void FileFormat::loadImpHash()
 }
 
 /**
+ * Loads exphash from export table.
+ */
+void FileFormat::loadExpHash()
+{
+	if (!exportTable || (loadFlags & LoadFlags::NO_VERBOSE_HASHES))
+	{
+		return;
+	}
+
+	exportTable->computeHashes();
+}
+
+/**
+ * Loads iconhash from resource table.
+ */
+void FileFormat::loadResourceIconHash()
+{
+	if (!resourceTable || (loadFlags & LoadFlags::NO_VERBOSE_HASHES))
+	{
+		return;
+	}
+
+	resourceTable->computeIconHashes(this);
+}
+
+
+
+/**
  * Getter for state of instance
  * @return @c true if all is OK, @c false otherwise
  */

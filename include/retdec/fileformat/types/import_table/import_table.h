@@ -24,7 +24,6 @@ class ImportTable
 		using importsIterator = std::vector<std::unique_ptr<Import>>::const_iterator;
 		std::vector<std::string> libraries;           ///< name of libraries
 		std::vector<std::unique_ptr<Import>> imports; ///< stored imports
-		std::vector<unsigned char> impHashBytes;      ///< bytes for calculation of imphash
 		std::string impHashCrc32;                     ///< imphash CRC32
 		std::string impHashMd5;                       ///< imphash MD5
 		std::string impHashSha256;                    ///< imphash SHA256
@@ -39,9 +38,9 @@ class ImportTable
 		std::size_t getNumberOfImportsInLibrary(std::size_t libraryIndex) const;
 		std::size_t getNumberOfImportsInLibrary(const std::string &name) const;
 		std::size_t getNumberOfImportsInLibraryCaseInsensitive(const std::string &name) const;
-		std::string getImphashCrc32() const;
-		std::string getImphashMd5() const;
-		std::string getImphashSha256() const;
+		const std::string& getImphashCrc32() const;
+		const std::string& getImphashMd5() const;
+		const std::string& getImphashSha256() const;
 		std::string getLibrary(std::size_t libraryIndex) const;
 		const Import* getImport(std::size_t importIndex) const;
 		const Import* getImport(const std::string &name) const;
