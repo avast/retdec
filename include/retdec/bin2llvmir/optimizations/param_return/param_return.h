@@ -31,10 +31,10 @@ class CallEntry
 		CallEntry(llvm::CallInst* c);
 
 	public:
-		void filterRegisters(Abi* _abi, Config* _config);
-		void filterSort(Config* _config);
-		void filterLeaveOnlyContinuousStackOffsets(Config* _config);
-		void filterLeaveOnlyNeededStackOffsets(Abi* _abi, Config* _config);
+		void filterRegisters(Abi* _abi);
+		void filterSort(Config* _config, Abi* _abi);
+		void filterLeaveOnlyContinuousStackOffsets(Config* _config, Abi *_abi);
+		void filterLeaveOnlyNeededStackOffsets(Config* _config, Abi *_abi);
 
 		void extractFormatString(ReachingDefinitionsAnalysis& _RDA);
 
@@ -99,6 +99,10 @@ class DataFlowEntry
 
 		void filterRegistersArgLoads();
 		void filterSortArgLoads();
+
+		void replaceCalls();
+		std::map<llvm::CallInst*, std::vector<llvm::Value*>>
+					fetchLoadsOfCalls() const;
 
 		llvm::CallInst* isSimpleWrapper(llvm::Function* fnc);
 

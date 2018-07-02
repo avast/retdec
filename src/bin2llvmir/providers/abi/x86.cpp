@@ -30,7 +30,7 @@ AbiX86::AbiX86(llvm::Module* m, Config* c) :
 			X86_REG_EBP};
 
 	_regReturn = X86_REG_EAX;
-	_regFPReturn = X86_REG_ST0;
+	_regFPReturn = X86_REG_ST7;
 }
 
 AbiX86::~AbiX86()

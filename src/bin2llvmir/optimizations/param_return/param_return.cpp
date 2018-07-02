@@ -280,55 +280,16 @@ CallEntry::CallEntry(llvm::CallInst* c) :
 
 }
 
-bool registerCanBeParameterAccordingToAbi(Abi* _abi, Config* _config, llvm::Value* val)
-{
-	if (!_abi->isRegister(val))
-	{
-		return true;
-	}
-
-	if (_config->getConfig().architecture.isX86())
-	{
-		return false;
-	}
-	else if (_config->getConfig().architecture.isPpc())
-	{
-		static std::set<std::string> names = {"r3", "r4", "r5", "r6", "r7", "r8", "r9"};
-		if (names.find(val->getName()) == names.end())
-		{
-			return false;
-		}
-	}
-	else if (_config->getConfig().architecture.isArmOrThumb())
-	{
-		static std::set<std::string> names = {"r0", "r1", "r2", "r3"};
-		if (names.find(val->getName()) == names.end())
-		{
-			return false;
-		}
-	}
-	else if (_config->getConfig().architecture.isMipsOrPic32())
-	{
-		static std::set<std::string> names = {"a0", "a1", "a2", "a3"};
-		if (names.find(val->getName()) == names.end())
-		{
-			return false;
-		}
-	}
-
-	return true;
-}
-
 /**
  * Remove all registers that are not used to pass argument according to ABI.
  */
-void CallEntry::filterRegisters(Abi* _abi, Config* _config)
+void CallEntry::filterRegisters(Abi* _abi)
 {
 	auto it = possibleArgStores.begin();
 	while (it != possibleArgStores.end())
 	{
 		auto* op = (*it)->getPointerOperand();
-		if (!registerCanBeParameterAccordingToAbi(_abi, _config, op))
+		if (_abi->valueCanBeParameter(op) == false)
 		{
 			it = possibleArgStores.erase(it);
 		}
@@ -345,7 +306,7 @@ void DataFlowEntry::filterRegistersArgLoads()
 	while (it != argLoads.end())
 	{
 		auto* op = (*it)->getPointerOperand();
-		if (!registerCanBeParameterAccordingToAbi(_abi, _config, op))
+		if (_abi->valueCanBeParameter(op) == false)
 		{
 			it = argLoads.erase(it);
 		}
@@ -367,22 +328,22 @@ void DataFlowEntry::filterRegistersArgLoads()
 /**
  * Stack with the lowest (highest negative) offset is the first call argument.
  */
-void CallEntry::filterSort(Config* _config)
+void CallEntry::filterSort(Config* _config, Abi* _abi)
 {
 	auto& stores = possibleArgStores;
 
 	std::stable_sort(
 			stores.begin(),
 			stores.end(),
-			[_config](StoreInst* a, StoreInst* b) -> bool
+			[_config, _abi](StoreInst* a, StoreInst* b) -> bool
 	{
 		auto aOff = _config->getStackVariableOffset(a->getPointerOperand());
 		auto bOff = _config->getStackVariableOffset(b->getPointerOperand());
 
 		if (aOff.isUndefined() && bOff.isUndefined())
 		{
-			return _config->getConfigRegisterNumber(a->getPointerOperand()) <
-					_config->getConfigRegisterNumber(b->getPointerOperand());
+			return _abi->getRegisterId(a->getPointerOperand()) <
+					_abi->getRegisterId(b->getPointerOperand());
 		}
 		else if (aOff.isUndefined() && bOff.isDefined())
 		{
@@ -411,8 +372,9 @@ void DataFlowEntry::filterSortArgLoads()
 
 		if (aOff.isUndefined() && bOff.isUndefined())
 		{
-			return _config->getConfigRegisterNumber(a->getPointerOperand()) <
-					_config->getConfigRegisterNumber(b->getPointerOperand());
+
+			return _abi->getRegisterId(a->getPointerOperand()) <
+					_abi->getRegisterId(b->getPointerOperand());
 		}
 		else if (aOff.isUndefined() && bOff.isDefined())
 		{
@@ -433,7 +395,7 @@ void DataFlowEntry::filterSortArgLoads()
  * Arguments are stored into stack variables which go one after another,
  * there can be no big stack offset gaps.
  */
-void CallEntry::filterLeaveOnlyContinuousStackOffsets(Config* _config)
+void CallEntry::filterLeaveOnlyContinuousStackOffsets(Config* _config, Abi* _abi)
 {
 	retdec::utils::Maybe<int> prevOff;
 	auto it = possibleArgStores.begin();
@@ -443,12 +405,8 @@ void CallEntry::filterLeaveOnlyContinuousStackOffsets(Config* _config)
 		auto off = _config->getStackVariableOffset(s->getPointerOperand());
 		auto* val = llvm_utils::skipCasts(s->getValueOperand());
 
-		int gap = 8;
-//		int gap = 4;
-		if (val->getType()->isFloatingPointTy())
-		{
-			gap = 8;
-		}
+		int gap = _abi->getTypeByteSize(val->getType())*2;
+		// static int gap = _abi->wordSize()*2/8;
 
 		if (off.isUndefined())
 		{
@@ -473,9 +431,9 @@ void CallEntry::filterLeaveOnlyContinuousStackOffsets(Config* _config)
 	}
 }
 
-void CallEntry::filterLeaveOnlyNeededStackOffsets(Abi* _abi, Config* _config)
+void CallEntry::filterLeaveOnlyNeededStackOffsets(Config* _config, Abi *_abi)
 {
-	int regNum = 0;
+	size_t regNum = 0;
 	auto it = possibleArgStores.begin();
 	while (it != possibleArgStores.end())
 	{
@@ -491,38 +449,10 @@ void CallEntry::filterLeaveOnlyNeededStackOffsets(Abi* _abi, Config* _config)
 		}
 		else if (off.isDefined())
 		{
-			if (_config->getConfig().architecture.isX86())
+			if (regNum < _abi->parameterRegisters().size())
 			{
-				// nothing
-			}
-			else if (_config->getConfig().architecture.isPpc())
-			{
-				if (regNum == 7)
-				{
-					// nothing
-				}
-				else
-				{
-					it = possibleArgStores.erase(it);
-					continue;
-				}
-			}
-			else if (_config->getConfig().architecture.isArmOrThumb()
-					|| _config->getConfig().architecture.isMipsOrPic32())
-			{
-				if (regNum == 4)
-				{
-					// nothing
-				}
-				else
-				{
-					it = possibleArgStores.erase(it);
-					continue;
-				}
-			}
-			else
-			{
-				// nothing
+				it = possibleArgStores.erase(it);
+				continue;
 			}
 		}
 
@@ -711,11 +641,7 @@ void DataFlowEntry::addArgLoads()
 		if (auto* l = dyn_cast<LoadInst>(&*it))
 		{
 			auto* ptr = l->getPointerOperand();
-			if (!_config->isStackVariable(ptr) && !_abi->isRegister(ptr))
-			{
-				continue;
-			}
-			if (_abi->isFlagRegister(ptr))
+			if (!_abi->valueCanBeParameter(ptr))
 			{
 				continue;
 			}
@@ -789,8 +715,7 @@ void DataFlowEntry::addRetStores()
 					auto* ptr = store->getPointerOperand();
 
 					if (disqualifiedValues.hasNot(ptr)
-							&& !_abi->isFlagRegister(ptr)
-							&& (_config->isStackVariable(ptr) || _abi->isRegister(ptr)))
+							&& _abi->canHoldReturnValue(ptr))
 					{
 						re.possibleRetStores.push_back(store);
 						disqualifiedValues.insert(ptr);
@@ -821,7 +746,7 @@ void DataFlowEntry::addCall(llvm::CallInst* call)
 	// TODO:
 	// => ignore - this is an ugly hack, solve somehow better.
 	//
-	if (_config->getConfig().architecture.isArmOrThumb())
+	if (_abi->isArm())
 	{
 		if (auto ai = AsmInstruction(call))
 		{
@@ -890,18 +815,22 @@ void DataFlowEntry::addCallArgs(llvm::CallInst* call, CallEntry& ce)
 			auto* val = store->getValueOperand();
 			auto* ptr = store->getPointerOperand();
 
-			if (!_config->isStackVariable(ptr) && !_abi->isRegister(ptr))
+			if (!_abi->valueCanBeParameter(ptr))
 			{
 				disqualifiedValues.insert(ptr);
 			}
 
 			if (auto* l = dyn_cast<LoadInst>(val))
 			{
-				if (l->getPointerOperand()->getName() == "ebp"
-						|| l->getPointerOperand()->getName() == "rbp")
+				if (_abi->isX86())
 				{
-					disqualifiedValues.insert(ptr);
+					if (_abi->getRegisterId(l->getPointerOperand()) == X86_REG_EBP
+							|| _abi->getRegisterId(l->getPointerOperand()) == X86_REG_RBP)
+					{
+						disqualifiedValues.insert(ptr);
+					}
 				}
+
 				if (_abi->isRegister(ptr)
 						&& _abi->isRegister(l->getPointerOperand())
 						&& ptr != l->getPointerOperand())
@@ -984,8 +913,7 @@ void DataFlowEntry::addCallReturns(llvm::CallInst* call, CallEntry& ce)
 			auto* ptr = load->getPointerOperand();
 
 			if (disqualifiedValues.hasNot(ptr)
-					&& !_abi->isFlagRegister(ptr)
-					&& (_config->isStackVariable(ptr) || _abi->isRegister(ptr)))
+					&& _abi->canHoldReturnValue(ptr))
 			{
 				ce.possibleRetLoads.push_back(load);
 				disqualifiedValues.insert(ptr);
@@ -1006,10 +934,10 @@ void DataFlowEntry::filter()
 
 	for (CallEntry& e : calls)
 	{
-		e.filterRegisters(_abi, _config);
-		e.filterSort(_config);
-		e.filterLeaveOnlyContinuousStackOffsets(_config);
-		e.filterLeaveOnlyNeededStackOffsets(_abi, _config);
+		e.filterRegisters(_abi);
+		e.filterSort(_config, _abi);
+		e.filterLeaveOnlyContinuousStackOffsets(_config, _abi);
+		e.filterLeaveOnlyNeededStackOffsets(_config, _abi);
 
 		if (isVarArg)
 		{
@@ -1048,19 +976,18 @@ void DataFlowEntry::filter()
 	}
 	else
 	{
-		if (_config->getConfig().architecture.isArmOrThumb())
+		if (_abi->isArm())
 		{
-			static std::vector<std::string> armNames =
-					{"r0", "r1", "r2", "r3"};
+			auto armRegs = _abi->parameterRegisters();
 
 			for (CallEntry& e : calls)
 			{
 				std::size_t idx = 0;
 				auto sIt = e.possibleArgStores.begin();
-				while (sIt != e.possibleArgStores.end() && idx < armNames.size())
+				while (sIt != e.possibleArgStores.end() && idx < armRegs.size())
 				{
 					StoreInst* s = *sIt;
-					if (s->getPointerOperand()->getName() != armNames[idx])
+					if (_abi->getRegisterId(s->getPointerOperand()) != armRegs[idx])
 					{
 						e.possibleArgStores.erase(sIt, e.possibleArgStores.end());
 						break;
@@ -1124,41 +1051,17 @@ void DataFlowEntry::callsFilterCommonRegisters()
 		commonRegs = std::move(intersect);
 	}
 
-	// If common contains r3, then it should also contain r2, r1, and r0.
-	// Example for MIPS: if contains a2, it should a1 and a0.
-	//
-	static std::vector<std::string> regNames;
-	if (regNames.empty())
+	auto regIds = _abi->parameterRegisters();
+
+	for (auto it = regIds.rbegin(); it != regIds.rend(); ++it)
 	{
-		if (_config->getConfig().architecture.isMipsOrPic32())
-		{
-			if (_config->getConfig().tools.isPspGcc())
-			{
-				regNames = {"a0", "a1", "a2", "a3", "t0", "t1", "t2", "t3"};
-			}
-			else
-			{
-				regNames = {"a0", "a1", "a2", "a3"};
-			}
-		}
-		else if (_config->getConfig().architecture.isArmOrThumb())
-		{
-			regNames = {"r0", "r1", "r2", "r3"};
-		}
-		else if (_config->getConfig().architecture.isPpc())
-		{
-			regNames = {"r3", "r4", "r5", "r6", "r7", "r8", "r9"};
-		}
-	}
-	for (auto it = regNames.rbegin(); it != regNames.rend(); ++it)
-	{
-		auto* r = _config->getLlvmRegister(*it);
+		auto* r = _abi->getRegister(*it);
 		if (commonRegs.count(r))
 		{
 			++it;
-			while (it != regNames.rend())
+			while (it != regIds.rend())
 			{
-				r = _config->getLlvmRegister(*it);
+				r = _abi->getRegister(*it);
 				commonRegs.insert(r);
 				++it;
 			}
@@ -1263,251 +1166,217 @@ void DataFlowEntry::applyToIr()
 	}
 }
 
-void DataFlowEntry::applyToIrOrdinary()
+std::map<CallInst*, std::vector<Value*>> DataFlowEntry::fetchLoadsOfCalls() const
 {
-	if (Function* fnc = getFunction())
+	std::map<CallInst*, std::vector<Value*>> loadsOfCalls;
+
+	for (auto& e : calls)
 	{
-		if (fnc->arg_size() > 0)
+		std::vector<Value*> loads;
+		auto* call = e.call;
+		for (auto* s : e.possibleArgStores)
 		{
-			return;
-		}
-
-		std::map<llvm::CallInst*, std::vector<llvm::Value*>> calls2vals;
-		for (auto& e : calls)
-		{
-			std::vector<Value*> loads;
-			auto* call = e.call;
-			for (auto* s : e.possibleArgStores)
-			{
-				auto fIt = specialArgStorage.find(loads.size());
-				while (fIt != specialArgStorage.end())
-				{
-					auto* sl = new LoadInst(fIt->second, "", call);
-					loads.push_back(sl);
-					fIt = specialArgStorage.find(loads.size());
-				}
-
-				auto* l = new LoadInst(s->getPointerOperand(), "", call);
-				loads.push_back(l);
-			}
-
-			calls2vals[call] = loads;
-		}
-
-		llvm::Value* retVal = nullptr;
-		std::map<ReturnInst*, Value*> rets2vals;
-		if (_config->getConfig().architecture.isX86())
-		{
-			if (retType->isFloatingPointTy())
-			{
-				retVal = _config->getLlvmRegister("st7");
-			}
-			else if (_config->getConfig().architecture.isX86_32())
-			{
-				retVal = _config->getLlvmRegister("eax");
-			}
-			else if (_config->getConfig().architecture.isX86_64())
-			{
-				retVal = _config->getLlvmRegister("rax");
-			}
-		}
-		else if (_config->getConfig().architecture.isMipsOrPic32())
-		{
-			retVal = _config->getLlvmRegister("v0");
-		}
-		else if (_config->getConfig().architecture.isArmOrThumb())
-		{
-			retVal = _config->getLlvmRegister("r0");
-		}
-		else if (_config->getConfig().architecture.isPpc())
-		{
-			retVal = _config->getLlvmRegister("r3");
-		}
-		if (retVal)
-		{
-			for (auto& e : retStores)
-			{
-				auto* l = new LoadInst(retVal, "", e.ret);
-				rets2vals[e.ret] = l;
-			}
-		}
-
-		std::vector<llvm::Value*> argStores;
-		for (LoadInst* l : argLoads)
-		{
-			auto fIt = specialArgStorage.find(argStores.size());
+			auto fIt = specialArgStorage.find(loads.size());
 			while (fIt != specialArgStorage.end())
 			{
-				argStores.push_back(fIt->second);
-				fIt = specialArgStorage.find(argStores.size());
+				auto* sl = new LoadInst(fIt->second, "", call);
+				loads.push_back(sl);
+				fIt = specialArgStorage.find(loads.size());
 			}
 
-			argStores.push_back(l->getPointerOperand());
+			auto* l = new LoadInst(s->getPointerOperand(), "", call);
+			loads.push_back(l);
 		}
 
-		static std::vector<std::string> ppcNames =
-				{"r3", "r4", "r5", "r6", "r7", "r8", "r9"};
-		static std::vector<std::string> armNames =
-				{"r0", "r1", "r2", "r3"};
-		static std::vector<std::string> mipsNames =
-				{"a0", "a1", "a2", "a3"};
-		if (_config->getConfig().tools.isPspGcc())
+		loadsOfCalls[call] = loads;
+	}
+
+	return loadsOfCalls;
+}
+
+void DataFlowEntry::replaceCalls()
+{
+	auto loadsOfCalls = fetchLoadsOfCalls();
+
+	for (auto l : loadsOfCalls)
+		IrModifier::modifyCallInst(l.first, l.first->getType(), l.second);
+}
+
+void DataFlowEntry::applyToIrOrdinary()
+{
+	Function* analysedFunction = getFunction();
+
+	if (analysedFunction == nullptr)
+	{
+		replaceCalls();
+
+		return;
+	}
+
+	if (analysedFunction->arg_size() > 0)
+	{
+		return;
+	}
+
+	auto loadsOfCalls = fetchLoadsOfCalls();
+
+	llvm::Value* retVal = retType->isFloatingPointTy() ?
+		_abi->getFPReturnRegister() : _abi->getReturnRegister();
+
+	std::map<ReturnInst*, Value*> rets2vals;
+
+	if (retVal)
+	{
+		for (auto& e : retStores)
 		{
-			mipsNames = {"a0", "a1", "a2", "a3", "t0", "t1", "t2", "t3"};
+			auto* l = new LoadInst(retVal, "", e.ret);
+			rets2vals[e.ret] = l;
 		}
-		for (auto& p : calls2vals)
+	}
+
+	std::vector<llvm::Value*> argStores;
+	for (LoadInst* l : argLoads)
+	{
+		auto fIt = specialArgStorage.find(argStores.size());
+		while (fIt != specialArgStorage.end())
 		{
-			retdec::utils::Maybe<int> stackOff;
-			if (_config->getConfig().architecture.isX86())
+			argStores.push_back(fIt->second);
+			fIt = specialArgStorage.find(argStores.size());
+		}
+
+		argStores.push_back(l->getPointerOperand());
+	}
+
+	auto paramRegs = _abi->parameterRegisters();
+
+	for (auto& p : loadsOfCalls)
+	{
+		retdec::utils::Maybe<int> stackOff;
+		if (_abi->isX86())
+		{
+			if (!p.second.empty())
 			{
-				if (!p.second.empty())
+				auto* l = cast<LoadInst>(p.second.back());
+				if (_config->isStackVariable(l->getPointerOperand()))
 				{
-					auto* l = cast<LoadInst>(p.second.back());
-					if (_config->isStackVariable(l->getPointerOperand()))
-					{
-						stackOff = _config->getStackVariableOffset(l->getPointerOperand());
-						stackOff = stackOff + 4;
-					}
+					stackOff = _config->getStackVariableOffset(l->getPointerOperand());
+					stackOff = stackOff + 4;
 				}
+			}
 
-				if (stackOff.isUndefined())
+			if (stackOff.isUndefined())
+			{
+				AsmInstruction ai(p.first);
+				while (ai.isValid())
 				{
-					AsmInstruction ai(p.first);
-					while (ai.isValid())
+					for (auto& i : ai)
 					{
-						for (auto& i : ai)
+						if (auto* s = dyn_cast<StoreInst>(&i))
 						{
-							if (auto* s = dyn_cast<StoreInst>(&i))
+							if (_config->isStackVariable(s->getPointerOperand()))
 							{
-								if (_config->isStackVariable(s->getPointerOperand()))
-								{
-									stackOff = _config->getStackVariableOffset(s->getPointerOperand());
-									break;
-								}
+								stackOff = _config->getStackVariableOffset(s->getPointerOperand());
+								break;
 							}
 						}
-						if (stackOff.isDefined())
-						{
-							break;
-						}
-						ai = ai.getPrev();
 					}
+					if (stackOff.isDefined())
+					{
+						break;
+					}
+					ai = ai.getPrev();
 				}
-			}
-
-			std::size_t idx = 0;
-			for (auto* t : argTypes)
-			{
-				(void) t;
-				if (p.second.size() <= idx)
-				{
-					if (_config->getConfig().architecture.isArmOrThumb())
-					{
-						if (idx < armNames.size())
-						{
-							auto* r = _config->getLlvmRegister(armNames[idx]);
-							auto* l = new LoadInst(r, "", p.first);
-							p.second.push_back(l);
-						}
-					}
-					else if (_config->getConfig().architecture.isMipsOrPic32())
-					{
-						if (idx < mipsNames.size())
-						{
-							auto* r = _config->getLlvmRegister(mipsNames[idx]);
-							auto* l = new LoadInst(r, "", p.first);
-							p.second.push_back(l);
-						}
-					}
-					else if (_config->getConfig().architecture.isPpc())
-					{
-						if (idx < ppcNames.size())
-						{
-							auto* r = _config->getLlvmRegister(ppcNames[idx]);
-							auto* l = new LoadInst(r, "", p.first);
-							p.second.push_back(l);
-						}
-					}
-					else if (_config->getConfig().architecture.isX86()
-							&& stackOff.isDefined())
-					{
-						auto* s = _config->getLlvmStackVariable(p.first->getFunction(), stackOff);
-						if (s)
-						{
-							auto* l = new LoadInst(s, "", p.first);
-							p.second.push_back(l);
-							stackOff = stackOff + 4;
-						}
-						else
-						{
-							stackOff.setUndefined();
-						}
-					}
-				}
-				++idx;
 			}
 		}
 
-		auto* oldType = fnc->getType();
-		IrModifier irm(_module, _config);
-		auto* newFnc = irm.modifyFunction(
-				fnc,
-				retType,
-				argTypes,
-				isVarArg,
-				rets2vals,
-				calls2vals,
-				retVal,
-				argStores,
-				argNames).first;
-
-		LOG << "modify fnc: " << newFnc->getName().str() << " = "
-				<< llvmObjToString(oldType) << " -> "
-				<< llvmObjToString(newFnc->getType()) << std::endl;
-
-		called = newFnc;
-	}
-	else
-	{
-		for (auto& e : calls)
+		std::size_t idx = 0;
+		for (auto* t : argTypes)
 		{
-			auto* call = e.call;
-			LOG << "\tmodify call: " << llvmObjToString(call) << std::endl;
-
-			std::vector<Value*> loads;
-			for (auto* s : e.possibleArgStores)
+			(void) t;
+			if (p.second.size() <= idx)
 			{
-				auto* l = new LoadInst(s->getPointerOperand(), "", call);
-				loads.push_back(l);
-				LOG << "\t\t" << llvmObjToString(l) << std::endl;
+				if (_abi->isArm())
+				{
+					if (idx < paramRegs.size())
+					{
+						auto* r = _abi->getRegister(paramRegs[idx]);
+						auto* l = new LoadInst(r, "", p.first);
+						p.second.push_back(l);
+					}
+				}
+				else if (_abi->isMips())
+				{
+					if (idx < paramRegs.size())
+					{
+						auto* r = _abi->getRegister(paramRegs[idx]);
+						auto* l = new LoadInst(r, "", p.first);
+						p.second.push_back(l);
+					}
+				}
+				else if (_abi->isPowerPC())
+				{
+					if (idx < paramRegs.size())
+					{
+						auto* r = _abi->getRegister(paramRegs[idx]);
+						auto* l = new LoadInst(r, "", p.first);
+						p.second.push_back(l);
+					}
+				}
+				else if (_abi->isX86()
+						&& stackOff.isDefined())
+				{
+					auto* s = _config->getLlvmStackVariable(p.first->getFunction(), stackOff);
+					if (s)
+					{
+						auto* l = new LoadInst(s, "", p.first);
+						p.second.push_back(l);
+						stackOff = stackOff + 4;
+					}
+					else
+					{
+						stackOff.setUndefined();
+					}
+				}
 			}
-
-			auto* ret = fnc ? fnc->getReturnType() : call->getType();
-			IrModifier::modifyCallInst(call, ret, loads);
+			++idx;
 		}
 	}
+
+	auto* oldType = analysedFunction->getType();
+	IrModifier irm(_module, _config);
+	auto* newFnc = irm.modifyFunction(
+			analysedFunction,
+			retType,
+			argTypes,
+			isVarArg,
+			rets2vals,
+			loadsOfCalls,
+			retVal,
+			argStores,
+			argNames).first;
+
+	LOG << "modify fnc: " << newFnc->getName().str() << " = "
+			<< llvmObjToString(oldType) << " -> "
+			<< llvmObjToString(newFnc->getType()) << std::endl;
+
+	called = newFnc;
 }
 
 void DataFlowEntry::applyToIrVariadic()
 {
-	std::vector<std::string> ppcNames =
-			{"r3", "r4", "r5", "r6", "r7", "r8", "r9"};
-	std::vector<std::string> armNames =
-			{"r0", "r1", "r2", "r3"};
-	std::vector<std::string> mipsNames =
-			{"a0", "a1", "a2", "a3"};
-	if (_config->getConfig().tools.isPspGcc())
-	{
-		mipsNames = {"a0", "a1", "a2", "a3", "t0", "t1", "t2", "t3"};
-	}
+	auto paramRegs = _abi->parameterRegisters();
 
-	std::vector<std::string> mipsFpNames =
-			{"fd12", "fd13", "fd14", "fd15", "fd16", "fd17", "fd18", "fd19", "fd20"};
+	static std::vector<uint32_t> mipsFpRegs = {
+		MIPS_REG_FD12,
+		MIPS_REG_FD14,
+		MIPS_REG_FD16,
+		MIPS_REG_FD18,
+		MIPS_REG_FD20};
 
 	llvm::Value* retVal = nullptr;
 	std::map<ReturnInst*, Value*> rets2vals;
 	std::vector<llvm::Value*> argStores;
-	std::map<llvm::CallInst*, std::vector<llvm::Value*>> calls2vals;
+	std::map<llvm::CallInst*, std::vector<llvm::Value*>> loadsOfCalls;
 
 	for (CallEntry& ce : calls)
 	{
@@ -1570,7 +1439,7 @@ void DataFlowEntry::applyToIrVariadic()
 			int sz = static_cast<int>(_abi->getTypeByteSize(t));
 			sz = sz > 4 ? 8 : 4;
 
-			if (_config->getConfig().architecture.isX86())
+			if (_abi->isX86())
 			{
 				auto* st = _config->getLlvmStackVariable(fnc, off);
 				if (st)
@@ -1580,11 +1449,11 @@ void DataFlowEntry::applyToIrVariadic()
 
 				off += sz;
 			}
-			else if (_config->getConfig().architecture.isPpc())
+			else if (_abi->isPowerPC())
 			{
-				if (aIdx < ppcNames.size())
+				if (aIdx < paramRegs.size())
 				{
-					auto* r = _module->getNamedGlobal(ppcNames[aIdx]);
+					auto* r = _abi->getRegister(paramRegs[aIdx]);
 					if (r)
 					{
 						args.push_back(r);
@@ -1601,11 +1470,11 @@ void DataFlowEntry::applyToIrVariadic()
 					off += sz;
 				}
 			}
-			else if (_config->getConfig().architecture.isArmOrThumb())
+			else if (_abi->isArm())
 			{
-				if (aIdx < armNames.size())
+				if (aIdx < paramRegs.size())
 				{
-					auto* r = _module->getNamedGlobal(armNames[aIdx]);
+					auto* r = _abi->getRegister(paramRegs[aIdx]);
 					if (r)
 					{
 						args.push_back(r);
@@ -1629,9 +1498,9 @@ void DataFlowEntry::applyToIrVariadic()
 			}
 			else if (_config->getConfig().architecture.isPic32())
 			{
-				if (aIdx < mipsNames.size())
+				if (aIdx < paramRegs.size())
 				{
-					auto* r = _module->getNamedGlobal(mipsNames[aIdx]);
+					auto* r = _abi->getRegister(paramRegs[aIdx]);
 					if (r)
 					{
 						args.push_back(r);
@@ -1648,16 +1517,16 @@ void DataFlowEntry::applyToIrVariadic()
 					off += sz;
 				}
 			}
-			else if (_config->getConfig().architecture.isMips())
+			else if (_abi->isMips())
 			{
 				bool useStack = false;
 				if (t->isFloatingPointTy())
 				{
 					--aIdx;
 
-					if (faIdx < mipsFpNames.size())
+					if (faIdx < mipsFpRegs.size())
 					{
-						auto* r = _module->getNamedGlobal(mipsFpNames[faIdx]);
+						auto* r = _abi->getRegister(mipsFpRegs[faIdx]);
 						if (r)
 						{
 							args.push_back(r);
@@ -1677,9 +1546,9 @@ void DataFlowEntry::applyToIrVariadic()
 				}
 				else
 				{
-					if (aIdx < mipsNames.size())
+					if (aIdx < paramRegs.size())
 					{
-						auto* r = _module->getNamedGlobal(mipsNames[aIdx]);
+						auto* r = _abi->getRegister(paramRegs[aIdx]);
 						if (r)
 						{
 							args.push_back(r);
@@ -1726,37 +1595,13 @@ void DataFlowEntry::applyToIrVariadic()
 
 		if (!loads.empty())
 		{
-			calls2vals[ce.call] = loads;
+			loadsOfCalls[ce.call] = loads;
 		}
 	}
 
-	if (_config->getConfig().architecture.isX86())
-	{
-		if (retType->isFloatingPointTy())
-		{
-			retVal = _config->getLlvmRegister("st7");
-		}
-		else if (_config->getConfig().architecture.isX86_32())
-		{
-			retVal = _config->getLlvmRegister("eax");
-		}
-		else if (_config->getConfig().architecture.isX86_64())
-		{
-			retVal = _config->getLlvmRegister("rax");
-		}
-	}
-	else if (_config->getConfig().architecture.isMipsOrPic32())
-	{
-		retVal = _config->getLlvmRegister("v0");
-	}
-	else if (_config->getConfig().architecture.isArmOrThumb())
-	{
-		retVal = _config->getLlvmRegister("r0");
-	}
-	else if (_config->getConfig().architecture.isPpc())
-	{
-		retVal = _config->getLlvmRegister("r3");
-	}
+	retVal = retType->isFloatingPointTy() ?
+		_abi->getFPReturnRegister() : _abi->getReturnRegister();
+
 	if (retVal)
 	{
 		for (auto& e : retStores)
@@ -1776,7 +1621,7 @@ void DataFlowEntry::applyToIrVariadic()
 			argTypes,
 			isVarArg,
 			rets2vals,
-			calls2vals,
+			loadsOfCalls,
 			retVal,
 			argStores,
 			argNames).first;
@@ -2148,7 +1993,7 @@ void DataFlowEntry::setTypeFromUseContext()
 void DataFlowEntry::setReturnType()
 {
 	llvm::Value* retVal = nullptr;
-	if (_config->getConfig().architecture.isX86())
+	if (_abi->isX86())
 	{
 		bool hasEax = false;
 		bool hasRax = false;
@@ -2157,17 +2002,17 @@ void DataFlowEntry::setReturnType()
 		{
 			for (StoreInst* s : re.possibleRetStores)
 			{
-				if (s->getPointerOperand()->getName() == "eax")
+				if (_abi->getRegisterId(s) == X86_REG_EAX)
 				{
 					hasEax = true;
 					break;
 				}
-				else if (s->getPointerOperand()->getName() == "rax")
+				else if (_abi->getRegisterId(s) == X86_REG_RAX)
 				{
 					hasRax = true;
 					break;
 				}
-				else if (s->getPointerOperand()->getName() == "st7")
+				else if (_abi->getRegisterId(s) == X86_REG_ST7)
 				{
 					hasSt0 = true;
 				}
@@ -2175,28 +2020,28 @@ void DataFlowEntry::setReturnType()
 		}
 		if (!hasEax && !hasRax && hasSt0)
 		{
-			retVal = _config->getLlvmRegister("st7");
+			retVal = _abi->getRegister(X86_REG_ST7);
 		}
-		else if (_config->getLlvmRegister("rax"))
+		else if (_abi->getRegister(X86_REG_RAX))
 		{
-			retVal = _config->getLlvmRegister("rax");
+			retVal = _abi->getRegister(X86_REG_RAX);
 		}
 		else
 		{
-			retVal = _config->getLlvmRegister("eax");
+			retVal = _abi->getRegister(X86_REG_EAX);
 		}
 	}
-	else if (_config->getConfig().architecture.isMipsOrPic32())
+	else if (_abi->isMips())
 	{
-		retVal = _config->getLlvmRegister("v0");
+		retVal = _abi->getRegister(MIPS_REG_V0);
 	}
-	else if (_config->getConfig().architecture.isArmOrThumb())
+	else if (_abi->isArm())
 	{
-		retVal = _config->getLlvmRegister("r0");
+		retVal = _abi->getRegister(ARM_REG_R0);
 	}
-	else if (_config->getConfig().architecture.isPpc())
+	else if (_abi->isPowerPC())
 	{
-		retVal = _config->getLlvmRegister("r3");
+		retVal = _abi->getRegister(PPC_REG_R3);
 	}
 
 	retType = retVal ?

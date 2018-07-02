@@ -254,7 +254,7 @@ bool Abi::canHoldReturnValue(const llvm::Value* val) const
 		return _config->isStackVariable(val);
 	}
 
-	if (!_config->isRegister(val))
+	if (!isRegister(val))
 	{
 		return false;
 	}
