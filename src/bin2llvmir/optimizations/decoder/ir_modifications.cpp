@@ -477,8 +477,16 @@ llvm::Function* Decoder::splitFunctionOn(utils::Address addr)
 	//
 	else if (auto ai = AsmInstruction(_module, addr))
 	{
-		LOG << "\t\t\t\t" << "S: ASM @ " << addr << std::endl;
-		return nullptr;
+		if (ai.isInvalid())
+		{
+			LOG << "\t\t\t\t" << "S: invalid ASM @ " << addr << std::endl;
+			return nullptr;
+		}
+		else
+		{
+			LOG << "\t\t\t\t" << "S: ASM @ " << addr << std::endl;
+			return nullptr;
+		}
 	}
 	else if (getFunctionContainingAddress(addr))
 	{
