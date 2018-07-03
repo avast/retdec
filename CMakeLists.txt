@@ -16,6 +16,14 @@ set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
+function(append_if condition value)
+  if (${condition})
+    foreach(variable ${ARGN})
+      set(${variable} "${${variable}} ${value}" PARENT_SCOPE)
+    endforeach(variable)
+  endif()
+endfunction()
+
 # On Linux and macOS, set RPATH relative to the origin of the installed
 # executables (i.e. relative to the bin directory). This allows us to move the
 # installation directory into a different location after installation, which is
@@ -62,6 +70,12 @@ if(MSVC)
 elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR
 		CMAKE_CXX_COMPILER_ID STREQUAL "Clang" OR
 		CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang")
+	# Unify visibility to meet llvm's default.
+	include(CheckCXXCompilerFlag)
+
+	check_cxx_compiler_flag("-fvisibility-inlines-hidden" SUPPORTS_FVISIBILITY_INLINES_HIDDEN_FLAG)
+	append_if(SUPPORTS_FVISIBILITY_INLINES_HIDDEN_FLAG "-fvisibility-inlines-hidden" CMAKE_CXX_FLAGS)
+
 	# Enable standard warnings.
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra")
 
