@@ -21,7 +21,10 @@ class ResourceTable
 {
 	private:
 		using resourcesIterator = std::vector<Resource>::const_iterator;
-		std::vector<Resource> table; ///< stored resources
+		std::vector<Resource> table;                  ///< stored resources
+		std::string iconHashCrc32;                    ///< imphash CRC32
+		std::string iconHashMd5;                      ///< imphash MD5
+		std::string iconHashSha256;                   ///< imphash SHA256
 	public:
 		ResourceTable();
 		~ResourceTable();
@@ -38,6 +41,9 @@ class ResourceTable
 		const Resource* getResourceWithType(std::size_t rId) const;
 		const Resource* getResourceWithLanguage(const std::string &rLan) const;
 		const Resource* getResourceWithLanguage(std::size_t rId) const;
+		const std::string& getResourceIconhashCrc32() const;
+		const std::string& getResourceIconhashMd5() const;
+		const std::string& getResourceIconhashSha256() const;
 		/// @}
 
 		/// @name Iterators
@@ -48,6 +54,7 @@ class ResourceTable
 
 		/// @name Other methods
 		/// @{
+		void computeIconHashes(const FileFormat *rOwner);
 		void clear();
 		void addResource(Resource &newResource);
 		bool hasResources() const;

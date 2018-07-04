@@ -806,12 +806,12 @@ void ImportTable::computeHashes()
 		// Yara adds comma if there are multiple imports
 		if(!impHashBytes.empty())
 		{
-			impHashBytes.push_back(static_cast<unsigned char>(','));
+			impHashBytes.push_back(static_cast<std::uint8_t>(','));
 		}
 
 		for(const auto c : std::string(libName + "." + funcName))
 		{
-			impHashBytes.push_back(static_cast<unsigned char>(c));
+			impHashBytes.push_back(static_cast<std::uint8_t>(c));
 		}
 	}
 
