@@ -116,6 +116,7 @@ class FileFormat : public retdec::utils::ByteValueStorage, private retdec::utils
 		void loadStrings(StringType type, std::size_t charSize);
 		void loadStrings(StringType type, std::size_t charSize, const SecSeg* secSeg);
 		void loadImpHash();
+		void loadExpHash();
 		bool isInValidState() const;
 		LoadFlags getLoadFlags() const;
 		/// @}

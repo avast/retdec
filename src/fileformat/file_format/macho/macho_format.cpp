@@ -246,6 +246,7 @@ void MachOFormat::initStructures()
 		loadCommands();
 		loadStrings();
 		loadImpHash();
+		loadExpHash();
 	}
 }
 

@@ -460,6 +460,19 @@ void FileFormat::loadImpHash()
 }
 
 /**
+ * Loads exphash from export table.
+ */
+void FileFormat::loadExpHash()
+{
+	if (!exportTable || (loadFlags & LoadFlags::NO_VERBOSE_HASHES))
+	{
+		return;
+	}
+
+	exportTable->computeHashes();
+}
+
+/**
  * Getter for state of instance
  * @return @c true if all is OK, @c false otherwise
  */
