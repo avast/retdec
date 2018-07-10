@@ -12,6 +12,8 @@
 #include "retdec/utils/system.h"
 #include "retdec/loader/loader/image.h"
 
+hello world
+
 using namespace retdec::utils;
 
 namespace retdec {
