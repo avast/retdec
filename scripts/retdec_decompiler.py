@@ -514,6 +514,8 @@ class Decompiler:
                 self.output_file = input_name[:-5] + self.args.hll
             else:
                 self.output_file = self.input_file + '.' + self.args.hll
+        else:
+            self.output_file = self.args.output
 
         # If the output file name matches the input file name, we have to change the
         # output file name. Otherwise, the input file gets overwritten.
