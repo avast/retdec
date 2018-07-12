@@ -253,13 +253,6 @@ TEST_F(ParamReturnTests, x86PtrCallOnlyStackStoresAreUsed)
 					}
 				]
 			}
-		],
-		"registers" : [
-			{
-				"name" : "eax",
-				"storage" : { "type" : "register", "value" : "eax",
-							"registerClass" : "gpr", "registerNumber" : 0 }
-			}
 		]
 	})");
 	auto abi = AbiProvider::addAbi(module.get(), &config);
@@ -956,19 +949,7 @@ TEST_F(ParamReturnTests, ppcPtrCallBasicFunctionality)
 			"bitSize" : 32,
 			"endian" : "big",
 			"name" : "powerpc"
-		},
-		"registers" : [
-			{
-				"name" : "r3",
-				"storage" : { "type" : "register", "value" : "r3",
-							"registerClass" : "gpregs", "registerNumber" : 3 }
-			},
-			{
-				"name" : "r4",
-				"storage" : { "type" : "register", "value" : "r4",
-							"registerClass" : "gpregs", "registerNumber" : 4 }
-			}
-		]
+		}
 	})");
 	auto abi = AbiProvider::addAbi(module.get(), &config);
 
@@ -1017,19 +998,7 @@ TEST_F(ParamReturnTests, ppcExternalCallBasicFunctionality)
 			"bitSize" : 32,
 			"endian" : "big",
 			"name" : "powerpc"
-		},
-		"registers" : [
-			{
-				"name" : "r3",
-				"storage" : { "type" : "register", "value" : "r3",
-							"registerClass" : "gpregs", "registerNumber" : 3 }
-			},
-			{
-				"name" : "r4",
-				"storage" : { "type" : "register", "value" : "r4",
-							"registerClass" : "gpregs", "registerNumber" : 4 }
-			}
-		]
+		}
 	})");
 	auto abi = AbiProvider::addAbi(module.get(), &config);
 
@@ -1120,24 +1089,7 @@ TEST_F(ParamReturnTests, ppcExternalCallFilterRegistersOnMultiplePlaces)
 			"bitSize" : 32,
 			"endian" : "big",
 			"name" : "powerpc"
-		},
-		"registers" : [
-			{
-				"name" : "r3",
-				"storage" : { "type" : "register", "value" : "r3",
-							"registerClass" : "gpregs", "registerNumber" : 3 }
-			},
-			{
-				"name" : "r4",
-				"storage" : { "type" : "register", "value" : "r4",
-							"registerClass" : "gpregs", "registerNumber" : 4 }
-			},
-			{
-				"name" : "r5",
-				"storage" : { "type" : "register", "value" : "r5",
-							"registerClass" : "gpregs", "registerNumber" : 5 }
-			}
-		]
+		}
 	})");
 	auto abi = AbiProvider::addAbi(module.get(), &config);
 	abi->addRegister(PPC_REG_R3, getGlobalByName("r3"));
@@ -1202,24 +1154,7 @@ TEST_F(ParamReturnTests, ppcExternalCallDoNotUseAllRegisters)
 			"bitSize" : 32,
 			"endian" : "big",
 			"name" : "powerpc"
-		},
-		"registers" : [
-			{
-				"name" : "r1",
-				"storage" : { "type" : "register", "value" : "r1",
-							"registerClass" : "gpregs", "registerNumber" : 1 }
-			},
-			{
-				"name" : "r2",
-				"storage" : { "type" : "register", "value" : "r2",
-							"registerClass" : "gpregs", "registerNumber" : 2 }
-			},
-			{
-				"name" : "r3",
-				"storage" : { "type" : "register", "value" : "r3",
-							"registerClass" : "gpregs", "registerNumber" : 3 }
-			}
-		]
+		}
 	})");
 	auto abi = AbiProvider::addAbi(module.get(), &config);
 
@@ -1274,24 +1209,7 @@ TEST_F(ParamReturnTests, ppcExternalCallSortRegistersIntoCorrectOrder)
 			"bitSize" : 32,
 			"endian" : "big",
 			"name" : "powerpc"
-		},
-		"registers" : [
-			{
-				"name" : "r3",
-				"storage" : { "type" : "register", "value" : "r3",
-							"registerClass" : "gpregs", "registerNumber" : 3 }
-			},
-			{
-				"name" : "r4",
-				"storage" : { "type" : "register", "value" : "r4",
-							"registerClass" : "gpregs", "registerNumber" : 4 }
-			},
-			{
-				"name" : "r5",
-				"storage" : { "type" : "register", "value" : "r5",
-							"registerClass" : "gpregs", "registerNumber" : 5 }
-			}
-		]
+		}
 	})");
 	auto abi = AbiProvider::addAbi(module.get(), &config);
 
@@ -1356,13 +1274,6 @@ TEST_F(ParamReturnTests, ppcExternalCallDoNotUseStacksIfLessThan7RegistersUsed)
 						"storage" : { "type" : "stack", "value" : -4 }
 					}
 				]
-			}
-		],
-		"registers" : [
-			{
-				"name" : "r3",
-				"storage" : { "type" : "register", "value" : "r3",
-							"registerClass" : "gpregs", "registerNumber" : 3 }
 			}
 		]
 	})");
@@ -1443,48 +1354,6 @@ TEST_F(ParamReturnTests, ppcExternalCallUseStacksIf7RegistersUsed)
 						"storage" : { "type" : "stack", "value" : -8 }
 					}
 				]
-			}
-		],
-		"registers" : [
-			{
-				"name" : "r3",
-				"storage" : { "type" : "register", "value" : "r3",
-							"registerClass" : "gpregs", "registerNumber" : 3 }
-			},
-			{
-				"name" : "r4",
-				"storage" : { "type" : "register", "value" : "r4",
-							"registerClass" : "gpregs", "registerNumber" : 4 }
-			},
-			{
-				"name" : "r5",
-				"storage" : { "type" : "register", "value" : "r5",
-							"registerClass" : "gpregs", "registerNumber" : 5 }
-			},
-			{
-				"name" : "r6",
-				"storage" : { "type" : "register", "value" : "r6",
-							"registerClass" : "gpregs", "registerNumber" : 6 }
-			},
-			{
-				"name" : "r7",
-				"storage" : { "type" : "register", "value" : "r7",
-							"registerClass" : "gpregs", "registerNumber" : 7 }
-			},
-			{
-				"name" : "r8",
-				"storage" : { "type" : "register", "value" : "r8",
-							"registerClass" : "gpregs", "registerNumber" : 8 }
-			},
-			{
-				"name" : "r9",
-				"storage" : { "type" : "register", "value" : "r9",
-							"registerClass" : "gpregs", "registerNumber" : 9 }
-			},
-			{
-				"name" : "r10",
-				"storage" : { "type" : "register", "value" : "r10",
-							"registerClass" : "gpregs", "registerNumber" : 10 }
 			}
 		]
 	})");
@@ -1717,33 +1586,6 @@ TEST_F(ParamReturnTests, armExternalCallUseStacksIf4RegistersUsed)
 						"storage" : { "type" : "stack", "value" : -8 }
 					}
 				]
-			}
-		],
-		"registers" : [
-			{
-				"name" : "r0",
-				"storage" : { "type" : "register", "value" : "r0",
-							"registerClass" : "regs", "registerNumber" : 0 }
-			},
-			{
-				"name" : "r1",
-				"storage" : { "type" : "register", "value" : "r1",
-							"registerClass" : "regs", "registerNumber" : 1 }
-			},
-			{
-				"name" : "r2",
-				"storage" : { "type" : "register", "value" : "r2",
-							"registerClass" : "regs", "registerNumber" : 2 }
-			},
-			{
-				"name" : "r3",
-				"storage" : { "type" : "register", "value" : "r3",
-							"registerClass" : "regs", "registerNumber" : 3 }
-			},
-			{
-				"name" : "r4",
-				"storage" : { "type" : "register", "value" : "r4",
-							"registerClass" : "regs", "registerNumber" : 4 }
 			}
 		]
 	})");
@@ -2024,33 +1866,6 @@ TEST_F(ParamReturnTests, mipsExternalCallUseStacksIf4RegistersUsed)
 						"storage" : { "type" : "stack", "value" : -8 }
 					}
 				]
-			}
-		],
-		"registers" : [
-			{
-				"name" : "a0",
-				"storage" : { "type" : "register", "value" : "a0",
-							"registerClass" : "gpregs", "registerNumber" : 4 }
-			},
-			{
-				"name" : "a1",
-				"storage" : { "type" : "register", "value" : "a1",
-							"registerClass" : "gpregs", "registerNumber" : 5 }
-			},
-			{
-				"name" : "a2",
-				"storage" : { "type" : "register", "value" : "a2",
-							"registerClass" : "gpregs", "registerNumber" : 6 }
-			},
-			{
-				"name" : "a3",
-				"storage" : { "type" : "register", "value" : "a3",
-							"registerClass" : "gpregs", "registerNumber" : 7 }
-			},
-			{
-				"name" : "t0",
-				"storage" : { "type" : "register", "value" : "t0",
-							"registerClass" : "gpregs", "registerNumber" : 8 }
 			}
 		]
 	})");
