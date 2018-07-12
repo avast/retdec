@@ -122,13 +122,13 @@ class ArchiveDecompiler:
         if Utils.is_macho_archive(self.library_path):
             if self.enable_list_mode:
                 if self.use_json_format:
-                    subprocess.call([config.EXTRACT, '--objects', '--json', self.library_path], shell=True)
+                    subprocess.call([config.EXTRACT, '--objects', '--json', self.library_path])
                 else:
-                    subprocess.call([config.EXTRACT, '--objects', self.library_path], shell=True)
+                    subprocess.call([config.EXTRACT, '--objects', self.library_path])
                 return 1
 
             self.tmp_archive = self.library_path + '.a'
-            subprocess.call([config.EXTRACT, '--best', '--out', self.tmp_archive, self.library_path], shell=True)
+            subprocess.call([config.EXTRACT, '--best', '--out', self.tmp_archive, self.library_path])
             self.library_path = self.tmp_archive
 
         # Check for thin archives.

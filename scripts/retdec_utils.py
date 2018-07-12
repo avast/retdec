@@ -236,7 +236,7 @@ class Utils:
         Returns - True if file has ar signature
                   False no signature
         """
-        ret = subprocess.call([config.AR, path, '--arch-magic'], shell=True)
+        ret = subprocess.call([config.AR, path, '--arch-magic'])
         return ret == 0
 
     @staticmethod
@@ -246,7 +246,7 @@ class Utils:
         Returns - True if file has thin ar signature
                   False no signature
         """
-        ret = subprocess.call([config.AR, path, '--thin-magic'], shell=True)
+        ret = subprocess.call([config.AR, path, '--thin-magic'])
         return ret == 0
 
     @staticmethod
@@ -257,7 +257,7 @@ class Utils:
                   False if file is invalid archive
         """
         # We use our own messages so throw original output away.
-        ret = subprocess.call([config.AR, path, '--valid'], shell=True, stderr=subprocess.STDOUT,
+        ret = subprocess.call([config.AR, path, '--valid'], stderr=subprocess.STDOUT,
                               stdout=None)
 
         return ret == 0
@@ -309,7 +309,7 @@ class Utils:
                                - output path
         """
         ret = subprocess.call([config.AR, path, '--name', name, '--output', output],
-                              shell=True, stderr=subprocess.STDOUT, stdout=None)
+                              stderr=subprocess.STDOUT, stdout=None)
 
         return ret != 2
 
@@ -321,7 +321,7 @@ class Utils:
                                - output path
         """
         ret = subprocess.call([config.AR, archive, '--index', index, '--output', output],
-                              shell=True, stderr=subprocess.STDOUT, stdout=None)
+                              stderr=subprocess.STDOUT, stdout=None)
         return ret != 2
 
     @staticmethod
@@ -331,7 +331,7 @@ class Utils:
         Returns - True if file is archive
                   False if file is not archive
         """
-        ret = subprocess.call([config.EXTRACT, '--check-archive', path], shell=True,
+        ret = subprocess.call([config.EXTRACT, '--check-archive', path],
                               stderr=subprocess.STDOUT, stdout=subprocess.DEVNULL)
 
         return ret == 0

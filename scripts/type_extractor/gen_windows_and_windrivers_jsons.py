@@ -131,39 +131,38 @@ os.makedirs(WDK_KM_OUT_DIR, exist_ok=True)
 os.makedirs(WDK_MMOS_OUT_DIR, exist_ok=True)
 os.makedirs(WDK_SHARED_OUT_DIR, exist_ok=True)
 os.makedirs(WDK_UM_OUT_DIR, exist_ok=True)
-os.makedirs(WDK_KMDF_OUT_DIR, exist_ok=True)
+#os.makedirs(WDK_KMDF_OUT_DIR, exist_ok=True)
 os.makedirs(WDK_UMDF_OUT_DIR, exist_ok=True)
 
 #
 # Parse the includes in the given Windows SDK directory and merge the generated
 # JSON files.
 #
-subprocess.call([sys.executable, EXTRACTOR, WIN_UCRT_IN_DIR, '-o', WIN_UCRT_OUT_DIR], shell=True)
-subprocess.call([sys.executable, EXTRACTOR, WIN_SHARED_IN_DIR, '-o', WIN_SHARED_OUT_DIR], shell=True)
-subprocess.call([sys.executable, EXTRACTOR, WIN_UM_IN_DIR, '-o', WIN_UM_OUT_DIR], shell=True)
-subprocess.call([sys.executable, EXTRACTOR, WIN_WINRT_IN_DIR, '-o', WIN_WINRT_OUT_DIR], shell=True)
-subprocess.call([sys.executable, EXTRACTOR, WIN_NETFX_IN_DIR, '-o', WIN_NETFX_OUT_DIR], shell=True)
+subprocess.call([sys.executable, EXTRACTOR, WIN_UCRT_IN_DIR, '-o', WIN_UCRT_OUT_DIR])
+subprocess.call([sys.executable, EXTRACTOR, WIN_SHARED_IN_DIR, '-o', WIN_SHARED_OUT_DIR])
+subprocess.call([sys.executable, EXTRACTOR, WIN_UM_IN_DIR, '-o', WIN_UM_OUT_DIR])
+subprocess.call([sys.executable, EXTRACTOR, WIN_WINRT_IN_DIR, '-o', WIN_WINRT_OUT_DIR])
+subprocess.call([sys.executable, EXTRACTOR, WIN_NETFX_IN_DIR, '-o', WIN_NETFX_OUT_DIR])
 subprocess.call([sys.executable, MERGER, WIN_SHARED_OUT_DIR, WIN_UM_OUT_DIR, WIN_UCRT_OUT_DIR, WIN_WINRT_OUT_DIR,
-                 WIN_NETFX_OUT_DIR, '-o', WIN_OUT_JSON, '--json-indent', args.json_indent], shell=True)
+                 WIN_NETFX_OUT_DIR, '-o', WIN_OUT_JSON, '--json-indent', args.json_indent])
 
 #
 # Parse the includes in the given WDK directory and merge the generated
 # JSON files.
 #
-subprocess.call([sys.executable, EXTRACTOR, WDK_KM_IN_DIR, '-o', WDK_KM_OUT_DIR], shell=True)
-subprocess.call([sys.executable, EXTRACTOR, WDK_MMOS_IN_DIR, '-o', WDK_MMOS_OUT_DIR], shell=True)
-subprocess.call([sys.executable, EXTRACTOR, WDK_SHARED_IN_DIR, '-o', WDK_SHARED_OUT_DIR], shell=True)
-subprocess.call([sys.executable, EXTRACTOR, WDK_UM_IN_DIR, '-o', WDK_UM_OUT_DIR], shell=True)
+subprocess.call([sys.executable, EXTRACTOR, WDK_KM_IN_DIR, '-o', WDK_KM_OUT_DIR])
+subprocess.call([sys.executable, EXTRACTOR, WDK_MMOS_IN_DIR, '-o', WDK_MMOS_OUT_DIR])
+subprocess.call([sys.executable, EXTRACTOR, WDK_SHARED_IN_DIR, '-o', WDK_SHARED_OUT_DIR])
+subprocess.call([sys.executable, EXTRACTOR, WDK_UM_IN_DIR, '-o', WDK_UM_OUT_DIR])
 
 for d in os.listdir(WDK_KMDF_IN_DIR):
-    subprocess.call([sys.executable, EXTRACTOR, os.path.join(WDK_KMDF_IN_DIR, d), '-o', WDK_KMDF_OUT_DIR], shell=True)
+    subprocess.call([sys.executable, EXTRACTOR, os.path.join(WDK_KMDF_IN_DIR, d), '-o', WDK_KMDF_OUT_DIR])
 
 for d in os.listdir(WDK_UMDF_IN_DIR):
-    subprocess.call([sys.executable, EXTRACTOR, os.path.join(WDK_UMDF_IN_DIR, d), '-o', WDK_UMDF_OUT_DIR], shell=True)
+    subprocess.call([sys.executable, EXTRACTOR, os.path.join(WDK_UMDF_IN_DIR, d), '-o', WDK_UMDF_OUT_DIR])
 
 subprocess.call([sys.executable, MERGER, WDK_SHARED_OUT_DIR, WDK_UM_OUT_DIR, WDK_KM_OUT_DIR, WDK_MMOS_OUT_DIR,
-                 WDK_KMDF_OUT_DIR, WDK_UMDF_OUT_DIR, '-o', WDK_OUT_JSON, '--json-indent', args.json_indent],
-                shell=True)
+                 WDK_KMDF_OUT_DIR, WDK_UMDF_OUT_DIR, '-o', WDK_OUT_JSON, '--json-indent', args.json_indent])
 
 #
 # WDK uses many types defined in Windows SDK. We need SDK JSON with all types extracted
@@ -171,21 +170,20 @@ subprocess.call([sys.executable, MERGER, WDK_SHARED_OUT_DIR, WDK_UM_OUT_DIR, WDK
 #
 subprocess.call([sys.executable, MERGER, WIN_SHARED_OUT_DIR, WIN_UM_OUT_DIR, WIN_UCRT_OUT_DIR, WIN_WINRT_OUT_DIR,
                  WIN_NETFX_OUT_DIR, '-o', WIN_OUT_JSON_WITH_UNUSED_TYPES, '--json-indent', args.json_indent,
-                 '--keep-unused-types'], shell=True)
+                 '--keep-unused-types'])
 
 if args.json_indent == 0:
     subprocess.call(['sed', '-i', '-e', 's/^.*\}, \'types\': \{/\{\'functions\': \{\}, \'types\': \{/',
-                     WIN_OUT_JSON_WITH_UNUSED_TYPES], shell=True)
+                     WIN_OUT_JSON_WITH_UNUSED_TYPES])
 else:
     TYPES_LINE_NUMBER = 0  # (os.popen('egrep -n \'^s*'types': {\' \''+(WIN_OUT_JSON_WITH_UNUSED_TYPES)+'\' | cut -f1 -d:').read().rip('\n'))
     TYPES_LINE_NUMBER = (TYPES_LINE_NUMBER - 1)
-    subprocess.call(['sed', '-i', '-e', '1,' + TYPES_LINE_NUMBER + ' d', WIN_OUT_JSON_WITH_UNUSED_TYPES], shell=True)
-    subprocess.call(['sed', '-i', '-e', '1s/^/\{\'functions\': \{\},\n/', WIN_OUT_JSON_WITH_UNUSED_TYPES], shell=True)
+    subprocess.call(['sed', '-i', '-e', '1,' + TYPES_LINE_NUMBER + ' d', WIN_OUT_JSON_WITH_UNUSED_TYPES])
+    subprocess.call(['sed', '-i', '-e', '1s/^/\{\'functions\': \{\},\n/', WIN_OUT_JSON_WITH_UNUSED_TYPES])
 
 subprocess.call(
     [sys.executable, MERGER, WDK_OUT_JSON, WIN_OUT_JSON_WITH_UNUSED_TYPES, '-o', WDK_OUT_JSON, '--json-indent',
-     args.json_indent],
-    shell=True)
+     args.json_indent])
 
 #
 # Optional cleanup at the end.

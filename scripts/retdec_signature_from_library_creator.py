@@ -112,7 +112,7 @@ class SigFromLib:
             os.makedirs(object_dir, exist_ok=True)
 
             # Extract all files to temporary folder.
-            subprocess.call([config.AR, lib_path, '--extract', '--output', object_dir], shell=True)
+            subprocess.call([config.AR, lib_path, '--extract', '--output', object_dir])
 
             # List all extracted objects.
             objects = []
@@ -126,7 +126,7 @@ class SigFromLib:
             # Extract patterns from library.
             pattern_file = os.path.join(self.tmp_dir_path, lib_name) + '.pat'
             pattern_files = [pattern_file]
-            result = subprocess.call([config.BIN2PAT, '-o', pattern_file, *objects], shell=True)
+            result = subprocess.call([config.BIN2PAT, '-o', pattern_file, *objects])
 
             if result != 0:
                 self.print_error_and_cleanup('utility bin2pat failed when processing %s' % lib_path)
@@ -150,15 +150,14 @@ class SigFromLib:
             result = subprocess.call(
                 [config.PAT2YARA, *pattern_files, '--min-pure', str(self.args.min_pure), '-o', self.file_path, '-l',
                  self.file_path + '.log', self.ignore_nop,
-                 str(self.args.ignore_nops)],
-                shell=True)
+                 str(self.args.ignore_nops)])
 
             if result != 0:
                 self.print_error_and_cleanup('utility pat2yara failed')
         else:
             result = subprocess.call(
                 [config.PAT2YARA, *pattern_files, '--min-pure', str(self.args.min_pure), '-o', self.file_path,
-                 self.ignore_nop, str(self.args.ignore_nops)], shell=True)
+                 self.ignore_nop, str(self.args.ignore_nops)])
 
             if result != 0:
                 self.print_error_and_cleanup('utility pat2yara failed')
