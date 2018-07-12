@@ -1,12 +1,8 @@
 #!/usr/bin/env python3
 
-"""When analyzing an archive, use the archive decompilation script `--list` instead of
-`fileinfo` because fileinfo is currently unable to analyze archives.
-
-First, we have to find path to the input file. We take the first parameter
-that does not start with a dash. This is a simplification and may not work in
-all cases. A proper solution would need to parse fileinfo parameters, which
-would be complex.
+"""A wrapper for fileinfo that:
+- uses also external YARA patterns,
+- is able to analyze archives (.a/.lib files).
 """
 
 import argparse
@@ -17,16 +13,11 @@ import retdec_config as config
 from retdec_utils import Utils
 from retdec_archive_decompiler import ArchiveDecompiler
 
-
 def parse_args():
     parser = argparse.ArgumentParser(
         description=__doc__,
         formatter_class=argparse.RawDescriptionHelpFormatter
     )
-
-    parser.add_argument('file',
-                        metavar='FILE',
-                        help='File to analyze.')
 
     parser.add_argument('-j', '--json',
                         dest='json',
@@ -38,18 +29,29 @@ def parse_args():
                         action='store_true',
                         help='Should use external patterns')
 
-    return parser.parse_args()
+    return parser.parse_known_args()
 
+def get_input_file(unknownargs):
+    """Find path to the input file.
+    We take the first parameter that does not start with a dash. This is a
+    simplification and may not work in all cases. A proper solution would
+    need to parse fileinfo parameters, which would be complex.
+    """
+    for arg in unknownargs:
+        if not arg.startswith('-'):
+            return arg
+    return None
 
 if __name__ == '__main__':
-    args = parse_args()
+    args, unknownargs = parse_args()
 
-    if Utils.has_archive_signature(args.file):
-        # The input file is not an archive.
+    input = get_input_file(unknownargs)
 
-        # The input file is an archive, so use the archive decompilation script
-        # instead of fileinfo.
-        archive_decompiler_args = [args.file, '--list']
+    # When analyzing an archive, use the archive decompilation script `--list`
+    # instead of `fileinfo` because fileinfo is currently unable to analyze
+    # archives.
+    if input and Utils.has_archive_signature(input):
+        archive_decompiler_args = [input, '--list']
 
         if args.json:
             archive_decompiler_args.append('--json')
@@ -58,7 +60,10 @@ if __name__ == '__main__':
         sys.exit(decompiler.decompile_archive())
 
     # We are not analyzing an archive, so proceed to fileinfo.
-    fileinfo_params = [args.file]
+    fileinfo_params = unknownargs
+
+    if args.json:
+        fileinfo_params.append('--json')
 
     for par in config.FILEINFO_EXTERNAL_YARA_PRIMARY_CRYPTO_DATABASES:
         fileinfo_params.extend(['--crypto', par])
@@ -67,4 +72,4 @@ if __name__ == '__main__':
         for par in config.FILEINFO_EXTERNAL_YARA_EXTRA_CRYPTO_DATABASES:
             fileinfo_params.extend(['--crypto', par])
 
-    subprocess.call([config.FILEINFO, *fileinfo_params], shell=True)
+    subprocess.call([config.FILEINFO, *fileinfo_params])
