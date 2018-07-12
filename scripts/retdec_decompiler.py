@@ -401,8 +401,12 @@ class Decompiler:
 
                 # Check if first <= last.
                 ranges = r.split('-')
+
                 # parser line into array
-                if int(ranges[0]) > int(ranges[1]):
+                start_range = int(ranges[0], 16 if ranges[0].startswith('0x') else 10)
+                end_range = int(ranges[1], 16 if ranges[1].startswith('0x') else 10)
+
+                if start_range > end_range:
                     Utils.print_error(
                         'Range \'%s\' in option --select-ranges is not a valid range: '
                         'second address must be greater or equal than the first one.' % ranges)
@@ -1078,12 +1082,12 @@ class Decompiler:
                 cmd.run_cmd([config.CONFIGTOOL, self.config_file, '--write', '--decode-only-selected', 'false'])
 
             # Store selected functions or selected ranges into config for frontend.
-            if self.args.selected_functions:
-                for f in self.args.selected_functions:
+            if self.selected_functions:
+                for f in self.selected_functions:
                     cmd.run_cmd([config.CONFIGTOOL, self.config_file, '--write', '--selected-func', f])
 
-            if self.args.selected_ranges:
-                for r in self.args.selected_ranges:
+            if self.selected_ranges:
+                for r in self.selected_ranges:
                     cmd.run_cmd([config.CONFIGTOOL, self.config_file, '--write', '--selected-range', r])
 
             # Assignment of other used variables.
