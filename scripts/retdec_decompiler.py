@@ -454,7 +454,7 @@ class Decompiler:
             if self.args.pdb:
                 Utils.print_warning('Option -p|--pdb is not used in mode ' + self.mode)
 
-            if not self.args.config_db or not self.args.no_config:
+            if not self.args.config_db and not self.args.no_config:
                 Utils.print_error('Option --config or --no-config must be specified in mode ' + self.mode)
                 return False
 
