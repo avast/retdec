@@ -657,8 +657,8 @@ class Decompiler:
                     #if not extract_rc:
                     if extract_rc:
                         # Architecture not supported
-                        print('Invalid --arch option \'' + self.args.arch +
-                              '\'. File contains these architecture families:')
+                        print('Invalid --arch option "' + self.args.arch +
+                              '". File contains these architecture families:')
                         output, _, _ = cmd.run_cmd([config.EXTRACT, '--list', self.input_file])
                         print(output)
                         self._cleanup()
