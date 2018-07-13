@@ -984,7 +984,7 @@ class Decompiler:
                 self._cleanup()
                 Utils.print_error(
                     'Unsupported target format \'%s%s\'. Supported formats: ELF32, PE32, Intel HEX 32, Mach-O 32.' % (
-                        format, fileclass))
+                        self.format.upper(), fileclass))
                 return 1
 
             # Set path to statically linked code signatures.
