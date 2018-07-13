@@ -732,7 +732,7 @@ class Decompiler:
 
                     if Utils.archive_get_by_name(self.input_file, self.args.ar_name, out_restored):
                         self._cleanup()
-                        Utils.print_error('File named %s was not found in the input archive.' % self.args.ar_name)
+                        Utils.print_error('File named \'%s\' was not found in the input archive.' % self.args.ar_name)
                         return 1
 
                     self.input_file = out_restored
