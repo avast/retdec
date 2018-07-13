@@ -25,14 +25,17 @@ def parse_args(args):
 
     parser.add_argument("--plain",
                         dest="plain_format",
+                        action='store_true',
                         help="print list of files in plain text")
 
     parser.add_argument("--json",
                         dest="json_format",
+                        action='store_true',
                         help="print list of files in json format")
 
     parser.add_argument("--list",
                         dest="list_mode",
+                        action='store_true',
                         help="list")
 
     parser.add_argument("--",
@@ -89,7 +92,7 @@ class ArchiveDecompiler:
                 self.use_plain_format = True
 
         if self.args.json_format:
-            if self.args.args.plain_format:
+            if self.args.plain_format:
                 Utils.print_error('Arguments --plain and --json are mutually exclusive.')
                 return False
             else:
@@ -132,7 +135,7 @@ class ArchiveDecompiler:
             self.library_path = self.tmp_archive
 
         # Check for thin archives.
-        if Utils.has_thin_archive_signature(self.library_path) == 0:
+        if Utils.has_thin_archive_signature(self.library_path):
             self._print_error_plain_or_json('File is a thin archive and cannot be decompiled.')
             return 1
 
