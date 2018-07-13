@@ -447,33 +447,33 @@ class Decompiler:
             self.mode = self.args.mode
 
         # Print warning message about unsupported combinations of options.
-        if self.args.mode == 'll':
+        if self.mode == 'll':
             if self.args.arch:
-                Utils.print_warning('Option -a|--arch is not used in mode ' + self.args.mode)
+                Utils.print_warning('Option -a|--arch is not used in mode ' + self.mode)
 
             if self.args.pdb:
-                Utils.print_warning('Option -p|--pdb is not used in mode ' + self.args.mode)
+                Utils.print_warning('Option -p|--pdb is not used in mode ' + self.mode)
 
             if not self.args.config_db or not self.args.no_config:
-                Utils.print_error('Option --config or --no-config must be specified in mode ' + self.args.mode)
+                Utils.print_error('Option --config or --no-config must be specified in mode ' + self.mode)
                 return False
 
-        elif self.args.mode == 'raw':
+        elif self.mode == 'raw':
             # Errors -- missing critical arguments.
             if not self.args.arch:
-                Utils.print_error('Option -a|--arch must be used with mode ' + self.args.mode)
+                Utils.print_error('Option -a|--arch must be used with mode ' + self.mode)
                 return False
 
             if not self.args.endian:
-                Utils.print_error('Option -e|--endian must be used with mode ' + self.args.mode)
+                Utils.print_error('Option -e|--endian must be used with mode ' + self.mode)
                 return False
 
             if not self.args.raw_entry_point:
-                Utils.print_error('Option --raw-entry-point must be used with mode ' + self.args.mode)
+                Utils.print_error('Option --raw-entry-point must be used with mode ' + self.mode)
                 return False
 
             if not self.args.raw_section_vma:
-                Utils.print_error('Option --raw-section-vma must be used with mode ' + self.args.mode)
+                Utils.print_error('Option --raw-section-vma must be used with mode ' + self.mode)
                 return False
 
             if not Utils.is_number(self.args.raw_entry_point):
@@ -491,12 +491,12 @@ class Decompiler:
             Utils.print_error('Options --ar-name and --ar-index are mutually exclusive. Pick one.')
             return False
 
-        if self.args.mode != 'bin':
+        if self.mode != 'bin':
             if self.args.ar_name:
-                Utils.print_warning('Option --ar-name is not used in mode ' + self.args.mode)
+                Utils.print_warning('Option --ar-name is not used in mode ' + self.mode)
 
             if self.args.ar_index:
-                Utils.print_warning('Option --ar-index is not used in mode ' + self.args.mode)
+                Utils.print_warning('Option --ar-index is not used in mode ' + self.mode)
 
         if not self.args.output:
             # No output file was given, so use the default one.
@@ -654,11 +654,13 @@ class Decompiler:
 
                     _, extract_rc, _ = cmd.run_cmd(
                         [config.EXTRACT, '--family', self.args.arch, '--out', out_archive, self.input_file])
-                    if not extract_rc:
+                    #if not extract_rc:
+                    if extract_rc:
                         # Architecture not supported
                         print('Invalid --arch option \'' + self.args.arch +
                               '\'. File contains these architecture families:')
-                        cmd.run_cmd([config.EXTRACT, '--list', self.input_file])
+                        output, _, _ = cmd.run_cmd([config.EXTRACT, '--list', self.input_file])
+                        print(output)
                         self._cleanup()
                         return 1
                 else:
