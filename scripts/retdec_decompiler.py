@@ -438,7 +438,7 @@ class Decompiler:
         # Try to detect desired decompilation mode if not set by user.
         # We cannot detect 'raw' mode because it overlaps with 'bin' (at least not based on extension).
         if not self.args.mode:
-            if self.args.input.endswith('ll'):
+            if self.args.input.endswith('.ll'):
                 # Suffix .ll
                 self.mode = 'll'
             else:
@@ -501,19 +501,19 @@ class Decompiler:
         if not self.args.output:
             # No output file was given, so use the default one.
             input_name = self.input_file
-            if input_name.endswith('ll'):
+            if input_name.endswith('.ll'):
                 # Suffix .ll
                 self.output_file = input_name[:-2] + self.args.hll
-            elif input_name.endswith('exe'):
+            elif input_name.endswith('.exe'):
                 # Suffix .exe
                 self.output_file = input_name[:-3] + self.args.hll
-            elif input_name.endswith('elf'):
+            elif input_name.endswith('.elf'):
                 # Suffix .elf
                 self.output_file = input_name[:-3] + self.args.hll
-            elif input_name.endswith('ihex'):
+            elif input_name.endswith('.ihex'):
                 # Suffix .ihex
                 self.output_file = input_name[:-4] + self.args.hll
-            elif input_name.endswith('macho'):
+            elif input_name.endswith('.macho'):
                 # Suffix .macho
                 self.output_file = input_name[:-5] + self.args.hll
             else:
