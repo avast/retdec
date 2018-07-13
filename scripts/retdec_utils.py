@@ -307,11 +307,13 @@ class Utils:
         3 arguments are needed - path to the archive
                                - name of the file
                                - output path
+        Returns - False if everything ok
+                  True if error
         """
         ret = subprocess.call([config.AR, path, '--name', name, '--output', output],
                               stderr=subprocess.STDOUT, stdout=None)
 
-        return ret != 2
+        return ret != 0
 
     @staticmethod
     def archive_get_by_index(archive, index, output):
@@ -319,10 +321,12 @@ class Utils:
         3 arguments are needed - path to the archive
                                - index of the file
                                - output path
+        Returns - False if everything ok
+                  True if error
         """
         ret = subprocess.call([config.AR, archive, '--index', index, '--output', output],
                               stderr=subprocess.STDOUT, stdout=None)
-        return ret != 2
+        return ret != 0
 
     @staticmethod
     def is_macho_archive(path):

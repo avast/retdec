@@ -657,8 +657,8 @@ class Decompiler:
                     #if not extract_rc:
                     if extract_rc:
                         # Architecture not supported
-                        print('Invalid --arch option "' + self.args.arch +
-                              '". File contains these architecture families:')
+                        print('Invalid --arch option \'' + self.args.arch +
+                              '\'. File contains these architecture families:')
                         output, _, _ = cmd.run_cmd([config.EXTRACT, '--list', self.input_file])
                         print(output)
                         self._cleanup()
@@ -708,14 +708,14 @@ class Decompiler:
                     print('RUN: ' + config.AR + ' ' + self.input_file + ' --index ' + self.args.ar_index + ' --output '
                           + out_restored)
 
-                    if not Utils.archive_get_by_index(self.input_file, self.args.ar_index, out_restored):
+                    if Utils.archive_get_by_index(self.input_file, self.args.ar_index, out_restored):
                         self._cleanup()
                         valid_index = (arch_object_count - 1)
 
                         if valid_index != 0:
                             Utils.print_error('File on index \'' + self.args.ar_index
                                               + '\' was not found in the input archive. Valid indexes are 0-' + (
-                                                  valid_index) + '.')
+                                                  str(valid_index)) + '.')
                             return 1
                         else:
                             Utils.print_error('File on index \'' + self.args.ar_index +
@@ -730,7 +730,7 @@ class Decompiler:
                     print('RUN: ' + config.AR + ' ' + self.input_file + ' --name ' + self.args.ar_name + ' --output '
                           + out_restored)
 
-                    if not Utils.archive_get_by_name(self.input_file, self.args.ar_name, out_restored):
+                    if Utils.archive_get_by_name(self.input_file, self.args.ar_name, out_restored):
                         self._cleanup()
                         Utils.print_error('File named %s was not found in the input archive.' % self.args.ar_name)
                         return 1
