@@ -1037,7 +1037,7 @@ class Decompiler:
                     print('Extracting signatures from file \'%s\'', lib)
                     # TODO replace command: LC_ALL=C sed -e 's/[^A-Za-z0-9_.-]/_/g'
                     crop_arch_path = os.path.basename(lib)
-                    sig_out = self.output_file + '.' + crop_arch_path + '.' + lib_index + '.yara'
+                    sig_out = self.output_file + '.' + crop_arch_path + '.' + str(lib_index) + '.yara'
 
                     # Call sig from lib tool
                     sig_from_lib = SigFromLib([lib, '--output', sig_out])
