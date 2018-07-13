@@ -227,7 +227,9 @@ class Utils:
     def print_warning(warning):
         """Print warning message to stderr.
         """
-        sys.stderr.write('Warning: %s' % warning)
+        # TODO
+        #sys.stderr.write('Warning: %s' % warning)
+        print('Warning: %s' % warning, file=sys.stdout)
 
     @staticmethod
     def has_archive_signature(path):

@@ -282,6 +282,8 @@ def parse_args(args):
 
     parser.add_argument('--static-code-archive',
                         dest='static_code_archive',
+                        action='append',
+                        default=[],
                         help='Adds additional signature file for static code detection from given archive.')
 
     parser.add_argument('--no-default-static-signatures',
@@ -374,10 +376,9 @@ class Decompiler:
                                   % self.args.max_memory)
                 return False
 
-        if self.args.static_code_archive:
-            # User provided archive to create signature file from.
-            if not os.path.isfile(self.args.static_code_archive):
-                Utils.print_error('Invalid archive file \'%s\'' % self.args.static_code_archive)
+        for sca in self.args.static_code_archive:
+            if not os.path.isfile(sca):
+                Utils.print_error('Invalid archive file \'%s\'' % sca)
                 return False
 
         if self.args.static_code_sigfile:
@@ -1034,14 +1035,13 @@ class Decompiler:
                 lib_index = 0
                 for lib in self.args.static_code_archive:
 
-                    print('Extracting signatures from file \'%s\'', lib)
-                    # TODO replace command: LC_ALL=C sed -e 's/[^A-Za-z0-9_.-]/_/g'
+                    print('Extracting signatures from file \'%s\'' % lib)
                     crop_arch_path = os.path.basename(lib)
                     sig_out = self.output_file + '.' + crop_arch_path + '.' + str(lib_index) + '.yara'
 
                     # Call sig from lib tool
                     sig_from_lib = SigFromLib([lib, '--output', sig_out])
-                    if sig_from_lib.run():
+                    if not sig_from_lib.run():
                         cmd.run_cmd([config.CONFIGTOOL, self.config_file, '--write', '--user-signature', sig_out])
                         self.signatures_to_remove.append(sig_out)
                     else:
