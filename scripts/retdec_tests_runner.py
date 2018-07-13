@@ -2,6 +2,7 @@
 
 """Runs all the installed unit tests."""
 
+import re
 import sys
 import os
 import subprocess
@@ -10,6 +11,7 @@ import retdec_config as config
 from retdec_utils import CmdRunner
 
 """First argument can be verbose."""
+verbose = False
 if len(sys.argv) > 1:
     if sys.argv[1] in ['-v', '--verbose']:
         verbose = True
@@ -48,14 +50,34 @@ def unit_tests_in_dir(path):
 
     tests = []
 
-    for file in os.listdir(path):
-        file_name = os.path.basename(file)
-        if file_name.startswith('retdec-tests-') and not file.endswith('.sh') and not file.endswith('.py'):
-            tests.append(os.path.abspath(file))
+    for dirpath, _, filenames in os.walk(path):
+        for f in filenames:
+            if f.startswith('retdec-tests-') and not f.endswith('.sh') and not f.endswith('.py'):
+                tests.append(os.path.abspath(os.path.join(dirpath, f)))
+                pass
 
     tests.sort()
 
     return tests
+
+
+def print_verbose(output):
+    print(output)
+
+
+def print_non_verbose(output):
+    output = output.splitlines()
+    p_neg = re.compile(r'(RUN|OK|----------|==========|^$|Running main\(\) from gmock_main.cc)')
+    p_passed = re.compile(r'^\[  PASSED  \]')
+    p_failed = re.compile(r'^\[  FAILED  \]')
+    for line in output:
+        if p_neg.search(line) is None:
+            if p_passed.search(line):
+                print_colored(line, 'green')
+            elif p_failed.search(line):
+                print_colored(line, 'red')
+            else:
+                print(line)
 
 
 def run_unit_tests_in_dir(path):
@@ -74,12 +96,13 @@ def run_unit_tests_in_dir(path):
         print()
         unit_test_name = os.path.basename(unit_test)
         print_colored(unit_test_name, 'yellow')
-        print()
 
-        # TODO verbose support
         cmd = CmdRunner()
         output, return_code, _ = cmd.run_cmd([unit_test, '--gtest_color=yes'])
-        print(output)
+        if verbose:
+            print_verbose(output)
+        else:
+            print_non_verbose(output)
 
         if return_code != 0:
             tests_failed = True
