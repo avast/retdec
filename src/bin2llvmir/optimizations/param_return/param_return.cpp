@@ -1238,91 +1238,17 @@ void DataFlowEntry::applyToIrOrdinary()
 
 	for (auto& p : loadsOfCalls)
 	{
-		retdec::utils::Maybe<int> stackOff;
-		if (_abi->isX86())
-		{
-			if (!p.second.empty())
-			{
-				auto* l = cast<LoadInst>(p.second.back());
-				if (_config->isStackVariable(l->getPointerOperand()))
-				{
-					stackOff = _config->getStackVariableOffset(l->getPointerOperand());
-					stackOff = stackOff + 4;
-				}
-			}
-
-			if (stackOff.isUndefined())
-			{
-				AsmInstruction ai(p.first);
-				while (ai.isValid())
-				{
-					for (auto& i : ai)
-					{
-						if (auto* s = dyn_cast<StoreInst>(&i))
-						{
-							if (_config->isStackVariable(s->getPointerOperand()))
-							{
-								stackOff = _config->getStackVariableOffset(s->getPointerOperand());
-								break;
-							}
-						}
-					}
-					if (stackOff.isDefined())
-					{
-						break;
-					}
-					ai = ai.getPrev();
-				}
-			}
-		}
-
 		std::size_t idx = 0;
 		for (auto* t : argTypes)
 		{
 			(void) t;
 			if (p.second.size() <= idx)
 			{
-				if (_abi->isArm())
+				if (idx < paramRegs.size())
 				{
-					if (idx < paramRegs.size())
-					{
-						auto* r = _abi->getRegister(paramRegs[idx]);
-						auto* l = new LoadInst(r, "", p.first);
-						p.second.push_back(l);
-					}
-				}
-				else if (_abi->isMips())
-				{
-					if (idx < paramRegs.size())
-					{
-						auto* r = _abi->getRegister(paramRegs[idx]);
-						auto* l = new LoadInst(r, "", p.first);
-						p.second.push_back(l);
-					}
-				}
-				else if (_abi->isPowerPC())
-				{
-					if (idx < paramRegs.size())
-					{
-						auto* r = _abi->getRegister(paramRegs[idx]);
-						auto* l = new LoadInst(r, "", p.first);
-						p.second.push_back(l);
-					}
-				}
-				else if (_abi->isX86()
-						&& stackOff.isDefined())
-				{
-					auto* s = _config->getLlvmStackVariable(p.first->getFunction(), stackOff);
-					if (s)
-					{
-						auto* l = new LoadInst(s, "", p.first);
-						p.second.push_back(l);
-						stackOff = stackOff + 4;
-					}
-					else
-					{
-						stackOff.setUndefined();
-					}
+					auto* r = _abi->getRegister(paramRegs[idx]);
+					auto* l = new LoadInst(r, "", p.first);
+					p.second.push_back(l);
 				}
 			}
 			++idx;
