@@ -3,6 +3,7 @@
 # dev
 
 * New Feature: Add generation of export-table hashes into `retdec-fileinfo` ([#121](https://github.com/avast-tl/retdec/issues/121), [#321](https://github.com/avast-tl/retdec/pull/321)).
+* Fix: Fixed assertions in statically linked code recognition ([#333](https://github.com/avast-tl/retdec/issues/333)).
 * Fix: Fixed aborts due to assertions during decoding of some MIPS binaries ([#335](https://github.com/avast-tl/retdec/issues/335)).
 * Fix: Fixed a memory leak when parsing Mach-O files ([#331](https://github.com/avast-tl/retdec/pull/331)).
 
