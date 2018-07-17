@@ -630,6 +630,9 @@ class Decompiler:
         if self.args.generate_log:
             self.log_decompilation_start_date = str(int(time.time()))
 
+        if self.args.raw_entry_point:
+            self.args.raw_entry_point = int(self.args.raw_entry_point, 16 if self.args.raw_entry_point.startswith('0x') else 10)
+
         # Raw.
         if self.mode == 'raw':
             # Entry point for THUMB must be odd.
@@ -794,7 +797,7 @@ class Decompiler:
 
                 if self.args.raw_entry_point:
                     cmd.run_cmd([config.CONFIGTOOL, self.config_file, '--write', '--entry-point',
-                                 self.args.raw_entry_point])
+                                 hex(self.args.raw_entry_point)])
 
                 if self.args.raw_section_vma:
                     cmd.run_cmd([config.CONFIGTOOL, self.config_file, '--write', '--section-vma',
