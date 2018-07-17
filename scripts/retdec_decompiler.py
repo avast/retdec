@@ -636,7 +636,7 @@ class Decompiler:
         # Raw.
         if self.mode == 'raw':
             # Entry point for THUMB must be odd.
-            if self.args.arch == 'thumb' or (self.args.raw_entry_point % 2) == 0:
+            if self.args.arch == 'thumb' and (self.args.raw_entry_point % 2) == 0:
                 self.args.raw_entry_point = (self.args.raw_entry_point + 1)
 
             self.args.keep_unreachable_funcs = True
