@@ -1979,57 +1979,7 @@ void DataFlowEntry::setTypeFromUseContext()
 
 void DataFlowEntry::setReturnType()
 {
-	llvm::Value* retVal = nullptr;
-	if (_abi->isX86())
-	{
-		bool hasEax = false;
-		bool hasRax = false;
-		bool hasSt0 = false;
-		for (auto& re : retStores)
-		{
-			for (StoreInst* s : re.possibleRetStores)
-			{
-				if (_abi->getRegisterId(s) == X86_REG_EAX)
-				{
-					hasEax = true;
-					break;
-				}
-				else if (_abi->getRegisterId(s) == X86_REG_RAX)
-				{
-					hasRax = true;
-					break;
-				}
-				else if (_abi->getRegisterId(s) == X86_REG_ST7)
-				{
-					hasSt0 = true;
-				}
-			}
-		}
-		if (!hasEax && !hasRax && hasSt0)
-		{
-			retVal = _abi->getRegister(X86_REG_ST7);
-		}
-		else if (_abi->getRegister(X86_REG_RAX))
-		{
-			retVal = _abi->getRegister(X86_REG_RAX);
-		}
-		else
-		{
-			retVal = _abi->getRegister(X86_REG_EAX);
-		}
-	}
-	else if (_abi->isMips())
-	{
-		retVal = _abi->getRegister(MIPS_REG_V0);
-	}
-	else if (_abi->isArm())
-	{
-		retVal = _abi->getRegister(ARM_REG_R0);
-	}
-	else if (_abi->isPowerPC())
-	{
-		retVal = _abi->getRegister(PPC_REG_R3);
-	}
+	llvm::Value* retVal = _abi->getReturnRegister();
 
 	retType = retVal ?
 			retVal->getType()->getPointerElementType() :
