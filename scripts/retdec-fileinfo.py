@@ -9,9 +9,14 @@ import argparse
 import subprocess
 import sys
 
-import retdec_config as config
-from retdec_utils import Utils
-from retdec_archive_decompiler import ArchiveDecompiler
+import importlib
+config = importlib.import_module('retdec-config')
+retdec_utils = importlib.import_module('retdec_utils')
+retdec_archive_decompiler = importlib.import_module('retdec_archive_decompiler')
+
+Utils = retdec_utils.Utils
+ArchiveDecompiler = retdec_archive_decompiler.ArchiveDecompiler
+
 
 def parse_args():
     parser = argparse.ArgumentParser(

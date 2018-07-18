@@ -7,8 +7,14 @@ import sys
 import os
 import subprocess
 
-import retdec_config as config
 from retdec_utils import CmdRunner
+
+import importlib
+config = importlib.import_module('retdec-config')
+retdec_utils = importlib.import_module('retdec-utils')
+
+CmdRunner = retdec_utils.CmdRunner
+
 
 """First argument can be verbose."""
 verbose = False

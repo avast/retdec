@@ -9,10 +9,16 @@ import shutil
 import sys
 import time
 
-import retdec_config as config
-from retdec_signature_from_library_creator import SigFromLib
-from retdec_unpacker import Unpacker
-from retdec_utils import Utils, CmdRunner
+import importlib
+config = importlib.import_module('retdec-config')
+retdec_signature_from_library_creator = importlib.import_module('retdec-signature-from-library-creator')
+retdec_unpacker = importlib.import_module('retdec-unpacker')
+retdec_utils = importlib.import_module('retdec-utils')
+
+SigFromLib = retdec_signature_from_library_creator.SigFromLib
+Unpacker = retdec_unpacker.Unpacker
+Utils = retdec_utils.Utils
+CmdRunner = retdec_utils.CmdRunner
 
 
 def parse_args(args):

@@ -22,9 +22,12 @@ import os
 import shutil
 import sys
 
-import retdec_config as config
-from retdec_utils import CmdRunner
-from retdec_utils import Utils
+import importlib
+config = importlib.import_module('retdec-config')
+retdec_utils = importlib.import_module('retdec-utils')
+
+Utils = retdec_utils.Utils
+CmdRunner = retdec_utils.CmdRunner
 
 
 def parse_args(_args):

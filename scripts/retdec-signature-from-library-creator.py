@@ -10,8 +10,11 @@ import subprocess
 import tempfile
 from pathlib import Path
 
-import retdec_config as config
-from retdec_utils import Utils
+import importlib
+config = importlib.import_module('retdec-config')
+retdec_utils = importlib.import_module('retdec-utils')
+
+Utils = retdec_utils.Utils
 
 
 def parse_args(args):

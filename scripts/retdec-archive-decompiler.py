@@ -6,9 +6,11 @@ import re
 import subprocess
 import sys
 
-import retdec_config as config
-from retdec_utils import Utils
-from retdec_utils import CmdRunner
+import importlib
+config = importlib.import_module('retdec-config')
+retdec_utils = importlib.import_module('retdec-utils')
+Utils = retdec_utils.Utils
+CmdRunner = retdec_utils.CmdRunner
 
 
 def parse_args(args):

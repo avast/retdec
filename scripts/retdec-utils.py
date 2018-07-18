@@ -10,7 +10,9 @@ import subprocess
 import sys
 import time
 
-import retdec_config as config
+import importlib
+config = importlib.import_module('retdec-config')
+
 
 """Taken from https://github.com/avast-tl/retdec-regression-tests-framework/blob/master/regression_tests/cmd_runner.py
 """
