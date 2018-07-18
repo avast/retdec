@@ -147,10 +147,11 @@ class SigFromLib:
 
         # Create final .yara file from .pat files.
         if self.args.logfile:
-            result = subprocess.call(
-                [config.PAT2YARA, *pattern_files, '--min-pure', str(self.args.min_pure), '-o', self.file_path, '-l',
-                 self.file_path + '.log', self.ignore_nop,
-                 str(self.args.ignore_nops)])
+            pat2yara_args = [config.PAT2YARA, *pattern_files, '--min-pure', str(self.args.min_pure), '-o', self.file_path, '-l', self.file_path + '.log']
+            if self.ignore_nop:
+                pat2yara_args.extend([self.ignore_nop, str(self.args.ignore_nops)])
+
+            result = subprocess.call(pat2yara_args)
 
             if result != 0:
                 self.print_error_and_cleanup('utility pat2yara failed')

@@ -212,6 +212,7 @@ class Utils:
                     shutil.rmtree(p, ignore_errors=True)
                 else:
                     os.unlink(p)
+            shutil.rmtree(path, ignore_errors=True)
 
     @staticmethod
     def is_windows():
