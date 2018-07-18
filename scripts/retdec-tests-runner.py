@@ -7,8 +7,6 @@ import sys
 import os
 import subprocess
 
-from retdec_utils import CmdRunner
-
 import importlib
 config = importlib.import_module('retdec-config')
 retdec_utils = importlib.import_module('retdec-utils')
