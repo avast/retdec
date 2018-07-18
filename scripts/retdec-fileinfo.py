@@ -36,6 +36,7 @@ def parse_args():
 
     return parser.parse_known_args()
 
+
 def get_input_file(unknownargs):
     """Find path to the input file.
     We take the first parameter that does not start with a dash. This is a
@@ -46,6 +47,7 @@ def get_input_file(unknownargs):
         if not arg.startswith('-'):
             return arg
     return None
+
 
 if __name__ == '__main__':
     args, unknownargs = parse_args()
