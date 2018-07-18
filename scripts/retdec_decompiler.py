@@ -278,6 +278,8 @@ def parse_args(args):
 
     parser.add_argument('--static-code-sigfile',
                         dest='static_code_sigfile',
+                        action='append',
+                        default=[],
                         help='Adds additional signature file for static code detection.')
 
     parser.add_argument('--static-code-archive',
@@ -383,10 +385,10 @@ class Decompiler:
                 Utils.print_error('Invalid archive file \'%s\'' % sca)
                 return False
 
-        if self.args.static_code_sigfile:
+        for sigfile in self.args.static_code_sigfile:
             # User provided signature file.
-            if not os.path.isfile(self.args.static_code_sigfile):
-                Utils.print_error('Invalid .yara file \'%s\'' % self.args.static_code_sigfile)
+            if not os.path.isfile(sigfile):
+                Utils.print_error('Invalid .yara file \'%s\'' % sigfile)
                 return False
 
         if self.args.selected_ranges:
@@ -1059,9 +1061,8 @@ class Decompiler:
                 cmd.run_cmd([config.CONFIGTOOL, self.config_file, '--write', '--signatures', signatures_dir])
 
             # User provided signatures.
-            if self.args.static_code_sigfile:
-                for i in self.args.static_code_sigfile:
-                    cmd.run_cmd([config.CONFIGTOOL, self.config_file, '--write', '--user-signature', i])
+            for i in self.args.static_code_sigfile:
+                cmd.run_cmd([config.CONFIGTOOL, self.config_file, '--write', '--user-signature', i])
 
             # Store paths of type files into config for frontend.
             if os.path.isdir(config.GENERIC_TYPES_DIR):
