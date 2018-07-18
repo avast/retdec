@@ -104,7 +104,7 @@ class SigFromLib:
                 continue
 
             # Get library name for .pat file.
-            lib_name = os.path.splitext(lib_path)[0]
+            lib_name = os.path.splitext(os.path.basename(lib_path))[0]
 
             # Create sub-directory for object files.
             object_dir = os.path.join(self.tmp_dir_path, lib_name) + '-objects'
