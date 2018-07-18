@@ -82,7 +82,7 @@ class SigFromLib:
 
         self.file_path = self.args.output
         dir_name = os.path.dirname(os.path.abspath(self.file_path))
-        self.tmp_dir_path = os.path.join(dir_name, 'XXXXXXXXX')
+        self.tmp_dir_path = tempfile.mkdtemp(dir=dir_name)
 
         if self.args.ignore_nops:
             self.ignore_nop = '--ignore-nops'
@@ -155,9 +155,11 @@ class SigFromLib:
             if result != 0:
                 self.print_error_and_cleanup('utility pat2yara failed')
         else:
-            result = subprocess.call(
-                [config.PAT2YARA, *pattern_files, '--min-pure', str(self.args.min_pure), '-o', self.file_path,
-                 self.ignore_nop, str(self.args.ignore_nops)])
+            pat2yara_args = [config.PAT2YARA, *pattern_files, '--min-pure', str(self.args.min_pure), '-o', self.file_path]
+            if self.ignore_nop:
+                pat2yara_args.extend([self.ignore_nop, str(self.args.ignore_nops)])
+
+            result = subprocess.call(pat2yara_args)
 
             if result != 0:
                 self.print_error_and_cleanup('utility pat2yara failed')
