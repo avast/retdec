@@ -49,7 +49,7 @@ def get_input_file(unknownargs):
     return None
 
 
-if __name__ == '__main__':
+def main():
     args, unknownargs = parse_args()
 
     input = get_input_file(unknownargs)
@@ -80,3 +80,6 @@ if __name__ == '__main__':
             fileinfo_params.extend(['--crypto', par])
 
     sys.exit(subprocess.call([config.FILEINFO, *fileinfo_params]))
+
+if __name__ == "__main__":
+    main()
