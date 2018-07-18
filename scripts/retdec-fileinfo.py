@@ -11,8 +11,8 @@ import sys
 
 import importlib
 config = importlib.import_module('retdec-config')
-retdec_utils = importlib.import_module('retdec_utils')
-retdec_archive_decompiler = importlib.import_module('retdec_archive_decompiler')
+retdec_utils = importlib.import_module('retdec-utils')
+retdec_archive_decompiler = importlib.import_module('retdec-archive-decompiler')
 
 Utils = retdec_utils.Utils
 ArchiveDecompiler = retdec_archive_decompiler.ArchiveDecompiler
