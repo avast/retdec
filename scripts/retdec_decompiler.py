@@ -369,8 +369,10 @@ class Decompiler:
 
             try:
                 max_memory = int(self.args.max_memory)
-                if max_memory > 0:
-                    return True
+                if max_memory <= 0:
+                    Utils.print_error('Invalid value for --max-memory: %s (expected a positive integer)'
+                                      % self.args.max_memory)
+                    return False
             except ValueError:
                 Utils.print_error('Invalid value for --max-memory: %s (expected a positive integer)'
                                   % self.args.max_memory)
