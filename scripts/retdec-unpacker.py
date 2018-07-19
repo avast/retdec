@@ -30,6 +30,9 @@ Utils = retdec_utils.Utils
 CmdRunner = retdec_utils.CmdRunner
 
 
+sys.stdout = retdec_utils.Unbuffered(sys.stdout)
+
+
 def parse_args(_args):
     parser = argparse.ArgumentParser(description=__doc__,
                                      formatter_class=argparse.ArgumentDefaultsHelpFormatter)
@@ -137,7 +140,7 @@ class Unpacker:
         print('RUN: ' + config.UNPACKER + ' '.join(unpacker_params))
 
         cmd = CmdRunner()
-        unpacker_output, unpacker_rc, _ = cmd.run_cmd([config.UNPACKER, *unpacker_params])
+        unpacker_output, unpacker_rc, _ = cmd.run_cmd([config.UNPACKER, *unpacker_params], buffer_output=True)
         print(unpacker_output)
 
         if unpacker_rc == self.UNPACKER_EXIT_CODE_OK:
@@ -158,8 +161,7 @@ class Unpacker:
             print('##### Trying to unpack ' + self.input + ' into ' + output + ' by using UPX...')
             print('RUN: upx -d ' + self.input + ' -o ' + output)
 
-            unpacker_output, upx_rc, _ = cmd.run_cmd(['upx', '-d', self.input, '-o', output])
-            print(unpacker_output)
+            unpacker_output, upx_rc, _ = cmd.run_cmd(['upx', '-d', self.input, '-o', output], buffer_output=True)
 
             if upx_rc == 0:
                 print('##### Unpacking by using UPX: successfully unpacked')

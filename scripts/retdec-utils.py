@@ -21,45 +21,33 @@ config = importlib.import_module('retdec-config')
 class CmdRunner:
     """A runner of external commands."""
 
-    def run_cmd(self, cmd, input=b'', timeout=None, input_encoding='utf-8',
-                output_encoding='utf-8', strip_shell_colors=True):
+    def run_cmd(self, cmd, input='', timeout=None, buffer_output=False):
         """Runs the given command (synchronously).
 
         :param list cmd: Command to be run as a list of arguments (strings).
-        :param bytes input: Input to be used when running the command.
+        :param str input: Input to be used when running the command.
         :param int timeout: Number of seconds after which the command should be
                             terminated.
-        :param str input_encoding: Encode the command's output in this encoding.
-        :param str output_encoding: Decode the command's output in this encoding.
-        :param bool strip_shell_colors: Should shell colors be stripped from
-                                        the output?
+        :param bool buffer_output: Should the output be buffered and returned
+                            in `output` instead of printing it to stdout?
+                            If `False`, `None` is returned in `output`.
 
         :returns: A triple (`output`, `return_code`, `timeouted`).
 
         The meaning of the items in the return value are:
 
-        * `output` contains the combined output from the standard outputs and
-          standard error,
+        * `output` if `buffer_output` is `True` contains the combined output from
+          the standard outputs and standard error,
         * `return_code` is the return code of the command,
         * `timeouted` is either `True` or `False`, depending on whether the
           command has timeouted.
-
-        If `input` is a string (`str`), not `bytes`, it is decoded into `bytes`
-        by using `input_encoding`.
-
-        If `output_encoding` is not ``None``, the returned data are decoded in
-        that encoding. Also, all line endings are converted to ``'\\n'``, and
-        if ``strip_shell_colors`` is ``True``, shell colors are stripped.
-        Otherwise, if `output_encoding` is ``None``, the data are directly
-        returned as raw bytes without any conversions.
 
         To disable the timeout, pass ``None`` as `timeout` (the default).
 
         If the timeout expires before the command finishes, the value of `output`
         is the command's output generated up to the timeout.
         """
-        _, output, return_code, timeouted = self._run_cmd(cmd, input, timeout, input_encoding, output_encoding,
-                                                          strip_shell_colors, False)
+        _, output, return_code, timeouted = self._run_cmd(cmd, input, timeout, buffer_output, track_memory=False)
 
         return output, return_code, timeouted
 
@@ -70,73 +58,65 @@ class CmdRunner:
         :returns: A quadruple (`memory`, `elapsed_time`, `output`, `return_code`).
         """
         start = time.time()
-        memory, output, rc, _ = CmdRunner()._run_cmd(command, track_memory=True)
+        memory, output, rc, _ = CmdRunner()._run_cmd(command, buffer_output=True, track_memory=True)
         elapsed = time.time() - start
 
         return memory, int(elapsed), output, rc
 
-    def _run_cmd(self, cmd, input=b'', timeout=None, input_encoding='utf-8',
-                 output_encoding='utf-8', strip_shell_colors=True, track_memory=False):
-
-        def decode(output):
-            if output_encoding is not None:
-                output = output.decode(output_encoding, errors='replace')
-                output = re.sub(r'\r\n?', '\n', output)
-                if strip_shell_colors:
-                    return re.sub(r'\x1b[^m]*m', '', output)
-            return output
-
-        # The communicate() call below expects the input to be in bytes, so
-        # convert it unless it is already in bytes.
-        if not isinstance(input, bytes):
-            input = input.encode(input_encoding)
+    def _run_cmd(self, cmd, input='', timeout=None, buffer_output=False, track_memory=False):
 
         memory = 0
         try:
-            p = self.start(cmd)
+            p = self.start(cmd, buffer_output)
             if track_memory:
-                try:
-                    import psutil
-                    proc = psutil.Process(p.pid)
-                    memory = int(proc.memory_info().rss / float(1 << 20))
-                except ImportError:
-                    memory = 0
+                # TODO
+                pass
 
             output, _ = p.communicate(input, timeout)
-            return memory, decode(output).rstrip(), p.returncode, False
+            if output:
+                output = output.rstrip()
+                output = self._strip_shell_colors(output)
+            return memory, output, p.returncode, False
         except subprocess.TimeoutExpired:
             # Kill the process, along with all its child processes.
             p.kill()
             # Finish the communication to obtain the output.
             output, _ = p.communicate()
-            return memory, decode(output).rstrip(), p.returncode, True
+            if output:
+                output = output.rstrip()
+                output = self._strip_shell_colors(output)
+            return memory, output, p.returncode, True
 
-    def start(self, cmd, discard_output=False, stdout=subprocess.STDOUT):
+    def start(self, cmd, buffer_output=False, stdout=subprocess.STDOUT):
         """Starts the given command and returns a handler to it.
 
         :param list cmd: Command to be run as a list of arguments (strings).
-        :param bool discard_output: Should the output be discarded instead of
-                                    being buffered so it can be obtained later?
-        :param int stdout: If discard_output is True, errors will be redirectected
-                                    to the stdout param.
+        :param bool buffer_output: See above.
+        :param int stdout: If buffer_output is True, errors will be redirectected
+                            to the stdout param.
 
         :returns: A handler to the started command (``subprocess.Popen``).
 
-        If the output is irrelevant for you, you should set `discard_output` to
-        ``True``.
+        If the output is irrelevant for you, you should set `buffer_output` to
+        ``True`` and ignore the `output`.
         """
         # The implementation is platform-specific because we want to be able to
         # kill the children alongside with the process.
         kwargs = dict(
             args=cmd,
             stdin=subprocess.PIPE,
-            stdout=subprocess.DEVNULL if discard_output else subprocess.PIPE,
-            stderr=subprocess.DEVNULL if discard_output else stdout
+            stdout=subprocess.PIPE if buffer_output else None,
+            stderr=stdout if buffer_output else None,
+            universal_newlines=True
         )
         if Utils.is_windows():
             return _WindowsProcess(**kwargs)
         else:
             return _LinuxProcess(**kwargs)
+
+    def _strip_shell_colors(self, text):
+        """Strips shell colors from the given text."""
+        return re.sub(r'\x1b[^m]*m', '', text)
 
 
 class _LinuxProcess(subprocess.Popen):
@@ -275,7 +255,7 @@ class Utils:
         1 argument is needed - file path
         Returns - 1 if error occurred
         """
-        output, rc, _ = CmdRunner().run_cmd([config.AR, path, '--object-count'])
+        output, rc, _ = CmdRunner().run_cmd([config.AR, path, '--object-count'], buffer_output=True)
         return int(output) if rc == 0 else 1
 
     @staticmethod
@@ -283,8 +263,7 @@ class Utils:
         """Print content of archive.
         1 argument is needed - file path
         """
-        output, _, _ = CmdRunner().run_cmd([config.AR, path, '--list', '--no-numbers'])
-        print(output)
+        CmdRunner().run_cmd([config.AR, path, '--list', '--no-numbers'])
 
     @staticmethod
     def archive_list_numbered_content(path):
@@ -292,16 +271,14 @@ class Utils:
         1 argument is needed - file path
         """
         print('Index\tName')
-        output, _, _ = CmdRunner().run_cmd([config.AR, path, '--list'])
-        print(output)
+        CmdRunner().run_cmd([config.AR, path, '--list'])
 
     @staticmethod
     def archive_list_numbered_content_json(path):
         """Print numbered content of archive in JSON format.
         1 argument is needed - file path
         """
-        output, _, _ = CmdRunner().run_cmd([config.AR, path, '--list', '--json'])
-        print(output)
+        CmdRunner().run_cmd([config.AR, path, '--list', '--json'])
 
     @staticmethod
     def archive_get_by_name(path, name, output):
@@ -364,3 +341,19 @@ class Utils:
     @staticmethod
     def is_range(range):
         return Utils.is_decimal_range(range) or Utils.is_hexadecimal_range(range)
+
+
+class Unbuffered(object):
+    """Used to force unbuddered streams, otherwise redirecting to log files
+    might mix the outputs from Python scripts and executed tools.
+    https://stackoverflow.com/a/107717"""
+    def __init__(self, stream):
+        self.stream = stream
+    def write(self, data):
+        self.stream.write(data)
+        self.stream.flush()
+    def writelines(self, datas):
+        self.stream.writelines(datas)
+        self.stream.flush()
+    def __getattr__(self, attr):
+        return getattr(self.stream, attr)

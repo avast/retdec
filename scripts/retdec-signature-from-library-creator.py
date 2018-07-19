@@ -17,6 +17,9 @@ retdec_utils = importlib.import_module('retdec-utils')
 Utils = retdec_utils.Utils
 
 
+sys.stdout = retdec_utils.Unbuffered(sys.stdout)
+
+
 def parse_args(args):
     parser = argparse.ArgumentParser(description=__doc__,
                                      formatter_class=argparse.ArgumentDefaultsHelpFormatter)

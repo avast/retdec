@@ -21,6 +21,9 @@ Utils = retdec_utils.Utils
 CmdRunner = retdec_utils.CmdRunner
 
 
+sys.stdout = retdec_utils.Unbuffered(sys.stdout)
+
+
 def parse_args(args):
     parser = argparse.ArgumentParser(description=__doc__,
                                      formatter_class=argparse.ArgumentDefaultsHelpFormatter)
@@ -550,7 +553,7 @@ class Decompiler:
         """Prints a warning if we are decompiling bytecode."""
 
         cmd = CmdRunner()
-        bytecode, _, _ = cmd.run_cmd([config.CONFIGTOOL, self.config_file, '--read', '--bytecode'])
+        bytecode, _, _ = cmd.run_cmd([config.CONFIGTOOL, self.config_file, '--read', '--bytecode'], buffer_output=True)
 
         if bytecode != '':
             Utils.print_warning('Detected %s bytecode, which cannot be decompiled by our machine-code decompiler.'
@@ -626,8 +629,7 @@ class Decompiler:
             f.write(json_string)
 
     def _json_escape(self, string):
-        # TODO
-        return string.rstrip('\r\n').replace('\n', r'\n')
+        return string.rstrip('\r\n').replace('\n', r'\n') if string else None
 
     def decompile(self):
         cmd = CmdRunner()
@@ -673,8 +675,7 @@ class Decompiler:
                         # Architecture not supported
                         print('Invalid --arch option \'' + self.args.arch +
                               '\'. File contains these architecture families:')
-                        output, _, _ = cmd.run_cmd([config.EXTRACT, '--list', self.input_file])
-                        print(output)
+                        cmd.run_cmd([config.EXTRACT, '--list', self.input_file])
                         self._cleanup()
                         return 1
                 else:
@@ -847,8 +848,7 @@ class Decompiler:
 
                 print(self.log_fileinfo_output)
             else:
-                fileinfo, fileinfo_rc, _ = cmd.run_cmd([config.FILEINFO, *fileinfo_params])
-                print(fileinfo)
+                _, fileinfo_rc, _ = cmd.run_cmd([config.FILEINFO, *fileinfo_params])
 
             if fileinfo_rc != 0:
                 if self.args.generate_log:
@@ -927,8 +927,7 @@ class Decompiler:
 
                     print(self.log_fileinfo_output)
                 else:
-                    fileinfo, fileinfo_rc, _ = cmd.run_cmd([config.FILEINFO, *fileinfo_params])
-                    print(fileinfo)
+                    fileinfo_rc, _ = cmd.run_cmd([config.FILEINFO, *fileinfo_params])
 
                 if fileinfo_rc != 0:
                     if self.args.generate_log:
@@ -946,14 +945,14 @@ class Decompiler:
                 cmd.run_cmd([config.CONFIGTOOL, self.config_file, '--write', '--arch', self.arch])
             else:
                 # Get full name of the target architecture including comments in parentheses
-                arch_full, _, _ = cmd.run_cmd([config.CONFIGTOOL, self.config_file, '--read', '--arch'])
+                arch_full, _, _ = cmd.run_cmd([config.CONFIGTOOL, self.config_file, '--read', '--arch'], buffer_output=True)
                 arch_full = arch_full.lower()
 
                 # Strip comments in parentheses and all trailing whitespace
                 self.arch = arch_full.split(' ')[0]
 
             # Get object file format.
-            self.format, _, _ = cmd.run_cmd([config.CONFIGTOOL, self.config_file, '--read', '--format'])
+            self.format, _, _ = cmd.run_cmd([config.CONFIGTOOL, self.config_file, '--read', '--format'], buffer_output=True)
             self.format = self.format.lower()
 
             # Intel HEX needs architecture to be specified
@@ -985,13 +984,13 @@ class Decompiler:
                     self._generate_log()
 
                 self._cleanup()
-                Utils.print_error('Unsupported target architecture %s. Supported architectures: '
+                Utils.print_error('Unsupported target architecture \'%s\'. Supported architectures: '
                                   'Intel x86, ARM, ARM + Thumb, MIPS, PIC32, PowerPC.' % self.arch)
                 return 1
 
             # Check file class (e.g. 'ELF32', 'ELF64'). At present, we can only decompile 32-bit files.
             # Note: we prefer to report the 'unsupported architecture' error (above) than this 'generic' error.
-            fileclass, _, _ = cmd.run_cmd([config.CONFIGTOOL, self.config_file, '--read', '--file-class'])
+            fileclass, _, _ = cmd.run_cmd([config.CONFIGTOOL, self.config_file, '--read', '--file-class'], buffer_output=True)
 
             if fileclass not in ['16', '32']:
                 if self.args.generate_log:
@@ -1012,7 +1011,7 @@ class Decompiler:
             if sig_format in ['ihex', 'raw']:
                 sig_format = 'elf'
 
-            endian_result, _, _ = cmd.run_cmd([config.CONFIGTOOL, self.config_file, '--read', '--endian'])
+            endian_result, _, _ = cmd.run_cmd([config.CONFIGTOOL, self.config_file, '--read', '--endian'], buffer_output=True)
 
             if endian_result == 'little':
                 sig_endian = 'le'
@@ -1153,9 +1152,7 @@ class Decompiler:
                 bin2llvmir_rc = self.log_bin2llvmir_rc
                 print(self.log_bin2llvmir_output)
             else:
-                bin22llvmir_out, bin2llvmir_rc, _ = cmd.run_cmd([config.BIN2LLVMIR, *bin2llvmir_params, '-o',
-                                                                 self.out_backend_bc])
-                print(bin22llvmir_out)
+                _, bin2llvmir_rc, _ = cmd.run_cmd([config.BIN2LLVMIR, *bin2llvmir_params, '-o', self.out_backend_bc])
 
             if bin2llvmir_rc != 0:
                 if self.args.generate_log:
@@ -1262,8 +1259,7 @@ class Decompiler:
             llvmir2hll_rc = self.log_llvmir2hll_rc
             print(self.log_llvmir2hll_output)
         else:
-            llvmir2hll_out, llvmir2hll_rc, _ = cmd.run_cmd([config.LLVMIR2HLL, *llvmir2hll_params])
-            print(llvmir2hll_out)
+            _, llvmir2hll_rc, _ = cmd.run_cmd([config.LLVMIR2HLL, *llvmir2hll_params])
 
         if llvmir2hll_rc != 0:
             if self.args.generate_log:

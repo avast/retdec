@@ -17,6 +17,9 @@ CmdRunner = retdec_utils.CmdRunner
 Utils = retdec_utils.Utils
 
 
+sys.stdout = retdec_utils.Unbuffered(sys.stdout)
+
+
 def print_colored(message, color=None):
     """Emits a colored version of the given message to the standard output (without
     a new line).
@@ -88,7 +91,7 @@ def run_unit_tests_in_dir(path, verbose=False):
         unit_test_name = os.path.basename(unit_test)
         print_colored(unit_test_name, colorama.Fore.YELLOW+colorama.Style.BRIGHT)
 
-        output, return_code, _ = CmdRunner().run_cmd([unit_test, '--gtest_color=yes'])
+        output, return_code, _ = CmdRunner().run_cmd([unit_test, '--gtest_color=yes'], buffer_output=True)
         print_output(output, verbose)
 
         if return_code != 0:

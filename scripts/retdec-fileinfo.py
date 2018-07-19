@@ -18,6 +18,9 @@ Utils = retdec_utils.Utils
 ArchiveDecompiler = retdec_archive_decompiler.ArchiveDecompiler
 
 
+sys.stdout = retdec_utils.Unbuffered(sys.stdout)
+
+
 def parse_args():
     parser = argparse.ArgumentParser(
         description=__doc__,
