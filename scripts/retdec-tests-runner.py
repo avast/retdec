@@ -2,54 +2,40 @@
 
 """Runs all the installed unit tests."""
 
-import re
-import sys
+import colorama
+colorama.init()
 import os
+import re
 import subprocess
+import sys
 
 import importlib
 config = importlib.import_module('retdec-config')
 retdec_utils = importlib.import_module('retdec-utils')
 
 CmdRunner = retdec_utils.CmdRunner
+Utils = retdec_utils.Utils
 
 
-"""First argument can be verbose."""
-verbose = False
-if len(sys.argv) > 1:
-    if sys.argv[1] in ['-v', '--verbose']:
-        verbose = True
-    else:
-        verbose = False
-
-
-def print_colored(message, color):
+def print_colored(message, color=None):
     """Emits a colored version of the given message to the standard output (without
     a new line).
-       2 string argument are needed:
-       $1 message to be colored
-       $2 color (red, green, yellow)
 
-    If the color is unknown, it emits just $1.
+    Arguments:
+        message - message to print
+        color   - colorama color (if None, no color)
+                  can be a combination of color and style (e.g. colorama.Fore.YELLOW+colorama.Style.BRIGHT)
     """
-
-    if color == 'red':
-        print('\033[22;31m' + message + '\033[0m')
-
-    elif color == 'green':
-        print('\033[22;32m' + message + '\033[0m')
-
-    elif color == 'yellow':
-        print('\033[01;33m' + message + '\033[0m')
-
+    if color:
+        print(color + message + colorama.Style.RESET_ALL)
     else:
-        print(message + '\n')
+        print(message)
 
 
 def unit_tests_in_dir(path):
     """Prints paths to all unit tests in the given directory.
-    1 string argument is needed:
-        path-path to the directory with unit tests
+    Arguments:
+        path - path to the directory with unit tests
     """
 
     tests = []
@@ -58,18 +44,18 @@ def unit_tests_in_dir(path):
         for f in filenames:
             if f.startswith('retdec-tests-') and not f.endswith('.sh') and not f.endswith('.py'):
                 tests.append(os.path.abspath(os.path.join(dirpath, f)))
-                pass
+                #pass
 
     tests.sort()
 
     return tests
 
 
-def print_verbose(output):
-    print(output)
+def print_output(output, verbose=False):
+    if verbose:
+        print(output)
+        return
 
-
-def print_non_verbose(output):
     output = output.splitlines()
     p_neg = re.compile(r'(RUN|OK|----------|==========|^$|Running main\(\) from gmock_main.cc)')
     p_passed = re.compile(r'^\[  PASSED  \]')
@@ -77,18 +63,19 @@ def print_non_verbose(output):
     for line in output:
         if p_neg.search(line) is None:
             if p_passed.search(line):
-                print_colored(line, 'green')
+                print_colored(line, colorama.Fore.GREEN)
             elif p_failed.search(line):
-                print_colored(line, 'red')
+                print_colored(line, colorama.Fore.RED)
             else:
                 print(line)
 
 
-def run_unit_tests_in_dir(path):
+def run_unit_tests_in_dir(path, verbose=False):
     """Runs all unit tests in the given directory.
-    1 string argument is needed:
+    Arguments:
 
-        path - path to the directory with unit tests
+        path    - path to the directory with unit tests
+        verbose - print more info
 
     Returns 0 if all tests passed, 1 otherwise.
     """
@@ -99,20 +86,14 @@ def run_unit_tests_in_dir(path):
     for unit_test in unit_tests_in_dir(path):
         print()
         unit_test_name = os.path.basename(unit_test)
-        print_colored(unit_test_name, 'yellow')
+        print_colored(unit_test_name, colorama.Fore.YELLOW+colorama.Style.BRIGHT)
 
-        cmd = CmdRunner()
-        output, return_code, _ = cmd.run_cmd([unit_test, '--gtest_color=yes'])
-        if verbose:
-            print_verbose(output)
-        else:
-            print_non_verbose(output)
+        output, return_code, _ = CmdRunner().run_cmd([unit_test, '--gtest_color=yes'])
+        print_output(output, verbose)
 
         if return_code != 0:
             tests_failed = True
-            if return_code >= 127:
-                # Segfault, floating-point exception, etc.
-                print_colored('FAILED (return code %d)\n' % return_code, 'red')
+            print_colored('FAILED (return code %d)\n' % return_code, colorama.Fore.RED)
         tests_run = True
 
     if tests_failed or not tests_run:
@@ -121,11 +102,15 @@ def run_unit_tests_in_dir(path):
         return 0
 
 
-if not os.path.isdir(config.UNIT_TESTS_DIR):
-    """Run all binaries in unit test dir."""
+def main():
+    verbose = len(sys.argv) > 1 and sys.argv[1] in ['-v', '--verbose']
 
-    sys.stderr.write('error: no unit tests found in %s' % config.UNIT_TESTS_DIR)
-    sys.exit(1)
+    if not os.path.isdir(config.UNIT_TESTS_DIR):
+        Utils.print_error_and_die('error: no unit tests found in %s' % config.UNIT_TESTS_DIR)
 
-print('Running all unit tests in %s...' % config.UNIT_TESTS_DIR)
-sys.exit(run_unit_tests_in_dir(config.UNIT_TESTS_DIR))
+    print('Running all unit tests in %s...' % config.UNIT_TESTS_DIR)
+    sys.exit(run_unit_tests_in_dir(config.UNIT_TESTS_DIR, verbose))
+
+
+if __name__ == "__main__":
+    main()

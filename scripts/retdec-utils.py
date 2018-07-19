@@ -227,6 +227,13 @@ class Utils:
         print('Error: %s' % error, file=sys.stdout)
 
     @staticmethod
+    def print_error_and_die(error, ret_code=1):
+        """Print error message to stderr, and exit with the given return code.
+        """
+        Utils.print_error(error)
+        sys.exit(1)
+
+    @staticmethod
     def print_warning(warning):
         """Print warning message to stderr.
         """
