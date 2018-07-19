@@ -84,7 +84,6 @@ class ArchiveDecompiler:
         Utils.remove_dir_forced(self.tmp_archive)
 
     def _check_arguments(self):
-
         if self.args.list_mode:
             self.enable_list_mode = True
 
@@ -121,7 +120,6 @@ class ArchiveDecompiler:
         return True
 
     def decompile_archive(self):
-
         # Check arguments
         if not self._check_arguments():
             return 1

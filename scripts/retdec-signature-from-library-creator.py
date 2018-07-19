@@ -8,7 +8,6 @@ import sys
 import os
 import subprocess
 import tempfile
-from pathlib import Path
 
 import importlib
 config = importlib.import_module('retdec-config')
@@ -66,28 +65,20 @@ class SigFromLib:
     def __init__(self, _args):
         self.args = parse_args(_args)
         self.ignore_nop = ''
-        self.file_path = ''
         self.tmp_dir_path = ''
 
     def print_error_and_cleanup(self, message):
-        """Print error message and clean up temporary files.
-        """
-
-        # Cleanup.
         if not self.args.no_cleanup:
             Utils.remove_dir_forced(self.tmp_dir_path)
-
-        Utils.print_error(message + '.')
+        Utils.print_error(message)
 
     def _check_arguments(self):
-
         for f in self.args.input:
             if not os.path.isfile(f):
-                self.print_error_and_cleanup('input %s is not a valid file nor argument' % f)
+                self.print_error_and_cleanup('input %s is not a valid file' % f)
                 return False
 
-        self.file_path = self.args.output
-        dir_name = os.path.dirname(os.path.abspath(self.file_path))
+        dir_name = os.path.dirname(os.path.abspath(self.args.output))
         self.tmp_dir_path = tempfile.mkdtemp(dir=dir_name)
 
         if self.args.ignore_nops:
@@ -152,25 +143,17 @@ class SigFromLib:
             return 0
 
         # Create final .yara file from .pat files.
+        pat2yara_args = [config.PAT2YARA, *pattern_files, '--min-pure', str(self.args.min_pure), '-o', self.args.output]
         if self.args.logfile:
-            pat2yara_args = [config.PAT2YARA, *pattern_files, '--min-pure', str(self.args.min_pure), '-o', self.file_path, '-l', self.file_path + '.log']
-            if self.ignore_nop:
-                pat2yara_args.extend([self.ignore_nop, str(self.args.ignore_nops)])
+            pat2yara_args.extend(['-l', self.args.output + '.log'])
+        if self.ignore_nop:
+            pat2yara_args.extend([self.ignore_nop, str(self.args.ignore_nops)])
 
-            result = subprocess.call(pat2yara_args)
+        result = subprocess.call(pat2yara_args)
 
-            if result != 0:
-                self.print_error_and_cleanup('utility pat2yara failed')
-        else:
-            pat2yara_args = [config.PAT2YARA, *pattern_files, '--min-pure', str(self.args.min_pure), '-o', self.file_path]
-            if self.ignore_nop:
-                pat2yara_args.extend([self.ignore_nop, str(self.args.ignore_nops)])
-
-            result = subprocess.call(pat2yara_args)
-
-            if result != 0:
-                self.print_error_and_cleanup('utility pat2yara failed')
-                return 1
+        if result != 0:
+            self.print_error_and_cleanup('utility pat2yara failed')
+            return 1
 
         # Do cleanup.
         if not self.args.no_cleanup:
