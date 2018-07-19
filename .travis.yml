@@ -72,12 +72,12 @@ before_script:
   - if [ "$TRAVIS_OS_NAME" = "osx" ]; then export PATH="/usr/local/opt/ccache/libexec:$PATH"; fi
 
 script:
+  - mkdir build && cd build
+  # We use "-O0" to speed up the build.
+  # "-O0" causes segfaults in LLVM if we do not use "-DNDEBUG" as well.
+  - cmake -DCMAKE_CXX_FLAGS_RELEASE="-O0 -DNDEBUG" -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="$(pwd)/install" -DRETDEC_TESTS=ON -DRETDEC_DEV_TOOLS=ON ..
   - python3 --version
   - python3.5 --version
-  #- mkdir build && cd build
-  ## We use "-O0" to speed up the build.
-  ## "-O0" causes segfaults in LLVM if we do not use "-DNDEBUG" as well.
-  #- cmake -DCMAKE_CXX_FLAGS_RELEASE="-O0 -DNDEBUG" -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="$(pwd)/install" -DRETDEC_TESTS=ON -DRETDEC_DEV_TOOLS=ON ..
   #- time make install -j $NPROC
   ## Check that install is movable and that it does not need the build directory.
   #- mv install ../retdec-install
