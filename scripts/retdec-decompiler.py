@@ -927,7 +927,7 @@ class Decompiler:
 
                     print(self.log_fileinfo_output)
                 else:
-                    fileinfo_rc, _ = cmd.run_cmd([config.FILEINFO, *fileinfo_params])
+                    _, fileinfo_rc, _ = cmd.run_cmd([config.FILEINFO, *fileinfo_params])
 
                 if fileinfo_rc != 0:
                     if self.args.generate_log:
