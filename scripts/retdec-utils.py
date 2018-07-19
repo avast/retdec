@@ -271,7 +271,6 @@ class Utils:
         # We use our own messages so throw original output away.
         ret = subprocess.call([config.AR, path, '--valid'], stderr=subprocess.STDOUT,
                               stdout=None)
-
         return ret == 0
 
     @staticmethod
@@ -280,9 +279,7 @@ class Utils:
         1 argument is needed - file path
         Returns - 1 if error occurred
         """
-        cmd = CmdRunner()
-        output, rc, _ = cmd.run_cmd([config.AR, path, '--object-count'])
-
+        output, rc, _ = CmdRunner().run_cmd([config.AR, path, '--object-count'])
         return int(output) if rc == 0 else 1
 
     @staticmethod
@@ -290,8 +287,7 @@ class Utils:
         """Print content of archive.
         1 argument is needed - file path
         """
-        cmd = CmdRunner()
-        output, _, _ = cmd.run_cmd([config.AR, path, '--list', '--no-numbers'])
+        output, _, _ = CmdRunner().run_cmd([config.AR, path, '--list', '--no-numbers'])
         print(output)
 
     @staticmethod
@@ -300,8 +296,7 @@ class Utils:
         1 argument is needed - file path
         """
         print('Index\tName')
-        cmd = CmdRunner()
-        output, _, _ = cmd.run_cmd([config.AR, path, '--list'])
+        output, _, _ = CmdRunner().run_cmd([config.AR, path, '--list'])
         print(output)
 
     @staticmethod
@@ -309,8 +304,7 @@ class Utils:
         """Print numbered content of archive in JSON format.
         1 argument is needed - file path
         """
-        cmd = CmdRunner()
-        output, _, _ = cmd.run_cmd([config.AR, path, '--list', '--json'])
+        output, _, _ = CmdRunner().run_cmd([config.AR, path, '--list', '--json'])
         print(output)
 
     @staticmethod
@@ -349,83 +343,28 @@ class Utils:
         """
         ret = subprocess.call([config.EXTRACT, '--check-archive', path],
                               stderr=subprocess.STDOUT, stdout=subprocess.DEVNULL)
-
         return ret == 0
 
     @staticmethod
     def is_decimal_number(num):
-        """Check string is a valid decimal number.
-            1 argument is needed - string to check.
-            Returns - 0 if string is a valid decimal number.
-                      1 otherwise
-        """
-        if re.search('^[0-9]+$', str(num)):
-            return True
-        else:
-            return False
+        return re.search('^[0-9]+$', str(num))
 
     @staticmethod
     def is_hexadecimal_number(num):
-        """Check string is a valid hexadecimal number.
-            1 argument is needed - string to check.
-            Returns - 0 if string is a valid hexadecimal number.
-                      1 otherwise
-        """
-        if re.search('^0x[0-9a-fA-F]+$', str(num)):
-            return True
-        else:
-            return False
+        return re.search('^0x[0-9a-fA-F]+$', str(num))
 
     @staticmethod
     def is_number(num):
-        """Check string is a valid number (decimal or hexadecimal).
-            1 argument is needed - string to check.
-            Returns - 0 if string is a valid number.
-                      1 otherwise
-        """
-        if Utils.is_decimal_number(num):
-            return True
-
-        if Utils.is_hexadecimal_number(num):
-            return True
-
-        return False
+        return Utils.is_decimal_number(num) or Utils.is_hexadecimal_number(num)
 
     @staticmethod
-    def is_decimal_range(num):
-        """Check string is a valid decimal range.
-            1 argument is needed - string to check.
-            Returns - 0 if string is a valid decimal range.
-                      1 otherwise
-        """
-        if re.search('^[0-9]+-[0-9]+$', str(num)):
-            return True
-        else:
-            return False
+    def is_decimal_range(range):
+        return re.search('^[0-9]+-[0-9]+$', str(range))
 
     @staticmethod
-    def is_hexadecimal_range(num):
-        """Check string is a valid hexadecimal range
-            1 argument is needed - string to check.
-            Returns - 0 if string is a valid hexadecimal range
-                      1 otherwise
-        """
-        if re.search('^0x[0-9a-fA-F]+-0x[0-9a-fA-F]+$', str(num)):
-            return True
-        else:
-            return False
+    def is_hexadecimal_range(range):
+        return re.search('^0x[0-9a-fA-F]+-0x[0-9a-fA-F]+$', str(range))
 
     @staticmethod
-    def is_range(num):
-        """Check string is a valid range (decimal or hexadecimal).
-            1 argument is needed - string to check.
-            Returns - 0 if string is a valid range
-                      1 otherwise
-        """
-        if Utils.is_decimal_range(num):
-            return True
-
-        if Utils.is_hexadecimal_range(num):
-            return True
-
-        return False
+    def is_range(range):
+        return Utils.is_decimal_range(range) or Utils.is_hexadecimal_range(range)
