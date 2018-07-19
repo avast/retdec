@@ -14,7 +14,7 @@ Optional arguments:
    * use extended exit codes
 
 Returns:
- 0 successfully unpacked
+   * 0 successfully unpacked
 """
 
 import argparse
@@ -78,6 +78,8 @@ class Unpacker:
     UNPACKER_EXIT_CODE_UNPACKING_FAILED = 2
     # 3 Error with preprocessing of input file before unpacking.
     UNPACKER_EXIT_CODE_PREPROCESSING_ERROR = 3
+    #
+    UNPACKER_EXIT_CODE_OTHER = -1
 
     def __init__(self, _args):
         self.args = parse_args(_args)
@@ -183,11 +185,10 @@ class Unpacker:
             return unpacker_output, self.RET_NOTHING_TO_DO
 
     def unpack_all(self):
-        # Check arguments and set default values for unset options.
         if not self._check_arguments():
-            return '', -1
+            return '', self.UNPACKER_EXIT_CODE_OTHER
 
-        res_rc = -1
+        res_rc = self.UNPACKER_EXIT_CODE_OTHER
         res_out = ''
         tmp_output = self.output + '.tmp'
 
@@ -209,7 +210,7 @@ class Unpacker:
                     os.remove(tmp_output)
                 break
 
-        return (res_out, return_code) if res_rc == -1 else (res_out, res_rc)
+        return (res_out, return_code) if res_rc == self.UNPACKER_EXIT_CODE_OTHER else (res_out, res_rc)
 
 
 if __name__ == '__main__':
