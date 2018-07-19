@@ -2,12 +2,31 @@
 
 """Runs all the installed unit tests."""
 
-import colorama
-colorama.init()
 import os
 import re
 import subprocess
 import sys
+
+try:
+    import colorama
+    colorama.init()
+except ImportError:
+    # The colorama module is not available, so fall back to output without
+    # colors. Instances of the following class can be called, and every
+    # attribute is equal to the empty string (this is why it inherits from
+    # str).
+    class NoColorsColorama(str):
+        """Fake implementation of colorama without color support."""
+
+        def __call__(self, *args, **kwargs):
+            pass
+
+        def __getattr__(self, _):
+            return self
+
+    colorama = NoColorsColorama()
+    print("warning: module 'colorama' (https://pypi.python.org/pypi/colorama)",
+          "not found, running without color support", file=sys.stderr)
 
 import importlib
 config = importlib.import_module('retdec-config')
