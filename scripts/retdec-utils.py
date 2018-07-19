@@ -69,10 +69,8 @@ class CmdRunner:
 
         :returns: A quadruple (`memory`, `elapsed_time`, `output`, `return_code`).
         """
-        cmd = CmdRunner()
-
         start = time.time()
-        memory, output, rc, _ = cmd._run_cmd(command, track_memory=True)
+        memory, output, rc, _ = CmdRunner()._run_cmd(command, track_memory=True)
         elapsed = time.time() - start
 
         return memory, int(elapsed), output, rc
@@ -224,7 +222,7 @@ class Utils:
     def print_error(error):
         """Print error message to stderr.
         """
-        print('Error: %s' % error, file=sys.stdout)
+        print('Error: %s' % error, file=sys.stderr)
 
     @staticmethod
     def print_error_and_die(error, ret_code=1):
@@ -237,9 +235,7 @@ class Utils:
     def print_warning(warning):
         """Print warning message to stderr.
         """
-        # TODO
-        #sys.stderr.write('Warning: %s' % warning)
-        print('Warning: %s' % warning, file=sys.stdout)
+        print('Warning: %s' % warning, file=sys.stderr)
 
     @staticmethod
     def has_archive_signature(path):
