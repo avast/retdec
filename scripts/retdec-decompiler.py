@@ -844,11 +844,11 @@ class Decompiler:
 
             if self.args.generate_log:
                 self.log_fileinfo_memory, self.log_fileinfo_time, self.log_fileinfo_output, self.log_fileinfo_rc = \
-                    cmd.run_measured_cmd([config.FILEINFO, *fileinfo_params])
+                    cmd.run_measured_cmd([config.FILEINFO] + fileinfo_params)
 
                 print(self.log_fileinfo_output)
             else:
-                _, fileinfo_rc, _ = cmd.run_cmd([config.FILEINFO, *fileinfo_params])
+                _, fileinfo_rc, _ = cmd.run_cmd([config.FILEINFO] + fileinfo_params)
 
             if fileinfo_rc != 0:
                 if self.args.generate_log:
@@ -919,7 +919,7 @@ class Decompiler:
 
                 if self.args.generate_log:
                     fileinfo_memory, fileinfo_time, self.log_fileinfo_output, self.log_fileinfo_rc \
-                        = cmd.run_measured_cmd([config.FILEINFO, *fileinfo_params])
+                        = cmd.run_measured_cmd([config.FILEINFO] + fileinfo_params)
 
                     fileinfo_rc = self.log_fileinfo_rc
                     self.log_fileinfo_time += fileinfo_time
@@ -927,7 +927,7 @@ class Decompiler:
 
                     print(self.log_fileinfo_output)
                 else:
-                    _, fileinfo_rc, _ = cmd.run_cmd([config.FILEINFO, *fileinfo_params])
+                    _, fileinfo_rc, _ = cmd.run_cmd([config.FILEINFO] + fileinfo_params)
 
                 if fileinfo_rc != 0:
                     if self.args.generate_log:
@@ -1146,13 +1146,13 @@ class Decompiler:
 
             if self.args.generate_log:
                 self.log_bin2llvmir_memory, self.log_bin2llvmir_time, self.log_bin2llvmir_output, \
-                self.log_bin2llvmir_rc = cmd.run_measured_cmd([config.BIN2LLVMIR, *bin2llvmir_params, '-o',
+                self.log_bin2llvmir_rc = cmd.run_measured_cmd([config.BIN2LLVMIR] + bin2llvmir_params + ['-o',
                                                                self.out_backend_bc])
 
                 bin2llvmir_rc = self.log_bin2llvmir_rc
                 print(self.log_bin2llvmir_output)
             else:
-                _, bin2llvmir_rc, _ = cmd.run_cmd([config.BIN2LLVMIR, *bin2llvmir_params, '-o', self.out_backend_bc])
+                _, bin2llvmir_rc, _ = cmd.run_cmd([config.BIN2LLVMIR] + bin2llvmir_params + ['-o', self.out_backend_bc])
 
             if bin2llvmir_rc != 0:
                 if self.args.generate_log:
@@ -1254,12 +1254,12 @@ class Decompiler:
 
         if self.args.generate_log:
             self.log_llvmir2hll_memory, self.log_llvmir2hll_time, self.log_llvmir2hll_output, \
-            self.log_llvmir2hll_rc = cmd.run_measured_cmd([config.LLVMIR2HLL, *llvmir2hll_params])
+            self.log_llvmir2hll_rc = cmd.run_measured_cmd([config.LLVMIR2HLL] + llvmir2hll_params)
 
             llvmir2hll_rc = self.log_llvmir2hll_rc
             print(self.log_llvmir2hll_output)
         else:
-            _, llvmir2hll_rc, _ = cmd.run_cmd([config.LLVMIR2HLL, *llvmir2hll_params])
+            _, llvmir2hll_rc, _ = cmd.run_cmd([config.LLVMIR2HLL] + llvmir2hll_params)
 
         if llvmir2hll_rc != 0:
             if self.args.generate_log:

@@ -21,7 +21,7 @@ def compile_files(yarac, input_folder, output_folder):
             inputs.append(os.path.join(input_folder, file))
 
     if inputs:
-        ret = subprocess.call([yarac, '-w', *inputs, output_folder])
+        ret = subprocess.call([yarac, '-w'] + inputs + [output_folder])
         if ret != 0:
             print('Error: yarac failed during compilation of file ', path)
             exit(1)

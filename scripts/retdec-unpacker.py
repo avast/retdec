@@ -140,7 +140,7 @@ class Unpacker:
         print('RUN: ' + config.UNPACKER + ' '.join(unpacker_params))
 
         cmd = CmdRunner()
-        unpacker_output, unpacker_rc, _ = cmd.run_cmd([config.UNPACKER, *unpacker_params], buffer_output=True)
+        unpacker_output, unpacker_rc, _ = cmd.run_cmd([config.UNPACKER] + unpacker_params, buffer_output=True)
         print(unpacker_output)
 
         if unpacker_rc == self.UNPACKER_EXIT_CODE_OK:

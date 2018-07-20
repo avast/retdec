@@ -30,7 +30,7 @@ The following list of passes is -O3
       -loop-unswitch -sroa -tailcallelim -functionattrs -memcpyopt -prune-eh
 
 The following options are useful during debugging of bin2llvmirl optimizations.
-parameters beginning with -disable-* may be included only once, which is the	
+parameters beginning with -disable-* may be included only once, which is the
  * -print-after-all -debug-only=idioms -print-before=idioms -print-after=idioms
 
  -unreachable-funcs is automatically removed in decompilation script when the
@@ -59,10 +59,10 @@ BIN2LLVMIR_LLVM_PASSES_ONLY = ['-instcombine', '-tbaa', '-targetlibinfo', '-basi
 BIN2LLVMIR_PARAMS = ['-provider-init', '-decoder', '-verify', '-main-detection', '-idioms-libgcc', '-inst-opt',
                      '-register', '-cond-branch-opt', '-syscalls', '-stack', '-constants', '-param-return',
                      '-local-vars', '-inst-opt', '-simple-types', '-generate-dsm', '-remove-asm-instrs',
-                     '-class-hierarchy', '-select-fncs', '-unreachable-funcs', '-inst-opt', '-value-protect',
-                     *BIN2LLVMIR_LLVM_PASSES_ONLY, *BIN2LLVMIR_LLVM_PASSES_ONLY, '-simple-types',
+                     '-class-hierarchy', '-select-fncs', '-unreachable-funcs', '-inst-opt', '-value-protect'] \
+                     + BIN2LLVMIR_LLVM_PASSES_ONLY + BIN2LLVMIR_LLVM_PASSES_ONLY + ['-simple-types',
                      '-stack-ptr-op-remove', '-inst-opt', '-idioms', '-global-to-local', '-dead-global-assign',
-                     '-instcombine', '-phi2seq', '-value-protect', *BIN2LLVMIR_PARAMS_DISABLES]
+                     '-instcombine', '-phi2seq', '-value-protect'] + BIN2LLVMIR_PARAMS_DISABLES
 
 # Paths to tools.
 FILEINFO = os.path.join(INSTALL_BIN_DIR, 'retdec-fileinfo')
