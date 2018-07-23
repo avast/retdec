@@ -29,6 +29,13 @@ build_script:
   - cmd: cmake --build . --config Release --target install
 
 test_script:
+  - cmd: set
+  - cmd: where python
+  - cmd: python --version
+  - cmd: where python3
+  - cmd: python3 --version
+  - cmd: where py
+  - cmd: py -3 --version
   # Check that install is movable and that it does not need the build directory.
   - cmd: mv install ../retdec-install
   - cmd: cd ..
