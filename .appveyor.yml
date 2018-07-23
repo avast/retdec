@@ -13,15 +13,9 @@ install:
   - appveyor DownloadFile "https://downloads.sourceforge.net/project/winflexbison/%WINFLEXBISON_ARCHIVE%"
   - 7z x -y -owinflexbison\ "%WINFLEXBISON_ARCHIVE%" > nul
   - set Path=%CD%\winflexbison;%Path%
+  - set Path=C:\Python36;%Path%
 
 before_build:
-  - cmd: set
-  - cmd: where python
-  - cmd: python --version
-  - cmd: where python3
-  - cmd: python3 --version
-  - cmd: where py
-  - cmd: py -3 --version
   - cmd: mkdir build
   - cmd: cd build
   - cmd: cmake -DCMAKE_CXX_FLAGS_RELEASE="/Od -DNDEBUG" -G"%CMAKE_GENERATOR%" -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="install" -DRETDEC_TESTS=ON -DRETDEC_DEV_TOOLS=ON ..
@@ -32,7 +26,7 @@ build_script:
   # step fails.
   # Otherwise, we could use `cmake --build . --config Release --target install -- -m`
   # and save a few seconds.
-  - set Path=C:\msys64\usr\bin;C:\msys64\mingw64\bin;%Path%
+#  - set Path=C:\msys64\usr\bin;C:\msys64\mingw64\bin;%Path%
   - cmd: cmake --build . --config Release --target install
 
 test_script:
@@ -40,9 +34,11 @@ test_script:
   - cmd: mv install ../retdec-install
   - cmd: cd ..
   # Run unit tests.
-  - cmd: C:\msys64\usr\bin\bash.exe retdec-install\bin\retdec-tests-runner.py
+#  - cmd: C:\msys64\usr\bin\bash.exe retdec-install\bin\retdec-tests-runner.py
+  - cmd: C:\Python36\python.exe retdec-install\bin\retdec-tests-runner.py
   # Run the decompilation script.
-  - cmd: C:\msys64\usr\bin\bash.exe retdec-install\bin\retdec-decompiler.py --help
+#  - cmd: C:\msys64\usr\bin\bash.exe retdec-install\bin\retdec-decompiler.py --help
+  - cmd: C:\Python36\python.exe retdec-install\bin\retdec-decompiler.py --help
   # Run a simple decompilation.
   - cmd: C:\msys64\usr\bin\echo.exe -e "#include <stdio.h>\n#include <stdlib.h>\nint main()\n{\n  printf(\"hello world\\\n\");\n  return 0;\n}\n" > hello-orig.c
   - cmd: cat hello-orig.c
@@ -50,9 +46,10 @@ test_script:
   - set Path=C:\MinGW\bin;%Path%
   - cmd: gcc.exe -o hello.exe hello-orig.c
     # Prefer msys64 after we have used 32-bit GCC.
-  - set Path=C:\msys64\usr\bin;C:\msys64\mingw64\bin;%Path%
+#  - set Path=C:\msys64\usr\bin;C:\msys64\mingw64\bin;%Path%
   - cmd: hello.exe
-  - cmd: C:\msys64\usr\bin\bash.exe retdec-install\bin\retdec-decompiler.py hello.exe
+#  - cmd: C:\msys64\usr\bin\bash.exe retdec-install\bin\retdec-decompiler.py hello.exe
+  - cmd: C:\Python36\python.exe retdec-install\bin\retdec-decompiler.py hello.exe
   - cmd: cat hello.c
   - cmd: grep "int main(int argc, char \*\* argv)" hello.c
 
