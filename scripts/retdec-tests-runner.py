@@ -62,6 +62,7 @@ def unit_tests_in_dir(path):
 
     tests = []
 
+    print('PATH = ', path)
     for dirpath, _, filenames in os.walk(path):
         for f in filenames:
             print('testing : "' + str(f) + '"')
