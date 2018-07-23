@@ -64,9 +64,12 @@ def unit_tests_in_dir(path):
 
     for dirpath, _, filenames in os.walk(path):
         for f in filenames:
+            print('testing : "' + str(f) + '"')
             if f.startswith('retdec-tests-') and not f.endswith('.sh') and not f.endswith('.py'):
                 tests.append(os.path.abspath(os.path.join(dirpath, f)))
-                #pass
+                print('\t===> MATCHED')
+            else:
+                print('\t===> NOT MATCHED')
 
     tests.sort()
 
@@ -106,6 +109,8 @@ def run_unit_tests_in_dir(path, verbose=False):
     tests_run = False
 
     for unit_test in unit_tests_in_dir(path):
+        #print('========> ', unit_test)
+        #continue
         print()
         unit_test_name = os.path.basename(unit_test)
         print_colored(unit_test_name, colorama.Fore.YELLOW+colorama.Style.BRIGHT)
