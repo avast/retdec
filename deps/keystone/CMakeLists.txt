@@ -17,7 +17,7 @@ ExternalProject_Add(keystone-project
 		# Force python3 version set in this cmake file.
 		# Python is used to generate LLVMBuild.cmake file. Python2 generates this file
 		# with UNIX paths, which do not work. Python3 generates proper Windows paths.
-		-DPYTHON_EXECUTABLE=${PYTHON3_EXECUTABLE}
+		-DPYTHON_EXECUTABLE=${PYTHON_EXECUTABLE}
 		-DKEYSTONE_BUILD_STATIC_RUNTIME=OFF
 		# Force the use of the same compiler as used to build the top-level
 		# project. Otherwise, the external project may pick up a different

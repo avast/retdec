@@ -36,8 +36,8 @@ ExternalProject_Add(llvm-project
 		# This has no effect on Windows with MSVC, but is useful on Linux.
 		-DCMAKE_BUILD_TYPE=Release
 
-		# Force Python3 (see the comment when setting PYTHON3_EXECUTABLE).
-		-DPYTHON_EXECUTABLE=${PYTHON3_EXECUTABLE}
+		# Force Python3.
+		-DPYTHON_EXECUTABLE=${PYTHON_EXECUTABLE}
 
 		# Targets to be build.
 		-DLLVM_TARGETS_TO_BUILD=X86

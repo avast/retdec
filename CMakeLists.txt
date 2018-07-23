@@ -16,13 +16,8 @@ set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-# RetDec, and some dependencies (e.g. LLVM, Keystone), require python3, so we
-# first check whether python3 is installed as "python3", and if not, we suppose
-# that `python` runs python3.
-find_program(PYTHON3_EXECUTABLE "python3")
-if(NOT PYTHON3_EXECUTABLE)
-	find_program(PYTHON3_EXECUTABLE "python")
-endif()
+# RetDec, and some dependencies (e.g. LLVM, Keystone), require python3.
+find_package(PythonInterp 3.4 REQUIRED)
 
 function(append_if condition value)
   if (${condition})
