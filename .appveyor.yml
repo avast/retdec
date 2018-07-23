@@ -21,7 +21,7 @@ before_build:
   - cmd: cmake -DCMAKE_CXX_FLAGS_RELEASE="/Od -DNDEBUG" -G"%CMAKE_GENERATOR%" -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="install" -DRETDEC_TESTS=ON -DRETDEC_DEV_TOOLS=ON ..
 
 build_script:
-  = cmd: cmake --build . --config Release --target install -- -m
+  - cmd: cmake --build . --config Release --target install -- -m
 
 test_script:
   # Check that install is movable and that it does not need the build directory.
