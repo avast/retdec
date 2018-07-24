@@ -1230,8 +1230,9 @@ void DataFlowEntry::applyToIrVariadic()
 		for (Type* t : types)
 		{
 			LOG << "\ttype : " << llvmObjToString(t) << std::endl;
-			int sz = static_cast<int>(_abi->getTypeByteSize(t));
-			sz = sz > 4 ? 8 : 4;
+			uint32_t sz = _abi->getTypeByteSize(t);
+			uint32_t ws = _abi->getTypeByteSize(_abi->getDefaultPointerType());
+			sz = sz > ws ? ws*2:ws;
 
 			if (t->isFloatTy() && _abi->usesFPRegistersForParameters() && faIdx < paramFPRegs.size())
 			{
@@ -1817,7 +1818,7 @@ void ParamFilter::orderRegistersBy(
 void ParamFilter::leaveOnlyContinuousStackOffsets()
 {
 	retdec::utils::Maybe<int> prevOff;
-	int gap = _abi.wordSize()*2/8;
+	int gap = _abi.getTypeByteSize(_abi.getDefaultPointerType()) * 2;
 
 	auto it = _stackValues.begin();
 	while (it != _stackValues.end())
