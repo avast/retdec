@@ -147,17 +147,17 @@ class _WindowsProcess(subprocess.Popen):
     """An internal wrapper around ``subprocess.Popen`` for Windows."""
 
     def __init__(self, **kwargs):
-        # Shell scripts need to be run with 'sh' on Windows. Simply running the
+        # Python scripts need to be run with 'python' on Windows. Simply running the
         # script by its path doesn't work. That is, for example, instead of
         #
-        #     /path/to/retdec-decompiler.sh
+        #     /path/to/retdec-decompiler.py
         #
         # we need to run
         #
-        #     sh /path/to/retdec-decompiler.sh
+        #     python /path/to/retdec-decompiler.py
         #
-        if 'args' in kwargs and kwargs['args'] and kwargs['args'][0].endswith('.sh'):
-            kwargs['args'].insert(0, 'sh')
+        if 'args' in kwargs and kwargs['args'] and kwargs['args'][0].endswith('.py'):
+            kwargs['args'].insert(0, sys.executable)
         super().__init__(**kwargs)
 
     def kill(self):
