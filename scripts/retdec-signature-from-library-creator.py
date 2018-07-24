@@ -69,7 +69,7 @@ class SigFromLib:
 
     def print_error_and_cleanup(self, message):
         if not self.args.no_cleanup:
-            Utils.remove_dir_forced(self.tmp_dir_path)
+            shutil.rmtree(self.tmp_dir_path, ignore_errors=True)
         Utils.print_error(message)
 
     def _check_arguments(self):
@@ -157,7 +157,7 @@ class SigFromLib:
 
         # Do cleanup.
         if not self.args.no_cleanup:
-            Utils.remove_dir_forced(self.tmp_dir_path)
+            shutil.rmtree(self.tmp_dir_path, ignore_errors=True)
 
         return result
 

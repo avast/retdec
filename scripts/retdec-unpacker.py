@@ -150,8 +150,6 @@ class Unpacker:
             print('##### Unpacking by using generic unpacker: nothing to do')
         else:
             # Do not return -> try the next unpacker
-            # UNPACKER_EXIT_CODE_UNPACKING_FAILED
-            # UNPACKER_EXIT_CODE_PREPROCESSING_ERROR
             print('##### Unpacking by using generic unpacker: failed')
 
         if Utils.tool_exists('upx'):
@@ -179,7 +177,6 @@ class Unpacker:
         else:
             print('##### \'upx\' not available: nothing to do')
 
-        # Do not return -> try the next unpacker
         # Return.
         if unpacker_rc >= self.UNPACKER_EXIT_CODE_UNPACKING_FAILED:
             return unpacker_output, self.RET_UNPACKER_FAILED

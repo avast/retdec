@@ -2,6 +2,7 @@
 
 import os
 
+
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 
 """Paths (everything has to be without the ending slash '/').

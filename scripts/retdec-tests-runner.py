@@ -17,13 +17,11 @@ except ImportError:
     # str).
     class NoColorsColorama(str):
         """Fake implementation of colorama without color support."""
-
         def __call__(self, *args, **kwargs):
             pass
 
         def __getattr__(self, _):
             return self
-
     colorama = NoColorsColorama()
     print("warning: module 'colorama' (https://pypi.python.org/pypi/colorama)",
           "not found, running without color support", file=sys.stderr)
@@ -59,17 +57,14 @@ def unit_tests_in_dir(path):
     Arguments:
         path - path to the directory with unit tests
     """
-
     tests = []
 
     for dirpath, _, filenames in os.walk(path):
         for f in filenames:
             if f.startswith('retdec-tests-') and not f.endswith('.sh') and not f.endswith('.py'):
                 tests.append(os.path.abspath(os.path.join(dirpath, f)))
-                #pass
 
     tests.sort()
-
     return tests
 
 
@@ -101,7 +96,6 @@ def run_unit_tests_in_dir(path, verbose=False):
 
     Returns 0 if all tests passed, 1 otherwise.
     """
-
     tests_failed = False
     tests_run = False
 

@@ -184,19 +184,8 @@ class Utils:
             os.remove(file)
 
     @staticmethod
-    def remove_dir_forced(path):
-        if os.path.exists(path):
-            for n in os.listdir(path):
-                p = os.path.join(path, n)
-                if os.path.isdir(p):
-                    shutil.rmtree(p, ignore_errors=True)
-                else:
-                    os.unlink(p)
-            shutil.rmtree(path, ignore_errors=True)
-
-    @staticmethod
     def is_windows():
-        return sys.platform in ('win32', 'msys')
+        return sys.platform in ('win32', 'msys') or os.name == 'nt'
 
     @staticmethod
     def print_error(error):
@@ -209,7 +198,7 @@ class Utils:
         """Print error message to stderr, and exit with the given return code.
         """
         Utils.print_error(error)
-        sys.exit(1)
+        sys.exit(ret_code)
 
     @staticmethod
     def print_warning(warning):
@@ -291,7 +280,6 @@ class Utils:
         """
         ret = subprocess.call([config.AR, path, '--name', name, '--output', output],
                               stderr=subprocess.STDOUT, stdout=None)
-
         return ret != 0
 
     @staticmethod

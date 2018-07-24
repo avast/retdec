@@ -55,7 +55,7 @@ class ArchiveDecompiler:
     def __init__(self, _args):
         self.args = parse_args(_args)
 
-        self.decompiler_sh_args = ''
+        self.decompiler_args = ''
         self.timeout = 300
         self.tmp_archive = ''
         self.use_json_format = False
@@ -81,7 +81,7 @@ class ArchiveDecompiler:
         """Cleans up all temporary files.
         No arguments accepted.
         """
-        Utils.remove_dir_forced(self.tmp_archive)
+        shutil.rmtree(self.tmp_archive, ignore_errors=True)
 
     def _check_arguments(self):
         if self.args.list_mode:
@@ -104,7 +104,7 @@ class ArchiveDecompiler:
                 self.use_json_format = True
 
         if self.args.arg_list:
-            self.decompiler_sh_args = self.args.arg_list
+            self.decompiler_args = self.args.arg_list
 
         if self.args.file:
             if not os.path.isfile(self.args.file):
@@ -167,8 +167,8 @@ class ArchiveDecompiler:
         # Run the decompilation script over all the found files.
         print('Running \`%s' % config.DECOMPILER, end='')
 
-        if self.decompiler_sh_args:
-            print(' '.join(self.decompiler_sh_args), end='')
+        if self.decompiler_args:
+            print(' '.join(self.decompiler_args), end='')
 
         print('\` over %d files with timeout %d s. (run \`kill %d \` to terminate this script)...' % (
             self.file_count, self.timeout, os.getpid()), file=sys.stderr)
@@ -184,7 +184,7 @@ class ArchiveDecompiler:
             # Do not escape!
             output, _, timeouted = cmd.run_cmd([sys.executable, config.DECOMPILER, '--ar-index=' + str(i), '-o',
                                                 self.library_path + '.file_' + str(file_index) + '.c',
-                                                self.library_path] + self.decompiler_sh_args,
+                                                self.library_path] + self.decompiler_args,
                                                 timeout=self.timeout,
                                                 buffer_output=True)
 

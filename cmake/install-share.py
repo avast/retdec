@@ -59,7 +59,6 @@ def main():
     # Download archive
     arch_url = 'https://github.com/avast-tl/retdec-support/releases/download/%s/%s' % (version, arch_name)
     print('Downloading archive from %s ...' % arch_url)
-
     try:
         urllib.request.urlretrieve(arch_url, arch_path)
     except (urllib.request.HTTPError, urllib.request.URLError):
@@ -69,7 +68,6 @@ def main():
 
     # Compute hash of the downloaded archive.
     print('Verfifying archive\'s checksum ...')
-
     sha256 = hashlib.sha256()
     with open(arch_path, 'rb') as f:
         try:
@@ -78,7 +76,6 @@ def main():
             print('ERROR: failed to compute the SHA-256 hash of the archive')
             cleanup(support_dir)
             sys.exit(1)
-
     sha256hash = sha256.hexdigest()
 
     # Check that hash is ok.
