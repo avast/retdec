@@ -137,6 +137,11 @@ llvm::GlobalVariable* Abi::getFPReturnRegister() const
 	return getRegister(_regFPReturn);
 }
 
+bool Abi::usesFPRegistersForParameters() const
+{
+	return _fpRegsAsParams;
+}
+
 bool Abi::isNopInstruction(AsmInstruction ai)
 {
 	return isNopInstruction(ai.getCapstoneInsn());
