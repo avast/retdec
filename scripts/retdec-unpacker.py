@@ -88,6 +88,8 @@ class Unpacker:
         self.args = parse_args(_args)
         self.input = ''
         self.output = ''
+        self.log_output = False
+        self.unpacker_output = ''
 
     def _check_arguments(self):
         """Check proper combination of input arguments.
@@ -135,55 +137,59 @@ class Unpacker:
         elif self.args.max_memory_half_ram:
             unpacker_params.append('--max-memory-half-ram')
 
-        print()
-        print('##### Trying to unpack ' + self.input + ' into ' + output + ' by using generic unpacker...')
-        print('RUN: ' + config.UNPACKER + ' '.join(unpacker_params))
+        self._print()
+        self._print('##### Trying to unpack ' + self.input + ' into ' + output + ' by using generic unpacker...')
+        self._print('RUN: ' + config.UNPACKER + ' '.join(unpacker_params))
 
         cmd = CmdRunner()
-        unpacker_output, unpacker_rc, _ = cmd.run_cmd([config.UNPACKER] + unpacker_params, buffer_output=True)
-        print(unpacker_output)
+        out, unpacker_rc, _ = cmd.run_cmd([config.UNPACKER] + unpacker_params, buffer_output=True)
+        self._print(out)
+        #self.unpacker_output = self.unpacker_output + out
 
         if unpacker_rc == self.UNPACKER_EXIT_CODE_OK:
-            print('##### Unpacking by using generic unpacker: successfully unpacked')
-            return unpacker_output, self.RET_UNPACK_OK
+            self._print('##### Unpacking by using generic unpacker: successfully unpacked')
+            return self.unpacker_output, self.RET_UNPACK_OK
         elif unpacker_rc == self.UNPACKER_EXIT_CODE_NOTHING_TO_DO:
-            print('##### Unpacking by using generic unpacker: nothing to do')
+            self._print('##### Unpacking by using generic unpacker: nothing to do')
         else:
             # Do not return -> try the next unpacker
-            print('##### Unpacking by using generic unpacker: failed')
+            self._print('##### Unpacking by using generic unpacker: failed')
 
         if Utils.tool_exists('upx'):
             # Do not return -> try the next unpacker
             # Try to unpack via UPX
-            print()
-            print('##### Trying to unpack ' + self.input + ' into ' + output + ' by using UPX...')
-            print('RUN: upx -d ' + self.input + ' -o ' + output)
+            self._print()
+            self._print('##### Trying to unpack ' + self.input + ' into ' + output + ' by using UPX...')
+            self._print('RUN: upx -d ' + self.input + ' -o ' + output)
 
-            unpacker_output, upx_rc, _ = cmd.run_cmd(['upx', '-d', self.input, '-o', output], buffer_output=True)
+            out, upx_rc, _ = cmd.run_cmd(['upx', '-d', self.input, '-o', output], buffer_output=True)
+            #self.unpacker_output = self.unpacker_output + out
+            self._print(out)
 
             if upx_rc == 0:
-                print('##### Unpacking by using UPX: successfully unpacked')
+                self._print('##### Unpacking by using UPX: successfully unpacked')
                 if self.args.extended_exit_codes:
                     if unpacker_rc == self.UNPACKER_EXIT_CODE_NOTHING_TO_DO:
-                        return unpacker_output, self.RET_UNPACKER_NOTHING_TO_DO_OTHERS_OK
+                        return self.unpacker_output, self.RET_UNPACKER_NOTHING_TO_DO_OTHERS_OK
                     elif unpacker_rc >= self.UNPACKER_EXIT_CODE_UNPACKING_FAILED:
-                        return unpacker_output, self.RET_UNPACKER_FAILED_OTHERS_OK
+                        return self.unpacker_output, self.RET_UNPACKER_FAILED_OTHERS_OK
                 else:
-                    return unpacker_output, self.RET_UNPACK_OK
+                    return self.unpacker_output, self.RET_UNPACK_OK
             else:
                 # We cannot distinguish whether upx failed or the input file was
                 # not upx-packed
-                print('##### Unpacking by using UPX: nothing to do')
+                self._print('##### Unpacking by using UPX: nothing to do')
         else:
-            print('##### \'upx\' not available: nothing to do')
+            self._print('##### \'upx\' not available: nothing to do')
 
         # Return.
         if unpacker_rc >= self.UNPACKER_EXIT_CODE_UNPACKING_FAILED:
-            return unpacker_output, self.RET_UNPACKER_FAILED
+            return self.unpacker_output, self.RET_UNPACKER_FAILED
         else:
-            return unpacker_output, self.RET_NOTHING_TO_DO
+            return self.unpacker_output, self.RET_NOTHING_TO_DO
 
-    def unpack_all(self):
+    def unpack_all(self, log_output=False):
+        self.log_output = log_output
         if not self._check_arguments():
             return '', self.UNPACKER_EXIT_CODE_OTHER
 
@@ -210,6 +216,12 @@ class Unpacker:
                 break
 
         return (res_out, return_code) if res_rc == self.UNPACKER_EXIT_CODE_OTHER else (res_out, res_rc)
+
+    def _print(self, line=''):
+        if self.log_output:
+            self.unpacker_output = self.unpacker_output + line
+        else:
+            print(line)
 
 
 if __name__ == '__main__':

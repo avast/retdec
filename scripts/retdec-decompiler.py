@@ -844,7 +844,7 @@ class Decompiler:
 
             if self.args.generate_log:
                 self.log_fileinfo_memory, self.log_fileinfo_time, self.log_fileinfo_output, self.log_fileinfo_rc = \
-                    cmd.run_measured_cmd([config.FILEINFO] + fileinfo_params)
+                    cmd.run_measured_cmd([config.FILEINFO] + fileinfo_params, timeout=config.LOG_TIMEOUT)
 
                 print(self.log_fileinfo_output)
             else:
@@ -877,9 +877,10 @@ class Decompiler:
             unpacker = Unpacker(unpack_params)
             if self.args.generate_log:
                 # we should get the output from the unpacker tool
-                self.log_unpacker_output, self.log_unpacker_rc = unpacker.unpack_all()
+                self.log_unpacker_output, self.log_unpacker_rc = unpacker.unpack_all(log_output=True)
 
                 unpacker_rc = self.log_unpacker_rc
+                print(self.log_unpacker_output)
             else:
                 _, unpacker_rc = unpacker.unpack_all()
 
@@ -919,7 +920,7 @@ class Decompiler:
 
                 if self.args.generate_log:
                     fileinfo_memory, fileinfo_time, self.log_fileinfo_output, self.log_fileinfo_rc \
-                        = cmd.run_measured_cmd([config.FILEINFO] + fileinfo_params)
+                        = cmd.run_measured_cmd([config.FILEINFO] + fileinfo_params, timeout=config.LOG_TIMEOUT)
 
                     fileinfo_rc = self.log_fileinfo_rc
                     self.log_fileinfo_time += fileinfo_time
@@ -1147,7 +1148,7 @@ class Decompiler:
             if self.args.generate_log:
                 self.log_bin2llvmir_memory, self.log_bin2llvmir_time, self.log_bin2llvmir_output, \
                 self.log_bin2llvmir_rc = cmd.run_measured_cmd([config.BIN2LLVMIR] + bin2llvmir_params + ['-o',
-                                                               self.out_backend_bc])
+                                                               self.out_backend_bc], timeout=config.LOG_TIMEOUT)
 
                 bin2llvmir_rc = self.log_bin2llvmir_rc
                 print(self.log_bin2llvmir_output)
@@ -1254,7 +1255,7 @@ class Decompiler:
 
         if self.args.generate_log:
             self.log_llvmir2hll_memory, self.log_llvmir2hll_time, self.log_llvmir2hll_output, \
-            self.log_llvmir2hll_rc = cmd.run_measured_cmd([config.LLVMIR2HLL] + llvmir2hll_params)
+            self.log_llvmir2hll_rc = cmd.run_measured_cmd([config.LLVMIR2HLL] + llvmir2hll_params, timeout=config.LOG_TIMEOUT)
 
             llvmir2hll_rc = self.log_llvmir2hll_rc
             print(self.log_llvmir2hll_output)

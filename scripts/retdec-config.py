@@ -85,3 +85,7 @@ LLVMIR2HLL = os.path.join(INSTALL_BIN_DIR, 'retdec-llvmir2hll')
 BIN2LLVMIR = os.path.join(INSTALL_BIN_DIR, 'retdec-bin2llvmir')
 IDA_COLORIZER = os.path.join(INSTALL_BIN_DIR, 'retdec-color-c.py')
 UNPACKER = os.path.join(INSTALL_BIN_DIR, 'retdec-unpacker')
+
+# Other.
+LOG_TIME = ['/usr/bin/time', '-v']
+LOG_TIMEOUT = 300
