@@ -225,6 +225,11 @@ std::vector<uint32_t> Abi::parameterRegisters() const
 	return _paramRegs;
 }
 
+std::vector<uint32_t> Abi::parameterFPRegisters() const
+{
+	return _paramFPRegs;
+}
+
 bool Abi::canHoldReturnValue(const llvm::Value* val) const
 {
 	if (returnsOnStack)

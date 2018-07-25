@@ -42,6 +42,7 @@ class Abi
 		bool isRegister(const llvm::Value* val) const;
 		bool isRegister(const llvm::Value* val, uint32_t r) const;
 		std::vector<uint32_t> parameterRegisters() const;
+		std::vector<uint32_t> parameterFPRegisters() const;
 		bool isFlagRegister(const llvm::Value* val);
 		bool isStackPointerRegister(const llvm::Value* val);
 		bool isZeroRegister(const llvm::Value* val);
