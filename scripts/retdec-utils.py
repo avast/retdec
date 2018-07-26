@@ -16,6 +16,7 @@ config = importlib.import_module('retdec-config')
 
 
 TIMEOUT_RC = 137
+BAD_ALLOC_RC = 135
 
 
 """Taken from https://github.com/avast-tl/retdec-regression-tests-framework/blob/master/regression_tests/cmd_runner.py
@@ -91,6 +92,10 @@ class CmdRunner:
                 if track_memory:
                     memory = self._get_memory_from_measured_output(output)
                     output = self._get_clean_output_from_measured_output(output)
+
+            if p.returncode == 134 and output and 'std::bad_alloc' in output:
+                return memory, output, BAD_ALLOC_RC, False
+
             return memory, output, p.returncode, False
         except subprocess.TimeoutExpired:
             # Kill the process, along with all its child processes.
