@@ -78,6 +78,11 @@ class CmdRunner:
 
             p = self.start(cmd, buffer_output)
 
+            def signal_handler(sig, frame):
+                p.kill()
+            signal.signal(signal.SIGINT, signal_handler)
+            signal.signal(signal.SIGTERM, signal_handler)
+
             output, _ = p.communicate(input, timeout)
 
             if output:
