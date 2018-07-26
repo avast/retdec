@@ -40,15 +40,19 @@ Currently, we support only Windows (7 or later), Linux, and unofficially macOS.
 
 2. Install [Microsoft Visual C++ Redistributable for Visual Studio 2015](https://www.microsoft.com/en-us/download/details.aspx?id=48145).
 
-3. Install [MSYS2](http://www.msys2.org/) and other needed applications by following RetDec's [Windows environment setup guide](https://github.com/avast-tl/retdec/wiki/Windows-Environment).
+3. Install the following programs:
+
+    * Python (version >= 3.4)
+    * [UPX](https://upx.github.io/)
+    * [Graphviz](https://graphviz.gitlab.io/_pages/Download/windows/graphviz-2.38.msi)
 
 3. Now, you are all set to run the decompiler. To decompile a binary file named `test.exe`, run
 
-    ```sh
-    bash $RETDEC_INSTALL_DIR/bin/retdec-decompiler.sh test.exe
+    ```
+    python3 $RETDEC_INSTALL_DIR/bin/retdec-decompiler.py test.exe
     ```
 
-   For more information, run `retdec-decompiler.sh` with `--help`.
+   For more information, run `retdec-decompiler.py` with `--help`.
 
 ### Linux
 
@@ -56,18 +60,17 @@ Currently, we support only Windows (7 or later), Linux, and unofficially macOS.
 
 2. After you have built the decompiler, you will need to install the following packages via your distribution's package manager:
 
-    * [Bash](https://www.gnu.org/software/bash/) (version >= 4)
+    * Python (version >= 3.4)
     * [UPX](https://upx.github.io/)
-    * [bc](https://www.gnu.org/software/bc/)
     * [Graphviz](http://www.graphviz.org/)
 
 3. Now, you are all set to run the decompiler. To decompile a binary file named `test.exe`, run
 
-    ```sh
-    $RETDEC_INSTALL_DIR/bin/retdec-decompiler.sh test.exe
+    ```
+    $RETDEC_INSTALL_DIR/bin/retdec-decompiler.py test.exe
     ```
 
-   For more information, run `retdec-decompiler.sh` with `--help`.
+   For more information, run `retdec-decompiler.py` with `--help`.
 
 ### macOS
 
@@ -77,19 +80,19 @@ Currently, we support only Windows (7 or later), Linux, and unofficially macOS.
 
 2. After you have built the decompiler, you will need to install the following packages:
 
-    * [Bash](https://www.gnu.org/software/bash/) (version >= 4; has to be before the default `bash` 3.2 in your `PATH`)
+    * Python (version >= 3.4)
     * [UPX](https://upx.github.io/)
     * [Graphviz](http://www.graphviz.org/)
-    * [GNU coreutils](https://www.gnu.org/software/coreutils) (ensure that you have `$(brew --prefix coreutils)/libexec/gnubin` in your `PATH`)
-    * [GNU getopt](https://www.gnu.org/software/libc/manual/html_node/Getopt.html) (has to be before the default `getopt` in your `PATH`)
+    * [GNU coreutils](https://www.gnu.org/software/coreutils) (ensure that you have `$(brew --prefix coreutils)/libexec/gnubin` in your `PATH`) (TODO: still needed?)
+    * [GNU getopt](https://www.gnu.org/software/libc/manual/html_node/Getopt.html) (has to be before the default `getopt` in your `PATH`) (TODO: still needed?)
 
 3. Now, you are all set to run the decompiler. To decompile a binary file named `test.exe`, run
 
     ```
-    $RETDEC_INSTALL_DIR/bin/retdec-decompiler.sh test.exe
+    $RETDEC_INSTALL_DIR/bin/retdec-decompiler.py test.exe
     ```
 
-   For more information, run `retdec-decompiler.sh` with `--help`.
+   For more information, run `retdec-decompiler.py` with `--help`.
 
 ## Build and Installation
 
@@ -110,7 +113,7 @@ This section describes a local build and installation of RetDec. Instructions fo
 * [pkg-config](https://www.freedesktop.org/wiki/Software/pkg-config/)
 * [m4](https://www.gnu.org/software/m4/m4.html)
 * [coreutils](https://www.gnu.org/software/coreutils)
-* [wget](https://www.gnu.org/software/wget/)
+* [wget](https://www.gnu.org/software/wget/) (TODO: still needed?)
 * [ncurses](http://invisible-island.net/ncurses/) (for `libtinfo`)
 * [zlib](http://zlib.net/)
 * Optional: [Doxygen](http://www.stack.nl/~dimitri/doxygen/) and [Graphviz](http://www.graphviz.org/) for generating API documentation
@@ -136,10 +139,12 @@ sudo pacman -S base-devel cmake git perl python3 bash bison flex autoconf automa
 #### Windows
 
 * Microsoft Visual C++ (version >= Visual Studio 2015 Update 2)
+* [CMake](https://cmake.org/) (version >= 3.6)
 * [Git](https://git-scm.com/)
-* [MSYS2](http://www.msys2.org/) and some other applications. Follow RetDec's [Windows environment setup guide](https://github.com/avast-tl/retdec/wiki/Windows-Environment) to get everything you need on Windows.
+* TODO: bison, flex
 * [Active Perl](https://www.activestate.com/activeperl). It needs to be the first Perl in `PATH`, or it has to be provided to CMake using `CMAKE_PROGRAM_PATH` variable, e.g. `-DCMAKE_PROGRAM_PATH=/c/perl/bin`.
 * [Python](https://www.python.org/) (version >= 3.4)
+* Optional: [Doxygen](http://ftp.stack.nl/pub/users/dimitri/doxygen-1.8.13-setup.exe) and [Graphviz](https://graphviz.gitlab.io/_pages/Download/windows/graphviz-2.38.msi) for generating API documentation
 
 #### macOS
 
@@ -153,7 +158,7 @@ Packages should be preferably installed via [Homebrew](https://brew.sh).
 * [Bison](https://www.gnu.org/software/bison/) (version >= 3.0)
 * [Flex](https://www.gnu.org/software/flex/) (version >= 2.6)
 * [autotools](https://en.wikipedia.org/wiki/GNU_Build_System) ([autoconf](https://www.gnu.org/software/autoconf/autoconf.html), [automake](https://www.gnu.org/software/automake/), and [libtool](https://www.gnu.org/software/libtool/))
-* [wget](https://www.gnu.org/software/wget/)
+* [wget](https://www.gnu.org/software/wget/) (TODO: still needed?)
 * Optional: [Doxygen](http://www.stack.nl/~dimitri/doxygen/) and [Graphviz](http://www.graphviz.org/) for generating API documentation
 
 ### Process
