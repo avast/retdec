@@ -15,6 +15,9 @@ import importlib
 config = importlib.import_module('retdec-config')
 
 
+TIMEOUT_RC = 137
+
+
 """Taken from https://github.com/avast-tl/retdec-regression-tests-framework/blob/master/regression_tests/cmd_runner.py
 """
 
@@ -92,7 +95,7 @@ class CmdRunner:
             if output:
                 output = output.rstrip()
                 output = self._strip_shell_colors(output)
-            return memory, output, p.returncode, True
+            return memory, output, TIMEOUT_RC, True
 
     def start(self, cmd, buffer_output=False, stdout=subprocess.STDOUT):
         """Starts the given command and returns a handler to it.
