@@ -17,11 +17,11 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 function(append_if condition value)
-  if (${condition})
-    foreach(variable ${ARGN})
-      set(${variable} "${${variable}} ${value}" PARENT_SCOPE)
-    endforeach(variable)
-  endif()
+	if (${condition})
+		foreach(variable ${ARGN})
+			set(${variable} "${${variable}} ${value}" PARENT_SCOPE)
+		endforeach(variable)
+	endif()
 endfunction()
 
 # On Linux and macOS, set RPATH relative to the origin of the installed
