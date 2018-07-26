@@ -9,6 +9,7 @@
 #include "retdec/bin2llvmir/providers/abi/mips.h"
 #include "retdec/bin2llvmir/providers/abi/powerpc.h"
 #include "retdec/bin2llvmir/providers/abi/x86.h"
+#include "retdec/bin2llvmir/providers/abi/pic32.h"
 
 using namespace llvm;
 
@@ -277,9 +278,14 @@ Abi* AbiProvider::addAbi(
 		auto p = _module2abi.emplace(m, std::make_unique<AbiArm>(m, c));
 		return p.first->second.get();
 	}
-	else if (c->getConfig().architecture.isMipsOrPic32())
+	else if (c->getConfig().architecture.isMips())
 	{
 		auto p = _module2abi.emplace(m, std::make_unique<AbiMips>(m, c));
+		return p.first->second.get();
+	}
+	else if (c->getConfig().architecture.isPic32())
+	{
+		auto p = _module2abi.emplace(m, std::make_unique<AbiPic32>(m, c));
 		return p.first->second.get();
 	}
 	else if (c->getConfig().architecture.isPpc())
