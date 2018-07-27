@@ -11,10 +11,6 @@ RUN apt-get -y update && \
 	git                                                 \
 	perl                                                \
 	python3                                             \
-	bash                                                \
-	coreutils                                           \
-	wget                                                \
-	bc                                                  \
 	doxygen                                             \
 	graphviz                                            \
 	upx                                                 \
