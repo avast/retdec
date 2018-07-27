@@ -153,8 +153,6 @@ bool ParamReturn::run()
 
 	_RDA.runOnModule(*_module, AbiProvider::getAbi(_module));
 
-//dumpModuleToFile(_module);
-
 	collectAllCalls();
 	dumpInfo();
 	filterCalls();
@@ -162,9 +160,6 @@ bool ParamReturn::run()
 	applyToIr();
 
 	_RDA.clear();
-
-//dumpModuleToFile(_module);
-//exit(1);
 
 	return false;
 }
