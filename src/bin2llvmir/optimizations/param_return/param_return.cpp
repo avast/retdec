@@ -278,7 +278,7 @@ CallEntry::CallEntry(llvm::CallInst* c) :
 /**
  * Remove all registers that are not used to pass argument according to ABI.
  */
-void CallEntry::filterRegisters(Abi* _abi)
+void CallEntry::filterStoreValues(Abi* _abi)
 {
 	auto it = possibleArgStores.begin();
 	while (it != possibleArgStores.end())
@@ -916,7 +916,7 @@ void DataFlowEntry::filter()
 
 	for (CallEntry& e : calls)
 	{
-		e.filterRegisters(_abi);
+		e.filterStoreValues(_abi);
 		e.filterSort(_config, _abi);
 		e.filterLeaveOnlyContinuousStackOffsets(_config, _abi);
 		e.filterLeaveOnlyNeededStackOffsets(_config, _abi);
