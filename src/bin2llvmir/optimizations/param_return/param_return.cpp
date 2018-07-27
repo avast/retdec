@@ -280,44 +280,32 @@ CallEntry::CallEntry(llvm::CallInst* c) :
  */
 void CallEntry::filterStoreValues(Abi* _abi)
 {
-	auto it = possibleArgStores.begin();
-	while (it != possibleArgStores.end())
-	{
-		auto* op = (*it)->getPointerOperand();
-		if (_abi->valueCanBeParameter(op) == false)
-		{
-			it = possibleArgStores.erase(it);
-		}
-		else
-		{
-			++it;
-		}
-	}
+	possibleArgStores.erase(
+		std::remove_if(possibleArgStores.begin(), possibleArgStores.end(),
+			[_abi](const StoreInst* si)
+			{
+				auto op = si->getPointerOperand();
+				return !_abi->valueCanBeParameter(op);
+			}),
+		possibleArgStores.end());
 }
 
 void DataFlowEntry::filterRegistersArgLoads()
 {
-	auto it = argLoads.begin();
-	while (it != argLoads.end())
-	{
-		auto* op = (*it)->getPointerOperand();
-		if (_abi->valueCanBeParameter(op) == false)
-		{
-			it = argLoads.erase(it);
-		}
-		else
-		{
-			auto aOff = _config->getStackVariableOffset(op);
-			if (aOff.isDefined() && aOff < 0)
+	argLoads.erase(
+		std::remove_if(argLoads.begin(), argLoads.end(),
+			[this](const LoadInst* li)
 			{
-				it = argLoads.erase(it);
-			}
-			else
-			{
-				++it;
-			}
-		}
-	}
+				auto* op = li->getPointerOperand();
+				if (_abi->valueCanBeParameter(op))
+				{
+					auto aOff = _config->getStackVariableOffset(op);
+					return aOff.isDefined() && aOff < 0;
+				}
+
+				return true;
+			}),
+		argLoads.end());
 }
 
 /**
