@@ -42,11 +42,11 @@ Currently, we support only Windows (7 or later), Linux, and unofficially macOS.
 
 3. Install the following programs:
 
-    * Python (version >= 3.4)
+    * [Python](https://www.python.org/) (version >= 3.4)
     * [UPX](https://upx.github.io/)
     * [Graphviz](https://graphviz.gitlab.io/_pages/Download/windows/graphviz-2.38.msi)
 
-3. Now, you are all set to run the decompiler. To decompile a binary file named `test.exe`, run
+4. Now, you are all set to run the decompiler. To decompile a binary file named `test.exe`, run
 
     ```
     python3 $RETDEC_INSTALL_DIR/bin/retdec-decompiler.py test.exe
@@ -60,7 +60,7 @@ Currently, we support only Windows (7 or later), Linux, and unofficially macOS.
 
 2. After you have built the decompiler, you will need to install the following packages via your distribution's package manager:
 
-    * Python (version >= 3.4)
+    * [Python](https://www.python.org/) (version >= 3.4)
     * [UPX](https://upx.github.io/)
     * [Graphviz](http://www.graphviz.org/)
 
@@ -80,11 +80,9 @@ Currently, we support only Windows (7 or later), Linux, and unofficially macOS.
 
 2. After you have built the decompiler, you will need to install the following packages:
 
-    * Python (version >= 3.4)
+    * [Python](https://www.python.org/) (version >= 3.4)
     * [UPX](https://upx.github.io/)
     * [Graphviz](http://www.graphviz.org/)
-    * [GNU coreutils](https://www.gnu.org/software/coreutils) (ensure that you have `$(brew --prefix coreutils)/libexec/gnubin` in your `PATH`) (TODO: still needed?)
-    * [GNU getopt](https://www.gnu.org/software/libc/manual/html_node/Getopt.html) (has to be before the default `getopt` in your `PATH`) (TODO: still needed?)
 
 3. Now, you are all set to run the decompiler. To decompile a binary file named `test.exe`, run
 
@@ -112,8 +110,6 @@ This section describes a local build and installation of RetDec. Instructions fo
 * [autotools](https://en.wikipedia.org/wiki/GNU_Build_System) ([autoconf](https://www.gnu.org/software/autoconf/autoconf.html), [automake](https://www.gnu.org/software/automake/), and [libtool](https://www.gnu.org/software/libtool/))
 * [pkg-config](https://www.freedesktop.org/wiki/Software/pkg-config/)
 * [m4](https://www.gnu.org/software/m4/m4.html)
-* [coreutils](https://www.gnu.org/software/coreutils)
-* [wget](https://www.gnu.org/software/wget/) (TODO: still needed?)
 * [ncurses](http://invisible-island.net/ncurses/) (for `libtinfo`)
 * [zlib](http://zlib.net/)
 * Optional: [Doxygen](http://www.stack.nl/~dimitri/doxygen/) and [Graphviz](http://www.graphviz.org/) for generating API documentation
@@ -121,19 +117,19 @@ This section describes a local build and installation of RetDec. Instructions fo
 On Debian-based distributions (e.g. Ubuntu), the required packages can be installed with `apt-get`:
 
 ```sh
-sudo apt-get install build-essential cmake git perl python3 bash bison flex autoconf automake libtool pkg-config m4 coreutils zlib1g-dev libtinfo-dev wget bc upx doxygen graphviz
+sudo apt-get install build-essential cmake git perl python3 bison flex autoconf automake libtool pkg-config m4 zlib1g-dev libtinfo-dev upx doxygen graphviz
 ```
 
 On RPM-based distributions (e.g. Fedora), the required packages can be installed with `dnf`:
 
 ```sh
-sudo dnf install gcc gcc-c++ cmake make git perl python3 bash bison flex autoconf automake libtool pkg-config m4 coreutils zlib-devel ncurses-devel wget bc upx doxygen graphviz
+sudo dnf install gcc gcc-c++ cmake make git perl python3 bison flex autoconf automake libtool pkg-config m4 zlib-devel ncurses-devel upx doxygen graphviz
 ```
 
 On Arch Linux, the required packages can be installed with `pacman`:
 
 ```sh
-sudo pacman -S base-devel cmake git perl python3 bash bison flex autoconf automake libtool pkg-config m4 coreutils zlib ncurses wget bc upx doxygen graphviz
+sudo pacman -S base-devel cmake git perl python3 bison flex autoconf automake libtool pkg-config m4 zlib ncurses upx doxygen graphviz
 ```
 
 #### Windows
@@ -141,7 +137,7 @@ sudo pacman -S base-devel cmake git perl python3 bash bison flex autoconf automa
 * Microsoft Visual C++ (version >= Visual Studio 2015 Update 2)
 * [CMake](https://cmake.org/) (version >= 3.6)
 * [Git](https://git-scm.com/)
-* TODO: bison, flex
+* [Flex+Bison](https://sourceforge.net/projects/winflexbison/files/win_flex_bison3-latest.zip/download) from the [Win flex-bison project](https://sourceforge.net/projects/winflexbison/). Add the extracted directory to the system `Path` ((HOWTO)[https://www.computerhope.com/issues/ch000549.htm]).
 * [Active Perl](https://www.activestate.com/activeperl). It needs to be the first Perl in `PATH`, or it has to be provided to CMake using `CMAKE_PROGRAM_PATH` variable, e.g. `-DCMAKE_PROGRAM_PATH=/c/perl/bin`.
 * [Python](https://www.python.org/) (version >= 3.4)
 * Optional: [Doxygen](http://ftp.stack.nl/pub/users/dimitri/doxygen-1.8.13-setup.exe) and [Graphviz](https://graphviz.gitlab.io/_pages/Download/windows/graphviz-2.38.msi) for generating API documentation
@@ -158,7 +154,6 @@ Packages should be preferably installed via [Homebrew](https://brew.sh).
 * [Bison](https://www.gnu.org/software/bison/) (version >= 3.0)
 * [Flex](https://www.gnu.org/software/flex/) (version >= 2.6)
 * [autotools](https://en.wikipedia.org/wiki/GNU_Build_System) ([autoconf](https://www.gnu.org/software/autoconf/autoconf.html), [automake](https://www.gnu.org/software/automake/), and [libtool](https://www.gnu.org/software/libtool/))
-* [wget](https://www.gnu.org/software/wget/) (TODO: still needed?)
 * Optional: [Doxygen](http://www.stack.nl/~dimitri/doxygen/) and [Graphviz](http://www.graphviz.org/) for generating API documentation
 
 ### Process
@@ -233,7 +228,7 @@ chmod 0777 /path/to/local/directory
 ```
 Now, you can run the decompiler inside a container:
 ```
-docker run --rm -v /path/to/local/directory:/destination retdec retdec-decompiler.sh /destination/binary
+docker run --rm -v /path/to/local/directory:/destination retdec retdec-decompiler.py /destination/binary
 ```
 Output files will be generated to the same directory (e.g. `/path/to/local/directory`).
 
@@ -280,16 +275,16 @@ This repository contains the following tools:
 * `unpackertool` - plugin-based unpacker (installed as `retdec-unpacker`).
 
 This repository contains the following scripts:
-* `retdec-decompiler.sh` - the main decompilation script binding it all together. This is the tool to use for full binary-to-C decompilations.
-* Support scripts used by `retdec-decompiler.sh`:
+* `retdec-decompiler.py` - the main decompilation script binding it all together. This is the tool to use for full binary-to-C decompilations.
+* Support scripts used by `retdec-decompiler.py`:
   * `retdec-color-c.py` - decorates output C sources with IDA color tags - syntax highlighting for IDA.
-  * `retdec-config.sh` - decompiler's configuration file.
-  * `retdec-archive-decompiler.sh` - decompiles objects in the given AR archive.
-  * `retdec-fileinfo.sh` - a Fileinfo tool wrapper.
-  * `retdec-signature-from-library-creator.sh` - extracts function signatures from the given library.
-  * `retdec-unpacker.sh` - tries to unpack the given executable file by using any of the supported unpackers.
-  * `retdec-utils.sh` - a collection of bash utilities.
-* `retdec-tests-runner.sh` - run all tests in the unit test directory.
+  * `retdec-config.py` - decompiler's configuration file.
+  * `retdec-archive-decompiler.py` - decompiles objects in the given AR archive.
+  * `retdec-fileinfo.py` - a Fileinfo tool wrapper.
+  * `retdec-signature-from-library-creator.py` - extracts function signatures from the given library.
+  * `retdec-unpacker.py` - tries to unpack the given executable file by using any of the supported unpackers.
+  * `retdec-utils.py` - a collection of Python utilities.
+* `retdec-tests-runner.py` - run all tests in the unit test directory.
 * `type_extractor`
 
 ## Related Repositories
