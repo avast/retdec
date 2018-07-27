@@ -43,8 +43,8 @@ Currently, we support only Windows (7 or later), Linux, and unofficially macOS.
 3. Install the following programs:
 
     * [Python](https://www.python.org/) (version >= 3.4)
-    * [UPX](https://upx.github.io/)
-    * [Graphviz](https://graphviz.gitlab.io/_pages/Download/windows/graphviz-2.38.msi)
+    * [UPX](https://upx.github.io/) (Optional: if you want to use UPX unpacker in the preprocessing stage)
+    * [Graphviz](https://graphviz.gitlab.io/_pages/Download/windows/graphviz-2.38.msi) (Optional: if you want to generate call or control flow graphs)
 
 4. Now, you are all set to run the decompiler. To decompile a binary file named `test.exe`, run
 
@@ -61,8 +61,8 @@ Currently, we support only Windows (7 or later), Linux, and unofficially macOS.
 2. After you have built the decompiler, you will need to install the following packages via your distribution's package manager:
 
     * [Python](https://www.python.org/) (version >= 3.4)
-    * [UPX](https://upx.github.io/)
-    * [Graphviz](http://www.graphviz.org/)
+    * [UPX](https://upx.github.io/) (Optional: if you want to use UPX unpacker in the preprocessing stage)
+    * [Graphviz](http://www.graphviz.org/) (Optional: if you want to generate call or control flow graphs)
 
 3. Now, you are all set to run the decompiler. To decompile a binary file named `test.exe`, run
 
@@ -81,8 +81,8 @@ Currently, we support only Windows (7 or later), Linux, and unofficially macOS.
 2. After you have built the decompiler, you will need to install the following packages:
 
     * [Python](https://www.python.org/) (version >= 3.4)
-    * [UPX](https://upx.github.io/)
-    * [Graphviz](http://www.graphviz.org/)
+    * [UPX](https://upx.github.io/) (Optional: if you want to use UPX unpacker in the preprocessing stage)
+    * [Graphviz](http://www.graphviz.org/) (Optional: if you want to generate call or control flow graphs)
 
 3. Now, you are all set to run the decompiler. To decompile a binary file named `test.exe`, run
 
