@@ -137,7 +137,7 @@ sudo pacman -S base-devel cmake git perl python3 bison flex autoconf automake li
 * Microsoft Visual C++ (version >= Visual Studio 2015 Update 2)
 * [CMake](https://cmake.org/) (version >= 3.6)
 * [Git](https://git-scm.com/)
-* [Flex+Bison](https://sourceforge.net/projects/winflexbison/files/win_flex_bison3-latest.zip/download) from the [Win flex-bison project](https://sourceforge.net/projects/winflexbison/). Add the extracted directory to the system `Path` ([HOWTO](https://www.computerhope.com/issues/ch000549.htm)).
+* [Flex+Bison](https://sourceforge.net/projects/winflexbison/files/win_flex_bison3-latest.zip/download) ([mirror](https://github.com/avast-tl/retdec-support/releases/download/2018-07-27/win_flex_bison3-latest.zip)) from the [Win flex-bison project](https://sourceforge.net/projects/winflexbison/). Add the extracted directory to the system `Path` ([HOWTO](https://www.computerhope.com/issues/ch000549.htm)).
 * [Active Perl](https://www.activestate.com/activeperl). It needs to be the first Perl in `PATH`, or it has to be provided to CMake using `CMAKE_PROGRAM_PATH` variable, e.g. `-DCMAKE_PROGRAM_PATH=/c/perl/bin`.
 * [Python](https://www.python.org/) (version >= 3.4)
 * Optional: [Doxygen](http://ftp.stack.nl/pub/users/dimitri/doxygen-1.8.13-setup.exe) and [Graphviz](https://graphviz.gitlab.io/_pages/Download/windows/graphviz-2.38.msi) for generating API documentation
