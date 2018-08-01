@@ -46,7 +46,7 @@ Currently, we support only Windows (7 or later), Linux, and unofficially macOS.
     * [UPX](https://upx.github.io/) (Optional: if you want to use UPX unpacker in the preprocessing stage)
     * [Graphviz](https://graphviz.gitlab.io/_pages/Download/windows/graphviz-2.38.msi) (Optional: if you want to generate call or control flow graphs)
 
-4. Now, you are all set to run the decompiler. To decompile a binary file named `test.exe`, run (make sure `python` command runs Python 3)
+4. Now, you are all set to run the decompiler. To decompile a binary file named `test.exe`, run the following command (ensure that `python` runs Python 3; as an alternative, you can try `py -3`)
 
     ```
     python $RETDEC_INSTALL_DIR/bin/retdec-decompiler.py test.exe
