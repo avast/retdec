@@ -72,8 +72,8 @@ def main():
     with open(arch_path, 'rb') as f:
         try:
             sha256.update(f.read())
-        except IOError:
-            print('ERROR: failed to compute the SHA-256 hash of the archive')
+        except IOError as ex:
+            print('ERROR: failed to compute the SHA-256 hash of the archive:', ex)
             cleanup(support_dir)
             sys.exit(1)
     sha256hash = sha256.hexdigest()
