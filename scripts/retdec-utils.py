@@ -6,7 +6,6 @@ import os
 import re
 import shutil
 import signal
-import string
 import subprocess
 import sys
 import time
