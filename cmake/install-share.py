@@ -89,8 +89,8 @@ def main():
     with tarfile.open(arch_path) as tar:
         try:
             tar.extractall(support_dir)
-        except tarfile.ExtractError:
-            print('ERROR: failed to unpack the archive')
+        except tarfile.ExtractError as ex:
+            print('ERROR: failed to unpack the archive', ex)
             cleanup(support_dir)
             sys.exit(1)
 
