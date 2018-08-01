@@ -918,31 +918,6 @@ void DataFlowEntry::filter()
 			}
 		}
 	}
-	else
-	{
-		if (_abi->isArm())
-		{
-			auto armRegs = _abi->parameterRegisters();
-
-			for (CallEntry& e : calls)
-			{
-				std::size_t idx = 0;
-				auto sIt = e.possibleArgStores.begin();
-				while (sIt != e.possibleArgStores.end() && idx < armRegs.size())
-				{
-					StoreInst* s = *sIt;
-					if (_abi->getRegisterId(s->getPointerOperand()) != armRegs[idx])
-					{
-						e.possibleArgStores.erase(sIt, e.possibleArgStores.end());
-						break;
-					}
-
-					++sIt;
-					++idx;
-				}
-			}
-		}
-	}
 
 	setTypeFromUseContext();
 }
