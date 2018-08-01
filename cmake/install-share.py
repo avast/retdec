@@ -50,7 +50,7 @@ def main():
                 print('%s already exists, version is ok' % support_dir)
                 sys.exit(0)
             else:
-                print('versions is not as expected -> replace with the expected version')
+                print('version is not as expected -> replace with the expected version')
         cleanup(support_dir)
 
     # Make sure destination directory exists.
