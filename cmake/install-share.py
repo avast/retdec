@@ -61,8 +61,8 @@ def main():
     print('Downloading archive from %s ...' % arch_url)
     try:
         urllib.request.urlretrieve(arch_url, arch_path)
-    except (urllib.request.HTTPError, urllib.request.URLError):
-        print('ERROR: download failed')
+    except (urllib.request.HTTPError, urllib.request.URLError) as ex:
+        print('ERROR: download failed:', ex)
         cleanup(support_dir)
         sys.exit(1)
 
