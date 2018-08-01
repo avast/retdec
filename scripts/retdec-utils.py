@@ -300,10 +300,10 @@ class Utils:
     def archive_object_count(path):
         """Counts object files in archive.
         1 argument is needed - file path
-        Returns - 1 if error occurred
+        Returns - number of objects in archive, or negative number (-1) if error occurred
         """
         output, rc, _ = CmdRunner().run_cmd([config.AR, path, '--object-count'], buffer_output=True)
-        return int(output) if rc == 0 else 1
+        return int(output) if rc == 0 else -1
 
     @staticmethod
     def archive_list_content(path):
