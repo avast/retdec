@@ -283,7 +283,7 @@ This repository contains the following scripts:
   * `retdec-unpacker.py` - tries to unpack the given executable file by using any of the supported unpackers.
   * `retdec-utils.py` - a collection of Python utilities.
 * `retdec-tests-runner.py` - run all tests in the unit test directory.
-* `type_extractor`
+* `type_extractor` - generation of type information (for internal use only)
 
 ## Related Repositories
 
