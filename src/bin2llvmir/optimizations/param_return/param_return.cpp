@@ -718,32 +718,6 @@ void DataFlowEntry::addRetStores()
 
 void DataFlowEntry::addCall(llvm::CallInst* call)
 {
-	// Pattern:
-	// bc pc   // call prantf()
-	// align 4
-	// prantf():
-	// ...
-	// Call has no args because it is stub, if we let it, it will destroy
-	// all arg from all other calls.
-	//
-	// TODO:
-	// => ignore - this is an ugly hack, solve somehow better.
-	//
-	if (_abi->isArm())
-	{
-		if (auto ai = AsmInstruction(call))
-		{
-			auto* cs = ai.getCapstoneInsn();
-			if ((cs->id == ARM_INS_B || cs->id == ARM_INS_BX)
-					&& cs->detail->arm.op_count == 1
-					&& cs->detail->arm.operands[0].type == ARM_OP_REG
-					&& cs->detail->arm.operands[0].reg == ARM_REG_PC)
-			{
-				return;
-			}
-		}
-	}
-
 	CallEntry ce(call);
 
 	addCallArgs(call, ce);
