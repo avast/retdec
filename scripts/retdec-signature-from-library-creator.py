@@ -122,7 +122,7 @@ class SigFromLib:
 
             # Extract patterns from library.
             pattern_file = os.path.join(self.tmp_dir_path, lib_name) + '.pat'
-            pattern_files = [pattern_file]
+            pattern_files.append(pattern_file)
             result = subprocess.call([config.BIN2PAT, '-o', pattern_file] + objects)
 
             if result != 0:
