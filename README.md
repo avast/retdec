@@ -74,8 +74,6 @@ Currently, we support only Windows (7 or later), Linux, and unofficially macOS.
 
 ### macOS
 
-**Warning: macOS build was added based on community feedback and is not directly supported by the RetDec team. We do not guarantee you that these instructions will work for you. If you encounter any problem with your build, submit an issue so the macOS community can help you out.**
-
 1. There are currently no pre-built packages for macOS. You will have to build and install the decompiler by yourself. The process is described below.
 
 2. After you have built the decompiler, you will need to install the following packages:
