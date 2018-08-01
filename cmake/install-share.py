@@ -67,7 +67,7 @@ def main():
         sys.exit(1)
 
     # Compute hash of the downloaded archive.
-    print('Verfifying archive\'s checksum ...')
+    print('Verifying archive\'s checksum ...')
     sha256 = hashlib.sha256()
     with open(arch_path, 'rb') as f:
         try:
