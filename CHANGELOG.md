@@ -2,6 +2,7 @@
 
 # dev
 
+* New Feature: Converted shell scripts to Python scripts so that Windows users no longer have to install MSYS2 in order to run RetDec ([#338](https://github.com/avast-tl/retdec/pull/338)).
 * New Feature: Add generation of export-table hashes into `retdec-fileinfo` ([#121](https://github.com/avast-tl/retdec/issues/121), [#321](https://github.com/avast-tl/retdec/pull/321)).
 * Fix: Fixed aborts due to assertions during decoding of some MIPS binaries ([#335](https://github.com/avast-tl/retdec/issues/335)).
 * Fix: Fixed a memory leak when parsing Mach-O files ([#331](https://github.com/avast-tl/retdec/pull/331)).
