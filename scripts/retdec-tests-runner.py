@@ -57,7 +57,7 @@ def unit_tests_in_dir(path):
 
     for dirpath, _, filenames in os.walk(path):
         for f in filenames:
-            if f.startswith('retdec-tests-') and not f.endswith('.sh') and not f.endswith('.py'):
+            if f.startswith('retdec-tests-') and not f.endswith('.py'):
                 tests.append(os.path.abspath(os.path.join(dirpath, f)))
 
     tests.sort()
