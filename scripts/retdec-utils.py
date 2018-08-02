@@ -2,6 +2,7 @@
 
 """Compilation and decompilation utility functions.
 """
+import contextlib
 import os
 import re
 import shutil
@@ -249,7 +250,7 @@ def tool_exists(tool_name):
     return shutil.which(tool_name) is not None
 
 def remove_file_forced(file):
-    if os.path.exists(file):
+    with contextlib.suppress(FileNotFoundError):
         os.remove(file)
 
 def is_windows():

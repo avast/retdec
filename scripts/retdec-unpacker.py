@@ -206,8 +206,7 @@ class Unpacker:
             else:
                 # Remove the temporary file, just in case some of the unpackers crashed
                 # during unpacking and left it on the disk (e.g. upx).
-                if os.path.exists(tmp_output):
-                    os.remove(tmp_output)
+                utils.remove_file_forced(tmp_output)
                 break
 
         return (res_out, return_code) if res_rc == self.UNPACKER_EXIT_CODE_OTHER else (res_out, res_rc)
