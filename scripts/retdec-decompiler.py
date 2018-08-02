@@ -13,15 +13,14 @@ import importlib
 config = importlib.import_module('retdec-config')
 retdec_signature_from_library_creator = importlib.import_module('retdec-signature-from-library-creator')
 retdec_unpacker = importlib.import_module('retdec-unpacker')
-retdec_utils = importlib.import_module('retdec-utils')
+utils = importlib.import_module('retdec-utils')
 
 SigFromLib = retdec_signature_from_library_creator.SigFromLib
 Unpacker = retdec_unpacker.Unpacker
-Utils = retdec_utils.Utils
-CmdRunner = retdec_utils.CmdRunner
+CmdRunner = utils.CmdRunner
 
 
-sys.stdout = retdec_utils.Unbuffered(sys.stdout)
+sys.stdout = utils.Unbuffered(sys.stdout)
 
 
 def parse_args(args):
@@ -366,38 +365,38 @@ class Decompiler:
         # Check whether the input file was specified.
         if self.args.input:
             if not os.access(self.args.input, os.R_OK):
-                Utils.print_error('The input file \'%s\' does not exist or is not readable' % self.args.input)
+                utils.print_error('The input file \'%s\' does not exist or is not readable' % self.args.input)
                 return False
             self.input_file = self.args.input
         else:
-            Utils.print_error('No input file was specified')
+            utils.print_error('No input file was specified')
             return False
 
         if self.args.max_memory:
             if self.args.no_memory_limit:
-                Utils.print_error('Clashing options: --max-memory and --no-memory-limit')
+                utils.print_error('Clashing options: --max-memory and --no-memory-limit')
                 return False
 
             try:
                 max_memory = int(self.args.max_memory)
                 if max_memory <= 0:
-                    Utils.print_error('Invalid value for --max-memory: %s (expected a positive integer)'
+                    utils.print_error('Invalid value for --max-memory: %s (expected a positive integer)'
                                       % self.args.max_memory)
                     return False
             except ValueError:
-                Utils.print_error('Invalid value for --max-memory: %s (expected a positive integer)'
+                utils.print_error('Invalid value for --max-memory: %s (expected a positive integer)'
                                   % self.args.max_memory)
                 return False
 
         for sca in self.args.static_code_archive:
             if not os.path.isfile(sca):
-                Utils.print_error('Invalid archive file \'%s\'' % sca)
+                utils.print_error('Invalid archive file \'%s\'' % sca)
                 return False
 
         for sigfile in self.args.static_code_sigfile:
             # User provided signature file.
             if not os.path.isfile(sigfile):
-                Utils.print_error('Invalid .yara file \'%s\'' % sigfile)
+                utils.print_error('Invalid .yara file \'%s\'' % sigfile)
                 return False
 
         if self.args.selected_ranges:
@@ -407,8 +406,8 @@ class Decompiler:
             # Check that selected ranges are valid.
             for r in self.selected_ranges:
                 # Check if valid range.
-                if not Utils.is_range(r):
-                    Utils.print_error(
+                if not utils.is_range(r):
+                    utils.print_error(
                         'Range %s in option --select-ranges is not a valid decimal (e.g. 123-456) or hexadecimal '
                         '(e.g. 0x123-0xabc) range.' % r)
                     return False
@@ -421,7 +420,7 @@ class Decompiler:
                 end_range = int(ranges[1], 16 if ranges[1].startswith('0x') else 10)
 
                 if start_range > end_range:
-                    Utils.print_error(
+                    utils.print_error(
                         'Range \'%s\' in option --select-ranges is not a valid range: '
                         'second address must be greater or equal than the first one.' % ranges)
                     return False
@@ -432,19 +431,19 @@ class Decompiler:
 
         if self.args.no_config:
             if self.args.config_db:
-                Utils.print_error('Option --no-config can not be used with option --config')
+                utils.print_error('Option --no-config can not be used with option --config')
                 return False
 
         if self.args.config_db:
             if not os.access(self.args.config_db, os.R_OK):
-                Utils.print_error('The input JSON configuration file \'%s\' does not exist or is not readable'
+                utils.print_error('The input JSON configuration file \'%s\' does not exist or is not readable'
                                   % self.args.config_db)
                 return False
 
         if self.args.pdb:
             # File containing PDB debug information.
             if not os.access(self.args.pdb, os.R_OK):
-                Utils.print_error('The input PDB file \'%s\' does not exist or is not readable' % self.args.pdb)
+                utils.print_error('The input PDB file \'%s\' does not exist or is not readable' % self.args.pdb)
                 return False
 
             self.pdb_file = os.path.abspath(self.args.pdb)
@@ -463,54 +462,54 @@ class Decompiler:
         # Print warning message about unsupported combinations of options.
         if self.mode == 'll':
             if self.args.arch:
-                Utils.print_warning('Option -a|--arch is not used in mode ' + self.mode)
+                utils.print_warning('Option -a|--arch is not used in mode ' + self.mode)
 
             if self.args.pdb:
-                Utils.print_warning('Option -p|--pdb is not used in mode ' + self.mode)
+                utils.print_warning('Option -p|--pdb is not used in mode ' + self.mode)
 
             if not self.args.config_db and not self.args.no_config:
-                Utils.print_error('Option --config or --no-config must be specified in mode ' + self.mode)
+                utils.print_error('Option --config or --no-config must be specified in mode ' + self.mode)
                 return False
 
         elif self.mode == 'raw':
             # Errors -- missing critical arguments.
             if not self.args.arch:
-                Utils.print_error('Option -a|--arch must be used with mode ' + self.mode)
+                utils.print_error('Option -a|--arch must be used with mode ' + self.mode)
                 return False
 
             if not self.args.endian:
-                Utils.print_error('Option -e|--endian must be used with mode ' + self.mode)
+                utils.print_error('Option -e|--endian must be used with mode ' + self.mode)
                 return False
 
             if not self.args.raw_entry_point:
-                Utils.print_error('Option --raw-entry-point must be used with mode ' + self.mode)
+                utils.print_error('Option --raw-entry-point must be used with mode ' + self.mode)
                 return False
 
             if not self.args.raw_section_vma:
-                Utils.print_error('Option --raw-section-vma must be used with mode ' + self.mode)
+                utils.print_error('Option --raw-section-vma must be used with mode ' + self.mode)
                 return False
 
-            if not Utils.is_number(self.args.raw_entry_point):
-                Utils.print_error(
+            if not utils.is_number(self.args.raw_entry_point):
+                utils.print_error(
                     'Value in option --raw-entry-point must be decimal (e.g. 123) or hexadecimal value (e.g. 0x123)')
                 return False
 
-            if not Utils.is_number(self.args.raw_section_vma):
-                Utils.print_error(
+            if not utils.is_number(self.args.raw_section_vma):
+                utils.print_error(
                     'Value in option --raw-section-vma must be decimal (e.g. 123) or hexadecimal value (e.g. 0x123)')
                 return False
 
         # Archive decompilation errors.
         if self.args.ar_name and self.args.ar_index:
-            Utils.print_error('Options --ar-name and --ar-index are mutually exclusive. Pick one.')
+            utils.print_error('Options --ar-name and --ar-index are mutually exclusive. Pick one.')
             return False
 
         if self.mode != 'bin':
             if self.args.ar_name:
-                Utils.print_warning('Option --ar-name is not used in mode ' + self.mode)
+                utils.print_warning('Option --ar-name is not used in mode ' + self.mode)
 
             if self.args.ar_index:
-                Utils.print_warning('Option --ar-index is not used in mode ' + self.mode)
+                utils.print_warning('Option --ar-index is not used in mode ' + self.mode)
 
         if not self.args.output:
             # No output file was given, so use the default one.
@@ -556,7 +555,7 @@ class Decompiler:
         bytecode, _, _ = cmd.run_cmd([config.CONFIGTOOL, self.config_file, '--read', '--bytecode'], buffer_output=True)
 
         if bytecode != '':
-            Utils.print_warning('Detected %s bytecode, which cannot be decompiled by our machine-code decompiler.'
+            utils.print_warning('Detected %s bytecode, which cannot be decompiled by our machine-code decompiler.'
                                 ' The decompilation result may be inaccurate.' % bytecode)
 
     def _check_whether_decompilation_should_be_forcefully_stopped(self, tool_name):
@@ -581,24 +580,24 @@ class Decompiler:
         """Cleanup working directory"""
 
         if self.args.cleanup:
-            Utils.remove_file_forced(self.out_unpacked)
-            Utils.remove_file_forced(self.out_frontend_ll)
-            Utils.remove_file_forced(self.out_frontend_bc)
+            utils.remove_file_forced(self.out_unpacked)
+            utils.remove_file_forced(self.out_frontend_ll)
+            utils.remove_file_forced(self.out_frontend_bc)
 
             if self.config_file != self.args.config_db:
-                Utils.remove_file_forced(self.config_file)
+                utils.remove_file_forced(self.config_file)
 
-            Utils.remove_file_forced(self.out_backend_bc)
-            Utils.remove_file_forced(self.out_backend_ll)
+            utils.remove_file_forced(self.out_backend_bc)
+            utils.remove_file_forced(self.out_backend_ll)
 
             # Archive support
-            Utils.remove_file_forced(self.out_restored)
+            utils.remove_file_forced(self.out_restored)
             # Archive support (Macho-O Universal)
-            Utils.remove_file_forced(self.out_archive)
+            utils.remove_file_forced(self.out_archive)
 
             # Signatures generated from archives
             for sig in self.signatures_to_remove:
-                Utils.remove_file_forced(sig)
+                utils.remove_file_forced(sig)
 
     def _generate_log(self):
         log_file = self.output_file + '.decompilation.log'
@@ -659,7 +658,7 @@ class Decompiler:
             print('##### Checking if file is a Mach-O Universal static library...')
             print('RUN: ' + config.EXTRACT + ' --list ' + self.input_file)
 
-            if Utils.is_macho_archive(self.input_file):
+            if utils.is_macho_archive(self.input_file):
                 out_archive = self.output_file + '.a'
                 if self.args.arch:
                     print()
@@ -691,26 +690,26 @@ class Decompiler:
             print('##### Checking if file is an archive...')
             print('RUN: ' + config.AR + ' --arch-magic ' + self.input_file)
 
-            if Utils.has_archive_signature(self.input_file):
+            if utils.has_archive_signature(self.input_file):
                 print('This file is an archive!')
 
                 # Check for thin signature.
-                if Utils.has_thin_archive_signature(self.input_file):
+                if utils.has_thin_archive_signature(self.input_file):
                     self._cleanup()
-                    Utils.print_error('File is a thin archive and cannot be decompiled.')
+                    utils.print_error('File is a thin archive and cannot be decompiled.')
                     return 1
 
                 # Check if our tools can handle it.
-                if not Utils.is_valid_archive(self.input_file):
+                if not utils.is_valid_archive(self.input_file):
                     self._cleanup()
-                    Utils.print_error('The input archive has invalid format.')
+                    utils.print_error('The input archive has invalid format.')
                     return 1
 
                 # Get and check number of objects.
-                arch_object_count = Utils.archive_object_count(self.input_file)
+                arch_object_count = utils.archive_object_count(self.input_file)
                 if arch_object_count <= 0:
                     self._cleanup()
-                    Utils.print_error('The input archive is empty.')
+                    utils.print_error('The input archive is empty.')
                     return 1
 
                 # Prepare object output path.
@@ -723,17 +722,17 @@ class Decompiler:
                     print('RUN: ' + config.AR + ' ' + self.input_file + ' --index ' + self.args.ar_index + ' --output '
                           + out_restored)
 
-                    if Utils.archive_get_by_index(self.input_file, self.args.ar_index, out_restored):
+                    if utils.archive_get_by_index(self.input_file, self.args.ar_index, out_restored):
                         self._cleanup()
                         valid_index = (arch_object_count - 1)
 
                         if valid_index != 0:
-                            Utils.print_error('File on index \'' + self.args.ar_index
+                            utils.print_error('File on index \'' + self.args.ar_index
                                               + '\' was not found in the input archive. Valid indexes are 0-' + (
                                                   str(valid_index)) + '.')
                             return 1
                         else:
-                            Utils.print_error('File on index \'' + self.args.ar_index +
+                            utils.print_error('File on index \'' + self.args.ar_index +
                                               '\' was not found in the input archive. The only valid index is 0.')
                             return 1
 
@@ -745,9 +744,9 @@ class Decompiler:
                     print('RUN: ' + config.AR + ' ' + self.input_file + ' --name ' + self.args.ar_name + ' --output '
                           + out_restored)
 
-                    if Utils.archive_get_by_name(self.input_file, self.args.ar_name, out_restored):
+                    if utils.archive_get_by_name(self.input_file, self.args.ar_name, out_restored):
                         self._cleanup()
-                        Utils.print_error('File named \'%s\' was not found in the input archive.' % self.args.ar_name)
+                        utils.print_error('File named \'%s\' was not found in the input archive.' % self.args.ar_name)
                         return 1
 
                     self.input_file = out_restored
@@ -756,15 +755,15 @@ class Decompiler:
                     print('Please select file to decompile with either \' --ar-index=n\'')
                     print('or \' --ar-name=string\' option. Archive contains these files:')
 
-                    Utils.archive_list_numbered_content(self.input_file)
+                    utils.archive_list_numbered_content(self.input_file)
                     self._cleanup()
                     return 1
             else:
                 if self.args.ar_name:
-                    Utils.print_warning('Option --ar-name can be used only with archives.')
+                    utils.print_warning('Option --ar-name can be used only with archives.')
 
                 if self.args.ar_index:
-                    Utils.print_warning('Option --ar-index can be used only with archives.')
+                    utils.print_warning('Option --ar-index can be used only with archives.')
 
                 print('Not an archive, going to the next step.')
 
@@ -778,7 +777,7 @@ class Decompiler:
             self.config_file = self.output_file + '.json'
 
             if self.config_file != self.args.config_db:
-                Utils.remove_file_forced(self.config_file)
+                utils.remove_file_forced(self.config_file)
 
             if self.args.config_db:
                 shutil.copyfile(self.args.config_db, self.config_file)
@@ -793,11 +792,11 @@ class Decompiler:
             # Raw data needs architecture, endianess and optionally sections's vma and entry point to be specified.
             if self.mode == 'raw':
                 if not self.arch or self.arch == 'unknown' or self.arch == '':
-                    Utils.print_error('Option -a|--arch must be used with mode ' + self.mode)
+                    utils.print_error('Option -a|--arch must be used with mode ' + self.mode)
                     return 1
 
                 if not self.args.endian:
-                    Utils.print_error('Option -e|--endian must be used with mode ' + self.mode)
+                    utils.print_error('Option -e|--endian must be used with mode ' + self.mode)
                     return 1
 
                 cmd.run_cmd([config.CONFIGTOOL, self.config_file, '--write', '--format', 'raw'])
@@ -856,7 +855,7 @@ class Decompiler:
 
                 self._cleanup()
                 # The error message has been already reported by fileinfo in stderr.
-                Utils.print_error('')
+                utils.print_error('')
                 return 1
 
             if self._check_whether_decompilation_should_be_forcefully_stopped('fileinfo'):
@@ -936,7 +935,7 @@ class Decompiler:
 
                     self._cleanup()
                     # The error message has been already reported by fileinfo in stderr.
-                    Utils.print_error('')
+                    utils.print_error('')
                     return 1
 
                 self._print_warning_if_decompiling_bytecode()
@@ -959,11 +958,11 @@ class Decompiler:
             # Intel HEX needs architecture to be specified
             if self.format in ['ihex']:
                 if not self.arch or self.arch == 'unknown':
-                    Utils.print_error('Option -a|--arch must be used with format ' + self.format)
+                    utils.print_error('Option -a|--arch must be used with format ' + self.format)
                     return 1
 
                 if not self.args.endian:
-                    Utils.print_error('Option -e|--endian must be used with format ' + self.format)
+                    utils.print_error('Option -e|--endian must be used with format ' + self.format)
                     return 1
 
                 cmd.run_cmd([config.CONFIGTOOL, self.config_file, '--write', '--arch', self.arch])
@@ -985,7 +984,7 @@ class Decompiler:
                     self._generate_log()
 
                 self._cleanup()
-                Utils.print_error('Unsupported target architecture \'%s\'. Supported architectures: '
+                utils.print_error('Unsupported target architecture \'%s\'. Supported architectures: '
                                   'Intel x86, ARM, ARM + Thumb, MIPS, PIC32, PowerPC.' % self.arch)
                 return 1
 
@@ -998,7 +997,7 @@ class Decompiler:
                     self._generate_log()
 
                 self._cleanup()
-                Utils.print_error(
+                utils.print_error(
                     'Unsupported target format \'%s%s\'. Supported formats: ELF32, PE32, Intel HEX 32, Mach-O 32.' % (
                         self.format.upper(), fileclass))
                 return 1
@@ -1023,7 +1022,7 @@ class Decompiler:
                     self._generate_log()
 
                 self._cleanup()
-                Utils.print_error('Cannot determine endiannesss.')
+                utils.print_error('Cannot determine endiannesss.')
                 return 1
 
             sig_arch = self.arch
@@ -1058,7 +1057,7 @@ class Decompiler:
                         cmd.run_cmd([config.CONFIGTOOL, self.config_file, '--write', '--user-signature', sig_out])
                         self.signatures_to_remove.append(sig_out)
                     else:
-                        Utils.print_warning('Failed extracting signatures from file \'' + lib + '\'')
+                        utils.print_warning('Failed extracting signatures from file \'' + lib + '\'')
 
                     lib_index += 1
 
@@ -1160,7 +1159,7 @@ class Decompiler:
                     self._generate_log()
 
                 self._cleanup()
-                Utils.print_error('Decompilation to LLVM IR failed')
+                utils.print_error('Decompilation to LLVM IR failed')
                 return 1
 
             if self._check_whether_decompilation_should_be_forcefully_stopped('bin2llvmir'):
@@ -1267,7 +1266,7 @@ class Decompiler:
                 self._generate_log()
 
             self._cleanup()
-            Utils.print_error('Decompilation of file %s failed' % self.out_backend_bc)
+            utils.print_error('Decompilation of file %s failed' % self.out_backend_bc)
             return 1
 
         if self._check_whether_decompilation_should_be_forcefully_stopped('llvmir2hll'):
@@ -1280,7 +1279,7 @@ class Decompiler:
             print('##### Converting .dot files to the desired format...')
 
         if self.args.backend_emit_cg and self.args.backend_cg_conversion == 'auto':
-            if Utils.tool_exists('dot'):
+            if utils.tool_exists('dot'):
                 print('RUN: dot -T' + self.args.graph_format + ' ' + self.output_file + '.cg.dot -o ' + self.output_file
                       + '.cg.' + self.args.graph_format)
 
@@ -1290,7 +1289,7 @@ class Decompiler:
                 print('Please install \'Graphviz\' to generate graphics.')
 
         if self.args.backend_emit_cfg and self.args.backend_cfg_conversion == 'auto':
-            if Utils.tool_exists('dot'):
+            if utils.tool_exists('dot'):
                 for cfg in glob.glob(self.output_file + '.cfg.*.dot'):
                     print('RUN: dot -T' + self.args.graph_format + ' ' + cfg + ' -o ' + (
                             os.path.splitext(cfg)[0] + '.' + self.args.graph_format))

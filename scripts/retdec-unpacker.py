@@ -24,13 +24,10 @@ import sys
 
 import importlib
 config = importlib.import_module('retdec-config')
-retdec_utils = importlib.import_module('retdec-utils')
+utils = importlib.import_module('retdec-utils')
 
-Utils = retdec_utils.Utils
-CmdRunner = retdec_utils.CmdRunner
-
-
-sys.stdout = retdec_utils.Unbuffered(sys.stdout)
+CmdRunner = utils.CmdRunner
+sys.stdout = utils.Unbuffered(sys.stdout)
 
 
 def parse_args(_args):
@@ -97,11 +94,11 @@ class Unpacker:
 
         # Check whether the input file was specified.
         if self.args.file is None:
-            Utils.print_error('No input file was specified')
+            utils.print_error('No input file was specified')
             return False
 
         if not os.access(self.args.file, os.R_OK):
-            Utils.print_error('The input file %s does not exist or is not readable' % self.args.file)
+            utils.print_error('The input file %s does not exist or is not readable' % self.args.file)
             return False
 
         # Conditional initialization.
@@ -114,7 +111,7 @@ class Unpacker:
             try:
                 int(self.args.max_memory)
             except ValueError:
-                Utils.print_error('Invalid value for --max-memory: %s (expected a positive integer)'
+                utils.print_error('Invalid value for --max-memory: %s (expected a positive integer)'
                                   % self.args.max_memory)
                 return False
 
@@ -153,7 +150,7 @@ class Unpacker:
             # Do not return -> try the next unpacker
             self._print('##### Unpacking by using generic unpacker: failed')
 
-        if Utils.tool_exists('upx'):
+        if utils.tool_exists('upx'):
             # Do not return -> try the next unpacker
             # Try to unpack via UPX
             self._print()

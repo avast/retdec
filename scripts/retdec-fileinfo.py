@@ -11,14 +11,13 @@ import sys
 
 import importlib
 config = importlib.import_module('retdec-config')
-retdec_utils = importlib.import_module('retdec-utils')
+utils = importlib.import_module('retdec-utils')
 retdec_archive_decompiler = importlib.import_module('retdec-archive-decompiler')
 
-Utils = retdec_utils.Utils
 ArchiveDecompiler = retdec_archive_decompiler.ArchiveDecompiler
 
 
-sys.stdout = retdec_utils.Unbuffered(sys.stdout)
+sys.stdout = utils.Unbuffered(sys.stdout)
 
 
 def parse_args():
@@ -60,7 +59,7 @@ def main():
     # When analyzing an archive, use the archive decompilation script `--list`
     # instead of `fileinfo` because fileinfo is currently unable to analyze
     # archives.
-    if input and Utils.has_archive_signature(input):
+    if input and utils.has_archive_signature(input):
         archive_decompiler_args = [input, '--list']
 
         if args.json:

@@ -11,12 +11,9 @@ import tempfile
 
 import importlib
 config = importlib.import_module('retdec-config')
-retdec_utils = importlib.import_module('retdec-utils')
+utils = importlib.import_module('retdec-utils')
 
-Utils = retdec_utils.Utils
-
-
-sys.stdout = retdec_utils.Unbuffered(sys.stdout)
+sys.stdout = utils.Unbuffered(sys.stdout)
 
 
 def parse_args(args):
@@ -70,7 +67,7 @@ class SigFromLib:
     def print_error_and_cleanup(self, message):
         if not self.args.no_cleanup:
             shutil.rmtree(self.tmp_dir_path, ignore_errors=True)
-        Utils.print_error(message)
+        utils.print_error(message)
 
     def _check_arguments(self):
         for f in self.args.input:
@@ -96,7 +93,7 @@ class SigFromLib:
         # Create .pat files for every library.
         for lib_path in self.args.input:
             # Check for invalid archives.
-            if not Utils.is_valid_archive(lib_path):
+            if not utils.is_valid_archive(lib_path):
                 print('ignoring file %s - not valid archive' % lib_path)
                 continue
 

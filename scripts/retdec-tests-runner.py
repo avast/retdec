@@ -27,13 +27,10 @@ except ImportError:
 
 import importlib
 config = importlib.import_module('retdec-config')
-retdec_utils = importlib.import_module('retdec-utils')
+utils = importlib.import_module('retdec-utils')
 
-CmdRunner = retdec_utils.CmdRunner
-Utils = retdec_utils.Utils
-
-
-sys.stdout = retdec_utils.Unbuffered(sys.stdout)
+CmdRunner = utils.CmdRunner
+sys.stdout = utils.Unbuffered(sys.stdout)
 
 
 def print_colored(message, color=None):
@@ -121,7 +118,7 @@ def main():
     verbose = len(sys.argv) > 1 and sys.argv[1] in ['-v', '--verbose']
 
     if not os.path.isdir(config.UNIT_TESTS_DIR):
-        Utils.print_error_and_die('error: no unit tests found in %s' % config.UNIT_TESTS_DIR)
+        utils.print_error_and_die('error: no unit tests found in %s' % config.UNIT_TESTS_DIR)
 
     print('Running all unit tests in %s...' % config.UNIT_TESTS_DIR)
     sys.exit(run_unit_tests_in_dir(config.UNIT_TESTS_DIR, verbose))

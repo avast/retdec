@@ -72,7 +72,7 @@ class CmdRunner:
         """:returns: A quadruple (`memory`, `output`, `return_code`, `timeouted`)."""
         memory = 0
         try:
-            track_memory = track_memory and Utils.tool_exists(config.LOG_TIME[0])
+            track_memory = track_memory and tool_exists(config.LOG_TIME[0])
             if track_memory:
                 cmd = config.LOG_TIME + cmd
 
@@ -128,7 +128,7 @@ class CmdRunner:
             stderr=stdout if buffer_output else None,
             universal_newlines=True
         )
-        if Utils.is_windows():
+        if is_windows():
             return _WindowsProcess(**kwargs)
         else:
             return _LinuxProcess(**kwargs)
@@ -229,165 +229,6 @@ class _WindowsProcess(subprocess.Popen):
         subprocess.call(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
 
-class Utils:
-
-    @staticmethod
-    def tool_exists(tool_name):
-        return shutil.which(tool_name) is not None
-
-    @staticmethod
-    def remove_file_forced(file):
-        if os.path.exists(file):
-            os.remove(file)
-
-    @staticmethod
-    def is_windows():
-        return sys.platform in ('win32', 'msys') or os.name == 'nt'
-
-    @staticmethod
-    def print_error(error):
-        """Print error message to stderr.
-        """
-        print('Error: %s' % error, file=sys.stderr)
-
-    @staticmethod
-    def print_error_and_die(error, ret_code=1):
-        """Print error message to stderr, and exit with the given return code.
-        """
-        Utils.print_error(error)
-        sys.exit(ret_code)
-
-    @staticmethod
-    def print_warning(warning):
-        """Print warning message to stderr.
-        """
-        print('Warning: %s' % warning, file=sys.stderr)
-
-    @staticmethod
-    def has_archive_signature(path):
-        """Check if file has any ar signature.
-        1 argument is needed - file path
-        Returns - True if file has ar signature
-                  False no signature
-        """
-        ret = subprocess.call([config.AR, path, '--arch-magic'])
-        return ret == 0
-
-    @staticmethod
-    def has_thin_archive_signature(path):
-        """Check if file has thin ar signature.
-        1 argument is needed - file path
-        Returns - True if file has thin ar signature
-                  False no signature
-        """
-        ret = subprocess.call([config.AR, path, '--thin-magic'])
-        return ret == 0
-
-    @staticmethod
-    def is_valid_archive(path):
-        """Check if file is an archive we can work with.
-        1 argument is needed - file path
-        Returns - True if file is valid archive
-                  False if file is invalid archive
-        """
-        # We use our own messages so throw original output away.
-        ret = subprocess.call([config.AR, path, '--valid'], stderr=subprocess.STDOUT,
-                              stdout=None)
-        return ret == 0
-
-    @staticmethod
-    def archive_object_count(path):
-        """Counts object files in archive.
-        1 argument is needed - file path
-        Returns - number of objects in archive, or negative number (-1) if error occurred
-        """
-        output, rc, _ = CmdRunner().run_cmd([config.AR, path, '--object-count'], buffer_output=True)
-        return int(output) if rc == 0 else -1
-
-    @staticmethod
-    def archive_list_content(path):
-        """Print content of archive.
-        1 argument is needed - file path
-        """
-        CmdRunner().run_cmd([config.AR, path, '--list', '--no-numbers'])
-
-    @staticmethod
-    def archive_list_numbered_content(path):
-        """Print numbered content of archive.
-        1 argument is needed - file path
-        """
-        print('Index\tName')
-        CmdRunner().run_cmd([config.AR, path, '--list'])
-
-    @staticmethod
-    def archive_list_numbered_content_json(path):
-        """Print numbered content of archive in JSON format.
-        1 argument is needed - file path
-        """
-        CmdRunner().run_cmd([config.AR, path, '--list', '--json'])
-
-    @staticmethod
-    def archive_get_by_name(path, name, output):
-        """Get a single file from archive by name.
-        3 arguments are needed - path to the archive
-                               - name of the file
-                               - output path
-        Returns - False if everything ok
-                  True if error
-        """
-        ret = subprocess.call([config.AR, path, '--name', name, '--output', output],
-                              stderr=subprocess.STDOUT, stdout=None)
-        return ret != 0
-
-    @staticmethod
-    def archive_get_by_index(archive, index, output):
-        """Get a single file from archive by index.
-        3 arguments are needed - path to the archive
-                               - index of the file
-                               - output path
-        Returns - False if everything ok
-                  True if error
-        """
-        ret = subprocess.call([config.AR, archive, '--index', index, '--output', output],
-                              stderr=subprocess.STDOUT, stdout=None)
-        return ret != 0
-
-    @staticmethod
-    def is_macho_archive(path):
-        """Check if file is Mach-O universal binary with archives.
-        1 argument is needed - file path
-        Returns - True if file is archive
-                  False if file is not archive
-        """
-        ret = subprocess.call([config.EXTRACT, '--check-archive', path],
-                              stderr=subprocess.STDOUT, stdout=subprocess.DEVNULL)
-        return ret == 0
-
-    @staticmethod
-    def is_decimal_number(num):
-        return re.search('^[0-9]+$', str(num))
-
-    @staticmethod
-    def is_hexadecimal_number(num):
-        return re.search('^0x[0-9a-fA-F]+$', str(num))
-
-    @staticmethod
-    def is_number(num):
-        return Utils.is_decimal_number(num) or Utils.is_hexadecimal_number(num)
-
-    @staticmethod
-    def is_decimal_range(range):
-        return re.search('^[0-9]+-[0-9]+$', str(range))
-
-    @staticmethod
-    def is_hexadecimal_range(range):
-        return re.search('^0x[0-9a-fA-F]+-0x[0-9a-fA-F]+$', str(range))
-
-    @staticmethod
-    def is_range(range):
-        return Utils.is_decimal_range(range) or Utils.is_hexadecimal_range(range)
-
-
 class Unbuffered(object):
     """Used to force unbuddered streams, otherwise redirecting to log files
     might mix the outputs from Python scripts and executed tools.
@@ -402,3 +243,138 @@ class Unbuffered(object):
         self.stream.flush()
     def __getattr__(self, attr):
         return getattr(self.stream, attr)
+
+
+def tool_exists(tool_name):
+    return shutil.which(tool_name) is not None
+
+def remove_file_forced(file):
+    if os.path.exists(file):
+        os.remove(file)
+
+def is_windows():
+    return sys.platform in ('win32', 'msys') or os.name == 'nt'
+
+def print_error(error):
+    """Print error message to stderr.
+    """
+    print('Error: %s' % error, file=sys.stderr)
+
+def print_error_and_die(error, ret_code=1):
+    """Print error message to stderr, and exit with the given return code.
+    """
+    print_error(error)
+    sys.exit(ret_code)
+
+def print_warning(warning):
+    """Print warning message to stderr.
+    """
+    print('Warning: %s' % warning, file=sys.stderr)
+
+def has_archive_signature(path):
+    """Check if file has any ar signature.
+    1 argument is needed - file path
+    Returns - True if file has ar signature
+                False no signature
+    """
+    ret = subprocess.call([config.AR, path, '--arch-magic'])
+    return ret == 0
+
+def has_thin_archive_signature(path):
+    """Check if file has thin ar signature.
+    1 argument is needed - file path
+    Returns - True if file has thin ar signature
+                False no signature
+    """
+    ret = subprocess.call([config.AR, path, '--thin-magic'])
+    return ret == 0
+
+def is_valid_archive(path):
+    """Check if file is an archive we can work with.
+    1 argument is needed - file path
+    Returns - True if file is valid archive
+                False if file is invalid archive
+    """
+    # We use our own messages so throw original output away.
+    ret = subprocess.call([config.AR, path, '--valid'], stderr=subprocess.STDOUT,
+                            stdout=None)
+    return ret == 0
+
+def archive_object_count(path):
+    """Counts object files in archive.
+    1 argument is needed - file path
+    Returns - number of objects in archive, or negative number (-1) if error occurred
+    """
+    output, rc, _ = CmdRunner().run_cmd([config.AR, path, '--object-count'], buffer_output=True)
+    return int(output) if rc == 0 else -1
+
+def archive_list_content(path):
+    """Print content of archive.
+    1 argument is needed - file path
+    """
+    CmdRunner().run_cmd([config.AR, path, '--list', '--no-numbers'])
+
+def archive_list_numbered_content(path):
+    """Print numbered content of archive.
+    1 argument is needed - file path
+    """
+    print('Index\tName')
+    CmdRunner().run_cmd([config.AR, path, '--list'])
+
+def archive_list_numbered_content_json(path):
+    """Print numbered content of archive in JSON format.
+    1 argument is needed - file path
+    """
+    CmdRunner().run_cmd([config.AR, path, '--list', '--json'])
+
+def archive_get_by_name(path, name, output):
+    """Get a single file from archive by name.
+    3 arguments are needed - path to the archive
+                            - name of the file
+                            - output path
+    Returns - False if everything ok
+                True if error
+    """
+    ret = subprocess.call([config.AR, path, '--name', name, '--output', output],
+                            stderr=subprocess.STDOUT, stdout=None)
+    return ret != 0
+
+def archive_get_by_index(archive, index, output):
+    """Get a single file from archive by index.
+    3 arguments are needed - path to the archive
+                            - index of the file
+                            - output path
+    Returns - False if everything ok
+                True if error
+    """
+    ret = subprocess.call([config.AR, archive, '--index', index, '--output', output],
+                            stderr=subprocess.STDOUT, stdout=None)
+    return ret != 0
+
+def is_macho_archive(path):
+    """Check if file is Mach-O universal binary with archives.
+    1 argument is needed - file path
+    Returns - True if file is archive
+                False if file is not archive
+    """
+    ret = subprocess.call([config.EXTRACT, '--check-archive', path],
+                            stderr=subprocess.STDOUT, stdout=subprocess.DEVNULL)
+    return ret == 0
+
+def is_decimal_number(num):
+    return re.search('^[0-9]+$', str(num))
+
+def is_hexadecimal_number(num):
+    return re.search('^0x[0-9a-fA-F]+$', str(num))
+
+def is_number(num):
+    return is_decimal_number(num) or is_hexadecimal_number(num)
+
+def is_decimal_range(range):
+    return re.search('^[0-9]+-[0-9]+$', str(range))
+
+def is_hexadecimal_range(range):
+    return re.search('^0x[0-9a-fA-F]+-0x[0-9a-fA-F]+$', str(range))
+
+def is_range(range):
+    return is_decimal_range(range) or is_hexadecimal_range(range)

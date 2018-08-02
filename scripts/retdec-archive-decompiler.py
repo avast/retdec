@@ -9,12 +9,11 @@ import sys
 
 import importlib
 config = importlib.import_module('retdec-config')
-retdec_utils = importlib.import_module('retdec-utils')
-Utils = retdec_utils.Utils
-CmdRunner = retdec_utils.CmdRunner
+utils = importlib.import_module('retdec-utils')
+CmdRunner = utils.CmdRunner
 
 
-sys.stdout = retdec_utils.Unbuffered(sys.stdout)
+sys.stdout = utils.Unbuffered(sys.stdout)
 
 
 def parse_args(args):
@@ -76,7 +75,7 @@ class ArchiveDecompiler:
             print('}')
         else:
             # Otherwise print in plain text.
-            Utils.print_error(error)
+            utils.print_error(error)
 
     def _cleanup(self):
         """Cleans up all temporary files.
@@ -90,7 +89,7 @@ class ArchiveDecompiler:
 
         if self.args.plain_format:
             if self.use_json_format:
-                Utils.print_error('Arguments --plain and --json are mutually exclusive.')
+                utils.print_error('Arguments --plain and --json are mutually exclusive.')
                 return False
             else:
                 self.enable_list_mode = True
@@ -98,7 +97,7 @@ class ArchiveDecompiler:
 
         if self.args.json_format:
             if self.args.plain_format:
-                Utils.print_error('Arguments --plain and --json are mutually exclusive.')
+                utils.print_error('Arguments --plain and --json are mutually exclusive.')
                 return False
             else:
                 self.enable_list_mode = True
@@ -109,7 +108,7 @@ class ArchiveDecompiler:
 
         if self.args.file:
             if not os.path.isfile(self.args.file):
-                Utils.print_error('Input %s is not a valid file.' % self.args.file)
+                utils.print_error('Input %s is not a valid file.' % self.args.file)
                 return False
 
             self.library_path = self.args.file
@@ -126,7 +125,7 @@ class ArchiveDecompiler:
             return 1
 
         # Check for archives packed in Mach-O Universal Binaries.
-        if Utils.is_macho_archive(self.library_path):
+        if utils.is_macho_archive(self.library_path):
             if self.enable_list_mode:
                 if self.use_json_format:
                     subprocess.call([config.EXTRACT, '--objects', '--json', self.library_path])
@@ -139,17 +138,17 @@ class ArchiveDecompiler:
             self.library_path = self.tmp_archive
 
         # Check for thin archives.
-        if Utils.has_thin_archive_signature(self.library_path):
+        if utils.has_thin_archive_signature(self.library_path):
             self._print_error_plain_or_json('File is a thin archive and cannot be decompiled.')
             return 1
 
         # Check if file is archive
-        if not Utils.is_valid_archive(self.library_path):
+        if not utils.is_valid_archive(self.library_path):
             self._print_error_plain_or_json('File is not supported archive or is not readable.')
             return 1
 
         # Check number of files.
-        self.file_count = Utils.archive_object_count(self.library_path)
+        self.file_count = utils.archive_object_count(self.library_path)
 
         if self.file_count <= 0:
             self._print_error_plain_or_json('No files found in archive.')
@@ -158,9 +157,9 @@ class ArchiveDecompiler:
         # List only mode.
         if self.enable_list_mode:
             if self.use_json_format:
-                Utils.archive_list_numbered_content_json(self.library_path)
+                utils.archive_list_numbered_content_json(self.library_path)
             else:
-                Utils.archive_list_numbered_content(self.library_path)
+                utils.archive_list_numbered_content(self.library_path)
 
             self._cleanup()
             return 0
