@@ -1305,6 +1305,8 @@ class Decompiler:
         # do it here.
         with open(self.output_file, 'r') as file:
             new = [line.rstrip() for line in file]
+            if new and new[-1] == '':
+                new.pop()
 
         with open(self.output_file, 'w') as fh:
             [fh.write('%s\n' % line) for line in new]
