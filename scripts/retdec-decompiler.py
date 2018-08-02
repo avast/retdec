@@ -790,7 +790,7 @@ class Decompiler:
                 with open(self.config_file, 'w') as f:
                     f.write('{}')
 
-            # Raw data needs architecture, endianess and optionaly sections's vma and entry point to be specified.
+            # Raw data needs architecture, endianess and optionally sections's vma and entry point to be specified.
             if self.mode == 'raw':
                 if not self.arch or self.arch == 'unknown' or self.arch == '':
                     Utils.print_error('Option -a|--arch must be used with mode ' + self.mode)
