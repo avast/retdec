@@ -101,7 +101,6 @@ TERMINAL_COLORS = {
 	Token.Comment:            SCOLOR_AUTOCMT,
 	Token.Comment.Preproc:    SCOLOR_AUTOCMT,
 	Token.Keyword:            SCOLOR_MACRO,
-#	Token.Keyword.Type:       SCOLOR_KEYWORD,
     Token.Keyword.Type:       SCOLOR_AUTOCMT,
 
 	Token.String:             SCOLOR_NUMBER,   # SCOLOR_CREFTAIL,

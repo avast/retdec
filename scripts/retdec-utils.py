@@ -296,7 +296,6 @@ def is_valid_archive(path):
     Returns - True if file is valid archive
                 False if file is invalid archive
     """
-    # We use our own messages so throw original output away.
     ret = subprocess.call([config.AR, path, '--valid'], stderr=subprocess.STDOUT,
                             stdout=None)
     return ret == 0

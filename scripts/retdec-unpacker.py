@@ -139,7 +139,6 @@ class Unpacker:
         cmd = CmdRunner()
         out, unpacker_rc, _ = cmd.run_cmd([config.UNPACKER] + unpacker_params, buffer_output=True)
         self._print(out)
-        #self.unpacker_output = self.unpacker_output + out
 
         if unpacker_rc == self.UNPACKER_EXIT_CODE_OK:
             self._print('##### Unpacking by using generic unpacker: successfully unpacked')
@@ -158,7 +157,6 @@ class Unpacker:
             self._print('RUN: upx -d ' + self.input + ' -o ' + output)
 
             out, upx_rc, _ = cmd.run_cmd(['upx', '-d', self.input, '-o', output], buffer_output=True)
-            #self.unpacker_output = self.unpacker_output + out
             self._print(out)
 
             if upx_rc == 0:
@@ -177,7 +175,6 @@ class Unpacker:
         else:
             self._print('##### \'upx\' not available: nothing to do')
 
-        # Return.
         if unpacker_rc >= self.UNPACKER_EXIT_CODE_UNPACKING_FAILED:
             return self.unpacker_output, self.RET_UNPACKER_FAILED
         else:
