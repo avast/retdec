@@ -845,8 +845,6 @@ class Decompiler:
                     self._generate_log()
 
                 self._cleanup()
-                # The error message has been already reported by fileinfo in stderr.
-                utils.print_error('')
                 return 1
 
             if self._check_whether_decompilation_should_be_forcefully_stopped('fileinfo'):
@@ -925,8 +923,6 @@ class Decompiler:
                         self._generate_log()
 
                     self._cleanup()
-                    # The error message has been already reported by fileinfo in stderr.
-                    utils.print_error('')
                     return 1
 
                 self._print_warning_if_decompiling_bytecode()
