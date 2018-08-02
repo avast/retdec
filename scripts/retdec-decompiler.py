@@ -650,15 +650,13 @@ class Decompiler:
         if self.mode == 'bin':
             # Check for archives packed in Mach-O Universal Binaries.
             print('##### Checking if file is a Mach-O Universal static library...')
-            print('RUN: ' + config.EXTRACT + ' --list ' + self.input_file)
 
             if utils.is_macho_archive(self.input_file):
                 out_archive = self.output_file + '.a'
                 if self.args.arch:
                     print()
                     print('##### Restoring static library with architecture family ' + self.args.arch + '...')
-                    print(
-                        'RUN: ' + config.EXTRACT + ' --family ' + self.args.arch + ' --out ' + out_archive + ' '
+                    print('RUN: ' + config.EXTRACT + ' --family ' + self.args.arch + ' --out ' + out_archive + ' '
                         + self.input_file)
 
                     _, extract_rc, _ = cmd.run_cmd(
