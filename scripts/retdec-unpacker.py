@@ -137,7 +137,7 @@ class Unpacker:
 
         self._print()
         self._print('##### Trying to unpack ' + self.input + ' into ' + output + ' by using generic unpacker...')
-        self._print('RUN: ' + config.UNPACKER + ' '.join(unpacker_params))
+        self._print('RUN: ' + config.UNPACKER + ' ' + ' '.join(unpacker_params))
 
         cmd = CmdRunner()
         out, unpacker_rc, _ = cmd.run_cmd([config.UNPACKER] + unpacker_params, buffer_output=True)
