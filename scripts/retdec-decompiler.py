@@ -565,8 +565,7 @@ class Decompiler:
                 self._generate_log()
 
             self._cleanup()
-            print()
-            print('#### Forced stop due to  \'--stop-after %s\'...' % self.args.stop_after)
+            print('\n#### Forced stop due to  \'--stop-after %s\'...' % self.args.stop_after)
             return True
         return False
 
@@ -654,13 +653,9 @@ class Decompiler:
             if utils.is_macho_archive(self.input_file):
                 out_archive = self.output_file + '.a'
                 if self.args.arch:
-                    print()
-                    print('##### Restoring static library with architecture family ' + self.args.arch + '...')
-                    print('RUN: ' + config.EXTRACT + ' --family ' + self.args.arch + ' --out ' + out_archive + ' '
-                        + self.input_file)
-
+                    print('\n##### Restoring static library with architecture family ' + self.args.arch + '...')
                     _, extract_rc, _ = cmd.run_cmd(
-                        [config.EXTRACT, '--family', self.args.arch, '--out', out_archive, self.input_file])
+                        [config.EXTRACT, '--family', self.args.arch, '--out', out_archive, self.input_file], print_run_msg=True)
                     if extract_rc:
                         # Architecture not supported
                         print('Invalid --arch option \'' + self.args.arch +
@@ -670,18 +665,13 @@ class Decompiler:
                         return 1
                 else:
                     # Pick best architecture
-                    print()
-                    print('##### Restoring best static library for decompilation...')
-                    print('RUN: ' + config.EXTRACT + ' --best --out ' + out_archive + ' ' + self.input_file)
-                    cmd.run_cmd([config.EXTRACT, '--best', '--out', out_archive, self.input_file])
+                    print('\n##### Restoring best static library for decompilation...')
+                    cmd.run_cmd([config.EXTRACT, '--best', '--out', out_archive, self.input_file], print_run_msg=True)
 
                 self.input_file = out_archive
 
-            print()
-            print('##### Checking if file is an archive...')
-            print('RUN: ' + config.AR + ' --arch-magic ' + self.input_file)
-
-            if utils.has_archive_signature(self.input_file):
+            print('\n##### Checking if file is an archive...')
+            if utils.has_archive_signature(self.input_file, print_run_msg=True):
                 print('This file is an archive!')
 
                 # Check for thin signature.
@@ -708,12 +698,8 @@ class Decompiler:
 
                 # Pick object by index.
                 if self.args.ar_index:
-                    print()
-                    print('##### Restoring object file on index \'%s\' from archive...' % self.args.ar_index)
-                    print('RUN: ' + config.AR + ' ' + self.input_file + ' --index ' + self.args.ar_index + ' --output '
-                          + out_restored)
-
-                    if utils.archive_get_by_index(self.input_file, self.args.ar_index, out_restored):
+                    print('\n##### Restoring object file on index \'%s\' from archive...' % self.args.ar_index)
+                    if utils.archive_get_by_index(self.input_file, self.args.ar_index, out_restored, print_run_msg=True):
                         self._cleanup()
                         valid_index = (arch_object_count - 1)
 
@@ -730,12 +716,8 @@ class Decompiler:
                     self.input_file = out_restored
                 # Pick object by name
                 elif self.args.ar_name:
-                    print()
-                    print('##### Restoring object file with name \'%s\' from archive...' % self.args.ar_name)
-                    print('RUN: ' + config.AR + ' ' + self.input_file + ' --name ' + self.args.ar_name + ' --output '
-                          + out_restored)
-
-                    if utils.archive_get_by_name(self.input_file, self.args.ar_name, out_restored):
+                    print('\n##### Restoring object file with name \'%s\' from archive...' % self.args.ar_name)
+                    if utils.archive_get_by_name(self.input_file, self.args.ar_name, out_restored, print_run_msg=True):
                         self._cleanup()
                         utils.print_error('File named \'%s\' was not found in the input archive.' % self.args.ar_name)
                         return 1
@@ -826,19 +808,15 @@ class Decompiler:
                 # system RAM to prevent potential black screens on Windows (#270).
                 fileinfo_params.append('--max-memory-half-ram')
 
-            print()
-            print('##### Gathering file information...')
-            print('RUN: ' + config.FILEINFO + ' ' + ' '.join(fileinfo_params))
-
+            print('\n##### Gathering file information...')
             fileinfo_rc = 0
-
             if self.args.generate_log:
                 self.log_fileinfo_memory, self.log_fileinfo_time, self.log_fileinfo_output, self.log_fileinfo_rc = \
-                    cmd.run_measured_cmd([config.FILEINFO] + fileinfo_params, timeout=config.LOG_TIMEOUT)
+                    cmd.run_measured_cmd([config.FILEINFO] + fileinfo_params, timeout=config.LOG_TIMEOUT, print_run_msg=True)
 
                 print(self.log_fileinfo_output)
             else:
-                _, fileinfo_rc, _ = cmd.run_cmd([config.FILEINFO] + fileinfo_params)
+                _, fileinfo_rc, _ = cmd.run_cmd([config.FILEINFO] + fileinfo_params, print_run_msg=True)
 
             if fileinfo_rc != 0:
                 if self.args.generate_log:
@@ -902,13 +880,10 @@ class Decompiler:
                     # system RAM to prevent potential black screens on Windows (#270).
                     fileinfo_params.append('--max-memory-half-ram')
 
-                print()
-                print('##### Gathering file information after unpacking...')
-                print('RUN: ' + config.FILEINFO + ' ' + ' '.join(fileinfo_params))
-
+                print('\t##### Gathering file information after unpacking...')
                 if self.args.generate_log:
                     fileinfo_memory, fileinfo_time, self.log_fileinfo_output, self.log_fileinfo_rc \
-                        = cmd.run_measured_cmd([config.FILEINFO] + fileinfo_params, timeout=config.LOG_TIMEOUT)
+                        = cmd.run_measured_cmd([config.FILEINFO] + fileinfo_params, timeout=config.LOG_TIMEOUT, print_run_msg=True)
 
                     fileinfo_rc = self.log_fileinfo_rc
                     self.log_fileinfo_time += fileinfo_time
@@ -916,7 +891,7 @@ class Decompiler:
 
                     print(self.log_fileinfo_output)
                 else:
-                    _, fileinfo_rc, _ = cmd.run_cmd([config.FILEINFO] + fileinfo_params)
+                    _, fileinfo_rc, _ = cmd.run_cmd([config.FILEINFO] + fileinfo_params, print_run_msg=True)
 
                 if fileinfo_rc != 0:
                     if self.args.generate_log:
@@ -1027,8 +1002,7 @@ class Decompiler:
             if self.args.static_code_archive:
                 # Get signatures from selected archives.
                 if len(self.args.static_code_archive) > 0:
-                    print()
-                    print('##### Extracting signatures from selected archives...')
+                    print('\n##### Extracting signatures from selected archives...')
 
                 lib_index = 0
                 for lib in self.args.static_code_archive:
@@ -1126,19 +1100,16 @@ class Decompiler:
                 # system RAM to prevent potential black screens on Windows (#270).
                 bin2llvmir_params.append('-max-memory-half-ram')
 
-            print()
-            print('##### Decompiling ' + self.input_file + ' into ' + self.out_backend_bc + '...')
-            print('RUN: ' + config.BIN2LLVMIR + ' ' + ' '.join(bin2llvmir_params) + ' -o ' + self.out_backend_bc)
-
+            print('\n##### Decompiling ' + self.input_file + ' into ' + self.out_backend_bc + '...')
             if self.args.generate_log:
                 self.log_bin2llvmir_memory, self.log_bin2llvmir_time, self.log_bin2llvmir_output, \
                 self.log_bin2llvmir_rc = cmd.run_measured_cmd([config.BIN2LLVMIR] + bin2llvmir_params + ['-o',
-                                                               self.out_backend_bc], timeout=config.LOG_TIMEOUT)
+                                                               self.out_backend_bc], timeout=config.LOG_TIMEOUT, print_run_msg=True)
 
                 bin2llvmir_rc = self.log_bin2llvmir_rc
                 print(self.log_bin2llvmir_output)
             else:
-                _, bin2llvmir_rc, _ = cmd.run_cmd([config.BIN2LLVMIR] + bin2llvmir_params + ['-o', self.out_backend_bc])
+                _, bin2llvmir_rc, _ = cmd.run_cmd([config.BIN2LLVMIR] + bin2llvmir_params + ['-o', self.out_backend_bc], print_run_msg=True)
 
             if bin2llvmir_rc != 0:
                 if self.args.generate_log:
@@ -1232,18 +1203,15 @@ class Decompiler:
             llvmir2hll_params.append('-max-memory-half-ram')
 
         # Decompile the optimized IR code.
-        print()
-        print('##### Decompiling ' + self.out_backend_bc + ' into ' + self.output_file + '...')
-        print('RUN: ' + config.LLVMIR2HLL + ' ' + ' '.join(llvmir2hll_params))
-
+        print('\n##### Decompiling ' + self.out_backend_bc + ' into ' + self.output_file + '...')
         if self.args.generate_log:
             self.log_llvmir2hll_memory, self.log_llvmir2hll_time, self.log_llvmir2hll_output, \
-            self.log_llvmir2hll_rc = cmd.run_measured_cmd([config.LLVMIR2HLL] + llvmir2hll_params, timeout=config.LOG_TIMEOUT)
+            self.log_llvmir2hll_rc = cmd.run_measured_cmd([config.LLVMIR2HLL] + llvmir2hll_params, timeout=config.LOG_TIMEOUT, print_run_msg=True)
 
             llvmir2hll_rc = self.log_llvmir2hll_rc
             print(self.log_llvmir2hll_output)
         else:
-            _, llvmir2hll_rc, _ = cmd.run_cmd([config.LLVMIR2HLL] + llvmir2hll_params)
+            _, llvmir2hll_rc, _ = cmd.run_cmd([config.LLVMIR2HLL] + llvmir2hll_params, print_run_msg=True)
 
         if llvmir2hll_rc != 0:
             if self.args.generate_log:
@@ -1259,27 +1227,20 @@ class Decompiler:
         # Convert .dot graphs to desired format.
         if ((self.args.backend_emit_cg and self.args.backend_cg_conversion == 'auto') or (
                 self.args.backend_emit_cfg and self.args.backend_cfg_conversion == 'auto')):
-            print()
-            print('##### Converting .dot files to the desired format...')
+            print('\n##### Converting .dot files to the desired format...')
 
         if self.args.backend_emit_cg and self.args.backend_cg_conversion == 'auto':
             if utils.tool_exists('dot'):
-                print('RUN: dot -T' + self.args.graph_format + ' ' + self.output_file + '.cg.dot -o ' + self.output_file
-                      + '.cg.' + self.args.graph_format)
-
                 cmd.run_cmd(['dot', '-T' + self.args.graph_format, self.output_file + '.cg.dot', '-o',
-                             self.output_file + '.cg.' + self.args.graph_format])
+                             self.output_file + '.cg.' + self.args.graph_format], print_run_msg=True)
             else:
                 print('Please install \'Graphviz\' to generate graphics.')
 
         if self.args.backend_emit_cfg and self.args.backend_cfg_conversion == 'auto':
             if utils.tool_exists('dot'):
                 for cfg in glob.glob(self.output_file + '.cfg.*.dot'):
-                    print('RUN: dot -T' + self.args.graph_format + ' ' + cfg + ' -o ' + (
-                            os.path.splitext(cfg)[0] + '.' + self.args.graph_format))
-
                     cmd.run_cmd(['dot', '-T' + self.args.graph_format, cfg, '-o',
-                                 os.path.splitext(cfg)[0] + '.' + self.args.graph_format])
+                                 os.path.splitext(cfg)[0] + '.' + self.args.graph_format], print_run_msg=True)
             else:
                 print('Please install \'Graphviz\' to generate graphics.')
 
@@ -1304,8 +1265,7 @@ class Decompiler:
 
         # Success!
         self._cleanup()
-        print()
-        print('##### Done!')
+        print('\n##### Done!')
 
         return 0
 
