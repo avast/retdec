@@ -124,17 +124,19 @@ class ArchiveDecompiler:
         if not self._check_arguments():
             return 1
 
+        cmd = CmdRunner()
+
         # Check for archives packed in Mach-O Universal Binaries.
         if utils.is_macho_archive(self.library_path):
             if self.enable_list_mode:
                 if self.use_json_format:
-                    subprocess.call([config.EXTRACT, '--objects', '--json', self.library_path])
+                    cmd.run_cmd([config.EXTRACT, '--objects', '--json', self.library_path])
                 else:
-                    subprocess.call([config.EXTRACT, '--objects', self.library_path])
+                    cmd.run_cmd([config.EXTRACT, '--objects', self.library_path])
                 return 1
 
             self.tmp_archive = self.library_path + '.a'
-            subprocess.call([config.EXTRACT, '--best', '--out', self.tmp_archive, self.library_path])
+            cmd.run_cmd([config.EXTRACT, '--best', '--out', self.tmp_archive, self.library_path])
             self.library_path = self.tmp_archive
 
         # Check for thin archives.
@@ -173,7 +175,6 @@ class ArchiveDecompiler:
         print('\` over %d files with timeout %d s. (run \`kill %d \` to terminate this script)...' % (
             self.file_count, self.timeout, os.getpid()), file=sys.stderr)
 
-        cmd = CmdRunner()
         for i in range(self.file_count):
             file_index = (i + 1)
             print('%d/%d\t\t' % (file_index, self.file_count))

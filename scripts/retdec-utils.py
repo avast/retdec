@@ -295,7 +295,7 @@ def has_archive_signature(path):
     Returns - True if file has ar signature
                 False no signature
     """
-    ret = subprocess.call([config.AR, path, '--arch-magic'])
+    _, ret, _ = CmdRunner().run_cmd([config.AR, path, '--arch-magic'], discard_stdout=True, discard_stderr=True)
     return ret == 0
 
 def has_thin_archive_signature(path):
@@ -304,7 +304,7 @@ def has_thin_archive_signature(path):
     Returns - True if file has thin ar signature
                 False no signature
     """
-    ret = subprocess.call([config.AR, path, '--thin-magic'])
+    _, ret, _ = CmdRunner().run_cmd([config.AR, path, '--thin-magic'], discard_stdout=True, discard_stderr=True)
     return ret == 0
 
 def is_valid_archive(path):
@@ -313,8 +313,7 @@ def is_valid_archive(path):
     Returns - True if file is valid archive
                 False if file is invalid archive
     """
-    ret = subprocess.call([config.AR, path, '--valid'], stderr=subprocess.STDOUT,
-                            stdout=None)
+    _, ret, _ = CmdRunner().run_cmd([config.AR, path, '--valid'], discard_stdout=True, discard_stderr=True)
     return ret == 0
 
 def archive_object_count(path):
@@ -352,8 +351,7 @@ def archive_get_by_name(path, name, output):
     Returns - False if everything ok
                 True if error
     """
-    ret = subprocess.call([config.AR, path, '--name', name, '--output', output],
-                            stderr=subprocess.STDOUT, stdout=None)
+    _, ret, _ = CmdRunner().run_cmd([config.AR, path, '--name', name, '--output', output], discard_stdout=True, discard_stderr=True)
     return ret != 0
 
 def archive_get_by_index(archive, index, output):
@@ -364,8 +362,7 @@ def archive_get_by_index(archive, index, output):
     Returns - False if everything ok
                 True if error
     """
-    ret = subprocess.call([config.AR, archive, '--index', index, '--output', output],
-                            stderr=subprocess.STDOUT, stdout=None)
+    _, ret, _ = CmdRunner().run_cmd([config.AR, archive, '--index', index, '--output', output], discard_stdout=True, discard_stderr=True)
     return ret != 0
 
 def is_macho_archive(path):
@@ -374,8 +371,7 @@ def is_macho_archive(path):
     Returns - True if file is archive
                 False if file is not archive
     """
-    ret = subprocess.call([config.EXTRACT, '--check-archive', path],
-                            stderr=subprocess.STDOUT, stdout=subprocess.DEVNULL)
+    _, ret, _ = CmdRunner().run_cmd([config.EXTRACT, '--check-archive', path], discard_stdout=True, discard_stderr=True)
     return ret == 0
 
 def is_decimal_number(num):

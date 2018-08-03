@@ -13,6 +13,7 @@ import importlib
 config = importlib.import_module('retdec-config')
 utils = importlib.import_module('retdec-utils')
 
+CmdRunner = utils.CmdRunner
 sys.stdout = utils.Unbuffered(sys.stdout)
 
 
@@ -87,6 +88,7 @@ class SigFromLib:
         if not self._check_arguments():
             return 1
 
+        cmd = CmdRunner()
         pattern_files = []
         object_dirs = []
 
@@ -106,7 +108,7 @@ class SigFromLib:
             os.makedirs(object_dir, exist_ok=True)
 
             # Extract all files to temporary folder.
-            subprocess.call([config.AR, lib_path, '--extract', '--output', object_dir])
+            cmd.run_cmd([config.AR, lib_path, '--extract', '--output', object_dir], discard_stdout=True, discard_stderr=True)
 
             # List all extracted objects.
             objects = []
@@ -120,7 +122,7 @@ class SigFromLib:
             # Extract patterns from library.
             pattern_file = os.path.join(self.tmp_dir_path, lib_name) + '.pat'
             pattern_files.append(pattern_file)
-            result = subprocess.call([config.BIN2PAT, '-o', pattern_file] + objects)
+            _, result, _ = cmd.run_cmd([config.BIN2PAT, '-o', pattern_file] + objects, discard_stdout=True, discard_stderr=True)
 
             if result != 0:
                 self.print_error_and_cleanup('utility bin2pat failed when processing %s' % lib_path)
@@ -146,7 +148,7 @@ class SigFromLib:
         if self.ignore_nop:
             pat2yara_args.extend([self.ignore_nop, str(self.args.ignore_nops)])
 
-        result = subprocess.call(pat2yara_args)
+        _, result, _ = cmd.run_cmd(pat2yara_args, discard_stdout=True, discard_stderr=True)
 
         if result != 0:
             self.print_error_and_cleanup('utility pat2yara failed')
