@@ -156,7 +156,7 @@ class Unpacker:
             self._print('##### Trying to unpack ' + self.input + ' into ' + output + ' by using UPX...')
             self._print('RUN: upx -d ' + self.input + ' -o ' + output)
 
-            out, upx_rc, _ = cmd.run_cmd(['upx', '-d', self.input, '-o', output], buffer_output=True)
+            out, upx_rc, _ = cmd.run_cmd(['upx', '-d', self.input, '-o', output], buffer_output=True, discard_stdout=True)
             self._print(out)
 
             if upx_rc == 0:

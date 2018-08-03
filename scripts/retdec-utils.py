@@ -26,7 +26,7 @@ BAD_ALLOC_RC = 135
 class CmdRunner:
     """A runner of external commands."""
 
-    def run_cmd(self, cmd, input='', timeout=None, buffer_output=False):
+    def run_cmd(self, cmd, input='', timeout=None, buffer_output=False, discard_stdout=False, discard_stderr=False):
         """Runs the given command (synchronously).
 
         :param list cmd: Command to be run as a list of arguments (strings).
@@ -52,24 +52,24 @@ class CmdRunner:
         If the timeout expires before the command finishes, the value of `output`
         is the command's output generated up to the timeout.
         """
-        _, output, return_code, timeouted = self._run_cmd(cmd, input, timeout, buffer_output, track_memory=False)
+        _, output, return_code, timeouted = self._run_cmd(cmd, input, timeout, buffer_output, track_memory=False, discard_stdout=discard_stdout, discard_stderr=discard_stderr)
 
         return output, return_code, timeouted
 
-    def run_measured_cmd(self, cmd, input='', timeout=None):
+    def run_measured_cmd(self, cmd, input='', timeout=None, discard_stdout=False, discard_stderr=False):
         """Runs the given command (synchronously) and measure its time and memory.
         :param list cmd: Command to be run as a list of arguments (strings).
 
         :returns: A quadruple (`memory`, `elapsed_time`, `output`, `return_code`).
         """
         start = time.time()
-        memory, output, rc, _ = CmdRunner()._run_cmd(cmd, input, timeout, buffer_output=True, track_memory=True)
+        memory, output, rc, _ = CmdRunner()._run_cmd(cmd, input, timeout, buffer_output=True, track_memory=True, discard_stdout=discard_stdout, discard_stderr=discard_stderr)
         elapsed = int(time.time() - start)
         if elapsed == 0:
             elapsed = 1
         return memory, elapsed, output, rc
 
-    def _run_cmd(self, cmd, input='', timeout=None, buffer_output=False, track_memory=False):
+    def _run_cmd(self, cmd, input='', timeout=None, buffer_output=False, track_memory=False, discard_stdout=False, discard_stderr=False):
         """:returns: A quadruple (`memory`, `output`, `return_code`, `timeouted`)."""
         memory = 0
         try:
@@ -77,14 +77,15 @@ class CmdRunner:
             if track_memory:
                 cmd = config.LOG_TIME + cmd
 
-            p = self._start(cmd, buffer_output)
+            p = self._start(cmd, buffer_output, discard_stdout=discard_stdout, discard_stderr=discard_stderr)
 
             def signal_handler(sig, frame):
                 p.kill()
             signal.signal(signal.SIGINT, signal_handler)
             signal.signal(signal.SIGTERM, signal_handler)
 
-            output, _ = p.communicate(input, timeout)
+            out, err = p.communicate(input, timeout)
+            output = err if out is None else out
 
             if output:
                 output = output.rstrip()
@@ -107,7 +108,7 @@ class CmdRunner:
                 output = self._strip_shell_colors(output)
             return memory, output, TIMEOUT_RC, True
 
-    def _start(self, cmd, buffer_output=False):
+    def _start(self, cmd, buffer_output=False, discard_stdout=False, discard_stderr=False):
         """Starts the given command and returns a handler to it.
 
         :param list cmd: Command to be run as a list of arguments (strings).
@@ -120,11 +121,29 @@ class CmdRunner:
         """
         # The implementation is platform-specific because we want to be able to
         # kill the children alongside with the process.
+
+        if discard_stdout:
+            stdout = subprocess.DEVNULL
+        elif buffer_output:
+            stdout = subprocess.PIPE
+        else:
+            stdout = None
+
+        if discard_stderr:
+            stderr = subprocess.DEVNULL
+        elif buffer_output:
+            if discard_stdout:
+                stderr = subprocess.PIPE
+            else:
+                stderr = subprocess.STDOUT
+        else:
+            stderr = None
+
         kwargs = dict(
             args=cmd,
             stdin=subprocess.PIPE,
-            stdout=subprocess.PIPE if buffer_output else None,
-            stderr=subprocess.STDOUT if buffer_output else None,
+            stdout=stdout,
+            stderr=stderr,
             universal_newlines=True
         )
         if is_windows():
