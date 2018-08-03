@@ -77,7 +77,7 @@ class CmdRunner:
             if track_memory:
                 cmd = config.LOG_TIME + cmd
 
-            p = self.start(cmd, buffer_output)
+            p = self._start(cmd, buffer_output)
 
             def signal_handler(sig, frame):
                 p.kill()
@@ -107,13 +107,11 @@ class CmdRunner:
                 output = self._strip_shell_colors(output)
             return memory, output, TIMEOUT_RC, True
 
-    def start(self, cmd, buffer_output=False, stdout=subprocess.STDOUT):
+    def _start(self, cmd, buffer_output=False):
         """Starts the given command and returns a handler to it.
 
         :param list cmd: Command to be run as a list of arguments (strings).
         :param bool buffer_output: See above.
-        :param int stdout: If buffer_output is True, errors will be redirectected
-                            to the stdout param.
 
         :returns: A handler to the started command (``subprocess.Popen``).
 
@@ -126,7 +124,7 @@ class CmdRunner:
             args=cmd,
             stdin=subprocess.PIPE,
             stdout=subprocess.PIPE if buffer_output else None,
-            stderr=stdout if buffer_output else None,
+            stderr=subprocess.STDOUT if buffer_output else None,
             universal_newlines=True
         )
         if is_windows():
