@@ -187,6 +187,12 @@ llvm::IntegerType* Abi::getDefaultType(llvm::Module* m)
 	return Type::getIntNTy(m->getContext(), s);
 }
 
+llvm::Type* Abi::getDefaultFPType(llvm::Module* m)
+{
+	assert(m);
+	return Type::getFloatTy(m->getContext());
+}
+
 llvm::PointerType* Abi::getDefaultPointerType(llvm::Module* m)
 {
 	assert(m);

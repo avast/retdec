@@ -88,6 +88,7 @@ class Abi
 		static std::size_t getTypeByteSize(llvm::Module* m, llvm::Type* t);
 		static std::size_t getTypeBitSize(llvm::Module* m, llvm::Type* t);
 		static llvm::IntegerType* getDefaultType(llvm::Module* m);
+		static llvm::Type* getDefaultFPType(llvm::Module* m);
 		static llvm::PointerType* getDefaultPointerType(llvm::Module* m);
 
 	// Architectures.
