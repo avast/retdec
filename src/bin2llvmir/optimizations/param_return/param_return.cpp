@@ -417,7 +417,9 @@ void CallEntry::filterLeaveOnlyContinuousStackOffsets(Config* _config, Abi* _abi
 void CallEntry::filterLeaveOnlyNeededStackOffsets(Config* _config, Abi *_abi)
 {
 	size_t regNum = 0;
+	size_t fpRegNum = 0;
 	auto it = possibleArgStores.begin();
+
 	while (it != possibleArgStores.end())
 	{
 		auto* s = *it;
@@ -426,7 +428,18 @@ void CallEntry::filterLeaveOnlyNeededStackOffsets(Config* _config, Abi *_abi)
 
 		if (_abi->isRegister(op))
 		{
-			++regNum;
+			if (_abi->isGeneralPurposeRegister(op))
+			{
+				++regNum;
+			}
+			else
+			{
+				if (_abi->usesFPRegistersForParameters())
+				{
+					fpRegNum++;
+				}
+			}
+
 			++it;
 			continue;
 		}
@@ -434,6 +447,13 @@ void CallEntry::filterLeaveOnlyNeededStackOffsets(Config* _config, Abi *_abi)
 		{
 			if (regNum < _abi->parameterRegisters().size())
 			{
+				if (_abi->usesFPRegistersForParameters()
+					&& fpRegNum >= _abi->parameterFPRegisters().size())
+				{
+					++it;
+					continue;
+				}
+
 				it = possibleArgStores.erase(it);
 				continue;
 			}
