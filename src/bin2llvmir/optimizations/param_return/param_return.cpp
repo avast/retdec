@@ -1772,10 +1772,19 @@ void DataFlowEntry::setArgumentTypes()
 			}
 		}
 
-		argTypes.insert(
-				argTypes.end(),
-				ce->possibleArgStores.size(),
-				Abi::getDefaultType(_module));
+		for (auto st: ce->possibleArgStores)
+		{
+			auto op = st->getPointerOperand();
+
+			if (_abi->isRegister(op) && !_abi->isGeneralPurposeRegister(op))
+			{
+				argTypes.push_back(Abi::getDefaultFPType(_module));
+			}
+			else
+			{
+				argTypes.push_back(Abi::getDefaultType(_module));
+			}
+		}
 	}
 }
 
