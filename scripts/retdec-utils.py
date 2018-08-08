@@ -89,6 +89,7 @@ class CmdRunner:
 
             def signal_handler(sig, frame):
                 p.kill()
+                sys.exit(1)
             signal.signal(signal.SIGINT, signal_handler)
             signal.signal(signal.SIGTERM, signal_handler)
 
