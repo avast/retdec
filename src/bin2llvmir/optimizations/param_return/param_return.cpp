@@ -815,9 +815,7 @@ void DataFlowEntry::addCallArgs(llvm::CallInst* call, CallEntry& ce)
 				}
 			}
 
-			if (disqualifiedValues.hasNot(ptr)
-					&& !_abi->isFlagRegister(ptr)
-					&& (isa<AllocaInst>(ptr) || _abi->isRegister(ptr)))
+			if (disqualifiedValues.hasNot(ptr))
 			{
 				ce.possibleArgStores.push_back(store);
 				disqualifiedValues.insert(ptr);
