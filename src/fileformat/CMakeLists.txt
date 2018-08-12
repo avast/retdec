@@ -30,6 +30,8 @@ set(FILEFORMAT_SOURCES
 	types/resource_table/resource.cpp
 	types/resource_table/resource_table.cpp
 	types/resource_table/resource_tree.cpp
+    types/resource_table/resource_icon.cpp
+    types/resource_table/resource_icon_group.cpp
 	types/certificate_table/certificate.cpp
 	types/certificate_table/certificate_table.cpp
 	types/dotnet_types/dotnet_type_reconstructor.cpp

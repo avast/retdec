@@ -482,7 +482,7 @@ void FileFormat::loadResourceIconHash()
 		return;
 	}
 
-	resourceTable->computeIconHashes(this);
+	resourceTable->computeIconHashes();
 }
 
 /**

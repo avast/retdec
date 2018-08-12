@@ -7,9 +7,11 @@
 #ifndef RETDEC_FILEFORMAT_TYPES_RESOURCE_TABLE_RESOURCE_TABLE_H
 #define RETDEC_FILEFORMAT_TYPES_RESOURCE_TABLE_RESOURCE_TABLE_H
 
+#include <memory>
 #include <vector>
 
 #include "retdec/fileformat/types/resource_table/resource.h"
+#include "retdec/fileformat/types/resource_table/resource_icon_group.h"
 
 namespace retdec {
 namespace fileformat {
@@ -20,8 +22,10 @@ namespace fileformat {
 class ResourceTable
 {
 	private:
-		using resourcesIterator = std::vector<Resource>::const_iterator;
-		std::vector<Resource> table;                  ///< stored resources
+		using resourcesIterator = std::vector<std::unique_ptr<Resource>>::const_iterator;
+		std::vector<std::unique_ptr<Resource>> table; ///< stored resources
+        std::vector<ResourceIconGroup *> iconGroups;  ///< icon groups
+        std::vector<ResourceIcon *> icons;            ///< icons
 		std::string iconHashCrc32;                    ///< imphash CRC32
 		std::string iconHashMd5;                      ///< imphash MD5
 		std::string iconHashSha256;                   ///< imphash SHA256
@@ -44,6 +48,7 @@ class ResourceTable
 		const std::string& getResourceIconhashCrc32() const;
 		const std::string& getResourceIconhashMd5() const;
 		const std::string& getResourceIconhashSha256() const;
+        const ResourceIconGroup* getPriorResourceIconGroup() const;
 		/// @}
 
 		/// @name Iterators
@@ -54,9 +59,12 @@ class ResourceTable
 
 		/// @name Other methods
 		/// @{
-		void computeIconHashes(const FileFormat *rOwner);
+		void computeIconHashes();
 		void clear();
-		void addResource(Resource &newResource);
+		void addResource(std::unique_ptr<Resource>&& newResource);
+        void addResourceIcon(ResourceIcon *icon);
+        void addResourceIconGroup(ResourceIconGroup *iGroup);
+        void linkResourceIconGroups();
 		bool hasResources() const;
 		bool hasResourceWithName(const std::string &rName) const;
 		bool hasResourceWithName(std::size_t rId) const;

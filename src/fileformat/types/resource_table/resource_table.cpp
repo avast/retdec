@@ -5,6 +5,7 @@
  */
 
 #include <sstream>
+#include <iostream>
 
 #include "retdec/crypto/crypto.h"
 #include "retdec/utils/conversion.h"
@@ -50,7 +51,7 @@ std::size_t ResourceTable::getSizeInFile() const
 
 	for(const auto &r : table)
 	{
-		sum += r.getSizeInFile();
+		sum += r->getSizeInFile();
 	}
 
 	return sum;
@@ -66,7 +67,7 @@ std::size_t ResourceTable::getLoadedSize() const
 
 	for(const auto &r : table)
 	{
-		sum += r.getLoadedSize();
+		sum += r->getLoadedSize();
 	}
 
 	return sum;
@@ -79,7 +80,7 @@ std::size_t ResourceTable::getLoadedSize() const
  */
 const Resource* ResourceTable::getResource(std::size_t rIndex) const
 {
-	return (rIndex < getNumberOfResources()) ? &table[rIndex] : nullptr;
+	return (rIndex < getNumberOfResources()) ? table[rIndex].get() : nullptr;
 }
 
 /**
@@ -91,9 +92,9 @@ const Resource* ResourceTable::getResourceWithName(const std::string &rName) con
 {
 	for(const auto &r : table)
 	{
-		if(r.getName() == rName)
+		if(r->getName() == rName)
 		{
-			return &r;
+			return r.get();
 		}
 	}
 
@@ -111,9 +112,9 @@ const Resource* ResourceTable::getResourceWithName(std::size_t rId) const
 
 	for(const auto &r : table)
 	{
-		if(r.getNameId(tmpId) && tmpId == rId)
+		if(r->getNameId(tmpId) && tmpId == rId)
 		{
-			return &r;
+			return r.get();
 		}
 	}
 
@@ -129,9 +130,9 @@ const Resource* ResourceTable::getResourceWithType(const std::string &rType) con
 {
 	for(const auto &r : table)
 	{
-		if(r.getType() == rType)
+		if(r->getType() == rType)
 		{
-			return &r;
+			return r.get();
 		}
 	}
 
@@ -149,9 +150,9 @@ const Resource* ResourceTable::getResourceWithType(std::size_t rId) const
 
 	for(const auto &r : table)
 	{
-		if(r.getTypeId(tmpId) && tmpId == rId)
+		if(r->getTypeId(tmpId) && tmpId == rId)
 		{
-			return &r;
+			return r.get();
 		}
 	}
 
@@ -167,9 +168,9 @@ const Resource* ResourceTable::getResourceWithLanguage(const std::string &rLan) 
 {
 	for(const auto &r : table)
 	{
-		if(r.getLanguage() == rLan)
+		if(r->getLanguage() == rLan)
 		{
-			return &r;
+			return r.get();
 		}
 	}
 
@@ -187,9 +188,9 @@ const Resource* ResourceTable::getResourceWithLanguage(std::size_t rId) const
 
 	for(const auto &r : table)
 	{
-		if(r.getLanguageId(tmpId) && tmpId == rId)
+		if(r->getLanguageId(tmpId) && tmpId == rId)
 		{
-			return &r;
+			return r.get();
 		}
 	}
 
@@ -224,6 +225,23 @@ const std::string& ResourceTable::getResourceIconhashSha256() const
 }
 
 /**
+ * Get prior icon group
+ * @return Prior icon group
+ */
+const ResourceIconGroup* ResourceTable::getPriorResourceIconGroup() const
+{
+    for(const auto group : iconGroups)
+    {
+        if(group->getIconGroupID() == 0)
+        {
+            return group;
+        }
+    }
+
+    return nullptr;
+}
+
+/**
  * Get begin iterator
  * @return Begin iterator
  */
@@ -243,72 +261,28 @@ ResourceTable::resourcesIterator ResourceTable::end() const
 
 /**
  * Compute icon hashes - CRC32, MD5, SHA256.
- * @param rOwner Pointer to input file
  */
-void ResourceTable::computeIconHashes(const FileFormat *rOwner)
+void ResourceTable::computeIconHashes()
 {
-	std::vector<Resource *> iconsWithName;
-	std::vector<Resource *> iconsWithId;
-	std::vector<std::uint8_t> iconHashBytes;
+    std::vector<std::uint8_t> iconHashBytes;
 
-	for(auto& resource : table)
-	{
-		if(!resource.isUsedForIconhash() || resource.getType() != "Icon")
-		{
-			continue;
-		}
+    auto priorGroup = getPriorResourceIconGroup();
+    if(!priorGroup)
+    {
+        return;
+    }
 
-		if(resource.hasValidName())
-		{
-			iconsWithName.push_back(&resource);
-		}
-		else if (resource.hasValidId())
-		{
-			iconsWithId.push_back(&resource);
-		}
-	}
+    auto priorIcon = priorGroup->getPriorIcon();
+    if(!priorIcon)
+    {
+        return;
+    }
 
-	std::sort(iconsWithName.begin(), iconsWithName.end(),
-		[](const Resource *r1, const Resource *r2) -> bool
-		{
-			return r1->getName() < r2->getName();
-		}
-	);
+    priorIcon->getBytes(iconHashBytes);
 
-	std::sort(iconsWithId.begin(), iconsWithId.end(),
-		[](const Resource *r1, const Resource *r2) -> bool
-		{
-			std::size_t id1, id2;
-			r1->getNameId(id1);
-			r2->getNameId(id2);
-
-			return id1 < id2;
-		}
-	);
-
-	for(auto icon : iconsWithName)
-	{
-		if(!icon->isLoaded())
-		{
-			icon->load(rOwner);
-		}
-
-		icon->getBytesPushBack(iconHashBytes);
-	}
-
-	for(auto icon : iconsWithId)
-	{
-		if(!icon->isLoaded())
-		{
-			icon->load(rOwner);
-		}
-
-		icon->getBytesPushBack(iconHashBytes);
-	}
-
-	iconHashCrc32 = retdec::crypto::getCrc32(iconHashBytes.data(), iconHashBytes.size());
-	iconHashMd5 = retdec::crypto::getMd5(iconHashBytes.data(), iconHashBytes.size());
-	iconHashSha256 = retdec::crypto::getSha256(iconHashBytes.data(), iconHashBytes.size());
+    iconHashCrc32 = retdec::crypto::getCrc32(iconHashBytes.data(), iconHashBytes.size());
+    iconHashMd5 = retdec::crypto::getMd5(iconHashBytes.data(), iconHashBytes.size());
+    iconHashSha256 = retdec::crypto::getSha256(iconHashBytes.data(), iconHashBytes.size());
 }
 
 /**
@@ -323,9 +297,82 @@ void ResourceTable::clear()
  * Add resource
  * @param newResource Resource which will be added
  */
-void ResourceTable::addResource(Resource &newResource)
+void ResourceTable::addResource(std::unique_ptr<Resource>&& newResource)
 {
-	table.push_back(newResource);
+	table.push_back(std::move(newResource));
+}
+
+/**
+ * Add icon
+ * @param icon Icon which will be added
+ */
+void ResourceTable::addResourceIcon(ResourceIcon *icon)
+{
+    icons.push_back(icon);
+}
+
+/**
+ * Add icon group
+ * @param iGroup Icon group which will be added
+ */
+void ResourceTable::addResourceIconGroup(ResourceIconGroup *iGroup)
+{
+    iconGroups.push_back(iGroup);
+}
+
+/**
+ * Link resource icon group with referenced icons and set icon properties
+ */
+void ResourceTable::linkResourceIconGroups()
+{
+    for(auto iconGroup : iconGroups)
+    {
+        std::size_t numberOfEntries;
+        if (!iconGroup->getNumberOfEntries(numberOfEntries))
+        {
+            continue;
+        }
+
+        for(size_t eIndex = 0; eIndex < numberOfEntries; eIndex++)
+        {
+            std::size_t entryNameID;
+            if(!iconGroup->getEntryNameID(eIndex, entryNameID))
+            {
+                continue;
+            }
+
+            for(auto icon : icons)
+            {
+                size_t iconNameID, iconSize;
+                unsigned short width, height;
+                uint16_t planes, bitCount;
+                uint8_t colorCount;
+                if(!icon->getNameId(iconNameID) || iconNameID != entryNameID
+                    || !iconGroup->getEntryWidth(eIndex, width) || !iconGroup->getEntryHeight(eIndex, height)
+                    || !iconGroup->getEntryIconSize(eIndex, iconSize) || !iconGroup->getEntryColorCount(eIndex, colorCount)
+                    || !iconGroup->getEntryPlanes(eIndex, planes) || !iconGroup->getEntryBitCount(eIndex, bitCount))
+                {
+                    continue;
+                }
+
+                icon->setWidth(width);
+                icon->setHeight(height);
+                icon->setIconSize(iconSize);
+                icon->setColorCount(colorCount);
+                icon->setPlanes(planes);
+                icon->setBitCount(bitCount);
+                icon->setIconGroup(iconGroup->getIconGroupID());
+                icon->setLoadedProperties();
+                
+                if(colorCount == 1 << (bitCount * planes))
+                {
+                    icon->setValidColorCount();
+                }
+
+                iconGroup->addIcon(icon);
+            }
+        }
+    }
 }
 
 /**
@@ -417,19 +464,19 @@ void ResourceTable::dump(std::string &dumpTable) const
 
 		for(const auto &res : table)
 		{
-			auto sName = (res.hasEmptyName() && res.getNameId(aux)) ? numToStr(aux, std::dec) : res.getName();
-			auto sType = (res.hasEmptyType() && res.getTypeId(aux)) ? numToStr(aux, std::dec) : res.getType();
-			auto sLang = res.getLanguage();
+			auto sName = (res->hasEmptyName() && res->getNameId(aux)) ? numToStr(aux, std::dec) : res->getName();
+			auto sType = (res->hasEmptyType() && res->getTypeId(aux)) ? numToStr(aux, std::dec) : res->getType();
+			auto sLang = res->getLanguage();
 			if(sType.empty())
 			{
 				sType = "-";
 			}
 			if(sLang.empty())
 			{
-				if(res.getLanguageId(aux))
+				if(res->getLanguageId(aux))
 				{
 					sLang = numToStr(aux, std::dec);
-					if(res.getSublanguageId(aux))
+					if(res->getSublanguageId(aux))
 					{
 						sLang += ":" + numToStr(aux, std::dec);
 					}
@@ -439,10 +486,10 @@ void ResourceTable::dump(std::string &dumpTable) const
 					sLang = "-";
 				}
 			}
-			const auto md5 = res.hasMd5() ? res.getMd5() : "-";
+			const auto md5 = res->hasMd5() ? res->getMd5() : "-";
 			ret << "; " << sName << " (type: " << sType << ", language: " << sLang << ", offset: " <<
-				numToStr(res.getOffset(), std::hex) << ", declSize: " << numToStr(res.getSizeInFile(), std::hex) <<
-				", loadedSize: " << numToStr(res.getLoadedSize(), std::hex) << ", md5: " << md5 << ")\n";
+				numToStr(res->getOffset(), std::hex) << ", declSize: " << numToStr(res->getSizeInFile(), std::hex) <<
+				", loadedSize: " << numToStr(res->getLoadedSize(), std::hex) << ", md5: " << md5 << ")\n";
 		}
 	}
 

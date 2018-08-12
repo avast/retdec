@@ -67,7 +67,6 @@ class Resource
 		/// @{
 		bool getBits(std::string &sResult) const;
 		bool getBytes(std::vector<unsigned char> &sResult, std::size_t sOffset = 0, std::size_t sSize = 0) const;
-		bool getBytesPushBack(std::vector<unsigned char> &sResult, std::size_t sOffset = 0, std::size_t sSize = 0) const;
 		bool getString(std::string &sResult, std::size_t sOffset = 0, std::size_t sSize = 0) const;
 		bool getHexBytes(std::string &sResult) const;
 		/// @}
@@ -90,7 +89,6 @@ class Resource
 		bool isLoaded() const;
 		bool hasValidName() const;
 		bool hasValidId() const;
-		bool isUsedForIconhash() const;
 		void invalidateNameId();
 		void invalidateTypeId();
 		void invalidateLanguageId();

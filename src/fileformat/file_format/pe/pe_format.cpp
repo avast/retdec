@@ -834,7 +834,7 @@ void PeFormat::loadResourceNodes(std::vector<const PeLib::ResourceChild*> &nodes
 		return;
 	}
 
-	Resource resource;
+	std::unique_ptr<Resource> resource = std::make_unique<Resource>();
 	resourceTable = new ResourceTable();
 	std::size_t firstLeafIndex = 0;
 
@@ -856,10 +856,10 @@ void PeFormat::loadResourceNodes(std::vector<const PeLib::ResourceChild*> &nodes
 		{
 			continue;
 		}
-		resource.setOffset(leaf->getOffsetToData() - rva + formatParser->getResourceDirectoryOffset());
-		resource.setSizeInFile(leaf->getSize());
-		resource.load(this);
-		resourceTable->addResource(resource);
+		resource->setOffset(leaf->getOffsetToData() - rva + formatParser->getResourceDirectoryOffset());
+		resource->setSizeInFile(leaf->getSize());
+		resource->load(this);
+		resourceTable->addResource(std::move(resource));
 	}
 }
 
@@ -868,96 +868,129 @@ void PeFormat::loadResourceNodes(std::vector<const PeLib::ResourceChild*> &nodes
  */
 void PeFormat::loadResources()
 {
-	unsigned long long rva = 0, size = 0;
-	if(!getDataDirectoryRelative(PELIB_IMAGE_DIRECTORY_ENTRY_RESOURCE, rva, size))
-	{
-		return;
-	}
+    size_t iconGroupIDcounter = 0;
+    unsigned long long rva = 0, size = 0;
+    if(!getDataDirectoryRelative(PELIB_IMAGE_DIRECTORY_ENTRY_RESOURCE, rva, size))
+    {
+        return;
+    }
 
-	std::vector<const ResourceChild*> nodes;
-	std::vector<std::size_t> levels;
-	if(!getResourceNodes(nodes, levels))
-	{
-		return;
-	}
-	else if(resourceTree->getNumberOfLevelsWithoutRoot() != 3)
-	{
-		loadResourceNodes(nodes, levels);
-		return;
-	}
+    std::vector<const ResourceChild*> nodes;
+    std::vector<std::size_t> levels;
+    if(!getResourceNodes(nodes, levels))
+    {
+        return;
+    }
+    else if(resourceTree->getNumberOfLevelsWithoutRoot() != 3)
+    {
+        loadResourceNodes(nodes, levels);
+        return;
+    }
 
-	Resource resource;
-	resourceTable = new ResourceTable();
+    std::unique_ptr<Resource> resource;
+    resourceTable = new ResourceTable();
 
-	for(std::size_t i = 0, e = levels[0], nSft = 0, lSft = 0; i < e; ++i)
-	{
-		auto *typeChild = nodes[i];
-		if(!typeChild)
-		{
-			continue;
-		}
-		resource.setType(typeChild->getName());
-		resource.invalidateTypeId();
-		if(resource.hasEmptyType())
-		{
-			resource.setTypeId(typeChild->getOffsetToName());
-			resource.setType(mapGetValueOrDefault(resourceTypeMap, typeChild->getOffsetToName(), ""));
-		}
-		nSft += typeChild->getNumberOfChildren();
+    for(std::size_t i = 0, e = levels[0], nSft = 0, lSft = 0; i < e; ++i)
+    {
+        auto *typeChild = nodes[i];
+        if(!typeChild)
+        {
+            continue;
+        }
 
-		for(std::size_t j = 0, f = typeChild->getNumberOfChildren(); j < f; ++j)
-		{
-			auto *nameChild = nodes[e + j + nSft - f];
-			if(!nameChild)
-			{
-				continue;
-			}
-			resource.setName(nameChild->getName());
-			resource.invalidateNameId();
-			if(resource.hasEmptyName())
-			{
-				resource.setNameId(nameChild->getOffsetToName());
-			}
-			lSft += nameChild->getNumberOfChildren();
+        bool emptyType = false;
+        auto type = typeChild->getName();
+        if(type.empty())
+        {
+            type = mapGetValueOrDefault(resourceTypeMap, typeChild->getOffsetToName(), "");
+            emptyType = true;
+        }
 
-			for(std::size_t k = 0, g = nameChild->getNumberOfChildren(); k < g; ++k)
-			{
-				auto *lanChild = nodes[e + levels[1] + k + lSft - g];
-				if(!lanChild)
-				{
-					continue;
-				}
-				auto *lanChildNode = lanChild->getNode();
-				auto *lanLeaf = dynamic_cast<const ResourceLeaf*>(lanChildNode);
-				if(!lanChildNode || !lanChildNode->isLeaf() || !lanLeaf)
-				{
-					continue;
-				}
-				resource.setOffset(lanLeaf->getOffsetToData() - rva + formatParser->getResourceDirectoryOffset());
-				resource.setSizeInFile(lanLeaf->getSize());
-				resource.setLanguage(lanChild->getName());
-				resource.invalidateLanguageId();
-				resource.invalidateSublanguageId();
-				if(resource.hasEmptyLanguage())
-				{
-					const auto lIdAll = lanChild->getOffsetToName();
-					const auto lId = lIdAll & 0x3FF;
-					resource.setLanguageId(lId);
-					resource.setSublanguageId((lIdAll & 0xFC00) >> 10);
-					resource.setLanguage(mapGetValueOrDefault(resourceLanguageMap, lId, ""));
-				}
-				resource.load(this);
-				resourceTable->addResource(resource);
-			}
-		}
-	}
+        nSft += typeChild->getNumberOfChildren();
 
-	loadResourceIconHash();
+        for(std::size_t j = 0, f = typeChild->getNumberOfChildren(); j < f; ++j)
+        {
+            auto *nameChild = nodes[e + j + nSft - f];
+            if(!nameChild)
+            {
+                continue;
+            }
 
-	for (auto&& addressRange : formatParser->getResourceDirectoryOccupiedAddresses())
-	{
-		nonDecodableRanges.addRange(std::move(addressRange));
-	}
+            auto name = nameChild->getName();
+            lSft += nameChild->getNumberOfChildren();
+
+            for(std::size_t k = 0, g = nameChild->getNumberOfChildren(); k < g; ++k)
+            {
+                auto *lanChild = nodes[e + levels[1] + k + lSft - g];
+                if(!lanChild)
+                {
+                    continue;
+                }
+                auto *lanChildNode = lanChild->getNode();
+                auto *lanLeaf = dynamic_cast<const ResourceLeaf*>(lanChildNode);
+                if(!lanChildNode || !lanChildNode->isLeaf() || !lanLeaf)
+                {
+                    continue;
+                }
+
+                if (type == "Icon")
+                {
+                    resource = std::make_unique<ResourceIcon>();
+                    resourceTable->addResourceIcon(static_cast<ResourceIcon *>(resource.get()));
+                }
+                else if (type == "Icon Group")
+                {
+                    auto iGroup = std::make_unique<ResourceIconGroup>();
+                    iGroup->setIconGroupID(iconGroupIDcounter);
+                    resource = std::move(iGroup);
+                    resourceTable->addResourceIconGroup(static_cast<ResourceIconGroup *>(resource.get()));
+                    iconGroupIDcounter++;
+                }
+                else
+                {
+                    resource = std::make_unique<Resource>();
+                }
+                resource->setType(type);
+                resource->invalidateTypeId();
+                if(emptyType)
+                {
+                    resource->setTypeId(typeChild->getOffsetToName());
+                }
+
+                resource->setName(name);
+                resource->invalidateNameId();
+                if(resource->hasEmptyName())
+                {
+                    resource->setNameId(nameChild->getOffsetToName());
+                }
+
+                resource->setOffset(lanLeaf->getOffsetToData() - rva + formatParser->getResourceDirectoryOffset());
+                resource->setSizeInFile(lanLeaf->getSize());
+                resource->setLanguage(lanChild->getName());
+                resource->invalidateLanguageId();
+                resource->invalidateSublanguageId();
+                if(resource->hasEmptyLanguage())
+                {
+                    const auto lIdAll = lanChild->getOffsetToName();
+                    const auto lId = lIdAll & 0x3FF;
+                    resource->setLanguageId(lId);
+                    resource->setSublanguageId((lIdAll & 0xFC00) >> 10);
+                    resource->setLanguage(mapGetValueOrDefault(resourceLanguageMap, lId, ""));
+                }
+                resource->load(this);
+                resourceTable->addResource(std::move(resource));
+            }
+        }
+    }
+
+    resourceTable->linkResourceIconGroups();
+
+    loadResourceIconHash();
+
+    for (auto&& addressRange : formatParser->getResourceDirectoryOccupiedAddresses())
+    {
+        nonDecodableRanges.addRange(std::move(addressRange));
+    }
 }
 
 /**
