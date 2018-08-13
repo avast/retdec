@@ -90,8 +90,6 @@ branches:
     - master
     # Version tags.
     - /^v?\d+\.\d+.*$/
-    # TODO: temporary
-    - bash-to-python
 
 notifications:
   email:

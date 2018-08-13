@@ -48,8 +48,6 @@ branches:
     - master
     # Version tags.
     - /^v?\d+\.\d+.*$/
-    # TODO: temporary
-    - bash-to-python
 
 skip_commits:
   files:
