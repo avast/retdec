@@ -32,7 +32,7 @@ For more information, check out our
 
 ## Installation and Use
 
-Currently, we support only Windows (7 or later), Linux, and unofficially macOS.
+Currently, we support Windows (7 or later), Linux, and macOS.
 
 ### Windows
 
