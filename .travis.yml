@@ -11,6 +11,7 @@ matrix:
       addons:
         apt:
           sources:
+            - deadsnakes
             - ubuntu-toolchain-r-test
           packages:
             - build-essential
@@ -19,7 +20,7 @@ matrix:
             - g++-4.9
             - cmake
             - perl
-            - python3
+            - python3.5
             - flex
             - bison
             - autoconf
@@ -27,11 +28,8 @@ matrix:
             - libtool
             - pkg-config
             - m4
-            - coreutils
             - zlib1g-dev
             - libtinfo-dev
-            - wget
-            - bc
             - upx
             - openssl
       env:
@@ -51,10 +49,8 @@ install:
   - if [ "$TRAVIS_OS_NAME" = "osx" ]; then brew install flex bison; fi
   # ccache is not installed on OS X.
   - if [ "$TRAVIS_OS_NAME" = "osx" ]; then brew install ccache; fi
-  # gnu-getopt
-  - if [ "$TRAVIS_OS_NAME" = "osx" ]; then brew install gnu-getopt; fi
-  # bash 4
-  - if [ "$TRAVIS_OS_NAME" = "osx" ]; then brew install bash; fi
+  # python 3
+  - if [ "$TRAVIS_OS_NAME" = "osx" ]; then brew upgrade python; fi
 
 before_script:
   - eval "${MATRIX_EVAL}"
@@ -62,9 +58,6 @@ before_script:
   - if [ "$TRAVIS_OS_NAME" = "osx" ]; then export CMAKE_INCLUDE_PATH="/usr/local/opt/flex/include"; fi
   - if [ "$TRAVIS_OS_NAME" = "osx" ]; then export CMAKE_LIBRARY_PATH="/usr/local/opt/flex/lib;/usr/local/opt/bison/lib"; fi
   - if [ "$TRAVIS_OS_NAME" = "osx" ]; then export PATH="/usr/local/opt/flex/bin:/usr/local/opt/bison/bin:$PATH"; fi
-  # Coreutils.
-  - if [ "$TRAVIS_OS_NAME" = "osx" ]; then export PATH="$(brew --prefix coreutils)/libexec/gnubin:$PATH"; fi
-  - if [ "$TRAVIS_OS_NAME" = "osx" ]; then export PATH="/usr/local/opt/gnu-getopt/bin:$PATH"; fi
   # We need to add ccache before everything else into PATH.
   - if [ "$TRAVIS_OS_NAME" = "osx" ]; then export PATH="/usr/local/opt/ccache/libexec:$PATH"; fi
 
@@ -79,18 +72,15 @@ script:
   - cd ..
   - rm -rf build
   # Run unit tests.
-  - if [ "$TRAVIS_OS_NAME" = "osx" ]; then /usr/local/bin/bash retdec-install/bin/retdec-tests-runner.sh; fi
-  - if [ "$TRAVIS_OS_NAME" = "linux" ]; then ./retdec-install/bin/retdec-tests-runner.sh; fi
+  - python3 retdec-install/bin/retdec-tests-runner.py
   # Run the decompilation script.
-  - if [ "$TRAVIS_OS_NAME" = "osx" ]; then /usr/local/bin/bash retdec-install/bin/retdec-decompiler.sh --help; fi
-  - if [ "$TRAVIS_OS_NAME" = "linux" ]; then ./retdec-install/bin/retdec-decompiler.sh --help; fi
+  - python3 retdec-install/bin/retdec-decompiler.py --help
   # Run a simple decompilation.
   - echo -e '#include <stdio.h>\n#include <stdlib.h>\nint main()\n{\n  printf("hello world\\n");\n  return 0;\n}\n' > hello-orig.c
   - cat hello-orig.c
   - gcc -m32 -o hello hello-orig.c
   - ./hello
-  - if [ "$TRAVIS_OS_NAME" = "osx" ]; then /usr/local/bin/bash retdec-install/bin/retdec-decompiler.sh hello; fi
-  - if [ "$TRAVIS_OS_NAME" = "linux" ]; then ./retdec-install/bin/retdec-decompiler.sh hello; fi
+  - python3 retdec-install/bin/retdec-decompiler.py hello
   - cat hello.c
   - grep "int main(int argc, char \*\* argv)" hello.c
 

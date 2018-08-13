@@ -7,15 +7,6 @@ if(CMAKE_CXX_COMPILER)
 	set(CMAKE_CXX_COMPILER_OPTION "-DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}")
 endif()
 
-# Keystone requires python3, so we first check whether python3 is installed as
-# "python3", and if not, we suppose that `python` runs python3.
-# Python is used to generate LLVMBuild.cmake file. Python2 generates this file
-# with UNIX paths, which do not work. Python3 generates proper Windows paths.
-find_program(PYTHON_EXECUTABLE "python3")
-if(NOT PYTHON_EXECUTABLE)
-	find_program(PYTHON_EXECUTABLE "python")
-endif()
-
 ExternalProject_Add(keystone-project
 	URL https://github.com/keystone-engine/keystone/archive/d7ba8e378e5284e6384fc9ecd660ed5f6532e922.zip
 	URL_HASH SHA256=13bd00e062e9c778fe76aaab5c163348b3c9457c0e9b2a4c2fb3e2d8747694ca
@@ -23,7 +14,9 @@ ExternalProject_Add(keystone-project
 	CMAKE_ARGS
 		# This does not work on MSVC, but may be useful on Linux.
 		-DCMAKE_BUILD_TYPE=Release
-		# Force python version set in this cmake file.
+		# Force python3 version set in this cmake file.
+		# Python is used to generate LLVMBuild.cmake file. Python2 generates this file
+		# with UNIX paths, which do not work. Python3 generates proper Windows paths.
 		-DPYTHON_EXECUTABLE=${PYTHON_EXECUTABLE}
 		-DKEYSTONE_BUILD_STATIC_RUNTIME=OFF
 		# Force the use of the same compiler as used to build the top-level

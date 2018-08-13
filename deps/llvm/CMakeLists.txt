@@ -27,13 +27,6 @@ endif()
 # install only some tools from LLVM, not all the libraries and tools.
 include(ExternalProject)
 
-# LLVM requires python3, so we first check whether python3 is installed as
-# "python3", and if not, we suppose that `python` runs python3.
-find_program(PYTHON_EXECUTABLE "python3")
-if(NOT PYTHON_EXECUTABLE)
-	find_program(PYTHON_EXECUTABLE "python")
-endif()
-
 ExternalProject_Add(llvm-project
 	URL https://github.com/avast-tl/llvm/archive/725d0cee133c6ab9b95c493f05de3b08016f5c3c.zip
 	URL_HASH SHA256=0ec70e790a84df1dcc4e5bb30f9a3ae32eb280aad8a4711158ba227513ddebf4
@@ -43,8 +36,7 @@ ExternalProject_Add(llvm-project
 		# This has no effect on Windows with MSVC, but is useful on Linux.
 		-DCMAKE_BUILD_TYPE=Release
 
-		# Force Python3 (see the comment above when setting
-		# PYTHON_EXECUTABLE).
+		# Force Python3.
 		-DPYTHON_EXECUTABLE=${PYTHON_EXECUTABLE}
 
 		# Targets to be build.
