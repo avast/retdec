@@ -1,5 +1,5 @@
 /**
- * @file src/llvm-support/utils.cpp
+ * @file src/bin2llvmir/utils/llvm.cpp
  * @brief LLVM Utility functions.
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */

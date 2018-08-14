@@ -169,7 +169,7 @@ const char *BreakMachOUniversal::getFileBufferStart()
  */
 bool BreakMachOUniversal::getByArchFamily(
 		std::uint32_t cpuType,
-		MachOUniversalBinary::object_iterator &res)
+		llvm::object::MachOUniversalBinary::object_iterator &res)
 {
 	for(auto i = file->begin_objects(), e = file->end_objects(); i != e; ++i)
 	{
@@ -190,7 +190,7 @@ bool BreakMachOUniversal::getByArchFamily(
  * @return @c true if object was created successfully, @c false otherwise
  */
 bool BreakMachOUniversal::extract(
-		MachOUniversalBinary::object_iterator &it,
+		llvm::object::MachOUniversalBinary::object_iterator &it,
 		const std::string &outPath)
 {
 	std::ofstream output(outPath, std::ios::binary);

@@ -1,5 +1,5 @@
 /**
- * @file include/retdec/cpdetec/settings.h
+ * @file include/retdec/cpdetect/settings.h
  * @brief Settings for compiler detection.
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */

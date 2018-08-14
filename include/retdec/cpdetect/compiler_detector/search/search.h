@@ -1,5 +1,5 @@
 /**
- * @file include/retdec/cpdetec/compiler_detector/search/search.h
+ * @file include/retdec/cpdetect/compiler_detector/search/search.h
  * @brief Class for search in file.
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */

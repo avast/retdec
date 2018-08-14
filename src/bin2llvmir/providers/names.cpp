@@ -1,5 +1,5 @@
 /**
-* @file src/bin2llvmir/optimizations/decoder/names.cpp
+* @file src/bin2llvmir/providers/names.cpp
 * @brief Database of objects' names in binary.
 * @copyright (c) 2017 Avast Software, licensed under the MIT license
 */

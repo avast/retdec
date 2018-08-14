@@ -1,5 +1,5 @@
 /**
- * @file patterns/stacofinl/stacofinl.cpp
+ * @file src/stacofin/stacofin.cpp
  * @brief Static code finder library.
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */

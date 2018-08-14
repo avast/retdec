@@ -1,5 +1,5 @@
 /**
- * @file include/retdec/cpdetec/cptypes.h
+ * @file include/retdec/cpdetect/cptypes.h
  * @brief cpdetectl types and structures.
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */

@@ -1,5 +1,5 @@
 /**
- * @file src/bin2llvmir/providers/abi/powerpc.h
+ * @file src/bin2llvmir/providers/abi/powerpc.cpp
  * @brief ABI information for PowerPC.
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */

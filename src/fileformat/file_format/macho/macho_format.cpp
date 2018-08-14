@@ -984,7 +984,7 @@ void MachOFormat::dyldInfoCommand(const llvm::object::MachOObjectFile::LoadComma
 /**
  * Convert MachOBindEntry to import
  * @param input Source entry
- * @param result Import
+ * @return Import
  *
  * Segments have to be loaded before calling this function
  */

@@ -1,5 +1,5 @@
 /**
- * @file include/retdec/cpdetec/compiler_detector/heuristics/heuristics.h
+ * @file include/retdec/cpdetect/compiler_detector/heuristics/heuristics.h
  * @brief Class for heuristics detection.
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */

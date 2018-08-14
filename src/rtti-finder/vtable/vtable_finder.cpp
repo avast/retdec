@@ -17,9 +17,7 @@
 const bool debug_enabled = false;
 
 using namespace retdec::utils;
-
-namespace retdec {
-namespace rtti_finder {
+using namespace retdec::rtti_finder;
 
 void findPossibleVtables(
 		const retdec::loader::Image* img,
@@ -138,10 +136,15 @@ bool fillVtable(
 	return true;
 }
 
-void findGccVtables(
+/**
+ * @note This method is defined outside the namespace retdec::rtti_finder with
+ *       explicit namespace declarations to help Doxygen and prevent it from
+ *       generating "no matching file member found for" warnings.
+ */
+void retdec::rtti_finder::findGccVtables(
 		const retdec::loader::Image* img,
-		VtablesGcc& vtables,
-		RttiGcc& rttis)
+		retdec::rtti_finder::VtablesGcc& vtables,
+		retdec::rtti_finder::RttiGcc& rttis)
 {
 	std::set<retdec::utils::Address> possibleVtables;
 	findPossibleVtables(img, possibleVtables, true);
@@ -150,7 +153,7 @@ void findGccVtables(
 	for (auto addr : possibleVtables)
 	{
 		LOG << "\t" << "possible vtable @ " << addr << std::endl;
-		VtableGcc vt(addr);
+		retdec::rtti_finder::VtableGcc vt(addr);
 
 		if (!fillVtable(img, processedAddresses, addr, vt))
 		{
@@ -182,10 +185,15 @@ void findGccVtables(
 	finalizeGccRtti(rttis);
 }
 
-void findMsvcVtables(
+/**
+ * @note This method is defined outside the namespace retdec::rtti_finder with
+ *       explicit namespace declarations to help Doxygen and prevent it from
+ *       generating "no matching file member found for" warnings.
+ */
+void retdec::rtti_finder::findMsvcVtables(
 		const retdec::loader::Image* img,
-		VtablesMsvc& vtables,
-		RttiMsvc& rttis)
+		retdec::rtti_finder::VtablesMsvc& vtables,
+		retdec::rtti_finder::RttiMsvc& rttis)
 {
 	std::set<retdec::utils::Address> possibleVtables;
 	findPossibleVtables(img, possibleVtables, false);
@@ -193,7 +201,7 @@ void findMsvcVtables(
 	std::set<retdec::utils::Address> processedAddresses;
 	for (auto addr : possibleVtables)
 	{
-		VtableMsvc vt(addr);
+		retdec::rtti_finder::VtableMsvc vt(addr);
 
 		if (!fillVtable(img, processedAddresses, addr, vt))
 		{
@@ -219,6 +227,3 @@ void findMsvcVtables(
 		vtables.emplace(addr, vt);
 	}
 }
-
-} // namespace rtti_finder
-} // namespace retdec

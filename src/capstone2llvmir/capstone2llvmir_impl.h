@@ -290,7 +290,7 @@ class Capstone2LlvmIrTranslator_impl : virtual public Capstone2LlvmIrTranslator
 //
 		/**
 		 * Load LLVM register corresponding to Capstone register @p r, using
-		 * instruction builder @irb. Optionally convert the loaded value to
+		 * instruction builder @p irb. Optionally convert the loaded value to
 		 * type @p dstType using cast type @p ct.
 		 * @return Loaded value.
 		 */

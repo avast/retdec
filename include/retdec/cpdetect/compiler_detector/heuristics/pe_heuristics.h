@@ -1,5 +1,5 @@
 /**
- * @file include/retdec/cpdetec/compiler_detector/heuristics/pe_heuristics.h
+ * @file include/retdec/cpdetect/compiler_detector/heuristics/pe_heuristics.h
  * @brief Definition of PeHeuristics class.
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */

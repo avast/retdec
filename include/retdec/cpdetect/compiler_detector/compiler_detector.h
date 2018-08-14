@@ -1,5 +1,5 @@
 /**
- * @file include/retdec/cpdetec/compiler_detector/compiler_detector.h
+ * @file include/retdec/cpdetect/compiler_detector/compiler_detector.h
  * @brief Class for tool detection.
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */

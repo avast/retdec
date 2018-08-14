@@ -1,5 +1,5 @@
 /**
-* @file src/bin2llvmir/optimizations/decoder/decode_ranges.h
+* @file src/bin2llvmir/optimizations/decoder/decoder_ranges.cpp
 * @brief Representation of ranges to decode.
 * @copyright (c) 2017 Avast Software, licensed under the MIT license
 */

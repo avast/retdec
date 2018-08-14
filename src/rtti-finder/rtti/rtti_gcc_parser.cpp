@@ -17,15 +17,14 @@ const bool debug_enabled = false;
 
 using namespace retdec::utils;
 
-namespace retdec {
-namespace rtti_finder {
-
 /**
- * Pointer to RTTI entry if parsed ok, @c nullptr otherwise.
+ * @note This method is defined outside the namespace retdec::rtti_finder with
+ *       explicit namespace declarations to help Doxygen and prevent it from
+ *       generating "no matching file member found for" warnings.
  */
-std::shared_ptr<ClassTypeInfo> parseGccRtti(
+std::shared_ptr<retdec::rtti_finder::ClassTypeInfo> retdec::rtti_finder::parseGccRtti(
 		const retdec::loader::Image* img,
-		RttiGcc& rttis,
+		retdec::rtti_finder::RttiGcc& rttis,
 		retdec::utils::Address rttiAddr)
 {
 	LOG << "\n\t" << "parseGccRtti() @ " << rttiAddr << std::endl;
@@ -222,7 +221,12 @@ std::shared_ptr<ClassTypeInfo> parseGccRtti(
 	return rttis.emplace(rttiAddr, cti).first->second;
 }
 
-void finalizeGccRtti(RttiGcc& rttis)
+/**
+ * @note This method is defined outside the namespace retdec::rtti_finder with
+ *       explicit namespace declarations to help Doxygen and prevent it from
+ *       generating "no matching file member found for" warnings.
+ */
+void retdec::rtti_finder::finalizeGccRtti(retdec::rtti_finder::RttiGcc& rttis)
 {
 	for (auto &rtti : rttis)
 	{
@@ -247,6 +251,3 @@ void finalizeGccRtti(RttiGcc& rttis)
 		}
 	}
 }
-
-} // namespace rtti_finder
-} // namespace retdec

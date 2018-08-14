@@ -1,5 +1,5 @@
 /**
- * @file preprocessing/ar_extractor/detection.cpp
+ * @file src/ar-extractor/detection.cpp
  * @brief Detection methods.
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */

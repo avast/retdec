@@ -1,5 +1,5 @@
 /**
- * @file preprocessing/ar_extractor/archive_wrapper.cpp
+ * @file src/ar-extractor/archive_wrapper.cpp
  * @brief Definition of ArchiveWrapper class.
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */

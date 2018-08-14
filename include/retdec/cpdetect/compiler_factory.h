@@ -1,5 +1,5 @@
 /**
- * @file include/retdec/cpdetec/compiler_factory.h
+ * @file include/retdec/cpdetect/compiler_factory.h
  * @brief Factory for creating compiler detectors.
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */

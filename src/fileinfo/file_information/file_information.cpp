@@ -3557,7 +3557,7 @@ void FileInformation::setLoaderStatusMessage(const std::string& statusMessage)
 
 /**
 * Sets loader error message.
-* @param statusMessage The loader error message.
+* @param ldrErrInfo The loader error message.
 */
 void FileInformation::setLoaderErrorInfo(const retdec::fileformat::LoaderErrorInfo & ldrErrInfo)
 {

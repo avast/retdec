@@ -7,5 +7,5 @@
 // As there is no better place to comment this namespace, we do this in the
 // present file.
 
-/// @file src/ar_extractor/doxygen.h
+/// @file src/ar-extractor/doxygen.h
 /// @namespace retdec::ar_extractor Library for ar archive functions.

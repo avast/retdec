@@ -1,5 +1,5 @@
 /**
- * @file src/fileformat/types/note_section/elf_note.cpp
+ * @file src/fileformat/types/note_section/elf_notes.cpp
  * @brief Class for ELF note segment.
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */

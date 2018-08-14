@@ -553,8 +553,6 @@ IrModifier::StackPair IrModifier::getStackVariable(
 
 /**
  * Get global variable from the given address @a addr in @a objf input file.
- * @param module Module in which global variable is created.
- * @param config Config file.
  * @param objf Object file.
  * @param dbgf Debug file.
  * @param addr Address of the global variable in the @a objf.
@@ -691,12 +689,11 @@ GlobalVariable* IrModifier::getGlobalVariable(
  * Change @c val declaration to @c toType. Only the object type is changed,
  * not its usages. Because of this, it is not safe to use this function alone.
  * This function is not public, i.e. accessible from other modules.
- * @param config Configuration that needs to be changed when object changed.
  * @param objf   Object file for this object -- needed to initialize it values.
- * @param module Module.
  * @param val    Value which type to change.
  * @param toType Type to change it to.
  * @param init   Initializer constant.
+ * @param wideString Is type a wide string?
  * @return New value with a desired type. This may be the same as @a val if
  * value's type can be mutated, or a new object if it cannot.
  */
@@ -766,9 +763,7 @@ llvm::Value* IrModifier::changeObjectDeclarationType(
 
 /**
  * Change @c val type to @c toType and fix all its uses.
- * @param config Configuration that needs to be changed when object changed.
  * @param objf   Object file for this object -- needed to initialize it values.
- * @param module Module.
  * @param val    Value which type to change.
  * @param toType Type to change it to.
  * @param init   Initializer constant.

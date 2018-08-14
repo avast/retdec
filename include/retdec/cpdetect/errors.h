@@ -1,5 +1,5 @@
 /**
- * @file include/retdec/cpdetec/errors.h
+ * @file include/retdec/cpdetect/errors.h
  * @brief Header file for error functions.
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */

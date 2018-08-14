@@ -1,5 +1,5 @@
 /**
- * @file include/retdec/cpdetec/cpdetect.h
+ * @file include/retdec/cpdetect/cpdetect.h
  * @brief Interface to cpdetectl library.
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */

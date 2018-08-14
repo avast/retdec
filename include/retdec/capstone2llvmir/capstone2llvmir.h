@@ -697,7 +697,7 @@ class Capstone2LlvmIrTranslator
 		/**
 		 * @return Capstone register corresponding to the provided LLVM global
 		 * variable @p gv if such register exists, zero otherwise (zero equals
-		 * to @c <arch>_REG_INVALID in all Capstone architecture models, e.g.
+		 * to @c [arch]_REG_INVALID in all Capstone architecture models, e.g.
 		 * @c ARM_REG_INVALID, @c MIPS_REG_INVALID).
 		 */
 		virtual uint32_t getCapstoneRegister(llvm::GlobalVariable* gv) const = 0;

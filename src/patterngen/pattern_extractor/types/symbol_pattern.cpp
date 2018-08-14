@@ -1,5 +1,5 @@
 /**
- * @file patterns/patterngenl/pattern_extractor/types/symbol_pattern.cpp
+ * @file src/patterngen/pattern_extractor/types/symbol_pattern.cpp
  * @brief Class representing pattern of one symbol.
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */

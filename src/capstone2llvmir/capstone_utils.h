@@ -1,5 +1,5 @@
 /**
- * @file include/retdec/capstone2llvmir/capstone_utils.h
+ * @file src/capstone2llvmir/capstone_utils.h
  * @brief Utility functions for types, enums, etc. defined in Capstone.
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */

@@ -35,10 +35,9 @@
 using retdec::utils::hasItem;
 using retdec::utils::isLowerThanCaseInsensitive;
 
-namespace retdec {
-namespace llvmir2hll {
-
 namespace {
+
+using namespace retdec::llvmir2hll;
 
 /**
 * @brief Compares the two given functions by their name.
@@ -90,10 +89,16 @@ ShPtr<Expression> skipUnaryExpr(ShPtr<Expression> expr) {
 
 /**
 * @brief Sorts the given vector by the name of its elements (case-insensitively).
+* @note This one function is defined outside the namespace below with explicit
+*       namespace declarations to help Doxygen and prevent it from generating
+*       "no matching file member found for" warnings.
 */
-void sortByName(FuncVector &vec) {
+void retdec::llvmir2hll::sortByName(retdec::llvmir2hll::FuncVector &vec) {
 	std::sort(vec.begin(), vec.end(), compareFuncs);
 }
+
+namespace retdec {
+namespace llvmir2hll {
 
 /**
 * @brief Sorts the given vector by the name of its elements (case-insensitively).

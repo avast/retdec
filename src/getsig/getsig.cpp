@@ -295,7 +295,7 @@ std::size_t getShortestLength(
 /**
  * Creates signature pattern from vector of strings
  * @param contents Vector of bytes from files
- * @param return created signature
+ * @return created signature
  */
 std::string createSignature(const std::vector<std::string> &contents)
 {

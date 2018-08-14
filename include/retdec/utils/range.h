@@ -140,6 +140,7 @@ public:
 	 * Sets the starting value of the range.
 	 *
 	 * @param start The starting value of the range.
+	 * @param end   The ending value of the range.
 	 */
 	void setStartEnd(const RangeType& start, const RangeType& end)
 	{

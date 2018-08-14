@@ -80,7 +80,7 @@ const std::unordered_map<ReturnCode, std::string, retdec::utils::EnumClassKeyHas
  * @param format Detected format (optional)
  * @return Error message
  */
-std::string getErrorMessage(ReturnCode errorCode, Format format)
+std::string getErrorMessage(ReturnCode errorCode, retdec::fileformat::Format format)
 {
 	auto str = mapGetValueOrDefault(errorMessages, errorCode, defaultError);
 	switch(errorCode)

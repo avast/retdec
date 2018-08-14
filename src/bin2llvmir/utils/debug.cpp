@@ -1,5 +1,5 @@
 /**
- * @file include/retdec/bin2llvmir/utils/debug.h
+ * @file src/bin2llvmir/utils/debug.cpp
  * @brief Debugging utilities.
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */

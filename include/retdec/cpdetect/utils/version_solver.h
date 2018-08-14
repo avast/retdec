@@ -1,5 +1,5 @@
 /**
- * @file include/retdec/cpdetec/utils/version_solver.h
+ * @file include/retdec/cpdetect/utils/version_solver.h
  * @brief Function for detection of version stored in string.
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */

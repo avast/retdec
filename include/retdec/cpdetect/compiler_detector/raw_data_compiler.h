@@ -1,5 +1,5 @@
 /**
- * @file include/retdec/cpdetec/compiler_detector/raw_data_compiler.h
+ * @file include/retdec/cpdetect/compiler_detector/raw_data_compiler.h
  * @brief Definition of RawDataCompiler class.
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */

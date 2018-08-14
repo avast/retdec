@@ -1,5 +1,5 @@
 /**
- * @file src/bin2llvmir/providers/abi/x86.h
+ * @file src/bin2llvmir/providers/abi/x86.cpp
  * @brief ABI information for x86.
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */

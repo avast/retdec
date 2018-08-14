@@ -1649,7 +1649,7 @@ Instruction *AnalysisInfo::getInstFromExtRUses(Value &leftOp, Value &rightOp) {
 *        specified by @a value.
 *
 * @param[in, out] value What is appended is specified by this value.
-* @param[in] std::set<llvm::Instruction*> To this set is appended instructions.
+* @param[in] instSet To this set is appended instructions.
 */
 void AnalysisInfo::appendFromExtRUses(Value &value, std::set<llvm::Instruction*> &instSet) {
 	extRUses.appendInstsFor(value, instSet);
@@ -2062,7 +2062,7 @@ void AnalysisInfo::ValInstSetMap::addFrom(const ValInstSetMap &toAdd) {
 * @brief Finds instructions for @a value and appends its into @a std::set<llvm::Instruction*>.
 *
 * @param[in] value For this value we find instructions.
-* @param[in, out] std::set<llvm::Instruction*> We append to this set.
+* @param[in, out] instSet We append to this set.
 */
 void AnalysisInfo::ValInstSetMap::appendInstsFor(Value &value,
 		std::set<llvm::Instruction*>& instSet) {

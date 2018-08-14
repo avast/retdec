@@ -18,7 +18,7 @@ namespace loader {
 } // namespace loader
 
 std::shared_ptr<ClassTypeInfo> parseGccRtti(
-		const retdec::loader::Image* ff,
+		const retdec::loader::Image* img,
 		RttiGcc& rttis,
 		retdec::utils::Address rttiAddr);
 

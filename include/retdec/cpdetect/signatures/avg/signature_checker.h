@@ -1,5 +1,5 @@
 /**
- * @file include/retdec/cpdetec/signatures/avg/signature_checker.h
+ * @file include/retdec/cpdetect/signatures/avg/signature_checker.h
  * @brief Utils for checking signatures format.
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */

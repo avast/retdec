@@ -1,5 +1,5 @@
 /**
- * @file include/retdec/cpdetec/signatures/avg/signature.h
+ * @file include/retdec/cpdetect/signatures/avg/signature.h
  * @brief Definiton of compiler or packer signature.
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */

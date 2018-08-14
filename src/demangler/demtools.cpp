@@ -59,7 +59,7 @@ sdate_t genTimeStruct() {
  * @param tobereplaced Substring which will be searched for and all of its instances will be replaced.
  * @param replacement The replacement string.
  */
-void xreplace(string &source, const string &tobereplaced, const string &replacement) {
+void xreplace(std::string &source, const std::string &tobereplaced, const std::string &replacement) {
 	std::size_t lastfound = 0;
 	if (tobereplaced != "") {
 		while (source.find(tobereplaced,lastfound) != source.npos) {

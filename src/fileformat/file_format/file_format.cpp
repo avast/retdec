@@ -1923,6 +1923,8 @@ bool FileFormat::setXBytes(std::uint64_t address, const std::vector<std::uint8_t
 /**
  * Find out, if there is a pointer (valid address) on the provided address
  * @param address Address to check
+ * @param[out] pointer If provided (not @c nullptr) it is filled with pointer's
+ *                     value on the provided address
  * @return @c true if pointer on address, @c false otherwise
  */
 bool FileFormat::isPointer(unsigned long long address, std::uint64_t* pointer) const

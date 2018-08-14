@@ -292,10 +292,12 @@ bool Decoder::patternTerminatingCalls()
  * Sometimes, statically linked code detection does not recognize all statically
  * linked functions. We search for the following patterns:
  *
+ * \code{.ll}
  * define <certain_fnc_name>()
  *     ...
  *     single function call in the whole body = call to statically linked fnc
  *     ...
+ * \endcode
  */
 bool Decoder::patternStaticallyLinked()
 {

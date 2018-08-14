@@ -1,5 +1,5 @@
 /**
- * @file src/capstone2llvmir/llvmir_utils.h
+ * @file src/capstone2llvmir/llvmir_utils.cpp
  * @brief LLVM IR utilities.
  * @copyright (c) 2018 Avast Software, licensed under the MIT license
  */

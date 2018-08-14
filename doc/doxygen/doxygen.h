@@ -1,5 +1,5 @@
 /**
-* @file doc/doxygen.h
+* @file doc/doxygen/doxygen.h
 * @brief Documentation of the main page and the used namespaces.
 * @copyright (c) 2017 Avast Software, licensed under the MIT license
 */

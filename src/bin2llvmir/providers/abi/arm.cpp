@@ -1,5 +1,5 @@
 /**
- * @file src/bin2llvmir/providers/abi/arm.h
+ * @file src/bin2llvmir/providers/abi/arm.cpp
  * @brief ABI information for ARM.
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */
