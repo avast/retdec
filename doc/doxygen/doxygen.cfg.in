@@ -1,5 +1,5 @@
 ##
-## The following variables are use from CMake automatically:
+## The following variables are used from CMake automatically:
 ##   PROJECT_NAME           = "@CMAKE_PROJECT_NAME@"
 ##   OUTPUT_DIRECTORY       = "@CMAKE_CURRENT_BINARY_DIR@"
 ##
@@ -11,6 +11,8 @@
 ##   ENABLED_SECTIONS       = @DOXYGEN_ENABLED_SECTIONS@
 ##   EXCLUDE_PATTERNS       = @DOXYGEN_EXCLUDE_PATTERNS@
 ##   EXCLUDE_SYMBOLS        = @DOXYGEN_EXCLUDE_SYMBOLS@
+##   INCLUDE_GRAPH          = @DOXYGEN_INCLUDE_GRAPH@
+##   INCLUDED_BY_GRAPH      = @DOXYGEN_INCLUDED_BY_GRAPH@
 ##
 ## The following input files are being processed:
 ##  INPUT                  = "@CMAKE_CURRENT_SOURCE_DIR@/doxygen.h" \
@@ -2325,7 +2327,7 @@ TEMPLATE_RELATIONS     = NO
 # The default value is: YES.
 # This tag requires that the tag HAVE_DOT is set to YES.
 
-INCLUDE_GRAPH          = YES
+INCLUDE_GRAPH          = @DOXYGEN_INCLUDE_GRAPH@
 
 # If the INCLUDED_BY_GRAPH, ENABLE_PREPROCESSING and SEARCH_INCLUDES tags are
 # set to YES then doxygen will generate a graph for each documented file showing
@@ -2334,7 +2336,7 @@ INCLUDE_GRAPH          = YES
 # The default value is: YES.
 # This tag requires that the tag HAVE_DOT is set to YES.
 
-INCLUDED_BY_GRAPH      = YES
+INCLUDED_BY_GRAPH      = @DOXYGEN_INCLUDED_BY_GRAPH@
 
 # If the CALL_GRAPH tag is set to YES then doxygen will generate a call
 # dependency graph for every global function or class method.
