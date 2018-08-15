@@ -286,6 +286,10 @@ This repository contains the following scripts:
 * `retdec-tests-runner.py` - run all tests in the unit test directory.
 * `type_extractor` - generation of type information (for internal use only)
 
+## Project Documentation
+
+See the [project documentation](https://retdec-tc.avast.com/repository/download/Retdec_DoxygenBuild/.lastSuccessful/build/doc/doxygen/html/index.html) for an up to date Doxygen-generated software reference corresponding to the latest commit in the `master` branch.
+
 ## Related Repositories
 
 * [retdec-idaplugin](https://github.com/avast-tl/retdec-idaplugin) -- Embeds RetDec into IDA (Interactive Disassembler) and makes its use much easier.
