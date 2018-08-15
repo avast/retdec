@@ -4,6 +4,7 @@
 
 * New Feature: Converted shell scripts to Python scripts so that Windows users no longer have to install MSYS2 in order to run RetDec ([#338](https://github.com/avast-tl/retdec/pull/338), [#147](https://github.com/avast-tl/retdec/issues/147)).
 * New Feature: Add generation of export-table hashes into `retdec-fileinfo` ([#121](https://github.com/avast-tl/retdec/issues/121), [#321](https://github.com/avast-tl/retdec/pull/321)).
+* New Feature: Automatically generate and publicly host an up to date Doxygen documentation ([#20](https://github.com/avast-tl/retdec/issues/20)). 
 * Enhancement: Suppress superfluous randlib warnings about static libraries having no symbols on macOS ([#271](https://github.com/avast-tl/retdec/issues/271), [#349](https://github.com/avast-tl/retdec/pull/349)).
 * Fix: Fixed assertions in statically linked code recognition ([#333](https://github.com/avast-tl/retdec/issues/333)).
 * Fix: Fixed aborts due to assertions during decoding of some MIPS binaries ([#335](https://github.com/avast-tl/retdec/issues/335)).
