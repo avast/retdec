@@ -2,6 +2,8 @@
 
 # dev
 
+# v3.2 (2018-08-16)
+
 * New Feature: Converted shell scripts to Python scripts so that Windows users no longer have to install MSYS2 in order to run RetDec ([#338](https://github.com/avast-tl/retdec/pull/338), [#147](https://github.com/avast-tl/retdec/issues/147)).
 * New Feature: Added generation of export-table hashes into `retdec-fileinfo` ([#121](https://github.com/avast-tl/retdec/issues/121), [#321](https://github.com/avast-tl/retdec/pull/321)).
 * New Feature: Automatically generate and publicly host an up to date Doxygen documentation ([#20](https://github.com/avast-tl/retdec/issues/20)).
