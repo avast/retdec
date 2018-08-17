@@ -37,7 +37,7 @@ bool isNonprintableChar(unsigned char c) {
 }
 
 /**
-* @brief Returns @c true if @c is non-ascii character, @c false otherwise.
+* @brief Returns @c true if @c is non-ASCII character, @c false otherwise.
 */
 bool isNonasciiChar(unsigned char c) {
 	return c > 0x7f;
@@ -246,7 +246,7 @@ bool hasNonprintableChars(const std::string &str) {
 
 /**
 * @brief Returns @c true if the given string contains at least one
-*        non-ascii character.
+*        non-ASCII character.
 */
 bool hasNonasciiChars(const std::string &str) {
 	return std::any_of(str.begin(), str.end(),
@@ -670,7 +670,7 @@ std::string replaceNonprintableChars(const std::string &str) {
 }
 
 /**
-* @brief Replaces non-ascii characters in @a str with their hexadecimal
+* @brief Replaces non-ASCII characters in @a str with their hexadecimal
 *        values.
 */
 std::string replaceNonasciiChars(const std::string &str) {
