@@ -7,6 +7,7 @@
 #include "retdec/bin2llvmir/providers/abi/abi.h"
 #include "retdec/bin2llvmir/providers/abi/arm.h"
 #include "retdec/bin2llvmir/providers/abi/mips.h"
+#include "retdec/bin2llvmir/providers/abi/ms_x64.h"
 #include "retdec/bin2llvmir/providers/abi/powerpc.h"
 #include "retdec/bin2llvmir/providers/abi/x86.h"
 #include "retdec/bin2llvmir/providers/abi/x64.h"
@@ -307,6 +308,15 @@ Abi* AbiProvider::addAbi(
 	}
 	else if (c->getConfig().architecture.isX86_64())
 	{
+		bool isMinGW = c->getConfig().tools.isGcc()
+				&& c->getConfig().fileFormat.isPe();
+
+		if (isMinGW || c->getConfig().tools.isMsvc())
+		{
+			auto p = _module2abi.emplace(m, std::make_unique<AbiMS_X64>(m, c));
+			return p.first->second.get();
+		}
+
 		auto p = _module2abi.emplace(m, std::make_unique<AbiX64>(m, c));
 		return p.first->second.get();
 	}
