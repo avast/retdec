@@ -67,6 +67,7 @@ set(BIN2LLVMIR_SOURCES
 	providers/abi/abi.cpp
 	providers/abi/arm.cpp
 	providers/abi/mips.cpp
+	providers/abi/ms_x64.cpp
 	providers/abi/pic32.cpp
 	providers/abi/powerpc.cpp
 	providers/abi/x86.cpp
