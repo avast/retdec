@@ -144,6 +144,11 @@ bool Abi::usesFPRegistersForParameters() const
 	return _fpRegsAsParams;
 }
 
+bool Abi::parameterRegistersOverlay() const
+{
+	return _paramRegsOverlay;
+}
+
 bool Abi::isNopInstruction(AsmInstruction ai)
 {
 	return isNopInstruction(ai.getCapstoneInsn());

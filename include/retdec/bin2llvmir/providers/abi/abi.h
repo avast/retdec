@@ -65,6 +65,7 @@ class Abi
 		llvm::GlobalVariable* getFPReturnRegister() const;
 
 		bool usesFPRegistersForParameters() const;
+		bool parameterRegistersOverlay() const;
 
 	// Values.
 	public:
@@ -143,6 +144,7 @@ class Abi
 		/// Specifies if abi returns value on stack.
 		bool returnsOnStack = false;
 		bool _fpRegsAsParams = false;
+		bool _paramRegsOverlay = false;
 
 };
 
