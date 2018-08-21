@@ -1030,15 +1030,6 @@ void DataFlowEntry::callsFilterCommonRegisters()
 
 	std::set<Value*> commonRegs;
 
-	for (auto* s : calls.front().possibleArgs)
-	{
-		Value* r = s;
-		if (_abi->isRegister(r))
-		{
-			commonRegs.insert(r);
-		}
-	}
-
 	for (auto& e : calls)
 	{
 		// TODO: sometimes, we do not find all arg stores.
@@ -1050,41 +1041,49 @@ void DataFlowEntry::callsFilterCommonRegisters()
 		}
 
 		std::set<Value*> regs;
-		for (auto* s : e.possibleArgs)
+		for (auto r : e.possibleArgs)
 		{
-			Value* r = s;
 			if (_abi->isRegister(r))
 			{
 				regs.insert(r);
 			}
 		}
 
-		std::set<Value*> intersect;
-		std::set_intersection(
-				commonRegs.begin(),
-				commonRegs.end(),
-				regs.begin(),
-				regs.end(),
-				std::inserter(intersect, intersect.begin()));
-		commonRegs = std::move(intersect);
+		if (regs.empty())
+		{
+			commonRegs.erase(commonRegs.begin(), commonRegs.end());
+			break;
+		}
+		else if (commonRegs.empty())
+		{
+			commonRegs = std::move(regs);
+		}
+		else
+		{
+			std::set<Value*> intersect;
+			std::set_intersection(
+					commonRegs.begin(),
+					commonRegs.end(),
+					regs.begin(),
+					regs.end(),
+					std::inserter(intersect, intersect.begin()));
+
+			commonRegs = std::move(intersect);
+		}
 	}
 
 	for (auto& e : calls)
 	{
-		auto it = e.possibleArgs.begin();
-		for ( ; it != e.possibleArgs.end(); )
-		{
-			Value* r = (*it);
-			if (_abi->isRegister(r)
-					&& commonRegs.find(r) == commonRegs.end())
-			{
-				it = e.possibleArgs.erase(it);
-			}
-			else
-			{
-				++it;
-			}
-		}
+		e.possibleArgs.erase(
+			std::remove_if(
+				e.possibleArgs.begin(),
+				e.possibleArgs.end(),
+				[this, commonRegs](Value* arg)
+				{
+					return _abi->isRegister(arg)
+						&& !commonRegs.count(arg);
+				}),
+			e.possibleArgs.end());
 	}
 }
 
