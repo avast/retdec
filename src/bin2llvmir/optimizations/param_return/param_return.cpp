@@ -292,11 +292,11 @@ void CallEntry::filterStoreValues(Abi* _abi)
 
 void DataFlowEntry::filterRegistersArgLoads()
 {
-	argLoads.erase(
-		std::remove_if(argLoads.begin(), argLoads.end(),
-			[this](const LoadInst* li)
+	args.erase(
+		std::remove_if(args.begin(), args.end(),
+			[this](const Value* li)
 			{
-				auto* op = li->getPointerOperand();
+				auto* op = li;
 				if (_abi->valueCanBeParameter(op))
 				{
 					auto aOff = _config->getStackVariableOffset(op);
@@ -305,7 +305,7 @@ void DataFlowEntry::filterRegistersArgLoads()
 
 				return true;
 			}),
-		argLoads.end());
+		args.end());
 }
 
 /**
@@ -354,18 +354,18 @@ void CallEntry::filterSort(Config* _config, Abi* _abi)
 void DataFlowEntry::filterSortArgLoads()
 {
 	std::stable_sort(
-			argLoads.begin(),
-			argLoads.end(),
-			[this](LoadInst* a, LoadInst* b) -> bool
+			args.begin(),
+			args.end(),
+			[this](Value* a, Value* b) -> bool
 	{
-		auto aOff = _config->getStackVariableOffset(a->getPointerOperand());
-		auto bOff = _config->getStackVariableOffset(b->getPointerOperand());
+		auto aOff = _config->getStackVariableOffset(a);
+		auto bOff = _config->getStackVariableOffset(b);
 
 		if (aOff.isUndefined() && bOff.isUndefined())
 		{
 			auto regs = _abi->parameterRegisters();
-			auto aId = _abi->getRegisterId(a->getPointerOperand());
-			auto bId = _abi->getRegisterId(b->getPointerOperand());
+			auto aId = _abi->getRegisterId(a);
+			auto bId = _abi->getRegisterId(b);
 
 			auto it1 = std::find(regs.begin(), regs.end(), aId);
 			auto it2 = std::find(regs.begin(), regs.end(), bId);
@@ -663,7 +663,7 @@ void DataFlowEntry::dump() const
 	}
 
 	LOG << "\t>|arg loads:" << std::endl;
-	for (auto* l : argLoads)
+	for (auto* l : args)
 	{
 		LOG << "\t\t\t>|" << llvmObjToString(l) << std::endl;
 	}
@@ -707,7 +707,7 @@ void DataFlowEntry::addArgLoads()
 			if ((use->defs.empty() || use->isUndef())
 					&& added.find(ptr) == added.end())
 			{
-				argLoads.push_back(l);
+				args.push_back(ptr);
 				added.insert(ptr);
 			}
 		}
@@ -1170,9 +1170,9 @@ void DataFlowEntry::callsFilterSameNumberOfStacks()
 	}
 
 	std::size_t loads = 0;
-	for (auto* l : argLoads)
+	for (auto* l : args)
 	{
-		if (_config->isStackVariable(l->getPointerOperand()))
+		if (_config->isStackVariable(l))
 		{
 			++loads;
 		}
@@ -1309,7 +1309,7 @@ void DataFlowEntry::applyToIrOrdinary()
 	}
 
 	std::vector<llvm::Value*> argStores;
-	for (LoadInst* l : argLoads)
+	for (Value* l : args)
 	{
 		auto fIt = specialArgStorage.find(argStores.size());
 		while (fIt != specialArgStorage.end())
@@ -1318,7 +1318,7 @@ void DataFlowEntry::applyToIrOrdinary()
 			fIt = specialArgStorage.find(argStores.size());
 		}
 
-		argStores.push_back(l->getPointerOperand());
+		argStores.push_back(l);
 	}
 
 	auto paramRegs = _abi->parameterRegisters();
@@ -1912,7 +1912,7 @@ void DataFlowEntry::setArgumentTypes()
 	{
 		argTypes.insert(
 				argTypes.end(),
-				argLoads.size(),
+				args.size(),
 				Abi::getDefaultType(_module));
 	}
 	else

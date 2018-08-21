@@ -136,7 +136,7 @@ class DataFlowEntry
 
 		// In called function.
 		//
-		std::vector<llvm::LoadInst*> argLoads;
+		std::vector<llvm::Value*> args;
 		std::vector<ReturnEntry> retStores;
 
 		// Result.
