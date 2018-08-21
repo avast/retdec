@@ -1021,30 +1021,12 @@ void DataFlowEntry::filter()
 
 	if (typeSet)
 	{
-		for (CallEntry& e : calls)
-		{
-			auto tIt = argTypes.begin();
-			auto sIt = e.possibleArgs.begin();
-
-			while (tIt != argTypes.end() && sIt != e.possibleArgs.end())
-			{
-				Type* t = *tIt;
-				auto nextIt = sIt;
-				++nextIt;
-				if (t->isDoubleTy()
-						&& nextIt != e.possibleArgs.end()
-						&& _abi->isRegister(*nextIt))
-				{
-					e.possibleArgs.erase(nextIt);
-				}
-
-				++tIt;
-				++sIt;
-			}
-		}
+		filterKnownParamPairs();
 	}
-
-	setTypeFromUseContext();
+	else
+	{
+		setTypeFromUseContext();
+	}
 }
 
 void DataFlowEntry::callsFilterCommonRegisters()
@@ -1840,12 +1822,9 @@ void DataFlowEntry::setTypeFromExtraInfo()
 
 void DataFlowEntry::setTypeFromUseContext()
 {
-	if (!typeSet)
-	{
-		setReturnType();
-		setArgumentTypes();
-		typeSet = true;
-	}
+	setReturnType();
+	setArgumentTypes();
+	typeSet = true;
 }
 
 void DataFlowEntry::setReturnType()
