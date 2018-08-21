@@ -1069,24 +1069,6 @@ void DataFlowEntry::callsFilterCommonRegisters()
 		commonRegs = std::move(intersect);
 	}
 
-	auto regIds = _abi->parameterRegisters();
-
-	for (auto it = regIds.rbegin(); it != regIds.rend(); ++it)
-	{
-		auto* r = _abi->getRegister(*it);
-		if (commonRegs.count(r))
-		{
-			++it;
-			while (it != regIds.rend())
-			{
-				r = _abi->getRegister(*it);
-				commonRegs.insert(r);
-				++it;
-			}
-			break;
-		}
-	}
-
 	for (auto& e : calls)
 	{
 		auto it = e.possibleArgs.begin();
