@@ -310,6 +310,8 @@ void DataFlowEntry::filterRegistersArgLoads()
 
 /**
  * Stack with the lowest (highest negative) offset is the first call argument.
+ *
+ * Registers are sorted according to position got from abi.
  */
 void CallEntry::filterSort(Config* _config, Abi* _abi)
 {
@@ -325,7 +327,14 @@ void CallEntry::filterSort(Config* _config, Abi* _abi)
 
 		if (aOff.isUndefined() && bOff.isUndefined())
 		{
-			return _abi->getRegisterId(a) < _abi->getRegisterId(b);
+			auto regs = _abi->parameterRegisters();
+			auto aId = _abi->getRegisterId(a);
+			auto bId = _abi->getRegisterId(b);
+
+			auto it1 = std::find(regs.begin(), regs.end(), aId);
+			auto it2 = std::find(regs.begin(), regs.end(), bId);
+
+			return std::distance(it1, it2) > 0;
 		}
 		else if (aOff.isUndefined() && bOff.isDefined())
 		{
@@ -354,8 +363,14 @@ void DataFlowEntry::filterSortArgLoads()
 
 		if (aOff.isUndefined() && bOff.isUndefined())
 		{
-			return _abi->getRegisterId(a->getPointerOperand()) <
-					_abi->getRegisterId(b->getPointerOperand());
+			auto regs = _abi->parameterRegisters();
+			auto aId = _abi->getRegisterId(a->getPointerOperand());
+			auto bId = _abi->getRegisterId(b->getPointerOperand());
+
+			auto it1 = std::find(regs.begin(), regs.end(), aId);
+			auto it2 = std::find(regs.begin(), regs.end(), bId);
+
+			return std::distance(it1, it2) > 0;
 		}
 		else if (aOff.isUndefined() && bOff.isDefined())
 		{
