@@ -965,6 +965,36 @@ void DataFlowEntry::addCallReturns(llvm::CallInst* call, CallEntry& ce)
 	}
 }
 
+/**
+ * TODO: This method just filters register pair of known double type.
+ * It should also remove another stack variable and not just for double
+ * but every large type -> wordSize * 2
+ */
+void DataFlowEntry::filterKnownParamPairs()
+{
+	for (CallEntry& e : calls)
+	{
+		auto tIt = argTypes.begin();
+		auto sIt = e.possibleArgs.begin();
+
+		while (tIt != argTypes.end() && sIt != e.possibleArgs.end())
+		{
+			Type* t = *tIt;
+			auto nextIt = sIt;
+			++nextIt;
+			if (t->isDoubleTy()
+					&& nextIt != e.possibleArgs.end()
+					&& _abi->isRegister(*nextIt))
+			{
+				e.possibleArgs.erase(nextIt);
+			}
+
+			++tIt;
+			++sIt;
+		}
+	}
+}
+
 void DataFlowEntry::filter()
 {
 	filterNegativeStacks();

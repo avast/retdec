@@ -111,6 +111,8 @@ class DataFlowEntry
 		void filterNegativeStacks();
 		void sortValues(std::vector<llvm::Value*> &args) const;
 
+		void filterKnownParamPairs();
+
 		void replaceCalls();
 		std::map<llvm::CallInst*, std::vector<llvm::Value*>>
 					fetchLoadsOfCalls() const;
