@@ -967,11 +967,6 @@ void DataFlowEntry::addCallReturns(llvm::CallInst* call, CallEntry& ce)
 
 void DataFlowEntry::filter()
 {
-	if (!isVarArg)
-	{
-		callsFilterCommonRegisters();
-	}
-
 	filterNegativeStacks();
 	sortValues(args);
 
@@ -990,6 +985,7 @@ void DataFlowEntry::filter()
 
 	if (!isVarArg)
 	{
+		callsFilterCommonRegisters();
 		callsFilterSameNumberOfStacks();
 	}
 
