@@ -12,6 +12,8 @@
 #include <utility>
 #include <vector>
 
+#include "retdec/config/config.h"
+#include "retdec/fileformat/fileformat.h"
 #include "retdec/utils/address.h"
 
 namespace retdec {
@@ -116,8 +118,14 @@ class Finder
 		/// @{
 		void clear();
 		void search(
-			const retdec::loader::Image &image,
-			const std::string &yaraFile);
+			const retdec::loader::Image& image,
+			const std::string& yaraFile);
+		void search(
+			const retdec::loader::Image& image,
+			const std::set<std::string>& yaraFiles);
+		void search(
+			const retdec::loader::Image& image,
+			const retdec::config::Config& config);
 		/// @}
 
 		/// @name Getters.

@@ -64,7 +64,7 @@ class StaticCodeAnalysis
 
 		stacofin::Finder _codeFinder;
 
-		std::set<std::string> _sigPaths;
+//		std::set<std::string> _sigPaths;
 		std::map<utils::Address, std::string> _imports;
 		std::set<std::string> _sectionNames;
 
