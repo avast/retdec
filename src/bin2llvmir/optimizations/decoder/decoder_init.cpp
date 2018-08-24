@@ -898,7 +898,7 @@ void Decoder::initStaticCode()
 		auto* sf = p.second;
 
 		if (auto* jt = _jumpTargets.push(
-				sf->address,
+				sf->getAddress(),
 				JumpTarget::eType::STATIC_CODE,
 				sf->isThumb() ? CS_MODE_THUMB : _c2l->getBasicMode(),
 				Address::getUndef,
@@ -918,12 +918,12 @@ void Decoder::initStaticCode()
 			// with IDA CFG.
 			//_ranges.remove(f->address, f->address + f->size);
 
-			LOG << "\t" << "[+] " << sf->address << " @ "
+			LOG << "\t" << "[+] " << sf->getAddress() << " @ "
 					<< nf->getName().str() << std::endl;
 		}
 		else
 		{
-			LOG << "\t" << "[-] " << sf->address << " (no JT)" << std::endl;
+			LOG << "\t" << "[-] " << sf->getAddress() << " (no JT)" << std::endl;
 		}
 	}
 }

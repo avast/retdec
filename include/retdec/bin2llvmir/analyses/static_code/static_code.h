@@ -20,62 +20,18 @@
 namespace retdec {
 namespace bin2llvmir {
 
-class StaticCodeFunction
-{
-	public:
-		class Reference
-		{
-			public:
-				Reference(
-						std::size_t o,
-						utils::Address a,
-						const std::string& n,
-						utils::Address t = utils::Address::getUndef,
-						StaticCodeFunction* tf = nullptr,
-						bool k = false);
-
-			public:
-				std::size_t offset = 0;
-				utils::Address address;
-				std::string name;
-
-				utils::Address target;
-				StaticCodeFunction* targetFnc = nullptr;
-				bool ok = false;
-		};
-
-	public:
-		StaticCodeFunction(const stacofin::DetectedFunction& df);
-		bool operator<(const StaticCodeFunction& o) const;
-
-		bool allRefsOk() const;
-		std::size_t countRefsOk() const;
-		float refsOkShare() const;
-		std::string getName() const;
-		bool isTerminating() const;
-		bool isThumb() const;
-
-	public:
-		utils::Address address;
-		std::size_t size;
-		std::vector<std::string> names;
-		std::string signaturePath;
-
-		std::vector<Reference> references;
-};
-
 class StaticCodeAnalysis
 {
 	public:
 		using DetectedFunctionsPtrMap = typename std::map<
 				utils::Address,
-				StaticCodeFunction*>;
+				retdec::stacofin::DetectedFunction*>;
 		using DetectedFunctionsMultimap = typename std::multimap<
 				utils::Address,
-				StaticCodeFunction>;
+				retdec::stacofin::DetectedFunction>;
 		using DetectedFunctionsPtrMultimap = typename std::multimap<
 				utils::Address,
-				StaticCodeFunction*>;
+				retdec::stacofin::DetectedFunction*>;
 
 	public:
 		StaticCodeAnalysis(
@@ -102,13 +58,13 @@ class StaticCodeAnalysis
 		utils::Address getAddressFromRef_arm(utils::Address ref);
 		utils::Address getAddressFromRef_ppc(utils::Address ref);
 
-		void checkRef(StaticCodeFunction::Reference& ref);
-		void checkRef_x86(StaticCodeFunction::Reference& ref);
+		void checkRef(retdec::stacofin::Reference& ref);
+		void checkRef_x86(retdec::stacofin::Reference& ref);
 
 		void confirmWithoutRefs();
 		void confirmAllRefsOk(std::size_t minFncSzWithoutRefs = 0x20);
 		void confirmPartialRefsOk(float okShare = 0.5);
-		void confirmFunction(StaticCodeFunction* f);
+		void confirmFunction(retdec::stacofin::DetectedFunction* f);
 
 	private:
 		Config* _config = nullptr;
@@ -130,14 +86,16 @@ class StaticCodeAnalysis
 		DetectedFunctionsPtrMultimap _rejectedDetections;
 
 	private:
-		struct StaticCodeFunctionComp
+		struct DetectedFunctionComp
 		{
-			bool operator()(const StaticCodeFunction* a, const StaticCodeFunction* b) const
+			bool operator()(
+					const retdec::stacofin::DetectedFunction* a,
+					const retdec::stacofin::DetectedFunction* b) const
 			{
 				return *a < *b;
 			}
 		};
-		std::set<StaticCodeFunction*, StaticCodeFunctionComp> _worklistDetections;
+		std::set<retdec::stacofin::DetectedFunction*, DetectedFunctionComp> _worklistDetections;
 };
 
 } // namespace bin2llvmir

@@ -359,14 +359,13 @@ std::string dumpDetectedFunctions(
 	ret << "\t Detected functions (stacofin):" << "\n";
 	for (auto& f : codeFinder.accessDectedFunctions())
 	{
-		ret << "\t\t" << f.address << " @ " << f.names.front()
+		ret << "\t\t" << f.getAddress() << " @ " << f.names.front()
 				<< ", sz = " << f.size << ", from = " << f.signaturePath
 				<< "\n";
 
 		for (auto& p : f.references)
 		{
-			Address refAddr = f.address + p.first;
-			ret << "\t\t\t" << refAddr << " @ " << p.second << "\n";
+			ret << "\t\t\t" << p.address << " @ " << p.name << "\n";
 		}
 	}
 
@@ -383,7 +382,7 @@ std::string dumpDetectedFunctions(
 		auto& f = p.second;
 
 		ret << "\t\t" << (p.second.allRefsOk() ? "[+] " : "[-] ")
-				<< f.address << " @ " << f.names.front()
+				<< f.getAddress() << " @ " << f.names.front()
 				<< ", sz = " << f.size << "\n";
 
 		for (auto& ref : f.references)
@@ -401,128 +400,6 @@ std::string dumpDetectedFunctions(
 
 namespace retdec {
 namespace bin2llvmir {
-
-//
-//==============================================================================
-// StaticCodeFunction.
-//==============================================================================
-//
-
-StaticCodeFunction::Reference::Reference(
-		std::size_t o,
-		utils::Address a,
-		const std::string& n,
-		utils::Address t,
-		StaticCodeFunction* tf,
-		bool k)
-		:
-		offset(o),
-		address(a),
-		name(n),
-		target(t),
-		targetFnc(tf),
-		ok(k)
-{
-
-}
-
-StaticCodeFunction::StaticCodeFunction(const stacofin::DetectedFunction& df) :
-		address(df.address),
-		size(df.size),
-		names(df.names),
-		signaturePath(df.signaturePath)
-{
-	for (auto& r : df.references)
-	{
-		references.emplace_back(r.first, r.first + address, r.second);
-	}
-}
-
-bool StaticCodeFunction::operator<(const StaticCodeFunction& o) const
-{
-	if (address == o.address)
-	{
-		if (names.empty())
-		{
-			return true;
-		}
-		else if (o.names.empty())
-		{
-			return false;
-		}
-		else
-		{
-			return getName() < o.getName();
-		}
-	}
-	else
-	{
-		return address < o.address;
-	}
-}
-
-bool StaticCodeFunction::allRefsOk() const
-{
-	for (auto& ref : references)
-	{
-		if (!ref.ok)
-		{
-			return false;
-		}
-	}
-
-	return true;
-}
-
-std::size_t StaticCodeFunction::countRefsOk() const
-{
-	std::size_t ret = 0;
-
-	for (auto& ref : references)
-	{
-		ret += ref.ok;
-	}
-
-	return ret;
-}
-
-float StaticCodeFunction::refsOkShare() const
-{
-	return references.empty()
-			? 1.0
-			: float(countRefsOk()) / float(references.size());
-}
-
-std::string StaticCodeFunction::getName() const
-{
-	return names.empty() ? "" : names.front();
-}
-
-bool StaticCodeFunction::isTerminating() const
-{
-	// TODO: couple names with source signaturePath to make sure we do not
-	// hit wrong functions?
-	//
-	static std::set<std::string> termNames = {
-			"exit",
-			"_exit",
-	};
-
-	for (auto& n : names)
-	{
-		if (termNames.count(n))
-		{
-			return true;
-		}
-	}
-
-	return false;
-}
-
-bool StaticCodeFunction::isThumb() const
-{
-	return utils::containsCaseInsensitive(signaturePath, "thumb");
-}
 
 //
 //==============================================================================
@@ -558,7 +435,7 @@ StaticCodeAnalysis::StaticCodeAnalysis(
 
 	for (auto& f : _codeFinder.accessDectedFunctions())
 	{
-		_allDetections.emplace(f.address, StaticCodeFunction(f));
+		_allDetections.emplace(f.getAddress(), f);
 	}
 
 	for (auto& s : _image->getSegments())
@@ -585,7 +462,6 @@ StaticCodeAnalysis::StaticCodeAnalysis(
 	LOG << "\t Confirmed detections:" << std::endl;
 	for (auto& p : _confirmedDetections)
 	{
-//		LOG << "\t\t" << p.first << " @ " << p.second->getName() << std::endl;
 		LOG << "        " << "assert self.out_config.is_statically_linked('"
 				<< p.second->getName() << "', " << p.first << ")"
 				<< std::endl;
@@ -593,7 +469,6 @@ StaticCodeAnalysis::StaticCodeAnalysis(
 	LOG << "\t Rejected detections:" << std::endl;
 	for (auto& p : _rejectedDetections)
 	{
-//		LOG << "\t\t" << p.first << " @ " << p.second->getName() << std::endl;
 		LOG << "        " << "assert not self.out_config.is_statically_linked('"
 				<< p.second->getName() << "', " << p.first << ")"
 				<< std::endl;
@@ -601,9 +476,8 @@ StaticCodeAnalysis::StaticCodeAnalysis(
 	LOG << "\t Worklist detections:" << std::endl;
 	for (auto* f : _worklistDetections)
 	{
-//		LOG << "\t\t" << f->address << " @ " << f->getName() << std::endl;
 		LOG << "        " << "assert not self.out_config.is_statically_linked('"
-				<< f->getName() << "', " << f->address << ")"
+				<< f->getName() << "', " << f->getAddress() << ")"
 				<< std::endl;
 	}
 }
@@ -1002,7 +876,7 @@ utils::Address StaticCodeAnalysis::getAddressFromRef_ppc(utils::Address ref)
 	return Address();
 }
 
-void StaticCodeAnalysis::checkRef(StaticCodeFunction::Reference& ref)
+void StaticCodeAnalysis::checkRef(retdec::stacofin::Reference& ref)
 {
 	if (ref.target.isUndefined())
 	{
@@ -1130,7 +1004,7 @@ void StaticCodeAnalysis::checkRef(StaticCodeFunction::Reference& ref)
 	}
 }
 
-void StaticCodeAnalysis::checkRef_x86(StaticCodeFunction::Reference& ref)
+void StaticCodeAnalysis::checkRef_x86(retdec::stacofin::Reference& ref)
 {
 	if (ref.target.isUndefined())
 	{
@@ -1189,7 +1063,7 @@ void StaticCodeAnalysis::confirmWithoutRefs()
 			continue;
 		}
 
-		if (auto* s = _image->getImage()->getSegmentFromAddress(f->address))
+		if (auto* s = _image->getImage()->getSegmentFromAddress(f->getAddress()))
 		{
 			for (auto& n : f->names)
 			{
@@ -1206,14 +1080,14 @@ void StaticCodeAnalysis::confirmWithoutRefs()
 struct comByRefSizeAddress
 {
 	bool operator() (
-			const StaticCodeFunction* lhs,
-			const StaticCodeFunction* rhs) const
+			const DetectedFunction* lhs,
+			const DetectedFunction* rhs) const
 	{
 		if (lhs->references.size() == rhs->references.size())
 		{
 			if (lhs->size == rhs->size)
 			{
-				return lhs->address > rhs->address;
+				return lhs->getAddress() > rhs->getAddress();
 			}
 			else
 			{
@@ -1234,7 +1108,7 @@ void StaticCodeAnalysis::confirmAllRefsOk(std::size_t minFncSzWithoutRefs)
 	// Sort all functions with all references OK by number of references
 	// (and other stuff).
 	//
-	std::multiset<StaticCodeFunction*, comByRefSizeAddress> byRefNum;
+	std::multiset<DetectedFunction*, comByRefSizeAddress> byRefNum;
 
 	DetectedFunctionsPtrMultimap byAddress;
 	for (auto* f : _worklistDetections)
@@ -1242,13 +1116,13 @@ void StaticCodeAnalysis::confirmAllRefsOk(std::size_t minFncSzWithoutRefs)
 		if (f->allRefsOk())
 		{
 			byRefNum.insert(f);
-			byAddress.emplace(f->address, f);
+			byAddress.emplace(f->getAddress(), f);
 		}
 	}
 	LOG << "\t\t" << "byRefNum (sz = " << byRefNum.size() << "):" << std::endl;
 	for (auto& f : byRefNum)
 	{
-		LOG << "\t\t\t" << f->references.size() << " @ " << f->address
+		LOG << "\t\t\t" << f->references.size() << " @ " << f->getAddress()
 				<< " " << f->getName() << ", sz = " << f->size << std::endl;
 	}
 
@@ -1276,7 +1150,7 @@ void StaticCodeAnalysis::confirmAllRefsOk(std::size_t minFncSzWithoutRefs)
 
 		// Only one function at this address.
 		//
-		if (byAddress.count(f->address) == 1)
+		if (byAddress.count(f->getAddress()) == 1)
 		{
 			confirmFunction(f);
 		}
@@ -1284,7 +1158,7 @@ void StaticCodeAnalysis::confirmAllRefsOk(std::size_t minFncSzWithoutRefs)
 		//
 		//
 		bool bestConflicting = true;
-		auto eqr = byAddress.equal_range(f->address);
+		auto eqr = byAddress.equal_range(f->getAddress());
 		for (auto it = eqr.first; it != eqr.second; ++it)
 		{
 			auto* of = it->second;
@@ -1314,7 +1188,7 @@ void StaticCodeAnalysis::confirmPartialRefsOk(float okShare)
 		// Find the function with max ok share.
 		//
 		float maxShare = 0.0;
-		StaticCodeFunction* f = nullptr;
+		DetectedFunction* f = nullptr;
 		for (auto* of : _worklistDetections)
 		{
 			if (of->references.empty())
@@ -1337,7 +1211,7 @@ void StaticCodeAnalysis::confirmPartialRefsOk(float okShare)
 		{
 			break;
 		}
-		LOG << "\t\t" << "[" << maxShare << "] " << f->address
+		LOG << "\t\t" << "[" << maxShare << "] " << f->getAddress()
 				<< " @ " << f->getName() << std::endl;
 
 		// This can increase ok share in other function by confirming all
@@ -1347,51 +1221,51 @@ void StaticCodeAnalysis::confirmPartialRefsOk(float okShare)
 	}
 }
 
-void StaticCodeAnalysis::confirmFunction(StaticCodeFunction* f)
+void StaticCodeAnalysis::confirmFunction(retdec::stacofin::DetectedFunction* f)
 {
-	LOG << "\t\t" << "confirming " << f->getName() << " @ " << f->address
+	LOG << "\t\t" << "confirming " << f->getName() << " @ " << f->getAddress()
 			<< std::endl;
 
 	// Confirm the function.
 	//
-	_confirmedDetections.emplace(f->address, f);
+	_confirmedDetections.emplace(f->getAddress(), f);
 	_worklistDetections.erase(f);
 	for (auto& n : f->names)
 	{
-		_names->addNameForAddress(f->address, n, Name::eType::STATIC_CODE);
+		_names->addNameForAddress(f->getAddress(), n, Name::eType::STATIC_CODE);
 	}
 
 	// Reject all other function at the same address.
 	//
-	auto eqr = _allDetections.equal_range(f->address);
+	auto eqr = _allDetections.equal_range(f->getAddress());
 	for (auto it = eqr.first; it != eqr.second; ++it)
 	{
 		auto* of = &it->second;
 		if (of != f)
 		{
-			_rejectedDetections.emplace(of->address, of);
+			_rejectedDetections.emplace(of->getAddress(), of);
 			_worklistDetections.erase(of);
 			LOG << "\t\t\t" << "rejecting #1 " << of->getName() << " @ "
-					<< of->address << std::endl;
+					<< of->getAddress() << std::endl;
 		}
 	}
 
 	// Reject all functions that overlap with the function.
 	//
-	AddressRange range(f->address, f->address + f->size);
+	AddressRange range(f->getAddress(), f->getAddress() + f->size);
 	auto it = _worklistDetections.begin(), e = _worklistDetections.end();
 	while (it != e)
 	{
 		auto* of = *it;
 		if (of != f)
 		{
-			AddressRange oRange(of->address, of->address + of->size);
+			AddressRange oRange(of->getAddress(), of->getAddress() + of->size);
 			if (range.overlaps(oRange))
 			{
-				_rejectedDetections.emplace(of->address, of);
+				_rejectedDetections.emplace(of->getAddress(), of);
 				it = _worklistDetections.erase(it);
 				LOG << "\t\t\t" << "rejecting #2 " << of->getName() << " @ "
-						<< of->address << std::endl;
+						<< of->getAddress() << std::endl;
 				continue;
 			}
 		}
