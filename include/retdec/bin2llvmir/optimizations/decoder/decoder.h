@@ -20,7 +20,6 @@
 
 #include "retdec/utils/address.h"
 #include "retdec/bin2llvmir/analyses/reaching_definitions.h"
-#include "retdec/bin2llvmir/analyses/static_code/static_code.h"
 #include "retdec/bin2llvmir/analyses/symbolic_tree.h"
 #include "retdec/bin2llvmir/providers/abi/abi.h"
 #include "retdec/bin2llvmir/providers/asm_instruction.h"
@@ -33,6 +32,7 @@
 #include "retdec/bin2llvmir/optimizations/decoder/jump_targets.h"
 #include "retdec/bin2llvmir/utils/ir_modifier.h"
 #include "retdec/capstone2llvmir/capstone2llvmir.h"
+#include "retdec/stacofin/stacofin.h"
 
 namespace retdec {
 namespace bin2llvmir {

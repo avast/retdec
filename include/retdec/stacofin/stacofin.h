@@ -12,6 +12,8 @@
 #include <utility>
 #include <vector>
 
+#include <capstone/capstone.h>
+
 #include "retdec/config/config.h"
 #include "retdec/fileformat/fileformat.h"
 #include "retdec/utils/address.h"
@@ -118,14 +120,14 @@ class Finder
 		/// @{
 		void clear();
 		void search(
-			const retdec::loader::Image& image,
-			const std::string& yaraFile);
+				const retdec::loader::Image& image,
+				const std::string& yaraFile);
 		void search(
-			const retdec::loader::Image& image,
-			const std::set<std::string>& yaraFiles);
+				const retdec::loader::Image& image,
+				const std::set<std::string>& yaraFiles);
 		void search(
-			const retdec::loader::Image& image,
-			const retdec::config::Config& config);
+				const retdec::loader::Image& image,
+				const retdec::config::Config& config);
 		/// @}
 
 		/// @name Getters.
@@ -135,11 +137,75 @@ class Finder
 		/// @}
 
 	private:
-		CoveredCode coveredCode;                         ///< Code coverage.
-		std::vector<DetectedFunction> detectedFunctions; ///< Functions.
-
 		void sort();
-		bool isSorted = true; ///< @c true if detected functions are sorted.
+
+	private:
+		/// Code coverage.
+		CoveredCode coveredCode;
+		/// Functions.
+		std::vector<DetectedFunction> detectedFunctions;
+		/// @c true if detected functions are sorted.
+		bool isSorted = true;
+
+//==============================================================================
+
+	public:
+		void searchAndConfirm(
+				const retdec::loader::Image& image,
+				const retdec::config::Config& config,
+				csh ce,
+				cs_mode md,
+				bool debug = false);
+
+		const retdec::stacofin::DetectedFunctionsMultimap& getAllDetections() const;
+		const retdec::stacofin::DetectedFunctionsPtrMap& getConfirmedDetections() const;
+
+	private:
+		using ByteData = typename std::pair<const std::uint8_t*, std::size_t>;
+
+	private:
+		void solveReferences();
+
+		utils::Address getAddressFromRef(utils::Address ref);
+		utils::Address getAddressFromRef_x86(utils::Address ref);
+		utils::Address getAddressFromRef_mips(utils::Address ref);
+		utils::Address getAddressFromRef_arm(utils::Address ref);
+		utils::Address getAddressFromRef_ppc(utils::Address ref);
+
+		void checkRef(retdec::stacofin::Reference& ref);
+		void checkRef_x86(retdec::stacofin::Reference& ref);
+
+		void confirmWithoutRefs();
+		void confirmAllRefsOk(std::size_t minFncSzWithoutRefs = 0x20);
+		void confirmPartialRefsOk(float okShare = 0.5);
+		void confirmFunction(retdec::stacofin::DetectedFunction* f);
+
+	private:
+		const retdec::config::Config* _config = nullptr;
+		const retdec::loader::Image* _image = nullptr;
+
+		csh _ce;
+		cs_mode _ceMode;
+		cs_insn* _ceInsn = nullptr;
+
+		std::map<utils::Address, std::string> _imports;
+		std::set<std::string> _sectionNames;
+
+		retdec::stacofin::DetectedFunctionsMultimap _allDetections;
+		retdec::stacofin::DetectedFunctionsPtrMap _confirmedDetections;
+		retdec::stacofin::DetectedFunctionsPtrMultimap _rejectedDetections;
+
+	private:
+		struct DetectedFunctionComp
+		{
+			bool operator()(
+					const retdec::stacofin::DetectedFunction* a,
+					const retdec::stacofin::DetectedFunction* b) const
+			{
+				return *a < *b;
+			}
+		};
+		std::set<retdec::stacofin::DetectedFunction*, DetectedFunctionComp> _worklistDetections;
 };
 
 } // namespace stacofin

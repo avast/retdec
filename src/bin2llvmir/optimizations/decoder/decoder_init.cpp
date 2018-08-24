@@ -885,9 +885,10 @@ void Decoder::initStaticCode()
 {
 	LOG << "\n" << "initStaticCode():" << std::endl;
 
-	StaticCodeAnalysis SCA(
-			_config,
-			_image,
+	stacofin::Finder SCA;
+	SCA.searchAndConfirm(
+			*_image->getImage(),
+			_config->getConfig(),
 			_c2l->getCapstoneEngine(),
 			_c2l->getBasicMode(),
 			debug_enabled);
