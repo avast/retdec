@@ -292,18 +292,7 @@ CoveredCode Finder::getCoveredCode()
  *
  * @return sorted detected functions
  */
-std::vector<DetectedFunction> Finder::getDectedFunctions()
-{
-	sort();
-	return detectedFunctions;
-}
-
-/**
- * Return detected functions sorted by their address.
- *
- * @return sorted detected functions
- */
-const std::vector<DetectedFunction>& Finder::accessDectedFunctions()
+const std::vector<DetectedFunction>& Finder::getDectedFunctions()
 {
 	sort();
 	return detectedFunctions;

@@ -159,10 +159,10 @@ int doActions(
 
 	// Print detections.
 	if (debugOn) {
-		printDetectionsDebug(codeFinder.accessDectedFunctions());
+		printDetectionsDebug(codeFinder.getDectedFunctions());
 	}
 	else {
-		printDetections(codeFinder.accessDectedFunctions());
+		printDetections(codeFinder.getDectedFunctions());
 	}
 
 	// Print total code coverage information.

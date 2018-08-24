@@ -7,8 +7,6 @@
 #ifndef RETDEC_BIN2LLVMIR_ANALYSES_STATIC_CODE_STATIC_CODE_H
 #define RETDEC_BIN2LLVMIR_ANALYSES_STATIC_CODE_STATIC_CODE_H
 
-#include <map>
-
 #include <capstone/capstone.h>
 
 #include "retdec/bin2llvmir/providers/config.h"
@@ -23,17 +21,6 @@ namespace bin2llvmir {
 class StaticCodeAnalysis
 {
 	public:
-		using DetectedFunctionsPtrMap = typename std::map<
-				utils::Address,
-				retdec::stacofin::DetectedFunction*>;
-		using DetectedFunctionsMultimap = typename std::multimap<
-				utils::Address,
-				retdec::stacofin::DetectedFunction>;
-		using DetectedFunctionsPtrMultimap = typename std::multimap<
-				utils::Address,
-				retdec::stacofin::DetectedFunction*>;
-
-	public:
 		StaticCodeAnalysis(
 				Config* c,
 				FileImage* i,
@@ -43,8 +30,8 @@ class StaticCodeAnalysis
 				bool debug = false);
 		~StaticCodeAnalysis();
 
-		const DetectedFunctionsMultimap& getAllDetections() const;
-		const DetectedFunctionsPtrMap& getConfirmedDetections() const;
+		const retdec::stacofin::DetectedFunctionsMultimap& getAllDetections() const;
+		const retdec::stacofin::DetectedFunctionsPtrMap& getConfirmedDetections() const;
 
 	private:
 		using ByteData = typename std::pair<const std::uint8_t*, std::size_t>;
@@ -81,9 +68,9 @@ class StaticCodeAnalysis
 		std::map<utils::Address, std::string> _imports;
 		std::set<std::string> _sectionNames;
 
-		DetectedFunctionsMultimap _allDetections;
-		DetectedFunctionsPtrMap _confirmedDetections;
-		DetectedFunctionsPtrMultimap _rejectedDetections;
+		retdec::stacofin::DetectedFunctionsMultimap _allDetections;
+		retdec::stacofin::DetectedFunctionsPtrMap _confirmedDetections;
+		retdec::stacofin::DetectedFunctionsPtrMultimap _rejectedDetections;
 
 	private:
 		struct DetectedFunctionComp

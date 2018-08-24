@@ -357,7 +357,7 @@ std::string dumpDetectedFunctions(
 {
 	std::stringstream ret;
 	ret << "\t Detected functions (stacofin):" << "\n";
-	for (auto& f : codeFinder.accessDectedFunctions())
+	for (auto& f : codeFinder.getDectedFunctions())
 	{
 		ret << "\t\t" << f.getAddress() << " @ " << f.names.front()
 				<< ", sz = " << f.size << ", from = " << f.signaturePath
@@ -373,7 +373,7 @@ std::string dumpDetectedFunctions(
 }
 
 std::string dumpDetectedFunctions(
-		const StaticCodeAnalysis::DetectedFunctionsMultimap& allDetections)
+		const retdec::stacofin::DetectedFunctionsMultimap& allDetections)
 {
 	std::stringstream ret;
 	ret << "\t Detected functions (bin2llvmir):" << "\n";
@@ -433,7 +433,7 @@ StaticCodeAnalysis::StaticCodeAnalysis(
 
 	collectImports(_image, _imports);
 
-	for (auto& f : _codeFinder.accessDectedFunctions())
+	for (auto& f : _codeFinder.getDectedFunctions())
 	{
 		_allDetections.emplace(f.getAddress(), f);
 	}
@@ -521,13 +521,13 @@ void StaticCodeAnalysis::solveReferences()
 	}
 }
 
-const StaticCodeAnalysis::DetectedFunctionsMultimap&
+const retdec::stacofin::DetectedFunctionsMultimap&
 StaticCodeAnalysis::getAllDetections() const
 {
 	return _allDetections;
 }
 
-const StaticCodeAnalysis::DetectedFunctionsPtrMap&
+const retdec::stacofin::DetectedFunctionsPtrMap&
 StaticCodeAnalysis::getConfirmedDetections() const
 {
 	return _confirmedDetections;

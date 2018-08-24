@@ -7,6 +7,7 @@
 #ifndef RETDEC_STACOFIN_STACOFIN_H
 #define RETDEC_STACOFIN_STACOFIN_H
 
+#include <map>
 #include <string>
 #include <utility>
 #include <vector>
@@ -92,6 +93,16 @@ struct DetectedFunction
 		retdec::utils::Address address;
 };
 
+using DetectedFunctionsPtrMap = typename std::map<
+		utils::Address,
+		DetectedFunction*>;
+using DetectedFunctionsMultimap = typename std::multimap<
+		utils::Address,
+		DetectedFunction>;
+using DetectedFunctionsPtrMultimap = typename std::multimap<
+		utils::Address,
+		DetectedFunction*>;
+
 /**
  * Finder implementation using Yara.
  */
@@ -112,8 +123,7 @@ class Finder
 		/// @name Getters.
 		/// @{
 		CoveredCode getCoveredCode();
-		std::vector<DetectedFunction> getDectedFunctions();
-		const std::vector<DetectedFunction>& accessDectedFunctions();
+		const std::vector<DetectedFunction>& getDectedFunctions();
 		/// @}
 
 	private:
