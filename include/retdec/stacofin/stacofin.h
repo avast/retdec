@@ -118,7 +118,6 @@ class Finder
 
 		/// @name Actions.
 		/// @{
-		void clear();
 		void search(
 				const retdec::loader::Image& image,
 				const std::string& yaraFile);
@@ -133,21 +132,28 @@ class Finder
 		/// @name Getters.
 		/// @{
 		CoveredCode getCoveredCode();
-		const std::vector<DetectedFunction>& getDectedFunctions();
-		const retdec::stacofin::DetectedFunctionsMultimap& getAllDetections() const;
-		const retdec::stacofin::DetectedFunctionsPtrMap& getConfirmedDetections() const;
+		const DetectedFunctionsMultimap& getAllDetections() const;
+		const DetectedFunctionsPtrMap& getConfirmedDetections() const;
 		/// @}
-
-	private:
-		void sort();
 
 	private:
 		/// Code coverage.
 		CoveredCode coveredCode;
-		/// Functions.
-		std::vector<DetectedFunction> detectedFunctions;
-		/// @c true if detected functions are sorted.
-		bool isSorted = true;
+
+		DetectedFunctionsMultimap _allDetections;
+		DetectedFunctionsPtrMap _confirmedDetections;
+		DetectedFunctionsPtrMultimap _rejectedDetections;
+
+		struct DetectedFunctionComp
+		{
+			bool operator()(
+					const DetectedFunction* a,
+					const DetectedFunction* b) const
+			{
+				return *a < *b;
+			}
+		};
+		std::set<DetectedFunction*, DetectedFunctionComp> _worklistDetections;
 
 //==============================================================================
 
@@ -171,13 +177,13 @@ class Finder
 		utils::Address getAddressFromRef_arm(utils::Address ref);
 		utils::Address getAddressFromRef_ppc(utils::Address ref);
 
-		void checkRef(retdec::stacofin::Reference& ref);
-		void checkRef_x86(retdec::stacofin::Reference& ref);
+		void checkRef(Reference& ref);
+		void checkRef_x86(Reference& ref);
 
 		void confirmWithoutRefs();
 		void confirmAllRefsOk(std::size_t minFncSzWithoutRefs = 0x20);
 		void confirmPartialRefsOk(float okShare = 0.5);
-		void confirmFunction(retdec::stacofin::DetectedFunction* f);
+		void confirmFunction(DetectedFunction* f);
 
 	private:
 		const retdec::config::Config* _config = nullptr;
@@ -189,22 +195,6 @@ class Finder
 
 		std::map<utils::Address, std::string> _imports;
 		std::set<std::string> _sectionNames;
-
-		retdec::stacofin::DetectedFunctionsMultimap _allDetections;
-		retdec::stacofin::DetectedFunctionsPtrMap _confirmedDetections;
-		retdec::stacofin::DetectedFunctionsPtrMultimap _rejectedDetections;
-
-	private:
-		struct DetectedFunctionComp
-		{
-			bool operator()(
-					const retdec::stacofin::DetectedFunction* a,
-					const retdec::stacofin::DetectedFunction* b) const
-			{
-				return *a < *b;
-			}
-		};
-		std::set<retdec::stacofin::DetectedFunction*, DetectedFunctionComp> _worklistDetections;
 };
 
 } // namespace stacofin

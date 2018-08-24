@@ -355,8 +355,9 @@ std::string dumpDetectedFunctions(
 {
 	std::stringstream ret;
 	ret << "\t Detected functions (stacofin):" << "\n";
-	for (auto& f : codeFinder.getDectedFunctions())
+	for (auto& p : codeFinder.getAllDetections())
 	{
+		auto& f = p.second;
 		ret << "\t\t" << f.getAddress() << " @ " << f.names.front()
 				<< ", sz = " << f.size << ", from = " << f.signaturePath
 				<< "\n";
@@ -576,15 +577,6 @@ Finder::~Finder()
 }
 
 /**
- * Clear all previous results.
- */
-void Finder::clear()
-{
-	coveredCode.clear();
-	detectedFunctions.clear();
-}
-
-/**
  * Search for static code in input file.
  *
  * @param image input file image
@@ -610,7 +602,6 @@ void Finder::search(
 	}
 
 	// Iterate over detected rules.
-	isSorted = false;
 	for (const YaraRule &detectedRule : detector.getDetectedRules()) {
 		DetectedFunction detectedFunction;
 		detectedFunction.signaturePath = yaraFile;
@@ -652,7 +643,8 @@ void Finder::search(
 			coveredCode.insert(AddressRange(
 					address,
 					address + detectedFunction.size));
-			detectedFunctions.push_back(detectedFunction);
+
+			_allDetections.emplace(detectedFunction.getAddress(), detectedFunction);
 		}
 	}
 }
@@ -685,17 +677,6 @@ CoveredCode Finder::getCoveredCode()
 	return coveredCode;
 }
 
-/**
- * Return detected functions sorted by their address.
- *
- * @return sorted detected functions
- */
-const std::vector<DetectedFunction>& Finder::getDectedFunctions()
-{
-	sort();
-	return detectedFunctions;
-}
-
 const DetectedFunctionsMultimap& Finder::getAllDetections() const
 {
 	return _allDetections;
@@ -704,29 +685,6 @@ const DetectedFunctionsMultimap& Finder::getAllDetections() const
 const DetectedFunctionsPtrMap& Finder::getConfirmedDetections() const
 {
 	return _confirmedDetections;
-}
-
-/**
- * Sort detected functions.
- *
- * Functions are sorted by their address, if detection address is same bigger
- * detection is frist.
- */
-void Finder::sort()
-{
-	if (!isSorted)
-	{
-		std::sort(detectedFunctions.begin(), detectedFunctions.end(),
-			[](DetectedFunction i, DetectedFunction j)
-			{
-				if (i.getAddress() == j.getAddress())
-				{
-					return i.size > j.size;
-				}
-				return i.getAddress() < j.getAddress();
-			});
-		isSorted = true;
-	}
 }
 
 //
@@ -757,11 +715,6 @@ void Finder::searchAndConfirm(
 	LOG << dumpDetectedFunctions(*this, _image) << std::endl;
 
 	collectImports(_image, _imports);
-
-	for (auto& f : getDectedFunctions())
-	{
-		_allDetections.emplace(f.getAddress(), f);
-	}
 
 	for (auto& s : _image->getSegments())
 	{
@@ -1196,7 +1149,7 @@ utils::Address Finder::getAddressFromRef_ppc(utils::Address ref)
 	return Address();
 }
 
-void Finder::checkRef(retdec::stacofin::Reference& ref)
+void Finder::checkRef(Reference& ref)
 {
 	if (ref.target.isUndefined())
 	{
@@ -1324,7 +1277,7 @@ void Finder::checkRef(retdec::stacofin::Reference& ref)
 	}
 }
 
-void Finder::checkRef_x86(retdec::stacofin::Reference& ref)
+void Finder::checkRef_x86(Reference& ref)
 {
 	if (ref.target.isUndefined())
 	{
@@ -1541,7 +1494,7 @@ void Finder::confirmPartialRefsOk(float okShare)
 	}
 }
 
-void Finder::confirmFunction(retdec::stacofin::DetectedFunction* f)
+void Finder::confirmFunction(DetectedFunction* f)
 {
 	LOG << "\t\t" << "confirming " << f->getName() << " @ " << f->getAddress()
 			<< std::endl;

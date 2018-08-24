@@ -62,10 +62,11 @@ std::string referencesToString(
  * @param detections detected functions
  */
 void printDetectionsDebug(
-	const std::vector<DetectedFunction> &detections)
+	const retdec::stacofin::DetectedFunctionsMultimap &detections)
 {
 	std::uint64_t lastAddress = 0;
-	for (const auto &detected : detections) {
+	for (const auto& p : detections) {
+		auto& detected = p.second;
 		if (detected.getAddress() == lastAddress) {
 			for (const auto &name : detected.names) {
 				std::cout << "or " << name << "\n";
@@ -88,10 +89,11 @@ void printDetectionsDebug(
  * @param detections detected functions
  */
 void printDetections(
-	const std::vector<DetectedFunction> &detections)
+	const retdec::stacofin::DetectedFunctionsMultimap &detections)
 {
 	std::uint64_t lastAddress = 0;
-	for (const auto &detected : detections) {
+	for (const auto& p : detections) {
+		auto& detected = p.second;
 		if (detected.getAddress() == lastAddress) {
 			for (const auto &name : detected.names) {
 				std::cout << "\t\t\t" << name << " "
@@ -159,10 +161,10 @@ int doActions(
 
 	// Print detections.
 	if (debugOn) {
-		printDetectionsDebug(codeFinder.getDectedFunctions());
+		printDetectionsDebug(codeFinder.getAllDetections());
 	}
 	else {
-		printDetections(codeFinder.getDectedFunctions());
+		printDetections(codeFinder.getAllDetections());
 	}
 
 	// Print total code coverage information.
