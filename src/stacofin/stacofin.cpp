@@ -569,6 +569,10 @@ Finder::Finder()
  */
 Finder::~Finder()
 {
+	if (_ceInsn)
+	{
+		cs_free(_ceInsn, 1);
+	}
 }
 
 /**
@@ -692,6 +696,16 @@ const std::vector<DetectedFunction>& Finder::getDectedFunctions()
 	return detectedFunctions;
 }
 
+const DetectedFunctionsMultimap& Finder::getAllDetections() const
+{
+	return _allDetections;
+}
+
+const DetectedFunctionsPtrMap& Finder::getConfirmedDetections() const
+{
+	return _confirmedDetections;
+}
+
 /**
  * Sort detected functions.
  *
@@ -793,12 +807,6 @@ void Finder::searchAndConfirm(
 	}
 }
 
-// TODO
-//Finder::~StaticCodeAnalysis()
-//{
-//	cs_free(_ceInsn, 1);
-//}
-
 void Finder::solveReferences()
 {
 	for (auto& p : _allDetections)
@@ -831,16 +839,6 @@ void Finder::solveReferences()
 			}
 		}
 	}
-}
-
-const DetectedFunctionsMultimap& Finder::getAllDetections() const
-{
-	return _allDetections;
-}
-
-const DetectedFunctionsPtrMap& Finder::getConfirmedDetections() const
-{
-	return _confirmedDetections;
 }
 
 utils::Address Finder::getAddressFromRef(utils::Address ref)

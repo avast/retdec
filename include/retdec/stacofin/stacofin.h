@@ -134,6 +134,8 @@ class Finder
 		/// @{
 		CoveredCode getCoveredCode();
 		const std::vector<DetectedFunction>& getDectedFunctions();
+		const retdec::stacofin::DetectedFunctionsMultimap& getAllDetections() const;
+		const retdec::stacofin::DetectedFunctionsPtrMap& getConfirmedDetections() const;
 		/// @}
 
 	private:
@@ -156,9 +158,6 @@ class Finder
 				csh ce,
 				cs_mode md,
 				bool debug = false);
-
-		const retdec::stacofin::DetectedFunctionsMultimap& getAllDetections() const;
-		const retdec::stacofin::DetectedFunctionsPtrMap& getConfirmedDetections() const;
 
 	private:
 		using ByteData = typename std::pair<const std::uint8_t*, std::size_t>;
@@ -185,7 +184,7 @@ class Finder
 		const retdec::loader::Image* _image = nullptr;
 
 		csh _ce;
-		cs_mode _ceMode;
+		cs_mode _ceMode = CS_MODE_LITTLE_ENDIAN;
 		cs_insn* _ceInsn = nullptr;
 
 		std::map<utils::Address, std::string> _imports;
