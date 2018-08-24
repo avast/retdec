@@ -11,7 +11,6 @@
 
 #include "retdec/bin2llvmir/providers/config.h"
 #include "retdec/bin2llvmir/providers/fileimage.h"
-#include "retdec/bin2llvmir/providers/names.h"
 #include "retdec/stacofin/stacofin.h"
 #include "retdec/utils/address.h"
 
@@ -24,7 +23,6 @@ class StaticCodeAnalysis
 		StaticCodeAnalysis(
 				Config* c,
 				FileImage* i,
-				NameContainer* ns,
 				csh ce,
 				cs_mode md,
 				bool debug = false);
@@ -56,7 +54,6 @@ class StaticCodeAnalysis
 	private:
 		Config* _config = nullptr;
 		FileImage* _image = nullptr;
-		NameContainer* _names = nullptr;
 
 		csh _ce;
 		cs_mode _ceMode;

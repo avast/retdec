@@ -13,6 +13,14 @@
 #include "retdec/loader/loader/image.h"
 #include "retdec/utils/string.h"
 
+/**
+ * Set \c debug_enabled to \c true to enable this LOG macro.
+ */
+#define LOG \
+	if (!debug_enabled) {} \
+	else std::cout << std::showbase
+static bool debug_enabled = false;
+
 using namespace retdec::utils;
 using namespace yaracpp;
 using namespace retdec::loader;

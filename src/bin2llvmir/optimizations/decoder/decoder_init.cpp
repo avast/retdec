@@ -888,7 +888,6 @@ void Decoder::initStaticCode()
 	StaticCodeAnalysis SCA(
 			_config,
 			_image,
-			_names,
 			_c2l->getCapstoneEngine(),
 			_c2l->getBasicMode(),
 			debug_enabled);
@@ -896,6 +895,22 @@ void Decoder::initStaticCode()
 	for (auto& p : SCA.getConfirmedDetections())
 	{
 		auto* sf = p.second;
+
+		for (auto& n : sf->names)
+		{
+			if (sf->getAddress().isDefined() && !n.empty())
+			{
+				_names->addNameForAddress(sf->getAddress(), n, Name::eType::STATIC_CODE);
+			}
+		}
+
+		for (auto& r : sf->references)
+		{
+			if (r.address.isDefined() && !r.name.empty())
+			{
+				_names->addNameForAddress(r.target, r.name, Name::eType::STATIC_CODE);
+			}
+		}
 
 		if (auto* jt = _jumpTargets.push(
 				sf->getAddress(),
