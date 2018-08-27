@@ -32,7 +32,6 @@ class CallEntry
 		CallEntry(llvm::CallInst* c);
 
 	public:
-		void filterStoreValues(Abi* _abi);
 		void filterSort(Config* _config, Abi* _abi);
 		void filterLeaveOnlyContinuousStackOffsets(Config* _config, Abi *_abi);
 		void filterLeaveOnlyContinuousSequence(Abi* _abi);

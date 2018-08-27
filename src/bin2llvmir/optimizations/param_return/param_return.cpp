@@ -276,20 +276,6 @@ CallEntry::CallEntry(llvm::CallInst* c) :
 
 }
 
-/**
- * Remove all registers that are not used to pass argument according to ABI.
- */
-void CallEntry::filterStoreValues(Abi* _abi)
-{
-	possibleArgs.erase(
-		std::remove_if(possibleArgs.begin(), possibleArgs.end(),
-			[_abi](const Value* v)
-			{
-				return !_abi->valueCanBeParameter(v);
-			}),
-		possibleArgs.end());
-}
-
 void DataFlowEntry::filterRegistersArgLoads()
 {
 	args.erase(
@@ -1032,7 +1018,6 @@ void DataFlowEntry::filter()
 
 	for (CallEntry& e : calls)
 	{
-		e.filterStoreValues(_abi);
 		e.filterSort(_config, _abi);
 		e.filterLeaveOnlyContinuousStackOffsets(_config, _abi);
 		e.filterLeaveOnlyContinuousSequence(_abi);
