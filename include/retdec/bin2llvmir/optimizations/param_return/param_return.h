@@ -108,8 +108,8 @@ class DataFlowEntry
 		void setReturnType();
 		void setArgumentTypes();
 
-		void filterRegistersArgLoads();
 		void filterSortArgLoads();
+		void filterNegativeStacks();
 
 		void replaceCalls();
 		std::map<llvm::CallInst*, std::vector<llvm::Value*>>

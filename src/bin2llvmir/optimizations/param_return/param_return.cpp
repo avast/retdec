@@ -276,20 +276,14 @@ CallEntry::CallEntry(llvm::CallInst* c) :
 
 }
 
-void DataFlowEntry::filterRegistersArgLoads()
+void DataFlowEntry::filterNegativeStacks()
 {
 	args.erase(
 		std::remove_if(args.begin(), args.end(),
 			[this](const Value* li)
 			{
-				auto* op = li;
-				if (_abi->valueCanBeParameter(op))
-				{
-					auto aOff = _config->getStackVariableOffset(op);
-					return aOff.isDefined() && aOff < 0;
-				}
-
-				return true;
+				auto aOff = _config->getStackVariableOffset(li);
+				return aOff.isDefined() && aOff < 0;
 			}),
 		args.end());
 }
@@ -1013,7 +1007,7 @@ void DataFlowEntry::filter()
 		callsFilterCommonRegisters();
 	}
 
-	filterRegistersArgLoads();
+	filterNegativeStacks();
 	filterSortArgLoads();
 
 	for (CallEntry& e : calls)
