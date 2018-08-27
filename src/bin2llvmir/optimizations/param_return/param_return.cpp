@@ -412,6 +412,54 @@ void CallEntry::filterLeaveOnlyContinuousStackOffsets(Config* _config, Abi* _abi
 	}
 }
 
+void CallEntry::filterLeaveOnlyContinuousSequence(Abi* _abi)
+{
+	auto fpRegs = _abi->parameterFPRegisters();
+	auto fIt = fpRegs.begin();
+
+	auto it = possibleArgs.begin();
+
+	for (auto rId : _abi->parameterRegisters())
+	{
+		if (it == possibleArgs.end())
+		{
+			return;
+		}
+
+		if (rId != _abi->getRegisterId(*it))
+		{
+			if (_abi->parameterRegistersOverlay())
+			{
+				auto nIt = std::find_if(
+						possibleArgs.begin(),
+						possibleArgs.end(),
+						[_abi, fIt](Value* arg)
+						{
+							return _abi->getRegisterId(arg) == *fIt;
+						});
+
+				if (nIt != possibleArgs.end())
+				{
+					auto val = *nIt;
+					possibleArgs.erase(nIt);
+					it = possibleArgs.insert(it, val);
+
+					it++;
+					fIt++;
+
+					continue;
+				}
+			}
+
+			possibleArgs.erase(it, possibleArgs.end());
+			return;
+		}
+
+		it++;
+	}
+
+}
+
 void CallEntry::filterLeaveOnlyNeededStackOffsets(Config* _config, Abi *_abi)
 {
 	size_t regNum = 0;
@@ -972,6 +1020,7 @@ void DataFlowEntry::filter()
 		e.filterStoreValues(_abi);
 		e.filterSort(_config, _abi);
 		e.filterLeaveOnlyContinuousStackOffsets(_config, _abi);
+		e.filterLeaveOnlyContinuousSequence(_abi);
 		e.filterLeaveOnlyNeededStackOffsets(_config, _abi);
 
 		if (isVarArg)
