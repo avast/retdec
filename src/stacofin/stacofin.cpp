@@ -572,10 +572,6 @@ Finder::Finder()
  */
 Finder::~Finder()
 {
-	if (_ceInsn)
-	{
-		cs_free(_ceInsn, 1);
-	}
 }
 
 /**
@@ -602,7 +598,7 @@ const DetectedFunctionsPtrMap& Finder::getConfirmedDetections() const
  * Search for static code in input file.
  *
  * @param image input file image
- * @param yaraFile static code signatures
+ * @param yaraFile static code signature file
  */
 void Finder::search(
 	const Image& image,
@@ -682,6 +678,12 @@ void Finder::search(
 	}
 }
 
+/**
+ * Search for static code in input file.
+ *
+ * @param image input file image
+ * @param yaraFiles static code signature files
+ */
 void Finder::search(
 	const retdec::loader::Image& image,
 	const std::set<std::string>& yaraFiles)
@@ -692,6 +694,12 @@ void Finder::search(
 	}
 }
 
+/**
+ * Search for static code in input file based on information in config file.
+ *
+ * @param image input file image
+ * @param config config file
+ */
 void Finder::search(
 	const retdec::loader::Image& image,
 	const retdec::config::Config& config)
@@ -700,32 +708,25 @@ void Finder::search(
 	search(image, sigPaths);
 }
 
-//
-//==============================================================================
-// TODO
-//==============================================================================
-//
-
 void Finder::searchAndConfirm(
 		const retdec::loader::Image& image,
-		const retdec::config::Config& config,
-		csh ce,
-		cs_mode md)
+		const retdec::config::Config& config)
 {
+	search(image, config);
+
 	_config = &config;
 	_image = &image;
-	_ce = ce;
-	_ceMode = md;
-	_ceInsn = cs_malloc(_ce);
+
+	if (initDisassembler() || _ceInsn == nullptr)
+	{
+		return;
+	}
 
 	LOG << "\n StaticCodeAnalysis():" << std::endl;
-
-	search(*_image, *_config);
 
 	LOG << dumpDetectedFunctions(*this, _image) << std::endl;
 
 	collectImports(_image, _imports);
-
 	for (auto& s : _image->getSegments())
 	{
 		if (!s->getName().empty())
@@ -768,6 +769,54 @@ void Finder::searchAndConfirm(
 				<< f->getName() << "', " << f->getAddress() << ")"
 				<< std::endl;
 	}
+
+	cs_free(_ceInsn, 1);
+	cs_close(&_ce);
+}
+
+/**
+ * @return @c False of everything ok, @c true otherwise.
+ */
+bool Finder::initDisassembler()
+{
+	cs_arch arch;
+	_ceMode = CS_MODE_LITTLE_ENDIAN;
+	if (_config->architecture.isX86())
+	{
+		arch = CS_ARCH_X86;
+		_ceMode = CS_MODE_32;
+	}
+	else if (_config->architecture.isMipsOrPic32())
+	{
+		arch = CS_ARCH_MIPS;
+		_ceMode = CS_MODE_MIPS32;
+	}
+	else if (_config->architecture.isArmOrThumb())
+	{
+		arch = CS_ARCH_ARM;
+		_ceMode = CS_MODE_ARM;
+	}
+	else if (_config->architecture.isPpc())
+	{
+		arch = CS_ARCH_PPC;
+		_ceMode = CS_MODE_LITTLE_ENDIAN;
+	}
+	else
+	{
+		return true;
+	}
+
+	if (cs_open(arch, _ceMode, &_ce) != CS_ERR_OK)
+	{
+		return true;
+	}
+	if (cs_option(_ce, CS_OPT_DETAIL, CS_OPT_ON) != CS_ERR_OK)
+	{
+		return true;
+	}
+	_ceInsn = cs_malloc(_ce);
+
+	return false;
 }
 
 void Finder::solveReferences()

@@ -129,9 +129,7 @@ class Finder
 				const retdec::config::Config& config);
 		void searchAndConfirm(
 				const retdec::loader::Image& image,
-				const retdec::config::Config& config,
-				csh ce,
-				cs_mode md);
+				const retdec::config::Config& config);
 		/// @}
 
 		/// @name Getters.
@@ -160,12 +158,11 @@ class Finder
 		};
 		std::set<DetectedFunction*, DetectedFunctionComp> _worklistDetections;
 
-//==============================================================================
-
 	private:
 		using ByteData = typename std::pair<const std::uint8_t*, std::size_t>;
 
 	private:
+		bool initDisassembler();
 		void solveReferences();
 
 		utils::Address getAddressFromRef(utils::Address ref);

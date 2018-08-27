@@ -886,11 +886,7 @@ void Decoder::initStaticCode()
 	LOG << "\n" << "initStaticCode():" << std::endl;
 
 	stacofin::Finder SCA;
-	SCA.searchAndConfirm(
-			*_image->getImage(),
-			_config->getConfig(),
-			_c2l->getCapstoneEngine(),
-			_c2l->getBasicMode());
+	SCA.searchAndConfirm(*_image->getImage(), _config->getConfig());
 
 	for (auto& p : SCA.getConfirmedDetections())
 	{
