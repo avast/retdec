@@ -32,10 +32,6 @@ class CallEntry
 		CallEntry(llvm::CallInst* c);
 
 	public:
-		void filterLeaveOnlyContinuousStackOffsets(Config* _config, Abi *_abi);
-		void filterLeaveOnlyContinuousSequence(Abi* _abi);
-		void filterLeaveOnlyNeededStackOffsets(Config* _config, Abi *_abi);
-
 		void extractFormatString(ReachingDefinitionsAnalysis& _RDA);
 		bool instructionStoresString(
 				llvm::StoreInst *si,
@@ -205,8 +201,6 @@ class ParamReturn : public llvm::ModulePass
 
 		void filterCalls();
 		void filterSort(CallEntry& ce);
-		void filterLeaveOnlyContinuousStackOffsets(CallEntry& ce);
-		void filterLeaveOnlyNeededStackOffsets(CallEntry& ce);
 
 		void applyToIr();
 
