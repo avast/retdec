@@ -1873,5 +1873,216 @@ void DataFlowEntry::setArgumentTypes()
 	}
 }
 
+//
+//=============================================================================
+//  ParamFilter
+//=============================================================================
+//
+
+ParamFilter::ParamFilter(
+		const std::vector<Value*>& paramValues,
+		const Abi& abi,
+		Config& config)
+		:
+		_abi(abi),
+		_config(config)
+{
+	separateParamValues(paramValues);
+
+	orderRegistersBy(_fpRegValues, _abi.parameterFPRegisters());
+	orderRegistersBy(_regValues, _abi.parameterRegisters());
+	orderStacks(_stackValues);
+}
+
+void ParamFilter::separateParamValues(const std::vector<Value*>& paramValues)
+{
+	auto regs = _abi.parameterRegisters();
+
+	for (auto pv: paramValues)
+	{
+		if (_config.isStackVariable(pv))
+		{
+			_stackValues.push_back(pv);
+		}
+		else if (std::find(regs.begin(), regs.end(),
+				_abi.getRegisterId(pv)) != regs.end())
+		{
+			_regValues.push_back(_abi.getRegisterId(pv));
+		}
+		else
+		{
+			_fpRegValues.push_back(_abi.getRegisterId(pv));
+		}
+	}
+}
+
+void ParamFilter::orderStacks(std::vector<Value*>& stacks, bool asc) const
+{
+	std::stable_sort(
+			stacks.begin(),
+			stacks.end(),
+			[this, asc](Value* a, Value* b) -> bool
+	{
+		auto aOff = _config.getStackVariableOffset(a);
+		auto bOff = _config.getStackVariableOffset(b);
+
+		bool ascOrd = aOff < bOff;
+
+		return asc ? ascOrd : !ascOrd;
+	});
+}
+
+void ParamFilter::orderRegistersBy(
+				std::vector<uint32_t>& regs,
+				const std::vector<uint32_t>& orderedVector) const
+{
+	std::stable_sort(
+			regs.begin(),
+			regs.end(),
+			[this, orderedVector](uint32_t a, uint32_t b) -> bool
+	{
+		auto it1 = std::find(orderedVector.begin(), orderedVector.end(), a);
+		auto it2 = std::find(orderedVector.begin(), orderedVector.end(), b);
+
+		return std::distance(it1, it2) > 0;
+	});
+}
+
+void ParamFilter::leaveOnlyContinuousStackOffsets()
+{
+	retdec::utils::Maybe<int> prevOff;
+	int gap = _abi.wordSize()*2/8;
+
+	auto it = _stackValues.begin();
+	while (it != _stackValues.end())
+	{
+		auto off = _config.getStackVariableOffset(*it);
+
+		if (prevOff.isUndefined())
+		{
+			prevOff = off;
+		}
+		else if (std::abs(prevOff - off) > gap)
+		{
+			it = _stackValues.erase(it);
+			continue;
+		}
+		else
+		{
+			prevOff = off;
+		}
+
+		++it;
+	}
+}
+
+void ParamFilter::leaveOnlyContinuousSequence()
+{
+	if (_abi.parameterRegistersOverlay())
+	{
+		applyAlternatingRegistersFilter();
+	}
+	else
+	{
+		applySequentialRegistersFilter();
+	}
+}
+
+void ParamFilter::applyAlternatingRegistersFilter()
+{
+	auto templRegs = _abi.parameterRegisters();
+	auto fpTemplRegs = _abi.parameterFPRegisters();
+
+	size_t idx = 0;
+	auto it = _regValues.begin();
+	auto fIt = _fpRegValues.begin();
+
+	while (idx < fpTemplRegs.size() && idx < templRegs.size())
+	{
+		if (it == _regValues.end() && fIt == _fpRegValues.end())
+		{
+			_stackValues.clear();
+			return;
+		}
+
+		if (it != _regValues.end() && *it == templRegs[idx])
+		{
+			it++;
+		}
+		else if (fIt != _fpRegValues.end() && *fIt == fpTemplRegs[idx])
+		{
+			fIt++;
+		}
+		else
+		{
+			_regValues.erase(it, _regValues.end());
+			_fpRegValues.erase(fIt, _fpRegValues.end());
+			_stackValues.clear();
+
+			return;
+		}
+
+		idx++;
+	}
+}
+
+void ParamFilter::applySequentialRegistersFilter()
+{
+	auto it = _regValues.begin();
+	for (auto regId : _abi.parameterRegisters())
+	{
+		if (it == _regValues.end())
+		{
+			_stackValues.clear();
+			break;
+		}
+
+		if (regId != *it)
+		{
+			_regValues.erase(it, _regValues.end());
+			_stackValues.clear();
+			break;
+		}
+
+		it++;
+	}
+
+	auto fIt = _fpRegValues.begin();
+	for (auto regId : _abi.parameterFPRegisters())
+	{
+		if (fIt == _fpRegValues.end())
+		{
+			break;
+		}
+
+		if (regId != *fIt)
+		{
+			_fpRegValues.erase(fIt, _fpRegValues.end());
+			break;
+		}
+
+		fIt++;
+	}
+}
+
+std::vector<Value*> ParamFilter::getParamValues() const
+{
+	std::vector<Value*> paramValues;
+
+	for (auto i : _regValues)
+	{
+		paramValues.push_back(_abi.getRegister(i));
+	}
+
+	for (auto i : _fpRegValues)
+	{
+		paramValues.push_back(_abi.getRegister(i));
+	}
+
+	paramValues.insert(paramValues.end(), _stackValues.begin(), _stackValues.end());
+
+	return paramValues;
+}
+
 } // namespace bin2llvmir
 } // namespace retdec

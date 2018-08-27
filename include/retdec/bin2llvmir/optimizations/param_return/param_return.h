@@ -60,6 +60,38 @@ class ReturnEntry
 		std::vector<llvm::StoreInst*> possibleRetStores;
 };
 
+class ParamFilter
+{
+	public:
+		ParamFilter(
+			const std::vector<llvm::Value*>& paramValues,
+			const Abi& abi,
+			Config& config);
+
+		void orderStacks(std::vector<llvm::Value*>& stacks, bool asc = true) const;
+		void orderRegistersBy(
+				std::vector<uint32_t>& regs,
+				const std::vector<uint32_t>& orderedVector) const;
+
+		void leaveOnlyContinuousSequence();
+		void leaveOnlyContinuousStackOffsets();
+
+		std::vector<llvm::Value*> getParamValues() const;
+
+	private:
+		void separateParamValues(const std::vector<llvm::Value*>& paramValues);
+		void applyAlternatingRegistersFilter();
+		void applySequentialRegistersFilter();
+
+	private:
+		const Abi& _abi;
+		Config& _config;
+
+		std::vector<uint32_t> _regValues;
+		std::vector<uint32_t> _fpRegValues;
+		std::vector<llvm::Value*> _stackValues;
+};
+
 class DataFlowEntry
 {
 	public:
