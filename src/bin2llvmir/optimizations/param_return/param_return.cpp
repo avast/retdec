@@ -23,6 +23,7 @@
 #include <iostream>
 #include <limits>
 
+#include <llvm/IR/CFG.h>
 #include <llvm/IR/Constants.h>
 #include <llvm/IR/InstIterator.h>
 #include <llvm/IR/Instruction.h>
@@ -280,14 +281,13 @@ CallEntry::CallEntry(llvm::CallInst* c) :
  */
 void CallEntry::filterStoreValues(Abi* _abi)
 {
-	possibleArgStores.erase(
-		std::remove_if(possibleArgStores.begin(), possibleArgStores.end(),
-			[_abi](const StoreInst* si)
+	possibleArgs.erase(
+		std::remove_if(possibleArgs.begin(), possibleArgs.end(),
+			[_abi](const Value* v)
 			{
-				auto op = si->getPointerOperand();
-				return !_abi->valueCanBeParameter(op);
+				return !_abi->valueCanBeParameter(v);
 			}),
-		possibleArgStores.end());
+		possibleArgs.end());
 }
 
 void DataFlowEntry::filterRegistersArgLoads()
@@ -313,20 +313,19 @@ void DataFlowEntry::filterRegistersArgLoads()
  */
 void CallEntry::filterSort(Config* _config, Abi* _abi)
 {
-	auto& stores = possibleArgStores;
+	auto& stores = possibleArgs;
 
 	std::stable_sort(
 			stores.begin(),
 			stores.end(),
-			[_config, _abi](StoreInst* a, StoreInst* b) -> bool
+			[_config, _abi](Value* a, Value* b) -> bool
 	{
-		auto aOff = _config->getStackVariableOffset(a->getPointerOperand());
-		auto bOff = _config->getStackVariableOffset(b->getPointerOperand());
+		auto aOff = _config->getStackVariableOffset(a);
+		auto bOff = _config->getStackVariableOffset(b);
 
 		if (aOff.isUndefined() && bOff.isUndefined())
 		{
-			return _abi->getRegisterId(a->getPointerOperand()) <
-					_abi->getRegisterId(b->getPointerOperand());
+			return _abi->getRegisterId(a) < _abi->getRegisterId(b);
 		}
 		else if (aOff.isUndefined() && bOff.isDefined())
 		{
@@ -355,7 +354,6 @@ void DataFlowEntry::filterSortArgLoads()
 
 		if (aOff.isUndefined() && bOff.isUndefined())
 		{
-
 			return _abi->getRegisterId(a->getPointerOperand()) <
 					_abi->getRegisterId(b->getPointerOperand());
 		}
@@ -381,15 +379,15 @@ void DataFlowEntry::filterSortArgLoads()
 void CallEntry::filterLeaveOnlyContinuousStackOffsets(Config* _config, Abi* _abi)
 {
 	retdec::utils::Maybe<int> prevOff;
-	auto it = possibleArgStores.begin();
-	while (it != possibleArgStores.end())
+	auto it = possibleArgs.begin();
+	while (it != possibleArgs.end())
 	{
 		auto* s = *it;
-		auto off = _config->getStackVariableOffset(s->getPointerOperand());
-		auto* val = llvm_utils::skipCasts(s->getValueOperand());
+		auto off = _config->getStackVariableOffset(s);
+		//auto* val = llvm_utils::skipCasts(s);
 
-		int gap = _abi->getTypeByteSize(val->getType())*2;
-		// static int gap = _abi->wordSize()*2/8;
+		// int gap = _abi->getTypeByteSize(val->getType())*2;
+		static int gap = _abi->wordSize()*2/8;
 
 		if (off.isUndefined())
 		{
@@ -402,7 +400,7 @@ void CallEntry::filterLeaveOnlyContinuousStackOffsets(Config* _config, Abi* _abi
 		}
 		else if (std::abs(prevOff - off) > gap)
 		{
-			it = possibleArgStores.erase(it);
+			it = possibleArgs.erase(it);
 			continue;
 		}
 		else
@@ -418,12 +416,11 @@ void CallEntry::filterLeaveOnlyNeededStackOffsets(Config* _config, Abi *_abi)
 {
 	size_t regNum = 0;
 	size_t fpRegNum = 0;
-	auto it = possibleArgStores.begin();
+	auto it = possibleArgs.begin();
 
-	while (it != possibleArgStores.end())
+	while (it != possibleArgs.end())
 	{
-		auto* s = *it;
-		auto* op = s->getPointerOperand();
+		auto* op = *it;
 		auto off = _config->getStackVariableOffset(op);
 
 		if (_abi->isRegister(op))
@@ -454,7 +451,7 @@ void CallEntry::filterLeaveOnlyNeededStackOffsets(Config* _config, Abi *_abi)
 					continue;
 				}
 
-				it = possibleArgStores.erase(it);
+				it = possibleArgs.erase(it);
 				continue;
 			}
 		}
@@ -465,35 +462,24 @@ void CallEntry::filterLeaveOnlyNeededStackOffsets(Config* _config, Abi *_abi)
 
 void CallEntry::extractFormatString(ReachingDefinitionsAnalysis& _RDA)
 {
-	for (auto* s : possibleArgStores)
+	for (auto i : possibleArgs)
 	{
-		auto* v = getRoot(_RDA, s->getValueOperand());
-		auto* gv = dyn_cast_or_null<GlobalVariable>(v);
+		auto inst = std::find_if(possibleArgStores.begin(),
+					possibleArgStores.end(),
+					[i](StoreInst *st)
+					{
+						return st->getPointerOperand() == i;
+					});
 
-		if (gv == nullptr || !gv->hasInitializer())
+		if (inst != possibleArgStores.end())
 		{
-			continue;
-		}
-
-		auto* init = dyn_cast_or_null<ConstantDataArray>(gv->getInitializer());
-		if (init == nullptr)
-		{
-			if (auto* i = dyn_cast<ConstantExpr>(gv->getInitializer()))
+			std::string str;
+			if (instructionStoresString(*inst, str, _RDA))
 			{
-				if (auto* igv = dyn_cast<GlobalVariable>(i->getOperand(0)))
-				{
-					init = dyn_cast_or_null<ConstantDataArray>(igv->getInitializer());
-				}
+				formatStr = str;
+				return;
 			}
 		}
-
-		if (init == nullptr || !init->isString())
-		{
-			continue;
-		}
-
-		formatStr = init->getAsString();
-		break;
 	}
 }
 
@@ -598,7 +584,7 @@ void DataFlowEntry::dump() const
 	{
 		LOG << "\t\t>|" << llvmObjToString(e.call) << std::endl;
 		LOG << "\t\t\targ stores:" << std::endl;
-		for (auto* s : e.possibleArgStores)
+		for (auto* s : e.possibleArgs)
 		{
 			LOG << "\t\t\t>|" << llvmObjToString(s) << std::endl;
 		}
@@ -746,54 +732,38 @@ void DataFlowEntry::addCall(llvm::CallInst* call)
 	calls.push_back(ce);
 }
 
-void DataFlowEntry::addCallArgs(llvm::CallInst* call, CallEntry& ce)
+// std::vector?
+std::set<Value*> DataFlowEntry::collectArgsFromInstruction(Instruction* startInst, std::map<BasicBlock*, std::set<Value*>> &seenBlocks, std::vector<StoreInst*> *possibleArgStores)
 {
-	NonIterableSet<Value*> disqualifiedValues;
-	auto* b = call->getParent();
-	Instruction* prev = call;
-	std::set<BasicBlock*> seen;
-	seen.insert(b);
-	while (true)
+	NonIterableSet<Value*> excludedValues;
+	auto* block = startInst->getParent();
+
+	std::set<Value*> argStores;
+
+	bool canContinue = true;
+	for (auto* inst = startInst; canContinue; inst = inst->getPrevNode())
 	{
-		if (prev == &b->front())
+		if (inst == nullptr)
 		{
-			auto* spb = b->getSinglePredecessor();
-			if (spb && !spb->empty() && spb != b && seen.count(spb) == 0)
-			{
-				b = spb;
-				prev = &b->back();
-				seen.insert(b);
-			}
-			else
-			{
-				break;
-			}
-		}
-		else
-		{
-			prev = prev->getPrevNode();
-		}
-		if (prev == nullptr)
-		{
-			break;
+			return argStores;
 		}
 
-		if (auto* call = dyn_cast<CallInst>(prev))
+		if (auto* call = dyn_cast<CallInst>(inst))
 		{
 			auto* calledFnc = call->getCalledFunction();
 			if (calledFnc == nullptr || !calledFnc->isIntrinsic())
 			{
-				break;
+				return argStores;
 			}
 		}
-		else if (auto* store = dyn_cast<StoreInst>(prev))
+		else if (auto* store = dyn_cast<StoreInst>(inst))
 		{
 			auto* val = store->getValueOperand();
 			auto* ptr = store->getPointerOperand();
 
 			if (!_abi->valueCanBeParameter(ptr))
 			{
-				disqualifiedValues.insert(ptr);
+				excludedValues.insert(ptr);
 			}
 
 			if (auto* l = dyn_cast<LoadInst>(val))
@@ -803,26 +773,129 @@ void DataFlowEntry::addCallArgs(llvm::CallInst* call, CallEntry& ce)
 					if (_abi->getRegisterId(l->getPointerOperand()) == X86_REG_EBP
 							|| _abi->getRegisterId(l->getPointerOperand()) == X86_REG_RBP)
 					{
-						disqualifiedValues.insert(ptr);
+						excludedValues.insert(ptr);
 					}
 				}
 
-				if (_abi->isRegister(ptr)
-						&& _abi->isRegister(l->getPointerOperand())
-						&& ptr != l->getPointerOperand())
+				if (l->getPointerOperand() != store->getPointerOperand())
 				{
-					disqualifiedValues.insert(l->getPointerOperand());
+					excludedValues.insert(l->getPointerOperand());
 				}
 			}
 
-			if (disqualifiedValues.hasNot(ptr))
+			if (excludedValues.hasNot(ptr))
 			{
-				ce.possibleArgStores.push_back(store);
-				disqualifiedValues.insert(ptr);
-				disqualifiedValues.insert(store);
+				argStores.insert(ptr);
+				excludedValues.insert(ptr);
+				excludedValues.insert(val);
+
+				if (possibleArgStores != nullptr)
+				{
+					possibleArgStores->push_back(store);
+				}
+			}
+		}
+
+		if (inst == &block->front())
+		{
+			canContinue = false;
+		}
+	}
+
+	std::set<Value*> commonArgStores;
+	// recursive?
+	seenBlocks[block] = argStores;
+
+	for (auto pred: predecessors(block))
+	{
+		std::set<Value*> foundArgs;
+		if (seenBlocks.find(pred) == seenBlocks.end())
+		{
+			foundArgs = collectArgsFromInstruction(&pred->back(), seenBlocks, possibleArgStores);
+		}
+		else
+		{
+			foundArgs = seenBlocks[pred];
+		}
+
+		if (foundArgs.empty())
+		{
+			return argStores;
+		}
+
+		if (commonArgStores.empty())
+		{
+			commonArgStores = std::move(foundArgs);
+		}
+		else
+		{
+			std::set<Value*> intersection;
+			std::set_intersection(
+				commonArgStores.begin(),
+				commonArgStores.end(),
+				foundArgs.begin(),
+				foundArgs.end(),
+				std::inserter(intersection, intersection.begin()));
+
+			commonArgStores = std::move(intersection);
+		}
+	}
+
+	argStores.insert(commonArgStores.begin(), commonArgStores.end());
+
+	seenBlocks[block] = argStores;
+	return argStores;
+}
+
+bool CallEntry::instructionStoresString(
+		StoreInst *si,
+		std::string& str,
+		ReachingDefinitionsAnalysis &_RDA) const
+{
+	auto* v = getRoot(_RDA, si->getValueOperand());
+	auto* gv = dyn_cast_or_null<GlobalVariable>(v);
+
+	if (gv == nullptr || !gv->hasInitializer())
+	{
+		return false;
+	}
+
+	auto* init = dyn_cast_or_null<ConstantDataArray>(gv->getInitializer());
+	if (init == nullptr)
+	{
+		if (auto* i = dyn_cast<ConstantExpr>(gv->getInitializer()))
+		{
+			if (auto* igv = dyn_cast<GlobalVariable>(i->getOperand(0)))
+			{
+				init = dyn_cast_or_null<ConstantDataArray>(igv->getInitializer());
 			}
 		}
 	}
+
+	if (init == nullptr || !init->isString())
+	{
+		return false;
+	}
+
+	str = init->getAsString();
+	return true;
+}
+
+void DataFlowEntry::addCallArgs(llvm::CallInst* call, CallEntry& ce)
+{
+	std::map<BasicBlock*, std::set<Value*>> seenBlocks;
+
+	auto fromInst = call->getPrevNode();
+	if (fromInst == nullptr)
+	{
+		return;
+	}
+
+	auto wantedStores = isVarArg ? &ce.possibleArgStores : nullptr;
+
+	auto possibleArgs = collectArgsFromInstruction(fromInst, seenBlocks, wantedStores);
+
+	ce.possibleArgs.assign(possibleArgs.begin(), possibleArgs.end());
 }
 
 void DataFlowEntry::addCallReturns(llvm::CallInst* call, CallEntry& ce)
@@ -917,18 +990,18 @@ void DataFlowEntry::filter()
 		for (CallEntry& e : calls)
 		{
 			auto tIt = argTypes.begin();
-			auto sIt = e.possibleArgStores.begin();
+			auto sIt = e.possibleArgs.begin();
 
-			while (tIt != argTypes.end() && sIt != e.possibleArgStores.end())
+			while (tIt != argTypes.end() && sIt != e.possibleArgs.end())
 			{
 				Type* t = *tIt;
 				auto nextIt = sIt;
 				++nextIt;
 				if (t->isDoubleTy()
-						&& nextIt != e.possibleArgStores.end()
-						&& _abi->isRegister((*nextIt)->getPointerOperand()))
+						&& nextIt != e.possibleArgs.end()
+						&& _abi->isRegister(*nextIt))
 				{
-					e.possibleArgStores.erase(nextIt);
+					e.possibleArgs.erase(nextIt);
 				}
 
 				++tIt;
@@ -949,9 +1022,9 @@ void DataFlowEntry::callsFilterCommonRegisters()
 
 	std::set<Value*> commonRegs;
 
-	for (auto* s : calls.front().possibleArgStores)
+	for (auto* s : calls.front().possibleArgs)
 	{
-		Value* r = s->getPointerOperand();
+		Value* r = s;
 		if (_abi->isRegister(r))
 		{
 			commonRegs.insert(r);
@@ -963,15 +1036,15 @@ void DataFlowEntry::callsFilterCommonRegisters()
 		// TODO: sometimes, we do not find all arg stores.
 		// this is a hack, we should manufacture loads even if we do not have
 		// stores but know there are some arguments (debug, ...).
-		if (e.possibleArgStores.empty())
+		if (e.possibleArgs.empty())
 		{
 			continue;
 		}
 
 		std::set<Value*> regs;
-		for (auto* s : e.possibleArgStores)
+		for (auto* s : e.possibleArgs)
 		{
-			Value* r = s->getPointerOperand();
+			Value* r = s;
 			if (_abi->isRegister(r))
 			{
 				regs.insert(r);
@@ -1008,14 +1081,14 @@ void DataFlowEntry::callsFilterCommonRegisters()
 
 	for (auto& e : calls)
 	{
-		auto it = e.possibleArgStores.begin();
-		for ( ; it != e.possibleArgStores.end(); )
+		auto it = e.possibleArgs.begin();
+		for ( ; it != e.possibleArgs.end(); )
 		{
-			Value* r = (*it)->getPointerOperand();
+			Value* r = (*it);
 			if (_abi->isRegister(r)
 					&& commonRegs.find(r) == commonRegs.end())
 			{
-				it = e.possibleArgStores.erase(it);
+				it = e.possibleArgs.erase(it);
 			}
 			else
 			{
@@ -1045,9 +1118,9 @@ void DataFlowEntry::callsFilterSameNumberOfStacks()
 	for (auto& ce : calls)
 	{
 		std::size_t ss = 0;
-		for (auto* s : ce.possibleArgStores)
+		for (auto* s : ce.possibleArgs)
 		{
-			if (_config->isStackVariable(s->getPointerOperand()))
+			if (_config->isStackVariable(s))
 			{
 				++ss;
 			}
@@ -1068,11 +1141,11 @@ void DataFlowEntry::callsFilterSameNumberOfStacks()
 	for (auto& ce : calls)
 	{
 		std::size_t cntr = 0;
-		auto it = ce.possibleArgStores.begin();
-		while (it != ce.possibleArgStores.end())
+		auto it = ce.possibleArgs.begin();
+		while (it != ce.possibleArgs.end())
 		{
 			auto* s = *it;
-			if (!_config->isStackVariable(s->getPointerOperand()))
+			if (!_config->isStackVariable(s))
 			{
 				++it;
 				continue;
@@ -1081,7 +1154,7 @@ void DataFlowEntry::callsFilterSameNumberOfStacks()
 			++cntr;
 			if (cntr > stacks)
 			{
-				it = ce.possibleArgStores.erase(it);
+				it = ce.possibleArgs.erase(it);
 			}
 			else
 			{
@@ -1111,7 +1184,7 @@ std::map<CallInst*, std::vector<Value*>> DataFlowEntry::fetchLoadsOfCalls() cons
 	{
 		std::vector<Value*> loads;
 		auto* call = e.call;
-		for (auto* s : e.possibleArgStores)
+		for (auto* s : e.possibleArgs)
 		{
 			auto fIt = specialArgStorage.find(loads.size());
 			while (fIt != specialArgStorage.end())
@@ -1121,7 +1194,7 @@ std::map<CallInst*, std::vector<Value*>> DataFlowEntry::fetchLoadsOfCalls() cons
 				fIt = specialArgStorage.find(loads.size());
 			}
 
-			auto* l = new LoadInst(s->getPointerOperand(), "", call);
+			auto* l = new LoadInst(s, "", call);
 			loads.push_back(l);
 		}
 
@@ -1247,11 +1320,11 @@ void DataFlowEntry::applyToIrVariadic()
 		// get lowest stack offset
 		//
 		int stackOff = std::numeric_limits<int>::max();
-		for (StoreInst* s : ce.possibleArgStores)
+		for (Value* s : ce.possibleArgs)
 		{
-			if (_config->isStackVariable(s->getPointerOperand()))
+			if (_config->isStackVariable(s))
 			{
-				auto so = _config->getStackVariableOffset(s->getPointerOperand());
+				auto so = _config->getStackVariableOffset(s);
 				if (so < stackOff)
 				{
 					stackOff = so;
@@ -1783,16 +1856,16 @@ void DataFlowEntry::setArgumentTypes()
 		CallEntry* ce = &calls.front();
 		for (auto& c : calls)
 		{
-			if (!c.possibleArgStores.empty())
+			if (!c.possibleArgs.empty())
 			{
 				ce = &c;
 				break;
 			}
 		}
 
-		for (auto st: ce->possibleArgStores)
+		for (auto st: ce->possibleArgs)
 		{
-			auto op = st->getPointerOperand();
+			auto op = st;
 
 			if (_abi->isRegister(op) && !_abi->isGeneralPurposeRegister(op))
 			{

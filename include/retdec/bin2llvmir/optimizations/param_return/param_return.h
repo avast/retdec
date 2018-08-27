@@ -21,6 +21,7 @@
 #include "retdec/bin2llvmir/providers/debugformat.h"
 #include "retdec/bin2llvmir/providers/fileimage.h"
 #include "retdec/bin2llvmir/providers/lti.h"
+#include "retdec/utils/container.h"
 
 namespace retdec {
 namespace bin2llvmir {
@@ -37,9 +38,14 @@ class CallEntry
 		void filterLeaveOnlyNeededStackOffsets(Config* _config, Abi *_abi);
 
 		void extractFormatString(ReachingDefinitionsAnalysis& _RDA);
+		bool instructionStoresString(
+				llvm::StoreInst *si,
+				std::string& str,
+				ReachingDefinitionsAnalysis &_RDA) const;
 
 	public:
 		llvm::CallInst* call = nullptr;
+		std::vector<llvm::Value*> possibleArgs;
 		std::vector<llvm::StoreInst*> possibleArgStores;
 		std::vector<llvm::LoadInst*> possibleRetLoads;
 		std::string formatStr;
@@ -88,6 +94,11 @@ class DataFlowEntry
 		void addRetStores();
 		void addCallArgs(llvm::CallInst* call, CallEntry& ce);
 		void addCallReturns(llvm::CallInst* call, CallEntry& ce);
+
+		std::set<llvm::Value*> collectArgsFromInstruction(
+				llvm::Instruction* startInst,
+				std::map<llvm::BasicBlock*, std::set<llvm::Value*>> &seenBlocks,
+				std::vector<llvm::StoreInst*> *possibleArgStores = nullptr);
 
 		void callsFilterCommonRegisters();
 		void callsFilterSameNumberOfStacks();
@@ -157,7 +168,6 @@ class ParamReturn : public llvm::ModulePass
 		void dumpInfo();
 
 		void collectAllCalls();
-		std::string extractFormatString(llvm::CallInst* call);
 
 		void filterCalls();
 		void filterSort(CallEntry& ce);
