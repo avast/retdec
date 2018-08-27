@@ -43,6 +43,7 @@ class Abi
 		bool isRegister(const llvm::Value* val, uint32_t r) const;
 		std::vector<uint32_t> parameterRegisters() const;
 		std::vector<uint32_t> parameterFPRegisters() const;
+		std::vector<uint32_t> doubleParameterRegisters() const;
 		bool isFlagRegister(const llvm::Value* val);
 		bool isStackPointerRegister(const llvm::Value* val);
 		bool isZeroRegister(const llvm::Value* val);
@@ -136,6 +137,7 @@ class Abi
 		std::vector<uint32_t> _paramRegs {};
 		/// Floating Point registers that can be used as parameter according to abi.
 		std::vector<uint32_t> _paramFPRegs {};
+		std::vector<uint32_t> _doubleParamRegs {};
 
 		/// Specifies if abi returns value on stack.
 		bool returnsOnStack = false;

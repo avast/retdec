@@ -230,6 +230,11 @@ std::vector<uint32_t> Abi::parameterRegisters() const
 	return _paramRegs;
 }
 
+std::vector<uint32_t> Abi::doubleParameterRegisters() const
+{
+	return _doubleParamRegs;
+}
+
 std::vector<uint32_t> Abi::parameterFPRegisters() const
 {
 	return _paramFPRegs;

@@ -61,6 +61,11 @@ AbiMips::AbiMips(llvm::Module* m, Config* c) :
 		MIPS_REG_F18
 	};
 
+	_doubleParamRegs = {
+		MIPS_REG_FD12,
+		MIPS_REG_FD14,
+		MIPS_REG_FD16,
+	};
 }
 
 AbiMips::~AbiMips()
