@@ -1210,13 +1210,8 @@ void DataFlowEntry::applyToIrOrdinary()
 void DataFlowEntry::applyToIrVariadic()
 {
 	auto paramRegs = _abi->parameterRegisters();
-
-	static std::vector<uint32_t> mipsFpRegs = {
-		MIPS_REG_FD12,
-		MIPS_REG_FD14,
-		MIPS_REG_FD16,
-		MIPS_REG_FD18,
-		MIPS_REG_FD20};
+	auto paramFPRegs = _abi->parameterFPRegisters();
+	auto doubleParamRegs = _abi->doubleParameterRegisters();
 
 	llvm::Value* retVal = nullptr;
 	std::map<ReturnInst*, Value*> rets2vals;
@@ -1284,7 +1279,43 @@ void DataFlowEntry::applyToIrVariadic()
 			int sz = static_cast<int>(_abi->getTypeByteSize(t));
 			sz = sz > 4 ? 8 : 4;
 
-			if (_abi->isX86())
+			if (t->isFloatTy() && _abi->usesFPRegistersForParameters() && faIdx < paramFPRegs.size())
+			{
+
+				auto* r = _abi->getRegister(paramFPRegs[faIdx]);
+				if (r)
+				{
+					args.push_back(r);
+				}
+				++faIdx;
+			}
+			else if (t->isDoubleTy() && _abi->usesFPRegistersForParameters() && faIdx < doubleParamRegs.size())
+			{
+				auto* r = _abi->getRegister(doubleParamRegs[faIdx]);
+				if (r)
+				{
+					args.push_back(r);
+				}
+				++faIdx;
+				++faIdx;
+			}
+			else if (aIdx < paramRegs.size())
+			{
+				auto* r = _abi->getRegister(paramRegs[aIdx]);
+				if (r)
+				{
+					args.push_back(r);
+				}
+
+				// TODO: register pairs -> if size is more than arch size
+				if (sz > ws)
+				{
+					++aIdx;
+				}
+
+				++aIdx;
+			}
+			else
 			{
 				auto* st = _config->getLlvmStackVariable(fnc, off);
 				if (st)
@@ -1294,130 +1325,6 @@ void DataFlowEntry::applyToIrVariadic()
 
 				off += sz;
 			}
-			else if (_abi->isPowerPC())
-			{
-				if (aIdx < paramRegs.size())
-				{
-					auto* r = _abi->getRegister(paramRegs[aIdx]);
-					if (r)
-					{
-						args.push_back(r);
-					}
-				}
-				else
-				{
-					auto* st = _config->getLlvmStackVariable(fnc, off);
-					if (st)
-					{
-						args.push_back(st);
-					}
-
-					off += sz;
-				}
-			}
-			else if (_abi->isArm())
-			{
-				if (aIdx < paramRegs.size())
-				{
-					auto* r = _abi->getRegister(paramRegs[aIdx]);
-					if (r)
-					{
-						args.push_back(r);
-					}
-
-					if (sz > 4)
-					{
-						++aIdx;
-					}
-				}
-				else
-				{
-					auto* st = _config->getLlvmStackVariable(fnc, off);
-					if (st)
-					{
-						args.push_back(st);
-					}
-
-					off += sz;
-				}
-			}
-			else if (_config->getConfig().architecture.isPic32())
-			{
-				if (aIdx < paramRegs.size())
-				{
-					auto* r = _abi->getRegister(paramRegs[aIdx]);
-					if (r)
-					{
-						args.push_back(r);
-					}
-				}
-				else
-				{
-					auto* st = _config->getLlvmStackVariable(fnc, off);
-					if (st)
-					{
-						args.push_back(st);
-					}
-
-					off += sz;
-				}
-			}
-			else if (_abi->isMips())
-			{
-				bool useStack = false;
-				if (t->isFloatingPointTy())
-				{
-					--aIdx;
-
-					if (faIdx < mipsFpRegs.size())
-					{
-						auto* r = _abi->getRegister(mipsFpRegs[faIdx]);
-						if (r)
-						{
-							args.push_back(r);
-						}
-
-						if (sz > 4)
-						{
-							++faIdx;
-						}
-					}
-					else
-					{
-						useStack = true;
-					}
-
-					++faIdx;
-				}
-				else
-				{
-					if (aIdx < paramRegs.size())
-					{
-						auto* r = _abi->getRegister(paramRegs[aIdx]);
-						if (r)
-						{
-							args.push_back(r);
-						}
-					}
-					else
-					{
-						useStack = true;
-					}
-				}
-
-				if (useStack)
-				{
-					auto* st = _config->getLlvmStackVariable(fnc, off);
-					if (st)
-					{
-						args.push_back(st);
-					}
-
-					off += sz;
-				}
-			}
-
-			++aIdx;
 		}
 
 		//
