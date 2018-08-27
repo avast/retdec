@@ -1002,10 +1002,12 @@ void DataFlowEntry::filter()
 
 	for (CallEntry& e : calls)
 	{
-		sortValues(e.possibleArgs);
-		e.filterLeaveOnlyContinuousStackOffsets(_config, _abi);
-		e.filterLeaveOnlyContinuousSequence(_abi);
-		e.filterLeaveOnlyNeededStackOffsets(_config, _abi);
+		ParamFilter filter(e.possibleArgs, *_abi, *_config);
+
+		filter.leaveOnlyContinuousStackOffsets();
+		filter.leaveOnlyContinuousSequence();
+
+		e.possibleArgs = filter.getParamValues();
 
 		if (isVarArg)
 		{
