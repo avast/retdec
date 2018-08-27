@@ -210,6 +210,11 @@ bool Abi::valueCanBeParameter(const llvm::Value *val) const
 	return isParamReg || isFpParamReg;
 }
 
+std::vector<uint32_t> Abi::parameterRegisters() const
+{
+	return _paramRegs;
+}
+
 //
 //==============================================================================
 // AbiProvider
