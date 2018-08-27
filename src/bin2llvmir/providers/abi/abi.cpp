@@ -127,6 +127,16 @@ llvm::GlobalVariable* Abi::getSyscallArgumentRegister(unsigned n)
 	return n < _syscallRegs.size() ? getRegister(_syscallRegs[n]) : nullptr;
 }
 
+llvm::GlobalVariable* Abi::getReturnRegister() const
+{
+	return getRegister(_regReturn);
+}
+
+llvm::GlobalVariable* Abi::getFPReturnRegister() const
+{
+	return getRegister(_regFPReturn);
+}
+
 bool Abi::isNopInstruction(AsmInstruction ai)
 {
 	return isNopInstruction(ai.getCapstoneInsn());

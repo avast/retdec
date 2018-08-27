@@ -59,6 +59,8 @@ class Abi
 		llvm::GlobalVariable* getSyscallReturnRegister();
 		llvm::GlobalVariable* getSyscallArgumentRegister(unsigned n);
 
+		llvm::GlobalVariable* getReturnRegister() const;
+		llvm::GlobalVariable* getFPReturnRegister() const;
 
 	// Values.
 	public:
