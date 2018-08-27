@@ -197,6 +197,19 @@ bool Abi::isPowerPC() const
 	return _config->getConfig().architecture.isPpc();
 }
 
+bool Abi::valueCanBeParameter(const llvm::Value *val) const
+{
+	if (_config->isStackVariable(val))
+	{
+		return true;
+	}
+
+	bool isParamReg = find(_paramRegs.begin(), _paramRegs.end(), getRegisterId(val)) != _paramRegs.end();
+	bool isFpParamReg = find(_paramFPRegs.begin(), _paramFPRegs.end(), getRegisterId(val)) != _paramFPRegs.end();
+
+	return isParamReg || isFpParamReg;
+}
+
 //
 //==============================================================================
 // AbiProvider

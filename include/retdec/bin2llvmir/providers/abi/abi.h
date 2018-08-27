@@ -58,6 +58,11 @@ class Abi
 		llvm::GlobalVariable* getSyscallReturnRegister();
 		llvm::GlobalVariable* getSyscallArgumentRegister(unsigned n);
 
+
+	// Values.
+	public:
+		bool valueCanBeParameter(const llvm::Value* val) const;
+
 	// Instructions.
 	//
 	public:
@@ -116,6 +121,10 @@ class Abi
 		uint32_t _regSyscallId = REG_INVALID;
 		/// Register that is always equal to zero - not every arch have this.
 		uint32_t _regZeroReg = REG_INVALID;
+		/// Registers that can be used as parameter according to abi.
+		std::vector<uint32_t> _paramRegs {};
+		/// Floating Point registers that can be used as parameter according to abi.
+		std::vector<uint32_t> _paramFPRegs {};
 };
 
 class AbiProvider

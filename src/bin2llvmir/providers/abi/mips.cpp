@@ -27,6 +27,35 @@ AbiMips::AbiMips(llvm::Module* m, Config* c) :
 			MIPS_REG_A1,
 			MIPS_REG_A2,
 			MIPS_REG_A3};
+
+	if (_config->getConfig().tools.isPspGcc())
+	{
+		_paramRegs = {
+			MIPS_REG_A0,
+			MIPS_REG_A1,
+			MIPS_REG_A2,
+			MIPS_REG_A3,
+			MIPS_REG_T0,
+			MIPS_REG_T1,
+			MIPS_REG_T2,
+			MIPS_REG_T3};
+	}
+	else
+	{
+		_paramRegs = {
+			MIPS_REG_A0,
+			MIPS_REG_A1,
+			MIPS_REG_A2,
+			MIPS_REG_A3};
+	}
+
+	_paramFPRegs = {
+		MIPS_REG_F12,
+		MIPS_REG_F14,
+		MIPS_REG_F16,
+		MIPS_REG_F18
+	};
+
 }
 
 AbiMips::~AbiMips()

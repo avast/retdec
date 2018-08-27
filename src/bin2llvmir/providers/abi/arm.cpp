@@ -28,6 +28,12 @@ AbiArm::AbiArm(llvm::Module* m, Config* c) :
 			ARM_REG_R3,
 			ARM_REG_R4,
 			ARM_REG_R5};
+
+	_paramRegs = {
+		ARM_REG_R0,
+		ARM_REG_R1,
+		ARM_REG_R2,
+		ARM_REG_R3};
 }
 
 AbiArm::~AbiArm()
