@@ -293,57 +293,22 @@ void DataFlowEntry::filterNegativeStacks()
  *
  * Registers are sorted according to position got from abi.
  */
-void CallEntry::filterSort(Config* _config, Abi* _abi)
+void DataFlowEntry::sortValues(std::vector<Value*> &args) const
 {
-	auto& stores = possibleArgs;
+	auto regs = _abi->parameterRegisters();
+	auto fpRegs = _abi->parameterFPRegisters();
+	regs.insert(regs.end(), fpRegs.begin(), fpRegs.end());
 
-	std::stable_sort(
-			stores.begin(),
-			stores.end(),
-			[_config, _abi](Value* a, Value* b) -> bool
-	{
-		auto aOff = _config->getStackVariableOffset(a);
-		auto bOff = _config->getStackVariableOffset(b);
-
-		if (aOff.isUndefined() && bOff.isUndefined())
-		{
-			auto regs = _abi->parameterRegisters();
-			auto aId = _abi->getRegisterId(a);
-			auto bId = _abi->getRegisterId(b);
-
-			auto it1 = std::find(regs.begin(), regs.end(), aId);
-			auto it2 = std::find(regs.begin(), regs.end(), bId);
-
-			return std::distance(it1, it2) > 0;
-		}
-		else if (aOff.isUndefined() && bOff.isDefined())
-		{
-			return true;
-		}
-		else if (aOff.isDefined() && bOff.isUndefined())
-		{
-			return false;
-		}
-		else
-		{
-			return aOff < bOff;
-		}
-	});
-}
-
-void DataFlowEntry::filterSortArgLoads()
-{
 	std::stable_sort(
 			args.begin(),
 			args.end(),
-			[this](Value* a, Value* b) -> bool
+			[this, regs, args](Value* a, Value* b) -> bool
 	{
 		auto aOff = _config->getStackVariableOffset(a);
 		auto bOff = _config->getStackVariableOffset(b);
 
 		if (aOff.isUndefined() && bOff.isUndefined())
 		{
-			auto regs = _abi->parameterRegisters();
 			auto aId = _abi->getRegisterId(a);
 			auto bId = _abi->getRegisterId(b);
 
@@ -1008,11 +973,11 @@ void DataFlowEntry::filter()
 	}
 
 	filterNegativeStacks();
-	filterSortArgLoads();
+	sortValues(args);
 
 	for (CallEntry& e : calls)
 	{
-		e.filterSort(_config, _abi);
+		sortValues(e.possibleArgs);
 		e.filterLeaveOnlyContinuousStackOffsets(_config, _abi);
 		e.filterLeaveOnlyContinuousSequence(_abi);
 		e.filterLeaveOnlyNeededStackOffsets(_config, _abi);

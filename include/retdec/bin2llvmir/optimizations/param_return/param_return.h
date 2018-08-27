@@ -32,7 +32,6 @@ class CallEntry
 		CallEntry(llvm::CallInst* c);
 
 	public:
-		void filterSort(Config* _config, Abi* _abi);
 		void filterLeaveOnlyContinuousStackOffsets(Config* _config, Abi *_abi);
 		void filterLeaveOnlyContinuousSequence(Abi* _abi);
 		void filterLeaveOnlyNeededStackOffsets(Config* _config, Abi *_abi);
@@ -110,6 +109,7 @@ class DataFlowEntry
 
 		void filterSortArgLoads();
 		void filterNegativeStacks();
+		void sortValues(std::vector<llvm::Value*> &args) const;
 
 		void replaceCalls();
 		std::map<llvm::CallInst*, std::vector<llvm::Value*>>
