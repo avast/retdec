@@ -524,10 +524,12 @@ void DetectedFunction::setReferences(const std::string &refsString)
 	std::size_t offset;
 	std::stringstream refsStream(refsString);
 
-	for (;;) {
+	for (;;)
+	{
 		refsStream >> std::hex >> offset;
 		refsStream >> name;
-		if (!refsStream) {
+		if (!refsStream)
+		{
 			break;
 		}
 
@@ -577,6 +579,26 @@ Finder::~Finder()
 }
 
 /**
+ * Return detected code coverage.
+ *
+ * @return covered code
+ */
+CoveredCode Finder::getCoveredCode()
+{
+	return coveredCode;
+}
+
+const DetectedFunctionsMultimap& Finder::getAllDetections() const
+{
+	return _allDetections;
+}
+
+const DetectedFunctionsPtrMap& Finder::getConfirmedDetections() const
+{
+	return _confirmedDetections;
+}
+
+/**
  * Search for static code in input file.
  *
  * @param image input file image
@@ -588,7 +610,8 @@ void Finder::search(
 {
 	// Get FileFormat instance.
 	const auto* fileFormat = image.getFileFormat();
-	if (!fileFormat) {
+	if (!fileFormat)
+	{
 		return;
 	}
 
@@ -597,43 +620,53 @@ void Finder::search(
 	detector.addRuleFile(yaraFile);
 	auto inputBytes = fileFormat->getLoadedBytes();
 	detector.analyze(inputBytes);
-	if (!detector.isInValidState()) {
+	if (!detector.isInValidState())
+	{
 		return;
 	}
 
 	// Iterate over detected rules.
-	for (const YaraRule &detectedRule : detector.getDetectedRules()) {
+	for (const YaraRule &detectedRule : detector.getDetectedRules())
+	{
 		DetectedFunction detectedFunction;
 		detectedFunction.signaturePath = yaraFile;
 
-		for (const YaraMeta &ruleMeta : detectedRule.getMetas()) {
-			if (ruleMeta.getId() == "name") {
+		for (const YaraMeta &ruleMeta : detectedRule.getMetas())
+		{
+			if (ruleMeta.getId() == "name")
+			{
 				detectedFunction.names.push_back(ruleMeta.getStringValue());
 			}
-			if (ruleMeta.getId() == "size") {
+			if (ruleMeta.getId() == "size")
+			{
 				detectedFunction.size = ruleMeta.getIntValue();
 			}
-			if (ruleMeta.getId() == "refs") {
+			if (ruleMeta.getId() == "refs")
+			{
 				const auto &refs = ruleMeta.getStringValue();
 				detectedFunction.setReferences(refs);
 			}
-			if (ruleMeta.getId() == "altNames") {
+			if (ruleMeta.getId() == "altNames")
+			{
 				std::string name;
 				const auto &altNames = ruleMeta.getStringValue();
 				std::istringstream ss(altNames, std::istringstream::in);
-				while(ss >> name) {
+				while(ss >> name)
+				{
 					detectedFunction.names.push_back(name);
 				}
 			}
 		}
 
 		// Iterate over all matches.
-		for (const YaraMatch &ruleMatch : detectedRule.getMatches()) {
+		for (const YaraMatch &ruleMatch : detectedRule.getMatches())
+		{
 			// This is different for every match.
 			detectedFunction.offset = ruleMatch.getOffset();
 			unsigned long long address = 0;
 			if (!fileFormat->getAddressFromOffset(
-						address, detectedFunction.offset)) {
+						address, detectedFunction.offset))
+			{
 				// Cannot get address. Maybe report error?
 				continue;
 			}
@@ -667,26 +700,6 @@ void Finder::search(
 	search(image, sigPaths);
 }
 
-/**
- * Return detected code coverage.
- *
- * @return covered code
- */
-CoveredCode Finder::getCoveredCode()
-{
-	return coveredCode;
-}
-
-const DetectedFunctionsMultimap& Finder::getAllDetections() const
-{
-	return _allDetections;
-}
-
-const DetectedFunctionsPtrMap& Finder::getConfirmedDetections() const
-{
-	return _confirmedDetections;
-}
-
 //
 //==============================================================================
 // TODO
@@ -697,16 +710,13 @@ void Finder::searchAndConfirm(
 		const retdec::loader::Image& image,
 		const retdec::config::Config& config,
 		csh ce,
-		cs_mode md,
-		bool debug)
+		cs_mode md)
 {
 	_config = &config;
 	_image = &image;
 	_ce = ce;
 	_ceMode = md;
 	_ceInsn = cs_malloc(_ce);
-
-	debug_enabled |= debug;
 
 	LOG << "\n StaticCodeAnalysis():" << std::endl;
 

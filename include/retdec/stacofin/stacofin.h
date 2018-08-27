@@ -127,6 +127,11 @@ class Finder
 		void search(
 				const retdec::loader::Image& image,
 				const retdec::config::Config& config);
+		void searchAndConfirm(
+				const retdec::loader::Image& image,
+				const retdec::config::Config& config,
+				csh ce,
+				cs_mode md);
 		/// @}
 
 		/// @name Getters.
@@ -157,14 +162,6 @@ class Finder
 
 //==============================================================================
 
-	public:
-		void searchAndConfirm(
-				const retdec::loader::Image& image,
-				const retdec::config::Config& config,
-				csh ce,
-				cs_mode md,
-				bool debug = false);
-
 	private:
 		using ByteData = typename std::pair<const std::uint8_t*, std::size_t>;
 
@@ -189,7 +186,7 @@ class Finder
 		const retdec::config::Config* _config = nullptr;
 		const retdec::loader::Image* _image = nullptr;
 
-		csh _ce;
+		csh _ce = 0;
 		cs_mode _ceMode = CS_MODE_LITTLE_ENDIAN;
 		cs_insn* _ceInsn = nullptr;
 
