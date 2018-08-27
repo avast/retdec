@@ -28,6 +28,8 @@ AbiPowerpc::AbiPowerpc(llvm::Module* m, Config* c) :
 		PPC_REG_R9,
 		PPC_REG_R10};
 
+	_regReturn = PPC_REG_R3;
+	_regFPReturn = PPC_REG_R3;
 }
 
 AbiPowerpc::~AbiPowerpc()

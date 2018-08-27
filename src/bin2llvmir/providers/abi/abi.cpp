@@ -215,6 +215,21 @@ std::vector<uint32_t> Abi::parameterRegisters() const
 	return _paramRegs;
 }
 
+bool Abi::canHoldReturnValue(const llvm::Value* val) const
+{
+	if (returnsOnStack)
+	{
+		return _config->isStackVariable(val);
+	}
+
+	if (!_config->isRegister(val))
+	{
+		return false;
+	}
+
+	return getRegisterId(val) == _regReturn || getRegisterId(val) == _regFPReturn;
+}
+
 //
 //==============================================================================
 // AbiProvider

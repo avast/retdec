@@ -29,6 +29,9 @@ AbiArm::AbiArm(llvm::Module* m, Config* c) :
 			ARM_REG_R4,
 			ARM_REG_R5};
 
+	_regReturn = ARM_REG_R0;
+	_regFPReturn = ARM_REG_R0;
+
 	_paramRegs = {
 		ARM_REG_R0,
 		ARM_REG_R1,

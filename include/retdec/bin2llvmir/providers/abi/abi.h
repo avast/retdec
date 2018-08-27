@@ -63,6 +63,7 @@ class Abi
 	// Values.
 	public:
 		bool valueCanBeParameter(const llvm::Value* val) const;
+		virtual bool canHoldReturnValue(const llvm::Value* val) const;
 
 	// Instructions.
 	//
@@ -122,10 +123,18 @@ class Abi
 		uint32_t _regSyscallId = REG_INVALID;
 		/// Register that is always equal to zero - not every arch have this.
 		uint32_t _regZeroReg = REG_INVALID;
+		/// Register used for returning values from functions.
+		uint32_t _regReturn = REG_INVALID;
+		/// Register used for returning floating point values from functions.
+		uint32_t _regFPReturn = REG_INVALID;
 		/// Registers that can be used as parameter according to abi.
 		std::vector<uint32_t> _paramRegs {};
 		/// Floating Point registers that can be used as parameter according to abi.
 		std::vector<uint32_t> _paramFPRegs {};
+
+		/// Specifies if abi returns value on stack.
+		bool returnsOnStack = false;
+
 };
 
 class AbiProvider
