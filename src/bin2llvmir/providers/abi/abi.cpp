@@ -36,12 +36,12 @@ Abi::~Abi()
 
 }
 
-bool Abi::isRegister(const llvm::Value* val)
+bool Abi::isRegister(const llvm::Value* val) const
 {
 	return _regs2id.count(val);
 }
 
-bool Abi::isRegister(const llvm::Value* val, uint32_t r)
+bool Abi::isRegister(const llvm::Value* val, uint32_t r) const
 {
 	return getRegister(r) == val;
 }
@@ -70,7 +70,7 @@ bool Abi::isZeroRegister(const llvm::Value* val)
  *            This solves the problem with overlapping IDs when used like this:
  *            Abi::getRegister(MIPS_REG_GP, Abi::isMips())
  */
-llvm::GlobalVariable* Abi::getRegister(uint32_t r, bool use)
+llvm::GlobalVariable* Abi::getRegister(uint32_t r, bool use) const
 {
 	if (!use)
 	{
@@ -80,7 +80,7 @@ llvm::GlobalVariable* Abi::getRegister(uint32_t r, bool use)
 	return _id2regs[r];
 }
 
-uint32_t Abi::getRegisterId(const llvm::Value* r)
+uint32_t Abi::getRegisterId(const llvm::Value* r) const
 {
 	auto it = _regs2id.find(r);
 	return it != _regs2id.end() ? it->second : Abi::REG_INVALID;

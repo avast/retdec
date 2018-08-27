@@ -39,15 +39,15 @@ class Abi
 	// Registers.
 	//
 	public:
-		bool isRegister(const llvm::Value* val);
-		bool isRegister(const llvm::Value* val, uint32_t r);
+		bool isRegister(const llvm::Value* val) const;
+		bool isRegister(const llvm::Value* val, uint32_t r) const;
 		bool isFlagRegister(const llvm::Value* val);
 		bool isStackPointerRegister(const llvm::Value* val);
 		bool isZeroRegister(const llvm::Value* val);
 		virtual bool isGeneralPurposeRegister(const llvm::Value* val) = 0;
 
-		llvm::GlobalVariable* getRegister(uint32_t r, bool use = true);
-		uint32_t getRegisterId(const llvm::Value* r);
+		llvm::GlobalVariable* getRegister(uint32_t r, bool use = true) const;
+		uint32_t getRegisterId(const llvm::Value* r) const;
 		const std::vector<llvm::GlobalVariable*>& getRegisters() const;
 		llvm::GlobalVariable* getStackPointerRegister();
 		llvm::GlobalVariable* getZeroRegister();
