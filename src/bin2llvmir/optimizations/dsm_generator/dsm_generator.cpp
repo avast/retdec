@@ -57,28 +57,16 @@ bool DsmGenerator::runOnModule(Module& m)
 
 	// New output name.
 	//
-//	auto out = _config->getConfig().parameters.getOutputFile();
-//	if (out.empty())
-//	{
-//		return false;
-//	}
-//	std::string dsmOut = out + ".dsm";
-//	if (out.find_last_of('.') != std::string::npos)
-//	{
-//		dsmOut = out.substr(0, out.find_last_of('.')) + ".dsm";
-//	}
-
-	// Old output name -- frontend.dsm
-	//
-	auto out = _config->getConfig().parameters.getFrontendOutputFile();
+	auto out = _config->getConfig().parameters.getOutputFile();
 	if (out.empty())
 	{
 		return false;
 	}
 	std::string dsmOut = out + ".dsm";
-	if (out.find_last_of('.') != std::string::npos)
+	auto lastDot = out.find_last_of('.');
+	if (lastDot != std::string::npos)
 	{
-		dsmOut = out.substr(0, out.find_last_of('.')) + ".dsm";
+		dsmOut = out.substr(0, lastDot) + ".dsm";
 	}
 
 	std::ofstream outFile(dsmOut, std::ofstream::out);

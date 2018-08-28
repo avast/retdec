@@ -331,11 +331,10 @@ class Decompiler:
         self.format = ''
         self.pdb_file = ''
 
+        self.out_bc = ''
+        self.out_ll = ''
+
         self.out_unpacked = ''
-        self.out_frontend_ll = ''
-        self.out_frontend_bc = ''
-        self.out_backend_bc = ''
-        self.out_backend_ll = ''
         self.out_restored = ''
         self.out_archive = ''
 
@@ -510,28 +509,10 @@ class Decompiler:
             if self.args.ar_index:
                 utils.print_warning('Option --ar-index is not used in mode ' + self.mode)
 
-        if not self.args.output:
-            # No output file was given, so use the default one.
-            input_name = self.input_file
-            if input_name.endswith('.ll'):
-                self.output_file = input_name[:-2] + self.args.hll
-            elif input_name.endswith('.exe'):
-                self.output_file = input_name[:-3] + self.args.hll
-            elif input_name.endswith('.elf'):
-                self.output_file = input_name[:-3] + self.args.hll
-            elif input_name.endswith('.ihex'):
-                self.output_file = input_name[:-4] + self.args.hll
-            elif input_name.endswith('.macho'):
-                self.output_file = input_name[:-5] + self.args.hll
-            else:
-                self.output_file = self.input_file + '.' + self.args.hll
-        else:
+        if self.args.output:
             self.output_file = self.args.output
-
-        # If the output file name matches the input file name, we have to change the
-        # output file name. Otherwise, the input file gets overwritten.
-        if self.input_file == self.output_file:
-            self.output_file = self.input_file + '.out.' + self.args.hll
+        else:
+            self.output_file = self.input_file + '.' + self.args.hll
 
         # Convert to absolute paths.
         self.input_file = os.path.abspath(self.input_file)
@@ -574,14 +555,12 @@ class Decompiler:
 
         if self.args.cleanup:
             utils.remove_file_forced(self.out_unpacked)
-            utils.remove_file_forced(self.out_frontend_ll)
-            utils.remove_file_forced(self.out_frontend_bc)
 
             if self.config_file != self.args.config_db:
                 utils.remove_file_forced(self.config_file)
 
-            utils.remove_file_forced(self.out_backend_bc)
-            utils.remove_file_forced(self.out_backend_ll)
+            utils.remove_file_forced(self.out_bc)
+            utils.remove_file_forced(self.out_ll)
 
             # Archive support
             utils.remove_file_forced(self.out_restored)
@@ -743,16 +722,13 @@ class Decompiler:
         if self.mode in ['bin', 'raw']:
             # Assignment of other used variables.
             name = os.path.splitext(self.output_file)[0]
-            out_frontend = self.output_file + '.frontend'
             self.out_unpacked = name + '-unpacked'
-            self.out_frontend_ll = out_frontend + '.ll'
-            self.out_frontend_bc = out_frontend + '.bc'
-            self.config_file = self.output_file + '.json'
+            self.config_file = name + '.json'
 
             if self.config_file != self.args.config_db:
                 utils.remove_file_forced(self.config_file)
 
-            if self.args.config_db:
+            if self.args.config_db and self.args.config_db != self.config_file:
                 shutil.copyfile(self.args.config_db, self.config_file)
 
             # Preprocess existing file or create a new, empty JSON file.
@@ -1021,7 +997,7 @@ class Decompiler:
 
                     lib_index += 1
 
-            # Store paths of signature files into config for frontend.
+            # Store paths of signature files into config.
             if not self.args.no_default_static_signatures:
                 cmd.run_cmd([config.CONFIGTOOL, self.config_file, '--write', '--signatures', signatures_dir])
 
@@ -1029,23 +1005,21 @@ class Decompiler:
             for i in self.args.static_code_sigfile:
                 cmd.run_cmd([config.CONFIGTOOL, self.config_file, '--write', '--user-signature', i])
 
-            # Store paths of type files into config for frontend.
+            # Store paths of type files into config.
             if os.path.isdir(config.GENERIC_TYPES_DIR):
                 cmd.run_cmd([config.CONFIGTOOL, self.config_file, '--write', '--types', config.GENERIC_TYPES_DIR])
 
-            # Store path of directory with ORD files into config for frontend (note: only directory,
+            # Store path of directory with ORD files into config (note: only directory,
             # not files themselves).
             if os.path.isdir(ords_dir):
                 cmd.run_cmd([config.CONFIGTOOL, self.config_file, '--write', '--ords', ords_dir + os.path.sep])
 
-            # Store paths to file with PDB debugging information into config for frontend.
+            # Store paths to file with PDB debugging information into config.
             if self.pdb_file:
                 cmd.run_cmd([config.CONFIGTOOL, self.config_file, '--write', '--pdb-file', self.pdb_file])
 
-            # Store file names of input and output into config for frontend.
+            # Store file names of input and output into config.
             cmd.run_cmd([config.CONFIGTOOL, self.config_file, '--write', '--input-file', self.input_file])
-            cmd.run_cmd([config.CONFIGTOOL, self.config_file, '--write', '--frontend-output-file',
-                         self.out_frontend_ll])
             cmd.run_cmd([config.CONFIGTOOL, self.config_file, '--write', '--output-file', self.output_file])
 
             # Store decode only selected parts flag.
@@ -1054,7 +1028,7 @@ class Decompiler:
             else:
                 cmd.run_cmd([config.CONFIGTOOL, self.config_file, '--write', '--decode-only-selected', 'false'])
 
-            # Store selected functions or selected ranges into config for frontend.
+            # Store selected functions or selected ranges into config.
             if self.selected_functions:
                 for f in self.selected_functions:
                     cmd.run_cmd([config.CONFIGTOOL, self.config_file, '--write', '--selected-func', f])
@@ -1069,15 +1043,9 @@ class Decompiler:
             # race-condition problems when the same input .ll file is decompiled in
             # parallel processes because they would overwrite each other's .bc file. This
             # is most likely to happen in regression tests in the 'll' mode.
-            out_backend = self.output_file + '.backend'
-
-            # If the input file is the same as out_backend_ll below, then we have to change the name of
-            # out_backend. Otherwise, the input file would get overwritten during the conversion.
-            if self.out_frontend_ll == out_backend + '.ll':
-                out_backend = self.output_file + '.backend.backend'
-
-            self.out_backend_bc = out_backend + '.bc'
-            self.out_backend_ll = out_backend + '.ll'
+            name = os.path.splitext(self.output_file)[0]
+            self.out_bc = name + '.bc'
+            self.out_ll = name + '.ll'
 
             #
             # Decompile the binary into LLVM IR.
@@ -1100,16 +1068,16 @@ class Decompiler:
                 # system RAM to prevent potential black screens on Windows (#270).
                 bin2llvmir_params.append('-max-memory-half-ram')
 
-            print('\n##### Decompiling ' + self.input_file + ' into ' + self.out_backend_bc + '...')
+            print('\n##### Decompiling ' + self.input_file + ' into ' + self.out_bc + '...')
             if self.args.generate_log:
                 self.log_bin2llvmir_memory, self.log_bin2llvmir_time, self.log_bin2llvmir_output, \
                 self.log_bin2llvmir_rc = cmd.run_measured_cmd([config.BIN2LLVMIR] + bin2llvmir_params + ['-o',
-                                                               self.out_backend_bc], timeout=config.LOG_TIMEOUT, print_run_msg=True)
+                                                               self.out_bc], timeout=config.LOG_TIMEOUT, print_run_msg=True)
 
                 bin2llvmir_rc = self.log_bin2llvmir_rc
                 print(self.log_bin2llvmir_output)
             else:
-                _, bin2llvmir_rc, _ = cmd.run_cmd([config.BIN2LLVMIR] + bin2llvmir_params + ['-o', self.out_backend_bc], print_run_msg=True)
+                _, bin2llvmir_rc, _ = cmd.run_cmd([config.BIN2LLVMIR] + bin2llvmir_params + ['-o', self.out_bc], print_run_msg=True)
 
             if bin2llvmir_rc != 0:
                 if self.args.generate_log:
@@ -1124,7 +1092,7 @@ class Decompiler:
 
         # LL mode goes straight to backend.
         if self.mode == 'll':
-            self.out_backend_bc = self.input_file
+            self.out_bc = self.input_file
             self.config_file = self.args.config_db
 
         # Create parameters for the llvmir2hll call.
@@ -1133,7 +1101,7 @@ class Decompiler:
                              '-call-info-obtainer=' + self.args.backend_call_info_obtainer,
                              '-arithm-expr-evaluator=' + self.args.backend_arithm_expr_evaluator, '-validate-module',
                              '-llvmir2bir-converter=' + self.args.backend_llvmir2bir_converter, '-o', self.output_file,
-                             self.out_backend_bc]
+                             self.out_bc]
 
         if not self.args.backend_no_debug:
             llvmir2hll_params.append('-enable-debug')
@@ -1203,7 +1171,7 @@ class Decompiler:
             llvmir2hll_params.append('-max-memory-half-ram')
 
         # Decompile the optimized IR code.
-        print('\n##### Decompiling ' + self.out_backend_bc + ' into ' + self.output_file + '...')
+        print('\n##### Decompiling ' + self.out_bc + ' into ' + self.output_file + '...')
         if self.args.generate_log:
             self.log_llvmir2hll_memory, self.log_llvmir2hll_time, self.log_llvmir2hll_output, \
             self.log_llvmir2hll_rc = cmd.run_measured_cmd([config.LLVMIR2HLL] + llvmir2hll_params, timeout=config.LOG_TIMEOUT, print_run_msg=True)
@@ -1218,7 +1186,7 @@ class Decompiler:
                 self._generate_log()
 
             self._cleanup()
-            utils.print_error('Decompilation of file %s failed' % self.out_backend_bc)
+            utils.print_error('Decompilation of file %s failed' % self.out_bc)
             return 1
 
         if self._check_whether_decompilation_should_be_forcefully_stopped('llvmir2hll'):

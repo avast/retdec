@@ -36,14 +36,12 @@ class Parameters
 		void setIsKeepAllFunctions(bool b);
 		void setIsSelectedDecodeOnly(bool b);
 		void setOutputFile(const std::string& n);
-		void setFrontendOutputFile(const std::string& n);
 		void setOrdinalNumbersDirectory(const std::string& n);
 		/// @}
 
 		/// @name Parameters get methods.
 		/// @{
 		std::string getOutputFile() const;
-		std::string getFrontendOutputFile() const;
 		std::string getOrdinalNumbersDirectory() const;
 		/// @}
 
@@ -85,7 +83,6 @@ class Parameters
 		bool _selectedDecodeOnly = false;
 
 		std::string _outputFile;
-		std::string _frontendOutputFile;
 		std::string _ordinalNumbersDirectory;
 };
 

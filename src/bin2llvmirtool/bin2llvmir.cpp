@@ -390,9 +390,10 @@ std::unique_ptr<tool_output_file> createAssemblyOutputFile()
 	}
 
 	std::string asmOut = out + ".ll";
-	if (out.find_last_of('.') != std::string::npos)
+	auto lastDot = out.find_last_of('.');
+	if (lastDot != std::string::npos)
 	{
-		asmOut = out.substr(0, out.find_last_of('.')) + ".ll";
+		asmOut = out.substr(0, lastDot) + ".ll";
 	}
 
 	std::error_code EC;
