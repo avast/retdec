@@ -2,6 +2,8 @@
 
 # dev
 
+* Enhancement: Redesign output files naming scheme ([#132](https://github.com/avast-tl/retdec/issues/132)). 
+
 # v3.2 (2018-08-16)
 
 * New Feature: Converted shell scripts to Python scripts so that Windows users no longer have to install MSYS2 in order to run RetDec ([#338](https://github.com/avast-tl/retdec/pull/338), [#147](https://github.com/avast-tl/retdec/issues/147)).
