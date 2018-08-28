@@ -13,22 +13,22 @@ namespace {
 // Icon priority list
 constexpr std::pair<unsigned short, uint16_t> iconPriorities[] =
 {
-    {32, 32},
-    {24, 32},
-    {48, 32},
-    {32, 8},
-    {16, 32},
-    {64, 32},
-    {24, 8},
-    {48, 8},
-    {16, 8},
-    {64, 8},
-    {96, 32},
-    {96, 8},
-    {128, 32},
-    {128, 8},
-    {256, 32},
-    {256, 8}
+	{32, 32},
+	{24, 32},
+	{48, 32},
+	{32, 8},
+	{16, 32},
+	{64, 32},
+	{24, 8},
+	{48, 8},
+	{16, 8},
+	{64, 8},
+	{96, 32},
+	{96, 8},
+	{128, 32},
+	{128, 8},
+	{256, 32},
+	{256, 8}
 };
 
 /**
@@ -39,31 +39,31 @@ constexpr std::pair<unsigned short, uint16_t> iconPriorities[] =
  */
 bool iconCompare(const retdec::fileformat::ResourceIcon *i1, const retdec::fileformat::ResourceIcon *i2)
 {
-    auto i1Width = i1->getWidth();
-    auto i1BitCount = i1->getBitCount();
-    auto i2Width = i2->getWidth();
-    auto i2Height = i2->getHeight();
-    auto i2BitCount = i2->getBitCount();
+	auto i1Width = i1->getWidth();
+	auto i1BitCount = i1->getBitCount();
+	auto i2Width = i2->getWidth();
+	auto i2Height = i2->getHeight();
+	auto i2BitCount = i2->getBitCount();
 
-    if(i2Width != i2Height)
-    {
-        return false;
-    }
+	if(i2Width != i2Height)
+	{
+		return false;
+	}
 
-    for(const auto &p : iconPriorities)
-    {
-        if(p.first == i1Width && p.second == i1BitCount)
-        {
-            return false;
-        }
+	for(const auto &p : iconPriorities)
+	{
+		if(p.first == i1Width && p.second == i1BitCount)
+		{
+			return false;
+		}
 
-        if(p.first == i2Width && p.second == i2BitCount)
-        {
-            return true;
-        }
-    }
+		if(p.first == i2Width && p.second == i2BitCount)
+		{
+			return true;
+		}
+	}
 
-    return false;
+	return false;
 }
 
 } // anonymous namespace
@@ -94,7 +94,7 @@ ResourceIconGroup::~ResourceIconGroup()
  */
 std::size_t ResourceIconGroup::getEntryOffset(std::size_t eIndex) const
 {
-    return 6 + eIndex * 14;
+	return 6 + eIndex * 14;
 }
 
 /**
@@ -103,7 +103,7 @@ std::size_t ResourceIconGroup::getEntryOffset(std::size_t eIndex) const
  */
 std::size_t ResourceIconGroup::getNumberOfIcons() const
 {
-    return icons.size();
+	return icons.size();
 }
 
 /**
@@ -113,12 +113,12 @@ std::size_t ResourceIconGroup::getNumberOfIcons() const
  */
 const ResourceIcon *ResourceIconGroup::getIcon(std::size_t iIndex) const
 {
-    if(iIndex >= icons.size())
-    {
-        return nullptr;
-    }
+	if(iIndex >= icons.size())
+	{
+		return nullptr;
+	}
 
-    return icons[iIndex];
+	return icons[iIndex];
 }
 
 /**
@@ -127,14 +127,14 @@ const ResourceIcon *ResourceIconGroup::getIcon(std::size_t iIndex) const
  */
 const ResourceIcon *ResourceIconGroup::getPriorIcon() const
 {
-    auto result = std::max_element(icons.begin(), icons.end(), iconCompare);
+	auto result = std::max_element(icons.begin(), icons.end(), iconCompare);
 
-    if(result == icons.end())
-    {
-        return nullptr;
-    }
+	if(result == icons.end())
+	{
+		return nullptr;
+	}
 
-    return *result;
+	return *result;
 }
 
 /**
@@ -143,7 +143,7 @@ const ResourceIcon *ResourceIconGroup::getPriorIcon() const
  */
 std::size_t ResourceIconGroup::getIconGroupID() const
 {
-    return iconGroupID;
+	return iconGroupID;
 }
 
 /**
@@ -153,16 +153,16 @@ std::size_t ResourceIconGroup::getIconGroupID() const
 */
 bool ResourceIconGroup::getNumberOfEntries(std::size_t &nEntries) const
 {
-    std::vector<unsigned char> bytes;
+	std::vector<unsigned char> bytes;
 
-    if(!getBytes(bytes, 4, 2))
-    {
-        return false;
-    }
+	if(!getBytes(bytes, 4, 2))
+	{
+		return false;
+	}
 
-    nEntries = bytes[1] << 8 | bytes[0];
+	nEntries = bytes[1] << 8 | bytes[0];
 
-    return true;
+	return true;
 }
 
 /**
@@ -173,16 +173,16 @@ bool ResourceIconGroup::getNumberOfEntries(std::size_t &nEntries) const
 */
 bool ResourceIconGroup::getEntryNameID(std::size_t eIndex, std::size_t &nameID) const
 {
-    std::vector<unsigned char> bytes;
+	std::vector<unsigned char> bytes;
 
-    if(!getBytes(bytes, getEntryOffset(eIndex) + 12, 2))
-    {
-        return false;
-    }
+	if(!getBytes(bytes, getEntryOffset(eIndex) + 12, 2))
+	{
+		return false;
+	}
 
-    nameID = bytes[1] << 8 | bytes[0];
+	nameID = bytes[1] << 8 | bytes[0];
 
-    return true;
+	return true;
 }
 
 /**
@@ -193,16 +193,16 @@ bool ResourceIconGroup::getEntryNameID(std::size_t eIndex, std::size_t &nameID) 
 */
 bool ResourceIconGroup::getEntryWidth(std::size_t eIndex, unsigned short &width) const
 {
-    std::vector<unsigned char> bytes;
+	std::vector<unsigned char> bytes;
 
-    if(!getBytes(bytes, getEntryOffset(eIndex) + 0, 1))
-    {
-        return false;
-    }
+	if(!getBytes(bytes, getEntryOffset(eIndex) + 0, 1))
+	{
+		return false;
+	}
 
-    width = bytes[0];
+	width = bytes[0];
 
-    return true;
+	return true;
 }
 
 /**
@@ -213,16 +213,16 @@ bool ResourceIconGroup::getEntryWidth(std::size_t eIndex, unsigned short &width)
 */
 bool ResourceIconGroup::getEntryHeight(std::size_t eIndex, unsigned short &height) const
 {
-    std::vector<unsigned char> bytes;
+	std::vector<unsigned char> bytes;
 
-    if(!getBytes(bytes, getEntryOffset(eIndex) + 1, 1))
-    {
-        return false;
-    }
+	if(!getBytes(bytes, getEntryOffset(eIndex) + 1, 1))
+	{
+		return false;
+	}
 
-    height = bytes[0];
+	height = bytes[0];
 
-    return true;
+	return true;
 }
 
 /**
@@ -233,16 +233,16 @@ bool ResourceIconGroup::getEntryHeight(std::size_t eIndex, unsigned short &heigh
 */
 bool ResourceIconGroup::getEntryIconSize(std::size_t eIndex, std::size_t &iconSize) const
 {
-    std::vector<unsigned char> bytes;
+	std::vector<unsigned char> bytes;
 
-    if(!getBytes(bytes, getEntryOffset(eIndex) + 8, 4))
-    {
-        return false;
-    }
+	if(!getBytes(bytes, getEntryOffset(eIndex) + 8, 4))
+	{
+		return false;
+	}
 
-    iconSize = bytes[3] << 24 | bytes[2] << 16 | bytes[1] << 8 | bytes[0];
+	iconSize = bytes[3] << 24 | bytes[2] << 16 | bytes[1] << 8 | bytes[0];
 
-    return true;
+	return true;
 }
 
 /**
@@ -253,16 +253,16 @@ bool ResourceIconGroup::getEntryIconSize(std::size_t eIndex, std::size_t &iconSi
 */
 bool ResourceIconGroup::getEntryColorCount(std::size_t eIndex, std::uint8_t &colorCount) const
 {
-    std::vector<unsigned char> bytes;
+	std::vector<unsigned char> bytes;
 
-    if(!getBytes(bytes, getEntryOffset(eIndex) + 2, 1))
-    {
-        return false;
-    }
+	if(!getBytes(bytes, getEntryOffset(eIndex) + 2, 1))
+	{
+		return false;
+	}
 
-    colorCount = bytes[0];
+	colorCount = bytes[0];
 
-    return true;
+	return true;
 }
 
 /**
@@ -273,16 +273,16 @@ bool ResourceIconGroup::getEntryColorCount(std::size_t eIndex, std::uint8_t &col
 */
 bool ResourceIconGroup::getEntryPlanes(std::size_t eIndex, std::uint16_t &planes) const
 {
-    std::vector<unsigned char> bytes;
+	std::vector<unsigned char> bytes;
 
-    if(!getBytes(bytes, getEntryOffset(eIndex) + 4, 2))
-    {
-        return false;
-    }
+	if(!getBytes(bytes, getEntryOffset(eIndex) + 4, 2))
+	{
+		return false;
+	}
 
-    planes = bytes[1] << 8 | bytes[0];
+	planes = bytes[1] << 8 | bytes[0];
 
-    return true;
+	return true;
 }
 
 /**
@@ -293,16 +293,16 @@ bool ResourceIconGroup::getEntryPlanes(std::size_t eIndex, std::uint16_t &planes
 */
 bool ResourceIconGroup::getEntryBitCount(std::size_t eIndex, std::uint16_t &bitCount) const
 {
-    std::vector<unsigned char> bytes;
+	std::vector<unsigned char> bytes;
 
-    if(!getBytes(bytes, getEntryOffset(eIndex) + 6, 2))
-    {
-        return false;
-    }
+	if(!getBytes(bytes, getEntryOffset(eIndex) + 6, 2))
+	{
+		return false;
+	}
 
-    bitCount = bytes[1] << 8 | bytes[0];
+	bitCount = bytes[1] << 8 | bytes[0];
 
-    return true;
+	return true;
 }
 
 /**
@@ -311,7 +311,7 @@ bool ResourceIconGroup::getEntryBitCount(std::size_t eIndex, std::uint16_t &bitC
 */
 void ResourceIconGroup::setIconGroupID(std::size_t id)
 {
-    iconGroupID = id;
+	iconGroupID = id;
 }
 
 /**
@@ -320,7 +320,7 @@ void ResourceIconGroup::setIconGroupID(std::size_t id)
  */
 bool ResourceIconGroup::hasIcons() const
 {
-    return !icons.empty();
+	return !icons.empty();
 }
 
 /**
@@ -328,7 +328,7 @@ bool ResourceIconGroup::hasIcons() const
  */
 void ResourceIconGroup::addIcon(ResourceIcon *icon)
 {
-    icons.push_back(icon);
+	icons.push_back(icon);
 }
 
 } // namespace fileformat
