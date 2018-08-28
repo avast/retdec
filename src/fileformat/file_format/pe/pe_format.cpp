@@ -834,7 +834,7 @@ void PeFormat::loadResourceNodes(std::vector<const PeLib::ResourceChild*> &nodes
 		return;
 	}
 
-	std::unique_ptr<Resource> resource = std::make_unique<Resource>();
+	auto resource = std::make_unique<Resource>();
 	resourceTable = new ResourceTable();
 	std::size_t firstLeafIndex = 0;
 

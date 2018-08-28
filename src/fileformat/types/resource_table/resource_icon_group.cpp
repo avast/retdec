@@ -127,7 +127,7 @@ const ResourceIcon *ResourceIconGroup::getIcon(std::size_t iIndex) const
  */
 const ResourceIcon *ResourceIconGroup::getPriorIcon() const
 {
-    auto result = max_element(icons.begin(), icons.end(), iconCompare);
+    auto result = std::max_element(icons.begin(), icons.end(), iconCompare);
 
     if(result == icons.end())
     {
