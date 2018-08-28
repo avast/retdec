@@ -159,10 +159,7 @@ void Decoder::initEnvironmentRegisters()
 		if (_c2l->isRegister(&gv))
 		{
 			unsigned regNum = _c2l->getCapstoneRegister(&gv);
-			auto s = config::Storage::inRegister(
-					gv.getName(),
-					regNum,
-					"");
+			auto s = config::Storage::inRegister(gv.getName(), regNum);
 
 			config::Object cr(gv.getName(), s);
 			cr.type.setLlvmIr(llvmObjToString(gv.getValueType()));

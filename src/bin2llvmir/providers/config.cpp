@@ -447,29 +447,21 @@ bool Config::isGeneralPurposeRegister(const llvm::Value* val)
 	}
 	if (getConfig().architecture.isMipsOrPic32())
 	{
-		// TODO
-//		return r->getStorage().getRegisterClass() == "gpregs";
 		auto rn = r->getStorage().getRegisterNumber();
 		return MIPS_REG_0 <= rn && rn <= MIPS_REG_31;
 	}
 	else if (getConfig().architecture.isArmOrThumb())
 	{
-		// TODO
-//		return r->getStorage().getRegisterClass() == "regs";
 		auto rn = r->getStorage().getRegisterNumber();
 		return ARM_REG_R0 <= rn && rn <= ARM_REG_R12;
 	}
 	else if (getConfig().architecture.isPpc())
 	{
-		// TODO
-//		return r->getStorage().getRegisterClass() == "gpregs";
 		auto rn = r->getStorage().getRegisterNumber();
 		return PPC_REG_R0 <= rn && rn <= PPC_REG_R31;
 	}
 	else if (getConfig().architecture.isX86())
 	{
-		// TODO: this whole thif is bad
-//		return r->getStorage().getRegisterClass() == "gpr";
 		auto n = r->getName();
 		return n == "eax" || n == "ebx" || n == "ecx" || n == "edx"
 				|| n == "esp" || n == "ebp" || n == "esi" || n == "edi";

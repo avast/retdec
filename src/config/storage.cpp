@@ -15,7 +15,6 @@ namespace {
 const std::string JSON_type      = "type";
 const std::string JSON_value     = "value";
 const std::string JSON_regNum    = "registerNumber";
-const std::string JSON_regClass  = "registerClass";
 
 const std::vector<std::string> typeStrings =
 {
@@ -101,14 +100,12 @@ Storage Storage::inRegister(unsigned registerNumber)
  */
 Storage Storage::inRegister(
 		const std::string& registerName,
-		unsigned registerNumber,
-		const std::string& registerClass)
+		unsigned registerNumber)
 {
 	Storage ret;
 	ret.type = eType::REGISTER;
 	ret._registerName = registerName;
 	ret._registerNumber = registerNumber;
-	ret._registerClass = registerClass;
 	return ret;
 }
 
@@ -153,11 +150,6 @@ void Storage::readJsonValue(const Json::Value& val)
 	{
 		_registerNumber = safeGetUint(val, JSON_regNum);
 	}
-
-	if (val.isMember(JSON_regClass))
-	{
-		_registerClass = safeGetString(val, JSON_regClass);
-	}
 }
 
 Json::Value Storage::getJsonValue() const
@@ -189,11 +181,6 @@ Json::Value Storage::getJsonValue() const
 	if (registerNumber.isDefined())
 	{
 		obj[JSON_regNum] = registerNumber.getValue();
-	}
-
-	if (!getRegisterClass().empty())
-	{
-		obj[JSON_regClass] = getRegisterClass();
 	}
 
 	return obj;
@@ -311,15 +298,6 @@ int Storage::getStackOffset() const
 retdec::utils::Maybe<unsigned> Storage::getRegisterNumber() const
 {
 	return _registerNumber;
-}
-
-/**
- * @return Register's class or empty string if class of register (or any
- * other storage type) not set.
- */
-std::string Storage::getRegisterClass() const
-{
-	return _registerClass;
 }
 
 } // namespace config

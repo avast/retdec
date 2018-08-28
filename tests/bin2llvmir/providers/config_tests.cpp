@@ -186,7 +186,7 @@ TEST_F(ConfigTests, getConfigRegisterNumberReturnDefinedValueIfItExists)
 		@r = global i1 0
 	)");
 	auto* llvmReg = getGlobalByName("r");
-	auto s = retdec::config::Storage::inRegister("r", 123, "class");
+	auto s = retdec::config::Storage::inRegister("r", 123);
 	auto r = retdec::config::Object("r", s);
 	auto config = Config::empty(module.get());
 	config.getConfig().registers.insert(r);
@@ -221,7 +221,7 @@ TEST_F(ConfigTests, getLlvmRegisterReturnsRegisterIfItExists)
 		@___eax = global i1 0
 	)");
 	auto* llvmReg = getGlobalByName("___eax");
-	auto s = retdec::config::Storage::inRegister("eax", 0, "gpr");
+	auto s = retdec::config::Storage::inRegister("eax", 0);
 	auto r = retdec::config::Object("___eax", s);
 	r.setRealName("eax");
 	auto config = Config::empty(module.get());
@@ -238,7 +238,7 @@ TEST_F(ConfigTests, getLlvmRegisterReturnsNullptrRegisterIfItDoesNotExist)
 		@___eax = global i1 0
 	)");
 	auto* llvmReg = getGlobalByName("___eax");
-	auto s = retdec::config::Storage::inRegister("eax", 0, "gpr");
+	auto s = retdec::config::Storage::inRegister("eax", 0);
 	auto r = retdec::config::Object("___eax", s);
 	r.setRealName("eax");
 	auto config = Config::empty(module.get());
@@ -397,82 +397,6 @@ TEST_F(ConfigTests, isStackPointerRegisterReturnsFalseForAllNonStackPointerRegis
 	EXPECT_FALSE(config.isStackPointerRegister(f));
 	EXPECT_FALSE(config.isStackPointerRegister(a));
 }
-
-//
-// isGeneralPurposeRegister()
-//
-// TODO
-//
-//TEST_F(ConfigTests, isGeneralPurposeRegisterReturnsFalseForNullptr)
-//{
-//	auto config = Config::empty(module.get());
-//
-//	EXPECT_FALSE(config.isGeneralPurposeRegister(nullptr));
-//}
-//
-//TEST_F(ConfigTests, isGeneralPurposeRegisterReturnsTrueForGpRegister)
-//{
-//	parseInput(R"(
-//		@eax = global i1 0
-//	)");
-//	auto* llvmReg = getGlobalByName("eax");
-//	auto s = retdec::config::Storage::inRegister("eax", 123, "gpr");
-//	auto r = retdec::config::Object("eax", s);
-//	auto config = Config::empty(module.get());
-//	config.getConfig().registers.insert(r);
-//	config.getConfig().architecture.setIsX86();
-//
-//	EXPECT_TRUE(config.isGeneralPurposeRegister(llvmReg));
-//}
-//
-//TEST_F(ConfigTests, isGeneralPurposeRegisterReturnsFalseForNonGpRegisters)
-//{
-//	parseInput(R"(
-//		@r = global i1 0
-//	)");
-//	auto* llvmReg = getGlobalByName("r");
-//	auto config = Config::empty(module.get());
-//
-//	EXPECT_FALSE(config.isGeneralPurposeRegister(llvmReg));
-//}
-
-//
-// isFloatingPointRegister()
-//
-// TODO
-//
-//TEST_F(ConfigTests, isFloatingPointRegisterReturnsFalseForNullptr)
-//{
-//	auto config = Config::empty(module.get());
-//
-//	EXPECT_FALSE(config.isFloatingPointRegister(nullptr));
-//}
-//
-//TEST_F(ConfigTests, isFloatingPointRegisterReturnsTrueForFpRegister)
-//{
-//	parseInput(R"(
-//		@r = global i1 0
-//	)");
-//	auto* llvmReg = getGlobalByName("r");
-//	auto s = retdec::config::Storage::inRegister("r", 123, "fpuregs_s");
-//	auto r = retdec::config::Object("r", s);
-//	auto config = Config::empty(module.get());
-//	config.getConfig().registers.insert(r);
-//	config.getConfig().architecture.setIsMips();
-//
-//	EXPECT_TRUE(config.isFloatingPointRegister(llvmReg));
-//}
-//
-//TEST_F(ConfigTests, isFloatingPointRegisterReturnsFalseForNonFpRegisters)
-//{
-//	parseInput(R"(
-//		@r = global i1 0
-//	)");
-//	auto* llvmReg = getGlobalByName("r");
-//	auto config = Config::empty(module.get());
-//
-//	EXPECT_FALSE(config.isFloatingPointRegister(llvmReg));
-//}
 
 //
 // getConfigGlobalVariable()
