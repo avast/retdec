@@ -2,6 +2,7 @@
 
 """Compilation and decompilation utility functions.
 """
+
 import contextlib
 import os
 import re
