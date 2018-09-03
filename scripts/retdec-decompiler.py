@@ -2,6 +2,8 @@
 
 """Decompiles the given file into the selected target high-level language."""
 
+from __future__ import print_function
+
 import argparse
 import glob
 import os
@@ -14,6 +16,7 @@ config = importlib.import_module('retdec-config')
 retdec_signature_from_library_creator = importlib.import_module('retdec-signature-from-library-creator')
 retdec_unpacker = importlib.import_module('retdec-unpacker')
 utils = importlib.import_module('retdec-utils')
+utils.check_python_version()
 
 SigFromLib = retdec_signature_from_library_creator.SigFromLib
 Unpacker = retdec_unpacker.Unpacker

@@ -3,6 +3,7 @@
 """
 Get RetDec share directory.
 """
+
 import sys
 import hashlib
 import os

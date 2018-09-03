@@ -2,9 +2,15 @@
 
 """Runs all the installed unit tests."""
 
+from __future__ import print_function
+
 import os
 import re
 import sys
+
+import importlib
+utils = importlib.import_module('retdec-utils')
+utils.check_python_version()
 
 try:
     import colorama

@@ -1,6 +1,8 @@
-#! /usr/bin/env python3
+#!/usr/bin/env python3
 
 """Create Yara rules file from static libraries."""
+
+from __future__ import print_function
 
 import argparse
 import shutil
@@ -12,6 +14,7 @@ import tempfile
 import importlib
 config = importlib.import_module('retdec-config')
 utils = importlib.import_module('retdec-utils')
+utils.check_python_version()
 
 CmdRunner = utils.CmdRunner
 sys.stdout = utils.Unbuffered(sys.stdout)
