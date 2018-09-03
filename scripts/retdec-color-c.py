@@ -8,6 +8,8 @@
 
 #=====================================================================================
 
+from __future__ import print_function
+
 import sys
 import re
 
@@ -20,6 +22,10 @@ from pygments.token import Token
 
 import json
 from pprint import pprint
+
+import importlib
+utils = importlib.import_module('retdec-utils')
+utils.check_python_version()
 
 #=====================================================================================
 

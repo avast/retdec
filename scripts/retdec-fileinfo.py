@@ -5,6 +5,8 @@
 - is able to analyze archives (.a/.lib files).
 """
 
+from __future__ import print_function
+
 import argparse
 import subprocess
 import sys
@@ -12,6 +14,7 @@ import sys
 import importlib
 config = importlib.import_module('retdec-config')
 utils = importlib.import_module('retdec-utils')
+utils.check_python_version()
 retdec_archive_decompiler = importlib.import_module('retdec-archive-decompiler')
 
 ArchiveDecompiler = retdec_archive_decompiler.ArchiveDecompiler

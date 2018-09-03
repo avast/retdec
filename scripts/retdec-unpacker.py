@@ -17,6 +17,8 @@ Returns:
    * 0 successfully unpacked
 """
 
+from __future__ import print_function
+
 import argparse
 import os
 import shutil
@@ -25,6 +27,7 @@ import sys
 import importlib
 config = importlib.import_module('retdec-config')
 utils = importlib.import_module('retdec-utils')
+utils.check_python_version()
 
 CmdRunner = utils.CmdRunner
 sys.stdout = utils.Unbuffered(sys.stdout)

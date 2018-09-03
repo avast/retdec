@@ -3,8 +3,11 @@
 """Compilation and decompilation utility functions.
 """
 
+from __future__ import print_function
+
 import contextlib
 import os
+import platform
 import re
 import shutil
 import signal
@@ -22,8 +25,6 @@ BAD_ALLOC_RC = 135
 
 """Taken from https://github.com/avast-tl/retdec-regression-tests-framework/blob/master/regression_tests/cmd_runner.py
 """
-
-
 class CmdRunner:
     """A runner of external commands."""
 
@@ -276,6 +277,10 @@ class Unbuffered(object):
     def __getattr__(self, attr):
         return getattr(self.stream, attr)
 
+
+def check_python_version():
+    if not sys.version_info >= (3,4):
+        print_error_and_die('Cannot use Python version {} ({}). Use at least Python 3.4.'.format(platform.python_version(), sys.executable))
 
 def tool_exists(tool_name):
     return shutil.which(tool_name) is not None
