@@ -80,7 +80,7 @@ def parse_args(args):
     parser.add_argument('--generate-log',
                         dest='generate_log',
                         action='store_true',
-                        help='Generate log')
+                        help=argparse.SUPPRESS)
 
     parser.add_argument('--ar-index',
                         dest='ar_index',
