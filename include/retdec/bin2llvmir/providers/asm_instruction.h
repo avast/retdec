@@ -23,12 +23,35 @@
 namespace retdec {
 namespace bin2llvmir {
 
-class Config;
+using Llvm2CapstoneInsnMap = typename std::map<llvm::StoreInst*, cs_insn*>;
 
-using Llvm2CapstoneMap = typename std::map<llvm::StoreInst*, cs_insn*>;
-
+/**
+ * Assembly instruction representation.
+ *
+ * This is a lightway class that contains only one llvm::StoreInst pointer.
+ * I.e. this class can be passed by value instead of by reference or pointer.
+ */
 class AsmInstruction
 {
+	// Constructors.
+	//
+	public:
+		AsmInstruction();
+		AsmInstruction(llvm::Instruction* inst);
+		AsmInstruction(llvm::BasicBlock* bb);
+		AsmInstruction(llvm::Function* f);
+		AsmInstruction(llvm::Module* m, retdec::utils::Address addr);
+
+	// Operators.
+	//
+	public:
+		bool operator<(const AsmInstruction& o) const;
+		bool operator==(const AsmInstruction& o) const;
+		bool operator!=(const AsmInstruction& o) const;
+		explicit operator bool() const;
+
+	// Iterators.
+	//
 	public:
 		template<
 			typename Category,
@@ -56,26 +79,14 @@ class AsmInstruction
 		const_reverse_iterator rbegin() const;
 		const_reverse_iterator rend() const;
 
+	// Other methods.
+	//
 	public:
-		AsmInstruction();
-		AsmInstruction(llvm::Instruction* inst);
-		AsmInstruction(llvm::BasicBlock* bb);
-		AsmInstruction(llvm::Function* f);
-		AsmInstruction(llvm::Module* m, retdec::utils::Address addr);
-
-		bool operator<(const AsmInstruction& o) const;
-		bool operator==(const AsmInstruction& o) const;
-		bool operator!=(const AsmInstruction& o) const;
-		explicit operator bool() const;
-
 		bool isValid() const;
 		bool isInvalid() const;
-		bool isConditional(Config* conf) const;
 		cs_insn* getCapstoneInsn() const;
-		bool isThumb() const;
 
 		std::string getDsm() const;
-		retdec::utils::Maybe<unsigned> getLatency() const;
 		retdec::utils::Address getAddress() const;
 		retdec::utils::Address getEndAddress() const;
 		std::size_t getByteSize() const;
@@ -142,7 +153,7 @@ class AsmInstruction
 		}
 
 	public:
-		static Llvm2CapstoneMap& getLlvmToCapstoneInsnMap(
+		static Llvm2CapstoneInsnMap& getLlvmToCapstoneInsnMap(
 				const llvm::Module* m);
 		static llvm::GlobalVariable* getLlvmToAsmGlobalVariable(
 				const llvm::Module* m);

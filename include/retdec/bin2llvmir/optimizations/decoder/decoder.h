@@ -284,7 +284,7 @@ class Decoder : public llvm::ModulePass
 		FileImage* _image = nullptr;
 		DebugFormat* _debug = nullptr;
 		NameContainer* _names = nullptr;
-		Llvm2CapstoneMap* _llvm2capstone = nullptr;
+		Llvm2CapstoneInsnMap* _llvm2capstone = nullptr;
 		Abi* _abi = nullptr;
 
 		ReachingDefinitionsAnalysis _RDA;
