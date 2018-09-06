@@ -144,29 +144,30 @@ llvm::SwitchInst* Decoder::transformToSwitch(
 }
 
 /**
- * TODO: This will be replaced by a proper ABI provider.
+ * TODO: We should get registers based on the ABI the function is using,
+ * not the same register for all calls on an architecture.
  */
 llvm::GlobalVariable* Decoder::getCallReturnObject()
 {
 	if (_config->getConfig().architecture.isX86_32())
 	{
-		return _module->getNamedGlobal("eax");
+		return _abi->getRegister(X86_REG_EAX);
 	}
 	else if (_config->getConfig().architecture.isX86_64())
 	{
-		return _module->getNamedGlobal("rax");
+		return _abi->getRegister(X86_REG_RAX);
 	}
 	else if (_config->getConfig().architecture.isMipsOrPic32())
 	{
-		return _config->getLlvmRegister("v0");
+		return _abi->getRegister(MIPS_REG_V0);
 	}
 	else if (_config->getConfig().architecture.isPpc())
 	{
-		return _config->getLlvmRegister("r3");
+		return _abi->getRegister(PPC_REG_R3);
 	}
 	else if (_config->getConfig().architecture.isArmOrThumb())
 	{
-		return _config->getLlvmRegister("r0");
+		return _abi->getRegister(ARM_REG_R0);
 	}
 
 	assert(false);

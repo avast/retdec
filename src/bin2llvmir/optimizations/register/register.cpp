@@ -66,15 +66,18 @@ bool RegisterAnalysis::runOnModule(llvm::Module& m)
 {
 	_module = &m;
 	_config = ConfigProvider::getConfig(_module);
+	_abi = AbiProvider::getAbi(_module);
 	return run();
 }
 
 bool RegisterAnalysis::runOnModuleCustom(
 		llvm::Module& m,
-		Config* c)
+		Config* c,
+		Abi* a)
 {
 	_module = &m;
 	_config = c;
+	_abi = a;
 	return run();
 }
 
@@ -85,18 +88,14 @@ bool RegisterAnalysis::run()
 		return false;
 	}
 
-//dumpModuleToFile(_module);
-
 	bool changed = false;
 
-	top = _module->getNamedGlobal("fpu_stat_TOP");
+	top = _abi->getRegister(X87_REG_TOP, _abi->isX86());
 	if (top == nullptr)
 	{
 		return changed;
 	}
 	changed |= x86FpuAnalysis();
-
-//dumpModuleToFile(_module);
 
 	return changed;
 }

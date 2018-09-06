@@ -1511,8 +1511,7 @@ void Decoder::finalizePseudoCalls()
 					&& _c2l->isCallFunctionCall(pseudo))
 			if (auto* st = dyn_cast<StoreInst>(i))
 			{
-				if (_c2l->isRegister(st->getPointerOperand())
-						&& st->getPointerOperand()->getName() == "ra")
+				if (_abi->isRegister(st->getPointerOperand(), MIPS_REG_RA))
 				{
 					st->eraseFromParent();
 				}
@@ -1526,8 +1525,7 @@ void Decoder::finalizePseudoCalls()
 					&& _c2l->isCallFunctionCall(pseudo))
 			if (auto* st = dyn_cast<StoreInst>(i))
 			{
-				if (_c2l->isRegister(st->getPointerOperand())
-						&& st->getPointerOperand()->getName() == "lr")
+				if (_abi->isRegister(st->getPointerOperand(), ARM_REG_LR))
 				{
 					st->eraseFromParent();
 				}
@@ -1539,8 +1537,7 @@ void Decoder::finalizePseudoCalls()
 					&& _c2l->isCallFunctionCall(pseudo))
 			if (auto* st = dyn_cast<StoreInst>(i))
 			{
-				if (_c2l->isRegister(st->getPointerOperand())
-						&& st->getPointerOperand()->getName() == "lr")
+				if (_abi->isRegister(st->getPointerOperand(), PPC_REG_LR))
 				{
 					st->eraseFromParent();
 				}

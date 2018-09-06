@@ -13,6 +13,7 @@
 #include <llvm/Pass.h>
 
 #include "retdec/bin2llvmir/analyses/symbolic_tree.h"
+#include "retdec/bin2llvmir/providers/abi/abi.h"
 #include "retdec/bin2llvmir/providers/config.h"
 
 namespace retdec {
@@ -26,7 +27,8 @@ class RegisterAnalysis : public llvm::ModulePass
 		virtual bool runOnModule(llvm::Module& m) override;
 		bool runOnModuleCustom(
 				llvm::Module& m,
-				Config* c);
+				Config* c,
+				Abi* a);
 
 	private:
 		bool run();
@@ -48,6 +50,7 @@ class RegisterAnalysis : public llvm::ModulePass
 	private:
 		llvm::Module* _module = nullptr;
 		Config* _config = nullptr;
+		Abi* _abi = nullptr;
 		llvm::GlobalVariable* top = nullptr;
 
 		const std::string _regStoreFncName = "__frontend_reg_store";

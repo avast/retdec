@@ -152,7 +152,7 @@ void Decoder::initializeGpReg_mips()
 		return;
 	}
 
-	if (auto* gp = _module->getNamedGlobal("gp"))
+	if (auto* gp = _abi->getRegister(MIPS_REG_GP))
 	{
 		Address lastAddr;
 		StoreInst* lastStore = nullptr;
