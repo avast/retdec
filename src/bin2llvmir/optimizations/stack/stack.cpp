@@ -135,13 +135,6 @@ void StackAnalysis::handleInstruction(
 {
 	LOG << llvmObjToString(inst) << std::endl;
 
-	if (val->getType()->isIntegerTy(1)
-			|| (val->getType()->isPointerTy()
-			&& val->getType()->getPointerElementType()->isIntegerTy(1)))
-	{
-		return;
-	}
-
 	SymbolicTree root(RDA, val, &val2val);
 	LOG << root << std::endl;
 
