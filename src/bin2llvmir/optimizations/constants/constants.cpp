@@ -93,8 +93,6 @@ bool ConstantsAnalysis::runOnModule(Module &M)
 		}
 	}
 
-	tagFunctionsWithUsedCryptoGlobals();
-
 	return false;
 }
 
@@ -156,42 +154,6 @@ void ConstantsAnalysis::checkForGlobalInInstruction(
 		auto* conv = IrModifier::convertConstantToType(gv, val->getType());
 		inst->replaceUsesOfWith(val, conv);
 		return;
-	}
-}
-
-void ConstantsAnalysis::tagFunctionsWithUsedCryptoGlobals()
-{
-	for (GlobalVariable& lgv : m_module->getGlobalList())
-	{
-		auto* cgv = config->getConfigGlobalVariable(&lgv);
-		if (cgv == nullptr || cgv->getCryptoDescription().empty())
-		{
-			continue;
-		}
-
-		for (auto* user : lgv.users())
-		{
-			if (auto* i = dyn_cast_or_null<Instruction>(user))
-			{
-				if (auto* cf = config->getConfigFunction(i->getFunction()))
-				{
-					cf->usedCryptoConstants.insert(cgv->getCryptoDescription());
-				}
-			}
-			else if (auto* e = dyn_cast_or_null<ConstantExpr>(user))
-			{
-				for (auto* u : e->users())
-				{
-					if (auto* i = dyn_cast_or_null<Instruction>(u))
-					{
-						if (auto* cf = config->getConfigFunction(i->getFunction()))
-						{
-							cf->usedCryptoConstants.insert(cgv->getCryptoDescription());
-						}
-					}
-				}
-			}
-		}
 	}
 }
 

@@ -85,6 +85,8 @@ Config Config::fromJsonString(llvm::Module* m, const std::string& json)
  */
 void Config::doFinalization()
 {
+	tagFunctionsWithUsedCryptoGlobals();
+
 	if (!_configPath.empty())
 	{
 		_configDB.generateJsonFile(_configPath);
@@ -580,6 +582,42 @@ bool Config::getCryptoPattern(
 	}
 
 	return false;
+}
+
+void Config::tagFunctionsWithUsedCryptoGlobals()
+{
+	for (GlobalVariable& lgv : _module->getGlobalList())
+	{
+		auto* cgv = getConfigGlobalVariable(&lgv);
+		if (cgv == nullptr || cgv->getCryptoDescription().empty())
+		{
+			continue;
+		}
+
+		for (auto* user : lgv.users())
+		{
+			if (auto* i = dyn_cast_or_null<Instruction>(user))
+			{
+				if (auto* cf = getConfigFunction(i->getFunction()))
+				{
+					cf->usedCryptoConstants.insert(cgv->getCryptoDescription());
+				}
+			}
+			else if (auto* e = dyn_cast_or_null<ConstantExpr>(user))
+			{
+				for (auto* u : e->users())
+				{
+					if (auto* i = dyn_cast_or_null<Instruction>(u))
+					{
+						if (auto* cf = getConfigFunction(i->getFunction()))
+						{
+							cf->usedCryptoConstants.insert(cgv->getCryptoDescription());
+						}
+					}
+				}
+			}
+		}
+	}
 }
 
 //

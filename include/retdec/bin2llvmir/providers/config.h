@@ -145,6 +145,9 @@ class Config
 				std::string& description,
 				llvm::Type*& type) const;
 
+	private:
+		void tagFunctionsWithUsedCryptoGlobals();
+
 	public:
 		llvm::Module* _module = nullptr;
 
