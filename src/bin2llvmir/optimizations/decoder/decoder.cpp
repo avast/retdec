@@ -810,7 +810,7 @@ utils::Address Decoder::getJumpTarget(
 			auto gotpltAddr = gotplt->getAddress();
 			for (auto* n : st.getPostOrder())
 			{
-				if (_config->isGeneralPurposeRegister(n->value))
+				if (_abi->isGeneralPurposeRegister(n->value))
 				{
 					n->value = ConstantInt::get(
 							_abi->getDefaultType(),
@@ -1498,7 +1498,7 @@ void Decoder::finalizePseudoCalls()
 							|| _c2l->isReturnFunctionCall(pseudo)))
 			if (auto* st = dyn_cast<StoreInst>(i))
 			{
-				if (_config->isStackPointerRegister(st->getPointerOperand())
+				if (_abi->isStackPointerRegister(st->getPointerOperand())
 						|| isa<ConstantInt>(st->getValueOperand()))
 				{
 					st->eraseFromParent();

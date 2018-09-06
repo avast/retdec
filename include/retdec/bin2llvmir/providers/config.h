@@ -53,12 +53,6 @@ class Config
 		llvm::GlobalVariable* getLlvmRegister(
 				const std::string& name);
 
-		bool isRegister(const llvm::Value* val);
-		bool isFlagRegister(const llvm::Value* val);
-		bool isStackPointerRegister(const llvm::Value* val);
-		bool isGeneralPurposeRegister(const llvm::Value* val);
-		bool isFloatingPointRegister(const llvm::Value* val);
-
 		// Global
 		//
 		const retdec::config::Object* getConfigGlobalVariable(

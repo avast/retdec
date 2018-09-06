@@ -11,7 +11,7 @@
 #include <llvm/IR/Module.h>
 #include <llvm/Pass.h>
 
-#include "retdec/bin2llvmir/providers/config.h"
+#include "retdec/bin2llvmir/providers/abi/abi.h"
 
 namespace retdec {
 namespace bin2llvmir {
@@ -21,8 +21,8 @@ class StackPointerOpsRemove : public llvm::ModulePass
 	public:
 		static char ID;
 		StackPointerOpsRemove();
-		virtual bool runOnModule(llvm::Module& M) override;
-		bool runOnModuleCustom(llvm::Module& M, Config* c);
+		virtual bool runOnModule(llvm::Module& m) override;
+		bool runOnModuleCustom(llvm::Module& m, Abi* a);
 
 	private:
 		bool run();
@@ -31,7 +31,7 @@ class StackPointerOpsRemove : public llvm::ModulePass
 
 	private:
 		llvm::Module* _module = nullptr;
-		Config* _config = nullptr;
+		Abi* _abi = nullptr;
 };
 
 } // namespace bin2llvmir

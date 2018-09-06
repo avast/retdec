@@ -150,7 +150,7 @@ void StackAnalysis::handleInstruction(
 		bool stackPtr = false;
 		for (SymbolicTree* n : root.getPostOrder())
 		{
-			if (_config->isStackPointerRegister(n->value))
+			if (_abi->isStackPointerRegister(n->value))
 			{
 				stackPtr = true;
 				break;
@@ -274,7 +274,7 @@ retdec::config::Object* StackAnalysis::getDebugStackVariable(
 			{
 				auto* l = cast<LoadInst>(n->ops[0].value);
 				auto* ci = cast<ConstantInt>(n->ops[1].value);
-				if (_config->isRegister(l->getPointerOperand()))
+				if (_abi->isRegister(l->getPointerOperand()))
 				{
 					baseOffset = ci->getSExtValue();
 				}
