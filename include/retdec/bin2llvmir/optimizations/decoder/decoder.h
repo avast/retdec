@@ -31,6 +31,7 @@
 #include "retdec/bin2llvmir/optimizations/decoder/decoder_ranges.h"
 #include "retdec/bin2llvmir/optimizations/decoder/jump_targets.h"
 #include "retdec/bin2llvmir/utils/ir_modifier.h"
+#include "retdec/bin2llvmir/utils/symbolic_tree_match.h"
 #include "retdec/capstone2llvmir/capstone2llvmir.h"
 #include "retdec/stacofin/stacofin.h"
 

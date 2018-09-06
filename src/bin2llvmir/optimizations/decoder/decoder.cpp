@@ -15,11 +15,11 @@
 #include "retdec/bin2llvmir/utils/llvm.h"
 #include "retdec/bin2llvmir/utils/capstone.h"
 
-using namespace retdec::utils;
-using namespace retdec::capstone2llvmir;
 using namespace llvm;
-using namespace llvm::PatternMatch;
+using namespace retdec::capstone2llvmir;
+using namespace retdec::bin2llvmir::st_match;
 using namespace retdec::fileformat;
+using namespace retdec::utils;
 
 namespace retdec {
 namespace bin2llvmir {
@@ -752,7 +752,8 @@ bool Decoder::getJumpTargetsFromInstruction(
 				SymbolicTree st(_RDA, l->getPointerOperand(), nullptr, 8);
 				st.simplifyNode();
 
-				if (auto* ci = dyn_cast<ConstantInt>(st.value))
+				ConstantInt* ci = nullptr;
+				if (match(st, m_ConstantInt(ci)))
 				{
 					Address t(ci->getZExtValue());
 					auto sz = _abi->getTypeByteSize(l->getType());
@@ -821,17 +822,15 @@ utils::Address Decoder::getJumpTarget(
 
 	st.simplifyNode();
 
-	if (auto* ci = dyn_cast<ConstantInt>(st.value))
+	ConstantInt* ci = nullptr;
+	if (match(st, m_ConstantInt(ci)))
 	{
 		return ci->getZExtValue();
 	}
 
 	// If there is load, at first try imports.
-	if (isa<LoadInst>(st.value)
-			&& st.ops.size() == 1
-			&& isa<ConstantInt>(st.ops[0].value))
+	if (match(st, m_Load(m_ConstantInt(ci))))
 	{
-		auto* ci = dyn_cast<ConstantInt>(st.ops[0].value);
 		Address t = ci->getZExtValue();
 		if (_imports.count(t))
 		{
@@ -851,16 +850,11 @@ utils::Address Decoder::getJumpTarget(
 	// solveMemoryLoads() and simplifyNode() combo will solve both loads
 	// -> we can not check for imports.
 	//
-	if (isa<LoadInst>(st.value)
-			&& st.ops.size() == 1
-			&& isa<LoadInst>(st.ops[0].value)
-			&& st.ops[0].ops.size() == 1
-			&& isa<ConstantInt>(st.ops[0].ops[0].value))
+	if (match(st, m_Load(m_Load(m_ConstantInt(ci)))))
 	{
-		auto* ptr = dyn_cast<ConstantInt>(st.ops[0].ops[0].value);
-		if (auto* ci = _image->getConstantDefault(ptr->getZExtValue()))
+		if (auto* val = _image->getConstantDefault(ci->getZExtValue()))
 		{
-			Address t = ci->getZExtValue();
+			Address t = val->getZExtValue();
 			if (_imports.count(t))
 			{
 				return t;
@@ -929,6 +923,11 @@ bool Decoder::getJumpTargetSwitch(
 {
 	unsigned archByteSz =  _config->getConfig().architecture.getByteSize();
 
+	BinaryOperator* mulOp = nullptr;
+	BinaryOperator* shlOp = nullptr;
+	ConstantInt* mulShlCi = nullptr;
+	ConstantInt* addrTblCi = nullptr;
+
 	// Pattern:
 	//>|   %55 = load i32, i32* %54
 	//		>|   %53 = add i32 Addr, %52
@@ -936,31 +935,25 @@ bool Decoder::getJumpTargetSwitch(
 	//						>| idx
 	//						>| i32 4
 	//				>| i32 tableAddr
-	if (!(isa<LoadInst>(st.value) // load
-			&& st.ops.size() == 1
-			&& isa<AddOperator>(st.ops[0].value) // add
-			&& st.ops[0].ops.size() == 2
-			&& (isa<MulOperator>(st.ops[0].ops[0].value) // mul
-					|| isa<ShlOperator>(st.ops[0].ops[0].value)) // shl
-			&& st.ops[0].ops[0].ops.size() == 2
-			&& isa<ConstantInt>(st.ops[0].ops[0].ops[1].value)
-			&& isa<ConstantInt>(st.ops[0].ops[1].value))) // table address
+	if (!match(st, m_Load(
+			m_c_Add(
+					m_CombineOr(
+							m_c_Mul(m_Value(), m_ConstantInt(mulShlCi), &mulOp),
+							m_Shl(m_Value(), m_ConstantInt(mulShlCi), &shlOp)),
+					m_ConstantInt(addrTblCi)))))
 	{
 		return false;
 	}
 
-	bool usesMul = isa<MulOperator>(st.ops[0].ops[0].value);
-	bool usesShl = isa<ShlOperator>(st.ops[0].ops[0].value);
-	auto* mulShlCi = cast<ConstantInt>(st.ops[0].ops[0].ops[1].value);
-	if (!((usesMul && mulShlCi->getZExtValue() == archByteSz)
-			|| (usesShl
+	if (!((mulOp && mulShlCi->getZExtValue() == archByteSz)
+			|| (shlOp
 					&& static_cast<uint64_t>(1 << mulShlCi->getZExtValue()) == archByteSz)))
 	{
 		return false;
 	}
 
-	Address tableAddr = cast<ConstantInt>(st.ops[0].ops[1].value)->getZExtValue();
-	Value* idx = cast<Instruction>(st.ops[0].ops[0].value)->getOperand(0);
+	Address tableAddr = addrTblCi->getZExtValue();
+	Value* idx = mulOp ? mulOp->getOperand(0) : shlOp->getOperand(0);
 
 	LOG << "\t\t" << "switch @ " << addr << std::endl;
 	LOG << "\t\t\t" << "table addr @ " << tableAddr << std::endl;
@@ -1056,6 +1049,8 @@ if (brToSwitch)
 	auto levelOrd = stCond.getLevelOrder();
 	for (SymbolicTree* n : levelOrd)
 	{
+		ConstantInt* ci = nullptr;
+
 		// x86:
 		//>|   %331 = or i1 %329, %330
 		//		>|   %317 = icmp ult i8 %312, 90
@@ -1066,91 +1061,33 @@ if (brToSwitch)
 		//						>|   %312 = trunc i32 %311 to i8
 		//						>| i8 90
 		//				>| i8 0
-		if (isa<BinaryOperator>(n->value)
-				&& cast<BinaryOperator>(n->value)->getOpcode()
-						== Instruction::Or
-				&& n->ops.size() == 2
-				&& isa<ICmpInst>(n->ops[0].value)
-				&& cast<ICmpInst>(n->ops[0].value)->getPredicate()
-						== ICmpInst::ICMP_ULT
-				&& n->ops[0].ops.size() == 2
-				&& isa<ConstantInt>(n->ops[0].ops[1].value)
-				&& isa<ICmpInst>(n->ops[1].value)
-				&& cast<ICmpInst>(n->ops[1].value)->getPredicate()
-						== ICmpInst::ICMP_EQ
-				&& n->ops[1].ops.size() == 2
-				&& isa<ConstantInt>(n->ops[1].ops[1].value)
-				&& cast<ConstantInt>(n->ops[1].ops[1].value)->isZero())
+		if (match(*n, m_c_Or(
+				m_c_ICmp(ICmpInst::ICMP_ULT, m_Value(), m_ConstantInt(ci)),
+				m_c_ICmp(ICmpInst::ICMP_EQ, m_Value(), m_Zero()))))
 		{
-			auto* ci = cast<ConstantInt>(n->ops[0].ops[1].value);
 			tableSize = ci->getZExtValue() + 1;
 			LOG << "\t\t\t" << "table size (1) = " << tableSize << std::endl;
 			break;
 		}
+		// TODO: apply this only if it si branching over?
 		// mips (???):
 		//>|   %319 = icmp ne i32 %318, 0
 		//		>|   %316 = icmp ult i32 %315, 121
 		//				>|   %314 = and i32 %313, 255
 		//				>| i32 121
 		//		>| i32 0
-		else if (isa<ICmpInst>(n->value)
-				&& cast<ICmpInst>(n->value)->getPredicate()
-						== ICmpInst::ICMP_NE
-				&& isa<ICmpInst>(n->ops[0].value)
-				&& cast<ICmpInst>(n->ops[0].value)->getPredicate()
-						== ICmpInst::ICMP_ULT
-				&& isa<ConstantInt>(n->ops[0].ops[1].value)
-				&& !cast<ConstantInt>(n->ops[0].ops[1].value)->isZero()
-				&& isa<ConstantInt>(n->ops[1].value)
-				&& cast<ConstantInt>(n->ops[1].value)->isZero())
+		else if (match(*n, m_c_ICmp(ICmpInst::ICMP_NE,
+				m_c_ICmp(ICmpInst::ICMP_ULT, m_Value(), m_not_Zero(ci)),
+				m_Zero())))
 		{
-			auto* ci = cast<ConstantInt>(n->ops[0].ops[1].value);
 			tableSize = ci->getZExtValue();
 			LOG << "\t\t\t" << "table size (2) = " << tableSize << std::endl;
 			break;
 		}
-		// TODO: apply this only if it si branching over?
-		// TODO: apply prev (very similar to this) only if branching to?
-		// mips (branching over):
-		//>|   %33 = icmp ne i32 %32, 0
-		//		>|   %22 = icmp ult i32 %20, %21
-		//				>| i32 8
-		//				>|   %19 = add i32 %18, -20
-		//		>| i32 0
-		else if (isa<ICmpInst>(n->value)
-				&& cast<ICmpInst>(n->value)->getPredicate()
-						== ICmpInst::ICMP_NE
-				&& isa<ICmpInst>(n->ops[0].value)
-				&& cast<ICmpInst>(n->ops[0].value)->getPredicate()
-						== ICmpInst::ICMP_ULT
-				&& isa<ConstantInt>(n->ops[0].ops[0].value)
-				&& !cast<ConstantInt>(n->ops[0].ops[0].value)->isZero()
-				&& isa<ConstantInt>(n->ops[1].value)
-				&& cast<ConstantInt>(n->ops[1].value)->isZero())
+		else if (match(*n, m_c_ICmp(ICmpInst::ICMP_EQ,
+				m_c_ICmp(ICmpInst::ICMP_ULT, m_Value(), m_not_Zero(ci)),
+				m_Zero())))
 		{
-			auto* ci = cast<ConstantInt>(n->ops[0].ops[0].value);
-			tableSize = ci->getZExtValue();
-			LOG << "\t\t\t" << "table size (2.5) = " << tableSize << std::endl;
-			break;
-		}
-		// mips:
-		//>|   %524 = icmp eq i32 %523, 0
-		//		>|   %449 = icmp ult i32 %448, 5
-		//				>| i32 3
-		//				>| i32 5
-		//		>| i32 0
-		else if (isa<ICmpInst>(n->value)
-				&& cast<ICmpInst>(n->value)->getPredicate()
-						== ICmpInst::ICMP_EQ
-				&& isa<ICmpInst>(n->ops[0].value)
-				&& cast<ICmpInst>(n->ops[0].value)->getPredicate()
-						== ICmpInst::ICMP_ULT
-				&& isa<ConstantInt>(n->ops[0].ops[1].value)
-				&& !cast<ConstantInt>(n->ops[0].ops[1].value)->isZero()
-				&& isa<ConstantInt>(n->ops[1].value)
-				&& cast<ConstantInt>(n->ops[1].value)->isZero())
-		{
-			auto* ci = cast<ConstantInt>(n->ops[0].ops[1].value);
 			tableSize = ci->getZExtValue();
 			LOG << "\t\t\t" << "table size (3) = " << tableSize << std::endl;
 			break;
@@ -1165,27 +1102,26 @@ if (brToSwitch)
 	unsigned maxIdx = 0;
 	SymbolicTree idxRoot(_RDA, idx);
 	idxRoot.simplifyNode();
+
+	LoadInst* l = nullptr;
+	ConstantInt* ci = nullptr;
+	Instruction* insn = nullptr;
 	if (_config->getConfig().architecture.isX86()
 			&& tableSize
-			&& isa<LoadInst>(idxRoot.value)
-			&& cast<LoadInst>(idxRoot.value)->getType()->isIntegerTy()
-			&& idxRoot.ops.size() == 1
-			&& isa<AddOperator>(idxRoot.ops[0].value)
-			&& idxRoot.ops[0].ops.size() == 2
-			&& isa<Instruction>(idxRoot.ops[0].ops[0].value)
-			&& cast<Instruction>(idxRoot.ops[0].ops[0].value)->getType()->isIntegerTy()
-			&& isa<ConstantInt>(idxRoot.ops[0].ops[1].value))
+			&& match(idxRoot, m_Load(
+					m_c_Add(m_Instruction(insn), m_ConstantInt(ci)),
+					&l))
+			&& l->getType()->isIntegerTy()
+			&& insn->getType()->isIntegerTy())
 	{
-		auto* l = cast<LoadInst>(idxRoot.value);
 		auto* it = cast<IntegerType>(l->getType());
-		auto* ci = cast<ConstantInt>(idxRoot.ops[0].ops[1].value);
 		retdec::utils::Address tableAddr2(ci->getZExtValue());
 
 		LOG << "\t\t\t" << "second table addr @ " << tableAddr2 << std::endl;
 
 		// Switch index must not be the table offset.
 		// We have to use the original index.
-		idx = cast<Instruction>(idxRoot.ops[0].ops[0].value);
+		idx = insn;
 
 		while (true)
 		{
