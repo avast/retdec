@@ -1097,7 +1097,8 @@ GenericValue executeFPExtInst(
 		for (unsigned i = 0; i < size; i++)
 			Dest.AggregateVal[i].DoubleVal = static_cast<double>(Src.AggregateVal[i].FloatVal);
 	}
-	else if (SrcVal->getType()->isFloatTy() && DstTy->isDoubleTy())
+	else if (SrcVal->getType()->isFloatTy()
+			&& (DstTy->isDoubleTy() || DstTy->isX86_FP80Ty()))
 	{
 		Dest.DoubleVal = static_cast<double>(Src.FloatVal);
 	}

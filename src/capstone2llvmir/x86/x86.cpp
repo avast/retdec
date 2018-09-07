@@ -4149,7 +4149,15 @@ void Capstone2LlvmIrTranslatorX86_impl::translateFadd(cs_insn* i, cs_x86* xi, ll
 
 	auto* fadd = irb.CreateFAdd(op0, op1);
 
-	storeX87DataReg(irb, idx, fadd);
+	if (xi->op_count == 2 || i->id == X86_INS_FADDP)
+	{
+		storeX87DataReg(irb, idx, fadd);
+	}
+	else
+	{
+		storeX87DataReg(irb, top, fadd);
+	}
+
 	if (i->id == X86_INS_FADDP)
 	{
 		clearX87TagReg(irb, top); // pop
