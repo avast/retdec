@@ -420,6 +420,15 @@ class FileInformation
 		/// @{
 		bool isDotnetUsed() const;
 		const std::string& getDotnetRuntimeVersion() const;
+		std::string getDotnetImportedClassName(std::size_t position) const;
+		std::string getDotnetImportedClassNestedName(std::size_t position) const;
+		std::string getDotnetImportedClassNameWithParentClassIndex(std::size_t position) const;
+		std::string getDotnetImportedClassLibName(std::size_t position) const;
+		std::string getDotnetImportedClassTypeRefIndexAsString(std::size_t position) const;
+		std::string getDotnetTypeRefhashCrc32() const;
+		std::string getDotnetTypeRefhashMd5() const;
+		std::string getDotnetTypeRefhashSha256() const;
+		std::size_t getNumberOfStoredDotnetImportedClasses() const;
 		std::string getDotnetMetadataHeaderAddressStr(std::ios_base &(* format)(std::ios_base &)) const;
 		std::string getDotnetMetadataStreamOffsetStr(std::ios_base &(* format)(std::ios_base &)) const;
 		std::string getDotnetMetadataStreamSizeStr(std::ios_base &(* format)(std::ios_base &)) const;
@@ -441,6 +450,7 @@ class FileInformation
 		bool hasDotnetGuidStream() const;
 		bool hasDotnetUserStringStream() const;
 		bool hasDotnetTypeLibId() const;
+		bool hasDotnetTypeRefTableRecords() const;
 		/// @}
 
 		/// @name Setters
@@ -519,6 +529,9 @@ class FileInformation
 		void setDotnetTypeLibId(const std::string& typeLibId);
 		void setDotnetDefinedClassList(const std::vector<std::shared_ptr<retdec::fileformat::DotnetClass>>& dotnetClassList);
 		void setDotnetImportedClassList(const std::vector<std::shared_ptr<retdec::fileformat::DotnetClass>>& dotnetClassList);
+		void setDotnetTypeRefhashCrc32(const std::string& crc32);
+		void setDotnetTypeRefhashMd5(const std::string& md5);
+		void setDotnetTypeRefhashSha256(const std::string& sha256);
 		/// @}
 
 		/// @name Other methods
