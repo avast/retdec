@@ -724,6 +724,7 @@ bool JsonPresentation::present()
 		presentIterativeSubtitle(root, SymbolTablesJsonGetter(fileinfo));
 		presentIterativeSubtitle(root, ImportTableJsonGetter(fileinfo));
 		presentIterativeSubtitle(root, ExportTableJsonGetter(fileinfo));
+		presentIterativeSubtitle(root, TypeRefTableJsonGetter(fileinfo));
 		presentIterativeSubtitle(root, RelocationTablesJsonGetter(fileinfo));
 		presentIterativeSubtitle(root, DynamicSectionsJsonGetter(fileinfo));
 		presentIterativeSubtitle(root, ResourceJsonGetter(fileinfo));
