@@ -267,9 +267,16 @@ void DotnetTypeReconstructor::linkReconstructedClasses()
 		return;
 	}
 
-	for (size_t i = 1; i < refClassTable.size(); i++)
+	auto refClasses = getReferencedClasses();
+
+	for (size_t i = 1; i < refClasses.size(); i++)
 	{
-		linkReconstructedClassesDo(i, visited, stack, typeRefTable);
+		linkReconstructedClassesDo(i, visited, stack, refClasses, typeRefTable);
+	}
+
+	for (size_t i = 1; i < refClasses.size(); i++)
+	{
+		auto t = refClasses[i];
 	}
 }
 
@@ -281,7 +288,7 @@ void DotnetTypeReconstructor::linkReconstructedClasses()
  * @param typeRefTable Typeref table.
  */
 void DotnetTypeReconstructor::linkReconstructedClassesDo(size_t i, std::vector<bool> &visited, std::vector<bool> &stack,
-														const MetadataTable<TypeRef>* typeRefTable)
+														ClassList &refClasses, const MetadataTable<TypeRef>* typeRefTable)
 {
 	if (visited[i])
 	{
@@ -290,7 +297,7 @@ void DotnetTypeReconstructor::linkReconstructedClassesDo(size_t i, std::vector<b
 
 	visited[i] = true;
 
-	auto typeRef = refClassTable[i];
+	auto typeRef = refClasses[i];
 	auto typeRefRaw = static_cast<const TypeRef *>(typeRef->getRawRecord());
 	MetadataTableType resolutionScopeType;
 
@@ -310,26 +317,31 @@ void DotnetTypeReconstructor::linkReconstructedClassesDo(size_t i, std::vector<b
 	const DotnetClass *parent = nullptr;
 
 	size_t parentI = 1;
-	while (parentI < refClassTable.size())
+	while (parentI < refClasses.size())
 	{
-		if (refClassTable[parentI]->getRawRecord() == parentRaw)
+		auto parentInRefClasses = refClasses[parentI];
+
+		if (parentInRefClasses->getRawRecord() == parentRaw)
 		{
-			parent = refClassTable[parentI].get();
+			parent = parentInRefClasses.get();
+			break;
 		}
 
 		parentI++;
 	}
 
+	stack[i] = true;
+
 	if (!parent || stack[parentI])
 	{
+		stack[i] = false;
 		return;
 	}
 
 	typeRef->setParent(parent);
-	
-	stack[parentI] = true;
-	linkReconstructedClassesDo(parentI, visited, stack, typeRefTable);
-	stack[parentI] = false;
+
+	linkReconstructedClassesDo(parentI, visited, stack, refClasses, typeRefTable);
+	stack[i] = false;
 }
 
 /**

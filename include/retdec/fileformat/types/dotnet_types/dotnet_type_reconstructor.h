@@ -42,7 +42,7 @@ class DotnetTypeReconstructor
 		bool reconstructBaseTypes();
 
 		void linkReconstructedClasses();
-		void linkReconstructedClassesDo(size_t i, std::vector<bool> &visited, std::vector<bool> &stack, const MetadataTable<TypeRef>* typeRefTable);
+		void linkReconstructedClassesDo(size_t i, std::vector<bool> &visited, std::vector<bool> &stack, ClassList &refClasses, const MetadataTable<TypeRef>* typeRefTable);
 
 		std::unique_ptr<DotnetClass> createClassDefinition(const TypeDef* typeDef, std::size_t fieldsCount,
 															std::size_t methodsCount, std::size_t typeDefIndex);
