@@ -275,6 +275,10 @@ void DotnetTypeReconstructor::linkReconstructedClasses()
 
 /**
  * Helper function for linkReconstructedClasses()
+ * @param i Index of a class to be linked.
+ * @param visited Visited flags for cyclic linkage detection.
+ * @param stack Recent traversal stack for cyclic linkage detection.
+ * @param typeRefTable Typeref table.
  */
 void DotnetTypeReconstructor::linkReconstructedClassesDo(size_t i, std::vector<bool> &visited, std::vector<bool> &stack,
 														const MetadataTable<TypeRef>* typeRefTable)
@@ -321,8 +325,6 @@ void DotnetTypeReconstructor::linkReconstructedClassesDo(size_t i, std::vector<b
 		return;
 	}
 
-	// std::cerr << "Setting parent: " << typeRef->getName() << "[" << typeRef->getIndex()
-	// 			<< "] -> " << parent->getName() << "[" << parent->getIndex() << "]\n";
 	typeRef->setParent(parent);
 	
 	stack[parentI] = true;

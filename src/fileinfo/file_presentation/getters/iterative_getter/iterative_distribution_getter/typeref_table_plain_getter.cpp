@@ -82,13 +82,7 @@ bool TypeRefTablePlainGetter::loadRecord(std::size_t structIndex, std::size_t re
 	record.push_back(replaceNonprintableChars(fileinfo.getDotnetImportedClassNameWithParentClassIndex(recIndex)));
 	record.push_back(replaceNonprintableChars(fileinfo.getDotnetImportedClassLibName(recIndex)));
 	record.push_back(fileinfo.getDotnetImportedClassTypeRefIndexAsString(recIndex));
-	// record.push_back(replaceNonprintableChars(fileinfo.getImportLibraryName(recIndex)));
-	// record.push_back(fileinfo.getImportOrdinalNumberStr(recIndex, std::dec));
-	// record.push_back(fileinfo.getImportAddressStr(recIndex, hexWithPrefix));
-	// if (fileinfo.getFileFormatEnum() == Format::PE)
-	// 	record.push_back(static_cast<const PeImport*>(fileinfo.getImport(recIndex))->isDelayed() ? "Yes" : "No");
-	// else
-	// 	record.push_back(std::string{});
+	
 	return true;
 }
 
