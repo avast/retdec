@@ -32,7 +32,7 @@ ResourceIcon::~ResourceIcon()
  * Get icon width
  * @return Icon with
  */
-unsigned short ResourceIcon::getWidth() const
+std::uint16_t ResourceIcon::getWidth() const
 {
     return width;
 }
@@ -41,7 +41,7 @@ unsigned short ResourceIcon::getWidth() const
  * Get icon height
  * @return Icon height
  */
-unsigned short ResourceIcon::getHeight() const
+std::uint16_t ResourceIcon::getHeight() const
 {
     return height;
 }
@@ -95,7 +95,7 @@ std::size_t ResourceIcon::getIconGroup() const
  * Set icon width
  * @param iWidth Icon width
  */
-void ResourceIcon::setWidth(unsigned short iWidth)
+void ResourceIcon::setWidth(std::uint16_t iWidth)
 {
     if(width == 0)
     {
@@ -109,7 +109,7 @@ void ResourceIcon::setWidth(unsigned short iWidth)
  * Set icon height
  * @param iHeight Icon height
  */
-void ResourceIcon::setHeight(unsigned short iHeight)
+void ResourceIcon::setHeight(std::uint16_t iHeight)
 {
     if(height == 0)
     {

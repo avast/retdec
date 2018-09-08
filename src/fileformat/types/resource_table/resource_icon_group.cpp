@@ -191,7 +191,7 @@ bool ResourceIconGroup::getEntryNameID(std::size_t eIndex, std::size_t &nameID) 
  * @param width Destination for result to be stored
  * @return @c true if get was successfull, otherwise false
 */
-bool ResourceIconGroup::getEntryWidth(std::size_t eIndex, unsigned short &width) const
+bool ResourceIconGroup::getEntryWidth(std::size_t eIndex, std::uint16_t &width) const
 {
 	std::vector<unsigned char> bytes;
 
@@ -211,7 +211,7 @@ bool ResourceIconGroup::getEntryWidth(std::size_t eIndex, unsigned short &width)
  * @param height Destination for result to be stored
  * @return @c true if get was successfull, otherwise false
 */
-bool ResourceIconGroup::getEntryHeight(std::size_t eIndex, unsigned short &height) const
+bool ResourceIconGroup::getEntryHeight(std::size_t eIndex, std::uint16_t &height) const
 {
 	std::vector<unsigned char> bytes;
 

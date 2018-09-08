@@ -43,8 +43,8 @@ class ResourceIconGroup : public Resource
         /// @{
         bool getNumberOfEntries(std::size_t &nEntries) const;
         bool getEntryNameID(std::size_t eIndex, std::size_t &nameID) const;
-        bool getEntryWidth(std::size_t eIndex, unsigned short &width) const;
-        bool getEntryHeight(std::size_t eIndex, unsigned short &height) const;
+        bool getEntryWidth(std::size_t eIndex, std::uint16_t &width) const;
+        bool getEntryHeight(std::size_t eIndex, std::uint16_t &height) const;
         bool getEntryIconSize(std::size_t eIndex, std::size_t &iconSize) const;
         bool getEntryColorCount(std::size_t eIndex, std::uint8_t &colorCount) const;
         bool getEntryPlanes(std::size_t eIndex, std::uint16_t &planes) const;

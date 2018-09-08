@@ -17,8 +17,8 @@ namespace fileformat {
 class ResourceIcon : public Resource
 {
     private:
-        unsigned short width;             ///< icon width
-        unsigned short height;            ///< icon height
+        std::uint16_t width;              ///< icon width
+        std::uint16_t height;             ///< icon height
         std::size_t iconSize;             ///< icon size in file
         std::uint8_t colorCount;          ///< icon color count
         std::uint16_t planes;             ///< icon planes
@@ -33,8 +33,8 @@ class ResourceIcon : public Resource
 
         /// @name Getters
         /// @{
-        unsigned short getWidth() const;
-        unsigned short getHeight() const;
+        std::uint16_t getWidth() const;
+        std::uint16_t getHeight() const;
         std::size_t getIconSize() const;
         std::uint8_t getColorCount() const;
         std::uint16_t getPlanes() const;
@@ -44,8 +44,8 @@ class ResourceIcon : public Resource
 
         /// @name Setters
         /// @{
-        void setWidth(unsigned short iWidth);
-        void setHeight(unsigned short iHeight);
+        void setWidth(std::uint16_t iWidth);
+        void setHeight(std::uint16_t iHeight);
         void setIconSize(std::size_t iSize);
         void setColorCount(std::uint8_t iColorCount);
         void setPlanes(std::uint16_t iPlanes);

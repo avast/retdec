@@ -278,7 +278,10 @@ void ResourceTable::computeIconHashes()
         return;
     }
 
-    priorIcon->getBytes(iconHashBytes);
+    if (!priorIcon->getBytes(iconHashBytes))
+    {
+    	return;
+    }
 
     iconHashCrc32 = retdec::crypto::getCrc32(iconHashBytes.data(), iconHashBytes.size());
     iconHashMd5 = retdec::crypto::getMd5(iconHashBytes.data(), iconHashBytes.size());
