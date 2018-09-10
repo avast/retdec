@@ -1066,6 +1066,10 @@ GenericValue executeFPTruncInst(
 	{
 		Dest.FloatVal = static_cast<float>(Src.DoubleVal);
 	}
+	else if (SrcVal->getType()->isX86_FP80Ty() && DstTy->isFloatTy())
+	{
+		Dest.FloatVal = static_cast<float>(Src.DoubleVal);
+	}
 	else if (SrcVal->getType()->isX86_FP80Ty() && DstTy->isDoubleTy())
 	{
 		Dest.DoubleVal = Src.DoubleVal;
