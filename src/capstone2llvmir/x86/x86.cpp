@@ -988,9 +988,32 @@ llvm::Value* Capstone2LlvmIrTranslatorX86_impl::loadOp(
 		}
 		case X86_OP_MEM:
 		{
-// TODO: what to do with this?
-//			auto* segR = loadRegister(op.mem.segment, irb);
-//			assert(segR == nullptr);
+			// LLVM doesn't really document address spaces. However, judging by
+			// X86ISelDAGToDag.cpp, the mapping is 256 -> GS, 257 -> FS, 258 -> SS.
+			unsigned addressSpace;
+			switch (op.mem.segment)
+			{
+				case X86_REG_FS:
+				{
+					addressSpace = 256;
+					break;
+				}
+				case X86_REG_GS:
+				{
+					addressSpace = 257;
+					break;
+				}
+				case X86_REG_SS:
+				{
+					addressSpace = 256;
+					break;
+				}
+				default:
+				{
+					addressSpace = 0;
+					break;
+				}
+			}
 
 			auto* baseR = loadRegister(op.mem.base, irb);
 			auto* t = baseR ? baseR->getType() : getDefaultType();
@@ -1047,7 +1070,7 @@ llvm::Value* Capstone2LlvmIrTranslatorX86_impl::loadOp(
 				llvm::Type* t = ty && ty->isFloatingPointTy()
 						? getFloatTypeFromByteSize(_module, op.size)
 						: getIntegerTypeFromByteSize(_module, op.size);
-				auto* pt = llvm::PointerType::get(t, 0);
+				auto* pt = llvm::PointerType::get(t, addressSpace);
 				addr = irb.CreateIntToPtr(addr, pt);
 				return irb.CreateLoad(addr);
 			}
