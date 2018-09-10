@@ -7,6 +7,7 @@
 #include "retdec/capstone2llvmir/capstone2llvmir.h"
 
 #include "capstone2llvmir/arm/arm_impl.h"
+#include "capstone2llvmir/arm64/arm64_impl.h"
 #include "capstone2llvmir/mips/mips_impl.h"
 #include "capstone2llvmir/powerpc/powerpc_impl.h"
 #include "capstone2llvmir/x86/x86_impl.h"
@@ -93,8 +94,7 @@ std::unique_ptr<Capstone2LlvmIrTranslator> Capstone2LlvmIrTranslator::createArm6
 		llvm::Module* m,
 		cs_mode extra)
 {
-	assert(false && "not implemented");
-	return nullptr;
+	return std::make_unique<Capstone2LlvmIrTranslatorArm64_impl>(m, CS_MODE_ARM, extra);
 }
 
 std::unique_ptr<Capstone2LlvmIrTranslator> Capstone2LlvmIrTranslator::createMips32(
