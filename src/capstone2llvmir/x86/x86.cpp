@@ -842,6 +842,31 @@ void Capstone2LlvmIrTranslatorX86_impl::storeRegistersPlusSflags(
 	storeRegister(X86_REG_PF, generateParityFlag(sflagsVal, irb), irb);
 }
 
+unsigned Capstone2LlvmIrTranslatorX86_impl::getAddrSpace(x86_reg segment)
+{
+	// LLVM doesn't really document address spaces. However, judging by
+	// X86ISelDAGToDag.cpp, the mapping is 256 -> GS, 257 -> FS, 258 -> SS.
+	switch (segment)
+	{
+		case X86_REG_FS:
+		{
+			return 256;
+		}
+		case X86_REG_GS:
+		{
+			return 257;
+		}
+		case X86_REG_SS:
+		{
+			return 258;
+		}
+		default:
+		{
+			return 0;
+		}
+	}
+}
+
 llvm::Value* Capstone2LlvmIrTranslatorX86_impl::loadX87Top(llvm::IRBuilder<>& irb)
 {
 	return loadRegister(X87_REG_TOP, irb);
@@ -988,33 +1013,6 @@ llvm::Value* Capstone2LlvmIrTranslatorX86_impl::loadOp(
 		}
 		case X86_OP_MEM:
 		{
-			// LLVM doesn't really document address spaces. However, judging by
-			// X86ISelDAGToDag.cpp, the mapping is 256 -> GS, 257 -> FS, 258 -> SS.
-			unsigned addressSpace;
-			switch (op.mem.segment)
-			{
-				case X86_REG_FS:
-				{
-					addressSpace = 256;
-					break;
-				}
-				case X86_REG_GS:
-				{
-					addressSpace = 257;
-					break;
-				}
-				case X86_REG_SS:
-				{
-					addressSpace = 258;
-					break;
-				}
-				default:
-				{
-					addressSpace = 0;
-					break;
-				}
-			}
-
 			auto* baseR = loadRegister(op.mem.base, irb);
 			auto* t = baseR ? baseR->getType() : getDefaultType();
 			llvm::Value* disp = op.mem.disp
@@ -1070,7 +1068,7 @@ llvm::Value* Capstone2LlvmIrTranslatorX86_impl::loadOp(
 				llvm::Type* t = ty && ty->isFloatingPointTy()
 						? getFloatTypeFromByteSize(_module, op.size)
 						: getIntegerTypeFromByteSize(_module, op.size);
-				auto* pt = llvm::PointerType::get(t, addressSpace);
+				auto* pt = llvm::PointerType::get(t, getAddrSpace(op.mem.segment));
 				addr = irb.CreateIntToPtr(addr, pt);
 				return irb.CreateLoad(addr);
 			}
@@ -1098,10 +1096,6 @@ llvm::Instruction* Capstone2LlvmIrTranslatorX86_impl::storeOp(
 		}
 		case X86_OP_MEM:
 		{
-// TODO: what to do with this?
-//			auto* segR = loadRegister(op.mem.segment, irb);
-//			assert(segR == nullptr);
-
 			auto* baseR = loadRegister(op.mem.base, irb);
 			auto* t = baseR ? baseR->getType() : getDefaultType();
 			llvm::Value* disp = op.mem.disp
@@ -1152,7 +1146,7 @@ llvm::Instruction* Capstone2LlvmIrTranslatorX86_impl::storeOp(
 
 			val = generateTypeConversion(irb, val, tt, ct);
 
-			auto* pt = llvm::PointerType::get(tt, 0);
+			auto* pt = llvm::PointerType::get(tt, getAddrSpace(op.mem.segment));
 			addr = irb.CreateIntToPtr(addr, pt);
 			return irb.CreateStore(val, addr);
 		}
