@@ -24,7 +24,11 @@ void Capstone2LlvmIrTranslatorArm64_impl::initializeRegNameMap()
 {
 	std::map<uint32_t, std::string> r2n =
 	{
-			// TODO: Status register
+			{ARM64_REG_CPSR_N, "cpsr_n"},
+			{ARM64_REG_CPSR_Z, "cpsr_z"},
+			{ARM64_REG_CPSR_C, "cpsr_c"},
+			{ARM64_REG_CPSR_V, "cpsr_v"},
+			{ARM64_REG_PC, "pc"},
 	};
 
 	_reg2name = std::move(r2n);
@@ -32,8 +36,7 @@ void Capstone2LlvmIrTranslatorArm64_impl::initializeRegNameMap()
 
 void Capstone2LlvmIrTranslatorArm64_impl::initializeRegTypeMap()
 {
-	// TODO: Add Status Register flags
-	//auto* i1 = llvm::IntegerType::getInt1Ty(_module->getContext());
+	auto* i1 = llvm::IntegerType::getInt1Ty(_module->getContext());
 	auto* i32 = llvm::IntegerType::getInt32Ty(_module->getContext());
 	auto* defTy = getDefaultType();
 
@@ -123,6 +126,13 @@ void Capstone2LlvmIrTranslatorArm64_impl::initializeRegTypeMap()
 
 		// CPSR flags.
 		//
+		{ARM64_REG_CPSR_N, i1},
+		{ARM64_REG_CPSR_Z, i1},
+		{ARM64_REG_CPSR_C, i1},
+		{ARM64_REG_CPSR_V, i1},
+
+		// Program counter.
+		{ARM64_REG_PC, defTy},
 	};
 
 	_reg2type = std::move(r2t);

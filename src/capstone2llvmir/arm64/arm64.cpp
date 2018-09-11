@@ -151,6 +151,15 @@ void Capstone2LlvmIrTranslatorArm64_impl::generateRegisters()
 	// Zero.
 	createRegister(ARM64_REG_XZR, _regLt);
 	createRegister(ARM64_REG_WZR, _regLt);
+
+	// Flags.
+	createRegister(ARM64_REG_CPSR_N, _regLt);
+	createRegister(ARM64_REG_CPSR_Z, _regLt);
+	createRegister(ARM64_REG_CPSR_C, _regLt);
+	createRegister(ARM64_REG_CPSR_V, _regLt);
+
+	// Program counter.
+	createRegister(ARM64_REG_PC, _regLt);
 }
 
 uint32_t Capstone2LlvmIrTranslatorArm64_impl::getCarryRegister()

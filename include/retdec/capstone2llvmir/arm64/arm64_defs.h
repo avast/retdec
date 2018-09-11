@@ -9,13 +9,13 @@
 
 #include <capstone/arm64.h>
 
-// TODO: Not relevant yet
-//enum arm64_reg_cpsr_flags
-//{
-//	ARM_REG_CPSR_N = ARM_REG_ENDING + 1,
-//	ARM_REG_CPSR_Z,
-//	ARM_REG_CPSR_C,
-//	ARM_REG_CPSR_V,
-//};
+enum arm64_reg_cpsr_flags
+{
+	ARM64_REG_CPSR_N = ARM64_REG_ENDING + 1,
+	ARM64_REG_CPSR_Z,
+	ARM64_REG_CPSR_C,
+	ARM64_REG_CPSR_V,
+	ARM64_REG_PC,
+};
 
 #endif /* RETDEC_CAPSTONE2LLVMIR_ARM64_ARM64_DEFS_H */
