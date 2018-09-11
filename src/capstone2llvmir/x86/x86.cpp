@@ -4165,6 +4165,18 @@ Capstone2LlvmIrTranslatorX86_impl::loadOpFloatingBinaryTop(
 		assert(false && "unhandled");
 	}
 
+	if (i->id == X86_INS_FSUBP
+			|| i->id == X86_INS_FADDP
+			|| i->id == X86_INS_FDIVP
+			|| i->id == X86_INS_FDIVRP
+			|| i->id == X86_INS_FMULP
+			|| i->id == X86_INS_FSUBRP)
+	{
+		auto* tmp = op0;
+		op0 = op1;
+		op1 = tmp;
+	}
+
 	return std::make_tuple(op0, op1, top, idx);
 }
 
@@ -4275,9 +4287,17 @@ void Capstone2LlvmIrTranslatorX86_impl::translateFsub(cs_insn* i, cs_x86* xi, ll
 {
 	std::tie(op0, op1, top, idx) = loadOpFloatingBinaryTop(i, xi, irb);
 
-	auto* fsub = irb.CreateFSub(op0, op1); // or op1, op0?
+	auto* fsub = irb.CreateFSub(op0, op1);
 
-	storeX87DataReg(irb, idx, fsub);
+	if (xi->op_count == 2 || i->id == X86_INS_FSUBP)
+	{
+		storeX87DataReg(irb, idx, fsub);
+	}
+	else
+	{
+		storeX87DataReg(irb, top, fsub);
+	}
+
 	if (i->id == X86_INS_FSUBP)
 	{
 		clearX87TagReg(irb, top); // pop
@@ -4290,12 +4310,19 @@ void Capstone2LlvmIrTranslatorX86_impl::translateFsub(cs_insn* i, cs_x86* xi, ll
  */
 void Capstone2LlvmIrTranslatorX86_impl::translateFsubr(cs_insn* i, cs_x86* xi, llvm::IRBuilder<>& irb)
 {
-	//        op, top
 	std::tie(op0, op1, top, idx) = loadOpFloatingBinaryTop(i, xi, irb);
 
-	auto* fsub = irb.CreateFSub(op0, op1); // or op1, op0?
+	auto* fsub = irb.CreateFSub(op1, op0);
 
-	storeX87DataReg(irb, idx, fsub);
+	if (xi->op_count == 2 || i->id == X86_INS_FSUBRP)
+	{
+		storeX87DataReg(irb, idx, fsub);
+	}
+	else
+	{
+		storeX87DataReg(irb, top, fsub);
+	}
+
 	if (i->id == X86_INS_FSUBRP)
 	{
 		clearX87TagReg(irb, top); // pop
@@ -4348,8 +4375,8 @@ void Capstone2LlvmIrTranslatorX86_impl::translateFxch(cs_insn* i, cs_x86* xi, ll
 {
 	std::tie(op0, op1, top, idx) = loadOpFloatingBinaryTop(i, xi, irb);
 
-	storeX87DataReg(irb, top, op0);
-	storeX87DataReg(irb, idx, op1);
+	storeX87DataReg(irb, top, op1);
+	storeX87DataReg(irb, idx, op0);
 }
 
 /**
@@ -4526,12 +4553,14 @@ void Capstone2LlvmIrTranslatorX86_impl::translateFucomPop(cs_insn* i, cs_x86* xi
 		r3 = X86_REG_ZF;
 	}
 
-	// op1 == top
-	std::tie(op0, op1, top, idx) = loadOpFloatingBinaryTop(i, xi, irb);
-
 	if (i->id == X86_INS_FTST)
 	{
-		op1 = llvm::ConstantFP::get(op1->getType(), 0.0);
+		std::tie(op0, top) = loadOpFloatingUnaryTop(i, xi, irb);
+		op1 = llvm::ConstantFP::get(op0->getType(), 0.0);
+	}
+	else
+	{
+		std::tie(op0, op1, top, idx) = loadOpFloatingBinaryTop(i, xi, irb);
 	}
 
 	auto* fcmpOgt = irb.CreateFCmpOGT(op0, op1);
