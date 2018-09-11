@@ -182,6 +182,7 @@ ShPtr<Expression> LLVMConverter::llvmConstantToExpression(llvm::Constant *c) {
 				return IntToPtrCastExpr::create(op, llvmTypeToType(ce->getType()));
 
 			case llvm::Instruction::BitCast:
+			case llvm::Instruction::AddrSpaceCast:
 				return BitCastExpr::create(op, llvmTypeToType(ce->getType()));
 
 			case llvm::Instruction::GetElementPtr:
