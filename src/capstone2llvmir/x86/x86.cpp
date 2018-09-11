@@ -1005,7 +1005,7 @@ llvm::Value* Capstone2LlvmIrTranslatorX86_impl::loadOp(
 				}
 				case X86_REG_SS:
 				{
-					addressSpace = 256;
+					addressSpace = 258;
 					break;
 				}
 				default:
