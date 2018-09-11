@@ -182,6 +182,7 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateInstruction(
 		}
 		else
 		{
+			(this->*f)(i, ai, irb);
 
 			assert(false && "NOT YET IMPLEMENTED");
 
