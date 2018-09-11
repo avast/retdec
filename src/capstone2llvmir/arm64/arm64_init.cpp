@@ -24,11 +24,11 @@ void Capstone2LlvmIrTranslatorArm64_impl::initializeRegNameMap()
 {
 	std::map<uint32_t, std::string> r2n =
 	{
-			{ARM64_REG_CPSR_N, "cpsr_n"},
-			{ARM64_REG_CPSR_Z, "cpsr_z"},
-			{ARM64_REG_CPSR_C, "cpsr_c"},
-			{ARM64_REG_CPSR_V, "cpsr_v"},
-			{ARM64_REG_PC, "pc"},
+			{ARM64_REG_CPSR_N, "cpsr_n"}, // Negative
+			{ARM64_REG_CPSR_Z, "cpsr_z"}, // Zero
+			{ARM64_REG_CPSR_C, "cpsr_c"}, // Carry
+			{ARM64_REG_CPSR_V, "cpsr_v"}, // Overflow
+			{ARM64_REG_PC, "pc"},         // Program counter
 	};
 
 	_reg2name = std::move(r2n);

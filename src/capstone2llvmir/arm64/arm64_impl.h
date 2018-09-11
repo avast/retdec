@@ -79,6 +79,11 @@ class Capstone2LlvmIrTranslatorArm64_impl :
 				llvm::Value* val,
 				llvm::IRBuilder<>& irb,
 				eOpConv ct = eOpConv::SEXT_TRUNC) override;
+
+		llvm::Value* generateOperandShift(
+				llvm::IRBuilder<>& irb,
+				cs_arm64_op& op,
+				llvm::Value* val);
 //
 //==============================================================================
 // ARM64 implementation data.

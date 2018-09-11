@@ -228,8 +228,24 @@ llvm::Value* Capstone2LlvmIrTranslatorArm64_impl::loadRegister(
 		llvm::Type* dstType,
 		eOpConv ct)
 {
-	assert(false && "NOT YET IMPLEMENTED");
-	return nullptr;
+	if (r == ARM64_REG_INVALID)
+	{
+		return nullptr;
+	}
+
+	if (r == ARM64_REG_PC)
+	{
+		return getCurrentPc(_insn);
+		// TODO: Check
+	}
+
+	auto* llvmReg = getRegister(r);
+	if (llvmReg == nullptr)
+	{
+		throw Capstone2LlvmIrError("loadRegister() unhandled reg.");
+	}
+
+	return irb.CreateLoad(llvmReg);
 }
 
 llvm::Value* Capstone2LlvmIrTranslatorArm64_impl::loadOp(
@@ -238,8 +254,37 @@ llvm::Value* Capstone2LlvmIrTranslatorArm64_impl::loadOp(
 		llvm::Type* ty,
 		bool lea)
 {
-	assert(false && "NOT YET IMPLEMENTED");
-	return nullptr;
+	switch (op.type)
+	{
+		case ARM64_OP_SYS:
+		case ARM64_OP_REG:
+		{
+			auto* val = loadRegister(op.reg, irb);
+			return generateOperandShift(irb, op, val);
+		}
+		case ARM64_OP_IMM:
+		{
+			auto* val = llvm::ConstantInt::getSigned(getDefaultType(), op.imm);
+			return generateOperandShift(irb, op, val);
+		}
+		case ARM64_OP_MEM:
+		{
+			// TODO: MEM OP
+		}
+		case ARM64_OP_FP:
+		case ARM64_OP_INVALID: 
+		case ARM64_OP_CIMM: 
+		case ARM64_OP_REG_MRS: 
+		case ARM64_OP_REG_MSR: 
+		case ARM64_OP_PSTATE: 
+		case ARM64_OP_PREFETCH: 
+		case ARM64_OP_BARRIER: 
+		default:
+		{
+			assert(false && "loadOp(): unhandled operand type.");
+			return nullptr;
+		}
+	}
 }
 
 llvm::Instruction* Capstone2LlvmIrTranslatorArm64_impl::storeRegister(
@@ -248,8 +293,25 @@ llvm::Instruction* Capstone2LlvmIrTranslatorArm64_impl::storeRegister(
 		llvm::IRBuilder<>& irb,
 		eOpConv ct)
 {
-	assert(false && "NOT YET IMPLEMENTED");
-	return nullptr;
+	if (r == ARM64_REG_INVALID)
+	{
+		return nullptr;
+	}
+
+	if (r == ARM64_REG_PC)
+	{
+		return nullptr;
+		// TODO: Check?
+	}
+
+	auto* llvmReg = getRegister(r);
+	if (llvmReg == nullptr)
+	{
+		throw Capstone2LlvmIrError("storeRegister() unhandled reg.");
+	}
+	val = generateTypeConversion(irb, val, llvmReg->getValueType(), ct);
+
+	return irb.CreateStore(val, llvmReg);
 }
 
 llvm::Instruction* Capstone2LlvmIrTranslatorArm64_impl::storeOp(
@@ -258,8 +320,41 @@ llvm::Instruction* Capstone2LlvmIrTranslatorArm64_impl::storeOp(
 		llvm::IRBuilder<>& irb,
 		eOpConv ct)
 {
-	assert(false && "NOT YET IMPLEMENTED");
-	return nullptr;
+	switch (op.type)
+	{
+		case ARM64_OP_SYS:
+		case ARM64_OP_REG:
+		{
+			return storeRegister(op.reg, val, irb, ct);
+		}
+		case ARM64_OP_MEM:
+		{
+			// TODO: OP MEM
+		}
+		case ARM64_OP_INVALID: 
+		case ARM64_OP_IMM: 
+		case ARM64_OP_FP:  
+		case ARM64_OP_CIMM: 
+		case ARM64_OP_REG_MRS: 
+		case ARM64_OP_REG_MSR: 
+		case ARM64_OP_PSTATE: 
+		case ARM64_OP_PREFETCH: 
+		case ARM64_OP_BARRIER: 
+		default:
+		{
+			assert(false && "stroreOp(): unhandled operand type.");
+			return nullptr;
+		}
+	}
+}
+
+llvm::Value* Capstone2LlvmIrTranslatorArm64_impl::generateOperandShift(
+		llvm::IRBuilder<>& irb,
+		cs_arm64_op& op,
+		llvm::Value* val)
+{
+	return val;
+	// TODO: NOT YET IMPLEMENTED
 }
 
 //
@@ -273,7 +368,9 @@ llvm::Instruction* Capstone2LlvmIrTranslatorArm64_impl::storeOp(
  */
 void Capstone2LlvmIrTranslatorArm64_impl::translateAdd(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb)
 {
-	assert(false && "NOT YET IMPLEMENTED");
+	std::tie(op1, op2) = loadOpTernaryOp1Op2(ai, irb);
+	auto *val = irb.CreateAdd(op1, op2);
+	storeOp(ai->operands[0], val, irb);
 }
 
 } // namespace capstone2llvmir
