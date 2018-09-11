@@ -3998,9 +3998,9 @@ void Capstone2LlvmIrTranslatorX86_impl::translateFst(cs_insn* i, cs_x86* xi, llv
 		assert(X86_REG_ST0 <= reg && reg <= X86_REG_ST7);
 		unsigned regOff = reg - X86_REG_ST0;
 
-		// TODO: here, and in other places, add is generated even if regOff is
-		// zero -> prevent this generation.
-		idx = irb.CreateAdd(top, llvm::ConstantInt::get(top->getType(), regOff));
+		idx = regOff
+				? irb.CreateAdd(top, llvm::ConstantInt::get(top->getType(), regOff))
+				: top;
 
 		storeX87DataReg(irb, idx, src);
 	}
@@ -4040,7 +4040,9 @@ Capstone2LlvmIrTranslatorX86_impl::loadOpFloatingUnaryTop(
 		auto reg1 = xi->operands[0].reg;
 		assert(X86_REG_ST0 <= reg1 && reg1 <= X86_REG_ST7);
 		unsigned regOff1 = reg1 - X86_REG_ST0;
-		auto* idx = irb.CreateAdd(top, llvm::ConstantInt::get(top->getType(), regOff1));
+		auto* idx = regOff1
+				? irb.CreateAdd(top, llvm::ConstantInt::get(top->getType(), regOff1))
+				: top;
 
 		op0 = loadX87DataReg(irb, idx);
 	}
@@ -4101,12 +4103,16 @@ Capstone2LlvmIrTranslatorX86_impl::loadOpFloatingBinaryTop(
 		auto reg1 = xi->operands[0].reg;
 		assert(X86_REG_ST0 <= reg1 && reg1 <= X86_REG_ST7);
 		unsigned regOff1 = reg1 - X86_REG_ST0;
-		idx = irb.CreateAdd(top, llvm::ConstantInt::get(top->getType(), regOff1));
+		idx = regOff1
+				? irb.CreateAdd(top, llvm::ConstantInt::get(top->getType(), regOff1))
+				: top;
 
 		auto reg2 = xi->operands[1].reg;
 		assert(X86_REG_ST0 <= reg2 && reg2 <= X86_REG_ST7);
 		unsigned regOff2 = reg2 - X86_REG_ST0;
-		auto* idx2 = irb.CreateAdd(top, llvm::ConstantInt::get(top->getType(), regOff2));
+		auto* idx2 = regOff2
+				? irb.CreateAdd(top, llvm::ConstantInt::get(top->getType(), regOff2))
+				: top;
 
 		op0 = loadX87DataReg(irb, idx);
 		op1 = loadX87DataReg(irb, idx2);
@@ -4116,7 +4122,9 @@ Capstone2LlvmIrTranslatorX86_impl::loadOpFloatingBinaryTop(
 		auto reg = xi->operands[0].reg;
 		assert(X86_REG_ST0 <= reg && reg <= X86_REG_ST7);
 		unsigned regOff = reg - X86_REG_ST0;
-		idx = irb.CreateAdd(top, llvm::ConstantInt::get(top->getType(), regOff));
+		idx = regOff
+				? irb.CreateAdd(top, llvm::ConstantInt::get(top->getType(), regOff))
+				: top;
 
 		op0 = loadX87DataReg(irb, top);
 		op1 = loadX87DataReg(irb, idx);
