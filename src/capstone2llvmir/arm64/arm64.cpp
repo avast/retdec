@@ -17,7 +17,7 @@ Capstone2LlvmIrTranslatorArm64_impl::Capstone2LlvmIrTranslatorArm64_impl(
 		cs_mode basic,
 		cs_mode extra)
 		:
-		Capstone2LlvmIrTranslator_impl(CS_ARCH_ARM, basic, extra, m)
+		Capstone2LlvmIrTranslator_impl(CS_ARCH_ARM64, basic, extra, m)
 {
 	initialize();
 }
@@ -71,6 +71,7 @@ void Capstone2LlvmIrTranslatorArm64_impl::generateRegisters()
 {
 			// General purpose registers.
 			//
+
 	createRegister(ARM64_REG_X0, _regLt);
 	createRegister(ARM64_REG_X1, _regLt);
 	createRegister(ARM64_REG_X2, _regLt);
