@@ -611,12 +611,14 @@ class Capstone2LlvmIrTranslatorTests : public ::testing::Test
 								<< "\n" << dumpFunction(_function);
 						break;
 					case StoredValue::eType::DOUBLE:
-						EXPECT_DOUBLE_EQ(val.d, getRegisterValueDouble(reg))
+						// EXPECT_DOUBLE_EQ is too strict.
+						EXPECT_NEAR(val.d, getRegisterValueDouble(reg), 0.001)
 								<< "\nregister = " << _translator->getRegisterName(reg)
 								<< "\n" << dumpFunction(_function);
 						break;
 					case StoredValue::eType::FLOAT:
-						EXPECT_FLOAT_EQ(val.f, getRegisterValueFloat(reg))
+						// EXPECT__FLOAT_EQ is too strict.
+						EXPECT_NEAR(val.f, getRegisterValueFloat(reg), 0.001)
 								<< "\nregister = " << _translator->getRegisterName(reg)
 								<< "\n" << dumpFunction(_function);
 						break;

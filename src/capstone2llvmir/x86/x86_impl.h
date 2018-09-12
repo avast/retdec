@@ -163,7 +163,12 @@ class Capstone2LlvmIrTranslatorX86_impl :
 				llvm::IRBuilder<>& irb,
 				llvm::Value* rNum);
 
-		std::tuple<llvm::Value*, llvm::Value*, llvm::Value*, llvm::Value*> loadOpFloatingUnaryTop(
+		std::tuple<llvm::Value*, llvm::Value*> loadOpFloatingUnaryTop(
+				cs_insn* i,
+				cs_x86* xi,
+				llvm::IRBuilder<>& irb);
+
+		std::tuple<llvm::Value*, llvm::Value*, llvm::Value*, llvm::Value*> loadOpFloatingBinaryTop(
 				cs_insn* i,
 				cs_x86* xi,
 				llvm::IRBuilder<>& irb);

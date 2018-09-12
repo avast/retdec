@@ -73,7 +73,7 @@ class Capstone2LlvmIrTranslatorX86Tests :
 			{
 				llvm::Instruction* i = &*I;
 
-				auto *l = dyn_cast<LoadInst>(i);
+				auto* l = dyn_cast<LoadInst>(i);
 				auto* sub = dyn_cast<SubOperator>(i);
 				auto* add = dyn_cast<AddOperator>(i);
 				auto* call = dyn_cast<CallInst>(i);
@@ -87,16 +87,18 @@ class Capstone2LlvmIrTranslatorX86Tests :
 						&& isa<ConstantInt>(sub->getOperand(1)))
 				{
 					uint64_t v = cast<ConstantInt>(sub->getOperand(1))->getZExtValue();
-					topVal += v;
-					vals[sub] = topVal;
+					auto fIt = vals.find(sub->getOperand(0));
+					assert(fIt != vals.end());
+					vals[sub] = fIt->second - v;
 				}
 				else if (add
 						&& vals.find(add->getOperand(0)) != vals.end()
 						&& isa<ConstantInt>(add->getOperand(1)))
 				{
 					uint64_t v = cast<ConstantInt>(add->getOperand(1))->getZExtValue();
-					topVal -= v;
-					vals[add] = topVal;
+					auto fIt = vals.find(add->getOperand(0));
+					assert(fIt != vals.end());
+					vals[add] = fIt->second + v;
 				}
 				else if (call
 						&& (x86Trans->getX87DataStoreFunction() == call->getCalledFunction()
@@ -9278,40 +9280,138 @@ TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_CMOVS_no_move)
 // X86_INS_FLD
 //
 
-TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FLD)
+// D9 /0	FLD m32fp	Push m32fp onto the FPU register stack.
+TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FLD_m32)
 {
 	ALL_MODES;
 
 	setRegisters({
-		{X87_REG_TOP, 0x0},
+		{X87_REG_TOP, 0x5},
 	});
 
 	setMemory({
-		{0x1234, 3.14},
+		{0x1234, 3.14_f32},
+	});
+
+	emulate("fld dword ptr [0x1234]");
+
+	EXPECT_JUST_REGISTERS_LOADED({X87_REG_TOP});
+	EXPECT_JUST_REGISTERS_STORED({
+		{X86_REG_ST4, 3.14},
+		{X87_REG_TAG4, ANY},
+		{X87_REG_TOP, 0x4},
+	});
+	EXPECT_JUST_MEMORY_LOADED({0x1234});
+	EXPECT_NO_MEMORY_STORED();
+}
+
+// DD /0	FLD m64fp	Push m64fp onto the FPU register stack.
+TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FLD_m64)
+{
+	ALL_MODES;
+
+	setRegisters({
+		{X87_REG_TOP, 0x5},
+	});
+
+	setMemory({
+		{0x1234, 3.14_f64},
 	});
 
 	emulate("fld qword ptr [0x1234]");
 
 	EXPECT_JUST_REGISTERS_LOADED({X87_REG_TOP});
 	EXPECT_JUST_REGISTERS_STORED({
-		{X86_REG_ST1, 3.14},
-		{X87_REG_TAG1, ANY},
-		{X87_REG_TOP, ANY},
+		{X86_REG_ST4, 3.14},
+		{X87_REG_TAG4, ANY},
+		{X87_REG_TOP, 0x4},
 	});
 	EXPECT_JUST_MEMORY_LOADED({0x1234});
 	EXPECT_NO_MEMORY_STORED();
+}
+
+// D9 C0+i	FLD ST(i)	Push ST(i) onto the FPU register stack.
+TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FLD_stX)
+{
+	ALL_MODES;
+
+	setRegisters({
+		{X87_REG_TOP, 0x4},
+		{X86_REG_ST6, 3.14}, // st(2)
+	});
+
+	emulate("fld st(2)");
+
+	EXPECT_JUST_REGISTERS_LOADED({X87_REG_TOP, X86_REG_ST6});
+	EXPECT_JUST_REGISTERS_STORED({
+		{X86_REG_ST3, 3.14},
+		{X87_REG_TAG3, ANY},
+		{X87_REG_TOP, 0x3},
+	});
+	EXPECT_NO_MEMORY_LOADED_STORED();
 }
 
 //
 // X86_INS_FILD
 //
 
-TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FILD)
+// DF /0	FILD m16int	Push m16int onto the FPU register stack.
+TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FILD_m16)
 {
 	ALL_MODES;
 
 	setRegisters({
-		{X87_REG_TOP, 0x0},
+		{X87_REG_TOP, 0x5},
+	});
+
+	setMemory({
+		{0x1234, 123_w},
+	});
+
+	emulate("fild word ptr [0x1234]");
+
+	EXPECT_JUST_REGISTERS_LOADED({X87_REG_TOP});
+	EXPECT_JUST_REGISTERS_STORED({
+		{X86_REG_ST4, 123.0},
+		{X87_REG_TAG4, ANY},
+		{X87_REG_TOP, 0x4},
+	});
+	EXPECT_JUST_MEMORY_LOADED({0x1234});
+	EXPECT_NO_MEMORY_STORED();
+}
+
+// DB /0	FILD m32int	Push m32int onto the FPU register stack.
+TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FILD_m32)
+{
+	ALL_MODES;
+
+	setRegisters({
+		{X87_REG_TOP, 0x5},
+	});
+
+	setMemory({
+		{0x1234, 123_dw},
+	});
+
+	emulate("fild dword ptr [0x1234]");
+
+	EXPECT_JUST_REGISTERS_LOADED({X87_REG_TOP});
+	EXPECT_JUST_REGISTERS_STORED({
+		{X86_REG_ST4, 123.0},
+		{X87_REG_TAG4, ANY},
+		{X87_REG_TOP, 0x4},
+	});
+	EXPECT_JUST_MEMORY_LOADED({0x1234});
+	EXPECT_NO_MEMORY_STORED();
+}
+
+// DF /5	FILD m64int	Push m64int onto the FPU register stack.
+TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FILD_m64)
+{
+	ALL_MODES;
+
+	setRegisters({
+		{X87_REG_TOP, 0x5},
 	});
 
 	setMemory({
@@ -9322,9 +9422,9 @@ TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FILD)
 
 	EXPECT_JUST_REGISTERS_LOADED({X87_REG_TOP});
 	EXPECT_JUST_REGISTERS_STORED({
-		{X86_REG_ST1, 123.0},
-		{X87_REG_TAG1, ANY},
-		{X87_REG_TOP, ANY},
+		{X86_REG_ST4, 123.0},
+		{X87_REG_TAG4, ANY},
+		{X87_REG_TOP, 0x4},
 	});
 	EXPECT_JUST_MEMORY_LOADED({0x1234});
 	EXPECT_NO_MEMORY_STORED();
@@ -9334,13 +9434,34 @@ TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FILD)
 // X86_INS_FST
 //
 
-TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FST)
+// D9 /2	FST m32fp	Copy ST(0) to m32fp.
+TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FST_m32)
 {
 	ALL_MODES;
 
 	setRegisters({
 		{X87_REG_TOP, 0x1},
-		{X86_REG_ST1, 3.14},
+		{X86_REG_ST1, 3.14}, // st(0)
+	});
+
+	emulate("fst dword ptr [0x1234]");
+
+	EXPECT_JUST_REGISTERS_LOADED({X87_REG_TOP, X86_REG_ST1});
+	EXPECT_NO_REGISTERS_STORED();
+	EXPECT_NO_MEMORY_LOADED();
+	EXPECT_JUST_MEMORY_STORED({
+		{0x1234, 3.14_f32},
+	});
+}
+
+// DD /2	FST m64fp	Copy ST(0) to m64fp.
+TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FST_m64)
+{
+	ALL_MODES;
+
+	setRegisters({
+		{X87_REG_TOP, 0x1},
+		{X86_REG_ST1, 3.14}, // st(0)
 	});
 
 	emulate("fst qword ptr [0x1234]");
@@ -9349,15 +9470,108 @@ TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FST)
 	EXPECT_NO_REGISTERS_STORED();
 	EXPECT_NO_MEMORY_LOADED();
 	EXPECT_JUST_MEMORY_STORED({
-		{0x1234, 3.14},
+		{0x1234, 3.14_f64},
 	});
+}
+
+// DD D0+i	FST ST(i)	Copy ST(0) to ST(i).
+TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FST_st3)
+{
+	ALL_MODES;
+
+	setRegisters({
+		{X87_REG_TOP, 0x1},
+		{X86_REG_ST1, 3.14}, // st(0)
+	});
+
+	emulate("fst st(3)");
+
+	EXPECT_JUST_REGISTERS_LOADED({X87_REG_TOP, X86_REG_ST1});
+	EXPECT_JUST_REGISTERS_STORED({
+		{X86_REG_ST4, 3.14},
+		{X87_REG_TAG4, ANY},
+	});
+	EXPECT_NO_MEMORY_LOADED_STORED();
 }
 
 //
 // X86_INS_FSTP
 //
 
-TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FSTP)
+// D9 /3	FSTP m32fp	Copy ST(0) to m32fp and pop register stack.
+TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FSTP_m32)
+{
+	ALL_MODES;
+
+	setRegisters({
+		{X87_REG_TOP, 0x1},
+		{X86_REG_ST1, 3.14}, // st(0)
+	});
+
+	emulate("fstp dword ptr [0x1234]");
+
+	EXPECT_JUST_REGISTERS_LOADED({X87_REG_TOP, X86_REG_ST1});
+	EXPECT_JUST_REGISTERS_STORED({
+		{X87_REG_TOP, 0x2},
+		{X87_REG_TAG1, ANY},
+	});
+	EXPECT_NO_MEMORY_LOADED();
+	EXPECT_JUST_MEMORY_STORED({
+		{0x1234, 3.14_f32},
+	});
+}
+
+// DD /3	FSTP m64fp	Copy ST(0) to m64fp and pop register stack.
+TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FSTP_m64)
+{
+	ALL_MODES;
+
+	setRegisters({
+		{X87_REG_TOP, 0x1},
+		{X86_REG_ST1, 3.14}, // st(0)
+	});
+
+	emulate("fstp qword ptr [0x1234]");
+
+	EXPECT_JUST_REGISTERS_LOADED({X87_REG_TOP, X86_REG_ST1});
+	EXPECT_JUST_REGISTERS_STORED({
+		{X87_REG_TOP, 0x2},
+		{X87_REG_TAG1, ANY},
+	});
+	EXPECT_NO_MEMORY_LOADED();
+	EXPECT_JUST_MEMORY_STORED({
+		{0x1234, 3.14_f64},
+	});
+}
+
+// DD D8+i	FSTP ST(i)	Copy ST(0) to ST(i) and pop register stack.
+TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FSTP_st3)
+{
+	ALL_MODES;
+
+	setRegisters({
+		{X87_REG_TOP, 0x1},
+		{X86_REG_ST1, 3.14}, // st(0)
+	});
+
+	emulate("fstp st(3)");
+
+	EXPECT_JUST_REGISTERS_LOADED({X87_REG_TOP, X86_REG_ST1});
+	EXPECT_JUST_REGISTERS_STORED({
+		{X87_REG_TOP, 0x2},
+		{X87_REG_TAG1, ANY},
+		{X86_REG_ST4, 3.14},
+		{X87_REG_TAG4, ANY},
+	});
+	EXPECT_NO_MEMORY_LOADED_STORED();
+}
+
+//
+// X86_INS_FIST
+//
+
+// DF /2	FIST m16int	Store ST(0) in m16int.
+TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FIST_16)
 {
 	ALL_MODES;
 
@@ -9366,16 +9580,106 @@ TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FSTP)
 		{X86_REG_ST1, 3.14},
 	});
 
-	emulate("fstp qword ptr [0x1234]");
+	emulate("fist word ptr [0x1234]");
+
+	EXPECT_JUST_REGISTERS_LOADED({X87_REG_TOP, X86_REG_ST1});
+	EXPECT_NO_REGISTERS_STORED();
+	EXPECT_NO_MEMORY_LOADED();
+	EXPECT_JUST_MEMORY_STORED({
+		{0x1234, 3_w},
+	});
+}
+
+// DB /2	FIST m32int	Store ST(0) in m32int.
+TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FIST_32)
+{
+	ALL_MODES;
+
+	setRegisters({
+		{X87_REG_TOP, 0x1},
+		{X86_REG_ST1, 3.14},
+	});
+
+	emulate("fist dword ptr [0x1234]");
+
+	EXPECT_JUST_REGISTERS_LOADED({X87_REG_TOP, X86_REG_ST1});
+	EXPECT_NO_REGISTERS_STORED();
+	EXPECT_NO_MEMORY_LOADED();
+	EXPECT_JUST_MEMORY_STORED({
+		{0x1234, 3_dw},
+	});
+}
+
+//
+// X86_INS_FISTP
+//
+
+// DF /3	FISTP m16int	Store ST(0) in m16int and pop register stack.
+TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FISTP_16)
+{
+	ALL_MODES;
+
+	setRegisters({
+		{X87_REG_TOP, 0x1},
+		{X86_REG_ST1, 3.14},
+	});
+
+	emulate("fistp word ptr [0x1234]");
 
 	EXPECT_JUST_REGISTERS_LOADED({X87_REG_TOP, X86_REG_ST1});
 	EXPECT_JUST_REGISTERS_STORED({
-		{X87_REG_TOP, ANY},
+		{X87_REG_TOP, 0x2},
 		{X87_REG_TAG1, ANY},
 	});
 	EXPECT_NO_MEMORY_LOADED();
 	EXPECT_JUST_MEMORY_STORED({
-		{0x1234, 3.14},
+		{0x1234, 3_w},
+	});
+}
+
+// DB /3	FISTP m32int	Store ST(0) in m32int and pop register stack.
+TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FISTP_32)
+{
+	ALL_MODES;
+
+	setRegisters({
+		{X87_REG_TOP, 0x1},
+		{X86_REG_ST1, 3.14},
+	});
+
+	emulate("fistp dword ptr [0x1234]");
+
+	EXPECT_JUST_REGISTERS_LOADED({X87_REG_TOP, X86_REG_ST1});
+	EXPECT_JUST_REGISTERS_STORED({
+		{X87_REG_TOP, 0x2},
+		{X87_REG_TAG1, ANY},
+	});
+	EXPECT_NO_MEMORY_LOADED();
+	EXPECT_JUST_MEMORY_STORED({
+		{0x1234, 3_dw},
+	});
+}
+
+// DF /7	FISTP m64int	Store ST(0) in m64int and pop register stack.
+TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FISTP_64)
+{
+	ALL_MODES;
+
+	setRegisters({
+		{X87_REG_TOP, 0x1},
+		{X86_REG_ST1, 3.14},
+	});
+
+	emulate("fistp qword ptr [0x1234]");
+
+	EXPECT_JUST_REGISTERS_LOADED({X87_REG_TOP, X86_REG_ST1});
+	EXPECT_JUST_REGISTERS_STORED({
+		{X87_REG_TOP, 0x2},
+		{X87_REG_TAG1, ANY},
+	});
+	EXPECT_NO_MEMORY_LOADED();
+	EXPECT_JUST_MEMORY_STORED({
+		{0x1234, 3_qw},
 	});
 }
 
@@ -9383,17 +9687,68 @@ TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FSTP)
 // X86_INS_FMUL
 //
 
-TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FMUL_st3)
+// D8 /1	FMUL m32fp	Multiply ST(0) by m32fp and store result in ST(0)
+TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FMUL_d8)
+{
+	ALL_MODES;
+
+	setMemory({
+		{0x1234, 3.14_f32},
+	});
+
+	setRegisters({
+		{X87_REG_TOP, 0x2},
+		{X86_REG_ST2, 3.14}, // st(0)
+	});
+
+	emulate("fmul dword ptr [0x1234]");
+
+	EXPECT_JUST_REGISTERS_LOADED({X87_REG_TOP, X86_REG_ST2});
+	EXPECT_JUST_REGISTERS_STORED({
+		{X86_REG_ST2, 3.14 * 3.14},
+		{X87_REG_TAG2, ANY},
+	});
+	EXPECT_JUST_MEMORY_LOADED({0x1234});
+	EXPECT_NO_MEMORY_STORED();
+}
+
+// DC /1	FMUL m64fp	Multiply ST(0) by m64fp and store result in ST(0)
+TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FMUL_dc)
+{
+	ALL_MODES;
+
+	setMemory({
+		{0x1234, 3.14_f64},
+	});
+
+	setRegisters({
+		{X87_REG_TOP, 0x2},
+		{X86_REG_ST2, 3.14}, // st(0)
+	});
+
+	emulate("fmul qword ptr [0x1234]");
+
+	EXPECT_JUST_REGISTERS_LOADED({X87_REG_TOP, X86_REG_ST2});
+	EXPECT_JUST_REGISTERS_STORED({
+		{X86_REG_ST2, 3.14 * 3.14},
+		{X87_REG_TAG2, ANY},
+	});
+	EXPECT_JUST_MEMORY_LOADED({0x1234});
+	EXPECT_NO_MEMORY_STORED();
+}
+
+// D8 C8+i	FMUL ST(0), ST(i)	Multiply ST(0) by ST(i) and store result in ST(0)
+TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FMUL_d8_c8)
 {
 	ALL_MODES;
 
 	setRegisters({
-		{X87_REG_TOP, 0x5},
-		{X86_REG_ST2, 3.14},
-		{X86_REG_ST5, 3.14},
+		{X87_REG_TOP, 0x2},
+		{X86_REG_ST2, 3.14}, // st(0)
+		{X86_REG_ST5, 3.14}, // st(3)
 	});
 
-	emulate("fmul st(3)");
+	emulate("fmul st(0), st(3)");
 
 	EXPECT_JUST_REGISTERS_LOADED({X87_REG_TOP, X86_REG_ST2, X86_REG_ST5});
 	EXPECT_JUST_REGISTERS_STORED({
@@ -9403,27 +9758,25 @@ TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FMUL_st3)
 	EXPECT_NO_MEMORY_LOADED_STORED();
 }
 
-TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FMUL_mem)
+// DC C8+i	FMUL ST(i), ST(0)	Multiply ST(i) by ST(0) and store result in ST(i)
+TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FMUL_dc_c8)
 {
 	ALL_MODES;
 
 	setRegisters({
-		{X87_REG_TOP, 0x5},
-		{X86_REG_ST5, 3.14},
-	});
-	setMemory({
-		{0x1234, 3.14}
+		{X87_REG_TOP, 0x2},
+		{X86_REG_ST2, 3.14}, // st(0)
+		{X86_REG_ST5, 3.14}, // st(3)
 	});
 
-	emulate("fmul qword ptr [0x1234]");
+	emulate("fmul st(3), st(0)");
 
-	EXPECT_JUST_REGISTERS_LOADED({X87_REG_TOP, X86_REG_ST5});
+	EXPECT_JUST_REGISTERS_LOADED({X87_REG_TOP, X86_REG_ST2, X86_REG_ST5});
 	EXPECT_JUST_REGISTERS_STORED({
 		{X86_REG_ST5, 3.14 * 3.14},
 		{X87_REG_TAG5, ANY},
 	});
-	EXPECT_JUST_MEMORY_LOADED({0x1234});
-	EXPECT_NO_MEMORY_STORED();
+	EXPECT_NO_MEMORY_LOADED_STORED();
 }
 
 TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FMUL_mem_complex)
@@ -9455,24 +9808,48 @@ TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FMUL_mem_complex)
 // X86_INS_FMULP
 //
 
+// DE C8+i	FMULP ST(i), ST(0)	Multiply ST(i) by ST(0), store result in ST(i), and pop the register stack
 TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FMULP_st3)
 {
 	ALL_MODES;
 
 	setRegisters({
-		{X87_REG_TOP, 0x5},
-		{X86_REG_ST2, 3.14},
-		{X86_REG_ST5, 3.14},
+		{X87_REG_TOP, 0x2},
+		{X86_REG_ST2, 3.14}, // st(0)
+		{X86_REG_ST5, 3.14}, // st(3)
 	});
 
 	emulate("fmulp st(3)");
 
 	EXPECT_JUST_REGISTERS_LOADED({X87_REG_TOP, X86_REG_ST2, X86_REG_ST5});
 	EXPECT_JUST_REGISTERS_STORED({
-		{X87_REG_TOP, 0x6},
-		{X86_REG_ST2, 3.14 * 3.14},
+		{X87_REG_TOP, 0x3},
+		{X86_REG_ST5, 3.14 * 3.14},
+		{X87_REG_TAG5, ANY},
 		{X87_REG_TAG2, ANY},
-		{X87_REG_TAG5, 0x3},
+	});
+	EXPECT_NO_MEMORY_LOADED_STORED();
+}
+
+// DE C9	FMULP	Multiply ST(1) by ST(0), store result in ST(1), and pop the register stack
+TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FMULP)
+{
+	ALL_MODES;
+
+	setRegisters({
+		{X87_REG_TOP, 0x2},
+		{X86_REG_ST2, 3.14}, // st(0)
+		{X86_REG_ST3, 3.14}, // st(1)
+	});
+
+	emulate("fmulp");
+
+	EXPECT_JUST_REGISTERS_LOADED({X87_REG_TOP, X86_REG_ST2, X86_REG_ST3});
+	EXPECT_JUST_REGISTERS_STORED({
+		{X87_REG_TOP, 0x3},
+		{X86_REG_ST3, 3.14 * 3.14},
+		{X87_REG_TAG3, ANY},
+		{X87_REG_TAG2, ANY},
 	});
 	EXPECT_NO_MEMORY_LOADED_STORED();
 }
@@ -9481,20 +9858,46 @@ TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FMULP_st3)
 // X86_INS_FIMUL
 //
 
-TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FIMUL)
+// DA /1	FIMUL m32int	Multiply ST(0) by m32int and store result in ST(0)
+TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FIMUL_m32)
 {
 	ALL_MODES;
 
 	setRegisters({
 		{X87_REG_TOP, 0x5},
-		{X86_REG_ST5, 3.14},
+		{X86_REG_ST5, 3.14}, // st(0)
 	});
 
 	setMemory({
-		{0x1234, 3},
+		{0x1234, 3_dw},
 	});
 
 	emulate("fimul dword ptr [0x1234]");
+
+	EXPECT_JUST_REGISTERS_LOADED({X87_REG_TOP, X86_REG_ST5});
+	EXPECT_JUST_REGISTERS_STORED({
+		{X86_REG_ST5, 3.14 * 3.0},
+		{X87_REG_TAG5, ANY},
+	});
+	EXPECT_JUST_MEMORY_LOADED({0x1234});
+	EXPECT_NO_MEMORY_STORED();
+}
+
+// DE /1	FIMUL m16int	Multiply ST(0) by m16int and store result in ST(0)
+TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FIMUL_m16)
+{
+	ALL_MODES;
+
+	setRegisters({
+		{X87_REG_TOP, 0x5},
+		{X86_REG_ST5, 3.14}, // st(0)
+	});
+
+	setMemory({
+		{0x1234, 3_w},
+	});
+
+	emulate("fimul word ptr [0x1234]");
 
 	EXPECT_JUST_REGISTERS_LOADED({X87_REG_TOP, X86_REG_ST5});
 	EXPECT_JUST_REGISTERS_STORED({
@@ -9509,22 +9912,94 @@ TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FIMUL)
 // X86_INS_FADD
 //
 
-TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FADD_st3)
+// D8 /0	FADD m32fp	Add m32fp to ST(0) and store result in ST(0).
+TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FADD_d8)
+{
+	ALL_MODES;
+
+	setMemory({
+		{0x1234, 3.14_f32},
+	});
+
+	setRegisters({
+		{X87_REG_TOP, 0x2},
+		{X86_REG_ST2, 3.14}, // st(0)
+	});
+
+	emulate("fadd dword ptr [0x1234]");
+
+	EXPECT_JUST_REGISTERS_LOADED({X87_REG_TOP, X86_REG_ST2});
+	EXPECT_JUST_REGISTERS_STORED({
+		{X86_REG_ST2, 3.14 + 3.14},
+		{X87_REG_TAG2, ANY},
+	});
+	EXPECT_JUST_MEMORY_LOADED({0x1234});
+	EXPECT_NO_MEMORY_STORED();
+}
+
+// DC /0	FADD m64fp	Add m64fp to ST(0) and store result in ST(0).
+TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FADD_dc)
+{
+	ALL_MODES;
+
+	setMemory({
+		{0x1234, 3.14_f64},
+	});
+
+	setRegisters({
+		{X87_REG_TOP, 0x2},
+		{X86_REG_ST2, 3.14}, // st(0)
+	});
+
+	emulate("fadd qword ptr [0x1234]");
+
+	EXPECT_JUST_REGISTERS_LOADED({X87_REG_TOP, X86_REG_ST2});
+	EXPECT_JUST_REGISTERS_STORED({
+		{X86_REG_ST2, 3.14 + 3.14},
+		{X87_REG_TAG2, ANY},
+	});
+	EXPECT_JUST_MEMORY_LOADED({0x1234});
+	EXPECT_NO_MEMORY_STORED();
+}
+
+// D8 C0+i	FADD ST(0), ST(i)	Add ST(0) to ST(i) and store result in ST(0).
+TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FADD_d8_c0)
 {
 	ALL_MODES;
 
 	setRegisters({
-		{X87_REG_TOP, 0x5},
-		{X86_REG_ST2, 3.14},
-		{X86_REG_ST5, 3.14},
+		{X87_REG_TOP, 0x2},
+		{X86_REG_ST2, 3.14}, // st(0)
+		{X86_REG_ST5, 3.14}, // st(3)
 	});
 
-	emulate("fadd st(3)");
+	emulate("fadd st(0), st(3)");
 
 	EXPECT_JUST_REGISTERS_LOADED({X87_REG_TOP, X86_REG_ST2, X86_REG_ST5});
 	EXPECT_JUST_REGISTERS_STORED({
 		{X86_REG_ST2, 3.14 + 3.14},
 		{X87_REG_TAG2, ANY},
+	});
+	EXPECT_NO_MEMORY_LOADED_STORED();
+}
+
+// DC C0+i	FADD ST(i), ST(0)	Add ST(i) to ST(0) and store result in ST(i).
+TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FADD_dc_c0)
+{
+	ALL_MODES;
+
+	setRegisters({
+		{X87_REG_TOP, 0x2},
+		{X86_REG_ST2, 3.14}, // st(0)
+		{X86_REG_ST5, 3.14}, // st(3)
+	});
+
+	emulate("fadd st(3), st(0)");
+
+	EXPECT_JUST_REGISTERS_LOADED({X87_REG_TOP, X86_REG_ST2, X86_REG_ST5});
+	EXPECT_JUST_REGISTERS_STORED({
+		{X86_REG_ST5, 3.14 + 3.14},
+		{X87_REG_TAG5, ANY},
 	});
 	EXPECT_NO_MEMORY_LOADED_STORED();
 }
@@ -9533,24 +10008,48 @@ TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FADD_st3)
 // X86_INS_FADDP
 //
 
+// DE C0+i	FADDP ST(i), ST(0)	Add ST(0) to ST(i), store result in ST(i), and pop the register stack.
 TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FADDP_st3)
 {
 	ALL_MODES;
 
 	setRegisters({
-		{X87_REG_TOP, 0x5},
-		{X86_REG_ST2, 3.14},
-		{X86_REG_ST5, 3.14},
+		{X87_REG_TOP, 0x2},
+		{X86_REG_ST2, 3.14}, // st(0)
+		{X86_REG_ST5, 3.14}, // st(3)
 	});
 
 	emulate("faddp st(3)");
 
 	EXPECT_JUST_REGISTERS_LOADED({X87_REG_TOP, X86_REG_ST2, X86_REG_ST5});
 	EXPECT_JUST_REGISTERS_STORED({
-		{X87_REG_TOP, 0x6},
-		{X86_REG_ST2, 3.14 + 3.14},
-		{X87_REG_TAG2, ANY},
+		{X87_REG_TOP, 0x3},
+		{X86_REG_ST5, 3.14 + 3.14},
 		{X87_REG_TAG5, ANY},
+		{X87_REG_TAG2, ANY},
+	});
+	EXPECT_NO_MEMORY_LOADED_STORED();
+}
+
+// DE C1	FADDP	Add ST(0) to ST(1), store result in ST(1), and pop the register stack.
+TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FADDP)
+{
+	ALL_MODES;
+
+	setRegisters({
+		{X87_REG_TOP, 0x2},
+		{X86_REG_ST2, 3.14}, // st(0)
+		{X86_REG_ST3, 3.14}, // st(1)
+	});
+
+	emulate("faddp");
+
+	EXPECT_JUST_REGISTERS_LOADED({X87_REG_TOP, X86_REG_ST2, X86_REG_ST3});
+	EXPECT_JUST_REGISTERS_STORED({
+		{X87_REG_TOP, 0x3},
+		{X86_REG_ST3, 3.14 + 3.14},
+		{X87_REG_TAG3, ANY},
+		{X87_REG_TAG2, ANY},
 	});
 	EXPECT_NO_MEMORY_LOADED_STORED();
 }
@@ -9559,17 +10058,18 @@ TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FADDP_st3)
 // X86_INS_FIADD
 //
 
-TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FIADD)
+// DA /0	FIADD m32int	Add m32int to ST(0) and store result in ST(0).
+TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FIADD_m32)
 {
 	ALL_MODES;
 
 	setRegisters({
 		{X87_REG_TOP, 0x5},
-		{X86_REG_ST5, 3.14},
+		{X86_REG_ST5, 3.14}, // st(0)
 	});
 
 	setMemory({
-		{0x1234, 3},
+		{0x1234, 3_dw},
 	});
 
 	emulate("fiadd dword ptr [0x1234]");
@@ -9583,25 +10083,755 @@ TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FIADD)
 	EXPECT_NO_MEMORY_STORED();
 }
 
-//
-// X86_INS_FDIV
-//
-TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FDIV_st3)
+// DE /0	FIADD m16int	Add m16int to ST(0) and store result in ST(0).
+TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FIADD_m16)
 {
 	ALL_MODES;
 
 	setRegisters({
 		{X87_REG_TOP, 0x5},
-		{X86_REG_ST2, 10.123},
-		{X86_REG_ST5, 3.14},
+		{X86_REG_ST5, 3.14}, // st(0)
 	});
 
-	emulate("fdiv st(3)");
+	setMemory({
+		{0x1234, 3_w},
+	});
+
+	emulate("fiadd word ptr [0x1234]");
+
+	EXPECT_JUST_REGISTERS_LOADED({X87_REG_TOP, X86_REG_ST5});
+	EXPECT_JUST_REGISTERS_STORED({
+		{X86_REG_ST5, 3.14 + 3.0},
+		{X87_REG_TAG5, ANY},
+	});
+	EXPECT_JUST_MEMORY_LOADED({0x1234});
+	EXPECT_NO_MEMORY_STORED();
+}
+
+//
+// X86_INS_FTST
+//
+
+// D9 E4	FTST	Compare ST(0) with 0.0.
+TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FTST_gt)
+{
+	ALL_MODES;
+
+	setRegisters({
+		{X87_REG_TOP, 0x5},
+		{X86_REG_ST5, 3.14}, // st(0)
+	});
+
+	emulate("ftst");
+
+	EXPECT_JUST_REGISTERS_LOADED({X87_REG_TOP, X86_REG_ST5});
+	EXPECT_JUST_REGISTERS_STORED({
+		{X87_REG_C0, false},
+		{X87_REG_C2, false},
+		{X87_REG_C3, false},
+	});
+	EXPECT_NO_MEMORY_LOADED_STORED();
+}
+
+// D9 E4	FTST	Compare ST(0) with 0.0.
+TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FTST_lt)
+{
+	ALL_MODES;
+
+	setRegisters({
+		{X87_REG_TOP, 0x5},
+		{X86_REG_ST5, -3.14}, // st(0)
+	});
+
+	emulate("ftst");
+
+	EXPECT_JUST_REGISTERS_LOADED({X87_REG_TOP, X86_REG_ST5});
+	EXPECT_JUST_REGISTERS_STORED({
+		{X87_REG_C0, true},
+		{X87_REG_C2, false},
+		{X87_REG_C3, false},
+	});
+	EXPECT_NO_MEMORY_LOADED_STORED();
+}
+
+// D9 E4	FTST	Compare ST(0) with 0.0.
+TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FTST_eq)
+{
+	ALL_MODES;
+
+	setRegisters({
+		{X87_REG_TOP, 0x5},
+		{X86_REG_ST5, 0.0}, // st(0)
+	});
+
+	emulate("ftst");
+
+	EXPECT_JUST_REGISTERS_LOADED({X87_REG_TOP, X86_REG_ST5});
+	EXPECT_JUST_REGISTERS_STORED({
+		{X87_REG_C0, false},
+		{X87_REG_C2, false},
+		{X87_REG_C3, true},
+	});
+	EXPECT_NO_MEMORY_LOADED_STORED();
+}
+
+//
+// X86_INS_FCOM
+//
+
+// D8 /2	FCOM m32fp	Compare ST(0) with m32fp.
+TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FCOM_m32_gt)
+{
+	ALL_MODES;
+
+	setMemory({
+		{0x1234, 2.0_f32},
+	});
+
+	setRegisters({
+		{X87_REG_TOP, 0x2},
+		{X86_REG_ST2, 3.0}, // st(0)
+	});
+
+	emulate("fcom dword ptr [0x1234]");
+
+	EXPECT_JUST_REGISTERS_LOADED({X87_REG_TOP, X86_REG_ST2});
+	EXPECT_JUST_REGISTERS_STORED({
+		{X87_REG_C0, false},
+		{X87_REG_C2, false},
+		{X87_REG_C3, false},
+	});
+	EXPECT_JUST_MEMORY_LOADED({0x1234});
+	EXPECT_NO_MEMORY_STORED();
+}
+
+// D8 /2	FCOM m32fp	Compare ST(0) with m32fp.
+TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FCOM_m32_lt)
+{
+	ALL_MODES;
+
+	setMemory({
+		{0x1234, 3.0_f32},
+	});
+
+	setRegisters({
+		{X87_REG_TOP, 0x2},
+		{X86_REG_ST2, 2.0}, // st(0)
+	});
+
+	emulate("fcom dword ptr [0x1234]");
+
+	EXPECT_JUST_REGISTERS_LOADED({X87_REG_TOP, X86_REG_ST2});
+	EXPECT_JUST_REGISTERS_STORED({
+		{X87_REG_C0, true},
+		{X87_REG_C2, false},
+		{X87_REG_C3, false},
+	});
+	EXPECT_JUST_MEMORY_LOADED({0x1234});
+	EXPECT_NO_MEMORY_STORED();
+}
+
+// D8 /2	FCOM m32fp	Compare ST(0) with m32fp.
+TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FCOM_m32_eq)
+{
+	ALL_MODES;
+
+	setMemory({
+		{0x1234, 2.0_f32},
+	});
+
+	setRegisters({
+		{X87_REG_TOP, 0x2},
+		{X86_REG_ST2, 2.0}, // st(0)
+	});
+
+	emulate("fcom dword ptr [0x1234]");
+
+	EXPECT_JUST_REGISTERS_LOADED({X87_REG_TOP, X86_REG_ST2});
+	EXPECT_JUST_REGISTERS_STORED({
+		{X87_REG_C0, false},
+		{X87_REG_C2, false},
+		{X87_REG_C3, true},
+	});
+	EXPECT_JUST_MEMORY_LOADED({0x1234});
+	EXPECT_NO_MEMORY_STORED();
+}
+
+// DC /2	FCOM m64fp	Compare ST(0) with m64fp.
+TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FCOM_m64_lt)
+{
+	ALL_MODES;
+
+	setMemory({
+		{0x1234, 3.0_f64},
+	});
+
+	setRegisters({
+		{X87_REG_TOP, 0x2},
+		{X86_REG_ST2, 2.0}, // st(0)
+	});
+
+	emulate("fcom qword ptr [0x1234]");
+
+	EXPECT_JUST_REGISTERS_LOADED({X87_REG_TOP, X86_REG_ST2});
+	EXPECT_JUST_REGISTERS_STORED({
+		{X87_REG_C0, true},
+		{X87_REG_C2, false},
+		{X87_REG_C3, false},
+	});
+	EXPECT_JUST_MEMORY_LOADED({0x1234});
+	EXPECT_NO_MEMORY_STORED();
+}
+
+// D8 D0+i	FCOM ST(i)	Compare ST(0) with ST(i).
+TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FCOM_stX)
+{
+	ALL_MODES;
+
+	setRegisters({
+		{X87_REG_TOP, 0x2},
+		{X86_REG_ST2, 3.0}, // st(0)
+		{X86_REG_ST5, 5.0}, // st(3)
+	});
+
+	emulate("fcom st(3)");
 
 	EXPECT_JUST_REGISTERS_LOADED({X87_REG_TOP, X86_REG_ST2, X86_REG_ST5});
 	EXPECT_JUST_REGISTERS_STORED({
-		{X86_REG_ST2, 10.123 / 3.14},
+		{X87_REG_C0, true},
+		{X87_REG_C2, false},
+		{X87_REG_C3, false},
+	});
+	EXPECT_NO_MEMORY_LOADED_STORED();
+}
+
+// D8 D1	FCOM	Compare ST(0) with ST(1).
+TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FCOM_st1)
+{
+	ALL_MODES;
+
+	setRegisters({
+		{X87_REG_TOP, 0x2},
+		{X86_REG_ST2, 3.0}, // st(0)
+		{X86_REG_ST3, 5.0}, // st(1)
+	});
+
+	emulate("fcom");
+
+	EXPECT_JUST_REGISTERS_LOADED({X87_REG_TOP, X86_REG_ST2, X86_REG_ST3});
+	EXPECT_JUST_REGISTERS_STORED({
+		{X87_REG_C0, true},
+		{X87_REG_C2, false},
+		{X87_REG_C3, false},
+	});
+	EXPECT_NO_MEMORY_LOADED_STORED();
+}
+
+//
+// X86_INS_FCOMP
+//
+
+// D8 D8+i	FCOMP ST(i)	Compare ST(0) with ST(i) and pop register stack.
+TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FCOMP_stX)
+{
+	ALL_MODES;
+
+	setRegisters({
+		{X87_REG_TOP, 0x2},
+		{X86_REG_ST2, 3.0}, // st(0)
+		{X86_REG_ST3, 5.0}, // st(1)
+	});
+
+	emulate("fcomp st(1)");
+
+	EXPECT_JUST_REGISTERS_LOADED({X87_REG_TOP, X86_REG_ST2, X86_REG_ST3});
+	EXPECT_JUST_REGISTERS_STORED({
+		{X87_REG_TOP, 0x3},
 		{X87_REG_TAG2, ANY},
+		{X87_REG_C0, true},
+		{X87_REG_C2, false},
+		{X87_REG_C3, false},
+	});
+	EXPECT_NO_MEMORY_LOADED_STORED();
+}
+
+//
+// X86_INS_FCOMPP
+//
+
+// DE D9	FCOMPP	Compare ST(0) with ST(1) and pop register stack twice.
+TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FCOMPP_stX)
+{
+	ALL_MODES;
+
+	setRegisters({
+		{X87_REG_TOP, 0x2},
+		{X86_REG_ST2, 3.0}, // st(0)
+		{X86_REG_ST3, 5.0}, // st(1)
+	});
+
+	emulate("fcompp");
+
+	EXPECT_JUST_REGISTERS_LOADED({X87_REG_TOP, X86_REG_ST2, X86_REG_ST3});
+	EXPECT_JUST_REGISTERS_STORED({
+		{X87_REG_TOP, 0x4},
+		{X87_REG_TAG2, ANY},
+		{X87_REG_TAG3, ANY},
+		{X87_REG_C0, true},
+		{X87_REG_C2, false},
+		{X87_REG_C3, false},
+	});
+	EXPECT_NO_MEMORY_LOADED_STORED();
+}
+
+//
+// X86_INS_FUCOM
+//
+
+// DD E0+i	FUCOM ST(i)	Compare ST(0) with ST(i).
+TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FUCOM_stX)
+{
+	ALL_MODES;
+
+	setRegisters({
+		{X87_REG_TOP, 0x2},
+		{X86_REG_ST2, 3.0}, // st(0)
+		{X86_REG_ST5, 5.0}, // st(3)
+	});
+
+	emulate("fucom st(3)");
+
+	EXPECT_JUST_REGISTERS_LOADED({X87_REG_TOP, X86_REG_ST2, X86_REG_ST5});
+	EXPECT_JUST_REGISTERS_STORED({
+		{X87_REG_C0, true},
+		{X87_REG_C2, false},
+		{X87_REG_C3, false},
+	});
+	EXPECT_NO_MEMORY_LOADED_STORED();
+}
+
+// DD E1	FUCOM	Compare ST(0) with ST(1).
+TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FUCOM_st1)
+{
+	ALL_MODES;
+
+	setRegisters({
+		{X87_REG_TOP, 0x2},
+		{X86_REG_ST2, 3.0}, // st(0)
+		{X86_REG_ST3, 5.0}, // st(1)
+	});
+
+	emulate("fucom");
+
+	EXPECT_JUST_REGISTERS_LOADED({X87_REG_TOP, X86_REG_ST2, X86_REG_ST3});
+	EXPECT_JUST_REGISTERS_STORED({
+		{X87_REG_C0, true},
+		{X87_REG_C2, false},
+		{X87_REG_C3, false},
+	});
+	EXPECT_NO_MEMORY_LOADED_STORED();
+}
+
+//
+// X86_INS_FUCOMP
+//
+
+// DD E8+i	FUCOMP ST(i)	Compare ST(0) with ST(i) and pop register stack.
+TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FUCOMP_stX)
+{
+	ALL_MODES;
+
+	setRegisters({
+		{X87_REG_TOP, 0x2},
+		{X86_REG_ST2, 3.0}, // st(0)
+		{X86_REG_ST3, 5.0}, // st(1)
+	});
+
+	emulate("fucomp st(1)");
+
+	EXPECT_JUST_REGISTERS_LOADED({X87_REG_TOP, X86_REG_ST2, X86_REG_ST3});
+	EXPECT_JUST_REGISTERS_STORED({
+		{X87_REG_TOP, 0x3},
+		{X87_REG_TAG2, ANY},
+		{X87_REG_C0, true},
+		{X87_REG_C2, false},
+		{X87_REG_C3, false},
+	});
+	EXPECT_NO_MEMORY_LOADED_STORED();
+}
+
+// DD E9	FUCOMP	Compare ST(0) with ST(1) and pop register stack.
+TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FUCOMP)
+{
+	ALL_MODES;
+
+	setRegisters({
+		{X87_REG_TOP, 0x2},
+		{X86_REG_ST2, 3.0}, // st(0)
+		{X86_REG_ST3, 5.0}, // st(1)
+	});
+
+	emulate("fucomp");
+
+	EXPECT_JUST_REGISTERS_LOADED({X87_REG_TOP, X86_REG_ST2, X86_REG_ST3});
+	EXPECT_JUST_REGISTERS_STORED({
+		{X87_REG_TOP, 0x3},
+		{X87_REG_TAG2, ANY},
+		{X87_REG_C0, true},
+		{X87_REG_C2, false},
+		{X87_REG_C3, false},
+	});
+	EXPECT_NO_MEMORY_LOADED_STORED();
+}
+
+//
+// X86_INS_FUCOMPP
+//
+
+// DA E9	FUCOMPP	Compare ST(0) with ST(1) and pop register stack twice.
+TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FUCOMPP_stX)
+{
+	ALL_MODES;
+
+	setRegisters({
+		{X87_REG_TOP, 0x2},
+		{X86_REG_ST2, 3.0}, // st(0)
+		{X86_REG_ST3, 5.0}, // st(1)
+	});
+
+	emulate("fucompp");
+
+	EXPECT_JUST_REGISTERS_LOADED({X87_REG_TOP, X86_REG_ST2, X86_REG_ST3});
+	EXPECT_JUST_REGISTERS_STORED({
+		{X87_REG_TOP, 0x4},
+		{X87_REG_TAG2, ANY},
+		{X87_REG_TAG3, ANY},
+		{X87_REG_C0, true},
+		{X87_REG_C2, false},
+		{X87_REG_C3, false},
+	});
+	EXPECT_NO_MEMORY_LOADED_STORED();
+}
+
+//
+// X86_INS_FCOMI
+//
+
+// DB F0+i	FCOMI ST, ST(i)	Compare ST(0) with ST(i) and set status flags accordingly.
+TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FCOMI_lt)
+{
+	ALL_MODES;
+
+	setRegisters({
+		{X87_REG_TOP, 0x2},
+		{X86_REG_ST2, 3.0}, // st(0)
+		{X86_REG_ST5, 5.0}, // st(3)
+	});
+
+	emulate("fcomi st(3)");
+
+	EXPECT_JUST_REGISTERS_LOADED({X87_REG_TOP, X86_REG_ST2, X86_REG_ST5});
+	EXPECT_JUST_REGISTERS_STORED({
+		{X86_REG_ZF, false},
+		{X86_REG_PF, false},
+		{X86_REG_CF, true},
+	});
+	EXPECT_NO_MEMORY_LOADED_STORED();
+}
+
+//
+// X86_INS_FCOMIP
+//
+
+// DF F0+i	FCOMIP ST, ST(i)	Compare ST(0) with ST(i), set status flags
+// accordingly, and pop register stack.
+TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FCOMIP_lt)
+{
+	ALL_MODES;
+
+	setRegisters({
+		{X87_REG_TOP, 0x2},
+		{X86_REG_ST2, 3.0}, // st(0)
+		{X86_REG_ST5, 5.0}, // st(3)
+	});
+
+	emulate("fcomip st(3)");
+
+	EXPECT_JUST_REGISTERS_LOADED({X87_REG_TOP, X86_REG_ST2, X86_REG_ST5});
+	EXPECT_JUST_REGISTERS_STORED({
+		{X87_REG_TOP, 0x3},
+		{X87_REG_TAG2, ANY},
+		{X86_REG_ZF, false},
+		{X86_REG_PF, false},
+		{X86_REG_CF, true},
+	});
+	EXPECT_NO_MEMORY_LOADED_STORED();
+}
+
+//
+// X86_INS_FUCOMI
+//
+
+// DB E8+i	FUCOMI ST, ST(i)	Compare ST(0) with ST(i), check for ordered values,
+// and set status flags accordingly.
+TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FUCOMI_lt)
+{
+	ALL_MODES;
+
+	setRegisters({
+		{X87_REG_TOP, 0x2},
+		{X86_REG_ST2, 3.0}, // st(0)
+		{X86_REG_ST5, 5.0}, // st(3)
+	});
+
+	emulate("fucomi st(3)");
+
+	EXPECT_JUST_REGISTERS_LOADED({X87_REG_TOP, X86_REG_ST2, X86_REG_ST5});
+	EXPECT_JUST_REGISTERS_STORED({
+		{X86_REG_ZF, false},
+		{X86_REG_PF, false},
+		{X86_REG_CF, true},
+	});
+	EXPECT_NO_MEMORY_LOADED_STORED();
+}
+
+//
+// X86_INS_FUCOMIP
+//
+
+// DF E8+i	FUCOMIP ST, ST(i)	Compare ST(0) with ST(i), check for ordered values,
+// set status flags accordingly, and pop register stack.
+TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FUCOMIP_lt)
+{
+	ALL_MODES;
+
+	setRegisters({
+		{X87_REG_TOP, 0x2},
+		{X86_REG_ST2, 3.0}, // st(0)
+		{X86_REG_ST5, 5.0}, // st(3)
+	});
+
+	emulate("fucomip st(3)");
+
+	EXPECT_JUST_REGISTERS_LOADED({X87_REG_TOP, X86_REG_ST2, X86_REG_ST5});
+	EXPECT_JUST_REGISTERS_STORED({
+		{X87_REG_TOP, 0x3},
+		{X87_REG_TAG2, ANY},
+		{X86_REG_ZF, false},
+		{X86_REG_PF, false},
+		{X86_REG_CF, true},
+	});
+	EXPECT_NO_MEMORY_LOADED_STORED();
+}
+
+//
+// X86_INS_FICOM
+//
+
+// DE /2	FICOM m16int	Compare ST(0) with m16int.
+TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FICOM_m16_gt)
+{
+	ALL_MODES;
+
+	setMemory({
+		{0x1234, 2_w},
+	});
+
+	setRegisters({
+		{X87_REG_TOP, 0x2},
+		{X86_REG_ST2, 1.0}, // st(0)
+	});
+
+	emulate("ficom word ptr [0x1234]");
+
+	EXPECT_JUST_REGISTERS_LOADED({X87_REG_TOP, X86_REG_ST2});
+	EXPECT_JUST_REGISTERS_STORED({
+		{X87_REG_C0, true},
+		{X87_REG_C2, false},
+		{X87_REG_C3, false},
+	});
+	EXPECT_JUST_MEMORY_LOADED({0x1234});
+	EXPECT_NO_MEMORY_STORED();
+}
+
+// DA /2	FICOM m32int	Compare ST(0) with m32int.
+TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FICOM_m32_gt)
+{
+	ALL_MODES;
+
+	setMemory({
+		{0x1234, 2_dw},
+	});
+
+	setRegisters({
+		{X87_REG_TOP, 0x2},
+		{X86_REG_ST2, 1.0}, // st(0)
+	});
+
+	emulate("ficom dword ptr [0x1234]");
+
+	EXPECT_JUST_REGISTERS_LOADED({X87_REG_TOP, X86_REG_ST2});
+	EXPECT_JUST_REGISTERS_STORED({
+		{X87_REG_C0, true},
+		{X87_REG_C2, false},
+		{X87_REG_C3, false},
+	});
+	EXPECT_JUST_MEMORY_LOADED({0x1234});
+	EXPECT_NO_MEMORY_STORED();
+}
+
+//
+// X86_INS_FICOMP
+//
+
+// DE /2	FICOM m16int	Compare ST(0) with m16int.
+TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FICOMP_m16_gt)
+{
+	ALL_MODES;
+
+	setMemory({
+		{0x1234, 2_w},
+	});
+
+	setRegisters({
+		{X87_REG_TOP, 0x2},
+		{X86_REG_ST2, 1.0}, // st(0)
+	});
+
+	emulate("ficomp word ptr [0x1234]");
+
+	EXPECT_JUST_REGISTERS_LOADED({X87_REG_TOP, X86_REG_ST2});
+	EXPECT_JUST_REGISTERS_STORED({
+		{X87_REG_TOP, 0x3},
+		{X87_REG_TAG2, ANY},
+		{X87_REG_C0, true},
+		{X87_REG_C2, false},
+		{X87_REG_C3, false},
+	});
+	EXPECT_JUST_MEMORY_LOADED({0x1234});
+	EXPECT_NO_MEMORY_STORED();
+}
+
+// DA /2	FICOMP m32int	Compare ST(0) with m32int.
+TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FICOMP_m32_gt)
+{
+	ALL_MODES;
+
+	setMemory({
+		{0x1234, 2_dw},
+	});
+
+	setRegisters({
+		{X87_REG_TOP, 0x2},
+		{X86_REG_ST2, 1.0}, // st(0)
+	});
+
+	emulate("ficomp dword ptr [0x1234]");
+
+	EXPECT_JUST_REGISTERS_LOADED({X87_REG_TOP, X86_REG_ST2});
+	EXPECT_JUST_REGISTERS_STORED({
+		{X87_REG_TOP, 0x3},
+		{X87_REG_TAG2, ANY},
+		{X87_REG_C0, true},
+		{X87_REG_C2, false},
+		{X87_REG_C3, false},
+	});
+	EXPECT_JUST_MEMORY_LOADED({0x1234});
+	EXPECT_NO_MEMORY_STORED();
+}
+
+//
+// X86_INS_FDIV
+//
+
+// D8 /6	FDIV m32fp	Divide ST(0) by m32fp and store result in ST(0).
+TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FDIV_d8)
+{
+	ALL_MODES;
+
+	setMemory({
+		{0x1234, 5.0_f32},
+	});
+
+	setRegisters({
+		{X87_REG_TOP, 0x2},
+		{X86_REG_ST2, 10.0}, // st(0)
+	});
+
+	emulate("fdiv dword ptr [0x1234]");
+
+	EXPECT_JUST_REGISTERS_LOADED({X87_REG_TOP, X86_REG_ST2});
+	EXPECT_JUST_REGISTERS_STORED({
+		{X86_REG_ST2, 10.0 / 5.0},
+		{X87_REG_TAG2, ANY},
+	});
+	EXPECT_JUST_MEMORY_LOADED({0x1234});
+	EXPECT_NO_MEMORY_STORED();
+}
+
+// DC /6	FDIV m64fp	Divide ST(0) by m64fp and store result in ST(0).
+TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FDIV_dc)
+{
+	ALL_MODES;
+
+	setMemory({
+		{0x1234, 5.0_f64},
+	});
+
+	setRegisters({
+		{X87_REG_TOP, 0x2},
+		{X86_REG_ST2, 10.0}, // st(0)
+	});
+
+	emulate("fdiv qword ptr [0x1234]");
+
+	EXPECT_JUST_REGISTERS_LOADED({X87_REG_TOP, X86_REG_ST2});
+	EXPECT_JUST_REGISTERS_STORED({
+		{X86_REG_ST2, 10.0 / 5.0},
+		{X87_REG_TAG2, ANY},
+	});
+	EXPECT_JUST_MEMORY_LOADED({0x1234});
+	EXPECT_NO_MEMORY_STORED();
+}
+
+// D8 F0+i	FDIV ST(0), ST(i)	Divide ST(0) by ST(i) and store result in ST(0).
+TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FDIV_st0_st3)
+{
+	ALL_MODES;
+
+	setRegisters({
+		{X87_REG_TOP, 0x2},
+		{X86_REG_ST2, 10.0}, // st(0)
+		{X86_REG_ST5, 5.0}, // st(3)
+	});
+
+	emulate("fdiv st(0), st(3)");
+
+	EXPECT_JUST_REGISTERS_LOADED({X87_REG_TOP, X86_REG_ST2, X86_REG_ST5});
+	EXPECT_JUST_REGISTERS_STORED({
+		{X86_REG_ST2, 10.0 / 5.0},
+		{X87_REG_TAG2, ANY},
+	});
+	EXPECT_NO_MEMORY_LOADED_STORED();
+}
+
+// DC F8+i	FDIV ST(i), ST(0)	Divide ST(i) by ST(0) and store result in ST(i).
+TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FDIV_st3_st0)
+{
+	ALL_MODES;
+
+	setRegisters({
+		{X87_REG_TOP, 0x2},
+		{X86_REG_ST2, 10.0}, // st(0)
+		{X86_REG_ST5, 5.0}, // st(3)
+	});
+
+	emulate("fdiv st(3), st(0)");
+
+	EXPECT_JUST_REGISTERS_LOADED({X87_REG_TOP, X86_REG_ST2, X86_REG_ST5});
+	EXPECT_JUST_REGISTERS_STORED({
+		{X86_REG_ST5, 5.0 / 10.0},
+		{X87_REG_TAG5, ANY},
 	});
 	EXPECT_NO_MEMORY_LOADED_STORED();
 }
@@ -9609,24 +10839,51 @@ TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FDIV_st3)
 //
 // X86_INS_FDIVP
 //
+
+// DE F8+i	FDIVP ST(i), ST(0)	Divide ST(i) by ST(0), store result in ST(i),
+// and pop the register stack.
 TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FDIVP_st3)
 {
 	ALL_MODES;
 
 	setRegisters({
-		{X87_REG_TOP, 0x5},
-		{X86_REG_ST2, 10.123},
-		{X86_REG_ST5, 3.14},
+		{X87_REG_TOP, 0x2},
+		{X86_REG_ST2, 10.123}, // st(0)
+		{X86_REG_ST5, 3.14}, // st(3)
 	});
 
-	emulate("fdivp st(3)");
+	emulate("fdivp st(3), st(0)");
 
 	EXPECT_JUST_REGISTERS_LOADED({X87_REG_TOP, X86_REG_ST2, X86_REG_ST5});
 	EXPECT_JUST_REGISTERS_STORED({
-		{X87_REG_TOP, 0x6},
-		{X86_REG_ST2, 10.123 / 3.14},
+		{X87_REG_TOP, 0x3},
+		{X86_REG_ST5, 3.14 / 10.123},
 		{X87_REG_TAG2, ANY},
 		{X87_REG_TAG5, ANY},
+	});
+	EXPECT_NO_MEMORY_LOADED_STORED();
+}
+
+// DE F9	FDIVP	Divide ST(1) by ST(0), store result in ST(1), and pop the
+// register stack.
+TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FDIVP)
+{
+	ALL_MODES;
+
+	setRegisters({
+		{X87_REG_TOP, 0x2},
+		{X86_REG_ST2, 10.123}, // st(0)
+		{X86_REG_ST3, 3.14}, // st(1)
+	});
+
+	emulate("fdivp");
+
+	EXPECT_JUST_REGISTERS_LOADED({X87_REG_TOP, X86_REG_ST2, X86_REG_ST3});
+	EXPECT_JUST_REGISTERS_STORED({
+		{X87_REG_TOP, 0x3},
+		{X86_REG_ST3, 3.14 / 10.123},
+		{X87_REG_TAG2, ANY},
+		{X87_REG_TAG3, ANY},
 	});
 	EXPECT_NO_MEMORY_LOADED_STORED();
 }
@@ -9635,17 +10892,43 @@ TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FDIVP_st3)
 // X86_INS_FIDIV
 //
 
-TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FIDIV)
+// DE /6	FIDIV m16int	Divide ST(0) by m64int and store result in ST(0).
+TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FIDIV_m16)
 {
 	ALL_MODES;
 
 	setRegisters({
 		{X87_REG_TOP, 0x5},
-		{X86_REG_ST5, 3.14},
+		{X86_REG_ST5, 3.14}, // st(0)
 	});
 
 	setMemory({
-		{0x1234, 3},
+		{0x1234, 3_w},
+	});
+
+	emulate("fidiv word ptr [0x1234]");
+
+	EXPECT_JUST_REGISTERS_LOADED({X87_REG_TOP, X86_REG_ST5});
+	EXPECT_JUST_REGISTERS_STORED({
+		{X86_REG_ST5, 3.14 / 3.0},
+		{X87_REG_TAG5, ANY},
+	});
+	EXPECT_JUST_MEMORY_LOADED({0x1234});
+	EXPECT_NO_MEMORY_STORED();
+}
+
+// DA /6	FIDIV m32int	Divide ST(0) by m32int and store result in ST(0).
+TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FIDIV_m32)
+{
+	ALL_MODES;
+
+	setRegisters({
+		{X87_REG_TOP, 0x5},
+		{X86_REG_ST5, 3.14}, // st(0)
+	});
+
+	setMemory({
+		{0x1234, 3_dw},
 	});
 
 	emulate("fidiv dword ptr [0x1234]");
@@ -9662,22 +10945,95 @@ TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FIDIV)
 //
 // X86_INS_FDIVR
 //
-TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FDIVR_st3)
+
+// D8 /7	FDIVR m32fp	Divide m32fp by ST(0) and store result in ST(0)
+TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FDIVR_d8)
+{
+	ALL_MODES;
+
+	setMemory({
+		{0x1234, 5.0_f32},
+	});
+
+	setRegisters({
+		{X87_REG_TOP, 0x2},
+		{X86_REG_ST2, 10.0}, // st(0)
+	});
+
+	emulate("fdivr dword ptr [0x1234]");
+
+	EXPECT_JUST_REGISTERS_LOADED({X87_REG_TOP, X86_REG_ST2});
+	EXPECT_JUST_REGISTERS_STORED({
+		{X86_REG_ST2, 5.0 / 10.0},
+		{X87_REG_TAG2, ANY},
+	});
+	EXPECT_JUST_MEMORY_LOADED({0x1234});
+	EXPECT_NO_MEMORY_STORED();
+}
+
+// DC /7	FDIVR m64fp	Divide m64fp by ST(0) and store result in ST(0)
+TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FDIVR_dc)
+{
+	ALL_MODES;
+
+	setMemory({
+		{0x1234, 5.0_f64},
+	});
+
+	setRegisters({
+		{X87_REG_TOP, 0x2},
+		{X86_REG_ST2, 10.0}, // st(0)
+	});
+
+	emulate("fdivr qword ptr [0x1234]");
+
+	EXPECT_JUST_REGISTERS_LOADED({X87_REG_TOP, X86_REG_ST2});
+	EXPECT_JUST_REGISTERS_STORED({
+		{X86_REG_ST2, 5.0 / 10.0},
+		{X87_REG_TAG2, ANY},
+	});
+	EXPECT_JUST_MEMORY_LOADED({0x1234});
+	EXPECT_NO_MEMORY_STORED();
+}
+
+// D8 F8+i	FDIVR ST(0), ST(i)	Divide ST(i) by ST(0) and store result in ST(0)
+TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FDIVR_st0_st3)
 {
 	ALL_MODES;
 
 	setRegisters({
-		{X87_REG_TOP, 0x5},
-		{X86_REG_ST2, 10.123},
-		{X86_REG_ST5, 3.14},
+		{X87_REG_TOP, 0x2},
+		{X86_REG_ST2, 10.0}, // st(0)
+		{X86_REG_ST5, 5.0}, // st(3)
 	});
 
-	emulate("fdivr st(3)");
+	emulate("fdivr st(0), st(3)");
 
 	EXPECT_JUST_REGISTERS_LOADED({X87_REG_TOP, X86_REG_ST2, X86_REG_ST5});
 	EXPECT_JUST_REGISTERS_STORED({
-		{X86_REG_ST2, 3.14 / 10.123},
+		{X86_REG_ST2, 5.0 / 10.0},
 		{X87_REG_TAG2, ANY},
+	});
+	EXPECT_NO_MEMORY_LOADED_STORED();
+}
+
+// DC F0+i	FDIVR ST(i), ST(0)	Divide ST(0) by ST(i) and store result in ST(i)
+TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FDIVR_st3_st0)
+{
+	ALL_MODES;
+
+	setRegisters({
+		{X87_REG_TOP, 0x2},
+		{X86_REG_ST2, 10.0}, // st(0)
+		{X86_REG_ST5, 5.0}, // st(3)
+	});
+
+	emulate("fdivr st(3), st(0)");
+
+	EXPECT_JUST_REGISTERS_LOADED({X87_REG_TOP, X86_REG_ST2, X86_REG_ST5});
+	EXPECT_JUST_REGISTERS_STORED({
+		{X86_REG_ST5, 10.0 / 5.0},
+		{X87_REG_TAG5, ANY},
 	});
 	EXPECT_NO_MEMORY_LOADED_STORED();
 }
@@ -9685,24 +11041,51 @@ TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FDIVR_st3)
 //
 // X86_INS_FDIVRP
 //
+
+// DE F0+i	FDIVRP ST(i), ST(0)	Divide ST(0) by ST(i), store result in ST(i),
+// and pop the register stack
 TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FDIVRP_st3)
 {
 	ALL_MODES;
 
 	setRegisters({
-		{X87_REG_TOP, 0x5},
-		{X86_REG_ST2, 10.123},
-		{X86_REG_ST5, 3.14},
+		{X87_REG_TOP, 0x2},
+		{X86_REG_ST2, 10.123}, // st(0)
+		{X86_REG_ST5, 3.14}, // st(3)
 	});
 
-	emulate("fdivrp st(3)");
+	emulate("fdivrp st(3), st(0)");
 
 	EXPECT_JUST_REGISTERS_LOADED({X87_REG_TOP, X86_REG_ST2, X86_REG_ST5});
 	EXPECT_JUST_REGISTERS_STORED({
-		{X87_REG_TOP, 0x6},
-		{X86_REG_ST2, 3.14 / 10.123},
+		{X87_REG_TOP, 0x3},
+		{X86_REG_ST5, 10.123 / 3.14},
 		{X87_REG_TAG2, ANY},
 		{X87_REG_TAG5, ANY},
+	});
+	EXPECT_NO_MEMORY_LOADED_STORED();
+}
+
+// DE F1	FDIVRP	Divide ST(0) by ST(1), store result in ST(1), and pop the
+// register stack
+TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FDIVRP)
+{
+	ALL_MODES;
+
+	setRegisters({
+		{X87_REG_TOP, 0x2},
+		{X86_REG_ST2, 10.123}, // st(0)
+		{X86_REG_ST3, 3.14}, // st(1)
+	});
+
+	emulate("fdivrp");
+
+	EXPECT_JUST_REGISTERS_LOADED({X87_REG_TOP, X86_REG_ST2, X86_REG_ST3});
+	EXPECT_JUST_REGISTERS_STORED({
+		{X87_REG_TOP, 0x3},
+		{X86_REG_ST3, 10.123 / 3.14},
+		{X87_REG_TAG2, ANY},
+		{X87_REG_TAG3, ANY},
 	});
 	EXPECT_NO_MEMORY_LOADED_STORED();
 }
@@ -9711,24 +11094,50 @@ TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FDIVRP_st3)
 // X86_INS_FIDIVR
 //
 
-TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FIDIVR)
+// DE /7	FIDIVR m16int	Divide m16int by ST(0) and store result in ST(0)
+TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FIDIVR_m16)
 {
 	ALL_MODES;
 
 	setRegisters({
 		{X87_REG_TOP, 0x5},
-		{X86_REG_ST5, 3.14},
+		{X86_REG_ST5, 3.14}, // st(0)
 	});
 
 	setMemory({
-		{0x1234, 3},
+		{0x1234, 10_w},
+	});
+
+	emulate("fidivr word ptr [0x1234]");
+
+	EXPECT_JUST_REGISTERS_LOADED({X87_REG_TOP, X86_REG_ST5});
+	EXPECT_JUST_REGISTERS_STORED({
+		{X86_REG_ST5, 10.0 / 3.14},
+		{X87_REG_TAG5, ANY},
+	});
+	EXPECT_JUST_MEMORY_LOADED({0x1234});
+	EXPECT_NO_MEMORY_STORED();
+}
+
+// DA /7	FIDIVR m32int	Divide m32int by ST(0) and store result in ST(0)
+TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FIDIVR_m32)
+{
+	ALL_MODES;
+
+	setRegisters({
+		{X87_REG_TOP, 0x5},
+		{X86_REG_ST5, 3.14}, // st(0)
+	});
+
+	setMemory({
+		{0x1234, 10_dw},
 	});
 
 	emulate("fidivr dword ptr [0x1234]");
 
 	EXPECT_JUST_REGISTERS_LOADED({X87_REG_TOP, X86_REG_ST5});
 	EXPECT_JUST_REGISTERS_STORED({
-		{X86_REG_ST5, 3.0 / 3.14},
+		{X86_REG_ST5, 10.0 / 3.14},
 		{X87_REG_TAG5, ANY},
 	});
 	EXPECT_JUST_MEMORY_LOADED({0x1234});
@@ -9739,22 +11148,94 @@ TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FIDIVR)
 // X86_INS_FSUB
 //
 
-TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FSUB_st3)
+// D8 /4	FSUB m32fp	Subtract m32fp from ST(0) and store result in ST(0).
+TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FSUB_d8)
+{
+	ALL_MODES;
+
+	setMemory({
+		{0x1234, 3.14_f32},
+	});
+
+	setRegisters({
+		{X87_REG_TOP, 0x2},
+		{X86_REG_ST2, 10.0}, // st(0)
+	});
+
+	emulate("fsub dword ptr [0x1234]");
+
+	EXPECT_JUST_REGISTERS_LOADED({X87_REG_TOP, X86_REG_ST2});
+	EXPECT_JUST_REGISTERS_STORED({
+		{X86_REG_ST2, 10.0 - 3.14},
+		{X87_REG_TAG2, ANY},
+	});
+	EXPECT_JUST_MEMORY_LOADED({0x1234});
+	EXPECT_NO_MEMORY_STORED();
+}
+
+// DC /4	FSUB m64fp	Subtract m64fp from ST(0) and store result in ST(0).
+TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FSUB_dc)
+{
+	ALL_MODES;
+
+	setMemory({
+		{0x1234, 3.14_f64},
+	});
+
+	setRegisters({
+		{X87_REG_TOP, 0x2},
+		{X86_REG_ST2, 10.0}, // st(0)
+	});
+
+	emulate("fsub qword ptr [0x1234]");
+
+	EXPECT_JUST_REGISTERS_LOADED({X87_REG_TOP, X86_REG_ST2});
+	EXPECT_JUST_REGISTERS_STORED({
+		{X86_REG_ST2, 10.0 - 3.14},
+		{X87_REG_TAG2, ANY},
+	});
+	EXPECT_JUST_MEMORY_LOADED({0x1234});
+	EXPECT_NO_MEMORY_STORED();
+}
+
+// D8 E0+i	FSUB ST(0), ST(i)	Subtract ST(i) from ST(0) and store result in ST(0).
+TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FSUB_d8_e0)
 {
 	ALL_MODES;
 
 	setRegisters({
-		{X87_REG_TOP, 0x5},
-		{X86_REG_ST2, 3.14},
-		{X86_REG_ST5, 3.14},
+		{X87_REG_TOP, 0x2},
+		{X86_REG_ST2, 10.0}, // st(0)
+		{X86_REG_ST5, 3.14}, // st(3)
 	});
 
-	emulate("fsub st(3)");
+	emulate("fsub st(0), st(3)");
 
 	EXPECT_JUST_REGISTERS_LOADED({X87_REG_TOP, X86_REG_ST2, X86_REG_ST5});
 	EXPECT_JUST_REGISTERS_STORED({
-		{X86_REG_ST2, 3.14 - 3.14},
-		{X87_REG_TAG2, 0x1},
+		{X86_REG_ST2, 10.0 - 3.14},
+		{X87_REG_TAG2, ANY},
+	});
+	EXPECT_NO_MEMORY_LOADED_STORED();
+}
+
+// DC E8+i	FSUB ST(i), ST(0)	Subtract ST(0) from ST(i) and store result in ST(i).
+TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FSUB_dc_e8)
+{
+	ALL_MODES;
+
+	setRegisters({
+		{X87_REG_TOP, 0x2},
+		{X86_REG_ST2, 3.14}, // st(0)
+		{X86_REG_ST5, 10.0}, // st(3)
+	});
+
+	emulate("fsub st(3), st(0)");
+
+	EXPECT_JUST_REGISTERS_LOADED({X87_REG_TOP, X86_REG_ST2, X86_REG_ST5});
+	EXPECT_JUST_REGISTERS_STORED({
+		{X86_REG_ST5, 10.0 - 3.14},
+		{X87_REG_TAG5, ANY},
 	});
 	EXPECT_NO_MEMORY_LOADED_STORED();
 }
@@ -9763,24 +11244,50 @@ TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FSUB_st3)
 // X86_INS_FSUBP
 //
 
+// DE E8+i	FSUBP ST(i), ST(0)	Subtract ST(0) from ST(i), store result in ST(i),
+// and pop register stack.
 TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FSUBP_st3)
 {
 	ALL_MODES;
 
 	setRegisters({
-		{X87_REG_TOP, 0x5},
-		{X86_REG_ST2, 3.14},
-		{X86_REG_ST5, 3.14},
+		{X87_REG_TOP, 0x2},
+		{X86_REG_ST2, 3.14}, // st(0)
+		{X86_REG_ST5, 10.0}, // st(3)
 	});
 
 	emulate("fsubp st(3)");
 
 	EXPECT_JUST_REGISTERS_LOADED({X87_REG_TOP, X86_REG_ST2, X86_REG_ST5});
 	EXPECT_JUST_REGISTERS_STORED({
-		{X87_REG_TOP, 0x6},
-		{X86_REG_ST2, 3.14 - 3.14},
-		{X87_REG_TAG2, 0x1},
-		{X87_REG_TAG5, 0x3},
+		{X87_REG_TOP, 0x3},
+		{X86_REG_ST5, 10.0 - 3.14},
+		{X87_REG_TAG5, ANY},
+		{X87_REG_TAG2, ANY},
+	});
+	EXPECT_NO_MEMORY_LOADED_STORED();
+}
+
+// DE E9	FSUBP	Subtract ST(0) from ST(1), store result in ST(1),
+// and pop register stack.
+TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FSUBP)
+{
+	ALL_MODES;
+
+	setRegisters({
+		{X87_REG_TOP, 0x2},
+		{X86_REG_ST2, 3.14}, // st(0)
+		{X86_REG_ST3, 10.0}, // st(1)
+	});
+
+	emulate("fsubp");
+
+	EXPECT_JUST_REGISTERS_LOADED({X87_REG_TOP, X86_REG_ST2, X86_REG_ST3});
+	EXPECT_JUST_REGISTERS_STORED({
+		{X87_REG_TOP, 0x3},
+		{X86_REG_ST3, 10.0 - 3.14},
+		{X87_REG_TAG3, ANY},
+		{X87_REG_TAG2, ANY},
 	});
 	EXPECT_NO_MEMORY_LOADED_STORED();
 }
@@ -9789,20 +11296,46 @@ TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FSUBP_st3)
 // X86_INS_FISUB
 //
 
-TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FISUB)
+// DA /4	FISUB m32int	Subtract m32int from ST(0) and store result in ST(0).
+TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FISUB_m32)
 {
 	ALL_MODES;
 
 	setRegisters({
 		{X87_REG_TOP, 0x5},
-		{X86_REG_ST5, 3.14},
+		{X86_REG_ST5, 3.14}, // st(0)
 	});
 
 	setMemory({
-		{0x1234, 3},
+		{0x1234, 3_dw},
 	});
 
 	emulate("fisub dword ptr [0x1234]");
+
+	EXPECT_JUST_REGISTERS_LOADED({X87_REG_TOP, X86_REG_ST5});
+	EXPECT_JUST_REGISTERS_STORED({
+		{X86_REG_ST5, 3.14 - 3.0},
+		{X87_REG_TAG5, ANY},
+	});
+	EXPECT_JUST_MEMORY_LOADED({0x1234});
+	EXPECT_NO_MEMORY_STORED();
+}
+
+// DE /4	FISUB m16int	Subtract m16int from ST(0) and store result in ST(0).
+TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FISUB_m16)
+{
+	ALL_MODES;
+
+	setRegisters({
+		{X87_REG_TOP, 0x5},
+		{X86_REG_ST5, 3.14}, // st(0)
+	});
+
+	setMemory({
+		{0x1234, 3_w},
+	});
+
+	emulate("fisub word ptr [0x1234]");
 
 	EXPECT_JUST_REGISTERS_LOADED({X87_REG_TOP, X86_REG_ST5});
 	EXPECT_JUST_REGISTERS_STORED({
@@ -9817,22 +11350,94 @@ TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FISUB)
 // X86_INS_FSUBR
 //
 
-TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FSUBR_st3)
+// D8 /5	FSUBR m32fp	Subtract ST(0) from m32fp and store result in ST(0).
+TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FSUBR_d8)
+{
+	ALL_MODES;
+
+	setMemory({
+		{0x1234, 3.14_f32},
+	});
+
+	setRegisters({
+		{X87_REG_TOP, 0x2},
+		{X86_REG_ST2, 10.0}, // st(0)
+	});
+
+	emulate("fsubr dword ptr [0x1234]");
+
+	EXPECT_JUST_REGISTERS_LOADED({X87_REG_TOP, X86_REG_ST2});
+	EXPECT_JUST_REGISTERS_STORED({
+		{X86_REG_ST2, 3.14 - 10.0},
+		{X87_REG_TAG2, ANY},
+	});
+	EXPECT_JUST_MEMORY_LOADED({0x1234});
+	EXPECT_NO_MEMORY_STORED();
+}
+
+// DC /5	FSUBR m64fp	Subtract ST(0) from m64fp and store result in ST(0).
+TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FSUBR_dc)
+{
+	ALL_MODES;
+
+	setMemory({
+		{0x1234, 3.14_f64},
+	});
+
+	setRegisters({
+		{X87_REG_TOP, 0x2},
+		{X86_REG_ST2, 10.0}, // st(0)
+	});
+
+	emulate("fsubr qword ptr [0x1234]");
+
+	EXPECT_JUST_REGISTERS_LOADED({X87_REG_TOP, X86_REG_ST2});
+	EXPECT_JUST_REGISTERS_STORED({
+		{X86_REG_ST2, 3.14 - 10.0},
+		{X87_REG_TAG2, ANY},
+	});
+	EXPECT_JUST_MEMORY_LOADED({0x1234});
+	EXPECT_NO_MEMORY_STORED();
+}
+
+// D8 E8+i	FSUBR ST(0), ST(i)	Subtract ST(0) from ST(i) and store result in ST(0).
+TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FSUBR_d8_e0)
 {
 	ALL_MODES;
 
 	setRegisters({
-		{X87_REG_TOP, 0x5},
-		{X86_REG_ST2, 10.0},
-		{X86_REG_ST5, 3.14},
+		{X87_REG_TOP, 0x2},
+		{X86_REG_ST2, 10.0}, // st(0)
+		{X86_REG_ST5, 3.14}, // st(3)
 	});
 
-	emulate("fsubr st(3)");
+	emulate("fsubr st(0), st(3)");
 
 	EXPECT_JUST_REGISTERS_LOADED({X87_REG_TOP, X86_REG_ST2, X86_REG_ST5});
 	EXPECT_JUST_REGISTERS_STORED({
-		{X86_REG_ST2, 10.0 - 3.14},
+		{X86_REG_ST2, 3.14 - 10.0},
 		{X87_REG_TAG2, ANY},
+	});
+	EXPECT_NO_MEMORY_LOADED_STORED();
+}
+
+// DC E0+i	FSUBR ST(i), ST(0)	Subtract ST(i) from ST(0) and store result in ST(i).
+TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FSUBR_dc_e8)
+{
+	ALL_MODES;
+
+	setRegisters({
+		{X87_REG_TOP, 0x2},
+		{X86_REG_ST2, 10.0}, // st(0)
+		{X86_REG_ST5, 3.14}, // st(3)
+	});
+
+	emulate("fsubr st(3), st(0)");
+
+	EXPECT_JUST_REGISTERS_LOADED({X87_REG_TOP, X86_REG_ST2, X86_REG_ST5});
+	EXPECT_JUST_REGISTERS_STORED({
+		{X86_REG_ST5, 10.0 - 3.14},
+		{X87_REG_TAG5, ANY},
 	});
 	EXPECT_NO_MEMORY_LOADED_STORED();
 }
@@ -9841,26 +11446,106 @@ TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FSUBR_st3)
 // X86_INS_FSUBRP
 //
 
+// DE E0+i	FSUBRP ST(i), ST(0)	Subtract ST(i) from ST(0), store result in ST(i),
+// and pop register stack.
 TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FSUBRP_st3)
 {
 	ALL_MODES;
 
 	setRegisters({
-		{X87_REG_TOP, 0x5},
-		{X86_REG_ST2, 10.0},
-		{X86_REG_ST5, 3.14},
+		{X87_REG_TOP, 0x2},
+		{X86_REG_ST2, 3.14}, // st(0)
+		{X86_REG_ST5, 10.0}, // st(3)
 	});
 
 	emulate("fsubrp st(3)");
 
 	EXPECT_JUST_REGISTERS_LOADED({X87_REG_TOP, X86_REG_ST2, X86_REG_ST5});
 	EXPECT_JUST_REGISTERS_STORED({
-		{X87_REG_TOP, 0x6},
-		{X86_REG_ST2, 10.0 - 3.14},
-		{X87_REG_TAG2, ANY},
+		{X87_REG_TOP, 0x3},
+		{X86_REG_ST5, 3.14 - 10.0},
 		{X87_REG_TAG5, ANY},
+		{X87_REG_TAG2, ANY},
 	});
 	EXPECT_NO_MEMORY_LOADED_STORED();
+}
+
+// DE E1	FSUBRP	Subtract ST(1) from ST(0), store result in ST(1),
+// and pop register stack.
+TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FSUBRP)
+{
+	ALL_MODES;
+
+	setRegisters({
+		{X87_REG_TOP, 0x2},
+		{X86_REG_ST2, 3.14}, // st(0)
+		{X86_REG_ST3, 10.0}, // st(1)
+	});
+
+	emulate("fsubrp");
+
+	EXPECT_JUST_REGISTERS_LOADED({X87_REG_TOP, X86_REG_ST2, X86_REG_ST3});
+	EXPECT_JUST_REGISTERS_STORED({
+		{X87_REG_TOP, 0x3},
+		{X86_REG_ST3, 3.14 - 10.0},
+		{X87_REG_TAG3, ANY},
+		{X87_REG_TAG2, ANY},
+	});
+	EXPECT_NO_MEMORY_LOADED_STORED();
+}
+
+//
+// X86_INS_FISUBR
+//
+
+// DA /5	FISUBR m32int	Subtract ST(0) from m32int and store result in ST(0).
+TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FISUBR_m32)
+{
+	ALL_MODES;
+
+	setRegisters({
+		{X87_REG_TOP, 0x5},
+		{X86_REG_ST5, 3.14}, // st(0)
+	});
+
+	setMemory({
+		{0x1234, 3_dw},
+	});
+
+	emulate("fisubr dword ptr [0x1234]");
+
+	EXPECT_JUST_REGISTERS_LOADED({X87_REG_TOP, X86_REG_ST5});
+	EXPECT_JUST_REGISTERS_STORED({
+		{X86_REG_ST5, 3.0 - 3.14},
+		{X87_REG_TAG5, ANY},
+	});
+	EXPECT_JUST_MEMORY_LOADED({0x1234});
+	EXPECT_NO_MEMORY_STORED();
+}
+
+// DE /5	FISUBR m16int	Subtract ST(0) from m16int and store result in ST(0).
+TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FISUBR_m16)
+{
+	ALL_MODES;
+
+	setRegisters({
+		{X87_REG_TOP, 0x5},
+		{X86_REG_ST5, 3.14}, // st(0)
+	});
+
+	setMemory({
+		{0x1234, 3_w},
+	});
+
+	emulate("fisubr word ptr [0x1234]");
+
+	EXPECT_JUST_REGISTERS_LOADED({X87_REG_TOP, X86_REG_ST5});
+	EXPECT_JUST_REGISTERS_STORED({
+		{X86_REG_ST5, 3.0 - 3.14},
+		{X87_REG_TAG5, ANY},
+	});
+	EXPECT_JUST_MEMORY_LOADED({0x1234});
+	EXPECT_NO_MEMORY_STORED();
 }
 
 //
@@ -9868,6 +11553,7 @@ TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FSUBRP_st3)
 // llvm.fabs.*() can not be lowered, so we need to check call.
 //
 
+// D9 E1	FABS	Replace ST with its absolute value.
 TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FABS)
 {
 	ALL_MODES;
@@ -9894,6 +11580,7 @@ TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FABS)
 // X86_INS_FCHS
 //
 
+// D9 E0	FCHS	Complements sign of ST(0)
 TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FCHS)
 {
 	ALL_MODES;
@@ -9944,12 +11631,36 @@ TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FSQRT)
 // X86_INS_FXCH
 //
 
+// D9 C9	FXCH	Exchange the contents of ST(0) and ST(1).
 TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FXCH)
 {
 	ALL_MODES;
 
 	setRegisters({
-		{X87_REG_TOP, 0x5},
+		{X87_REG_TOP, 0x2},
+		{X86_REG_ST2, 10.0},
+		{X86_REG_ST3, 3.14},
+	});
+
+	emulate("fxch");
+
+	EXPECT_JUST_REGISTERS_LOADED({X87_REG_TOP, X86_REG_ST2, X86_REG_ST3});
+	EXPECT_JUST_REGISTERS_STORED({
+		{X86_REG_ST2, 3.14},
+		{X86_REG_ST3, 10.0},
+		{X87_REG_TAG2, ANY},
+		{X87_REG_TAG3, ANY},
+	});
+	EXPECT_NO_MEMORY_LOADED_STORED();
+}
+
+// D9 C8+i	FXCH ST(i)	Exchange the contents of ST(0) and ST(i).
+TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FXCH_st3)
+{
+	ALL_MODES;
+
+	setRegisters({
+		{X87_REG_TOP, 0x2},
 		{X86_REG_ST2, 10.0},
 		{X86_REG_ST5, 3.14},
 	});
@@ -9970,13 +11681,14 @@ TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FXCH)
 // X86_INS_FCOS
 //
 
+// D9 FF	FCOS	Replace ST(0) with its cosine.
 TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FCOS_compute)
 {
 	ALL_MODES;
 
 	setRegisters({
 		{X87_REG_TOP, 0x1},
-		{X86_REG_ST1, 10.0},
+		{X86_REG_ST1, 10.0}, // st(0)
 	});
 
 	emulate("fcos");
@@ -10041,9 +11753,9 @@ TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FSINCOS_compute)
 	EXPECT_JUST_REGISTERS_STORED({
 		{X86_REG_ST1, ANY},
 		{X87_REG_TAG1, ANY},
-		{X86_REG_ST2, ANY},
-		{X87_REG_TAG2, ANY},
-		{X87_REG_TOP, ANY},
+		{X86_REG_ST0, ANY},
+		{X87_REG_TAG0, ANY},
+		{X87_REG_TOP, 0x0},
 		{X87_REG_C2, false},
 	});
 	EXPECT_NO_MEMORY_LOADED_STORED();
@@ -10058,12 +11770,13 @@ TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FSINCOS_compute)
 // X86_INS_FLD1
 //
 
+// D9 E8	FLD1	Push +1.0 onto the FPU register stack.
 TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FLD1)
 {
 	ALL_MODES;
 
 	setRegisters({
-		{X87_REG_TOP, 0x1},
+		{X87_REG_TOP, 0x3},
 	});
 
 	emulate("fld1");
@@ -10072,7 +11785,7 @@ TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FLD1)
 	EXPECT_JUST_REGISTERS_STORED({
 		{X86_REG_ST2, 1.0},
 		{X87_REG_TAG2, ANY},
-		{X87_REG_TOP, 0},
+		{X87_REG_TOP, 2},
 	});
 	EXPECT_NO_MEMORY_LOADED_STORED();
 }
@@ -10081,12 +11794,13 @@ TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FLD1)
 // X86_INS_FLDL2T
 //
 
+// D9 E9	FLDL2T	Push log_2(10) onto the FPU register stack.
 TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FLDL2T)
 {
 	ALL_MODES;
 
 	setRegisters({
-		{X87_REG_TOP, 0x1},
+		{X87_REG_TOP, 0x3},
 	});
 
 	emulate("fldl2t");
@@ -10095,7 +11809,7 @@ TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FLDL2T)
 	EXPECT_JUST_REGISTERS_STORED({
 		{X86_REG_ST2, static_cast<double>(std::log2(10.0L))},
 		{X87_REG_TAG2, ANY},
-		{X87_REG_TOP, 0},
+		{X87_REG_TOP, 2},
 	});
 	EXPECT_NO_MEMORY_LOADED_STORED();
 }
@@ -10104,12 +11818,13 @@ TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FLDL2T)
 // X86_INS_FLDL2E
 //
 
+// D9 EA	FLDL2E	Push log_2(e) onto the FPU register stack.
 TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FLDL2E)
 {
 	ALL_MODES;
 
 	setRegisters({
-		{X87_REG_TOP, 0x1},
+		{X87_REG_TOP, 0x3},
 	});
 
 	emulate("fldl2e");
@@ -10118,7 +11833,7 @@ TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FLDL2E)
 	EXPECT_JUST_REGISTERS_STORED({
 		{X86_REG_ST2, static_cast<double>(std::log2(std::exp(1.0L)))},
 		{X87_REG_TAG2, ANY},
-		{X87_REG_TOP, 0},
+		{X87_REG_TOP, 2},
 	});
 	EXPECT_NO_MEMORY_LOADED_STORED();
 }
@@ -10127,12 +11842,13 @@ TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FLDL2E)
 // X86_INS_FLDPI
 //
 
+// D9 EB	FLDPI	Push pi onto the FPU register stack.
 TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FLDPI)
 {
 	ALL_MODES;
 
 	setRegisters({
-		{X87_REG_TOP, 0x1},
+		{X87_REG_TOP, 0x3},
 	});
 
 	emulate("fldpi");
@@ -10141,7 +11857,7 @@ TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FLDPI)
 	EXPECT_JUST_REGISTERS_STORED({
 		{X86_REG_ST2, 3.14159265358979323846},
 		{X87_REG_TAG2, ANY},
-		{X87_REG_TOP, 0},
+		{X87_REG_TOP, 2},
 	});
 	EXPECT_NO_MEMORY_LOADED_STORED();
 }
@@ -10150,12 +11866,13 @@ TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FLDPI)
 // X86_INS_FLDLG2
 //
 
+// D9 EC	FLDLG2	Push log_10(2) onto the FPU register stack.
 TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FLDLG2)
 {
 	ALL_MODES;
 
 	setRegisters({
-		{X87_REG_TOP, 0x1},
+		{X87_REG_TOP, 0x3},
 	});
 
 	emulate("fldlg2");
@@ -10164,7 +11881,7 @@ TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FLDLG2)
 	EXPECT_JUST_REGISTERS_STORED({
 		{X86_REG_ST2, static_cast<double>(std::log10(2.0L))},
 		{X87_REG_TAG2, ANY},
-		{X87_REG_TOP, 0},
+		{X87_REG_TOP, 2},
 	});
 	EXPECT_NO_MEMORY_LOADED_STORED();
 }
@@ -10173,12 +11890,13 @@ TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FLDLG2)
 // X86_INS_FLDLN2
 //
 
+// D9 ED	FLDLN2	Push log_e(2) onto the FPU register stack.
 TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FLDLN2)
 {
 	ALL_MODES;
 
 	setRegisters({
-		{X87_REG_TOP, 0x1},
+		{X87_REG_TOP, 0x3},
 	});
 
 	emulate("fldln2");
@@ -10187,7 +11905,7 @@ TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FLDLN2)
 	EXPECT_JUST_REGISTERS_STORED({
 		{X86_REG_ST2, static_cast<double>(std::log(2.0L))},
 		{X87_REG_TAG2, ANY},
-		{X87_REG_TOP, 0},
+		{X87_REG_TOP, 2},
 	});
 	EXPECT_NO_MEMORY_LOADED_STORED();
 }
@@ -10196,12 +11914,13 @@ TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FLDLN2)
 // X86_INS_FLDZ
 //
 
+// D9 EE	FLDZ	Push +0.0 onto the FPU register stack.
 TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FLDZ)
 {
 	ALL_MODES;
 
 	setRegisters({
-		{X87_REG_TOP, 0x1},
+		{X87_REG_TOP, 0x3},
 	});
 
 	emulate("fldz");
@@ -10210,7 +11929,7 @@ TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FLDZ)
 	EXPECT_JUST_REGISTERS_STORED({
 		{X86_REG_ST2, 0.0},
 		{X87_REG_TAG2, ANY},
-		{X87_REG_TOP, 0},
+		{X87_REG_TOP, 2},
 	});
 	EXPECT_NO_MEMORY_LOADED_STORED();
 }
@@ -10237,10 +11956,29 @@ TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FINCSTP)
 	EXPECT_NO_MEMORY_LOADED_STORED();
 }
 
+TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FINCSTP_rotate)
+{
+	ALL_MODES;
+
+	setRegisters({
+		{X87_REG_TOP, 0x7},
+	});
+
+	emulate("fincstp");
+
+	EXPECT_JUST_REGISTERS_LOADED({X87_REG_TOP});
+	EXPECT_JUST_REGISTERS_STORED({
+		{X87_REG_TOP, 0x0},
+		{X87_REG_C1, false},
+	});
+	EXPECT_NO_MEMORY_LOADED_STORED();
+}
+
 //
 // X86_INS_FDECSTP
 //
 
+// D9 F6	FDECSTP	Decrement TOP field in FPU status word.
 TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FDECSTP)
 {
 	ALL_MODES;
@@ -10254,6 +11992,25 @@ TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FDECSTP)
 	EXPECT_JUST_REGISTERS_LOADED({X87_REG_TOP});
 	EXPECT_JUST_REGISTERS_STORED({
 		{X87_REG_TOP, 0x2},
+		{X87_REG_C1, false},
+	});
+	EXPECT_NO_MEMORY_LOADED_STORED();
+}
+
+// D9 F6	FDECSTP	Decrement TOP field in FPU status word.
+TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FDECSTP_rotate)
+{
+	ALL_MODES;
+
+	setRegisters({
+		{X87_REG_TOP, 0x0},
+	});
+
+	emulate("fdecstp");
+
+	EXPECT_JUST_REGISTERS_LOADED({X87_REG_TOP});
+	EXPECT_JUST_REGISTERS_STORED({
+		{X87_REG_TOP, 0x7},
 		{X87_REG_C1, false},
 	});
 	EXPECT_NO_MEMORY_LOADED_STORED();
