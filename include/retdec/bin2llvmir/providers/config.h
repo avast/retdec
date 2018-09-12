@@ -141,6 +141,31 @@ class Config
 		llvm::CallInst* isLlvmAnyBranchPseudoFunctionCall(llvm::Value* c);
 		llvm::CallInst* isLlvmAnyUncondBranchPseudoFunctionCall(llvm::Value* c);
 
+		// x86-specific pseudo-functions.
+		//
+		void setLlvmX87DataStorePseudoFunction(llvm::Function* f);
+		llvm::Function* getLlvmX87DataStorePseudoFunction() const;
+		bool isLlvmX87DataStorePseudoFunction(llvm::Value* f);
+		llvm::CallInst* isLlvmX87DataStorePseudoFunctionCall(llvm::Value* c);
+
+		void setLlvmX87TagStorePseudoFunction(llvm::Function* f);
+		llvm::Function* getLlvmX87TagStorePseudoFunction() const;
+		bool isLlvmX87TagStorePseudoFunction(llvm::Value* f);
+		llvm::CallInst* isLlvmX87TagStorePseudoFunctionCall(llvm::Value* c);
+
+		void setLlvmX87DataLoadPseudoFunction(llvm::Function* f);
+		llvm::Function* getLlvmX87DataLoadPseudoFunction() const;
+		bool isLlvmX87DataLoadPseudoFunction(llvm::Value* f);
+		llvm::CallInst* isLlvmX87DataLoadPseudoFunctionCall(llvm::Value* c);
+
+		void setLlvmX87TagLoadPseudoFunction(llvm::Function* f);
+		llvm::Function* getLlvmX87TagLoadPseudoFunction() const;
+		bool isLlvmX87TagLoadPseudoFunction(llvm::Value* f);
+		llvm::CallInst* isLlvmX87TagLoadPseudoFunctionCall(llvm::Value* c);
+
+		llvm::CallInst* isLlvmX87StorePseudoFunctionCall(llvm::Value* c);
+		llvm::CallInst* isLlvmX87LoadPseudoFunctionCall(llvm::Value* c);
+
 		// Other
 		//
 		llvm::GlobalVariable* getGlobalDummy();
@@ -158,10 +183,16 @@ class Config
 		retdec::config::Config _configDB;
 		std::string _configPath;
 		llvm::GlobalVariable* _globalDummy = nullptr;
+
 		llvm::Function* _callFunction = nullptr;
 		llvm::Function* _returnFunction = nullptr;
 		llvm::Function* _branchFunction = nullptr;
 		llvm::Function* _condBranchFunction = nullptr;
+
+		llvm::Function* _x87DataStoreFunction = nullptr; // void (i3, fp80)
+		llvm::Function* _x87TagStoreFunction = nullptr; // void (i3, i2)
+		llvm::Function* _x87DataLoadFunction = nullptr; // fp80 (i3)
+		llvm::Function* _x87TagLoadFunction = nullptr; // i2 (i3)
 };
 
 class ConfigProvider

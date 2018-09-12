@@ -52,7 +52,7 @@ set(BIN2LLVMIR_SOURCES
 	optimizations/param_return/param_return.cpp
 	optimizations/phi2seq/phi2seq.cpp
 	optimizations/provider_init/provider_init.cpp
-	optimizations/register/register.cpp
+	optimizations/x87_fpu/x87_fpu.cpp
 	optimizations/select_functions/select_functions.cpp
 	optimizations/simple_types/simple_types.cpp
 	optimizations/stack/stack.cpp
