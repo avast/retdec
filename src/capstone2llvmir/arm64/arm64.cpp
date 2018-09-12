@@ -176,6 +176,7 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateInstruction(
 	cs_detail* d = i->detail;
 	cs_arm64* ai = &d->arm64;
 
+	std::cerr << "Translating instruction: " << cs_insn_name(_handle, i->id) << std::endl;
 	auto fIt = _i2fm.find(i->id);
 	if (fIt != _i2fm.end() && fIt->second != nullptr)
 	{
@@ -193,9 +194,7 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateInstruction(
 		{
 			(this->*f)(i, ai, irb);
 
-			assert(false && "NOT YET IMPLEMENTED");
-
-			_inCondition = true;
+			//_inCondition = true;
 			//auto* cond = generateInsnConditionCode(irb, ai);
 			//auto bodyIrb = generateIfThen(cond, irb);
 
@@ -204,7 +203,7 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateInstruction(
 	}
 	else
 	{
-		assert(false && "NOT YET IMPLEMENTED");
+		assert(false && "Instruction is not implemented");
 		// TODO: Automatically generate pseudo asm call.
 	}
 }
@@ -329,7 +328,64 @@ llvm::Instruction* Capstone2LlvmIrTranslatorArm64_impl::storeOp(
 		}
 		case ARM64_OP_MEM:
 		{
-			// TODO: OP MEM
+			auto* baseR = loadRegister(op.mem.base, irb);
+			auto* t = baseR ? baseR->getType() : getDefaultType();
+			llvm::Value* disp = op.mem.disp
+					? llvm::ConstantInt::get(t, op.mem.disp)
+					: nullptr;
+
+			auto* idxR = loadRegister(op.mem.index, irb);
+			if (idxR)
+			{
+				//struct {
+				//    arm64_shifter type;	// shifter type of this operand
+				//    unsigned int value;	// shifter value of this operand
+				//} shift;
+				//if (op.mem.lshift)
+				//{
+				//	auto* lshift = llvm::ConstantInt::get(
+				//			idxR->getType(),
+				//			op.mem.lshift);
+				//	idxR = irb.CreateShl(idxR, lshift);
+				//}
+
+				// If there is a shift in memory operand, it is applied to
+				// the index register.
+				idxR = generateOperandShift(irb, op, idxR);
+			}
+
+			llvm::Value* addr = nullptr;
+			if (baseR && disp == nullptr)
+			{
+				addr = baseR;
+			}
+			else if (disp && baseR == nullptr)
+			{
+				addr = disp;
+			}
+			else if (baseR && disp)
+			{
+				disp = irb.CreateSExtOrTrunc(disp, baseR->getType());
+				addr = irb.CreateAdd(baseR, disp);
+			}
+			else if (idxR)
+			{
+				addr = idxR;
+			}
+			else
+			{
+				addr = llvm::ConstantInt::get(getDefaultType(), 0);
+			}
+
+			if (idxR && addr != idxR)
+			{
+				idxR = irb.CreateZExtOrTrunc(idxR, addr->getType());
+				addr = irb.CreateAdd(addr, idxR);
+			}
+
+			auto* pt = llvm::PointerType::get(val->getType(), 0);
+			addr = irb.CreateIntToPtr(addr, pt);
+			return irb.CreateStore(val, addr);
 		}
 		case ARM64_OP_INVALID: 
 		case ARM64_OP_IMM: 
@@ -371,6 +427,38 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateAdd(cs_insn* i, cs_arm64* ai,
 	std::tie(op1, op2) = loadOpTernaryOp1Op2(ai, irb);
 	auto *val = irb.CreateAdd(op1, op2);
 	storeOp(ai->operands[0], val, irb);
+}
+
+/**
+ * ARM64_INS_STR
+ */
+void Capstone2LlvmIrTranslatorArm64_impl::translateStr(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb)
+{
+	op0 = loadOp(ai->operands[0], irb);
+	op0 = irb.CreateZExtOrTrunc(op0, getDefaultType());
+
+	uint32_t baseR = ARM_REG_INVALID;
+	llvm::Value* idx = nullptr;
+	bool subtract = false;
+	storeOp(ai->operands[1], op0, irb);
+	baseR = ai->operands[1].mem.base;
+	if (auto disp = ai->operands[1].mem.disp)
+	{
+		idx = llvm::ConstantInt::getSigned(getDefaultType(), disp);
+	}
+	else if (ai->operands[1].mem.index != ARM64_REG_INVALID)
+	{
+		idx = loadRegister(ai->operands[1].mem.index, irb);
+	}
+
+	if (ai->writeback && idx && baseR != ARM64_REG_INVALID)
+	{
+		auto* b = loadRegister(baseR, irb);
+		auto* v = subtract
+				? irb.CreateSub(b, idx)
+				: irb.CreateAdd(b, idx);
+		storeRegister(baseR, v, irb);
+	}
 }
 
 } // namespace capstone2llvmir
