@@ -108,9 +108,13 @@ std::set<std::string> selectSignaturePaths(
 		selectSignaturesWithName(allSigs, sigs, "ucrt");
 
 		std::string arch;
-		if (c.architecture.isX86())
+		if (c.architecture.isX86_32())
 		{
 			arch = "x86";
+		}
+		else if (c.architecture.isX86_64())
+		{
+			arch = "x64";
 		}
 		else if (c.architecture.isArmOrThumb())
 		{
@@ -855,7 +859,7 @@ void Finder::solveReferences()
 
 utils::Address Finder::getAddressFromRef(utils::Address ref)
 {
-	if (_config->architecture.isX86_32())
+	if (_config->architecture.isX86())
 	{
 		return getAddressFromRef_x86(ref);
 	}

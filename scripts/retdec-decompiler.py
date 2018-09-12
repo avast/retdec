@@ -973,6 +973,8 @@ class Decompiler:
 
             if sig_arch == 'pic32':
                 sig_arch = 'mips'
+            elif sig_arch == 'x86-64':
+                sig_arch = 'x86';
 
             signatures_dir = os.path.join(config.GENERIC_SIGNATURES_DIR, sig_format, fileclass, sig_endian, sig_arch)
 
