@@ -92,7 +92,10 @@ ShPtr<Expression> LLVMInstructionConverter::convertConstExprToExpression(
 	}
 
 	switch (opCode) {
+		case llvm::Instruction::AddrSpaceCast:
 		case llvm::Instruction::BitCast:
+			// TODO: Address space casts are treated like bit casts, there might
+			// be a better way to deal with them.
 			return convertCastInstToExpression<BitCastExpr>(*cExpr);
 
 		case llvm::Instruction::FCmp:
@@ -226,6 +229,16 @@ void LLVMInstructionConverter::setLLVMValueConverter(ShPtr<LLVMValueConverter> c
 */
 void LLVMInstructionConverter::setOptionStrictFPUSemantics(bool strict) {
 	fcmpConverter->setOptionStrictFPUSemantics(strict);
+}
+
+/**
+* @brief Converts the given LLVM address space cast instruction @a inst into an
+*        expression in BIR.
+*/
+ShPtr<Expression> LLVMInstructionConverter::visitAddrSpaceCastInst(llvm::AddrSpaceCastInst &inst) {
+	// TODO: Address space casts are treated like bit casts, there might
+	// be a better way to deal with them.
+	return convertCastInstToExpression<BitCastExpr>(inst);
 }
 
 /**
