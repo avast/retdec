@@ -934,6 +934,18 @@ class Decompiler:
                         self.format.upper(), fileclass))
                 return 1
 
+            # TODO this should be somehow connected somewhere else
+            if fileclass == '64' and self.arch in ['arm', 'mips', 'pic32', 'powerpc', 'x86']:
+                if self.args.generate_log:
+                    self.generate_log()
+
+                self._cleanup()
+                utils.print_error(
+                    'Unsupported target format and architecture combination: \'%s%s\' + \'%s\'.' % (
+                        self.format.upper(), fileclass, self.arch))
+
+                return 1
+
             # Set path to statically linked code signatures.
             #
             # TODO: Using ELF for IHEX is ok, but for raw, we probably should somehow decide between ELF and PE,
