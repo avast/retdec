@@ -568,7 +568,7 @@ bool FileImage::isImportTerminating(
 	retdec::utils::NonIterableSet<std::string> exitFncs =
 	{
 		"exit", "_exit", "ExitThread", "abort", "longjmp", "_Exit",
-		"quick_exit", "thrd_exit", "ExitProcess"
+		"quick_exit", "thrd_exit", "ExitProcess", "_CxxThrowException"
 	};
 	return exitFncs.has(name);
 }
