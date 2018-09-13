@@ -221,6 +221,166 @@ llvm::Value* Capstone2LlvmIrTranslatorArm64_impl::getCurrentPc(cs_insn* i)
 			((i->address + (2*i->size)) >> 2) << 2);
 }
 
+llvm::Value* Capstone2LlvmIrTranslatorArm64_impl::generateOperandShift(
+		llvm::IRBuilder<>& irb,
+		cs_arm64_op& op,
+		llvm::Value* val)
+{
+	llvm::Value* n = nullptr;
+	if (op.shift.type == ARM64_SFT_INVALID)
+	{
+		return val;
+	}
+	else
+	{
+		n = llvm::ConstantInt::get(val->getType(), op.shift.value);
+	}
+
+	if (n == nullptr)
+	{
+		assert(false && "should not be possible");
+		return val;
+	}
+	n = irb.CreateZExtOrTrunc(n, val->getType());
+
+	switch (op.shift.type)
+	{
+		case ARM64_SFT_ASR:
+		{
+			return generateShiftAsr(irb, val, n);
+		}
+		case ARM64_SFT_LSL:
+		{
+			return generateShiftLsl(irb, val, n);
+		}
+		case ARM64_SFT_LSR:
+		{
+			return generateShiftLsr(irb, val, n);
+		}
+		case ARM64_SFT_ROR:
+		{
+			return generateShiftRor(irb, val, n);
+		}
+		case ARM64_SFT_MSL:
+		{
+			assert(false && "CHECK IMPLEMENTATION");
+			return generateShiftMsl(irb, val, n);
+		}
+		case ARM64_SFT_INVALID:
+		default:
+		{
+			return val;
+		}
+	}
+}
+
+llvm::Value* Capstone2LlvmIrTranslatorArm64_impl::generateShiftAsr(
+		llvm::IRBuilder<>& irb,
+		llvm::Value* val,
+		llvm::Value* n)
+{
+	// TODO: In the old semantics, there is:
+	// n = (n == 0) ? 32 : n;
+	// It looks like capstone does not allow op.shift.value to be zero,
+	// in such a case, Capstone throws away the shift.
+	// But there still might be zero in register, if register variant
+	// is used.
+
+	auto* cfOp1 = irb.CreateSub(n, llvm::ConstantInt::get(n->getType(), 1));
+	auto* cfShl = irb.CreateShl(llvm::ConstantInt::get(cfOp1->getType(), 1), cfOp1);
+	auto* cfAnd = irb.CreateAnd(cfShl, val);
+	auto* cfIcmp = irb.CreateICmpNE(cfAnd, llvm::ConstantInt::get(cfAnd->getType(), 0));
+	storeRegister(ARM64_REG_CPSR_C, cfIcmp, irb);
+
+	return irb.CreateAShr(val, n);
+}
+
+llvm::Value* Capstone2LlvmIrTranslatorArm64_impl::generateShiftLsl(
+		llvm::IRBuilder<>& irb,
+		llvm::Value* val,
+		llvm::Value* n)
+{
+	auto* cfOp1 = irb.CreateSub(n, llvm::ConstantInt::get(n->getType(), 1));
+	auto* cfShl = irb.CreateShl(val, cfOp1);
+	auto* cfIntT = llvm::cast<llvm::IntegerType>(cfShl->getType());
+	auto* cfRightCount = llvm::ConstantInt::get(cfIntT, cfIntT->getBitWidth() - 1);
+	auto* cfLow = irb.CreateLShr(cfShl, cfRightCount);
+	storeRegister(ARM64_REG_CPSR_C, cfLow, irb);
+
+	return irb.CreateShl(val, n);
+}
+
+llvm::Value* Capstone2LlvmIrTranslatorArm64_impl::generateShiftLsr(
+		llvm::IRBuilder<>& irb,
+		llvm::Value* val,
+		llvm::Value* n)
+{
+	// TODO: In the old semantics, there is:
+	// n = (n == 0) ? 32 : n;
+
+	auto* cfOp1 = irb.CreateSub(n, llvm::ConstantInt::get(n->getType(), 1));
+	auto* cfShl = irb.CreateShl(llvm::ConstantInt::get(cfOp1->getType(), 1), cfOp1);
+	auto* cfAnd = irb.CreateAnd(cfShl, val);
+	auto* cfIcmp = irb.CreateICmpNE(cfAnd, llvm::ConstantInt::get(cfAnd->getType(), 0));
+	storeRegister(ARM64_REG_CPSR_C, cfIcmp, irb);
+
+	return irb.CreateLShr(val, n);
+}
+
+llvm::Value* Capstone2LlvmIrTranslatorArm64_impl::generateShiftRor(
+		llvm::IRBuilder<>& irb,
+		llvm::Value* val,
+		llvm::Value* n)
+{
+	// TODO: In the old semantics, there is same more complicated code
+	// if n == 0.
+	unsigned op0BitW = llvm::cast<llvm::IntegerType>(n->getType())->getBitWidth();
+
+	auto* srl = irb.CreateLShr(val, n);
+	auto* sub = irb.CreateSub(llvm::ConstantInt::get(n->getType(), op0BitW), n);
+	auto* shl = irb.CreateShl(val, sub);
+	auto* orr = irb.CreateOr(srl, shl);
+
+	auto* cfSrl = irb.CreateLShr(orr, llvm::ConstantInt::get(orr->getType(), op0BitW - 1));
+	auto* cfIcmp = irb.CreateICmpNE(cfSrl, llvm::ConstantInt::get(cfSrl->getType(), 0));
+	storeRegister(ARM64_REG_CPSR_C, cfIcmp, irb);
+
+	return orr;
+}
+
+llvm::Value* Capstone2LlvmIrTranslatorArm64_impl::generateShiftMsl(
+		llvm::IRBuilder<>& irb,
+		llvm::Value* val,
+		llvm::Value* n)
+{
+	unsigned op0BitW = llvm::cast<llvm::IntegerType>(n->getType())->getBitWidth();
+	auto* doubleT = llvm::Type::getIntNTy(_module->getContext(), op0BitW*2);
+
+	auto* cf = loadRegister(ARM_REG_CPSR_C, irb);
+	cf = irb.CreateZExtOrTrunc(cf, n->getType());
+
+	auto* srl = irb.CreateLShr(val, n);
+	auto* srlZext = irb.CreateZExt(srl, doubleT);
+	auto* op0Zext = irb.CreateZExt(val, doubleT);
+	auto* sub = irb.CreateSub(llvm::ConstantInt::get(n->getType(), op0BitW + 1), n);
+	auto* subZext = irb.CreateZExt(sub, doubleT);
+	auto* shl = irb.CreateShl(op0Zext, subZext);
+	auto* sub2 = irb.CreateSub(llvm::ConstantInt::get(n->getType(), op0BitW), n);
+	auto* shl2 = irb.CreateShl(cf, sub2);
+	auto* shl2Zext = irb.CreateZExt(shl2, doubleT);
+	auto* or1 = irb.CreateOr(shl, srlZext);
+	auto* or2 = irb.CreateOr(or1, shl2Zext);
+	auto* or2Trunc = irb.CreateTrunc(or2, val->getType());
+
+	auto* sub3 = irb.CreateSub(n, llvm::ConstantInt::get(n->getType(), 1));
+	auto* shl3 = irb.CreateShl(llvm::ConstantInt::get(sub3->getType(), 1), sub3);
+	auto* and1 = irb.CreateAnd(shl3, val);
+	auto* cfIcmp = irb.CreateICmpNE(and1, llvm::ConstantInt::get(and1->getType(), 0));
+	storeRegister(ARM64_REG_CPSR_C, cfIcmp, irb);
+
+	return or2Trunc;
+}
+
 llvm::Value* Capstone2LlvmIrTranslatorArm64_impl::loadRegister(
 		uint32_t r,
 		llvm::IRBuilder<>& irb,
@@ -404,15 +564,6 @@ llvm::Instruction* Capstone2LlvmIrTranslatorArm64_impl::storeOp(
 	}
 }
 
-llvm::Value* Capstone2LlvmIrTranslatorArm64_impl::generateOperandShift(
-		llvm::IRBuilder<>& irb,
-		cs_arm64_op& op,
-		llvm::Value* val)
-{
-	return val;
-	// TODO: NOT YET IMPLEMENTED
-}
-
 //
 //==============================================================================
 // ARM64 instruction translation methods.
@@ -427,6 +578,35 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateAdd(cs_insn* i, cs_arm64* ai,
 	std::tie(op1, op2) = loadOpTernaryOp1Op2(ai, irb);
 	auto *val = irb.CreateAdd(op1, op2);
 	storeOp(ai->operands[0], val, irb);
+}
+
+/**
+ * ARM64_INS_MOV, ARM64_INS_MVN, ARM64_INS_MOVZ
+ */
+void Capstone2LlvmIrTranslatorArm64_impl::translateMov(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb)
+{
+	if (ai->op_count != 2)
+	{
+		return;
+	}
+
+	op1 = loadOpBinaryOp1(ai, irb);
+	if (i->id == ARM64_INS_MVN)
+	{
+		op1 = generateValueNegate(irb, op1);
+	}
+
+	// If S is specified, the MOV instruction:
+	// - updates the N and Z flags according to the result
+	// - can update the C flag during the calculation of Operand2 (shifts?)
+	// - does not affect the V flag.
+	if (ai->update_flags)
+	{
+		llvm::Value* zero = llvm::ConstantInt::get(op1->getType(), 0);
+		storeRegister(ARM64_REG_CPSR_N, irb.CreateICmpSLT(op1, zero), irb);
+		storeRegister(ARM64_REG_CPSR_Z, irb.CreateICmpEQ(op1, zero), irb);
+	}
+	storeOp(ai->operands[0], op1, irb);
 }
 
 /**

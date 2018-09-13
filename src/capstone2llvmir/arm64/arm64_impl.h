@@ -58,6 +58,31 @@ class Capstone2LlvmIrTranslatorArm64_impl :
 	protected:
 		llvm::Value* getCurrentPc(cs_insn* i);
 
+		llvm::Value* generateOperandShift(
+				llvm::IRBuilder<>& irb,
+				cs_arm64_op& op,
+				llvm::Value* val);
+		llvm::Value* generateShiftAsr(
+				llvm::IRBuilder<>& irb,
+				llvm::Value* val,
+				llvm::Value* n);
+		llvm::Value* generateShiftLsl(
+				llvm::IRBuilder<>& irb,
+				llvm::Value* val,
+				llvm::Value* n);
+		llvm::Value* generateShiftLsr(
+				llvm::IRBuilder<>& irb,
+				llvm::Value* val,
+				llvm::Value* n);
+		llvm::Value* generateShiftRor(
+				llvm::IRBuilder<>& irb,
+				llvm::Value* val,
+				llvm::Value* n);
+		llvm::Value* generateShiftMsl(
+				llvm::IRBuilder<>& irb,
+				llvm::Value* val,
+				llvm::Value* n);
+
 		virtual llvm::Value* loadRegister(
 				uint32_t r,
 				llvm::IRBuilder<>& irb,
@@ -80,10 +105,6 @@ class Capstone2LlvmIrTranslatorArm64_impl :
 				llvm::IRBuilder<>& irb,
 				eOpConv ct = eOpConv::SEXT_TRUNC) override;
 
-		llvm::Value* generateOperandShift(
-				llvm::IRBuilder<>& irb,
-				cs_arm64_op& op,
-				llvm::Value* val);
 //
 //==============================================================================
 // ARM64 implementation data.
@@ -103,6 +124,7 @@ class Capstone2LlvmIrTranslatorArm64_impl :
 //
 	protected:
 		void translateAdd(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb);
+		void translateMov(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb);
 		void translateStr(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb);
 
 };
