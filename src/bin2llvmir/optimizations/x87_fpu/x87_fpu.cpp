@@ -62,6 +62,10 @@ bool X87FpuAnalysis::run()
 	{
 		return false;
 	}
+	if (!_abi->isX86())
+	{
+		return false;
+	}
 
 	top = _abi->getRegister(X87_REG_TOP);
 	if (top == nullptr)
