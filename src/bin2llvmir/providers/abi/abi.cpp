@@ -67,6 +67,10 @@ bool Abi::isZeroRegister(const llvm::Value* val)
  */
 llvm::GlobalVariable* Abi::getRegister(uint32_t r, bool use)
 {
+	if (!use)
+	{
+		return nullptr;
+	}
 	assert(r < _id2regs.size());
 	return _id2regs[r];
 }
