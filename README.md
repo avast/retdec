@@ -309,3 +309,5 @@ See [RetDec contribution guidelines](https://github.com/avast-tl/retdec/wiki/Con
 ## Acknowledgements
 
 This software was supported by the research funding TACR (Technology Agency of the Czech Republic), ALFA Programme No. TA01010667.
+
+hello
