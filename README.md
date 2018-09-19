@@ -288,7 +288,7 @@ This repository contains the following scripts:
 
 ## Project Documentation
 
-See the [project documentation](https://retdec-tc.avast.com/repository/download/Retdec_DoxygenBuild/.lastSuccessful/build/doc/doxygen/html/index.html) for an up to date Doxygen-generated software reference corresponding to the latest commit in the `master` branch.
+See the [project documentation](https://retdec-tc.avast.com/repository/download/Retdec_DoxygenBuild/.lastSuccessful/build/doc/doxygen/html/index.html?guest=1) for an up to date Doxygen-generated software reference corresponding to the latest commit in the `master` branch.
 
 ## Related Repositories
 
