@@ -567,8 +567,29 @@ bool FileImage::isImportTerminating(
 	// TODO: are these all? maybe search for some more complete list.
 	retdec::utils::NonIterableSet<std::string> exitFncs =
 	{
-		"exit", "_exit", "ExitThread", "abort", "longjmp", "_Exit",
-		"quick_exit", "thrd_exit", "ExitProcess"
+		"exit", "_exit", "abort", "longjmp", "_Exit",
+		"quick_exit", "thrd_exit",
+
+		// KERNEL32.DLL
+		"ExitProcess", "ExitThread",  "FreeLibraryAndExitThread",
+
+		// MSVCP140.DLL
+		"__ExceptionPtrRethrow@@YAXPBX@Z",
+		"_Rethrow_future_exception@std@@YAXVexception_ptr@1@@Z",
+		"_Rng_abort@std@@YAXPBD@Z",
+		"_Throw_future_error@std@@YAXABVerror_code@1@@Z",
+		"_Xbad_alloc@std@@YAXXZ", "_Xbad_function_call@std@@YAXXZ",
+		"_XGetLastError@std@@YAXXZ", "_Xinvalid_argument@std@@YAXPBD@Z",
+		"_Xlength_error@std@@YAXPBD@Z", "_Xout_of_range@std@@YAXPBD@Z",
+		"_Xoverflow_error@std@@YAXPBD@Z",
+		"_Xregex_error@std@@YAXW4error_type@regex_constants@1@@Z",
+		"_Xruntime_error@std@@YAXPBD@Z",
+
+		// RPCRT4.DLL
+		"RpcRaiseException",
+
+		// VCRUNTIME140.DLL
+		"_CxxThrowException"
 	};
 	return exitFncs.has(name);
 }
