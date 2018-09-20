@@ -112,6 +112,15 @@ std::string DotnetClass::getNestedName() const
  */
 const std::string& DotnetClass::getLibName() const
 {
+	if (recordType == MetadataTableType::AssemblyRef)
+	{
+		return libName;
+	}
+	if (parent)
+	{
+		return parent->getLibName();
+	}
+	
 	return libName;
 }
 
