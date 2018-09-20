@@ -137,6 +137,8 @@ class Capstone2LlvmIrTranslatorX86_impl :
 				llvm::Value* sflagsVal,
 				const std::vector<std::pair<uint32_t, llvm::Value*>>& regs);
 
+		unsigned getAddrSpace(x86_reg segment);
+
 		llvm::Value* loadX87Top(llvm::IRBuilder<>& irb);
 		llvm::Value* loadX87TopDec(llvm::IRBuilder<>& irb);
 		llvm::Value* loadX87TopInc(llvm::IRBuilder<>& irb);

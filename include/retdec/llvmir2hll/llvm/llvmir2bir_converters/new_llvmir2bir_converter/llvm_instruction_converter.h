@@ -19,6 +19,7 @@
 
 namespace llvm {
 
+class AddrSpaceCastInst;
 class BinaryOperator;
 class BitCastInst;
 class CallInst;
@@ -91,6 +92,7 @@ private:
 	/// @name Instruction conversion using InstVisitor
 	/// @{
 	friend class llvm::InstVisitor<LLVMInstructionConverter, ShPtr<Expression>>;
+	ShPtr<Expression> visitAddrSpaceCastInst(llvm::AddrSpaceCastInst &inst);
 	ShPtr<Expression> visitBinaryOperator(llvm::BinaryOperator &inst);
 	ShPtr<Expression> visitBitCastInst(llvm::BitCastInst &inst);
 	ShPtr<Expression> visitFPExtInst(llvm::FPExtInst &inst);

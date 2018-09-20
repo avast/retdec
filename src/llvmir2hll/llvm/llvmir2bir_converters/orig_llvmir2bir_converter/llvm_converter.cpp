@@ -182,6 +182,9 @@ ShPtr<Expression> LLVMConverter::llvmConstantToExpression(llvm::Constant *c) {
 				return IntToPtrCastExpr::create(op, llvmTypeToType(ce->getType()));
 
 			case llvm::Instruction::BitCast:
+			case llvm::Instruction::AddrSpaceCast:
+				// TODO: Address space casts are treated like bit casts, there might
+				// be a better way to deal with them.
 				return BitCastExpr::create(op, llvmTypeToType(ce->getType()));
 
 			case llvm::Instruction::GetElementPtr:
@@ -1340,6 +1343,9 @@ ShPtr<Value> LLVMConverter::visitCastInst(llvm::CastInst &i) {
 		case llvm::Instruction::IntToPtr:
 			return IntToPtrCastExpr::create(op, llvmTypeToType(i.getType()));
 		case llvm::Instruction::BitCast:
+		case llvm::Instruction::AddrSpaceCast:
+			// TODO: Address space casts are treated like bit casts, there might
+			// be a better way to deal with them.
 			return BitCastExpr::create(op, llvmTypeToType(i.getType()));
 		default:
 			return llvmValueToExpression(i.getOperand(0));

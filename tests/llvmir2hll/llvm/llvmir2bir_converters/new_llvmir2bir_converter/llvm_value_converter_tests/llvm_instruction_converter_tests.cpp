@@ -386,6 +386,15 @@ XorInstructionIsConvertedCorrectly) {
 }
 
 TEST_F(LLVMInstructionsConverterTests,
+AddrSpaceCastInstructionIsConvertedCorrectly) {
+	auto srcType = llvm::Type::getInt32PtrTy(context, 256);
+	auto dstType = llvm::Type::getInt16PtrTy(context);
+	SCOPED_TRACE("AddrSpaceCastInstructionIsConvertedCorrectly");
+	castInstIsConvertedCorrectly<BitCastExpr>(srcType, dstType,
+		llvm::Instruction::AddrSpaceCast);
+}
+
+TEST_F(LLVMInstructionsConverterTests,
 BitCastInstructionIsConvertedCorrectly) {
 	auto srcType = llvm::Type::getInt32PtrTy(context);
 	auto dstType = llvm::Type::getInt16PtrTy(context);
