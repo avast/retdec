@@ -1955,8 +1955,14 @@ void PeFormat::computeTypeRefHashes()
 	{
 		auto typeRefRow = typeRefTable->getRow(i);
 
-		validTypeName = stringStream->getString(typeRefRow->typeName.getIndex(), typeName);
-		validNameSpace = stringStream->getString(typeRefRow->typeNamespace.getIndex(), nameSpace);
+		if (stringStream->getString(typeRefRow->typeName.getIndex(), typeName) && !typeName.empty())
+		{
+			validTypeName = true;
+		}
+		if (stringStream->getString(typeRefRow->typeNamespace.getIndex(), nameSpace) && !nameSpace.empty())
+		{	
+			validNameSpace = true;
+		}
 
 		if (typeRefRow->resolutionScope.getTable(resolutionScopeType))
 		{
@@ -1966,8 +1972,10 @@ void PeFormat::computeTypeRefHashes()
 			{
 				case MetadataTableType::TypeRef :
 					referenced = typeRefTable->getRow(typeRefRow->resolutionScope.getIndex());
-					if (referenced && stringStream->getString(static_cast<const TypeRef*>(referenced)->typeName.getIndex(), referencedName))
+					if (referenced && stringStream->getString(static_cast<const TypeRef*>(referenced)->typeName.getIndex(), referencedName) &&
+						!referencedName.empty())
 					{
+						referencedName += "TR";
 						validReferencedName = true;
 					}
 					break;
@@ -1979,8 +1987,10 @@ void PeFormat::computeTypeRefHashes()
 					}
 
 					referenced = moduleTable->getRow(typeRefRow->resolutionScope.getIndex());
-					if (referenced && stringStream->getString(static_cast<const DotnetModule*>(referenced)->name.getIndex(), referencedName))
+					if (referenced && stringStream->getString(static_cast<const DotnetModule*>(referenced)->name.getIndex(), referencedName) &&
+						!referencedName.empty())
 					{
+						referencedName += "M";
 						validReferencedName = true;
 					}
 					break;
@@ -1992,8 +2002,10 @@ void PeFormat::computeTypeRefHashes()
 					}
 
 					referenced = moduleRefTable->getRow(typeRefRow->resolutionScope.getIndex());
-					if (referenced && stringStream->getString(static_cast<const ModuleRef*>(referenced)->name.getIndex(), referencedName))
+					if (referenced && stringStream->getString(static_cast<const ModuleRef*>(referenced)->name.getIndex(), referencedName) &&
+						!referencedName.empty())
 					{
+						referencedName += "MR";
 						validReferencedName = true;
 					}
 					break;
@@ -2005,8 +2017,10 @@ void PeFormat::computeTypeRefHashes()
 					}
 
 					referenced = assemblyRefTable->getRow(typeRefRow->resolutionScope.getIndex());
-					if (referenced && stringStream->getString(static_cast<const AssemblyRef*>(referenced)->name.getIndex(), referencedName))
+					if (referenced && stringStream->getString(static_cast<const AssemblyRef*>(referenced)->name.getIndex(), referencedName) &&
+						!referencedName.empty())
 					{
+						referencedName += "AR";
 						validReferencedName = true;
 					}
 					break;
@@ -2024,11 +2038,11 @@ void PeFormat::computeTypeRefHashes()
 
 			std::string fullName;
 
-			if (validTypeName && !typeName.empty())
+			if (validTypeName)
 			{
 				fullName = typeName;
 			}
-			if (validNameSpace && !nameSpace.empty())
+			if (validNameSpace)
 			{
 				if (!fullName.empty())
 				{
@@ -2037,7 +2051,7 @@ void PeFormat::computeTypeRefHashes()
 
 				fullName += nameSpace;
 			}
-			if (validReferencedName && !referencedName.empty())
+			if (validReferencedName)
 			{
 				if (!fullName.empty())
 				{
