@@ -176,6 +176,74 @@ TEST_P(Capstone2LlvmIrTranslatorArm64Tests, ARM64_INS_STR_r_r)
 	EXPECT_NO_VALUE_CALLED();
 }
 
+//
+// ARM64_INS_STP
+//
+
+TEST_P(Capstone2LlvmIrTranslatorArm64Tests, ARM64_INS_STP_r_r_r)
+{
+	setRegisters({
+		{ARM64_REG_X0, 0x0123456789abcdef},
+		{ARM64_REG_X2, 0xfedcba9876543210},
+		{ARM64_REG_SP, 0x1234},
+	});
+
+	emulate("stp x0, x2, [sp]");
+
+	EXPECT_JUST_REGISTERS_LOADED({ARM64_REG_X0, ARM64_REG_X2, ARM64_REG_SP});
+	EXPECT_NO_REGISTERS_STORED();
+	EXPECT_NO_MEMORY_LOADED();
+	EXPECT_JUST_MEMORY_STORED({
+		{0x1234, 0x0123456789abcdef_qw},
+		{0x123c, 0xfedcba9876543210_qw}
+	});
+	EXPECT_NO_VALUE_CALLED();
+}
+
+TEST_P(Capstone2LlvmIrTranslatorArm64Tests, ARM64_INS_STP_r_r_mw)
+{
+	setRegisters({
+		{ARM64_REG_X0, 0x0123456789abcdef},
+		{ARM64_REG_X2, 0xfedcba9876543210},
+		{ARM64_REG_SP, 0x1234},
+	});
+
+	emulate("stp x0, x2, [sp, #-0x20]!");
+
+	EXPECT_JUST_REGISTERS_LOADED({ARM64_REG_X0, ARM64_REG_X2, ARM64_REG_SP});
+	EXPECT_JUST_REGISTERS_STORED({
+		{ARM64_REG_SP, 0x121c}
+	});
+	EXPECT_NO_MEMORY_LOADED();
+	EXPECT_JUST_MEMORY_STORED({
+		{0x1214, 0x0123456789abcdef_qw},
+		{0x121c, 0xfedcba9876543210_qw}
+	});
+	EXPECT_NO_VALUE_CALLED();
+}
+
+TEST_P(Capstone2LlvmIrTranslatorArm64Tests, ARM64_INS_STP_r_r_m_i)
+{
+	setRegisters({
+		{ARM64_REG_X0, 0x0123456789abcdef},
+		{ARM64_REG_X2, 0xfedcba9876543210},
+		{ARM64_REG_SP, 0x1234},
+	});
+
+	emulate("stp x0, x2, [sp], #-0x20");
+
+	EXPECT_JUST_REGISTERS_LOADED({ARM64_REG_X0, ARM64_REG_X2, ARM64_REG_SP});
+	EXPECT_JUST_REGISTERS_STORED({
+		{ARM64_REG_SP, 0x1214}
+	});
+	EXPECT_NO_MEMORY_LOADED();
+	EXPECT_JUST_MEMORY_STORED({
+		{0x1234, 0x0123456789abcdef_qw},
+		{0x123c, 0xfedcba9876543210_qw}
+	});
+	EXPECT_NO_VALUE_CALLED();
+}
+
 } // namespace tests
 } // namespace capstone2llvmir
 } // namespace retdec

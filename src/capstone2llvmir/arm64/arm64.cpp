@@ -69,9 +69,8 @@ void Capstone2LlvmIrTranslatorArm64_impl::generateDataLayout()
 
 void Capstone2LlvmIrTranslatorArm64_impl::generateRegisters()
 {
-			// General purpose registers.
-			//
-
+	// General purpose registers.
+	//
 	createRegister(ARM64_REG_X0, _regLt);
 	createRegister(ARM64_REG_X1, _regLt);
 	createRegister(ARM64_REG_X2, _regLt);
@@ -160,6 +159,8 @@ void Capstone2LlvmIrTranslatorArm64_impl::generateRegisters()
 
 	// Program counter.
 	createRegister(ARM64_REG_PC, _regLt);
+
+	// TODO: Generate parent register map
 }
 
 uint32_t Capstone2LlvmIrTranslatorArm64_impl::getCarryRegister()
@@ -356,7 +357,7 @@ llvm::Value* Capstone2LlvmIrTranslatorArm64_impl::generateShiftMsl(
 	unsigned op0BitW = llvm::cast<llvm::IntegerType>(n->getType())->getBitWidth();
 	auto* doubleT = llvm::Type::getIntNTy(_module->getContext(), op0BitW*2);
 
-	auto* cf = loadRegister(ARM_REG_CPSR_C, irb);
+	auto* cf = loadRegister(ARM64_REG_CPSR_C, irb);
 	cf = irb.CreateZExtOrTrunc(cf, n->getType());
 
 	auto* srl = irb.CreateLShr(val, n);
@@ -379,6 +380,54 @@ llvm::Value* Capstone2LlvmIrTranslatorArm64_impl::generateShiftMsl(
 	storeRegister(ARM64_REG_CPSR_C, cfIcmp, irb);
 
 	return or2Trunc;
+}
+
+llvm::Value* Capstone2LlvmIrTranslatorArm64_impl::generateGetOperandMemAddr(
+		cs_arm64_op& op,
+		llvm::IRBuilder<>& irb)
+{
+	// TODO: generateGetOperandAddr?
+	auto* baseR = loadRegister(op.mem.base, irb);
+	auto* t = baseR ? baseR->getType() : getDefaultType();
+	llvm::Value* disp = op.mem.disp
+			? llvm::ConstantInt::get(t, op.mem.disp)
+			: nullptr;
+
+	auto* idxR = loadRegister(op.mem.index, irb);
+	if (idxR)
+	{
+		idxR = generateOperandShift(irb, op, idxR);
+	}
+
+	llvm::Value* addr = nullptr;
+	if (baseR && disp == nullptr)
+	{
+		addr = baseR;
+	}
+	else if (disp && baseR == nullptr)
+	{
+		addr = disp;
+	}
+	else if (baseR && disp)
+	{
+		disp = irb.CreateSExtOrTrunc(disp, baseR->getType());
+		addr = irb.CreateAdd(baseR, disp);
+	}
+	else if (idxR)
+	{
+		addr = idxR;
+	}
+	else
+	{
+		addr = llvm::ConstantInt::get(getDefaultType(), 0);
+	}
+
+	if (idxR && addr != idxR)
+	{
+		idxR = irb.CreateZExtOrTrunc(idxR, addr->getType());
+		addr = irb.CreateAdd(addr, idxR);
+	}
+	return addr;
 }
 
 llvm::Value* Capstone2LlvmIrTranslatorArm64_impl::loadRegister(
@@ -428,7 +477,54 @@ llvm::Value* Capstone2LlvmIrTranslatorArm64_impl::loadOp(
 		}
 		case ARM64_OP_MEM:
 		{
-			// TODO: MEM OP
+			/*
+			auto* baseR = loadRegister(op.mem.base, irb);
+			auto* t = baseR ? baseR->getType() : getDefaultType();
+			llvm::Value* disp = op.mem.disp
+					? llvm::ConstantInt::get(t, op.mem.disp)
+					: nullptr;
+
+			auto* idxR = loadRegister(op.mem.index, irb);
+			if (idxR)
+			{
+				idxR = generateOperandShift(irb, op, idxR);
+			}
+
+			llvm::Value* addr = nullptr;
+			if (baseR && disp == nullptr)
+			{
+				addr = baseR;
+			}
+			else if (disp && baseR == nullptr)
+			{
+				addr = disp;
+			}
+			else if (baseR && disp)
+			{
+				disp = irb.CreateSExtOrTrunc(disp, baseR->getType());
+				addr = irb.CreateAdd(baseR, disp);
+			}
+			else if (idxR)
+			{
+				addr = idxR;
+			}
+			else
+			{
+				addr = llvm::ConstantInt::get(getDefaultType(), 0);
+			}
+
+			if (idxR && addr != idxR)
+			{
+				idxR = irb.CreateZExtOrTrunc(idxR, addr->getType());
+				addr = irb.CreateAdd(addr, idxR);
+			}
+			*/
+			auto* addr = generateGetOperandMemAddr(op, irb);
+
+			auto* lty = ty ? ty : getDefaultType();
+			auto* pt = llvm::PointerType::get(lty, 0);
+			addr = irb.CreateIntToPtr(addr, pt);
+			return irb.CreateLoad(addr);
 		}
 		case ARM64_OP_FP:
 		case ARM64_OP_INVALID: 
@@ -488,60 +584,7 @@ llvm::Instruction* Capstone2LlvmIrTranslatorArm64_impl::storeOp(
 		}
 		case ARM64_OP_MEM:
 		{
-			auto* baseR = loadRegister(op.mem.base, irb);
-			auto* t = baseR ? baseR->getType() : getDefaultType();
-			llvm::Value* disp = op.mem.disp
-					? llvm::ConstantInt::get(t, op.mem.disp)
-					: nullptr;
-
-			auto* idxR = loadRegister(op.mem.index, irb);
-			if (idxR)
-			{
-				//struct {
-				//    arm64_shifter type;	// shifter type of this operand
-				//    unsigned int value;	// shifter value of this operand
-				//} shift;
-				//if (op.mem.lshift)
-				//{
-				//	auto* lshift = llvm::ConstantInt::get(
-				//			idxR->getType(),
-				//			op.mem.lshift);
-				//	idxR = irb.CreateShl(idxR, lshift);
-				//}
-
-				// If there is a shift in memory operand, it is applied to
-				// the index register.
-				idxR = generateOperandShift(irb, op, idxR);
-			}
-
-			llvm::Value* addr = nullptr;
-			if (baseR && disp == nullptr)
-			{
-				addr = baseR;
-			}
-			else if (disp && baseR == nullptr)
-			{
-				addr = disp;
-			}
-			else if (baseR && disp)
-			{
-				disp = irb.CreateSExtOrTrunc(disp, baseR->getType());
-				addr = irb.CreateAdd(baseR, disp);
-			}
-			else if (idxR)
-			{
-				addr = idxR;
-			}
-			else
-			{
-				addr = llvm::ConstantInt::get(getDefaultType(), 0);
-			}
-
-			if (idxR && addr != idxR)
-			{
-				idxR = irb.CreateZExtOrTrunc(idxR, addr->getType());
-				addr = irb.CreateAdd(addr, idxR);
-			}
+			auto* addr = generateGetOperandMemAddr(op, irb);
 
 			auto* pt = llvm::PointerType::get(val->getType(), 0);
 			addr = irb.CreateIntToPtr(addr, pt);
@@ -617,7 +660,7 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateStr(cs_insn* i, cs_arm64* ai,
 	op0 = loadOp(ai->operands[0], irb);
 	op0 = irb.CreateZExtOrTrunc(op0, getDefaultType());
 
-	uint32_t baseR = ARM_REG_INVALID;
+	uint32_t baseR = ARM64_REG_INVALID;
 	llvm::Value* idx = nullptr;
 	bool subtract = false;
 	storeOp(ai->operands[1], op0, irb);
@@ -638,6 +681,53 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateStr(cs_insn* i, cs_arm64* ai,
 				? irb.CreateSub(b, idx)
 				: irb.CreateAdd(b, idx);
 		storeRegister(baseR, v, irb);
+	}
+}
+
+/**
+ * ARM64_INS_STP
+ */
+void Capstone2LlvmIrTranslatorArm64_impl::translateStp(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb)
+{
+	op0 = loadOp(ai->operands[0], irb);
+	op1 = loadOp(ai->operands[1], irb);
+
+	uint32_t baseR = ARM64_REG_INVALID;
+	llvm::Value* newDest = nullptr;
+	auto* dest = generateGetOperandMemAddr(ai->operands[2], irb);
+	auto* registerSize = llvm::ConstantInt::get(getDefaultType(), getRegisterByteSize(ai->operands[0].reg));
+	storeOp(ai->operands[2], op0, irb);
+	if(ai->op_count == 3)
+	{
+		newDest = irb.CreateAdd(dest, registerSize);
+
+		auto* pt = llvm::PointerType::get(op1->getType(), 0);
+		auto* addr = irb.CreateIntToPtr(newDest, pt);
+		irb.CreateStore(op1, addr);
+
+		baseR = ai->operands[2].mem.base;
+	}
+	else if(ai->op_count == 4)
+	{
+		auto* disp = llvm::ConstantInt::get(getDefaultType(), ai->operands[3].imm);
+		newDest    = irb.CreateAdd(dest, registerSize);
+
+		auto* pt = llvm::PointerType::get(op1->getType(), 0);
+		auto* addr = irb.CreateIntToPtr(newDest, pt);
+		irb.CreateStore(op1, addr);
+
+		baseR = ai->operands[2].mem.base;
+
+		newDest = irb.CreateAdd(dest, disp);
+	}
+	else
+	{
+		assert(false && "unsupported STP format");
+	}
+
+	if(ai->writeback && baseR != ARM64_REG_INVALID)
+	{
+	    storeRegister(baseR, newDest, irb);
 	}
 }
 

@@ -83,6 +83,10 @@ class Capstone2LlvmIrTranslatorArm64_impl :
 				llvm::Value* val,
 				llvm::Value* n);
 
+		llvm::Value* generateGetOperandMemAddr(
+				cs_arm64_op& op,
+				llvm::IRBuilder<>& irb);
+
 		virtual llvm::Value* loadRegister(
 				uint32_t r,
 				llvm::IRBuilder<>& irb,
@@ -126,6 +130,7 @@ class Capstone2LlvmIrTranslatorArm64_impl :
 		void translateAdd(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb);
 		void translateMov(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb);
 		void translateStr(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb);
+		void translateStp(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb);
 
 };
 
