@@ -834,7 +834,6 @@ void PeFormat::loadResourceNodes(std::vector<const PeLib::ResourceChild*> &nodes
 		return;
 	}
 
-	auto resource = std::make_unique<Resource>();
 	resourceTable = new ResourceTable();
 	std::size_t firstLeafIndex = 0;
 
@@ -856,6 +855,7 @@ void PeFormat::loadResourceNodes(std::vector<const PeLib::ResourceChild*> &nodes
 		{
 			continue;
 		}
+		auto resource = std::make_unique<Resource>();
 		resource->setOffset(leaf->getOffsetToData() - rva + formatParser->getResourceDirectoryOffset());
 		resource->setSizeInFile(leaf->getSize());
 		resource->load(this);
