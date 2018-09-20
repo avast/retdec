@@ -114,6 +114,10 @@ TEST_P(Capstone2LlvmIrTranslatorArm64Tests, ARM64_INS_MOV_r_r)
 	EXPECT_NO_VALUE_CALLED();
 }
 
+//
+// ARM64_INS_MOVZ
+//
+
 TEST_P(Capstone2LlvmIrTranslatorArm64Tests, ARM64_INS_MOVZ_r_i)
 {
 	setRegisters({
@@ -130,6 +134,10 @@ TEST_P(Capstone2LlvmIrTranslatorArm64Tests, ARM64_INS_MOVZ_r_i)
 	EXPECT_NO_VALUE_CALLED();
 }
 
+//
+// ARM64_INS_MVN
+//
+
 TEST_P(Capstone2LlvmIrTranslatorArm64Tests, ARM64_INS_MVN_r_r)
 {
 	setRegisters({
@@ -143,6 +151,28 @@ TEST_P(Capstone2LlvmIrTranslatorArm64Tests, ARM64_INS_MVN_r_r)
 		{ARM64_REG_X0, 0xfedcba9876543210},
 	});
 	EXPECT_NO_MEMORY_LOADED_STORED();
+	EXPECT_NO_VALUE_CALLED();
+}
+
+//
+// ARM64_INS_STR
+//
+
+TEST_P(Capstone2LlvmIrTranslatorArm64Tests, ARM64_INS_STR_r_r)
+{
+	setRegisters({
+		{ARM64_REG_X0, 0xcafebabecafebabe},
+		{ARM64_REG_X1, 0x1234},
+	});
+
+	emulate("str x0, [x1]");
+
+	EXPECT_JUST_REGISTERS_LOADED({ARM64_REG_X0, ARM64_REG_X1});
+	EXPECT_NO_REGISTERS_STORED();
+	EXPECT_NO_MEMORY_LOADED();
+	EXPECT_JUST_MEMORY_STORED({
+		{0x1234, 0xcafebabecafebabe}
+	});
 	EXPECT_NO_VALUE_CALLED();
 }
 
