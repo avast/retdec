@@ -72,8 +72,8 @@ std::string DotnetClass::getFullyQualifiedNameWithGenericParameters() const
 }
 
 /**
- * Returns the name of the class appended with parent class typeref index.
- * @return Name with parent class typeref index.
+ * Returns the name of the class appended with parent class presentation index.
+ * @return Name with parent class presentation index.
  */
 std::string DotnetClass::getNameWithParentClassIndex() const
 {
@@ -82,7 +82,7 @@ std::string DotnetClass::getNameWithParentClassIndex() const
 		return name;
 	}
 
-	return name + "." + numToStr(parent->getIndex());
+	return name + "." + numToStr(parent->getIndex() - 1);
 }
 
 /**

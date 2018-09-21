@@ -2827,9 +2827,9 @@ std::string FileInformation::getDotnetImportedClassNestedName(std::size_t positi
 }
 
 /**
- * Get imported class name with parent class typeref index
+ * Get imported class name with parent class presentation index
  * @param position Index of selected imported class (indexed from 0)
- * @return Name of selected imported class with parent class typeref index
+ * @return Name of selected imported class with parent class presentation index
  */
 std::string FileInformation::getDotnetImportedClassNameWithParentClassIndex(std::size_t position) const
 {
@@ -2844,17 +2844,6 @@ std::string FileInformation::getDotnetImportedClassNameWithParentClassIndex(std:
 std::string FileInformation::getDotnetImportedClassLibName(std::size_t position) const
 {
 	return dotnetInfo.getImportedClassLibName(position);
-}
-
-/**
- * Get imported class typeref index as string
- * @param position Index of selected imported class (indexed from 0)
- * @return Typeref index of selected imported class
- */
-std::string FileInformation::getDotnetImportedClassTypeRefIndexAsString(std::size_t position) const
-{
-	std::size_t typeRefIndex;
-	return dotnetInfo.getImportedClassIndex(position, typeRefIndex) ? numToStr(typeRefIndex) : "";
 }
 
 /**

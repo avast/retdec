@@ -424,7 +424,6 @@ class FileInformation
 		std::string getDotnetImportedClassNestedName(std::size_t position) const;
 		std::string getDotnetImportedClassNameWithParentClassIndex(std::size_t position) const;
 		std::string getDotnetImportedClassLibName(std::size_t position) const;
-		std::string getDotnetImportedClassTypeRefIndexAsString(std::size_t position) const;
 		std::string getDotnetTypeRefhashCrc32() const;
 		std::string getDotnetTypeRefhashMd5() const;
 		std::string getDotnetTypeRefhashSha256() const;

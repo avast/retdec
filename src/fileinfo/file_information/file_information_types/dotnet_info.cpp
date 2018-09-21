@@ -56,9 +56,9 @@ std::string DotnetInfo::getImportedClassNestedName(std::size_t position) const
 }
 
 /**
- * Get imported class name with parent class typeref index
+ * Get imported class name with parent class presentation index
  * @param position Index of selected imported class from typeref table (indexed from 0)
- * @return Imported class name with parent class typeref index
+ * @return Imported class name with parent class presentation index
  */
 std::string DotnetInfo::getImportedClassNameWithParentClassIndex(std::size_t position) const
 {
