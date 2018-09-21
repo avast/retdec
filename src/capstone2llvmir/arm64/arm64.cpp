@@ -477,48 +477,6 @@ llvm::Value* Capstone2LlvmIrTranslatorArm64_impl::loadOp(
 		}
 		case ARM64_OP_MEM:
 		{
-			/*
-			auto* baseR = loadRegister(op.mem.base, irb);
-			auto* t = baseR ? baseR->getType() : getDefaultType();
-			llvm::Value* disp = op.mem.disp
-					? llvm::ConstantInt::get(t, op.mem.disp)
-					: nullptr;
-
-			auto* idxR = loadRegister(op.mem.index, irb);
-			if (idxR)
-			{
-				idxR = generateOperandShift(irb, op, idxR);
-			}
-
-			llvm::Value* addr = nullptr;
-			if (baseR && disp == nullptr)
-			{
-				addr = baseR;
-			}
-			else if (disp && baseR == nullptr)
-			{
-				addr = disp;
-			}
-			else if (baseR && disp)
-			{
-				disp = irb.CreateSExtOrTrunc(disp, baseR->getType());
-				addr = irb.CreateAdd(baseR, disp);
-			}
-			else if (idxR)
-			{
-				addr = idxR;
-			}
-			else
-			{
-				addr = llvm::ConstantInt::get(getDefaultType(), 0);
-			}
-
-			if (idxR && addr != idxR)
-			{
-				idxR = irb.CreateZExtOrTrunc(idxR, addr->getType());
-				addr = irb.CreateAdd(addr, idxR);
-			}
-			*/
 			auto* addr = generateGetOperandMemAddr(op, irb);
 
 			auto* lty = ty ? ty : getDefaultType();
@@ -658,29 +616,33 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateMov(cs_insn* i, cs_arm64* ai,
 void Capstone2LlvmIrTranslatorArm64_impl::translateStr(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb)
 {
 	op0 = loadOp(ai->operands[0], irb);
-	op0 = irb.CreateZExtOrTrunc(op0, getDefaultType());
+	auto* dest = generateGetOperandMemAddr(ai->operands[1], irb);
+
+	auto* pt = llvm::PointerType::get(op0->getType(), 0);
+	auto* addr = irb.CreateIntToPtr(dest, pt);
+	irb.CreateStore(op0, addr);
 
 	uint32_t baseR = ARM64_REG_INVALID;
-	llvm::Value* idx = nullptr;
-	bool subtract = false;
-	storeOp(ai->operands[1], op0, irb);
-	baseR = ai->operands[1].mem.base;
-	if (auto disp = ai->operands[1].mem.disp)
+	if(ai->op_count == 2)
 	{
-		idx = llvm::ConstantInt::getSigned(getDefaultType(), disp);
+		baseR = ai->operands[1].reg;
 	}
-	else if (ai->operands[1].mem.index != ARM64_REG_INVALID)
+	else if(ai->op_count == 3)
 	{
-		idx = loadRegister(ai->operands[1].mem.index, irb);
+		baseR = ai->operands[1].reg;
+
+		auto* disp = llvm::ConstantInt::get(getDefaultType(), ai->operands[2].imm);
+		dest = irb.CreateAdd(dest, disp);
+		// post-index -> always writeback
+	}
+	else
+	{
+		assert(false && "unsupported STR format");
 	}
 
-	if (ai->writeback && idx && baseR != ARM64_REG_INVALID)
+	if(ai->writeback && baseR != ARM64_REG_INVALID)
 	{
-		auto* b = loadRegister(baseR, irb);
-		auto* v = subtract
-				? irb.CreateSub(b, idx)
-				: irb.CreateAdd(b, idx);
-		storeRegister(baseR, v, irb);
+		storeRegister(baseR, dest, irb);
 	}
 }
 
@@ -727,8 +689,57 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateStp(cs_insn* i, cs_arm64* ai,
 
 	if(ai->writeback && baseR != ARM64_REG_INVALID)
 	{
-	    storeRegister(baseR, newDest, irb);
+		storeRegister(baseR, newDest, irb);
 	}
+}
+
+/**
+ * ARM64_INS_LDR
+ */
+void Capstone2LlvmIrTranslatorArm64_impl::translateLdr(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb)
+{
+	auto* regType = getRegisterType(ai->operands[0].reg);
+	auto* dest = generateGetOperandMemAddr(ai->operands[1], irb);
+	auto* pt = llvm::PointerType::get(regType, 0);
+	auto* addr = irb.CreateIntToPtr(dest, pt);
+
+	auto* newRegValue = irb.CreateLoad(addr);
+	storeRegister(ai->operands[0].reg, newRegValue, irb);
+
+	uint32_t baseR = ARM64_REG_INVALID;
+	if(ai->op_count == 2)
+	{
+		baseR = ai->operands[1].reg;
+	}
+	else if(ai->op_count == 3)
+	{
+		baseR = ai->operands[1].reg;
+
+		auto* disp = llvm::ConstantInt::get(getDefaultType(), ai->operands[2].imm);
+		dest = irb.CreateAdd(dest, disp);
+		// post-index -> always writeback
+	}
+	else
+	{
+		assert(false && "unsupported LDR format");
+	}
+
+	if(ai->writeback && baseR != ARM64_REG_INVALID)
+	{
+		storeRegister(baseR, dest, irb);
+	}
+}
+
+/**
+ * ARM64_INS_LDP
+ */
+void Capstone2LlvmIrTranslatorArm64_impl::translateLdp(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb)
+{
+	// TODO: Implement
+	// TODO: Get adress from op2
+	// TODO: Load op0 from op2 addr
+	// TODO: Add registerSize to op2 addr
+	// TODO: Load op2 from op2 addr + registerSize
 }
 
 } // namespace capstone2llvmir
