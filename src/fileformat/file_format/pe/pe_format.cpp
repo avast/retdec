@@ -1936,9 +1936,6 @@ void PeFormat::computeTypeRefHashes()
 	std::string typeName;
 	std::string nameSpace;
 	std::string referencedName;
-	bool validTypeName = false;
-	bool validNameSpace = false;
-	bool validReferencedName = false;
 	MetadataTableType resolutionScopeType;
 	
 	auto typeRefTable = static_cast<const MetadataTable<TypeRef>*>(metadataStream->getMetadataTable(MetadataTableType::TypeRef));
@@ -1953,6 +1950,10 @@ void PeFormat::computeTypeRefHashes()
 
 	for (std::size_t i = 1; i <= typeRefTable->getNumberOfRows(); ++i)
 	{
+		bool validTypeName = false;
+		bool validNameSpace = false;
+		bool validReferencedName = false;
+
 		auto typeRefRow = typeRefTable->getRow(i);
 
 		if (stringStream->getString(typeRefRow->typeName.getIndex(), typeName) && !typeName.empty())
