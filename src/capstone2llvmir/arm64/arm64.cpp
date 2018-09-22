@@ -17,7 +17,8 @@ Capstone2LlvmIrTranslatorArm64_impl::Capstone2LlvmIrTranslatorArm64_impl(
 		cs_mode basic,
 		cs_mode extra)
 		:
-		Capstone2LlvmIrTranslator_impl(CS_ARCH_ARM64, basic, extra, m)
+		Capstone2LlvmIrTranslator_impl(CS_ARCH_ARM64, basic, extra, m),
+		_reg2parentMap(ARM64_REG_ENDING, ARM64_REG_INVALID)
 {
 	initialize();
 }
@@ -58,7 +59,7 @@ uint32_t Capstone2LlvmIrTranslatorArm64_impl::getArchByteSize()
 
 void Capstone2LlvmIrTranslatorArm64_impl::generateEnvironmentArchSpecific()
 {
-	// Nothing.
+	initializeRegistersParentMap();
 }
 
 void Capstone2LlvmIrTranslatorArm64_impl::generateDataLayout()
@@ -103,6 +104,7 @@ void Capstone2LlvmIrTranslatorArm64_impl::generateRegisters()
 
 	// Lower 32 bits of 64 arm{xN} bit regs.
 	//
+	/*
 	createRegister(ARM64_REG_W0, _regLt);
 	createRegister(ARM64_REG_W1, _regLt);
 	createRegister(ARM64_REG_W2, _regLt);
@@ -134,6 +136,7 @@ void Capstone2LlvmIrTranslatorArm64_impl::generateRegisters()
 	createRegister(ARM64_REG_W28, _regLt);
 	createRegister(ARM64_REG_W29, _regLt);
 	createRegister(ARM64_REG_W30, _regLt);
+	*/
 
 	// Special registers.
 
@@ -145,11 +148,11 @@ void Capstone2LlvmIrTranslatorArm64_impl::generateRegisters()
 
 	// Stack pointer.
 	createRegister(ARM64_REG_SP, _regLt);
-	createRegister(ARM64_REG_WSP, _regLt);
+	//createRegister(ARM64_REG_WSP, _regLt);
 
 	// Zero.
 	createRegister(ARM64_REG_XZR, _regLt);
-	createRegister(ARM64_REG_WZR, _regLt);
+	//createRegister(ARM64_REG_WZR, _regLt);
 
 	// Flags.
 	createRegister(ARM64_REG_CPSR_N, _regLt);
@@ -159,8 +162,6 @@ void Capstone2LlvmIrTranslatorArm64_impl::generateRegisters()
 
 	// Program counter.
 	createRegister(ARM64_REG_PC, _regLt);
-
-	// TODO: Generate parent register map
 }
 
 uint32_t Capstone2LlvmIrTranslatorArm64_impl::getCarryRegister()
@@ -208,6 +209,12 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateInstruction(
 		// TODO: Automatically generate pseudo asm call.
 	}
 }
+
+uint32_t Capstone2LlvmIrTranslatorArm64_impl::getParentRegister(uint32_t r) const
+{
+	return r < _reg2parentMap.size() ? _reg2parentMap[r] : r;
+}
+
 
 //
 //==============================================================================
@@ -447,13 +454,22 @@ llvm::Value* Capstone2LlvmIrTranslatorArm64_impl::loadRegister(
 		// TODO: Check
 	}
 
-	auto* llvmReg = getRegister(r);
+	auto* rt = getRegisterType(r);
+	auto pr = getParentRegister(r);
+	auto* llvmReg = getRegister(pr);
 	if (llvmReg == nullptr)
 	{
 		throw Capstone2LlvmIrError("loadRegister() unhandled reg.");
 	}
 
-	return irb.CreateLoad(llvmReg);
+	llvm::Value* ret = irb.CreateLoad(llvmReg);
+	if (r != pr)
+	{
+	    ret = irb.CreateTrunc(ret, rt);
+	}
+
+	ret = generateTypeConversion(irb, ret, dstType, ct);
+	return ret;
 }
 
 llvm::Value* Capstone2LlvmIrTranslatorArm64_impl::loadOp(
@@ -517,14 +533,49 @@ llvm::Instruction* Capstone2LlvmIrTranslatorArm64_impl::storeRegister(
 		// TODO: Check?
 	}
 
-	auto* llvmReg = getRegister(r);
+	auto* rt = getRegisterType(r);
+	auto pr = getParentRegister(r);
+	auto* llvmReg = getRegister(pr);
 	if (llvmReg == nullptr)
 	{
 		throw Capstone2LlvmIrError("storeRegister() unhandled reg.");
 	}
+
 	val = generateTypeConversion(irb, val, llvmReg->getValueType(), ct);
 
-	return irb.CreateStore(val, llvmReg);
+	llvm::StoreInst* ret = nullptr;
+	if (r == pr
+			// Zext for 64-bit target llvmRegs & 32-bit source regs.
+			|| (getRegisterBitSize(pr) == 64 && getRegisterBitSize(r) == 32))
+	{
+		ret = irb.CreateStore(val, llvmReg);
+	}
+	else
+	{
+		llvm::Value* l = irb.CreateLoad(llvmReg);
+		if (!(l->getType()->isIntegerTy(16)
+				|| l->getType()->isIntegerTy(32)
+				|| l->getType()->isIntegerTy(64)))
+		{
+			throw Capstone2LlvmIrError("Unexpected parent type.");
+		}
+
+		llvm::Value* andC = nullptr;
+		if (rt->isIntegerTy(32))
+		{
+			if (l->getType()->isIntegerTy(64))
+			{
+				andC = irb.getInt64(0xffffffff00000000);
+			}
+		}
+		assert(andC);
+		l = irb.CreateAnd(l, andC);
+
+		auto* o = irb.CreateOr(l, val);
+		ret = irb.CreateStore(o, llvmReg);
+	}
+
+	return ret;
 }
 
 llvm::Instruction* Capstone2LlvmIrTranslatorArm64_impl::storeOp(

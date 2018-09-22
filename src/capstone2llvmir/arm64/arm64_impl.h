@@ -32,6 +32,15 @@ class Capstone2LlvmIrTranslatorArm64_impl :
 		virtual bool isAllowedBasicMode(cs_mode m) override;
 		virtual bool isAllowedExtraMode(cs_mode m) override;
 		virtual uint32_t getArchByteSize() override;
+
+//
+//==============================================================================
+// x86 specialization methods - from Capstone2LlvmIrTranslatorX86
+//==============================================================================
+//
+	public:
+
+		virtual uint32_t getParentRegister(uint32_t r) const override;
 //
 //==============================================================================
 // Pure virtual methods from Capstone2LlvmIrTranslator_impl
@@ -57,6 +66,12 @@ class Capstone2LlvmIrTranslatorArm64_impl :
 //
 	protected:
 		llvm::Value* getCurrentPc(cs_insn* i);
+
+		void initializeRegistersParentMapToOther(
+				const std::vector<arm64_reg>& rs,
+				arm64_reg other);
+
+		void initializeRegistersParentMap();
 
 		llvm::Value* generateOperandShift(
 				llvm::IRBuilder<>& irb,
@@ -115,6 +130,9 @@ class Capstone2LlvmIrTranslatorArm64_impl :
 //==============================================================================
 //
 	protected:
+
+		std::vector<uint32_t> _reg2parentMap;
+
 		static std::map<
 			std::size_t,
 			void (Capstone2LlvmIrTranslatorArm64_impl::*)(

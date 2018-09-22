@@ -20,6 +20,13 @@ class Capstone2LlvmIrTranslatorArm64 : virtual public Capstone2LlvmIrTranslator
 {
 	public:
 		virtual ~Capstone2LlvmIrTranslatorArm64() {};
+
+	public:
+		/**
+		 * @return Capstone register that is parent to the specified Capstone
+		 * register @p r. Register can be its own parent.
+		 */
+		virtual uint32_t getParentRegister(uint32_t r) const = 0;
 };
 
 } // namespace capstone2llvmir

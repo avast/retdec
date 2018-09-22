@@ -166,6 +166,65 @@ void Capstone2LlvmIrTranslatorArm64_impl::initializePseudoCallInstructionIDs()
 	};
 }
 
+void Capstone2LlvmIrTranslatorArm64_impl::initializeRegistersParentMapToOther(
+		const std::vector<arm64_reg>& rs,
+		arm64_reg other)
+{
+	for (auto r : rs)
+	{
+		assert(r < _reg2parentMap.size());
+		_reg2parentMap[r] = other;
+	}
+}
+
+
+void Capstone2LlvmIrTranslatorArm64_impl::initializeRegistersParentMap()
+{
+	// Last element in vector is its own parent.
+	std::vector<std::vector<arm64_reg>> rss =
+	{
+			{ARM64_REG_W0, ARM64_REG_X0},
+			{ARM64_REG_W1, ARM64_REG_X1},
+			{ARM64_REG_W2, ARM64_REG_X2},
+			{ARM64_REG_W3, ARM64_REG_X3},
+			{ARM64_REG_W4, ARM64_REG_X4},
+			{ARM64_REG_W5, ARM64_REG_X5},
+			{ARM64_REG_W6, ARM64_REG_X6},
+			{ARM64_REG_W7, ARM64_REG_X7},
+			{ARM64_REG_W8, ARM64_REG_X8},
+			{ARM64_REG_W9, ARM64_REG_X9},
+			{ARM64_REG_W10, ARM64_REG_X10},
+			{ARM64_REG_W11, ARM64_REG_X11},
+			{ARM64_REG_W12, ARM64_REG_X12},
+			{ARM64_REG_W13, ARM64_REG_X13},
+			{ARM64_REG_W14, ARM64_REG_X14},
+			{ARM64_REG_W15, ARM64_REG_X15},
+			{ARM64_REG_W16, ARM64_REG_X16},
+			{ARM64_REG_W17, ARM64_REG_X17},
+			{ARM64_REG_W18, ARM64_REG_X18},
+			{ARM64_REG_W19, ARM64_REG_X19},
+			{ARM64_REG_W20, ARM64_REG_X20},
+			{ARM64_REG_W21, ARM64_REG_X21},
+			{ARM64_REG_W22, ARM64_REG_X22},
+			{ARM64_REG_W23, ARM64_REG_X23},
+			{ARM64_REG_W24, ARM64_REG_X24},
+			{ARM64_REG_W25, ARM64_REG_X25},
+			{ARM64_REG_W26, ARM64_REG_X26},
+			{ARM64_REG_W27, ARM64_REG_X27},
+			{ARM64_REG_W28, ARM64_REG_X28},
+			{ARM64_REG_W29, ARM64_REG_X29},
+			{ARM64_REG_W30, ARM64_REG_X30},
+
+			{ARM64_REG_WSP, ARM64_REG_SP},
+			{ARM64_REG_WZR, ARM64_REG_XZR}
+	};
+
+	for (std::vector<arm64_reg>& rs : rss)
+	{
+		initializeRegistersParentMapToOther(rs, rs.back());
+	}
+}
+
 //
 //==============================================================================
 // Instruction translation map initialization.
