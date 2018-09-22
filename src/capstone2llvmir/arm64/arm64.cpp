@@ -64,8 +64,8 @@ void Capstone2LlvmIrTranslatorArm64_impl::generateEnvironmentArchSpecific()
 
 void Capstone2LlvmIrTranslatorArm64_impl::generateDataLayout()
 {
-	_module->setDataLayout("e-p:32:32:32-f80:32:32");
-	// TODO: Modify data layout.
+	// clang -x c /dev/null -emit-llvm -S -o -
+	_module->setDataLayout("e-m:e-i64:64-i128:128-n32:64-S128");
 }
 
 void Capstone2LlvmIrTranslatorArm64_impl::generateRegisters()
