@@ -794,5 +794,15 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateLdp(cs_insn* i, cs_arm64* ai,
 	// TODO: Load op2 from op2 addr + registerSize
 }
 
+/**
+ * ARM64_INS_BL
+ */
+void Capstone2LlvmIrTranslatorArm64_impl::translateBl(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb)
+{
+	storeRegister(ARM64_REG_LR, getNextInsnAddress(i), irb);
+	op0 = loadOpUnary(ai, irb);
+	generateCallFunctionCall(irb, op0);
+}
+
 } // namespace capstone2llvmir
 } // namespace retdec

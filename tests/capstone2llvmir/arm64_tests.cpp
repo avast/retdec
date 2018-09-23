@@ -650,6 +650,38 @@ TEST_P(Capstone2LlvmIrTranslatorArm64Tests, ARM64_INS_LDR_minus_imm_postindexed_
 	EXPECT_NO_VALUE_CALLED();
 }
 
+//
+// ARM64_INS_BL
+//
+
+TEST_P(Capstone2LlvmIrTranslatorArm64Tests, ARM64_INS_BL)
+{
+	emulate("bl #0x110d8", 0x1107C);
+
+	EXPECT_NO_REGISTERS_LOADED();
+	EXPECT_JUST_REGISTERS_STORED({
+		{ARM64_REG_LR, 0x11080},
+	});
+	EXPECT_NO_MEMORY_LOADED_STORED();
+	EXPECT_JUST_VALUES_CALLED({
+		{_translator->getCallFunction(), {0x110d8}},
+	});
+}
+
+TEST_P(Capstone2LlvmIrTranslatorArm64Tests, ARM64_INS_BL_label)
+{
+	emulate("label_test:; bl label_test", 0x1000);
+
+	EXPECT_NO_REGISTERS_LOADED();
+	EXPECT_JUST_REGISTERS_STORED({
+		{ARM64_REG_LR, 0x1004},
+	});
+	EXPECT_NO_MEMORY_LOADED_STORED();
+	EXPECT_JUST_VALUES_CALLED({
+		{_translator->getCallFunction(), {0x1000}},
+	});
+}
+
 } // namespace tests
 } // namespace capstone2llvmir
 } // namespace retdec

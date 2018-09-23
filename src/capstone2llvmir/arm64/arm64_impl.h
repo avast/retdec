@@ -151,6 +151,7 @@ class Capstone2LlvmIrTranslatorArm64_impl :
 		void translateStp(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb);
 		void translateLdr(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb);
 		void translateLdp(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb);
+		void translateBl(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb);
 
 };
 
