@@ -166,7 +166,7 @@ void Capstone2LlvmIrTranslatorArm64_impl::generateRegisters()
 
 uint32_t Capstone2LlvmIrTranslatorArm64_impl::getCarryRegister()
 {
-	return 0; /* TODO: ARM_REG_CPSR_C; */
+	return ARM64_REG_CPSR_C;
 }
 
 void Capstone2LlvmIrTranslatorArm64_impl::translateInstruction(
