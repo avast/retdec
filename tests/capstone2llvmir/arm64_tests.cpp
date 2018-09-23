@@ -186,6 +186,22 @@ TEST_P(Capstone2LlvmIrTranslatorArm64Tests, ARM64_INS_ADD32_r_r_i)
 	EXPECT_NO_VALUE_CALLED();
 }
 
+TEST_P(Capstone2LlvmIrTranslatorArm64Tests, ARM64_INS_ADD32_r_r_i_extend_test)
+{
+	// Value should be Zero extended into 64bit register
+	setRegisters({
+		{ARM64_REG_X0, 0xcafebabecafebabe},
+		{ARM64_REG_W1, 0xf0000000},
+	});
+
+	emulate("add w0, w1, #1");
+
+	EXPECT_JUST_REGISTERS_LOADED({ARM64_REG_X1});
+	EXPECT_JUST_REGISTERS_STORED({{ARM64_REG_X0, 0xf0000001},});
+	EXPECT_NO_MEMORY_LOADED_STORED();
+	EXPECT_NO_VALUE_CALLED();
+}
+
 //
 // ARM64_INS_MOV
 //
@@ -201,6 +217,23 @@ TEST_P(Capstone2LlvmIrTranslatorArm64Tests, ARM64_INS_MOV_r_r)
 	EXPECT_JUST_REGISTERS_LOADED({ARM64_REG_X1});
 	EXPECT_JUST_REGISTERS_STORED({
 		{ARM64_REG_X0, 0xcafebabecafebabe},
+	});
+	EXPECT_NO_MEMORY_LOADED_STORED();
+	EXPECT_NO_VALUE_CALLED();
+}
+
+TEST_P(Capstone2LlvmIrTranslatorArm64Tests, ARM64_INS_MOV32_r_r_extend_test)
+{
+	setRegisters({
+		{ARM64_REG_X0, 0x123456789abcdef0},
+		{ARM64_REG_W1, 0xf0000000},
+	});
+
+	emulate("mov w0, w1");
+
+	EXPECT_JUST_REGISTERS_LOADED({ARM64_REG_W1});
+	EXPECT_JUST_REGISTERS_STORED({
+		{ARM64_REG_W0, 0xf0000000},
 	});
 	EXPECT_NO_MEMORY_LOADED_STORED();
 	EXPECT_NO_VALUE_CALLED();
