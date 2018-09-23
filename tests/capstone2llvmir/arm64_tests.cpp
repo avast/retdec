@@ -682,6 +682,27 @@ TEST_P(Capstone2LlvmIrTranslatorArm64Tests, ARM64_INS_BL_label)
 	});
 }
 
+//
+// ARM64_INS_RET
+//
+
+TEST_P(Capstone2LlvmIrTranslatorArm64Tests, ARM64_INS_RET)
+{
+	setRegisters({
+		{ARM64_REG_LR, 0xcafebabe},
+	});
+
+	emulate("ret");
+
+	EXPECT_JUST_REGISTERS_LOADED({ARM64_REG_LR});
+	EXPECT_NO_REGISTERS_STORED();
+	EXPECT_NO_MEMORY_LOADED_STORED();
+	EXPECT_JUST_VALUES_CALLED({
+		{_translator->getReturnFunction(), {0xcafebabe}},
+	});
+}
+
+
 } // namespace tests
 } // namespace capstone2llvmir
 } // namespace retdec

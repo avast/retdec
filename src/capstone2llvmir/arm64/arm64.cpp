@@ -804,5 +804,14 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateBl(cs_insn* i, cs_arm64* ai, 
 	generateCallFunctionCall(irb, op0);
 }
 
+/**
+ * ARM64_INS_RET
+ */
+void Capstone2LlvmIrTranslatorArm64_impl::translateRet(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb)
+{
+	op0 = loadRegister(ARM64_REG_LR, irb);
+	generateReturnFunctionCall(irb, op0);
+}
+
 } // namespace capstone2llvmir
 } // namespace retdec
