@@ -787,11 +787,49 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateLdr(cs_insn* i, cs_arm64* ai,
  */
 void Capstone2LlvmIrTranslatorArm64_impl::translateLdp(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb)
 {
-	// TODO: Implement
-	// TODO: Get adress from op2
-	// TODO: Load op0 from op2 addr
-	// TODO: Add registerSize to op2 addr
-	// TODO: Load op2 from op2 addr + registerSize
+	auto* regType = getRegisterType(ai->operands[0].reg);
+	auto* dest = generateGetOperandMemAddr(ai->operands[2], irb);
+	auto* pt = llvm::PointerType::get(regType, 0);
+	auto* addr = irb.CreateIntToPtr(dest, pt);
+	auto* registerSize = llvm::ConstantInt::get(getDefaultType(), getRegisterByteSize(ai->operands[0].reg));
+
+	auto* newReg1Value = irb.CreateLoad(addr);
+
+	llvm::Value* newDest = nullptr;
+	llvm::Value* newReg2Value = nullptr;
+	uint32_t baseR = ARM64_REG_INVALID;
+	if(ai->op_count == 3)
+	{
+		storeRegister(ai->operands[0].reg, newReg1Value, irb);
+		newDest = irb.CreateAdd(dest, registerSize);
+		addr = irb.CreateIntToPtr(newDest, pt);
+		newReg2Value = irb.CreateLoad(addr);
+		storeRegister(ai->operands[1].reg, newReg2Value, irb);
+
+		baseR = ai->operands[2].mem.base;
+	}
+	else if(ai->op_count == 4)
+	{
+
+		storeRegister(ai->operands[0].reg, newReg1Value, irb);
+		newDest = irb.CreateAdd(dest, registerSize);
+		addr = irb.CreateIntToPtr(newDest, pt);
+		newReg2Value = irb.CreateLoad(addr);
+		storeRegister(ai->operands[1].reg, newReg2Value, irb);
+
+		auto* disp = llvm::ConstantInt::get(getDefaultType(), ai->operands[3].imm);
+		dest = irb.CreateAdd(dest, disp);
+		baseR = ai->operands[2].mem.base;
+	}
+	else
+	{
+		assert(false && "unsupported LDP format");
+	}
+
+	if(ai->writeback && baseR != ARM64_REG_INVALID)
+	{
+		storeRegister(baseR, dest, irb);
+	}
 }
 
 /**
