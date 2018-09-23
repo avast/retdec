@@ -52,6 +52,83 @@ class Capstone2LlvmIrTranslatorArm64Tests :
 			}
 		}
 
+	protected:
+		Capstone2LlvmIrTranslatorArm64* getArm64Translator()
+		{
+			return dynamic_cast<Capstone2LlvmIrTranslatorArm64*>(_translator.get());
+		}
+
+	// Some of these (or their parts) might be moved to abstract parent class.
+	//
+	protected:
+		uint32_t getParentRegister(uint32_t reg)
+		{
+			return getArm64Translator()->getParentRegister(reg);
+		}
+
+		virtual llvm::GlobalVariable* getRegister(uint32_t reg) override
+		{
+			return _translator->getRegister(getParentRegister(reg));
+		}
+
+		virtual uint64_t getRegisterValueUnsigned(uint32_t reg) override
+		{
+			auto preg = getParentRegister(reg);
+			auto* gv = getRegister(preg);
+			auto val = _emulator->getGlobalVariableValue(gv).IntVal.getZExtValue();
+
+			if (reg == preg)
+			{
+				return val;
+			}
+
+			switch (_translator->getRegisterBitSize(reg))
+			{
+				case 32: return static_cast<uint32_t>(val);
+				case 64: return static_cast<uint64_t>(val);
+				default: throw std::runtime_error("Unknown reg bit size.");
+			}
+		}
+
+		virtual void setRegisterValueUnsigned(uint32_t reg, uint64_t val) override
+		{
+			auto preg = getParentRegister(reg);
+			auto* gv = getRegister(preg);
+			auto* t = cast<llvm::IntegerType>(gv->getValueType());
+
+			GenericValue v = _emulator->getGlobalVariableValue(gv);
+
+			if (reg == preg)
+			{
+				bool isSigned = false;
+				v.IntVal = APInt(t->getBitWidth(), val, isSigned);
+				_emulator->setGlobalVariableValue(gv, v);
+				return;
+			}
+
+			uint64_t old = v.IntVal.getZExtValue();
+
+			switch (_translator->getRegisterBitSize(reg))
+			{
+			case 32:
+			    val = val & 0x00000000ffffffff;
+			    old = old & 0xffffffff00000000;
+			    break;
+			case 64:
+			    val = val & 0xffffffffffffffff;
+			    old = old & 0x0000000000000000;
+			    break;
+			default:
+			    throw std::runtime_error("Unknown reg bit size.");
+			}
+
+			val = old | val;
+			bool isSigned = false;
+			v.IntVal = APInt(t->getBitWidth(), val, isSigned);
+			_emulator->setGlobalVariableValue(gv, v);
+			return;
+		}
+
 };
 
 struct PrintCapstoneModeToString_Arm64
@@ -94,6 +171,21 @@ TEST_P(Capstone2LlvmIrTranslatorArm64Tests, ARM64_INS_ADD_r_r_i)
 	EXPECT_NO_VALUE_CALLED();
 }
 
+TEST_P(Capstone2LlvmIrTranslatorArm64Tests, ARM64_INS_ADD32_r_r_i)
+{
+
+	setRegisters({
+		{ARM64_REG_W1, 0x1230},
+	});
+
+	emulate("add w0, w1, #3");
+
+	EXPECT_JUST_REGISTERS_LOADED({ARM64_REG_X1});
+	EXPECT_JUST_REGISTERS_STORED({{ARM64_REG_X0, 0x1233},});
+	EXPECT_NO_MEMORY_LOADED_STORED();
+	EXPECT_NO_VALUE_CALLED();
+}
+
 //
 // ARM64_INS_MOV
 //
@@ -109,6 +201,22 @@ TEST_P(Capstone2LlvmIrTranslatorArm64Tests, ARM64_INS_MOV_r_r)
 	EXPECT_JUST_REGISTERS_LOADED({ARM64_REG_X1});
 	EXPECT_JUST_REGISTERS_STORED({
 		{ARM64_REG_X0, 0xcafebabecafebabe},
+	});
+	EXPECT_NO_MEMORY_LOADED_STORED();
+	EXPECT_NO_VALUE_CALLED();
+}
+
+TEST_P(Capstone2LlvmIrTranslatorArm64Tests, ARM64_INS_MOV32_r_r)
+{
+	setRegisters({
+		{ARM64_REG_W1, 0xcafebabe},
+	});
+
+	emulate("mov w0, w1");
+
+	EXPECT_JUST_REGISTERS_LOADED({ARM64_REG_W1});
+	EXPECT_JUST_REGISTERS_STORED({
+		{ARM64_REG_W0, 0xcafebabe},
 	});
 	EXPECT_NO_MEMORY_LOADED_STORED();
 	EXPECT_NO_VALUE_CALLED();
@@ -154,6 +262,22 @@ TEST_P(Capstone2LlvmIrTranslatorArm64Tests, ARM64_INS_MVN_r_r)
 	EXPECT_NO_VALUE_CALLED();
 }
 
+TEST_P(Capstone2LlvmIrTranslatorArm64Tests, ARM64_INS_MVN32_r_r)
+{
+	setRegisters({
+		{ARM64_REG_W1, 0x89abcdef},
+	});
+
+	emulate("mvn w0, w1");
+
+	EXPECT_JUST_REGISTERS_LOADED({ARM64_REG_W1});
+	EXPECT_JUST_REGISTERS_STORED({
+		{ARM64_REG_W0, 0x76543210},
+	});
+	EXPECT_NO_MEMORY_LOADED_STORED();
+	EXPECT_NO_VALUE_CALLED();
+}
+
 //
 // ARM64_INS_STR
 //
@@ -172,6 +296,24 @@ TEST_P(Capstone2LlvmIrTranslatorArm64Tests, ARM64_INS_STR_r_r)
 	EXPECT_NO_MEMORY_LOADED();
 	EXPECT_JUST_MEMORY_STORED({
 		{0x1234, 0xcafebabecafebabe}
+	});
+	EXPECT_NO_VALUE_CALLED();
+}
+
+TEST_P(Capstone2LlvmIrTranslatorArm64Tests, ARM64_INS_STR32_r_r)
+{
+	setRegisters({
+		{ARM64_REG_W0, 0xcafebabe},
+		{ARM64_REG_X1, 0x1234},
+	});
+
+	emulate("str w0, [x1]");
+
+	EXPECT_JUST_REGISTERS_LOADED({ARM64_REG_W0, ARM64_REG_X1});
+	EXPECT_NO_REGISTERS_STORED();
+	EXPECT_NO_MEMORY_LOADED();
+	EXPECT_JUST_MEMORY_STORED({
+		{0x1234, 0xcafebabe}
 	});
 	EXPECT_NO_VALUE_CALLED();
 }
@@ -196,6 +338,26 @@ TEST_P(Capstone2LlvmIrTranslatorArm64Tests, ARM64_INS_STP_r_r_r)
 	EXPECT_JUST_MEMORY_STORED({
 		{0x1234, 0x0123456789abcdef_qw},
 		{0x123c, 0xfedcba9876543210_qw}
+	});
+	EXPECT_NO_VALUE_CALLED();
+}
+
+TEST_P(Capstone2LlvmIrTranslatorArm64Tests, ARM64_INS_STP32_r_r_r)
+{
+	setRegisters({
+		{ARM64_REG_W0, 0x01234567},
+		{ARM64_REG_W2, 0xfedcba98},
+		{ARM64_REG_SP, 0x1234},
+	});
+
+	emulate("stp w0, w2, [sp]");
+
+	EXPECT_JUST_REGISTERS_LOADED({ARM64_REG_W0, ARM64_REG_W2, ARM64_REG_SP});
+	EXPECT_NO_REGISTERS_STORED();
+	EXPECT_NO_MEMORY_LOADED();
+	EXPECT_JUST_MEMORY_STORED({
+		{0x1234, 0x01234567_dw},
+		{0x1238, 0xfedcba98_dw}
 	});
 	EXPECT_NO_VALUE_CALLED();
 }
@@ -262,6 +424,27 @@ TEST_P(Capstone2LlvmIrTranslatorArm64Tests, ARM64_INS_LDR)
 	EXPECT_JUST_REGISTERS_LOADED({ARM64_REG_X1});
 	EXPECT_JUST_REGISTERS_STORED({
 		{ARM64_REG_X0, 0x123456789abcdef0},
+	});
+	EXPECT_JUST_MEMORY_LOADED({0x1000});
+	EXPECT_NO_MEMORY_STORED();
+	EXPECT_NO_VALUE_CALLED();
+}
+
+TEST_P(Capstone2LlvmIrTranslatorArm64Tests, ARM64_INS_LDR32)
+{
+	setRegisters({
+		{ARM64_REG_X1, 0x1000},
+		//{ARM64_REG_X0, 0xcafebabecafebabe},
+	});
+	setMemory({
+		{0x1000, 0x12345678_dw},
+	});
+
+	emulate("ldr w0, [x1]");
+
+	EXPECT_JUST_REGISTERS_LOADED({ARM64_REG_X1});
+	EXPECT_JUST_REGISTERS_STORED({
+		{ARM64_REG_W0, 0x12345678},
 	});
 	EXPECT_JUST_MEMORY_LOADED({0x1000});
 	EXPECT_NO_MEMORY_STORED();

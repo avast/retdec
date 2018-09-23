@@ -214,7 +214,6 @@ uint32_t Capstone2LlvmIrTranslatorArm64_impl::getParentRegister(uint32_t r) cons
 	return r < _reg2parentMap.size() ? _reg2parentMap[r] : r;
 }
 
-
 //
 //==============================================================================
 // ARM64-specific methods.
@@ -627,6 +626,9 @@ llvm::Instruction* Capstone2LlvmIrTranslatorArm64_impl::storeOp(
 void Capstone2LlvmIrTranslatorArm64_impl::translateAdd(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb)
 {
 	std::tie(op1, op2) = loadOpTernaryOp1Op2(ai, irb);
+	// In case of 32bit reg, trunc the imm
+	op2 = irb.CreateZExtOrTrunc(op2, op1->getType());
+
 	auto *val = irb.CreateAdd(op1, op2);
 	storeOp(ai->operands[0], val, irb);
 }
