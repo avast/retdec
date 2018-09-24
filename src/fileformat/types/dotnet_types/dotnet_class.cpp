@@ -42,6 +42,11 @@ std::string DotnetClass::getGenericParametersString() const
  */
 const TypeDef* DotnetClass::getRawTypeDef() const
 {
+	if (recordType != MetadataTableType::TypeDef)
+	{
+		return nullptr;
+	}
+
 	return mpark::get<const TypeDef*>(rawRecord);
 }
 
@@ -51,6 +56,11 @@ const TypeDef* DotnetClass::getRawTypeDef() const
  */
 const TypeRef* DotnetClass::getRawTypeRef() const
 {
+	if (recordType != MetadataTableType::TypeRef)
+	{
+		return nullptr;
+	}
+
 	return mpark::get<const TypeRef*>(rawRecord);
 }
 
