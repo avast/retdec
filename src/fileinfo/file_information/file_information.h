@@ -197,6 +197,8 @@ class FileInformation
 		std::string getResourceIconhashCrc32() const;
 		std::string getResourceIconhashMd5() const;
 		std::string getResourceIconhashSha256() const;
+		std::string getResourceIconPerceptualAvgHash() const;
+		std::string getResourceIconPerceptualDCTpHash() const;
 		std::string getResourceName(std::size_t index) const;
 		std::string getResourceType(std::size_t index) const;
 		std::string getResourceLanguage(std::size_t index) const;

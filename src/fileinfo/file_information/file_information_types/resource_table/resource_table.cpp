@@ -95,6 +95,24 @@ std::string ResourceTable::getResourceIconhashSha256() const
 }
 
 /**
+ * Get icon perceptual hash as AvgHash
+ * @return Icon perceptual hash as AvgHash
+ */
+std::string ResourceTable::getResourceIconPerceptualAvgHash() const
+{
+	return table ? table->getResourceIconPerceptualAvgHash() : "";
+}
+
+/**
+ * Get icon perceptual hash as AvgHash
+ * @return Icon perceptual hash as AvgHash
+ */
+std::string ResourceTable::getResourceIconPerceptualDCTpHash() const
+{
+	return table ? table->getResourceIconPerceptualDCTpHash() : "";
+}
+
+/**
  * Get resource
  * @param position Index of selected resource from table (indexed from 0)
  * @return Resource

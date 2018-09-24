@@ -26,9 +26,14 @@ class ResourceTable
 		std::vector<std::unique_ptr<Resource>> table; ///< stored resources
 		std::vector<ResourceIconGroup *> iconGroups;  ///< icon groups
 		std::vector<ResourceIcon *> icons;            ///< icons
-		std::string iconHashCrc32;                    ///< imphash CRC32
-		std::string iconHashMd5;                      ///< imphash MD5
-		std::string iconHashSha256;                   ///< imphash SHA256
+		std::string iconHashCrc32;                    ///< iconhash CRC32
+		std::string iconHashMd5;                      ///< iconhash MD5
+		std::string iconHashSha256;                   ///< iconhash SHA256
+		std::string iconPerceptualAvgHash;            ///< icon perceptual hash AvgHash
+		std::string iconPerceptualDCTpHash;           ///< icon perceptual hash DCTpHash
+
+		std::string computePerceptualAvgHash(const ResourceIcon &icon) const;
+		std::string computePercetualDCTpHash(const ResourceIcon &icon) const;
 	public:
 		ResourceTable();
 		~ResourceTable();
@@ -48,6 +53,8 @@ class ResourceTable
 		const std::string& getResourceIconhashCrc32() const;
 		const std::string& getResourceIconhashMd5() const;
 		const std::string& getResourceIconhashSha256() const;
+		const std::string& getResourceIconPerceptualAvgHash() const;
+		const std::string& getResourceIconPerceptualDCTpHash() const;
 		const ResourceIconGroup* getPriorResourceIconGroup() const;
 		/// @}
 

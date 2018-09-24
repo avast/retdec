@@ -1078,6 +1078,24 @@ std::string FileInformation::getResourceIconhashSha256() const
 }
 
 /**
+ * Get icon perceptual hash as AvgHash
+ * @return Icon perceptual hash as AvgHash
+ */
+std::string FileInformation::getResourceIconPerceptualAvgHash() const
+{
+	return resourceTable.getResourceIconPerceptualAvgHash();
+}
+
+/**
+ * Get icon perceptual hash as DCTpHash
+ * @return Icon perceptual hash as DCTpHash
+ */
+std::string FileInformation::getResourceIconPerceptualDCTpHash() const
+{
+	return resourceTable.getResourceIconPerceptualDCTpHash();
+}
+
+/**
  * Get name of selected resource
  * @param index Index of selected resource (indexed from 0)
  * @return Name of selected resource

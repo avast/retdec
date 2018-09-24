@@ -33,6 +33,26 @@ ResourceTable::~ResourceTable()
 }
 
 /**
+ * Compute icon perceptual hashes
+ * @param icon Icon to compute the hash of
+ * @return Perceptual hash as AvgHash
+ */
+std::string ResourceTable::computePerceptualAvgHash(const ResourceIcon &icon) const
+{
+	return "[KUBO]";
+}
+
+/**
+ * Compute icon perceptual hashes
+ * @param icon Icon to compute the hash of
+ * @return Perceptual hash as AvgHash
+ */
+std::string ResourceTable::computePercetualDCTpHash(const ResourceIcon &icon) const
+{
+	return "[KUBO]";
+}
+
+/**
  * Get number of stored resources
  * @return Number of stored resources
  */
@@ -225,6 +245,24 @@ const std::string& ResourceTable::getResourceIconhashSha256() const
 }
 
 /**
+ * Get icon perceptual hash as AvgHash
+ * @return Icon perceptual hash as AvgHash
+ */
+const std::string& ResourceTable::getResourceIconPerceptualAvgHash() const
+{
+	return iconPerceptualAvgHash;
+}
+
+/**
+ * Get icon perceptual hash as DCTpHash
+ * @return Icon perceptual hash as DCTpHash
+ */
+const std::string& ResourceTable::getResourceIconPerceptualDCTpHash() const
+{
+	return iconPerceptualDCTpHash;
+}
+
+/**
  * Get prior icon group
  * @return Prior icon group
  */
@@ -286,6 +324,8 @@ void ResourceTable::computeIconHashes()
     iconHashCrc32 = retdec::crypto::getCrc32(iconHashBytes.data(), iconHashBytes.size());
     iconHashMd5 = retdec::crypto::getMd5(iconHashBytes.data(), iconHashBytes.size());
     iconHashSha256 = retdec::crypto::getSha256(iconHashBytes.data(), iconHashBytes.size());
+    iconPerceptualAvgHash = computePerceptualAvgHash(*priorIcon);
+	iconPerceptualDCTpHash = computePercetualDCTpHash(*priorIcon);
 }
 
 /**

@@ -37,6 +37,8 @@ class ResourceTable
 		std::string getResourceIconhashCrc32() const;
 		std::string getResourceIconhashMd5() const;
 		std::string getResourceIconhashSha256() const;
+		std::string getResourceIconPerceptualAvgHash() const;
+		std::string getResourceIconPerceptualDCTpHash() const;
 		const retdec::fileformat::Resource* getResource(std::size_t position) const;
 		std::string getResourceName(std::size_t index) const;
 		std::string getResourceType(std::size_t index) const;
