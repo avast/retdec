@@ -224,7 +224,7 @@ llvm::Value* Capstone2LlvmIrTranslatorArm64_impl::getCurrentPc(cs_insn* i)
 {
 	return llvm::ConstantInt::get(
 			getDefaultType(),
-			((i->address + (2*i->size)) >> 2) << 2);
+			i->address + i->size);
 }
 
 llvm::Value* Capstone2LlvmIrTranslatorArm64_impl::generateOperandShift(
@@ -830,6 +830,19 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateLdp(cs_insn* i, cs_arm64* ai,
 	{
 		storeRegister(baseR, dest, irb);
 	}
+}
+
+/**
+ * ARM64_INS_ADRP
+ */
+void Capstone2LlvmIrTranslatorArm64_impl::translateAdrp(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb)
+{
+	auto* imm  = loadOpBinaryOp1(ai, irb);
+	auto* base = llvm::ConstantInt::get(getDefaultType(), (((i->address + i->size) >> 12) << 12));
+
+	auto* res  = irb.CreateAdd(base, imm);
+
+	storeRegister(ai->operands[0].reg, res, irb);
 }
 
 /**
