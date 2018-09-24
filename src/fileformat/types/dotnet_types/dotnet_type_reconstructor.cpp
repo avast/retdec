@@ -298,7 +298,7 @@ void DotnetTypeReconstructor::linkReconstructedClassesDo(size_t i, std::vector<b
 	visited[i] = true;
 
 	auto typeRef = refClasses[i];
-	auto typeRefRaw = static_cast<const TypeRef *>(typeRef->getRawRecord());
+	auto typeRefRaw = typeRef->getRawTypeRef();
 	MetadataTableType resolutionScopeType;
 
 	if (!typeRefRaw || !typeRefRaw->resolutionScope.getTable(resolutionScopeType) ||
@@ -321,7 +321,7 @@ void DotnetTypeReconstructor::linkReconstructedClassesDo(size_t i, std::vector<b
 	{
 		auto parentInRefClasses = refClasses[parentI];
 
-		if (parentInRefClasses->getRawRecord() == parentRaw)
+		if (parentInRefClasses->getRawTypeRef() == parentRaw)
 		{
 			parent = parentInRefClasses.get();
 			break;
@@ -423,7 +423,7 @@ bool DotnetTypeReconstructor::reconstructMethods()
 	{
 		// Obtain TypeDef from the class
 		const auto& classType = kv.second;
-		auto typeDef = static_cast<const TypeDef*>(classType->getRawRecord());
+		auto typeDef = classType->getRawTypeDef();
 
 		auto methodStartIndex = typeDef->methodList.getIndex();
 		for (auto i = methodStartIndex; i < methodStartIndex + classType->getDeclaredMethodsCount(); ++i)
@@ -561,7 +561,7 @@ bool DotnetTypeReconstructor::reconstructFields()
 	for (const auto& kv : defClassTable)
 	{
 		const auto& classType = kv.second;
-		auto typeDef = static_cast<const TypeDef*>(classType->getRawRecord());
+		auto typeDef = classType->getRawTypeDef();
 
 		auto fieldStartIndex = typeDef->fieldList.getIndex();
 		for (auto i = fieldStartIndex; i < fieldStartIndex + classType->getDeclaredFieldsCount(); ++i)
@@ -679,7 +679,7 @@ bool DotnetTypeReconstructor::reconstructBaseTypes()
 
 		std::unique_ptr<DotnetDataTypeBase> baseType;
 
-		auto typeDef = static_cast<const TypeDef*>(classType->getRawRecord());
+		auto typeDef = classType->getRawTypeDef();
 
 		MetadataTableType extendsTable;
 		if (!typeDef->extends.getTable(extendsTable))

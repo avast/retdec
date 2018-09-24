@@ -1,0 +1,3 @@
+[submodule "deps/variant"]
+	path = deps/variant
+	url = https://github.com/mpark/variant

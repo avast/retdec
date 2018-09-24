@@ -15,9 +15,10 @@ namespace fileformat {
 /**
  * Constructor
  */
-DotnetClass::DotnetClass(MetadataTableType rType, std::size_t idx) : rawRecord(nullptr), parent(nullptr), index(idx),
-							declaredFieldsCount(0), declaredMethodsCount(0), declaredGenericParametersCount(0),
-							classOrInterface(false), abstract(false), sealed(false), recordType(rType)
+DotnetClass::DotnetClass(MetadataTableType rType, std::size_t idx) : rawRecord{static_cast<const TypeDef *>(nullptr)},
+							parent(nullptr), index(idx), declaredFieldsCount(0), declaredMethodsCount(0),
+							declaredGenericParametersCount(0), classOrInterface(false), abstract(false),
+							sealed(false), recordType(rType)
 {
 
 }
@@ -37,11 +38,20 @@ std::string DotnetClass::getGenericParametersString() const
 
 /**
  * Returns the raw metadata table record for this class.
- * @return Raw type record.
+ * @return Raw typeDef record.
  */
-const void* DotnetClass::getRawRecord() const
+const TypeDef* DotnetClass::getRawTypeDef() const
 {
-	return rawRecord;
+	return mpark::get<const TypeDef*>(rawRecord);
+}
+
+/**
+ * Returns the raw metadata table record for this class.
+ * @return Raw typeRef record.
+ */
+const TypeRef* DotnetClass::getRawTypeRef() const
+{
+	return mpark::get<const TypeRef*>(rawRecord);
 }
 
 /**
@@ -263,7 +273,7 @@ MetadataTableType DotnetClass::getRecordType() const
  * Sets the raw metadata table record for this class.
  * @param rRecord Raw metadata table record.
  */
-void DotnetClass::setRawRecord(const void* rRecord)
+void DotnetClass::setRawRecord(mpark::variant<const TypeDef*, const TypeRef*> rRecord)
 {
 	rawRecord = rRecord;
 }

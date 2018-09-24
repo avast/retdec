@@ -10,6 +10,8 @@
 #include <memory>
 #include <vector>
 
+#include <mpark/variant.hpp>
+
 #include "retdec/utils/conversion.h"
 #include "retdec/fileformat/types/dotnet_types/dotnet_field.h"
 #include "retdec/fileformat/types/dotnet_types/dotnet_method.h"
@@ -25,7 +27,7 @@ namespace fileformat {
 class DotnetClass : public DotnetType
 {
 	private:
-		const void* rawRecord;
+		mpark::variant<const TypeDef *, const TypeRef *> rawRecord;
 		const DotnetClass* parent;
 		std::size_t index;
 		std::size_t declaredFieldsCount;
@@ -48,7 +50,8 @@ class DotnetClass : public DotnetType
 
 		/// @name Getters
 		/// @{
-		const void* getRawRecord() const;
+		const TypeDef* getRawTypeDef() const;
+		const TypeRef* getRawTypeRef() const;
 		const DotnetClass* getParent() const;
 		std::string getNameWithGenericParameters() const;
 		std::string getFullyQualifiedNameWithGenericParameters() const;
@@ -74,7 +77,7 @@ class DotnetClass : public DotnetType
 
 		/// @name Setters
 		/// @{
-		void setRawRecord(const void* rRecord);
+		void setRawRecord(mpark::variant<const TypeDef*, const TypeRef*> rRecord);
 		void setParent(const DotnetClass* par);
 		void setDeclaredFieldsCount(std::size_t classFieldsCount);
 		void setDeclaredMethodsCount(std::size_t classMethodsCount);
