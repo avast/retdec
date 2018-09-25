@@ -224,7 +224,7 @@ void Capstone2LlvmIrTranslatorX86_impl::generateDataLayout()
 		}
 		case CS_MODE_64:
 		{
-			_module->setDataLayout("e-i64:64-f80:128-n8:16:32:64-S128"); // clang
+			_module->setDataLayout("e-m:e-p:64:64-i64:64-f80:128-n8:16:32:64-S128"); // clang
 			break;
 		}
 		default:
