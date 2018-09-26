@@ -37,8 +37,8 @@ def parse_args(args):
     parser.add_argument('-a', '--arch',
                         dest='arch',
                         metavar='ARCH',
-                        choices=['mips', 'pic32', 'arm', 'thumb', 'powerpc', 'x86'],
-                        help='Specify target architecture [mips|pic32|arm|thumb|powerpc|x86].'
+                        choices=['mips', 'pic32', 'arm', 'arm64', 'thumb', 'powerpc', 'x86'],
+                        help='Specify target architecture [mips|pic32|arm|arm64|thumb|powerpc|x86].'
                              ' Required if it cannot be autodetected from the input (e.g. raw mode, Intel HEX).')
 
     parser.add_argument('-e', '--endian',
@@ -937,7 +937,7 @@ class Decompiler:
 
             ords_dir = ''
             # Check whether the correct target architecture was specified.
-            if self.arch in ['arm', 'thumb']:
+            if self.arch in ['arm', 'thumb', 'arm64']:
                 ords_dir = config.ARM_ORDS_DIR
             elif self.arch in ['x86']:
                 ords_dir = config.X86_ORDS_DIR
@@ -949,20 +949,20 @@ class Decompiler:
 
                 self._cleanup()
                 utils.print_error('Unsupported target architecture \'%s\'. Supported architectures: '
-                                  'Intel x86, ARM, ARM + Thumb, MIPS, PIC32, PowerPC.' % self.arch)
+                                  'Intel x86, ARM, ARM + Thumb, ARM64, MIPS, PIC32, PowerPC.' % self.arch)
                 return 1
 
             # Check file class (e.g. 'ELF32', 'ELF64'). At present, we can only decompile 32-bit files.
             # Note: we prefer to report the 'unsupported architecture' error (above) than this 'generic' error.
             fileclass, _, _ = cmd.run_cmd([config.CONFIGTOOL, self.config_file, '--read', '--file-class'], buffer_output=True)
 
-            if fileclass not in ['16', '32']:
+            if fileclass not in ['16', '32', '64']:
                 if self.args.generate_log:
                     self._generate_log()
 
                 self._cleanup()
                 utils.print_error(
-                    'Unsupported target format \'%s%s\'. Supported formats: ELF32, PE32, Intel HEX 32, Mach-O 32.' % (
+                    'Unsupported target format \'%s%s\'. Supported formats: ELF32, ELF64, PE32, Intel HEX 32, Mach-O 32.' % (
                         self.format.upper(), fileclass))
                 return 1
 
