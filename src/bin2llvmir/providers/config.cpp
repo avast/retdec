@@ -452,6 +452,13 @@ bool Config::isGeneralPurposeRegister(const llvm::Value* val)
 		auto rn = r->getStorage().getRegisterNumber();
 		return MIPS_REG_0 <= rn && rn <= MIPS_REG_31;
 	}
+	else if (getConfig().architecture.isArm64())
+	{
+		// TODO
+//		return r->getStorage().getRegisterClass() == "regs";
+		auto rn = r->getStorage().getRegisterNumber();
+		return ARM64_REG_X0 <= rn && rn <= ARM64_REG_X30;
+	}
 	else if (getConfig().architecture.isArmOrThumb())
 	{
 		// TODO

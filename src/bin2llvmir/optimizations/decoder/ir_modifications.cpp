@@ -168,6 +168,10 @@ llvm::GlobalVariable* Decoder::getCallReturnObject()
 	{
 		return _config->getLlvmRegister("r0");
 	}
+	else if (_config->getConfig().architecture.isArm64())
+	{
+		return _config->getLlvmRegister("r0");
+	}
 
 	assert(false);
 	return nullptr;

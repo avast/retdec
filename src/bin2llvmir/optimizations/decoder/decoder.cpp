@@ -380,6 +380,10 @@ std::size_t Decoder::decodeJumpTargetDryRun(
 	{
 		return decodeJumpTargetDryRun_arm(jt, bytes, strict);
 	}
+	else if (_config->getConfig().architecture.isArm64())
+	{
+		return decodeJumpTargetDryRun_arm64(jt, bytes, strict);
+	}
 	else if (_config->getConfig().architecture.isMipsOrPic32())
 	{
 		return decodeJumpTargetDryRun_mips(jt, bytes, strict);

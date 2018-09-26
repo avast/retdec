@@ -37,7 +37,6 @@ Capstone2LlvmIrTranslatorArm64_impl::~Capstone2LlvmIrTranslatorArm64_impl()
 bool Capstone2LlvmIrTranslatorArm64_impl::isAllowedBasicMode(cs_mode m)
 {
 	return m == CS_MODE_ARM;
-	    // || m == CS_MODE_THUMB;
 }
 
 bool Capstone2LlvmIrTranslatorArm64_impl::isAllowedExtraMode(cs_mode m)
@@ -204,7 +203,7 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateInstruction(
 	}
 	else
 	{
-		assert(false && "Instruction is not implemented");
+		//assert(false && "Instruction is not implemented");
 		// TODO: Automatically generate pseudo asm call.
 	}
 }

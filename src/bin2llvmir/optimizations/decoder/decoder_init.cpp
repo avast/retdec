@@ -67,6 +67,11 @@ void Decoder::initTranslator()
 		arch = CS_ARCH_ARM;
 		basicMode = CS_MODE_ARM; // We start with ARM mode even for THUMB.
 	}
+	else if (a.isArm64())
+	{
+		arch = CS_ARCH_ARM64;
+		basicMode = CS_MODE_ARM;
+	}
 	else
 	{
 		throw std::runtime_error("Unsupported architecture.");
@@ -185,6 +190,7 @@ void Decoder::initRanges()
 	auto& arch = _config->getConfig().architecture;
 	unsigned a = 0;
 	a = arch.isArmOrThumb() ? 2 : a;
+	a = arch.isArm64() ? 4 : a;
 	a = arch.isMipsOrPic32() ? 4 : a;
 	a = arch.isPpc() ? 4 : a;
 	_ranges.setArchitectureInstructionAlignment(a);
