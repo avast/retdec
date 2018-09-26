@@ -81,6 +81,7 @@ class Abi
 	public:
 		bool isMips() const;
 		bool isArm() const;
+		bool isArm64() const;
 		bool isX86() const;
 		bool isPowerPC() const;
 

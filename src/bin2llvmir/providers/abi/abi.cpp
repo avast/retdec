@@ -6,6 +6,7 @@
 
 #include "retdec/bin2llvmir/providers/abi/abi.h"
 #include "retdec/bin2llvmir/providers/abi/arm.h"
+#include "retdec/bin2llvmir/providers/abi/arm64.h"
 #include "retdec/bin2llvmir/providers/abi/mips.h"
 #include "retdec/bin2llvmir/providers/abi/powerpc.h"
 #include "retdec/bin2llvmir/providers/abi/x86.h"
@@ -178,6 +179,11 @@ bool Abi::isArm() const
 	return _config->getConfig().architecture.isArmOrThumb();
 }
 
+bool Abi::isArm64() const
+{
+	return _config->getConfig().architecture.isArm64();
+}
+
 bool Abi::isX86() const
 {
 	return _config->getConfig().architecture.isX86();
@@ -208,6 +214,11 @@ Abi* AbiProvider::addAbi(
 	if (c->getConfig().architecture.isArmOrThumb())
 	{
 		auto p = _module2abi.emplace(m, std::make_unique<AbiArm>(m, c));
+		return p.first->second.get();
+	}
+	else if (c->getConfig().architecture.isArm64())
+	{
+		auto p = _module2abi.emplace(m, std::make_unique<AbiArm64>(m, c));
 		return p.first->second.get();
 	}
 	else if (c->getConfig().architecture.isMipsOrPic32())

@@ -65,6 +65,7 @@ set(BIN2LLVMIR_SOURCES
 	optimizations/unreachable_funcs/unreachable_funcs.cpp
 	providers/abi/abi.cpp
 	providers/abi/arm.cpp
+	providers/abi/arm64.cpp
 	providers/abi/mips.cpp
 	providers/abi/powerpc.cpp
 	providers/abi/x86.cpp
