@@ -76,27 +76,33 @@ class Capstone2LlvmIrTranslatorArm64_impl :
 		llvm::Value* generateOperandShift(
 				llvm::IRBuilder<>& irb,
 				cs_arm64_op& op,
-				llvm::Value* val);
+				llvm::Value* val,
+				bool updateFlags = false);
 		llvm::Value* generateShiftAsr(
 				llvm::IRBuilder<>& irb,
 				llvm::Value* val,
-				llvm::Value* n);
+				llvm::Value* n,
+				bool updateFlags = false);
 		llvm::Value* generateShiftLsl(
 				llvm::IRBuilder<>& irb,
 				llvm::Value* val,
-				llvm::Value* n);
+				llvm::Value* n,
+				bool updateFlags = false);
 		llvm::Value* generateShiftLsr(
 				llvm::IRBuilder<>& irb,
 				llvm::Value* val,
-				llvm::Value* n);
+				llvm::Value* n,
+				bool updateFlags = false);
 		llvm::Value* generateShiftRor(
 				llvm::IRBuilder<>& irb,
 				llvm::Value* val,
-				llvm::Value* n);
+				llvm::Value* n,
+				bool updateFlags = false);
 		llvm::Value* generateShiftMsl(
 				llvm::IRBuilder<>& irb,
 				llvm::Value* val,
-				llvm::Value* n);
+				llvm::Value* n,
+				bool updateFlags = false);
 
 		llvm::Value* generateGetOperandMemAddr(
 				cs_arm64_op& op,
