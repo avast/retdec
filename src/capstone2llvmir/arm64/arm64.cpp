@@ -225,6 +225,72 @@ llvm::Value* Capstone2LlvmIrTranslatorArm64_impl::getCurrentPc(cs_insn* i)
 			i->address + i->size);
 }
 
+llvm::Value* Capstone2LlvmIrTranslatorArm64_impl::generateOperandExtension(
+		llvm::IRBuilder<>& irb,
+		arm64_extender ext,
+		llvm::Value* val,
+		llvm::Type* destType)
+{
+	auto* i8  = llvm::IntegerType::getInt8Ty(_module->getContext());
+	auto* i16 = llvm::IntegerType::getInt16Ty(_module->getContext());
+	auto* i32 = llvm::IntegerType::getInt32Ty(_module->getContext());
+	auto* i64 = llvm::IntegerType::getInt64Ty(_module->getContext());
+
+	auto* ty  = destType ? destType : getDefaultType();
+
+	llvm::Value* trunc = nullptr;
+	switch(ext)
+	{
+		case ARM64_EXT_INVALID:
+		{
+			return val;
+		}
+		case ARM64_EXT_UXTB:
+		{
+			trunc = irb.CreateTrunc(val, i8);
+			return irb.CreateZExt(trunc, ty);
+		}
+		case ARM64_EXT_UXTH:
+		{
+			trunc = irb.CreateTrunc(val, i16);
+			return irb.CreateZExt(trunc, ty);
+		}
+		case ARM64_EXT_UXTW:
+		{
+			trunc = irb.CreateTrunc(val, i32);
+			return irb.CreateZExt(trunc, ty);
+		}
+		case ARM64_EXT_UXTX:
+		{
+			trunc = irb.CreateTrunc(val, i64);
+			return irb.CreateZExt(trunc, ty);
+		}
+		case ARM64_EXT_SXTB:
+		{
+			trunc = irb.CreateTrunc(val, i8);
+			return irb.CreateSExt(trunc, ty);
+		}
+		case ARM64_EXT_SXTH:
+		{
+			trunc = irb.CreateTrunc(val, i16);
+			return irb.CreateSExt(trunc, ty);
+		}
+		case ARM64_EXT_SXTW:
+		{
+			trunc = irb.CreateTrunc(val, i32);
+			return irb.CreateSExt(trunc, ty);
+		}
+		case ARM64_EXT_SXTX:
+		{
+			trunc = irb.CreateTrunc(val, i64);
+			return irb.CreateSExt(trunc, ty);
+		}
+		default:
+		    assert(false && "generateOperandExtension(): Unsupported extension type");
+	}
+	return val;
+}
+
 llvm::Value* Capstone2LlvmIrTranslatorArm64_impl::generateOperandShift(
 		llvm::IRBuilder<>& irb,
 		cs_arm64_op& op,
@@ -284,7 +350,7 @@ llvm::Value* Capstone2LlvmIrTranslatorArm64_impl::generateShiftAsr(
 		llvm::Value *n,
 		bool updateFlags)
 {
-	if(updateFlags)
+	if (updateFlags)
 	{
 		auto* cfOp1 = irb.CreateSub(n, llvm::ConstantInt::get(n->getType(), 1));
 		auto* cfShl = irb.CreateShl(llvm::ConstantInt::get(cfOp1->getType(), 1), cfOp1);
@@ -301,7 +367,7 @@ llvm::Value* Capstone2LlvmIrTranslatorArm64_impl::generateShiftLsl(
 		llvm::Value *n,
 		bool updateFlags)
 {
-	if(updateFlags)
+	if (updateFlags)
 	{
 		auto* cfOp1 = irb.CreateSub(n, llvm::ConstantInt::get(n->getType(), 1));
 		auto* cfShl = irb.CreateShl(val, cfOp1);
@@ -319,7 +385,7 @@ llvm::Value* Capstone2LlvmIrTranslatorArm64_impl::generateShiftLsr(
 		llvm::Value *n,
 		bool updateFlags)
 {
-	if(updateFlags)
+	if (updateFlags)
 	{
 		auto* cfOp1 = irb.CreateSub(n, llvm::ConstantInt::get(n->getType(), 1));
 		auto* cfShl = irb.CreateShl(llvm::ConstantInt::get(cfOp1->getType(), 1), cfOp1);
@@ -343,7 +409,7 @@ llvm::Value* Capstone2LlvmIrTranslatorArm64_impl::generateShiftRor(
 	auto* sub = irb.CreateSub(llvm::ConstantInt::get(n->getType(), op0BitW), n);
 	auto* shl = irb.CreateShl(val, sub);
 	auto* orr = irb.CreateOr(srl, shl);
-	if(updateFlags)
+	if (updateFlags)
 	{
 
 		auto* cfSrl = irb.CreateLShr(orr, llvm::ConstantInt::get(orr->getType(), op0BitW - 1));
@@ -484,7 +550,8 @@ llvm::Value* Capstone2LlvmIrTranslatorArm64_impl::loadOp(
 		case ARM64_OP_REG:
 		{
 			auto* val = loadRegister(op.reg, irb);
-			return generateOperandShift(irb, op, val);
+			auto* ext = generateOperandExtension(irb, op.ext, val, ty);
+			return generateOperandShift(irb, op, ext);
 		}
 		case ARM64_OP_IMM:
 		{
@@ -677,11 +744,11 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateStr(cs_insn* i, cs_arm64* ai,
 	irb.CreateStore(op0, addr);
 
 	uint32_t baseR = ARM64_REG_INVALID;
-	if(ai->op_count == 2)
+	if (ai->op_count == 2)
 	{
 		baseR = ai->operands[1].reg;
 	}
-	else if(ai->op_count == 3)
+	else if (ai->op_count == 3)
 	{
 		baseR = ai->operands[1].reg;
 
@@ -694,7 +761,7 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateStr(cs_insn* i, cs_arm64* ai,
 		assert(false && "unsupported STR format");
 	}
 
-	if(ai->writeback && baseR != ARM64_REG_INVALID)
+	if (ai->writeback && baseR != ARM64_REG_INVALID)
 	{
 		storeRegister(baseR, dest, irb);
 	}
@@ -713,7 +780,7 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateStp(cs_insn* i, cs_arm64* ai,
 	auto* dest = generateGetOperandMemAddr(ai->operands[2], irb);
 	auto* registerSize = llvm::ConstantInt::get(getDefaultType(), getRegisterByteSize(ai->operands[0].reg));
 	storeOp(ai->operands[2], op0, irb);
-	if(ai->op_count == 3)
+	if (ai->op_count == 3)
 	{
 		newDest = irb.CreateAdd(dest, registerSize);
 
@@ -723,7 +790,7 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateStp(cs_insn* i, cs_arm64* ai,
 
 		baseR = ai->operands[2].mem.base;
 	}
-	else if(ai->op_count == 4)
+	else if (ai->op_count == 4)
 	{
 		auto* disp = llvm::ConstantInt::get(getDefaultType(), ai->operands[3].imm);
 		newDest    = irb.CreateAdd(dest, registerSize);
@@ -741,7 +808,7 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateStp(cs_insn* i, cs_arm64* ai,
 		assert(false && "unsupported STP format");
 	}
 
-	if(ai->writeback && baseR != ARM64_REG_INVALID)
+	if (ai->writeback && baseR != ARM64_REG_INVALID)
 	{
 		storeRegister(baseR, newDest, irb);
 	}
@@ -761,11 +828,11 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateLdr(cs_insn* i, cs_arm64* ai,
 	storeRegister(ai->operands[0].reg, newRegValue, irb);
 
 	uint32_t baseR = ARM64_REG_INVALID;
-	if(ai->op_count == 2)
+	if (ai->op_count == 2)
 	{
 		baseR = ai->operands[1].reg;
 	}
-	else if(ai->op_count == 3)
+	else if (ai->op_count == 3)
 	{
 		baseR = ai->operands[1].reg;
 
@@ -778,7 +845,7 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateLdr(cs_insn* i, cs_arm64* ai,
 		assert(false && "unsupported LDR format");
 	}
 
-	if(ai->writeback && baseR != ARM64_REG_INVALID)
+	if (ai->writeback && baseR != ARM64_REG_INVALID)
 	{
 		storeRegister(baseR, dest, irb);
 	}
@@ -800,7 +867,7 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateLdp(cs_insn* i, cs_arm64* ai,
 	llvm::Value* newDest = nullptr;
 	llvm::Value* newReg2Value = nullptr;
 	uint32_t baseR = ARM64_REG_INVALID;
-	if(ai->op_count == 3)
+	if (ai->op_count == 3)
 	{
 		storeRegister(ai->operands[0].reg, newReg1Value, irb);
 		newDest = irb.CreateAdd(dest, registerSize);
@@ -810,7 +877,7 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateLdp(cs_insn* i, cs_arm64* ai,
 
 		baseR = ai->operands[2].mem.base;
 	}
-	else if(ai->op_count == 4)
+	else if (ai->op_count == 4)
 	{
 
 		storeRegister(ai->operands[0].reg, newReg1Value, irb);
@@ -828,7 +895,7 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateLdp(cs_insn* i, cs_arm64* ai,
 		assert(false && "unsupported LDP format");
 	}
 
-	if(ai->writeback && baseR != ARM64_REG_INVALID)
+	if (ai->writeback && baseR != ARM64_REG_INVALID)
 	{
 		storeRegister(baseR, dest, irb);
 	}

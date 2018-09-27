@@ -73,6 +73,12 @@ class Capstone2LlvmIrTranslatorArm64_impl :
 
 		void initializeRegistersParentMap();
 
+		llvm::Value* generateOperandExtension(
+				llvm::IRBuilder<>& irb,
+				arm64_extender ext,
+				llvm::Value* val,
+				llvm::Type* destType = nullptr);
+
 		llvm::Value* generateOperandShift(
 				llvm::IRBuilder<>& irb,
 				cs_arm64_op& op,
