@@ -102,7 +102,7 @@ std::size_t Decoder::decodeJumpTargetDryRun_arm64(
 
 bool looksLikeArm64FunctionStart(cs_insn* insn)
 {
-	//return insn->id == ARM64_INS_PUSH;
+	// Create stack frame 'stp x29, x30, [sp, -48]!'
 	return insn->id == ARM64_INS_STP;
 }
 
