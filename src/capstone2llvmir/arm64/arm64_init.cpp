@@ -142,12 +142,12 @@ void Capstone2LlvmIrTranslatorArm64_impl::initializePseudoCallInstructionIDs()
 {
 	_callInsnIds =
 	{
-
+		ARM64_INS_BL,
 	};
 
 	_returnInsnIds =
 	{
-
+		ARM64_INS_RET,
 	};
 
 	_branchInsnIds =
