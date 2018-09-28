@@ -202,6 +202,7 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateInstruction(
 	}
 	else
 	{
+		std::cerr << "Instruction not implemented " << cs_insn_name(_handle, i->id) << " " << i->op_str << std::endl;
 		//assert(false && "Instruction is not implemented");
 		// TODO: Automatically generate pseudo asm call.
 	}
@@ -925,6 +926,15 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateAdrp(cs_insn* i, cs_arm64* ai
 	auto* res  = irb.CreateAdd(base, imm);
 
 	storeRegister(ai->operands[0].reg, res, irb);
+}
+
+/**
+ * ARM64_INS_BR
+ */
+void Capstone2LlvmIrTranslatorArm64_impl::translateBr(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb)
+{
+	op0 = loadOpUnary(ai, irb);
+	generateBranchFunctionCall(irb, op0);
 }
 
 /**
