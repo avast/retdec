@@ -419,6 +419,69 @@ TEST_P(Capstone2LlvmIrTranslatorArm64Tests, ARM64_INS_ADD_w_w_w_SXTW)
 }
 
 //
+// ARM64_INS_SUB
+//
+
+TEST_P(Capstone2LlvmIrTranslatorArm64Tests, ARM64_INS_SUB_r_r_i)
+{
+	setRegisters({
+		{ARM64_REG_X1, 0x1230},
+	});
+
+	emulate("sub x0, x1, #3");
+
+	EXPECT_JUST_REGISTERS_LOADED({ARM64_REG_X1});
+	EXPECT_JUST_REGISTERS_STORED({{ARM64_REG_X0, 0x122d},});
+	EXPECT_NO_MEMORY_LOADED_STORED();
+	EXPECT_NO_VALUE_CALLED();
+}
+
+TEST_P(Capstone2LlvmIrTranslatorArm64Tests, ARM64_INS_SUB32_r_r_i)
+{
+	setRegisters({
+		{ARM64_REG_W1, 0x1230},
+	});
+
+	emulate("sub w0, w1, #3");
+
+	EXPECT_JUST_REGISTERS_LOADED({ARM64_REG_X1});
+	EXPECT_JUST_REGISTERS_STORED({{ARM64_REG_X0, 0x122d},});
+	EXPECT_NO_MEMORY_LOADED_STORED();
+	EXPECT_NO_VALUE_CALLED();
+}
+
+TEST_P(Capstone2LlvmIrTranslatorArm64Tests, ARM64_INS_SUB32_r_r_ishift)
+{
+	setRegisters({
+		{ARM64_REG_X1, 0x1230},
+	});
+
+	// Valid shifts are: LSL #0 and LSL #12
+	emulate("sub x0, x1, #1, LSL #12");
+
+	EXPECT_JUST_REGISTERS_LOADED({ARM64_REG_X1});
+	EXPECT_JUST_REGISTERS_STORED({{ARM64_REG_X0, 0x0230_qw},});
+	EXPECT_NO_MEMORY_LOADED_STORED();
+	EXPECT_NO_VALUE_CALLED();
+}
+
+TEST_P(Capstone2LlvmIrTranslatorArm64Tests, ARM64_INS_SUB32_r_r_i_extend_test)
+{
+	// Value should be Zero extended into 64bit register
+	setRegisters({
+		{ARM64_REG_X0, 0xcafebabecafebabe},
+		{ARM64_REG_W1, 0xf0000000},
+	});
+
+	emulate("sub w0, w1, #1");
+
+	EXPECT_JUST_REGISTERS_LOADED({ARM64_REG_X1});
+	EXPECT_JUST_REGISTERS_STORED({{ARM64_REG_X0, 0xefffffff},});
+	EXPECT_NO_MEMORY_LOADED_STORED();
+	EXPECT_NO_VALUE_CALLED();
+}
+
+//
 // ARM64_INS_MOV
 //
 

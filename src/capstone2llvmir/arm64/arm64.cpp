@@ -703,6 +703,19 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateAdd(cs_insn* i, cs_arm64* ai,
 }
 
 /**
+ * ARM64_INS_SUB
+ */
+void Capstone2LlvmIrTranslatorArm64_impl::translateSub(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb)
+{
+	std::tie(op1, op2) = loadOpTernaryOp1Op2(ai, irb);
+	// In case of 32bit reg, trunc the imm
+	op2 = irb.CreateZExtOrTrunc(op2, op1->getType());
+
+	auto *val = irb.CreateSub(op1, op2);
+	storeOp(ai->operands[0], val, irb);
+}
+
+/**
  * ARM64_INS_MOV, ARM64_INS_MVN, ARM64_INS_MOVZ
  */
 void Capstone2LlvmIrTranslatorArm64_impl::translateMov(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb)
