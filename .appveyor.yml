@@ -24,7 +24,8 @@ build_script:
   - cmd: cmake --build . --config Release --target install -- -m
 
 test_script:
-  # Check that install is movable and that it does not need the build directory.
+  # Check that the installation directory is movable and that it does not need
+  # the build directory.
   - cmd: mv install ../retdec-install
   - cmd: cd ..
   # Run unit tests.
