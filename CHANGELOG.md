@@ -2,7 +2,7 @@
 
 # dev
 
-* Fix: Fixed x86 FPU instruction binary to LLVM IR translation ([#293](https://github.com/avast-tl/retdec/issues/293)).
+* Fix: Fixed translation of x86 FPU instructions to LLVM IR ([#293](https://github.com/avast-tl/retdec/issues/293)).
 
 # v3.2 (2018-08-16)
 
