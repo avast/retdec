@@ -172,7 +172,7 @@ const std::vector<DetectedFunction>& Finder::accessDectedFunctions()
  * Sort detected functions.
  *
  * Functions are sorted by their address, if detection address is same bigger
- * detection is frist.
+ * detection is first.
  */
 void Finder::sort()
 {
