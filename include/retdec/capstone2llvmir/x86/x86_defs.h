@@ -125,4 +125,17 @@ enum x87_reg_tag
 	X87_REG_TAG7
 };
 
+/**
+ * Representation of x86 address spaces.
+ *
+ * Based on values in X86ISelDAGToDag.cpp.
+ */
+enum class x86_addr_space
+{
+	DEFAULT = 0,
+	GS = 256,
+	FS = 257,
+	SS = 258
+};
+
 #endif

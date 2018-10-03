@@ -844,25 +844,23 @@ void Capstone2LlvmIrTranslatorX86_impl::storeRegistersPlusSflags(
 
 unsigned Capstone2LlvmIrTranslatorX86_impl::getAddrSpace(x86_reg segment)
 {
-	// LLVM doesn't really document address spaces. However, judging by
-	// X86ISelDAGToDag.cpp, the mapping is 256 -> GS, 257 -> FS, 258 -> SS.
 	switch (segment)
 	{
 		case X86_REG_FS:
 		{
-			return 256;
+			return static_cast<unsigned>(x86_addr_space::FS);
 		}
 		case X86_REG_GS:
 		{
-			return 257;
+			return static_cast<unsigned>(x86_addr_space::GS);
 		}
 		case X86_REG_SS:
 		{
-			return 258;
+			return static_cast<unsigned>(x86_addr_space::SS);
 		}
 		default:
 		{
-			return 0;
+			return static_cast<unsigned>(x86_addr_space::DEFAULT);
 		}
 	}
 }

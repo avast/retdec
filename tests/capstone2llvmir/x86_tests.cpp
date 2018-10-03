@@ -3298,6 +3298,136 @@ TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_MOV_reg64_reg64)
 	EXPECT_NO_VALUE_CALLED();
 }
 
+TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_MOV_from_ds_addr_space_1)
+{
+	SKIP_MODE_16;
+
+	setMemory({
+		{0x1000, 0x12345678_dw},
+	});
+
+	// should be the same as "mov eax, ds:0x1000"
+	emulate("mov eax, [0x1000]");
+
+	EXPECT_NO_REGISTERS_LOADED();
+	EXPECT_JUST_REGISTERS_STORED({
+		{X86_REG_EAX, 0x12345678},
+	});
+	EXPECT_JUST_MEMORY_LOADED({0x1000});
+	EXPECT_NO_MEMORY_STORED();
+	EXPECT_NO_VALUE_CALLED();
+}
+
+TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_MOV_from_ds_addr_space_2)
+{
+	SKIP_MODE_16;
+
+	setMemory({
+		{0x1000, 0x12345678_dw},
+	});
+
+	// should be the same as "mov eax, [0x1000]"
+	emulate("mov eax, ds:0x1000");
+
+	EXPECT_NO_REGISTERS_LOADED();
+	EXPECT_JUST_REGISTERS_STORED({
+		{X86_REG_EAX, 0x12345678},
+	});
+	EXPECT_JUST_MEMORY_LOADED({0x1000});
+	EXPECT_NO_MEMORY_STORED();
+	EXPECT_NO_VALUE_CALLED();
+}
+
+TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_MOV_from_gs_addr_space)
+{
+	SKIP_MODE_16;
+
+	emulate("mov eax, gs:0x1000");
+
+	bool loadInsnOk = false;
+	for (llvm::inst_iterator I = llvm::inst_begin(_function),
+			E = llvm::inst_end(_function); I != E; ++I)
+	{
+		if (llvm::LoadInst* l = llvm::dyn_cast<llvm::LoadInst>(&*I))
+		{
+			llvm::ConstantExpr* ce = llvm::dyn_cast<llvm::ConstantExpr>(l->getPointerOperand());
+			llvm::ConstantInt* ci = ce ? llvm::dyn_cast<llvm::ConstantInt>(ce->getOperand(0)) : nullptr;
+
+			loadInsnOk = ce
+					&& ci
+					&& ce->getOpcode() == llvm::Instruction::IntToPtr
+					&& ce->getType()->getPointerAddressSpace()
+						== static_cast<unsigned>(x86_addr_space::GS);
+			if (loadInsnOk)
+			{
+				break;
+			}
+		}
+	}
+
+	EXPECT_TRUE(loadInsnOk);
+}
+
+TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_MOV_from_fs_addr_space)
+{
+	SKIP_MODE_16;
+
+	emulate("mov eax, fs:0x1000");
+
+	bool loadInsnOk = false;
+	for (llvm::inst_iterator I = llvm::inst_begin(_function),
+			E = llvm::inst_end(_function); I != E; ++I)
+	{
+		if (llvm::LoadInst* l = llvm::dyn_cast<llvm::LoadInst>(&*I))
+		{
+			llvm::ConstantExpr* ce = llvm::dyn_cast<llvm::ConstantExpr>(l->getPointerOperand());
+			llvm::ConstantInt* ci = ce ? llvm::dyn_cast<llvm::ConstantInt>(ce->getOperand(0)) : nullptr;
+
+			loadInsnOk = ce
+					&& ci
+					&& ce->getOpcode() == llvm::Instruction::IntToPtr
+					&& ce->getType()->getPointerAddressSpace()
+						== static_cast<unsigned>(x86_addr_space::FS);
+			if (loadInsnOk)
+			{
+				break;
+			}
+		}
+	}
+
+	EXPECT_TRUE(loadInsnOk);
+}
+
+TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_MOV_from_ss_addr_space)
+{
+	SKIP_MODE_16;
+
+	emulate("mov eax, ss:0x1000");
+
+	bool loadInsnOk = false;
+	for (llvm::inst_iterator I = llvm::inst_begin(_function),
+			E = llvm::inst_end(_function); I != E; ++I)
+	{
+		if (llvm::LoadInst* l = llvm::dyn_cast<llvm::LoadInst>(&*I))
+		{
+			llvm::ConstantExpr* ce = llvm::dyn_cast<llvm::ConstantExpr>(l->getPointerOperand());
+			llvm::ConstantInt* ci = ce ? llvm::dyn_cast<llvm::ConstantInt>(ce->getOperand(0)) : nullptr;
+
+			loadInsnOk = ce
+					&& ci
+					&& ce->getOpcode() == llvm::Instruction::IntToPtr
+					&& ce->getType()->getPointerAddressSpace()
+						== static_cast<unsigned>(x86_addr_space::SS);
+			if (loadInsnOk)
+			{
+				break;
+			}
+		}
+	}
+
+	EXPECT_TRUE(loadInsnOk);
+}
+
 //
 // X86_INS_MOVABS
 //
