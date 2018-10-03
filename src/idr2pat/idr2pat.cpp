@@ -95,7 +95,7 @@ void skip(
 /**
  * Get string from relocations.
  *
- * @param relocations vectgor with relocation pairs
+ * @param relocations vector with relocation pairs
  * @return formatted string
  */
 std::string getRelocationsAsString(

@@ -16,7 +16,7 @@ set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-# RetDec, and some dependencies (e.g. LLVM, Keystone), require python3.
+# RetDec, and some dependencies (e.g. LLVM, Keystone), require Python 3.
 find_package(PythonInterp 3.4 REQUIRED)
 
 function(append_if condition value)
@@ -73,7 +73,7 @@ if(MSVC)
 elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR
 		CMAKE_CXX_COMPILER_ID STREQUAL "Clang" OR
 		CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang")
-	# Unify visibility to meet llvm's default.
+	# Unify visibility to meet LLVM's default.
 	include(CheckCXXCompilerFlag)
 
 	check_cxx_compiler_flag("-fvisibility-inlines-hidden" SUPPORTS_FVISIBILITY_INLINES_HIDDEN_FLAG)
