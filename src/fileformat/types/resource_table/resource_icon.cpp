@@ -13,7 +13,7 @@ namespace fileformat {
  * Constructor
  */
 ResourceIcon::ResourceIcon() : width(0), height(0), iconSize(0), colorCount(0), planes(0), bitCount(0),
-    iconGroup(0), loadedProperties(false)
+	iconGroup(0), loadedProperties(false)
 {
 
 }
@@ -26,15 +26,13 @@ ResourceIcon::~ResourceIcon()
 
 }
 
-
-
 /**
  * Get icon width
  * @return Icon with
  */
 std::uint16_t ResourceIcon::getWidth() const
 {
-    return width;
+	return width;
 }
 
 /**
@@ -43,7 +41,7 @@ std::uint16_t ResourceIcon::getWidth() const
  */
 std::uint16_t ResourceIcon::getHeight() const
 {
-    return height;
+	return height;
 }
 
 /**
@@ -52,7 +50,7 @@ std::uint16_t ResourceIcon::getHeight() const
  */
 std::size_t ResourceIcon::getIconSize() const
 {
-    return iconSize;
+	return iconSize;
 }
 
 /**
@@ -61,7 +59,7 @@ std::size_t ResourceIcon::getIconSize() const
  */
 std::uint8_t ResourceIcon::getColorCount() const
 {
-    return colorCount;
+	return colorCount;
 }
 
 /**
@@ -70,7 +68,7 @@ std::uint8_t ResourceIcon::getColorCount() const
  */
 std::uint16_t ResourceIcon::getPlanes() const
 {
-    return planes;
+	return planes;
 }
 
 /**
@@ -79,7 +77,7 @@ std::uint16_t ResourceIcon::getPlanes() const
  */
 std::uint16_t ResourceIcon::getBitCount() const
 {
-    return bitCount;
+	return bitCount;
 }
 
 /**
@@ -88,7 +86,7 @@ std::uint16_t ResourceIcon::getBitCount() const
  */
 std::size_t ResourceIcon::getIconGroup() const
 {
-    return iconGroup;
+	return iconGroup;
 }
 
 /**
@@ -97,12 +95,12 @@ std::size_t ResourceIcon::getIconGroup() const
  */
 void ResourceIcon::setWidth(std::uint16_t iWidth)
 {
-    if(width == 0)
-    {
-        width = 256;
-    }
+	if(width == 0)
+	{
+		width = 256;
+	}
 
-    width = iWidth;
+	width = iWidth;
 }
 
 /**
@@ -111,12 +109,12 @@ void ResourceIcon::setWidth(std::uint16_t iWidth)
  */
 void ResourceIcon::setHeight(std::uint16_t iHeight)
 {
-    if(height == 0)
-    {
-        height = 256;
-    }
+	if(height == 0)
+	{
+		height = 256;
+	}
 
-    height = iHeight;
+	height = iHeight;
 }
 
 /**
@@ -125,7 +123,7 @@ void ResourceIcon::setHeight(std::uint16_t iHeight)
  */
 void ResourceIcon::setIconSize(std::size_t iSize)
 {
-    iconSize = iSize;
+	iconSize = iSize;
 }
 
 /**
@@ -134,7 +132,7 @@ void ResourceIcon::setIconSize(std::size_t iSize)
  */
 void ResourceIcon::setColorCount(std::uint8_t iColorCount)
 {
-    colorCount = iColorCount;
+	colorCount = iColorCount;
 }
 
 /**
@@ -143,7 +141,7 @@ void ResourceIcon::setColorCount(std::uint8_t iColorCount)
  */
 void ResourceIcon::setPlanes(std::uint16_t iPlanes)
 {
-    planes = iPlanes;
+	planes = iPlanes;
 }
 
 /**
@@ -152,7 +150,7 @@ void ResourceIcon::setPlanes(std::uint16_t iPlanes)
  */
 void ResourceIcon::setBitCount(std::uint16_t iBitCount)
 {
-    bitCount = iBitCount;
+	bitCount = iBitCount;
 }
 
 /**
@@ -161,7 +159,7 @@ void ResourceIcon::setBitCount(std::uint16_t iBitCount)
  */
 void ResourceIcon::setIconGroup(std::size_t iGroup)
 {
-    iconGroup = iGroup;
+	iconGroup = iGroup;
 }
 
 /**
@@ -169,7 +167,7 @@ void ResourceIcon::setIconGroup(std::size_t iGroup)
  */
 void ResourceIcon::setLoadedProperties()
 {
-    loadedProperties = true;
+	loadedProperties = true;
 }
 
 /**
@@ -177,7 +175,7 @@ void ResourceIcon::setLoadedProperties()
  */
 void ResourceIcon::setValidColorCount()
 {
-    validColorCount = true;
+	validColorCount = true;
 }
 
 /**
@@ -186,7 +184,7 @@ void ResourceIcon::setValidColorCount()
  */
 bool ResourceIcon::hasLoadedProperties() const
 {
-    return loadedProperties;
+	return loadedProperties;
 }
 
 
@@ -196,7 +194,7 @@ bool ResourceIcon::hasLoadedProperties() const
  */
 bool ResourceIcon::hasValidColorCount() const
 {
-    return validColorCount;
+	return validColorCount;
 }
 
 } // namespace fileformat

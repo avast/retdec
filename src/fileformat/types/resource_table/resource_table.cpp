@@ -10,6 +10,7 @@
 #include "retdec/crypto/crypto.h"
 #include "retdec/utils/conversion.h"
 #include "retdec/fileformat/types/resource_table/resource_table.h"
+#include "retdec/fileformat/types/resource_table/bitmap_image.h"
 
 using namespace retdec::utils;
 
@@ -39,7 +40,33 @@ ResourceTable::~ResourceTable()
  */
 std::string ResourceTable::computePerceptualAvgHash(const ResourceIcon &icon) const
 {
-	return "[KUBO]";
+	BitmapInformationHeader bih;
+	auto img = BitmapImage();
+
+	if (!img.parseDibFormat(icon, bih))
+	{
+		return "";
+	}
+
+	if (bih.size != 40)
+	{
+		return "0 0 0 0 0 0 0 0 0 0 0 0";
+	}
+
+	std::string bihStr = "1 " +
+		std::to_string(bih.size) + ' ' +
+		std::to_string(bih.width) + ' ' +
+		std::to_string(bih.height) + ' ' +
+		std::to_string(bih.planes) + ' ' +
+		std::to_string(bih.bitCount) + ' ' +
+		std::to_string(bih.compression) + ' ' +
+		std::to_string(bih.bitmapSize) + ' ' +
+		std::to_string(bih.horizontalRes) + ' ' +
+		std::to_string(bih.verticalRes) + ' ' +
+		std::to_string(bih.colorsUsed) + ' ' +
+		std::to_string(bih.colorImportant);
+
+	return bihStr;
 }
 
 /**
@@ -49,7 +76,7 @@ std::string ResourceTable::computePerceptualAvgHash(const ResourceIcon &icon) co
  */
 std::string ResourceTable::computePercetualDCTpHash(const ResourceIcon &icon) const
 {
-	return "[KUBO]";
+	return "";
 }
 
 /**
@@ -268,15 +295,15 @@ const std::string& ResourceTable::getResourceIconPerceptualDCTpHash() const
  */
 const ResourceIconGroup* ResourceTable::getPriorResourceIconGroup() const
 {
-    for(const auto group : iconGroups)
-    {
-        if(group->getIconGroupID() == 0)
-        {
-            return group;
-        }
-    }
+	for(const auto group : iconGroups)
+	{
+		if(group->getIconGroupID() == 0)
+		{
+			return group;
+		}
+	}
 
-    return nullptr;
+	return nullptr;
 }
 
 /**
@@ -302,29 +329,29 @@ ResourceTable::resourcesIterator ResourceTable::end() const
  */
 void ResourceTable::computeIconHashes()
 {
-    std::vector<std::uint8_t> iconHashBytes;
+	std::vector<std::uint8_t> iconHashBytes;
 
-    auto priorGroup = getPriorResourceIconGroup();
-    if(!priorGroup)
-    {
-        return;
-    }
+	auto priorGroup = getPriorResourceIconGroup();
+	if(!priorGroup)
+	{
+		return;
+	}
 
-    auto priorIcon = priorGroup->getPriorIcon();
-    if(!priorIcon)
-    {
-        return;
-    }
+	auto priorIcon = priorGroup->getPriorIcon();
+	if(!priorIcon)
+	{
+		return;
+	}
 
-    if (!priorIcon->getBytes(iconHashBytes))
-    {
-    	return;
-    }
+	if (!priorIcon->getBytes(iconHashBytes))
+	{
+		return;
+	}
 
-    iconHashCrc32 = retdec::crypto::getCrc32(iconHashBytes.data(), iconHashBytes.size());
-    iconHashMd5 = retdec::crypto::getMd5(iconHashBytes.data(), iconHashBytes.size());
-    iconHashSha256 = retdec::crypto::getSha256(iconHashBytes.data(), iconHashBytes.size());
-    iconPerceptualAvgHash = computePerceptualAvgHash(*priorIcon);
+	iconHashCrc32 = retdec::crypto::getCrc32(iconHashBytes.data(), iconHashBytes.size());
+	iconHashMd5 = retdec::crypto::getMd5(iconHashBytes.data(), iconHashBytes.size());
+	iconHashSha256 = retdec::crypto::getSha256(iconHashBytes.data(), iconHashBytes.size());
+	iconPerceptualAvgHash = computePerceptualAvgHash(*priorIcon);
 	iconPerceptualDCTpHash = computePercetualDCTpHash(*priorIcon);
 }
 
@@ -351,7 +378,7 @@ void ResourceTable::addResource(std::unique_ptr<Resource>&& newResource)
  */
 void ResourceTable::addResourceIcon(ResourceIcon *icon)
 {
-    icons.push_back(icon);
+	icons.push_back(icon);
 }
 
 /**
@@ -360,7 +387,7 @@ void ResourceTable::addResourceIcon(ResourceIcon *icon)
  */
 void ResourceTable::addResourceIconGroup(ResourceIconGroup *iGroup)
 {
-    iconGroups.push_back(iGroup);
+	iconGroups.push_back(iGroup);
 }
 
 /**
@@ -368,54 +395,54 @@ void ResourceTable::addResourceIconGroup(ResourceIconGroup *iGroup)
  */
 void ResourceTable::linkResourceIconGroups()
 {
-    for(auto iconGroup : iconGroups)
-    {
-        std::size_t numberOfEntries;
-        if (!iconGroup->getNumberOfEntries(numberOfEntries))
-        {
-            continue;
-        }
+	for(auto iconGroup : iconGroups)
+	{
+		std::size_t numberOfEntries;
+		if (!iconGroup->getNumberOfEntries(numberOfEntries))
+		{
+			continue;
+		}
 
-        for(size_t eIndex = 0; eIndex < numberOfEntries; eIndex++)
-        {
-            std::size_t entryNameID;
-            if(!iconGroup->getEntryNameID(eIndex, entryNameID))
-            {
-                continue;
-            }
+		for(size_t eIndex = 0; eIndex < numberOfEntries; eIndex++)
+		{
+			std::size_t entryNameID;
+			if(!iconGroup->getEntryNameID(eIndex, entryNameID))
+			{
+				continue;
+			}
 
-            for(auto icon : icons)
-            {
-                size_t iconNameID, iconSize;
-                unsigned short width, height;
-                uint16_t planes, bitCount;
-                uint8_t colorCount;
-                if(!icon->getNameId(iconNameID) || iconNameID != entryNameID
-                    || !iconGroup->getEntryWidth(eIndex, width) || !iconGroup->getEntryHeight(eIndex, height)
-                    || !iconGroup->getEntryIconSize(eIndex, iconSize) || !iconGroup->getEntryColorCount(eIndex, colorCount)
-                    || !iconGroup->getEntryPlanes(eIndex, planes) || !iconGroup->getEntryBitCount(eIndex, bitCount))
-                {
-                    continue;
-                }
+			for(auto icon : icons)
+			{
+				size_t iconNameID, iconSize;
+				unsigned short width, height;
+				uint16_t planes, bitCount;
+				uint8_t colorCount;
+				if(!icon->getNameId(iconNameID) || iconNameID != entryNameID
+					|| !iconGroup->getEntryWidth(eIndex, width) || !iconGroup->getEntryHeight(eIndex, height)
+					|| !iconGroup->getEntryIconSize(eIndex, iconSize) || !iconGroup->getEntryColorCount(eIndex, colorCount)
+					|| !iconGroup->getEntryPlanes(eIndex, planes) || !iconGroup->getEntryBitCount(eIndex, bitCount))
+				{
+					continue;
+				}
 
-                icon->setWidth(width);
-                icon->setHeight(height);
-                icon->setIconSize(iconSize);
-                icon->setColorCount(colorCount);
-                icon->setPlanes(planes);
-                icon->setBitCount(bitCount);
-                icon->setIconGroup(iconGroup->getIconGroupID());
-                icon->setLoadedProperties();
-                
-                if(colorCount == 1 << (bitCount * planes))
-                {
-                    icon->setValidColorCount();
-                }
+				icon->setWidth(width);
+				icon->setHeight(height);
+				icon->setIconSize(iconSize);
+				icon->setColorCount(colorCount);
+				icon->setPlanes(planes);
+				icon->setBitCount(bitCount);
+				icon->setIconGroup(iconGroup->getIconGroupID());
+				icon->setLoadedProperties();
+				
+				if(colorCount == 1 << (bitCount * planes))
+				{
+					icon->setValidColorCount();
+				}
 
-                iconGroup->addIcon(icon);
-            }
-        }
-    }
+				iconGroup->addIcon(icon);
+			}
+		}
+	}
 }
 
 /**

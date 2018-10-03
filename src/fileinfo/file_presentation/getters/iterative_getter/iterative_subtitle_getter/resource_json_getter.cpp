@@ -63,10 +63,14 @@ std::size_t ResourceJsonGetter::getBasicInfo(std::size_t structIndex, std::vecto
 	desc.push_back("iconCrc32");
 	desc.push_back("iconMd5");
 	desc.push_back("iconSha256");
+	desc.push_back("iconAvgHash");
+	desc.push_back("iconDCTpHash");
 	info.push_back(numToStr(fileinfo.getNumberOfStoredResources()));
 	info.push_back(fileinfo.getResourceIconhashCrc32());
 	info.push_back(fileinfo.getResourceIconhashMd5());
 	info.push_back(fileinfo.getResourceIconhashSha256());
+	info.push_back(fileinfo.getResourceIconPerceptualAvgHash());
+	info.push_back(fileinfo.getResourceIconPerceptualDCTpHash());
 
 	return info.size();
 }
