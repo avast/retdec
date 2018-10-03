@@ -231,14 +231,14 @@ docker run --rm -v /path/to/local/directory:/destination retdec retdec-decompile
 ```
 Output files will be generated to the same directory (e.g. `/path/to/local/directory`).
 
-## Automated TeamCity builds
+## Automated TeamCity Builds
 
-Our TeamCity servers are continuously generating up to date RetDec packages from the latest commit in the `master` branch. These are mostly meant to be used by RetDec developers, contributors, and other people experimenting with the product (e.g. testing if an issue present in the official release still exists in the current `master`). 
+Our TeamCity servers are continuously generating up-to-date RetDec packages from the latest commit in the `master` branch. These are mostly meant to be used by RetDec developers, contributors, and other people experimenting with the product (e.g. testing if an issue present in the official release still exists in the current `master`).
 
-You can use these as you wish, but keep in mind that there are no guarantees they will work on your system (especially the Linux version), and that regressions are a possibility. Download the latest official pre-built package, or build the latest RetDec version tag, to get a stable RetDec version.
+You can use these as you wish, but keep in mind that there are no guarantees they will work on your system (especially the Linux version), and that regressions are a possibility. To get a stable RetDec version, either download the latest official pre-built package or build the latest RetDec version tag.
 
 * [Windows Server 2016, version 10.0](https://retdec-tc.avast.com/repository/download/Retdec_WinBuild/.lastSuccessful/package/retdec-master-windows-64b.zip)
-* [Linux, version 3.10.0-693.21.1.el7.x86_64](https://retdec-tc.avast.com/repository/download/RetDec_LinuxBuild/.lastSuccessful/package/retdec-master-linux-64b.zip)
+* [CentOS Linux, version 3.10.0-693.21.1.el7.x86_64](https://retdec-tc.avast.com/repository/download/RetDec_LinuxBuild/.lastSuccessful/package/retdec-master-linux-64b.zip)
 * [Mac OS X, version 10.13.4](https://retdec-tc.avast.com/repository/download/Retdec_MacBuild/.lastSuccessful/package/retdec-master-macos-64b.zip)
 
 ## Repository Overview
