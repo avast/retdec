@@ -1,0 +1,70 @@
+# MPark.Variant
+#
+# Copyright Michael Park, 2015-2017
+#
+# Distributed under the Boost Software License, Version 1.0.
+# (See accompanying file LICENSE.md or copy at http://boost.org/LICENSE_1_0.txt)
+
+build:
+  verbosity: detailed
+
+branches:
+  only:
+    - master
+
+clone_depth: 1
+
+install:
+  - cmd: git submodule -q update --init
+
+environment:
+  matrix:
+    - GENERATOR: Visual Studio 14 2015 Win64
+      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
+
+    # Clang/LLVM
+    - GENERATOR: Visual Studio 14 2015 Win64
+      TOOLSET: LLVM-vs2014
+      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
+
+    # /std:c++14
+    - GENERATOR: Visual Studio 15 2017 Win64
+      CXXFLAGS: /std:c++14 /permissive-
+      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+
+    # /std:c++latest
+    - GENERATOR: Visual Studio 15 2017 Win64
+      CXXFLAGS: /std:c++latest /permissive-
+      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+
+platform: x64
+
+build_script:
+  - ps: |
+      $env:CXXFLAGS = $env:CXXFLAGS + ' /W4'
+
+      mkdir build-ON
+      cd build-ON
+      if (Test-Path env:TOOLSET) {
+        cmake -G "$env:GENERATOR" -T "$env:TOOLSET" -DMPARK_VARIANT_EXCEPTIONS=ON -DMPARK_VARIANT_INCLUDE_TESTS="mpark" ..
+      } else {
+        cmake -G "$env:GENERATOR" -DMPARK_VARIANT_EXCEPTIONS=ON -DMPARK_VARIANT_INCLUDE_TESTS="mpark" ..
+      }
+      cmake --build . --config Debug
+      ctest --output-on-failure --build-config Debug
+      cmake --build . --config Release
+      ctest --output-on-failure --build-config Release
+      cd ..
+
+      mkdir build-OFF
+      cd build-OFF
+      if (Test-Path env:TOOLSET) {
+        cmake -G "$env:GENERATOR" -T "$env:TOOLSET" -DMPARK_VARIANT_EXCEPTIONS=OFF -DMPARK_VARIANT_INCLUDE_TESTS="mpark" ..
+      } else {
+        cmake -G "$env:GENERATOR" -DMPARK_VARIANT_EXCEPTIONS=OFF -DMPARK_VARIANT_INCLUDE_TESTS="mpark" ..
+      }
+      cmake --build . --config Debug
+      ctest --output-on-failure --build-config Debug
+      cmake --build . --config Release
+      ctest --output-on-failure --build-config Release
+      cd ..
