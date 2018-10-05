@@ -44,6 +44,11 @@ class Config
 		retdec::utils::Address getFunctionAddress(
 				const llvm::Function* fnc);
 
+		// Intrinsic functions.
+		//
+		using IntrinsicFunctionCreatorPtr = llvm::Function* (*)(llvm::Module*);
+		llvm::Function* getIntrinsicFunction(IntrinsicFunctionCreatorPtr f);
+
 		// Register
 		//
 		const retdec::config::Object* getConfigRegister(
@@ -193,6 +198,8 @@ class Config
 		llvm::Function* _x87TagStoreFunction = nullptr; // void (i3, i2)
 		llvm::Function* _x87DataLoadFunction = nullptr; // fp80 (i3)
 		llvm::Function* _x87TagLoadFunction = nullptr; // i2 (i3)
+
+		std::map<IntrinsicFunctionCreatorPtr, llvm::Function*> _intrinsicFunctions;
 };
 
 class ConfigProvider

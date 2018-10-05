@@ -126,6 +126,21 @@ retdec::config::Function* Config::getConfigFunction(
 	return _configDB.functions.getFunctionByStartAddress(startAddr);
 }
 
+llvm::Function* Config::getIntrinsicFunction(IntrinsicFunctionCreatorPtr f)
+{
+	auto fit = _intrinsicFunctions.find(f);
+	if (fit != _intrinsicFunctions.end())
+	{
+		return fit->second;
+	}
+	else
+	{
+		auto* intrinsic = f(_module);
+		_intrinsicFunctions[f] = intrinsic;
+		return intrinsic;
+	}
+}
+
 const retdec::config::Object* Config::getConfigGlobalVariable(
 		const llvm::GlobalVariable* gv)
 {
