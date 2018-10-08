@@ -11,6 +11,7 @@ endif()
 option(RETDEC_DOC "Build public API documentation (requires Doxygen)." OFF)
 option(RETDEC_TESTS "Build tests." OFF)
 option(RETDEC_DEV_TOOLS "Build dev tools." OFF)
+option(RETDEC_FORCE_OPENSSL_BUILD "Force OpenSSL build." OFF)
 
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
