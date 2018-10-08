@@ -29,7 +29,6 @@ matrix:
             - pkg-config
             - m4
             - zlib1g-dev
-            - libtinfo-dev
             - upx
             - openssl
       env:
