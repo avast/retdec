@@ -59,17 +59,13 @@ ExternalProject_Add(llvm-project
 		# exceptions).
 		-DLLVM_ENABLE_WARNINGS=NO
 
-		# Enable the use of terminfo because in the back-end, we use the
-		# coloring system from LLVM so we do not have to deal with issues
-		# due to multi-platform support of coloring by ourselves.
-		# Note to developers: On Linux, programs that link LLVM libraries
-		#                     need to also link the tinfo library.
-		-DLLVM_ENABLE_TERMINFO=YES
-
 		# Disable build of unnecessary LLVM parts.
 		-DLLVM_BUILD_TOOLS=OFF
 		-DLLVM_BUILD_UTILS=OFF
 		-DLLVM_BUILD_RUNTIME=OFF
+		# We don't want this so that wi don't have to link with tinfo.
+		# It looks like terminal colors are working even without this.
+		-DLLVM_ENABLE_TERMINFO=OFF
 
 		# Force the use of the same compiler as used to build the top-level
 		# project. Otherwise, the external project may pick up a different
@@ -127,14 +123,6 @@ endif()
 if(UNIX)
 	target_link_libraries(llvm INTERFACE debug     ${ZLIB_LIBRARIES} dl)
 	target_link_libraries(llvm INTERFACE optimized ${ZLIB_LIBRARIES} dl)
-
-	if(NOT APPLE)
-		target_link_libraries(llvm INTERFACE debug     rt tinfo)
-		target_link_libraries(llvm INTERFACE optimized rt tinfo)
-	else()
-		target_link_libraries(llvm INTERFACE debug     curses)
-		target_link_libraries(llvm INTERFACE optimized curses)
-	endif()
 endif()
 
 # Set include directories.
