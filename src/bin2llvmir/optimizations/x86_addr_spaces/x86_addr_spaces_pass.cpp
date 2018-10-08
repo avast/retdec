@@ -1,5 +1,5 @@
 /**
- * @file src/bin2llvmir/optimizations/x86_addr_spaces/x86_addr_spaces_pass.xpp
+ * @file src/bin2llvmir/optimizations/x86_addr_spaces/x86_addr_spaces_pass.cpp
  * @brief x86 address spaces optimization pass.
  * @copyright (c) 2018 Avast Software, licensed under the MIT license
  */
