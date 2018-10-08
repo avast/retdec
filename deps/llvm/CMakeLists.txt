@@ -63,7 +63,7 @@ ExternalProject_Add(llvm-project
 		-DLLVM_BUILD_TOOLS=OFF
 		-DLLVM_BUILD_UTILS=OFF
 		-DLLVM_BUILD_RUNTIME=OFF
-		# We don't want this so that wi don't have to link with tinfo.
+		# We don't want this so that we don't have to link with tinfo.
 		# It looks like terminal colors are working even without this.
 		-DLLVM_ENABLE_TERMINFO=OFF
 
