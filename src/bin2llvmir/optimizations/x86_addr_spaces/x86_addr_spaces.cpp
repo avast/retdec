@@ -419,11 +419,11 @@ llvm::Instruction* optimizeStore(llvm::StoreInst* store, Config* c)
 
 llvm::Instruction* optimize(llvm::Instruction* insn, Config* config)
 {
-	if (llvm::LoadInst* l = llvm::dyn_cast<llvm::LoadInst>(insn))
+	if (LoadInst* l = dyn_cast<LoadInst>(insn))
 	{
 		return optimizeLoad(l, config);
 	}
-	else if (llvm::StoreInst* s = llvm::dyn_cast<llvm::StoreInst>(insn))
+	else if (StoreInst* s = dyn_cast<StoreInst>(insn))
 	{
 		return optimizeStore(s, config);
 	}
