@@ -17,7 +17,6 @@ RUN apt-get -y update && \
 	flex                                                \
 	bison                                               \
 	zlib1g-dev                                          \
-	libtinfo-dev                                        \
 	autoconf                                            \
 	automake                                            \
 	pkg-config                                          \
