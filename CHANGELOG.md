@@ -3,6 +3,7 @@
 # dev
 
 * Fix: Fixed translation of x86 FPU instructions to LLVM IR ([#293](https://github.com/avast-tl/retdec/issues/293)).
+* Enhancement: Removed the build and runtime dependency on ncurses/libtinfo ([#409](https://github.com/avast-tl/retdec/pull/409)).
 
 # v3.2 (2018-08-16)
 
