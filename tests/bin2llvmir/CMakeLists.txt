@@ -13,6 +13,7 @@ set(RETDEC_TESTS_BIN2LLVMIR_SOURCES
 	optimizations/phi2seq/phi2seq_tests.cpp
 	optimizations/stack_pointer_ops/stack_pointer_ops_tests.cpp
 	optimizations/unreachable_funcs/unreachable_funcs_tests.cpp
+	optimizations/value_protect/value_protect_test.cpp
 	optimizations/x86_addr_spaces/x86_addr_spaces_pass_test.cpp
 	optimizations/x86_addr_spaces/x86_addr_spaces_test.cpp
 	providers/asm_instruction_tests.cpp
