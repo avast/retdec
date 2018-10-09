@@ -103,7 +103,7 @@ llvm::Function* getWriteFsByte(llvm::Module* m)
 
 /**
  * MSDN: void __writefsword(unsigned long Offset, unsigned short Data);
- * LLVM: void __writefsword(<default_type> offset, i6 data)
+ * LLVM: void __writefsword(<default_type> offset, i16 data)
  */
 llvm::Function* getWriteFsWord(llvm::Module* m)
 {
@@ -231,7 +231,7 @@ llvm::Function* getWriteGsByte(llvm::Module* m)
 
 /**
  * MSDN: void __writegsword(unsigned long Offset, unsigned short Data);
- * LLVM: void __writegsword(<default_type> offset, i6 data)
+ * LLVM: void __writegsword(<default_type> offset, i16 data)
  */
 llvm::Function* getWriteGsWord(llvm::Module* m)
 {
