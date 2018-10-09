@@ -40,7 +40,6 @@ TEST_F(X86AddressSpacesPassTests, noOptimizationReturnsFalse)
 TEST_F(X86AddressSpacesPassTests, optimizationReturnsTrue)
 {
 	parseInput(R"(
-		@reg = global i32 0
 		define i32 @fnc() {
 			%a = load i32, i32 addrspace(257)* inttoptr (i32 24 to i32 addrspace(257)*)
 			ret i32 %a
@@ -52,7 +51,6 @@ TEST_F(X86AddressSpacesPassTests, optimizationReturnsTrue)
 	bool ret = pass.runOnModuleCustom(*module, &c);
 
 	std::string exp = R"(
-		@reg = global i32 0
 		define i32 @fnc() {
 			%a = call i32 @__readfsdword(i32 24)
 			ret i32 %a
