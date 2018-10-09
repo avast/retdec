@@ -165,8 +165,9 @@ void retdec::rtti_finder::findGccVtables(
 		std::uint64_t rttiAddr = 0;
 		if (img->getWord(rttiPtrAddr, rttiAddr))
 		{
+			std::set<retdec::utils::Address> visited;
 			vt.rttiAddress = rttiAddr;
-			vt.rtti = parseGccRtti(img, rttis, vt.rttiAddress);
+			vt.rtti = parseGccRtti(img, rttis, vt.rttiAddress, visited);
 			if (vt.rtti == nullptr)
 			{
 				LOG << "\t\t" << "parseGccRtti() failed" << std::endl;
