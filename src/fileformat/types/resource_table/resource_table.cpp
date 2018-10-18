@@ -40,6 +40,7 @@ ResourceTable::~ResourceTable()
  */
 std::string ResourceTable::computePerceptualAvgHash(const ResourceIcon &icon) const
 {
+	// TODO
 	BitmapInformationHeader bih;
 	auto img = BitmapImage();
 
@@ -47,6 +48,9 @@ std::string ResourceTable::computePerceptualAvgHash(const ResourceIcon &icon) co
 	{
 		return "";
 	}
+
+	// TODO delme
+	img.dumpImageHex();
 
 	if (bih.size != 40)
 	{

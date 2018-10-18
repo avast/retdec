@@ -5,6 +5,7 @@
  */
 
 #include <vector>
+#include <iostream>			// TODO delme
 
 #include "retdec/fileformat/types/resource_table/bitmap_image.h"
 #include "retdec/utils/conversion.h"
@@ -18,7 +19,7 @@ namespace fileformat {
 /**
  * Constructor
  */
-BitmapImage::BitmapImage() : width(0), height(0)
+BitmapImage::BitmapImage()
 {
 
 }
@@ -39,7 +40,12 @@ BitmapImage::~BitmapImage()
  */
 std::size_t BitmapImage::getWidth() const
 {
-	return width;
+	if (getHeight() == 0)
+	{
+		return 0;
+	}
+
+	return image[0].size();
 }
 
 /**
@@ -48,7 +54,7 @@ std::size_t BitmapImage::getWidth() const
  */
 std::size_t BitmapImage::getHeight() const
 {
-	return height;
+	return image.size();
 }
 
 /**
@@ -58,151 +64,319 @@ std::size_t BitmapImage::getHeight() const
  */
 bool BitmapImage::parseDibFormat(const ResourceIcon &icon, BitmapInformationHeader &res)
 {
-	// TODO delete parameter
-	std::vector<std::uint8_t> bytes;
+	// TODO delete parameter res
 	struct BitmapInformationHeader bih;
 
-	bytes.reserve(bih.headerSize());
+	if (!parseDibHeader(icon, bih))
+	{
+		return false;
+	}
 
-	if (!icon.getBytes(bytes, 0, bih.headerSize()) || bytes.size() != bih.headerSize())
+	dumpDibHeader(bih);	// TODO delme
+
+	image.clear();
+
+	switch (bih.bitCount)
+	{
+		case 1:
+			return parseDib1Data(icon, bih);
+
+		case 4:
+			return parseDib4Data(icon, bih);
+
+		case 8:
+			return parseDib8Data(icon, bih);
+
+		case 24:
+			return parseDib24Data(icon, bih);
+
+		case 32:
+			return parseDib32Data(icon, bih);
+
+		default:
+			return false;
+	}
+
+	// std::uint32_t nColumns = bih.width;
+	// std::uint32_t nRows = bih.height / 2;
+	// std::size_t nBytesInRow = ((bih.bitCount * nColumns + 31) / 32) * 4;
+	// std::size_t nBytes = nBytesInRow * nRows;
+
+	// image.reserve(nRows);
+	// bytes.clear();
+	// bytes.reserve(nBytes);
+
+	// if (!icon.getBytes(bytes, bih.headerSize(), nBytes) || bytes.size() != nBytes)
+	// {
+	// 	return false;
+	// }
+
+
+
+	
+
+	// TODO delme
+	// if (bih.bitCount == 32)
+	// {
+	// 	std::size_t offset = 0;
+
+	// 	for (std::size_t i = 0; i < nRows; i++)
+	// 	{
+	// 		std::vector<struct BitmapPixel> row;
+	// 		row.reserve(nColumns);
+
+	// 		for (std::size_t j = 0; j < nBytesInRow / 4; j++)
+	// 		{
+	// 			row.emplace_back(bytes[offset], bytes[offset + 1], bytes[offset + 2], bytes[offset + 3]);
+	// 			offset += 4;
+	// 		}
+
+	// 		image.push_back(std::move(row));
+	// 	}
+	// }
+
+	// dumpImageHex(); // TODO delme
+
+
+
+/////// TODO delete me
+	// res.size = bih.size;
+	// res.width = bih.width;
+	// res.height = bih.height;
+	// res.planes = bih.planes;
+	// res.bitCount = bih.bitCount;
+	// res.compression = bih.compression;
+	// res.bitmapSize = bih.bitmapSize;
+	// res.horizontalRes = bih.horizontalRes;
+	// res.verticalRes = bih.verticalRes;
+	// res.colorsUsed = bih.colorsUsed;
+	// res.colorImportant = bih.colorImportant;
+
+
+	// return true;
+}
+
+/**
+ * Parse a DIB header
+ * @param icon Icon to parse the header from
+ * @param res DIB header structure to store the result to
+ * @return @c `true` on success, otherwise `false`
+ */
+bool BitmapImage::parseDibHeader(const ResourceIcon &icon, struct BitmapInformationHeader &res) const
+{
+	std::vector<std::uint8_t> bytes;
+
+	bytes.reserve(res.headerSize());
+
+	if (!icon.getBytes(bytes, 0, res.headerSize()) || bytes.size() != res.headerSize())
 	{
 		return false;
 	}
 
 	std::size_t offset = 0;
-	bih.size = *reinterpret_cast<uint32_t *>(&bytes.data()[offset]); offset += sizeof(bih.size);
-	bih.width = *reinterpret_cast<int32_t *>(&bytes.data()[offset]); offset += sizeof(bih.width);
-	bih.height = *reinterpret_cast<int32_t *>(&bytes.data()[offset]); offset += sizeof(bih.height);
-	bih.planes = *reinterpret_cast<uint16_t *>(&bytes.data()[offset]); offset += sizeof(bih.planes);
-	bih.bitCount = *reinterpret_cast<uint16_t *>(&bytes.data()[offset]); offset += sizeof(bih.bitCount);
-	bih.compression = *reinterpret_cast<uint32_t *>(&bytes.data()[offset]); offset += sizeof(bih.compression);
-	bih.bitmapSize = *reinterpret_cast<uint32_t *>(&bytes.data()[offset]); offset += sizeof(bih.bitmapSize);
-	bih.horizontalRes = *reinterpret_cast<int32_t *>(&bytes.data()[offset]); offset += sizeof(bih.horizontalRes);
-	bih.verticalRes = *reinterpret_cast<int32_t *>(&bytes.data()[offset]); offset += sizeof(bih.verticalRes);
-	bih.colorsUsed = *reinterpret_cast<uint32_t *>(&bytes.data()[offset]); offset += sizeof(bih.colorsUsed);
-	bih.colorImportant = *reinterpret_cast<uint32_t *>(&bytes.data()[offset]); offset += sizeof(bih.colorImportant);
+	res.size = *reinterpret_cast<uint32_t *>(&bytes.data()[offset]); offset += sizeof(res.size);
+	res.width = *reinterpret_cast<int32_t *>(&bytes.data()[offset]); offset += sizeof(res.width);
+	res.height = *reinterpret_cast<int32_t *>(&bytes.data()[offset]); offset += sizeof(res.height);
+	res.planes = *reinterpret_cast<uint16_t *>(&bytes.data()[offset]); offset += sizeof(res.planes);
+	res.bitCount = *reinterpret_cast<uint16_t *>(&bytes.data()[offset]); offset += sizeof(res.bitCount);
+	res.compression = *reinterpret_cast<uint32_t *>(&bytes.data()[offset]); offset += sizeof(res.compression);
+	res.bitmapSize = *reinterpret_cast<uint32_t *>(&bytes.data()[offset]); offset += sizeof(res.bitmapSize);
+	res.horizontalRes = *reinterpret_cast<int32_t *>(&bytes.data()[offset]); offset += sizeof(res.horizontalRes);
+	res.verticalRes = *reinterpret_cast<int32_t *>(&bytes.data()[offset]); offset += sizeof(res.verticalRes);
+	res.colorsUsed = *reinterpret_cast<uint32_t *>(&bytes.data()[offset]); offset += sizeof(res.colorsUsed);
+	res.colorImportant = *reinterpret_cast<uint32_t *>(&bytes.data()[offset]); offset += sizeof(res.colorImportant);
 
 	if (!isLittleEndian())
 	{
-		bih.size = byteSwap32(bih.size);
-		bih.width = byteSwap32(bih.width);
-		bih.height = byteSwap32(bih.height);
-		bih.planes = byteSwap16(bih.planes);
-		bih.bitCount = byteSwap16(bih.bitCount);
-		bih.compression = byteSwap32(bih.compression);
-		bih.bitmapSize = byteSwap32(bih.bitmapSize);
-		bih.horizontalRes = byteSwap32(bih.horizontalRes);
-		bih.verticalRes = byteSwap32(bih.verticalRes);
-		bih.colorsUsed = byteSwap32(bih.colorsUsed);
-		bih.colorImportant = byteSwap32(bih.colorImportant);
+		res.size = byteSwap32(res.size);
+		res.width = byteSwap32(res.width);
+		res.height = byteSwap32(res.height);
+		res.planes = byteSwap16(res.planes);
+		res.bitCount = byteSwap16(res.bitCount);
+		res.compression = byteSwap32(res.compression);
+		res.bitmapSize = byteSwap32(res.bitmapSize);
+		res.horizontalRes = byteSwap32(res.horizontalRes);
+		res.verticalRes = byteSwap32(res.verticalRes);
+		res.colorsUsed = byteSwap32(res.colorsUsed);
+		res.colorImportant = byteSwap32(res.colorImportant);
 	}
 
-	// TODO uncomment
-	// if (bih.size != bih.headerSize() || bih.planes != 1)
-	// {
-	// 	return false;
-	// }
-
-
-
-
-
-
-/////////////////////////////////////////////////////////
-	// std::vector<uint8_t> dataBytes;
-
-	// if (!icon.getBytes(dataBytes, bih.headerSize(), 0))
-	// {
-	// 	return false;
-	// }
-
-	// std::cout << "[KUBO]\n" <<
-	// "size:           " << bih.size << "\n" <<
-	// "width:          " << bih.width << "\n" <<
-	// "height:         " << bih.height << "\n" <<
-	// "planes:         " << bih.planes << "\n" <<
-	// "bitCount:       " << bih.bitCount << "\n" <<
-	// "compression:    " << bih.compression << "\n" <<
-	// "bitmapSize:     " << bih.bitmapSize << "\n" <<
-	// "horizontalRes:  " << bih.horizontalRes << "\n" <<
-	// "verticalRes:    " << bih.verticalRes << "\n" <<
-	// "colorsUsed:     " << bih.colorsUsed << "\n" <<
-	// "colorImportant: " << bih.colorImportant << "\n" << "\n" <<
-
-	// "iconWidth:      " << icon.getWidth() << "\n" <<
-	// "iconHeight:     " << icon.getHeight() << "\n" <<
-	// "bytesRead:      " << dataBytes.size() << "\n";
-
-	// std::string hexBytes;
-	// if (!icon.getHexBytes(hexBytes))
-	// {
-	// 	return false;
-	// }
-
-	// for (std::size_t i = 0; i < bih.headerSize() * 2; i++)
-	// {
-	// 	if (!(i % 64))
-	// 	{
-	// 		std::cout << "\n";
-	// 	}
-
-	// 	std::cout << hexBytes[i];
-
-	// 	if (i % 2)
-	// 	{
-	// 		std::cout << " ";
-	// 	}
-	// }
-
-	// std::cout << "\n";
-
-	// for (std::size_t i = bih.headerSize() * 2; i < hexBytes.size(); i++)
-	// {
-	// 	if (!((i - bih.headerSize() * 2) % 64))
-	// 	{
-	// 		std::cout << "\n";
-	// 	}
-
-	// 	std::cout << hexBytes[i];
-
-	// 	if (i % 2)
-	// 	{
-	// 		std::cout << " ";
-	// 	}
-	// }
-
-	// hexBytes.erase(0, 2 * bih.headerSize());
-
-	// hexBytes.erase(0, 2 * 4 * bih.width * bih.height);
-
-	// std::cout << 4 * bih.width * bih.width << "\n";
-	// std::cout << hexBytes << "\n";
-
-	// for (std::size_t i = 0; i < bih.height; i++)
-	// {
-	// 	for (std::size_t j = 0; j < bih.width; j++)
-	// 	{
-	// 		std::cout << hexBytes[bih.height * i + j] << hexBytes[bih.height * i + j + 1] << ' ';
-	// 	}
-	// 	std::cout << "\n";
-	// }
-
-
-/////// TODO delete me
-	res.size = bih.size;
-	res.width = bih.width;
-	res.height = bih.height;
-	res.planes = bih.planes;
-	res.bitCount = bih.bitCount;
-	res.compression = bih.compression;
-	res.bitmapSize = bih.bitmapSize;
-	res.horizontalRes = bih.horizontalRes;
-	res.verticalRes = bih.verticalRes;
-	res.colorsUsed = bih.colorsUsed;
-	res.colorImportant = bih.colorImportant;
-
+	if (res.size != res.headerSize() || res.planes != 1 || res.compression != 0 ||
+		res.width * 2 != res.height || res.width > 512 || res.bitCount > 32)
+	{
+		return false;
+	}
 
 	return true;
+}
+
+/**
+ * Parse a 1 bpp DIB data
+ * @param icon Icon to parse the data from
+ * @param hdr DIB header structure
+ * @return @c `true` on success, otherwise `false`
+ */
+bool BitmapImage::parseDib1Data(const ResourceIcon &icon, const struct BitmapInformationHeader &hdr)
+{
+	// TODO
+	(void)icon;
+	(void)hdr;
+	return true;
+}
+
+/**
+ * Parse a 4 bpp DIB data
+ * @param icon Icon to parse the data from
+ * @param hdr DIB header structure
+ * @return @c `true` on success, otherwise `false`
+ */
+bool BitmapImage::parseDib4Data(const ResourceIcon &icon, const struct BitmapInformationHeader &hdr)
+{
+	// TODO
+	(void)icon;
+	(void)hdr;
+	return true;
+}
+
+/**
+ * Parse a 8 bpp DIB data
+ * @param icon Icon to parse the data from
+ * @param hdr DIB header structure
+ * @return @c `true` on success, otherwise `false`
+ */
+bool BitmapImage::parseDib8Data(const ResourceIcon &icon, const struct BitmapInformationHeader &hdr)
+{
+	// TODO
+	(void)icon;
+	(void)hdr;
+	return true;
+}
+
+/**
+ * Parse a 24 bpp DIB data
+ * @param icon Icon to parse the data from
+ * @param hdr DIB header structure
+ * @return @c `true` on success, otherwise `false`
+ */
+bool BitmapImage::parseDib24Data(const ResourceIcon &icon, const struct BitmapInformationHeader &hdr)
+{
+	if (hdr.colorsUsed != 0)
+	{
+		return false;
+	}
+
+	std::vector<std::uint8_t> bytes;
+	std::uint32_t nColumns = hdr.width;
+	std::uint32_t nRows = hdr.height / 2;
+	std::size_t nBytesInRow = ((hdr.bitCount * nColumns + 31) / 32) * 4;
+	std::size_t nBytes = nBytesInRow * nRows;
+
+	image.reserve(nRows);
+	bytes.reserve(nBytes);
+
+	if (!icon.getBytes(bytes, hdr.headerSize(), nBytes) || bytes.size() != nBytes)
+	{
+		return false;
+	}
+
+	std::size_t offset = 0;
+
+	for (std::size_t i = 0; i < nRows; i++)
+	{
+		std::vector<struct BitmapPixel> row;
+		row.reserve(nColumns);
+
+		for (std::size_t j = 0; j < nBytesInRow / 3; j++)
+		{
+			row.emplace_back(bytes[offset], bytes[offset + 1], bytes[offset + 2], 0xFF);
+			offset += 3;
+		}
+
+		image.push_back(std::move(row));
+	}
+
+	return true;
+}
+
+/**
+ * Parse a 32 bpp DIB data
+ * @param icon Icon to parse the data from
+ * @param hdr DIB header structure
+ * @return @c `true` on success, otherwise `false`
+ */
+bool BitmapImage::parseDib32Data(const ResourceIcon &icon, const struct BitmapInformationHeader &hdr)
+{
+	if (hdr.colorsUsed != 0)
+	{
+		return false;
+	}
+
+	std::vector<std::uint8_t> bytes;
+	std::uint32_t nColumns = hdr.width;
+	std::uint32_t nRows = hdr.height / 2;
+	std::size_t nBytesInRow = ((hdr.bitCount * nColumns + 31) / 32) * 4;
+	std::size_t nBytes = nBytesInRow * nRows;
+
+	image.reserve(nRows);
+	bytes.reserve(nBytes);
+
+	if (!icon.getBytes(bytes, hdr.headerSize(), nBytes) || bytes.size() != nBytes)
+	{
+		return false;
+	}
+
+	std::size_t offset = 0;
+
+	for (std::size_t i = 0; i < nRows; i++)
+	{
+		std::vector<struct BitmapPixel> row;
+		row.reserve(nColumns);
+
+		for (std::size_t j = 0; j < nBytesInRow / 4; j++)
+		{
+			row.emplace_back(bytes[offset], bytes[offset + 1], bytes[offset + 2], bytes[offset + 3]);
+			offset += 4;
+		}
+
+		image.push_back(std::move(row));
+	}
+
+	return true;
+}
+
+void BitmapImage::dumpImageHex() const	// TODO delme
+{
+	std::cout << "IMAGE\n";
+	std::cout << "W: " << getWidth() << "\n";
+	std::cout << "H: " << getHeight() << "\n";
+	for (std::size_t i = 0; i < getHeight(); i++)
+	{
+		for (std::size_t j = 0; j < getWidth(); j++)
+		{
+			std::cout << "[" << std::hex << static_cast<unsigned>(image[i][j].r) << ","
+						<< static_cast<unsigned>(image[i][j].g) << ","
+						<< static_cast<unsigned>(image[i][j].b) << ","
+						<< static_cast<unsigned>(image[i][j].a) << "]";
+		}
+
+		std::cout << "\n\n";
+	}
+}
+
+void BitmapImage::dumpDibHeader(const struct BitmapInformationHeader &hdr) const
+{
+	std::cout << "BITMAP INFORMATION HEADER\n" <<
+	"bisize:         " << hdr.size << "\n" <<
+	"width:          " << hdr.width << "\n" <<
+	"height:         " << hdr.height << "\n" <<
+	"planes:         " << hdr.planes << "\n" <<
+	"bitCount:       " << hdr.bitCount << "\n" <<
+	"compression:    " << hdr.compression << "\n" <<
+	"bitmapSize:     " << hdr.bitmapSize << "\n" <<
+	"horizontalRes:  " << hdr.horizontalRes << "\n" <<
+	"verticalRes:    " << hdr.verticalRes << "\n" <<
+	"colorsUsed:     " << hdr.colorsUsed << "\n" <<
+	"colorImportant: " << hdr.colorImportant << "\n" << "\n";
 }
 
 } // namespace fileformat

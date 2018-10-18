@@ -39,14 +39,26 @@ struct BitmapInformationHeader
 	}
 };
 
+struct BitmapPixel
+{
+	std::uint8_t r;
+	std::uint8_t g;
+	std::uint8_t b;
+	std::uint8_t a;
+
+	BitmapPixel(std::uint8_t r, std::uint8_t g, std::uint8_t b, std::uint8_t a) : r(r), g(g), b(b), a(a)
+	{
+
+	}
+};
+
 /**
  * One bitmap image
  */
 class BitmapImage
 {
 	private:
-		std::size_t width;                ///< image width
-		std::size_t height;               ///< image height
+		std::vector<std::vector<struct BitmapPixel>> image;    ///< bitmap image map row x column
 
 	public:
 		BitmapImage();
@@ -67,6 +79,14 @@ class BitmapImage
 		/// @name Other methods
 		/// @{
 		bool parseDibFormat(const ResourceIcon &icon, BitmapInformationHeader &res);
+		bool parseDibHeader(const ResourceIcon &icon, struct BitmapInformationHeader &res) const;
+		bool parseDib1Data(const ResourceIcon &icon, const struct BitmapInformationHeader &hdr);
+		bool parseDib4Data(const ResourceIcon &icon, const struct BitmapInformationHeader &hdr);
+		bool parseDib8Data(const ResourceIcon &icon, const struct BitmapInformationHeader &hdr);
+		bool parseDib24Data(const ResourceIcon &icon, const struct BitmapInformationHeader &hdr);
+		bool parseDib32Data(const ResourceIcon &icon, const struct BitmapInformationHeader &hdr);
+		void dumpImageHex() const;	// TODO delme
+		void dumpDibHeader(const struct BitmapInformationHeader &hdr) const; // TODO delme
 		/// @}
 };
 
