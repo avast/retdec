@@ -289,6 +289,7 @@ namespace std {
 #ifndef MPARK_IN_PLACE_HPP
 #define MPARK_IN_PLACE_HPP
 
+
 namespace mpark {
 
   struct in_place_t { explicit in_place_t() = default; };
@@ -751,7 +752,6 @@ namespace mpark {
 #undef RETURN
 
 #endif  // MPARK_LIB_HPP
-
 
 namespace mpark {
 
