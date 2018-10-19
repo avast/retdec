@@ -15,6 +15,7 @@ import importlib
 config = importlib.import_module('retdec-config')
 utils = importlib.import_module('retdec-utils')
 utils.check_python_version()
+utils.ensure_script_is_being_run_from_installed_retdec()
 
 CmdRunner = utils.CmdRunner
 sys.stdout = utils.Unbuffered(sys.stdout)

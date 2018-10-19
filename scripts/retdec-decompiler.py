@@ -17,6 +17,7 @@ retdec_signature_from_library_creator = importlib.import_module('retdec-signatur
 retdec_unpacker = importlib.import_module('retdec-unpacker')
 utils = importlib.import_module('retdec-utils')
 utils.check_python_version()
+utils.ensure_script_is_being_run_from_installed_retdec()
 
 SigFromLib = retdec_signature_from_library_creator.SigFromLib
 Unpacker = retdec_unpacker.Unpacker

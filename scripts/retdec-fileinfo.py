@@ -15,6 +15,7 @@ import importlib
 config = importlib.import_module('retdec-config')
 utils = importlib.import_module('retdec-utils')
 utils.check_python_version()
+utils.ensure_script_is_being_run_from_installed_retdec()
 retdec_archive_decompiler = importlib.import_module('retdec-archive-decompiler')
 
 ArchiveDecompiler = retdec_archive_decompiler.ArchiveDecompiler

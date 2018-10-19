@@ -11,6 +11,7 @@ import sys
 import importlib
 utils = importlib.import_module('retdec-utils')
 utils.check_python_version()
+utils.ensure_script_is_being_run_from_installed_retdec()
 
 try:
     import colorama
