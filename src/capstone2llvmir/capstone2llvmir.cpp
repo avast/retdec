@@ -72,7 +72,7 @@ std::unique_ptr<Capstone2LlvmIrTranslator> Capstone2LlvmIrTranslator::createArch
 		}
 	}
 
-	throw Capstone2LlvmIrError("Unhandled Capstone architecture or mode.");
+	throw GenericError("Unhandled Capstone architecture or mode.");
 }
 
 std::unique_ptr<Capstone2LlvmIrTranslator> Capstone2LlvmIrTranslator::createArm(
@@ -93,7 +93,7 @@ std::unique_ptr<Capstone2LlvmIrTranslator> Capstone2LlvmIrTranslator::createArm6
 		llvm::Module* m,
 		cs_mode extra)
 {
-	assert(false && "not implemented");
+	throw GenericError("Not implemented.");
 	return nullptr;
 }
 
@@ -171,7 +171,7 @@ std::unique_ptr<Capstone2LlvmIrTranslator> Capstone2LlvmIrTranslator::createSpar
 		llvm::Module* m,
 		cs_mode extra)
 {
-	assert(false && "not implemented");
+	throw GenericError("Not implemented.");
 	return nullptr;
 }
 
@@ -179,7 +179,7 @@ std::unique_ptr<Capstone2LlvmIrTranslator> Capstone2LlvmIrTranslator::createSysz
 		llvm::Module* m,
 		cs_mode extra)
 {
-	assert(false && "not implemented");
+	throw GenericError("Not implemented.");
 	return nullptr;
 }
 
@@ -187,7 +187,7 @@ std::unique_ptr<Capstone2LlvmIrTranslator> Capstone2LlvmIrTranslator::createXcor
 		llvm::Module* m,
 		cs_mode extra)
 {
-	assert(false && "not implemented");
+	throw GenericError("Not implemented.");
 	return nullptr;
 }
 

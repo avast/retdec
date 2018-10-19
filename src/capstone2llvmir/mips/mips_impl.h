@@ -121,26 +121,20 @@ class Capstone2LlvmIrTranslatorMips_impl :
 		void translateBc1f(cs_insn* i, cs_mips* mi, llvm::IRBuilder<>& irb);
 		void translateBc1t(cs_insn* i, cs_mips* mi, llvm::IRBuilder<>& irb);
 		void translateBcondal(cs_insn* i, cs_mips* mi, llvm::IRBuilder<>& irb);
-		void translateBinaryPseudoAsm(cs_insn* i, cs_mips* mi, llvm::IRBuilder<>& irb);
-		void translateBitrev(cs_insn* i, cs_mips* mi, llvm::IRBuilder<>& irb);
 		void translateBreak(cs_insn* i, cs_mips* mi, llvm::IRBuilder<>& irb);
 		void translateC(cs_insn* i, cs_mips* mi, llvm::IRBuilder<>& irb);
 		void translateClo(cs_insn* i, cs_mips* mi, llvm::IRBuilder<>& irb);
 		void translateClz(cs_insn* i, cs_mips* mi, llvm::IRBuilder<>& irb);
 		void translateCondBranchTernary(cs_insn* i, cs_mips* mi, llvm::IRBuilder<>& irb);
 		void translateCondBranchBinary(cs_insn* i, cs_mips* mi, llvm::IRBuilder<>& irb);
-		void translateCtc1(cs_insn* i, cs_mips* mi, llvm::IRBuilder<>& irb);
 		void translateCvt(cs_insn* i, cs_mips* mi, llvm::IRBuilder<>& irb);
 		void translateDiv(cs_insn* i, cs_mips* mi, llvm::IRBuilder<>& irb);
 		void translateDivu(cs_insn* i, cs_mips* mi, llvm::IRBuilder<>& irb);
 		void translateExt(cs_insn* i, cs_mips* mi, llvm::IRBuilder<>& irb);
-		void translateIns(cs_insn* i, cs_mips* mi, llvm::IRBuilder<>& irb);
 		void translateJ(cs_insn* i, cs_mips* mi, llvm::IRBuilder<>& irb);
 		void translateJal(cs_insn* i, cs_mips* mi, llvm::IRBuilder<>& irb);
 		void translateLoadMemory(cs_insn* i, cs_mips* mi, llvm::IRBuilder<>& irb);
 		void translateLui(cs_insn* i, cs_mips* mi, llvm::IRBuilder<>& irb);
-		void translateLwl(cs_insn* i, cs_mips* mi, llvm::IRBuilder<>& irb);
-		void translateLwr(cs_insn* i, cs_mips* mi, llvm::IRBuilder<>& irb);
 		void translateMadd(cs_insn* i, cs_mips* mi, llvm::IRBuilder<>& irb);
 		void translateMaddf(cs_insn* i, cs_mips* mi, llvm::IRBuilder<>& irb);
 		void translateMax(cs_insn* i, cs_mips* mi, llvm::IRBuilder<>& irb);
@@ -176,10 +170,7 @@ class Capstone2LlvmIrTranslatorMips_impl :
 		void translateSrl(cs_insn* i, cs_mips* mi, llvm::IRBuilder<>& irb);
 		void translateStoreMemory(cs_insn* i, cs_mips* mi, llvm::IRBuilder<>& irb);
 		void translateSub(cs_insn* i, cs_mips* mi, llvm::IRBuilder<>& irb);
-		void translateSwl(cs_insn* i, cs_mips* mi, llvm::IRBuilder<>& irb);
-		void translateSwr(cs_insn* i, cs_mips* mi, llvm::IRBuilder<>& irb);
 		void translateSyscall(cs_insn* i, cs_mips* mi, llvm::IRBuilder<>& irb);
-		void translateWsbh(cs_insn* i, cs_mips* mi, llvm::IRBuilder<>& irb);
 		void translateXor(cs_insn* i, cs_mips* mi, llvm::IRBuilder<>& irb);
 };
 

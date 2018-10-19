@@ -1876,7 +1876,7 @@ TEST_P(Capstone2LlvmIrTranslatorArmTests, ARM_INS_RSC_r_r_r_false)
 	EXPECT_JUST_REGISTERS_STORED({
 		{ARM_REG_R0, 0x1230},
 		// TODO: These probably should not be set for "rsc" without "s".
-		// Probbaly a Capstone bug.
+		// Probably a Capstone bug.
 		{ARM_REG_CPSR_N, ANY},
 		{ARM_REG_CPSR_Z, ANY},
 		{ARM_REG_CPSR_C, ANY},
@@ -1902,7 +1902,7 @@ TEST_P(Capstone2LlvmIrTranslatorArmTests, ARM_INS_RSC_r_r_r_true)
 	EXPECT_JUST_REGISTERS_STORED({
 		{ARM_REG_R0, 0x1231},
 		// TODO: These probably should not be set for "rsc" without "s".
-		// Probbaly a Capstone bug.
+		// Probably a Capstone bug.
 		{ARM_REG_CPSR_N, ANY},
 		{ARM_REG_CPSR_Z, ANY},
 		{ARM_REG_CPSR_C, ANY},
@@ -3084,7 +3084,7 @@ TEST_P(Capstone2LlvmIrTranslatorArmTests, ARM_INS_REV16)
 	});
 	EXPECT_NO_MEMORY_LOADED_STORED();
 	EXPECT_JUST_VALUES_CALLED({
-		{_module.getFunction("__asm_rev16.i32"), {0x12345678}},
+		{_module.getFunction("__asm_rev16"), {0x12345678}},
 	});
 }
 
@@ -3108,7 +3108,7 @@ TEST_P(Capstone2LlvmIrTranslatorArmTests, ARM_INS_REVSH)
 	});
 	EXPECT_NO_MEMORY_LOADED_STORED();
 	EXPECT_JUST_VALUES_CALLED({
-		{_module.getFunction("__asm_revsh.i32"), {0x12345678}},
+		{_module.getFunction("__asm_revsh"), {0x12345678}},
 	});
 }
 
@@ -3132,7 +3132,7 @@ TEST_P(Capstone2LlvmIrTranslatorArmTests, ARM_INS_RBIT)
 	});
 	EXPECT_NO_MEMORY_LOADED_STORED();
 	EXPECT_JUST_VALUES_CALLED({
-		{_module.getFunction("__asm_rbit.i32"), {0x12345678}},
+		{_module.getFunction("__asm_rbit"), {0x12345678}},
 	});
 }
 
@@ -3197,7 +3197,7 @@ TEST_P(Capstone2LlvmIrTranslatorArmTests, ARM_INS_UQADD8)
 	});
 	EXPECT_NO_MEMORY_LOADED_STORED();
 	EXPECT_JUST_VALUES_CALLED({
-		{_module.getFunction("__asm_uqadd8.i32.i32"), {0x1234, 0x5678}},
+		{_module.getFunction("__asm_uqadd8"), {0x1234, 0x5678}},
 	});
 }
 
@@ -3222,7 +3222,7 @@ TEST_P(Capstone2LlvmIrTranslatorArmTests, ARM_INS_UQADD16)
 	});
 	EXPECT_NO_MEMORY_LOADED_STORED();
 	EXPECT_JUST_VALUES_CALLED({
-		{_module.getFunction("__asm_uqadd16.i32.i32"), {0x1234, 0x5678}},
+		{_module.getFunction("__asm_uqadd16"), {0x1234, 0x5678}},
 	});
 }
 
@@ -3247,7 +3247,7 @@ TEST_P(Capstone2LlvmIrTranslatorArmTests, ARM_INS_UQSUB8)
 	});
 	EXPECT_NO_MEMORY_LOADED_STORED();
 	EXPECT_JUST_VALUES_CALLED({
-		{_module.getFunction("__asm_uqsub8.i32.i32"), {0x1234, 0x5678}},
+		{_module.getFunction("__asm_uqsub8"), {0x1234, 0x5678}},
 	});
 }
 
@@ -3272,7 +3272,7 @@ TEST_P(Capstone2LlvmIrTranslatorArmTests, ARM_INS_UQSUB16)
 	});
 	EXPECT_NO_MEMORY_LOADED_STORED();
 	EXPECT_JUST_VALUES_CALLED({
-		{_module.getFunction("__asm_uqsub16.i32.i32"), {0x1234, 0x5678}},
+		{_module.getFunction("__asm_uqsub16"), {0x1234, 0x5678}},
 	});
 }
 
@@ -3297,7 +3297,7 @@ TEST_P(Capstone2LlvmIrTranslatorArmTests, ARM_INS_UQASX)
 	});
 	EXPECT_NO_MEMORY_LOADED_STORED();
 	EXPECT_JUST_VALUES_CALLED({
-		{_module.getFunction("__asm_uqasx.i32.i32"), {0x1234, 0x5678}},
+		{_module.getFunction("__asm_uqasx"), {0x1234, 0x5678}},
 	});
 }
 
@@ -3322,7 +3322,7 @@ TEST_P(Capstone2LlvmIrTranslatorArmTests, ARM_INS_UQSAX)
 	});
 	EXPECT_NO_MEMORY_LOADED_STORED();
 	EXPECT_JUST_VALUES_CALLED({
-		{_module.getFunction("__asm_uqsax.i32.i32"), {0x1234, 0x5678}},
+		{_module.getFunction("__asm_uqsax"), {0x1234, 0x5678}},
 	});
 }
 
@@ -3347,7 +3347,7 @@ TEST_P(Capstone2LlvmIrTranslatorArmTests, ARM_INS_SEL)
 	});
 	EXPECT_NO_MEMORY_LOADED_STORED();
 	EXPECT_JUST_VALUES_CALLED({
-		{_module.getFunction("__asm_sel.i32.i32"), {0x1234, 0x5678}},
+		{_module.getFunction("__asm_sel"), {0x1234, 0x5678}},
 	});
 }
 
@@ -3372,7 +3372,7 @@ TEST_P(Capstone2LlvmIrTranslatorArmTests, ARM_INS_USAD8)
 	});
 	EXPECT_NO_MEMORY_LOADED_STORED();
 	EXPECT_JUST_VALUES_CALLED({
-		{_module.getFunction("__asm_usad8.i32.i32"), {0x1234, 0x5678}},
+		{_module.getFunction("__asm_usad8"), {0x1234, 0x5678}},
 	});
 }
 
@@ -3422,7 +3422,7 @@ TEST_P(Capstone2LlvmIrTranslatorArmTests, ARM_INS_USAT)
 	});
 	EXPECT_NO_MEMORY_LOADED_STORED();
 	EXPECT_JUST_VALUES_CALLED({
-		{_module.getFunction("__asm_usat.i32.i32"), {0x8, 0x5678}},
+		{_module.getFunction("__asm_usat"), {0x8, 0x5678}},
 	});
 }
 
@@ -3446,7 +3446,7 @@ TEST_P(Capstone2LlvmIrTranslatorArmTests, ARM_INS_USAT16)
 	});
 	EXPECT_NO_MEMORY_LOADED_STORED();
 	EXPECT_JUST_VALUES_CALLED({
-		{_module.getFunction("__asm_usat16.i32.i32"), {0x8, 0x5678}},
+		{_module.getFunction("__asm_usat16"), {0x8, 0x5678}},
 	});
 }
 
@@ -3471,7 +3471,7 @@ TEST_P(Capstone2LlvmIrTranslatorArmTests, ARM_INS_UHADD8)
 	});
 	EXPECT_NO_MEMORY_LOADED_STORED();
 	EXPECT_JUST_VALUES_CALLED({
-		{_module.getFunction("__asm_uhadd8.i32.i32"), {0x1234, 0x5678}},
+		{_module.getFunction("__asm_uhadd8"), {0x1234, 0x5678}},
 	});
 }
 
@@ -3575,6 +3575,86 @@ TEST_P(Capstone2LlvmIrTranslatorArmTests, ARM_INS_BLX_thumb)
 	EXPECT_NO_MEMORY_LOADED_STORED();
 	EXPECT_JUST_VALUES_CALLED({
 		{_translator->getCallFunction(), {0x110d8}},
+	});
+}
+
+//
+// ARM_INS_CBNZ
+//
+
+TEST_P(Capstone2LlvmIrTranslatorArmTests, ARM_INS_CBNZ_cond_true)
+{
+	ONLY_MODE_THUMB;
+
+	setRegisters({
+		{ARM_REG_R1, 0x1234},
+	});
+
+	emulate("cbnz r1, #0x1008", 0x1000);
+
+	EXPECT_JUST_REGISTERS_LOADED({ARM_REG_R1});
+	EXPECT_NO_REGISTERS_STORED();
+	EXPECT_NO_MEMORY_LOADED_STORED();
+	EXPECT_JUST_VALUES_CALLED({
+		{_translator->getCondBranchFunction(), {true, 0x1008}},
+	});
+}
+
+TEST_P(Capstone2LlvmIrTranslatorArmTests, ARM_INS_CBNZ_cond_false)
+{
+	ONLY_MODE_THUMB;
+
+	setRegisters({
+		{ARM_REG_R1, 0x0},
+	});
+
+	emulate("cbnz r1, #0x1008", 0x1000);
+
+	EXPECT_JUST_REGISTERS_LOADED({ARM_REG_R1});
+	EXPECT_NO_REGISTERS_STORED();
+	EXPECT_NO_MEMORY_LOADED_STORED();
+	EXPECT_JUST_VALUES_CALLED({
+		{_translator->getCondBranchFunction(), {false, 0x1008}},
+	});
+}
+
+//
+// ARM_INS_CBZ
+//
+
+TEST_P(Capstone2LlvmIrTranslatorArmTests, ARM_INS_CBZ_cond_true)
+{
+	ONLY_MODE_THUMB;
+
+	setRegisters({
+		{ARM_REG_R1, 0x0},
+	});
+
+	emulate("cbz r1, #0x1008", 0x1000);
+
+	EXPECT_JUST_REGISTERS_LOADED({ARM_REG_R1});
+	EXPECT_NO_REGISTERS_STORED();
+	EXPECT_NO_MEMORY_LOADED_STORED();
+	EXPECT_JUST_VALUES_CALLED({
+		{_translator->getCondBranchFunction(), {true, 0x1008}},
+	});
+}
+
+TEST_P(Capstone2LlvmIrTranslatorArmTests, ARM_INS_CBZ_cond_false)
+{
+	ONLY_MODE_THUMB;
+
+	setRegisters({
+		{ARM_REG_R1, 0x1234},
+	});
+
+	emulate("cbz r1, #0x1008", 0x1000);
+
+	EXPECT_JUST_REGISTERS_LOADED({ARM_REG_R1});
+	EXPECT_NO_REGISTERS_STORED();
+	EXPECT_NO_MEMORY_LOADED_STORED();
+	EXPECT_JUST_VALUES_CALLED({
+		{_translator->getCondBranchFunction(), {false, 0x1008}},
 	});
 }
 
@@ -4600,6 +4680,152 @@ TEST_P(Capstone2LlvmIrTranslatorArmTests, ARM_INS_BFI)
 	EXPECT_NO_MEMORY_LOADED_STORED();
 	EXPECT_JUST_VALUES_CALLED({
 		{_module.getFunction("__asm_bfi"), {0x1234, 0x5678, 0x5, 0x10}},
+	});
+}
+
+//
+// ARM_INS_UXTAH
+//
+
+TEST_P(Capstone2LlvmIrTranslatorArmTests, ARM_INS_UXTAH)
+{
+	ONLY_MODE_ARM;
+
+	setRegisters({
+		{ARM_REG_R0, 0x1234},
+		{ARM_REG_R1, 0x12345678},
+	});
+
+	emulate("uxtah r3, r0, r1");
+
+	EXPECT_JUST_REGISTERS_LOADED({ARM_REG_R0, ARM_REG_R1});
+	EXPECT_JUST_REGISTERS_STORED({
+		{ARM_REG_R3, 0x1234 + 0x5678},
+	});
+	EXPECT_NO_MEMORY_LOADED_STORED();
+	EXPECT_NO_VALUE_CALLED();
+}
+
+//
+// ARM_INS_UXTB
+//
+
+TEST_P(Capstone2LlvmIrTranslatorArmTests, ARM_INS_UXTB)
+{
+	ALL_MODES;
+
+	setRegisters({
+		{ARM_REG_R1, 0x12345678},
+	});
+
+	emulate("uxtb r0, r1");
+
+	EXPECT_JUST_REGISTERS_LOADED({ARM_REG_R1});
+	EXPECT_JUST_REGISTERS_STORED({
+		{ARM_REG_R0, 0x78},
+	});
+	EXPECT_NO_MEMORY_LOADED_STORED();
+	EXPECT_NO_VALUE_CALLED();
+}
+
+//
+// ARM_INS_UXTB16
+//
+
+TEST_P(Capstone2LlvmIrTranslatorArmTests, ARM_INS_UXTB16)
+{
+	ONLY_MODE_ARM;
+
+	setRegisters({
+		{ARM_REG_R1, 0x12345678},
+	});
+
+	emulate("uxtb16 r0, r1");
+
+	EXPECT_JUST_REGISTERS_LOADED({ARM_REG_R1});
+	EXPECT_JUST_REGISTERS_STORED({
+		{ARM_REG_R0, 0x00340078},
+	});
+	EXPECT_NO_MEMORY_LOADED_STORED();
+	EXPECT_NO_VALUE_CALLED();
+}
+
+//
+// ARM_INS_UXTH
+//
+
+TEST_P(Capstone2LlvmIrTranslatorArmTests, ARM_INS_UXTH)
+{
+	ALL_MODES;
+
+	setRegisters({
+		{ARM_REG_R1, 0x12345678},
+	});
+
+	emulate("uxth r0, r1");
+
+	EXPECT_JUST_REGISTERS_LOADED({ARM_REG_R1});
+	EXPECT_JUST_REGISTERS_STORED({
+		{ARM_REG_R0, 0x00005678},
+	});
+	EXPECT_NO_MEMORY_LOADED_STORED();
+	EXPECT_NO_VALUE_CALLED();
+}
+
+//
+// ARM_INS_SVC
+//
+
+TEST_P(Capstone2LlvmIrTranslatorArmTests, ARM_INS_SVC)
+{
+	ONLY_MODE_ARM;
+
+	emulate("svc 0x123");
+
+	EXPECT_NO_REGISTERS_LOADED_STORED();
+	EXPECT_NO_MEMORY_LOADED_STORED();
+	EXPECT_JUST_VALUES_CALLED({
+		{_module.getFunction("__asm_svc"), {0x123}},
+	});
+}
+
+//
+// Tests for generic pseudo assembly generation.
+//
+
+TEST_P(Capstone2LlvmIrTranslatorArmTests, MVN_ternary)
+{
+	ONLY_MODE_ARM;
+
+	emulate("mvn r1, #44, #4");
+
+	EXPECT_NO_REGISTERS_LOADED();
+	EXPECT_JUST_REGISTERS_STORED({
+		{ARM_REG_R1, ANY},
+	});
+	EXPECT_NO_MEMORY_LOADED_STORED();
+	EXPECT_JUST_VALUES_CALLED({
+		{_module.getFunction("__asm_mvn"), {44, 4}},
+	});
+}
+
+TEST_P(Capstone2LlvmIrTranslatorArmTests, AND_quaternary)
+{
+	ONLY_MODE_ARM;
+
+	setRegisters({
+		{ARM_REG_R8, 0x1234},
+	});
+
+	emulate("and r2, r8, #0, #2");
+
+	EXPECT_JUST_REGISTERS_LOADED({ARM_REG_R8});
+	EXPECT_JUST_REGISTERS_STORED({
+		{ARM_REG_R2, ANY},
+	});
+	EXPECT_NO_MEMORY_LOADED_STORED();
+	EXPECT_JUST_VALUES_CALLED({
+		{_module.getFunction("__asm_and"), {0x1234, 0, 2}},
 	});
 }
 

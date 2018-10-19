@@ -120,6 +120,7 @@ void Capstone2LlvmIrTranslatorArm_impl::translateInstruction(
 			&& ai->cps_flag == ARM_CPSFLAG_INVALID
 			&& ai->mem_barrier == ARM_MB_INVALID))
 	{
+		throwUnhandledInstructions(i);
 		return;
 	}
 
@@ -148,7 +149,22 @@ void Capstone2LlvmIrTranslatorArm_impl::translateInstruction(
 	}
 	else
 	{
-		// TODO: Automatically generate pseudo asm call.
+		throwUnhandledInstructions(i);
+
+		if (ai->cc == ARM_CC_AL || ai->cc == ARM_CC_INVALID)
+		{
+			_inCondition = false;
+			translatePseudoAsmGeneric(i, ai, irb);
+		}
+		else
+		{
+			_inCondition = true;
+
+			auto* cond = generateInsnConditionCode(irb, ai);
+			auto bodyIrb = generateIfThen(cond, irb);
+
+			translatePseudoAsmGeneric(i, ai, bodyIrb);
+		}
 	}
 }
 
@@ -203,13 +219,13 @@ llvm::Value* Capstone2LlvmIrTranslatorArm_impl::loadRegister(
 		return getCurrentPc(_insn);
 	}
 
-	auto* llvmReg = getRegister(r);
+	llvm::Value* llvmReg = getRegister(r);
 	if (llvmReg == nullptr)
 	{
-		throw Capstone2LlvmIrError("loadRegister() unhandled reg.");
+		throw GenericError("loadRegister() unhandled reg.");
 	}
 
-	// TODO: do type conversion
+	llvmReg = generateTypeConversion(irb, llvmReg, dstType, ct);
 
 	return irb.CreateLoad(llvmReg);
 }
@@ -243,7 +259,7 @@ llvm::Value* Capstone2LlvmIrTranslatorArm_impl::generateOperandShift(
 	}
 	if (n == nullptr)
 	{
-		assert(false && "should not be possible");
+		throw GenericError("should not be possible");
 		return val;
 	}
 	n = irb.CreateZExtOrTrunc(n, val->getType());
@@ -288,13 +304,6 @@ llvm::Value* Capstone2LlvmIrTranslatorArm_impl::generateShiftAsr(
 		llvm::Value* val,
 		llvm::Value* n)
 {
-	// TODO: In the old semantics, there is:
-	// n = (n == 0) ? 32 : n;
-	// It looks like capstone does not allow op.shift.value to be zero,
-	// in such a case, Capstone throws away the shift.
-	// But there still might be zero in register, if register variant
-	// is used.
-
 	auto* cfOp1 = irb.CreateSub(n, llvm::ConstantInt::get(n->getType(), 1));
 	auto* cfShl = irb.CreateShl(llvm::ConstantInt::get(cfOp1->getType(), 1), cfOp1);
 	auto* cfAnd = irb.CreateAnd(cfShl, val);
@@ -324,9 +333,6 @@ llvm::Value* Capstone2LlvmIrTranslatorArm_impl::generateShiftLsr(
 		llvm::Value* val,
 		llvm::Value* n)
 {
-	// TODO: In the old semantics, there is:
-	// n = (n == 0) ? 32 : n;
-
 	auto* cfOp1 = irb.CreateSub(n, llvm::ConstantInt::get(n->getType(), 1));
 	auto* cfShl = irb.CreateShl(llvm::ConstantInt::get(cfOp1->getType(), 1), cfOp1);
 	auto* cfAnd = irb.CreateAnd(cfShl, val);
@@ -341,8 +347,6 @@ llvm::Value* Capstone2LlvmIrTranslatorArm_impl::generateShiftRor(
 		llvm::Value* val,
 		llvm::Value* n)
 {
-	// TODO: In the old semantics, there is same more complicated code
-	// if n == 0.
 	unsigned op0BitW = llvm::cast<llvm::IntegerType>(n->getType())->getBitWidth();
 
 	auto* srl = irb.CreateLShr(val, n);
@@ -394,10 +398,12 @@ llvm::Value* Capstone2LlvmIrTranslatorArm_impl::loadOp(
 		cs_arm_op& op,
 		llvm::IRBuilder<>& irb,
 		llvm::Type* ty,
-		bool lea) // TODO: implement lea
+		bool lea)
 {
-//	assert(op.vector_index == -1);
-//	assert(op.neon_lane == -1);
+	if (!(op.vector_index == -1 && op.neon_lane == -1))
+	{
+		return nullptr;
+	}
 
 	switch (op.type)
 	{
@@ -423,8 +429,7 @@ llvm::Value* Capstone2LlvmIrTranslatorArm_impl::loadOp(
 			auto* idxR = loadRegister(op.mem.index, irb);
 			if (idxR)
 			{
-				assert(op.mem.lshift >= 0);
-				if (op.mem.lshift)
+				if (op.mem.lshift > 0)
 				{
 					auto* lshift = llvm::ConstantInt::get(
 							idxR->getType(),
@@ -445,7 +450,7 @@ llvm::Value* Capstone2LlvmIrTranslatorArm_impl::loadOp(
 				}
 				else
 				{
-					assert(false && "arm.h saus this is only 1 || -1");
+					throw GenericError("arm.h saus this is only 1 || -1");
 				}
 
 				// If there is a shift in memory operand, it is applied to
@@ -482,14 +487,20 @@ llvm::Value* Capstone2LlvmIrTranslatorArm_impl::loadOp(
 				addr = irb.CreateAdd(addr, idxR);
 			}
 
-			auto* lty = ty ? ty : getDefaultType();
-			auto* pt = llvm::PointerType::get(lty, 0);
-			addr = irb.CreateIntToPtr(addr, pt);
-			return irb.CreateLoad(addr);
+			if (lea)
+			{
+				return addr;
+			}
+			else
+			{
+				auto* lty = ty ? ty : getDefaultType();
+				auto* pt = llvm::PointerType::get(lty, 0);
+				addr = irb.CreateIntToPtr(addr, pt);
+				return irb.CreateLoad(addr);
+			}
 		}
 		case ARM_OP_FP:
 		{
-			// TODO: That FP type should be used? Float/Double?
 			auto* val = llvm::ConstantFP::get(irb.getFloatTy(), op.fp);
 			return generateOperandShift(irb, op, val);
 		}
@@ -499,7 +510,7 @@ llvm::Value* Capstone2LlvmIrTranslatorArm_impl::loadOp(
 		case ARM_OP_INVALID:
 		default:
 		{
-			assert(false && "unhandled value");
+			throw GenericError("Unhandled value.");
 			return nullptr;
 		}
 	}
@@ -526,7 +537,7 @@ llvm::Instruction* Capstone2LlvmIrTranslatorArm_impl::storeRegister(
 	auto* llvmReg = getRegister(r);
 	if (llvmReg == nullptr)
 	{
-		throw Capstone2LlvmIrError("storeRegister() unhandled reg.");
+		throw GenericError("storeRegister() unhandled reg.");
 	}
 	val = generateTypeConversion(irb, val, llvmReg->getValueType(), ct);
 
@@ -539,21 +550,15 @@ llvm::Instruction* Capstone2LlvmIrTranslatorArm_impl::storeOp(
 		llvm::IRBuilder<>& irb,
 		eOpConv ct)
 {
-//	assert(op.vector_index == -1);
-//	assert(op.neon_lane == -1);
 	if (!(op.vector_index == -1 && op.neon_lane == -1))
 	{
 		return nullptr;
 	}
 
-	// TODO: "01 24 24 07" = "streq r2, [r4, -r1, lsl #8]!"
-//	assert(op.subtracted == false);
-
-	// TODO: These are handled in loadOp(), but I'm not sure how it would work
-	// when operand is being stored.
-	// Memory can be shifted.
-	//
-	assert(op.shift.type == ARM_SFT_INVALID || op.type == ARM_OP_MEM);
+	if (op.type != ARM_OP_MEM && op.shift.type != ARM_SFT_INVALID)
+	{
+		throw GenericError("Unhandled situation in storeOp().");
+	}
 
 	switch (op.type)
 	{
@@ -573,8 +578,7 @@ llvm::Instruction* Capstone2LlvmIrTranslatorArm_impl::storeOp(
 			auto* idxR = loadRegister(op.mem.index, irb);
 			if (idxR)
 			{
-				assert(op.mem.lshift >= 0);
-				if (op.mem.lshift)
+				if (op.mem.lshift >= 0)
 				{
 					auto* lshift = llvm::ConstantInt::get(
 							idxR->getType(),
@@ -595,7 +599,7 @@ llvm::Instruction* Capstone2LlvmIrTranslatorArm_impl::storeOp(
 				}
 				else
 				{
-					assert(false && "arm.h saus this is only 1 || -1");
+					throw GenericError("arm.h saus this is only 1 || -1");
 				}
 
 				// If there is a shift in memory operand, it is applied to
@@ -644,8 +648,7 @@ llvm::Instruction* Capstone2LlvmIrTranslatorArm_impl::storeOp(
 		case ARM_OP_INVALID:
 		default:
 		{
-			assert(false && "unhandled value");
-			return nullptr;
+			throw GenericError("unhandled value");
 		}
 	}
 }
@@ -760,8 +763,72 @@ llvm::Value* Capstone2LlvmIrTranslatorArm_impl::generateInsnConditionCode(
 		case ARM_CC_INVALID:
 		default:
 		{
-			assert(false && "should not be possible");
-			return nullptr;
+			throw GenericError("should not be possible");
+		}
+	}
+}
+
+/**
+ * ARM is special because operands contain access information.
+ */
+void Capstone2LlvmIrTranslatorArm_impl::translatePseudoAsmGeneric(
+		cs_insn* i,
+		cs_arm* ci,
+		llvm::IRBuilder<>& irb)
+{
+	std::vector<llvm::Value*> vals;
+	std::vector<llvm::Type*> types;
+
+	bool writesOp = false;
+	for (std::size_t j = 0; j < ci->op_count; ++j)
+	{
+		auto& op = ci->operands[j];
+		if (op.access == CS_AC_INVALID || op.access & CS_AC_READ)
+		{
+			auto* o = loadOp(op, irb);
+			vals.push_back(o);
+			types.push_back(o->getType());
+		}
+		else if (op.access & CS_AC_WRITE)
+		{
+			writesOp = true;
+		}
+	}
+
+	if (vals.empty())
+	{
+		for (std::size_t j = 0; j < i->detail->regs_read_count; ++j)
+		{
+			auto* op = loadRegister(i->detail->regs_read[j], irb);
+			vals.push_back(op);
+			types.push_back(op->getType());
+		}
+	}
+
+	auto* retType = writesOp ? getDefaultType() : irb.getVoidTy();
+	llvm::Function* fnc = getPseudoAsmFunction(
+			i,
+			retType,
+			types);
+
+	auto* c = irb.CreateCall(fnc, vals);
+
+	for (std::size_t j = 0; j < i->detail->regs_write_count; ++j)
+	{
+		auto r = i->detail->regs_write[j];
+		auto* undef = llvm::UndefValue::get(getRegisterType(r));
+		storeRegister(r, undef, irb);
+	}
+
+	if (retType)
+	{
+		for (std::size_t j = 0; j < ci->op_count; ++j)
+		{
+			auto& op = ci->operands[j];
+			if (op.access & CS_AC_WRITE)
+			{
+				storeOp(op, c, irb);
+			}
 		}
 	}
 }
@@ -775,11 +842,13 @@ llvm::Value* Capstone2LlvmIrTranslatorArm_impl::generateInsnConditionCode(
 /**
  * ARM_INS_ADC
  * TODO: Castone sets update_flags==true even when "adc", not "adcs".
- * Check onece more and report as bug.
+ * Check once more and report as bug.
  */
 void Capstone2LlvmIrTranslatorArm_impl::translateAdc(cs_insn* i, cs_arm* ai, llvm::IRBuilder<>& irb)
 {
-	std::tie(op1, op2) = loadOpTernaryOp1Op2(ai, irb, eOpConv::THROW);
+	EXPECT_IS_BINARY_OR_TERNARY(i, ai, irb);
+
+	std::tie(op1, op2) = loadOpBinaryOrTernaryOp1Op2(ai, irb, eOpConv::THROW);
 	auto* cf = loadRegister(ARM_REG_CPSR_C, irb);
 	auto* add1 = irb.CreateAdd(op1, op2);
 	auto* val = irb.CreateAdd(add1, irb.CreateZExtOrTrunc(cf, add1->getType()));
@@ -799,22 +868,9 @@ void Capstone2LlvmIrTranslatorArm_impl::translateAdc(cs_insn* i, cs_arm* ai, llv
  */
 void Capstone2LlvmIrTranslatorArm_impl::translateAdd(cs_insn* i, cs_arm* ai, llvm::IRBuilder<>& irb)
 {
-	// TODO:
-	// IDA     : 00008410 00 C6 8F E2    ADR R12, 0x8418
-	// Capstone: add ip, pc, #0, #12
-	// ODA     : add ip, pc, #0, 12
-	// Very strange. No idea what it is, not able to find any mention of
-	// 4-operand ADD.
-	// It looks like 4th op is ignored: result = 0x8418 = pc + 0
-	if (ai->op_count == 4)
-	{
-		op1 = loadOp(ai->operands[1], irb);
-		op2 = loadOp(ai->operands[2], irb);
-	}
-	else
-	{
-		std::tie(op1, op2) = loadOpTernaryOp1Op2(ai, irb, eOpConv::THROW);
-	}
+	EXPECT_IS_BINARY_OR_TERNARY(i, ai, irb);
+
+	std::tie(op1, op2) = loadOpBinaryOrTernaryOp1Op2(ai, irb, eOpConv::THROW);
 	auto* add = irb.CreateAdd(op1, op2);
 	if (ai->update_flags || i->id == ARM_INS_CMN)
 	{
@@ -835,7 +891,9 @@ void Capstone2LlvmIrTranslatorArm_impl::translateAdd(cs_insn* i, cs_arm* ai, llv
  */
 void Capstone2LlvmIrTranslatorArm_impl::translateAnd(cs_insn* i, cs_arm* ai, llvm::IRBuilder<>& irb)
 {
-	std::tie(op1, op2) = loadOpTernaryOp1Op2(ai, irb, eOpConv::THROW);
+	EXPECT_IS_BINARY_OR_TERNARY(i, ai, irb);
+
+	std::tie(op1, op2) = loadOpBinaryOrTernaryOp1Op2(ai, irb, eOpConv::THROW);
 	if (i->id == ARM_INS_BIC)
 	{
 		op2 = generateValueNegate(irb, op2);
@@ -862,6 +920,8 @@ void Capstone2LlvmIrTranslatorArm_impl::translateAnd(cs_insn* i, cs_arm* ai, llv
  */
 void Capstone2LlvmIrTranslatorArm_impl::translateB(cs_insn* i, cs_arm* ai, llvm::IRBuilder<>& irb)
 {
+	EXPECT_IS_UNARY(i, ai, irb);
+
 	op0 = loadOpUnary(ai, irb);
 	bool isReturn = ai->operands[0].type == ARM_OP_REG
 			&& ai->operands[0].reg == ARM_REG_LR;
@@ -886,6 +946,8 @@ void Capstone2LlvmIrTranslatorArm_impl::translateB(cs_insn* i, cs_arm* ai, llvm:
  */
 void Capstone2LlvmIrTranslatorArm_impl::translateBl(cs_insn* i, cs_arm* ai, llvm::IRBuilder<>& irb)
 {
+	EXPECT_IS_UNARY(i, ai, irb);
+
 	storeRegister(ARM_REG_LR, getNextInsnAddress(i), irb);
 	op0 = loadOpUnary(ai, irb);
 	if (ai->cc == ARM_CC_AL || ai->cc == ARM_CC_INVALID)
@@ -894,7 +956,6 @@ void Capstone2LlvmIrTranslatorArm_impl::translateBl(cs_insn* i, cs_arm* ai, llvm
 	}
 	else
 	{
-		// TODO: Conditional fnc call?
 		auto* cond = generateInsnConditionCode(irb, ai);
 		generateCondBranchFunctionCall(irb, cond, op0);
 	}
@@ -902,10 +963,11 @@ void Capstone2LlvmIrTranslatorArm_impl::translateBl(cs_insn* i, cs_arm* ai, llvm
 
 /**
  * ARM_INS_CBNZ
- * TODO: unit test
  */
 void Capstone2LlvmIrTranslatorArm_impl::translateCbnz(cs_insn* i, cs_arm* ai, llvm::IRBuilder<>& irb)
 {
+	EXPECT_IS_BINARY(i, ai, irb);
+
 	std::tie(op0, op1) = loadOpBinary(ai, irb, eOpConv::NOTHING);
 	auto* cond = irb.CreateICmpNE(op0, llvm::ConstantInt::get(op0->getType(), 0));
 	if (ai->cc != ARM_CC_AL && ai->cc != ARM_CC_INVALID)
@@ -917,10 +979,11 @@ void Capstone2LlvmIrTranslatorArm_impl::translateCbnz(cs_insn* i, cs_arm* ai, ll
 
 /**
  * ARM_INS_CBZ
- * TODO: unit test
  */
 void Capstone2LlvmIrTranslatorArm_impl::translateCbz(cs_insn* i, cs_arm* ai, llvm::IRBuilder<>& irb)
 {
+	EXPECT_IS_BINARY(i, ai, irb);
+
 	std::tie(op0, op1) = loadOpBinary(ai, irb, eOpConv::NOTHING);
 	auto* cond = irb.CreateICmpEQ(op0, llvm::ConstantInt::get(op0->getType(), 0));
 	if (ai->cc != ARM_CC_AL && ai->cc != ARM_CC_INVALID)
@@ -935,6 +998,8 @@ void Capstone2LlvmIrTranslatorArm_impl::translateCbz(cs_insn* i, cs_arm* ai, llv
  */
 void Capstone2LlvmIrTranslatorArm_impl::translateClz(cs_insn* i, cs_arm* ai, llvm::IRBuilder<>& irb)
 {
+	EXPECT_IS_BINARY(i, ai, irb);
+
 	op1 = loadOpBinaryOp1(ai, irb);
 	auto* f = llvm::Intrinsic::getDeclaration(
 			_module,
@@ -949,7 +1014,9 @@ void Capstone2LlvmIrTranslatorArm_impl::translateClz(cs_insn* i, cs_arm* ai, llv
  */
 void Capstone2LlvmIrTranslatorArm_impl::translateEor(cs_insn* i, cs_arm* ai, llvm::IRBuilder<>& irb)
 {
-	std::tie(op1, op2) = loadOpTernaryOp1Op2(ai, irb, eOpConv::THROW);
+	EXPECT_IS_BINARY_OR_TERNARY(i, ai, irb);
+
+	std::tie(op1, op2) = loadOpBinaryOrTernaryOp1Op2(ai, irb, eOpConv::THROW);
 	auto* val = irb.CreateXor(op1, op2);
 	// If S is specified, the EOR instruction:
 	// - updates the N and Z flags according to the result
@@ -972,6 +1039,8 @@ void Capstone2LlvmIrTranslatorArm_impl::translateEor(cs_insn* i, cs_arm* ai, llv
  */
 void Capstone2LlvmIrTranslatorArm_impl::translateMla(cs_insn* i, cs_arm* ai, llvm::IRBuilder<>& irb)
 {
+	EXPECT_IS_QUATERNARY(i, ai, irb);
+
 	std::tie(op1, op2, op3) = loadOpQuaternaryOp1Op2Op3(ai, irb);
 	auto* val = irb.CreateMul(op1, op2);
 	val = irb.CreateAdd(op3, val);
@@ -995,6 +1064,8 @@ void Capstone2LlvmIrTranslatorArm_impl::translateMla(cs_insn* i, cs_arm* ai, llv
  */
 void Capstone2LlvmIrTranslatorArm_impl::translateMls(cs_insn* i, cs_arm* ai, llvm::IRBuilder<>& irb)
 {
+	EXPECT_IS_QUATERNARY(i, ai, irb);
+
 	std::tie(op1, op2, op3) = loadOpQuaternaryOp1Op2Op3(ai, irb);
 	auto* val = irb.CreateMul(op1, op2);
 	val = irb.CreateSub(op3, val);
@@ -1006,12 +1077,7 @@ void Capstone2LlvmIrTranslatorArm_impl::translateMls(cs_insn* i, cs_arm* ai, llv
  */
 void Capstone2LlvmIrTranslatorArm_impl::translateMov(cs_insn* i, cs_arm* ai, llvm::IRBuilder<>& irb)
 {
-	// TODO: e.g. "2c 12 f0 13" = "mvnsne r1, #44, #4"
-	//
-	if (ai->op_count != 2)
-	{
-		return;
-	}
+	EXPECT_IS_BINARY(i, ai, irb);
 
 	op1 = loadOpBinaryOp1(ai, irb);
 	if (i->id == ARM_INS_MVN)
@@ -1044,11 +1110,11 @@ void Capstone2LlvmIrTranslatorArm_impl::translateMov(cs_insn* i, cs_arm* ai, llv
  *   e.g. lsl r0, r1, r2 = 3 operands, r1 have ARM_SFT_INVALID, r2 separate op.
  *   It should be 2 operands, r1 with ARM_SFT_LSL_REG, r2 in r1 op as shift val.
  * - On THUMB, not even imm is ok, it creates 3th operand as well.
- *
- * TODO: When these problems are fixed, this should be merged with simple MOV.
  */
 void Capstone2LlvmIrTranslatorArm_impl::translateShifts(cs_insn* i, cs_arm* ai, llvm::IRBuilder<>& irb)
 {
+	EXPECT_IS_BINARY_OR_TERNARY(i, ai, irb);
+
 	// We expect 2nd operand to have shift/rotate set -> loadOp() will take
 	// care of shift/rotate computation.
 	//
@@ -1066,7 +1132,7 @@ void Capstone2LlvmIrTranslatorArm_impl::translateShifts(cs_insn* i, cs_arm* ai, 
 	//
 	else if (ai->op_count == 2 || ai->op_count == 3)
 	{
-		std::tie(op1, op2) = loadOpTernaryOp1Op2(ai, irb, eOpConv::THROW);
+		std::tie(op1, op2) = loadOpBinaryOrTernaryOp1Op2(ai, irb, eOpConv::THROW);
 
 		switch (i->id)
 		{
@@ -1077,15 +1143,13 @@ void Capstone2LlvmIrTranslatorArm_impl::translateShifts(cs_insn* i, cs_arm* ai, 
 			case ARM_INS_RRX: op1 = generateShiftRrx(irb, op1, op2); break;
 			default:
 			{
-				assert(false && "unhandled insn ID");
-				return;
+				throw GenericError("unhandled insn ID");
 			}
 		}
 	}
 	else
 	{
-		assert(false && "unhandled shift/rotate insn format");
-		return;
+		throw GenericError("unhandled shift/rotate insn format");
 	}
 
 	// If S is specified, the MOV instruction:
@@ -1106,6 +1170,8 @@ void Capstone2LlvmIrTranslatorArm_impl::translateShifts(cs_insn* i, cs_arm* ai, 
  */
 void Capstone2LlvmIrTranslatorArm_impl::translateMovt(cs_insn* i, cs_arm* ai, llvm::IRBuilder<>& irb)
 {
+	EXPECT_IS_BINARY(i, ai, irb);
+
 	// TODO: It looks like on THUMB, op0 is not ANDed -- investigate.
 	// Add/Fix THUMB unit tests.
 	if (_basicMode == CS_MODE_THUMB)
@@ -1130,6 +1196,8 @@ void Capstone2LlvmIrTranslatorArm_impl::translateMovt(cs_insn* i, cs_arm* ai, ll
  */
 void Capstone2LlvmIrTranslatorArm_impl::translateMovw(cs_insn* i, cs_arm* ai, llvm::IRBuilder<>& irb)
 {
+	EXPECT_IS_BINARY(i, ai, irb);
+
 	// TODO: It looks like on THUMB, result is overwritten -- investigate.
 	// Add/Fix THUMB unit tests.
 	if (_basicMode == CS_MODE_THUMB)
@@ -1152,7 +1220,9 @@ void Capstone2LlvmIrTranslatorArm_impl::translateMovw(cs_insn* i, cs_arm* ai, ll
  */
 void Capstone2LlvmIrTranslatorArm_impl::translateMul(cs_insn* i, cs_arm* ai, llvm::IRBuilder<>& irb)
 {
-	std::tie(op1, op2) = loadOpTernaryOp1Op2(ai, irb, eOpConv::THROW);
+	EXPECT_IS_BINARY_OR_TERNARY(i, ai, irb);
+
+	std::tie(op1, op2) = loadOpBinaryOrTernaryOp1Op2(ai, irb, eOpConv::THROW);
 	auto* val = irb.CreateMul(op1, op2);
 	// If S is specified, the MUL instruction:
 	// - updates the N and Z flags according to the result
@@ -1168,7 +1238,7 @@ void Capstone2LlvmIrTranslatorArm_impl::translateMul(cs_insn* i, cs_arm* ai, llv
 }
 
 /**
- * ARM_INS_NOP, ARM_INS_SVC (TODO)
+ * ARM_INS_NOP
  */
 void Capstone2LlvmIrTranslatorArm_impl::translateNop(cs_insn* i, cs_arm* ai, llvm::IRBuilder<>& irb)
 {
@@ -1180,7 +1250,9 @@ void Capstone2LlvmIrTranslatorArm_impl::translateNop(cs_insn* i, cs_arm* ai, llv
  */
 void Capstone2LlvmIrTranslatorArm_impl::translateOrr(cs_insn* i, cs_arm* ai, llvm::IRBuilder<>& irb)
 {
-	std::tie(op1, op2) = loadOpTernaryOp1Op2(ai, irb, eOpConv::THROW);
+	EXPECT_IS_BINARY_OR_TERNARY(i, ai, irb);
+
+	std::tie(op1, op2) = loadOpBinaryOrTernaryOp1Op2(ai, irb, eOpConv::THROW);
 	auto* val = irb.CreateOr(op1, op2);
 	// If S is specified, the ORR instruction:
 	// - updates the N and Z flags according to the result
@@ -1220,7 +1292,7 @@ void Capstone2LlvmIrTranslatorArm_impl::translateOrr(cs_insn* i, cs_arm* ai, llv
  */
 void Capstone2LlvmIrTranslatorArm_impl::translateLdmStm(cs_insn* i, cs_arm* ai, llvm::IRBuilder<>& irb)
 {
-	assert(ai->op_count > 0);
+	EXPECT_IS_EXPR(i, ai, irb, (ai->op_count > 0));
 
 	auto sz = getArchByteSize();
 	auto* ty = getDefaultType();
@@ -1340,6 +1412,8 @@ void Capstone2LlvmIrTranslatorArm_impl::translateLdmStm(cs_insn* i, cs_arm* ai, 
  */
 void Capstone2LlvmIrTranslatorArm_impl::translateRev(cs_insn* i, cs_arm* ai, llvm::IRBuilder<>& irb)
 {
+	EXPECT_IS_BINARY(i, ai, irb);
+
 	op1 = loadOpBinaryOp1(ai, irb);
 	auto* f = llvm::Intrinsic::getDeclaration(
 			_module,
@@ -1355,13 +1429,15 @@ void Capstone2LlvmIrTranslatorArm_impl::translateRev(cs_insn* i, cs_arm* ai, llv
  */
 void Capstone2LlvmIrTranslatorArm_impl::translateSbc(cs_insn* i, cs_arm* ai, llvm::IRBuilder<>& irb)
 {
+	EXPECT_IS_BINARY_OR_TERNARY(i, ai, irb);
+
 	if (i->id == ARM_INS_SBC)
 	{
-		std::tie(op1, op2) = loadOpTernaryOp1Op2(ai, irb, eOpConv::THROW);
+		std::tie(op1, op2) = loadOpBinaryOrTernaryOp1Op2(ai, irb, eOpConv::THROW);
 	}
 	else if (i->id == ARM_INS_RSC)
 	{
-		std::tie(op2, op1) = loadOpTernaryOp1Op2(ai, irb, eOpConv::THROW);
+		std::tie(op2, op1) = loadOpBinaryOrTernaryOp1Op2(ai, irb, eOpConv::THROW);
 	}
 	auto* cf = loadRegister(ARM_REG_CPSR_C, irb);
 	// If the carry flag is clear, the result is reduced by one.
@@ -1371,10 +1447,7 @@ void Capstone2LlvmIrTranslatorArm_impl::translateSbc(cs_insn* i, cs_arm* ai, llv
 	if (ai->update_flags)
 	{
 		llvm::Value* zero = llvm::ConstantInt::get(val->getType(), 0);
-		// TODO: There is xor -1 (negate) in the original semantics. Is it ok?
-//		storeRegister(ARM_REG_CPSR_C, genBorrowSubC(val, op1, op2, irb, cf), irb);
 		storeRegister(ARM_REG_CPSR_C, generateValueNegate(irb, generateBorrowSubC(val, op1, op2, irb, cf)), irb);
-
 		storeRegister(ARM_REG_CPSR_V, generateOverflowSubC(val, op1, op2, irb, cf), irb);
 		storeRegister(ARM_REG_CPSR_N, irb.CreateICmpSLT(val, zero), irb);
 		storeRegister(ARM_REG_CPSR_Z, irb.CreateICmpEQ(val, zero), irb);
@@ -1405,6 +1478,8 @@ void Capstone2LlvmIrTranslatorArm_impl::translateSbc(cs_insn* i, cs_arm* ai, llv
  */
 void Capstone2LlvmIrTranslatorArm_impl::translateLdr(cs_insn* i, cs_arm* ai, llvm::IRBuilder<>& irb)
 {
+	EXPECT_IS_BINARY_OR_TERNARY(i, ai, irb);
+
 	llvm::Type* ty = nullptr;
 	bool sext = false;
 	switch (i->id)
@@ -1449,8 +1524,7 @@ void Capstone2LlvmIrTranslatorArm_impl::translateLdr(cs_insn* i, cs_arm* ai, llv
 		}
 		default:
 		{
-			assert(false && "unhandled LDR id");
-			return;
+			throw GenericError("unhandled LDR id");
 		}
 	}
 
@@ -1481,8 +1555,7 @@ void Capstone2LlvmIrTranslatorArm_impl::translateLdr(cs_insn* i, cs_arm* ai, llv
 	}
 	else
 	{
-		assert(false && "unhandled LDR format");
-		return;
+		throw GenericError("unhandled LDR format");
 	}
 
 	op1 = sext
@@ -1518,6 +1591,8 @@ void Capstone2LlvmIrTranslatorArm_impl::translateLdr(cs_insn* i, cs_arm* ai, llv
  */
 void Capstone2LlvmIrTranslatorArm_impl::translateLdrd(cs_insn* i, cs_arm* ai, llvm::IRBuilder<>& irb)
 {
+	EXPECT_IS_SET(i, ai, irb, (std::set<unsigned>{3, 4}));
+
 	uint32_t baseR = ARM_REG_INVALID;
 	llvm::Value* idx = nullptr;
 	bool subtract = false;
@@ -1545,8 +1620,7 @@ void Capstone2LlvmIrTranslatorArm_impl::translateLdrd(cs_insn* i, cs_arm* ai, ll
 	}
 	else
 	{
-		assert(false && "unhandled LDRD format");
-		return;
+		throw GenericError("unhandled LDRD format");
 	}
 
 	auto* lo = irb.CreateTrunc(op1, irb.getInt32Ty());
@@ -1617,11 +1691,7 @@ void Capstone2LlvmIrTranslatorArm_impl::translateLdrd(cs_insn* i, cs_arm* ai, ll
  */
 void Capstone2LlvmIrTranslatorArm_impl::translateStr(cs_insn* i, cs_arm* ai, llvm::IRBuilder<>& irb)
 {
-	if (!(ai->op_count > 1))
-	{
-		assert(false && "unhandled STR format");
-		return;
-	}
+	EXPECT_IS_EXPR(i, ai, irb, (ai->op_count > 1));
 
 	switch (i->id)
 	{
@@ -1660,15 +1730,8 @@ void Capstone2LlvmIrTranslatorArm_impl::translateStr(cs_insn* i, cs_arm* ai, llv
 		{
 			if (!(ai->op_count > 2))
 			{
-				assert(false && "unhandled STRD format");
-				return;
+				throw GenericError("Unhandled STRD format.");
 			}
-//			op0 = loadOp(ai->operands[0], irb);
-//			op0 = irb.CreateZExtOrTrunc(op0, irb.getInt64Ty());
-//			op0 = irb.CreateShl(op0, 32);
-//			op1 = loadOp(ai->operands[1], irb);
-//			op1 = irb.CreateZExtOrTrunc(op1, irb.getInt64Ty());
-//			op0 = irb.CreateOr(op0, op1);
 
 			op0 = loadOp(ai->operands[0], irb);
 			op1 = loadOp(ai->operands[1], irb);
@@ -1676,8 +1739,7 @@ void Capstone2LlvmIrTranslatorArm_impl::translateStr(cs_insn* i, cs_arm* ai, llv
 		}
 		default:
 		{
-			assert(false && "unhandled STR id");
-			return;
+			throw GenericError("Unhandled STR id.");
 		}
 	}
 
@@ -1712,8 +1774,7 @@ void Capstone2LlvmIrTranslatorArm_impl::translateStr(cs_insn* i, cs_arm* ai, llv
 		}
 		else
 		{
-			assert(false && "unhandled STRD format");
-			return;
+			throw GenericError("unhandled STRD format");
 		}
 	}
 	else if (ai->op_count == 2
@@ -1740,8 +1801,7 @@ void Capstone2LlvmIrTranslatorArm_impl::translateStr(cs_insn* i, cs_arm* ai, llv
 	}
 	else
 	{
-		assert(false && "unhandled STR format");
-		return;
+		throw GenericError("unhandled STRD format");
 	}
 
 	if (ai->writeback && idx && baseR != ARM_REG_INVALID)
@@ -1759,13 +1819,15 @@ void Capstone2LlvmIrTranslatorArm_impl::translateStr(cs_insn* i, cs_arm* ai, llv
  */
 void Capstone2LlvmIrTranslatorArm_impl::translateSub(cs_insn* i, cs_arm* ai, llvm::IRBuilder<>& irb)
 {
+	EXPECT_IS_BINARY_OR_TERNARY(i, ai, irb);
+
 	if (i->id == ARM_INS_RSB)
 	{
-		std::tie(op2, op1) = loadOpTernaryOp1Op2(ai, irb, eOpConv::THROW);
+		std::tie(op2, op1) = loadOpBinaryOrTernaryOp1Op2(ai, irb, eOpConv::THROW);
 	}
 	else
 	{
-		std::tie(op1, op2) = loadOpTernaryOp1Op2(ai, irb, eOpConv::THROW);
+		std::tie(op1, op2) = loadOpBinaryOrTernaryOp1Op2(ai, irb, eOpConv::THROW);
 	}
 	auto* sub = irb.CreateSub(op1, op2);
 	if (ai->update_flags || i->id == ARM_INS_CMP)
@@ -1781,12 +1843,7 @@ void Capstone2LlvmIrTranslatorArm_impl::translateSub(cs_insn* i, cs_arm* ai, llv
 
 		storeRegister(ARM_REG_CPSR_V, generateOverflowSub(sub, op1, op2, irb), irb);
 		storeRegister(ARM_REG_CPSR_N, irb.CreateICmpSLT(sub, zero), irb);
-
-		// TODO: These are eq, but the second one is much nicer.
-		// Moreover, some bin2llvmirl patterns rely on it. Check all other zero
-		// flag sets if we can do it same as here.
-//		storeRegister(ARM_REG_CPSR_Z, irb.CreateICmpEQ(sub, zero), irb); // ugly
-		storeRegister(ARM_REG_CPSR_Z, irb.CreateICmpEQ(op1, op2), irb); // nice
+		storeRegister(ARM_REG_CPSR_Z, irb.CreateICmpEQ(op1, op2), irb);
 	}
 	if (i->id != ARM_INS_CMP)
 	{
@@ -1799,11 +1856,7 @@ void Capstone2LlvmIrTranslatorArm_impl::translateSub(cs_insn* i, cs_arm* ai, llv
  */
 void Capstone2LlvmIrTranslatorArm_impl::translateUmlal(cs_insn* i, cs_arm* ai, llvm::IRBuilder<>& irb)
 {
-	if (ai->op_count != 4)
-	{
-		assert(false && "unhandled UNULL format");
-		return;
-	}
+	EXPECT_IS_QUATERNARY(i, ai, irb);
 
 	op0 = loadOp(ai->operands[0], irb);
 	op0 = irb.CreateZExtOrTrunc(op0, irb.getInt64Ty());
@@ -1846,11 +1899,7 @@ void Capstone2LlvmIrTranslatorArm_impl::translateUmlal(cs_insn* i, cs_arm* ai, l
  */
 void Capstone2LlvmIrTranslatorArm_impl::translateUmull(cs_insn* i, cs_arm* ai, llvm::IRBuilder<>& irb)
 {
-	if (ai->op_count != 4)
-	{
-		assert(false && "unhandled UNULL format");
-		return;
-	}
+	EXPECT_IS_QUATERNARY(i, ai, irb);
 
 	op2 = loadOp(ai->operands[2], irb);
 	op2 = i->id == ARM_INS_UMULL
@@ -1880,86 +1929,13 @@ void Capstone2LlvmIrTranslatorArm_impl::translateUmull(cs_insn* i, cs_arm* ai, l
 }
 
 /**
- * ARM_INS_REV16, ARM_INS_REVSH, ARM_INS_RBIT
- *
- * Without unit tests.
- * ARM_INS_SXTB, ARM_INS_SXTB16, ARM_INS_SXTH, ARM_INS_UXTB
- *
- * None of these change any condition flags.
- *
- * TODO: Move to parent abstract class?
- */
-void Capstone2LlvmIrTranslatorArm_impl::translateBinaryPseudoAsm(cs_insn* i, cs_arm* ai, llvm::IRBuilder<>& irb)
-{
-	op1 = loadOpBinaryOp1(ai, irb);
-
-	std::string tyStr;
-	llvm::raw_string_ostream rso(tyStr);
-	op1->getType()->print(rso);
-
-	llvm::Function* fnc = getOrCreateAsmFunction(
-			i->id,
-			"__asm_" + std::string(i->mnemonic) + "." + rso.str(),
-			op1->getType(),
-			{op1->getType()});
-
-	auto* c = irb.CreateCall(fnc, {op1});
-	storeOp(ai->operands[0], c, irb);
-}
-
-/**
- * op0 = __pseudo_asm(op1, op2)
- *
- * ARM_INS_UQADD8, ARM_INS_UQADD16, ARM_INS_UQSUB8, ARM_INS_UQSUB16,
- * ARM_INS_UQASX, ARM_INS_UQSAX, ARM_INS_SEL, ARM_INS_USAD8, ARM_INS_USAT,
- * ARM_INS_USAT16, ARM_INS_UHADD8,
- *
- * Without unit tests.
- * ARM_INS_UHADD16, ARM_INS_UHASX, ARM_INS_UHSAX, ARM_INS_UHSUB8,
- * ARM_INS_UHSUB16, ARM_INS_SSUB8, ARM_INS_SSUB16, ARM_INS_SSAX,
- * ARM_INS_SASX, ARM_INS_SADD8, ARM_INS_SADD16, ARM_INS_UXTAB16,
- * ARM_INS_SXTAB16, ARM_INS_SSAT, ARM_INS_SSAT16,
- * ARM_INS_SXTAB, ARM_INS_SXTAH, ARM_INS_UXTAB,
- * ARM_INS_SMUAD, ARM_INS_SMUADX,
- *
- * These are not very comple, maybe they could be properly translated:
- * ARM_INS_SMMUL, ARM_INS_SMMULR, ARM_INS_SMULWB, ARM_INS_SMULWT,
- * ARM_INS_SMULBB, ARM_INS_SMULBT, ARM_INS_SMULTB, ARM_INS_SMULTT,
- * ARM_INS_PKHBT, ARM_INS_PKHTB
- *
- * None of these change any condition flags.
- *
- * TODO: Move to parent abstract class?
- */
-void Capstone2LlvmIrTranslatorArm_impl::translateTernaryPseudoAsm(cs_insn* i, cs_arm* ai, llvm::IRBuilder<>& irb)
-{
-	std::tie(op1, op2) = loadOpTernaryOp1Op2(ai, irb, eOpConv::THROW);
-
-	std::string tyStr1;
-	llvm::raw_string_ostream rso1(tyStr1);
-	op1->getType()->print(rso1);
-
-	std::string tyStr2;
-	llvm::raw_string_ostream rso2(tyStr2);
-	op2->getType()->print(rso2);
-
-	llvm::Function* fnc = getOrCreateAsmFunction(
-			i->id,
-			"__asm_" + std::string(i->mnemonic) + "." + rso1.str() + "." + rso2.str(),
-			op1->getType(),
-			{op1->getType(), op2->getType()});
-
-	auto* c = irb.CreateCall(fnc, {op1, op2});
-	storeOp(ai->operands[0], c, irb);
-}
-
-/**
  * ARM_INS_UXTAH
- * TOOD: Unit tests.
  */
 void Capstone2LlvmIrTranslatorArm_impl::translateUxtah(cs_insn* i, cs_arm* ai, llvm::IRBuilder<>& irb)
 {
-	std::tie(op1, op2) = loadOpTernaryOp1Op2(ai, irb, eOpConv::THROW);
+	EXPECT_IS_BINARY_OR_TERNARY(i, ai, irb);
+
+	std::tie(op1, op2) = loadOpBinaryOrTernaryOp1Op2(ai, irb, eOpConv::THROW);
 	op2 = irb.CreateZExtOrTrunc(op2, irb.getInt16Ty());
 	op2 = irb.CreateZExtOrTrunc(op2, irb.getInt32Ty());
 	op0 = irb.CreateAdd(op1, op2);
@@ -1968,10 +1944,11 @@ void Capstone2LlvmIrTranslatorArm_impl::translateUxtah(cs_insn* i, cs_arm* ai, l
 
 /**
  * ARM_INS_UXTB
- * TODO: unit tests
  */
 void Capstone2LlvmIrTranslatorArm_impl::translateUxtb(cs_insn* i, cs_arm* ai, llvm::IRBuilder<>& irb)
 {
+	EXPECT_IS_BINARY(i, ai, irb);
+
 	op1 = loadOpBinaryOp1(ai, irb);
 	op1 = irb.CreateAnd(op1, 0x000000ff);
 	storeOp(ai->operands[0], op1, irb);
@@ -1979,13 +1956,11 @@ void Capstone2LlvmIrTranslatorArm_impl::translateUxtb(cs_insn* i, cs_arm* ai, ll
 
 /**
  * ARM_INS_UXTB16
- * TODO: This was originally implemented as pseudo ASM call, but it turns out
- * it is much simpler to implement than it looks. Maybe some other instructions
- * are the same.
- * TOOD: Unit tests.
  */
 void Capstone2LlvmIrTranslatorArm_impl::translateUxtb16(cs_insn* i, cs_arm* ai, llvm::IRBuilder<>& irb)
 {
+	EXPECT_IS_BINARY(i, ai, irb);
+
 	op1 = loadOpBinaryOp1(ai, irb);
 	op1 = irb.CreateAnd(op1, 0x00ff00ff);
 	storeOp(ai->operands[0], op1, irb);
@@ -1993,121 +1968,14 @@ void Capstone2LlvmIrTranslatorArm_impl::translateUxtb16(cs_insn* i, cs_arm* ai, 
 
 /**
  * ARM_INS_UXTH
- * TODO: unit tests
  */
 void Capstone2LlvmIrTranslatorArm_impl::translateUxth(cs_insn* i, cs_arm* ai, llvm::IRBuilder<>& irb)
 {
+	EXPECT_IS_BINARY(i, ai, irb);
+
 	op1 = loadOpBinaryOp1(ai, irb);
 	op1 = irb.CreateAnd(op1, 0x0000ffff);
 	storeOp(ai->operands[0], op1, irb);
-}
-
-/**
- * op0 = __pseudo_asm(op0, op1, op2)
- *
- * ARM_INS_BFC
- */
-void Capstone2LlvmIrTranslatorArm_impl::translateTernaryPseudoAsm3Args(cs_insn* i, cs_arm* ai, llvm::IRBuilder<>& irb)
-{
-	std::tie(op0, op1, op2) = loadOpTernary(ai, irb);
-
-	llvm::Function* fnc = getOrCreateAsmFunction(
-			i->id,
-			"__asm_" + std::string(i->mnemonic),
-			op0->getType(),
-			{op0->getType(), op1->getType(), op2->getType()});
-
-	auto* c = irb.CreateCall(fnc, {op0, op1, op2});
-	storeOp(ai->operands[0], c, irb);
-}
-
-/**
- * op0 = __pseudo_asm(op1, op2, op3)
- *
- * ARM_INS_USADA8
- *
- * Without unit tests.
- * ARM_INS_SMLABB, ARM_INS_SMLABT, ARM_INS_SMLATB, ARM_INS_SMLATT,
- * ARM_INS_SBFX, ARM_INS_UBFX, ARM_INS_SMLAWB, ARM_INS_SMLAWT,
- * ARM_INS_SMLAD, ARM_INS_SMLADX, ARM_INS_SMLSD, ARM_INS_SMLSDX,
- * ARM_INS_SMMLA, ARM_INS_SMMLAR, ARM_INS_SMMLS, ARM_INS_SMMLSR
- *
- * TODO: We do not use argument types in function name here.
- * It is probbaly not necessary on ARM at all -- all operands should have default
- * type. But if we move this and other similar functions to abstract parent class,
- * then we probably will need something like it, because on other archs (MIPS),
- * arguments can have different types for the same instruction.
- *
- * TODO: Move to parent abstract class?
- */
-void Capstone2LlvmIrTranslatorArm_impl::translateQuaternaryPseudoAsm(cs_insn* i, cs_arm* ai, llvm::IRBuilder<>& irb)
-{
-	assert(ai->op_count == 4);
-
-	op1 = loadOp(ai->operands[1], irb);
-	op2 = loadOp(ai->operands[2], irb);
-	op3 = loadOp(ai->operands[3], irb);
-
-	llvm::Function* fnc = getOrCreateAsmFunction(
-			i->id,
-			"__asm_" + std::string(i->mnemonic),
-			op1->getType(),
-			{op1->getType(), op2->getType(), op3->getType()});
-
-	auto* c = irb.CreateCall(fnc, {op1, op2, op3});
-	storeOp(ai->operands[0], c, irb);
-}
-
-/**
- * op0 = __pseudo_asm(op0, op1, op2, op3)
- *
- * ARM_INS_BFI
- */
-void Capstone2LlvmIrTranslatorArm_impl::translateQuaternaryPseudoAsm4Args(cs_insn* i, cs_arm* ai, llvm::IRBuilder<>& irb)
-{
-	assert(ai->op_count == 4);
-
-	op0 = loadOp(ai->operands[0], irb);
-	op1 = loadOp(ai->operands[1], irb);
-	op2 = loadOp(ai->operands[2], irb);
-	op3 = loadOp(ai->operands[3], irb);
-
-	llvm::Function* fnc = getOrCreateAsmFunction(
-			i->id,
-			"__asm_" + std::string(i->mnemonic),
-			op0->getType(),
-			{op0->getType(), op1->getType(), op2->getType(), op3->getType()});
-
-	auto* c = irb.CreateCall(fnc, {op0, op1, op2, op3});
-	storeOp(ai->operands[0], c, irb);
-}
-
-/**
- * {op0, op1} = __pseudo_asm(op0, op1, op2, op3)
- *
- * ARM_INS_UMAAL, ARM_INS_SMLALBB, ARM_INS_SMLALBT, ARM_INS_SMLALTT,
- * ARM_INS_SMLALTB, ARM_INS_SMLALD, ARM_INS_SMLALDX, ARM_INS_SMLSLD,
- * ARM_INS_SMLSLDX
- */
-void Capstone2LlvmIrTranslatorArm_impl::translateQuaternaryPseudoAsm4Args2Dsts(cs_insn* i, cs_arm* ai, llvm::IRBuilder<>& irb)
-{
-	assert(ai->op_count == 4);
-
-	op0 = loadOp(ai->operands[0], irb);
-	op1 = loadOp(ai->operands[1], irb);
-	op2 = loadOp(ai->operands[2], irb);
-	op3 = loadOp(ai->operands[3], irb);
-
-	llvm::Function* fnc = getOrCreateAsmFunction(
-			i->id,
-			"__asm_" + std::string(i->mnemonic),
-			llvm::StructType::create({op0->getType(), op1->getType()}),
-			{op0->getType(), op1->getType(), op2->getType(), op3->getType()});
-
-	auto* c = irb.CreateCall(fnc, {op0, op1, op2, op3});
-
-	storeOp(ai->operands[0], irb.CreateExtractValue(c, {0}), irb);
-	storeOp(ai->operands[1], irb.CreateExtractValue(c, {1}), irb);
 }
 
 } // namespace capstone2llvmir

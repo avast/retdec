@@ -39,6 +39,18 @@ class Capstone2LlvmIrTranslator_impl : virtual public Capstone2LlvmIrTranslator
 		virtual ~Capstone2LlvmIrTranslator_impl();
 //
 //==============================================================================
+// Translator configuration methods.
+//==============================================================================
+//
+		virtual void setIgnoreUnexpectedOperands(bool f) override;
+		virtual void setIgnoreUnhandledInstructions(bool f) override;
+		virtual void setGeneratePseudoAsmFunctions(bool f) override;
+
+		virtual bool isIgnoreUnexpectedOperands() const override;
+		virtual bool isIgnoreUnhandledInstructions() const override;
+		virtual bool isGeneratePseudoAsmFunctions() const override;
+//
+//==============================================================================
 // Mode query & modification methods - from Capstone2LlvmIrTranslator.
 //==============================================================================
 //
@@ -339,7 +351,7 @@ class Capstone2LlvmIrTranslator_impl : virtual public Capstone2LlvmIrTranslator
 		std::tuple<llvm::Value*, llvm::Value*, llvm::Value*> loadOpTernary(
 				CInsn* ci,
 				llvm::IRBuilder<>& irb);
-		std::pair<llvm::Value*, llvm::Value*> loadOpTernaryOp1Op2(
+		std::pair<llvm::Value*, llvm::Value*> loadOpBinaryOrTernaryOp1Op2(
 				CInsn* ai,
 				llvm::IRBuilder<>& irb,
 				eOpConv ct = eOpConv::NOTHING);
@@ -414,7 +426,7 @@ class Capstone2LlvmIrTranslator_impl : virtual public Capstone2LlvmIrTranslator
 				llvm::Value* cf = nullptr);
 //
 //==============================================================================
-// Non-virtual helper methods.
+// Helper methods.
 //==============================================================================
 //
 	protected:
@@ -427,24 +439,40 @@ class Capstone2LlvmIrTranslator_impl : virtual public Capstone2LlvmIrTranslator
 				llvm::Instruction* i) const;
 
 	protected:
-		llvm::Function* getAsmFunction(const std::string& name) const;
-		llvm::Function* getOrCreateAsmFunction(
-				std::size_t insnId,
-				const std::string& name,
-				llvm::FunctionType* type);
-		llvm::Function* getOrCreateAsmFunction(
-				std::size_t insnId,
-				const std::string& name,
-				llvm::Type* retType);
-		llvm::Function* getOrCreateAsmFunction(
-				std::size_t insnId,
-				const std::string& name,
-				llvm::ArrayRef<llvm::Type*> params);
-		llvm::Function* getOrCreateAsmFunction(
-				std::size_t insnId,
-				const std::string& name,
+		std::string getPseudoAsmFunctionName(cs_insn* insn);
+		llvm::Function* getPseudoAsmFunction(
+				cs_insn* insn,
+				llvm::FunctionType* type,
+				const std::string& name = "");
+		llvm::Function* getPseudoAsmFunction(
+				cs_insn* insn,
 				llvm::Type* retType,
-				llvm::ArrayRef<llvm::Type*> params);
+				llvm::ArrayRef<llvm::Type*> params,
+				const std::string& name = "");
+
+		// Unary.
+		void translatePseudoAsmOp0Fnc(cs_insn* i, CInsn* ci, llvm::IRBuilder<>& irb);
+		void translatePseudoAsmFncOp0(cs_insn* i, CInsn* ci, llvm::IRBuilder<>& irb);
+		void translatePseudoAsmOp0FncOp0(cs_insn* i, CInsn* ci, llvm::IRBuilder<>& irb);
+		// Binary.
+		void translatePseudoAsmFncOp0Op1(cs_insn* i, CInsn* ci, llvm::IRBuilder<>& irb);
+		void translatePseudoAsmOp0FncOp1(cs_insn* i, CInsn* ci, llvm::IRBuilder<>& irb);
+		void translatePseudoAsmOp0FncOp0Op1(cs_insn* i, CInsn* ci, llvm::IRBuilder<>& irb);
+		// Ternary.
+		void translatePseudoAsmFncOp0Op1Op2(cs_insn* i, CInsn* ci, llvm::IRBuilder<>& irb);
+		void translatePseudoAsmOp0FncOp1Op2(cs_insn* i, CInsn* ci, llvm::IRBuilder<>& irb);
+		void translatePseudoAsmOp0FncOp0Op1Op2(cs_insn* i, CInsn* ci, llvm::IRBuilder<>& irb);
+		// Quaternary.
+		void translatePseudoAsmFncOp0Op1Op2Op3(cs_insn* i, CInsn* ci, llvm::IRBuilder<>& irb);
+		void translatePseudoAsmOp0FncOp1Op2Op3(cs_insn* i, CInsn* ci, llvm::IRBuilder<>& irb);
+		void translatePseudoAsmOp0FncOp0Op1Op2Op3(cs_insn* i, CInsn* ci, llvm::IRBuilder<>& irb);
+		void translatePseudoAsmOp0Op1FncOp0Op1Op2Op3(cs_insn* i, CInsn* ci, llvm::IRBuilder<>& irb);
+		// Generic.
+		virtual void translatePseudoAsmGeneric(cs_insn* i, CInsn* ci, llvm::IRBuilder<>& irb);
+
+		void throwUnexpectedOperands(cs_insn* i, const std::string comment = "");
+		void throwUnhandledInstructions(cs_insn* i, const std::string comment = "");
+
 //
 //==============================================================================
 // Common implementation data.
@@ -466,7 +494,8 @@ class Capstone2LlvmIrTranslator_impl : virtual public Capstone2LlvmIrTranslator
 		llvm::GlobalValue::LinkageTypes _regLt =
 				llvm::GlobalValue::LinkageTypes::InternalLinkage;
 
-		std::map<std::string, llvm::Function*> _asmFunctions;
+		std::map<std::pair<std::size_t, llvm::FunctionType*>, llvm::Function*>
+				_asmFunctions;
 
 		/// Register number to register name map. If register number is not
 		/// mapped here, Capstone's @c cs_reg_name() function is used to get
@@ -523,7 +552,129 @@ class Capstone2LlvmIrTranslator_impl : virtual public Capstone2LlvmIrTranslator
 		/// Set of Capstone instruction IDs translation of which may produce
 		/// any kind of control flow changing pseudo call.
 		std::set<unsigned int> _controlFlowInsnIds;
+
+		bool _ignoreUnexpectedOperands = true;
+		bool _ignoreUnhandledInstructions = true;
+		bool _generatePseudoAsmFunctions = true;
 };
+
+//
+// Arity checking utility macros.
+//
+// Yeah, macros are ugly, but we want them to potentially cause return in
+// function that uses them so that there does not need to be if condition or
+// other such construction.
+//
+
+#define EXPECT_IS_NULLARY(i, ci, irb)          \
+{                                              \
+	if (ci->op_count != 0)                     \
+	{                                          \
+		throwUnexpectedOperands(i);            \
+		translatePseudoAsmGeneric(i, ci, irb); \
+		return;                                \
+	}                                          \
+}
+
+#define EXPECT_IS_UNARY(i, ci, irb)            \
+{                                              \
+	if (ci->op_count != 1)                     \
+	{                                          \
+		throwUnexpectedOperands(i);            \
+		translatePseudoAsmGeneric(i, ci, irb); \
+		return;                                \
+	}                                          \
+}
+
+#define EXPECT_IS_NULLARY_OR_UNARY(i, ci, irb) \
+{                                              \
+	if (ci->op_count != 0 &&ci->op_count != 1) \
+	{                                          \
+		throwUnexpectedOperands(i);            \
+		translatePseudoAsmGeneric(i, ci, irb); \
+		return;                                \
+	}                                          \
+}
+
+#define EXPECT_IS_BINARY(i, ci, irb)           \
+{                                              \
+	if (ci->op_count != 2)                     \
+	{                                          \
+		throwUnexpectedOperands(i);            \
+		translatePseudoAsmGeneric(i, ci, irb); \
+		return;                                \
+	}                                          \
+}
+
+#define EXPECT_IS_UNARY_OR_BINARY(i, ci, irb)  \
+{                                              \
+	if (ci->op_count != 1 &&ci->op_count != 2) \
+	{                                          \
+		throwUnexpectedOperands(i);            \
+		translatePseudoAsmGeneric(i, ci, irb); \
+		return;                                \
+	}                                          \
+}
+
+#define EXPECT_IS_TERNARY(i, ci, irb)          \
+{                                              \
+	if (ci->op_count != 3)                     \
+	{                                          \
+		throwUnexpectedOperands(i);            \
+		translatePseudoAsmGeneric(i, ci, irb); \
+		return;                                \
+	}                                          \
+}
+
+#define EXPECT_IS_BINARY_OR_TERNARY(i, ci, irb)\
+{                                              \
+	if (ci->op_count != 2 &&ci->op_count != 3) \
+	{                                          \
+		throwUnexpectedOperands(i);            \
+		translatePseudoAsmGeneric(i, ci, irb); \
+		return;                                \
+	}                                          \
+}
+
+#define EXPECT_IS_QUATERNARY(i, ci, irb)       \
+{                                              \
+	if (ci->op_count != 4)                     \
+	{                                          \
+		throwUnexpectedOperands(i);            \
+		translatePseudoAsmGeneric(i, ci, irb); \
+		return;                                \
+	}                                          \
+}
+
+#define EXPECT_IS_NARY(i, ci, irb, n)          \
+{                                              \
+	if (ci->op_count != n)                     \
+	{                                          \
+		throwUnexpectedOperands(i);            \
+		translatePseudoAsmGeneric(i, ci, irb); \
+		return;                                \
+	}                                          \
+}
+
+#define EXPECT_IS_SET(i, ci, irb, ns)          \
+{                                              \
+	if (ns.find(ci->op_count) == ns.end())     \
+	{                                          \
+		throwUnexpectedOperands(i);            \
+		translatePseudoAsmGeneric(i, ci, irb); \
+		return;                                \
+	}                                          \
+}
+
+#define EXPECT_IS_EXPR(i, ci, irb, expr)       \
+{                                              \
+	if (!(expr))                               \
+	{                                          \
+		throwUnexpectedOperands(i);            \
+		translatePseudoAsmGeneric(i, ci, irb); \
+		return;                                \
+	}                                          \
+}
 
 } // namespace capstone2llvmir
 } // namespace retdec

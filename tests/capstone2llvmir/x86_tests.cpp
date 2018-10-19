@@ -3922,17 +3922,6 @@ TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FNOP)
 	EXPECT_NO_VALUE_CALLED();
 }
 
-TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_HLT)
-{
-	ALL_MODES;
-
-	emulate("hlt");
-
-	EXPECT_NO_REGISTERS_LOADED_STORED();
-	EXPECT_NO_MEMORY_LOADED_STORED();
-	EXPECT_NO_VALUE_CALLED();
-}
-
 //
 // X86_INS_NOT
 //

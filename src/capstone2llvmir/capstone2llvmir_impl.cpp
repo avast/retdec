@@ -37,6 +37,48 @@ Capstone2LlvmIrTranslator_impl<CInsn, CInsnOp>::~Capstone2LlvmIrTranslator_impl(
 
 //
 //==============================================================================
+// Translator configuration methods.
+//==============================================================================
+//
+
+template <typename CInsn, typename CInsnOp>
+void Capstone2LlvmIrTranslator_impl<CInsn, CInsnOp>::setIgnoreUnexpectedOperands(bool f)
+{
+	_ignoreUnexpectedOperands = f;
+}
+
+template <typename CInsn, typename CInsnOp>
+void Capstone2LlvmIrTranslator_impl<CInsn, CInsnOp>::setIgnoreUnhandledInstructions(bool f)
+{
+	_ignoreUnhandledInstructions = f;
+}
+
+template <typename CInsn, typename CInsnOp>
+void Capstone2LlvmIrTranslator_impl<CInsn, CInsnOp>::setGeneratePseudoAsmFunctions(bool f)
+{
+	_generatePseudoAsmFunctions = f;
+}
+
+template <typename CInsn, typename CInsnOp>
+bool Capstone2LlvmIrTranslator_impl<CInsn, CInsnOp>::isIgnoreUnexpectedOperands() const
+{
+	return _ignoreUnexpectedOperands;
+}
+
+template <typename CInsn, typename CInsnOp>
+bool Capstone2LlvmIrTranslator_impl<CInsn, CInsnOp>::isIgnoreUnhandledInstructions() const
+{
+	return _ignoreUnhandledInstructions;
+}
+
+template <typename CInsn, typename CInsnOp>
+bool Capstone2LlvmIrTranslator_impl<CInsn, CInsnOp>::isGeneratePseudoAsmFunctions() const
+{
+	return _generatePseudoAsmFunctions;
+}
+
+//
+//==============================================================================
 // Mode query & modification methods - from Capstone2LlvmIrTranslator.
 //==============================================================================
 //
@@ -46,10 +88,10 @@ void Capstone2LlvmIrTranslator_impl<CInsn, CInsnOp>::modifyBasicMode(cs_mode m)
 {
 	if (!isAllowedBasicMode(m))
 	{
-		throw Capstone2LlvmIrModeError(
+		throw ModeSettingError(
 				_arch,
 				m,
-				Capstone2LlvmIrModeError::eType::BASIC_MODE);
+				ModeSettingError::eType::BASIC_MODE);
 	}
 
 	if (cs_option(_handle, CS_OPT_MODE, m + _extraMode) != CS_ERR_OK)
@@ -65,10 +107,10 @@ void Capstone2LlvmIrTranslator_impl<CInsn, CInsnOp>::modifyExtraMode(cs_mode m)
 {
 	if (!isAllowedExtraMode(m))
 	{
-		throw Capstone2LlvmIrModeError(
+		throw ModeSettingError(
 				_arch,
 				m,
-				Capstone2LlvmIrModeError::eType::EXTRA_MODE);
+				ModeSettingError::eType::EXTRA_MODE);
 	}
 
 	if (cs_option(_handle, CS_OPT_MODE, m + _basicMode) != CS_ERR_OK)
@@ -308,7 +350,7 @@ std::string Capstone2LlvmIrTranslator_impl<CInsn, CInsnOp>::getRegisterName(uint
 		}
 		else
 		{
-			throw Capstone2LlvmIrError(
+			throw GenericError(
 					"Missing name for register number: " + std::to_string(r));
 		}
 	}
@@ -348,7 +390,7 @@ uint32_t Capstone2LlvmIrTranslator_impl<CInsn, CInsnOp>::getRegisterBitSize(uint
 	}
 	else
 	{
-		throw Capstone2LlvmIrError(
+		throw GenericError(
 				"Unhandled type of register number: " + std::to_string(r));
 	}
 }
@@ -367,8 +409,7 @@ llvm::Type* Capstone2LlvmIrTranslator_impl<CInsn, CInsnOp>::getRegisterType(
 	auto fIt = _reg2type.find(r);
 	if (fIt == _reg2type.end())
 	{
-		assert(false);
-		throw Capstone2LlvmIrError(
+		throw GenericError(
 				"Missing type for register number: " + std::to_string(r));
 	}
 	return fIt->second;
@@ -629,17 +670,17 @@ void Capstone2LlvmIrTranslator_impl<CInsn, CInsnOp>::initialize()
 {
 	if (!isAllowedBasicMode(_basicMode))
 	{
-		throw Capstone2LlvmIrModeError(
+		throw ModeSettingError(
 				_arch,
 				_basicMode,
-				Capstone2LlvmIrModeError::eType::BASIC_MODE);
+				ModeSettingError::eType::BASIC_MODE);
 	}
 	if (!isAllowedExtraMode(_extraMode))
 	{
-		throw Capstone2LlvmIrModeError(
+		throw ModeSettingError(
 				_arch,
 				_extraMode,
-				Capstone2LlvmIrModeError::eType::EXTRA_MODE);
+				ModeSettingError::eType::EXTRA_MODE);
 	}
 
 	openHandle(); // Sets both _basicMode and _extraMode.
@@ -890,7 +931,7 @@ llvm::GlobalVariable* Capstone2LlvmIrTranslator_impl<CInsn, CInsnOp>::createRegi
 		}
 		else
 		{
-			throw Capstone2LlvmIrError("Unhandled register type.");
+			throw GenericError("Unhandled register type.");
 		}
 	}
 
@@ -904,7 +945,7 @@ llvm::GlobalVariable* Capstone2LlvmIrTranslator_impl<CInsn, CInsnOp>::createRegi
 
 	if (gv == nullptr)
 	{
-		throw Capstone2LlvmIrError("Memory allocation error.");
+		throw GenericError("Memory allocation error.");
 	}
 
 	_allLlvmRegs[gv] = r;
@@ -918,6 +959,9 @@ llvm::GlobalVariable* Capstone2LlvmIrTranslator_impl<CInsn, CInsnOp>::createRegi
 //==============================================================================
 //
 
+/**
+ * Throws if op_count != 1.
+ */
 template <typename CInsn, typename CInsnOp>
 llvm::Value* Capstone2LlvmIrTranslator_impl<CInsn, CInsnOp>::loadOpUnary(
 		CInsn* ci,
@@ -928,14 +972,22 @@ llvm::Value* Capstone2LlvmIrTranslator_impl<CInsn, CInsnOp>::loadOpUnary(
 {
 	if (ci->op_count != 1)
 	{
-		throw Capstone2LlvmIrError("This is not an unary instruction.");
+		throw GenericError("This is not an unary instruction.");
 	}
 
-	auto* op = loadOp(ci->operands[0], irb, loadType);
-	op = generateTypeConversion(irb, op, dstType, ct);
-	return op;
+	auto* op0 = loadOp(ci->operands[0], irb, loadType);
+	if (op0 == nullptr)
+	{
+		throw GenericError("Operand loading failed.");
+	}
+	op0 = generateTypeConversion(irb, op0, dstType, ct);
+
+	return op0;
 }
 
+/**
+ * Throws if op_count != 2.
+ */
 template <typename CInsn, typename CInsnOp>
 std::pair<llvm::Value*, llvm::Value*>
 Capstone2LlvmIrTranslator_impl<CInsn, CInsnOp>::loadOpBinary(
@@ -945,20 +997,23 @@ Capstone2LlvmIrTranslator_impl<CInsn, CInsnOp>::loadOpBinary(
 {
 	if (ci->op_count != 2)
 	{
-		throw Capstone2LlvmIrError("This is not a binary instruction.");
+		throw GenericError("This is not a binary instruction.");
 	}
 
 	auto* op0 = loadOp(ci->operands[0], irb);
 	auto* op1 = loadOp(ci->operands[1], irb);
 	if (op0 == nullptr || op1 == nullptr)
 	{
-		throw Capstone2LlvmIrError("Operands loading failed.");
+		throw GenericError("Operands loading failed.");
 	}
 	op1 = generateTypeConversion(irb, op1, op0->getType(), ct);
 
 	return std::make_pair(op0, op1);
 }
 
+/**
+ * Throws if op_count != 2.
+ */
 template <typename CInsn, typename CInsnOp>
 llvm::Value* Capstone2LlvmIrTranslator_impl<CInsn, CInsnOp>::loadOpBinaryOp0(
 		CInsn* ci,
@@ -967,12 +1022,15 @@ llvm::Value* Capstone2LlvmIrTranslator_impl<CInsn, CInsnOp>::loadOpBinaryOp0(
 {
 	if (ci->op_count != 2)
 	{
-		throw Capstone2LlvmIrError("This is not a binary instruction.");
+		throw GenericError("This is not a binary instruction.");
 	}
 
 	return loadOp(ci->operands[0], irb, ty);
 }
 
+/**
+ * Throws if op_count != 2.
+ */
 template <typename CInsn, typename CInsnOp>
 llvm::Value* Capstone2LlvmIrTranslator_impl<CInsn, CInsnOp>::loadOpBinaryOp1(
 		CInsn* ci,
@@ -981,12 +1039,15 @@ llvm::Value* Capstone2LlvmIrTranslator_impl<CInsn, CInsnOp>::loadOpBinaryOp1(
 {
 	if (ci->op_count != 2)
 	{
-		throw Capstone2LlvmIrError("This is not a binary instruction.");
+		throw GenericError("This is not a binary instruction.");
 	}
 
 	return loadOp(ci->operands[1], irb, ty);
 }
 
+/**
+ * Throws if op_count != 3.
+ */
 template <typename CInsn, typename CInsnOp>
 std::tuple<llvm::Value*, llvm::Value*, llvm::Value*>
 Capstone2LlvmIrTranslator_impl<CInsn, CInsnOp>::loadOpTernary(
@@ -995,7 +1056,7 @@ Capstone2LlvmIrTranslator_impl<CInsn, CInsnOp>::loadOpTernary(
 {
 	if (ci->op_count != 3)
 	{
-		throw Capstone2LlvmIrError("This is not a ternary instruction.");
+		throw GenericError("This is not a ternary instruction.");
 	}
 
 	auto* op0 = loadOp(ci->operands[0], irb);
@@ -1003,15 +1064,18 @@ Capstone2LlvmIrTranslator_impl<CInsn, CInsnOp>::loadOpTernary(
 	auto* op2 = loadOp(ci->operands[2], irb);
 	if (op0 == nullptr || op1 == nullptr || op2 == nullptr)
 	{
-		throw Capstone2LlvmIrError("Operands loading failed.");
+		throw GenericError("Operands loading failed.");
 	}
 
 	return std::make_tuple(op0, op1, op2);
 }
 
+/**
+ * Throws if op_count not in {2, 3}.
+ */
 template <typename CInsn, typename CInsnOp>
 std::pair<llvm::Value*, llvm::Value*>
-Capstone2LlvmIrTranslator_impl<CInsn, CInsnOp>::loadOpTernaryOp1Op2(
+Capstone2LlvmIrTranslator_impl<CInsn, CInsnOp>::loadOpBinaryOrTernaryOp1Op2(
 		CInsn* ci,
 		llvm::IRBuilder<>& irb,
 		eOpConv ct)
@@ -1019,44 +1083,33 @@ Capstone2LlvmIrTranslator_impl<CInsn, CInsnOp>::loadOpTernaryOp1Op2(
 	llvm::Value* op1 = nullptr;
 	llvm::Value* op2 = nullptr;
 
-//	if (mi->op_count != 3)
-//	{
-//		throw Capstone2LlvmIrError("This is not a ternary instruction.");
-//	}
-
-	if (ci->op_count == 3)
-	{
-		op1 = loadOp(ci->operands[1], irb);
-		op2 = loadOp(ci->operands[2], irb);
-	}
 	// TODO: Is this desirable here? Maybe special function with this behaviour?
-	else if (ci->op_count == 2)
+	if (ci->op_count == 2)
 	{
 		op1 = loadOp(ci->operands[0], irb);
 		op2 = loadOp(ci->operands[1], irb);
 	}
-	// TODO: "00 21 08 22" = "andhs r2, r8, #0, #2"
-	// No idea what this is, we just want to ignore it somehow, when throwing
-	// and silent catching is done, this hack can be removed.
-	//
-	else if (ci->op_count > 3)
+	else if (ci->op_count == 3)
 	{
 		op1 = loadOp(ci->operands[1], irb);
 		op2 = loadOp(ci->operands[2], irb);
 	}
 	else
 	{
-		throw Capstone2LlvmIrError("This is not a ternary instruction.");
+		throw GenericError("This is not a ternary instruction.");
 	}
 	if (op1 == nullptr || op2 == nullptr)
 	{
-		throw Capstone2LlvmIrError("Operands loading failed.");
+		throw GenericError("Operands loading failed.");
 	}
 	op2 = generateTypeConversion(irb, op2, op1->getType(), ct);
 
 	return std::make_pair(op1, op2);
 }
 
+/**
+ * Throws if op_count != 4.
+ */
 template <typename CInsn, typename CInsnOp>
 std::tuple<llvm::Value*, llvm::Value*, llvm::Value*>
 Capstone2LlvmIrTranslator_impl<CInsn, CInsnOp>::loadOpQuaternaryOp1Op2Op3(
@@ -1065,7 +1118,7 @@ Capstone2LlvmIrTranslator_impl<CInsn, CInsnOp>::loadOpQuaternaryOp1Op2Op3(
 {
 	if (ci->op_count != 4)
 	{
-		throw Capstone2LlvmIrError("This is not a ternary instruction.");
+		throw GenericError("This is not a ternary instruction.");
 	}
 
 	auto* op1 = loadOp(ci->operands[1], irb);
@@ -1073,7 +1126,7 @@ Capstone2LlvmIrTranslator_impl<CInsn, CInsnOp>::loadOpQuaternaryOp1Op2Op3(
 	auto* op3 = loadOp(ci->operands[3], irb);
 	if (op1 == nullptr || op2 == nullptr || op3 == nullptr)
 	{
-		throw Capstone2LlvmIrError("Operands loading failed.");
+		throw GenericError("Operands loading failed.");
 	}
 
 	return std::make_tuple(op1, op2, op3);
@@ -1343,27 +1396,27 @@ llvm::IntegerType* Capstone2LlvmIrTranslator_impl<CInsn, CInsnOp>::getDefaultTyp
 }
 
 template <typename CInsn, typename CInsnOp>
-llvm::Value* Capstone2LlvmIrTranslator_impl<CInsn, CInsnOp>::getThisInsnAddress(cs_insn* i)
+llvm::Value* Capstone2LlvmIrTranslator_impl<CInsn, CInsnOp>::getThisInsnAddress(
+		cs_insn* i)
 {
 	return llvm::ConstantInt::get(getDefaultType(), i->address);
 }
 
 template <typename CInsn, typename CInsnOp>
-llvm::Value* Capstone2LlvmIrTranslator_impl<CInsn, CInsnOp>::getNextInsnAddress(cs_insn* i)
+llvm::Value* Capstone2LlvmIrTranslator_impl<CInsn, CInsnOp>::getNextInsnAddress(
+		cs_insn* i)
 {
 	return llvm::ConstantInt::get(getDefaultType(), i->address + i->size);
 }
 
 /**
- * @return Asm function associated with @p name, or @c nullptr if there is
- *         no such function.
+ * Generate pseudo assembly function name from the given instruction @a insn.
  */
 template <typename CInsn, typename CInsnOp>
-llvm::Function* Capstone2LlvmIrTranslator_impl<CInsn, CInsnOp>::getAsmFunction(
-		const std::string& name) const
+std::string Capstone2LlvmIrTranslator_impl<CInsn, CInsnOp>::getPseudoAsmFunctionName(
+		cs_insn* insn)
 {
-	auto fIt = _asmFunctions.find(name);
-	return fIt != _asmFunctions.end() ? fIt->second : nullptr;
+	return "__asm_" + std::string(insn->mnemonic);
 }
 
 /**
@@ -1373,77 +1426,44 @@ llvm::Function* Capstone2LlvmIrTranslator_impl<CInsn, CInsnOp>::getAsmFunction(
  * @return Functions associated with @p insnId.
  */
 template <typename CInsn, typename CInsnOp>
-llvm::Function* Capstone2LlvmIrTranslator_impl<CInsn, CInsnOp>::getOrCreateAsmFunction(
-		std::size_t insnId,
-		const std::string& name,
-		llvm::FunctionType* type)
+llvm::Function* Capstone2LlvmIrTranslator_impl<CInsn, CInsnOp>::getPseudoAsmFunction(
+		cs_insn* insn,
+		llvm::FunctionType* type,
+		const std::string& name)
 {
-	llvm::Function* fnc = getAsmFunction(name);
-	if (fnc == nullptr)
+	auto p = std::make_pair(insn->id, type);
+	auto fIt = _asmFunctions.find(p);
+	if (fIt == _asmFunctions.end())
 	{
-		fnc = llvm::Function::Create(
+		auto* fnc = llvm::Function::Create(
 				type,
 				llvm::GlobalValue::LinkageTypes::ExternalLinkage,
-				name,
+				name.empty() ? getPseudoAsmFunctionName(insn) : name,
 				_module);
-		_asmFunctions[name] = fnc;
+		_asmFunctions[p] = fnc;
+		return fnc;
 	}
-	return fnc;
+	else
+	{
+		return fIt->second;
+	}
 }
 
 /**
- * The same as @c getOrCreateAsmFunction(std::size_t,std::string&, llvm::FunctionType*),
- * but function is created with zero parameters and @p retType return type.
- */
-template <typename CInsn, typename CInsnOp>
-llvm::Function* Capstone2LlvmIrTranslator_impl<CInsn, CInsnOp>::getOrCreateAsmFunction(
-		std::size_t insnId,
-		const std::string& name,
-		llvm::Type* retType)
-{
-	return getOrCreateAsmFunction(
-			insnId,
-			name,
-			llvm::FunctionType::get(retType, false));
-}
-
-/**
- * The same as @c getOrCreateAsmFunction(std::size_t,std::string&, llvm::FunctionType*),
- * but function is created with void return type and @p params parameters.
- *
- * TODO: This is not ideal, when used with only one argument (e.g. {i32}),
- * the llvm::Type* retType variant is used instead of this method.
- */
-template <typename CInsn, typename CInsnOp>
-llvm::Function* Capstone2LlvmIrTranslator_impl<CInsn, CInsnOp>::getOrCreateAsmFunction(
-		std::size_t insnId,
-		const std::string& name,
-		llvm::ArrayRef<llvm::Type*> params)
-{
-	return getOrCreateAsmFunction(
-			insnId,
-			name,
-			llvm::FunctionType::get(
-					llvm::Type::getVoidTy(_module->getContext()),
-					params,
-					false));
-}
-
-/**
- * The same as @c getOrCreateAsmFunction(std::size_t,std::string&, llvm::FunctionType*),
+ * The same as @c getPseudoAsmFunction(std::size_t,std::string&, llvm::FunctionType*),
  * but function type is created by this variant.
  */
 template <typename CInsn, typename CInsnOp>
-llvm::Function* Capstone2LlvmIrTranslator_impl<CInsn, CInsnOp>::getOrCreateAsmFunction(
-		std::size_t insnId,
-		const std::string& name,
+llvm::Function* Capstone2LlvmIrTranslator_impl<CInsn, CInsnOp>::getPseudoAsmFunction(
+		cs_insn* insn,
 		llvm::Type* retType,
-		llvm::ArrayRef<llvm::Type*> params)
+		llvm::ArrayRef<llvm::Type*> params,
+		const std::string& name)
 {
-	return getOrCreateAsmFunction(
-			insnId,
-			name,
-			llvm::FunctionType::get(retType, params, false));
+	return getPseudoAsmFunction(
+			insn,
+			llvm::FunctionType::get(retType, params, false),
+			name);
 }
 
 template <typename CInsn, typename CInsnOp>
@@ -1508,11 +1528,410 @@ llvm::Value* Capstone2LlvmIrTranslator_impl<CInsn, CInsnOp>::generateTypeConvers
 		case eOpConv::THROW:
 		default:
 		{
-			throw Capstone2LlvmIrError("Unhandled eOpConv type.");
+			throw GenericError("Unhandled eOpConv type.");
 		}
 	}
 
 	return ret;
+}
+
+/**
+ * op0 = __asm_<mnem>()
+ */
+template <typename CInsn, typename CInsnOp>
+void Capstone2LlvmIrTranslator_impl<CInsn, CInsnOp>::translatePseudoAsmOp0Fnc(
+		cs_insn* i,
+		CInsn* ci,
+		llvm::IRBuilder<>& irb)
+{
+	EXPECT_IS_UNARY(i, ci, irb);
+
+	llvm::Function* fnc = getPseudoAsmFunction(
+			i,
+			getDefaultType(),
+			llvm::ArrayRef<llvm::Type*>{});
+
+	auto* c = irb.CreateCall(fnc, llvm::ArrayRef<llvm::Value*>{});
+
+	storeOp(ci->operands[0], c, irb);
+}
+
+/**
+ * __asm_<mnem>(op0)
+ */
+template <typename CInsn, typename CInsnOp>
+void Capstone2LlvmIrTranslator_impl<CInsn, CInsnOp>::translatePseudoAsmFncOp0(
+		cs_insn* i,
+		CInsn* ci,
+		llvm::IRBuilder<>& irb)
+{
+	EXPECT_IS_UNARY(i, ci, irb);
+
+	op0 = loadOp(ci->operands[0], irb);
+
+	llvm::Function* fnc = getPseudoAsmFunction(
+			i,
+			irb.getVoidTy(),
+			llvm::ArrayRef<llvm::Type*>{op0->getType()});
+
+	irb.CreateCall(fnc, llvm::ArrayRef<llvm::Value*>{op0});
+}
+
+/**
+ * op0 = __asm_<mnem>(op0)
+ */
+template <typename CInsn, typename CInsnOp>
+void Capstone2LlvmIrTranslator_impl<CInsn, CInsnOp>::translatePseudoAsmOp0FncOp0(
+		cs_insn* i,
+		CInsn* ci,
+		llvm::IRBuilder<>& irb)
+{
+	EXPECT_IS_UNARY(i, ci, irb);
+
+	op0 = loadOp(ci->operands[0], irb);
+
+	llvm::Function* fnc = getPseudoAsmFunction(
+			i,
+			op0->getType(),
+			llvm::ArrayRef<llvm::Type*>{op0->getType()});
+
+	auto* c = irb.CreateCall(fnc, llvm::ArrayRef<llvm::Value*>{op0});
+
+	storeOp(ci->operands[0], c, irb);
+}
+
+/**
+ * __asm_<mnem>(op0, op1)
+ */
+template <typename CInsn, typename CInsnOp>
+void Capstone2LlvmIrTranslator_impl<CInsn, CInsnOp>::translatePseudoAsmFncOp0Op1(
+		cs_insn* i,
+		CInsn* ci,
+		llvm::IRBuilder<>& irb)
+{
+	EXPECT_IS_BINARY(i, ci, irb);
+
+	op0 = loadOp(ci->operands[0], irb);
+	op1 = loadOp(ci->operands[1], irb);
+
+	llvm::Function* fnc = getPseudoAsmFunction(
+			i,
+			irb.getVoidTy(),
+			llvm::ArrayRef<llvm::Type*>{op0->getType(), op1->getType()});
+
+	irb.CreateCall(fnc, llvm::ArrayRef<llvm::Value*>{op0, op1});
+}
+
+/**
+ * op0 = __asm_<mnem>(op1)
+ */
+template <typename CInsn, typename CInsnOp>
+void Capstone2LlvmIrTranslator_impl<CInsn, CInsnOp>::translatePseudoAsmOp0FncOp1(
+		cs_insn* i,
+		CInsn* ci,
+		llvm::IRBuilder<>& irb)
+{
+	EXPECT_IS_BINARY(i, ci, irb);
+
+	op1 = loadOp(ci->operands[1], irb);
+
+	llvm::Function* fnc = getPseudoAsmFunction(
+			i,
+			op1->getType(),
+			llvm::ArrayRef<llvm::Type*>{op1->getType()});
+
+	auto* c = irb.CreateCall(fnc, llvm::ArrayRef<llvm::Value*>{op1});
+
+	storeOp(ci->operands[0], c, irb);
+}
+
+/**
+ * op0 = __asm_<mnem>(op0, op1)
+ */
+template <typename CInsn, typename CInsnOp>
+void Capstone2LlvmIrTranslator_impl<CInsn, CInsnOp>::translatePseudoAsmOp0FncOp0Op1(
+		cs_insn* i,
+		CInsn* ci,
+		llvm::IRBuilder<>& irb)
+{
+	EXPECT_IS_BINARY(i, ci, irb);
+
+	op0 = loadOp(ci->operands[0], irb);
+	op1 = loadOp(ci->operands[1], irb);
+
+	llvm::Function* fnc = getPseudoAsmFunction(
+			i,
+			op0->getType(),
+			llvm::ArrayRef<llvm::Type*>{op0->getType(), op1->getType()});
+
+	auto* c = irb.CreateCall(fnc, llvm::ArrayRef<llvm::Value*>{op0, op1});
+
+	storeOp(ci->operands[0], c, irb);
+}
+
+/**
+ * __asm_<mnem>(op0, op1, op2)
+ */
+template <typename CInsn, typename CInsnOp>
+void Capstone2LlvmIrTranslator_impl<CInsn, CInsnOp>::translatePseudoAsmFncOp0Op1Op2(
+		cs_insn* i,
+		CInsn* ci,
+		llvm::IRBuilder<>& irb)
+{
+	EXPECT_IS_TERNARY(i, ci, irb);
+
+	op0 = loadOp(ci->operands[0], irb);
+	op1 = loadOp(ci->operands[1], irb);
+	op2 = loadOp(ci->operands[2], irb);
+
+	llvm::Function* fnc = getPseudoAsmFunction(
+			i,
+			irb.getVoidTy(),
+			llvm::ArrayRef<llvm::Type*>{
+					op0->getType(),
+					op1->getType(),
+					op2->getType()});
+
+	irb.CreateCall(fnc, llvm::ArrayRef<llvm::Value*>{op0, op1, op2});
+}
+
+/**
+ * op0 = __asm_<mnem>(op1, op2)
+ */
+template <typename CInsn, typename CInsnOp>
+void Capstone2LlvmIrTranslator_impl<CInsn, CInsnOp>::translatePseudoAsmOp0FncOp1Op2(
+		cs_insn* i,
+		CInsn* ci,
+		llvm::IRBuilder<>& irb)
+{
+	EXPECT_IS_TERNARY(i, ci, irb);
+
+	op1 = loadOp(ci->operands[1], irb);
+	op2 = loadOp(ci->operands[2], irb);
+
+	llvm::Function* fnc = getPseudoAsmFunction(
+			i,
+			getDefaultType(),
+			llvm::ArrayRef<llvm::Type*>{
+					op1->getType(),
+					op2->getType()});
+
+	auto* c = irb.CreateCall(fnc, llvm::ArrayRef<llvm::Value*>{op1, op2});
+
+	storeOp(ci->operands[0], c, irb);
+}
+
+/**
+ * op0 = __asm_<mnem>(op0, op1, op2)
+ */
+template <typename CInsn, typename CInsnOp>
+void Capstone2LlvmIrTranslator_impl<CInsn, CInsnOp>::translatePseudoAsmOp0FncOp0Op1Op2(
+		cs_insn* i,
+		CInsn* ci,
+		llvm::IRBuilder<>& irb)
+{
+	EXPECT_IS_TERNARY(i, ci, irb);
+
+	op0 = loadOp(ci->operands[0], irb);
+	op1 = loadOp(ci->operands[1], irb);
+	op2 = loadOp(ci->operands[2], irb);
+
+	llvm::Function* fnc = getPseudoAsmFunction(
+			i,
+			op0->getType(),
+			llvm::ArrayRef<llvm::Type*>{
+					op0->getType(),
+					op1->getType(),
+					op2->getType()});
+
+	auto* c = irb.CreateCall(fnc, llvm::ArrayRef<llvm::Value*>{op0, op1, op2});
+
+	storeOp(ci->operands[0], c, irb);
+}
+
+/**
+ * __asm_<mnem>(op0, op1, op2, op3)
+ */
+template <typename CInsn, typename CInsnOp>
+void Capstone2LlvmIrTranslator_impl<CInsn, CInsnOp>::translatePseudoAsmFncOp0Op1Op2Op3(
+		cs_insn* i,
+		CInsn* ci,
+		llvm::IRBuilder<>& irb)
+{
+	EXPECT_IS_QUATERNARY(i, ci, irb);
+
+	op0 = loadOp(ci->operands[0], irb);
+	op1 = loadOp(ci->operands[1], irb);
+	op2 = loadOp(ci->operands[2], irb);
+	op3 = loadOp(ci->operands[3], irb);
+
+	llvm::Function* fnc = getPseudoAsmFunction(
+			i,
+			irb.getVoidTy(),
+			llvm::ArrayRef<llvm::Type*>{
+					op0->getType(),
+					op1->getType(),
+					op2->getType(),
+					op3->getType()});
+
+	irb.CreateCall(fnc, llvm::ArrayRef<llvm::Value*>{op0, op1, op2, op3});
+}
+
+/**
+ * op0 = __asm_<mnem>(op1, op2, op3)
+ */
+template <typename CInsn, typename CInsnOp>
+void Capstone2LlvmIrTranslator_impl<CInsn, CInsnOp>::translatePseudoAsmOp0FncOp1Op2Op3(
+		cs_insn* i,
+		CInsn* ci,
+		llvm::IRBuilder<>& irb)
+{
+	EXPECT_IS_QUATERNARY(i, ci, irb);
+
+	op1 = loadOp(ci->operands[1], irb);
+	op2 = loadOp(ci->operands[2], irb);
+	op3 = loadOp(ci->operands[3], irb);
+
+	llvm::Function* fnc = getPseudoAsmFunction(
+			i,
+			getDefaultType(),
+			llvm::ArrayRef<llvm::Type*>{
+					op1->getType(),
+					op2->getType(),
+					op3->getType()});
+
+	auto* c = irb.CreateCall(fnc, llvm::ArrayRef<llvm::Value*>{op1, op2, op3});
+
+	storeOp(ci->operands[0], c, irb);
+}
+
+/**
+ * op0 = __asm_<mnem>(op0, op1, op2, op3)
+ */
+template <typename CInsn, typename CInsnOp>
+void Capstone2LlvmIrTranslator_impl<CInsn, CInsnOp>::translatePseudoAsmOp0FncOp0Op1Op2Op3(
+		cs_insn* i,
+		CInsn* ci,
+		llvm::IRBuilder<>& irb)
+{
+	EXPECT_IS_QUATERNARY(i, ci, irb);
+
+	op0 = loadOp(ci->operands[0], irb);
+	op1 = loadOp(ci->operands[1], irb);
+	op2 = loadOp(ci->operands[2], irb);
+	op3 = loadOp(ci->operands[3], irb);
+
+	llvm::Function* fnc = getPseudoAsmFunction(
+			i,
+			op0->getType(),
+			llvm::ArrayRef<llvm::Type*>{
+					op0->getType(),
+					op1->getType(),
+					op2->getType(),
+					op3->getType()});
+
+	auto* c = irb.CreateCall(fnc, llvm::ArrayRef<llvm::Value*>{op0, op1, op2, op3});
+
+	storeOp(ci->operands[0], c, irb);
+}
+
+/**
+ * op0, op1 = __asm_<mnem>(op0, op1, op2, op3)
+ */
+template <typename CInsn, typename CInsnOp>
+void Capstone2LlvmIrTranslator_impl<CInsn, CInsnOp>::translatePseudoAsmOp0Op1FncOp0Op1Op2Op3(
+		cs_insn* i,
+		CInsn* ci,
+		llvm::IRBuilder<>& irb)
+{
+	EXPECT_IS_QUATERNARY(i, ci, irb);
+
+	op0 = loadOp(ci->operands[0], irb);
+	op1 = loadOp(ci->operands[1], irb);
+	op2 = loadOp(ci->operands[2], irb);
+	op3 = loadOp(ci->operands[3], irb);
+
+	llvm::Function* fnc = getPseudoAsmFunction(
+			i,
+			llvm::StructType::create(llvm::ArrayRef<llvm::Type*>{
+					op0->getType(),
+					op1->getType()}),
+			llvm::ArrayRef<llvm::Type*>{
+					op0->getType(),
+					op1->getType(),
+					op2->getType(),
+					op3->getType()});
+
+	auto* c = irb.CreateCall(fnc, llvm::ArrayRef<llvm::Value*>{op0, op1, op2, op3});
+
+	storeOp(ci->operands[0], irb.CreateExtractValue(c, {0}), irb);
+	storeOp(ci->operands[1], irb.CreateExtractValue(c, {1}), irb);
+}
+
+/**
+ * Generate pseudo asm call using information provided by Capstone.
+ */
+template <typename CInsn, typename CInsnOp>
+void Capstone2LlvmIrTranslator_impl<CInsn, CInsnOp>::translatePseudoAsmGeneric(
+		cs_insn* i,
+		CInsn* ci,
+		llvm::IRBuilder<>& irb)
+{
+	std::vector<llvm::Value*> vals;
+	std::vector<llvm::Type*> types;
+
+	for (std::size_t j = 0; j < ci->op_count; ++j)
+	{
+		auto* op = loadOp(ci->operands[j], irb);
+		vals.push_back(op);
+		types.push_back(op->getType());
+	}
+
+	if (vals.empty())
+	{
+		for (std::size_t j = 0; j < i->detail->regs_read_count; ++j)
+		{
+			auto* op = loadRegister(i->detail->regs_read[j], irb);
+			vals.push_back(op);
+			types.push_back(op->getType());
+		}
+	}
+
+	llvm::Function* fnc = getPseudoAsmFunction(
+			i,
+			irb.getVoidTy(),
+			types);
+
+	irb.CreateCall(fnc, vals);
+
+	for (std::size_t j = 0; j < i->detail->regs_write_count; ++j)
+	{
+		auto r = i->detail->regs_write[j];
+		auto* undef = llvm::UndefValue::get(getRegisterType(r));
+		storeRegister(r, undef, irb);
+	}
+}
+
+template <typename CInsn, typename CInsnOp>
+void Capstone2LlvmIrTranslator_impl<CInsn, CInsnOp>::throwUnexpectedOperands(
+		cs_insn* i,
+		const std::string comment)
+{
+	if (!isIgnoreUnexpectedOperands())
+	{
+		throw UnexpectedOperandsError(i, comment);
+	}
+}
+
+template <typename CInsn, typename CInsnOp>
+void Capstone2LlvmIrTranslator_impl<CInsn, CInsnOp>::throwUnhandledInstructions(
+		cs_insn* i,
+		const std::string comment)
+{
+	if (!isIgnoreUnhandledInstructions())
+	{
+		throw UnhandledInstructionError(i, comment);
+	}
 }
 
 template class Capstone2LlvmIrTranslator_impl<cs_arm, cs_arm_op>;

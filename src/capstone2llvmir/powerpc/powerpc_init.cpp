@@ -831,7 +831,7 @@ Capstone2LlvmIrTranslatorPowerpc_impl::_i2fm =
 		{PPC_INS_LWARX, nullptr},
 		{PPC_INS_LWAUX, nullptr},
 		{PPC_INS_LWAX, nullptr},
-		{PPC_INS_LWBRX, &Capstone2LlvmIrTranslatorPowerpc_impl::translateLwbrx},
+		{PPC_INS_LWBRX, &Capstone2LlvmIrTranslatorPowerpc_impl::translatePseudoAsmOp0FncOp1Op2},
 		{PPC_INS_LWZ, &Capstone2LlvmIrTranslatorPowerpc_impl::translateLoad},
 		{PPC_INS_LWZCIX, nullptr},
 		{PPC_INS_LWZU, &Capstone2LlvmIrTranslatorPowerpc_impl::translateLoad},
@@ -845,14 +845,14 @@ Capstone2LlvmIrTranslatorPowerpc_impl::_i2fm =
 		{PPC_INS_MBAR, nullptr},
 		{PPC_INS_MCRF, &Capstone2LlvmIrTranslatorPowerpc_impl::translateMcrf},
 		{PPC_INS_MCRFS, nullptr},
-		{PPC_INS_MFCR, &Capstone2LlvmIrTranslatorPowerpc_impl::translateMfcr},
+		{PPC_INS_MFCR, &Capstone2LlvmIrTranslatorPowerpc_impl::translatePseudoAsmOp0Fnc},
 		{PPC_INS_MFCTR, &Capstone2LlvmIrTranslatorPowerpc_impl::translateMfctr},
 		{PPC_INS_MFDCR, nullptr},
 		{PPC_INS_MFFS, nullptr},
 		{PPC_INS_MFLR, &Capstone2LlvmIrTranslatorPowerpc_impl::translateMflr},
 		{PPC_INS_MFMSR, nullptr},
 		{PPC_INS_MFOCRF, nullptr},
-		{PPC_INS_MFSPR, &Capstone2LlvmIrTranslatorPowerpc_impl::translateMfspr},
+		{PPC_INS_MFSPR, &Capstone2LlvmIrTranslatorPowerpc_impl::translatePseudoAsmOp0FncOp1},
 		{PPC_INS_MFSR, nullptr},
 		{PPC_INS_MFSRIN, nullptr},
 		{PPC_INS_MFTB, nullptr},
@@ -869,7 +869,7 @@ Capstone2LlvmIrTranslatorPowerpc_impl::_i2fm =
 		{PPC_INS_MTMSR, nullptr},
 		{PPC_INS_MTMSRD, nullptr},
 		{PPC_INS_MTOCRF, nullptr},
-		{PPC_INS_MTSPR, &Capstone2LlvmIrTranslatorPowerpc_impl::translateMtspr},
+		{PPC_INS_MTSPR, &Capstone2LlvmIrTranslatorPowerpc_impl::translatePseudoAsmFncOp0Op1},
 		{PPC_INS_MTSR, nullptr},
 		{PPC_INS_MTSRIN, nullptr},
 		{PPC_INS_MTVSCR, nullptr},
@@ -1057,7 +1057,7 @@ Capstone2LlvmIrTranslatorPowerpc_impl::_i2fm =
 		{PPC_INS_STFSUX, nullptr},
 		{PPC_INS_STFSX, nullptr},
 		{PPC_INS_STH, &Capstone2LlvmIrTranslatorPowerpc_impl::translateStore},
-		{PPC_INS_STHBRX, &Capstone2LlvmIrTranslatorPowerpc_impl::translateStoreReverseIndexed},
+		{PPC_INS_STHBRX, &Capstone2LlvmIrTranslatorPowerpc_impl::translatePseudoAsmFncOp0Op1Op2},
 		{PPC_INS_STHCIX, nullptr},
 		{PPC_INS_STHU, &Capstone2LlvmIrTranslatorPowerpc_impl::translateStore},
 		{PPC_INS_STHUX, &Capstone2LlvmIrTranslatorPowerpc_impl::translateStoreIndexed},
@@ -1070,7 +1070,7 @@ Capstone2LlvmIrTranslatorPowerpc_impl::_i2fm =
 		{PPC_INS_STVX, nullptr},
 		{PPC_INS_STVXL, nullptr},
 		{PPC_INS_STW, &Capstone2LlvmIrTranslatorPowerpc_impl::translateStore},
-		{PPC_INS_STWBRX, &Capstone2LlvmIrTranslatorPowerpc_impl::translateStoreReverseIndexed},
+		{PPC_INS_STWBRX, &Capstone2LlvmIrTranslatorPowerpc_impl::translatePseudoAsmFncOp0Op1Op2},
 		{PPC_INS_STWCIX, nullptr},
 		{PPC_INS_STWCX, nullptr},
 		{PPC_INS_STWU, &Capstone2LlvmIrTranslatorPowerpc_impl::translateStore},
@@ -1647,8 +1647,7 @@ Capstone2LlvmIrTranslatorPowerpc_impl::_i2fm =
 		{PPC_INS_BDZFLA, &Capstone2LlvmIrTranslatorPowerpc_impl::translateB},
 		{PPC_INS_BDZFLRL, &Capstone2LlvmIrTranslatorPowerpc_impl::translateB},
 
-		// TODO: What is this? It is not in specification. Is it even branch?
-		{PPC_INS_BCT, nullptr}, // &Capstone2LlvmIrTranslatorPowerpc_impl::translateASSERT
+		{PPC_INS_BCT, nullptr},
 };
 
 } // namespace capstone2llvmir

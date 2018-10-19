@@ -367,7 +367,10 @@ void Capstone2LlvmIrTranslatorX86_impl::initializeRegistersParentMapToSelf(
 {
 	for (auto r : rs)
 	{
-		assert(r < _reg2parentMap.size());
+		if (r >= _reg2parentMap.size())
+		{
+			throw GenericError("Register out of range.");
+		}
 		_reg2parentMap[r] = r;
 	}
 }
@@ -378,7 +381,10 @@ void Capstone2LlvmIrTranslatorX86_impl::initializeRegistersParentMapToOther(
 {
 	for (auto r : rs)
 	{
-		assert(r < _reg2parentMap.size());
+		if (r >= _reg2parentMap.size())
+		{
+			throw GenericError("Register out of range.");
+		}
 		_reg2parentMap[r] = other;
 	}
 }
@@ -394,7 +400,7 @@ void Capstone2LlvmIrTranslatorX86_impl::initializeRegistersParentMap()
 		case CS_MODE_64: initializeRegistersParentMap64(); break;
 		default:
 		{
-			throw Capstone2LlvmIrError("Unhandled mode in "
+			throw GenericError("Unhandled mode in "
 					"initializeRegistersParentMap().");
 			break;
 		}
@@ -562,7 +568,7 @@ Capstone2LlvmIrTranslatorX86_impl::_i2fm =
 		{X86_INS_BLSIC, nullptr},
 		{X86_INS_BLSMSK, nullptr},
 		{X86_INS_BLSR, nullptr},
-		{X86_INS_BOUND, &Capstone2LlvmIrTranslatorX86_impl::translateBound},
+		{X86_INS_BOUND, nullptr},
 		{X86_INS_BSF, &Capstone2LlvmIrTranslatorX86_impl::translateBsf},
 		{X86_INS_BSR, &Capstone2LlvmIrTranslatorX86_impl::translateBsf},
 		{X86_INS_BSWAP, &Capstone2LlvmIrTranslatorX86_impl::translateBswap},
@@ -680,8 +686,8 @@ Capstone2LlvmIrTranslatorX86_impl::_i2fm =
 		{X86_INS_FICOM, &Capstone2LlvmIrTranslatorX86_impl::translateFucomPop},
 		{X86_INS_FICOMP, &Capstone2LlvmIrTranslatorX86_impl::translateFucomPop},
 		{X86_INS_FINCSTP, &Capstone2LlvmIrTranslatorX86_impl::translateFincstp},
-		{X86_INS_FLDCW, &Capstone2LlvmIrTranslatorX86_impl::translateFldcw},
-		{X86_INS_FLDENV, &Capstone2LlvmIrTranslatorX86_impl::translateFldenv},
+		{X86_INS_FLDCW, nullptr},
+		{X86_INS_FLDENV, nullptr},
 		{X86_INS_FLDL2E, &Capstone2LlvmIrTranslatorX86_impl::translateFloadConstant},
 		{X86_INS_FLDL2T, &Capstone2LlvmIrTranslatorX86_impl::translateFloadConstant},
 		{X86_INS_FLDLG2, &Capstone2LlvmIrTranslatorX86_impl::translateFloadConstant},
@@ -690,8 +696,8 @@ Capstone2LlvmIrTranslatorX86_impl::_i2fm =
 		{X86_INS_FNCLEX, nullptr},
 		{X86_INS_FNINIT, &Capstone2LlvmIrTranslatorX86_impl::translateFninit},
 		{X86_INS_FNOP, &Capstone2LlvmIrTranslatorX86_impl::translateNop},
-		{X86_INS_FNSTCW, &Capstone2LlvmIrTranslatorX86_impl::translateFnstcw},
-		{X86_INS_FNSTSW, &Capstone2LlvmIrTranslatorX86_impl::translateFnstsw},
+		{X86_INS_FNSTCW, nullptr},
+		{X86_INS_FNSTSW, nullptr},
 		{X86_INS_FPATAN, nullptr},
 		{X86_INS_FPREM, nullptr},
 		{X86_INS_FPREM1, nullptr},
@@ -703,8 +709,8 @@ Capstone2LlvmIrTranslatorX86_impl::_i2fm =
 		{X86_INS_FSCALE, nullptr},
 		{X86_INS_FSETPM, nullptr},
 		{X86_INS_FSINCOS, &Capstone2LlvmIrTranslatorX86_impl::translateFsincos},
-		{X86_INS_FNSTENV, &Capstone2LlvmIrTranslatorX86_impl::translateFnstenv},
-		{X86_INS_FXAM, &Capstone2LlvmIrTranslatorX86_impl::translateFxam},
+		{X86_INS_FNSTENV, nullptr},
+		{X86_INS_FXAM, nullptr},
 		{X86_INS_FXRSTOR, nullptr},
 		{X86_INS_FXRSTOR64, nullptr},
 		{X86_INS_FXSAVE, nullptr},
@@ -723,7 +729,7 @@ Capstone2LlvmIrTranslatorX86_impl::_i2fm =
 		{X86_INS_GETSEC, nullptr},
 		{X86_INS_HADDPD, nullptr},
 		{X86_INS_HADDPS, nullptr},
-		{X86_INS_HLT, &Capstone2LlvmIrTranslatorX86_impl::translateHlt},
+		{X86_INS_HLT, nullptr},
 		{X86_INS_HSUBPD, nullptr},
 		{X86_INS_HSUBPS, nullptr},
 		{X86_INS_IDIV, &Capstone2LlvmIrTranslatorX86_impl::translateDiv},
@@ -736,10 +742,10 @@ Capstone2LlvmIrTranslatorX86_impl::_i2fm =
 		{X86_INS_INSERTQ, nullptr},
 		{X86_INS_INSD, &Capstone2LlvmIrTranslatorX86_impl::translateIns},
 		{X86_INS_INSW, &Capstone2LlvmIrTranslatorX86_impl::translateIns},
-		{X86_INS_INT, &Capstone2LlvmIrTranslatorX86_impl::translateInt},
-		{X86_INS_INT1, &Capstone2LlvmIrTranslatorX86_impl::translateInt1},
-		{X86_INS_INT3, &Capstone2LlvmIrTranslatorX86_impl::translateInt3},
-		{X86_INS_INTO, &Capstone2LlvmIrTranslatorX86_impl::translateInto},
+		{X86_INS_INT, nullptr},
+		{X86_INS_INT1, nullptr},
+		{X86_INS_INT3, nullptr},
+		{X86_INS_INTO, nullptr},
 		{X86_INS_INVD, nullptr},
 		{X86_INS_INVEPT, nullptr},
 		{X86_INS_INVLPG, nullptr},
@@ -1808,7 +1814,7 @@ Capstone2LlvmIrTranslatorX86_impl::_i2fm =
 		{X86_INS_VUNPCKLPS, nullptr},
 		{X86_INS_VZEROALL, nullptr},
 		{X86_INS_VZEROUPPER, nullptr},
-		{X86_INS_WAIT, &Capstone2LlvmIrTranslatorX86_impl::translateWait},
+		{X86_INS_WAIT, nullptr},
 		{X86_INS_WBINVD, nullptr},
 		{X86_INS_WRFSBASE, nullptr},
 		{X86_INS_WRGSBASE, nullptr},

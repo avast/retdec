@@ -252,6 +252,43 @@ class Capstone2LlvmIrTranslator
 		virtual ~Capstone2LlvmIrTranslator();
 //
 //==============================================================================
+// Translator configuration methods.
+//==============================================================================
+//
+		/**
+		 * Should the translator ignore unexpected operands encountered in
+		 * Capstone instructions?
+		 * True -> ignore -> try recover or ignore the problem.
+		 * False -> don't ignore -> throw @c UnexpectedOperandsError.
+		 *
+		 * Default value: true.
+		 */
+		virtual void setIgnoreUnexpectedOperands(bool f) = 0;
+		/**
+		 * Should the translator ignore unhandled instructions?
+		 * True -> ignore.
+		 * False -> don't ignore -> throw @c UnhandledInstructionError when
+		 * instructions without an implemented translation routine is
+		 * encountered.
+		 *
+		 * Default value: true.
+		 */
+		virtual void setIgnoreUnhandledInstructions(bool f) = 0;
+		/**
+		 * Should the translator generate pseudo assembly functions for
+		 * instructions which full semantics is not implemented?
+		 * True -> generate.
+		 * False -> don't generate.
+		 *
+		 * Default value: true.
+		 */
+		virtual void setGeneratePseudoAsmFunctions(bool f) = 0;
+
+		virtual bool isIgnoreUnexpectedOperands() const = 0;
+		virtual bool isIgnoreUnhandledInstructions() const = 0;
+		virtual bool isGeneratePseudoAsmFunctions() const = 0;
+//
+//==============================================================================
 // Mode query & modification methods.
 //==============================================================================
 //
