@@ -85,6 +85,8 @@ class BitmapImage
 		bool parseDib8Data(const ResourceIcon &icon, const struct BitmapInformationHeader &hdr);
 		bool parseDib24Data(const ResourceIcon &icon, const struct BitmapInformationHeader &hdr);
 		bool parseDib32Data(const ResourceIcon &icon, const struct BitmapInformationHeader &hdr);
+		bool parseDibPalette(const ResourceIcon &icon, std::vector<struct BitmapPixel> &palette,
+								std::uint32_t nColors);
 		void dumpImageHex() const;	// TODO delme
 		void dumpDibHeader(const struct BitmapInformationHeader &hdr) const; // TODO delme
 		/// @}
