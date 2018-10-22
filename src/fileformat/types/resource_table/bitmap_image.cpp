@@ -218,9 +218,75 @@ bool BitmapImage::parseDibHeader(const ResourceIcon &icon, struct BitmapInformat
  */
 bool BitmapImage::parseDib1Data(const ResourceIcon &icon, const struct BitmapInformationHeader &hdr)
 {
-	// TODO
-	(void)icon;
-	(void)hdr;
+	std::uint32_t paletteSize = hdr.colorsUsed;
+
+	if (paletteSize == 0)
+	{
+		paletteSize = 2;
+	}
+
+	if (paletteSize != 2)
+	{
+		return false;
+	}
+
+	std::vector<struct BitmapPixel> palette;
+	palette.reserve(paletteSize);
+
+	if (!parseDibPalette(icon, palette, paletteSize))
+	{
+		return false;
+	}
+
+	std::vector<std::uint8_t> bytes;
+	std::uint32_t nColumns = hdr.width;
+	std::uint32_t nRows = hdr.height / 2;
+	std::size_t nBytesInRow = ((hdr.bitCount * nColumns + 31) / 32) * 4;         // 4 Byte alignment
+	std::size_t nBytes = nBytesInRow * nRows;
+	std::uint8_t padding = nBytesInRow - ((nColumns + 7) / 8);
+
+	image.reserve(nRows);
+	bytes.reserve(nBytes);
+
+	if (!icon.getBytes(bytes, hdr.headerSize() + paletteSize, nBytes) || bytes.size() != nBytes)
+	{
+		return false;
+	}
+
+	std::size_t offset = 0;
+
+	for (std::size_t i = 0; i < nRows; i++)
+	{
+		std::vector<struct BitmapPixel> row;
+		row.reserve(nColumns);
+
+		for (std::size_t j = 0; j < nColumns / 8; j++)
+		{
+			for (auto bit = 7; bit >= 0; bit--)
+			{
+				auto idx = (bytes[offset] >> bit) & 0x01;
+				row.push_back(palette[idx]);
+			}
+
+			offset++;
+		}
+
+		int8_t rest = nColumns % 8;
+		if (rest)
+		{
+			for (auto bit = 7; bit > 7 - rest; bit--)
+			{
+				auto idx = (bytes[offset] >> bit) & 0x01;
+				row.push_back(palette[idx]);
+			}
+			
+			offset++;
+		}
+
+		offset += padding;
+		image.push_back(std::move(row));
+	}
+
 	return true;
 }
 
@@ -252,36 +318,45 @@ bool BitmapImage::parseDib4Data(const ResourceIcon &icon, const struct BitmapInf
 		return false;
 	}
 
-	// std::vector<std::uint8_t> bytes;
-	// std::uint32_t nColumns = hdr.width;
-	// std::uint32_t nRows = hdr.height / 2;
-	// std::size_t nBytesInRow = ((hdr.bitCount * nColumns + 31) / 32) * 4;         // 4 Byte alignment
-	// std::size_t nBytes = nBytesInRow * nRows;
-	// std::uint8_t padding = nBytesInRow - (nColumns * hdr.bitCount / 8);
-	// std::uint8_t bytesPP = hdr.bitCount / 8;
+	std::vector<std::uint8_t> bytes;
+	std::uint32_t nColumns = hdr.width;
+	std::uint32_t nRows = hdr.height / 2;
+	std::size_t nBytesInRow = ((hdr.bitCount * nColumns + 31) / 32) * 4;         // 4 Byte alignment
+	std::size_t nBytes = nBytesInRow * nRows;
+	std::uint8_t padding = nBytesInRow - ((nColumns + 1) / 2);
 
-	// image.reserve(nRows);
-	// bytes.reserve(nBytes);
+	image.reserve(nRows);
+	bytes.reserve(nBytes);
 
-	// if (!icon.getBytes(bytes, hdr.headerSize() + paletteSize, nBytes) || bytes.size() != nBytes)
-	// {
-	// 	return false;
-	// }
+	if (!icon.getBytes(bytes, hdr.headerSize() + paletteSize, nBytes) || bytes.size() != nBytes)
+	{
+		return false;
+	}
 
-	// for (std::size_t i = 0; i < nRows; i++)
-	// {
-	// 	std::vector<struct BitmapPixel> row;
-	// 	row.reserve(nColumns);
+	std::size_t offset = 0;
 
-	// 	for (std::size_t j = 0; j < nColumns; j++)
-	// 	{
-	// 		row.push_back(palette[bytes[offset]]);
-	// 		offset += bytesPP;
-	// 	}
+	for (std::size_t i = 0; i < nRows; i++)
+	{
+		std::vector<struct BitmapPixel> row;
+		row.reserve(nColumns);
 
-	// 	offset += padding;
-	// 	image.push_back(std::move(row));
-	// }
+		for (std::size_t j = 0; j < nColumns / 2; j++)
+		{
+			row.push_back(palette[bytes[offset] >> 4]);                         // upper 4 bits
+			row.push_back(palette[bytes[offset] & 0x0F]);                       // lower 4 bits
+			offset++;
+		}
+
+		auto rest = nColumns % 2;
+		if (rest)
+		{
+			row.push_back(palette[bytes[offset] >> 4]);
+			offset++;
+		}
+
+		offset += padding;
+		image.push_back(std::move(row));
+	}
 
 	return true;
 }
@@ -319,8 +394,8 @@ bool BitmapImage::parseDib8Data(const ResourceIcon &icon, const struct BitmapInf
 	std::uint32_t nRows = hdr.height / 2;
 	std::size_t nBytesInRow = ((hdr.bitCount * nColumns + 31) / 32) * 4;         // 4 Byte alignment
 	std::size_t nBytes = nBytesInRow * nRows;
-	std::uint8_t padding = nBytesInRow - (nColumns * hdr.bitCount / 8);
 	std::uint8_t bytesPP = hdr.bitCount / 8;
+	std::uint8_t padding = nBytesInRow - (nColumns * bytesPP);
 
 	image.reserve(nRows);
 	bytes.reserve(nBytes);
@@ -329,6 +404,8 @@ bool BitmapImage::parseDib8Data(const ResourceIcon &icon, const struct BitmapInf
 	{
 		return false;
 	}
+
+	std::size_t offset = 0;
 
 	for (std::size_t i = 0; i < nRows; i++)
 	{
@@ -366,8 +443,8 @@ bool BitmapImage::parseDib24Data(const ResourceIcon &icon, const struct BitmapIn
 	std::uint32_t nRows = hdr.height / 2;
 	std::size_t nBytesInRow = ((hdr.bitCount * nColumns + 31) / 32) * 4;         // 4 Byte alignment
 	std::size_t nBytes = nBytesInRow * nRows;
-	std::uint8_t padding = nBytesInRow - (nColumns * hdr.bitCount / 8);
 	std::uint8_t bytesPP = hdr.bitCount / 8;
+	std::uint8_t padding = nBytesInRow - (nColumns * bytesPP);
 
 	image.reserve(nRows);
 	bytes.reserve(nBytes);
@@ -467,6 +544,8 @@ bool BitmapImage::parseDibPalette(const ResourceIcon &icon, std::vector<struct B
 	{
 		palette.emplace_back(bytes[i], bytes[i + 1], bytes[i + 2], bytes[i + 3]);
 	}
+
+	return true;
 }
 
 void BitmapImage::dumpImageHex() const	// TODO delme
