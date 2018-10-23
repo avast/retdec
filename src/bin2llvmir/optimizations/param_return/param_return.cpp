@@ -517,6 +517,9 @@ void DataFlowEntry::addArgLoads()
 					&& added.find(ptr) == added.end())
 			{
 				args.push_back(ptr);
+				if (_abi->isRegister(ptr))
+					regArgs.push_back(ptr);
+
 				added.insert(ptr);
 			}
 		}
@@ -1723,8 +1726,9 @@ void DataFlowEntry::setArgumentTypes()
 				break;
 			}
 		}
+		std::vector<Value*> &a = args.empty() ? ce->possibleArgs : args;
 
-		for (auto st: ce->possibleArgs)
+		for (auto st: a)
 		{
 			auto op = st;
 
