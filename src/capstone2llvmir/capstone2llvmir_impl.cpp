@@ -1473,12 +1473,6 @@ llvm::Value* Capstone2LlvmIrTranslator_impl<CInsn, CInsnOp>::generateTypeConvers
 		llvm::Type* to,
 		eOpConv ct)
 {
-	if (from == nullptr)
-	{
-		std::cout << "shit" << std::endl;
-		exit(1);
-	}
-
 	if (to == nullptr || from->getType() == to)
 	{
 		return from;
@@ -1490,19 +1484,52 @@ llvm::Value* Capstone2LlvmIrTranslator_impl<CInsn, CInsnOp>::generateTypeConvers
 	{
 		case eOpConv::SEXT_TRUNC:
 		{
-			if (from->getType()->isFloatingPointTy())
+			if (from->getType()->isIntegerTy() && to->isIntegerTy())
+			{
+				ret = irb.CreateSExtOrTrunc(from, to);
+			}
+			else if (from->getType()->isFloatingPointTy()
+					&& to->isFloatingPointTy())
 			{
 				ret = irb.CreateFPCast(from, to);
 			}
+			else if (from->getType()->isIntegerTy() && to->isFloatingPointTy())
+			{
+				ret = irb.CreateSIToFP(from, to);
+			}
+			else if (from->getType()->isFloatingPointTy() && to->isIntegerTy())
+			{
+				ret = irb.CreateFPToSI(from, to);
+			}
 			else
 			{
-				ret = irb.CreateSExtOrTrunc(from, to);
+				throw GenericError("Unhandled eOpConv::SEXT_TRUNC conversion.");
 			}
 			break;
 		}
 		case eOpConv::ZEXT_TRUNC:
 		{
-			ret = irb.CreateZExtOrTrunc(from, to);
+			if (from->getType()->isIntegerTy() && to->isIntegerTy())
+			{
+				ret = irb.CreateZExtOrTrunc(from, to);
+			}
+			else if (from->getType()->isFloatingPointTy()
+					&& to->isFloatingPointTy())
+			{
+				ret = irb.CreateFPCast(from, to);
+			}
+			else if (from->getType()->isIntegerTy() && to->isFloatingPointTy())
+			{
+				ret = irb.CreateUIToFP(from, to);
+			}
+			else if (from->getType()->isFloatingPointTy() && to->isIntegerTy())
+			{
+				ret = irb.CreateFPToUI(from, to);
+			}
+			else
+			{
+				throw GenericError("Unhandled eOpConv::ZEXT_TRUNC conversion.");
+			}
 			break;
 		}
 		case eOpConv::FP_CAST:

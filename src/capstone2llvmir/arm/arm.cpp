@@ -70,34 +70,10 @@ void Capstone2LlvmIrTranslatorArm_impl::generateDataLayout()
 
 void Capstone2LlvmIrTranslatorArm_impl::generateRegisters()
 {
-	// General purpose registers.
-	//
-	createRegister(ARM_REG_R0, _regLt);
-	createRegister(ARM_REG_R1, _regLt);
-	createRegister(ARM_REG_R2, _regLt);
-	createRegister(ARM_REG_R3, _regLt);
-	createRegister(ARM_REG_R4, _regLt);
-	createRegister(ARM_REG_R5, _regLt);
-	createRegister(ARM_REG_R6, _regLt);
-	createRegister(ARM_REG_R7, _regLt);
-	createRegister(ARM_REG_R8, _regLt);
-	createRegister(ARM_REG_R9, _regLt);
-	createRegister(ARM_REG_R10, _regLt);
-	createRegister(ARM_REG_R11, _regLt);
-	createRegister(ARM_REG_R12, _regLt);
-
-	// Special registers.
-	//
-	createRegister(ARM_REG_SP, _regLt);
-	createRegister(ARM_REG_LR, _regLt);
-	createRegister(ARM_REG_PC, _regLt);
-
-	// CPSR flags.
-	//
-	createRegister(ARM_REG_CPSR_N, _regLt);
-	createRegister(ARM_REG_CPSR_Z, _regLt);
-	createRegister(ARM_REG_CPSR_C, _regLt);
-	createRegister(ARM_REG_CPSR_V, _regLt);
+	for (auto& p : _reg2type)
+	{
+		createRegister(p.first, _regLt);
+	}
 }
 
 uint32_t Capstone2LlvmIrTranslatorArm_impl::getCarryRegister()
@@ -113,16 +89,6 @@ void Capstone2LlvmIrTranslatorArm_impl::translateInstruction(
 
 	cs_detail* d = i->detail;
 	cs_arm* ai = &d->arm;
-
-	if (!(ai->vector_size == 0
-			&& ai->vector_data == ARM_VECTORDATA_INVALID
-			&& ai->cps_mode == ARM_CPSMODE_INVALID
-			&& ai->cps_flag == ARM_CPSFLAG_INVALID
-			&& ai->mem_barrier == ARM_MB_INVALID))
-	{
-		throwUnhandledInstructions(i);
-		return;
-	}
 
 	auto fIt = _i2fm.find(i->id);
 	if (fIt != _i2fm.end() && fIt->second != nullptr)
@@ -400,11 +366,6 @@ llvm::Value* Capstone2LlvmIrTranslatorArm_impl::loadOp(
 		llvm::Type* ty,
 		bool lea)
 {
-	if (!(op.vector_index == -1 && op.neon_lane == -1))
-	{
-		return nullptr;
-	}
-
 	switch (op.type)
 	{
 		case ARM_OP_SYSREG:
@@ -414,6 +375,8 @@ llvm::Value* Capstone2LlvmIrTranslatorArm_impl::loadOp(
 			return generateOperandShift(irb, op, val);
 		}
 		case ARM_OP_IMM:
+		case ARM_OP_PIMM:
+		case ARM_OP_CIMM:
 		{
 			auto* val = llvm::ConstantInt::getSigned(getDefaultType(), op.imm);
 			return generateOperandShift(irb, op, val);
@@ -505,8 +468,9 @@ llvm::Value* Capstone2LlvmIrTranslatorArm_impl::loadOp(
 			return generateOperandShift(irb, op, val);
 		}
 		case ARM_OP_SETEND:
-		case ARM_OP_PIMM:
-		case ARM_OP_CIMM:
+		{
+			return llvm::UndefValue::get(getDefaultType());
+		}
 		case ARM_OP_INVALID:
 		default:
 		{
@@ -640,16 +604,21 @@ llvm::Instruction* Capstone2LlvmIrTranslatorArm_impl::storeOp(
 			addr = irb.CreateIntToPtr(addr, pt);
 			return irb.CreateStore(val, addr);
 		}
+		case ARM_OP_PIMM:
+		case ARM_OP_CIMM:
+		{
+			return nullptr;
+		}
 		case ARM_OP_FP:
 		case ARM_OP_IMM:
 		case ARM_OP_SETEND:
-		case ARM_OP_PIMM:
-		case ARM_OP_CIMM:
 		case ARM_OP_INVALID:
 		default:
 		{
 			throw GenericError("unhandled value");
 		}
+
+//		auto* undef = llvm::UndefValue::get(getRegisterType(r));
 	}
 }
 
@@ -779,6 +748,8 @@ void Capstone2LlvmIrTranslatorArm_impl::translatePseudoAsmGeneric(
 	std::vector<llvm::Value*> vals;
 	std::vector<llvm::Type*> types;
 
+	unsigned writeCnt = 0;
+	llvm::Type* writeType = getDefaultType();
 	bool writesOp = false;
 	for (std::size_t j = 0; j < ci->op_count; ++j)
 	{
@@ -789,9 +760,28 @@ void Capstone2LlvmIrTranslatorArm_impl::translatePseudoAsmGeneric(
 			vals.push_back(o);
 			types.push_back(o->getType());
 		}
-		else if (op.access & CS_AC_WRITE)
+
+		if (op.access & CS_AC_WRITE)
 		{
 			writesOp = true;
+			++writeCnt;
+
+			if (op.type == ARM_OP_REG)
+			{
+				auto* t = getRegisterType(op.reg);
+				if (writeCnt == 1 || writeType == t)
+				{
+					writeType = t;
+				}
+				else
+				{
+					writeType = getDefaultType();
+				}
+			}
+			else
+			{
+				writeType = getDefaultType();
+			}
 		}
 	}
 
@@ -805,7 +795,7 @@ void Capstone2LlvmIrTranslatorArm_impl::translatePseudoAsmGeneric(
 		}
 	}
 
-	auto* retType = writesOp ? getDefaultType() : irb.getVoidTy();
+	auto* retType = writesOp ? writeType : irb.getVoidTy();
 	llvm::Function* fnc = getPseudoAsmFunction(
 			i,
 			retType,
@@ -813,13 +803,7 @@ void Capstone2LlvmIrTranslatorArm_impl::translatePseudoAsmGeneric(
 
 	auto* c = irb.CreateCall(fnc, vals);
 
-	for (std::size_t j = 0; j < i->detail->regs_write_count; ++j)
-	{
-		auto r = i->detail->regs_write[j];
-		auto* undef = llvm::UndefValue::get(getRegisterType(r));
-		storeRegister(r, undef, irb);
-	}
-
+	std::set<uint32_t> writtenRegs;
 	if (retType)
 	{
 		for (std::size_t j = 0; j < ci->op_count; ++j)
@@ -828,7 +812,25 @@ void Capstone2LlvmIrTranslatorArm_impl::translatePseudoAsmGeneric(
 			if (op.access & CS_AC_WRITE)
 			{
 				storeOp(op, c, irb);
+
+				if (op.type == ARM_OP_REG || op.type == ARM_OP_SYSREG)
+				{
+					writtenRegs.insert(op.reg);
+				}
 			}
+		}
+	}
+
+	for (std::size_t j = 0; j < i->detail->regs_write_count; ++j)
+	{
+		auto r = i->detail->regs_write[j];
+		if (writtenRegs.find(r) == writtenRegs.end())
+		{
+			llvm::Value* val = retType->isVoidTy()
+					? llvm::cast<llvm::Value>(
+							llvm::UndefValue::get(getRegisterType(r)))
+					: llvm::cast<llvm::Value>(c);
+			storeRegister(r, val, irb);
 		}
 	}
 }

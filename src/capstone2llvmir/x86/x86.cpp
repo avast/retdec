@@ -192,7 +192,9 @@ llvm::Function* Capstone2LlvmIrTranslatorX86_impl::getX87TagLoadFunction() const
  */
 uint32_t Capstone2LlvmIrTranslatorX86_impl::getParentRegister(uint32_t r) const
 {
-	return r < _reg2parentMap.size() ? _reg2parentMap[r] : r;
+	return r < _reg2parentMap.size()
+			? (_reg2parentMap[r] != X86_REG_INVALID ? _reg2parentMap[r] : r)
+			: r;
 }
 
 //
@@ -461,6 +463,130 @@ void Capstone2LlvmIrTranslatorX86_impl::generateRegistersCommon()
 	createRegister(X87_REG_TAG6, _regLt);
 	createRegister(X87_REG_TAG7, _regLt);
 
+	// 64-bit FP registers.
+	//
+	createRegister(X86_REG_FP0, _regLt);
+	createRegister(X86_REG_FP1, _regLt);
+	createRegister(X86_REG_FP2, _regLt);
+	createRegister(X86_REG_FP3, _regLt);
+	createRegister(X86_REG_FP4, _regLt);
+	createRegister(X86_REG_FP5, _regLt);
+	createRegister(X86_REG_FP6, _regLt);
+	createRegister(X86_REG_FP7, _regLt);
+
+	// MMX.
+	//
+	createRegister(X86_REG_MM0, _regLt);
+	createRegister(X86_REG_MM1, _regLt);
+	createRegister(X86_REG_MM2, _regLt);
+	createRegister(X86_REG_MM3, _regLt);
+	createRegister(X86_REG_MM4, _regLt);
+	createRegister(X86_REG_MM5, _regLt);
+	createRegister(X86_REG_MM6, _regLt);
+	createRegister(X86_REG_MM7, _regLt);
+
+	// XMM.
+	createRegister(X86_REG_XMM0, _regLt);
+	createRegister(X86_REG_XMM1, _regLt);
+	createRegister(X86_REG_XMM2, _regLt);
+	createRegister(X86_REG_XMM3, _regLt);
+	createRegister(X86_REG_XMM4, _regLt);
+	createRegister(X86_REG_XMM5, _regLt);
+	createRegister(X86_REG_XMM6, _regLt);
+	createRegister(X86_REG_XMM7, _regLt);
+	createRegister(X86_REG_XMM8, _regLt);
+	createRegister(X86_REG_XMM9, _regLt);
+	createRegister(X86_REG_XMM10, _regLt);
+	createRegister(X86_REG_XMM11, _regLt);
+	createRegister(X86_REG_XMM12, _regLt);
+	createRegister(X86_REG_XMM13, _regLt);
+	createRegister(X86_REG_XMM14, _regLt);
+	createRegister(X86_REG_XMM15, _regLt);
+	createRegister(X86_REG_XMM16, _regLt);
+	createRegister(X86_REG_XMM17, _regLt);
+	createRegister(X86_REG_XMM18, _regLt);
+	createRegister(X86_REG_XMM19, _regLt);
+	createRegister(X86_REG_XMM20, _regLt);
+	createRegister(X86_REG_XMM21, _regLt);
+	createRegister(X86_REG_XMM22, _regLt);
+	createRegister(X86_REG_XMM23, _regLt);
+	createRegister(X86_REG_XMM24, _regLt);
+	createRegister(X86_REG_XMM25, _regLt);
+	createRegister(X86_REG_XMM26, _regLt);
+	createRegister(X86_REG_XMM27, _regLt);
+	createRegister(X86_REG_XMM28, _regLt);
+	createRegister(X86_REG_XMM29, _regLt);
+	createRegister(X86_REG_XMM30, _regLt);
+	createRegister(X86_REG_XMM31, _regLt);
+
+	// YMM.
+	createRegister(X86_REG_YMM0, _regLt);
+	createRegister(X86_REG_YMM1, _regLt);
+	createRegister(X86_REG_YMM2, _regLt);
+	createRegister(X86_REG_YMM3, _regLt);
+	createRegister(X86_REG_YMM4, _regLt);
+	createRegister(X86_REG_YMM5, _regLt);
+	createRegister(X86_REG_YMM6, _regLt);
+	createRegister(X86_REG_YMM7, _regLt);
+	createRegister(X86_REG_YMM8, _regLt);
+	createRegister(X86_REG_YMM9, _regLt);
+	createRegister(X86_REG_YMM10, _regLt);
+	createRegister(X86_REG_YMM11, _regLt);
+	createRegister(X86_REG_YMM12, _regLt);
+	createRegister(X86_REG_YMM13, _regLt);
+	createRegister(X86_REG_YMM14, _regLt);
+	createRegister(X86_REG_YMM15, _regLt);
+	createRegister(X86_REG_YMM16, _regLt);
+	createRegister(X86_REG_YMM17, _regLt);
+	createRegister(X86_REG_YMM18, _regLt);
+	createRegister(X86_REG_YMM19, _regLt);
+	createRegister(X86_REG_YMM20, _regLt);
+	createRegister(X86_REG_YMM21, _regLt);
+	createRegister(X86_REG_YMM22, _regLt);
+	createRegister(X86_REG_YMM23, _regLt);
+	createRegister(X86_REG_YMM24, _regLt);
+	createRegister(X86_REG_YMM25, _regLt);
+	createRegister(X86_REG_YMM26, _regLt);
+	createRegister(X86_REG_YMM27, _regLt);
+	createRegister(X86_REG_YMM28, _regLt);
+	createRegister(X86_REG_YMM29, _regLt);
+	createRegister(X86_REG_YMM30, _regLt);
+	createRegister(X86_REG_YMM31, _regLt);
+
+	// ZMM.
+	createRegister(X86_REG_ZMM0, _regLt);
+	createRegister(X86_REG_ZMM1, _regLt);
+	createRegister(X86_REG_ZMM2, _regLt);
+	createRegister(X86_REG_ZMM3, _regLt);
+	createRegister(X86_REG_ZMM4, _regLt);
+	createRegister(X86_REG_ZMM5, _regLt);
+	createRegister(X86_REG_ZMM6, _regLt);
+	createRegister(X86_REG_ZMM7, _regLt);
+	createRegister(X86_REG_ZMM8, _regLt);
+	createRegister(X86_REG_ZMM9, _regLt);
+	createRegister(X86_REG_ZMM10, _regLt);
+	createRegister(X86_REG_ZMM11, _regLt);
+	createRegister(X86_REG_ZMM12, _regLt);
+	createRegister(X86_REG_ZMM13, _regLt);
+	createRegister(X86_REG_ZMM14, _regLt);
+	createRegister(X86_REG_ZMM15, _regLt);
+	createRegister(X86_REG_ZMM16, _regLt);
+	createRegister(X86_REG_ZMM17, _regLt);
+	createRegister(X86_REG_ZMM18, _regLt);
+	createRegister(X86_REG_ZMM19, _regLt);
+	createRegister(X86_REG_ZMM20, _regLt);
+	createRegister(X86_REG_ZMM21, _regLt);
+	createRegister(X86_REG_ZMM22, _regLt);
+	createRegister(X86_REG_ZMM23, _regLt);
+	createRegister(X86_REG_ZMM24, _regLt);
+	createRegister(X86_REG_ZMM25, _regLt);
+	createRegister(X86_REG_ZMM26, _regLt);
+	createRegister(X86_REG_ZMM27, _regLt);
+	createRegister(X86_REG_ZMM28, _regLt);
+	createRegister(X86_REG_ZMM29, _regLt);
+	createRegister(X86_REG_ZMM30, _regLt);
+	createRegister(X86_REG_ZMM31, _regLt);
+
 	// Debug registers.
 	//
 	createRegister(X86_REG_DR0, _regLt);
@@ -471,6 +597,14 @@ void Capstone2LlvmIrTranslatorX86_impl::generateRegistersCommon()
 	createRegister(X86_REG_DR5, _regLt);
 	createRegister(X86_REG_DR6, _regLt);
 	createRegister(X86_REG_DR7, _regLt);
+	createRegister(X86_REG_DR8, _regLt);
+	createRegister(X86_REG_DR9, _regLt);
+	createRegister(X86_REG_DR10, _regLt);
+	createRegister(X86_REG_DR11, _regLt);
+	createRegister(X86_REG_DR12, _regLt);
+	createRegister(X86_REG_DR13, _regLt);
+	createRegister(X86_REG_DR14, _regLt);
+	createRegister(X86_REG_DR15, _regLt);
 
 	// Control registers.
 	//
@@ -490,6 +624,8 @@ void Capstone2LlvmIrTranslatorX86_impl::generateRegistersCommon()
 	createRegister(X86_REG_CR13, _regLt);
 	createRegister(X86_REG_CR14, _regLt);
 	createRegister(X86_REG_CR15, _regLt);
+
+	createRegister(X86_REG_FPSW, _regLt);
 }
 
 void Capstone2LlvmIrTranslatorX86_impl::generateRegisters16()
@@ -1516,6 +1652,8 @@ void Capstone2LlvmIrTranslatorX86_impl::translatePseudoAsmGeneric(
 	std::vector<llvm::Value*> vals;
 	std::vector<llvm::Type*> types;
 
+	unsigned writeCnt = 0;
+	llvm::Type* writeType = getDefaultType();
 	bool writesOp = false;
 	for (std::size_t j = 0; j < ci->op_count; ++j)
 	{
@@ -1526,9 +1664,28 @@ void Capstone2LlvmIrTranslatorX86_impl::translatePseudoAsmGeneric(
 			vals.push_back(o);
 			types.push_back(o->getType());
 		}
-		else if (op.access & CS_AC_WRITE)
+
+		if (op.access & CS_AC_WRITE)
 		{
 			writesOp = true;
+			++writeCnt;
+
+			if (op.type == X86_OP_REG)
+			{
+				auto* t = getRegisterType(op.reg);
+				if (writeCnt == 1 || writeType == t)
+				{
+					writeType = t;
+				}
+				else
+				{
+					writeType = getDefaultType();
+				}
+			}
+			else
+			{
+				writeType = getDefaultType();
+			}
 		}
 	}
 
@@ -1542,7 +1699,7 @@ void Capstone2LlvmIrTranslatorX86_impl::translatePseudoAsmGeneric(
 		}
 	}
 
-	auto* retType = writesOp ? getDefaultType() : irb.getVoidTy();
+	auto* retType = writesOp ? writeType : irb.getVoidTy();
 	llvm::Function* fnc = getPseudoAsmFunction(
 			i,
 			retType,
@@ -1550,13 +1707,7 @@ void Capstone2LlvmIrTranslatorX86_impl::translatePseudoAsmGeneric(
 
 	auto* c = irb.CreateCall(fnc, vals);
 
-	for (std::size_t j = 0; j < i->detail->regs_write_count; ++j)
-	{
-		auto r = i->detail->regs_write[j];
-		auto* undef = llvm::UndefValue::get(getRegisterType(r));
-		storeRegister(r, undef, irb);
-	}
-
+	std::set<uint32_t> writtenRegs;
 	if (retType)
 	{
 		for (std::size_t j = 0; j < ci->op_count; ++j)
@@ -1565,7 +1716,25 @@ void Capstone2LlvmIrTranslatorX86_impl::translatePseudoAsmGeneric(
 			if (op.access & CS_AC_WRITE)
 			{
 				storeOp(op, c, irb);
+
+				if (op.type == X86_OP_REG)
+				{
+					writtenRegs.insert(op.reg);
+				}
 			}
+		}
+	}
+
+	for (std::size_t j = 0; j < i->detail->regs_write_count; ++j)
+	{
+		auto r = i->detail->regs_write[j];
+		if (writtenRegs.find(r) == writtenRegs.end())
+		{
+			llvm::Value* val = retType->isVoidTy()
+					? llvm::cast<llvm::Value>(
+							llvm::UndefValue::get(getRegisterType(r)))
+					: llvm::cast<llvm::Value>(c);
+			storeRegister(r, val, irb);
 		}
 	}
 }
@@ -2663,6 +2832,9 @@ void Capstone2LlvmIrTranslatorX86_impl::translateNeg(cs_insn* i, cs_x86* xi, llv
 /**
  * X86_INS_NOP, X86_INS_UD2, X86_INS_UD2B, X86_INS_FNOP, X86_INS_FDISI8087_NOP,
  * X86_INS_FENI8087_NOP
+ *
+ * X86_INS_FNSTCW - ignore FPU control word store.
+ * X86_INS_FLDCW - ignore FPU control word load.
  *
  * Complete list from the old semantics:
  * IRETD, IRET, STI, CLI, VERR, VERW, LMSW, LTR,

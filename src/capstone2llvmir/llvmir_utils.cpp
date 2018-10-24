@@ -4,6 +4,8 @@
  * @copyright (c) 2018 Avast Software, licensed under the MIT license
  */
 
+#include <iostream>
+
 #include "capstone2llvmir/llvmir_utils.h"
 #include "retdec/capstone2llvmir/exceptions.h"
 
@@ -17,18 +19,8 @@ llvm::Value* generateValueNegate(llvm::IRBuilder<>& irb, llvm::Value* val)
 
 llvm::IntegerType* getIntegerTypeFromByteSize(llvm::Module* module, unsigned sz)
 {
-	auto& ctx = module->getContext();
-	switch (sz)
-	{
-		case 1: return llvm::Type::getInt8Ty(ctx);
-		case 2: return llvm::Type::getInt16Ty(ctx);
-		case 4: return llvm::Type::getInt32Ty(ctx);
-		case 6: return llvm::Type::getIntNTy(ctx, 48);
-		case 8: return llvm::Type::getInt64Ty(ctx);
-		default:
-			throw GenericError("Unhandled value in getIntegerTypeFromByteSize().");
-			return llvm::Type::getInt32Ty(ctx);
-	}
+	sz = sz ? 8*sz : module->getDataLayout().getPointerSizeInBits();
+	return llvm::Type::getIntNTy(module->getContext(), sz);
 }
 
 llvm::Type* getFloatTypeFromByteSize(llvm::Module* module, unsigned sz)
