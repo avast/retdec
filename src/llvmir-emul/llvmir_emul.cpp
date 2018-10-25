@@ -1066,6 +1066,10 @@ GenericValue executeFPTruncInst(
 	{
 		Dest.FloatVal = static_cast<float>(Src.DoubleVal);
 	}
+	else if (SrcVal->getType()->isX86_FP80Ty() && DstTy->isFloatTy())
+	{
+		Dest.FloatVal = static_cast<float>(Src.DoubleVal);
+	}
 	else if (SrcVal->getType()->isX86_FP80Ty() && DstTy->isDoubleTy())
 	{
 		Dest.DoubleVal = Src.DoubleVal;
@@ -1097,7 +1101,8 @@ GenericValue executeFPExtInst(
 		for (unsigned i = 0; i < size; i++)
 			Dest.AggregateVal[i].DoubleVal = static_cast<double>(Src.AggregateVal[i].FloatVal);
 	}
-	else if (SrcVal->getType()->isFloatTy() && DstTy->isDoubleTy())
+	else if (SrcVal->getType()->isFloatTy()
+			&& (DstTy->isDoubleTy() || DstTy->isX86_FP80Ty()))
 	{
 		Dest.DoubleVal = static_cast<double>(Src.FloatVal);
 	}

@@ -1,7 +1,7 @@
 version: '{build}'
 
 environment:
-  WINFLEXBISON_ARCHIVE: win_flex_bison-2.5.14.zip
+  WINFLEXBISON_ARCHIVE: winflexbison-2.5.16.zip
   matrix:
     - CMAKE_GENERATOR: Visual Studio 14 2015 Win64
       APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
@@ -24,7 +24,8 @@ build_script:
   - cmd: cmake --build . --config Release --target install -- -m
 
 test_script:
-  # Check that install is movable and that it does not need the build directory.
+  # Check that the installation directory is movable and that it does not need
+  # the build directory.
   - cmd: mv install ../retdec-install
   - cmd: cd ..
   # Run unit tests.

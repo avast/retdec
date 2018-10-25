@@ -17,6 +17,7 @@ retdec_signature_from_library_creator = importlib.import_module('retdec-signatur
 retdec_unpacker = importlib.import_module('retdec-unpacker')
 utils = importlib.import_module('retdec-utils')
 utils.check_python_version()
+utils.ensure_script_is_being_run_from_installed_retdec()
 
 SigFromLib = retdec_signature_from_library_creator.SigFromLib
 Unpacker = retdec_unpacker.Unpacker
@@ -80,7 +81,7 @@ def parse_args(args):
     parser.add_argument('--generate-log',
                         dest='generate_log',
                         action='store_true',
-                        help='Generate log')
+                        help=argparse.SUPPRESS)
 
     parser.add_argument('--ar-index',
                         dest='ar_index',

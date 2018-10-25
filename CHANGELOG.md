@@ -2,7 +2,11 @@
 
 # dev
 
-* Enhancement: Redesign output files naming scheme ([#132](https://github.com/avast-tl/retdec/issues/132)). 
+* Fix: Fixed handling of pointers with segment overrides, including loads/stores from/to zero (null) pointers ([#41](https://github.com/avast-tl/retdec/issues/41), [#169](https://github.com/avast-tl/retdec/issues/169), [#347](https://github.com/avast-tl/retdec/issues/347), [#376](https://github.com/avast-tl/retdec/issues/376), [#391](https://github.com/avast-tl/retdec/pull/391)).
+* Fix: Fixed translation of x86 FPU instructions to LLVM IR ([#293](https://github.com/avast-tl/retdec/issues/293)).
+* Enhancement: Removed the build and runtime dependency on ncurses/libtinfo ([#409](https://github.com/avast-tl/retdec/pull/409)).
+* Enhancement: Add a check into our scripts that they are run from an installation directory and not from the `scripts` directory ([#418](https://github.com/avast-tl/retdec/issues/418)).
+* Enhancement: Redesign output files naming scheme ([#132](https://github.com/avast-tl/retdec/issues/132)).
 
 # v3.2 (2018-08-16)
 

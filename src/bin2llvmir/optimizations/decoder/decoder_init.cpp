@@ -137,14 +137,21 @@ void Decoder::initEnvironmentPseudoFunctions()
 
 	if (auto* c2lX86 = dynamic_cast<Capstone2LlvmIrTranslatorX86*>(_c2l.get()))
 	{
-		c2lX86->getX87DataLoadFunction()->setName(
-				names::pseudoX87dataLoadFunction);
-		c2lX86->getX87TagLoadFunction()->setName(
-				names::pseudoX87tagLoadFunction);
-		c2lX86->getX87DataStoreFunction()->setName(
-				names::pseudoX87dataStoreFunction);
-		c2lX86->getX87TagStoreFunction()->setName(
-				names::pseudoX87tagStoreFunction);
+		auto* dl = c2lX86->getX87DataLoadFunction();
+		dl->setName(names::pseudoX87dataLoadFunction);
+		_config->setLlvmX87DataLoadPseudoFunction(dl);
+
+		auto* tl = c2lX86->getX87TagLoadFunction();
+		tl->setName(names::pseudoX87tagLoadFunction);
+		_config->setLlvmX87TagLoadPseudoFunction(tl);
+
+		auto* ds = c2lX86->getX87DataStoreFunction();
+		ds->setName(names::pseudoX87dataStoreFunction);
+		_config->setLlvmX87DataStorePseudoFunction(ds);
+
+		auto* ts = c2lX86->getX87TagStoreFunction();
+		ts->setName(names::pseudoX87tagStoreFunction);
+		_config->setLlvmX87TagStorePseudoFunction(ts);
 	}
 }
 

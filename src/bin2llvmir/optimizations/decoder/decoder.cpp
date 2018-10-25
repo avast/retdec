@@ -1461,10 +1461,13 @@ void Decoder::finalizePseudoCalls()
 		{
 			continue;
 		}
-		if (!_c2l->isCallFunctionCall(pseudo)
-				&& !_c2l->isReturnFunctionCall(pseudo)
-				&& !_c2l->isBranchFunctionCall(pseudo)
-				&& !_c2l->isCondBranchFunctionCall(pseudo))
+
+		bool icf = _c2l->isCallFunctionCall(pseudo);
+		bool irf = _c2l->isReturnFunctionCall(pseudo);
+		bool ibf = _c2l->isBranchFunctionCall(pseudo);
+		bool icbf = _c2l->isCondBranchFunctionCall(pseudo);
+
+		if (!icf && !irf && !ibf && !icbf)
 		{
 			continue;
 		}
@@ -1494,26 +1497,27 @@ void Decoder::finalizePseudoCalls()
 			// Return address store to stack in x86 calls.
 			//
 			if (_config->getConfig().architecture.isX86()
-					&& (_c2l->isCallFunctionCall(pseudo)
-							|| _c2l->isReturnFunctionCall(pseudo)))
+					&& (icf || irf))
 			if (auto* st = dyn_cast<StoreInst>(i))
 			{
 				if (_abi->isStackPointerRegister(st->getPointerOperand())
 						|| isa<ConstantInt>(st->getValueOperand()))
 				{
 					st->eraseFromParent();
+					i = nullptr;
 				}
 			}
 
 			// Return address store to register in MIPS calls.
 			//
 			if (_config->getConfig().architecture.isMipsOrPic32()
-					&& _c2l->isCallFunctionCall(pseudo))
+					&& icf)
 			if (auto* st = dyn_cast<StoreInst>(i))
 			{
 				if (_abi->isRegister(st->getPointerOperand(), MIPS_REG_RA))
 				{
 					st->eraseFromParent();
+					i = nullptr;
 				}
 			}
 
@@ -1522,28 +1526,30 @@ void Decoder::finalizePseudoCalls()
 			// patternsPseudoCall_arm().
 			//
 			if (_config->getConfig().architecture.isArmOrThumb()
-					&& _c2l->isCallFunctionCall(pseudo))
+					&& icf)
 			if (auto* st = dyn_cast<StoreInst>(i))
 			{
 				if (_abi->isRegister(st->getPointerOperand(), ARM_REG_LR))
 				{
 					st->eraseFromParent();
+					i = nullptr;
 				}
 			}
 
-			// TOOD: again, other possible stores && r32 stores.
+			// TODO: again, other possible stores && r32 stores.
 			//
 			if (_config->getConfig().architecture.isPpc()
-					&& _c2l->isCallFunctionCall(pseudo))
+					&& icf)
 			if (auto* st = dyn_cast<StoreInst>(i))
 			{
 				if (_abi->isRegister(st->getPointerOperand(), PPC_REG_LR))
 				{
 					st->eraseFromParent();
+					i = nullptr;
 				}
 			}
 
-			if (!i->getType()->isVoidTy() && i->use_empty())
+			if (i && !i->getType()->isVoidTy() && i->use_empty())
 			{
 				i->eraseFromParent();
 			}

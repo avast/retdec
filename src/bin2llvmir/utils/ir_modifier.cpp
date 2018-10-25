@@ -71,12 +71,23 @@ Value* convertToType(
 	{
 		if (constExpr)
 		{
-			conv = ConstantExpr::getBitCast(cval, type);
+			if (val->getType()->getPointerAddressSpace() == type->getPointerAddressSpace())
+				conv = ConstantExpr::getBitCast(cval, type);
+			else
+				conv = ConstantExpr::getAddrSpaceCast(cval, type);
 		}
 		else
 		{
-			auto* i = new BitCastInst(val, type, "");
-			conv = insertBeforeAfter(i, before, after);
+			if (val->getType()->getPointerAddressSpace() == type->getPointerAddressSpace())
+			{
+				auto* i = new BitCastInst(val, type, "");
+				conv = insertBeforeAfter(i, before, after);
+			}
+			else
+			{
+				auto* i = new AddrSpaceCastInst(val, type, "");
+				conv = insertBeforeAfter(i, before, after);
+			}
 		}
 	}
 	else if (val->getType()->isPointerTy() && type->isIntegerTy())

@@ -20,7 +20,8 @@ namespace loader {
 std::shared_ptr<ClassTypeInfo> parseGccRtti(
 		const retdec::loader::Image* img,
 		RttiGcc& rttis,
-		retdec::utils::Address rttiAddr);
+		retdec::utils::Address rttiAddr,
+		std::set<retdec::utils::Address>& visited);
 
 void finalizeGccRtti(RttiGcc& rttis);
 

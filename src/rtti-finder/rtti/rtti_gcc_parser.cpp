@@ -25,9 +25,21 @@ using namespace retdec::utils;
 std::shared_ptr<retdec::rtti_finder::ClassTypeInfo> retdec::rtti_finder::parseGccRtti(
 		const retdec::loader::Image* img,
 		retdec::rtti_finder::RttiGcc& rttis,
-		retdec::utils::Address rttiAddr)
+		retdec::utils::Address rttiAddr,
+		std::set<retdec::utils::Address>& visited)
 {
 	LOG << "\n\t" << "parseGccRtti() @ " << rttiAddr << std::endl;
+
+	if (visited.count(rttiAddr))
+	{
+		LOG << "\t[FAILED] already visited - preventing infinite recursion"
+				<< std::endl << std::endl;
+		return nullptr;
+	}
+	else
+	{
+		visited.insert(rttiAddr);
+	}
 
 	auto findRtti = rttis.find(rttiAddr);
 	if (findRtti != rttis.end())
@@ -123,7 +135,7 @@ std::shared_ptr<retdec::rtti_finder::ClassTypeInfo> retdec::rtti_finder::parseGc
 	if (baseAddr.isDefined() && img->isPointer(addrOfBaseAddr)
 			&& baseAddr != rttiAddr)
 	{
-		baseRtti = parseGccRtti(img, rttis, baseAddr);
+		baseRtti = parseGccRtti(img, rttis, baseAddr, visited);
 		if (baseRtti == nullptr)
 		{
 			LOG << "\t[FAILED] parsing base rtti @ " << baseAddr << "\n";
@@ -169,7 +181,7 @@ std::shared_ptr<retdec::rtti_finder::ClassTypeInfo> retdec::rtti_finder::parseGc
 			baseRtti = nullptr;
 			if (img->isPointer(addr) && mbaseAddr != rttiAddr)
 			{
-				baseRtti = parseGccRtti(img, rttis, mbaseAddr);
+				baseRtti = parseGccRtti(img, rttis, mbaseAddr, visited);
 			}
 			if (baseRtti == nullptr)
 			{

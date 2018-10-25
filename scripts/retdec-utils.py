@@ -279,8 +279,19 @@ class Unbuffered(object):
 
 
 def check_python_version():
-    if not sys.version_info >= (3,4):
+    if sys.version_info < (3,4):
         print_error_and_die('Cannot use Python version {} ({}). Use at least Python 3.4.'.format(platform.python_version(), sys.executable))
+
+def ensure_script_is_being_run_from_installed_retdec():
+    # Use this function to assist our users when they try to run the scripts
+    # from the 'retdec/scripts' directory instead of from an installed RetDec.
+    # See https://github.com/avast-tl/retdec/issues/418
+    if not os.path.dirname(__file__).endswith('bin'):
+        print_error_and_die(
+            'You need to build and install RetDec first and then run the installed script via '
+            '`python $RETDEC_INSTALL_DIR/bin/retdec-decompiler.py`.\n'
+            'For more details, see https://github.com/avast-tl/retdec#installation-and-use'
+        )
 
 def tool_exists(tool_name):
     return shutil.which(tool_name) is not None

@@ -43,10 +43,11 @@ class ValueProtect : public llvm::ModulePass
 
 	private:
 		bool run();
-		void protect();
-		void protectStack();
-		void protectRegisters();
-		void unprotect();
+		bool protect();
+		bool protectStack();
+		bool protectRegisters();
+		bool protectLoadStores();
+		bool unprotect();
 
 		void protectValue(
 				llvm::Value* val,

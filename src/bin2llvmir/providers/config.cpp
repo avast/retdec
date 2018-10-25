@@ -128,6 +128,21 @@ retdec::config::Function* Config::getConfigFunction(
 	return _configDB.functions.getFunctionByStartAddress(startAddr);
 }
 
+llvm::Function* Config::getIntrinsicFunction(IntrinsicFunctionCreatorPtr f)
+{
+	auto fit = _intrinsicFunctions.find(f);
+	if (fit != _intrinsicFunctions.end())
+	{
+		return fit->second;
+	}
+	else
+	{
+		auto* intrinsic = f(_module);
+		_intrinsicFunctions[f] = intrinsic;
+		return intrinsic;
+	}
+}
+
 const retdec::config::Object* Config::getConfigGlobalVariable(
 		const llvm::GlobalVariable* gv)
 {
@@ -499,6 +514,92 @@ llvm::CallInst* Config::isLlvmCondBranchPseudoFunctionCall(llvm::Value* c)
 {
 	auto* cc = dyn_cast_or_null<CallInst>(c);
 	return cc && cc->getCalledValue() == _condBranchFunction ? cc : nullptr;
+}
+
+void Config::setLlvmX87DataStorePseudoFunction(llvm::Function* f)
+{
+	_x87DataStoreFunction = f;
+}
+llvm::Function* Config::getLlvmX87DataStorePseudoFunction() const
+{
+	return _x87DataStoreFunction;
+}
+bool Config::isLlvmX87DataStorePseudoFunction(llvm::Value* f)
+{
+	return _x87DataStoreFunction == f;
+}
+llvm::CallInst* Config::isLlvmX87DataStorePseudoFunctionCall(llvm::Value* c)
+{
+	auto* cc = dyn_cast_or_null<CallInst>(c);
+	return cc && cc->getCalledValue() == _x87DataStoreFunction ? cc : nullptr;
+}
+
+void Config::setLlvmX87TagStorePseudoFunction(llvm::Function* f)
+{
+	_x87TagStoreFunction = f;
+}
+llvm::Function* Config::getLlvmX87TagStorePseudoFunction() const
+{
+	return _x87TagStoreFunction;
+}
+bool Config::isLlvmX87TagStorePseudoFunction(llvm::Value* f)
+{
+	return _x87TagStoreFunction == f;
+}
+llvm::CallInst* Config::isLlvmX87TagStorePseudoFunctionCall(llvm::Value* c)
+{
+	auto* cc = dyn_cast_or_null<CallInst>(c);
+	return cc && cc->getCalledValue() == _x87TagStoreFunction ? cc : nullptr;
+}
+
+void Config::setLlvmX87DataLoadPseudoFunction(llvm::Function* f)
+{
+	_x87DataLoadFunction = f;
+}
+llvm::Function* Config::getLlvmX87DataLoadPseudoFunction() const
+{
+	return _x87DataLoadFunction;
+}
+bool Config::isLlvmX87DataLoadPseudoFunction(llvm::Value* f)
+{
+	return _x87DataLoadFunction == f;
+}
+llvm::CallInst* Config::isLlvmX87DataLoadPseudoFunctionCall(llvm::Value* c)
+{
+	auto* cc = dyn_cast_or_null<CallInst>(c);
+	return cc && cc->getCalledValue() == _x87DataLoadFunction ? cc : nullptr;
+}
+
+void Config::setLlvmX87TagLoadPseudoFunction(llvm::Function* f)
+{
+	_x87TagLoadFunction = f;
+}
+llvm::Function* Config::getLlvmX87TagLoadPseudoFunction() const
+{
+	return _x87TagLoadFunction;
+}
+bool Config::isLlvmX87TagLoadPseudoFunction(llvm::Value* f)
+{
+	return _x87TagLoadFunction == f;
+}
+llvm::CallInst* Config::isLlvmX87TagLoadPseudoFunctionCall(llvm::Value* c)
+{
+	auto* cc = dyn_cast_or_null<CallInst>(c);
+	return cc && cc->getCalledValue() == _x87TagLoadFunction ? cc : nullptr;
+}
+
+llvm::CallInst* Config::isLlvmX87StorePseudoFunctionCall(llvm::Value* c)
+{
+	if (auto* cc = isLlvmX87DataStorePseudoFunctionCall(c)) return cc;
+	if (auto* cc = isLlvmX87TagStorePseudoFunctionCall(c)) return cc;
+	return nullptr;
+}
+
+llvm::CallInst* Config::isLlvmX87LoadPseudoFunctionCall(llvm::Value* c)
+{
+	if (auto* cc = isLlvmX87DataLoadPseudoFunctionCall(c)) return cc;
+	if (auto* cc = isLlvmX87TagLoadPseudoFunctionCall(c)) return cc;
+	return nullptr;
 }
 
 llvm::CallInst* Config::isLlvmAnyBranchPseudoFunctionCall(llvm::Value* c)
