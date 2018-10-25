@@ -36,6 +36,7 @@ void Capstone2LlvmIrTranslatorArm_impl::initializeRegNameMap()
 //			{ARM_SYSREG_SPSR_X, "sysreg_spsr_x"},
 //			{ARM_SYSREG_SPSR_S, "sysreg_spsr_s"},
 //			{ARM_SYSREG_SPSR_F, "sysreg_spsr_f"},
+			{ARM_SYSREG_SPSR, "sysreg_spsr"},
 			// CPSR* registers.
 			// We cannot use these defines, they have the same numbers as
 			// regular ARM registers.
@@ -43,6 +44,7 @@ void Capstone2LlvmIrTranslatorArm_impl::initializeRegNameMap()
 //			{ARM_SYSREG_CPSR_X, "sysreg_cpsr_x"},
 //			{ARM_SYSREG_CPSR_S, "sysreg_cpsr_s"},
 //			{ARM_SYSREG_CPSR_F, "sysreg_cpsr_f"},
+			{ARM_SYSREG_CPSR, "sysreg_cpsr"},
 			// Independent registers.
 			{ARM_SYSREG_APSR, "sysreg_apsr"},
 			{ARM_SYSREG_APSR_G, "sysreg_apsr_g"},
@@ -111,6 +113,7 @@ void Capstone2LlvmIrTranslatorArm_impl::initializeRegNameMap()
 void Capstone2LlvmIrTranslatorArm_impl::initializeRegTypeMap()
 {
 	auto* i1 = llvm::IntegerType::getInt1Ty(_module->getContext());
+	auto* i4 = llvm::IntegerType::getIntNTy(_module->getContext(), 4);
 	auto* f32 = llvm::Type::getFloatTy(_module->getContext());
 	auto* f64 = llvm::Type::getDoubleTy(_module->getContext());
 	auto* f128 = llvm::Type::getFP128Ty(_module->getContext());
@@ -258,6 +261,7 @@ void Capstone2LlvmIrTranslatorArm_impl::initializeRegTypeMap()
 //			{ARM_SYSREG_SPSR_X, i1},
 //			{ARM_SYSREG_SPSR_S, i1},
 //			{ARM_SYSREG_SPSR_F, i1},
+			{ARM_SYSREG_SPSR, i4},
 			// CPSR* registers.
 			// We cannot use these defines, they have the same numbers as
 			// regular ARM registers.
@@ -265,6 +269,7 @@ void Capstone2LlvmIrTranslatorArm_impl::initializeRegTypeMap()
 //			{ARM_SYSREG_CPSR_X, i1},
 //			{ARM_SYSREG_CPSR_S, i1},
 //			{ARM_SYSREG_CPSR_F, i1},
+			{ARM_SYSREG_CPSR, i4},
 			// Independent registers.
 			{ARM_SYSREG_APSR, defTy},
 			{ARM_SYSREG_APSR_G, defTy},

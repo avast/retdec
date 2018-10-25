@@ -108,6 +108,8 @@ class Capstone2LlvmIrTranslatorArm_impl :
 				llvm::IRBuilder<>& irb,
 				llvm::Value* val,
 				llvm::Value* n);
+
+		uint32_t sysregNumberTranslation(uint32_t r);
 //
 //==============================================================================
 // Helper methods.

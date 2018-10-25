@@ -403,6 +403,8 @@ void Capstone2LlvmIrTranslatorX86_impl::generateRegistersCommon()
 	createRegister(X86_REG_VIP, _regLt);
 	createRegister(X86_REG_ID, _regLt);
 
+	createRegister(X86_REG_EFLAGS, _regLt);
+
 	// Segment registers.
 	//
 	createRegister(X86_REG_SS, _regLt);
@@ -783,21 +785,13 @@ llvm::StoreInst* Capstone2LlvmIrTranslatorX86_impl::storeRegister(
 
 	// We probably want to do this for all conversion variants.
 	//
-	if (rt->isIntegerTy())
+	if (rt->isIntegerTy() && val->getType()->isIntegerTy())
 	{
 		auto* valT = llvm::cast<llvm::IntegerType>(val->getType());
 		if (valT->getBitWidth() > getRegisterBitSize(r))
 		{
 			val = irb.CreateTrunc(val, rt);
 		}
-	}
-	else if (rt->isFloatingPointTy())
-	{
-		// nothing?
-	}
-	else
-	{
-		throw GenericError("Unhandled register type.");
 	}
 
 	val = generateTypeConversion(irb, val, reg->getValueType(), ct);
@@ -1693,9 +1687,15 @@ void Capstone2LlvmIrTranslatorX86_impl::translatePseudoAsmGeneric(
 	{
 		for (std::size_t j = 0; j < i->detail->regs_read_count; ++j)
 		{
-			auto* op = loadRegister(i->detail->regs_read[j], irb);
-			vals.push_back(op);
-			types.push_back(op->getType());
+			auto r = i->detail->regs_read[j];
+			// Check that we have such register.
+			// E.g. 32-bit mode, instruction getsec, Capstone says Rxx is used.
+			if (getRegister(r))
+			{
+				auto* op = loadRegister(r, irb);
+				vals.push_back(op);
+				types.push_back(op->getType());
+			}
 		}
 	}
 
@@ -1728,7 +1728,12 @@ void Capstone2LlvmIrTranslatorX86_impl::translatePseudoAsmGeneric(
 	for (std::size_t j = 0; j < i->detail->regs_write_count; ++j)
 	{
 		auto r = i->detail->regs_write[j];
-		if (writtenRegs.find(r) == writtenRegs.end())
+		if (writtenRegs.find(r) == writtenRegs.end()
+				// Check that we have such register.
+				// E.g. 32-bit mode, instruction getsec, Capstone says Rxx is used.
+				&& getRegister(r)
+				// Ignore some registers.
+				&& r != X86_REG_FPSW)
 		{
 			llvm::Value* val = retType->isVoidTy()
 					? llvm::cast<llvm::Value>(

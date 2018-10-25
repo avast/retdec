@@ -360,6 +360,28 @@ llvm::Value* Capstone2LlvmIrTranslatorArm_impl::generateShiftRrx(
 	return or2Trunc;
 }
 
+/**
+ * We cannot use some sysreg ID numbers -> translate them to other ID numbers.
+ * See comment for @c arm_sysreg_extension for more details.
+ */
+uint32_t Capstone2LlvmIrTranslatorArm_impl::sysregNumberTranslation(uint32_t r)
+{
+	if (ARM_SYSREG_SPSR_C <= r
+			&& r <= (ARM_SYSREG_SPSR_C | ARM_SYSREG_SPSR_X | ARM_SYSREG_SPSR_S | ARM_SYSREG_SPSR_F))
+	{
+		return ARM_SYSREG_SPSR;
+	}
+	else if (ARM_SYSREG_CPSR_C <= r
+			&& r <= (ARM_SYSREG_CPSR_C | ARM_SYSREG_CPSR_X | ARM_SYSREG_CPSR_S | ARM_SYSREG_CPSR_F))
+	{
+		return ARM_SYSREG_CPSR;
+	}
+	else
+	{
+		return r;
+	}
+}
+
 llvm::Value* Capstone2LlvmIrTranslatorArm_impl::loadOp(
 		cs_arm_op& op,
 		llvm::IRBuilder<>& irb,
@@ -369,6 +391,10 @@ llvm::Value* Capstone2LlvmIrTranslatorArm_impl::loadOp(
 	switch (op.type)
 	{
 		case ARM_OP_SYSREG:
+		{
+			auto* val = loadRegister(sysregNumberTranslation(op.reg), irb);
+			return generateOperandShift(irb, op, val);
+		}
 		case ARM_OP_REG:
 		{
 			auto* val = loadRegister(op.reg, irb);
@@ -527,6 +553,9 @@ llvm::Instruction* Capstone2LlvmIrTranslatorArm_impl::storeOp(
 	switch (op.type)
 	{
 		case ARM_OP_SYSREG:
+		{
+			return storeRegister(sysregNumberTranslation(op.reg), val, irb, ct);
+		}
 		case ARM_OP_REG:
 		{
 			return storeRegister(op.reg, val, irb, ct);
@@ -813,9 +842,13 @@ void Capstone2LlvmIrTranslatorArm_impl::translatePseudoAsmGeneric(
 			{
 				storeOp(op, c, irb);
 
-				if (op.type == ARM_OP_REG || op.type == ARM_OP_SYSREG)
+				if (op.type == ARM_OP_REG)
 				{
 					writtenRegs.insert(op.reg);
+				}
+				else if (op.type == ARM_OP_SYSREG)
+				{
+					writtenRegs.insert(sysregNumberTranslation(op.reg));
 				}
 			}
 		}
@@ -870,9 +903,31 @@ void Capstone2LlvmIrTranslatorArm_impl::translateAdc(cs_insn* i, cs_arm* ai, llv
  */
 void Capstone2LlvmIrTranslatorArm_impl::translateAdd(cs_insn* i, cs_arm* ai, llvm::IRBuilder<>& irb)
 {
-	EXPECT_IS_BINARY_OR_TERNARY(i, ai, irb);
+//	EXPECT_IS_BINARY_OR_TERNARY(i, ai, irb);
+	EXPECT_IS_EXPR(i, ai, irb, (2 <= ai->op_count && ai->op_count <= 4));
 
-	std::tie(op1, op2) = loadOpBinaryOrTernaryOp1Op2(ai, irb, eOpConv::THROW);
+	if (ai->op_count < 4)
+	{
+		std::tie(op1, op2) = loadOpBinaryOrTernaryOp1Op2(ai, irb, eOpConv::THROW);
+	}
+	// TODO: "00 C6 8F E2" = "add ip, pc, #0, #12"
+	// If we translate this to "@__asm_add(i32 pc, i32 0, i32 12)" then some
+	// regression tests fail because values that were computed before can not
+	// be computed now.
+	// ARM specification does not allow instruction like this, but it looks like
+	// it can happend (probably not only in ADD). See:
+	// https://stackoverflow.com/questions/16207865/weird-gas-arm-syntax
+	// https://reverseengineering.stackexchange.com/questions/16154/arm-add-instruction-with-shift
+	//
+	// This is just a hack that ignores the fourth operand. We should use it in
+	// rotation. But the best solution is to fix Capstone to interpret it as
+	// such, not to hack it here in our library.
+	//
+	else
+	{
+		std::tie(op1, op2, op3) = loadOpQuaternaryOp1Op2Op3(ai, irb);
+	}
+
 	auto* add = irb.CreateAdd(op1, op2);
 	if (ai->update_flags || i->id == ARM_INS_CMN)
 	{

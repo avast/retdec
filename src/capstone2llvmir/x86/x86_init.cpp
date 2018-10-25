@@ -574,6 +574,8 @@ void Capstone2LlvmIrTranslatorX86_impl::initializeRegistersParentMapCommon()
 			X86_REG_CR5, X86_REG_CR6, X86_REG_CR7, X86_REG_CR8, X86_REG_CR9,
 			X86_REG_CR10, X86_REG_CR11, X86_REG_CR12, X86_REG_CR13,
 			X86_REG_CR14, X86_REG_CR15,
+			//
+			X86_REG_EFLAGS,
 	});
 }
 
