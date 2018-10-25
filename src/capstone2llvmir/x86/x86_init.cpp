@@ -536,8 +536,6 @@ void Capstone2LlvmIrTranslatorX86_impl::initializeRegistersParentMapToOther(
 
 void Capstone2LlvmIrTranslatorX86_impl::initializeRegistersParentMap()
 {
-	initializeRegistersParentMapCommon();
-
 	switch (_origBasicMode)
 	{
 		case CS_MODE_16: initializeRegistersParentMap16(); break;
@@ -550,33 +548,6 @@ void Capstone2LlvmIrTranslatorX86_impl::initializeRegistersParentMap()
 			break;
 		}
 	}
-}
-
-/**
- * Set mapping for registers that are their own parents.
- */
-void Capstone2LlvmIrTranslatorX86_impl::initializeRegistersParentMapCommon()
-{
-	initializeRegistersParentMapToSelf({
-			// Segment registers.
-			X86_REG_SS, X86_REG_CS, X86_REG_DS, X86_REG_ES, X86_REG_FS,
-			X86_REG_GS,
-			// Debug registers.
-			X86_REG_DR0, X86_REG_DR1, X86_REG_DR2, X86_REG_DR3, X86_REG_DR4,
-			X86_REG_DR5, X86_REG_DR6, X86_REG_DR7, X86_REG_DR8, X86_REG_DR9,
-			X86_REG_DR10, X86_REG_DR11, X86_REG_DR12, X86_REG_DR13,
-			X86_REG_DR14, X86_REG_DR15,
-			// x87 FPU Data registers.
-			X86_REG_ST0, X86_REG_ST1, X86_REG_ST2, X86_REG_ST3, X86_REG_ST4,
-			X86_REG_ST5, X86_REG_ST6, X86_REG_ST7,
-			// Control registers.
-			X86_REG_CR0, X86_REG_CR1, X86_REG_CR2, X86_REG_CR3, X86_REG_CR4,
-			X86_REG_CR5, X86_REG_CR6, X86_REG_CR7, X86_REG_CR8, X86_REG_CR9,
-			X86_REG_CR10, X86_REG_CR11, X86_REG_CR12, X86_REG_CR13,
-			X86_REG_CR14, X86_REG_CR15,
-			//
-			X86_REG_EFLAGS,
-	});
 }
 
 void Capstone2LlvmIrTranslatorX86_impl::initializeRegistersParentMap16()

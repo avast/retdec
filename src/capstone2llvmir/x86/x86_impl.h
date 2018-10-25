@@ -92,7 +92,6 @@ class Capstone2LlvmIrTranslatorX86_impl :
 		void generateX87RegLoadStoreFunctions();
 
 		void initializeRegistersParentMap();
-		void initializeRegistersParentMapCommon();
 		void initializeRegistersParentMap16();
 		void initializeRegistersParentMap32();
 		void initializeRegistersParentMap64();
