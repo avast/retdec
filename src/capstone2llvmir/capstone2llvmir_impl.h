@@ -141,6 +141,10 @@ class Capstone2LlvmIrTranslator_impl : virtual public Capstone2LlvmIrTranslator
 
 		virtual llvm::GlobalVariable* isRegister(llvm::Value* v) const override;
 		virtual uint32_t getCapstoneRegister(llvm::GlobalVariable* gv) const override;
+
+		virtual bool isPseudoAsmFunction(llvm::Function* f) const override;
+		virtual bool isPseudoAsmFunctionCall(llvm::CallInst* c) const override;
+		virtual const std::set<llvm::Function*>& getPseudoAsmFunctions() const override;
 //
 //==============================================================================
 // Common implementation enums, structures, classes, etc.
@@ -494,8 +498,11 @@ class Capstone2LlvmIrTranslator_impl : virtual public Capstone2LlvmIrTranslator
 		llvm::GlobalValue::LinkageTypes _regLt =
 				llvm::GlobalValue::LinkageTypes::InternalLinkage;
 
+		/// (insn_id, fnc_type) -> fnc
 		std::map<std::pair<std::size_t, llvm::FunctionType*>, llvm::Function*>
-				_asmFunctions;
+				_insn2asmFunctions;
+		// The same functions as in the map above, but meant for fast search.
+		std::set<llvm::Function*> _asmFunctions;
 
 		/// Register number to register name map. If register number is not
 		/// mapped here, Capstone's @c cs_reg_name() function is used to get

@@ -738,6 +738,22 @@ class Capstone2LlvmIrTranslator
 		 * @c ARM_REG_INVALID, @c MIPS_REG_INVALID).
 		 */
 		virtual uint32_t getCapstoneRegister(llvm::GlobalVariable* gv) const = 0;
+
+		/**
+		 * Is the passed LLVM function @p f any pseudo assembly functions for
+		 * instructions which full semantics is not implemented?
+		 */
+		virtual bool isPseudoAsmFunction(llvm::Function* f) const = 0;
+		/**
+		 * Is the passed LLVM call @p c any kind of pseudo assembly call for
+		 * instructions which full semantics is not implemented?
+		 */
+		virtual bool isPseudoAsmFunctionCall(llvm::CallInst* c) const = 0;
+		/**
+		 * Get all pseudo assembly functions for instructions which full
+		 * semantics is not implemented.
+		 */
+		virtual const std::set<llvm::Function*>& getPseudoAsmFunctions() const = 0;
 };
 
 } // namespace capstone2llvmir

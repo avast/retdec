@@ -612,7 +612,8 @@ bool Capstone2LlvmIrTranslator_impl<CInsn, CInsnOp>::isCondBranchFunctionCall(
 }
 
 template <typename CInsn, typename CInsnOp>
-llvm::BranchInst* Capstone2LlvmIrTranslator_impl<CInsn, CInsnOp>::isInConditionCondBranchFunctionCall(llvm::CallInst* c) const
+llvm::BranchInst* Capstone2LlvmIrTranslator_impl<CInsn, CInsnOp>::isInConditionCondBranchFunctionCall(
+		llvm::CallInst* c) const
 {
 	return isCondBranchFunctionCall(c) ? getCondBranchForInsnInIfThen(c) : nullptr;
 }
@@ -657,6 +658,26 @@ uint32_t Capstone2LlvmIrTranslator_impl<CInsn, CInsnOp>::getCapstoneRegister(
 {
 	auto it = _allLlvmRegs.find(gv);
 	return it != _allLlvmRegs.end() ? it->second : 0;
+}
+
+template <typename CInsn, typename CInsnOp>
+bool Capstone2LlvmIrTranslator_impl<CInsn, CInsnOp>::isPseudoAsmFunction(
+		llvm::Function* f) const
+{
+	return _asmFunctions.count(f);
+}
+
+template <typename CInsn, typename CInsnOp>
+bool Capstone2LlvmIrTranslator_impl<CInsn, CInsnOp>::isPseudoAsmFunctionCall(
+		llvm::CallInst* c) const
+{
+	return c ? isPseudoAsmFunction(c->getCalledFunction()) : false;
+}
+
+template <typename CInsn, typename CInsnOp>
+const std::set<llvm::Function*>& Capstone2LlvmIrTranslator_impl<CInsn, CInsnOp>::getPseudoAsmFunctions() const
+{
+	return _asmFunctions;
 }
 
 //
@@ -1432,15 +1453,16 @@ llvm::Function* Capstone2LlvmIrTranslator_impl<CInsn, CInsnOp>::getPseudoAsmFunc
 		const std::string& name)
 {
 	auto p = std::make_pair(insn->id, type);
-	auto fIt = _asmFunctions.find(p);
-	if (fIt == _asmFunctions.end())
+	auto fIt = _insn2asmFunctions.find(p);
+	if (fIt == _insn2asmFunctions.end())
 	{
 		auto* fnc = llvm::Function::Create(
 				type,
 				llvm::GlobalValue::LinkageTypes::ExternalLinkage,
 				name.empty() ? getPseudoAsmFunctionName(insn) : name,
 				_module);
-		_asmFunctions[p] = fnc;
+		_insn2asmFunctions[p] = fnc;
+		_asmFunctions.insert(fnc);
 		return fnc;
 	}
 	else

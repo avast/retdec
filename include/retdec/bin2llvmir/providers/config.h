@@ -171,6 +171,12 @@ class Config
 		llvm::CallInst* isLlvmX87StorePseudoFunctionCall(llvm::Value* c);
 		llvm::CallInst* isLlvmX87LoadPseudoFunctionCall(llvm::Value* c);
 
+		// Assembly pseudo-functions.
+		//
+		void addPseudoAsmFunction(llvm::Function* f);
+		bool isPseudoAsmFunction(llvm::Function* f);
+		llvm::CallInst* isPseudoAsmFunctionCall(llvm::Value* c);
+
 		// Other
 		//
 		llvm::GlobalVariable* getGlobalDummy();
@@ -200,6 +206,7 @@ class Config
 		llvm::Function* _x87TagLoadFunction = nullptr; // i2 (i3)
 
 		std::map<IntrinsicFunctionCreatorPtr, llvm::Function*> _intrinsicFunctions;
+		std::set<llvm::Function*> _pseudoAsmFunctions;
 };
 
 class ConfigProvider
