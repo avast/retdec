@@ -223,11 +223,11 @@ llvm::Value* Capstone2LlvmIrTranslatorArm_impl::generateOperandShift(
 	{
 		n = loadRegister(op.shift.value, irb);
 	}
-	if (n == nullptr)
+	else
 	{
-		throw GenericError("should not be possible");
 		return val;
 	}
+
 	n = irb.CreateZExtOrTrunc(n, val->getType());
 
 	switch (op.shift.type)
@@ -426,20 +426,13 @@ llvm::Value* Capstone2LlvmIrTranslatorArm_impl::loadOp(
 					idxR = irb.CreateShl(idxR, lshift);
 				}
 
-				if (op.mem.scale == 1)
-				{
-					// nothing.
-				}
-				else if (op.mem.scale == -1)
+				// arm.h says this is only 1 || -1 -> ignore anything != -1.
+				if (op.mem.scale == -1)
 				{
 					auto* scale = llvm::ConstantInt::get(
 							idxR->getType(),
 							op.mem.scale);
 					idxR = irb.CreateMul(idxR, scale);
-				}
-				else
-				{
-					throw GenericError("arm.h saus this is only 1 || -1");
 				}
 
 				// If there is a shift in memory operand, it is applied to
@@ -500,8 +493,7 @@ llvm::Value* Capstone2LlvmIrTranslatorArm_impl::loadOp(
 		case ARM_OP_INVALID:
 		default:
 		{
-			throw GenericError("Unhandled value.");
-			return nullptr;
+			return llvm::UndefValue::get(ty ? ty : getDefaultType());
 		}
 	}
 }
@@ -540,11 +532,6 @@ llvm::Instruction* Capstone2LlvmIrTranslatorArm_impl::storeOp(
 		llvm::IRBuilder<>& irb,
 		eOpConv ct)
 {
-	if (!(op.vector_index == -1 && op.neon_lane == -1))
-	{
-		return nullptr;
-	}
-
 	if (op.type != ARM_OP_MEM && op.shift.type != ARM_SFT_INVALID)
 	{
 		throw GenericError("Unhandled situation in storeOp().");
@@ -579,20 +566,13 @@ llvm::Instruction* Capstone2LlvmIrTranslatorArm_impl::storeOp(
 					idxR = irb.CreateShl(idxR, lshift);
 				}
 
-				if (op.mem.scale == 1)
-				{
-					// nothing.
-				}
-				else if (op.mem.scale == -1)
+				// arm.h says this is only 1 || -1 -> ignore anything != -1.
+				if (op.mem.scale == -1)
 				{
 					auto* scale = llvm::ConstantInt::get(
 							idxR->getType(),
 							op.mem.scale);
 					idxR = irb.CreateMul(idxR, scale);
-				}
-				else
-				{
-					throw GenericError("arm.h saus this is only 1 || -1");
 				}
 
 				// If there is a shift in memory operand, it is applied to
@@ -646,8 +626,6 @@ llvm::Instruction* Capstone2LlvmIrTranslatorArm_impl::storeOp(
 		{
 			throw GenericError("unhandled value");
 		}
-
-//		auto* undef = llvm::UndefValue::get(getRegisterType(r));
 	}
 }
 
@@ -1203,10 +1181,6 @@ void Capstone2LlvmIrTranslatorArm_impl::translateShifts(cs_insn* i, cs_arm* ai, 
 				throw GenericError("unhandled insn ID");
 			}
 		}
-	}
-	else
-	{
-		throw GenericError("unhandled shift/rotate insn format");
 	}
 
 	// If S is specified, the MOV instruction:

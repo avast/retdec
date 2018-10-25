@@ -367,7 +367,7 @@ llvm::Value* Capstone2LlvmIrTranslatorMips_impl::loadOp(
 		case MIPS_OP_INVALID:
 		default:
 		{
-			throw GenericError("should not be possible");
+			return llvm::UndefValue::get(ty ? ty : getDefaultType());
 		}
 	}
 }

@@ -1146,7 +1146,7 @@ llvm::Value* Capstone2LlvmIrTranslatorX86_impl::loadOp(
 		case X86_OP_INVALID:
 		default:
 		{
-			throw GenericError("Should not be possible.");
+			return llvm::UndefValue::get(ty ? ty : getDefaultType());
 		}
 	}
 }

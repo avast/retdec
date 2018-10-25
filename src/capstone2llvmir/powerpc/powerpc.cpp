@@ -213,7 +213,7 @@ llvm::Value* Capstone2LlvmIrTranslatorPowerpc_impl::loadOp(
 		case PPC_OP_INVALID:
 		default:
 		{
-			throw GenericError("Should not be possible.");
+			return llvm::UndefValue::get(ty ? ty : getDefaultType());
 		}
 	}
 }

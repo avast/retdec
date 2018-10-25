@@ -95,7 +95,6 @@ class Capstone2LlvmIrTranslatorX86_impl :
 		void initializeRegistersParentMap16();
 		void initializeRegistersParentMap32();
 		void initializeRegistersParentMap64();
-		void initializeRegistersParentMapToSelf(const std::vector<x86_reg>& rs);
 		void initializeRegistersParentMapToOther(
 				const std::vector<x86_reg>& rs,
 				x86_reg other);

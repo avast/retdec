@@ -507,19 +507,6 @@ void Capstone2LlvmIrTranslatorX86_impl::initializePseudoCallInstructionIDs()
 //==============================================================================
 //
 
-void Capstone2LlvmIrTranslatorX86_impl::initializeRegistersParentMapToSelf(
-		const std::vector<x86_reg>& rs)
-{
-	for (auto r : rs)
-	{
-		if (r >= _reg2parentMap.size())
-		{
-			throw GenericError("Register out of range.");
-		}
-		_reg2parentMap[r] = r;
-	}
-}
-
 void Capstone2LlvmIrTranslatorX86_impl::initializeRegistersParentMapToOther(
 		const std::vector<x86_reg>& rs,
 		x86_reg other)
