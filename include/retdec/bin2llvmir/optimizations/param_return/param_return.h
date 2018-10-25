@@ -32,18 +32,25 @@ class CallEntry
 		CallEntry(llvm::CallInst* c);
 
 	public:
-		void extractFormatString(ReachingDefinitionsAnalysis& _RDA);
 		bool instructionStoresString(
-				llvm::StoreInst *si,
+				llvm::StoreInst* si,
 				std::string& str,
-				ReachingDefinitionsAnalysis &_RDA) const;
+				ReachingDefinitionsAnalysis& _RDA) const;
+
+		void extractSpecificArgTypes(
+				llvm::Module* m,
+				ReachingDefinitionsAnalysis& _RDA,
+				llvm::CallInst* wrappedCall = nullptr);
+
+	private:
+		std::string extractFormatString(ReachingDefinitionsAnalysis& _RDA) const;
 
 	public:
 		llvm::CallInst* call = nullptr;
 		std::vector<llvm::Value*> possibleArgs;
 		std::vector<llvm::StoreInst*> possibleArgStores;
 		std::vector<llvm::LoadInst*> possibleRetLoads;
-		std::string formatStr;
+		std::vector<llvm::Type*> specTypes;
 };
 
 class ReturnEntry
@@ -60,9 +67,11 @@ class ParamFilter
 {
 	public:
 		ParamFilter(
+			llvm::CallInst* call,
 			const std::vector<llvm::Value*>& paramValues,
-			const Abi& abi,
-			Config& config);
+			const std::vector<llvm::Type*> &types,
+			const Abi* abi,
+			Config* config);
 
 		void orderStacks(std::vector<llvm::Value*>& stacks, bool asc = true) const;
 		void orderRegistersBy(
@@ -71,6 +80,11 @@ class ParamFilter
 
 		void leaveOnlyContinuousSequence();
 		void leaveOnlyContinuousStackOffsets();
+		void leaveOnlyPositiveStacks();
+
+		void adjustValuesByKnownTypes(
+				llvm::CallInst* call, 
+				std::vector<llvm::Type*> &types);
 
 		std::vector<llvm::Value*> getParamValues() const;
 
@@ -78,14 +92,24 @@ class ParamFilter
 		void separateParamValues(const std::vector<llvm::Value*>& paramValues);
 		void applyAlternatingRegistersFilter();
 		void applySequentialRegistersFilter();
+		llvm::Value* stackVariableForType(llvm::CallInst* call, llvm::Type* type) const;
+
+		bool moveRegsByTypeSizeAtIdx(std::vector<uint32_t> &destinastion,
+					const std::vector<uint32_t> &sourceTemplate,
+					llvm::Type* type,
+					uint32_t* idx);
 
 	private:
-		const Abi& _abi;
-		Config& _config;
+		const Abi* _abi;
+		Config* _config;
+
+		llvm::CallInst* _call;
 
 		std::vector<uint32_t> _regValues;
 		std::vector<uint32_t> _fpRegValues;
 		std::vector<llvm::Value*> _stackValues;
+
+		std::vector<llvm::Type*> _paramTypes;
 };
 
 class DataFlowEntry
@@ -112,8 +136,6 @@ class DataFlowEntry
 		void filter();
 
 		void applyToIr();
-		void applyToIrOrdinary();
-		void applyToIrVariadic();
 		void connectWrappers();
 
 	private:
@@ -135,6 +157,8 @@ class DataFlowEntry
 		void setReturnType();
 		void setArgumentTypes();
 
+		llvm::CallInst* isSimpleWrapper(llvm::Function* fnc) const;
+
 		void filterSortArgLoads();
 		void filterNegativeStacks();
 		void sortValues(std::vector<llvm::Value*> &args) const;
@@ -145,7 +169,11 @@ class DataFlowEntry
 		std::map<llvm::CallInst*, std::vector<llvm::Value*>>
 					fetchLoadsOfCalls() const;
 
-		llvm::CallInst* isSimpleWrapper(llvm::Function* fnc);
+		llvm::Value* joinParamPair(llvm::Value* low, llvm::Value* high,
+				llvm::Type *type, llvm::Instruction *before) const;
+		void splitIntoParamPair(
+				llvm::AllocaInst* blob,
+				std::pair<llvm::Value*, llvm::Value*> &paramPair) const;
 
 	public:
 		llvm::Module* _module = nullptr;

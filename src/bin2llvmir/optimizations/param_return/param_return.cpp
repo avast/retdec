@@ -32,7 +32,7 @@
 #include "retdec/utils/container.h"
 #include "retdec/utils/string.h"
 #include "retdec/bin2llvmir/optimizations/param_return/param_return.h"
-#define debug_enabled false
+#define debug_enabled true
 #include "retdec/bin2llvmir/utils/llvm.h"
 #include "retdec/bin2llvmir/providers/asm_instruction.h"
 #include "retdec/bin2llvmir/utils/ir_modifier.h"
@@ -124,6 +124,7 @@ bool ParamReturn::runOnModule(Module& m)
 	_image = FileImageProvider::getFileImage(_module);
 	_dbgf = DebugFormatProvider::getDebugFormat(_module);
 	_lti = LtiProvider::getLti(_module);
+
 	return run();
 }
 
@@ -276,16 +277,21 @@ CallEntry::CallEntry(llvm::CallInst* c) :
 
 }
 
-void DataFlowEntry::filterNegativeStacks()
+void CallEntry::extractSpecificArgTypes(Module* m,
+						ReachingDefinitionsAnalysis& _RDA,
+						CallInst *wrappedCall)
 {
-	args.erase(
-		std::remove_if(args.begin(), args.end(),
-			[this](const Value* li)
-			{
-				auto aOff = _config->getStackVariableOffset(li);
-				return aOff.isDefined() && aOff < 0;
-			}),
-		args.end());
+	std::string formatStr = extractFormatString(_RDA);
+
+	if (formatStr.empty())
+		return;
+
+	auto trueCall = wrappedCall ? wrappedCall : call;
+
+	specTypes = llvm_utils::parseFormatString(
+			m,
+			formatStr,
+			trueCall->getCalledFunction());
 }
 
 /**
@@ -332,8 +338,10 @@ void DataFlowEntry::sortValues(std::vector<Value*> &args) const
 	});
 }
 
-void CallEntry::extractFormatString(ReachingDefinitionsAnalysis& _RDA)
+std::string CallEntry::extractFormatString(ReachingDefinitionsAnalysis& _RDA) const
 {
+	std::string str;
+
 	for (auto i : possibleArgs)
 	{
 		auto inst = std::find_if(possibleArgStores.begin(),
@@ -345,14 +353,14 @@ void CallEntry::extractFormatString(ReachingDefinitionsAnalysis& _RDA)
 
 		if (inst != possibleArgStores.end())
 		{
-			std::string str;
 			if (instructionStoresString(*inst, str, _RDA))
 			{
-				formatStr = str;
-				return;
+				break;
 			}
 		}
 	}
+
+	return str;
 }
 
 //
@@ -465,9 +473,10 @@ void DataFlowEntry::dump() const
 		{
 			LOG << "\t\t\t>|" << llvmObjToString(l) << std::endl;
 		}
-		if (!e.formatStr.empty())
+		LOG << "\t\t\targ types:" << std::endl;
+		for (auto* t : e.specTypes)
 		{
-			LOG << "\t\t\t>|format str: " << e.formatStr << std::endl;
+			LOG << "\t\t\t>|" << llvmObjToString(t) << std::endl;
 		}
 	}
 
@@ -608,7 +617,10 @@ void DataFlowEntry::addCall(llvm::CallInst* call)
 }
 
 // std::vector?
-std::set<Value*> DataFlowEntry::collectArgsFromInstruction(Instruction* startInst, std::map<BasicBlock*, std::set<Value*>> &seenBlocks, std::vector<StoreInst*> *possibleArgStores)
+std::set<Value*> DataFlowEntry::collectArgsFromInstruction(
+				Instruction* startInst,
+				std::map<BasicBlock*, std::set<Value*>> &seenBlocks,
+				std::vector<StoreInst*> *possibleArgStores)
 {
 	NonIterableSet<Value*> excludedValues;
 	auto* block = startInst->getParent();
@@ -832,54 +844,36 @@ void DataFlowEntry::addCallReturns(llvm::CallInst* call, CallEntry& ce)
 	}
 }
 
-/**
- * TODO: This method just filters register pair of known double type.
- * It should also remove another stack variable and not just for double
- * but every large type -> wordSize * 2
- */
-void DataFlowEntry::filterKnownParamPairs()
-{
-	for (CallEntry& e : calls)
-	{
-		auto tIt = argTypes.begin();
-		auto sIt = e.possibleArgs.begin();
-
-		while (tIt != argTypes.end() && sIt != e.possibleArgs.end())
-		{
-			Type* t = *tIt;
-			auto nextIt = sIt;
-			++nextIt;
-			if (t->isDoubleTy()
-					&& nextIt != e.possibleArgs.end()
-					&& _abi->isRegister(*nextIt))
-			{
-				e.possibleArgs.erase(nextIt);
-			}
-
-			++tIt;
-			++sIt;
-		}
-	}
-}
-
 void DataFlowEntry::filter()
 {
-	filterNegativeStacks();
-	sortValues(args);
+	if (!args.empty())
+	{
+		ParamFilter filter(nullptr, args, argTypes, _abi, _config);
+		filter.leaveOnlyPositiveStacks();
+		args = filter.getParamValues();
+	}
 
 	for (CallEntry& e : calls)
 	{
-		ParamFilter filter(e.possibleArgs, *_abi, *_config);
+		if (isVarArg)
+		{
+			e.extractSpecificArgTypes(
+				_module, 
+				_RDA,
+				isSimpleWrapper(
+					e.call->getCalledFunction()));
+		}
+
+		auto types = argTypes;
+		types.insert(types.end(), e.specTypes.begin(), e.specTypes.end());
+
+		ParamFilter filter(e.call, e.possibleArgs, types,
+					_abi, _config);
 
 		filter.leaveOnlyContinuousStackOffsets();
 		filter.leaveOnlyContinuousSequence();
 
 		e.possibleArgs = filter.getParamValues();
-
-		if (isVarArg)
-		{
-			e.extractFormatString(_RDA);
-		}
 	}
 
 	if (!isVarArg)
@@ -888,11 +882,7 @@ void DataFlowEntry::filter()
 		callsFilterSameNumberOfStacks();
 	}
 
-	if (typeSet)
-	{
-		filterKnownParamPairs();
-	}
-	else
+	if (!typeSet)
 	{
 		setTypeFromUseContext();
 	}
@@ -1030,16 +1020,45 @@ void DataFlowEntry::callsFilterSameNumberOfStacks()
 	}
 }
 
-void DataFlowEntry::applyToIr()
+Value* DataFlowEntry::joinParamPair(Value* low, Value* high, Type *type, Instruction *before) const
 {
-	if (isVarArg)
-	{
-		applyToIrVariadic();
-	}
-	else
-	{
-		applyToIrOrdinary();
-	}
+	auto ib = _abi->getTypeBitSize(type);
+	auto intType = IntegerType::get(_module->getContext(), ib); 
+	auto wordSize = _abi->getTypeBitSize(
+				_abi->getDefaultPointerType());
+
+	high = IrModifier::convertValueToType(high, intType, before);
+	low = IrModifier::convertValueToType(low, intType, before);
+
+	high = BinaryOperator::Create(Instruction::Shl, high, llvm::ConstantInt::get(intType, wordSize), "", before);
+	auto join = BinaryOperator::Create(Instruction::Or, low, high, "", before);
+
+	return IrModifier::convertValueToType(join, type, before);
+}
+
+void DataFlowEntry::splitIntoParamPair(AllocaInst* blob, std::pair<Value*, Value*> &paramPair) const
+{
+	auto param1 = paramPair.first;
+	auto param2 = paramPair.second;
+
+	auto wordSize = _abi->getTypeBitSize(
+				_abi->getDefaultPointerType());
+
+	auto halfInt = IntegerType::get(_module->getContext(), wordSize);
+	auto intType = IntegerType::get(_module->getContext(), wordSize*2); 
+
+	auto before = blob->getNextNode();
+
+	auto load = new LoadInst(blob, "", before);
+
+	auto val = IrModifier::convertValueToType(load, intType, before);
+
+	auto trunc = new TruncInst(val, halfInt, "", before);
+	new StoreInst(trunc, param1, before);
+
+	auto shift = BinaryOperator::Create(Instruction::LShr, val, llvm::ConstantInt::get(intType, wordSize), "", before);
+	trunc = new TruncInst(shift, halfInt, "", before);
+	new StoreInst(trunc, param2, before);
 }
 
 std::map<CallInst*, std::vector<Value*>> DataFlowEntry::fetchLoadsOfCalls() const
@@ -1050,8 +1069,22 @@ std::map<CallInst*, std::vector<Value*>> DataFlowEntry::fetchLoadsOfCalls() cons
 	{
 		std::vector<Value*> loads;
 		auto* call = e.call;
-		for (auto* s : e.possibleArgs)
+		auto paramRegs = _abi->parameterRegisters();
+
+		auto types = argTypes;
+		types.insert(types.end(),
+				e.specTypes.begin(), e.specTypes.end());
+		auto tIt = types.begin();
+
+		auto aIt = e.possibleArgs.begin();
+		while (aIt != e.possibleArgs.end())
 		{
+			if (*aIt == nullptr)
+			{
+				aIt++;
+				continue;
+			}
+
 			auto fIt = specialArgStorage.find(loads.size());
 			while (fIt != specialArgStorage.end())
 			{
@@ -1060,7 +1093,33 @@ std::map<CallInst*, std::vector<Value*>> DataFlowEntry::fetchLoadsOfCalls() cons
 				fIt = specialArgStorage.find(loads.size());
 			}
 
-			auto* l = new LoadInst(s, "", call);
+			Value* l = new LoadInst(*aIt, "", call);
+			aIt++;
+
+			if (tIt != types.end())
+			{
+				auto wordSize = _abi->getTypeByteSize(
+							_abi->getDefaultPointerType());
+				if (wordSize < _abi->getTypeByteSize(*tIt)
+						&& aIt != e.possibleArgs.end())
+				{
+					Value* lp = new LoadInst(*aIt, "", call);
+					aIt++;
+
+					l = joinParamPair(l, lp, *tIt, call);
+				}
+				else
+				{			
+					l = IrModifier::convertValueToType(l, *tIt, call);
+				}
+
+				tIt++;
+			}
+			else
+			{
+				l = IrModifier::convertValueToType(l, _abi->getDefaultType(), call);
+			}
+
 			loads.push_back(l);
 		}
 
@@ -1078,7 +1137,7 @@ void DataFlowEntry::replaceCalls()
 		IrModifier::modifyCallInst(l.first, l.first->getType(), l.second);
 }
 
-void DataFlowEntry::applyToIrOrdinary()
+void DataFlowEntry::applyToIr()
 {
 	Function* analysedFunction = getFunction();
 
@@ -1110,223 +1169,54 @@ void DataFlowEntry::applyToIrOrdinary()
 		}
 	}
 
+	auto paramRegs = _abi->parameterRegisters();
+
 	std::vector<llvm::Value*> argStores;
-	for (Value* l : args)
+
+	auto aIt = args.begin();
+	auto tIt = argTypes.begin();
+
+	std::map<AllocaInst*, std::pair<Value*, Value*>> createdPairs;
+
+	while (aIt != args.end())
 	{
+		if (*aIt == nullptr) {
+			aIt++;
+			continue;
+		}
+
+		Value *l = *aIt;
+		aIt++;
+
 		auto fIt = specialArgStorage.find(argStores.size());
 		while (fIt != specialArgStorage.end())
 		{
 			argStores.push_back(fIt->second);
 			fIt = specialArgStorage.find(argStores.size());
 		}
+		auto wordSize = _abi->getTypeByteSize(
+					_abi->getDefaultPointerType());
+
+		if (aIt != args.end() && tIt != argTypes.end()
+			&& _abi->getTypeByteSize(*tIt) > wordSize)
+		{
+			auto p1 = l;
+			auto p2 = *aIt;
+			aIt++;
+
+			auto ai = IrModifier::createAlloca(analysedFunction, *tIt);
+			createdPairs[ai] = std::make_pair(p1, p2);
+			splitIntoParamPair(ai, createdPairs[ai]);
+			l = ai;
+		}
 
 		argStores.push_back(l);
-	}
-
-	auto paramRegs = _abi->parameterRegisters();
-
-	for (auto& p : loadsOfCalls)
-	{
-		std::size_t idx = 0;
-		for (auto* t : argTypes)
-		{
-			(void) t;
-			if (p.second.size() <= idx)
-			{
-				if (idx < paramRegs.size())
-				{
-					auto* r = _abi->getRegister(paramRegs[idx]);
-					auto* l = new LoadInst(r, "", p.first);
-					p.second.push_back(l);
-				}
-			}
-			++idx;
-		}
 	}
 
 	auto* oldType = analysedFunction->getType();
 	IrModifier irm(_module, _config);
 	auto* newFnc = irm.modifyFunction(
 			analysedFunction,
-			retType,
-			argTypes,
-			isVarArg,
-			rets2vals,
-			loadsOfCalls,
-			retVal,
-			argStores,
-			argNames).first;
-
-	LOG << "modify fnc: " << newFnc->getName().str() << " = "
-			<< llvmObjToString(oldType) << " -> "
-			<< llvmObjToString(newFnc->getType()) << std::endl;
-
-	called = newFnc;
-}
-
-void DataFlowEntry::applyToIrVariadic()
-{
-	auto paramRegs = _abi->parameterRegisters();
-	auto paramFPRegs = _abi->parameterFPRegisters();
-	auto doubleParamRegs = _abi->doubleParameterRegisters();
-
-	llvm::Value* retVal = nullptr;
-	std::map<ReturnInst*, Value*> rets2vals;
-	std::vector<llvm::Value*> argStores;
-	std::map<llvm::CallInst*, std::vector<llvm::Value*>> loadsOfCalls;
-
-	for (CallEntry& ce : calls)
-	{
-		auto* fnc = ce.call->getFunction();
-		auto* calledFnc = ce.call->getCalledFunction();
-
-		LOG << llvmObjToString(ce.call) << std::endl;
-		LOG << "\tformat : " << ce.formatStr << std::endl;
-
-		// get lowest stack offset
-		//
-		int stackOff = std::numeric_limits<int>::max();
-		for (Value* s : ce.possibleArgs)
-		{
-			if (_config->isStackVariable(s))
-			{
-				auto so = _config->getStackVariableOffset(s);
-				if (so < stackOff)
-				{
-					stackOff = so;
-				}
-			}
-		}
-		LOG << "\tlowest : " << std::dec << stackOff << std::endl;
-
-		//
-		//
-		auto* wrapCall = isSimpleWrapper(calledFnc);
-		auto* wrapFnc = wrapCall ? wrapCall->getCalledFunction() : calledFnc;
-		std::vector<llvm::Type*> ttypes = llvm_utils::parseFormatString(
-				_module,
-				ce.formatStr,
-				wrapFnc);
-
-		if (_config->getConfig().architecture.isPic32())
-		{
-			for (size_t i = 0; i < ttypes.size(); ++i)
-			{
-				if (ttypes[i]->isDoubleTy())
-				{
-					ttypes[i] = Type::getFloatTy(_module->getContext());
-				}
-			}
-		}
-
-		//
-		//
-		int off = stackOff;
-		std::vector<Value*> args;
-
-		size_t faIdx = 0;
-		size_t aIdx = 0;
-
-		std::vector<llvm::Type*> types = argTypes;
-		types.insert(types.end(), ttypes.begin(), ttypes.end());
-
-		for (Type* t : types)
-		{
-			LOG << "\ttype : " << llvmObjToString(t) << std::endl;
-			uint32_t sz = _abi->getTypeByteSize(t);
-			uint32_t ws = _abi->getTypeByteSize(_abi->getDefaultPointerType());
-			sz = sz > ws ? ws*2:ws;
-
-			if (t->isFloatTy() && _abi->usesFPRegistersForParameters() && faIdx < paramFPRegs.size())
-			{
-
-				auto* r = _abi->getRegister(paramFPRegs[faIdx]);
-				if (r)
-				{
-					args.push_back(r);
-				}
-				++faIdx;
-			}
-			else if (t->isDoubleTy() && _abi->usesFPRegistersForParameters() && faIdx < doubleParamRegs.size())
-			{
-				auto* r = _abi->getRegister(doubleParamRegs[faIdx]);
-				if (r)
-				{
-					args.push_back(r);
-				}
-				++faIdx;
-				++faIdx;
-			}
-			else if (aIdx < paramRegs.size())
-			{
-				auto* r = _abi->getRegister(paramRegs[aIdx]);
-				if (r)
-				{
-					args.push_back(r);
-				}
-
-				// TODO: register pairs -> if size is more than arch size
-				if (sz > ws)
-				{
-					++aIdx;
-				}
-
-				++aIdx;
-			}
-			else
-			{
-				auto* st = _config->getLlvmStackVariable(fnc, off);
-				if (st)
-				{
-					args.push_back(st);
-				}
-
-				off += sz;
-			}
-		}
-
-		//
-		//
-		unsigned idx = 0;
-		std::vector<Value*> loads;
-		for (auto* a : args)
-		{
-			Value* l = new LoadInst(a, "", ce.call);
-			LOG << "\t\t" << llvmObjToString(l) << std::endl;
-
-			if (types.size() > idx)
-			{
-				l = IrModifier::convertValueToType(l, types[idx], ce.call);
-			}
-
-			loads.push_back(l);
-			++idx;
-		}
-
-		if (!loads.empty())
-		{
-			loadsOfCalls[ce.call] = loads;
-		}
-	}
-
-	retVal = retType->isFloatingPointTy() ?
-		_abi->getFPReturnRegister() : _abi->getReturnRegister();
-
-	if (retVal)
-	{
-		for (auto& e : retStores)
-		{
-			auto* l = new LoadInst(retVal, "", e.ret);
-			rets2vals[e.ret] = l;
-		}
-	}
-
-	auto* fnc = getFunction();
-	auto* oldType = fnc->getType();
-
-	IrModifier irm(_module, _config);
-	auto* newFnc = irm.modifyFunction(
-			fnc,
 			retType,
 			argTypes,
 			isVarArg,
@@ -1433,7 +1323,7 @@ void DataFlowEntry::connectWrappers()
 	}
 }
 
-llvm::CallInst* DataFlowEntry::isSimpleWrapper(llvm::Function* fnc)
+llvm::CallInst* DataFlowEntry::isSimpleWrapper(llvm::Function* fnc) const
 {
 	auto ai = AsmInstruction(fnc);
 	if (ai.isInvalid())
@@ -1717,21 +1607,11 @@ void DataFlowEntry::setArgumentTypes()
 	}
 	else
 	{
-		CallEntry* ce = &calls.front();
-		for (auto& c : calls)
-		{
-			if (!c.possibleArgs.empty())
-			{
-				ce = &c;
-				break;
-			}
-		}
-		std::vector<Value*> &a = args.empty() ? ce->possibleArgs : args;
+		auto ce = calls.front();
+		std::vector<Value*> &a = args.empty() ? ce.possibleArgs : args;
 
-		for (auto st: a)
+		for (const auto& op: a)
 		{
-			auto op = st;
-
 			if (_abi->isRegister(op) && !_abi->isGeneralPurposeRegister(op))
 			{
 				argTypes.push_back(Abi::getDefaultFPType(_module));
@@ -1751,38 +1631,47 @@ void DataFlowEntry::setArgumentTypes()
 //
 
 ParamFilter::ParamFilter(
+		CallInst* call,
 		const std::vector<Value*>& paramValues,
-		const Abi& abi,
-		Config& config)
+		const std::vector<Type*>& paramTypes,
+		const Abi* abi,
+		Config* config)
 		:
 		_abi(abi),
-		_config(config)
+		_config(config),
+		_call(call),
+		_paramTypes(paramTypes)
 {
 	separateParamValues(paramValues);
 
-	orderRegistersBy(_fpRegValues, _abi.parameterFPRegisters());
-	orderRegistersBy(_regValues, _abi.parameterRegisters());
+	orderRegistersBy(_fpRegValues, _abi->parameterFPRegisters());
+	orderRegistersBy(_regValues, _abi->parameterRegisters());
 	orderStacks(_stackValues);
+
+	if (!paramTypes.empty() && call != nullptr)
+	{
+		adjustValuesByKnownTypes(call, _paramTypes);
+	}
 }
 
 void ParamFilter::separateParamValues(const std::vector<Value*>& paramValues)
 {
-	auto regs = _abi.parameterRegisters();
+	auto regs = _abi->parameterRegisters();
 
 	for (auto pv: paramValues)
 	{
-		if (_config.isStackVariable(pv))
+		if (_config->isStackVariable(pv))
 		{
 			_stackValues.push_back(pv);
 		}
 		else if (std::find(regs.begin(), regs.end(),
-				_abi.getRegisterId(pv)) != regs.end())
+				_abi->getRegisterId(pv)) != regs.end())
 		{
-			_regValues.push_back(_abi.getRegisterId(pv));
+			_regValues.push_back(_abi->getRegisterId(pv));
 		}
 		else
 		{
-			_fpRegValues.push_back(_abi.getRegisterId(pv));
+			_fpRegValues.push_back(_abi->getRegisterId(pv));
 		}
 	}
 }
@@ -1794,8 +1683,8 @@ void ParamFilter::orderStacks(std::vector<Value*>& stacks, bool asc) const
 			stacks.end(),
 			[this, asc](Value* a, Value* b) -> bool
 	{
-		auto aOff = _config.getStackVariableOffset(a);
-		auto bOff = _config.getStackVariableOffset(b);
+		auto aOff = _config->getStackVariableOffset(a);
+		auto bOff = _config->getStackVariableOffset(b);
 
 		bool ascOrd = aOff < bOff;
 
@@ -1822,12 +1711,12 @@ void ParamFilter::orderRegistersBy(
 void ParamFilter::leaveOnlyContinuousStackOffsets()
 {
 	retdec::utils::Maybe<int> prevOff;
-	int gap = _abi.getTypeByteSize(_abi.getDefaultPointerType()) * 2;
+	int gap = _abi->getTypeByteSize(_abi->getDefaultPointerType()) * 2;
 
 	auto it = _stackValues.begin();
 	while (it != _stackValues.end())
 	{
-		auto off = _config.getStackVariableOffset(*it);
+		auto off = _config->getStackVariableOffset(*it);
 
 		if (prevOff.isUndefined())
 		{
@@ -1849,7 +1738,7 @@ void ParamFilter::leaveOnlyContinuousStackOffsets()
 
 void ParamFilter::leaveOnlyContinuousSequence()
 {
-	if (_abi.parameterRegistersOverlay())
+	if (_abi->parameterRegistersOverlay())
 	{
 		applyAlternatingRegistersFilter();
 	}
@@ -1861,8 +1750,8 @@ void ParamFilter::leaveOnlyContinuousSequence()
 
 void ParamFilter::applyAlternatingRegistersFilter()
 {
-	auto templRegs = _abi.parameterRegisters();
-	auto fpTemplRegs = _abi.parameterFPRegisters();
+	auto templRegs = _abi->parameterRegisters();
+	auto fpTemplRegs = _abi->parameterFPRegisters();
 
 	size_t idx = 0;
 	auto it = _regValues.begin();
@@ -1900,7 +1789,7 @@ void ParamFilter::applyAlternatingRegistersFilter()
 void ParamFilter::applySequentialRegistersFilter()
 {
 	auto it = _regValues.begin();
-	for (auto regId : _abi.parameterRegisters())
+	for (auto regId : _abi->parameterRegisters())
 	{
 		if (it == _regValues.end())
 		{
@@ -1919,7 +1808,7 @@ void ParamFilter::applySequentialRegistersFilter()
 	}
 
 	auto fIt = _fpRegValues.begin();
-	for (auto regId : _abi.parameterFPRegisters())
+	for (auto regId : _abi->parameterFPRegisters())
 	{
 		if (fIt == _fpRegValues.end())
 		{
@@ -1939,20 +1828,200 @@ void ParamFilter::applySequentialRegistersFilter()
 std::vector<Value*> ParamFilter::getParamValues() const
 {
 	std::vector<Value*> paramValues;
+	auto ri = _regValues.begin();
+	auto fi = _fpRegValues.begin();
+	auto si = _stackValues.begin();
 
-	for (auto i : _regValues)
+	for (auto t: _paramTypes)
 	{
-		paramValues.push_back(_abi.getRegister(i));
+		bool shouldGetFromStack = false;
+
+		if (t->isFloatingPointTy() && _abi->usesFPRegistersForParameters())
+		{
+			if (fi != _fpRegValues.end())
+			{
+				auto reg = _abi->getRegister(*fi);
+				paramValues.push_back(reg);
+				++fi;
+			}
+			else 
+			{
+				shouldGetFromStack = true;
+			}
+		}
+		else if (ri != _regValues.end())
+		{
+			auto reg = _abi->getRegister(*ri);
+			paramValues.push_back(reg);
+			++ri;
+		}	
+		else
+		{
+			shouldGetFromStack = true;
+		}
+
+		if (shouldGetFromStack)
+		{
+			if (si != _stackValues.end())
+			{
+				paramValues.push_back(*si);
+				++si;
+			}
+			else
+			{
+				paramValues.push_back(nullptr);
+			}
+		}
 	}
 
-	for (auto i : _fpRegValues)
+	while (ri != _regValues.end())
 	{
-		paramValues.push_back(_abi.getRegister(i));
+		paramValues.push_back(_abi->getRegister(*ri));
+		ri++;
 	}
 
-	paramValues.insert(paramValues.end(), _stackValues.begin(), _stackValues.end());
+	while (fi != _fpRegValues.end())
+	{
+		paramValues.push_back(_abi->getRegister(*fi));
+		fi++;
+	}
+
+	paramValues.insert(paramValues.end(), si, _stackValues.end());
 
 	return paramValues;
+}
+
+Value* ParamFilter::stackVariableForType(CallInst* call, Type* type) const
+{
+	uint32_t wordSize = _abi->getTypeByteSize(_abi->getDefaultPointerType());
+
+	uint32_t off = _abi->getTypeByteSize(type);
+	off = off > wordSize ? wordSize*2:wordSize;
+
+	if (!_stackValues.empty())
+	{
+		off += _config->getStackVariableOffset(_stackValues.back());
+	}
+
+	return _config->getLlvmStackVariable(call->getFunction(), off);
+}
+
+bool ParamFilter::moveRegsByTypeSizeAtIdx(std::vector<uint32_t> &destinastion,
+					const std::vector<uint32_t> &sourceTemplate,
+					Type* type,
+					uint32_t* idx)
+{
+	if (idx == nullptr || *idx >= sourceTemplate.size())
+	{
+		return false;
+	}
+
+	/*
+	// Register pairs must start with register with even number
+	if (*idx % reqRegs != 0)
+	{
+		(*idx)++;
+	}*/
+
+	destinastion.push_back(sourceTemplate[*idx]);
+	auto templateReg = _abi->getRegister(sourceTemplate[*idx]);
+
+	*idx += 1;
+
+	if (_abi->getTypeByteSize(type)
+		> _abi->getTypeByteSize(templateReg->getType()))
+	{
+		if (*idx >= sourceTemplate.size())
+		{
+			return false;
+		}
+
+
+		destinastion.push_back(sourceTemplate[*idx]);
+		*idx += 1;
+	}
+
+	return true;
+}
+
+void ParamFilter::adjustValuesByKnownTypes(CallInst* call, std::vector<llvm::Type*>& types)
+{
+	std::vector<uint32_t> regValues, fpRegValues;
+
+	auto paramRegs = _abi->parameterRegisters();
+	auto fpParamRegs = _abi->parameterFPRegisters();
+	
+	// Indexes of registers to be used next as particular parameter.
+	uint32_t pI = 0;
+	uint32_t fI = 0;
+
+	auto sI = _stackValues.begin();
+
+	std::vector<Value*> paramValues;
+	for (auto t: types)
+	{
+		if (_abi->usesFPRegistersForParameters()
+				&& t->isFloatingPointTy())
+		{
+			// if cannot move to fp regs push on stack
+			if (!moveRegsByTypeSizeAtIdx(fpRegValues, fpParamRegs, t, &fI))
+			{
+				if (sI != _stackValues.end())
+				{
+					sI++;
+				}
+				else
+				{
+					auto s = stackVariableForType(call, t);
+					if (s != nullptr)
+					{
+						_stackValues.push_back(s);
+						sI = _stackValues.end();
+					}
+				}
+			}
+		}
+		else
+		{
+			// if cannot move to regs push on stack
+			if (!moveRegsByTypeSizeAtIdx(regValues, paramRegs, t, &pI))
+			{
+				if (sI != _stackValues.end())
+				{
+					sI++;
+				}
+				else
+				{
+					auto s = stackVariableForType(call, t);
+					if (s != nullptr)
+					{
+						_stackValues.push_back(s);
+						sI = _stackValues.end();
+					}
+				}
+			}
+		}
+	}
+
+	_fpRegValues = fpRegValues;
+	_regValues = regValues;
+
+	if (sI != _stackValues.end())
+	{
+		_stackValues.erase(sI, _stackValues.end());
+	}
+}
+
+void ParamFilter::leaveOnlyPositiveStacks()
+{
+	_stackValues.erase(
+		std::remove_if(_stackValues.begin(), _stackValues.end(),
+			[this](const Value* li)
+			{
+				auto aOff = _config->getStackVariableOffset(li);
+				return aOff.isDefined() && aOff < 0;
+			}),
+		_stackValues.end());
 }
 
 } // namespace bin2llvmir
