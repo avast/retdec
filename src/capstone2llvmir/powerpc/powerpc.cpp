@@ -2184,7 +2184,7 @@ void Capstone2LlvmIrTranslatorPowerpc_impl::translateB(cs_insn* i, cs_ppc* pi, l
 		}
 		else
 		{
-			throw GenericError("unhandled branch instruction format");
+			throw GenericError("unhandled branch instruction format #1");
 		}
 	}
 	else if (toCTR)
@@ -2206,9 +2206,17 @@ void Capstone2LlvmIrTranslatorPowerpc_impl::translateB(cs_insn* i, cs_ppc* pi, l
 		{
 			crReg = pi->operands[0].reg;
 		}
+		// 200a134 @ bdzctrl 0x200a13c = "4f ec 14 21"
+		// I have no fucking idea what this does.
+		//
+		else if (pi->op_count == 1
+				&& pi->operands[0].type == PPC_OP_IMM)
+		{
+			crReg = PPC_REG_CR0;
+		}
 		else
 		{
-			throw GenericError("unhandled branch instruction format");
+			throw GenericError("unhandled branch instruction format #2");
 		}
 	}
 	else
@@ -2268,13 +2276,13 @@ void Capstone2LlvmIrTranslatorPowerpc_impl::translateB(cs_insn* i, cs_ppc* pi, l
 		}
 		else
 		{
-			throw GenericError("unhandled branch instruction format");
+			throw GenericError("unhandled branch instruction format #3");
 		}
 	}
 
 	if (target == nullptr)
 	{
-		throw GenericError("unhandled branch instruction format");
+		throw GenericError("unhandled branch instruction format #4");
 	}
 
 	// Store to LR, right before branch generation.
