@@ -204,10 +204,8 @@ class Capstone2LlvmIrTranslatorX86_impl :
 //==============================================================================
 //
 	protected:
-		virtual void translatePseudoAsmGeneric(
-				cs_insn* i,
-				cs_x86* ci,
-				llvm::IRBuilder<>& irb) override;
+		virtual bool isOperandRegister(cs_x86_op& op) override;
+		virtual uint8_t getOperandAccess(cs_x86_op& op) override;
 //
 //==============================================================================
 // x86 implementation data.

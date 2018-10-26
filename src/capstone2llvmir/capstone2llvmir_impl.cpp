@@ -333,9 +333,8 @@ std::size_t Capstone2LlvmIrTranslator_impl<CInsn, CInsnOp>::getDelaySlot(uint32_
 template <typename CInsn, typename CInsnOp>
 llvm::GlobalVariable* Capstone2LlvmIrTranslator_impl<CInsn, CInsnOp>::getRegister(uint32_t r)
 {
-	// This could be optimized using cache.
-	auto rn = getRegisterName(r);
-	return _module->getNamedGlobal(rn);
+	auto fIt = _capstone2LlvmRegs.find(r);
+	return fIt != _capstone2LlvmRegs.end() ? fIt->second : nullptr;
 }
 
 template <typename CInsn, typename CInsnOp>
@@ -648,16 +647,16 @@ template <typename CInsn, typename CInsnOp>
 llvm::GlobalVariable* Capstone2LlvmIrTranslator_impl<CInsn, CInsnOp>::isRegister(
 		llvm::Value* v) const
 {
-	auto it = _allLlvmRegs.find(llvm::dyn_cast_or_null<llvm::GlobalVariable>(v));
-	return it != _allLlvmRegs.end() ? it->first : nullptr;
+	auto it = _llvm2CapstoneRegs.find(llvm::dyn_cast_or_null<llvm::GlobalVariable>(v));
+	return it != _llvm2CapstoneRegs.end() ? it->first : nullptr;
 }
 
 template <typename CInsn, typename CInsnOp>
 uint32_t Capstone2LlvmIrTranslator_impl<CInsn, CInsnOp>::getCapstoneRegister(
 		llvm::GlobalVariable* gv) const
 {
-	auto it = _allLlvmRegs.find(gv);
-	return it != _allLlvmRegs.end() ? it->second : 0;
+	auto it = _llvm2CapstoneRegs.find(gv);
+	return it != _llvm2CapstoneRegs.end() ? it->second : 0;
 }
 
 template <typename CInsn, typename CInsnOp>
@@ -969,7 +968,8 @@ llvm::GlobalVariable* Capstone2LlvmIrTranslator_impl<CInsn, CInsnOp>::createRegi
 		throw GenericError("Memory allocation error.");
 	}
 
-	_allLlvmRegs[gv] = r;
+	_llvm2CapstoneRegs[gv] = r;
+	_capstone2LlvmRegs[r] = gv;
 
 	return gv;
 }
@@ -1918,6 +1918,16 @@ void Capstone2LlvmIrTranslator_impl<CInsn, CInsnOp>::translatePseudoAsmOp0Op1Fnc
 }
 
 /**
+ * Some architectures do not have this info in operands.
+ * Return default value: CS_AC_INVALID.
+ */
+template <typename CInsn, typename CInsnOp>
+uint8_t Capstone2LlvmIrTranslator_impl<CInsn, CInsnOp>::getOperandAccess(CInsnOp&)
+{
+	return CS_AC_INVALID;
+}
+
+/**
  * Generate pseudo asm call using information provided by Capstone.
  */
 template <typename CInsn, typename CInsnOp>
@@ -1929,35 +1939,125 @@ void Capstone2LlvmIrTranslator_impl<CInsn, CInsnOp>::translatePseudoAsmGeneric(
 	std::vector<llvm::Value*> vals;
 	std::vector<llvm::Type*> types;
 
+	unsigned writeCnt = 0;
+	llvm::Type* writeType = getDefaultType();
+	bool writesOp = false;
 	for (std::size_t j = 0; j < ci->op_count; ++j)
 	{
-		auto* op = loadOp(ci->operands[j], irb);
-		vals.push_back(op);
-		types.push_back(op->getType());
+		auto& op = ci->operands[j];
+		auto access = getOperandAccess(op);
+		if (access == CS_AC_INVALID || (access & CS_AC_READ))
+		{
+			auto* o = loadOp(op, irb);
+			vals.push_back(o);
+			types.push_back(o->getType());
+		}
+
+		if (access & CS_AC_WRITE)
+		{
+			writesOp = true;
+			++writeCnt;
+
+			if (isOperandRegister(op))
+			{
+				auto* t = getRegisterType(op.reg);
+				if (writeCnt == 1 || writeType == t)
+				{
+					writeType = t;
+				}
+				else
+				{
+					writeType = getDefaultType();
+				}
+			}
+			else
+			{
+				writeType = getDefaultType();
+			}
+		}
 	}
 
 	if (vals.empty())
 	{
+		// All registers must be ok, or don't use them at all.
+		std::vector<uint32_t> readRegs;
+		readRegs.reserve(i->detail->regs_read_count);
 		for (std::size_t j = 0; j < i->detail->regs_read_count; ++j)
 		{
-			auto* op = loadRegister(i->detail->regs_read[j], irb);
+			auto r = i->detail->regs_read[j];
+			if (getRegister(r))
+			{
+				readRegs.push_back(r);
+			}
+			else
+			{
+				readRegs.clear();
+				break;
+			}
+		}
+
+		for (auto r : readRegs)
+		{
+			auto* op = loadRegister(r, irb);
 			vals.push_back(op);
 			types.push_back(op->getType());
 		}
 	}
 
+	auto* retType = writesOp ? writeType : irb.getVoidTy();
 	llvm::Function* fnc = getPseudoAsmFunction(
 			i,
-			irb.getVoidTy(),
+			retType,
 			types);
 
-	irb.CreateCall(fnc, vals);
+	auto* c = irb.CreateCall(fnc, vals);
 
+	std::set<uint32_t> writtenRegs;
+	if (retType)
+	{
+		for (std::size_t j = 0; j < ci->op_count; ++j)
+		{
+			auto& op = ci->operands[j];
+			if (getOperandAccess(op) & CS_AC_WRITE)
+			{
+				storeOp(op, c, irb);
+
+				if (isOperandRegister(op))
+				{
+					writtenRegs.insert(op.reg);
+				}
+			}
+		}
+	}
+
+	// All registers must be ok, or don't use them at all.
+	std::vector<uint32_t> writeRegs;
+	writeRegs.reserve(i->detail->regs_write_count);
 	for (std::size_t j = 0; j < i->detail->regs_write_count; ++j)
 	{
 		auto r = i->detail->regs_write[j];
-		auto* undef = llvm::UndefValue::get(getRegisterType(r));
-		storeRegister(r, undef, irb);
+		if (writtenRegs.count(r))
+		{
+			// silently ignore
+		}
+		else if (getRegister(r))
+		{
+			writeRegs.push_back(r);
+		}
+		else
+		{
+			writeRegs.clear();
+			break;
+		}
+	}
+
+	for (auto r : writeRegs)
+	{
+		llvm::Value* val = retType->isVoidTy()
+				? llvm::cast<llvm::Value>(
+						llvm::UndefValue::get(getRegisterType(r)))
+				: llvm::cast<llvm::Value>(c);
+		storeRegister(r, val, irb);
 	}
 }
 

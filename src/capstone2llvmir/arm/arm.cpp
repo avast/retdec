@@ -744,106 +744,14 @@ llvm::Value* Capstone2LlvmIrTranslatorArm_impl::generateInsnConditionCode(
 	}
 }
 
-/**
- * ARM is special because operands contain access information.
- */
-void Capstone2LlvmIrTranslatorArm_impl::translatePseudoAsmGeneric(
-		cs_insn* i,
-		cs_arm* ci,
-		llvm::IRBuilder<>& irb)
+bool Capstone2LlvmIrTranslatorArm_impl::isOperandRegister(cs_arm_op& op)
 {
-	std::vector<llvm::Value*> vals;
-	std::vector<llvm::Type*> types;
+	return op.type == ARM_OP_REG;
+}
 
-	unsigned writeCnt = 0;
-	llvm::Type* writeType = getDefaultType();
-	bool writesOp = false;
-	for (std::size_t j = 0; j < ci->op_count; ++j)
-	{
-		auto& op = ci->operands[j];
-		if (op.access == CS_AC_INVALID || op.access & CS_AC_READ)
-		{
-			auto* o = loadOp(op, irb);
-			vals.push_back(o);
-			types.push_back(o->getType());
-		}
-
-		if (op.access & CS_AC_WRITE)
-		{
-			writesOp = true;
-			++writeCnt;
-
-			if (op.type == ARM_OP_REG)
-			{
-				auto* t = getRegisterType(op.reg);
-				if (writeCnt == 1 || writeType == t)
-				{
-					writeType = t;
-				}
-				else
-				{
-					writeType = getDefaultType();
-				}
-			}
-			else
-			{
-				writeType = getDefaultType();
-			}
-		}
-	}
-
-	if (vals.empty())
-	{
-		for (std::size_t j = 0; j < i->detail->regs_read_count; ++j)
-		{
-			auto* op = loadRegister(i->detail->regs_read[j], irb);
-			vals.push_back(op);
-			types.push_back(op->getType());
-		}
-	}
-
-	auto* retType = writesOp ? writeType : irb.getVoidTy();
-	llvm::Function* fnc = getPseudoAsmFunction(
-			i,
-			retType,
-			types);
-
-	auto* c = irb.CreateCall(fnc, vals);
-
-	std::set<uint32_t> writtenRegs;
-	if (retType)
-	{
-		for (std::size_t j = 0; j < ci->op_count; ++j)
-		{
-			auto& op = ci->operands[j];
-			if (op.access & CS_AC_WRITE)
-			{
-				storeOp(op, c, irb);
-
-				if (op.type == ARM_OP_REG)
-				{
-					writtenRegs.insert(op.reg);
-				}
-				else if (op.type == ARM_OP_SYSREG)
-				{
-					writtenRegs.insert(sysregNumberTranslation(op.reg));
-				}
-			}
-		}
-	}
-
-	for (std::size_t j = 0; j < i->detail->regs_write_count; ++j)
-	{
-		auto r = i->detail->regs_write[j];
-		if (writtenRegs.find(r) == writtenRegs.end())
-		{
-			llvm::Value* val = retType->isVoidTy()
-					? llvm::cast<llvm::Value>(
-							llvm::UndefValue::get(getRegisterType(r)))
-					: llvm::cast<llvm::Value>(c);
-			storeRegister(r, val, irb);
-		}
-	}
+uint8_t Capstone2LlvmIrTranslatorArm_impl::getOperandAccess(cs_arm_op& op)
+{
+	return op.access;
 }
 
 //

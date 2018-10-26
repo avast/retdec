@@ -99,6 +99,8 @@ class Capstone2LlvmIrTranslatorPowerpc_impl :
 		uint32_t crBitIndexToCrRegister(uint32_t idx);
 		bool isCrRegister(uint32_t r);
 		bool isCrRegister(cs_ppc_op& op);
+
+		virtual bool isOperandRegister(cs_ppc_op& op) override;
 //
 //==============================================================================
 // PowerPC implementation data.

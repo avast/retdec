@@ -1635,113 +1635,14 @@ llvm::Value* Capstone2LlvmIrTranslatorX86_impl::generateCcS(llvm::IRBuilder<>& i
 	return loadRegister(X86_REG_SF, irb);
 }
 
-/**
- * x86 is special because operands contain access information.
- */
-void Capstone2LlvmIrTranslatorX86_impl::translatePseudoAsmGeneric(
-		cs_insn* i,
-		cs_x86* ci,
-		llvm::IRBuilder<>& irb)
+bool Capstone2LlvmIrTranslatorX86_impl::isOperandRegister(cs_x86_op& op)
 {
-	std::vector<llvm::Value*> vals;
-	std::vector<llvm::Type*> types;
+	return op.type == X86_OP_REG;
+}
 
-	unsigned writeCnt = 0;
-	llvm::Type* writeType = getDefaultType();
-	bool writesOp = false;
-	for (std::size_t j = 0; j < ci->op_count; ++j)
-	{
-		auto& op = ci->operands[j];
-		if (op.access == CS_AC_INVALID || op.access & CS_AC_READ)
-		{
-			auto* o = loadOp(op, irb);
-			vals.push_back(o);
-			types.push_back(o->getType());
-		}
-
-		if (op.access & CS_AC_WRITE)
-		{
-			writesOp = true;
-			++writeCnt;
-
-			if (op.type == X86_OP_REG)
-			{
-				auto* t = getRegisterType(op.reg);
-				if (writeCnt == 1 || writeType == t)
-				{
-					writeType = t;
-				}
-				else
-				{
-					writeType = getDefaultType();
-				}
-			}
-			else
-			{
-				writeType = getDefaultType();
-			}
-		}
-	}
-
-	if (vals.empty())
-	{
-		for (std::size_t j = 0; j < i->detail->regs_read_count; ++j)
-		{
-			auto r = i->detail->regs_read[j];
-			// Check that we have such register.
-			// E.g. 32-bit mode, instruction getsec, Capstone says Rxx is used.
-			if (getRegister(r))
-			{
-				auto* op = loadRegister(r, irb);
-				vals.push_back(op);
-				types.push_back(op->getType());
-			}
-		}
-	}
-
-	auto* retType = writesOp ? writeType : irb.getVoidTy();
-	llvm::Function* fnc = getPseudoAsmFunction(
-			i,
-			retType,
-			types);
-
-	auto* c = irb.CreateCall(fnc, vals);
-
-	std::set<uint32_t> writtenRegs;
-	if (retType)
-	{
-		for (std::size_t j = 0; j < ci->op_count; ++j)
-		{
-			auto& op = ci->operands[j];
-			if (op.access & CS_AC_WRITE)
-			{
-				storeOp(op, c, irb);
-
-				if (op.type == X86_OP_REG)
-				{
-					writtenRegs.insert(op.reg);
-				}
-			}
-		}
-	}
-
-	for (std::size_t j = 0; j < i->detail->regs_write_count; ++j)
-	{
-		auto r = i->detail->regs_write[j];
-		if (writtenRegs.find(r) == writtenRegs.end()
-				// Check that we have such register.
-				// E.g. 32-bit mode, instruction getsec, Capstone says Rxx is used.
-				&& getRegister(r)
-				// Ignore some registers.
-				&& r != X86_REG_FPSW)
-		{
-			llvm::Value* val = retType->isVoidTy()
-					? llvm::cast<llvm::Value>(
-							llvm::UndefValue::get(getRegisterType(r)))
-					: llvm::cast<llvm::Value>(c);
-			storeRegister(r, val, irb);
-		}
-	}
+uint8_t Capstone2LlvmIrTranslatorX86_impl::getOperandAccess(cs_x86_op& op)
+{
+	return op.access;
 }
 
 //

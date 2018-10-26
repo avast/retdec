@@ -483,6 +483,11 @@ bool Capstone2LlvmIrTranslatorMips_impl::isFpInstructionVariant(cs_insn* i)
 			&& mi.operands[0].reg <= MIPS_REG_F31;
 }
 
+bool Capstone2LlvmIrTranslatorMips_impl::isOperandRegister(cs_mips_op& op)
+{
+	return op.type == MIPS_OP_REG;
+}
+
 //
 //==============================================================================
 // MIPS instruction translation methods.

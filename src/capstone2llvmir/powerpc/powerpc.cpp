@@ -590,6 +590,11 @@ bool Capstone2LlvmIrTranslatorPowerpc_impl::isCrRegister(cs_ppc_op& op)
 	return op.type == PPC_OP_REG && isCrRegister(op.reg);
 }
 
+bool Capstone2LlvmIrTranslatorPowerpc_impl::isOperandRegister(cs_ppc_op& op)
+{
+	return op.type == PPC_OP_REG;
+}
+
 //
 //==============================================================================
 // PowerPC instruction translation methods.

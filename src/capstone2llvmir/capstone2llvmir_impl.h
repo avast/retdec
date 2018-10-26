@@ -472,7 +472,10 @@ class Capstone2LlvmIrTranslator_impl : virtual public Capstone2LlvmIrTranslator
 		void translatePseudoAsmOp0FncOp0Op1Op2Op3(cs_insn* i, CInsn* ci, llvm::IRBuilder<>& irb);
 		void translatePseudoAsmOp0Op1FncOp0Op1Op2Op3(cs_insn* i, CInsn* ci, llvm::IRBuilder<>& irb);
 		// Generic.
+		virtual bool isOperandRegister(CInsnOp& op) = 0;
+		virtual uint8_t getOperandAccess(CInsnOp& op);
 		virtual void translatePseudoAsmGeneric(cs_insn* i, CInsn* ci, llvm::IRBuilder<>& irb);
+
 
 		void throwUnexpectedOperands(cs_insn* i, const std::string comment = "");
 		void throwUnhandledInstructions(cs_insn* i, const std::string comment = "");
@@ -516,10 +519,10 @@ class Capstone2LlvmIrTranslator_impl : virtual public Capstone2LlvmIrTranslator
 		/// need to be manually mapped here.
 		std::map<uint32_t, llvm::Type*> _reg2type;
 
-		/// This is a helper map with all LLVM registers created by the
-		/// translator. It is used to check, if given LLVM value is a register.
-		/// Maybe, it would be possible to do this task without this.
-		std::map<llvm::GlobalVariable*, uint32_t> _allLlvmRegs;
+		/// Maps with all LLVM registers created by the translator.
+		/// Used for bidirectional queries.
+		std::map<llvm::GlobalVariable*, uint32_t> _llvm2CapstoneRegs;
+		std::map<uint32_t, llvm::GlobalVariable*> _capstone2LlvmRegs;
 
 		/// If the last translated instruction generated branch call, it is
 		/// stored to this member.

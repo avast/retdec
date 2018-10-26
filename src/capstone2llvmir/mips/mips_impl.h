@@ -98,6 +98,8 @@ class Capstone2LlvmIrTranslatorMips_impl :
 				uint32_t r,
 				llvm::IRBuilder<>& irb);
 		bool isFpInstructionVariant(cs_insn* i);
+
+		virtual bool isOperandRegister(cs_mips_op& op) override;
 //
 //==============================================================================
 // MIPS implementation data.
