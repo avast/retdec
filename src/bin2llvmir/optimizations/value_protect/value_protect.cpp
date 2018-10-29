@@ -260,6 +260,7 @@ llvm::Function* getWriteUndefQword(llvm::Module* m)
 char ValueProtect::ID = 0;
 
 std::map<llvm::Type*, llvm::Function*> ValueProtect::_type2fnc;
+llvm::Function* ValueProtect::_dymmyFnc = nullptr;
 
 static RegisterPass<ValueProtect> X(
 		"value-protect",
@@ -338,7 +339,7 @@ bool ValueProtect::protectStack()
 			// Right now, ww protect all allocas, not only stacks.
 			if (auto* a = dyn_cast<AllocaInst>(&i))
 			{
-				protectValue(a, a->getAllocatedType(), a->getNextNode());
+				protectValue_semi(a, a->getAllocatedType(), a->getNextNode());
 				changed = true;
 			}
 		}
@@ -378,22 +379,79 @@ bool ValueProtect::protectRegisters()
 		Instruction* first = &F.front().front();
 		for (auto* r : regs)
 		{
-			protectValue(r, r->getValueType(), first);
+			protectValue_semi(r, r->getValueType(), first);
 			changed = true;
 		}
 	}
 
+	// We need to make really sure registers are protected and no register will
+	// be erased by LLVM.
+	// Function needs to be named so LLVM won't erase it.
+	//
+	auto* ft = FunctionType::get(Type::getVoidTy(_module->getContext()), false);
+	_dymmyFnc = Function::Create(
+			ft,
+			GlobalValue::ExternalLinkage,
+			names::generatedValueProtectFnc,
+			_module);
+	auto* bb = BasicBlock::Create(_module->getContext(), "", _dymmyFnc);
+	auto* ret = ReturnInst::Create(_module->getContext(), bb);
+	for (auto* r : regs)
+	{
+		// It would be safer to do this for all registers, but then some
+		// optimizations work slightly different and some regression tests fail.
+		if (r->user_empty())
+		{
+			protectValue_full(r, r->getValueType(), ret);
+		}
+	}
+	changed = true;
+
 	return changed;
 }
 
-void ValueProtect::protectValue(
+/**
+ * Full protection will prevent LLVM to remove @p val even if it is not used at
+ * all - e.g. register that is only declared, but not used.
+ *
+ * undef = call undef_fnc(val)
+ * store undef val
+ */
+void ValueProtect::protectValue_full(
 		llvm::Value* val,
 		llvm::Type* t,
 		llvm::Instruction* before)
 {
-	Function* fnc = getOrCreateFunction(t);
-	auto* c = CallInst::Create(fnc);
-	c->insertBefore(before);
+	auto* ft = FunctionType::get(
+			t,
+			ArrayRef<Type*>{val->getType()},
+			false);
+	Function* fnc = getOrCreateFunction(ft);
+
+	auto* c = CallInst::Create(fnc, ArrayRef<Value*>{val}, "", before);
+
+	auto* s = new StoreInst(c, val);
+	s->insertAfter(c);
+}
+
+/**
+ * Semi protection will initialize @p val with undefined value, but LLVM may
+ * remove this initialization and the @p val itself if it is not used nowhere
+ * else.
+ *
+ * undef = call undef_fnc()
+ * store undef val
+ */
+void ValueProtect::protectValue_semi(
+		llvm::Value* val,
+		llvm::Type* t,
+		llvm::Instruction* before)
+{
+	auto* ft = FunctionType::get(t, false);
+	Function* fnc = getOrCreateFunction(ft);
+
+	auto* c = CallInst::Create(fnc, "", before);
+
 	auto* s = new StoreInst(c, val);
 	s->insertAfter(c);
 }
@@ -545,17 +603,16 @@ bool ValueProtect::protectLoadStores()
 	return changed;
 }
 
-llvm::Function* ValueProtect::getOrCreateFunction(llvm::Type* t)
+llvm::Function* ValueProtect::getOrCreateFunction(llvm::FunctionType* t)
 {
 	auto fIt = _type2fnc.find(t);
 	return fIt != _type2fnc.end() ? fIt->second : createFunction(t);
 }
 
-llvm::Function* ValueProtect::createFunction(llvm::Type* t)
+llvm::Function* ValueProtect::createFunction(llvm::FunctionType* t)
 {
-	FunctionType* ft = FunctionType::get(t, false);
 	auto* fnc = Function::Create(
-			ft,
+			t,
 			GlobalValue::ExternalLinkage,
 			names::generateFunctionNameUndef(_type2fnc.size()),
 			_module);
@@ -571,6 +628,13 @@ llvm::Function* ValueProtect::createFunction(llvm::Type* t)
 bool ValueProtect::unprotect()
 {
 	bool changed = false;
+
+	if (_dymmyFnc)
+	{
+		_dymmyFnc->eraseFromParent();
+		_dymmyFnc = nullptr;
+		changed = true;
+	}
 
 	for (auto& p : _type2fnc)
 	{
@@ -607,8 +671,8 @@ bool ValueProtect::unprotect()
 			changed = true;
 		}
 	}
-
 	_type2fnc.clear();
+
 	return changed;
 }
 

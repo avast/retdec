@@ -49,19 +49,26 @@ class ValueProtect : public llvm::ModulePass
 		bool protectLoadStores();
 		bool unprotect();
 
-		void protectValue(
+		void protectValue_full(
+				llvm::Value* val,
+				llvm::Type* t,
+				llvm::Instruction* before);
+		void protectValue_semi(
 				llvm::Value* val,
 				llvm::Type* t,
 				llvm::Instruction* before);
 
-		llvm::Function* getOrCreateFunction(llvm::Type* t);
-		llvm::Function* createFunction(llvm::Type* t);
+		llvm::Function* getOrCreateFunction(llvm::FunctionType* t);
+		llvm::Function* createFunction(llvm::FunctionType* t);
 
 	private:
 		llvm::Module* _module = nullptr;
 		Config* _config = nullptr;
 		Abi* _abi = nullptr;
 		static std::map<llvm::Type*, llvm::Function*> _type2fnc;
+		/// Artificial function where any global protections can be placed.
+		/// It is removed at the end.
+		static llvm::Function* _dymmyFnc;
 };
 
 } // namespace bin2llvmir
