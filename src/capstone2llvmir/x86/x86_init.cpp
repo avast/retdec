@@ -109,6 +109,10 @@ void Capstone2LlvmIrTranslatorX86_impl::initializeRegTypeMap()
 	auto* i16 = llvm::IntegerType::getInt16Ty(_module->getContext());
 	auto* i32 = llvm::IntegerType::getInt32Ty(_module->getContext());
 	auto* i64 = llvm::IntegerType::getInt64Ty(_module->getContext());
+	auto* i128 = llvm::IntegerType::getInt128Ty(_module->getContext());
+	auto* i256 = llvm::IntegerType::getIntNTy(_module->getContext(), 256);
+	auto* i512 = llvm::IntegerType::getIntNTy(_module->getContext(), 512);
+	auto* fp64 = llvm::IntegerType::getDoubleTy(_module->getContext());
 	auto* fp80 = llvm::IntegerType::getX86_FP80Ty(_module->getContext());
 
 	auto* defTy = _origBasicMode == CS_MODE_64 ? i64 : i32;
@@ -209,6 +213,15 @@ void Capstone2LlvmIrTranslatorX86_impl::initializeRegTypeMap()
 			{X86_REG_ST6, fp80},
 			{X86_REG_ST7, fp80},
 
+			{X86_REG_FP0, fp64},
+			{X86_REG_FP1, fp64},
+			{X86_REG_FP2, fp64},
+			{X86_REG_FP3, fp64},
+			{X86_REG_FP4, fp64},
+			{X86_REG_FP5, fp64},
+			{X86_REG_FP6, fp64},
+			{X86_REG_FP7, fp64},
+
 			{X86_REG_EFLAGS, defTy},
 			{X86_REG_DR0, defTy},
 			{X86_REG_DR1, defTy},
@@ -218,6 +231,14 @@ void Capstone2LlvmIrTranslatorX86_impl::initializeRegTypeMap()
 			{X86_REG_DR5, defTy},
 			{X86_REG_DR6, defTy},
 			{X86_REG_DR7, defTy},
+			{X86_REG_DR8, defTy},
+			{X86_REG_DR9, defTy},
+			{X86_REG_DR10, defTy},
+			{X86_REG_DR11, defTy},
+			{X86_REG_DR12, defTy},
+			{X86_REG_DR13, defTy},
+			{X86_REG_DR14, defTy},
+			{X86_REG_DR15, defTy},
 
 			{X86_REG_CR0, defTy},
 			{X86_REG_CR1, defTy},
@@ -235,6 +256,130 @@ void Capstone2LlvmIrTranslatorX86_impl::initializeRegTypeMap()
 			{X86_REG_CR13, defTy},
 			{X86_REG_CR14, defTy},
 			{X86_REG_CR15, defTy},
+
+			{X86_REG_FPSW, defTy},
+
+			// opmask registers (AVX-512)
+			{X86_REG_K0, i64},
+			{X86_REG_K1, i64},
+			{X86_REG_K2, i64},
+			{X86_REG_K3, i64},
+			{X86_REG_K4, i64},
+			{X86_REG_K5, i64},
+			{X86_REG_K6, i64},
+			{X86_REG_K7, i64},
+
+			// MMX
+			{X86_REG_MM0, i64},
+			{X86_REG_MM1, i64},
+			{X86_REG_MM2, i64},
+			{X86_REG_MM3, i64},
+			{X86_REG_MM4, i64},
+			{X86_REG_MM5, i64},
+			{X86_REG_MM6, i64},
+			{X86_REG_MM7, i64},
+
+			// XMM
+			{X86_REG_XMM0, i128},
+			{X86_REG_XMM1, i128},
+			{X86_REG_XMM2, i128},
+			{X86_REG_XMM3, i128},
+			{X86_REG_XMM4, i128},
+			{X86_REG_XMM5, i128},
+			{X86_REG_XMM6, i128},
+			{X86_REG_XMM7, i128},
+			{X86_REG_XMM8, i128},
+			{X86_REG_XMM9, i128},
+			{X86_REG_XMM10, i128},
+			{X86_REG_XMM11, i128},
+			{X86_REG_XMM12, i128},
+			{X86_REG_XMM13, i128},
+			{X86_REG_XMM14, i128},
+			{X86_REG_XMM15, i128},
+			{X86_REG_XMM16, i128},
+			{X86_REG_XMM17, i128},
+			{X86_REG_XMM18, i128},
+			{X86_REG_XMM19, i128},
+			{X86_REG_XMM20, i128},
+			{X86_REG_XMM21, i128},
+			{X86_REG_XMM22, i128},
+			{X86_REG_XMM23, i128},
+			{X86_REG_XMM24, i128},
+			{X86_REG_XMM25, i128},
+			{X86_REG_XMM26, i128},
+			{X86_REG_XMM27, i128},
+			{X86_REG_XMM28, i128},
+			{X86_REG_XMM29, i128},
+			{X86_REG_XMM30, i128},
+			{X86_REG_XMM31, i128},
+
+			// YMM
+			{X86_REG_YMM0, i256},
+			{X86_REG_YMM1, i256},
+			{X86_REG_YMM2, i256},
+			{X86_REG_YMM3, i256},
+			{X86_REG_YMM4, i256},
+			{X86_REG_YMM5, i256},
+			{X86_REG_YMM6, i256},
+			{X86_REG_YMM7, i256},
+			{X86_REG_YMM8, i256},
+			{X86_REG_YMM9, i256},
+			{X86_REG_YMM10, i256},
+			{X86_REG_YMM11, i256},
+			{X86_REG_YMM12, i256},
+			{X86_REG_YMM13, i256},
+			{X86_REG_YMM14, i256},
+			{X86_REG_YMM15, i256},
+			{X86_REG_YMM16, i256},
+			{X86_REG_YMM17, i256},
+			{X86_REG_YMM18, i256},
+			{X86_REG_YMM19, i256},
+			{X86_REG_YMM20, i256},
+			{X86_REG_YMM21, i256},
+			{X86_REG_YMM22, i256},
+			{X86_REG_YMM23, i256},
+			{X86_REG_YMM24, i256},
+			{X86_REG_YMM25, i256},
+			{X86_REG_YMM26, i256},
+			{X86_REG_YMM27, i256},
+			{X86_REG_YMM28, i256},
+			{X86_REG_YMM29, i256},
+			{X86_REG_YMM30, i256},
+			{X86_REG_YMM31, i256},
+
+			// ZMM
+			{X86_REG_ZMM0, i512},
+			{X86_REG_ZMM1, i512},
+			{X86_REG_ZMM2, i512},
+			{X86_REG_ZMM3, i512},
+			{X86_REG_ZMM4, i512},
+			{X86_REG_ZMM5, i512},
+			{X86_REG_ZMM6, i512},
+			{X86_REG_ZMM7, i512},
+			{X86_REG_ZMM8, i512},
+			{X86_REG_ZMM9, i512},
+			{X86_REG_ZMM10, i512},
+			{X86_REG_ZMM11, i512},
+			{X86_REG_ZMM12, i512},
+			{X86_REG_ZMM13, i512},
+			{X86_REG_ZMM14, i512},
+			{X86_REG_ZMM15, i512},
+			{X86_REG_ZMM16, i512},
+			{X86_REG_ZMM17, i512},
+			{X86_REG_ZMM18, i512},
+			{X86_REG_ZMM19, i512},
+			{X86_REG_ZMM20, i512},
+			{X86_REG_ZMM21, i512},
+			{X86_REG_ZMM22, i512},
+			{X86_REG_ZMM23, i512},
+			{X86_REG_ZMM24, i512},
+			{X86_REG_ZMM25, i512},
+			{X86_REG_ZMM26, i512},
+			{X86_REG_ZMM27, i512},
+			{X86_REG_ZMM28, i512},
+			{X86_REG_ZMM29, i512},
+			{X86_REG_ZMM30, i512},
+			{X86_REG_ZMM31, i512},
 
 			// x86_reg_rflags
 			//
@@ -362,31 +507,22 @@ void Capstone2LlvmIrTranslatorX86_impl::initializePseudoCallInstructionIDs()
 //==============================================================================
 //
 
-void Capstone2LlvmIrTranslatorX86_impl::initializeRegistersParentMapToSelf(
-		const std::vector<x86_reg>& rs)
-{
-	for (auto r : rs)
-	{
-		assert(r < _reg2parentMap.size());
-		_reg2parentMap[r] = r;
-	}
-}
-
 void Capstone2LlvmIrTranslatorX86_impl::initializeRegistersParentMapToOther(
 		const std::vector<x86_reg>& rs,
 		x86_reg other)
 {
 	for (auto r : rs)
 	{
-		assert(r < _reg2parentMap.size());
+		if (r >= _reg2parentMap.size())
+		{
+			throw GenericError("Register out of range.");
+		}
 		_reg2parentMap[r] = other;
 	}
 }
 
 void Capstone2LlvmIrTranslatorX86_impl::initializeRegistersParentMap()
 {
-	initializeRegistersParentMapCommon();
-
 	switch (_origBasicMode)
 	{
 		case CS_MODE_16: initializeRegistersParentMap16(); break;
@@ -394,34 +530,11 @@ void Capstone2LlvmIrTranslatorX86_impl::initializeRegistersParentMap()
 		case CS_MODE_64: initializeRegistersParentMap64(); break;
 		default:
 		{
-			throw Capstone2LlvmIrError("Unhandled mode in "
+			throw GenericError("Unhandled mode in "
 					"initializeRegistersParentMap().");
 			break;
 		}
 	}
-}
-
-/**
- * Set mapping for registers that are their own parents.
- */
-void Capstone2LlvmIrTranslatorX86_impl::initializeRegistersParentMapCommon()
-{
-	initializeRegistersParentMapToSelf({
-			// Segment registers.
-			X86_REG_SS, X86_REG_CS, X86_REG_DS, X86_REG_ES, X86_REG_FS,
-			X86_REG_GS,
-			// Debug registers.
-			X86_REG_DR0, X86_REG_DR1, X86_REG_DR2, X86_REG_DR3, X86_REG_DR4,
-			X86_REG_DR5, X86_REG_DR6, X86_REG_DR7,
-			// x87 FPU Data registers.
-			X86_REG_ST0, X86_REG_ST1, X86_REG_ST2, X86_REG_ST3, X86_REG_ST4,
-			X86_REG_ST5, X86_REG_ST6, X86_REG_ST7,
-			// Control registers.
-			X86_REG_CR0, X86_REG_CR1, X86_REG_CR2, X86_REG_CR3, X86_REG_CR4,
-			X86_REG_CR5, X86_REG_CR6, X86_REG_CR7, X86_REG_CR8, X86_REG_CR9,
-			X86_REG_CR10, X86_REG_CR11, X86_REG_CR12, X86_REG_CR13,
-			X86_REG_CR14, X86_REG_CR15,
-	});
 }
 
 void Capstone2LlvmIrTranslatorX86_impl::initializeRegistersParentMap16()
@@ -562,7 +675,7 @@ Capstone2LlvmIrTranslatorX86_impl::_i2fm =
 		{X86_INS_BLSIC, nullptr},
 		{X86_INS_BLSMSK, nullptr},
 		{X86_INS_BLSR, nullptr},
-		{X86_INS_BOUND, &Capstone2LlvmIrTranslatorX86_impl::translateBound},
+		{X86_INS_BOUND, nullptr},
 		{X86_INS_BSF, &Capstone2LlvmIrTranslatorX86_impl::translateBsf},
 		{X86_INS_BSR, &Capstone2LlvmIrTranslatorX86_impl::translateBsf},
 		{X86_INS_BSWAP, &Capstone2LlvmIrTranslatorX86_impl::translateBswap},
@@ -680,8 +793,8 @@ Capstone2LlvmIrTranslatorX86_impl::_i2fm =
 		{X86_INS_FICOM, &Capstone2LlvmIrTranslatorX86_impl::translateFucomPop},
 		{X86_INS_FICOMP, &Capstone2LlvmIrTranslatorX86_impl::translateFucomPop},
 		{X86_INS_FINCSTP, &Capstone2LlvmIrTranslatorX86_impl::translateFincstp},
-		{X86_INS_FLDCW, &Capstone2LlvmIrTranslatorX86_impl::translateFldcw},
-		{X86_INS_FLDENV, &Capstone2LlvmIrTranslatorX86_impl::translateFldenv},
+		{X86_INS_FLDCW, &Capstone2LlvmIrTranslatorX86_impl::translateNop},
+		{X86_INS_FLDENV, nullptr},
 		{X86_INS_FLDL2E, &Capstone2LlvmIrTranslatorX86_impl::translateFloadConstant},
 		{X86_INS_FLDL2T, &Capstone2LlvmIrTranslatorX86_impl::translateFloadConstant},
 		{X86_INS_FLDLG2, &Capstone2LlvmIrTranslatorX86_impl::translateFloadConstant},
@@ -690,8 +803,8 @@ Capstone2LlvmIrTranslatorX86_impl::_i2fm =
 		{X86_INS_FNCLEX, nullptr},
 		{X86_INS_FNINIT, &Capstone2LlvmIrTranslatorX86_impl::translateFninit},
 		{X86_INS_FNOP, &Capstone2LlvmIrTranslatorX86_impl::translateNop},
-		{X86_INS_FNSTCW, &Capstone2LlvmIrTranslatorX86_impl::translateFnstcw},
-		{X86_INS_FNSTSW, &Capstone2LlvmIrTranslatorX86_impl::translateFnstsw},
+		{X86_INS_FNSTCW, &Capstone2LlvmIrTranslatorX86_impl::translateNop},
+		{X86_INS_FNSTSW, nullptr},
 		{X86_INS_FPATAN, nullptr},
 		{X86_INS_FPREM, nullptr},
 		{X86_INS_FPREM1, nullptr},
@@ -703,8 +816,8 @@ Capstone2LlvmIrTranslatorX86_impl::_i2fm =
 		{X86_INS_FSCALE, nullptr},
 		{X86_INS_FSETPM, nullptr},
 		{X86_INS_FSINCOS, &Capstone2LlvmIrTranslatorX86_impl::translateFsincos},
-		{X86_INS_FNSTENV, &Capstone2LlvmIrTranslatorX86_impl::translateFnstenv},
-		{X86_INS_FXAM, &Capstone2LlvmIrTranslatorX86_impl::translateFxam},
+		{X86_INS_FNSTENV, nullptr},
+		{X86_INS_FXAM, nullptr},
 		{X86_INS_FXRSTOR, nullptr},
 		{X86_INS_FXRSTOR64, nullptr},
 		{X86_INS_FXSAVE, nullptr},
@@ -723,7 +836,7 @@ Capstone2LlvmIrTranslatorX86_impl::_i2fm =
 		{X86_INS_GETSEC, nullptr},
 		{X86_INS_HADDPD, nullptr},
 		{X86_INS_HADDPS, nullptr},
-		{X86_INS_HLT, &Capstone2LlvmIrTranslatorX86_impl::translateHlt},
+		{X86_INS_HLT, nullptr},
 		{X86_INS_HSUBPD, nullptr},
 		{X86_INS_HSUBPS, nullptr},
 		{X86_INS_IDIV, &Capstone2LlvmIrTranslatorX86_impl::translateDiv},
@@ -736,10 +849,10 @@ Capstone2LlvmIrTranslatorX86_impl::_i2fm =
 		{X86_INS_INSERTQ, nullptr},
 		{X86_INS_INSD, &Capstone2LlvmIrTranslatorX86_impl::translateIns},
 		{X86_INS_INSW, &Capstone2LlvmIrTranslatorX86_impl::translateIns},
-		{X86_INS_INT, &Capstone2LlvmIrTranslatorX86_impl::translateInt},
-		{X86_INS_INT1, &Capstone2LlvmIrTranslatorX86_impl::translateInt1},
-		{X86_INS_INT3, &Capstone2LlvmIrTranslatorX86_impl::translateInt3},
-		{X86_INS_INTO, &Capstone2LlvmIrTranslatorX86_impl::translateInto},
+		{X86_INS_INT, nullptr},
+		{X86_INS_INT1, nullptr},
+		{X86_INS_INT3, nullptr},
+		{X86_INS_INTO, nullptr},
 		{X86_INS_INVD, nullptr},
 		{X86_INS_INVEPT, nullptr},
 		{X86_INS_INVLPG, nullptr},
@@ -1808,7 +1921,7 @@ Capstone2LlvmIrTranslatorX86_impl::_i2fm =
 		{X86_INS_VUNPCKLPS, nullptr},
 		{X86_INS_VZEROALL, nullptr},
 		{X86_INS_VZEROUPPER, nullptr},
-		{X86_INS_WAIT, &Capstone2LlvmIrTranslatorX86_impl::translateWait},
+		{X86_INS_WAIT, nullptr},
 		{X86_INS_WBINVD, nullptr},
 		{X86_INS_WRFSBASE, nullptr},
 		{X86_INS_WRGSBASE, nullptr},

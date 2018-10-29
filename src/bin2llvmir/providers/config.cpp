@@ -619,6 +619,22 @@ llvm::CallInst* Config::isLlvmAnyUncondBranchPseudoFunctionCall(llvm::Value* c)
 	return nullptr;
 }
 
+void Config::addPseudoAsmFunction(llvm::Function* f)
+{
+	_pseudoAsmFunctions.insert(f);
+}
+
+bool Config::isPseudoAsmFunction(llvm::Function* f)
+{
+	return _pseudoAsmFunctions.count(f);
+}
+
+llvm::CallInst* Config::isPseudoAsmFunctionCall(llvm::Value* c)
+{
+	auto* cc = dyn_cast_or_null<CallInst>(c);
+	return isPseudoAsmFunction(cc->getCalledFunction()) ? cc : nullptr;
+}
+
 /**
  * Get crypto pattern information for address \p addr - fill \p name,
  * \p description, and \p type, if there is a pattern on address.

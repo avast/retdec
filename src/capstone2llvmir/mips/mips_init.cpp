@@ -49,6 +49,7 @@ void Capstone2LlvmIrTranslatorMips_impl::initializeRegNameMap()
 
 void Capstone2LlvmIrTranslatorMips_impl::initializeRegTypeMap()
 {
+	auto* i1 = llvm::IntegerType::getInt32Ty(_module->getContext());
 	auto* i32 = llvm::IntegerType::getInt32Ty(_module->getContext());
 	auto* i64 = llvm::IntegerType::getInt64Ty(_module->getContext());
 	auto* i128 = llvm::IntegerType::getInt64Ty(_module->getContext());
@@ -64,11 +65,6 @@ void Capstone2LlvmIrTranslatorMips_impl::initializeRegTypeMap()
 			// Program counter.
 			//
 			{MIPS_REG_PC, defTy},
-
-			// Multiply and divide registers.
-			//
-			{MIPS_REG_HI, defTy},
-			{MIPS_REG_LO, defTy},
 
 			// General purpose registers.
 			//
@@ -105,6 +101,38 @@ void Capstone2LlvmIrTranslatorMips_impl::initializeRegTypeMap()
 			{MIPS_REG_30, defTy},
 			{MIPS_REG_31, defTy},
 
+			// DSP registers.
+			//
+			{MIPS_REG_DSPCCOND, i1},
+			{MIPS_REG_DSPCARRY, i1},
+			{MIPS_REG_DSPEFI, i1},
+			{MIPS_REG_DSPOUTFLAG, i1},
+			{MIPS_REG_DSPOUTFLAG16_19, i1},
+			{MIPS_REG_DSPOUTFLAG20, i1},
+			{MIPS_REG_DSPOUTFLAG21, i1},
+			{MIPS_REG_DSPOUTFLAG22, i1},
+			{MIPS_REG_DSPOUTFLAG23, i1},
+			{MIPS_REG_DSPPOS, defTy},
+			{MIPS_REG_DSPSCOUNT, defTy},
+
+			// ACC registers.
+			//
+			{MIPS_REG_AC0, defTy},
+			{MIPS_REG_AC1, defTy},
+			{MIPS_REG_AC2, defTy},
+			{MIPS_REG_AC3, defTy},
+
+			// COP registers.
+			//
+			{MIPS_REG_CC0, defTy},
+			{MIPS_REG_CC1, defTy},
+			{MIPS_REG_CC2, defTy},
+			{MIPS_REG_CC3, defTy},
+			{MIPS_REG_CC4, defTy},
+			{MIPS_REG_CC5, defTy},
+			{MIPS_REG_CC6, defTy},
+			{MIPS_REG_CC7, defTy},
+
 			// FPU registers.
 			//
 			{MIPS_REG_F0, defFty},
@@ -140,25 +168,6 @@ void Capstone2LlvmIrTranslatorMips_impl::initializeRegTypeMap()
 			{MIPS_REG_F30, defFty},
 			{MIPS_REG_F31, defFty},
 
-			// mips_reg_fpu_double
-			//
-			{MIPS_REG_FD0, f64},
-			{MIPS_REG_FD2, f64},
-			{MIPS_REG_FD4, f64},
-			{MIPS_REG_FD6, f64},
-			{MIPS_REG_FD8, f64},
-			{MIPS_REG_FD10, f64},
-			{MIPS_REG_FD12, f64},
-			{MIPS_REG_FD14, f64},
-			{MIPS_REG_FD16, f64},
-			{MIPS_REG_FD18, f64},
-			{MIPS_REG_FD20, f64},
-			{MIPS_REG_FD22, f64},
-			{MIPS_REG_FD24, f64},
-			{MIPS_REG_FD26, f64},
-			{MIPS_REG_FD28, f64},
-			{MIPS_REG_FD30, f64},
-
 			{MIPS_REG_FCC0, defTy},
 			{MIPS_REG_FCC1, defTy},
 			{MIPS_REG_FCC2, defTy},
@@ -167,38 +176,6 @@ void Capstone2LlvmIrTranslatorMips_impl::initializeRegTypeMap()
 			{MIPS_REG_FCC5, defTy},
 			{MIPS_REG_FCC6, defTy},
 			{MIPS_REG_FCC7, defTy},
-
-//			// DSP registers.
-//			//
-//			{MIPS_REG_DSPCCOND, },
-//			{MIPS_REG_DSPCARRY, },
-//			{MIPS_REG_DSPEFI, },
-//			{MIPS_REG_DSPOUTFLAG, },
-//			{MIPS_REG_DSPOUTFLAG16_19, },
-//			{MIPS_REG_DSPOUTFLAG20, },
-//			{MIPS_REG_DSPOUTFLAG21, },
-//			{MIPS_REG_DSPOUTFLAG22, },
-//			{MIPS_REG_DSPOUTFLAG23, },
-//			{MIPS_REG_DSPPOS, },
-//			{MIPS_REG_DSPSCOUNT, },
-
-			// ACC registers.
-			//
-			{MIPS_REG_AC0, defTy},
-			{MIPS_REG_AC1, defTy},
-			{MIPS_REG_AC2, defTy},
-			{MIPS_REG_AC3, defTy},
-
-			// COP registers.
-			//
-			{MIPS_REG_CC0, defTy},
-			{MIPS_REG_CC1, defTy},
-			{MIPS_REG_CC2, defTy},
-			{MIPS_REG_CC3, defTy},
-			{MIPS_REG_CC4, defTy},
-			{MIPS_REG_CC5, defTy},
-			{MIPS_REG_CC6, defTy},
-			{MIPS_REG_CC7, defTy},
 
 			// AFPR128.
 			//
@@ -235,6 +212,11 @@ void Capstone2LlvmIrTranslatorMips_impl::initializeRegTypeMap()
 			{MIPS_REG_W30, i128},
 			{MIPS_REG_W31, f128},
 
+			// Multiply and divide registers.
+			//
+			{MIPS_REG_HI, defTy},
+			{MIPS_REG_LO, defTy},
+
 			{MIPS_REG_P0, defTy},
 			{MIPS_REG_P1, defTy},
 			{MIPS_REG_P2, defTy},
@@ -243,6 +225,28 @@ void Capstone2LlvmIrTranslatorMips_impl::initializeRegTypeMap()
 			{MIPS_REG_MPL1, defTy},
 			{MIPS_REG_MPL2, defTy},
 	};
+
+	// mips_reg_fpu_double
+	//
+	if (defFty->isFloatTy())
+	{
+		r2t.emplace(MIPS_REG_FD0, f64);
+		r2t.emplace(MIPS_REG_FD2, f64);
+		r2t.emplace(MIPS_REG_FD4, f64);
+		r2t.emplace(MIPS_REG_FD6, f64);
+		r2t.emplace(MIPS_REG_FD8, f64);
+		r2t.emplace(MIPS_REG_FD10, f64);
+		r2t.emplace(MIPS_REG_FD12, f64);
+		r2t.emplace(MIPS_REG_FD14, f64);
+		r2t.emplace(MIPS_REG_FD16, f64);
+		r2t.emplace(MIPS_REG_FD18, f64);
+		r2t.emplace(MIPS_REG_FD20, f64);
+		r2t.emplace(MIPS_REG_FD22, f64);
+		r2t.emplace(MIPS_REG_FD24, f64);
+		r2t.emplace(MIPS_REG_FD26, f64);
+		r2t.emplace(MIPS_REG_FD28, f64);
+		r2t.emplace(MIPS_REG_FD30, f64);
+	}
 
 	_reg2type = std::move(r2t);
 }
@@ -419,7 +423,7 @@ Capstone2LlvmIrTranslatorMips_impl::_i2fm =
 		{MIPS_INS_BINSL, nullptr},
 		{MIPS_INS_BINSRI, nullptr},
 		{MIPS_INS_BINSR, nullptr},
-		{MIPS_INS_BITREV, &Capstone2LlvmIrTranslatorMips_impl::translateBitrev},
+		{MIPS_INS_BITREV, &Capstone2LlvmIrTranslatorMips_impl::translatePseudoAsmOp0FncOp1},
 		{MIPS_INS_BITSWAP, nullptr},
 		{MIPS_INS_BLEZ, &Capstone2LlvmIrTranslatorMips_impl::translateCondBranchBinary},
 		{MIPS_INS_BLEZALC, nullptr},
@@ -463,10 +467,10 @@ Capstone2LlvmIrTranslatorMips_impl::_i2fm =
 		{MIPS_INS_BTEQZ, nullptr},
 		{MIPS_INS_BTNEZ, nullptr},
 		{MIPS_INS_CACHE, nullptr},
-		{MIPS_INS_CEIL, &Capstone2LlvmIrTranslatorMips_impl::translateBinaryPseudoAsm},
+		{MIPS_INS_CEIL, &Capstone2LlvmIrTranslatorMips_impl::translatePseudoAsmOp0FncOp1},
 		{MIPS_INS_CEQI, nullptr},
 		{MIPS_INS_CEQ, nullptr},
-		{MIPS_INS_CFC1, &Capstone2LlvmIrTranslatorMips_impl::translateBinaryPseudoAsm},
+		{MIPS_INS_CFC1, &Capstone2LlvmIrTranslatorMips_impl::translatePseudoAsmOp0FncOp1},
 		{MIPS_INS_CFCMSA, nullptr},
 		{MIPS_INS_CINS, nullptr},
 		{MIPS_INS_CINS32, nullptr},
@@ -487,7 +491,7 @@ Capstone2LlvmIrTranslatorMips_impl::_i2fm =
 		{MIPS_INS_CMP, nullptr},
 		{MIPS_INS_COPY_S, nullptr},
 		{MIPS_INS_COPY_U, nullptr},
-		{MIPS_INS_CTC1, &Capstone2LlvmIrTranslatorMips_impl::translateCtc1},
+		{MIPS_INS_CTC1, nullptr},
 		{MIPS_INS_CTCMSA, nullptr},
 		{MIPS_INS_CVT, &Capstone2LlvmIrTranslatorMips_impl::translateCvt},
 		{MIPS_INS_C, &Capstone2LlvmIrTranslatorMips_impl::translateC},
@@ -587,7 +591,7 @@ Capstone2LlvmIrTranslatorMips_impl::_i2fm =
 		{MIPS_INS_EXTR, nullptr},
 		{MIPS_INS_EXTS, nullptr},
 		{MIPS_INS_EXTS32, nullptr},
-		{MIPS_INS_ABS, &Capstone2LlvmIrTranslatorMips_impl::translateBinaryPseudoAsm},
+		{MIPS_INS_ABS, &Capstone2LlvmIrTranslatorMips_impl::translatePseudoAsmOp0FncOp1},
 		{MIPS_INS_FADD, nullptr},
 		{MIPS_INS_FCAF, nullptr},
 		{MIPS_INS_FCEQ, nullptr},
@@ -612,7 +616,7 @@ Capstone2LlvmIrTranslatorMips_impl::_i2fm =
 		{MIPS_INS_FFQR, nullptr},
 		{MIPS_INS_FILL, nullptr},
 		{MIPS_INS_FLOG2, nullptr},
-		{MIPS_INS_FLOOR, &Capstone2LlvmIrTranslatorMips_impl::translateBinaryPseudoAsm},
+		{MIPS_INS_FLOOR, &Capstone2LlvmIrTranslatorMips_impl::translatePseudoAsmOp0FncOp1},
 		{MIPS_INS_FMADD, nullptr},
 		{MIPS_INS_FMAX_A, nullptr},
 		{MIPS_INS_FMAX, nullptr},
@@ -622,7 +626,7 @@ Capstone2LlvmIrTranslatorMips_impl::_i2fm =
 		{MIPS_INS_FMSUB, nullptr},
 		{MIPS_INS_FMUL, nullptr},
 		{MIPS_INS_MUL, &Capstone2LlvmIrTranslatorMips_impl::translateMul},
-		{MIPS_INS_NEG, &Capstone2LlvmIrTranslatorMips_impl::translateBinaryPseudoAsm},
+		{MIPS_INS_NEG, &Capstone2LlvmIrTranslatorMips_impl::translatePseudoAsmOp0FncOp1},
 		{MIPS_INS_FRCP, nullptr},
 		{MIPS_INS_FRINT, nullptr},
 		{MIPS_INS_FRSQRT, nullptr},
@@ -633,7 +637,7 @@ Capstone2LlvmIrTranslatorMips_impl::_i2fm =
 		{MIPS_INS_FSNE, nullptr},
 		{MIPS_INS_FSOR, nullptr},
 		{MIPS_INS_FSQRT, nullptr},
-		{MIPS_INS_SQRT, &Capstone2LlvmIrTranslatorMips_impl::translateBinaryPseudoAsm},
+		{MIPS_INS_SQRT, &Capstone2LlvmIrTranslatorMips_impl::translatePseudoAsmOp0FncOp1},
 		{MIPS_INS_FSUB, nullptr},
 		{MIPS_INS_SUB, &Capstone2LlvmIrTranslatorMips_impl::translateSub},
 		{MIPS_INS_FSUEQ, nullptr},
@@ -654,7 +658,7 @@ Capstone2LlvmIrTranslatorMips_impl::_i2fm =
 		{MIPS_INS_ILVL, nullptr},
 		{MIPS_INS_ILVOD, nullptr},
 		{MIPS_INS_ILVR, nullptr},
-		{MIPS_INS_INS, &Capstone2LlvmIrTranslatorMips_impl::translateIns},
+		{MIPS_INS_INS, &Capstone2LlvmIrTranslatorMips_impl::translatePseudoAsmOp0FncOp1Op2Op3},
 		{MIPS_INS_INSERT, nullptr},
 		{MIPS_INS_INSV, nullptr},
 		{MIPS_INS_INSVE, nullptr},
@@ -700,12 +704,12 @@ Capstone2LlvmIrTranslatorMips_impl::_i2fm =
 		{MIPS_INS_LWC1, &Capstone2LlvmIrTranslatorMips_impl::translateLoadMemory},
 		{MIPS_INS_LWC2, nullptr},
 		{MIPS_INS_LWC3, nullptr},
-		{MIPS_INS_LWL, &Capstone2LlvmIrTranslatorMips_impl::translateLwl},
+		{MIPS_INS_LWL, &Capstone2LlvmIrTranslatorMips_impl::translatePseudoAsmOp0FncOp1},
 		{MIPS_INS_LWM16, nullptr},
 		{MIPS_INS_LWM32, nullptr},
 		{MIPS_INS_LWPC, nullptr},
 		{MIPS_INS_LWP, nullptr},
-		{MIPS_INS_LWR, &Capstone2LlvmIrTranslatorMips_impl::translateLwr},
+		{MIPS_INS_LWR, &Capstone2LlvmIrTranslatorMips_impl::translatePseudoAsmOp0FncOp1},
 		{MIPS_INS_LWUPC, nullptr},
 		{MIPS_INS_LWU, &Capstone2LlvmIrTranslatorMips_impl::translateLoadMemory},
 		{MIPS_INS_LWX, nullptr},
@@ -822,7 +826,7 @@ Capstone2LlvmIrTranslatorMips_impl::_i2fm =
 		{MIPS_INS_RINT, nullptr},
 		{MIPS_INS_ROTR, &Capstone2LlvmIrTranslatorMips_impl::translateRotr},
 		{MIPS_INS_ROTRV, &Capstone2LlvmIrTranslatorMips_impl::translateRotr},
-		{MIPS_INS_ROUND, &Capstone2LlvmIrTranslatorMips_impl::translateBinaryPseudoAsm},
+		{MIPS_INS_ROUND, &Capstone2LlvmIrTranslatorMips_impl::translatePseudoAsmOp0FncOp1},
 		{MIPS_INS_SAT_S, nullptr},
 		{MIPS_INS_SAT_U, nullptr},
 		{MIPS_INS_SB, &Capstone2LlvmIrTranslatorMips_impl::translateStoreMemory},
@@ -908,11 +912,11 @@ Capstone2LlvmIrTranslatorMips_impl::_i2fm =
 		{MIPS_INS_SWC1, &Capstone2LlvmIrTranslatorMips_impl::translateStoreMemory},
 		{MIPS_INS_SWC2, nullptr},
 		{MIPS_INS_SWC3, nullptr},
-		{MIPS_INS_SWL, &Capstone2LlvmIrTranslatorMips_impl::translateSwl},
+		{MIPS_INS_SWL, &Capstone2LlvmIrTranslatorMips_impl::translatePseudoAsmFncOp0Op1},
 		{MIPS_INS_SWM16, nullptr},
 		{MIPS_INS_SWM32, nullptr},
 		{MIPS_INS_SWP, nullptr},
-		{MIPS_INS_SWR, &Capstone2LlvmIrTranslatorMips_impl::translateSwr},
+		{MIPS_INS_SWR, &Capstone2LlvmIrTranslatorMips_impl::translatePseudoAsmFncOp0Op1},
 		{MIPS_INS_SWXC1, nullptr},
 		{MIPS_INS_SYNC, nullptr},
 		{MIPS_INS_SYNCI, nullptr},
@@ -935,14 +939,14 @@ Capstone2LlvmIrTranslatorMips_impl::_i2fm =
 		{MIPS_INS_TLTU, nullptr},
 		{MIPS_INS_TNE, nullptr},
 		{MIPS_INS_TNEI, nullptr},
-		{MIPS_INS_TRUNC, &Capstone2LlvmIrTranslatorMips_impl::translateBinaryPseudoAsm},
+		{MIPS_INS_TRUNC, &Capstone2LlvmIrTranslatorMips_impl::translatePseudoAsmOp0FncOp1},
 		{MIPS_INS_V3MULU, nullptr},
 		{MIPS_INS_VMM0, nullptr},
 		{MIPS_INS_VMULU, nullptr},
 		{MIPS_INS_VSHF, nullptr},
 		{MIPS_INS_WAIT, nullptr},
 		{MIPS_INS_WRDSP, nullptr},
-		{MIPS_INS_WSBH, &Capstone2LlvmIrTranslatorMips_impl::translateWsbh},
+		{MIPS_INS_WSBH, &Capstone2LlvmIrTranslatorMips_impl::translatePseudoAsmOp0FncOp1},
 		{MIPS_INS_XOR, &Capstone2LlvmIrTranslatorMips_impl::translateXor},
 		{MIPS_INS_XOR16, nullptr},
 		{MIPS_INS_XORI, &Capstone2LlvmIrTranslatorMips_impl::translateXor},

@@ -89,10 +89,10 @@ bool Decoder::runCatcher()
 	{
 		return run();
 	}
-	catch (const Capstone2LlvmIrBaseError& e)
+	catch (const BaseError& e)
 	{
-		LOG << "[capstone2llvmir]: " << e.what() << std::endl;
-		return false;
+		std::cerr << "[capstone2llvmir]: " << e.what() << std::endl;
+		exit(1);
 	}
 }
 

@@ -108,6 +108,16 @@ class Capstone2LlvmIrTranslatorArm_impl :
 				llvm::IRBuilder<>& irb,
 				llvm::Value* val,
 				llvm::Value* n);
+
+		uint32_t sysregNumberTranslation(uint32_t r);
+//
+//==============================================================================
+// Helper methods.
+//==============================================================================
+//
+	protected:
+		virtual bool isOperandRegister(cs_arm_op& op) override;
+		virtual uint8_t getOperandAccess(cs_arm_op& op) override;
 //
 //==============================================================================
 // ARM implementation data.
@@ -153,19 +163,10 @@ class Capstone2LlvmIrTranslatorArm_impl :
 		void translateSub(cs_insn* i, cs_arm* ai, llvm::IRBuilder<>& irb);
 		void translateUmlal(cs_insn* i, cs_arm* ai, llvm::IRBuilder<>& irb);
 		void translateUmull(cs_insn* i, cs_arm* ai, llvm::IRBuilder<>& irb);
-
 		void translateUxtah(cs_insn* i, cs_arm* ai, llvm::IRBuilder<>& irb);
 		void translateUxtb(cs_insn* i, cs_arm* ai, llvm::IRBuilder<>& irb);
 		void translateUxtb16(cs_insn* i, cs_arm* ai, llvm::IRBuilder<>& irb);
 		void translateUxth(cs_insn* i, cs_arm* ai, llvm::IRBuilder<>& irb);
-
-		void translateBinaryPseudoAsm(cs_insn* i, cs_arm* ai, llvm::IRBuilder<>& irb);
-		void translateTernaryPseudoAsm(cs_insn* i, cs_arm* ai, llvm::IRBuilder<>& irb);
-		void translateTernaryPseudoAsm3Args(cs_insn* i, cs_arm* ai, llvm::IRBuilder<>& irb);
-		void translateQuaternaryPseudoAsm(cs_insn* i, cs_arm* ai, llvm::IRBuilder<>& irb);
-		void translateQuaternaryPseudoAsm4Args(cs_insn* i, cs_arm* ai, llvm::IRBuilder<>& irb);
-		void translateQuaternaryPseudoAsm4Args2Dsts(cs_insn* i, cs_arm* ai, llvm::IRBuilder<>& irb);
-
 };
 
 } // namespace capstone2llvmir

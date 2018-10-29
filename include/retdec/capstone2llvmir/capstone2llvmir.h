@@ -252,6 +252,43 @@ class Capstone2LlvmIrTranslator
 		virtual ~Capstone2LlvmIrTranslator();
 //
 //==============================================================================
+// Translator configuration methods.
+//==============================================================================
+//
+		/**
+		 * Should the translator ignore unexpected operands encountered in
+		 * Capstone instructions?
+		 * True -> ignore -> try recover or ignore the problem.
+		 * False -> don't ignore -> throw @c UnexpectedOperandsError.
+		 *
+		 * Default value: true.
+		 */
+		virtual void setIgnoreUnexpectedOperands(bool f) = 0;
+		/**
+		 * Should the translator ignore unhandled instructions?
+		 * True -> ignore.
+		 * False -> don't ignore -> throw @c UnhandledInstructionError when
+		 * instructions without an implemented translation routine is
+		 * encountered.
+		 *
+		 * Default value: true.
+		 */
+		virtual void setIgnoreUnhandledInstructions(bool f) = 0;
+		/**
+		 * Should the translator generate pseudo assembly functions for
+		 * instructions which full semantics is not implemented?
+		 * True -> generate.
+		 * False -> don't generate.
+		 *
+		 * Default value: true.
+		 */
+		virtual void setGeneratePseudoAsmFunctions(bool f) = 0;
+
+		virtual bool isIgnoreUnexpectedOperands() const = 0;
+		virtual bool isIgnoreUnhandledInstructions() const = 0;
+		virtual bool isGeneratePseudoAsmFunctions() const = 0;
+//
+//==============================================================================
 // Mode query & modification methods.
 //==============================================================================
 //
@@ -701,6 +738,22 @@ class Capstone2LlvmIrTranslator
 		 * @c ARM_REG_INVALID, @c MIPS_REG_INVALID).
 		 */
 		virtual uint32_t getCapstoneRegister(llvm::GlobalVariable* gv) const = 0;
+
+		/**
+		 * Is the passed LLVM function @p f any pseudo assembly functions for
+		 * instructions which full semantics is not implemented?
+		 */
+		virtual bool isPseudoAsmFunction(llvm::Function* f) const = 0;
+		/**
+		 * Is the passed LLVM call @p c any kind of pseudo assembly call for
+		 * instructions which full semantics is not implemented?
+		 */
+		virtual bool isPseudoAsmFunctionCall(llvm::CallInst* c) const = 0;
+		/**
+		 * Get all pseudo assembly functions for instructions which full
+		 * semantics is not implemented.
+		 */
+		virtual const std::set<llvm::Function*>& getPseudoAsmFunctions() const = 0;
 };
 
 } // namespace capstone2llvmir
