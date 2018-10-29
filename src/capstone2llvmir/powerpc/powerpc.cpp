@@ -2207,7 +2207,7 @@ void Capstone2LlvmIrTranslatorPowerpc_impl::translateB(cs_insn* i, cs_ppc* pi, l
 			crReg = pi->operands[0].reg;
 		}
 		// 200a134 @ bdzctrl 0x200a13c = "4f ec 14 21"
-		// I have no fucking idea what this does.
+		// I have no idea what this does.
 		//
 		else if (pi->op_count == 1
 				&& pi->operands[0].type == PPC_OP_IMM)
