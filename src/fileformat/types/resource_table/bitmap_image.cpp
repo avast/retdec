@@ -504,8 +504,6 @@ void BitmapImage::invertAxisY()
 	{
 		image[i].swap(image[height - i - 1]);
 	}
-
-	return true;
 }
 
 /**
