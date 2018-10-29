@@ -476,6 +476,17 @@ void Capstone2LlvmIrTranslatorX86_impl::generateRegistersCommon()
 	createRegister(X86_REG_FP6, _regLt);
 	createRegister(X86_REG_FP7, _regLt);
 
+	// Opmask registers (AVX-512).
+	//
+	createRegister(X86_REG_K0, _regLt);
+	createRegister(X86_REG_K1, _regLt);
+	createRegister(X86_REG_K2, _regLt);
+	createRegister(X86_REG_K3, _regLt);
+	createRegister(X86_REG_K4, _regLt);
+	createRegister(X86_REG_K5, _regLt);
+	createRegister(X86_REG_K6, _regLt);
+	createRegister(X86_REG_K7, _regLt);
+
 	// MMX.
 	//
 	createRegister(X86_REG_MM0, _regLt);
