@@ -1021,6 +1021,11 @@ void Decoder::initConfigFunctions()
 			cf->setSourceFileName(df->getSourceFileName());
 		}
 	}
+
+	for (auto* f : _c2l->getPseudoAsmFunctions())
+	{
+		_config->addPseudoAsmFunction(f);
+	}
 }
 
 } // namespace bin2llvmir

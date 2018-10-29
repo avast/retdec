@@ -18,17 +18,18 @@ namespace capstone2llvmir {
 
 /**
  * Base class for all Capstone2LllvmIr errors.
+ * This class itself should never be thrown.
  */
-class Capstone2LlvmIrBaseError : public std::exception
+class BaseError : public std::exception
 {
 	public:
-		virtual ~Capstone2LlvmIrBaseError();
+		virtual ~BaseError();
 };
 
 /**
- * An exception class encapsulating Capstone errors.
+ * An exception class encapsulating all Capstone errors.
  */
-class CapstoneError : public Capstone2LlvmIrBaseError
+class CapstoneError : public BaseError
 {
 	public:
 		CapstoneError(cs_err e);
@@ -45,7 +46,7 @@ class CapstoneError : public Capstone2LlvmIrBaseError
 /**
  * An exception class related to Capstone mode setting errors.
  */
-class Capstone2LlvmIrModeError : public Capstone2LlvmIrBaseError
+class ModeSettingError : public BaseError
 {
 	public:
 		enum class eType
@@ -60,8 +61,8 @@ class Capstone2LlvmIrModeError : public Capstone2LlvmIrBaseError
 		};
 
 	public:
-		Capstone2LlvmIrModeError(cs_arch a, cs_mode m, eType t);
-		virtual ~Capstone2LlvmIrModeError();
+		ModeSettingError(cs_arch a, cs_mode m, eType t);
+		virtual ~ModeSettingError();
 
 		std::string getMessage() const;
 		virtual const char* what() const noexcept override;
@@ -73,13 +74,63 @@ class Capstone2LlvmIrModeError : public Capstone2LlvmIrBaseError
 };
 
 /**
- * A general exception class for all Capstone2LlvmIr errors.
+ * An exception class thrown when unexpected operand(s) (number, type, etc.)
+ * is(are) encountered.
+ *
+ * These exceptions may be suppressed and/or ignored.
  */
-class Capstone2LlvmIrError : public Capstone2LlvmIrBaseError
+class UnexpectedOperandsError : public BaseError
 {
 	public:
-		Capstone2LlvmIrError(const std::string& message);
-		virtual ~Capstone2LlvmIrError();
+		/**
+		 * @param i       Capstone instruction in which unexpected operand
+		 *                was encountered.
+		 * @param comment Optional comment about the problem.
+		 */
+		UnexpectedOperandsError(cs_insn* i, const std::string& comment = "");
+		virtual ~UnexpectedOperandsError();
+
+		virtual const char* what() const noexcept override;
+
+	private:
+		cs_insn* _insn = nullptr;
+		std::string _comment;
+};
+
+/**
+ * An exception class thrown when unhandled instruction is encountered.
+ *
+ * These exceptions may be suppressed and/or ignored. Not all instructions are
+ * handled, or will be handled in the future.
+ */
+class UnhandledInstructionError : public BaseError
+{
+	public:
+		/**
+		 * @param i       Capstone instruction which is not handled.
+		 * @param comment Optional comment about the problem.
+		 */
+		UnhandledInstructionError(cs_insn* i, const std::string& comment = "");
+		~UnhandledInstructionError();
+
+		virtual const char* what() const noexcept override;
+
+	private:
+		cs_insn* _insn = nullptr;
+		std::string _comment;
+};
+
+/**
+ * A generic exception class for miscellaneous Capstone2LlvmIr errors.
+ *
+ * These exceptions signal some operational problems in Capstone2LlvmIr library.
+ * They should not be ignored. They should be reported to RetDec developers.
+ */
+class GenericError : public BaseError
+{
+	public:
+		GenericError(const std::string& message);
+		virtual ~GenericError();
 
 		virtual const char* what() const noexcept override;
 

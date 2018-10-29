@@ -317,8 +317,6 @@ class Decoder : public llvm::ModulePass
 		/// label is not in jump table).
 		std::map<utils::Address, std::set<llvm::SwitchInst*>> _switchTableStarts;
 
-		std::map<llvm::CallInst*, llvm::Instruction*> _pseudoCalls;
-
 		// We create helper BBs (without name and address) to handle MIPS
 		// likely branches. For convenience, we map them to real BBs they will
 		// eventually jump to.

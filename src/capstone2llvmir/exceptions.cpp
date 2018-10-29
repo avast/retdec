@@ -12,11 +12,11 @@ namespace capstone2llvmir {
 
 //
 //==============================================================================
-// Capstone2LlvmIrBaseError
+// BaseError
 //==============================================================================
 //
 
-Capstone2LlvmIrBaseError::~Capstone2LlvmIrBaseError()
+BaseError::~BaseError()
 {
 
 }
@@ -50,11 +50,11 @@ const char* CapstoneError::what() const noexcept
 
 //
 //==============================================================================
-// Capstone2LlvmIrModeError
+// ModeSettingError
 //==============================================================================
 //
 
-Capstone2LlvmIrModeError::Capstone2LlvmIrModeError(
+ModeSettingError::ModeSettingError(
 		cs_arch a,
 		cs_mode m,
 		eType t)
@@ -66,12 +66,12 @@ Capstone2LlvmIrModeError::Capstone2LlvmIrModeError(
 
 }
 
-Capstone2LlvmIrModeError::~Capstone2LlvmIrModeError()
+ModeSettingError::~ModeSettingError()
 {
 
 }
 
-std::string Capstone2LlvmIrModeError::getMessage() const
+std::string ModeSettingError::getMessage() const
 {
 	std::string ms = capstoneModeToString(_mode) + " ("
 			+ std::to_string(static_cast<unsigned>(_mode)) + ")";
@@ -110,28 +110,99 @@ std::string Capstone2LlvmIrModeError::getMessage() const
 	return ret;
 }
 
-const char* Capstone2LlvmIrModeError::what() const noexcept
+const char* ModeSettingError::what() const noexcept
 {
 	return getMessage().c_str();
 }
 
 //
 //==============================================================================
-// Capstone2LlvmIrError
+// UnexpectedOperandsError
 //==============================================================================
 //
 
-Capstone2LlvmIrError::Capstone2LlvmIrError(const std::string& message) :
+UnexpectedOperandsError::UnexpectedOperandsError(
+		cs_insn* i,
+		const std::string& comment)
+		:
+		_insn(i),
+		_comment(comment)
+{
+
+}
+
+UnexpectedOperandsError::~UnexpectedOperandsError()
+{
+
+}
+
+const char* UnexpectedOperandsError::what() const noexcept
+{
+	std::stringstream ret;
+
+	ret << "Unexpected operand @ " << std::hex << _insn->address
+			<< " : " << _insn->mnemonic << " " << _insn->op_str;
+	if (!_comment.empty())
+	{
+		ret << "\n" << "Comment: " << _comment;
+	}
+
+	return ret.str().c_str();
+}
+
+//
+//==============================================================================
+// UnhandledInstructionError
+//==============================================================================
+//
+
+UnhandledInstructionError::UnhandledInstructionError(
+		cs_insn* i,
+		const std::string& comment)
+		:
+		_insn(i),
+		_comment(comment)
+{
+
+}
+
+UnhandledInstructionError::~UnhandledInstructionError()
+{
+
+}
+
+const char* UnhandledInstructionError::what() const noexcept
+{
+	std::stringstream ret;
+
+	ret << "Unhandled instruction @ " << std::hex << _insn->address
+			<< " : " << _insn->mnemonic << " " << _insn->op_str;
+	if (!_comment.empty())
+	{
+		ret << "\n" << "Comment: " << _comment;
+	}
+
+	return ret.str().c_str();
+}
+
+//
+//==============================================================================
+// GenericError
+//==============================================================================
+//
+
+GenericError::GenericError(const std::string& message) :
 		_whatMessage(message)
 {
 
 }
 
-Capstone2LlvmIrError::~Capstone2LlvmIrError()
+GenericError::~GenericError()
 {
+
 }
 
-const char* Capstone2LlvmIrError::what() const noexcept
+const char* GenericError::what() const noexcept
 {
 	return _whatMessage.c_str();
 }
