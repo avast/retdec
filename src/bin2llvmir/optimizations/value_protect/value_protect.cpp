@@ -353,29 +353,6 @@ bool ValueProtect::protectRegisters()
 	bool changed = false;
 	const auto& regs = _abi->getRegisters();
 
-	// We need to make really sure registers are protected and no register will
-	// be erased by LLVM.
-	// Function needs to be named so LLVM won't erase it.
-	//
-	auto* ft = FunctionType::get(Type::getVoidTy(_module->getContext()), false);
-	_dymmyFnc = Function::Create(
-			ft,
-			GlobalValue::ExternalLinkage,
-			names::generatedValueProtectFnc,
-			_module);
-	auto* bb = BasicBlock::Create(_module->getContext(), "", _dymmyFnc);
-	auto* ret = ReturnInst::Create(_module->getContext(), bb);
-	for (auto* r : regs)
-	{
-		// It would be safer to do this for all registers, but then some
-		// optimizations work slightly different and some regression tests fail.
-		if (r->user_empty())
-		{
-			protectValue_full(r, r->getValueType(), ret);
-		}
-	}
-	changed = true;
-
 	for (Function& F : _module->getFunctionList())
 	{
 		if (F.empty() || F.front().empty())
@@ -406,6 +383,29 @@ bool ValueProtect::protectRegisters()
 			changed = true;
 		}
 	}
+
+	// We need to make really sure registers are protected and no register will
+	// be erased by LLVM.
+	// Function needs to be named so LLVM won't erase it.
+	//
+	auto* ft = FunctionType::get(Type::getVoidTy(_module->getContext()), false);
+	_dymmyFnc = Function::Create(
+			ft,
+			GlobalValue::ExternalLinkage,
+			names::generatedValueProtectFnc,
+			_module);
+	auto* bb = BasicBlock::Create(_module->getContext(), "", _dymmyFnc);
+	auto* ret = ReturnInst::Create(_module->getContext(), bb);
+	for (auto* r : regs)
+	{
+		// It would be safer to do this for all registers, but then some
+		// optimizations work slightly different and some regression tests fail.
+		if (r->user_empty())
+		{
+			protectValue_full(r, r->getValueType(), ret);
+		}
+	}
+	changed = true;
 
 	return changed;
 }
