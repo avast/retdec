@@ -19,7 +19,6 @@
 #include "retdec/bin2llvmir/optimizations/globals/dead_global_assign.h"
 #include "retdec/bin2llvmir/optimizations/globals/global_to_local.h"
 #include "retdec/bin2llvmir/optimizations/globals/global_to_local_and_dead_global_assign.h"
-#include "retdec/bin2llvmir/providers/abi/abi.h"
 
 #define DEBUG_TYPE "global-to-local-and-dead-global-assign"
 
@@ -85,14 +84,6 @@ bool canHaveAddressTaken(GlobalVariable &glob) {
 * 4. Global variable that doesn't have private or internal linkage.
 */
 bool globalVarCanBeOptimized(GlobalVariable &glob) {
-	// TODO: use only this? localize all registers, do not localize anything
-	// else.
-	//
-	auto* abi = AbiProvider::getAbi(glob.getParent());
-	if (abi && abi->isRegister(&glob)) {
-		return true;
-	}
-
 	Type *globType(glob.getType()->getElementType());
 	if (!globType->isSingleValueType()) {
 		// We don't want to optimize aggregate types (array, structure, ..).
