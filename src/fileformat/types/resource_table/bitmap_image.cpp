@@ -5,7 +5,6 @@
  */
 
 #include <vector>
-#include <iostream>			// TODO delme
 
 #include "retdec/fileformat/types/resource_table/bitmap_image.h"
 #include "retdec/utils/conversion.h"
@@ -32,8 +31,6 @@ BitmapImage::~BitmapImage()
 
 }
 
-
-
 /**
  * Get image width
  * @return Image with
@@ -58,21 +55,27 @@ std::size_t BitmapImage::getHeight() const
 }
 
 /**
+ * Get image
+ * @return Image
+ */
+const std::vector<std::vector<struct BitmapPixel>> &BitmapImage::getImage() const
+{
+	return image;
+}
+
+/**
  * Parse image in DIB format and converts it to unified BMP
  * @param icon Icon to parse
  * @return @c `true` on success, otherwise `false`
  */
-bool BitmapImage::parseDibFormat(const ResourceIcon &icon, BitmapInformationHeader &res)
+bool BitmapImage::parseDibFormat(const ResourceIcon &icon)
 {
-	// TODO delete parameter res
 	struct BitmapInformationHeader bih;
 
 	if (!parseDibHeader(icon, bih))
 	{
 		return false;
 	}
-
-	dumpDibHeader(bih);	// TODO delme
 
 	image.clear();
 
@@ -96,64 +99,6 @@ bool BitmapImage::parseDibFormat(const ResourceIcon &icon, BitmapInformationHead
 		default:
 			return false;
 	}
-
-	// std::uint32_t nColumns = bih.width;
-	// std::uint32_t nRows = bih.height / 2;
-	// std::size_t nBytesInRow = ((bih.bitCount * nColumns + 31) / 32) * 4;
-	// std::size_t nBytes = nBytesInRow * nRows;
-
-	// image.reserve(nRows);
-	// bytes.clear();
-	// bytes.reserve(nBytes);
-
-	// if (!icon.getBytes(bytes, bih.headerSize(), nBytes) || bytes.size() != nBytes)
-	// {
-	// 	return false;
-	// }
-
-
-
-	
-
-	// TODO delme
-	// if (bih.bitCount == 32)
-	// {
-	// 	std::size_t offset = 0;
-
-	// 	for (std::size_t i = 0; i < nRows; i++)
-	// 	{
-	// 		std::vector<struct BitmapPixel> row;
-	// 		row.reserve(nColumns);
-
-	// 		for (std::size_t j = 0; j < nBytesInRow / 4; j++)
-	// 		{
-	// 			row.emplace_back(bytes[offset], bytes[offset + 1], bytes[offset + 2], bytes[offset + 3]);
-	// 			offset += 4;
-	// 		}
-
-	// 		image.push_back(std::move(row));
-	// 	}
-	// }
-
-	// dumpImageHex(); // TODO delme
-
-
-
-/////// TODO delete me
-	// res.size = bih.size;
-	// res.width = bih.width;
-	// res.height = bih.height;
-	// res.planes = bih.planes;
-	// res.bitCount = bih.bitCount;
-	// res.compression = bih.compression;
-	// res.bitmapSize = bih.bitmapSize;
-	// res.horizontalRes = bih.horizontalRes;
-	// res.verticalRes = bih.verticalRes;
-	// res.colorsUsed = bih.colorsUsed;
-	// res.colorImportant = bih.colorImportant;
-
-
-	// return true;
 }
 
 /**
@@ -243,12 +188,12 @@ bool BitmapImage::parseDib1Data(const ResourceIcon &icon, const struct BitmapInf
 	std::uint32_t nRows = hdr.height / 2;
 	std::size_t nBytesInRow = ((hdr.bitCount * nColumns + 31) / 32) * 4;         // 4 Byte alignment
 	std::size_t nBytes = nBytesInRow * nRows;
-	std::uint8_t padding = nBytesInRow - ((nColumns + 7) / 8);
+	std::uint8_t padding = nBytesInRow - ((nColumns * hdr.bitCount + 7) / 8);
 
 	image.reserve(nRows);
 	bytes.reserve(nBytes);
 
-	if (!icon.getBytes(bytes, hdr.headerSize() + paletteSize, nBytes) || bytes.size() != nBytes)
+	if (!icon.getBytes(bytes, hdr.headerSize() + paletteSize * 4, nBytes) || bytes.size() != nBytes)
 	{
 		return false;
 	}
@@ -262,22 +207,23 @@ bool BitmapImage::parseDib1Data(const ResourceIcon &icon, const struct BitmapInf
 
 		for (std::size_t j = 0; j < nColumns / 8; j++)
 		{
-			for (auto bit = 7; bit >= 0; bit--)
+			for (std::size_t i = 0; i < 8; i++)
 			{
-				auto idx = (bytes[offset] >> bit) & 0x01;
-				row.push_back(palette[idx]);
+				auto index = !!(bytes[offset] & (0x01 << (7 - i)));
+				row.push_back(palette[index]);
 			}
 
 			offset++;
 		}
 
-		int8_t rest = nColumns % 8;
-		if (rest)
+		std::size_t rest = nColumns % 8;
+
+		if (rest != 0)
 		{
-			for (auto bit = 7; bit > 7 - rest; bit--)
+			for (std::size_t i = 0; i < rest; i++)
 			{
-				auto idx = (bytes[offset] >> bit) & 0x01;
-				row.push_back(palette[idx]);
+				auto index = !!(bytes[offset] & (0x01 << (7 - i)));
+				row.push_back(palette[index]);
 			}
 			
 			offset++;
@@ -323,12 +269,12 @@ bool BitmapImage::parseDib4Data(const ResourceIcon &icon, const struct BitmapInf
 	std::uint32_t nRows = hdr.height / 2;
 	std::size_t nBytesInRow = ((hdr.bitCount * nColumns + 31) / 32) * 4;         // 4 Byte alignment
 	std::size_t nBytes = nBytesInRow * nRows;
-	std::uint8_t padding = nBytesInRow - ((nColumns + 1) / 2);
+	std::uint8_t padding = nBytesInRow - ((nColumns * hdr.bitCount + 7) / 8);
 
 	image.reserve(nRows);
 	bytes.reserve(nBytes);
 
-	if (!icon.getBytes(bytes, hdr.headerSize() + paletteSize, nBytes) || bytes.size() != nBytes)
+	if (!icon.getBytes(bytes, hdr.headerSize() + paletteSize * 4, nBytes) || bytes.size() != nBytes)
 	{
 		return false;
 	}
@@ -342,13 +288,12 @@ bool BitmapImage::parseDib4Data(const ResourceIcon &icon, const struct BitmapInf
 
 		for (std::size_t j = 0; j < nColumns / 2; j++)
 		{
-			row.push_back(palette[bytes[offset] >> 4]);                         // upper 4 bits
-			row.push_back(palette[bytes[offset] & 0x0F]);                       // lower 4 bits
+			row.push_back(palette[bytes[offset] >> 4]);
+			row.push_back(palette[bytes[offset] & 0x0F]);
 			offset++;
 		}
 
-		auto rest = nColumns % 2;
-		if (rest)
+		if (nColumns % 2)
 		{
 			row.push_back(palette[bytes[offset] >> 4]);
 			offset++;
@@ -400,7 +345,7 @@ bool BitmapImage::parseDib8Data(const ResourceIcon &icon, const struct BitmapInf
 	image.reserve(nRows);
 	bytes.reserve(nBytes);
 
-	if (!icon.getBytes(bytes, hdr.headerSize() + paletteSize, nBytes) || bytes.size() != nBytes)
+	if (!icon.getBytes(bytes, hdr.headerSize() + paletteSize * 4, nBytes) || bytes.size() != nBytes)
 	{
 		return false;
 	}
@@ -463,7 +408,7 @@ bool BitmapImage::parseDib24Data(const ResourceIcon &icon, const struct BitmapIn
 
 		for (std::size_t j = 0; j < nColumns; j++)
 		{
-			row.emplace_back(bytes[offset], bytes[offset + 1], bytes[offset + 2], 0xFF);
+			row.emplace_back(bytes[offset + 2], bytes[offset + 1], bytes[offset], 0xFF);
 			offset += bytesPP;
 		}
 
@@ -511,7 +456,7 @@ bool BitmapImage::parseDib32Data(const ResourceIcon &icon, const struct BitmapIn
 
 		for (std::size_t j = 0; j < nColumns; j++)
 		{
-			row.emplace_back(bytes[offset], bytes[offset + 1], bytes[offset + 2], bytes[offset + 3]);
+			row.emplace_back(bytes[offset + 2], bytes[offset + 1], bytes[offset], bytes[offset + 3]);
 			offset += bytesPP;
 		}
 
@@ -542,46 +487,231 @@ bool BitmapImage::parseDibPalette(const ResourceIcon &icon, std::vector<struct B
 
 	for (std::uint32_t i = 0; i < nBytes; i += 4)
 	{
-		palette.emplace_back(bytes[i], bytes[i + 1], bytes[i + 2], bytes[i + 3]);
+		palette.emplace_back(bytes[i + 2], bytes[i + 1], bytes[i], bytes[i + 3]);
 	}
 
 	return true;
 }
 
-void BitmapImage::dumpImageHex() const	// TODO delme
+/**
+ * Invert Y axis
+ */
+void BitmapImage::invertAxisY()
 {
-	std::cout << "IMAGE\n";
-	std::cout << "W: " << getWidth() << "\n";
-	std::cout << "H: " << getHeight() << "\n";
-	for (std::size_t i = 0; i < getHeight(); i++)
-	{
-		for (std::size_t j = 0; j < getWidth(); j++)
-		{
-			std::cout << "[" << std::hex << static_cast<unsigned>(image[i][j].r) << ","
-						<< static_cast<unsigned>(image[i][j].g) << ","
-						<< static_cast<unsigned>(image[i][j].b) << ","
-						<< static_cast<unsigned>(image[i][j].a) << "]";
-		}
+	auto height = getHeight();
 
-		std::cout << "\n\n";
+	for (std::size_t i = 0; i < height / 2; i++)
+	{
+		image[i].swap(image[height - i - 1]);
+	}
+
+	return true;
+}
+
+/**
+ * Set image alpha channel to 0xFF
+ */
+void BitmapImage::setAlphaFull()
+{
+	for (auto &row : image)
+	{
+		for (auto &pixel : row)
+		{
+			pixel.a = 0xFF;
+		}
 	}
 }
 
-void BitmapImage::dumpDibHeader(const struct BitmapInformationHeader &hdr) const
+/**
+ * Reduces an image to 8x8
+ * @return @c `true` on success, otherwise `false`
+ */
+bool BitmapImage::reduce8x8()
 {
-	std::cout << "BITMAP INFORMATION HEADER\n" <<
-	"bisize:         " << hdr.size << "\n" <<
-	"width:          " << hdr.width << "\n" <<
-	"height:         " << hdr.height << "\n" <<
-	"planes:         " << hdr.planes << "\n" <<
-	"bitCount:       " << hdr.bitCount << "\n" <<
-	"compression:    " << hdr.compression << "\n" <<
-	"bitmapSize:     " << hdr.bitmapSize << "\n" <<
-	"horizontalRes:  " << hdr.horizontalRes << "\n" <<
-	"verticalRes:    " << hdr.verticalRes << "\n" <<
-	"colorsUsed:     " << hdr.colorsUsed << "\n" <<
-	"colorImportant: " << hdr.colorImportant << "\n" << "\n";
+	auto width = getWidth();
+	auto height = getHeight();
+
+	if (width < 8 || height < 8)
+	{
+		return false;
+	}
+
+	std::size_t boxWidth = width / 8;
+	std::size_t extraPixels = width % 8;
+	std::size_t normalPixels = 8 - extraPixels;
+	std::size_t period = 8 / normalPixels;
+
+	/* reduce X axis */
+	for (std::size_t row = 0; row < height; row++)
+	{
+		std::size_t offset = 0;
+		std::size_t nExtraLeft = extraPixels;
+
+		for (std::size_t column = 0; column < 8; column++)
+		{
+			if (column % period == 0 && nExtraLeft > 0)
+			{
+				if (!averageRowPixels(row, offset, boxWidth + 1, image[row][column]))
+				{
+					return false;
+				}
+
+				offset += boxWidth + 1;
+				nExtraLeft--;
+			}
+
+			else
+			{
+				if (!averageRowPixels(row, offset, boxWidth, image[row][column]))
+				{
+					return false;
+				}
+
+				offset += boxWidth;
+			}
+		}
+	}
+
+	std::size_t boxHeight = height / 8;
+	extraPixels = height % 8;
+	normalPixels = 8 - extraPixels;
+	period = 8 / normalPixels;
+
+	/* reduce Y axis */
+	for (std::size_t column = 0; column < 8; column++)
+	{
+		std::size_t offset = 0;
+		std::size_t nExtraLeft = extraPixels;
+
+		for (std::size_t row = 0; row < 8; row++)
+		{
+			if (row % period == 0 && nExtraLeft > 0)
+			{
+				if (!averageColumnPixels(column, offset, boxHeight + 1, image[row][column]))
+				{
+					return false;
+				}
+
+				offset += boxHeight + 1;
+				nExtraLeft--;
+			}
+
+			else
+			{
+				if (!averageColumnPixels(column, offset, boxHeight, image[row][column]))
+				{
+					return false;
+				}
+
+				offset += boxHeight;
+			}
+		}
+	}
+
+
+	/* crop to 8x8 */
+	image.resize(8);
+	for (auto &row : image)
+	{
+		row.resize(8);
+	}
+
+	return true;
 }
+
+/**
+ * Average pixels in a row
+ * @param row A row to average pixels from (indexed from 0)
+ * @param offset Column offset (indexed from 0)
+ * @param nPixels Number of pixels
+ * @param res Pixel to store the result to
+ * @return @c `true` on success, otherwise `false`
+ */
+bool BitmapImage::averageRowPixels(std::size_t row, std::size_t offset, std::size_t nPixels, struct BitmapPixel &res)
+{
+	if (row >= getHeight() || nPixels == 0)
+	{
+		return false;
+	}
+
+	if (offset + nPixels > getWidth())
+	{
+		nPixels = getWidth() - offset;
+	}
+
+	std::size_t r = 0, g = 0, b = 0;
+
+	for (std::size_t i = 0; i < nPixels; i++)
+	{
+		const auto &pixel = image[row][offset + i];
+		r += pixel.r;
+		g += pixel.g;
+		b += pixel.b;
+	}
+
+	r /= nPixels;
+	g /= nPixels;
+	b /= nPixels;
+
+	res = {static_cast<uint8_t>(r), static_cast<uint8_t>(g), static_cast<uint8_t>(b), 0xFF};
+	return true;
+}
+
+/**
+ * Average pixels in a column
+ * @param column A column to average pixels from (indexed from 0)
+ * @param offset Row offset (indexed from 0)
+ * @param nPixels Number of pixels
+ * @param res Pixel to store the result to
+ * @return @c `true` on success, otherwise `false`
+ */
+bool BitmapImage::averageColumnPixels(std::size_t column, std::size_t offset, std::size_t nPixels,
+										struct BitmapPixel &res)
+{
+	if (column >= getWidth() || nPixels == 0)
+	{
+		return false;
+	}
+
+	if (offset + nPixels > getHeight())
+	{
+		nPixels = getHeight() - offset;
+	}
+
+	std::size_t r = 0, g = 0, b = 0;
+
+	for (std::size_t i = 0; i < nPixels; i++)
+	{
+		const auto &pixel = image[offset + i][column];
+		r += pixel.r;
+		g += pixel.g;
+		b += pixel.b;
+	}
+
+	r /= nPixels;
+	g /= nPixels;
+	b /= nPixels;
+
+	res = {static_cast<uint8_t>(r), static_cast<uint8_t>(g), static_cast<uint8_t>(b), 0xFF};
+	return true;
+}
+
+/**
+ * Converts image to greyscale
+ */
+void BitmapImage::greyScale()
+{
+	for (auto &row : image)
+	{
+		for (auto &pixel : row)
+		{
+			double i = pixel.r * 0.299 + pixel.g * 0.587 + pixel.b * 0.114;
+			auto intensity = static_cast<uint8_t>(i + 0.5);
+			pixel = {intensity, intensity, intensity, pixel.a};
+		}
+	}
+}
+
 
 } // namespace fileformat
 } // namespace retdec

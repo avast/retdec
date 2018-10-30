@@ -50,6 +50,11 @@ struct BitmapPixel
 	{
 
 	}
+
+	BitmapPixel()
+	{
+
+	}
 };
 
 /**
@@ -69,6 +74,7 @@ class BitmapImage
 		std::size_t getWidth() const;
 		std::size_t getHeight() const;
 		std::size_t getSize() const;
+		const std::vector<std::vector<struct BitmapPixel>> &getImage() const;
 		/// @}
 
 		/// @name Setters
@@ -78,7 +84,7 @@ class BitmapImage
 
 		/// @name Other methods
 		/// @{
-		bool parseDibFormat(const ResourceIcon &icon, BitmapInformationHeader &res);
+		bool parseDibFormat(const ResourceIcon &icon);
 		bool parseDibHeader(const ResourceIcon &icon, struct BitmapInformationHeader &res) const;
 		bool parseDib1Data(const ResourceIcon &icon, const struct BitmapInformationHeader &hdr);
 		bool parseDib4Data(const ResourceIcon &icon, const struct BitmapInformationHeader &hdr);
@@ -87,8 +93,14 @@ class BitmapImage
 		bool parseDib32Data(const ResourceIcon &icon, const struct BitmapInformationHeader &hdr);
 		bool parseDibPalette(const ResourceIcon &icon, std::vector<struct BitmapPixel> &palette,
 								std::uint32_t nColors);
-		void dumpImageHex() const;	// TODO delme
-		void dumpDibHeader(const struct BitmapInformationHeader &hdr) const; // TODO delme
+
+		void invertAxisY();
+		void setAlphaFull();
+		bool reduce8x8();
+		bool averageRowPixels(std::size_t row, std::size_t offset, std::size_t nPixels, struct BitmapPixel &res);
+		bool averageColumnPixels(std::size_t column, std::size_t offset, std::size_t nPixels,
+								struct BitmapPixel &res);
+		void greyScale();
 		/// @}
 };
 

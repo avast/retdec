@@ -40,47 +40,39 @@ ResourceTable::~ResourceTable()
  */
 std::string ResourceTable::computePerceptualAvgHash(const ResourceIcon &icon) const
 {
-	// TODO
-	BitmapInformationHeader bih;
+	std::size_t trashHold = 128;
 	auto img = BitmapImage();
 
-	if (!img.parseDibFormat(icon, bih))
+	if (!img.parseDibFormat(icon))
 	{
 		return "";
 	}
 
-	// TODO delme
-	img.dumpImageHex();
-
-	if (bih.size != 40)
+	if (!img.reduce8x8())
 	{
-		return "0 0 0 0 0 0 0 0 0 0 0 0";
+		return "";
 	}
 
-	std::string bihStr = "1 " +
-		std::to_string(bih.size) + ' ' +
-		std::to_string(bih.width) + ' ' +
-		std::to_string(bih.height) + ' ' +
-		std::to_string(bih.planes) + ' ' +
-		std::to_string(bih.bitCount) + ' ' +
-		std::to_string(bih.compression) + ' ' +
-		std::to_string(bih.bitmapSize) + ' ' +
-		std::to_string(bih.horizontalRes) + ' ' +
-		std::to_string(bih.verticalRes) + ' ' +
-		std::to_string(bih.colorsUsed) + ' ' +
-		std::to_string(bih.colorImportant);
+	img.greyScale();
 
-	return bihStr;
-}
+	std::uint64_t bytes = 0;
+	std::size_t position = 63;
 
-/**
- * Compute icon perceptual hashes
- * @param icon Icon to compute the hash of
- * @return Perceptual hash as AvgHash
- */
-std::string ResourceTable::computePercetualDCTpHash(const ResourceIcon &icon) const
-{
-	return "";
+	for (std::size_t i = 0; i < 8; i++)
+	{
+		auto &row = img.getImage()[i];
+
+		for (std::uint8_t j = 0; j < 8; j++)
+		{
+			auto &pixel = row[j];
+			uint64_t value = (pixel.r >= trashHold) ? 0x00 : 0x01;
+
+			bytes |= (value << position);
+			position--;
+		}
+	}
+
+	return retdec::utils::toHex(bytes, false, 16);
 }
 
 /**
@@ -285,15 +277,6 @@ const std::string& ResourceTable::getResourceIconPerceptualAvgHash() const
 }
 
 /**
- * Get icon perceptual hash as DCTpHash
- * @return Icon perceptual hash as DCTpHash
- */
-const std::string& ResourceTable::getResourceIconPerceptualDCTpHash() const
-{
-	return iconPerceptualDCTpHash;
-}
-
-/**
  * Get prior icon group
  * @return Prior icon group
  */
@@ -356,7 +339,6 @@ void ResourceTable::computeIconHashes()
 	iconHashMd5 = retdec::crypto::getMd5(iconHashBytes.data(), iconHashBytes.size());
 	iconHashSha256 = retdec::crypto::getSha256(iconHashBytes.data(), iconHashBytes.size());
 	iconPerceptualAvgHash = computePerceptualAvgHash(*priorIcon);
-	iconPerceptualDCTpHash = computePercetualDCTpHash(*priorIcon);
 }
 
 /**

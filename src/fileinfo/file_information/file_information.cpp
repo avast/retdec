@@ -1087,15 +1087,6 @@ std::string FileInformation::getResourceIconPerceptualAvgHash() const
 }
 
 /**
- * Get icon perceptual hash as DCTpHash
- * @return Icon perceptual hash as DCTpHash
- */
-std::string FileInformation::getResourceIconPerceptualDCTpHash() const
-{
-	return resourceTable.getResourceIconPerceptualDCTpHash();
-}
-
-/**
  * Get name of selected resource
  * @param index Index of selected resource (indexed from 0)
  * @return Name of selected resource
