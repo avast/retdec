@@ -12,6 +12,7 @@
 #include "llvm/Demangle/demangler_base.h"
 #include "llvm/Demangle/itanium_demangler.h"
 #include "llvm/Demangle/microsoft_demangler.h"
+#include "llvm/Demangle/borland_demangler.h"
 
 namespace retdec {
 namespace demangler {
@@ -27,6 +28,8 @@ class DemanglerFactory
 		static std::unique_ptr<ItaniumDemangler> getItaniumDemangler();
 
 		static std::unique_ptr<MicrosoftDemangler> getMicrosoftDemangler();
+
+		static std::unique_ptr<BorlandDemangler> getBorlandDemangler();
 };
 
 }

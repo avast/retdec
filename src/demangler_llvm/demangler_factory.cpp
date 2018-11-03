@@ -22,6 +22,8 @@ std::unique_ptr<Demangler> DemanglerFactory::getDemangler(const std::string &com
 		return getItaniumDemangler();
 	} else if (compiler == "microsoft") {
 		return getMicrosoftDemangler();
+	} else if (compiler == "borland") {
+		return getBorlandDemangler();
 	}
 	return nullptr;
 }
@@ -42,6 +44,15 @@ std::unique_ptr<ItaniumDemangler> DemanglerFactory::getItaniumDemangler()
 std::unique_ptr<MicrosoftDemangler> DemanglerFactory::getMicrosoftDemangler()
 {
 	return std::make_unique<MicrosoftDemangler>();
+}
+
+/**
+ * @brief Crates new instance of BorlandDemangler.
+ * @return unique_ptr to created demangler instance
+ */
+std::unique_ptr<BorlandDemangler> DemanglerFactory::getBorlandDemangler()
+{
+	return std::make_unique<BorlandDemangler>();
 }
 
 }

@@ -4,6 +4,7 @@ set(RETDEC_TESTS_DEMANGLER_SOURCES
 	msvc_tests.cpp
 	llvm_itanium_demangler_tests.cpp
 	llvm_microsoft_demangler_tests.cpp
+	borland_demangler_tests.cpp
 )
 
 add_executable(retdec-tests-demangler ${RETDEC_TESTS_DEMANGLER_SOURCES})

@@ -6,6 +6,7 @@ set(DEMANGLER_LLVM_SOURCES
 		demangler_factory.cpp
 		itanium_demangler_adapter.cpp
 		microsoft_demangler_adapter.cpp
+		borland_demangler.cpp
 		)
 
 add_library(llvm-demangler STATIC ${DEMANGLER_LLVM_SOURCES})
