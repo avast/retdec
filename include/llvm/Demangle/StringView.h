@@ -48,6 +48,19 @@ public:
     return npos;
   }
 
+  // RetDec{
+  StringView substrUntil(char c) const {
+    const char *cmp = First;
+    while (cmp != Last){
+      if (*First == c) {
+        return {First, cmp};
+      }
+      ++cmp;
+    }
+    return {};
+  }
+  // }RetDec
+
   StringView substr(size_t From, size_t To) const {
     if (To >= size())
       To = size() - 1;
