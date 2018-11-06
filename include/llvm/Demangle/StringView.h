@@ -50,14 +50,8 @@ public:
 
   // RetDec{
   StringView substrUntil(char c) const {
-    const char *cmp = First;
-    while (cmp != Last){
-      if (*First == c) {
-        return {First, cmp};
-      }
-      ++cmp;
-    }
-    return {};
+  	auto pos = find(c);
+    return dropBack(size() - pos);
   }
   // }RetDec
 
