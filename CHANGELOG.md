@@ -2,6 +2,7 @@
 
 # dev
 
+* New Feature: Added presentation of imported types and TypeRef hashes for .NET binaries ([#363](https://github.com/avast-tl/retdec/issues/363), [#364](https://github.com/avast-tl/retdec/issues/364)).
 * Fix: Fixed handling of pointers with segment overrides, including loads/stores from/to zero (null) pointers ([#41](https://github.com/avast-tl/retdec/issues/41), [#169](https://github.com/avast-tl/retdec/issues/169), [#347](https://github.com/avast-tl/retdec/issues/347), [#376](https://github.com/avast-tl/retdec/issues/376), [#391](https://github.com/avast-tl/retdec/pull/391)).
 * Fix: Fixed translation of x86 FPU instructions to LLVM IR ([#293](https://github.com/avast-tl/retdec/issues/293)).
 * Enhancement: Capstone2LlvmIr library refactoring ([#115](https://github.com/avast-tl/retdec/issues/115)).
