@@ -24,7 +24,7 @@ TypeRefTableJsonGetter::TypeRefTableJsonGetter(FileInformation &fileInfo) : Iter
 	numberOfStoredRecords.push_back(fileinfo.getNumberOfStoredDotnetImportedClasses());
 	numberOfExtraElements.push_back(0);
 	title = "typeRefTable";
-	subtitle = "dotnet imported classes";
+	subtitle = "types";
 	commonHeaderElements.push_back("index");
 	commonHeaderElements.push_back("name");
 	commonHeaderElements.push_back("libraryName");
@@ -48,7 +48,7 @@ std::size_t TypeRefTableJsonGetter::getBasicInfo(std::size_t structIndex, std::v
 	desc.clear();
 	info.clear();
 
-	desc.push_back("numberOfDotnetImportedClasses");
+	desc.push_back("numberOfTypes");
 	desc.push_back("crc32");
 	desc.push_back("md5");
 	desc.push_back("sha256");

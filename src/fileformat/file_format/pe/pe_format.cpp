@@ -1967,78 +1967,67 @@ void PeFormat::computeTypeRefHashes()
 
 		if (typeRefRow->resolutionScope.getTable(resolutionScopeType))
 		{
-			const void *referenced = nullptr;
-
 			switch (resolutionScopeType)
 			{
-				case MetadataTableType::TypeRef :
-					referenced = typeRefTable->getRow(typeRefRow->resolutionScope.getIndex());
-					if (referenced && stringStream->getString(static_cast<const TypeRef*>(referenced)->typeName.getIndex(), referencedName) &&
-						!referencedName.empty())
+				case MetadataTableType::TypeRef:
+				{
+					auto typeRef = typeRefTable->getRow(typeRefRow->resolutionScope.getIndex());
+					if (typeRef && stringStream->getString(typeRef->typeName.getIndex(), referencedName) && !referencedName.empty())
 					{
 						referencedName += "TR";
 						validReferencedName = true;
 					}
 					break;
-
-				case MetadataTableType::Module :
-					if (!moduleTable)
+				}
+				case MetadataTableType::Module:
+				{
+					if (moduleTable)
 					{
-						break;
-					}
-
-					referenced = moduleTable->getRow(typeRefRow->resolutionScope.getIndex());
-					if (referenced && stringStream->getString(static_cast<const DotnetModule*>(referenced)->name.getIndex(), referencedName) &&
-						!referencedName.empty())
-					{
-						referencedName += "M";
-						validReferencedName = true;
+						auto module = moduleTable->getRow(typeRefRow->resolutionScope.getIndex());
+						if (module && stringStream->getString(module->name.getIndex(), referencedName) && !referencedName.empty())
+						{
+							referencedName += "M";
+							validReferencedName = true;
+						}
 					}
 					break;
-
-				case MetadataTableType::ModuleRef :
-					if (!moduleRefTable)
+				}
+				case MetadataTableType::ModuleRef:
+				{
+					if (moduleRefTable)
 					{
-						break;
-					}
-
-					referenced = moduleRefTable->getRow(typeRefRow->resolutionScope.getIndex());
-					if (referenced && stringStream->getString(static_cast<const ModuleRef*>(referenced)->name.getIndex(), referencedName) &&
-						!referencedName.empty())
-					{
-						referencedName += "MR";
-						validReferencedName = true;
+						auto moduleRef = moduleRefTable->getRow(typeRefRow->resolutionScope.getIndex());
+						if (moduleRef && stringStream->getString(moduleRef->name.getIndex(), referencedName) && !referencedName.empty())
+						{
+							referencedName += "MR";
+							validReferencedName = true;
+						}
 					}
 					break;
-
-				case MetadataTableType::AssemblyRef :
-					if (!assemblyRefTable)
+				}
+				case MetadataTableType::AssemblyRef:
+				{
+					if (assemblyRefTable)
 					{
-						break;
-					}
-
-					referenced = assemblyRefTable->getRow(typeRefRow->resolutionScope.getIndex());
-					if (referenced && stringStream->getString(static_cast<const AssemblyRef*>(referenced)->name.getIndex(), referencedName) &&
-						!referencedName.empty())
-					{
-						referencedName += "AR";
-						validReferencedName = true;
+						auto assemblyRef = assemblyRefTable->getRow(typeRefRow->resolutionScope.getIndex());
+						if (assemblyRef && stringStream->getString(assemblyRef->name.getIndex(), referencedName) && !referencedName.empty())
+						{
+							referencedName += "AR";
+							validReferencedName = true;
+						}
 					}
 					break;
-
+				}
 				default:
 					break;
 			}
 
-
-			// Yara adds comma if there are multiple imports
-			if(!typeRefHashBytes.empty())
+			if (!typeRefHashBytes.empty())
 			{
 				typeRefHashBytes.push_back(static_cast<unsigned char>(','));
 			}
 
 			std::string fullName;
-
 			if (validTypeName)
 			{
 				fullName = typeName;
