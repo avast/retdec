@@ -475,6 +475,8 @@ void JsonPresentation::presentDotnetInfo(Json::Value &root) const
 		jDotnet["classes"].append(jClass);
 	}
 
+	presentIterativeSubtitle(jDotnet, TypeRefTableJsonGetter(fileinfo));
+
 	root["dotnetInfo"] = jDotnet;
 }
 

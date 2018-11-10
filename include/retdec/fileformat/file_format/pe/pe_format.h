@@ -41,6 +41,9 @@ class PeFormat : public FileFormat
 		std::string typeLibId;                                     ///< .NET type lib ID
 		std::vector<std::shared_ptr<DotnetClass>> definedClasses;  ///< .NET defined class list
 		std::vector<std::shared_ptr<DotnetClass>> importedClasses; ///< .NET imported class list
+		std::string typeRefHashCrc32;                              ///< .NET typeref table hash as CRC32
+		std::string typeRefHashMd5;                                ///< .NET typeref table hash as MD5
+		std::string typeRefHashSha256;                             ///< .NET typeref table hash as SHA256
 
 		/// @name Initialization methods
 		/// @{
@@ -88,6 +91,7 @@ class PeFormat : public FileFormat
 		void detectTypeLibId();
 		void detectDotnetTypes();
 		std::uint64_t detectPossibleMetadataHeaderAddress() const;
+		void computeTypeRefHashes();
 		/// @}
 	protected:
 		PeLib::PeFile *file;              ///< PeLib representation of PE file
@@ -171,6 +175,9 @@ class PeFormat : public FileFormat
 		const std::string& getTypeLibId() const;
 		const std::vector<std::shared_ptr<DotnetClass>>& getDefinedDotnetClasses() const;
 		const std::vector<std::shared_ptr<DotnetClass>>& getImportedDotnetClasses() const;
+		const std::string& getTypeRefhashCrc32() const;
+		const std::string& getTypeRefhashMd5() const;
+		const std::string& getTypeRefhashSha256() const;
 		/// @}
 };
 

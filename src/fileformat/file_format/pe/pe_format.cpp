@@ -26,6 +26,7 @@
 #include "retdec/fileformat/utils/asn1.h"
 #include "retdec/fileformat/utils/conversions.h"
 #include "retdec/fileformat/utils/file_io.h"
+#include "retdec/crypto/crypto.h"
 
 using namespace retdec::utils;
 using namespace PeLib;
@@ -1861,6 +1862,8 @@ void PeFormat::detectDotnetTypes()
 		definedClasses = reconstructor.getDefinedClasses();
 		importedClasses = reconstructor.getReferencedClasses();
 	}
+
+	computeTypeRefHashes();
 }
 
 /**
@@ -1917,6 +1920,147 @@ std::uint64_t PeFormat::detectPossibleMetadataHeaderAddress() const
 	}
 
 	return metadataHeaderFound ? address : 0;
+}
+
+/**
+ * Compute typeref hashes - CRC32, MD5, SHA256.
+ */
+void PeFormat::computeTypeRefHashes()
+{
+	if (!metadataStream || !stringStream)
+	{
+		return;
+	}
+
+	std::vector<std::uint8_t> typeRefHashBytes;
+	std::string typeName;
+	std::string nameSpace;
+	std::string referencedName;
+	MetadataTableType resolutionScopeType;
+	
+	auto typeRefTable = static_cast<const MetadataTable<TypeRef>*>(metadataStream->getMetadataTable(MetadataTableType::TypeRef));
+	auto moduleTable = static_cast<const MetadataTable<DotnetModule>*>(metadataStream->getMetadataTable(MetadataTableType::Module));
+	auto moduleRefTable = static_cast<const MetadataTable<ModuleRef>*>(metadataStream->getMetadataTable(MetadataTableType::ModuleRef));
+	auto assemblyRefTable = static_cast<const MetadataTable<AssemblyRef>*>(metadataStream->getMetadataTable(MetadataTableType::AssemblyRef));
+
+	if (!typeRefTable)
+	{
+		return;
+	}
+
+	for (std::size_t i = 1; i <= typeRefTable->getNumberOfRows(); ++i)
+	{
+		bool validTypeName = false;
+		bool validNameSpace = false;
+		bool validReferencedName = false;
+
+		auto typeRefRow = typeRefTable->getRow(i);
+
+		if (stringStream->getString(typeRefRow->typeName.getIndex(), typeName) && !typeName.empty())
+		{
+			validTypeName = true;
+		}
+		if (stringStream->getString(typeRefRow->typeNamespace.getIndex(), nameSpace) && !nameSpace.empty())
+		{	
+			validNameSpace = true;
+		}
+
+		if (typeRefRow->resolutionScope.getTable(resolutionScopeType))
+		{
+			switch (resolutionScopeType)
+			{
+				case MetadataTableType::TypeRef:
+				{
+					auto typeRef = typeRefTable->getRow(typeRefRow->resolutionScope.getIndex());
+					if (typeRef && stringStream->getString(typeRef->typeName.getIndex(), referencedName) && !referencedName.empty())
+					{
+						referencedName += "TR";
+						validReferencedName = true;
+					}
+					break;
+				}
+				case MetadataTableType::Module:
+				{
+					if (moduleTable)
+					{
+						auto module = moduleTable->getRow(typeRefRow->resolutionScope.getIndex());
+						if (module && stringStream->getString(module->name.getIndex(), referencedName) && !referencedName.empty())
+						{
+							referencedName += "M";
+							validReferencedName = true;
+						}
+					}
+					break;
+				}
+				case MetadataTableType::ModuleRef:
+				{
+					if (moduleRefTable)
+					{
+						auto moduleRef = moduleRefTable->getRow(typeRefRow->resolutionScope.getIndex());
+						if (moduleRef && stringStream->getString(moduleRef->name.getIndex(), referencedName) && !referencedName.empty())
+						{
+							referencedName += "MR";
+							validReferencedName = true;
+						}
+					}
+					break;
+				}
+				case MetadataTableType::AssemblyRef:
+				{
+					if (assemblyRefTable)
+					{
+						auto assemblyRef = assemblyRefTable->getRow(typeRefRow->resolutionScope.getIndex());
+						if (assemblyRef && stringStream->getString(assemblyRef->name.getIndex(), referencedName) && !referencedName.empty())
+						{
+							referencedName += "AR";
+							validReferencedName = true;
+						}
+					}
+					break;
+				}
+				default:
+					break;
+			}
+
+			if (!typeRefHashBytes.empty())
+			{
+				typeRefHashBytes.push_back(static_cast<unsigned char>(','));
+			}
+
+			std::string fullName;
+			if (validTypeName)
+			{
+				fullName = typeName;
+			}
+			if (validNameSpace)
+			{
+				if (!fullName.empty())
+				{
+					fullName += ".";
+				}
+
+				fullName += nameSpace;
+			}
+			if (validReferencedName)
+			{
+				if (!fullName.empty())
+				{
+					fullName += ".";
+				}
+
+				fullName += referencedName;
+			}
+
+			for(const auto c : fullName)
+			{
+				typeRefHashBytes.push_back(static_cast<uint8_t>(c));
+			}
+		}
+	}
+
+	typeRefHashCrc32 = retdec::crypto::getCrc32(typeRefHashBytes.data(), typeRefHashBytes.size());
+	typeRefHashMd5 = retdec::crypto::getMd5(typeRefHashBytes.data(), typeRefHashBytes.size());
+	typeRefHashSha256 = retdec::crypto::getSha256(typeRefHashBytes.data(), typeRefHashBytes.size());
 }
 
 retdec::utils::Endianness PeFormat::getEndianness() const
@@ -2533,6 +2677,22 @@ const std::vector<std::shared_ptr<DotnetClass>>& PeFormat::getDefinedDotnetClass
 const std::vector<std::shared_ptr<DotnetClass>>& PeFormat::getImportedDotnetClasses() const
 {
 	return importedClasses;
+}
+
+
+const std::string& PeFormat::getTypeRefhashCrc32() const
+{
+	return typeRefHashCrc32;
+}
+
+const std::string& PeFormat::getTypeRefhashMd5() const
+{
+	return typeRefHashMd5;
+}
+
+const std::string& PeFormat::getTypeRefhashSha256() const
+{
+	return typeRefHashSha256;
 }
 
 } // namespace fileformat

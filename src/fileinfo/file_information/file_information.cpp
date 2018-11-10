@@ -2807,6 +2807,82 @@ const std::string& FileInformation::getDotnetRuntimeVersion() const
 }
 
 /**
+ * Get imported class name
+ * @param position Index of selected imported class (indexed from 0)
+ * @return Name of selected imported class
+ */
+std::string FileInformation::getDotnetImportedClassName(std::size_t position) const
+{
+	return dotnetInfo.getImportedClassName(position);
+}
+
+/**
+ * Get imported class nested name
+ * @param position Index of selected imported class (indexed from 0)
+ * @return Nested name of selected imported class
+ */
+std::string FileInformation::getDotnetImportedClassNestedName(std::size_t position) const
+{
+	return dotnetInfo.getImportedClassNestedName(position);
+}
+
+/**
+ * Get imported class name with parent class presentation index
+ * @param position Index of selected imported class (indexed from 0)
+ * @return Name of selected imported class with parent class presentation index
+ */
+std::string FileInformation::getDotnetImportedClassNameWithParentClassIndex(std::size_t position) const
+{
+	return dotnetInfo.getImportedClassNameWithParentClassIndex(position);
+}
+
+/**
+ * Get imported class library name
+ * @param position Index of selected imported class (indexed from 0)
+ * @return Library name of selected imported class
+ */
+std::string FileInformation::getDotnetImportedClassLibName(std::size_t position) const
+{
+	return dotnetInfo.getImportedClassLibName(position);
+}
+
+/**
+ * Get dotnet typeref hash as CRC32
+ * @return Typeref hash as CRC32
+ */
+std::string FileInformation::getDotnetTypeRefhashCrc32() const
+{
+	return dotnetInfo.getTypeRefhashCrc32();
+}
+
+/**
+ * Get dotnet typeref hash as MD5
+ * @return Typeref hash as MD5
+ */
+std::string FileInformation::getDotnetTypeRefhashMd5() const
+{
+	return dotnetInfo.getTypeRefhashMd5();
+}
+
+/**
+ * Get dotnet typeref hash as SHA256
+ * @return Typeref hash as SHA256
+ */
+std::string FileInformation::getDotnetTypeRefhashSha256() const
+{
+	return dotnetInfo.getTypeRefhashSha256();
+}
+
+/**
+ * Get number of stored imported dotnet classes
+ * @return Number of stored imported dotnet classes
+ */
+std::size_t FileInformation::getNumberOfStoredDotnetImportedClasses() const
+{
+	return dotnetInfo.getNumberOfImportedClasses();
+}
+
+/**
  * Returns .NET metadata header address in string representation in specified format.
  * @param format Format.
  * @return Metadata header address in string representation.
@@ -3004,6 +3080,15 @@ bool FileInformation::hasDotnetUserStringStream() const
 bool FileInformation::hasDotnetTypeLibId() const
 {
 	return dotnetInfo.hasTypeLibId();
+}
+
+/**
+ * Find out if there are any records in typeref table
+ * @return @c true if typeref is not empty, @c false otherwise
+ */
+bool FileInformation::hasDotnetTypeRefTableRecords() const
+{
+	return dotnetInfo.hasImportedClassListRecords();
 }
 
 /**
@@ -3676,6 +3761,33 @@ void FileInformation::setDotnetDefinedClassList(const std::vector<std::shared_pt
 void FileInformation::setDotnetImportedClassList(const std::vector<std::shared_ptr<retdec::fileformat::DotnetClass>>& dotnetClassList)
 {
 	dotnetInfo.setImportedClassList(dotnetClassList);
+}
+
+/**
+ * Sets .NET typeref hash as CRC32.
+ * @param crc32 Hash as CRC32.
+ */
+void FileInformation::setDotnetTypeRefhashCrc32(const std::string& crc32)
+{
+	dotnetInfo.setTypeRefhashCrc32(crc32);
+}
+
+/**
+ * Sets .NET typeref hash as MD5.
+ * @param md5 Hash as MD5.
+ */
+void FileInformation::setDotnetTypeRefhashMd5(const std::string& md5)
+{
+	dotnetInfo.setTypeRefhashMd5(md5);
+}
+
+/**
+ * Sets .NET typeref hash as SHA256.
+ * @param sha256 Hash as SHA256.
+ */
+void FileInformation::setDotnetTypeRefhashSha256(const std::string& sha256)
+{
+	dotnetInfo.setTypeRefhashSha256(sha256);
 }
 
 /**
