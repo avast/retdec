@@ -285,10 +285,11 @@ void DotnetTypeReconstructor::linkReconstructedClasses()
  * @param i Index of a class to be linked.
  * @param visited Visited flags for cyclic linkage detection.
  * @param stack Recent traversal stack for cyclic linkage detection.
+ * @param refClasses List of imported classes.
  * @param typeRefTable Typeref table.
  */
 void DotnetTypeReconstructor::linkReconstructedClassesDo(size_t i, std::vector<bool> &visited, std::vector<bool> &stack,
-														ClassList &refClasses, const MetadataTable<TypeRef>* typeRefTable)
+		ClassList &refClasses, const MetadataTable<TypeRef>* typeRefTable)
 {
 	if (visited[i])
 	{
@@ -782,10 +783,11 @@ bool DotnetTypeReconstructor::reconstructBaseTypes()
  * @param typeDef TypeDef table record.
  * @param fieldsCount Declared number of fields.
  * @param methodsCount Declared number of methods.
+ * @param typeDefIndex Index of TypeDef record.
  * @return New class definition or @c nullptr in case of failure.
  */
 std::unique_ptr<DotnetClass> DotnetTypeReconstructor::createClassDefinition(const TypeDef* typeDef, std::size_t fieldsCount,
-																		std::size_t methodsCount, std::size_t typeDefIndex)
+		std::size_t methodsCount, std::size_t typeDefIndex)
 {
 	std::string className, classNameSpace;
 	if (!stringStream->getString(typeDef->typeName.getIndex(), className) || !stringStream->getString(typeDef->typeNamespace.getIndex(), classNameSpace))
