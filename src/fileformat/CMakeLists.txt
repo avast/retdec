@@ -21,6 +21,7 @@ set(FILEFORMAT_SOURCES
 	types/symbol_table/elf_symbol.cpp
 	types/rich_header/rich_header.cpp
 	types/rich_header/linker_info.cpp
+	types/visual_basic_header/visual_basic_header.cpp
 	types/import_table/import.cpp
 	types/import_table/import_table.cpp
 	types/import_table/pe_import.cpp
