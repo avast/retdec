@@ -1,6 +1,6 @@
 /**
  * @file src/fileformat/types/visual_basic_header/visual_basic_header.cpp
- * @brief Class for rich header.
+ * @brief Class for visual basic header.
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */
 

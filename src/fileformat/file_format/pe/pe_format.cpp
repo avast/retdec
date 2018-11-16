@@ -28,6 +28,9 @@
 #include "retdec/fileformat/utils/file_io.h"
 #include "retdec/crypto/crypto.h"
 
+
+#include "retdec/fileformat/types/visual_basic_header/visual_basic_project_info.h" // TODO delme
+
 using namespace retdec::utils;
 using namespace PeLib;
 
@@ -625,30 +628,33 @@ void PeFormat::loadRichHeader()
 
 /**
  * Load visual basic header
+ * @return @c true if header was successfuly loaded, @c false otherwise
  */
-void PeFormat::loadVisualBasicHeader()
+bool PeFormat::loadVisualBasicHeader()
 {
+	std::vector<std::uint8_t> bytes;
 	unsigned long long version = 0;
 	unsigned long long baseAddress = 0;
 	std::size_t vbHeaderAddress = 0;
 	std::size_t vbHeaderOffset = 0;
+	std::size_t vbProjectInfoOffset = 0;
+	std::size_t offset = 0;
 	struct VBHeader vbh;
 
 	if (!isVisualBasic(version))
 	{
-		return;
+		return false;
 	}
 
-	// first instruction is expected to be PUSH <vbHeaderAddress> (0x68 b0 b1 b2 b3)
-	std::vector<std::uint8_t>bytes;
+	// first instruction is expected to be PUSH <vbHeaderAddress> (0x68 <b0> <b1> <b2> <b3>)
 	if (!getEpBytes(bytes, 5) || bytes.size() != 5 || bytes[0] != 0x68)
 	{
-		return;
+		return false;
 	}
 
 	if (!getImageBaseAddress(baseAddress))
 	{
-		return;
+		return false;
 	}
 
 	vbHeaderAddress = bytes[4] << 24 | bytes[3] << 16 | bytes[2] << 8 | bytes[1];
@@ -656,32 +662,30 @@ void PeFormat::loadVisualBasicHeader()
 
 	if (!getBytes(bytes, vbHeaderOffset, vbh.headerSize()) || bytes.size() != vbh.headerSize())
 	{
-		return;
+		return false;
 	}
 
-	std::size_t offset = 0;
-
 	std::memcpy(&vbh.signature, reinterpret_cast<void *>(&bytes.data()[offset]), sizeof(vbh.signature)); offset += sizeof(vbh.signature);
-	vbh.runtimeBuild = *reinterpret_cast<uint16_t *>(&bytes.data()[offset]); offset += sizeof(vbh.runtimeBuild);
+	vbh.runtimeBuild = *reinterpret_cast<std::uint16_t *>(&bytes.data()[offset]); offset += sizeof(vbh.runtimeBuild);
 	std::memcpy(&vbh.languageDLL, reinterpret_cast<void *>(&bytes.data()[offset]), sizeof(vbh.languageDLL)); offset += sizeof(vbh.languageDLL);
 	std::memcpy(&vbh.backupLanguageDLL, reinterpret_cast<void *>(&bytes.data()[offset]), sizeof(vbh.backupLanguageDLL)); offset += sizeof(vbh.backupLanguageDLL);
-	vbh.runtimeDLLVersion = *reinterpret_cast<uint16_t *>(&bytes.data()[offset]); offset += sizeof(vbh.runtimeDLLVersion);
-	vbh.languageID = *reinterpret_cast<uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbh.languageID);
-	vbh.backupLanguageID = *reinterpret_cast<uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbh.backupLanguageID);
-	vbh.aSubMain = *reinterpret_cast<uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbh.aSubMain);
-	vbh.aProjectInfo = *reinterpret_cast<uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbh.aProjectInfo);
-	vbh.threadFlags = *reinterpret_cast<uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbh.threadFlags);
-	vbh.threadCount = *reinterpret_cast<uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbh.threadCount);
-	vbh.formCount = *reinterpret_cast<uint16_t *>(&bytes.data()[offset]); offset += sizeof(vbh.formCount);
-	vbh.externalComponentCount = *reinterpret_cast<uint16_t *>(&bytes.data()[offset]); offset += sizeof(vbh.externalComponentCount);
-	vbh.thunkCount = *reinterpret_cast<uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbh.thunkCount);
-	vbh.aGUITable = *reinterpret_cast<uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbh.aGUITable);
-	vbh.aExternalComponentTable = *reinterpret_cast<uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbh.aExternalComponentTable);
-	vbh.aComRegisterData = *reinterpret_cast<uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbh.aComRegisterData);
-	vbh.oProjectExename = *reinterpret_cast<uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbh.oProjectExename);
-	vbh.oProjectTitle = *reinterpret_cast<uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbh.oProjectTitle);
-	vbh.oHelpFile = *reinterpret_cast<uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbh.oHelpFile);
-	vbh.oProjectName = *reinterpret_cast<uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbh.oProjectName);
+	vbh.runtimeDLLVersion = *reinterpret_cast<std::uint16_t *>(&bytes.data()[offset]); offset += sizeof(vbh.runtimeDLLVersion);
+	vbh.languageID = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbh.languageID);
+	vbh.backupLanguageID = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbh.backupLanguageID);
+	vbh.aSubMain = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbh.aSubMain);
+	vbh.aProjectInfo = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbh.aProjectInfo);
+	vbh.threadFlags = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbh.threadFlags);
+	vbh.threadCount = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbh.threadCount);
+	vbh.formCount = *reinterpret_cast<std::uint16_t *>(&bytes.data()[offset]); offset += sizeof(vbh.formCount);
+	vbh.externalComponentCount = *reinterpret_cast<std::uint16_t *>(&bytes.data()[offset]); offset += sizeof(vbh.externalComponentCount);
+	vbh.thunkCount = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbh.thunkCount);
+	vbh.aGUITable = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbh.aGUITable);
+	vbh.aExternalComponentTable = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbh.aExternalComponentTable);
+	vbh.aComRegisterData = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbh.aComRegisterData);
+	vbh.oProjectExename = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbh.oProjectExename);
+	vbh.oProjectTitle = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbh.oProjectTitle);
+	vbh.oHelpFile = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbh.oHelpFile);
+	vbh.oProjectName = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbh.oProjectName);
 
 	if (!isLittleEndian())
 	{
@@ -705,12 +709,73 @@ void PeFormat::loadVisualBasicHeader()
 		vbh.oProjectName = byteSwap32(vbh.oProjectName);
 	}
 
-	std::cout << "KUBO " << std::to_string(vbh.headerSize()) << "\n";
+	// TODO check VB header magic
+
+	std::cout << "[KUBO] VB header <<<<<<<<<<< " << std::to_string(vbh.headerSize()) << "\n";
 	vbh.dump(std::cout);
+
+	vbProjectInfoOffset = vbh.aProjectInfo - baseAddress;
+
+	loadVisualBasicProjectInfo(vbProjectInfoOffset);
 
 
 	visualBasicHeader = new VisualBasicHeader();
 	visualBasicHeader->setHeaderAddress(vbHeaderAddress);
+
+
+	// TODO iclude VB headrov to /fftypes and delete here
+
+	return true;
+}
+
+/**
+ * Load visual basic project info
+ * @param structureOffset Offset in file where the structure starts
+ * @return @c true if project info was successfuly loaded, @c false otherwise
+ */
+bool PeFormat::loadVisualBasicProjectInfo(std::size_t structureOffset)
+{
+	std::vector<std::uint8_t> bytes;
+	std::size_t offset = 0;
+	struct VBProjInfo vbpi;
+
+	if (!getBytes(bytes, structureOffset, vbpi.headerSize()) || bytes.size() != vbpi.headerSize())
+	{
+		return false;
+	}
+
+	vbpi.dwVersion = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbpi.dwVersion);
+	vbpi.lpObjectTable = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbpi.lpObjectTable);
+	vbpi.dwNull = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbpi.dwNull);
+	vbpi.lpCodeStart = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbpi.lpCodeStart);
+	vbpi.lpCodeEnd = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbpi.lpCodeEnd);
+	vbpi.dwDataSize = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbpi.dwDataSize);
+	vbpi.lpThreadSpace = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbpi.lpThreadSpace);
+	vbpi.lpVbaSeh = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbpi.lpVbaSeh);
+	vbpi.lpNativeCode = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbpi.lpNativeCode);
+	std::memcpy(&vbpi.szPathInformation, reinterpret_cast<void *>(&bytes.data()[offset]), sizeof(vbpi.szPathInformation)); offset += sizeof(vbpi.szPathInformation);
+	vbpi.lpExternalTable = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbpi.lpExternalTable);
+	vbpi.dwExternalCount = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbpi.dwExternalCount);
+
+	if (!isLittleEndian())
+	{
+		vbpi.dwVersion = byteSwap32(vbpi.dwVersion);
+		vbpi.lpObjectTable = byteSwap32(vbpi.lpObjectTable);
+		vbpi.dwNull = byteSwap32(vbpi.dwNull);
+		vbpi.lpCodeStart = byteSwap32(vbpi.lpCodeStart);
+		vbpi.lpCodeEnd = byteSwap32(vbpi.lpCodeEnd);
+		vbpi.dwDataSize = byteSwap32(vbpi.dwDataSize);
+		vbpi.lpThreadSpace = byteSwap32(vbpi.lpThreadSpace);
+		vbpi.lpVbaSeh = byteSwap32(vbpi.lpVbaSeh);
+		vbpi.lpNativeCode = byteSwap32(vbpi.lpNativeCode);
+		vbpi.lpExternalTable = byteSwap32(vbpi.lpExternalTable);
+		vbpi.dwExternalCount = byteSwap32(vbpi.dwExternalCount);
+	}
+
+	std::cout << "[KUBO] VB project info <<<<<<<<<<< " << std::to_string(vbpi.headerSize()) << "\n";
+	vbpi.dump(std::cout);
+
+	return true;
 }
 
 /**

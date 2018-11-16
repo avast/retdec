@@ -22,6 +22,7 @@ set(FILEFORMAT_SOURCES
 	types/rich_header/rich_header.cpp
 	types/rich_header/linker_info.cpp
 	types/visual_basic_header/visual_basic_header.cpp
+	types/visual_basic_header/visual_basic_project_info.cpp
 	types/import_table/import.cpp
 	types/import_table/import_table.cpp
 	types/import_table/pe_import.cpp
