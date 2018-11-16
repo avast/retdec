@@ -210,7 +210,7 @@ bool BitmapImage::parseDib1Data(const ResourceIcon &icon, const struct BitmapInf
 			for (std::size_t i = 0; i < 8; i++)
 			{
 				auto bit = (bytes[offset] & (0x01 << (7 - i)));
-				auto index = (bit > 0) ? 1 : 0;
+				auto index = (bit == 0) ? 0 : 1;
 				row.push_back(palette[index]);
 			}
 
