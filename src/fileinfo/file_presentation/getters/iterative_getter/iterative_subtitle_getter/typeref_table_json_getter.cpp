@@ -28,6 +28,7 @@ TypeRefTableJsonGetter::TypeRefTableJsonGetter(FileInformation &fileInfo) : Iter
 	commonHeaderElements.push_back("index");
 	commonHeaderElements.push_back("name");
 	commonHeaderElements.push_back("libraryName");
+	commonHeaderElements.push_back("nameSpace");
 }
 
 /**
@@ -71,6 +72,7 @@ bool TypeRefTableJsonGetter::getRecord(std::size_t structIndex, std::size_t recI
 	record.push_back(numToStr(recIndex));
 	record.push_back(replaceNonprintableChars(fileinfo.getDotnetImportedClassNestedName(recIndex)));
 	record.push_back(replaceNonprintableChars(fileinfo.getDotnetImportedClassLibName(recIndex)));
+	record.push_back(replaceNonprintableChars(fileinfo.getDotnetImportedClassNameSpace(recIndex)));
 	
 	return true;
 }

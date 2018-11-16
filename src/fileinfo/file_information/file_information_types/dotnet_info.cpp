@@ -76,6 +76,16 @@ std::string DotnetInfo::getImportedClassLibName(std::size_t position) const
 }
 
 /**
+ * Get imported class namespace
+ * @param position Index of selected imported class from typeref table (indexed from 0)
+ * @return Imported class namespace
+ */
+std::string DotnetInfo::getImportedClassNameSpace(std::size_t position) const
+{
+	return (position < getNumberOfImportedClasses()) ? importedClassList[position]->getTopLevelNameSpace() : "";
+}
+
+/**
  * Get imported class typeref index
  * @param position Index of selected imported class from typeref table (indexed from 0)
  * @param result Variable to store the result to

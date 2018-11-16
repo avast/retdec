@@ -145,6 +145,22 @@ const std::string& DotnetClass::getLibName() const
 }
 
 /**
+ * Returns the top level namespace of the class.
+ * @return Top level namespace.
+ */
+const std::string& DotnetClass::getTopLevelNameSpace() const
+{
+	auto dnClass = this;
+
+	while (dnClass->parent)
+	{
+		dnClass = dnClass->parent;
+	}
+
+	return dnClass->getNameSpace();
+}
+
+/**
  * Returns index of the class
  * @return Index of the class
  */
