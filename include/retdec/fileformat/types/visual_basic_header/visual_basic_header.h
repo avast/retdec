@@ -1,6 +1,6 @@
 /**
  * @file include/retdec/fileformat/types/visual_basic_header/visual_basic_header.h
- * @brief Class for rich header.
+ * @brief Class for visual basic header.
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */
 
@@ -23,13 +23,13 @@ struct VBHeader
 	std::uint32_t backupLanguageID;          ///< Used with backup language DLL
 	std::uint32_t aSubMain;                  ///< Procedure to start after the application is launched
 	std::uint32_t aProjectInfo;              ///< Pointer to ProjectInfo
-	std::uint32_t fMDLIntObjs;
-	std::uint32_t fMDLIntObjs2;
+	std::uint32_t fMDLIntObjs;               ///< VB controll flags for IDs < 32
+	std::uint32_t fMDLIntObjs2;              ///< VB controll flags for IDs > 32
 	std::uint32_t threadFlags;               ///< Thread flags
 	std::uint32_t threadCount;               ///< Number of threads (themeaning of this field is unclear as VB doesn't let you make multithreaded application)
 	std::uint16_t formCount;                 ///< Number of forms in this application
 	std::uint16_t externalComponentCount;    ///< Number of external OCX components
-	std::uint32_t thunkCount;
+	std::uint32_t thunkCount;                ///< Number of thunks to create
 	std::uint32_t aGUITable;                 ///< Pointer to GUITable
 	std::uint32_t aExternalComponentTable;   ///< Pointer to ExternalComponentTable
 	std::uint32_t aComRegisterData;          ///< Pointer to ComRegisterData
@@ -108,6 +108,7 @@ struct VBHeader
 		out << "oProjectTitle:\t\t" << oProjectTitle << "\n";
 		out << "oHelpFile:\t\t" << oHelpFile << "\n";
 		out << "oProjectName:\t\t" << oProjectName << std::dec << "\n";
+		out << "\n";
 	}
 };
 

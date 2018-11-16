@@ -61,7 +61,8 @@ class PeFormat : public FileFormat
 		std::size_t getRichHeaderOffset(const std::string &plainFile);
 		bool getResourceNodes(std::vector<const PeLib::ResourceChild*> &nodes, std::vector<std::size_t> &levels);
 		void loadRichHeader();
-		void loadVisualBasicHeader();
+		bool loadVisualBasicHeader();
+		bool loadVisualBasicProjectInfo(std::size_t structureOffset);
 		void loadSections();
 		void loadSymbols();
 		void loadImports();
