@@ -14,19 +14,20 @@ namespace retdec {
 namespace demangler {
 namespace tests {
 
+#define DEM_EQ(mangled, demangled) \
+			do {	\
+				EXPECT_EQ(demangler->demangleToString(mangled), demangled); \
+                EXPECT_EQ(demangler->status(), status::success); \
+			} while(0)
+
 class LlvmBorlandDemanglerTests : public Test
 {
 	public:
+		using status = retdec::demangler::Demangler::Status;
+
 		LlvmBorlandDemanglerTests():
 			demangler(retdec::demangler::DemanglerFactory::getDemangler("borland")) {}
 
-		void demangle_eq(const std::string &mangled, const std::string &demangled) {
-			using status = retdec::demangler::Demangler::Status;
-
-			auto result = demangler->demangleToString(mangled);
-			EXPECT_EQ(demangler->status(), status::success);
-			EXPECT_EQ(result, demangled);
-		}
 	protected:
 		std::unique_ptr<retdec::demangler::Demangler> demangler;
 };
@@ -34,7 +35,16 @@ class LlvmBorlandDemanglerTests : public Test
 TEST_F(LlvmBorlandDemanglerTests,
 	   BasicTest)
 {
-	demangle_eq("@Project1@mojaproc$qqri", "mojaproc(Integer);");
+	DEM_EQ("@myFunc_int_$qi", "myFunc(int)");
+}
+
+TEST_F(LlvmBorlandDemanglerTests,
+		CallConvTest)
+{
+	DEM_EQ("@myFunc_fastcall_$qqrv", "__fastcall myFunc_fastcall_()");
+	DEM_EQ("@myFunc_cdecl_$qv", "__cdecl myFunc_cdecl_()");
+	DEM_EQ("@myFunc_pascal_$qv", "__pascal myFunc_pascal_()");
+	DEM_EQ("@myFunc_stdcall_$qqsv", "__stdcall myFunc_stdcall_()");
 }
 
 } // namespace tests
