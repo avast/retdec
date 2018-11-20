@@ -2,7 +2,7 @@
 
 # dev
 
-* New Feature: Added presentation of imported types and TypeRef hashes for .NET binaries ([#363](https://github.com/avast-tl/retdec/issues/363), [#364](https://github.com/avast-tl/retdec/issues/364)).
+* New Feature: Added presentation of imported types and TypeRef hashes for .NET binaries ([#363](https://github.com/avast-tl/retdec/issues/363), [#364](https://github.com/avast-tl/retdec/issues/364), [#428](https://github.com/avast-tl/retdec/issues/428)).
 * Enhancement: Capstone2LlvmIr library refactoring ([#115](https://github.com/avast-tl/retdec/issues/115)).
 * Enhancement: Removed the build and runtime dependency on ncurses/libtinfo ([#409](https://github.com/avast-tl/retdec/pull/409)).
 * Enhancement: Add a check into our scripts that they are run from an installation directory and not from the `scripts` directory ([#418](https://github.com/avast-tl/retdec/issues/418)).
