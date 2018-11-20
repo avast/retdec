@@ -35,15 +35,15 @@ class LlvmBorlandDemanglerTests : public Test
 TEST_F(LlvmBorlandDemanglerTests,
 	   BasicTest)
 {
-	DEM_EQ("@myFunc_int_$qi", "myFunc(int)");
+	DEM_EQ("@myFunc_int_$qi", "myFunc_int_(int)");
 }
 
 TEST_F(LlvmBorlandDemanglerTests,
 		CallConvTest)
 {
 	DEM_EQ("@myFunc_fastcall_$qqrv", "__fastcall myFunc_fastcall_()");
-	DEM_EQ("@myFunc_cdecl_$qv", "__cdecl myFunc_cdecl_()");
-	DEM_EQ("@myFunc_pascal_$qv", "__pascal myFunc_pascal_()");
+	DEM_EQ("@myFunc_cdecl_$qv", "myFunc_cdecl_()");
+	DEM_EQ("@myFunc_pascal_$qv", "myFunc_pascal_()");
 	DEM_EQ("@myFunc_stdcall_$qqsv", "__stdcall myFunc_stdcall_()");
 }
 

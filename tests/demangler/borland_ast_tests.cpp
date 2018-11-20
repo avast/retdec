@@ -46,7 +46,7 @@ TEST_F(BorlandAstTests,	NestedNameTest)
 		std::move(baz));
 	AST_EQ("foo::bar::baz", foo_bar_baz);
 
-	EXPECT_EQ(foo_bar_baz->kind(), Node::KNestedName);
+	EXPECT_EQ(foo_bar_baz->kind(), Node::Kind::KNestedName);
 }
 
 TEST_F(BorlandAstTests, ParseNameTest)
