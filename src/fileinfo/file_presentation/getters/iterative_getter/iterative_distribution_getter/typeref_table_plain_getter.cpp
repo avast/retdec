@@ -17,9 +17,9 @@ namespace fileinfo {
 namespace
 {
 
-const std::size_t distributionArray[] = {6, 40, 30, 45};
-const std::string headerArray[] = {"i", "name", "libName", "nameSpace"};
-const std::string headerDesc[] = {"index", "name of dotnet import", "name of library from which is import imported"};
+const std::size_t distributionArray[] = {6, 40, 40, 45};
+const std::string headerArray[] = {"i", "name", "nameSpace", "libName"};
+const std::string headerDesc[] = {"index", "name of dotnet import", "namespace of type", "name of library from which is import imported"};
 
 } // anonymous namespace
 
@@ -79,9 +79,9 @@ bool TypeRefTablePlainGetter::loadRecord(std::size_t structIndex, std::size_t re
 	record.clear();
 	record.push_back(numToStr(recIndex));
 	record.push_back(replaceNonprintableChars(fileinfo.getDotnetImportedClassNameWithParentClassIndex(recIndex)));
-	record.push_back(replaceNonprintableChars(fileinfo.getDotnetImportedClassLibName(recIndex)));
 	record.push_back(replaceNonprintableChars(fileinfo.getDotnetImportedClassNameSpace(recIndex)));
-	
+	record.push_back(replaceNonprintableChars(fileinfo.getDotnetImportedClassLibName(recIndex)));
+
 	return true;
 }
 
