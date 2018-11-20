@@ -58,6 +58,7 @@ class DotnetClass : public DotnetType
 		std::string getNameWithParentClassIndex() const;
 		std::string getNestedName() const;
 		const std::string& getLibName() const;
+		const std::string& getTopLevelNameSpace() const;
 		std::size_t getIndex() const;
 		std::size_t getDeclaredFieldsCount() const;
 		std::size_t getDeclaredMethodsCount() const;

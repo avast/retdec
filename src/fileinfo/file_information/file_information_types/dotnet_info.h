@@ -53,6 +53,7 @@ class DotnetInfo
 		std::string getImportedClassNestedName(std::size_t position) const;
 		std::string getImportedClassNameWithParentClassIndex(std::size_t position) const;
 		std::string getImportedClassLibName(std::size_t position) const;
+		std::string getImportedClassNameSpace(std::size_t position) const;
 		bool getImportedClassIndex(std::size_t position, std::size_t &result) const;
 		const std::string& getTypeRefhashCrc32() const;
 		const std::string& getTypeRefhashMd5() const;

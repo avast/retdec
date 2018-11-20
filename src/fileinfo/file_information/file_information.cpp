@@ -2847,6 +2847,16 @@ std::string FileInformation::getDotnetImportedClassLibName(std::size_t position)
 }
 
 /**
+ * Get imported class namespace
+ * @param position Index of selected imported class (indexed from 0)
+ * @return Namespace of selected imported class
+ */
+std::string FileInformation::getDotnetImportedClassNameSpace(std::size_t position) const
+{
+	return dotnetInfo.getImportedClassNameSpace(position);
+}
+
+/**
  * Get dotnet typeref hash as CRC32
  * @return Typeref hash as CRC32
  */
