@@ -237,6 +237,48 @@ void NestedNameNode::printLeft(std::ostream &s)
 	_name->print(s);
 }
 
+/**
+ * @brief Private constructor for NodeArray. Use create().
+ */
+NodeArray::NodeArray() : Node(Kind::KNodeArray), _nodes() {}
+
+/**
+ * @brief Creates unique pointer to new NodeArray object.
+ * @return Pointer to empty ArrayNode.
+ */
+std::unique_ptr<NodeArray> NodeArray::create()
+{
+	return std::unique_ptr<NodeArray>(new NodeArray());
+}
+
+/**
+ * @brief Appends new node to array.
+ * @param node Node to be added.
+ */
+void NodeArray::addNode(std::unique_ptr<retdec::demangler::borland::Node> node)
+{
+	_nodes.push_back(std::move(node));
+}
+
+/**
+ * @brief Prints text representaion of array.
+ * @param s Output stream.
+ */
+void NodeArray::printLeft(std::ostream &s)
+{
+	if (!_nodes.empty()) {
+		/* print first */
+		auto current = _nodes.begin();
+		(*current)->print(s);
+
+		/* print others */
+		while (++current != _nodes.end()) {
+			s << ", ";
+			(*current)->print(s);
+		}
+	}
+}
+
 }    // borland
 }    // demangler
 }    // retdec

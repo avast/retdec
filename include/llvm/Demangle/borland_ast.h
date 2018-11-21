@@ -30,6 +30,7 @@ class Node
 				KFunction,
 				KName,
 				KNestedName,
+				KNodeArray,
 		};
 
 	public:
@@ -161,6 +162,25 @@ class NestedNameNode: public Node
 	private:
 		std::unique_ptr<Node> _super;
 		std::unique_ptr<Node> _name;
+};
+
+/**
+ * @brief Node for representation of arrays of nodes.
+ */
+class NodeArray: public Node
+{
+	public:
+		static std::unique_ptr<NodeArray> create();
+
+		void addNode(std::unique_ptr<Node> node);
+
+	private:
+		NodeArray();
+
+		void printLeft(std::ostream &s) override;
+
+	private:
+		std::vector<std::unique_ptr<Node>> _nodes;
 };
 
 }    // borland
