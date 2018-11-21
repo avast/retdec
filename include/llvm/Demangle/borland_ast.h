@@ -25,6 +25,7 @@ class Node
 	public:
 		enum class Kind
 		{
+				KBuiltIn,
 				KCallConv,
 				KFunction,
 				KName,
@@ -50,6 +51,23 @@ class Node
 	protected:
 		Kind _kind;
 		bool _has_right;
+};
+
+/**
+ * @brief Node for representation of built-in types.
+ */
+class BuiltInType: public Node
+{
+	public:
+		static std::unique_ptr<BuiltInType> create(const StringView &typeName);
+
+	private:
+		explicit BuiltInType(const StringView &typeName);
+
+		void printLeft(std::ostream &s) override;
+
+	private:
+		StringView _typeName;
 };
 
 /**
@@ -145,8 +163,8 @@ class NestedNameNode: public Node
 		std::unique_ptr<Node> _name;
 };
 
-}	// borland
-}	// demangler
-}	// retdec
+}    // borland
+}    // demangler
+}    // retdec
 
 #endif //RETDEC_BORLAND_AST_H

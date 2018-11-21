@@ -9,7 +9,6 @@
 
 #include "llvm/Demangle/borland_ast.h"
 
-
 namespace retdec {
 namespace demangler {
 namespace borland {
@@ -56,6 +55,32 @@ Node::Kind Node::kind()
  * @param s output stream.
  */
 void Node::printRight(std::ostream &s) {}
+
+/**
+ * @brief Private constructor for built-in type nodes. Use create().
+ * @param typeName Representation of type name.
+ */
+BuiltInType::BuiltInType(const StringView &typeName) :
+	Node(Kind::KBuiltIn), _typeName{typeName} {}
+
+/**
+ * @brief Creates unique pointer to built-in type nodes.
+ * @param typeName Representation of type name.
+ * @return Unique pointer to built-in type nodes.
+ */
+std::unique_ptr<BuiltInType> BuiltInType::create(const StringView &typeName)
+{
+	return std::unique_ptr<BuiltInType>(new BuiltInType(typeName));
+}
+
+/**
+ * @brief Prints string representation of built-in type.
+ * @param s Output stream.
+ */
+void BuiltInType::printLeft(std::ostream &s)
+{
+	s << std::string{_typeName.begin(), _typeName.size()};
+}
 
 /**
  * @brief Calling convention node private constructor. Use create().
@@ -212,6 +237,6 @@ void NestedNameNode::printLeft(std::ostream &s)
 	_name->print(s);
 }
 
-}	// borland
-}	// demangler
-}	// retdec
+}    // borland
+}    // demangler
+}    // retdec
