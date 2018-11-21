@@ -7,7 +7,7 @@
 #include <memory>
 #include <gtest/gtest.h>
 
-#include "llvm/Demangle/borland_ast.h"
+#include "llvm/Demangle/borland_ast_parser.h"
 
 #define AST_EQ(expected, ast) ast_eq(expected, ast.get())
 
@@ -61,6 +61,16 @@ TEST_F(BorlandAstTests, ParseNameTest)
 	ast2->str();
 
 	EXPECT_EQ(demangled, expected);
+}
+
+TEST_F(BorlandAstTests, NodeArrayTest)
+{
+	auto i_arr = NodeArray::create();
+	AST_EQ("", i_arr);
+	i_arr->addNode(BuiltInType::create("int"));
+	AST_EQ("int", i_arr);
+	i_arr->addNode(BuiltInType::create("bool"));
+	AST_EQ("int, bool", i_arr);
 }
 
 } // tests
