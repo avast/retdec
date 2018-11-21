@@ -90,8 +90,7 @@ void BorlandASTParser::parse()
  */
 StringView BorlandASTParser::getNestedName(StringView &source)
 {
-	auto nested = source.substrUntil('@');
-	source.consumeFront(nested);
+	auto nested = source.cutUntil('@');
 	source.consumeFront('@');
 	return nested;
 }

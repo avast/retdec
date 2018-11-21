@@ -53,6 +53,12 @@ public:
   	auto pos = find(c);
     return dropBack(size() - pos);
   }
+
+  StringView cutUntil(char c) {
+    auto cut = substrUntil(c);
+    consumeFront(cut);
+    return cut;
+  }
   // }RetDec
 
   StringView substr(size_t From, size_t To) const {
