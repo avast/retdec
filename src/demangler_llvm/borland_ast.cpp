@@ -21,8 +21,6 @@ namespace borland {
 Node::Node(Kind kind, bool has_right_side) :
 	_kind(kind), _has_right(has_right_side) {}
 
-void Node::printRight(std::ostream &s) {}
-
 /**
  * @brief Prints left side of node.
  * @param s output stream
@@ -51,6 +49,112 @@ std::string Node::str()
 Node::Kind Node::kind()
 {
 	return _kind;
+}
+
+/**
+ * @brief Some nodes need special trailing characters.
+ * @param s output stream.
+ */
+void Node::printRight(std::ostream &s) {}
+
+/**
+ * @brief Calling convention node private constructor. Use create().
+ * @param conv Calling convention.
+ * @param has_right Weather the space after calling convention should be printed.
+ */
+CallConv::CallConv(CallConv::Conventions &conv, bool has_right) :
+	Node(Kind::KCallConv, has_right), _conv(conv) {}
+
+/**
+ * @brief Creates unique pointer to CallConv node.
+ * @param conv Calling convention.
+ * @return Unique pointer to CallConv node.
+ */
+std::unique_ptr<CallConv> CallConv::create(Conventions &conv)
+{
+	bool has_rhs = conv == Conventions::unknown;
+	return std::unique_ptr<CallConv>(new CallConv(conv, has_rhs));
+}
+
+/**
+ * @return Call convention type.
+ */
+CallConv::Conventions CallConv::conv()
+{
+	return _conv;
+}
+
+/**
+ * @brief Prints string representation of calling convention into ostream s.
+ * @param s Output stream.
+ */
+void CallConv::printLeft(std::ostream &s)
+{
+	std::map<Conventions, std::string> to_str{
+		{Conventions::stdcall, "__stdcall"},
+		{Conventions::fastcall, "__fastcall"},
+		{Conventions::cdecl, "__cdecl"},
+		{Conventions::pascal, "__pascal"},
+		{Conventions::unknown, ""}
+	};
+
+	s << to_str[_conv];
+}
+
+/**
+ * @brief Prints space after calling convention.
+ * @param s Output stream.
+ */
+void CallConv::printRight(std::ostream &s)
+{
+	s << " ";
+}
+
+/**
+ * @brief Private function node constructor. Use create().
+ * @param call_conv Pointer to calling convention.
+ * @param name Pointer to Name or NestedName node.
+ * @param params Pointer to parameters.
+ */
+FunctionNode::FunctionNode(
+	std::unique_ptr<retdec::demangler::borland::CallConv> call_conv,
+	std::unique_ptr<retdec::demangler::borland::Node> name,
+	std::unique_ptr<retdec::demangler::borland::Node> params) :
+	Node(Kind::KFunction, false),
+	_call_conv(std::move(call_conv)),
+	_name(std::move(name)),
+	_params(std::move(params)) {}
+
+/**
+ * @brief Creates unique pointer to function node.
+ * @param call_conv Pointer to calling convention node.
+ * @param name Pointer to Name or NestedName node.
+ * @param params Pointer to parameters.
+ * @return Unique pointer to constructed FunctionNode.
+ */
+std::unique_ptr<FunctionNode> FunctionNode::create(
+	std::unique_ptr<retdec::demangler::borland::CallConv> call_conv,
+	std::unique_ptr<retdec::demangler::borland::Node> name,
+	std::unique_ptr<retdec::demangler::borland::Node> params)
+{
+	return std::unique_ptr<FunctionNode>(
+		new FunctionNode(std::move(call_conv), std::move(name), std::move(params)));
+}
+
+/**
+ * @brief Prints text representation of function.
+ * @param s Output stream.
+ */
+void FunctionNode::printLeft(std::ostream &s)
+{
+	if (_call_conv->conv() != CallConv::Conventions::unknown) {
+		_call_conv->print(s);
+		s << " ";
+	}
+	_name->print(s);
+	s << "(";
+	_params->print(s);
+	s << ")";
 }
 
 /**
@@ -106,106 +210,6 @@ void NestedNameNode::printLeft(std::ostream &s)
 	_super->print(s);
 	s << std::string{"::"};
 	_name->print(s);
-}
-
-/**
- * @brief Calling convention node private constructor. Use create().
- * @param conv Calling convention.
- * @param has_right Weather the space after calling convention should be printed.
- */
-CallConv::CallConv(CallConv::Conventions &conv, bool has_right) :
-	Node(Kind::KCallConv, has_right), _conv(conv) {}
-
-/**
- * @brief Prints string representation of calling convention into ostream s.
- * @param s Output stream.
- */
-void CallConv::printLeft(std::ostream &s)
-{
-	std::map<Conventions, std::string> to_str{
-		{Conventions::stdcall, "__stdcall"},
-		{Conventions::fastcall, "__fastcall"},
-		{Conventions::cdecl, "__cdecl"},
-		{Conventions::pascal, "__pascal"},
-		{Conventions::unknown, ""}
-	};
-
-	s << to_str[_conv];
-}
-
-/**
- * @brief Prints space after calling convention.
- * @param s Output stream.
- */
-void CallConv::printRight(std::ostream &s)
-{
-	s << " ";
-}
-
-/**
- * @brief Creates unique pointer to CallConv node.
- * @param conv Calling convention.
- * @return Unique pointer to CallConv node.
- */
-std::unique_ptr<CallConv> CallConv::create(Conventions &conv)
-{
-	bool has_rhs = conv == Conventions::unknown;
-	return std::unique_ptr<CallConv>(new CallConv(conv, has_rhs));
-}
-
-/**
- * @return Call convention type.
- */
-CallConv::Conventions CallConv::conv()
-{
-	return _conv;
-}
-
-/**
- * @brief Private function node constructor. Use create().
- * @param call_conv Pointer to calling convention.
- * @param name Pointer to Name or NestedName node.
- * @param params Pointer to parameters.
- */
-FunctionNode::FunctionNode(
-	std::unique_ptr<retdec::demangler::borland::CallConv> call_conv,
-	std::unique_ptr<retdec::demangler::borland::Node> name,
-	std::unique_ptr<retdec::demangler::borland::Node> params) :
-	Node(Kind::KFunction, false),
-	_call_conv(std::move(call_conv)),
-	_name(std::move(name)),
-	_params(std::move(params)) {}
-
-/**
- * @brief Creates unique pointer to function node.
- * @param call_conv Pointer to calling convention node.
- * @param name Pointer to Name or NestedName node.
- * @param params Pointer to parameters.
- * @return Unique pointer to constructed FunctionNode.
- */
-std::unique_ptr<FunctionNode> FunctionNode::create(
-	std::unique_ptr<retdec::demangler::borland::CallConv> call_conv,
-	std::unique_ptr<retdec::demangler::borland::Node> name,
-	std::unique_ptr<retdec::demangler::borland::Node> params)
-{
-	return std::unique_ptr<FunctionNode>(
-		new FunctionNode(std::move(call_conv), std::move(name), std::move(params)));
-}
-
-/**
- * @brief Prints text representation of function.
- * @param s Output stream.
- */
-void FunctionNode::printLeft(std::ostream &s)
-{
-	if (_call_conv->conv() != CallConv::Conventions::unknown) {
-		_call_conv->print(s);
-		s << " ";
-	}
-	_name->print(s);
-	s << "(";
-	_params->print(s);
-	s << ")";
 }
 
 }	// borland

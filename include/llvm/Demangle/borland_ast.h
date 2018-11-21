@@ -9,6 +9,7 @@
 
 #include <memory>
 #include <string>
+#include <vector>
 
 #include "llvm/Demangle/StringView.h"
 
@@ -24,12 +25,10 @@ class Node
 	public:
 		enum class Kind
 		{
+				KCallConv,
+				KFunction,
 				KName,
 				KNestedName,
-				KType,
-				KNodeArray,
-				KFunction,
-				KCallConv,
 		};
 
 	public:
@@ -51,6 +50,63 @@ class Node
 	protected:
 		Kind _kind;
 		bool _has_right;
+};
+
+/**
+ * @brief Node for representation of calling conventions.
+ */
+class CallConv: public Node
+{
+	public:
+		enum class Conventions
+		{
+				fastcall,
+				cdecl,
+				pascal,
+				stdcall,
+				unknown,
+		};
+
+	public:
+		static std::unique_ptr<CallConv> create(Conventions &conv);
+
+		Conventions conv();
+
+	private:
+		explicit CallConv(CallConv::Conventions &conv, bool has_right);
+
+		void printLeft(std::ostream &s) override;
+
+		void printRight(std::ostream &s) override;
+
+	private:
+		Conventions _conv;
+};
+
+/**
+ * Node for representation of functions.
+ */
+class FunctionNode: public Node
+{
+	public:
+		static std::unique_ptr<FunctionNode> create(
+			std::unique_ptr<CallConv> call_conv,
+			std::unique_ptr<Node> name,
+			std::unique_ptr<Node> params);
+
+	private:
+		FunctionNode(
+			std::unique_ptr<CallConv> call_conv,
+			std::unique_ptr<Node> name,
+			std::unique_ptr<Node> params);
+
+		void printLeft(std::ostream &s) override;
+
+	private:
+		std::unique_ptr<CallConv> _call_conv;
+		std::unique_ptr<Node> _name;
+		std::unique_ptr<Node> _params;
+
 };
 
 /**
@@ -87,57 +143,6 @@ class NestedNameNode: public Node
 	private:
 		std::unique_ptr<Node> _super;
 		std::unique_ptr<Node> _name;
-};
-
-class CallConv: public Node
-{
-	public:
-		enum class Conventions
-		{
-				fastcall,
-				cdecl,
-				pascal,
-				stdcall,
-				unknown,
-		};
-
-	public:
-		static std::unique_ptr<CallConv> create(Conventions &conv);
-
-		void printLeft(std::ostream &s) override;
-
-		void printRight(std::ostream &s) override;
-
-		Conventions conv();
-
-	private:
-		explicit CallConv(CallConv::Conventions &conv, bool has_right);
-
-	private:
-		Conventions _conv;
-};
-
-class FunctionNode: public Node
-{
-	public:
-		static std::unique_ptr<FunctionNode> create(
-			std::unique_ptr<CallConv> call_conv,
-			std::unique_ptr<Node> name,
-			std::unique_ptr<Node> params);
-
-	private:
-		FunctionNode(
-			std::unique_ptr<CallConv> call_conv,
-			std::unique_ptr<Node> name,
-			std::unique_ptr<Node> params);
-
-		void printLeft(std::ostream &s) override;
-
-	private:
-		std::unique_ptr<CallConv> _call_conv;
-		std::unique_ptr<Node> _name;
-		std::unique_ptr<Node> _params;
-
 };
 
 }	// borland
