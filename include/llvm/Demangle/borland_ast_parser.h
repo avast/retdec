@@ -37,9 +37,9 @@ class BorlandASTParser
 
 	private:
 		void parse();
+		std::unique_ptr<CallConv> parseCallConv();
 		std::unique_ptr<Node> parseFullName();
 		static StringView getNestedName(StringView &source);
-		std::unique_ptr<CallConv> parseCallConv();
 
 	private:
 		Status _status;

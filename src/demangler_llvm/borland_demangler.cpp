@@ -43,6 +43,15 @@ BorlandASTParser::BorlandASTParser(const std::string &mangled) :
 }
 
 /**
+ * @return Shared pointer to AST.
+ */
+std::shared_ptr<Node> BorlandASTParser::ast()
+{
+	return _status == success ? _ast : nullptr;
+}
+
+
+/**
  * @return Status of parser.
  */
 BorlandASTParser::Status BorlandASTParser::status()
@@ -86,6 +95,35 @@ void BorlandASTParser::parse()
 }
 
 /**
+ * @brief Tries to parse calling convention into AST node.
+ * @return Pointer to CallConv on success, else nullptr.
+ */
+std::unique_ptr<CallConv> BorlandASTParser::parseCallConv()
+{
+	using Convention = CallConv::Conventions;
+
+	if (!_mangled.consumeFront('q')) {
+		return nullptr;
+	}
+
+	auto conv = Convention::unknown;
+	if (_mangled.consumeFront('q')) {
+		switch (_mangled.popFront()) {
+		case 'r':
+			conv = Convention::fastcall;
+			break;
+		case 's':
+			conv = Convention::stdcall;
+			break;
+		default:
+			break;
+		}
+	} //else unknown, cant tell for certain
+
+	return CallConv::create(conv);
+}
+
+/**
  * @brief Tries to consume first nested name in in source and returns it.
  */
 StringView BorlandASTParser::getNestedName(StringView &source)
@@ -123,43 +161,6 @@ std::unique_ptr<Node> BorlandASTParser::parseFullName()
 	// everything left must be absolute name
 	auto absNameNode = NameNode::create(name);
 	return NestedNameNode::create(std::move(nameNode), std::move(absNameNode));
-}
-
-/**
- * @brief Tries to parse calling convention into AST node.
- * @return Pointer to CallConv on success, else nullptr.
- */
-std::unique_ptr<CallConv> BorlandASTParser::parseCallConv()
-{
-	using Convention = CallConv::Conventions;
-
-	if (!_mangled.consumeFront('q')) {
-		return nullptr;
-	}
-
-	auto conv = Convention::unknown;
-	if (_mangled.consumeFront('q')) {
-		switch (_mangled.popFront()) {
-		case 'r':
-			conv = Convention::fastcall;
-			break;
-		case 's':
-			conv = Convention::stdcall;
-			break;
-		default:
-			break;
-		}
-	} //else unknown, cant tell for certain
-
-	return CallConv::create(conv);
-}
-
-/**
- * @return Shared pointer to AST.
- */
-std::shared_ptr<Node> BorlandASTParser::ast()
-{
-	return _status == success ? _ast : nullptr;
 }
 
 } // borland
