@@ -39,16 +39,20 @@ public:
 
 	void reset();
 
+	void addGlobalValVarPair(llvm::Value *val, ShPtr<Variable> var);
 	ShPtr<Variable> getVarByValue(llvm::Value *val);
 	VarSet getLocalVars() const;
 
 private:
 	void assignNameToValue(llvm::Value *val) const;
-	ShPtr<Variable> getVarByName(const std::string &name);
-	ShPtr<Variable> getOrCreateLocalVar(const std::string &name);
+	ShPtr<Variable> getGlobalVar(llvm::Value *val);
+	ShPtr<Variable> getOrCreateLocalVar(llvm::Value *val);
 
-	/// Mapping of a variable name into an existing variable.
-	std::unordered_map<std::string, ShPtr<Variable>> localVarsMap;
+	/// Mapping of a LLVM value to an existing variable.
+	std::unordered_map<llvm::Value*, ShPtr<Variable>> localVarsMap;
+
+	/// Mapping of LLVM functions and globals to existing variables.
+	std::unordered_map<llvm::Value*, ShPtr<Variable>> globalVarsMap;
 
 	/// Variable names generator.
 	UPtr<VarNameGen> varNameGen;

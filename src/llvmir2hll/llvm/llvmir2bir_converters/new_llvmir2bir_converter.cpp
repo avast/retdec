@@ -143,6 +143,7 @@ void NewLLVMIR2BIRConverter::convertAndAddGlobalVariables() {
 			auto variable = convertGlobalVariable(globVar);
 			auto initializer = convertGlobalVariableInitializer(globVar);
 			resModule->addGlobalVar(variable, initializer);
+			variablesManager->addGlobalValVarPair(&globVar, variable);
 		}
 	}
 }
@@ -173,6 +174,7 @@ ShPtr<Function> NewLLVMIR2BIRConverter::convertFuncDeclaration(
 	auto params = convertFuncParams(func);
 
 	auto birFunc = Function::create(retType, func.getName(), params);
+	variablesManager->addGlobalValVarPair(&func, birFunc->getAsVar());
 	birFunc->setVarArg(func.isVarArg());
 	return birFunc;
 }
