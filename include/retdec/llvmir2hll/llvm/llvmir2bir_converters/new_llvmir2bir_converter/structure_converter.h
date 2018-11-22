@@ -243,6 +243,7 @@ private:
 	void insertClonedLoopTargets( ShPtr<Statement> origParent,
 		ShPtr<Statement> newParent);
 	ShPtr<Statement> deepCloneStatements(ShPtr<Statement> orig);
+	void fixClonedGotos(ShPtr<Statement> statement);
 	/// @}
 
 	/// @name Helper methods
@@ -281,6 +282,9 @@ private:
 
 	/// A map of targets for break and continue statements
 	MapStmtToTargetNode loopTargets;
+
+	/// A map of goto target statements to cfg nodes.
+	MapStmtToTargetNode gotoTargetsToCfgNodes;
 
 	/// A map of references for goto targets
 	MapTargetToGoto targetReferences;
