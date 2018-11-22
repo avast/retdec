@@ -165,7 +165,7 @@ def parse_args(args):
 
     parser.add_argument('--backend-llvmir2bir-converter',
                         dest='backend_llvmir2bir_converter',
-                        default='orig',
+                        default='new',
                         choices=['orig', 'new'],
                         help='Name of the converter from LLVM IR to BIR.')
 
