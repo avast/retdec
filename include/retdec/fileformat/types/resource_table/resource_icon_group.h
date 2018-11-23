@@ -1,5 +1,5 @@
 /**
- * @file include/retdec/fileformat/types/resource_table/resource_group.h
+ * @file include/retdec/fileformat/types/resource_table/resource_icon_group.h
  * @brief Class for one resource icon group.
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */
