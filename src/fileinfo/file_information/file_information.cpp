@@ -1051,6 +1051,42 @@ std::string FileInformation::getResourceSha256(std::size_t index) const
 }
 
 /**
+ * Get iconhash as CRC32
+ * @return ResourceIconhash as CRC32
+ */
+std::string FileInformation::getResourceIconhashCrc32() const
+{
+	return resourceTable.getResourceIconhashCrc32();
+}
+
+/**
+ * Get iconhash as MD5
+ * @return ResourceIconhash as MD5
+ */
+std::string FileInformation::getResourceIconhashMd5() const
+{
+	return resourceTable.getResourceIconhashMd5();
+}
+
+/**
+ * Get iconhash as SHA256
+ * @return ResourceIconhash as SHA256
+ */
+std::string FileInformation::getResourceIconhashSha256() const
+{
+	return resourceTable.getResourceIconhashSha256();
+}
+
+/**
+ * Get icon perceptual hash as AvgHash
+ * @return Icon perceptual hash as AvgHash
+ */
+std::string FileInformation::getResourceIconPerceptualAvgHash() const
+{
+	return resourceTable.getResourceIconPerceptualAvgHash();
+}
+
+/**
  * Get name of selected resource
  * @param index Index of selected resource (indexed from 0)
  * @return Name of selected resource
@@ -1144,6 +1180,15 @@ std::string FileInformation::getResourceOffsetStr(std::size_t index, std::ios_ba
 std::string FileInformation::getResourceSizeStr(std::size_t index, std::ios_base &(* format)(std::ios_base &)) const
 {
 	return resourceTable.getResourceSizeStr(index, format);
+}
+
+/**
+ * Find out if there are any records in resource table
+ * @return @c true if resource table is not empty, @c false otherwise
+ */
+bool FileInformation::hasResourceTableRecords() const
+{
+	return resourceTable.hasRecords();
 }
 
 /**
@@ -3606,6 +3651,15 @@ void FileInformation::setExportTable(const retdec::fileformat::ExportTable *sTab
 }
 
 /**
+ * Set resource table
+ * @param sTable Information about resource table
+ */
+void FileInformation::setResourceTable(const retdec::fileformat::ResourceTable *sTable)
+{
+	resourceTable.setTable(sTable);
+}
+
+/**
  * Set pointer to detected strings
  * @param sStrings Pointer to detected strings
  */
@@ -3834,23 +3888,6 @@ void FileInformation::addDllFlagsDescriptor(std::string descriptor, std::string 
 void FileInformation::clearDllFlagsDescriptors()
 {
 	header.clearDllFlagsDescriptors();
-}
-
-/**
- * Add resource to resource table
- * @param resource Resource to add
- */
-void FileInformation::addResource(Resource &resource)
-{
-	resourceTable.addResource(resource);
-}
-
-/**
- * Delete all resources from resource table
- */
-void FileInformation::clearResources()
-{
-	resourceTable.clearResources();
 }
 
 /**

@@ -5,9 +5,12 @@
  */
 
 #include <sstream>
+#include <iostream>
 
+#include "retdec/crypto/crypto.h"
 #include "retdec/utils/conversion.h"
 #include "retdec/fileformat/types/resource_table/resource_table.h"
+#include "retdec/fileformat/types/resource_table/bitmap_image.h"
 
 using namespace retdec::utils;
 
@@ -31,6 +34,48 @@ ResourceTable::~ResourceTable()
 }
 
 /**
+ * Compute icon perceptual hashes
+ * @param icon Icon to compute the hash of
+ * @return Perceptual hash as AvgHash
+ */
+std::string ResourceTable::computePerceptualAvgHash(const ResourceIcon &icon) const
+{
+	std::size_t trashHold = 128;
+	auto img = BitmapImage();
+
+	if (!img.parseDibFormat(icon))
+	{
+		return "";
+	}
+
+	if (!img.reduce8x8())
+	{
+		return "";
+	}
+
+	img.greyScale();
+
+	std::uint64_t bytes = 0;
+	std::size_t position = 63;
+
+	for (std::size_t i = 0; i < 8; i++)
+	{
+		auto &row = img.getImage()[i];
+
+		for (std::uint8_t j = 0; j < 8; j++)
+		{
+			auto &pixel = row[j];
+			uint64_t value = (pixel.r >= trashHold) ? 0x00 : 0x01;
+
+			bytes |= (value << position);
+			position--;
+		}
+	}
+
+	return retdec::utils::toHex(bytes, false, 16);
+}
+
+/**
  * Get number of stored resources
  * @return Number of stored resources
  */
@@ -49,7 +94,7 @@ std::size_t ResourceTable::getSizeInFile() const
 
 	for(const auto &r : table)
 	{
-		sum += r.getSizeInFile();
+		sum += r->getSizeInFile();
 	}
 
 	return sum;
@@ -65,7 +110,7 @@ std::size_t ResourceTable::getLoadedSize() const
 
 	for(const auto &r : table)
 	{
-		sum += r.getLoadedSize();
+		sum += r->getLoadedSize();
 	}
 
 	return sum;
@@ -78,7 +123,7 @@ std::size_t ResourceTable::getLoadedSize() const
  */
 const Resource* ResourceTable::getResource(std::size_t rIndex) const
 {
-	return (rIndex < getNumberOfResources()) ? &table[rIndex] : nullptr;
+	return (rIndex < getNumberOfResources()) ? table[rIndex].get() : nullptr;
 }
 
 /**
@@ -90,9 +135,9 @@ const Resource* ResourceTable::getResourceWithName(const std::string &rName) con
 {
 	for(const auto &r : table)
 	{
-		if(r.getName() == rName)
+		if(r->getName() == rName)
 		{
-			return &r;
+			return r.get();
 		}
 	}
 
@@ -110,9 +155,9 @@ const Resource* ResourceTable::getResourceWithName(std::size_t rId) const
 
 	for(const auto &r : table)
 	{
-		if(r.getNameId(tmpId) && tmpId == rId)
+		if(r->getNameId(tmpId) && tmpId == rId)
 		{
-			return &r;
+			return r.get();
 		}
 	}
 
@@ -128,9 +173,9 @@ const Resource* ResourceTable::getResourceWithType(const std::string &rType) con
 {
 	for(const auto &r : table)
 	{
-		if(r.getType() == rType)
+		if(r->getType() == rType)
 		{
-			return &r;
+			return r.get();
 		}
 	}
 
@@ -148,9 +193,9 @@ const Resource* ResourceTable::getResourceWithType(std::size_t rId) const
 
 	for(const auto &r : table)
 	{
-		if(r.getTypeId(tmpId) && tmpId == rId)
+		if(r->getTypeId(tmpId) && tmpId == rId)
 		{
-			return &r;
+			return r.get();
 		}
 	}
 
@@ -166,9 +211,9 @@ const Resource* ResourceTable::getResourceWithLanguage(const std::string &rLan) 
 {
 	for(const auto &r : table)
 	{
-		if(r.getLanguage() == rLan)
+		if(r->getLanguage() == rLan)
 		{
-			return &r;
+			return r.get();
 		}
 	}
 
@@ -186,9 +231,62 @@ const Resource* ResourceTable::getResourceWithLanguage(std::size_t rId) const
 
 	for(const auto &r : table)
 	{
-		if(r.getLanguageId(tmpId) && tmpId == rId)
+		if(r->getLanguageId(tmpId) && tmpId == rId)
 		{
-			return &r;
+			return r.get();
+		}
+	}
+
+	return nullptr;
+}
+
+/**
+ * Get iconhash as CRC32
+ * @return Iconhash as CRC32
+ */
+const std::string& ResourceTable::getResourceIconhashCrc32() const
+{
+	return iconHashCrc32;
+}
+
+/**
+ * Get iconhash as MD5
+ * @return Iconhash as MD5
+ */
+const std::string& ResourceTable::getResourceIconhashMd5() const
+{
+	return iconHashMd5;
+}
+
+/**
+ * Get iconhash as SHA256
+ * @return Iconhash as SHA256
+ */
+const std::string& ResourceTable::getResourceIconhashSha256() const
+{
+	return iconHashSha256;
+}
+
+/**
+ * Get icon perceptual hash as AvgHash
+ * @return Icon perceptual hash as AvgHash
+ */
+const std::string& ResourceTable::getResourceIconPerceptualAvgHash() const
+{
+	return iconPerceptualAvgHash;
+}
+
+/**
+ * Get prior icon group
+ * @return Prior icon group
+ */
+const ResourceIconGroup* ResourceTable::getPriorResourceIconGroup() const
+{
+	for(const auto group : iconGroups)
+	{
+		if(group->getIconGroupID() == 0)
+		{
+			return group;
 		}
 	}
 
@@ -214,6 +312,36 @@ ResourceTable::resourcesIterator ResourceTable::end() const
 }
 
 /**
+ * Compute icon hashes - CRC32, MD5, SHA256.
+ */
+void ResourceTable::computeIconHashes()
+{
+	std::vector<std::uint8_t> iconHashBytes;
+
+	auto priorGroup = getPriorResourceIconGroup();
+	if(!priorGroup)
+	{
+		return;
+	}
+
+	auto priorIcon = priorGroup->getPriorIcon();
+	if(!priorIcon)
+	{
+		return;
+	}
+
+	if (!priorIcon->getBytes(iconHashBytes))
+	{
+		return;
+	}
+
+	iconHashCrc32 = retdec::crypto::getCrc32(iconHashBytes.data(), iconHashBytes.size());
+	iconHashMd5 = retdec::crypto::getMd5(iconHashBytes.data(), iconHashBytes.size());
+	iconHashSha256 = retdec::crypto::getSha256(iconHashBytes.data(), iconHashBytes.size());
+	iconPerceptualAvgHash = computePerceptualAvgHash(*priorIcon);
+}
+
+/**
  * Delete all records from table
  */
 void ResourceTable::clear()
@@ -225,9 +353,82 @@ void ResourceTable::clear()
  * Add resource
  * @param newResource Resource which will be added
  */
-void ResourceTable::addResource(Resource &newResource)
+void ResourceTable::addResource(std::unique_ptr<Resource>&& newResource)
 {
-	table.push_back(newResource);
+	table.push_back(std::move(newResource));
+}
+
+/**
+ * Add icon
+ * @param icon Icon which will be added
+ */
+void ResourceTable::addResourceIcon(ResourceIcon *icon)
+{
+	icons.push_back(icon);
+}
+
+/**
+ * Add icon group
+ * @param iGroup Icon group which will be added
+ */
+void ResourceTable::addResourceIconGroup(ResourceIconGroup *iGroup)
+{
+	iconGroups.push_back(iGroup);
+}
+
+/**
+ * Link resource icon group with referenced icons and set icon properties
+ */
+void ResourceTable::linkResourceIconGroups()
+{
+	for(auto iconGroup : iconGroups)
+	{
+		std::size_t numberOfEntries;
+		if (!iconGroup->getNumberOfEntries(numberOfEntries))
+		{
+			continue;
+		}
+
+		for(size_t eIndex = 0; eIndex < numberOfEntries; eIndex++)
+		{
+			std::size_t entryNameID;
+			if(!iconGroup->getEntryNameID(eIndex, entryNameID))
+			{
+				continue;
+			}
+
+			for(auto icon : icons)
+			{
+				size_t iconNameID, iconSize;
+				unsigned short width, height;
+				uint16_t planes, bitCount;
+				uint8_t colorCount;
+				if(!icon->getNameId(iconNameID) || iconNameID != entryNameID
+					|| !iconGroup->getEntryWidth(eIndex, width) || !iconGroup->getEntryHeight(eIndex, height)
+					|| !iconGroup->getEntryIconSize(eIndex, iconSize) || !iconGroup->getEntryColorCount(eIndex, colorCount)
+					|| !iconGroup->getEntryPlanes(eIndex, planes) || !iconGroup->getEntryBitCount(eIndex, bitCount))
+				{
+					continue;
+				}
+
+				icon->setWidth(width);
+				icon->setHeight(height);
+				icon->setIconSize(iconSize);
+				icon->setColorCount(colorCount);
+				icon->setPlanes(planes);
+				icon->setBitCount(bitCount);
+				icon->setIconGroup(iconGroup->getIconGroupID());
+				icon->setLoadedProperties();
+				
+				if(colorCount == 1 << (bitCount * planes))
+				{
+					icon->setValidColorCount();
+				}
+
+				iconGroup->addIcon(icon);
+			}
+		}
+	}
 }
 
 /**
@@ -319,19 +520,19 @@ void ResourceTable::dump(std::string &dumpTable) const
 
 		for(const auto &res : table)
 		{
-			auto sName = (res.hasEmptyName() && res.getNameId(aux)) ? numToStr(aux, std::dec) : res.getName();
-			auto sType = (res.hasEmptyType() && res.getTypeId(aux)) ? numToStr(aux, std::dec) : res.getType();
-			auto sLang = res.getLanguage();
+			auto sName = (res->hasEmptyName() && res->getNameId(aux)) ? numToStr(aux, std::dec) : res->getName();
+			auto sType = (res->hasEmptyType() && res->getTypeId(aux)) ? numToStr(aux, std::dec) : res->getType();
+			auto sLang = res->getLanguage();
 			if(sType.empty())
 			{
 				sType = "-";
 			}
 			if(sLang.empty())
 			{
-				if(res.getLanguageId(aux))
+				if(res->getLanguageId(aux))
 				{
 					sLang = numToStr(aux, std::dec);
-					if(res.getSublanguageId(aux))
+					if(res->getSublanguageId(aux))
 					{
 						sLang += ":" + numToStr(aux, std::dec);
 					}
@@ -341,10 +542,10 @@ void ResourceTable::dump(std::string &dumpTable) const
 					sLang = "-";
 				}
 			}
-			const auto md5 = res.hasMd5() ? res.getMd5() : "-";
+			const auto md5 = res->hasMd5() ? res->getMd5() : "-";
 			ret << "; " << sName << " (type: " << sType << ", language: " << sLang << ", offset: " <<
-				numToStr(res.getOffset(), std::hex) << ", declSize: " << numToStr(res.getSizeInFile(), std::hex) <<
-				", loadedSize: " << numToStr(res.getLoadedSize(), std::hex) << ", md5: " << md5 << ")\n";
+				numToStr(res->getOffset(), std::hex) << ", declSize: " << numToStr(res->getSizeInFile(), std::hex) <<
+				", loadedSize: " << numToStr(res->getLoadedSize(), std::hex) << ", md5: " << md5 << ")\n";
 		}
 	}
 
