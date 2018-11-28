@@ -128,44 +128,6 @@ ShPtr<Statement> StructureConverter::convertFuncBody(llvm::Function &func) {
 }
 
 /**
-* @brief Deep clone statements
-*/
-ShPtr<Statement> StructureConverter::deepCloneStatements(ShPtr<Statement> orig) {
-	ShPtr<Statement> currStmt = orig;
-	ShPtr<Statement> clonedStmts;
-
-	while (currStmt) {
-		auto currStmtClone = ucast<Statement>(currStmt->clone());
-
-		if (auto ifStmt = cast<IfStmt>(currStmt)) {
-			auto cloneIfStmt = cast<IfStmt>(currStmtClone);
-			// only if/else here (no else if)
-			cloneIfStmt->setFirstIfBody(deepCloneStatements(ifStmt->getFirstIfBody()));
-			if (cloneIfStmt->hasElseClause()) {
-				cloneIfStmt->setElseClause(deepCloneStatements(ifStmt->getElseClause()));
-			}
-		} else if (auto switchStmt = cast<SwitchStmt>(currStmt)) {
-			auto cloneSwitchStmt = cast<SwitchStmt>(currStmtClone);
-			auto cloneClause = cloneSwitchStmt->clause_begin();
-			for (auto clause = switchStmt->clause_begin();
-					clause != switchStmt->clause_end(); ++clause) {
-
-				Statement::replaceStatement(cloneClause->second, deepCloneStatements(clause->second));
-				++cloneClause;
-			}
-		} else if (auto whileStmt = cast<WhileLoopStmt>(currStmt)) {
-			auto cloneWhileStmt = cast<WhileLoopStmt>(currStmtClone);
-			cloneWhileStmt->setBody(deepCloneStatements(whileStmt->getBody()));
-		}
-
-		clonedStmts = Statement::mergeStatements(clonedStmts, currStmtClone);
-		currStmt = currStmt->getSuccessor();
-	}
-
-	return clonedStmts;
-}
-
-/**
  * Add goto statements created by cloning to @c targetReferences container.
  */
 void StructureConverter::fixClonedGotos(ShPtr<Statement> statement) {
@@ -213,7 +175,6 @@ void StructureConverter::replaceGoto(CFGNodeVector &targets) {
 				Statement::removeStatement(targetBody);
 				generatedNodes.insert(target);
 			} else if (predNum == 1) {
-				//ShPtr<Statement> targetBodyClone = deepCloneStatements(targetBody);
 				ShPtr<Statement> targetBodyClone = Statement::cloneStatements(targetBody);
 				if (getStatementCount(targetBodyClone) != getStatementCount(targetBody)) {
 					continue;
@@ -249,7 +210,6 @@ void StructureConverter::replaceGoto(CFGNodeVector &targets) {
 				}
 				if (cnt <= MIN_GOTO_STATEMENTS) {
 					// contains just a few statements
-					//ShPtr<Statement> targetBodyClone = deepCloneStatements(targetBody);
 					ShPtr<Statement> targetBodyClone = Statement::cloneStatements(targetBody);
 					if (getStatementCount(targetBodyClone) != getStatementCount(targetBody)) {
 						continue;
@@ -269,7 +229,6 @@ void StructureConverter::replaceGoto(CFGNodeVector &targets) {
 					// replacing needs to be done later (it changes predecessors)
 					for (auto &stmt : toReplace) {
 						if (stmt != toReplace.front()) {
-							//targetBodyClone = deepCloneStatements(targetBody);
 							targetBodyClone = Statement::cloneStatements(targetBody);
 						}
 

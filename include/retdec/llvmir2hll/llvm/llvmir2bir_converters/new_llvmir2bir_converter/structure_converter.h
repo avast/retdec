@@ -242,7 +242,6 @@ private:
 	unsigned getStatementCount(ShPtr<Statement> statement);
 	void insertClonedLoopTargets( ShPtr<Statement> origParent,
 		ShPtr<Statement> newParent);
-	ShPtr<Statement> deepCloneStatements(ShPtr<Statement> orig);
 	void fixClonedGotos(ShPtr<Statement> statement);
 	/// @}
 
