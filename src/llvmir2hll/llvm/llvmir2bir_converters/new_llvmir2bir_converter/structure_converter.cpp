@@ -1040,7 +1040,7 @@ bool StructureConverter::isSwitchStatement(const ShPtr<CFGNode> &node) const {
 bool StructureConverter::canBeCloned(const ShPtr<CFGNode> &node) const {
 	PRECONDITION_NON_NULL(node);
 
-	if (node->getPredsNum() < 2 || node->getPredsNum() == 1) {
+	if (node->getPredsNum() < 2) {
 		return false;
 	}
 
