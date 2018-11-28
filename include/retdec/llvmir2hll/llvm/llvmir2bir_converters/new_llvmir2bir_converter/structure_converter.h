@@ -71,7 +71,7 @@ private:
 	using MapCFGNodeToDFSNodeState = std::unordered_map<ShPtr<CFGNode>, DFSNodeState>;
 	using MapLoopToCFGNode = std::unordered_map<llvm::Loop *, ShPtr<CFGNode>>;
 	using MapStmtToTargetNode = std::unordered_map<ShPtr<Statement>, ShPtr<CFGNode>>;
-	using MapTargetToGoto = std::unordered_map<ShPtr<CFGNode>, std::vector<ShPtr<Statement>>>;
+	using MapTargetToGoto = std::unordered_map<ShPtr<CFGNode>, std::vector<ShPtr<GotoStmt>>>;
 	using MapStmtToClones = std::unordered_map<ShPtr<Statement>, std::vector<ShPtr<Statement>>>;
 
 public:

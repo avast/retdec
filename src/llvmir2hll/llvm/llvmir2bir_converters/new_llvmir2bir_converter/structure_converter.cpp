@@ -275,15 +275,14 @@ unsigned StructureConverter::getStatementCount(ShPtr<Statement> statement) {
 *   with its clone (that is used)
 */
 void StructureConverter::correctUndefinedLabels() {
-	for (auto &label : targetReferences) {
-		auto targetBody = label.first->getBody();
+	for (auto &p : targetReferences) {
+		auto targetBody = p.first->getBody();
+		auto& gotos = p.second;
 		auto it = stmtClones.find(targetBody);
 		if (it != stmtClones.end()) {
-			for (auto &ref : label.second) {
-				if (auto gotoRef = cast<GotoStmt>(ref)) {
-					gotoRef->setTarget(it->second.back());
-					it->second.back()->setLabel(targetBody->getLabel());
-				}
+			for (auto &gotoStmt : gotos) {
+				gotoStmt->setTarget(it->second.back());
+				it->second.back()->setLabel(targetBody->getLabel());
 			}
 		}
 	}
@@ -1204,9 +1203,10 @@ void StructureConverter::reduceToIfElseStatementWithBreakInLoop(ShPtr<CFGNode> n
 			loopTargets.emplace(breakStmt, targetNode);
 		} else {
 			labelsHandler->setGotoTargetLabel(targetNode->getBody(), targetNode->getFirstBB());
-			breakStmt = GotoStmt::create(targetNode->getBody());
+			auto gotoStmt = GotoStmt::create(targetNode->getBody());
+			breakStmt = gotoStmt;
 			breakStmt->setMetadata("break (via goto) -> " + getLabel(targetNode));
-			targetReferences[targetNode].push_back(breakStmt);
+			targetReferences[targetNode].push_back(gotoStmt);
 			gotoTargetsToCfgNodes.emplace(targetNode->getBody(), targetNode);
 			addGotoTargetIfNotExists(targetNode);
 		}
@@ -1282,8 +1282,9 @@ void StructureConverter::reduceToIfElseStatementWithContinue(ShPtr<CFGNode> node
 		loopTargets.emplace(continueStmt, targetNode);
 	} else {
 		labelsHandler->setGotoTargetLabel(targetNode->getBody(), targetNode->getFirstBB());
-		continueStmt = GotoStmt::create(targetNode->getBody());
-		targetReferences[targetNode].push_back(continueStmt);
+		auto gotoStmt = GotoStmt::create(targetNode->getBody());
+		continueStmt = gotoStmt;
+		targetReferences[targetNode].push_back(gotoStmt);
 		gotoTargetsToCfgNodes.emplace(targetNode->getBody(), targetNode);
 		continueStmt->setMetadata("continue (via goto) -> " + getLabel(targetNode));
 		addGotoTargetIfNotExists(targetNode);
@@ -1314,8 +1315,9 @@ void StructureConverter::reduceToContinueStatement(ShPtr<CFGNode> node) {
 		loopTargets.emplace(continueStmt, targetNode);
 	} else {
 		labelsHandler->setGotoTargetLabel(targetNode->getBody(), targetNode->getFirstBB());
-		continueStmt = GotoStmt::create(targetNode->getBody());
-		targetReferences[targetNode].push_back(continueStmt);
+		auto gotoStmt = GotoStmt::create(targetNode->getBody());
+		continueStmt = gotoStmt;
+		targetReferences[targetNode].push_back(gotoStmt);
 		gotoTargetsToCfgNodes.emplace(targetNode->getBody(), targetNode);
 		continueStmt->setMetadata("continue (via goto) -> " + getLabel(targetNode));
 		addGotoTargetIfNotExists(targetNode);
