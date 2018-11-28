@@ -295,6 +295,15 @@ Statement::predecessor_iterator Statement::predecessor_end() const {
 void Statement::removeStatement(ShPtr<Statement> stmt) {
 	PRECONDITION_NON_NULL(stmt);
 
+	// If the stamement to remove is goto, we need to remove it from its
+	// target's predecessors - target is not goto's successor.
+	if (auto gotoStmt = cast<GotoStmt>(stmt)) {
+		if (gotoStmt->getTarget()) {
+			gotoStmt->getTarget()->preds.erase(stmt);
+			preserveLabel(stmt, gotoStmt->getTarget());
+		}
+	}
+
 	// If some predecessor of stmt is a goto statement and stmt doesn't have a
 	// successor, we have to replace it with an empty statement. Indeed, we
 	// need to preserve the goto target. To this end, we first check whether
@@ -488,6 +497,14 @@ void Statement::replaceStatement(ShPtr<Statement> oldStmt,
 	// Use the observer/subject interface to replace it also in all statements
 	// which contain it.
 	oldStmt->notifyObservers(newStmt);
+
+	// If the stamement to replace is goto, we need to remove it from its
+	// target's predecessors - target is not goto's successor.
+	if (auto gotoStmt = cast<GotoStmt>(oldStmt)) {
+		if (gotoStmt->getTarget()) {
+			gotoStmt->getTarget()->preds.erase(oldStmt);
+		}
+	}
 
 	oldStmt->removePredecessors();
 	oldStmt->removeSuccessor();
