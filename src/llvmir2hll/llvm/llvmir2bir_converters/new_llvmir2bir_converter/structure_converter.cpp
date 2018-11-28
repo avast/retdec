@@ -167,14 +167,52 @@ void StructureConverter::fixClonedGotos(ShPtr<Statement> statement) {
 */
 void StructureConverter::replaceGoto(CFGNodeVector &targets) {
 	for (const auto &target : targets) {
-		if (!hasItem(generatedNodes, target)) {
-			auto targetBody = target->getBody();
-			auto predNum = targetBody->getNumberOfPredecessors();
-			if (predNum == 0) {
-				// has zero references, delete it
-				Statement::removeStatement(targetBody);
-				generatedNodes.insert(target);
-			} else if (predNum == 1) {
+		if (hasItem(generatedNodes, target)) {
+			continue;
+		}
+
+		auto targetBody = target->getBody();
+		auto predNum = targetBody->getNumberOfPredecessors();
+		if (predNum == 0) {
+			// has zero references, delete it
+			Statement::removeStatement(targetBody);
+			generatedNodes.insert(target);
+		} else if (predNum == 1) {
+			ShPtr<Statement> targetBodyClone = Statement::cloneStatements(targetBody);
+			if (getStatementCount(targetBodyClone) != getStatementCount(targetBody)) {
+				continue;
+			}
+
+			fixClonedGotos(targetBodyClone);
+
+			// has one reference, replace goto with body of label
+			for (auto pred = targetBody->predecessor_begin();
+					pred != targetBody->predecessor_end(); ++pred) {
+
+				ShPtr<GotoStmt> stmt = cast<GotoStmt>(*pred);
+				if (stmt && stmt->getTarget() == targetBody) {
+					insertClonedLoopTargets(targetBody, targetBodyClone);
+					Statement::replaceStatement(stmt, targetBodyClone);
+					generatedNodes.insert(target);
+					break;
+				}
+			}
+		} else {
+			// check if body of label has "enough" statements
+			auto stmt = targetBody;
+			unsigned cnt = 0;
+			while (stmt) {
+				if (stmt->isCompound()) {
+					cnt = MIN_GOTO_STATEMENTS + 1;
+					break;
+				}
+				if (++cnt > MIN_GOTO_STATEMENTS) {
+					break;
+				}
+				stmt = stmt->getSuccessor();
+			}
+			if (cnt <= MIN_GOTO_STATEMENTS) {
+				// contains just a few statements
 				ShPtr<Statement> targetBodyClone = Statement::cloneStatements(targetBody);
 				if (getStatementCount(targetBodyClone) != getStatementCount(targetBody)) {
 					continue;
@@ -182,63 +220,27 @@ void StructureConverter::replaceGoto(CFGNodeVector &targets) {
 
 				fixClonedGotos(targetBodyClone);
 
-				// has one reference, replace goto with body of label
+				std::vector<ShPtr<Statement>> toReplace;
 				for (auto pred = targetBody->predecessor_begin();
 						pred != targetBody->predecessor_end(); ++pred) {
 
 					ShPtr<GotoStmt> stmt = cast<GotoStmt>(*pred);
 					if (stmt && stmt->getTarget() == targetBody) {
-						insertClonedLoopTargets(targetBody, targetBodyClone);
-						Statement::replaceStatement(stmt, targetBodyClone);
-						generatedNodes.insert(target);
-						break;
+						toReplace.push_back(stmt);
 					}
 				}
-			} else {
-				// check if body of label has "enough" statements
-				auto stmt = targetBody;
-				unsigned cnt = 0;
-				while (stmt) {
-					if (stmt->isCompound()) {
-						cnt = MIN_GOTO_STATEMENTS + 1;
-						break;
-					}
-					if (++cnt > MIN_GOTO_STATEMENTS) {
-						break;
-					}
-					stmt = stmt->getSuccessor();
-				}
-				if (cnt <= MIN_GOTO_STATEMENTS) {
-					// contains just a few statements
-					ShPtr<Statement> targetBodyClone = Statement::cloneStatements(targetBody);
-					if (getStatementCount(targetBodyClone) != getStatementCount(targetBody)) {
-						continue;
+				// replacing needs to be done later (it changes predecessors)
+				for (auto &stmt : toReplace) {
+					if (stmt != toReplace.front()) {
+						targetBodyClone = Statement::cloneStatements(targetBody);
 					}
 
 					fixClonedGotos(targetBodyClone);
 
-					std::vector<ShPtr<Statement>> toReplace;
-					for (auto pred = targetBody->predecessor_begin();
-							pred != targetBody->predecessor_end(); ++pred) {
-
-						ShPtr<GotoStmt> stmt = cast<GotoStmt>(*pred);
-						if (stmt && stmt->getTarget() == targetBody) {
-							toReplace.push_back(stmt);
-						}
-					}
-					// replacing needs to be done later (it changes predecessors)
-					for (auto &stmt : toReplace) {
-						if (stmt != toReplace.front()) {
-							targetBodyClone = Statement::cloneStatements(targetBody);
-						}
-
-						fixClonedGotos(targetBodyClone);
-
-						insertClonedLoopTargets(targetBody, targetBodyClone);
-						Statement::replaceStatement(stmt, targetBodyClone);
-					}
-					generatedNodes.insert(target);
+					insertClonedLoopTargets(targetBody, targetBodyClone);
+					Statement::replaceStatement(stmt, targetBodyClone);
 				}
+				generatedNodes.insert(target);
 			}
 		}
 	}
