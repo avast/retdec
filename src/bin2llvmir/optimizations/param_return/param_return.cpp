@@ -1563,8 +1563,16 @@ void DataFlowEntry::setArgumentTypes()
 	}
 	else
 	{
-		auto ce = calls.front();
-		std::vector<Value*> &a = args.empty() ? ce.possibleArgs : args;
+		CallEntry* ce = &calls.front();
+		for (auto& c : calls)
+		{
+			if (!c.possibleArgs.empty())
+			{
+				ce = &c;
+				break;
+			}
+		}
+		std::vector<Value*> &a = args.size() < ce->possibleArgs.size() ? ce->possibleArgs : args;
 
 		for (const auto& op: a)
 		{
