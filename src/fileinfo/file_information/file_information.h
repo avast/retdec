@@ -39,6 +39,7 @@ class FileInformation
 		std::string compactManifest;                   ///< compact version of XML manifest
 		FileHeader header;                             ///< file header
 		RichHeader richHeader;                         ///< rich header
+		VisualBasicInfo visualBasicInfo;               ///< visual basic information
 		PdbInfo pdbInfo;                               ///< information about related PDB file
 		ImportTable importTable;                       ///< information about imports
 		ExportTable exportTable;                       ///< information about exports
