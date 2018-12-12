@@ -61,12 +61,11 @@ class PeFormat : public FileFormat
 		std::size_t getRichHeaderOffset(const std::string &plainFile);
 		bool getResourceNodes(std::vector<const PeLib::ResourceChild*> &nodes, std::vector<std::size_t> &levels);
 		void loadRichHeader();
-		bool loadVisualBasicHeader();
-		bool loadVisualBasicProjectInfo(std::size_t structureOffset);
 		void loadSections();
 		void loadSymbols();
 		void loadImports();
 		void loadExports();
+		void loadVisualBasicHeader();
 		void loadPdbInfo();
 		void loadResourceNodes(std::vector<const PeLib::ResourceChild*> &nodes, const std::vector<std::size_t> &levels);
 		void loadResources();
@@ -94,6 +93,16 @@ class PeFormat : public FileFormat
 		void detectDotnetTypes();
 		std::uint64_t detectPossibleMetadataHeaderAddress() const;
 		void computeTypeRefHashes();
+		/// @}
+		/// @name Visual Basic methods
+		/// @{
+		bool parseVisualBasicProjectInfo(std::size_t structureOffset, std::size_t baseAddress);
+		bool parseVisualBasicExternTable(std::size_t structureOffset, std::size_t baseAddress,
+											std::size_t nEntries);
+		bool parseVisualBasicObjectTable(std::size_t structureOffset, std::size_t baseAddress);
+		bool parseVisualBasicObjects(std::size_t structureOffset, std::size_t baseAddress,
+										std::size_t nObjects);
+		bool parseVisualBasicComRegistrationData(std::size_t structureOffset, std::size_t baseAddress);
 		/// @}
 	protected:
 		PeLib::PeFile *file;              ///< PeLib representation of PE file
