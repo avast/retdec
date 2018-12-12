@@ -23,13 +23,12 @@
 #include "retdec/fileformat/file_format/pe/pe_format_parser/pe_format_parser64.h"
 #include "retdec/fileformat/types/dotnet_headers/metadata_tables.h"
 #include "retdec/fileformat/types/dotnet_types/dotnet_type_reconstructor.h"
+#include "retdec/fileformat/types/visual_basic/visual_basic_structures.h"
 #include "retdec/fileformat/utils/asn1.h"
 #include "retdec/fileformat/utils/conversions.h"
 #include "retdec/fileformat/utils/file_io.h"
 #include "retdec/crypto/crypto.h"
 
-
-#include "retdec/fileformat/types/visual_basic_header/visual_basic_project_info.h" // TODO delme
 
 using namespace retdec::utils;
 using namespace PeLib;
@@ -628,41 +627,54 @@ void PeFormat::loadRichHeader()
 
 /**
  * Load visual basic header
- * @return @c true if header was successfuly loaded, @c false otherwise
  */
-bool PeFormat::loadVisualBasicHeader()
+void PeFormat::loadVisualBasicHeader()
 {
+	auto allBytes = getBytes();
 	std::vector<std::uint8_t> bytes;
 	unsigned long long version = 0;
 	unsigned long long baseAddress = 0;
 	std::size_t vbHeaderAddress = 0;
 	std::size_t vbHeaderOffset = 0;
 	std::size_t vbProjectInfoOffset = 0;
+	std::size_t vbComDataRegistrationOffset = 0;
+	std::string projLanguageDLL;
+	std::string projBackupLanguageDLL;
+	std::string projExeName;
+	std::string projDesc;
+	std::string helpFile;
+	std::string projName;
 	std::size_t offset = 0;
 	struct VBHeader vbh;
 
 	if (!isVisualBasic(version))
 	{
-		return false;
+		return;
 	}
 
 	// first instruction is expected to be PUSH <vbHeaderAddress> (0x68 <b0> <b1> <b2> <b3>)
 	if (!getEpBytes(bytes, 5) || bytes.size() != 5 || bytes[0] != 0x68)
 	{
-		return false;
+		return;
 	}
 
 	if (!getImageBaseAddress(baseAddress))
 	{
-		return false;
+		return;
 	}
 
 	vbHeaderAddress = bytes[4] << 24 | bytes[3] << 16 | bytes[2] << 8 | bytes[1];
+
+	if (vbHeaderAddress < baseAddress)
+	{
+		return;
+	}
+
 	vbHeaderOffset = vbHeaderAddress - baseAddress;
 
 	if (!getBytes(bytes, vbHeaderOffset, vbh.headerSize()) || bytes.size() != vbh.headerSize())
 	{
-		return false;
+		return;
 	}
 
 	std::memcpy(&vbh.signature, reinterpret_cast<void *>(&bytes.data()[offset]), sizeof(vbh.signature)); offset += sizeof(vbh.signature);
@@ -670,72 +682,193 @@ bool PeFormat::loadVisualBasicHeader()
 	std::memcpy(&vbh.languageDLL, reinterpret_cast<void *>(&bytes.data()[offset]), sizeof(vbh.languageDLL)); offset += sizeof(vbh.languageDLL);
 	std::memcpy(&vbh.backupLanguageDLL, reinterpret_cast<void *>(&bytes.data()[offset]), sizeof(vbh.backupLanguageDLL)); offset += sizeof(vbh.backupLanguageDLL);
 	vbh.runtimeDLLVersion = *reinterpret_cast<std::uint16_t *>(&bytes.data()[offset]); offset += sizeof(vbh.runtimeDLLVersion);
-	vbh.languageID = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbh.languageID);
-	vbh.backupLanguageID = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbh.backupLanguageID);
-	vbh.aSubMain = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbh.aSubMain);
-	vbh.aProjectInfo = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbh.aProjectInfo);
+	vbh.LCID1 = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbh.LCID1);
+	vbh.LCID2 = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbh.LCID2);
+	vbh.subMainAddr = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbh.subMainAddr);
+	vbh.projectInfoAddr = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbh.projectInfoAddr);
+	vbh.MDLIntObjsFlags = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbh.MDLIntObjsFlags);
+	vbh.MDLIntObjsFlags2 = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbh.MDLIntObjsFlags2);
 	vbh.threadFlags = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbh.threadFlags);
-	vbh.threadCount = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbh.threadCount);
-	vbh.formCount = *reinterpret_cast<std::uint16_t *>(&bytes.data()[offset]); offset += sizeof(vbh.formCount);
-	vbh.externalComponentCount = *reinterpret_cast<std::uint16_t *>(&bytes.data()[offset]); offset += sizeof(vbh.externalComponentCount);
-	vbh.thunkCount = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbh.thunkCount);
-	vbh.aGUITable = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbh.aGUITable);
-	vbh.aExternalComponentTable = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbh.aExternalComponentTable);
-	vbh.aComRegisterData = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbh.aComRegisterData);
-	vbh.oProjectExename = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbh.oProjectExename);
-	vbh.oProjectTitle = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbh.oProjectTitle);
-	vbh.oHelpFile = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbh.oHelpFile);
-	vbh.oProjectName = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbh.oProjectName);
+	vbh.nThreads = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbh.nThreads);
+	vbh.nForms = *reinterpret_cast<std::uint16_t *>(&bytes.data()[offset]); offset += sizeof(vbh.nForms);
+	vbh.nExternals = *reinterpret_cast<std::uint16_t *>(&bytes.data()[offset]); offset += sizeof(vbh.nExternals);
+	vbh.nThunks = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbh.nThunks);
+	vbh.GUITableAddr = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbh.GUITableAddr);
+	vbh.externalTableAddr = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbh.externalTableAddr);
+	vbh.COMRegisterDataAddr = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbh.COMRegisterDataAddr);
+	vbh.projExeNameOffset = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbh.projExeNameOffset);
+	vbh.projDescOffset = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbh.projDescOffset);
+	vbh.helpFileOffset = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbh.helpFileOffset);
+	vbh.projNameOffset = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbh.projNameOffset);
 
 	if (!isLittleEndian())
 	{
 		vbh.runtimeBuild = byteSwap16(vbh.runtimeBuild);
 		vbh.runtimeDLLVersion = byteSwap16(vbh.runtimeDLLVersion);
-		vbh.languageID = byteSwap32(vbh.languageID);
-		vbh.backupLanguageID = byteSwap32(vbh.backupLanguageID);
-		vbh.aSubMain = byteSwap32(vbh.aSubMain);
-		vbh.aProjectInfo = byteSwap32(vbh.aProjectInfo);
+		vbh.LCID1 = byteSwap32(vbh.LCID1);
+		vbh.LCID2 = byteSwap32(vbh.LCID2);
+		vbh.subMainAddr = byteSwap32(vbh.subMainAddr);
+		vbh.projectInfoAddr = byteSwap32(vbh.projectInfoAddr);
+		vbh.MDLIntObjsFlags = byteSwap32(vbh.MDLIntObjsFlags);
+		vbh.MDLIntObjsFlags2 = byteSwap32(vbh.MDLIntObjsFlags2);
 		vbh.threadFlags = byteSwap32(vbh.threadFlags);
-		vbh.threadCount = byteSwap32(vbh.threadCount);
-		vbh.formCount = byteSwap16(vbh.formCount);
-		vbh.externalComponentCount = byteSwap16(vbh.externalComponentCount);
-		vbh.thunkCount = byteSwap32(vbh.thunkCount);
-		vbh.aGUITable = byteSwap32(vbh.aGUITable);
-		vbh.aExternalComponentTable = byteSwap32(vbh.aExternalComponentTable);
-		vbh.aComRegisterData = byteSwap32(vbh.aComRegisterData);
-		vbh.oProjectExename = byteSwap32(vbh.oProjectExename);
-		vbh.oProjectTitle = byteSwap32(vbh.oProjectTitle);
-		vbh.oHelpFile = byteSwap32(vbh.oHelpFile);
-		vbh.oProjectName = byteSwap32(vbh.oProjectName);
+		vbh.nThreads = byteSwap32(vbh.nThreads);
+		vbh.nForms = byteSwap16(vbh.nForms);
+		vbh.nExternals = byteSwap16(vbh.nExternals);
+		vbh.nThunks = byteSwap32(vbh.nThunks);
+		vbh.GUITableAddr = byteSwap32(vbh.GUITableAddr);
+		vbh.externalTableAddr = byteSwap32(vbh.externalTableAddr);
+		vbh.COMRegisterDataAddr = byteSwap32(vbh.COMRegisterDataAddr);
+		vbh.projExeNameOffset = byteSwap32(vbh.projExeNameOffset);
+		vbh.projDescOffset = byteSwap32(vbh.projDescOffset);
+		vbh.helpFileOffset = byteSwap32(vbh.helpFileOffset);
+		vbh.projNameOffset = byteSwap32(vbh.projNameOffset);
 	}
 
 	// TODO check VB header magic
 
-	std::cout << "[KUBO] VB header <<<<<<<<<<< " << std::to_string(vbh.headerSize()) << "\n";
+	std::cout << "[KUBO] VB header size:" << std::to_string(vbh.headerSize()) << "\n";
 	vbh.dump(std::cout);
 
-	vbProjectInfoOffset = vbh.aProjectInfo - baseAddress;
+	visualBasicInfo = new VisualBasicInfo();
+	if (vbh.projExeNameOffset != 0)
+	{
+		projExeName = retdec::utils::readNullTerminatedAscii(allBytes.data(), allBytes.size(),
+														vbHeaderOffset + vbh.projExeNameOffset);
+		visualBasicInfo->setProjectExeName(projExeName);
+	}
+	if (vbh.projDescOffset != 0)
+	{
+		projDesc = retdec::utils::readNullTerminatedAscii(allBytes.data(), allBytes.size(),
+														vbHeaderOffset + vbh.projDescOffset);
+		visualBasicInfo->setProjectDescription(projDesc);
+	}
+	if (vbh.helpFileOffset != 0)
+	{
+		helpFile = retdec::utils::readNullTerminatedAscii(allBytes.data(), allBytes.size(),
+														vbHeaderOffset + vbh.helpFileOffset);
+		visualBasicInfo->setProjectHelpFile(helpFile);
+	}
+	if (vbh.projNameOffset != 0)
+	{
+		projName = retdec::utils::readNullTerminatedAscii(allBytes.data(), allBytes.size(),
+														vbHeaderOffset + vbh.projNameOffset);
+		visualBasicInfo->setProjectName(projName);
+	}
 
-	loadVisualBasicProjectInfo(vbProjectInfoOffset);
+	std::cout << "KUBO KING: " << projExeName << " | " << projDesc << " | " << helpFile << " | "
+		<< projName << "\n\n";
+
+	for (size_t i = 0; i < sizeof(vbh.languageDLL) && vbh.languageDLL[i]; i++)
+	{
+		projLanguageDLL.push_back(vbh.languageDLL[i]);
+	}
+	for (size_t i = 0; i < sizeof(vbh.backupLanguageDLL) && vbh.backupLanguageDLL[i]; i++)
+	{
+		projBackupLanguageDLL.push_back(vbh.backupLanguageDLL[i]);
+	}
+	visualBasicInfo->setLanguageDLL(projLanguageDLL);
+	visualBasicInfo->setBackupLanguageDLL(projBackupLanguageDLL);
+	visualBasicInfo->setLanguageDLLPrimaryLCID(vbh.LCID1);
+	visualBasicInfo->setLanguageDLLSecondaryLCID(vbh.LCID2);
+	std::cout << "KUBO KING: " << projLanguageDLL << " | " << projBackupLanguageDLL << "\n\n";
 
 
-	visualBasicHeader = new VisualBasicHeader();
-	visualBasicHeader->setHeaderAddress(vbHeaderAddress);
+	if (vbh.projectInfoAddr >= baseAddress)
+	{
+		vbProjectInfoOffset = vbh.projectInfoAddr - baseAddress;
+		parseVisualBasicProjectInfo(vbProjectInfoOffset, baseAddress);
+	}
 
+	if (vbh.COMRegisterDataAddr >= baseAddress)
+	{
+		vbComDataRegistrationOffset = vbh.COMRegisterDataAddr - baseAddress;
+		parseVisualBasicComRegistrationData(vbComDataRegistrationOffset, baseAddress);
+	}
+}
 
-	// TODO iclude VB headrov to /fftypes and delete here
+/**
+ * Parse visual basic COM registration data
+ * @param structureOffset Offset in file where the structure starts
+ * @param baseAddress Base address
+ * @return @c true if COM retistration data was successfuly parsed, @c false otherwise
+ */
+bool PeFormat::parseVisualBasicComRegistrationData(std::size_t structureOffset, std::size_t baseAddress)
+{
+	auto allBytes = getBytes();
+	std::vector<std::uint8_t> bytes;
+	std::size_t offset = 0;
+	struct VBCOMRData vbcrd;
+	std::string projName;
+	std::string helpFile;
+	std::string projDesc;
+
+	if (!getBytes(bytes, structureOffset, vbcrd.structureSize()) || bytes.size() != vbcrd.structureSize())
+	{
+		return false;
+	}
+
+	vbcrd.regInfoOffset = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbcrd.regInfoOffset);
+	vbcrd.projNameOffset = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbcrd.projNameOffset);
+	vbcrd.helpFileOffset = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbcrd.helpFileOffset);
+	vbcrd.projDescOffset = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbcrd.projDescOffset);
+	std::memcpy(&vbcrd.projCLSID, reinterpret_cast<void *>(&bytes.data()[offset]), sizeof(vbcrd.projCLSID)); offset += sizeof(vbcrd.projCLSID);
+	vbcrd.projTlbLCID = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbcrd.projTlbLCID);
+	vbcrd.unknown = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbcrd.unknown);
+	vbcrd.tlbVerMajor = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbcrd.tlbVerMajor);
+	vbcrd.tlbVerMinor = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbcrd.tlbVerMinor);
+
+	if (!isLittleEndian())
+	{
+		vbcrd.regInfoOffset = byteSwap32(vbcrd.regInfoOffset);
+		vbcrd.projNameOffset = byteSwap32(vbcrd.projNameOffset);
+		vbcrd.helpFileOffset = byteSwap32(vbcrd.helpFileOffset);
+		vbcrd.projDescOffset = byteSwap32(vbcrd.projDescOffset);
+		vbcrd.projTlbLCID = byteSwap32(vbcrd.projTlbLCID);
+		vbcrd.unknown = byteSwap32(vbcrd.unknown);
+		vbcrd.tlbVerMajor = byteSwap32(vbcrd.tlbVerMajor);
+		vbcrd.tlbVerMinor = byteSwap32(vbcrd.tlbVerMinor);
+	}
+	// visualBasicInfo->setTypeLibCLSID(vbcrd.projCLSID); TODO
+	visualBasicInfo->setTypeLibLCID(vbcrd.projDescOffset);
+	if (!visualBasicInfo->hasProjectName())
+	{
+		projName = retdec::utils::readNullTerminatedAscii(allBytes.data(), allBytes.size(),
+															structureOffset + vbcrd.projNameOffset);
+	}
+	if (!visualBasicInfo->hasProjectHelpFile())
+	{
+		helpFile = retdec::utils::readNullTerminatedAscii(allBytes.data(), allBytes.size(),
+															structureOffset + vbcrd.helpFileOffset);
+	}
+	if (!visualBasicInfo->hasProjectDescription())
+	{
+		projDesc = retdec::utils::readNullTerminatedAscii(allBytes.data(), allBytes.size(),
+															structureOffset + vbcrd.projDescOffset);
+	}
+
+	std::cout << "[KUBO] VB COM register data size: " << std::to_string(vbcrd.structureSize()) << "\n";
+	std::cout << "projName: " << projName << "\n";
+	std::cout << "helpFile: " << helpFile << "\n";
+	std::cout << "projDesc: " << projDesc << "\n";
+
+	vbcrd.dump(std::cout);
 
 	return true;
 }
 
 /**
- * Load visual basic project info
+ * Parse visual basic project info
  * @param structureOffset Offset in file where the structure starts
- * @return @c true if project info was successfuly loaded, @c false otherwise
+ * @param baseAddress Base address
+ * @return @c true if project info was successfuly parsed, @c false otherwise
  */
-bool PeFormat::loadVisualBasicProjectInfo(std::size_t structureOffset)
+bool PeFormat::parseVisualBasicProjectInfo(std::size_t structureOffset, std::size_t baseAddress)
 {
 	std::vector<std::uint8_t> bytes;
+	std::size_t vbExternTableOffset = 0;
+	std::size_t vbObjectTableOffset = 0;
+	std::string projPath;
 	std::size_t offset = 0;
 	struct VBProjInfo vbpi;
 
@@ -744,36 +877,331 @@ bool PeFormat::loadVisualBasicProjectInfo(std::size_t structureOffset)
 		return false;
 	}
 
-	vbpi.dwVersion = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbpi.dwVersion);
-	vbpi.lpObjectTable = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbpi.lpObjectTable);
-	vbpi.dwNull = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbpi.dwNull);
-	vbpi.lpCodeStart = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbpi.lpCodeStart);
-	vbpi.lpCodeEnd = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbpi.lpCodeEnd);
-	vbpi.dwDataSize = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbpi.dwDataSize);
-	vbpi.lpThreadSpace = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbpi.lpThreadSpace);
-	vbpi.lpVbaSeh = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbpi.lpVbaSeh);
-	vbpi.lpNativeCode = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbpi.lpNativeCode);
-	std::memcpy(&vbpi.szPathInformation, reinterpret_cast<void *>(&bytes.data()[offset]), sizeof(vbpi.szPathInformation)); offset += sizeof(vbpi.szPathInformation);
-	vbpi.lpExternalTable = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbpi.lpExternalTable);
-	vbpi.dwExternalCount = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbpi.dwExternalCount);
+	vbpi.version = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbpi.version);
+	vbpi.objectTableAddr = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbpi.objectTableAddr);
+	vbpi.null = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbpi.null);
+	vbpi.codeStartAddr = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbpi.codeStartAddr);
+	vbpi.codeEndAddr = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbpi.codeEndAddr);
+	vbpi.dataSize = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbpi.dataSize);
+	vbpi.threadSpaceAddr = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbpi.threadSpaceAddr);
+	vbpi.exHandlerAddr = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbpi.exHandlerAddr);
+	vbpi.nativeCodeAddr = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbpi.nativeCodeAddr);
+	std::memcpy(&vbpi.pathInformation, reinterpret_cast<void *>(&bytes.data()[offset]), sizeof(vbpi.pathInformation)); offset += sizeof(vbpi.pathInformation);
+	vbpi.externalTableAddr = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbpi.externalTableAddr);
+	vbpi.nExternals = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbpi.nExternals);
 
 	if (!isLittleEndian())
 	{
-		vbpi.dwVersion = byteSwap32(vbpi.dwVersion);
-		vbpi.lpObjectTable = byteSwap32(vbpi.lpObjectTable);
-		vbpi.dwNull = byteSwap32(vbpi.dwNull);
-		vbpi.lpCodeStart = byteSwap32(vbpi.lpCodeStart);
-		vbpi.lpCodeEnd = byteSwap32(vbpi.lpCodeEnd);
-		vbpi.dwDataSize = byteSwap32(vbpi.dwDataSize);
-		vbpi.lpThreadSpace = byteSwap32(vbpi.lpThreadSpace);
-		vbpi.lpVbaSeh = byteSwap32(vbpi.lpVbaSeh);
-		vbpi.lpNativeCode = byteSwap32(vbpi.lpNativeCode);
-		vbpi.lpExternalTable = byteSwap32(vbpi.lpExternalTable);
-		vbpi.dwExternalCount = byteSwap32(vbpi.dwExternalCount);
+		vbpi.version = byteSwap32(vbpi.version);
+		vbpi.objectTableAddr = byteSwap32(vbpi.objectTableAddr);
+		vbpi.null = byteSwap32(vbpi.null);
+		vbpi.codeStartAddr = byteSwap32(vbpi.codeStartAddr);
+		vbpi.codeEndAddr = byteSwap32(vbpi.codeEndAddr);
+		vbpi.dataSize = byteSwap32(vbpi.dataSize);
+		vbpi.threadSpaceAddr = byteSwap32(vbpi.threadSpaceAddr);
+		vbpi.exHandlerAddr = byteSwap32(vbpi.exHandlerAddr);
+		vbpi.nativeCodeAddr = byteSwap32(vbpi.nativeCodeAddr);
+		vbpi.externalTableAddr = byteSwap32(vbpi.externalTableAddr);
+		vbpi.nExternals = byteSwap32(vbpi.nExternals);
 	}
 
-	std::cout << "[KUBO] VB project info <<<<<<<<<<< " << std::to_string(vbpi.headerSize()) << "\n";
+	projPath = retdec::utils::unicodeToAscii(vbpi.pathInformation, sizeof(vbpi.pathInformation));
+	visualBasicInfo->setProjectPath(projPath);
+
+	std::cout << "[KUBO] VB project info size: " << std::to_string(vbpi.headerSize()) << "\n";
+	std::cout << "[KUBO] path: " << retdec::utils::unicodeToAscii(vbpi.pathInformation, sizeof(vbpi.pathInformation)) << "\n";
 	vbpi.dump(std::cout);
+
+	if (vbpi.externalTableAddr >= baseAddress)
+	{
+		vbExternTableOffset = vbpi.externalTableAddr - baseAddress;
+		parseVisualBasicExternTable(vbExternTableOffset, vbpi.nExternals, baseAddress);
+	}
+
+	if (vbpi.objectTableAddr >= baseAddress)
+	{
+		vbObjectTableOffset = vbpi.objectTableAddr - baseAddress;
+		parseVisualBasicObjectTable(vbObjectTableOffset, baseAddress);
+	}
+
+	return true;
+}
+
+/**
+ * Parse visual basic extern table
+ * @param structureOffset Offset in file where the structure starts
+ * @param baseAddress Base address
+ * @param nEntries Number of entries in table
+ * @return @c true if extern table was successfuly parsed, @c false otherwise
+ */
+bool PeFormat::parseVisualBasicExternTable(std::size_t structureOffset, std::size_t baseAddress,
+											std::size_t nEntries)
+{
+	auto allBytes = getBytes();
+	std::vector<std::uint8_t> bytes;
+	struct VBExternTableEntry entry;
+	struct VBExternTableEntryData entryData;
+	std::size_t vbExternEntryDataOffset = 0;
+	std::size_t offset = 0;
+
+	for (std::size_t i = 0; i < nEntries; i++)
+	{
+		std::string moduleName;
+		std::string apiName;
+
+		if (!getBytes(bytes, structureOffset + i * entry.structureSize(), entry.structureSize())
+			|| bytes.size() != entry.structureSize())
+		{
+			break;
+		}
+
+		offset = 0;
+		entry.type = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(entry.type);
+		entry.importDataAddr = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(entry.importDataAddr);
+
+		if (!isLittleEndian())
+		{
+			entry.type = byteSwap32(entry.type);
+			entry.importDataAddr = byteSwap32(entry.importDataAddr);
+		}
+
+		if (entry.type != static_cast<std::uint32_t>(VBExternTableEntryType::external)
+			|| entry.importDataAddr < baseAddress)
+		{
+			continue;
+		}
+
+		vbExternEntryDataOffset = entry.importDataAddr - baseAddress;
+
+		if (!getBytes(bytes, vbExternEntryDataOffset, entryData.structureSize()) 
+			|| bytes.size() != entryData.structureSize())
+		{
+			continue;
+		}
+
+		offset = 0;
+		entryData.moduleNameAddr = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(entryData.moduleNameAddr);
+		entryData.apiNameAddr = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(entryData.apiNameAddr);
+
+		if (!isLittleEndian())
+		{
+			entryData.moduleNameAddr = byteSwap32(entryData.moduleNameAddr);
+			entryData.apiNameAddr = byteSwap32(entryData.apiNameAddr);
+		}
+
+		if (entryData.moduleNameAddr >= baseAddress)
+		{
+			std::size_t moduleNameOffset = entryData.moduleNameAddr - baseAddress;
+			moduleName = retdec::utils::readNullTerminatedAscii(allBytes.data(), allBytes.size(), moduleNameOffset);
+		}
+
+		if (entryData.apiNameAddr >= baseAddress)
+		{
+			std::size_t apiNameOffset = entryData.apiNameAddr - baseAddress;
+			apiName = retdec::utils::readNullTerminatedAscii(allBytes.data(), allBytes.size(), apiNameOffset);
+		}
+
+		auto ext = std::make_unique<VisualBasicExtern>();
+		ext->setModuleName(moduleName);
+		ext->setApiName(apiName);
+		visualBasicInfo->addExtern(std::move(ext));
+		std::cout << "[KUBO] moduleName: " << moduleName << "\n";
+		std::cout << "[KUBO] apiName: " << apiName << "\n";
+	}
+
+	return true;
+}
+
+/**
+ * Parse visual basic object table
+ * @param structureOffset Offset in file where the structure starts
+ * @param baseAddress Base address
+ * @return @c true if object table was successfuly parsed, @c false otherwise
+ */
+bool PeFormat::parseVisualBasicObjectTable(std::size_t structureOffset, std::size_t baseAddress)
+{
+	auto allBytes = getBytes();
+	std::vector<std::uint8_t> bytes;
+	std::size_t offset = 0;
+	std::size_t projectNameOffset = 0;
+	std::size_t objectDescriptorsOffset = 0;
+	struct VBObjectTable vbot;
+	std::string projName;
+
+	if (!getBytes(bytes, structureOffset, vbot.structureSize()) || bytes.size() != vbot.structureSize())
+	{
+		return false;
+	}
+
+	vbot.null1 = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbot.null1);
+	vbot.execCOMAddr = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbot.execCOMAddr);
+	vbot.projecInfo2Addr = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbot.projecInfo2Addr);
+	vbot.reserved = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbot.reserved);
+	vbot.null2 = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbot.null2);
+	vbot.projectObjectAddr = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbot.projectObjectAddr);
+	std::memcpy(&vbot.objectGUID, reinterpret_cast<void *>(&bytes.data()[offset]), sizeof(vbot.objectGUID)); offset += sizeof(vbot.objectGUID);
+	vbot.flagsCompileState = *reinterpret_cast<std::uint16_t *>(&bytes.data()[offset]); offset += sizeof(vbot.flagsCompileState);
+	vbot.nObjects = *reinterpret_cast<std::uint16_t *>(&bytes.data()[offset]); offset += sizeof(vbot.nObjects);
+	vbot.nCompiledObjects = *reinterpret_cast<std::uint16_t *>(&bytes.data()[offset]); offset += sizeof(vbot.nCompiledObjects);
+	vbot.nUsedObjects = *reinterpret_cast<std::uint16_t *>(&bytes.data()[offset]); offset += sizeof(vbot.nUsedObjects);
+	vbot.objectDescriptorsAddr = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbot.objectDescriptorsAddr);
+	vbot.IDE1 = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbot.IDE1);
+	vbot.IDE2 = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbot.IDE2);
+	vbot.IDE3 = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbot.IDE3);
+	vbot.projectNameAddr = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbot.projectNameAddr);
+	vbot.LCID1 = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbot.LCID1);
+	vbot.LCID2 = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbot.LCID2);
+	vbot.IDE4 = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbot.IDE4);
+	vbot.templateVesion = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbot.templateVesion);
+
+	if (!isLittleEndian())
+	{
+		vbot.null1 = byteSwap32(vbot.null1);
+		vbot.execCOMAddr = byteSwap32(vbot.execCOMAddr);
+		vbot.projecInfo2Addr = byteSwap32(vbot.projecInfo2Addr);
+		vbot.reserved = byteSwap32(vbot.reserved);
+		vbot.null2 = byteSwap32(vbot.null2);
+		vbot.projectObjectAddr = byteSwap32(vbot.projectObjectAddr);
+		vbot.flagsCompileState = byteSwap16(vbot.flagsCompileState);
+		vbot.nObjects = byteSwap16(vbot.nObjects);
+		vbot.nCompiledObjects = byteSwap16(vbot.nCompiledObjects);
+		vbot.nUsedObjects = byteSwap16(vbot.nUsedObjects);
+		vbot.objectDescriptorsAddr = byteSwap32(vbot.objectDescriptorsAddr);
+		vbot.IDE1 = byteSwap32(vbot.IDE1);
+		vbot.IDE2 = byteSwap32(vbot.IDE2);
+		vbot.IDE3 = byteSwap32(vbot.IDE3);
+		vbot.projectNameAddr = byteSwap32(vbot.projectNameAddr);
+		vbot.LCID1 = byteSwap32(vbot.LCID1);
+		vbot.LCID2 = byteSwap32(vbot.LCID2);
+		vbot.IDE4 = byteSwap32(vbot.IDE4);
+		vbot.templateVesion = byteSwap32(vbot.templateVesion);
+	}
+
+	visualBasicInfo->setProjectPrimaryLCID(vbot.LCID1);
+	visualBasicInfo->setProjectSecondaryLCID(vbot.LCID2);
+	// TODO KUBO  GUID
+
+	std::cout << "[KUBO] VB object table size: " << std::to_string(vbot.structureSize()) << "\n";
+
+	if (!visualBasicInfo->hasProjectName() && vbot.projectNameAddr >= baseAddress)
+	{
+		projectNameOffset = vbot.projectNameAddr - baseAddress;
+		projName = retdec::utils::readNullTerminatedAscii(allBytes.data(), allBytes.size(), projectNameOffset);
+		visualBasicInfo->setProjectName(projName);
+		std::cout << "[KUBO] Project name: " << projName << "\n";
+	}
+	vbot.dump(std::cout);
+
+	if (vbot.objectDescriptorsAddr >= baseAddress)
+	{
+		objectDescriptorsOffset = vbot.objectDescriptorsAddr - baseAddress;
+		parseVisualBasicObjects(objectDescriptorsOffset, baseAddress, vbot.nObjects);
+	}
+
+	return true;
+}
+
+/**
+ * Parse visual basic objects
+ * @param structureOffset Offset in file where the public object descriptors array starts
+ * @param baseAddress Base address
+ * @param nEntries Number of objects in array
+ * @return @c true if objects were successfuly parsed, @c false otherwise
+ */
+bool PeFormat::parseVisualBasicObjects(std::size_t structureOffset, std::size_t baseAddress,
+										std::size_t nObjects)
+{
+	auto allBytes = getBytes();
+	std::vector<std::uint8_t> bytes;
+	struct VBPublicObjectDescriptor vbpod;
+	std::size_t offset = 0;
+
+	for (std::size_t i = 0; i < nObjects; i++)
+	{
+		std::unique_ptr<VisualBasicObject> object;
+		if (!getBytes(bytes, structureOffset + i * vbpod.structureSize(), vbpod.structureSize())
+			|| bytes.size() != vbpod.structureSize())
+		{
+			break;
+		}
+
+		offset = 0;
+		vbpod.objectInfoAddr = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbpod.objectInfoAddr);
+		vbpod.reserved = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbpod.reserved);
+		vbpod.publicBytesAddr = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbpod.publicBytesAddr);
+		vbpod.staticBytesAddr = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbpod.staticBytesAddr);
+		vbpod.modulePublicAddr = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbpod.modulePublicAddr);
+		vbpod.moduleStaticAddr = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbpod.moduleStaticAddr);
+		vbpod.objectNameAddr = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbpod.objectNameAddr);
+		vbpod.nMethods = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbpod.nMethods);
+		vbpod.methodNamesAddr = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbpod.methodNamesAddr);
+		vbpod.staticVarsCopyAddr = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbpod.staticVarsCopyAddr);
+		vbpod.objectType = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbpod.objectType);
+		vbpod.null = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbpod.null);
+
+		if (!isLittleEndian())
+		{
+			vbpod.objectInfoAddr = byteSwap32(vbpod.objectInfoAddr);
+			vbpod.reserved = byteSwap32(vbpod.reserved);
+			vbpod.publicBytesAddr = byteSwap32(vbpod.publicBytesAddr);
+			vbpod.staticBytesAddr = byteSwap32(vbpod.staticBytesAddr);
+			vbpod.modulePublicAddr = byteSwap32(vbpod.modulePublicAddr);
+			vbpod.moduleStaticAddr = byteSwap32(vbpod.moduleStaticAddr);
+			vbpod.objectNameAddr = byteSwap32(vbpod.objectNameAddr);
+			vbpod.nMethods = byteSwap32(vbpod.nMethods);
+			vbpod.methodNamesAddr = byteSwap32(vbpod.methodNamesAddr);
+			vbpod.staticVarsCopyAddr = byteSwap32(vbpod.staticVarsCopyAddr);
+			vbpod.objectType = byteSwap32(vbpod.objectType);
+			vbpod.null = byteSwap32(vbpod.null);
+		}
+
+		if (vbpod.objectNameAddr < baseAddress)		
+		{
+			continue;
+		}
+
+
+		std::size_t objectNameOffset = vbpod.objectNameAddr - baseAddress;
+		std::string objectName = readNullTerminatedAscii(allBytes.data(), allBytes.size(), objectNameOffset);
+		object = std::make_unique<VisualBasicObject>();
+		object->setName(objectName);
+		std::cout << "[KUBO] objectName: " << objectName << "\n";
+
+		if (vbpod.methodNamesAddr >= baseAddress)
+		{
+			std::size_t methodAddrOffset = vbpod.methodNamesAddr - baseAddress;
+			for (std::size_t mIdx = 0; mIdx < vbpod.nMethods; mIdx++)
+			{
+				if (!getBytes(bytes, methodAddrOffset + mIdx * sizeof(std::uint32_t), sizeof(std::uint32_t))
+					|| bytes.size() != sizeof(std::uint32_t))
+				{
+					break;
+				}
+
+				std::uint32_t methodNameAddr = *reinterpret_cast<std::uint32_t *>(bytes.data());
+
+				if (!isLittleEndian())
+				{
+					methodNameAddr = byteSwap32(methodNameAddr);
+				}
+
+				if (methodNameAddr < baseAddress)
+				{
+					continue;
+				}
+
+				std::size_t methodNameOffset = methodNameAddr - baseAddress;
+				std::string methodName = readNullTerminatedAscii(allBytes.data(), allBytes.size(), methodNameOffset);
+				object->addMethod(methodName);
+
+				std::cout << "[KUBO] method" << mIdx << ": " << methodName << "\n";
+			}
+		}
+
+		visualBasicInfo->addObject(std::move(object));
+		std::cout << "\n[KUBO] object" << i << "\n";
+		vbpod.dump(std::cout);
+	}
 
 	return true;
 }
