@@ -405,6 +405,73 @@ std::string toWide(const std::string &str, std::string::size_type length) {
 }
 
 /**
+* @brief Converts unicode @a bytes to ASCII string.
+*
+* @param[in] bytes Bytes for conversion.
+* @param[in] nBytes Number of bytes.
+*
+* @return Converted string in ASCII.
+*/
+std::string unicodeToAscii(const std::uint8_t *bytes, std::size_t nBytes)
+{
+	std::stringstream result;
+	if (!bytes || !nBytes)
+	{
+		return "";
+	}
+	if (nBytes & 1)
+	{
+		nBytes--;
+	}
+
+	for (std::size_t i = 0; i < nBytes; i += 2)
+	{
+		if (bytes[i] == 0 && bytes[i + 1] == 0)
+		{
+			break;
+		}
+		if (bytes[i + 1] == 0 && isPrintableChar(bytes[i]))
+		{
+			result << bytes[i];
+		}
+		else
+		{
+			const std::size_t maxC = std::pow(2, sizeof(std::string::value_type) * CHAR_BIT) - 1;
+			const auto val1 = numToStr<std::size_t>(bytes[i] & maxC, std::hex);	
+			const auto val2 = numToStr<std::size_t>(bytes[i + 1] & maxC, std::hex);	
+			result << "\\x" << std::setw(2) << std::setfill('0') << val1;
+			result << "\\x" << std::setw(2) << std::setfill('0') << val2;
+		}
+	}
+
+	return result.str();
+}
+
+/**
+* @brief Read up to @a maxBytes bytes as ASCII string.
+*
+* @param[in] bytes Bytes to read from.
+* @param[in] maxBytes Maximum bytes to read.
+* @param[in] offset Offset in bytes.
+*
+* @return Converted string in ASCII.
+*/
+std::string readNullTerminatedAscii(const std::uint8_t *bytes, std::size_t maxBytes, std::size_t offset)
+{
+	std::string result;
+	if (!bytes)
+	{
+		return "";
+	}
+	for (std::size_t i = offset; i < maxBytes && bytes[i]; i++)
+	{
+		result.push_back(bytes[i]);
+	}
+
+	return replaceNonprintableChars(result);
+}
+
+/**
 * @brief Trims the given string.
 *
 * @param[in] str String to be trimmed.
