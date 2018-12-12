@@ -30,6 +30,7 @@ set(FILEINFO_SOURCES
 	file_information/file_information_types/resource_table/resource.cpp
 	file_information/file_information_types/resource_table/resource_table.cpp
 	file_information/file_information_types/rich_header.cpp
+	file_information/file_information_types/visual_basic_info.cpp
 	file_information/file_information_types/special_information.cpp
 	file_information/file_information_types/strings.cpp
 	file_information/file_information_types/symbol_table/symbol.cpp
