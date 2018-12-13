@@ -81,7 +81,6 @@ class FileFormat : public retdec::utils::ByteValueStorage, private retdec::utils
 		ResourceTable *resourceTable;                                     ///< table of resources
 		ResourceTree *resourceTree;                                       ///< structure of resource tree
 		RichHeader *richHeader;                                           ///< rich header
-		VisualBasicInfo *visualBasicInfo;                                 ///< visual basic header information
 		PdbInfo *pdbInfo;                                                 ///< information about related PDB debug file
 		CertificateTable *certificateTable;                               ///< table of certificates
 		ElfCoreInfo *elfCoreInfo;                                         ///< information about core file structures

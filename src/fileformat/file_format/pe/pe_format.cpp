@@ -730,30 +730,29 @@ void PeFormat::loadVisualBasicHeader()
 	std::cout << "[KUBO] VB header size:" << std::to_string(vbh.headerSize()) << "\n";
 	vbh.dump(std::cout);
 
-	visualBasicInfo = new VisualBasicInfo();
 	if (vbh.projExeNameOffset != 0)
 	{
 		projExeName = retdec::utils::readNullTerminatedAscii(allBytes.data(), allBytes.size(),
 														vbHeaderOffset + vbh.projExeNameOffset);
-		visualBasicInfo->setProjectExeName(projExeName);
+		visualBasicInfo.setProjectExeName(projExeName);
 	}
 	if (vbh.projDescOffset != 0)
 	{
 		projDesc = retdec::utils::readNullTerminatedAscii(allBytes.data(), allBytes.size(),
 														vbHeaderOffset + vbh.projDescOffset);
-		visualBasicInfo->setProjectDescription(projDesc);
+		visualBasicInfo.setProjectDescription(projDesc);
 	}
 	if (vbh.helpFileOffset != 0)
 	{
 		helpFile = retdec::utils::readNullTerminatedAscii(allBytes.data(), allBytes.size(),
 														vbHeaderOffset + vbh.helpFileOffset);
-		visualBasicInfo->setProjectHelpFile(helpFile);
+		visualBasicInfo.setProjectHelpFile(helpFile);
 	}
 	if (vbh.projNameOffset != 0)
 	{
 		projName = retdec::utils::readNullTerminatedAscii(allBytes.data(), allBytes.size(),
 														vbHeaderOffset + vbh.projNameOffset);
-		visualBasicInfo->setProjectName(projName);
+		visualBasicInfo.setProjectName(projName);
 	}
 
 	std::cout << "KUBO KING: " << projExeName << " | " << projDesc << " | " << helpFile << " | "
@@ -767,10 +766,10 @@ void PeFormat::loadVisualBasicHeader()
 	{
 		projBackupLanguageDLL.push_back(vbh.backupLanguageDLL[i]);
 	}
-	visualBasicInfo->setLanguageDLL(projLanguageDLL);
-	visualBasicInfo->setBackupLanguageDLL(projBackupLanguageDLL);
-	visualBasicInfo->setLanguageDLLPrimaryLCID(vbh.LCID1);
-	visualBasicInfo->setLanguageDLLSecondaryLCID(vbh.LCID2);
+	visualBasicInfo.setLanguageDLL(projLanguageDLL);
+	visualBasicInfo.setBackupLanguageDLL(projBackupLanguageDLL);
+	visualBasicInfo.setLanguageDLLPrimaryLCID(vbh.LCID1);
+	visualBasicInfo.setLanguageDLLSecondaryLCID(vbh.LCID2);
 	std::cout << "KUBO KING: " << projLanguageDLL << " | " << projBackupLanguageDLL << "\n\n";
 
 
@@ -829,19 +828,19 @@ bool PeFormat::parseVisualBasicComRegistrationData(std::size_t structureOffset, 
 		vbcrd.tlbVerMajor = byteSwap32(vbcrd.tlbVerMajor);
 		vbcrd.tlbVerMinor = byteSwap32(vbcrd.tlbVerMinor);
 	}
-	// visualBasicInfo->setTypeLibCLSID(vbcrd.projCLSID); TODO
-	visualBasicInfo->setTypeLibLCID(vbcrd.projDescOffset);
-	if (!visualBasicInfo->hasProjectName())
+	// visualBasicInfo.setTypeLibCLSID(vbcrd.projCLSID); TODO
+	visualBasicInfo.setTypeLibLCID(vbcrd.projDescOffset);
+	if (!visualBasicInfo.hasProjectName())
 	{
 		projName = retdec::utils::readNullTerminatedAscii(allBytes.data(), allBytes.size(),
 															structureOffset + vbcrd.projNameOffset);
 	}
-	if (!visualBasicInfo->hasProjectHelpFile())
+	if (!visualBasicInfo.hasProjectHelpFile())
 	{
 		helpFile = retdec::utils::readNullTerminatedAscii(allBytes.data(), allBytes.size(),
 															structureOffset + vbcrd.helpFileOffset);
 	}
-	if (!visualBasicInfo->hasProjectDescription())
+	if (!visualBasicInfo.hasProjectDescription())
 	{
 		projDesc = retdec::utils::readNullTerminatedAscii(allBytes.data(), allBytes.size(),
 															structureOffset + vbcrd.projDescOffset);
@@ -906,7 +905,7 @@ bool PeFormat::parseVisualBasicProjectInfo(std::size_t structureOffset, std::siz
 	}
 
 	projPath = retdec::utils::unicodeToAscii(vbpi.pathInformation, sizeof(vbpi.pathInformation));
-	visualBasicInfo->setProjectPath(projPath);
+	visualBasicInfo.setProjectPath(projPath);
 
 	std::cout << "[KUBO] VB project info size: " << std::to_string(vbpi.headerSize()) << "\n";
 	std::cout << "[KUBO] path: " << retdec::utils::unicodeToAscii(vbpi.pathInformation, sizeof(vbpi.pathInformation)) << "\n";
@@ -915,7 +914,7 @@ bool PeFormat::parseVisualBasicProjectInfo(std::size_t structureOffset, std::siz
 	if (vbpi.externalTableAddr >= baseAddress)
 	{
 		vbExternTableOffset = vbpi.externalTableAddr - baseAddress;
-		parseVisualBasicExternTable(vbExternTableOffset, vbpi.nExternals, baseAddress);
+		parseVisualBasicExternTable(vbExternTableOffset, baseAddress, vbpi.nExternals);
 	}
 
 	if (vbpi.objectTableAddr >= baseAddress)
@@ -965,6 +964,8 @@ bool PeFormat::parseVisualBasicExternTable(std::size_t structureOffset, std::siz
 			entry.importDataAddr = byteSwap32(entry.importDataAddr);
 		}
 
+		// std::cerr << "Entry type: " << entry.type << "\n";
+
 		if (entry.type != static_cast<std::uint32_t>(VBExternTableEntryType::external)
 			|| entry.importDataAddr < baseAddress)
 		{
@@ -1004,9 +1005,12 @@ bool PeFormat::parseVisualBasicExternTable(std::size_t structureOffset, std::siz
 		auto ext = std::make_unique<VisualBasicExtern>();
 		ext->setModuleName(moduleName);
 		ext->setApiName(apiName);
-		visualBasicInfo->addExtern(std::move(ext));
-		std::cout << "[KUBO] moduleName: " << moduleName << "\n";
-		std::cout << "[KUBO] apiName: " << apiName << "\n";
+		// std::cerr << "[<3] " << ext->getModuleName() << "\n";
+		// std::cerr << "[<3] " << ext->getApiName() << "\n";
+		visualBasicInfo.addExtern(std::move(ext));
+		// std::cerr << "[<3] " << visualBasicInfo.getNumberOfExterns() << "\n";
+		// std::cout << "[KUBO] moduleName: " << moduleName << "\n";
+		// std::cout << "[KUBO] apiName: " << apiName << "\n";
 	}
 
 	return true;
@@ -1077,17 +1081,17 @@ bool PeFormat::parseVisualBasicObjectTable(std::size_t structureOffset, std::siz
 		vbot.templateVesion = byteSwap32(vbot.templateVesion);
 	}
 
-	visualBasicInfo->setProjectPrimaryLCID(vbot.LCID1);
-	visualBasicInfo->setProjectSecondaryLCID(vbot.LCID2);
+	visualBasicInfo.setProjectPrimaryLCID(vbot.LCID1);
+	visualBasicInfo.setProjectSecondaryLCID(vbot.LCID2);
 	// TODO KUBO  GUID
 
 	std::cout << "[KUBO] VB object table size: " << std::to_string(vbot.structureSize()) << "\n";
 
-	if (!visualBasicInfo->hasProjectName() && vbot.projectNameAddr >= baseAddress)
+	if (!visualBasicInfo.hasProjectName() && vbot.projectNameAddr >= baseAddress)
 	{
 		projectNameOffset = vbot.projectNameAddr - baseAddress;
 		projName = retdec::utils::readNullTerminatedAscii(allBytes.data(), allBytes.size(), projectNameOffset);
-		visualBasicInfo->setProjectName(projName);
+		visualBasicInfo.setProjectName(projName);
 		std::cout << "[KUBO] Project name: " << projName << "\n";
 	}
 	vbot.dump(std::cout);
@@ -1198,7 +1202,7 @@ bool PeFormat::parseVisualBasicObjects(std::size_t structureOffset, std::size_t 
 			}
 		}
 
-		visualBasicInfo->addObject(std::move(object));
+		visualBasicInfo.addObject(std::move(object));
 		std::cout << "\n[KUBO] object" << i << "\n";
 		vbpod.dump(std::cout);
 	}
@@ -3322,7 +3326,6 @@ const std::vector<std::shared_ptr<DotnetClass>>& PeFormat::getImportedDotnetClas
 	return importedClasses;
 }
 
-
 const std::string& PeFormat::getTypeRefhashCrc32() const
 {
 	return typeRefHashCrc32;
@@ -3336,6 +3339,11 @@ const std::string& PeFormat::getTypeRefhashMd5() const
 const std::string& PeFormat::getTypeRefhashSha256() const
 {
 	return typeRefHashSha256;
+}
+
+const VisualBasicInfo* PeFormat::getVisualBasicInfo() const
+{
+	return &visualBasicInfo;
 }
 
 } // namespace fileformat

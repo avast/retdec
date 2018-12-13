@@ -781,6 +781,192 @@ bool FileInformation::hasRichHeaderRecords() const
 	return richHeader.hasRecords();
 }
 
+
+
+
+
+/**
+ * Check whether visual basic informations are used.
+ * @return @c true if it is used, otherwise @c false/
+ */
+bool FileInformation::isVisualBasicUsed() const
+{
+	return visualBasicInfo.isUsed();
+}
+
+/**
+ * Get visual basic language DLL
+ * @return Visual basic language DLL
+ */
+std::string FileInformation::getVisualBasicLanguageDLL() const
+{
+	return visualBasicInfo.getLanguageDLL();
+}
+
+/**
+ * Get visual basic backup language DLL
+ * @return Visual basic backup language DLL
+ */
+std::string FileInformation::getVisualBasicBackupLanguageDLL() const
+{
+	return visualBasicInfo.getBackupLanguageDLL();
+}
+
+/**
+ * Get visual basic project exe name
+ * @return Visual basic project exe name
+ */
+std::string FileInformation::getVisualBasicProjectExeName() const
+{
+	return visualBasicInfo.getProjectExeName();
+}
+
+/**
+ * Get visual basic project description
+ * @return Visual basic project description
+ */
+std::string FileInformation::getVisualBasicProjectDescription() const
+{
+	return visualBasicInfo.getProjectDescription();
+}
+
+/**
+ * Get visual basic project help file
+ * @return Visual basic project help file
+ */
+std::string FileInformation::getVisualBasicProjectHelpFile() const
+{
+	return visualBasicInfo.getProjectHelpFile();
+}
+
+/**
+ * Get visual basic project name
+ * @return Visual basic project name
+ */
+std::string FileInformation::getVisualBasicProjectName() const
+{
+	return visualBasicInfo.getProjectName();
+}
+
+/**
+ * Get visual basic language DLL primary LCID
+ * @return Visual basic language DLL primary LCID
+ */
+std::string FileInformation::getVisualBasicLanguageDLLPrimaryLCIDStr() const
+{
+	return visualBasicInfo.getLanguageDLLPrimaryLCIDStr();
+}
+
+/**
+ * Get visual basic language DLL secondary LCID
+ * @return Visual basic language DLL secondary LCID
+ */
+std::string FileInformation::getVisualBasicLanguageDLLSecondaryLCIDStr() const
+{
+	return visualBasicInfo.getLanguageDLLSecondaryLCIDStr();
+}
+
+/**
+ * Get visual basic project path
+ * @return Visual basic project path
+ */
+std::string FileInformation::getVisualBasicProjectPath() const
+{
+	return visualBasicInfo.getProjectPath();
+}
+
+/**
+ * Get visual basic project primary LCID
+ * @return Visual basic project primary LCID
+ */
+std::string FileInformation::getVisualBasicProjectPrimaryLCIDStr() const
+{
+	return visualBasicInfo.getProjectPrimaryLCIDStr();
+}
+
+/**
+ * Get visual basic project secondary LCID
+ * @return Visual basic project secondary LCID
+ */
+std::string FileInformation::getVisualBasicProjectSecondaryLCIDStr() const
+{
+	return visualBasicInfo.getProjectSecondaryLCIDStr();
+}
+
+/**
+ * Get visual basic object
+ * @param position Index of selected object (indexed from 0)
+ * @return Visual basic object
+ */
+const retdec::fileformat::VisualBasicObject *FileInformation::getVisualBasicObject(std::size_t position) const
+{
+	return visualBasicInfo.getObject(position);
+}
+
+/**
+ * Get visual basic extern
+ * @param position Index of selected extern (indexed from 0)
+ * @return Visual basic extern
+ */
+const retdec::fileformat::VisualBasicExtern *FileInformation::getVisualBasicExtern(std::size_t position) const
+{
+	return visualBasicInfo.getExtern(position);
+}
+
+/**
+ * Get visual basic number of objects
+ * @return Visual basic number of objects
+ */
+std::size_t FileInformation::getVisualBasicNumberOfObjects() const
+{
+	return visualBasicInfo.getNumberOfObjects();
+}
+
+/**
+ * Get visual basic number of externs
+ * @return Visual basic number of externs
+ */
+std::size_t FileInformation::getVisualBasicNumberOfExterns() const
+{
+	return visualBasicInfo.getNumberOfExterns();
+}
+
+/**
+ * Get visual basic extern module name
+ * @param position Index of selected extern (indexed from 0)
+ * @return Visual basic extern module name
+ */
+std::string FileInformation::getVisualBasicExternModuleName(std::size_t position) const
+{
+	return visualBasicInfo.getExternModuleName(position);
+}
+
+/**
+ * Get visual basic extern api name
+ * @param position Index of selected extern (indexed from 0)
+ * @return Visual basic extern api name
+ */
+std::string FileInformation::getVisualBasicExternApiName(std::size_t position) const
+{
+	return visualBasicInfo.getExternApiName(position);
+}
+
+/**
+ * Get visual basic typeLib LCID
+ * @return Visual basic typeLib LCID
+ */
+std::string FileInformation::getVisualBasicTypeLibLCIDStr() const
+{
+	return visualBasicInfo.getTypeLibLCIDStr();
+}
+
+
+
+
+
+
+
+
 /**
  * Get type of related PDB file
  * @return Type of related PDB file
@@ -3596,6 +3782,24 @@ void FileInformation::setRichHeader(const retdec::fileformat::RichHeader *rHeade
 {
 	richHeader.setHeader(rHeader);
 }
+
+/**
+ * Set visual basic information
+ * @param vbInfo Information about visual basic
+ */
+void FileInformation::setVisualBasicInfo(const retdec::fileformat::VisualBasicInfo *vbInfo)
+{
+	visualBasicInfo.setInfo(vbInfo);
+}
+
+/**
+ * Sets whether visual basic informations are used.
+ * @param set @c true if used, otherwise @c false.
+ */
+void FileInformation::setVisualBasicUsed(bool set)
+{
+	visualBasicInfo.setUsed(set);
+} 
 
 /**
  * Set type of related PDB file
