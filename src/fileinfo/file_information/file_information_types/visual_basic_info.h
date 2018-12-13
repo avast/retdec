@@ -19,6 +19,7 @@ namespace fileinfo {
 class VisualBasicInfo
 {
 	private:
+		bool used;
 		const retdec::fileformat::VisualBasicInfo *visualBasicInfo;
 	public:
 		VisualBasicInfo();
@@ -41,6 +42,8 @@ class VisualBasicInfo
 		const retdec::fileformat::VisualBasicExtern *getExtern(std::size_t position) const;
 		std::size_t getNumberOfObjects() const;
 		std::size_t getNumberOfExterns() const;
+		std::string getExternModuleName(std::size_t position) const;
+		std::string getExternApiName(std::size_t position) const;
 		// std::string getTypeLibCLSIDStr() const;
 		std::string getTypeLibLCIDStr() const;
 		/// @}
@@ -48,10 +51,12 @@ class VisualBasicInfo
 		/// @name Setters
 		/// @{
 		void setInfo(const retdec::fileformat::VisualBasicInfo *vbInfo);
+		void setUsed(bool set);
 		/// @}
 
 		/// @name Other methods
 		/// @{
+		bool isUsed() const;
 		/// @}
 };
 

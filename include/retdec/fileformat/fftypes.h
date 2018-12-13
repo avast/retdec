@@ -24,7 +24,6 @@
 #include "retdec/fileformat/types/resource_table/resource_icon.h"
 #include "retdec/fileformat/types/resource_table/resource_icon_group.h"
 #include "retdec/fileformat/types/rich_header/rich_header.h"
-#include "retdec/fileformat/types/visual_basic/visual_basic_info.h"
 #include "retdec/fileformat/types/sec_seg/elf_section.h"
 #include "retdec/fileformat/types/sec_seg/elf_segment.h"
 #include "retdec/fileformat/types/sec_seg/macho_section.h"

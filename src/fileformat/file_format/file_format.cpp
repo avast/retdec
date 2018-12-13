@@ -185,7 +185,6 @@ void FileFormat::init()
 	resourceTable = nullptr;
 	resourceTree = nullptr;
 	richHeader = nullptr;
-	visualBasicInfo = nullptr;
 	pdbInfo = nullptr;
 	certificateTable = nullptr;
 	elfCoreInfo = nullptr;
@@ -231,7 +230,6 @@ void FileFormat::clear()
 	delete resourceTable;
 	delete resourceTree;
 	delete richHeader;
-	delete visualBasicInfo;
 	delete pdbInfo;
 	delete certificateTable;
 	delete elfCoreInfo;

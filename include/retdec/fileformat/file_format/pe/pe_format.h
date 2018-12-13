@@ -18,6 +18,7 @@
 #include "retdec/fileformat/types/dotnet_headers/string_stream.h"
 #include "retdec/fileformat/types/dotnet_headers/user_string_stream.h"
 #include "retdec/fileformat/types/dotnet_types/dotnet_class.h"
+#include "retdec/fileformat/types/visual_basic/visual_basic_info.h"
 
 namespace retdec {
 namespace fileformat {
@@ -44,6 +45,7 @@ class PeFormat : public FileFormat
 		std::string typeRefHashCrc32;                              ///< .NET typeref table hash as CRC32
 		std::string typeRefHashMd5;                                ///< .NET typeref table hash as MD5
 		std::string typeRefHashSha256;                             ///< .NET typeref table hash as SHA256
+		VisualBasicInfo visualBasicInfo;                           ///< visual basic header information
 
 		/// @name Initialization methods
 		/// @{
@@ -191,6 +193,7 @@ class PeFormat : public FileFormat
 		const std::string& getTypeRefhashCrc32() const;
 		const std::string& getTypeRefhashMd5() const;
 		const std::string& getTypeRefhashSha256() const;
+		const VisualBasicInfo* getVisualBasicInfo() const;
 		/// @}
 };
 

@@ -14,7 +14,7 @@ namespace fileinfo {
 /**
  * Constructor
  */
-VisualBasicInfo::VisualBasicInfo() : visualBasicInfo(nullptr)
+VisualBasicInfo::VisualBasicInfo() : used(false), visualBasicInfo(nullptr)
 {
 
 }
@@ -184,6 +184,29 @@ std::size_t VisualBasicInfo::getNumberOfExterns() const
 	return visualBasicInfo ? visualBasicInfo->getNumberOfExterns() : 0;
 }
 
+/**
+ * Get extern module name
+ * @param position Index of selected visual basic extern (indexed from 0)
+ * @return Extern module name
+ */
+std::string VisualBasicInfo::getExternModuleName(std::size_t position) const
+{
+	auto ext = getExtern(position);
+	return ext ? ext->getModuleName() : "";
+}
+
+/**
+ * Get extern api name
+ * @param position Index of selected visual basic extern (indexed from 0)
+ * @return Extern api name
+ */
+std::string VisualBasicInfo::getExternApiName(std::size_t position) const
+{
+	auto ext = getExtern(position);
+	return ext ? ext->getApiName() : "";
+}
+
+
 // /**
 //  * Get typeLib CLSID
 //  * @return Visual basic typeLib CLSID as string
@@ -219,6 +242,24 @@ std::string VisualBasicInfo::getTypeLibLCIDStr() const
 void VisualBasicInfo::setInfo(const retdec::fileformat::VisualBasicInfo *vbInfo)
 {
 	visualBasicInfo = vbInfo;
+}
+
+/**
+ * Set whether visual basic info is used.
+ * @param set @c true if used, @c false otherwise.
+ */
+void VisualBasicInfo::setUsed(bool set)
+{
+	used = set;
+}
+
+/**
+ * Check whether visual basic informations are used.
+ * @return @c true if used, otherwise @c false.
+ */
+bool VisualBasicInfo::isUsed() const
+{
+	return used;
 }
 
 } // namespace fileinfo
