@@ -627,6 +627,36 @@ void PlainPresentation::presentDotnetClasses() const
 	}
 }
 
+void PlainPresentation::presentVisualBasicObjects() const
+{	
+	auto nObjs = fileinfo.getVisualBasicNumberOfObjects();
+	if (!fileinfo.isVisualBasicUsed() || nObjs == 0)
+	{
+		return;
+	}
+
+	std::cout << "\n";
+	std::cout << "Visual Basic objects" << "\n";
+	for (std::size_t i = 0; i < nObjs; i++)
+	{
+		auto obj = fileinfo.getVisualBasicObject(i);
+		if (!obj)
+		{
+			continue;
+		}
+		auto objName = obj->getName();
+		if (objName.empty())
+		{
+			continue;
+		}
+		std::cout << "    object name: " << objName << "\n";
+		for (const auto &m : obj->getMethods())
+		{
+			std::cout << "        method name: " << m << "\n";
+		}
+	}
+}
+
 /**
  * Present ELF notes
  */
@@ -729,6 +759,8 @@ bool PlainPresentation::present()
 		presentIterativeSimple(CertificateTablePlainGetter(fileinfo));
 		presentSimple(DotnetPlainGetter(fileinfo), false, ".NET Information");
 		presentDotnetClasses();
+		presentSimple(VisualBasicPlainGetter(fileinfo), false, "Visual Basic Information");
+		presentVisualBasicObjects();
 
 		if(returnCode != ReturnCode::FILE_NOT_EXIST && returnCode != ReturnCode::UNKNOWN_FORMAT)
 		{

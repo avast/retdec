@@ -28,6 +28,7 @@
 #include "fileinfo/file_presentation/getters/iterative_getter/iterative_distribution_getter/visual_basic_extern_table_plain_getter.h"
 #include "fileinfo/file_presentation/getters/simple_getter/basic_plain_getter.h"
 #include "fileinfo/file_presentation/getters/simple_getter/dotnet_plain_getter.h"
+#include "fileinfo/file_presentation/getters/simple_getter/visual_basic_plain_getter.h"
 #include "fileinfo/file_presentation/getters/simple_getter/header_plain_getter.h"
 #include "fileinfo/file_presentation/getters/simple_getter/pdb_plain_getter.h"
 
