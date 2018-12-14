@@ -1,0 +1,23 @@
+name: retdec
+version: "8e65c05"
+summary: RetDec
+description: |
+  RetDec is a retargetable machine-code decompiler based on LLVM.
+  The decompiler is not limited to any particular target architecture,
+  operating system, or executable file format.
+  Supported file formats are ELF, PE, Mach-O, COFF, AR (archive), Intel HEX, and raw machine code.
+  Supported architectures (32b only) are Intel x86, ARM, MIPS, PIC32, and PowerPC.
+
+confinement: strict
+
+apps:
+  retdec:
+    command: bin/retdec-decompiler.py
+
+parts:
+  retdec:
+    plugin: cmake
+    configflags:
+      - -DCMAKE_INSTALL_PREFIX=/
+    source-type: git
+    source: https://github.com/avast-tl/retdec.git
