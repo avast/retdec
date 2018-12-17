@@ -56,7 +56,7 @@ endif()
 set(YARA_COMPILE_PY ${CMAKE_SOURCE_DIR}/support/yara_patterns/tools/compile-yara.py)
 install(CODE "
 	execute_process(
-		COMMAND ${PYTHON_EXECUTABLE} -u \"${YARA_COMPILE_PY}\" \"${YARAC_PATH}\" \"${CMAKE_SOURCE_DIR}\" \"${CMAKE_INSTALL_PREFIX}\"
+		COMMAND \"${PYTHON_EXECUTABLE}\" -u \"${YARA_COMPILE_PY}\" \"${YARAC_PATH}\" \"${CMAKE_SOURCE_DIR}\" \"${CMAKE_INSTALL_PREFIX}\"
 		RESULT_VARIABLE COMPILE_YARA_RES
 	)
 	if(COMPILE_YARA_RES)
