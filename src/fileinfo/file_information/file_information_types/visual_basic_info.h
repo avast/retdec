@@ -57,6 +57,7 @@ class VisualBasicInfo
 		/// @name Other methods
 		/// @{
 		bool isUsed() const;
+		bool isPcode() const;
 		/// @}
 };
 

@@ -16,7 +16,7 @@ VisualBasicInfo::VisualBasicInfo() : languageDLLPrimaryLCID(0), languageDLLSecon
 	projectPrimaryLCID(0), projectSecondaryLCID(0), /*typeLibCLSID(0),*/ typeLibLCID(0),
 	validLanguageDLLPrimaryLCID(false), validLanguageDLLSecondaryLCID(false),
 	validProjectPrimaryLCID(false), validProjectSecondaryLCID(false), /*validTypeLibCLSID(false),*/
-	validTypeLibLCID(false)
+	validTypeLibLCID(false), pcodeFlag(false)
 {
 
 }
@@ -362,6 +362,15 @@ void VisualBasicInfo::setTypeLibLCID(std::uint32_t tlbLCID)
 }
 
 /**
+ * Set whether visual basic file is a P-code file.
+ * @param set @c true if file is a P-code, @c false otherwise.
+ */
+void VisualBasicInfo::setPcode(bool set)
+{
+	pcodeFlag = set;
+}
+
+/**
  * Add visual basic object
  * @param obj Object to add
  */
@@ -404,6 +413,15 @@ bool VisualBasicInfo::hasProjectDescription() const
 bool VisualBasicInfo::hasProjectHelpFile() const
 {
 	return !projectHelpFile.empty();
+}
+
+/**
+ * Check if visual basic file is a P-code file
+ * @return @c true if visual basic file is P-code, @c false otherwise
+ */
+bool VisualBasicInfo::isPcode() const
+{
+	return pcodeFlag;
 }
 
 

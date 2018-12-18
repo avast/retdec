@@ -55,6 +55,7 @@ class VisualBasicInfo
 		bool validProjectSecondaryLCID;
 		// bool validTypeLibCLSID;
 		bool validTypeLibLCID;
+		bool pcodeFlag;
 
 	public:
 		VisualBasicInfo();
@@ -98,6 +99,7 @@ class VisualBasicInfo
 		void setProjectSecondaryLCID(std::uint32_t secLCID);
 		// void setTypeLibCLSID(std::uint32_t tlbCLSID);
 		void setTypeLibLCID(std::uint32_t tlbLCID);
+		void setPcode(bool set);
 		/// @}
 
 		/// @name Other methods
@@ -107,6 +109,7 @@ class VisualBasicInfo
 		bool hasProjectName() const;
 		bool hasProjectDescription() const;
 		bool hasProjectHelpFile() const;
+		bool isPcode() const;
 		/// @}
 };
 

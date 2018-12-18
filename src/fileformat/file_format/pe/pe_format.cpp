@@ -906,6 +906,7 @@ bool PeFormat::parseVisualBasicProjectInfo(std::size_t structureOffset, std::siz
 
 	projPath = retdec::utils::unicodeToAscii(vbpi.pathInformation, sizeof(vbpi.pathInformation));
 	visualBasicInfo.setProjectPath(projPath);
+	visualBasicInfo.setPcode(vbpi.nativeCodeAddr == 0);
 
 	std::cout << "[KUBO] VB project info size: " << std::to_string(vbpi.headerSize()) << "\n";
 	std::cout << "[KUBO] path: " << retdec::utils::unicodeToAscii(vbpi.pathInformation, sizeof(vbpi.pathInformation)) << "\n";
