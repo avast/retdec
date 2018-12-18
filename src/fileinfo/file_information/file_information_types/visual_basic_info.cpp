@@ -262,4 +262,14 @@ bool VisualBasicInfo::isUsed() const
 	return used;
 }
 
+/**
+ * Check whether visual basic file is a P-code file.
+ * @return @c true if is a P-code file, otherwise @c false.
+ */
+bool VisualBasicInfo::isPcode() const
+{
+	return visualBasicInfo ? visualBasicInfo->isPcode() : false;
+}
+
+
 } // namespace fileinfo

@@ -43,6 +43,27 @@ std::size_t VisualBasicPlainGetter::loadInformation(std::vector<std::string> &de
 	info.push_back("TODO");
 	info.push_back("TODO");
 
+	// isPcode
+	// getLanguageDLL
+	// getBackupLanguageDLL
+	// getProjectExeName
+	// getProjectDescription
+	// getProjectHelpFile
+	// getProjectName
+	// getLanguageDLLPrimaryLCID
+	// getLanguageDLLSecondaryLCID
+	// getProjectPath
+	// getProjectPrimaryLCID
+	// getProjectSecondaryLCID
+	// getObjects
+	// getExterns
+	// getObject
+	// getExtern
+	// getNumberOfObjects
+	// getNumberOfExterns
+	// getTypeLibCLSID
+	// getTypeLibLCID
+
 	return info.size();
 }
 
