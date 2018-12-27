@@ -87,5 +87,5 @@ IDA_COLORIZER = os.path.join(INSTALL_BIN_DIR, 'retdec-color-c.py')
 UNPACKER = os.path.join(INSTALL_BIN_DIR, 'retdec-unpacker')
 
 # Other.
-LOG_TIME = ['/usr/bin/time', '-v']
+LOG_TIME = ['/usr/bin/time']
 LOG_TIMEOUT = 300
