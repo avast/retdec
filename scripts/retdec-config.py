@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 import os
-
+from sys import platform
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 
@@ -87,5 +87,10 @@ IDA_COLORIZER = os.path.join(INSTALL_BIN_DIR, 'retdec-color-c.py')
 UNPACKER = os.path.join(INSTALL_BIN_DIR, 'retdec-unpacker')
 
 # Other.
-LOG_TIME = ['/usr/bin/time']
+
+if platform == "darwin":
+    # mac os x doesn't support the v flag
+    LOG_TIME = ['/usr/bin/time']
+else:
+    LOG_TIME = ['/usr/bin/time', '-v']
 LOG_TIMEOUT = 300
