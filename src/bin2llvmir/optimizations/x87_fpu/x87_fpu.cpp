@@ -97,11 +97,13 @@ bool X87FpuAnalysis::analyzeBb(
 		int topVal)
 {
 
-	std::queue<llvm::BasicBlock*> queue;
-	queue.push(bb);
+	std::queue<std::pair<llvm::BasicBlock*, int>> queue;
+	queue.push({bb, topVal});
 	bool changed = false;
 	while(!queue.empty()) {
-		auto currentBb = queue.front();
+		auto pair = queue.front();
+		auto currentBb = pair.first;
+		topVal = pair.second;
 		queue.pop();
 		LOG << "\t" << currentBb->getName().str() << std::endl;
 
@@ -233,7 +235,7 @@ bool X87FpuAnalysis::analyzeBb(
 
 		for (auto succIt = succ_begin(currentBb), e = succ_end(currentBb); succIt != e; ++succIt) {
 			auto *succ = *succIt;
-			queue.push(succ);
+			queue.push({succ, topVal});
 		}
 	}
 	return changed;
