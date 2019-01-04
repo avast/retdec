@@ -144,7 +144,7 @@ sudo pacman -S base-devel cmake git perl python3 bison flex autoconf automake li
 
 Packages should be preferably installed via [Homebrew](https://brew.sh).
 
-* Full Xcode installation (Command Line Tools are untested)
+* Full Xcode installation ([including command-line tools](https://github.com/frida/frida/issues/338#issuecomment-426777849), see [#425](https://github.com/avast-tl/retdec/issues/425) and [#433](https://github.com/avast-tl/retdec/issues/433))
 * [CMake](https://cmake.org/) (version >= 3.6)
 * [Git](https://git-scm.com/)
 * [Perl](https://www.perl.org/)

@@ -86,6 +86,9 @@ class Resource
 
 		/// @name Other methods
 		/// @{
+		bool isLoaded() const;
+		bool hasValidName() const;
+		bool hasValidId() const;
 		void invalidateNameId();
 		void invalidateTypeId();
 		void invalidateLanguageId();
