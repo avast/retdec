@@ -130,6 +130,11 @@ void BIRWriter::emitLabel(ShPtr<Statement> stmt) {
 		std::cout << stmt->getLabel() << ": (" << std::hex
 				<< uint64_t(stmt.get()) << std::dec << ")" << std::endl;
 	}
+	else if (stmt && stmt->isGotoTarget()) {
+		emitIndent(2);
+		std::cout << "missing label for goto target: (" << std::hex
+				<< uint64_t(stmt.get()) << std::dec << ")" << std::endl;
+	}
 }
 
 void BIRWriter::visit(ShPtr<GlobalVarDef> varDef) {
