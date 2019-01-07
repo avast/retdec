@@ -72,7 +72,7 @@ ShPtr<Module> NewLLVMIR2BIRConverter::convert(llvm::Module *llvmModule,
 		config);
 	variablesManager = std::make_shared<VariablesManager>(resModule);
 	converter = LLVMValueConverter::create(resModule, variablesManager);
-	structConverter = std::make_unique<StructureConverter>(basePass, converter);
+	structConverter = std::make_unique<StructureConverter>(basePass, converter, resModule);
 
 	converter->setOptionStrictFPUSemantics(optionStrictFPUSemantics);
 

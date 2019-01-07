@@ -13,6 +13,7 @@
 #include <llvm/IR/Instructions.h>
 #include <llvm/Pass.h>
 
+#include "retdec/llvmir2hll/hll/bir_writer.h"
 #include "retdec/llvmir2hll/ir/assign_stmt.h"
 #include "retdec/llvmir2hll/ir/break_stmt.h"
 #include "retdec/llvmir2hll/ir/const_bool.h"
@@ -68,12 +69,12 @@ const unsigned MIN_GOTO_STATEMENTS = 3;
 * @param[in] conv A converter from LLVM values to values in BIR.
 */
 StructureConverter::StructureConverter(llvm::Pass *basePass,
-	ShPtr<LLVMValueConverter> conv):
+	ShPtr<LLVMValueConverter> conv, ShPtr<Module> module):
 		basePass(basePass), loopInfo(), scalarEvolution(),
 		labelsHandler(std::make_shared<LabelsHandler>()),
 		bbConverter(std::make_unique<BasicBlockConverter>(conv, labelsHandler)),
 		converter(conv), loopHeaders(), generatedPHINodes(),
-		reducedLoops(), reducedSwitches() {}
+		reducedLoops(), reducedSwitches(), resModule(module) {}
 
 /**
 * @brief Destructs the converter.

@@ -75,7 +75,7 @@ private:
 	using MapStmtToClones = std::unordered_map<ShPtr<Statement>, std::vector<ShPtr<Statement>>>;
 
 public:
-	StructureConverter(llvm::Pass *basePass, ShPtr<LLVMValueConverter> conv);
+	StructureConverter(llvm::Pass *basePass, ShPtr<LLVMValueConverter> conv, ShPtr<Module> module);
 	~StructureConverter();
 
 	ShPtr<Statement> convertFuncBody(llvm::Function &func);
@@ -311,6 +311,9 @@ private:
 
 	// A set of nodes, which are already generated to the resulting code.
 	CFGNode::CFGNodeSet generatedNodes;
+
+	/// The resulting module in BIR.
+	ShPtr<Module> resModule;
 };
 
 } // namespace llvmir2hll
