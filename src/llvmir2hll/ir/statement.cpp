@@ -6,6 +6,7 @@
 
 #include "retdec/llvmir2hll/ir/empty_stmt.h"
 #include "retdec/llvmir2hll/ir/goto_stmt.h"
+#include "retdec/llvmir2hll/ir/return_stmt.h"
 #include "retdec/llvmir2hll/ir/statement.h"
 #include "retdec/llvmir2hll/llvm/llvm_support.h"
 #include "retdec/llvmir2hll/support/debug.h"
@@ -69,7 +70,7 @@ void Statement::setSuccessor(ShPtr<Statement> newSucc) {
 	if (newSucc) {
 		// Update the non-goto predecessors of the new successor.
 		newSucc->removePredecessors(true);
-		newSucc->preds.insert(ucast<Statement>(shared_from_this()));
+		newSucc->addPredecessor(ucast<Statement>(shared_from_this()));
 	}
 
 	succ = newSucc;
@@ -151,7 +152,7 @@ void Statement::prependStatement(ShPtr<Statement> stmt) {
 
 	// Set lastStmt as the only non-goto predecessor of the current statement.
 	removePredecessors(true);
-	preds.insert(lastStmt);
+	addPredecessor(lastStmt);
 
 	// Set the current statement as lastStmt's successor.
 	lastStmt->setSuccessor(ucast<Statement>(thisStmt));
@@ -200,7 +201,7 @@ void Statement::appendStatement(ShPtr<Statement> stmt) {
 	succ = stmt;
 
 	stmt->removePredecessors(true);
-	stmt->preds.insert(ucast<Statement>(shared_from_this()));
+	stmt->addPredecessor(ucast<Statement>(shared_from_this()));
 }
 
 /**
