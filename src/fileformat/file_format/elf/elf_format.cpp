@@ -1877,9 +1877,15 @@ void ElfFormat::loadDynamicTable(DynamicTable &table, const ELFIO::dynamic_secti
  * Load dynamic table
  * @param elfDynamicTable Pointer to dynamic section accessor
  */
-void ElfFormat::loadDynamicTable(const ELFIO::dynamic_section_accessor *elfDynamicTable)
+void ElfFormat::loadDynamicTable(
+		const ELFIO::dynamic_section_accessor *elfDynamicTable,
+		const ELFIO::section *sec)
 {
 	auto *table = new DynamicTable();
+	if (sec)
+	{
+		table->setSectionName(sec->get_name());
+	}
 	loadDynamicTable(*table, elfDynamicTable);
 	dynamicTables.push_back(table);
 }
@@ -1941,7 +1947,7 @@ void ElfFormat::loadSections()
 			case SHT_DYNAMIC:
 			{
 				auto dyn = dynamic_section_accessor(reader, sec);
-				loadDynamicTable(&dyn);
+				loadDynamicTable(&dyn, sec);
 				break;
 			}
 			default:;
@@ -2063,7 +2069,7 @@ void ElfFormat::loadInfoFromDynamicSegment()
 		dynamic->set_size(seg->get_file_size());
 		dynamic->set_data(seg->get_data(), seg->get_file_size());
 		auto *accessor = new dynamic_section_accessor(writer, dynamic);
-		loadDynamicTable(accessor);
+		loadDynamicTable(accessor, dynamic);
 		delete accessor;
 	}
 
