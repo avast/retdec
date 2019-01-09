@@ -960,24 +960,38 @@ std::size_t getAreaSize(std::size_t address, const Segment &seg, const DynamicTa
 		{
 			switch(item.getType())
 			{
-				case DT_NULL:
-				case DT_NEEDED:
-				case DT_PLTRELSZ:
-				case DT_RELASZ:
-				case DT_RELAENT:
-				case DT_STRSZ:
-				case DT_SYMENT:
-				case DT_SONAME:
-				case DT_RPATH:
-				case DT_RELSZ:
-				case DT_RELENT:
-				case DT_INIT_ARRAYSZ:
-				case DT_FINI_ARRAYSZ:
-				case DT_RUNPATH:
-				case DT_PREINIT_ARRAYSZ:
+				// Whitelist types that we use -> there can be weird entries
+				// that would screw up the size.
+				// All symbols with d_ptr semantics (= virtual address)
+				// https://dmz-portal.mips.com/wiki/MIPS_Dynamic
+				case DT_PLTGOT:
+				case DT_HASH:
+				case DT_STRTAB:
+				case DT_SYMTAB:
+				case DT_RELA:
+				case DT_INIT:
+				case DT_FINI:
+				case DT_REL:
+				case DT_DEBUG:
+				case DT_JMPREL:
+				case DT_INIT_ARRAY:
+				case DT_FINI_ARRAY:
+				case DT_PREINIT_ARRAY:
+				// MIPS specific.
+				//case DT_MIPS_BASE_ADDRESS: // We probably do not want to use this.
+				case DT_MIPS_CONFLICT:
+				case DT_MIPS_LIBLIST:
+				{
+					auto tmp = !size ? item.getValue() : std::min(size, static_cast<std::size_t>(item.getValue()));
+					if (tmp > address)
+					{
+						size = tmp;
+					}
 					break;
+				}
 				default:
-					size = !size ? item.getValue() : std::min(size, static_cast<std::size_t>(item.getValue()));
+					break;
+
 			}
 		}
 	}
