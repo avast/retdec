@@ -98,26 +98,4 @@ ELFIO::relocation_section_accessor* ElfWrapper::getRelocationTable(unsigned long
 			new relocation_section_accessor(reader, fileSec) : nullptr;
 }
 
-/**
- * Get dynamic section
- * @param secIndex Index of dynamic section (indexed from 0)
- * @return Pointer to dynamic section or @c nullptr if any error
- *
- * If required section is not dynamic section, method will return @c nullptr
- *
- * Pointer to dynamic section accessor is dynamically allocated and must be released
- *    (otherwise there is a memory leak)
- */
-ELFIO::dynamic_section_accessor* ElfWrapper::getDynamicSection(unsigned long long secIndex) const
-{
-	section *fileSec = getFileSection(secIndex);
-	if(!fileSec)
-	{
-		return nullptr;
-	}
-
-	const unsigned long long secType = fileSec->get_type();
-	return secType == SHT_DYNAMIC ? new dynamic_section_accessor(reader, fileSec) : nullptr;
-}
-
 } // namespace fileinfo
