@@ -32,6 +32,7 @@ class ElfFormat : public FileFormat
 			unsigned long long size;      ///< size of table
 			unsigned long long entrySize; ///< size of one entry in table
 			unsigned long long type;      ///< type of relocations (SHT_REL or SHT_RELA)
+			bool plt = false;             ///< associated with Procedure Linkage Table.
 
 			RelocationTableInfo();
 			~RelocationTableInfo();
@@ -54,6 +55,7 @@ class ElfFormat : public FileFormat
 		ELFIO::section* addRelocationTable(ELFIO::section *dynamicSection, const RelocationTableInfo &info, ELFIO::section *symbolTable);
 		ELFIO::section* addRelRelocationTable(ELFIO::section *dynamicSection, const DynamicTable &table, ELFIO::section *symbolTable);
 		ELFIO::section* addRelaRelocationTable(ELFIO::section *dynamicSection, const DynamicTable &table, ELFIO::section *symbolTable);
+		ELFIO::section* addPltRelocationTable(ELFIO::section *dynamicSection, const DynamicTable &table, ELFIO::section *symbolTable);
 		ELFIO::section* addGlobalOffsetTable(ELFIO::section *dynamicSection, const DynamicTable &table);
 		ELFIO::Elf_Half fixSymbolLink(ELFIO::Elf_Half symbolLink, ELFIO::Elf64_Addr symbolValue);
 		bool getRelocationMask(unsigned relType, std::vector<std::uint8_t> &mask);

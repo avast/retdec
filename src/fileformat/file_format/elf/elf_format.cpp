@@ -1318,7 +1318,13 @@ ELFIO::section* ElfFormat::addRelocationTable(ELFIO::section *dynamicSection, co
 		return nullptr;
 	}
 
-	auto *relocationTable = writer.sections.add((info.type == SHT_REL ? "rel_" : "rela_") + dynamicSection->get_name());
+	std::string name = info.type == SHT_REL ? "rel_" : "rela_";
+	if (info.plt)
+	{
+		name = "plt_" + name;
+	}
+
+	auto *relocationTable = writer.sections.add(name + dynamicSection->get_name());
 	relocationTable->set_type(info.type);
 	relocationTable->set_offset(relSeg->getOffset() + (info.address - relSeg->getAddress()));
 	relocationTable->set_address(info.address);
@@ -1408,6 +1414,64 @@ ELFIO::section* ElfFormat::addRelaRelocationTable(ELFIO::section *dynamicSection
 	info.size = sizeRecord->getValue();
 	info.entrySize = entrySizeRecord->getValue();
 	info.type = SHT_RELA;
+	return addRelocationTable(dynamicSection, info, symbolTable);
+}
+
+/**
+ * LOAD relocations associated with the Procedure Linkage Table (PLT).
+ * @param dynamicSection Section from @a writer which represents ELF dynamic segment
+ * @param table Loaded dynamic records from @a dynamicSection
+ * @param symbolTable Symbol table associated with relocation table
+ * @return Pointer to added relocation table or @c nullptr if relocation table
+ *    was not successfully added to @a writer
+ */
+ELFIO::section* ElfFormat::addPltRelocationTable(ELFIO::section *dynamicSection, const DynamicTable &table, ELFIO::section *symbolTable)
+{
+	if(!dynamicSection || dynamicSection->get_type() != SHT_DYNAMIC)
+	{
+		return nullptr;
+	}
+
+	const auto *pltgotRecord = table.getRecordOfType(DT_PLTGOT);
+	const auto *addrRecord = table.getRecordOfType(DT_JMPREL);
+	const auto *sizeRecord = table.getRecordOfType(DT_PLTRELSZ);
+	const auto *entryTypeRecord = table.getRecordOfType(DT_PLTREL);
+	const auto *relEntrySizeRecord = table.getRecordOfType(DT_RELENT);
+	const auto *relaEntrySizeRecord = table.getRecordOfType(DT_RELAENT);
+
+	if(!pltgotRecord || !addrRecord || !sizeRecord)
+	{
+		return nullptr;
+	}
+	if (entryTypeRecord->getValue() != DT_REL
+			&& entryTypeRecord->getValue() != DT_RELA)
+	{
+		return nullptr;
+	}
+	if ((entryTypeRecord->getValue() == DT_REL && !relEntrySizeRecord)
+			|| (entryTypeRecord->getValue() == DT_RELA && !relaEntrySizeRecord))
+	{
+		return nullptr;
+	}
+
+	RelocationTableInfo info;
+	info.plt = true;
+	info.address = addrRecord->getValue();
+	info.size = sizeRecord->getValue();
+	if (entryTypeRecord->getValue() == DT_REL)
+	{
+		info.entrySize = relEntrySizeRecord->getValue();
+		info.type = SHT_REL;
+	}
+	else if (entryTypeRecord->getValue() == DT_RELA)
+	{
+		info.entrySize = relaEntrySizeRecord->getValue();
+		info.type = SHT_RELA;
+	}
+	else
+	{
+		return nullptr;
+	}
 	return addRelocationTable(dynamicSection, info, symbolTable);
 }
 
@@ -2035,6 +2099,7 @@ void ElfFormat::loadInfoFromDynamicTables(std::size_t noOfTables)
 
 		addRelRelocationTable(sec, *dynTab, symTab);
 		addRelaRelocationTable(sec, *dynTab, symTab);
+		addPltRelocationTable(sec, *dynTab, symTab);
 		auto *symAccessor = new symbol_section_accessor(writer, symTab);
 		loadSymbols(&writer, symAccessor, symTab);
 		delete symAccessor;
