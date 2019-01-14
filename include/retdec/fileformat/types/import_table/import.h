@@ -17,15 +17,25 @@ namespace fileformat {
  */
 class Import
 {
+	public:
+		enum class UsageType
+		{
+			UNKNOWN,
+			FUNCTION,
+			OBJECT,
+			FILE
+		};
+
 	private:
 		std::string name;                 ///< import name
 		unsigned long long libraryIndex;  ///< index of library from which is import imported
 		unsigned long long address;       ///< address of import
 		unsigned long long ordinalNumber; ///< ordinal number
 		bool ordinalNumberIsValid;        ///< @c true if ordinal number is valid
+		UsageType usageType;              ///< usage of symbol
 	public:
 		Import();
-		~Import();
+		virtual ~Import();
 
 		/// @name Getters
 		/// @{
@@ -33,6 +43,15 @@ class Import
 		unsigned long long getLibraryIndex() const;
 		unsigned long long getAddress() const;
 		bool getOrdinalNumber(unsigned long long &importOrdinalNumber) const;
+		Import::UsageType getUsageType() const;
+		/// @}
+
+		/// @name Usage type queries
+		/// @{
+		bool isUnknown() const;
+		bool isFunction() const;
+		bool isObject() const;
+		bool isFile() const;
 		/// @}
 
 		/// @name Setters
@@ -41,6 +60,7 @@ class Import
 		void setLibraryIndex(unsigned long long importLibraryIndex);
 		void setAddress(unsigned long long importAddress);
 		void setOrdinalNumber(unsigned long long importOrdinalNumber);
+		void setUsageType(Import::UsageType importUsageType);
 		/// @}
 
 		/// @name Other methods

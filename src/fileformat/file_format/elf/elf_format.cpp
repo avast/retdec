@@ -863,6 +863,21 @@ Symbol::UsageType getSymbolUsageType(unsigned char type)
 	}
 }
 
+Import::UsageType symbolToImportUsage(Symbol::UsageType symbolUsage)
+{
+	switch(symbolUsage)
+	{
+		case Symbol::UsageType::FUNCTION:
+			return Import::UsageType::FUNCTION;
+		case Symbol::UsageType::OBJECT:
+			return Import::UsageType::OBJECT;
+		case Symbol::UsageType::FILE:
+			return Import::UsageType::FILE;
+		default:
+			return Import::UsageType::UNKNOWN;
+	}
+}
+
 /**
  * Get type of section
  * @param sec ELF section
@@ -1784,6 +1799,7 @@ void ElfFormat::loadSymbols(const ELFIO::elfio *file, const ELFIO::symbol_sectio
 					auto import = std::make_unique<Import>();
 					import->setName(name);
 					import->setAddress(address.second);
+					import->setUsageType(symbolToImportUsage(symbol->getUsageType()));
 					importTable->addImport(std::move(import));
 				}
 				if(keyIter.first == keyIter.second && getSectionFromAddress(value))
@@ -1791,6 +1807,7 @@ void ElfFormat::loadSymbols(const ELFIO::elfio *file, const ELFIO::symbol_sectio
 					auto import = std::make_unique<Import>();
 					import->setName(name);
 					import->setAddress(value);
+					import->setUsageType(symbolToImportUsage(symbol->getUsageType()));
 					importTable->addImport(std::move(import));
 				}
 			}
