@@ -37,7 +37,7 @@ Currently, we support Windows (7 or later), Linux, and macOS.
 
 ### Windows
 
-1. Either download and unpack a [pre-built package](https://github.com/avast-tl/retdec/releases), or build and install the decompiler by yourself (the process is described below):
+1. Either download and unpack a [pre-built package](https://github.com/avast-tl/retdec/releases), or build and install the decompiler by yourself (the process is described below).
 
 2. Install [Microsoft Visual C++ Redistributable for Visual Studio 2015](https://www.microsoft.com/en-us/download/details.aspx?id=48145).
 
