@@ -2149,12 +2149,13 @@ void ElfFormat::loadInfoFromDynamicSegment()
 			continue;
 		}
 
-		if(seg->get_offset() + seg->get_file_size() > getFileLength())
+		if (seg->get_offset() >= getFileLength())
 		{
 			continue;
 		}
+		std::size_t segSz = getFileLength() - seg->get_offset();
 
-		seg->load(*reader.get_istream(), seg->get_offset(), seg->get_file_size());
+		seg->load(*reader.get_istream(), seg->get_offset(), segSz);
 		auto *dynamic = writer.sections.add("dynamic_" + numToStr(++noOfDynTables));
 		dynamic->set_type(SHT_DYNAMIC);
 		dynamic->set_offset(seg->get_offset());
@@ -2162,8 +2163,8 @@ void ElfFormat::loadInfoFromDynamicSegment()
 		dynamic->set_entry_size((reader.get_class() == ELFCLASS32) ? sizeof(Elf32_Dyn) : sizeof(Elf64_Dyn));
 		dynamic->set_addr_align(seg->get_align());
 		dynamic->set_link(0);
-		dynamic->set_size(seg->get_file_size());
-		dynamic->set_data(seg->get_data(), seg->get_file_size());
+		dynamic->set_size(segSz);
+		dynamic->set_data(seg->get_data(), segSz);
 		auto *accessor = new dynamic_section_accessor(writer, dynamic);
 		loadDynamicTable(accessor, dynamic);
 		delete accessor;
