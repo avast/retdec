@@ -33,7 +33,7 @@ For more information, check out our
 
 ## Installation and Use
 
-Currently, we support Windows (7 or later), Linux, and macOS.
+Currently, we support Windows (7 or later), Linux, and macOS. An installed version of RetDec requires approximately 4 GB of free disk space.
 
 ### Windows
 
