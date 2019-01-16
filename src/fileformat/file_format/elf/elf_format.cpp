@@ -1137,6 +1137,7 @@ void ElfFormat::initStructures()
 	elfClass = reader.get_class();
 	loadSections();
 	loadSegments();
+
 	if(!dynamicSectionLoaded && reader.segments.size() && !isUnknownEndian() &&
 		(elfClass == ELFCLASS32 || elfClass == ELFCLASS64))
 	{
@@ -1957,8 +1958,9 @@ void ElfFormat::loadDynamicTable(DynamicTable &table, const ELFIO::dynamic_secti
 /**
  * Load dynamic table
  * @param elfDynamicTable Pointer to dynamic section accessor
+ * @return @c True if table was successfully loaded, @c false otherwise.
  */
-void ElfFormat::loadDynamicTable(
+bool ElfFormat::loadDynamicTable(
 		const ELFIO::dynamic_section_accessor *elfDynamicTable,
 		const ELFIO::section *sec)
 {
@@ -1968,7 +1970,16 @@ void ElfFormat::loadDynamicTable(
 		table->setSectionName(sec->get_name());
 	}
 	loadDynamicTable(*table, elfDynamicTable);
-	dynamicTables.push_back(table);
+	if (table->getNumberOfRecords() > 0)
+	{
+		dynamicTables.push_back(table);
+		return true;
+	}
+	else
+	{
+		delete table;
+		return false;
+	}
 }
 
 /**
@@ -2028,8 +2039,7 @@ void ElfFormat::loadSections()
 			case SHT_DYNAMIC:
 			{
 				auto dyn = dynamic_section_accessor(reader, sec);
-				loadDynamicTable(&dyn, sec);
-				dynamicSectionLoaded = true;
+				dynamicSectionLoaded = loadDynamicTable(&dyn, sec);
 				break;
 			}
 			default:;
