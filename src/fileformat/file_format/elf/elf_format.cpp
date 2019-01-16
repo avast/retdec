@@ -1053,19 +1053,6 @@ void getRelatedRelocationTables(const ELFIO::elfio *file, const ELFIO::section *
 }
 
 /**
- * Fix symbol name
- * @param symbolName Name of symbol
- */
-void fixSymbolName(std::string &symbolName)
-{
-	const auto pos = symbolName.find("@@GLIBC_");
-	if(pos && pos != std::string::npos)
-	{
-		symbolName.erase(pos);
-	}
-}
-
-/**
  * Create new relocation with given parameters
  * @param name Name of symbol being relocated
  * @param offset Offset of symbol being relocated
@@ -1771,7 +1758,6 @@ void ElfFormat::loadSymbols(const ELFIO::elfio *file, const ELFIO::symbol_sectio
 		symbol->setType(getSymbolType(bind, type, link));
 		symbol->setUsageType(getSymbolUsageType(type));
 		symbol->setOriginalName(name);
-		fixSymbolName(name);
 		symbol->setName(name);
 		symbol->setIndex(i);
 		symbol->setElfType(type);
