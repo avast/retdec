@@ -1137,7 +1137,7 @@ void ElfFormat::initStructures()
 	elfClass = reader.get_class();
 	loadSections();
 	loadSegments();
-	if(!getNumberOfSymbolTables() && reader.segments.size() && !isUnknownEndian() &&
+	if(!dynamicSectionLoaded && reader.segments.size() && !isUnknownEndian() &&
 		(elfClass == ELFCLASS32 || elfClass == ELFCLASS64))
 	{
 		writer.create(elfClass, reader.get_encoding());
@@ -2029,6 +2029,7 @@ void ElfFormat::loadSections()
 			{
 				auto dyn = dynamic_section_accessor(reader, sec);
 				loadDynamicTable(&dyn, sec);
+				dynamicSectionLoaded = true;
 				break;
 			}
 			default:;
@@ -2103,9 +2104,13 @@ void ElfFormat::loadInfoFromDynamicTables(std::size_t noOfTables)
 		addRelRelocationTable(sec, *dynTab, symTab);
 		addRelaRelocationTable(sec, *dynTab, symTab);
 		addPltRelocationTable(sec, *dynTab, symTab);
-		auto *symAccessor = new symbol_section_accessor(writer, symTab);
-		loadSymbols(&writer, symAccessor, symTab);
-		delete symAccessor;
+
+		if (getNumberOfSymbolTables() == 0)
+		{
+			auto *symAccessor = new symbol_section_accessor(writer, symTab);
+			loadSymbols(&writer, symAccessor, symTab);
+			delete symAccessor;
+		}
 
 		// MIPS specific analysis
 		if(isMips() && symbolTables.size())
