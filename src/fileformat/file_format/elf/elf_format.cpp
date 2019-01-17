@@ -1965,6 +1965,10 @@ void ElfFormat::loadSections()
 			{
 				auto sym = symbol_section_accessor(reader, sec);
 				loadSymbols(&reader, &sym, sec);
+
+				symtabOffsets.insert(sec->get_offset());
+				symtabAddresses.insert(sec->get_address());
+
 				break;
 			}
 			default:;
@@ -2165,12 +2169,17 @@ void ElfFormat::loadInfoFromDynamicTables(DynamicTable &dynTab, ELFIO::section *
 	addRelRelocationTable(sec, dynTab, symTab);
 	addRelaRelocationTable(sec, dynTab, symTab);
 	addPltRelocationTable(sec, dynTab, symTab);
-
-	if (getNumberOfSymbolTables() == 0)
+	// Load symtab from DYNAMIC section only if it is different from all
+	// already loaded symtabs.
+	if (symtabOffsets.count(symTab->get_offset()) == 0
+			&& symtabAddresses.count(symTab->get_address()) == 0)
 	{
 		auto *symAccessor = new symbol_section_accessor(writer, symTab);
 		loadSymbols(&writer, symAccessor, symTab);
 		delete symAccessor;
+
+		symtabOffsets.insert(symTab->get_offset());
+		symtabAddresses.insert(symTab->get_address());
 	}
 
 	// MIPS specific analysis

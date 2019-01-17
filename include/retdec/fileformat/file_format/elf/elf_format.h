@@ -81,6 +81,11 @@ class ElfFormat : public FileFormat
 		int elfClass;        ///< class of input ELF file
 		ELFIO::elfio reader; ///< parser of input ELF file
 		ELFIO::elfio writer; ///< parser of auxiliary ELF object which is needed for fixing representation of input file
+
+		/// Offsets of already read symbol tables.
+		std::set<ELFIO::Elf64_Off> symtabOffsets;
+		/// Addresses of already read symbol tables.
+		std::set<ELFIO::Elf64_Addr> symtabAddresses;
 	public:
 		ElfFormat(std::string pathToFile, LoadFlags loadFlags = LoadFlags::NONE);
 		ElfFormat(std::istream &inputStream, LoadFlags loadFlags = LoadFlags::NONE);
