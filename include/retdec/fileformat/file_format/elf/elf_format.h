@@ -67,7 +67,7 @@ class ElfFormat : public FileFormat
 		void loadSections();
 		void loadSegments();
 		void loadDynamicSegmentSection();
-		void loadInfoFromDynamicTables(std::size_t noOfTables);
+		void loadInfoFromDynamicTables(DynamicTable &dynTab, ELFIO::section *sec);
 		void loadInfoFromDynamicSegment();
 		void loadNoteSecSeg(ElfNoteSecSeg &noteSecSegs) const;
 		void loadNotes();

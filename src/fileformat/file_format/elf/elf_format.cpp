@@ -2024,8 +2024,18 @@ void ElfFormat::loadDynamicSegmentSection()
 			auto *sec = reader.sections[i];
 			if (sec && sec->get_type() == SHT_DYNAMIC)
 			{
+				if (sec->get_entry_size() == 0)
+				{
+					auto esz = (reader.get_class() == ELFCLASS64) ? sizeof(Elf64_Dyn) : sizeof(Elf32_Dyn);
+					sec->set_entry_size(esz);
+				}
+				sec->load(*reader.get_istream(), sec->get_offset(), sec->get_size());
+
 				auto dyn = dynamic_section_accessor(reader, sec);
-				loadDynamicTable(&dyn, sec);
+				if (loadDynamicTable(&dyn, sec))
+				{
+					loadInfoFromDynamicTables(*dynamicTables.back(), sec);
+				}
 			}
 		}
 	}
@@ -2036,8 +2046,7 @@ void ElfFormat::loadDynamicSegmentSection()
  */
 void ElfFormat::loadInfoFromDynamicSegment()
 {
-	std::size_t noOfDynTables = 0;
-
+	std::size_t noOfDynTables = 1;
 	for(std::size_t i = 0, e = reader.segments.size(); i < e; ++i)
 	{
 		auto *seg = reader.segments[i];
@@ -2053,7 +2062,7 @@ void ElfFormat::loadInfoFromDynamicSegment()
 		std::size_t segSz = getFileLength() - seg->get_offset();
 
 		seg->load(*reader.get_istream(), seg->get_offset(), segSz);
-		auto *dynamic = writer.sections.add("dynamic_" + numToStr(++noOfDynTables));
+		auto *dynamic = writer.sections.add("dynamic_" + numToStr(noOfDynTables++));
 		dynamic->set_type(SHT_DYNAMIC);
 		dynamic->set_offset(seg->get_offset());
 		dynamic->set_address(seg->get_virtual_address());
@@ -2062,12 +2071,13 @@ void ElfFormat::loadInfoFromDynamicSegment()
 		dynamic->set_link(0);
 		dynamic->set_size(segSz);
 		dynamic->set_data(seg->get_data(), segSz);
+
 		auto *accessor = new dynamic_section_accessor(writer, dynamic);
 		loadDynamicTable(accessor, dynamic);
 		delete accessor;
-	}
 
-	loadInfoFromDynamicTables(noOfDynTables);
+		loadInfoFromDynamicTables(*dynamicTables.back(), dynamic);
+	}
 }
 
 /**
@@ -2133,59 +2143,44 @@ void ElfFormat::loadDynamicTable(DynamicTable &table, const ELFIO::dynamic_secti
 
 /**
  * Load information from dynamic tables
- * @param noOfTables Number of dynamic tables which have been added to @a writer
- *    member of this class. It is supposed, that each of these tables have been
- *    added as the new section to the end of section list andas the new dynamic
- *    table to the end of dynamic table list.
  */
-void ElfFormat::loadInfoFromDynamicTables(std::size_t noOfTables)
+void ElfFormat::loadInfoFromDynamicTables(DynamicTable &dynTab, ELFIO::section *sec)
 {
-	const auto noOfWriterSections = writer.sections.size();
-	if(!noOfTables || noOfTables > noOfWriterSections || noOfTables > getNumberOfDynamicTables())
+	auto *strTab = addStringTable(sec, dynTab);
+	if(!strTab)
 	{
 		return;
 	}
 
-	for(std::size_t i = 0; i < noOfTables; ++i)
+	auto *dynAccessor = new dynamic_section_accessor(writer, sec);
+	loadDynamicTable(dynTab, dynAccessor);
+	delete dynAccessor;
+
+	auto *symTab = addSymbolTable(sec, dynTab, strTab);
+	if(!symTab)
 	{
-		auto *sec = writer.sections[noOfWriterSections - noOfTables + i];
-		auto *dynTab = dynamicTables[getNumberOfDynamicTables() - noOfTables + i];
-		auto *strTab = addStringTable(sec, *dynTab);
-		if(!strTab)
+		return;
+	}
+
+	addRelRelocationTable(sec, dynTab, symTab);
+	addRelaRelocationTable(sec, dynTab, symTab);
+	addPltRelocationTable(sec, dynTab, symTab);
+
+	if (getNumberOfSymbolTables() == 0)
+	{
+		auto *symAccessor = new symbol_section_accessor(writer, symTab);
+		loadSymbols(&writer, symAccessor, symTab);
+		delete symAccessor;
+	}
+
+	// MIPS specific analysis
+	if(isMips() && symbolTables.size())
+	{
+		auto *got = addGlobalOffsetTable(sec, dynTab);
+		if(got)
 		{
-			continue;
-		}
-
-		auto *dynAccessor = new dynamic_section_accessor(writer, sec);
-		loadDynamicTable(*dynTab, dynAccessor);
-		delete dynAccessor;
-
-		auto *symTab = addSymbolTable(sec, *dynTab, strTab);
-		if(!symTab)
-		{
-			continue;
-		}
-
-		addRelRelocationTable(sec, *dynTab, symTab);
-		addRelaRelocationTable(sec, *dynTab, symTab);
-		addPltRelocationTable(sec, *dynTab, symTab);
-
-		if (getNumberOfSymbolTables() == 0)
-		{
-			auto *symAccessor = new symbol_section_accessor(writer, symTab);
-			loadSymbols(&writer, symAccessor, symTab);
-			delete symAccessor;
-		}
-
-		// MIPS specific analysis
-		if(isMips() && symbolTables.size())
-		{
-			auto *got = addGlobalOffsetTable(sec, *dynTab);
-			if(got)
-			{
-				auto *symbols = symbolTables.back();
-				loadSymbols(*symbols, *dynTab, *got);
-			}
+			auto *symbols = symbolTables.back();
+			loadSymbols(*symbols, dynTab, *got);
 		}
 	}
 }
