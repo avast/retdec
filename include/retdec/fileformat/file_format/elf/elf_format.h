@@ -66,6 +66,7 @@ class ElfFormat : public FileFormat
 		bool loadDynamicTable(const ELFIO::dynamic_section_accessor *elfDynamicTable, const ELFIO::section *sec);
 		void loadSections();
 		void loadSegments();
+		void loadDynamicSegmentSection();
 		void loadInfoFromDynamicTables(std::size_t noOfTables);
 		void loadInfoFromDynamicSegment();
 		void loadNoteSecSeg(ElfNoteSecSeg &noteSecSegs) const;
@@ -80,9 +81,6 @@ class ElfFormat : public FileFormat
 		int elfClass;        ///< class of input ELF file
 		ELFIO::elfio reader; ///< parser of input ELF file
 		ELFIO::elfio writer; ///< parser of auxiliary ELF object which is needed for fixing representation of input file
-
-		/// Was the dynamic section loaded?
-		bool dynamicSectionLoaded = false;
 	public:
 		ElfFormat(std::string pathToFile, LoadFlags loadFlags = LoadFlags::NONE);
 		ElfFormat(std::istream &inputStream, LoadFlags loadFlags = LoadFlags::NONE);

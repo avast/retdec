@@ -1137,16 +1137,8 @@ void ElfFormat::initStructures()
 	elfClass = reader.get_class();
 	loadSections();
 	loadSegments();
+	loadDynamicSegmentSection();
 
-	if(!dynamicSectionLoaded && reader.segments.size() && !isUnknownEndian() &&
-		(elfClass == ELFCLASS32 || elfClass == ELFCLASS64))
-	{
-		writer.create(elfClass, reader.get_encoding());
-		writer.set_os_abi(static_cast<unsigned char>(getOsOrAbi()));
-		writer.set_type(reader.get_type());
-		writer.set_machine(reader.get_machine());
-		loadInfoFromDynamicSegment();
-	}
 	computeSectionTableHashes();
 	loadStrings();
 	loadNotes(); // must be done after sections and segments
@@ -1922,67 +1914,6 @@ void ElfFormat::loadSymbols(const SymbolTable &oldTab, const DynamicTable &dynTa
 }
 
 /**
- * Load dynamic table
- * @param table Parameter for store dynamic table
- * @param elfDynamicTable Pointer to dynamic section accessor
- *
- * @a Content of elfDynamicTable is stored into @a table. Previous content
- * of @a table is deleted.
- */
-void ElfFormat::loadDynamicTable(DynamicTable &table, const ELFIO::dynamic_section_accessor *elfDynamicTable)
-{
-	table.clear();
-	if(!elfDynamicTable)
-	{
-		return;
-	}
-
-	DynamicEntry entry;
-	std::string desc;
-	Elf_Xword type = 0, value = 0;
-
-	for(std::size_t i = 0, e = elfDynamicTable->get_loaded_entries_num(); i < e; ++i)
-	{
-		elfDynamicTable->get_entry(i, type, value, desc);
-		entry.setType(type);
-		entry.setValue(value);
-		entry.setDescription(desc);
-		table.addRecord(entry);
-		if(type == DT_NULL)
-		{
-			break;
-		}
-	}
-}
-
-/**
- * Load dynamic table
- * @param elfDynamicTable Pointer to dynamic section accessor
- * @return @c True if table was successfully loaded, @c false otherwise.
- */
-bool ElfFormat::loadDynamicTable(
-		const ELFIO::dynamic_section_accessor *elfDynamicTable,
-		const ELFIO::section *sec)
-{
-	auto *table = new DynamicTable();
-	if (sec)
-	{
-		table->setSectionName(sec->get_name());
-	}
-	loadDynamicTable(*table, elfDynamicTable);
-	if (table->getNumberOfRecords() > 0)
-	{
-		dynamicTables.push_back(table);
-		return true;
-	}
-	else
-	{
-		delete table;
-		return false;
-	}
-}
-
-/**
  * Load information about sections
  */
 void ElfFormat::loadSections()
@@ -2036,12 +1967,6 @@ void ElfFormat::loadSections()
 				loadSymbols(&reader, &sym, sec);
 				break;
 			}
-			case SHT_DYNAMIC:
-			{
-				auto dyn = dynamic_section_accessor(reader, sec);
-				dynamicSectionLoaded = loadDynamicTable(&dyn, sec);
-				break;
-			}
 			default:;
 		}
 	}
@@ -2073,6 +1998,136 @@ void ElfFormat::loadSegments()
 		fSeg->setElfAlign(seg->get_align());
 		fSeg->load(this);
 		segments.push_back(fSeg);
+	}
+}
+
+void ElfFormat::loadDynamicSegmentSection()
+{
+	// Read from segments first.
+	//
+	if(reader.segments.size() && !isUnknownEndian() &&
+		(elfClass == ELFCLASS32 || elfClass == ELFCLASS64))
+	{
+		writer.create(elfClass, reader.get_encoding());
+		writer.set_os_abi(static_cast<unsigned char>(getOsOrAbi()));
+		writer.set_type(reader.get_type());
+		writer.set_machine(reader.get_machine());
+		loadInfoFromDynamicSegment();
+	}
+	// Try sections if no dynamic table read from segments.
+	//
+	if (dynamicTables.empty())
+	{
+		const auto noOfSections = reader.sections.size();
+		for(auto i = 0; i < noOfSections; ++i)
+		{
+			auto *sec = reader.sections[i];
+			if (sec && sec->get_type() == SHT_DYNAMIC)
+			{
+				auto dyn = dynamic_section_accessor(reader, sec);
+				loadDynamicTable(&dyn, sec);
+			}
+		}
+	}
+}
+
+/**
+ * Load information from dynamic segment
+ */
+void ElfFormat::loadInfoFromDynamicSegment()
+{
+	std::size_t noOfDynTables = 0;
+
+	for(std::size_t i = 0, e = reader.segments.size(); i < e; ++i)
+	{
+		auto *seg = reader.segments[i];
+		if(!seg || seg->get_type() != PT_DYNAMIC || !reader.get_istream())
+		{
+			continue;
+		}
+
+		if (seg->get_offset() >= getFileLength())
+		{
+			continue;
+		}
+		std::size_t segSz = getFileLength() - seg->get_offset();
+
+		seg->load(*reader.get_istream(), seg->get_offset(), segSz);
+		auto *dynamic = writer.sections.add("dynamic_" + numToStr(++noOfDynTables));
+		dynamic->set_type(SHT_DYNAMIC);
+		dynamic->set_offset(seg->get_offset());
+		dynamic->set_address(seg->get_virtual_address());
+		dynamic->set_entry_size((reader.get_class() == ELFCLASS32) ? sizeof(Elf32_Dyn) : sizeof(Elf64_Dyn));
+		dynamic->set_addr_align(seg->get_align());
+		dynamic->set_link(0);
+		dynamic->set_size(segSz);
+		dynamic->set_data(seg->get_data(), segSz);
+		auto *accessor = new dynamic_section_accessor(writer, dynamic);
+		loadDynamicTable(accessor, dynamic);
+		delete accessor;
+	}
+
+	loadInfoFromDynamicTables(noOfDynTables);
+}
+
+/**
+ * Load dynamic table
+ * @param elfDynamicTable Pointer to dynamic section accessor
+ * @return @c True if table was successfully loaded, @c false otherwise.
+ */
+bool ElfFormat::loadDynamicTable(
+		const ELFIO::dynamic_section_accessor *elfDynamicTable,
+		const ELFIO::section *sec)
+{
+	auto *table = new DynamicTable();
+	if (sec)
+	{
+		table->setSectionName(sec->get_name());
+	}
+	loadDynamicTable(*table, elfDynamicTable);
+	if (table->getNumberOfRecords() > 0)
+	{
+		dynamicTables.push_back(table);
+		return true;
+	}
+	else
+	{
+		delete table;
+		return false;
+	}
+}
+
+/**
+ * Load dynamic table
+ * @param table Parameter for store dynamic table
+ * @param elfDynamicTable Pointer to dynamic section accessor
+ *
+ * @a Content of elfDynamicTable is stored into @a table. Previous content
+ * of @a table is deleted.
+ */
+void ElfFormat::loadDynamicTable(DynamicTable &table, const ELFIO::dynamic_section_accessor *elfDynamicTable)
+{
+	table.clear();
+	if(!elfDynamicTable)
+	{
+		return;
+	}
+
+	DynamicEntry entry;
+	std::string desc;
+	Elf_Xword type = 0, value = 0;
+
+	for(std::size_t i = 0, e = elfDynamicTable->get_loaded_entries_num(); i < e; ++i)
+	{
+		elfDynamicTable->get_entry(i, type, value, desc);
+		entry.setType(type);
+		entry.setValue(value);
+		entry.setDescription(desc);
+		table.addRecord(entry);
+		if(type == DT_NULL)
+		{
+			break;
+		}
 	}
 }
 
@@ -2133,45 +2188,6 @@ void ElfFormat::loadInfoFromDynamicTables(std::size_t noOfTables)
 			}
 		}
 	}
-}
-
-/**
- * Load information from dynamic segment
- */
-void ElfFormat::loadInfoFromDynamicSegment()
-{
-	std::size_t noOfDynTables = 0;
-
-	for(std::size_t i = 0, e = reader.segments.size(); i < e; ++i)
-	{
-		auto *seg = reader.segments[i];
-		if(!seg || seg->get_type() != PT_DYNAMIC || !reader.get_istream())
-		{
-			continue;
-		}
-
-		if (seg->get_offset() >= getFileLength())
-		{
-			continue;
-		}
-		std::size_t segSz = getFileLength() - seg->get_offset();
-
-		seg->load(*reader.get_istream(), seg->get_offset(), segSz);
-		auto *dynamic = writer.sections.add("dynamic_" + numToStr(++noOfDynTables));
-		dynamic->set_type(SHT_DYNAMIC);
-		dynamic->set_offset(seg->get_offset());
-		dynamic->set_address(seg->get_virtual_address());
-		dynamic->set_entry_size((reader.get_class() == ELFCLASS32) ? sizeof(Elf32_Dyn) : sizeof(Elf64_Dyn));
-		dynamic->set_addr_align(seg->get_align());
-		dynamic->set_link(0);
-		dynamic->set_size(segSz);
-		dynamic->set_data(seg->get_data(), segSz);
-		auto *accessor = new dynamic_section_accessor(writer, dynamic);
-		loadDynamicTable(accessor, dynamic);
-		delete accessor;
-	}
-
-	loadInfoFromDynamicTables(noOfDynTables);
 }
 
 /**
