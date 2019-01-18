@@ -18,8 +18,8 @@ namespace
 {
 
 const std::size_t distributionArray[] = {6, 40, 20, 11, 11, 8};
-const std::string headerArray[] = {"i", "name", "libName", "ordNum", "address", "delayed"};
-const std::string headerDesc[] = {"index", "name of import", "name of library from which is import imported",
+const std::string headerArray[] = {"i", "name", "type", "libName", "ordNum", "address", "delayed"};
+const std::string headerDesc[] = {"index", "name of import", "type of symbol", "name of library from which is import imported",
 									"ordinal number of import", "address of import", "delayed import (only PE)"};
 
 } // anonymous namespace
@@ -80,6 +80,7 @@ bool ImportTablePlainGetter::loadRecord(std::size_t structIndex, std::size_t rec
 	record.clear();
 	record.push_back(numToStr(recIndex));
 	record.push_back(replaceNonprintableChars(fileinfo.getImportName(recIndex)));
+	record.push_back(replaceNonprintableChars(fileinfo.getImportUsageType(recIndex)));
 	record.push_back(replaceNonprintableChars(fileinfo.getImportLibraryName(recIndex)));
 	record.push_back(fileinfo.getImportOrdinalNumberStr(recIndex, std::dec));
 	record.push_back(fileinfo.getImportAddressStr(recIndex, hexWithPrefix));

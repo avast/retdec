@@ -105,6 +105,7 @@ class Name
 
 	private:
 		void fixPic32Mangling();
+		void fixPostfix();
 
 	private:
 		std::string _name;
