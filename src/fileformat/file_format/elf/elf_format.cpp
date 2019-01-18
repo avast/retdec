@@ -2087,6 +2087,7 @@ void ElfFormat::loadInfoFromDynamicSegment()
 /**
  * Load dynamic table
  * @param elfDynamicTable Pointer to dynamic section accessor
+ * @param sec Pointer to dynamic table section
  * @return @c True if table was successfully loaded, @c false otherwise.
  */
 bool ElfFormat::loadDynamicTable(
