@@ -17,7 +17,7 @@ namespace fileinfo {
 namespace
 {
 
-const std::size_t distributionArray[] = {6, 40, 20, 11, 11, 8};
+const std::size_t distributionArray[] = {6, 40, 12, 20, 11, 11, 8};
 const std::string headerArray[] = {"i", "name", "type", "libName", "ordNum", "address", "delayed"};
 const std::string headerDesc[] = {"index", "name of import", "type of symbol", "name of library from which is import imported",
 									"ordinal number of import", "address of import", "delayed import (only PE)"};
