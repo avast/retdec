@@ -4,6 +4,7 @@
 
 * New Feature: Added presentation of imported types and TypeRef hashes for .NET binaries ([#363](https://github.com/avast-tl/retdec/issues/363), [#364](https://github.com/avast-tl/retdec/issues/364), [#428](https://github.com/avast-tl/retdec/issues/428)).
 * New Feature: Added computation and presentation of icon hashes for exact and also similarity matching in PE files ([#339](https://github.com/avast-tl/retdec/issues/339)).
+* Enhancement: It is possible to use local PeLib directory instead of remote revision via CMake viariable `PELIB_LOCAL_DIR`. This is convenient when modifying both PeLib and RetDec.
 * Enhancement: Improved detection of needed libraries and imported/external functions in ELF binaries ([#457](https://github.com/avast-tl/retdec/issues/457)).
 * Enhancement: Added semantics for more MIPS instructions.
 * Enhancement: Capstone2LlvmIr library refactoring ([#115](https://github.com/avast-tl/retdec/issues/115)).
