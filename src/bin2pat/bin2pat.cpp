@@ -41,7 +41,7 @@ int printErrorAndDie(
 {
 	std::cerr << "Error: " << message << ".\n";
 	printUsage(std::cerr);
-	return 1;
+	exit(1);
 }
 
 int needValue(
