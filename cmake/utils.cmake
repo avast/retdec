@@ -6,14 +6,14 @@
 # changes and (2) fix infinite recursion of 'make' after a terminated build.
 # Usage example: force_configure_step(your-external-project)
 macro(force_configure_step target)
-    # This solution is based on
-    # http://comments.gmane.org/gmane.comp.programming.tools.cmake.user/43024
-    ExternalProject_Add_Step(${target} force-configure
-        COMMAND ${CMAKE_COMMAND} -E echo "Force configure of ${target}"
-        DEPENDEES update
-        DEPENDERS configure
-        ALWAYS 1
-    )
+	# This solution is based on
+	# http://comments.gmane.org/gmane.comp.programming.tools.cmake.user/43024
+	ExternalProject_Add_Step(${target} force-configure
+		COMMAND ${CMAKE_COMMAND} -E echo "Force configure of ${target}"
+		DEPENDEES update
+		DEPENDERS configure
+		ALWAYS 1
+	)
 endmacro()
 
 # Check if 'variable' changed between two consequent CMake runs.
@@ -33,7 +33,7 @@ function(check_if_variable_changed variable result)
 		set(${result} TRUE PARENT_SCOPE)
 	endif()
 	# Store current value in the "shadow" variable unconditionally.
-	set(PELIB_LOCAL_DIR_old ${PELIB_LOCAL_DIR} CACHE INTERNAL "Copy of ${variable}")	
+	set(PELIB_LOCAL_DIR_old ${PELIB_LOCAL_DIR} CACHE INTERNAL "Copy of ${variable}")
 endfunction()
 
 # Clean all CMake files in the given 'directory'.

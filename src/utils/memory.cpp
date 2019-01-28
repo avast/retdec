@@ -125,9 +125,9 @@ bool limitSystemMemoryOnMacOS(std::size_t limit) {
 * @brief Implementation of @c getTotalSystemMemory() on Linux.
 */
 std::size_t getTotalSystemMemoryOnLinux() {
-    struct sysinfo system_info;
-    auto rc = sysinfo(&system_info);
-    return rc == 0 ? system_info.totalram : 0;
+	struct sysinfo system_info;
+	auto rc = sysinfo(&system_info);
+	return rc == 0 ? system_info.totalram : 0;
 }
 
 /**
