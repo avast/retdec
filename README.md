@@ -33,7 +33,7 @@ For more information, check out our
 
 ## Installation and Use
 
-Currently, we support Windows (7 or later), Linux, and macOS. An installed version of RetDec requires approximately 4 GB of free disk space.
+Currently, we support Windows (7 or later), Linux, macOS, and (experimental) FreeBSD. An installed version of RetDec requires approximately 4 GB of free disk space.
 
 ### Windows
 
@@ -89,6 +89,21 @@ Currently, we support Windows (7 or later), Linux, and macOS. An installed versi
     $RETDEC_INSTALL_DIR/bin/retdec-decompiler.py test.exe
     ```
 
+   For more information, run `retdec-decompiler.py` with `--help`.
+
+### FreeBSD
+
+1. There are currently no pre-built "ports" package for FreeBSD. You will have to build and install the decompiler by yourself. The process is described below.
+
+2. Prior to you building the decompiler, you may need to install the following packages and execute the following command:
+* `sudo pkg install cmake python37 bison git autotools`
+* `sudo ln -s /usr/local/bin/python3.7 /usr/local/bin/python3`
+
+3. Now, you are all set to run the decompiler. To decompile a binary file named `test.exe`, run
+
+    ```
+    $RETDEC_INSTALL_DIR/bin/retdec-decompiler.py test.exe
+    ```
    For more information, run `retdec-decompiler.py` with `--help`.
 
 ## Build and Installation
@@ -154,6 +169,21 @@ Packages should be preferably installed via [Homebrew](https://brew.sh).
 * [autotools](https://en.wikipedia.org/wiki/GNU_Build_System) ([autoconf](https://www.gnu.org/software/autoconf/autoconf.html), [automake](https://www.gnu.org/software/automake/), and [libtool](https://www.gnu.org/software/libtool/))
 * Optional: [Doxygen](http://www.stack.nl/~dimitri/doxygen/) and [Graphviz](http://www.graphviz.org/) for generating API documentation
 
+#### FreeBSD
+
+Packages should be installed via FreeBSDs pre-compiled package repository using the `pkg` command OR built from scratch using the `ports` database method.
+
+* Full "pkg" tool instructions [handbook pkg method](https://www.freebsd.org/doc/handbook/pkgng-intro.html)
+* `pkg install cmake python37 bison git autotools`
+* OR
+* Full "ports" instructions [handbook ports method](https://www.freebsd.org/doc/handbook/ports-using.html)
+* `portsnap fetch`
+* `portsnap extract`
+* For example "cmake" would be
+* `whereis cmake`
+* `cd /usr/ports/devel/cmake`
+* `make install clean`
+
 ### Process
 
 Note: Although RetDec now supports a system-wide installation ([#94](https://github.com/avast-tl/retdec/issues/94)), unless you use your distribution's package manager to install it, we recommend installing RetDec locally into a designated directory. The reason for this is that uninstallation will be easier as you will only need to remove a single directory. To perform a local installation, run `cmake` with the `-DCMAKE_INSTALL_PREFIX=<path>` parameter, where `<path>` is directory into which RetDec will be installed (e.g. `$HOME/projects/retdec-install` on Linux and macOS, and `C:\projects\retdec-install` on Windows).
@@ -182,6 +212,22 @@ Note: Although RetDec now supports a system-wide installation ([#94](https://git
     export CMAKE_INCLUDE_PATH="/usr/local/opt/flex/include"
     export CMAKE_LIBRARY_PATH="/usr/local/opt/flex/lib;/usr/local/opt/bison/lib"
     export PATH="/usr/local/opt/flex/bin:/usr/local/opt/bison/bin:$PATH"
+    ```
+  * `cmake .. -DCMAKE_INSTALL_PREFIX=<path>`
+  * `make -jN` (`N` is the number of CPU cores to use for parallel build)
+  * `make install`
+* FreeBSD:
+  * `sudo pkg install git`
+  * `git clone https://github.com/avast-tl/retdec`
+  * `cd retdec`
+  * `mkdir build && cd build`
+  * ```sh
+    # FreeBSD (and other BSDs) do need cmake, python3, bison, git, autotools. Flex and perl are pre-installed in the OS but check versions.
+    # Later versions may be available for each of the packages.
+    # See what is installed:
+    sudo pkg info cmake python37 bison autotools
+    # Install/upgrade them
+    sudo pkg install cmake python37 bison autotools
     ```
   * `cmake .. -DCMAKE_INSTALL_PREFIX=<path>`
   * `make -jN` (`N` is the number of CPU cores to use for parallel build)
