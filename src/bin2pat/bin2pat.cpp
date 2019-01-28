@@ -37,7 +37,7 @@ void printUsage(
 		<< "    If multiple notes are given, only last one is used.\n\n";
 }
 
-int printErrorAndDie(
+void printErrorAndDie(
 	const std::string &message)
 {
 	std::cerr << "Error: " << message << ".\n";
@@ -45,13 +45,13 @@ int printErrorAndDie(
 	std::exit(1);
 }
 
-int needValue(
+void needValue(
 	const std::string &arg)
 {
-	return printErrorAndDie("argument " + arg + " requires value");
+	printErrorAndDie("argument " + arg + " requires value");
 }
 
-int processArgs(
+void processArgs(
 	const std::vector<std::string> &args)
 {
 	std::string note;
@@ -61,14 +61,15 @@ int processArgs(
 	for (std::size_t i = 0, e = args.size(); i < e; ++i) {
 		if (args[i] == "--help" || args[i] == "-h") {
 			printUsage(std::cout);
-			return 0;
+			return;
 		}
 		else if (args[i] == "-o" || args[i] == "--output") {
 			if (i + 1 < e) {
 				outPath = args[++i];
 			}
 			else {
-				return needValue(args[i]);
+				needValue(args[i]);
+				return;
 			}
 		}
 		else if (args[i] == "-n" || args[i] == "--note") {
@@ -76,7 +77,8 @@ int processArgs(
 				note = args[++i];
 			}
 			else {
-				return needValue(args[i]);
+				needValue(args[i]);
+				return;
 			}
 		}
 		else {
@@ -84,6 +86,7 @@ int processArgs(
 			if(!FilesystemPath(args[i]).isFile()) {
 				printErrorAndDie("argument '" + args[i]
 					+ "' is neither valid file nor argument");
+				return;
 			}
 			else {
 				inPaths.push_back(args[i]);
@@ -92,7 +95,8 @@ int processArgs(
 	}
 
 	if (inPaths.empty()) {
-		return printErrorAndDie("input files missing");
+		printErrorAndDie("input files missing");
+		return;
 	}
 
 	// Prepare builder.
@@ -131,6 +135,7 @@ int processArgs(
 	// Check processing results.
 	if (!atLeastOne) {
 		printErrorAndDie("no valid files were processed");
+		return;
 	}
 
 	// Print results.
@@ -138,18 +143,18 @@ int processArgs(
 		std::ofstream outputFile(outPath);
 		if (!outputFile) {
 			printErrorAndDie("could not open output file");
+			return;
 		}
 		outputFile << builder.get(false)->getText() << "\n";
 	}
 	else {
 		std::cout << builder.get(false)->getText() << "\n";
 	}
-
-	return 0;
 }
 
 int main(int argc, char *argv[])
 {
 	std::vector<std::string> args(argv + 1, argv + argc);
-	return processArgs(args);
+	processArgs(args);
+	return 0;
 }
