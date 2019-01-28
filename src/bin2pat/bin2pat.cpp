@@ -4,6 +4,7 @@
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */
 
+#include <cstdlib>
 #include <fstream>
 #include <iostream>
 #include <ostream>
@@ -41,7 +42,7 @@ int printErrorAndDie(
 {
 	std::cerr << "Error: " << message << ".\n";
 	printUsage(std::cerr);
-	exit(1);
+	std::exit(1);
 }
 
 int needValue(
