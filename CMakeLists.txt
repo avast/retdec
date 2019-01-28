@@ -92,6 +92,9 @@ elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR
 
 	# Disable warnings that produce more headaches than use.
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unused-parameter")
+
+	# FreeBSD Clang does Wc++11-narrowing by default, must be off for 'memory.cpp' utility otherwise `error` now `warning`
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-error=c++11-narrowing")
 endif()
 
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/install-external.cmake)

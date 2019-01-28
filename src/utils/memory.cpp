@@ -9,9 +9,10 @@
 
 #ifdef OS_WINDOWS
 	#include <windows.h>
-#elif defined(OS_MACOS)
+#elif defined(OS_MACOS) || defined(OS_BSD) // MacOS & FreeBSD are closely linked
 	#include <sys/types.h>
 	#include <sys/sysctl.h>
+	#include <stddef.h> // for std::size_t
 #else
 	#include <sys/sysinfo.h>
 #endif
@@ -119,6 +120,28 @@ bool limitSystemMemoryOnMacOS(std::size_t limit) {
 	return limitSystemMemoryOnPOSIX(limit);
 }
 
+#elif defined(OS_BSD)
+
+/**
+* @brief Implementation of @c getTotalSystemMemory() on *BSD.
+* aka FreeBSD, DragonFly, NetBSD, OpenBSD, TrueOS, PCBSD
+*/
+std::size_t getTotalSystemMemoryOnBSD() {
+	int what[] = { CTL_HW, HW_PHYSMEM };
+	std::size_t value = 0;
+	size_t length = sizeof(value);
+	auto rc = sysctl(what, 2, &value, &length, nullptr, 0);
+	return rc != -1 ? value : 0;
+}
+
+/**
+* @brief Implementation of @c limitSystemMemory() on *BSD.
+* aka FreeBSD, DragonFly, NetBSD, OpenBSD, TrueOS, PCBSD
+*/
+bool limitSystemMemoryOnBSD(std::size_t limit) {
+	return limitSystemMemoryOnPOSIX(limit);
+}
+
 #else
 
 /*
@@ -151,6 +174,8 @@ std::size_t getTotalSystemMemory() {
 	return getTotalSystemMemoryOnWindows();
 #elif defined(OS_MACOS)
 	return getTotalSystemMemoryOnMacOS();
+#elif defined(OS_BSD)
+	return getTotalSystemMemoryOnBSD();
 #else
 	return getTotalSystemMemoryOnLinux();
 #endif
@@ -175,6 +200,8 @@ bool limitSystemMemory(std::size_t limit) {
 	return limitSystemMemoryOnWindows(limit);
 #elif defined(OS_MACOS)
 	return limitSystemMemoryOnMacOS(limit);
+#elif defined(OS_BSD)
+	return limitSystemMemoryOnBSD(limit);
 #else
 	return limitSystemMemoryOnLinux(limit);
 #endif
