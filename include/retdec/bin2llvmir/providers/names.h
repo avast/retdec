@@ -178,11 +178,9 @@ class NameContainer
 		using ImportOrdMap = std::map<int, std::string>;
 
 	private:
-		llvm::Module* _module = nullptr;
 		Config* _config = nullptr;
 		DebugFormat* _debug = nullptr;
 		FileImage* _image = nullptr;
-		demangler::CDemangler* _demangler = nullptr;
 		Lti* _lti = nullptr;
 
 		std::map<retdec::utils::Address, Names> _data;

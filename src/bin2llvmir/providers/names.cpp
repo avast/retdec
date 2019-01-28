@@ -262,18 +262,16 @@ bool Names::empty() const
 //
 
 NameContainer::NameContainer(
-		llvm::Module* m,
+		llvm::Module*,
 		Config* c,
 		DebugFormat* d,
 		FileImage* i,
-		demangler::CDemangler* dm,
+		demangler::CDemangler*,
 		Lti* lti)
 		:
-		_module(m),
 		_config(c),
 		_debug(d),
 		_image(i),
-		_demangler(dm),
 		_lti(lti)
 {
 	initFromConfig();
