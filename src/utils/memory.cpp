@@ -104,7 +104,7 @@ bool limitSystemMemoryOnWindows(std::size_t limit) {
 std::size_t getTotalSystemMemoryOnMacOS() {
 	int what[] = { CTL_HW, HW_MEMSIZE };
 	std::size_t value = 0;
-	size_t length = sizeof(value);
+	std::size_t length = sizeof(value);
 	auto rc = sysctl(what, 2, &value, &length, nullptr, 0);
 	return rc != -1 ? value : 0;
 }
