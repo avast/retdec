@@ -42,9 +42,6 @@ else()
 			# compiler, which may result in link errors.
 			"${CMAKE_C_COMPILER_OPTION}"
 			"${CMAKE_CXX_COMPILER_OPTION}"
-		# Force rebuild if switch happened.
-		# Seems like this is not needed on Linux, and not working on Windows :-(
-		BUILD_ALWAYS ${CHANGED}
 		# Disable the update step.
 		UPDATE_COMMAND ""
 		# Disable the install step.
