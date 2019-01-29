@@ -93,13 +93,13 @@ Currently, we support Windows (7 or later), Linux, macOS, and (experimental) Fre
 
 ### FreeBSD
 
-1. There are currently no pre-built "ports" package for FreeBSD. You will have to build and install the decompiler by yourself. The process is described below.
+1. There are currently no pre-built "ports" packages for FreeBSD. You will have to build and install the decompiler by yourself. The process is described below.
 
 2. Prior to you building the decompiler, you may need to install the following packages and execute the following command:
 * `sudo pkg install cmake python37 bison git autotools`
 * `sudo ln -s /usr/local/bin/python3.7 /usr/local/bin/python3`
 
-3. Follow the instructions (below) on how to build the the decompiler.
+3. Follow the instructions (below) on how to build the decompiler.
 
 4. Now, you are all set to run the decompiler. To decompile a binary file named `test.exe`, run
 
