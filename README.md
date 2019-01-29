@@ -99,7 +99,9 @@ Currently, we support Windows (7 or later), Linux, macOS, and (experimental) Fre
 * `sudo pkg install cmake python37 bison git autotools`
 * `sudo ln -s /usr/local/bin/python3.7 /usr/local/bin/python3`
 
-3. Now, you are all set to run the decompiler. To decompile a binary file named `test.exe`, run
+3. Follow the instructions (below) on how to build the the decompiler.
+
+4. Now, you are all set to run the decompiler. To decompile a binary file named `test.exe`, run
 
     ```
     $RETDEC_INSTALL_DIR/bin/retdec-decompiler.py test.exe
