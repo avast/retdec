@@ -200,6 +200,17 @@ StrToNumIntHexFailure) {
 	EXPECT_EQ(-1, out);
 }
 
+TEST_F(ConversionTests,
+StrToNumConversionFailsWhenConvertingNegativeNumberIntoUnsignedInt) {
+	unsigned out = 0;
+	EXPECT_FALSE(strToNum("-1", out, std::dec));
+	EXPECT_EQ(0, out);
+
+	out = 0;
+	EXPECT_FALSE(strToNum("+-1", out, std::dec));
+	EXPECT_EQ(0, out);
+}
+
 //
 // bytesToBits()
 //
