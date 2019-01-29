@@ -86,11 +86,12 @@ inline bool strToNum(const std::string &str, N &number,
 	std::istringstream strStream(str);
 	N convNumber = 0;
 	strStream >> format >> convNumber;
-	if (!strStream.fail() && strStream.eof()) {
-		number = convNumber;
-		return true;
+	if (strStream.fail() || !strStream.eof()) {
+		return false;
 	}
-	return false;
+
+	number = convNumber;
+	return true;
 }
 
 /**
