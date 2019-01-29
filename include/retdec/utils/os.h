@@ -11,15 +11,15 @@
 // Windows, macOS, and Linux.
 #if defined(__WIN) || defined(_WIN32) || defined(__WIN32__) || defined(__CYGWIN__)
 	#define OS_WINDOWS
-#elif defined(__unix__) || (defined(__APPLE__) && defined(__MACH__))
+#else
 	#include <sys/param.h>
-	#if defined(BSD)
+	#if defined(__APPLE__)
+		#define OS_MACOS
+	#elif defined(BSD)
 		#define OS_BSD
 	#else
-		#define OS_MACOS
+		#define OS_LINUX
 	#endif
-#else
-	#define OS_LINUX
 #endif
 
 // It is also useful to know whether the operating system is POSIX compliant.

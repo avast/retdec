@@ -95,13 +95,11 @@ Currently, we support Windows (7 or later), Linux, macOS, and (experimental) Fre
 
 1. There are currently no pre-built "ports" packages for FreeBSD. You will have to build and install the decompiler by yourself. The process is described below.
 
-2. Prior to you building the decompiler, you may need to install the following packages and execute the following command:
-* `sudo pkg install cmake python37 bison git autotools`
+2. After you have built the decompiler, you may need to install the following packages and execute the following command:
+* `sudo pkg install python37 bison autotools`
 * `sudo ln -s /usr/local/bin/python3.7 /usr/local/bin/python3`
 
-3. Follow the instructions (below) on how to build the decompiler.
-
-4. Now, you are all set to run the decompiler. To decompile a binary file named `test.exe`, run
+3. Now, you are all set to run the decompiler. To decompile a binary file named `test.exe`, run
 
     ```
     $RETDEC_INSTALL_DIR/bin/retdec-decompiler.py test.exe
@@ -176,15 +174,15 @@ Packages should be preferably installed via [Homebrew](https://brew.sh).
 Packages should be installed via FreeBSDs pre-compiled package repository using the `pkg` command OR built from scratch using the `ports` database method.
 
 * Full "pkg" tool instructions [handbook pkg method](https://www.freebsd.org/doc/handbook/pkgng-intro.html)
-* `pkg install cmake python37 bison git autotools`
-* OR
+  * `pkg install cmake python37 bison git autotools`
+OR
 * Full "ports" instructions [handbook ports method](https://www.freebsd.org/doc/handbook/ports-using.html)
-* `portsnap fetch`
-* `portsnap extract`
+  * `portsnap fetch`
+  * `portsnap extract`
 * For example "cmake" would be
-* `whereis cmake`
-* `cd /usr/ports/devel/cmake`
-* `make install clean`
+  * `whereis cmake`
+  * `cd /usr/ports/devel/cmake`
+  * `make install clean`
 
 ### Process
 
@@ -219,7 +217,7 @@ Note: Although RetDec now supports a system-wide installation ([#94](https://git
   * `make -jN` (`N` is the number of CPU cores to use for parallel build)
   * `make install`
 * FreeBSD:
-  * `sudo pkg install git`
+  * `sudo pkg install git cmake`
   * `git clone https://github.com/avast-tl/retdec`
   * `cd retdec`
   * `mkdir build && cd build`
