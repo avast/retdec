@@ -140,7 +140,7 @@ const std::string& DotnetClass::getLibName() const
 	{
 		return parent->getLibName();
 	}
-	
+
 	return libName;
 }
 
