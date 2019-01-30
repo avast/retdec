@@ -28,13 +28,21 @@ endmacro()
 # https://stackoverflow.com/questions/43542381/set-a-cmake-variable-if-it-is-not-changed-by-the-user
 # https://markdewing.github.io/blog/posts/notes-on-cmake/
 function(check_if_variable_changed variable result)
-	if(NOT DEFINED ${variable}_old OR (${variable} STREQUAL ${variable}_old))
+	if(NOT DEFINED ${variable})
+		set(${variable} "")
+	endif()
+
+	if(NOT DEFINED ${variable}_old)
+		set(${variable}_old ${${variable}} CACHE INTERNAL "Copy of ${variable}")
+	endif()
+
+	if(${variable} STREQUAL ${variable}_old)
 		set(${result} FALSE PARENT_SCOPE)
 	else()
 		set(${result} TRUE PARENT_SCOPE)
 	endif()
 	# Store current value in the "shadow" variable unconditionally.
-	set(PELIB_LOCAL_DIR_old ${PELIB_LOCAL_DIR} CACHE INTERNAL "Copy of ${variable}")
+	set(${variable}_old ${${variable}} CACHE INTERNAL "Copy of ${variable}")
 endfunction()
 
 # Clean all CMake files in the given 'directory'.
