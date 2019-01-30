@@ -70,8 +70,9 @@ set(BIN2LLVMIR_SOURCES
 	providers/abi/ms_x64.cpp
 	providers/abi/pic32.cpp
 	providers/abi/powerpc.cpp
-	providers/abi/x86.cpp
 	providers/abi/x64.cpp
+	providers/abi/x86.cpp
+	providers/abi/x86_fastcall.cpp
 	providers/asm_instruction.cpp
 	providers/config.cpp
 	providers/debugformat.cpp
