@@ -33,7 +33,7 @@ For more information, check out our
 
 ## Installation and Use
 
-Currently, we support Windows (7 or later), Linux, macOS, and (experimental) FreeBSD. An installed version of RetDec requires approximately 4 GB of free disk space.
+Currently, we support Windows (7 or later), Linux, macOS, and (experimentally) FreeBSD. An installed version of RetDec requires approximately 4 GB of free disk space.
 
 ### Windows
 
@@ -91,19 +91,23 @@ Currently, we support Windows (7 or later), Linux, macOS, and (experimental) Fre
 
    For more information, run `retdec-decompiler.py` with `--help`.
 
-### FreeBSD
+### FreeBSD (Experimental)
 
 1. There are currently no pre-built "ports" packages for FreeBSD. You will have to build and install the decompiler by yourself. The process is described below.
 
 2. After you have built the decompiler, you may need to install the following packages and execute the following command:
-* `sudo pkg install python37 bison autotools`
-* `sudo ln -s /usr/local/bin/python3.7 /usr/local/bin/python3`
+
+    ```
+    sudo pkg install python37
+    sudo ln -s /usr/local/bin/python3.7 /usr/local/bin/python3
+    ```
 
 3. Now, you are all set to run the decompiler. To decompile a binary file named `test.exe`, run
 
     ```
     $RETDEC_INSTALL_DIR/bin/retdec-decompiler.py test.exe
     ```
+
    For more information, run `retdec-decompiler.py` with `--help`.
 
 ## Build and Installation
@@ -169,17 +173,17 @@ Packages should be preferably installed via [Homebrew](https://brew.sh).
 * [autotools](https://en.wikipedia.org/wiki/GNU_Build_System) ([autoconf](https://www.gnu.org/software/autoconf/autoconf.html), [automake](https://www.gnu.org/software/automake/), and [libtool](https://www.gnu.org/software/libtool/))
 * Optional: [Doxygen](http://www.stack.nl/~dimitri/doxygen/) and [Graphviz](http://www.graphviz.org/) for generating API documentation
 
-#### FreeBSD
+#### FreeBSD (Experimental)
 
-Packages should be installed via FreeBSDs pre-compiled package repository using the `pkg` command OR built from scratch using the `ports` database method.
+Packages should be installed via FreeBSDs pre-compiled package repository using the `pkg` command or built from scratch using the `ports` database method.
 
-* Full "pkg" tool instructions [handbook pkg method](https://www.freebsd.org/doc/handbook/pkgng-intro.html)
+* Full "pkg" tool instructions: [handbook pkg method](https://www.freebsd.org/doc/handbook/pkgng-intro.html)
   * `pkg install cmake python37 bison git autotools`
 OR
-* Full "ports" instructions [handbook ports method](https://www.freebsd.org/doc/handbook/ports-using.html)
+* Full "ports" instructions: [handbook ports method](https://www.freebsd.org/doc/handbook/ports-using.html)
   * `portsnap fetch`
   * `portsnap extract`
-* For example "cmake" would be
+* For example, `cmake` would be
   * `whereis cmake`
   * `cd /usr/ports/devel/cmake`
   * `make install clean`
@@ -226,7 +230,7 @@ Note: Although RetDec now supports a system-wide installation ([#94](https://git
     # Later versions may be available for each of the packages.
     # See what is installed:
     sudo pkg info cmake python37 bison autotools
-    # Install/upgrade them
+    # Install/upgrade them:
     sudo pkg install cmake python37 bison autotools
     ```
   * `cmake .. -DCMAKE_INSTALL_PREFIX=<path>`
