@@ -795,6 +795,15 @@ bool FileInformation::isVisualBasicUsed() const
 }
 
 /**
+ * Check whether visual basic uses P-Code.
+ * @return @c true if it does, otherwise @c false/
+ */
+bool FileInformation::getVisualBasicIsPcode() const
+{
+	return visualBasicInfo.isPcode();
+}
+
+/**
  * Get visual basic language DLL
  * @return Visual basic language DLL
  */

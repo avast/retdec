@@ -7,6 +7,7 @@
 #include "retdec/fileformat/utils/conversions.h"
 #include "fileinfo/file_presentation/getters/simple_getter/visual_basic_plain_getter.h"
 
+using namespace retdec::utils;
 using namespace retdec::fileformat;
 
 namespace fileinfo {
@@ -38,31 +39,35 @@ std::size_t VisualBasicPlainGetter::loadInformation(std::vector<std::string> &de
 		return 0;
 	}
 
-	desc.push_back("Super Cool Info                                              : ");
-	desc.push_back("More Super Cool Info                                         : ");
-	info.push_back("TODO");
-	info.push_back("TODO");
+	desc.push_back("Project name                                                 : ");
+	desc.push_back("Project exe name                                             : ");
+	desc.push_back("Project path                                                 : ");
+	desc.push_back("Project description                                          : ");
+	desc.push_back("Project help file                                            : ");
+	desc.push_back("Language DLL                                                 : ");
+	desc.push_back("Backup Language DLL                                          : ");
+	desc.push_back("Language DLL primary LCID                                    : ");
+	desc.push_back("Language DLL secondary LCID                                  : ");
+	desc.push_back("Project primary LCID                                         : ");
+	desc.push_back("Project secondary LCID                                       : ");
+	desc.push_back("TypeLibLCID                                                  : ");
+	desc.push_back("Is P-Code                                                    : ");
 
-	// isPcode
-	// getLanguageDLL
-	// getBackupLanguageDLL
-	// getProjectExeName
-	// getProjectDescription
-	// getProjectHelpFile
-	// getProjectName
-	// getLanguageDLLPrimaryLCID
-	// getLanguageDLLSecondaryLCID
-	// getProjectPath
-	// getProjectPrimaryLCID
-	// getProjectSecondaryLCID
-	// getObjects
-	// getExterns
-	// getObject
-	// getExtern
-	// getNumberOfObjects
-	// getNumberOfExterns
+	info.push_back(replaceNonprintableChars(fileinfo.getVisualBasicProjectName()));
+	info.push_back(replaceNonprintableChars(fileinfo.getVisualBasicProjectExeName()));
+	info.push_back(replaceNonprintableChars(fileinfo.getVisualBasicProjectPath()));
+	info.push_back(replaceNonprintableChars(fileinfo.getVisualBasicProjectDescription()));
+	info.push_back(replaceNonprintableChars(fileinfo.getVisualBasicProjectHelpFile()));
+	info.push_back(replaceNonprintableChars(fileinfo.getVisualBasicLanguageDLL()));
+	info.push_back(replaceNonprintableChars(fileinfo.getVisualBasicBackupLanguageDLL()));
+	info.push_back(replaceNonprintableChars(fileinfo.getVisualBasicLanguageDLLPrimaryLCIDStr()));
+	info.push_back(replaceNonprintableChars(fileinfo.getVisualBasicLanguageDLLSecondaryLCIDStr()));
+	info.push_back(replaceNonprintableChars(fileinfo.getVisualBasicProjectPrimaryLCIDStr()));
+	info.push_back(replaceNonprintableChars(fileinfo.getVisualBasicProjectSecondaryLCIDStr()));
+	info.push_back(replaceNonprintableChars(fileinfo.getVisualBasicTypeLibLCIDStr()));
+	info.push_back((fileinfo.getVisualBasicIsPcode()) ? "Yes" : "No");
+
 	// getTypeLibCLSID
-	// getTypeLibLCID
 
 	return info.size();
 }
