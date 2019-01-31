@@ -156,6 +156,7 @@ class FileInformation
 		/// @name Getters of @a visualBasicInfo
 		/// @{
 		bool isVisualBasicUsed() const;
+		bool getVisualBasicIsPcode() const;
 		std::string getVisualBasicLanguageDLL() const;
 		std::string getVisualBasicBackupLanguageDLL() const;
 		std::string getVisualBasicProjectExeName() const;
