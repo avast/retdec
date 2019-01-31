@@ -4,9 +4,10 @@
 * @copyright (c) 2017 Avast Software, licensed under the MIT license
 */
 
+#include <cstddef>
+
 #include "retdec/utils/memory.h"
 #include "retdec/utils/os.h"
-#include <cstddef>
 
 #ifdef OS_WINDOWS
 	#include <windows.h>
