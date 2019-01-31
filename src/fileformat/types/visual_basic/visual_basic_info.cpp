@@ -4,7 +4,12 @@
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */
 
+#include "retdec/crypto/crypto.h"
+#include "retdec/utils/string.h"
 #include "retdec/fileformat/types/visual_basic/visual_basic_info.h"
+
+
+using namespace retdec::utils;
 
 namespace retdec {
 namespace fileformat {
@@ -239,6 +244,60 @@ bool VisualBasicInfo::getTypeLibLCID(std::uint32_t &res) const
 }
 
 /**
+ * Get extern table hash as CRC32
+ * @return Extern table hash
+ */
+const std::string &VisualBasicInfo::getExternTableHashCrc32() const
+{
+	return externTableHashCrc32;
+}
+
+/**
+ * Get extern table hash as MD5
+ * @return Extern table hash
+ */
+const std::string &VisualBasicInfo::getExternTableHashMd5() const
+{
+	return externTableHashMd5;
+}
+
+/**
+ * Get extern table hash as SHA256
+ * @return Extern table hash
+ */
+const std::string &VisualBasicInfo::getExternTableHashSha256() const
+{
+	return externTableHashSha256;
+}
+
+/**
+ * Get object table hash as CRC32
+ * @return Object table hash
+ */
+const std::string &VisualBasicInfo::getObjectTableHashCrc32() const
+{
+	return objectTableHashCrc32;
+}
+
+/**
+ * Get object table hash as MD5
+ * @return Object table hash
+ */
+const std::string &VisualBasicInfo::getObjectTableHashMd5() const
+{
+	return objectTableHashMd5;
+}
+
+/**
+ * Get object table hash as SHA256
+ * @return Object table hash
+ */
+const std::string &VisualBasicInfo::getObjectTableHashSha256() const
+{
+	return objectTableHashSha256;
+}
+
+/**
  * Set language DLL
  * @param lDLL Language DLL to set
  */
@@ -422,6 +481,81 @@ bool VisualBasicInfo::hasProjectHelpFile() const
 bool VisualBasicInfo::isPcode() const
 {
 	return pcodeFlag;
+}
+
+/**
+ * Compute external table hashes - CRC32, MD5, SHA256.
+ */
+void VisualBasicInfo::computeExternTableHashes()
+{
+	std::vector<std::uint8_t> hashBytes;
+
+	for (const auto& ext : externs)
+	{
+		auto moduleName = toLower(ext->getModuleName());
+		auto apiName = toLower(ext->getApiName());
+
+		if(apiName.empty() || moduleName.empty())
+		{
+			continue;
+		}
+
+		if(!hashBytes.empty())
+		{
+			hashBytes.push_back(static_cast<unsigned char>(','));
+		}
+
+		for(const auto c : std::string(apiName + "." + moduleName))
+		{
+			hashBytes.push_back(static_cast<unsigned char>(c));
+		}
+	}
+
+	externTableHashCrc32 = retdec::crypto::getCrc32(hashBytes.data(), hashBytes.size());
+	externTableHashMd5 = retdec::crypto::getMd5(hashBytes.data(), hashBytes.size());
+	externTableHashSha256 = retdec::crypto::getSha256(hashBytes.data(), hashBytes.size());
+}
+
+/**
+ * Compute object table hashes - CRC32, MD5, SHA256.
+ */
+void VisualBasicInfo::computeObjectTableHashes()
+{
+	std::vector<std::uint8_t> hashBytes;
+
+	for (const auto& obj : objects)
+	{
+		auto objName = toLower(obj->getName());
+		if(objName.empty())
+		{
+			continue;
+		}
+
+		std::string methods = "";
+		for (const auto &method : obj->getMethods())
+		{
+			if (!methods.empty())
+			{
+				methods.push_back('.');
+			}
+
+			methods += method;
+		}
+
+		if(!hashBytes.empty())
+		{
+			hashBytes.push_back(static_cast<unsigned char>(','));
+		}
+
+		for(const auto c : std::string(objName + "." + methods))
+		{
+			hashBytes.push_back(static_cast<unsigned char>(c));
+		}
+	}
+
+	objectTableHashCrc32 = retdec::crypto::getCrc32(hashBytes.data(), hashBytes.size());
+	objectTableHashMd5 = retdec::crypto::getMd5(hashBytes.data(), hashBytes.size());
+	objectTableHashSha256 = retdec::crypto::getSha256(hashBytes.data(), hashBytes.size());
 }
 
 

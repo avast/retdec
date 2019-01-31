@@ -46,6 +46,12 @@ class VisualBasicInfo
 		std::string getExternApiName(std::size_t position) const;
 		// std::string getTypeLibCLSIDStr() const;
 		std::string getTypeLibLCIDStr() const;
+		std::string getExternTableHashCrc32() const;
+		std::string getExternTableHashMd5() const;
+		std::string getExternTableHashSha256() const;
+		std::string getObjectTableHashCrc32() const;
+		std::string getObjectTableHashMd5() const;
+		std::string getObjectTableHashSha256() const;
 		/// @}
 
 		/// @name Setters

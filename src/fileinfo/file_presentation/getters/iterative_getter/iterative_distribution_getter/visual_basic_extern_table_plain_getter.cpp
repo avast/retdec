@@ -57,14 +57,14 @@ std::size_t VisualBasicExternTablePlainGetter::getBasicInfo(std::size_t structIn
 	desc.clear();
 	info.clear();
 
-	desc.push_back("Number of visual basic externs: ");
+	desc.push_back("Number of externs: ");
 	desc.push_back("CRC32            : ");
 	desc.push_back("MD5              : ");
 	desc.push_back("SHA256           : ");
 	info.push_back(numToStr(fileinfo.getVisualBasicNumberOfExterns()));
-	info.push_back("TODO");
-	info.push_back("TODO");
-	info.push_back("TODO");
+	info.push_back(fileinfo.getVisualBasicExternTableHashCrc32());
+	info.push_back(fileinfo.getVisualBasicExternTableHashMd5());
+	info.push_back(fileinfo.getVisualBasicExternTableHashSha256());
 
 	return info.size();
 }
