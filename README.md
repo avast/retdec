@@ -33,11 +33,11 @@ For more information, check out our
 
 ## Installation and Use
 
-Currently, we support Windows (7 or later), Linux, and macOS.
+Currently, we support Windows (7 or later), Linux, macOS, and (experimentally) FreeBSD. An installed version of RetDec requires approximately 4 GB of free disk space.
 
 ### Windows
 
-1. Either download and unpack a [pre-built package](https://github.com/avast-tl/retdec/releases), or build and install the decompiler by yourself (the process is described below):
+1. Either download and unpack a [pre-built package](https://github.com/avast-tl/retdec/releases), or build and install the decompiler by yourself (the process is described below).
 
 2. Install [Microsoft Visual C++ Redistributable for Visual Studio 2015](https://www.microsoft.com/en-us/download/details.aspx?id=48145).
 
@@ -91,6 +91,25 @@ Currently, we support Windows (7 or later), Linux, and macOS.
 
    For more information, run `retdec-decompiler.py` with `--help`.
 
+### FreeBSD (Experimental)
+
+1. There are currently no pre-built "ports" packages for FreeBSD. You will have to build and install the decompiler by yourself. The process is described below.
+
+2. After you have built the decompiler, you may need to install the following packages and execute the following command:
+
+    ```
+    sudo pkg install python37
+    sudo ln -s /usr/local/bin/python3.7 /usr/local/bin/python3
+    ```
+
+3. Now, you are all set to run the decompiler. To decompile a binary file named `test.exe`, run
+
+    ```
+    $RETDEC_INSTALL_DIR/bin/retdec-decompiler.py test.exe
+    ```
+
+   For more information, run `retdec-decompiler.py` with `--help`.
+
 ## Build and Installation
 
 This section describes a local build and installation of RetDec. Instructions for Docker are given in the next section.
@@ -109,26 +128,25 @@ This section describes a local build and installation of RetDec. Instructions fo
 * [autotools](https://en.wikipedia.org/wiki/GNU_Build_System) ([autoconf](https://www.gnu.org/software/autoconf/autoconf.html), [automake](https://www.gnu.org/software/automake/), and [libtool](https://www.gnu.org/software/libtool/))
 * [pkg-config](https://www.freedesktop.org/wiki/Software/pkg-config/)
 * [m4](https://www.gnu.org/software/m4/m4.html)
-* [ncurses](http://invisible-island.net/ncurses/) (for `libtinfo`)
 * [zlib](http://zlib.net/)
 * Optional: [Doxygen](http://www.stack.nl/~dimitri/doxygen/) and [Graphviz](http://www.graphviz.org/) for generating API documentation
 
 On Debian-based distributions (e.g. Ubuntu), the required packages can be installed with `apt-get`:
 
 ```sh
-sudo apt-get install build-essential cmake git perl python3 bison flex libfl-dev autoconf automake libtool pkg-config m4 zlib1g-dev libtinfo-dev upx doxygen graphviz
+sudo apt-get install build-essential cmake git perl python3 bison flex libfl-dev autoconf automake libtool pkg-config m4 zlib1g-dev upx doxygen graphviz
 ```
 
 On RPM-based distributions (e.g. Fedora), the required packages can be installed with `dnf`:
 
 ```sh
-sudo dnf install gcc gcc-c++ cmake make git perl python3 bison flex autoconf automake libtool pkg-config m4 zlib-devel ncurses-devel upx doxygen graphviz
+sudo dnf install gcc gcc-c++ cmake make git perl python3 bison flex autoconf automake libtool pkg-config m4 zlib-devel upx doxygen graphviz
 ```
 
 On Arch Linux, the required packages can be installed with `pacman`:
 
 ```sh
-sudo pacman -S base-devel cmake git perl python3 bison flex autoconf automake libtool pkg-config m4 zlib ncurses upx doxygen graphviz
+sudo pacman -S base-devel cmake git perl python3 bison flex autoconf automake libtool pkg-config m4 zlib upx doxygen graphviz
 ```
 
 #### Windows
@@ -145,7 +163,7 @@ sudo pacman -S base-devel cmake git perl python3 bison flex autoconf automake li
 
 Packages should be preferably installed via [Homebrew](https://brew.sh).
 
-* Full Xcode installation (Command Line Tools are untested)
+* Full Xcode installation ([including command-line tools](https://github.com/frida/frida/issues/338#issuecomment-426777849), see [#425](https://github.com/avast-tl/retdec/issues/425) and [#433](https://github.com/avast-tl/retdec/issues/433))
 * [CMake](https://cmake.org/) (version >= 3.6)
 * [Git](https://git-scm.com/)
 * [Perl](https://www.perl.org/)
@@ -154,6 +172,21 @@ Packages should be preferably installed via [Homebrew](https://brew.sh).
 * [Flex](https://www.gnu.org/software/flex/) (version >= 2.6)
 * [autotools](https://en.wikipedia.org/wiki/GNU_Build_System) ([autoconf](https://www.gnu.org/software/autoconf/autoconf.html), [automake](https://www.gnu.org/software/automake/), and [libtool](https://www.gnu.org/software/libtool/))
 * Optional: [Doxygen](http://www.stack.nl/~dimitri/doxygen/) and [Graphviz](http://www.graphviz.org/) for generating API documentation
+
+#### FreeBSD (Experimental)
+
+Packages should be installed via FreeBSDs pre-compiled package repository using the `pkg` command or built from scratch using the `ports` database method.
+
+* Full "pkg" tool instructions: [handbook pkg method](https://www.freebsd.org/doc/handbook/pkgng-intro.html)
+  * `pkg install cmake python37 bison git autotools`
+OR
+* Full "ports" instructions: [handbook ports method](https://www.freebsd.org/doc/handbook/ports-using.html)
+  * `portsnap fetch`
+  * `portsnap extract`
+* For example, `cmake` would be
+  * `whereis cmake`
+  * `cd /usr/ports/devel/cmake`
+  * `make install clean`
 
 ### Process
 
@@ -187,6 +220,22 @@ Note: Although RetDec now supports a system-wide installation ([#94](https://git
   * `cmake .. -DCMAKE_INSTALL_PREFIX=<path>`
   * `make -jN` (`N` is the number of CPU cores to use for parallel build)
   * `make install`
+* FreeBSD:
+  * `sudo pkg install git cmake`
+  * `git clone https://github.com/avast-tl/retdec`
+  * `cd retdec`
+  * `mkdir build && cd build`
+  * ```sh
+    # FreeBSD (and other BSDs) do need cmake, python3, bison, git, autotools. Flex and perl are pre-installed in the OS but check versions.
+    # Later versions may be available for each of the packages.
+    # See what is installed:
+    sudo pkg info cmake python37 bison autotools
+    # Install/upgrade them:
+    sudo pkg install cmake python37 bison autotools
+    ```
+  * `cmake .. -DCMAKE_INSTALL_PREFIX=<path>`
+  * `make -jN` (`N` is the number of CPU cores to use for parallel build)
+  * `make install`
 
 You have to pass the following parameters to `cmake`:
 * `-DCMAKE_INSTALL_PREFIX=<path>` to set the installation path to `<path>`. Quote the path if you are using backslashes on Windows (e.g. `-DCMAKE_INSTALL_PREFIX="C:\retdec"`).
@@ -196,6 +245,7 @@ You can pass the following additional parameters to `cmake`:
 * `-DRETDEC_DOC=ON` to build with API documentation (requires Doxygen and Graphviz, disabled by default).
 * `-DRETDEC_TESTS=ON` to build with tests (disabled by default).
 * `-DRETDEC_DEV_TOOLS=ON` to build with development tools (disabled by default).
+* `-DRETDEC_FORCE_OPENSSL_BUILD=ON` to force OpenSSL build even if it is installed in the system (disabled by default).
 * `-DCMAKE_BUILD_TYPE=Debug` to build with debugging information, which is useful during development. By default, the project is built in the `Release` mode. This has no effect on Windows, but the same thing can be achieved by running `cmake --build .` with the `--config Debug` parameter.
 * `-DCMAKE_PROGRAM_PATH=<path>` to use Perl at `<path>` (probably useful only on Windows).
 
@@ -230,6 +280,16 @@ Now, you can run the decompiler inside a container:
 docker run --rm -v /path/to/local/directory:/destination retdec retdec-decompiler.py /destination/binary
 ```
 Output files will be generated to the same directory (e.g. `/path/to/local/directory`).
+
+## Automated TeamCity Builds
+
+Our TeamCity servers are continuously generating up-to-date RetDec packages from the latest commit in the `master` branch. These are mostly meant to be used by RetDec developers, contributors, and other people experimenting with the product (e.g. testing if an issue present in the official release still exists in the current `master`).
+
+You can use these as you wish, but keep in mind that there are no guarantees they will work on your system (especially the Linux version), and that regressions are a possibility. To get a stable RetDec version, either download the latest official pre-built package or build the latest RetDec version tag.
+
+* [Windows Server 2016, version 10.0](https://retdec-tc.avast.com/repository/download/Retdec_WinBuild/.lastSuccessful/package/retdec-master-windows-64b.zip)
+* [CentOS Linux, version 3.10.0-693.21.1.el7.x86_64](https://retdec-tc.avast.com/repository/download/RetDec_LinuxBuild/.lastSuccessful/package/retdec-master-linux-64b.zip)
+* [Mac OS X, version 10.13.4](https://retdec-tc.avast.com/repository/download/Retdec_MacBuild/.lastSuccessful/package/retdec-master-macos-64b.zip)
 
 ## Repository Overview
 
@@ -288,7 +348,7 @@ This repository contains the following scripts:
 
 ## Project Documentation
 
-See the [project documentation](https://retdec-tc.avast.com/repository/download/Retdec_DoxygenBuild/.lastSuccessful/build/doc/doxygen/html/index.html) for an up to date Doxygen-generated software reference corresponding to the latest commit in the `master` branch.
+See the [project documentation](https://retdec-tc.avast.com/repository/download/Retdec_DoxygenBuild/.lastSuccessful/build/doc/doxygen/html/index.html?guest=1) for an up to date Doxygen-generated software reference corresponding to the latest commit in the `master` branch.
 
 ## Related Repositories
 

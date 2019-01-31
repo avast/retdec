@@ -21,6 +21,8 @@
 #include "retdec/fileformat/types/relocation_table/relocation_table.h"
 #include "retdec/fileformat/types/resource_table/resource_table.h"
 #include "retdec/fileformat/types/resource_table/resource_tree.h"
+#include "retdec/fileformat/types/resource_table/resource_icon.h"
+#include "retdec/fileformat/types/resource_table/resource_icon_group.h"
 #include "retdec/fileformat/types/rich_header/rich_header.h"
 #include "retdec/fileformat/types/sec_seg/elf_section.h"
 #include "retdec/fileformat/types/sec_seg/elf_segment.h"

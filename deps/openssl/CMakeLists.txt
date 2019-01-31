@@ -1,9 +1,11 @@
 
-find_package(OpenSSL 1.0.1)
-if(OPENSSL_FOUND)
-	add_library(openssl-crypto INTERFACE)
-	target_link_libraries(openssl-crypto INTERFACE OpenSSL::Crypto)
-	return()
+if(NOT RETDEC_FORCE_OPENSSL_BUILD)
+	find_package(OpenSSL 1.0.1)
+	if(OPENSSL_FOUND)
+		add_library(openssl-crypto INTERFACE)
+		target_link_libraries(openssl-crypto INTERFACE OpenSSL::Crypto)
+		return()
+	endif()
 endif()
 message(STATUS "  --> OpenSSL will be built as an external project")
 

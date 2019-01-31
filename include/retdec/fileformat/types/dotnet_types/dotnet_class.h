@@ -10,6 +10,9 @@
 #include <memory>
 #include <vector>
 
+#include <mpark/variant.hpp>
+
+#include "retdec/utils/conversion.h"
 #include "retdec/fileformat/types/dotnet_types/dotnet_field.h"
 #include "retdec/fileformat/types/dotnet_types/dotnet_method.h"
 #include "retdec/fileformat/types/dotnet_types/dotnet_property.h"
@@ -24,7 +27,9 @@ namespace fileformat {
 class DotnetClass : public DotnetType
 {
 	private:
-		const TypeDef* rawRecord;
+		mpark::variant<const TypeDef *, const TypeRef *> rawRecord;
+		const DotnetClass* parent;
+		std::size_t index;
 		std::size_t declaredFieldsCount;
 		std::size_t declaredMethodsCount;
 		std::size_t declaredGenericParametersCount;
@@ -33,17 +38,28 @@ class DotnetClass : public DotnetType
 		std::vector<std::unique_ptr<DotnetMethod>> methods;
 		std::vector<std::string> genericParameters;
 		std::vector<std::unique_ptr<DotnetDataTypeBase>> baseTypes;
+		std::string libName;
 		bool classOrInterface;
 		bool abstract;
 		bool sealed;
+		MetadataTableType recordType;
 
 		std::string getGenericParametersString() const;
 	public:
+		DotnetClass(MetadataTableType rType, std::size_t idx);
+
 		/// @name Getters
 		/// @{
-		const TypeDef* getRawRecord() const;
+		const TypeDef* getRawTypeDef() const;
+		const TypeRef* getRawTypeRef() const;
+		const DotnetClass* getParent() const;
 		std::string getNameWithGenericParameters() const;
 		std::string getFullyQualifiedNameWithGenericParameters() const;
+		std::string getNameWithParentClassIndex() const;
+		std::string getNestedName() const;
+		const std::string& getLibName() const;
+		const std::string& getTopLevelNameSpace() const;
+		std::size_t getIndex() const;
 		std::size_t getDeclaredFieldsCount() const;
 		std::size_t getDeclaredMethodsCount() const;
 		std::size_t getDeclaredGenericParametersCount() const;
@@ -57,14 +73,17 @@ class DotnetClass : public DotnetType
 		std::size_t getMethodsCount() const;
 		std::size_t getGenericParametersCount() const;
 		std::string getTypeString() const;
+		MetadataTableType getRecordType() const;
 		/// @}
 
 		/// @name Setters
 		/// @{
-		void setRawRecord(const TypeDef* classTypeDef);
+		void setRawRecord(mpark::variant<const TypeDef*, const TypeRef*> rRecord);
+		void setParent(const DotnetClass* par);
 		void setDeclaredFieldsCount(std::size_t classFieldsCount);
 		void setDeclaredMethodsCount(std::size_t classMethodsCount);
 		void setDeclaredGenericParametersCount(std::size_t classGenericParamsCount);
+		void setLibName(const std::string &lName);
 		void setIsInterface(bool set);
 		void setIsAbstract(bool set);
 		void setIsSealed(bool set);

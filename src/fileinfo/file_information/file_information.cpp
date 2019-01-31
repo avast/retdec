@@ -904,6 +904,16 @@ std::string FileInformation::getImportLibraryName(std::size_t position) const
 }
 
 /**
+ * Get import type
+ * @param position Index of selected import (indexed from 0)
+ * @return Symbol type
+ */
+std::string FileInformation::getImportUsageType(std::size_t position) const
+{
+	return importTable.getImportUsageType(position);
+}
+
+/**
  * Get import address
  * @param position Index of selected import (indexed from 0)
  * @param format Format of resulting string (e.g. std::dec, std::hex)
@@ -1051,6 +1061,42 @@ std::string FileInformation::getResourceSha256(std::size_t index) const
 }
 
 /**
+ * Get iconhash as CRC32
+ * @return ResourceIconhash as CRC32
+ */
+std::string FileInformation::getResourceIconhashCrc32() const
+{
+	return resourceTable.getResourceIconhashCrc32();
+}
+
+/**
+ * Get iconhash as MD5
+ * @return ResourceIconhash as MD5
+ */
+std::string FileInformation::getResourceIconhashMd5() const
+{
+	return resourceTable.getResourceIconhashMd5();
+}
+
+/**
+ * Get iconhash as SHA256
+ * @return ResourceIconhash as SHA256
+ */
+std::string FileInformation::getResourceIconhashSha256() const
+{
+	return resourceTable.getResourceIconhashSha256();
+}
+
+/**
+ * Get icon perceptual hash as AvgHash
+ * @return Icon perceptual hash as AvgHash
+ */
+std::string FileInformation::getResourceIconPerceptualAvgHash() const
+{
+	return resourceTable.getResourceIconPerceptualAvgHash();
+}
+
+/**
  * Get name of selected resource
  * @param index Index of selected resource (indexed from 0)
  * @return Name of selected resource
@@ -1144,6 +1190,15 @@ std::string FileInformation::getResourceOffsetStr(std::size_t index, std::ios_ba
 std::string FileInformation::getResourceSizeStr(std::size_t index, std::ios_base &(* format)(std::ios_base &)) const
 {
 	return resourceTable.getResourceSizeStr(index, format);
+}
+
+/**
+ * Find out if there are any records in resource table
+ * @return @c true if resource table is not empty, @c false otherwise
+ */
+bool FileInformation::hasResourceTableRecords() const
+{
+	return resourceTable.hasRecords();
 }
 
 /**
@@ -2807,6 +2862,92 @@ const std::string& FileInformation::getDotnetRuntimeVersion() const
 }
 
 /**
+ * Get imported class name
+ * @param position Index of selected imported class (indexed from 0)
+ * @return Name of selected imported class
+ */
+std::string FileInformation::getDotnetImportedClassName(std::size_t position) const
+{
+	return dotnetInfo.getImportedClassName(position);
+}
+
+/**
+ * Get imported class nested name
+ * @param position Index of selected imported class (indexed from 0)
+ * @return Nested name of selected imported class
+ */
+std::string FileInformation::getDotnetImportedClassNestedName(std::size_t position) const
+{
+	return dotnetInfo.getImportedClassNestedName(position);
+}
+
+/**
+ * Get imported class name with parent class presentation index
+ * @param position Index of selected imported class (indexed from 0)
+ * @return Name of selected imported class with parent class presentation index
+ */
+std::string FileInformation::getDotnetImportedClassNameWithParentClassIndex(std::size_t position) const
+{
+	return dotnetInfo.getImportedClassNameWithParentClassIndex(position);
+}
+
+/**
+ * Get imported class library name
+ * @param position Index of selected imported class (indexed from 0)
+ * @return Library name of selected imported class
+ */
+std::string FileInformation::getDotnetImportedClassLibName(std::size_t position) const
+{
+	return dotnetInfo.getImportedClassLibName(position);
+}
+
+/**
+ * Get imported class namespace
+ * @param position Index of selected imported class (indexed from 0)
+ * @return Namespace of selected imported class
+ */
+std::string FileInformation::getDotnetImportedClassNameSpace(std::size_t position) const
+{
+	return dotnetInfo.getImportedClassNameSpace(position);
+}
+
+/**
+ * Get dotnet typeref hash as CRC32
+ * @return Typeref hash as CRC32
+ */
+std::string FileInformation::getDotnetTypeRefhashCrc32() const
+{
+	return dotnetInfo.getTypeRefhashCrc32();
+}
+
+/**
+ * Get dotnet typeref hash as MD5
+ * @return Typeref hash as MD5
+ */
+std::string FileInformation::getDotnetTypeRefhashMd5() const
+{
+	return dotnetInfo.getTypeRefhashMd5();
+}
+
+/**
+ * Get dotnet typeref hash as SHA256
+ * @return Typeref hash as SHA256
+ */
+std::string FileInformation::getDotnetTypeRefhashSha256() const
+{
+	return dotnetInfo.getTypeRefhashSha256();
+}
+
+/**
+ * Get number of stored imported dotnet classes
+ * @return Number of stored imported dotnet classes
+ */
+std::size_t FileInformation::getNumberOfStoredDotnetImportedClasses() const
+{
+	return dotnetInfo.getNumberOfImportedClasses();
+}
+
+/**
  * Returns .NET metadata header address in string representation in specified format.
  * @param format Format.
  * @return Metadata header address in string representation.
@@ -3004,6 +3145,15 @@ bool FileInformation::hasDotnetUserStringStream() const
 bool FileInformation::hasDotnetTypeLibId() const
 {
 	return dotnetInfo.hasTypeLibId();
+}
+
+/**
+ * Find out if there are any records in typeref table
+ * @return @c true if typeref is not empty, @c false otherwise
+ */
+bool FileInformation::hasDotnetTypeRefTableRecords() const
+{
+	return dotnetInfo.hasImportedClassListRecords();
 }
 
 /**
@@ -3511,6 +3661,15 @@ void FileInformation::setExportTable(const retdec::fileformat::ExportTable *sTab
 }
 
 /**
+ * Set resource table
+ * @param sTable Information about resource table
+ */
+void FileInformation::setResourceTable(const retdec::fileformat::ResourceTable *sTable)
+{
+	resourceTable.setTable(sTable);
+}
+
+/**
  * Set pointer to detected strings
  * @param sStrings Pointer to detected strings
  */
@@ -3679,6 +3838,33 @@ void FileInformation::setDotnetImportedClassList(const std::vector<std::shared_p
 }
 
 /**
+ * Sets .NET typeref hash as CRC32.
+ * @param crc32 Hash as CRC32.
+ */
+void FileInformation::setDotnetTypeRefhashCrc32(const std::string& crc32)
+{
+	dotnetInfo.setTypeRefhashCrc32(crc32);
+}
+
+/**
+ * Sets .NET typeref hash as MD5.
+ * @param md5 Hash as MD5.
+ */
+void FileInformation::setDotnetTypeRefhashMd5(const std::string& md5)
+{
+	dotnetInfo.setTypeRefhashMd5(md5);
+}
+
+/**
+ * Sets .NET typeref hash as SHA256.
+ * @param sha256 Hash as SHA256.
+ */
+void FileInformation::setDotnetTypeRefhashSha256(const std::string& sha256)
+{
+	dotnetInfo.setTypeRefhashSha256(sha256);
+}
+
+/**
  * Add file flag descriptor
  * @param descriptor Descriptor (full description of flag)
  * @param abbreviation Abbreviation (short description of flag)
@@ -3712,23 +3898,6 @@ void FileInformation::addDllFlagsDescriptor(std::string descriptor, std::string 
 void FileInformation::clearDllFlagsDescriptors()
 {
 	header.clearDllFlagsDescriptors();
-}
-
-/**
- * Add resource to resource table
- * @param resource Resource to add
- */
-void FileInformation::addResource(Resource &resource)
-{
-	resourceTable.addResource(resource);
-}
-
-/**
- * Delete all resources from resource table
- */
-void FileInformation::clearResources()
-{
-	resourceTable.clearResources();
 }
 
 /**

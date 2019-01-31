@@ -7,8 +7,21 @@
 #include "retdec/utils/string.h"
 #include "retdec/fileformat/types/dotnet_types/dotnet_class.h"
 
+using namespace retdec::utils;
+
 namespace retdec {
 namespace fileformat {
+
+/**
+ * Constructor
+ */
+DotnetClass::DotnetClass(MetadataTableType rType, std::size_t idx) : rawRecord{static_cast<const TypeDef *>(nullptr)},
+							parent(nullptr), index(idx), declaredFieldsCount(0), declaredMethodsCount(0),
+							declaredGenericParametersCount(0), classOrInterface(false), abstract(false),
+							sealed(false), recordType(rType)
+{
+
+}
 
 /**
  * Returns string containing all the generic pamaters. Returned string is in the format <Param1,Param2,...,ParamN>
@@ -25,11 +38,39 @@ std::string DotnetClass::getGenericParametersString() const
 
 /**
  * Returns the raw metadata table record for this class.
- * @return Raw type record.
+ * @return Raw typeDef record.
  */
-const TypeDef* DotnetClass::getRawRecord() const
+const TypeDef* DotnetClass::getRawTypeDef() const
 {
-	return rawRecord;
+	if (recordType != MetadataTableType::TypeDef)
+	{
+		return nullptr;
+	}
+
+	return mpark::get<const TypeDef*>(rawRecord);
+}
+
+/**
+ * Returns the raw metadata table record for this class.
+ * @return Raw typeRef record.
+ */
+const TypeRef* DotnetClass::getRawTypeRef() const
+{
+	if (recordType != MetadataTableType::TypeRef)
+	{
+		return nullptr;
+	}
+
+	return mpark::get<const TypeRef*>(rawRecord);
+}
+
+/**
+ * Returns this classes parent.
+ * @return Parent.
+ */
+const DotnetClass* DotnetClass::getParent() const
+{
+	return parent;
 }
 
 /**
@@ -48,6 +89,84 @@ std::string DotnetClass::getNameWithGenericParameters() const
 std::string DotnetClass::getFullyQualifiedNameWithGenericParameters() const
 {
 	return getFullyQualifiedName() + getGenericParametersString();
+}
+
+/**
+ * Returns the name of the class appended with parent class presentation index.
+ * @return Name with parent class presentation index.
+ */
+std::string DotnetClass::getNameWithParentClassIndex() const
+{
+	if (name.empty() || !parent)
+	{
+		return name;
+	}
+
+	return name + "." + numToStr(parent->getIndex() - 1);
+}
+
+/**
+ * Returns the nested name of the class.
+ * @return Nested name.
+ */
+std::string DotnetClass::getNestedName() const
+{
+	auto nestedName = name;
+
+	if (nestedName.empty())
+	{
+		return "";
+	}
+
+	for (auto p = parent; p; p = p->getParent())
+	{
+		nestedName += "." + p->getName();
+	}
+
+	return nestedName;
+}
+
+/**
+ * Returns library name of the referencing class
+ * @return Library name of the referencing class.
+ */
+const std::string& DotnetClass::getLibName() const
+{
+	if (recordType == MetadataTableType::AssemblyRef)
+	{
+		return libName;
+	}
+	if (parent)
+	{
+		return parent->getLibName();
+	}
+
+	return libName;
+}
+
+/**
+ * Returns the top level namespace of the class.
+ * @return Top level namespace.
+ */
+const std::string& DotnetClass::getTopLevelNameSpace() const
+{
+	auto dnClass = this;
+
+	while (dnClass->parent)
+	{
+		dnClass = dnClass->parent;
+	}
+
+	return dnClass->getNameSpace();
+}
+
+/**
+ * Returns index of the class
+ * @return Index of the class
+ */
+std::size_t DotnetClass::getIndex() const
+{
+	return index;
 }
 
 /**
@@ -168,12 +287,30 @@ std::string DotnetClass::getTypeString() const
 }
 
 /**
- * Sets the raw metadata table record for this class.
- * @param classRawRecord Raw metadata table record.
+ * Returns the record type of the class
+ * @return Record type of the class
  */
-void DotnetClass::setRawRecord(const TypeDef* classRawRecord)
+MetadataTableType DotnetClass::getRecordType() const
 {
-	rawRecord = classRawRecord;
+	return recordType;
+}
+
+/**
+ * Sets the raw metadata table record for this class.
+ * @param rRecord Raw metadata table record.
+ */
+void DotnetClass::setRawRecord(mpark::variant<const TypeDef*, const TypeRef*> rRecord)
+{
+	rawRecord = rRecord;
+}
+
+/**
+ * Sets this classes parent.
+ * @param par Parent.
+ */
+void DotnetClass::setParent(const DotnetClass* par)
+{
+	parent = par;
 }
 
 /**
@@ -201,6 +338,15 @@ void DotnetClass::setDeclaredMethodsCount(std::size_t classMethodsCount)
 void DotnetClass::setDeclaredGenericParametersCount(std::size_t classGenericParamsCount)
 {
 	declaredGenericParametersCount = classGenericParamsCount;
+}
+
+/**
+ * Sets the library name of referencing class.
+ * @param lName Library name.
+ */
+void DotnetClass::setLibName(const std::string &lName)
+{
+	libName = lName;
 }
 
 /**

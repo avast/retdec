@@ -1298,7 +1298,7 @@ void DataFlowEntry::applyToIrOrdinary()
 		{
 			if (retType->isFloatingPointTy())
 			{
-				retVal = _config->getLlvmRegister("st0");
+				retVal = _config->getLlvmRegister("st7");
 			}
 			else if (_config->getConfig().architecture.isX86_32())
 			{
@@ -1732,7 +1732,7 @@ void DataFlowEntry::applyToIrVariadic()
 	{
 		if (retType->isFloatingPointTy())
 		{
-			retVal = _config->getLlvmRegister("st0");
+			retVal = _config->getLlvmRegister("st7");
 		}
 		else if (_config->getConfig().architecture.isX86_32())
 		{
@@ -2165,7 +2165,7 @@ void DataFlowEntry::setReturnType()
 					hasRax = true;
 					break;
 				}
-				else if (s->getPointerOperand()->getName() == "st0")
+				else if (s->getPointerOperand()->getName() == "st7")
 				{
 					hasSt0 = true;
 				}
@@ -2173,7 +2173,7 @@ void DataFlowEntry::setReturnType()
 		}
 		if (!hasEax && !hasRax && hasSt0)
 		{
-			retVal = _config->getLlvmRegister("st0");
+			retVal = _config->getLlvmRegister("st7");
 		}
 		else if (_config->getLlvmRegister("rax"))
 		{

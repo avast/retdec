@@ -170,12 +170,12 @@ void ExportTable::computeHashes()
 		// Yara adds comma if there are multiple imports
 		if(!expHashBytes.empty())
 		{
-			expHashBytes.push_back(static_cast<unsigned char>(','));
+			expHashBytes.push_back(static_cast<std::uint8_t>(','));
 		}
 
 		for(const auto c : std::string(funcName))
 		{
-			expHashBytes.push_back(static_cast<unsigned char>(c));
+			expHashBytes.push_back(static_cast<std::uint8_t>(c));
 		}
 	}
 

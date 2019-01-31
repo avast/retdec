@@ -401,7 +401,7 @@ int main(int argc, char *argv[])
 				po.extraMode);
 		c2l->translate(po.code.data(), po.code.size(), po.base, irb);
 	}
-	catch (const Capstone2LlvmIrBaseError& e)
+	catch (const BaseError& e)
 	{
 		std::cerr << e.what() << std::endl;
 		assert(false);

@@ -66,6 +66,15 @@ const DynamicEntry* DynamicTable::getRecordOfType(unsigned long long recordType)
 }
 
 /**
+ * Get name of the section/segment this dynamic table was created from.
+ * @return Section/segment name.
+ */
+const std::string& DynamicTable::getSectionName() const
+{
+	return sectionName;
+}
+
+/**
  * Get begin of records
  * @return Begin of dynamic table records
  */
@@ -117,6 +126,15 @@ bool DynamicTable::hasRecords() const
 bool DynamicTable::hasRecordOfType(unsigned long long recordType) const
 {
 	return getRecordOfType(recordType);
+}
+
+/**
+ * Set name of the section/segment this table was created from.
+ * @param name Section/segment name.
+ */
+void DynamicTable::setSectionName(const std::string& name)
+{
+	sectionName = name;
 }
 
 /**

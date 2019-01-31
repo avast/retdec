@@ -117,7 +117,7 @@ bool LLVMSupport::isInlinableInst(const llvm::Instruction *i) {
 
 	// Always inline cast instructions (this prevents emission of useless
 	// temporary variables).
-	if (llvm::isa<llvm::BitCastInst>(i))
+	if (llvm::isa<llvm::AddrSpaceCastInst>(i) || llvm::isa<llvm::BitCastInst>(i))
 		return true;
 
 	// Always inline CMP instructions, even if they are shared by multiple

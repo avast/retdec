@@ -9,6 +9,7 @@
 
 #include <vector>
 
+#include "retdec/fileformat/types/resource_table/resource_table.h"
 #include "fileinfo/file_information/file_information_types/resource_table/resource.h"
 
 namespace fileinfo {
@@ -22,7 +23,7 @@ namespace fileinfo {
 class ResourceTable
 {
 	private:
-		std::vector<Resource> table; ///< vector of stored resources
+		const retdec::fileformat::ResourceTable *table;
 	public:
 		ResourceTable();
 		~ResourceTable();
@@ -33,6 +34,12 @@ class ResourceTable
 		std::string getResourceCrc32(std::size_t index) const;
 		std::string getResourceMd5(std::size_t index) const;
 		std::string getResourceSha256(std::size_t index) const;
+		std::string getResourceIconhashCrc32() const;
+		std::string getResourceIconhashMd5() const;
+		std::string getResourceIconhashSha256() const;
+		std::string getResourceIconPerceptualAvgHash() const;
+		std::string getResourceIconPerceptualDCTpHash() const;
+		const retdec::fileformat::Resource* getResource(std::size_t position) const;
 		std::string getResourceName(std::size_t index) const;
 		std::string getResourceType(std::size_t index) const;
 		std::string getResourceLanguage(std::size_t index) const;
@@ -44,10 +51,14 @@ class ResourceTable
 		std::string getResourceSizeStr(std::size_t index, std::ios_base &(* format)(std::ios_base &)) const;
 		/// @}
 
+		/// @name Setters
+		/// @{
+		void setTable(const retdec::fileformat::ResourceTable *resourceTable);
+		/// @}
+
 		/// @name Other methods
 		/// @{
-		void addResource(Resource &resource);
-		void clearResources();
+		bool hasRecords() const;
 		/// @}
 };
 

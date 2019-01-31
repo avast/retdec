@@ -32,6 +32,7 @@ class ElfFormat : public FileFormat
 			unsigned long long size;      ///< size of table
 			unsigned long long entrySize; ///< size of one entry in table
 			unsigned long long type;      ///< type of relocations (SHT_REL or SHT_RELA)
+			bool plt = false;             ///< associated with Procedure Linkage Table.
 
 			RelocationTableInfo();
 			~RelocationTableInfo();
@@ -54,6 +55,7 @@ class ElfFormat : public FileFormat
 		ELFIO::section* addRelocationTable(ELFIO::section *dynamicSection, const RelocationTableInfo &info, ELFIO::section *symbolTable);
 		ELFIO::section* addRelRelocationTable(ELFIO::section *dynamicSection, const DynamicTable &table, ELFIO::section *symbolTable);
 		ELFIO::section* addRelaRelocationTable(ELFIO::section *dynamicSection, const DynamicTable &table, ELFIO::section *symbolTable);
+		ELFIO::section* addPltRelocationTable(ELFIO::section *dynamicSection, const DynamicTable &table, ELFIO::section *symbolTable);
 		ELFIO::section* addGlobalOffsetTable(ELFIO::section *dynamicSection, const DynamicTable &table);
 		ELFIO::Elf_Half fixSymbolLink(ELFIO::Elf_Half symbolLink, ELFIO::Elf64_Addr symbolValue);
 		bool getRelocationMask(unsigned relType, std::vector<std::uint8_t> &mask);
@@ -61,10 +63,11 @@ class ElfFormat : public FileFormat
 		void loadSymbols(const ELFIO::elfio *file, const ELFIO::symbol_section_accessor *elfSymbolTable, const ELFIO::section *elfSection);
 		void loadSymbols(const SymbolTable &oldTab, const DynamicTable &dynTab, ELFIO::section &got);
 		void loadDynamicTable(DynamicTable &table, const ELFIO::dynamic_section_accessor *elfDynamicTable);
-		void loadDynamicTable(const ELFIO::dynamic_section_accessor *elfDynamicTable);
+		bool loadDynamicTable(const ELFIO::dynamic_section_accessor *elfDynamicTable, const ELFIO::section *sec);
 		void loadSections();
 		void loadSegments();
-		void loadInfoFromDynamicTables(std::size_t noOfTables);
+		void loadDynamicSegmentSection();
+		void loadInfoFromDynamicTables(DynamicTable &dynTab, ELFIO::section *sec);
 		void loadInfoFromDynamicSegment();
 		void loadNoteSecSeg(ElfNoteSecSeg &noteSecSegs) const;
 		void loadNotes();
@@ -78,6 +81,11 @@ class ElfFormat : public FileFormat
 		int elfClass;        ///< class of input ELF file
 		ELFIO::elfio reader; ///< parser of input ELF file
 		ELFIO::elfio writer; ///< parser of auxiliary ELF object which is needed for fixing representation of input file
+
+		/// Offsets of already read symbol tables.
+		std::set<ELFIO::Elf64_Off> symtabOffsets;
+		/// Addresses of already read symbol tables.
+		std::set<ELFIO::Elf64_Addr> symtabAddresses;
 	public:
 		ElfFormat(std::string pathToFile, LoadFlags loadFlags = LoadFlags::NONE);
 		ElfFormat(std::istream &inputStream, LoadFlags loadFlags = LoadFlags::NONE);

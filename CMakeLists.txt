@@ -11,12 +11,13 @@ endif()
 option(RETDEC_DOC "Build public API documentation (requires Doxygen)." OFF)
 option(RETDEC_TESTS "Build tests." OFF)
 option(RETDEC_DEV_TOOLS "Build dev tools." OFF)
+option(RETDEC_FORCE_OPENSSL_BUILD "Force OpenSSL build." OFF)
 
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-# RetDec, and some dependencies (e.g. LLVM, Keystone), require python3.
+# RetDec, and some dependencies (e.g. LLVM, Keystone), require Python 3.
 find_package(PythonInterp 3.4 REQUIRED)
 
 function(append_if condition value)
@@ -45,7 +46,7 @@ elseif(UNIX)
 	set(CMAKE_INSTALL_RPATH "$ORIGIN/../lib")
 endif()
 
-# Suppress superfluous randlib warnings about "*.a" having no symbols on MacOSX.
+# Suppress superfluous ranlib warnings about "*.a" having no symbols on MacOSX.
 if (APPLE)
 	set(CMAKE_C_ARCHIVE_CREATE   "<CMAKE_AR> Scr <TARGET> <LINK_FLAGS> <OBJECTS>")
 	set(CMAKE_CXX_ARCHIVE_CREATE "<CMAKE_AR> Scr <TARGET> <LINK_FLAGS> <OBJECTS>")
@@ -73,7 +74,7 @@ if(MSVC)
 elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR
 		CMAKE_CXX_COMPILER_ID STREQUAL "Clang" OR
 		CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang")
-	# Unify visibility to meet llvm's default.
+	# Unify visibility to meet LLVM's default.
 	include(CheckCXXCompilerFlag)
 
 	check_cxx_compiler_flag("-fvisibility-inlines-hidden" SUPPORTS_FVISIBILITY_INLINES_HIDDEN_FLAG)
@@ -94,6 +95,7 @@ elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR
 endif()
 
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/install-external.cmake)
+include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/utils.cmake)
 
 add_subdirectory(deps)
 if(RETDEC_DOC)

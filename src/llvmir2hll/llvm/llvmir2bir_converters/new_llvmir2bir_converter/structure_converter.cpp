@@ -1538,10 +1538,10 @@ ShPtr<Statement> StructureConverter::getIfClauseBodyClone(const ShPtr<CFGNode> &
 * If the given @a trueBody contains only empty statements, the condition will be
 * negated to produce non-empty body of the @c if statement.
 *
-* If the given @a falseBody ir nullptr or contains only empty statements,
+* If the given @a falseBody ir @c nullptr or contains only empty statements,
 * the else clause will be omitted.
 *
-* If both @a trueBody and @a falseBody contain only empty statements, nullptr
+* If both @a trueBody and @a falseBody contain only empty statements, @c nullptr
 * will be returned.
 *
 * @par Preconditions
@@ -1576,7 +1576,7 @@ ShPtr<IfStmt> StructureConverter::getIfStmt(const ShPtr<Expression> &cond,
 /**
 * @brief Returns successor of the given loop node @a loopNode.
 *
-* Loop also could have no successor. In that case, nullptr is returned.
+* Loop also could have no successor. In that case, @c nullptr is returned.
 *
 * @par Preconditions
 *  - @a loopNode is non-null
@@ -1643,7 +1643,7 @@ void StructureConverter::reduceSwitchStatement(ShPtr<CFGNode> node) {
 /**
 * @brief Returns successor of the given switch node @a switchNode.
 *
-* Switch also could have no successor. In that case, nullptr is returned.
+* Switch also could have no successor. In that case, @c nullptr is returned.
 *
 * @par Preconditions
 *  - @a switchNode is non-null

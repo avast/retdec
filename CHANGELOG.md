@@ -2,12 +2,27 @@
 
 # dev
 
+* New Feature: Added presentation of imported types and TypeRef hashes for .NET binaries ([#363](https://github.com/avast-tl/retdec/issues/363), [#364](https://github.com/avast-tl/retdec/issues/364), [#428](https://github.com/avast-tl/retdec/issues/428)).
+* New Feature: Added computation and presentation of icon hashes for exact and also similarity matching in PE files ([#339](https://github.com/avast-tl/retdec/issues/339)).
+* Enhancement: Added support for build and run on FreeBSD and potentially on other BSD OSes ([#476](https://github.com/avast-tl/retdec/pull/476)).
+* Enhancement: It is possible to use local PeLib directory instead of remote revision via CMake viariable `PELIB_LOCAL_DIR`. This is convenient when modifying both PeLib and RetDec at the same time.
+* Enhancement: Improved detection of needed libraries and imported/external functions in ELF binaries ([#457](https://github.com/avast-tl/retdec/issues/457)).
+* Enhancement: Added semantics for more MIPS instructions.
+* Enhancement: Capstone2LlvmIr library refactoring ([#115](https://github.com/avast-tl/retdec/issues/115)).
+* Enhancement: Removed the build and runtime dependency on ncurses/libtinfo ([#409](https://github.com/avast-tl/retdec/pull/409)).
+* Enhancement: Add a check into our scripts that they are run from an installation directory and not from the `scripts` directory ([#418](https://github.com/avast-tl/retdec/issues/418)).
+* Enhancement: Improved corruption checks in `retdec-fileinfo` to recognize cut PE files which are still loadable ([#463](https://github.com/avast-tl/retdec/issues/463)).
+* Fix: Fixed incorrect return code of `bin2pat` that caused `signature-from-library-creator.py` to silently fail on error ([#473](https://github.com/avast-tl/retdec/issues/473), [#474](https://github.com/avast-tl/retdec/pull/474)).
+* Fix: Fixed installation when Python is in a path containing spaces ([#441](https://github.com/avast-tl/retdec/issues/441)).
+* Fix: Fixed handling of pointers with segment overrides, including loads/stores from/to zero (null) pointers ([#41](https://github.com/avast-tl/retdec/issues/41), [#169](https://github.com/avast-tl/retdec/issues/169), [#347](https://github.com/avast-tl/retdec/issues/347), [#376](https://github.com/avast-tl/retdec/issues/376), [#391](https://github.com/avast-tl/retdec/pull/391)).
+* Fix: Fixed translation of x86 FPU instructions to LLVM IR ([#293](https://github.com/avast-tl/retdec/issues/293)).
+
 # v3.2 (2018-08-16)
 
 * New Feature: Converted shell scripts to Python scripts so that Windows users no longer have to install MSYS2 in order to run RetDec ([#338](https://github.com/avast-tl/retdec/pull/338), [#147](https://github.com/avast-tl/retdec/issues/147)).
 * New Feature: Added generation of export-table hashes into `retdec-fileinfo` ([#121](https://github.com/avast-tl/retdec/issues/121), [#321](https://github.com/avast-tl/retdec/pull/321)).
 * New Feature: Automatically generate and publicly host an up-to-date Doxygen documentation ([#20](https://github.com/avast-tl/retdec/issues/20)).
-* Enhancement: Suppress superfluous randlib warnings about static libraries having no symbols on macOS ([#271](https://github.com/avast-tl/retdec/issues/271), [#349](https://github.com/avast-tl/retdec/pull/349)).
+* Enhancement: Suppress superfluous ranlib warnings about static libraries having no symbols on macOS ([#271](https://github.com/avast-tl/retdec/issues/271), [#349](https://github.com/avast-tl/retdec/pull/349)).
 * Fix: Fixed assertions in statically linked code recognition ([#333](https://github.com/avast-tl/retdec/issues/333)).
 * Fix: Fixed aborts due to assertions during decoding of some MIPS binaries ([#335](https://github.com/avast-tl/retdec/issues/335)).
 * Fix: Fixed a memory leak when parsing Mach-O files ([#331](https://github.com/avast-tl/retdec/pull/331)).

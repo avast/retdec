@@ -15,6 +15,7 @@ add_subdirectory(pelib)
 add_subdirectory(yaracpp)
 add_subdirectory(yaramod)
 add_subdirectory(whereami)
+add_subdirectory(variant)
 
 if(RETDEC_TESTS)
 	add_subdirectory(googletest)

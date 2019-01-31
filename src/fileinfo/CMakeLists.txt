@@ -55,6 +55,7 @@ set(FILEINFO_SOURCES
 	file_presentation/getters/iterative_getter/iterative_distribution_getter/segment_plain_getter.cpp
 	file_presentation/getters/iterative_getter/iterative_distribution_getter/strings_plain_getter.cpp
 	file_presentation/getters/iterative_getter/iterative_distribution_getter/symbol_tables_plain_getter.cpp
+	file_presentation/getters/iterative_getter/iterative_distribution_getter/typeref_table_plain_getter.cpp
 	file_presentation/getters/iterative_getter/iterative_getter.cpp
 	file_presentation/getters/iterative_getter/iterative_simple_getter/certificate_table_plain_getter.cpp
 	file_presentation/getters/iterative_getter/iterative_simple_getter/iterative_simple_getter.cpp
@@ -72,6 +73,7 @@ set(FILEINFO_SOURCES
 	file_presentation/getters/iterative_getter/iterative_subtitle_getter/segment_json_getter.cpp
 	file_presentation/getters/iterative_getter/iterative_subtitle_getter/strings_json_getter.cpp
 	file_presentation/getters/iterative_getter/iterative_subtitle_getter/symbol_tables_json_getter.cpp
+	file_presentation/getters/iterative_getter/iterative_subtitle_getter/typeref_table_json_getter.cpp
 	file_presentation/getters/pattern_config_getter/pattern_config_getter.cpp
 	file_presentation/getters/simple_getter/basic_json_getter.cpp
 	file_presentation/getters/simple_getter/basic_plain_getter.cpp

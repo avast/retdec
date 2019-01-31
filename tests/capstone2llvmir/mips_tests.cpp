@@ -544,6 +544,29 @@ TEST_P(Capstone2LlvmIrTranslatorMipsTests, MIPS_INS_NOR_3_op)
 }
 
 //
+// MIPS_INS_NOT
+//
+
+TEST_P(Capstone2LlvmIrTranslatorMipsTests, MIPS_INS_NOT)
+{
+	SKIP_MODE_64;
+
+	setRegisters({
+		{MIPS_REG_1, 0x12345678},
+		{MIPS_REG_2, 0xff00ff00},
+	});
+
+	emulate("not $1, $2");
+
+	EXPECT_JUST_REGISTERS_LOADED({MIPS_REG_2});
+	EXPECT_JUST_REGISTERS_STORED({
+		{MIPS_REG_1, 0x00ff00ff},
+	});
+	EXPECT_NO_MEMORY_LOADED_STORED();
+	EXPECT_NO_VALUE_CALLED();
+}
+
+//
 // MIPS_INS_MUL
 //
 
@@ -1510,6 +1533,21 @@ TEST_P(Capstone2LlvmIrTranslatorMipsTests, MIPS_INS_CLZ_ones)
 
 //
 // MIPS_INS_SEH
+// TODO: Keystone -- instruction requires a CPU feature not currently enabled.
+//
+
+//
+// MIPS_INS_SNE, MIPS_INS_SNEI
+// TODO: Keystone -- instruction requires a CPU feature not currently enabled.
+//
+
+//
+// MIPS_INS_SNE, MIPS_INS_SNEI
+// TODO: Keystone -- instruction requires a CPU feature not currently enabled.
+//
+
+//
+// MIPS_INS_SEQ, MIPS_INS_SEQI
 // TODO: Keystone -- instruction requires a CPU feature not currently enabled.
 //
 
@@ -4153,7 +4191,7 @@ TEST_P(Capstone2LlvmIrTranslatorMipsTests, MIPS_INS_ROUND_w_s_32)
 	});
 	EXPECT_NO_MEMORY_LOADED_STORED();
 	EXPECT_JUST_VALUES_CALLED({
-		{_module.getFunction("__asm_round.w.s.float"), {3.14_f32}},
+		{_module.getFunction("__asm_round.w.s"), {3.14_f32}},
 	});
 }
 
@@ -4173,7 +4211,7 @@ TEST_P(Capstone2LlvmIrTranslatorMipsTests, MIPS_INS_ROUND_w_d_32)
 	});
 	EXPECT_NO_MEMORY_LOADED_STORED();
 	EXPECT_JUST_VALUES_CALLED({
-		{_module.getFunction("__asm_round.w.d.double"), {3.14_f64}},
+		{_module.getFunction("__asm_round.w.d"), {3.14_f64}},
 	});
 }
 
@@ -4193,7 +4231,7 @@ TEST_P(Capstone2LlvmIrTranslatorMipsTests, MIPS_INS_ROUND_w_s_64)
 	});
 	EXPECT_NO_MEMORY_LOADED_STORED();
 	EXPECT_JUST_VALUES_CALLED({
-		{_module.getFunction("__asm_round.w.s.double"), {3.14_f64}},
+		{_module.getFunction("__asm_round.w.s"), {3.14_f64}},
 	});
 }
 
@@ -4213,7 +4251,7 @@ TEST_P(Capstone2LlvmIrTranslatorMipsTests, MIPS_INS_ROUND_w_d_64)
 	});
 	EXPECT_NO_MEMORY_LOADED_STORED();
 	EXPECT_JUST_VALUES_CALLED({
-		{_module.getFunction("__asm_round.w.d.double"), {3.14_f64}},
+		{_module.getFunction("__asm_round.w.d"), {3.14_f64}},
 	});
 }
 
@@ -4233,7 +4271,7 @@ TEST_P(Capstone2LlvmIrTranslatorMipsTests, MIPS_INS_ROUND_l_s_64)
 	});
 	EXPECT_NO_MEMORY_LOADED_STORED();
 	EXPECT_JUST_VALUES_CALLED({
-		{_module.getFunction("__asm_round.l.s.double"), {3.14_f64}},
+		{_module.getFunction("__asm_round.l.s"), {3.14_f64}},
 	});
 }
 
@@ -4253,7 +4291,7 @@ TEST_P(Capstone2LlvmIrTranslatorMipsTests, MIPS_INS_ROUND_l_d_64)
 	});
 	EXPECT_NO_MEMORY_LOADED_STORED();
 	EXPECT_JUST_VALUES_CALLED({
-		{_module.getFunction("__asm_round.l.d.double"), {3.14_f64}},
+		{_module.getFunction("__asm_round.l.d"), {3.14_f64}},
 	});
 }
 
@@ -4277,7 +4315,7 @@ TEST_P(Capstone2LlvmIrTranslatorMipsTests, MIPS_INS_ABS_s_32)
 	});
 	EXPECT_NO_MEMORY_LOADED_STORED();
 	EXPECT_JUST_VALUES_CALLED({
-		{_module.getFunction("__asm_abs.s.float"), {3.14_f32}},
+		{_module.getFunction("__asm_abs.s"), {3.14_f32}},
 	});
 }
 
@@ -4297,7 +4335,7 @@ TEST_P(Capstone2LlvmIrTranslatorMipsTests, MIPS_INS_ABS_d_32)
 	});
 	EXPECT_NO_MEMORY_LOADED_STORED();
 	EXPECT_JUST_VALUES_CALLED({
-		{_module.getFunction("__asm_abs.d.double"), {3.14_f64}},
+		{_module.getFunction("__asm_abs.d"), {3.14_f64}},
 	});
 }
 
@@ -4317,7 +4355,7 @@ TEST_P(Capstone2LlvmIrTranslatorMipsTests, MIPS_INS_ABS_s_64)
 	});
 	EXPECT_NO_MEMORY_LOADED_STORED();
 	EXPECT_JUST_VALUES_CALLED({
-		{_module.getFunction("__asm_abs.s.double"), {3.14_f64}},
+		{_module.getFunction("__asm_abs.s"), {3.14_f64}},
 	});
 }
 
@@ -4337,13 +4375,53 @@ TEST_P(Capstone2LlvmIrTranslatorMipsTests, MIPS_INS_ABS_d_64)
 	});
 	EXPECT_NO_MEMORY_LOADED_STORED();
 	EXPECT_JUST_VALUES_CALLED({
-		{_module.getFunction("__asm_abs.d.double"), {3.14_f64}},
+		{_module.getFunction("__asm_abs.d"), {3.14_f64}},
 	});
+}
+
+//
+// MIPS_INS_NEGU
+//
+
+TEST_P(Capstone2LlvmIrTranslatorMipsTests, MIPS_INS_NEGU)
+{
+	SKIP_MODE_64;
+
+	setRegisters({
+		{MIPS_REG_1, 0x00ffffff},
+	});
+
+	emulate("negu $1, $1");
+
+	EXPECT_JUST_REGISTERS_LOADED({MIPS_REG_1});
+	EXPECT_JUST_REGISTERS_STORED({
+		{MIPS_REG_1, 0xff000001},
+	});
+	EXPECT_NO_MEMORY_LOADED_STORED();
+	EXPECT_NO_VALUE_CALLED();
 }
 
 //
 // MIPS_INS_NEG
 //
+
+TEST_P(Capstone2LlvmIrTranslatorMipsTests, MIPS_INS_NEG_int)
+{
+	SKIP_MODE_64;
+
+	setRegisters({
+		{MIPS_REG_1, 0x00ffffff},
+	});
+
+	emulate("neg $1, $1");
+
+	EXPECT_JUST_REGISTERS_LOADED({MIPS_REG_1});
+	EXPECT_JUST_REGISTERS_STORED({
+		{MIPS_REG_1, 0xff000001},
+	});
+	EXPECT_NO_MEMORY_LOADED_STORED();
+	EXPECT_NO_VALUE_CALLED();
+}
 
 TEST_P(Capstone2LlvmIrTranslatorMipsTests, MIPS_INS_NEG_s_32)
 {
@@ -4361,7 +4439,7 @@ TEST_P(Capstone2LlvmIrTranslatorMipsTests, MIPS_INS_NEG_s_32)
 	});
 	EXPECT_NO_MEMORY_LOADED_STORED();
 	EXPECT_JUST_VALUES_CALLED({
-		{_module.getFunction("__asm_neg.s.float"), {3.14_f32}},
+		{_module.getFunction("__asm_neg.s"), {3.14_f32}},
 	});
 }
 
@@ -4381,7 +4459,7 @@ TEST_P(Capstone2LlvmIrTranslatorMipsTests, MIPS_INS_NEG_d_32)
 	});
 	EXPECT_NO_MEMORY_LOADED_STORED();
 	EXPECT_JUST_VALUES_CALLED({
-		{_module.getFunction("__asm_neg.d.double"), {3.14_f64}},
+		{_module.getFunction("__asm_neg.d"), {3.14_f64}},
 	});
 }
 
@@ -4401,7 +4479,7 @@ TEST_P(Capstone2LlvmIrTranslatorMipsTests, MIPS_INS_NEG_s_64)
 	});
 	EXPECT_NO_MEMORY_LOADED_STORED();
 	EXPECT_JUST_VALUES_CALLED({
-		{_module.getFunction("__asm_neg.s.double"), {3.14_f64}},
+		{_module.getFunction("__asm_neg.s"), {3.14_f64}},
 	});
 }
 
@@ -4421,7 +4499,7 @@ TEST_P(Capstone2LlvmIrTranslatorMipsTests, MIPS_INS_NEG_d_64)
 	});
 	EXPECT_NO_MEMORY_LOADED_STORED();
 	EXPECT_JUST_VALUES_CALLED({
-		{_module.getFunction("__asm_neg.d.double"), {3.14_f64}},
+		{_module.getFunction("__asm_neg.d"), {3.14_f64}},
 	});
 }
 
@@ -4445,7 +4523,7 @@ TEST_P(Capstone2LlvmIrTranslatorMipsTests, MIPS_INS_SQRT_s_32)
 	});
 	EXPECT_NO_MEMORY_LOADED_STORED();
 	EXPECT_JUST_VALUES_CALLED({
-		{_module.getFunction("__asm_sqrt.s.float"), {3.14_f32}},
+		{_module.getFunction("__asm_sqrt.s"), {3.14_f32}},
 	});
 }
 
@@ -4465,7 +4543,7 @@ TEST_P(Capstone2LlvmIrTranslatorMipsTests, MIPS_INS_SQRT_d_32)
 	});
 	EXPECT_NO_MEMORY_LOADED_STORED();
 	EXPECT_JUST_VALUES_CALLED({
-		{_module.getFunction("__asm_sqrt.d.double"), {3.14_f64}},
+		{_module.getFunction("__asm_sqrt.d"), {3.14_f64}},
 	});
 }
 
@@ -4485,7 +4563,7 @@ TEST_P(Capstone2LlvmIrTranslatorMipsTests, MIPS_INS_SQRT_s_64)
 	});
 	EXPECT_NO_MEMORY_LOADED_STORED();
 	EXPECT_JUST_VALUES_CALLED({
-		{_module.getFunction("__asm_sqrt.s.double"), {3.14_f64}},
+		{_module.getFunction("__asm_sqrt.s"), {3.14_f64}},
 	});
 }
 
@@ -4505,7 +4583,7 @@ TEST_P(Capstone2LlvmIrTranslatorMipsTests, MIPS_INS_SQRT_d_64)
 	});
 	EXPECT_NO_MEMORY_LOADED_STORED();
 	EXPECT_JUST_VALUES_CALLED({
-		{_module.getFunction("__asm_sqrt.d.double"), {3.14_f64}},
+		{_module.getFunction("__asm_sqrt.d"), {3.14_f64}},
 	});
 }
 
@@ -4529,7 +4607,7 @@ TEST_P(Capstone2LlvmIrTranslatorMipsTests, MIPS_INS_FLOOR_w_s_32)
 	});
 	EXPECT_NO_MEMORY_LOADED_STORED();
 	EXPECT_JUST_VALUES_CALLED({
-		{_module.getFunction("__asm_floor.w.s.float"), {3.14_f32}},
+		{_module.getFunction("__asm_floor.w.s"), {3.14_f32}},
 	});
 }
 
@@ -4549,7 +4627,7 @@ TEST_P(Capstone2LlvmIrTranslatorMipsTests, MIPS_INS_FLOOR_w_d_32)
 	});
 	EXPECT_NO_MEMORY_LOADED_STORED();
 	EXPECT_JUST_VALUES_CALLED({
-		{_module.getFunction("__asm_floor.w.d.double"), {3.14_f64}},
+		{_module.getFunction("__asm_floor.w.d"), {3.14_f64}},
 	});
 }
 
@@ -4569,7 +4647,7 @@ TEST_P(Capstone2LlvmIrTranslatorMipsTests, MIPS_INS_FLOOR_w_s_64)
 	});
 	EXPECT_NO_MEMORY_LOADED_STORED();
 	EXPECT_JUST_VALUES_CALLED({
-		{_module.getFunction("__asm_floor.w.s.double"), {3.14_f64}},
+		{_module.getFunction("__asm_floor.w.s"), {3.14_f64}},
 	});
 }
 
@@ -4589,7 +4667,7 @@ TEST_P(Capstone2LlvmIrTranslatorMipsTests, MIPS_INS_FLOOR_w_d_64)
 	});
 	EXPECT_NO_MEMORY_LOADED_STORED();
 	EXPECT_JUST_VALUES_CALLED({
-		{_module.getFunction("__asm_floor.w.d.double"), {3.14_f64}},
+		{_module.getFunction("__asm_floor.w.d"), {3.14_f64}},
 	});
 }
 
@@ -4609,7 +4687,7 @@ TEST_P(Capstone2LlvmIrTranslatorMipsTests, MIPS_INS_FLOOR_l_s_64)
 	});
 	EXPECT_NO_MEMORY_LOADED_STORED();
 	EXPECT_JUST_VALUES_CALLED({
-		{_module.getFunction("__asm_floor.l.s.double"), {3.14_f64}},
+		{_module.getFunction("__asm_floor.l.s"), {3.14_f64}},
 	});
 }
 
@@ -4629,7 +4707,7 @@ TEST_P(Capstone2LlvmIrTranslatorMipsTests, MIPS_INS_FLOOR_l_d_64)
 	});
 	EXPECT_NO_MEMORY_LOADED_STORED();
 	EXPECT_JUST_VALUES_CALLED({
-		{_module.getFunction("__asm_floor.l.d.double"), {3.14_f64}},
+		{_module.getFunction("__asm_floor.l.d"), {3.14_f64}},
 	});
 }
 
@@ -4653,7 +4731,7 @@ TEST_P(Capstone2LlvmIrTranslatorMipsTests, MIPS_INS_CEIL_w_s_32)
 	});
 	EXPECT_NO_MEMORY_LOADED_STORED();
 	EXPECT_JUST_VALUES_CALLED({
-		{_module.getFunction("__asm_ceil.w.s.float"), {3.14_f32}},
+		{_module.getFunction("__asm_ceil.w.s"), {3.14_f32}},
 	});
 }
 
@@ -4673,7 +4751,7 @@ TEST_P(Capstone2LlvmIrTranslatorMipsTests, MIPS_INS_CEIL_w_d_32)
 	});
 	EXPECT_NO_MEMORY_LOADED_STORED();
 	EXPECT_JUST_VALUES_CALLED({
-		{_module.getFunction("__asm_ceil.w.d.double"), {3.14_f64}},
+		{_module.getFunction("__asm_ceil.w.d"), {3.14_f64}},
 	});
 }
 
@@ -4693,7 +4771,7 @@ TEST_P(Capstone2LlvmIrTranslatorMipsTests, MIPS_INS_CEIL_w_s_64)
 	});
 	EXPECT_NO_MEMORY_LOADED_STORED();
 	EXPECT_JUST_VALUES_CALLED({
-		{_module.getFunction("__asm_ceil.w.s.double"), {3.14_f64}},
+		{_module.getFunction("__asm_ceil.w.s"), {3.14_f64}},
 	});
 }
 
@@ -4713,7 +4791,7 @@ TEST_P(Capstone2LlvmIrTranslatorMipsTests, MIPS_INS_CEIL_w_d_64)
 	});
 	EXPECT_NO_MEMORY_LOADED_STORED();
 	EXPECT_JUST_VALUES_CALLED({
-		{_module.getFunction("__asm_ceil.w.d.double"), {3.14_f64}},
+		{_module.getFunction("__asm_ceil.w.d"), {3.14_f64}},
 	});
 }
 
@@ -4733,7 +4811,7 @@ TEST_P(Capstone2LlvmIrTranslatorMipsTests, MIPS_INS_CEIL_l_s_64)
 	});
 	EXPECT_NO_MEMORY_LOADED_STORED();
 	EXPECT_JUST_VALUES_CALLED({
-		{_module.getFunction("__asm_ceil.l.s.double"), {3.14_f64}},
+		{_module.getFunction("__asm_ceil.l.s"), {3.14_f64}},
 	});
 }
 
@@ -4753,7 +4831,7 @@ TEST_P(Capstone2LlvmIrTranslatorMipsTests, MIPS_INS_CEIL_l_d_64)
 	});
 	EXPECT_NO_MEMORY_LOADED_STORED();
 	EXPECT_JUST_VALUES_CALLED({
-		{_module.getFunction("__asm_ceil.l.d.double"), {3.14_f64}},
+		{_module.getFunction("__asm_ceil.l.d"), {3.14_f64}},
 	});
 }
 
@@ -4777,7 +4855,7 @@ TEST_P(Capstone2LlvmIrTranslatorMipsTests, MIPS_INS_TRUNC_w_s_32)
 	});
 	EXPECT_NO_MEMORY_LOADED_STORED();
 	EXPECT_JUST_VALUES_CALLED({
-		{_module.getFunction("__asm_trunc.w.s.float"), {3.14_f32}},
+		{_module.getFunction("__asm_trunc.w.s"), {3.14_f32}},
 	});
 }
 
@@ -4797,7 +4875,7 @@ TEST_P(Capstone2LlvmIrTranslatorMipsTests, MIPS_INS_TRUNC_w_d_32)
 	});
 	EXPECT_NO_MEMORY_LOADED_STORED();
 	EXPECT_JUST_VALUES_CALLED({
-		{_module.getFunction("__asm_trunc.w.d.double"), {3.14_f64}},
+		{_module.getFunction("__asm_trunc.w.d"), {3.14_f64}},
 	});
 }
 
@@ -4817,7 +4895,7 @@ TEST_P(Capstone2LlvmIrTranslatorMipsTests, MIPS_INS_TRUNC_w_s_64)
 	});
 	EXPECT_NO_MEMORY_LOADED_STORED();
 	EXPECT_JUST_VALUES_CALLED({
-		{_module.getFunction("__asm_trunc.w.s.double"), {3.14_f64}},
+		{_module.getFunction("__asm_trunc.w.s"), {3.14_f64}},
 	});
 }
 
@@ -4837,7 +4915,7 @@ TEST_P(Capstone2LlvmIrTranslatorMipsTests, MIPS_INS_TRUNC_w_d_64)
 	});
 	EXPECT_NO_MEMORY_LOADED_STORED();
 	EXPECT_JUST_VALUES_CALLED({
-		{_module.getFunction("__asm_trunc.w.d.double"), {3.14_f64}},
+		{_module.getFunction("__asm_trunc.w.d"), {3.14_f64}},
 	});
 }
 
@@ -4857,7 +4935,7 @@ TEST_P(Capstone2LlvmIrTranslatorMipsTests, MIPS_INS_TRUNC_l_s_64)
 	});
 	EXPECT_NO_MEMORY_LOADED_STORED();
 	EXPECT_JUST_VALUES_CALLED({
-		{_module.getFunction("__asm_trunc.l.s.double"), {3.14_f64}},
+		{_module.getFunction("__asm_trunc.l.s"), {3.14_f64}},
 	});
 }
 
@@ -4877,7 +4955,7 @@ TEST_P(Capstone2LlvmIrTranslatorMipsTests, MIPS_INS_TRUNC_l_d_64)
 	});
 	EXPECT_NO_MEMORY_LOADED_STORED();
 	EXPECT_JUST_VALUES_CALLED({
-		{_module.getFunction("__asm_trunc.l.d.double"), {3.14_f64}},
+		{_module.getFunction("__asm_trunc.l.d"), {3.14_f64}},
 	});
 }
 
@@ -4963,7 +5041,7 @@ TEST_P(Capstone2LlvmIrTranslatorMipsTests, MIPS_INS_CFC1_32)
 	});
 	EXPECT_NO_MEMORY_LOADED_STORED();
 	EXPECT_JUST_VALUES_CALLED({
-		{_module.getFunction("__asm_cfc1.i32"), {0x1234}},
+		{_module.getFunction("__asm_cfc1"), {0x1234}},
 	});
 }
 
@@ -4983,7 +5061,7 @@ TEST_P(Capstone2LlvmIrTranslatorMipsTests, MIPS_INS_CFC1_64)
 	});
 	EXPECT_NO_MEMORY_LOADED_STORED();
 	EXPECT_JUST_VALUES_CALLED({
-		{_module.getFunction("__asm_cfc1.i64"), {0x1234}},
+		{_module.getFunction("__asm_cfc1"), {0x1234}},
 	});
 }
 
@@ -6005,28 +6083,6 @@ TEST_P(Capstone2LlvmIrTranslatorMipsTests, MIPS_INS_C_ule_d_32)
 	EXPECT_JUST_REGISTERS_LOADED({MIPS_REG_FD0, MIPS_REG_FD2});
 	EXPECT_JUST_REGISTERS_STORED({
 		{MIPS_REG_FCC0, true},
-	});
-	EXPECT_NO_MEMORY_LOADED_STORED();
-	EXPECT_NO_VALUE_CALLED();
-}
-
-//
-// MIPS_INS_NEGU
-//
-
-TEST_P(Capstone2LlvmIrTranslatorMipsTests, MIPS_INS_NEGU)
-{
-	SKIP_MODE_64;
-
-	setRegisters({
-		{MIPS_REG_1, 0x00ffffff},
-	});
-
-	emulate("negu $1, $1");
-
-	EXPECT_JUST_REGISTERS_LOADED({MIPS_REG_1});
-	EXPECT_JUST_REGISTERS_STORED({
-		{MIPS_REG_1, 0xff000001},
 	});
 	EXPECT_NO_MEMORY_LOADED_STORED();
 	EXPECT_NO_VALUE_CALLED();

@@ -18,6 +18,7 @@ target_link_libraries(retdec-utils whereami)
 if(MSVC)
 	target_link_libraries(retdec-utils whereami shlwapi) # shlwapi.dll for PathRemoveFileSpec()
 endif()
+target_link_libraries(retdec-utils mpark_variant)
 target_include_directories(retdec-utils PUBLIC ${PROJECT_SOURCE_DIR}/include/)
 target_include_directories(retdec-utils PUBLIC ${PROJECT_SOURCE_DIR}/deps/)
 

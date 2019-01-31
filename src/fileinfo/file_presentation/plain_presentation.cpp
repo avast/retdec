@@ -703,6 +703,7 @@ bool PlainPresentation::present()
 		presentIterativeDistribution(SymbolTablesPlainGetter(fileinfo), explanatory);
 		presentIterativeDistribution(ImportTablePlainGetter(fileinfo), explanatory);
 		presentIterativeDistribution(ExportTablePlainGetter(fileinfo), explanatory);
+		presentIterativeDistribution(TypeRefTablePlainGetter(fileinfo), explanatory);
 		presentIterativeDistribution(RelocationTablesPlainGetter(fileinfo), explanatory);
 		presentIterativeDistribution(DynamicSectionsPlainGetter(fileinfo), explanatory);
 		presentIterativeDistribution(ResourcePlainGetter(fileinfo), explanatory);

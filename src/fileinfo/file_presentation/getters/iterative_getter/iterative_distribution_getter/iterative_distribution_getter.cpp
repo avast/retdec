@@ -271,9 +271,10 @@ void IterativeDistributionGetter::getHeader(std::size_t structIndex, std::string
 	}
 	const std::size_t basicElemSize = commonHeaderElements.size();
 	const std::size_t flagsSize = distFlags[structIndex].size();
+	auto end = std::min(distribution.size(), std::min(basicElemSize, flagsSize));
 	header.clear();
 
-	for(std::size_t i = 0, e = std::min(basicElemSize, flagsSize); i < e; ++i)
+	for(std::size_t i = 0, e = end; i < e; ++i)
 	{
 		if(distFlags[structIndex][i])
 		{

@@ -17,6 +17,7 @@ retdec_signature_from_library_creator = importlib.import_module('retdec-signatur
 retdec_unpacker = importlib.import_module('retdec-unpacker')
 utils = importlib.import_module('retdec-utils')
 utils.check_python_version()
+utils.ensure_script_is_being_run_from_installed_retdec()
 
 SigFromLib = retdec_signature_from_library_creator.SigFromLib
 Unpacker = retdec_unpacker.Unpacker
@@ -765,7 +766,7 @@ class Decompiler:
                 with open(self.config_file, 'w') as f:
                     f.write('{}')
 
-            # Raw data needs architecture, endianess and optionally sections's vma and entry point to be specified.
+            # Raw data needs architecture, endianess and optionally section's vma and entry point to be specified.
             if self.mode == 'raw':
                 if not self.arch or self.arch == 'unknown' or self.arch == '':
                     utils.print_error('Option -a|--arch must be used with mode ' + self.mode)
