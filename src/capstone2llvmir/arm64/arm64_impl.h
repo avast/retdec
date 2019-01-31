@@ -135,7 +135,14 @@ class Capstone2LlvmIrTranslatorArm64_impl :
 				llvm::Value* val,
 				llvm::IRBuilder<>& irb,
 				eOpConv ct = eOpConv::ZEXT_TRUNC) override;
-
+//
+//==============================================================================
+// Helper methods.
+//==============================================================================
+//
+	protected:
+		virtual bool isOperandRegister(cs_arm64_op& op) override;
+		virtual uint8_t getOperandAccess(cs_arm64_op& op) override;
 //
 //==============================================================================
 // ARM64 implementation data.

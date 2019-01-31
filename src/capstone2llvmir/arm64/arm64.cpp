@@ -526,7 +526,7 @@ llvm::Value* Capstone2LlvmIrTranslatorArm64_impl::loadRegister(
 	auto* llvmReg = getRegister(pr);
 	if (llvmReg == nullptr)
 	{
-		throw Capstone2LlvmIrError("loadRegister() unhandled reg.");
+		//throw Capstone2LlvmIrError("loadRegister() unhandled reg.");
 	}
 
 	llvm::Value* ret = irb.CreateLoad(llvmReg);
@@ -606,7 +606,7 @@ llvm::Instruction* Capstone2LlvmIrTranslatorArm64_impl::storeRegister(
 	auto* llvmReg = getRegister(pr);
 	if (llvmReg == nullptr)
 	{
-		throw Capstone2LlvmIrError("storeRegister() unhandled reg.");
+		//throw Capstone2LlvmIrError("storeRegister() unhandled reg.");
 	}
 
 	val = generateTypeConversion(irb, val, llvmReg->getValueType(), ct);
@@ -625,7 +625,7 @@ llvm::Instruction* Capstone2LlvmIrTranslatorArm64_impl::storeRegister(
 				|| l->getType()->isIntegerTy(32)
 				|| l->getType()->isIntegerTy(64)))
 		{
-			throw Capstone2LlvmIrError("Unexpected parent type.");
+			//throw Capstone2LlvmIrError("Unexpected parent type.");
 		}
 
 		llvm::Value* andC = nullptr;
@@ -684,6 +684,17 @@ llvm::Instruction* Capstone2LlvmIrTranslatorArm64_impl::storeOp(
 	}
 }
 
+bool Capstone2LlvmIrTranslatorArm64_impl::isOperandRegister(cs_arm64_op& op)
+{
+	return op.type == ARM64_OP_REG;
+}
+
+uint8_t Capstone2LlvmIrTranslatorArm64_impl::getOperandAccess(cs_arm64_op& op)
+{
+	return op.access;
+}
+
+
 //
 //==============================================================================
 // ARM64 instruction translation methods.
@@ -695,7 +706,7 @@ llvm::Instruction* Capstone2LlvmIrTranslatorArm64_impl::storeOp(
  */
 void Capstone2LlvmIrTranslatorArm64_impl::translateAdd(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb)
 {
-	std::tie(op1, op2) = loadOpTernaryOp1Op2(ai, irb);
+	std::tie(op1, op2) = loadOpBinaryOrTernaryOp1Op2(ai, irb);
 	// In case of 32bit reg, trunc the imm
 	op2 = irb.CreateZExtOrTrunc(op2, op1->getType());
 
@@ -708,7 +719,7 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateAdd(cs_insn* i, cs_arm64* ai,
  */
 void Capstone2LlvmIrTranslatorArm64_impl::translateSub(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb)
 {
-	std::tie(op1, op2) = loadOpTernaryOp1Op2(ai, irb);
+	std::tie(op1, op2) = loadOpBinaryOrTernaryOp1Op2(ai, irb);
 	// In case of 32bit reg, trunc the imm
 	op2 = irb.CreateZExtOrTrunc(op2, op1->getType());
 
