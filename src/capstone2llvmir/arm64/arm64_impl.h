@@ -110,6 +110,10 @@ class Capstone2LlvmIrTranslatorArm64_impl :
 				llvm::Value* n,
 				bool updateFlags = false);
 
+		llvm::Value* generateInsnConditionCode(
+				llvm::IRBuilder<>& irb,
+				cs_arm64* ai);
+
 		llvm::Value* generateGetOperandMemAddr(
 				cs_arm64_op& op,
 				llvm::IRBuilder<>& irb);

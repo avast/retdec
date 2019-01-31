@@ -181,9 +181,6 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateInstruction(
 	{
 		auto f = fIt->second;
 
-		//bool branchInsn = i->id == ARM_INS_B || i->id == ARM_INS_BX
-		//		|| i->id == ARM_INS_BL || i->id == ARM_INS_BLX
-		//		|| i->id == ARM_INS_CBZ || i->id == ARM_INS_CBNZ;
 		if (ai->cc == ARM64_CC_AL || ai->cc == ARM64_CC_NV /* || branchInsn */)
 		{
 			_inCondition = false;
@@ -202,9 +199,22 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateInstruction(
 	}
 	else
 	{
-		std::cerr << "Instruction not implemented " << cs_insn_name(_handle, i->id) << " " << i->op_str << std::endl;
-		//assert(false && "Instruction is not implemented");
-		// TODO: Automatically generate pseudo asm call.
+		throwUnhandledInstructions(i);
+
+		if (ai->cc == ARM64_CC_AL || ai->cc == ARM64_CC_INVALID)
+		{
+			_inCondition = false;
+			translatePseudoAsmGeneric(i, ai, irb);
+		}
+		else
+		{
+			_inCondition = true;
+
+			auto* cond = generateInsnConditionCode(irb, ai);
+			auto bodyIrb = generateIfThen(cond, irb);
+
+			translatePseudoAsmGeneric(i, ai, bodyIrb);
+		}
 	}
 }
 
@@ -683,6 +693,123 @@ llvm::Instruction* Capstone2LlvmIrTranslatorArm64_impl::storeOp(
 		}
 	}
 }
+
+llvm::Value* Capstone2LlvmIrTranslatorArm64_impl::generateInsnConditionCode(
+		llvm::IRBuilder<>& irb,
+		cs_arm64* ai)
+{
+	switch (ai->cc)
+	{
+		// Equal = Zero set
+		case ARM64_CC_EQ:
+		{
+			auto* z = loadRegister(ARM64_REG_CPSR_Z, irb);
+			return z;
+		}
+		// Not equal = Zero clear
+		case ARM64_CC_NE:
+		{
+			auto* z = loadRegister(ARM64_REG_CPSR_Z, irb);
+			return generateValueNegate(irb, z);
+		}
+		// Unsigned higher or same = Carry set
+		case ARM64_CC_HS:
+		{
+			auto* c = loadRegister(ARM64_REG_CPSR_C, irb);
+			return c;
+		}
+		// Unsigned lower = Carry clear
+		case ARM64_CC_LO:
+		{
+			auto* c = loadRegister(ARM64_REG_CPSR_C, irb);
+			return generateValueNegate(irb, c);
+		}
+		// Negative = N set
+		case ARM64_CC_MI:
+		{
+			auto* n = loadRegister(ARM64_REG_CPSR_N, irb);
+			return n;
+		}
+		// Positive or zero = N clear
+		case ARM64_CC_PL:
+		{
+			auto* n = loadRegister(ARM64_REG_CPSR_N, irb);
+			return generateValueNegate(irb, n);
+		}
+		// Overflow = V set
+		case ARM64_CC_VS:
+		{
+			auto* v = loadRegister(ARM64_REG_CPSR_V, irb);
+			return v;
+		}
+		// No overflow = V clear
+		case ARM64_CC_VC:
+		{
+			auto* v = loadRegister(ARM64_REG_CPSR_V, irb);
+			return generateValueNegate(irb, v);
+		}
+		// Unsigned higher = Carry set & Zero clear
+		case ARM64_CC_HI:
+		{
+			auto* c = loadRegister(ARM64_REG_CPSR_C, irb);
+			auto* z = loadRegister(ARM64_REG_CPSR_Z, irb);
+			auto* nz = generateValueNegate(irb, z);
+			return irb.CreateAnd(c, nz);
+		}
+		// Unsigned lower or same = Carry clear or Zero set
+		case ARM64_CC_LS:
+		{
+			auto* z = loadRegister(ARM64_REG_CPSR_Z, irb);
+			auto* c = loadRegister(ARM64_REG_CPSR_C, irb);
+			auto* nc = generateValueNegate(irb, c);
+			return irb.CreateOr(z, nc);
+		}
+		// Greater than or equal = N set and V set || N clear and V clear
+		// (N & V) || (!N & !V) == !(N xor V)
+		case ARM64_CC_GE:
+		{
+			auto* n = loadRegister(ARM64_REG_CPSR_N, irb);
+			auto* v = loadRegister(ARM64_REG_CPSR_V, irb);
+			auto* x = irb.CreateXor(n, v);
+			return generateValueNegate(irb, x);
+		}
+		// Less than = N set and V clear || N clear and V set
+		// (N & !V) || (!N & V) == (N xor V)
+		case ARM64_CC_LT:
+		{
+			auto* n = loadRegister(ARM64_REG_CPSR_N, irb);
+			auto* v = loadRegister(ARM64_REG_CPSR_V, irb);
+			return irb.CreateXor(n, v);
+		}
+		// Greater than = Z clear, and either N set and V set, or N clear and V set
+		case ARM64_CC_GT:
+		{
+			auto* z = loadRegister(ARM64_REG_CPSR_Z, irb);
+			auto* n = loadRegister(ARM64_REG_CPSR_N, irb);
+			auto* v = loadRegister(ARM64_REG_CPSR_V, irb);
+			auto* xor1 = irb.CreateXor(n, v);
+			auto* or1 = irb.CreateOr(z, xor1);
+			return generateValueNegate(irb, or1);
+		}
+		// Less than or equal = Z set, or N set and V clear, or N clear and V set
+		case ARM64_CC_LE:
+		{
+			auto* z = loadRegister(ARM64_REG_CPSR_Z, irb);
+			auto* n = loadRegister(ARM64_REG_CPSR_N, irb);
+			auto* v = loadRegister(ARM64_REG_CPSR_V, irb);
+			auto* xor1 = irb.CreateXor(n, v);
+			return irb.CreateOr(z, xor1);
+		}
+		case ARM64_CC_AL:
+		case ARM64_CC_NV:
+		case ARM64_CC_INVALID:
+		default:
+		{
+			throw GenericError("should not be possible");
+		}
+	}
+}
+
 
 bool Capstone2LlvmIrTranslatorArm64_impl::isOperandRegister(cs_arm64_op& op)
 {
