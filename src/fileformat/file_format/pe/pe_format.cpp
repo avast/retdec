@@ -997,6 +997,8 @@ bool PeFormat::parseVisualBasicExternTable(std::size_t structureOffset, std::siz
 		visualBasicInfo.addExtern(std::move(ext));
 	}
 
+	visualBasicInfo.computeExternTableHashes();
+
 	return true;
 }
 
@@ -1082,6 +1084,7 @@ bool PeFormat::parseVisualBasicObjectTable(std::size_t structureOffset, std::siz
 		parseVisualBasicObjects(objectDescriptorsOffset, baseAddress, vbot.nObjects);
 	}
 
+	visualBasicInfo.computeObjectTableHashes();
 	return true;
 }
 

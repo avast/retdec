@@ -175,6 +175,13 @@ class FileInformation
 		std::string getVisualBasicExternModuleName(std::size_t position) const;
 		std::string getVisualBasicExternApiName(std::size_t position) const;
 		std::string getVisualBasicTypeLibLCIDStr() const;
+		std::string getExternTableHashCrc32() const;
+		std::string getVisualBasicExternTableHashCrc32() const;
+		std::string getVisualBasicExternTableHashMd5() const;
+		std::string getVisualBasicExternTableHashSha256() const;
+		std::string getVisualBasicObjectTableHashCrc32() const;
+		std::string getVisualBasicObjectTableHashMd5() const;
+		std::string getVisualBasicObjectTableHashSha256() const;
 		/// @}
 
 

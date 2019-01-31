@@ -969,6 +969,60 @@ std::string FileInformation::getVisualBasicTypeLibLCIDStr() const
 	return visualBasicInfo.getTypeLibLCIDStr();
 }
 
+/**
+ * Get visual basic extern table hash as Crc32
+ * @return Visual basic extern table hash
+ */
+std::string FileInformation::getVisualBasicExternTableHashCrc32() const
+{
+	return visualBasicInfo.getExternTableHashCrc32();
+}
+
+/**
+ * Get visual basic extern table hash as Md5
+ * @return Visual basic extern table hash
+ */
+std::string FileInformation::getVisualBasicExternTableHashMd5() const
+{
+	return visualBasicInfo.getExternTableHashMd5();
+}
+
+/**
+ * Get visual basic extern table hash as Sha256
+ * @return Visual basic extern table hash
+ */
+std::string FileInformation::getVisualBasicExternTableHashSha256() const
+{
+	return visualBasicInfo.getExternTableHashSha256();
+}
+
+/**
+ * Get visual basic object table hash as Crc32
+ * @return Visual basic object table hash
+ */
+std::string FileInformation::getVisualBasicObjectTableHashCrc32() const
+{
+	return visualBasicInfo.getObjectTableHashCrc32();
+}
+
+/**
+ * Get visual basic object table hash as Md5
+ * @return Visual basic object table hash
+ */
+std::string FileInformation::getVisualBasicObjectTableHashMd5() const
+{
+	return visualBasicInfo.getObjectTableHashMd5();
+}
+
+/**
+ * Get visual basic object table hash as Sha256
+ * @return Visual basic object table hash
+ */
+std::string FileInformation::getVisualBasicObjectTableHashSha256() const
+{
+	return visualBasicInfo.getObjectTableHashSha256();
+}
+
 
 
 

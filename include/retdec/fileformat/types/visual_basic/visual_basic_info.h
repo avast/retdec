@@ -49,6 +49,13 @@ class VisualBasicInfo
 		// std::uint32_t typeLibCLSID; 16BYTES
 		std::uint32_t typeLibLCID;
 
+		std::string externTableHashCrc32;
+		std::string externTableHashMd5;
+		std::string externTableHashSha256;
+		std::string objectTableHashCrc32;
+		std::string objectTableHashMd5;
+		std::string objectTableHashSha256;
+
 		bool validLanguageDLLPrimaryLCID;
 		bool validLanguageDLLSecondaryLCID;
 		bool validProjectPrimaryLCID;
@@ -82,6 +89,12 @@ class VisualBasicInfo
 		std::size_t getNumberOfExterns() const;
 		// bool getTypeLibCLSID(std::uint32_t &res) const;
 		bool getTypeLibLCID(std::uint32_t &res) const;
+		const std::string &getExternTableHashCrc32() const;
+		const std::string &getExternTableHashMd5() const;
+		const std::string &getExternTableHashSha256() const;
+		const std::string &getObjectTableHashCrc32() const;
+		const std::string &getObjectTableHashMd5() const;
+		const std::string &getObjectTableHashSha256() const;
 		/// @}
 
 		/// @name Setters
@@ -110,6 +123,8 @@ class VisualBasicInfo
 		bool hasProjectDescription() const;
 		bool hasProjectHelpFile() const;
 		bool isPcode() const;
+		void computeExternTableHashes();
+		void computeObjectTableHashes();
 		/// @}
 };
 
