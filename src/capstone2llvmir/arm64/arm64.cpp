@@ -833,6 +833,8 @@ uint8_t Capstone2LlvmIrTranslatorArm64_impl::getOperandAccess(cs_arm64_op& op)
  */
 void Capstone2LlvmIrTranslatorArm64_impl::translateAdd(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb)
 {
+	EXPECT_IS_TERNARY(i, ai, irb);
+
 	std::tie(op1, op2) = loadOpBinaryOrTernaryOp1Op2(ai, irb);
 	// In case of 32bit reg, trunc the imm
 	op2 = irb.CreateZExtOrTrunc(op2, op1->getType());
@@ -846,6 +848,8 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateAdd(cs_insn* i, cs_arm64* ai,
  */
 void Capstone2LlvmIrTranslatorArm64_impl::translateSub(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb)
 {
+	EXPECT_IS_TERNARY(i, ai, irb);
+
 	std::tie(op1, op2) = loadOpBinaryOrTernaryOp1Op2(ai, irb);
 	// In case of 32bit reg, trunc the imm
 	op2 = irb.CreateZExtOrTrunc(op2, op1->getType());
@@ -859,10 +863,7 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateSub(cs_insn* i, cs_arm64* ai,
  */
 void Capstone2LlvmIrTranslatorArm64_impl::translateMov(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb)
 {
-	if (ai->op_count != 2)
-	{
-		return;
-	}
+	EXPECT_IS_BINARY(i, ai, irb);
 
 	op1 = loadOpBinaryOp1(ai, irb);
 	if (i->id == ARM64_INS_MVN)
@@ -888,6 +889,8 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateMov(cs_insn* i, cs_arm64* ai,
  */
 void Capstone2LlvmIrTranslatorArm64_impl::translateStr(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb)
 {
+	EXPECT_IS_BINARY_OR_TERNARY(i, ai, irb);
+
 	op0 = loadOp(ai->operands[0], irb);
 	auto* dest = generateGetOperandMemAddr(ai->operands[1], irb);
 
@@ -924,6 +927,8 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateStr(cs_insn* i, cs_arm64* ai,
  */
 void Capstone2LlvmIrTranslatorArm64_impl::translateStp(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb)
 {
+	EXPECT_IS_EXPR(i, ai, irb, (2 <= ai->op_count && ai->op_count <= 4));
+
 	op0 = loadOp(ai->operands[0], irb);
 	op1 = loadOp(ai->operands[1], irb);
 
@@ -971,6 +976,8 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateStp(cs_insn* i, cs_arm64* ai,
  */
 void Capstone2LlvmIrTranslatorArm64_impl::translateLdr(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb)
 {
+	EXPECT_IS_BINARY_OR_TERNARY(i, ai, irb);
+
 	auto* regType = getRegisterType(ai->operands[0].reg);
 	auto* dest = generateGetOperandMemAddr(ai->operands[1], irb);
 	auto* pt = llvm::PointerType::get(regType, 0);
@@ -1008,6 +1015,8 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateLdr(cs_insn* i, cs_arm64* ai,
  */
 void Capstone2LlvmIrTranslatorArm64_impl::translateLdp(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb)
 {
+	EXPECT_IS_EXPR(i, ai, irb, (2 <= ai->op_count && ai->op_count <= 4));
+
 	auto* regType = getRegisterType(ai->operands[0].reg);
 	auto* dest = generateGetOperandMemAddr(ai->operands[2], irb);
 	auto* pt = llvm::PointerType::get(regType, 0);
@@ -1058,6 +1067,8 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateLdp(cs_insn* i, cs_arm64* ai,
  */
 void Capstone2LlvmIrTranslatorArm64_impl::translateAdrp(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb)
 {
+	EXPECT_IS_BINARY(i, ai, irb);
+
 	auto* imm  = loadOpBinaryOp1(ai, irb);
 	auto* base = llvm::ConstantInt::get(getDefaultType(), (((i->address + i->size) >> 12) << 12));
 
@@ -1071,6 +1082,8 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateAdrp(cs_insn* i, cs_arm64* ai
  */
 void Capstone2LlvmIrTranslatorArm64_impl::translateBr(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb)
 {
+	EXPECT_IS_UNARY(i, ai, irb);
+
 	op0 = loadOpUnary(ai, irb);
 	generateBranchFunctionCall(irb, op0);
 }
@@ -1080,6 +1093,8 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateBr(cs_insn* i, cs_arm64* ai, 
  */
 void Capstone2LlvmIrTranslatorArm64_impl::translateBl(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb)
 {
+	EXPECT_IS_UNARY(i, ai, irb);
+    
 	storeRegister(ARM64_REG_LR, getNextInsnAddress(i), irb);
 	op0 = loadOpUnary(ai, irb);
 	generateCallFunctionCall(irb, op0);
@@ -1090,6 +1105,9 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateBl(cs_insn* i, cs_arm64* ai, 
 */
 void Capstone2LlvmIrTranslatorArm64_impl::translateRet(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb)
 {
+	EXPECT_IS_NULLARY_OR_UNARY(i, ai, irb);
+
+	// TODO: Unary variant
 	op0 = loadRegister(ARM64_REG_LR, irb);
 	generateReturnFunctionCall(irb, op0);
 }
