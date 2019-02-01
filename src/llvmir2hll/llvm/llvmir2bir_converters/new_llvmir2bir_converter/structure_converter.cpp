@@ -179,21 +179,12 @@ void StructureConverter::replaceGoto(CFGNodeVector &targets) {
 			Statement::removeStatement(targetBody);
 			generatedNodes.insert(target);
 		} else if (predNum == 1) {
-			ShPtr<Statement> targetBodyClone = Statement::cloneStatements(targetBody);
-			if (getStatementCount(targetBodyClone) != getStatementCount(targetBody)) {
-				continue;
-			}
-
-			fixClonedGotos(targetBodyClone);
-
 			// has one reference, replace goto with body of label
 			for (auto pred = targetBody->predecessor_begin();
 					pred != targetBody->predecessor_end(); ++pred) {
-
 				ShPtr<GotoStmt> stmt = cast<GotoStmt>(*pred);
 				if (stmt && stmt->getTarget() == targetBody) {
-					insertClonedLoopTargets(targetBody, targetBodyClone);
-					Statement::replaceStatement(stmt, targetBodyClone);
+					Statement::replaceStatement(stmt, targetBody);
 					generatedNodes.insert(target);
 					break;
 				}
