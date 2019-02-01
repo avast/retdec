@@ -9,6 +9,7 @@
 
 #include <cstddef>
 #include <string>
+#include <sstream>
 
 #include "retdec/llvmir2hll/ir/module.h"
 #include "retdec/llvmir2hll/support/smart_ptr.h"
@@ -23,7 +24,7 @@ public:
 	BIRWriter();
 	virtual ~BIRWriter() override;
 
-	void emit(ShPtr<Module> m);
+	void emit(ShPtr<Module> m, const std::string& fileName = "");
 
 protected:
 	void emitGlobals();
@@ -111,6 +112,8 @@ public:
 protected:
 	/// The module to be written.
 	ShPtr<Module> module;
+	/// The output stream.
+	std::stringstream out;
 
 	unsigned currIndent = 0;
 };
