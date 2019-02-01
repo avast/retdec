@@ -12,6 +12,7 @@
 * Enhancement: Removed the build and runtime dependency on ncurses/libtinfo ([#409](https://github.com/avast-tl/retdec/pull/409)).
 * Enhancement: Add a check into our scripts that they are run from an installation directory and not from the `scripts` directory ([#418](https://github.com/avast-tl/retdec/issues/418)).
 * Enhancement: Improved corruption checks in `retdec-fileinfo` to recognize cut PE files which are still loadable ([#463](https://github.com/avast-tl/retdec/issues/463)).
+* Fix: Stricter rules for PE section names ([#451](https://github.com/avast-tl/retdec/issues/451)).
 * Fix: Fixed incorrect return code of `bin2pat` that caused `signature-from-library-creator.py` to silently fail on error ([#473](https://github.com/avast-tl/retdec/issues/473), [#474](https://github.com/avast-tl/retdec/pull/474)).
 * Fix: Fixed installation when Python is in a path containing spaces ([#441](https://github.com/avast-tl/retdec/issues/441)).
 * Fix: Fixed handling of pointers with segment overrides, including loads/stores from/to zero (null) pointers ([#41](https://github.com/avast-tl/retdec/issues/41), [#169](https://github.com/avast-tl/retdec/issues/169), [#347](https://github.com/avast-tl/retdec/issues/347), [#376](https://github.com/avast-tl/retdec/issues/376), [#391](https://github.com/avast-tl/retdec/pull/391)).
