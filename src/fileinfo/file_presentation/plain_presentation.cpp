@@ -636,7 +636,13 @@ void PlainPresentation::presentVisualBasicObjects() const
 	}
 
 	std::cout << "\n";
-	std::cout << "Visual Basic objects" << "\n";
+	std::cout << "Visual Basic Object table" << "\n";
+	std::cout << "-------------------------" << "\n";
+	std::cout << "CRC32            : " << fileinfo.getVisualBasicObjectTableHashCrc32() << "\n";
+	std::cout << "MD5              : " << fileinfo.getVisualBasicObjectTableHashMd5() << "\n";
+	std::cout << "SHA256           : " << fileinfo.getVisualBasicObjectTableHashSha256() << "\n";
+	std::cout << "\n";
+	std::size_t cnt = 0;
 	for (std::size_t i = 0; i < nObjs; i++)
 	{
 		auto obj = fileinfo.getVisualBasicObject(i);
@@ -649,11 +655,12 @@ void PlainPresentation::presentVisualBasicObjects() const
 		{
 			continue;
 		}
-		std::cout << "    object name: " << objName << "\n";
+		std::cout << cnt << ". " << "object name: " << objName << "\n";
 		for (const auto &m : obj->getMethods())
 		{
-			std::cout << "        method name: " << m << "\n";
+			std::cout << "    method name: " << m << "\n";
 		}
+		cnt++;
 	}
 }
 
