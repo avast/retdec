@@ -486,11 +486,57 @@ void JsonPresentation::presentDotnetInfo(Json::Value &root) const
  */
 void JsonPresentation::presentVisualBasicInfo(Json::Value &root) const
 {
-	// TODO add object table and export table dump (as above in .NET)
 	Value jVBasic;
 	if (!presentSimple(VisualBasicJsonGetter(fileinfo), jVBasic))
 	{
 		return;
+	}
+
+	auto nExterns = fileinfo.getVisualBasicNumberOfExterns();
+	if (nExterns)
+	{
+		Value jExternTable;
+		jExternTable["crc32"] = fileinfo.getVisualBasicExternTableHashCrc32();
+		jExternTable["md5"] = fileinfo.getVisualBasicExternTableHashMd5();
+		jExternTable["sha256"] = fileinfo.getVisualBasicExternTableHashSha256();
+		for (std::size_t i = 0; i < nExterns; i++)
+		{
+			auto ext = fileinfo.getVisualBasicExtern(i);
+			if (!ext)
+			{
+				continue;
+			}
+			Value jExtern;
+			jExtern["moduleName"] = ext->getModuleName();
+			jExtern["apiName"] = ext->getApiName();
+			jExternTable["externs"].append(jExtern);
+		}
+		jVBasic["externTable"] = jExternTable;
+	}
+
+	auto nObjects = fileinfo.getVisualBasicNumberOfObjects();
+	if (nObjects)
+	{
+		Value jObjectTable;
+		jObjectTable["crc32"] = fileinfo.getVisualBasicObjectTableHashCrc32();
+		jObjectTable["md5"] = fileinfo.getVisualBasicObjectTableHashMd5();
+		jObjectTable["sha256"] = fileinfo.getVisualBasicObjectTableHashSha256();
+		for (std::size_t i = 0; i < nObjects; i++)
+		{
+			auto obj = fileinfo.getVisualBasicObject(i);
+			if (!obj)
+			{
+				continue;
+			}
+			Value jObject;
+			jObject["name"] = obj->getName();
+			for (const auto &method : obj->getMethods())
+			{
+				jObject["methods"].append(method);
+			}
+			jObjectTable["objects"].append(jObject);
+		}
+		jVBasic["objectTable"] = jObjectTable;
 	}
 
 	root["visualBasicInfo"] = jVBasic;
