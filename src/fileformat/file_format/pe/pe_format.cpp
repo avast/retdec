@@ -1092,7 +1092,7 @@ bool PeFormat::parseVisualBasicObjectTable(std::size_t structureOffset, std::siz
  * Parse visual basic objects
  * @param structureOffset Offset in file where the public object descriptors array starts
  * @param baseAddress Base address
- * @param nEntries Number of objects in array
+ * @param nObjects Number of objects in array
  * @return @c true if objects were successfuly parsed, @c false otherwise
  */
 bool PeFormat::parseVisualBasicObjects(std::size_t structureOffset, std::size_t baseAddress,

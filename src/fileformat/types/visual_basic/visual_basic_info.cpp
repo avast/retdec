@@ -402,7 +402,7 @@ void VisualBasicInfo::setProjectSecondaryLCID(std::uint32_t secLCID)
 
 // /**
 //  * Set typeLib CLSID
-//  * @param tlbCLSID TypeLib CLSID to set
+//  * @ TODO param tlbCLSID TypeLib CLSID to set
 //  */
 // void VisualBasicInfo::setTypeLibCLSID(std::uint32_t tlbCLSID)
 // {
