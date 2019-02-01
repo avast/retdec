@@ -143,7 +143,12 @@ void BIRWriter::visit(ShPtr<GlobalVarDef> varDef) {
 
 	varDef->getVar()->accept(this);
 	std::cout << " = ";
-	varDef->getInitializer()->accept(this);
+	if (varDef->getInitializer()) {
+		varDef->getInitializer()->accept(this);
+	}
+	else {
+		std::cout << "<UNINITIALIZED>";
+	}
 	std::cout << std::endl;
 }
 
@@ -323,7 +328,11 @@ void BIRWriter::visit(ShPtr<ReturnStmt> stmt) {
 	emitLabel(stmt);
 	emitCurrentIndent();
 	std::cout << "return ";
-	stmt->getRetVal()->accept(this);
+	if (stmt->hasRetVal()) {
+		stmt->getRetVal()->accept(this);
+	} else {
+		std::cout << "void";
+	}
 	std::cout<< std::endl;
 	if (stmt->getSuccessor()) stmt->getSuccessor()->accept(this);
 }
@@ -337,8 +346,12 @@ void BIRWriter::visit(ShPtr<SwitchStmt> stmt) {
 
 	for (auto it = stmt->clause_begin(), e = stmt->clause_end(); it != e; ++it) {
 		emitCurrentIndent();
-		std::cout << "case ";
-		it->first->accept(this);
+		if (it->first) {
+			std::cout << "case ";
+			it->first->accept(this);
+		} else {
+			std::cout << "default";
+		}
 		std::cout << ":" << std::endl;
 		if (it->second) {
 			++currIndent;
