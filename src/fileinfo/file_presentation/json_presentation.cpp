@@ -481,6 +481,22 @@ void JsonPresentation::presentDotnetInfo(Json::Value &root) const
 }
 
 /**
+ * Present information about Visual Basic
+ * @param root Parent node in output document
+ */
+void JsonPresentation::presentVisualBasicInfo(Json::Value &root) const
+{
+	// TODO add object table and export table dump (as above in .NET)
+	Value jVBasic;
+	if (!presentSimple(VisualBasicJsonGetter(fileinfo), jVBasic))
+	{
+		return;
+	}
+
+	root["visualBasicInfo"] = jVBasic;
+}
+
+/**
  * Present ELF notes
  * @param root Parent node in output document
  */
@@ -740,6 +756,7 @@ bool JsonPresentation::present()
 		presentPatterns(root);
 		presentCertificateAttributes(root);
 		presentDotnetInfo(root);
+		presentVisualBasicInfo(root);
 	}
 	else
 	{
