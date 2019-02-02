@@ -929,6 +929,23 @@ TEST_P(Capstone2LlvmIrTranslatorArm64Tests, ARM64_INS_LDR_minus_imm_postindexed_
 	EXPECT_NO_VALUE_CALLED();
 }
 
+TEST_P(Capstone2LlvmIrTranslatorArm64Tests, ARM64_INS_LDR_label)
+{
+	// Load the memory at given label, or imm in this case
+	setMemory({
+		{0x15000, 0x123456789abcdef0_qw},
+	});
+	emulate("ldr x0, #0x15000");
+
+	EXPECT_NO_REGISTERS_LOADED();
+	EXPECT_JUST_REGISTERS_STORED({
+		{ARM64_REG_X0, 0x123456789abcdef0_qw},
+	});
+	EXPECT_JUST_MEMORY_LOADED({0x15000});
+	EXPECT_NO_MEMORY_STORED();
+	EXPECT_NO_VALUE_CALLED();
+}
+
 //
 // ARM64_INS_LDP
 //

@@ -16,7 +16,7 @@ AbiArm64::AbiArm64(llvm::Module* m, Config* c) :
 {
 	_regs.reserve(ARM64_REG_ENDING);
 	_id2regs.resize(ARM64_REG_ENDING, nullptr);
-	//_regStackPointerId = ARM64_REG_SP;
+	_regStackPointerId = ARM64_REG_SP;
 	// TODO: Stack analysis fails in ARM64
 	_regStackPointerId = ARM64_REG_INVALID;
 

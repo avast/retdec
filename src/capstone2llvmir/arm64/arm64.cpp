@@ -382,7 +382,9 @@ llvm::Value* Capstone2LlvmIrTranslatorArm64_impl::generateGetOperandMemAddr(
 		cs_arm64_op& op,
 		llvm::IRBuilder<>& irb)
 {
-	// TODO: generateGetOperandAddr?
+	// TODO: Check the operand types
+	// TODO: If the type is IMM return load of that value, or variable
+	// TODO: name, maybe generateGetOperandValue?
 	auto* baseR = loadRegister(op.mem.base, irb);
 	auto* t = baseR ? baseR->getType() : getDefaultType();
 	llvm::Value* disp = op.mem.disp
@@ -485,10 +487,18 @@ llvm::Value* Capstone2LlvmIrTranslatorArm64_impl::loadOp(
 		{
 			auto* addr = generateGetOperandMemAddr(op, irb);
 
-			auto* lty = ty ? ty : getDefaultType();
-			auto* pt = llvm::PointerType::get(lty, 0);
-			addr = irb.CreateIntToPtr(addr, pt);
-			return irb.CreateLoad(addr);
+			if (lea)
+			{
+				return addr;
+			}
+			else
+			{
+				auto* lty = ty ? ty : getDefaultType();
+				auto* pt = llvm::PointerType::get(lty, 0);
+				addr = irb.CreateIntToPtr(addr, pt);
+				return irb.CreateLoad(addr);
+			}
+
 		}
 		case ARM64_OP_FP:
 		case ARM64_OP_INVALID: 
@@ -891,7 +901,7 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateLdr(cs_insn* i, cs_arm64* ai,
 	EXPECT_IS_BINARY_OR_TERNARY(i, ai, irb);
 
 	auto* regType = getRegisterType(ai->operands[0].reg);
-	auto* dest = generateGetOperandMemAddr(ai->operands[1], irb);
+	auto* dest = loadOp(ai->operands[1], irb, nullptr, true);
 	auto* pt = llvm::PointerType::get(regType, 0);
 	auto* addr = irb.CreateIntToPtr(dest, pt);
 
@@ -903,16 +913,16 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateLdr(cs_insn* i, cs_arm64* ai,
 	{
 		baseR = ai->operands[1].reg;
 	}
-	else if (ai->op_count == 3)
+	else if (ai->op_count == 3) // POST-index
 	{
 		baseR = ai->operands[1].reg;
 
 		auto* disp = llvm::ConstantInt::get(getDefaultType(), ai->operands[2].imm);
 		dest = irb.CreateAdd(dest, disp);
-		// post-index -> always writeback
 	}
 	else
 	{
+		// TODO: This should not be posible, throw error?
 		assert(false && "unsupported LDR format");
 	}
 
