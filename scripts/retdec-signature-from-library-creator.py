@@ -82,6 +82,7 @@ class SigFromLib:
 
         dir_name = os.path.dirname(os.path.abspath(self.args.output))
         self.tmp_dir_path = tempfile.mkdtemp(dir=dir_name)
+        self.object_list_path = os.path.join(self.tmp_dir_path, 'object-list.txt')
 
         if self.args.ignore_nops:
             self.ignore_nop = '--ignore-nops'
@@ -126,7 +127,10 @@ class SigFromLib:
             # Extract patterns from library.
             pattern_file = os.path.join(self.tmp_dir_path, lib_name) + '.pat'
             pattern_files.append(pattern_file)
-            _, result, _ = cmd.run_cmd([config.BIN2PAT, '-o', pattern_file] + objects, discard_stdout=True, discard_stderr=True)
+            with open(self.object_list_path, 'w') as object_list:
+                for item in objects:
+                    object_list.write(item+'\n')
+            _, result, _ = cmd.run_cmd([config.BIN2PAT, '-o', pattern_file, '-l', self.object_list_path], discard_stdout=True, discard_stderr=True)
 
             if result != 0:
                 self.print_error_and_cleanup('utility bin2pat failed when processing %s' % lib_path)
