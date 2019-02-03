@@ -49,6 +49,13 @@ bool insnWrittesPcArm64(csh& ce, cs_insn* insn)
 	*/
 }
 
+bool looksLikeArm64FunctionStart(cs_insn* insn)
+{
+	// Create stack frame 'stp x29, x30, [sp, -48]!'
+	return insn->id == ARM64_INS_STP;
+}
+
+    /*
 std::size_t Decoder::decodeJumpTargetDryRun_arm64(
 		const JumpTarget& jt,
 		ByteData bytes,
@@ -99,33 +106,32 @@ std::size_t Decoder::decodeJumpTargetDryRun_arm64(
 		return skipArm64 < skipThumb ? skipArm64 : skipThumb;
 	}
 }
-
-bool looksLikeArm64FunctionStart(cs_insn* insn)
-{
-	// Create stack frame 'stp x29, x30, [sp, -48]!'
-	return insn->id == ARM64_INS_STP;
-}
+    */
 
 std::size_t Decoder::decodeJumpTargetDryRun_arm64(
 		const JumpTarget& jt,
 		ByteData bytes,
-		cs_mode mode,
-		std::size_t &decodedSz,
 		bool strict)
 {
 
-	auto basicMode = _c2l->getBasicMode();
-	if (mode != basicMode) _c2l->modifyBasicMode(mode);
+	if (strict)
+	{
+		return true;
+	}
+
+	//auto basicMode = _c2l->getBasicMode();
+	//if (mode != basicMode) _c2l->modifyBasicMode(mode);
 
 	static csh ce = _c2l->getCapstoneEngine();
 
-	decodedSz = 0;
 	uint64_t addr = jt.getAddress();
 	std::size_t nops = 0;
 	bool first = true;
+	// bytes.first  -> Code
+	// bytes.second -> Code size
+	// addr         -> Address of first instruction
 	while (cs_disasm_iter(ce, &bytes.first, &bytes.second, &addr, _dryCsInsn))
 	{
-		decodedSz += _dryCsInsn->size;
 
 		if (strict && first && !looksLikeArm64FunctionStart(_dryCsInsn))
 		{
@@ -141,14 +147,12 @@ std::size_t Decoder::decodeJumpTargetDryRun_arm64(
 		else if (jt.getType() == JumpTarget::eType::LEFTOVER
 				&& nops > 0)
 		{
-			if (mode != basicMode) _c2l->modifyBasicMode(basicMode);
 			return nops;
 		}
 
 		if (_c2l->isControlFlowInstruction(*_dryCsInsn)
 				|| insnWrittesPcArm64(ce, _dryCsInsn))
 		{
-			if (mode != basicMode) _c2l->modifyBasicMode(basicMode);
 			return false;
 		}
 
@@ -157,7 +161,6 @@ std::size_t Decoder::decodeJumpTargetDryRun_arm64(
 
 	if (nops > 0)
 	{
-		if (mode != basicMode) _c2l->modifyBasicMode(basicMode);
 		return nops;
 	}
 
@@ -165,11 +168,9 @@ std::size_t Decoder::decodeJumpTargetDryRun_arm64(
 	//
 	if (getBasicBlockAtAddress(addr) && getFunctionAtAddress(addr) == nullptr)
 	{
-		if (mode != basicMode) _c2l->modifyBasicMode(basicMode);
 		return false;
 	}
 
-	if (mode != basicMode) _c2l->modifyBasicMode(basicMode);
 	return true;
 }
 

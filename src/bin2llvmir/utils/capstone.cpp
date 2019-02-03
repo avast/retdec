@@ -33,6 +33,11 @@ std::string mode2string(const config::Architecture& arch, cs_mode m)
 		ret += m & CS_MODE_MIPS32R6 ? ", CS_MODE_MIPS32R6" : "";
 		ret += m & CS_MODE_MIPS2 ? ", CS_MODE_MIPS2" : "";
 	}
+	else if (arch.isArm64())
+	{
+		ret += m & CS_MODE_V8 ? ", CS_MODE_V8" : ", CS_MODE_ARM";
+		ret += m & CS_MODE_MCLASS ? ", CS_MODE_MCLASS" : "";
+	}
 	else if (arch.isArmOrThumb())
 	{
 		ret += m & CS_MODE_THUMB ? ", CS_MODE_THUMB" : ", CS_MODE_ARM";
