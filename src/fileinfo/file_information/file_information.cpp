@@ -961,6 +961,42 @@ std::string FileInformation::getVisualBasicExternApiName(std::size_t position) c
 }
 
 /**
+ * Get visual basic object table GUID
+ * @return Object table GUID as string
+ */
+std::string FileInformation::getVisualBasicObjectTableGUID() const
+{
+	return visualBasicInfo.getObjectTableGUID();
+}
+
+/**
+ * Get visual basic typeLib CLSID
+ * @return typeLib CLSID as string
+ */
+std::string FileInformation::getVisualBasicTypeLibCLSID() const
+{
+	return visualBasicInfo.getTypeLibCLSID();
+}
+
+/**
+ * Get visual basic typeLib major version
+ * @return TypeLib major version
+ */
+std::string FileInformation::getVisualBasicTypeLibMajorVersionStr() const
+{
+	return visualBasicInfo.getTypeLibMajorVersionStr();
+}
+
+/**
+ * Get visual basic typeLib minor version
+ * @return TypeLib minor version
+ */
+std::string FileInformation::getVisualBasicTypeLibMinorVersionStr() const
+{
+	return visualBasicInfo.getTypeLibMinorVersionStr();
+}
+
+/**
  * Get visual basic typeLib LCID
  * @return Visual basic typeLib LCID
  */

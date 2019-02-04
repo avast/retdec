@@ -786,67 +786,61 @@ void PeFormat::loadVisualBasicHeader()
  */
 bool PeFormat::parseVisualBasicComRegistrationData(std::size_t structureOffset, std::size_t baseAddress)
 {
-	// auto allBytes = getBytes();
-	// std::vector<std::uint8_t> bytes;
-	// std::size_t offset = 0;
-	// struct VBCOMRData vbcrd;
-	// std::string projName;
-	// std::string helpFile;
-	// std::string projDesc;
+	auto allBytes = getBytes();
+	std::vector<std::uint8_t> bytes;
+	std::size_t offset = 0;
+	struct VBCOMRData vbcrd;
+	std::string projName;
+	std::string helpFile;
+	std::string projDesc;
 
-	// if (!getBytes(bytes, structureOffset, vbcrd.structureSize()) || bytes.size() != vbcrd.structureSize())
-	// {
-	// 	return false;
-	// }
+	if (!getBytes(bytes, structureOffset, vbcrd.structureSize()) || bytes.size() != vbcrd.structureSize())
+	{
+		return false;
+	}
 
-	// vbcrd.regInfoOffset = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbcrd.regInfoOffset);
-	// vbcrd.projNameOffset = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbcrd.projNameOffset);
-	// vbcrd.helpFileOffset = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbcrd.helpFileOffset);
-	// vbcrd.projDescOffset = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbcrd.projDescOffset);
-	// std::memcpy(&vbcrd.projCLSID, reinterpret_cast<void *>(&bytes.data()[offset]), sizeof(vbcrd.projCLSID)); offset += sizeof(vbcrd.projCLSID);
-	// vbcrd.projTlbLCID = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbcrd.projTlbLCID);
-	// vbcrd.unknown = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbcrd.unknown);
-	// vbcrd.tlbVerMajor = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbcrd.tlbVerMajor);
-	// vbcrd.tlbVerMinor = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbcrd.tlbVerMinor);
+	vbcrd.regInfoOffset = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbcrd.regInfoOffset);
+	vbcrd.projNameOffset = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbcrd.projNameOffset);
+	vbcrd.helpFileOffset = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbcrd.helpFileOffset);
+	vbcrd.projDescOffset = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbcrd.projDescOffset);
+	std::memcpy(&vbcrd.projCLSID, reinterpret_cast<void *>(&bytes.data()[offset]), sizeof(vbcrd.projCLSID)); offset += sizeof(vbcrd.projCLSID);
+	vbcrd.projTlbLCID = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbcrd.projTlbLCID);
+	vbcrd.unknown = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbcrd.unknown);
+	vbcrd.tlbVerMajor = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbcrd.tlbVerMajor);
+	vbcrd.tlbVerMinor = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbcrd.tlbVerMinor);
 
-	// if (!isLittleEndian())
-	// {
-	// 	vbcrd.regInfoOffset = byteSwap32(vbcrd.regInfoOffset);
-	// 	vbcrd.projNameOffset = byteSwap32(vbcrd.projNameOffset);
-	// 	vbcrd.helpFileOffset = byteSwap32(vbcrd.helpFileOffset);
-	// 	vbcrd.projDescOffset = byteSwap32(vbcrd.projDescOffset);
-	// 	vbcrd.projTlbLCID = byteSwap32(vbcrd.projTlbLCID);
-	// 	vbcrd.unknown = byteSwap32(vbcrd.unknown);
-	// 	vbcrd.tlbVerMajor = byteSwap32(vbcrd.tlbVerMajor);
-	// 	vbcrd.tlbVerMinor = byteSwap32(vbcrd.tlbVerMinor);
-	// }
-	// // visualBasicInfo.setTypeLibCLSID(vbcrd.projCLSID); TODO
-	// visualBasicInfo.setTypeLibLCID(vbcrd.projDescOffset);
-	// if (!visualBasicInfo.hasProjectName())
-	// {
-	// 	projName = retdec::utils::readNullTerminatedAscii(allBytes.data(), allBytes.size(),
-	// 														structureOffset + vbcrd.projNameOffset);
-	// }
-	// if (!visualBasicInfo.hasProjectHelpFile())
-	// {
-	// 	helpFile = retdec::utils::readNullTerminatedAscii(allBytes.data(), allBytes.size(),
-	// 														structureOffset + vbcrd.helpFileOffset);
-	// }
-	// if (!visualBasicInfo.hasProjectDescription())
-	// {
-	// 	projDesc = retdec::utils::readNullTerminatedAscii(allBytes.data(), allBytes.size(),
-	// 														structureOffset + vbcrd.projDescOffset);
-	// }
+	if (!isLittleEndian())
+	{
+		vbcrd.regInfoOffset = byteSwap32(vbcrd.regInfoOffset);
+		vbcrd.projNameOffset = byteSwap32(vbcrd.projNameOffset);
+		vbcrd.helpFileOffset = byteSwap32(vbcrd.helpFileOffset);
+		vbcrd.projDescOffset = byteSwap32(vbcrd.projDescOffset);
+		vbcrd.projTlbLCID = byteSwap32(vbcrd.projTlbLCID);
+		vbcrd.unknown = byteSwap32(vbcrd.unknown);
+		vbcrd.tlbVerMajor = byteSwap32(vbcrd.tlbVerMajor);
+		vbcrd.tlbVerMinor = byteSwap32(vbcrd.tlbVerMinor);
+	}
 
-	// std::cout << "[KUBO] VB COM register data size: " << std::to_string(vbcrd.structureSize()) << "\n";
-	// std::cout << "projName: " << projName << "\n";
-	// std::cout << "helpFile: " << helpFile << "\n";
-	// std::cout << "projDesc: " << projDesc << "\n";
+	visualBasicInfo.setTypeLibLCID(vbcrd.projDescOffset);
+	visualBasicInfo.setTypeLibMajorVersion(vbcrd.tlbVerMajor);
+	visualBasicInfo.setTypeLibMinorVersion(vbcrd.tlbVerMinor);
+	if (!visualBasicInfo.hasProjectName())
+	{
+		projName = retdec::utils::readNullTerminatedAscii(allBytes.data(), allBytes.size(),
+															structureOffset + vbcrd.projNameOffset);
+	}
+	if (!visualBasicInfo.hasProjectHelpFile())
+	{
+		helpFile = retdec::utils::readNullTerminatedAscii(allBytes.data(), allBytes.size(),
+															structureOffset + vbcrd.helpFileOffset);
+	}
+	if (!visualBasicInfo.hasProjectDescription())
+	{
+		projDesc = retdec::utils::readNullTerminatedAscii(allBytes.data(), allBytes.size(),
+															structureOffset + vbcrd.projDescOffset);
+	}
 
-	// vbcrd.dump(std::cout);
-
-	// return true;
-	(void)structureOffset; (void)baseAddress;
+	visualBasicInfo.setTypeLibCLSID(vbcrd.projCLSID);
 	return true;
 }
 
@@ -1069,7 +1063,7 @@ bool PeFormat::parseVisualBasicObjectTable(std::size_t structureOffset, std::siz
 
 	visualBasicInfo.setProjectPrimaryLCID(vbot.LCID1);
 	visualBasicInfo.setProjectSecondaryLCID(vbot.LCID2);
-	// TODO GUID
+	visualBasicInfo.setObjectTableGUID(vbot.objectGUID);
 
 	if (!visualBasicInfo.hasProjectName() && vbot.projectNameAddr >= baseAddress)
 	{

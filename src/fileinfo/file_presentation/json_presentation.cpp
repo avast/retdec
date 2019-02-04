@@ -514,10 +514,12 @@ void JsonPresentation::presentVisualBasicInfo(Json::Value &root) const
 		jVBasic["externTable"] = jExternTable;
 	}
 
+	Value jObjectTable;
+	jObjectTable["guid"] = fileinfo.getVisualBasicObjectTableGUID();
+
 	auto nObjects = fileinfo.getVisualBasicNumberOfObjects();
 	if (nObjects)
 	{
-		Value jObjectTable;
 		jObjectTable["crc32"] = fileinfo.getVisualBasicObjectTableHashCrc32();
 		jObjectTable["md5"] = fileinfo.getVisualBasicObjectTableHashMd5();
 		jObjectTable["sha256"] = fileinfo.getVisualBasicObjectTableHashSha256();
@@ -536,9 +538,9 @@ void JsonPresentation::presentVisualBasicInfo(Json::Value &root) const
 			}
 			jObjectTable["objects"].append(jObject);
 		}
-		jVBasic["objectTable"] = jObjectTable;
 	}
 
+	jVBasic["objectTable"] = jObjectTable;
 	root["visualBasicInfo"] = jVBasic;
 }
 

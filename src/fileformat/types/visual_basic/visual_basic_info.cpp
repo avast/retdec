@@ -6,6 +6,8 @@
 
 #include "retdec/crypto/crypto.h"
 #include "retdec/utils/string.h"
+#include "retdec/utils/system.h"
+#include "retdec/utils/conversion.h"
 #include "retdec/fileformat/types/visual_basic/visual_basic_info.h"
 
 
@@ -18,10 +20,10 @@ namespace fileformat {
  * Constructor
  */
 VisualBasicInfo::VisualBasicInfo() : languageDLLPrimaryLCID(0), languageDLLSecondaryLCID(0),
-	projectPrimaryLCID(0), projectSecondaryLCID(0), /*typeLibCLSID(0),*/ typeLibLCID(0),
-	validLanguageDLLPrimaryLCID(false), validLanguageDLLSecondaryLCID(false),
-	validProjectPrimaryLCID(false), validProjectSecondaryLCID(false), /*validTypeLibCLSID(false),*/
-	validTypeLibLCID(false), pcodeFlag(false)
+	projectPrimaryLCID(0), projectSecondaryLCID(0), typeLibLCID(0), typeLibMajorVersion(1),
+	typeLibMinorVersion(0), validLanguageDLLPrimaryLCID(false), validLanguageDLLSecondaryLCID(false),
+	validProjectPrimaryLCID(false), validProjectSecondaryLCID(false), validTypeLibLCID(false),
+	pcodeFlag(false)
 {
 
 }
@@ -213,20 +215,23 @@ size_t VisualBasicInfo::getNumberOfExterns() const
 	return externs.size();
 }
 
-// /**
-//  * Get typeLib CLSID
-//  * @param res Variable to store the result to
-//  * @return @c true if project typeLib CLSID is valid, @c false otherwise
-//  */
-// bool VisualBasicInfo::getTypeLibCLSID(std::uint32_t &res) const
-// {
-// 	if (!validTypeLibCLSID)
-// 	{
-// 		return false;
-// 	}
-// 	res = typeLibCLSID;
-// 	return true;
-// }
+/**
+ * Get object table GUID
+ * @return Object table GUID as string
+ */
+const std::string &VisualBasicInfo::getObjectTableGUID() const
+{
+	return objectTableGUID;
+}
+
+/**
+ * Get typeLib CLSID
+ * @return typeLib CLSID as string
+ */
+const std::string &VisualBasicInfo::getTypeLibCLSID() const
+{
+	return typeLibCLSID;
+}
 
 /**
  * Get typeLib LCID
@@ -242,6 +247,25 @@ bool VisualBasicInfo::getTypeLibLCID(std::uint32_t &res) const
 	res = typeLibLCID;
 	return true;
 }
+
+/**
+ * Get typeLib major version
+ * @return TypeLib major version
+ */
+std::uint16_t VisualBasicInfo::getTypeLibMajorVersion() const
+{
+	return typeLibMajorVersion;
+}
+
+/**
+ * Get typeLib minor version
+ * @return TypeLib minor version
+ */
+std::uint16_t VisualBasicInfo::getTypeLibMinorVersion() const
+{
+	return typeLibMinorVersion;
+}
+
 
 /**
  * Get extern table hash as CRC32
@@ -400,15 +424,14 @@ void VisualBasicInfo::setProjectSecondaryLCID(std::uint32_t secLCID)
 	validProjectSecondaryLCID = true;
 }
 
-// /**
-//  * Set typeLib CLSID
-//  * @ TODO param tlbCLSID TypeLib CLSID to set
-//  */
-// void VisualBasicInfo::setTypeLibCLSID(std::uint32_t tlbCLSID)
-// {
-// 	typeLibCLSID = tlbCLSID;
-// 	validTypeLibCLSID = true;
-// }
+/**
+ * Set typeLib CLSID
+ * @param data CLSID raw data
+ */
+void VisualBasicInfo::setTypeLibCLSID(const std::uint8_t data[16])
+{
+	typeLibCLSID = guidToStr(data);
+}
 
 /**
  * Set typeLib LCID
@@ -428,6 +451,34 @@ void VisualBasicInfo::setPcode(bool set)
 {
 	pcodeFlag = set;
 }
+
+/**
+ * Set object table GUID
+ * @param data Raw GUID data
+ */
+void VisualBasicInfo::setObjectTableGUID(const std::uint8_t data[16])
+{
+	objectTableGUID = guidToStr(data);
+}
+
+/**
+ * Set typeLib major version
+ * @param majVer Version to set
+ */
+void VisualBasicInfo::setTypeLibMajorVersion(std::uint16_t majVer)
+{
+	typeLibMajorVersion = majVer;
+}
+
+/**
+ * Set typeLib minor version
+ * @param minVer Version to set
+ */
+void VisualBasicInfo::setTypeLibMinorVersion(std::uint16_t minVer)
+{
+	typeLibMinorVersion = minVer;
+}
+
 
 /**
  * Add visual basic object
@@ -556,6 +607,22 @@ void VisualBasicInfo::computeObjectTableHashes()
 	objectTableHashCrc32 = retdec::crypto::getCrc32(hashBytes.data(), hashBytes.size());
 	objectTableHashMd5 = retdec::crypto::getMd5(hashBytes.data(), hashBytes.size());
 	objectTableHashSha256 = retdec::crypto::getSha256(hashBytes.data(), hashBytes.size());
+}
+
+/**
+ * Convert raw GUID data to string
+ * @param data Raw GUID data
+ */
+std::string VisualBasicInfo::guidToStr(const std::uint8_t data[16])
+{
+	std::string r1, r2, r3, r4, r5;
+	bytesToHexString(data, 16, r1, 0, 4);
+	bytesToHexString(data, 16, r2, 4, 2);
+	bytesToHexString(data, 16, r3, 6, 2);
+	bytesToHexString(data, 16, r4, 8, 2);
+	bytesToHexString(data, 16, r5, 10, 6);
+
+	return r1 + "-" + r2 + "-" + r3 + "-" + r4 + "-" + r5;
 }
 
 

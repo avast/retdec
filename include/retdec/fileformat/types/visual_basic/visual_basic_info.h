@@ -37,7 +37,7 @@ class VisualBasicInfo
 		std::string projectPath;
 
 		// VB Object table
-		// object table GUID TODO DATA TYPE
+		std::string objectTableGUID;
 		std::uint32_t projectPrimaryLCID;
 		std::uint32_t projectSecondaryLCID;
 		std::vector<std::unique_ptr<VisualBasicObject>> objects;
@@ -46,9 +46,12 @@ class VisualBasicInfo
 		std::vector<std::unique_ptr<VisualBasicExtern>> externs;
 
 		// COM register data
-		// std::uint32_t typeLibCLSID; 16BYTES
+		std::string typeLibCLSID;
 		std::uint32_t typeLibLCID;
+		std::uint16_t typeLibMajorVersion;
+		std::uint16_t typeLibMinorVersion;
 
+		// others
 		std::string externTableHashCrc32;
 		std::string externTableHashMd5;
 		std::string externTableHashSha256;
@@ -60,9 +63,10 @@ class VisualBasicInfo
 		bool validLanguageDLLSecondaryLCID;
 		bool validProjectPrimaryLCID;
 		bool validProjectSecondaryLCID;
-		// bool validTypeLibCLSID;
 		bool validTypeLibLCID;
 		bool pcodeFlag;
+
+		std::string guidToStr(const std::uint8_t data[16]);
 
 	public:
 		VisualBasicInfo();
@@ -87,8 +91,11 @@ class VisualBasicInfo
 		const VisualBasicExtern *getExtern(std::size_t position) const;
 		std::size_t getNumberOfObjects() const;
 		std::size_t getNumberOfExterns() const;
-		// bool getTypeLibCLSID(std::uint32_t &res) const;
+		const std::string &getObjectTableGUID() const;
+		const std::string &getTypeLibCLSID() const;
 		bool getTypeLibLCID(std::uint32_t &res) const;
+		std::uint16_t getTypeLibMajorVersion() const;
+		std::uint16_t getTypeLibMinorVersion() const;
 		const std::string &getExternTableHashCrc32() const;
 		const std::string &getExternTableHashMd5() const;
 		const std::string &getExternTableHashSha256() const;
@@ -110,9 +117,12 @@ class VisualBasicInfo
 		void setProjectPath(const std::string &path);
 		void setProjectPrimaryLCID(std::uint32_t primLCID);
 		void setProjectSecondaryLCID(std::uint32_t secLCID);
-		// void setTypeLibCLSID(std::uint32_t tlbCLSID);
+		void setTypeLibCLSID(const std::uint8_t data[16]);
 		void setTypeLibLCID(std::uint32_t tlbLCID);
 		void setPcode(bool set);
+		void setObjectTableGUID(const std::uint8_t data[16]);
+		void setTypeLibMajorVersion(std::uint16_t majVer);
+		void setTypeLibMinorVersion(std::uint16_t minVer);
 		/// @}
 
 		/// @name Other methods

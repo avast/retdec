@@ -44,7 +44,10 @@ class VisualBasicInfo
 		std::size_t getNumberOfExterns() const;
 		std::string getExternModuleName(std::size_t position) const;
 		std::string getExternApiName(std::size_t position) const;
-		// std::string getTypeLibCLSIDStr() const;
+		std::string getObjectTableGUID() const;
+		std::string getTypeLibCLSID() const;
+		std::string getTypeLibMajorVersionStr() const;
+		std::string getTypeLibMinorVersionStr() const;
 		std::string getTypeLibLCIDStr() const;
 		std::string getExternTableHashCrc32() const;
 		std::string getExternTableHashMd5() const;

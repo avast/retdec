@@ -641,6 +641,7 @@ void PlainPresentation::presentVisualBasicObjects() const
 	std::cout << "CRC32            : " << fileinfo.getVisualBasicObjectTableHashCrc32() << "\n";
 	std::cout << "MD5              : " << fileinfo.getVisualBasicObjectTableHashMd5() << "\n";
 	std::cout << "SHA256           : " << fileinfo.getVisualBasicObjectTableHashSha256() << "\n";
+	std::cout << "GUID             : " << fileinfo.getVisualBasicObjectTableGUID() << "\n";
 	std::cout << "\n";
 	std::size_t cnt = 0;
 	for (std::size_t i = 0; i < nObjs; i++)
