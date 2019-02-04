@@ -50,6 +50,9 @@ std::size_t VisualBasicJsonGetter::loadInformation(std::vector<std::string> &des
 	desc.push_back("languageDLLSecondaryLCID");
 	desc.push_back("projectPrimaryLCID");
 	desc.push_back("projectSecondaryLCID");
+	desc.push_back("typeLibCLSID");
+	desc.push_back("typeLibMajorVersion");
+	desc.push_back("typeLibMinorVersion");
 	desc.push_back("typeLibLCID");
 	desc.push_back("isPCode");
 
@@ -64,6 +67,9 @@ std::size_t VisualBasicJsonGetter::loadInformation(std::vector<std::string> &des
 	info.push_back(replaceNonprintableChars(fileinfo.getVisualBasicLanguageDLLSecondaryLCIDStr()));
 	info.push_back(replaceNonprintableChars(fileinfo.getVisualBasicProjectPrimaryLCIDStr()));
 	info.push_back(replaceNonprintableChars(fileinfo.getVisualBasicProjectSecondaryLCIDStr()));
+	info.push_back(replaceNonprintableChars(fileinfo.getVisualBasicTypeLibCLSID()));
+	info.push_back(replaceNonprintableChars(fileinfo.getVisualBasicTypeLibMajorVersionStr()));
+	info.push_back(replaceNonprintableChars(fileinfo.getVisualBasicTypeLibMinorVersionStr()));
 	info.push_back(replaceNonprintableChars(fileinfo.getVisualBasicTypeLibLCIDStr()));
 	info.push_back((fileinfo.getVisualBasicIsPcode()) ? "yes" : "no");
 

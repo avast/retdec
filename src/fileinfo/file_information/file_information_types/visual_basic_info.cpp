@@ -206,20 +206,41 @@ std::string VisualBasicInfo::getExternApiName(std::size_t position) const
 	return ext ? ext->getApiName() : "";
 }
 
+/**
+ * Get object table GUID
+ * @return Object table GUID as string
+ */
+std::string VisualBasicInfo::getObjectTableGUID() const
+{
+	return visualBasicInfo ? visualBasicInfo->getObjectTableGUID() : "";
+}
 
-// /**
-//  * Get typeLib CLSID
-//  * @return Visual basic typeLib CLSID as string
-//  */
-// std::string VisualBasicInfo::getTypeLibCLSIDStr() const
-// {
-// 	std::uint32_t clsid;
-// 	if (!visualBasicInfo || !visualBasicInfo->getTypeLibCLSID(clsid))
-// 	{
-// 		return "";
-// 	}
-// 	return getNumberAsString(clsid);
-// }
+/**
+ * Get typeLib CLSID
+ * @return typeLib CLSID as string
+ */
+std::string VisualBasicInfo::getTypeLibCLSID() const
+{
+	return visualBasicInfo ? visualBasicInfo->getTypeLibCLSID() : "";
+}
+
+/**
+ * Get typeLib major version
+ * @return TypeLib major version
+ */
+std::string VisualBasicInfo::getTypeLibMajorVersionStr() const
+{
+	return visualBasicInfo ? getNumberAsString(visualBasicInfo->getTypeLibMajorVersion()) : "";
+}
+
+/**
+ * Get typeLib minor version
+ * @return TypeLib minor version
+ */
+std::string VisualBasicInfo::getTypeLibMinorVersionStr() const
+{
+	return visualBasicInfo ? getNumberAsString(visualBasicInfo->getTypeLibMinorVersion()) : "";
+}
 
 /**
  * Get typeLib LCID

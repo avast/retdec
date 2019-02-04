@@ -50,7 +50,10 @@ std::size_t VisualBasicPlainGetter::loadInformation(std::vector<std::string> &de
 	desc.push_back("Language DLL secondary LCID                                  : ");
 	desc.push_back("Project primary LCID                                         : ");
 	desc.push_back("Project secondary LCID                                       : ");
-	desc.push_back("TypeLibLCID                                                  : ");
+	desc.push_back("TypeLib CLSID                                                : ");
+	desc.push_back("TypeLib major version                                        : ");
+	desc.push_back("TypeLib minor version                                        : ");
+	desc.push_back("TypeLib LCID                                                 : ");
 	desc.push_back("Is P-Code                                                    : ");
 
 	info.push_back(replaceNonprintableChars(fileinfo.getVisualBasicProjectName()));
@@ -64,10 +67,11 @@ std::size_t VisualBasicPlainGetter::loadInformation(std::vector<std::string> &de
 	info.push_back(replaceNonprintableChars(fileinfo.getVisualBasicLanguageDLLSecondaryLCIDStr()));
 	info.push_back(replaceNonprintableChars(fileinfo.getVisualBasicProjectPrimaryLCIDStr()));
 	info.push_back(replaceNonprintableChars(fileinfo.getVisualBasicProjectSecondaryLCIDStr()));
+	info.push_back(replaceNonprintableChars(fileinfo.getVisualBasicTypeLibCLSID()));
+	info.push_back(replaceNonprintableChars(fileinfo.getVisualBasicTypeLibMajorVersionStr()));
+	info.push_back(replaceNonprintableChars(fileinfo.getVisualBasicTypeLibMinorVersionStr()));
 	info.push_back(replaceNonprintableChars(fileinfo.getVisualBasicTypeLibLCIDStr()));
 	info.push_back((fileinfo.getVisualBasicIsPcode()) ? "Yes" : "No");
-
-	// getTypeLibCLSID
 
 	return info.size();
 }
