@@ -125,7 +125,6 @@ bool VisualBasicInfo::getLanguageDLLSecondaryLCID(std::uint32_t &res) const
  */
 const std::string &VisualBasicInfo::getProjectPath() const
 {
-	// if prefix else TODO
 	return projectPath;
 }
 
@@ -401,7 +400,24 @@ void VisualBasicInfo::setLanguageDLLSecondaryLCID(std::uint32_t lDLLSecLCID)
  */
 void VisualBasicInfo::setProjectPath(const std::string &path)
 {
-	projectPath = path;
+	const std::string prefix = "*\\\\A";
+
+	if (prefix.size() > path.size())
+	{
+		projectPath = path;
+	}
+	else
+	{
+		auto res = std::mismatch(prefix.begin(), prefix.end(), path.begin());
+		if (res.first == prefix.end())
+		{
+			projectPath = path.substr(prefix.size(), path.size() - prefix.size());
+		}
+		else
+		{
+			projectPath = path;
+		}
+	}
 }
 
 /**
