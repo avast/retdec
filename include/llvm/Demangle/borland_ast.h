@@ -17,6 +17,8 @@ namespace retdec {
 namespace demangler {
 namespace borland {
 
+using StringView = llvm::itanium_demangle::StringView;
+
 /**
  * @brief Base class for all nodes in AST.
  */
