@@ -841,6 +841,10 @@ bool PeFormat::parseVisualBasicComRegistrationData(std::size_t structureOffset, 
 	}
 
 	visualBasicInfo.setTypeLibCLSID(vbcrd.projCLSID);
+
+	// TODO this line is added here just for convenient extraction of info offset
+	// for crawler tool and MUST BE DELETED WHEN DONE
+	visualBasicInfo.setTypeLibMinorVersion(vbcrd.regInfoOffset);
 	return true;
 }
 
