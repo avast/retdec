@@ -141,7 +141,11 @@ public:
 
 	virtual bool isFile() override
 	{
-		return !isDirectory();
+		WIN32_FIND_DATA ffd;
+		if (FindFirstFile(_path.c_str(), &ffd) == reinterpret_cast<HANDLE>(-1))
+			return false;
+
+		return !(ffd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY);
 	}
 
 	virtual bool isDirectory() override
@@ -231,7 +235,11 @@ public:
 
 	virtual bool isFile() override
 	{
-		return !isDirectory();
+		struct stat st;
+		if (stat(_path.c_str(), &st) != 0)
+			return false;
+
+		return S_ISREG(st.st_mode);
 	}
 
 	virtual bool isDirectory() override
