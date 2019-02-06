@@ -88,32 +88,34 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateInstruction(
 	cs_detail* d = i->detail;
 	cs_arm64* ai = &d->arm64;
 
+	std::cout << i->mnemonic << " " << i->op_str << std::endl;
+
 	auto fIt = _i2fm.find(i->id);
 	if (fIt != _i2fm.end() && fIt->second != nullptr)
 	{
 		auto f = fIt->second;
 
-		if (ai->cc == ARM64_CC_AL || ai->cc == ARM64_CC_NV /* || branchInsn */)
+		if (ai->cc == ARM64_CC_AL
+		    || ai->cc == ARM64_CC_INVALID /* || branchInsn */)
 		{
 			_inCondition = false;
 			(this->*f)(i, ai, irb);
 		}
 		else
 		{
-			(this->*f)(i, ai, irb);
+			_inCondition = true;
+			auto* cond = generateInsnConditionCode(irb, ai);
+			auto bodyIrb = generateIfThen(cond, irb);
 
-			//_inCondition = true;
-			//auto* cond = generateInsnConditionCode(irb, ai);
-			//auto bodyIrb = generateIfThen(cond, irb);
-
-			//(this->*f)(i, ai, bodyIrb);
+			(this->*f)(i, ai, bodyIrb);
 		}
 	}
 	else
 	{
 		throwUnhandledInstructions(i);
 
-		if (ai->cc == ARM64_CC_AL || ai->cc == ARM64_CC_INVALID)
+		if (ai->cc == ARM64_CC_AL
+		    || ai->cc == ARM64_CC_INVALID)
 		{
 			_inCondition = false;
 			translatePseudoAsmGeneric(i, ai, irb);
@@ -727,7 +729,7 @@ llvm::Value* Capstone2LlvmIrTranslatorArm64_impl::generateInsnConditionCode(
 		case ARM64_CC_INVALID:
 		default:
 		{
-			throw GenericError("should not be possible");
+			throw GenericError("Probably wrong condition code.");
 		}
 	}
 }
