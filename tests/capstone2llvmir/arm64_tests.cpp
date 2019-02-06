@@ -1122,6 +1122,34 @@ TEST_P(Capstone2LlvmIrTranslatorArm64Tests, ARM64_INS_LDP_r_r_r_i)
 }
 
 //
+// ARM64_INS_B
+//
+
+TEST_P(Capstone2LlvmIrTranslatorArm64Tests, ARM64_INS_B)
+{
+	emulate("b #0x110d8", 0x1107C);
+
+	EXPECT_NO_REGISTERS_LOADED_STORED();
+	EXPECT_NO_MEMORY_LOADED_STORED();
+	EXPECT_JUST_VALUES_CALLED({
+		{_translator->getBranchFunction(), {0x110d8}},
+	});
+}
+
+TEST_P(Capstone2LlvmIrTranslatorArm64Tests, ARM64_INS_B_cond)
+{
+	emulate("b.ne #0x110d8", 0x1107C);
+
+	EXPECT_JUST_REGISTERS_LOADED({ARM64_REG_CPSR_Z});
+	EXPECT_NO_REGISTERS_STORED();
+	EXPECT_NO_MEMORY_LOADED_STORED();
+	// TODO: How to test this?
+	//EXPECT_JUST_VALUES_CALLED({
+	//	{_translator->getCondBranchFunction(), {0x110d8}},
+	//});
+}
+
+//
 // ARM64_INS_BL
 //
 

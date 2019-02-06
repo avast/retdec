@@ -139,6 +139,7 @@ class Capstone2LlvmIrTranslatorArm64_impl :
 				llvm::Value* val,
 				llvm::IRBuilder<>& irb,
 				eOpConv ct = eOpConv::ZEXT_TRUNC) override;
+		bool isCondIns(cs_arm64 * i);
 //
 //==============================================================================
 // Helper methods.
@@ -176,6 +177,7 @@ class Capstone2LlvmIrTranslatorArm64_impl :
 		void translateLdr(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb);
 		void translateLdp(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb);
 		void translateAdrp(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb);
+		void translateB(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb);
 		void translateBl(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb);
 		void translateBr(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb);
 		void translateRet(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb);

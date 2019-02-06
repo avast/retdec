@@ -95,20 +95,7 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateInstruction(
 	{
 		auto f = fIt->second;
 
-		if (ai->cc == ARM64_CC_AL
-		    || ai->cc == ARM64_CC_INVALID /* || branchInsn */)
-		{
-			_inCondition = false;
-			(this->*f)(i, ai, irb);
-		}
-		else
-		{
-			_inCondition = true;
-			auto* cond = generateInsnConditionCode(irb, ai);
-			auto bodyIrb = generateIfThen(cond, irb);
-
-			(this->*f)(i, ai, bodyIrb);
-		}
+		(this->*f)(i, ai, irb);
 	}
 	else
 	{
@@ -745,6 +732,9 @@ uint8_t Capstone2LlvmIrTranslatorArm64_impl::getOperandAccess(cs_arm64_op& op)
 	return op.access;
 }
 
+bool Capstone2LlvmIrTranslatorArm64_impl::isCondIns(cs_arm64 * i) {
+    return (i->cc == ARM64_CC_AL || i->cc == ARM64_CC_INVALID) ? false : true;
+}
 
 //
 //==============================================================================
@@ -1027,6 +1017,25 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateBr(cs_insn* i, cs_arm64* ai, 
 
 	op0 = loadOpUnary(ai, irb);
 	generateBranchFunctionCall(irb, op0);
+}
+
+/**
+ * ARM64_INS_B
+ */
+void Capstone2LlvmIrTranslatorArm64_impl::translateB(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb)
+{
+	EXPECT_IS_UNARY(i, ai, irb);
+    
+	op0 = loadOpUnary(ai, irb);
+
+	if (isCondIns(ai)) {
+		auto* cond = generateInsnConditionCode(irb, ai);
+		generateCondBranchFunctionCall(irb, cond, op0);
+	}
+	else
+	{
+		generateBranchFunctionCall(irb, op0);
+	}
 }
 
 /**
