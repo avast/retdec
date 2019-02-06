@@ -1221,6 +1221,22 @@ TEST_P(Capstone2LlvmIrTranslatorArm64Tests, ARM64_INS_RET)
 	});
 }
 
+TEST_P(Capstone2LlvmIrTranslatorArm64Tests, ARM64_INS_RET_r)
+{
+	setRegisters({
+		{ARM64_REG_X1, 0xcafebabe},
+	});
+
+	emulate("ret x1");
+
+	EXPECT_JUST_REGISTERS_LOADED({ARM64_REG_X1});
+	EXPECT_NO_REGISTERS_STORED();
+	EXPECT_NO_MEMORY_LOADED_STORED();
+	EXPECT_JUST_VALUES_CALLED({
+		{_translator->getReturnFunction(), {0xcafebabe}},
+	});
+}
+
 
 } // namespace tests
 } // namespace capstone2llvmir

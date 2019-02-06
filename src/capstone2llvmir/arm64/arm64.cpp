@@ -1057,8 +1057,16 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateRet(cs_insn* i, cs_arm64* ai,
 {
 	EXPECT_IS_NULLARY_OR_UNARY(i, ai, irb);
 
-	// TODO: Unary variant
-	op0 = loadRegister(ARM64_REG_LR, irb);
+	// If the register operand is present
+	if (ai->op_count == 1)
+	{
+		op0 = loadOp(ai->operands[0], irb);
+	}
+	else
+	{
+		// Default use x30
+		op0 = loadRegister(ARM64_REG_LR, irb);
+	}
 	generateReturnFunctionCall(irb, op0);
 }
 
