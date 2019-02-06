@@ -815,7 +815,24 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateStr(cs_insn* i, cs_arm64* ai,
 {
 	EXPECT_IS_BINARY_OR_TERNARY(i, ai, irb);
 
+	auto ty = getDefaultType();
+
+	switch (i->id)
+	{
+		case ARM64_INS_STRB:
+		{
+			ty = irb.getInt8Ty();
+			break;
+		}
+		case ARM64_INS_STRH:
+		{
+			ty = irb.getInt16Ty();
+			break;
+		}
+	}
+
 	op0 = loadOp(ai->operands[0], irb);
+	op0 = irb.CreateZExtOrTrunc(op0, ty);
 	auto* dest = generateGetOperandMemAddr(ai->operands[1], irb);
 
 	auto* pt = llvm::PointerType::get(op0->getType(), 0);
