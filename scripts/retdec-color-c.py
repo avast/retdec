@@ -11,17 +11,13 @@
 from __future__ import print_function
 
 import sys
-import re
 
 from pygments import highlight
 from pygments.formatter import Formatter
-from pygments.formatters import RawTokenFormatter
 from pygments.lexers import CppLexer
-from pygments.lexers import CLexer
 from pygments.token import Token
 
 import json
-from pprint import pprint
 
 import importlib
 utils = importlib.import_module('retdec-utils')

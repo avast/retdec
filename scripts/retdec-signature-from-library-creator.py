@@ -8,7 +8,6 @@ import argparse
 import shutil
 import sys
 import os
-import subprocess
 import tempfile
 
 import importlib
