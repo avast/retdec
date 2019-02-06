@@ -1009,11 +1009,17 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateAdrp(cs_insn* i, cs_arm64* ai
 }
 
 /**
- * ARM64_INS_BR
+ * ARM64_INS_BR, ARM64_INS_BRL
  */
 void Capstone2LlvmIrTranslatorArm64_impl::translateBr(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb)
 {
 	EXPECT_IS_UNARY(i, ai, irb);
+
+	// Branch with link to register
+	if (i->id == ARM64_INS_BLR)
+	{
+		storeRegister(ARM64_REG_LR, getNextInsnAddress(i), irb);
+	}
 
 	op0 = loadOpUnary(ai, irb);
 	generateBranchFunctionCall(irb, op0);

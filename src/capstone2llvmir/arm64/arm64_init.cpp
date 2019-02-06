@@ -262,7 +262,7 @@ Capstone2LlvmIrTranslatorArm64_impl::_i2fm =
 	{ARM64_INS_BIF, nullptr},
 	{ARM64_INS_BIT, nullptr},
 	{ARM64_INS_BL, &Capstone2LlvmIrTranslatorArm64_impl::translateBl},
-	{ARM64_INS_BLR, nullptr},
+	{ARM64_INS_BLR, &Capstone2LlvmIrTranslatorArm64_impl::translateBr},
 	{ARM64_INS_BR, &Capstone2LlvmIrTranslatorArm64_impl::translateBr},
 	{ARM64_INS_BRK, nullptr},
 	{ARM64_INS_BSL, nullptr},

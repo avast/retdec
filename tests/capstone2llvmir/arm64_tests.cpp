@@ -1202,6 +1202,28 @@ TEST_P(Capstone2LlvmIrTranslatorArm64Tests, ARM64_INS_BR)
 }
 
 //
+// ARM64_INS_BLR
+//
+
+TEST_P(Capstone2LlvmIrTranslatorArm64Tests, ARM64_INS_BLR)
+{
+	setRegisters({
+		{ARM64_REG_X2, 0x123456789abcdef0},
+	});
+
+	emulate("blr x2", 0x2000);
+
+	EXPECT_JUST_REGISTERS_LOADED({ARM64_REG_X2});
+	EXPECT_JUST_REGISTERS_STORED({
+		{ARM64_REG_LR, 0x2004},
+	});
+	EXPECT_NO_MEMORY_LOADED_STORED();
+	EXPECT_JUST_VALUES_CALLED({
+		{_translator->getBranchFunction(), {0x123456789abcdef0}},
+	});
+}
+
+//
 // ARM64_INS_RET
 //
 
