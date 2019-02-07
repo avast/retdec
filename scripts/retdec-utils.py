@@ -6,6 +6,7 @@
 from __future__ import print_function
 
 import contextlib
+import importlib
 import os
 import platform
 import re
@@ -15,9 +16,7 @@ import subprocess
 import sys
 import time
 
-import importlib
 config = importlib.import_module('retdec-config')
-
 
 TIMEOUT_RC = 137
 BAD_ALLOC_RC = 135

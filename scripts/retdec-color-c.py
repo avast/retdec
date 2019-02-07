@@ -10,6 +10,8 @@
 
 from __future__ import print_function
 
+import importlib
+import json
 import sys
 
 from pygments import highlight
@@ -17,9 +19,6 @@ from pygments.formatter import Formatter
 from pygments.lexers import CppLexer
 from pygments.token import Token
 
-import json
-
-import importlib
 utils = importlib.import_module('retdec-utils')
 utils.check_python_version()
 

@@ -4,11 +4,11 @@
 
 from __future__ import print_function
 
+import importlib
 import os
 import re
 import sys
 
-import importlib
 utils = importlib.import_module('retdec-utils')
 utils.check_python_version()
 utils.ensure_script_is_being_run_from_installed_retdec()
@@ -32,7 +32,6 @@ except ImportError:
     print("warning: module 'colorama' (https://pypi.python.org/pypi/colorama)",
           "not found, running without color support", file=sys.stderr)
 
-import importlib
 config = importlib.import_module('retdec-config')
 utils = importlib.import_module('retdec-utils')
 

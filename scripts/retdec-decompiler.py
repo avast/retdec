@@ -6,12 +6,12 @@ from __future__ import print_function
 
 import argparse
 import glob
+import importlib
 import os
 import shutil
 import sys
 import time
 
-import importlib
 config = importlib.import_module('retdec-config')
 retdec_signature_from_library_creator = importlib.import_module('retdec-signature-from-library-creator')
 retdec_unpacker = importlib.import_module('retdec-unpacker')

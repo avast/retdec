@@ -3,12 +3,12 @@
 from __future__ import print_function
 
 import argparse
+import importlib
 import os
 import re
 import shutil
 import sys
 
-import importlib
 config = importlib.import_module('retdec-config')
 utils = importlib.import_module('retdec-utils')
 utils.check_python_version()
