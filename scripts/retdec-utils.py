@@ -23,10 +23,10 @@ TIMEOUT_RC = 137
 BAD_ALLOC_RC = 135
 
 
-"""Taken from https://github.com/avast-tl/retdec-regression-tests-framework/blob/master/regression_tests/cmd_runner.py
-"""
 class CmdRunner:
     """A runner of external commands."""
+
+    # Taken from https://github.com/avast-tl/retdec-regression-tests-framework/blob/master/regression_tests/cmd_runner.py
 
     def run_cmd(self, cmd, input='', timeout=None, buffer_output=False, discard_stdout=False, discard_stderr=False, print_run_msg=False):
         """Runs the given command (synchronously).
@@ -209,6 +209,7 @@ class CmdRunner:
         out = out.rstrip()
         return out
 
+
 class _LinuxProcess(subprocess.Popen):
     """An internal wrapper around ``subprocess.Popen`` for Linux."""
 
@@ -282,6 +283,7 @@ def check_python_version():
     if sys.version_info < (3,4):
         print_error_and_die('Cannot use Python version {} ({}). Use at least Python 3.4.'.format(platform.python_version(), sys.executable))
 
+
 def ensure_script_is_being_run_from_installed_retdec():
     # Use this function to assist our users when they try to run the scripts
     # from the 'retdec/scripts' directory instead of from an installed RetDec.
@@ -293,20 +295,25 @@ def ensure_script_is_being_run_from_installed_retdec():
             'For more details, see https://github.com/avast-tl/retdec#installation-and-use'
         )
 
+
 def tool_exists(tool_name):
     return shutil.which(tool_name) is not None
+
 
 def remove_file_forced(file):
     with contextlib.suppress(FileNotFoundError):
         os.remove(file)
 
+
 def is_windows():
     return sys.platform in ('win32', 'msys') or os.name == 'nt'
+
 
 def print_error(error):
     """Print error message to stderr.
     """
     print('Error: %s' % error, file=sys.stderr)
+
 
 def print_error_and_die(error, ret_code=1):
     """Print error message to stderr, and exit with the given return code.
@@ -314,10 +321,12 @@ def print_error_and_die(error, ret_code=1):
     print_error(error)
     sys.exit(ret_code)
 
+
 def print_warning(warning):
     """Print warning message to stderr.
     """
     print('Warning: %s' % warning, file=sys.stderr)
+
 
 def has_archive_signature(path, print_run_msg=False):
     """Check if file has any ar signature.
@@ -328,6 +337,7 @@ def has_archive_signature(path, print_run_msg=False):
     _, ret, _ = CmdRunner().run_cmd([config.AR, path, '--arch-magic'], discard_stdout=True, discard_stderr=True, print_run_msg=print_run_msg)
     return ret == 0
 
+
 def has_thin_archive_signature(path):
     """Check if file has thin ar signature.
     1 argument is needed - file path
@@ -336,6 +346,7 @@ def has_thin_archive_signature(path):
     """
     _, ret, _ = CmdRunner().run_cmd([config.AR, path, '--thin-magic'], discard_stdout=True, discard_stderr=True)
     return ret == 0
+
 
 def is_valid_archive(path):
     """Check if file is an archive we can work with.
@@ -346,6 +357,7 @@ def is_valid_archive(path):
     _, ret, _ = CmdRunner().run_cmd([config.AR, path, '--valid'], discard_stdout=True, discard_stderr=True)
     return ret == 0
 
+
 def archive_object_count(path):
     """Counts object files in archive.
     1 argument is needed - file path
@@ -354,11 +366,13 @@ def archive_object_count(path):
     output, rc, _ = CmdRunner().run_cmd([config.AR, path, '--object-count'], buffer_output=True)
     return int(output) if rc == 0 else -1
 
+
 def archive_list_content(path):
     """Print content of archive.
     1 argument is needed - file path
     """
     CmdRunner().run_cmd([config.AR, path, '--list', '--no-numbers'])
+
 
 def archive_list_numbered_content(path):
     """Print numbered content of archive.
@@ -367,11 +381,13 @@ def archive_list_numbered_content(path):
     print('Index\tName')
     CmdRunner().run_cmd([config.AR, path, '--list'])
 
+
 def archive_list_numbered_content_json(path):
     """Print numbered content of archive in JSON format.
     1 argument is needed - file path
     """
     CmdRunner().run_cmd([config.AR, path, '--list', '--json'])
+
 
 def archive_get_by_name(path, name, output, print_run_msg=False):
     """Get a single file from archive by name.
@@ -384,6 +400,7 @@ def archive_get_by_name(path, name, output, print_run_msg=False):
     _, ret, _ = CmdRunner().run_cmd([config.AR, path, '--name', name, '--output', output], discard_stdout=True, discard_stderr=True, print_run_msg=print_run_msg)
     return ret != 0
 
+
 def archive_get_by_index(archive, index, output, print_run_msg=False):
     """Get a single file from archive by index.
     3 arguments are needed - path to the archive
@@ -395,6 +412,7 @@ def archive_get_by_index(archive, index, output, print_run_msg=False):
     _, ret, _ = CmdRunner().run_cmd([config.AR, archive, '--index', index, '--output', output], discard_stdout=True, discard_stderr=True, print_run_msg=print_run_msg)
     return ret != 0
 
+
 def is_macho_archive(path):
     """Check if file is Mach-O universal binary with archives.
     1 argument is needed - file path
@@ -404,20 +422,26 @@ def is_macho_archive(path):
     _, ret, _ = CmdRunner().run_cmd([config.EXTRACT, '--check-archive', path], discard_stdout=True, discard_stderr=True)
     return ret == 0
 
+
 def is_decimal_number(num):
     return re.search('^[0-9]+$', str(num))
+
 
 def is_hexadecimal_number(num):
     return re.search('^0x[0-9a-fA-F]+$', str(num))
 
+
 def is_number(num):
     return is_decimal_number(num) or is_hexadecimal_number(num)
+
 
 def is_decimal_range(range):
     return re.search('^[0-9]+-[0-9]+$', str(range))
 
+
 def is_hexadecimal_range(range):
     return re.search('^0x[0-9a-fA-F]+-0x[0-9a-fA-F]+$', str(range))
+
 
 def is_range(range):
     return is_decimal_range(range) or is_hexadecimal_range(range)

@@ -77,6 +77,7 @@ SCOLOR_ADDR      = '\x28'  # Hidden address mark                     # default b
 SCOLOR_ON        = '\x01'  # Escape character (ON)
 SCOLOR_OFF       = '\x02'  # Escape character (OFF)
 
+
 def idaformat(color, text):
 	"""
 	Format `text` with a color: ``'\\1 COLOR text \\2 COLOR'``.
@@ -121,6 +122,7 @@ TERMINAL_COLORS = {
 
 	Token.Error:              SCOLOR_ERROR,
 }
+
 
 class IDAFormatter(Formatter):
     """
