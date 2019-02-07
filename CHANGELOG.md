@@ -6,7 +6,7 @@
 * New Feature: Added computation and presentation of icon hashes for exact and also similarity matching in PE files ([#339](https://github.com/avast-tl/retdec/issues/339)).
 * Enhancement: Reduced the needed stack space in `retdec-llvmir2hll` ([#492](https://github.com/avast-tl/retdec/pull/492)).
 * Enhancement: Added support for build and run on FreeBSD and potentially on other BSD OSes ([#476](https://github.com/avast-tl/retdec/pull/476)).
-* Enhancement: It is possible to use local PeLib directory instead of remote revision via CMake viariable `PELIB_LOCAL_DIR`. This is convenient when modifying both PeLib and RetDec at the same time.
+* Enhancement: It is possible to use local PeLib directory instead of remote revision via CMake variable `PELIB_LOCAL_DIR`. This is convenient when modifying both PeLib and RetDec at the same time.
 * Enhancement: Improved detection of needed libraries and imported/external functions in ELF binaries ([#457](https://github.com/avast-tl/retdec/issues/457)).
 * Enhancement: Added semantics for more MIPS instructions.
 * Enhancement: Capstone2LlvmIr library refactoring ([#115](https://github.com/avast-tl/retdec/issues/115)).
