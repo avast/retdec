@@ -27,7 +27,8 @@ class CmdRunner:
 
     # Taken from https://github.com/avast-tl/retdec-regression-tests-framework/blob/master/regression_tests/cmd_runner.py
 
-    def run_cmd(self, cmd, input='', timeout=None, buffer_output=False, discard_stdout=False, discard_stderr=False, print_run_msg=False):
+    @classmethod
+    def run_cmd(cls, cmd, input='', timeout=None, buffer_output=False, discard_stdout=False, discard_stderr=False, print_run_msg=False):
         """Runs the given command (synchronously).
 
         :param list cmd: Command to be run as a list of arguments (strings).
@@ -53,24 +54,26 @@ class CmdRunner:
         If the timeout expires before the command finishes, the value of `output`
         is the command's output generated up to the timeout.
         """
-        _, output, return_code, timeouted = self._run_cmd(cmd, input, timeout, buffer_output, track_memory=False, discard_stdout=discard_stdout, discard_stderr=discard_stderr, print_run_msg=print_run_msg)
+        _, output, return_code, timeouted = cls._run_cmd(cmd, input, timeout, buffer_output, track_memory=False, discard_stdout=discard_stdout, discard_stderr=discard_stderr, print_run_msg=print_run_msg)
 
         return output, return_code, timeouted
 
-    def run_measured_cmd(self, cmd, input='', timeout=None, discard_stdout=False, discard_stderr=False, print_run_msg=False):
+    @classmethod
+    def run_measured_cmd(cls, cmd, input='', timeout=None, discard_stdout=False, discard_stderr=False, print_run_msg=False):
         """Runs the given command (synchronously) and measure its time and memory.
         :param list cmd: Command to be run as a list of arguments (strings).
 
         :returns: A quadruple (`memory`, `elapsed_time`, `output`, `return_code`).
         """
         start = time.time()
-        memory, output, rc, _ = CmdRunner()._run_cmd(cmd, input, timeout, buffer_output=True, track_memory=True, discard_stdout=discard_stdout, discard_stderr=discard_stderr, print_run_msg=print_run_msg)
+        memory, output, rc, _ = cls._run_cmd(cmd, input, timeout, buffer_output=True, track_memory=True, discard_stdout=discard_stdout, discard_stderr=discard_stderr, print_run_msg=print_run_msg)
         elapsed = int(time.time() - start)
         if elapsed == 0:
             elapsed = 1
         return memory, elapsed, output, rc
 
-    def _run_cmd(self, cmd, input='', timeout=None, buffer_output=False, track_memory=False, discard_stdout=False, discard_stderr=False, print_run_msg=False):
+    @classmethod
+    def _run_cmd(cls, cmd, input='', timeout=None, buffer_output=False, track_memory=False, discard_stdout=False, discard_stderr=False, print_run_msg=False):
         """:returns: A quadruple (`memory`, `output`, `return_code`, `timeouted`)."""
         memory = 0
         try:
@@ -86,7 +89,7 @@ class CmdRunner:
             if track_memory:
                 cmd = config.LOG_TIME + cmd
 
-            p = self._start(cmd, buffer_output, discard_stdout=discard_stdout, discard_stderr=discard_stderr)
+            p = cls._start(cmd, buffer_output, discard_stdout=discard_stdout, discard_stderr=discard_stderr)
 
             def signal_handler(sig, frame):
                 p.kill()
@@ -103,10 +106,10 @@ class CmdRunner:
 
             if output:
                 output = output.rstrip()
-                output = self._strip_shell_colors(output)
+                output = cls._strip_shell_colors(output)
                 if track_memory:
-                    memory = self._get_memory_from_measured_output(output)
-                    output = self._get_clean_output_from_measured_output(output)
+                    memory = cls._get_memory_from_measured_output(output)
+                    output = cls._get_clean_output_from_measured_output(output)
 
             if p.returncode == 134 and output and 'std::bad_alloc' in output:
                 return memory, output, BAD_ALLOC_RC, False
@@ -119,10 +122,11 @@ class CmdRunner:
             output, _ = p.communicate()
             if output:
                 output = output.rstrip()
-                output = self._strip_shell_colors(output)
+                output = cls._strip_shell_colors(output)
             return memory, output, TIMEOUT_RC, True
 
-    def _start(self, cmd, buffer_output=False, discard_stdout=False, discard_stderr=False):
+    @staticmethod
+    def _start(cmd, buffer_output=False, discard_stdout=False, discard_stderr=False):
         """Starts the given command and returns a handler to it.
 
         :param list cmd: Command to be run as a list of arguments (strings).
@@ -165,11 +169,13 @@ class CmdRunner:
         else:
             return _LinuxProcess(**kwargs)
 
-    def _strip_shell_colors(self, text):
+    @staticmethod
+    def _strip_shell_colors(text):
         """Strips shell colors from the given text."""
         return re.sub(r'\x1b[^m]*m', '', text)
 
-    def _get_memory_from_measured_output(self, output):
+    @staticmethod
+    def _get_memory_from_measured_output(output):
         """Get memory in MB from output string generated by `config.LOG_TIME`.
         `/usr/bin/time` format is expected."""
         memory = 0
@@ -183,7 +189,8 @@ class CmdRunner:
                     memory = 1
         return memory
 
-    def _get_clean_output_from_measured_output(self, output):
+    @staticmethod
+    def _get_clean_output_from_measured_output(output):
         """Get the original output of the executed command from the measured
         output containing additional information.
 
@@ -337,7 +344,7 @@ def has_archive_signature(path, print_run_msg=False):
     Returns - True if file has ar signature
                 False no signature
     """
-    _, ret, _ = CmdRunner().run_cmd([config.AR, path, '--arch-magic'], discard_stdout=True, discard_stderr=True, print_run_msg=print_run_msg)
+    _, ret, _ = CmdRunner.run_cmd([config.AR, path, '--arch-magic'], discard_stdout=True, discard_stderr=True, print_run_msg=print_run_msg)
     return ret == 0
 
 
@@ -347,7 +354,7 @@ def has_thin_archive_signature(path):
     Returns - True if file has thin ar signature
                 False no signature
     """
-    _, ret, _ = CmdRunner().run_cmd([config.AR, path, '--thin-magic'], discard_stdout=True, discard_stderr=True)
+    _, ret, _ = CmdRunner.run_cmd([config.AR, path, '--thin-magic'], discard_stdout=True, discard_stderr=True)
     return ret == 0
 
 
@@ -357,7 +364,7 @@ def is_valid_archive(path):
     Returns - True if file is valid archive
                 False if file is invalid archive
     """
-    _, ret, _ = CmdRunner().run_cmd([config.AR, path, '--valid'], discard_stdout=True, discard_stderr=True)
+    _, ret, _ = CmdRunner.run_cmd([config.AR, path, '--valid'], discard_stdout=True, discard_stderr=True)
     return ret == 0
 
 
@@ -366,7 +373,7 @@ def archive_object_count(path):
     1 argument is needed - file path
     Returns - number of objects in archive, or negative number (-1) if error occurred
     """
-    output, rc, _ = CmdRunner().run_cmd([config.AR, path, '--object-count'], buffer_output=True)
+    output, rc, _ = CmdRunner.run_cmd([config.AR, path, '--object-count'], buffer_output=True)
     return int(output) if rc == 0 else -1
 
 
@@ -374,7 +381,7 @@ def archive_list_content(path):
     """Print content of archive.
     1 argument is needed - file path
     """
-    CmdRunner().run_cmd([config.AR, path, '--list', '--no-numbers'])
+    CmdRunner.run_cmd([config.AR, path, '--list', '--no-numbers'])
 
 
 def archive_list_numbered_content(path):
@@ -382,14 +389,14 @@ def archive_list_numbered_content(path):
     1 argument is needed - file path
     """
     print('Index\tName')
-    CmdRunner().run_cmd([config.AR, path, '--list'])
+    CmdRunner.run_cmd([config.AR, path, '--list'])
 
 
 def archive_list_numbered_content_json(path):
     """Print numbered content of archive in JSON format.
     1 argument is needed - file path
     """
-    CmdRunner().run_cmd([config.AR, path, '--list', '--json'])
+    CmdRunner.run_cmd([config.AR, path, '--list', '--json'])
 
 
 def archive_get_by_name(path, name, output, print_run_msg=False):
@@ -400,7 +407,7 @@ def archive_get_by_name(path, name, output, print_run_msg=False):
     Returns - False if everything ok
                 True if error
     """
-    _, ret, _ = CmdRunner().run_cmd([config.AR, path, '--name', name, '--output', output], discard_stdout=True, discard_stderr=True, print_run_msg=print_run_msg)
+    _, ret, _ = CmdRunner.run_cmd([config.AR, path, '--name', name, '--output', output], discard_stdout=True, discard_stderr=True, print_run_msg=print_run_msg)
     return ret != 0
 
 
@@ -412,7 +419,7 @@ def archive_get_by_index(archive, index, output, print_run_msg=False):
     Returns - False if everything ok
                 True if error
     """
-    _, ret, _ = CmdRunner().run_cmd([config.AR, archive, '--index', index, '--output', output], discard_stdout=True, discard_stderr=True, print_run_msg=print_run_msg)
+    _, ret, _ = CmdRunner.run_cmd([config.AR, archive, '--index', index, '--output', output], discard_stdout=True, discard_stderr=True, print_run_msg=print_run_msg)
     return ret != 0
 
 
@@ -422,7 +429,7 @@ def is_macho_archive(path):
     Returns - True if file is archive
                 False if file is not archive
     """
-    _, ret, _ = CmdRunner().run_cmd([config.EXTRACT, '--check-archive', path], discard_stdout=True, discard_stderr=True)
+    _, ret, _ = CmdRunner.run_cmd([config.EXTRACT, '--check-archive', path], discard_stdout=True, discard_stderr=True)
     return ret == 0
 
 

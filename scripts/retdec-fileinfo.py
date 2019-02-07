@@ -84,7 +84,7 @@ def main():
         for par in config.FILEINFO_EXTERNAL_YARA_EXTRA_CRYPTO_DATABASES:
             fileinfo_params.extend(['--crypto', par])
 
-    _, ret, _ = utils.CmdRunner().run_cmd([config.FILEINFO] + fileinfo_params)
+    _, ret, _ = utils.CmdRunner.run_cmd([config.FILEINFO] + fileinfo_params)
     sys.exit(ret)
 
 

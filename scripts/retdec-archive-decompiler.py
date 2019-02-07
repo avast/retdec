@@ -126,19 +126,17 @@ class ArchiveDecompiler:
         if not self._check_arguments():
             return 1
 
-        cmd = CmdRunner()
-
         # Check for archives packed in Mach-O Universal Binaries.
         if utils.is_macho_archive(self.library_path):
             if self.enable_list_mode:
                 if self.use_json_format:
-                    cmd.run_cmd([config.EXTRACT, '--objects', '--json', self.library_path])
+                    CmdRunner.run_cmd([config.EXTRACT, '--objects', '--json', self.library_path])
                 else:
-                    cmd.run_cmd([config.EXTRACT, '--objects', self.library_path])
+                    CmdRunner.run_cmd([config.EXTRACT, '--objects', self.library_path])
                 return 1
 
             self.tmp_archive = self.library_path + '.a'
-            cmd.run_cmd([config.EXTRACT, '--best', '--out', self.tmp_archive, self.library_path])
+            CmdRunner.run_cmd([config.EXTRACT, '--best', '--out', self.tmp_archive, self.library_path])
             self.library_path = self.tmp_archive
 
         # Check for thin archives.
@@ -185,11 +183,11 @@ class ArchiveDecompiler:
             log_file = self.library_path + '.file_' + str(file_index) + '.log.verbose'
 
             # Do not escape!
-            output, rc, timeouted = cmd.run_cmd([sys.executable, config.DECOMPILER, '--ar-index=' + str(i), '-o',
-                                                self.library_path + '.file_' + str(file_index) + '.c',
-                                                self.library_path] + self.decompiler_args,
-                                                timeout=self.timeout,
-                                                buffer_output=True)
+            output, rc, timeouted = CmdRunner.run_cmd([sys.executable, config.DECOMPILER, '--ar-index=' + str(i), '-o',
+                                                      self.library_path + '.file_' + str(file_index) + '.c',
+                                                      self.library_path] + self.decompiler_args,
+                                                      timeout=self.timeout,
+                                                      buffer_output=True)
 
             with open(log_file, 'wb') as f:
                 f.write(output)

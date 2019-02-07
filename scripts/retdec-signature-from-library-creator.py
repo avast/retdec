@@ -92,7 +92,6 @@ class SigFromLib:
         if not self._check_arguments():
             return 1
 
-        cmd = CmdRunner()
         pattern_files = []
         object_dirs = []
 
@@ -112,7 +111,7 @@ class SigFromLib:
             os.makedirs(object_dir, exist_ok=True)
 
             # Extract all files to temporary folder.
-            cmd.run_cmd([config.AR, lib_path, '--extract', '--output', object_dir], discard_stdout=True, discard_stderr=True)
+            CmdRunner.run_cmd([config.AR, lib_path, '--extract', '--output', object_dir], discard_stdout=True, discard_stderr=True)
 
             # List all extracted objects.
             objects = []
@@ -129,7 +128,7 @@ class SigFromLib:
             with open(self.object_list_path, 'w') as object_list:
                 for item in objects:
                     object_list.write(item + '\n')
-            _, result, _ = cmd.run_cmd([config.BIN2PAT, '-o', pattern_file, '-l', self.object_list_path], discard_stdout=True, discard_stderr=True)
+            _, result, _ = CmdRunner.run_cmd([config.BIN2PAT, '-o', pattern_file, '-l', self.object_list_path], discard_stdout=True, discard_stderr=True)
 
             if result != 0:
                 self.print_error_and_cleanup('utility bin2pat failed when processing %s' % lib_path)
@@ -155,7 +154,7 @@ class SigFromLib:
         if self.ignore_nop:
             pat2yara_args.extend([self.ignore_nop, str(self.args.ignore_nops)])
 
-        _, result, _ = cmd.run_cmd(pat2yara_args, discard_stdout=True, discard_stderr=True)
+        _, result, _ = CmdRunner.run_cmd(pat2yara_args, discard_stdout=True, discard_stderr=True)
 
         if result != 0:
             self.print_error_and_cleanup('utility pat2yara failed')

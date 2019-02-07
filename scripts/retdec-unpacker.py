@@ -136,10 +136,8 @@ class Unpacker:
         elif self.args.max_memory_half_ram:
             unpacker_params.append('--max-memory-half-ram')
 
-        cmd = CmdRunner()
-
         self._print('\n##### Trying to unpack ' + self.input + ' into ' + output + ' by using generic unpacker...')
-        out, unpacker_rc, _ = cmd.run_cmd([config.UNPACKER] + unpacker_params, buffer_output=True, print_run_msg=True)
+        out, unpacker_rc, _ = CmdRunner.run_cmd([config.UNPACKER] + unpacker_params, buffer_output=True, print_run_msg=True)
         self._print(out)
 
         if unpacker_rc == self.UNPACKER_EXIT_CODE_OK:
@@ -155,7 +153,7 @@ class Unpacker:
             # Do not return -> try the next unpacker
             # Try to unpack via UPX
             self._print('\n##### Trying to unpack ' + self.input + ' into ' + output + ' by using UPX...')
-            out, upx_rc, _ = cmd.run_cmd(['upx', '-d', self.input, '-o', output], buffer_output=True, discard_stdout=True, print_run_msg=True)
+            out, upx_rc, _ = CmdRunner.run_cmd(['upx', '-d', self.input, '-o', output], buffer_output=True, discard_stdout=True, print_run_msg=True)
             self._print(out)
 
             if upx_rc == 0:

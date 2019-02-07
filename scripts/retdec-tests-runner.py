@@ -106,7 +106,7 @@ def run_unit_tests_in_dir(path, verbose=False):
         unit_test_name = os.path.basename(unit_test)
         print_colored(unit_test_name, colorama.Fore.YELLOW + colorama.Style.BRIGHT)
 
-        output, return_code, _ = CmdRunner().run_cmd([unit_test, '--gtest_color=yes'], buffer_output=True)
+        output, return_code, _ = CmdRunner.run_cmd([unit_test, '--gtest_color=yes'], buffer_output=True)
         print_output(output, verbose)
 
         if return_code != 0:
