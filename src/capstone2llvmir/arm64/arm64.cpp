@@ -1057,6 +1057,30 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateBl(cs_insn* i, cs_arm64* ai, 
 }
 
 /**
+ * ARM64_INS_CBNZ, ARM64_INS_CBZ
+ */
+void Capstone2LlvmIrTranslatorArm64_impl::translateCbnz(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb)
+{
+	EXPECT_IS_BINARY(i, ai, irb);
+
+	std::tie(op0, op1) = loadOpBinary(ai, irb);
+	llvm::Value* cond = nullptr;
+	if (i->id == ARM64_INS_CBNZ)
+	{
+		cond = irb.CreateICmpNE(op0, llvm::ConstantInt::get(op0->getType(), 0));
+	}
+	else if (i->id == ARM64_INS_CBZ)
+	{
+		cond = irb.CreateICmpEQ(op0, llvm::ConstantInt::get(op0->getType(), 0));
+	}
+	else
+	{
+		throw GenericError("cbnz, cbz: Instruction id error");
+	}
+	generateCondBranchFunctionCall(irb, cond, op1);
+}
+
+/**
  * ARM64_INS_RET
 */
 void Capstone2LlvmIrTranslatorArm64_impl::translateRet(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb)

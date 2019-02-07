@@ -180,6 +180,7 @@ class Capstone2LlvmIrTranslatorArm64_impl :
 		void translateB(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb);
 		void translateBl(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb);
 		void translateBr(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb);
+		void translateCbnz(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb);
 		void translateRet(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb);
 
 };
