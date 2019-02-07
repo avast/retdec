@@ -87,5 +87,6 @@ def main():
     _, ret, _ = utils.CmdRunner().run_cmd([config.FILEINFO] + fileinfo_params)
     sys.exit(ret)
 
+
 if __name__ == "__main__":
     main()

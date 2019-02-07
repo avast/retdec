@@ -159,6 +159,7 @@ class IDAFormatter(Formatter):
 
         return TERMINAL_COLORS.get(ttype)
 
+
 #=====================================================================================
 
 inSitu    = True          # do coloring in situ
