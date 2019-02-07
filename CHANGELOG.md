@@ -2,6 +2,8 @@
 
 # dev
 
+* Fix: Added option to `retdec-bin2pat` to have the objects list passed through a text file.
+Modified `retdec-signature-from-library-creator.py` to pass objects list as a text file. ([#472](https://github.com/avast-tl/retdec/issues/472)).
 * New Feature: Added presentation of imported types and TypeRef hashes for .NET binaries ([#363](https://github.com/avast-tl/retdec/issues/363), [#364](https://github.com/avast-tl/retdec/issues/364), [#428](https://github.com/avast-tl/retdec/issues/428)).
 * New Feature: Added computation and presentation of icon hashes for exact and also similarity matching in PE files ([#339](https://github.com/avast-tl/retdec/issues/339)).
 * Enhancement: Added support for build and run on FreeBSD and potentially on other BSD OSes ([#476](https://github.com/avast-tl/retdec/pull/476)).
