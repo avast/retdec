@@ -177,11 +177,11 @@ code = highlight(code, CppLexer(), IDAFormatter())
 # This comes in handy when we want to find out token name for same particular lexeme.
 # It just dumps all the lexemes and their token names that can be used in TERMINAL_COLORS mapping.
 #
-#code = highlight(code, CppLexer(), RawTokenFormatter())
+# code = highlight(code, CppLexer(), RawTokenFormatter())
 
 # Enable only during debugging.
 #
-#print(code)
+# print(code)
 
 outFileName = inFileName if inSitu else inFileName + extension
 with open(outFileName, 'w') as f:
