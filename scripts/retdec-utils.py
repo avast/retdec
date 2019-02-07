@@ -283,7 +283,7 @@ class Unbuffered(object):
 
 
 def check_python_version():
-    if sys.version_info < (3,4):
+    if sys.version_info < (3, 4):
         print_error_and_die('Cannot use Python version {} ({}). Use at least Python 3.4.'.format(platform.python_version(), sys.executable))
 
 
