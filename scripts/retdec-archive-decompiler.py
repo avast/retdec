@@ -169,12 +169,12 @@ class ArchiveDecompiler:
             return 0
 
         # Run the decompilation script over all the found files.
-        print('Running \`%s' % config.DECOMPILER, end='')
+        print('Running `%s' % config.DECOMPILER, end='')
 
         if self.decompiler_args:
             print(' '.join(self.decompiler_args), end='')
 
-        print('\` over %d files with timeout %d s. (run \`kill %d \` to terminate this script)...' % (
+        print('` over %d files with timeout %d s. (run `kill %d ` to terminate this script)...' % (
             self.file_count, self.timeout, os.getpid()), file=sys.stderr)
 
         for i in range(self.file_count):
