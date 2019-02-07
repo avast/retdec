@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """
-	retdec-color-c
-	~~~~~~~
+    retdec-color-c
+    ~~~~~~~
 
-	Color given C file using the IDA pro tags.
+    Color given C file using the IDA pro tags.
 """
 
 from __future__ import print_function
@@ -72,13 +72,13 @@ SCOLOR_OFF       = '\x02'  # Escape character (OFF)
 
 
 def idaformat(color, text):
-	"""
-	Format `text` with a color: ``'\\1 COLOR text \\2 COLOR'``.
-	"""
-	if color is None:
-		return text
+    """
+    Format `text` with a color: ``'\\1 COLOR text \\2 COLOR'``.
+    """
+    if color is None:
+        return text
 
-	return SCOLOR_ON + color + text + SCOLOR_OFF + color
+    return SCOLOR_ON + color + text + SCOLOR_OFF + color
 
 
 #: Map token types to a IDA Pro color value.
@@ -89,29 +89,29 @@ def idaformat(color, text):
 #
 
 TERMINAL_COLORS = {
-	Token.Token:              '',              # Empty => default blue.
+    Token.Token:              '',              # Empty => default blue.
 
-	Token.Whitespace:         '',
-	Token.Comment:            SCOLOR_AUTOCMT,
-	Token.Comment.Preproc:    SCOLOR_AUTOCMT,
-	Token.Keyword:            SCOLOR_MACRO,
+    Token.Whitespace:         '',
+    Token.Comment:            SCOLOR_AUTOCMT,
+    Token.Comment.Preproc:    SCOLOR_AUTOCMT,
+    Token.Keyword:            SCOLOR_MACRO,
     Token.Keyword.Type:       SCOLOR_AUTOCMT,
 
-	Token.String:             SCOLOR_NUMBER,   # SCOLOR_CREFTAIL,
-	Token.Number:             SCOLOR_NUMBER,
+    Token.String:             SCOLOR_NUMBER,   # SCOLOR_CREFTAIL,
+    Token.Number:             SCOLOR_NUMBER,
 
-	Token.Punctuation:        SCOLOR_KEYWORD,
-	Token.Operator:           SCOLOR_KEYWORD,  # SCOLOR_MACRO
-	Token.Name:               SCOLOR_DREF,     # variables and functions uses
-	Token.Name.Function:      SCOLOR_DEFAULT,  # function definition
+    Token.Punctuation:        SCOLOR_KEYWORD,
+    Token.Operator:           SCOLOR_KEYWORD,  # SCOLOR_MACRO
+    Token.Name:               SCOLOR_DREF,     # variables and functions uses
+    Token.Name.Function:      SCOLOR_DEFAULT,  # function definition
 
-	Token.Generic.Deleted:    '',
-	Token.Generic.Inserted:   '',
-	Token.Generic.Heading:    '',
-	Token.Generic.Subheading: '',
-	Token.Generic.Error:      SCOLOR_ERROR,
+    Token.Generic.Deleted:    '',
+    Token.Generic.Inserted:   '',
+    Token.Generic.Heading:    '',
+    Token.Generic.Subheading: '',
+    Token.Generic.Error:      SCOLOR_ERROR,
 
-	Token.Error:              SCOLOR_ERROR,
+    Token.Error:              SCOLOR_ERROR,
 }
 
 
@@ -155,8 +155,8 @@ inSitu    = True          # do coloring in situ
 extension = '.colored.c'  # extension to use if inSitu is false
 
 if len(sys.argv) != 3:
-	print('Error: script expects two arguments, a file to color and its decompilation config database (json).')
-	sys.exit(1)
+    print('Error: script expects two arguments, a file to color and its decompilation config database (json).')
+    sys.exit(1)
 
 inConfigName = sys.argv[2]
 with open(inConfigName, 'r') as inConfigFile:
@@ -171,7 +171,7 @@ for g in data.get('globals', []):
 
 inFileName = sys.argv[1]
 with open(inFileName, 'r') as f:
-	code = f.read()
+    code = f.read()
 code = highlight(code, CppLexer(), IDAFormatter())
 
 # This comes in handy when we want to find out token name for same particular lexeme.
@@ -185,4 +185,4 @@ code = highlight(code, CppLexer(), IDAFormatter())
 
 outFileName = inFileName if inSitu else inFileName + extension
 with open(outFileName, 'w') as f:
-	f.write(code)
+    f.write(code)
