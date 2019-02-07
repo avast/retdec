@@ -6,8 +6,6 @@
 	Color given C file using the IDA pro tags.
 """
 
-#=====================================================================================
-
 from __future__ import print_function
 
 import importlib
@@ -22,13 +20,9 @@ from pygments.token import Token
 utils = importlib.import_module('retdec-utils')
 utils.check_python_version()
 
-#=====================================================================================
-
 externalFunctionList = []
 userFunctionList = []
 globalVariableList = []
-
-#=====================================================================================
 
 # Same constants as in <IDASDK>/include/lines.hpp.
 #
@@ -86,8 +80,6 @@ def idaformat(color, text):
 
 	return SCOLOR_ON + color + text + SCOLOR_OFF + color
 
-
-#=====================================================================================
 
 #: Map token types to a IDA Pro color value.
 #
@@ -158,8 +150,6 @@ class IDAFormatter(Formatter):
 
         return TERMINAL_COLORS.get(ttype)
 
-
-#=====================================================================================
 
 inSitu    = True          # do coloring in situ
 extension = '.colored.c'  # extension to use if inSitu is false
