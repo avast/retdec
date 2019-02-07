@@ -128,7 +128,7 @@ class SigFromLib:
             pattern_files.append(pattern_file)
             with open(self.object_list_path, 'w') as object_list:
                 for item in objects:
-                    object_list.write(item+'\n')
+                    object_list.write(item + '\n')
             _, result, _ = cmd.run_cmd([config.BIN2PAT, '-o', pattern_file, '-l', self.object_list_path], discard_stdout=True, discard_stderr=True)
 
             if result != 0:
