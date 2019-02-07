@@ -1106,9 +1106,11 @@ class Decompiler:
 
             print('\n##### Decompiling ' + self.input_file + ' into ' + self.out_backend_bc + '...')
             if self.args.generate_log:
-                self.log_bin2llvmir_memory, self.log_bin2llvmir_time, self.log_bin2llvmir_output, \
-                self.log_bin2llvmir_rc = cmd.run_measured_cmd([config.BIN2LLVMIR] + bin2llvmir_params + ['-o',
-                                                               self.out_backend_bc], timeout=config.LOG_TIMEOUT, print_run_msg=True)
+                self.log_bin2llvmir_memory, self.log_bin2llvmir_time, self.log_bin2llvmir_output, self.log_bin2llvmir_rc = cmd.run_measured_cmd(
+                    [config.BIN2LLVMIR] + bin2llvmir_params + ['-o', self.out_backend_bc],
+                    timeout=config.LOG_TIMEOUT,
+                    print_run_msg=True
+                )
 
                 bin2llvmir_rc = self.log_bin2llvmir_rc
                 print(self.log_bin2llvmir_output)
@@ -1209,8 +1211,11 @@ class Decompiler:
         # Decompile the optimized IR code.
         print('\n##### Decompiling ' + self.out_backend_bc + ' into ' + self.output_file + '...')
         if self.args.generate_log:
-            self.log_llvmir2hll_memory, self.log_llvmir2hll_time, self.log_llvmir2hll_output, \
-            self.log_llvmir2hll_rc = cmd.run_measured_cmd([config.LLVMIR2HLL] + llvmir2hll_params, timeout=config.LOG_TIMEOUT, print_run_msg=True)
+            self.log_llvmir2hll_memory, self.log_llvmir2hll_time, self.log_llvmir2hll_output, self.log_llvmir2hll_rc = cmd.run_measured_cmd(
+                [config.LLVMIR2HLL] + llvmir2hll_params,
+                timeout=config.LOG_TIMEOUT,
+                print_run_msg=True
+            )
 
             llvmir2hll_rc = self.log_llvmir2hll_rc
             print(self.log_llvmir2hll_output)
