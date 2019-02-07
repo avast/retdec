@@ -179,7 +179,7 @@ class CmdRunner:
             g = s.group(1)
             if g:
                 memory_kb = int(g)
-                memory = int(memory_kb / 1024) # to MB
+                memory = int(memory_kb / 1024)  # to MB
                 if memory == 0:
                     memory = 1
         return memory
