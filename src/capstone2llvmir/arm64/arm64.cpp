@@ -1081,6 +1081,36 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateCbnz(cs_insn* i, cs_arm64* ai
 }
 
 /**
+ * ARM64_INS_TBNZ, ARM64_INS_TBZ
+ */
+void Capstone2LlvmIrTranslatorArm64_impl::translateTbnz(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb)
+{
+	EXPECT_IS_TERNARY(i, ai, irb);
+
+	std::tie(op0, op1, op2) = loadOpTernary(ai, irb);
+
+	// Get the needed bit
+	auto* ext_imm = irb.CreateZExtOrTrunc(op1, op0->getType());
+	auto* shifted_one = irb.CreateShl(llvm::ConstantInt::get(op0->getType(), 1), ext_imm);
+	auto* test_bit = irb.CreateAnd(shifted_one, op0);
+
+	llvm::Value* cond = nullptr;
+	if (i->id == ARM64_INS_TBNZ)
+	{
+		cond = irb.CreateICmpNE(test_bit, llvm::ConstantInt::get(op0->getType(), 0));
+	}
+	else if (i->id == ARM64_INS_TBZ)
+	{
+		cond = irb.CreateICmpEQ(test_bit, llvm::ConstantInt::get(op0->getType(), 0));
+	}
+	else
+	{
+		throw GenericError("cbnz, cbz: Instruction id error");
+	}
+	generateCondBranchFunctionCall(irb, cond, op2);
+}
+
+/**
  * ARM64_INS_RET
 */
 void Capstone2LlvmIrTranslatorArm64_impl::translateRet(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb)
