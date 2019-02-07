@@ -41,7 +41,7 @@ Signature::~Signature()
 /**
  * Assignment operator allowing initializer list assignment.
  *
- * @param initList Initializer list containg Signature::Byte objects.
+ * @param initList Initializer list containing Signature::Byte objects.
  *
  * @return Newly created Signature object.
  */

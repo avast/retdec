@@ -158,7 +158,7 @@ bool CFGTraversal::getCurrRetVal() const {
 }
 
 /**
-* @brief A recursive implementation of performTraversal().
+* @brief A non-recursive implementation of performTraversal().
 *
 * @param[in] node Node to be traversed.
 * @param[in] stmtIter Iterator to a statement in @a node to be checked.
@@ -168,7 +168,7 @@ bool CFGTraversal::getCurrRetVal() const {
 */
 bool CFGTraversal::performTraversalImpl(ShPtr<CFG::Node> node,
 		CFG::stmt_iterator stmtIter) {
-	if (stmtIter != node->stmt_end()) {
+	while (stmtIter != node->stmt_end()) {
 		// We're not at the end of the node, so check the statement under
 		// stmtIter.
 
@@ -182,7 +182,7 @@ bool CFGTraversal::performTraversalImpl(ShPtr<CFG::Node> node,
 			return getCurrRetVal();
 		}
 
-		return performTraversalImpl(node, ++stmtIter);
+		++stmtIter;
 	}
 
 	// We have reached the end of the node, so check node's successors.
@@ -190,7 +190,7 @@ bool CFGTraversal::performTraversalImpl(ShPtr<CFG::Node> node,
 }
 
 /**
-* @brief A recursive implementation of performReverseTraversal().
+* @brief A non-recursive implementation of performReverseTraversal().
 *
 * @param[in] node Node to be traversed.
 * @param[in] stmtRIter Reverse iterator to a statement in @a node to be
@@ -202,7 +202,7 @@ bool CFGTraversal::performTraversalImpl(ShPtr<CFG::Node> node,
 bool CFGTraversal::performReverseTraversalImpl(ShPtr<CFG::Node> node,
 		CFG::stmt_reverse_iterator stmtRIter) {
 
-	if (stmtRIter != node->stmt_rend()) {
+	while (stmtRIter != node->stmt_rend()) {
 		// We're not at the start of the node, so check the statement under
 		// stmtRIter.
 
@@ -216,7 +216,7 @@ bool CFGTraversal::performReverseTraversalImpl(ShPtr<CFG::Node> node,
 			return getCurrRetVal();
 		}
 
-		return performReverseTraversalImpl(node, ++stmtRIter);
+		++stmtRIter;
 	}
 
 	// We have reached the start of the node, so check node's predecessors.

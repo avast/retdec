@@ -33,11 +33,11 @@ For more information, check out our
 
 ## Installation and Use
 
-Currently, we support Windows (7 or later), Linux, and macOS.
+Currently, we support Windows (7 or later), Linux, macOS, and (experimentally) FreeBSD. An installed version of RetDec requires approximately 4 GB of free disk space.
 
 ### Windows
 
-1. Either download and unpack a [pre-built package](https://github.com/avast-tl/retdec/releases), or build and install the decompiler by yourself (the process is described below):
+1. Either download and unpack a [pre-built package](https://github.com/avast-tl/retdec/releases), or build and install the decompiler by yourself (the process is described below).
 
 2. Install [Microsoft Visual C++ Redistributable for Visual Studio 2015](https://www.microsoft.com/en-us/download/details.aspx?id=48145).
 
@@ -82,6 +82,25 @@ Currently, we support Windows (7 or later), Linux, and macOS.
     * [Python](https://www.python.org/) (version >= 3.4)
     * [UPX](https://upx.github.io/) (Optional: if you want to use UPX unpacker in the preprocessing stage)
     * [Graphviz](http://www.graphviz.org/) (Optional: if you want to generate call or control flow graphs)
+
+3. Now, you are all set to run the decompiler. To decompile a binary file named `test.exe`, run
+
+    ```
+    $RETDEC_INSTALL_DIR/bin/retdec-decompiler.py test.exe
+    ```
+
+   For more information, run `retdec-decompiler.py` with `--help`.
+
+### FreeBSD (Experimental)
+
+1. There are currently no pre-built "ports" packages for FreeBSD. You will have to build and install the decompiler by yourself. The process is described below.
+
+2. After you have built the decompiler, you may need to install the following packages and execute the following command:
+
+    ```
+    sudo pkg install python37
+    sudo ln -s /usr/local/bin/python3.7 /usr/local/bin/python3
+    ```
 
 3. Now, you are all set to run the decompiler. To decompile a binary file named `test.exe`, run
 
@@ -154,6 +173,21 @@ Packages should be preferably installed via [Homebrew](https://brew.sh).
 * [autotools](https://en.wikipedia.org/wiki/GNU_Build_System) ([autoconf](https://www.gnu.org/software/autoconf/autoconf.html), [automake](https://www.gnu.org/software/automake/), and [libtool](https://www.gnu.org/software/libtool/))
 * Optional: [Doxygen](http://www.stack.nl/~dimitri/doxygen/) and [Graphviz](http://www.graphviz.org/) for generating API documentation
 
+#### FreeBSD (Experimental)
+
+Packages should be installed via FreeBSDs pre-compiled package repository using the `pkg` command or built from scratch using the `ports` database method.
+
+* Full "pkg" tool instructions: [handbook pkg method](https://www.freebsd.org/doc/handbook/pkgng-intro.html)
+  * `pkg install cmake python37 bison git autotools`
+OR
+* Full "ports" instructions: [handbook ports method](https://www.freebsd.org/doc/handbook/ports-using.html)
+  * `portsnap fetch`
+  * `portsnap extract`
+* For example, `cmake` would be
+  * `whereis cmake`
+  * `cd /usr/ports/devel/cmake`
+  * `make install clean`
+
 ### Process
 
 Note: Although RetDec now supports a system-wide installation ([#94](https://github.com/avast-tl/retdec/issues/94)), unless you use your distribution's package manager to install it, we recommend installing RetDec locally into a designated directory. The reason for this is that uninstallation will be easier as you will only need to remove a single directory. To perform a local installation, run `cmake` with the `-DCMAKE_INSTALL_PREFIX=<path>` parameter, where `<path>` is directory into which RetDec will be installed (e.g. `$HOME/projects/retdec-install` on Linux and macOS, and `C:\projects\retdec-install` on Windows).
@@ -182,6 +216,22 @@ Note: Although RetDec now supports a system-wide installation ([#94](https://git
     export CMAKE_INCLUDE_PATH="/usr/local/opt/flex/include"
     export CMAKE_LIBRARY_PATH="/usr/local/opt/flex/lib;/usr/local/opt/bison/lib"
     export PATH="/usr/local/opt/flex/bin:/usr/local/opt/bison/bin:$PATH"
+    ```
+  * `cmake .. -DCMAKE_INSTALL_PREFIX=<path>`
+  * `make -jN` (`N` is the number of CPU cores to use for parallel build)
+  * `make install`
+* FreeBSD:
+  * `sudo pkg install git cmake`
+  * `git clone https://github.com/avast-tl/retdec`
+  * `cd retdec`
+  * `mkdir build && cd build`
+  * ```sh
+    # FreeBSD (and other BSDs) do need cmake, python3, bison, git, autotools. Flex and perl are pre-installed in the OS but check versions.
+    # Later versions may be available for each of the packages.
+    # See what is installed:
+    sudo pkg info cmake python37 bison autotools
+    # Install/upgrade them:
+    sudo pkg install cmake python37 bison autotools
     ```
   * `cmake .. -DCMAKE_INSTALL_PREFIX=<path>`
   * `make -jN` (`N` is the number of CPU cores to use for parallel build)

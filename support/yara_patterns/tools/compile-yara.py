@@ -17,7 +17,7 @@ def print_help():
 def compile_files(yarac, input_folder, output_folder):
     inputs = []
     for file in os.listdir(input_folder):
-        if file.endswith(".yara"):
+        if file.endswith('.yara'):
             inputs.append(os.path.join(input_folder, file))
 
     if inputs:
@@ -86,5 +86,5 @@ def main():
     sys.exit(0)
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()

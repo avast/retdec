@@ -904,6 +904,16 @@ std::string FileInformation::getImportLibraryName(std::size_t position) const
 }
 
 /**
+ * Get import type
+ * @param position Index of selected import (indexed from 0)
+ * @return Symbol type
+ */
+std::string FileInformation::getImportUsageType(std::size_t position) const
+{
+	return importTable.getImportUsageType(position);
+}
+
+/**
  * Get import address
  * @param position Index of selected import (indexed from 0)
  * @param format Format of resulting string (e.g. std::dec, std::hex)

@@ -1972,7 +1972,7 @@ void PeFormat::computeTypeRefHashes()
 	std::string nameSpace;
 	std::string referencedName;
 	MetadataTableType resolutionScopeType;
-	
+
 	auto typeRefTable = static_cast<const MetadataTable<TypeRef>*>(metadataStream->getMetadataTable(MetadataTableType::TypeRef));
 	auto moduleTable = static_cast<const MetadataTable<DotnetModule>*>(metadataStream->getMetadataTable(MetadataTableType::Module));
 	auto moduleRefTable = static_cast<const MetadataTable<ModuleRef>*>(metadataStream->getMetadataTable(MetadataTableType::ModuleRef));
@@ -1996,7 +1996,7 @@ void PeFormat::computeTypeRefHashes()
 			validTypeName = true;
 		}
 		if (stringStream->getString(typeRefRow->typeNamespace.getIndex(), nameSpace) && !nameSpace.empty())
-		{	
+		{
 			validNameSpace = true;
 		}
 

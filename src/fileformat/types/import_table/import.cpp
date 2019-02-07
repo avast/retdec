@@ -12,7 +12,12 @@ namespace fileformat {
 /**
  * Constructor
  */
-Import::Import() : libraryIndex(0), address(0), ordinalNumber(0), ordinalNumberIsValid(false)
+Import::Import() :
+		libraryIndex(0),
+		address(0),
+		ordinalNumber(0),
+		ordinalNumberIsValid(false),
+		usageType(Import::UsageType::UNKNOWN)
 {
 
 }
@@ -70,6 +75,47 @@ bool Import::getOrdinalNumber(unsigned long long &importOrdinalNumber) const
 }
 
 /**
+ * Get import usage type
+ * @return Import usage type
+ */
+Import::UsageType Import::getUsageType() const
+{
+	return usageType;
+}
+
+/**
+ * @return @c true if import is unkown, @c false otherwise
+ */
+bool Import::isUnknown() const
+{
+	return getUsageType() == UsageType::UNKNOWN;
+}
+
+/**
+ * @return @c true if import is function, @c false otherwise
+ */
+bool Import::isFunction() const
+{
+	return getUsageType() == UsageType::FUNCTION;
+}
+
+/**
+ * @return @c true if import is object, @c false otherwise
+ */
+bool Import::isObject() const
+{
+	return getUsageType() == UsageType::OBJECT;
+}
+
+/**
+ * @return @c true if import is file, @c false otherwise
+ */
+bool Import::isFile() const
+{
+	return getUsageType() == UsageType::FILE;
+}
+
+/**
  * Set import name
  * @param importName Import name
  */
@@ -104,6 +150,15 @@ void Import::setOrdinalNumber(unsigned long long importOrdinalNumber)
 {
 	ordinalNumber = importOrdinalNumber;
 	ordinalNumberIsValid = true;
+}
+
+/**
+ * Set import usage type
+ * @param importUsageType Symbol usage type
+ */
+void Import::setUsageType(Import::UsageType importUsageType)
+{
+	usageType = importUsageType;
 }
 
 /**

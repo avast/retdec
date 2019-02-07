@@ -226,7 +226,7 @@ bool BitmapImage::parseDib1Data(const ResourceIcon &icon, const struct BitmapInf
 				auto index = !!(bytes[offset] & (0x01 << (7 - i)));
 				row.push_back(palette[index]);
 			}
-			
+
 			offset++;
 		}
 
