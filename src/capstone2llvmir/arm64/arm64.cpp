@@ -904,18 +904,77 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateStp(cs_insn* i, cs_arm64* ai,
 
 /**
  * ARM64_INS_LDR
+ * ARM64_INS_LDURB, ARM64_INS_LDUR, ARM64_INS_LDURH, ARM64_INS_LDURSB, ARM64_INS_LDURSH, ARM64_INS_LDURSW
+ * ARM64_INS_LDRB, ARM64_INS_LDRH, ARM64_INS_LDRSB, ARM64_INS_LDRSH, ARM64_INS_LDRSW
  */
 void Capstone2LlvmIrTranslatorArm64_impl::translateLdr(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb)
 {
 	EXPECT_IS_BINARY_OR_TERNARY(i, ai, irb);
 
+	llvm::Type* ty = nullptr;
+	bool sext = false;
+	switch (i->id)
+	{
+		case ARM64_INS_LDR:
+		case ARM64_INS_LDUR:
+		{
+			ty = irb.getInt32Ty();
+			sext = false;
+			break;
+		}
+		case ARM64_INS_LDRB:
+		case ARM64_INS_LDURB:
+		{
+			ty = irb.getInt8Ty();
+			sext = false;
+			break;
+		}
+		case ARM64_INS_LDRH:
+		case ARM64_INS_LDURH:
+		{
+			ty = irb.getInt16Ty();
+			sext = false;
+			break;
+		}
+		// Signed loads
+		case ARM64_INS_LDRSB:
+		case ARM64_INS_LDURSB:
+		{
+			ty = irb.getInt8Ty();
+			sext = true;
+			break;
+		}
+		case ARM64_INS_LDRSH:
+		case ARM64_INS_LDURSH:
+		{
+			ty = irb.getInt16Ty();
+			sext = true;
+			break;
+		}
+		case ARM64_INS_LDRSW:
+		case ARM64_INS_LDURSW:
+		{
+			ty = irb.getInt32Ty();
+			sext = true;
+			break;
+		}
+		default:
+		{
+			throw GenericError("Arm64: unhandled LDR id");
+		}
+	}
+
 	auto* regType = getRegisterType(ai->operands[0].reg);
 	auto* dest = loadOp(ai->operands[1], irb, nullptr, true);
-	auto* pt = llvm::PointerType::get(regType, 0);
+	auto* pt = llvm::PointerType::get(ty, 0);
 	auto* addr = irb.CreateIntToPtr(dest, pt);
 
-	auto* newRegValue = irb.CreateLoad(addr);
-	storeRegister(ai->operands[0].reg, newRegValue, irb);
+	auto* loaded_value = irb.CreateLoad(addr);
+	auto* ext_value    = sext
+			? irb.CreateSExtOrTrunc(loaded_value, regType)
+			: irb.CreateZExtOrTrunc(loaded_value, regType);
+
+	storeRegister(ai->operands[0].reg, ext_value, irb);
 
 	uint32_t baseR = ARM64_REG_INVALID;
 	if (ai->op_count == 2)
@@ -931,8 +990,7 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateLdr(cs_insn* i, cs_arm64* ai,
 	}
 	else
 	{
-		// TODO: This should not be posible, throw error?
-		assert(false && "unsupported LDR format");
+		throw GenericError("Arm64: unsupported ldr format");
 	}
 
 	if (ai->writeback && baseR != ARM64_REG_INVALID)
