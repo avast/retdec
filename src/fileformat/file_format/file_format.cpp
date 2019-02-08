@@ -1121,7 +1121,13 @@ bool FileFormat::getOffsetFromAddress(unsigned long long &result, unsigned long 
 		return false;
 	}
 
-	result = secSeg->getOffset() + (address - secSeg->getAddress());
+	auto secSegAddr = secSeg->getAddress();
+	if (secSegAddr > address)
+	{
+		return false;
+	}
+
+	result = secSeg->getOffset() + (address - secSegAddr);
 	return true;
 }
 
@@ -1141,7 +1147,13 @@ bool FileFormat::getAddressFromOffset(unsigned long long &result, unsigned long 
 		return false;
 	}
 
-	result = secSeg->getAddress() + (offset - secSeg->getOffset());
+	auto secSegOffset = secSeg->getOffset();
+	if (secSegOffset > offset)
+	{
+		return false;
+	}
+
+	result = secSeg->getAddress() + (offset - secSegOffset);
 	return true;
 }
 
