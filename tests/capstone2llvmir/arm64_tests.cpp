@@ -156,7 +156,7 @@ INSTANTIATE_TEST_CASE_P(
 // ARM64_INS_ADC
 //
 
-TEST_P(Capstone2LlvmIrTranslatorArm64Tests, ARM64_INS_ADC_r_r_i_false)
+TEST_P(Capstone2LlvmIrTranslatorArm64Tests, ARM64_INS_ADC_r_r_r_false)
 {
 	setRegisters({
 		{ARM64_REG_CPSR_C, false},
@@ -174,7 +174,7 @@ TEST_P(Capstone2LlvmIrTranslatorArm64Tests, ARM64_INS_ADC_r_r_i_false)
 	EXPECT_NO_VALUE_CALLED();
 }
 
-TEST_P(Capstone2LlvmIrTranslatorArm64Tests, ARM64_INS_ADC_r_r_i_true)
+TEST_P(Capstone2LlvmIrTranslatorArm64Tests, ARM64_INS_ADC_r_r_r_true)
 {
 	setRegisters({
 		{ARM64_REG_CPSR_C, true},
@@ -192,7 +192,7 @@ TEST_P(Capstone2LlvmIrTranslatorArm64Tests, ARM64_INS_ADC_r_r_i_true)
 	EXPECT_NO_VALUE_CALLED();
 }
 
-TEST_P(Capstone2LlvmIrTranslatorArm64Tests, ARM64_INS_ADC_s_r_r_i_false)
+TEST_P(Capstone2LlvmIrTranslatorArm64Tests, ARM64_INS_ADC_s_r_r_r_false)
 {
 	setRegisters({
 		{ARM64_REG_CPSR_C, false},
@@ -213,6 +213,69 @@ TEST_P(Capstone2LlvmIrTranslatorArm64Tests, ARM64_INS_ADC_s_r_r_i_false)
 	EXPECT_NO_MEMORY_LOADED_STORED();
 	EXPECT_NO_VALUE_CALLED();
 }
+
+TEST_P(Capstone2LlvmIrTranslatorArm64Tests, ARM64_INS_ADC32_r_r_r_true)
+{
+	setRegisters({
+		{ARM64_REG_CPSR_C, true},
+		{ARM64_REG_X1, 0x1230},
+		{ARM64_REG_X2, 0x4},
+	});
+
+	emulate("adc w0, w1, w2");
+
+	EXPECT_JUST_REGISTERS_LOADED({ARM64_REG_X1, ARM64_REG_X2, ARM64_REG_CPSR_C});
+	EXPECT_JUST_REGISTERS_STORED({
+		{ARM64_REG_X0, 0x1235},
+	});
+	EXPECT_NO_MEMORY_LOADED_STORED();
+	EXPECT_NO_VALUE_CALLED();
+}
+
+TEST_P(Capstone2LlvmIrTranslatorArm64Tests, ARM64_INS_ADC32_s_r_r_r_false)
+{
+	setRegisters({
+		{ARM64_REG_CPSR_C, false},
+		{ARM64_REG_X1, 0x1230},
+		{ARM64_REG_X2, 0x4},
+	});
+
+	emulate("adcs w0, w1, w2");
+
+	EXPECT_JUST_REGISTERS_LOADED({ARM64_REG_X1, ARM64_REG_X2, ARM64_REG_CPSR_C});
+	EXPECT_JUST_REGISTERS_STORED({
+		{ARM64_REG_X0, 0x1234},
+		{ARM64_REG_CPSR_N, false},
+		{ARM64_REG_CPSR_Z, false},
+		{ARM64_REG_CPSR_C, false},
+		{ARM64_REG_CPSR_V, false},
+	});
+	EXPECT_NO_MEMORY_LOADED_STORED();
+	EXPECT_NO_VALUE_CALLED();
+}
+
+TEST_P(Capstone2LlvmIrTranslatorArm64Tests, ARM64_INS_ADC32_flags)
+{
+	setRegisters({
+		{ARM64_REG_CPSR_C, true},
+		{ARM64_REG_X1, 0xfffffffffffffffe},
+		{ARM64_REG_X2, 0x1},
+	});
+
+	emulate("adcs w0, w1, w2");
+
+	EXPECT_JUST_REGISTERS_LOADED({ARM64_REG_X1, ARM64_REG_X2, ARM64_REG_CPSR_C});
+	EXPECT_JUST_REGISTERS_STORED({
+		{ARM64_REG_X0, 0x0},
+		{ARM64_REG_CPSR_N, false},
+		{ARM64_REG_CPSR_Z, true},
+		{ARM64_REG_CPSR_C, true},
+		{ARM64_REG_CPSR_V, false},
+	});
+	EXPECT_NO_MEMORY_LOADED_STORED();
+	EXPECT_NO_VALUE_CALLED();
+}
+
 
 TEST_P(Capstone2LlvmIrTranslatorArm64Tests, ARM64_INS_ADC_flags)
 {
