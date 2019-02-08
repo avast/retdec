@@ -88,7 +88,7 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateInstruction(
 	cs_detail* d = i->detail;
 	cs_arm64* ai = &d->arm64;
 
-	std::cout << i->mnemonic << " " << i->op_str << std::endl;
+	//std::cout << i->mnemonic << " " << i->op_str << std::endl;
 
 	auto fIt = _i2fm.find(i->id);
 	if (fIt != _i2fm.end() && fIt->second != nullptr)
@@ -799,16 +799,20 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateMov(cs_insn* i, cs_arm64* ai,
 }
 
 /**
- * ARM64_INS_STR
+ * ARM64_INS_STR, ARM64_INS_STRB, ARM64_INS_STRH
  */
 void Capstone2LlvmIrTranslatorArm64_impl::translateStr(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb)
 {
 	EXPECT_IS_BINARY_OR_TERNARY(i, ai, irb);
 
-	auto ty = getDefaultType();
-
+	llvm::Type* ty = nullptr;
 	switch (i->id)
 	{
+		case ARM64_INS_STR:
+		{
+			ty = getDefaultType();
+			break;
+		}
 		case ARM64_INS_STRB:
 		{
 			ty = irb.getInt8Ty();
@@ -818,6 +822,10 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateStr(cs_insn* i, cs_arm64* ai,
 		{
 			ty = irb.getInt16Ty();
 			break;
+		}
+		default:
+		{
+			throw GenericError("Arm64: unhandled STR id");
 		}
 	}
 
@@ -1000,17 +1008,35 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateLdr(cs_insn* i, cs_arm64* ai,
 }
 
 /**
- * ARM64_INS_LDP
+ * ARM64_INS_LDP, ARM64_INS_LDPSW
  */
 void Capstone2LlvmIrTranslatorArm64_impl::translateLdp(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb)
 {
 	EXPECT_IS_EXPR(i, ai, irb, (2 <= ai->op_count && ai->op_count <= 4));
 
-	auto* regType = getRegisterType(ai->operands[0].reg);
-	auto* dest = generateGetOperandMemAddr(ai->operands[2], irb);
-	auto* pt = llvm::PointerType::get(regType, 0);
+	llvm::Value* data_size = nullptr;
+	llvm::Type* ty = nullptr;
+	eOpConv ct = eOpConv::THROW;
+	if(i->id == ARM64_INS_LDP)
+	{
+		data_size = llvm::ConstantInt::get(getDefaultType(), getRegisterByteSize(ai->operands[0].reg));
+		ty = getRegisterType(ai->operands[0].reg);
+		ct = eOpConv::ZEXT_TRUNC;
+	}
+	else if(i->id == ARM64_INS_LDPSW)
+	{
+		data_size = llvm::ConstantInt::get(getDefaultType(), 4);
+		ty = irb.getInt32Ty();
+		ct = eOpConv::SEXT_TRUNC;
+	}
+	else
+	{
+		throw GenericError("ldp, ldpsw: Instruction id error");
+	}
+
+	auto* dest = loadOp(ai->operands[2], irb, nullptr, true);
+	auto* pt = llvm::PointerType::get(ty, 0);
 	auto* addr = irb.CreateIntToPtr(dest, pt);
-	auto* registerSize = llvm::ConstantInt::get(getDefaultType(), getRegisterByteSize(ai->operands[0].reg));
 
 	auto* newReg1Value = irb.CreateLoad(addr);
 
@@ -1019,22 +1045,22 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateLdp(cs_insn* i, cs_arm64* ai,
 	uint32_t baseR = ARM64_REG_INVALID;
 	if (ai->op_count == 3)
 	{
-		storeRegister(ai->operands[0].reg, newReg1Value, irb);
-		newDest = irb.CreateAdd(dest, registerSize);
+		storeRegister(ai->operands[0].reg, newReg1Value, irb, ct);
+		newDest = irb.CreateAdd(dest, data_size);
 		addr = irb.CreateIntToPtr(newDest, pt);
 		newReg2Value = irb.CreateLoad(addr);
-		storeRegister(ai->operands[1].reg, newReg2Value, irb);
+		storeRegister(ai->operands[1].reg, newReg2Value, irb, ct);
 
 		baseR = ai->operands[2].mem.base;
 	}
 	else if (ai->op_count == 4)
 	{
 
-		storeRegister(ai->operands[0].reg, newReg1Value, irb);
-		newDest = irb.CreateAdd(dest, registerSize);
+		storeRegister(ai->operands[0].reg, newReg1Value, irb, ct);
+		newDest = irb.CreateAdd(dest, data_size);
 		addr = irb.CreateIntToPtr(newDest, pt);
 		newReg2Value = irb.CreateLoad(addr);
-		storeRegister(ai->operands[1].reg, newReg2Value, irb);
+		storeRegister(ai->operands[1].reg, newReg2Value, irb, ct);
 
 		auto* disp = llvm::ConstantInt::get(getDefaultType(), ai->operands[3].imm);
 		dest = irb.CreateAdd(dest, disp);
@@ -1042,7 +1068,7 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateLdp(cs_insn* i, cs_arm64* ai,
 	}
 	else
 	{
-		assert(false && "unsupported LDP format");
+		throw GenericError("ldp, ldpsw: Unsupported instruction format");
 	}
 
 	if (ai->writeback && baseR != ARM64_REG_INVALID)
