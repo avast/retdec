@@ -633,11 +633,10 @@ void PeFormat::loadVisualBasicHeader()
 	auto allBytes = getBytes();
 	std::vector<std::uint8_t> bytes;
 	unsigned long long version = 0;
-	unsigned long long baseAddress = 0;
-	std::size_t vbHeaderAddress = 0;
-	std::size_t vbHeaderOffset = 0;
-	std::size_t vbProjectInfoOffset = 0;
-	std::size_t vbComDataRegistrationOffset = 0;
+	unsigned long long vbHeaderAddress = 0;
+	unsigned long long vbHeaderOffset = 0;
+	unsigned long long vbProjectInfoOffset = 0;
+	unsigned long long vbComDataRegistrationOffset = 0;
 	std::string projLanguageDLL;
 	std::string projBackupLanguageDLL;
 	std::string projExeName;
@@ -658,19 +657,11 @@ void PeFormat::loadVisualBasicHeader()
 		return;
 	}
 
-	if (!getImageBaseAddress(baseAddress))
-	{
-		return;
-	}
-
 	vbHeaderAddress = bytes[4] << 24 | bytes[3] << 16 | bytes[2] << 8 | bytes[1];
-
-	if (vbHeaderAddress < baseAddress)
+	if (!getOffsetFromAddress(vbHeaderOffset, vbHeaderAddress))
 	{
 		return;
 	}
-
-	vbHeaderOffset = vbHeaderAddress - baseAddress;
 
 	if (!getBytes(bytes, vbHeaderOffset, vbh.headerSize()) || bytes.size() != vbh.headerSize())
 	{
@@ -725,8 +716,6 @@ void PeFormat::loadVisualBasicHeader()
 		vbh.projNameOffset = byteSwap32(vbh.projNameOffset);
 	}
 
-	// TODO check VB header magic
-
 	if (vbh.projExeNameOffset != 0)
 	{
 		projExeName = retdec::utils::readNullTerminatedAscii(allBytes.data(), allBytes.size(),
@@ -765,26 +754,23 @@ void PeFormat::loadVisualBasicHeader()
 	visualBasicInfo.setLanguageDLLPrimaryLCID(vbh.LCID1);
 	visualBasicInfo.setLanguageDLLSecondaryLCID(vbh.LCID2);
 
-	if (vbh.projectInfoAddr >= baseAddress)
+	if (getOffsetFromAddress(vbProjectInfoOffset, vbh.projectInfoAddr))
 	{
-		vbProjectInfoOffset = vbh.projectInfoAddr - baseAddress;
-		parseVisualBasicProjectInfo(vbProjectInfoOffset, baseAddress);
+		parseVisualBasicProjectInfo(vbProjectInfoOffset);
 	}
 
-	if (vbh.COMRegisterDataAddr >= baseAddress)
+	if (getOffsetFromAddress(vbComDataRegistrationOffset, vbh.COMRegisterDataAddr))
 	{
-		vbComDataRegistrationOffset = vbh.COMRegisterDataAddr - baseAddress;
-		parseVisualBasicComRegistrationData(vbComDataRegistrationOffset, baseAddress);
+		parseVisualBasicComRegistrationData(vbComDataRegistrationOffset);
 	}
 }
 
 /**
  * Parse visual basic COM registration data
  * @param structureOffset Offset in file where the structure starts
- * @param baseAddress Base address
  * @return @c true if COM retistration data was successfuly parsed, @c false otherwise
  */
-bool PeFormat::parseVisualBasicComRegistrationData(std::size_t structureOffset, std::size_t baseAddress)
+bool PeFormat::parseVisualBasicComRegistrationData(std::size_t structureOffset)
 {
 	auto allBytes = getBytes();
 	std::vector<std::uint8_t> bytes;
@@ -851,14 +837,13 @@ bool PeFormat::parseVisualBasicComRegistrationData(std::size_t structureOffset, 
 /**
  * Parse visual basic project info
  * @param structureOffset Offset in file where the structure starts
- * @param baseAddress Base address
  * @return @c true if project info was successfuly parsed, @c false otherwise
  */
-bool PeFormat::parseVisualBasicProjectInfo(std::size_t structureOffset, std::size_t baseAddress)
+bool PeFormat::parseVisualBasicProjectInfo(std::size_t structureOffset)
 {
 	std::vector<std::uint8_t> bytes;
-	std::size_t vbExternTableOffset = 0;
-	std::size_t vbObjectTableOffset = 0;
+	unsigned long long vbExternTableOffset = 0;
+	unsigned long long vbObjectTableOffset = 0;
 	std::string projPath;
 	std::size_t offset = 0;
 	struct VBProjInfo vbpi;
@@ -900,16 +885,14 @@ bool PeFormat::parseVisualBasicProjectInfo(std::size_t structureOffset, std::siz
 	visualBasicInfo.setProjectPath(projPath);
 	visualBasicInfo.setPcode(vbpi.nativeCodeAddr == 0);
 
-	if (vbpi.externalTableAddr >= baseAddress)
+	if (getOffsetFromAddress(vbExternTableOffset, vbpi.externalTableAddr))
 	{
-		vbExternTableOffset = vbpi.externalTableAddr - baseAddress;
-		parseVisualBasicExternTable(vbExternTableOffset, baseAddress, vbpi.nExternals);
+		parseVisualBasicExternTable(vbExternTableOffset, vbpi.nExternals);
 	}
 
-	if (vbpi.objectTableAddr >= baseAddress)
+	if (getOffsetFromAddress(vbObjectTableOffset, vbpi.objectTableAddr))
 	{
-		vbObjectTableOffset = vbpi.objectTableAddr - baseAddress;
-		parseVisualBasicObjectTable(vbObjectTableOffset, baseAddress);
+		parseVisualBasicObjectTable(vbObjectTableOffset);
 	}
 
 	return true;
@@ -918,18 +901,16 @@ bool PeFormat::parseVisualBasicProjectInfo(std::size_t structureOffset, std::siz
 /**
  * Parse visual basic extern table
  * @param structureOffset Offset in file where the structure starts
- * @param baseAddress Base address
  * @param nEntries Number of entries in table
  * @return @c true if extern table was successfuly parsed, @c false otherwise
  */
-bool PeFormat::parseVisualBasicExternTable(std::size_t structureOffset, std::size_t baseAddress,
-											std::size_t nEntries)
+bool PeFormat::parseVisualBasicExternTable(std::size_t structureOffset, std::size_t nEntries)
 {
 	auto allBytes = getBytes();
 	std::vector<std::uint8_t> bytes;
 	struct VBExternTableEntry entry;
 	struct VBExternTableEntryData entryData;
-	std::size_t vbExternEntryDataOffset = 0;
+	unsigned long long vbExternEntryDataOffset = 0;
 	std::size_t offset = 0;
 
 	for (std::size_t i = 0; i < nEntries; i++)
@@ -953,13 +934,15 @@ bool PeFormat::parseVisualBasicExternTable(std::size_t structureOffset, std::siz
 			entry.importDataAddr = byteSwap32(entry.importDataAddr);
 		}
 
-		if (entry.type != static_cast<std::uint32_t>(VBExternTableEntryType::external)
-			|| entry.importDataAddr < baseAddress)
+		if (entry.type != static_cast<std::uint32_t>(VBExternTableEntryType::external))
 		{
 			continue;
 		}
 
-		vbExternEntryDataOffset = entry.importDataAddr - baseAddress;
+		if (!getOffsetFromAddress(vbExternEntryDataOffset, entry.importDataAddr))
+		{
+			continue;
+		}
 
 		if (!getBytes(bytes, vbExternEntryDataOffset, entryData.structureSize()) 
 			|| bytes.size() != entryData.structureSize())
@@ -977,15 +960,15 @@ bool PeFormat::parseVisualBasicExternTable(std::size_t structureOffset, std::siz
 			entryData.apiNameAddr = byteSwap32(entryData.apiNameAddr);
 		}
 
-		if (entryData.moduleNameAddr >= baseAddress)
+		unsigned long long moduleNameOffset;
+		if (!getOffsetFromAddress(moduleNameOffset, entryData.moduleNameAddr))
 		{
-			std::size_t moduleNameOffset = entryData.moduleNameAddr - baseAddress;
 			moduleName = retdec::utils::readNullTerminatedAscii(allBytes.data(), allBytes.size(), moduleNameOffset);
 		}
 
-		if (entryData.apiNameAddr >= baseAddress)
+		unsigned long long apiNameOffset;
+		if (!getOffsetFromAddress(apiNameOffset, entryData.apiNameAddr))
 		{
-			std::size_t apiNameOffset = entryData.apiNameAddr - baseAddress;
 			apiName = retdec::utils::readNullTerminatedAscii(allBytes.data(), allBytes.size(), apiNameOffset);
 		}
 
@@ -1003,16 +986,15 @@ bool PeFormat::parseVisualBasicExternTable(std::size_t structureOffset, std::siz
 /**
  * Parse visual basic object table
  * @param structureOffset Offset in file where the structure starts
- * @param baseAddress Base address
  * @return @c true if object table was successfuly parsed, @c false otherwise
  */
-bool PeFormat::parseVisualBasicObjectTable(std::size_t structureOffset, std::size_t baseAddress)
+bool PeFormat::parseVisualBasicObjectTable(std::size_t structureOffset)
 {
 	auto allBytes = getBytes();
 	std::vector<std::uint8_t> bytes;
 	std::size_t offset = 0;
-	std::size_t projectNameOffset = 0;
-	std::size_t objectDescriptorsOffset = 0;
+	unsigned long long projectNameOffset = 0;
+	unsigned long long objectDescriptorsOffset = 0;
 	struct VBObjectTable vbot;
 	std::string projName;
 
@@ -1069,17 +1051,15 @@ bool PeFormat::parseVisualBasicObjectTable(std::size_t structureOffset, std::siz
 	visualBasicInfo.setProjectSecondaryLCID(vbot.LCID2);
 	visualBasicInfo.setObjectTableGUID(vbot.objectGUID);
 
-	if (!visualBasicInfo.hasProjectName() && vbot.projectNameAddr >= baseAddress)
+	if (!visualBasicInfo.hasProjectName() && getOffsetFromAddress(projectNameOffset, vbot.projectNameAddr))
 	{
-		projectNameOffset = vbot.projectNameAddr - baseAddress;
 		projName = retdec::utils::readNullTerminatedAscii(allBytes.data(), allBytes.size(), projectNameOffset);
 		visualBasicInfo.setProjectName(projName);
 	}
 
-	if (vbot.objectDescriptorsAddr >= baseAddress)
+	if (getOffsetFromAddress(objectDescriptorsOffset, vbot.objectDescriptorsAddr))
 	{
-		objectDescriptorsOffset = vbot.objectDescriptorsAddr - baseAddress;
-		parseVisualBasicObjects(objectDescriptorsOffset, baseAddress, vbot.nObjects);
+		parseVisualBasicObjects(objectDescriptorsOffset, vbot.nObjects);
 	}
 
 	visualBasicInfo.computeObjectTableHashes();
@@ -1089,12 +1069,10 @@ bool PeFormat::parseVisualBasicObjectTable(std::size_t structureOffset, std::siz
 /**
  * Parse visual basic objects
  * @param structureOffset Offset in file where the public object descriptors array starts
- * @param baseAddress Base address
  * @param nObjects Number of objects in array
  * @return @c true if objects were successfuly parsed, @c false otherwise
  */
-bool PeFormat::parseVisualBasicObjects(std::size_t structureOffset, std::size_t baseAddress,
-										std::size_t nObjects)
+bool PeFormat::parseVisualBasicObjects(std::size_t structureOffset, std::size_t nObjects)
 {
 	auto allBytes = getBytes();
 	std::vector<std::uint8_t> bytes;
@@ -1140,20 +1118,19 @@ bool PeFormat::parseVisualBasicObjects(std::size_t structureOffset, std::size_t 
 			vbpod.null = byteSwap32(vbpod.null);
 		}
 
-		if (vbpod.objectNameAddr < baseAddress)		
+		unsigned long long objectNameOffset;
+		if (!getOffsetFromAddress(objectNameOffset, vbpod.objectNameAddr))
 		{
 			continue;
 		}
 
-
-		std::size_t objectNameOffset = vbpod.objectNameAddr - baseAddress;
 		std::string objectName = readNullTerminatedAscii(allBytes.data(), allBytes.size(), objectNameOffset);
 		object = std::make_unique<VisualBasicObject>();
 		object->setName(objectName);
 
-		if (vbpod.methodNamesAddr >= baseAddress)
+		unsigned long long methodAddrOffset;
+		if (getOffsetFromAddress(methodAddrOffset, vbpod.methodNamesAddr))
 		{
-			std::size_t methodAddrOffset = vbpod.methodNamesAddr - baseAddress;
 			for (std::size_t mIdx = 0; mIdx < vbpod.nMethods; mIdx++)
 			{
 				if (!getBytes(bytes, methodAddrOffset + mIdx * sizeof(std::uint32_t), sizeof(std::uint32_t))
@@ -1162,19 +1139,19 @@ bool PeFormat::parseVisualBasicObjects(std::size_t structureOffset, std::size_t 
 					break;
 				}
 
-				std::uint32_t methodNameAddr = *reinterpret_cast<std::uint32_t *>(bytes.data());
+				auto methodNameAddr = *reinterpret_cast<std::uint32_t *>(bytes.data());
 
 				if (!isLittleEndian())
 				{
 					methodNameAddr = byteSwap32(methodNameAddr);
 				}
 
-				if (methodNameAddr < baseAddress)
+				unsigned long long methodNameOffset;
+				if (!getOffsetFromAddress(methodNameOffset, methodNameAddr))
 				{
 					continue;
 				}
 
-				std::size_t methodNameOffset = methodNameAddr - baseAddress;
 				std::string methodName = readNullTerminatedAscii(allBytes.data(), allBytes.size(), methodNameOffset);
 				object->addMethod(methodName);
 			}

@@ -98,13 +98,11 @@ class PeFormat : public FileFormat
 		/// @}
 		/// @name Visual Basic methods
 		/// @{
-		bool parseVisualBasicProjectInfo(std::size_t structureOffset, std::size_t baseAddress);
-		bool parseVisualBasicExternTable(std::size_t structureOffset, std::size_t baseAddress,
-											std::size_t nEntries);
-		bool parseVisualBasicObjectTable(std::size_t structureOffset, std::size_t baseAddress);
-		bool parseVisualBasicObjects(std::size_t structureOffset, std::size_t baseAddress,
-										std::size_t nObjects);
-		bool parseVisualBasicComRegistrationData(std::size_t structureOffset, std::size_t baseAddress);
+		bool parseVisualBasicProjectInfo(std::size_t structureOffset);
+		bool parseVisualBasicExternTable(std::size_t structureOffset, std::size_t nEntries);
+		bool parseVisualBasicObjectTable(std::size_t structureOffset);
+		bool parseVisualBasicObjects(std::size_t structureOffset, std::size_t nObjects);
+		bool parseVisualBasicComRegistrationData(std::size_t structureOffset);
 		/// @}
 	protected:
 		PeLib::PeFile *file;              ///< PeLib representation of PE file
