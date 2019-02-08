@@ -253,6 +253,18 @@ TEST_F(LlvmItaniumDemanglerTests, GCCTestSuite){
 	DEM_EQ("_Z3fooI1FEN1XIXszdtcl1PclcvT__EEE5arrayEE4TypeEv", "X<sizeof (P((F)()()).array)>::Type foo<F>()");
 }
 
+TEST_F(LlvmItaniumDemanglerTests, BasicTests) {
+	DEM_EQ("_Z3fooPA3_dPKdd", "foo(double (*) [3], double const*, double)");
+	DEM_EQ("_Z3fooPFvPiE", "foo(void (*)(int*))");
+	DEM_EQ("_Z3fooPFvPiES1_", "foo(void (*)(int*), void (*)(int*))");
+	DEM_EQ("_Z3fooPFPFvPiEvE", "foo(void (* (*)())(int*))");
+	DEM_EQ("_Z3fooPiS_", "foo(int*, int*)");
+	DEM_EQ("_Z3fooPFvvES0_", "foo(void (*)(), void (*)())");
+	DEM_EQ("_Z3fooPKPFvvES2_", "foo(void (* const*)(), void (* const*)())");
+	DEM_EQ("_Z3fooPPFvvES1_", "foo(void (**)(), void (**)())");
+	DEM_EQ("_Z3fooPK1SS1_", "foo(S const*, S const*)");
+}
+
 } // namespace tests
 } // namespace demangler
 } // namespace retdec
