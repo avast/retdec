@@ -743,6 +743,32 @@ bool Capstone2LlvmIrTranslatorArm64_impl::isCondIns(cs_arm64 * i) {
 //
 
 /**
+ * ARM64_INS_ADC
+ */
+void Capstone2LlvmIrTranslatorArm64_impl::translateAdc(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb)
+{
+	EXPECT_IS_TERNARY(i, ai, irb);
+
+	std::tie(op1, op2) = loadOpBinaryOrTernaryOp1Op2(ai, irb);
+	op2 = irb.CreateZExtOrTrunc(op2, op1->getType());
+	auto* carry = loadRegister(ARM64_REG_CPSR_C, irb);
+
+	auto* val = irb.CreateAdd(op1, op2);
+	val       = irb.CreateAdd(val, irb.CreateZExtOrTrunc(carry, val->getType()));
+
+	storeOp(ai->operands[0], val, irb);
+
+	if (ai->update_flags)
+	{
+		llvm::Value* zero = llvm::ConstantInt::get(val->getType(), 0);
+		storeRegister(ARM64_REG_CPSR_C, generateCarryAddC(op1, op2, irb, carry), irb);
+		storeRegister(ARM64_REG_CPSR_V, generateOverflowAddC(val, op1, op2, irb, carry), irb);
+		storeRegister(ARM64_REG_CPSR_N, irb.CreateICmpSLT(val, zero), irb);
+		storeRegister(ARM64_REG_CPSR_Z, irb.CreateICmpEQ(val, zero), irb);
+	}
+}
+
+/**
  * ARM64_INS_ADD
  */
 void Capstone2LlvmIrTranslatorArm64_impl::translateAdd(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb)
@@ -750,11 +776,19 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateAdd(cs_insn* i, cs_arm64* ai,
 	EXPECT_IS_TERNARY(i, ai, irb);
 
 	std::tie(op1, op2) = loadOpBinaryOrTernaryOp1Op2(ai, irb);
-	// In case of 32bit reg, trunc the imm
 	op2 = irb.CreateZExtOrTrunc(op2, op1->getType());
 
 	auto *val = irb.CreateAdd(op1, op2);
 	storeOp(ai->operands[0], val, irb);
+
+	if (ai->update_flags)
+	{
+		llvm::Value* zero = llvm::ConstantInt::get(val->getType(), 0);
+		storeRegister(ARM64_REG_CPSR_C, generateCarryAdd(val, op1, irb), irb);
+		storeRegister(ARM64_REG_CPSR_V, generateOverflowAdd(val, op1, op2, irb), irb);
+		storeRegister(ARM64_REG_CPSR_N, irb.CreateICmpSLT(val, zero), irb);
+		storeRegister(ARM64_REG_CPSR_Z, irb.CreateICmpEQ(val, zero), irb);
+	}
 }
 
 /**
@@ -765,7 +799,6 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateSub(cs_insn* i, cs_arm64* ai,
 	EXPECT_IS_TERNARY(i, ai, irb);
 
 	std::tie(op1, op2) = loadOpBinaryOrTernaryOp1Op2(ai, irb);
-	// In case of 32bit reg, trunc the imm
 	op2 = irb.CreateZExtOrTrunc(op2, op1->getType());
 
 	auto *val = irb.CreateSub(op1, op2);

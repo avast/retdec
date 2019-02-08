@@ -242,7 +242,7 @@ Capstone2LlvmIrTranslatorArm64_impl::_i2fm =
 	{ARM_INS_INVALID, nullptr},
 
 	{ARM64_INS_ABS, nullptr},
-	{ARM64_INS_ADC, nullptr},
+	{ARM64_INS_ADC, &Capstone2LlvmIrTranslatorArm64_impl::translateAdc},
 	{ARM64_INS_ADDHN, nullptr},
 	{ARM64_INS_ADDHN2, nullptr},
 	{ARM64_INS_ADDP, nullptr},
