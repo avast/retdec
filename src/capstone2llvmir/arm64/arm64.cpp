@@ -1111,18 +1111,30 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateLdp(cs_insn* i, cs_arm64* ai,
 }
 
 /**
- * ARM64_INS_ADRP
+ * ARM64_INS_ADR, ARM64_INS_ADRP
  */
-void Capstone2LlvmIrTranslatorArm64_impl::translateAdrp(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb)
+void Capstone2LlvmIrTranslatorArm64_impl::translateAdr(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb)
 {
 	EXPECT_IS_BINARY(i, ai, irb);
 
 	auto* imm  = loadOpBinaryOp1(ai, irb);
-	auto* base = llvm::ConstantInt::get(getDefaultType(), (((i->address + i->size) >> 12) << 12));
 
+	// Eventhough the semantics for this instruction is
+	// base = PC[]
+	// X[t] = base + imm
+	// It looks like capstone is already doing this work for us and
+	// second operand has calculated value already
+	/*
+	auto* base = loadRegister(ARM64_REG_PC, irb);
+	// ADRP loads address to 4KB page
+	if (i->id == ARM64_INS_ADRP)
+	{
+		base = llvm::ConstantInt::get(getDefaultType(), (((i->address + i->size) >> 12) << 12));
+	}
 	auto* res  = irb.CreateAdd(base, imm);
+	*/
 
-	storeRegister(ai->operands[0].reg, res, irb);
+	storeRegister(ai->operands[0].reg, imm, irb);
 }
 
 /**

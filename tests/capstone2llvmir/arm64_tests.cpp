@@ -693,6 +693,37 @@ TEST_P(Capstone2LlvmIrTranslatorArm64Tests, ARM64_INS_ADD_s_overflow_r_r_r)
 	EXPECT_NO_VALUE_CALLED();
 }
 
+//
+// ARM64_INS_ADR
+//
+
+TEST_P(Capstone2LlvmIrTranslatorArm64Tests, ARM64_INS_ADR)
+{
+	emulate("test:; adr x0, test", 0x40578);
+
+	EXPECT_NO_REGISTERS_LOADED();
+	EXPECT_JUST_REGISTERS_STORED({
+		{ARM64_REG_X0, 0x40578},
+	    });
+	EXPECT_NO_MEMORY_LOADED_STORED();
+	EXPECT_NO_VALUE_CALLED();
+}
+
+//
+// ARM64_INS_ADRP
+//
+
+TEST_P(Capstone2LlvmIrTranslatorArm64Tests, ARM64_INS_ADRP)
+{
+	emulate("test:; adrp x0, test", 0x41578);
+
+	EXPECT_NO_REGISTERS_LOADED();
+	EXPECT_JUST_REGISTERS_STORED({
+		{ARM64_REG_X0, 0x82000},
+	    });
+	EXPECT_NO_MEMORY_LOADED_STORED();
+	EXPECT_NO_VALUE_CALLED();
+}
 
 //
 // ARM64_INS_SUB
