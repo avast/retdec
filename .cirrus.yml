@@ -12,7 +12,7 @@ task:
     - pkg upgrade -y
     - pkg install -y git cmake python37 bison autotools
   script:
-    - ln -s /usr/local/bin/python3.7 /usr/local/bin/python3
+    - [ ! -f /usr/local/bin/python3 ] && ln -s /usr/local/bin/python3.7 /usr/local/bin/python3
     - mkdir build
     - cd build
     - cmake .. -DCMAKE_INSTALL_PREFIX=/usr/local/bin
