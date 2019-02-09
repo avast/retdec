@@ -1178,6 +1178,21 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateShifts(cs_insn* i, cs_arm64* 
 			val = irb.CreateAShr(op1, op2);
 			break;
 		}
+		case ARM64_INS_LSL:
+		{
+			val = irb.CreateShl(op1, op2);
+			break;
+		}
+		case ARM64_INS_LSR:
+		{
+			val = irb.CreateLShr(op1, op2);
+			break;
+		}
+		case ARM64_INS_ROR:
+		{
+			val = generateShiftRor(irb, op1, op2);
+			break;
+		}
 		default:
 		{
 			throw GenericError("Shifts: unhandled insn ID");
