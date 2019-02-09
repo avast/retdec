@@ -769,19 +769,22 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateAdc(cs_insn* i, cs_arm64* ai,
 }
 
 /**
- * ARM64_INS_ADD
+ * ARM64_INS_ADD, ARM64_INS_CMN
  */
 void Capstone2LlvmIrTranslatorArm64_impl::translateAdd(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb)
 {
-	EXPECT_IS_TERNARY(i, ai, irb);
+	EXPECT_IS_BINARY_OR_TERNARY(i, ai, irb);
 
 	std::tie(op1, op2) = loadOpBinaryOrTernaryOp1Op2(ai, irb);
 	op2 = irb.CreateZExtOrTrunc(op2, op1->getType());
 
 	auto *val = irb.CreateAdd(op1, op2);
-	storeOp(ai->operands[0], val, irb);
+	if (i->id != ARM64_INS_CMN)
+	{
+		storeOp(ai->operands[0], val, irb);
+	}
 
-	if (ai->update_flags)
+	if (ai->update_flags || i->id == ARM64_INS_CMN)
 	{
 		llvm::Value* zero = llvm::ConstantInt::get(val->getType(), 0);
 		storeRegister(ARM64_REG_CPSR_C, generateCarryAdd(val, op1, irb), irb);
@@ -796,15 +799,18 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateAdd(cs_insn* i, cs_arm64* ai,
  */
 void Capstone2LlvmIrTranslatorArm64_impl::translateSub(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb)
 {
-	EXPECT_IS_TERNARY(i, ai, irb);
+	EXPECT_IS_BINARY_OR_TERNARY(i, ai, irb);
 
 	std::tie(op1, op2) = loadOpBinaryOrTernaryOp1Op2(ai, irb);
 	op2 = irb.CreateZExtOrTrunc(op2, op1->getType());
 
 	auto *val = irb.CreateSub(op1, op2);
-	storeOp(ai->operands[0], val, irb);
+	if (i->id != ARM64_INS_CMP)
+	{
+		storeOp(ai->operands[0], val, irb);
+	}
 
-	if (ai->update_flags)
+	if (ai->update_flags || i->id == ARM64_INS_CMP)
 	{
 		llvm::Value* zero = llvm::ConstantInt::get(val->getType(), 0);
 		storeRegister(ARM64_REG_CPSR_C, generateValueNegate(irb, generateBorrowSub(op1, op2, irb)), irb);
