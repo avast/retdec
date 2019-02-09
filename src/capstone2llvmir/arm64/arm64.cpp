@@ -1160,6 +1160,34 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateAnd(cs_insn* i, cs_arm64* ai,
 }
 
 /**
+ * ARM64_INS_ASR
+ */
+void Capstone2LlvmIrTranslatorArm64_impl::translateShifts(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb)
+{
+	EXPECT_IS_BINARY_OR_TERNARY(i, ai, irb);
+
+	std::tie(op1, op2) = loadOpBinaryOrTernaryOp1Op2(ai, irb);
+	op2 = irb.CreateZExtOrTrunc(op2, op1->getType());
+
+	llvm::Value* val = nullptr;
+	switch(i->id)
+	{
+		// TODO: Other shifts
+		case ARM64_INS_ASR:
+		{
+			val = irb.CreateAShr(op1, op2);
+			break;
+		}
+		default:
+		{
+			throw GenericError("Shifts: unhandled insn ID");
+		}
+	}
+
+	storeOp(ai->operands[0], val, irb);
+}
+
+/**
  * ARM64_INS_BR, ARM64_INS_BRL
  */
 void Capstone2LlvmIrTranslatorArm64_impl::translateBr(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb)
