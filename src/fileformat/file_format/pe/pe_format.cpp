@@ -828,10 +828,6 @@ bool PeFormat::parseVisualBasicComRegistrationData(std::size_t structureOffset)
 
 	visualBasicInfo.setTypeLibCLSID(vbcrd.projCLSID);
 
-	// TODO this line is added here just for convenient extraction of info offset
-	// for crawler tool and MUST BE DELETED WHEN DONE
-	visualBasicInfo.setTypeLibMinorVersion(vbcrd.regInfoOffset);
-
 	if (vbcrd.regInfoOffset != 0)
 	{
 		parseVisualBasicComRegistrationInfo(structureOffset + vbcrd.regInfoOffset, structureOffset);
@@ -897,7 +893,6 @@ bool PeFormat::parseVisualBasicComRegistrationInfo(std::size_t structureOffset,
 		vbcri.designerDataOffset = byteSwap32(vbcri.designerDataOffset);
 	}
 
-	// kubo TODO DELME
 	if (vbcri.objNameOffset != 0)
 	{
 		COMObjectName = retdec::utils::readNullTerminatedAscii(allBytes.data(), allBytes.size(),
@@ -925,18 +920,6 @@ bool PeFormat::parseVisualBasicComRegistrationInfo(std::size_t structureOffset,
 	{
 		visualBasicInfo.setCOMObjectEventsCLSID(bytes.data());
 	}
-
-	// if (DESIGNER)
-	// {
-	// 	TODO DESIGNER
-	// }
-
-	std::cerr << "name: " << COMObjectName << "\n";
-	std::cerr << "desc: " << COMObjectDesc << "\n";
-	std::cerr << "type: " << visualBasicInfo.getCOMObjectType() << "\n";
-	std::cerr << "objCLSID: " << visualBasicInfo.getCOMObjectCLSID() << "\n";
-	std::cerr << "ifCLSID: " << visualBasicInfo.getCOMObjectInterfaceCLSID() << "\n";
-	std::cerr << "evCLSID: " << visualBasicInfo.getCOMObjectEventsCLSID() << "\n";
 
 	return true;
 }

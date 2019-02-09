@@ -179,6 +179,12 @@ class FileInformation
 		std::string getVisualBasicTypeLibMajorVersionStr() const;
 		std::string getVisualBasicTypeLibMinorVersionStr() const;
 		std::string getVisualBasicTypeLibLCIDStr() const;
+		std::string getVisualBasicCOMObjectName() const;
+		std::string getVisualBasicCOMObjectDescription() const;
+		std::string getVisualBasicCOMObjectCLSID() const;
+		std::string getVisualBasicCOMObjectInterfaceCLSID() const;
+		std::string getVisualBasicCOMObjectEventsCLSID() const;
+		std::string getVisualBasicCOMObjectType() const;
 		std::string getVisualBasicExternTableHashCrc32() const;
 		std::string getVisualBasicExternTableHashMd5() const;
 		std::string getVisualBasicExternTableHashSha256() const;

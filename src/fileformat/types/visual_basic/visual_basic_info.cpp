@@ -20,10 +20,10 @@ namespace fileformat {
  * Constructor
  */
 VisualBasicInfo::VisualBasicInfo() : languageDLLPrimaryLCID(0), languageDLLSecondaryLCID(0),
-	projectPrimaryLCID(0), projectSecondaryLCID(0), typeLibLCID(0), typeLibMajorVersion(1),
+	projectPrimaryLCID(0), projectSecondaryLCID(0), typeLibLCID(0), typeLibMajorVersion(0),
 	typeLibMinorVersion(0), validLanguageDLLPrimaryLCID(false), validLanguageDLLSecondaryLCID(false),
 	validProjectPrimaryLCID(false), validProjectSecondaryLCID(false), validTypeLibLCID(false),
-	pcodeFlag(false)
+	validTypeLibMajorVersion(false), validTypeLibMinorVersion(false), pcodeFlag(false)
 {
 
 }
@@ -249,27 +249,39 @@ bool VisualBasicInfo::getTypeLibLCID(std::uint32_t &res) const
 
 /**
  * Get typeLib major version
- * @return TypeLib major version
+ * @param res Variable to store result to
+ * @return @c true if typeLib major version is valid, @c false otherwise
  */
-std::uint16_t VisualBasicInfo::getTypeLibMajorVersion() const
+bool VisualBasicInfo::getTypeLibMajorVersion(std::uint16_t &res) const
 {
-	return typeLibMajorVersion;
+	if (!validTypeLibMajorVersion)
+	{
+		return false;
+	}
+	res = typeLibMajorVersion;
+	return true;
 }
 
 /**
  * Get typeLib minor version
- * @return TypeLib minor version
+ * @param res Variable to store result to
+ * @return @c true if typeLib minor version is valid, @c false otherwise
  */
-std::uint16_t VisualBasicInfo::getTypeLibMinorVersion() const
+bool VisualBasicInfo::getTypeLibMinorVersion(std::uint16_t &res) const
 {
-	return typeLibMinorVersion;
+	if (!validTypeLibMinorVersion)
+	{
+		return false;
+	}
+	res = typeLibMinorVersion;
+	return true;
 }
 
 /**
  * Get COM object name
  * @return COM object name
  */
-const std::string &VisualBasicInfo::getCOMObjectName()
+const std::string &VisualBasicInfo::getCOMObjectName() const
 {
 	return COMObjectName;
 }
@@ -278,7 +290,7 @@ const std::string &VisualBasicInfo::getCOMObjectName()
  * Get COM object description
  * @return COM object description
  */
-const std::string &VisualBasicInfo::getCOMObjectDescription()
+const std::string &VisualBasicInfo::getCOMObjectDescription() const
 {
 	return COMObjectDescription;
 }
@@ -287,7 +299,7 @@ const std::string &VisualBasicInfo::getCOMObjectDescription()
  * Get COM object CLSID
  * @return COM object CLSID
  */
-const std::string &VisualBasicInfo::getCOMObjectCLSID()
+const std::string &VisualBasicInfo::getCOMObjectCLSID() const
 {
 	return COMObjectCLSID;
 }
@@ -296,7 +308,7 @@ const std::string &VisualBasicInfo::getCOMObjectCLSID()
  * Get COM object interface CLSID
  * @return COM object interface CLSID
  */
-const std::string &VisualBasicInfo::getCOMObjectInterfaceCLSID()
+const std::string &VisualBasicInfo::getCOMObjectInterfaceCLSID() const
 {
 	return COMObjectInterfaceCLSID;
 }
@@ -305,7 +317,7 @@ const std::string &VisualBasicInfo::getCOMObjectInterfaceCLSID()
  * Get COM object events CLSID
  * @return COM object events CLSID
  */
-const std::string &VisualBasicInfo::getCOMObjectEventsCLSID()
+const std::string &VisualBasicInfo::getCOMObjectEventsCLSID() const
 {
 	return COMObjectEventsCLSID;
 }
@@ -314,7 +326,7 @@ const std::string &VisualBasicInfo::getCOMObjectEventsCLSID()
  * Get COM object type
  * @return COM object type
  */
-const std::string &VisualBasicInfo::getCOMObjectType()
+const std::string &VisualBasicInfo::getCOMObjectType() const
 {
 	return COMObjectType;
 }
@@ -537,6 +549,7 @@ void VisualBasicInfo::setObjectTableGUID(const std::uint8_t data[16])
 void VisualBasicInfo::setTypeLibMajorVersion(std::uint16_t majVer)
 {
 	typeLibMajorVersion = majVer;
+	validTypeLibMajorVersion = true;
 }
 
 /**
@@ -546,6 +559,7 @@ void VisualBasicInfo::setTypeLibMajorVersion(std::uint16_t majVer)
 void VisualBasicInfo::setTypeLibMinorVersion(std::uint16_t minVer)
 {
 	typeLibMinorVersion = minVer;
+	validTypeLibMinorVersion = true;
 }
 
 /**
