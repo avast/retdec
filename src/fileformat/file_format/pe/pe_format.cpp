@@ -961,13 +961,13 @@ bool PeFormat::parseVisualBasicExternTable(std::size_t structureOffset, std::siz
 		}
 
 		unsigned long long moduleNameOffset;
-		if (!getOffsetFromAddress(moduleNameOffset, entryData.moduleNameAddr))
+		if (getOffsetFromAddress(moduleNameOffset, entryData.moduleNameAddr))
 		{
 			moduleName = retdec::utils::readNullTerminatedAscii(allBytes.data(), allBytes.size(), moduleNameOffset);
 		}
 
 		unsigned long long apiNameOffset;
-		if (!getOffsetFromAddress(apiNameOffset, entryData.apiNameAddr))
+		if (getOffsetFromAddress(apiNameOffset, entryData.apiNameAddr))
 		{
 			apiName = retdec::utils::readNullTerminatedAscii(allBytes.data(), allBytes.size(), apiNameOffset);
 		}
