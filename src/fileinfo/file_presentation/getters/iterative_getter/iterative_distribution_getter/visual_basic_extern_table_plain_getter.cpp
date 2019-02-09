@@ -49,7 +49,8 @@ VisualBasicExternTablePlainGetter::~VisualBasicExternTablePlainGetter()
 
 std::size_t VisualBasicExternTablePlainGetter::getBasicInfo(std::size_t structIndex, std::vector<std::string> &desc, std::vector<std::string> &info) const
 {
-	if(structIndex >= numberOfStructures || !fileinfo.isVisualBasicUsed())
+	if(structIndex >= numberOfStructures || !fileinfo.isVisualBasicUsed()
+		|| !fileinfo.getVisualBasicNumberOfExterns())
 	{
 		return 0;
 	}
