@@ -9,11 +9,11 @@ task:
       image: freebsd-11-2-release-amd64
   install_script:
     - sed -i.bak -e 's,pkg+[http://pkg.FreeBSD.org/\${ABI}/quarterly,pkg+http://pkg.FreeBSD.org/\${ABI}/latest](http://pkg.FreeBSD.org/%5C$%7BABI%7D/quarterly,pkg+http://pkg.FreeBSD.org/%5C$%7BABI%7D/latest),' /etc/pkg/FreeBSD.conf
-    - yes | pkg upgrade
-    - yes | pkg install git cmake python37 bison autotools
+    - pkg upgrade -y
+    - pkg install -y git cmake python37 bison autotools
   script:
     - mkdir build
     - cd build
     - cmake .. -DCMAKE_INSTALL_PREFIX=/usr/local/bin
-    - make -jN
+    - make
 
