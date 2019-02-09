@@ -49,6 +49,12 @@ class VisualBasicInfo
 		std::string getTypeLibMajorVersionStr() const;
 		std::string getTypeLibMinorVersionStr() const;
 		std::string getTypeLibLCIDStr() const;
+		std::string getCOMObjectName() const;
+		std::string getCOMObjectDescription() const;
+		std::string getCOMObjectCLSID() const;
+		std::string getCOMObjectInterfaceCLSID() const;
+		std::string getCOMObjectEventsCLSID() const;
+		std::string getCOMObjectType() const;
 		std::string getExternTableHashCrc32() const;
 		std::string getExternTableHashMd5() const;
 		std::string getExternTableHashSha256() const;

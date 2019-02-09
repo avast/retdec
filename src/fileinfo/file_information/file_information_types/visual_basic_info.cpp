@@ -230,7 +230,12 @@ std::string VisualBasicInfo::getTypeLibCLSID() const
  */
 std::string VisualBasicInfo::getTypeLibMajorVersionStr() const
 {
-	return visualBasicInfo ? getNumberAsString(visualBasicInfo->getTypeLibMajorVersion()) : "";
+	std::uint16_t majV;
+	if (!visualBasicInfo || !visualBasicInfo->getTypeLibMajorVersion(majV))
+	{
+		return "";
+	}
+	return getNumberAsString(majV);
 }
 
 /**
@@ -239,7 +244,12 @@ std::string VisualBasicInfo::getTypeLibMajorVersionStr() const
  */
 std::string VisualBasicInfo::getTypeLibMinorVersionStr() const
 {
-	return visualBasicInfo ? getNumberAsString(visualBasicInfo->getTypeLibMinorVersion()) : "";
+	std::uint16_t minV;
+	if (!visualBasicInfo || !visualBasicInfo->getTypeLibMinorVersion(minV))
+	{
+		return "";
+	}
+	return getNumberAsString(minV);
 }
 
 /**
@@ -254,6 +264,60 @@ std::string VisualBasicInfo::getTypeLibLCIDStr() const
 		return "";
 	}
 	return getNumberAsString(lcid);
+}
+
+/**
+ * Get COM object name
+ * @return Visual basic COM object name
+ */
+std::string VisualBasicInfo::getCOMObjectName() const
+{
+	return visualBasicInfo ? visualBasicInfo->getCOMObjectName() : "";
+}
+
+/**
+ * Get COM object description
+ * @return Visual basic COM object description
+ */
+std::string VisualBasicInfo::getCOMObjectDescription() const
+{
+	return visualBasicInfo ? visualBasicInfo->getCOMObjectDescription() : "";
+}
+
+/**
+ * Get COM object CLSID
+ * @return Visual basic COM object CLSID
+ */
+std::string VisualBasicInfo::getCOMObjectCLSID() const
+{
+	return visualBasicInfo ? visualBasicInfo->getCOMObjectCLSID() : "";
+}
+
+/**
+ * Get COM object interface CLSID
+ * @return Visual basic COM object interface CLSID
+ */
+std::string VisualBasicInfo::getCOMObjectInterfaceCLSID() const
+{
+	return visualBasicInfo ? visualBasicInfo->getCOMObjectInterfaceCLSID() : "";
+}
+
+/**
+ * Get COM object events CLSID
+ * @return Visual basic COM object events CLSID
+ */
+std::string VisualBasicInfo::getCOMObjectEventsCLSID() const
+{
+	return visualBasicInfo ? visualBasicInfo->getCOMObjectEventsCLSID() : "";
+}
+
+/**
+ * Get COM object type
+ * @return Visual basic COM object type
+ */
+std::string VisualBasicInfo::getCOMObjectType() const
+{
+	return visualBasicInfo ? visualBasicInfo->getCOMObjectType() : "";
 }
 
 /**

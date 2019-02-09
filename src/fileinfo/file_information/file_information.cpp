@@ -1006,6 +1006,60 @@ std::string FileInformation::getVisualBasicTypeLibLCIDStr() const
 }
 
 /**
+ * Get visual basic COM object name
+ * @return Visual basic COM object name
+ */
+std::string FileInformation::getVisualBasicCOMObjectName() const
+{
+	return visualBasicInfo.getCOMObjectName();
+}
+
+/**
+ * Get visual basic COM object description
+ * @return Visual basic COM object description
+ */
+std::string FileInformation::getVisualBasicCOMObjectDescription() const
+{
+	return visualBasicInfo.getCOMObjectDescription();
+}
+
+/**
+ * Get visual basic COM object CLSID
+ * @return Visual basic COM object CLSID
+ */
+std::string FileInformation::getVisualBasicCOMObjectCLSID() const
+{
+	return visualBasicInfo.getCOMObjectCLSID();
+}
+
+/**
+ * Get visual basic COM object interface CLSID
+ * @return Visual basic COM object interface CLSID
+ */
+std::string FileInformation::getVisualBasicCOMObjectInterfaceCLSID() const
+{
+	return visualBasicInfo.getCOMObjectInterfaceCLSID();
+}
+
+/**
+ * Get visual basic COM object events CLSID
+ * @return Visual basic COM object events CLSID
+ */
+std::string FileInformation::getVisualBasicCOMObjectEventsCLSID() const
+{
+	return visualBasicInfo.getCOMObjectEventsCLSID();
+}
+
+/**
+ * Get visual basic COM object type
+ * @return Visual basic COM object type
+ */
+std::string FileInformation::getVisualBasicCOMObjectType() const
+{
+	return visualBasicInfo.getCOMObjectType();
+}
+
+/**
  * Get visual basic extern table hash as Crc32
  * @return Visual basic extern table hash
  */

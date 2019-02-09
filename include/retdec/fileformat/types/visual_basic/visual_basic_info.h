@@ -72,6 +72,8 @@ class VisualBasicInfo
 		bool validProjectPrimaryLCID;
 		bool validProjectSecondaryLCID;
 		bool validTypeLibLCID;
+		bool validTypeLibMajorVersion;
+		bool validTypeLibMinorVersion;
 		bool pcodeFlag;
 
 		std::string guidToStr(const std::uint8_t data[16]);
@@ -102,14 +104,14 @@ class VisualBasicInfo
 		const std::string &getObjectTableGUID() const;
 		const std::string &getTypeLibCLSID() const;
 		bool getTypeLibLCID(std::uint32_t &res) const;
-		std::uint16_t getTypeLibMajorVersion() const;
-		std::uint16_t getTypeLibMinorVersion() const;
-		const std::string &getCOMObjectName();
-		const std::string &getCOMObjectDescription();
-		const std::string &getCOMObjectCLSID();
-		const std::string &getCOMObjectInterfaceCLSID();
-		const std::string &getCOMObjectEventsCLSID();
-		const std::string &getCOMObjectType();
+		bool getTypeLibMajorVersion(std::uint16_t &res) const;
+		bool getTypeLibMinorVersion(std::uint16_t &res) const;
+		const std::string &getCOMObjectName() const;
+		const std::string &getCOMObjectDescription() const;
+		const std::string &getCOMObjectCLSID() const;
+		const std::string &getCOMObjectInterfaceCLSID() const;
+		const std::string &getCOMObjectEventsCLSID() const;
+		const std::string &getCOMObjectType() const;
 		const std::string &getExternTableHashCrc32() const;
 		const std::string &getExternTableHashMd5() const;
 		const std::string &getExternTableHashSha256() const;
