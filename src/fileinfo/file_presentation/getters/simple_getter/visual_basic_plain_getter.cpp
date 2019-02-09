@@ -77,7 +77,6 @@ std::size_t VisualBasicPlainGetter::loadInformation(std::vector<std::string> &de
 	info.push_back(replaceNonprintableChars(fileinfo.getVisualBasicTypeLibMajorVersionStr()));
 	info.push_back(replaceNonprintableChars(fileinfo.getVisualBasicTypeLibMinorVersionStr()));
 	info.push_back(replaceNonprintableChars(fileinfo.getVisualBasicTypeLibLCIDStr()));
-
 	info.push_back(replaceNonprintableChars(fileinfo.getVisualBasicCOMObjectName()));
 	info.push_back(replaceNonprintableChars(fileinfo.getVisualBasicCOMObjectDescription()));
 	info.push_back(fileinfo.getVisualBasicCOMObjectCLSID());

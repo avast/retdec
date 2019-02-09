@@ -54,6 +54,12 @@ std::size_t VisualBasicJsonGetter::loadInformation(std::vector<std::string> &des
 	desc.push_back("typeLibMajorVersion");
 	desc.push_back("typeLibMinorVersion");
 	desc.push_back("typeLibLCID");
+	desc.push_back("comObjectName");
+	desc.push_back("comObjectDescription");
+	desc.push_back("comObjectCLSID");
+	desc.push_back("comObjectInterfaceCLSID");
+	desc.push_back("comObjectEventsCLSID");
+	desc.push_back("comObjectType");
 	desc.push_back("isPCode");
 
 	info.push_back(replaceNonprintableChars(fileinfo.getVisualBasicProjectName()));
@@ -71,6 +77,12 @@ std::size_t VisualBasicJsonGetter::loadInformation(std::vector<std::string> &des
 	info.push_back(replaceNonprintableChars(fileinfo.getVisualBasicTypeLibMajorVersionStr()));
 	info.push_back(replaceNonprintableChars(fileinfo.getVisualBasicTypeLibMinorVersionStr()));
 	info.push_back(replaceNonprintableChars(fileinfo.getVisualBasicTypeLibLCIDStr()));
+	info.push_back(replaceNonprintableChars(fileinfo.getVisualBasicCOMObjectName()));
+	info.push_back(replaceNonprintableChars(fileinfo.getVisualBasicCOMObjectDescription()));
+	info.push_back(fileinfo.getVisualBasicCOMObjectCLSID());
+	info.push_back(fileinfo.getVisualBasicCOMObjectInterfaceCLSID());
+	info.push_back(fileinfo.getVisualBasicCOMObjectEventsCLSID());
+	info.push_back(fileinfo.getVisualBasicCOMObjectType());
 	info.push_back((fileinfo.getVisualBasicIsPcode()) ? "yes" : "no");
 
 	return info.size();
