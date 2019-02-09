@@ -103,6 +103,8 @@ class PeFormat : public FileFormat
 		bool parseVisualBasicObjectTable(std::size_t structureOffset);
 		bool parseVisualBasicObjects(std::size_t structureOffset, std::size_t nObjects);
 		bool parseVisualBasicComRegistrationData(std::size_t structureOffset);
+		bool parseVisualBasicComRegistrationInfo(std::size_t structureOffset,
+												std::size_t comRegDataOffset);
 		/// @}
 	protected:
 		PeLib::PeFile *file;              ///< PeLib representation of PE file

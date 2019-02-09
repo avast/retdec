@@ -265,6 +265,59 @@ std::uint16_t VisualBasicInfo::getTypeLibMinorVersion() const
 	return typeLibMinorVersion;
 }
 
+/**
+ * Get COM object name
+ * @return COM object name
+ */
+const std::string &VisualBasicInfo::getCOMObjectName()
+{
+	return COMObjectName;
+}
+
+/**
+ * Get COM object description
+ * @return COM object description
+ */
+const std::string &VisualBasicInfo::getCOMObjectDescription()
+{
+	return COMObjectDescription;
+}
+
+/**
+ * Get COM object CLSID
+ * @return COM object CLSID
+ */
+const std::string &VisualBasicInfo::getCOMObjectCLSID()
+{
+	return COMObjectCLSID;
+}
+
+/**
+ * Get COM object interface CLSID
+ * @return COM object interface CLSID
+ */
+const std::string &VisualBasicInfo::getCOMObjectInterfaceCLSID()
+{
+	return COMObjectInterfaceCLSID;
+}
+
+/**
+ * Get COM object events CLSID
+ * @return COM object events CLSID
+ */
+const std::string &VisualBasicInfo::getCOMObjectEventsCLSID()
+{
+	return COMObjectEventsCLSID;
+}
+
+/**
+ * Get COM object type
+ * @return COM object type
+ */
+const std::string &VisualBasicInfo::getCOMObjectType()
+{
+	return COMObjectType;
+}
 
 /**
  * Get extern table hash as CRC32
@@ -400,7 +453,7 @@ void VisualBasicInfo::setLanguageDLLSecondaryLCID(std::uint32_t lDLLSecLCID)
  */
 void VisualBasicInfo::setProjectPath(const std::string &path)
 {
-	const std::string prefix = "*\\\\A";
+	const std::string prefix = "*\\A";
 
 	if (prefix.size() > path.size())
 	{
@@ -495,6 +548,66 @@ void VisualBasicInfo::setTypeLibMinorVersion(std::uint16_t minVer)
 	typeLibMinorVersion = minVer;
 }
 
+/**
+ * Set COM object name
+ * @param name COM object name to set
+ */
+void VisualBasicInfo::setCOMObjectName(const std::string &name)
+{
+	COMObjectName = name;
+}
+
+/**
+ * Set COM object description
+ * @param description COM object description to set
+ */
+void VisualBasicInfo::setCOMObjectDescription(const std::string &description)
+{
+	COMObjectDescription = description;
+}
+
+/**
+ * Set COM object CLSID
+ * @param data Raw CLSID data
+ */
+void VisualBasicInfo::setCOMObjectCLSID(const std::uint8_t data[16])
+{
+	COMObjectCLSID = guidToStr(data);
+}
+
+/**
+ * Set COM object interfaceCLSID
+ * @param data Raw CLSID data
+ */
+void VisualBasicInfo::setCOMObjectInterfaceCLSID(const std::uint8_t data[16])
+{
+	COMObjectInterfaceCLSID = guidToStr(data);
+}
+
+/**
+ * Set COM object eventsCLSID
+ * @param data Raw CLSID data
+ */
+void VisualBasicInfo::setCOMObjectEventsCLSID(const std::uint8_t data[16])
+{
+	COMObjectEventsCLSID = guidToStr(data);
+}
+
+/**
+ * Set COM object type
+ * @param type COM object type to set
+ */
+void VisualBasicInfo::setCOMObjectType(std::uint8_t type)
+{
+	switch (type)
+	{
+		case 0x2: COMObjectType = "Designer"; break;
+		case 0x10: COMObjectType = "ClassModule"; break;
+		case 0x20: COMObjectType = "ActiveXUserControl"; break;
+		case 0x80: COMObjectType = "UserDocument"; break;
+		default: COMObjectType = "unknown"; break;
+	}
+}
 
 /**
  * Add visual basic object
