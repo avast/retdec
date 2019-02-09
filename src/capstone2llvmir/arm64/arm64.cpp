@@ -198,7 +198,7 @@ llvm::Value* Capstone2LlvmIrTranslatorArm64_impl::generateOperandExtension(
 			return irb.CreateSExt(trunc, ty);
 		}
 		default:
-		    assert(false && "generateOperandExtension(): Unsupported extension type");
+			throw GenericError("Arm64: generateOperandExtension(): Unsupported extension type");
 	}
 	return val;
 }
@@ -499,7 +499,7 @@ llvm::Value* Capstone2LlvmIrTranslatorArm64_impl::loadOp(
 		case ARM64_OP_BARRIER: 
 		default:
 		{
-			assert(false && "loadOp(): unhandled operand type.");
+			throw GenericError("Arm64: loadOp(): unhandled operand type");
 			return nullptr;
 		}
 	}
@@ -599,7 +599,7 @@ llvm::Instruction* Capstone2LlvmIrTranslatorArm64_impl::storeOp(
 		case ARM64_OP_BARRIER: 
 		default:
 		{
-			assert(false && "stroreOp(): unhandled operand type.");
+			throw GenericError("storeOp(): unhandled operand type");
 			return nullptr;
 		}
 	}
@@ -803,6 +803,41 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateSub(cs_insn* i, cs_arm64* ai,
 
 	auto *val = irb.CreateSub(op1, op2);
 	storeOp(ai->operands[0], val, irb);
+
+	if (ai->update_flags)
+	{
+		llvm::Value* zero = llvm::ConstantInt::get(val->getType(), 0);
+		storeRegister(ARM64_REG_CPSR_C, generateValueNegate(irb, generateBorrowSub(op1, op2, irb)), irb);
+		storeRegister(ARM64_REG_CPSR_V, generateOverflowSub(val, op1, op2, irb), irb);
+		storeRegister(ARM64_REG_CPSR_N, irb.CreateICmpSLT(val, zero), irb);
+		storeRegister(ARM64_REG_CPSR_Z, irb.CreateICmpEQ(val, zero), irb);
+	}
+}
+
+/**
+ * ARM64_INS_SBC
+ */
+void Capstone2LlvmIrTranslatorArm64_impl::translateSbc(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb)
+{
+	EXPECT_IS_TERNARY(i, ai, irb);
+
+	std::tie(op1, op2) = loadOpBinaryOrTernaryOp1Op2(ai, irb);
+	op2 = irb.CreateZExtOrTrunc(op2, op1->getType());
+	auto* carry = loadRegister(ARM64_REG_CPSR_C, irb);
+
+	auto* val = irb.CreateSub(op1, op2);
+	val       = irb.CreateSub(val, irb.CreateZExtOrTrunc(carry, val->getType()));
+
+	storeOp(ai->operands[0], val, irb);
+
+	if (ai->update_flags)
+	{
+		llvm::Value* zero = llvm::ConstantInt::get(val->getType(), 0);
+		storeRegister(ARM64_REG_CPSR_C, generateValueNegate(irb, generateBorrowSubC(val, op1, op2, irb, carry)), irb);
+		storeRegister(ARM64_REG_CPSR_V, generateOverflowSubC(val, op1, op2, irb, carry), irb);
+		storeRegister(ARM64_REG_CPSR_N, irb.CreateICmpSLT(val, zero), irb);
+		storeRegister(ARM64_REG_CPSR_Z, irb.CreateICmpEQ(val, zero), irb);
+	}
 }
 
 /**
@@ -818,10 +853,6 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateMov(cs_insn* i, cs_arm64* ai,
 		op1 = generateValueNegate(irb, op1);
 	}
 
-	// If S is specified, the MOV instruction:
-	// - updates the N and Z flags according to the result
-	// - can update the C flag during the calculation of Operand2 (shifts?)
-	// - does not affect the V flag.
 	if (ai->update_flags)
 	{
 		llvm::Value* zero = llvm::ConstantInt::get(op1->getType(), 0);
@@ -885,7 +916,7 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateStr(cs_insn* i, cs_arm64* ai,
 	}
 	else
 	{
-		assert(false && "unsupported STR format");
+		throw GenericError("STR: unsupported STR format");
 	}
 
 	if (ai->writeback && baseR != ARM64_REG_INVALID)
@@ -934,7 +965,7 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateStp(cs_insn* i, cs_arm64* ai,
 	}
 	else
 	{
-		assert(false && "unsupported STP format");
+		throw GenericError("STR: unsupported STP format");
 	}
 
 	if (ai->writeback && baseR != ARM64_REG_INVALID)
