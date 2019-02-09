@@ -1119,7 +1119,7 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateAdr(cs_insn* i, cs_arm64* ai,
 
 	auto* imm  = loadOpBinaryOp1(ai, irb);
 
-	// Eventhough the semantics for this instruction is
+	// Even though the semantics for this instruction is
 	// base = PC[]
 	// X[t] = base + imm
 	// It looks like capstone is already doing this work for us and
@@ -1135,6 +1135,28 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateAdr(cs_insn* i, cs_arm64* ai,
 	*/
 
 	storeRegister(ai->operands[0].reg, imm, irb);
+}
+
+/**
+ * ARM64_INS_AND
+ */
+void Capstone2LlvmIrTranslatorArm64_impl::translateAnd(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb)
+{
+	EXPECT_IS_BINARY_OR_TERNARY(i, ai, irb);
+
+	std::tie(op1, op2) = loadOpBinaryOrTernaryOp1Op2(ai, irb);
+	op2 = irb.CreateZExtOrTrunc(op2, op1->getType());
+
+	auto* val = irb.CreateAnd(op1, op2);
+
+	storeOp(ai->operands[0], val, irb);
+
+	if (ai->update_flags)
+	{
+		llvm::Value* zero = llvm::ConstantInt::get(val->getType(), 0);
+		storeRegister(ARM64_REG_CPSR_N, irb.CreateICmpSLT(val, zero), irb);
+		storeRegister(ARM64_REG_CPSR_Z, irb.CreateICmpEQ(val, zero), irb);
+	}
 }
 
 /**

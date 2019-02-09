@@ -726,6 +726,97 @@ TEST_P(Capstone2LlvmIrTranslatorArm64Tests, ARM64_INS_ADRP)
 }
 
 //
+// ARM64_INS_AND
+//
+
+TEST_P(Capstone2LlvmIrTranslatorArm64Tests, ARM64_INS_AND_r_r_i)
+{
+	setRegisters({
+		{ARM64_REG_X1, 0x1234567890abcdef},
+	});
+
+	emulate("and x0, x1, #0xf0");
+
+	EXPECT_JUST_REGISTERS_LOADED({ARM64_REG_X1});
+	EXPECT_JUST_REGISTERS_STORED({
+		{ARM64_REG_X0, 0x00000000000000e0},
+	});
+	EXPECT_NO_MEMORY_LOADED_STORED();
+	EXPECT_NO_VALUE_CALLED();
+}
+
+TEST_P(Capstone2LlvmIrTranslatorArm64Tests, ARM64_INS_AND_r_r_r)
+{
+	setRegisters({
+		{ARM64_REG_X1, 0x1234567890abcdef},
+		{ARM64_REG_X2, 0xff00ff00ff00ff00},
+	});
+
+	emulate("and x0, x1, x2");
+
+	EXPECT_JUST_REGISTERS_LOADED({ARM64_REG_X1, ARM64_REG_X2});
+	EXPECT_JUST_REGISTERS_STORED({
+		{ARM64_REG_X0, 0x120056009000cd00},
+	});
+	EXPECT_NO_MEMORY_LOADED_STORED();
+	EXPECT_NO_VALUE_CALLED();
+}
+
+TEST_P(Capstone2LlvmIrTranslatorArm64Tests, ARM64_INS_AND32_r_r_i)
+{
+	setRegisters({
+		{ARM64_REG_X1, 0x1234567890abcdef},
+	});
+
+	emulate("and w0, w1, #0x0f");
+
+	EXPECT_JUST_REGISTERS_LOADED({ARM64_REG_X1});
+	EXPECT_JUST_REGISTERS_STORED({
+		{ARM64_REG_X0, 0x000000000000000f},
+	});
+	EXPECT_NO_MEMORY_LOADED_STORED();
+	EXPECT_NO_VALUE_CALLED();
+}
+
+TEST_P(Capstone2LlvmIrTranslatorArm64Tests, ARM64_INS_AND_s_zero_r_r_r)
+{
+	setRegisters({
+		{ARM64_REG_X1, 0x12345678},
+		{ARM64_REG_X2, 0x0},
+	});
+
+	emulate("ands x0, x1, x2");
+
+	EXPECT_JUST_REGISTERS_LOADED({ARM64_REG_X1, ARM64_REG_X2});
+	EXPECT_JUST_REGISTERS_STORED({
+		{ARM64_REG_X0, 0x0},
+		{ARM64_REG_CPSR_N, false},
+		{ARM64_REG_CPSR_Z, true},
+	});
+	EXPECT_NO_MEMORY_LOADED_STORED();
+	EXPECT_NO_VALUE_CALLED();
+}
+
+TEST_P(Capstone2LlvmIrTranslatorArm64Tests, ARM64_INS_AND32_s_negative_r_r_r)
+{
+	setRegisters({
+		{ARM64_REG_X1, 0x1234567880abcdef},
+		{ARM64_REG_X2, 0xf0000000},
+	});
+
+	emulate("ands w0, w1, w2");
+
+	EXPECT_JUST_REGISTERS_LOADED({ARM64_REG_X1, ARM64_REG_X2});
+	EXPECT_JUST_REGISTERS_STORED({
+		{ARM64_REG_X0, 0x80000000},
+		{ARM64_REG_CPSR_N, true},
+		{ARM64_REG_CPSR_Z, false},
+	});
+	EXPECT_NO_MEMORY_LOADED_STORED();
+	EXPECT_NO_VALUE_CALLED();
+}
+
+//
 // ARM64_INS_SUB
 //
 
