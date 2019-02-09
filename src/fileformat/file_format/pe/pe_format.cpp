@@ -768,7 +768,7 @@ void PeFormat::loadVisualBasicHeader()
 /**
  * Parse visual basic COM registration data
  * @param structureOffset Offset in file where the structure starts
- * @return @c true if COM retistration data was successfuly parsed, @c false otherwise
+ * @return @c true if COM registration data was successfuly parsed, @c false otherwise
  */
 bool PeFormat::parseVisualBasicComRegistrationData(std::size_t structureOffset)
 {
@@ -807,20 +807,20 @@ bool PeFormat::parseVisualBasicComRegistrationData(std::size_t structureOffset)
 		vbcrd.tlbVerMinor = byteSwap32(vbcrd.tlbVerMinor);
 	}
 
-	visualBasicInfo.setTypeLibLCID(vbcrd.projDescOffset);
+	visualBasicInfo.setTypeLibLCID(vbcrd.projTlbLCID);
 	visualBasicInfo.setTypeLibMajorVersion(vbcrd.tlbVerMajor);
 	visualBasicInfo.setTypeLibMinorVersion(vbcrd.tlbVerMinor);
-	if (!visualBasicInfo.hasProjectName())
+	if (!visualBasicInfo.hasProjectName() && vbcrd.projNameOffset != 0)
 	{
 		projName = retdec::utils::readNullTerminatedAscii(allBytes.data(), allBytes.size(),
 															structureOffset + vbcrd.projNameOffset);
 	}
-	if (!visualBasicInfo.hasProjectHelpFile())
+	if (!visualBasicInfo.hasProjectHelpFile() && vbcrd.helpFileOffset != 0)
 	{
 		helpFile = retdec::utils::readNullTerminatedAscii(allBytes.data(), allBytes.size(),
 															structureOffset + vbcrd.helpFileOffset);
 	}
-	if (!visualBasicInfo.hasProjectDescription())
+	if (!visualBasicInfo.hasProjectDescription() && vbcrd.projDescOffset != 0)
 	{
 		projDesc = retdec::utils::readNullTerminatedAscii(allBytes.data(), allBytes.size(),
 															structureOffset + vbcrd.projDescOffset);
@@ -831,6 +831,113 @@ bool PeFormat::parseVisualBasicComRegistrationData(std::size_t structureOffset)
 	// TODO this line is added here just for convenient extraction of info offset
 	// for crawler tool and MUST BE DELETED WHEN DONE
 	visualBasicInfo.setTypeLibMinorVersion(vbcrd.regInfoOffset);
+
+	if (vbcrd.regInfoOffset != 0)
+	{
+		parseVisualBasicComRegistrationInfo(structureOffset + vbcrd.regInfoOffset, structureOffset);
+	}
+
+	return true;
+}
+
+/**
+ * Parse visual basic COM registration info
+ * @param structureOffset Offset in file where the structure starts
+ * @param comRegDataOffset Offset in file where the com registration data structure starts
+ * @return @c true if COM registration info was successfuly parsed, @c false otherwise
+ */
+bool PeFormat::parseVisualBasicComRegistrationInfo(std::size_t structureOffset,
+													std::size_t comRegDataOffset)
+{
+	auto allBytes = getBytes();
+	std::vector<std::uint8_t> bytes;
+	std::size_t offset = 0;
+	struct VBCOMRInfo vbcri;
+	std::string COMObjectName;
+	std::string COMObjectDesc;
+
+	if (!getBytes(bytes, structureOffset, vbcri.structureSize()) || bytes.size() != vbcri.structureSize())
+	{
+		return false;
+	}
+
+	vbcri.ifInfoOffset = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbcri.ifInfoOffset);
+	vbcri.objNameOffset = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbcri.objNameOffset);
+	vbcri.objDescOffset = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbcri.objDescOffset);
+	vbcri.instancing = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbcri.instancing);
+	vbcri.objID = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbcri.objID);
+	std::memcpy(&vbcri.objCLSID, reinterpret_cast<void *>(&bytes.data()[offset]), sizeof(vbcri.objCLSID)); offset += sizeof(vbcri.objCLSID);
+	vbcri.isInterfaceFlag = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbcri.isInterfaceFlag);
+	vbcri.ifCLSIDOffset = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbcri.ifCLSIDOffset);
+	vbcri.eventCLSIDOffset = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbcri.eventCLSIDOffset);
+	vbcri.hasEvents = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbcri.hasEvents);
+	vbcri.olemicsFlags = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbcri.olemicsFlags);
+	vbcri.classType = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbcri.classType);
+	vbcri.objectType = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbcri.objectType);
+	vbcri.toolboxBitmap32 = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbcri.toolboxBitmap32);
+	vbcri.defaultIcon = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbcri.defaultIcon);
+	vbcri.isDesignerFlag = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbcri.isDesignerFlag);
+	vbcri.designerDataOffset = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbcri.designerDataOffset);
+
+	if (!isLittleEndian())
+	{
+		vbcri.ifInfoOffset = byteSwap32(vbcri.ifInfoOffset);
+		vbcri.objNameOffset = byteSwap32(vbcri.objNameOffset);
+		vbcri.objDescOffset = byteSwap32(vbcri.objDescOffset);
+		vbcri.instancing = byteSwap32(vbcri.instancing);
+		vbcri.objID = byteSwap32(vbcri.objID);
+		vbcri.isInterfaceFlag = byteSwap32(vbcri.isInterfaceFlag);
+		vbcri.ifCLSIDOffset = byteSwap32(vbcri.ifCLSIDOffset);
+		vbcri.eventCLSIDOffset = byteSwap32(vbcri.eventCLSIDOffset);
+		vbcri.hasEvents = byteSwap32(vbcri.hasEvents);
+		vbcri.olemicsFlags = byteSwap32(vbcri.olemicsFlags);
+		vbcri.toolboxBitmap32 = byteSwap16(vbcri.toolboxBitmap32);
+		vbcri.defaultIcon = byteSwap16(vbcri.defaultIcon);
+		vbcri.isDesignerFlag = byteSwap16(vbcri.isDesignerFlag);
+		vbcri.designerDataOffset = byteSwap32(vbcri.designerDataOffset);
+	}
+
+	// kubo TODO DELME
+	if (vbcri.objNameOffset != 0)
+	{
+		COMObjectName = retdec::utils::readNullTerminatedAscii(allBytes.data(), allBytes.size(),
+												comRegDataOffset + vbcri.objNameOffset);
+		visualBasicInfo.setCOMObjectName(COMObjectName);
+	}
+	if (vbcri.objDescOffset != 0)
+	{
+		COMObjectDesc = retdec::utils::readNullTerminatedAscii(allBytes.data(), allBytes.size(),
+												comRegDataOffset + vbcri.objDescOffset);
+		visualBasicInfo.setCOMObjectDescription(COMObjectDesc);
+	}
+	
+	visualBasicInfo.setCOMObjectCLSID(vbcri.objCLSID);
+	visualBasicInfo.setCOMObjectType(vbcri.objectType);
+
+	if (vbcri.isInterfaceFlag != 0 && vbcri.ifCLSIDOffset != 0 &&
+		getBytes(bytes, comRegDataOffset + vbcri.ifCLSIDOffset, 16) && bytes.size() == 16)
+	{
+		visualBasicInfo.setCOMObjectInterfaceCLSID(bytes.data());
+	}
+
+	if (vbcri.hasEvents != 0 && vbcri.eventCLSIDOffset != 0 &&
+		getBytes(bytes, comRegDataOffset + vbcri.eventCLSIDOffset, 16) && bytes.size() == 16)
+	{
+		visualBasicInfo.setCOMObjectEventsCLSID(bytes.data());
+	}
+
+	// if (DESIGNER)
+	// {
+	// 	TODO DESIGNER
+	// }
+
+	std::cerr << "name: " << COMObjectName << "\n";
+	std::cerr << "desc: " << COMObjectDesc << "\n";
+	std::cerr << "type: " << visualBasicInfo.getCOMObjectType() << "\n";
+	std::cerr << "objCLSID: " << visualBasicInfo.getCOMObjectCLSID() << "\n";
+	std::cerr << "ifCLSID: " << visualBasicInfo.getCOMObjectInterfaceCLSID() << "\n";
+	std::cerr << "evCLSID: " << visualBasicInfo.getCOMObjectEventsCLSID() << "\n";
+
 	return true;
 }
 

@@ -360,6 +360,64 @@ struct VBCOMRData
 	}
 };
 
+struct VBCOMRInfo
+{
+	std::uint32_t ifInfoOffset;              ///< Offset to COM Interface Info
+	std::uint32_t objNameOffset;             ///< Offset to object name
+	std::uint32_t objDescOffset;             ///< Offset to object description
+	std::uint32_t instancing;                ///< Instancing mode
+	std::uint32_t objID;                     ///< Object ID within project
+	std::uint8_t objCLSID[16];               ///< Object CLSID
+	std::uint32_t isInterfaceFlag;           ///< Specifies whether Interface CLSID is valid
+	std::uint32_t ifCLSIDOffset;             ///< Interface CLSID
+	std::uint32_t eventCLSIDOffset;          ///< Event CLSID
+	std::uint32_t hasEvents;                 ///< Specifies whether Event CLSID is valid
+	std::uint32_t olemicsFlags;              ///< Status
+	std::uint8_t classType;                  ///< Class Type
+	std::uint8_t objectType;                 ///< Object Type
+	std::uint16_t toolboxBitmap32;           ///< Control Bitmap ID in toobox
+	std::uint16_t defaultIcon;               ///< Minimized icon of control window
+	std::uint16_t isDesignerFlag;            ///< Specifies whether Designed Data offset is valid
+	std::uint32_t designerDataOffset;        ///< Offset to Designed Data
+	
+	VBCOMRInfo()
+	{
+
+	}
+
+	std::size_t structureSize()
+	{
+		return
+			sizeof(ifInfoOffset) + sizeof(objNameOffset) + sizeof(objDescOffset) +
+			sizeof(instancing) + sizeof(objID) + sizeof(objCLSID) + sizeof(isInterfaceFlag) +
+			sizeof(ifCLSIDOffset) + sizeof(eventCLSIDOffset) + sizeof(hasEvents) +
+			sizeof(olemicsFlags) + sizeof(classType) + sizeof(objectType) +
+			sizeof(toolboxBitmap32) + sizeof(defaultIcon) + sizeof(isDesignerFlag) +
+			sizeof(designerDataOffset);
+	}
+
+	void dump(std::ostream &out)
+	{
+		out << std::hex;
+		out << "ifInfoOffset:\t\t" << ifInfoOffset << "\n";
+		out << "objNameOffset:\t\t" << objNameOffset << "\n";
+		out << "objDescOffset:\t\t" << objDescOffset << "\n";
+		out << "instancing:\t\t" << instancing << "\n";
+		out << "objID:\t\t" << objID << "\n";
+		out << "isInterfaceFlag:\t\t" << isInterfaceFlag << "\n";
+		out << "ifCLSIDOffset:\t\t" << ifCLSIDOffset << "\n";
+		out << "eventCLSIDOffset:\t\t" << eventCLSIDOffset << "\n";
+		out << "hasEvents:\t\t" << hasEvents << "\n";
+		out << "olemicsFlags:\t\t" << olemicsFlags << "\n";
+		out << "classType:\t\t" << static_cast<uint16_t>(classType) << "\n";
+		out << "objectType:\t\t" << static_cast<uint16_t>(objectType) << "\n";
+		out << "toolboxBitmap32:\t\t" << toolboxBitmap32 << "\n";
+		out << "defaultIcon:\t\t" << defaultIcon << "\n";
+		out << "isDesignerFlag:\t\t" << isDesignerFlag << "\n";
+		out << "designerDataOffset:\t\t" << designerDataOffset << "\n";
+	}
+};
+
 } // namespace fileformat
 } // namespace retdec
 

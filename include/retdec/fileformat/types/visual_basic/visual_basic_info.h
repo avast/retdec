@@ -51,6 +51,14 @@ class VisualBasicInfo
 		std::uint16_t typeLibMajorVersion;
 		std::uint16_t typeLibMinorVersion;
 
+		// COM register info
+		std::string COMObjectName;
+		std::string COMObjectDescription;
+		std::string COMObjectCLSID;
+		std::string COMObjectInterfaceCLSID;
+		std::string COMObjectEventsCLSID;
+		std::string COMObjectType;
+
 		// others
 		std::string externTableHashCrc32;
 		std::string externTableHashMd5;
@@ -96,6 +104,12 @@ class VisualBasicInfo
 		bool getTypeLibLCID(std::uint32_t &res) const;
 		std::uint16_t getTypeLibMajorVersion() const;
 		std::uint16_t getTypeLibMinorVersion() const;
+		const std::string &getCOMObjectName();
+		const std::string &getCOMObjectDescription();
+		const std::string &getCOMObjectCLSID();
+		const std::string &getCOMObjectInterfaceCLSID();
+		const std::string &getCOMObjectEventsCLSID();
+		const std::string &getCOMObjectType();
 		const std::string &getExternTableHashCrc32() const;
 		const std::string &getExternTableHashMd5() const;
 		const std::string &getExternTableHashSha256() const;
@@ -123,6 +137,12 @@ class VisualBasicInfo
 		void setObjectTableGUID(const std::uint8_t data[16]);
 		void setTypeLibMajorVersion(std::uint16_t majVer);
 		void setTypeLibMinorVersion(std::uint16_t minVer);
+		void setCOMObjectName(const std::string &name);
+		void setCOMObjectDescription(const std::string &description);
+		void setCOMObjectCLSID(const std::uint8_t data[16]);
+		void setCOMObjectInterfaceCLSID(const std::uint8_t data[16]);
+		void setCOMObjectEventsCLSID(const std::uint8_t data[16]);
+		void setCOMObjectType(std::uint8_t type);
 		/// @}
 
 		/// @name Other methods
