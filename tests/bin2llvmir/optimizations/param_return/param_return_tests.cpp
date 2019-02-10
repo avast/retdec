@@ -6,6 +6,7 @@
 
 #include "retdec/bin2llvmir/providers/abi/arm64.h"
 #include "retdec/bin2llvmir/providers/abi/x86_fastcall.h"
+#include "retdec/bin2llvmir/providers/abi/x86_watcom.h"
 
 #include "retdec/bin2llvmir/optimizations/param_return/param_return.h"
 #include "bin2llvmir/utils/llvmir_tests.h"
@@ -3370,6 +3371,168 @@ TEST_F(ParamReturnTests, x86FastcallLargeTypeCatch)
 			call void %4(i32 %1, i32 %2, i32 %3)
 			%5 = load i32, i32* @eax
 			ret i32 %5
+		}
+
+		declare void @0()
+	)";
+	checkModuleAgainstExpectedIr(exp);
+}
+
+TEST_F(ParamReturnTests, x86WatcomBasic)
+{
+	parseInput(R"(
+		@eax = global i32 0
+		@ebx = global i32 0
+		@edx = global i32 0
+		@ecx = global i32 0
+		@r = global i32 0
+		define void @fnc() {
+			%stack_-4 = alloca i32
+			%stack_-8 = alloca i32
+			store i32 1, i32* @eax
+			store i32 1, i32* @ebx
+			store i32 1, i32* @ecx
+			store i32 1, i32* @edx
+			store i32 123, i32* %stack_-4
+			store i32 456, i32* %stack_-8
+			%a = bitcast i32* @r to void()*
+			call void %a()
+			ret void
+		}
+	)");
+	auto config = Config::fromJsonString(module.get(), R"({
+		"architecture" : {
+			"bitSize" : 32,
+			"endian" : "little",
+			"name" : "x86"
+		},
+		"functions" : [
+			{
+				"name" : "fnc",
+				"locals" : [
+					{
+						"name" : "stack_-4",
+						"storage" : { "type" : "stack", "value" : -4 }
+					},
+					{
+						"name" : "stack_-8",
+						"storage" : { "type" : "stack", "value" : -8 }
+					}
+				]
+			}
+		]
+	})");
+
+	AbiX86Watcom abi(module.get(), &config);
+	abi.addRegister(X86_REG_EAX, getGlobalByName("eax"));
+	abi.addRegister(X86_REG_EBX, getGlobalByName("ebx"));
+	abi.addRegister(X86_REG_ECX, getGlobalByName("ecx"));
+	abi.addRegister(X86_REG_EDX, getGlobalByName("edx"));
+
+	pass.runOnModuleCustom(*module, &config, &abi);
+
+	std::string exp = R"(
+		@eax = global i32 0
+		@ebx = global i32 0
+		@edx = global i32 0
+		@ecx = global i32 0
+		@r = global i32 0
+
+		define i32 @fnc() {
+			%stack_-4 = alloca i32
+			%stack_-8 = alloca i32
+			store i32 1, i32* @eax
+			store i32 1, i32* @ebx
+			store i32 1, i32* @ecx
+			store i32 1, i32* @edx
+			store i32 123, i32* %stack_-4
+			store i32 456, i32* %stack_-8
+			%a = bitcast i32* @r to void()*
+			%1 = load i32, i32* @eax
+			%2 = load i32, i32* @edx
+			%3 = load i32, i32* @ebx
+			%4 = load i32, i32* @ecx
+			%5 = load i32, i32* %stack_-8
+			%6 = load i32, i32* %stack_-4
+			%7 = bitcast void ()* %a to void (i32, i32, i32, i32, i32, i32)*
+			call void %7(i32 %1, i32 %2, i32 %3, i32 %4, i32 %5, i32 %6)
+			%8 = load i32, i32* @eax
+			ret i32 %8
+		}
+
+		declare void @0()
+	)";
+	checkModuleAgainstExpectedIr(exp);
+}
+
+TEST_F(ParamReturnTests, x86WatcomPassDouble)
+{
+	parseInput(R"(
+		@eax = global i32 0
+		@edx = global i32 0
+		@r = global i32 0
+		define void @fnc() {
+			%stack_-4 = alloca i32
+			%stack_-8 = alloca i32
+			store i32 1, i32* @eax
+			store i32 1, i32* @edx
+			store i32 456, i32* %stack_-8
+			store i32 123, i32* %stack_-4
+			%a = bitcast i32* @r to void()*
+			call void %a()
+			ret void
+		}
+	)");
+	auto config = Config::fromJsonString(module.get(), R"({
+		"architecture" : {
+			"bitSize" : 32,
+			"endian" : "little",
+			"name" : "x86"
+		},
+		"functions" : [
+			{
+				"name" : "fnc",
+				"locals" : [
+					{
+						"name" : "stack_-4",
+						"storage" : { "type" : "stack", "value" : -4 }
+					},
+					{
+						"name" : "stack_-8",
+						"storage" : { "type" : "stack", "value" : -8 }
+					}
+				]
+			}
+		]
+	})");
+
+	AbiX86Watcom abi(module.get(), &config);
+	abi.addRegister(X86_REG_EAX, getGlobalByName("eax"));
+	abi.addRegister(X86_REG_EDX, getGlobalByName("edx"));
+
+	pass.runOnModuleCustom(*module, &config, &abi);
+
+	std::string exp = R"(
+		@eax = global i32 0
+		@edx = global i32 0
+		@r = global i32 0
+
+		define i32 @fnc() {
+			%stack_-4 = alloca i32
+			%stack_-8 = alloca i32
+			store i32 1, i32* @eax
+			store i32 1, i32* @edx
+			store i32 456, i32* %stack_-8
+			store i32 123, i32* %stack_-4
+			%a = bitcast i32* @r to void()*
+			%1 = load i32, i32* @eax
+			%2 = load i32, i32* @edx
+			%3 = load i32, i32* %stack_-8
+			%4 = load i32, i32* %stack_-4
+			%5 = bitcast void ()* %a to void (i32, i32, i32, i32)*
+			call void %5(i32 %1, i32 %2, i32 %3, i32 %4)
+			%6 = load i32, i32* @eax
+			ret i32 %6
 		}
 
 		declare void @0()
