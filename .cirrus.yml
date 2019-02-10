@@ -17,7 +17,7 @@ task:
     - cd build
     - cmake .. -DCMAKE_INSTALL_PREFIX=/usr/local/bin
     - echo "using: make -j"`sysctl -n kern.smp.cpus`
-    - make -j `sysctl -n kern.smp.cpus`
+    - make
     - make install
     - cd ..
     - /usr/local/bin/retdec-decompiler.py --no-memory-limit test.so
