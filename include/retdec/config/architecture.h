@@ -29,6 +29,7 @@ class Architecture
 		bool isPic32() const;
 		bool isMipsOrPic32() const;
 		bool isArm() const;
+		bool isArm64() const;
 		bool isThumb() const;
 		bool isArmOrThumb() const;
 		bool isX86() const;

@@ -16,6 +16,7 @@ const std::string ARCH_MIPS    = "mips";
 const std::string ARCH_MIPS64  = "mips64";
 const std::string ARCH_PIC32   = "pic32";
 const std::string ARCH_ARM     = "arm";
+const std::string ARCH_ARM64   = "arm64";
 const std::string ARCH_THUMB   = "thumb";
 const std::string ARCH_x86     = "x86";
 const std::string ARCH_PPC     = "powerpc";
@@ -35,6 +36,7 @@ namespace config {
 bool Architecture::isArmOrThumb() const { return isArm() || isThumb(); }
 bool Architecture::isPic32() const      { return isArch(eArch::PIC32); }
 bool Architecture::isArm() const        { return isArch(eArch::ARM); }
+bool Architecture::isArm64() const      { return isArm() && getBitSize() == 64; }
 bool Architecture::isThumb() const      { return isArch(eArch::THUMB); }
 bool Architecture::isX86() const        { return isArch(eArch::X86); }
 bool Architecture::isX86_16() const     { return isX86() && getBitSize() == 16; }
