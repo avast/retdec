@@ -76,6 +76,8 @@ set(BIN2LLVMIR_SOURCES
 	providers/abi/x64.cpp
 	providers/abi/x86.cpp
 	providers/abi/x86_fastcall.cpp
+	providers/abi/x86_pascal.cpp
+	providers/abi/x86_watcom.cpp
 	providers/asm_instruction.cpp
 	providers/config.cpp
 	providers/debugformat.cpp
