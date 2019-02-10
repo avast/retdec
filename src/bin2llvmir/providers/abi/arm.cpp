@@ -17,6 +17,7 @@ AbiArm::AbiArm(llvm::Module* m, Config* c) :
 	_regs.reserve(ARM_REG_ENDING);
 	_id2regs.resize(ARM_REG_ENDING, nullptr);
 	_regStackPointerId = ARM_REG_SP;
+	_fpRegsAsParams = true;
 
 	// system calls
 	_regSyscallId = ARM_REG_R7;
@@ -30,13 +31,19 @@ AbiArm::AbiArm(llvm::Module* m, Config* c) :
 			ARM_REG_R5};
 
 	_regReturn = ARM_REG_R0;
-	_regFPReturn = ARM_REG_R0;
+	_regFPReturn = ARM_REG_D0;
 
 	_paramRegs = {
 		ARM_REG_R0,
 		ARM_REG_R1,
 		ARM_REG_R2,
 		ARM_REG_R3};
+
+	_paramFPRegs = {
+		ARM_REG_D0,
+		ARM_REG_D1,
+		ARM_REG_D2,
+		ARM_REG_D3};
 }
 
 AbiArm::~AbiArm()
