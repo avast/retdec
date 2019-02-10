@@ -6,10 +6,9 @@ task:
   freebsd_instance:
     matrix:
       image: freebsd-12-0-release-amd64
+      image: freebsd-11-2-release-amd64
   install_script:
-    - sed -i.bak -e 's,pkg+[http://pkg.FreeBSD.org/\${ABI}/quarterly,pkg+http://pkg.FreeBSD.org/\${ABI}/latest](http://pkg.FreeBSD.org/%5C$%7BABI%7D/quarterly,pkg+http://pkg.FreeBSD.org/%5C$%7BABI%7D/latest),' /etc/pkg/FreeBSD.conf
-    - pkg upgrade -y
-    - pkg install -y git cmake python37 bison autotools
+    - pkg install -y git cmake python37 bison autotools textproc/flex
   script:
     - ln -sf /usr/local/bin/python3.7 /usr/local/bin/python3
     - mkdir build
