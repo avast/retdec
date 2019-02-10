@@ -1327,6 +1327,36 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateCsel(cs_insn* i, cs_arm64* ai
 }
 
 /**
+ * ARM64_INS_CSET, ARM64_INS_CSETM
+ */
+void Capstone2LlvmIrTranslatorArm64_impl::translateCset(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb)
+{
+	EXPECT_IS_UNARY(i, ai, irb);
+
+	auto* rt = getRegisterType(ai->operands[0].reg);
+	auto* zero = llvm::ConstantInt::get(rt, 0);
+	llvm::Value* one = nullptr;
+	if (i->id == ARM64_INS_CSET)
+	{
+		one = llvm::ConstantInt::get(rt, 1);
+	}
+	else if (i->id == ARM64_INS_CSETM)
+	{
+		one = llvm::ConstantInt::get(rt, ~0);
+		// 0xffffffffffffffff - one in all bits
+	}
+	else
+	{
+		throw GenericError("cset, csetm: Instruction id error");
+	}
+
+	auto* cond = generateInsnConditionCode(irb, ai);
+	auto* val  = irb.CreateSelect(cond, one, zero);
+
+	storeOp(ai->operands[0], val, irb);
+}
+
+/**
  * ARM64_INS_TBNZ, ARM64_INS_TBZ
  */
 void Capstone2LlvmIrTranslatorArm64_impl::translateTbnz(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb)
