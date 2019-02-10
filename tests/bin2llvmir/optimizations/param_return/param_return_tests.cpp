@@ -4,6 +4,7 @@
 * @copyright (c) 2017 Avast Software, licensed under the MIT license
 */
 
+#include "retdec/bin2llvmir/providers/abi/arm64.h"
 #include "retdec/bin2llvmir/providers/abi/x86_fastcall.h"
 
 #include "retdec/bin2llvmir/optimizations/param_return/param_return.h"
@@ -2465,6 +2466,469 @@ TEST_F(ParamReturnTests, armExternalCallUseStacksIf4RegistersUsed)
 			store i32 %7, i32* @r0
 			%8 = load i32, i32* @r0
 			ret i32 %8
+		}
+
+		declare void @1()
+	)";
+	checkModuleAgainstExpectedIr(exp);
+}
+
+TEST_F(ParamReturnTests, armExternalCallHasLargeSecondParameter)
+{
+	parseInput(R"(
+		@r0 = global i32 0
+		@r1 = global i32 0
+		@r2 = global i32 0
+		@r3 = global i32 0
+		@r4 = global i32 0
+		declare void @print()
+		define void @fnc() {
+			store i32 1, i32* @r2
+			store i32 1, i32* @r3
+			store i32 1, i32* @r0
+			call void @print()
+			ret void
+		}
+	)");
+	auto config = Config::fromJsonString(module.get(), R"({
+		"architecture" : {
+			"bitSize" : 32,
+			"endian" : "little",
+			"name" : "arm"
+		}
+	})");
+	auto abi = AbiProvider::addAbi(module.get(), &config);
+
+	abi->addRegister(ARM_REG_R0, getGlobalByName("r0"));
+	abi->addRegister(ARM_REG_R1, getGlobalByName("r1"));
+	abi->addRegister(ARM_REG_R2, getGlobalByName("r2"));
+	abi->addRegister(ARM_REG_R3, getGlobalByName("r3"));
+	abi->addRegister(ARM_REG_R4, getGlobalByName("r4"));
+
+	pass.runOnModuleCustom(*module, &config, abi);
+
+	std::string exp = R"(
+		@r0 = global i32 0
+		@r1 = global i32 0
+		@r2 = global i32 0
+		@r3 = global i32 0
+		@r4 = global i32 0
+
+		declare i32 @print(i32, i32, i32)
+
+		declare void @0()
+
+		define i32 @fnc() {
+			store i32 1, i32* @r2
+			store i32 1, i32* @r3
+			store i32 1, i32* @r0
+			%1 = load i32, i32* @r0
+			%2 = load i32, i32* @r2
+			%3 = load i32, i32* @r3
+			%4 = call i32 @print(i32 %1, i32 %2, i32 %3)
+			store i32 %4, i32* @r0
+			%5 = load i32, i32* @r0
+			ret i32 %5
+		}
+
+		declare void @1()
+	)";
+	checkModuleAgainstExpectedIr(exp);
+}
+
+TEST_F(ParamReturnTests, armExternalCallHasDouleParameter)
+{
+	parseInput(R"(
+		@r0 = global i32 0
+		@r1 = global i32 0
+		@r2 = global i32 0
+		@r3 = global i32 0
+		@r4 = global i32 0
+		@d0 = global f64 0
+		declare void @foo()
+		define void @fnc() {
+			store f64 0, f64* @d0
+			call void @foo()
+			ret void
+		}
+	)");
+	auto config = Config::fromJsonString(module.get(), R"({
+		"architecture" : {
+			"bitSize" : 32,
+			"endian" : "little",
+			"name" : "arm"
+		}
+	})");
+	auto abi = AbiProvider::addAbi(module.get(), &config);
+
+	abi->addRegister(ARM_REG_R0, getGlobalByName("r0"));
+	abi->addRegister(ARM_REG_R1, getGlobalByName("r1"));
+	abi->addRegister(ARM_REG_R2, getGlobalByName("r2"));
+	abi->addRegister(ARM_REG_R3, getGlobalByName("r3"));
+	abi->addRegister(ARM_REG_R4, getGlobalByName("r4"));
+	abi->addRegister(ARM_REG_D0, getGlobalByName("d0"));
+
+	pass.runOnModuleCustom(*module, &config, abi);
+
+	std::string exp = R"(
+		@r0 = global i32 0
+		@r1 = global i32 0
+		@r2 = global i32 0
+		@r3 = global i32 0
+		@r4 = global i32 0
+		@d0 = global f64 0
+
+		declare i32 @print(f64)
+
+		declare void @0()
+
+		define i32 @fnc() {
+			store i32 1, i32* @d0
+			%1 = load f64, i64* @d0
+			%2 = call i32 @print(f64 %1)
+			store i32 %2, i32* @r0
+			%3 = load i32, i32* @r0
+			ret i32 %3
+		}
+
+		declare void @1()
+	)";
+	checkModuleAgainstExpectedIr(exp);
+}
+
+TEST_F(ParamReturnTests, arm64PtrCallBasicFunctionality)
+{
+	parseInput(R"(
+		@r = global i64 0
+		@x0 = global i64 0
+		@x1 = global i64 0
+		define void @fnc() {
+			store i64 123, i64* @x0
+			store i64 456, i64* @x1
+			%a = bitcast i64* @r to void()*
+			call void %a()
+			ret void
+		}
+	)");
+	auto config = Config::fromJsonString(module.get(), R"({
+		"architecture" : {
+			"bitSize" : 64,
+			"endian" : "little",
+			"name" : "arm64"
+		}
+	})");
+	AbiArm64 abi(module.get(), &config);
+
+	abi.addRegister(ARM64_REG_X0, getGlobalByName("x0"));
+	abi.addRegister(ARM64_REG_X1, getGlobalByName("x1"));
+
+	pass.runOnModuleCustom(*module, &config, &abi);
+
+	std::string exp = R"(
+		@r = global i32 0
+		@x0 = global i64 0
+		@x1 = global i64 0
+
+		define i32 @fnc() {
+			store i64 123, i64* @x0
+			store i64 456, i64* @x1
+			%a = bitcast i64* @r to void ()*
+			%1 = load i64, i64* @x0
+			%2 = load i64, i64* @x1
+			%3 = bitcast void ()* %a to void (i32, i32)*
+			call void %3(i64 %1, i64 %2)
+			%4 = load i64, i64* @x0
+			ret i64 %4
+		}
+
+		declare void @0()
+	)";
+	checkModuleAgainstExpectedIr(exp);
+}
+
+TEST_F(ParamReturnTests, arm64ExternalCallBasicFunctionality)
+{
+	parseInput(R"(
+		@x0 = global i64 0
+		@x1 = global i64 0
+		declare void @print()
+		define void @fnc() {
+			store i64 123, i64* @x0
+			store i64 456, i64* @x1
+			call void @print()
+			ret void
+		}
+	)");
+	auto config = Config::fromJsonString(module.get(), R"({
+		"architecture" : {
+			"bitSize" : 64,
+			"endian" : "little",
+			"name" : "arm64"
+		}
+	})");
+
+	AbiArm64 abi(module.get(), &config);
+
+	abi.addRegister(ARM64_REG_X0, getGlobalByName("x0"));
+	abi.addRegister(ARM64_REG_X1, getGlobalByName("x1"));
+
+	pass.runOnModuleCustom(*module, &config, &abi);
+
+	std::string exp = R"(
+		@x0 = global i64 0
+		@x1 = global i64 0
+
+		declare i64 @print(i64, i64)
+
+		declare void @0()
+
+		define i64 @fnc() {
+			store i64 123, i64* @x0
+			store i64 456, i64* @x1
+			%1 = load i64, i64* @x0
+			%2 = load i64, i64* @x1
+			%3 = call i64 @print(i64 %1, i64 %2)
+			store i64 %3, i64* @x0
+			%4 = load i64, i64* @x0
+			ret i64 %4
+		}
+
+		declare void @1()
+
+	)";
+	checkModuleAgainstExpectedIr(exp);
+}
+
+TEST_F(ParamReturnTests, arm64ExternalCallUseStacksIf8RegistersUsed)
+{
+	parseInput(R"(
+		@x0 = global i64 0
+		@x1 = global i64 0
+		@x2 = global i64 0
+		@x3 = global i64 0
+		@x4 = global i64 0
+		@x5 = global i64 0
+		@x6 = global i64 0
+		@x7 = global i64 0
+		@x8 = global i64 0
+		declare void @print()
+		define void @fnc() {
+			%stack_-4 = alloca i64
+			%stack_-12 = alloca i64
+			store i64 1, i64* @x2
+			store i64 1, i64* @x1
+			store i64 1, i64* @x5
+			store i64 1, i64* @x6
+			store i64 1, i64* @x8
+			store i64 1, i64* @x7
+			store i64 2, i64* %stack_-4
+			store i64 1, i64* @x4
+			store i64 1, i64* @x0
+			store i64 2, i64* %stack_-12
+			store i64 1, i64* @x3
+			call void @print()
+			ret void
+		}
+	)");
+	auto config = Config::fromJsonString(module.get(), R"({
+		"architecture" : {
+			"bitSize" : 64,
+			"endian" : "little",
+			"name" : "arm64"
+		},
+		"functions" : [
+			{
+				"name" : "fnc",
+				"locals" : [
+					{
+						"name" : "stack_-4",
+						"storage" : { "type" : "stack", "value" : -4 }
+					},
+					{
+						"name" : "stack_-12",
+						"storage" : { "type" : "stack", "value" : -12 }
+					}
+				]
+			}
+		]
+	})");
+	AbiArm64 abi(module.get(), &config);
+
+	abi.addRegister(ARM64_REG_X0, getGlobalByName("x0"));
+	abi.addRegister(ARM64_REG_X1, getGlobalByName("x1"));
+	abi.addRegister(ARM64_REG_X2, getGlobalByName("x2"));
+	abi.addRegister(ARM64_REG_X3, getGlobalByName("x3"));
+	abi.addRegister(ARM64_REG_X4, getGlobalByName("x4"));
+	abi.addRegister(ARM64_REG_X5, getGlobalByName("x5"));
+	abi.addRegister(ARM64_REG_X6, getGlobalByName("x6"));
+	abi.addRegister(ARM64_REG_X7, getGlobalByName("x7"));
+	abi.addRegister(ARM64_REG_X8, getGlobalByName("x8"));
+
+	pass.runOnModuleCustom(*module, &config, &abi);
+
+	std::string exp = R"(
+		@x0 = global i64 0
+		@x1 = global i64 0
+		@x2 = global i64 0
+		@x3 = global i64 0
+		@x4 = global i64 0
+		@x5 = global i64 0
+		@x6 = global i64 0
+		@x7 = global i64 0
+		@x8 = global i64 0
+
+		declare i64 @print(i64, i64, i64, i64, i64, i64, i64, i64, i64, i64)
+		
+		define i64 @fnc() {
+			%stack_-4 = alloca i64
+			%stack_-12 = alloca i64
+			store i64 1, i64* @x2
+			store i64 1, i64* @x1
+			store i64 1, i64* @x5
+			store i64 1, i64* @x6
+			store i64 1, i64* @x8
+			store i64 1, i64* @x7
+			store i64 2, i64* %stack_-4
+			store i64 1, i64* @x4
+			store i64 1, i64* @x0
+			store i64 2, i64* %stack_-12
+			store i64 1, i64* @x3
+
+			%1 = load i64, i64* @x0
+			%2 = load i64, i64* @x1
+			%3 = load i64, i64* @x2
+			%4 = load i64, i64* @x3
+			%5 = load i64, i64* @x4
+			%6 = load i64, i64* @x5
+			%7 = load i64, i64* @x6
+			%8 = load i64, i64* @x7
+			%9 = load i64, i64* %stack_-12
+			%10 = load i64, i64* %stack_-4
+			%11 = call i64 @print(i64 %1, i64 %2, i64 %3, i64 %4, i64 %5, i64 %6, i64, %7, i64, %8, i64 %9, i64 %10)
+			store i64 %11, i64* @x0
+			%12 = load i64, i64* @x0
+			ret i32 %12
+		}
+	)";
+	checkModuleAgainstExpectedIr(exp);
+}
+
+TEST_F(ParamReturnTests, arm64ExternalCallHasLargeSecondParameter)
+{
+	parseInput(R"(
+		@x0 = global i64 0
+		@x1 = global i64 0
+		@x2 = global i64 0
+		@x3 = global i64 0
+		@x4 = global i64 0
+		declare void @print()
+		define void @fnc() {
+			store i64 1, i64* @x2
+			store i64 1, i64* @x3
+			store i64 1, i64* @x0
+			call void @print()
+			ret void
+		}
+	)");
+	auto config = Config::fromJsonString(module.get(), R"({
+		"architecture" : {
+			"bitSize" : 64,
+			"endian" : "little",
+			"name" : "arm64"
+		}
+	})");
+	AbiArm64 abi(module.get(), &config);
+
+	abi.addRegister(ARM64_REG_X0, getGlobalByName("x0"));
+	abi.addRegister(ARM64_REG_X1, getGlobalByName("x1"));
+	abi.addRegister(ARM64_REG_X2, getGlobalByName("x2"));
+	abi.addRegister(ARM64_REG_X3, getGlobalByName("x3"));
+	abi.addRegister(ARM64_REG_X4, getGlobalByName("x4"));
+
+	pass.runOnModuleCustom(*module, &config, &abi);
+
+	std::string exp = R"(
+		@x0 = global i64 0
+		@x1 = global i64 0
+		@x2 = global i64 0
+		@x3 = global i64 0
+		@x4 = global i64 0
+
+		declare i64 @print(i64, i64, i64)
+
+		declare void @0()
+
+		define i64 @fnc() {
+			store i64 1, i64* @r2
+			store i64 1, i64* @r3
+			store i64 1, i64* @r0
+			%1 = load i64, i64* @r0
+			%2 = load i64, i64* @r2
+			%3 = load i64, i64* @r3
+			%4 = call i64 @print(i64 %1, i64 %2, i64 %3)
+			store i64 %4, i64* @x0
+			%5 = load i64, i64* @x0
+			ret i64 %5
+		}
+
+		declare void @1()
+	)";
+	checkModuleAgainstExpectedIr(exp);
+}
+
+TEST_F(ParamReturnTests, arm64ExternalCallHasDouleParameter)
+{
+	parseInput(R"(
+		@x0 = global i64 0
+		@x1 = global i64 0
+		@x2 = global i64 0
+		@x3 = global i64 0
+		@x4 = global i64 0
+		@d0 = global f64 0
+		declare void @foo()
+		define void @fnc() {
+			store f64 0, f64* @d0
+			call void @foo()
+			ret void
+		}
+	)");
+	auto config = Config::fromJsonString(module.get(), R"({
+		"architecture" : {
+			"bitSize" : 64,
+			"endian" : "little",
+			"name" : "arm64"
+		}
+	})");
+	AbiArm64 abi(module.get(), &config);
+
+	abi.addRegister(ARM64_REG_X0, getGlobalByName("x0"));
+	abi.addRegister(ARM64_REG_X1, getGlobalByName("x1"));
+	abi.addRegister(ARM64_REG_X2, getGlobalByName("x2"));
+	abi.addRegister(ARM64_REG_X3, getGlobalByName("x3"));
+	abi.addRegister(ARM64_REG_X4, getGlobalByName("x4"));
+	abi.addRegister(ARM64_REG_D0, getGlobalByName("d0"));
+
+	pass.runOnModuleCustom(*module, &config, &abi);
+
+	std::string exp = R"(
+		@x0 = global i64 0
+		@x1 = global i64 0
+		@x2 = global i64 0
+		@x3 = global i64 0
+		@x4 = global i64 0
+		@d0 = global f64 0
+
+		declare i64 @print(f64)
+
+		declare void @0()
+
+		define i64 @fnc() {
+			store i64 1, i64* @d0
+			%1 = load f64, i64* @d0
+			%2 = call i64 @print(f64 %1)
+			store i64 %2, i64* @x0
+			%3 = load i64, i64* @x0
+			ret i64 %3
 		}
 
 		declare void @1()
