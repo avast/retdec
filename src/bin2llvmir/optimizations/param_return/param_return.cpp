@@ -1646,7 +1646,7 @@ ParamFilter::ParamFilter(
 
 	orderRegistersBy(_fpRegValues, _abi->parameterFPRegisters());
 	orderRegistersBy(_regValues, _abi->parameterRegisters());
-	orderStacks(_stackValues);
+	orderStacks(_stackValues, _abi->getStackParamOrder() == Abi::RTL);
 
 	if (!paramTypes.empty() && call != nullptr)
 	{
