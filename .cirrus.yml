@@ -9,15 +9,12 @@ task:
   install_script:
     - sed -i.bak -e 's,pkg+[http://pkg.FreeBSD.org/\${ABI}/quarterly,pkg+http://pkg.FreeBSD.org/\${ABI}/latest](http://pkg.FreeBSD.org/%5C$%7BABI%7D/quarterly,pkg+http://pkg.FreeBSD.org/%5C$%7BABI%7D/latest),' /etc/pkg/FreeBSD.conf
     - pkg upgrade -y
-    - pkg install -y git cmake python37 bison autotools textproc/flex
+    - pkg install -y git cmake python37 bison autotools
   script:
-    - ln -sf /usr/local/bin/python3.7 /usr/local/bin/python
+    - ln -sf /usr/local/bin/python3.7 /usr/local/bin/python3
     - mkdir build
     - cd build
     - cmake .. -DCMAKE_INSTALL_PREFIX=/usr/local/bin
     - echo "using: make -j"`sysctl -n kern.smp.cpus`
-    - make
-    - make install
-    - cd ..
-    - /usr/local/bin/retdec-decompiler.py --no-memory-limit test.so
+    - make -j`sysctl -n kern.smp.cpus`
 
