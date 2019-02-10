@@ -37,6 +37,7 @@ class Architecture
 		bool isX86_32() const;
 		bool isX86_64() const;
 		bool isPpc() const;
+		bool isPpc64() const;
 		bool isEndianLittle() const;
 		bool isEndianBig() const;
 		bool isEndianKnown() const;

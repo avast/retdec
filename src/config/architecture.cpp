@@ -20,6 +20,7 @@ const std::string ARCH_ARM64   = "arm64";
 const std::string ARCH_THUMB   = "thumb";
 const std::string ARCH_x86     = "x86";
 const std::string ARCH_PPC     = "powerpc";
+const std::string ARCH_PPC64   = "powerpc64";
 
 const std::string JSON_name    = "name";
 const std::string JSON_endian  = "endian";
@@ -43,6 +44,7 @@ bool Architecture::isX86_16() const     { return isX86() && getBitSize() == 16; 
 bool Architecture::isX86_32() const     { return isX86() && getBitSize() == 32; }
 bool Architecture::isX86_64() const     { return isX86() && getBitSize() == 64; }
 bool Architecture::isPpc() const        { return isArch(eArch::PPC); }
+bool Architecture::isPpc64() const      { return isPpc() && getBitSize() == 64; }
 bool Architecture::isKnown() const      { return !isUnknown(); }
 bool Architecture::isUnknown() const    { return isArch(eArch::UNKNOWN); }
 bool Architecture::isMips() const       { return isArch(eArch::MIPS); }
