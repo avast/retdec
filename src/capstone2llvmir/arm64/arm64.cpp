@@ -1312,6 +1312,21 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateCbnz(cs_insn* i, cs_arm64* ai
 }
 
 /**
+ * ARM64_INS_CSEL
+ */
+void Capstone2LlvmIrTranslatorArm64_impl::translateCsel(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb)
+{
+	EXPECT_IS_TERNARY(i, ai, irb);
+
+	std::tie(op1, op2) = loadOpBinaryOrTernaryOp1Op2(ai, irb);
+
+	auto* cond = generateInsnConditionCode(irb, ai);
+	auto* val  = irb.CreateSelect(cond, op1, op2);
+
+	storeOp(ai->operands[0], val, irb);
+}
+
+/**
  * ARM64_INS_TBNZ, ARM64_INS_TBZ
  */
 void Capstone2LlvmIrTranslatorArm64_impl::translateTbnz(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb)

@@ -291,7 +291,7 @@ Capstone2LlvmIrTranslatorArm64_impl::_i2fm =
 	{ARM64_INS_CRC32H, nullptr},
 	{ARM64_INS_CRC32W, nullptr},
 	{ARM64_INS_CRC32X, nullptr},
-	{ARM64_INS_CSEL, nullptr},
+	{ARM64_INS_CSEL, &Capstone2LlvmIrTranslatorArm64_impl::translateCsel},
 	{ARM64_INS_CSINC, nullptr},
 	{ARM64_INS_CSINV, nullptr},
 	{ARM64_INS_CSNEG, nullptr},
