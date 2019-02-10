@@ -5,6 +5,7 @@
 */
 
 #include "retdec/bin2llvmir/providers/abi/arm64.h"
+#include "retdec/bin2llvmir/providers/abi/mips64.h"
 #include "retdec/bin2llvmir/providers/abi/x86_fastcall.h"
 #include "retdec/bin2llvmir/providers/abi/x86_pascal.h"
 #include "retdec/bin2llvmir/providers/abi/x86_watcom.h"
@@ -3205,6 +3206,380 @@ TEST_F(ParamReturnTests, mipsExternalCallUseStacksIf4RegistersUsed)
 			%5 = load i32, i32* %stack_-8
 			%6 = load i32, i32* %stack_-4
 			call void @print(i32 %1, i32 %2, i32 %3, i32 %4, i32 %5, i32 %6)
+			ret void
+		}
+	)";
+	checkModuleAgainstExpectedIr(exp);
+}
+
+TEST_F(ParamReturnTests, mipsExternalCallHasFloatParameter)
+{
+	parseInput(R"(
+		@a0 = global i32 0
+		@a1 = global i32 0
+		@a2 = global i32 0
+		@a3 = global i32 0
+		@f12 = global f32 0
+		@t0 = global i32 0
+		declare void @foo()
+		define void @fnc() {
+			store i32 1, i32* @t0
+			store i32 1, f32* @f12
+			call void @foo()
+			ret void
+		}
+	)");
+	auto config = Config::fromJsonString(module.get(), R"({
+		"architecture" : {
+			"bitSize" : 32,
+			"endian" : "little",
+			"name" : "mips"
+		}
+	})");
+	auto abi = AbiProvider::addAbi(module.get(), &config);
+
+	abi->addRegister(MIPS_REG_A0, getGlobalByName("a0"));
+	abi->addRegister(MIPS_REG_A1, getGlobalByName("a1"));
+	abi->addRegister(MIPS_REG_A2, getGlobalByName("a2"));
+	abi->addRegister(MIPS_REG_A3, getGlobalByName("a3"));
+	abi->addRegister(MIPS_REG_F12, getGlobalByName("f12"));
+	abi->addRegister(MIPS_REG_T0, getGlobalByName("t0"));
+
+	pass.runOnModuleCustom(*module, &config, abi);
+
+	std::string exp = R"(
+		@a0 = global i32 0
+		@a1 = global i32 0
+		@a2 = global i32 0
+		@a3 = global i32 0
+		@f12 = gloabl f32 0
+		@t0 = global i32 0
+		declare void @foo(f32)
+		declare void @0()
+		define void @fnc() {
+			store i32 1, i32* @t0
+			store i32 1, f32* @f12
+			%1 = load f32, f32* @f12
+			call void @foo(f32 %1)
+			ret void
+		}
+	)";
+	checkModuleAgainstExpectedIr(exp);
+}
+
+TEST_F(ParamReturnTests, mipsExternalCallHasFloatFirstParameter)
+{
+	parseInput(R"(
+		@a0 = global i32 0
+		@a1 = global i32 0
+		@a2 = global i32 0
+		@a3 = global i32 0
+		@f12 = global f32 0
+		@t0 = global i32 0
+		declare void @foo()
+		define void @fnc() {
+			store i32 1, i32* @t0
+			store i32 1, i32* @a0
+			store i32 1, f32* @f12
+			call void @foo()
+			ret void
+		}
+	)");
+	auto config = Config::fromJsonString(module.get(), R"({
+		"architecture" : {
+			"bitSize" : 32,
+			"endian" : "little",
+			"name" : "mips"
+		}
+	})");
+	auto abi = AbiProvider::addAbi(module.get(), &config);
+
+	abi->addRegister(MIPS_REG_A0, getGlobalByName("a0"));
+	abi->addRegister(MIPS_REG_A1, getGlobalByName("a1"));
+	abi->addRegister(MIPS_REG_A2, getGlobalByName("a2"));
+	abi->addRegister(MIPS_REG_A3, getGlobalByName("a3"));
+	abi->addRegister(MIPS_REG_F12, getGlobalByName("f12"));
+	abi->addRegister(MIPS_REG_T0, getGlobalByName("t0"));
+
+	pass.runOnModuleCustom(*module, &config, abi);
+
+	std::string exp = R"(
+		@a0 = global i32 0
+		@a1 = global i32 0
+		@a2 = global i32 0
+		@a3 = global i32 0
+		@f12 = gloabl f32 0
+		@t0 = global i32 0
+		declare void @foo(f32, i32)
+		declare void @0()
+		define void @fnc() {
+			store i32 1, i32* @t0
+			store i32 1, i32* @a0
+			store i32 1, f32* @f12
+			%1 = load f32, f32* @f12
+			%2 = load i32, i32* @a
+			call void @foo(f32 %1, i32 %2)
+			ret void
+		}
+	)";
+	checkModuleAgainstExpectedIr(exp);
+}
+
+TEST_F(ParamReturnTests, mips64PtrCallBasicFunctionality)
+{
+	parseInput(R"(
+		@r = global i64 0
+		@a0 = global i64 0
+		@a1 = global i64 0
+		define void @fnc() {
+			store i64 123, i64* @a0
+			store i64 456, i64* @a1
+			%a = bitcast i64* @r to void()*
+			call void %a()
+			ret void
+		}
+	)");
+	auto config = Config::fromJsonString(module.get(), R"({
+		"architecture" : {
+			"bitSize" : 64,
+			"endian" : "little",
+			"name" : "mips64"
+		}
+	})");
+
+	AbiMips64 abi(module.get(), &config);
+
+	abi.addRegister(MIPS_REG_A0, getGlobalByName("a0"));
+	abi.addRegister(MIPS_REG_A1, getGlobalByName("a1"));
+
+	pass.runOnModuleCustom(*module, &config, &abi);
+
+	std::string exp = R"(
+		@r = global i64 0
+		@a0 = global i64 0
+		@a1 = global i64 0
+		define void @fnc() {
+			store i64 123, i64* @a0
+			store i64 456, i64* @a1
+			%a = bitcast i64* @r to void()*
+			%1 = load i64, i64* @a0
+			%2 = load i64, i64* @a1
+			%3 = bitcast void ()* %a to void (i64, i64)*
+			call void %3(i64 %1, i64 %2)
+			ret void
+		}
+	)";
+	checkModuleAgainstExpectedIr(exp);
+}
+
+TEST_F(ParamReturnTests, mips64ExternalCallBasicFunctionality)
+{
+	parseInput(R"(
+		@a0 = global i64 0
+		@a1 = global i64 0
+		declare void @print()
+		define void @fnc() {
+			store i64 123, i64* @a0
+			store i64 456, i64* @a1
+			call void @print()
+			ret void
+		}
+	)");
+	auto config = Config::fromJsonString(module.get(), R"({
+		"architecture" : {
+			"bitSize" : 64,
+			"endian" : "little",
+			"name" : "mips64"
+		}
+	})");
+
+	AbiMips64 abi(module.get(), &config);
+
+	abi.addRegister(MIPS_REG_A0, getGlobalByName("a0"));
+	abi.addRegister(MIPS_REG_A1, getGlobalByName("a1"));
+
+	pass.runOnModuleCustom(*module, &config, &abi);
+
+	std::string exp = R"(
+		@a0 = global i64 0
+		@a1 = global i64 0
+		declare void @print(i64, i64)
+		declare void @0()
+		define void @fnc() {
+			store i64 123, i64* @a0
+			store i64 456, i64* @a1
+			%1 = load i64, i64* @a0
+			%2 = load i64, i64* @a1
+			call void @print(i64 %1, i64 %2)
+			ret void
+		}
+	)";
+	checkModuleAgainstExpectedIr(exp);
+}
+
+TEST_F(ParamReturnTests, mips64ExternalCallUseStacksIf8RegistersUsed)
+{
+	parseInput(R"(
+		@a0 = global i64 0
+		@a1 = global i64 0
+		@a2 = global i64 0
+		@a3 = global i64 0
+		@a4 = global i64 0
+		@a5 = global i64 0
+		@a6 = global i64 0
+		@a7 = global i64 0
+		@t4 = global i64 0
+		declare void @print()
+		define void @fnc() {
+			%stack_-4 = alloca i64
+			%stack_-12 = alloca i64
+			store i64 1, i64* @a2
+			store i64 1, i64* @a1
+			store i64 1, i64* @a7
+			store i64 1, i64* @a4
+			store i64 2, i64* %stack_-4
+			store i64 1, i64* @t4
+			store i64 1, i64* @a0
+			store i64 2, i64* %stack_-12
+			store i64 1, i64* @a6
+			store i64 1, i64* @a5
+			store i64 1, i64* @a3
+			call void @print()
+			ret void
+		}
+	)");
+	auto config = Config::fromJsonString(module.get(), R"({
+		"architecture" : {
+			"bitSize" : 64,
+			"endian" : "little",
+			"name" : "mips64"
+		},
+		"functions" : [
+			{
+				"name" : "fnc",
+				"locals" : [
+					{
+						"name" : "stack_-4",
+						"storage" : { "type" : "stack", "value" : -4 }
+					},
+					{
+						"name" : "stack_-12",
+						"storage" : { "type" : "stack", "value" : -12 }
+					}
+				]
+			}
+		]
+	})");
+
+	AbiMips64 abi(module.get(), &config);
+
+	abi.addRegister(MIPS_REG_A0, getGlobalByName("a0"));
+	abi.addRegister(MIPS_REG_A1, getGlobalByName("a1"));
+	abi.addRegister(MIPS_REG_A2, getGlobalByName("a2"));
+	abi.addRegister(MIPS_REG_A3, getGlobalByName("a3"));
+	abi.addRegister(MIPS_REG_T0, getGlobalByName("a1"));
+	abi.addRegister(MIPS_REG_T1, getGlobalByName("a2"));
+	abi.addRegister(MIPS_REG_T2, getGlobalByName("a3"));
+	abi.addRegister(MIPS_REG_T3, getGlobalByName("a4"));
+	abi.addRegister(MIPS_REG_T4, getGlobalByName("t4"));
+
+	pass.runOnModuleCustom(*module, &config, &abi);
+
+	std::string exp = R"(
+		@a0 = global i64 0
+		@a1 = global i64 0
+		@a2 = global i64 0
+		@a3 = global i64 0
+		@a4 = global i64 0
+		@a5 = global i64 0
+		@a6 = global i64 0
+		@a7 = global i64 0
+		@t4 = global i64 0
+
+		declare void @0()
+		declare void @print(i64, i64, i64, i64, i64, i64, i64, i64, i64, i64)
+		define void @fnc() {
+			%stack_-4 = alloca i64
+			%stack_-12 = alloca i64
+			store i64 1, i64* @a2
+			store i64 1, i64* @a1
+			store i64 1, i64* @a7
+			store i64 1, i64* @a4
+			store i64 2, i64* %stack_-4
+			store i64 1, i64* @t4
+			store i64 1, i64* @a0
+			store i64 2, i64* %stack_-12
+			store i64 1, i64* @a6
+			store i64 1, i64* @a5
+			store i64 1, i64* @a3
+
+			%1 = load i64, i64* @a0
+			%2 = load i64, i64* @a1
+			%3 = load i64, i64* @a2
+			%4 = load i64, i64* @a3
+			%5 = load i64, i64* @a4
+			%6 = load i64, i64* @a5
+			%7 = load i64, i64* @a6
+			%8 = load i64, i64* @a7
+			%9 = load i64, i64* %stack_-12
+			%10 = load i64, i64* %stack_-4
+			call void @print(i64 %1, i64 %2, i64 %3, i64 %4, i64 %5, i64 %6, i64 %7, i64 %8, i64 %9, i64 %10)
+			ret void
+		}
+	)";
+	checkModuleAgainstExpectedIr(exp);
+}
+
+TEST_F(ParamReturnTests, mips64ExternalCallHasFloatParameter)
+{
+	parseInput(R"(
+		@a0 = global i64 0
+		@a1 = global i64 0
+		@a2 = global i64 0
+		@a3 = global i64 0
+		@t4 = global i64 0
+		@f12 = global f64 0
+		declare void @foo()
+		define void @fnc() {
+			store i64 1, i64* @t4
+			store i64 1, f64* @f12
+			call void @foo()
+			ret void
+		}
+	)");
+	auto config = Config::fromJsonString(module.get(), R"({
+		"architecture" : {
+			"bitSize" : 64,
+			"endian" : "little",
+			"name" : "mips64"
+		}
+	})");
+
+	AbiMips64 abi(module.get(), &config);
+
+	abi.addRegister(MIPS_REG_A0, getGlobalByName("a0"));
+	abi.addRegister(MIPS_REG_A1, getGlobalByName("a1"));
+	abi.addRegister(MIPS_REG_A2, getGlobalByName("a2"));
+	abi.addRegister(MIPS_REG_A3, getGlobalByName("a3"));
+	abi.addRegister(MIPS_REG_T4, getGlobalByName("t4"));
+	abi.addRegister(MIPS_REG_F12, getGlobalByName("f12"));
+
+	pass.runOnModuleCustom(*module, &config, &abi);
+
+	std::string exp = R"(
+		@a0 = global i64 0
+		@a1 = global i64 0
+		@a2 = global i64 0
+		@a3 = global i64 0
+		@f12 = gloabl f64 0
+		@t0 = global i64 0
+		declare void @foo(f64)
+		declare void @0()
+		define void @fnc() {
+			store i64 1, i64* @t0
+			store i64 1, f64* @f12
+			%1 = load f64, f64* @f12
+			call void @foo(f64 %1)
 			ret void
 		}
 	)";
