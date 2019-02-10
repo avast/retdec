@@ -29,6 +29,8 @@ class Abi
 	public:
 		static const uint32_t REG_INVALID;
 		static const unsigned DEFAULT_ADDR_SPACE;
+		static const bool RTL;
+		static const bool LTR;
 
 	// Ctors, dtors.
 	//
@@ -54,6 +56,8 @@ class Abi
 		const std::vector<llvm::GlobalVariable*>& getRegisters() const;
 		llvm::GlobalVariable* getStackPointerRegister();
 		llvm::GlobalVariable* getZeroRegister();
+
+		bool getStackParamOrder() const;
 
 		void addRegister(uint32_t id, llvm::GlobalVariable* reg);
 
@@ -145,7 +149,7 @@ class Abi
 		bool returnsOnStack = false;
 		bool _fpRegsAsParams = false;
 		bool _paramRegsOverlay = false;
-
+		bool _stackParamOrder = RTL;
 };
 
 class AbiProvider

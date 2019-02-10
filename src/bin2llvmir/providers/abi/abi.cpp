@@ -26,6 +26,8 @@ namespace bin2llvmir {
 
 const uint32_t Abi::REG_INVALID = 0;
 const unsigned Abi::DEFAULT_ADDR_SPACE = 0;
+const bool Abi::RTL = true;
+const bool Abi::LTR = false;
 
 Abi::Abi(llvm::Module* m, Config* c) :
 		_module(m),
@@ -63,6 +65,12 @@ bool Abi::isStackPointerRegister(const llvm::Value* val)
 bool Abi::isZeroRegister(const llvm::Value* val)
 {
 	return getZeroRegister() == val;
+}
+
+
+bool Abi::getStackParamOrder() const
+{
+	return _stackParamOrder;
 }
 
 /**
