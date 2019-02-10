@@ -25,6 +25,7 @@ class Architecture
 		bool isUnknown() const;
 		bool isKnown() const;
 		bool isMips() const;
+		bool isMips64() const;
 		bool isPic32() const;
 		bool isMipsOrPic32() const;
 		bool isArm() const;

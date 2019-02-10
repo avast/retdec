@@ -13,6 +13,7 @@ namespace {
 
 const std::string ARCH_UNKNOWN = "unknown";
 const std::string ARCH_MIPS    = "mips";
+const std::string ARCH_MIPS64  = "mips64";
 const std::string ARCH_PIC32   = "pic32";
 const std::string ARCH_ARM     = "arm";
 const std::string ARCH_THUMB   = "thumb";
@@ -43,6 +44,7 @@ bool Architecture::isPpc() const        { return isArch(eArch::PPC); }
 bool Architecture::isKnown() const      { return !isUnknown(); }
 bool Architecture::isUnknown() const    { return isArch(eArch::UNKNOWN); }
 bool Architecture::isMips() const       { return isArch(eArch::MIPS); }
+bool Architecture::isMips64() const     { return isMips() && getBitSize() == 64; }
 bool Architecture::isMipsOrPic32() const{ return isMips() || isPic32(); }
 
 /**
