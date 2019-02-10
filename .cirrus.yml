@@ -12,7 +12,6 @@ task:
     - pkg upgrade -y
     - pkg install -y git cmake python37 bison autotools textproc/flex
   script:
-    - set PATH=/usr/local/bin:$PATH
     - ln -sf /usr/local/bin/python3.7 /usr/local/bin/python
     - mkdir build
     - cd build
