@@ -1980,6 +1980,64 @@ TEST_F(ParamReturnTests, ppcExternalCallBasicFunctionality)
 	checkModuleAgainstExpectedIr(exp);
 }
 
+TEST_F(ParamReturnTests, ppcExternalCallBasicFPFunctionality)
+{
+	parseInput(R"(
+		@r3 = global i32 0
+		@r4 = global i32 0
+		@f1 = global f64 0
+		@f2 = global f64 0
+		declare void @print()
+		define void @fnc() {
+			store i32 123, i32* @r3
+			store i32 456, i32* @r4
+			store f64 0, f64* @f1
+			store f64 0, f64* @f2
+			call void @print()
+			ret void
+		}
+	)");
+	auto config = Config::fromJsonString(module.get(), R"({
+		"architecture" : {
+			"bitSize" : 32,
+			"endian" : "big",
+			"name" : "powerpc"
+		}
+	})");
+	auto abi = AbiProvider::addAbi(module.get(), &config);
+
+	abi->addRegister(PPC_REG_R3, getGlobalByName("r3"));
+	abi->addRegister(PPC_REG_R4, getGlobalByName("r4"));
+	abi->addRegister(PPC_REG_F1, getGlobalByName("f1"));
+	abi->addRegister(PPC_REG_F2, getGlobalByName("f2"));
+
+	pass.runOnModuleCustom(*module, &config, abi);
+
+	std::string exp = R"(
+		@r3 = global i32 0
+		@r4 = global i32 0
+
+		declare i32 @print(i32, i32, f64, f64)
+		declare void @0()
+
+		define i32 @fnc() {
+			store i32 123, i32* @r3
+			store i32 456, i32* @r4
+			%1 = load i32, i32* @r3
+			%2 = load i32, i32* @r4
+			%3 = load i64, i64* @f1
+			%4 = load i64, i64* @f2
+			%5 = call i32 @print(i32 %1, i32 %2, f64 %3, f64 %4)
+			store i32 %5, i32* @r3
+			%6 = load i32, i32* @r3
+			ret i32 %6
+		}
+
+		declare void @1()
+	)";
+	checkModuleAgainstExpectedIr(exp);
+}
+
 TEST_F(ParamReturnTests, ppcExternalCallDoNotUseObjectsIfTheyAreNotRegisters)
 {
 	parseInput(R"(
