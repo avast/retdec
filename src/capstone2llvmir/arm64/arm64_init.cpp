@@ -428,7 +428,7 @@ Capstone2LlvmIrTranslatorArm64_impl::_i2fm =
 	{ARM64_INS_LDXR, nullptr},
 	{ARM64_INS_LSL, &Capstone2LlvmIrTranslatorArm64_impl::translateShifts},
 	{ARM64_INS_LSR, &Capstone2LlvmIrTranslatorArm64_impl::translateShifts},
-	{ARM64_INS_MADD, nullptr},
+	{ARM64_INS_MADD, &Capstone2LlvmIrTranslatorArm64_impl::translateMul},
 	{ARM64_INS_MLA, nullptr},
 	{ARM64_INS_MLS, nullptr},
 	{ARM64_INS_MOVI, nullptr},
