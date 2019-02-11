@@ -754,6 +754,7 @@ void PeFormat::loadVisualBasicHeader()
 	visualBasicInfo.setLanguageDLLPrimaryLCID(vbh.LCID1);
 	visualBasicInfo.setLanguageDLLSecondaryLCID(vbh.LCID2);
 
+
 	if (getOffsetFromAddress(vbProjectInfoOffset, vbh.projectInfoAddr))
 	{
 		parseVisualBasicProjectInfo(vbProjectInfoOffset);
@@ -809,7 +810,8 @@ bool PeFormat::parseVisualBasicComRegistrationData(std::size_t structureOffset)
 
 	visualBasicInfo.setTypeLibLCID(vbcrd.projTlbLCID);
 	visualBasicInfo.setTypeLibMajorVersion(vbcrd.tlbVerMajor);
-	visualBasicInfo.setTypeLibMinorVersion(vbcrd.tlbVerMinor);
+	// TODO uncomment
+	// visualBasicInfo.setTypeLibMinorVersion(vbcrd.tlbVerMinor);
 	if (!visualBasicInfo.hasProjectName() && vbcrd.projNameOffset != 0)
 	{
 		projName = retdec::utils::readNullTerminatedAscii(allBytes.data(), allBytes.size(),
@@ -920,6 +922,9 @@ bool PeFormat::parseVisualBasicComRegistrationInfo(std::size_t structureOffset,
 	{
 		visualBasicInfo.setCOMObjectEventsCLSID(bytes.data());
 	}
+
+	// TODO MUST DELME
+	visualBasicInfo.setTypeLibMinorVersion(vbcri.isDesignerFlag);
 
 	return true;
 }
