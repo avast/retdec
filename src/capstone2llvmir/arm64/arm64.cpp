@@ -1357,7 +1357,7 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateCset(cs_insn* i, cs_arm64* ai
 }
 
 /**
- * ARM64_INS_MUL, ARM64_INS_MADD
+ * ARM64_INS_MUL, ARM64_INS_MADD, ARM64_INS_MSUB, ARM64_INS_MNEG
  */
 void Capstone2LlvmIrTranslatorArm64_impl::translateMul(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb)
 {
@@ -1377,6 +1377,12 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateMul(cs_insn* i, cs_arm64* ai,
 	{
 		auto* op3 = loadOp(ai->operands[3], irb);
 		val = irb.CreateSub(op3, val);
+	}
+
+	if (i->id == ARM64_INS_MNEG)
+	{
+		llvm::Value* zero = llvm::ConstantInt::get(val->getType(), 0);
+		val = irb.CreateSub(zero, val);
 	}
 	storeOp(ai->operands[0], val, irb);
 }
