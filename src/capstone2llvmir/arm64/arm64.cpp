@@ -1357,6 +1357,20 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateCset(cs_insn* i, cs_arm64* ai
 }
 
 /**
+ * ARM64_INS_MUL
+ */
+void Capstone2LlvmIrTranslatorArm64_impl::translateMul(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb)
+{
+	EXPECT_IS_BINARY_OR_TERNARY(i, ai, irb);
+
+	std::tie(op1, op2) = loadOpBinaryOrTernaryOp1Op2(ai, irb);
+	op2 = irb.CreateZExtOrTrunc(op2, op1->getType());
+
+	auto *val = irb.CreateMul(op1, op2);
+	storeOp(ai->operands[0], val, irb);
+}
+
+/**
  * ARM64_INS_TBNZ, ARM64_INS_TBZ
  */
 void Capstone2LlvmIrTranslatorArm64_impl::translateTbnz(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb)
