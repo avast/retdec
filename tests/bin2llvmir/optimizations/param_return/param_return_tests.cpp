@@ -23,9 +23,6 @@ class ParamReturnTests: public LlvmIrTests
 		ParamReturn pass;
 };
 
-////
-//// x86
-////
 //
 // x86
 //
