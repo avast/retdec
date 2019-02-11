@@ -540,7 +540,10 @@ void JsonPresentation::presentVisualBasicInfo(Json::Value &root) const
 		}
 	}
 
-	jVBasic["objectTable"] = jObjectTable;
+	if (!jObjectTable["guid"].empty() || nObjects > 0)
+	{
+		jVBasic["objectTable"] = jObjectTable;
+	}
 	root["visualBasicInfo"] = jVBasic;
 }
 

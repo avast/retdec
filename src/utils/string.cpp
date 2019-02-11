@@ -451,21 +451,48 @@ std::string unicodeToAscii(const std::uint8_t *bytes, std::size_t nBytes)
 * @brief Read up to @a maxBytes bytes as ASCII string.
 *
 * @param[in] bytes Bytes to read from.
-* @param[in] maxBytes Maximum bytes to read.
+* @param[in] bytesLen Length of @a bytes
 * @param[in] offset Offset in bytes.
+* @param[in] maxBytes Maximum of bytes to read. Zero indicates as much as possible.
+* @param[in] failOnExceed If string isn't null terminated until @a maxBytes, an empty string is returned
 *
 * @return Converted string in ASCII.
 */
-std::string readNullTerminatedAscii(const std::uint8_t *bytes, std::size_t maxBytes, std::size_t offset)
+std::string readNullTerminatedAscii(const std::uint8_t *bytes, std::size_t bytesLen, std::size_t offset,
+									std::size_t maxBytes, bool failOnExceed)
 {
 	std::string result;
 	if (!bytes)
 	{
 		return "";
 	}
-	for (std::size_t i = offset; i < maxBytes && bytes[i]; i++)
+
+	if (maxBytes == 0)
 	{
+		maxBytes = bytesLen;
+	}
+	else if (offset + maxBytes > bytesLen)
+	{
+		maxBytes = bytesLen;
+	}
+	else
+	{
+		maxBytes += offset;
+	}
+
+	std::size_t i;
+	for (i = offset; i < maxBytes; i++)
+	{
+		if (bytes[i] == '\0')
+		{
+			break;
+		}
 		result.push_back(bytes[i]);
+	}
+
+	if (i == maxBytes && failOnExceed)
+	{
+		return "";
 	}
 
 	return replaceNonprintableChars(result);
