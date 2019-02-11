@@ -1373,6 +1373,11 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateMul(cs_insn* i, cs_arm64* ai,
 		auto* op3 = loadOp(ai->operands[3], irb);
 		val = irb.CreateAdd(val, op3);
 	}
+	else if (i->id == ARM64_INS_MSUB)
+	{
+		auto* op3 = loadOp(ai->operands[3], irb);
+		val = irb.CreateSub(op3, val);
+	}
 	storeOp(ai->operands[0], val, irb);
 }
 
