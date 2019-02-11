@@ -6,6 +6,7 @@
 
 #include "retdec/bin2llvmir/providers/abi/arm64.h"
 #include "retdec/bin2llvmir/providers/abi/mips64.h"
+#include "retdec/bin2llvmir/providers/abi/powerpc64.h"
 #include "retdec/bin2llvmir/providers/abi/x86_fastcall.h"
 #include "retdec/bin2llvmir/providers/abi/x86_pascal.h"
 #include "retdec/bin2llvmir/providers/abi/x86_watcom.h"
@@ -2310,6 +2311,57 @@ TEST_F(ParamReturnTests, ppcExternalCallDoNotUseStacksIfLessThan7RegistersUsed)
 		}
 
 		declare void @1()
+	)";
+	checkModuleAgainstExpectedIr(exp);
+}
+
+TEST_F(ParamReturnTests, ppc64PtrCallBasicFunctionality)
+{
+	parseInput(R"(
+		@r = global i64 0
+		@r3 = global i64 0
+		@r4 = global i64 0
+		define void @fnc() {
+			store i64 123, i64* @r3
+			store i64 456, i64* @r4
+			%a = bitcast i64* @r to void()*
+			call void %a()
+			ret void
+		}
+	)");
+	auto config = Config::fromJsonString(module.get(), R"({
+		"architecture" : {
+			"bitSize" : 64,
+			"endian" : "big",
+			"name" : "powerpc64"
+		}
+	})");
+
+	AbiPowerpc64 abi(module.get(), &config);
+
+	abi.addRegister(PPC_REG_R3, getGlobalByName("r3"));
+	abi.addRegister(PPC_REG_R4, getGlobalByName("r4"));
+
+	pass.runOnModuleCustom(*module, &config, &abi);
+
+	std::string exp = R"(
+		@r = global i64 0
+		@r3 = global i64 0
+		@r4 = global i64 0
+
+		define i64 @fnc() {
+			store i32 123, i64* @r3
+			store i32 456, i64* @r4
+			%a = bitcast i32* @r to void ()*
+			%1 = load i32, i64* @r3
+			%2 = load i32, i64* @r4
+			%3 = bitcast void ()* %a to void (i64, i64)*
+			call void %3(i64 %1, i64 %2)
+			%4 = load i64, i64* @r3
+			ret i64 %4
+		}
+
+		declare void @0()
 	)";
 	checkModuleAgainstExpectedIr(exp);
 }
