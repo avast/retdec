@@ -849,6 +849,7 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateNeg(cs_insn* i, cs_arm64* ai,
  */
 void Capstone2LlvmIrTranslatorArm64_impl::translateSbc(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb)
 {
+	// TODO: Reimplement as add
 	EXPECT_IS_TERNARY(i, ai, irb);
 
 	std::tie(op1, op2) = loadOpBinaryOrTernaryOp1Op2(ai, irb);
@@ -865,6 +866,32 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateSbc(cs_insn* i, cs_arm64* ai,
 		llvm::Value* zero = llvm::ConstantInt::get(val->getType(), 0);
 		storeRegister(ARM64_REG_CPSR_C, generateValueNegate(irb, generateBorrowSubC(val, op1, op2, irb, carry)), irb);
 		storeRegister(ARM64_REG_CPSR_V, generateOverflowSubC(val, op1, op2, irb, carry), irb);
+		storeRegister(ARM64_REG_CPSR_N, irb.CreateICmpSLT(val, zero), irb);
+		storeRegister(ARM64_REG_CPSR_Z, irb.CreateICmpEQ(val, zero), irb);
+	}
+}
+
+/**
+ * ARM64_INS_NGC, ARM64_INS_NGCS
+ */
+void Capstone2LlvmIrTranslatorArm64_impl::translateNgc(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb)
+{
+	EXPECT_IS_BINARY(i, ai, irb);
+
+	auto* op2 = loadOpBinaryOp1(ai, irb);
+	llvm::Value* zero = llvm::ConstantInt::get(op2->getType(), 0);
+	auto* carry = loadRegister(ARM64_REG_CPSR_C, irb);
+
+	auto* val = irb.CreateSub(zero, op2);
+	val       = irb.CreateSub(val, irb.CreateZExtOrTrunc(carry, val->getType()));
+
+	storeOp(ai->operands[0], val, irb);
+
+	if (ai->update_flags)
+	{
+		llvm::Value* zero = llvm::ConstantInt::get(val->getType(), 0);
+		storeRegister(ARM64_REG_CPSR_C, generateValueNegate(irb, generateBorrowSubC(val, zero, op2, irb, carry)), irb);
+		storeRegister(ARM64_REG_CPSR_V, generateOverflowSubC(val, zero, op2, irb, carry), irb);
 		storeRegister(ARM64_REG_CPSR_N, irb.CreateICmpSLT(val, zero), irb);
 		storeRegister(ARM64_REG_CPSR_Z, irb.CreateICmpEQ(val, zero), irb);
 	}

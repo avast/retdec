@@ -672,7 +672,7 @@ Capstone2LlvmIrTranslatorArm64_impl::_i2fm =
 	{ARM64_INS_WFI, nullptr},
 	{ARM64_INS_SEV, nullptr},
 	{ARM64_INS_SEVL, nullptr},
-	{ARM64_INS_NGC, nullptr},
+	{ARM64_INS_NGC, &Capstone2LlvmIrTranslatorArm64_impl::translateNgc},
 	{ARM64_INS_SBFIZ, nullptr},
 	{ARM64_INS_UBFIZ, nullptr},
 	{ARM64_INS_SBFX, nullptr},
@@ -700,7 +700,7 @@ Capstone2LlvmIrTranslatorArm64_impl::_i2fm =
 	{ARM64_INS_TLBI, nullptr},
 
 	{ARM64_INS_NEGS, &Capstone2LlvmIrTranslatorArm64_impl::translateNeg},
-	{ARM64_INS_NGCS, nullptr},
+	{ARM64_INS_NGCS, &Capstone2LlvmIrTranslatorArm64_impl::translateNgc},
 
 	{ARM64_INS_ENDING, nullptr}
 };
