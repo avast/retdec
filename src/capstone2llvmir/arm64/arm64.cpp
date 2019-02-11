@@ -821,6 +821,30 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateSub(cs_insn* i, cs_arm64* ai,
 }
 
 /**
+ * ARM64_INS_NEG
+ * ARM64_INS_NEGS for some reason capstone includes this instruction as alias.
+ */
+void Capstone2LlvmIrTranslatorArm64_impl::translateNeg(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb)
+{
+	EXPECT_IS_BINARY(i, ai, irb);
+
+	auto* op2 = loadOpBinaryOp1(ai, irb);
+	llvm::Value* zero = llvm::ConstantInt::get(op2->getType(), 0);
+
+	auto* val = irb.CreateSub(zero, op2);
+	storeOp(ai->operands[0], val, irb);
+
+	if (ai->update_flags)
+	{
+		llvm::Value* zero = llvm::ConstantInt::get(val->getType(), 0);
+		storeRegister(ARM64_REG_CPSR_C, generateValueNegate(irb, generateBorrowSub(zero, op2, irb)), irb);
+		storeRegister(ARM64_REG_CPSR_V, generateOverflowSub(val, zero, op2, irb), irb);
+		storeRegister(ARM64_REG_CPSR_N, irb.CreateICmpSLT(val, zero), irb);
+		storeRegister(ARM64_REG_CPSR_Z, irb.CreateICmpEQ(val, zero), irb);
+	}
+}
+
+/**
  * ARM64_INS_SBC
  */
 void Capstone2LlvmIrTranslatorArm64_impl::translateSbc(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb)
@@ -1365,7 +1389,6 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateMul(cs_insn* i, cs_arm64* ai,
 
 	auto* op1 = loadOp(ai->operands[1], irb);
 	auto* op2 = loadOp(ai->operands[2], irb);
-	op2 = irb.CreateZExtOrTrunc(op2, op1->getType());
 
 	auto *val = irb.CreateMul(op1, op2);
 	if (i->id == ARM64_INS_MADD)
