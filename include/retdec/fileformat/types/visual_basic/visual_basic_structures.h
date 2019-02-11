@@ -12,6 +12,9 @@
 namespace retdec {
 namespace fileformat {
 
+constexpr std::size_t VBHEADER_SIGNATURE = 0x21354256;
+constexpr std::size_t VB_MAX_STRING_LEN = 100;
+
 enum class VBExternTableEntryType
 {
 	internal = 0x6,
@@ -20,7 +23,7 @@ enum class VBExternTableEntryType
 
 struct VBHeader
 {
-	std::uint8_t signature[4];               ///< "VB5!" signature
+	std::uint32_t signature;                 ///< "VB5!" signature
 	std::uint16_t runtimeBuild;              ///< runtime flag
 	std::uint8_t languageDLL[14];            ///< language DLL
 	std::uint8_t backupLanguageDLL[14];      ///< backup language DLL
@@ -64,12 +67,12 @@ struct VBHeader
 
 	void dump(std::ostream &out)
 	{
-		out << "signature:\t\t";
-		for (std::size_t i = 0; i < sizeof(signature); i++)
-		{
-			out << signature[i];
-		}
-		out << "\n";
+		// out << "signature:\t\t";
+		// for (std::size_t i = 0; i < sizeof(signature); i++)
+		// {
+		// 	out << signature[i];
+		// }
+		// out << "\n";
 
 		out << "runtimeBuild:\t\t" << runtimeBuild << "\n";
 

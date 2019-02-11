@@ -668,7 +668,7 @@ void PeFormat::loadVisualBasicHeader()
 		return;
 	}
 
-	std::memcpy(&vbh.signature, reinterpret_cast<void *>(&bytes.data()[offset]), sizeof(vbh.signature)); offset += sizeof(vbh.signature);
+	vbh.signature = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbh.signature);
 	vbh.runtimeBuild = *reinterpret_cast<std::uint16_t *>(&bytes.data()[offset]); offset += sizeof(vbh.runtimeBuild);
 	std::memcpy(&vbh.languageDLL, reinterpret_cast<void *>(&bytes.data()[offset]), sizeof(vbh.languageDLL)); offset += sizeof(vbh.languageDLL);
 	std::memcpy(&vbh.backupLanguageDLL, reinterpret_cast<void *>(&bytes.data()[offset]), sizeof(vbh.backupLanguageDLL)); offset += sizeof(vbh.backupLanguageDLL);
@@ -694,6 +694,7 @@ void PeFormat::loadVisualBasicHeader()
 
 	if (!isLittleEndian())
 	{
+		vbh.signature = byteSwap32(vbh.signature);
 		vbh.runtimeBuild = byteSwap16(vbh.runtimeBuild);
 		vbh.runtimeDLLVersion = byteSwap16(vbh.runtimeDLLVersion);
 		vbh.LCID1 = byteSwap32(vbh.LCID1);
@@ -716,28 +717,33 @@ void PeFormat::loadVisualBasicHeader()
 		vbh.projNameOffset = byteSwap32(vbh.projNameOffset);
 	}
 
+	if (vbh.signature != VBHEADER_SIGNATURE)
+	{
+		return;
+	}
+
 	if (vbh.projExeNameOffset != 0)
 	{
 		projExeName = retdec::utils::readNullTerminatedAscii(allBytes.data(), allBytes.size(),
-														vbHeaderOffset + vbh.projExeNameOffset);
+									vbHeaderOffset + vbh.projExeNameOffset, VB_MAX_STRING_LEN, true);
 		visualBasicInfo.setProjectExeName(projExeName);
 	}
 	if (vbh.projDescOffset != 0)
 	{
 		projDesc = retdec::utils::readNullTerminatedAscii(allBytes.data(), allBytes.size(),
-														vbHeaderOffset + vbh.projDescOffset);
+									vbHeaderOffset + vbh.projDescOffset, VB_MAX_STRING_LEN, true);
 		visualBasicInfo.setProjectDescription(projDesc);
 	}
 	if (vbh.helpFileOffset != 0)
 	{
 		helpFile = retdec::utils::readNullTerminatedAscii(allBytes.data(), allBytes.size(),
-														vbHeaderOffset + vbh.helpFileOffset);
+									vbHeaderOffset + vbh.helpFileOffset, VB_MAX_STRING_LEN, true);
 		visualBasicInfo.setProjectHelpFile(helpFile);
 	}
 	if (vbh.projNameOffset != 0)
 	{
 		projName = retdec::utils::readNullTerminatedAscii(allBytes.data(), allBytes.size(),
-														vbHeaderOffset + vbh.projNameOffset);
+									vbHeaderOffset + vbh.projNameOffset, VB_MAX_STRING_LEN, true);
 		visualBasicInfo.setProjectName(projName);
 	}
 
@@ -810,22 +816,22 @@ bool PeFormat::parseVisualBasicComRegistrationData(std::size_t structureOffset)
 
 	visualBasicInfo.setTypeLibLCID(vbcrd.projTlbLCID);
 	visualBasicInfo.setTypeLibMajorVersion(vbcrd.tlbVerMajor);
-	// TODO uncomment
-	// visualBasicInfo.setTypeLibMinorVersion(vbcrd.tlbVerMinor);
+	visualBasicInfo.setTypeLibMinorVersion(vbcrd.tlbVerMinor);
+
 	if (!visualBasicInfo.hasProjectName() && vbcrd.projNameOffset != 0)
 	{
 		projName = retdec::utils::readNullTerminatedAscii(allBytes.data(), allBytes.size(),
-															structureOffset + vbcrd.projNameOffset);
+							structureOffset + vbcrd.projNameOffset, VB_MAX_STRING_LEN, true);
 	}
 	if (!visualBasicInfo.hasProjectHelpFile() && vbcrd.helpFileOffset != 0)
 	{
 		helpFile = retdec::utils::readNullTerminatedAscii(allBytes.data(), allBytes.size(),
-															structureOffset + vbcrd.helpFileOffset);
+							structureOffset + vbcrd.helpFileOffset, VB_MAX_STRING_LEN, true);
 	}
 	if (!visualBasicInfo.hasProjectDescription() && vbcrd.projDescOffset != 0)
 	{
 		projDesc = retdec::utils::readNullTerminatedAscii(allBytes.data(), allBytes.size(),
-															structureOffset + vbcrd.projDescOffset);
+							structureOffset + vbcrd.projDescOffset, VB_MAX_STRING_LEN, true);
 	}
 
 	visualBasicInfo.setTypeLibCLSID(vbcrd.projCLSID);
@@ -898,13 +904,13 @@ bool PeFormat::parseVisualBasicComRegistrationInfo(std::size_t structureOffset,
 	if (vbcri.objNameOffset != 0)
 	{
 		COMObjectName = retdec::utils::readNullTerminatedAscii(allBytes.data(), allBytes.size(),
-												comRegDataOffset + vbcri.objNameOffset);
+										comRegDataOffset + vbcri.objNameOffset, VB_MAX_STRING_LEN, true);
 		visualBasicInfo.setCOMObjectName(COMObjectName);
 	}
 	if (vbcri.objDescOffset != 0)
 	{
 		COMObjectDesc = retdec::utils::readNullTerminatedAscii(allBytes.data(), allBytes.size(),
-												comRegDataOffset + vbcri.objDescOffset);
+										comRegDataOffset + vbcri.objDescOffset, VB_MAX_STRING_LEN, true);
 		visualBasicInfo.setCOMObjectDescription(COMObjectDesc);
 	}
 	
@@ -922,9 +928,6 @@ bool PeFormat::parseVisualBasicComRegistrationInfo(std::size_t structureOffset,
 	{
 		visualBasicInfo.setCOMObjectEventsCLSID(bytes.data());
 	}
-
-	// TODO MUST DELME
-	visualBasicInfo.setTypeLibMinorVersion(vbcri.isDesignerFlag);
 
 	return true;
 }
@@ -1058,19 +1061,24 @@ bool PeFormat::parseVisualBasicExternTable(std::size_t structureOffset, std::siz
 		unsigned long long moduleNameOffset;
 		if (getOffsetFromAddress(moduleNameOffset, entryData.moduleNameAddr))
 		{
-			moduleName = retdec::utils::readNullTerminatedAscii(allBytes.data(), allBytes.size(), moduleNameOffset);
+			moduleName = retdec::utils::readNullTerminatedAscii(allBytes.data(), allBytes.size(),
+														moduleNameOffset, VB_MAX_STRING_LEN, true);
 		}
 
 		unsigned long long apiNameOffset;
 		if (getOffsetFromAddress(apiNameOffset, entryData.apiNameAddr))
 		{
-			apiName = retdec::utils::readNullTerminatedAscii(allBytes.data(), allBytes.size(), apiNameOffset);
+			apiName = retdec::utils::readNullTerminatedAscii(allBytes.data(), allBytes.size(),
+														apiNameOffset, VB_MAX_STRING_LEN, true);
 		}
 
-		auto ext = std::make_unique<VisualBasicExtern>();
-		ext->setModuleName(moduleName);
-		ext->setApiName(apiName);
-		visualBasicInfo.addExtern(std::move(ext));
+		if (!moduleName.empty() || !apiName.empty())
+		{
+			auto ext = std::make_unique<VisualBasicExtern>();
+			ext->setModuleName(moduleName);
+			ext->setApiName(apiName);
+			visualBasicInfo.addExtern(std::move(ext));
+		}
 	}
 
 	visualBasicInfo.computeExternTableHashes();
@@ -1148,7 +1156,8 @@ bool PeFormat::parseVisualBasicObjectTable(std::size_t structureOffset)
 
 	if (!visualBasicInfo.hasProjectName() && getOffsetFromAddress(projectNameOffset, vbot.projectNameAddr))
 	{
-		projName = retdec::utils::readNullTerminatedAscii(allBytes.data(), allBytes.size(), projectNameOffset);
+		projName = retdec::utils::readNullTerminatedAscii(allBytes.data(), allBytes.size(), projectNameOffset,
+														VB_MAX_STRING_LEN, true);
 		visualBasicInfo.setProjectName(projName);
 	}
 
@@ -1219,7 +1228,8 @@ bool PeFormat::parseVisualBasicObjects(std::size_t structureOffset, std::size_t 
 			continue;
 		}
 
-		std::string objectName = readNullTerminatedAscii(allBytes.data(), allBytes.size(), objectNameOffset);
+		std::string objectName = readNullTerminatedAscii(allBytes.data(), allBytes.size(), objectNameOffset,
+														VB_MAX_STRING_LEN, true);
 		object = std::make_unique<VisualBasicObject>();
 		object->setName(objectName);
 
@@ -1247,12 +1257,20 @@ bool PeFormat::parseVisualBasicObjects(std::size_t structureOffset, std::size_t 
 					continue;
 				}
 
-				std::string methodName = readNullTerminatedAscii(allBytes.data(), allBytes.size(), methodNameOffset);
-				object->addMethod(methodName);
+				std::string methodName = readNullTerminatedAscii(allBytes.data(), allBytes.size(),
+															methodNameOffset, VB_MAX_STRING_LEN, true);
+
+				if (!methodName.empty())
+				{
+					object->addMethod(methodName);
+				}
 			}
 		}
 
-		visualBasicInfo.addObject(std::move(object));
+		if (!objectName.empty() || object->getNumberOfMethods() > 0)
+		{
+			visualBasicInfo.addObject(std::move(object));
+		}
 	}
 
 	return true;
