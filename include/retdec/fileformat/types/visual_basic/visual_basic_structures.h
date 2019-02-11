@@ -64,61 +64,6 @@ struct VBHeader
 			sizeof(COMRegisterDataAddr) + sizeof(projExeNameOffset) + sizeof(projDescOffset) +
 			sizeof(helpFileOffset) + sizeof(projNameOffset);
 	}
-
-	void dump(std::ostream &out)
-	{
-		// out << "signature:\t\t";
-		// for (std::size_t i = 0; i < sizeof(signature); i++)
-		// {
-		// 	out << signature[i];
-		// }
-		// out << "\n";
-
-		out << "runtimeBuild:\t\t" << runtimeBuild << "\n";
-
-		out << "languageDLL:\t\t";
-		for (std::size_t i = 0; i < sizeof(languageDLL); i++)
-		{
-			if (!languageDLL[i])
-			{
-				break;
-			}
-			out << languageDLL[i];
-		}
-		out << "\n";
-
-		out << "backupLanguageDLL:\t";
-		for (std::size_t i = 0; i < sizeof(backupLanguageDLL); i++)
-		{
-			if (!backupLanguageDLL[i])
-			{
-				break;
-			}
-			out << backupLanguageDLL[i];
-		}
-		out << "\n";
-
-		out << "runtimeDLLVersion:\t" << runtimeDLLVersion << "\n";
-		out << "LCID1:\t\t" << LCID1 << "\n";
-		out << "LCID2:\t" << LCID2 << "\n";
-		out << "subMainAddr:\t\t" << std::hex << subMainAddr << "\n";
-		out << "projectInfoAddr:\t\t" << projectInfoAddr << std::dec << "\n";
-		out << "MDLIntObjsFlags:\t\t" << MDLIntObjsFlags << "\n";
-		out << "MDLIntObjsFlags2:\t\t" << MDLIntObjsFlags2 << "\n";
-		out << "threadFlags:\t\t" << threadFlags << "\n";
-		out << "nThreads:\t\t" << nThreads << "\n";
-		out << "nForms:\t\t" << nForms << "\n";
-		out << "nExternals:\t" << nExternals << "\n";
-		out << "nThunks:\t\t" << nThunks << "\n";
-		out << "GUITableAddr:\t\t" << std::hex << GUITableAddr << "\n";
-		out << "externalTableAddr:" << externalTableAddr << "\n";
-		out << "COMRegisterDataAddr:\t" << COMRegisterDataAddr << "\n";
-		out << "projExeNameOffset:\t" << projExeNameOffset << "\n";
-		out << "projDescOffset:\t\t" << projDescOffset << "\n";
-		out << "helpFileOffset:\t\t" << helpFileOffset << "\n";
-		out << "projNameOffset:\t\t" << projNameOffset << std::dec << "\n";
-		out << "\n";
-	}
 };
 
 struct VBProjInfo
@@ -148,22 +93,6 @@ struct VBProjInfo
 			+ sizeof(codeStartAddr) + sizeof(codeEndAddr) + sizeof(dataSize)
 			+ sizeof(threadSpaceAddr) + sizeof(exHandlerAddr) + sizeof(nativeCodeAddr)
 			+ sizeof(pathInformation) + sizeof(externalTableAddr) + sizeof(nExternals);
-	}
-
-	void dump(std::ostream &out)
-	{
-		out << "version:\t\t" << version << "\n";
-		out << "objectTableAddr:\t\t" << objectTableAddr << "\n";
-		out << "null:\t\t\t" << null << "\n";
-		out << "codeStartAddr:\t\t" << codeStartAddr << "\n";
-		out << "codeEndAddr:\t\t" << codeEndAddr << "\n";
-		out << "dataSize:\t\t" << dataSize << "\n";
-		out << "threadSpaceAddr:\t\t" << threadSpaceAddr << "\n";
-		out << "exHandlerAddr:\t\t" << exHandlerAddr << "\n";
-		out << "nativeCodeAddr:\t\t" << nativeCodeAddr << "\n";
-		out << "externalTableAddr:\t" << externalTableAddr << "\n";
-		out << "nExternals:\t" << nExternals << "\n";
-		out << "\n";
 	}
 };
 
@@ -205,30 +134,6 @@ struct VBObjectTable
 			sizeof(projectNameAddr) + sizeof(LCID1) + sizeof(LCID2) + sizeof(IDE4) +
 			sizeof(templateVesion);
 	}
-
-	void dump(std::ostream &out)
-	{
-		out << "null1:\t\t\t" << null1 << "\n";
-		out << "execCOMAddr:\t\t" << execCOMAddr << "\n";
-		out << "projecInfo2Addr:\t" << projecInfo2Addr << "\n";
-		out << "reserved:\t\t" << reserved << "\n";
-		out << "null2:\t\t\t" << null2 << "\n";
-		out << "projectObjectAddr:\t" << projectObjectAddr << "\n";
-		// out << "objectGUID:\t\t" << objectGUID << "\n"; // TODO
-		out << "flagsCompileState:\t\t" << flagsCompileState << "\n";
-		out << "nObjects:\t\t" << nObjects << "\n";
-		out << "nCompiledObjects:\t" << nCompiledObjects << "\n";
-		out << "nUsedObjects:\t\t" << nUsedObjects << "\n";
-		out << "objectDescriptorsAddr:\t" << objectDescriptorsAddr << "\n";
-		out << "IDE1:\t\t\t" << IDE1 << "\n";
-		out << "IDE2:\t\t\t" << IDE2 << "\n";
-		out << "IDE3:\t\t\t" << IDE3 << "\n";
-		out << "projectNameAddr:\t" << projectNameAddr << "\n";
-		out << "LCID1:\t\t\t" << LCID1 << "\n";
-		out << "LCID2:\t\t\t" << LCID2 << "\n";
-		out << "IDE4:\t\t\t" << IDE4 << "\n";
-		out << "templateVesion:\t\t" << templateVesion << "\n";
-	}
 };
 
 struct VBPublicObjectDescriptor
@@ -259,22 +164,6 @@ struct VBPublicObjectDescriptor
 			sizeof(objectNameAddr) + sizeof(nMethods) + sizeof(methodNamesAddr) +
 			sizeof(staticVarsCopyAddr) + sizeof(objectType) + sizeof(null);
 	}
-
-	void dump(std::ostream &out)
-	{
-		out << "objectInfoAddr:\t\t" << objectInfoAddr << "\n";
-		out << "reserved:\t\t" << reserved << "\n";
-		out << "publicBytesAddr:\t" << publicBytesAddr << "\n";
-		out << "staticBytesAddr:\t" << staticBytesAddr << "\n";
-		out << "modulePublicAddr:\t" << modulePublicAddr << "\n";
-		out << "moduleStaticAddr:\t" << moduleStaticAddr << "\n";
-		out << "objectNameAddr:\t\t" << objectNameAddr << "\n";
-		out << "nMethods:\t\t" << nMethods << "\n";
-		out << "methodNamesAddr:\t" << methodNamesAddr << "\n";
-		out << "staticVarsCopyAddr:\t" << staticVarsCopyAddr << "\n";
-		out << "objectType:\t\t" << objectType << "\n";
-		out << "null:\t\t\t" << null << "\n";
-	}
 };
 
 struct VBExternTableEntry
@@ -291,13 +180,6 @@ struct VBExternTableEntry
 	{
 		return sizeof(type) + sizeof(importDataAddr);
 	}
-
-	void dump(std::ostream &out)
-	{
-		out << "type:\t\t" << type << "\n";
-		out << "importDataAddr:\t\t" << importDataAddr << "\n";
-		out << "\n";
-	}
 };
 
 struct VBExternTableEntryData
@@ -313,13 +195,6 @@ struct VBExternTableEntryData
 	std::size_t structureSize()
 	{
 		return sizeof(moduleNameAddr) + sizeof(apiNameAddr);
-	}
-
-	void dump(std::ostream &out)
-	{
-		out << "moduleNameAddr:\t" << moduleNameAddr << "\n";
-		out << "apiNameAddr:\t" << apiNameAddr << "\n";
-		out << "\n";
 	}
 };
 
@@ -346,20 +221,6 @@ struct VBCOMRData
 			sizeof(regInfoOffset) + sizeof(projNameOffset) + sizeof(helpFileOffset) +
 			sizeof(projDescOffset) + sizeof(projCLSID) + sizeof(projTlbLCID) +
 			sizeof(unknown) + sizeof(tlbVerMajor) + sizeof(tlbVerMinor);
-	}
-
-	void dump(std::ostream &out)
-	{
-		out << std::hex;
-		out << "regInfoOffset\t:" << regInfoOffset << "\n";
-		out << "projNameOffset\t:" << projNameOffset << "\n";
-		out << "helpFileOffset\t:" << helpFileOffset << "\n";
-		out << "projDescOffset\t:" << projDescOffset << "\n";
-		out << "projTlbLCID\t:" << projTlbLCID << "\n";
-		out << "unknown\t\t:" << unknown << "\n";
-		out << "tlbVerMajor\t:" << tlbVerMajor << "\n";
-		out << "tlbVerMinor\t:" << tlbVerMinor << "\n";
-		out << std::dec;
 	}
 };
 
@@ -397,27 +258,6 @@ struct VBCOMRInfo
 			sizeof(olemicsFlags) + sizeof(classType) + sizeof(objectType) +
 			sizeof(toolboxBitmap32) + sizeof(defaultIcon) + sizeof(isDesignerFlag) +
 			sizeof(designerDataOffset);
-	}
-
-	void dump(std::ostream &out)
-	{
-		out << std::hex;
-		out << "ifInfoOffset:\t\t" << ifInfoOffset << "\n";
-		out << "objNameOffset:\t\t" << objNameOffset << "\n";
-		out << "objDescOffset:\t\t" << objDescOffset << "\n";
-		out << "instancing:\t\t" << instancing << "\n";
-		out << "objID:\t\t" << objID << "\n";
-		out << "isInterfaceFlag:\t\t" << isInterfaceFlag << "\n";
-		out << "ifCLSIDOffset:\t\t" << ifCLSIDOffset << "\n";
-		out << "eventCLSIDOffset:\t\t" << eventCLSIDOffset << "\n";
-		out << "hasEvents:\t\t" << hasEvents << "\n";
-		out << "olemicsFlags:\t\t" << olemicsFlags << "\n";
-		out << "classType:\t\t" << static_cast<uint16_t>(classType) << "\n";
-		out << "objectType:\t\t" << static_cast<uint16_t>(objectType) << "\n";
-		out << "toolboxBitmap32:\t\t" << toolboxBitmap32 << "\n";
-		out << "defaultIcon:\t\t" << defaultIcon << "\n";
-		out << "isDesignerFlag:\t\t" << isDesignerFlag << "\n";
-		out << "designerDataOffset:\t\t" << designerDataOffset << "\n";
 	}
 };
 
