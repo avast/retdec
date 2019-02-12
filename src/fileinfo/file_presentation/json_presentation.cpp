@@ -515,7 +515,12 @@ void JsonPresentation::presentVisualBasicInfo(Json::Value &root) const
 	}
 
 	Value jObjectTable;
-	jObjectTable["guid"] = fileinfo.getVisualBasicObjectTableGUID();
+	auto guid = fileinfo.getVisualBasicObjectTableGUID();
+
+	if (!guid.empty())
+	{
+		jObjectTable["guid"] = guid;
+	}
 
 	auto nObjects = fileinfo.getVisualBasicNumberOfObjects();
 	if (nObjects)
