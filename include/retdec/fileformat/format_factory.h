@@ -14,7 +14,10 @@
 namespace retdec {
 namespace fileformat {
 
-std::unique_ptr<FileFormat> createFileFormat(const std::string &filePath, retdec::config::Config *config = nullptr, LoadFlags loadFlags = LoadFlags::NONE);
+std::unique_ptr<FileFormat> createFileFormat(
+		const std::string &filePath,
+		bool isRaw = false,
+		LoadFlags loadFlags = LoadFlags::NONE);
 
 } // namespace fileformat
 } // namespace retdec

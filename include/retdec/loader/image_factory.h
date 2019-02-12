@@ -10,6 +10,7 @@
 #include <memory>
 #include <string>
 
+#include "retdec/config/config.h"
 #include "retdec/loader/loader/image.h"
 
 namespace retdec {

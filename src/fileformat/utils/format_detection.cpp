@@ -182,10 +182,10 @@ bool isStrangeFeedface(const std::string &filePath)
 /**
  * Detects file format of input file
  * @param filePath Path to input file
- * @param config Config is used to determine if the input is a raw binary
+ * @param isRaw Is the input is a raw binary?
  * @return Detected file format in enumeration representation
  */
-Format detectFileFormat(const std::string &filePath, retdec::config::Config *config)
+Format detectFileFormat(const std::string &filePath, bool isRaw)
 {
 	std::ifstream stream(filePath, std::ifstream::in | std::ifstream::binary);
 	if(!stream.is_open())
@@ -208,7 +208,8 @@ Format detectFileFormat(const std::string &filePath, retdec::config::Config *con
 	{
 		magic.resize(magicSize);
 		stream.read(&magic[0], magicSize);
-	} catch(...)
+	}
+	catch(...)
 	{
 		return Format::UNDETECTABLE;
 	}
@@ -246,7 +247,7 @@ Format detectFileFormat(const std::string &filePath, retdec::config::Config *con
 	{
 		return Format::COFF;
 	}
-	else if(config && config->fileFormat.isRaw())
+	else if(isRaw)
 	{
 		return Format::RAW_DATA;
 	}

@@ -70,5 +70,5 @@ set(FILEFORMAT_SOURCES
 )
 
 add_library(retdec-fileformat STATIC ${FILEFORMAT_SOURCES})
-target_link_libraries(retdec-fileformat retdec-crypto retdec-config retdec-utils pelib elfio llvm)
+target_link_libraries(retdec-fileformat retdec-crypto retdec-utils pelib elfio llvm)
 target_include_directories(retdec-fileformat PUBLIC ${PROJECT_SOURCE_DIR}/include/)

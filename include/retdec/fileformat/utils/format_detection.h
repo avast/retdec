@@ -13,7 +13,9 @@
 namespace retdec {
 namespace fileformat {
 
-Format detectFileFormat(const std::string &filePath, retdec::config::Config *config = nullptr);
+Format detectFileFormat(
+		const std::string &filePath,
+		bool isRaw = false);
 
 } // namespace fileformat
 } // namespace retdec

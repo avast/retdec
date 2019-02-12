@@ -18,15 +18,18 @@ namespace fileformat {
 /**
  * Create instance of FileFormat class
  * @param filePath Path to input file
- * @param config Pointer to config used to detect raw data file format
+ * @param isRaw Is the input is a raw binary?
  * @param loadFlags Load flags
  * @return Pointer to instance of FileFormat class or @c nullptr if any error
  *
  * If format of input file is not supported, function will return @c nullptr.
  */
-std::unique_ptr<FileFormat> createFileFormat(const std::string &filePath, retdec::config::Config *config, LoadFlags loadFlags)
+std::unique_ptr<FileFormat> createFileFormat(
+		const std::string &filePath,
+		bool isRaw,
+		LoadFlags loadFlags)
 {
-	switch(detectFileFormat(filePath, config))
+	switch(detectFileFormat(filePath, isRaw))
 	{
 		case Format::PE:
 			return std::make_unique<PeFormat>(filePath, loadFlags);

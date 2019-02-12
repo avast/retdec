@@ -184,51 +184,6 @@ void FileFormat::initStream()
 }
 
 /**
- * Provides architecture information for formats which do not store such information eg. Intel HEX
- * @param derivedPtr Pointer to derived FileFormat class
- * @param arch Architecture information
- */
-template<typename T> void FileFormat::initFormatArch(T derivedPtr, const retdec::config::Architecture &arch)
-{
-	if(!derivedPtr)
-	{
-		return;
-	}
-
-	derivedPtr->setBytesPerWord(arch.getByteSize());
-
-	if(arch.isEndianLittle())
-	{
-		derivedPtr->setEndianness(Endianness::LITTLE);
-	}
-	else if(arch.isEndianBig())
-	{
-		derivedPtr->setEndianness(Endianness::BIG);
-	}
-
-	if(arch.isX86())
-	{
-		derivedPtr->setTargetArchitecture(Architecture::X86);
-	}
-	if(arch.isArmOrThumb())
-	{
-		derivedPtr->setTargetArchitecture(Architecture::ARM);
-	}
-	if(arch.isPpc())
-	{
-		derivedPtr->setTargetArchitecture(Architecture::POWERPC);
-	}
-	if(arch.isMips())
-	{
-		derivedPtr->setTargetArchitecture(Architecture::MIPS);
-	}
-	if(arch.isPic32())
-	{
-		derivedPtr->setTargetArchitecture(Architecture::MIPS);
-	}
-}
-
-/**
  * @fn std::size_t FileFormat::initSectionTableHashOffsets()
  * Init offsets for calculation of section table hashes
  * @return Number of offsets in offsets vector after initialization
@@ -350,28 +305,33 @@ void FileFormat::setLoadedBytes(std::vector<unsigned char> *lBytes)
  * critical information like architecture, endianness or word size.
  * However, fileformat users expect it to contain this information.
  * Therefore, this method needs to be called to set these critical information.
- * @param config Config information
  */
-void FileFormat::initFromConfig(const retdec::config::Config& config)
+void FileFormat::initArchitecture(
+		Architecture arch,
+		retdec::utils::Endianness endian,
+		std::size_t bytesPerWord,
+		retdec::utils::Address entryPoint,
+		retdec::utils::Address sectionVMA)
 {
 	if(IntelHexFormat *ihex = dynamic_cast<IntelHexFormat*>(this))
 	{
-		initFormatArch(ihex, config.architecture);
+		ihex->setTargetArchitecture(arch);
+		ihex->setBytesPerWord(bytesPerWord);
+		ihex->setEndianness(endian);
 	}
 	else if(RawDataFormat *raw = dynamic_cast<RawDataFormat*>(this))
 	{
-		initFormatArch(raw, config.architecture);
-		// Set section address
-		Address tmpAddr = config.getSectionVMA();
-		if(tmpAddr.isDefined())
+		raw->setTargetArchitecture(arch);
+		raw->setBytesPerWord(bytesPerWord);
+		raw->setEndianness(endian);
+
+		if(sectionVMA.isDefined())
 		{
-			raw->setBaseAddress(tmpAddr);
+			raw->setBaseAddress(sectionVMA);
 		}
-		// Set entry point
-		tmpAddr = config.getEntryPoint();
-		if(tmpAddr.isDefined())
+		if(entryPoint.isDefined())
 		{
-			raw->setEntryPoint(tmpAddr);
+			raw->setEntryPoint(entryPoint);
 		}
 	}
 }

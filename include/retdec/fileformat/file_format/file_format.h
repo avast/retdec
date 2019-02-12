@@ -13,8 +13,8 @@
 #include <set>
 #include <vector>
 
-#include "retdec/config/config.h"
 #include "retdec/utils/byte_value_storage.h"
+#include "retdec/utils/value.h"
 #include "retdec/utils/non_copyable.h"
 #include "retdec/fileformat/fftypes.h"
 
@@ -49,7 +49,6 @@ class FileFormat : public retdec::utils::ByteValueStorage, private retdec::utils
 		/// @{
 		void init();
 		void initStream();
-		template<typename T> void initFormatArch(T derivedPtr, const retdec::config::Architecture &arch);
 		/// @}
 
 		/// @name Pure virtual initialization methods
@@ -111,7 +110,12 @@ class FileFormat : public retdec::utils::ByteValueStorage, private retdec::utils
 
 		/// @name Other methods
 		/// @{
-		void initFromConfig(const retdec::config::Config &config);
+		void initArchitecture(
+				Architecture arch,
+				retdec::utils::Endianness endian = retdec::utils::Endianness::UNKNOWN,
+				std::size_t bytesPerWord = 4,
+				retdec::utils::Address entryPoint = retdec::utils::Address::getUndef,
+				retdec::utils::Address sectionVMA = retdec::utils::Address::getUndef);
 		void loadStrings();
 		void loadStrings(StringType type, std::size_t charSize);
 		void loadStrings(StringType type, std::size_t charSize, const SecSeg* secSeg);
