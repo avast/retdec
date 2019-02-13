@@ -1,5 +1,6 @@
 set(FILEFORMAT_SOURCES
 	utils/format_detection.cpp
+	utils/byte_array_buffer.cpp
 	utils/conversions.cpp
 	utils/other.cpp
 	utils/asn1.cpp

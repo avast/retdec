@@ -19,6 +19,17 @@ std::unique_ptr<FileFormat> createFileFormat(
 		bool isRaw = false,
 		LoadFlags loadFlags = LoadFlags::NONE);
 
+std::unique_ptr<FileFormat> createFileFormat(
+		std::istream &inputStream,
+		bool isRaw = false,
+		LoadFlags loadFlags = LoadFlags::NONE);
+
+std::unique_ptr<FileFormat> createFileFormat(
+		const std::uint8_t *data,
+		std::size_t size,
+		bool isRaw = false,
+		LoadFlags loadFlags = LoadFlags::NONE);
+
 } // namespace fileformat
 } // namespace retdec
 

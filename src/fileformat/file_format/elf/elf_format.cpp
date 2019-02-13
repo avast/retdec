@@ -1100,6 +1100,18 @@ ElfFormat::ElfFormat(std::istream &inputStream, LoadFlags loadFlags) : FileForma
 }
 
 /**
+ * Constructor
+ * @param data Input data.
+ * @param size Input data size.
+ * @param loadFlags Load flags
+ */
+ElfFormat::ElfFormat(const std::uint8_t *data, std::size_t size, LoadFlags loadFlags) :
+		FileFormat(data, size, loadFlags)
+{
+	initStructures();
+}
+
+/**
  * Destructor
  */
 ElfFormat::~ElfFormat()

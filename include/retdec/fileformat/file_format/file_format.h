@@ -17,6 +17,7 @@
 #include "retdec/utils/value.h"
 #include "retdec/utils/non_copyable.h"
 #include "retdec/fileformat/fftypes.h"
+#include "retdec/fileformat/utils/byte_array_buffer.h"
 
 namespace retdec {
 namespace fileformat {
@@ -41,7 +42,9 @@ struct LoaderErrorInfo
 class FileFormat : public retdec::utils::ByteValueStorage, private retdec::utils::NonCopyable
 {
 	private:
-		std::ifstream auxStream;                 ///< auxiliary member for opening of input file
+		byte_array_buffer auxBuff;               ///< auxiliary input buffer
+		std::ifstream auxFStream;                ///< auxiliary input file stream
+		std::istream auxIStream;                 ///< auxiliary input stream
 		std::vector<unsigned char> *loadedBytes; ///< reference to serialized content of input file
 		LoadFlags loadFlags;                     ///< load flags for configurable file loading
 
@@ -103,9 +106,10 @@ class FileFormat : public retdec::utils::ByteValueStorage, private retdec::utils
 		void setLoadedBytes(std::vector<unsigned char> *lBytes);
 		/// @}
 
-		FileFormat(std::istream &inputStream, LoadFlags loadFlags = LoadFlags::NONE);
 	public:
 		FileFormat(std::string pathToFile, LoadFlags loadFlags = LoadFlags::NONE);
+		FileFormat(std::istream &inputStream, LoadFlags loadFlags = LoadFlags::NONE);
+		FileFormat(const std::uint8_t *data, std::size_t size, LoadFlags loadFlags = LoadFlags::NONE);
 		virtual ~FileFormat();
 
 		/// @name Other methods
@@ -185,7 +189,6 @@ class FileFormat : public retdec::utils::ByteValueStorage, private retdec::utils
 		std::string getSectionTableMd5() const;
 		std::string getSectionTableSha256() const;
 		std::string getPathToFile() const;
-		std::istream& getFileStream();
 		Format getFileFormat() const;
 		std::size_t getNumberOfSections() const;
 		std::size_t getNumberOfSegments() const;

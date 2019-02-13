@@ -236,7 +236,7 @@ Format detectFileFormat(const std::string &filePath, bool isRaw)
 						// Java class and some other format use Mach-O magics
 						return Format::UNKNOWN;
 					}
-					/* fall-thru */
+					return item.second;
 				default:
 					return item.second;
 			}

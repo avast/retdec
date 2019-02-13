@@ -48,5 +48,22 @@ std::unique_ptr<FileFormat> createFileFormat(
 	}
 }
 
+std::unique_ptr<FileFormat> createFileFormat(
+		std::istream &inputStream,
+		bool isRaw,
+		LoadFlags loadFlags)
+{
+	return nullptr; // TODO
+}
+
+std::unique_ptr<FileFormat> createFileFormat(
+		const std::uint8_t *data,
+		std::size_t size,
+		bool isRaw,
+		LoadFlags loadFlags)
+{
+	return nullptr; // TODO
+}
+
 } // namespace fileformat
 } // namespace retdec
