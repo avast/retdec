@@ -18,37 +18,46 @@ namespace borland {
  */
 class BorlandASTParser
 {
-	public:
-		enum Status: uint8_t
-		{
-			success = 0,
-			init,
-			memory_alloc_failure,
-			invalid_mangled_name,
-			unknown_error,
-		};
+public:
+	enum Status : uint8_t
+	{
+		success = 0,
+		in_progress,
+		memory_alloc_failure,
+		invalid_mangled_name,
+		unknown_error,
+	};
 
-	public:
-		explicit BorlandASTParser(const std::string &mangled);
+public:
+	explicit BorlandASTParser(const std::string &mangled);
 
-		std::shared_ptr<Node> ast();
+	std::shared_ptr<Node> ast();
 
-		Status status();
+	Status status();
 
-	private:
-		void parse();
-		std::unique_ptr<CallConv> parseCallConv();
-		std::unique_ptr<Node> parseFullName();
-		static StringView getNestedName(StringView &source);
+private:
+	void parse();
+	void parseFunction();
+	std::pair<bool, bool> parseQualifiers();
+	std::unique_ptr<Node> parseAbsoluteName();
+	FunctionNode::CallConv parseCallConv();
+	std::unique_ptr<NodeArray> parseFuncParams();
+	std::unique_ptr<Node> parseType();
+	std::unique_ptr<Node> parseBuildInType();
+//	unsigned parseNumber();
+//	std::unique_ptr<Node> parseNamedType();
+//		std::unique_ptr<Node> parseRetType();
+//		std::unique_ptr<Node> parseFuncInfo();
+	static StringView getNestedName(StringView &source);
 
-	private:
-		Status _status;
-		StringView _mangled;
-		std::shared_ptr<Node> _ast;
+private:
+	Status _status;
+	StringView _mangled;
+	std::shared_ptr<Node> _ast;
 };
 
-}	// borland
-}	// demangler
-}	// retdec
+}    // borland
+}    // demangler
+}    // retdec
 
 #endif //RETDEC_BORLAND_AST_PARSER_H

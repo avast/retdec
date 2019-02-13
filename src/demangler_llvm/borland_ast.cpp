@@ -56,13 +56,76 @@ Node::Kind Node::kind()
  */
 void Node::printRight(std::ostream &s) {}
 
+std::unique_ptr<Node> TypeFactory::createVoid()
+{
+	return BuiltInType::create("void");
+}
+
+std::unique_ptr<Node> TypeFactory::createBool()
+{
+	return BuiltInType::create("bool");
+}
+
+std::unique_ptr<Node> TypeFactory::createWChar()
+{
+	return BuiltInType::create("wchar_t");
+}
+
+std::unique_ptr<Node> TypeFactory::createSignedChar()
+{
+	return CharType::create(CharType::Signness::signed_char);
+}
+
+std::unique_ptr<Node> TypeFactory::createChar(bool isUnsigned)
+{
+	if (isUnsigned) {
+		return CharType::create(CharType::Signness::unsigned_char);
+	} else {
+		return CharType::create(CharType::Signness::not_stated);
+	}
+}
+
+std::unique_ptr<Node> TypeFactory::createShort(bool isUnsigned)
+{
+	return IntegralType::create("short", isUnsigned);
+}
+
+std::unique_ptr<Node> TypeFactory::createInt(bool isUnsigned)
+{
+	return IntegralType::create("int", isUnsigned);
+}
+
+std::unique_ptr<Node> TypeFactory::createLong(bool isUnsigned)
+{
+	return IntegralType::create("long", isUnsigned);
+}
+
+std::unique_ptr<Node> TypeFactory::createLongLong(bool isUnsigned)
+{
+	return IntegralType::create("long long", isUnsigned);
+}
+
+std::unique_ptr<Node> TypeFactory::createFloat()
+{
+	return FloatType::create("float");
+}
+
+std::unique_ptr<Node> TypeFactory::createDouble()
+{
+	return FloatType::create("double");
+}
+
+std::unique_ptr<Node> TypeFactory::createLongDouble()
+{
+	return FloatType::create("long double");
+}
+
 /**
  * @brief Private constructor for built-in type nodes. Use create().
  * @param typeName Representation of type name.
  */
 BuiltInType::BuiltInType(const StringView &typeName) :
-	Node(Kind::KBuiltIn), _typeName{typeName} {}
-
+	Node(Kind::KBuiltInType), _typeName{typeName} {}
 /**
  * @brief Creates unique pointer to built-in type nodes.
  * @param typeName Representation of type name.
@@ -82,57 +145,72 @@ void BuiltInType::printLeft(std::ostream &s)
 	s << std::string{_typeName.begin(), _typeName.size()};
 }
 
-/**
- * @brief Calling convention node private constructor. Use create().
- * @param conv Calling convention.
- * @param has_right Weather the space after calling convention should be printed.
- */
-CallConv::CallConv(CallConv::Conventions &conv, bool has_right) :
-	Node(Kind::KCallConv, has_right), _conv(conv) {}
-
-/**
- * @brief Creates unique pointer to CallConv node.
- * @param conv Calling convention.
- * @return Unique pointer to CallConv node.
- */
-std::unique_ptr<CallConv> CallConv::create(Conventions &conv)
+IntegralType::IntegralType(const StringView &typeName, bool isUnsigned) :
+	BuiltInType(typeName), _isUnsigned(isUnsigned)
 {
-	bool has_rhs = conv == Conventions::unknown;
-	return std::unique_ptr<CallConv>(new CallConv(conv, has_rhs));
+	_kind = Kind::KIntegralType;
+};
+
+std::unique_ptr<IntegralType> IntegralType::create(const StringView &typeName, bool isUnsigned)
+{
+	return std::unique_ptr<IntegralType>(new IntegralType(typeName, isUnsigned));
 }
 
-/**
- * @return Call convention type.
- */
-CallConv::Conventions CallConv::conv()
-{
-	return _conv;
+void IntegralType::printLeft(std::ostream &s) {
+	if (_isUnsigned) {
+		s << "unsigned ";
+	}
+	s << std::string{_typeName.begin(), _typeName.size()};
 }
 
-/**
- * @brief Prints string representation of calling convention into ostream s.
- * @param s Output stream.
- */
-void CallConv::printLeft(std::ostream &s)
+CharType::CharType(retdec::demangler::borland::CharType::Signness signness):
+	BuiltInType("char"), _signness(signness)
 {
-	std::map<Conventions, std::string> to_str{
-		{Conventions::stdcall, "__stdcall"},
-		{Conventions::fastcall, "__fastcall"},
-		{Conventions::cdecl, "__cdecl"},
-		{Conventions::pascal, "__pascal"},
-		{Conventions::unknown, ""}
-	};
-
-	s << to_str[_conv];
+	_kind = Kind::KCharType;
 }
 
-/**
- * @brief Prints space after calling convention.
- * @param s Output stream.
- */
-void CallConv::printRight(std::ostream &s)
+std::unique_ptr<CharType> CharType::create(Signness signess)
 {
-	s << " ";
+	return std::unique_ptr<CharType>(new CharType(signess));
+}
+
+void CharType::printLeft(std::ostream &s)
+{
+	switch (_signness) {
+	case Signness::signed_char:
+		s << "signed char";
+		break;
+	case Signness::unsigned_char:
+		s<< "unsigned char";
+		break;
+	case Signness::not_stated:
+		s<< "char";
+		break;
+	}
+}
+
+FloatType::FloatType(const StringView &typeName): BuiltInType(typeName)
+{
+	_kind = Kind::KFloatType;
+}
+
+std::unique_ptr<FloatType> FloatType::create(const StringView &typeName)
+{
+	return std::unique_ptr<FloatType>(new FloatType(typeName));
+}
+
+PointerType::PointerType(std::unique_ptr<retdec::demangler::borland::Node> pointee) :
+	Node(Kind::KPointerType), _pointee(std::move(pointee)) {}
+
+std::unique_ptr<PointerType> PointerType::create(std::unique_ptr<retdec::demangler::borland::Node> pointee)
+{
+	return std::unique_ptr<PointerType>(new PointerType(std::move(pointee)));
+}
+
+void PointerType::printLeft(std::ostream &s)
+{
+	_pointee->print(s);
+	s << " *";
 }
 
 /**
@@ -142,11 +220,11 @@ void CallConv::printRight(std::ostream &s)
  * @param params Pointer to parameters.
  */
 FunctionNode::FunctionNode(
-	std::unique_ptr<retdec::demangler::borland::CallConv> call_conv,
 	std::unique_ptr<retdec::demangler::borland::Node> name,
+	CallConv call_conv,
 	std::unique_ptr<retdec::demangler::borland::Node> params) :
 	Node(Kind::KFunction, false),
-	_call_conv(std::move(call_conv)),
+	_call_conv(call_conv),
 	_name(std::move(name)),
 	_params(std::move(params)) {}
 
@@ -158,12 +236,12 @@ FunctionNode::FunctionNode(
  * @return Unique pointer to constructed FunctionNode.
  */
 std::unique_ptr<FunctionNode> FunctionNode::create(
-	std::unique_ptr<retdec::demangler::borland::CallConv> call_conv,
 	std::unique_ptr<retdec::demangler::borland::Node> name,
-	std::unique_ptr<retdec::demangler::borland::Node> params)
+	CallConv call_conv,
+	std::unique_ptr<Node> params)
 {
 	return std::unique_ptr<FunctionNode>(
-		new FunctionNode(std::move(call_conv), std::move(name), std::move(params)));
+		new FunctionNode(std::move(name), call_conv, std::move(params)));
 }
 
 /**
@@ -172,13 +250,19 @@ std::unique_ptr<FunctionNode> FunctionNode::create(
  */
 void FunctionNode::printLeft(std::ostream &s)
 {
-	if (_call_conv->conv() != CallConv::Conventions::unknown) {
-		_call_conv->print(s);
-		s << " ";
+	switch (_call_conv) {
+	case CallConv::fastcall: s << "__fastcall ";
+		break;
+	case CallConv::stdcall: s << "__stdcall ";
+		break;
+	default: break;
 	}
+
 	_name->print(s);
 	s << "(";
-	_params->print(s);
+	if (_params) {
+		_params->print(s);
+	}
 	s << ")";
 }
 
@@ -258,6 +342,11 @@ std::unique_ptr<NodeArray> NodeArray::create()
 void NodeArray::addNode(std::unique_ptr<retdec::demangler::borland::Node> node)
 {
 	_nodes.push_back(std::move(node));
+}
+
+bool NodeArray::empty()
+{
+	return _nodes.empty();
 }
 
 /**
