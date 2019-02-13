@@ -35,6 +35,18 @@ IntelHexFormat::IntelHexFormat(std::istream &inputStream, LoadFlags loadFlags) :
 }
 
 /**
+ * Constructor
+ * @param data Input data.
+ * @param size Input data size.
+ * @param loadFlags Load flags
+ */
+IntelHexFormat::IntelHexFormat(const std::uint8_t *data, std::size_t size, LoadFlags loadFlags) :
+		FileFormat(data, size, loadFlags)
+{
+	initStructures();
+}
+
+/**
  * Destructor
  */
 IntelHexFormat::~IntelHexFormat()

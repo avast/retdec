@@ -36,24 +36,19 @@ namespace fileformat {
 namespace tests {
 
 /**
- * Tests for the @c elf_format module
+ * Tests for the @c elf_format module - using istream constructor.
  */
 class ElfFormatTests_istream : public Test
 {
 	private:
 		std::stringstream elfStringStream;
 	protected:
-		ElfFormat *parser;
+		std::unique_ptr<ElfFormat> parser;
 	public:
 		ElfFormatTests_istream()
 		{
 			elfStringStream << std::string(elfBytes.begin(), elfBytes.end());
-			parser = new ElfFormat(elfStringStream);
-		}
-
-		~ElfFormatTests_istream()
-		{
-			delete parser;
+			parser = std::make_unique<ElfFormat>(elfStringStream);
 		}
 };
 
@@ -91,21 +86,16 @@ TEST_F(ElfFormatTests_istream, DataInterpretationBig)
 }
 
 /**
- * Tests for the @c elf_format module
+ * Tests for the @c elf_format module - using binary data constructor.
  */
 class ElfFormatTests_data : public Test
 {
 	protected:
-		ElfFormat *parser;
+		std::unique_ptr<ElfFormat> parser;
 	public:
 		ElfFormatTests_data()
 		{
-			parser = new ElfFormat(elfBytes.data(), elfBytes.size());
-		}
-
-		~ElfFormatTests_data()
-		{
-			delete parser;
+			parser = std::make_unique<ElfFormat>(elfBytes.data(), elfBytes.size());
 		}
 };
 

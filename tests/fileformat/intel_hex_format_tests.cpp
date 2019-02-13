@@ -43,22 +43,17 @@ namespace fileformat {
 namespace tests {
 
 /**
- * Tests for the @c intel_hex module
+ * Tests for the @c intel_hex module - using istream constructor.
  */
-class IntelHexFormatTests : public Test
+class IntelHexFormatTests_istream : public Test
 {
 	protected:
 		std::unique_ptr<IntelHexFormat> parser;
 	public:
-		IntelHexFormatTests()
+		IntelHexFormatTests_istream()
 		{
 			ihexStream << intel_hex_example;
 			parser = std::make_unique<IntelHexFormat>(ihexStream);
-		}
-
-		~IntelHexFormatTests()
-		{
-
 		}
 
 		void loadOtherString(const std::string &str)
@@ -71,13 +66,13 @@ class IntelHexFormatTests : public Test
 		std::stringstream ihexStream;
 };
 
-TEST_F(IntelHexFormatTests, CorrectParsing)
+TEST_F(IntelHexFormatTests_istream, CorrectParsing)
 {
 	EXPECT_EQ(true, parser->isInValidState());
 	EXPECT_EQ(2, parser->getNumberOfSections());
 }
 
-TEST_F(IntelHexFormatTests, CorrectSections)
+TEST_F(IntelHexFormatTests_istream, CorrectSections)
 {
 	unsigned long long res;
 	EXPECT_EQ(true, parser->getEpAddress(res));
@@ -97,7 +92,7 @@ TEST_F(IntelHexFormatTests, CorrectSections)
 	EXPECT_EQ(0x40, section->getSizeInFile());
 }
 
-TEST_F(IntelHexFormatTests, CorrectSerialization)
+TEST_F(IntelHexFormatTests_istream, CorrectSerialization)
 {
 	unsigned long long res;
 	EXPECT_EQ(true, parser->getEpOffset(res));
@@ -105,7 +100,7 @@ TEST_F(IntelHexFormatTests, CorrectSerialization)
 	EXPECT_EQ(0x63, parser->getLoadedBytes().size());
 }
 
-TEST_F(IntelHexFormatTests, CorrectFileInfo)
+TEST_F(IntelHexFormatTests_istream, CorrectFileInfo)
 {
 	unsigned long long res;
 	EXPECT_EQ(330, parser->getFileLength());
@@ -122,7 +117,7 @@ TEST_F(IntelHexFormatTests, CorrectFileInfo)
 	EXPECT_EQ("Intel HEX", parser->getFileFormatName());
 }
 
-TEST_F(IntelHexFormatTests, CorrectSetters)
+TEST_F(IntelHexFormatTests_istream, CorrectSetters)
 {
 	parser->setTargetArchitecture(Architecture::X86);
 	parser->setEndianness(Endianness::LITTLE);
@@ -132,7 +127,7 @@ TEST_F(IntelHexFormatTests, CorrectSetters)
 	EXPECT_EQ(4, parser->getBytesPerWord());
 }
 
-TEST_F(IntelHexFormatTests, InvalidRecords)
+TEST_F(IntelHexFormatTests_istream, InvalidRecords)
 {
 	loadOtherString(intel_hex_invalid_no_semicolon);
 	EXPECT_EQ(false, parser->isInValidState());
@@ -150,6 +145,50 @@ TEST_F(IntelHexFormatTests, InvalidRecords)
 	EXPECT_EQ(false, parser->isInValidState());
 	// Original.
 	loadOtherString(intel_hex_example);
+}
+
+/**
+ * Tests for the @c intel_hex module - using binary data constructor.
+ */
+class IntelHexFormatTests_data : public Test
+{
+	protected:
+		std::unique_ptr<IntelHexFormat> parser;
+	public:
+		IntelHexFormatTests_data()
+		{
+			parser = std::make_unique<IntelHexFormat>(
+					reinterpret_cast<const uint8_t*>(intel_hex_example.data()),
+					intel_hex_example.size());
+		}
+	private:
+		std::stringstream ihexStream;
+};
+
+TEST_F(IntelHexFormatTests_data, CorrectParsing)
+{
+	EXPECT_EQ(true, parser->isInValidState());
+	EXPECT_EQ(2, parser->getNumberOfSections());
+}
+
+TEST_F(IntelHexFormatTests_data, CorrectSections)
+{
+	unsigned long long res;
+	EXPECT_EQ(true, parser->getEpAddress(res));
+	EXPECT_EQ(2, parser->getDeclaredNumberOfSections());
+	EXPECT_EQ(0xffff0001, res);
+
+	auto section = parser->getSectionFromAddress(0xffff0000);
+	ASSERT_NE(nullptr, section);
+	EXPECT_EQ(0x00, section->getOffset());
+	EXPECT_EQ(0x23, section->getLoadedSize());
+	EXPECT_EQ(0x23, section->getSizeInFile());
+
+	section = parser->getSectionFromAddress(0xffff0100);
+	ASSERT_NE(nullptr, section);
+	EXPECT_EQ(0x23, section->getOffset());
+	EXPECT_EQ(0x40, section->getLoadedSize());
+	EXPECT_EQ(0x40, section->getSizeInFile());
 }
 
 } // namespace tests
