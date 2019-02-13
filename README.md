@@ -259,7 +259,7 @@ Building in Docker does not require installation of the required libraries local
 
 To build the RetDec Docker image, run
 ```
-docker build -t retdec .
+docker build -t retdec - < Dockerfile
 ```
 
 This builds the image from the master branch of this repository.
