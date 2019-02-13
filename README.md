@@ -279,7 +279,7 @@ Now, you can run the decompiler inside a container:
 ```
 docker run --rm -v /path/to/local/directory:/destination retdec retdec-decompiler.py /destination/binary
 ```
-Output files will be generated to the same directory (e.g. `/path/to/local/directory`).
+Note: Do not modify the `/destination` part is. You only need to change `/path/to/local/directory`. Output files will then be generated to `/path/to/local/directory`.
 
 ## Automated TeamCity Builds
 
