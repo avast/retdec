@@ -6,7 +6,7 @@
 
 #include <memory>
 
-#include "llvm/Demangle/demangler_retdec.h"
+#include "llvm/Demangle/demangler_factory.h"
 
 namespace retdec {
 namespace demangler {

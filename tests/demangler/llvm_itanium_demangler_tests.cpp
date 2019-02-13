@@ -6,7 +6,7 @@
 
 #include <gtest/gtest.h>
 
-#include "llvm/Demangle/demangler_retdec.h"
+#include "llvm/Demangle/demangler.h"
 
 using namespace ::testing;
 
