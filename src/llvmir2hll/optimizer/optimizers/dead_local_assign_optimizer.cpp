@@ -68,6 +68,12 @@ void DeadLocalAssignOptimizer::runOnFunction(ShPtr<Function> func) {
 */
 bool DeadLocalAssignOptimizer::canBeOptimized(ShPtr<Variable> var,
 		ShPtr<VarUses> varUses) {
+
+	// We do not want to optimize external variables (used in a volatile
+	// load/store).
+	if (var->isExternal()) {
+		return false;
+	}
 	// For every direct use of the variable...
 	for (const auto &use : varUses->dirUses) {
 		// The use has to be a variable-defining/assign statement.
@@ -86,11 +92,6 @@ bool DeadLocalAssignOptimizer::canBeOptimized(ShPtr<Variable> var,
 			return false;
 		}
 
-		// We do not want to optimize external variables (used in a volatile
-		// load/store).
-		if (var->isExternal()) {
-			return false;
-		}
 
 		// The use cannot contain any function calls.
 		if (useData->hasCalls()) {
