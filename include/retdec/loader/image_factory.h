@@ -16,7 +16,7 @@
 namespace retdec {
 namespace loader {
 
-std::unique_ptr<Image> createImage(const std::string& filePath, retdec::config::Config *config = nullptr);
+std::unique_ptr<Image> createImage(const std::string& filePath, bool isRaw = false);
 std::unique_ptr<Image> createImage(const std::shared_ptr<retdec::fileformat::FileFormat>& fileFormat);
 
 } // namespace loader

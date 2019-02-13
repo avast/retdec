@@ -28,7 +28,9 @@ FileImage::FileImage(
 		:
 		FileImage(
 				m,
-				retdec::loader::createImage(path, &config->getConfig()),
+				retdec::loader::createImage(
+						path,
+						config->getConfig().fileFormat.isRaw()),
 				config)
 {
 
@@ -64,7 +66,7 @@ FileImage::FileImage(
 	auto& c = config->getConfig();
 	auto& ca = c.architecture;
 	auto endian = ca.isEndianUnknown()
-			? retdec::utils::Endianness::UNKNOWN
+			? _image->getEndianness()
 			: (ca.isEndianLittle()
 					? retdec::utils::Endianness::LITTLE
 					: retdec::utils::Endianness::BIG);

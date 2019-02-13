@@ -280,7 +280,7 @@ void FileDetector::setConfigFile(retdec::config::Config &config)
 
 	auto& ca = config.architecture;
 	auto endian = ca.isEndianUnknown()
-			? retdec::utils::Endianness::UNKNOWN
+			? fileParser->getEndianness()
 			: (ca.isEndianLittle()
 					? retdec::utils::Endianness::LITTLE
 					: retdec::utils::Endianness::BIG);
