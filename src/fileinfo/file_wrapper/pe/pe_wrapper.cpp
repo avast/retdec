@@ -176,9 +176,15 @@ bool PeWrapper::getFileSection(unsigned long long secIndex, FileSection &section
 		const auto *auxSec = getSection(index);
 		if(auxSec)
 		{
+			double entropy;
+			if(auxSec->getEntropy(entropy))
+			{
+				section.setEntropy(entropy);
+			}
 			section.setCrc32(auxSec->getCrc32());
 			section.setMd5(auxSec->getMd5());
 			section.setSha256(auxSec->getSha256());
+
 		}
 	}
 
