@@ -7,6 +7,7 @@
 #include <array>
 #include <map>
 #include <unordered_map>
+#include <cmath>
 
 #include "retdec/utils/container.h"
 #include "retdec/utils/conversion.h"
