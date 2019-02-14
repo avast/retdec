@@ -19,6 +19,7 @@ std::size_t getRealSizeInRegion(std::size_t offset, std::size_t requestedSize, s
 std::string getFileFormatNameFromEnum(Format format);
 std::vector<std::string> getSupportedFileFormats();
 std::vector<std::string> getSupportedArchitectures();
+double computeDataEntropy(const std::uint8_t *data, std::size_t dataLen);
 
 } // namespace fileformat
 } // namespace retdec

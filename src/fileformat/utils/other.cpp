@@ -5,6 +5,7 @@
  */
 
 #include <map>
+#include <cmath>
 
 #include "retdec/utils/container.h"
 #include "retdec/fileformat/utils/other.h"
@@ -97,6 +98,34 @@ std::vector<std::string> getSupportedArchitectures()
 	}
 
 	return result;
+}
+
+/**
+ * Compute entropy of given data
+ * @param data Data to compute entropy from
+ * @param dataLen Length of @a data
+ * @return entropy in <0,1>
+ */
+double computeDataEntropy(const std::uint8_t *data, std::size_t dataLen)
+{
+	std::array<std::size_t, 256> histogram{};
+	double entropy = 0;
+
+	for (std::size_t i = 0; i < dataLen; i++)
+	{
+		histogram[data[i]]++;
+	}
+
+	for (auto frequency : histogram)
+	{
+		if (frequency)
+		{
+			double probability = static_cast<double>(frequency) / dataLen;
+			entropy -= probability * (log(probability) / log(256));
+		}
+	}
+
+	return entropy;
 }
 
 } // namespace fileformat
