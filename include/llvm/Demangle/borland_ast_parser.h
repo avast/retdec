@@ -8,6 +8,7 @@
 #define RETDEC_BORLAND_AST_PARSER_H
 
 #include "llvm/Demangle/borland_ast.h"
+#include "llvm/Demangle/context.h"
 
 namespace retdec {
 namespace demangler {
@@ -29,7 +30,7 @@ public:
 	};
 
 public:
-	explicit BorlandASTParser(const std::string &mangled);
+	explicit BorlandASTParser(Context &context, const std::string &mangled);
 
 	std::shared_ptr<Node> ast();
 
@@ -39,11 +40,11 @@ private:
 	void parse();
 	void parseFunction();
 	std::pair<bool, bool> parseQualifiers();
-	std::unique_ptr<Node> parseAbsoluteName();
+	std::shared_ptr<Node> parseAbsoluteName();
 	FunctionNode::CallConv parseCallConv();
-	std::unique_ptr<NodeArray> parseFuncParams();
-	std::unique_ptr<Node> parseType();
-	std::unique_ptr<Node> parseBuildInType();
+	std::shared_ptr<NodeArray> parseFuncParams();
+	std::shared_ptr<Node> parseType();
+	std::shared_ptr<Node> parseBuildInType();
 //	unsigned parseNumber();
 //	std::unique_ptr<Node> parseNamedType();
 //		std::unique_ptr<Node> parseRetType();
@@ -54,6 +55,7 @@ private:
 	Status _status;
 	StringView _mangled;
 	std::shared_ptr<Node> _ast;
+	Context _context;
 };
 
 }    // borland

@@ -8,6 +8,7 @@
 #define RETDEC_LLVM_BORLAND_DEMANGLER_H
 
 #include "llvm/Demangle/demangler_base.h"
+#include "llvm/Demangle/context.h"
 
 namespace retdec {
 namespace demangler {
@@ -15,12 +16,15 @@ namespace demangler {
 /**
  * @brief Borland demangler.
  */
-class BorlandDemangler: public Demangler
+class BorlandDemangler : public Demangler
 {
-	public:
-		BorlandDemangler();
+public:
+	BorlandDemangler();
 
-		std::string demangleToString(const std::string &mangled) override;
+	std::string demangleToString(const std::string &mangled) override;
+
+private:
+	borland::Context _context;
 };
 
 }

@@ -7,6 +7,7 @@
 #include "llvm/Demangle/borland_demangler.h"
 #include "llvm/Demangle/borland_ast.h"
 #include "llvm/Demangle/borland_ast_parser.h"
+#include "llvm/Demangle/borland_ast_types.h"
 
 namespace retdec {
 namespace demangler {
@@ -14,7 +15,7 @@ namespace demangler {
 /**
  * @brief Constructor for borland demangler.
  */
-BorlandDemangler::BorlandDemangler() : Demangler("borland") {}
+BorlandDemangler::BorlandDemangler() : Demangler("borland"), _context() {}
 
 /**
  * @brief Demangles name mangled by borland mangling scheme into string.
@@ -23,7 +24,7 @@ BorlandDemangler::BorlandDemangler() : Demangler("borland") {}
  */
 std::string BorlandDemangler::demangleToString(const std::string &mangled)
 {
-	borland::BorlandASTParser parser{mangled};
+	borland::BorlandASTParser parser{_context, mangled};
 	auto ast = parser.ast();
 	return ast ? ast->str() : std::string{};
 }
@@ -34,10 +35,11 @@ namespace borland {
  * @brief Constructor for AST parser. It parses name mangled by borland mangling scheme into AST.
  * @param mangled Name mangled by borland mangling scheme.
  */
-BorlandASTParser::BorlandASTParser(const std::string &mangled) :
+BorlandASTParser::BorlandASTParser(Context &context, const std::string &mangled) :
 	_status(in_progress),
 	_mangled(mangled.c_str(), mangled.length()),
-	_ast(nullptr)
+	_ast(nullptr),
+	_context(context)
 {
 	parse();
 }
@@ -104,7 +106,7 @@ void BorlandASTParser::parseFunction()
 //	auto retType = parseRetType();
 
 	_status = Status::success;
-	_ast = FunctionNode::create(std::move(absNameNode), callConv, std::move(paramsNode));
+	_ast = FunctionNode::create(absNameNode, callConv, paramsNode);
 }
 
 std::pair<bool, bool> BorlandASTParser::parseQualifiers()
@@ -129,31 +131,30 @@ FunctionNode::CallConv BorlandASTParser::parseCallConv()
 	}
 }
 
-std::unique_ptr<NodeArray> BorlandASTParser::parseFuncParams()
+std::shared_ptr<NodeArray> BorlandASTParser::parseFuncParams()
 {
 	auto params = NodeArray::create();
 
 	while (!_mangled.empty() && _status == Status::in_progress) {
 		auto param = parseType();
-	 	if (param) {
-			params->addNode(std::move(param));
+		if (param) {
+			params->addNode(param);
 		} else {
 			break;
 		}
 	}
 
-	return params->empty() ? nullptr : std::move(params);
+	return params->empty() ? nullptr : params;
 }
 
-std::unique_ptr<Node> BorlandASTParser::parseType()
+std::shared_ptr<Node> BorlandASTParser::parseType()
 {
 	/* qualifiers */
-	bool isVolatile {}, isConst {};
+	bool isVolatile{}, isConst{};
 	std::tie(isVolatile, isConst) = parseQualifiers();
 
-
 	if (_mangled.consumeFront('p')) {
-		return PointerType::create(parseType());
+		return PointerTypeNode::create(_context, parseType(), false, false);
 	}
 
 	if (_mangled.consumeFront('r')) {
@@ -179,56 +180,67 @@ std::unique_ptr<Node> BorlandASTParser::parseType()
 //	}
 
 	auto builtIn = parseBuildInType();
-	if(builtIn) {
+	if (builtIn) {
 		return builtIn;
 	}
 
 	return nullptr;
 }
 
-std::unique_ptr<Node> BorlandASTParser::parseBuildInType()
+std::shared_ptr<Node> BorlandASTParser::parseBuildInType()    // TODO isVolatile a const as params
 {
 	if (_mangled.consumeFront('o')) {
-		return TypeFactory::createBool();
+		return BuiltInTypeNode::create(_context, "bool", false, false);
 	} else if (_mangled.consumeFront('b')) {
-		return TypeFactory::createWChar();
+//		return TypeFactory::createWChar();
+		return BuiltInTypeNode::create(_context, "wchar_t", false, false);
 	} else if (_mangled.consumeFront('v')) {
-		return TypeFactory::createVoid();
+//		return TypeFactory::createVoid();
+		return BuiltInTypeNode::create(_context, "void", false, false);
+	}
+
+	/* char types */
+	if (_mangled.consumeFront("zc")) {    //only explicitly signed type
+		return CharTypeNode::create(_context, ThreeStateSignness::signed_char, false, false);
+	} else if (_mangled.consumeFront("uc")) {
+		return CharTypeNode::create(_context, ThreeStateSignness::unsigned_char, false, false);
+	} else if (_mangled.consumeFront('c')) {
+		return CharTypeNode::create(_context, ThreeStateSignness::no_prefix, false, false);
 	}
 
 	/* integral types */
-	if (_mangled.consumeFront("zc")) {	//only explicitly signed type
-		return TypeFactory::createSignedChar();
-	}
-
 	bool isUnsigned = false;
 	if (_mangled.consumeFront('u')) {
 		isUnsigned = true;
 	}
 	if (_mangled.consumeFront('s')) {
-		return TypeFactory::createShort(isUnsigned);
+//		return TypeFactory::createShort(isUnsigned);
+		return IntegralTypeNode::create(_context, "short", isUnsigned, false, false);
 	} else if (_mangled.consumeFront('i')) {
-		return TypeFactory::createInt(isUnsigned);
+//		return TypeFactory::createInt(isUnsigned);
+		return IntegralTypeNode::create(_context, "int", isUnsigned, false, false);
 	} else if (_mangled.consumeFront('l')) {
-		return TypeFactory::createLong(isUnsigned);
+//		return TypeFactory::createLong(isUnsigned);
+		return IntegralTypeNode::create(_context, "long", isUnsigned, false, false);
 	} else if (_mangled.consumeFront('j')) {
-		return TypeFactory::createLongLong(isUnsigned);
-	} else if (_mangled.consumeFront('c')) {
-		return TypeFactory::createChar(isUnsigned);
+//		return TypeFactory::createLongLong(isUnsigned);
+		return IntegralTypeNode::create(_context, "long long", isUnsigned, false, false);
 	}
-
-	if (isUnsigned) {	// was 'u' then not integral type
+	if (isUnsigned) {    // was 'u' then not integral type
 		_status = Status::invalid_mangled_name;
 		return nullptr;
 	}
 
-	/* float types */
+		/* float types */
 	else if (_mangled.consumeFront('f')) {
-		return TypeFactory::createFloat();
-	} else if (_mangled.consumeFront('d')){
-		return TypeFactory::createDouble();
+//		return TypeFactory::createFloat();
+		return FloatTypeNode::create(_context, "float", false, false);
+	} else if (_mangled.consumeFront('d')) {
+//		return TypeFactory::createDouble();
+		return FloatTypeNode::create(_context, "double", false, false);
 	} else if (_mangled.consumeFront('g')) {
-		return TypeFactory::createLongDouble();
+//		return TypeFactory::createLongDouble();
+		return FloatTypeNode::create(_context, "long double", false, false);
 	}
 
 	return nullptr;
@@ -252,7 +264,7 @@ StringView BorlandASTParser::getNestedName(StringView &source)
  * <namespace> ::=
  * <namespace> ::= <basic-name> @ <namespace>
  */
-std::unique_ptr<Node> BorlandASTParser::parseAbsoluteName()
+std::shared_ptr<Node> BorlandASTParser::parseAbsoluteName()
 {
 	auto name = _mangled.cutUntil('$');
 	if (name.empty()) {
@@ -265,17 +277,17 @@ std::unique_ptr<Node> BorlandASTParser::parseAbsoluteName()
 	if (nestedPart.empty()) {
 		return NameNode::create(name);
 	}
-	std::unique_ptr<Node> nameNode = NameNode::create(nestedPart);
+	std::shared_ptr<Node> nameNode = NameNode::create(nestedPart);
 
 	StringView nextNested;
 	while (!(nextNested = getNestedName(name)).empty()) {
 		auto nextNestedNode = NameNode::create(nextNested);
-		nameNode = NestedNameNode::create(std::move(nameNode), std::move(nextNestedNode));
+		nameNode = NestedNameNode::create(nameNode, nextNestedNode);
 	}
 
 	// everything left must be absolute name
 	auto absNameNode = NameNode::create(name);
-	return NestedNameNode::create(std::move(nameNode), std::move(absNameNode));
+	return NestedNameNode::create(nameNode, absNameNode);
 }
 
 } // borland

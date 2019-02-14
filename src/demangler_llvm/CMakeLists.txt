@@ -8,6 +8,8 @@ set(DEMANGLER_LLVM_SOURCES
 		microsoft_demangler_adapter.cpp
 		borland_demangler.cpp
 		borland_ast.cpp
+		context.cpp
+		borland_ast_types.cpp
 		)
 
 add_library(llvm-demangler STATIC ${DEMANGLER_LLVM_SOURCES})

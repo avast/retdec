@@ -8,6 +8,7 @@
 #include <gtest/gtest.h>
 
 #include "llvm/Demangle/borland_ast_parser.h"
+#include "llvm/Demangle/borland_ast_types.h"
 
 #define AST_EQ(expected, ast) ast_eq(expected, ast.get())
 
@@ -29,6 +30,8 @@ class BorlandAstTests: public Test
 			ast->print(ss);
 			EXPECT_EQ(expected, ss.str());
 		}
+
+		Context context;
 };
 
 TEST_F(BorlandAstTests,	NestedNameTest)
@@ -51,10 +54,10 @@ TEST_F(BorlandAstTests,	NestedNameTest)
 
 TEST_F(BorlandAstTests, ParseNameTest)
 {
-	std::string mangled = "@Project1@mojaproc$";
-	std::string expected = "Project1::mojaproc";
+	std::string mangled = "@Project1@mojaproc$q";
+	std::string expected = "Project1::mojaproc()";
 
-	BorlandASTParser parser = BorlandASTParser(mangled);
+	BorlandASTParser parser = BorlandASTParser(context, mangled);
 	auto ast = parser.ast();
 	auto ast2 = parser.ast();
 	std::string demangled = ast->str();
@@ -67,9 +70,9 @@ TEST_F(BorlandAstTests, NodeArrayTest)
 {
 	auto i_arr = NodeArray::create();
 	AST_EQ("", i_arr);
-	i_arr->addNode(BuiltInType::create("int"));
+	i_arr->addNode(BuiltInTypeNode::create(context, "int", false, false));
 	AST_EQ("int", i_arr);
-	i_arr->addNode(BuiltInType::create("bool"));
+	i_arr->addNode(BuiltInTypeNode::create(context, "bool", false, false));
 	AST_EQ("int, bool", i_arr);
 }
 
