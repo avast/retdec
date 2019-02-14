@@ -279,6 +279,19 @@ TEST_F(CoffFormatTests_istream, DataInterpretationDefault)
 	EXPECT_EQ(0x00a128ec83e58955, res);
 }
 
+TEST_F(CoffFormatTests_istream, DataInterpretationBig)
+{
+	std::uint64_t res = 0;
+	EXPECT_EQ(true, parser->get1ByteOffset(0xb4, res, Endianness::BIG));
+	EXPECT_EQ(0x55, res);
+	EXPECT_EQ(true, parser->get2ByteOffset(0xb4, res, Endianness::BIG));
+	EXPECT_EQ(0x5589, res);
+	EXPECT_EQ(true, parser->get4ByteOffset(0xb4, res, Endianness::BIG));
+	EXPECT_EQ(0x5589e583, res);
+	EXPECT_EQ(true, parser->get8ByteOffset(0xb4, res, Endianness::BIG));
+	EXPECT_EQ(0x5589e583ec28a100, res);
+}
+
 /**
  * Tests for the @c elf_format module - using istream constructor.
  */
