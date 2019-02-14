@@ -331,6 +331,7 @@ void CoffFormat::loadSections()
 		{
 			section->load(this);
 		}
+		section->computeEntropy();
 	}
 }
 
