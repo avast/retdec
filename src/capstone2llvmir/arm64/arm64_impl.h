@@ -35,7 +35,7 @@ class Capstone2LlvmIrTranslatorArm64_impl :
 
 //
 //==============================================================================
-// x86 specialization methods - from Capstone2LlvmIrTranslatorX86
+// Arm64 specialization methods - from Capstone2LlvmIrTranslatorX86
 //==============================================================================
 //
 	public:
@@ -189,6 +189,7 @@ class Capstone2LlvmIrTranslatorArm64_impl :
 		void translateCbnz(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb);
 		void translateCsel(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb);
 		void translateCset(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb);
+		void translateDiv(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb);
 		void translateMul(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb);
 		void translateTbnz(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb);
 		void translateRet(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb);

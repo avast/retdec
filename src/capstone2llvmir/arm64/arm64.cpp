@@ -1408,6 +1408,41 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateCset(cs_insn* i, cs_arm64* ai
 }
 
 /**
+ * ARM64_INS_UDIV, ARM64_INS_SDIV
+ */
+void Capstone2LlvmIrTranslatorArm64_impl::translateDiv(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb)
+{
+	EXPECT_IS_TERNARY(i, ai, irb);
+
+	std::tie(op1, op2) = loadOpBinaryOrTernaryOp1Op2(ai, irb);
+
+	// Zero division yelds zero as result in this case we
+	// don't want undefined behaviour so we
+	// check for zero division and manualy set the result, for now.
+	llvm::Value* zero = llvm::ConstantInt::get(op1->getType(), 0);
+	auto* cond = irb.CreateICmpEQ(op2, zero);
+	auto irbP = generateIfThenElse(cond, irb);
+	llvm::IRBuilder<>& bodyIf(irbP.first), bodyElse(irbP.second);
+
+	//IF - store zero
+	storeOp(ai->operands[0], zero, bodyIf);
+
+	//ELSE - store result of division
+	llvm::Value *val = nullptr;
+	if (i->id == ARM64_INS_UDIV)
+	{
+		val = bodyElse.CreateUDiv(op1, op2);
+	}
+	else if (i->id == ARM64_INS_SDIV)
+	{
+		val = bodyElse.CreateSDiv(op1, op2);
+	}
+
+	storeOp(ai->operands[0], val, bodyElse);
+	//ENDIF
+}
+
+/**
  * ARM64_INS_MUL, ARM64_INS_MADD, ARM64_INS_MSUB, ARM64_INS_MNEG
  */
 void Capstone2LlvmIrTranslatorArm64_impl::translateMul(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb)
