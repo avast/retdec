@@ -354,6 +354,7 @@ See the [project documentation](https://retdec-tc.avast.com/repository/download/
 
 * [retdec-idaplugin](https://github.com/avast-tl/retdec-idaplugin) -- Embeds RetDec into IDA (Interactive Disassembler) and makes its use much easier.
 * [retdec-regression-tests-framework](https://github.com/avast-tl/retdec-regression-tests-framework) -- A framework for writing and running regression tests for RetDec and related tools. This is a must if you plan to contribute to the RetDec project.
+* [retdec-regression-tests](https://github.com/avast-tl/retdec-regression-tests) -- A suite of regression tests for RetDec and related tools.
 * [vim-syntax-retdecdsm](https://github.com/s3rvac/vim-syntax-retdecdsm) -- Vim syntax-highlighting file for the output from the RetDec's disassembler (`.dsm` files).
 
 ## License
