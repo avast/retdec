@@ -154,7 +154,7 @@ std::shared_ptr<Node> BorlandASTParser::parseType()
 	std::tie(isVolatile, isConst) = parseQualifiers();
 
 	if (_mangled.consumeFront('p')) {
-		return PointerTypeNode::create(_context, parseType(), false, false);
+		return PointerTypeNode::create(_context, parseType(), isVolatile, isConst);
 	}
 
 	if (_mangled.consumeFront('r')) {
@@ -179,7 +179,7 @@ std::shared_ptr<Node> BorlandASTParser::parseType()
 //		return parseNamedType();
 //	}
 
-	auto builtIn = parseBuildInType();
+	auto builtIn = parseBuildInType(isVolatile, isConst);
 	if (builtIn) {
 		return builtIn;
 	}
@@ -187,25 +187,25 @@ std::shared_ptr<Node> BorlandASTParser::parseType()
 	return nullptr;
 }
 
-std::shared_ptr<Node> BorlandASTParser::parseBuildInType()    // TODO isVolatile a const as params
+std::shared_ptr<Node> BorlandASTParser::parseBuildInType(bool isVolatile, bool isConst)    // TODO isVolatile a const as params
 {
 	if (_mangled.consumeFront('o')) {
-		return BuiltInTypeNode::create(_context, "bool", false, false);
+		return BuiltInTypeNode::create(_context, "bool", isVolatile, isConst);
 	} else if (_mangled.consumeFront('b')) {
 //		return TypeFactory::createWChar();
-		return BuiltInTypeNode::create(_context, "wchar_t", false, false);
+		return BuiltInTypeNode::create(_context, "wchar_t", isVolatile, isConst);
 	} else if (_mangled.consumeFront('v')) {
 //		return TypeFactory::createVoid();
-		return BuiltInTypeNode::create(_context, "void", false, false);
+		return BuiltInTypeNode::create(_context, "void", isVolatile, isConst);
 	}
 
 	/* char types */
 	if (_mangled.consumeFront("zc")) {    //only explicitly signed type
-		return CharTypeNode::create(_context, ThreeStateSignness::signed_char, false, false);
+		return CharTypeNode::create(_context, ThreeStateSignness::signed_char, isVolatile, isConst);
 	} else if (_mangled.consumeFront("uc")) {
-		return CharTypeNode::create(_context, ThreeStateSignness::unsigned_char, false, false);
+		return CharTypeNode::create(_context, ThreeStateSignness::unsigned_char, isVolatile, isConst);
 	} else if (_mangled.consumeFront('c')) {
-		return CharTypeNode::create(_context, ThreeStateSignness::no_prefix, false, false);
+		return CharTypeNode::create(_context, ThreeStateSignness::no_prefix, isVolatile, isConst);
 	}
 
 	/* integral types */
@@ -215,16 +215,16 @@ std::shared_ptr<Node> BorlandASTParser::parseBuildInType()    // TODO isVolatile
 	}
 	if (_mangled.consumeFront('s')) {
 //		return TypeFactory::createShort(isUnsigned);
-		return IntegralTypeNode::create(_context, "short", isUnsigned, false, false);
+		return IntegralTypeNode::create(_context, "short", isUnsigned, isVolatile, isConst);
 	} else if (_mangled.consumeFront('i')) {
 //		return TypeFactory::createInt(isUnsigned);
-		return IntegralTypeNode::create(_context, "int", isUnsigned, false, false);
+		return IntegralTypeNode::create(_context, "int", isUnsigned, isVolatile, isConst);
 	} else if (_mangled.consumeFront('l')) {
 //		return TypeFactory::createLong(isUnsigned);
-		return IntegralTypeNode::create(_context, "long", isUnsigned, false, false);
+		return IntegralTypeNode::create(_context, "long", isUnsigned, isVolatile, isConst);
 	} else if (_mangled.consumeFront('j')) {
 //		return TypeFactory::createLongLong(isUnsigned);
-		return IntegralTypeNode::create(_context, "long long", isUnsigned, false, false);
+		return IntegralTypeNode::create(_context, "long long", isUnsigned, isVolatile, isConst);
 	}
 	if (isUnsigned) {    // was 'u' then not integral type
 		_status = Status::invalid_mangled_name;
@@ -234,13 +234,13 @@ std::shared_ptr<Node> BorlandASTParser::parseBuildInType()    // TODO isVolatile
 		/* float types */
 	else if (_mangled.consumeFront('f')) {
 //		return TypeFactory::createFloat();
-		return FloatTypeNode::create(_context, "float", false, false);
+		return FloatTypeNode::create(_context, "float", isVolatile, isConst);
 	} else if (_mangled.consumeFront('d')) {
 //		return TypeFactory::createDouble();
-		return FloatTypeNode::create(_context, "double", false, false);
+		return FloatTypeNode::create(_context, "double", isVolatile, isConst);
 	} else if (_mangled.consumeFront('g')) {
 //		return TypeFactory::createLongDouble();
-		return FloatTypeNode::create(_context, "long double", false, false);
+		return FloatTypeNode::create(_context, "long double", isVolatile, isConst);
 	}
 
 	return nullptr;

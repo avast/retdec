@@ -33,6 +33,12 @@ StringView TypeNode::typeName() const
 
 void TypeNode::printLeft(std::ostream &s) const
 {
+	if (_isVolatile) {
+		s << "volatile ";
+	}
+	if (_isConst) {
+		s << "const ";
+	}
 	s << std::string{_typeName.begin(), _typeName.size()};
 }
 
@@ -96,6 +102,12 @@ ThreeStateSignness CharTypeNode::signness()
 
 void CharTypeNode::printLeft(std::ostream &s) const
 {
+	if (_isVolatile) {
+		s << "volatile ";
+	}
+	if (_isConst) {
+		s << "const ";
+	}
 	switch (_signness) {
 	case ThreeStateSignness::signed_char: s << "signed char";
 		break;
@@ -137,6 +149,12 @@ bool IntegralTypeNode::isUnsigned()
 
 void IntegralTypeNode::printLeft(std::ostream &s) const
 {
+	if (_isVolatile) {
+		s << "volatile ";
+	}
+	if (_isConst) {
+		s << "const ";
+	}
 	if (_isUnsigned) {
 		s << "unsigned ";
 	}
@@ -196,6 +214,12 @@ void PointerTypeNode::printLeft(std::ostream &s) const
 {
 	_pointee->print(s);
 	s << " *";
+	if (_isVolatile) {
+		s << " volatile";
+	}
+	if (_isConst) {
+		s << " const";
+	}
 }
 
 }    // borland

@@ -44,7 +44,7 @@ private:
 	FunctionNode::CallConv parseCallConv();
 	std::shared_ptr<NodeArray> parseFuncParams();
 	std::shared_ptr<Node> parseType();
-	std::shared_ptr<Node> parseBuildInType();
+	std::shared_ptr<Node> parseBuildInType(bool isVolatile, bool isConst);
 //	unsigned parseNumber();
 //	std::unique_ptr<Node> parseNamedType();
 //		std::unique_ptr<Node> parseRetType();

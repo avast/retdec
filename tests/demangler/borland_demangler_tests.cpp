@@ -94,9 +94,9 @@ TEST_F(BorlandDemanglerTests, QualifiersTests)
 	DEM_EQ("@Bar@foo7$xqv", "Bar::foo7(void) const");
 	DEM_EQ("@Bar@foo8$wqv", "Bar::foo7(void) volatile");
 	DEM_EQ("@Bar@foo9$wxqv", "BAR::foo9(void) const volatile");
-	DEM_EQ("@foo10$qpwxi", "foo10(const volatile int *)");
+	DEM_EQ("@foo10$qpwxi", "foo10(volatile const int *)");
 	DEM_EQ("@foo11$qpwxi", "foo11(volatile const int *)");
-	DEM_EQ("@foonew$qrwxpi", "foonew(int *__restrict volatile const)");
+	DEM_EQ("@foonew$qrwxpi", "foonew(int *__restrict volatile const)");	// TODO not supporting __restrict keyword
 	DEM_EQ("@Bar@foo$wxqqrv", "__fastcall Bar::foo(void) const volatile");
 }
 
