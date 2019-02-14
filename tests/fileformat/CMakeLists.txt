@@ -4,6 +4,7 @@ set(RETDEC_TESTS_FILEFORMAT_SOURCES
 	intel_hex_format_20bit_tests.cpp
 	intel_hex_format_tests.cpp
 	intel_hex_token_test.cpp
+	macho_format_tests.cpp
 	raw_data_format_tests.cpp
 )
 
