@@ -26,7 +26,8 @@ FileSection::FileSection() : index(std::numeric_limits<unsigned long long>::max(
 								linkToSection(std::numeric_limits<unsigned long long>::max()),
 								extraInfo(std::numeric_limits<unsigned long long>::max()),
 								lineOffset(std::numeric_limits<unsigned long long>::max()),
-								relocationsLineOffset(std::numeric_limits<unsigned long long>::max())
+								relocationsLineOffset(std::numeric_limits<unsigned long long>::max()),
+								entropy(std::numeric_limits<double>::max())
 {
 
 }
@@ -224,6 +225,15 @@ std::string FileSection::getLineOffsetStr(std::ios_base &(* format)(std::ios_bas
 std::string FileSection::getRelocationsLineOffsetStr(std::ios_base &(* format)(std::ios_base &)) const
 {
 	return getNumberAsString(relocationsLineOffset, format);
+}
+
+/**
+ * Get entropy of section data
+ * @return Start line of relocations for this section
+ */
+std::string FileSection::getEntropyStr(std::ios_base &(* format)(std::ios_base &)) const
+{
+	return getNumberAsString(entropy, format);
 }
 
 /**
@@ -452,6 +462,15 @@ void FileSection::setLineOffset(unsigned long long sectionOffset)
 void FileSection::setRelocationsLineOffset(unsigned long long relocOffset)
 {
 	relocationsLineOffset = relocOffset;
+}
+
+/**
+ * Set section data entropy
+ * @param entr Data entropy of section
+ */
+void FileSection::setEntropy(double entr)
+{
+	entropy = entr;
 }
 
 /**

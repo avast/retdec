@@ -352,6 +352,7 @@ class FileInformation
 		std::string getSectionExtraInfoStr(std::size_t position) const;
 		std::string getSectionLineOffsetStr(std::size_t position, std::ios_base &(* format)(std::ios_base &)) const;
 		std::string getSectionRelocationsLineOffsetStr(std::size_t position, std::ios_base &(* format)(std::ios_base &)) const;
+		std::string getSectionEntropy(std::size_t position, std::ios_base &(* format)(std::ios_base &)) const;
 		unsigned long long getSectionFlagsSize(std::size_t position) const;
 		unsigned long long getSectionFlags(std::size_t position) const;
 		std::string getSectionFlagsStr(std::size_t position) const;
