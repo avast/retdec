@@ -1076,6 +1076,7 @@ void ElfDetector::getSections()
 
 	for(unsigned long long i = 0; i < storedNoOfSections; ++i)
 	{
+		double entropy;
 		const auto *sec = elfParser->getFileSection(i);
 		if(!sec)
 		{
@@ -1107,6 +1108,10 @@ void ElfDetector::getSections()
 			fs.setCrc32(auxSec->getCrc32());
 			fs.setMd5(auxSec->getMd5());
 			fs.setSha256(auxSec->getSha256());
+			if(auxSec->getEntropy(entropy))
+			{
+				fs.setEntropy(entropy);
+			}
 		}
 		fileInfo.addSection(fs);
 		switch(sec->get_type())
