@@ -1452,6 +1452,48 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateDiv(cs_insn* i, cs_arm64* ai,
 }
 
 /**
+ * ARM64_INS_UMADDL, ARM64_INS_SMADDL
+ */
+void Capstone2LlvmIrTranslatorArm64_impl::translateMaddl(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb)
+{
+	EXPECT_IS_EXPR(i, ai, irb, (3 <= ai->op_count && ai->op_count <= 4));
+
+	bool sext = true;
+	switch(i->id) {
+	case ARM64_INS_UMADDL:
+		sext = false;
+		break;
+	case ARM64_INS_SMADDL:
+		sext = true;
+		break;
+	default:
+		throw GenericError("Maddl: Unhandled instruction ID");
+	}
+
+	auto* res_type = getDefaultType();
+
+	auto* op1 = loadOp(ai->operands[1], irb);
+	auto* op2 = loadOp(ai->operands[2], irb);
+	if (sext)
+	{
+		op1 = irb.CreateSExtOrTrunc(op1, res_type);
+		op2 = irb.CreateSExtOrTrunc(op2, res_type);
+	}
+	else
+	{
+		op1 = irb.CreateZExtOrTrunc(op1, res_type);
+		op2 = irb.CreateZExtOrTrunc(op2, res_type);
+	}
+
+	auto *val = irb.CreateMul(op1, op2);
+
+	auto* op3 = loadOp(ai->operands[3], irb);
+	val = irb.CreateAdd(val, op3);
+
+	storeOp(ai->operands[0], val, irb);
+}
+
+/**
  * ARM64_INS_MUL, ARM64_INS_MADD, ARM64_INS_MSUB, ARM64_INS_MNEG
  */
 void Capstone2LlvmIrTranslatorArm64_impl::translateMul(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb)
