@@ -10,13 +10,16 @@
 #include <gtest/gtest.h>
 
 #include "retdec/fileformat/file_format/intel_hex/intel_hex_format.h"
+#include "fileformat/fileformat_tests.h"
 
 using namespace ::testing;
 using namespace retdec::utils;
 
-namespace {
+namespace retdec {
+namespace fileformat {
+namespace tests {
 
-const std::string intel_hex_example =
+const std::string ihexBytes =
 	":02000004FFFFFC\n"
 	":10010000214601360121470136007efe09d2190140\n"
 	":100110002146017E17C20001FF5F16002148011928\n"
@@ -36,12 +39,6 @@ const std::string intel_hex_invalid_data = ":04000005FFFF!!01F8\n";
 const std::string intel_hex_invalid_csum = ":04000005FFFF0001F9\n";
 const std::string intel_hex_invalid_nl = ":04000005FFFF0001F80000";
 
-} // anonymous namespace
-
-namespace retdec {
-namespace fileformat {
-namespace tests {
-
 /**
  * Tests for the @c intel_hex module - using istream constructor.
  */
@@ -52,7 +49,7 @@ class IntelHexFormatTests_istream : public Test
 	public:
 		IntelHexFormatTests_istream()
 		{
-			ihexStream << intel_hex_example;
+			ihexStream << ihexBytes;
 			parser = std::make_unique<IntelHexFormat>(ihexStream);
 		}
 
@@ -144,7 +141,7 @@ TEST_F(IntelHexFormatTests_istream, InvalidRecords)
 	loadOtherString(intel_hex_invalid_nl);
 	EXPECT_EQ(false, parser->isInValidState());
 	// Original.
-	loadOtherString(intel_hex_example);
+	loadOtherString(ihexBytes);
 }
 
 /**
@@ -158,8 +155,8 @@ class IntelHexFormatTests_data : public Test
 		IntelHexFormatTests_data()
 		{
 			parser = std::make_unique<IntelHexFormat>(
-					reinterpret_cast<const uint8_t*>(intel_hex_example.data()),
-					intel_hex_example.size());
+					reinterpret_cast<const uint8_t*>(ihexBytes.data()),
+					ihexBytes.size());
 		}
 	private:
 		std::stringstream ihexStream;

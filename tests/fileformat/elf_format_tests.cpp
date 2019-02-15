@@ -9,11 +9,14 @@
 #include <gtest/gtest.h>
 
 #include "retdec/fileformat/file_format/elf/elf_format.h"
+#include "fileformat/fileformat_tests.h"
 
 using namespace ::testing;
 using namespace retdec::utils;
 
-namespace {
+namespace retdec {
+namespace fileformat {
+namespace tests {
 
 const std::vector<uint8_t> elfBytes = {
 	0x7f, 0x45, 0x4c, 0x46, 0x01, 0x01, 0x01, 0x48, 0x69, 0x20, 0x57, 0x6f, 0x72, 0x6c, 0x64, 0x0a,
@@ -28,12 +31,6 @@ const std::vector<uint8_t> elfBytes = {
 	0x04, 0x00, 0x00, 0x00, 0xcd, 0x80, 0xbb, 0x00, 0x00, 0x00, 0x00, 0xb8, 0x01, 0x00, 0x00, 0x00,
 	0xcd, 0x80, 0x00, 0x00
 };
-
-} // anonymous namespace
-
-namespace retdec {
-namespace fileformat {
-namespace tests {
 
 /**
  * Tests for the @c elf_format module - using istream constructor.

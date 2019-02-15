@@ -9,13 +9,16 @@
 #include <gtest/gtest.h>
 
 #include "retdec/fileformat/file_format/coff/coff_format.h"
+#include "fileformat/fileformat_tests.h"
 
 using namespace ::testing;
 using namespace retdec::utils;
 
-namespace {
+namespace retdec {
+namespace fileformat {
+namespace tests {
 
-const std::vector<uint8_t> bytes =
+const std::vector<uint8_t> coffBytes =
 {
 	0x4c, 0x01, 0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0xf8, 0x01, 0x00, 0x00,
 	0x14, 0x00, 0x00, 0x00, 0x00, 0x00, 0x04, 0x01, 0x2e, 0x74, 0x65, 0x78,
@@ -92,13 +95,6 @@ const std::vector<uint8_t> bytes =
 	0x04, 0x00, 0x00, 0x00
 };
 
-
-} // anonymous namespace
-
-namespace retdec {
-namespace fileformat {
-namespace tests {
-
 /**
  * Tests for the @c coff_format module - using istream constructor.
  */
@@ -111,7 +107,9 @@ class CoffFormatTests_istream : public Test
 	public:
 		CoffFormatTests_istream()
 		{
-			coffStringStream << std::string(bytes.begin(), bytes.end());
+			coffStringStream << std::string(
+					coffBytes.begin(),
+					coffBytes.end());
 			parser = std::make_unique<CoffFormat>(coffStringStream);
 		}
 };
@@ -159,7 +157,9 @@ class CoffFormatTests_data : public Test
 	public:
 		CoffFormatTests_data()
 		{
-			parser = std::make_unique<CoffFormat>(bytes.data(), bytes.size());
+			parser = std::make_unique<CoffFormat>(
+					coffBytes.data(),
+					coffBytes.size());
 		}
 };
 

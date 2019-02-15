@@ -14,7 +14,16 @@ namespace retdec {
 namespace fileformat {
 
 Format detectFileFormat(
-		const std::string &filePath,
+		const std::string& filePath,
+		bool isRaw = false);
+
+Format detectFileFormat(
+		std::istream &inputStream,
+		bool isRaw = false);
+
+Format detectFileFormat(
+		const std::uint8_t* data,
+		std::size_t size,
 		bool isRaw = false);
 
 } // namespace fileformat

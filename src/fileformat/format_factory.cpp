@@ -53,7 +53,23 @@ std::unique_ptr<FileFormat> createFileFormat(
 		bool isRaw,
 		LoadFlags loadFlags)
 {
-	return nullptr; // TODO
+	switch(detectFileFormat(inputStream, isRaw))
+	{
+		case Format::PE:
+			return std::make_unique<PeFormat>(inputStream, loadFlags);
+		case Format::ELF:
+			return std::make_unique<ElfFormat>(inputStream, loadFlags);
+		case Format::COFF:
+			return std::make_unique<CoffFormat>(inputStream, loadFlags);
+		case Format::MACHO:
+			return std::make_unique<MachOFormat>(inputStream, loadFlags);
+		case Format::INTEL_HEX:
+			return std::make_unique<IntelHexFormat>(inputStream, loadFlags);
+		case Format::RAW_DATA:
+			return std::make_unique<RawDataFormat>(inputStream, loadFlags);
+		default:
+			return nullptr;
+	}
 }
 
 std::unique_ptr<FileFormat> createFileFormat(
@@ -62,7 +78,23 @@ std::unique_ptr<FileFormat> createFileFormat(
 		bool isRaw,
 		LoadFlags loadFlags)
 {
-	return nullptr; // TODO
+	switch(detectFileFormat(data, size, isRaw))
+	{
+		case Format::PE:
+			return std::make_unique<PeFormat>(data, size, loadFlags);
+		case Format::ELF:
+			return std::make_unique<ElfFormat>(data, size, loadFlags);
+		case Format::COFF:
+			return std::make_unique<CoffFormat>(data, size, loadFlags);
+		case Format::MACHO:
+			return std::make_unique<MachOFormat>(data, size, loadFlags);
+		case Format::INTEL_HEX:
+			return std::make_unique<IntelHexFormat>(data, size, loadFlags);
+		case Format::RAW_DATA:
+			return std::make_unique<RawDataFormat>(data, size, loadFlags);
+		default:
+			return nullptr;
+	}
 }
 
 } // namespace fileformat

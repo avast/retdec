@@ -292,7 +292,31 @@ Symbol::UsageType getSymbolUsageType(byte storageClass, byte complexType)
  * @param pathToFile Path to input file
  * @param loadFlags Load flags
  */
-PeFormat::PeFormat(std::string pathToFile, LoadFlags loadFlags) : FileFormat(pathToFile, loadFlags)
+PeFormat::PeFormat(std::string pathToFile, LoadFlags loadFlags) :
+		FileFormat(pathToFile, loadFlags)
+{
+	initStructures();
+}
+
+/**
+ * Constructor
+ * @param inputStream Representation of input file
+ * @param loadFlags Load flags
+ */
+PeFormat::PeFormat(std::istream &inputStream, LoadFlags loadFlags) :
+		FileFormat(inputStream, loadFlags)
+{
+	initStructures();
+}
+
+/**
+ * Constructor
+ * @param data Input data.
+ * @param size Input data size.
+ * @param loadFlags Load flags
+ */
+PeFormat::PeFormat(const std::uint8_t *data, std::size_t size, LoadFlags loadFlags) :
+		FileFormat(data, size, loadFlags)
 {
 	initStructures();
 }
@@ -327,7 +351,7 @@ void PeFormat::initStructures()
 	peHeader32 = nullptr;
 	peHeader64 = nullptr;
 	peClass = PEFILE_UNKNOWN;
-	file = openPeFile(filePath);
+	file = openPeFile(fileStream);
 	if(file)
 	{
 		stateIsValid = true;
@@ -350,7 +374,7 @@ void PeFormat::initStructures()
 			initLoaderErrorInfo();
 
 			mzHeader = file->mzHeader();
-			switch((peClass = getFileType(filePath)))
+			switch((peClass = getFileType(fileStream)))
 			{
 				case PEFILE32:
 				{

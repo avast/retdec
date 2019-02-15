@@ -10,51 +10,44 @@
 #include <gtest/gtest.h>
 
 #include "retdec/fileformat/file_format/raw_data/raw_data_format.h"
+#include "fileformat/fileformat_tests.h"
 
 using namespace ::testing;
 using namespace retdec::utils;
-
-namespace {
-
-const std::string input = "0123456789";
-
-} // anonymous namespace
 
 namespace retdec {
 namespace fileformat {
 namespace tests {
 
+const std::string rawBytes = "0123456789";
+
 /**
- * Tests for the @c raw_data module
+ * Tests for the @c raw_data module - using istream constructor.
  */
-class RawDataFormatTests : public Test
+class RawDataFormatTests_istream : public Test
 {
 	protected:
 		std::unique_ptr<RawDataFormat> parser;
 
 	public:
-		RawDataFormatTests()
+		RawDataFormatTests_istream()
 		{
-			inputstream << input;
+			inputstream << rawBytes;
 			parser = std::make_unique<RawDataFormat>(inputstream);
-		}
-
-		~RawDataFormatTests()
-		{
 		}
 
 	private:
 		std::stringstream inputstream;
 };
 
-TEST_F(RawDataFormatTests, CorrectLoading)
+TEST_F(RawDataFormatTests_istream, CorrectLoading)
 {
 	EXPECT_EQ(true, parser->isInValidState());
 	EXPECT_EQ(1, parser->getNumberOfSections());
 	EXPECT_EQ(10, parser->getLoadedBytes().size());
 }
 
-TEST_F(RawDataFormatTests, TestSettersGetters)
+TEST_F(RawDataFormatTests_istream, TestSettersGetters)
 {
 	parser->setTargetArchitecture(Architecture::ARM);
 	parser->setEndianness(Endianness::LITTLE);
@@ -73,7 +66,49 @@ TEST_F(RawDataFormatTests, TestSettersGetters)
 	EXPECT_EQ(4, parser->getBytesPerWord());
 }
 
-TEST_F(RawDataFormatTests, TestInvalidEP)
+TEST_F(RawDataFormatTests_istream, TestInvalidEP)
+{
+	unsigned long long result;
+	parser->setBaseAddress(0x8000);
+
+	parser->setEntryPoint(0x800B);
+	EXPECT_EQ(true, parser->getEpOffset(result));
+	EXPECT_EQ(0x00, result);
+	EXPECT_EQ(true, parser->getEpAddress(result));
+	EXPECT_EQ(0x8000, result);
+
+	parser->setEntryPoint(0x7FFF);
+	EXPECT_EQ(true, parser->getEpOffset(result));
+	EXPECT_EQ(0x00, result);
+	EXPECT_EQ(true, parser->getEpAddress(result));
+	EXPECT_EQ(0x8000, result);
+}
+
+/**
+ * Tests for the @c raw_data module - using istream constructor.
+ */
+class RawDataFormatTests_data : public Test
+{
+	protected:
+		std::unique_ptr<RawDataFormat> parser;
+
+	public:
+		RawDataFormatTests_data()
+		{
+			parser = std::make_unique<RawDataFormat>(
+					reinterpret_cast<const std::uint8_t*>(rawBytes.data()),
+					rawBytes.size());
+		}
+};
+
+TEST_F(RawDataFormatTests_data, CorrectLoading)
+{
+	EXPECT_EQ(true, parser->isInValidState());
+	EXPECT_EQ(1, parser->getNumberOfSections());
+	EXPECT_EQ(10, parser->getLoadedBytes().size());
+}
+
+TEST_F(RawDataFormatTests_data, TestInvalidEP)
 {
 	unsigned long long result;
 	parser->setBaseAddress(0x8000);

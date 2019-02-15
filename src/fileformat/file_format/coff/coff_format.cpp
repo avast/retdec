@@ -228,9 +228,12 @@ CoffFormat::CoffFormat(std::string pathToFile, LoadFlags loadFlags) :
  */
 CoffFormat::CoffFormat(std::istream &inputStream, LoadFlags loadFlags) :
 		FileFormat(inputStream, loadFlags),
-		fileBuffer(MemoryBuffer::getMemBuffer(StringRef(
-				reinterpret_cast<const char*>(bytes.data()),
-				bytes.size())))
+		fileBuffer(MemoryBuffer::getMemBuffer(
+				StringRef(
+						reinterpret_cast<const char*>(bytes.data()),
+						bytes.size()),
+				"",
+				false))
 {
 	initStructures();
 }

@@ -25,10 +25,16 @@ namespace fileinfo {
  * @param loadFlags Load flags
  * @return Pointer to instance of detector or @c nullptr if any error
  *
- * Pointer to detector is dynamically allocated and must be released (otherwise there is a memory leak).
- * If format of input file is not supported, function will return @c nullptr.
+ * Pointer to detector is dynamically allocated and must be released (otherwise
+ * there is a memory leak). If format of input file is not supported, function
+ * will return @c nullptr.
  */
-FileDetector* createFileDetector(std::string pathToInputFile, retdec::fileformat::Format fileFormat, FileInformation &finfo, retdec::cpdetect::DetectParams &searchPar, retdec::fileformat::LoadFlags loadFlags)
+FileDetector* createFileDetector(
+		std::string pathToInputFile,
+		retdec::fileformat::Format fileFormat,
+		FileInformation &finfo,
+		retdec::cpdetect::DetectParams &searchPar,
+		retdec::fileformat::LoadFlags loadFlags)
 {
 	switch(fileFormat)
 	{

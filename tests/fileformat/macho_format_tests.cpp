@@ -9,13 +9,16 @@
 #include <gtest/gtest.h>
 
 #include "retdec/fileformat/file_format/macho/macho_format.h"
+#include "fileformat/fileformat_tests.h"
 
 using namespace ::testing;
 using namespace retdec::utils;
 
-namespace {
+namespace retdec {
+namespace fileformat {
+namespace tests {
 
-const std::vector<uint8_t> bytes =
+const std::vector<uint8_t> machoBytes =
 {
     0xcf, 0xfa, 0xed, 0xfe, 0x07, 0x00, 0x00, 0x01, 0x03, 0x00, 0x00, 0x80,
     0x02, 0x00, 0x00, 0x00, 0x0e, 0x00, 0x00, 0x00, 0xd8, 0x02, 0x00, 0x00,
@@ -365,12 +368,6 @@ const std::vector<uint8_t> bytes =
     0x00, 0x00, 0x00, 0x00
 };
 
-} // anonymous namespace
-
-namespace retdec {
-namespace fileformat {
-namespace tests {
-
 /**
  * Tests for the @c macho_format module - using istream constructor.
  */
@@ -383,7 +380,9 @@ class MachoFormatTests_istream : public Test
 	public:
 		MachoFormatTests_istream()
 		{
-			machoStringStream << std::string(bytes.begin(), bytes.end());
+			machoStringStream << std::string(
+					machoBytes.begin(),
+					machoBytes.end());
 			parser = std::make_unique<MachOFormat>(machoStringStream);
 		}
 };
@@ -433,7 +432,9 @@ class MachoFormatTests_data : public Test
 	public:
 		MachoFormatTests_data()
 		{
-			parser = std::make_unique<MachOFormat>(bytes.data(), bytes.size());
+			parser = std::make_unique<MachOFormat>(
+					machoBytes.data(),
+					machoBytes.size());
 		}
 };
 
