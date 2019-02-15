@@ -1076,7 +1076,6 @@ void ElfDetector::getSections()
 
 	for(unsigned long long i = 0; i < storedNoOfSections; ++i)
 	{
-		double entropy;
 		const auto *sec = elfParser->getFileSection(i);
 		if(!sec)
 		{
@@ -1105,6 +1104,7 @@ void ElfDetector::getSections()
 		const auto *auxSec = elfParser->getSection(sec->get_index());
 		if(auxSec)
 		{
+			double entropy;
 			fs.setCrc32(auxSec->getCrc32());
 			fs.setMd5(auxSec->getMd5());
 			fs.setSha256(auxSec->getSha256());
