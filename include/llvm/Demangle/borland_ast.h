@@ -35,6 +35,8 @@ public:
 		KIntegralType,
 		KCharType,
 		KFloatType,
+		KReferenceType,
+		KNamedType,
 	};
 
 public:

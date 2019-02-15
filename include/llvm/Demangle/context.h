@@ -19,8 +19,11 @@ class FloatTypeNode;
 class CharTypeNode;
 enum class ThreeStateSignness;
 class PointerTypeNode;
+class ReferenceTypeNode;
+class NamedTypeNode;
 
-class Context {
+class Context
+{
 public:
 	Context() = default;
 
@@ -59,18 +62,35 @@ public:
 	void addPointerType(
 		const std::shared_ptr<PointerTypeNode> &type);
 
+	bool hasReferenceType(std::shared_ptr<Node> pointee) const;
+	std::shared_ptr<ReferenceTypeNode> getReferenceType(std::shared_ptr<Node> pointee) const;
+	void addReferenceType(const std::shared_ptr<ReferenceTypeNode> &type);
+
+//	bool hasNamedType(
+//		const std::string &name, bool isVolatile, bool isConst) const;
+//	std::shared_ptr<NamedTypeNode> getNamedType(
+//		const std::string &name, bool isVolatile, bool isConst) const;
+//	void addNamedType(
+//		const std::shared_ptr<NamedTypeNode> &type);
+
 private:
 	using BuiltInTypeNodes = std::map<std::tuple<std::string, bool, bool>, std::shared_ptr<BuiltInTypeNode>>;
 	BuiltInTypeNodes builtInTypes;
 
 	using CharTypeNodes = std::map<std::tuple<ThreeStateSignness, bool, bool>, std::shared_ptr<CharTypeNode>>;
-	CharTypeNodes  charTypes;
+	CharTypeNodes charTypes;
 
 	using IntegralTypeNodes = std::map<std::tuple<std::string, bool, bool, bool>, std::shared_ptr<IntegralTypeNode>>;
 	IntegralTypeNodes integralTypes;
 
 	using PointerTypeNodes = std::map<std::tuple<std::shared_ptr<Node>, bool, bool>, std::shared_ptr<PointerTypeNode>>;
 	PointerTypeNodes pointerTypes;
+
+	using ReferenceTypeNodes = std::map<std::shared_ptr<Node>, std::shared_ptr<ReferenceTypeNode>>;
+	ReferenceTypeNodes referenceTypes;
+
+//	using NamedTypeNodes = std::map<std::tuple<std::string, bool, bool>, std::shared_ptr<NamedTypeNode>>;;
+//	NamedTypeNodes namedTypes;
 
 };
 

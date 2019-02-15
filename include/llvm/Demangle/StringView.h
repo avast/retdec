@@ -59,6 +59,15 @@ public:
     consumeFront(cut);
     return cut;
   }
+
+  StringView drop(size_t len) {
+    if (len > size()) {
+      len = size();
+    }
+    auto dropped = StringView(First, First+len);
+    First += len;
+    return dropped;
+  }
   // }RetDec
 
   StringView substr(size_t From, size_t To) const {

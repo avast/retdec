@@ -20,6 +20,8 @@ enum class ThreeStateSignness {
 	no_prefix
 };
 
+// TODO isVolatile, isConst and isRestricted change to class with 3 bools
+
 class TypeNode : public Node {
 public:
 	bool isVolatile() const;
@@ -107,6 +109,27 @@ private:
 	FloatTypeNode(const StringView &typeName, bool isVolatile, bool isConst);
 };
 
+class NamedTypeNode : public TypeNode
+{
+public:
+	static std::shared_ptr<NamedTypeNode> create(
+		Context &context,
+		std::shared_ptr<Node> typeName,
+		bool isVolatile,
+		bool isConst
+		);
+
+	std::shared_ptr<Node> name();
+
+private:
+	NamedTypeNode(std::shared_ptr<Node> typeName, bool isVolatile, bool isConst);
+
+	void printLeft(std::ostream &s) const override;
+
+private:
+	std::shared_ptr<Node> _typeName;
+};
+
 class PointerTypeNode : public TypeNode
 {
 public:
@@ -123,7 +146,25 @@ private:
 
 	void printLeft(std::ostream &s) const override;
 
-protected:
+private:
+	std::shared_ptr<Node> _pointee;
+};
+
+class ReferenceTypeNode : public TypeNode
+{
+public:
+	static std::shared_ptr<ReferenceTypeNode> create(
+		Context &context,
+		std::shared_ptr<Node> pointee);
+
+	std::shared_ptr<Node> pointee();
+
+private:
+	explicit ReferenceTypeNode(std::shared_ptr<Node> pointee);
+
+	void printLeft(std::ostream &s) const override;
+
+private:
 	std::shared_ptr<Node> _pointee;
 };
 

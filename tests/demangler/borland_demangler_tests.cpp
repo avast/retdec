@@ -96,9 +96,10 @@ TEST_F(BorlandDemanglerTests, QualifiersTests)
 	DEM_EQ("@Bar@foo9$wxqv", "Bar::foo9(void) volatile const");
 	DEM_EQ("@foo10$qpwxi", "foo10(volatile const int *)");
 	DEM_EQ("@foo11$qpwxi", "foo11(volatile const int *)");
-	DEM_EQ("@foonew$qrwxpi", "foonew(int *__restrict volatile const)");	// TODO not supporting __restrict keyword
+	DEM_EQ("@foonew$qrwxpi", "foonew(int * volatile const &)");
+//	DEM_EQ("@foonew$qrwxpi", "foonew(int *__restrict volatile const)");	// TODO when possible demangle as reference
 	DEM_EQ("@Bar@foo$wxqqrv", "__fastcall Bar::foo(void) volatile const");
-	DEM_EQ("@foo$qrri", "foo(int & _restrict");
+	DEM_EQ("@foo$qrri", "foo(int & _restrict)");
 }
 
 TEST_F(BorlandDemanglerTests, PointersTests)
@@ -112,6 +113,7 @@ TEST_F(BorlandDemanglerTests, ReferecenceTests)
 {
 	DEM_EQ("@myFunc_ref1_$qr3Tmp", "myFunc_ref1_(Tmp &)");
 	DEM_EQ("@myFunc_ref2_$qh3Tmp", "myFunc_ref2_(Tmp &&)");
+	DEM_EQ("@foo$qri", "foo(int &)");
 }
 
 TEST_F(BorlandDemanglerTests, RandomTests)
@@ -179,6 +181,11 @@ TEST_F(BorlandDemanglerTests, TemplateTests)
 {
 	DEM_EQ("@%myFunc_template_$i%$qi$d", "double myFunc_template_<int>(int)");
 	DEM_EQ("@ns@%myFunc_template_$i%$qi$d", "double ns::myFunc_template_<int>(int)");
+}
+
+TEST_F(BorlandDemanglerTests, NamedTypes) {
+	DEM_EQ("@foo$q10ns@Bar@Baz", "foo(ns::Bar::Baz)");
+	DEM_EQ("@foo$qpx10ns@Bar@Baz", "foo(const ns::Bar::Baz *)");
 }
 
 // TODO operator tests, named params tests, fail tests, extra long names, backref tests

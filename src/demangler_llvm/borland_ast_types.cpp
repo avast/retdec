@@ -113,8 +113,7 @@ void CharTypeNode::printLeft(std::ostream &s) const
 		break;
 	case ThreeStateSignness::unsigned_char: s << "unsigned char";
 		break;
-	case ThreeStateSignness::no_prefix: s << "char";
-		break;
+	default: s << "char";
 	}
 }
 
@@ -183,6 +182,46 @@ std::shared_ptr<FloatTypeNode> FloatTypeNode::create(
 	return newType;
 }
 
+NamedTypeNode::NamedTypeNode(std::shared_ptr<Node> typeName, bool isVolatile, bool isConst) :
+	TypeNode("", isVolatile, isConst), _typeName(typeName)
+{
+	_kind = Kind::KNamedType;
+}
+
+std::shared_ptr<NamedTypeNode> NamedTypeNode::create(
+	retdec::demangler::borland::Context &context,
+	std::shared_ptr<Node> typeName,
+	bool isVolatile,
+	bool isConst)
+{
+	// TODO context
+//	auto type = context.getNamedType(typeName, isVolatile, isConst);
+//	if (type && type->kind() == Kind::KNamedType) {
+//		return type;
+//	}
+//
+	auto newType = std::shared_ptr<NamedTypeNode>(new NamedTypeNode(typeName, isVolatile, isConst));
+//	context.addNamedType(newType);
+	return newType;
+}
+
+std::shared_ptr<Node> NamedTypeNode::name()
+{
+	return _typeName;
+}
+
+void NamedTypeNode::printLeft(std::ostream &s) const
+{
+	if (_isVolatile) {
+		s << "volatile ";
+	}
+	if (_isConst) {
+		s << "const ";
+	}
+
+	s << _typeName->str();
+}
+
 PointerTypeNode::PointerTypeNode(std::shared_ptr<Node> pointee, bool isVolatile, bool isConst) :
 	TypeNode("", isVolatile, isConst), _pointee(std::move(pointee))
 {    // TODO clang hovori ze tam ma byt move tak to over
@@ -220,6 +259,37 @@ void PointerTypeNode::printLeft(std::ostream &s) const
 	if (_isConst) {
 		s << " const";
 	}
+}
+
+ReferenceTypeNode::ReferenceTypeNode(std::shared_ptr<Node> pointee) :
+	TypeNode("", false, false), _pointee(pointee)
+{
+	_kind = Kind::KReferenceType;
+}
+
+std::shared_ptr<ReferenceTypeNode> ReferenceTypeNode::create(
+	retdec::demangler::borland::Context &context,
+	std::shared_ptr<retdec::demangler::borland::Node> pointee)
+{
+	auto type = context.getReferenceType(pointee);
+	if (type && type->kind() == Kind::KReferenceType) {
+		return type;
+	}
+
+	auto newType = std::shared_ptr<ReferenceTypeNode>(new ReferenceTypeNode(pointee));
+	context.addReferenceType(newType);
+	return newType;
+}
+
+std::shared_ptr<Node> ReferenceTypeNode::pointee()
+{
+	return _pointee;
+}
+
+void ReferenceTypeNode::printLeft(std::ostream &s) const
+{
+	_pointee->print(s);
+	s << " &";
 }
 
 }    // borland
