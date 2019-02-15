@@ -24,7 +24,6 @@ public:
 	{
 		success = 0,
 		in_progress,
-		memory_alloc_failure,
 		invalid_mangled_name,
 		unknown_error,
 	};

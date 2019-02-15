@@ -14,7 +14,7 @@ namespace demangler {
  * @param compiler Name of compiler mangling scheme.
  */
 Demangler::Demangler(const std::string &compiler) :
-	_compiler(compiler), _status(success) {}
+	_compiler(compiler), _status(init) {}
 
 /**
  * @return Currend demangler status.

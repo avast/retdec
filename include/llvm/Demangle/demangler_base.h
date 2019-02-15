@@ -21,10 +21,11 @@ class Demangler
 		enum Status: u_char
 		{
 			success = 0,
-			init_fail = 1,
-			memory_alloc_failure = 2,
-			invalid_mangled_name = 3,
-			unknown = 4,
+			init,
+			init_fail,
+			memory_alloc_failure,
+			invalid_mangled_name,
+			unknown,
 		};
 
 	public:
