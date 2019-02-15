@@ -1454,6 +1454,7 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateDiv(cs_insn* i, cs_arm64* ai,
 /**
  * ARM64_INS_UMADDL, ARM64_INS_SMADDL
  * ARM64_INS_UMSUBL, ARM64_INS_SMSUBL
+ * ARM64_INS_UMNEGL, ARM64_INS_SMNEGL
  */
 void Capstone2LlvmIrTranslatorArm64_impl::translateMull(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb)
 {
@@ -1461,6 +1462,7 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateMull(cs_insn* i, cs_arm64* ai
 
 	bool sext = true;
 	bool add_operation = true;
+	bool op3_zero = false;
 	switch(i->id) {
 	case ARM64_INS_UMADDL:
 		sext = false;
@@ -1477,6 +1479,16 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateMull(cs_insn* i, cs_arm64* ai
 	case ARM64_INS_SMSUBL:
 		sext = true;
 		add_operation = false;
+		break;
+	case ARM64_INS_UMNEGL:
+		sext = false;
+		add_operation = false;
+		op3_zero = true;
+		break;
+	case ARM64_INS_SMNEGL:
+		sext = true;
+		add_operation = false;
+		op3_zero = true;
 		break;
 	default:
 		throw GenericError("Maddl: Unhandled instruction ID");
@@ -1499,7 +1511,16 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateMull(cs_insn* i, cs_arm64* ai
 
 	auto *val = irb.CreateMul(op1, op2);
 
-	auto* op3 = loadOp(ai->operands[3], irb);
+	llvm::Value* op3;
+	if (op3_zero)
+	{
+		op3 = llvm::ConstantInt::get(res_type, 0);
+	}
+	else
+	{
+		op3 = loadOp(ai->operands[3], irb);
+	}
+
 	if (add_operation)
 	{
 		val = irb.CreateAdd(op3, val);

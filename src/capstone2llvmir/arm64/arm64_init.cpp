@@ -664,8 +664,8 @@ Capstone2LlvmIrTranslatorArm64_impl::_i2fm =
 
 	// alias insn
 	{ARM64_INS_MNEG, &Capstone2LlvmIrTranslatorArm64_impl::translateMul},
-	{ARM64_INS_UMNEGL, nullptr},
-	{ARM64_INS_SMNEGL, nullptr},
+	{ARM64_INS_UMNEGL, &Capstone2LlvmIrTranslatorArm64_impl::translateMull},
+	{ARM64_INS_SMNEGL, &Capstone2LlvmIrTranslatorArm64_impl::translateMull},
 	{ARM64_INS_NOP, nullptr},
 	{ARM64_INS_YIELD, nullptr},
 	{ARM64_INS_WFE, nullptr},
