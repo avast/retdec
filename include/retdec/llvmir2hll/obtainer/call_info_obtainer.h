@@ -278,9 +278,9 @@ protected:
 	* It means that the concrete obtainer should first compute the FuncInfo for
 	* 5, then for 4, then for the strongly connected component (SCC, see
 	* http://en.wikipedia.org/wiki/Strongly_connected_component) which contains
-	* 3, and then for 6. Note that in @c order, instead of 3, there may be 2 or
-	* 1 (since all of them form an SCC, it doesn't matter which of them appears
-	* in @c order).
+	* 1, 2, and 3, and then for 6. Note that in @c order, instead of 3, there
+	* may be 2 or 1 (since all of them form an SCC, it doesn't matter which of
+	* them appears in @c order).
 	*
 	* A single function is not considered to be an SCC unless it contains a
 	* call to itself.
