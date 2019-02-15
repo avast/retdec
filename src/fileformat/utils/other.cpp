@@ -111,6 +111,11 @@ double computeDataEntropy(const std::uint8_t *data, std::size_t dataLen)
 	std::array<std::size_t, 256> histogram{};
 	double entropy = 0;
 
+	if (!data)
+	{
+		return 0;
+	}
+
 	for (std::size_t i = 0; i < dataLen; i++)
 	{
 		histogram[data[i]]++;
