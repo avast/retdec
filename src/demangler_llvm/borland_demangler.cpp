@@ -109,8 +109,10 @@ void BorlandASTParser::parseFunction()
 	}
 
 	/* function qualifiers */
-	bool is_volatile{}, is_const{};
-	std::tie(is_volatile, is_const) = parseQualifiers();
+	bool isVolatile{}, isConst{};
+	std::tie(isVolatile, isConst) = parseQualifiers();
+
+	// TODO operators
 
 	/* function calling convention */
 	FunctionNode::CallConv callConv = parseCallConv();
@@ -127,7 +129,7 @@ void BorlandASTParser::parseFunction()
 //	auto retType = parseRetType();
 
 	_status = Status::success;
-	_ast = FunctionNode::create(absNameNode, callConv, paramsNode);
+	_ast = FunctionNode::create(absNameNode, callConv, paramsNode, isVolatile, isConst);
 }
 
 std::pair<bool, bool> BorlandASTParser::parseQualifiers()

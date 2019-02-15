@@ -76,15 +76,19 @@ public:
 public:
 	static std::shared_ptr<FunctionNode> create(
 		std::shared_ptr<Node> name,
-		CallConv call_conv = CallConv::unknown,
-		std::shared_ptr<Node> params = nullptr
+		CallConv call_conv,
+		std::shared_ptr<Node> params,
+		bool isVolatile,
+		bool isConst
 	);
 
 private:
 	explicit FunctionNode(
 		std::shared_ptr<Node> name,
-		CallConv call_conv = CallConv::unknown,
-		std::shared_ptr<Node> params = nullptr);
+		CallConv call_conv,
+		std::shared_ptr<Node> params,
+		bool isVolatile,
+		bool isConst);
 
 	void printLeft(std::ostream &s) const override;
 
@@ -92,6 +96,8 @@ private:
 	CallConv _call_conv;
 	std::shared_ptr<Node> _name;
 	std::shared_ptr<Node> _params;
+	bool _isVolatile;
+	bool _isConst;
 
 };
 

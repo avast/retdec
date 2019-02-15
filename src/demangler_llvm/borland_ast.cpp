@@ -65,11 +65,15 @@ void Node::printRight(std::ostream &s) const {}
 FunctionNode::FunctionNode(
 	std::shared_ptr<retdec::demangler::borland::Node> name,
 	CallConv call_conv,
-	std::shared_ptr<retdec::demangler::borland::Node> params) :
+	std::shared_ptr<retdec::demangler::borland::Node> params,
+	bool isVolatile,
+	bool isConst) :
 	Node(Kind::KFunction, false),
 	_call_conv(call_conv),
 	_name(name),
-	_params(params) {}
+	_params(params),
+	_isVolatile(isVolatile),
+	_isConst(isConst) {}
 
 /**
  * @brief Creates shared pointer to function node.
@@ -81,9 +85,11 @@ FunctionNode::FunctionNode(
 std::shared_ptr<FunctionNode> FunctionNode::create(
 	std::shared_ptr<retdec::demangler::borland::Node> name,
 	CallConv call_conv,
-	std::shared_ptr<Node> params)
+	std::shared_ptr<Node> params,
+	bool isVolatile,
+	bool isConst)
 {
-	return std::shared_ptr<FunctionNode>(new FunctionNode(name, call_conv, params));
+	return std::shared_ptr<FunctionNode>(new FunctionNode(name, call_conv, params, isVolatile, isConst));
 }
 
 /**
@@ -106,6 +112,13 @@ void FunctionNode::printLeft(std::ostream &s) const
 		_params->print(s);
 	}
 	s << ")";
+
+	if (_isVolatile) {
+		s << " volatile";
+	}
+	if (_isConst) {
+		s << " const";
+	}
 }
 
 /**
