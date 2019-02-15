@@ -27,7 +27,7 @@ FileSection::FileSection() : index(std::numeric_limits<unsigned long long>::max(
 								extraInfo(std::numeric_limits<unsigned long long>::max()),
 								lineOffset(std::numeric_limits<unsigned long long>::max()),
 								relocationsLineOffset(std::numeric_limits<unsigned long long>::max()),
-								entropy(std::numeric_limits<double>::max())
+								entropy(std::numeric_limits<double>::min())
 {
 
 }

@@ -14,7 +14,7 @@ namespace fileinfo {
 /**
  * Class for save information about section
  *
- * Value std::numeric_limits<unsigned long long>::max() mean unspecified value or error for numeric types.
+ * Value std::numeric_limits<unsigned long long>::max()/min() mean unspecified value or error for numeric types.
  */
 class FileSection
 {
