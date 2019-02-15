@@ -269,10 +269,9 @@ void PeDetector::getSections()
 											"section can be written to"};
 	const std::string flagsAbbv[flagsSize] = {"b", "E", "i", "u", "l", "t", "g", purgeableAbbv, "L",
 											"P", "R", "d", "c", "p", "s", "x", "r", "w"};
-	FileSection fs;
-
 	for(unsigned long long i = 0; i < storedSections; ++i)
 	{
+		FileSection fs;
 		if(!peParser->getFileSection(i, fs))
 		{
 			continue;
