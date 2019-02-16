@@ -111,8 +111,13 @@ void FileDetector::getOverlayInfo()
 	const auto size = fileParser->getOverlaySize();
 	if(size)
 	{
+		double entropy;
 		fileInfo.setOverlayOffset(fileParser->getDeclaredFileLength());
 		fileInfo.setOverlaySize(size);
+		if(fileParser->getOverlayEntropy(entropy))
+		{
+			fileInfo.setOverlayEntropy(entropy);
+		}
 	}
 }
 

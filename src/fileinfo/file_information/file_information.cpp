@@ -678,6 +678,15 @@ std::string FileInformation::getOverlaySizeStr(std::ios_base &(* format)(std::io
 }
 
 /**
+ * Get overlay entropy
+ * @return Overlay entropy
+ */
+std::string FileInformation::getOverlayEntropyStr(std::ios_base &(* format)(std::ios_base &)) const
+{
+	return header.getOverlayEntropyStr(format);
+}
+
+/**
  * Get number of records in rich header
  * @return Number of records in rich header
  */
@@ -3931,6 +3940,15 @@ void FileInformation::setOverlayOffset(unsigned long long offset)
 void FileInformation::setOverlaySize(unsigned long long size)
 {
 	header.setOverlaySize(size);
+}
+
+/**
+ * Set overlay entropy
+ * @param entropy Entropy of overlay
+ */
+void FileInformation::setOverlayEntropy(double entropy)
+{
+	header.setOverlayEntropy(entropy);
 }
 
 /**
