@@ -181,9 +181,15 @@ TEST_F(BorlandDemanglerTests, TemplateTests)
 {
 	DEM_EQ("@%myFunc_template_$i%$qi$d", "double myFunc_template_<int>(int)");
 	DEM_EQ("@ns@%myFunc_template_$i%$qi$d", "double ns::myFunc_template_<int>(int)");
+	DEM_EQ("@%foo2$60std@%basic_string$c19std@%char_traits$c%17std@%allocator$c%%i%$qv$v",
+		"void foo2<std::basic_string<char,std::char_traits<char>, std::allocator<char>>, int>()");
+	DEM_EQ(
+		"@%foo$60std@%basic_string$c19std@%char_traits$c%17std@%allocator$c%%%$q60std@%basic_string$c19std@%char_traits$c%17std@%allocator$c%%$v",
+		"void foo<std::basic_string<char,std::char_traits<char>, std::allocator<char>>> (std::basic_string<char,std::char_traits<char>, std::allocator<char>>)");
 }
 
-TEST_F(BorlandDemanglerTests, NamedTypes) {
+TEST_F(BorlandDemanglerTests, NamedTypes)
+{
 	DEM_EQ("@foo$q10ns@Bar@Baz", "foo(ns::Bar::Baz)");
 	DEM_EQ("@foo$qpx10ns@Bar@Baz", "foo(const ns::Bar::Baz *)");
 }
