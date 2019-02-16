@@ -10,6 +10,7 @@
 #include "retdec/utils/container.h"
 #include "retdec/utils/conversion.h"
 #include "retdec/fileformat/utils/other.h"
+#include <iostream> // TODO
 
 using namespace retdec::utils;
 
