@@ -10,14 +10,16 @@
 #include <memory>
 #include <string>
 
-#include "retdec/config/config.h"
 #include "retdec/loader/loader/image.h"
 
 namespace retdec {
 namespace loader {
 
-std::unique_ptr<Image> createImage(const std::string& filePath, bool isRaw = false);
-std::unique_ptr<Image> createImage(const std::shared_ptr<retdec::fileformat::FileFormat>& fileFormat);
+std::unique_ptr<Image> createImage(
+		const std::string& filePath,
+		bool isRaw = false);
+std::unique_ptr<Image> createImage(
+		const std::shared_ptr<retdec::fileformat::FileFormat>& fileFormat);
 
 } // namespace loader
 } // namespace retdec
