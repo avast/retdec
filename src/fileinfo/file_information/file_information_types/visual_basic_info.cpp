@@ -4,9 +4,11 @@
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */
 
+#include "retdec/fileformat/utils/other.h"
 #include "fileinfo/file_information/file_information_types/visual_basic_info.h"
 #include "fileinfo/file_information/file_information_types/type_conversions.h"
 
+using namespace retdec::utils;
 using namespace retdec::fileformat;
 
 namespace fileinfo {
@@ -92,7 +94,7 @@ std::string VisualBasicInfo::getLanguageDLLPrimaryLCIDStr() const
 	{
 		return "";
 	}
-	return getNumberAsString(lcid);
+	return lcidToStr(lcid);
 }
 
 /**
@@ -106,7 +108,7 @@ std::string VisualBasicInfo::getLanguageDLLSecondaryLCIDStr() const
 	{
 		return "";
 	}
-	return getNumberAsString(lcid);
+	return lcidToStr(lcid);
 }
 
 /**
@@ -129,7 +131,7 @@ std::string VisualBasicInfo::getProjectPrimaryLCIDStr() const
 	{
 		return "";
 	}
-	return getNumberAsString(lcid);
+	return lcidToStr(lcid);
 }
 
 /**
@@ -143,7 +145,7 @@ std::string VisualBasicInfo::getProjectSecondaryLCIDStr() const
 	{
 		return "";
 	}
-	return getNumberAsString(lcid);
+	return lcidToStr(lcid);
 }
 
 /**
@@ -263,7 +265,7 @@ std::string VisualBasicInfo::getTypeLibLCIDStr() const
 	{
 		return "";
 	}
-	return getNumberAsString(lcid);
+	return lcidToStr(lcid);
 }
 
 /**
