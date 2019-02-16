@@ -1452,11 +1452,96 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateDiv(cs_insn* i, cs_arm64* ai,
 }
 
 /**
+ * ARM64_INS_UMULH, ARM64_INS_SMULH
+ */
+void Capstone2LlvmIrTranslatorArm64_impl::translateMulh(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb)
+{
+	EXPECT_IS_TERNARY(i, ai, irb);
+
+	bool sext = true;
+	if (i->id == ARM64_INS_UMULH)
+	{
+		sext = false;
+	}
+	else if (i->id == ARM64_INS_SMULH)
+	{
+		sext = true;
+	}
+	else
+	{
+		throw GenericError("Mulh: Unhandled instruction ID");
+	}
+
+	auto* res_type = llvm::IntegerType::getInt128Ty(_module->getContext());
+	auto* op1 = loadOp(ai->operands[1], irb);
+	auto* op2 = loadOp(ai->operands[2], irb);
+	if (sext)
+	{
+		op1 = irb.CreateSExtOrTrunc(op1, res_type);
+		op2 = irb.CreateSExtOrTrunc(op2, res_type);
+	}
+	else
+	{
+		op1 = irb.CreateZExtOrTrunc(op1, res_type);
+		op2 = irb.CreateZExtOrTrunc(op2, res_type);
+	}
+
+	auto *val = irb.CreateMul(op1, op2);
+
+	// Get the high bits of the result
+	val = irb.CreateAShr(val, llvm::ConstantInt::get(val->getType(), 64));
+
+	val = irb.CreateSExtOrTrunc(val, getDefaultType());
+
+	storeOp(ai->operands[0], val, irb);
+}
+
+/**
+ * ARM64_INS_UMULL, ARM64_INS_SMULL
+ */
+void Capstone2LlvmIrTranslatorArm64_impl::translateMull(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb)
+{
+	EXPECT_IS_TERNARY(i, ai, irb);
+
+	bool sext = true;
+	if (i->id == ARM64_INS_UMULL)
+	{
+		sext = false;
+	}
+	else if (i->id == ARM64_INS_SMULL)
+	{
+		sext = true;
+	}
+	else
+	{
+		throw GenericError("Mull: Unhandled instruction ID");
+	}
+
+	auto* res_type = getDefaultType();
+	auto* op1 = loadOp(ai->operands[1], irb);
+	auto* op2 = loadOp(ai->operands[2], irb);
+	if (sext)
+	{
+		op1 = irb.CreateSExtOrTrunc(op1, res_type);
+		op2 = irb.CreateSExtOrTrunc(op2, res_type);
+	}
+	else
+	{
+		op1 = irb.CreateZExtOrTrunc(op1, res_type);
+		op2 = irb.CreateZExtOrTrunc(op2, res_type);
+	}
+
+	auto *val = irb.CreateMul(op1, op2);
+
+	storeOp(ai->operands[0], val, irb);
+}
+
+/**
  * ARM64_INS_UMADDL, ARM64_INS_SMADDL
  * ARM64_INS_UMSUBL, ARM64_INS_SMSUBL
  * ARM64_INS_UMNEGL, ARM64_INS_SMNEGL
  */
-void Capstone2LlvmIrTranslatorArm64_impl::translateMull(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb)
+void Capstone2LlvmIrTranslatorArm64_impl::translateMulOpl(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb)
 {
 	EXPECT_IS_EXPR(i, ai, irb, (3 <= ai->op_count && ai->op_count <= 4));
 
