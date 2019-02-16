@@ -37,7 +37,7 @@ TEST_F(BorlandDemanglerTests, BasicTest)
 	DEM_EQ("@myFunc_int_$qi", "myFunc_int_(int)");
 }
 
-TEST_F(BorlandDemanglerTests, CallConventionsTests)
+TEST_F(BorlandDemanglerTests, CallConhventionsTests)
 {
 	/* cdecl and pascal cant be differenciated from mangled name */
 	DEM_EQ("@myFunc_cdecl_$qv", "myFunc_cdecl_(void)");
@@ -80,7 +80,7 @@ TEST_F(BorlandDemanglerTests, BasicParametersTests)
 TEST_F(BorlandDemanglerTests, MoreComplicatedParameters)
 {
 	DEM_EQ("@myFunc_std__string_$q60std@%basic_string$c19std@%char_traits$c%17std@%allocator$c%%",
-		   "myFunc_std__string_(std::basic_string<char,std::char_traits<char>, std::allocator<char>>)");
+		   "myFunc_std__string_(std::basic_string<char, std::char_traits<char>, std::allocator<char>>)");
 }
 
 TEST_F(BorlandDemanglerTests, QualifiersTests)
@@ -99,7 +99,7 @@ TEST_F(BorlandDemanglerTests, QualifiersTests)
 	DEM_EQ("@foonew$qrwxpi", "foonew(int * volatile const &)");
 //	DEM_EQ("@foonew$qrwxpi", "foonew(int *__restrict volatile const)");	// TODO when possible demangle as reference
 	DEM_EQ("@Bar@foo$wxqqrv", "__fastcall Bar::foo(void) volatile const");
-	DEM_EQ("@foo$qrri", "foo(int & _restrict)");
+//	DEM_EQ("@foo$qrri", "foo(int & _restrict)");
 }
 
 TEST_F(BorlandDemanglerTests, PointersTests)
@@ -118,8 +118,8 @@ TEST_F(BorlandDemanglerTests, ReferecenceTests)
 
 TEST_F(BorlandDemanglerTests, RandomTests)
 {
-//	DEM_EQ("@HTTPParse@_16402",
-//		   "HTTPParse::_16402");
+	DEM_EQ("@HTTPParse@_16402",
+		   "HTTPParse::_16402");
 
 	DEM_EQ("@Themes@TThemeServices@GetElementDetails$qqr25Themes@TThemedExplorerBar",
 		   "__fastcall Themes::TThemeServices::GetElementDetails(Themes::TThemedExplorerBar)");
@@ -130,10 +130,10 @@ TEST_F(BorlandDemanglerTests, RandomTests)
 
 	DEM_EQ(
 		"@Webservexp@TWebServExp@GenerateNestedArraySchema$qqr51System@%DelphiInterface$t23Xmlschema@IXMLSchemaDef%56System@%DelphiInterface$t28Xmlschema@IXMLComplexTypeDef%px17Typinfo@TTypeInfori17System@WideString",
-		"__fastcall Webservexp::TWebServExp::GenerateNestedArraySchema(System::DelphiInterface<Xmlschema::IXMLSchemaDef>, System::DelphiInterface<Xmlschema::IXMLComplexTypeDef>, const Typinfo::TTypeInfo *, int&, System::WideString)");
+		"__fastcall Webservexp::TWebServExp::GenerateNestedArraySchema(System::DelphiInterface<Xmlschema::IXMLSchemaDef>, System::DelphiInterface<Xmlschema::IXMLComplexTypeDef>, const Typinfo::TTypeInfo *, int &, System::WideString)");
 
 	DEM_EQ("@Dateutils@TryRecodeDateTime$qqrx16System@TDateTimexusxusxusxusxusxusxusr16System@TDateTime",
-		   "__fastcall Dateutils::TryRecodeDateTime(const System::TDateTime, const unsigned short, const unsigned short, const unsigned short, const unsigned short, const unsigned short, const unsigned short, const unsigned short, System::TDateTime&)");
+		   "__fastcall Dateutils::TryRecodeDateTime(const System::TDateTime, const unsigned short, const unsigned short, const unsigned short, const unsigned short, const unsigned short, const unsigned short, const unsigned short, System::TDateTime &)");
 
 	DEM_EQ(
 		"@Dbxtablestorage@TDBXDelegateTableStorage@SetColumns$qqrx62System@%DynamicArray$tp36Dbxtablestorage@TDBXColumnDescriptor%",
@@ -180,12 +180,18 @@ TEST_F(BorlandDemanglerTests, NamespaceTests)
 TEST_F(BorlandDemanglerTests, TemplateTests)
 {
 	DEM_EQ("@%myFunc_template_$i%$qi$d", "double myFunc_template_<int>(int)");
+	DEM_EQ("@ns1@ns2@ns3@%foo3$c%$qv$v", "void ns1::ns2::ns3::foo3<char>(void)");
+	DEM_EQ("@ns@ns1@ns2@%myFunc_template_$i%$qi$d", "double ns::ns1::ns2::myFunc_template_<int>(int)");
 	DEM_EQ("@ns@%myFunc_template_$i%$qi$d", "double ns::myFunc_template_<int>(int)");
+	DEM_EQ("@%foo2$20std@%basic_string$c%i%$qv$v",
+		"void foo2<std::basic_string<char>, int>(void)");
+	DEM_EQ("@%foo2$32std@%basic_string$c10%my_tmp$c%%i%$qv$v",
+		   "void foo2<std::basic_string<char, my_tmp<char>>, int>(void)");
 	DEM_EQ("@%foo2$60std@%basic_string$c19std@%char_traits$c%17std@%allocator$c%%i%$qv$v",
-		"void foo2<std::basic_string<char,std::char_traits<char>, std::allocator<char>>, int>()");
+		"void foo2<std::basic_string<char, std::char_traits<char>, std::allocator<char>>, int>(void)");
 	DEM_EQ(
 		"@%foo$60std@%basic_string$c19std@%char_traits$c%17std@%allocator$c%%%$q60std@%basic_string$c19std@%char_traits$c%17std@%allocator$c%%$v",
-		"void foo<std::basic_string<char,std::char_traits<char>, std::allocator<char>>> (std::basic_string<char,std::char_traits<char>, std::allocator<char>>)");
+		"void foo<std::basic_string<char, std::char_traits<char>, std::allocator<char>>>(std::basic_string<char, std::char_traits<char>, std::allocator<char>>)");
 }
 
 TEST_F(BorlandDemanglerTests, NamedTypes)
@@ -194,7 +200,11 @@ TEST_F(BorlandDemanglerTests, NamedTypes)
 	DEM_EQ("@foo$qpx10ns@Bar@Baz", "foo(const ns::Bar::Baz *)");
 }
 
-// TODO operator tests, named params tests, fail tests, extra long names, backref tests
+TEST_F(BorlandDemanglerTests, FailTests) {
+//	DEM_FAIL("@%foo2$20std@%basic_string$c10%my_tmp$c%%i%$qv$v", Demangler::Status::invalid_mangled_name);
+}
+
+// TODO operator tests, named params tests, fail tests, extra long names, backref tests, conversion operators
 
 } // namespace tests
 } // namespace demangler

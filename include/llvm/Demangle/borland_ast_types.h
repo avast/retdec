@@ -168,6 +168,24 @@ private:
 	std::shared_ptr<Node> _pointee;
 };
 
+class RReferenceTypeNode : public TypeNode
+{
+public:
+	static std::shared_ptr<RReferenceTypeNode> create (
+		Context &context,
+		std::shared_ptr<Node> pointee);
+
+	std::shared_ptr<Node> pointee();
+
+private:
+	explicit  RReferenceTypeNode(std::shared_ptr<Node> pointee);
+
+	void printLeft(std::ostream &s) const override;
+
+private:
+	std::shared_ptr<Node> _pointee;
+};
+
 }    // borland
 }    // demangler
 }    // retdec

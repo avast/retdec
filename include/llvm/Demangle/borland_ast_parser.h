@@ -39,17 +39,17 @@ private:
 	void parse();
 	void parseFunction();
 	std::pair<bool, bool> parseQualifiers();
-	std::shared_ptr<Node> parseAbsoluteName(StringView &name);
 	FunctionNode::CallConv parseCallConv();
 	std::shared_ptr<NodeArray> parseFuncParams();
 	std::shared_ptr<Node> parseType();
 	std::shared_ptr<Node> parseBuildInType(bool isVolatile, bool isConst);
 	unsigned parseNumber();
 	std::shared_ptr<Node> parseNamedType(unsigned nameLen);
-//		std::unique_ptr<Node> parseRetType();
-//		std::unique_ptr<Node> parseFuncInfo();
-//	StringView getFuncName();
-	static StringView getNestedName(StringView &source);
+	std::shared_ptr<Node> parseFuncName();
+	std::shared_ptr<Node> parseName(const char *end);
+	std::shared_ptr<Node> parseTemplate(std::shared_ptr<Node> templateNamespace);
+	std::shared_ptr<Node> parseTemplate(std::shared_ptr<Node> templateNamespace, const char *end);
+	std::shared_ptr<Node> parseArray();
 
 private:
 	Status _status;

@@ -64,14 +64,9 @@ void BorlandASTParser::parse()
  */
 void BorlandASTParser::parseFunction()
 {
-	auto funcName = _mangled.cutUntil('$');
-	if (funcName.empty()) {		// no function name
+	auto absNameNode = parseFuncName();
+	if (_status == invalid_mangled_name || absNameNode == nullptr) {
 		_status = invalid_mangled_name;
-		return;
-	}
-
-	auto absNameNode = parseAbsoluteName(funcName);
-	if (_status == Status::invalid_mangled_name) {
 		return;
 	}
 
@@ -95,10 +90,98 @@ void BorlandASTParser::parseFunction()
 		return;
 	}
 
-//	auto retType = parseRetType();
+	std::shared_ptr<Node> retType = nullptr;
+	if (_mangled.consumeFront('$')) {
+		retType = parseType();    // TODO zaclen to do funkcie
+	}
 
 	_status = Status::success;
-	_ast = FunctionNode::create(absNameNode, callConv, paramsNode, isVolatile, isConst);
+	_ast = FunctionNode::create(absNameNode, callConv, paramsNode, retType, isVolatile, isConst);
+}
+
+std::shared_ptr<Node> BorlandASTParser::parseFuncName()
+{
+	std::shared_ptr<Node> name = nullptr;
+
+	const char *start = _mangled.begin();
+	const char *end = _mangled.end();
+	const char *c = _mangled.begin();
+	while (c <= end) {
+		if (*c == '$' || *c == '%' || *c == '@') {
+			auto nameView = StringView(start, c);
+			if (!nameView.empty()) {
+				_mangled.consumeFront(nameView);        // propagate to mangled
+				auto nameNode = NameNode::create(nameView);
+				if (!name) {
+					name = nameNode;
+				} else {
+					name = NestedNameNode::create(name, nameNode);
+				}
+
+				start = c + 1;
+			}
+			if (_mangled.front() == '@') {
+				_mangled.consumeFront('@');
+			} else {
+				break;
+			}
+		}
+		++c;
+	}
+
+	if (_mangled.front() == '%') {
+		name = parseTemplate(name);
+	}
+
+	return name;
+}
+
+std::shared_ptr<Node> BorlandASTParser::parseName(const char *endMangled)
+{
+	std::shared_ptr<Node> name = nullptr;
+
+	const char *start = _mangled.begin();
+	const char *end = endMangled;
+	const char *c = _mangled.begin();
+	while (c < end) {
+		if (*c == '%' || *c == '@') {
+			auto nameView = StringView(start, c);
+			if (!nameView.empty()) {
+				_mangled.consumeFront(nameView);        // propagate to mangled
+				auto nameNode = NameNode::create(nameView);
+				if (!name) {
+					name = nameNode;
+				} else {
+					name = NestedNameNode::create(name, nameNode);
+				}
+
+				start = c + 1;
+			}
+			if (_mangled.front() == '@') {
+				_mangled.consumeFront('@');
+			} else {
+				break;
+			}
+		}
+		++c;
+	}
+
+	if (c == end) { // parse remainder as name
+		auto nameView = StringView(start, c);
+		_mangled.consumeFront(nameView);        // propagate to mangled
+		auto nameNode = NameNode::create(nameView);
+		if (!name) {
+			name = nameNode;
+		} else {
+			name = NestedNameNode::create(name, nameNode);
+		}
+	}
+
+	if (!_mangled.empty() && _mangled.front() == '%' && c != end) {
+		name = parseTemplate(name, end);
+	}
+
+	return name;
 }
 
 std::pair<bool, bool> BorlandASTParser::parseQualifiers()
@@ -171,7 +254,12 @@ std::shared_ptr<Node> BorlandASTParser::parseType()
 	}
 
 	if (_mangled.consumeFront('h')) {
-		// rRef
+		auto referencedType = parseType();
+		if (!referencedType || referencedType->kind() == Node::Kind::KReferenceType) {    // TODO more restrictions
+			_status = invalid_mangled_name;
+			return nullptr;
+		}
+		return RReferenceTypeNode::create(_context, referencedType);
 	}
 
 	if (_mangled.consumeFront('a')) {
@@ -187,7 +275,7 @@ std::shared_ptr<Node> BorlandASTParser::parseType()
 	}
 	if (len > 0) {
 		auto name = parseNamedType(len);
-		return NamedTypeNode::create(_context, name, isVolatile, isConst);	//todo checky
+		return NamedTypeNode::create(_context, name, isVolatile, isConst);    //todo checky
 //		return parseNamedType(len);
 	}
 
@@ -250,43 +338,6 @@ std::shared_ptr<Node> BorlandASTParser::parseBuildInType(bool isVolatile,
 	return nullptr;
 }
 
-/**
- * @brief Tries to consume first nested name in in source and returns it.
- */
-StringView BorlandASTParser::getNestedName(StringView &source)
-{
-	auto nested = source.cutUntil('@');
-	source.consumeFront('@');
-	return nested;
-}
-
-/**
- * @brief Tries to parse whole name into AST.
- * @return Pointer to Node that represents name.
- *
- * <abslute-name> ::= <namespace> <name> $
- * <namespace> ::=
- * <namespace> ::= <basic-name> @ <namespace>
- */
-std::shared_ptr<Node> BorlandASTParser::parseAbsoluteName(StringView &name)
-{
-	auto nestedPart = getNestedName(name);
-	if (nestedPart.empty()) {
-		return NameNode::create(name);
-	}
-	std::shared_ptr<Node> nameNode = NameNode::create(nestedPart);
-
-	StringView nextNested;
-	while (!(nextNested = getNestedName(name)).empty()) {
-		auto nextNestedNode = NameNode::create(nextNested);
-		nameNode = NestedNameNode::create(nameNode, nextNestedNode);
-	}
-
-	// everything left must be absolute name
-	auto absNameNode = NameNode::create(name);
-	return NestedNameNode::create(nameNode, absNameNode);
-}
-
 unsigned BorlandASTParser::parseNumber()
 {
 	char c = _mangled.front();
@@ -307,20 +358,87 @@ unsigned BorlandASTParser::parseNumber()
 
 std::shared_ptr<Node> BorlandASTParser::parseNamedType(unsigned nameLen)
 {
-	auto name = _mangled.drop(nameLen);
-	if (name.size() < nameLen) {
+	const char *end_named = _mangled.begin() + nameLen;
+	if (_mangled.end() < end_named) {
 		_status = invalid_mangled_name;
 		return nullptr;
 	}
 
-	auto nameNode = parseAbsoluteName(name);
-	if (!nameNode) {
+	auto nameNode = parseName(end_named);
+	if (nameNode == nullptr) {
 		_status = invalid_mangled_name;
 		return nullptr;
 	}
 
 	return nameNode;    // TODO quals
 //	return NamedTypeNode::create(_context, nameNode, )
+}
+
+std::shared_ptr<Node> BorlandASTParser::parseTemplate(std::shared_ptr<Node> templateNamespace)
+{
+	_mangled.consumeFront('%');
+
+	auto templateName = _mangled.cutUntil('$');
+	if (templateName.empty()) {
+		_status = invalid_mangled_name;
+		return nullptr;
+	}
+	std::shared_ptr<Node> templateNameNode = NameNode::create(templateName);
+
+	if (templateNamespace) {
+		templateNameNode = NestedNameNode::create(templateNamespace, templateNameNode);
+	}
+
+	_mangled.consumeFront('$');
+
+	auto params = NodeArray::create();
+	while (_mangled.front() != '%') {
+		_mangled.consumeFront('t');	// TODO REMOVE, ONLY FOR TESTING!!!!!!!!!!!!!!!!!!!!!!!!!
+		auto typeNode = parseType();
+		if (typeNode && _status != invalid_mangled_name) {
+			params->addNode(typeNode);
+		}
+	}
+
+	_mangled.consumeFront('%');
+	auto templateNode = TemplateNode::create(templateNameNode, params);
+	return templateNode;
+}
+
+std::shared_ptr<Node> BorlandASTParser::parseTemplate(std::shared_ptr<Node> templateNamespace, const char *end)
+{
+	_mangled.consumeFront('%');
+	auto templateName = _mangled.cutUntil('$');
+	if (templateName.empty()) {
+		_status = invalid_mangled_name;
+		return nullptr;
+	}
+
+	std::shared_ptr<Node> templateNameNode = NameNode::create(templateName);
+
+	if (templateNamespace) {
+		templateNameNode = NestedNameNode::create(templateNamespace, templateNameNode);
+	}
+
+	_mangled.consumeFront('$');
+	auto params = NodeArray::create();
+	while (_mangled.front() != '%') {	// TODO tato podmienka je zle, musi sa ist po kedy nebude jedno pred koncom, posledny znak musi byt %
+		_mangled.consumeFront('t');	// TODO REMOVE, ONLY FOR TESTING!!!!!!!!!!!!!!!!!!!!!!!!!
+		auto typeNode = parseType();
+		if (!typeNode || _status == invalid_mangled_name) {
+			break;
+		}
+		params->addNode(typeNode);
+	}
+
+	_mangled.consumeFront('%');
+	if (_mangled.begin() != end) {
+		_status = invalid_mangled_name;
+		return nullptr;
+	}
+	auto templateNode = TemplateNode::create(templateNameNode, params);
+	return templateNode;
+	// TODO problem ked je viac parametrov v template
 }
 
 } // borland

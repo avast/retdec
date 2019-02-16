@@ -292,6 +292,29 @@ void ReferenceTypeNode::printLeft(std::ostream &s) const
 	s << " &";
 }
 
+RReferenceTypeNode::RReferenceTypeNode(std::shared_ptr<Node> pointee) :
+	TypeNode("", false, false), _pointee(pointee)
+{
+	_kind = Kind::KRReferenceType;
+}
+
+std::shared_ptr<RReferenceTypeNode> RReferenceTypeNode::create(
+	Context &context, std::shared_ptr<Node> pointee)
+{
+	return std::shared_ptr<RReferenceTypeNode>(new RReferenceTypeNode(pointee));
+}
+
+std::shared_ptr<Node> RReferenceTypeNode::pointee()
+{
+	return _pointee;
+}
+
+void RReferenceTypeNode::printLeft(std::ostream &s) const
+{
+	_pointee->print(s);
+	s << " &&";
+}
+
 }    // borland
 }    // demangler
 }    // retdec

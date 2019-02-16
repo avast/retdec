@@ -66,12 +66,14 @@ FunctionNode::FunctionNode(
 	std::shared_ptr<retdec::demangler::borland::Node> name,
 	CallConv call_conv,
 	std::shared_ptr<retdec::demangler::borland::Node> params,
+	std::shared_ptr<Node> retType,
 	bool isVolatile,
 	bool isConst) :
 	Node(Kind::KFunction, false),
 	_call_conv(call_conv),
 	_name(name),
 	_params(params),
+	_retType(retType),
 	_isVolatile(isVolatile),
 	_isConst(isConst) {}
 
@@ -86,10 +88,11 @@ std::shared_ptr<FunctionNode> FunctionNode::create(
 	std::shared_ptr<retdec::demangler::borland::Node> name,
 	CallConv call_conv,
 	std::shared_ptr<Node> params,
+	std::shared_ptr<Node> retType,
 	bool isVolatile,
 	bool isConst)
 {
-	return std::shared_ptr<FunctionNode>(new FunctionNode(name, call_conv, params, isVolatile, isConst));
+	return std::shared_ptr<FunctionNode>(new FunctionNode(name, call_conv, params, retType, isVolatile, isConst));
 }
 
 /**
@@ -98,6 +101,11 @@ std::shared_ptr<FunctionNode> FunctionNode::create(
  */
 void FunctionNode::printLeft(std::ostream &s) const
 {
+	if (_retType) {
+		_retType->print(s);
+		s << " ";
+	}
+
 	switch (_call_conv) {
 	case CallConv::fastcall: s << "__fastcall ";
 		break;
@@ -119,6 +127,29 @@ void FunctionNode::printLeft(std::ostream &s) const
 	if (_isConst) {
 		s << " const";
 	}
+}
+
+TemplateNode::TemplateNode(
+	std::shared_ptr<retdec::demangler::borland::Node> name,
+	std::shared_ptr<retdec::demangler::borland::Node> params) :
+	Node(Kind::KTemplateNode), _name(name), _params(params) {}
+
+std::shared_ptr<TemplateNode> TemplateNode::create(
+	std::shared_ptr<retdec::demangler::borland::Node> name,
+	std::shared_ptr<retdec::demangler::borland::Node> params)
+{
+	// TODO context
+	return std::shared_ptr<TemplateNode>(new TemplateNode(name, params));
+}
+
+void TemplateNode::printLeft(std::ostream &s) const
+{
+	_name->print(s);
+	s << "<";
+	if (_params) {
+		_params->print(s);
+	}
+	s << ">";
 }
 
 /**
