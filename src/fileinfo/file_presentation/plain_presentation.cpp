@@ -460,6 +460,7 @@ void PlainPresentation::presentOverlay() const
 {
 	const auto offset = fileinfo.getOverlayOffsetStr(hexWithPrefix);
 	const auto size = fileinfo.getOverlaySizeStr(hexWithPrefix);
+	const auto entropy = fileinfo.getOverlayEntropyStr(std::dec);
 	if(!offset.empty())
 	{
 		std::cout << "Overlay offset           : " << offset << "\n";
@@ -467,6 +468,10 @@ void PlainPresentation::presentOverlay() const
 	if(!size.empty())
 	{
 		std::cout << "Overlay size             : " << size << "\n";
+	}
+	if(!entropy.empty())
+	{
+		std::cout << "Overlay entropy          : " << entropy << "\n";
 	}
 }
 
