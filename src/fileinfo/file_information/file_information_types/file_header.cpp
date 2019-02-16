@@ -33,7 +33,8 @@ FileHeader::FileHeader() : numberOfBitsInByte(std::numeric_limits<unsigned long 
 							numberOfDataDirectories(std::numeric_limits<unsigned long long>::max()),
 							numberOfSymbolTables(std::numeric_limits<unsigned long long>::max()),
 							overlayOffset(std::numeric_limits<unsigned long long>::max()),
-							overlaySize(std::numeric_limits<unsigned long long>::max())
+							overlaySize(std::numeric_limits<unsigned long long>::max()),
+							overlayEntropy(std::numeric_limits<double>::min())
 {
 
 }
@@ -397,6 +398,15 @@ std::string FileHeader::getOverlaySizeStr(std::ios_base &(* format)(std::ios_bas
 }
 
 /**
+ * Get overlay entropy
+ * @return Entropy of overlay
+ */
+std::string FileHeader::getOverlayEntropyStr(std::ios_base &(* format)(std::ios_base &)) const
+{
+	return getNumberAsString(overlayEntropy, format);
+}
+
+/**
  * Set time stamp
  * @param timestamp Time stamp
  */
@@ -682,6 +692,15 @@ void FileHeader::setOverlayOffset(unsigned long long offset)
 void FileHeader::setOverlaySize(unsigned long long size)
 {
 	overlaySize = size;
+}
+
+/**
+ * Set entropy of overlay
+ * @param entr Entropy of overlay
+ */
+void FileHeader::setOverlayEntropy(double entr)
+{
+	overlayEntropy = entr;
 }
 
 /**

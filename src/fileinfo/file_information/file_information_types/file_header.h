@@ -49,6 +49,7 @@ class FileHeader
 		unsigned long long numberOfSymbolTables;    ///< number of symbol tables
 		unsigned long long overlayOffset;           ///< offset of overlay
 		unsigned long long overlaySize;             ///< size of overlay
+		double overlayEntropy;                      ///< overlay data entropy
 	public:
 		FileHeader();
 		~FileHeader();
@@ -93,6 +94,7 @@ class FileHeader
 		std::string getNumberOfSymbolTablesStr() const;
 		std::string getOverlayOffsetStr(std::ios_base &(* format)(std::ios_base &)) const;
 		std::string getOverlaySizeStr(std::ios_base &(* format)(std::ios_base &)) const;
+		std::string getOverlayEntropyStr(std::ios_base &(* format)(std::ios_base &)) const;
 		/// @}
 
 		/// @name Setters
@@ -130,6 +132,7 @@ class FileHeader
 		void setNumberOfSymbolTables(unsigned long long tables);
 		void setOverlayOffset(unsigned long long offset);
 		void setOverlaySize(unsigned long long size);
+		void setOverlayEntropy(double entr);
 		/// @}
 
 		/// @name Other methods
