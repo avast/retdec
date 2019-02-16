@@ -1387,6 +1387,91 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateCsel(cs_insn* i, cs_arm64* ai
 }
 
 /**
+ * ARM64_INS_CINC, ARM64_INS_CINV, ARM64_INS_CNEG
+ */
+void Capstone2LlvmIrTranslatorArm64_impl::translateCondOp(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb)
+{
+	EXPECT_IS_BINARY(i, ai, irb);
+
+	op1 = loadOp(ai->operands[1], irb);
+
+	auto* cond = generateInsnConditionCode(irb, ai);
+	// Invert the condition
+	cond = generateValueNegate(irb, cond);
+	auto irbP = generateIfThenElse(cond, irb);
+	llvm::IRBuilder<>& bodyIf(irbP.first), bodyElse(irbP.second);
+
+	//IF - store first operand
+	storeOp(ai->operands[0], op1, bodyIf);
+
+	//ELSE
+	llvm::Value *val = nullptr;
+	switch(i->id)
+	{
+	case ARM64_INS_CINC:
+		val = bodyElse.CreateAdd(op1, llvm::ConstantInt::get(op1->getType(), 1));
+		break;
+	case ARM64_INS_CINV:
+		val = generateValueNegate(bodyElse, op1);
+		break;
+	case ARM64_INS_CNEG:
+		val = generateValueNegate(bodyElse, op1);
+		val = bodyElse.CreateAdd(val, llvm::ConstantInt::get(val->getType(), 1));
+		//TODO: Express this as: (zero - op1) ?
+		//llvm::Value* zero = llvm::ConstantInt::get(val->getType(), 0);
+		//val = irb.CreateSub(zero, val);
+		break;
+	default:
+		throw GenericError("translateCondOp: Instruction id error");
+		break;
+	}
+	storeOp(ai->operands[0], val, bodyElse);
+	//ENDIF
+}
+
+/**
+ * ARM64_INS_CSINC, ARM64_INS_CSINV, ARM64_INS_CSNEG
+ */
+void Capstone2LlvmIrTranslatorArm64_impl::translateCondSelOp(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb)
+{
+	EXPECT_IS_TERNARY(i, ai, irb);
+
+	op1 = loadOp(ai->operands[1], irb);
+	op2 = loadOp(ai->operands[2], irb);
+
+	auto* cond = generateInsnConditionCode(irb, ai);
+	auto irbP = generateIfThenElse(cond, irb);
+	llvm::IRBuilder<>& bodyIf(irbP.first), bodyElse(irbP.second);
+
+	//IF
+	storeOp(ai->operands[0], op1, bodyIf);
+
+	//ELSE
+	llvm::Value *val = nullptr;
+	switch(i->id)
+	{
+	case ARM64_INS_CSINC:
+		val = bodyElse.CreateAdd(op2, llvm::ConstantInt::get(op2->getType(), 1));
+		break;
+	case ARM64_INS_CSINV:
+		val = generateValueNegate(bodyElse, op2);
+		break;
+	case ARM64_INS_CSNEG:
+		val = generateValueNegate(bodyElse, op2);
+		val = bodyElse.CreateAdd(val, llvm::ConstantInt::get(val->getType(), 1));
+		//TODO: Express this as: (zero - op2) ?
+		//llvm::Value* zero = llvm::ConstantInt::get(val->getType(), 0);
+		//val = irb.CreateSub(zero, val);
+		break;
+	default:
+		throw GenericError("translateCondSelOp: Instruction id error");
+		break;
+	}
+	storeOp(ai->operands[0], val, bodyElse);
+	//ENDIF
+}
+
+/**
  * ARM64_INS_CSET, ARM64_INS_CSETM
  */
 void Capstone2LlvmIrTranslatorArm64_impl::translateCset(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb)
