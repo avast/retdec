@@ -7,7 +7,6 @@
 #ifndef RETDEC_FILEFORMAT_UTILS_FORMAT_DETECTION_H
 #define RETDEC_FILEFORMAT_UTILS_FORMAT_DETECTION_H
 
-#include "retdec/config/config.h"
 #include "retdec/fileformat/fftypes.h"
 
 namespace retdec {
