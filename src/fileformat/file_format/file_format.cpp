@@ -1080,14 +1080,14 @@ std::size_t FileFormat::getOverlaySize() const
  */
 bool FileFormat::getOverlayEntropy(double &res) const
 {
-	const auto size = getOverlaySize();
+	const auto overlaySize = getOverlaySize();
 	const auto declSize = getDeclaredFileLength();
 	const auto bytes = getBytes();
-	if (size == 0 || declSize == 0 || bytes.size() < declSize)
+	if (overlaySize == 0 || declSize == 0 || bytes.size() < declSize + overlaySize)
 	{
 		return false;
 	}
-	res = computeDataEntropy(bytes.data(), bytes.size());
+	res = computeDataEntropy(bytes.data() + declSize, overlaySize);
 	return true;
 }
 
