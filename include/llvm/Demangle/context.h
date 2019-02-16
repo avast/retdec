@@ -92,6 +92,10 @@ private:
 //	using NamedTypeNodes = std::map<std::tuple<std::string, bool, bool>, std::shared_ptr<NamedTypeNode>>;;
 //	NamedTypeNodes namedTypes;
 
+	// TODO opytaj sa peta ako casto bud v ramci jedneho behu rovnake mangling mena (funkcie by sa dali haskovat podla manglovaneho mena)
+	// TODO manglovane meno (pri voloani parseabsolutename @abdsaj$) aj ciastocne by mali byt v kontextne, nestednames asi nie
+	// TODO pri named types by sa dalo hashovat aj podla demangled name, ale to neviem ci dava zmysel
+
 };
 
 }    // borland

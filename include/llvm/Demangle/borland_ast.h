@@ -37,6 +37,7 @@ public:
 		KFloatType,
 		KReferenceType,
 		KNamedType,
+		KTemplateNode,
 	};
 
 public:
@@ -85,7 +86,7 @@ public:
 	);
 
 private:
-	explicit FunctionNode(
+	FunctionNode(
 		std::shared_ptr<Node> name,
 		CallConv call_conv,
 		std::shared_ptr<Node> params,
@@ -101,6 +102,21 @@ private:
 	bool _isVolatile;
 	bool _isConst;
 
+};
+
+class TemplateNode : public Node
+{
+public:
+	std::shared_ptr<TemplateNode> create(std::shared_ptr<Node> name, std::shared_ptr<Node> params);
+
+private:
+	TemplateNode(std::shared_ptr<Node> name, std::shared_ptr<Node> params);
+
+	void printLeft(std::ostream &s) const override;
+
+private:
+	std::shared_ptr<Node> _name;
+	std::shared_ptr<Node> _params;
 };
 
 /**

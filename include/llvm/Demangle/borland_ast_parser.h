@@ -48,7 +48,7 @@ private:
 	std::shared_ptr<Node> parseNamedType(unsigned nameLen);
 //		std::unique_ptr<Node> parseRetType();
 //		std::unique_ptr<Node> parseFuncInfo();
-//	StringView getFuncName();
+	StringView getName(const StringView &source);
 	static StringView getNestedName(StringView &source);
 
 private:

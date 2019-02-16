@@ -121,6 +121,29 @@ void FunctionNode::printLeft(std::ostream &s) const
 	}
 }
 
+TemplateNode::TemplateNode(
+	std::shared_ptr<retdec::demangler::borland::Node> name,
+	std::shared_ptr<retdec::demangler::borland::Node> params) :
+	Node(Kind::KTemplateNode), _name(name), _params(params) {}
+
+std::shared_ptr<TemplateNode> TemplateNode::create(
+	std::shared_ptr<retdec::demangler::borland::Node> name,
+	std::shared_ptr<retdec::demangler::borland::Node> params)
+{
+	// TODO context
+	return std::shared_ptr<TemplateNode>(new TemplateNode(name, params));
+}
+
+void TemplateNode::printLeft(std::ostream &s) const
+{
+	_name->print(s);
+	s << "<";
+	if(_params) {
+		_params->print(s);
+	}
+	s << ">";
+}
+
 /**
  * @brief Constructor for NameNode
  * @param name StringView representation of name.

@@ -64,8 +64,25 @@ void BorlandASTParser::parse()
  */
 void BorlandASTParser::parseFunction()
 {
-	auto funcName = _mangled.cutUntil('$');
-	if (funcName.empty()) {		// no function name
+	std::shared_ptr<Node> name = nullptr;
+	if (_mangled.front() != '%') {
+		// parse namespace (and names if not template)
+		const char *c = _mangled.front();
+		while ((*c != '%') && (*c != '$')) {
+			//postupne parsuj name a nested names
+			++c;
+		}
+	}
+
+	// uz mam parsnute namespacy pripadne meno
+	// if ide '%'
+	// parse template, daj mu namespace ako parmeter?
+	// to vrati template, ktory dam ako meno funckie
+
+
+	// =====================================================================
+	auto funcName = _mangled.cutUntil('$');    // todo nefunguje pri templatoch, treba pozerat ci sa uzatvorili %
+	if (funcName.empty()) {        // no function name
 		_status = invalid_mangled_name;
 		return;
 	}
@@ -187,7 +204,7 @@ std::shared_ptr<Node> BorlandASTParser::parseType()
 	}
 	if (len > 0) {
 		auto name = parseNamedType(len);
-		return NamedTypeNode::create(_context, name, isVolatile, isConst);	//todo checky
+		return NamedTypeNode::create(_context, name, isVolatile, isConst);    //todo checky
 //		return parseNamedType(len);
 	}
 
@@ -270,21 +287,42 @@ StringView BorlandASTParser::getNestedName(StringView &source)
  */
 std::shared_ptr<Node> BorlandASTParser::parseAbsoluteName(StringView &name)
 {
-	auto nestedPart = getNestedName(name);
-	if (nestedPart.empty()) {
-		return NameNode::create(name);
-	}
-	std::shared_ptr<Node> nameNode = NameNode::create(nestedPart);
+	// "foo@bar%baz@b%
 
-	StringView nextNested;
-	while (!(nextNested = getNestedName(name)).empty()) {
-		auto nextNestedNode = NameNode::create(nextNested);
-		nameNode = NestedNameNode::create(nameNode, nextNestedNode);
+	// postupne prechadzaj znaky
+	// najprv bude meno, to uloz do _name
+	// moze byt nested
+
+	// ked bude znak '@' alebo '%' tak
+
+	std::shared_ptr<Node> nestedName = nullptr;
+
+	const char *first = name.begin();
+	const char *c = name.begin();
+	while (c <= name.end()) {
+		if (*c == '@') {
+			auto partName = StringView(first, c - 1);
+
+		}
+		++c;
 	}
 
-	// everything left must be absolute name
-	auto absNameNode = NameNode::create(name);
-	return NestedNameNode::create(nameNode, absNameNode);
+
+//	auto nestedPart = getNestedName(name);
+//	if (nestedPart.empty()) {
+//		return NameNode::create(name);
+//	}
+//	std::shared_ptr<Node> nameNode = NameNode::create(nestedPart);
+//
+//	StringView nextNested;
+//	while (!(nextNested = getNestedName(name)).empty()) {
+//		auto nextNestedNode = NameNode::create(nextNested);
+//		nameNode = NestedNameNode::create(nameNode, nextNestedNode);
+//	}
+//
+//	// everything left must be absolute name
+//	auto absNameNode = NameNode::create(name);
+//	return NestedNameNode::create(nameNode, absNameNode);
 }
 
 unsigned BorlandASTParser::parseNumber()
@@ -321,6 +359,22 @@ std::shared_ptr<Node> BorlandASTParser::parseNamedType(unsigned nameLen)
 
 	return nameNode;    // TODO quals
 //	return NamedTypeNode::create(_context, nameNode, )
+}
+
+StringView BorlandASTParser::getName(const StringView &source)
+{
+	// @myFunc_s_$q60std@%basic_string$c19std@%char_traits$c%17std@%allocator$c%%t1t1
+
+	// prejdi postupne znaky
+	// pocitaj '%'
+	unsigned percCounter = 0;
+	const char *c = source.begin();
+	while (c <= source.end()) {
+		if (*c == '%') {
+
+		}
+		++c;
+	}
 }
 
 } // borland
