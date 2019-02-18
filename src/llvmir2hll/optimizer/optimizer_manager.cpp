@@ -174,7 +174,6 @@ void OptimizerManager::optimize(ShPtr<Module> m) {
 	run<GotoStmtOptimizer>(m);
 	run<RemoveUselessCastsOptimizer>(m);
 
-
 	// The first part of removal of non-compound statements. The other part
 	// should be run after structure optimizations because they may introduce
 	// constructs that can be optimized.
