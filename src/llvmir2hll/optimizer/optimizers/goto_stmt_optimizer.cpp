@@ -1,5 +1,5 @@
 /**
-* @file stc/llvmir2hll/optimizer/optimizers/goto_stmt_optimizer.cpp
+* @file src/llvmir2hll/optimizer/optimizers/goto_stmt_optimizer.cpp
 * @brief Replace goto statements when possible.
 * @copyright (c) 2018 Avast Software, licensed under the MIT license
 */

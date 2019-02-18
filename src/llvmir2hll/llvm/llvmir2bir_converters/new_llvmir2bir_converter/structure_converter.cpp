@@ -67,6 +67,8 @@ const unsigned MIN_GOTO_STATEMENTS = 3;
 *
 * @param[in] basePass Pass that have instantiated the converter.
 * @param[in] conv A converter from LLVM values to values in BIR.
+* @param[in] module A module this converter works on. Needed only for debugging
+* purposes.
 */
 StructureConverter::StructureConverter(llvm::Pass *basePass,
 	ShPtr<LLVMValueConverter> conv, ShPtr<Module> module):

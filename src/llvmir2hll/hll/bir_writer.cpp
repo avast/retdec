@@ -1,5 +1,5 @@
 /**
-* @file src/llvmir2hll/hll/bir_writer.h
+* @file src/llvmir2hll/hll/bir_writer.cpp
 * @brief Implementation of BIRWriter.
 * @copyright (c) 2018 Avast Software, licensed under the MIT license
 */
