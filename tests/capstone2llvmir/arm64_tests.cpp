@@ -817,6 +817,90 @@ TEST_P(Capstone2LlvmIrTranslatorArm64Tests, ARM64_INS_AND32_s_negative_r_r_r)
 }
 
 //
+// ARM64_INS_EOR
+//
+
+TEST_P(Capstone2LlvmIrTranslatorArm64Tests, ARM64_INS_EOR_r_r_r)
+{
+	setRegisters({
+		{ARM64_REG_X1, 0xffffffffffffffff},
+		{ARM64_REG_X2, 0x00000000ffffffff},
+	});
+
+	emulate("eor x0, x1, x2");
+
+	EXPECT_JUST_REGISTERS_LOADED({ARM64_REG_X1, ARM64_REG_X2});
+	EXPECT_JUST_REGISTERS_STORED({{ARM64_REG_X0, 0xffffffff00000000},});
+	EXPECT_NO_MEMORY_LOADED_STORED();
+	EXPECT_NO_VALUE_CALLED();
+}
+
+TEST_P(Capstone2LlvmIrTranslatorArm64Tests, ARM64_INS_EOR_r_r_i)
+{
+	setRegisters({
+		{ARM64_REG_X1, 0xffffffffffffffff},
+	});
+
+	emulate("eor x0, x1, #3");
+
+	EXPECT_JUST_REGISTERS_LOADED({ARM64_REG_X1});
+	EXPECT_JUST_REGISTERS_STORED({{ARM64_REG_X0, 0xfffffffffffffffc},});
+	EXPECT_NO_MEMORY_LOADED_STORED();
+	EXPECT_NO_VALUE_CALLED();
+}
+
+TEST_P(Capstone2LlvmIrTranslatorArm64Tests, ARM64_INS_EOR32_r_r_r)
+{
+	setRegisters({
+		{ARM64_REG_X0, 0xffffffffffffffff},
+		{ARM64_REG_X1, 0xffff0000},
+		{ARM64_REG_X2, 0xffffffff},
+	});
+
+	emulate("eor w0, w1, w2");
+
+	EXPECT_JUST_REGISTERS_LOADED({ARM64_REG_X1, ARM64_REG_X2});
+	EXPECT_JUST_REGISTERS_STORED({{ARM64_REG_X0, 0xffff},});
+	EXPECT_NO_MEMORY_LOADED_STORED();
+	EXPECT_NO_VALUE_CALLED();
+}
+
+//
+// ARM64_INS_EON
+//
+
+TEST_P(Capstone2LlvmIrTranslatorArm64Tests, ARM64_INS_EON_r_r_r)
+{
+	setRegisters({
+		{ARM64_REG_X1, 0x00000000ffffffff},
+		{ARM64_REG_X2, 0xffffffffffffffff},
+	});
+
+	emulate("eon x0, x1, x2");
+
+	EXPECT_JUST_REGISTERS_LOADED({ARM64_REG_X1, ARM64_REG_X2});
+	EXPECT_JUST_REGISTERS_STORED({{ARM64_REG_X0, 0x00000000ffffffff},});
+	EXPECT_NO_MEMORY_LOADED_STORED();
+	EXPECT_NO_VALUE_CALLED();
+}
+
+TEST_P(Capstone2LlvmIrTranslatorArm64Tests, ARM64_INS_EON32_r_r_r)
+{
+	setRegisters({
+		{ARM64_REG_X0, 0xffffffffffffffff},
+		{ARM64_REG_X1, 0xffffffff},
+		{ARM64_REG_X2, 0x0000ffff},
+	});
+
+	emulate("eon w0, w1, w2, LSL #16");
+
+	EXPECT_JUST_REGISTERS_LOADED({ARM64_REG_X1, ARM64_REG_X2});
+	EXPECT_JUST_REGISTERS_STORED({{ARM64_REG_X0, 0xffff0000},});
+	EXPECT_NO_MEMORY_LOADED_STORED();
+	EXPECT_NO_VALUE_CALLED();
+}
+
+//
 // ARM64_INS_ASR
 //
 
