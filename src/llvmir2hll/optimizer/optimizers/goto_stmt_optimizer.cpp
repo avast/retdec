@@ -14,14 +14,6 @@
 #include "retdec/llvmir2hll/optimizer/optimizers/goto_stmt_optimizer.h"
 #include "retdec/llvmir2hll/support/debug.h"
 
-#include "retdec/llvmir2hll/hll/bir_writer.h"
-
-std::string getPtrStr(void* ptr) {
-	std::stringstream ss;
-	ss << "(" << std::hex << uint64_t(ptr) << std::dec << ")";
-	return ss.str();
-}
-
 namespace retdec {
 namespace llvmir2hll {
 
@@ -44,14 +36,22 @@ GotoStmtOptimizer::GotoStmtOptimizer(ShPtr<Module> module):
 GotoStmtOptimizer::~GotoStmtOptimizer() {}
 
 /**
-* TODO
+* @brief Optimize goto statement.
 */
 void GotoStmtOptimizer::visit(ShPtr<GotoStmt> stmt) {
 	auto target = stmt->getTarget();
 
-//BIRWriter bw;
-
+	// goto label
+	// ...
+	// label:
+	//   goto/return/break/continue
 	//
+	// ==>
+	//
+	// cloned goto/return/break/continue
+	// ...
+	// label: (possibly remove if no goto label left)
+	//   goto/return/break/continue
 	//
 	if (isa<GotoStmt>(target)
 			|| isa<ReturnStmt>(target)
@@ -66,51 +66,6 @@ void GotoStmtOptimizer::visit(ShPtr<GotoStmt> stmt) {
 		if (!target->isGotoTarget()) {
 			target->removeLabel();
 		}
-
-		return;
-	}
-
-	return;
-
-	//
-	//
-	if (target->getNumberOfPredecessors() == 1) {
-		auto pred = *target->predecessor_begin();
-		if (pred != stmt) {
-			assert(false && "Should never happen.");
-			return;
-		}
-
-//bw.emit(module);
-
-//		std::set<ShPtr<Statement>> seen;
-//		auto succ = target;
-//		seen.insert(succ);
-//		while (succ)
-//		{
-//			if (succ == stmt) {
-//				std::cout << "=======> SHIT" << std::endl;
-//				return;
-//			}
-//			succ = target->getSuccessor();
-//			if (seen.count(succ)) {
-//				break;
-//			} else {
-//				seen.insert(succ);
-//			}
-//		}
-
-//		stmt->prependStatement(target);
-//		Statement::removeStatement(stmt);
-
-		Statement::replaceStatement(stmt, target);
-//		Statement::removeStatement(stmt);
-
-		if (!target->isGotoTarget()) {
-			target->removeLabel();
-		}
-
-//bw.emit(module);
 
 		return;
 	}
