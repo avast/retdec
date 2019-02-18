@@ -20,15 +20,33 @@ namespace fileformat {
  * @param inputStream Input stream
  * @param loadFlags Load flags
  */
-RawDataFormat::RawDataFormat(std::istream &inputStream, LoadFlags loadFlags) : FileFormat(inputStream, loadFlags)
+RawDataFormat::RawDataFormat(
+		std::istream &inputStream,
+		LoadFlags loadFlags)
+		:
+		FileFormat(inputStream, loadFlags)
 {
 	initStructures();
 }
 
-RawDataFormat::RawDataFormat(const std::string &filePath, LoadFlags loadFlags) : FileFormat(filePath, loadFlags)
+RawDataFormat::RawDataFormat(
+		const std::string &filePath,
+		LoadFlags loadFlags)
+		:
+		FileFormat(filePath, loadFlags)
 {
 	secName = ".text";
 	secType = Section::Type::CODE;
+	initStructures();
+}
+
+RawDataFormat::RawDataFormat(
+		const std::uint8_t *data,
+		std::size_t size,
+		LoadFlags loadFlags)
+		:
+		FileFormat(data, size, loadFlags)
+{
 	initStructures();
 }
 

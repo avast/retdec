@@ -13,10 +13,11 @@
 #include <set>
 #include <vector>
 
-#include "retdec/config/config.h"
 #include "retdec/utils/byte_value_storage.h"
+#include "retdec/utils/value.h"
 #include "retdec/utils/non_copyable.h"
 #include "retdec/fileformat/fftypes.h"
+#include "retdec/fileformat/utils/byte_array_buffer.h"
 
 namespace retdec {
 namespace fileformat {
@@ -41,7 +42,9 @@ struct LoaderErrorInfo
 class FileFormat : public retdec::utils::ByteValueStorage, private retdec::utils::NonCopyable
 {
 	private:
-		std::ifstream auxStream;                 ///< auxiliary member for opening of input file
+		byte_array_buffer auxBuff;               ///< auxiliary input buffer
+		std::ifstream auxFStream;                ///< auxiliary input file stream
+		std::istream auxIStream;                 ///< auxiliary input stream
 		std::vector<unsigned char> *loadedBytes; ///< reference to serialized content of input file
 		LoadFlags loadFlags;                     ///< load flags for configurable file loading
 
@@ -49,7 +52,6 @@ class FileFormat : public retdec::utils::ByteValueStorage, private retdec::utils
 		/// @{
 		void init();
 		void initStream();
-		template<typename T> void initFormatArch(T derivedPtr, const retdec::config::Architecture &arch);
 		/// @}
 
 		/// @name Pure virtual initialization methods
@@ -104,14 +106,20 @@ class FileFormat : public retdec::utils::ByteValueStorage, private retdec::utils
 		void setLoadedBytes(std::vector<unsigned char> *lBytes);
 		/// @}
 
-		FileFormat(std::istream &inputStream, LoadFlags loadFlags = LoadFlags::NONE);
 	public:
 		FileFormat(std::string pathToFile, LoadFlags loadFlags = LoadFlags::NONE);
+		FileFormat(std::istream &inputStream, LoadFlags loadFlags = LoadFlags::NONE);
+		FileFormat(const std::uint8_t *data, std::size_t size, LoadFlags loadFlags = LoadFlags::NONE);
 		virtual ~FileFormat();
 
 		/// @name Other methods
 		/// @{
-		void initFromConfig(const retdec::config::Config &config);
+		void initArchitecture(
+				Architecture arch,
+				retdec::utils::Endianness endian = retdec::utils::Endianness::UNKNOWN,
+				std::size_t bytesPerWord = 4,
+				retdec::utils::Address entryPoint = retdec::utils::Address::getUndef,
+				retdec::utils::Address sectionVMA = retdec::utils::Address::getUndef);
 		void loadStrings();
 		void loadStrings(StringType type, std::size_t charSize);
 		void loadStrings(StringType type, std::size_t charSize, const SecSeg* secSeg);
@@ -181,7 +189,6 @@ class FileFormat : public retdec::utils::ByteValueStorage, private retdec::utils
 		std::string getSectionTableMd5() const;
 		std::string getSectionTableSha256() const;
 		std::string getPathToFile() const;
-		std::istream& getFileStream();
 		Format getFileFormat() const;
 		std::size_t getNumberOfSections() const;
 		std::size_t getNumberOfSegments() const;

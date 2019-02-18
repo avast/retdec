@@ -20,6 +20,8 @@
 #include "retdec/utils/string.h"
 #include "retdec/utils/system.h"
 #include "retdec/fileformat/file_format/file_format.h"
+
+#include "retdec/fileformat/utils/byte_array_buffer.h"
 #include "retdec/fileformat/file_format/intel_hex/intel_hex_format.h"
 #include "retdec/fileformat/file_format/raw_data/raw_data_format.h"
 #include "retdec/fileformat/types/strings/character_iterator.h"
@@ -113,11 +115,35 @@ bool isAddressFromRegion(const SecSeg *actualRegion, const SecSeg *newRegion, st
 
 /**
  * Constructor
+ * @param pathToFile Path to input file
+ * @param loadFlags Load flags
+ */
+FileFormat::FileFormat(std::string pathToFile, LoadFlags loadFlags) :
+		auxBuff(nullptr, nullptr),
+		auxIStream(&auxBuff),
+		loadedBytes(&bytes),
+		loadFlags(loadFlags),
+		filePath(pathToFile),
+		fileStream(auxFStream),
+		_ldrErrInfo()
+{
+	auxFStream.open(filePath, std::ifstream::binary);
+	stateIsValid = auxFStream.is_open();
+	init();
+}
+
+/**
+ * Constructor
  * @param inputStream Stream which represents input file
  * @param loadFlags Load flags
  */
-FileFormat::FileFormat(std::istream &inputStream, LoadFlags loadFlags) : loadedBytes(&bytes),
-	loadFlags(loadFlags), fileStream(inputStream), _ldrErrInfo()
+FileFormat::FileFormat(std::istream &inputStream, LoadFlags loadFlags) :
+		auxBuff(nullptr, nullptr),
+		auxIStream(&auxBuff),
+		loadedBytes(&bytes),
+		loadFlags(loadFlags),
+		fileStream(inputStream),
+		_ldrErrInfo()
 {
 	stateIsValid = !inputStream.fail();
 	init();
@@ -125,14 +151,19 @@ FileFormat::FileFormat(std::istream &inputStream, LoadFlags loadFlags) : loadedB
 
 /**
  * Constructor
- * @param pathToFile Path to input file
+ * @param data Input data.
+ * @param size Input data size.
  * @param loadFlags Load flags
  */
-FileFormat::FileFormat(std::string pathToFile, LoadFlags loadFlags) : loadedBytes(&bytes),
-	loadFlags(loadFlags), filePath(pathToFile), fileStream(auxStream), _ldrErrInfo()
+FileFormat::FileFormat(const std::uint8_t *data, std::size_t size, LoadFlags loadFlags) :
+		auxBuff(data, size),
+		auxIStream(&auxBuff),
+		loadedBytes(&bytes),
+		loadFlags(loadFlags),
+		fileStream(auxIStream),
+		_ldrErrInfo()
 {
-	auxStream.open(filePath, std::ifstream::binary);
-	stateIsValid = auxStream.is_open();
+	stateIsValid = true;
 	init();
 }
 
@@ -181,51 +212,6 @@ void FileFormat::initStream()
 {
 	fileStream.clear();
 	fileStream.seekg(0);
-}
-
-/**
- * Provides architecture information for formats which do not store such information eg. Intel HEX
- * @param derivedPtr Pointer to derived FileFormat class
- * @param arch Architecture information
- */
-template<typename T> void FileFormat::initFormatArch(T derivedPtr, const retdec::config::Architecture &arch)
-{
-	if(!derivedPtr)
-	{
-		return;
-	}
-
-	derivedPtr->setBytesPerWord(arch.getByteSize());
-
-	if(arch.isEndianLittle())
-	{
-		derivedPtr->setEndianness(Endianness::LITTLE);
-	}
-	else if(arch.isEndianBig())
-	{
-		derivedPtr->setEndianness(Endianness::BIG);
-	}
-
-	if(arch.isX86())
-	{
-		derivedPtr->setTargetArchitecture(Architecture::X86);
-	}
-	if(arch.isArmOrThumb())
-	{
-		derivedPtr->setTargetArchitecture(Architecture::ARM);
-	}
-	if(arch.isPpc())
-	{
-		derivedPtr->setTargetArchitecture(Architecture::POWERPC);
-	}
-	if(arch.isMips())
-	{
-		derivedPtr->setTargetArchitecture(Architecture::MIPS);
-	}
-	if(arch.isPic32())
-	{
-		derivedPtr->setTargetArchitecture(Architecture::MIPS);
-	}
 }
 
 /**
@@ -350,28 +336,33 @@ void FileFormat::setLoadedBytes(std::vector<unsigned char> *lBytes)
  * critical information like architecture, endianness or word size.
  * However, fileformat users expect it to contain this information.
  * Therefore, this method needs to be called to set these critical information.
- * @param config Config information
  */
-void FileFormat::initFromConfig(const retdec::config::Config& config)
+void FileFormat::initArchitecture(
+		Architecture arch,
+		retdec::utils::Endianness endian,
+		std::size_t bytesPerWord,
+		retdec::utils::Address entryPoint,
+		retdec::utils::Address sectionVMA)
 {
 	if(IntelHexFormat *ihex = dynamic_cast<IntelHexFormat*>(this))
 	{
-		initFormatArch(ihex, config.architecture);
+		ihex->setTargetArchitecture(arch);
+		ihex->setBytesPerWord(bytesPerWord);
+		ihex->setEndianness(endian);
 	}
 	else if(RawDataFormat *raw = dynamic_cast<RawDataFormat*>(this))
 	{
-		initFormatArch(raw, config.architecture);
-		// Set section address
-		Address tmpAddr = config.getSectionVMA();
-		if(tmpAddr.isDefined())
+		raw->setTargetArchitecture(arch);
+		raw->setBytesPerWord(bytesPerWord);
+		raw->setEndianness(endian);
+
+		if(sectionVMA.isDefined())
 		{
-			raw->setBaseAddress(tmpAddr);
+			raw->setBaseAddress(sectionVMA);
 		}
-		// Set entry point
-		tmpAddr = config.getEntryPoint();
-		if(tmpAddr.isDefined())
+		if(entryPoint.isDefined())
 		{
-			raw->setEntryPoint(tmpAddr);
+			raw->setEntryPoint(entryPoint);
 		}
 	}
 }
@@ -994,15 +985,6 @@ std::string FileFormat::getSectionTableSha256() const
 std::string FileFormat::getPathToFile() const
 {
 	return filePath;
-}
-
-/**
- * Get stream of input file
- * @return Stream of input file
- */
-std::istream& FileFormat::getFileStream()
-{
-	return fileStream;
 }
 
 /**

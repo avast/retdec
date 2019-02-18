@@ -89,6 +89,7 @@ class ElfFormat : public FileFormat
 	public:
 		ElfFormat(std::string pathToFile, LoadFlags loadFlags = LoadFlags::NONE);
 		ElfFormat(std::istream &inputStream, LoadFlags loadFlags = LoadFlags::NONE);
+		ElfFormat(const std::uint8_t *data, std::size_t size, LoadFlags loadFlags = LoadFlags::NONE);
 		virtual ~ElfFormat() override;
 
 		/// @name Byte value storage methods

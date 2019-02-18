@@ -4,6 +4,7 @@
 
 * New Feature: Added presentation of imported types and TypeRef hashes for .NET binaries ([#363](https://github.com/avast-tl/retdec/issues/363), [#364](https://github.com/avast-tl/retdec/issues/364), [#428](https://github.com/avast-tl/retdec/issues/428)).
 * New Feature: Added computation and presentation of icon hashes for exact and also similarity matching in PE files ([#339](https://github.com/avast-tl/retdec/issues/339)).
+* Enhancement: The `fileformat` library, and all its object file modules, accept both `std::istream` and `(data, size)` pair, in addition to the original input file path.
 * Enhancement: Reduced the needed stack space in `retdec-llvmir2hll` ([#492](https://github.com/avast-tl/retdec/pull/492)).
 * Enhancement: Added support for build and run on FreeBSD and potentially on other BSD OSes ([#476](https://github.com/avast-tl/retdec/pull/476)).
 * Enhancement: It is possible to use local PeLib directory instead of remote revision via CMake variable `PELIB_LOCAL_DIR`. This is convenient when modifying both PeLib and RetDec at the same time.
