@@ -1,5 +1,5 @@
 /**
- * @file src/fileformat/utils/char_array_buffer.cpp
+ * @file src/fileformat/utils/byte_array_buffer.cpp
  * @brief Array of bytes to std::istream abstraction.
  * @copyright (c) 2019 Avast Software, licensed under the MIT license
  */
