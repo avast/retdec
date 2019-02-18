@@ -4,10 +4,20 @@
 
 * New Feature: Added presentation of imported types and TypeRef hashes for .NET binaries ([#363](https://github.com/avast-tl/retdec/issues/363), [#364](https://github.com/avast-tl/retdec/issues/364), [#428](https://github.com/avast-tl/retdec/issues/428)).
 * New Feature: Added computation and presentation of icon hashes for exact and also similarity matching in PE files ([#339](https://github.com/avast-tl/retdec/issues/339)).
+* Enhancement: The `fileformat` library, and all its object file modules, accept both `std::istream` and `(data, size)` pair, in addition to the original input file path.
+* Enhancement: Reduced the needed stack space in `retdec-llvmir2hll` ([#492](https://github.com/avast-tl/retdec/pull/492)).
+* Enhancement: Added support for build and run on FreeBSD and potentially on other BSD OSes ([#476](https://github.com/avast-tl/retdec/pull/476)).
+* Enhancement: It is possible to use local PeLib directory instead of remote revision via CMake variable `PELIB_LOCAL_DIR`. This is convenient when modifying both PeLib and RetDec at the same time.
+* Enhancement: Improved detection of needed libraries and imported/external functions in ELF binaries ([#457](https://github.com/avast-tl/retdec/issues/457)).
 * Enhancement: Added semantics for more MIPS instructions.
 * Enhancement: Capstone2LlvmIr library refactoring ([#115](https://github.com/avast-tl/retdec/issues/115)).
 * Enhancement: Removed the build and runtime dependency on ncurses/libtinfo ([#409](https://github.com/avast-tl/retdec/pull/409)).
 * Enhancement: Add a check into our scripts that they are run from an installation directory and not from the `scripts` directory ([#418](https://github.com/avast-tl/retdec/issues/418)).
+* Enhancement: Improved corruption checks in `retdec-fileinfo` to recognize cut PE files which are still loadable ([#463](https://github.com/avast-tl/retdec/issues/463)).
+* Fix: Fixed `FilesystemPath::isFile()` ([#490](https://github.com/avast-tl/retdec/issues/490), [#491](https://github.com/avast-tl/retdec/pull/491)).
+* Fix: Fixed `retdec-signature-from-library-creator.py` when there is a lot of input files by adding an option to `retdec-bin2pat` to have the objects list passed through a text file instead of via program arguments ([#472](https://github.com/avast-tl/retdec/issues/472), [#484](https://github.com/avast-tl/retdec/pull/484)).
+* Fix: Stricter rules for PE section names ([#451](https://github.com/avast-tl/retdec/issues/451)).
+* Fix: Fixed incorrect return code of `bin2pat` that caused `signature-from-library-creator.py` to silently fail on error ([#473](https://github.com/avast-tl/retdec/issues/473), [#474](https://github.com/avast-tl/retdec/pull/474)).
 * Fix: Fixed installation when Python is in a path containing spaces ([#441](https://github.com/avast-tl/retdec/issues/441)).
 * Fix: Fixed handling of pointers with segment overrides, including loads/stores from/to zero (null) pointers ([#41](https://github.com/avast-tl/retdec/issues/41), [#169](https://github.com/avast-tl/retdec/issues/169), [#347](https://github.com/avast-tl/retdec/issues/347), [#376](https://github.com/avast-tl/retdec/issues/376), [#391](https://github.com/avast-tl/retdec/pull/391)).
 * Fix: Fixed translation of x86 FPU instructions to LLVM IR ([#293](https://github.com/avast-tl/retdec/issues/293)).

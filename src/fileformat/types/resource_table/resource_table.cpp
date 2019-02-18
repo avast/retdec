@@ -419,7 +419,7 @@ void ResourceTable::linkResourceIconGroups()
 				icon->setBitCount(bitCount);
 				icon->setIconGroup(iconGroup->getIconGroupID());
 				icon->setLoadedProperties();
-				
+
 				if(colorCount == 1 << (bitCount * planes))
 				{
 					icon->setValidColorCount();

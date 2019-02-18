@@ -27,7 +27,7 @@ namespace st_match {
 template <typename Pattern>
 bool match(SymbolicTree& st, const Pattern& p)
 {
-    return const_cast<Pattern&>(p).match(st);
+	return const_cast<Pattern&>(p).match(st);
 }
 
 //
@@ -111,22 +111,22 @@ struct AnyBinaryOp_match
 
 	bool match(SymbolicTree& st)
 	{
-        if (!st.isBinary())
-        {
-            return false;
-        }
+		if (!st.isBinary())
+		{
+			return false;
+		}
 
 		if (auto* I = llvm::dyn_cast<llvm::BinaryOperator>(st.value))
 		{
 			if ((L.match(st.ops[0]) && R.match(st.ops[1]))
-            		|| (Commutable && L.match(st.ops[1]) && R.match(st.ops[0])))
-            {
+					|| (Commutable && L.match(st.ops[1]) && R.match(st.ops[0])))
+			{
 				if (insn)
 				{
 					*insn = I;
 				}
 				return true;
-            }
+			}
 		}
 
 		return false;
@@ -160,45 +160,45 @@ inline AnyBinaryOp_match<LHS, RHS, true> m_c_BinOp(
 template <typename LHS_t, typename RHS_t, unsigned Opcode, bool Commutable = false>
 struct BinaryOp_match
 {
-    LHS_t L;
-    RHS_t R;
-    llvm::Instruction** insn = nullptr;
+	LHS_t L;
+	RHS_t R;
+	llvm::Instruction** insn = nullptr;
 
-    BinaryOp_match(const LHS_t &LHS, const RHS_t &RHS, llvm::Instruction** i = nullptr) :
-            L(LHS),
-            R(RHS),
+	BinaryOp_match(const LHS_t &LHS, const RHS_t &RHS, llvm::Instruction** i = nullptr) :
+			L(LHS),
+			R(RHS),
 			insn(i)
-    {
-    }
+	{
+	}
 
-    bool match(SymbolicTree& st)
-    {
-        if (!st.isBinary())
-        {
-            return false;
-        }
+	bool match(SymbolicTree& st)
+	{
+		if (!st.isBinary())
+		{
+			return false;
+		}
 
-        if (st.value->getValueID() == llvm::Value::InstructionVal + Opcode)
-        {
-            if ((L.match(st.ops[0]) && R.match(st.ops[1]))
-            		|| (Commutable && L.match(st.ops[1]) && R.match(st.ops[0])))
-            {
-            	if (insn)
-            	{
-            		*insn = llvm::cast<llvm::Instruction>(st.value);
-            	}
-            	return true;
-            }
-        }
-        if (auto* ce = llvm::dyn_cast<llvm::ConstantExpr>(st.value))
-        {
-            return ce->getOpcode() == Opcode &&
-            		((L.match(st.ops[0]) && R.match(st.ops[1]))
+		if (st.value->getValueID() == llvm::Value::InstructionVal + Opcode)
+		{
+			if ((L.match(st.ops[0]) && R.match(st.ops[1]))
+					|| (Commutable && L.match(st.ops[1]) && R.match(st.ops[0])))
+			{
+				if (insn)
+				{
+					*insn = llvm::cast<llvm::Instruction>(st.value);
+				}
+				return true;
+			}
+		}
+		if (auto* ce = llvm::dyn_cast<llvm::ConstantExpr>(st.value))
+		{
+			return ce->getOpcode() == Opcode &&
+					((L.match(st.ops[0]) && R.match(st.ops[1]))
 					|| (Commutable && L.match(st.ops[1]) && R.match(st.ops[0])));
-        }
+		}
 
-        return false;
-    }
+		return false;
+	}
 };
 
 //
@@ -437,10 +437,10 @@ template<typename LHS_t> struct not_match
 
 	bool match(SymbolicTree& st)
 	{
-        if (!st.isBinary())
-        {
-            return false;
-        }
+		if (!st.isBinary())
+		{
+			return false;
+		}
 
 		if (auto *O = llvm::dyn_cast<llvm::Operator>(st.value))
 		{
@@ -479,10 +479,10 @@ template<typename LHS_t> struct neg_match
 
 	bool match(SymbolicTree& st)
 	{
-        if (!st.isBinary())
-        {
-            return false;
-        }
+		if (!st.isBinary())
+		{
+			return false;
+		}
 
 		if (auto *O = llvm::dyn_cast<llvm::Operator>(st.value))
 		{
@@ -543,10 +543,10 @@ struct CmpClass_match
 
 	bool match(SymbolicTree& st)
 	{
-        if (!st.isBinary())
-        {
-            return false;
-        }
+		if (!st.isBinary())
+		{
+			return false;
+		}
 
 		auto *I = llvm::dyn_cast<Class>(st.value);
 		if (I == nullptr)
@@ -643,10 +643,10 @@ struct CmpClass_pred_match
 
 	bool match(SymbolicTree& st)
 	{
-        if (!st.isBinary())
-        {
-            return false;
-        }
+		if (!st.isBinary())
+		{
+			return false;
+		}
 
 		auto *I = llvm::dyn_cast<Class>(st.value);
 		if (I == nullptr)
@@ -731,10 +731,10 @@ template<typename Op_t> struct LoadClass_match
 
 	bool match(SymbolicTree& st)
 	{
-        if (!st.isUnary())
-        {
-            return false;
-        }
+		if (!st.isUnary())
+		{
+			return false;
+		}
 
 		if (auto *LI = llvm::dyn_cast<llvm::LoadInst>(st.value))
 		{
@@ -767,22 +767,22 @@ template<typename OpTy> inline LoadClass_match<OpTy> m_Load(
 template <typename Class>
 struct bind_ty
 {
-    Class*& VR;
+	Class*& VR;
 
-    bind_ty(Class*& v) :
-        VR(v)
-    {
-    }
+	bind_ty(Class*& v) :
+		VR(v)
+	{
+	}
 
-    bool match(SymbolicTree& st)
-    {
-        if (auto* CV = llvm::dyn_cast<Class>(st.value))
-        {
-            VR = CV;
-            return true;
-        }
-        return false;
-    }
+	bool match(SymbolicTree& st)
+	{
+		if (auto* CV = llvm::dyn_cast<Class>(st.value))
+		{
+			VR = CV;
+			return true;
+		}
+		return false;
+	}
 };
 
 inline bind_ty<llvm::Value> m_Value(llvm::Value*& V)

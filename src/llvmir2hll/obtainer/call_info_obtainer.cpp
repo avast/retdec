@@ -240,8 +240,9 @@ bool CallInfoObtainer::callsJustComputedFuncs(ShPtr<Function> func,
 *  - @a remainingFuncs doesn't contain a function which calls just functions
 *    from @a computedFuncs.
 */
-CallInfoObtainer::SCCWithRepresent CallInfoObtainer::findNextSCC(const FuncSetSet &sccs,
-		const FuncSet &computedFuncs, const FuncSet &remainingFuncs) const {
+CallInfoObtainer::SCCWithRepresent CallInfoObtainer::findNextSCC(
+		const FuncVectorSet &sccs, const FuncSet &computedFuncs,
+		const FuncSet &remainingFuncs) const {
 	PRECONDITION(!remainingFuncs.empty(), "it should not be empty");
 
 	//
@@ -287,7 +288,7 @@ CallInfoObtainer::SCCWithRepresent CallInfoObtainer::findNextSCC(const FuncSetSe
 * A single function is not considered to be an SCC unless it contains a call to
 * itself (see the description of FuncInfoCompOrder).
 */
-CallInfoObtainer::FuncSetSet CallInfoObtainer::computeSCCs() {
+CallInfoObtainer::FuncVectorSet CallInfoObtainer::computeSCCs() {
 	return SCCComputer::computeSCCs(cg);
 }
 
@@ -348,7 +349,7 @@ CallInfoObtainer::SCCComputer::~SCCComputer() {}
 * A single function is not considered to be an SCC unless it contains a call to
 * itself (see the description of FuncInfoCompOrder).
 */
-CallInfoObtainer::FuncSetSet CallInfoObtainer::SCCComputer::computeSCCs(
+CallInfoObtainer::FuncVectorSet CallInfoObtainer::SCCComputer::computeSCCs(
 		ShPtr<CG> cg) {
 	PRECONDITION_NON_NULL(cg);
 
@@ -363,7 +364,7 @@ CallInfoObtainer::FuncSetSet CallInfoObtainer::SCCComputer::computeSCCs(
 * A single function is not considered to be an SCC unless it contains a call to
 * itself (see the description of FuncInfoCompOrder).
 */
-CallInfoObtainer::FuncSetSet CallInfoObtainer::SCCComputer::findSCCs() {
+CallInfoObtainer::FuncVectorSet CallInfoObtainer::SCCComputer::findSCCs() {
 	// The following code corresponds to the code from
 	// http://en.wikipedia.org/wiki/Tarjan%27s_strongly_connected_components_algorithm
 
@@ -436,7 +437,10 @@ void CallInfoObtainer::SCCComputer::visit(ShPtr<CG::CalledFuncs> calledFunc,
 		// function, do this only if it calls itself (see the description of
 		// computeSCCs()).
 		if (scc.size() != 1 || hasItem(calledFunc->callees, calledFunc->caller)) {
-			sccs.insert(scc);
+			// Tarjan only tries to create each SCC once, so it is
+			// safe to use push_back here - it will never add
+			// duplicates.
+			sccs.push_back(scc);
 		}
 	}
 }

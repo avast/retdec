@@ -100,6 +100,8 @@ class PeFormat : public FileFormat
 		int peClass;                      ///< class of PE file
 	public:
 		PeFormat(std::string pathToFile, LoadFlags loadFlags = LoadFlags::NONE);
+		PeFormat(std::istream &inputStream, LoadFlags loadFlags = LoadFlags::NONE);
+		PeFormat(const std::uint8_t *data, std::size_t size, LoadFlags loadFlags = LoadFlags::NONE);
 		virtual ~PeFormat() override;
 
 		/// @name Byte value storage methods

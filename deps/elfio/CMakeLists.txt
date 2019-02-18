@@ -8,8 +8,8 @@ if(CMAKE_CXX_COMPILER)
 endif()
 
 ExternalProject_Add(elfio-project
-	URL https://github.com/avast-tl/elfio/archive/998374baace397ea98f3b1d768e81c978b4fba41.zip
-	URL_HASH SHA256=3617770aac77d3bde428c84e8e80bf1da85f37a6741589ece7a84ac7e5a45fb9
+	URL https://github.com/avast-tl/elfio/archive/f85f07390b756fee61408dfe0b04ae4fb86c5477.zip
+	URL_HASH SHA256=bc821b602cad22de1d671f0314b1171e4bca7ca1aabc85eb2d32945ed8dfcc66
 	DOWNLOAD_NAME elfio.zip
 	CMAKE_ARGS
 		# This does not work on MSVC, but may be useful on Linux.

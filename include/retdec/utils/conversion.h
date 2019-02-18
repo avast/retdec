@@ -12,6 +12,7 @@
 #include <limits>
 #include <sstream>
 #include <string>
+#include <type_traits>
 #include <vector>
 
 namespace retdec {
@@ -86,11 +87,18 @@ inline bool strToNum(const std::string &str, N &number,
 	std::istringstream strStream(str);
 	N convNumber = 0;
 	strStream >> format >> convNumber;
-	if (!strStream.fail() && strStream.eof()) {
-		number = convNumber;
-		return true;
+	if (strStream.fail() || !strStream.eof()) {
+		return false;
 	}
-	return false;
+
+	// The above checks do not detect conversion of a negative number into an
+	// unsigned integer. We have to perform an additional check here.
+	if (std::is_unsigned<N>::value && str[0] == '-') {
+		return false;
+	}
+
+	number = convNumber;
+	return true;
 }
 
 /**

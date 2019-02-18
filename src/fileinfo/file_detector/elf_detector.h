@@ -30,8 +30,8 @@ class ElfDetector : public FileDetector
 		void getSegments();
 		void getSymbolTable();
 		void getRelocationTable(const ELFIO::section *sec);
-		void getDynamicSection(const ELFIO::section *sec);
 		void getSections();
+		void getDynamicSectionsSegments();
 		void getNotes();
 		void getCoreInfo();
 		/// @}

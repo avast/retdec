@@ -113,6 +113,8 @@ class MachOFormat : public FileFormat
 		std::unique_ptr<llvm::object::MachOUniversalBinary> fatFile; ///< parser of universal binary
 	public:
 		MachOFormat(std::string pathToFile, LoadFlags loadFlags = LoadFlags::NONE);
+		MachOFormat(std::istream &inputStream, LoadFlags loadFlags = LoadFlags::NONE);
+		MachOFormat(const std::uint8_t *data, std::size_t size, LoadFlags loadFlags = LoadFlags::NONE);
 		virtual ~MachOFormat() override;
 
 		/// @name Byte value storage methods

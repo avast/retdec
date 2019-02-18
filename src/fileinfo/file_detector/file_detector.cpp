@@ -277,7 +277,26 @@ void FileDetector::getLoaderInfo()
 void FileDetector::setConfigFile(retdec::config::Config &config)
 {
 	fileConfig = &config;
-	fileParser->initFromConfig(config);
+
+	auto& ca = config.architecture;
+	auto endian = ca.isEndianUnknown()
+			? fileParser->getEndianness()
+			: (ca.isEndianLittle()
+					? retdec::utils::Endianness::LITTLE
+					: retdec::utils::Endianness::BIG);
+	auto arch = retdec::fileformat::Architecture::UNKNOWN;
+	if (ca.isX86()) arch = retdec::fileformat::Architecture::X86;
+	if (ca.isX86_64()) arch = retdec::fileformat::Architecture::X86_64;
+	if (ca.isArmOrThumb()) arch = retdec::fileformat::Architecture::ARM;
+	if (ca.isPpc()) arch = retdec::fileformat::Architecture::POWERPC;
+	if (ca.isMipsOrPic32()) arch = retdec::fileformat::Architecture::MIPS;
+
+	fileParser->initArchitecture(
+			arch,
+			endian,
+			config.architecture.getByteSize(),
+			config.getEntryPoint(),
+			config.getSectionVMA());
 }
 
 /**

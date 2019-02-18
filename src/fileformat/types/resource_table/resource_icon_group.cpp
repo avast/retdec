@@ -324,7 +324,7 @@ bool ResourceIconGroup::hasIcons() const
 }
 
 /**
- * Add an icon to the icon group 
+ * Add an icon to the icon group
  */
 void ResourceIconGroup::addIcon(ResourceIcon *icon)
 {
