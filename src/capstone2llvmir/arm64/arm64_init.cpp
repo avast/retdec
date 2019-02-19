@@ -305,7 +305,7 @@ Capstone2LlvmIrTranslatorArm64_impl::_i2fm =
 	{ARM64_INS_EON, &Capstone2LlvmIrTranslatorArm64_impl::translateEor},
 	{ARM64_INS_EOR, &Capstone2LlvmIrTranslatorArm64_impl::translateEor},
 	{ARM64_INS_ERET, nullptr},
-	{ARM64_INS_EXTR, nullptr},
+	{ARM64_INS_EXTR, &Capstone2LlvmIrTranslatorArm64_impl::translateExtr},
 	{ARM64_INS_EXT, nullptr},
 	{ARM64_INS_FABD, nullptr},
 	{ARM64_INS_FABS, nullptr},

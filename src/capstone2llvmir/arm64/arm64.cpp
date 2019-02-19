@@ -1523,6 +1523,28 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateEor(cs_insn* i, cs_arm64* ai,
 }
 
 /**
+ * ARM64_INS_EXTR
+*/
+void Capstone2LlvmIrTranslatorArm64_impl::translateExtr(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb)
+{
+	EXPECT_IS_QUATERNARY(i, ai, irb);
+
+	op1 = loadOp(ai->operands[1], irb);
+	op2 = loadOp(ai->operands[2], irb);
+	auto* lsb1 = loadOp(ai->operands[3], irb);
+	lsb1 = irb.CreateZExtOrTrunc(lsb1, op1->getType());
+	llvm::Value* lsb2 = llvm::ConstantInt::get(op1->getType(), llvm::cast<llvm::IntegerType>(op2->getType())->getBitWidth());
+	lsb2 = irb.CreateSub(lsb2, lsb1);
+
+	auto* left_val  = irb.CreateLShr(op2, lsb1);
+	auto* right_val = irb.CreateShl(op1, lsb2);
+
+	auto* val = irb.CreateOr(left_val, right_val);
+
+	storeOp(ai->operands[0], val, irb);
+}
+
+/**
  * ARM64_INS_ORR, ARM64_INS_ORN
  */
 void Capstone2LlvmIrTranslatorArm64_impl::translateOrr(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb)
