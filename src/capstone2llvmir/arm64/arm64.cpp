@@ -1522,6 +1522,26 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateEor(cs_insn* i, cs_arm64* ai,
 }
 
 /**
+ * ARM64_INS_ORR, ARM64_INS_ORN
+ */
+void Capstone2LlvmIrTranslatorArm64_impl::translateOrr(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb)
+{
+	EXPECT_IS_BINARY_OR_TERNARY(i, ai, irb);
+
+	std::tie(op1, op2) = loadOpBinaryOrTernaryOp1Op2(ai, irb);
+	op2 = irb.CreateZExtOrTrunc(op2, op1->getType());
+
+	if (i->id == ARM64_INS_ORN)
+	{
+	    op2 = generateValueNegate(irb, op2);
+	}
+
+	auto* val = irb.CreateOr(op1, op2);
+
+	storeOp(ai->operands[0], val, irb);
+}
+
+/**
  * ARM64_INS_UDIV, ARM64_INS_SDIV
  */
 void Capstone2LlvmIrTranslatorArm64_impl::translateDiv(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb)
