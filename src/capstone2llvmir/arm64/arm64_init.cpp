@@ -681,7 +681,7 @@ Capstone2LlvmIrTranslatorArm64_impl::_i2fm =
 	{ARM64_INS_BFXIL, nullptr},
 	{ARM64_INS_CMN, &Capstone2LlvmIrTranslatorArm64_impl::translateAdd},
 	{ARM64_INS_MVN, &Capstone2LlvmIrTranslatorArm64_impl::translateMov},
-	{ARM64_INS_TST, nullptr},
+	{ARM64_INS_TST, &Capstone2LlvmIrTranslatorArm64_impl::translateAnd},
 	{ARM64_INS_CSET, &Capstone2LlvmIrTranslatorArm64_impl::translateCset},
 	{ARM64_INS_CINC, &Capstone2LlvmIrTranslatorArm64_impl::translateCondOp},
 	{ARM64_INS_CSETM, &Capstone2LlvmIrTranslatorArm64_impl::translateCset},

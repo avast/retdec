@@ -919,12 +919,6 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateMov(cs_insn* i, cs_arm64* ai,
 		op1 = generateValueNegate(irb, op1);
 	}
 
-	if (ai->update_flags)
-	{
-		llvm::Value* zero = llvm::ConstantInt::get(op1->getType(), 0);
-		storeRegister(ARM64_REG_CPSR_N, irb.CreateICmpSLT(op1, zero), irb);
-		storeRegister(ARM64_REG_CPSR_Z, irb.CreateICmpEQ(op1, zero), irb);
-	}
 	storeOp(ai->operands[0], op1, irb);
 }
 
@@ -1235,7 +1229,7 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateAdr(cs_insn* i, cs_arm64* ai,
 }
 
 /**
- * ARM64_INS_AND
+ * ARM64_INS_AND, ARM64_INS_TST
  */
 void Capstone2LlvmIrTranslatorArm64_impl::translateAnd(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb)
 {
@@ -1246,13 +1240,20 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateAnd(cs_insn* i, cs_arm64* ai,
 
 	auto* val = irb.CreateAnd(op1, op2);
 
-	storeOp(ai->operands[0], val, irb);
+	if (i->id != ARM64_INS_TST)
+	{
+		storeOp(ai->operands[0], val, irb);
+	}
 
 	if (ai->update_flags)
 	{
 		llvm::Value* zero = llvm::ConstantInt::get(val->getType(), 0);
 		storeRegister(ARM64_REG_CPSR_N, irb.CreateICmpSLT(val, zero), irb);
 		storeRegister(ARM64_REG_CPSR_Z, irb.CreateICmpEQ(val, zero), irb);
+		// According to documentation carry and overflow should be
+		// set to zero.
+		storeRegister(ARM64_REG_CPSR_C, zero, irb);
+		storeRegister(ARM64_REG_CPSR_V, zero, irb);
 	}
 }
 
