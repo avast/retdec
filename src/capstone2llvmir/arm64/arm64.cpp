@@ -1523,6 +1523,69 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateEor(cs_insn* i, cs_arm64* ai,
 }
 
 /**
+ * ARM64_INS_
+*/
+void Capstone2LlvmIrTranslatorArm64_impl::translateExtensions(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb)
+{
+	EXPECT_IS_BINARY(i, ai, irb);
+
+	auto* val = loadOp(ai->operands[1], irb);
+
+	auto* i8  = llvm::IntegerType::getInt8Ty(_module->getContext());
+	auto* i16 = llvm::IntegerType::getInt16Ty(_module->getContext());
+	auto* i32 = llvm::IntegerType::getInt32Ty(_module->getContext());
+
+	auto* ty  = getRegisterType(ai->operands[0].reg);
+
+	llvm::Value* trunc = nullptr;
+	switch(i->id)
+	{
+		case ARM64_INS_UXTB:
+		{
+			trunc = irb.CreateTrunc(val, i8);
+			val   = irb.CreateZExt(trunc, ty);
+			break;
+		}
+		case ARM64_INS_UXTH:
+		{
+			trunc = irb.CreateTrunc(val, i16);
+			val   = irb.CreateZExt(trunc, ty);
+			break;
+		}
+		/*
+		case ARM64_INS_UXTW:
+		{
+			trunc = irb.CreateTrunc(val, i32);
+			val   = irb.CreateZExt(trunc, ty);
+			break;
+		}
+		*/
+		case ARM64_INS_SXTB:
+		{
+			trunc = irb.CreateTrunc(val, i8);
+			val   = irb.CreateSExt(trunc, ty);
+			break;
+		}
+		case ARM64_INS_SXTH:
+		{
+			trunc = irb.CreateTrunc(val, i16);
+			val   = irb.CreateSExt(trunc, ty);
+			break;
+		}
+		case ARM64_INS_SXTW:
+		{
+			trunc = irb.CreateTrunc(val, i32);
+			val   = irb.CreateSExt(trunc, ty);
+			break;
+		}
+		default:
+			throw GenericError("Arm64 translateExtension(): Unsupported extension type");
+	}
+
+	storeOp(ai->operands[0], val, irb);
+}
+
+/**
  * ARM64_INS_EXTR
 */
 void Capstone2LlvmIrTranslatorArm64_impl::translateExtr(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb)
