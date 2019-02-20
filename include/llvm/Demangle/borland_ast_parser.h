@@ -44,6 +44,7 @@ private:
 	std::shared_ptr<Node> parseType();
 	std::shared_ptr<Node> parseBuildInType(bool isVolatile, bool isConst);
 	unsigned parseNumber();
+	unsigned parseNumberNoConsume() const;
 	std::shared_ptr<Node> parseNamedType(unsigned nameLen);
 	std::shared_ptr<Node> parseFuncName();
 	std::shared_ptr<Node> parseName(const char *end);

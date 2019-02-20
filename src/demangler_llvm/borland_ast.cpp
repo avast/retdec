@@ -56,6 +56,11 @@ Node::Kind Node::kind() const
  */
 void Node::printRight(std::ostream &s) const {}
 
+bool Node::hasRight()
+{
+	return _has_right;
+}
+
 /**
  * @brief Private function node constructor. Use create().
  * @param call_conv Pointer to calling convention.
@@ -235,6 +240,11 @@ bool NodeArray::empty() const
 	return _nodes.empty();
 }
 
+size_t NodeArray::size()
+{
+	return _nodes.size();
+}
+
 /**
  * @brief Prints text representaion of array.
  * @param s Output stream.
@@ -252,6 +262,11 @@ void NodeArray::printLeft(std::ostream &s) const
 			(*current)->print(s);
 		}
 	}
+}
+
+std::shared_ptr<Node> NodeArray::get(unsigned i) const
+{
+	return  _nodes.at(i); // TODO ked je i vacsie ako size
 }
 
 }    // borland

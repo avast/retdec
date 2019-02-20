@@ -17,6 +17,8 @@ namespace retdec {
 namespace demangler {
 namespace borland {
 
+class Context;
+
 /**
  * @brief Base class for all nodes in AST.
  */
@@ -39,6 +41,7 @@ public:
 		KRReferenceType,
 		KNamedType,
 		KTemplateNode,
+		KArrayNode,
 	};
 
 public:
@@ -52,10 +55,11 @@ public:
 
 	Kind kind() const;
 
-protected:
 	virtual void printLeft(std::ostream &s) const = 0;
 
 	virtual void printRight(std::ostream &s) const;
+
+	bool hasRight();
 
 protected:
 	Kind _kind;
@@ -87,6 +91,8 @@ public:
 		bool isConst
 	);
 
+	void printLeft(std::ostream &s) const override;
+
 private:
 	FunctionNode(
 		std::shared_ptr<Node> name,
@@ -95,8 +101,6 @@ private:
 		std::shared_ptr<Node> retType,
 		bool isVolatile,
 		bool isConst);
-
-	void printLeft(std::ostream &s) const override;
 
 private:
 	CallConv _call_conv;
@@ -113,10 +117,10 @@ class TemplateNode : public Node
 public:
 	static std::shared_ptr<TemplateNode> create(std::shared_ptr<Node> name, std::shared_ptr<Node> params);
 
+	void printLeft(std::ostream &s) const override;
+
 private:
 	TemplateNode(std::shared_ptr<Node> name, std::shared_ptr<Node> params);
-
-	void printLeft(std::ostream &s) const override;
 
 private:
 	std::shared_ptr<Node> _name;
@@ -131,10 +135,10 @@ class NameNode : public Node
 public:
 	static std::shared_ptr<NameNode> create(const StringView &name);
 
+	void printLeft(std::ostream &s) const override;
+
 private:
 	explicit NameNode(const StringView &name);
-
-	void printLeft(std::ostream &s) const override;
 
 private:
 	StringView _name;
@@ -149,10 +153,10 @@ public:
 	static std::shared_ptr<NestedNameNode> create(
 		std::shared_ptr<Node> super, std::shared_ptr<Node> name);
 
+	void printLeft(std::ostream &s) const override;
+
 private:
 	NestedNameNode(std::shared_ptr<Node> super, std::shared_ptr<Node> name);
-
-	void printLeft(std::ostream &s) const override;
 
 private:
 	std::shared_ptr<Node> _super;
@@ -171,10 +175,14 @@ public:
 
 	bool empty() const;
 
-private:
-	NodeArray();
+	size_t size();
 
 	void printLeft(std::ostream &s) const override;
+
+	std::shared_ptr<Node> get(unsigned i) const;
+
+private:
+	NodeArray();
 
 private:
 	std::vector<std::shared_ptr<Node>> _nodes;

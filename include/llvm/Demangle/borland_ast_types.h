@@ -14,7 +14,8 @@ namespace borland {
 
 class Context;
 
-enum class ThreeStateSignness {
+enum class ThreeStateSignness
+{
 	signed_char,
 	unsigned_char,
 	no_prefix
@@ -22,16 +23,17 @@ enum class ThreeStateSignness {
 
 // TODO isVolatile, isConst and isRestricted change to class with 3 bools
 
-class TypeNode : public Node {
+class TypeNode : public Node
+{
 public:
 	bool isVolatile() const;
 	bool isConst() const;
 	StringView typeName() const;
 
+	void printLeft(std::ostream &s) const override;
+
 protected:
 	TypeNode(const StringView &typeName, bool isVolatile, bool isConst);
-
-	void printLeft(std::ostream &s) const override;
 
 protected:
 	StringView _typeName;
@@ -66,10 +68,10 @@ public:
 
 	ThreeStateSignness signness();
 
+	void printLeft(std::ostream &s) const override;
+
 private:
 	CharTypeNode(ThreeStateSignness signness, bool isVolatile, bool isConst);
-
-	void printLeft(std::ostream &s) const override;
 
 private:
 	ThreeStateSignness _signness;
@@ -87,10 +89,10 @@ public:
 
 	bool isUnsigned();
 
+	void printLeft(std::ostream &s) const override;
+
 private:
 	IntegralTypeNode(const StringView &typeName, bool isUnsigned, bool isVolatile, bool isConst);
-
-	void printLeft(std::ostream &s) const override;
 
 private:
 	bool _isUnsigned;
@@ -117,14 +119,14 @@ public:
 		std::shared_ptr<Node> typeName,
 		bool isVolatile,
 		bool isConst
-		);
+	);
 
 	std::shared_ptr<Node> name();
 
+	void printLeft(std::ostream &s) const override;
+
 private:
 	NamedTypeNode(std::shared_ptr<Node> typeName, bool isVolatile, bool isConst);
-
-	void printLeft(std::ostream &s) const override;
 
 private:
 	std::shared_ptr<Node> _typeName;
@@ -141,10 +143,10 @@ public:
 
 	std::shared_ptr<Node> pointee();
 
+	void printLeft(std::ostream &s) const override;
+
 private:
 	PointerTypeNode(std::shared_ptr<Node> pointee, bool isVolatile, bool isConst);
-
-	void printLeft(std::ostream &s) const override;
 
 private:
 	std::shared_ptr<Node> _pointee;
@@ -159,10 +161,10 @@ public:
 
 	std::shared_ptr<Node> pointee();
 
+	void printLeft(std::ostream &s) const override;
+
 private:
 	explicit ReferenceTypeNode(std::shared_ptr<Node> pointee);
-
-	void printLeft(std::ostream &s) const override;
 
 private:
 	std::shared_ptr<Node> _pointee;
@@ -171,19 +173,41 @@ private:
 class RReferenceTypeNode : public TypeNode
 {
 public:
-	static std::shared_ptr<RReferenceTypeNode> create (
+	static std::shared_ptr<RReferenceTypeNode> create(
 		Context &context,
 		std::shared_ptr<Node> pointee);
 
 	std::shared_ptr<Node> pointee();
 
-private:
-	explicit  RReferenceTypeNode(std::shared_ptr<Node> pointee);
-
 	void printLeft(std::ostream &s) const override;
 
 private:
+	explicit RReferenceTypeNode(std::shared_ptr<Node> pointee);
+
+private:
 	std::shared_ptr<Node> _pointee;
+};
+
+class ArrayNode : public TypeNode
+{
+public:
+	static std::shared_ptr<ArrayNode> create(
+		Context &context,
+		std::shared_ptr<retdec::demangler::borland::Node> pointee,
+		unsigned size,
+		bool isVolatile,
+		bool isConst);
+
+	void printLeft(std::ostream &s) const override;
+
+	void printRight(std::ostream &s) const override;
+
+private:
+	ArrayNode(std::shared_ptr<retdec::demangler::borland::Node> pointee, unsigned size, bool isVolatile, bool isConst);
+
+private:
+	std::shared_ptr<Node> _pointee;
+	unsigned _size;
 };
 
 }    // borland

@@ -211,6 +211,14 @@ std::shared_ptr<NodeArray> BorlandASTParser::parseFuncParams()
 	auto params = NodeArray::create();
 
 	while (!_mangled.empty() && _status == Status::in_progress) {
+		if (_mangled.consumeFront('t')) {
+			unsigned backref = parseNumberNoConsume();
+			if (backref > 0 && backref <= params->size()) {
+				parseNumber();
+				params->addNode(params->get(backref-1));
+				continue;
+			}
+		}
 		auto param = parseType();
 		if (param) {
 			params->addNode(param);
@@ -263,10 +271,15 @@ std::shared_ptr<Node> BorlandASTParser::parseType()
 	}
 
 	if (_mangled.consumeFront('a')) {
-		// array
-		//consume size
-		//consume $
-		//parse array type
+		unsigned len = parseNumber();
+		if (len == 0) {
+			_status = invalid_mangled_name;
+			return nullptr;
+		}
+		_mangled.consumeFront('$');
+		auto arrType = parseType();
+		return ArrayNode::create(_context, arrType, len, isVolatile, isConst);
+//		return PointerTypeNode::create(_context, arrType, false, false);
 	}
 
 	unsigned len = parseNumber();
@@ -340,17 +353,36 @@ std::shared_ptr<Node> BorlandASTParser::parseBuildInType(bool isVolatile,
 
 unsigned BorlandASTParser::parseNumber()
 {
-	char c = _mangled.front();
-	if (c == '0') {
-		_status = invalid_mangled_name;    // cant start with 0
-		return 0;
+	unsigned acc = 0;
+	if (!_mangled.empty()) {
+		char c = _mangled.front();
+		if (c == '0') {
+			_status = invalid_mangled_name;    // cant start with 0
+			return 0;
+		}
+
+		while (!_mangled.empty() && _mangled.front() >= '0' && _mangled.front() <= '9') {
+			c = _mangled.popFront();
+			acc = 10*acc + static_cast<unsigned>(c-'0');
+		}
 	}
 
+	return acc;
+}
+
+unsigned BorlandASTParser::parseNumberNoConsume() const {
+	StringView mangledCopy = _mangled;
 	unsigned acc = 0;
-	while ((c >= '0') && (c <= '9')) {
-		_mangled.popFront();
-		acc = 10 * acc + static_cast<unsigned>(c - '0');
-		c = _mangled.front();
+	if (!mangledCopy.empty()) {
+		char c = mangledCopy.front();
+		if (c == '0') {
+			return 0;
+		}
+
+		while (!mangledCopy.empty() && mangledCopy.front() >= '0' && mangledCopy.front() <= '9') {
+			c = mangledCopy.popFront();
+			acc = 10*acc + static_cast<unsigned>(c-'0');
+		}
 	}
 
 	return acc;
@@ -393,7 +425,14 @@ std::shared_ptr<Node> BorlandASTParser::parseTemplate(std::shared_ptr<Node> temp
 
 	auto params = NodeArray::create();
 	while (_mangled.front() != '%') {
-		_mangled.consumeFront('t');	// TODO REMOVE, ONLY FOR TESTING!!!!!!!!!!!!!!!!!!!!!!!!!
+		if (_mangled.consumeFront('t')) {
+			unsigned backref = parseNumberNoConsume();
+			if (backref > 0 && backref <= params->size()) {
+				parseNumber();
+				params->addNode(params->get(backref-1));
+				continue;
+			}
+		}// TODO else nothing, check delphi for tests
 		auto typeNode = parseType();
 		if (typeNode && _status != invalid_mangled_name) {
 			params->addNode(typeNode);
@@ -423,7 +462,14 @@ std::shared_ptr<Node> BorlandASTParser::parseTemplate(std::shared_ptr<Node> temp
 	_mangled.consumeFront('$');
 	auto params = NodeArray::create();
 	while (_mangled.front() != '%') {	// TODO tato podmienka je zle, musi sa ist po kedy nebude jedno pred koncom, posledny znak musi byt %
-		_mangled.consumeFront('t');	// TODO REMOVE, ONLY FOR TESTING!!!!!!!!!!!!!!!!!!!!!!!!!
+		if (_mangled.consumeFront('t')) {
+			unsigned backref = parseNumberNoConsume();
+			if (backref > 0 && backref <= params->size()) {
+				parseNumber();
+				params->addNode(params->get(backref-1));
+				continue;
+			}
+		}// TODO else nothing, check delphi for tests
 		auto typeNode = parseType();
 		if (!typeNode || _status == invalid_mangled_name) {
 			break;

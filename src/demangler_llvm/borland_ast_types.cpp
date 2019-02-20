@@ -251,13 +251,26 @@ std::shared_ptr<Node> PointerTypeNode::pointee()
 
 void PointerTypeNode::printLeft(std::ostream &s) const
 {
-	_pointee->print(s);
-	s << " *";
-	if (_isVolatile) {
-		s << " volatile";
-	}
-	if (_isConst) {
-		s << " const";
+	if (_pointee->hasRight()) {
+		_pointee->printLeft(s);
+		s << " (*";
+		if (_isVolatile) {
+			s << " volatile";
+		}
+		if (_isConst) {
+			s << " const";
+		}
+		s << ")";
+		_pointee->printRight(s);
+	} else {
+		_pointee->print(s);
+		s << " *";
+		if (_isVolatile) {
+			s << " volatile";
+		}
+		if (_isConst) {
+			s << " const";
+		}
 	}
 }
 
@@ -288,8 +301,14 @@ std::shared_ptr<Node> ReferenceTypeNode::pointee()
 
 void ReferenceTypeNode::printLeft(std::ostream &s) const
 {
-	_pointee->print(s);
-	s << " &";
+	if (_pointee->hasRight()) {
+		_pointee->printLeft(s);
+		s << " (&)";
+		_pointee->printRight(s);
+	} else {
+		_pointee->print(s);
+		s << " &";
+	}
 }
 
 RReferenceTypeNode::RReferenceTypeNode(std::shared_ptr<Node> pointee) :
@@ -311,8 +330,52 @@ std::shared_ptr<Node> RReferenceTypeNode::pointee()
 
 void RReferenceTypeNode::printLeft(std::ostream &s) const
 {
-	_pointee->print(s);
-	s << " &&";
+	if (_pointee->hasRight()) {
+		_pointee->printLeft(s);
+		s << " (&&)";
+		_pointee->printRight(s);
+	} else {
+		_pointee->print(s);
+		s << " &&";
+	}
+}
+
+ArrayNode::ArrayNode(
+	std::shared_ptr<retdec::demangler::borland::Node> pointee,
+	unsigned size,
+	bool isVolatile,
+	bool isConst) :
+	TypeNode("", isVolatile, isConst), _pointee(pointee), _size(size)
+{
+	_kind = Kind::KArrayNode;
+	_has_right = true;
+}
+
+std::shared_ptr<ArrayNode> ArrayNode::create(
+	Context &context,
+	std::shared_ptr<retdec::demangler::borland::Node> pointee,
+	unsigned size,
+	bool isVolatile,
+	bool isConst)
+{
+	return std::shared_ptr<ArrayNode>(new ArrayNode(pointee, size, isVolatile, isConst));
+}
+
+void ArrayNode::printLeft(std::ostream &s) const
+{
+	_pointee->printLeft(s);
+	if (isVolatile()) {
+		s << " volatile";
+	}
+	if (isConst()) {
+		s << " const";
+	}
+}
+
+void ArrayNode::printRight(std::ostream &s) const
+{
+	s << "[" << _size << "]";
+	_pointee->printRight(s);
 }
 
 }    // borland
