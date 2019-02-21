@@ -486,7 +486,7 @@ int _main(int argc, char **argv)
 	// Write bitcode to the output as the last step.
 	std::unique_ptr<tool_output_file> bcOut = createBitcodeOutputFile();
 	raw_ostream *bcOs = &bcOut->os();
-	bool PreserveBitcodeUseListOrder = true;
+	bool PreserveBitcodeUseListOrder = false;
 	addPassWithoutVerification(
 			Passes,
 			createBitcodeWriterPass(*bcOs, PreserveBitcodeUseListOrder));
@@ -494,7 +494,7 @@ int _main(int argc, char **argv)
 	// Write assembly to the output as the last step.
 	std::unique_ptr<tool_output_file> llOut = createAssemblyOutputFile();
 	raw_ostream *llOs = &llOut->os();
-	bool PreserveAssemblyUseListOrder = true;
+	bool PreserveAssemblyUseListOrder = false;
 	addPassWithoutVerification(
 			Passes,
 			createPrintModulePass(*llOs, "", PreserveAssemblyUseListOrder),
