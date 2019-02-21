@@ -92,6 +92,7 @@ class Abi
 		bool isArm() const;
 		bool isX86() const;
 		bool isPowerPC() const;
+		bool isPic32() const;
 
 	// Private data - misc.
 	//

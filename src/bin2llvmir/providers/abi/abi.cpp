@@ -223,6 +223,10 @@ bool Abi::isPowerPC() const
 	return _config->getConfig().architecture.isPpc();
 }
 
+bool Abi::isPic32() const
+{
+	return _config->getConfig().architecture.isPic32();
+}
 
 
 //
