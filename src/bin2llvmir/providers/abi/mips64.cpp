@@ -19,8 +19,6 @@ AbiMips64::AbiMips64(llvm::Module* m, Config* c) :
 	_regStackPointerId = MIPS_REG_SP;
 	_regZeroReg = MIPS_REG_ZERO;
 
-	_fpRegsAsParams = true;
-
 	// system calls
 	_regSyscallId = MIPS_REG_V0;
 	_regSyscallReturn = MIPS_REG_V0;
@@ -33,29 +31,6 @@ AbiMips64::AbiMips64(llvm::Module* m, Config* c) :
 			MIPS_REG_T1,
 			MIPS_REG_T2,
 			MIPS_REG_T3};
-
-	_regReturn = MIPS_REG_V0;
-	_regFPReturn = MIPS_REG_V0;
-
-	_paramRegs = {
-			MIPS_REG_A0,
-			MIPS_REG_A1,
-			MIPS_REG_A2,
-			MIPS_REG_A3,
-			MIPS_REG_T0,
-			MIPS_REG_T1,
-			MIPS_REG_T2,
-			MIPS_REG_T3};
-
-	_paramFPRegs = {
-		MIPS_REG_F12,
-		MIPS_REG_F13,
-		MIPS_REG_F14,
-		MIPS_REG_F15,
-		MIPS_REG_F16,
-		MIPS_REG_F17,
-		MIPS_REG_F18
-	};
 }
 
 AbiMips64::~AbiMips64()
