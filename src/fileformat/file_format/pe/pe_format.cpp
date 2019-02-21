@@ -630,7 +630,7 @@ void PeFormat::loadRichHeader()
  */
 void PeFormat::loadVisualBasicHeader()
 {
-	auto allBytes = getBytes();
+	const auto &allBytes = getBytes();
 	std::vector<std::uint8_t> bytes;
 	unsigned long long version = 0;
 	unsigned long long vbHeaderAddress = 0;
@@ -779,7 +779,7 @@ void PeFormat::loadVisualBasicHeader()
  */
 bool PeFormat::parseVisualBasicComRegistrationData(std::size_t structureOffset)
 {
-	auto allBytes = getBytes();
+	const auto &allBytes = getBytes();
 	std::vector<std::uint8_t> bytes;
 	std::size_t offset = 0;
 	struct VBCOMRData vbcrd;
@@ -853,7 +853,7 @@ bool PeFormat::parseVisualBasicComRegistrationData(std::size_t structureOffset)
 bool PeFormat::parseVisualBasicComRegistrationInfo(std::size_t structureOffset,
 													std::size_t comRegDataOffset)
 {
-	auto allBytes = getBytes();
+	const auto &allBytes = getBytes();
 	std::vector<std::uint8_t> bytes;
 	std::size_t offset = 0;
 	struct VBCOMRInfo vbcri;
@@ -1004,7 +1004,7 @@ bool PeFormat::parseVisualBasicProjectInfo(std::size_t structureOffset)
  */
 bool PeFormat::parseVisualBasicExternTable(std::size_t structureOffset, std::size_t nEntries)
 {
-	auto allBytes = getBytes();
+	const auto &allBytes = getBytes();
 	std::vector<std::uint8_t> bytes;
 	struct VBExternTableEntry entry;
 	struct VBExternTableEntryData entryData;
@@ -1093,7 +1093,7 @@ bool PeFormat::parseVisualBasicExternTable(std::size_t structureOffset, std::siz
  */
 bool PeFormat::parseVisualBasicObjectTable(std::size_t structureOffset)
 {
-	auto allBytes = getBytes();
+	const auto &allBytes = getBytes();
 	std::vector<std::uint8_t> bytes;
 	std::size_t offset = 0;
 	unsigned long long projectNameOffset = 0;
@@ -1178,7 +1178,7 @@ bool PeFormat::parseVisualBasicObjectTable(std::size_t structureOffset)
  */
 bool PeFormat::parseVisualBasicObjects(std::size_t structureOffset, std::size_t nObjects)
 {
-	auto allBytes = getBytes();
+	const auto &allBytes = getBytes();
 	std::vector<std::uint8_t> bytes;
 	struct VBPublicObjectDescriptor vbpod;
 	std::size_t offset = 0;
