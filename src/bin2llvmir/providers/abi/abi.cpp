@@ -28,8 +28,6 @@ namespace bin2llvmir {
 
 const uint32_t Abi::REG_INVALID = 0;
 const unsigned Abi::DEFAULT_ADDR_SPACE = 0;
-const bool Abi::RTL = true;
-const bool Abi::LTR = false;
 
 Abi::Abi(llvm::Module* m, Config* c) :
 		_module(m),
@@ -67,12 +65,6 @@ bool Abi::isStackPointerRegister(const llvm::Value* val)
 bool Abi::isZeroRegister(const llvm::Value* val)
 {
 	return getZeroRegister() == val;
-}
-
-
-bool Abi::getStackParamOrder() const
-{
-	return _stackParamOrder;
 }
 
 /**
@@ -140,25 +132,6 @@ llvm::GlobalVariable* Abi::getSyscallArgumentRegister(unsigned n)
 	return n < _syscallRegs.size() ? getRegister(_syscallRegs[n]) : nullptr;
 }
 
-llvm::GlobalVariable* Abi::getReturnRegister() const
-{
-	return getRegister(_regReturn);
-}
-
-llvm::GlobalVariable* Abi::getFPReturnRegister() const
-{
-	return getRegister(_regFPReturn);
-}
-
-bool Abi::usesFPRegistersForParameters() const
-{
-	return _fpRegsAsParams;
-}
-
-bool Abi::parameterRegistersOverlay() const
-{
-	return _paramRegsOverlay;
-}
 
 bool Abi::isNopInstruction(AsmInstruction ai)
 {
@@ -246,48 +219,7 @@ bool Abi::isPowerPC() const
 	return _config->getConfig().architecture.isPpc();
 }
 
-bool Abi::valueCanBeParameter(const llvm::Value *val) const
-{
-	if (_config->isStackVariable(val))
-	{
-		return true;
-	}
 
-	bool isParamReg = find(_paramRegs.begin(), _paramRegs.end(), getRegisterId(val)) != _paramRegs.end();
-	bool isFpParamReg = find(_paramFPRegs.begin(), _paramFPRegs.end(), getRegisterId(val)) != _paramFPRegs.end();
-
-	return isParamReg || isFpParamReg;
-}
-
-std::vector<uint32_t> Abi::parameterRegisters() const
-{
-	return _paramRegs;
-}
-
-std::vector<uint32_t> Abi::doubleParameterRegisters() const
-{
-	return _doubleParamRegs;
-}
-
-std::vector<uint32_t> Abi::parameterFPRegisters() const
-{
-	return _paramFPRegs;
-}
-
-bool Abi::canHoldReturnValue(const llvm::Value* val) const
-{
-	if (returnsOnStack)
-	{
-		return _config->isStackVariable(val);
-	}
-
-	if (!isRegister(val))
-	{
-		return false;
-	}
-
-	return getRegisterId(val) == _regReturn || getRegisterId(val) == _regFPReturn;
-}
 
 //
 //==============================================================================

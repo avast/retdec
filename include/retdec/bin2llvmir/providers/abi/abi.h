@@ -29,8 +29,6 @@ class Abi
 	public:
 		static const uint32_t REG_INVALID;
 		static const unsigned DEFAULT_ADDR_SPACE;
-		static const bool RTL;
-		static const bool LTR;
 
 	// Ctors, dtors.
 	//
@@ -43,9 +41,6 @@ class Abi
 	public:
 		bool isRegister(const llvm::Value* val) const;
 		bool isRegister(const llvm::Value* val, uint32_t r) const;
-		std::vector<uint32_t> parameterRegisters() const;
-		std::vector<uint32_t> parameterFPRegisters() const;
-		std::vector<uint32_t> doubleParameterRegisters() const;
 		bool isFlagRegister(const llvm::Value* val);
 		bool isStackPointerRegister(const llvm::Value* val);
 		bool isZeroRegister(const llvm::Value* val);
@@ -57,24 +52,11 @@ class Abi
 		llvm::GlobalVariable* getStackPointerRegister();
 		llvm::GlobalVariable* getZeroRegister();
 
-		bool getStackParamOrder() const;
-
 		void addRegister(uint32_t id, llvm::GlobalVariable* reg);
 
 		llvm::GlobalVariable* getSyscallIdRegister();
 		llvm::GlobalVariable* getSyscallReturnRegister();
 		llvm::GlobalVariable* getSyscallArgumentRegister(unsigned n);
-
-		llvm::GlobalVariable* getReturnRegister() const;
-		llvm::GlobalVariable* getFPReturnRegister() const;
-
-		bool usesFPRegistersForParameters() const;
-		bool parameterRegistersOverlay() const;
-
-	// Values.
-	public:
-		bool valueCanBeParameter(const llvm::Value* val) const;
-		virtual bool canHoldReturnValue(const llvm::Value* val) const;
 
 	// Instructions.
 	//
@@ -137,21 +119,6 @@ class Abi
 		uint32_t _regSyscallId = REG_INVALID;
 		/// Register that is always equal to zero - not every arch have this.
 		uint32_t _regZeroReg = REG_INVALID;
-		/// Register used for returning values from functions.
-		uint32_t _regReturn = REG_INVALID;
-		/// Register used for returning floating point values from functions.
-		uint32_t _regFPReturn = REG_INVALID;
-		/// Registers that can be used as parameter according to abi.
-		std::vector<uint32_t> _paramRegs {};
-		/// Floating Point registers that can be used as parameter according to abi.
-		std::vector<uint32_t> _paramFPRegs {};
-		std::vector<uint32_t> _doubleParamRegs {};
-
-		/// Specifies if abi returns value on stack.
-		bool returnsOnStack = false;
-		bool _fpRegsAsParams = false;
-		bool _paramRegsOverlay = false;
-		bool _stackParamOrder = RTL;
 };
 
 class AbiProvider
