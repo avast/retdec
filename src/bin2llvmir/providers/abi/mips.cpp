@@ -28,6 +28,14 @@ AbiMips::AbiMips(llvm::Module* m, Config* c) :
 			MIPS_REG_A2,
 			MIPS_REG_A3};
 
+	if (c->getConfig().tools.isPspGcc())
+	{
+		_defcc = CallingConvention::ID::CC_MIPSPSP;
+	}
+	else
+	{
+		_defcc = CallingConvention::ID::CC_MIPS;
+	}
 }
 
 AbiMips::~AbiMips()
