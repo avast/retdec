@@ -28,6 +28,8 @@ AbiX64::AbiX64(llvm::Module* m, Config* c) :
 		X86_REG_R10,
 		X86_REG_R8,
 		X86_REG_R9};
+
+	_defcc = CallingConvention::ID::CC_SYSTEMVX64;
 }
 
 AbiX64::~AbiX64()
