@@ -57,6 +57,11 @@ class Abi
 		llvm::GlobalVariable* getSyscallIdRegister();
 		llvm::GlobalVariable* getSyscallReturnRegister();
 		llvm::GlobalVariable* getSyscallArgumentRegister(unsigned n);
+	
+	// Stacks.
+	//
+	public:
+		bool isStackVariable(const llvm::Value* val) const;
 
 	// Instructions.
 	//

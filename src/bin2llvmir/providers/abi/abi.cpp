@@ -132,6 +132,10 @@ llvm::GlobalVariable* Abi::getSyscallArgumentRegister(unsigned n)
 	return n < _syscallRegs.size() ? getRegister(_syscallRegs[n]) : nullptr;
 }
 
+bool Abi::isStackVariable(const Value* val) const
+{
+	return _config->isStackVariable(val);
+}
 
 bool Abi::isNopInstruction(AsmInstruction ai)
 {
