@@ -228,6 +228,52 @@ bool Abi::isPic32() const
 	return _config->getConfig().architecture.isPic32();
 }
 
+CallingConvention* Abi::getDefaultCallingConvention()
+{
+	return getCallingConvention(_defcc);
+}
+
+CallingConvention* Abi::getCallingConvention(
+			const CallingConvention::ID& c)
+{
+	CallingConvention::ID cc = c;
+	if (!isSpecialCallingConvention(cc) && !supportsCallingConvention(cc))
+	{
+		return nullptr;
+	}
+
+	auto ccId = static_cast<size_t>(cc);
+
+	if (ccId >= _id2cc.size())
+	{
+		_id2cc.resize(ccId+1, nullptr);
+	}
+	if (_id2cc[ccId] == nullptr)
+	{
+		auto provider = CallingConventionProvider::getProvider();	
+		_id2cc[ccId] = provider->createCallingConvention(cc, this);
+	}
+
+	return _id2cc[ccId].get();
+}
+
+bool Abi::supportsCallingConvention(CallingConvention::ID& cc) const
+{
+	return cc == _defcc;
+}
+
+bool Abi::isSpecialCallingConvention(const CallingConvention::ID& cc) const
+{
+	switch (cc)
+	{
+		case CallingConvention::ID::CC_VOIDARG:
+		case CallingConvention::ID::CC_SPECIAL:
+			return true;
+
+		default:
+			return false;
+	}
+}
 
 //
 //==============================================================================

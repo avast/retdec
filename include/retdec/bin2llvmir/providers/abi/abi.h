@@ -16,6 +16,7 @@
 
 #include "retdec/bin2llvmir/providers/asm_instruction.h"
 #include "retdec/bin2llvmir/providers/config.h"
+#include "retdec/bin2llvmir/providers/calling_convention/calling_convention.h"
 
 //#include "retdec/capstone2llvmir/x86/x86_defs.h"
 
@@ -93,6 +94,15 @@ class Abi
 		bool isX86() const;
 		bool isPowerPC() const;
 		bool isPic32() const;
+	
+	// Calling conventions.
+	//
+	public:
+		CallingConvention* getCallingConvention(
+				const CallingConvention::ID& cc);
+		CallingConvention* getDefaultCallingConvention();
+		virtual bool supportsCallingConvention(CallingConvention::ID& cc) const;
+		bool isSpecialCallingConvention(const CallingConvention::ID& cc) const;
 
 	// Private data - misc.
 	//
@@ -125,6 +135,13 @@ class Abi
 		uint32_t _regSyscallId = REG_INVALID;
 		/// Register that is always equal to zero - not every arch have this.
 		uint32_t _regZeroReg = REG_INVALID;
+
+	// Private data - calling convention
+	//
+	protected:
+		std::vector<CallingConvention::Ptr> _id2cc;
+		CallingConvention::ID _defcc;
+		
 };
 
 class AbiProvider
