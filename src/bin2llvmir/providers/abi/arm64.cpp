@@ -29,28 +29,6 @@ AbiArm64::AbiArm64(llvm::Module* m, Config* c) :
 			ARM64_REG_X4,
 			ARM64_REG_X5};
 
-	_regReturn = ARM64_REG_X0;
-	_regFPReturn = ARM64_REG_X0;
-
-	_paramRegs = {
-		ARM64_REG_X0,
-		ARM64_REG_X1,
-		ARM64_REG_X2,
-		ARM64_REG_X3,
-		ARM64_REG_X4,
-		ARM64_REG_X5,
-		ARM64_REG_X6,
-		ARM64_REG_X7};
-
-	_paramFPRegs = {
-		ARM64_REG_V0,
-		ARM64_REG_V1,
-		ARM64_REG_V2,
-		ARM64_REG_V3,
-		ARM64_REG_V4,
-		ARM64_REG_V5,
-		ARM64_REG_V6,
-		ARM64_REG_V7};	
 }
 
 AbiArm64::~AbiArm64()
