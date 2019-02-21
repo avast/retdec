@@ -28,6 +28,7 @@ AbiPic32::AbiPic32(llvm::Module* m, Config* c) :
 			MIPS_REG_A2,
 			MIPS_REG_A3};
 
+	_defcc = CallingConvention::ID::CC_PIC32;
 }
 
 AbiPic32::~AbiPic32()
