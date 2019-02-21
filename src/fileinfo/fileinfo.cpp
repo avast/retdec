@@ -428,7 +428,7 @@ int main(int argc, char* argv[])
 	}
 
 	DetectParams searchPar(params.searchMode, params.internalDatabase, params.externalDatabase, params.epBytesCount);
-	const auto fileFormat = detectFileFormat(params.filePath, useConfig ? &config : nullptr);
+	const auto fileFormat = detectFileFormat(params.filePath, useConfig && config.fileFormat.isRaw());
 	FileInformation fileinfo;
 	FileDetector *fileDetector = nullptr;
 	fileinfo.setPathToFile(params.filePath);

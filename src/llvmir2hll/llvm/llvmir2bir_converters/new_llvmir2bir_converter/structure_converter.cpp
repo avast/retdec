@@ -13,6 +13,7 @@
 #include <llvm/IR/Instructions.h>
 #include <llvm/Pass.h>
 
+#include "retdec/llvmir2hll/hll/bir_writer.h"
 #include "retdec/llvmir2hll/ir/assign_stmt.h"
 #include "retdec/llvmir2hll/ir/break_stmt.h"
 #include "retdec/llvmir2hll/ir/const_bool.h"
@@ -24,6 +25,7 @@
 #include "retdec/llvmir2hll/ir/if_stmt.h"
 #include "retdec/llvmir2hll/ir/lt_op_expr.h"
 #include "retdec/llvmir2hll/ir/switch_stmt.h"
+#include "retdec/llvmir2hll/ir/ufor_loop_stmt.h"
 #include "retdec/llvmir2hll/ir/variable.h"
 #include "retdec/llvmir2hll/ir/while_loop_stmt.h"
 #include "retdec/llvmir2hll/llvm/llvm_support.h"
@@ -65,14 +67,16 @@ const unsigned MIN_GOTO_STATEMENTS = 3;
 *
 * @param[in] basePass Pass that have instantiated the converter.
 * @param[in] conv A converter from LLVM values to values in BIR.
+* @param[in] module A module this converter works on. Needed only for debugging
+* purposes.
 */
 StructureConverter::StructureConverter(llvm::Pass *basePass,
-	ShPtr<LLVMValueConverter> conv):
+	ShPtr<LLVMValueConverter> conv, ShPtr<Module> module):
 		basePass(basePass), loopInfo(), scalarEvolution(),
 		labelsHandler(std::make_shared<LabelsHandler>()),
 		bbConverter(std::make_unique<BasicBlockConverter>(conv, labelsHandler)),
 		converter(conv), loopHeaders(), generatedPHINodes(),
-		reducedLoops(), reducedSwitches() {}
+		reducedLoops(), reducedSwitches(), resModule(module) {}
 
 /**
 * @brief Destructs the converter.
@@ -127,41 +131,38 @@ ShPtr<Statement> StructureConverter::convertFuncBody(llvm::Function &func) {
 }
 
 /**
-* @brief Deep clone statements
-*/
-ShPtr<Statement> StructureConverter::deepCloneStatements(ShPtr<Statement> orig) {
-	ShPtr<Statement> currStmt = orig;
-	ShPtr<Statement> clonedStmts;
+ * Add goto statements created by cloning to @c targetReferences container.
+ */
+void StructureConverter::fixClonedGotos(ShPtr<Statement> statement) {
+	ShPtr<Statement> stmt = statement;
 
-	while (currStmt) {
-		auto currStmtClone = ucast<Statement>(currStmt->clone());
-
-		if (auto ifStmt = cast<IfStmt>(currStmt)) {
-			auto cloneIfStmt = cast<IfStmt>(currStmtClone);
-			// only if/else here (no else if)
-			cloneIfStmt->setFirstIfBody(deepCloneStatements(ifStmt->getFirstIfBody()));
-			if (cloneIfStmt->hasElseClause()) {
-				cloneIfStmt->setElseClause(deepCloneStatements(ifStmt->getElseClause()));
-			}
-		} else if (auto switchStmt = cast<SwitchStmt>(currStmt)) {
-			auto cloneSwitchStmt = cast<SwitchStmt>(currStmtClone);
-			auto cloneClause = cloneSwitchStmt->clause_begin();
+	while (stmt) {
+		if (auto ifStmt = cast<IfStmt>(stmt)) {
+			fixClonedGotos(ifStmt->getFirstIfBody());
+			fixClonedGotos(ifStmt->getElseClause());
+		} else if (auto switchStmt = cast<SwitchStmt>(stmt)) {
 			for (auto clause = switchStmt->clause_begin();
 					clause != switchStmt->clause_end(); ++clause) {
 
-				Statement::replaceStatement(cloneClause->second, deepCloneStatements(clause->second));
-				++cloneClause;
+				fixClonedGotos((*clause).second);
 			}
-		} else if (auto whileStmt = cast<WhileLoopStmt>(currStmt)) {
-			auto cloneWhileStmt = cast<WhileLoopStmt>(currStmtClone);
-			cloneWhileStmt->setBody(deepCloneStatements(whileStmt->getBody()));
+		} else if (auto whileStmt = cast<WhileLoopStmt>(stmt)) {
+			fixClonedGotos(whileStmt->getBody());
+		} else if (auto forStmt = cast<ForLoopStmt>(stmt)) {
+			fixClonedGotos(forStmt->getBody());
+		} else if (auto uforStmt = cast<UForLoopStmt>(stmt)) {
+			fixClonedGotos(uforStmt->getBody());
+		} else if (ShPtr<GotoStmt> gotostmt = cast<GotoStmt>(stmt)) {
+			auto it = gotoTargetsToCfgNodes.find(gotostmt->getTarget());
+			if (it != gotoTargetsToCfgNodes.end()) {
+				auto it2 = targetReferences.find(it->second);
+				if (it2 != targetReferences.end()) {
+					it2->second.push_back(gotostmt);
+				}
+			}
 		}
-
-		clonedStmts = Statement::mergeStatements(clonedStmts, currStmtClone);
-		currStmt = currStmt->getSuccessor();
+		stmt = stmt->getSuccessor();
 	}
-
-	return clonedStmts;
 }
 
 /**
@@ -169,72 +170,71 @@ ShPtr<Statement> StructureConverter::deepCloneStatements(ShPtr<Statement> orig) 
 */
 void StructureConverter::replaceGoto(CFGNodeVector &targets) {
 	for (const auto &target : targets) {
-		if (!hasItem(generatedNodes, target)) {
-			auto targetBody = target->getBody();
-			auto predNum = targetBody->getNumberOfPredecessors();
-			if (predNum == 0) {
-				// has zero references, delete it
-				Statement::removeStatement(targetBody);
-				generatedNodes.insert(target);
-			} else if (predNum == 1) {
-				//ShPtr<Statement> targetBodyClone = deepCloneStatements(targetBody);
+		if (hasItem(generatedNodes, target)) {
+			continue;
+		}
+
+		auto targetBody = target->getBody();
+		auto predNum = targetBody->getNumberOfPredecessors();
+		if (predNum == 0) {
+			// has zero references, delete it
+			Statement::removeStatement(targetBody);
+			generatedNodes.insert(target);
+		} else if (predNum == 1) {
+			// has one reference, replace goto with body of label
+			for (auto pred = targetBody->predecessor_begin();
+					pred != targetBody->predecessor_end(); ++pred) {
+				ShPtr<GotoStmt> stmt = cast<GotoStmt>(*pred);
+				if (stmt && stmt->getTarget() == targetBody) {
+					Statement::replaceStatement(stmt, targetBody);
+					generatedNodes.insert(target);
+					break;
+				}
+			}
+		} else {
+			// check if body of label has "enough" statements
+			auto stmt = targetBody;
+			unsigned cnt = 0;
+			while (stmt) {
+				if (stmt->isCompound()) {
+					cnt = MIN_GOTO_STATEMENTS + 1;
+					break;
+				}
+				if (++cnt > MIN_GOTO_STATEMENTS) {
+					break;
+				}
+				stmt = stmt->getSuccessor();
+			}
+			if (cnt <= MIN_GOTO_STATEMENTS) {
+				// contains just a few statements
 				ShPtr<Statement> targetBodyClone = Statement::cloneStatements(targetBody);
 				if (getStatementCount(targetBodyClone) != getStatementCount(targetBody)) {
 					continue;
 				}
-				// has one reference, replace goto with body of label
+
+				fixClonedGotos(targetBodyClone);
+
+				std::vector<ShPtr<Statement>> toReplace;
 				for (auto pred = targetBody->predecessor_begin();
 						pred != targetBody->predecessor_end(); ++pred) {
 
 					ShPtr<GotoStmt> stmt = cast<GotoStmt>(*pred);
 					if (stmt && stmt->getTarget() == targetBody) {
-						insertClonedLoopTargets(targetBody, targetBodyClone);
-						Statement::replaceStatement(stmt, targetBodyClone);
-						generatedNodes.insert(target);
-						break;
+						toReplace.push_back(stmt);
 					}
 				}
-			} else {
-				// check if body of label has "enough" statements
-				auto stmt = targetBody;
-				unsigned cnt = 0;
-				while (stmt) {
-					if (stmt->isCompound()) {
-						cnt = MIN_GOTO_STATEMENTS + 1;
-						break;
+				// replacing needs to be done later (it changes predecessors)
+				for (auto &stmt : toReplace) {
+					if (stmt != toReplace.front()) {
+						targetBodyClone = Statement::cloneStatements(targetBody);
 					}
-					if (++cnt > MIN_GOTO_STATEMENTS) {
-						break;
-					}
-					stmt = stmt->getSuccessor();
-				}
-				if (cnt <= MIN_GOTO_STATEMENTS) {
-					// contains just a few statements
-					//ShPtr<Statement> targetBodyClone = deepCloneStatements(targetBody);
-					ShPtr<Statement> targetBodyClone = Statement::cloneStatements(targetBody);
-					if (getStatementCount(targetBodyClone) != getStatementCount(targetBody)) {
-						continue;
-					}
-					std::vector<ShPtr<Statement>> toReplace;
-					for (auto pred = targetBody->predecessor_begin();
-							pred != targetBody->predecessor_end(); ++pred) {
 
-						ShPtr<GotoStmt> stmt = cast<GotoStmt>(*pred);
-						if (stmt && stmt->getTarget() == targetBody) {
-							toReplace.push_back(stmt);
-						}
-					}
-					// replacing needs to be done later (it changes predecessors)
-					for (auto &stmt : toReplace) {
-						if (stmt != toReplace.front()) {
-							//targetBodyClone = deepCloneStatements(targetBody);
-							targetBodyClone = Statement::cloneStatements(targetBody);
-						}
-						insertClonedLoopTargets(targetBody, targetBodyClone);
-						Statement::replaceStatement(stmt, targetBodyClone);
-					}
-					generatedNodes.insert(target);
+					fixClonedGotos(targetBodyClone);
+
+					insertClonedLoopTargets(targetBody, targetBodyClone);
+					Statement::replaceStatement(stmt, targetBodyClone);
 				}
+				generatedNodes.insert(target);
 			}
 		}
 	}
@@ -271,15 +271,14 @@ unsigned StructureConverter::getStatementCount(ShPtr<Statement> statement) {
 *   with its clone (that is used)
 */
 void StructureConverter::correctUndefinedLabels() {
-	for (auto &label : targetReferences) {
-		auto targetBody = label.first->getBody();
+	for (auto &p : targetReferences) {
+		auto targetBody = p.first->getBody();
+		auto& gotos = p.second;
 		auto it = stmtClones.find(targetBody);
 		if (it != stmtClones.end()) {
-			for (auto &ref : label.second) {
-				if (auto gotoRef = cast<GotoStmt>(ref)) {
-					gotoRef->setTarget(it->second.back());
-					it->second.back()->setLabel(targetBody->getLabel());
-				}
+			for (auto &gotoStmt : gotos) {
+				gotoStmt->setTarget(it->second.back());
+				it->second.back()->setLabel(targetBody->getLabel());
 			}
 		}
 	}
@@ -309,6 +308,7 @@ ShPtr<Statement> StructureConverter::replaceBreakOrContinueOutsideLoop(ShPtr<Sta
 				if (it != loopTargets.end()) {
 					labelsHandler->setGotoTargetLabel(it->second->getBody(), it->second->getFirstBB());
 					ShPtr<Statement> gotoStmt = GotoStmt::create(it->second->getBody());
+					gotoTargetsToCfgNodes.emplace(it->second->getBody(), it->second);
 					if (isa<ContinueStmt>(stmt)) {
 						gotoStmt->setMetadata("continue -> " + getLabel(it->second));
 					} else {
@@ -1036,7 +1036,7 @@ bool StructureConverter::isSwitchStatement(const ShPtr<CFGNode> &node) const {
 bool StructureConverter::canBeCloned(const ShPtr<CFGNode> &node) const {
 	PRECONDITION_NON_NULL(node);
 
-	if (node->getPredsNum() < 2 || node->getPredsNum() == 1) {
+	if (node->getPredsNum() < 2) {
 		return false;
 	}
 
@@ -1199,9 +1199,11 @@ void StructureConverter::reduceToIfElseStatementWithBreakInLoop(ShPtr<CFGNode> n
 			loopTargets.emplace(breakStmt, targetNode);
 		} else {
 			labelsHandler->setGotoTargetLabel(targetNode->getBody(), targetNode->getFirstBB());
-			breakStmt = GotoStmt::create(targetNode->getBody());
+			auto gotoStmt = GotoStmt::create(targetNode->getBody());
+			breakStmt = gotoStmt;
 			breakStmt->setMetadata("break (via goto) -> " + getLabel(targetNode));
-			targetReferences[targetNode].push_back(breakStmt);
+			targetReferences[targetNode].push_back(gotoStmt);
+			gotoTargetsToCfgNodes.emplace(targetNode->getBody(), targetNode);
 			addGotoTargetIfNotExists(targetNode);
 		}
 
@@ -1240,6 +1242,7 @@ void StructureConverter::reduceToIfElseStatementWithBreakByGotoInLoop(ShPtr<CFGN
 	auto phiCopies = getAssignsToPHINodes(node, targetNode);
 	auto gotoStmt = GotoStmt::create(gotoTarget);
 	targetReferences[targetNode].push_back(gotoStmt);
+	gotoTargetsToCfgNodes.emplace(targetNode->getBody(), targetNode);
 	auto ifBody = Statement::mergeStatements(phiCopies, gotoStmt);
 	node->appendToBody(getIfStmt(cond, ifBody));
 
@@ -1275,8 +1278,10 @@ void StructureConverter::reduceToIfElseStatementWithContinue(ShPtr<CFGNode> node
 		loopTargets.emplace(continueStmt, targetNode);
 	} else {
 		labelsHandler->setGotoTargetLabel(targetNode->getBody(), targetNode->getFirstBB());
-		continueStmt = GotoStmt::create(targetNode->getBody());
-		targetReferences[targetNode].push_back(continueStmt);
+		auto gotoStmt = GotoStmt::create(targetNode->getBody());
+		continueStmt = gotoStmt;
+		targetReferences[targetNode].push_back(gotoStmt);
+		gotoTargetsToCfgNodes.emplace(targetNode->getBody(), targetNode);
 		continueStmt->setMetadata("continue (via goto) -> " + getLabel(targetNode));
 		addGotoTargetIfNotExists(targetNode);
 	}
@@ -1306,8 +1311,10 @@ void StructureConverter::reduceToContinueStatement(ShPtr<CFGNode> node) {
 		loopTargets.emplace(continueStmt, targetNode);
 	} else {
 		labelsHandler->setGotoTargetLabel(targetNode->getBody(), targetNode->getFirstBB());
-		continueStmt = GotoStmt::create(targetNode->getBody());
-		targetReferences[targetNode].push_back(continueStmt);
+		auto gotoStmt = GotoStmt::create(targetNode->getBody());
+		continueStmt = gotoStmt;
+		targetReferences[targetNode].push_back(gotoStmt);
+		gotoTargetsToCfgNodes.emplace(targetNode->getBody(), targetNode);
 		continueStmt->setMetadata("continue (via goto) -> " + getLabel(targetNode));
 		addGotoTargetIfNotExists(targetNode);
 	}
@@ -1538,10 +1545,10 @@ ShPtr<Statement> StructureConverter::getIfClauseBodyClone(const ShPtr<CFGNode> &
 * If the given @a trueBody contains only empty statements, the condition will be
 * negated to produce non-empty body of the @c if statement.
 *
-* If the given @a falseBody ir nullptr or contains only empty statements,
+* If the given @a falseBody ir @c nullptr or contains only empty statements,
 * the else clause will be omitted.
 *
-* If both @a trueBody and @a falseBody contain only empty statements, nullptr
+* If both @a trueBody and @a falseBody contain only empty statements, @c nullptr
 * will be returned.
 *
 * @par Preconditions
@@ -1576,7 +1583,7 @@ ShPtr<IfStmt> StructureConverter::getIfStmt(const ShPtr<Expression> &cond,
 /**
 * @brief Returns successor of the given loop node @a loopNode.
 *
-* Loop also could have no successor. In that case, nullptr is returned.
+* Loop also could have no successor. In that case, @c nullptr is returned.
 *
 * @par Preconditions
 *  - @a loopNode is non-null
@@ -1643,7 +1650,7 @@ void StructureConverter::reduceSwitchStatement(ShPtr<CFGNode> node) {
 /**
 * @brief Returns successor of the given switch node @a switchNode.
 *
-* Switch also could have no successor. In that case, nullptr is returned.
+* Switch also could have no successor. In that case, @c nullptr is returned.
 *
 * @par Preconditions
 *  - @a switchNode is non-null
@@ -2167,11 +2174,14 @@ ShPtr<Statement> StructureConverter::getGotoForSuccessor(const ShPtr<CFGNode> &n
 
 	addGotoTargetIfNotExists(target);
 
-	labelsHandler->setGotoTargetLabel(target->getBody(), target->getFirstBB());
+	if (!target->getBody()->hasLabel()) {
+		labelsHandler->setGotoTargetLabel(target->getBody(), target->getFirstBB());
+	}
 
 	auto phiCopies = getAssignsToPHINodes(node, target);
 	auto gotoStmt = GotoStmt::create(target->getBody());
 	targetReferences[target].push_back(gotoStmt);
+	gotoTargetsToCfgNodes.emplace(target->getBody(), target);
 	return Statement::mergeStatements(phiCopies, gotoStmt);
 }
 
@@ -2426,6 +2436,7 @@ void StructureConverter::cleanUp() {
 	gotoTargetsSet.clear();
 	generatedNodes.clear();
 	loopTargets.clear();
+	gotoTargetsToCfgNodes.clear();
 	targetReferences.clear();
 	stmtClones.clear();
 }

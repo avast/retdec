@@ -24,7 +24,7 @@ class Export
 		bool ordinalNumberIsValid;        ///< @c true if ordinal number is valid
 	public:
 		Export();
-		~Export();
+		virtual ~Export();
 
 		/// @name Getters
 		/// @{

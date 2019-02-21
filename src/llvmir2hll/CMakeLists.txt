@@ -40,6 +40,7 @@ set(LLVMIR2HLL_SOURCES
 	graphs/cg/cg_builder.cpp
 	graphs/cg/cg_writer.cpp
 	graphs/cg/cg_writers/graphviz_cg_writer.cpp
+	hll/bir_writer.cpp
 	hll/bracket_manager.cpp
 	hll/bracket_managers/c_bracket_manager.cpp
 	hll/bracket_managers/no_bracket_manager.cpp
@@ -173,6 +174,7 @@ set(LLVMIR2HLL_SOURCES
 	optimizer/optimizers/deref_to_array_index_optimizer.cpp
 	optimizer/optimizers/empty_array_to_string_optimizer.cpp
 	optimizer/optimizers/empty_stmt_optimizer.cpp
+	optimizer/optimizers/goto_stmt_optimizer.cpp
 	optimizer/optimizers/if_before_loop_optimizer.cpp
 	optimizer/optimizers/if_structure_optimizer.cpp
 	optimizer/optimizers/if_to_switch_optimizer.cpp

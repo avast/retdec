@@ -544,6 +544,29 @@ TEST_P(Capstone2LlvmIrTranslatorMipsTests, MIPS_INS_NOR_3_op)
 }
 
 //
+// MIPS_INS_NOT
+//
+
+TEST_P(Capstone2LlvmIrTranslatorMipsTests, MIPS_INS_NOT)
+{
+	SKIP_MODE_64;
+
+	setRegisters({
+		{MIPS_REG_1, 0x12345678},
+		{MIPS_REG_2, 0xff00ff00},
+	});
+
+	emulate("not $1, $2");
+
+	EXPECT_JUST_REGISTERS_LOADED({MIPS_REG_2});
+	EXPECT_JUST_REGISTERS_STORED({
+		{MIPS_REG_1, 0x00ff00ff},
+	});
+	EXPECT_NO_MEMORY_LOADED_STORED();
+	EXPECT_NO_VALUE_CALLED();
+}
+
+//
 // MIPS_INS_MUL
 //
 
@@ -1510,6 +1533,21 @@ TEST_P(Capstone2LlvmIrTranslatorMipsTests, MIPS_INS_CLZ_ones)
 
 //
 // MIPS_INS_SEH
+// TODO: Keystone -- instruction requires a CPU feature not currently enabled.
+//
+
+//
+// MIPS_INS_SNE, MIPS_INS_SNEI
+// TODO: Keystone -- instruction requires a CPU feature not currently enabled.
+//
+
+//
+// MIPS_INS_SNE, MIPS_INS_SNEI
+// TODO: Keystone -- instruction requires a CPU feature not currently enabled.
+//
+
+//
+// MIPS_INS_SEQ, MIPS_INS_SEQI
 // TODO: Keystone -- instruction requires a CPU feature not currently enabled.
 //
 
@@ -4342,8 +4380,48 @@ TEST_P(Capstone2LlvmIrTranslatorMipsTests, MIPS_INS_ABS_d_64)
 }
 
 //
+// MIPS_INS_NEGU
+//
+
+TEST_P(Capstone2LlvmIrTranslatorMipsTests, MIPS_INS_NEGU)
+{
+	SKIP_MODE_64;
+
+	setRegisters({
+		{MIPS_REG_1, 0x00ffffff},
+	});
+
+	emulate("negu $1, $1");
+
+	EXPECT_JUST_REGISTERS_LOADED({MIPS_REG_1});
+	EXPECT_JUST_REGISTERS_STORED({
+		{MIPS_REG_1, 0xff000001},
+	});
+	EXPECT_NO_MEMORY_LOADED_STORED();
+	EXPECT_NO_VALUE_CALLED();
+}
+
+//
 // MIPS_INS_NEG
 //
+
+TEST_P(Capstone2LlvmIrTranslatorMipsTests, MIPS_INS_NEG_int)
+{
+	SKIP_MODE_64;
+
+	setRegisters({
+		{MIPS_REG_1, 0x00ffffff},
+	});
+
+	emulate("neg $1, $1");
+
+	EXPECT_JUST_REGISTERS_LOADED({MIPS_REG_1});
+	EXPECT_JUST_REGISTERS_STORED({
+		{MIPS_REG_1, 0xff000001},
+	});
+	EXPECT_NO_MEMORY_LOADED_STORED();
+	EXPECT_NO_VALUE_CALLED();
+}
 
 TEST_P(Capstone2LlvmIrTranslatorMipsTests, MIPS_INS_NEG_s_32)
 {
@@ -6005,28 +6083,6 @@ TEST_P(Capstone2LlvmIrTranslatorMipsTests, MIPS_INS_C_ule_d_32)
 	EXPECT_JUST_REGISTERS_LOADED({MIPS_REG_FD0, MIPS_REG_FD2});
 	EXPECT_JUST_REGISTERS_STORED({
 		{MIPS_REG_FCC0, true},
-	});
-	EXPECT_NO_MEMORY_LOADED_STORED();
-	EXPECT_NO_VALUE_CALLED();
-}
-
-//
-// MIPS_INS_NEGU
-//
-
-TEST_P(Capstone2LlvmIrTranslatorMipsTests, MIPS_INS_NEGU)
-{
-	SKIP_MODE_64;
-
-	setRegisters({
-		{MIPS_REG_1, 0x00ffffff},
-	});
-
-	emulate("negu $1, $1");
-
-	EXPECT_JUST_REGISTERS_LOADED({MIPS_REG_1});
-	EXPECT_JUST_REGISTERS_STORED({
-		{MIPS_REG_1, 0xff000001},
 	});
 	EXPECT_NO_MEMORY_LOADED_STORED();
 	EXPECT_NO_VALUE_CALLED();

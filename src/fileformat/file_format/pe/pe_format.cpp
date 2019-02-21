@@ -26,6 +26,7 @@
 #include "retdec/fileformat/utils/asn1.h"
 #include "retdec/fileformat/utils/conversions.h"
 #include "retdec/fileformat/utils/file_io.h"
+#include "retdec/crypto/crypto.h"
 
 using namespace retdec::utils;
 using namespace PeLib;
@@ -291,7 +292,31 @@ Symbol::UsageType getSymbolUsageType(byte storageClass, byte complexType)
  * @param pathToFile Path to input file
  * @param loadFlags Load flags
  */
-PeFormat::PeFormat(std::string pathToFile, LoadFlags loadFlags) : FileFormat(pathToFile, loadFlags)
+PeFormat::PeFormat(std::string pathToFile, LoadFlags loadFlags) :
+		FileFormat(pathToFile, loadFlags)
+{
+	initStructures();
+}
+
+/**
+ * Constructor
+ * @param inputStream Representation of input file
+ * @param loadFlags Load flags
+ */
+PeFormat::PeFormat(std::istream &inputStream, LoadFlags loadFlags) :
+		FileFormat(inputStream, loadFlags)
+{
+	initStructures();
+}
+
+/**
+ * Constructor
+ * @param data Input data.
+ * @param size Input data size.
+ * @param loadFlags Load flags
+ */
+PeFormat::PeFormat(const std::uint8_t *data, std::size_t size, LoadFlags loadFlags) :
+		FileFormat(data, size, loadFlags)
 {
 	initStructures();
 }
@@ -326,7 +351,7 @@ void PeFormat::initStructures()
 	peHeader32 = nullptr;
 	peHeader64 = nullptr;
 	peClass = PEFILE_UNKNOWN;
-	file = openPeFile(filePath);
+	file = openPeFile(fileStream);
 	if(file)
 	{
 		stateIsValid = true;
@@ -349,7 +374,7 @@ void PeFormat::initStructures()
 			initLoaderErrorInfo();
 
 			mzHeader = file->mzHeader();
-			switch((peClass = getFileType(filePath)))
+			switch((peClass = getFileType(fileStream)))
 			{
 				case PEFILE32:
 				{
@@ -833,7 +858,6 @@ void PeFormat::loadResourceNodes(std::vector<const PeLib::ResourceChild*> &nodes
 		return;
 	}
 
-	Resource resource;
 	resourceTable = new ResourceTable();
 	std::size_t firstLeafIndex = 0;
 
@@ -855,10 +879,11 @@ void PeFormat::loadResourceNodes(std::vector<const PeLib::ResourceChild*> &nodes
 		{
 			continue;
 		}
-		resource.setOffset(leaf->getOffsetToData() - rva + formatParser->getResourceDirectoryOffset());
-		resource.setSizeInFile(leaf->getSize());
-		resource.load(this);
-		resourceTable->addResource(resource);
+		auto resource = std::make_unique<Resource>();
+		resource->setOffset(leaf->getOffsetToData() - rva + formatParser->getResourceDirectoryOffset());
+		resource->setSizeInFile(leaf->getSize());
+		resource->load(this);
+		resourceTable->addResource(std::move(resource));
 	}
 }
 
@@ -867,6 +892,7 @@ void PeFormat::loadResourceNodes(std::vector<const PeLib::ResourceChild*> &nodes
  */
 void PeFormat::loadResources()
 {
+	size_t iconGroupIDcounter = 0;
 	unsigned long long rva = 0, size = 0;
 	if(!getDataDirectoryRelative(PELIB_IMAGE_DIRECTORY_ENTRY_RESOURCE, rva, size))
 	{
@@ -885,7 +911,7 @@ void PeFormat::loadResources()
 		return;
 	}
 
-	Resource resource;
+	std::unique_ptr<Resource> resource;
 	resourceTable = new ResourceTable();
 
 	for(std::size_t i = 0, e = levels[0], nSft = 0, lSft = 0; i < e; ++i)
@@ -895,13 +921,15 @@ void PeFormat::loadResources()
 		{
 			continue;
 		}
-		resource.setType(typeChild->getName());
-		resource.invalidateTypeId();
-		if(resource.hasEmptyType())
+
+		bool emptyType = false;
+		auto type = typeChild->getName();
+		if(type.empty())
 		{
-			resource.setTypeId(typeChild->getOffsetToName());
-			resource.setType(mapGetValueOrDefault(resourceTypeMap, typeChild->getOffsetToName(), ""));
+			type = mapGetValueOrDefault(resourceTypeMap, typeChild->getOffsetToName(), "");
+			emptyType = true;
 		}
+
 		nSft += typeChild->getNumberOfChildren();
 
 		for(std::size_t j = 0, f = typeChild->getNumberOfChildren(); j < f; ++j)
@@ -911,12 +939,8 @@ void PeFormat::loadResources()
 			{
 				continue;
 			}
-			resource.setName(nameChild->getName());
-			resource.invalidateNameId();
-			if(resource.hasEmptyName())
-			{
-				resource.setNameId(nameChild->getOffsetToName());
-			}
+
+			auto name = nameChild->getName();
 			lSft += nameChild->getNumberOfChildren();
 
 			for(std::size_t k = 0, g = nameChild->getNumberOfChildren(); k < g; ++k)
@@ -932,24 +956,60 @@ void PeFormat::loadResources()
 				{
 					continue;
 				}
-				resource.setOffset(lanLeaf->getOffsetToData() - rva + formatParser->getResourceDirectoryOffset());
-				resource.setSizeInFile(lanLeaf->getSize());
-				resource.setLanguage(lanChild->getName());
-				resource.invalidateLanguageId();
-				resource.invalidateSublanguageId();
-				if(resource.hasEmptyLanguage())
+
+				if (type == "Icon")
+				{
+					resource = std::make_unique<ResourceIcon>();
+					resourceTable->addResourceIcon(static_cast<ResourceIcon *>(resource.get()));
+				}
+				else if (type == "Icon Group")
+				{
+					auto iGroup = std::make_unique<ResourceIconGroup>();
+					iGroup->setIconGroupID(iconGroupIDcounter);
+					resource = std::move(iGroup);
+					resourceTable->addResourceIconGroup(static_cast<ResourceIconGroup *>(resource.get()));
+					iconGroupIDcounter++;
+				}
+				else
+				{
+					resource = std::make_unique<Resource>();
+				}
+				resource->setType(type);
+				resource->invalidateTypeId();
+				if(emptyType)
+				{
+					resource->setTypeId(typeChild->getOffsetToName());
+				}
+
+				resource->setName(name);
+				resource->invalidateNameId();
+				if(resource->hasEmptyName())
+				{
+					resource->setNameId(nameChild->getOffsetToName());
+				}
+
+				resource->setOffset(lanLeaf->getOffsetToData() - rva + formatParser->getResourceDirectoryOffset());
+				resource->setSizeInFile(lanLeaf->getSize());
+				resource->setLanguage(lanChild->getName());
+				resource->invalidateLanguageId();
+				resource->invalidateSublanguageId();
+				if(resource->hasEmptyLanguage())
 				{
 					const auto lIdAll = lanChild->getOffsetToName();
 					const auto lId = lIdAll & 0x3FF;
-					resource.setLanguageId(lId);
-					resource.setSublanguageId((lIdAll & 0xFC00) >> 10);
-					resource.setLanguage(mapGetValueOrDefault(resourceLanguageMap, lId, ""));
+					resource->setLanguageId(lId);
+					resource->setSublanguageId((lIdAll & 0xFC00) >> 10);
+					resource->setLanguage(mapGetValueOrDefault(resourceLanguageMap, lId, ""));
 				}
-				resource.load(this);
-				resourceTable->addResource(resource);
+				resource->load(this);
+				resourceTable->addResource(std::move(resource));
 			}
 		}
 	}
+
+	resourceTable->linkResourceIconGroups();
+
+	loadResourceIconHash();
 
 	for (auto&& addressRange : formatParser->getResourceDirectoryOccupiedAddresses())
 	{
@@ -1861,6 +1921,8 @@ void PeFormat::detectDotnetTypes()
 		definedClasses = reconstructor.getDefinedClasses();
 		importedClasses = reconstructor.getReferencedClasses();
 	}
+
+	computeTypeRefHashes();
 }
 
 /**
@@ -1917,6 +1979,147 @@ std::uint64_t PeFormat::detectPossibleMetadataHeaderAddress() const
 	}
 
 	return metadataHeaderFound ? address : 0;
+}
+
+/**
+ * Compute typeref hashes - CRC32, MD5, SHA256.
+ */
+void PeFormat::computeTypeRefHashes()
+{
+	if (!metadataStream || !stringStream)
+	{
+		return;
+	}
+
+	std::vector<std::uint8_t> typeRefHashBytes;
+	std::string typeName;
+	std::string nameSpace;
+	std::string referencedName;
+	MetadataTableType resolutionScopeType;
+
+	auto typeRefTable = static_cast<const MetadataTable<TypeRef>*>(metadataStream->getMetadataTable(MetadataTableType::TypeRef));
+	auto moduleTable = static_cast<const MetadataTable<DotnetModule>*>(metadataStream->getMetadataTable(MetadataTableType::Module));
+	auto moduleRefTable = static_cast<const MetadataTable<ModuleRef>*>(metadataStream->getMetadataTable(MetadataTableType::ModuleRef));
+	auto assemblyRefTable = static_cast<const MetadataTable<AssemblyRef>*>(metadataStream->getMetadataTable(MetadataTableType::AssemblyRef));
+
+	if (!typeRefTable)
+	{
+		return;
+	}
+
+	for (std::size_t i = 1; i <= typeRefTable->getNumberOfRows(); ++i)
+	{
+		bool validTypeName = false;
+		bool validNameSpace = false;
+		bool validReferencedName = false;
+
+		auto typeRefRow = typeRefTable->getRow(i);
+
+		if (stringStream->getString(typeRefRow->typeName.getIndex(), typeName) && !typeName.empty())
+		{
+			validTypeName = true;
+		}
+		if (stringStream->getString(typeRefRow->typeNamespace.getIndex(), nameSpace) && !nameSpace.empty())
+		{
+			validNameSpace = true;
+		}
+
+		if (typeRefRow->resolutionScope.getTable(resolutionScopeType))
+		{
+			switch (resolutionScopeType)
+			{
+				case MetadataTableType::TypeRef:
+				{
+					auto typeRef = typeRefTable->getRow(typeRefRow->resolutionScope.getIndex());
+					if (typeRef && stringStream->getString(typeRef->typeName.getIndex(), referencedName) && !referencedName.empty())
+					{
+						referencedName += "TR";
+						validReferencedName = true;
+					}
+					break;
+				}
+				case MetadataTableType::Module:
+				{
+					if (moduleTable)
+					{
+						auto module = moduleTable->getRow(typeRefRow->resolutionScope.getIndex());
+						if (module && stringStream->getString(module->name.getIndex(), referencedName) && !referencedName.empty())
+						{
+							referencedName += "M";
+							validReferencedName = true;
+						}
+					}
+					break;
+				}
+				case MetadataTableType::ModuleRef:
+				{
+					if (moduleRefTable)
+					{
+						auto moduleRef = moduleRefTable->getRow(typeRefRow->resolutionScope.getIndex());
+						if (moduleRef && stringStream->getString(moduleRef->name.getIndex(), referencedName) && !referencedName.empty())
+						{
+							referencedName += "MR";
+							validReferencedName = true;
+						}
+					}
+					break;
+				}
+				case MetadataTableType::AssemblyRef:
+				{
+					if (assemblyRefTable)
+					{
+						auto assemblyRef = assemblyRefTable->getRow(typeRefRow->resolutionScope.getIndex());
+						if (assemblyRef && stringStream->getString(assemblyRef->name.getIndex(), referencedName) && !referencedName.empty())
+						{
+							referencedName += "AR";
+							validReferencedName = true;
+						}
+					}
+					break;
+				}
+				default:
+					break;
+			}
+
+			if (!typeRefHashBytes.empty())
+			{
+				typeRefHashBytes.push_back(static_cast<unsigned char>(','));
+			}
+
+			std::string fullName;
+			if (validTypeName)
+			{
+				fullName = typeName;
+			}
+			if (validNameSpace)
+			{
+				if (!fullName.empty())
+				{
+					fullName += ".";
+				}
+
+				fullName += nameSpace;
+			}
+			if (validReferencedName)
+			{
+				if (!fullName.empty())
+				{
+					fullName += ".";
+				}
+
+				fullName += referencedName;
+			}
+
+			for(const auto c : fullName)
+			{
+				typeRefHashBytes.push_back(static_cast<uint8_t>(c));
+			}
+		}
+	}
+
+	typeRefHashCrc32 = retdec::crypto::getCrc32(typeRefHashBytes.data(), typeRefHashBytes.size());
+	typeRefHashMd5 = retdec::crypto::getMd5(typeRefHashBytes.data(), typeRefHashBytes.size());
+	typeRefHashSha256 = retdec::crypto::getSha256(typeRefHashBytes.data(), typeRefHashBytes.size());
 }
 
 retdec::utils::Endianness PeFormat::getEndianness() const
@@ -2533,6 +2736,22 @@ const std::vector<std::shared_ptr<DotnetClass>>& PeFormat::getDefinedDotnetClass
 const std::vector<std::shared_ptr<DotnetClass>>& PeFormat::getImportedDotnetClasses() const
 {
 	return importedClasses;
+}
+
+
+const std::string& PeFormat::getTypeRefhashCrc32() const
+{
+	return typeRefHashCrc32;
+}
+
+const std::string& PeFormat::getTypeRefhashMd5() const
+{
+	return typeRefHashMd5;
+}
+
+const std::string& PeFormat::getTypeRefhashSha256() const
+{
+	return typeRefHashSha256;
 }
 
 } // namespace fileformat

@@ -7,6 +7,7 @@
 #ifndef FILEINFO_FILE_DETECTOR_FILE_DETECTOR_H
 #define FILEINFO_FILE_DETECTOR_FILE_DETECTOR_H
 
+#include "retdec/config/config.h"
 #include "retdec/utils/non_copyable.h"
 #include "fileinfo/file_information/file_information.h"
 

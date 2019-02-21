@@ -72,7 +72,7 @@ ShPtr<Module> NewLLVMIR2BIRConverter::convert(llvm::Module *llvmModule,
 		config);
 	variablesManager = std::make_shared<VariablesManager>(resModule);
 	converter = LLVMValueConverter::create(resModule, variablesManager);
-	structConverter = std::make_unique<StructureConverter>(basePass, converter);
+	structConverter = std::make_unique<StructureConverter>(basePass, converter, resModule);
 
 	converter->setOptionStrictFPUSemantics(optionStrictFPUSemantics);
 
@@ -143,6 +143,7 @@ void NewLLVMIR2BIRConverter::convertAndAddGlobalVariables() {
 			auto variable = convertGlobalVariable(globVar);
 			auto initializer = convertGlobalVariableInitializer(globVar);
 			resModule->addGlobalVar(variable, initializer);
+			variablesManager->addGlobalValVarPair(&globVar, variable);
 		}
 	}
 }
@@ -173,6 +174,7 @@ ShPtr<Function> NewLLVMIR2BIRConverter::convertFuncDeclaration(
 	auto params = convertFuncParams(func);
 
 	auto birFunc = Function::create(retType, func.getName(), params);
+	variablesManager->addGlobalValVarPair(&func, birFunc->getAsVar());
 	birFunc->setVarArg(func.isVarArg());
 	return birFunc;
 }

@@ -18,15 +18,18 @@ namespace fileformat {
 /**
  * Create instance of FileFormat class
  * @param filePath Path to input file
- * @param config Pointer to config used to detect raw data file format
+ * @param isRaw Is the input is a raw binary?
  * @param loadFlags Load flags
  * @return Pointer to instance of FileFormat class or @c nullptr if any error
  *
  * If format of input file is not supported, function will return @c nullptr.
  */
-std::unique_ptr<FileFormat> createFileFormat(const std::string &filePath, retdec::config::Config *config, LoadFlags loadFlags)
+std::unique_ptr<FileFormat> createFileFormat(
+		const std::string &filePath,
+		bool isRaw,
+		LoadFlags loadFlags)
 {
-	switch(detectFileFormat(filePath, config))
+	switch(detectFileFormat(filePath, isRaw))
 	{
 		case Format::PE:
 			return std::make_unique<PeFormat>(filePath, loadFlags);
@@ -40,6 +43,55 @@ std::unique_ptr<FileFormat> createFileFormat(const std::string &filePath, retdec
 			return std::make_unique<IntelHexFormat>(filePath, loadFlags);
 		case Format::RAW_DATA:
 			return std::make_unique<RawDataFormat>(filePath, loadFlags);
+		default:
+			return nullptr;
+	}
+}
+
+std::unique_ptr<FileFormat> createFileFormat(
+		std::istream &inputStream,
+		bool isRaw,
+		LoadFlags loadFlags)
+{
+	switch(detectFileFormat(inputStream, isRaw))
+	{
+		case Format::PE:
+			return std::make_unique<PeFormat>(inputStream, loadFlags);
+		case Format::ELF:
+			return std::make_unique<ElfFormat>(inputStream, loadFlags);
+		case Format::COFF:
+			return std::make_unique<CoffFormat>(inputStream, loadFlags);
+		case Format::MACHO:
+			return std::make_unique<MachOFormat>(inputStream, loadFlags);
+		case Format::INTEL_HEX:
+			return std::make_unique<IntelHexFormat>(inputStream, loadFlags);
+		case Format::RAW_DATA:
+			return std::make_unique<RawDataFormat>(inputStream, loadFlags);
+		default:
+			return nullptr;
+	}
+}
+
+std::unique_ptr<FileFormat> createFileFormat(
+		const std::uint8_t *data,
+		std::size_t size,
+		bool isRaw,
+		LoadFlags loadFlags)
+{
+	switch(detectFileFormat(data, size, isRaw))
+	{
+		case Format::PE:
+			return std::make_unique<PeFormat>(data, size, loadFlags);
+		case Format::ELF:
+			return std::make_unique<ElfFormat>(data, size, loadFlags);
+		case Format::COFF:
+			return std::make_unique<CoffFormat>(data, size, loadFlags);
+		case Format::MACHO:
+			return std::make_unique<MachOFormat>(data, size, loadFlags);
+		case Format::INTEL_HEX:
+			return std::make_unique<IntelHexFormat>(data, size, loadFlags);
+		case Format::RAW_DATA:
+			return std::make_unique<RawDataFormat>(data, size, loadFlags);
 		default:
 			return nullptr;
 	}

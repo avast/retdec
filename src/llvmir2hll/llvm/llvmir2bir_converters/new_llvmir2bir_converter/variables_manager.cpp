@@ -42,6 +42,10 @@ void VariablesManager::reset() {
 	varNameGen->restart();
 }
 
+void VariablesManager::addGlobalValVarPair(llvm::Value *val, ShPtr<Variable> var) {
+	globalVarsMap.emplace(val, var);
+}
+
 /**
 * @brief Returns the variable representing LLVM value @a val.
 *
@@ -53,7 +57,11 @@ ShPtr<Variable> VariablesManager::getVarByValue(llvm::Value *val) {
 		assignNameToValue(val);
 	}
 
-	return getVarByName(val->getName());
+	if (auto gv = getGlobalVar(val)) {
+		return gv;
+	}
+
+	return getOrCreateLocalVar(val);
 }
 
 /**
@@ -65,38 +73,25 @@ void VariablesManager::assignNameToValue(llvm::Value *val) const {
 	val->setName(varNameGen->getNextVarName());
 }
 
-/**
-* @brief Returns the variable named by @a name.
-*
-* If resulting module contains function named by @a name, this function is
-* returned as variable. If resulting module contains global variable named by
-* @a name, this global variable is returned. Otherwise, variable named by
-* @a name is returned.
-*/
-ShPtr<Variable> VariablesManager::getVarByName(const std::string &name) {
-	if (auto func = resModule->getFuncByName(name)) {
-		return func->getAsVar();
-	} else if (auto globVar = resModule->getGlobalVarByName(name)) {
-		return globVar;
-	}
-
-	return getOrCreateLocalVar(name);
+ShPtr<Variable> VariablesManager::getGlobalVar(llvm::Value *val) {
+	auto fit = globalVarsMap.find(val);
+	return fit != globalVarsMap.end() ? fit->second : nullptr;
 }
 
 /**
-* @brief Returns the local variable named by @a name.
+* @brief Returns the local variable for @a val.
 *
 * If local variable doesn't exist, new one will be created. Type of new created
 * variable is unknown.
 */
-ShPtr<Variable> VariablesManager::getOrCreateLocalVar(const std::string &name) {
-	auto existingVarIt = localVarsMap.find(name);
+ShPtr<Variable> VariablesManager::getOrCreateLocalVar(llvm::Value *val) {
+	auto existingVarIt = localVarsMap.find(val);
 	if (existingVarIt != localVarsMap.end()) {
 		return existingVarIt->second;
 	}
 
-	auto var = Variable::create(name, UnknownType::create());
-	localVarsMap.emplace(name, var);
+	auto var = Variable::create(val->getName(), UnknownType::create());
+	localVarsMap.emplace(val, var);
 	return var;
 }
 

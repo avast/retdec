@@ -137,42 +137,7 @@ void FileDetector::getPdbInfo()
  */
 void FileDetector::getResourceInfo()
 {
-	const auto *resTable = fileParser->getResourceTable();
-	if(!resTable)
-	{
-		return;
-	}
-
-	for(const auto &dRes : *resTable)
-	{
-		Resource res;
-		res.setCrc32(dRes.getCrc32());
-		res.setMd5(dRes.getMd5());
-		res.setSha256(dRes.getSha256());
-		res.setName(dRes.getName());
-		res.setType(dRes.getType());
-		res.setLanguage(dRes.getLanguage());
-		res.setOffset(dRes.getOffset());
-		res.setSize(dRes.getSizeInFile());
-		std::size_t aux;
-		if(dRes.getNameId(aux))
-		{
-			res.setNameId(aux);
-		}
-		if(dRes.getTypeId(aux))
-		{
-			res.setTypeId(aux);
-		}
-		if(dRes.getLanguageId(aux))
-		{
-			res.setLanguageId(aux);
-		}
-		if(dRes.getSublanguageId(aux))
-		{
-			res.setSublanguageId(aux);
-		}
-		fileInfo.addResource(res);
-	}
+	fileInfo.setResourceTable(fileParser->getResourceTable());
 }
 
 /**
@@ -312,7 +277,26 @@ void FileDetector::getLoaderInfo()
 void FileDetector::setConfigFile(retdec::config::Config &config)
 {
 	fileConfig = &config;
-	fileParser->initFromConfig(config);
+
+	auto& ca = config.architecture;
+	auto endian = ca.isEndianUnknown()
+			? fileParser->getEndianness()
+			: (ca.isEndianLittle()
+					? retdec::utils::Endianness::LITTLE
+					: retdec::utils::Endianness::BIG);
+	auto arch = retdec::fileformat::Architecture::UNKNOWN;
+	if (ca.isX86()) arch = retdec::fileformat::Architecture::X86;
+	if (ca.isX86_64()) arch = retdec::fileformat::Architecture::X86_64;
+	if (ca.isArmOrThumb()) arch = retdec::fileformat::Architecture::ARM;
+	if (ca.isPpc()) arch = retdec::fileformat::Architecture::POWERPC;
+	if (ca.isMipsOrPic32()) arch = retdec::fileformat::Architecture::MIPS;
+
+	fileParser->initArchitecture(
+			arch,
+			endian,
+			config.architecture.getByteSize(),
+			config.getEntryPoint(),
+			config.getSectionVMA());
 }
 
 /**

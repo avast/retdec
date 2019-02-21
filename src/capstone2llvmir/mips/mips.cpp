@@ -488,6 +488,11 @@ bool Capstone2LlvmIrTranslatorMips_impl::isOperandRegister(cs_mips_op& op)
 	return op.type == MIPS_OP_REG;
 }
 
+bool Capstone2LlvmIrTranslatorMips_impl::isGeneralPurposeRegister(uint32_t r)
+{
+	return MIPS_REG_0 <= r && r <= MIPS_REG_31;
+}
+
 //
 //==============================================================================
 // MIPS instruction translation methods.
@@ -1215,6 +1220,25 @@ void Capstone2LlvmIrTranslatorMips_impl::translateMaddf(cs_insn* i, cs_mips* mi,
 }
 
 /**
+ * MIPS_INS_NEG
+ */
+void Capstone2LlvmIrTranslatorMips_impl::translateNeg(cs_insn* i, cs_mips* mi, llvm::IRBuilder<>& irb)
+{
+	if (mi->op_count == 2
+			&& isOperandRegister(mi->operands[0])
+			&& isGeneralPurposeRegister(mi->operands[0].reg)
+			&& isOperandRegister(mi->operands[1])
+			&& isGeneralPurposeRegister(mi->operands[1].reg))
+	{
+		translateNegu(i, mi, irb);
+	}
+	else
+	{
+		translatePseudoAsmOp0FncOp1(i, mi, irb);
+	}
+}
+
+/**
  * MIPS_INS_NEGU
  */
 void Capstone2LlvmIrTranslatorMips_impl::translateNegu(cs_insn* i, cs_mips* mi, llvm::IRBuilder<>& irb)
@@ -1581,6 +1605,18 @@ void Capstone2LlvmIrTranslatorMips_impl::translateNor(cs_insn* i, cs_mips* mi, l
 }
 
 /**
+ * MIPS_INS_NOT
+ */
+void Capstone2LlvmIrTranslatorMips_impl::translateNot(cs_insn* i, cs_mips* mi, llvm::IRBuilder<>& irb)
+{
+	EXPECT_IS_BINARY(i, mi, irb);
+
+	op1 = loadOpBinaryOp1(mi, irb);
+	op1 = irb.CreateNot(op1);
+	storeOp(mi->operands[0], op1, irb);
+}
+
+/**
  * MIPS_INS_OR, MIPS_INS_ORI
  */
 void Capstone2LlvmIrTranslatorMips_impl::translateOr(cs_insn* i, cs_mips* mi, llvm::IRBuilder<>& irb)
@@ -1641,7 +1677,7 @@ void Capstone2LlvmIrTranslatorMips_impl::translateSeh(cs_insn* i, cs_mips* mi, l
 }
 
 /**
- * MIPS_INS_SLL, MIPS_INS_SLLV
+ * MIPS_INS_SLL, MIPS_INS_SLLI, MIPS_INS_SLLV
  */
 void Capstone2LlvmIrTranslatorMips_impl::translateSll(cs_insn* i, cs_mips* mi, llvm::IRBuilder<>& irb)
 {
@@ -1679,7 +1715,7 @@ void Capstone2LlvmIrTranslatorMips_impl::translateSltu(cs_insn* i, cs_mips* mi, 
 }
 
 /**
- * MIPS_INS_SRA, MIPS_INS_SRAV
+ * MIPS_INS_SRA, MIPS_INS_SRAI, MIPS_INS_SRAV
  */
 void Capstone2LlvmIrTranslatorMips_impl::translateSra(cs_insn* i, cs_mips* mi, llvm::IRBuilder<>& irb)
 {
@@ -1691,7 +1727,7 @@ void Capstone2LlvmIrTranslatorMips_impl::translateSra(cs_insn* i, cs_mips* mi, l
 }
 
 /**
- * MIPS_INS_SRL, MIPS_INS_SRLV
+ * MIPS_INS_SRL, MIPS_INS_SRLI, MIPS_INS_SRLV
  */
 void Capstone2LlvmIrTranslatorMips_impl::translateSrl(cs_insn* i, cs_mips* mi, llvm::IRBuilder<>& irb)
 {
@@ -1752,6 +1788,32 @@ void Capstone2LlvmIrTranslatorMips_impl::translateXor(cs_insn* i, cs_mips* mi, l
 	std::tie(op1, op2) = loadOpBinaryOrTernaryOp1Op2(mi, irb, eOpConv::ZEXT_TRUNC);
 	auto* x = irb.CreateXor(op1, op2);
 	storeOp(mi->operands[0], x, irb);
+}
+
+/**
+ * MIPS_INS_SNE, MIPS_INS_SNEI
+ * op0 = (op1 != op2) ? 1 : 0
+ */
+void Capstone2LlvmIrTranslatorMips_impl::translateSne(cs_insn* i, cs_mips* mi, llvm::IRBuilder<>& irb)
+{
+	EXPECT_IS_BINARY_OR_TERNARY(i, mi, irb);
+
+	std::tie(op1, op2) = loadOpBinaryOrTernaryOp1Op2(mi, irb, eOpConv::SEXT_TRUNC);
+	auto* ne = irb.CreateICmpNE(op1, op2);
+	storeOp(mi->operands[0], ne, irb, eOpConv::ZEXT_TRUNC);
+}
+
+/**
+ * MIPS_INS_SEQ, MIPS_INS_SEQI
+ * op0 = (op1 != op2) ? 1 : 0
+ */
+void Capstone2LlvmIrTranslatorMips_impl::translateSeq(cs_insn* i, cs_mips* mi, llvm::IRBuilder<>& irb)
+{
+	EXPECT_IS_BINARY_OR_TERNARY(i, mi, irb);
+
+	std::tie(op1, op2) = loadOpBinaryOrTernaryOp1Op2(mi, irb, eOpConv::SEXT_TRUNC);
+	auto* ne = irb.CreateICmpEQ(op1, op2);
+	storeOp(mi->operands[0], ne, irb, eOpConv::ZEXT_TRUNC);
 }
 
 } // namespace capstone2llvmir

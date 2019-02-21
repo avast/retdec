@@ -63,13 +63,15 @@ std::unique_ptr<Image> createImageImpl(const std::shared_ptr<retdec::fileformat:
  * Loaded image becomes owner of the provided @c FileFormat.
  *
  * @param filePath Path to input file.
- * @param config Config used to determine if the input is a raw binary file format.
+ * @param isRaw Is the input a raw binary file format?
  *
  * @return Pointer to instance of Image class or @c nullptr if any error
  */
-std::unique_ptr<Image> createImage(const std::string& filePath, retdec::config::Config *config)
+std::unique_ptr<Image> createImage(const std::string& filePath, bool isRaw)
 {
-	std::unique_ptr<retdec::fileformat::FileFormat> fileFormat = retdec::fileformat::createFileFormat(filePath, config);
+	std::unique_ptr<retdec::fileformat::FileFormat> fileFormat = retdec::fileformat::createFileFormat(
+			filePath,
+			isRaw);
 	std::shared_ptr<retdec::fileformat::FileFormat> fileFormatShared(std::move(fileFormat)); // Obtain ownership.
 	return createImageImpl(fileFormatShared);
 }

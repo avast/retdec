@@ -71,11 +71,11 @@ private:
 	using MapCFGNodeToDFSNodeState = std::unordered_map<ShPtr<CFGNode>, DFSNodeState>;
 	using MapLoopToCFGNode = std::unordered_map<llvm::Loop *, ShPtr<CFGNode>>;
 	using MapStmtToTargetNode = std::unordered_map<ShPtr<Statement>, ShPtr<CFGNode>>;
-	using MapTargetToGoto = std::unordered_map<ShPtr<CFGNode>, std::vector<ShPtr<Statement>>>;
+	using MapTargetToGoto = std::unordered_map<ShPtr<CFGNode>, std::vector<ShPtr<GotoStmt>>>;
 	using MapStmtToClones = std::unordered_map<ShPtr<Statement>, std::vector<ShPtr<Statement>>>;
 
 public:
-	StructureConverter(llvm::Pass *basePass, ShPtr<LLVMValueConverter> conv);
+	StructureConverter(llvm::Pass *basePass, ShPtr<LLVMValueConverter> conv, ShPtr<Module> module);
 	~StructureConverter();
 
 	ShPtr<Statement> convertFuncBody(llvm::Function &func);
@@ -242,7 +242,7 @@ private:
 	unsigned getStatementCount(ShPtr<Statement> statement);
 	void insertClonedLoopTargets( ShPtr<Statement> origParent,
 		ShPtr<Statement> newParent);
-	ShPtr<Statement> deepCloneStatements(ShPtr<Statement> orig);
+	void fixClonedGotos(ShPtr<Statement> statement);
 	/// @}
 
 	/// @name Helper methods
@@ -282,6 +282,9 @@ private:
 	/// A map of targets for break and continue statements
 	MapStmtToTargetNode loopTargets;
 
+	/// A map of goto target statements to cfg nodes.
+	MapStmtToTargetNode gotoTargetsToCfgNodes;
+
 	/// A map of references for goto targets
 	MapTargetToGoto targetReferences;
 
@@ -308,6 +311,9 @@ private:
 
 	// A set of nodes, which are already generated to the resulting code.
 	CFGNode::CFGNodeSet generatedNodes;
+
+	/// The resulting module in BIR.
+	ShPtr<Module> resModule;
 };
 
 } // namespace llvmir2hll

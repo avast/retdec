@@ -114,7 +114,7 @@ public:
 
 		subpaths.clear();
 		HANDLE hFnd = FindFirstFile(examineDir.c_str(), &ffd);
-		if (hFnd == reinterpret_cast<HANDLE>(-1))
+		if (hFnd == INVALID_HANDLE_VALUE)
 			return false;
 
 		do
@@ -141,16 +141,16 @@ public:
 
 	virtual bool isFile() override
 	{
-		return !isDirectory();
+		DWORD attributes = GetFileAttributes(_path.c_str());
+		return (attributes != INVALID_FILE_ATTRIBUTES) &&
+				 (attributes & FILE_ATTRIBUTE_DIRECTORY) == 0;
 	}
 
 	virtual bool isDirectory() override
 	{
-		WIN32_FIND_DATA ffd;
-		if (FindFirstFile(_path.c_str(), &ffd) == reinterpret_cast<HANDLE>(-1))
-			return false;
-
-		return ffd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY;
+		DWORD attributes = GetFileAttributes(_path.c_str());
+		return (attributes != INVALID_FILE_ATTRIBUTES) &&
+				 (attributes & FILE_ATTRIBUTE_DIRECTORY);
 	}
 
 	virtual bool isAbsolute() override
@@ -231,7 +231,11 @@ public:
 
 	virtual bool isFile() override
 	{
-		return !isDirectory();
+		struct stat st;
+		if (stat(_path.c_str(), &st) != 0)
+			return false;
+
+		return S_ISREG(st.st_mode);
 	}
 
 	virtual bool isDirectory() override

@@ -332,6 +332,9 @@ void PeDetector::getDotnetInfo()
 	fileInfo.setDotnetTypeLibId(peParser->getTypeLibId());
 	fileInfo.setDotnetDefinedClassList(peParser->getDefinedDotnetClasses());
 	fileInfo.setDotnetImportedClassList(peParser->getImportedDotnetClasses());
+	fileInfo.setDotnetTypeRefhashCrc32(peParser->getTypeRefhashCrc32());
+	fileInfo.setDotnetTypeRefhashMd5(peParser->getTypeRefhashMd5());
+	fileInfo.setDotnetTypeRefhashSha256(peParser->getTypeRefhashSha256());
 }
 
 void PeDetector::detectFileClass()

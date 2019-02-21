@@ -89,7 +89,7 @@ llvm::TerminatorInst *CFGNode::getTerm() const {
 
 /**
 * @brief Returns a condition of this node if this is conditional branch.
-*        Otherwise, returns nullptr.
+*        Otherwise, returns @c nullptr.
 */
 llvm::Value *CFGNode::getCond() const {
 	if (auto branchInst = llvm::dyn_cast<llvm::BranchInst>(getTerm())) {
@@ -127,7 +127,7 @@ void CFGNode::setBody(ShPtr<Statement> body) {
 /**
 * @brief Appends the given statement @a statement to this node's body.
 *
-* Appended statement @a statement could be also nullptr.
+* Appended statement @a statement could be also @c nullptr.
 */
 void CFGNode::appendToBody(ShPtr<Statement> statement) {
 	body = Statement::mergeStatements(body, statement);
@@ -271,7 +271,7 @@ ShPtr<CFGNode> CFGNode::getSucc(std::size_t i) const {
 
 /**
 * @brief Returns a successor of this node on the index @a i. If this node does
-*        not have a successor on the index @a i, it returns nullptr.
+*        not have a successor on the index @a i, it returns @c nullptr.
 */
 ShPtr<CFGNode> CFGNode::getSuccOrNull(std::size_t i) const {
 	if (i >= getSuccNum()) {

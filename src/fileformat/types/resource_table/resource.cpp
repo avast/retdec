@@ -227,7 +227,7 @@ bool Resource::getBits(std::string &sResult) const
  */
 bool Resource::getBytes(std::vector<unsigned char> &sResult, std::size_t sOffset, std::size_t sSize) const
 {
-	if(sOffset >= bytes.size())
+	if(!loaded || sOffset >= bytes.size())
 	{
 		return false;
 	}
@@ -352,6 +352,33 @@ void Resource::setSublanguageId(std::size_t rId)
 {
 	sublanguageId = rId;
 	sublanguageIdIsValid = true;
+}
+
+/**
+ * A method which indicates whether resource is loaded.
+ * @return `true` if it is, otherwise `false`.
+ */
+bool Resource::isLoaded() const
+{
+	return loaded;
+}
+
+/**
+ * A method which indicates whether name is valid.
+ * @return `true` if it is, otherwise `false`.
+ */
+bool Resource::hasValidName() const
+{
+	return !name.empty();
+}
+
+/**
+ * A method which indicates whether ID is valid.
+ * @return `true` if it is, otherwise `false`.
+ */
+bool Resource::hasValidId() const
+{
+	return nameIdIsValid;
 }
 
 /**

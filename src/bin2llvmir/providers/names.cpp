@@ -74,6 +74,8 @@ Name::Name(Config* c, const std::string& name, eType type, Lti* lti) :
 		fixPic32Mangling();
 	}
 
+	fixPostfix();
+
 	_inLti = lti->getLtiFunction(_name) != nullptr;
 }
 
@@ -182,6 +184,24 @@ void Name::fixPic32Mangling()
 	}
 }
 
+/**
+ * Remove name's postfix.
+ * TODO: This was done in fileformat, but was removed from there.
+ * Maybe we should do it only for some types of names (e.g. symbols).
+ * Probably we should not take care only of GLIBC, there might be more std
+ * postfixes (e.g. GLIBCXX), or any other postfixes (e.g. NSS).
+ * Maybe we should keep the postfix somewhere and let the user know this fix
+ * happened (e.g. add comment to name).
+ */
+void Name::fixPostfix()
+{
+	const auto pos = _name.find("@@GLIBC_");
+	if(pos && pos != std::string::npos)
+	{
+		_name.erase(pos);
+	}
+}
+
 //
 //==============================================================================
 // Names
@@ -242,18 +262,16 @@ bool Names::empty() const
 //
 
 NameContainer::NameContainer(
-		llvm::Module* m,
+		llvm::Module*,
 		Config* c,
 		DebugFormat* d,
 		FileImage* i,
-		demangler::CDemangler* dm,
+		demangler::CDemangler*,
 		Lti* lti)
 		:
-		_module(m),
 		_config(c),
 		_debug(d),
 		_image(i),
-		_demangler(dm),
 		_lti(lti)
 {
 	initFromConfig();

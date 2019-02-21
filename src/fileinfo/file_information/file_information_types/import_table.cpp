@@ -91,6 +91,27 @@ std::string ImportTable::getImportName(std::size_t position) const
 	return record ? record->getName() : "";
 }
 
+std::string ImportTable::getImportUsageType(std::size_t position) const
+{
+	const auto *record = table ? table->getImport(position) : nullptr;
+	if (record == nullptr)
+	{
+		return "";
+	}
+	switch (record->getUsageType())
+	{
+		case retdec::fileformat::Import::UsageType::FILE:
+			return "FILE";
+		case retdec::fileformat::Import::UsageType::FUNCTION:
+			return "FUNCTION";
+		case retdec::fileformat::Import::UsageType::OBJECT:
+			return "OBJECT";
+		case retdec::fileformat::Import::UsageType::UNKNOWN:
+		default:
+			return "UNKNOWN";
+	}
+}
+
 /**
  * Get import library name
  * @param position Index of selected import from table (indexed from 0)

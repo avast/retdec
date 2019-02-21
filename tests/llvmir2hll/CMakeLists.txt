@@ -85,6 +85,7 @@ set(RETDEC_TESTS_LLVMIR2HLL_SOURCES
 	optimizer/optimizers/deref_to_array_index_optimizer_tests.cpp
 	optimizer/optimizers/empty_array_to_string_optimizer_tests.cpp
 	optimizer/optimizers/empty_stmt_optimizer_tests.cpp
+	optimizer/optimizers/goto_stmt_optimizer_tests.cpp
 	optimizer/optimizers/if_before_loop_optimizer_tests.cpp
 	optimizer/optimizers/if_structure_optimizer_tests.cpp
 	optimizer/optimizers/if_to_switch_optimizer_tests.cpp
