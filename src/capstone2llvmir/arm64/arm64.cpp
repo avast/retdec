@@ -784,7 +784,7 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateAdd(cs_insn* i, cs_arm64* ai,
 		storeOp(ai->operands[0], val, irb);
 	}
 
-	if (ai->update_flags || i->id == ARM64_INS_CMN)
+	if (ai->update_flags)
 	{
 		llvm::Value* zero = llvm::ConstantInt::get(val->getType(), 0);
 		storeRegister(ARM64_REG_CPSR_C, generateCarryAdd(val, op1, irb), irb);
@@ -795,7 +795,7 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateAdd(cs_insn* i, cs_arm64* ai,
 }
 
 /**
- * ARM64_INS_SUB
+ * ARM64_INS_SUB, ARM64_INS_CMP
  */
 void Capstone2LlvmIrTranslatorArm64_impl::translateSub(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb)
 {
@@ -810,7 +810,7 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateSub(cs_insn* i, cs_arm64* ai,
 		storeOp(ai->operands[0], val, irb);
 	}
 
-	if (ai->update_flags || i->id == ARM64_INS_CMP)
+	if (ai->update_flags)
 	{
 		llvm::Value* zero = llvm::ConstantInt::get(val->getType(), 0);
 		storeRegister(ARM64_REG_CPSR_C, generateValueNegate(irb, generateBorrowSub(op1, op2, irb)), irb);
@@ -1373,6 +1373,57 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateCbnz(cs_insn* i, cs_arm64* ai
 }
 
 /**
+ * ARM64_INS_CCMN, ARM64_INS_CCMP
+ */
+void Capstone2LlvmIrTranslatorArm64_impl::translateCondCompare(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb)
+{
+	EXPECT_IS_TERNARY(i, ai, irb);
+
+	op1 = loadOp(ai->operands[0], irb);
+	op2 = loadOp(ai->operands[1], irb);
+	auto* nzvc = loadOp(ai->operands[2], irb);
+
+	op2 = irb.CreateZExtOrTrunc(op2, op1->getType());
+
+	auto* cond = generateInsnConditionCode(irb, ai);
+	auto irbP = generateIfThenElse(cond, irb);
+	llvm::IRBuilder<>& bodyIf(irbP.first), bodyElse(irbP.second);
+
+	//IF - condition holds
+	llvm::Value* val = nullptr;
+	if (i->id == ARM64_INS_CCMP)
+	{
+		val = bodyIf.CreateSub(op1, op2);
+		llvm::Value* zero = llvm::ConstantInt::get(val->getType(), 0);
+		storeRegister(ARM64_REG_CPSR_C, generateValueNegate(bodyIf, generateBorrowSub(op1, op2, bodyIf)), bodyIf);
+		storeRegister(ARM64_REG_CPSR_V, generateOverflowSub(val, op1, op2, bodyIf), bodyIf);
+		storeRegister(ARM64_REG_CPSR_N, bodyIf.CreateICmpSLT(val, zero), bodyIf);
+		storeRegister(ARM64_REG_CPSR_Z, bodyIf.CreateICmpEQ(val, zero), bodyIf);
+	}
+	else if (i->id == ARM64_INS_CCMN)
+	{
+		val = bodyIf.CreateAdd(op1, op2);
+		llvm::Value* zero = llvm::ConstantInt::get(val->getType(), 0);
+		storeRegister(ARM64_REG_CPSR_C, generateCarryAdd(val, op1, bodyIf), bodyIf);
+		storeRegister(ARM64_REG_CPSR_V, generateOverflowAdd(val, op1, op2, bodyIf), bodyIf);
+		storeRegister(ARM64_REG_CPSR_N, bodyIf.CreateICmpSLT(val, zero), bodyIf);
+		storeRegister(ARM64_REG_CPSR_Z, bodyIf.CreateICmpEQ(val, zero), bodyIf);
+	}
+	else
+	{
+		throw GenericError("Arm64 ccmp, ccmn: Instruction id error");
+	}
+
+	//ELSE - Set the flags from IMM
+	// We only use shifts because the final value to be stored is truncated to i1.
+	storeRegister(ARM64_REG_CPSR_N, bodyElse.CreateLShr(nzvc, llvm::ConstantInt::get(nzvc->getType(), 3)), bodyElse);
+	storeRegister(ARM64_REG_CPSR_Z, bodyElse.CreateLShr(nzvc, llvm::ConstantInt::get(nzvc->getType(), 2)), bodyElse);
+	storeRegister(ARM64_REG_CPSR_C, bodyElse.CreateLShr(nzvc, llvm::ConstantInt::get(nzvc->getType(), 1)), bodyElse);
+	storeRegister(ARM64_REG_CPSR_V, nzvc, bodyElse);
+
+}
+
+/**
  * ARM64_INS_CSEL
  */
 void Capstone2LlvmIrTranslatorArm64_impl::translateCsel(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb)
@@ -1523,7 +1574,8 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateEor(cs_insn* i, cs_arm64* ai,
 }
 
 /**
- * ARM64_INS_
+ * ARM64_INS_SXTB, ARM64_INS_SXTH, ARM64_INS_SXTW
+ * ARM64_INS_UXTB, ARM64_INS_UXTH
 */
 void Capstone2LlvmIrTranslatorArm64_impl::translateExtensions(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb)
 {
