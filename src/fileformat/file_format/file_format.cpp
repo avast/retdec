@@ -1082,7 +1082,7 @@ bool FileFormat::getOverlayEntropy(double &res) const
 {
 	const auto overlaySize = getOverlaySize();
 	const auto declSize = getDeclaredFileLength();
-	const auto bytes = getBytes();
+	const auto &bytes = getBytes();
 	if (overlaySize == 0 || declSize == 0 || bytes.size() < declSize + overlaySize)
 	{
 		return false;
