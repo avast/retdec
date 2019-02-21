@@ -27,44 +27,44 @@ class Context
 public:
 	Context() = default;
 
-	bool hasBuiltInType(
-		const StringView &name, bool isVolatile, bool isConst) const;
-	std::shared_ptr<BuiltInTypeNode> getBuiltInType(
-		const StringView &name, bool isVolatile, bool isConst) const;
-	void addBuiltInType(
-		const std::shared_ptr<BuiltInTypeNode> &type);
-
-	bool hasCharType(
-		const ThreeStateSignness &signness, bool isVolatile, bool isConst) const;
-	std::shared_ptr<CharTypeNode> getCharType(
-		const ThreeStateSignness &signness, bool isVolatile, bool isConst) const;
-	void addCharType(
-		const std::shared_ptr<CharTypeNode> &type);
-
-	bool hasIntegralType(
-		const StringView &name, bool isUnsigned, bool isVolatile, bool isConst) const;
-	std::shared_ptr<IntegralTypeNode> getIntegralType(
-		const StringView &name, bool isUnsigned, bool isVolatile, bool isConst) const;
-	void addIntegralType(
-		const std::shared_ptr<IntegralTypeNode> &type);
-
-	bool hasFloatType(
-		const StringView &name, bool isVolatile, bool isConst) const;
-	std::shared_ptr<FloatTypeNode> getFloatType(
-		const StringView &name, bool isVolatile, bool isConst) const;
-	void addFloatType(
-		const std::shared_ptr<FloatTypeNode> &type);
-
-	bool hasPointerType(
-		std::shared_ptr<Node> pointee, bool isVolatile, bool isConst) const;
-	std::shared_ptr<PointerTypeNode> getPointerType(
-		std::shared_ptr<Node> pointee, bool isVolatile, bool isConst) const;
-	void addPointerType(
-		const std::shared_ptr<PointerTypeNode> &type);
-
-	bool hasReferenceType(std::shared_ptr<Node> pointee) const;
-	std::shared_ptr<ReferenceTypeNode> getReferenceType(std::shared_ptr<Node> pointee) const;
-	void addReferenceType(const std::shared_ptr<ReferenceTypeNode> &type);
+//	bool hasBuiltInType(
+//		const StringView &name, bool isVolatile, bool isConst) const;
+//	std::shared_ptr<BuiltInTypeNode> getBuiltInType(
+//		const StringView &name, bool isVolatile, bool isConst) const;
+//	void addBuiltInType(
+//		const std::shared_ptr<BuiltInTypeNode> &type);
+//
+//	bool hasCharType(
+//		const ThreeStateSignness &signness, bool isVolatile, bool isConst) const;
+//	std::shared_ptr<CharTypeNode> getCharType(
+//		const ThreeStateSignness &signness, bool isVolatile, bool isConst) const;
+//	void addCharType(
+//		const std::shared_ptr<CharTypeNode> &type);
+//
+//	bool hasIntegralType(
+//		const StringView &name, bool isUnsigned, bool isVolatile, bool isConst) const;
+//	std::shared_ptr<IntegralTypeNode> getIntegralType(
+//		const StringView &name, bool isUnsigned, bool isVolatile, bool isConst) const;
+//	void addIntegralType(
+//		const std::shared_ptr<IntegralTypeNode> &type);
+//
+//	bool hasFloatType(
+//		const StringView &name, bool isVolatile, bool isConst) const;
+//	std::shared_ptr<FloatTypeNode> getFloatType(
+//		const StringView &name, bool isVolatile, bool isConst) const;
+//	void addFloatType(
+//		const std::shared_ptr<FloatTypeNode> &type);
+//
+//	bool hasPointerType(
+//		std::shared_ptr<Node> pointee, bool isVolatile, bool isConst) const;
+//	std::shared_ptr<PointerTypeNode> getPointerType(
+//		std::shared_ptr<Node> pointee, bool isVolatile, bool isConst) const;
+//	void addPointerType(
+//		const std::shared_ptr<PointerTypeNode> &type);
+//
+//	bool hasReferenceType(std::shared_ptr<Node> pointee) const;
+//	std::shared_ptr<ReferenceTypeNode> getReferenceType(std::shared_ptr<Node> pointee) const;
+//	void addReferenceType(const std::shared_ptr<ReferenceTypeNode> &type);
 
 //	bool hasNamedType(
 //		const std::string &name, bool isVolatile, bool isConst) const;

@@ -33,48 +33,48 @@ class BorlandAstTests: public Test
 
 		Context context;
 };
-
-TEST_F(BorlandAstTests,	NestedNameTest)
-{
-	auto foo = NameNode::create("foo");
-	auto bar = NameNode::create("bar");
-	auto foo_bar = NestedNameNode::create(
-		std::move(foo),
-		std::move(bar));
-	AST_EQ("foo::bar", foo_bar);
-
-	auto baz = NameNode::create("baz");
-	auto foo_bar_baz = NestedNameNode::create(
-		std::move(foo_bar),
-		std::move(baz));
-	AST_EQ("foo::bar::baz", foo_bar_baz);
-
-	EXPECT_EQ(foo_bar_baz->kind(), Node::Kind::KNestedName);
-}
-
-TEST_F(BorlandAstTests, ParseNameTest)
-{
-	std::string mangled = "@Project1@mojaproc$q";
-	std::string expected = "Project1::mojaproc()";
-
-	BorlandASTParser parser = BorlandASTParser(context, mangled);
-	auto ast = parser.ast();
-	auto ast2 = parser.ast();
-	std::string demangled = ast->str();
-	ast2->str();
-
-	EXPECT_EQ(demangled, expected);
-}
-
-TEST_F(BorlandAstTests, NodeArrayTest)
-{
-	auto i_arr = NodeArray::create();
-	AST_EQ("", i_arr);
-	i_arr->addNode(BuiltInTypeNode::create(context, "int", false, false));
-	AST_EQ("int", i_arr);
-	i_arr->addNode(BuiltInTypeNode::create(context, "bool", false, false));
-	AST_EQ("int, bool", i_arr);
-}
+//
+//TEST_F(BorlandAstTests,	NestedNameTest)
+//{
+//	auto foo = NameNode::create("foo");
+//	auto bar = NameNode::create("bar");
+//	auto foo_bar = NestedNameNode::create(
+//		std::move(foo),
+//		std::move(bar));
+//	AST_EQ("foo::bar", foo_bar);
+//
+//	auto baz = NameNode::create("baz");
+//	auto foo_bar_baz = NestedNameNode::create(
+//		std::move(foo_bar),
+//		std::move(baz));
+//	AST_EQ("foo::bar::baz", foo_bar_baz);
+//
+//	EXPECT_EQ(foo_bar_baz->kind(), Node::Kind::KNestedName);
+//}
+//
+//TEST_F(BorlandAstTests, ParseNameTest)
+//{
+//	std::string mangled = "@Project1@mojaproc$q";
+//	std::string expected = "Project1::mojaproc()";
+//
+//	BorlandASTParser parser = BorlandASTParser(context, mangled);
+//	auto ast = parser.ast();
+//	auto ast2 = parser.ast();
+//	std::string demangled = ast->str();
+//	ast2->str();
+//
+//	EXPECT_EQ(demangled, expected);
+//}
+//
+//TEST_F(BorlandAstTests, NodeArrayTest)
+//{
+//	auto i_arr = NodeArray::create();
+//	AST_EQ("", i_arr);
+//	i_arr->addNode(BuiltInTypeNode::create(context, "int", false, false));
+//	AST_EQ("int", i_arr);
+//	i_arr->addNode(BuiltInTypeNode::create(context, "bool", false, false));
+//	AST_EQ("int, bool", i_arr);
+//}
 
 } // tests
 } // borland

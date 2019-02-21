@@ -13,17 +13,11 @@ namespace retdec {
 namespace demangler {
 namespace borland {
 
-TypeNode::TypeNode(const StringView &typeName, bool isVolatile, bool isConst) :
-	Node(Kind::KTypeNode), _typeName(typeName), _isVolatile(isVolatile), _isConst(isConst) {}
+TypeNode::TypeNode(const StringView &typeName, const Qualifiers &quals) :
+	Node(Kind::KTypeNode), _typeName(typeName), _quals(quals) {}
 
-bool TypeNode::isVolatile() const
-{
-	return _isVolatile;
-}
-
-bool TypeNode::isConst() const
-{
-	return _isConst;
+Qualifiers TypeNode::quals() {
+	return _quals;
 }
 
 StringView TypeNode::typeName() const
@@ -33,12 +27,7 @@ StringView TypeNode::typeName() const
 
 void TypeNode::printLeft(std::ostream &s) const
 {
-	if (_isVolatile) {
-		s << "volatile ";
-	}
-	if (_isConst) {
-		s << "const ";
-	}
+	_quals.printSpaceR(s);
 	s << std::string{_typeName.begin(), _typeName.size()};
 }
 
@@ -46,8 +35,8 @@ void TypeNode::printLeft(std::ostream &s) const
  * @brief Private constructor for built-in type nodes. Use create().
  * @param typeName Representation of type name.
  */
-BuiltInTypeNode::BuiltInTypeNode(const StringView &typeName, bool isVolatile, bool isConst) :
-	TypeNode(typeName, isVolatile, isConst)
+BuiltInTypeNode::BuiltInTypeNode(const StringView &typeName, const Qualifiers &quals) :
+	TypeNode(typeName, quals)
 {
 	_kind = Kind::KBuiltInType;
 }
@@ -60,21 +49,20 @@ BuiltInTypeNode::BuiltInTypeNode(const StringView &typeName, bool isVolatile, bo
 std::shared_ptr<BuiltInTypeNode> BuiltInTypeNode::create(
 	Context &context,
 	const StringView &typeName,
-	bool isVolatile,
-	bool isConst)
+	const Qualifiers &quals)
 {
-	auto type = context.getBuiltInType(typeName, isVolatile, isConst);
-	if (type && type->kind() == Kind::KBuiltInType) {
-		return type;
-	}
+//	auto type = context.getBuiltInType(typeName, isVolatile, isConst);
+//	if (type && type->kind() == Kind::KBuiltInType) {
+//		return type;
+//	}
 
-	auto newType = std::shared_ptr<BuiltInTypeNode>(new BuiltInTypeNode(typeName, isVolatile, isConst));
-	context.addBuiltInType(newType);
+	auto newType = std::shared_ptr<BuiltInTypeNode>(new BuiltInTypeNode(typeName, quals));
+//	context.addBuiltInType(newType);
 	return newType;
 }
 
-CharTypeNode::CharTypeNode(ThreeStateSignness signness, bool isVolatile, bool isConst) :
-	BuiltInTypeNode("char", isVolatile, isConst), _signness(signness)
+CharTypeNode::CharTypeNode(ThreeStateSignness signness, const Qualifiers &quals) :
+	BuiltInTypeNode("char", quals), _signness(signness)
 {
 	_kind = Kind::KCharType;
 }
@@ -82,16 +70,15 @@ CharTypeNode::CharTypeNode(ThreeStateSignness signness, bool isVolatile, bool is
 std::shared_ptr<CharTypeNode> CharTypeNode::create(
 	Context &context,
 	ThreeStateSignness signness,
-	bool isVolatile,
-	bool isConst)
+	const Qualifiers &quals)
 {
-	auto type = context.getCharType(signness, isVolatile, isConst);
-	if (type && type->kind() == Kind::KCharType) {
-		return type;
-	}
+//	auto type = context.getCharType(signness, isVolatile, isConst);
+//	if (type && type->kind() == Kind::KCharType) {
+//		return type;
+//	}
 
-	auto newType = std::shared_ptr<CharTypeNode>(new CharTypeNode(signness, isVolatile, isConst));
-	context.addCharType(newType);
+	auto newType = std::shared_ptr<CharTypeNode>(new CharTypeNode(signness, quals));
+//	context.addCharType(newType);
 	return newType;
 }
 
@@ -102,12 +89,7 @@ ThreeStateSignness CharTypeNode::signness()
 
 void CharTypeNode::printLeft(std::ostream &s) const
 {
-	if (_isVolatile) {
-		s << "volatile ";
-	}
-	if (_isConst) {
-		s << "const ";
-	}
+	_quals.printSpaceR(s);
 	switch (_signness) {
 	case ThreeStateSignness::signed_char: s << "signed char";
 		break;
@@ -118,8 +100,8 @@ void CharTypeNode::printLeft(std::ostream &s) const
 }
 
 IntegralTypeNode::IntegralTypeNode(
-	const StringView &typeName, bool isUnsigned, bool isVolatile, bool isConst) :
-	BuiltInTypeNode(typeName, isVolatile, isConst), _isUnsigned(isUnsigned)
+	const StringView &typeName, bool isUnsigned, const Qualifiers &quals) :
+	BuiltInTypeNode(typeName, quals), _isUnsigned(isUnsigned)
 {
 	_kind = Kind::KIntegralType;
 };
@@ -128,16 +110,15 @@ std::shared_ptr<IntegralTypeNode> IntegralTypeNode::create(
 	Context &context,
 	const StringView &typeName,
 	bool isUnsigned,
-	bool isVolatile,
-	bool isConst)
+	const Qualifiers &quals)
 {
-	auto type = context.getIntegralType(typeName, isUnsigned, isVolatile, isConst);
-	if (type && type->kind() == Kind::KIntegralType) {
-		return type;
-	}
+//	auto type = context.getIntegralType(typeName, isUnsigned, quals);
+//	if (type && type->kind() == Kind::KIntegralType) {
+//		return type;
+//	}
 
-	auto newType = std::shared_ptr<IntegralTypeNode>(new IntegralTypeNode(typeName, isUnsigned, isVolatile, isConst));
-	context.addIntegralType(newType);
+	auto newType = std::shared_ptr<IntegralTypeNode>(new IntegralTypeNode(typeName, isUnsigned, quals));
+//	context.addIntegralType(newType);
 	return newType;
 }
 
@@ -148,20 +129,15 @@ bool IntegralTypeNode::isUnsigned()
 
 void IntegralTypeNode::printLeft(std::ostream &s) const
 {
-	if (_isVolatile) {
-		s << "volatile ";
-	}
-	if (_isConst) {
-		s << "const ";
-	}
+	_quals.printSpaceR(s);
 	if (_isUnsigned) {
 		s << "unsigned ";
 	}
 	s << std::string{_typeName.begin(), _typeName.size()};
 }
 
-FloatTypeNode::FloatTypeNode(const StringView &typeName, bool isVolatile, bool isConst) :
-	BuiltInTypeNode(typeName, isVolatile, isConst)
+FloatTypeNode::FloatTypeNode(const StringView &typeName, const Qualifiers &quals) :
+	BuiltInTypeNode(typeName, quals)
 {
 	_kind = Kind::KFloatType;
 }
@@ -169,21 +145,20 @@ FloatTypeNode::FloatTypeNode(const StringView &typeName, bool isVolatile, bool i
 std::shared_ptr<FloatTypeNode> FloatTypeNode::create(
 	Context &context,
 	const StringView &typeName,
-	bool isVolatile,
-	bool isConst)
+	const Qualifiers &quals)
 {
-	auto type = context.getFloatType(typeName, isVolatile, isConst);
-	if (type && type->kind() == Kind::KFloatType) {
-		return type;
-	}
+//	auto type = context.getFloatType(typeName, isVolatile, isConst);
+//	if (type && type->kind() == Kind::KFloatType) {
+//		return type;
+//	}
 
-	auto newType = std::shared_ptr<FloatTypeNode>(new FloatTypeNode(typeName, isVolatile, isConst));
-	context.addFloatType(newType);
+	auto newType = std::shared_ptr<FloatTypeNode>(new FloatTypeNode(typeName, quals));
+//	context.addFloatType(newType);
 	return newType;
 }
 
-NamedTypeNode::NamedTypeNode(std::shared_ptr<Node> typeName, bool isVolatile, bool isConst) :
-	TypeNode("", isVolatile, isConst), _typeName(typeName)
+NamedTypeNode::NamedTypeNode(std::shared_ptr<Node> typeName, const Qualifiers &quals) :
+	TypeNode("", quals), _typeName(typeName)
 {
 	_kind = Kind::KNamedType;
 }
@@ -191,8 +166,7 @@ NamedTypeNode::NamedTypeNode(std::shared_ptr<Node> typeName, bool isVolatile, bo
 std::shared_ptr<NamedTypeNode> NamedTypeNode::create(
 	retdec::demangler::borland::Context &context,
 	std::shared_ptr<Node> typeName,
-	bool isVolatile,
-	bool isConst)
+	const Qualifiers &quals)
 {
 	// TODO context
 //	auto type = context.getNamedType(typeName, isVolatile, isConst);
@@ -200,7 +174,7 @@ std::shared_ptr<NamedTypeNode> NamedTypeNode::create(
 //		return type;
 //	}
 //
-	auto newType = std::shared_ptr<NamedTypeNode>(new NamedTypeNode(typeName, isVolatile, isConst));
+	auto newType = std::shared_ptr<NamedTypeNode>(new NamedTypeNode(typeName, quals));
 //	context.addNamedType(newType);
 	return newType;
 }
@@ -212,18 +186,12 @@ std::shared_ptr<Node> NamedTypeNode::name()
 
 void NamedTypeNode::printLeft(std::ostream &s) const
 {
-	if (_isVolatile) {
-		s << "volatile ";
-	}
-	if (_isConst) {
-		s << "const ";
-	}
-
+	_quals.printSpaceR(s);
 	s << _typeName->str();
 }
 
-PointerTypeNode::PointerTypeNode(std::shared_ptr<Node> pointee, bool isVolatile, bool isConst) :
-	TypeNode("", isVolatile, isConst), _pointee(std::move(pointee))
+PointerTypeNode::PointerTypeNode(std::shared_ptr<Node> pointee, const Qualifiers &quals) :
+	TypeNode("", quals), _pointee(std::move(pointee))
 {    // TODO clang hovori ze tam ma byt move tak to over
 	_kind = Kind::KPointerType;
 }
@@ -231,16 +199,15 @@ PointerTypeNode::PointerTypeNode(std::shared_ptr<Node> pointee, bool isVolatile,
 std::shared_ptr<PointerTypeNode> PointerTypeNode::create(
 	Context context,
 	std::shared_ptr<Node> pointee,
-	bool isVolatile,
-	bool isConst)
+	const Qualifiers &quals)
 {
-	auto type = context.getPointerType(pointee, isVolatile, isConst);
-	if (type && type->kind() == Kind::KPointerType) {
-		return type;
-	}
+//	auto type = context.getPointerType(pointee, isVolatile, isConst);
+//	if (type && type->kind() == Kind::KPointerType) {
+//		return type;
+//	}
 
-	auto newType = std::shared_ptr<PointerTypeNode>(new PointerTypeNode(pointee, isVolatile, isConst));
-	context.addPointerType(newType);
+	auto newType = std::shared_ptr<PointerTypeNode>(new PointerTypeNode(pointee, quals));
+//	context.addPointerType(newType);
 	return newType;
 }
 
@@ -254,28 +221,18 @@ void PointerTypeNode::printLeft(std::ostream &s) const
 	if (_pointee->hasRight()) {
 		_pointee->printLeft(s);
 		s << " (*";
-		if (_isVolatile) {
-			s << " volatile";
-		}
-		if (_isConst) {
-			s << " const";
-		}
+		_quals.printSpaceL(s);
 		s << ")";
 		_pointee->printRight(s);
 	} else {
 		_pointee->print(s);
 		s << " *";
-		if (_isVolatile) {
-			s << " volatile";
-		}
-		if (_isConst) {
-			s << " const";
-		}
+		_quals.printSpaceL(s);
 	}
 }
 
 ReferenceTypeNode::ReferenceTypeNode(std::shared_ptr<Node> pointee) :
-	TypeNode("", false, false), _pointee(pointee)
+	TypeNode("", {false, false}), _pointee(std::move(pointee))
 {
 	_kind = Kind::KReferenceType;
 }
@@ -284,13 +241,13 @@ std::shared_ptr<ReferenceTypeNode> ReferenceTypeNode::create(
 	retdec::demangler::borland::Context &context,
 	std::shared_ptr<retdec::demangler::borland::Node> pointee)
 {
-	auto type = context.getReferenceType(pointee);
-	if (type && type->kind() == Kind::KReferenceType) {
-		return type;
-	}
+//	auto type = context.getReferenceType(pointee);
+//	if (type && type->kind() == Kind::KReferenceType) {
+//		return type;
+//	}
 
 	auto newType = std::shared_ptr<ReferenceTypeNode>(new ReferenceTypeNode(pointee));
-	context.addReferenceType(newType);
+//	context.addReferenceType(newType);
 	return newType;
 }
 
@@ -312,7 +269,7 @@ void ReferenceTypeNode::printLeft(std::ostream &s) const
 }
 
 RReferenceTypeNode::RReferenceTypeNode(std::shared_ptr<Node> pointee) :
-	TypeNode("", false, false), _pointee(pointee)
+	TypeNode("", {false, false}), _pointee(std::move(pointee))
 {
 	_kind = Kind::KRReferenceType;
 }
@@ -320,7 +277,7 @@ RReferenceTypeNode::RReferenceTypeNode(std::shared_ptr<Node> pointee) :
 std::shared_ptr<RReferenceTypeNode> RReferenceTypeNode::create(
 	Context &context, std::shared_ptr<Node> pointee)
 {
-	return std::shared_ptr<RReferenceTypeNode>(new RReferenceTypeNode(pointee));
+	return std::shared_ptr<RReferenceTypeNode>(new RReferenceTypeNode(std::move(pointee)));
 }
 
 std::shared_ptr<Node> RReferenceTypeNode::pointee()
@@ -343,9 +300,8 @@ void RReferenceTypeNode::printLeft(std::ostream &s) const
 ArrayNode::ArrayNode(
 	std::shared_ptr<retdec::demangler::borland::Node> pointee,
 	unsigned size,
-	bool isVolatile,
-	bool isConst) :
-	TypeNode("", isVolatile, isConst), _pointee(pointee), _size(size)
+	const Qualifiers &quals) :
+	TypeNode("", quals), _pointee(std::move(pointee)), _size(size)
 {
 	_kind = Kind::KArrayNode;
 	_has_right = true;
@@ -355,21 +311,15 @@ std::shared_ptr<ArrayNode> ArrayNode::create(
 	Context &context,
 	std::shared_ptr<retdec::demangler::borland::Node> pointee,
 	unsigned size,
-	bool isVolatile,
-	bool isConst)
+	const Qualifiers &quals)
 {
-	return std::shared_ptr<ArrayNode>(new ArrayNode(pointee, size, isVolatile, isConst));
+	return std::shared_ptr<ArrayNode>(new ArrayNode(pointee, size, quals));
 }
 
 void ArrayNode::printLeft(std::ostream &s) const
 {
 	_pointee->printLeft(s);
-	if (isVolatile()) {
-		s << " volatile";
-	}
-	if (isConst()) {
-		s << " const";
-	}
+	_quals.printSpaceL(s);
 }
 
 void ArrayNode::printRight(std::ostream &s) const

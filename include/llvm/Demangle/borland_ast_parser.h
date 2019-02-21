@@ -36,15 +36,20 @@ public:
 	Status status();
 
 private:
+	unsigned peekNumber() const;
+	bool peekChar(char c) const;
+	bool statusOk() const;
+	bool checkResult(std::shared_ptr<Node> node);
+	bool mustConsumeChar(char c);
+
 	void parse();
 	void parseFunction();
-	std::pair<bool, bool> parseQualifiers();
+	Qualifiers parseQualifiers();
 	FunctionNode::CallConv parseCallConv();
 	std::shared_ptr<NodeArray> parseFuncParams();
 	std::shared_ptr<Node> parseType();
-	std::shared_ptr<Node> parseBuildInType(bool isVolatile, bool isConst);
+	std::shared_ptr<Node> parseBuildInType(const Qualifiers &quals);
 	unsigned parseNumber();
-	unsigned parseNumberNoConsume() const;
 	std::shared_ptr<Node> parseNamedType(unsigned nameLen);
 	std::shared_ptr<Node> parseFuncName();
 	std::shared_ptr<Node> parseName(const char *end);

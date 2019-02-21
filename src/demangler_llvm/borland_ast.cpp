@@ -72,15 +72,13 @@ FunctionNode::FunctionNode(
 	CallConv call_conv,
 	std::shared_ptr<retdec::demangler::borland::Node> params,
 	std::shared_ptr<Node> retType,
-	bool isVolatile,
-	bool isConst) :
+	Qualifiers &quals) :
 	Node(Kind::KFunction, false),
 	_call_conv(call_conv),
-	_name(name),
-	_params(params),
-	_retType(retType),
-	_isVolatile(isVolatile),
-	_isConst(isConst) {}
+	_name(std::move(name)),
+	_params(std::move(params)),
+	_retType(std::move(retType)),
+	_quals(quals) {}
 
 /**
  * @brief Creates shared pointer to function node.
@@ -94,10 +92,13 @@ std::shared_ptr<FunctionNode> FunctionNode::create(
 	CallConv call_conv,
 	std::shared_ptr<Node> params,
 	std::shared_ptr<Node> retType,
-	bool isVolatile,
-	bool isConst)
+	Qualifiers &quals)
 {
-	return std::shared_ptr<FunctionNode>(new FunctionNode(name, call_conv, params, retType, isVolatile, isConst));
+	return std::shared_ptr<FunctionNode>(new FunctionNode(std::move(name),
+														  call_conv,
+														  std::move(params),
+														  std::move(retType),
+														  quals));
 }
 
 /**
@@ -126,12 +127,7 @@ void FunctionNode::printLeft(std::ostream &s) const
 	}
 	s << ")";
 
-	if (_isVolatile) {
-		s << " volatile";
-	}
-	if (_isConst) {
-		s << " const";
-	}
+	_quals.printSpaceL(s);
 }
 
 TemplateNode::TemplateNode(
@@ -266,7 +262,40 @@ void NodeArray::printLeft(std::ostream &s) const
 
 std::shared_ptr<Node> NodeArray::get(unsigned i) const
 {
-	return  _nodes.at(i); // TODO ked je i vacsie ako size
+	return _nodes.at(i); // TODO ked je i vacsie ako size
+}
+
+Qualifiers::Qualifiers(bool isVolatile, bool isConst) :
+	_isVolatile(isVolatile), _isConst(isConst) {}
+
+bool Qualifiers::isVolatile()
+{
+	return _isVolatile;
+}
+
+bool Qualifiers::isConst()
+{
+	return _isConst;
+}
+
+void Qualifiers::printSpaceL(std::ostream &s) const
+{
+	if (_isVolatile) {
+		s << " volatile";
+	}
+	if (_isConst) {
+		s << " const";
+	}
+}
+
+void Qualifiers::printSpaceR(std::ostream &s) const
+{
+	if (_isVolatile) {
+		s << "volatile ";
+	}
+	if (_isConst) {
+		s << "const ";
+	}
 }
 
 }    // borland

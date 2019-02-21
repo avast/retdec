@@ -26,19 +26,17 @@ enum class ThreeStateSignness
 class TypeNode : public Node
 {
 public:
-	bool isVolatile() const;
-	bool isConst() const;
+	Qualifiers quals();
 	StringView typeName() const;
 
 	void printLeft(std::ostream &s) const override;
 
 protected:
-	TypeNode(const StringView &typeName, bool isVolatile, bool isConst);
+	TypeNode(const StringView &typeName, const Qualifiers &quals);
 
 protected:
 	StringView _typeName;
-	bool _isVolatile;
-	bool _isConst;
+	Qualifiers _quals;
 };
 
 /**
@@ -50,11 +48,10 @@ public:
 	static std::shared_ptr<BuiltInTypeNode> create(
 		Context &context,
 		const StringView &typeName,
-		bool isVolatile,
-		bool isConst);
+		const Qualifiers &quals);
 
 protected:
-	BuiltInTypeNode(const StringView &typeName, bool isVolatile, bool isConst);
+	BuiltInTypeNode(const StringView &typeName, const Qualifiers &quals);
 };
 
 class CharTypeNode : public BuiltInTypeNode
@@ -63,15 +60,14 @@ public:
 	static std::shared_ptr<CharTypeNode> create(
 		Context &context,
 		ThreeStateSignness signness,
-		bool isVolatile,
-		bool isConst);
+		const Qualifiers &quals);
 
 	ThreeStateSignness signness();
 
 	void printLeft(std::ostream &s) const override;
 
 private:
-	CharTypeNode(ThreeStateSignness signness, bool isVolatile, bool isConst);
+	CharTypeNode(ThreeStateSignness signness, const Qualifiers &quals);
 
 private:
 	ThreeStateSignness _signness;
@@ -84,15 +80,14 @@ public:
 		Context &context,
 		const StringView &typeName,
 		bool isUnsigned,
-		bool isVolatile,
-		bool isConst);
+		const Qualifiers &quals);
 
 	bool isUnsigned();
 
 	void printLeft(std::ostream &s) const override;
 
 private:
-	IntegralTypeNode(const StringView &typeName, bool isUnsigned, bool isVolatile, bool isConst);
+	IntegralTypeNode(const StringView &typeName, bool isUnsigned, const Qualifiers &quals);
 
 private:
 	bool _isUnsigned;
@@ -104,11 +99,10 @@ public:
 	static std::shared_ptr<FloatTypeNode> create(
 		Context &context,
 		const StringView &typeName,
-		bool isVolatile,
-		bool isConst);
+		const Qualifiers &quals);
 
 private:
-	FloatTypeNode(const StringView &typeName, bool isVolatile, bool isConst);
+	FloatTypeNode(const StringView &typeName, const Qualifiers &quals);
 };
 
 class NamedTypeNode : public TypeNode
@@ -117,16 +111,14 @@ public:
 	static std::shared_ptr<NamedTypeNode> create(
 		Context &context,
 		std::shared_ptr<Node> typeName,
-		bool isVolatile,
-		bool isConst
-	);
+		const Qualifiers &quals);
 
 	std::shared_ptr<Node> name();
 
 	void printLeft(std::ostream &s) const override;
 
 private:
-	NamedTypeNode(std::shared_ptr<Node> typeName, bool isVolatile, bool isConst);
+	NamedTypeNode(std::shared_ptr<Node> typeName, const Qualifiers &quals);
 
 private:
 	std::shared_ptr<Node> _typeName;
@@ -138,15 +130,14 @@ public:
 	static std::shared_ptr<PointerTypeNode> create(
 		Context context,
 		std::shared_ptr<Node> pointee,
-		bool isVolatile,
-		bool isConst);
+		const Qualifiers &quals);
 
 	std::shared_ptr<Node> pointee();
 
 	void printLeft(std::ostream &s) const override;
 
 private:
-	PointerTypeNode(std::shared_ptr<Node> pointee, bool isVolatile, bool isConst);
+	PointerTypeNode(std::shared_ptr<Node> pointee, const Qualifiers &quals);
 
 private:
 	std::shared_ptr<Node> _pointee;
@@ -195,15 +186,14 @@ public:
 		Context &context,
 		std::shared_ptr<retdec::demangler::borland::Node> pointee,
 		unsigned size,
-		bool isVolatile,
-		bool isConst);
+		const Qualifiers &quals);
 
 	void printLeft(std::ostream &s) const override;
 
 	void printRight(std::ostream &s) const override;
 
 private:
-	ArrayNode(std::shared_ptr<retdec::demangler::borland::Node> pointee, unsigned size, bool isVolatile, bool isConst);
+	ArrayNode(std::shared_ptr<retdec::demangler::borland::Node> pointee, unsigned size, const Qualifiers &quals);
 
 private:
 	std::shared_ptr<Node> _pointee;

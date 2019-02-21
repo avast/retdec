@@ -206,8 +206,25 @@ TEST_F(BorlandDemanglerTests, Backrefs)
 		"void foo<std::basic_string<char, std::char_traits<char>, std::allocator<char>>, std::basic_string<char, std::char_traits<char>, std::allocator<char>>>(void)");
 }
 
+TEST_F(BorlandDemanglerTests, Operators)
+{
+	DEM_EQ("@Foo@$badd$q3Foo", "Foo::operator+(Foo)");
+	DEM_EQ("@$badd$q3Bart1", "operator+(Bar, Bar)");
+	DEM_EQ("@%$badd$3Bar%$q3Bart1$3Bar", "Bar operator+<Bar>(Bar, Bar)");
+}
+
+TEST_F(BorlandDemanglerTests, FunctionPointers)
+{
+	DEM_EQ("@foo1$qpqv$i", "foo1(int (*)(void))");
+	DEM_EQ("@foo2$qr$qv$i", "foo2(int (&)(void))");
+	DEM_EQ("@foo3$qh$qv$i", "foo3(int (&&)(void))");
+	DEM_EQ("@foo4$qpqv$pqpi$v", "foo4(void (*(*)(void))(int *))");
+	DEM_EQ("@foo5$qpxpqv$vpxpqv$v", "foo5(void (* const*)(), void (* const*)()) ");
+}
+
 TEST_F(BorlandDemanglerTests, FailTests) {
 //	DEM_FAIL("@%foo2$20std@%basic_string$c10%my_tmp$c%%i%$qv$v", Demangler::Status::invalid_mangled_name);
+//	DEM_EQ("@%foo2$20std@%basic_string$c10%my_tmp$c%%i%$qv$v", "");
 }
 
 // TODO operator tests, named params tests, fail tests, extra long names, backref tests, conversion operators, functions as params

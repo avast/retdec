@@ -19,6 +19,24 @@ namespace borland {
 
 class Context;
 
+class Qualifiers
+{
+public:
+	Qualifiers(bool isVolatile, bool isConst);
+
+	bool isVolatile();
+
+	bool isConst();
+
+	void printSpaceL(std::ostream &s) const;
+
+	void printSpaceR(std::ostream &s) const;
+
+private:
+	bool _isVolatile;
+	bool _isConst;
+};
+
 /**
  * @brief Base class for all nodes in AST.
  */
@@ -87,9 +105,7 @@ public:
 		CallConv call_conv,
 		std::shared_ptr<Node> params,
 		std::shared_ptr<Node> retType,
-		bool isVolatile,
-		bool isConst
-	);
+		Qualifiers &quals);
 
 	void printLeft(std::ostream &s) const override;
 
@@ -99,17 +115,14 @@ private:
 		CallConv call_conv,
 		std::shared_ptr<Node> params,
 		std::shared_ptr<Node> retType,
-		bool isVolatile,
-		bool isConst);
+		Qualifiers &quals);
 
 private:
 	CallConv _call_conv;
 	std::shared_ptr<Node> _name;
 	std::shared_ptr<Node> _params;
 	std::shared_ptr<Node> _retType;
-	bool _isVolatile;
-	bool _isConst;
-
+	Qualifiers _quals;
 };
 
 class TemplateNode : public Node
