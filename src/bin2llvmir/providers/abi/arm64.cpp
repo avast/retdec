@@ -29,6 +29,7 @@ AbiArm64::AbiArm64(llvm::Module* m, Config* c) :
 			ARM64_REG_X4,
 			ARM64_REG_X5};
 
+	_defcc = CallingConvention::ID::CC_ARM64;
 }
 
 AbiArm64::~AbiArm64()
