@@ -1,0 +1,31 @@
+/**
+ * @file src/bin2llvmir/providers/calling_convention/pic32.cpp
+ * @brief Calling conventions of PIC32 architecture.
+ * @copyright (c) 2019 Avast Software, licensed under the MIT license
+ */
+
+#include "retdec/bin2llvmir/providers/calling_convention/pic32.h"
+#include "retdec/capstone2llvmir/mips/mips.h"
+
+namespace retdec {
+namespace bin2llvmir {
+
+Pic32CallingConvention::Pic32CallingConvention(const Abi* a) :
+	CallingConvention(a)
+{
+	_paramRegs = {
+		MIPS_REG_A0,
+		MIPS_REG_A1,
+		MIPS_REG_A2,
+		MIPS_REG_A3
+	};
+
+	_returnRegs = {
+		MIPS_REG_V0
+	};
+
+	_regNumPerParam = 2;
+}
+
+}
+}

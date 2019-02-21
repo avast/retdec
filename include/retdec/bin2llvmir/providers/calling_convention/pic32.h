@@ -1,0 +1,33 @@
+/**
+ * @file retdec/include/bin2llvmir/providers/calling_convention/pic32.h
+ * @brief Calling conventions of PIC32 architecture.
+ * @copyright (c) 2017 Avast Software, licensed under the MIT license
+ */
+
+#ifndef RETDEC_BIN2LLVMIR_PROVIDERS_CALL_CONV_PIC32_H
+#define RETDEC_BIN2LLVMIR_PROVIDERS_CALL_CONV_PIC32_H
+
+#include "retdec/bin2llvmir/providers/calling_convention/calling_convention.h"
+
+namespace retdec {
+namespace bin2llvmir {
+
+class Pic32CallingConvention: public CallingConvention
+{
+	// Ctors, dtors.
+	//
+	public:
+		Pic32CallingConvention(const Abi* a);
+		virtual ~Pic32CallingConvention();
+
+	// Construcor method.
+	//
+	public:
+		static CallingConvention::Ptr create(const Abi* a);
+
+};
+
+}
+}
+
+#endif
