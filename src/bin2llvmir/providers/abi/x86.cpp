@@ -29,6 +29,7 @@ AbiX86::AbiX86(llvm::Module* m, Config* c) :
 			X86_REG_EDI,
 			X86_REG_EBP};
 
+	_defcc = fetchDefaultCC();
 }
 
 AbiX86::~AbiX86()
@@ -88,6 +89,57 @@ bool AbiX86::isNopInstruction(cs_insn* insn)
 			&& insn86.operands[0].reg == insn86.operands[1].reg)
 	{
 		return true;
+	}
+
+	return false;
+}
+
+CallingConvention::ID AbiX86::fetchDefaultCC() const
+{
+	if (_config->getConfig().tools.isWatcom())
+	{
+		return CallingConvention::ID::CC_WATCOM;
+	}
+	if (_config->getConfig().tools.isBorland())
+	{
+		return CallingConvention::ID::CC_PASCAL;
+	}
+
+	return CallingConvention::ID::CC_CDECL;
+}
+
+bool AbiX86::supportsCallingConvention(CallingConvention::ID& cc) const
+{
+	if (_config->getConfig().tools.isBorland())
+	{
+		switch (cc)
+		{
+			case CallingConvention::ID::CC_CDECL:
+			case CallingConvention::ID::CC_PASCAL:
+				cc = CallingConvention::ID::CC_PASCAL;
+				return true;
+
+			case CallingConvention::ID::CC_FASTCALL:
+			case CallingConvention::ID::CC_FASTCALL_PASCAL:
+				cc = CallingConvention::ID::CC_FASTCALL;
+				return true;
+
+			default:
+				return false;
+		}
+	}
+
+	switch (cc)
+	{
+		case CallingConvention::ID::CC_CDECL:
+		case CallingConvention::ID::CC_ELLIPSIS:
+		case CallingConvention::ID::CC_FASTCALL:
+		case CallingConvention::ID::CC_THISCALL:
+		case CallingConvention::ID::CC_STDCALL:
+			return true;
+
+		default:
+			return false;
 	}
 
 	return false;

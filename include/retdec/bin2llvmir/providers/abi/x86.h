@@ -29,6 +29,13 @@ class AbiX86 : public Abi
 	//
 	public:
 		virtual bool isNopInstruction(cs_insn* insn) override;
+
+
+	// Calling conventions.
+	//
+	private:
+		virtual bool supportsCallingConvention(CallingConvention::ID& cc) const override;
+		CallingConvention::ID fetchDefaultCC() const;
 };
 
 } // namespace bin2llvmir
