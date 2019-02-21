@@ -83,6 +83,7 @@ set(BIN2LLVMIR_SOURCES
 	providers/calling_convention/arm64.h
 	providers/calling_convention/mips.h
 	providers/calling_convention/mips64.h
+	providers/calling_convention/x64.h
 	providers/calling_convention/x86.h
 	providers/asm_instruction.cpp
 	providers/config.cpp
