@@ -294,50 +294,6 @@ void CallEntry::extractSpecificArgTypes(Module* m,
 			trueCall->getCalledFunction());
 }
 
-/**
- * Stack with the lowest (highest negative) offset is the first call argument.
- *
- * Registers are sorted according to position got from abi.
- */
-void DataFlowEntry::sortValues(std::vector<Value*> &args) const
-{
-	auto regs = _abi->parameterRegisters();
-	auto fpRegs = _abi->parameterFPRegisters();
-	regs.insert(regs.end(), fpRegs.begin(), fpRegs.end());
-
-	std::stable_sort(
-			args.begin(),
-			args.end(),
-			[this, regs, args](Value* a, Value* b) -> bool
-	{
-		auto aOff = _config->getStackVariableOffset(a);
-		auto bOff = _config->getStackVariableOffset(b);
-
-		if (aOff.isUndefined() && bOff.isUndefined())
-		{
-			auto aId = _abi->getRegisterId(a);
-			auto bId = _abi->getRegisterId(b);
-
-			auto it1 = std::find(regs.begin(), regs.end(), aId);
-			auto it2 = std::find(regs.begin(), regs.end(), bId);
-
-			return std::distance(it1, it2) > 0;
-		}
-		else if (aOff.isUndefined() && bOff.isDefined())
-		{
-			return true;
-		}
-		else if (aOff.isDefined() && bOff.isUndefined())
-		{
-			return false;
-		}
-		else
-		{
-			return aOff < bOff;
-		}
-	});
-}
-
 std::string CallEntry::extractFormatString(ReachingDefinitionsAnalysis& _RDA) const
 {
 	std::string str;

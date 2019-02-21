@@ -161,7 +161,6 @@ class DataFlowEntry
 
 		void filterSortArgLoads();
 		void filterNegativeStacks();
-		void sortValues(std::vector<llvm::Value*> &args) const;
 
 		void filterKnownParamPairs();
 
