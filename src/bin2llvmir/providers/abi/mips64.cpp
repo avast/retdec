@@ -31,6 +31,8 @@ AbiMips64::AbiMips64(llvm::Module* m, Config* c) :
 			MIPS_REG_T1,
 			MIPS_REG_T2,
 			MIPS_REG_T3};
+
+	_defcc = CallingConvention::ID::CC_MIPS64;
 }
 
 AbiMips64::~AbiMips64()
