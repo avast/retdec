@@ -29,6 +29,7 @@ AbiArm::AbiArm(llvm::Module* m, Config* c) :
 			ARM_REG_R4,
 			ARM_REG_R5};
 
+	_defcc = CallingConvention::ID::CC_ARM;
 }
 
 AbiArm::~AbiArm()
