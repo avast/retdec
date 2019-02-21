@@ -14,8 +14,6 @@ namespace bin2llvmir {
 AbiMS_X64::AbiMS_X64(llvm::Module* m, Config* c) :
 		Abi(m, c)
 {
-	_paramRegsOverlay = true;
-	_fpRegsAsParams = true;
 	_regs.reserve(X86_REG_ENDING);
 	_id2regs.resize(X86_REG_ENDING, nullptr);
 	_regStackPointerId = X86_REG_RSP;
@@ -31,21 +29,6 @@ AbiMS_X64::AbiMS_X64(llvm::Module* m, Config* c) :
 		X86_REG_R8,
 		X86_REG_R9};
 
-	_paramRegs = {
-		X86_REG_RCX,
-		X86_REG_RDX,
-		X86_REG_R8,
-		X86_REG_R9};
-
-	_paramFPRegs = {
-		X86_REG_XMM0,
-		X86_REG_XMM1,
-		X86_REG_XMM2,
-		X86_REG_XMM3};
-
-	_regReturn = X86_REG_RAX;
-
-	_regFPReturn = X86_REG_ST0;
 }
 
 AbiMS_X64::~AbiMS_X64()
