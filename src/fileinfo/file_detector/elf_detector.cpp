@@ -1104,10 +1104,10 @@ void ElfDetector::getSections()
 		const auto *auxSec = elfParser->getSection(sec->get_index());
 		if(auxSec)
 		{
-			double entropy;
 			fs.setCrc32(auxSec->getCrc32());
 			fs.setMd5(auxSec->getMd5());
 			fs.setSha256(auxSec->getSha256());
+			double entropy;
 			if(auxSec->getEntropy(entropy))
 			{
 				fs.setEntropy(entropy);

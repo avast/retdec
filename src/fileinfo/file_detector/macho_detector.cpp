@@ -105,7 +105,6 @@ void MachODetector::getSections()
 	for(auto sec : fileParser->getSections())
 	{
 		/// @todo add section type, flags, reserved1/reserved2
-		double entropy;
 		fsec.setName(sec->getName());
 		fsec.setIndex(sec->getIndex());
 		fsec.setOffset(sec->getOffset());
@@ -119,6 +118,7 @@ void MachODetector::getSections()
 		fsec.setMemoryAlignment(pow(2, mSec->getAlignment()));
 		fsec.setRelocationsOffset(mSec->getRelocationOffset());
 		fsec.setNumberOfRelocations(mSec->getNumberOfRelocations());
+		double entropy;
 		if(sec->getEntropy(entropy))
 		{
 			fsec.setEntropy(entropy);
