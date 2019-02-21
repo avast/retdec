@@ -427,7 +427,36 @@ bool Decoder::instructionBreaksBasicBlock(
 		_irb->SetInsertPoint(ui);
 		return true;
 	}
-	// TODO: terminating syscalls.
+	// x86 terminating syscall pattern:
+	//    mov eax, 1
+	//    int 0x80
+	//
+	// TODO: other terminating syscalls.
+	else if (_config->getConfig().architecture.isX86()
+			&& tr.capstoneInsn->id == X86_INS_INT
+			&& tr.capstoneInsn->detail->x86.op_count == 1
+			&& tr.capstoneInsn->detail->x86.operands[0].type == X86_OP_IMM
+			&& tr.capstoneInsn->detail->x86.operands[0].imm == 0x80)
+	{
+		AsmInstruction ai(tr.llvmInsn);
+		auto prev = ai.getPrev();
+		if (prev.isValid())
+		{
+			auto& detail = prev.getCapstoneInsn()->detail->x86;
+			if (prev.getCapstoneInsn()->id == X86_INS_MOV
+					&& detail.op_count == 2
+					&& detail.operands[0].type == X86_OP_REG
+					&& detail.operands[0].reg == X86_REG_EAX
+					&& detail.operands[1].type == X86_OP_IMM
+					&& detail.operands[1].imm == 1)
+			{
+				auto* ui = new UnreachableInst(_module->getContext());
+				ReplaceInstWithInst(&*_irb->GetInsertPoint(), ui);
+				_irb->SetInsertPoint(ui);
+				return true;
+			}
+		}
+	}
 
 	return false;
 }
