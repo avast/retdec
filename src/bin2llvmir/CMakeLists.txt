@@ -81,6 +81,7 @@ set(BIN2LLVMIR_SOURCES
 	providers/calling_convention/calling_conventnion.cpp
 	providers/calling_convention/arm.h
 	providers/calling_convention/arm64.h
+	providers/calling_convention/mips.h
 	providers/asm_instruction.cpp
 	providers/config.cpp
 	providers/debugformat.cpp
