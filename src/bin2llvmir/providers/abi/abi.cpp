@@ -185,6 +185,11 @@ llvm::PointerType* Abi::getDefaultPointerType() const
 	return Abi::getDefaultPointerType(_module);
 }
 
+std::size_t Abi::getWordSize() const
+{
+	return getWordSize(_module);
+}
+
 std::size_t Abi::getTypeByteSize(llvm::Module* m, llvm::Type* t)
 {
 	assert(m);
@@ -214,6 +219,11 @@ llvm::PointerType* Abi::getDefaultPointerType(llvm::Module* m)
 {
 	assert(m);
 	return PointerType::get(Abi::getDefaultType(m), 0);
+}
+
+std::size_t Abi::getWordSize(llvm::Module* m)
+{
+	return m->getDataLayout().getPointerSize(0);
 }
 
 bool Abi::isMips() const
