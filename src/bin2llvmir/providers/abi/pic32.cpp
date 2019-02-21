@@ -28,29 +28,6 @@ AbiPic32::AbiPic32(llvm::Module* m, Config* c) :
 			MIPS_REG_A2,
 			MIPS_REG_A3};
 
-	_regReturn = MIPS_REG_V0;
-	_regFPReturn = MIPS_REG_V0;
-
-	if (_config->getConfig().tools.isPspGcc())
-	{
-		_paramRegs = {
-			MIPS_REG_A0,
-			MIPS_REG_A1,
-			MIPS_REG_A2,
-			MIPS_REG_A3,
-			MIPS_REG_T0,
-			MIPS_REG_T1,
-			MIPS_REG_T2,
-			MIPS_REG_T3};
-	}
-	else
-	{
-		_paramRegs = {
-			MIPS_REG_A0,
-			MIPS_REG_A1,
-			MIPS_REG_A2,
-			MIPS_REG_A3};
-	}
 }
 
 AbiPic32::~AbiPic32()
