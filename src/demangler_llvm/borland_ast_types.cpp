@@ -16,7 +16,8 @@ namespace borland {
 TypeNode::TypeNode(const StringView &typeName, const Qualifiers &quals) :
 	Node(Kind::KTypeNode), _typeName(typeName), _quals(quals) {}
 
-Qualifiers TypeNode::quals() {
+Qualifiers TypeNode::quals()
+{
 	return _quals;
 }
 
@@ -192,8 +193,9 @@ void NamedTypeNode::printLeft(std::ostream &s) const
 
 PointerTypeNode::PointerTypeNode(std::shared_ptr<Node> pointee, const Qualifiers &quals) :
 	TypeNode("", quals), _pointee(std::move(pointee))
-{    // TODO clang hovori ze tam ma byt move tak to over
+{
 	_kind = Kind::KPointerType;
+	_has_right = _pointee->hasRight();
 }
 
 std::shared_ptr<PointerTypeNode> PointerTypeNode::create(
@@ -220,10 +222,8 @@ void PointerTypeNode::printLeft(std::ostream &s) const
 {
 	if (_pointee->hasRight()) {
 		_pointee->printLeft(s);
-		s << " (*";
+		s << "(*";
 		_quals.printSpaceL(s);
-		s << ")";
-		_pointee->printRight(s);
 	} else {
 		_pointee->print(s);
 		s << " *";
@@ -231,10 +231,16 @@ void PointerTypeNode::printLeft(std::ostream &s) const
 	}
 }
 
+void PointerTypeNode::printRight(std::ostream &s) const {
+	s << ")";
+	_pointee->printRight(s);
+}
+
 ReferenceTypeNode::ReferenceTypeNode(std::shared_ptr<Node> pointee) :
 	TypeNode("", {false, false}), _pointee(std::move(pointee))
 {
 	_kind = Kind::KReferenceType;
+	_has_right = _pointee->hasRight();
 }
 
 std::shared_ptr<ReferenceTypeNode> ReferenceTypeNode::create(
@@ -260,18 +266,32 @@ void ReferenceTypeNode::printLeft(std::ostream &s) const
 {
 	if (_pointee->hasRight()) {
 		_pointee->printLeft(s);
-		s << " (&)";
-		_pointee->printRight(s);
+		s << "(&";
 	} else {
 		_pointee->print(s);
 		s << " &";
+		_quals.printSpaceL(s);
 	}
+//	if (_pointee->hasRight()) {
+//		_pointee->printLeft(s);
+//		s << " (&)";
+//		_pointee->printRight(s);
+//	} else {
+//		_pointee->print(s);
+//		s << " &";
+//	}
+}
+
+void ReferenceTypeNode::printRight(std::ostream &s) const {
+	s << ")";
+	_pointee->printRight(s);
 }
 
 RReferenceTypeNode::RReferenceTypeNode(std::shared_ptr<Node> pointee) :
 	TypeNode("", {false, false}), _pointee(std::move(pointee))
 {
 	_kind = Kind::KRReferenceType;
+	_has_right = _pointee->hasRight();
 }
 
 std::shared_ptr<RReferenceTypeNode> RReferenceTypeNode::create(
@@ -289,12 +309,25 @@ void RReferenceTypeNode::printLeft(std::ostream &s) const
 {
 	if (_pointee->hasRight()) {
 		_pointee->printLeft(s);
-		s << " (&&)";
-		_pointee->printRight(s);
+		s << "(&&";
 	} else {
 		_pointee->print(s);
 		s << " &&";
+		_quals.printSpaceL(s);
 	}
+//	if (_pointee->hasRight()) {
+//		_pointee->printLeft(s);
+//		s << " (&&)";
+//		_pointee->printRight(s);
+//	} else {
+//		_pointee->print(s);
+//		s << " &&";
+//	}
+}
+
+void RReferenceTypeNode::printRight(std::ostream &s) const {
+	s << ")";
+	_pointee->printRight(s);
 }
 
 ArrayNode::ArrayNode(
@@ -326,6 +359,62 @@ void ArrayNode::printRight(std::ostream &s) const
 {
 	s << "[" << _size << "]";
 	_pointee->printRight(s);
+}
+
+FunctionTypeNode::FunctionTypeNode(
+	retdec::demangler::borland::CallConv callConv,
+	std::shared_ptr<retdec::demangler::borland::Node> params,
+	std::shared_ptr<retdec::demangler::borland::Node> retType,
+	retdec::demangler::borland::Qualifiers &quals) :
+	TypeNode("", quals), _callConv(callConv), _params(params), _retType(retType)
+{
+	_kind = Kind::KFunctionType;
+	_has_right = true;
+}
+
+std::shared_ptr<FunctionTypeNode> FunctionTypeNode::create(
+	retdec::demangler::borland::Context &context,
+	retdec::demangler::borland::CallConv callConv,
+	std::shared_ptr<retdec::demangler::borland::Node> params,
+	std::shared_ptr<retdec::demangler::borland::Node> retType,
+	retdec::demangler::borland::Qualifiers &quals)
+{
+	return std::shared_ptr<FunctionTypeNode>(new FunctionTypeNode(callConv, params, retType, quals));
+}
+
+void FunctionTypeNode::printLeft(std::ostream &s) const
+{
+	if (_retType) {
+		if (_retType->hasRight()){
+			_retType->printLeft(s);
+		} else {
+			_retType->print(s);
+			s << " ";
+		}
+	}
+
+	switch (_callConv) {
+	case CallConv::fastcall: s << "__fastcall ";
+		break;
+	case CallConv::stdcall: s << "__stdcall ";
+		break;
+	default: break;
+	}
+}
+
+void FunctionTypeNode::printRight(std::ostream &s) const
+{
+	s << "(";
+	if (_params) {
+		_params->print(s);
+	}
+	s << ")";
+
+	if (_retType && _retType->hasRight()) {
+		_retType->printRight(s);
+	}
+
+	_quals.printSpaceL(s);
 }
 
 }    // borland

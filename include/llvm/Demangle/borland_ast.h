@@ -18,6 +18,7 @@ namespace demangler {
 namespace borland {
 
 class Context;
+class FunctionTypeNode;
 
 class Qualifiers
 {
@@ -37,6 +38,15 @@ private:
 	bool _isConst;
 };
 
+enum class CallConv
+{
+	fastcall,
+	cdecl,
+	pascal,
+	stdcall,
+	unknown,
+};
+
 /**
  * @brief Base class for all nodes in AST.
  */
@@ -46,6 +56,7 @@ public:
 	enum class Kind
 	{
 		KFunction,
+		KFunctionType,
 		KName,
 		KNestedName,
 		KNodeArray,
@@ -90,39 +101,20 @@ protected:
 class FunctionNode : public Node
 {
 public:
-	enum class CallConv
-	{
-		fastcall,
-		cdecl,
-		pascal,
-		stdcall,
-		unknown,
-	};
-
-public:
 	static std::shared_ptr<FunctionNode> create(
 		std::shared_ptr<Node> name,
-		CallConv call_conv,
-		std::shared_ptr<Node> params,
-		std::shared_ptr<Node> retType,
-		Qualifiers &quals);
+		std::shared_ptr<FunctionTypeNode> funcType);
 
 	void printLeft(std::ostream &s) const override;
 
 private:
 	FunctionNode(
 		std::shared_ptr<Node> name,
-		CallConv call_conv,
-		std::shared_ptr<Node> params,
-		std::shared_ptr<Node> retType,
-		Qualifiers &quals);
+		std::shared_ptr<FunctionTypeNode> funcType);
 
 private:
-	CallConv _call_conv;
 	std::shared_ptr<Node> _name;
-	std::shared_ptr<Node> _params;
-	std::shared_ptr<Node> _retType;
-	Qualifiers _quals;
+	std::shared_ptr<FunctionTypeNode> _funcNode;
 };
 
 class TemplateNode : public Node

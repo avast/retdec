@@ -8,6 +8,7 @@
 #include <map>
 
 #include "llvm/Demangle/borland_ast.h"
+#include "llvm/Demangle/borland_ast_types.h"
 
 namespace retdec {
 namespace demangler {
@@ -69,16 +70,10 @@ bool Node::hasRight()
  */
 FunctionNode::FunctionNode(
 	std::shared_ptr<retdec::demangler::borland::Node> name,
-	CallConv call_conv,
-	std::shared_ptr<retdec::demangler::borland::Node> params,
-	std::shared_ptr<Node> retType,
-	Qualifiers &quals) :
+	std::shared_ptr<FunctionTypeNode> funcType) :
 	Node(Kind::KFunction, false),
-	_call_conv(call_conv),
 	_name(std::move(name)),
-	_params(std::move(params)),
-	_retType(std::move(retType)),
-	_quals(quals) {}
+	_funcNode(funcType) {}
 
 /**
  * @brief Creates shared pointer to function node.
@@ -89,16 +84,9 @@ FunctionNode::FunctionNode(
  */
 std::shared_ptr<FunctionNode> FunctionNode::create(
 	std::shared_ptr<retdec::demangler::borland::Node> name,
-	CallConv call_conv,
-	std::shared_ptr<Node> params,
-	std::shared_ptr<Node> retType,
-	Qualifiers &quals)
+	std::shared_ptr<FunctionTypeNode> funcType)
 {
-	return std::shared_ptr<FunctionNode>(new FunctionNode(std::move(name),
-														  call_conv,
-														  std::move(params),
-														  std::move(retType),
-														  quals));
+	return std::shared_ptr<FunctionNode>(new FunctionNode(name, funcType));
 }
 
 /**
@@ -107,27 +95,30 @@ std::shared_ptr<FunctionNode> FunctionNode::create(
  */
 void FunctionNode::printLeft(std::ostream &s) const
 {
-	if (_retType) {
-		_retType->print(s);
-		s << " ";
-	}
-
-	switch (_call_conv) {
-	case CallConv::fastcall: s << "__fastcall ";
-		break;
-	case CallConv::stdcall: s << "__stdcall ";
-		break;
-	default: break;
-	}
-
+	_funcNode->printLeft(s);
 	_name->print(s);
-	s << "(";
-	if (_params) {
-		_params->print(s);
-	}
-	s << ")";
-
-	_quals.printSpaceL(s);
+	_funcNode->printRight(s);
+//	if (_retType) {
+//		_retType->print(s);
+//		s << " ";
+//	}
+//
+//	switch (_call_conv) {
+//	case CallConv::fastcall: s << "__fastcall ";
+//		break;
+//	case CallConv::stdcall: s << "__stdcall ";
+//		break;
+//	default: break;
+//	}
+//
+//	_name->print(s);
+//	s << "(";
+//	if (_params) {
+//		_params->print(s);
+//	}
+//	s << ")";
+//
+//	_quals.printSpaceL(s);
 }
 
 TemplateNode::TemplateNode(

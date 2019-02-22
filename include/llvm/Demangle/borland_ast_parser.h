@@ -14,6 +14,8 @@ namespace retdec {
 namespace demangler {
 namespace borland {
 
+class FunctionTypeNode;
+
 /**
  * @brief Parser from name mangled by borland mangling scheme into AST.
  */
@@ -36,16 +38,21 @@ public:
 	Status status();
 
 private:
+	char peek() const;
 	unsigned peekNumber() const;
 	bool peekChar(char c) const;
 	bool statusOk() const;
 	bool checkResult(std::shared_ptr<Node> node);
-	bool mustConsumeChar(char c);
+	bool consumeIfPossible(char c);
+	bool consumeIfPossible(const StringView &s);
+	bool consume(char c);
+	bool consume(const StringView &s);
 
 	void parse();
 	void parseFunction();
+	std::shared_ptr<FunctionTypeNode> parseFuncType(Qualifiers &quals);
 	Qualifiers parseQualifiers();
-	FunctionNode::CallConv parseCallConv();
+	CallConv parseCallConv();
 	std::shared_ptr<NodeArray> parseFuncParams();
 	std::shared_ptr<Node> parseType();
 	std::shared_ptr<Node> parseBuildInType(const Qualifiers &quals);
@@ -55,7 +62,10 @@ private:
 	std::shared_ptr<Node> parseName(const char *end);
 	std::shared_ptr<Node> parseTemplate(std::shared_ptr<Node> templateNamespace);
 	std::shared_ptr<Node> parseTemplate(std::shared_ptr<Node> templateNamespace, const char *end);
-	std::shared_ptr<Node> parseArray();
+	std::shared_ptr<Node> parsePointer(const Qualifiers &quals);
+	std::shared_ptr<Node> parseReference(const Qualifiers &quals);
+	std::shared_ptr<Node> parseRReference(const Qualifiers &quals);
+	std::shared_ptr<Node> parseArray(const Qualifiers &quals);
 
 private:
 	Status _status;

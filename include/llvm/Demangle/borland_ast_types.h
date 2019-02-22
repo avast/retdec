@@ -136,6 +136,8 @@ public:
 
 	void printLeft(std::ostream &s) const override;
 
+	void printRight(std::ostream &s) const override;
+
 private:
 	PointerTypeNode(std::shared_ptr<Node> pointee, const Qualifiers &quals);
 
@@ -154,6 +156,8 @@ public:
 
 	void printLeft(std::ostream &s) const override;
 
+	void printRight(std::ostream &s) const override;
+
 private:
 	explicit ReferenceTypeNode(std::shared_ptr<Node> pointee);
 
@@ -171,6 +175,8 @@ public:
 	std::shared_ptr<Node> pointee();
 
 	void printLeft(std::ostream &s) const override;
+
+	void printRight(std::ostream &s) const override;
 
 private:
 	explicit RReferenceTypeNode(std::shared_ptr<Node> pointee);
@@ -198,6 +204,33 @@ private:
 private:
 	std::shared_ptr<Node> _pointee;
 	unsigned _size;
+};
+
+class FunctionTypeNode: public TypeNode
+{
+public:
+	static std::shared_ptr<FunctionTypeNode> create(
+		Context &context,
+		CallConv callConv,
+		std::shared_ptr<Node> params,
+		std::shared_ptr<Node> retType,
+		Qualifiers &quals);
+
+	void printLeft(std::ostream &s) const override;
+
+	void printRight(std::ostream &s) const override;
+
+private:
+	FunctionTypeNode(
+		CallConv callConv,
+		std::shared_ptr<Node> params,
+		std::shared_ptr<Node> retType,
+		Qualifiers &quals);
+
+private:
+	CallConv _callConv;
+	std::shared_ptr<Node> _params;
+	std::shared_ptr<Node> _retType;
 };
 
 }    // borland
