@@ -300,7 +300,6 @@ void double10ToDouble8(std::vector<unsigned char> &dest,
 
 unsigned short byteSwap16(unsigned short val);
 unsigned int byteSwap32(unsigned int val);
-unsigned long byteSwap64(unsigned long val);
 std::string byteSwap16(const std::string &val);
 std::string byteSwap32(const std::string &val);
 

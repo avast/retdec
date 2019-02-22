@@ -52,7 +52,7 @@ struct VBHeader
 
 	}
 
-	std::size_t headerSize()
+	static std::size_t structureSize()
 	{
 		return
 			sizeof(signature) + sizeof(runtimeBuild) + sizeof(languageDLL) +
@@ -86,7 +86,7 @@ struct VBProjInfo
 
 	}
 
-	std::size_t headerSize()
+	static std::size_t structureSize()
 	{
 		return
 			sizeof(version) + sizeof(objectTableAddr) + sizeof(null)
@@ -124,7 +124,7 @@ struct VBObjectTable
 
 	}
 
-	std::size_t structureSize()
+	static std::size_t structureSize()
 	{
 		return
 			sizeof(null1) + sizeof(execCOMAddr) + sizeof(projecInfo2Addr) + sizeof(reserved) +
@@ -156,7 +156,7 @@ struct VBPublicObjectDescriptor
 
 	}
 
-	std::size_t structureSize()
+	static std::size_t structureSize()
 	{
 		return
 			sizeof(objectInfoAddr) + sizeof(reserved) + sizeof(publicBytesAddr) +
@@ -176,7 +176,7 @@ struct VBExternTableEntry
 
 	}
 
-	std::size_t structureSize()
+	static std::size_t structureSize()
 	{
 		return sizeof(type) + sizeof(importDataAddr);
 	}
@@ -192,7 +192,7 @@ struct VBExternTableEntryData
 
 	}
 
-	std::size_t structureSize()
+	static std::size_t structureSize()
 	{
 		return sizeof(moduleNameAddr) + sizeof(apiNameAddr);
 	}
@@ -215,7 +215,7 @@ struct VBCOMRData
 
 	}
 
-	std::size_t structureSize()
+	static std::size_t structureSize()
 	{
 		return
 			sizeof(regInfoOffset) + sizeof(projNameOffset) + sizeof(helpFileOffset) +
@@ -249,7 +249,7 @@ struct VBCOMRInfo
 
 	}
 
-	std::size_t structureSize()
+	static std::size_t structureSize()
 	{
 		return
 			sizeof(ifInfoOffset) + sizeof(objNameOffset) + sizeof(objDescOffset) +

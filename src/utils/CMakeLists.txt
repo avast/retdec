@@ -4,6 +4,7 @@ set(RETDEC_UTILS_SOURCES
 	byte_value_storage.cpp
 	binary_path.cpp
 	conversion.cpp
+	dynamic_buffer.cpp
 	file_io.cpp
 	filesystem_path.cpp
 	math.cpp

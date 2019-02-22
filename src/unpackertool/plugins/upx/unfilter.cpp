@@ -8,7 +8,7 @@
 
 #include "unpackertool/plugins/upx/unfilter.h"
 
-using namespace retdec::unpacker;
+using namespace retdec::utils;
 
 namespace retdec {
 namespace unpackertool {

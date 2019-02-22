@@ -781,10 +781,6 @@ bool FileInformation::hasRichHeaderRecords() const
 	return richHeader.hasRecords();
 }
 
-
-
-
-
 /**
  * Check whether visual basic informations are used.
  * @return @c true if it is used, otherwise @c false/

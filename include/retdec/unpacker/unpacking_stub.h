@@ -13,7 +13,7 @@ namespace retdec {
 
 // Forward declarations
 namespace loader { class Image; }
-namespace unpacker { class DynamicBuffer; }
+namespace utils { class DynamicBuffer; }
 
 namespace unpacker {
 

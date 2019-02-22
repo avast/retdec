@@ -7,11 +7,15 @@
 #ifndef UNPACKERTOOL_PLUGINS_MPRESS_MPRESS_H
 #define UNPACKERTOOL_PLUGINS_MPRESS_MPRESS_H
 
+#include <pelib/PeLib.h>
+
 #include "retdec/loader/loader.h"
-#include "retdec/unpacker/dynamic_buffer.h"
+#include "retdec/utils/dynamic_buffer.h"
 #include "retdec/unpacker/plugin.h"
 
 #define mpress_plugin plugin(retdec::unpackertool::mpress::MpressPlugin)
+
+using namespace retdec::utils;
 
 namespace retdec {
 namespace unpackertool {
@@ -72,17 +76,17 @@ public:
 	virtual void cleanup() override;
 
 private:
-	bool decompressData(unpacker::DynamicBuffer& compressedContent, unpacker::DynamicBuffer& decompressedContent);
-	void decodeLzmaProperties(unpacker::DynamicBuffer& compressedContent, std::uint8_t& pb, std::uint8_t& lp, std::uint8_t& lc);
+	bool decompressData(DynamicBuffer& compressedContent, DynamicBuffer& decompressedContent);
+	void decodeLzmaProperties(DynamicBuffer& compressedContent, std::uint8_t& pb, std::uint8_t& lp, std::uint8_t& lc);
 	std::uint32_t getFixStub();
-	void fixJumpsAndCalls(unpacker::DynamicBuffer& buffer);
-	void fixImportsAndEp(unpacker::DynamicBuffer& buffer);
-	void offsetAnalysis(const unpacker::DynamicBuffer& buffer);
-	void trailingBytesAnalysis(const unpacker::DynamicBuffer& buffer);
+	void fixJumpsAndCalls(DynamicBuffer& buffer);
+	void fixImportsAndEp(DynamicBuffer& buffer);
+	void offsetAnalysis(const DynamicBuffer& buffer);
+	void trailingBytesAnalysis(const DynamicBuffer& buffer);
 	void fixRelocations();
 	MpressUnpackerStub detectUnpackerStubVersion();
-	MpressFixStub detectFixStubVersion(unpacker::DynamicBuffer& unpackedContent);
-	void saveFile(const std::string& fileName, unpacker::DynamicBuffer& content);
+	MpressFixStub detectFixStubVersion(DynamicBuffer& unpackedContent);
+	void saveFile(const std::string& fileName, DynamicBuffer& content);
 	void copySectionFromOriginalFile(std::uint32_t origSectIndex, const std::string& newFileName, std::uint32_t newSectIndex);
 
 	std::unique_ptr<retdec::loader::Image> _file;

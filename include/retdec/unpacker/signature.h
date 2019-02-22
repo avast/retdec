@@ -12,7 +12,9 @@
 #include <vector>
 
 #include "retdec/loader/loader.h"
-#include "retdec/unpacker/dynamic_buffer.h"
+#include "retdec/utils/dynamic_buffer.h"
+
+using namespace retdec::utils;
 
 namespace retdec {
 namespace unpacker {

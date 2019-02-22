@@ -185,25 +185,6 @@ unsigned int byteSwap32(unsigned int val) {
 }
 
 /**
-* @brief Swap bytes for Intel x86 64-bit little-endian immediate.
-*
-* @param val Original value.
-*
-* @return Value with swapped bytes
-*/
-unsigned long byteSwap64(unsigned long val) {
-	return (0xFF00000000000000 & val) >> 56 |
-		(0xFF000000000000 & val) >> 40 |
-		(0xFF0000000000 & val) >> 24 |
-		(0xFF00000000 & val) >> 8 |
-		(0xFF000000 & val) << 8 |
-		(0xFF0000 & val) << 24 |
-		(0xFF00 & val) << 40 |
-		(0xFF & val) << 56;
-}
-
-
-/**
 * @brief Swap bytes for Intel x86 16-bit little-endian immediate.
 *
 * @param val Original value.

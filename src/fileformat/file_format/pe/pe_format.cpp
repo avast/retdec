@@ -663,7 +663,7 @@ void PeFormat::loadVisualBasicHeader()
 		return;
 	}
 
-	if (!getBytes(bytes, vbHeaderOffset, vbh.headerSize()) || bytes.size() != vbh.headerSize())
+	if (!getBytes(bytes, vbHeaderOffset, vbh.structureSize()) || bytes.size() != vbh.structureSize())
 	{
 		return;
 	}
@@ -946,7 +946,7 @@ bool PeFormat::parseVisualBasicProjectInfo(std::size_t structureOffset)
 	std::size_t offset = 0;
 	struct VBProjInfo vbpi;
 
-	if (!getBytes(bytes, structureOffset, vbpi.headerSize()) || bytes.size() != vbpi.headerSize())
+	if (!getBytes(bytes, structureOffset, vbpi.structureSize()) || bytes.size() != vbpi.structureSize())
 	{
 		return false;
 	}

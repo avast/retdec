@@ -4,12 +4,12 @@
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */
 
-#include "retdec/unpacker/dynamic_buffer.h"
+#include "retdec/utils/dynamic_buffer.h"
 
 using namespace retdec::utils;
 
 namespace retdec {
-namespace unpacker {
+namespace utils {
 
 /**
  * Creates the empty DynamicBuffer object with no capacity and specified endianness.

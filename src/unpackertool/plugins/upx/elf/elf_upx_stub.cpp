@@ -18,8 +18,9 @@
 #include "unpackertool/plugins/upx/upx.h"
 #include "unpackertool/plugins/upx/upx_exceptions.h"
 #include "unpackertool/plugins/upx/upx_stub_signatures.h"
-#include "retdec/unpacker/dynamic_buffer.h"
+#include "retdec/utils/dynamic_buffer.h"
 
+using namespace retdec::utils;
 using namespace retdec::unpacker;
 
 namespace retdec {
@@ -256,7 +257,7 @@ template <int bits> void ElfUpxStub<bits>::setupPackingMethod(std::uint8_t packi
  * @param packedData The packed data.
  * @param unpackedData Buffer where to unpack the data.
  */
-template <int bits> void ElfUpxStub<bits>::decompress(retdec::unpacker::DynamicBuffer& packedData, retdec::unpacker::DynamicBuffer& unpackedData)
+template <int bits> void ElfUpxStub<bits>::decompress(DynamicBuffer& packedData, DynamicBuffer& unpackedData)
 {
 	_decompressor->decompress(this, packedData, unpackedData);
 }
@@ -370,7 +371,7 @@ template <int bits> void ElfUpxStub<bits>::unpackBlock(DynamicBuffer& unpackedDa
 }
 
 /**
- * Unpacks the packed block that is stored in the @ref retdec::unpacker::DynamicBuffer.
+ * Unpacks the packed block that is stored in the @ref retdec::utils::DynamicBuffer.
  *
  * @tparam bits Number of bits of the architecture.
  *
