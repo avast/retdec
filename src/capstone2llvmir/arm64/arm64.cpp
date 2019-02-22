@@ -1237,7 +1237,7 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateAdr(cs_insn* i, cs_arm64* ai,
 }
 
 /**
- * ARM64_INS_AND, ARM64_INS_TST
+ * ARM64_INS_AND, ARM64_INS_BIC, ARM64_INS_TST
  */
 void Capstone2LlvmIrTranslatorArm64_impl::translateAnd(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb)
 {
@@ -1246,6 +1246,10 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateAnd(cs_insn* i, cs_arm64* ai,
 	std::tie(op1, op2) = loadOpBinaryOrTernaryOp1Op2(ai, irb);
 	op2 = irb.CreateZExtOrTrunc(op2, op1->getType());
 
+	if (i->id == ARM64_INS_BIC)
+	{
+		op2 = generateValueNegate(irb, op2);
+	}
 	auto* val = irb.CreateAnd(op1, op2);
 
 	if (i->id != ARM64_INS_TST)
