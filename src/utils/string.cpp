@@ -49,7 +49,7 @@ bool isNonasciiChar(unsigned char c) {
 */
 std::string replaceChars(const std::string &str, bool (* predicate)(unsigned char)) {
 	std::stringstream result;
-	const std::size_t maxC = (2 << (sizeof(std::string::value_type) * CHAR_BIT)) - 1;
+	const std::size_t maxC = (2 << (sizeof(std::string::value_type) * CHAR_BIT - 1)) - 1;
 	for (const auto &c : str) {
 		if (predicate(c)) {
 			const auto val = numToStr<std::size_t>(c & maxC, std::hex);
@@ -436,7 +436,7 @@ std::string unicodeToAscii(const std::uint8_t *bytes, std::size_t nBytes)
 		}
 		else
 		{
-			const std::size_t maxC = (2 << (sizeof(std::string::value_type) * CHAR_BIT)) - 1;
+			const std::size_t maxC = (2 << (sizeof(std::string::value_type) * CHAR_BIT - 1)) - 1;
 			const auto val1 = numToStr<std::size_t>(bytes[i] & maxC, std::hex);	
 			const auto val2 = numToStr<std::size_t>(bytes[i + 1] & maxC, std::hex);	
 			result << "\\x" << std::setw(2) << std::setfill('0') << val1;
