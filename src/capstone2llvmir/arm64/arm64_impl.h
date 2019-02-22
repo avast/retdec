@@ -175,6 +175,7 @@ class Capstone2LlvmIrTranslatorArm64_impl :
 		void translateCondOp(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb);
 		void translateCondSelOp(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb);
 		void translateCondCompare(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb);
+		void translateClz(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb);
 		void translateShifts(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb);
 		void translateSub(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb);
 		void translateNeg(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb);
@@ -204,6 +205,7 @@ class Capstone2LlvmIrTranslatorArm64_impl :
 		void translateNop(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb);
 		void translateTbnz(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb);
 		void translateRet(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb);
+		void translateRev(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb);
 
 };
 

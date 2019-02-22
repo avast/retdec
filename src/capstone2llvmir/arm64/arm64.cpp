@@ -1357,6 +1357,24 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateBl(cs_insn* i, cs_arm64* ai, 
 }
 
 /**
+ * ARM64_INS_CLZ
+ */
+void Capstone2LlvmIrTranslatorArm64_impl::translateClz(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb)
+{
+	EXPECT_IS_BINARY(i, ai, irb);
+
+	op1 = loadOpBinaryOp1(ai, irb);
+
+	auto* f = llvm::Intrinsic::getDeclaration(
+	    _module,
+	    llvm::Intrinsic::ctlz,
+	    op1->getType());
+
+	auto* val = irb.CreateCall(f, {op1, irb.getTrue()});
+	storeOp(ai->operands[0], val, irb);
+}
+
+/**
  * ARM64_INS_CBNZ, ARM64_INS_CBZ
  */
 void Capstone2LlvmIrTranslatorArm64_impl::translateCbnz(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb)
@@ -1967,6 +1985,39 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateRet(cs_insn* i, cs_arm64* ai,
 		op0 = loadRegister(ARM64_REG_LR, irb);
 	}
 	generateReturnFunctionCall(irb, op0);
+}
+
+/**
+ * ARM64_INS_REV, ARM64_INS_RBIT
+ */
+void Capstone2LlvmIrTranslatorArm64_impl::translateRev(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb)
+{
+	EXPECT_IS_BINARY(i, ai, irb);
+
+	op1 = loadOpBinaryOp1(ai, irb);
+
+	llvm::Function* f = nullptr;
+	if (i->id == ARM64_INS_REV)
+	{
+		f = llvm::Intrinsic::getDeclaration(
+				_module,
+				llvm::Intrinsic::bswap,
+				op1->getType());
+	}
+	else if (i->id == ARM64_INS_RBIT)
+	{
+		f = llvm::Intrinsic::getDeclaration(
+				_module,
+				llvm::Intrinsic::bitreverse,
+				op1->getType());
+	}
+	else
+	{
+		throw GenericError("Arm64 REV, RBIT: Unhandled instruction id");
+	}
+
+	auto* val = irb.CreateCall(f, {op1});
+	storeOp(ai->operands[0], val, irb);
 }
 
 } // namespace capstone2llvmir

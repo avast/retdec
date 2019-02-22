@@ -1182,6 +1182,106 @@ TEST_P(Capstone2LlvmIrTranslatorArm64Tests, ARM64_INS_ASR32_r_r_i)
 }
 
 //
+// ARM64_INS_CLZ
+//
+
+TEST_P(Capstone2LlvmIrTranslatorArm64Tests, ARM64_INS_CLZ_r_r)
+{
+	setRegisters({
+		{ARM64_REG_X2, 0x0},
+	});
+
+	emulate("clz x1, x2");
+
+	EXPECT_JUST_REGISTERS_LOADED({ARM64_REG_X2});
+	EXPECT_JUST_REGISTERS_STORED({
+		{ARM64_REG_X1, 0x40},
+	});
+	EXPECT_NO_MEMORY_LOADED_STORED();
+	EXPECT_NO_VALUE_CALLED();
+}
+
+TEST_P(Capstone2LlvmIrTranslatorArm64Tests, ARM64_INS_CLZ_r_r_1)
+{
+	setRegisters({
+		{ARM64_REG_X2, 0x1},
+	});
+
+	emulate("clz x1, x2");
+
+	EXPECT_JUST_REGISTERS_LOADED({ARM64_REG_X2});
+	EXPECT_JUST_REGISTERS_STORED({
+		{ARM64_REG_X1, 0x3f},
+	});
+	EXPECT_NO_MEMORY_LOADED_STORED();
+	EXPECT_NO_VALUE_CALLED();
+}
+
+TEST_P(Capstone2LlvmIrTranslatorArm64Tests, ARM64_INS_CLZ_r_r_2)
+{
+	setRegisters({
+		{ARM64_REG_X2, 0x100000000},
+	});
+
+	emulate("clz x1, x2");
+
+	EXPECT_JUST_REGISTERS_LOADED({ARM64_REG_X2});
+	EXPECT_JUST_REGISTERS_STORED({
+		{ARM64_REG_X1, 0x1f},
+	});
+	EXPECT_NO_MEMORY_LOADED_STORED();
+	EXPECT_NO_VALUE_CALLED();
+}
+
+TEST_P(Capstone2LlvmIrTranslatorArm64Tests, ARM64_INS_CLZ32_r_r)
+{
+	setRegisters({
+		{ARM64_REG_X2, 0x0},
+	});
+
+	emulate("clz w1, w2");
+
+	EXPECT_JUST_REGISTERS_LOADED({ARM64_REG_X2});
+	EXPECT_JUST_REGISTERS_STORED({
+		{ARM64_REG_X1, 0x20},
+	});
+	EXPECT_NO_MEMORY_LOADED_STORED();
+	EXPECT_NO_VALUE_CALLED();
+}
+
+TEST_P(Capstone2LlvmIrTranslatorArm64Tests, ARM64_INS_CLZ32_r_r_1)
+{
+	setRegisters({
+		{ARM64_REG_X2, 0x10000000},
+	});
+
+	emulate("clz w1, w2");
+
+	EXPECT_JUST_REGISTERS_LOADED({ARM64_REG_X2});
+	EXPECT_JUST_REGISTERS_STORED({
+		{ARM64_REG_X1, 0x3},
+	});
+	EXPECT_NO_MEMORY_LOADED_STORED();
+	EXPECT_NO_VALUE_CALLED();
+}
+
+TEST_P(Capstone2LlvmIrTranslatorArm64Tests, ARM64_INS_CLZ32_r_r_2)
+{
+	setRegisters({
+		{ARM64_REG_X2, 0x00000008},
+	});
+
+	emulate("clz w1, w2");
+
+	EXPECT_JUST_REGISTERS_LOADED({ARM64_REG_X2});
+	EXPECT_JUST_REGISTERS_STORED({
+		{ARM64_REG_X1, 0x1c},
+	});
+	EXPECT_NO_MEMORY_LOADED_STORED();
+	EXPECT_NO_VALUE_CALLED();
+}
+
+//
 // ARM64_INS_CMN
 //
 
@@ -5312,7 +5412,6 @@ TEST_P(Capstone2LlvmIrTranslatorArm64Tests, ARM64_INS_TST_zero_r_i)
 	EXPECT_NO_VALUE_CALLED();
 }
 
-
 TEST_P(Capstone2LlvmIrTranslatorArm64Tests, ARM64_INS_TST_zero_r_r)
 {
 	setRegisters({
@@ -5388,6 +5487,80 @@ TEST_P(Capstone2LlvmIrTranslatorArm64Tests, ARM64_INS_TST32_negative_r_r)
 		{ARM64_REG_CPSR_Z, false},
 		{ARM64_REG_CPSR_V, false},
 		{ARM64_REG_CPSR_C, false},
+	});
+	EXPECT_NO_MEMORY_LOADED_STORED();
+	EXPECT_NO_VALUE_CALLED();
+}
+
+/* TODO: LLVM ERROR: Code generator does not support intrinsic function 'llvm.bitreverse.i64'!
+//
+// ARM64_INS_RBIT
+//
+
+TEST_P(Capstone2LlvmIrTranslatorArm64Tests, ARM64_INS_RBIT_r_r)
+{
+	setRegisters({
+		{ARM64_REG_X2, 0x1234567890abcdef},
+	});
+
+	emulate("rbit x1, x2");
+
+	EXPECT_JUST_REGISTERS_LOADED({ARM64_REG_X2});
+	EXPECT_JUST_REGISTERS_STORED({
+		{ARM64_REG_X1, 0xf7b3d5091e6a2c48},
+	});
+	EXPECT_NO_MEMORY_LOADED_STORED();
+	EXPECT_NO_VALUE_CALLED();
+}
+
+TEST_P(Capstone2LlvmIrTranslatorArm64Tests, ARM64_INS_RBIT32_r_r)
+{
+	setRegisters({
+		{ARM64_REG_X2, 0x1234567890abcdef},
+	});
+
+	emulate("rev w1, w2");
+
+	EXPECT_JUST_REGISTERS_LOADED({ARM64_REG_X2});
+	EXPECT_JUST_REGISTERS_STORED({
+		{ARM64_REG_X1, 0x00000000f7b3d509},
+	});
+	EXPECT_NO_MEMORY_LOADED_STORED();
+	EXPECT_NO_VALUE_CALLED();
+}
+*/
+
+//
+// ARM64_INS_REV
+//
+
+TEST_P(Capstone2LlvmIrTranslatorArm64Tests, ARM64_INS_REV_r_r)
+{
+	setRegisters({
+		{ARM64_REG_X2, 0x1234567890abcdef},
+	});
+
+	emulate("rev x1, x2");
+
+	EXPECT_JUST_REGISTERS_LOADED({ARM64_REG_X2});
+	EXPECT_JUST_REGISTERS_STORED({
+		{ARM64_REG_X1, 0xefcdab9078563412},
+	});
+	EXPECT_NO_MEMORY_LOADED_STORED();
+	EXPECT_NO_VALUE_CALLED();
+}
+
+TEST_P(Capstone2LlvmIrTranslatorArm64Tests, ARM64_INS_REV32_r_r)
+{
+	setRegisters({
+		{ARM64_REG_X2, 0x1234567890abcdef},
+	});
+
+	emulate("rev w1, w2");
+
+	EXPECT_JUST_REGISTERS_LOADED({ARM64_REG_X2});
+	EXPECT_JUST_REGISTERS_STORED({
+		{ARM64_REG_X1, 0x00000000efcdab90},
 	});
 	EXPECT_NO_MEMORY_LOADED_STORED();
 	EXPECT_NO_VALUE_CALLED();
