@@ -16,6 +16,10 @@
 * Enhancement: Add a check into our scripts that they are run from an installation directory and not from the `scripts` directory ([#418](https://github.com/avast-tl/retdec/issues/418)).
 * Enhancement: Improved corruption checks in `retdec-fileinfo` to recognize cut PE files which are still loadable ([#463](https://github.com/avast-tl/retdec/issues/463)).
 * Enhancement: Redesign output files naming scheme ([#132](https://github.com/avast-tl/retdec/issues/132)).
+* Fix: Fixed generation of MIPS branch instructions ([#88](https://github.com/avast-tl/retdec/issues/88)).
+* Fix: Fixed generation of empty if blocks in C output ([#83](https://github.com/avast-tl/retdec/issues/83)).
+* Fix: Fixed decompilation of simple x86 system calls ([#24](https://github.com/avast-tl/retdec/issues/24)).
+* Fix: Fixed potential infinite cycling in llvmir2hll's copy propagation pass ([#479](https://github.com/avast-tl/retdec/issues/479)).
 * Fix: Fixed `FilesystemPath::isFile()` ([#490](https://github.com/avast-tl/retdec/issues/490), [#491](https://github.com/avast-tl/retdec/pull/491)).
 * Fix: Fixed `retdec-signature-from-library-creator.py` when there is a lot of input files by adding an option to `retdec-bin2pat` to have the objects list passed through a text file instead of via program arguments ([#472](https://github.com/avast-tl/retdec/issues/472), [#484](https://github.com/avast-tl/retdec/pull/484)).
 * Fix: Stricter rules for PE section names ([#451](https://github.com/avast-tl/retdec/issues/451)).
