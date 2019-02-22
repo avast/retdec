@@ -907,6 +907,14 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateNgc(cs_insn* i, cs_arm64* ai,
 }
 
 /**
+ * ARM64_INS_NOP
+ */
+void Capstone2LlvmIrTranslatorArm64_impl::translateNop(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb)
+{
+	// Don't translate anything.
+}
+
+/**
  * ARM64_INS_MOV, ARM64_INS_MVN, ARM64_INS_MOVZ
  */
 void Capstone2LlvmIrTranslatorArm64_impl::translateMov(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb)

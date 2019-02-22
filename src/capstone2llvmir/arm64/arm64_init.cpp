@@ -666,7 +666,7 @@ Capstone2LlvmIrTranslatorArm64_impl::_i2fm =
 	{ARM64_INS_MNEG, &Capstone2LlvmIrTranslatorArm64_impl::translateMul},
 	{ARM64_INS_UMNEGL, &Capstone2LlvmIrTranslatorArm64_impl::translateMulOpl},
 	{ARM64_INS_SMNEGL, &Capstone2LlvmIrTranslatorArm64_impl::translateMulOpl},
-	{ARM64_INS_NOP, nullptr},
+	{ARM64_INS_NOP, &Capstone2LlvmIrTranslatorArm64_impl::translateNop},
 	{ARM64_INS_YIELD, nullptr},
 	{ARM64_INS_WFE, nullptr},
 	{ARM64_INS_WFI, nullptr},

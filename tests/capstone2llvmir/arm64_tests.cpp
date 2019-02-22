@@ -2405,6 +2405,20 @@ TEST_P(Capstone2LlvmIrTranslatorArm64Tests, ARM64_INS_MVN32_r_r)
 }
 
 //
+// ARM64_INS_NOP
+//
+
+TEST_P(Capstone2LlvmIrTranslatorArm64Tests, ARM64_INS_NOP)
+{
+	emulate("nop");
+
+	EXPECT_NO_REGISTERS_LOADED();
+	EXPECT_NO_REGISTERS_STORED();
+	EXPECT_NO_MEMORY_LOADED_STORED();
+	EXPECT_NO_VALUE_CALLED();
+}
+
+//
 // ARM64_INS_STR
 //
 
