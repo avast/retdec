@@ -1,5 +1,5 @@
 /**
- * @file include/retdec/unpacker/dynamic_buffer.h
+ * @file include/retdec/utils/dynamic_buffer.h
  * @brief Declaration of class for buffered data mainpulation.
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */

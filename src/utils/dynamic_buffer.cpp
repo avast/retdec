@@ -1,5 +1,5 @@
 /**
- * @file src/unpacker/dynamic_buffer.cpp
+ * @file src/utils/dynamic_buffer.cpp
  * @brief Implementation of class for buffered data mainpulation.
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */
