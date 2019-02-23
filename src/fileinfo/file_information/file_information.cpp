@@ -2222,6 +2222,7 @@ std::string FileInformation::getSectionType(std::size_t position) const
 /**
  * Get section entropy
  * @param position Position of section in internal list of sections (0..x)
+ * @param format Format of resulting string (e.g. std::dec, std::hex)
  * @return Entropy of section
  */
 std::string FileInformation::getSectionEntropy(std::size_t position, std::ios_base &(* format)(std::ios_base &)) const

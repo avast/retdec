@@ -377,7 +377,7 @@ bool SecSeg::getMemory() const
 /**
  * Get entropy of section data
  * @param res Variable to store result to
- * @return @c true if entropy is valid, otherwise @false
+ * @return @c true if entropy is valid, otherwise @c false
  */
 bool SecSeg::getEntropy(double &res) const
 {
