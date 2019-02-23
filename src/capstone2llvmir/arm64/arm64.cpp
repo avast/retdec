@@ -934,6 +934,7 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateMov(cs_insn* i, cs_arm64* ai,
  * ARM64_INS_STR, ARM64_INS_STRB, ARM64_INS_STRH
  * ARM64_INS_STUR, ARM64_INS_STURB, ARM64_INS_STURH
  * ARM64_INS_STTR, ARM64_INS_STTRB, ARM64_INS_STTRH
+ * TODO: Prob pseudo! ARM64_INS_STXR, ARM64_INS_STXRB, ARM64_INS_STXRH
  */
 void Capstone2LlvmIrTranslatorArm64_impl::translateStr(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb)
 {
@@ -945,6 +946,7 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateStr(cs_insn* i, cs_arm64* ai,
 		case ARM64_INS_STR:
 		case ARM64_INS_STUR:
 		case ARM64_INS_STTR:
+		//case ARM64_INS_STXR:
 		{
 			ty = getDefaultType();
 			break;
@@ -952,6 +954,7 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateStr(cs_insn* i, cs_arm64* ai,
 		case ARM64_INS_STRB:
 		case ARM64_INS_STURB:
 		case ARM64_INS_STTRB:
+		//case ARM64_INS_STXRB:
 		{
 			ty = irb.getInt8Ty();
 			break;
@@ -959,6 +962,7 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateStr(cs_insn* i, cs_arm64* ai,
 		case ARM64_INS_STRH:
 		case ARM64_INS_STURH:
 		case ARM64_INS_STTRH:
+		//case ARM64_INS_STXRH:
 		{
 			ty = irb.getInt16Ty();
 			break;
@@ -1003,6 +1007,7 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateStr(cs_insn* i, cs_arm64* ai,
 
 /**
  * ARM64_INS_STP, ARM64_INS_STNP
+ * TODO: prob Pseudo! ARM64_INS_STXP
  */
 void Capstone2LlvmIrTranslatorArm64_impl::translateStp(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb)
 {
@@ -1055,6 +1060,7 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateStp(cs_insn* i, cs_arm64* ai,
  * ARM64_INS_LDURB, ARM64_INS_LDUR, ARM64_INS_LDURH, ARM64_INS_LDURSB, ARM64_INS_LDURSH, ARM64_INS_LDURSW
  * ARM64_INS_LDRB, ARM64_INS_LDRH, ARM64_INS_LDRSB, ARM64_INS_LDRSH, ARM64_INS_LDRSW
  * ARM64_INS_LDTR, ARM64_INS_LDTRB, ARM64_INS_LDTRSB, ARM64_INS_LDTRH, ARM64_INS_LDTRSH, ARM64_INS_LDTRSW
+ * ARM64_INS_LDXR, ARM64_INS_LDXRB, ARM64_INS_LDXRH
  */
 void Capstone2LlvmIrTranslatorArm64_impl::translateLdr(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb)
 {
@@ -1067,6 +1073,7 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateLdr(cs_insn* i, cs_arm64* ai,
 		case ARM64_INS_LDR:
 		case ARM64_INS_LDUR:
 		case ARM64_INS_LDTR:
+		case ARM64_INS_LDXR:
 		{
 			ty = irb.getInt32Ty();
 			sext = false;
@@ -1075,6 +1082,7 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateLdr(cs_insn* i, cs_arm64* ai,
 		case ARM64_INS_LDRB:
 		case ARM64_INS_LDURB:
 		case ARM64_INS_LDTRB:
+		case ARM64_INS_LDXRB:
 		{
 			ty = irb.getInt8Ty();
 			sext = false;
@@ -1083,6 +1091,7 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateLdr(cs_insn* i, cs_arm64* ai,
 		case ARM64_INS_LDRH:
 		case ARM64_INS_LDURH:
 		case ARM64_INS_LDTRH:
+		case ARM64_INS_LDXRH:
 		{
 			ty = irb.getInt16Ty();
 			sext = false;
@@ -1155,7 +1164,9 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateLdr(cs_insn* i, cs_arm64* ai,
 }
 
 /**
- * ARM64_INS_LDP, ARM64_INS_LDPSW, ARM64_INS_LDNP
+ * ARM64_INS_LDP, ARM64_INS_LDPSW
+ * ARM64_INS_LDNP (Non-temporal)
+ * ARM64_INS_LDXP (Exclusive)
  */
 void Capstone2LlvmIrTranslatorArm64_impl::translateLdp(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb)
 {
@@ -1169,6 +1180,7 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateLdp(cs_insn* i, cs_arm64* ai,
 	case ARM64_INS_LDNP:
 		// Hints PE that the memory is not going to be used in near future
 	case ARM64_INS_LDP:
+	case ARM64_INS_LDXP:
 		data_size = llvm::ConstantInt::get(getDefaultType(), getRegisterByteSize(ai->operands[0].reg));
 		ty = getRegisterType(ai->operands[0].reg);
 		ct = eOpConv::ZEXT_TRUNC;
@@ -1179,7 +1191,7 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateLdp(cs_insn* i, cs_arm64* ai,
 		ct = eOpConv::SEXT_TRUNC;
 		break;
 	default:
-		throw GenericError("ldp, ldpsw: Instruction id error");
+		throw GenericError("Arm64 Ldp: Instruction id error");
 	}
 
 	auto* dest = loadOp(ai->operands[2], irb, nullptr, true);
