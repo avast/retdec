@@ -47,11 +47,6 @@ struct VBHeader
 	std::uint32_t helpFileOffset;            ///< offset to the string containing name of the Help file
 	std::uint32_t projNameOffset;            ///< offset to the string containing project's name
 
-	VBHeader()
-	{
-
-	}
-
 	static std::size_t structureSize()
 	{
 		return
@@ -80,11 +75,6 @@ struct VBProjInfo
 	std::uint8_t pathInformation[528];            ///< path and id string, <SP6
 	std::uint32_t externalTableAddr;              ///< External table address
 	std::uint32_t nExternals;                     ///< number of external OCX components
-
-	VBProjInfo()
-	{
-
-	}
 
 	static std::size_t structureSize()
 	{
@@ -119,11 +109,6 @@ struct VBObjectTable
 	std::uint32_t IDE4;                           ///< IDE4 internals
 	std::uint32_t templateVesion;                 ///< template version
 
-	VBObjectTable()
-	{
-
-	}
-
 	static std::size_t structureSize()
 	{
 		return
@@ -151,11 +136,6 @@ struct VBPublicObjectDescriptor
 	std::uint32_t objectType;                     ///< object type flags
 	std::uint32_t null;                           ///< null
 
-	VBPublicObjectDescriptor()
-	{
-
-	}
-
 	static std::size_t structureSize()
 	{
 		return
@@ -171,11 +151,6 @@ struct VBExternTableEntry
 	std::uint32_t type;                      ///< import type
 	std::uint32_t importDataAddr;            ///< import data address
 
-	VBExternTableEntry()
-	{
-
-	}
-
 	static std::size_t structureSize()
 	{
 		return sizeof(type) + sizeof(importDataAddr);
@@ -186,11 +161,6 @@ struct VBExternTableEntryData
 {
 	std::uint32_t moduleNameAddr;            ///< mode name address
 	std::uint32_t apiNameAddr;               ///< api name address
-
-	VBExternTableEntryData()
-	{
-
-	}
 
 	static std::size_t structureSize()
 	{
@@ -209,11 +179,6 @@ struct VBCOMRData
 	std::uint16_t unknown;                   ///< unknown
 	std::uint16_t tlbVerMajor;               ///< TypeLib major version
 	std::uint16_t tlbVerMinor;               ///< TypeLib minor version
-	
-	VBCOMRData()
-	{
-
-	}
 
 	static std::size_t structureSize()
 	{
@@ -243,11 +208,6 @@ struct VBCOMRInfo
 	std::uint16_t defaultIcon;               ///< Minimized icon of control window
 	std::uint16_t isDesignerFlag;            ///< Specifies whether Designed Data offset is valid
 	std::uint32_t designerDataOffset;        ///< Offset to Designed Data
-	
-	VBCOMRInfo()
-	{
-
-	}
 
 	static std::size_t structureSize()
 	{

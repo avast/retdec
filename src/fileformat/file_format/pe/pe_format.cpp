@@ -18,6 +18,7 @@
 #include "retdec/utils/conversion.h"
 #include "retdec/utils/scope_exit.h"
 #include "retdec/utils/string.h"
+#include "retdec/utils/dynamic_buffer.h"
 #include "retdec/fileformat/file_format/pe/pe_format.h"
 #include "retdec/fileformat/file_format/pe/pe_format_parser/pe_format_parser32.h"
 #include "retdec/fileformat/file_format/pe/pe_format_parser/pe_format_parser64.h"
@@ -668,54 +669,30 @@ void PeFormat::loadVisualBasicHeader()
 		return;
 	}
 
-	vbh.signature = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbh.signature);
-	vbh.runtimeBuild = *reinterpret_cast<std::uint16_t *>(&bytes.data()[offset]); offset += sizeof(vbh.runtimeBuild);
-	std::memcpy(&vbh.languageDLL, reinterpret_cast<void *>(&bytes.data()[offset]), sizeof(vbh.languageDLL)); offset += sizeof(vbh.languageDLL);
-	std::memcpy(&vbh.backupLanguageDLL, reinterpret_cast<void *>(&bytes.data()[offset]), sizeof(vbh.backupLanguageDLL)); offset += sizeof(vbh.backupLanguageDLL);
-	vbh.runtimeDLLVersion = *reinterpret_cast<std::uint16_t *>(&bytes.data()[offset]); offset += sizeof(vbh.runtimeDLLVersion);
-	vbh.LCID1 = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbh.LCID1);
-	vbh.LCID2 = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbh.LCID2);
-	vbh.subMainAddr = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbh.subMainAddr);
-	vbh.projectInfoAddr = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbh.projectInfoAddr);
-	vbh.MDLIntObjsFlags = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbh.MDLIntObjsFlags);
-	vbh.MDLIntObjsFlags2 = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbh.MDLIntObjsFlags2);
-	vbh.threadFlags = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbh.threadFlags);
-	vbh.nThreads = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbh.nThreads);
-	vbh.nForms = *reinterpret_cast<std::uint16_t *>(&bytes.data()[offset]); offset += sizeof(vbh.nForms);
-	vbh.nExternals = *reinterpret_cast<std::uint16_t *>(&bytes.data()[offset]); offset += sizeof(vbh.nExternals);
-	vbh.nThunks = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbh.nThunks);
-	vbh.GUITableAddr = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbh.GUITableAddr);
-	vbh.externalTableAddr = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbh.externalTableAddr);
-	vbh.COMRegisterDataAddr = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbh.COMRegisterDataAddr);
-	vbh.projExeNameOffset = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbh.projExeNameOffset);
-	vbh.projDescOffset = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbh.projDescOffset);
-	vbh.helpFileOffset = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbh.helpFileOffset);
-	vbh.projNameOffset = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbh.projNameOffset);
-
-	if (!isLittleEndian())
-	{
-		vbh.signature = byteSwap32(vbh.signature);
-		vbh.runtimeBuild = byteSwap16(vbh.runtimeBuild);
-		vbh.runtimeDLLVersion = byteSwap16(vbh.runtimeDLLVersion);
-		vbh.LCID1 = byteSwap32(vbh.LCID1);
-		vbh.LCID2 = byteSwap32(vbh.LCID2);
-		vbh.subMainAddr = byteSwap32(vbh.subMainAddr);
-		vbh.projectInfoAddr = byteSwap32(vbh.projectInfoAddr);
-		vbh.MDLIntObjsFlags = byteSwap32(vbh.MDLIntObjsFlags);
-		vbh.MDLIntObjsFlags2 = byteSwap32(vbh.MDLIntObjsFlags2);
-		vbh.threadFlags = byteSwap32(vbh.threadFlags);
-		vbh.nThreads = byteSwap32(vbh.nThreads);
-		vbh.nForms = byteSwap16(vbh.nForms);
-		vbh.nExternals = byteSwap16(vbh.nExternals);
-		vbh.nThunks = byteSwap32(vbh.nThunks);
-		vbh.GUITableAddr = byteSwap32(vbh.GUITableAddr);
-		vbh.externalTableAddr = byteSwap32(vbh.externalTableAddr);
-		vbh.COMRegisterDataAddr = byteSwap32(vbh.COMRegisterDataAddr);
-		vbh.projExeNameOffset = byteSwap32(vbh.projExeNameOffset);
-		vbh.projDescOffset = byteSwap32(vbh.projDescOffset);
-		vbh.helpFileOffset = byteSwap32(vbh.helpFileOffset);
-		vbh.projNameOffset = byteSwap32(vbh.projNameOffset);
-	}
+	DynamicBuffer structContent(bytes, retdec::utils::Endianness::LITTLE);
+	vbh.signature = structContent.read<std::uint32_t>(offset); offset += sizeof(vbh.signature);
+	vbh.runtimeBuild = structContent.read<std::uint16_t>(offset); offset += sizeof(vbh.runtimeBuild);
+	std::memcpy(&vbh.languageDLL, static_cast<void *>(&bytes.data()[offset]), sizeof(vbh.languageDLL)); offset += sizeof(vbh.languageDLL);
+	std::memcpy(&vbh.backupLanguageDLL, static_cast<void *>(&bytes.data()[offset]), sizeof(vbh.backupLanguageDLL)); offset += sizeof(vbh.backupLanguageDLL);
+	vbh.runtimeDLLVersion = structContent.read<std::uint16_t>(offset); offset += sizeof(vbh.runtimeDLLVersion);
+	vbh.LCID1 = structContent.read<std::uint32_t>(offset); offset += sizeof(vbh.LCID1);
+	vbh.LCID2 = structContent.read<std::uint32_t>(offset); offset += sizeof(vbh.LCID2);
+	vbh.subMainAddr = structContent.read<std::uint32_t>(offset); offset += sizeof(vbh.subMainAddr);
+	vbh.projectInfoAddr = structContent.read<std::uint32_t>(offset); offset += sizeof(vbh.projectInfoAddr);
+	vbh.MDLIntObjsFlags = structContent.read<std::uint32_t>(offset); offset += sizeof(vbh.MDLIntObjsFlags);
+	vbh.MDLIntObjsFlags2 = structContent.read<std::uint32_t>(offset); offset += sizeof(vbh.MDLIntObjsFlags2);
+	vbh.threadFlags = structContent.read<std::uint32_t>(offset); offset += sizeof(vbh.threadFlags);
+	vbh.nThreads = structContent.read<std::uint32_t>(offset); offset += sizeof(vbh.nThreads);
+	vbh.nForms = structContent.read<std::uint16_t>(offset); offset += sizeof(vbh.nForms);
+	vbh.nExternals = structContent.read<std::uint16_t>(offset); offset += sizeof(vbh.nExternals);
+	vbh.nThunks = structContent.read<std::uint32_t>(offset); offset += sizeof(vbh.nThunks);
+	vbh.GUITableAddr = structContent.read<std::uint32_t>(offset); offset += sizeof(vbh.GUITableAddr);
+	vbh.externalTableAddr = structContent.read<std::uint32_t>(offset); offset += sizeof(vbh.externalTableAddr);
+	vbh.COMRegisterDataAddr = structContent.read<std::uint32_t>(offset); offset += sizeof(vbh.COMRegisterDataAddr);
+	vbh.projExeNameOffset = structContent.read<std::uint32_t>(offset); offset += sizeof(vbh.projExeNameOffset);
+	vbh.projDescOffset = structContent.read<std::uint32_t>(offset); offset += sizeof(vbh.projDescOffset);
+	vbh.helpFileOffset = structContent.read<std::uint32_t>(offset); offset += sizeof(vbh.helpFileOffset);
+	vbh.projNameOffset = structContent.read<std::uint32_t>(offset); offset += sizeof(vbh.projNameOffset);
 
 	if (vbh.signature != VBHEADER_SIGNATURE)
 	{
@@ -792,27 +769,16 @@ bool PeFormat::parseVisualBasicComRegistrationData(std::size_t structureOffset)
 		return false;
 	}
 
-	vbcrd.regInfoOffset = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbcrd.regInfoOffset);
-	vbcrd.projNameOffset = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbcrd.projNameOffset);
-	vbcrd.helpFileOffset = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbcrd.helpFileOffset);
-	vbcrd.projDescOffset = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbcrd.projDescOffset);
+	DynamicBuffer structContent(bytes, retdec::utils::Endianness::LITTLE);
+	vbcrd.regInfoOffset = structContent.read<std::uint32_t>(offset); offset += sizeof(vbcrd.regInfoOffset);
+	vbcrd.projNameOffset = structContent.read<std::uint32_t>(offset); offset += sizeof(vbcrd.projNameOffset);
+	vbcrd.helpFileOffset = structContent.read<std::uint32_t>(offset); offset += sizeof(vbcrd.helpFileOffset);
+	vbcrd.projDescOffset = structContent.read<std::uint32_t>(offset); offset += sizeof(vbcrd.projDescOffset);
 	std::memcpy(&vbcrd.projCLSID, reinterpret_cast<void *>(&bytes.data()[offset]), sizeof(vbcrd.projCLSID)); offset += sizeof(vbcrd.projCLSID);
-	vbcrd.projTlbLCID = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbcrd.projTlbLCID);
-	vbcrd.unknown = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbcrd.unknown);
-	vbcrd.tlbVerMajor = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbcrd.tlbVerMajor);
-	vbcrd.tlbVerMinor = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbcrd.tlbVerMinor);
-
-	if (!isLittleEndian())
-	{
-		vbcrd.regInfoOffset = byteSwap32(vbcrd.regInfoOffset);
-		vbcrd.projNameOffset = byteSwap32(vbcrd.projNameOffset);
-		vbcrd.helpFileOffset = byteSwap32(vbcrd.helpFileOffset);
-		vbcrd.projDescOffset = byteSwap32(vbcrd.projDescOffset);
-		vbcrd.projTlbLCID = byteSwap32(vbcrd.projTlbLCID);
-		vbcrd.unknown = byteSwap32(vbcrd.unknown);
-		vbcrd.tlbVerMajor = byteSwap32(vbcrd.tlbVerMajor);
-		vbcrd.tlbVerMinor = byteSwap32(vbcrd.tlbVerMinor);
-	}
+	vbcrd.projTlbLCID = structContent.read<std::uint32_t>(offset); offset += sizeof(vbcrd.projTlbLCID);
+	vbcrd.unknown = structContent.read<std::uint32_t>(offset); offset += sizeof(vbcrd.unknown);
+	vbcrd.tlbVerMajor = structContent.read<std::uint32_t>(offset); offset += sizeof(vbcrd.tlbVerMajor);
+	vbcrd.tlbVerMinor = structContent.read<std::uint32_t>(offset); offset += sizeof(vbcrd.tlbVerMinor);
 
 	visualBasicInfo.setTypeLibLCID(vbcrd.projTlbLCID);
 	visualBasicInfo.setTypeLibMajorVersion(vbcrd.tlbVerMajor);
@@ -865,41 +831,24 @@ bool PeFormat::parseVisualBasicComRegistrationInfo(std::size_t structureOffset,
 		return false;
 	}
 
-	vbcri.ifInfoOffset = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbcri.ifInfoOffset);
-	vbcri.objNameOffset = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbcri.objNameOffset);
-	vbcri.objDescOffset = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbcri.objDescOffset);
-	vbcri.instancing = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbcri.instancing);
-	vbcri.objID = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbcri.objID);
+	DynamicBuffer structContent(bytes, retdec::utils::Endianness::LITTLE);
+	vbcri.ifInfoOffset = structContent.read<std::uint32_t>(offset); offset += sizeof(vbcri.ifInfoOffset);
+	vbcri.objNameOffset = structContent.read<std::uint32_t>(offset); offset += sizeof(vbcri.objNameOffset);
+	vbcri.objDescOffset = structContent.read<std::uint32_t>(offset); offset += sizeof(vbcri.objDescOffset);
+	vbcri.instancing = structContent.read<std::uint32_t>(offset); offset += sizeof(vbcri.instancing);
+	vbcri.objID = structContent.read<std::uint32_t>(offset); offset += sizeof(vbcri.objID);
 	std::memcpy(&vbcri.objCLSID, reinterpret_cast<void *>(&bytes.data()[offset]), sizeof(vbcri.objCLSID)); offset += sizeof(vbcri.objCLSID);
-	vbcri.isInterfaceFlag = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbcri.isInterfaceFlag);
-	vbcri.ifCLSIDOffset = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbcri.ifCLSIDOffset);
-	vbcri.eventCLSIDOffset = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbcri.eventCLSIDOffset);
-	vbcri.hasEvents = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbcri.hasEvents);
-	vbcri.olemicsFlags = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbcri.olemicsFlags);
-	vbcri.classType = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbcri.classType);
-	vbcri.objectType = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbcri.objectType);
-	vbcri.toolboxBitmap32 = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbcri.toolboxBitmap32);
-	vbcri.defaultIcon = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbcri.defaultIcon);
-	vbcri.isDesignerFlag = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbcri.isDesignerFlag);
-	vbcri.designerDataOffset = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbcri.designerDataOffset);
-
-	if (!isLittleEndian())
-	{
-		vbcri.ifInfoOffset = byteSwap32(vbcri.ifInfoOffset);
-		vbcri.objNameOffset = byteSwap32(vbcri.objNameOffset);
-		vbcri.objDescOffset = byteSwap32(vbcri.objDescOffset);
-		vbcri.instancing = byteSwap32(vbcri.instancing);
-		vbcri.objID = byteSwap32(vbcri.objID);
-		vbcri.isInterfaceFlag = byteSwap32(vbcri.isInterfaceFlag);
-		vbcri.ifCLSIDOffset = byteSwap32(vbcri.ifCLSIDOffset);
-		vbcri.eventCLSIDOffset = byteSwap32(vbcri.eventCLSIDOffset);
-		vbcri.hasEvents = byteSwap32(vbcri.hasEvents);
-		vbcri.olemicsFlags = byteSwap32(vbcri.olemicsFlags);
-		vbcri.toolboxBitmap32 = byteSwap16(vbcri.toolboxBitmap32);
-		vbcri.defaultIcon = byteSwap16(vbcri.defaultIcon);
-		vbcri.isDesignerFlag = byteSwap16(vbcri.isDesignerFlag);
-		vbcri.designerDataOffset = byteSwap32(vbcri.designerDataOffset);
-	}
+	vbcri.isInterfaceFlag = structContent.read<std::uint32_t>(offset); offset += sizeof(vbcri.isInterfaceFlag);
+	vbcri.ifCLSIDOffset = structContent.read<std::uint32_t>(offset); offset += sizeof(vbcri.ifCLSIDOffset);
+	vbcri.eventCLSIDOffset = structContent.read<std::uint32_t>(offset); offset += sizeof(vbcri.eventCLSIDOffset);
+	vbcri.hasEvents = structContent.read<std::uint32_t>(offset); offset += sizeof(vbcri.hasEvents);
+	vbcri.olemicsFlags = structContent.read<std::uint32_t>(offset); offset += sizeof(vbcri.olemicsFlags);
+	vbcri.classType = structContent.read<std::uint32_t>(offset); offset += sizeof(vbcri.classType);
+	vbcri.objectType = structContent.read<std::uint32_t>(offset); offset += sizeof(vbcri.objectType);
+	vbcri.toolboxBitmap32 = structContent.read<std::uint32_t>(offset); offset += sizeof(vbcri.toolboxBitmap32);
+	vbcri.defaultIcon = structContent.read<std::uint32_t>(offset); offset += sizeof(vbcri.defaultIcon);
+	vbcri.isDesignerFlag = structContent.read<std::uint32_t>(offset); offset += sizeof(vbcri.isDesignerFlag);
+	vbcri.designerDataOffset = structContent.read<std::uint32_t>(offset); offset += sizeof(vbcri.designerDataOffset);
 
 	if (vbcri.objNameOffset != 0)
 	{
@@ -951,33 +900,19 @@ bool PeFormat::parseVisualBasicProjectInfo(std::size_t structureOffset)
 		return false;
 	}
 
-	vbpi.version = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbpi.version);
-	vbpi.objectTableAddr = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbpi.objectTableAddr);
-	vbpi.null = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbpi.null);
-	vbpi.codeStartAddr = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbpi.codeStartAddr);
-	vbpi.codeEndAddr = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbpi.codeEndAddr);
-	vbpi.dataSize = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbpi.dataSize);
-	vbpi.threadSpaceAddr = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbpi.threadSpaceAddr);
-	vbpi.exHandlerAddr = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbpi.exHandlerAddr);
-	vbpi.nativeCodeAddr = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbpi.nativeCodeAddr);
+	DynamicBuffer structContent(bytes, retdec::utils::Endianness::LITTLE);
+	vbpi.version = structContent.read<std::uint32_t>(offset); offset += sizeof(vbpi.version);
+	vbpi.objectTableAddr = structContent.read<std::uint32_t>(offset); offset += sizeof(vbpi.objectTableAddr);
+	vbpi.null = structContent.read<std::uint32_t>(offset); offset += sizeof(vbpi.null);
+	vbpi.codeStartAddr = structContent.read<std::uint32_t>(offset); offset += sizeof(vbpi.codeStartAddr);
+	vbpi.codeEndAddr = structContent.read<std::uint32_t>(offset); offset += sizeof(vbpi.codeEndAddr);
+	vbpi.dataSize = structContent.read<std::uint32_t>(offset); offset += sizeof(vbpi.dataSize);
+	vbpi.threadSpaceAddr = structContent.read<std::uint32_t>(offset); offset += sizeof(vbpi.threadSpaceAddr);
+	vbpi.exHandlerAddr = structContent.read<std::uint32_t>(offset); offset += sizeof(vbpi.exHandlerAddr);
+	vbpi.nativeCodeAddr = structContent.read<std::uint32_t>(offset); offset += sizeof(vbpi.nativeCodeAddr);
 	std::memcpy(&vbpi.pathInformation, reinterpret_cast<void *>(&bytes.data()[offset]), sizeof(vbpi.pathInformation)); offset += sizeof(vbpi.pathInformation);
-	vbpi.externalTableAddr = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbpi.externalTableAddr);
-	vbpi.nExternals = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbpi.nExternals);
-
-	if (!isLittleEndian())
-	{
-		vbpi.version = byteSwap32(vbpi.version);
-		vbpi.objectTableAddr = byteSwap32(vbpi.objectTableAddr);
-		vbpi.null = byteSwap32(vbpi.null);
-		vbpi.codeStartAddr = byteSwap32(vbpi.codeStartAddr);
-		vbpi.codeEndAddr = byteSwap32(vbpi.codeEndAddr);
-		vbpi.dataSize = byteSwap32(vbpi.dataSize);
-		vbpi.threadSpaceAddr = byteSwap32(vbpi.threadSpaceAddr);
-		vbpi.exHandlerAddr = byteSwap32(vbpi.exHandlerAddr);
-		vbpi.nativeCodeAddr = byteSwap32(vbpi.nativeCodeAddr);
-		vbpi.externalTableAddr = byteSwap32(vbpi.externalTableAddr);
-		vbpi.nExternals = byteSwap32(vbpi.nExternals);
-	}
+	vbpi.externalTableAddr = structContent.read<std::uint32_t>(offset); offset += sizeof(vbpi.externalTableAddr);
+	vbpi.nExternals = structContent.read<std::uint32_t>(offset); offset += sizeof(vbpi.nExternals);
 
 	projPath = retdec::utils::unicodeToAscii(vbpi.pathInformation, sizeof(vbpi.pathInformation));
 	visualBasicInfo.setProjectPath(projPath);
@@ -1023,14 +958,9 @@ bool PeFormat::parseVisualBasicExternTable(std::size_t structureOffset, std::siz
 		}
 
 		offset = 0;
-		entry.type = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(entry.type);
-		entry.importDataAddr = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(entry.importDataAddr);
-
-		if (!isLittleEndian())
-		{
-			entry.type = byteSwap32(entry.type);
-			entry.importDataAddr = byteSwap32(entry.importDataAddr);
-		}
+		DynamicBuffer entryContent(bytes, retdec::utils::Endianness::LITTLE);
+		entry.type = entryContent.read<std::uint32_t>(offset); offset += sizeof(entry.type);
+		entry.importDataAddr = entryContent.read<std::uint32_t>(offset); offset += sizeof(entry.importDataAddr);
 
 		if (entry.type != static_cast<std::uint32_t>(VBExternTableEntryType::external))
 		{
@@ -1049,14 +979,9 @@ bool PeFormat::parseVisualBasicExternTable(std::size_t structureOffset, std::siz
 		}
 
 		offset = 0;
-		entryData.moduleNameAddr = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(entryData.moduleNameAddr);
-		entryData.apiNameAddr = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(entryData.apiNameAddr);
-
-		if (!isLittleEndian())
-		{
-			entryData.moduleNameAddr = byteSwap32(entryData.moduleNameAddr);
-			entryData.apiNameAddr = byteSwap32(entryData.apiNameAddr);
-		}
+		DynamicBuffer entryDataContent(bytes, retdec::utils::Endianness::LITTLE);
+		entryData.moduleNameAddr = entryDataContent.read<std::uint32_t>(offset); offset += sizeof(entryData.moduleNameAddr);
+		entryData.apiNameAddr = entryDataContent.read<std::uint32_t>(offset); offset += sizeof(entryData.apiNameAddr);
 
 		unsigned long long moduleNameOffset;
 		if (getOffsetFromAddress(moduleNameOffset, entryData.moduleNameAddr))
@@ -1106,49 +1031,27 @@ bool PeFormat::parseVisualBasicObjectTable(std::size_t structureOffset)
 		return false;
 	}
 
-	vbot.null1 = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbot.null1);
-	vbot.execCOMAddr = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbot.execCOMAddr);
-	vbot.projecInfo2Addr = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbot.projecInfo2Addr);
-	vbot.reserved = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbot.reserved);
-	vbot.null2 = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbot.null2);
-	vbot.projectObjectAddr = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbot.projectObjectAddr);
+	DynamicBuffer structContent(bytes, retdec::utils::Endianness::LITTLE);
+	vbot.null1 = structContent.read<std::uint32_t>(offset); offset += sizeof(vbot.null1);
+	vbot.execCOMAddr = structContent.read<std::uint32_t>(offset); offset += sizeof(vbot.execCOMAddr);
+	vbot.projecInfo2Addr = structContent.read<std::uint32_t>(offset); offset += sizeof(vbot.projecInfo2Addr);
+	vbot.reserved = structContent.read<std::uint32_t>(offset); offset += sizeof(vbot.reserved);
+	vbot.null2 = structContent.read<std::uint32_t>(offset); offset += sizeof(vbot.null2);
+	vbot.projectObjectAddr = structContent.read<std::uint32_t>(offset); offset += sizeof(vbot.projectObjectAddr);
 	std::memcpy(&vbot.objectGUID, reinterpret_cast<void *>(&bytes.data()[offset]), sizeof(vbot.objectGUID)); offset += sizeof(vbot.objectGUID);
-	vbot.flagsCompileState = *reinterpret_cast<std::uint16_t *>(&bytes.data()[offset]); offset += sizeof(vbot.flagsCompileState);
-	vbot.nObjects = *reinterpret_cast<std::uint16_t *>(&bytes.data()[offset]); offset += sizeof(vbot.nObjects);
-	vbot.nCompiledObjects = *reinterpret_cast<std::uint16_t *>(&bytes.data()[offset]); offset += sizeof(vbot.nCompiledObjects);
-	vbot.nUsedObjects = *reinterpret_cast<std::uint16_t *>(&bytes.data()[offset]); offset += sizeof(vbot.nUsedObjects);
-	vbot.objectDescriptorsAddr = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbot.objectDescriptorsAddr);
-	vbot.IDE1 = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbot.IDE1);
-	vbot.IDE2 = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbot.IDE2);
-	vbot.IDE3 = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbot.IDE3);
-	vbot.projectNameAddr = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbot.projectNameAddr);
-	vbot.LCID1 = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbot.LCID1);
-	vbot.LCID2 = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbot.LCID2);
-	vbot.IDE4 = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbot.IDE4);
-	vbot.templateVesion = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbot.templateVesion);
-
-	if (!isLittleEndian())
-	{
-		vbot.null1 = byteSwap32(vbot.null1);
-		vbot.execCOMAddr = byteSwap32(vbot.execCOMAddr);
-		vbot.projecInfo2Addr = byteSwap32(vbot.projecInfo2Addr);
-		vbot.reserved = byteSwap32(vbot.reserved);
-		vbot.null2 = byteSwap32(vbot.null2);
-		vbot.projectObjectAddr = byteSwap32(vbot.projectObjectAddr);
-		vbot.flagsCompileState = byteSwap16(vbot.flagsCompileState);
-		vbot.nObjects = byteSwap16(vbot.nObjects);
-		vbot.nCompiledObjects = byteSwap16(vbot.nCompiledObjects);
-		vbot.nUsedObjects = byteSwap16(vbot.nUsedObjects);
-		vbot.objectDescriptorsAddr = byteSwap32(vbot.objectDescriptorsAddr);
-		vbot.IDE1 = byteSwap32(vbot.IDE1);
-		vbot.IDE2 = byteSwap32(vbot.IDE2);
-		vbot.IDE3 = byteSwap32(vbot.IDE3);
-		vbot.projectNameAddr = byteSwap32(vbot.projectNameAddr);
-		vbot.LCID1 = byteSwap32(vbot.LCID1);
-		vbot.LCID2 = byteSwap32(vbot.LCID2);
-		vbot.IDE4 = byteSwap32(vbot.IDE4);
-		vbot.templateVesion = byteSwap32(vbot.templateVesion);
-	}
+	vbot.flagsCompileState = structContent.read<std::uint16_t>(offset); offset += sizeof(vbot.flagsCompileState);
+	vbot.nObjects = structContent.read<std::uint16_t>(offset); offset += sizeof(vbot.nObjects);
+	vbot.nCompiledObjects = structContent.read<std::uint16_t>(offset); offset += sizeof(vbot.nCompiledObjects);
+	vbot.nUsedObjects = structContent.read<std::uint16_t>(offset); offset += sizeof(vbot.nUsedObjects);
+	vbot.objectDescriptorsAddr = structContent.read<std::uint32_t>(offset); offset += sizeof(vbot.objectDescriptorsAddr);
+	vbot.IDE1 = structContent.read<std::uint32_t>(offset); offset += sizeof(vbot.IDE1);
+	vbot.IDE2 = structContent.read<std::uint32_t>(offset); offset += sizeof(vbot.IDE2);
+	vbot.IDE3 = structContent.read<std::uint32_t>(offset); offset += sizeof(vbot.IDE3);
+	vbot.projectNameAddr = structContent.read<std::uint32_t>(offset); offset += sizeof(vbot.projectNameAddr);
+	vbot.LCID1 = structContent.read<std::uint32_t>(offset); offset += sizeof(vbot.LCID1);
+	vbot.LCID2 = structContent.read<std::uint32_t>(offset); offset += sizeof(vbot.LCID2);
+	vbot.IDE4 = structContent.read<std::uint32_t>(offset); offset += sizeof(vbot.IDE4);
+	vbot.templateVesion = structContent.read<std::uint32_t>(offset); offset += sizeof(vbot.templateVesion);
 
 	visualBasicInfo.setProjectPrimaryLCID(vbot.LCID1);
 	visualBasicInfo.setProjectSecondaryLCID(vbot.LCID2);
@@ -1193,34 +1096,19 @@ bool PeFormat::parseVisualBasicObjects(std::size_t structureOffset, std::size_t 
 		}
 
 		offset = 0;
-		vbpod.objectInfoAddr = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbpod.objectInfoAddr);
-		vbpod.reserved = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbpod.reserved);
-		vbpod.publicBytesAddr = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbpod.publicBytesAddr);
-		vbpod.staticBytesAddr = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbpod.staticBytesAddr);
-		vbpod.modulePublicAddr = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbpod.modulePublicAddr);
-		vbpod.moduleStaticAddr = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbpod.moduleStaticAddr);
-		vbpod.objectNameAddr = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbpod.objectNameAddr);
-		vbpod.nMethods = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbpod.nMethods);
-		vbpod.methodNamesAddr = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbpod.methodNamesAddr);
-		vbpod.staticVarsCopyAddr = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbpod.staticVarsCopyAddr);
-		vbpod.objectType = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbpod.objectType);
-		vbpod.null = *reinterpret_cast<std::uint32_t *>(&bytes.data()[offset]); offset += sizeof(vbpod.null);
-
-		if (!isLittleEndian())
-		{
-			vbpod.objectInfoAddr = byteSwap32(vbpod.objectInfoAddr);
-			vbpod.reserved = byteSwap32(vbpod.reserved);
-			vbpod.publicBytesAddr = byteSwap32(vbpod.publicBytesAddr);
-			vbpod.staticBytesAddr = byteSwap32(vbpod.staticBytesAddr);
-			vbpod.modulePublicAddr = byteSwap32(vbpod.modulePublicAddr);
-			vbpod.moduleStaticAddr = byteSwap32(vbpod.moduleStaticAddr);
-			vbpod.objectNameAddr = byteSwap32(vbpod.objectNameAddr);
-			vbpod.nMethods = byteSwap32(vbpod.nMethods);
-			vbpod.methodNamesAddr = byteSwap32(vbpod.methodNamesAddr);
-			vbpod.staticVarsCopyAddr = byteSwap32(vbpod.staticVarsCopyAddr);
-			vbpod.objectType = byteSwap32(vbpod.objectType);
-			vbpod.null = byteSwap32(vbpod.null);
-		}
+		DynamicBuffer structContent(bytes, retdec::utils::Endianness::LITTLE);
+		vbpod.objectInfoAddr = structContent.read<std::uint32_t>(offset); offset += sizeof(vbpod.objectInfoAddr);
+		vbpod.reserved = structContent.read<std::uint32_t>(offset); offset += sizeof(vbpod.reserved);
+		vbpod.publicBytesAddr = structContent.read<std::uint32_t>(offset); offset += sizeof(vbpod.publicBytesAddr);
+		vbpod.staticBytesAddr = structContent.read<std::uint32_t>(offset); offset += sizeof(vbpod.staticBytesAddr);
+		vbpod.modulePublicAddr = structContent.read<std::uint32_t>(offset); offset += sizeof(vbpod.modulePublicAddr);
+		vbpod.moduleStaticAddr = structContent.read<std::uint32_t>(offset); offset += sizeof(vbpod.moduleStaticAddr);
+		vbpod.objectNameAddr = structContent.read<std::uint32_t>(offset); offset += sizeof(vbpod.objectNameAddr);
+		vbpod.nMethods = structContent.read<std::uint32_t>(offset); offset += sizeof(vbpod.nMethods);
+		vbpod.methodNamesAddr = structContent.read<std::uint32_t>(offset); offset += sizeof(vbpod.methodNamesAddr);
+		vbpod.staticVarsCopyAddr = structContent.read<std::uint32_t>(offset); offset += sizeof(vbpod.staticVarsCopyAddr);
+		vbpod.objectType = structContent.read<std::uint32_t>(offset); offset += sizeof(vbpod.objectType);
+		vbpod.null = structContent.read<std::uint32_t>(offset); offset += sizeof(vbpod.null);
 
 		unsigned long long objectNameOffset;
 		if (!getOffsetFromAddress(objectNameOffset, vbpod.objectNameAddr))
