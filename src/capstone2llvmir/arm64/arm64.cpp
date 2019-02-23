@@ -932,6 +932,8 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateMov(cs_insn* i, cs_arm64* ai,
 
 /**
  * ARM64_INS_STR, ARM64_INS_STRB, ARM64_INS_STRH
+ * ARM64_INS_STUR, ARM64_INS_STURB, ARM64_INS_STURH
+ * ARM64_INS_STTR, ARM64_INS_STTRB, ARM64_INS_STTRH
  */
 void Capstone2LlvmIrTranslatorArm64_impl::translateStr(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb)
 {
@@ -941,16 +943,22 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateStr(cs_insn* i, cs_arm64* ai,
 	switch (i->id)
 	{
 		case ARM64_INS_STR:
+		case ARM64_INS_STUR:
+		case ARM64_INS_STTR:
 		{
 			ty = getDefaultType();
 			break;
 		}
 		case ARM64_INS_STRB:
+		case ARM64_INS_STURB:
+		case ARM64_INS_STTRB:
 		{
 			ty = irb.getInt8Ty();
 			break;
 		}
 		case ARM64_INS_STRH:
+		case ARM64_INS_STURH:
+		case ARM64_INS_STTRH:
 		{
 			ty = irb.getInt16Ty();
 			break;
@@ -994,7 +1002,7 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateStr(cs_insn* i, cs_arm64* ai,
 }
 
 /**
- * ARM64_INS_STP
+ * ARM64_INS_STP, ARM64_INS_STNP
  */
 void Capstone2LlvmIrTranslatorArm64_impl::translateStp(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb)
 {
@@ -1046,6 +1054,7 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateStp(cs_insn* i, cs_arm64* ai,
  * ARM64_INS_LDR
  * ARM64_INS_LDURB, ARM64_INS_LDUR, ARM64_INS_LDURH, ARM64_INS_LDURSB, ARM64_INS_LDURSH, ARM64_INS_LDURSW
  * ARM64_INS_LDRB, ARM64_INS_LDRH, ARM64_INS_LDRSB, ARM64_INS_LDRSH, ARM64_INS_LDRSW
+ * ARM64_INS_LDTR, ARM64_INS_LDTRB, ARM64_INS_LDTRSB, ARM64_INS_LDTRH, ARM64_INS_LDTRSH, ARM64_INS_LDTRSW
  */
 void Capstone2LlvmIrTranslatorArm64_impl::translateLdr(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb)
 {
@@ -1057,6 +1066,7 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateLdr(cs_insn* i, cs_arm64* ai,
 	{
 		case ARM64_INS_LDR:
 		case ARM64_INS_LDUR:
+		case ARM64_INS_LDTR:
 		{
 			ty = irb.getInt32Ty();
 			sext = false;
@@ -1064,6 +1074,7 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateLdr(cs_insn* i, cs_arm64* ai,
 		}
 		case ARM64_INS_LDRB:
 		case ARM64_INS_LDURB:
+		case ARM64_INS_LDTRB:
 		{
 			ty = irb.getInt8Ty();
 			sext = false;
@@ -1071,6 +1082,7 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateLdr(cs_insn* i, cs_arm64* ai,
 		}
 		case ARM64_INS_LDRH:
 		case ARM64_INS_LDURH:
+		case ARM64_INS_LDTRH:
 		{
 			ty = irb.getInt16Ty();
 			sext = false;
@@ -1079,6 +1091,7 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateLdr(cs_insn* i, cs_arm64* ai,
 		// Signed loads
 		case ARM64_INS_LDRSB:
 		case ARM64_INS_LDURSB:
+		case ARM64_INS_LDTRSB:
 		{
 			ty = irb.getInt8Ty();
 			sext = true;
@@ -1086,6 +1099,7 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateLdr(cs_insn* i, cs_arm64* ai,
 		}
 		case ARM64_INS_LDRSH:
 		case ARM64_INS_LDURSH:
+		case ARM64_INS_LDTRSH:
 		{
 			ty = irb.getInt16Ty();
 			sext = true;
@@ -1093,6 +1107,7 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateLdr(cs_insn* i, cs_arm64* ai,
 		}
 		case ARM64_INS_LDRSW:
 		case ARM64_INS_LDURSW:
+		case ARM64_INS_LDTRSW:
 		{
 			ty = irb.getInt32Ty();
 			sext = true;
@@ -1140,7 +1155,7 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateLdr(cs_insn* i, cs_arm64* ai,
 }
 
 /**
- * ARM64_INS_LDP, ARM64_INS_LDPSW
+ * ARM64_INS_LDP, ARM64_INS_LDPSW, ARM64_INS_LDNP
  */
 void Capstone2LlvmIrTranslatorArm64_impl::translateLdp(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb)
 {
@@ -1149,20 +1164,21 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateLdp(cs_insn* i, cs_arm64* ai,
 	llvm::Value* data_size = nullptr;
 	llvm::Type* ty = nullptr;
 	eOpConv ct = eOpConv::THROW;
-	if(i->id == ARM64_INS_LDP)
+	switch(i->id)
 	{
+	case ARM64_INS_LDNP:
+		// Hints PE that the memory is not going to be used in near future
+	case ARM64_INS_LDP:
 		data_size = llvm::ConstantInt::get(getDefaultType(), getRegisterByteSize(ai->operands[0].reg));
 		ty = getRegisterType(ai->operands[0].reg);
 		ct = eOpConv::ZEXT_TRUNC;
-	}
-	else if(i->id == ARM64_INS_LDPSW)
-	{
+		break;
+	case ARM64_INS_LDPSW:
 		data_size = llvm::ConstantInt::get(getDefaultType(), 4);
 		ty = irb.getInt32Ty();
 		ct = eOpConv::SEXT_TRUNC;
-	}
-	else
-	{
+		break;
+	default:
 		throw GenericError("ldp, ldpsw: Instruction id error");
 	}
 
