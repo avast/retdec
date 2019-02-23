@@ -1076,7 +1076,7 @@ std::size_t FileFormat::getOverlaySize() const
 /**
  * Get overlay data entropy
  * @param res Variable to store the result to
- * @return @c true if entropy calculation succeeded, @false otherwise
+ * @return @c true if entropy calculation succeeded, @c false otherwise
  */
 bool FileFormat::getOverlayEntropy(double &res) const
 {
