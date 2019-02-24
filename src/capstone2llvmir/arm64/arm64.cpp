@@ -1062,6 +1062,7 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateStp(cs_insn* i, cs_arm64* ai,
  * ARM64_INS_LDTR, ARM64_INS_LDTRB, ARM64_INS_LDTRSB, ARM64_INS_LDTRH, ARM64_INS_LDTRSH, ARM64_INS_LDTRSW
  * ARM64_INS_LDXR, ARM64_INS_LDXRB, ARM64_INS_LDXRH
  * ARM64_INS_LDAXR, ARM64_INS_LDAXRB, ARM64_INS_LDAXRH
+ * ARM64_INS_LDAR, ARM64_INS_LDARB, ARM64_INS_LDARH
  */
 void Capstone2LlvmIrTranslatorArm64_impl::translateLdr(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb)
 {
@@ -1076,6 +1077,7 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateLdr(cs_insn* i, cs_arm64* ai,
 		case ARM64_INS_LDTR:
 		case ARM64_INS_LDXR:
 		case ARM64_INS_LDAXR:
+		case ARM64_INS_LDAR:
 		{
 			ty = irb.getInt32Ty();
 			sext = false;
@@ -1086,6 +1088,7 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateLdr(cs_insn* i, cs_arm64* ai,
 		case ARM64_INS_LDTRB:
 		case ARM64_INS_LDXRB:
 		case ARM64_INS_LDAXRB:
+		case ARM64_INS_LDARB:
 		{
 			ty = irb.getInt8Ty();
 			sext = false;
@@ -1096,6 +1099,7 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateLdr(cs_insn* i, cs_arm64* ai,
 		case ARM64_INS_LDTRH:
 		case ARM64_INS_LDXRH:
 		case ARM64_INS_LDAXRH:
+		case ARM64_INS_LDARH:
 		{
 			ty = irb.getInt16Ty();
 			sext = false;
