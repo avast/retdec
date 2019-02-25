@@ -223,8 +223,81 @@ std::shared_ptr<Node> BorlandASTParser::parseFuncName()
 
 std::shared_ptr<Node> BorlandASTParser::parseOperator()
 {
+	// TODO peek $b
 	if (consumeIfPossible("$badd")) {
 		return NameNode::create("operator+");
+	} else if (consumeIfPossible("$bsubs")) {	// must be before '$sub'
+		return NameNode::create("operator[]");
+	} else if (consumeIfPossible("$bsub")) {
+		return NameNode::create("operator-");
+	} else if (consumeIfPossible("$basg")) {
+		return NameNode::create("operator=");
+	} else if (consumeIfPossible("$bmul")) {
+		return NameNode::create("operator*");
+	} else if (consumeIfPossible("$bdiv")) {
+		return NameNode::create("operator/");
+	} else if (consumeIfPossible("$bmod")) {
+		return NameNode::create("operator%");
+	} else if (consumeIfPossible("$binc")) {
+		return NameNode::create("operator++");
+	} else if (consumeIfPossible("$bdec")) {
+		return NameNode::create("operator--");
+	} else if (consumeIfPossible("$beql")) {
+		return NameNode::create("operator==");
+	} else if (consumeIfPossible("$bneq")) {
+		return NameNode::create("operator!=");
+	} else if (consumeIfPossible("$bgtr")) {
+		return NameNode::create("operator>");
+	} else if (consumeIfPossible("$blss")) {
+		return NameNode::create("operator<");
+	} else if (consumeIfPossible("$bgeq")) {
+		return NameNode::create("operator>=");
+	} else if (consumeIfPossible("$bleq")) {
+		return NameNode::create("operator<=");
+	} else if (consumeIfPossible("$bnot")) {
+		return NameNode::create("operator!");
+	} else if (consumeIfPossible("$bland")) {
+		return NameNode::create("operator&&");
+	} else if (consumeIfPossible("$blor")) {
+		return NameNode::create("operator||");
+	} else if (consumeIfPossible("$bcmp")) {
+		return NameNode::create("operator~");
+	} else if (consumeIfPossible("$band")) {
+		return NameNode::create("operator&");
+	} else if (consumeIfPossible("$bor")) {
+		return NameNode::create("operator|");
+	} else if (consumeIfPossible("$bxor")) {
+		return NameNode::create("operator^");
+	} else if (consumeIfPossible("$blsh")) {
+		return NameNode::create("operator<<");
+	} else if (consumeIfPossible("$brsh")) {
+		return NameNode::create("operator>>");
+	} else if (consumeIfPossible("$brplu")) {
+		return NameNode::create("operator+=");
+	} else if (consumeIfPossible("$brmin")) {
+		return NameNode::create("operator-=");
+	} else if (consumeIfPossible("$brmul")) {
+		return NameNode::create("operator*=");
+	} else if (consumeIfPossible("$brdiv")) {
+		return NameNode::create("operator/=");
+	} else if (consumeIfPossible("$brmod")) {
+		return NameNode::create("operator%=");
+	} else if (consumeIfPossible("$brand")) {
+		return NameNode::create("operator&=");
+	} else if (consumeIfPossible("$bror")) {
+		return NameNode::create("operator|=");
+	} else if (consumeIfPossible("$brxor")) {
+		return NameNode::create("operator^=");
+	} else if (consumeIfPossible("$brlsh")) {
+		return NameNode::create("operator<<=");
+	} else if (consumeIfPossible("$brrsh")) {
+		return NameNode::create("operator>>=");
+	} else if (consumeIfPossible("$bind")) {
+		return NameNode::create("operator*");
+	} else if (consumeIfPossible("$badr")) {
+		return NameNode::create("operator&");
+	} else if (consumeIfPossible("$barow")) {
+		return NameNode::create("operator->");
 	}
 	return nullptr;
 }

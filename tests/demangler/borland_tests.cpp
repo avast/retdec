@@ -113,9 +113,6 @@ TEST_F(BorlandDemanglerTests, ReferecenceTests)
 
 TEST_F(BorlandDemanglerTests, RandomTests)
 {
-//	DEM_EQ("@HTTPParse@_16402",
-//		   "HTTPParse::_16402");	// probably bad test
-
 	DEM_EQ("@Themes@TThemeServices@GetElementDetails$qqr25Themes@TThemedExplorerBar",
 		   "__fastcall Themes::TThemeServices::GetElementDetails(Themes::TThemedExplorerBar)");
 
@@ -138,14 +135,14 @@ TEST_F(BorlandDemanglerTests, RandomTests)
 		"@Dbxmysqlmetadatareader@TDBXMySqlCustomMetaDataReader@TDBXMySql4IndexesCursor@FindStringSize$qqrxix62System@%DynamicArray$tp36Dbxtablestorage@TDBXColumnDescriptor%",
 		"__fastcall Dbxmysqlmetadatareader::TDBXMySqlCustomMetaDataReader::TDBXMySql4IndexesCursor::FindStringSize(const int, const System::DynamicArray<Dbxtablestorage::TDBXColumnDescriptor *>)");
 
-//	DEM_EQ("@Idimap4@TIdImapSubSection@$bleq$qqrv",
-//		   "__fastcall Idimap4::TIdImapSubSection::operator<=(void)");
+	DEM_EQ("@Idimap4@TIdImapSubSection@$bleq$qqrv",
+		   "__fastcall Idimap4::TIdImapSubSection::operator<=(void)");
 
 	DEM_EQ("@Idimap4@TIdImapSubSection@bagr$qqriipa15$a89$a2$ipa10$a666$25System@%DynamicArray$tuc%",
 		   "__fastcall Idimap4::TIdImapSubSection::bagr(int, int, int(*)[15][89][2], System::DynamicArray<unsigned char>(*)[10][666])");
 
-//	DEM_EQ("@Idimap4@TIdImapSubSection@$brrsh$qqrv",
-//		   "__fastcall Idimap4::TIdImapSubSection::operator>>=(void)");
+	DEM_EQ("@Idimap4@TIdImapSubSection@$brrsh$qqrv",
+		   "__fastcall Idimap4::TIdImapSubSection::operator>>=(void)");
 
 	DEM_EQ(
 		"@Sqlexpr@TSQLConnection@SQLError$qqrus25Sqlexpr@TSQLExceptionTypex48System@%DelphiInterface$t20Dbxpress@ISQLCommand%",
@@ -207,6 +204,42 @@ TEST_F(BorlandDemanglerTests, Operators)
 	DEM_EQ("@Foo@$badd$q3Foo", "Foo::operator+(Foo)");
 	DEM_EQ("@$badd$q3Bart1", "operator+(Bar, Bar)");
 	DEM_EQ("@%$badd$3Bar%$q3Bart1$3Bar", "Bar operator+<Bar>(Bar, Bar)");
+	DEM_EQ("@Foo@$bsub$q3Foo", "Foo::operator-(Foo)");
+	DEM_EQ("@Foo@$basg$q3Foo", "Foo::operator=(Foo)");
+	DEM_EQ("@Foo@$bmul$q3Foo", "Foo::operator*(Foo)");
+	DEM_EQ("@Foo@$bdiv$q3Foo", "Foo::operator/(Foo)");
+	DEM_EQ("@Foo@$bmod$q3Foo", "Foo::operator%(Foo)");
+	DEM_EQ("@Foo@$binc$qi", "Foo::operator++(int)");
+	DEM_EQ("@Foo@$bdec$qi", "Foo::operator--(int)");
+	DEM_EQ("@Foo@$beql$q3Foo", "Foo::operator==(Foo)");
+	DEM_EQ("@Foo@$bneq$q3Foo", "Foo::operator!=(Foo)");
+	DEM_EQ("@Foo@$bgtr$q3Foo", "Foo::operator>(Foo)");
+	DEM_EQ("@Foo@$blss$q3Foo", "Foo::operator<(Foo)");
+	DEM_EQ("@Foo@$bgeq$q3Foo", "Foo::operator>=(Foo)");
+	DEM_EQ("@Foo@$bleq$q3Foo", "Foo::operator<=(Foo)");
+	DEM_EQ("@Foo@$bnot$qv", "Foo::operator!(void)");
+	DEM_EQ("@Foo@$bland$q3Foo", "Foo::operator&&(Foo)");
+	DEM_EQ("@Foo@$blor$q3Foo", "Foo::operator||(Foo)");
+	DEM_EQ("@Foo@$bcmp$qv", "Foo::operator~(void)");
+	DEM_EQ("@Foo@$band$q3Foo", "Foo::operator&(Foo)");
+	DEM_EQ("@Foo@$bor$q3Foo", "Foo::operator|(Foo)");
+	DEM_EQ("@Foo@$bxor$q3Foo", "Foo::operator^(Foo)");
+	DEM_EQ("@Foo@$blsh$q3Foo", "Foo::operator<<(Foo)");
+	DEM_EQ("@Foo@$brsh$q3Foo", "Foo::operator>>(Foo)");
+	DEM_EQ("@Foo@$brplu$q3Foo", "Foo::operator+=(Foo)");
+	DEM_EQ("@Foo@$brmin$q3Foo", "Foo::operator-=(Foo)");
+	DEM_EQ("@Foo@$brmul$q3Foo", "Foo::operator*=(Foo)");
+	DEM_EQ("@Foo@$brdiv$q3Foo", "Foo::operator/=(Foo)");
+	DEM_EQ("@Foo@$brmod$q3Foo", "Foo::operator%=(Foo)");
+	DEM_EQ("@Foo@$brand$q3Foo", "Foo::operator&=(Foo)");
+	DEM_EQ("@Foo@$bror$q3Foo", "Foo::operator|=(Foo)");
+	DEM_EQ("@Foo@$brxor$q3Foo", "Foo::operator^=(Foo)");
+	DEM_EQ("@Foo@$brlsh$q3Foo", "Foo::operator<<=(Foo)");
+	DEM_EQ("@Foo@$brrsh$q3Foo", "Foo::operator>>=(Foo)");
+	DEM_EQ("@Foo@$bsubs$q3Foo", "Foo::operator[](Foo)");
+	DEM_EQ("@Foo@$bind$qv", "Foo::operator*(void)");
+	DEM_EQ("@Foo@$badr$qv", "Foo::operator&(void)");
+	DEM_EQ("@Foo@$barow$qv", "Foo::operator->(void)");
 }
 
 TEST_F(BorlandDemanglerTests, FunctionPointers)
@@ -227,6 +260,10 @@ TEST_F(BorlandDemanglerTests, FailTests)
 	DEM_FAIL("@foo$q14std@%tmp$c11std@%tmp$c%", status::invalid_mangled_name);
 	DEM_FAIL("@foo$q23std@%tmp$c11std@%tmp$c%", status::invalid_mangled_name);
 	DEM_FAIL("@foo$q14std@%tmp$c11std@%tmp$c%%", status::invalid_mangled_name);
+}
+
+TEST_F(BorlandDemanglerTests, tmp) {
+//	DEM_EQ("Lllvm$workaround$fake$stub$@%$badd$3Bar%$q3Bart1$3Bar", "Bar Lllvm::workaround::fake::stub::operator+<Bar>(Bar, Bar)");
 }
 
 // TODO operator tests, named params tests, fail tests, extra long names, backref tests, conversion operators, functions as params
