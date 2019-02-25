@@ -207,9 +207,26 @@ std::shared_ptr<Node> BorlandASTParser::parseFuncName()
 		name = parseTemplate(name);
 	}
 
+	auto op = parseOperator();
+	if (op) {
+		if (!name) {
+			name = op;
+		} else {
+			name = NestedNameNode::create(name, op);
+		}
+	}
+
 	checkResult(name);
 
 	return name;
+}
+
+std::shared_ptr<Node> BorlandASTParser::parseOperator()
+{
+	if (consumeIfPossible("$badd")) {
+		return NameNode::create("operator+");
+	}
+	return nullptr;
 }
 
 std::shared_ptr<Node> BorlandASTParser::parseName(const char *endMangled)
@@ -542,12 +559,18 @@ std::shared_ptr<Node> BorlandASTParser::parseNamedType(unsigned nameLen, const Q
 
 std::shared_ptr<Node> BorlandASTParser::parseTemplateName(std::shared_ptr<Node> templateNamespace)
 {
-	auto templateName = _mangled.cutUntil('$');
-	if (templateName.empty()) {
-		_status = invalid_mangled_name;
-		return nullptr;
+	std::shared_ptr<Node> templateNameNode = nullptr;
+	auto op = parseOperator();
+	if (op) {
+		templateNameNode = op;
+	} else {
+		auto templateName = _mangled.cutUntil('$');
+		if (templateName.empty()) {
+			_status = invalid_mangled_name;
+			return nullptr;
+		}
+		templateNameNode = NameNode::create(templateName);
 	}
-	std::shared_ptr<Node> templateNameNode = NameNode::create(templateName);
 
 	if (templateNamespace) {
 		templateNameNode = NestedNameNode::create(templateNamespace, templateNameNode);

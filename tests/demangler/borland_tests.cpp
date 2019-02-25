@@ -204,9 +204,9 @@ TEST_F(BorlandDemanglerTests, Backrefs)
 
 TEST_F(BorlandDemanglerTests, Operators)
 {
-//	DEM_EQ("@Foo@$badd$q3Foo", "Foo::operator+(Foo)");
-//	DEM_EQ("@$badd$q3Bart1", "operator+(Bar, Bar)");
-//	DEM_EQ("@%$badd$3Bar%$q3Bart1$3Bar", "Bar operator+<Bar>(Bar, Bar)");
+	DEM_EQ("@Foo@$badd$q3Foo", "Foo::operator+(Foo)");
+	DEM_EQ("@$badd$q3Bart1", "operator+(Bar, Bar)");
+	DEM_EQ("@%$badd$3Bar%$q3Bart1$3Bar", "Bar operator+<Bar>(Bar, Bar)");
 }
 
 TEST_F(BorlandDemanglerTests, FunctionPointers)
