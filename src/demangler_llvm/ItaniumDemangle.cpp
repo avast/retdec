@@ -1,9 +1,8 @@
 //===------------------------- ItaniumDemangle.cpp ------------------------===//
 //
-//                     The LLVM Compiler Infrastructure
-//
-// This file is dual licensed under the MIT and the University of Illinois Open
-// Source Licenses. See LICENSE.TXT for details.
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //
 //===----------------------------------------------------------------------===//
 
@@ -340,7 +339,7 @@ char *llvm::itaniumDemangle(const char *MangledName, char *Buf,
 
   if (AST == nullptr)
     InternalStatus = demangle_invalid_mangled_name;
-  else if (initializeOutputStream(Buf, N, S, 1024))
+  else if (!initializeOutputStream(Buf, N, S, 1024))
     InternalStatus = demangle_memory_alloc_failure;
   else {
     assert(Parser.ForwardTemplateRefs.empty());
@@ -354,15 +353,6 @@ char *llvm::itaniumDemangle(const char *MangledName, char *Buf,
   if (Status)
     *Status = InternalStatus;
   return InternalStatus == demangle_success ? Buf : nullptr;
-}
-
-bool llvm::itaniumFindTypesInMangledName(const char *MangledName, void *Ctx,
-                                         void (*Callback)(void *,
-                                                          const char *)) {
-  Demangler Parser(MangledName, MangledName + std::strlen(MangledName));
-  Parser.TypeCallback = Callback;
-  Parser.TypeCallbackContext = Ctx;
-  return Parser.parse() == nullptr;
 }
 
 ItaniumPartialDemangler::ItaniumPartialDemangler()
@@ -396,7 +386,7 @@ bool ItaniumPartialDemangler::partialDemangle(const char *MangledName) {
 
 static char *printNode(const Node *RootNode, char *Buf, size_t *N) {
   OutputStream S;
-  if (initializeOutputStream(Buf, N, S, 128))
+  if (!initializeOutputStream(Buf, N, S, 128))
     return nullptr;
   RootNode->print(S);
   S += '\0';
@@ -441,7 +431,7 @@ char *ItaniumPartialDemangler::getFunctionDeclContextName(char *Buf,
   const Node *Name = static_cast<const FunctionEncoding *>(RootNode)->getName();
 
   OutputStream S;
-  if (initializeOutputStream(Buf, N, S, 128))
+  if (!initializeOutputStream(Buf, N, S, 128))
     return nullptr;
 
  KeepGoingLocalFunction:
@@ -494,7 +484,7 @@ char *ItaniumPartialDemangler::getFunctionParameters(char *Buf,
   NodeArray Params = static_cast<FunctionEncoding *>(RootNode)->getParams();
 
   OutputStream S;
-  if (initializeOutputStream(Buf, N, S, 128))
+  if (!initializeOutputStream(Buf, N, S, 128))
     return nullptr;
 
   S += '(';
@@ -512,7 +502,7 @@ char *ItaniumPartialDemangler::getFunctionReturnType(
     return nullptr;
 
   OutputStream S;
-  if (initializeOutputStream(Buf, N, S, 128))
+  if (!initializeOutputStream(Buf, N, S, 128))
     return nullptr;
 
   if (const Node *Ret =

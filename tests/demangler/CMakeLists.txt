@@ -1,9 +1,7 @@
 set(RETDEC_TESTS_DEMANGLER_SOURCES
 	gcc_tests.cpp
 	msvc_tests.cpp
-	llvm_itanium_demangler_tests.cpp
-	llvm_microsoft_demangler_tests.cpp
-	borland_demangler_tests.cpp
+	borland_tests.cpp
 	borland_ast_tests.cpp
 )
 

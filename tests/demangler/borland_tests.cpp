@@ -7,18 +7,13 @@
 #include <gtest/gtest.h>
 
 #include "llvm/Demangle/demangler.h"
+#include "dem_test.h"
 
 using namespace ::testing;
 
 namespace retdec {
 namespace demangler {
 namespace tests {
-
-#define DEM_EQ(mangled, demangled) \
-            do {    \
-                EXPECT_EQ(demangler->demangleToString(mangled), demangled); \
-                EXPECT_EQ(demangler->status(), status::success); \
-            } while(0)
 
 class BorlandDemanglerTests : public Test
 {
@@ -184,11 +179,11 @@ TEST_F(BorlandDemanglerTests, TemplateTests)
 	DEM_EQ("@ns@ns1@ns2@%myFunc_template_$i%$qi$d", "double ns::ns1::ns2::myFunc_template_<int>(int)");
 	DEM_EQ("@ns@%myFunc_template_$i%$qi$d", "double ns::myFunc_template_<int>(int)");
 	DEM_EQ("@%foo2$20std@%basic_string$c%i%$qv$v",
-		"void foo2<std::basic_string<char>, int>(void)");
+		   "void foo2<std::basic_string<char>, int>(void)");
 	DEM_EQ("@%foo2$32std@%basic_string$c10%my_tmp$c%%i%$qv$v",
 		   "void foo2<std::basic_string<char, my_tmp<char>>, int>(void)");
 	DEM_EQ("@%foo2$60std@%basic_string$c19std@%char_traits$c%17std@%allocator$c%%i%$qv$v",
-		"void foo2<std::basic_string<char, std::char_traits<char>, std::allocator<char>>, int>(void)");
+		   "void foo2<std::basic_string<char, std::char_traits<char>, std::allocator<char>>, int>(void)");
 	DEM_EQ(
 		"@%foo$60std@%basic_string$c19std@%char_traits$c%17std@%allocator$c%%%$q60std@%basic_string$c19std@%char_traits$c%17std@%allocator$c%%$v",
 		"void foo<std::basic_string<char, std::char_traits<char>, std::allocator<char>>>(std::basic_string<char, std::char_traits<char>, std::allocator<char>>)");
@@ -203,7 +198,7 @@ TEST_F(BorlandDemanglerTests, NamedTypes)
 TEST_F(BorlandDemanglerTests, Backrefs)
 {
 	DEM_EQ("@%foo$60std@%basic_string$c19std@%char_traits$c%17std@%allocator$c%%t1%$qv$v",
-		"void foo<std::basic_string<char, std::char_traits<char>, std::allocator<char>>, std::basic_string<char, std::char_traits<char>, std::allocator<char>>>(void)");
+		   "void foo<std::basic_string<char, std::char_traits<char>, std::allocator<char>>, std::basic_string<char, std::char_traits<char>, std::allocator<char>>>(void)");
 }
 
 TEST_F(BorlandDemanglerTests, Operators)
@@ -223,9 +218,9 @@ TEST_F(BorlandDemanglerTests, FunctionPointers)
 	DEM_EQ("@foo6$qpqv$pqpi$pqpd$v", "foo6(void (*(*(*)(void))(int *))(double *))");
 }
 
-TEST_F(BorlandDemanglerTests, FailTests) {
-//	DEM_FAIL("@%foo2$20std@%basic_string$c10%my_tmp$c%%i%$qv$v", Demangler::Status::invalid_mangled_name);
-	DEM_EQ("@%foo2$20std@%basic_string$c10%my_tmp$c%%i%$qv$v", "");
+TEST_F(BorlandDemanglerTests, FailTests)
+{
+	DEM_FAIL("@%foo2$20std@%basic_string$c10%my_tmp$c%%i%$qv$v", status::invalid_mangled_name);
 }
 
 // TODO operator tests, named params tests, fail tests, extra long names, backref tests, conversion operators, functions as params

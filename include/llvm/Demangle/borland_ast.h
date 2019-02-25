@@ -20,6 +20,8 @@ namespace borland {
 class Context;
 class FunctionTypeNode;
 
+using StringView = llvm::itanium_demangle::StringView;
+
 class Qualifiers
 {
 public:

@@ -1,9 +1,8 @@
 //===- MicrosoftDemangle.cpp ----------------------------------------------===//
 //
-//                     The LLVM Compiler Infrastructure
-//
-// This file is dual licensed under the MIT and the University of Illinois Open
-// Source Licenses. See LICENSE.TXT for details.
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //
 //===----------------------------------------------------------------------===//
 //
@@ -12,9 +11,10 @@
 //===----------------------------------------------------------------------===//
 
 #include "llvm/Demangle/MicrosoftDemangleNodes.h"
-#include "llvm/Demangle/Compiler.h"
+#include "llvm/Demangle/DemangleConfig.h"
 #include "llvm/Demangle/Utility.h"
 #include <cctype>
+#include <string>
 
 using namespace llvm;
 using namespace ms_demangle;
@@ -113,6 +113,14 @@ static void outputCallingConvention(OutputStream &OS, CallingConv CC) {
   }
 }
 
+std::string Node::toString(OutputFlags Flags) const {
+  OutputStream OS;
+  initializeOutputStream(nullptr, nullptr, OS, 1024);
+  this->output(OS, Flags);
+  OS << '\0';
+  return {OS.getBuffer()};
+}
+
 void TypeNode::outputQuals(bool SpaceBefore, bool SpaceAfter) const {}
 
 void PrimitiveTypeNode::outputPre(OutputStream &OS, OutputFlags Flags) const {
@@ -161,22 +169,21 @@ void EncodedStringLiteralNode::output(OutputStream &OS,
                                       OutputFlags Flags) const {
   switch (Char) {
   case CharKind::Wchar:
-    OS << "const wchar_t * {L\"";
+    OS << "L\"";
     break;
   case CharKind::Char:
-    OS << "const char * {\"";
+    OS << "\"";
     break;
   case CharKind::Char16:
-    OS << "const char16_t * {u\"";
+    OS << "u\"";
     break;
   case CharKind::Char32:
-    OS << "const char32_t * {U\"";
+    OS << "U\"";
     break;
   }
   OS << DecodedString << "\"";
   if (IsTruncated)
     OS << "...";
-  OS << "}";
 }
 
 void IntegerLiteralNode::output(OutputStream &OS, OutputFlags Flags) const {
@@ -369,15 +376,22 @@ void LiteralOperatorIdentifierNode::output(OutputStream &OS,
 
 void FunctionSignatureNode::outputPre(OutputStream &OS,
                                       OutputFlags Flags) const {
+  if (FunctionClass & FC_Public)
+    OS << "public: ";
+  if (FunctionClass & FC_Protected)
+    OS << "protected: ";
+  if (FunctionClass & FC_Private)
+    OS << "private: ";
+
   if (!(FunctionClass & FC_Global)) {
     if (FunctionClass & FC_Static)
       OS << "static ";
   }
-  if (FunctionClass & FC_ExternC)
-    OS << "extern \"C\" ";
-
   if (FunctionClass & FC_Virtual)
     OS << "virtual ";
+
+  if (FunctionClass & FC_ExternC)
+    OS << "extern \"C\" ";
 
   if (ReturnType) {
     ReturnType->outputPre(OS, Flags);
@@ -407,6 +421,9 @@ void FunctionSignatureNode::outputPost(OutputStream &OS,
     OS << " __restrict";
   if (Quals & Q_Unaligned)
     OS << " __unaligned";
+
+  if (IsNoexcept)
+    OS << " noexcept";
 
   if (RefQualifier == FunctionRefQualifier::Reference)
     OS << " &";
@@ -495,13 +512,15 @@ void PointerTypeNode::outputPost(OutputStream &OS, OutputFlags Flags) const {
 }
 
 void TagTypeNode::outputPre(OutputStream &OS, OutputFlags Flags) const {
-  switch (Tag) {
-    OUTPUT_ENUM_CLASS_VALUE(TagKind, Class, "class");
-    OUTPUT_ENUM_CLASS_VALUE(TagKind, Struct, "struct");
-    OUTPUT_ENUM_CLASS_VALUE(TagKind, Union, "union");
-    OUTPUT_ENUM_CLASS_VALUE(TagKind, Enum, "enum");
+  if (!(Flags & OF_NoTagSpecifier)) {
+    switch (Tag) {
+      OUTPUT_ENUM_CLASS_VALUE(TagKind, Class, "class");
+      OUTPUT_ENUM_CLASS_VALUE(TagKind, Struct, "struct");
+      OUTPUT_ENUM_CLASS_VALUE(TagKind, Union, "union");
+      OUTPUT_ENUM_CLASS_VALUE(TagKind, Enum, "enum");
+    }
+    OS << " ";
   }
-  OS << " ";
   QualifiedName->output(OS, Flags);
   outputQualifiers(OS, Quals, true, false);
 }
@@ -555,9 +574,13 @@ void FunctionSymbolNode::output(OutputStream &OS, OutputFlags Flags) const {
 void VariableSymbolNode::output(OutputStream &OS, OutputFlags Flags) const {
   switch (SC) {
   case StorageClass::PrivateStatic:
+    OS << "private: static ";
+    break;
   case StorageClass::PublicStatic:
+    OS << "public: static ";
+    break;
   case StorageClass::ProtectedStatic:
-    OS << "static ";
+    OS << "protected: static ";
     break;
   default:
     break;

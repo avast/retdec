@@ -11,6 +11,7 @@ set(DEMANGLER_LLVM_SOURCES
 		borland_ast_parser.cpp
 		context.cpp
 		borland_ast_types.cpp
+		Demangle.cpp
 		)
 
 add_library(llvm-demangler STATIC ${DEMANGLER_LLVM_SOURCES})
