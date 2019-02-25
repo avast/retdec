@@ -225,7 +225,7 @@ TEST_F(BorlandDemanglerTests, FunctionPointers)
 
 TEST_F(BorlandDemanglerTests, FailTests) {
 //	DEM_FAIL("@%foo2$20std@%basic_string$c10%my_tmp$c%%i%$qv$v", Demangler::Status::invalid_mangled_name);
-//	DEM_EQ("@%foo2$20std@%basic_string$c10%my_tmp$c%%i%$qv$v", "");
+	DEM_EQ("@%foo2$20std@%basic_string$c10%my_tmp$c%%i%$qv$v", "");
 }
 
 // TODO operator tests, named params tests, fail tests, extra long names, backref tests, conversion operators, functions as params

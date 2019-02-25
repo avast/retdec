@@ -41,6 +41,14 @@ BorlandASTParser::Status BorlandASTParser::status()
 	return _status;
 }
 
+inline char BorlandASTParser::peek() const
+{
+	if (!_mangled.empty()) {
+		return _mangled.front();
+	}
+	return EOF;
+}
+
 unsigned BorlandASTParser::peekNumber() const
 {
 	StringView mangledCopy = _mangled;
@@ -104,6 +112,16 @@ bool BorlandASTParser::consume(char c)
 	return true;
 }
 
+bool BorlandASTParser::consume(const StringView &s)
+{
+	if (!_mangled.consumeFront(s)) {
+		_status = invalid_mangled_name;
+		return false;
+	}
+
+	return true;
+}
+
 /**
  * @brief Main method of parser. Tries to create AST, sets status.
  *
@@ -129,8 +147,8 @@ void BorlandASTParser::parseFunction()
 {
 	/* name part */
 	consume('@');
-	auto absNameNode = parseFuncName();    // TODO if null
-	if (!statusOk()) {
+	auto absNameNode = parseFuncName();
+	if (!checkResult(absNameNode)) {
 		return;
 	}
 
@@ -140,13 +158,18 @@ void BorlandASTParser::parseFunction()
 		return;
 	}
 
-	/* function qualifiers */
 	auto quals = parseQualifiers();
-
 	auto funcType = parseFuncType(quals);
+	if (!checkResult(funcType)) {
+		return;
+	}
 
-	_status =
-		Status::success;    // TODO vsetko po $ daj do zvlast funckie, to bude parsovat aj ked bude pointer na func
+	if (!_mangled.empty()) {
+		_status = invalid_mangled_name;
+		return;
+	}
+
+	_status = Status::success;
 	_ast = FunctionNode::create(absNameNode, funcType);
 }
 
@@ -187,33 +210,6 @@ std::shared_ptr<Node> BorlandASTParser::parseFuncName()
 	checkResult(name);
 
 	return name;
-}
-
-std::shared_ptr<FunctionTypeNode> BorlandASTParser::parseFuncType(Qualifiers &quals)
-{
-	/* function calling convention */
-	auto callConv = parseCallConv();
-	if (!statusOk()) {
-		return nullptr;
-	}
-
-	/* parameters */
-	auto paramsNode = parseFuncParams();
-	if (!statusOk()) {
-		return nullptr;
-	}
-
-	/* return type */
-	std::shared_ptr<Node> retType = nullptr;
-	if (peekChar('$')) {
-		consume('$');
-		retType = parseType();
-		if (!checkResult(retType)) {
-			return nullptr;
-		}
-	}
-
-	return FunctionTypeNode::create(_context, callConv, paramsNode, retType, quals);
 }
 
 std::shared_ptr<Node> BorlandASTParser::parseName(const char *endMangled)
@@ -257,17 +253,43 @@ std::shared_ptr<Node> BorlandASTParser::parseName(const char *endMangled)
 		}
 	}
 
-	if (!_mangled.empty() && _mangled.front() == '%' && c != end) {
+	if (peekChar('%') && c != end) {
 		name = parseTemplate(name, end);
 	}
 
 	return name;
 }
 
+std::shared_ptr<FunctionTypeNode> BorlandASTParser::parseFuncType(Qualifiers &quals)
+{
+	/* function calling convention */
+	auto callConv = parseCallConv();
+	if (!statusOk()) {
+		return nullptr;
+	}
+
+	/* parameters */
+	auto paramsNode = parseFuncParams();
+	if (!statusOk()) {
+		return nullptr;
+	}
+
+	/* return type */
+	std::shared_ptr<Node> retType = nullptr;
+	if (consumeIfPossible('$')) {
+		retType = parseType();
+		if (!checkResult(retType)) {
+			return nullptr;
+		}
+	}
+
+	return FunctionTypeNode::create(_context, callConv, paramsNode, retType, quals);
+}
+
 Qualifiers BorlandASTParser::parseQualifiers()
 {
-	bool is_volatile = _mangled.consumeFront('w');
-	bool is_const = _mangled.consumeFront('x');
+	bool is_volatile = consumeIfPossible('w');
+	bool is_const = consumeIfPossible('x');
 
 	return {is_volatile, is_const};
 }
@@ -278,8 +300,8 @@ CallConv BorlandASTParser::parseCallConv()
 		return CallConv::fastcall;
 	} else if (_mangled.consumeFront("qqs")) {
 		return CallConv::stdcall;
-	} else if (_mangled.consumeFront("q")) {
-		return CallConv::unknown;    // most likely cdecl, pascal
+	} else if (_mangled.consumeFront("q")) {    // most likely cdecl, pascal
+		return CallConv::unknown;
 	} else {
 		_status = Status::invalid_mangled_name;
 		return CallConv::unknown;
@@ -290,20 +312,23 @@ std::shared_ptr<NodeArray> BorlandASTParser::parseFuncParams()
 {
 	auto params = NodeArray::create();
 
-	while (!_mangled.empty() && _status == Status::in_progress) {
-		if (_mangled.consumeFront('t')) {
-			unsigned backref = peekNumber();
-			if (backref > 0 && backref <= params->size()) {
-				parseNumber();
-				params->addNode(params->get(backref - 1));
-				continue;
+	while (!_mangled.empty() && statusOk() && !peekChar('$')) {
+		if (consumeIfPossible('t')) {    // TODO delphi check for t before named types
+			unsigned backref = parseNumber();
+			if (backref == 0 || backref > params->size() || !statusOk()) {
+				_status = invalid_mangled_name;
+				return nullptr;
+			}
+			params->addNode(params->get(backref - 1));
+		} else {
+			auto param = parseType();
+			if (param && statusOk()) {
+				params->addNode(param);
 			}
 		}
-		auto param = parseType();
-		if (param) {
-			params->addNode(param);
-		} else {
-			break;
+
+		if (!statusOk()) {
+			return nullptr;
 		}
 	}
 
@@ -315,89 +340,45 @@ std::shared_ptr<Node> BorlandASTParser::parseType()
 	/* qualifiers */
 	auto quals = parseQualifiers();
 
-	if (_mangled.consumeFront('p')) {
+	if (consumeIfPossible('p')) {
 		return parsePointer(quals);
 	}
 
-	if (_mangled.consumeFront('r')) {
+	if (consumeIfPossible('r')) {
 		if (quals.isConst() || quals.isVolatile()) {
 			_status = invalid_mangled_name;
 			return nullptr;
 		}
-
-		if (consumeIfPossible('$')) {    // must be reference to function
-			auto fakeQuals = Qualifiers(false, false);    // reference to function cannot have
-			auto funcType = parseFuncType(fakeQuals);
-			if (!checkResult(funcType)) {
-				return nullptr;
-			}
-			return ReferenceTypeNode::create(_context, funcType);
-		}
-
-		auto referencedType = parseType();
-		// TODO reference on reference referencedType->kind() == Node::Kind::KReferenceType
-		// TODO restricted reference
-		if (!checkResult(referencedType)) {
-			return nullptr;
-		}
-
-		return ReferenceTypeNode::create(_context, referencedType);
+		return parseReference();
 	}
 
-	if (_mangled.consumeFront('h')) {
-		if (consumeIfPossible('$')) {    // must be reference to function
-			auto fakeQuals = Qualifiers(false, false);    // reference to function cannot have
-			auto funcType = parseFuncType(fakeQuals);
-			if (!checkResult(funcType)) {
-				return nullptr;
-			}
-			return RReferenceTypeNode::create(_context, funcType);
-		}
-
-		auto referencedType = parseType();
-		if (!referencedType || referencedType->kind() == Node::Kind::KReferenceType) {    // TODO more restrictions
+	if (consumeIfPossible('h')) {
+		if (quals.isConst() || quals.isVolatile()) {
 			_status = invalid_mangled_name;
 			return nullptr;
 		}
-		return RReferenceTypeNode::create(_context, referencedType);
+		return parseRReference();
 	}
 
-	if (_mangled.consumeFront('a')) {    // TODO do funkcie
-		unsigned len = parseNumber();
-		if (len == 0) {
-			_status = invalid_mangled_name;
-			return nullptr;
-		}
-		_mangled.consumeFront('$');
-		auto arrType = parseType();
-		return ArrayNode::create(_context, arrType, len, quals);
-//		return PointerTypeNode::create(_context, arrType, false, false);
+	if (_mangled.consumeFront('a')) {
+		return parseArray(quals);
 	}
 
 	if (peekChar('q')) {
-		auto funType = parseFuncType(quals);
-		if (!checkResult(funType)) {
-			return nullptr;
-		}
-		return funType;
+		return parseFuncType(quals);
 	}
 
+	/* named type */
 	unsigned len = parseNumber();
 	if (_status == invalid_mangled_name) {
 		return nullptr;
 	}
 	if (len > 0) {
-		auto name = parseNamedType(len);
-		return NamedTypeNode::create(_context, name, quals);    //todo checky
-//		return parseNamedType(len);
+		return parseNamedType(len, quals);
 	}
 
-	auto builtIn = parseBuildInType(quals);
-	if (builtIn) {
-		return builtIn;
-	}
-
-	return nullptr;
+	/* must be built-in type */
+	return parseBuildInType(quals);
 }
 
 std::shared_ptr<Node> BorlandASTParser::parsePointer(const retdec::demangler::borland::Qualifiers &quals)
@@ -410,37 +391,97 @@ std::shared_ptr<Node> BorlandASTParser::parsePointer(const retdec::demangler::bo
 	return PointerTypeNode::create(_context, pointeeType, quals);
 }
 
-std::shared_ptr<Node> BorlandASTParser::parseBuildInType(const Qualifiers &quals)    // TODO isVolatile a const as params
+std::shared_ptr<Node> BorlandASTParser::parseReference()
 {
-	if (_mangled.consumeFront('o')) {
+	if (consumeIfPossible('$')) {    // must be reference to function
+		auto fakeQuals = Qualifiers(false, false);    // reference to function cannot have qualifiers
+		auto funcType = parseFuncType(fakeQuals);
+		if (!checkResult(funcType)) {
+			return nullptr;
+		}
+		return ReferenceTypeNode::create(_context, funcType);
+	}
+
+	auto referencedType = parseType();
+	if (!checkResult(referencedType) ||
+		referencedType->kind() == Node::Kind::KReferenceType ||
+		referencedType->kind() == Node::Kind::KRReferenceType) {
+		return nullptr;
+	}
+
+	return ReferenceTypeNode::create(_context, referencedType);
+}
+
+std::shared_ptr<Node> BorlandASTParser::parseRReference()
+{
+	if (consumeIfPossible('$')) {    // must be reference to function
+		auto fakeQuals = Qualifiers(false, false);    // reference to function cannot have
+		auto funcType = parseFuncType(fakeQuals);
+		if (!checkResult(funcType)) {
+			return nullptr;
+		}
+		return RReferenceTypeNode::create(_context, funcType);
+	}
+
+	auto referencedType = parseType();
+	if (!referencedType || referencedType->kind() == Node::Kind::KReferenceType) {
+		_status = invalid_mangled_name;
+		return nullptr;
+	}
+	return RReferenceTypeNode::create(_context, referencedType);
+}
+
+std::shared_ptr<Node> BorlandASTParser::parseArray(const retdec::demangler::borland::Qualifiers &quals)
+{
+	unsigned len = parseNumber();
+	if (len == 0) {
+		_status = invalid_mangled_name;
+		return nullptr;
+	}
+
+	if (!consume('$')) {
+		return nullptr;
+	}
+
+	auto arrType = parseType();
+	if (!checkResult(arrType)) {
+		return nullptr;
+	}
+
+	return ArrayNode::create(_context, arrType, len, quals);
+}
+
+std::shared_ptr<Node> BorlandASTParser::parseBuildInType(const Qualifiers &quals)
+{
+	if (consumeIfPossible('o')) {
 		return BuiltInTypeNode::create(_context, "bool", quals);
-	} else if (_mangled.consumeFront('b')) {
+	} else if (consumeIfPossible('b')) {
 		return BuiltInTypeNode::create(_context, "wchar_t", quals);
-	} else if (_mangled.consumeFront('v')) {
+	} else if (consumeIfPossible('v')) {
 		return BuiltInTypeNode::create(_context, "void", quals);
 	}
 
 	/* char types */
-	if (_mangled.consumeFront("zc")) {    //only explicitly signed type
+	if (consumeIfPossible("zc")) {    //only explicitly signed type
 		return CharTypeNode::create(_context, ThreeStateSignness::signed_char, quals);
-	} else if (_mangled.consumeFront("uc")) {
+	} else if (consumeIfPossible("uc")) {
 		return CharTypeNode::create(_context, ThreeStateSignness::unsigned_char, quals);
-	} else if (_mangled.consumeFront('c')) {
+	} else if (consumeIfPossible('c')) {
 		return CharTypeNode::create(_context, ThreeStateSignness::no_prefix, quals);
 	}
 
 	/* integral types */
 	bool isUnsigned = false;
-	if (_mangled.consumeFront('u')) {
+	if (consumeIfPossible('u')) {
 		isUnsigned = true;
 	}
-	if (_mangled.consumeFront('s')) {
+	if (consumeIfPossible('s')) {
 		return IntegralTypeNode::create(_context, "short", isUnsigned, quals);
-	} else if (_mangled.consumeFront('i')) {
+	} else if (consumeIfPossible('i')) {
 		return IntegralTypeNode::create(_context, "int", isUnsigned, quals);
-	} else if (_mangled.consumeFront('l')) {
+	} else if (consumeIfPossible('l')) {
 		return IntegralTypeNode::create(_context, "long", isUnsigned, quals);
-	} else if (_mangled.consumeFront('j')) {
+	} else if (consumeIfPossible('j')) {
 		return IntegralTypeNode::create(_context, "long long", isUnsigned, quals);
 	}
 	if (isUnsigned) {    // was 'u' then not integral type
@@ -449,15 +490,15 @@ std::shared_ptr<Node> BorlandASTParser::parseBuildInType(const Qualifiers &quals
 	}
 
 		/* float types */
-	else if (_mangled.consumeFront('f')) {
+	else if (consumeIfPossible('f')) {
 		return FloatTypeNode::create(_context, "float", quals);
-	} else if (_mangled.consumeFront('d')) {
+	} else if (consumeIfPossible('d')) {
 		return FloatTypeNode::create(_context, "double", quals);
-	} else if (_mangled.consumeFront('g')) {
+	} else if (consumeIfPossible('g')) {
 		return FloatTypeNode::create(_context, "long double", quals);
 	}
 
-	return nullptr;
+	return nullptr;        // did nothing
 }
 
 unsigned BorlandASTParser::parseNumber()
@@ -479,7 +520,7 @@ unsigned BorlandASTParser::parseNumber()
 	return acc;
 }
 
-std::shared_ptr<Node> BorlandASTParser::parseNamedType(unsigned nameLen)
+std::shared_ptr<Node> BorlandASTParser::parseNamedType(unsigned nameLen, const Qualifiers &quals)
 {
 	const char *end_named = _mangled.begin() + nameLen;
 	if (_mangled.end() < end_named) {
@@ -493,14 +534,11 @@ std::shared_ptr<Node> BorlandASTParser::parseNamedType(unsigned nameLen)
 		return nullptr;
 	}
 
-	return nameNode;    // TODO quals
-//	return NamedTypeNode::create(_context, nameNode, )
+	return NamedTypeNode::create(_context, nameNode, quals);
 }
 
-std::shared_ptr<Node> BorlandASTParser::parseTemplate(std::shared_ptr<Node> templateNamespace)
+std::shared_ptr<Node> BorlandASTParser::parseTemplateName(std::shared_ptr<Node> templateNamespace)
 {
-	_mangled.consumeFront('%');
-
 	auto templateName = _mangled.cutUntil('$');
 	if (templateName.empty()) {
 		_status = invalid_mangled_name;
@@ -512,8 +550,11 @@ std::shared_ptr<Node> BorlandASTParser::parseTemplate(std::shared_ptr<Node> temp
 		templateNameNode = NestedNameNode::create(templateNamespace, templateNameNode);
 	}
 
-	_mangled.consumeFront('$');
+	return templateNameNode;
+}
 
+std::shared_ptr<Node> BorlandASTParser::parseTemplateParams()
+{
 	auto params = NodeArray::create();
 	while (_mangled.front() != '%') {
 		if (_mangled.consumeFront('t')) {
@@ -525,36 +566,66 @@ std::shared_ptr<Node> BorlandASTParser::parseTemplate(std::shared_ptr<Node> temp
 			}
 		}// TODO else nothing, check delphi for tests
 		auto typeNode = parseType();
-		if (typeNode && _status != invalid_mangled_name) {
+		if (!statusOk()) {
+			return nullptr;
+		}
+		if (typeNode) {
 			params->addNode(typeNode);
 		}
 	}
+	return params->empty() ? nullptr : params;
+}
 
-	_mangled.consumeFront('%');
-	auto templateNode = TemplateNode::create(templateNameNode, params);
-	return templateNode;
+std::shared_ptr<Node> BorlandASTParser::parseTemplate(std::shared_ptr<Node> templateNamespace)
+{
+	if (!consume('%')) {
+		return nullptr;
+	}
+
+	auto templateNameNode = parseTemplateName(templateNamespace);
+	if (!checkResult(templateNameNode)) {
+		return nullptr;
+	}
+
+	if (!consume('$')) {
+		return nullptr;
+	}
+
+	auto params = parseTemplateParams();
+	if (!checkResult(params)) {
+		return nullptr;
+	}
+
+	if (!consume('%')) {
+		return nullptr;
+	}
+
+	return TemplateNode::create(templateNameNode, params);
 }
 
 std::shared_ptr<Node> BorlandASTParser::parseTemplate(std::shared_ptr<Node> templateNamespace, const char *end)
 {
-	_mangled.consumeFront('%');
+	if (!consume('%')) {
+		return nullptr;
+	}
+
 	auto templateName = _mangled.cutUntil('$');
 	if (templateName.empty()) {
 		_status = invalid_mangled_name;
 		return nullptr;
 	}
-
 	std::shared_ptr<Node> templateNameNode = NameNode::create(templateName);
-
 	if (templateNamespace) {
 		templateNameNode = NestedNameNode::create(templateNamespace, templateNameNode);
 	}
 
-	_mangled.consumeFront('$');
+	if(!consume('$')) {
+		return nullptr;
+	}
+
 	auto params = NodeArray::create();
-	while (_mangled.front()
-		!= '%') {    // TODO tato podmienka je zle, musi sa ist po kedy nebude jedno pred koncom, posledny znak musi byt %
-		if (_mangled.consumeFront('t')) {
+	while (!peekChar('%')) {
+		if (consumeIfPossible('t')) {
 			unsigned backref = peekNumber();
 			if (backref > 0 && backref <= params->size()) {
 				parseNumber();
@@ -569,14 +640,16 @@ std::shared_ptr<Node> BorlandASTParser::parseTemplate(std::shared_ptr<Node> temp
 		params->addNode(typeNode);
 	}
 
-	_mangled.consumeFront('%');
+	if (!consume('%')){
+		return nullptr;
+	}
+
 	if (_mangled.begin() != end) {
 		_status = invalid_mangled_name;
 		return nullptr;
 	}
-	auto templateNode = TemplateNode::create(templateNameNode, params);
-	return templateNode;
-	// TODO problem ked je viac parametrov v template
+
+	return TemplateNode::create(templateNameNode, params);
 }
 
 } // borland

@@ -259,12 +259,12 @@ std::shared_ptr<Node> NodeArray::get(unsigned i) const
 Qualifiers::Qualifiers(bool isVolatile, bool isConst) :
 	_isVolatile(isVolatile), _isConst(isConst) {}
 
-bool Qualifiers::isVolatile()
+bool Qualifiers::isVolatile() const
 {
 	return _isVolatile;
 }
 
-bool Qualifiers::isConst()
+bool Qualifiers::isConst() const
 {
 	return _isConst;
 }

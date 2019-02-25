@@ -25,9 +25,9 @@ class Qualifiers
 public:
 	Qualifiers(bool isVolatile, bool isConst);
 
-	bool isVolatile();
+	bool isVolatile() const;
 
-	bool isConst();
+	bool isConst() const;
 
 	void printSpaceL(std::ostream &s) const;
 

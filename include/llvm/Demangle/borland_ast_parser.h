@@ -57,14 +57,16 @@ private:
 	std::shared_ptr<Node> parseType();
 	std::shared_ptr<Node> parseBuildInType(const Qualifiers &quals);
 	unsigned parseNumber();
-	std::shared_ptr<Node> parseNamedType(unsigned nameLen);
+	std::shared_ptr<Node> parseNamedType(unsigned nameLen, const Qualifiers &quals);
 	std::shared_ptr<Node> parseFuncName();
 	std::shared_ptr<Node> parseName(const char *end);
+	std::shared_ptr<Node> parseTemplateName(std::shared_ptr<Node> templateNamespace);
+	std::shared_ptr<Node> parseTemplateParams();
 	std::shared_ptr<Node> parseTemplate(std::shared_ptr<Node> templateNamespace);
 	std::shared_ptr<Node> parseTemplate(std::shared_ptr<Node> templateNamespace, const char *end);
 	std::shared_ptr<Node> parsePointer(const Qualifiers &quals);
-	std::shared_ptr<Node> parseReference(const Qualifiers &quals);
-	std::shared_ptr<Node> parseRReference(const Qualifiers &quals);
+	std::shared_ptr<Node> parseReference();
+	std::shared_ptr<Node> parseRReference();
 	std::shared_ptr<Node> parseArray(const Qualifiers &quals);
 
 private:
