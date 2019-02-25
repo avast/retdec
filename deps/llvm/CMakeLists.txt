@@ -23,10 +23,6 @@ else()
 	set(IS_DEBUG_BUILD "NO")
 endif()
 
-# Pass only the optimization flag to LLVM.
-# LLVM does not like some other flags (e.g. -DNDEBUG) - compilations ends with errors.
-string(REGEX MATCH "-O[0-9a-zA-Z]|/O[0-9a-zA-Z]" CMAKE_CXX_FLAGS_RELEASE_LLVM "${CMAKE_CXX_FLAGS_RELEASE}")
-
 # Use the ExternalProject module instead of just CMake because we want to build and
 # install only some tools from LLVM, not all the libraries and tools.
 include(ExternalProject)
@@ -39,7 +35,7 @@ ExternalProject_Add(llvm-project
 		# Force a release build (we don't need to debug LLVM).
 		# This has no effect on Windows with MSVC, but is useful on Linux.
 		-DCMAKE_BUILD_TYPE=Release
-		-DCMAKE_CXX_FLAGS_RELEASE="${CMAKE_CXX_FLAGS_RELEASE_LLVM}"
+		-DCMAKE_CXX_FLAGS_RELEASE=${CMAKE_CXX_FLAGS_RELEASE}
 
 		# Force Python3.
 		-DPYTHON_EXECUTABLE=${PYTHON_EXECUTABLE}
