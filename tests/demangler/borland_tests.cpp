@@ -193,6 +193,7 @@ TEST_F(BorlandDemanglerTests, NamedTypes)
 {
 	DEM_EQ("@foo$q10ns@Bar@Baz", "foo(ns::Bar::Baz)");
 	DEM_EQ("@foo$qpx10ns@Bar@Baz", "foo(const ns::Bar::Baz *)");
+	DEM_FAIL("@foo$q010ns@Bar@Baz", status::invalid_mangled_name);
 }
 
 TEST_F(BorlandDemanglerTests, Backrefs)
@@ -221,6 +222,11 @@ TEST_F(BorlandDemanglerTests, FunctionPointers)
 TEST_F(BorlandDemanglerTests, FailTests)
 {
 	DEM_FAIL("@%foo2$20std@%basic_string$c10%my_tmp$c%%i%$qv$v", status::invalid_mangled_name);
+	DEM_FAIL("@foo$q14std@%tmp$c%iii", status::invalid_mangled_name);
+	DEM_FAIL("@foo$q14std@%tmp$c%", status::invalid_mangled_name);
+	DEM_FAIL("@foo$q14std@%tmp$c11std@%tmp$c%", status::invalid_mangled_name);
+	DEM_FAIL("@foo$q23std@%tmp$c11std@%tmp$c%", status::invalid_mangled_name);
+	DEM_FAIL("@foo$q14std@%tmp$c11std@%tmp$c%%", status::invalid_mangled_name);
 }
 
 // TODO operator tests, named params tests, fail tests, extra long names, backref tests, conversion operators, functions as params

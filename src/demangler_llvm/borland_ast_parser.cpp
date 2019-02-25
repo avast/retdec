@@ -253,8 +253,13 @@ std::shared_ptr<Node> BorlandASTParser::parseName(const char *endMangled)
 		}
 	}
 
-	if (peekChar('%') && c != end) {
-		name = parseTemplate(name, end);
+	if (peekChar('%') && c != end) { // TODO treba tam check na end?
+		name = parseTemplate(name);
+	}
+
+	if (_mangled.begin() != end) {
+		_status = invalid_mangled_name;
+		return nullptr;
 	}
 
 	return name;
@@ -503,20 +508,18 @@ std::shared_ptr<Node> BorlandASTParser::parseBuildInType(const Qualifiers &quals
 
 unsigned BorlandASTParser::parseNumber()
 {
-	unsigned acc = 0;
-	if (!_mangled.empty()) {
-		char c = _mangled.front();
-		if (c == '0') {
-			_status = invalid_mangled_name;    // cant start with 0
-			return 0;
-		}
-
-		while (!_mangled.empty() && _mangled.front() >= '0' && _mangled.front() <= '9') {
-			c = _mangled.popFront();
-			acc = 10 * acc + static_cast<unsigned>(c - '0');
-		}
+	char c = peek();
+	if (c == '0' || c == EOF) {
+		_status = invalid_mangled_name;
+		return 0;
 	}
 
+	unsigned acc = 0;
+	while (c >= '0' && c <= '9') {
+		_mangled.popFront();
+		acc = 10 * acc + static_cast<unsigned>(c - '0');
+		c = peek();
+	}
 	return acc;
 }
 
@@ -556,8 +559,8 @@ std::shared_ptr<Node> BorlandASTParser::parseTemplateName(std::shared_ptr<Node> 
 std::shared_ptr<Node> BorlandASTParser::parseTemplateParams()
 {
 	auto params = NodeArray::create();
-	while (_mangled.front() != '%') {
-		if (_mangled.consumeFront('t')) {
+	while (!peekChar('%')) {
+		if (consumeIfPossible('t')) {
 			unsigned backref = peekNumber();
 			if (backref > 0 && backref <= params->size()) {
 				parseNumber();
@@ -569,10 +572,12 @@ std::shared_ptr<Node> BorlandASTParser::parseTemplateParams()
 		if (!statusOk()) {
 			return nullptr;
 		}
-		if (typeNode) {
-			params->addNode(typeNode);
+		if (!typeNode) {
+			break;
 		}
+		params->addNode(typeNode);
 	}
+
 	return params->empty() ? nullptr : params;
 }
 
@@ -582,7 +587,7 @@ std::shared_ptr<Node> BorlandASTParser::parseTemplate(std::shared_ptr<Node> temp
 		return nullptr;
 	}
 
-	auto templateNameNode = parseTemplateName(templateNamespace);
+	auto templateNameNode = parseTemplateName(std::move(templateNamespace));
 	if (!checkResult(templateNameNode)) {
 		return nullptr;
 	}
@@ -597,55 +602,6 @@ std::shared_ptr<Node> BorlandASTParser::parseTemplate(std::shared_ptr<Node> temp
 	}
 
 	if (!consume('%')) {
-		return nullptr;
-	}
-
-	return TemplateNode::create(templateNameNode, params);
-}
-
-std::shared_ptr<Node> BorlandASTParser::parseTemplate(std::shared_ptr<Node> templateNamespace, const char *end)
-{
-	if (!consume('%')) {
-		return nullptr;
-	}
-
-	auto templateName = _mangled.cutUntil('$');
-	if (templateName.empty()) {
-		_status = invalid_mangled_name;
-		return nullptr;
-	}
-	std::shared_ptr<Node> templateNameNode = NameNode::create(templateName);
-	if (templateNamespace) {
-		templateNameNode = NestedNameNode::create(templateNamespace, templateNameNode);
-	}
-
-	if(!consume('$')) {
-		return nullptr;
-	}
-
-	auto params = NodeArray::create();
-	while (!peekChar('%')) {
-		if (consumeIfPossible('t')) {
-			unsigned backref = peekNumber();
-			if (backref > 0 && backref <= params->size()) {
-				parseNumber();
-				params->addNode(params->get(backref - 1));
-				continue;
-			}
-		}// TODO else nothing, check delphi for tests
-		auto typeNode = parseType();
-		if (!typeNode || _status == invalid_mangled_name) {
-			break;
-		}
-		params->addNode(typeNode);
-	}
-
-	if (!consume('%')){
-		return nullptr;
-	}
-
-	if (_mangled.begin() != end) {
-		_status = invalid_mangled_name;
 		return nullptr;
 	}
 

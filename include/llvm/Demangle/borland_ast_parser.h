@@ -63,7 +63,6 @@ private:
 	std::shared_ptr<Node> parseTemplateName(std::shared_ptr<Node> templateNamespace);
 	std::shared_ptr<Node> parseTemplateParams();
 	std::shared_ptr<Node> parseTemplate(std::shared_ptr<Node> templateNamespace);
-	std::shared_ptr<Node> parseTemplate(std::shared_ptr<Node> templateNamespace, const char *end);
 	std::shared_ptr<Node> parsePointer(const Qualifiers &quals);
 	std::shared_ptr<Node> parseReference();
 	std::shared_ptr<Node> parseRReference();
