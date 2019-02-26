@@ -184,7 +184,6 @@ bool PeWrapper::getFileSection(unsigned long long secIndex, FileSection &section
 			section.setCrc32(auxSec->getCrc32());
 			section.setMd5(auxSec->getMd5());
 			section.setSha256(auxSec->getSha256());
-
 		}
 	}
 
