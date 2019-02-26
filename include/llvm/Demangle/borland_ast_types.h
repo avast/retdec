@@ -129,7 +129,7 @@ class PointerTypeNode : public TypeNode
 public:
 	static std::shared_ptr<PointerTypeNode> create(
 		Context context,
-		std::shared_ptr<Node> pointee,
+		const std::shared_ptr<Node> &pointee,
 		const Qualifiers &quals);
 
 	std::shared_ptr<Node> pointee();
@@ -139,7 +139,7 @@ public:
 	void printRight(std::ostream &s) const override;
 
 private:
-	PointerTypeNode(std::shared_ptr<Node> pointee, const Qualifiers &quals);
+	PointerTypeNode(const std::shared_ptr<Node> &pointee, const Qualifiers &quals);
 
 private:
 	std::shared_ptr<Node> _pointee;

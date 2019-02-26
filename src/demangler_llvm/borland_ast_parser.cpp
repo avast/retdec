@@ -158,8 +158,6 @@ void BorlandASTParser::parseFunction()
 		return;
 	}
 
-	// TODO operators
-
 	if (!consume('$')) {
 		return;
 	}

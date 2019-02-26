@@ -52,13 +52,13 @@ std::shared_ptr<BuiltInTypeNode> BuiltInTypeNode::create(
 	const StringView &typeName,
 	const Qualifiers &quals)
 {
-//	auto type = context.getBuiltInType(typeName, isVolatile, isConst);
-//	if (type && type->kind() == Kind::KBuiltInType) {
-//		return type;
-//	}
+	auto type = context.getBuiltInType(typeName, quals);
+	if (type && type->kind() == Kind::KBuiltInType) {
+		return type;
+	}
 
 	auto newType = std::shared_ptr<BuiltInTypeNode>(new BuiltInTypeNode(typeName, quals));
-//	context.addBuiltInType(newType);
+	context.addBuiltInType(newType);
 	return newType;
 }
 
@@ -73,13 +73,13 @@ std::shared_ptr<CharTypeNode> CharTypeNode::create(
 	ThreeStateSignness signness,
 	const Qualifiers &quals)
 {
-//	auto type = context.getCharType(signness, isVolatile, isConst);
-//	if (type && type->kind() == Kind::KCharType) {
-//		return type;
-//	}
+	auto type = context.getCharType(signness, quals);
+	if (type && type->kind() == Kind::KCharType) {
+		return type;
+	}
 
 	auto newType = std::shared_ptr<CharTypeNode>(new CharTypeNode(signness, quals));
-//	context.addCharType(newType);
+	context.addCharType(newType);
 	return newType;
 }
 
@@ -113,13 +113,13 @@ std::shared_ptr<IntegralTypeNode> IntegralTypeNode::create(
 	bool isUnsigned,
 	const Qualifiers &quals)
 {
-//	auto type = context.getIntegralType(typeName, isUnsigned, quals);
-//	if (type && type->kind() == Kind::KIntegralType) {
-//		return type;
-//	}
+	auto type = context.getIntegralType(typeName, isUnsigned, quals);
+	if (type && type->kind() == Kind::KIntegralType) {
+		return type;
+	}
 
 	auto newType = std::shared_ptr<IntegralTypeNode>(new IntegralTypeNode(typeName, isUnsigned, quals));
-//	context.addIntegralType(newType);
+	context.addIntegralType(newType);
 	return newType;
 }
 
@@ -148,13 +148,13 @@ std::shared_ptr<FloatTypeNode> FloatTypeNode::create(
 	const StringView &typeName,
 	const Qualifiers &quals)
 {
-//	auto type = context.getFloatType(typeName, isVolatile, isConst);
-//	if (type && type->kind() == Kind::KFloatType) {
-//		return type;
-//	}
+	auto type = context.getFloatType(typeName, quals);
+	if (type && type->kind() == Kind::KFloatType) {
+		return type;
+	}
 
 	auto newType = std::shared_ptr<FloatTypeNode>(new FloatTypeNode(typeName, quals));
-//	context.addFloatType(newType);
+	context.addFloatType(newType);
 	return newType;
 }
 
@@ -191,7 +191,7 @@ void NamedTypeNode::printLeft(std::ostream &s) const
 	s << _typeName->str();
 }
 
-PointerTypeNode::PointerTypeNode(std::shared_ptr<Node> pointee, const Qualifiers &quals) :
+PointerTypeNode::PointerTypeNode(const std::shared_ptr<Node> &pointee, const Qualifiers &quals) :
 	TypeNode("", quals), _pointee(std::move(pointee))
 {
 	_kind = Kind::KPointerType;
@@ -200,16 +200,16 @@ PointerTypeNode::PointerTypeNode(std::shared_ptr<Node> pointee, const Qualifiers
 
 std::shared_ptr<PointerTypeNode> PointerTypeNode::create(
 	Context context,
-	std::shared_ptr<Node> pointee,
+	const std::shared_ptr<Node> &pointee,
 	const Qualifiers &quals)
 {
-//	auto type = context.getPointerType(pointee, isVolatile, isConst);
-//	if (type && type->kind() == Kind::KPointerType) {
-//		return type;
-//	}
+	auto type = context.getPointerType(pointee, quals);
+	if (type && type->kind() == Kind::KPointerType) {
+		return type;
+	}
 
 	auto newType = std::shared_ptr<PointerTypeNode>(new PointerTypeNode(pointee, quals));
-//	context.addPointerType(newType);
+	context.addPointerType(newType);
 	return newType;
 }
 
