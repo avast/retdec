@@ -15,8 +15,6 @@
 
 #define mpress_plugin plugin(retdec::unpackertool::mpress::MpressPlugin)
 
-using namespace retdec::utils;
-
 namespace retdec {
 namespace unpackertool {
 namespace mpress {
@@ -76,17 +74,19 @@ public:
 	virtual void cleanup() override;
 
 private:
-	bool decompressData(DynamicBuffer& compressedContent, DynamicBuffer& decompressedContent);
-	void decodeLzmaProperties(DynamicBuffer& compressedContent, std::uint8_t& pb, std::uint8_t& lp, std::uint8_t& lc);
+	bool decompressData(retdec::utils::DynamicBuffer& compressedContent,
+						retdec::utils::DynamicBuffer& decompressedContent);
+	void decodeLzmaProperties(retdec::utils::DynamicBuffer& compressedContent, std::uint8_t& pb,
+						std::uint8_t& lp, std::uint8_t& lc);
 	std::uint32_t getFixStub();
-	void fixJumpsAndCalls(DynamicBuffer& buffer);
-	void fixImportsAndEp(DynamicBuffer& buffer);
-	void offsetAnalysis(const DynamicBuffer& buffer);
-	void trailingBytesAnalysis(const DynamicBuffer& buffer);
+	void fixJumpsAndCalls(retdec::utils::DynamicBuffer& buffer);
+	void fixImportsAndEp(retdec::utils::DynamicBuffer& buffer);
+	void offsetAnalysis(const retdec::utils::DynamicBuffer& buffer);
+	void trailingBytesAnalysis(const retdec::utils::DynamicBuffer& buffer);
 	void fixRelocations();
 	MpressUnpackerStub detectUnpackerStubVersion();
-	MpressFixStub detectFixStubVersion(DynamicBuffer& unpackedContent);
-	void saveFile(const std::string& fileName, DynamicBuffer& content);
+	MpressFixStub detectFixStubVersion(retdec::utils::DynamicBuffer& unpackedContent);
+	void saveFile(const std::string& fileName, retdec::utils::DynamicBuffer& content);
 	void copySectionFromOriginalFile(std::uint32_t origSectIndex, const std::string& newFileName, std::uint32_t newSectIndex);
 
 	std::unique_ptr<retdec::loader::Image> _file;

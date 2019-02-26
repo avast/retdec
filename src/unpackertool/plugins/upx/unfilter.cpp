@@ -5,6 +5,7 @@
  */
 
 #include <memory>
+#include <algorithm>
 
 #include "unpackertool/plugins/upx/unfilter.h"
 
