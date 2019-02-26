@@ -141,7 +141,7 @@ private:
 class NameNode : public Node
 {
 public:
-	static std::shared_ptr<NameNode> create(const StringView &name);
+	static std::shared_ptr<NameNode> create(Context &context, const StringView &name);
 
 	void printLeft(std::ostream &s) const override;
 
@@ -159,9 +159,13 @@ class NestedNameNode : public Node
 {
 public:
 	static std::shared_ptr<NestedNameNode> create(
-		std::shared_ptr<Node> super, std::shared_ptr<Node> name);
+		Context &context, std::shared_ptr<Node> super, std::shared_ptr<Node> name);
 
 	void printLeft(std::ostream &s) const override;
+
+	std::shared_ptr<Node> super();
+
+	std::shared_ptr<Node> name();
 
 private:
 	NestedNameNode(std::shared_ptr<Node> super, std::shared_ptr<Node> name);

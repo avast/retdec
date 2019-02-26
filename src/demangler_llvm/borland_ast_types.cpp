@@ -170,11 +170,11 @@ std::shared_ptr<NamedTypeNode> NamedTypeNode::create(
 	const Qualifiers &quals)
 {
 	// TODO context
-//	auto type = context.getNamedType(typeName, isVolatile, isConst);
+//	auto type = context.getNamedType(typeName, quals);
 //	if (type && type->kind() == Kind::KNamedType) {
 //		return type;
 //	}
-//
+
 	auto newType = std::shared_ptr<NamedTypeNode>(new NamedTypeNode(typeName, quals));
 //	context.addNamedType(newType);
 	return newType;
@@ -203,13 +203,13 @@ std::shared_ptr<PointerTypeNode> PointerTypeNode::create(
 	const std::shared_ptr<Node> &pointee,
 	const Qualifiers &quals)
 {
-	auto type = context.getPointerType(pointee, quals);
-	if (type && type->kind() == Kind::KPointerType) {
-		return type;
-	}
+//	auto type = context.getPointerType(pointee, quals);
+//	if (type && type->kind() == Kind::KPointerType) {
+//		return type;
+//	}
 
 	auto newType = std::shared_ptr<PointerTypeNode>(new PointerTypeNode(pointee, quals));
-	context.addPointerType(newType);
+//	context.addPointerType(newType);
 	return newType;
 }
 
@@ -247,13 +247,13 @@ std::shared_ptr<ReferenceTypeNode> ReferenceTypeNode::create(
 	retdec::demangler::borland::Context &context,
 	std::shared_ptr<retdec::demangler::borland::Node> pointee)
 {
-//	auto type = context.getReferenceType(pointee);
-//	if (type && type->kind() == Kind::KReferenceType) {
-//		return type;
-//	}
+	auto type = context.getReferenceType(pointee);
+	if (type && type->kind() == Kind::KReferenceType) {
+		return type;
+	}
 
 	auto newType = std::shared_ptr<ReferenceTypeNode>(new ReferenceTypeNode(pointee));
-//	context.addReferenceType(newType);
+	context.addReferenceType(newType);
 	return newType;
 }
 

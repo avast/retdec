@@ -9,6 +9,7 @@
 
 #include "llvm/Demangle/borland_ast.h"
 #include "llvm/Demangle/borland_ast_types.h"
+#include "llvm/Demangle/context.h"
 
 namespace retdec {
 namespace demangler {
@@ -154,9 +155,16 @@ NameNode::NameNode(const StringView &name) : Node(NameNode::Kind::KName, false),
  * @param name StringView representation of name.
  * @return Unique pointer to new NameNode
  */
-std::shared_ptr<NameNode> NameNode::create(const StringView &name)
+std::shared_ptr<NameNode> NameNode::create(Context &context, const StringView &name)
 {
-	return std::shared_ptr<NameNode>(new NameNode(name));
+	auto type = context.getName(name);
+	if (type) {
+		return type;
+	}
+
+	auto newName = std::shared_ptr<NameNode>(new NameNode(name));
+	context.addName(newName);
+	return newName;
 }
 
 /**
@@ -183,9 +191,17 @@ NestedNameNode::NestedNameNode(
  * @return Unique pointer to new nested name node.
  */
 std::shared_ptr<NestedNameNode> NestedNameNode::create(
-	std::shared_ptr<Node> super, std::shared_ptr<Node> name)
+	Context &context, std::shared_ptr<Node> super, std::shared_ptr<Node> name)
 {
-	return std::shared_ptr<NestedNameNode>(new NestedNameNode(super, name));
+	auto type = context.getNestedName(super, name);
+	if (type) {
+		return type;
+	}
+
+	auto newName = std::shared_ptr<NestedNameNode>(new NestedNameNode(super, name));
+	context.addNestedName(newName);
+	return newName;
+//	return std::shared_ptr<NestedNameNode>(new NestedNameNode(super, name));
 }
 
 /**
@@ -197,6 +213,14 @@ void NestedNameNode::printLeft(std::ostream &s) const
 	_super->print(s);
 	s << std::string{"::"};
 	_name->print(s);
+}
+
+std::shared_ptr<Node> NestedNameNode::super() {
+	return _super;
+}
+
+std::shared_ptr<Node> NestedNameNode::name() {
+	return _name;
 }
 
 /**

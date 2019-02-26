@@ -19,7 +19,7 @@ namespace demangler {
 namespace borland {
 namespace tests {
 
-class BorlandContextTests: public Test
+class BorlandContextTests : public Test
 {
 public:
 	BorlandContextTests() = default;
@@ -42,19 +42,66 @@ TEST_F(BorlandContextTests, IntegralTest)
 	EXPECT_NE(i4, i5);
 }
 
-TEST_F(BorlandContextTests, PointerTests)
+//TEST_F(BorlandContextTests, PointerTests)
+//{
+//	auto i1 = IntegralTypeNode::create(context, "int", false, {false, false});
+//	auto i2 = IntegralTypeNode::create(context, "int", false, {false, false});
+//
+//	auto p1 = PointerTypeNode::create(context, i1, {false, false});
+//	auto p2 = PointerTypeNode::create(context, i1, {false, false});
+//	auto p3 = PointerTypeNode::create(context, i2, {false, false});
+//
+//	EXPECT_EQ(p1, p2);
+//	EXPECT_NE(p1, p3);
+//
+//}
+
+TEST_F(BorlandContextTests, ReferenceTests)
 {
 	auto i1 = IntegralTypeNode::create(context, "int", false, {false, false});
-	auto i2 = IntegralTypeNode::create(context, "int", false, {false, false});
+	auto i2 = IntegralTypeNode::create(context, "int", false, {false, true});
 
-	auto p1 = PointerTypeNode::create(context, i1, {false, false});
-	auto p2 = PointerTypeNode::create(context, i1, {false, false});
-	auto p3 = PointerTypeNode::create(context, i2, {false, false});
+	auto r1 = ReferenceTypeNode::create(context, i1);
+	auto r2 = ReferenceTypeNode::create(context, i1);
+	auto r3 = ReferenceTypeNode::create(context, i2);
 
-	EXPECT_EQ(p1, p2);
-	EXPECT_NE(p1, p3);
-
+	EXPECT_EQ(r1, r2);
+	EXPECT_NE(r1, r3);
 }
+
+//TEST_F(BorlandContextTests, NamedTypeTests)
+//{
+//	auto name = NameNode::create(context, "Foo");
+//
+//	auto n1 = NamedTypeNode::create(context, name, {false, false});
+//	auto n2 = NamedTypeNode::create(context, name, {false, false});
+//
+//	EXPECT_EQ(n1, n2);
+//}
+
+TEST_F(BorlandContextTests, NameNodesTests)
+{
+	auto n1 = NameNode::create(context, "foo");
+	auto n2 = NameNode::create(context, "foo");
+	auto n3 = NameNode::create(context, "fo");
+
+	EXPECT_EQ(n1, n2);
+	EXPECT_NE(n1, n3);
+}
+
+TEST_F(BorlandContextTests, NestedNameNodesTests)
+{
+	auto name = NameNode::create(context, "foo");
+	auto name2 = NameNode::create(context, "bar");
+
+	auto nn1 = NestedNameNode::create(context, name, name);
+	auto nn2 = NestedNameNode::create(context, name, name);
+	auto nn3 = NestedNameNode::create(context, name, name2);
+
+	EXPECT_EQ(nn1, nn2);
+	EXPECT_NE(nn1, nn3);
+}
+
 
 } // tests
 } // borland

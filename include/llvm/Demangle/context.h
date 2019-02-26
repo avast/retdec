@@ -22,6 +22,8 @@ class PointerTypeNode;
 class ReferenceTypeNode;
 class NamedTypeNode;
 class Qualifiers;
+class NameNode;
+class NestedNameNode;
 
 class Context
 {
@@ -58,23 +60,34 @@ public:
 	void addFloatType(
 		const std::shared_ptr<FloatTypeNode> &type);
 
-	bool hasPointerType(
-		const std::shared_ptr<Node> &pointee, const Qualifiers &quals) const;
-	std::shared_ptr<PointerTypeNode> getPointerType(
-		const std::shared_ptr<Node> &pointee, const Qualifiers &quals) const;
-	void addPointerType(
-		const std::shared_ptr<PointerTypeNode> &type);
+//	bool hasPointerType(
+//		std::shared_ptr<Node> pointee, const Qualifiers &quals) const;
+//	std::shared_ptr<PointerTypeNode> getPointerType(
+//		std::shared_ptr<Node> pointee, const Qualifiers &quals) const;
+//	void addPointerType(
+//		const std::shared_ptr<PointerTypeNode> &type);
 
 	bool hasReferenceType(std::shared_ptr<Node> pointee) const;
 	std::shared_ptr<ReferenceTypeNode> getReferenceType(std::shared_ptr<Node> pointee) const;
 	void addReferenceType(const std::shared_ptr<ReferenceTypeNode> &type);
 
 	bool hasNamedType(
-		const std::string &name, bool isVolatile, bool isConst) const;
+		const StringView &name, const Qualifiers &quals) const;
 	std::shared_ptr<NamedTypeNode> getNamedType(
-		const std::string &name, bool isVolatile, bool isConst) const;
+		const StringView &name, const Qualifiers &quals) const;
 	void addNamedType(
 		const std::shared_ptr<NamedTypeNode> &type);
+
+	bool hasFunction(const StringView &mangled) const;
+	std::shared_ptr<Node> getFunction(const StringView &mangled) const;
+	void addFunction(const StringView &mangled, const std::shared_ptr<Node> &function);
+
+//	bool hasName(const StringView &name) const;
+	std::shared_ptr<NameNode> getName(const StringView &name) const;
+	void addName(const std::shared_ptr<NameNode> &name);
+
+	std::shared_ptr<NestedNameNode> getNestedName(std::shared_ptr<Node> super, std::shared_ptr<Node> name);
+	void addNestedName(const std::shared_ptr<NestedNameNode> &name);
 
 private:
 	using BuiltInTypeNodes = std::map<std::tuple<std::string, bool, bool>, std::shared_ptr<BuiltInTypeNode>>;
@@ -86,18 +99,23 @@ private:
 	using IntegralTypeNodes = std::map<std::tuple<std::string, bool, bool, bool>, std::shared_ptr<IntegralTypeNode>>;
 	IntegralTypeNodes integralTypes;
 
-	using PointerTypeNodes = std::map<std::tuple</*std::shared_ptr<Node>,*/ bool, bool>, std::shared_ptr<PointerTypeNode>>;
-	PointerTypeNodes pointerTypes;
+//	using PointerTypeNodes = std::map<std::shared_ptr<Node>, std::shared_ptr<PointerTypeNode>>;
+//	PointerTypeNodes pointerTypes;
 
 	using ReferenceTypeNodes = std::map<std::shared_ptr<Node>, std::shared_ptr<ReferenceTypeNode>>;
 	ReferenceTypeNodes referenceTypes;
 
-//	using NamedTypeNodes = std::map<std::tuple<std::string, bool, bool>, std::shared_ptr<NamedTypeNode>>;;
-//	NamedTypeNodes namedTypes;
+	using NamedTypeNodes = std::map<std::tuple<std::string, bool, bool>, std::shared_ptr<NamedTypeNode>>;;
+	NamedTypeNodes namedTypes;
 
-	// TODO opytaj sa peta ako casto bud v ramci jedneho behu rovnake mangling mena (funkcie by sa dali haskovat podla manglovaneho mena)
-	// TODO manglovane meno (pri voloani parseabsolutename @abdsaj$) aj ciastocne by mali byt v kontextne, nestednames asi nie
-	// TODO pri named types by sa dalo hashovat aj podla demangled name, ale to neviem ci dava zmysel
+	using FunctionNodes = std::map<std::string, std::shared_ptr<Node>>;
+	FunctionNodes functions;
+
+	using NameNodes = std::map<std::string, std::shared_ptr<NameNode>>;
+	NameNodes nameNodes;
+
+	using NestedNameNodes = std::map<std::tuple<std::shared_ptr<Node>, std::shared_ptr<Node>>, std::shared_ptr<NestedNameNode>>;
+	NestedNameNodes nestedNameNodes;
 
 };
 
