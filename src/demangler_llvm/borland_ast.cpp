@@ -289,6 +289,20 @@ void Qualifiers::printSpaceR(std::ostream &s) const
 	}
 }
 
+ConversionOperatorNode::ConversionOperatorNode(std::shared_ptr<retdec::demangler::borland::Node> type) :
+	Node(Kind::KConversionOperator), _type(type) {}
+
+std::shared_ptr<ConversionOperatorNode> ConversionOperatorNode::create(Context &context, std::shared_ptr<Node> type)
+{
+	return std::shared_ptr<ConversionOperatorNode>(new ConversionOperatorNode(type));
+}
+
+void ConversionOperatorNode::printLeft(std::ostream &s) const
+{
+	s << "operator ";
+	_type -> print(s);
+}
+
 }    // borland
 }    // demangler
 }    // retdec

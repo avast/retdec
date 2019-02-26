@@ -214,7 +214,8 @@ public:
 		CallConv callConv,
 		std::shared_ptr<Node> params,
 		std::shared_ptr<Node> retType,
-		Qualifiers &quals);
+		Qualifiers &quals,
+		bool isVarArg);
 
 	void printLeft(std::ostream &s) const override;
 
@@ -225,12 +226,14 @@ private:
 		CallConv callConv,
 		std::shared_ptr<Node> params,
 		std::shared_ptr<Node> retType,
-		Qualifiers &quals);
+		Qualifiers &quals,
+		bool isVarArg);
 
 private:
 	CallConv _callConv;
 	std::shared_ptr<Node> _params;
 	std::shared_ptr<Node> _retType;
+	bool _isVarArg;
 };
 
 }    // borland

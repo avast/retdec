@@ -73,6 +73,7 @@ public:
 		KNamedType,
 		KTemplateNode,
 		KArrayNode,
+		KConversionOperator,
 	};
 
 public:
@@ -193,6 +194,20 @@ private:
 
 private:
 	std::vector<std::shared_ptr<Node>> _nodes;
+};
+
+class ConversionOperatorNode : public Node
+{
+public:
+	static std::shared_ptr<ConversionOperatorNode> create(Context &context, std::shared_ptr<Node> type);
+
+	void printLeft(std::ostream &s) const override;
+
+private:
+	ConversionOperatorNode(std::shared_ptr<Node> type);
+
+private:
+	std::shared_ptr<Node> _type;
 };
 
 }    // borland

@@ -39,8 +39,9 @@ public:
 
 private:
 	char peek() const;
-	unsigned peekNumber() const;
 	bool peekChar(char c) const;
+	bool peek(const StringView &s) const;
+	unsigned peekNumber() const;
 	bool statusOk() const;
 	bool checkResult(std::shared_ptr<Node> node);
 	bool consumeIfPossible(char c);

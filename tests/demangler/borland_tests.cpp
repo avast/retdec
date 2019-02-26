@@ -185,6 +185,7 @@ TEST_F(BorlandDemanglerTests, TemplateTests)
 	DEM_EQ(
 		"@%foo$60std@%basic_string$c19std@%char_traits$c%17std@%allocator$c%%%$q60std@%basic_string$c19std@%char_traits$c%17std@%allocator$c%%$v",
 		"void foo<std::basic_string<char, std::char_traits<char>, std::allocator<char>>>(std::basic_string<char, std::char_traits<char>, std::allocator<char>>)");
+	DEM_EQ("@%adder$iVii%$qiii$i", "int adder<int, int, int>(int, int, int)");	// TODO check validity
 }
 
 TEST_F(BorlandDemanglerTests, NamedTypes)
@@ -249,7 +250,8 @@ TEST_F(BorlandDemanglerTests, Operators)
 	DEM_EQ("@Foo@$bdele$qpv", "Foo::operator delete(void *)");
 	DEM_EQ("@Foo@$bdla$qpv", "Foo::operator delete[](void *)");
 
-	DEM_EQ("@Foo@$o3Bar$qv", "Foo::operator Bar(void)");
+	DEM_EQ("@Foo@$o3Bar$qv", "Foo::operator Bar(void)");	// TODO test with template?
+	DEM_EQ("@Foo@$oi$qv", "Foo::operator int(void)");
 	DEM_EQ("@li_abc$qg", "operator \"\" _abc(long double)");
 }
 

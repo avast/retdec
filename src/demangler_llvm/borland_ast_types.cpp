@@ -365,8 +365,9 @@ FunctionTypeNode::FunctionTypeNode(
 	retdec::demangler::borland::CallConv callConv,
 	std::shared_ptr<retdec::demangler::borland::Node> params,
 	std::shared_ptr<retdec::demangler::borland::Node> retType,
-	retdec::demangler::borland::Qualifiers &quals) :
-	TypeNode("", quals), _callConv(callConv), _params(params), _retType(retType)
+	retdec::demangler::borland::Qualifiers &quals,
+	bool isVarArg) :
+	TypeNode("", quals), _callConv(callConv), _params(params), _retType(retType), _isVarArg(isVarArg)
 {
 	_kind = Kind::KFunctionType;
 	_has_right = true;
@@ -377,9 +378,10 @@ std::shared_ptr<FunctionTypeNode> FunctionTypeNode::create(
 	retdec::demangler::borland::CallConv callConv,
 	std::shared_ptr<retdec::demangler::borland::Node> params,
 	std::shared_ptr<retdec::demangler::borland::Node> retType,
-	retdec::demangler::borland::Qualifiers &quals)
+	retdec::demangler::borland::Qualifiers &quals,
+	bool isVarArg)
 {
-	return std::shared_ptr<FunctionTypeNode>(new FunctionTypeNode(callConv, params, retType, quals));
+	return std::shared_ptr<FunctionTypeNode>(new FunctionTypeNode(callConv, params, retType, quals, isVarArg));
 }
 
 void FunctionTypeNode::printLeft(std::ostream &s) const
@@ -407,6 +409,9 @@ void FunctionTypeNode::printRight(std::ostream &s) const
 	s << "(";
 	if (_params) {
 		_params->print(s);
+	}
+	if (_isVarArg) {
+		s << ", ...";
 	}
 	s << ")";
 
