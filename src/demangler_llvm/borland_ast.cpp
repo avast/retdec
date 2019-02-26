@@ -300,7 +300,7 @@ std::shared_ptr<ConversionOperatorNode> ConversionOperatorNode::create(Context &
 void ConversionOperatorNode::printLeft(std::ostream &s) const
 {
 	s << "operator ";
-	_type -> print(s);
+	_type->print(s);
 }
 
 }    // borland

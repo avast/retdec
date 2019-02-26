@@ -192,17 +192,10 @@ std::shared_ptr<Node> BorlandASTParser::parseFuncName()
 			if (!nameView.empty()) {
 				_mangled.consumeFront(nameView);        // propagate to mangled
 				auto nameNode = NameNode::create(nameView);
-				if (!name) {
-					name = nameNode;
-				} else {
-					name = NestedNameNode::create(name, nameNode);
-				}
-
-				start = c + 1;
+				name = name ? std::static_pointer_cast<Node>(NestedNameNode::create(name, nameNode)) : nameNode;
+				start = c + 1;    // skip already checked chars and one of '%', '$', '@'
 			}
-			if (_mangled.front() == '@') {
-				_mangled.consumeFront('@');
-			} else {
+			if (!consumeIfPossible('@')) {    // $ or %
 				break;
 			}
 		}
@@ -335,12 +328,11 @@ std::shared_ptr<Node> BorlandASTParser::parseOperator()
 	return nullptr;
 }
 
-std::shared_ptr<Node> BorlandASTParser::parseName(const char *endMangled)
+std::shared_ptr<Node> BorlandASTParser::parseName(const char *end)
 {
 	std::shared_ptr<Node> name = nullptr;
 
 	const char *start = _mangled.begin();
-	const char *end = endMangled;
 	const char *c = _mangled.begin();
 	while (c < end) {
 		if (*c == '%' || *c == '@') {
@@ -348,17 +340,10 @@ std::shared_ptr<Node> BorlandASTParser::parseName(const char *endMangled)
 			if (!nameView.empty()) {
 				_mangled.consumeFront(nameView);        // propagate to mangled
 				auto nameNode = NameNode::create(nameView);
-				if (!name) {
-					name = nameNode;
-				} else {
-					name = NestedNameNode::create(name, nameNode);
-				}
-
+				name = name ? std::static_pointer_cast<Node>(NestedNameNode::create(name, nameNode)) : nameNode;
 				start = c + 1;
 			}
-			if (_mangled.front() == '@') {
-				_mangled.consumeFront('@');
-			} else {
+			if (!consumeIfPossible('@')) {
 				break;
 			}
 		}
@@ -369,18 +354,14 @@ std::shared_ptr<Node> BorlandASTParser::parseName(const char *endMangled)
 		auto nameView = StringView(start, c);
 		_mangled.consumeFront(nameView);        // propagate to mangled
 		auto nameNode = NameNode::create(nameView);
-		if (!name) {
-			name = nameNode;
-		} else {
-			name = NestedNameNode::create(name, nameNode);
-		}
+		name = name ? std::static_pointer_cast<Node>(NestedNameNode::create(name, nameNode)) : nameNode;
 	}
 
-	if (peekChar('%') && c != end) { // TODO treba tam check na end?
+	if (peekChar('%') && c != end) {    // check end if next parameter is template
 		name = parseTemplate(name);
 	}
 
-	if (_mangled.begin() != end) {
+	if (_mangled.begin() != end) {        // length was wrong
 		_status = invalid_mangled_name;
 		return nullptr;
 	}
@@ -403,7 +384,6 @@ std::shared_ptr<FunctionTypeNode> BorlandASTParser::parseFuncType(Qualifiers &qu
 	}
 
 	bool isVarArg = consumeIfPossible('e');
-	// todo var args
 
 	/* return type */
 	std::shared_ptr<Node> retType = nullptr;
@@ -445,12 +425,9 @@ std::shared_ptr<NodeArray> BorlandASTParser::parseFuncParams()
 
 	while (!_mangled.empty() && statusOk() && !peekChar('$')) {
 		if (consumeIfPossible('t')) {    // TODO delphi check for t before named types
-			unsigned backref = parseNumber();
-			if (backref == 0 || backref > params->size() || !statusOk()) {
-				_status = invalid_mangled_name;
+			if (!parseBackref(params)) {
 				return nullptr;
 			}
-			params->addNode(params->get(backref - 1));
 		} else {
 			auto param = parseType();
 			if (!statusOk()) {
@@ -464,6 +441,18 @@ std::shared_ptr<NodeArray> BorlandASTParser::parseFuncParams()
 	}
 
 	return params->empty() ? nullptr : params;
+}
+
+bool BorlandASTParser::parseBackref(std::shared_ptr<retdec::demangler::borland::NodeArray> &paramArray)
+{
+	unsigned backref = parseNumber();
+	if (backref == 0 || backref > paramArray->size() || !statusOk()) {
+		_status = invalid_mangled_name;
+		return false;
+	}
+
+	paramArray->addNode(paramArray->get(backref - 1));
+	return true;
 }
 
 std::shared_ptr<Node> BorlandASTParser::parseType()
@@ -695,7 +684,7 @@ std::shared_ptr<Node> BorlandASTParser::parseTemplateParams()
 {
 	auto params = NodeArray::create();
 	while (!peekChar('%')) {
-		consumeIfPossible('V');	// information about varargness of template is not used
+		consumeIfPossible('V');    // information about varargness of template is not used
 		if (consumeIfPossible('t')) {
 			unsigned backref = peekNumber();
 			if (backref > 0 && backref <= params->size()) {
@@ -703,6 +692,9 @@ std::shared_ptr<Node> BorlandASTParser::parseTemplateParams()
 				params->addNode(params->get(backref - 1));
 				continue;
 			}
+//			if (!parseBackref(params)) {
+//				return nullptr;
+//			}
 		}// TODO else nothing, check delphi for tests
 		auto typeNode = parseType();
 		if (!statusOk()) {

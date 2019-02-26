@@ -249,10 +249,8 @@ TEST_F(BorlandDemanglerTests, Operators)
 	DEM_EQ("@Foo@$bnwa$qui", "Foo::operator new[](unsigned int)");
 	DEM_EQ("@Foo@$bdele$qpv", "Foo::operator delete(void *)");
 	DEM_EQ("@Foo@$bdla$qpv", "Foo::operator delete[](void *)");
-
 	DEM_EQ("@Foo@$o3Bar$qv", "Foo::operator Bar(void)");	// TODO test with template?
 	DEM_EQ("@Foo@$oi$qv", "Foo::operator int(void)");
-	DEM_EQ("@li_abc$qg", "operator \"\" _abc(long double)");
 }
 
 TEST_F(BorlandDemanglerTests, FunctionPointers)
@@ -279,7 +277,9 @@ TEST_F(BorlandDemanglerTests, tmp) {
 //	DEM_EQ("Lllvm$workaround$fake$stub$@%$badd$3Bar%$q3Bart1$3Bar", "Bar Lllvm::workaround::fake::stub::operator+<Bar>(Bar, Bar)");
 }
 
-// TODO operator tests, named params tests, fail tests, extra long names, backref tests, conversion operators, functions as params
+// TODO fail tests, extra long names
+
+// NOT SUPPORTING __restrict keyword and User defined literal (operator "")
 
 } // namespace tests
 } // namespace demangler

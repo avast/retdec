@@ -55,6 +55,7 @@ private:
 	Qualifiers parseQualifiers();
 	CallConv parseCallConv();
 	std::shared_ptr<NodeArray> parseFuncParams();
+	bool parseBackref(std::shared_ptr<NodeArray> &paramArray);
 	std::shared_ptr<Node> parseType();
 	std::shared_ptr<Node> parseBuildInType(const Qualifiers &quals);
 	unsigned parseNumber();
