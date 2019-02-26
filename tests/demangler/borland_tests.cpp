@@ -70,6 +70,7 @@ TEST_F(BorlandDemanglerTests, BasicParametersTests)
 	DEM_EQ("@foo3$qb", "foo3(wchar_t)");
 	DEM_EQ("@myFunc_all_$qsusiuiluljujzcuccfdgo",
 		   "myFunc_all_(short, unsigned short, int, unsigned int, long, unsigned long, long long, unsigned long long, signed char, unsigned char, char, float, double, long double, bool)");
+	DEM_EQ("@foo$qie", "foo(int, ...)");
 }
 
 TEST_F(BorlandDemanglerTests, MoreComplicatedParameters)
@@ -240,6 +241,16 @@ TEST_F(BorlandDemanglerTests, Operators)
 	DEM_EQ("@Foo@$bind$qv", "Foo::operator*(void)");
 	DEM_EQ("@Foo@$badr$qv", "Foo::operator&(void)");
 	DEM_EQ("@Foo@$barow$qv", "Foo::operator->(void)");
+	DEM_EQ("@Foo@$barwm$q3Foo", "Foo::operator->*(Foo)");
+	DEM_EQ("@Foo@$bcall$qi", "Foo::operator()(int)");
+	DEM_EQ("@Foo@$bcoma$q3Foo", "Foo::operator,(Foo)");
+	DEM_EQ("@Foo@$bnew$qui", "Foo::operator new(unsigned int)");
+	DEM_EQ("@Foo@$bnwa$qui", "Foo::operator new[](unsigned int)");
+	DEM_EQ("@Foo@$bdele$qpv", "Foo::operator delete(void *)");
+	DEM_EQ("@Foo@$bdla$qpv", "Foo::operator delete[](void *)");
+
+	DEM_EQ("@Foo@$o3Bar$qv", "Foo::operator Bar(void)");
+	DEM_EQ("@li_abc$qg", "operator \"\" _abc(long double)");
 }
 
 TEST_F(BorlandDemanglerTests, FunctionPointers)

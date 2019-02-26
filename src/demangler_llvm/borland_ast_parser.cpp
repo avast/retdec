@@ -298,6 +298,20 @@ std::shared_ptr<Node> BorlandASTParser::parseOperator()
 		return NameNode::create("operator&");
 	} else if (consumeIfPossible("$barow")) {
 		return NameNode::create("operator->");
+	} else if (consumeIfPossible("$barwm")) {
+		return NameNode::create("operator->*");
+	} else if (consumeIfPossible("$bcall")) {
+		return NameNode::create("operator()");
+	} else if (consumeIfPossible("$bcoma")) {
+		return NameNode::create("operator,");
+	} else if (consumeIfPossible("$bnew")) {
+		return NameNode::create("operator new");
+	} else if (consumeIfPossible("$bnwa")) {
+		return NameNode::create("operator new[]");
+	} else if (consumeIfPossible("$bdele")) {
+		return NameNode::create("operator delete");
+	} else if (consumeIfPossible("$bdla")) {
+		return NameNode::create("operator delete[]");
 	}
 	return nullptr;
 }
@@ -417,13 +431,13 @@ std::shared_ptr<NodeArray> BorlandASTParser::parseFuncParams()
 			params->addNode(params->get(backref - 1));
 		} else {
 			auto param = parseType();
-			if (param && statusOk()) {
-				params->addNode(param);
+			if (!statusOk()) {
+				return nullptr;
 			}
-		}
-
-		if (!statusOk()) {
-			return nullptr;
+			if (!param) {
+				break;
+			}
+			params->addNode(param);
 		}
 	}
 
