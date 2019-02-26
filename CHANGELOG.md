@@ -4,7 +4,7 @@
 
 * New Feature: Added presentation of imported types and TypeRef hashes for .NET binaries ([#363](https://github.com/avast-tl/retdec/issues/363), [#364](https://github.com/avast-tl/retdec/issues/364), [#428](https://github.com/avast-tl/retdec/issues/428)).
 * New Feature: Added computation and presentation of icon hashes for exact and also similarity matching in PE files ([#339](https://github.com/avast-tl/retdec/issues/339)).
-* Enhancement: The `new` LLVM IR to BIR converter is now the default back-end's converter. In most cases, this will improve code structure and significantly speed up decompilations ([#211](https://github.com/avast-tl/retdec/issues/211)).
+* Enhancement: The `new` LLVM IR to BIR converter is now the default back-end's converter. In most cases, this improves code structure and significantly speeds up decompilations ([#211](https://github.com/avast-tl/retdec/issues/211)).
 * Enhancement: The `fileformat` library, and all its object file modules, accept both `std::istream` and `(data, size)` pair, in addition to the original input file path.
 * Enhancement: Reduced the needed stack space in `retdec-llvmir2hll` ([#492](https://github.com/avast-tl/retdec/pull/492)).
 * Enhancement: Added support for build and run on FreeBSD and potentially on other BSD OSes ([#476](https://github.com/avast-tl/retdec/pull/476)).
