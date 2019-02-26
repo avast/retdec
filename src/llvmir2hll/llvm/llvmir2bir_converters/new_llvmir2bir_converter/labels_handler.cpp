@@ -1,5 +1,5 @@
 /**
-* @file src/llvmir2hll/llvm/llvmir2bir_converters/orig_llvmir2bir_converter/labels_handler.cpp
+* @file src/llvmir2hll/llvm/llvmir2bir_converters/new_llvmir2bir_converter/labels_handler.cpp
 * @brief Implementation of LabelsHandler.
 * @copyright (c) 2017 Avast Software, licensed under the MIT license
 */
@@ -8,7 +8,7 @@
 
 #include "retdec/llvmir2hll/ir/statement.h"
 #include "retdec/llvmir2hll/llvm/llvm_support.h"
-#include "retdec/llvmir2hll/llvm/llvmir2bir_converters/orig_llvmir2bir_converter/labels_handler.h"
+#include "retdec/llvmir2hll/llvm/llvmir2bir_converters/new_llvmir2bir_converter/labels_handler.h"
 #include "retdec/llvmir2hll/utils/string.h"
 #include "retdec/utils/container.h"
 

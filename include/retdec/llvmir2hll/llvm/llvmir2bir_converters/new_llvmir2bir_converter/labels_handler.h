@@ -1,11 +1,11 @@
 /**
-* @file include/retdec/llvmir2hll/llvm/llvmir2bir_converters/orig_llvmir2bir_converter/labels_handler.h
+* @file include/retdec/llvmir2hll/llvm/llvmir2bir_converters/new_llvmir2bir_converter/labels_handler.h
 * @brief Handling of labels during conversion of LLVM IR to BIR.
 * @copyright (c) 2017 Avast Software, licensed under the MIT license
 */
 
-#ifndef RETDEC_LLVMIR2HLL_LLVM_LLVMIR2BIR_CONVERTERS_ORIG_LLVMIR2BIR_CONVERTER_LABELS_HANDLER_H
-#define RETDEC_LLVMIR2HLL_LLVM_LLVMIR2BIR_CONVERTERS_ORIG_LLVMIR2BIR_CONVERTER_LABELS_HANDLER_H
+#ifndef RETDEC_LLVMIR2HLL_LLVM_LLVMIR2BIR_CONVERTERS_NEW_LLVMIR2BIR_CONVERTER_LABELS_HANDLER_H
+#define RETDEC_LLVMIR2HLL_LLVM_LLVMIR2BIR_CONVERTERS_NEW_LLVMIR2BIR_CONVERTER_LABELS_HANDLER_H
 
 #include <string>
 

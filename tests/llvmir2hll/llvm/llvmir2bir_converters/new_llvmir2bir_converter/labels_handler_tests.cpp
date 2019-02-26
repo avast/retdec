@@ -1,5 +1,5 @@
 /**
-* @file tests/llvmir2hll/llvm/llvmir2bir_converters/orig_llvmir2bir_converter/labels_handler_tests.cpp
+* @file tests/llvmir2hll/llvm/llvmir2bir_converters/new_llvmir2bir_converter/labels_handler_tests.cpp
 * @brief Tests for the @c labels_handler module.
 * @copyright (c) 2017 Avast Software, licensed under the MIT license
 */
@@ -9,7 +9,7 @@
 #include <llvm/IR/LLVMContext.h>
 
 #include "retdec/llvmir2hll/ir/empty_stmt.h"
-#include "retdec/llvmir2hll/llvm/llvmir2bir_converters/orig_llvmir2bir_converter/labels_handler.h"
+#include "retdec/llvmir2hll/llvm/llvmir2bir_converters/new_llvmir2bir_converter/labels_handler.h"
 
 using namespace ::testing;
 

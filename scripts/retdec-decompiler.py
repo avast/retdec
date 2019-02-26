@@ -166,7 +166,7 @@ def parse_args(args):
     parser.add_argument('--backend-llvmir2bir-converter',
                         dest='backend_llvmir2bir_converter',
                         default='new',
-                        choices=['orig', 'new'],
+                        choices=['new'],
                         help='Name of the converter from LLVM IR to BIR.')
 
     parser.add_argument('--backend-no-compound-operators',
