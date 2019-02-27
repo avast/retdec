@@ -6240,7 +6240,6 @@ TEST_P(Capstone2LlvmIrTranslatorArm64Tests, ARM64_INS_TST32_negative_r_r)
 	EXPECT_NO_VALUE_CALLED();
 }
 
-/* TODO: LLVM ERROR: Code generator does not support intrinsic function 'llvm.bitreverse.i64'!
 //
 // ARM64_INS_RBIT
 //
@@ -6255,10 +6254,12 @@ TEST_P(Capstone2LlvmIrTranslatorArm64Tests, ARM64_INS_RBIT_r_r)
 
 	EXPECT_JUST_REGISTERS_LOADED({ARM64_REG_X2});
 	EXPECT_JUST_REGISTERS_STORED({
-		{ARM64_REG_X1, 0xf7b3d5091e6a2c48},
+		{ARM64_REG_X1, ANY},
 	});
 	EXPECT_NO_MEMORY_LOADED_STORED();
-	EXPECT_NO_VALUE_CALLED();
+	EXPECT_VALUES_CALLED({
+		{_module.getFunction("llvm.bitreverse.i64"), {0x1234567890abcdef}},
+	});
 }
 
 TEST_P(Capstone2LlvmIrTranslatorArm64Tests, ARM64_INS_RBIT32_r_r)
@@ -6267,16 +6268,17 @@ TEST_P(Capstone2LlvmIrTranslatorArm64Tests, ARM64_INS_RBIT32_r_r)
 		{ARM64_REG_X2, 0x1234567890abcdef},
 	});
 
-	emulate("rev w1, w2");
+	emulate("rbit w1, w2");
 
 	EXPECT_JUST_REGISTERS_LOADED({ARM64_REG_X2});
 	EXPECT_JUST_REGISTERS_STORED({
-		{ARM64_REG_X1, 0x00000000f7b3d509},
+		{ARM64_REG_X1, ANY},
 	});
 	EXPECT_NO_MEMORY_LOADED_STORED();
-	EXPECT_NO_VALUE_CALLED();
+	EXPECT_VALUES_CALLED({
+		{_module.getFunction("llvm.bitreverse.i32"), {0x90abcdef}},
+	});
 }
-*/
 
 //
 // ARM64_INS_REV
