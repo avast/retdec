@@ -4469,6 +4469,112 @@ TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_STD)
 }
 
 //
+// X86_INS_SBB
+//
+
+TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_SBB_cf_false)
+{
+	SKIP_MODE_16;
+
+	setRegisters({
+		{X86_REG_EAX, 0x1234},
+		{X86_REG_EBX, 0x567},
+		{X86_REG_CF, false}
+	});
+
+	emulate("sbb eax, ebx");
+
+	EXPECT_JUST_REGISTERS_LOADED({X86_REG_EAX, X86_REG_EBX, X86_REG_CF});
+	EXPECT_JUST_REGISTERS_STORED({
+		{X86_REG_EAX, 0x1234 - (0x567 + 0x0)},
+		{X86_REG_CF, false},
+		{X86_REG_OF, ANY},
+		{X86_REG_ZF, ANY},
+		{X86_REG_SF, ANY},
+		{X86_REG_PF, ANY},
+		{X86_REG_AF, ANY},
+	});
+	EXPECT_NO_MEMORY_LOADED_STORED();
+	EXPECT_NO_VALUE_CALLED();
+}
+
+TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_SBB_cf_true)
+{
+	SKIP_MODE_16;
+
+	setRegisters({
+		{X86_REG_EAX, 0x1234},
+		{X86_REG_EBX, 0x567},
+		{X86_REG_CF, true}
+	});
+
+	emulate("sbb eax, ebx");
+
+	EXPECT_JUST_REGISTERS_LOADED({X86_REG_EAX, X86_REG_EBX, X86_REG_CF});
+	EXPECT_JUST_REGISTERS_STORED({
+		{X86_REG_EAX, 0x1234 - (0x567 + 0x1)},
+		{X86_REG_CF, true},
+		{X86_REG_OF, ANY},
+		{X86_REG_ZF, ANY},
+		{X86_REG_SF, ANY},
+		{X86_REG_PF, ANY},
+		{X86_REG_AF, ANY},
+	});
+	EXPECT_NO_MEMORY_LOADED_STORED();
+	EXPECT_NO_VALUE_CALLED();
+}
+
+TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_SBB_eax_eax_cf_false)
+{
+	SKIP_MODE_16;
+
+	setRegisters({
+		{X86_REG_EAX, 0x1234}, // in this case, it does not matter what is here
+		{X86_REG_CF, false}
+	});
+
+	emulate("sbb eax, eax");
+
+	EXPECT_JUST_REGISTERS_LOADED({X86_REG_EAX, X86_REG_CF});
+	EXPECT_JUST_REGISTERS_STORED({
+		{X86_REG_EAX, 0x0},
+		{X86_REG_CF, false},
+		{X86_REG_OF, ANY},
+		{X86_REG_ZF, ANY},
+		{X86_REG_SF, ANY},
+		{X86_REG_PF, ANY},
+		{X86_REG_AF, ANY},
+	});
+	EXPECT_NO_MEMORY_LOADED_STORED();
+	EXPECT_NO_VALUE_CALLED();
+}
+
+TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_SBB_eax_eax_cf_true)
+{
+	SKIP_MODE_16;
+
+	setRegisters({
+		{X86_REG_EAX, 0x1234}, // in this case, it does not matter what is here
+		{X86_REG_CF, true}
+	});
+
+	emulate("sbb eax, eax");
+
+	EXPECT_JUST_REGISTERS_LOADED({X86_REG_EAX, X86_REG_CF});
+	EXPECT_JUST_REGISTERS_STORED({
+		{X86_REG_EAX, 0xffffffff},
+		{X86_REG_CF, true},
+		{X86_REG_OF, ANY},
+		{X86_REG_ZF, ANY},
+		{X86_REG_SF, ANY},
+		{X86_REG_PF, ANY},
+		{X86_REG_AF, ANY},
+	});
+	EXPECT_NO_MEMORY_LOADED_STORED();
+	EXPECT_NO_VALUE_CALLED();
+}
+
+//
 // X86_INS_SHL
 //
 
