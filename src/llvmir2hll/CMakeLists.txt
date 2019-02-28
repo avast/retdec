@@ -135,21 +135,16 @@ set(LLVMIR2HLL_SOURCES
 	llvm/llvm_intrinsic_converter.cpp
 	llvm/llvm_support.cpp
 	llvm/llvmir2bir_converter.cpp
-	llvm/llvmir2bir_converters/new_llvmir2bir_converter.cpp
-	llvm/llvmir2bir_converters/new_llvmir2bir_converter/basic_block_converter.cpp
-	llvm/llvmir2bir_converters/new_llvmir2bir_converter/cfg_node.cpp
-	llvm/llvmir2bir_converters/new_llvmir2bir_converter/llvm_constant_converter.cpp
-	llvm/llvmir2bir_converters/new_llvmir2bir_converter/llvm_fcmp_converter.cpp
-	llvm/llvmir2bir_converters/new_llvmir2bir_converter/llvm_instruction_converter.cpp
-	llvm/llvmir2bir_converters/new_llvmir2bir_converter/llvm_type_converter.cpp
-	llvm/llvmir2bir_converters/new_llvmir2bir_converter/llvm_value_converter.cpp
-	llvm/llvmir2bir_converters/new_llvmir2bir_converter/structure_converter.cpp
-	llvm/llvmir2bir_converters/new_llvmir2bir_converter/variables_manager.cpp
-	llvm/llvmir2bir_converters/orig_llvmir2bir_converter.cpp
-	llvm/llvmir2bir_converters/orig_llvmir2bir_converter/labels_handler.cpp
-	llvm/llvmir2bir_converters/orig_llvmir2bir_converter/llvm_branch_info.cpp
-	llvm/llvmir2bir_converters/orig_llvmir2bir_converter/llvm_converter.cpp
-	llvm/llvmir2bir_converters/orig_llvmir2bir_converter/vars_handler.cpp
+	llvm/llvmir2bir_converter/basic_block_converter.cpp
+	llvm/llvmir2bir_converter/cfg_node.cpp
+	llvm/llvmir2bir_converter/labels_handler.cpp
+	llvm/llvmir2bir_converter/llvm_constant_converter.cpp
+	llvm/llvmir2bir_converter/llvm_fcmp_converter.cpp
+	llvm/llvmir2bir_converter/llvm_instruction_converter.cpp
+	llvm/llvmir2bir_converter/llvm_type_converter.cpp
+	llvm/llvmir2bir_converter/llvm_value_converter.cpp
+	llvm/llvmir2bir_converter/structure_converter.cpp
+	llvm/llvmir2bir_converter/variables_manager.cpp
 	llvm/string_conversions.cpp
 	obtainer/call_info_obtainer.cpp
 	obtainer/call_info_obtainers/optim_call_info_obtainer.cpp
@@ -307,29 +302,6 @@ set(LLVMIR2HLL_SOURCES
 	var_renamer/var_renamers/simple_var_renamer.cpp
 	var_renamer/var_renamers/unified_var_renamer.cpp
 )
-
-# Build of the original LLVMIR2BIR converter fails on GCC 6.1 with the
-# following internal error:
-#
-#    from orig_llvmir2bir_converter.cpp:57:
-#      include/llvm/IR/InstVisitor.h: In member function llvm::InstVisitor::visitInvokeInst(...):
-#      include/llvm/IR/InstVisitor.h:244:7: internal compiler error: in assign_temp, at function.c:961
-#    DELEGATE(Instruction);
-#    ^
-#
-# It seems to be related to the following bug report:
-#
-#    https://gcc.gnu.org/bugzilla/show_bug.cgi?id=69241
-#
-# Although the bug report says that this issue has already been fixed, GCC
-# 6.1.1 still fails (checked on 2016-05-03). A suggested workaround is to
-# use -O1 instead of -O2 when building with GCC >= 6.1.
-if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 6)
-	set_source_files_properties(
-		"${CMAKE_CURRENT_SOURCE_DIR}/llvm/llvmir2bir_converters/orig_llvmir2bir_converter.cpp"
-		PROPERTIES COMPILE_FLAGS "-O1"
-	)
-endif()
 
 add_library(retdec-llvmir2hll STATIC ${LLVMIR2HLL_SOURCES})
 target_link_libraries(retdec-llvmir2hll retdec-config retdec-utils retdec-llvm-support llvm)

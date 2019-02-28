@@ -163,12 +163,6 @@ def parse_args(args):
                         action='store_true',
                         help='Keep functions from standard libraries.')
 
-    parser.add_argument('--backend-llvmir2bir-converter',
-                        dest='backend_llvmir2bir_converter',
-                        default='new',
-                        choices=['orig', 'new'],
-                        help='Name of the converter from LLVM IR to BIR.')
-
     parser.add_argument('--backend-no-compound-operators',
                         dest='backend_no_compound_operators',
                         action='store_true',
@@ -1101,7 +1095,7 @@ class Decompiler:
                              '-var-name-gen=fruit', '-var-name-gen-prefix=',
                              '-call-info-obtainer=' + self.args.backend_call_info_obtainer,
                              '-arithm-expr-evaluator=' + self.args.backend_arithm_expr_evaluator, '-validate-module',
-                             '-llvmir2bir-converter=' + self.args.backend_llvmir2bir_converter, '-o', self.output_file,
+                             '-o', self.output_file,
                              self.out_bc]
 
         if not self.args.backend_no_debug:

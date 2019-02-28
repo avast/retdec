@@ -57,7 +57,6 @@
 #include "retdec/llvmir2hll/llvm/llvm_debug_info_obtainer.h"
 #include "retdec/llvmir2hll/llvm/llvm_intrinsic_converter.h"
 #include "retdec/llvmir2hll/llvm/llvmir2bir_converter.h"
-#include "retdec/llvmir2hll/llvm/llvmir2bir_converter_factory.h"
 #include "retdec/llvmir2hll/obtainer/call_info_obtainer.h"
 #include "retdec/llvmir2hll/obtainer/call_info_obtainer_factory.h"
 #include "retdec/llvmir2hll/optimizer/optimizer_manager.h"
@@ -195,11 +194,6 @@ cl::opt<std::string> VarRenamer("var-renamer",
 	cl::desc("Name of the used renamer of variable names "
 		"(the default is 'readable'; set to 'help' to list all the supported renamers)."),
 	cl::init("readable"));
-
-cl::opt<std::string> LLVMIR2BIRConverter("llvmir2bir-converter",
-	cl::desc("Name of the used convereter of LLVM IR to BIR "
-		"(the default is 'orig'; set to 'help' to list all the supported renamers)."),
-	cl::init("orig"));
 
 cl::opt<bool> EmitCFGs("emit-cfgs",
 	cl::desc("Enables the emission of control-flow graphs (CFGs) for each "
@@ -713,18 +707,7 @@ void Decompiler::saveConfig() {
 *         wrong and decompilation should abort.
 */
 bool Decompiler::convertLLVMIRToBIR() {
-	// Instantiate the requested converter of LLVM IR to BIR and make sure it
-	// exists.
-	if (Debug) {
-		retdec::llvm_support::printSubPhase("creating the used LLVM IR to BIR converter [" + LLVMIR2BIRConverter + "]");
-	}
-	auto llvm2BIRConverter = retdec::llvmir2hll::LLVMIR2BIRConverterFactory::getInstance().createObject(
-		LLVMIR2BIRConverter, this);
-	if (!llvm2BIRConverter) {
-		printErrorUnsupportedObject<retdec::llvmir2hll::LLVMIR2BIRConverterFactory>(
-			"converter of LLVM IR to BIR", "converters of LLVM IR to BIR");
-		return false;
-	}
+	auto llvm2BIRConverter = retdec::llvmir2hll::LLVMIR2BIRConverter::create(this);
 	// Options
 	llvm2BIRConverter->setOptionStrictFPUSemantics(StrictFPUSemantics);
 
