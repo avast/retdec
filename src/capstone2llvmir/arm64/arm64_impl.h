@@ -155,7 +155,7 @@ class Capstone2LlvmIrTranslatorArm64_impl :
 //
 	protected:
 
-		std::vector<uint32_t> _reg2parentMap;
+		std::map<uint32_t, uint32_t> _reg2parentMap;
 
 		static std::map<
 			std::size_t,
@@ -207,6 +207,16 @@ class Capstone2LlvmIrTranslatorArm64_impl :
 		void translateRet(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb);
 		void translateRev(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb);
 
+		// FP - instructions
+		void translateFAdd(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb);
+		void translateFCsel(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb);
+		void translateFDiv(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb);
+		void translateFMadd(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb);
+		void translateFMsub(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb);
+		void translateFMov(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb);
+		void translateFMul(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb);
+		void translateFSub(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb);
+		void translateFUnaryOp(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb);
 };
 
 } // namespace capstone2llvmir

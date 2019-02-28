@@ -17,8 +17,7 @@ Capstone2LlvmIrTranslatorArm64_impl::Capstone2LlvmIrTranslatorArm64_impl(
 		cs_mode basic,
 		cs_mode extra)
 		:
-		Capstone2LlvmIrTranslator_impl(CS_ARCH_ARM64, basic, extra, m),
-		_reg2parentMap(ARM64_REG_ENDING, ARM64_REG_INVALID)
+		Capstone2LlvmIrTranslator_impl(CS_ARCH_ARM64, basic, extra, m)
 {
 	initialize();
 }
@@ -68,10 +67,229 @@ void Capstone2LlvmIrTranslatorArm64_impl::generateDataLayout()
 
 void Capstone2LlvmIrTranslatorArm64_impl::generateRegisters()
 {
-	for (auto& p : _reg2type)
-	{
-		createRegister(p.first, _regLt);
-	}
+	// FP&SIMD registers
+	createRegister(ARM64_REG_Q0, _regLt);
+	createRegister(ARM64_REG_Q1, _regLt);
+	createRegister(ARM64_REG_Q2, _regLt);
+	createRegister(ARM64_REG_Q3, _regLt);
+	createRegister(ARM64_REG_Q4, _regLt);
+	createRegister(ARM64_REG_Q5, _regLt);
+	createRegister(ARM64_REG_Q6, _regLt);
+	createRegister(ARM64_REG_Q7, _regLt);
+	createRegister(ARM64_REG_Q8, _regLt);
+	createRegister(ARM64_REG_Q9, _regLt);
+	createRegister(ARM64_REG_Q10, _regLt);
+	createRegister(ARM64_REG_Q11, _regLt);
+	createRegister(ARM64_REG_Q12, _regLt);
+	createRegister(ARM64_REG_Q13, _regLt);
+	createRegister(ARM64_REG_Q14, _regLt);
+	createRegister(ARM64_REG_Q15, _regLt);
+	createRegister(ARM64_REG_Q16, _regLt);
+	createRegister(ARM64_REG_Q17, _regLt);
+	createRegister(ARM64_REG_Q18, _regLt);
+	createRegister(ARM64_REG_Q19, _regLt);
+	createRegister(ARM64_REG_Q20, _regLt);
+	createRegister(ARM64_REG_Q21, _regLt);
+	createRegister(ARM64_REG_Q22, _regLt);
+	createRegister(ARM64_REG_Q23, _regLt);
+	createRegister(ARM64_REG_Q24, _regLt);
+	createRegister(ARM64_REG_Q25, _regLt);
+	createRegister(ARM64_REG_Q26, _regLt);
+	createRegister(ARM64_REG_Q27, _regLt);
+	createRegister(ARM64_REG_Q28, _regLt);
+	createRegister(ARM64_REG_Q29, _regLt);
+	createRegister(ARM64_REG_Q30, _regLt);
+	createRegister(ARM64_REG_Q31, _regLt);
+
+	createRegister(ARM64_REG_D0, _regLt);
+	createRegister(ARM64_REG_D1, _regLt);
+	createRegister(ARM64_REG_D2, _regLt);
+	createRegister(ARM64_REG_D3, _regLt);
+	createRegister(ARM64_REG_D4, _regLt);
+	createRegister(ARM64_REG_D5, _regLt);
+	createRegister(ARM64_REG_D6, _regLt);
+	createRegister(ARM64_REG_D7, _regLt);
+	createRegister(ARM64_REG_D8, _regLt);
+	createRegister(ARM64_REG_D9, _regLt);
+	createRegister(ARM64_REG_D10, _regLt);
+	createRegister(ARM64_REG_D11, _regLt);
+	createRegister(ARM64_REG_D12, _regLt);
+	createRegister(ARM64_REG_D13, _regLt);
+	createRegister(ARM64_REG_D14, _regLt);
+	createRegister(ARM64_REG_D15, _regLt);
+	createRegister(ARM64_REG_D16, _regLt);
+	createRegister(ARM64_REG_D17, _regLt);
+	createRegister(ARM64_REG_D18, _regLt);
+	createRegister(ARM64_REG_D19, _regLt);
+	createRegister(ARM64_REG_D20, _regLt);
+	createRegister(ARM64_REG_D21, _regLt);
+	createRegister(ARM64_REG_D22, _regLt);
+	createRegister(ARM64_REG_D23, _regLt);
+	createRegister(ARM64_REG_D24, _regLt);
+	createRegister(ARM64_REG_D25, _regLt);
+	createRegister(ARM64_REG_D26, _regLt);
+	createRegister(ARM64_REG_D27, _regLt);
+	createRegister(ARM64_REG_D28, _regLt);
+	createRegister(ARM64_REG_D29, _regLt);
+	createRegister(ARM64_REG_D30, _regLt);
+	createRegister(ARM64_REG_D31, _regLt);
+
+	createRegister(ARM64_REG_S0, _regLt);
+	createRegister(ARM64_REG_S1, _regLt);
+	createRegister(ARM64_REG_S2, _regLt);
+	createRegister(ARM64_REG_S3, _regLt);
+	createRegister(ARM64_REG_S4, _regLt);
+	createRegister(ARM64_REG_S5, _regLt);
+	createRegister(ARM64_REG_S6, _regLt);
+	createRegister(ARM64_REG_S7, _regLt);
+	createRegister(ARM64_REG_S8, _regLt);
+	createRegister(ARM64_REG_S9, _regLt);
+	createRegister(ARM64_REG_S10, _regLt);
+	createRegister(ARM64_REG_S11, _regLt);
+	createRegister(ARM64_REG_S12, _regLt);
+	createRegister(ARM64_REG_S13, _regLt);
+	createRegister(ARM64_REG_S14, _regLt);
+	createRegister(ARM64_REG_S15, _regLt);
+	createRegister(ARM64_REG_S16, _regLt);
+	createRegister(ARM64_REG_S17, _regLt);
+	createRegister(ARM64_REG_S18, _regLt);
+	createRegister(ARM64_REG_S19, _regLt);
+	createRegister(ARM64_REG_S20, _regLt);
+	createRegister(ARM64_REG_S21, _regLt);
+	createRegister(ARM64_REG_S22, _regLt);
+	createRegister(ARM64_REG_S23, _regLt);
+	createRegister(ARM64_REG_S24, _regLt);
+	createRegister(ARM64_REG_S25, _regLt);
+	createRegister(ARM64_REG_S26, _regLt);
+	createRegister(ARM64_REG_S27, _regLt);
+	createRegister(ARM64_REG_S28, _regLt);
+	createRegister(ARM64_REG_S29, _regLt);
+	createRegister(ARM64_REG_S30, _regLt);
+	createRegister(ARM64_REG_S31, _regLt);
+
+	/*
+	createRegister(ARM64_REG_H0, _regLt);
+	createRegister(ARM64_REG_H1, _regLt);
+	createRegister(ARM64_REG_H2, _regLt);
+	createRegister(ARM64_REG_H3, _regLt);
+	createRegister(ARM64_REG_H4, _regLt);
+	createRegister(ARM64_REG_H5, _regLt);
+	createRegister(ARM64_REG_H6, _regLt);
+	createRegister(ARM64_REG_H7, _regLt);
+	createRegister(ARM64_REG_H8, _regLt);
+	createRegister(ARM64_REG_H9, _regLt);
+	createRegister(ARM64_REG_H10, _regLt);
+	createRegister(ARM64_REG_H11, _regLt);
+	createRegister(ARM64_REG_H12, _regLt);
+	createRegister(ARM64_REG_H13, _regLt);
+	createRegister(ARM64_REG_H14, _regLt);
+	createRegister(ARM64_REG_H15, _regLt);
+	createRegister(ARM64_REG_H16, _regLt);
+	createRegister(ARM64_REG_H17, _regLt);
+	createRegister(ARM64_REG_H18, _regLt);
+	createRegister(ARM64_REG_H19, _regLt);
+	createRegister(ARM64_REG_H20, _regLt);
+	createRegister(ARM64_REG_H21, _regLt);
+	createRegister(ARM64_REG_H22, _regLt);
+	createRegister(ARM64_REG_H23, _regLt);
+	createRegister(ARM64_REG_H24, _regLt);
+	createRegister(ARM64_REG_H25, _regLt);
+	createRegister(ARM64_REG_H26, _regLt);
+	createRegister(ARM64_REG_H27, _regLt);
+	createRegister(ARM64_REG_H28, _regLt);
+	createRegister(ARM64_REG_H29, _regLt);
+	createRegister(ARM64_REG_H30, _regLt);
+	createRegister(ARM64_REG_H31, _regLt);
+	*/
+
+	createRegister(ARM64_REG_B0, _regLt);
+	createRegister(ARM64_REG_B1, _regLt);
+	createRegister(ARM64_REG_B2, _regLt);
+	createRegister(ARM64_REG_B3, _regLt);
+	createRegister(ARM64_REG_B4, _regLt);
+	createRegister(ARM64_REG_B5, _regLt);
+	createRegister(ARM64_REG_B6, _regLt);
+	createRegister(ARM64_REG_B7, _regLt);
+	createRegister(ARM64_REG_B8, _regLt);
+	createRegister(ARM64_REG_B9, _regLt);
+	createRegister(ARM64_REG_B10, _regLt);
+	createRegister(ARM64_REG_B11, _regLt);
+	createRegister(ARM64_REG_B12, _regLt);
+	createRegister(ARM64_REG_B13, _regLt);
+	createRegister(ARM64_REG_B14, _regLt);
+	createRegister(ARM64_REG_B15, _regLt);
+	createRegister(ARM64_REG_B17, _regLt);
+	createRegister(ARM64_REG_B18, _regLt);
+	createRegister(ARM64_REG_B19, _regLt);
+	createRegister(ARM64_REG_B20, _regLt);
+	createRegister(ARM64_REG_B21, _regLt);
+	createRegister(ARM64_REG_B22, _regLt);
+	createRegister(ARM64_REG_B23, _regLt);
+	createRegister(ARM64_REG_B24, _regLt);
+	createRegister(ARM64_REG_B25, _regLt);
+	createRegister(ARM64_REG_B26, _regLt);
+	createRegister(ARM64_REG_B27, _regLt);
+	createRegister(ARM64_REG_B28, _regLt);
+	createRegister(ARM64_REG_B29, _regLt);
+	createRegister(ARM64_REG_B30, _regLt);
+	createRegister(ARM64_REG_B31, _regLt);
+
+	// General purpose registers
+	createRegister(ARM64_REG_X0, _regLt);
+	createRegister(ARM64_REG_X1, _regLt);
+	createRegister(ARM64_REG_X2, _regLt);
+	createRegister(ARM64_REG_X3, _regLt);
+	createRegister(ARM64_REG_X4, _regLt);
+	createRegister(ARM64_REG_X5, _regLt);
+	createRegister(ARM64_REG_X6, _regLt);
+	createRegister(ARM64_REG_X7, _regLt);
+	createRegister(ARM64_REG_X8, _regLt);
+	createRegister(ARM64_REG_X9, _regLt);
+	createRegister(ARM64_REG_X10, _regLt);
+	createRegister(ARM64_REG_X11, _regLt);
+	createRegister(ARM64_REG_X12, _regLt);
+	createRegister(ARM64_REG_X13, _regLt);
+	createRegister(ARM64_REG_X14, _regLt);
+	createRegister(ARM64_REG_X15, _regLt);
+	createRegister(ARM64_REG_X16, _regLt);
+	createRegister(ARM64_REG_X17, _regLt);
+	createRegister(ARM64_REG_X18, _regLt);
+	createRegister(ARM64_REG_X19, _regLt);
+	createRegister(ARM64_REG_X20, _regLt);
+	createRegister(ARM64_REG_X21, _regLt);
+	createRegister(ARM64_REG_X22, _regLt);
+	createRegister(ARM64_REG_X23, _regLt);
+	createRegister(ARM64_REG_X24, _regLt);
+	createRegister(ARM64_REG_X25, _regLt);
+	createRegister(ARM64_REG_X26, _regLt);
+	createRegister(ARM64_REG_X27, _regLt);
+	createRegister(ARM64_REG_X28, _regLt);
+
+	// Special registers.
+
+	// FP Frame pointer.
+	createRegister(ARM64_REG_X29, _regLt);
+
+	// LP Link register.
+	createRegister(ARM64_REG_X30, _regLt);
+
+	// Stack pointer.
+	createRegister(ARM64_REG_SP, _regLt);
+	createRegister(ARM64_REG_WSP, _regLt);
+
+	// Zero.
+	createRegister(ARM64_REG_XZR, _regLt);
+	createRegister(ARM64_REG_WZR, _regLt);
+
+	// Flags.
+	createRegister(ARM64_REG_CPSR_N, _regLt);
+	createRegister(ARM64_REG_CPSR_Z, _regLt);
+	createRegister(ARM64_REG_CPSR_C, _regLt);
+	createRegister(ARM64_REG_CPSR_V, _regLt);
+
+	// Program counter.
+	createRegister(ARM64_REG_PC, _regLt);
+
 }
 
 uint32_t Capstone2LlvmIrTranslatorArm64_impl::getCarryRegister()
@@ -121,7 +339,13 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateInstruction(
 
 uint32_t Capstone2LlvmIrTranslatorArm64_impl::getParentRegister(uint32_t r) const
 {
-	return r < _reg2parentMap.size() ? _reg2parentMap[r] : r;
+	try {
+		return _reg2parentMap.at(r);
+	}
+	catch (std::out_of_range &e)
+	{
+		return r;
+	}
 }
 
 //
@@ -490,6 +714,10 @@ llvm::Value* Capstone2LlvmIrTranslatorArm64_impl::loadOp(
 
 		}
 		case ARM64_OP_FP:
+		{
+			auto* val = llvm::ConstantFP::get(irb.getDoubleTy(), op.fp);
+			return val; //generateOperandShift(irb, op, val);
+		}
 		case ARM64_OP_INVALID: 
 		case ARM64_OP_CIMM: 
 		case ARM64_OP_REG_MRS: 
@@ -522,7 +750,7 @@ llvm::Instruction* Capstone2LlvmIrTranslatorArm64_impl::storeRegister(
 		// TODO: Check?
 	}
 
-	auto* rt = getRegisterType(r);
+	//auto* rt = getRegisterType(r);
 	auto pr = getParentRegister(r);
 	auto* llvmReg = getRegister(pr);
 	if (llvmReg == nullptr)
@@ -532,39 +760,7 @@ llvm::Instruction* Capstone2LlvmIrTranslatorArm64_impl::storeRegister(
 
 	val = generateTypeConversion(irb, val, llvmReg->getValueType(), ct);
 
-	llvm::StoreInst* ret = nullptr;
-	if (r == pr
-			// Zext for 64-bit target llvmRegs & 32-bit source regs.
-			|| (getRegisterBitSize(pr) == 64 && getRegisterBitSize(r) == 32))
-	{
-		ret = irb.CreateStore(val, llvmReg);
-	}
-	else
-	{
-		llvm::Value* l = irb.CreateLoad(llvmReg);
-		if (!(l->getType()->isIntegerTy(16)
-				|| l->getType()->isIntegerTy(32)
-				|| l->getType()->isIntegerTy(64)))
-		{
-			throw GenericError("Unexpected parent type.");
-		}
-
-		llvm::Value* andC = nullptr;
-		if (rt->isIntegerTy(32))
-		{
-			if (l->getType()->isIntegerTy(64))
-			{
-				andC = irb.getInt64(0xffffffff00000000);
-			}
-		}
-		assert(andC);
-		l = irb.CreateAnd(l, andC);
-
-		auto* o = irb.CreateOr(l, val);
-		ret = irb.CreateStore(o, llvmReg);
-	}
-
-	return ret;
+	return irb.CreateStore(val, llvmReg);
 }
 
 llvm::Instruction* Capstone2LlvmIrTranslatorArm64_impl::storeOp(
@@ -1308,7 +1504,7 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateAnd(cs_insn* i, cs_arm64* ai,
 }
 
 /**
- * ARM64_INS_ASR
+ * ARM64_INS_ASR, ARM64_INS_LSL, ARM64_INS_LSR, ARM64_INS_ROR
  */
 void Capstone2LlvmIrTranslatorArm64_impl::translateShifts(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb)
 {
@@ -1320,7 +1516,6 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateShifts(cs_insn* i, cs_arm64* 
 	llvm::Value* val = nullptr;
 	switch(i->id)
 	{
-		// TODO: Other shifts
 		case ARM64_INS_ASR:
 		{
 			val = irb.CreateAShr(op1, op2);
@@ -2059,6 +2254,166 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateRev(cs_insn* i, cs_arm64* ai,
 	}
 
 	auto* val = irb.CreateCall(f, {op1});
+	storeOp(ai->operands[0], val, irb);
+}
+
+/**
+ * ARM64_INS_FADD
+ */
+void Capstone2LlvmIrTranslatorArm64_impl::translateFAdd(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb)
+{
+	EXPECT_IS_TERNARY(i, ai, irb);
+
+	op1 = loadOp(ai->operands[1], irb);
+	op2 = loadOp(ai->operands[2], irb);
+
+	auto *val = irb.CreateFAdd(op1, op2);
+	storeOp(ai->operands[0], val, irb);
+}
+
+/**
+ * ARM64_INS_FCSEL
+ */
+void Capstone2LlvmIrTranslatorArm64_impl::translateFCsel(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb)
+{
+	EXPECT_IS_TERNARY(i, ai, irb);
+
+	op1 = loadOp(ai->operands[1], irb);
+	op2 = loadOp(ai->operands[2], irb);
+
+	auto* cond = generateInsnConditionCode(irb, ai);
+	auto* val  = irb.CreateSelect(cond, op1, op2);
+
+	storeOp(ai->operands[0], val, irb);
+}
+
+/**
+ * ARM64_INS_FDIV
+ */
+void Capstone2LlvmIrTranslatorArm64_impl::translateFDiv(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb)
+{
+	EXPECT_IS_TERNARY(i, ai, irb);
+
+	op1 = loadOp(ai->operands[1], irb);
+	op2 = loadOp(ai->operands[2], irb);
+
+	auto *val = irb.CreateFDiv(op1, op2);
+	storeOp(ai->operands[0], val, irb);
+}
+
+/**
+ * ARM64_INS_FMADD, ARM64_INS_FNMADD
+ */
+void Capstone2LlvmIrTranslatorArm64_impl::translateFMadd(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb)
+{
+	EXPECT_IS_QUATERNARY(i, ai, irb);
+
+	op1 = loadOp(ai->operands[1], irb);
+	op2 = loadOp(ai->operands[2], irb);
+	op3 = loadOp(ai->operands[3], irb);
+
+	auto *val = irb.CreateFMul(op1, op2);
+	val = irb.CreateFAdd(op3, val);
+	if (i->id == ARM64_INS_FNMADD)
+	{
+		val = irb.CreateFNeg(val);
+	}
+	storeOp(ai->operands[0], val, irb);
+}
+
+/**
+ * ARM64_INS_FMOV
+ */
+void Capstone2LlvmIrTranslatorArm64_impl::translateFMov(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb)
+{
+	EXPECT_IS_BINARY(i, ai, irb);
+
+	op1 = loadOp(ai->operands[1], irb);
+	op1 = irb.CreateBitCast(op1, getRegisterType(ai->operands[0].reg));
+
+	storeOp(ai->operands[0], op1, irb);
+}
+
+/**
+ * ARM64_INS_FMUL, ARM64_INS_FNMUL
+ */
+void Capstone2LlvmIrTranslatorArm64_impl::translateFMul(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb)
+{
+	EXPECT_IS_TERNARY(i, ai, irb);
+
+	op1 = loadOp(ai->operands[1], irb);
+	op2 = loadOp(ai->operands[2], irb);
+
+	auto *val = irb.CreateFMul(op1, op2);
+	if (i->id == ARM64_INS_FNMUL)
+	{
+		val = irb.CreateFNeg(val);
+	}
+	storeOp(ai->operands[0], val, irb);
+}
+
+/**
+ * ARM64_INS_FMSUB, ARM64_INS_FNMSUB
+ */
+void Capstone2LlvmIrTranslatorArm64_impl::translateFMsub(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb)
+{
+	EXPECT_IS_QUATERNARY(i, ai, irb);
+
+	op1 = loadOp(ai->operands[1], irb);
+	op2 = loadOp(ai->operands[2], irb);
+	op3 = loadOp(ai->operands[3], irb);
+
+	auto *val = irb.CreateFMul(op1, op2);
+	val = irb.CreateFSub(op3, val);
+	if (i->id == ARM64_INS_FNMSUB)
+	{
+		val = irb.CreateFNeg(val);
+	}
+	storeOp(ai->operands[0], val, irb);
+}
+
+/**
+ * ARM64_INS_FSUB
+ */
+void Capstone2LlvmIrTranslatorArm64_impl::translateFSub(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb)
+{
+	EXPECT_IS_TERNARY(i, ai, irb);
+
+	op1 = loadOp(ai->operands[1], irb);
+	op2 = loadOp(ai->operands[2], irb);
+
+	auto *val = irb.CreateFSub(op1, op2);
+	storeOp(ai->operands[0], val, irb);
+}
+
+/**
+ * ARM64_INS_FNEG, ARM64_INS_FABS, ARM64_INS_FSQRT
+ */
+void Capstone2LlvmIrTranslatorArm64_impl::translateFUnaryOp(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb)
+{
+	EXPECT_IS_BINARY(i, ai, irb);
+
+	op1 = loadOp(ai->operands[1], irb);
+
+	llvm::Value* val = nullptr;
+	llvm::Function* intrinsic = nullptr;
+	switch(i->id)
+	{
+	case ARM64_INS_FNEG:
+		val = irb.CreateFNeg(op1);
+		break;
+	case ARM64_INS_FABS:
+		intrinsic = llvm::Intrinsic::getDeclaration(_module, llvm::Intrinsic::fabs, op1->getType());
+		val = irb.CreateCall(intrinsic, {op1});
+		break;
+	case ARM64_INS_FSQRT:
+		intrinsic = llvm::Intrinsic::getDeclaration(_module, llvm::Intrinsic::sqrt, op1->getType());
+		val = irb.CreateCall(intrinsic, {op1});
+		break;
+	default:
+		throw GenericError("Arm64: translateFUnary(): Unsupported instruction id");
+	}
+
 	storeOp(ai->operands[0], val, irb);
 }
 
