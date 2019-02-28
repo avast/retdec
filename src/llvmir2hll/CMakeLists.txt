@@ -135,17 +135,16 @@ set(LLVMIR2HLL_SOURCES
 	llvm/llvm_intrinsic_converter.cpp
 	llvm/llvm_support.cpp
 	llvm/llvmir2bir_converter.cpp
-	llvm/llvmir2bir_converters/new_llvmir2bir_converter.cpp
-	llvm/llvmir2bir_converters/new_llvmir2bir_converter/basic_block_converter.cpp
-	llvm/llvmir2bir_converters/new_llvmir2bir_converter/cfg_node.cpp
-	llvm/llvmir2bir_converters/new_llvmir2bir_converter/labels_handler.cpp
-	llvm/llvmir2bir_converters/new_llvmir2bir_converter/llvm_constant_converter.cpp
-	llvm/llvmir2bir_converters/new_llvmir2bir_converter/llvm_fcmp_converter.cpp
-	llvm/llvmir2bir_converters/new_llvmir2bir_converter/llvm_instruction_converter.cpp
-	llvm/llvmir2bir_converters/new_llvmir2bir_converter/llvm_type_converter.cpp
-	llvm/llvmir2bir_converters/new_llvmir2bir_converter/llvm_value_converter.cpp
-	llvm/llvmir2bir_converters/new_llvmir2bir_converter/structure_converter.cpp
-	llvm/llvmir2bir_converters/new_llvmir2bir_converter/variables_manager.cpp
+	llvm/llvmir2bir_converter/basic_block_converter.cpp
+	llvm/llvmir2bir_converter/cfg_node.cpp
+	llvm/llvmir2bir_converter/labels_handler.cpp
+	llvm/llvmir2bir_converter/llvm_constant_converter.cpp
+	llvm/llvmir2bir_converter/llvm_fcmp_converter.cpp
+	llvm/llvmir2bir_converter/llvm_instruction_converter.cpp
+	llvm/llvmir2bir_converter/llvm_type_converter.cpp
+	llvm/llvmir2bir_converter/llvm_value_converter.cpp
+	llvm/llvmir2bir_converter/structure_converter.cpp
+	llvm/llvmir2bir_converter/variables_manager.cpp
 	llvm/string_conversions.cpp
 	obtainer/call_info_obtainer.cpp
 	obtainer/call_info_obtainers/optim_call_info_obtainer.cpp
