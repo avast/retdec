@@ -17,7 +17,7 @@
 * Enhancement: Improved corruption checks in `retdec-fileinfo` to recognize cut PE files which are still loadable ([#463](https://github.com/avast-tl/retdec/issues/463)).
 * Enhancement: Redesign output files naming scheme ([#132](https://github.com/avast-tl/retdec/issues/132)).
 * Fix: Fixed translation of x86 `sbb` instruction ([#401](https://github.com/avast-tl/retdec/issues/401)).
-* Fix: Fixed `fileinfo` crash during `Asn1Sequence` initialization ([#256](https://github.com/avast-tl/retdec/issues/256)).
+* Fix: Fixed `fileinfo` crash during `Asn1Sequence` initialization when parsing PE certificates ([#256](https://github.com/avast-tl/retdec/issues/256)).
 * Fix: Fixed generation of MIPS branch instructions ([#88](https://github.com/avast-tl/retdec/issues/88)).
 * Fix: Fixed generation of empty if blocks in C output ([#83](https://github.com/avast-tl/retdec/issues/83)).
 * Fix: Fixed decompilation of simple x86 system calls ([#24](https://github.com/avast-tl/retdec/issues/24)).
