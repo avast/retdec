@@ -678,7 +678,7 @@ GlobalVariable* IrModifier::getGlobalVariable(
 				name);
 
 		auto* conv = IrModifier::convertConstantToType(ngv, gv->getType());
-		if (conv != ngv)
+		if (conv != gv)
 		{
 			gv->replaceAllUsesWith(conv);
 		}

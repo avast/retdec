@@ -16,6 +16,7 @@
 * Enhancement: Add a check into our scripts that they are run from an installation directory and not from the `scripts` directory ([#418](https://github.com/avast-tl/retdec/issues/418)).
 * Enhancement: Improved corruption checks in `retdec-fileinfo` to recognize cut PE files which are still loadable ([#463](https://github.com/avast-tl/retdec/issues/463)).
 * Enhancement: Redesign output files naming scheme ([#132](https://github.com/avast-tl/retdec/issues/132)).
+* Fix: Fixed LLVM IR syntax error: `Global variable initializer type does not match global variable type` ([#436](https://github.com/avast-tl/retdec/issues/436)).
 * Fix: Fixed translation of x86 `sbb` instruction ([#401](https://github.com/avast-tl/retdec/issues/401)).
 * Fix: Fixed `fileinfo` crash during `Asn1Sequence` initialization when parsing PE certificates ([#256](https://github.com/avast-tl/retdec/issues/256)).
 * Fix: Fixed `fileinfo` crash during reconstruction of .NET types ([#458](https://github.com/avast-tl/retdec/issues/458), [#511](https://github.com/avast-tl/retdec/pull/511)).
