@@ -212,6 +212,8 @@ class Capstone2LlvmIrTranslatorArm64_impl :
 		void translateFCsel(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb);
 		void translateFDiv(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb);
 		void translateFMadd(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb);
+		void translateFMinMax(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb);
+		void translateFMinMaxNum(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb);
 		void translateFMsub(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb);
 		void translateFMov(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb);
 		void translateFMul(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb);

@@ -2322,6 +2322,61 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateFMadd(cs_insn* i, cs_arm64* a
 }
 
 /**
+ * ARM64_INS_FMAX, ARM64_INS_FMIN
+ */
+void Capstone2LlvmIrTranslatorArm64_impl::translateFMinMax(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb)
+{
+	EXPECT_IS_TERNARY(i, ai, irb);
+
+	op1 = loadOp(ai->operands[1], irb);
+	op2 = loadOp(ai->operands[2], irb);
+
+	llvm::Value* cond;
+	switch(i->id)
+	{
+	case ARM64_INS_FMIN:
+		cond = irb.CreateFCmpULE(op1, op2);
+		break;
+	case ARM64_INS_FMAX:
+		cond = irb.CreateFCmpUGE(op1, op2);
+		break;
+	default:
+		throw GenericError("Arm64: translateFMinMax(): Unsupported instruction id");
+	}
+
+	auto* val = irb.CreateSelect(cond, op1, op2);
+	storeOp(ai->operands[0], val, irb);
+}
+
+/**
+ * ARM64_INS_FMAXNM, ARM64_INS_FMINNM
+ */
+void Capstone2LlvmIrTranslatorArm64_impl::translateFMinMaxNum(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb)
+{
+	EXPECT_IS_TERNARY(i, ai, irb);
+
+	op1 = loadOp(ai->operands[1], irb);
+	op2 = loadOp(ai->operands[2], irb);
+
+	llvm::Value* val = nullptr;
+	llvm::Function* intrinsic = nullptr;
+	switch(i->id)
+	{
+	case ARM64_INS_FMINNM:
+		intrinsic = llvm::Intrinsic::getDeclaration(_module, llvm::Intrinsic::minnum, op1->getType());
+		break;
+	case ARM64_INS_FMAXNM:
+		intrinsic = llvm::Intrinsic::getDeclaration(_module, llvm::Intrinsic::maxnum, op1->getType());
+		break;
+	default:
+		throw GenericError("Arm64: translateFMinMaxNum(): Unsupported instruction id");
+	}
+
+	val = irb.CreateCall(intrinsic, {op1, op2});
+	storeOp(ai->operands[0], val, irb);
+}
+
+/**
  * ARM64_INS_FMOV
  */
 void Capstone2LlvmIrTranslatorArm64_impl::translateFMov(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb)
