@@ -23,7 +23,7 @@ byte_array_buffer::byte_array_buffer(
 		end_(end),
 		current_(begin_)
 {
-    assert(std::less_equal<const std::uint8_t *>()(begin_, end_));
+	assert(std::less_equal<const std::uint8_t *>()(begin_, end_));
 }
 
 byte_array_buffer::byte_array_buffer(const std::uint8_t* data, const std::size_t size) :
@@ -71,7 +71,7 @@ std::streamsize byte_array_buffer::showmanyc()
 std::streampos byte_array_buffer::seekoff(
 		std::streamoff off,
 		std::ios_base::seekdir way,
-        std::ios_base::openmode which)
+		std::ios_base::openmode which)
 {
 	if (way == std::ios_base::beg)
 	{
