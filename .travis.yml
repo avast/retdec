@@ -6,21 +6,12 @@ matrix:
   fast_finish: true
   include:
     - os: linux
-      dist: trusty
-      compiler: gcc-4.9
+      dist: xenial
       addons:
         apt:
-          sources:
-            - deadsnakes
-            - ubuntu-toolchain-r-test
           packages:
             - build-essential
-            - gcc-4.8-multilib
-            - gcc-4.9
-            - g++-4.9
-            - cmake
-            - perl
-            - python3.5
+            - gcc-multilib
             - flex
             - bison
             - autoconf
@@ -29,16 +20,15 @@ matrix:
             - pkg-config
             - m4
             - zlib1g-dev
-            - upx
             - openssl
       env:
-        - MATRIX_EVAL="CC=gcc-4.9 && CXX=g++-4.9 && NPROC=$(nproc)"
+        - MATRIX_EVAL="NPROC=$(nproc)"
         # We need this so that ccache does not cause compilation errors.
         # e.g. retdec/tests/utils/string_tests.cpp:276:2: error: stray '\' in program
         - CCACHE_CPP2=true
 
     - os: osx
-      osx_image: xcode8.3
+      osx_image: xcode10.1
       env:
         - MATRIX_EVAL="NPROC=$(sysctl -n hw.physicalcpu)"
         - CCACHE_CPP2=true
@@ -89,6 +79,8 @@ branches:
     - master
     # Version tags.
     - /^v?\d+\.\d+.*$/
+    # Temporary.
+    - travis-xenial
 
 notifications:
   email:
