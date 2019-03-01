@@ -135,7 +135,7 @@ bool BorlandASTParser::consume(const StringView &s)
  */
 void BorlandASTParser::parse()
 {
-	if (peekChar('@')) {
+	if (peekChar('@') || peek("Lllvm")) {
 		parseFunction();
 	}
 
@@ -160,11 +160,17 @@ void BorlandASTParser::parseFunction()
 		return;
 	}
 
-	/* name part */
-	consume('@');
-	auto absNameNode = parseFuncName();
-	if (!checkResult(absNameNode)) {
-		return;
+	std::shared_ptr<Node> absNameNode = nullptr;
+	if (consumeIfPossible('@')) {
+		absNameNode = parseFuncName();
+		if (!checkResult(absNameNode)) {
+			return;
+		}
+	} else {
+		absNameNode = parseLlvmName();
+		if (!checkResult(absNameNode)) {
+			return;
+		}
 	}
 
 	if (!consume('$')) {
@@ -209,6 +215,47 @@ std::shared_ptr<Node> BorlandASTParser::parseFuncName()
 			}
 		}
 		++c;
+	}
+
+	if (peekChar('%')) {
+		name = parseTemplate(name);
+		if (!statusOk()) {
+			return nullptr;
+		}
+	}
+
+	auto op = parseOperator();
+	if (!statusOk()) {
+		return nullptr;
+	}
+
+	if (op) {
+		name = name ? NestedNameNode::create(_context, name, op) : op;
+	}
+
+	checkResult(name);
+
+	return name;
+}
+
+std::shared_ptr<Node> BorlandASTParser::parseLlvmName()
+{
+	if (!consume("Lllvm$")) {
+		return nullptr;
+	}
+
+	std::shared_ptr<Node> name = NameNode::create(_context, "Lllvm");
+
+	while (!consumeIfPossible('@')) {
+		auto partName = _mangled.cutUntil('$');
+		if (partName.empty() || _mangled.empty()) {
+			_status = invalid_mangled_name;
+			return nullptr;
+		}
+
+		consumeIfPossible('$');
+		auto partNameNode = std::static_pointer_cast<Node>(NameNode::create(_context, getString(partName)));
+		name = NestedNameNode::create(_context, name, partNameNode);
 	}
 
 	if (peekChar('%')) {
@@ -490,7 +537,7 @@ std::shared_ptr<Node> BorlandASTParser::parseType()
 		return parseRReference();
 	}
 
-	if (_mangled.consumeFront('a')) {
+	if (consumeIfPossible('a')) {
 		return parseArray(quals);
 	}
 

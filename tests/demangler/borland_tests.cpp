@@ -93,9 +93,8 @@ TEST_F(BorlandDemanglerTests, QualifiersTests)
 	DEM_EQ("@foo10$qpwxi", "foo10(volatile const int *)");
 	DEM_EQ("@foo11$qpwxi", "foo11(volatile const int *)");
 	DEM_EQ("@foonew$qrwxpi", "foonew(int * volatile const &)");
-//	DEM_EQ("@foonew$qrwxpi", "foonew(int *__restrict volatile const)");	// TODO when possible demangle as reference
 	DEM_EQ("@Bar@foo$wxqqrv", "__fastcall Bar::foo(void) volatile const");
-//	DEM_EQ("@foo$qrri", "foo(int & _restrict)");
+//	DEM_EQ("@foo$qrri", "foo(int & _restrict)"); 	// TODO when possible demangle as reference
 }
 
 TEST_F(BorlandDemanglerTests, PointersTests)
@@ -273,11 +272,9 @@ TEST_F(BorlandDemanglerTests, FailTests)
 	DEM_FAIL("@foo$q14std@%tmp$c11std@%tmp$c%%", status::invalid_mangled_name);
 }
 
-TEST_F(BorlandDemanglerTests, tmp) {
-//	DEM_EQ("Lllvm$workaround$fake$stub$@%$badd$3Bar%$q3Bart1$3Bar", "Bar Lllvm::workaround::fake::stub::operator+<Bar>(Bar, Bar)");
+TEST_F(BorlandDemanglerTests, FakeStubTest) {
+	DEM_EQ("Lllvm$workaround$fake$stub$@%$badd$3Bar%$q3Bart1$3Bar", "Bar Lllvm::workaround::fake::stub::operator+<Bar>(Bar, Bar)");
 }
-
-// TODO fail tests, extra long names
 
 // NOT SUPPORTING __restrict keyword and User defined literal (operator "")
 

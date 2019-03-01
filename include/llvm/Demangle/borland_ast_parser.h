@@ -65,6 +65,7 @@ private:
 	unsigned parseNumber();
 	std::shared_ptr<Node> parseNamedType(unsigned nameLen, const Qualifiers &quals);
 	std::shared_ptr<Node> parseFuncName();
+	std::shared_ptr<Node> parseLlvmName();
 	std::shared_ptr<Node> parseOperator();
 	std::shared_ptr<Node> parseName(const char *end);
 	std::shared_ptr<Node> parseTemplateName(std::shared_ptr<Node> templateNamespace);

@@ -57,7 +57,7 @@ public:
     return dropBack(size() - pos);
   }
 
-  StringView cutUntil(char c) {
+  StringView cutUntil(char c) { 	// TODO ked tam neni/ked bude prazdny
     auto cut = substrUntil(c);
     consumeFront(cut);
     return cut;
