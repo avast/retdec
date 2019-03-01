@@ -149,7 +149,7 @@ private:
 	explicit NameNode(const StringView &name);
 
 private:
-	StringView _name;
+	StringView _name;		// TODO prerob na string
 };
 
 /**

@@ -7,16 +7,6 @@ namespace retdec {
 namespace demangler {
 namespace borland {
 
-bool Context::hasBuiltInType(const StringView &name, const Qualifiers &quals) const
-{
-	std::string name_str = std::string{name.begin(), name.size()};
-	bool isVolatile = quals.isVolatile();
-	bool isConst = quals.isConst();
-
-	auto key = std::make_tuple(name_str, isVolatile, isConst);
-	return retdec::utils::mapHasKey(builtInTypes, key);
-}
-
 std::shared_ptr<BuiltInTypeNode> Context::getBuiltInType(const StringView &name, const Qualifiers &quals) const
 {
 	std::string name_str = std::string{name.begin(), name.size()};
@@ -41,12 +31,6 @@ void Context::addBuiltInType(const std::shared_ptr<BuiltInTypeNode> &type)
 	builtInTypes.emplace(key, type);
 }
 
-bool Context::hasCharType(const ThreeStateSignness &signness, const Qualifiers &quals) const
-{
-	auto key = std::make_tuple(signness, quals.isVolatile(), quals.isConst());
-	return retdec::utils::mapHasKey(charTypes, key);
-}
-
 std::shared_ptr<CharTypeNode> Context::getCharType(
 	const ThreeStateSignness &signness,
 	const Qualifiers &quals) const
@@ -63,17 +47,6 @@ void Context::addCharType(const std::shared_ptr<CharTypeNode> &type)
 	auto key = std::make_tuple(signness, type->quals().isVolatile(), type->quals().isConst());
 
 	charTypes.emplace(key, type);
-}
-
-bool Context::hasIntegralType(
-	const StringView &name, bool isUnsigned, const Qualifiers &quals) const
-{
-	std::string name_str = std::string{name.begin(), name.size()};
-	bool isVolatile = quals.isVolatile();
-	bool isConst = quals.isConst();
-
-	auto key = std::make_tuple(name_str, isUnsigned, isVolatile, isConst);
-	return retdec::utils::mapHasKey(integralTypes, key);
 }
 
 std::shared_ptr<IntegralTypeNode> Context::getIntegralType(
@@ -102,16 +75,6 @@ void Context::addIntegralType(const std::shared_ptr<IntegralTypeNode> &type)
 	integralTypes.emplace(key, type);
 }
 
-bool Context::hasFloatType(const StringView &name, const Qualifiers &quals) const
-{
-	std::string name_str = std::string{name.begin(), name.size()};
-	bool isVolatile = quals.isVolatile();
-	bool isConst = quals.isConst();
-
-	auto key = std::make_tuple(name_str, isVolatile, isConst);
-	return retdec::utils::mapHasKey(builtInTypes, key);
-}
-
 std::shared_ptr<FloatTypeNode> Context::getFloatType(const StringView &name, const Qualifiers &quals) const
 {
 	std::string name_str = std::string{name.begin(), name.size()};
@@ -136,28 +99,23 @@ void Context::addFloatType(const std::shared_ptr<FloatTypeNode> &type)
 	builtInTypes.emplace(key, type);
 }
 
-//bool Context::hasPointerType(
-//	std::shared_ptr<retdec::demangler::borland::Node> pointee, const Qualifiers &quals) const
-//{
-//	return retdec::utils::mapHasKey(pointerTypes, pointee);
-//}
-//
-//std::shared_ptr<PointerTypeNode> Context::getPointerType(
-//	std::shared_ptr<Node> pointee, const Qualifiers &quals) const
-//{
-//	return retdec::utils::mapGetValueOrDefault(pointerTypes, pointee);
-//}
-//
-//void Context::addPointerType(const std::shared_ptr<PointerTypeNode> &type)
-//{
-//	assert(type && "violated precondition - type cannot be null");
-//
-//	pointerTypes.emplace(type->pointee(), type);
-//}
-
-bool Context::hasReferenceType(std::shared_ptr<retdec::demangler::borland::Node> pointee) const
+std::shared_ptr<PointerTypeNode> Context::getPointerType(
+	std::shared_ptr<Node> pointee, const Qualifiers &quals) const
 {
-	return retdec::utils::mapHasKey(referenceTypes, pointee);
+	auto key = std::make_tuple(pointee, quals.isVolatile(), quals.isConst());
+	return retdec::utils::mapGetValueOrDefault(pointerTypes, key);
+}
+
+void Context::addPointerType(const std::shared_ptr<PointerTypeNode> &type)
+{
+	assert(type && "violated precondition - type cannot be null");
+
+	auto pointee = type->pointee();
+	auto isVolatile = type->quals().isVolatile();
+	auto isConst = type->quals().isConst();
+	auto key = std::make_tuple(pointee, isVolatile, isConst);
+
+	pointerTypes.emplace(key, type);
 }
 
 std::shared_ptr<ReferenceTypeNode> Context::getReferenceType(std::shared_ptr<Node> pointee) const
@@ -170,16 +128,6 @@ void Context::addReferenceType(const std::shared_ptr<ReferenceTypeNode> &type)
 	assert(type && "violated precondition - type cannot be null");
 
 	referenceTypes.emplace(type->pointee(), type);
-}
-
-bool Context::hasNamedType(const StringView &name, const Qualifiers &quals) const
-{
-	std::string name_str = std::string{name.begin(), name.size()};
-	bool isVolatile = quals.isVolatile();
-	bool isConst = quals.isConst();
-
-	auto key = std::make_tuple(name_str, isVolatile, isConst);
-	return retdec::utils::mapHasKey(namedTypes, key);
 }
 
 std::shared_ptr<NamedTypeNode> Context::getNamedType(const StringView &name, const Qualifiers &quals) const
@@ -204,12 +152,6 @@ void Context::addNamedType(const std::shared_ptr<retdec::demangler::borland::Nam
 	auto key = std::make_tuple(name_str, isVolatile, isConst);
 
 	namedTypes.emplace(key, type);
-}
-
-bool Context::hasFunction(const retdec::demangler::borland::StringView &mangled) const
-{
-	auto key = std::string{mangled.begin(), mangled.size()};
-	return retdec::utils::mapHasKey(functions, key);
 }
 
 std::shared_ptr<Node> Context::getFunction(const retdec::demangler::borland::StringView &mangled) const

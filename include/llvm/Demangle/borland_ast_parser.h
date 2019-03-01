@@ -75,7 +75,7 @@ private:
 	Status _status;
 	StringView _mangled;
 	std::shared_ptr<Node> _ast;
-	Context _context;
+	Context &_context;
 };
 
 }    // borland

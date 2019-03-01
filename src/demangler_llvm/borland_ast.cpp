@@ -99,27 +99,6 @@ void FunctionNode::printLeft(std::ostream &s) const
 	_funcNode->printLeft(s);
 	_name->print(s);
 	_funcNode->printRight(s);
-//	if (_retType) {
-//		_retType->print(s);
-//		s << " ";
-//	}
-//
-//	switch (_call_conv) {
-//	case CallConv::fastcall: s << "__fastcall ";
-//		break;
-//	case CallConv::stdcall: s << "__stdcall ";
-//		break;
-//	default: break;
-//	}
-//
-//	_name->print(s);
-//	s << "(";
-//	if (_params) {
-//		_params->print(s);
-//	}
-//	s << ")";
-//
-//	_quals.printSpaceL(s);
 }
 
 TemplateNode::TemplateNode(
@@ -131,7 +110,6 @@ std::shared_ptr<TemplateNode> TemplateNode::create(
 	std::shared_ptr<retdec::demangler::borland::Node> name,
 	std::shared_ptr<retdec::demangler::borland::Node> params)
 {
-	// TODO context
 	return std::shared_ptr<TemplateNode>(new TemplateNode(name, params));
 }
 

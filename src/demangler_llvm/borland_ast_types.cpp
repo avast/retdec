@@ -169,15 +169,7 @@ std::shared_ptr<NamedTypeNode> NamedTypeNode::create(
 	std::shared_ptr<Node> typeName,
 	const Qualifiers &quals)
 {
-	// TODO context
-//	auto type = context.getNamedType(typeName, quals);
-//	if (type && type->kind() == Kind::KNamedType) {
-//		return type;
-//	}
-
-	auto newType = std::shared_ptr<NamedTypeNode>(new NamedTypeNode(typeName, quals));
-//	context.addNamedType(newType);
-	return newType;
+	return std::shared_ptr<NamedTypeNode>(new NamedTypeNode(typeName, quals));
 }
 
 std::shared_ptr<Node> NamedTypeNode::name()
@@ -199,17 +191,17 @@ PointerTypeNode::PointerTypeNode(const std::shared_ptr<Node> &pointee, const Qua
 }
 
 std::shared_ptr<PointerTypeNode> PointerTypeNode::create(
-	Context context,
+	Context &context,
 	const std::shared_ptr<Node> &pointee,
 	const Qualifiers &quals)
 {
-//	auto type = context.getPointerType(pointee, quals);
-//	if (type && type->kind() == Kind::KPointerType) {
-//		return type;
-//	}
+	auto type = context.getPointerType(pointee, quals);
+	if (type && type->kind() == Kind::KPointerType) {
+		return type;
+	}
 
 	auto newType = std::shared_ptr<PointerTypeNode>(new PointerTypeNode(pointee, quals));
-//	context.addPointerType(newType);
+	context.addPointerType(newType);
 	return newType;
 }
 

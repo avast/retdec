@@ -26,9 +26,8 @@ std::string BorlandDemangler::demangleToString(const std::string &mangled)
 
 	borland::BorlandASTParser parser{_context, mangled};
 
-	/* update demanlger status based on parser status */
-	auto parserStatus = parser.status();
-	switch (parserStatus) {
+	/* update demangler status based on parser status */
+	switch (parser.status()) {
 	case borland::BorlandASTParser::Status::success:
 		_status = success;
 		break;

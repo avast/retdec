@@ -128,7 +128,7 @@ class PointerTypeNode : public TypeNode
 {
 public:
 	static std::shared_ptr<PointerTypeNode> create(
-		Context context,
+		Context &context,
 		const std::shared_ptr<Node> &pointee,
 		const Qualifiers &quals);
 
