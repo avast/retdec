@@ -5,8 +5,6 @@
 #include <memory>
 #include <map>
 
-#include "llvm/Demangle/StringView.h"
-
 namespace retdec {
 namespace demangler {
 namespace borland {
@@ -28,12 +26,10 @@ class NestedNameNode;
 class Context
 {
 public:
-	using StringView = llvm::itanium_demangle::StringView;
-
 	Context() = default;
 
 	std::shared_ptr<BuiltInTypeNode> getBuiltInType(
-		const StringView &name,  const Qualifiers &quals) const;
+		const std::string &name,  const Qualifiers &quals) const;
 	void addBuiltInType(
 		const std::shared_ptr<BuiltInTypeNode> &type);
 
@@ -43,12 +39,12 @@ public:
 		const std::shared_ptr<CharTypeNode> &type);
 
 	std::shared_ptr<IntegralTypeNode> getIntegralType(
-		const StringView &name, bool isUnsigned, const Qualifiers &quals) const;
+		const std::string &name, bool isUnsigned, const Qualifiers &quals) const;
 	void addIntegralType(
 		const std::shared_ptr<IntegralTypeNode> &type);
 
 	std::shared_ptr<FloatTypeNode> getFloatType(
-		const StringView &name,  const Qualifiers &quals) const;
+		const std::string &name,  const Qualifiers &quals) const;
 	void addFloatType(
 		const std::shared_ptr<FloatTypeNode> &type);
 
@@ -61,14 +57,16 @@ public:
 	void addReferenceType(const std::shared_ptr<ReferenceTypeNode> &type);
 
 	std::shared_ptr<NamedTypeNode> getNamedType(
-		const StringView &name, const Qualifiers &quals) const;
+		const std::string &name, const Qualifiers &quals) const;
 	void addNamedType(
+		const std::string &mangled,
+		const Qualifiers &quals,
 		const std::shared_ptr<NamedTypeNode> &type);
 
-	std::shared_ptr<Node> getFunction(const StringView &mangled) const;
-	void addFunction(const StringView &mangled, const std::shared_ptr<Node> &function);
+	std::shared_ptr<Node> getFunction(const std::string &mangled) const;
+	void addFunction(const std::string &mangled, const std::shared_ptr<Node> &function);
 
-	std::shared_ptr<NameNode> getName(const StringView &name) const;
+	std::shared_ptr<NameNode> getName(const std::string &name) const;
 	void addName(const std::shared_ptr<NameNode> &name);
 
 	std::shared_ptr<NestedNameNode> getNestedName(std::shared_ptr<Node> super, std::shared_ptr<Node> name);

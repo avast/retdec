@@ -13,31 +13,20 @@ namespace retdec {
 namespace demangler {
 namespace borland {
 
-TypeNode::TypeNode(const StringView &typeName, const Qualifiers &quals) :
-	Node(Kind::KTypeNode), _typeName(typeName), _quals(quals) {}
+TypeNode::TypeNode(const Qualifiers &quals) :
+	Node(Kind::KTypeNode), _quals(quals) {}
 
 Qualifiers TypeNode::quals()
 {
 	return _quals;
 }
 
-StringView TypeNode::typeName() const
-{
-	return _typeName;
-}
-
-void TypeNode::printLeft(std::ostream &s) const
-{
-	_quals.printSpaceR(s);
-	s << std::string{_typeName.begin(), _typeName.size()};
-}
-
 /**
  * @brief Private constructor for built-in type nodes. Use create().
  * @param typeName Representation of type name.
  */
-BuiltInTypeNode::BuiltInTypeNode(const StringView &typeName, const Qualifiers &quals) :
-	TypeNode(typeName, quals)
+BuiltInTypeNode::BuiltInTypeNode(const std::string &typeName, const Qualifiers &quals) :
+	TypeNode(quals), _typeName(typeName)
 {
 	_kind = Kind::KBuiltInType;
 }
@@ -49,7 +38,7 @@ BuiltInTypeNode::BuiltInTypeNode(const StringView &typeName, const Qualifiers &q
  */
 std::shared_ptr<BuiltInTypeNode> BuiltInTypeNode::create(
 	Context &context,
-	const StringView &typeName,
+	const std::string &typeName,
 	const Qualifiers &quals)
 {
 	auto type = context.getBuiltInType(typeName, quals);
@@ -60,6 +49,17 @@ std::shared_ptr<BuiltInTypeNode> BuiltInTypeNode::create(
 	auto newType = std::shared_ptr<BuiltInTypeNode>(new BuiltInTypeNode(typeName, quals));
 	context.addBuiltInType(newType);
 	return newType;
+}
+
+std::string BuiltInTypeNode::typeName() const
+{
+	return _typeName;
+}
+
+void BuiltInTypeNode::printLeft(std::ostream &s) const
+{
+	_quals.printSpaceR(s);
+	s << _typeName;
 }
 
 CharTypeNode::CharTypeNode(ThreeStateSignness signness, const Qualifiers &quals) :
@@ -101,7 +101,7 @@ void CharTypeNode::printLeft(std::ostream &s) const
 }
 
 IntegralTypeNode::IntegralTypeNode(
-	const StringView &typeName, bool isUnsigned, const Qualifiers &quals) :
+	const std::string &typeName, bool isUnsigned, const Qualifiers &quals) :
 	BuiltInTypeNode(typeName, quals), _isUnsigned(isUnsigned)
 {
 	_kind = Kind::KIntegralType;
@@ -109,7 +109,7 @@ IntegralTypeNode::IntegralTypeNode(
 
 std::shared_ptr<IntegralTypeNode> IntegralTypeNode::create(
 	Context &context,
-	const StringView &typeName,
+	const std::string &typeName,
 	bool isUnsigned,
 	const Qualifiers &quals)
 {
@@ -134,10 +134,10 @@ void IntegralTypeNode::printLeft(std::ostream &s) const
 	if (_isUnsigned) {
 		s << "unsigned ";
 	}
-	s << std::string{_typeName.begin(), _typeName.size()};
+	s << _typeName;
 }
 
-FloatTypeNode::FloatTypeNode(const StringView &typeName, const Qualifiers &quals) :
+FloatTypeNode::FloatTypeNode(const std::string &typeName, const Qualifiers &quals) :
 	BuiltInTypeNode(typeName, quals)
 {
 	_kind = Kind::KFloatType;
@@ -145,7 +145,7 @@ FloatTypeNode::FloatTypeNode(const StringView &typeName, const Qualifiers &quals
 
 std::shared_ptr<FloatTypeNode> FloatTypeNode::create(
 	Context &context,
-	const StringView &typeName,
+	const std::string &typeName,
 	const Qualifiers &quals)
 {
 	auto type = context.getFloatType(typeName, quals);
@@ -159,7 +159,7 @@ std::shared_ptr<FloatTypeNode> FloatTypeNode::create(
 }
 
 NamedTypeNode::NamedTypeNode(std::shared_ptr<Node> typeName, const Qualifiers &quals) :
-	TypeNode("", quals), _typeName(typeName)
+	TypeNode(quals), _typeName(typeName)
 {
 	_kind = Kind::KNamedType;
 }
@@ -184,7 +184,7 @@ void NamedTypeNode::printLeft(std::ostream &s) const
 }
 
 PointerTypeNode::PointerTypeNode(const std::shared_ptr<Node> &pointee, const Qualifiers &quals) :
-	TypeNode("", quals), _pointee(std::move(pointee))
+	TypeNode(quals), _pointee(std::move(pointee))
 {
 	_kind = Kind::KPointerType;
 	_has_right = _pointee->hasRight();
@@ -223,13 +223,14 @@ void PointerTypeNode::printLeft(std::ostream &s) const
 	}
 }
 
-void PointerTypeNode::printRight(std::ostream &s) const {
+void PointerTypeNode::printRight(std::ostream &s) const
+{
 	s << ")";
 	_pointee->printRight(s);
 }
 
 ReferenceTypeNode::ReferenceTypeNode(std::shared_ptr<Node> pointee) :
-	TypeNode("", {false, false}), _pointee(std::move(pointee))
+	TypeNode({false, false}), _pointee(std::move(pointee))
 {
 	_kind = Kind::KReferenceType;
 	_has_right = _pointee->hasRight();
@@ -264,23 +265,16 @@ void ReferenceTypeNode::printLeft(std::ostream &s) const
 		s << " &";
 		_quals.printSpaceL(s);
 	}
-//	if (_pointee->hasRight()) {
-//		_pointee->printLeft(s);
-//		s << " (&)";
-//		_pointee->printRight(s);
-//	} else {
-//		_pointee->print(s);
-//		s << " &";
-//	}
 }
 
-void ReferenceTypeNode::printRight(std::ostream &s) const {
+void ReferenceTypeNode::printRight(std::ostream &s) const
+{
 	s << ")";
 	_pointee->printRight(s);
 }
 
 RReferenceTypeNode::RReferenceTypeNode(std::shared_ptr<Node> pointee) :
-	TypeNode("", {false, false}), _pointee(std::move(pointee))
+	TypeNode({false, false}), _pointee(std::move(pointee))
 {
 	_kind = Kind::KRReferenceType;
 	_has_right = _pointee->hasRight();
@@ -307,17 +301,10 @@ void RReferenceTypeNode::printLeft(std::ostream &s) const
 		s << " &&";
 		_quals.printSpaceL(s);
 	}
-//	if (_pointee->hasRight()) {
-//		_pointee->printLeft(s);
-//		s << " (&&)";
-//		_pointee->printRight(s);
-//	} else {
-//		_pointee->print(s);
-//		s << " &&";
-//	}
 }
 
-void RReferenceTypeNode::printRight(std::ostream &s) const {
+void RReferenceTypeNode::printRight(std::ostream &s) const
+{
 	s << ")";
 	_pointee->printRight(s);
 }
@@ -326,7 +313,7 @@ ArrayNode::ArrayNode(
 	std::shared_ptr<retdec::demangler::borland::Node> pointee,
 	unsigned size,
 	const Qualifiers &quals) :
-	TypeNode("", quals), _pointee(std::move(pointee)), _size(size)
+	TypeNode(quals), _pointee(std::move(pointee)), _size(size)
 {
 	_kind = Kind::KArrayNode;
 	_has_right = true;
@@ -359,7 +346,7 @@ FunctionTypeNode::FunctionTypeNode(
 	std::shared_ptr<retdec::demangler::borland::Node> retType,
 	retdec::demangler::borland::Qualifiers &quals,
 	bool isVarArg) :
-	TypeNode("", quals), _callConv(callConv), _params(params), _retType(retType), _isVarArg(isVarArg)
+	TypeNode(quals), _callConv(callConv), _params(params), _retType(retType), _isVarArg(isVarArg)
 {
 	_kind = Kind::KFunctionType;
 	_has_right = true;
@@ -379,7 +366,7 @@ std::shared_ptr<FunctionTypeNode> FunctionTypeNode::create(
 void FunctionTypeNode::printLeft(std::ostream &s) const
 {
 	if (_retType) {
-		if (_retType->hasRight()){
+		if (_retType->hasRight()) {
 			_retType->printLeft(s);
 		} else {
 			_retType->print(s);

@@ -42,19 +42,22 @@ TEST_F(BorlandContextTests, IntegralTest)
 	EXPECT_NE(i4, i5);
 }
 
-//TEST_F(BorlandContextTests, PointerTests)
-//{
-//	auto i1 = IntegralTypeNode::create(context, "int", false, {false, false});
-//	auto i2 = IntegralTypeNode::create(context, "int", false, {false, false});
-//
-//	auto p1 = PointerTypeNode::create(context, i1, {false, false});
-//	auto p2 = PointerTypeNode::create(context, i1, {false, false});
-//	auto p3 = PointerTypeNode::create(context, i2, {false, false});
-//
-//	EXPECT_EQ(p1, p2);
-//	EXPECT_NE(p1, p3);
-//
-//}
+TEST_F(BorlandContextTests, PointerTests)
+{
+	auto i1 = IntegralTypeNode::create(context, "int", false, {false, false});
+	auto i2 = IntegralTypeNode::create(context, "long", false, {false, false});
+
+	auto p1 = PointerTypeNode::create(context, i1, {false, false});
+	auto p2 = PointerTypeNode::create(context, i1, {false, false});
+	auto p3 = PointerTypeNode::create(context, i2, {false, false});
+	auto p4 = PointerTypeNode::create(context, i1, {true, false});
+	auto p5 = PointerTypeNode::create(context, i1, {false, true});
+
+	EXPECT_EQ(p1, p2);
+	EXPECT_NE(p1, p3);
+	EXPECT_NE(p1, p4);
+	EXPECT_NE(p4, p5);
+}
 
 TEST_F(BorlandContextTests, ReferenceTests)
 {
@@ -68,16 +71,6 @@ TEST_F(BorlandContextTests, ReferenceTests)
 	EXPECT_EQ(r1, r2);
 	EXPECT_NE(r1, r3);
 }
-
-//TEST_F(BorlandContextTests, NamedTypeTests)
-//{
-//	auto name = NameNode::create(context, "Foo");
-//
-//	auto n1 = NamedTypeNode::create(context, name, {false, false});
-//	auto n2 = NamedTypeNode::create(context, name, {false, false});
-//
-//	EXPECT_EQ(n1, n2);
-//}
 
 TEST_F(BorlandContextTests, NameNodesTests)
 {
@@ -102,6 +95,22 @@ TEST_F(BorlandContextTests, NestedNameNodesTests)
 	EXPECT_NE(nn1, nn3);
 }
 
+TEST_F(BorlandContextTests, FuntionTests)
+{
+	borland::BorlandASTParser parser1{context, "@foo1$qpxi"};
+	auto ast1 = parser1.ast();
+
+	EXPECT_EQ(context.functions.size(), 1);
+
+	borland::BorlandASTParser parser2{context, "@foo1$qpxi"};
+	auto ast2 = parser2.ast();
+
+	borland::BorlandASTParser parser3{context, "@foo2$qpxi"};
+	auto ast3 = parser3.ast();
+
+	EXPECT_EQ(ast1, ast2);
+	EXPECT_NE(ast1, ast3);
+}
 
 } // tests
 } // borland

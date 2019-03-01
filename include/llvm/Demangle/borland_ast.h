@@ -11,16 +11,12 @@
 #include <string>
 #include <vector>
 
-#include "llvm/Demangle/StringView.h"
-
 namespace retdec {
 namespace demangler {
 namespace borland {
 
 class Context;
 class FunctionTypeNode;
-
-using StringView = llvm::itanium_demangle::StringView;
 
 class Qualifiers
 {
@@ -141,15 +137,15 @@ private:
 class NameNode : public Node
 {
 public:
-	static std::shared_ptr<NameNode> create(Context &context, const StringView &name);
+	static std::shared_ptr<NameNode> create(Context &context, const std::string &name);
 
 	void printLeft(std::ostream &s) const override;
 
 private:
-	explicit NameNode(const StringView &name);
+	explicit NameNode(const std::string &name);
 
 private:
-	StringView _name;		// TODO prerob na string
+	std::string _name;
 };
 
 /**

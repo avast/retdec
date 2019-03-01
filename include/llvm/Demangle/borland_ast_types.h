@@ -5,7 +5,6 @@
 #include <string>
 #include <vector>
 
-#include "llvm/Demangle/StringView.h"
 #include "llvm/Demangle/borland_ast.h"
 
 namespace retdec {
@@ -21,21 +20,15 @@ enum class ThreeStateSignness
 	no_prefix
 };
 
-// TODO isVolatile, isConst and isRestricted change to class with 3 bools
-
 class TypeNode : public Node
 {
 public:
 	Qualifiers quals();
-	StringView typeName() const;
-
-	void printLeft(std::ostream &s) const override;
 
 protected:
-	TypeNode(const StringView &typeName, const Qualifiers &quals);
+	explicit TypeNode(const Qualifiers &quals);
 
 protected:
-	StringView _typeName;
 	Qualifiers _quals;
 };
 
@@ -47,11 +40,18 @@ class BuiltInTypeNode : public TypeNode
 public:
 	static std::shared_ptr<BuiltInTypeNode> create(
 		Context &context,
-		const StringView &typeName,
+		const std::string &typeName,
 		const Qualifiers &quals);
 
+	std::string typeName() const;
+
+	void printLeft(std::ostream &s) const override;
+
 protected:
-	BuiltInTypeNode(const StringView &typeName, const Qualifiers &quals);
+	BuiltInTypeNode(const std::string &typeName, const Qualifiers &quals);
+
+protected:
+	std::string _typeName;
 };
 
 class CharTypeNode : public BuiltInTypeNode
@@ -78,7 +78,7 @@ class IntegralTypeNode : public BuiltInTypeNode
 public:
 	static std::shared_ptr<IntegralTypeNode> create(
 		Context &context,
-		const StringView &typeName,
+		const std::string &typeName,
 		bool isUnsigned,
 		const Qualifiers &quals);
 
@@ -87,7 +87,7 @@ public:
 	void printLeft(std::ostream &s) const override;
 
 private:
-	IntegralTypeNode(const StringView &typeName, bool isUnsigned, const Qualifiers &quals);
+	IntegralTypeNode(const std::string &typeName, bool isUnsigned, const Qualifiers &quals);
 
 private:
 	bool _isUnsigned;
@@ -98,11 +98,11 @@ class FloatTypeNode : public BuiltInTypeNode
 public:
 	static std::shared_ptr<FloatTypeNode> create(
 		Context &context,
-		const StringView &typeName,
+		const std::string &typeName,
 		const Qualifiers &quals);
 
 private:
-	FloatTypeNode(const StringView &typeName, const Qualifiers &quals);
+	FloatTypeNode(const std::string &typeName, const Qualifiers &quals);
 };
 
 class NamedTypeNode : public TypeNode
