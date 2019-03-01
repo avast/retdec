@@ -2272,6 +2272,115 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateFAdd(cs_insn* i, cs_arm64* ai
 }
 
 /**
+ * ARM64_INS_FCCMP
+ */
+void Capstone2LlvmIrTranslatorArm64_impl::translateFCCmp(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb)
+{
+	EXPECT_IS_TERNARY(i, ai, irb);
+
+	op0 = loadOp(ai->operands[0], irb);
+	op1 = loadOp(ai->operands[1], irb);
+	auto* nzvc = loadOp(ai->operands[2], irb);
+
+	auto* cond = generateInsnConditionCode(irb, ai);
+	auto irbCond = generateIfThenElse(cond, irb);
+	llvm::IRBuilder<>& condIf(irbCond.first), condElse(irbCond.second);
+
+	// IF condition holds
+
+	// IF op1 == op2
+	auto* fcmpOeq = condIf.CreateFCmpOEQ(op0, op1);
+	auto irbP = generateIfThenElse(fcmpOeq, condIf);
+	llvm::IRBuilder<>& bodyIf(irbP.first), bodyElse(irbP.second);
+
+	storeRegister(ARM64_REG_CPSR_N, bodyIf.getFalse(), bodyIf);
+	storeRegister(ARM64_REG_CPSR_Z, bodyIf.getTrue(), bodyIf);
+	storeRegister(ARM64_REG_CPSR_C, bodyIf.getTrue(), bodyIf);
+	storeRegister(ARM64_REG_CPSR_V, bodyIf.getFalse(), bodyIf);
+
+	// ELSE IF op1 < op2
+	auto* fcmpOgt = bodyElse.CreateFCmpOGT(op0, op1);
+	auto irbP1 = generateIfThenElse(fcmpOgt, bodyElse);
+	llvm::IRBuilder<>& bodyIf1(irbP1.first), bodyElse1(irbP1.second);
+
+	storeRegister(ARM64_REG_CPSR_N, bodyIf1.getTrue(), bodyIf1);
+	storeRegister(ARM64_REG_CPSR_Z, bodyIf1.getFalse(), bodyIf1);
+	storeRegister(ARM64_REG_CPSR_C, bodyIf1.getFalse(), bodyIf1);
+	storeRegister(ARM64_REG_CPSR_V, bodyIf1.getFalse(), bodyIf1);
+
+	// ELSE IF op1 > op2
+	auto* fcmpOlt = bodyElse1.CreateFCmpOLT(op0, op1);
+	auto irbP2 = generateIfThenElse(fcmpOlt, bodyElse1);
+	llvm::IRBuilder<>& bodyIf2(irbP2.first), bodyElse2(irbP2.second);
+
+	storeRegister(ARM64_REG_CPSR_N, bodyIf2.getFalse(), bodyIf2);
+	storeRegister(ARM64_REG_CPSR_Z, bodyIf2.getFalse(), bodyIf2);
+	storeRegister(ARM64_REG_CPSR_C, bodyIf2.getTrue(), bodyIf2);
+	storeRegister(ARM64_REG_CPSR_V, bodyIf2.getFalse(), bodyIf2);
+
+	// ELSE - NAN
+	storeRegister(ARM64_REG_CPSR_N, bodyElse2.getFalse(), bodyElse2);
+	storeRegister(ARM64_REG_CPSR_Z, bodyElse2.getFalse(), bodyElse2);
+	storeRegister(ARM64_REG_CPSR_C, bodyElse2.getTrue(), bodyElse2);
+	storeRegister(ARM64_REG_CPSR_V, bodyElse2.getTrue(), bodyElse2);
+
+	//ELSE - Set the flags from IMM
+	// We only use shifts because the final value to be stored is truncated to i1.
+	storeRegister(ARM64_REG_CPSR_N, bodyElse.CreateLShr(nzvc, llvm::ConstantInt::get(nzvc->getType(), 3)), condElse);
+	storeRegister(ARM64_REG_CPSR_Z, bodyElse.CreateLShr(nzvc, llvm::ConstantInt::get(nzvc->getType(), 2)), condElse);
+	storeRegister(ARM64_REG_CPSR_C, bodyElse.CreateLShr(nzvc, llvm::ConstantInt::get(nzvc->getType(), 1)), condElse);
+	storeRegister(ARM64_REG_CPSR_V, nzvc, condElse);
+
+}
+
+/**
+ * ARM64_INS_FCMP
+ */
+void Capstone2LlvmIrTranslatorArm64_impl::translateFCmp(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb)
+{
+	EXPECT_IS_BINARY(i, ai, irb);
+
+	op0 = loadOp(ai->operands[0], irb);
+	op1 = loadOp(ai->operands[1], irb);
+
+	// IF op1 == op2
+	auto* fcmpOeq = irb.CreateFCmpOEQ(op0, op1);
+	auto irbP = generateIfThenElse(fcmpOeq, irb);
+	llvm::IRBuilder<>& bodyIf(irbP.first), bodyElse(irbP.second);
+
+	storeRegister(ARM64_REG_CPSR_N, bodyIf.getFalse(), bodyIf);
+	storeRegister(ARM64_REG_CPSR_Z, bodyIf.getTrue(), bodyIf);
+	storeRegister(ARM64_REG_CPSR_C, bodyIf.getTrue(), bodyIf);
+	storeRegister(ARM64_REG_CPSR_V, bodyIf.getFalse(), bodyIf);
+
+	// ELSE IF op1 < op2
+	auto* fcmpOgt = bodyElse.CreateFCmpOGT(op0, op1);
+	auto irbP1 = generateIfThenElse(fcmpOgt, bodyElse);
+	llvm::IRBuilder<>& bodyIf1(irbP1.first), bodyElse1(irbP1.second);
+
+	storeRegister(ARM64_REG_CPSR_N, bodyIf1.getTrue(), bodyIf1);
+	storeRegister(ARM64_REG_CPSR_Z, bodyIf1.getFalse(), bodyIf1);
+	storeRegister(ARM64_REG_CPSR_C, bodyIf1.getFalse(), bodyIf1);
+	storeRegister(ARM64_REG_CPSR_V, bodyIf1.getFalse(), bodyIf1);
+
+	// ELSE IF op1 > op2
+	auto* fcmpOlt = bodyElse1.CreateFCmpOLT(op0, op1);
+	auto irbP2 = generateIfThenElse(fcmpOlt, bodyElse1);
+	llvm::IRBuilder<>& bodyIf2(irbP2.first), bodyElse2(irbP2.second);
+
+	storeRegister(ARM64_REG_CPSR_N, bodyIf2.getFalse(), bodyIf2);
+	storeRegister(ARM64_REG_CPSR_Z, bodyIf2.getFalse(), bodyIf2);
+	storeRegister(ARM64_REG_CPSR_C, bodyIf2.getTrue(), bodyIf2);
+	storeRegister(ARM64_REG_CPSR_V, bodyIf2.getFalse(), bodyIf2);
+
+	// ELSE
+	storeRegister(ARM64_REG_CPSR_N, bodyElse2.getFalse(), bodyElse2);
+	storeRegister(ARM64_REG_CPSR_Z, bodyElse2.getFalse(), bodyElse2);
+	storeRegister(ARM64_REG_CPSR_C, bodyElse2.getTrue(), bodyElse2);
+	storeRegister(ARM64_REG_CPSR_V, bodyElse2.getTrue(), bodyElse2);
+}
+
+/**
  * ARM64_INS_FCSEL
  */
 void Capstone2LlvmIrTranslatorArm64_impl::translateFCsel(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb)
@@ -2285,6 +2394,39 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateFCsel(cs_insn* i, cs_arm64* a
 	auto* val  = irb.CreateSelect(cond, op1, op2);
 
 	storeOp(ai->operands[0], val, irb);
+}
+
+/**
+ * ARM64_INS_FCVT
+ */
+void Capstone2LlvmIrTranslatorArm64_impl::translateFCvt(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb)
+{
+	EXPECT_IS_BINARY(i, ai, irb);
+
+	op1 = loadOp(ai->operands[1], irb);
+	storeOp(ai->operands[0], op1, irb);
+}
+
+/**
+ * ARM64_INS_UCVTF, ARM64_INS_SCVTF
+ */
+void Capstone2LlvmIrTranslatorArm64_impl::translateFCvtf(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb)
+{
+	EXPECT_IS_BINARY(i, ai, irb);
+
+	op1 = loadOp(ai->operands[1], irb);
+
+	switch(i->id)
+	{
+	case ARM64_INS_UCVTF:
+		storeOp(ai->operands[0], op1, irb, eOpConv::UITOFP);
+		break;
+	case ARM64_INS_SCVTF:
+		storeOp(ai->operands[0], op1, irb, eOpConv::SITOFP);
+		break;
+	default:
+		throw GenericError("Arm64: translateFCvtf(): Unsupported instruction id");
+	}
 }
 
 /**
