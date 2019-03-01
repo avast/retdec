@@ -301,7 +301,8 @@ void SymbolicTree::expandNode(
 			|| isa<CallInst>(value)
 			|| (_abi
 					&& _abi->isRegister(value)
-					&& !_abi->isStackPointerRegister(value)
+					&& (!_trackThroughStackPointerRegister
+							|| !_abi->isStackPointerRegister(value))
 					&& !_abi->isZeroRegister(value)
 					&& value != _abi->getRegister(MIPS_REG_GP, _abi->isMips())))
 	{
@@ -702,6 +703,7 @@ Config* SymbolicTree::_config = nullptr;
 bool SymbolicTree::_val2valUsed = false;
 bool SymbolicTree::_trackThroughAllocaLoads = true;
 bool SymbolicTree::_trackThroughGeneralRegisterLoads = true;
+bool SymbolicTree::_trackThroughStackPointerRegister = true;
 bool SymbolicTree::_trackOnlyFlagRegisters = false;
 bool SymbolicTree::_simplifyAtCreation = true;
 unsigned SymbolicTree::_naryLimit = 3;
@@ -710,6 +712,7 @@ void SymbolicTree::setToDefaultConfiguration()
 {
 	_trackThroughAllocaLoads = true;
 	_trackThroughGeneralRegisterLoads = true;
+	_trackThroughStackPointerRegister = true;
 	_trackOnlyFlagRegisters = false;
 	_simplifyAtCreation = true;
 	_naryLimit = 3;
@@ -738,6 +741,11 @@ void SymbolicTree::setTrackThroughAllocaLoads(bool b)
 void SymbolicTree::setTrackThroughGeneralRegisterLoads(bool b)
 {
 	_trackThroughGeneralRegisterLoads = b;
+}
+
+void SymbolicTree::setTrackThroughStackPointerRegister(bool b)
+{
+	_trackThroughStackPointerRegister = b;
 }
 
 void SymbolicTree::setTrackOnlyFlagRegisters(bool b)
