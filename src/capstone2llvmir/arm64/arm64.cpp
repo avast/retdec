@@ -2430,6 +2430,29 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateFCvtf(cs_insn* i, cs_arm64* a
 }
 
 /**
+ * ARM64_INS_FCVTZS, ARM64_INS_FCVTZU
+ */
+void Capstone2LlvmIrTranslatorArm64_impl::translateFCvtz(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb)
+{
+	EXPECT_IS_BINARY(i, ai, irb);
+
+	op1 = loadOp(ai->operands[1], irb);
+
+	switch(i->id)
+	{
+	case ARM64_INS_FCVTZU:
+		op1 = irb.CreateFPToSI(op1, getRegisterType(ai->operands[0].reg));
+		break;
+	case ARM64_INS_FCVTZS:
+		op1 = irb.CreateFPToUI(op1, getRegisterType(ai->operands[0].reg));
+		break;
+	default:
+		throw GenericError("Arm64: translateFCvtz(): Unsupported instruction id");
+	}
+	storeOp(ai->operands[0], op1, irb);
+}
+
+/**
  * ARM64_INS_FDIV
  */
 void Capstone2LlvmIrTranslatorArm64_impl::translateFDiv(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb)
