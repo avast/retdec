@@ -125,15 +125,15 @@ void TemplateNode::printLeft(std::ostream &s) const
 
 /**
  * @brief Constructor for NameNode
- * @param name StringView representation of name.
+ * @param name std::string representation of name.
  */
-NameNode::NameNode(const StringView &name) : Node(NameNode::Kind::KName, false), _name(name) {}
+NameNode::NameNode(const std::string &name) : Node(NameNode::Kind::KName, false), _name(name) {}
 
 /**
- * @param name StringView representation of name.
+ * @param name std::string representation of name.
  * @return Unique pointer to new NameNode
  */
-std::shared_ptr<NameNode> NameNode::create(Context &context, const StringView &name)
+std::shared_ptr<NameNode> NameNode::create(Context &context, const std::string &name)
 {
 	auto type = context.getName(name);
 	if (type) {
@@ -151,7 +151,7 @@ std::shared_ptr<NameNode> NameNode::create(Context &context, const StringView &n
  */
 void NameNode::printLeft(std::ostream &s) const
 {
-	s << std::string{_name.begin(), _name.size()};
+	s << _name;
 }
 
 /**

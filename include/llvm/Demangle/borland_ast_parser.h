@@ -10,11 +10,15 @@
 #include "llvm/Demangle/borland_ast.h"
 #include "llvm/Demangle/context.h"
 
+#include "llvm/Demangle/StringView.h"
+
 namespace retdec {
 namespace demangler {
 namespace borland {
 
 class FunctionTypeNode;
+
+using StringView = llvm::itanium_demangle::StringView;
 
 /**
  * @brief Parser from name mangled by borland mangling scheme into AST.
@@ -71,6 +75,7 @@ private:
 	std::shared_ptr<Node> parseRReference();
 	std::shared_ptr<Node> parseArray(const Qualifiers &quals);
 
+	static std::string getString(const StringView &s);
 private:
 	Status _status;
 	StringView _mangled;

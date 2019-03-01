@@ -151,13 +151,13 @@ void BorlandASTParser::parse()
  */
 void BorlandASTParser::parseFunction()
 {
-	auto func = _context.getFunction(_mangled);
+	auto mangled_str = getString(_mangled);
+	auto func = _context.getFunction(mangled_str);
 	if (func) {
 		_status = Status::success;
 		_ast = func;
 		return;
 	}
-	auto mangledCopy = _mangled;
 
 	/* name part */
 	consume('@');
@@ -183,7 +183,7 @@ void BorlandASTParser::parseFunction()
 
 	_status = Status::success;
 	_ast = FunctionNode::create(absNameNode, funcType);
-	_context.addFunction(mangledCopy, _ast);
+	_context.addFunction(mangled_str, _ast);
 }
 
 std::shared_ptr<Node> BorlandASTParser::parseFuncName()
@@ -198,8 +198,9 @@ std::shared_ptr<Node> BorlandASTParser::parseFuncName()
 			auto nameView = StringView(start, c);
 			if (!nameView.empty()) {
 				_mangled.consumeFront(nameView);        // propagate to mangled
-				auto nameNode = NameNode::create(_context, nameView);
-				name = name ? std::static_pointer_cast<Node>(NestedNameNode::create(_context, name, nameNode)) : nameNode;
+				auto nameNode = NameNode::create(_context, getString(nameView));
+				name =
+					name ? std::static_pointer_cast<Node>(NestedNameNode::create(_context, name, nameNode)) : nameNode;
 				start = c + 1;    // skip already checked chars and one of '%', '$', '@'
 			}
 			if (!consumeIfPossible('@')) {    // $ or %
@@ -346,8 +347,9 @@ std::shared_ptr<Node> BorlandASTParser::parseName(const char *end)
 			auto nameView = StringView(start, c);
 			if (!nameView.empty()) {
 				_mangled.consumeFront(nameView);        // propagate to mangled
-				auto nameNode = NameNode::create(_context, nameView);
-				name = name ? std::static_pointer_cast<Node>(NestedNameNode::create(_context, name, nameNode)) : nameNode;
+				auto nameNode = NameNode::create(_context, getString(nameView));
+				name =
+					name ? std::static_pointer_cast<Node>(NestedNameNode::create(_context, name, nameNode)) : nameNode;
 				start = c + 1;
 			}
 			if (!consumeIfPossible('@')) {
@@ -360,7 +362,7 @@ std::shared_ptr<Node> BorlandASTParser::parseName(const char *end)
 	if (c == end) { // parse remainder as name
 		auto nameView = StringView(start, c);
 		_mangled.consumeFront(nameView);        // propagate to mangled
-		auto nameNode = NameNode::create(_context, nameView);
+		auto nameNode = NameNode::create(_context, getString(nameView));
 		name = name ? std::static_pointer_cast<Node>(NestedNameNode::create(_context, name, nameNode)) : nameNode;
 	}
 
@@ -653,8 +655,10 @@ std::shared_ptr<Node> BorlandASTParser::parseNamedType(unsigned nameLen, const Q
 		return nullptr;
 	}
 
-	auto type = _context.getNamedType({_mangled.begin(), nameLen}, quals);
+	auto mangled_type = std::string{_mangled.begin(), nameLen};
+	auto type = _context.getNamedType(mangled_type, quals);
 	if (type) {
+		_mangled.drop(nameLen);
 		return type;
 	}
 
@@ -665,7 +669,7 @@ std::shared_ptr<Node> BorlandASTParser::parseNamedType(unsigned nameLen, const Q
 	}
 
 	auto newType = NamedTypeNode::create(_context, nameNode, quals);
-	_context.addNamedType(newType);
+	_context.addNamedType(mangled_type, quals, newType);
 	return newType;
 }
 
@@ -684,7 +688,7 @@ std::shared_ptr<Node> BorlandASTParser::parseTemplateName(std::shared_ptr<Node> 
 			_status = invalid_mangled_name;
 			return nullptr;
 		}
-		templateNameNode = NameNode::create(_context, templateName);
+		templateNameNode = NameNode::create(_context, getString(templateName));
 	}
 
 	if (templateNamespace) {
@@ -748,6 +752,11 @@ std::shared_ptr<Node> BorlandASTParser::parseTemplate(std::shared_ptr<Node> temp
 	}
 
 	return TemplateNode::create(templateNameNode, params);
+}
+
+inline std::string BorlandASTParser::getString(const retdec::demangler::borland::StringView &s)
+{
+	return {s.begin(), s.size()};
 }
 
 } // borland
