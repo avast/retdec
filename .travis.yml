@@ -28,7 +28,7 @@ matrix:
         - CCACHE_CPP2=true
 
     - os: osx
-      osx_image: xcode10.1
+      osx_image: xcode8.3
       env:
         - MATRIX_EVAL="NPROC=$(sysctl -n hw.physicalcpu)"
         - CCACHE_CPP2=true
@@ -79,8 +79,6 @@ branches:
     - master
     # Version tags.
     - /^v?\d+\.\d+.*$/
-    # Temporary.
-    - travis-xenial
 
 notifications:
   email:
