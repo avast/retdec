@@ -96,160 +96,148 @@ bool X87FpuAnalysis::analyzeBb(
 		llvm::BasicBlock* bb,
 		int topVal)
 {
-	LOG << "\t" << bb->getName().str() << std::endl;
+
+	std::queue<std::pair<llvm::BasicBlock*, int>> queue;
+	queue.push({bb, topVal});
 	bool changed = false;
+	while(!queue.empty()) {
+		auto pair = queue.front();
+		auto currentBb = pair.first;
+		topVal = pair.second;
+		queue.pop();
+		LOG << "\t" << currentBb->getName().str() << std::endl;
 
-	if (seenBbs.has(bb))
-	{
-		LOG << "\t\t" << "already seen" << std::endl;
-		return false;
-	}
-	seenBbs.insert(bb);
-
-	auto it = bb->begin();
-	while (it != bb->end())
-	{
-		Instruction* i = &(*it);
-		++it;
-
-		auto* l = dyn_cast<LoadInst>(i);
-		auto* s = dyn_cast<StoreInst>(i);
-		auto* add = dyn_cast<AddOperator>(i);
-		auto* sub = dyn_cast<SubOperator>(i);
-		auto* callStore = _config->isLlvmX87StorePseudoFunctionCall(i);
-		auto* callLoad = _config->isLlvmX87LoadPseudoFunctionCall(i);
-
-		if (l && l->getPointerOperand() == top)
-		{
-			topVals[i] = topVal;
-
-			LOG << "\t\t" << AsmInstruction(i).getAddress()
-					<< " @ " << std::dec << topVal << std::endl;
-		}
-		else if (s
-				&& s->getPointerOperand() == top
-				&& topVals.find(s->getValueOperand()) != topVals.end())
-		{
-			auto fIt = topVals.find(s->getValueOperand());
-			topVal = fIt->second;
-
-			LOG << "\t\t" << AsmInstruction(i).getAddress()
-					<< " @ " << std::dec << fIt->second << std::endl;
-		}
-		else if (add
-				&& topVals.find(add->getOperand(0)) != topVals.end()
-				&& isa<ConstantInt>(add->getOperand(1)))
-		{
-			auto fIt = topVals.find(add->getOperand(0));
-			auto* ci = cast<ConstantInt>(add->getOperand(1));
-			// Constants are i3, so 7 can be represented as -1, we need to either
-			// use zext here (potentially dangerous if instructions were already
-			// modified and there are true negative values), or compute values
-			// in i3 arithmetics.
-			int tmp = fIt->second + ci->getZExtValue();
-			if (tmp > 8)
-			{
-				LOG << "\t\t\t" << "overflow fix " << tmp << " -> " << 8
-						<< std::endl;
-				tmp = 8;
-			}
-			topVals[i] = tmp;
-
-			LOG << "\t\t" << AsmInstruction(i).getAddress() << std::dec
-					<< " @ " << fIt->second << " + " << ci->getZExtValue()
-					<< " = " << tmp << std::endl;
-		}
-		else if (sub
-				&& topVals.find(sub->getOperand(0)) != topVals.end()
-				&& isa<ConstantInt>(sub->getOperand(1)))
-		{
-			auto fIt = topVals.find(sub->getOperand(0));
-			auto* ci = cast<ConstantInt>(sub->getOperand(1));
-			// Constants are i3, so 7 can be represented as -1, we need to either
-			// use zext here (potentially dangerous if instructions were already
-			// modified and there are true negative values), or compute values
-			// in i3 arithmetics.
-			int tmp = fIt->second - ci->getZExtValue();
-			if (tmp < 0)
-			{
-				LOG << "\t\t\t" << "undeflow fix " << tmp << " -> " << 7
-						<< std::endl;
-				tmp = 7;
-			}
-			topVals[i] = tmp;
-
-			LOG << "\t\t" << AsmInstruction(i).getAddress() << std::dec
-					<< " @ " << fIt->second << " - " << ci->getZExtValue() << " = "
-					<< tmp << std::endl;
-		}
-		else if (callStore
-				&& topVals.find(callStore->getArgOperand(0)) != topVals.end())
-		{
-			auto fIt = topVals.find(callStore->getArgOperand(0));
-			int tmp = fIt->second;
-
-			auto regBase = _config->isLlvmX87DataStorePseudoFunctionCall(callStore)
-					? uint32_t(X86_REG_ST0)
-					: uint32_t(X87_REG_TAG0);
-			// Storing value to an empty stack -> suspicious.
-			if (tmp == 8)
-			{
-				tmp = 7;
-				topVal = 7;
-			}
-			int regNum = tmp % 8;
-			auto* reg = _abi->getRegister(regBase + regNum);
-
-			LOG << "\t\t\t" << "store -- " << reg->getName().str() << std::endl;
-
-			new StoreInst(callStore->getArgOperand(1), reg, callStore);
-			callStore->eraseFromParent();
-			changed = true;
-		}
-		else if (callLoad
-				&& topVals.find(callLoad->getArgOperand(0)) != topVals.end())
-		{
-			auto fIt = topVals.find(callLoad->getArgOperand(0));
-			int tmp = fIt->second;
-
-			auto regBase = _config->isLlvmX87DataLoadPseudoFunctionCall(callLoad)
-					? uint32_t(X86_REG_ST0)
-					: uint32_t(X87_REG_TAG0);
-			// Loading value from an empty stack -> value may have been placed
-			// there without us knowing, e.g. return value of some other
-			// function.
-			if (tmp == 8)
-			{
-				tmp = 7;
-				topVal = 7;
-			}
-			int regNum = tmp % 8;
-			auto* reg = _abi->getRegister(regBase + regNum);
-
-			LOG << "\t\t\t" << "load -- " << reg->getName().str() << std::endl;
-
-			auto* l = new LoadInst(reg, "", callLoad);
-			auto* conv = IrModifier::convertValueToType(l, callLoad->getType(), callLoad);
-
-			callLoad->replaceAllUsesWith(conv);
-			callLoad->eraseFromParent();
-			changed = true;
-		}
-		else if (callStore || callLoad)
-		{
-			LOG << "\t\t" << AsmInstruction(i).getAddress() << " @ "
-					<< llvmObjToString(i) << std::endl;
-			assert(false && "some other pattern");
+		if (seenBbs.has(currentBb)) {
+			LOG << "\t\t" << "already seen" << std::endl;
 			return false;
 		}
-	}
+		seenBbs.insert(currentBb);
 
-	for (auto succIt = succ_begin(bb), e = succ_end(bb); succIt != e; ++succIt)
-	{
-		auto* succ = *succIt;
-		changed |= analyzeBb(seenBbs, topVals, succ, topVal);
-	}
+		auto it = currentBb->begin();
+		while (it != currentBb->end()) {
+			Instruction *i = &(*it);
+			++it;
 
+			auto *l = dyn_cast<LoadInst>(i);
+			auto *s = dyn_cast<StoreInst>(i);
+			auto *add = dyn_cast<AddOperator>(i);
+			auto *sub = dyn_cast<SubOperator>(i);
+			auto *callStore = _config->isLlvmX87StorePseudoFunctionCall(i);
+			auto *callLoad = _config->isLlvmX87LoadPseudoFunctionCall(i);
+
+			if (l && l->getPointerOperand() == top) {
+				topVals[i] = topVal;
+
+				LOG << "\t\t" << AsmInstruction(i).getAddress()
+					<< " @ " << std::dec << topVal << std::endl;
+			} else if (s
+					   && s->getPointerOperand() == top
+					   && topVals.find(s->getValueOperand()) != topVals.end()) {
+				auto fIt = topVals.find(s->getValueOperand());
+				topVal = fIt->second;
+
+				LOG << "\t\t" << AsmInstruction(i).getAddress()
+					<< " @ " << std::dec << fIt->second << std::endl;
+			} else if (add
+					   && topVals.find(add->getOperand(0)) != topVals.end()
+					   && isa<ConstantInt>(add->getOperand(1))) {
+				auto fIt = topVals.find(add->getOperand(0));
+				auto *ci = cast<ConstantInt>(add->getOperand(1));
+				// Constants are i3, so 7 can be represented as -1, we need to either
+				// use zext here (potentially dangerous if instructions were already
+				// modified and there are true negative values), or compute values
+				// in i3 arithmetics.
+				auto tmp = fIt->second + ci->getZExtValue();
+				if (tmp > 8) {
+					LOG << "\t\t\t" << "overflow fix " << tmp << " -> " << 8
+						<< std::endl;
+					tmp = 8;
+				}
+				topVals[i] = tmp;
+
+				LOG << "\t\t" << AsmInstruction(i).getAddress() << std::dec
+					<< " @ " << fIt->second << " + " << ci->getZExtValue()
+					<< " = " << tmp << std::endl;
+			} else if (sub
+					   && topVals.find(sub->getOperand(0)) != topVals.end()
+					   && isa<ConstantInt>(sub->getOperand(1))) {
+				auto fIt = topVals.find(sub->getOperand(0));
+				auto *ci = cast<ConstantInt>(sub->getOperand(1));
+				// Constants are i3, so 7 can be represented as -1, we need to either
+				// use zext here (potentially dangerous if instructions were already
+				// modified and there are true negative values), or compute values
+				// in i3 arithmetics.
+				auto tmp = fIt->second - ci->getZExtValue();
+				if (tmp < 0) {
+					LOG << "\t\t\t" << "undeflow fix " << tmp << " -> " << 7
+						<< std::endl;
+					tmp = 7;
+				}
+				topVals[i] = tmp;
+
+				LOG << "\t\t" << AsmInstruction(i).getAddress() << std::dec
+					<< " @ " << fIt->second << " - " << ci->getZExtValue() << " = "
+					<< tmp << std::endl;
+			} else if (callStore
+					   && topVals.find(callStore->getArgOperand(0)) != topVals.end()) {
+				auto fIt = topVals.find(callStore->getArgOperand(0));
+				auto tmp = fIt->second;
+
+				auto regBase = _config->isLlvmX87DataStorePseudoFunctionCall(callStore)
+							   ? uint32_t(X86_REG_ST0)
+							   : uint32_t(X87_REG_TAG0);
+				// Storing value to an empty stack -> suspicious.
+				if (tmp == 8) {
+					tmp = 7;
+					topVal = 7;
+				}
+				int regNum = tmp % 8;
+				auto *reg = _abi->getRegister(regBase + regNum);
+
+				LOG << "\t\t\t" << "store -- " << reg->getName().str() << std::endl;
+
+				new StoreInst(callStore->getArgOperand(1), reg, callStore);
+				callStore->eraseFromParent();
+				changed = true;
+			} else if (callLoad
+					   && topVals.find(callLoad->getArgOperand(0)) != topVals.end()) {
+				auto fIt = topVals.find(callLoad->getArgOperand(0));
+				auto tmp = fIt->second;
+
+				auto regBase = _config->isLlvmX87DataLoadPseudoFunctionCall(callLoad)
+							   ? uint32_t(X86_REG_ST0)
+							   : uint32_t(X87_REG_TAG0);
+				// Loading value from an empty stack -> value may have been placed
+				// there without us knowing, e.g. return value of some other
+				// function.
+				if (tmp == 8) {
+					tmp = 7;
+					topVal = 7;
+				}
+				int regNum = tmp % 8;
+				auto *reg = _abi->getRegister(regBase + regNum);
+
+				LOG << "\t\t\t" << "load -- " << reg->getName().str() << std::endl;
+
+				auto *lTmp = new LoadInst(reg, "", callLoad);
+				auto *conv = IrModifier::convertValueToType(lTmp, callLoad->getType(), callLoad);
+
+				callLoad->replaceAllUsesWith(conv);
+				callLoad->eraseFromParent();
+				changed = true;
+			} else if (callStore || callLoad) {
+				LOG << "\t\t" << AsmInstruction(i).getAddress() << " @ "
+					<< llvmObjToString(i) << std::endl;
+				assert(false && "some other pattern");
+				return false;
+			}
+		}
+
+		for (auto succIt = succ_begin(currentBb), e = succ_end(currentBb); succIt != e; ++succIt) {
+			auto *succ = *succIt;
+			queue.push({succ, topVal});
+		}
+	}
 	return changed;
 }
 

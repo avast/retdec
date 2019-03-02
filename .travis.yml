@@ -40,6 +40,8 @@ install:
   - if [ "$TRAVIS_OS_NAME" = "osx" ]; then brew install ccache; fi
   # python 3
   - if [ "$TRAVIS_OS_NAME" = "osx" ]; then brew upgrade python; fi
+  # install for os x the gnu time library
+  - if [ "$TRAVIS_OS_NAME" = "osx" ]; then brew install gnu-time; fi
 
 before_script:
   - eval "${MATRIX_EVAL}"
