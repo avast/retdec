@@ -272,7 +272,8 @@ TEST_F(BorlandDemanglerTests, FailTests)
 	DEM_FAIL("@foo$q14std@%tmp$c11std@%tmp$c%%", status::invalid_mangled_name);
 }
 
-TEST_F(BorlandDemanglerTests, FakeStubTest) {
+TEST_F(BorlandDemanglerTests, FakeStubTest)
+{
 	DEM_EQ("Lllvm$workaround$fake$stub$@%$badd$3Bar%$q3Bart1$3Bar", "Bar Lllvm::workaround::fake::stub::operator+<Bar>(Bar, Bar)");
 }
 

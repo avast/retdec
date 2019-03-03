@@ -8,6 +8,7 @@
 #define RETDEC_BORLAND_AST_PARSER_H
 
 #include "llvm/Demangle/borland_ast.h"
+#include "llvm/Demangle/borland_ast_types.h"
 #include "llvm/Demangle/context.h"
 
 #include "llvm/Demangle/StringView.h"
@@ -16,12 +17,10 @@ namespace retdec {
 namespace demangler {
 namespace borland {
 
-class FunctionTypeNode;
-
 using StringView = llvm::itanium_demangle::StringView;
 
 /**
- * @brief Parser from name mangled by borland mangling scheme into AST.
+ * @brief Parses name mangled by borland mangling scheme into AST.
  */
 class BorlandASTParser
 {
@@ -43,7 +42,7 @@ public:
 
 private:
 	char peek() const;
-	bool peekChar(char c) const;
+	bool peek(char c) const;
 	bool peek(const StringView &s) const;
 	unsigned peekNumber() const;
 	bool statusOk() const;
@@ -52,9 +51,10 @@ private:
 	bool consumeIfPossible(const StringView &s);
 	bool consume(char c);
 	bool consume(const StringView &s);
+	static std::string getString(const StringView &s);
 
 	void parse();
-	void parseFunction();
+	std::shared_ptr<Node> parseFunction();
 	std::shared_ptr<FunctionTypeNode> parseFuncType(Qualifiers &quals);
 	Qualifiers parseQualifiers();
 	CallConv parseCallConv();
@@ -65,18 +65,17 @@ private:
 	unsigned parseNumber();
 	std::shared_ptr<Node> parseNamedType(unsigned nameLen, const Qualifiers &quals);
 	std::shared_ptr<Node> parseFuncName();
-	std::shared_ptr<Node> parseLlvmName();
+	std::shared_ptr<Node> parseFuncNameClasic();
+	std::shared_ptr<Node> parseFuncNameLlvm();
 	std::shared_ptr<Node> parseOperator();
-	std::shared_ptr<Node> parseName(const char *end);
+	std::shared_ptr<Node> parseAsNameUntil(const char *end);
+	std::shared_ptr<Node> parseTemplate(std::shared_ptr<Node> templateNamespace);
 	std::shared_ptr<Node> parseTemplateName(std::shared_ptr<Node> templateNamespace);
 	std::shared_ptr<Node> parseTemplateParams();
-	std::shared_ptr<Node> parseTemplate(std::shared_ptr<Node> templateNamespace);
 	std::shared_ptr<Node> parsePointer(const Qualifiers &quals);
 	std::shared_ptr<Node> parseReference();
 	std::shared_ptr<Node> parseRReference();
 	std::shared_ptr<Node> parseArray(const Qualifiers &quals);
-
-	static std::string getString(const StringView &s);
 private:
 	Status _status;
 	StringView _mangled;

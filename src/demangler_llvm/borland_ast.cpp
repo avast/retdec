@@ -255,7 +255,7 @@ void NodeArray::printLeft(std::ostream &s) const
 
 std::shared_ptr<Node> NodeArray::get(unsigned i) const
 {
-	return _nodes.at(i); // TODO ked je i vacsie ako size
+	return i < _nodes.size() ? _nodes.at(i): nullptr;
 }
 
 Qualifiers::Qualifiers(bool isVolatile, bool isConst) :
