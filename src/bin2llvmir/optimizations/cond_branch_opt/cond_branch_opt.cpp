@@ -104,7 +104,7 @@ bool CondBranchOpt::runOnInstruction(
 
 	Value* testedVal = nullptr;
 	Value* subVal = nullptr;
-	Instruction* binOp = nullptr;
+	BinaryOperator* binOp = nullptr;
 	ICmpInst* icmp = nullptr;
 
 	// ZF SF OF xor or

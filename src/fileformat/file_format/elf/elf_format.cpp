@@ -1084,7 +1084,8 @@ Relocation createRelocation(const std::string &name, std::uint64_t offset, std::
  * @param pathToFile Path to input file
  * @param loadFlags Load flags
  */
-ElfFormat::ElfFormat(std::string pathToFile, LoadFlags loadFlags) : FileFormat(pathToFile, loadFlags)
+ElfFormat::ElfFormat(std::string pathToFile, LoadFlags loadFlags) :
+		FileFormat(pathToFile, loadFlags)
 {
 	initStructures();
 }
@@ -1094,7 +1095,20 @@ ElfFormat::ElfFormat(std::string pathToFile, LoadFlags loadFlags) : FileFormat(p
  * @param inputStream Representation of input file
  * @param loadFlags Load flags
  */
-ElfFormat::ElfFormat(std::istream &inputStream, LoadFlags loadFlags) : FileFormat(inputStream, loadFlags)
+ElfFormat::ElfFormat(std::istream &inputStream, LoadFlags loadFlags) :
+		FileFormat(inputStream, loadFlags)
+{
+	initStructures();
+}
+
+/**
+ * Constructor
+ * @param data Input data.
+ * @param size Input data size.
+ * @param loadFlags Load flags
+ */
+ElfFormat::ElfFormat(const std::uint8_t *data, std::size_t size, LoadFlags loadFlags) :
+		FileFormat(data, size, loadFlags)
 {
 	initStructures();
 }

@@ -35,6 +35,7 @@ ExternalProject_Add(llvm-project
 		# Force a release build (we don't need to debug LLVM).
 		# This has no effect on Windows with MSVC, but is useful on Linux.
 		-DCMAKE_BUILD_TYPE=Release
+		-DCMAKE_CXX_FLAGS_RELEASE=${CMAKE_CXX_FLAGS_RELEASE}
 
 		# Force Python3.
 		-DPYTHON_EXECUTABLE=${PYTHON_EXECUTABLE}

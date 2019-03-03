@@ -50,7 +50,7 @@ std::string referencesToString(
 {
 	std::string result;
 	for (const auto &ref : references) {
-		result += std::to_string(ref.first) + " " + ref.second + " ";
+		result += std::to_string(ref.offset) + " " + ref.name + " ";
 	}
 
 	return result;
@@ -62,20 +62,21 @@ std::string referencesToString(
  * @param detections detected functions
  */
 void printDetectionsDebug(
-	const std::vector<DetectedFunction> &detections)
+	const retdec::stacofin::DetectedFunctionsMultimap &detections)
 {
 	std::uint64_t lastAddress = 0;
-	for (const auto &detected : detections) {
-		if (detected.address == lastAddress) {
+	for (const auto& p : detections) {
+		auto& detected = p.second;
+		if (detected.getAddress() == lastAddress) {
 			for (const auto &name : detected.names) {
 				std::cout << "or " << name << "\n";
 			}
 			continue;
 		}
-		lastAddress = detected.address;
+		lastAddress = detected.getAddress();
 
 		std::cout << "0x" << std::setfill('0') << std::setw(8) << std::hex
-			<< detected.address << " " << detected.names[0] << "\n";
+			<< detected.getAddress() << " " << detected.names[0] << "\n";
 		for (std::size_t i = 1; i < detected.names.size(); ++i) {
 			std::cout << "or " << detected.names[i] << "\n";
 		}
@@ -88,20 +89,21 @@ void printDetectionsDebug(
  * @param detections detected functions
  */
 void printDetections(
-	const std::vector<DetectedFunction> &detections)
+	const retdec::stacofin::DetectedFunctionsMultimap &detections)
 {
 	std::uint64_t lastAddress = 0;
-	for (const auto &detected : detections) {
-		if (detected.address == lastAddress) {
+	for (const auto& p : detections) {
+		auto& detected = p.second;
+		if (detected.getAddress() == lastAddress) {
 			for (const auto &name : detected.names) {
 				std::cout << "\t\t\t" << name << " "
 					<< referencesToString(detected.references) << "\n";;
 			}
 			continue;
 		}
-		lastAddress = detected.address;
+		lastAddress = detected.getAddress();
 
-		std::cout << "0x" << std::hex << detected.address << " \t"
+		std::cout << "0x" << std::hex << detected.getAddress() << " \t"
 			<< std::dec << detected.size << "\t" << detected.names[0] << " "
 			<< referencesToString(detected.references) << "\n";
 		for (std::size_t i = 1; i < detected.names.size(); ++i) {
@@ -159,10 +161,10 @@ int doActions(
 
 	// Print detections.
 	if (debugOn) {
-		printDetectionsDebug(codeFinder.accessDectedFunctions());
+		printDetectionsDebug(codeFinder.getAllDetections());
 	}
 	else {
-		printDetections(codeFinder.accessDectedFunctions());
+		printDetections(codeFinder.getAllDetections());
 	}
 
 	// Print total code coverage information.

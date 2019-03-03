@@ -280,9 +280,9 @@ CallEntry::CallEntry(llvm::CallInst* c) :
 
 }
 
-bool registerCanBeParameterAccordingToAbi(Config* _config, llvm::Value* val)
+bool registerCanBeParameterAccordingToAbi(Abi* _abi, Config* _config, llvm::Value* val)
 {
-	if (!_config->isRegister(val))
+	if (!_abi->isRegister(val))
 	{
 		return true;
 	}
@@ -322,13 +322,13 @@ bool registerCanBeParameterAccordingToAbi(Config* _config, llvm::Value* val)
 /**
  * Remove all registers that are not used to pass argument according to ABI.
  */
-void CallEntry::filterRegisters(Config* _config)
+void CallEntry::filterRegisters(Abi* _abi, Config* _config)
 {
 	auto it = possibleArgStores.begin();
 	while (it != possibleArgStores.end())
 	{
 		auto* op = (*it)->getPointerOperand();
-		if (!registerCanBeParameterAccordingToAbi(_config, op))
+		if (!registerCanBeParameterAccordingToAbi(_abi, _config, op))
 		{
 			it = possibleArgStores.erase(it);
 		}
@@ -345,7 +345,7 @@ void DataFlowEntry::filterRegistersArgLoads()
 	while (it != argLoads.end())
 	{
 		auto* op = (*it)->getPointerOperand();
-		if (!registerCanBeParameterAccordingToAbi(_config, op))
+		if (!registerCanBeParameterAccordingToAbi(_abi, _config, op))
 		{
 			it = argLoads.erase(it);
 		}
@@ -473,7 +473,7 @@ void CallEntry::filterLeaveOnlyContinuousStackOffsets(Config* _config)
 	}
 }
 
-void CallEntry::filterLeaveOnlyNeededStackOffsets(Config* _config)
+void CallEntry::filterLeaveOnlyNeededStackOffsets(Abi* _abi, Config* _config)
 {
 	int regNum = 0;
 	auto it = possibleArgStores.begin();
@@ -483,7 +483,7 @@ void CallEntry::filterLeaveOnlyNeededStackOffsets(Config* _config)
 		auto* op = s->getPointerOperand();
 		auto off = _config->getStackVariableOffset(op);
 
-		if (_config->isRegister(op))
+		if (_abi->isRegister(op))
 		{
 			++regNum;
 			++it;
@@ -711,11 +711,11 @@ void DataFlowEntry::addArgLoads()
 		if (auto* l = dyn_cast<LoadInst>(&*it))
 		{
 			auto* ptr = l->getPointerOperand();
-			if (!_config->isStackVariable(ptr) && !_config->isRegister(ptr))
+			if (!_config->isStackVariable(ptr) && !_abi->isRegister(ptr))
 			{
 				continue;
 			}
-			if (_config->isFlagRegister(ptr))
+			if (_abi->isFlagRegister(ptr))
 			{
 				continue;
 			}
@@ -789,8 +789,8 @@ void DataFlowEntry::addRetStores()
 					auto* ptr = store->getPointerOperand();
 
 					if (disqualifiedValues.hasNot(ptr)
-							&& !_config->isFlagRegister(ptr)
-							&& (_config->isStackVariable(ptr) || _config->isRegister(ptr)))
+							&& !_abi->isFlagRegister(ptr)
+							&& (_config->isStackVariable(ptr) || _abi->isRegister(ptr)))
 					{
 						re.possibleRetStores.push_back(store);
 						disqualifiedValues.insert(ptr);
@@ -890,7 +890,7 @@ void DataFlowEntry::addCallArgs(llvm::CallInst* call, CallEntry& ce)
 			auto* val = store->getValueOperand();
 			auto* ptr = store->getPointerOperand();
 
-			if (!_config->isStackVariable(ptr) && !_config->isRegister(ptr))
+			if (!_config->isStackVariable(ptr) && !_abi->isRegister(ptr))
 			{
 				disqualifiedValues.insert(ptr);
 			}
@@ -902,8 +902,8 @@ void DataFlowEntry::addCallArgs(llvm::CallInst* call, CallEntry& ce)
 				{
 					disqualifiedValues.insert(ptr);
 				}
-				if (_config->isRegister(ptr)
-						&& _config->isRegister(l->getPointerOperand())
+				if (_abi->isRegister(ptr)
+						&& _abi->isRegister(l->getPointerOperand())
 						&& ptr != l->getPointerOperand())
 				{
 					disqualifiedValues.insert(l->getPointerOperand());
@@ -911,15 +911,17 @@ void DataFlowEntry::addCallArgs(llvm::CallInst* call, CallEntry& ce)
 			}
 
 			if (disqualifiedValues.hasNot(ptr)
-					&& !_config->isFlagRegister(ptr)
-					&& (isa<AllocaInst>(ptr) || _config->isRegister(ptr)))
+					&& !_abi->isFlagRegister(ptr)
+					&& (isa<AllocaInst>(ptr) || _abi->isRegister(ptr)))
 			{
 				ce.possibleArgStores.push_back(store);
 				disqualifiedValues.insert(ptr);
 				disqualifiedValues.insert(store);
 
-				if (_config->isGeneralPurposeRegister(ptr)
-						|| _config->isFloatingPointRegister(ptr))
+				if (_abi->isGeneralPurposeRegister(ptr)
+						|| (_config->getConfig().architecture.isMipsOrPic32()
+								&& _abi->isRegister(ptr)
+								&& ptr->getType()->isFloatingPointTy()))
 				{
 					auto rn = _config->getConfigRegisterNumber(ptr);
 					if (rn.isDefined() && rn > maxUsedRegNum)
@@ -982,8 +984,8 @@ void DataFlowEntry::addCallReturns(llvm::CallInst* call, CallEntry& ce)
 			auto* ptr = load->getPointerOperand();
 
 			if (disqualifiedValues.hasNot(ptr)
-					&& !_config->isFlagRegister(ptr)
-					&& (_config->isStackVariable(ptr) || _config->isRegister(ptr)))
+					&& !_abi->isFlagRegister(ptr)
+					&& (_config->isStackVariable(ptr) || _abi->isRegister(ptr)))
 			{
 				ce.possibleRetLoads.push_back(load);
 				disqualifiedValues.insert(ptr);
@@ -1004,10 +1006,10 @@ void DataFlowEntry::filter()
 
 	for (CallEntry& e : calls)
 	{
-		e.filterRegisters(_config);
+		e.filterRegisters(_abi, _config);
 		e.filterSort(_config);
 		e.filterLeaveOnlyContinuousStackOffsets(_config);
-		e.filterLeaveOnlyNeededStackOffsets(_config);
+		e.filterLeaveOnlyNeededStackOffsets(_abi, _config);
 
 		if (isVarArg)
 		{
@@ -1034,7 +1036,7 @@ void DataFlowEntry::filter()
 				++nextIt;
 				if (t->isDoubleTy()
 						&& nextIt != e.possibleArgStores.end()
-						&& _config->isRegister((*nextIt)->getPointerOperand()))
+						&& _abi->isRegister((*nextIt)->getPointerOperand()))
 				{
 					e.possibleArgStores.erase(nextIt);
 				}
@@ -1086,7 +1088,7 @@ void DataFlowEntry::callsFilterCommonRegisters()
 	for (auto* s : calls.front().possibleArgStores)
 	{
 		Value* r = s->getPointerOperand();
-		if (_config->isRegister(r))
+		if (_abi->isRegister(r))
 		{
 			commonRegs.insert(r);
 		}
@@ -1106,7 +1108,7 @@ void DataFlowEntry::callsFilterCommonRegisters()
 		for (auto* s : e.possibleArgStores)
 		{
 			Value* r = s->getPointerOperand();
-			if (_config->isRegister(r))
+			if (_abi->isRegister(r))
 			{
 				regs.insert(r);
 			}
@@ -1170,7 +1172,7 @@ void DataFlowEntry::callsFilterCommonRegisters()
 		for ( ; it != e.possibleArgStores.end(); )
 		{
 			Value* r = (*it)->getPointerOperand();
-			if (_config->isRegister(r)
+			if (_abi->isRegister(r)
 					&& commonRegs.find(r) == commonRegs.end())
 			{
 				it = e.possibleArgStores.erase(it);

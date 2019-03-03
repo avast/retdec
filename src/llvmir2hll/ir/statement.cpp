@@ -6,6 +6,7 @@
 
 #include "retdec/llvmir2hll/ir/empty_stmt.h"
 #include "retdec/llvmir2hll/ir/goto_stmt.h"
+#include "retdec/llvmir2hll/ir/return_stmt.h"
 #include "retdec/llvmir2hll/ir/statement.h"
 #include "retdec/llvmir2hll/llvm/llvm_support.h"
 #include "retdec/llvmir2hll/support/debug.h"
@@ -69,7 +70,7 @@ void Statement::setSuccessor(ShPtr<Statement> newSucc) {
 	if (newSucc) {
 		// Update the non-goto predecessors of the new successor.
 		newSucc->removePredecessors(true);
-		newSucc->preds.insert(ucast<Statement>(shared_from_this()));
+		newSucc->addPredecessor(ucast<Statement>(shared_from_this()));
 	}
 
 	succ = newSucc;
@@ -151,7 +152,7 @@ void Statement::prependStatement(ShPtr<Statement> stmt) {
 
 	// Set lastStmt as the only non-goto predecessor of the current statement.
 	removePredecessors(true);
-	preds.insert(lastStmt);
+	addPredecessor(lastStmt);
 
 	// Set the current statement as lastStmt's successor.
 	lastStmt->setSuccessor(ucast<Statement>(thisStmt));
@@ -200,7 +201,7 @@ void Statement::appendStatement(ShPtr<Statement> stmt) {
 	succ = stmt;
 
 	stmt->removePredecessors(true);
-	stmt->preds.insert(ucast<Statement>(shared_from_this()));
+	stmt->addPredecessor(ucast<Statement>(shared_from_this()));
 }
 
 /**
@@ -294,6 +295,15 @@ Statement::predecessor_iterator Statement::predecessor_end() const {
 */
 void Statement::removeStatement(ShPtr<Statement> stmt) {
 	PRECONDITION_NON_NULL(stmt);
+
+	// If the stamement to remove is goto, we need to remove it from its
+	// target's predecessors - target is not goto's successor.
+	if (auto gotoStmt = cast<GotoStmt>(stmt)) {
+		if (gotoStmt->getTarget()) {
+			gotoStmt->getTarget()->preds.erase(stmt);
+			preserveLabel(stmt, gotoStmt->getTarget());
+		}
+	}
 
 	// If some predecessor of stmt is a goto statement and stmt doesn't have a
 	// successor, we have to replace it with an empty statement. Indeed, we
@@ -488,6 +498,14 @@ void Statement::replaceStatement(ShPtr<Statement> oldStmt,
 	// Use the observer/subject interface to replace it also in all statements
 	// which contain it.
 	oldStmt->notifyObservers(newStmt);
+
+	// If the stamement to replace is goto, we need to remove it from its
+	// target's predecessors - target is not goto's successor.
+	if (auto gotoStmt = cast<GotoStmt>(oldStmt)) {
+		if (gotoStmt->getTarget()) {
+			gotoStmt->getTarget()->preds.erase(oldStmt);
+		}
+	}
 
 	oldStmt->removePredecessors();
 	oldStmt->removeSuccessor();

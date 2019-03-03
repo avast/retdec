@@ -57,7 +57,6 @@
 #include "retdec/llvmir2hll/llvm/llvm_debug_info_obtainer.h"
 #include "retdec/llvmir2hll/llvm/llvm_intrinsic_converter.h"
 #include "retdec/llvmir2hll/llvm/llvmir2bir_converter.h"
-#include "retdec/llvmir2hll/llvm/llvmir2bir_converter_factory.h"
 #include "retdec/llvmir2hll/obtainer/call_info_obtainer.h"
 #include "retdec/llvmir2hll/obtainer/call_info_obtainer_factory.h"
 #include "retdec/llvmir2hll/optimizer/optimizer_manager.h"
@@ -195,11 +194,6 @@ cl::opt<std::string> VarRenamer("var-renamer",
 	cl::desc("Name of the used renamer of variable names "
 		"(the default is 'readable'; set to 'help' to list all the supported renamers)."),
 	cl::init("readable"));
-
-cl::opt<std::string> LLVMIR2BIRConverter("llvmir2bir-converter",
-	cl::desc("Name of the used convereter of LLVM IR to BIR "
-		"(the default is 'orig'; set to 'help' to list all the supported renamers)."),
-	cl::init("orig"));
 
 cl::opt<bool> EmitCFGs("emit-cfgs",
 	cl::desc("Enables the emission of control-flow graphs (CFGs) for each "
@@ -345,7 +339,7 @@ private:
 	void createSemanticsFromLLVMIR();
 	bool loadConfig();
 	void saveConfig();
-	void convertLLVMIRToBIR();
+	bool convertLLVMIRToBIR();
 	void removeLibraryFuncs();
 	void removeCodeUnreachableInCFG();
 	void removeFuncsPrefixedWith(const retdec::llvmir2hll::StringSet &prefixes);
@@ -405,9 +399,6 @@ private:
 
 	/// The used renamer of variables.
 	ShPtr<retdec::llvmir2hll::VarRenamer> varRenamer;
-
-	/// The used convereter of LLVM IR to BIR.
-	ShPtr<retdec::llvmir2hll::LLVMIR2BIRConverter> llvm2BIRConverter;
 };
 
 // Static variables and constants initialization.
@@ -422,7 +413,7 @@ char Decompiler::ID = 0;
 Decompiler::Decompiler(raw_pwrite_stream &out):
 	ModulePass(ID), out(out), llvmModule(nullptr), resModule(), semantics(),
 	hllWriter(), aliasAnalysis(), cio(), arithmExprEvaluator(),
-	varNameGen(), varRenamer(), llvm2BIRConverter() {}
+	varNameGen(), varRenamer() {}
 
 bool Decompiler::runOnModule(Module &m) {
 	if (Debug) retdec::llvm_support::printPhase("initialization");
@@ -433,7 +424,10 @@ bool Decompiler::runOnModule(Module &m) {
 	}
 
 	if (Debug) retdec::llvm_support::printPhase("conversion of LLVM IR into BIR");
-	convertLLVMIRToBIR();
+	decompilationShouldContinue = convertLLVMIRToBIR();
+	if (!decompilationShouldContinue) {
+		return false;
+	}
 
 	retdec::llvmir2hll::StringSet funcPrefixes(getPrefixesOfFuncsToBeRemoved());
 	if (Debug) retdec::llvm_support::printPhase("removing functions prefixed with [" + joinStrings(funcPrefixes) + "]");
@@ -594,19 +588,6 @@ bool Decompiler::initialize(Module &m) {
 		return false;
 	}
 
-	// Instantiate the requested converter of LLVM IR to BIR and make sure it
-	// exists.
-	if (Debug) retdec::llvm_support::printSubPhase("creating the used LLVM IR to BIR converter [" + LLVMIR2BIRConverter + "]");
-	llvm2BIRConverter = retdec::llvmir2hll::LLVMIR2BIRConverterFactory::getInstance().createObject(
-		LLVMIR2BIRConverter, this);
-	if (!llvm2BIRConverter) {
-		printErrorUnsupportedObject<retdec::llvmir2hll::LLVMIR2BIRConverterFactory>(
-			"converter of LLVM IR to BIR", "converters of LLVM IR to BIR");
-		return false;
-	}
-	// Options
-	llvm2BIRConverter->setOptionStrictFPUSemantics(StrictFPUSemantics);
-
 	createSemantics();
 
 	bool configLoaded = loadConfig();
@@ -722,12 +703,20 @@ void Decompiler::saveConfig() {
 /**
 * @brief Convert the LLVM IR module into a BIR module using the instantiated
 *        converter.
+* @return @c True if decompilation should continue, @c False if something went
+*         wrong and decompilation should abort.
 */
-void Decompiler::convertLLVMIRToBIR() {
+bool Decompiler::convertLLVMIRToBIR() {
+	auto llvm2BIRConverter = retdec::llvmir2hll::LLVMIR2BIRConverter::create(this);
+	// Options
+	llvm2BIRConverter->setOptionStrictFPUSemantics(StrictFPUSemantics);
+
 	std::string moduleName = ForcedModuleName.empty() ?
 		llvmModule->getModuleIdentifier() : ForcedModuleName;
 	resModule = llvm2BIRConverter->convert(llvmModule, moduleName,
 		semantics, config, Debug);
+
+	return true;
 }
 
 /**

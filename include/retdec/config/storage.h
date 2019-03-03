@@ -36,8 +36,7 @@ class Storage
 		static Storage inRegister(unsigned registerNumber);
 		static Storage inRegister(
 				const std::string& registerName,
-				unsigned registerNumber,
-				const std::string& registerClass);
+				unsigned registerNumber);
 		static Storage fromJsonValue(const Json::Value& val);
 		/// @}
 
@@ -60,7 +59,6 @@ class Storage
 		std::string getRegisterName() const;
 		int getStackOffset() const;
 		retdec::utils::Maybe<unsigned> getRegisterNumber() const;
-		std::string getRegisterClass() const;
 		/// @}
 
 	protected:
@@ -81,7 +79,6 @@ class Storage
 		retdec::utils::Address _globalAddress;
 
 		retdec::utils::Maybe<unsigned> _registerNumber;
-		std::string _registerClass;
 };
 
 } // namespace config

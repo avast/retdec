@@ -525,7 +525,7 @@ std::string PatternExtractor::getArchAsString()
 PatternExtractor::PatternExtractor(
 	const std::string &filePath,
 	const std::string &groupName)
-	: inputFile(createFileFormat(filePath, nullptr, loadFlags)),
+	: inputFile(createFileFormat(filePath, false, loadFlags)),
 	groupName(groupName)
 {
 	stateValid = processFile();

@@ -3243,6 +3243,7 @@ void Capstone2LlvmIrTranslatorX86_impl::translateSalc(cs_insn* i, cs_x86* xi, ll
 
 /**
  * X86_INS_SBB
+ * op0 = op0 - (op1 + CF)
  */
 void Capstone2LlvmIrTranslatorX86_impl::translateSbb(cs_insn* i, cs_x86* xi, llvm::IRBuilder<>& irb)
 {
@@ -3251,13 +3252,13 @@ void Capstone2LlvmIrTranslatorX86_impl::translateSbb(cs_insn* i, cs_x86* xi, llv
 	std::tie(op0, op1) = loadOpBinary(xi, irb, eOpConv::SEXT_TRUNC);
 	auto* cf = loadRegister(X86_REG_CF, irb, op0->getType(), eOpConv::ZEXT_TRUNC);
 
-	auto* sub1 = irb.CreateSub(op0, op1);
-	auto* sub = irb.CreateAdd(sub1, cf); // Yes, this really is add.
-
+	op1 = irb.CreateAdd(op1, cf);
+	auto* sub = irb.CreateSub(op0, op1);
 	storeRegistersPlusSflags(irb, sub, {
 			{X86_REG_AF, generateBorrowSubCInt4(op0, op1, irb)},
-			{X86_REG_CF, generateBorrowSubC(sub1, op0, op1, irb)}, // Really sub1.
-			{X86_REG_OF, generateOverflowSubC(sub1, op0, op1, irb)}}); // Really sub1.
+			{X86_REG_CF, generateBorrowSubC(sub, op0, op1, irb)},
+			{X86_REG_OF, generateOverflowSubC(sub, op0, op1, irb)}});
+
 	storeOp(xi->operands[0], sub, irb);
 }
 

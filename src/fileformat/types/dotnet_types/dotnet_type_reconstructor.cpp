@@ -840,6 +840,12 @@ std::unique_ptr<DotnetClass> DotnetTypeReconstructor::createClassReference(const
 	else
 	{
 		auto assemblyRefTable = static_cast<const MetadataTable<AssemblyRef>*>(metadataStream->getMetadataTable(MetadataTableType::AssemblyRef));
+
+		if (!assemblyRefTable)
+		{
+			return nullptr;
+		}
+
 		auto assemblyRef = assemblyRefTable->getRow(typeRef->resolutionScope.getIndex());
 
 		if (!assemblyRef || !stringStream->getString(assemblyRef->name.getIndex(), classLibName))

@@ -1,5 +1,4 @@
 set(BIN2LLVMIR_SOURCES
-	analyses/static_code/static_code.cpp
 	analyses/ctor_dtor.cpp
 	analyses/indirectly_called_funcs_analysis.cpp
 	analyses/reachable_funcs_analysis.cpp

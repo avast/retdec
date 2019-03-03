@@ -10,7 +10,7 @@ matrix:
   fast_finish: true
 
 install:
-  - appveyor DownloadFile "https://downloads.sourceforge.net/project/winflexbison/%WINFLEXBISON_ARCHIVE%"
+  - appveyor DownloadFile "https://downloads.sourceforge.net/project/winflexbison/old_versions/%WINFLEXBISON_ARCHIVE%"
   - 7z x -y -owinflexbison\ "%WINFLEXBISON_ARCHIVE%" > nul
   - set Path=%CD%\winflexbison;%Path%
   - set Path=C:\Python36;%Path%
@@ -40,8 +40,8 @@ test_script:
   - cmd: gcc.exe -o hello.exe hello-orig.c
   - cmd: hello.exe
   - cmd: C:\Python36\python.exe retdec-install\bin\retdec-decompiler.py hello.exe
-  - cmd: cat hello.c
-  - cmd: grep "int main(int argc, char \*\* argv)" hello.c
+  - cmd: cat hello.exe.c
+  - cmd: grep "int main(int argc, char \*\* argv)" hello.exe.c
 
 branches:
   only:

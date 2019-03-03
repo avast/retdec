@@ -461,7 +461,10 @@ template<int bits> bool peDataDirectoryAbsolute(const PeLib::PeHeaderT<bits> &pe
  *
  * If function returns @c false, @a fileName is left unchanged.
  */
-template<int bits> bool peImportedLibraryFileName(const PeLib::ImportDirectory<bits> &peImports, std::string &fileName, unsigned long long index)
+template<int bits> bool peImportedLibraryFileName(
+		const PeLib::ImportDirectory<bits> &peImports,
+		std::string &fileName,
+		unsigned long long index)
 {
 	if(index >= peNumberOfImportedLibraries(peImports))
 	{

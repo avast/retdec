@@ -31,10 +31,10 @@ class CallEntry
 		CallEntry(llvm::CallInst* c);
 
 	public:
-		void filterRegisters(Config* _config);
+		void filterRegisters(Abi* _abi, Config* _config);
 		void filterSort(Config* _config);
 		void filterLeaveOnlyContinuousStackOffsets(Config* _config);
-		void filterLeaveOnlyNeededStackOffsets(Config* _config);
+		void filterLeaveOnlyNeededStackOffsets(Abi* _abi, Config* _config);
 
 		void extractFormatString(ReachingDefinitionsAnalysis& _RDA);
 

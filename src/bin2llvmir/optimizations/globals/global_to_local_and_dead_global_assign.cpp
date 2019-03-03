@@ -84,14 +84,6 @@ bool canHaveAddressTaken(GlobalVariable &glob) {
 * 4. Global variable that doesn't have private or internal linkage.
 */
 bool globalVarCanBeOptimized(GlobalVariable &glob) {
-	// TODO: use only this? localize all registers, do not localize anything
-	// else.
-	//
-	auto* config = ConfigProvider::getConfig(glob.getParent());
-	if (config && config->isRegister(&glob)) {
-		return true;
-	}
-
 	Type *globType(glob.getType()->getElementType());
 	if (!globType->isSingleValueType()) {
 		// We don't want to optimize aggregate types (array, structure, ..).

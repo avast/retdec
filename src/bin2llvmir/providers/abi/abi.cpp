@@ -42,6 +42,11 @@ bool Abi::isRegister(const llvm::Value* val)
 	return _regs2id.count(val);
 }
 
+bool Abi::isRegister(const llvm::Value* val, uint32_t r)
+{
+	return getRegister(r) == val;
+}
+
 bool Abi::isFlagRegister(const llvm::Value* val)
 {
 	return isRegister(val)

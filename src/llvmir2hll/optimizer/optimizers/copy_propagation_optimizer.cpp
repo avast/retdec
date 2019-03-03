@@ -91,6 +91,16 @@ int compareStmtsInDUChains(const ShPtr<Statement> &s1, const ShPtr<Statement> &s
 auto ordered(const DefUseChains::DefUseChain &du) {
 	std::vector<std::pair<DefUseChains::StmtVarPair, StmtSet>> v(du.begin(), du.end());
 	std::sort(v.begin(), v.end(), [](const auto &p1, const auto &p2) {
+		auto v1 = p1.first.second;
+		auto v2 = p2.first.second;
+		auto s1 = p1.first.first;
+		auto s2 = p2.first.first;
+
+		// We are comparing the same variable in the same statement.
+		if (v1 == v2 && s1 == s2) {
+			return false;
+		}
+
 		// Begin by checking the sizes of the uses because it's faster than
 		// checking the statements and variables.
 		auto uses1Size = p1.second.size();
@@ -100,8 +110,8 @@ auto ordered(const DefUseChains::DefUseChain &du) {
 		}
 
 		// The uses sets have the same size, so continue to variables.
-		const auto &v1Name = p1.first.second->getName();
-		const auto &v2Name = p2.first.second->getName();
+		const auto &v1Name = v1->getName();
+		const auto &v2Name = v2->getName();
 		auto cmpResult = v1Name.compare(v2Name);
 		if (cmpResult != 0) {
 			return cmpResult < 0;
@@ -109,8 +119,6 @@ auto ordered(const DefUseChains::DefUseChain &du) {
 
 		// Check the statements. We have to use getTextRepr() because
 		// there is no other way of comparing the statements.
-		auto s1 = p1.first.first;
-		auto s2 = p2.first.first;
 		cmpResult = compareStmtsInDUChains(s1, s2);
 		if (cmpResult != 0) {
 			return cmpResult < 0;
@@ -139,6 +147,8 @@ auto ordered(const DefUseChains::DefUseChain &du) {
 			return cmpResult < 0;
 		}
 		// Predecessors:
+		std::set<ShPtr<Statement>> s1Seen;
+		std::set<ShPtr<Statement>> s2Seen;
 		while (true) {
 			const auto &s1PredSize = s1->getNumberOfPredecessors();
 			const auto &s2PredSize = s2->getNumberOfPredecessors();
@@ -150,6 +160,14 @@ auto ordered(const DefUseChains::DefUseChain &du) {
 				cmpResult = compareStmtsInDUChains(s1Pred, s2Pred);
 				if (cmpResult != 0) {
 					return cmpResult < 0;
+				}
+				s1Seen.insert(s1);
+				s2Seen.insert(s2);
+				if (s1Seen.count(s1Pred)) {
+					return false;
+				}
+				if (s2Seen.count(s2Pred)) {
+					return false;
 				}
 				s1 = s1Pred;
 				s2 = s2Pred;
