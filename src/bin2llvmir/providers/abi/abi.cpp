@@ -177,7 +177,7 @@ llvm::PointerType* Abi::getDefaultPointerType() const
 
 std::size_t Abi::getWordSize() const
 {
-	return getWordSize(_module);
+	return _config->getConfig().architecture.getBitSize() / 8;
 }
 
 std::size_t Abi::getTypeByteSize(llvm::Module* m, llvm::Type* t)
