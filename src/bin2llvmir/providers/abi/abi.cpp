@@ -183,12 +183,16 @@ std::size_t Abi::getWordSize() const
 std::size_t Abi::getTypeByteSize(llvm::Module* m, llvm::Type* t)
 {
 	assert(m);
+	assert(t->isSized());
+
 	return m->getDataLayout().getTypeStoreSize(t);
 }
 
 std::size_t Abi::getTypeBitSize(llvm::Module* m, llvm::Type* t)
 {
 	assert(m);
+	assert(t->isSized());
+
 	return m->getDataLayout().getTypeSizeInBits(t);
 }
 
