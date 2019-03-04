@@ -106,6 +106,11 @@ class Abi
 		virtual bool supportsCallingConvention(CallingConvention::ID& cc) const;
 		bool isSpecialCallingConvention(const CallingConvention::ID& cc) const;
 
+	// Config.
+	//
+	public:
+		Config* getConfig() const;
+
 	// Private data - misc.
 	//
 	protected:

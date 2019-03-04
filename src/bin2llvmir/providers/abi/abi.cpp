@@ -288,6 +288,11 @@ bool Abi::isSpecialCallingConvention(const CallingConvention::ID& cc) const
 	}
 }
 
+Config* Abi::getConfig() const
+{
+	return _config;
+}
+
 //
 //==============================================================================
 // AbiProvider
