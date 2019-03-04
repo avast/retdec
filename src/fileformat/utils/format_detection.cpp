@@ -210,6 +210,11 @@ bool isStrangeFeedface(std::istream& stream)
 
 Format detectFileFormat(std::istream &inputStream, bool isRaw)
 {
+	if (isRaw)
+	{
+		return Format::RAW_DATA;
+	}
+
 	resetStream(inputStream);
 
 	std::size_t magicSize = 0;
@@ -265,10 +270,6 @@ Format detectFileFormat(std::istream &inputStream, bool isRaw)
 	if(isCoff(inputStream, magic))
 	{
 		return Format::COFF;
-	}
-	else if(isRaw)
-	{
-		return Format::RAW_DATA;
 	}
 
 	return Format::UNKNOWN;
