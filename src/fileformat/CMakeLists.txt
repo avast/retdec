@@ -34,6 +34,7 @@ set(FILEFORMAT_SOURCES
 	types/resource_table/resource.cpp
 	types/resource_table/resource_table.cpp
 	types/resource_table/resource_tree.cpp
+	types/resource_table/resource_version.cpp
 	types/resource_table/resource_icon.cpp
 	types/resource_table/resource_icon_group.cpp
 	types/resource_table/bitmap_image.cpp

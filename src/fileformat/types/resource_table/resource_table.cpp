@@ -9,13 +9,58 @@
 
 #include "retdec/crypto/crypto.h"
 #include "retdec/utils/conversion.h"
+#include "retdec/utils/dynamic_buffer.h"
 #include "retdec/fileformat/types/resource_table/resource_table.h"
 #include "retdec/fileformat/types/resource_table/bitmap_image.h"
 
 using namespace retdec::utils;
 
+namespace {
+
+enum class VersionInfoType = {BINARY = 0, STRING = 1};
+
+struct FixedFileInfo
+{
+	std::uint32_t signature;                   ///< signature 0xFEEF04BD
+	std::uint16_t strucVersionMaj;             ///< binary major version number
+	std::uint16_t strucVersionMin;             ///< binary minor version number
+	std::uint64_t fileVersion;                 ///< file version number
+	std::uint32_t productVersion;              ///< product version number
+	std::uint32_t fileFlagsMask;               ///< validity mask of fileFalgs member
+	std::uint32_t fileFlags;                   ///< file flags
+	std::uint32_t fileOS;                      ///< target operating system
+	std::uint32_t fileType;                    ///< type of file
+	std::uint32_t fileSubtype;                 ///< subtype of file
+	std::uint64_t timestamp;                   ///< timestamp
+
+	static std::size_t structSize()
+	{
+		return
+			sizeof(signature) + sizeof(strucVersionMaj) + sizeof(strucVersionMin) + sizeof(fileVersion) +
+			sizeof(productVersion) + sizeof(fileFlagsMask) + sizeof(fileFlags) + sizeof(fileOS) +
+			sizeof(fileType) + sizeof(fileSubtype) + sizeof(timestamp);
+	}
+};
+
+struct VersionInfoHeader
+{
+	std::uint16_t length;                       ///< length of whole version info structure
+	std::uint16_t valueLength;                  ///< length of following struct FixedFileInfo
+	std::uint16_t type;                         ///< type of data
+
+	static std::size_t structSize()
+	{
+		return sizeof(length) + sizeof(valueLength) + sizeof(type);
+	}
+};
+
+} // anonymous namespace
+
+
 namespace retdec {
 namespace fileformat {
+
+
 
 /**
  * Constructor
@@ -342,6 +387,36 @@ void ResourceTable::computeIconHashes()
 }
 
 /**
+ * Parse version information
+ */
+void ResourceTable::parseVersionInfo()
+{
+	std::vector<std::uint8_t> bytes;
+
+	for (auto ver : resourceVersions)
+	{
+		struct VersionInfoHeader vih;
+		if (!ver->getBytes(bytes) || bytes.size() < vih.structSize())
+		{
+			return;
+		}
+
+		std::size_t offset = 0; 
+		DynamicBuffer structContent(bytes, retdec::utils::Endianness::LITTLE);
+
+		vih.length = structContent.read<std::uint16_t>(offset); offset += sizeof(vbh.length);
+		vih.valueLength = structContent.read<std::uint16_t>(offset); offset += sizeof(vbh.valueLength);
+		vih.type = structContent.read<std::uint16_t>(offset); offset += sizeof(vbh.type);
+
+		std::cerr << vih.length << " " << vih.valueLength << " " << vih.type << "\n";
+
+		for (std::size_t i = 0; i < 30 && i < bytes.size(); i++)
+			std::cerr << std::hex << static_cast<std::uint16_t>(bytes[i]) << " ";
+		std::cerr << "\n\n";
+	}
+}
+
+/**
  * Delete all records from table
  */
 void ResourceTable::clear()
@@ -356,6 +431,15 @@ void ResourceTable::clear()
 void ResourceTable::addResource(std::unique_ptr<Resource>&& newResource)
 {
 	table.push_back(std::move(newResource));
+}
+
+/**
+ * Add version resource
+ * @param ver Version resource which will be added
+ */
+void ResourceTable::addResourceVersion(ResourceVersion *ver)
+{
+	resourceVersions.push_back(ver);
 }
 
 /**
@@ -389,7 +473,7 @@ void ResourceTable::linkResourceIconGroups()
 			continue;
 		}
 
-		for(size_t eIndex = 0; eIndex < numberOfEntries; eIndex++)
+		for(std::size_t eIndex = 0; eIndex < numberOfEntries; eIndex++)
 		{
 			std::size_t entryNameID;
 			if(!iconGroup->getEntryNameID(eIndex, entryNameID))
@@ -399,7 +483,7 @@ void ResourceTable::linkResourceIconGroups()
 
 			for(auto icon : icons)
 			{
-				size_t iconNameID, iconSize;
+				std::size_t iconNameID, iconSize;
 				unsigned short width, height;
 				uint16_t planes, bitCount;
 				uint8_t colorCount;
