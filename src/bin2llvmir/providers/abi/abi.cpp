@@ -57,7 +57,7 @@ bool Abi::isFlagRegister(const llvm::Value* val)
 			&& val->getType()->getPointerElementType()->isIntegerTy(1);
 }
 
-bool Abi::isStackPointerRegister(const llvm::Value* val)
+bool Abi::isStackPointerRegister(const llvm::Value* val) const
 {
 	return getStackPointerRegister() == val;
 }
@@ -96,12 +96,12 @@ const std::vector<llvm::GlobalVariable*>& Abi::getRegisters() const
 	return _regs;
 }
 
-llvm::GlobalVariable* Abi::getStackPointerRegister()
+llvm::GlobalVariable* Abi::getStackPointerRegister() const
 {
 	return getRegister(_regStackPointerId);
 }
 
-llvm::GlobalVariable* Abi::getZeroRegister()
+llvm::GlobalVariable* Abi::getZeroRegister() const
 {
 	return getRegister(_regZeroReg);
 }
