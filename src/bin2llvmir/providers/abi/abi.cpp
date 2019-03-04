@@ -255,13 +255,9 @@ CallingConvention* Abi::getCallingConvention(
 		return nullptr;
 	}
 
-	auto ccId = static_cast<size_t>(cc);
+	auto ccId = static_cast<std::size_t>(cc);
 
-	if (ccId >= _id2cc.size())
-	{
-		_id2cc.resize(ccId+1, nullptr);
-	}
-	if (_id2cc[ccId] == nullptr)
+	if (!_id2cc.count(ccId))
 	{
 		auto provider = CallingConventionProvider::getProvider();	
 		_id2cc[ccId] = provider->createCallingConvention(cc, this);

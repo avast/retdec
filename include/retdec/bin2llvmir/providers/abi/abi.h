@@ -146,7 +146,7 @@ class Abi
 	// Private data - calling convention
 	//
 	protected:
-		std::vector<CallingConvention::Ptr> _id2cc;
+		std::map<int, CallingConvention::Ptr> _id2cc;
 		CallingConvention::ID _defcc;
 		
 };
