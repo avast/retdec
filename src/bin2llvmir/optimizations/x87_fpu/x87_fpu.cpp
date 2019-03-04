@@ -147,7 +147,7 @@ bool X87FpuAnalysis::analyzeBb(
 				// use zext here (potentially dangerous if instructions were already
 				// modified and there are true negative values), or compute values
 				// in i3 arithmetics.
-				auto tmp = fIt->second + ci->getZExtValue();
+				int tmp = fIt->second + ci->getZExtValue();
 				if (tmp > 8) {
 					LOG << "\t\t\t" << "overflow fix " << tmp << " -> " << 8
 						<< std::endl;
@@ -167,7 +167,7 @@ bool X87FpuAnalysis::analyzeBb(
 				// use zext here (potentially dangerous if instructions were already
 				// modified and there are true negative values), or compute values
 				// in i3 arithmetics.
-				auto tmp = fIt->second - ci->getZExtValue();
+				int tmp = fIt->second - ci->getZExtValue();
 				if (tmp < 0) {
 					LOG << "\t\t\t" << "undeflow fix " << tmp << " -> " << 7
 						<< std::endl;
