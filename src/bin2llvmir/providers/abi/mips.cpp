@@ -43,7 +43,7 @@ AbiMips::~AbiMips()
 
 }
 
-bool AbiMips::isGeneralPurposeRegister(const llvm::Value* val)
+bool AbiMips::isGeneralPurposeRegister(const llvm::Value* val) const
 {
 	uint32_t rid = getRegisterId(val);
 	return MIPS_REG_0 <= rid && rid <= MIPS_REG_31;

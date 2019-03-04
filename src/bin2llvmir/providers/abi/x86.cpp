@@ -37,7 +37,7 @@ AbiX86::~AbiX86()
 
 }
 
-bool AbiX86::isGeneralPurposeRegister(const llvm::Value* val)
+bool AbiX86::isGeneralPurposeRegister(const llvm::Value* val) const
 {
 	uint32_t rid = getRegisterId(val);
 	return rid == X86_REG_EAX

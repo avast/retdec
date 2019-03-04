@@ -26,7 +26,7 @@ AbiPowerpc::~AbiPowerpc()
 
 }
 
-bool AbiPowerpc::isGeneralPurposeRegister(const llvm::Value* val)
+bool AbiPowerpc::isGeneralPurposeRegister(const llvm::Value* val) const
 {
 	uint32_t rid = getRegisterId(val);
 	return PPC_REG_R0 <= rid && rid <= PPC_REG_R31;

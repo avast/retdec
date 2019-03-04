@@ -36,7 +36,7 @@ AbiX64::~AbiX64()
 {
 }
 
-bool AbiX64::isGeneralPurposeRegister(const llvm::Value* val)
+bool AbiX64::isGeneralPurposeRegister(const llvm::Value* val) const
 {
 	uint32_t rid = getRegisterId(val);
 	return rid == X86_REG_RAX

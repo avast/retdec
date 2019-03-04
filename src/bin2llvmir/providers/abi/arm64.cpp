@@ -37,7 +37,7 @@ AbiArm64::~AbiArm64()
 
 }
 
-bool AbiArm64::isGeneralPurposeRegister(const llvm::Value* val)
+bool AbiArm64::isGeneralPurposeRegister(const llvm::Value* val) const
 {
 	uint32_t rid = getRegisterId(val);
 	return ARM64_REG_X0 <= rid && rid <= ARM64_REG_X30;
