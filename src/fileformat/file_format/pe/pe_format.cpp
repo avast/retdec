@@ -1513,6 +1513,11 @@ void PeFormat::loadResources()
 					resourceTable->addResourceIconGroup(static_cast<ResourceIconGroup *>(resource.get()));
 					iconGroupIDcounter++;
 				}
+				else if (type == "Version")
+				{
+					resource = std::make_unique<ResourceVersion>();
+					resourceTable->addResourceVersion(static_cast<ResourceVersion *>(resource.get()));
+				}
 				else
 				{
 					resource = std::make_unique<Resource>();
@@ -1551,7 +1556,7 @@ void PeFormat::loadResources()
 	}
 
 	resourceTable->linkResourceIconGroups();
-
+	resourceTable->parseVersionInfo();
 	loadResourceIconHash();
 
 	for (auto&& addressRange : formatParser->getResourceDirectoryOccupiedAddresses())

@@ -12,9 +12,11 @@
 
 #include "retdec/fileformat/types/resource_table/resource.h"
 #include "retdec/fileformat/types/resource_table/resource_icon_group.h"
+#include "retdec/fileformat/types/resource_table/resource_version.h"
 
 namespace retdec {
 namespace fileformat {
+
 
 /**
  * Table of resources
@@ -23,13 +25,14 @@ class ResourceTable
 {
 	private:
 		using resourcesIterator = std::vector<std::unique_ptr<Resource>>::const_iterator;
-		std::vector<std::unique_ptr<Resource>> table; ///< stored resources
-		std::vector<ResourceIconGroup *> iconGroups;  ///< icon groups
-		std::vector<ResourceIcon *> icons;            ///< icons
-		std::string iconHashCrc32;                    ///< iconhash CRC32
-		std::string iconHashMd5;                      ///< iconhash MD5
-		std::string iconHashSha256;                   ///< iconhash SHA256
-		std::string iconPerceptualAvgHash;            ///< icon perceptual hash AvgHash
+		std::vector<std::unique_ptr<Resource>> table;     ///< stored resources
+		std::vector<ResourceVersion *> resourceVersions;  ///< icon groups
+		std::vector<ResourceIconGroup *> iconGroups;      ///< icon groups
+		std::vector<ResourceIcon *> icons;                ///< icons
+		std::string iconHashCrc32;                        ///< iconhash CRC32
+		std::string iconHashMd5;                          ///< iconhash MD5
+		std::string iconHashSha256;                       ///< iconhash SHA256
+		std::string iconPerceptualAvgHash;                ///< icon perceptual hash AvgHash
 
 		std::string computePerceptualAvgHash(const ResourceIcon &icon) const;
 		std::string computePercetualDCTpHash(const ResourceIcon &icon) const;
@@ -65,8 +68,10 @@ class ResourceTable
 		/// @name Other methods
 		/// @{
 		void computeIconHashes();
+		void parseVersionInfo();
 		void clear();
 		void addResource(std::unique_ptr<Resource>&& newResource);
+		void addResourceVersion(ResourceVersion *ver);
 		void addResourceIcon(ResourceIcon *icon);
 		void addResourceIconGroup(ResourceIconGroup *iGroup);
 		void linkResourceIconGroups();
