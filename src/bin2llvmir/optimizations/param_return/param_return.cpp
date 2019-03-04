@@ -457,7 +457,16 @@ void ParamReturn::addDataFromCall(DataFlowEntry* dataflow, CallInst* call) const
 	CallEntry* ce = dataflow->createCallEntry(call);
 
 	_collector->collectCallArgs(ce);
-	_collector->collectCallRets(ce);
+
+	// TODO: Use info from collecting return loads.
+	//
+	// At this moment info return loads is not used
+	// as it is not reliable source of info
+	// about return value. To enable this
+	// collector must have redesigned and reimplemented
+	// collection algorithm.
+	//
+	//_collector->collectCallRets(ce);
 
 	collectExtraData(ce);
 }
