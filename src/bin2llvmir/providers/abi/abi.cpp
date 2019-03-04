@@ -106,6 +106,19 @@ llvm::GlobalVariable* Abi::getZeroRegister() const
 	return getRegister(_regZeroReg);
 }
 
+std::size_t Abi::getRegisterByteSize(uint32_t reg) const
+{
+	auto r = getRegister(reg);
+	assert(r);
+
+	if (auto* p = dyn_cast<PointerType>(r->getType()))
+	{
+		return getTypeByteSize(p->getElementType());
+	}
+
+	return getTypeByteSize(r->getType());
+}
+
 void Abi::addRegister(uint32_t id, llvm::GlobalVariable* reg)
 {
 	if (id >= _id2regs.size())

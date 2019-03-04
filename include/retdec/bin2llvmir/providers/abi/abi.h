@@ -53,6 +53,8 @@ class Abi
 		llvm::GlobalVariable* getStackPointerRegister() const;
 		llvm::GlobalVariable* getZeroRegister() const;
 
+		std::size_t getRegisterByteSize(uint32_t r) const;
+
 		void addRegister(uint32_t id, llvm::GlobalVariable* reg);
 
 		llvm::GlobalVariable* getSyscallIdRegister();
