@@ -75,8 +75,8 @@ class Abi
 	// Types.
 	//
 	public:
-		std::size_t getTypeByteSize(llvm::Type* t) const;
-		std::size_t getTypeBitSize(llvm::Type* t) const;
+		virtual std::size_t getTypeByteSize(llvm::Type* t) const;
+		virtual std::size_t getTypeBitSize(llvm::Type* t) const;
 		llvm::IntegerType* getDefaultType() const;
 		llvm::PointerType* getDefaultPointerType() const;
 		std::size_t getWordSize() const;
