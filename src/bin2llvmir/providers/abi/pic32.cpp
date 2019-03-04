@@ -55,5 +55,25 @@ bool AbiPic32::isNopInstruction(cs_insn* insn)
 	return false;
 }
 
+std::size_t AbiPic32::getTypeByteSize(llvm::Type* t) const
+{
+	if (t->isDoubleTy())
+	{
+		t = Type::getFloatTy(_module->getContext());
+	}
+
+	return Abi::getTypeByteSize(t);
+}
+
+std::size_t AbiPic32::getTypeBitSize(llvm::Type* t) const
+{
+	if (t->isDoubleTy())
+	{
+		t = Type::getFloatTy(_module->getContext());
+	}
+
+	return Abi::getTypeByteSize(t);
+}
+
 } // namespace bin2llvmir
 } // namespace retdec

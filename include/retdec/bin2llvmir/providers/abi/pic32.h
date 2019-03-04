@@ -20,6 +20,12 @@ class AbiPic32 : public Abi
 		AbiPic32(llvm::Module* m, Config* c);
 		virtual ~AbiPic32();
 
+	// Types
+	//
+	public:
+		virtual std::size_t getTypeByteSize(llvm::Type* t) const override;
+		virtual std::size_t getTypeBitSize(llvm::Type* t) const override;
+
 	// Registers.
 	//
 	public:
