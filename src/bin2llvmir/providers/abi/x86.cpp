@@ -132,6 +132,7 @@ bool AbiX86::supportsCallingConvention(CallingConvention::ID& cc) const
 	switch (cc)
 	{
 		case CallingConvention::ID::CC_CDECL:
+		case CallingConvention::ID::CC_WATCOM:
 		case CallingConvention::ID::CC_ELLIPSIS:
 		case CallingConvention::ID::CC_FASTCALL:
 		case CallingConvention::ID::CC_THISCALL:

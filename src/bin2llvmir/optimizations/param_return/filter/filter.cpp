@@ -837,6 +837,11 @@ void Filter::orderFiterableLayout(FilterableLayout& lay) const
 
 void Filter::orderStacks(std::vector<llvm::Value*>& stacks, bool asc) const
 {
+	if (stacks.empty())
+	{
+		return;
+	}
+
 	auto config = _abi->getConfig();
 
 	std::stable_sort(
@@ -938,6 +943,10 @@ FilterableLayout Filter::separateValues(
 		if (_abi->isStackVariable(pv))
 		{
 			layout.stacks.push_back(pv);
+		}
+		else if (!_abi->isRegister(pv))
+		{
+			continue;
 		}
 		if (std::find(gpRegs.begin(), gpRegs.end(),
 				_abi->getRegisterId(pv)) != gpRegs.end())
@@ -1316,6 +1325,7 @@ Filter::Ptr FilterProvider::createFilter(Abi* abi, const CallingConvention::ID& 
 		cc = abi->getDefaultCallingConvention();
 	}
 
+	assert(cc);
 	return std::make_unique<Filter>(abi, cc);
 }
 

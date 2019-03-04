@@ -252,7 +252,8 @@ CallingConvention* Abi::getCallingConvention(
 			const CallingConvention::ID& c)
 {
 	CallingConvention::ID cc = c;
-	if (!isSpecialCallingConvention(cc) && !supportsCallingConvention(cc))
+	if (!isSpecialCallingConvention(cc)
+		&& !supportsCallingConvention(cc))
 	{
 		return nullptr;
 	}
