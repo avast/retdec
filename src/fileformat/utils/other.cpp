@@ -334,7 +334,7 @@ double computeDataEntropy(const std::uint8_t *data, std::size_t dataLen)
 		if (frequency)
 		{
 			double probability = static_cast<double>(frequency) / dataLen;
-			entropy -= probability * (log(probability) / log(2));
+			entropy -= probability * std::log2(probability);
 		}
 	}
 
