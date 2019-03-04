@@ -10,8 +10,6 @@
 #include "retdec/bin2llvmir/providers/abi/ms_x64.h"
 #include "retdec/bin2llvmir/providers/abi/powerpc.h"
 #include "retdec/bin2llvmir/providers/abi/x86.h"
-#include "retdec/bin2llvmir/providers/abi/x86_watcom.h"
-#include "retdec/bin2llvmir/providers/abi/x86_pascal.h"
 #include "retdec/bin2llvmir/providers/abi/x64.h"
 #include "retdec/bin2llvmir/providers/abi/pic32.h"
 
@@ -346,16 +344,6 @@ Abi* AbiProvider::addAbi(
 	}
 	else if (c->getConfig().architecture.isX86())
 	{
-		if (c->getConfig().tools.isWatcom()) {
-			auto p = _module2abi.emplace(m, std::make_unique<AbiX86Watcom>(m, c));
-			return p.first->second.get();
-
-		}
-		if (c->getConfig().tools.isBorland()) {
-			auto p = _module2abi.emplace(m, std::make_unique<AbiX86Pascal>(m, c));
-			return p.first->second.get();
-		}
-
 		auto p = _module2abi.emplace(m, std::make_unique<AbiX86>(m, c));
 		return p.first->second.get();
 	}
