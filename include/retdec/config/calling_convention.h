@@ -111,10 +111,16 @@ class CallingConvention
 			CC_PIC32,
 			CC_ENDING,
 		};
-		eCallingConvention _callingConvention = eCallingConvention::CC_UNKNOWN;
+
+		eCallingConvention getID() const;
+
+		friend std::ostream& operator<< (std::ostream &out, const eCallingConvention& cc);
 
 	private:
 		CallingConvention(eCallingConvention cc);
+
+	private:
+		eCallingConvention _callingConvention = eCallingConvention::CC_UNKNOWN;
 };
 
 typedef CallingConvention::eCallingConvention CallingConventionID;
