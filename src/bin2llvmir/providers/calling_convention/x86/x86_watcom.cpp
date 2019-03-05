@@ -16,6 +16,9 @@ WatcomCallingConvention::WatcomCallingConvention(const Abi* a) :
 
 {
 	_paramRegs = {
+		X86_REG_EAX,
+		X86_REG_EDX,
+		X86_REG_EBX,
 		X86_REG_ECX
 	};
 

@@ -22,8 +22,9 @@ PascalFastcallCallingConvention::PascalFastcallCallingConvention(const Abi* a) :
 
 {
 	_paramRegs = {
-		X86_REG_ECX,
+		X86_REG_EAX,
 		X86_REG_EDX,
+		X86_REG_ECX
 	};
 
 	_returnRegs = {
