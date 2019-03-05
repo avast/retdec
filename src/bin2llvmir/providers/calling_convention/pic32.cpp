@@ -24,7 +24,18 @@ Pic32CallingConvention::Pic32CallingConvention(const Abi* a) :
 		MIPS_REG_V0
 	};
 
-	_regNumPerParam = 2;
+	_numOfRegsPerParam = 1;
+	_largeObjectsPassedByReference = true;
+	_respectsRegCouples = true;
+}
+
+Pic32CallingConvention::~Pic32CallingConvention()
+{
+}
+
+CallingConvention::Ptr Pic32CallingConvention::create(const Abi* a)
+{
+	return std::make_unique<Pic32CallingConvention>(a);
 }
 
 }
