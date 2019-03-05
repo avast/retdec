@@ -1127,6 +1127,38 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateMov(cs_insn* i, cs_arm64* ai,
 }
 
 /**
+ * ARM64_INS_MOVK
+ */
+void Capstone2LlvmIrTranslatorArm64_impl::translateMovk(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb)
+{
+	EXPECT_IS_BINARY(i, ai, irb);
+
+	// Load the destination register
+	op0 = loadOp(ai->operands[0], irb);
+
+	// Create simple imm16 bit inverted mask
+	llvm::Value* and_mask = llvm::ConstantInt::get(op0->getType(), 0xffff);
+
+	// Get the operand shift value
+	auto shift_val = (ai->operands[1].shift.type == ARM64_SFT_INVALID) ? 0 : ai->operands[1].shift.value;
+
+	// Shift the mask to proper place in case of LSL imm shift (example: movk x0, #123, LSL #32)
+	and_mask = irb.CreateShl(and_mask, llvm::ConstantInt::get(op0->getType(), shift_val));
+
+	// Invert the mask
+	and_mask = generateValueNegate(irb, and_mask);
+
+	op0 = irb.CreateAnd(op0, and_mask);
+
+	op1 = loadOp(ai->operands[1], irb);
+	op1 = irb.CreateZExtOrTrunc(op1, op0->getType());
+	// Move the value keeping the original data in register changing only the 16bit imm
+	auto *val = irb.CreateOr(op0, op1);
+
+	storeOp(ai->operands[0], val, irb);
+}
+
+/**
  * ARM64_INS_STR, ARM64_INS_STRB, ARM64_INS_STRH
  * ARM64_INS_STUR, ARM64_INS_STURB, ARM64_INS_STURH
  * ARM64_INS_STTR, ARM64_INS_STTRB, ARM64_INS_STTRH

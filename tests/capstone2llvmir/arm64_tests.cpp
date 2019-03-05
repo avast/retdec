@@ -2469,6 +2469,106 @@ TEST_P(Capstone2LlvmIrTranslatorArm64Tests, ARM64_INS_MOVZ_r_i)
 }
 
 //
+// ARM64_INS_MOVK
+//
+
+TEST_P(Capstone2LlvmIrTranslatorArm64Tests, ARM64_INS_MOVK_r_i)
+{
+	setRegisters({
+		{ARM64_REG_X0, 0xcafebabecafebabe},
+	});
+
+	emulate("movk x0, #0x8f01");
+
+	EXPECT_JUST_REGISTERS_LOADED({ARM64_REG_X0});
+	EXPECT_JUST_REGISTERS_STORED({
+		{ARM64_REG_X0, 0xcafebabecafe8f01},
+	});
+	EXPECT_NO_MEMORY_LOADED_STORED();
+	EXPECT_NO_VALUE_CALLED();
+}
+
+TEST_P(Capstone2LlvmIrTranslatorArm64Tests, ARM64_INS_MOVK_r_i_16)
+{
+	setRegisters({
+		{ARM64_REG_X0, 0xcafebabecafebabe},
+	});
+
+	emulate("movk x0, #0x8f01, LSL #16");
+
+	EXPECT_JUST_REGISTERS_LOADED({ARM64_REG_X0});
+	EXPECT_JUST_REGISTERS_STORED({
+		{ARM64_REG_X0, 0xcafebabe8f01babe},
+	});
+	EXPECT_NO_MEMORY_LOADED_STORED();
+	EXPECT_NO_VALUE_CALLED();
+}
+
+TEST_P(Capstone2LlvmIrTranslatorArm64Tests, ARM64_INS_MOVK_r_i_32)
+{
+	setRegisters({
+		{ARM64_REG_X0, 0xcafebabecafebabe},
+	});
+
+	emulate("movk x0, #0x8f01, LSL #32");
+
+	EXPECT_JUST_REGISTERS_LOADED({ARM64_REG_X0});
+	EXPECT_JUST_REGISTERS_STORED({
+		{ARM64_REG_X0, 0xcafe8f01cafebabe},
+	});
+	EXPECT_NO_MEMORY_LOADED_STORED();
+	EXPECT_NO_VALUE_CALLED();
+}
+
+TEST_P(Capstone2LlvmIrTranslatorArm64Tests, ARM64_INS_MOVK_r_i_48)
+{
+	setRegisters({
+		{ARM64_REG_X0, 0xcafebabecafebabe},
+	});
+
+	emulate("movk x0, #0x8f01, LSL #48");
+
+	EXPECT_JUST_REGISTERS_LOADED({ARM64_REG_X0});
+	EXPECT_JUST_REGISTERS_STORED({
+		{ARM64_REG_X0, 0x8f01babecafebabe},
+	});
+	EXPECT_NO_MEMORY_LOADED_STORED();
+	EXPECT_NO_VALUE_CALLED();
+}
+
+TEST_P(Capstone2LlvmIrTranslatorArm64Tests, ARM64_INS_MOVK_w_i)
+{
+	setRegisters({
+		{ARM64_REG_W0, 0xcafebabe},
+	});
+
+	emulate("movk w0, #0x8f01");
+
+	EXPECT_JUST_REGISTERS_LOADED({ARM64_REG_W0});
+	EXPECT_JUST_REGISTERS_STORED({
+		{ARM64_REG_X0, 0xcafe8f01},
+	});
+	EXPECT_NO_MEMORY_LOADED_STORED();
+	EXPECT_NO_VALUE_CALLED();
+}
+
+TEST_P(Capstone2LlvmIrTranslatorArm64Tests, ARM64_INS_MOVK_w_i_16)
+{
+	setRegisters({
+		{ARM64_REG_W0, 0xcafebabe},
+	});
+
+	emulate("movk w0, #0x8f01, LSL #16");
+
+	EXPECT_JUST_REGISTERS_LOADED({ARM64_REG_W0});
+	EXPECT_JUST_REGISTERS_STORED({
+		{ARM64_REG_X0, 0x8f01babe},
+	});
+	EXPECT_NO_MEMORY_LOADED_STORED();
+	EXPECT_NO_VALUE_CALLED();
+}
+
+//
 // ARM64_INS_MVN
 //
 
