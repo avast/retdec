@@ -1348,7 +1348,6 @@ TEST_F(ParamReturnTests, x86_64UsesJustContinuousSequenceOfRegisters)
 	checkModuleAgainstExpectedIr(exp);
 }
 
-/*
 TEST_F(ParamReturnTests, ms_x64PtrCallBasicFunctionality)
 {
 	parseInput(R"(
@@ -1605,8 +1604,6 @@ TEST_F(ParamReturnTests, ms_x64ExternalCallUsesFPRegisters)
 
 		declare void @print()
 		define void @fnc() {
-			store i64 1, i64* @r9
-			store i64 1, i64* @r8
 			store double 2.0, double* @xmm1
 			store double 2.0, double* @xmm0
 			call void @print()
@@ -1645,25 +1642,19 @@ TEST_F(ParamReturnTests, ms_x64ExternalCallUsesFPRegisters)
 	@xmm0 = global double 0.000000e+00
 	@xmm1 = global double 0.000000e+00
 
-	declare i64 @print(i64, i64, float, float)
+	declare i64 @print(double, double)
 
 	declare void @0()
 
 	define i64 @fnc() {
-		store i64 1, i64* @r9
-		store i64 1, i64* @r8
 		store double 2.000000e+00, double* @xmm1
 		store double 2.000000e+00, double* @xmm0
-		%1 = load i64, i64* @r8
-		%2 = load i64, i64* @r9
-		%3 = load double, double* @xmm0
-		%4 = fptrunc double %3 to float
-		%5 = load double, double* @xmm1
-		%6 = fptrunc double %5 to float
-		%7 = call i64 @print(i64 %1, i64 %2, float %4, float %6)
-		store i64 %7, i64* @rax
-		%8 = load i64, i64* @rax
-		ret i64 %8
+		%1 = load double, double* @xmm0
+		%2 = load double, double* @xmm1
+		%3 = call i64 @print(double %1, double %2)
+		store i64 %3, i64* @rax
+		%4 = load i64, i64* @rax
+		ret i64 %4
 	}
 
 	declare void @1()
@@ -1672,6 +1663,78 @@ TEST_F(ParamReturnTests, ms_x64ExternalCallUsesFPRegisters)
 	checkModuleAgainstExpectedIr(exp);
 }
 
+TEST_F(ParamReturnTests, ms_x64UsesJustContinuousSequenceOfRegisters)
+{
+	parseInput(R"(
+		target datalayout = "e-m:e-i64:64-f80:128-n8:16:32:64-S128"
+
+		@rax = global i64 0
+		@r8 = global i64 0
+		@r9 = global i64 0
+		@rcx = global i64 0
+		@rdx = global i64 0
+
+		declare void @print()
+		define void @fnc() {
+			store i64 1, i64* @r9
+			store i64 1, i64* @r8
+			store i64 1, i64* @rcx
+			call void @print()
+			ret void
+		}
+	)");
+	auto config = Config::fromJsonString(module.get(), R"({
+		"architecture" : {
+			"bitSize" : 64,
+			"endian" : "little",
+			"name" : "x86"
+		},
+		"fileFormat" : "pe64",
+		"tools" :
+		[
+			{"name" : "gcc"}
+		]
+	})");
+	auto abi = AbiProvider::addAbi(module.get(), &config);
+
+	abi->addRegister(X86_REG_RAX, getGlobalByName("rax"));
+	abi->addRegister(X86_REG_R8, getGlobalByName("r8"));
+	abi->addRegister(X86_REG_R9, getGlobalByName("r9"));
+	abi->addRegister(X86_REG_RCX, getGlobalByName("rcx"));
+	abi->addRegister(X86_REG_RDX, getGlobalByName("rdx"));
+
+	pass.runOnModuleCustom(*module, &config, abi);
+
+	std::string exp = R"(
+		target datalayout = "e-m:e-i64:64-f80:128-n8:16:32:64-S128"
+
+		@rax = global i64 0
+		@r8 = global i64 0
+		@r9 = global i64 0
+		@rcx = global i64 0
+		@rdx = global i64 0
+
+		declare i64 @print(i64)
+
+		declare void @0()
+
+		define i64 @fnc() {
+			store i64 1, i64* @r9
+			store i64 1, i64* @r8
+			store i64 1, i64* @rcx
+			%1 = load i64, i64* @rcx
+			%2 = call i64 @print(i64 %1)
+			store i64 %2, i64* @rax
+			%3 = load i64, i64* @rax
+			ret i64 %3
+		}
+
+		declare void @1()
+	)";
+	checkModuleAgainstExpectedIr(exp);
+}
+
+/*
 TEST_F(ParamReturnTests, ms_x64ExternalCallUsesFPRegistersAdvanced)
 {
 	parseInput(R"(
@@ -1751,77 +1814,7 @@ TEST_F(ParamReturnTests, ms_x64ExternalCallUsesFPRegistersAdvanced)
 	)";
 	checkModuleAgainstExpectedIr(exp);
 }
-
-TEST_F(ParamReturnTests, ms_x64UsesJustContinuousSequenceOfRegisters)
-{
-	parseInput(R"(
-		target datalayout = "e-m:e-i64:64-f80:128-n8:16:32:64-S128"
-
-		@rax = global i64 0
-		@r8 = global i64 0
-		@r9 = global i64 0
-		@rcx = global i64 0
-		@rdx = global i64 0
-
-		declare void @print()
-		define void @fnc() {
-			store i64 1, i64* @r9
-			store i64 1, i64* @r8
-			store i64 1, i64* @rcx
-			call void @print()
-			ret void
-		}
-	)");
-	auto config = Config::fromJsonString(module.get(), R"({
-		"architecture" : {
-			"bitSize" : 64,
-			"endian" : "little",
-			"name" : "x86"
-		},
-		"fileFormat" : "pe64",
-		"tools" :
-		[
-			{"name" : "gcc"}
-		]
-	})");
-	auto abi = AbiProvider::addAbi(module.get(), &config);
-
-	abi->addRegister(X86_REG_RAX, getGlobalByName("rax"));
-	abi->addRegister(X86_REG_R8, getGlobalByName("r8"));
-	abi->addRegister(X86_REG_R9, getGlobalByName("r9"));
-	abi->addRegister(X86_REG_RCX, getGlobalByName("rcx"));
-	abi->addRegister(X86_REG_RDX, getGlobalByName("rdx"));
-
-	pass.runOnModuleCustom(*module, &config, abi);
-
-	std::string exp = R"(
-		target datalayout = "e-m:e-i64:64-f80:128-n8:16:32:64-S128"
-
-		@rax = global i64 0
-		@r8 = global i64 0
-		@r9 = global i64 0
-		@rcx = global i64 0
-		@rdx = global i64 0
-
-		declare i64 @print(i64)
-
-		declare void @0()
-
-		define i64 @fnc() {
-			store i64 1, i64* @r9
-			store i64 1, i64* @r8
-			store i64 1, i64* @rcx
-			%1 = load i64, i64* @rcx
-			%2 = call i64 @print(i64 %1)
-			store i64 %2, i64* @rax
-			%3 = load i64, i64* @rax
-			ret i64 %3
-		}
-
-		declare void @1()
-	)";
-	checkModuleAgainstExpectedIr(exp);
-}*/
+*/
 
 //
 //TEST_F(ParamReturnTests, x86PtrCallOnlyContinuousStackOffsetsAreUsed)
