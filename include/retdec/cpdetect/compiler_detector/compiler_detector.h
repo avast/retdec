@@ -9,7 +9,6 @@
 
 #include "retdec/utils/filesystem_path.h"
 #include "retdec/utils/non_copyable.h"
-#include "yaracpp/yara_detector/yara_detector.h"
 #include "retdec/cpdetect/compiler_detector/heuristics/heuristics.h"
 #include "retdec/cpdetect/compiler_detector/search/search.h"
 

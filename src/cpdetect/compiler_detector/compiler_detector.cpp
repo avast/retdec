@@ -12,6 +12,7 @@
 #include "retdec/cpdetect/compiler_detector/compiler_detector.h"
 #include "retdec/cpdetect/settings.h"
 #include "retdec/cpdetect/utils/version_solver.h"
+#include "yaracpp/yara_detector/yara_detector.h"
 
 using namespace retdec::fileformat;
 using namespace retdec::utils;
