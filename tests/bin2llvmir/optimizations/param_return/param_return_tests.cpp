@@ -3364,7 +3364,6 @@ TEST_F(ParamReturnTests, mips64ExternalCallUseStacksIf8RegistersUsed)
 	checkModuleAgainstExpectedIr(exp);
 }
 
-/*
 TEST_F(ParamReturnTests, x86FastcallBasic)
 {
 	parseInput(R"(
@@ -3390,6 +3389,10 @@ TEST_F(ParamReturnTests, x86FastcallBasic)
 			"endian" : "little",
 			"name" : "x86"
 		},
+		"tools" :
+		[
+			{ "name" : "gcc" }
+		],
 		"functions" : [
 			{
 				"name" : "fnc",
@@ -3402,11 +3405,11 @@ TEST_F(ParamReturnTests, x86FastcallBasic)
 						"name" : "stack_-8",
 						"storage" : { "type" : "stack", "value" : -8 }
 					}
-				]
+				],
+				"callingConvention" : "fastcall",
 			}
 		]
 	})");
-
 
 	AbiMips64 abi(module.get(), &config);
 	abi.addRegister(X86_REG_EAX, getGlobalByName("eax"));
@@ -3469,6 +3472,10 @@ TEST_F(ParamReturnTests, x86FastcallLargeTypeCatch)
 			"endian" : "little",
 			"name" : "x86"
 		},
+		"tools" :
+		[
+			{ "name" : "gcc" }
+		],
 		"functions" : [
 			{
 				"name" : "fnc",
@@ -3481,7 +3488,8 @@ TEST_F(ParamReturnTests, x86FastcallLargeTypeCatch)
 						"name" : "stack_-8",
 						"storage" : { "type" : "stack", "value" : -8 }
 					}
-				]
+				],
+				"calingConvention" : "fastcall",
 			}
 		]
 
@@ -3540,6 +3548,10 @@ TEST_F(ParamReturnTests, x86PascalBasic)
 			"endian" : "little",
 			"name" : "x86"
 		},
+		"tools" :
+		[
+			{ "name" : "borland" }
+		],
 		"functions" : [
 			{
 				"name" : "fnc",
@@ -3604,6 +3616,10 @@ TEST_F(ParamReturnTests, x86PascalFastcallBasic)
 			"endian" : "little",
 			"name" : "x86"
 		},
+		"tools" :
+		[
+			{ "name" : "borland" }
+		],
 		"functions" : [
 			{
 				"name" : "fnc",
@@ -3616,7 +3632,8 @@ TEST_F(ParamReturnTests, x86PascalFastcallBasic)
 						"name" : "stack_-8",
 						"storage" : { "type" : "stack", "value" : -8 }
 					}
-				]
+				],
+				"callingConvention" : "fastcall",
 			}
 		]
 	})");
@@ -3683,6 +3700,10 @@ TEST_F(ParamReturnTests, x86PascalFastcallLargeType)
 			"endian" : "little",
 			"name" : "x86"
 		},
+		"tools" :
+		[
+			{ "name" : "borland" }
+		],
 		"functions" : [
 			{
 				"name" : "fnc",
@@ -3695,7 +3716,8 @@ TEST_F(ParamReturnTests, x86PascalFastcallLargeType)
 						"name" : "stack_-8",
 						"storage" : { "type" : "stack", "value" : -8 }
 					}
-				]
+				],
+				"callingConvention" : "fastcall",
 			}
 		]
 	})");
@@ -3762,6 +3784,10 @@ TEST_F(ParamReturnTests, x86WatcomBasic)
 			"endian" : "little",
 			"name" : "x86"
 		},
+		"tools" :
+		[
+			{ "name" : "open_watcom" }
+		],
 		"functions" : [
 			{
 				"name" : "fnc",
@@ -3845,6 +3871,10 @@ TEST_F(ParamReturnTests, x86WatcomPassDouble)
 			"endian" : "little",
 			"name" : "x86"
 		},
+		"tools" :
+		[
+			{ "name" : "open_watcom" }
+		],
 		"functions" : [
 			{
 				"name" : "fnc",
@@ -3895,7 +3925,6 @@ TEST_F(ParamReturnTests, x86WatcomPassDouble)
 	)";
 	checkModuleAgainstExpectedIr(exp);
 }
-*/
 
 } // namespace tests
 } // namespace bin2llvmir
