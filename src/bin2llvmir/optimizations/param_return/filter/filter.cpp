@@ -1341,7 +1341,7 @@ Filter::Ptr FilterProvider::createFilter(Abi* abi, const CallingConvention::ID& 
 	bool isMinGW = c->getConfig().tools.isGcc()
 			&& c->getConfig().fileFormat.isPe();
 
-	if (isMinGW || c->getConfig().tools.isMsvc())
+	if (abi->isX64() && (isMinGW || c->getConfig().tools.isMsvc()))
 	{
 		return std::make_unique<MSX64Filter>(abi, cc);
 	}
