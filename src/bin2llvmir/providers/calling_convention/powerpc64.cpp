@@ -44,8 +44,9 @@ PowerPC64CallingConvention::PowerPC64CallingConvention(const Abi* a) :
 		PPC_REG_F1
 	};
 
-	_regNumPerParam = 2;
-	_paramStructsOnStack = false;
+	_numOfRegsPerParam = 2;
+	_largeObjectsPassedByReference = true;
+	_respectsRegCouples = true;
 }
 
 PowerPC64CallingConvention::~PowerPC64CallingConvention()
