@@ -2569,6 +2569,106 @@ TEST_P(Capstone2LlvmIrTranslatorArm64Tests, ARM64_INS_MOVK_w_i_16)
 }
 
 //
+// ARM64_INS_MOVN
+//
+
+TEST_P(Capstone2LlvmIrTranslatorArm64Tests, ARM64_INS_MOVN_r_i)
+{
+	setRegisters({
+		{ARM64_REG_X0, 0xcafebabecafebabe},
+	});
+
+	emulate("movn x0, #0x8f01");
+
+	EXPECT_NO_REGISTERS_LOADED();
+	EXPECT_JUST_REGISTERS_STORED({
+		{ARM64_REG_X0, 0xffffffffffff70fe},
+	});
+	EXPECT_NO_MEMORY_LOADED_STORED();
+	EXPECT_NO_VALUE_CALLED();
+}
+
+TEST_P(Capstone2LlvmIrTranslatorArm64Tests, ARM64_INS_MOVN_r_i_16)
+{
+	setRegisters({
+		{ARM64_REG_X0, 0xcafebabecafebabe},
+	});
+
+	emulate("movn x0, #0x8f01, LSL #16");
+
+	EXPECT_NO_REGISTERS_LOADED();
+	EXPECT_JUST_REGISTERS_STORED({
+		{ARM64_REG_X0, 0xffffffff70feffff},
+	});
+	EXPECT_NO_MEMORY_LOADED_STORED();
+	EXPECT_NO_VALUE_CALLED();
+}
+
+TEST_P(Capstone2LlvmIrTranslatorArm64Tests, ARM64_INS_MOVN_r_i_32)
+{
+	setRegisters({
+		{ARM64_REG_X0, 0xcafebabecafebabe},
+	});
+
+	emulate("movn x0, #0x8f01, LSL #32");
+
+	EXPECT_NO_REGISTERS_LOADED();
+	EXPECT_JUST_REGISTERS_STORED({
+		{ARM64_REG_X0, 0xffff70feffffffff},
+	});
+	EXPECT_NO_MEMORY_LOADED_STORED();
+	EXPECT_NO_VALUE_CALLED();
+}
+
+TEST_P(Capstone2LlvmIrTranslatorArm64Tests, ARM64_INS_MOVN_r_i_48)
+{
+	setRegisters({
+		{ARM64_REG_X0, 0xcafebabecafebabe},
+	});
+
+	emulate("movn x0, #0x8f01, LSL #48");
+
+	EXPECT_NO_REGISTERS_LOADED();
+	EXPECT_JUST_REGISTERS_STORED({
+		{ARM64_REG_X0, 0x70feffffffffffff},
+	});
+	EXPECT_NO_MEMORY_LOADED_STORED();
+	EXPECT_NO_VALUE_CALLED();
+}
+
+TEST_P(Capstone2LlvmIrTranslatorArm64Tests, ARM64_INS_MOVN_w_i)
+{
+	setRegisters({
+		{ARM64_REG_W0, 0xcafebabe},
+	});
+
+	emulate("movn w0, #0x8f01");
+
+	EXPECT_NO_REGISTERS_LOADED();
+	EXPECT_JUST_REGISTERS_STORED({
+		{ARM64_REG_X0, 0x00000000ffff70fe},
+	});
+	EXPECT_NO_MEMORY_LOADED_STORED();
+	EXPECT_NO_VALUE_CALLED();
+}
+
+TEST_P(Capstone2LlvmIrTranslatorArm64Tests, ARM64_INS_MOVN_w_i_16)
+{
+	setRegisters({
+		{ARM64_REG_W0, 0xcafebabe},
+	});
+
+	emulate("movn w0, #0x8f01, LSL #16");
+
+	EXPECT_NO_REGISTERS_LOADED();
+	EXPECT_JUST_REGISTERS_STORED({
+		{ARM64_REG_X0, 0x0000000070feffff},
+	});
+	EXPECT_NO_MEMORY_LOADED_STORED();
+	EXPECT_NO_VALUE_CALLED();
+}
+
+//
 // ARM64_INS_MVN
 //
 

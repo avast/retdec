@@ -1111,14 +1111,15 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateNop(cs_insn* i, cs_arm64* ai,
 }
 
 /**
- * ARM64_INS_MOV, ARM64_INS_MVN, ARM64_INS_MOVZ
+ * ARM64_INS_MOV, ARM64_INS_MVN, ARM64_INS_MOVZ, ARM64_INS_MOVN
  */
 void Capstone2LlvmIrTranslatorArm64_impl::translateMov(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb)
 {
 	EXPECT_IS_BINARY(i, ai, irb);
 
-	op1 = loadOpBinaryOp1(ai, irb);
-	if (i->id == ARM64_INS_MVN)
+	op1 = loadOp(ai->operands[1], irb);
+	op1 = irb.CreateZExtOrTrunc(op1, getRegisterType(ai->operands[0].reg));
+	if (i->id == ARM64_INS_MVN || i->id == ARM64_INS_MOVN)
 	{
 		op1 = generateValueNegate(irb, op1);
 	}

@@ -608,7 +608,7 @@ Capstone2LlvmIrTranslatorArm64_impl::_i2fm =
 	{ARM64_INS_MLS, nullptr},
 	{ARM64_INS_MOVI, nullptr},
 	{ARM64_INS_MOVK, &Capstone2LlvmIrTranslatorArm64_impl::translateMovk},
-	{ARM64_INS_MOVN, nullptr},
+	{ARM64_INS_MOVN, &Capstone2LlvmIrTranslatorArm64_impl::translateMov},
 	{ARM64_INS_MOVZ, &Capstone2LlvmIrTranslatorArm64_impl::translateMov},
 	{ARM64_INS_MRS, nullptr},
 	{ARM64_INS_MSR, nullptr},
