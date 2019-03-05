@@ -16,7 +16,7 @@ rule upx_391_lzma
 	strings:
 		$1 = { E8 ?? ?? ?? ?? 55 53 51 52 48 01 FE 56 41 80 F8 0E 0F 85 6C 0A 00 00 55 48 89 E5 44 8B 09 49 89 D0 }
 	condition:
-		$1 at macho.entry_point or $1 at macho.ep_for_arch(macho.CPU_TYPE_X86_64)
+		$1 at macho.entry_point or $1 at macho.entry_point_for_arch(macho.CPU_TYPE_X86_64)
 }
 
 rule upx_391_nrv2b
@@ -31,7 +31,7 @@ rule upx_391_nrv2b
 	strings:
 		$1 = { FC 41 5B 41 80 F8 02 74 0D E9 ?? ?? ?? ?? 48 FF C6 88 17 48 FF C7 8A 16 01 DB 75 0A 8B 1E 48 83 EE FC 11 DB 8A 16 72 E6 8D 41 01 41 FF D3 }
 	condition:
-		$1 at macho.entry_point + 112 or $1 at macho.ep_for_arch(macho.CPU_TYPE_X86_64) + 112
+		$1 at macho.entry_point + 112 or $1 at macho.entry_point_for_arch(macho.CPU_TYPE_X86_64) + 112
 }
 
 rule upx_391_nrv2d
@@ -46,7 +46,7 @@ rule upx_391_nrv2d
 	strings:
 		$1 = { FC 41 5B 41 80 F8 05 74 0D E9 ?? ?? ?? ?? 48 FF C6 88 17 48 FF C7 8A 16 01 DB 75 0A 8B 1E 48 83 EE FC 11 DB 8A 16 72 E6 8D 41 01 EB 07 FF C8 41 FF D3 }
 	condition:
-		$1 at macho.entry_point + 112 or $1 at macho.ep_for_arch(macho.CPU_TYPE_X86_64) + 112
+		$1 at macho.entry_point + 112 or $1 at macho.entry_point_for_arch(macho.CPU_TYPE_X86_64) + 112
 }
 
 rule upx_391_nrv2e
@@ -61,7 +61,7 @@ rule upx_391_nrv2e
 	strings:
 		$1 = { FC 41 5B 41 80 F8 08 74 0D E9 ?? ?? ?? ?? 48 FF C6 88 17 48 FF C7 8A 16 01 DB 75 0A 8B 1E 48 83 EE FC 11 DB 8A 16 72 E6 8D 41 01 EB 07 FF C8 41 FF D3 }
 	condition:
-		$1 at macho.entry_point + 112 or $1 at macho.ep_for_arch(macho.CPU_TYPE_X86_64) + 112
+		$1 at macho.entry_point + 112 or $1 at macho.entry_point_for_arch(macho.CPU_TYPE_X86_64) + 112
 }
 
 rule upx_392_lzma
@@ -77,7 +77,7 @@ rule upx_392_lzma
 		$1 = { FF C3 01 00 00 00 1C 00 00 00 00 00 00 00 1C 00 00 00 00 00 00 00 1C 00 00 00 02 00 00 00 FD 08 00 00 34 00 00 00 34 00 00 00 A9 0F 00 00 00 00 00 00 34 00 00 00 03 00 00 00 0C 00 03 00 18 00 03 00 00 00 00 02 13 06 00 01 5D 06 00 00 00 00 00 00 00 00 00 01 D1 58 05 01 33 C1 0B A6 55 50 58 21 BD 0B 0D 22 00 00 00 00 ?? ?? ?? 00 ?? ?? ?? 00 ?? ?? 00 00 ?? 0? 00 00 0E 00 00 00 1A 03 00 67 BE 99 AF DE 39 19 1D 3F 9? ?? ?A }
 
 	condition:
-		$1 at macho.entry_point + 354 or $1 at macho.ep_for_arch(macho.CPU_TYPE_X86_64) + 354
+		$1 at macho.entry_point + 354 or $1 at macho.entry_point_for_arch(macho.CPU_TYPE_X86_64) + 354
 }
 
 rule upx_392_nrv2b
@@ -92,7 +92,7 @@ rule upx_392_nrv2b
 	strings:
 		$1 = { FF C3 01 00 00 00 1C 00 00 00 00 00 00 00 1C 00 00 00 00 00 00 00 1C 00 00 00 02 00 00 00 FD 08 00 00 34 00 00 00 34 00 00 00 A9 0F 00 00 00 00 00 00 34 00 00 00 03 00 00 00 0C 00 03 00 18 00 03 00 00 00 00 02 13 06 00 01 5D 06 00 00 00 00 00 00 00 00 00 01 D1 58 05 01 37 F6 FE 4F 55 50 58 21 41 02 0D 22 00 00 00 00 ?? ?? ?? 00 ?? ?? ?? 00 ?? ?? 00 00 ?? 0? 00 00 02 00 00 00 ?? ?? B7 FF CF FA ED FE 07 00 00 01 03 03 ?0 02 }
 	condition:
-		$1 at macho.entry_point + 354 or $1 at macho.ep_for_arch(macho.CPU_TYPE_X86_64) + 354
+		$1 at macho.entry_point + 354 or $1 at macho.entry_point_for_arch(macho.CPU_TYPE_X86_64) + 354
 }
 
 rule upx_392_nrv2d
@@ -107,7 +107,7 @@ rule upx_392_nrv2d
 	strings:
 		$1 = { FF C3 01 00 00 00 1C 00 00 00 00 00 00 00 1C 00 00 00 00 00 00 00 1C 00 00 00 02 00 00 00 FD 08 00 00 34 00 00 00 34 00 00 00 A9 0F 00 00 00 00 00 00 34 00 00 00 03 00 00 00 0C 00 03 00 18 00 03 00 00 00 00 02 13 06 00 01 5D 06 00 00 00 00 00 00 00 00 00 01 D1 58 05 01 E2 02 7C E8 55 50 58 21 51 02 0D 22 00 00 00 00 ?? ?? ?? 00 ?? ?? ?? 00 ?? ?? 00 00 ?? 0? 00 00 05 00 00 00 ?? ?? BE FF CF FA ED FE 07 00 00 01 03 07 ?0 02 }
 	condition:
-		$1 at macho.entry_point + 354 or $1 at macho.ep_for_arch(macho.CPU_TYPE_X86_64) + 354
+		$1 at macho.entry_point + 354 or $1 at macho.entry_point_for_arch(macho.CPU_TYPE_X86_64) + 354
 }
 
 rule upx_392_nrv2e
@@ -122,7 +122,7 @@ rule upx_392_nrv2e
 	strings:
 		$1 = { FF C3 01 00 00 00 1C 00 00 00 00 00 00 00 1C 00 00 00 00 00 00 00 1C 00 00 00 02 00 00 00 FD 08 00 00 34 00 00 00 34 00 00 00 A9 0F 00 00 00 00 00 00 34 00 00 00 03 00 00 00 0C 00 03 00 18 00 03 00 00 00 00 02 13 06 00 01 5D 06 00 00 00 00 00 00 00 00 00 01 D1 58 05 01 ED 0C 65 23 55 50 58 21 69 02 0D 22 00 00 00 00 ?? ?? ?? 00 ?? ?? ?? 00 ?? ?? 00 00 ?? 0? 00 00 08 00 00 00 ?? ?? B6 FF CF FA ED FE 07 00 00 01 03 06 ?0 02 }
 	condition:
-		$1 at macho.entry_point + 354 or $1 at macho.ep_for_arch(macho.CPU_TYPE_X86_64) + 354
+		$1 at macho.entry_point + 354 or $1 at macho.entry_point_for_arch(macho.CPU_TYPE_X86_64) + 354
 }
 
 rule upx_393_lzma
@@ -138,7 +138,7 @@ rule upx_393_lzma
 		$1 = { FF C3 01 00 00 00 1C 00 00 00 00 00 00 00 1C 00 00 00 00 00 00 00 1C 00 00 00 02 00 00 00 FD 08 00 00 34 00 00 00 34 00 00 00 A9 0F 00 00 00 00 00 00 34 00 00 00 03 00 00 00 0C 00 03 00 18 00 03 00 00 00 00 02 13 06 00 01 5D 06 00 00 00 00 00 00 00 00 00 01 D1 58 05 01 35 C1 FB A6 55 50 58 21 BD 0B 0D 22 00 00 00 00 ?? ?? ?? 00 ?? ?? ?? 00 ?? ?? 00 00 ?? 0? 00 00 0E 00 00 00 1A 03 00 67 BE 99 AF DE 39 19 1D 3F 9? ?? ?A }
 
 	condition:
-		$1 at macho.entry_point + 354 or $1 at macho.ep_for_arch(macho.CPU_TYPE_X86_64) + 354
+		$1 at macho.entry_point + 354 or $1 at macho.entry_point_for_arch(macho.CPU_TYPE_X86_64) + 354
 }
 
 rule upx_393_nrv2b
@@ -153,7 +153,7 @@ rule upx_393_nrv2b
 	strings:
 		$1 = { FF C3 01 00 00 00 1C 00 00 00 00 00 00 00 1C 00 00 00 00 00 00 00 1C 00 00 00 02 00 00 00 FD 08 00 00 34 00 00 00 34 00 00 00 A9 0F 00 00 00 00 00 00 34 00 00 00 03 00 00 00 0C 00 03 00 18 00 03 00 00 00 00 02 13 06 00 01 5D 06 00 00 00 00 00 00 00 00 00 01 D1 58 05 01 39 F6 EA 50 55 50 58 21 41 02 0D 22 00 00 00 00 ?? ?? ?? 00 ?? ?? ?? 00 ?? ?? 00 00 ?? 0? 00 00 02 00 00 00 ?? ?? B7 FF CF FA ED FE 07 00 00 01 03 03 ?0 02 }
 	condition:
-		$1 at macho.entry_point + 354 or $1 at macho.ep_for_arch(macho.CPU_TYPE_X86_64) + 354
+		$1 at macho.entry_point + 354 or $1 at macho.entry_point_for_arch(macho.CPU_TYPE_X86_64) + 354
 }
 
 rule upx_393_nrv2d
@@ -168,7 +168,7 @@ rule upx_393_nrv2d
 	strings:
 		$1 = { FF C3 01 00 00 00 1C 00 00 00 00 00 00 00 1C 00 00 00 00 00 00 00 1C 00 00 00 02 00 00 00 FD 08 00 00 34 00 00 00 34 00 00 00 A9 0F 00 00 00 00 00 00 34 00 00 00 03 00 00 00 0C 00 03 00 18 00 03 00 00 00 00 02 13 06 00 01 5D 06 00 00 00 00 00 00 00 00 00 01 D1 58 05 01 E4 02 6C E9 55 50 58 21 51 02 0D 22 00 00 00 00 ?? ?? ?? 00 ?? ?? ?? 00 ?? ?? 00 00 ?? 0? 00 00 05 00 00 00 ?? ?? BE FF CF FA ED FE 07 00 00 01 03 07 ?0 02 }
 	condition:
-		$1 at macho.entry_point + 354 or $1 at macho.ep_for_arch(macho.CPU_TYPE_X86_64) + 354
+		$1 at macho.entry_point + 354 or $1 at macho.entry_point_for_arch(macho.CPU_TYPE_X86_64) + 354
 }
 
 rule upx_393_nrv2e
@@ -183,7 +183,7 @@ rule upx_393_nrv2e
 	strings:
 		$1 = { FF C3 01 00 00 00 1C 00 00 00 00 00 00 00 1C 00 00 00 00 00 00 00 1C 00 00 00 02 00 00 00 FD 08 00 00 34 00 00 00 34 00 00 00 A9 0F 00 00 00 00 00 00 34 00 00 00 03 00 00 00 0C 00 03 00 18 00 03 00 00 00 00 02 13 06 00 01 5D 06 00 00 00 00 00 00 00 00 00 01 D1 58 05 01 EF 0C 53 24 55 50 58 21 69 02 0D 22 00 00 00 00 ?? ?? ?? 00 ?? ?? ?? 00 ?? ?? 00 00 ?? 0? 00 00 08 00 00 00 ?? ?? B6 FF CF FA ED FE 07 00 00 01 03 06 ?0 02 }
 	condition:
-		$1 at macho.entry_point + 354 or $1 at macho.ep_for_arch(macho.CPU_TYPE_X86_64) + 354
+		$1 at macho.entry_point + 354 or $1 at macho.entry_point_for_arch(macho.CPU_TYPE_X86_64) + 354
 }
 
 rule upx_394_lzma
@@ -199,7 +199,7 @@ rule upx_394_lzma
 		$1 = { FF C3 01 00 00 00 1C 00 00 00 00 00 00 00 1C 00 00 00 00 00 00 00 1C 00 00 00 02 00 00 00 FD 08 00 00 34 00 00 00 34 00 00 00 A9 0F 00 00 00 00 00 00 34 00 00 00 03 00 00 00 0C 00 03 00 18 00 03 00 00 00 00 02 13 06 00 01 5D 06 00 00 00 00 00 00 00 00 00 01 D1 58 05 01 78 BC 96 68 55 50 58 21 B5 0B 0D 22 00 00 00 00 ?? ?? ?? 00 ?? ?? ?? 00 ?? ?? 00 00 ?? 0? 00 00 0E 00 00 00 1A 03 00 67 BE 99 AF DE 39 19 1D 3F 9? ?? ?A }
 
 	condition:
-		$1 at macho.entry_point + 354 or $1 at macho.ep_for_arch(macho.CPU_TYPE_X86_64) + 354
+		$1 at macho.entry_point + 354 or $1 at macho.entry_point_for_arch(macho.CPU_TYPE_X86_64) + 354
 }
 
 rule upx_394_nrv2b
@@ -214,7 +214,7 @@ rule upx_394_nrv2b
 	strings:
 		$1 = { FF C3 01 00 00 00 1C 00 00 00 00 00 00 00 1C 00 00 00 00 00 00 00 1C 00 00 00 02 00 00 00 FD 08 00 00 34 00 00 00 34 00 00 00 A9 0F 00 00 00 00 00 00 34 00 00 00 03 00 00 00 0C 00 03 00 18 00 03 00 00 00 00 02 13 06 00 01 5D 06 00 00 00 00 00 00 00 00 00 01 D1 58 05 01 BE F3 84 60 55 50 58 21 3D 02 0D 22 00 00 00 00 ?? ?? ?? 00 ?? ?? ?? 00 ?? ?? 00 00 ?? 0? 00 00 02 00 00 00 ?? ?? B7 FF CF FA ED FE 07 00 00 01 03 03 ?0 02 }
 	condition:
-		$1 at macho.entry_point + 354 or $1 at macho.ep_for_arch(macho.CPU_TYPE_X86_64) + 354
+		$1 at macho.entry_point + 354 or $1 at macho.entry_point_for_arch(macho.CPU_TYPE_X86_64) + 354
 }
 
 rule upx_394_nrv2d
@@ -229,7 +229,7 @@ rule upx_394_nrv2d
 	strings:
 		$1 = { FF C3 01 00 00 00 1C 00 00 00 00 00 00 00 1C 00 00 00 00 00 00 00 1C 00 00 00 02 00 00 00 FD 08 00 00 34 00 00 00 34 00 00 00 A9 0F 00 00 00 00 00 00 34 00 00 00 03 00 00 00 0C 00 03 00 18 00 03 00 00 00 00 02 13 06 00 01 5D 06 00 00 00 00 00 00 00 00 00 01 D1 58 05 01 1A FE 28 C5 55 50 58 21 49 02 0D 22 00 00 00 00 ?? ?? ?? 00 ?? ?? ?? 00 ?? ?? 00 00 ?? 0? 00 00 05 00 00 00 ?? ?? BE FF CF FA ED FE 07 00 00 01 03 07 ?0 02 }
 	condition:
-		$1 at macho.entry_point + 354 or $1 at macho.ep_for_arch(macho.CPU_TYPE_X86_64) + 354
+		$1 at macho.entry_point + 354 or $1 at macho.entry_point_for_arch(macho.CPU_TYPE_X86_64) + 354
 }
 
 rule upx_394_nrv2e
@@ -244,5 +244,5 @@ rule upx_394_nrv2e
 	strings:
 		$1 = { FF C3 01 00 00 00 1C 00 00 00 00 00 00 00 1C 00 00 00 00 00 00 00 1C 00 00 00 02 00 00 00 FD 08 00 00 34 00 00 00 34 00 00 00 A9 0F 00 00 00 00 00 00 34 00 00 00 03 00 00 00 0C 00 03 00 18 00 03 00 00 00 00 02 13 06 00 01 5D 06 00 00 00 00 00 00 00 00 00 01 D1 58 05 01 34 08 49 95 55 50 58 21 61 02 0D 22 00 00 00 00 ?? ?? ?? 00 ?? ?? ?? 00 ?? ?? 00 00 ?? 0? 00 00 08 00 00 00 ?? ?? B6 FF CF FA ED FE 07 00 00 01 03 06 ?0 02 }
 	condition:
-		$1 at macho.entry_point + 354 or $1 at macho.ep_for_arch(macho.CPU_TYPE_X86_64) + 354
+		$1 at macho.entry_point + 354 or $1 at macho.entry_point_for_arch(macho.CPU_TYPE_X86_64) + 354
 }

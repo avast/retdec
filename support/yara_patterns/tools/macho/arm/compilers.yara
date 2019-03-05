@@ -16,7 +16,7 @@ rule xcode_ios_sdk_01
 	strings:
 		$1 = { 00 00 9D E5 04 10 8D E2 01 40 80 E2 04 21 81 E0 07 D0 CD E3 02 30 A0 E1 04 40 93 E4 00 00 54 E3 FC FF FF 1A }
 	condition:
-		$1 at macho.entry_point or $1 at macho.ep_for_arch(macho.CPU_TYPE_ARM)
+		$1 at macho.entry_point or $1 at macho.entry_point_for_arch(macho.CPU_TYPE_ARM)
 }
 
 rule xcode_ios_sdk_02 {
@@ -29,5 +29,5 @@ rule xcode_ios_sdk_02 {
 	strings:
 		$1 = { 00 00 9D E5 04 10 8D E2 01 40 80 E2 04 21 81 E0 07 D0 CD E3 02 30 A0 E1 04 40 93 E4 00 00 54 E3 FC FF FF 1A 18 C0 9F E5 0C C0 8F E0 00 C0 9C E5 3C FF 2F E1 0C C0 9F E5 0C C0 8F E0 00 C0 9C E5 1C FF 2F E1 }
 	condition:
-		$1 at macho.entry_point or $1 at macho.ep_for_arch(macho.CPU_TYPE_ARM)
+		$1 at macho.entry_point or $1 at macho.entry_point_for_arch(macho.CPU_TYPE_ARM)
 }
