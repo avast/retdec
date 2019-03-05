@@ -66,6 +66,10 @@ void Filter::estimateRetValue(DataFlowEntry* de) const
 	else
 	{
 //		TODO: double-read-modf.x86.clang-3.2.O0.g.elf
+//		In test above return type is found from configuration to be
+//		double but collector finds only stores to EAX which results in failure in
+//		decompilation.
+//
 //		if (!de->retEntries().empty()
 //			&& !de->retEntries().front().retValues().empty())
 //		{
@@ -181,7 +185,13 @@ void Filter::filterCalls(DataFlowEntry* de) const
 				de->argTypes());
 		if (!de->isVoidarg() && !de->argTypes().empty())
 		{
-			// We need order
+			// This function is called because
+			// in case when we have info about
+			// types and order of the parameters
+			// we would loose it by plain creation
+			// of template.
+			// This order is estimated in function
+			// below.
 			filterArgsByKnownTypes(defArgs);
 		}
 		else if (de->args().empty())
@@ -821,7 +831,6 @@ void Filter::leaveCommon(std::vector<FilterableLayout>& lays) const
 		lay.vectorRegisters.assign(commonVR.begin(), commonVR.end());
 		lay.stacks.resize(minStacks, nullptr);
 
-		// TODO: move commons to layout and order just it.
 		orderFiterableLayout(lay);
 	}
 }
