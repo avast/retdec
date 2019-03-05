@@ -175,7 +175,7 @@ CallingConventionProvider::CallingConventionProvider()
 	registerCC(CallingConvention::ID::CC_THISCALL, &ThiscallCallingConvention::create);
 	registerCC(CallingConvention::ID::CC_PASCAL, &PascalCallingConvention::create);
 	registerCC(CallingConvention::ID::CC_FASTCALL, &FastcallCallingConvention::create);
-	registerCC(CallingConvention::ID::CC_PASCAL_FASTCALL, &PascalFastcallCallingConvention::create);
+	registerCC(CallingConvention::ID::CC_FASTCALL_PASCAL, &PascalFastcallCallingConvention::create);
 	registerCC(CallingConvention::ID::CC_WATCOM, &WatcomCallingConvention::create);
 	registerCC(CallingConvention::ID::CC_SYSTEMVX64, &SystemVX64CallingConvention::create);
 	registerCC(CallingConvention::ID::CC_MICROSOFTX64, &MicrosoftX64CallingConvention::create);
