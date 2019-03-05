@@ -10,6 +10,7 @@
 #include <llvm/IR/InstIterator.h>
 
 #include "retdec/bin2llvmir/optimizations/param_return/collector/collector.h"
+#include "retdec/bin2llvmir/optimizations/param_return/collector/pic32.h"
 
 using namespace retdec::utils;
 using namespace llvm;
@@ -589,38 +590,6 @@ llvm::Value* Collector::getRoot(llvm::Value* i, bool first) const
 	}
 
 	return i;
-}
-
-CollectorPic32::CollectorPic32(
-		const Abi* abi,
-		llvm::Module* m,
-		const ReachingDefinitionsAnalysis* rda) :
-	Collector(abi, m, rda)
-{
-}
-
-CollectorPic32::~CollectorPic32()
-{
-}
-
-void CollectorPic32::collectCallSpecificTypes(CallEntry* ce) const
-{
-	Collector::collectCallSpecificTypes(ce);
-	
-	std::vector<llvm::Type*> argTypes;
-	for (auto t : ce->argTypes())
-	{
-		if (t->isDoubleTy())
-		{
-			argTypes.push_back(Type::getFloatTy(_module->getContext()));
-		}
-		else
-		{
-			argTypes.push_back(t);
-		}
-	}
-
-	ce->setArgTypes(std::move(argTypes));
 }
 
 //

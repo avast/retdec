@@ -86,20 +86,6 @@ class Collector
 		const ReachingDefinitionsAnalysis* _rda;
 };
 
-class CollectorPic32 : public Collector
-{
-	public:
-		CollectorPic32(
-			const Abi* abi,
-			llvm::Module* m,
-			const ReachingDefinitionsAnalysis* rda);
-
-		virtual ~CollectorPic32() override;
-
-	public:
-		virtual void collectCallSpecificTypes(CallEntry* ce) const override;
-};
-
 class CollectorProvider
 {
 	public:
