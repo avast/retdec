@@ -4,6 +4,7 @@
  * @copyright (c) 2019 Avast Software, licensed under the MIT license
  */
 
+#include "retdec/bin2llvmir/providers/abi/abi.h"
 #include "retdec/bin2llvmir/providers/calling_convention/x86.h"
 #include "retdec/capstone2llvmir/x86/x86.h"
 
@@ -28,12 +29,15 @@ CdeclCallingConvention::CdeclCallingConvention(const Abi* a) :
 		X86_REG_ST7,
 		X86_REG_ST0
 	};
-
-	_regNumPerParam = 1;
 }
 
 CdeclCallingConvention::~CdeclCallingConvention()
 {
+}
+
+std::size_t CdeclCallingConvention::getMaxBytesPerStackParam() const
+{
+	return _abi->getWordSize()*2;
 }
 
 CallingConvention::Ptr CdeclCallingConvention::create(const Abi* a)
@@ -65,12 +69,15 @@ FastcallCallingConvention::FastcallCallingConvention(const Abi* a) :
 		X86_REG_ST7,
 		X86_REG_ST0
 	};
-
-	_regNumPerParam = 1;
 }
 
 FastcallCallingConvention::~FastcallCallingConvention()
 {
+}
+
+std::size_t FastcallCallingConvention::getMaxBytesPerStackParam() const
+{
+	return _abi->getWordSize()*2;
 }
 
 CallingConvention::Ptr FastcallCallingConvention::create(const Abi* a)
@@ -98,12 +105,16 @@ PascalCallingConvention::PascalCallingConvention(const Abi* a) :
 		X86_REG_ST0
 	};
 
-	_regNumPerParam = 1;
 	_stackParamOrder = LTR;
 }
 
 PascalCallingConvention::~PascalCallingConvention()
 {
+}
+
+std::size_t PascalCallingConvention::getMaxBytesPerStackParam() const
+{
+	return _abi->getWordSize()*2;
 }
 
 CallingConvention::Ptr PascalCallingConvention::create(const Abi* a)
@@ -136,12 +147,16 @@ PascalFastcallCallingConvention::PascalFastcallCallingConvention(const Abi* a) :
 		X86_REG_ST0
 	};
 
-	_regNumPerParam = 1;
 	_stackParamOrder = LTR;
 }
 
 PascalFastcallCallingConvention::~PascalFastcallCallingConvention()
 {
+}
+
+std::size_t PascalFastcallCallingConvention::getMaxBytesPerStackParam() const
+{
+	return _abi->getWordSize()*2;
 }
 
 CallingConvention::Ptr PascalFastcallCallingConvention::create(const Abi* a)
@@ -172,12 +187,15 @@ ThiscallCallingConvention::ThiscallCallingConvention(const Abi* a) :
 		X86_REG_ST7,
 		X86_REG_ST0
 	};
-
-	_regNumPerParam = 1;
 }
 
 ThiscallCallingConvention::~ThiscallCallingConvention()
 {
+}
+
+std::size_t ThiscallCallingConvention::getMaxBytesPerStackParam() const
+{
+	return _abi->getWordSize()*2;
 }
 
 CallingConvention::Ptr ThiscallCallingConvention::create(const Abi* a)
@@ -208,12 +226,15 @@ WatcomCallingConvention::WatcomCallingConvention(const Abi* a) :
 		X86_REG_ST7,
 		X86_REG_ST0
 	};
-
-	_regNumPerParam = 1;
 }
 
 WatcomCallingConvention::~WatcomCallingConvention()
 {
+}
+
+std::size_t WatcomCallingConvention::getMaxBytesPerStackParam() const
+{
+	return _abi->getWordSize()*2;
 }
 
 CallingConvention::Ptr WatcomCallingConvention::create(const Abi* a)

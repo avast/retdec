@@ -37,16 +37,34 @@ SystemVX64CallingConvention::SystemVX64CallingConvention(const Abi* a) :
 		X86_REG_XMM6,
 		X86_REG_XMM7
 	};
+	_paramVectorRegs = {
+		X86_REG_XMM0,
+		X86_REG_XMM1,
+		X86_REG_XMM2,
+		X86_REG_XMM3,
+		X86_REG_XMM4,
+		X86_REG_XMM5,
+		X86_REG_XMM6,
+		X86_REG_XMM7
+	};
 
 	_returnRegs = {
 		X86_REG_RAX,
 		X86_REG_RDX
 	};
 	_returnFPRegs = {
-		X86_REG_XMM0
+		X86_REG_XMM0,
+		X86_REG_XMM1
+	};
+	_returnVectorRegs = {
+		X86_REG_XMM0,
+		X86_REG_XMM1
 	};
 
-	_regNumPerParam = 2;
+	_largeObjectsPassedByReference = true;
+	_numOfRegsPerParam = 2;
+	_numOfFPRegsPerParam = 2;
+	_numOfVectorRegsPerParam = 2;
 }
 
 SystemVX64CallingConvention::~SystemVX64CallingConvention()
@@ -87,8 +105,7 @@ MicrosoftX64CallingConvention::MicrosoftX64CallingConvention(const Abi* a) :
 		X86_REG_XMM0
 	};
 
-	_paramRegsOverlay = true;
-	_regNumPerParam = 1;
+	_largeObjectsPassedByReference = true;
 }
 
 MicrosoftX64CallingConvention::~MicrosoftX64CallingConvention()
