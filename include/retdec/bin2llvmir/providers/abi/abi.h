@@ -92,9 +92,13 @@ class Abi
 	//
 	public:
 		bool isMips() const;
+		bool isMips64() const;
 		bool isArm() const;
+		bool isArm64() const;
 		bool isX86() const;
+		bool isX64() const;
 		bool isPowerPC() const;
+		bool isPowerPC64() const;
 		bool isPic32() const;
 	
 	// Calling conventions.

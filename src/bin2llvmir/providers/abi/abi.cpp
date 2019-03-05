@@ -223,9 +223,19 @@ bool Abi::isMips() const
 	return _config->getConfig().architecture.isMipsOrPic32();
 }
 
+bool Abi::isMips64() const
+{
+	return _config->getConfig().architecture.isMips64();
+}
+
 bool Abi::isArm() const
 {
 	return _config->getConfig().architecture.isArmOrThumb();
+}
+
+bool Abi::isArm64() const
+{
+	return _config->getConfig().architecture.isArm64();
 }
 
 bool Abi::isX86() const
@@ -233,9 +243,19 @@ bool Abi::isX86() const
 	return _config->getConfig().architecture.isX86();
 }
 
+bool Abi::isX64() const
+{
+	return _config->getConfig().architecture.isX86_64();
+}
+
 bool Abi::isPowerPC() const
 {
 	return _config->getConfig().architecture.isPpc();
+}
+
+bool Abi::isPowerPC64() const
+{
+	return _config->getConfig().architecture.isPpc64();
 }
 
 bool Abi::isPic32() const
