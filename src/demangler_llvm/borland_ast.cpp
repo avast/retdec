@@ -74,7 +74,7 @@ FunctionNode::FunctionNode(
 	std::shared_ptr<FunctionTypeNode> funcType) :
 	Node(Kind::KFunction, false),
 	_name(std::move(name)),
-	_funcNode(funcType) {}
+	_funcNode(std::move(funcType)) {}
 
 /**
  * @brief Creates shared pointer to function node.
@@ -87,7 +87,8 @@ std::shared_ptr<FunctionNode> FunctionNode::create(
 	std::shared_ptr<retdec::demangler::borland::Node> name,
 	std::shared_ptr<FunctionTypeNode> funcType)
 {
-	return std::shared_ptr<FunctionNode>(new FunctionNode(name, funcType));
+	return std::shared_ptr<FunctionNode>(
+		new FunctionNode(std::move(name), std::move(funcType)));
 }
 
 /**
@@ -101,18 +102,35 @@ void FunctionNode::printLeft(std::ostream &s) const
 	_funcNode->printRight(s);
 }
 
+/**
+ * Private Template node constructor. TemplateNode::create should be used.
+ * @param name Name node.
+ * @param params Array node of parameters.
+ */
 TemplateNode::TemplateNode(
 	std::shared_ptr<retdec::demangler::borland::Node> name,
 	std::shared_ptr<retdec::demangler::borland::Node> params) :
-	Node(Kind::KTemplateNode), _name(name), _params(params) {}
+	Node(Kind::KTemplateNode), _name(std::move(name)),
+	_params(std::move(params)) {}
 
+/**
+ * @brief Creates shared pointer to template node.
+ * @param name Pointer to Name or NestedName node.
+ * @param params Pointer to parameters.
+ * @return Unique pointer to constructed TemplateNode.
+ */
 std::shared_ptr<TemplateNode> TemplateNode::create(
 	std::shared_ptr<retdec::demangler::borland::Node> name,
 	std::shared_ptr<retdec::demangler::borland::Node> params)
 {
-	return std::shared_ptr<TemplateNode>(new TemplateNode(name, params));
+	return std::shared_ptr<TemplateNode>(
+		new TemplateNode(std::move(name), std::move(params)));
 }
 
+/**
+ * @brief Prints text representation of template.
+ * @param s Output stream.
+ */
 void TemplateNode::printLeft(std::ostream &s) const
 {
 	_name->print(s);
@@ -146,7 +164,7 @@ std::shared_ptr<NameNode> NameNode::create(Context &context, const std::string &
 }
 
 /**
- * @brief Prints left side of node represention.
+ * @brief Prints string represention of node.
  * @param s output stream
  */
 void NameNode::printLeft(std::ostream &s) const
@@ -161,7 +179,8 @@ void NameNode::printLeft(std::ostream &s) const
  */
 NestedNameNode::NestedNameNode(
 	std::shared_ptr<Node> super, std::shared_ptr<Node> name) :
-	Node(NameNode::Kind::KNestedName, false), _super(super), _name(name) {}
+	Node(NameNode::Kind::KNestedName, false),
+	_super(std::move(super)), _name(std::move(name)) {}
 
 /**
  * @param super Higher level node.
@@ -193,10 +212,16 @@ void NestedNameNode::printLeft(std::ostream &s) const
 	_name->print(s);
 }
 
+/**
+ * @return Higher level nodes in nested name.
+ */
 std::shared_ptr<Node> NestedNameNode::super() {
 	return _super;
 }
 
+/**
+ * @return Lover level node in neste name.
+ */
 std::shared_ptr<Node> NestedNameNode::name() {
 	return _name;
 }
@@ -224,11 +249,17 @@ void NodeArray::addNode(std::shared_ptr<retdec::demangler::borland::Node> node)
 	_nodes.push_back(node);
 }
 
+/**
+ * @return true if size of nodes is 0, false otherwise.
+ */
 bool NodeArray::empty() const
 {
 	return _nodes.empty();
 }
 
+/**
+ * @return Number of nodes in array.
+ */
 size_t NodeArray::size()
 {
 	return _nodes.size();
@@ -253,11 +284,18 @@ void NodeArray::printLeft(std::ostream &s) const
 	}
 }
 
+/**
+ * @param i Index to get.
+ * @return Node on index i or nullptr if i is greater than size.
+ */
 std::shared_ptr<Node> NodeArray::get(unsigned i) const
 {
 	return i < _nodes.size() ? _nodes.at(i): nullptr;
 }
 
+/**
+ * Constuctor for qualifiers.
+ */
 Qualifiers::Qualifiers(bool isVolatile, bool isConst) :
 	_isVolatile(isVolatile), _isConst(isConst) {}
 
@@ -271,6 +309,11 @@ bool Qualifiers::isConst() const
 	return _isConst;
 }
 
+/**
+ * Prints string representation of qualifiers.
+ * Prints space on the left side.
+ * @param s Output stream.
+ */
 void Qualifiers::printSpaceL(std::ostream &s) const
 {
 	if (_isVolatile) {
@@ -281,6 +324,11 @@ void Qualifiers::printSpaceL(std::ostream &s) const
 	}
 }
 
+/**
+ * Prints string representation of qualifiers.
+ * Prints space on the right side.
+ * @param s Output stream.
+ */
 void Qualifiers::printSpaceR(std::ostream &s) const
 {
 	if (_isVolatile) {
@@ -291,14 +339,28 @@ void Qualifiers::printSpaceR(std::ostream &s) const
 	}
 }
 
-ConversionOperatorNode::ConversionOperatorNode(std::shared_ptr<retdec::demangler::borland::Node> type) :
-	Node(Kind::KConversionOperator), _type(type) {}
+/**
+ * Private constructor for Conversino Operator Node. Use create.
+ * @param type Node representing target type.
+ */
+ConversionOperatorNode::ConversionOperatorNode(
+	std::shared_ptr<Node> type) :
+	Node(Kind::KConversionOperator), _type(std::move(type)) {}
 
+/**
+ * Creates shared pointer with Conversion operator.
+ * @param type Node representing target type.
+ * @return pointer to constructed operator.
+ */
 std::shared_ptr<ConversionOperatorNode> ConversionOperatorNode::create(Context &context, std::shared_ptr<Node> type)
 {
-	return std::shared_ptr<ConversionOperatorNode>(new ConversionOperatorNode(type));
+	return std::shared_ptr<ConversionOperatorNode>(new ConversionOperatorNode(type));	// TODO context
 }
 
+/**
+ * Prints string representation of conversion operator.
+ * @param s Output stream.
+ */
 void ConversionOperatorNode::printLeft(std::ostream &s) const
 {
 	s << "operator ";
