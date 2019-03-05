@@ -39,6 +39,7 @@ class FileInformation
 		std::string compactManifest;                   ///< compact version of XML manifest
 		FileHeader header;                             ///< file header
 		RichHeader richHeader;                         ///< rich header
+		VisualBasicInfo visualBasicInfo;               ///< visual basic information
 		PdbInfo pdbInfo;                               ///< information about related PDB file
 		ImportTable importTable;                       ///< information about imports
 		ExportTable exportTable;                       ///< information about exports
@@ -151,6 +152,47 @@ class FileInformation
 		std::string getRichHeaderRawBytesStr() const;
 		bool hasRichHeaderRecords() const;
 		/// @}
+
+		/// @name Getters of @a visualBasicInfo
+		/// @{
+		bool isVisualBasicUsed() const;
+		bool getVisualBasicIsPcode() const;
+		std::string getVisualBasicLanguageDLL() const;
+		std::string getVisualBasicBackupLanguageDLL() const;
+		std::string getVisualBasicProjectExeName() const;
+		std::string getVisualBasicProjectDescription() const;
+		std::string getVisualBasicProjectHelpFile() const;
+		std::string getVisualBasicProjectName() const;
+		std::string getVisualBasicLanguageDLLPrimaryLCIDStr() const;
+		std::string getVisualBasicLanguageDLLSecondaryLCIDStr() const;
+		std::string getVisualBasicProjectPath() const;
+		std::string getVisualBasicProjectPrimaryLCIDStr() const;
+		std::string getVisualBasicProjectSecondaryLCIDStr() const;
+		const retdec::fileformat::VisualBasicObject *getVisualBasicObject(std::size_t position) const;
+		const retdec::fileformat::VisualBasicExtern *getVisualBasicExtern(std::size_t position) const;
+		std::size_t getVisualBasicNumberOfObjects() const;
+		std::size_t getVisualBasicNumberOfExterns() const;
+		std::string getVisualBasicExternModuleName(std::size_t position) const;
+		std::string getVisualBasicExternApiName(std::size_t position) const;
+		std::string getVisualBasicObjectTableGUID() const;
+		std::string getVisualBasicTypeLibCLSID() const;
+		std::string getVisualBasicTypeLibMajorVersionStr() const;
+		std::string getVisualBasicTypeLibMinorVersionStr() const;
+		std::string getVisualBasicTypeLibLCIDStr() const;
+		std::string getVisualBasicCOMObjectName() const;
+		std::string getVisualBasicCOMObjectDescription() const;
+		std::string getVisualBasicCOMObjectCLSID() const;
+		std::string getVisualBasicCOMObjectInterfaceCLSID() const;
+		std::string getVisualBasicCOMObjectEventsCLSID() const;
+		std::string getVisualBasicCOMObjectType() const;
+		std::string getVisualBasicExternTableHashCrc32() const;
+		std::string getVisualBasicExternTableHashMd5() const;
+		std::string getVisualBasicExternTableHashSha256() const;
+		std::string getVisualBasicObjectTableHashCrc32() const;
+		std::string getVisualBasicObjectTableHashMd5() const;
+		std::string getVisualBasicObjectTableHashSha256() const;
+		/// @}
+
 
 		/// @name Getters of @a pdbInfo
 		/// @{
@@ -510,6 +552,8 @@ class FileInformation
 		void setOverlayOffset(unsigned long long offset);
 		void setOverlaySize(unsigned long long size);
 		void setRichHeader(const retdec::fileformat::RichHeader *rHeader);
+		void setVisualBasicInfo(const retdec::fileformat::VisualBasicInfo *vbInfo);
+		void setVisualBasicUsed(bool set);
 		void setPdbType(const std::string &sType);
 		void setPdbPath(const std::string &sPath);
 		void setPdbGuid(const std::string &sGuid);

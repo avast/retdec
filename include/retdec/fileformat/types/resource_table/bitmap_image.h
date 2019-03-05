@@ -77,11 +77,6 @@ class BitmapImage
 		const std::vector<std::vector<struct BitmapPixel>> &getImage() const;
 		/// @}
 
-		/// @name Setters
-		/// @{
-		// TODO
-		/// @}
-
 		/// @name Other methods
 		/// @{
 		bool parseDibFormat(const ResourceIcon &icon);

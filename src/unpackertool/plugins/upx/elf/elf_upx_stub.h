@@ -11,7 +11,9 @@
 
 #include "unpackertool/plugins/upx/upx_stub.h"
 #include "retdec/unpacker/decompression/nrv/bit_parsers.h"
-#include "retdec/unpacker/dynamic_buffer.h"
+#include "retdec/utils/dynamic_buffer.h"
+
+using namespace retdec::utils;
 
 // Foroward declarations
 namespace ELFIO {
@@ -81,7 +83,7 @@ public:
 	using ElfHeaderType = typename ElfUpxStubTraits<bits>::ElfHeaderType;
 	using ProgHeaderType = typename ElfUpxStubTraits<bits>::ProgHeaderType;
 
-	ElfUpxStub(retdec::loader::Image* inputFile, const UpxStubData* stubData, const retdec::unpacker::DynamicBuffer& stubCapturedData,
+	ElfUpxStub(retdec::loader::Image* inputFile, const UpxStubData* stubData, const DynamicBuffer& stubCapturedData,
 			std::unique_ptr<Decompressor> decompressor, const UpxMetadata& metadata);
 
 	virtual ~ElfUpxStub() override;
@@ -90,15 +92,15 @@ public:
 	virtual void cleanup() override;
 
 	void setupPackingMethod(std::uint8_t packingMethod);
-	void decompress(retdec::unpacker::DynamicBuffer& packedData, retdec::unpacker::DynamicBuffer& unpackedData);
+	void decompress(DynamicBuffer& packedData, DynamicBuffer& unpackedData);
 
 private:
 	std::uint32_t getFirstBlockOffset();
-	bool validBlock(const retdec::unpacker::DynamicBuffer& block);
-	void unpackBlock(retdec::unpacker::DynamicBuffer& unpackedData, AddressType fileOffset, AddressType& readFromBuffer, std::uint32_t sizeHint = 0);
-	void unpackBlock(retdec::unpacker::DynamicBuffer& unpackedData, retdec::unpacker::DynamicBuffer& packedBlock, AddressType& readFromBuffer, std::uint32_t sizeHint = 0);
+	bool validBlock(const DynamicBuffer& block);
+	void unpackBlock(DynamicBuffer& unpackedData, AddressType fileOffset, AddressType& readFromBuffer, std::uint32_t sizeHint = 0);
+	void unpackBlock(DynamicBuffer& unpackedData, DynamicBuffer& packedBlock, AddressType& readFromBuffer, std::uint32_t sizeHint = 0);
 	AddressType nextLoadSegmentGap(const std::vector<ProgHeaderType>& phdrs, std::uint32_t currentLoadSegmentIndex);
-	void unfilterBlock(const retdec::unpacker::DynamicBuffer& packedBlock, retdec::unpacker::DynamicBuffer& unpackedData);
+	void unfilterBlock(const DynamicBuffer& packedBlock, DynamicBuffer& unpackedData);
 
 	retdec::unpacker::BitParser* _bitParser; ///< Associated NRV bit parser.
 };

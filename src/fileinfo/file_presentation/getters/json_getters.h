@@ -26,5 +26,6 @@
 #include "fileinfo/file_presentation/getters/simple_getter/entry_point_json_getter.h"
 #include "fileinfo/file_presentation/getters/simple_getter/header_json_getter.h"
 #include "fileinfo/file_presentation/getters/simple_getter/pdb_json_getter.h"
+#include "fileinfo/file_presentation/getters/simple_getter/visual_basic_json_getter.h"
 
 #endif

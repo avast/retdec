@@ -49,7 +49,7 @@ bool isNonasciiChar(unsigned char c) {
 */
 std::string replaceChars(const std::string &str, bool (* predicate)(unsigned char)) {
 	std::stringstream result;
-	const std::size_t maxC = std::pow(2, sizeof(std::string::value_type) * CHAR_BIT) - 1;
+	const std::size_t maxC = (1 << (sizeof(std::string::value_type) * CHAR_BIT)) - 1;
 	for (const auto &c : str) {
 		if (predicate(c)) {
 			const auto val = numToStr<std::size_t>(c & maxC, std::hex);
@@ -402,6 +402,100 @@ std::string toWide(const std::string &str, std::string::size_type length) {
 		result += c + padding;
 	}
 	return result;
+}
+
+/**
+* @brief Converts unicode @a bytes to ASCII string.
+*
+* @param[in] bytes Bytes for conversion.
+* @param[in] nBytes Number of bytes.
+*
+* @return Converted string in ASCII.
+*/
+std::string unicodeToAscii(const std::uint8_t *bytes, std::size_t nBytes)
+{
+	std::stringstream result;
+	if (!bytes || !nBytes)
+	{
+		return {};
+	}
+	if (nBytes & 1)
+	{
+		nBytes--;
+	}
+
+	for (std::size_t i = 0; i < nBytes; i += 2)
+	{
+		if (bytes[i] == 0 && bytes[i + 1] == 0)
+		{
+			break;
+		}
+		if (bytes[i + 1] == 0 && isPrintableChar(bytes[i]))
+		{
+			result << bytes[i];
+		}
+		else
+		{
+			const std::size_t maxC = (1 << (sizeof(std::string::value_type) * CHAR_BIT)) - 1;
+			const auto val1 = numToStr<std::size_t>(bytes[i] & maxC, std::hex);	
+			const auto val2 = numToStr<std::size_t>(bytes[i + 1] & maxC, std::hex);	
+			result << "\\x" << std::setw(2) << std::setfill('0') << val1;
+			result << "\\x" << std::setw(2) << std::setfill('0') << val2;
+		}
+	}
+
+	return result.str();
+}
+
+/**
+* @brief Read up to @a maxBytes bytes as ASCII string.
+*
+* @param[in] bytes Bytes to read from.
+* @param[in] bytesLen Length of @a bytes
+* @param[in] offset Offset in bytes.
+* @param[in] maxBytes Maximum of bytes to read. Zero indicates as much as possible.
+* @param[in] failOnExceed If string isn't null terminated until @a maxBytes, an empty string is returned
+*
+* @return Converted string in ASCII.
+*/
+std::string readNullTerminatedAscii(const std::uint8_t *bytes, std::size_t bytesLen, std::size_t offset,
+									std::size_t maxBytes, bool failOnExceed)
+{
+	std::string result;
+	if (!bytes)
+	{
+		return {};
+	}
+
+	if (maxBytes == 0)
+	{
+		maxBytes = bytesLen;
+	}
+	else if (offset + maxBytes > bytesLen)
+	{
+		maxBytes = bytesLen;
+	}
+	else
+	{
+		maxBytes += offset;
+	}
+
+	std::size_t i;
+	for (i = offset; i < maxBytes; i++)
+	{
+		if (bytes[i] == '\0')
+		{
+			break;
+		}
+		result.push_back(bytes[i]);
+	}
+
+	if (i == maxBytes && failOnExceed)
+	{
+		return {};
+	}
+
+	return replaceNonprintableChars(result);
 }
 
 /**

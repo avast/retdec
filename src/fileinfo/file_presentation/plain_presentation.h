@@ -30,6 +30,7 @@ class PlainPresentation : public FilePresentation
 		void presentSimpleFlags(const std::string &title, const std::string &flags, const std::vector<std::string> &desc, const std::vector<std::string> &abbv) const;
 		void presentPatterns(const std::string &title, const std::vector<Pattern> &patterns);
 		void presentDotnetClasses() const;
+		void presentVisualBasicObjects() const;
 		void presentNotes() const;
 		void presentCore() const;
 		/// @}

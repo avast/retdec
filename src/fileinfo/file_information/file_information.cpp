@@ -782,6 +782,341 @@ bool FileInformation::hasRichHeaderRecords() const
 }
 
 /**
+ * Check whether visual basic informations are used.
+ * @return @c true if it is used, otherwise @c false/
+ */
+bool FileInformation::isVisualBasicUsed() const
+{
+	return visualBasicInfo.isUsed();
+}
+
+/**
+ * Check whether visual basic uses P-Code.
+ * @return @c true if it does, otherwise @c false/
+ */
+bool FileInformation::getVisualBasicIsPcode() const
+{
+	return visualBasicInfo.isPcode();
+}
+
+/**
+ * Get visual basic language DLL
+ * @return Visual basic language DLL
+ */
+std::string FileInformation::getVisualBasicLanguageDLL() const
+{
+	return visualBasicInfo.getLanguageDLL();
+}
+
+/**
+ * Get visual basic backup language DLL
+ * @return Visual basic backup language DLL
+ */
+std::string FileInformation::getVisualBasicBackupLanguageDLL() const
+{
+	return visualBasicInfo.getBackupLanguageDLL();
+}
+
+/**
+ * Get visual basic project exe name
+ * @return Visual basic project exe name
+ */
+std::string FileInformation::getVisualBasicProjectExeName() const
+{
+	return visualBasicInfo.getProjectExeName();
+}
+
+/**
+ * Get visual basic project description
+ * @return Visual basic project description
+ */
+std::string FileInformation::getVisualBasicProjectDescription() const
+{
+	return visualBasicInfo.getProjectDescription();
+}
+
+/**
+ * Get visual basic project help file
+ * @return Visual basic project help file
+ */
+std::string FileInformation::getVisualBasicProjectHelpFile() const
+{
+	return visualBasicInfo.getProjectHelpFile();
+}
+
+/**
+ * Get visual basic project name
+ * @return Visual basic project name
+ */
+std::string FileInformation::getVisualBasicProjectName() const
+{
+	return visualBasicInfo.getProjectName();
+}
+
+/**
+ * Get visual basic language DLL primary LCID
+ * @return Visual basic language DLL primary LCID
+ */
+std::string FileInformation::getVisualBasicLanguageDLLPrimaryLCIDStr() const
+{
+	return visualBasicInfo.getLanguageDLLPrimaryLCIDStr();
+}
+
+/**
+ * Get visual basic language DLL secondary LCID
+ * @return Visual basic language DLL secondary LCID
+ */
+std::string FileInformation::getVisualBasicLanguageDLLSecondaryLCIDStr() const
+{
+	return visualBasicInfo.getLanguageDLLSecondaryLCIDStr();
+}
+
+/**
+ * Get visual basic project path
+ * @return Visual basic project path
+ */
+std::string FileInformation::getVisualBasicProjectPath() const
+{
+	return visualBasicInfo.getProjectPath();
+}
+
+/**
+ * Get visual basic project primary LCID
+ * @return Visual basic project primary LCID
+ */
+std::string FileInformation::getVisualBasicProjectPrimaryLCIDStr() const
+{
+	return visualBasicInfo.getProjectPrimaryLCIDStr();
+}
+
+/**
+ * Get visual basic project secondary LCID
+ * @return Visual basic project secondary LCID
+ */
+std::string FileInformation::getVisualBasicProjectSecondaryLCIDStr() const
+{
+	return visualBasicInfo.getProjectSecondaryLCIDStr();
+}
+
+/**
+ * Get visual basic object
+ * @param position Index of selected object (indexed from 0)
+ * @return Visual basic object
+ */
+const retdec::fileformat::VisualBasicObject *FileInformation::getVisualBasicObject(std::size_t position) const
+{
+	return visualBasicInfo.getObject(position);
+}
+
+/**
+ * Get visual basic extern
+ * @param position Index of selected extern (indexed from 0)
+ * @return Visual basic extern
+ */
+const retdec::fileformat::VisualBasicExtern *FileInformation::getVisualBasicExtern(std::size_t position) const
+{
+	return visualBasicInfo.getExtern(position);
+}
+
+/**
+ * Get visual basic number of objects
+ * @return Visual basic number of objects
+ */
+std::size_t FileInformation::getVisualBasicNumberOfObjects() const
+{
+	return visualBasicInfo.getNumberOfObjects();
+}
+
+/**
+ * Get visual basic number of externs
+ * @return Visual basic number of externs
+ */
+std::size_t FileInformation::getVisualBasicNumberOfExterns() const
+{
+	return visualBasicInfo.getNumberOfExterns();
+}
+
+/**
+ * Get visual basic extern module name
+ * @param position Index of selected extern (indexed from 0)
+ * @return Visual basic extern module name
+ */
+std::string FileInformation::getVisualBasicExternModuleName(std::size_t position) const
+{
+	return visualBasicInfo.getExternModuleName(position);
+}
+
+/**
+ * Get visual basic extern api name
+ * @param position Index of selected extern (indexed from 0)
+ * @return Visual basic extern api name
+ */
+std::string FileInformation::getVisualBasicExternApiName(std::size_t position) const
+{
+	return visualBasicInfo.getExternApiName(position);
+}
+
+/**
+ * Get visual basic object table GUID
+ * @return Object table GUID as string
+ */
+std::string FileInformation::getVisualBasicObjectTableGUID() const
+{
+	return visualBasicInfo.getObjectTableGUID();
+}
+
+/**
+ * Get visual basic typeLib CLSID
+ * @return typeLib CLSID as string
+ */
+std::string FileInformation::getVisualBasicTypeLibCLSID() const
+{
+	return visualBasicInfo.getTypeLibCLSID();
+}
+
+/**
+ * Get visual basic typeLib major version
+ * @return TypeLib major version
+ */
+std::string FileInformation::getVisualBasicTypeLibMajorVersionStr() const
+{
+	return visualBasicInfo.getTypeLibMajorVersionStr();
+}
+
+/**
+ * Get visual basic typeLib minor version
+ * @return TypeLib minor version
+ */
+std::string FileInformation::getVisualBasicTypeLibMinorVersionStr() const
+{
+	return visualBasicInfo.getTypeLibMinorVersionStr();
+}
+
+/**
+ * Get visual basic typeLib LCID
+ * @return Visual basic typeLib LCID
+ */
+std::string FileInformation::getVisualBasicTypeLibLCIDStr() const
+{
+	return visualBasicInfo.getTypeLibLCIDStr();
+}
+
+/**
+ * Get visual basic COM object name
+ * @return Visual basic COM object name
+ */
+std::string FileInformation::getVisualBasicCOMObjectName() const
+{
+	return visualBasicInfo.getCOMObjectName();
+}
+
+/**
+ * Get visual basic COM object description
+ * @return Visual basic COM object description
+ */
+std::string FileInformation::getVisualBasicCOMObjectDescription() const
+{
+	return visualBasicInfo.getCOMObjectDescription();
+}
+
+/**
+ * Get visual basic COM object CLSID
+ * @return Visual basic COM object CLSID
+ */
+std::string FileInformation::getVisualBasicCOMObjectCLSID() const
+{
+	return visualBasicInfo.getCOMObjectCLSID();
+}
+
+/**
+ * Get visual basic COM object interface CLSID
+ * @return Visual basic COM object interface CLSID
+ */
+std::string FileInformation::getVisualBasicCOMObjectInterfaceCLSID() const
+{
+	return visualBasicInfo.getCOMObjectInterfaceCLSID();
+}
+
+/**
+ * Get visual basic COM object events CLSID
+ * @return Visual basic COM object events CLSID
+ */
+std::string FileInformation::getVisualBasicCOMObjectEventsCLSID() const
+{
+	return visualBasicInfo.getCOMObjectEventsCLSID();
+}
+
+/**
+ * Get visual basic COM object type
+ * @return Visual basic COM object type
+ */
+std::string FileInformation::getVisualBasicCOMObjectType() const
+{
+	return visualBasicInfo.getCOMObjectType();
+}
+
+/**
+ * Get visual basic extern table hash as Crc32
+ * @return Visual basic extern table hash
+ */
+std::string FileInformation::getVisualBasicExternTableHashCrc32() const
+{
+	return visualBasicInfo.getExternTableHashCrc32();
+}
+
+/**
+ * Get visual basic extern table hash as Md5
+ * @return Visual basic extern table hash
+ */
+std::string FileInformation::getVisualBasicExternTableHashMd5() const
+{
+	return visualBasicInfo.getExternTableHashMd5();
+}
+
+/**
+ * Get visual basic extern table hash as Sha256
+ * @return Visual basic extern table hash
+ */
+std::string FileInformation::getVisualBasicExternTableHashSha256() const
+{
+	return visualBasicInfo.getExternTableHashSha256();
+}
+
+/**
+ * Get visual basic object table hash as Crc32
+ * @return Visual basic object table hash
+ */
+std::string FileInformation::getVisualBasicObjectTableHashCrc32() const
+{
+	return visualBasicInfo.getObjectTableHashCrc32();
+}
+
+/**
+ * Get visual basic object table hash as Md5
+ * @return Visual basic object table hash
+ */
+std::string FileInformation::getVisualBasicObjectTableHashMd5() const
+{
+	return visualBasicInfo.getObjectTableHashMd5();
+}
+
+/**
+ * Get visual basic object table hash as Sha256
+ * @return Visual basic object table hash
+ */
+std::string FileInformation::getVisualBasicObjectTableHashSha256() const
+{
+	return visualBasicInfo.getObjectTableHashSha256();
+}
+
+
+
+
+
+
+
+
+/**
  * Get type of related PDB file
  * @return Type of related PDB file
  */
@@ -3596,6 +3931,24 @@ void FileInformation::setRichHeader(const retdec::fileformat::RichHeader *rHeade
 {
 	richHeader.setHeader(rHeader);
 }
+
+/**
+ * Set visual basic information
+ * @param vbInfo Information about visual basic
+ */
+void FileInformation::setVisualBasicInfo(const retdec::fileformat::VisualBasicInfo *vbInfo)
+{
+	visualBasicInfo.setInfo(vbInfo);
+}
+
+/**
+ * Sets whether visual basic informations are used.
+ * @param set @c true if used, otherwise @c false.
+ */
+void FileInformation::setVisualBasicUsed(bool set)
+{
+	visualBasicInfo.setUsed(set);
+} 
 
 /**
  * Set type of related PDB file

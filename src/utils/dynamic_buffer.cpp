@@ -1,15 +1,15 @@
 /**
- * @file src/unpacker/dynamic_buffer.cpp
+ * @file src/utils/dynamic_buffer.cpp
  * @brief Implementation of class for buffered data mainpulation.
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */
 
-#include "retdec/unpacker/dynamic_buffer.h"
+#include "retdec/utils/dynamic_buffer.h"
 
 using namespace retdec::utils;
 
 namespace retdec {
-namespace unpacker {
+namespace utils {
 
 /**
  * Creates the empty DynamicBuffer object with no capacity and specified endianness.

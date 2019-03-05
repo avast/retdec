@@ -14,6 +14,7 @@
 #include "unpackertool/plugins/upx/upx_stub.h"
 #include "retdec/unpacker/decompression/lzma/lzma_data.h"
 
+using namespace retdec::utils;
 using namespace retdec::unpacker;
 
 namespace retdec {
