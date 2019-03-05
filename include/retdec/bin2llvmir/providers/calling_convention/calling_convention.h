@@ -44,26 +44,34 @@ class CallingConvention
 	// Registers.
 	//
 	public:
-		std::vector<uint32_t> getParamRegisters() const;
-		std::vector<uint32_t> getParamFPRegisters() const;
-		std::vector<uint32_t> getParamDoubleRegisters() const;
-		std::vector<uint32_t> getParamVectorRegisters() const;
+		const std::vector<uint32_t>& getParamRegisters() const;
+		const std::vector<uint32_t>& getParamFPRegisters() const;
+		const std::vector<uint32_t>& getParamDoubleRegisters() const;
+		const std::vector<uint32_t>& getParamVectorRegisters() const;
 
-		std::vector<uint32_t> getReturnRegisters() const;
-		std::vector<uint32_t> getReturnFPRegisters() const;
-		std::vector<uint32_t> getReturnDoubleRegisters() const;
-		std::vector<uint32_t> getReturnVectorRegisters() const;
+		const std::vector<uint32_t>& getReturnRegisters() const;
+		const std::vector<uint32_t>& getReturnFPRegisters() const;
+		const std::vector<uint32_t>& getReturnDoubleRegisters() const;
+		const std::vector<uint32_t>& getReturnVectorRegisters() const;
 
 		bool usesFPRegistersForParameters() const;
-		bool parameterRegistersOverlay() const;
 
-		std::size_t getRegsNumPerParam() const;
+		std::size_t getMaxNumOfRegsPerParam() const;
+		std::size_t getMaxNumOfFPRegsPerParam() const;
+		std::size_t getMaxNumOfDoubleRegsPerParam() const;
+		std::size_t getMaxNumOfVectorRegsPerParam() const;
+
+		std::size_t getMaxNumOfRegsPerReturn() const;
+		std::size_t getMaxNumOfFPRegsPerReturn() const;
+		std::size_t getMaxNumOfDoubleRegsPerReturn() const;
+		std::size_t getMaxNumOfVectorRegsPerReturn() const;
 
 	// Stacks.
 	public:
 		bool getStackParamOrder() const;
 		bool usesStackForParameters() const;
-		bool passesStructsOnStack() const;
+		bool passesLargeObjectsByReference() const;
+		bool respectsRegisterCouples() const;
 
 		virtual std::size_t getMaxBytesPerStackParam() const;
 	
@@ -94,15 +102,22 @@ class CallingConvention
 	// Private data - registers informational.
 	//
 	protected:
-		bool _paramRegsOverlay = false;
-		size_t _regNumPerParam = 1;
+		size_t _numOfRegsPerParam = 1;
+		size_t _numOfFPRegsPerParam = 1;
+		size_t _numOfDoubleRegsPerParam = 1;
+		size_t _numOfVectorRegsPerParam = 1;
+
+		size_t _numOfRegsPerReturn = 1;
+		size_t _numOfFPRegsPerReturn = 1;
+		size_t _numOfDoubleRegsPerReturn = 1;
+		size_t _numOfVectorRegsPerReturn = 1;
 
 	// Private data - stacks informational.
 	//
 	protected:
-		bool _paramStructsOnStack = false;
 		bool _stackParamOrder = RTL;
-		bool _passesOnStack = true;
+		bool _largeObjectsPassedByReference = false;
+		bool _respectsRegCouples = false;
 };
 
 class CallingConventionProvider

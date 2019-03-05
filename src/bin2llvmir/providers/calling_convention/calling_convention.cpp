@@ -41,42 +41,42 @@ CallingConvention::~CallingConvention()
 {
 }
 
-std::vector<uint32_t> CallingConvention::getParamRegisters() const
+const std::vector<uint32_t>& CallingConvention::getParamRegisters() const
 {
 	return _paramRegs;
 }
 
-std::vector<uint32_t> CallingConvention::getParamFPRegisters() const
+const std::vector<uint32_t>& CallingConvention::getParamFPRegisters() const
 {
 	return _paramFPRegs;
 }
 
-std::vector<uint32_t> CallingConvention::getParamDoubleRegisters() const
+const std::vector<uint32_t>& CallingConvention::getParamDoubleRegisters() const
 {
 	return _paramDoubleRegs;
 }
 
-std::vector<uint32_t> CallingConvention::getParamVectorRegisters() const
+const std::vector<uint32_t>& CallingConvention::getParamVectorRegisters() const
 {
 	return _paramVectorRegs;
 }
 
-std::vector<uint32_t> CallingConvention::getReturnRegisters() const
+const std::vector<uint32_t>& CallingConvention::getReturnRegisters() const
 {
 	return _returnRegs;
 }
 
-std::vector<uint32_t> CallingConvention::getReturnFPRegisters() const
+const std::vector<uint32_t>& CallingConvention::getReturnFPRegisters() const
 {
 	return _returnFPRegs;
 }
 
-std::vector<uint32_t> CallingConvention::getReturnDoubleRegisters() const
+const std::vector<uint32_t>& CallingConvention::getReturnDoubleRegisters() const
 {
 	return _returnDoubleRegs;
 }
 
-std::vector<uint32_t> CallingConvention::getReturnVectorRegisters() const
+const std::vector<uint32_t>& CallingConvention::getReturnVectorRegisters() const
 {
 	return _returnVectorRegs;
 }
@@ -86,14 +86,24 @@ bool CallingConvention::usesFPRegistersForParameters() const
 	return !(_paramFPRegs.empty() && _paramDoubleRegs.empty());
 }
 
-bool CallingConvention::parameterRegistersOverlay() const
+std::size_t CallingConvention::getMaxNumOfRegsPerParam() const
 {
-	return _paramRegsOverlay;
+	return _numOfRegsPerParam;
 }
 
-std::size_t CallingConvention::getRegsNumPerParam() const
+std::size_t CallingConvention::getMaxNumOfFPRegsPerParam() const
 {
-	return _regNumPerParam;
+	return _numOfFPRegsPerParam;
+}
+
+std::size_t CallingConvention::getMaxNumOfDoubleRegsPerParam() const
+{
+	return _numOfDoubleRegsPerParam;
+}
+
+std::size_t CallingConvention::getMaxNumOfVectorRegsPerParam() const
+{
+	return _numOfVectorRegsPerParam;
 }
 
 bool CallingConvention::getStackParamOrder() const
@@ -101,9 +111,14 @@ bool CallingConvention::getStackParamOrder() const
 	return _stackParamOrder;
 }
 
-bool CallingConvention::passesStructsOnStack() const
+bool CallingConvention::passesLargeObjectsByReference() const
 {
-	return _paramStructsOnStack;
+	return _largeObjectsPassedByReference;
+}
+
+bool CallingConvention::respectsRegisterCouples() const
+{
+	return _respectsRegCouples;
 }
 
 std::size_t CallingConvention::getMaxBytesPerStackParam() const
