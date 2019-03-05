@@ -50,6 +50,7 @@ set(BIN2LLVMIR_SOURCES
 	optimizations/main_detection/main_detection.cpp
 	optimizations/param_return/collector/collector.cpp
 	optimizations/param_return/param_return.cpp
+	optimizations/param_return/data_entries.cpp
 	optimizations/phi2seq/phi2seq.cpp
 	optimizations/provider_init/provider_init.cpp
 	optimizations/x86_addr_spaces/x86_addr_spaces_pass.cpp
