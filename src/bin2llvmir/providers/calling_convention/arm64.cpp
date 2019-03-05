@@ -35,6 +35,17 @@ Arm64CallingConvention::Arm64CallingConvention(const Abi* a) :
 		ARM64_REG_V7
 	};
 
+	_paramVectorRegs = {
+		ARM64_REG_V0,
+		ARM64_REG_V1,
+		ARM64_REG_V2,
+		ARM64_REG_V3,
+		ARM64_REG_V4,
+		ARM64_REG_V5,
+		ARM64_REG_V6,
+		ARM64_REG_V7
+	};
+
 	_returnRegs = {
 		ARM64_REG_X0
 	};
@@ -43,7 +54,9 @@ Arm64CallingConvention::Arm64CallingConvention(const Abi* a) :
 		ARM64_REG_V0
 	};
 
-	_regNumPerParam = 2;
+	_largeObjectsPassedByReference = true;
+	_respectsRegCouples = true;
+	_numOfRegsPerParam = 2;
 }
 
 Arm64CallingConvention::~Arm64CallingConvention()
