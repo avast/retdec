@@ -1734,7 +1734,6 @@ TEST_F(ParamReturnTests, ms_x64UsesJustContinuousSequenceOfRegisters)
 	checkModuleAgainstExpectedIr(exp);
 }
 
-/*
 TEST_F(ParamReturnTests, ms_x64ExternalCallUsesFPRegistersAdvanced)
 {
 	parseInput(R"(
@@ -1788,7 +1787,7 @@ TEST_F(ParamReturnTests, ms_x64ExternalCallUsesFPRegistersAdvanced)
 	@xmm2 = global double 0.000000e+00
 	@xmm3 = global double 0.000000e+00
 
-	declare i64 @print(i64, i64, float, float)
+	declare i64 @print(i64, i64, double, double)
 
 	declare void @0()
 
@@ -1800,13 +1799,11 @@ TEST_F(ParamReturnTests, ms_x64ExternalCallUsesFPRegistersAdvanced)
 		%1 = load i64, i64* @rcx
 		%2 = load i64, i64* @rdx
 		%3 = load double, double* @xmm2
-		%4 = fptrunc double %3 to float
-		%5 = load double, double* @xmm3
-		%6 = fptrunc double %5 to float
-		%7 = call i64 @print(i64 %1, i64 %2, float %4, float %6)
-		store i64 %7, i64* @rax
-		%8 = load i64, i64* @rax
-		ret i64 %8
+		%4 = load double, double* @xmm3
+		%5 = call i64 @print(i64 %1, i64 %2, double %3, double %4)
+		store i64 %5, i64* @rax
+		%6 = load i64, i64* @rax
+		ret i64 %6
 	}
 
 	declare void @1()
@@ -1814,7 +1811,6 @@ TEST_F(ParamReturnTests, ms_x64ExternalCallUsesFPRegistersAdvanced)
 	)";
 	checkModuleAgainstExpectedIr(exp);
 }
-*/
 
 //
 //TEST_F(ParamReturnTests, x86PtrCallOnlyContinuousStackOffsetsAreUsed)

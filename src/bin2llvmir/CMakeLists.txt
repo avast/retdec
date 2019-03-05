@@ -51,6 +51,7 @@ set(BIN2LLVMIR_SOURCES
 	optimizations/param_return/collector/collector.cpp
 	optimizations/param_return/collector/pic32.cpp
 	optimizations/param_return/filter/filter.cpp
+	optimizations/param_return/filter/ms_x64.cpp
 	optimizations/param_return/param_return.cpp
 	optimizations/param_return/data_entries.cpp
 	optimizations/phi2seq/phi2seq.cpp

@@ -7,6 +7,7 @@
 #include <deque>
 
 #include "retdec/bin2llvmir/optimizations/param_return/filter/filter.h"
+#include "retdec/bin2llvmir/optimizations/param_return/filter/ms_x64.h"
 
 using namespace retdec::utils;
 using namespace llvm;
@@ -1335,6 +1336,16 @@ Filter::Ptr FilterProvider::createFilter(Abi* abi, const CallingConvention::ID& 
 	}
 
 	assert(cc);
+
+	auto c = abi->getConfig();
+	bool isMinGW = c->getConfig().tools.isGcc()
+			&& c->getConfig().fileFormat.isPe();
+
+	if (isMinGW || c->getConfig().tools.isMsvc())
+	{
+		return std::make_unique<MSX64Filter>(abi, cc);
+	}
+
 	return std::make_unique<Filter>(abi, cc);
 }
 
