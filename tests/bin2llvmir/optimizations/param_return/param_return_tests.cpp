@@ -3371,6 +3371,7 @@ TEST_F(ParamReturnTests, x86FastcallBasic)
 		@edx = global i32 0
 		@ecx = global i32 0
 		@r = global i32 0
+		declare void @a()
 		define void @fnc() {
 			%stack_-4 = alloca i32
 			%stack_-8 = alloca i32
@@ -3378,8 +3379,7 @@ TEST_F(ParamReturnTests, x86FastcallBasic)
 			store i32 1, i32* @edx
 			store i32 123, i32* %stack_-4
 			store i32 456, i32* %stack_-8
-			%a = bitcast i32* @r to void()*
-			call void %a()
+			call void @a()
 			ret void
 		}
 	)");
@@ -3405,24 +3405,31 @@ TEST_F(ParamReturnTests, x86FastcallBasic)
 						"name" : "stack_-8",
 						"storage" : { "type" : "stack", "value" : -8 }
 					}
-				],
-				"callingConvention" : "fastcall",
+				]
+			},
+			{
+				"name" : "a",
+				"callingConvention" : "fastcall"
 			}
 		]
 	})");
 
-	AbiMips64 abi(module.get(), &config);
-	abi.addRegister(X86_REG_EAX, getGlobalByName("eax"));
-	abi.addRegister(X86_REG_ECX, getGlobalByName("ecx"));
-	abi.addRegister(X86_REG_EDX, getGlobalByName("edx"));
+	auto abi = AbiProvider::addAbi(module.get(), &config);
+	abi->addRegister(X86_REG_EAX, getGlobalByName("eax"));
+	abi->addRegister(X86_REG_ECX, getGlobalByName("ecx"));
+	abi->addRegister(X86_REG_EDX, getGlobalByName("edx"));
 
-	pass.runOnModuleCustom(*module, &config, &abi);
+	pass.runOnModuleCustom(*module, &config, abi);
 
 	std::string exp = R"(
 		@eax = global i32 0
 		@edx = global i32 0
 		@ecx = global i32 0
 		@r = global i32 0
+
+		declare i32 @a(i32, i32, i32, i32)
+
+		declare void @0()
 
 		define i32 @fnc() {
 			%stack_-4 = alloca i32
@@ -3431,18 +3438,17 @@ TEST_F(ParamReturnTests, x86FastcallBasic)
 			store i32 1, i32* @edx
 			store i32 123, i32* %stack_-4
 			store i32 456, i32* %stack_-8
-			%a = bitcast i32* @r to void()*
 			%1 = load i32, i32* @ecx
 			%2 = load i32, i32* @edx
 			%3 = load i32, i32* %stack_-8
 			%4 = load i32, i32* %stack_-4
-			%5 = bitcast void ()* %a to void (i32, i32, i32, i32)*
-			call void %5(i32 %1, i32 %2, i32 %3, i32 %4)
+			%5 = call i32 @a(i32 %1, i32 %2, i32 %3, i32 %4)
+			store i32 %5, i32* @eax
 			%6 = load i32, i32* @eax
 			ret i32 %6
 		}
 
-		declare void @0()
+		declare void @1()
 	)";
 	checkModuleAgainstExpectedIr(exp);
 }
@@ -3455,14 +3461,14 @@ TEST_F(ParamReturnTests, x86FastcallLargeTypeCatch)
 		@ecx = global i32 0
 		@edx = global i32 0
 		@eax = global i32 0
+		declare void @a()
 		define void @fnc() {
 			%stack_-4 = alloca i32
 			%stack_-8 = alloca i32
 			store i32 123, i32* @ecx
 			store i32 456, i32* %stack_-4
 			store i32 789, i32* %stack_-8
-			%a = bitcast i32* @r to void()*
-			call void %a()
+			call void @a()
 			ret void
 		}
 	)");
@@ -3489,17 +3495,21 @@ TEST_F(ParamReturnTests, x86FastcallLargeTypeCatch)
 						"storage" : { "type" : "stack", "value" : -8 }
 					}
 				],
-				"calingConvention" : "fastcall",
+				"calingConvention" : "fastcall"
+			},
+			{
+				"name" : "a",
+				"callingConvention" : "fastcall"
 			}
 		]
 
 	})");
-	AbiMips64 abi(module.get(), &config);
 
-	abi.addRegister(X86_REG_ECX, getGlobalByName("ecx"));
-	abi.addRegister(X86_REG_EAX, getGlobalByName("eax"));
+	auto abi = AbiProvider::addAbi(module.get(), &config);
+	abi->addRegister(X86_REG_ECX, getGlobalByName("ecx"));
+	abi->addRegister(X86_REG_EAX, getGlobalByName("eax"));
 
-	pass.runOnModuleCustom(*module, &config, &abi);
+	pass.runOnModuleCustom(*module, &config, abi);
 
 	std::string exp = R"(
 		@r = global i32 0
@@ -3507,23 +3517,26 @@ TEST_F(ParamReturnTests, x86FastcallLargeTypeCatch)
 		@edx = global i32 0
 		@eax = global i32 0
 
+		declare i32 @a(i32, i32, i32)
+
+		declare void @0()
+
 		define i32 @fnc() {
 			%stack_-4 = alloca i32
 			%stack_-8 = alloca i32
 			store i32 123, i32* @ecx
 			store i32 456, i32* %stack_-4
 			store i32 789, i32* %stack_-8
-			%a = bitcast i32* @r to void()*
 			%1 = load i32, i32* @ecx
 			%2 = load i32, i32* %stack_-8
 			%3 = load i32, i32* %stack_-4
-			%4 = bitcast void ()* %a to void (i32, i32, i32)*
-			call void %4(i32 %1, i32 %2, i32 %3)
+			%4 = call i32 @a(i32 %1, i32 %2, i32 %3)
+			store i32 %4, i32* @eax
 			%5 = load i32, i32* @eax
 			ret i32 %5
 		}
 
-		declare void @0()
+		declare void @1()
 	)";
 	checkModuleAgainstExpectedIr(exp);
 }
@@ -3568,9 +3581,9 @@ TEST_F(ParamReturnTests, x86PascalBasic)
 			}
 		]
 	})");
-	AbiMips64 abi(module.get(), &config);
 
-	pass.runOnModuleCustom(*module, &config, &abi);
+	auto abi = AbiProvider::addAbi(module.get(), &config);
+	pass.runOnModuleCustom(*module, &config, abi);
 
 	std::string exp = R"(
 		@r = global i32 0
@@ -3597,6 +3610,9 @@ TEST_F(ParamReturnTests, x86PascalFastcallBasic)
 		@edx = global i32 0
 		@ecx = global i32 0
 		@r = global i32 0
+
+		declare void @a()
+
 		define void @fnc() {
 			%stack_-4 = alloca i32
 			%stack_-8 = alloca i32
@@ -3605,8 +3621,7 @@ TEST_F(ParamReturnTests, x86PascalFastcallBasic)
 			store i32 1, i32* @edx
 			store i32 123, i32* %stack_-4
 			store i32 456, i32* %stack_-8
-			%a = bitcast i32* @r to void()*
-			call void %a()
+			call void @a()
 			ret void
 		}
 	)");
@@ -3633,23 +3648,31 @@ TEST_F(ParamReturnTests, x86PascalFastcallBasic)
 						"storage" : { "type" : "stack", "value" : -8 }
 					}
 				],
-				"callingConvention" : "fastcall",
+				"callingConvention" : "fastcall"
+			},
+			{
+				"name" : "a",
+				"callingConvention" : "fastcall"
 			}
 		]
 	})");
 
-	AbiMips64 abi(module.get(), &config);
-	abi.addRegister(X86_REG_EAX, getGlobalByName("eax"));
-	abi.addRegister(X86_REG_EDX, getGlobalByName("edx"));
-	abi.addRegister(X86_REG_ECX, getGlobalByName("ecx"));
+	auto abi = AbiProvider::addAbi(module.get(), &config);
+	abi->addRegister(X86_REG_EAX, getGlobalByName("eax"));
+	abi->addRegister(X86_REG_EDX, getGlobalByName("edx"));
+	abi->addRegister(X86_REG_ECX, getGlobalByName("ecx"));
 
-	pass.runOnModuleCustom(*module, &config, &abi);
+	pass.runOnModuleCustom(*module, &config, abi);
 
 	std::string exp = R"(
 		@eax = global i32 0
 		@edx = global i32 0
 		@ecx = global i32 0
 		@r = global i32 0
+
+		declare i32 @a(i32, i32, i32, i32, i32)
+
+		declare void @0()
 
 		define i32 @fnc() {
 			%stack_-4 = alloca i32
@@ -3659,19 +3682,18 @@ TEST_F(ParamReturnTests, x86PascalFastcallBasic)
 			store i32 1, i32* @edx
 			store i32 123, i32* %stack_-4
 			store i32 456, i32* %stack_-8
-			%a = bitcast i32* @r to void()*
 			%1 = load i32, i32* @eax
 			%2 = load i32, i32* @edx
 			%3 = load i32, i32* @ecx
 			%4 = load i32, i32* %stack_-4
 			%5 = load i32, i32* %stack_-8
-			%6 = bitcast void ()* %a to void (i32, i32, i32, i32, i32)*
-			call void %6(i32 %1, i32 %2, i32 %3, i32 %4, i32 %5)
+			%6 = call i32 @a(i32 %1, i32 %2, i32 %3, i32 %4, i32 %5)
+			store i32 %6, i32* @eax
 			%7 = load i32, i32* @eax
 			ret i32 %7
 		}
 
-		declare void @0()
+		declare void @1()
 	)";
 	checkModuleAgainstExpectedIr(exp);
 }
@@ -3682,6 +3704,9 @@ TEST_F(ParamReturnTests, x86PascalFastcallLargeType)
 		@eax = global i32 0
 		@edx = global i32 0
 		@r = global i32 0
+
+		declare void @a()
+
 		define void @fnc() {
 			%stack_-4 = alloca i32
 			%stack_-8 = alloca i32
@@ -3689,8 +3714,7 @@ TEST_F(ParamReturnTests, x86PascalFastcallLargeType)
 			store i32 456, i32* %stack_-8
 			store i32 123, i32* %stack_-4
 			store i32 1, i32* @edx
-			%a = bitcast i32* @r to void()*
-			call void %a()
+			call void @a()
 			ret void
 		}
 	)");
@@ -3717,21 +3741,29 @@ TEST_F(ParamReturnTests, x86PascalFastcallLargeType)
 						"storage" : { "type" : "stack", "value" : -8 }
 					}
 				],
-				"callingConvention" : "fastcall",
+				"callingConvention" : "fastcall"
+			},
+			{
+				"name" : "a",
+				"callingConvention" : "fastcall"
 			}
 		]
 	})");
 
-	AbiMips64 abi(module.get(), &config);
-	abi.addRegister(X86_REG_EAX, getGlobalByName("eax"));
-	abi.addRegister(X86_REG_EDX, getGlobalByName("edx"));
+	auto abi = AbiProvider::addAbi(module.get(), &config);
+	abi->addRegister(X86_REG_EAX, getGlobalByName("eax"));
+	abi->addRegister(X86_REG_EDX, getGlobalByName("edx"));
 
-	pass.runOnModuleCustom(*module, &config, &abi);
+	pass.runOnModuleCustom(*module, &config, abi);
 
 	std::string exp = R"(
 		@eax = global i32 0
 		@edx = global i32 0
 		@r = global i32 0
+
+		declare i32 @a(i32, i32, i32, i32)
+
+		declare void @0()
 
 		define i32 @fnc() {
 			%stack_-4 = alloca i32
@@ -3740,18 +3772,17 @@ TEST_F(ParamReturnTests, x86PascalFastcallLargeType)
 			store i32 456, i32* %stack_-8
 			store i32 123, i32* %stack_-4
 			store i32 1, i32* @edx
-			%a = bitcast i32* @r to void()*
 			%1 = load i32, i32* @eax
 			%2 = load i32, i32* @edx
 			%3 = load i32, i32* %stack_-4
 			%4 = load i32, i32* %stack_-8
-			%5 = bitcast void ()* %a to void (i32, i32, i32, i32)*
-			call void %5(i32 %1, i32 %2, i32 %3, i32 %4)
+			%5 = call i32 @a(i32 %1, i32 %2, i32 %3, i32 %4)
+			store i32 %5, i32* @eax
 			%6 = load i32, i32* @eax
 			ret i32 %6
 		}
 
-		declare void @0()
+		declare void @1()
 	)";
 	checkModuleAgainstExpectedIr(exp);
 }
@@ -3805,13 +3836,13 @@ TEST_F(ParamReturnTests, x86WatcomBasic)
 		]
 	})");
 
-	AbiMips64 abi(module.get(), &config);
-	abi.addRegister(X86_REG_EAX, getGlobalByName("eax"));
-	abi.addRegister(X86_REG_EBX, getGlobalByName("ebx"));
-	abi.addRegister(X86_REG_ECX, getGlobalByName("ecx"));
-	abi.addRegister(X86_REG_EDX, getGlobalByName("edx"));
+	auto abi = AbiProvider::addAbi(module.get(), &config);
+	abi->addRegister(X86_REG_EAX, getGlobalByName("eax"));
+	abi->addRegister(X86_REG_EBX, getGlobalByName("ebx"));
+	abi->addRegister(X86_REG_ECX, getGlobalByName("ecx"));
+	abi->addRegister(X86_REG_EDX, getGlobalByName("edx"));
 
-	pass.runOnModuleCustom(*module, &config, &abi);
+	pass.runOnModuleCustom(*module, &config, abi);
 
 	std::string exp = R"(
 		@eax = global i32 0
@@ -3892,11 +3923,11 @@ TEST_F(ParamReturnTests, x86WatcomPassDouble)
 		]
 	})");
 
-	AbiMips64 abi(module.get(), &config);
-	abi.addRegister(X86_REG_EAX, getGlobalByName("eax"));
-	abi.addRegister(X86_REG_EDX, getGlobalByName("edx"));
+	auto abi = AbiProvider::addAbi(module.get(), &config);
+	abi->addRegister(X86_REG_EAX, getGlobalByName("eax"));
+	abi->addRegister(X86_REG_EDX, getGlobalByName("edx"));
 
-	pass.runOnModuleCustom(*module, &config, &abi);
+	pass.runOnModuleCustom(*module, &config, abi);
 
 	std::string exp = R"(
 		@eax = global i32 0
