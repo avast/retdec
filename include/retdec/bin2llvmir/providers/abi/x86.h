@@ -34,7 +34,6 @@ class AbiX86 : public Abi
 	// Calling conventions.
 	//
 	private:
-		virtual bool supportsCallingConvention(CallingConvention::ID& cc) const override;
 		CallingConvention::ID fetchDefaultCC() const;
 };
 

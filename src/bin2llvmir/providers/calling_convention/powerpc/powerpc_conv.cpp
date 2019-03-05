@@ -1,10 +1,11 @@
 /**
- * @file src/bin2llvmir/providers/calling_convention/powerpc.cpp
+ * @file src/bin2llvmir/providers/calling_convention/powerpc/powerpc_conv.cpp
  * @brief Calling conventions of PowerPC architecture.
  * @copyright (c) 2019 Avast Software, licensed under the MIT license
  */
 
-#include "retdec/bin2llvmir/providers/calling_convention/powerpc.h"
+#include "retdec/bin2llvmir/providers/abi/abi.h"
+#include "retdec/bin2llvmir/providers/calling_convention/powerpc/powerpc_conv.h"
 #include "retdec/capstone2llvmir/powerpc/powerpc.h"
 
 namespace retdec {
@@ -53,6 +54,11 @@ PowerPCCallingConvention::~PowerPCCallingConvention()
 
 CallingConvention::Ptr PowerPCCallingConvention::create(const Abi* a)
 {
+	if (!a->isPowerPC())
+	{
+		return nullptr;
+	}
+
 	return std::make_unique<PowerPCCallingConvention>(a);
 }
 

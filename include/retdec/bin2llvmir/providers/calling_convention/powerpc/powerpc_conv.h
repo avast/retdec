@@ -1,11 +1,11 @@
 /**
- * @file retdec/include/bin2llvmir/providers/calling_convention/powerpc.h
+ * @file retdec/include/bin2llvmir/providers/calling_convention/powerpc/powerpc_conv.h
  * @brief Calling conventions of PowerPC architecture.
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */
 
-#ifndef RETDEC_BIN2LLVMIR_PROVIDERS_CALL_CONV_POWERPC_H
-#define RETDEC_BIN2LLVMIR_PROVIDERS_CALL_CONV_POWERPC_H
+#ifndef RETDEC_BIN2LLVMIR_PROVIDERS_CALL_CONV_POWERPC_POWERPC_CONV_H
+#define RETDEC_BIN2LLVMIR_PROVIDERS_CALL_CONV_POWERPC_POWERPC_CONV_H
 
 #include "retdec/bin2llvmir/providers/calling_convention/calling_convention.h"
 

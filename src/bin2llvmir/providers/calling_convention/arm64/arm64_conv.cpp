@@ -1,12 +1,13 @@
 /**
- * @file src/bin2llvmir/providers/calling_convention/arm64.cpp
+ * @file src/bin2llvmir/providers/calling_convention/arm64/arm64_conv.cpp
  * @brief Calling conventions of ARM64 architecture.
  * @copyright (c) 2019 Avast Software, licensed under the MIT license
  */
 
 #include <capstone/arm64.h>
 
-#include "retdec/bin2llvmir/providers/calling_convention/arm64.h"
+#include "retdec/bin2llvmir/providers/abi/abi.h"
+#include "retdec/bin2llvmir/providers/calling_convention/arm64/arm64_conv.h"
 
 namespace retdec {
 namespace bin2llvmir {
@@ -65,6 +66,11 @@ Arm64CallingConvention::~Arm64CallingConvention()
 
 CallingConvention::Ptr Arm64CallingConvention::create(const Abi* a)
 {
+	if (!a->isArm64())
+	{
+		return nullptr;
+	}
+
 	return std::make_unique<Arm64CallingConvention>(a);
 }
 

@@ -7,15 +7,19 @@
 
 #include "retdec/bin2llvmir/providers/abi/abi.h"
 #include "retdec/bin2llvmir/providers/calling_convention/calling_convention.h"
-#include "retdec/bin2llvmir/providers/calling_convention/arm.h"
-#include "retdec/bin2llvmir/providers/calling_convention/arm64.h"
-#include "retdec/bin2llvmir/providers/calling_convention/mips.h"
-#include "retdec/bin2llvmir/providers/calling_convention/mips64.h"
-#include "retdec/bin2llvmir/providers/calling_convention/pic32.h"
-#include "retdec/bin2llvmir/providers/calling_convention/powerpc.h"
-#include "retdec/bin2llvmir/providers/calling_convention/powerpc64.h"
-#include "retdec/bin2llvmir/providers/calling_convention/x86.h"
-#include "retdec/bin2llvmir/providers/calling_convention/x64.h"
+#include "retdec/bin2llvmir/providers/calling_convention/arm/arm_conv.h"
+#include "retdec/bin2llvmir/providers/calling_convention/arm64/arm64_conv.h"
+#include "retdec/bin2llvmir/providers/calling_convention/mips/mips_conv.h"
+#include "retdec/bin2llvmir/providers/calling_convention/mips64/mips64_conv.h"
+#include "retdec/bin2llvmir/providers/calling_convention/pic32/pic32_conv.h"
+#include "retdec/bin2llvmir/providers/calling_convention/powerpc/powerpc_conv.h"
+#include "retdec/bin2llvmir/providers/calling_convention/powerpc64/powerpc64_conv.h"
+#include "retdec/bin2llvmir/providers/calling_convention/x86/x86_cdecl.h"
+#include "retdec/bin2llvmir/providers/calling_convention/x86/x86_fastcall.h"
+#include "retdec/bin2llvmir/providers/calling_convention/x86/x86_pascal.h"
+#include "retdec/bin2llvmir/providers/calling_convention/x86/x86_thiscall.h"
+#include "retdec/bin2llvmir/providers/calling_convention/x86/x86_watcom.h"
+#include "retdec/bin2llvmir/providers/calling_convention/x64/x64_conv.h"
 
 using namespace llvm;
 
@@ -175,16 +179,13 @@ CallingConventionProvider::CallingConventionProvider()
 	registerCC(CallingConvention::ID::CC_THISCALL, &ThiscallCallingConvention::create);
 	registerCC(CallingConvention::ID::CC_PASCAL, &PascalCallingConvention::create);
 	registerCC(CallingConvention::ID::CC_FASTCALL, &FastcallCallingConvention::create);
-	registerCC(CallingConvention::ID::CC_FASTCALL_PASCAL, &PascalFastcallCallingConvention::create);
 	registerCC(CallingConvention::ID::CC_WATCOM, &WatcomCallingConvention::create);
-	registerCC(CallingConvention::ID::CC_SYSTEMVX64, &SystemVX64CallingConvention::create);
-	registerCC(CallingConvention::ID::CC_MICROSOFTX64, &MicrosoftX64CallingConvention::create);
+	registerCC(CallingConvention::ID::CC_X64, &X64CallingConvention::create);
 	registerCC(CallingConvention::ID::CC_ARM, &ArmCallingConvention::create);
 	registerCC(CallingConvention::ID::CC_ARM64, &Arm64CallingConvention::create);
 	registerCC(CallingConvention::ID::CC_POWERPC, &PowerPCCallingConvention::create);
 	registerCC(CallingConvention::ID::CC_POWERPC64, &PowerPC64CallingConvention::create);
 	registerCC(CallingConvention::ID::CC_MIPS, &MipsCallingConvention::create);
-	registerCC(CallingConvention::ID::CC_MIPSPSP, &MipsPSPCallingConvention::create);
 	registerCC(CallingConvention::ID::CC_MIPS64, &Mips64CallingConvention::create);
 	registerCC(CallingConvention::ID::CC_PIC32, &Pic32CallingConvention::create);
 }

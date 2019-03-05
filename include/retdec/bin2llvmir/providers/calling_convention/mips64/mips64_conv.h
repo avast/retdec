@@ -1,11 +1,11 @@
 /**
- * @file retdec/include/bin2llvmir/providers/calling_convention/mips64.h
- * @brief Calling conventions of Mips64 architecture.
+ * @file retdec/include/bin2llvmir/providers/calling_convention/mips64/mips64_convention.h
+ * @brief Calling convention of Mips64 architecture.
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */
 
-#ifndef RETDEC_BIN2LLVMIR_PROVIDERS_CALL_CONV_MIPS64_H
-#define RETDEC_BIN2LLVMIR_PROVIDERS_CALL_CONV_MIPS64_H
+#ifndef RETDEC_BIN2LLVMIR_PROVIDERS_CALL_CONV_MIPS64_MIPS64_H
+#define RETDEC_BIN2LLVMIR_PROVIDERS_CALL_CONV_MIPS64_MIPS64_H
 
 #include "retdec/bin2llvmir/providers/calling_convention/calling_convention.h"
 

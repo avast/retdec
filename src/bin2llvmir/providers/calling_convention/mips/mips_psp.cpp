@@ -1,16 +1,16 @@
 /**
- * @file src/bin2llvmir/providers/calling_convention/mips64.cpp
- * @brief Calling conventions of Mips64 architecture.
+ * @file src/bin2llvmir/providers/calling_convention/mips/mips_psp.cpp
+ * @brief Calling conventions of MIPS architecture.
  * @copyright (c) 2019 Avast Software, licensed under the MIT license
  */
 
-#include "retdec/bin2llvmir/providers/calling_convention/mips64.h"
+#include "retdec/bin2llvmir/providers/calling_convention/mips/mips_psp.h"
 #include "retdec/capstone2llvmir/mips/mips.h"
 
 namespace retdec {
 namespace bin2llvmir {
 
-Mips64CallingConvention::Mips64CallingConvention(const Abi* a) :
+MipsPSPCallingConvention::MipsPSPCallingConvention(const Abi* a) :
 	CallingConvention(a)
 {
 	_paramRegs = {
@@ -25,19 +25,24 @@ Mips64CallingConvention::Mips64CallingConvention(const Abi* a) :
 	};
 	_paramFPRegs = {
 		MIPS_REG_F12,
-		MIPS_REG_F13,
 		MIPS_REG_F14,
-		MIPS_REG_F15,
 		MIPS_REG_F16,
-		MIPS_REG_F17,
 		MIPS_REG_F18
+	};
+	_paramDoubleRegs = {
+		MIPS_REG_FD12,
+		MIPS_REG_FD14,
+		MIPS_REG_FD16,
 	};
 
 	_returnRegs = {
 		MIPS_REG_V0
 	};
 	_returnFPRegs = {
-		MIPS_REG_F1
+		MIPS_REG_V0
+	};
+	_returnDoubleRegs = {
+		MIPS_REG_V0
 	};
 
 	_numOfRegsPerParam = 2;
@@ -45,13 +50,8 @@ Mips64CallingConvention::Mips64CallingConvention(const Abi* a) :
 	_respectsRegCouples = true;
 }
 
-Mips64CallingConvention::~Mips64CallingConvention()
+MipsPSPCallingConvention::~MipsPSPCallingConvention()
 {
-}
-
-CallingConvention::Ptr Mips64CallingConvention::create(const Abi* a)
-{
-	return std::make_unique<Mips64CallingConvention>(a);
 }
 
 }

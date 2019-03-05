@@ -269,42 +269,15 @@ CallingConvention* Abi::getDefaultCallingConvention()
 }
 
 CallingConvention* Abi::getCallingConvention(
-			const CallingConvention::ID& c)
+			const CallingConvention::ID& cc)
 {
-	CallingConvention::ID cc = c;
-	if (!isSpecialCallingConvention(cc)
-		&& !supportsCallingConvention(cc))
-	{
-		return nullptr;
-	}
-
-	auto ccId = static_cast<std::size_t>(cc);
-
-	if (!_id2cc.count(ccId))
+	if (_id2cc.find(cc) == _id2cc.end())
 	{
 		auto provider = CallingConventionProvider::getProvider();	
-		_id2cc[ccId] = provider->createCallingConvention(cc, this);
+		_id2cc[cc] = provider->createCallingConvention(cc, this);
 	}
 
-	return _id2cc[ccId].get();
-}
-
-bool Abi::supportsCallingConvention(CallingConvention::ID& cc) const
-{
-	return cc == _defcc;
-}
-
-bool Abi::isSpecialCallingConvention(const CallingConvention::ID& cc) const
-{
-	switch (cc)
-	{
-		case CallingConvention::ID::CC_VOIDARG:
-		case CallingConvention::ID::CC_SPECIAL:
-			return true;
-
-		default:
-			return false;
-	}
+	return _id2cc[cc].get();
 }
 
 Config* Abi::getConfig() const

@@ -107,8 +107,6 @@ class Abi
 		CallingConvention* getCallingConvention(
 				const CallingConvention::ID& cc);
 		CallingConvention* getDefaultCallingConvention();
-		virtual bool supportsCallingConvention(CallingConvention::ID& cc) const;
-		bool isSpecialCallingConvention(const CallingConvention::ID& cc) const;
 
 	// Config.
 	//
@@ -150,7 +148,7 @@ class Abi
 	// Private data - calling convention
 	//
 	protected:
-		std::map<int, CallingConvention::Ptr> _id2cc;
+		std::map<CallingConvention::ID, CallingConvention::Ptr> _id2cc;
 		CallingConvention::ID _defcc;
 		
 };

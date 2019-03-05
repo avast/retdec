@@ -108,43 +108,5 @@ CallingConvention::ID AbiX86::fetchDefaultCC() const
 	return CallingConvention::ID::CC_CDECL;
 }
 
-bool AbiX86::supportsCallingConvention(CallingConvention::ID& cc) const
-{
-	if (_config->getConfig().tools.isBorland())
-	{
-		switch (cc)
-		{
-			case CallingConvention::ID::CC_CDECL:
-			case CallingConvention::ID::CC_PASCAL:
-				cc = CallingConvention::ID::CC_PASCAL;
-				return true;
-
-			case CallingConvention::ID::CC_FASTCALL:
-			case CallingConvention::ID::CC_FASTCALL_PASCAL:
-				cc = CallingConvention::ID::CC_FASTCALL;
-				return true;
-
-			default:
-				return false;
-		}
-	}
-
-	switch (cc)
-	{
-		case CallingConvention::ID::CC_CDECL:
-		case CallingConvention::ID::CC_WATCOM:
-		case CallingConvention::ID::CC_ELLIPSIS:
-		case CallingConvention::ID::CC_FASTCALL:
-		case CallingConvention::ID::CC_THISCALL:
-		case CallingConvention::ID::CC_STDCALL:
-			return true;
-
-		default:
-			return false;
-	}
-
-	return false;
-}
-
 } // namespace bin2llvmir
 } // namespace retdec

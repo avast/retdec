@@ -29,7 +29,7 @@ AbiMS_X64::AbiMS_X64(llvm::Module* m, Config* c) :
 		X86_REG_R8,
 		X86_REG_R9};
 
-	_defcc = CallingConvention::ID::CC_MICROSOFTX64;
+	_defcc = CallingConvention::ID::CC_X64;
 }
 
 AbiMS_X64::~AbiMS_X64()

@@ -79,15 +79,23 @@ set(BIN2LLVMIR_SOURCES
 	providers/abi/x64.cpp
 	providers/abi/x86.cpp
 	providers/calling_convention/calling_convention.cpp
-	providers/calling_convention/arm.cpp
-	providers/calling_convention/arm64.cpp
-	providers/calling_convention/mips.cpp
-	providers/calling_convention/mips64.cpp
-	providers/calling_convention/pic32.cpp
-	providers/calling_convention/powerpc.cpp
-	providers/calling_convention/powerpc64.cpp
-	providers/calling_convention/x64.cpp
-	providers/calling_convention/x86.cpp
+	providers/calling_convention/arm/arm_conv.cpp
+	providers/calling_convention/arm64/arm64_conv.cpp
+	providers/calling_convention/mips/mips_conv.cpp
+	providers/calling_convention/mips/mips_psp.cpp
+	providers/calling_convention/mips64/mips64_conv.cpp
+	providers/calling_convention/pic32/pic32_conv.cpp
+	providers/calling_convention/powerpc/powerpc_conv.cpp
+	providers/calling_convention/powerpc64/powerpc64_conv.cpp
+	providers/calling_convention/x64/x64_conv.cpp
+	providers/calling_convention/x64/x64_microsoft.cpp
+	providers/calling_convention/x64/x64_systemv.cpp
+	providers/calling_convention/x86/x86_cdecl.cpp
+	providers/calling_convention/x86/x86_conv.cpp
+	providers/calling_convention/x86/x86_fastcall.cpp
+	providers/calling_convention/x86/x86_pascal.cpp
+	providers/calling_convention/x86/x86_thiscall.cpp
+	providers/calling_convention/x86/x86_watcom.cpp
 	providers/asm_instruction.cpp
 	providers/config.cpp
 	providers/debugformat.cpp

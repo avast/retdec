@@ -1,10 +1,11 @@
 /**
- * @file src/bin2llvmir/providers/calling_convention/arm.cpp
- * @brief Calling conventions of ARM architecture.
+ * @file src/bin2llvmir/providers/calling_convention/arm/arm_conv.cpp
+ * @brief Calling convention of ARM architecture.
  * @copyright (c) 2019 Avast Software, licensed under the MIT license
  */
 
-#include "retdec/bin2llvmir/providers/calling_convention/arm.h"
+#include "retdec/bin2llvmir/providers/abi/abi.h"
+#include "retdec/bin2llvmir/providers/calling_convention/arm/arm_conv.h"
 #include "retdec/capstone2llvmir/arm/arm.h"
 
 namespace retdec {
@@ -36,6 +37,11 @@ ArmCallingConvention::~ArmCallingConvention()
 
 CallingConvention::Ptr ArmCallingConvention::create(const Abi* a)
 {
+	if (!a->isArm())
+	{
+		return nullptr;
+	}
+
 	return std::make_unique<ArmCallingConvention>(a);
 }
 
