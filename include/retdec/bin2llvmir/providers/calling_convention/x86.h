@@ -20,6 +20,11 @@ class CdeclCallingConvention: public CallingConvention
 		CdeclCallingConvention(const Abi* a);
 		virtual ~CdeclCallingConvention();
 	
+	// Stacks.
+	//
+	public:
+		virtual std::size_t getMaxBytesPerStackParam() const override;
+	
 	// Construcor method.
 	//
 	public:
@@ -33,6 +38,11 @@ class FastcallCallingConvention: public CallingConvention
 	public:
 		FastcallCallingConvention(const Abi* a);
 		virtual ~FastcallCallingConvention();
+	
+	// Stacks.
+	//
+	public:
+		virtual std::size_t getMaxBytesPerStackParam() const override;
 	
 	// Construcor method.
 	//
@@ -48,6 +58,11 @@ class PascalCallingConvention: public CallingConvention
 		PascalCallingConvention(const Abi* a);
 		virtual ~PascalCallingConvention();
 	
+	// Stacks.
+	//
+	public:
+		virtual std::size_t getMaxBytesPerStackParam() const override;
+	
 	// Construcor method.
 	//
 	public:
@@ -61,6 +76,11 @@ class PascalFastcallCallingConvention: public CallingConvention
 	public:
 		PascalFastcallCallingConvention(const Abi* a);
 		virtual ~PascalFastcallCallingConvention();
+	
+	// Stacks.
+	//
+	public:
+		virtual std::size_t getMaxBytesPerStackParam() const override;
 	
 	// Construcor method.
 	//
@@ -76,6 +96,11 @@ class ThiscallCallingConvention: public CallingConvention
 		ThiscallCallingConvention(const Abi* a);
 		virtual ~ThiscallCallingConvention();
 	
+	// Stacks.
+	//
+	public:
+		virtual std::size_t getMaxBytesPerStackParam() const override;
+	
 	// Construcor method.
 	//
 	public:
@@ -89,6 +114,11 @@ class WatcomCallingConvention: public CallingConvention
 	public:
 		WatcomCallingConvention(const Abi* a);
 		virtual ~WatcomCallingConvention();
+	
+	// Stacks.
+	//
+	public:
+		virtual std::size_t getMaxBytesPerStackParam() const override;
 	
 	// Construcor method.
 	//
