@@ -113,6 +113,17 @@ void Collector::collectRetStores(ReturnEntry* re) const
 {
 	std::vector<llvm::StoreInst*> foundStores;
 
+// TODO:
+// This method should be used only after
+// speed comparation of below methods.
+//
+// In this implementation of parameter
+// analysis return type is estimated
+// only as last option from colelcted
+// values. This iss reason why quicklier
+// but not reliable method is used
+// instead of more reliable one.
+//
 //	collectStoresBeforeInstruction(
 //		re->getRetInstruction(),
 //		foundStores);
