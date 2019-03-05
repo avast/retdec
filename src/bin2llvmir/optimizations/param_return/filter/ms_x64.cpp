@@ -77,7 +77,6 @@ void MSX64Filter::filterArgsByKnownTypes(FilterableLayout& lay) const
 	newLayout.knownTypes = lay.knownTypes;
 
 	auto& gpRegs = _cc->getParamRegisters();
-	auto& fpRegs = _cc->getParamFPRegisters();
 	
 	// Indexes of registers to be used next as particular parameter.
 	auto sIt = lay.stacks.begin();
@@ -97,11 +96,9 @@ void MSX64Filter::filterArgsByKnownTypes(FilterableLayout& lay) const
 		{
 			if (registers.size() < regEnd)
 			{
-				requiredStacks = fetchRegsForType(
-							t,
-							registers,
-							fpRegs,
-							_cc->getMaxNumOfRegsPerParam());
+				newLayout.fpRegisters = registers;
+				requiredStacks = fetchFPRegsForType(t, newLayout);
+				registers = newLayout.fpRegisters;
 				stackOrd = OrderID::ORD_STACK_GROUP;
 			}
 		}
@@ -109,15 +106,12 @@ void MSX64Filter::filterArgsByKnownTypes(FilterableLayout& lay) const
 		{
 			if (registers.size() < regEnd)
 			{
-				requiredStacks = fetchRegsForType(
-							t,
-							registers,
-							gpRegs,
-							_cc->getMaxNumOfRegsPerParam());
+				newLayout.gpRegisters = registers;
+				requiredStacks = fetchGPRegsForType(t, newLayout);
+				registers = newLayout.gpRegisters;
 				stackOrd = OrderID::ORD_STACK_GROUP;
 			}
 		}
-
 		
 		if (!requiredStacks && stackOrd == OrderID::ORD_STACK)
 		{
@@ -150,8 +144,8 @@ void MSX64Filter::filterArgsByKnownTypes(FilterableLayout& lay) const
 
 	lay = separateArgValues(regVals);
 	lay.stacks = newLayout.stacks;
-	lay.knownTypes = newLayout.knownTypes;
 	lay.knownOrder = newLayout.knownOrder;
+	lay.knownTypes = newLayout.knownTypes;
 }
 
 void MSX64Filter::leaveOnlyAlternatingArgRegisters(FilterableLayout& lay) const
