@@ -1,21 +1,7 @@
 /**
 * @file src/bin2llvmir/optimizations/param_return/param_return.cpp
 * @brief Detect functions' parameters and returns.
-* @copyright (c) 2017 Avast Software, licensed under the MIT license
-*
-* Original implementation:
-*   name -- position of format string, position of variadic arg start
-*   printf/scanf -- 0, 1
-*   __printf_chk -- 1, 2
-*   __fprintf_chk -- 2, 3
-*   fprintf/fscanf/wsprintfA/wsprintf/sprintf/sscanf -- 1, 2
-*   snprintf -- 2, 3
-*   __snprintf_chk -- 4, 5
-*   ioctl/open/FmtStr -- not handled -- erase arguments
-*   wprintf/wscanf -- 0, 1
-*   error -- 2, 3
-*   error_at_line -- 4, 5
-*   other -- not handled -- copy arguments
+* @copyright (c) 2019 Avast Software, licensed under the MIT license
 */
 
 #include <cassert>
@@ -31,8 +17,9 @@
 
 #include "retdec/utils/container.h"
 #include "retdec/utils/string.h"
+#include "retdec/bin2llvmir/optimizations/param_return/filter/filter.h"
 #include "retdec/bin2llvmir/optimizations/param_return/param_return.h"
-#define debug_enabled true
+#define debug_enabled false
 #include "retdec/bin2llvmir/utils/llvm.h"
 #include "retdec/bin2llvmir/providers/asm_instruction.h"
 #include "retdec/bin2llvmir/utils/ir_modifier.h"
@@ -42,58 +29,6 @@ using namespace llvm;
 
 namespace retdec {
 namespace bin2llvmir {
-
-llvm::Value* getRoot(ReachingDefinitionsAnalysis& RDA, llvm::Value* i, bool first = true)
-{
-	static std::set<llvm::Value*> seen;
-	if (first)
-	{
-		seen.clear();
-	}
-	if (seen.count(i))
-	{
-		return i;
-	}
-	seen.insert(i);
-
-	i = llvm_utils::skipCasts(i);
-	if (auto* ii = dyn_cast<Instruction>(i))
-	{
-		if (auto* u = RDA.getUse(ii))
-		{
-			if (u->defs.size() == 1)
-			{
-				auto* d = (*u->defs.begin())->def;
-				if (auto* s = dyn_cast<StoreInst>(d))
-				{
-					return getRoot(RDA, s->getValueOperand(), false);
-				}
-				else
-				{
-					return d;
-				}
-			}
-			else if (auto* l = dyn_cast<LoadInst>(ii))
-			{
-				return getRoot(RDA, l->getPointerOperand(), false);
-			}
-			else
-			{
-				return i;
-			}
-		}
-		else if (auto* l = dyn_cast<LoadInst>(ii))
-		{
-			return getRoot(RDA, l->getPointerOperand(), false);
-		}
-		else
-		{
-			return i;
-		}
-	}
-
-	return i;
-}
 
 //
 //=============================================================================
@@ -124,12 +59,13 @@ bool ParamReturn::runOnModule(Module& m)
 	_image = FileImageProvider::getFileImage(_module);
 	_dbgf = DebugFormatProvider::getDebugFormat(_module);
 	_lti = LtiProvider::getLti(_module);
+	_collector = CollectorProvider::createCollector(_abi, _module, &_RDA);
 
 	return run();
 }
 
 bool ParamReturn::runOnModuleCustom(
-		llvm::Module& m,
+		Module& m,
 		Config* c,
 		Abi* abi,
 		FileImage* img,
@@ -142,6 +78,8 @@ bool ParamReturn::runOnModuleCustom(
 	_image = img;
 	_dbgf = dbgf;
 	_lti = lti;
+	_collector = CollectorProvider::createCollector(_abi, _module, &_RDA);
+
 	return run();
 }
 
@@ -153,12 +91,12 @@ bool ParamReturn::run()
 		return false;
 	}
 
-	_RDA.runOnModule(*_module, AbiProvider::getAbi(_module));
+	_RDA.runOnModule(*_module, _abi);
 
 	collectAllCalls();
-	dumpInfo();
+//	dumpInfo();
 	filterCalls();
-	dumpInfo();
+//	dumpInfo();
 	applyToIr();
 
 	_RDA.clear();
@@ -180,18 +118,9 @@ void ParamReturn::collectAllCalls()
 			continue;
 		}
 
-		_fnc2calls.emplace(
-				std::make_pair(
-						&f,
-						DataFlowEntry(
-								_module,
-								_RDA,
-								_config,
-								_abi,
-								_image,
-								_dbgf,
-								_lti,
-								&f)));
+		_fnc2calls.emplace(std::make_pair(
+					&f,
+					createDataFlowEntry(&f)));
 	}
 
 	for (auto& f : _module->getFunctionList())
@@ -215,1071 +144,205 @@ void ParamReturn::collectAllCalls()
 		auto fIt = _fnc2calls.find(calledVal);
 		if (fIt == _fnc2calls.end())
 		{
-			fIt = _fnc2calls.emplace(std::make_pair(
+			fIt = _fnc2calls.emplace(
+				std::make_pair(
 					calledVal,
-					DataFlowEntry(
-							_module,
-							_RDA,
-							_config,
-							_abi,
-							_image,
-							_dbgf,
-							_lti,
-							calledVal))).first;
+					createDataFlowEntry(calledVal))).first;
 		}
 
-		fIt->second.addCall(call);
+		addDataFromCall(&fIt->second, call);
 	}
 }
 
-void ParamReturn::filterCalls()
+DataFlowEntry ParamReturn::createDataFlowEntry(Value* calledValue) const
 {
-	for (auto& p : _fnc2calls)
-	{
-		p.second.filter();
-	}
+	DataFlowEntry dataflow(calledValue);
+
+	_collector->collectDefArgs(&dataflow);
+	_collector->collectDefRets(&dataflow);
+
+	collectExtraData(&dataflow);
+
+	return dataflow;
 }
 
-void ParamReturn::applyToIr()
+void ParamReturn::collectExtraData(DataFlowEntry* dataflow) const
 {
-	for (auto& p : _fnc2calls)
-	{
-		p.second.applyToIr();
-	}
-
-	for (auto& p : _fnc2calls)
-	{
-		p.second.connectWrappers();
-	}
-}
-
-/**
- * Dump all the info collected and processed so far.
- */
-void ParamReturn::dumpInfo()
-{
-	LOG << std::endl << "_fnc2calls:" << std::endl;
-	for (auto& p : _fnc2calls)
-	{
-		p.second.dump();
-	}
-}
-
-//
-//=============================================================================
-//  CallEntry
-//=============================================================================
-//
-
-CallEntry::CallEntry(llvm::CallInst* c) :
-		call(c)
-{
-
-}
-
-void CallEntry::extractSpecificArgTypes(Module* m,
-						ReachingDefinitionsAnalysis& _RDA,
-						CallInst *wrappedCall)
-{
-	std::string formatStr = extractFormatString(_RDA);
-
-	if (formatStr.empty())
-		return;
-
-	auto trueCall = wrappedCall ? wrappedCall : call;
-
-	specTypes = llvm_utils::parseFormatString(
-			m,
-			formatStr,
-			trueCall->getCalledFunction());
-}
-
-std::string CallEntry::extractFormatString(ReachingDefinitionsAnalysis& _RDA) const
-{
-	std::string str;
-
-	for (auto i : possibleArgs)
-	{
-		auto inst = std::find_if(possibleArgStores.begin(),
-					possibleArgStores.end(),
-					[i](StoreInst *st)
-					{
-						return st->getPointerOperand() == i;
-					});
-
-		if (inst != possibleArgStores.end())
-		{
-			if (instructionStoresString(*inst, str, _RDA))
-			{
-				break;
-			}
-		}
-	}
-
-	return str;
-}
-
-//
-//=============================================================================
-//  ReturnEntry
-//=============================================================================
-//
-
-ReturnEntry::ReturnEntry(llvm::ReturnInst* r) :
-		ret(r)
-{
-
-}
-
-//
-//=============================================================================
-//  DataFlowEntry
-//=============================================================================
-//
-
-DataFlowEntry::DataFlowEntry(
-		llvm::Module* m,
-		ReachingDefinitionsAnalysis& rda,
-		Config* c,
-		Abi* abi,
-		FileImage* img,
-		DebugFormat* dbg,
-		Lti* lti,
-		llvm::Value* v)
-		:
-		_module(m),
-		_RDA(rda),
-		_config(c),
-		_abi(abi),
-		_image(img),
-		_lti(lti),
-		called(v)
-{
-	if (auto* f = getFunction())
-	{
-		configFnc = c->getConfigFunction(f);
-		if (dbg)
-		{
-			dbgFnc = dbg->getFunction(c->getFunctionAddress(f));
-		}
-
-		if (!f->empty())
-		{
-			addArgLoads();
-			addRetStores();
-		}
-	}
-
-	setTypeFromExtraInfo();
-}
-
-bool DataFlowEntry::isFunctionEntry() const
-{
-	return getFunction() != nullptr;
-}
-
-bool DataFlowEntry::isValueEntry() const
-{
-	return called && !isFunctionEntry();
-}
-
-llvm::Value* DataFlowEntry::getValue() const
-{
-	return called;
-}
-
-llvm::Function* DataFlowEntry::getFunction() const
-{
-	return dyn_cast_or_null<Function>(called);
-}
-
-void DataFlowEntry::dump() const
-{
-	LOG << "\n\t>|" << called->getName().str() << std::endl;
-	LOG << "\t>|fnc call : " << isFunctionEntry() << std::endl;
-	LOG << "\t>|val call : " << isValueEntry() << std::endl;
-	LOG << "\t>|variadic : " << isVarArg << std::endl;
-	LOG << "\t>|config f : " << (configFnc != nullptr) << std::endl;
-	LOG << "\t>|debug f  : " << (dbgFnc != nullptr) << std::endl;
-	LOG << "\t>|wrapp c  : " << llvmObjToString(wrappedCall) << std::endl;
-	LOG << "\t>|type set : " << typeSet << std::endl;
-	LOG << "\t>|ret type : " << llvmObjToString(retType) << std::endl;
-	LOG << "\t>|arg types:" << std::endl;
-	for (auto* t : argTypes)
-	{
-		LOG << "\t\t>|" << llvmObjToString(t) << std::endl;
-	}
-	LOG << "\t>|arg names:" << std::endl;
-	for (auto& n : argNames)
-	{
-		LOG << "\t\t>|" << n << std::endl;
-	}
-
-	LOG << "\t>|calls:" << std::endl;
-	for (auto& e : calls)
-	{
-		LOG << "\t\t>|" << llvmObjToString(e.call) << std::endl;
-		LOG << "\t\t\targ stores:" << std::endl;
-		for (auto* s : e.possibleArgs)
-		{
-			LOG << "\t\t\t>|" << llvmObjToString(s) << std::endl;
-		}
-		LOG << "\t\t\tret loads:" << std::endl;
-		for (auto* l : e.possibleRetLoads)
-		{
-			LOG << "\t\t\t>|" << llvmObjToString(l) << std::endl;
-		}
-		LOG << "\t\t\targ types:" << std::endl;
-		for (auto* t : e.specTypes)
-		{
-			LOG << "\t\t\t>|" << llvmObjToString(t) << std::endl;
-		}
-	}
-
-	LOG << "\t>|arg loads:" << std::endl;
-	for (auto* l : args)
-	{
-		LOG << "\t\t\t>|" << llvmObjToString(l) << std::endl;
-	}
-
-	LOG << "\t>|return stores:" << std::endl;
-	for (auto& e : retStores)
-	{
-		LOG << "\t\t>|" << llvmObjToString(e.ret) << std::endl;
-		for (auto* s : e.possibleRetStores)
-		{
-			LOG << "\t\t\t>|" << llvmObjToString(s) << std::endl;
-		}
-	}
-}
-
-void DataFlowEntry::addArgLoads()
-{
-	auto* f = getFunction();
-	if (f == nullptr)
+	auto* fnc = dataflow->getFunction();
+	if (fnc == nullptr)
 	{
 		return;
 	}
 
-	std::set<Value*> added;
-	for (auto it = inst_begin(f), end = inst_end(f); it != end; ++it)
-	{
-		if (auto* l = dyn_cast<LoadInst>(&*it))
-		{
-			auto* ptr = l->getPointerOperand();
-			if (!_abi->valueCanBeParameter(ptr))
-			{
-				continue;
-			}
-
-			auto* use = _RDA.getUse(l);
-			if (use == nullptr)
-			{
-				continue;
-			}
-
-			if ((use->defs.empty() || use->isUndef())
-					&& added.find(ptr) == added.end())
-			{
-				args.push_back(ptr);
-				if (_abi->isRegister(ptr))
-					regArgs.push_back(ptr);
-
-				added.insert(ptr);
-			}
-		}
-	}
-}
-
-void DataFlowEntry::addRetStores()
-{
-	auto* f = getFunction();
-	if (f == nullptr)
-	{
-		return;
-	}
-
-	for (auto it = inst_begin(f), end = inst_end(f); it != end; ++it)
-	{
-		if (auto* r = dyn_cast<ReturnInst>(&*it))
-		{
-			ReturnEntry re(r);
-
-			NonIterableSet<BasicBlock*> seenBbs;
-			NonIterableSet<Value*> disqualifiedValues;
-			auto* b = r->getParent();
-			seenBbs.insert(b);
-			Instruction* prev = r;
-			while (true)
-			{
-				if (prev == &b->front())
-				{
-					auto* spb = b->getSinglePredecessor();
-					if (spb && !spb->empty() && seenBbs.hasNot(spb))
-					{
-						b = spb;
-						prev = &b->back();
-						seenBbs.insert(b);
-					}
-					else
-					{
-						break;
-					}
-				}
-				else
-				{
-					prev = prev->getPrevNode();
-				}
-				if (prev == nullptr)
-				{
-					break;
-				}
-
-				if (isa<CallInst>(prev) || isa<ReturnInst>(prev))
-				{
-					break;
-				}
-				else if (auto* store = dyn_cast<StoreInst>(prev))
-				{
-					auto* ptr = store->getPointerOperand();
-
-					if (disqualifiedValues.hasNot(ptr)
-							&& _abi->canHoldReturnValue(ptr))
-					{
-						re.possibleRetStores.push_back(store);
-						disqualifiedValues.insert(ptr);
-					}
-				}
-				else if (auto* load = dyn_cast<LoadInst>(prev))
-				{
-					auto* ptr = load->getPointerOperand();
-					disqualifiedValues.insert(ptr);
-				}
-			}
-
-			retStores.push_back(re);
-		}
-	}
-}
-
-void DataFlowEntry::addCall(llvm::CallInst* call)
-{
-	CallEntry ce(call);
-
-	addCallArgs(call, ce);
-	addCallReturns(call, ce);
-
-	calls.push_back(ce);
-}
-
-// std::vector?
-std::set<Value*> DataFlowEntry::collectArgsFromInstruction(
-				Instruction* startInst,
-				std::map<BasicBlock*, std::set<Value*>> &seenBlocks,
-				std::vector<StoreInst*> *possibleArgStores)
-{
-	NonIterableSet<Value*> excludedValues;
-	auto* block = startInst->getParent();
-
-	std::set<Value*> argStores;
-
-	bool canContinue = true;
-	for (auto* inst = startInst; canContinue; inst = inst->getPrevNode())
-	{
-		if (inst == nullptr)
-		{
-			return argStores;
-		}
-
-		if (auto* call = dyn_cast<CallInst>(inst))
-		{
-			auto* calledFnc = call->getCalledFunction();
-			if (calledFnc == nullptr || !calledFnc->isIntrinsic())
-			{
-				return argStores;
-			}
-		}
-		else if (auto* store = dyn_cast<StoreInst>(inst))
-		{
-			auto* val = store->getValueOperand();
-			auto* ptr = store->getPointerOperand();
-
-			if (!_abi->valueCanBeParameter(ptr))
-			{
-				excludedValues.insert(ptr);
-			}
-
-			if (auto* l = dyn_cast<LoadInst>(val))
-			{
-				if (_abi->isX86())
-				{
-					if (_abi->getRegisterId(l->getPointerOperand()) == X86_REG_EBP
-							|| _abi->getRegisterId(l->getPointerOperand()) == X86_REG_RBP)
-					{
-						excludedValues.insert(ptr);
-					}
-				}
-
-				if (l->getPointerOperand() != store->getPointerOperand())
-				{
-					excludedValues.insert(l->getPointerOperand());
-				}
-			}
-
-			if (excludedValues.hasNot(ptr))
-			{
-				argStores.insert(ptr);
-				excludedValues.insert(ptr);
-				excludedValues.insert(val);
-
-				if (possibleArgStores != nullptr)
-				{
-					possibleArgStores->push_back(store);
-				}
-			}
-		}
-
-		if (inst == &block->front())
-		{
-			canContinue = false;
-		}
-	}
-
-	std::set<Value*> commonArgStores;
-	// recursive?
-	seenBlocks[block] = argStores;
-
-	for (auto pred: predecessors(block))
-	{
-		std::set<Value*> foundArgs;
-		if (seenBlocks.find(pred) == seenBlocks.end())
-		{
-			foundArgs = collectArgsFromInstruction(&pred->back(), seenBlocks, possibleArgStores);
-		}
-		else
-		{
-			foundArgs = seenBlocks[pred];
-		}
-
-		if (foundArgs.empty())
-		{
-			return argStores;
-		}
-
-		if (commonArgStores.empty())
-		{
-			commonArgStores = std::move(foundArgs);
-		}
-		else
-		{
-			std::set<Value*> intersection;
-			std::set_intersection(
-				commonArgStores.begin(),
-				commonArgStores.end(),
-				foundArgs.begin(),
-				foundArgs.end(),
-				std::inserter(intersection, intersection.begin()));
-
-			commonArgStores = std::move(intersection);
-		}
-	}
-
-	argStores.insert(commonArgStores.begin(), commonArgStores.end());
-
-	seenBlocks[block] = argStores;
-	return argStores;
-}
-
-bool CallEntry::instructionStoresString(
-		StoreInst *si,
-		std::string& str,
-		ReachingDefinitionsAnalysis &_RDA) const
-{
-	auto* v = getRoot(_RDA, si->getValueOperand());
-	auto* gv = dyn_cast_or_null<GlobalVariable>(v);
-
-	if (gv == nullptr || !gv->hasInitializer())
-	{
-		return false;
-	}
-
-	auto* init = dyn_cast_or_null<ConstantDataArray>(gv->getInitializer());
-	if (init == nullptr)
-	{
-		if (auto* i = dyn_cast<ConstantExpr>(gv->getInitializer()))
-		{
-			if (auto* igv = dyn_cast<GlobalVariable>(i->getOperand(0)))
-			{
-				init = dyn_cast_or_null<ConstantDataArray>(igv->getInitializer());
-			}
-		}
-	}
-
-	if (init == nullptr || !init->isString())
-	{
-		return false;
-	}
-
-	str = init->getAsString();
-	return true;
-}
-
-void DataFlowEntry::addCallArgs(llvm::CallInst* call, CallEntry& ce)
-{
-	std::map<BasicBlock*, std::set<Value*>> seenBlocks;
-
-	auto fromInst = call->getPrevNode();
-	if (fromInst == nullptr)
-	{
-		return;
-	}
-
-	auto wantedStores = isVarArg ? &ce.possibleArgStores : nullptr;
-
-	auto possibleArgs = collectArgsFromInstruction(fromInst, seenBlocks, wantedStores);
-
-	ce.possibleArgs.assign(possibleArgs.begin(), possibleArgs.end());
-}
-
-void DataFlowEntry::addCallReturns(llvm::CallInst* call, CallEntry& ce)
-{
-	NonIterableSet<Value*> disqualifiedValues;
-	auto* b = call->getParent();
-	Instruction* next = call;
-	std::set<BasicBlock*> seen;
-	seen.insert(b);
-	while (true)
-	{
-		if (next == &b->back())
-		{
-			auto* ssb = b->getSingleSuccessor();
-			if (ssb && !ssb->empty() && ssb != b && seen.count(ssb) == 0)
-			{
-				b = ssb;
-				next = &b->front();
-				seen.insert(b);
-			}
-			else
-			{
-				break;
-			}
-		}
-		else
-		{
-			next = next->getNextNode();
-		}
-		if (next == nullptr)
-		{
-			break;
-		}
-
-		if (auto* call = dyn_cast<CallInst>(next))
-		{
-			auto* calledFnc = call->getCalledFunction();
-			if (calledFnc == nullptr || !calledFnc->isIntrinsic())
-			{
-				break;
-			}
-		}
-		else if (auto* store = dyn_cast<StoreInst>(next))
-		{
-			auto* ptr = store->getPointerOperand();
-			disqualifiedValues.insert(ptr);
-		}
-		else if (auto* load = dyn_cast<LoadInst>(next))
-		{
-			auto* ptr = load->getPointerOperand();
-
-			if (disqualifiedValues.hasNot(ptr)
-					&& _abi->canHoldReturnValue(ptr))
-			{
-				ce.possibleRetLoads.push_back(load);
-				disqualifiedValues.insert(ptr);
-			}
-		}
-	}
-}
-
-void DataFlowEntry::filter()
-{
-	if (!args.empty())
-	{
-		ParamFilter filter(nullptr, args, argTypes, _abi, _config);
-		filter.leaveOnlyPositiveStacks();
-		args = filter.getParamValues();
-	}
-
-	for (CallEntry& e : calls)
-	{
-		if (isVarArg)
-		{
-			e.extractSpecificArgTypes(
-				_module, 
-				_RDA,
-				isSimpleWrapper(
-					e.call->getCalledFunction()));
-		}
-
-		auto types = argTypes;
-		types.insert(types.end(), e.specTypes.begin(), e.specTypes.end());
-
-		ParamFilter filter(e.call, e.possibleArgs, types,
-					_abi, _config);
-
-		filter.leaveOnlyContinuousStackOffsets();
-		filter.leaveOnlyContinuousSequence();
-
-		e.possibleArgs = filter.getParamValues();
-	}
-
-	if (!isVarArg)
-	{
-		callsFilterCommonRegisters();
-		callsFilterSameNumberOfStacks();
-	}
-
-	if (!typeSet)
-	{
-		setTypeFromUseContext();
-	}
-}
-
-void DataFlowEntry::callsFilterCommonRegisters()
-{
-	if (calls.empty())
-	{
-		return;
-	}
-
-	std::set<Value*> commonRegs;
-
-	for (auto& e : calls)
-	{
-		// TODO: sometimes, we do not find all arg stores.
-		// this is a hack, we should manufacture loads even if we do not have
-		// stores but know there are some arguments (debug, ...).
-		if (e.possibleArgs.empty())
-		{
-			continue;
-		}
-
-		std::set<Value*> regs;
-		for (auto r : e.possibleArgs)
-		{
-			if (_abi->isRegister(r))
-			{
-				regs.insert(r);
-			}
-		}
-
-		if (regs.empty())
-		{
-			commonRegs.erase(commonRegs.begin(), commonRegs.end());
-			break;
-		}
-		else if (commonRegs.empty())
-		{
-			commonRegs = std::move(regs);
-		}
-		else
-		{
-			std::set<Value*> intersect;
-			std::set_intersection(
-					commonRegs.begin(),
-					commonRegs.end(),
-					regs.begin(),
-					regs.end(),
-					std::inserter(intersect, intersect.begin()));
-
-			commonRegs = std::move(intersect);
-		}
-	}
-
-	for (auto& e : calls)
-	{
-		e.possibleArgs.erase(
-			std::remove_if(
-				e.possibleArgs.begin(),
-				e.possibleArgs.end(),
-				[this, commonRegs](Value* arg)
-				{
-					return _abi->isRegister(arg)
-						&& !commonRegs.count(arg);
-				}),
-			e.possibleArgs.end());
-	}
-}
-
-void DataFlowEntry::callsFilterSameNumberOfStacks()
-{
-	if (calls.empty())
-	{
-		return;
-	}
-
-	std::size_t loads = 0;
-	for (auto* l : args)
-	{
-		if (_config->isStackVariable(l))
-		{
-			++loads;
-		}
-	}
-
-	std::size_t stacks = std::numeric_limits<std::size_t>::max();
-	for (auto& ce : calls)
-	{
-		std::size_t ss = 0;
-		for (auto* s : ce.possibleArgs)
-		{
-			if (_config->isStackVariable(s))
-			{
-				++ss;
-			}
-		}
-
-		// TODO: all but one have 2 params, receiving have 2 params, one has zero.
-		//
-		if (ss < stacks && ss != 0 && ss >= loads)
-		{
-			stacks = ss;
-		}
-	}
-	if (typeSet && stacks < argTypes.size())
-	{
-		stacks = argTypes.size();
-	}
-
-	for (auto& ce : calls)
-	{
-		std::size_t cntr = 0;
-		auto it = ce.possibleArgs.begin();
-		while (it != ce.possibleArgs.end())
-		{
-			auto* s = *it;
-			if (!_config->isStackVariable(s))
-			{
-				++it;
-				continue;
-			}
-
-			++cntr;
-			if (cntr > stacks)
-			{
-				it = ce.possibleArgs.erase(it);
-			}
-			else
-			{
-				++it;
-			}
-		}
-	}
-}
-
-Value* DataFlowEntry::joinParamPair(Value* low, Value* high, Type *type, Instruction *before) const
-{
-	auto ib = _abi->getTypeBitSize(type);
-	auto intType = IntegerType::get(_module->getContext(), ib); 
-	auto wordSize = _abi->getTypeBitSize(
-				_abi->getDefaultPointerType());
-
-	high = IrModifier::convertValueToType(high, intType, before);
-	low = IrModifier::convertValueToType(low, intType, before);
-
-	high = BinaryOperator::Create(Instruction::Shl, high, llvm::ConstantInt::get(intType, wordSize), "", before);
-	auto join = BinaryOperator::Create(Instruction::Or, low, high, "", before);
-
-	return IrModifier::convertValueToType(join, type, before);
-}
-
-void DataFlowEntry::splitIntoParamPair(AllocaInst* blob, std::pair<Value*, Value*> &paramPair) const
-{
-	auto param1 = paramPair.first;
-	auto param2 = paramPair.second;
-
-	auto wordSize = _abi->getTypeBitSize(
-				_abi->getDefaultPointerType());
-
-	auto halfInt = IntegerType::get(_module->getContext(), wordSize);
-	auto intType = IntegerType::get(_module->getContext(), wordSize*2); 
-
-	auto before = blob->getNextNode();
-
-	auto load = new LoadInst(blob, "", before);
-
-	auto val = IrModifier::convertValueToType(load, intType, before);
-
-	auto trunc = new TruncInst(val, halfInt, "", before);
-	new StoreInst(trunc, param1, before);
-
-	auto shift = BinaryOperator::Create(Instruction::LShr, val, llvm::ConstantInt::get(intType, wordSize), "", before);
-	trunc = new TruncInst(shift, halfInt, "", before);
-	new StoreInst(trunc, param2, before);
-}
-
-std::map<CallInst*, std::vector<Value*>> DataFlowEntry::fetchLoadsOfCalls() const
-{
-	std::map<CallInst*, std::vector<Value*>> loadsOfCalls;
-
-	for (auto& e : calls)
-	{
-		std::vector<Value*> loads;
-		auto* call = e.call;
-		auto paramRegs = _abi->parameterRegisters();
-
-		auto types = argTypes;
-		types.insert(types.end(),
-				e.specTypes.begin(), e.specTypes.end());
-		auto tIt = types.begin();
-
-		auto aIt = e.possibleArgs.begin();
-		while (aIt != e.possibleArgs.end())
-		{
-			if (*aIt == nullptr)
-			{
-				aIt++;
-				continue;
-			}
-
-			auto fIt = specialArgStorage.find(loads.size());
-			while (fIt != specialArgStorage.end())
-			{
-				auto* sl = new LoadInst(fIt->second, "", call);
-				loads.push_back(sl);
-				fIt = specialArgStorage.find(loads.size());
-			}
-
-			Value* l = new LoadInst(*aIt, "", call);
-			aIt++;
-
-			if (tIt != types.end())
-			{
-				auto wordSize = _abi->getTypeByteSize(
-							_abi->getDefaultPointerType());
-				if (wordSize < _abi->getTypeByteSize(*tIt)
-						&& aIt != e.possibleArgs.end())
-				{
-					Value* lp = new LoadInst(*aIt, "", call);
-					aIt++;
-
-					l = joinParamPair(l, lp, *tIt, call);
-				}
-				else
-				{			
-					l = IrModifier::convertValueToType(l, *tIt, call);
-				}
-
-				tIt++;
-			}
-			else
-			{
-				l = IrModifier::convertValueToType(l, _abi->getDefaultType(), call);
-			}
-
-			loads.push_back(l);
-		}
-
-		loadsOfCalls[call] = loads;
-	}
-
-	return loadsOfCalls;
-}
-
-void DataFlowEntry::replaceCalls()
-{
-	auto loadsOfCalls = fetchLoadsOfCalls();
-
-	for (auto l : loadsOfCalls)
-		IrModifier::modifyCallInst(l.first, l.first->getType(), l.second);
-}
-
-void DataFlowEntry::applyToIr()
-{
-	Function* analysedFunction = getFunction();
-
-	if (analysedFunction == nullptr)
-	{
-		replaceCalls();
-
-		return;
-	}
-
-	if (analysedFunction->arg_size() > 0)
-	{
-		return;
-	}
-
-	auto loadsOfCalls = fetchLoadsOfCalls();
-
-	llvm::Value* retVal = retType->isFloatingPointTy() ?
-		_abi->getFPReturnRegister() : _abi->getReturnRegister();
-
-	std::map<ReturnInst*, Value*> rets2vals;
-
-	if (retVal)
-	{
-		for (auto& e : retStores)
-		{
-			auto* l = new LoadInst(retVal, "", e.ret);
-			rets2vals[e.ret] = l;
-		}
-	}
-
-	auto paramRegs = _abi->parameterRegisters();
-
-	std::vector<llvm::Value*> argStores;
-
-	auto aIt = args.begin();
-	auto tIt = argTypes.begin();
-
-	std::map<AllocaInst*, std::pair<Value*, Value*>> createdPairs;
-
-	while (aIt != args.end())
-	{
-		if (*aIt == nullptr) {
-			aIt++;
-			continue;
-		}
-
-		Value *l = *aIt;
-		aIt++;
-
-		auto fIt = specialArgStorage.find(argStores.size());
-		while (fIt != specialArgStorage.end())
-		{
-			argStores.push_back(fIt->second);
-			fIt = specialArgStorage.find(argStores.size());
-		}
-		auto wordSize = _abi->getTypeByteSize(
-					_abi->getDefaultPointerType());
-
-		if (aIt != args.end() && tIt != argTypes.end()
-			&& _abi->getTypeByteSize(*tIt) > wordSize)
-		{
-			auto p1 = l;
-			auto p2 = *aIt;
-			aIt++;
-
-			auto ai = IrModifier::createAlloca(analysedFunction, *tIt);
-			createdPairs[ai] = std::make_pair(p1, p2);
-			splitIntoParamPair(ai, createdPairs[ai]);
-			l = ai;
-		}
-
-		argStores.push_back(l);
-	}
-
-	auto* oldType = analysedFunction->getType();
-	IrModifier irm(_module, _config);
-	auto* newFnc = irm.modifyFunction(
-			analysedFunction,
-			retType,
-			argTypes,
-			isVarArg,
-			rets2vals,
-			loadsOfCalls,
-			retVal,
-			argStores,
-			argNames).first;
-
-	LOG << "modify fnc: " << newFnc->getName().str() << " = "
-			<< llvmObjToString(oldType) << " -> "
-			<< llvmObjToString(newFnc->getType()) << std::endl;
-
-	called = newFnc;
-}
-
-void DataFlowEntry::connectWrappers()
-{
-	auto* fnc = getFunction();
-	if (fnc == nullptr || wrappedCall == nullptr)
-	{
-		return;
-	}
-
-	wrappedCall = nullptr;
-	for (inst_iterator I = inst_begin(fnc), E = inst_end(fnc); I != E; ++I)
-	{
-		if (auto* c = dyn_cast<CallInst>(&*I))
-		{
-			auto* cf = c->getCalledFunction();
-			if (cf && !cf->isIntrinsic()) // && cf->isDeclaration())
-			{
-				wrappedCall = c;
-				break;
-			}
-		}
-	}
-
-	if (wrappedCall == nullptr)
-	{
-		return;
-	}
-
-	if (wrappedCall->getNumArgOperands() != fnc->getArgumentList().size())
-	{
-		// TODO: enable assert and inspect these cases.
-		return;
-	}
-	assert(wrappedCall->getNumArgOperands() == fnc->getArgumentList().size());
-
-	unsigned i = 0;
-	for (auto& a : fnc->getArgumentList())
-	{
-		auto* conv = IrModifier::convertValueToType(&a, wrappedCall->getArgOperand(i)->getType(), wrappedCall);
-		wrappedCall->setArgOperand(i++, conv);
-	}
-
+	// Main
 	//
-	//
-	std::set<CallInst*> calls;
-	for (auto* u : fnc->users())
+	if (fnc->getName() == "main")
 	{
-		if (auto* c = dyn_cast<CallInst>(u))
+		auto charPointer = PointerType::get(
+			Type::getInt8Ty(_module->getContext()), 0);
+
+		dataflow->setArgTypes(
 		{
-			// inline all wrapped functions
-			// TODO: only really simple fncs, or from .plt, etc.?
-//			if (fnc->isVarArg())
+			_abi->getDefaultType(),
+			PointerType::get(charPointer, 0)
+		},
+		{
+			"argc",
+			"argv"
+		});
+
+		dataflow->setRetType(_abi->getDefaultType());
+		return;
+	}
+
+	// LTI info.
+	//
+	auto* cf = _config->getConfigFunction(fnc);
+	if (cf && (cf->isDynamicallyLinked() || cf->isStaticallyLinked()))
+	{
+		auto fp = _lti->getPairFunctionFree(cf->getName());
+		if (fp.first)
+		{
+			std::vector<Type*> argTypes;
+			std::vector<std::string> argNames;
+			for (auto& a : fp.first->args())
 			{
-				calls.insert(c);
+				if (!a.getType()->isSized())
+				{
+					continue;
+				}
+				argTypes.push_back(a.getType());
+				argNames.push_back(a.getName());
 			}
+			dataflow->setArgTypes(
+					std::move(argTypes),
+					std::move(argNames));
+
+			if (fp.first->isVarArg())
+			{
+				dataflow->setVariadic();
+			}
+			dataflow->setRetType(fp.first->getReturnType());
+
+			std::string declr = fp.second->getDeclaration();
+			if (!declr.empty())
+			{
+				cf->setDeclarationString(declr);
+			}
+			return;
 		}
 	}
 
-	auto* wrappedFnc = wrappedCall->getCalledFunction();
-	assert(wrappedFnc);
-	for (auto* c : calls)
-	{
-		// todo: should not happen?
-		if (c->getType()->isVoidTy() && !wrappedFnc->getReturnType()->isVoidTy())
-		{
-			continue;
-		}
+	auto dbgFnc = _dbgf ? _dbgf->getFunction(
+			_config->getFunctionAddress(fnc)) : nullptr;
 
-		std::vector<Value*> args;
-		unsigned numParams = wrappedFnc->getFunctionType()->getNumParams();
-		unsigned i = 0;
-		for (auto& a : c->arg_operands())
+	// Debug info.
+	//
+	if (dbgFnc)
+	{
+		std::vector<Type*> argTypes;
+		std::vector<std::string> argNames;
+		for (auto& a : dbgFnc->parameters)
 		{
-			if (i >= numParams) // var args fncs
+			auto* t = llvm_utils::stringToLlvmTypeDefault(
+					_module, a.type.getLlvmIr());
+			if (!t->isSized())
 			{
-				assert(wrappedFnc->isVarArg());
-				args.push_back(a);
+				continue;
 			}
-			else
-			{
-				auto* conv = IrModifier::convertValueToType(a, wrappedFnc->getFunctionType()->getParamType(i++), c);
-				args.push_back(conv);
-			}
+			argTypes.push_back(t);
+			argNames.push_back(a.getName());
 		}
-		auto* nc = CallInst::Create(wrappedFnc, args, "", c);
-		auto* resConv = IrModifier::convertValueToTypeAfter(nc, c->getType(), nc);
-		c->replaceAllUsesWith(resConv);
-		c->eraseFromParent();
+		dataflow->setArgTypes(
+				std::move(argTypes),
+				std::move(argNames));
+
+		if (dbgFnc->isVariadic())
+		{
+			dataflow->setVariadic();
+		}
+		dataflow->setRetType(
+			llvm_utils::stringToLlvmTypeDefault(
+				_module,
+				dbgFnc->returnType.getLlvmIr()));
+
+		return;
+	}
+
+	auto configFnc = _config->getConfigFunction(fnc);
+	if (_config->getConfig().isIda() && configFnc)
+	{
+		std::vector<Type*> argTypes;
+		std::vector<std::string> argNames;
+		for (auto& a : configFnc->parameters)
+		{
+			auto* t = llvm_utils::stringToLlvmTypeDefault(
+					_module,
+					a.type.getLlvmIr());
+			if (!t->isSized())
+			{
+				continue;
+			}
+			argTypes.push_back(t);
+			argNames.push_back(a.getName());
+		}
+		dataflow->setArgTypes(
+				std::move(argTypes),
+				std::move(argNames));
+
+		if (configFnc->isVariadic())
+		{
+			dataflow->setVariadic();
+		}
+		dataflow->setRetType(
+			llvm_utils::stringToLlvmTypeDefault(
+				_module,
+				configFnc->returnType.getLlvmIr()));
+		return;
+	}
+
+	// Calling convention.
+	if (configFnc)
+	{
+		dataflow->setCallingConvention(configFnc->callingConvention.getID());
+	}
+
+	// Wrappers.
+	//
+	if (CallInst* wrappedCall = getWrapper(fnc))
+	{
+		auto* wf = wrappedCall->getCalledFunction();
+		auto* ltiFnc = _lti->getLlvmFunctionFree(wf->getName());
+		if (ltiFnc)
+		{
+			std::vector<Type*> argTypes;
+			std::vector<std::string> argNames;
+			for (auto& a : ltiFnc->args())
+			{
+				if (!a.getType()->isSized())
+				{
+					continue;
+				}
+				argTypes.push_back(a.getType());
+				argNames.push_back(a.getName());
+			}
+			dataflow->setArgTypes(
+					std::move(argTypes),
+					std::move(argNames));
+
+			if (ltiFnc->isVarArg())
+			{
+				dataflow->setVariadic();
+			}
+			dataflow->setRetType(ltiFnc->getReturnType());
+			dataflow->setWrappedCall(wrappedCall);
+
+			return;
+		}
 	}
 }
 
-llvm::CallInst* DataFlowEntry::isSimpleWrapper(llvm::Function* fnc) const
+CallInst* ParamReturn::getWrapper(Function* fnc) const
 {
 	auto ai = AsmInstruction(fnc);
 	if (ai.isInvalid())
@@ -1389,604 +452,516 @@ llvm::CallInst* DataFlowEntry::isSimpleWrapper(llvm::Function* fnc) const
 	return nullptr;
 }
 
-void DataFlowEntry::setTypeFromExtraInfo()
+void ParamReturn::addDataFromCall(DataFlowEntry* dataflow, CallInst* call) const
 {
-	auto* fnc = getFunction();
-	if (fnc == nullptr)
+	CallEntry* ce = dataflow->createCallEntry(call);
+
+	_collector->collectCallArgs(ce);
+	_collector->collectCallRets(ce);
+
+	collectExtraData(ce);
+}
+
+void ParamReturn::collectExtraData(CallEntry* ce) const
+{
+}
+
+void ParamReturn::dumpInfo() const
+{
+	LOG << std::endl << "_fnc2calls:" << std::endl;
+
+	for (auto& p : _fnc2calls)
 	{
-		return;
+		dumpInfo(p.second);
+	}
+}
+
+void ParamReturn::dumpInfo(const DataFlowEntry& de) const
+{
+	auto called = de.getValue();
+	auto fnc = de.getFunction();
+	auto configFnc = _config->getConfigFunction(fnc);
+	auto dbgFnc = _dbgf ? _dbgf->getFunction(
+			_config->getFunctionAddress(fnc)) : nullptr;
+	auto wrappedCall = de.getWrappedCall();
+
+	LOG << "\n\t>|" << called->getName().str() << std::endl;
+	LOG << "\t>|fnc call : " << de.isFunction() << std::endl;
+	LOG << "\t>|val call : " << de.isValue() << std::endl;
+	LOG << "\t>|variadic : " << de.isVariadic() << std::endl;
+	LOG << "\t>|voidarg  : " << de.isVoidarg() << std::endl;
+	LOG << "\t>|call conv: " << de.getCallingConvention() << std::endl;
+	LOG << "\t>|config f : " << (configFnc != nullptr) << std::endl;
+	LOG << "\t>|debug f  : " << (dbgFnc != nullptr) << std::endl;
+	LOG << "\t>|wrapp c  : " << llvmObjToString(wrappedCall) << std::endl;
+	LOG << "\t>|type set : " << !de.argTypes().empty() << std::endl;
+	LOG << "\t>|ret type : " << llvmObjToString(de.getRetType()) << std::endl;
+	LOG << "\t>|ret value: " << llvmObjToString(de.getRetValue()) << std::endl;
+	LOG << "\t>|arg types:" << std::endl;
+	for (auto* t : de.argTypes())
+	{
+		LOG << "\t\t>|" << llvmObjToString(t) << std::endl;
+	}
+	LOG << "\t>|arg names:" << std::endl;
+	for (auto& n : de.argNames())
+	{
+		LOG << "\t\t>|" << n << std::endl;
 	}
 
-	// Main
-	//
-	if (fnc->getName() == "main")
+	LOG << "\t>|calls:" << std::endl;
+	for (auto& e : de.callEntries())
 	{
-		argTypes.push_back(Type::getInt32Ty(_module->getContext()));
-		argTypes.push_back(PointerType::get(
-				PointerType::get(
-						Type::getInt8Ty(_module->getContext()),
-						0),
-				0));
-		argNames.push_back("argc");
-		argNames.push_back("argv");
-		retType = Type::getInt32Ty(_module->getContext());
-		typeSet = true;
-		return;
+		dumpInfo(e);
 	}
 
-	// LTI info.
-	//
-	auto* cf = _config->getConfigFunction(fnc);
-	if (cf && (cf->isDynamicallyLinked() || cf->isStaticallyLinked()))
+	LOG << "\t>|arg loads:" << std::endl;
+	for (auto* l : de.args())
 	{
-		auto fp = _lti->getPairFunctionFree(cf->getName());
-		if (fp.first)
-		{
-			for (auto& a : fp.first->args())
-			{
-				argTypes.push_back(a.getType());
-				argNames.push_back(a.getName());
-			}
-			if (fp.first->isVarArg())
-			{
-				isVarArg = true;
-			}
-			retType = fp.first->getReturnType();
-			typeSet = true;
-
-			std::string declr = fp.second->getDeclaration();
-			if (!declr.empty())
-			{
-				cf->setDeclarationString(declr);
-			}
-
-			// TODO: we could rename function if LTI name differs.
-			// e.g. scanf vs _scanf.
-			//
-//			if (fp.first->getName() != fnc->getName())
-//			{
-//				IrModifier irmodif(_module, _config);
-//				irmodif.renameFunction(fnc, fp.first->getName());
-//			}
-
-			return;
-		}
+		LOG << "\t\t\t>|" << llvmObjToString(l) << std::endl;
 	}
 
-	// Debug info.
-	//
-	if (dbgFnc)
+	LOG << "\t>|return stores:" << std::endl;
+	for (auto& e : de.retEntries())
 	{
-		for (auto& a : dbgFnc->parameters)
-		{
-			auto* t = llvm_utils::stringToLlvmTypeDefault(_module, a.type.getLlvmIr());
-			argTypes.push_back(t);
-			argNames.push_back(a.getName());
-		}
-		if (dbgFnc->isVariadic())
-		{
-			isVarArg = true;
-		}
-		retType = llvm_utils::stringToLlvmTypeDefault(
-				_module,
-				dbgFnc->returnType.getLlvmIr());
-		typeSet = true;
-		return;
+		dumpInfo(e);
+	}
+}
+
+void ParamReturn::dumpInfo(const CallEntry& ce) const
+{
+	LOG << "\t\t>|" << llvmObjToString(ce.getCallInstruction())
+		<< std::endl;
+	LOG << "\t\t\tvoidarg :" << ce.isVoidarg() << std::endl;
+	LOG << "\t\t\targ values:" << std::endl;
+	for (auto* s : ce.args())
+	{
+		LOG << "\t\t\t>|" << llvmObjToString(s) << std::endl;
+	}
+	LOG << "\t\t\targ stores:" << std::endl;
+	for (auto* s : ce.argStores())
+	{
+		LOG << "\t\t\t>|" << llvmObjToString(s) << std::endl;
+	}
+	LOG << "\t\t\tret values:" << std::endl;
+	for (auto* l : ce.retValues())
+	{
+		LOG << "\t\t\t>|" << llvmObjToString(l) << std::endl;
+	}
+	LOG << "\t\t\tret loads:" << std::endl;
+	for (auto* l : ce.retLoads())
+	{
+		LOG << "\t\t\t>|" << llvmObjToString(l) << std::endl;
+	}
+	LOG << "\t\t\targ types:" << std::endl;
+	for (auto* t : ce.getBaseFunction()->argTypes())
+	{
+		LOG << "\t\t\t>|" << llvmObjToString(t);
+		LOG << " (size : " << _abi->getTypeByteSize(t) << "B)" << std::endl;
+	}
+	for (auto* t : ce.argTypes())
+	{
+		LOG << "\t\t\t>|" << llvmObjToString(t);
+		LOG << " (size : " << _abi->getTypeByteSize(t) << "B)" << std::endl;
+	}
+	LOG << "\t\t\tformat string: " << ce.getFormatString() << std::endl;
+}
+
+void ParamReturn::dumpInfo(const ReturnEntry& re) const
+{
+	LOG << "\t\t>|" << llvmObjToString(re.getRetInstruction())
+		<< std::endl;
+
+	LOG << "\t\t\tret stores:" << std::endl;
+	for (auto* s : re.retStores())
+	{
+		LOG << "\t\t\t>|" << llvmObjToString(s) << std::endl;
 	}
 
-	if (_config->getConfig().isIda() && configFnc)
+	LOG << "\t\t\tret values:" << std::endl;
+	for (auto* s : re.retValues())
 	{
-		for (auto& a : configFnc->parameters)
-		{
-			auto* t = llvm_utils::stringToLlvmTypeDefault(_module, a.type.getLlvmIr());
-			argTypes.push_back(t);
-			argNames.push_back(a.getName());
-
-			if (_config->getConfig().architecture.isX86())
-			{
-				std::string regName;
-				if (a.getStorage().isRegister(regName))
-				{
-					if (auto* reg = _config->getLlvmRegister(regName))
-					{
-						specialArgStorage[argTypes.size()-1] = reg;
-					}
-				}
-			}
-		}
-		if (configFnc->isVariadic())
-		{
-			isVarArg = true;
-		}
-		retType = llvm_utils::stringToLlvmTypeDefault(
-				_module,
-				configFnc->returnType.getLlvmIr());
-		if (!argTypes.empty())
-		{
-			typeSet = true;
-		}
-		return;
+		LOG << "\t\t\t>|" << llvmObjToString(s) << std::endl;
 	}
+}
 
-	// Wrappers.
-	//
-	if ((wrappedCall = isSimpleWrapper(fnc)))
+void ParamReturn::filterCalls()
+{
+	std::map<CallingConvention::ID, Filter::Ptr> filters;
+
+	for (auto& p : _fnc2calls)
 	{
-		auto* wf = wrappedCall->getCalledFunction();
-		auto* ltiFnc = _lti->getLlvmFunctionFree(wf->getName());
-		if (ltiFnc)
+		DataFlowEntry& de = p.second;
+		auto cc = de.getCallingConvention();
+		if (filters.find(cc) == filters.end())
 		{
-			for (auto& a : ltiFnc->args())
-			{
-				argTypes.push_back(a.getType());
-				argNames.push_back(a.getName());
-			}
-			if (ltiFnc->isVarArg())
-			{
-				isVarArg = true;
-			}
-			retType = ltiFnc->getReturnType();
-			typeSet = true;
-			return;
+			filters[cc] = FilterProvider::createFilter(_abi, cc);
+		}
+
+		if (de.hasDefinition())
+		{
+			filters[cc]->filterDefinition(&de);
+		}
+
+		if (de.isVariadic())	
+		{
+			filters[cc]->filterCallsVariadic(&de, _collector.get());
 		}
 		else
 		{
-			wrappedCall = nullptr;
+			filters[cc]->filterCalls(&de);
 		}
+
+		filters[cc]->estimateRetValue(&de);
+
+		modifyType(de);
 	}
 }
 
-void DataFlowEntry::setTypeFromUseContext()
+Type* ParamReturn::extractType(Value* from) const
 {
-	setReturnType();
-	setArgumentTypes();
-	typeSet = true;
-}
+	from = llvm_utils::skipCasts(from);
 
-void DataFlowEntry::setReturnType()
-{
-	llvm::Value* retVal = _abi->getReturnRegister();
-
-	retType = retVal ?
-			retVal->getType()->getPointerElementType() :
-			Type::getVoidTy(_module->getContext());
-}
-
-void DataFlowEntry::setArgumentTypes()
-{
-	if (calls.empty())
+	if (from == nullptr)
 	{
-		argTypes.insert(
-				argTypes.end(),
-				args.size(),
-				Abi::getDefaultType(_module));
+		return _abi->getDefaultType();
+	}
+
+	if (auto* p = dyn_cast<ArrayType>(from->getType()))
+	{
+		return p->getElementType();
+	}
+
+	if (auto* p = dyn_cast<PointerType>(from->getType()))
+	{
+		if (auto* a = dyn_cast<ArrayType>(p->getElementType()))
+		{
+			return PointerType::get(a->getElementType(), 0);
+		}
+	}
+
+	return from->getType();
+}
+
+void ParamReturn::modifyType(DataFlowEntry& de) const
+{
+	// TODO
+	// Based on large type we should do:
+	//
+	// If large type is encountered
+	// and if cc passes large type by reference
+	// just cast the reference
+	//
+	// else separate as much values as possible
+	// and call function that will create new structure
+	// and put this values in the elements of
+	// the structure set this structure as parameter
+
+	if (de.argTypes().empty())
+	{
+		for (auto& call : de.callEntries())
+		{
+			std::vector<Type*> types;
+			for (auto& arg : call.args())
+			{
+				if (arg == nullptr)
+				{
+					types.push_back(_abi->getDefaultType());
+					continue;
+				}
+
+				auto usage = std::find_if(
+						call.argStores().begin(),
+						call.argStores().end(),
+						[arg](StoreInst* s)
+						{
+							return s->getPointerOperand()
+								== arg;
+						});
+
+				if (usage == call.argStores().end())
+				{
+
+					if (auto* p = dyn_cast<PointerType>(arg->getType()))
+					{
+						types.push_back(p->getElementType());
+					}
+					else
+					{
+						types.push_back(arg->getType());
+					}
+				}
+				else
+				{
+					types.push_back(extractType((*usage)->getValueOperand()));
+				}
+			}
+
+			de.setArgTypes(std::move(types));
+			break;
+		}
+	}
+
+	if (de.argTypes().empty())
+	{
+		std::vector<Type*> types;
+		std::vector<Value*> args;
+
+		for (auto i : de.args())
+		{
+			if (i == nullptr)
+			{
+				types.push_back(_abi->getDefaultType());
+			}
+			else if (auto* p = dyn_cast<PointerType>(i->getType()))
+			{
+				types.push_back(p->getElementType());
+			}
+			else
+			{
+				types.push_back(i->getType());
+			}
+		}
+
+		de.setArgTypes(std::move(types));
+	}
+
+	auto args = de.args();
+	args.erase(
+		std::remove_if(
+			args.begin(),
+			args.end(),
+			[](Value* v){return v == nullptr;}),
+		args.end());
+	de.setArgs(std::move(args));
+}
+
+void ParamReturn::applyToIr()
+{
+	for (auto& p : _fnc2calls)
+	{
+		applyToIr(p.second);
+	}
+
+	for (auto& p : _fnc2calls)
+	{
+	
+		connectWrappers(p.second);
+	}
+}
+
+void ParamReturn::applyToIr(DataFlowEntry& de)
+{
+	Function* fnc = de.getFunction();
+
+	if (fnc == nullptr)
+	{
+		auto loadsOfCalls = fetchLoadsOfCalls(de.callEntries());
+
+		for (auto l : loadsOfCalls)
+		{
+			IrModifier::modifyCallInst(l.first, de.getRetType(), l.second);
+		}
+
+		return;
+	}
+
+	if (fnc->arg_size() > 0)
+	{
+		return;
+	}
+	
+	auto loadsOfCalls = fetchLoadsOfCalls(de.callEntries());
+
+	std::map<ReturnInst*, Value*> rets2vals;
+
+	if (de.getRetValue())
+	{
+		if (de.getRetType() == nullptr)
+		{
+			if (auto* p = dyn_cast<PointerType>(de.getRetValue()->getType()))
+			{
+				de.setRetType(p->getElementType());
+			}
+			else
+			{
+				de.setRetType(de.getRetValue()->getType());
+			}
+		}
+
+		for (auto& e : de.retEntries())
+		{
+			auto* l = new LoadInst(de.getRetValue(), "", e.getRetInstruction());
+			rets2vals[e.getRetInstruction()] = l;
+		}
 	}
 	else
 	{
-		CallEntry* ce = &calls.front();
-		for (auto& c : calls)
+		de.setRetType(Type::getVoidTy(_module->getContext()));
+	}
+
+	std::vector<llvm::Value*> definitionArgs;
+	for (auto& a : de.args())
+	{
+		if (a != nullptr)
 		{
-			if (!c.possibleArgs.empty())
+			definitionArgs.push_back(a);
+		}
+	}
+
+	IrModifier irm(_module, _config);
+	auto* newFnc = irm.modifyFunction(
+			fnc,
+			de.getRetType(),
+			de.argTypes(),
+			de.isVariadic(),
+			rets2vals,
+			loadsOfCalls,
+			de.getRetValue(),
+			definitionArgs,
+			de.argNames()).first;
+
+	de.setCalledValue(newFnc);
+}
+
+void ParamReturn::connectWrappers(const DataFlowEntry& de)
+{
+	auto* fnc = de.getFunction();
+	auto* wrappedCall = de.getWrappedCall();
+	if (fnc == nullptr || wrappedCall == nullptr)
+	{
+		return;
+	}
+
+	wrappedCall = nullptr;
+	for (inst_iterator I = inst_begin(fnc), E = inst_end(fnc); I != E; ++I)
+	{
+		if (auto* c = dyn_cast<CallInst>(&*I))
+		{
+			auto* cf = c->getCalledFunction();
+			if (cf && !cf->isIntrinsic()) // && cf->isDeclaration())
 			{
-				ce = &c;
+				wrappedCall = c;
 				break;
 			}
 		}
-		std::vector<Value*> &a = args.size() < ce->possibleArgs.size() ? ce->possibleArgs : args;
+	}
 
-		for (const auto& op: a)
+	if (wrappedCall == nullptr)
+	{
+		return;
+	}
+
+	if (wrappedCall->getNumArgOperands() != fnc->getArgumentList().size())
+	{
+		// TODO: enable assert and inspect these cases.
+		return;
+	}
+	assert(wrappedCall->getNumArgOperands() == fnc->getArgumentList().size());
+
+	unsigned i = 0;
+	for (auto& a : fnc->getArgumentList())
+	{
+		auto* conv = IrModifier::convertValueToType(&a, wrappedCall->getArgOperand(i)->getType(), wrappedCall);
+		wrappedCall->setArgOperand(i++, conv);
+	}
+
+	//
+	//
+	std::set<CallInst*> calls;
+	for (auto* u : fnc->users())
+	{
+		if (auto* c = dyn_cast<CallInst>(u))
 		{
-			if (_abi->isRegister(op) && !_abi->isGeneralPurposeRegister(op))
+			// inline all wrapped functions
+			// TODO: only really simple fncs, or from .plt, etc.?
+//			if (fnc->isVarArg())
 			{
-				argTypes.push_back(Abi::getDefaultFPType(_module));
-			}
-			else
-			{
-				argTypes.push_back(Abi::getDefaultType(_module));
+				calls.insert(c);
 			}
 		}
 	}
-}
 
-//
-//=============================================================================
-//  ParamFilter
-//=============================================================================
-//
-
-ParamFilter::ParamFilter(
-		CallInst* call,
-		const std::vector<Value*>& paramValues,
-		const std::vector<Type*>& paramTypes,
-		const Abi* abi,
-		Config* config)
-		:
-		_abi(abi),
-		_config(config),
-		_call(call),
-		_paramTypes(paramTypes)
-{
-	separateParamValues(paramValues);
-
-	orderRegistersBy(_fpRegValues, _abi->parameterFPRegisters());
-	orderRegistersBy(_regValues, _abi->parameterRegisters());
-	orderStacks(_stackValues, _abi->getStackParamOrder() == Abi::RTL);
-
-	if (!paramTypes.empty() && call != nullptr)
+	auto* wrappedFnc = wrappedCall->getCalledFunction();
+	assert(wrappedFnc);
+	for (auto* c : calls)
 	{
-		adjustValuesByKnownTypes(call, _paramTypes);
-	}
-}
-
-void ParamFilter::separateParamValues(const std::vector<Value*>& paramValues)
-{
-	auto regs = _abi->parameterRegisters();
-
-	for (auto pv: paramValues)
-	{
-		if (_config->isStackVariable(pv))
+		// todo: should not happen?
+		if (c->getType()->isVoidTy() && !wrappedFnc->getReturnType()->isVoidTy())
 		{
-			_stackValues.push_back(pv);
-		}
-		else if (std::find(regs.begin(), regs.end(),
-				_abi->getRegisterId(pv)) != regs.end())
-		{
-			_regValues.push_back(_abi->getRegisterId(pv));
-		}
-		else
-		{
-			_fpRegValues.push_back(_abi->getRegisterId(pv));
-		}
-	}
-}
-
-void ParamFilter::orderStacks(std::vector<Value*>& stacks, bool asc) const
-{
-	std::stable_sort(
-			stacks.begin(),
-			stacks.end(),
-			[this, asc](Value* a, Value* b) -> bool
-	{
-		auto aOff = _config->getStackVariableOffset(a);
-		auto bOff = _config->getStackVariableOffset(b);
-
-		bool ascOrd = aOff < bOff;
-
-		return asc ? ascOrd : !ascOrd;
-	});
-}
-
-void ParamFilter::orderRegistersBy(
-				std::vector<uint32_t>& regs,
-				const std::vector<uint32_t>& orderedVector) const
-{
-	std::stable_sort(
-			regs.begin(),
-			regs.end(),
-			[this, orderedVector](uint32_t a, uint32_t b) -> bool
-	{
-		auto it1 = std::find(orderedVector.begin(), orderedVector.end(), a);
-		auto it2 = std::find(orderedVector.begin(), orderedVector.end(), b);
-
-		return std::distance(it1, it2) > 0;
-	});
-}
-
-void ParamFilter::leaveOnlyContinuousStackOffsets()
-{
-	retdec::utils::Maybe<int> prevOff;
-	int gap = _abi->getTypeByteSize(_abi->getDefaultPointerType()) * 2;
-
-	auto it = _stackValues.begin();
-	while (it != _stackValues.end())
-	{
-		auto off = _config->getStackVariableOffset(*it);
-
-		if (prevOff.isUndefined())
-		{
-			prevOff = off;
-		}
-		else if (std::abs(prevOff - off) > gap)
-		{
-			it = _stackValues.erase(it);
 			continue;
 		}
-		else
+
+		std::vector<Value*> args;
+		unsigned numParams = wrappedFnc->getFunctionType()->getNumParams();
+		unsigned i = 0;
+		for (auto& a : c->arg_operands())
 		{
-			prevOff = off;
-		}
-
-		++it;
-	}
-}
-
-void ParamFilter::leaveOnlyContinuousSequence()
-{
-	if (_abi->parameterRegistersOverlay())
-	{
-		applyAlternatingRegistersFilter();
-	}
-	else
-	{
-		applySequentialRegistersFilter();
-	}
-}
-
-void ParamFilter::applyAlternatingRegistersFilter()
-{
-	auto templRegs = _abi->parameterRegisters();
-	auto fpTemplRegs = _abi->parameterFPRegisters();
-
-	size_t idx = 0;
-	auto it = _regValues.begin();
-	auto fIt = _fpRegValues.begin();
-
-	while (idx < fpTemplRegs.size() && idx < templRegs.size())
-	{
-		if (it == _regValues.end() && fIt == _fpRegValues.end())
-		{
-			_stackValues.clear();
-			return;
-		}
-
-		if (it != _regValues.end() && *it == templRegs[idx])
-		{
-			it++;
-		}
-		else if (fIt != _fpRegValues.end() && *fIt == fpTemplRegs[idx])
-		{
-			fIt++;
-		}
-		else
-		{
-			_regValues.erase(it, _regValues.end());
-			_fpRegValues.erase(fIt, _fpRegValues.end());
-			_stackValues.clear();
-
-			return;
-		}
-
-		idx++;
-	}
-}
-
-void ParamFilter::applySequentialRegistersFilter()
-{
-	auto it = _regValues.begin();
-	for (auto regId : _abi->parameterRegisters())
-	{
-		if (it == _regValues.end())
-		{
-			_stackValues.clear();
-			break;
-		}
-
-		if (regId != *it)
-		{
-			_regValues.erase(it, _regValues.end());
-			_stackValues.clear();
-			break;
-		}
-
-		it++;
-	}
-
-	auto fIt = _fpRegValues.begin();
-	for (auto regId : _abi->parameterFPRegisters())
-	{
-		if (fIt == _fpRegValues.end())
-		{
-			break;
-		}
-
-		if (regId != *fIt)
-		{
-			_fpRegValues.erase(fIt, _fpRegValues.end());
-			break;
-		}
-
-		fIt++;
-	}
-}
-
-std::vector<Value*> ParamFilter::getParamValues() const
-{
-	std::vector<Value*> paramValues;
-	auto ri = _regValues.begin();
-	auto fi = _fpRegValues.begin();
-	auto si = _stackValues.begin();
-
-	for (auto t: _paramTypes)
-	{
-		bool shouldGetFromStack = false;
-
-		if (t->isFloatingPointTy() && _abi->usesFPRegistersForParameters())
-		{
-			if (fi != _fpRegValues.end())
+			if (i >= numParams) // var args fncs
 			{
-				auto reg = _abi->getRegister(*fi);
-				paramValues.push_back(reg);
-				++fi;
-			}
-			else 
-			{
-				shouldGetFromStack = true;
-			}
-		}
-		else if (ri != _regValues.end())
-		{
-			auto reg = _abi->getRegister(*ri);
-			paramValues.push_back(reg);
-			++ri;
-		}	
-		else
-		{
-			shouldGetFromStack = true;
-		}
-
-		if (shouldGetFromStack)
-		{
-			if (si != _stackValues.end())
-			{
-				paramValues.push_back(*si);
-				++si;
+				assert(wrappedFnc->isVarArg());
+				args.push_back(a);
 			}
 			else
 			{
-				paramValues.push_back(nullptr);
+				auto* conv = IrModifier::convertValueToType(a, wrappedFnc->getFunctionType()->getParamType(i++), c);
+				args.push_back(conv);
 			}
 		}
+		auto* nc = CallInst::Create(wrappedFnc, args, "", c);
+		auto* resConv = IrModifier::convertValueToTypeAfter(nc, c->getType(), nc);
+		c->replaceAllUsesWith(resConv);
+		c->eraseFromParent();
 	}
-
-	while (ri != _regValues.end())
-	{
-		paramValues.push_back(_abi->getRegister(*ri));
-		ri++;
-	}
-
-	while (fi != _fpRegValues.end())
-	{
-		paramValues.push_back(_abi->getRegister(*fi));
-		fi++;
-	}
-
-	paramValues.insert(paramValues.end(), si, _stackValues.end());
-
-	return paramValues;
 }
 
-Value* ParamFilter::stackVariableForType(CallInst* call, Type* type) const
+std::map<CallInst*, std::vector<Value*>> ParamReturn::fetchLoadsOfCalls(
+						const std::vector<CallEntry>& calls) const
 {
-	uint32_t wordSize = _abi->getTypeByteSize(_abi->getDefaultPointerType());
+	std::map<CallInst*, std::vector<Value*>> loadsOfCalls;
 
-	uint32_t off = _abi->getTypeByteSize(type);
-	off = off > wordSize ? wordSize*2:wordSize;
-
-	if (!_stackValues.empty())
+	for (auto& e : calls)
 	{
-		off += _config->getStackVariableOffset(_stackValues.back());
-	}
+		std::vector<Value*> loads;
+		auto* call = e.getCallInstruction();
 
-	return _config->getLlvmStackVariable(call->getFunction(), off);
-}
+		auto types = e.getBaseFunction()->argTypes();
+		types.insert(
+			types.end(),
+			e.argTypes().begin(),
+			e.argTypes().end());
 
-bool ParamFilter::moveRegsByTypeSizeAtIdx(std::vector<uint32_t> &destinastion,
-					const std::vector<uint32_t> &sourceTemplate,
-					Type* type,
-					uint32_t* idx)
-{
-	if (idx == nullptr || *idx >= sourceTemplate.size())
-	{
-		return false;
-	}
+		auto tIt = types.begin();
+		auto aIt = e.args().begin();
 
-	/*
-	// Register pairs must start with register with even number
-	if (*idx % reqRegs != 0)
-	{
-		(*idx)++;
-	}*/
-
-	destinastion.push_back(sourceTemplate[*idx]);
-	auto templateReg = _abi->getRegister(sourceTemplate[*idx]);
-
-	*idx += 1;
-
-	if (_abi->getTypeByteSize(type)
-		> _abi->getTypeByteSize(templateReg->getType()))
-	{
-		if (*idx >= sourceTemplate.size())
+		while (aIt != e.args().end())
 		{
-			return false;
-		}
-
-
-		destinastion.push_back(sourceTemplate[*idx]);
-		*idx += 1;
-	}
-
-	return true;
-}
-
-void ParamFilter::adjustValuesByKnownTypes(CallInst* call, std::vector<llvm::Type*>& types)
-{
-	std::vector<uint32_t> regValues, fpRegValues;
-
-	auto paramRegs = _abi->parameterRegisters();
-	auto fpParamRegs = _abi->parameterFPRegisters();
-	
-	// Indexes of registers to be used next as particular parameter.
-	uint32_t pI = 0;
-	uint32_t fI = 0;
-
-	auto sI = _stackValues.begin();
-
-	std::vector<Value*> paramValues;
-	for (auto t: types)
-	{
-		if (_abi->usesFPRegistersForParameters()
-				&& t->isFloatingPointTy())
-		{
-			// if cannot move to fp regs push on stack
-			if (!moveRegsByTypeSizeAtIdx(fpRegValues, fpParamRegs, t, &fI))
+			if (*aIt == nullptr)
 			{
-				if (sI != _stackValues.end())
-				{
-					sI++;
-				}
-				else
-				{
-					auto s = stackVariableForType(call, t);
-					if (s != nullptr)
-					{
-						_stackValues.push_back(s);
-						sI = _stackValues.end();
-					}
-				}
+				aIt++;
+				continue;
 			}
-		}
-		else
-		{
-			// if cannot move to regs push on stack
-			if (!moveRegsByTypeSizeAtIdx(regValues, paramRegs, t, &pI))
+
+			Value* l = new LoadInst(*aIt, "", call);
+
+			if (tIt != types.end())
 			{
-				if (sI != _stackValues.end())
-				{
-					sI++;
-				}
-				else
-				{
-					auto s = stackVariableForType(call, t);
-					if (s != nullptr)
-					{
-						_stackValues.push_back(s);
-						sI = _stackValues.end();
-					}
-				}
+				l = IrModifier::convertValueToType(l, *tIt, call);
+				tIt++;
 			}
-		}
-	}
-
-	_fpRegValues = fpRegValues;
-	_regValues = regValues;
-
-	if (sI != _stackValues.end())
-	{
-		_stackValues.erase(sI, _stackValues.end());
-	}
-}
-
-void ParamFilter::leaveOnlyPositiveStacks()
-{
-	_stackValues.erase(
-		std::remove_if(_stackValues.begin(), _stackValues.end(),
-			[this](const Value* li)
+			else
 			{
-				auto aOff = _config->getStackVariableOffset(li);
-				return aOff.isDefined() && aOff < 0;
-			}),
-		_stackValues.end());
+				l = IrModifier::convertValueToType(l, _abi->getDefaultType(), call);
+			}
+
+			loads.push_back(l);
+			aIt++;
+		}
+
+		loadsOfCalls[call] = std::move(loads);
+	}
+
+	return loadsOfCalls;
 }
 
-} // namespace bin2llvmir
-} // namespace retdec
+}
+}
