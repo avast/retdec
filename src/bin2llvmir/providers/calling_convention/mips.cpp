@@ -40,14 +40,19 @@ MipsCallingConvention::MipsCallingConvention(const Abi* a) :
 	_returnRegs = {
 		MIPS_REG_V0
 	};
-	_returnFPRegs = {
-		MIPS_REG_V0
-	};
-	_returnDoubleRegs = {
-		MIPS_REG_V0
-	};
 
-	_regNumPerParam = 2;
+	_numOfRegsPerParam = 2;
+	_largeObjectsPassedByReference = true;
+	_respectsRegCouples = true;
+}
+
+MipsCallingConvention::~MipsCallingConvention()
+{
+}
+
+CallingConvention::Ptr MipsCallingConvention::create(const Abi* a)
+{
+	return std::make_unique<MipsCallingConvention>(a);
 }
 
 //
@@ -91,7 +96,18 @@ MipsPSPCallingConvention::MipsPSPCallingConvention(const Abi* a) :
 		MIPS_REG_V0
 	};
 
-	_regNumPerParam = 2;
+	_numOfRegsPerParam = 2;
+	_largeObjectsPassedByReference = true;
+	_respectsRegCouples = true;
+}
+
+MipsPSPCallingConvention::~MipsPSPCallingConvention()
+{
+}
+
+CallingConvention::Ptr MipsPSPCallingConvention::create(const Abi* a)
+{
+	return std::make_unique<MipsPSPCallingConvention>(a);
 }
 
 }
