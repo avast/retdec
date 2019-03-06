@@ -110,7 +110,7 @@ void Filter::filterDefinition(DataFlowEntry* de) const
 	filterDefinitionArgs(defArgs, de->isVoidarg());
 
 	de->setArgs(createGroupedArgValues(defArgs));
-	
+
 	if (de->retEntries().empty())
 	{
 		return;
@@ -318,7 +318,7 @@ void Filter::filterDefinitionArgs(FilterableLayout& args, bool isVoidarg) const
 	{
 		createContinuousArgRegisters(args);
 	}
-	
+
 	leaveOnlyContinuousStack(args);
 }
 
@@ -340,7 +340,7 @@ void Filter::filterCallArgs(FilterableLayout& args, bool isVoidarg) const
 	{
 		leaveOnlyContinuousArgRegisters(args);
 	}
-	
+
 	leaveOnlyContinuousStack(args);
 }
 
@@ -391,7 +391,7 @@ void Filter::filterArgsByKnownTypes(FilterableLayout& lay) const
 	auto& fpRegs = _cc->getParamFPRegisters();
 	auto& doubleRegs = _cc->getParamDoubleRegisters();
 	auto& vecRegs = _cc->getParamVectorRegisters();
-	
+
 	// Indexes of registers to be used next as particular parameter.
 	auto sIt = lay.stacks.begin();
 
@@ -440,7 +440,7 @@ void Filter::filterArgsByKnownTypes(FilterableLayout& lay) const
 			}
 		}
 
-		
+
 		if (!requiredStacks && stackOrd == OrderID::ORD_STACK)
 		{
 			requiredStacks = getNumberOfStacksForType(t);
@@ -605,7 +605,7 @@ size_t Filter::fetchRegsForType(
 		{
 			return  getNumberOfStacksForType(registerType);
 		}
-		
+
 		auto reg = regs[store.size()];
 		store.push_back(reg);
 
@@ -682,7 +682,7 @@ void Filter::filterRetsByKnownTypes(FilterableLayout& lay) const
 
 	Type* retType = lay.knownTypes.empty() ? nullptr
 				: lay.knownTypes.front();
-	
+
 	if (retType == nullptr)
 	{
 		return;

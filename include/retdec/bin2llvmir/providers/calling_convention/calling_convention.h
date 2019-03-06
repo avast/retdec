@@ -28,7 +28,7 @@ class CallingConvention
 		typedef retdec::config::CallingConventionID ID;
 
 		typedef Ptr (*ConstructorMethod)(const Abi*);
- 
+
 	// Constants.
 	//
 	public:
@@ -40,7 +40,7 @@ class CallingConvention
 	public:
 		CallingConvention(const Abi* abi);
 		virtual ~CallingConvention();
-	
+
 	// Registers.
 	//
 	public:
@@ -74,18 +74,18 @@ class CallingConvention
 		bool respectsRegisterCouples() const;
 
 		virtual std::size_t getMaxBytesPerStackParam() const;
-	
+
 	// Values.
 	public:
 		virtual bool valueCanBeParameter(const llvm::Value* val) const;
 		virtual bool canHoldReturnValue(const llvm::Value* val) const;
-	
+
 	// Private data - misc.
 	//
 	protected:
 		const Abi* _abi;
 		CallingConvention::ID _ccType;
-	
+
 	// Private data - registers.
 	//
 	protected:
@@ -98,7 +98,7 @@ class CallingConvention
 		std::vector<uint32_t> _returnFPRegs {};
 		std::vector<uint32_t> _returnDoubleRegs {};
 		std::vector<uint32_t> _returnVectorRegs {};
-	
+
 	// Private data - registers informational.
 	//
 	protected:
@@ -123,7 +123,7 @@ class CallingConvention
 class CallingConventionProvider
 {
 	// Private constructor.
-	// 
+	//
 	private:
 		CallingConventionProvider();
 
@@ -145,7 +145,7 @@ class CallingConventionProvider
 	// Private data - constrctor methods.
 	private:
 		std::vector<CallingConvention::ConstructorMethod> _id2cc;
-	
+
 };
 
 } // namespace bin2llvmir

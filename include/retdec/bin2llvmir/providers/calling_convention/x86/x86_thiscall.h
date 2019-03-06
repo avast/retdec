@@ -19,7 +19,7 @@ class ThiscallCallingConvention: public X86CallingConvention
 	public:
 		ThiscallCallingConvention(const Abi* a);
 		virtual ~ThiscallCallingConvention();
-	
+
 	// Construcor method.
 	//
 	public:

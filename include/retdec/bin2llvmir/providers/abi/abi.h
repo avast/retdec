@@ -60,7 +60,7 @@ class Abi
 		llvm::GlobalVariable* getSyscallIdRegister();
 		llvm::GlobalVariable* getSyscallReturnRegister();
 		llvm::GlobalVariable* getSyscallArgumentRegister(unsigned n);
-	
+
 	// Stacks.
 	//
 	public:
@@ -100,7 +100,7 @@ class Abi
 		bool isPowerPC() const;
 		bool isPowerPC64() const;
 		bool isPic32() const;
-	
+
 	// Calling conventions.
 	//
 	public:
@@ -150,7 +150,7 @@ class Abi
 	protected:
 		std::map<CallingConvention::ID, CallingConvention::Ptr> _id2cc;
 		CallingConvention::ID _defcc;
-		
+
 };
 
 class AbiProvider

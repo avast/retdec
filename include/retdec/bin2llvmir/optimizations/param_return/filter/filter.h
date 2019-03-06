@@ -142,7 +142,7 @@ class Filter
 
 		std::vector<llvm::Type*> expandTypes(
 			const std::vector<llvm::Type*>& types) const;
-	
+
 	protected:
 		std::size_t fetchGPRegsForType(
 				llvm::Type* type,

@@ -19,7 +19,7 @@ class PascalCallingConvention: public X86CallingConvention
 	public:
 		PascalCallingConvention(const Abi* a);
 		virtual ~PascalCallingConvention();
-	
+
 	// Construcor method.
 	//
 	public:

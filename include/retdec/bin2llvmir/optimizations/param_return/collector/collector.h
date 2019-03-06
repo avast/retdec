@@ -41,7 +41,7 @@ class Collector
 		virtual void collectDefRets(DataFlowEntry* de) const;
 
 		virtual void collectCallSpecificTypes(CallEntry* ce) const;
-	
+
 	protected:
 
 		void collectRetStores(ReturnEntry* re) const;

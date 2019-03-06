@@ -27,7 +27,7 @@ class MSX64Filter : public Filter
 				bool isVoidarg) const override;
 
 		virtual void filterArgsByKnownTypes(FilterableLayout& lay) const override;
-	
+
 	private:
 		void leaveOnlyAlternatingArgRegisters(FilterableLayout& lay) const;
 };

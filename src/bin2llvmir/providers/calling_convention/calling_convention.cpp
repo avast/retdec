@@ -208,7 +208,7 @@ void CallingConventionProvider::registerCC(
 {
 	auto ccId = static_cast<size_t>(cc);
 
-	if (ccId >= _id2cc.size()) 
+	if (ccId >= _id2cc.size())
 	{
 		_id2cc.resize(ccId+1, nullptr);
 	}

@@ -45,7 +45,7 @@ void MSX64Filter::filterDefinitionArgs(FilterableLayout& args, bool isVoidarg) c
 	{
 		leaveOnlyAlternatingArgRegisters(args);
 	}
-	
+
 	leaveOnlyContinuousStack(args);
 }
 
@@ -67,7 +67,7 @@ void MSX64Filter::filterCallArgs(FilterableLayout& args, bool isVoidarg) const
 	{
 		leaveOnlyAlternatingArgRegisters(args);
 	}
-	
+
 	leaveOnlyContinuousStack(args);
 }
 
@@ -77,7 +77,7 @@ void MSX64Filter::filterArgsByKnownTypes(FilterableLayout& lay) const
 	newLayout.knownTypes = lay.knownTypes;
 
 	auto& gpRegs = _cc->getParamRegisters();
-	
+
 	// Indexes of registers to be used next as particular parameter.
 	auto sIt = lay.stacks.begin();
 
@@ -112,7 +112,7 @@ void MSX64Filter::filterArgsByKnownTypes(FilterableLayout& lay) const
 				stackOrd = OrderID::ORD_STACK_GROUP;
 			}
 		}
-		
+
 		if (!requiredStacks && stackOrd == OrderID::ORD_STACK)
 		{
 			requiredStacks = getNumberOfStacksForType(t);

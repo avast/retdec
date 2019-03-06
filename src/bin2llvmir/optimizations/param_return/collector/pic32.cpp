@@ -27,7 +27,7 @@ CollectorPic32::~CollectorPic32()
 void CollectorPic32::collectCallSpecificTypes(CallEntry* ce) const
 {
 	Collector::collectCallSpecificTypes(ce);
-	
+
 	std::vector<llvm::Type*> argTypes;
 	for (auto t : ce->argTypes())
 	{

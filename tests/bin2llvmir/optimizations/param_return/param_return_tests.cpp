@@ -2765,7 +2765,7 @@ TEST_F(ParamReturnTests, arm64ExternalCallUseStacksIf8RegistersUsed)
 		declare i64 @print(i64, i64, i64, i64, i64, i64, i64, i64, i64, i64)
 
 		declare void @0()
-		
+
 		define i64 @fnc() {
 			%stack_-4 = alloca i64
 			%stack_-12 = alloca i64

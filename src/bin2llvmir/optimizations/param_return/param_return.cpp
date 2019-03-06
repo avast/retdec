@@ -611,7 +611,7 @@ void ParamReturn::filterCalls()
 			filters[cc]->filterDefinition(&de);
 		}
 
-		if (de.isVariadic())	
+		if (de.isVariadic())
 		{
 			filters[cc]->filterCallsVariadic(&de, _collector.get());
 		}
@@ -753,7 +753,7 @@ void ParamReturn::applyToIr()
 
 	for (auto& p : _fnc2calls)
 	{
-	
+
 		connectWrappers(p.second);
 	}
 }
@@ -778,7 +778,7 @@ void ParamReturn::applyToIr(DataFlowEntry& de)
 	{
 		return;
 	}
-	
+
 	auto loadsOfCalls = fetchLoadsOfCalls(de.callEntries());
 
 	std::map<ReturnInst*, Value*> rets2vals;

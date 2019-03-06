@@ -60,7 +60,7 @@ class ParamReturn : public llvm::ModulePass
 		void collectExtraData(CallEntry* ce) const;
 
 		void collectCallSpecificTypes(CallEntry* ce) const;
-	
+
 	// Collection of functions usage data.
 	//
 	private:

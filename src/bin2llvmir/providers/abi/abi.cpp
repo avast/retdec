@@ -273,7 +273,7 @@ CallingConvention* Abi::getCallingConvention(
 {
 	if (_id2cc.find(cc) == _id2cc.end())
 	{
-		auto provider = CallingConventionProvider::getProvider();	
+		auto provider = CallingConventionProvider::getProvider();
 		_id2cc[cc] = provider->createCallingConvention(cc, this);
 	}
 

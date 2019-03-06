@@ -437,8 +437,8 @@ std::string unicodeToAscii(const std::uint8_t *bytes, std::size_t nBytes)
 		else
 		{
 			const std::size_t maxC = (1 << (sizeof(std::string::value_type) * CHAR_BIT)) - 1;
-			const auto val1 = numToStr<std::size_t>(bytes[i] & maxC, std::hex);	
-			const auto val2 = numToStr<std::size_t>(bytes[i + 1] & maxC, std::hex);	
+			const auto val1 = numToStr<std::size_t>(bytes[i] & maxC, std::hex);
+			const auto val2 = numToStr<std::size_t>(bytes[i + 1] & maxC, std::hex);
 			result << "\\x" << std::setw(2) << std::setfill('0') << val1;
 			result << "\\x" << std::setw(2) << std::setfill('0') << val2;
 		}

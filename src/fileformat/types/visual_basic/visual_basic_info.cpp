@@ -113,7 +113,7 @@ bool VisualBasicInfo::getLanguageDLLSecondaryLCID(std::uint32_t &res) const
 {
 	if (!validLanguageDLLSecondaryLCID)
 	{
-		return false;	
+		return false;
 	}
 	res = languageDLLSecondaryLCID;
 	return true;

@@ -19,7 +19,7 @@ class WatcomCallingConvention: public X86CallingConvention
 	public:
 		WatcomCallingConvention(const Abi* a);
 		virtual ~WatcomCallingConvention();
-	
+
 	// Construcor method.
 	//
 	public:

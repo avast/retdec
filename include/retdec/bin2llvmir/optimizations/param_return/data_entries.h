@@ -61,12 +61,12 @@ class CallableEntry
 		const std::vector<llvm::Value*>& args() const;
 		const std::vector<llvm::Type*>& argTypes() const;
 		const std::vector<std::string>& argNames() const;
-	
+
 	protected:
 		std::vector<llvm::Value*> _args;
 		std::vector<llvm::Type*> _argTypes;
 		std::vector<std::string> _argNames;
-	
+
 	protected:
 		bool _voidarg = false;
 };
@@ -96,7 +96,7 @@ class FunctionEntry : public CallableEntry
 
 		const std::vector<ReturnEntry>& retEntries() const;
 		std::vector<ReturnEntry>& retEntries();
-	
+
 	private:
 		llvm::CallInst* _wrap = nullptr;
 		llvm::Type* _retType = nullptr;
@@ -115,7 +115,7 @@ class CallEntry : public CallableEntry
 		CallEntry(
 			llvm::CallInst* call,
 			const FunctionEntry* base = nullptr);
-	
+
 	// Usage data.
 	//
 	public:
@@ -165,7 +165,7 @@ class DataFlowEntry : public FunctionEntry
 		llvm::Value* getValue() const;
 
 		void setCalledValue(llvm::Value* called);
-	
+
 	// Usage data.
 	//
 	public:

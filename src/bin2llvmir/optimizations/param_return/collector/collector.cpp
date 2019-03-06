@@ -53,7 +53,7 @@ void Collector::collectCallRets(CallEntry* ce) const
 
 	ce->setRetLoads(std::move(foundLoads));
 }
-	
+
 void Collector::collectDefArgs(DataFlowEntry* dataflow) const
 {
 	if (!dataflow->hasDefinition())
@@ -355,7 +355,7 @@ bool Collector::collectStoresInInstructionBlock(
 					excluded.insert(l->getPointerOperand());
 				}
 			}
-			
+
 			if (excluded.find(ptr) == excluded.end())
 			{
 				stores.push_back(store);
@@ -369,7 +369,7 @@ bool Collector::collectStoresInInstructionBlock(
 			return true;
 		}
 	}
-	
+
 	return true;
 }
 
@@ -393,7 +393,7 @@ void Collector::collectLoadsAfterInstruction(
 	{
 		auto* i = next.front();
 		next.pop();
-		
+
 		auto* block = i->getParent();
 		seen.insert(block);
 
@@ -465,7 +465,7 @@ bool Collector::collectLoadsAfterInstruction(
 			return true;
 		}
 	}
-	
+
 	return true;
 }
 
