@@ -3,6 +3,7 @@
 # dev
 
 * New Feature: Added presentation of imported types and TypeRef hashes for .NET binaries ([#363](https://github.com/avast-tl/retdec/issues/363), [#364](https://github.com/avast-tl/retdec/issues/364), [#428](https://github.com/avast-tl/retdec/issues/428)).
+* New Feature: Added presentation of metadata from binaries written in Visual Basic and detection of P-code ([#138](https://github.com/avast-tl/retdec/issues/138), [#440](https://github.com/avast-tl/retdec/pull/440)).
 * New Feature: Added computation and presentation of icon hashes for exact and also similarity matching in PE files ([#339](https://github.com/avast-tl/retdec/issues/339)).
 * Enhancement: Update YARA to version 3.8.1 ([#218](https://github.com/avast-tl/retdec/issues/218)).
 * Enhancement: Make `--generate-log` option of `retdec-decompiler.py` work on macOS ([#383](https://github.com/avast-tl/retdec/issues/383), [#450](https://github.com/avast-tl/retdec/pull/450)).
