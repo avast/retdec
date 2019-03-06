@@ -1000,58 +1000,52 @@ void ElfDetector::getRelocationTable(const ELFIO::section *sec)
 	delete relocations;
 }
 
-/**
- * Get information about dynamic section
- * @param sec File section
- */
-void ElfDetector::getDynamicSection(const ELFIO::section *sec)
+void ElfDetector::getDynamicSectionsSegments()
 {
-	const dynamic_section_accessor *dynamic = elfParser->getDynamicSection(sec->get_index());
-	if(!dynamic)
-	{
-		return;
-	}
-	DynamicSection dynamicSection;
-	DynamicEntry dynamicEntry;
-	std::string str;
-	Elf_Xword tag = 0, dynValue = 0;
-
-	dynamicSection.setNumberOfDeclaredEntries(dynamic->get_entries_num());
 	const unsigned long long flagMasks[] = {DF_ORIGIN, DF_SYMBOLIC, DF_TEXTREL, DF_BIND_NOW, DF_STATIC_TLS};
 	const unsigned long long flagsSize = arraySize(flagMasks);
 	const std::string flagsDesc[flagsSize] = {"DF_ORIGIN", "DF_SYMBOLIC", "DF_TEXTREL", "DF_BIND_NOW",
 												"file contains code using a static thread-local storage scheme (DF_STATIC_TLS)"};
 	const std::string flagsAbbv[flagsSize] = {"o", "s", "r", "b", "t"};
 
-	for(unsigned long long i = 0, e = dynamic->get_loaded_entries_num(); i < e; ++i)
+	for (auto* dt : elfParser->getDynamicTables())
 	{
-		dynamic->get_entry(i, tag, dynValue, str);
-		dynamicEntry.setValue(dynValue);
-		dynamicEntry.setDescription(replaceNonprintableChars(str));
-		dynamicEntry.setType(getDynamicEntryType(tag));
-		dynamicEntry.clearFlagsDescriptors();
-		if(tag == DT_FLAGS)
+		DynamicSection dynamicSection;
+
+		dynamicSection.setNumberOfDeclaredEntries(dt->getNumberOfRecords());
+		dynamicSection.setSectionName(dt->getSectionName());
+
+		for (auto& de : *dt)
 		{
-			dynamicEntry.setFlagsSize(ELF_64_FLAGS_SIZE);
-			dynamicEntry.setFlags(dynValue);
-			for(unsigned long long j = 0; j < flagsSize; ++j)
+			DynamicEntry dynamicEntry;
+
+			dynamicEntry.setValue(de.getValue());
+			dynamicEntry.setDescription(replaceNonprintableChars(de.getDescription()));
+			dynamicEntry.setType(getDynamicEntryType(de.getType()));
+			dynamicEntry.clearFlagsDescriptors();
+			if(de.getType() == DT_FLAGS)
 			{
-				if(dynValue & flagMasks[j])
+				dynamicEntry.setFlagsSize(ELF_64_FLAGS_SIZE);
+				dynamicEntry.setFlags(de.getValue());
+				for(unsigned long long j = 0; j < flagsSize; ++j)
 				{
-					dynamicEntry.addFlagsDescriptor(flagsDesc[j], flagsAbbv[j]);
+					if(de.getValue() & flagMasks[j])
+					{
+						dynamicEntry.addFlagsDescriptor(flagsDesc[j], flagsAbbv[j]);
+					}
 				}
 			}
+			else
+			{
+				dynamicEntry.setFlagsSize(0);
+				dynamicEntry.setFlags(0);
+			}
+
+			dynamicSection.addEntry(dynamicEntry);
 		}
-		else
-		{
-			dynamicEntry.setFlagsSize(0);
-			dynamicEntry.setFlags(0);
-		}
-		dynamicSection.addEntry(dynamicEntry);
+
+		fileInfo.addDynamicSection(dynamicSection);
 	}
-	dynamicSection.setSectionName(sec->get_name());
-	fileInfo.addDynamicSection(dynamicSection);
-	delete dynamic;
 }
 
 /**
@@ -1124,9 +1118,6 @@ void ElfDetector::getSections()
 			case SHT_RELA:
 			case SHT_REL:
 				getRelocationTable(sec);
-				break;
-			case SHT_DYNAMIC:
-				getDynamicSection(sec);
 				break;
 			default:
 				break;
@@ -1964,6 +1955,7 @@ void ElfDetector::getAdditionalInfo()
 	getFlags();
 	getSegments();
 	getSections();
+	getDynamicSectionsSegments();
 	getSymbolTable();
 	getNotes();
 	getCoreInfo();

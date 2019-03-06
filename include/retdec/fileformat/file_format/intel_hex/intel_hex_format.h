@@ -40,6 +40,7 @@ class IntelHexFormat : public FileFormat
 	public:
 		IntelHexFormat(std::string pathToFile, LoadFlags loadFlags = LoadFlags::NONE);
 		IntelHexFormat(std::istream &inputStream, LoadFlags loadFlags = LoadFlags::NONE);
+		IntelHexFormat(const std::uint8_t *data, std::size_t size, LoadFlags loadFlags = LoadFlags::NONE);
 		virtual ~IntelHexFormat() override;
 
 		/// @name Byte value storage methods

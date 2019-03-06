@@ -332,6 +332,23 @@ void PeDetector::getDotnetInfo()
 	fileInfo.setDotnetTypeLibId(peParser->getTypeLibId());
 	fileInfo.setDotnetDefinedClassList(peParser->getDefinedDotnetClasses());
 	fileInfo.setDotnetImportedClassList(peParser->getImportedDotnetClasses());
+	fileInfo.setDotnetTypeRefhashCrc32(peParser->getTypeRefhashCrc32());
+	fileInfo.setDotnetTypeRefhashMd5(peParser->getTypeRefhashMd5());
+	fileInfo.setDotnetTypeRefhashSha256(peParser->getTypeRefhashSha256());
+}
+
+/**
+ * Get information about .NET
+ */
+void PeDetector::getVisualBasicInfo()
+{
+	unsigned long long version;
+	if (!peParser->isVisualBasic(version))
+	{
+		return;
+	}
+	fileInfo.setVisualBasicUsed(true);
+	fileInfo.setVisualBasicInfo(peParser->getVisualBasicInfo());
 }
 
 void PeDetector::detectFileClass()
@@ -491,6 +508,7 @@ void PeDetector::getAdditionalInfo()
 	getCoffSymbols();
 	getRelocationTableInfo();
 	getDotnetInfo();
+	getVisualBasicInfo();
 
 	/* In future we can detect more information about PE files:
 		- TimeDateStamp

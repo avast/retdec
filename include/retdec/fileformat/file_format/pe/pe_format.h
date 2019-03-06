@@ -18,6 +18,7 @@
 #include "retdec/fileformat/types/dotnet_headers/string_stream.h"
 #include "retdec/fileformat/types/dotnet_headers/user_string_stream.h"
 #include "retdec/fileformat/types/dotnet_types/dotnet_class.h"
+#include "retdec/fileformat/types/visual_basic/visual_basic_info.h"
 
 namespace retdec {
 namespace fileformat {
@@ -41,6 +42,10 @@ class PeFormat : public FileFormat
 		std::string typeLibId;                                     ///< .NET type lib ID
 		std::vector<std::shared_ptr<DotnetClass>> definedClasses;  ///< .NET defined class list
 		std::vector<std::shared_ptr<DotnetClass>> importedClasses; ///< .NET imported class list
+		std::string typeRefHashCrc32;                              ///< .NET typeref table hash as CRC32
+		std::string typeRefHashMd5;                                ///< .NET typeref table hash as MD5
+		std::string typeRefHashSha256;                             ///< .NET typeref table hash as SHA256
+		VisualBasicInfo visualBasicInfo;                           ///< visual basic header information
 
 		/// @name Initialization methods
 		/// @{
@@ -62,6 +67,7 @@ class PeFormat : public FileFormat
 		void loadSymbols();
 		void loadImports();
 		void loadExports();
+		void loadVisualBasicHeader();
 		void loadPdbInfo();
 		void loadResourceNodes(std::vector<const PeLib::ResourceChild*> &nodes, const std::vector<std::size_t> &levels);
 		void loadResources();
@@ -88,6 +94,17 @@ class PeFormat : public FileFormat
 		void detectTypeLibId();
 		void detectDotnetTypes();
 		std::uint64_t detectPossibleMetadataHeaderAddress() const;
+		void computeTypeRefHashes();
+		/// @}
+		/// @name Visual Basic methods
+		/// @{
+		bool parseVisualBasicProjectInfo(std::size_t structureOffset);
+		bool parseVisualBasicExternTable(std::size_t structureOffset, std::size_t nEntries);
+		bool parseVisualBasicObjectTable(std::size_t structureOffset);
+		bool parseVisualBasicObjects(std::size_t structureOffset, std::size_t nObjects);
+		bool parseVisualBasicComRegistrationData(std::size_t structureOffset);
+		bool parseVisualBasicComRegistrationInfo(std::size_t structureOffset,
+												std::size_t comRegDataOffset);
 		/// @}
 	protected:
 		PeLib::PeFile *file;              ///< PeLib representation of PE file
@@ -96,6 +113,8 @@ class PeFormat : public FileFormat
 		int peClass;                      ///< class of PE file
 	public:
 		PeFormat(std::string pathToFile, LoadFlags loadFlags = LoadFlags::NONE);
+		PeFormat(std::istream &inputStream, LoadFlags loadFlags = LoadFlags::NONE);
+		PeFormat(const std::uint8_t *data, std::size_t size, LoadFlags loadFlags = LoadFlags::NONE);
 		virtual ~PeFormat() override;
 
 		/// @name Byte value storage methods
@@ -171,6 +190,10 @@ class PeFormat : public FileFormat
 		const std::string& getTypeLibId() const;
 		const std::vector<std::shared_ptr<DotnetClass>>& getDefinedDotnetClasses() const;
 		const std::vector<std::shared_ptr<DotnetClass>>& getImportedDotnetClasses() const;
+		const std::string& getTypeRefhashCrc32() const;
+		const std::string& getTypeRefhashMd5() const;
+		const std::string& getTypeRefhashSha256() const;
+		const VisualBasicInfo* getVisualBasicInfo() const;
 		/// @}
 };
 

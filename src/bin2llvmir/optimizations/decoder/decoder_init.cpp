@@ -166,10 +166,7 @@ void Decoder::initEnvironmentRegisters()
 		if (_c2l->isRegister(&gv))
 		{
 			unsigned regNum = _c2l->getCapstoneRegister(&gv);
-			auto s = config::Storage::inRegister(
-					gv.getName(),
-					regNum,
-					"");
+			auto s = config::Storage::inRegister(gv.getName(), regNum);
 
 			config::Object cr(gv.getName(), s);
 			cr.type.setLlvmIr(llvmObjToString(gv.getValueType()));
@@ -892,20 +889,31 @@ void Decoder::initStaticCode()
 {
 	LOG << "\n" << "initStaticCode():" << std::endl;
 
-	StaticCodeAnalysis SCA(
-			_config,
-			_image,
-			_names,
-			_c2l->getCapstoneEngine(),
-			_c2l->getBasicMode(),
-			debug_enabled);
+	stacofin::Finder SCA;
+	SCA.searchAndConfirm(*_image->getImage(), _config->getConfig());
 
 	for (auto& p : SCA.getConfirmedDetections())
 	{
 		auto* sf = p.second;
 
+		for (auto& n : sf->names)
+		{
+			if (sf->getAddress().isDefined() && !n.empty())
+			{
+				_names->addNameForAddress(sf->getAddress(), n, Name::eType::STATIC_CODE);
+			}
+		}
+
+		for (auto& r : sf->references)
+		{
+			if (r.address.isDefined() && !r.name.empty())
+			{
+				_names->addNameForAddress(r.target, r.name, Name::eType::STATIC_CODE);
+			}
+		}
+
 		if (auto* jt = _jumpTargets.push(
-				sf->address,
+				sf->getAddress(),
 				JumpTarget::eType::STATIC_CODE,
 				sf->isThumb() ? CS_MODE_THUMB : _c2l->getBasicMode(),
 				Address::getUndef,
@@ -925,12 +933,12 @@ void Decoder::initStaticCode()
 			// with IDA CFG.
 			//_ranges.remove(f->address, f->address + f->size);
 
-			LOG << "\t" << "[+] " << sf->address << " @ "
+			LOG << "\t" << "[+] " << sf->getAddress() << " @ "
 					<< nf->getName().str() << std::endl;
 		}
 		else
 		{
-			LOG << "\t" << "[-] " << sf->address << " (no JT)" << std::endl;
+			LOG << "\t" << "[-] " << sf->getAddress() << " (no JT)" << std::endl;
 		}
 	}
 }

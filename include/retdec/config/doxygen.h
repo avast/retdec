@@ -213,7 +213,7 @@ std::string createJson()
 
 void parseJson(const std::string& json)
 {
-	std::stringstream out;
+    std::stringstream out;
 
     // We again create an empty config file.
     // We can initialize it manually like in the createJson() function,

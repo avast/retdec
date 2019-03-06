@@ -782,6 +782,341 @@ bool FileInformation::hasRichHeaderRecords() const
 }
 
 /**
+ * Check whether visual basic informations are used.
+ * @return @c true if it is used, otherwise @c false/
+ */
+bool FileInformation::isVisualBasicUsed() const
+{
+	return visualBasicInfo.isUsed();
+}
+
+/**
+ * Check whether visual basic uses P-Code.
+ * @return @c true if it does, otherwise @c false/
+ */
+bool FileInformation::getVisualBasicIsPcode() const
+{
+	return visualBasicInfo.isPcode();
+}
+
+/**
+ * Get visual basic language DLL
+ * @return Visual basic language DLL
+ */
+std::string FileInformation::getVisualBasicLanguageDLL() const
+{
+	return visualBasicInfo.getLanguageDLL();
+}
+
+/**
+ * Get visual basic backup language DLL
+ * @return Visual basic backup language DLL
+ */
+std::string FileInformation::getVisualBasicBackupLanguageDLL() const
+{
+	return visualBasicInfo.getBackupLanguageDLL();
+}
+
+/**
+ * Get visual basic project exe name
+ * @return Visual basic project exe name
+ */
+std::string FileInformation::getVisualBasicProjectExeName() const
+{
+	return visualBasicInfo.getProjectExeName();
+}
+
+/**
+ * Get visual basic project description
+ * @return Visual basic project description
+ */
+std::string FileInformation::getVisualBasicProjectDescription() const
+{
+	return visualBasicInfo.getProjectDescription();
+}
+
+/**
+ * Get visual basic project help file
+ * @return Visual basic project help file
+ */
+std::string FileInformation::getVisualBasicProjectHelpFile() const
+{
+	return visualBasicInfo.getProjectHelpFile();
+}
+
+/**
+ * Get visual basic project name
+ * @return Visual basic project name
+ */
+std::string FileInformation::getVisualBasicProjectName() const
+{
+	return visualBasicInfo.getProjectName();
+}
+
+/**
+ * Get visual basic language DLL primary LCID
+ * @return Visual basic language DLL primary LCID
+ */
+std::string FileInformation::getVisualBasicLanguageDLLPrimaryLCIDStr() const
+{
+	return visualBasicInfo.getLanguageDLLPrimaryLCIDStr();
+}
+
+/**
+ * Get visual basic language DLL secondary LCID
+ * @return Visual basic language DLL secondary LCID
+ */
+std::string FileInformation::getVisualBasicLanguageDLLSecondaryLCIDStr() const
+{
+	return visualBasicInfo.getLanguageDLLSecondaryLCIDStr();
+}
+
+/**
+ * Get visual basic project path
+ * @return Visual basic project path
+ */
+std::string FileInformation::getVisualBasicProjectPath() const
+{
+	return visualBasicInfo.getProjectPath();
+}
+
+/**
+ * Get visual basic project primary LCID
+ * @return Visual basic project primary LCID
+ */
+std::string FileInformation::getVisualBasicProjectPrimaryLCIDStr() const
+{
+	return visualBasicInfo.getProjectPrimaryLCIDStr();
+}
+
+/**
+ * Get visual basic project secondary LCID
+ * @return Visual basic project secondary LCID
+ */
+std::string FileInformation::getVisualBasicProjectSecondaryLCIDStr() const
+{
+	return visualBasicInfo.getProjectSecondaryLCIDStr();
+}
+
+/**
+ * Get visual basic object
+ * @param position Index of selected object (indexed from 0)
+ * @return Visual basic object
+ */
+const retdec::fileformat::VisualBasicObject *FileInformation::getVisualBasicObject(std::size_t position) const
+{
+	return visualBasicInfo.getObject(position);
+}
+
+/**
+ * Get visual basic extern
+ * @param position Index of selected extern (indexed from 0)
+ * @return Visual basic extern
+ */
+const retdec::fileformat::VisualBasicExtern *FileInformation::getVisualBasicExtern(std::size_t position) const
+{
+	return visualBasicInfo.getExtern(position);
+}
+
+/**
+ * Get visual basic number of objects
+ * @return Visual basic number of objects
+ */
+std::size_t FileInformation::getVisualBasicNumberOfObjects() const
+{
+	return visualBasicInfo.getNumberOfObjects();
+}
+
+/**
+ * Get visual basic number of externs
+ * @return Visual basic number of externs
+ */
+std::size_t FileInformation::getVisualBasicNumberOfExterns() const
+{
+	return visualBasicInfo.getNumberOfExterns();
+}
+
+/**
+ * Get visual basic extern module name
+ * @param position Index of selected extern (indexed from 0)
+ * @return Visual basic extern module name
+ */
+std::string FileInformation::getVisualBasicExternModuleName(std::size_t position) const
+{
+	return visualBasicInfo.getExternModuleName(position);
+}
+
+/**
+ * Get visual basic extern api name
+ * @param position Index of selected extern (indexed from 0)
+ * @return Visual basic extern api name
+ */
+std::string FileInformation::getVisualBasicExternApiName(std::size_t position) const
+{
+	return visualBasicInfo.getExternApiName(position);
+}
+
+/**
+ * Get visual basic object table GUID
+ * @return Object table GUID as string
+ */
+std::string FileInformation::getVisualBasicObjectTableGUID() const
+{
+	return visualBasicInfo.getObjectTableGUID();
+}
+
+/**
+ * Get visual basic typeLib CLSID
+ * @return typeLib CLSID as string
+ */
+std::string FileInformation::getVisualBasicTypeLibCLSID() const
+{
+	return visualBasicInfo.getTypeLibCLSID();
+}
+
+/**
+ * Get visual basic typeLib major version
+ * @return TypeLib major version
+ */
+std::string FileInformation::getVisualBasicTypeLibMajorVersionStr() const
+{
+	return visualBasicInfo.getTypeLibMajorVersionStr();
+}
+
+/**
+ * Get visual basic typeLib minor version
+ * @return TypeLib minor version
+ */
+std::string FileInformation::getVisualBasicTypeLibMinorVersionStr() const
+{
+	return visualBasicInfo.getTypeLibMinorVersionStr();
+}
+
+/**
+ * Get visual basic typeLib LCID
+ * @return Visual basic typeLib LCID
+ */
+std::string FileInformation::getVisualBasicTypeLibLCIDStr() const
+{
+	return visualBasicInfo.getTypeLibLCIDStr();
+}
+
+/**
+ * Get visual basic COM object name
+ * @return Visual basic COM object name
+ */
+std::string FileInformation::getVisualBasicCOMObjectName() const
+{
+	return visualBasicInfo.getCOMObjectName();
+}
+
+/**
+ * Get visual basic COM object description
+ * @return Visual basic COM object description
+ */
+std::string FileInformation::getVisualBasicCOMObjectDescription() const
+{
+	return visualBasicInfo.getCOMObjectDescription();
+}
+
+/**
+ * Get visual basic COM object CLSID
+ * @return Visual basic COM object CLSID
+ */
+std::string FileInformation::getVisualBasicCOMObjectCLSID() const
+{
+	return visualBasicInfo.getCOMObjectCLSID();
+}
+
+/**
+ * Get visual basic COM object interface CLSID
+ * @return Visual basic COM object interface CLSID
+ */
+std::string FileInformation::getVisualBasicCOMObjectInterfaceCLSID() const
+{
+	return visualBasicInfo.getCOMObjectInterfaceCLSID();
+}
+
+/**
+ * Get visual basic COM object events CLSID
+ * @return Visual basic COM object events CLSID
+ */
+std::string FileInformation::getVisualBasicCOMObjectEventsCLSID() const
+{
+	return visualBasicInfo.getCOMObjectEventsCLSID();
+}
+
+/**
+ * Get visual basic COM object type
+ * @return Visual basic COM object type
+ */
+std::string FileInformation::getVisualBasicCOMObjectType() const
+{
+	return visualBasicInfo.getCOMObjectType();
+}
+
+/**
+ * Get visual basic extern table hash as Crc32
+ * @return Visual basic extern table hash
+ */
+std::string FileInformation::getVisualBasicExternTableHashCrc32() const
+{
+	return visualBasicInfo.getExternTableHashCrc32();
+}
+
+/**
+ * Get visual basic extern table hash as Md5
+ * @return Visual basic extern table hash
+ */
+std::string FileInformation::getVisualBasicExternTableHashMd5() const
+{
+	return visualBasicInfo.getExternTableHashMd5();
+}
+
+/**
+ * Get visual basic extern table hash as Sha256
+ * @return Visual basic extern table hash
+ */
+std::string FileInformation::getVisualBasicExternTableHashSha256() const
+{
+	return visualBasicInfo.getExternTableHashSha256();
+}
+
+/**
+ * Get visual basic object table hash as Crc32
+ * @return Visual basic object table hash
+ */
+std::string FileInformation::getVisualBasicObjectTableHashCrc32() const
+{
+	return visualBasicInfo.getObjectTableHashCrc32();
+}
+
+/**
+ * Get visual basic object table hash as Md5
+ * @return Visual basic object table hash
+ */
+std::string FileInformation::getVisualBasicObjectTableHashMd5() const
+{
+	return visualBasicInfo.getObjectTableHashMd5();
+}
+
+/**
+ * Get visual basic object table hash as Sha256
+ * @return Visual basic object table hash
+ */
+std::string FileInformation::getVisualBasicObjectTableHashSha256() const
+{
+	return visualBasicInfo.getObjectTableHashSha256();
+}
+
+
+
+
+
+
+
+
+/**
  * Get type of related PDB file
  * @return Type of related PDB file
  */
@@ -901,6 +1236,16 @@ std::string FileInformation::getImportName(std::size_t position) const
 std::string FileInformation::getImportLibraryName(std::size_t position) const
 {
 	return importTable.getImportLibraryName(position);
+}
+
+/**
+ * Get import type
+ * @param position Index of selected import (indexed from 0)
+ * @return Symbol type
+ */
+std::string FileInformation::getImportUsageType(std::size_t position) const
+{
+	return importTable.getImportUsageType(position);
 }
 
 /**
@@ -1051,6 +1396,42 @@ std::string FileInformation::getResourceSha256(std::size_t index) const
 }
 
 /**
+ * Get iconhash as CRC32
+ * @return ResourceIconhash as CRC32
+ */
+std::string FileInformation::getResourceIconhashCrc32() const
+{
+	return resourceTable.getResourceIconhashCrc32();
+}
+
+/**
+ * Get iconhash as MD5
+ * @return ResourceIconhash as MD5
+ */
+std::string FileInformation::getResourceIconhashMd5() const
+{
+	return resourceTable.getResourceIconhashMd5();
+}
+
+/**
+ * Get iconhash as SHA256
+ * @return ResourceIconhash as SHA256
+ */
+std::string FileInformation::getResourceIconhashSha256() const
+{
+	return resourceTable.getResourceIconhashSha256();
+}
+
+/**
+ * Get icon perceptual hash as AvgHash
+ * @return Icon perceptual hash as AvgHash
+ */
+std::string FileInformation::getResourceIconPerceptualAvgHash() const
+{
+	return resourceTable.getResourceIconPerceptualAvgHash();
+}
+
+/**
  * Get name of selected resource
  * @param index Index of selected resource (indexed from 0)
  * @return Name of selected resource
@@ -1144,6 +1525,15 @@ std::string FileInformation::getResourceOffsetStr(std::size_t index, std::ios_ba
 std::string FileInformation::getResourceSizeStr(std::size_t index, std::ios_base &(* format)(std::ios_base &)) const
 {
 	return resourceTable.getResourceSizeStr(index, format);
+}
+
+/**
+ * Find out if there are any records in resource table
+ * @return @c true if resource table is not empty, @c false otherwise
+ */
+bool FileInformation::hasResourceTableRecords() const
+{
+	return resourceTable.hasRecords();
 }
 
 /**
@@ -2807,6 +3197,92 @@ const std::string& FileInformation::getDotnetRuntimeVersion() const
 }
 
 /**
+ * Get imported class name
+ * @param position Index of selected imported class (indexed from 0)
+ * @return Name of selected imported class
+ */
+std::string FileInformation::getDotnetImportedClassName(std::size_t position) const
+{
+	return dotnetInfo.getImportedClassName(position);
+}
+
+/**
+ * Get imported class nested name
+ * @param position Index of selected imported class (indexed from 0)
+ * @return Nested name of selected imported class
+ */
+std::string FileInformation::getDotnetImportedClassNestedName(std::size_t position) const
+{
+	return dotnetInfo.getImportedClassNestedName(position);
+}
+
+/**
+ * Get imported class name with parent class presentation index
+ * @param position Index of selected imported class (indexed from 0)
+ * @return Name of selected imported class with parent class presentation index
+ */
+std::string FileInformation::getDotnetImportedClassNameWithParentClassIndex(std::size_t position) const
+{
+	return dotnetInfo.getImportedClassNameWithParentClassIndex(position);
+}
+
+/**
+ * Get imported class library name
+ * @param position Index of selected imported class (indexed from 0)
+ * @return Library name of selected imported class
+ */
+std::string FileInformation::getDotnetImportedClassLibName(std::size_t position) const
+{
+	return dotnetInfo.getImportedClassLibName(position);
+}
+
+/**
+ * Get imported class namespace
+ * @param position Index of selected imported class (indexed from 0)
+ * @return Namespace of selected imported class
+ */
+std::string FileInformation::getDotnetImportedClassNameSpace(std::size_t position) const
+{
+	return dotnetInfo.getImportedClassNameSpace(position);
+}
+
+/**
+ * Get dotnet typeref hash as CRC32
+ * @return Typeref hash as CRC32
+ */
+std::string FileInformation::getDotnetTypeRefhashCrc32() const
+{
+	return dotnetInfo.getTypeRefhashCrc32();
+}
+
+/**
+ * Get dotnet typeref hash as MD5
+ * @return Typeref hash as MD5
+ */
+std::string FileInformation::getDotnetTypeRefhashMd5() const
+{
+	return dotnetInfo.getTypeRefhashMd5();
+}
+
+/**
+ * Get dotnet typeref hash as SHA256
+ * @return Typeref hash as SHA256
+ */
+std::string FileInformation::getDotnetTypeRefhashSha256() const
+{
+	return dotnetInfo.getTypeRefhashSha256();
+}
+
+/**
+ * Get number of stored imported dotnet classes
+ * @return Number of stored imported dotnet classes
+ */
+std::size_t FileInformation::getNumberOfStoredDotnetImportedClasses() const
+{
+	return dotnetInfo.getNumberOfImportedClasses();
+}
+
+/**
  * Returns .NET metadata header address in string representation in specified format.
  * @param format Format.
  * @return Metadata header address in string representation.
@@ -3004,6 +3480,15 @@ bool FileInformation::hasDotnetUserStringStream() const
 bool FileInformation::hasDotnetTypeLibId() const
 {
 	return dotnetInfo.hasTypeLibId();
+}
+
+/**
+ * Find out if there are any records in typeref table
+ * @return @c true if typeref is not empty, @c false otherwise
+ */
+bool FileInformation::hasDotnetTypeRefTableRecords() const
+{
+	return dotnetInfo.hasImportedClassListRecords();
 }
 
 /**
@@ -3448,6 +3933,24 @@ void FileInformation::setRichHeader(const retdec::fileformat::RichHeader *rHeade
 }
 
 /**
+ * Set visual basic information
+ * @param vbInfo Information about visual basic
+ */
+void FileInformation::setVisualBasicInfo(const retdec::fileformat::VisualBasicInfo *vbInfo)
+{
+	visualBasicInfo.setInfo(vbInfo);
+}
+
+/**
+ * Sets whether visual basic informations are used.
+ * @param set @c true if used, otherwise @c false.
+ */
+void FileInformation::setVisualBasicUsed(bool set)
+{
+	visualBasicInfo.setUsed(set);
+} 
+
+/**
  * Set type of related PDB file
  * @param sType Type of related PDB file
  */
@@ -3508,6 +4011,15 @@ void FileInformation::setImportTable(const retdec::fileformat::ImportTable *sTab
 void FileInformation::setExportTable(const retdec::fileformat::ExportTable *sTable)
 {
 	exportTable.setTable(sTable);
+}
+
+/**
+ * Set resource table
+ * @param sTable Information about resource table
+ */
+void FileInformation::setResourceTable(const retdec::fileformat::ResourceTable *sTable)
+{
+	resourceTable.setTable(sTable);
 }
 
 /**
@@ -3679,6 +4191,33 @@ void FileInformation::setDotnetImportedClassList(const std::vector<std::shared_p
 }
 
 /**
+ * Sets .NET typeref hash as CRC32.
+ * @param crc32 Hash as CRC32.
+ */
+void FileInformation::setDotnetTypeRefhashCrc32(const std::string& crc32)
+{
+	dotnetInfo.setTypeRefhashCrc32(crc32);
+}
+
+/**
+ * Sets .NET typeref hash as MD5.
+ * @param md5 Hash as MD5.
+ */
+void FileInformation::setDotnetTypeRefhashMd5(const std::string& md5)
+{
+	dotnetInfo.setTypeRefhashMd5(md5);
+}
+
+/**
+ * Sets .NET typeref hash as SHA256.
+ * @param sha256 Hash as SHA256.
+ */
+void FileInformation::setDotnetTypeRefhashSha256(const std::string& sha256)
+{
+	dotnetInfo.setTypeRefhashSha256(sha256);
+}
+
+/**
  * Add file flag descriptor
  * @param descriptor Descriptor (full description of flag)
  * @param abbreviation Abbreviation (short description of flag)
@@ -3712,23 +4251,6 @@ void FileInformation::addDllFlagsDescriptor(std::string descriptor, std::string 
 void FileInformation::clearDllFlagsDescriptors()
 {
 	header.clearDllFlagsDescriptors();
-}
-
-/**
- * Add resource to resource table
- * @param resource Resource to add
- */
-void FileInformation::addResource(Resource &resource)
-{
-	resourceTable.addResource(resource);
-}
-
-/**
- * Delete all resources from resource table
- */
-void FileInformation::clearResources()
-{
-	resourceTable.clearResources();
 }
 
 /**

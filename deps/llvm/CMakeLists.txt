@@ -28,13 +28,14 @@ endif()
 include(ExternalProject)
 
 ExternalProject_Add(llvm-project
-	URL https://github.com/avast-tl/llvm/archive/725d0cee133c6ab9b95c493f05de3b08016f5c3c.zip
-	URL_HASH SHA256=0ec70e790a84df1dcc4e5bb30f9a3ae32eb280aad8a4711158ba227513ddebf4
+	URL https://github.com/avast-tl/llvm/archive/3d1e5d0bc1122a027e83f57c86851a027dd09112.zip
+	URL_HASH SHA256=069fdb818c75c1aecad1d24848fd0fe7359ca16871aae595a1389274ba92815d
 	DOWNLOAD_NAME llvm.zip
 	CMAKE_ARGS
 		# Force a release build (we don't need to debug LLVM).
 		# This has no effect on Windows with MSVC, but is useful on Linux.
 		-DCMAKE_BUILD_TYPE=Release
+		-DCMAKE_CXX_FLAGS_RELEASE=${CMAKE_CXX_FLAGS_RELEASE}
 
 		# Force Python3.
 		-DPYTHON_EXECUTABLE=${PYTHON_EXECUTABLE}

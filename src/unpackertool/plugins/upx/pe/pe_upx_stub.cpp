@@ -271,7 +271,7 @@ template <int bits> void PeUpxStub<bits>::setupPackingMethod(std::uint8_t packin
 }
 
 /**
- * Reads the unpacking stub (from EP up to the end of the EP section) and stores it into @ref retdec::unpacker::DynamicBuffer.
+ * Reads the unpacking stub (from EP up to the end of the EP section) and stores it into @ref retdec::utils::DynamicBuffer.
  *
  * @param unpackingStub Buffer where to store unpacking stub.
  */
@@ -292,7 +292,7 @@ template <int bits> void PeUpxStub<bits>::readPackedData(DynamicBuffer& packedDa
 }
 
 /**
- * Decompresses the packed data and stores result in @ref retdec::unpacker::DynamicBuffer.
+ * Decompresses the packed data and stores result in @ref retdec::utils::DynamicBuffer.
  *
  * @param packedData Data to decompress.
  * @param unpackedData Buffer where to store the result.
@@ -427,7 +427,7 @@ template <int bits> void PeUpxStub<bits>::unpackData(DynamicBuffer& unpackedData
 }
 
 /**
- * Reads the ILT (Import Lookup Table) of the packed file and stores it into @ref retdec::unpacker::DynamicBuffer.
+ * Reads the ILT (Import Lookup Table) of the packed file and stores it into @ref retdec::utils::DynamicBuffer.
  *
  * @param ilt Buffer where to store ILT.
  */
@@ -510,7 +510,7 @@ template <int bits> void PeUpxStub<bits>::fixSizeOfSections(const DynamicBuffer&
  *
  * @return @ref UpxExtraData structure.
  */
-template <int bits> UpxExtraData PeUpxStub<bits>::parseExtraData(retdec::unpacker::DynamicBuffer& unpackedData, retdec::unpacker::DynamicBuffer& originalHeader)
+template <int bits> UpxExtraData PeUpxStub<bits>::parseExtraData(DynamicBuffer& unpackedData, DynamicBuffer& originalHeader)
 {
 	// First we need to find original PE header. If we have metadata, we can easily find it using unpacked data size.
 	// However, if we don't have, we need to use heuristic that looks in the last 1024 bytes (should be more than enough)
@@ -828,7 +828,7 @@ template <int bits> void PeUpxStub<bits>::fixOep(const DynamicBuffer& originalHe
  *
  * @param originalHeader The original PE header.
  */
-template <int bits> void PeUpxStub<bits>::fixExports(const retdec::unpacker::DynamicBuffer& originalHeader)
+template <int bits> void PeUpxStub<bits>::fixExports(const DynamicBuffer& originalHeader)
 {
 	// Assumption is that exports are compressed
 	_exportsCompressed = true;
@@ -1171,7 +1171,7 @@ template <int bits> void PeUpxStub<bits>::fixCertificates()
  * @param unpackedData The unpacked data.
  * @param extraData @ref UpxExtraData structure.
  */
-template <int bits> void PeUpxStub<bits>::cutHintsData(retdec::unpacker::DynamicBuffer& unpackedData, const UpxExtraData& extraData)
+template <int bits> void PeUpxStub<bits>::cutHintsData(DynamicBuffer& unpackedData, const UpxExtraData& extraData)
 {
 	// We need to find lowest possible address where we can cut the unpacked data and remove hints.
 	// We always know the address of original PE header, we need to check whether import hints or reloc hints are at lower address.

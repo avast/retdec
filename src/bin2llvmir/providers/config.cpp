@@ -85,6 +85,8 @@ Config Config::fromJsonString(llvm::Module* m, const std::string& json)
  */
 void Config::doFinalization()
 {
+	tagFunctionsWithUsedCryptoGlobals();
+
 	if (!_configPath.empty())
 	{
 		_configDB.generateJsonFile(_configPath);
@@ -418,105 +420,6 @@ llvm::GlobalVariable* Config::getLlvmRegister(
 	return cr ? _module->getNamedGlobal(cr->getName()) : nullptr;
 }
 
-bool Config::isRegister(const llvm::Value* val)
-{
-	return getConfigRegister(val) != nullptr;
-}
-
-/**
- * @return @c True if the the provided LLVM value @a val is a flag register,
- *         i.e. it is a register with @c i1 type. @c False otherwise.
- */
-bool Config::isFlagRegister(const llvm::Value* val)
-{
-	return isRegister(val)
-			&& val->getType()->getPointerElementType()->isIntegerTy(1);
-}
-
-/**
- * TODO: Right now this is based on name comparisons with known stack
- * pointer register names. We should use info from ABI or config instead.
- */
-bool Config::isStackPointerRegister(const llvm::Value* val)
-{
-	if (!isRegister(val))
-	{
-		return false;
-	}
-
-	auto& arch = getConfig().architecture;
-
-	std::string n = val->getName();
-	return n == "esp"
-			|| (n == "r1" && arch.isPpc())
-			|| n == "sp"
-			|| n == "rsp";
-}
-
-bool Config::isGeneralPurposeRegister(const llvm::Value* val)
-{
-	auto* r = getConfigRegister(val);
-	if (r == nullptr)
-	{
-		return false;
-	}
-	if (getConfig().architecture.isMipsOrPic32())
-	{
-		// TODO
-//		return r->getStorage().getRegisterClass() == "gpregs";
-		auto rn = r->getStorage().getRegisterNumber();
-		return MIPS_REG_0 <= rn && rn <= MIPS_REG_31;
-	}
-	else if (getConfig().architecture.isArmOrThumb())
-	{
-		// TODO
-//		return r->getStorage().getRegisterClass() == "regs";
-		auto rn = r->getStorage().getRegisterNumber();
-		return ARM_REG_R0 <= rn && rn <= ARM_REG_R12;
-	}
-	else if (getConfig().architecture.isPpc())
-	{
-		// TODO
-//		return r->getStorage().getRegisterClass() == "gpregs";
-		auto rn = r->getStorage().getRegisterNumber();
-		return PPC_REG_R0 <= rn && rn <= PPC_REG_R31;
-	}
-	else if (getConfig().architecture.isX86())
-	{
-		// TODO: this whole thif is bad
-//		return r->getStorage().getRegisterClass() == "gpr";
-		auto n = r->getName();
-		return n == "eax" || n == "ebx" || n == "ecx" || n == "edx"
-				|| n == "esp" || n == "ebp" || n == "esi" || n == "edi";
-	}
-	else
-	{
-		return false;
-	}
-}
-
-/**
- * TODO: bad, fix/remove.
- */
-bool Config::isFloatingPointRegister(const llvm::Value* val)
-{
-	auto* gv = dyn_cast_or_null<GlobalVariable>(val);
-	auto* r = getConfigRegister(val);
-	if (r == nullptr || gv == nullptr)
-	{
-		return false;
-	}
-
-	if (getConfig().architecture.isMipsOrPic32())
-	{
-		return gv->getValueType()->isFloatingPointTy();
-	}
-	else
-	{
-		return false;
-	}
-}
-
 /**
  * @return Always returns the same dummy global variable.
  */
@@ -796,6 +699,42 @@ bool Config::getCryptoPattern(
 	}
 
 	return false;
+}
+
+void Config::tagFunctionsWithUsedCryptoGlobals()
+{
+	for (GlobalVariable& lgv : _module->getGlobalList())
+	{
+		auto* cgv = getConfigGlobalVariable(&lgv);
+		if (cgv == nullptr || cgv->getCryptoDescription().empty())
+		{
+			continue;
+		}
+
+		for (auto* user : lgv.users())
+		{
+			if (auto* i = dyn_cast_or_null<Instruction>(user))
+			{
+				if (auto* cf = getConfigFunction(i->getFunction()))
+				{
+					cf->usedCryptoConstants.insert(cgv->getCryptoDescription());
+				}
+			}
+			else if (auto* e = dyn_cast_or_null<ConstantExpr>(user))
+			{
+				for (auto* u : e->users())
+				{
+					if (auto* i = dyn_cast_or_null<Instruction>(u))
+					{
+						if (auto* cf = getConfigFunction(i->getFunction()))
+						{
+							cf->usedCryptoConstants.insert(cgv->getCryptoDescription());
+						}
+					}
+				}
+			}
+		}
+	}
 }
 
 //

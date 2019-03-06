@@ -39,12 +39,25 @@ class DotnetInfo
 		std::string typeLibId;
 		std::vector<std::shared_ptr<retdec::fileformat::DotnetClass>> definedClassList;
 		std::vector<std::shared_ptr<retdec::fileformat::DotnetClass>> importedClassList;
+		std::string typeRefHashCrc32;
+		std::string typeRefHashMd5;
+		std::string typeRefHashSha256;
 	public:
 		DotnetInfo();
 
 		/// @name Getters
 		/// @{
 		const std::string& getRuntimeVersion() const;
+		std::size_t getNumberOfImportedClasses() const;
+		std::string getImportedClassName(std::size_t position) const;
+		std::string getImportedClassNestedName(std::size_t position) const;
+		std::string getImportedClassNameWithParentClassIndex(std::size_t position) const;
+		std::string getImportedClassLibName(std::size_t position) const;
+		std::string getImportedClassNameSpace(std::size_t position) const;
+		bool getImportedClassIndex(std::size_t position, std::size_t &result) const;
+		const std::string& getTypeRefhashCrc32() const;
+		const std::string& getTypeRefhashMd5() const;
+		const std::string& getTypeRefhashSha256() const;
 		std::string getMetadataHeaderAddressStr(std::ios_base &(* format)(std::ios_base &)) const;
 		std::string getMetadataStreamOffsetStr(std::ios_base &(* format)(std::ios_base &)) const;
 		std::string getMetadataStreamSizeStr(std::ios_base &(* format)(std::ios_base &)) const;
@@ -76,6 +89,9 @@ class DotnetInfo
 		void setTypeLibId(const std::string& id);
 		void setDefinedClassList(const std::vector<std::shared_ptr<retdec::fileformat::DotnetClass>>& dotnetClassList);
 		void setImportedClassList(const std::vector<std::shared_ptr<retdec::fileformat::DotnetClass>>& dotnetClassList);
+		void setTypeRefhashCrc32(const std::string& crc32);
+		void setTypeRefhashMd5(const std::string& md5);
+		void setTypeRefhashSha256(const std::string& sha256);
 		/// @}
 
 		/// @name Detection
@@ -87,6 +103,7 @@ class DotnetInfo
 		bool hasGuidStream() const;
 		bool hasUserStringStream() const;
 		bool hasTypeLibId() const;
+		bool hasImportedClassListRecords() const;
 		/// @}
 };
 

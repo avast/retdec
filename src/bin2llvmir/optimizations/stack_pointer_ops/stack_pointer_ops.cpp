@@ -40,17 +40,17 @@ StackPointerOpsRemove::StackPointerOpsRemove() :
 
 }
 
-bool StackPointerOpsRemove::runOnModule(Module& M)
+bool StackPointerOpsRemove::runOnModule(Module& m)
 {
-	_module = &M;
-	_config = ConfigProvider::getConfig(&M);
+	_module = &m;
+	_abi = AbiProvider::getAbi(_module);
 	return run();
 }
 
-bool StackPointerOpsRemove::runOnModuleCustom(llvm::Module& M, Config* c)
+bool StackPointerOpsRemove::runOnModuleCustom(llvm::Module& m, Abi* a)
 {
-	_module = &M;
-	_config = c;
+	_module = &m;
+	_abi = a;
 	return run();
 }
 
@@ -69,9 +69,9 @@ bool StackPointerOpsRemove::run()
 
 bool StackPointerOpsRemove::removeStackPointerStores()
 {
-	if (_config == nullptr)
+	if (_abi == nullptr)
 	{
-		LOG << "[ABORT] config file is not available\n";
+		LOG << "[ABORT] ABI is not available\n";
 		return false;
 	}
 
@@ -92,7 +92,7 @@ bool StackPointerOpsRemove::removeStackPointerStores()
 			if (StoreInst* s = dyn_cast<StoreInst>(inst))
 			{
 				auto* reg = s->getPointerOperand();
-				if (!_config->isStackPointerRegister(reg))
+				if (!_abi->isStackPointerRegister(reg))
 				{
 					continue;
 				}
@@ -134,7 +134,8 @@ bool StackPointerOpsRemove::removePreservationStores()
 				{
 					auto* l = dyn_cast<LoadInst>(s->getValueOperand());
 					if (l && storedVal == nullptr
-							&& (l->getPointerOperand()->getName() == "ebp" || l->getPointerOperand()->getName() == "rbp"))
+							&& (_abi->isRegister(l->getPointerOperand(), X86_REG_EBP)
+							|| _abi->isRegister(l->getPointerOperand(), X86_REG_RBP)))
 					{
 						storedVal = l->getPointerOperand();
 						toRemove.insert(s);
@@ -155,7 +156,8 @@ bool StackPointerOpsRemove::removePreservationStores()
 					{
 						auto* s = dyn_cast<StoreInst>(uu);
 						if (s && storedVal == nullptr
-								&& (s->getPointerOperand()->getName() == "ebp" || s->getPointerOperand()->getName() == "rbp"))
+								&& (_abi->isRegister(s->getPointerOperand(), X86_REG_EBP)
+								|| _abi->isRegister(s->getPointerOperand(), X86_REG_RBP)))
 						{
 							storedVal = s->getPointerOperand();
 							toRemove.insert(s);

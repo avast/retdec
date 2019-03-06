@@ -247,8 +247,13 @@ void Asn1Sequence::init()
 		if (element == nullptr)
 			return;
 
-		assert(element->getLength() <= contentData.size() && "https://github.com/avast-tl/retdec/issues/256");
-		contentData.erase(contentData.begin(), contentData.begin() + element->getLength());
+		// Looks like size of the created element might be greater than size of
+		// the data it was created from.
+		auto endIt = element->getLength() >= contentData.size()
+				? contentData.end()
+				: contentData.begin() + element->getLength();
+
+		contentData.erase(contentData.begin(), endIt);
 		_elements.push_back(std::move(element));
 	}
 }

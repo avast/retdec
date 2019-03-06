@@ -8,6 +8,8 @@
 
 #include "retdec/unpacker/signature.h"
 
+using namespace retdec::utils;
+
 namespace retdec {
 namespace unpacker {
 
@@ -41,7 +43,7 @@ Signature::~Signature()
 /**
  * Assignment operator allowing initializer list assignment.
  *
- * @param initList Initializer list containg Signature::Byte objects.
+ * @param initList Initializer list containing Signature::Byte objects.
  *
  * @return Newly created Signature object.
  */

@@ -253,6 +253,99 @@ DotnetTypeReconstructor::ClassList DotnetTypeReconstructor::getReferencedClasses
 }
 
 /**
+ * Links referenced (imported) classes.
+ */
+void DotnetTypeReconstructor::linkReconstructedClasses()
+{
+	std::vector<bool> visited (refClassTable.size(), false);
+	std::vector<bool> stack (refClassTable.size(), false);
+
+	auto typeRefTable = static_cast<const MetadataTable<TypeRef>*>(metadataStream->getMetadataTable(MetadataTableType::TypeRef));
+
+	if (!typeRefTable)
+	{
+		return;
+	}
+
+	auto refClasses = getReferencedClasses();
+
+	for (size_t i = 1; i < refClasses.size(); i++)
+	{
+		linkReconstructedClassesDo(i, visited, stack, refClasses, typeRefTable);
+	}
+
+	for (size_t i = 1; i < refClasses.size(); i++)
+	{
+		auto t = refClasses[i];
+	}
+}
+
+/**
+ * Helper function for linkReconstructedClasses()
+ * @param i Index of a class to be linked.
+ * @param visited Visited flags for cyclic linkage detection.
+ * @param stack Recent traversal stack for cyclic linkage detection.
+ * @param refClasses List of imported classes.
+ * @param typeRefTable Typeref table.
+ */
+void DotnetTypeReconstructor::linkReconstructedClassesDo(size_t i, std::vector<bool> &visited, std::vector<bool> &stack,
+		ClassList &refClasses, const MetadataTable<TypeRef>* typeRefTable)
+{
+	if (visited[i])
+	{
+		return;
+	}
+
+	visited[i] = true;
+
+	auto typeRef = refClasses[i];
+	auto typeRefRaw = typeRef->getRawTypeRef();
+	MetadataTableType resolutionScopeType;
+
+	if (!typeRefRaw || !typeRefRaw->resolutionScope.getTable(resolutionScopeType) ||
+		resolutionScopeType != MetadataTableType::TypeRef)
+	{
+		return;
+	}
+
+	auto parentRaw = typeRefTable->getRow(typeRefRaw->resolutionScope.getIndex());
+
+	if (!parentRaw)
+	{
+		return;
+	}
+
+	const DotnetClass *parent = nullptr;
+
+	size_t parentI = 1;
+	while (parentI < refClasses.size())
+	{
+		auto parentInRefClasses = refClasses[parentI];
+
+		if (parentInRefClasses->getRawTypeRef() == parentRaw)
+		{
+			parent = parentInRefClasses.get();
+			break;
+		}
+
+		parentI++;
+	}
+
+	stack[i] = true;
+
+	if (!parent || stack[parentI])
+	{
+		stack[i] = false;
+		return;
+	}
+
+	typeRef->setParent(parent);
+
+	linkReconstructedClassesDo(parentI, visited, stack, refClasses, typeRefTable);
+	stack[i] = false;
+}
+
+/**
  * Reconstructs defined and referenced (imported) classes and interfaces.
  * @return @c true if reconstruction successful, otherwise @c false.
  */
@@ -268,7 +361,7 @@ bool DotnetTypeReconstructor::reconstructClasses()
 	// Reconstruct defined classes from TypeDef table
 	for (std::size_t i = 1; i <= typeDefTable->getNumberOfRows(); ++i)
 	{
-		auto typeDef = typeDefTable->getRow(i);
+		auto typeDef = static_cast<const TypeDef*>(typeDefTable->getRow(i));
 
 		std::size_t fieldsCount = 0;
 		std::size_t methodsCount = 0;
@@ -293,7 +386,7 @@ bool DotnetTypeReconstructor::reconstructClasses()
 				: methodDefTable->getSize() - typeDef->methodList.getIndex() + 1;
 		}
 
-		auto newClass = createClassDefinition(typeDef, fieldsCount, methodsCount);
+		auto newClass = createClassDefinition(typeDef, fieldsCount, methodsCount, i);
 		if (newClass == nullptr)
 			continue;
 
@@ -305,12 +398,14 @@ bool DotnetTypeReconstructor::reconstructClasses()
 	{
 		auto typeRef = typeRefTable->getRow(i);
 
-		auto newClass = createClassReference(typeRef);
+		auto newClass = createClassReference(typeRef, i);
 		if (newClass == nullptr)
 			continue;
 
 		refClassTable.emplace(i, std::move(newClass));
 	}
+
+	linkReconstructedClasses();
 
 	return true;
 }
@@ -329,7 +424,7 @@ bool DotnetTypeReconstructor::reconstructMethods()
 	{
 		// Obtain TypeDef from the class
 		const auto& classType = kv.second;
-		auto typeDef = classType->getRawRecord();
+		auto typeDef = classType->getRawTypeDef();
 
 		auto methodStartIndex = typeDef->methodList.getIndex();
 		for (auto i = methodStartIndex; i < methodStartIndex + classType->getDeclaredMethodsCount(); ++i)
@@ -467,7 +562,7 @@ bool DotnetTypeReconstructor::reconstructFields()
 	for (const auto& kv : defClassTable)
 	{
 		const auto& classType = kv.second;
-		auto typeDef = classType->getRawRecord();
+		auto typeDef = classType->getRawTypeDef();
 
 		auto fieldStartIndex = typeDef->fieldList.getIndex();
 		for (auto i = fieldStartIndex; i < fieldStartIndex + classType->getDeclaredFieldsCount(); ++i)
@@ -585,7 +680,7 @@ bool DotnetTypeReconstructor::reconstructBaseTypes()
 
 		std::unique_ptr<DotnetDataTypeBase> baseType;
 
-		auto typeDef = classType->getRawRecord();
+		auto typeDef = classType->getRawTypeDef();
 
 		MetadataTableType extendsTable;
 		if (!typeDef->extends.getTable(extendsTable))
@@ -688,9 +783,11 @@ bool DotnetTypeReconstructor::reconstructBaseTypes()
  * @param typeDef TypeDef table record.
  * @param fieldsCount Declared number of fields.
  * @param methodsCount Declared number of methods.
+ * @param typeDefIndex Index of TypeDef record.
  * @return New class definition or @c nullptr in case of failure.
  */
-std::unique_ptr<DotnetClass> DotnetTypeReconstructor::createClassDefinition(const TypeDef* typeDef, std::size_t fieldsCount, std::size_t methodsCount)
+std::unique_ptr<DotnetClass> DotnetTypeReconstructor::createClassDefinition(const TypeDef* typeDef, std::size_t fieldsCount,
+		std::size_t methodsCount, std::size_t typeDefIndex)
 {
 	std::string className, classNameSpace;
 	if (!stringStream->getString(typeDef->typeName.getIndex(), className) || !stringStream->getString(typeDef->typeNamespace.getIndex(), classNameSpace))
@@ -704,7 +801,7 @@ std::unique_ptr<DotnetClass> DotnetTypeReconstructor::createClassDefinition(cons
 	if (className.empty() || className == "<Module>")
 		return nullptr;
 
-	auto newClass = std::make_unique<DotnetClass>();
+	auto newClass = std::make_unique<DotnetClass>(MetadataTableType::TypeDef, typeDefIndex);
 	newClass->setRawRecord(typeDef);
 	newClass->setName(className);
 	newClass->setNameSpace(classNameSpace);
@@ -722,24 +819,56 @@ std::unique_ptr<DotnetClass> DotnetTypeReconstructor::createClassDefinition(cons
 /**
  * Creates new class reference from TypeRef table record.
  * @param typeRef TypeRef table record.
+ * @param typeRefIndex Index of typeRef table record.
  * @return New class reference or @c nullptr in case of failure.
  */
-std::unique_ptr<DotnetClass> DotnetTypeReconstructor::createClassReference(const TypeRef* typeRef)
+std::unique_ptr<DotnetClass> DotnetTypeReconstructor::createClassReference(const TypeRef* typeRef, std::size_t typeRefIndex)
 {
-	std::string className, classNameSpace;
-	if (!stringStream->getString(typeRef->typeName.getIndex(), className) || !stringStream->getString(typeRef->typeNamespace.getIndex(), classNameSpace))
+	std::string className, classNameSpace, classLibName;
+	MetadataTableType resolutionScopeType;
+	if (!stringStream->getString(typeRef->typeName.getIndex(), className) ||
+		!stringStream->getString(typeRef->typeNamespace.getIndex(), classNameSpace))
+	{
 		return nullptr;
+	}
+
+	if (!typeRef->resolutionScope.getTable(resolutionScopeType) || resolutionScopeType != MetadataTableType::AssemblyRef)
+	{
+		classLibName = "";
+	}
+
+	else
+	{
+		auto assemblyRefTable = static_cast<const MetadataTable<AssemblyRef>*>(metadataStream->getMetadataTable(MetadataTableType::AssemblyRef));
+
+		if (!assemblyRefTable)
+		{
+			return nullptr;
+		}
+
+		auto assemblyRef = assemblyRefTable->getRow(typeRef->resolutionScope.getIndex());
+
+		if (!assemblyRef || !stringStream->getString(assemblyRef->name.getIndex(), classLibName))
+		{
+			classLibName = "";
+		}
+	}
 
 	className = retdec::utils::replaceNonprintableChars(className);
 	classNameSpace = retdec::utils::replaceNonprintableChars(classNameSpace);
+	classLibName = retdec::utils::replaceNonprintableChars(classLibName);
 	auto genericParamsCount = extractGenericParamsCountAndFixClassName(className);
 
 	if (className.empty())
+	{
 		return nullptr;
+	}
 
-	auto newClass = std::make_unique<DotnetClass>();
+	auto newClass = std::make_unique<DotnetClass>(MetadataTableType::TypeRef, typeRefIndex);
+	newClass->setRawRecord(typeRef);
 	newClass->setName(className);
 	newClass->setNameSpace(classNameSpace);
+	newClass->setLibName(classLibName);
 	newClass->setDeclaredGenericParametersCount(genericParamsCount);
 
 	return newClass;

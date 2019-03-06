@@ -41,8 +41,12 @@ class DotnetTypeReconstructor
 		bool reconstructNestedClasses();
 		bool reconstructBaseTypes();
 
-		std::unique_ptr<DotnetClass> createClassDefinition(const TypeDef* typeDef, std::size_t fieldsCount, std::size_t methodsCount);
-		std::unique_ptr<DotnetClass> createClassReference(const TypeRef* typeRef);
+		void linkReconstructedClasses();
+		void linkReconstructedClassesDo(size_t i, std::vector<bool> &visited, std::vector<bool> &stack, ClassList &refClasses, const MetadataTable<TypeRef>* typeRefTable);
+
+		std::unique_ptr<DotnetClass> createClassDefinition(const TypeDef* typeDef, std::size_t fieldsCount,
+															std::size_t methodsCount, std::size_t typeDefIndex);
+		std::unique_ptr<DotnetClass> createClassReference(const TypeRef* typeRef, std::size_t typeRefIndex);
 		std::unique_ptr<DotnetField> createField(const Field* field, const DotnetClass* ownerClass);
 		std::unique_ptr<DotnetProperty> createProperty(const Property* property, const DotnetClass* ownerClass);
 		std::unique_ptr<DotnetMethod> createMethod(const MethodDef* methodDef, const DotnetClass* ownerClass);

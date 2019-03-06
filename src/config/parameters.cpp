@@ -12,7 +12,6 @@ const std::string JSON_verboseOut               = "verboseOut";
 const std::string JSON_keepAllFuncs             = "keepAllFuncs";
 const std::string JSON_selectedDecodeOnly       = "selectedDecodeOnly";
 const std::string JSON_outputFile               = "outputFile";
-const std::string JSON_frontendOutputFile       = "frontEndOutputFile";
 const std::string JSON_ordinalNumDir            = "ordinalNumDirectory";
 const std::string JSON_userStaticSigPaths       = "userStaticSignPaths";
 const std::string JSON_staticSigPaths           = "staticSignPaths";
@@ -98,11 +97,6 @@ void Parameters::setOutputFile(const std::string& n)
 	_outputFile = n;
 }
 
-void Parameters::setFrontendOutputFile(const std::string& n)
-{
-	_frontendOutputFile = n;
-}
-
 void Parameters::setOrdinalNumbersDirectory(const std::string& n)
 {
 	_ordinalNumbersDirectory = n;
@@ -111,11 +105,6 @@ void Parameters::setOrdinalNumbersDirectory(const std::string& n)
 std::string Parameters::getOutputFile() const
 {
 	return _outputFile;
-}
-
-std::string Parameters::getFrontendOutputFile() const
-{
-	return _frontendOutputFile;
 }
 
 std::string Parameters::getOrdinalNumbersDirectory() const
@@ -135,7 +124,6 @@ Json::Value Parameters::getJsonValue() const
 	params[JSON_keepAllFuncs]       = isKeepAllFunctions();
 	params[JSON_selectedDecodeOnly] = isSelectedDecodeOnly();
 	params[JSON_outputFile]         = getOutputFile();
-	params[JSON_frontendOutputFile] = getFrontendOutputFile();
 
 	if (!getOrdinalNumbersDirectory().empty()) params[JSON_ordinalNumDir] = getOrdinalNumbersDirectory();
 
@@ -168,7 +156,6 @@ void Parameters::readJsonValue(const Json::Value& val)
 	setIsSelectedDecodeOnly( safeGetBool(val, JSON_selectedDecodeOnly) );
 	setOrdinalNumbersDirectory( safeGetString(val, JSON_ordinalNumDir) );
 	setOutputFile( safeGetString(val, JSON_outputFile) );
-	setFrontendOutputFile( safeGetString(val, JSON_frontendOutputFile) );
 
 	selectedRanges.readJsonValue( val[JSON_selectedRanges] );
 

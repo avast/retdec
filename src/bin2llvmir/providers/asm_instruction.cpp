@@ -9,7 +9,6 @@
 
 #include "retdec/utils/container.h"
 #include "retdec/bin2llvmir/providers/asm_instruction.h"
-#include "retdec/bin2llvmir/providers/config.h"
 #include "retdec/bin2llvmir/providers/names.h"
 #include "retdec/bin2llvmir/utils/debug.h"
 #include "retdec/bin2llvmir/utils/ir_modifier.h"
@@ -183,7 +182,7 @@ const llvm::GlobalVariable* AsmInstruction::getLlvmToAsmGlobalVariablePrivate(
 	}
 }
 
-Llvm2CapstoneMap& AsmInstruction::getLlvmToCapstoneInsnMap(
+Llvm2CapstoneInsnMap& AsmInstruction::getLlvmToCapstoneInsnMap(
 		const llvm::Module* m)
 {
 	for (auto& p : _module2instMap)
@@ -300,36 +299,6 @@ cs_insn* AsmInstruction::getCapstoneInsn() const
 	return nullptr;
 }
 
-bool AsmInstruction::isThumb() const
-{
-	cs_insn* ci = getCapstoneInsn();
-	if (ci == nullptr)
-	{
-		return false;
-	}
-
-	for (auto g : ci->detail->groups)
-	{
-		if (g == ARM_GRP_THUMB2DSP
-				|| g == ARM_GRP_THUMB
-				|| g == ARM_GRP_THUMB1ONLY
-				|| g == ARM_GRP_THUMB2)
-		{
-			return true;
-		}
-	}
-
-	return false;
-}
-
-bool AsmInstruction::isConditional(Config* conf) const
-{
-	auto* i = getCapstoneInsn();
-	return conf && conf->getConfig().architecture.isArmOrThumb() && i
-			? i->detail->arm.cc != ARM_CC_AL && i->detail->arm.cc != ARM_CC_INVALID
-			: false;
-}
-
 std::string AsmInstruction::getDsm() const
 {
 	auto* i = getCapstoneInsn();
@@ -369,13 +338,6 @@ bool AsmInstruction::contains(retdec::utils::Address addr) const
 llvm::StoreInst* AsmInstruction::getLlvmToAsmInstruction() const
 {
 	return _llvmToAsmInstr;
-}
-
-retdec::utils::Maybe<unsigned> AsmInstruction::getLatency() const
-{
-	assert(false && "AsmInstruction::getLatency() not implemented.");
-	retdec::utils::Maybe<unsigned> ret;
-	return ret;
 }
 
 /**

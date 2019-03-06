@@ -7,9 +7,9 @@
 #ifndef RETDEC_LLVMIR2HLL_SUPPORT_DEBUG_H
 #define RETDEC_LLVMIR2HLL_SUPPORT_DEBUG_H
 
-#include <cstdlib> // for abort()
+#include <cstdlib>
 
-#include <llvm/Support/raw_ostream.h> // for llvm::errs()
+#include <llvm/Support/raw_ostream.h>
 
 /// @name Assertions and Preconditions
 /// @{

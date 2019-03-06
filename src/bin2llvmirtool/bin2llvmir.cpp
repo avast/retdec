@@ -390,9 +390,10 @@ std::unique_ptr<tool_output_file> createAssemblyOutputFile()
 	}
 
 	std::string asmOut = out + ".ll";
-	if (out.find_last_of('.') != std::string::npos)
+	auto lastDot = out.find_last_of('.');
+	if (lastDot != std::string::npos)
 	{
-		asmOut = out.substr(0, out.find_last_of('.')) + ".ll";
+		asmOut = out.substr(0, lastDot) + ".ll";
 	}
 
 	std::error_code EC;
@@ -486,7 +487,7 @@ int _main(int argc, char **argv)
 	// Write bitcode to the output as the last step.
 	std::unique_ptr<tool_output_file> bcOut = createBitcodeOutputFile();
 	raw_ostream *bcOs = &bcOut->os();
-	bool PreserveBitcodeUseListOrder = true;
+	bool PreserveBitcodeUseListOrder = false;
 	addPassWithoutVerification(
 			Passes,
 			createBitcodeWriterPass(*bcOs, PreserveBitcodeUseListOrder));
@@ -494,7 +495,7 @@ int _main(int argc, char **argv)
 	// Write assembly to the output as the last step.
 	std::unique_ptr<tool_output_file> llOut = createAssemblyOutputFile();
 	raw_ostream *llOs = &llOut->os();
-	bool PreserveAssemblyUseListOrder = true;
+	bool PreserveAssemblyUseListOrder = false;
 	addPassWithoutVerification(
 			Passes,
 			createPrintModulePass(*llOs, "", PreserveAssemblyUseListOrder),

@@ -43,6 +43,8 @@ class CoffFormat : public FileFormat
 		llvm::object::COFFObjectFile *file; ///< parser of input COFF file
 	public:
 		CoffFormat(std::string pathToFile, LoadFlags loadFlags = LoadFlags::NONE);
+		CoffFormat(std::istream &inputStream, LoadFlags loadFlags = LoadFlags::NONE);
+		CoffFormat(const std::uint8_t *data, std::size_t size, LoadFlags loadFlags = LoadFlags::NONE);
 		virtual ~CoffFormat() override;
 
 		/// @name Byte value storage methods

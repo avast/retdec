@@ -20,7 +20,6 @@
 
 #include "retdec/utils/address.h"
 #include "retdec/bin2llvmir/analyses/reaching_definitions.h"
-#include "retdec/bin2llvmir/analyses/static_code/static_code.h"
 #include "retdec/bin2llvmir/analyses/symbolic_tree.h"
 #include "retdec/bin2llvmir/providers/abi/abi.h"
 #include "retdec/bin2llvmir/providers/asm_instruction.h"
@@ -32,7 +31,9 @@
 #include "retdec/bin2llvmir/optimizations/decoder/decoder_ranges.h"
 #include "retdec/bin2llvmir/optimizations/decoder/jump_targets.h"
 #include "retdec/bin2llvmir/utils/ir_modifier.h"
+#include "retdec/bin2llvmir/utils/symbolic_tree_match.h"
 #include "retdec/capstone2llvmir/capstone2llvmir.h"
+#include "retdec/stacofin/stacofin.h"
 
 namespace retdec {
 namespace bin2llvmir {
@@ -283,7 +284,7 @@ class Decoder : public llvm::ModulePass
 		FileImage* _image = nullptr;
 		DebugFormat* _debug = nullptr;
 		NameContainer* _names = nullptr;
-		Llvm2CapstoneMap* _llvm2capstone = nullptr;
+		Llvm2CapstoneInsnMap* _llvm2capstone = nullptr;
 		Abi* _abi = nullptr;
 
 		ReachingDefinitionsAnalysis _RDA;

@@ -39,6 +39,7 @@ class FileInformation
 		std::string compactManifest;                   ///< compact version of XML manifest
 		FileHeader header;                             ///< file header
 		RichHeader richHeader;                         ///< rich header
+		VisualBasicInfo visualBasicInfo;               ///< visual basic information
 		PdbInfo pdbInfo;                               ///< information about related PDB file
 		ImportTable importTable;                       ///< information about imports
 		ExportTable exportTable;                       ///< information about exports
@@ -152,6 +153,47 @@ class FileInformation
 		bool hasRichHeaderRecords() const;
 		/// @}
 
+		/// @name Getters of @a visualBasicInfo
+		/// @{
+		bool isVisualBasicUsed() const;
+		bool getVisualBasicIsPcode() const;
+		std::string getVisualBasicLanguageDLL() const;
+		std::string getVisualBasicBackupLanguageDLL() const;
+		std::string getVisualBasicProjectExeName() const;
+		std::string getVisualBasicProjectDescription() const;
+		std::string getVisualBasicProjectHelpFile() const;
+		std::string getVisualBasicProjectName() const;
+		std::string getVisualBasicLanguageDLLPrimaryLCIDStr() const;
+		std::string getVisualBasicLanguageDLLSecondaryLCIDStr() const;
+		std::string getVisualBasicProjectPath() const;
+		std::string getVisualBasicProjectPrimaryLCIDStr() const;
+		std::string getVisualBasicProjectSecondaryLCIDStr() const;
+		const retdec::fileformat::VisualBasicObject *getVisualBasicObject(std::size_t position) const;
+		const retdec::fileformat::VisualBasicExtern *getVisualBasicExtern(std::size_t position) const;
+		std::size_t getVisualBasicNumberOfObjects() const;
+		std::size_t getVisualBasicNumberOfExterns() const;
+		std::string getVisualBasicExternModuleName(std::size_t position) const;
+		std::string getVisualBasicExternApiName(std::size_t position) const;
+		std::string getVisualBasicObjectTableGUID() const;
+		std::string getVisualBasicTypeLibCLSID() const;
+		std::string getVisualBasicTypeLibMajorVersionStr() const;
+		std::string getVisualBasicTypeLibMinorVersionStr() const;
+		std::string getVisualBasicTypeLibLCIDStr() const;
+		std::string getVisualBasicCOMObjectName() const;
+		std::string getVisualBasicCOMObjectDescription() const;
+		std::string getVisualBasicCOMObjectCLSID() const;
+		std::string getVisualBasicCOMObjectInterfaceCLSID() const;
+		std::string getVisualBasicCOMObjectEventsCLSID() const;
+		std::string getVisualBasicCOMObjectType() const;
+		std::string getVisualBasicExternTableHashCrc32() const;
+		std::string getVisualBasicExternTableHashMd5() const;
+		std::string getVisualBasicExternTableHashSha256() const;
+		std::string getVisualBasicObjectTableHashCrc32() const;
+		std::string getVisualBasicObjectTableHashMd5() const;
+		std::string getVisualBasicObjectTableHashSha256() const;
+		/// @}
+
+
 		/// @name Getters of @a pdbInfo
 		/// @{
 		std::string getPdbType() const;
@@ -171,6 +213,7 @@ class FileInformation
 		const retdec::fileformat::Import* getImport(std::size_t position) const;
 		std::string getImportName(std::size_t position) const;
 		std::string getImportLibraryName(std::size_t position) const;
+		std::string getImportUsageType(std::size_t position) const;
 		std::string getImportAddressStr(std::size_t position, std::ios_base &(* format)(std::ios_base &)) const;
 		std::string getImportOrdinalNumberStr(std::size_t position, std::ios_base &(* format)(std::ios_base &)) const;
 		bool hasImportTableRecords() const;
@@ -194,6 +237,10 @@ class FileInformation
 		std::string getResourceCrc32(std::size_t index) const;
 		std::string getResourceMd5(std::size_t index) const;
 		std::string getResourceSha256(std::size_t index) const;
+		std::string getResourceIconhashCrc32() const;
+		std::string getResourceIconhashMd5() const;
+		std::string getResourceIconhashSha256() const;
+		std::string getResourceIconPerceptualAvgHash() const;
 		std::string getResourceName(std::size_t index) const;
 		std::string getResourceType(std::size_t index) const;
 		std::string getResourceLanguage(std::size_t index) const;
@@ -203,6 +250,7 @@ class FileInformation
 		std::string getResourceSublanguageIdStr(std::size_t index, std::ios_base &(* format)(std::ios_base &)) const;
 		std::string getResourceOffsetStr(std::size_t index, std::ios_base &(* format)(std::ios_base &)) const;
 		std::string getResourceSizeStr(std::size_t index, std::ios_base &(* format)(std::ios_base &)) const;
+		bool hasResourceTableRecords() const;
 		/// @}
 
 		/// @name Getters of @a certificateTable
@@ -420,6 +468,15 @@ class FileInformation
 		/// @{
 		bool isDotnetUsed() const;
 		const std::string& getDotnetRuntimeVersion() const;
+		std::string getDotnetImportedClassName(std::size_t position) const;
+		std::string getDotnetImportedClassNestedName(std::size_t position) const;
+		std::string getDotnetImportedClassNameWithParentClassIndex(std::size_t position) const;
+		std::string getDotnetImportedClassLibName(std::size_t position) const;
+		std::string getDotnetImportedClassNameSpace(std::size_t position) const;
+		std::string getDotnetTypeRefhashCrc32() const;
+		std::string getDotnetTypeRefhashMd5() const;
+		std::string getDotnetTypeRefhashSha256() const;
+		std::size_t getNumberOfStoredDotnetImportedClasses() const;
 		std::string getDotnetMetadataHeaderAddressStr(std::ios_base &(* format)(std::ios_base &)) const;
 		std::string getDotnetMetadataStreamOffsetStr(std::ios_base &(* format)(std::ios_base &)) const;
 		std::string getDotnetMetadataStreamSizeStr(std::ios_base &(* format)(std::ios_base &)) const;
@@ -441,6 +498,7 @@ class FileInformation
 		bool hasDotnetGuidStream() const;
 		bool hasDotnetUserStringStream() const;
 		bool hasDotnetTypeLibId() const;
+		bool hasDotnetTypeRefTableRecords() const;
 		/// @}
 
 		/// @name Setters
@@ -494,6 +552,8 @@ class FileInformation
 		void setOverlayOffset(unsigned long long offset);
 		void setOverlaySize(unsigned long long size);
 		void setRichHeader(const retdec::fileformat::RichHeader *rHeader);
+		void setVisualBasicInfo(const retdec::fileformat::VisualBasicInfo *vbInfo);
+		void setVisualBasicUsed(bool set);
 		void setPdbType(const std::string &sType);
 		void setPdbPath(const std::string &sPath);
 		void setPdbGuid(const std::string &sGuid);
@@ -501,6 +561,7 @@ class FileInformation
 		void setPdbTimeStamp(std::size_t sTimeStamp);
 		void setImportTable(const retdec::fileformat::ImportTable *sTable);
 		void setExportTable(const retdec::fileformat::ExportTable *sTable);
+		void setResourceTable(const retdec::fileformat::ResourceTable *sTable);
 		void setStrings(const std::vector<retdec::fileformat::String> *sStrings);
 		void setCertificateTable(const retdec::fileformat::CertificateTable *sTable);
 		void setSignatureVerified(bool verified);
@@ -519,6 +580,9 @@ class FileInformation
 		void setDotnetTypeLibId(const std::string& typeLibId);
 		void setDotnetDefinedClassList(const std::vector<std::shared_ptr<retdec::fileformat::DotnetClass>>& dotnetClassList);
 		void setDotnetImportedClassList(const std::vector<std::shared_ptr<retdec::fileformat::DotnetClass>>& dotnetClassList);
+		void setDotnetTypeRefhashCrc32(const std::string& crc32);
+		void setDotnetTypeRefhashMd5(const std::string& md5);
+		void setDotnetTypeRefhashSha256(const std::string& sha256);
 		/// @}
 
 		/// @name Other methods
@@ -527,8 +591,6 @@ class FileInformation
 		void clearFileFlagsDescriptors();
 		void addDllFlagsDescriptor(std::string descriptor, std::string abbreviation);
 		void clearDllFlagsDescriptors();
-		void addResource(Resource &resource);
-		void clearResources();
 		void addDataDirectory(DataDirectory &dataDirectory);
 		void addSegment(FileSegment &fileSegment);
 		void addSection(FileSection &fileSection);

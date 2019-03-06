@@ -15,7 +15,7 @@ rule xcode_osx_sdk_01 {
 	strings:
 		$1 = { 6A 00 48 89 E5 48 83 E4 F0 48 8B 7D 08 48 8D 75 10 89 FA 83 C2 01 C1 E2 03 48 01 F2 E8 ?? ?? ?? ?? F4 }
 	condition:
-		$1 at macho.entry_point or $1 at macho.ep_for_arch(macho.CPU_TYPE_X86_64)
+		$1 at macho.entry_point or $1 at macho.entry_point_for_arch(macho.CPU_TYPE_X86_64)
 }
 
 rule xcode_osx_sdk_02 {
@@ -28,7 +28,7 @@ rule xcode_osx_sdk_02 {
 	strings:
 		$1 = { 6A 00 48 89 E5 48 83 E4 F0 48 8B 7D 08 48 8D 75 10 89 FA 83 C2 01 C1 E2 03 48 01 F2 48 89 D1 EB 04 48 83 C1 08 48 83 39 00 75 F6 48 83 C1 08 E8 ?? ?? ?? ?? 89 C7 E8 ?? ?? ?? ?? F4 }
 	condition:
-		$1 at macho.entry_point or $1 at macho.ep_for_arch(macho.CPU_TYPE_X86_64)
+		$1 at macho.entry_point or $1 at macho.entry_point_for_arch(macho.CPU_TYPE_X86_64)
 }
 
 rule gc
@@ -41,5 +41,5 @@ rule gc
 		strings:
 		$1 = { 48 8D 74 24 08 48 8B 3C 24 48 8D 05 10 00 00 00 FF E0 ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? 48 8D 05 ?9 C? FF FF FF E0 ?? ?? ?? ?? ?? ?? ?? 8B 7C 24 08 B8 01 00 00 02 0F 05 C7 04 25 F1 00 00 00 F1 00 00 00 C3 ?? ?? ?? ?? ?? ?? ?? ?? ?? 8B 7C 24 08 B8 69 01 00 02 0F 05 C7 04 25 F1 00 00 00 F1 00 00 00 C3 ?? ?? ?? ?? ?? ?? ?? ?? ?? 48 8B 7C 24 08 8B 74 24 }
 	condition:
-		$1 at macho.entry_point or $1 at macho.ep_for_arch(macho.CPU_TYPE_X86_64)
+		$1 at macho.entry_point or $1 at macho.entry_point_for_arch(macho.CPU_TYPE_X86_64)
 }

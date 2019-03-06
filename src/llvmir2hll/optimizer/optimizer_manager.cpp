@@ -6,6 +6,7 @@
 
 #include "retdec/llvmir2hll/analysis/value_analysis.h"
 #include "retdec/llvmir2hll/graphs/cg/cg_builder.h"
+#include "retdec/llvmir2hll/hll/bir_writer.h"
 #include "retdec/llvmir2hll/hll/hll_writer.h"
 #include "retdec/llvmir2hll/obtainer/call_info_obtainer.h"
 #include "retdec/llvmir2hll/optimizer/optimizer_manager.h"
@@ -24,6 +25,7 @@
 #include "retdec/llvmir2hll/optimizer/optimizers/deref_to_array_index_optimizer.h"
 #include "retdec/llvmir2hll/optimizer/optimizers/empty_array_to_string_optimizer.h"
 #include "retdec/llvmir2hll/optimizer/optimizers/empty_stmt_optimizer.h"
+#include "retdec/llvmir2hll/optimizer/optimizers/goto_stmt_optimizer.h"
 #include "retdec/llvmir2hll/optimizer/optimizers/if_before_loop_optimizer.h"
 #include "retdec/llvmir2hll/optimizer/optimizers/if_structure_optimizer.h"
 #include "retdec/llvmir2hll/optimizer/optimizers/if_to_switch_optimizer.h"
@@ -169,6 +171,7 @@ void OptimizerManager::optimize(ShPtr<Module> m) {
 		run<EmptyStmtOptimizer>(m);
 	}
 
+	run<GotoStmtOptimizer>(m);
 	run<RemoveUselessCastsOptimizer>(m);
 
 	// The first part of removal of non-compound statements. The other part
@@ -254,6 +257,9 @@ void OptimizerManager::optimize(ShPtr<Module> m) {
 	// wouldn't be initializers.
 	run<VarDefForLoopOptimizer>(m);
 	run<VarDefStmtOptimizer>(m, va);
+
+	run<EmptyStmtOptimizer>(m);
+	run<GotoStmtOptimizer>(m);
 
 	// SimplifyArithmExprOptimizer should be run at the end to produce the most
 	// readable output.

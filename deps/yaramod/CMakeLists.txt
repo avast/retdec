@@ -12,8 +12,8 @@ if(CMAKE_CXX_COMPILER)
 endif()
 
 ExternalProject_Add(yaramod-project
-	URL https://github.com/avast-tl/yaramod/archive/v2.2.1.zip
-	URL_HASH SHA256=c7b8653426dc6dce264a2babcd3cbd45a05fb072d56800906c78f124329c7382
+	URL https://github.com/avast-tl/yaramod/archive/v2.4.1.zip
+	URL_HASH SHA256=e8341feba2cea4d00a1f31a3b24823511cf0e77e80621b635e57643aa5c5acee
 	DOWNLOAD_NAME yaramod.zip
 	CMAKE_ARGS
 		# This does not work on MSVC, but may be useful on Linux.

@@ -27,6 +27,109 @@ const std::string& DotnetInfo::getRuntimeVersion() const
 }
 
 /**
+ * Get number of imported classes in typeref table
+ * @return Number of imported classes in typeref table
+ */
+std::size_t DotnetInfo::getNumberOfImportedClasses() const
+{
+	return importedClassList.size();
+}
+
+/**
+ * Get imported class name
+ * @param position Index of selected imported class from typeref table (indexed from 0)
+ * @return Imported class name
+ */
+std::string DotnetInfo::getImportedClassName(std::size_t position) const
+{
+	return (position < getNumberOfImportedClasses()) ? importedClassList[position]->getName() : "";
+}
+
+/**
+ * Get imported class nested name
+ * @param position Index of selected imported class from typeref table (indexed from 0)
+ * @return Imported class nested name
+ */
+std::string DotnetInfo::getImportedClassNestedName(std::size_t position) const
+{
+	return (position < getNumberOfImportedClasses()) ? importedClassList[position]->getNestedName() : "";
+}
+
+/**
+ * Get imported class name with parent class presentation index
+ * @param position Index of selected imported class from typeref table (indexed from 0)
+ * @return Imported class name with parent class presentation index
+ */
+std::string DotnetInfo::getImportedClassNameWithParentClassIndex(std::size_t position) const
+{
+	return (position < getNumberOfImportedClasses()) ? importedClassList[position]->getNameWithParentClassIndex() : "";
+}
+
+/**
+ * Get imported class library name
+ * @param position Index of selected imported class from typeref table (indexed from 0)
+ * @return Imported class library name
+ */
+std::string DotnetInfo::getImportedClassLibName(std::size_t position) const
+{
+	return (position < getNumberOfImportedClasses()) ? importedClassList[position]->getLibName() : "";
+}
+
+/**
+ * Get imported class namespace
+ * @param position Index of selected imported class from typeref table (indexed from 0)
+ * @return Imported class namespace
+ */
+std::string DotnetInfo::getImportedClassNameSpace(std::size_t position) const
+{
+	return (position < getNumberOfImportedClasses()) ? importedClassList[position]->getTopLevelNameSpace() : "";
+}
+
+/**
+ * Get imported class typeref index
+ * @param position Index of selected imported class from typeref table (indexed from 0)
+ * @param result Variable to store the result to
+ * @return @c true if result is valid, otherwise @c false.
+ */
+bool DotnetInfo::getImportedClassIndex(std::size_t position, std::size_t &result) const
+{
+	if (position >= getNumberOfImportedClasses())
+	{
+		return false;
+	}
+
+	result = importedClassList[position]->getIndex();
+	return true;
+}
+
+/**
+ * Get typeRefhash as CRC32
+ * @return TypeRefhash as CRC32
+ */
+const std::string& DotnetInfo::getTypeRefhashCrc32() const
+{
+	return typeRefHashCrc32;
+}
+
+/**
+ * Get typeRefhash as MD5
+ * @return TypeRefhash as MD5
+ */
+const std::string& DotnetInfo::getTypeRefhashMd5() const
+{
+	return typeRefHashMd5;
+}
+
+/**
+ * Get typeRefhash as SHA256
+ * @return TypeRefhash as SHA256
+ */
+const std::string& DotnetInfo::getTypeRefhashSha256() const
+{
+	return typeRefHashSha256;
+}
+
+/**
  * Returns the metadata header address in string representation with specified format.
  * @param format Format.
  * @return Metadata header address string.
@@ -294,6 +397,33 @@ void DotnetInfo::setImportedClassList(const std::vector<std::shared_ptr<retdec::
 }
 
 /**
+ * Sets typeref table hash as CRC32.
+ * @param crc32 Hash as CRC32.
+ */
+void DotnetInfo::setTypeRefhashCrc32(const std::string& crc32)
+{
+	typeRefHashCrc32 = crc32;
+}
+
+/**
+ * Sets typeref table hash as MD5.
+ * @param md5 Hash as MD5.
+ */
+void DotnetInfo::setTypeRefhashMd5(const std::string& md5)
+{
+	typeRefHashMd5 = md5;
+}
+
+/**
+ * Sets typeref table hash as SHA256.
+ * @param sha256 Hash as SHA256.
+ */
+void DotnetInfo::setTypeRefhashSha256(const std::string& sha256)
+{
+	typeRefHashSha256 = sha256;
+}
+
+/**
  * Checks whether .NET information are used.
  * @return @c true if used, otherwise @c false.
  */
@@ -354,6 +484,15 @@ bool DotnetInfo::hasUserStringStream() const
 bool DotnetInfo::hasTypeLibId() const
 {
 	return !typeLibId.empty();
+}
+
+/**
+ * Find out if there are any imported class records
+ * @return @c true if there are some imported class records, @c false otherwise
+ */
+bool DotnetInfo::hasImportedClassListRecords() const
+{
+	return !importedClassList.empty();
 }
 
 } // namespace fileinfo

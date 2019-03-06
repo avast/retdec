@@ -69,7 +69,6 @@ void printHelp()
 	std::cout << "\t--input-file path" << std::endl;
 	std::cout << "\t--unpacked-in-file path" << std::endl;
 	std::cout << "\t--output-file path" << std::endl;
-	std::cout << "\t--frontend-output-file path" << std::endl;
 	std::cout << "\t--decode-only-selected true/false" << std::endl;
 	std::cout << "\t--selected-func name" << std::endl;
 	std::cout << "\t--selected-range range" << std::endl;
@@ -337,10 +336,6 @@ int handleArguments(std::vector<std::string> &args)
 			else if (opt == "--output-file")
 			{
 				config.parameters.setOutputFile(val);
-			}
-			else if (opt == "--frontend-output-file")
-			{
-				config.parameters.setFrontendOutputFile(val);
 			}
 			else if (opt == "--decode-only-selected")
 			{

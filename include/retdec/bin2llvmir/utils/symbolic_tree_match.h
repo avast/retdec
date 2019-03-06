@@ -27,7 +27,7 @@ namespace st_match {
 template <typename Pattern>
 bool match(SymbolicTree& st, const Pattern& p)
 {
-    return const_cast<Pattern&>(p).match(st);
+	return const_cast<Pattern&>(p).match(st);
 }
 
 //
@@ -111,22 +111,22 @@ struct AnyBinaryOp_match
 
 	bool match(SymbolicTree& st)
 	{
-        if (!st.isBinary())
-        {
-            return false;
-        }
+		if (!st.isBinary())
+		{
+			return false;
+		}
 
 		if (auto* I = llvm::dyn_cast<llvm::BinaryOperator>(st.value))
 		{
 			if ((L.match(st.ops[0]) && R.match(st.ops[1]))
-            		|| (Commutable && L.match(st.ops[1]) && R.match(st.ops[0])))
-            {
+					|| (Commutable && L.match(st.ops[1]) && R.match(st.ops[0])))
+			{
 				if (insn)
 				{
 					*insn = I;
 				}
 				return true;
-            }
+			}
 		}
 
 		return false;
@@ -160,45 +160,45 @@ inline AnyBinaryOp_match<LHS, RHS, true> m_c_BinOp(
 template <typename LHS_t, typename RHS_t, unsigned Opcode, bool Commutable = false>
 struct BinaryOp_match
 {
-    LHS_t L;
-    RHS_t R;
-    llvm::Instruction** insn = nullptr;
+	LHS_t L;
+	RHS_t R;
+	llvm::BinaryOperator** insn = nullptr;
 
-    BinaryOp_match(const LHS_t &LHS, const RHS_t &RHS, llvm::Instruction** i = nullptr) :
-            L(LHS),
-            R(RHS),
+	BinaryOp_match(const LHS_t &LHS, const RHS_t &RHS, llvm::BinaryOperator** i = nullptr) :
+			L(LHS),
+			R(RHS),
 			insn(i)
-    {
-    }
+	{
+	}
 
-    bool match(SymbolicTree& st)
-    {
-        if (!st.isBinary())
-        {
-            return false;
-        }
+	bool match(SymbolicTree& st)
+	{
+		if (!st.isBinary())
+		{
+			return false;
+		}
 
-        if (st.value->getValueID() == llvm::Value::InstructionVal + Opcode)
-        {
-            if ((L.match(st.ops[0]) && R.match(st.ops[1]))
-            		|| (Commutable && L.match(st.ops[1]) && R.match(st.ops[0])))
-            {
-            	if (insn)
-            	{
-            		*insn = llvm::cast<llvm::Instruction>(st.value);
-            	}
-            	return true;
-            }
-        }
-        if (auto* ce = llvm::dyn_cast<llvm::ConstantExpr>(st.value))
-        {
-            return ce->getOpcode() == Opcode &&
-            		((L.match(st.ops[0]) && R.match(st.ops[1]))
+		if (st.value->getValueID() == llvm::Value::InstructionVal + Opcode)
+		{
+			if ((L.match(st.ops[0]) && R.match(st.ops[1]))
+					|| (Commutable && L.match(st.ops[1]) && R.match(st.ops[0])))
+			{
+				if (insn)
+				{
+					*insn = llvm::cast<llvm::BinaryOperator>(st.value);
+				}
+				return true;
+			}
+		}
+		if (auto* ce = llvm::dyn_cast<llvm::ConstantExpr>(st.value))
+		{
+			return ce->getOpcode() == Opcode &&
+					((L.match(st.ops[0]) && R.match(st.ops[1]))
 					|| (Commutable && L.match(st.ops[1]) && R.match(st.ops[0])));
-        }
+		}
 
-        return false;
-    }
+		return false;
+	}
 };
 
 //
@@ -211,7 +211,7 @@ template <typename LHS, typename RHS>
 inline BinaryOp_match<LHS, RHS, llvm::Instruction::Add> m_Add(
 		const LHS &L,
 		const RHS &R,
-		llvm::Instruction** add = nullptr)
+		llvm::BinaryOperator** add = nullptr)
 {
 	return BinaryOp_match<LHS, RHS, llvm::Instruction::Add>(L, R, add);
 }
@@ -220,7 +220,7 @@ template <typename LHS, typename RHS>
 inline BinaryOp_match<LHS, RHS, llvm::Instruction::FAdd> m_FAdd(
 	const LHS &L,
 	const RHS &R,
-	llvm::Instruction** fadd = nullptr)
+	llvm::BinaryOperator** fadd = nullptr)
 {
 	return BinaryOp_match<LHS, RHS, llvm::Instruction::FAdd>(L, R, fadd);
 }
@@ -229,7 +229,7 @@ template <typename LHS, typename RHS>
 inline BinaryOp_match<LHS, RHS, llvm::Instruction::Sub> m_Sub(
 		const LHS &L,
 		const RHS &R,
-		llvm::Instruction** sub = nullptr)
+		llvm::BinaryOperator** sub = nullptr)
 {
 	return BinaryOp_match<LHS, RHS, llvm::Instruction::Sub>(L, R, sub);
 }
@@ -238,7 +238,7 @@ template <typename LHS, typename RHS>
 inline BinaryOp_match<LHS, RHS, llvm::Instruction::FSub> m_FSub(
 		const LHS &L,
 		const RHS &R,
-		llvm::Instruction** fsub = nullptr)
+		llvm::BinaryOperator** fsub = nullptr)
 {
 	return BinaryOp_match<LHS, RHS, llvm::Instruction::FSub>(L, R, fsub);
 }
@@ -247,7 +247,7 @@ template <typename LHS, typename RHS>
 inline BinaryOp_match<LHS, RHS, llvm::Instruction::Mul> m_Mul(
 		const LHS &L,
 		const RHS &R,
-		llvm::Instruction** mul = nullptr)
+		llvm::BinaryOperator** mul = nullptr)
 {
 	return BinaryOp_match<LHS, RHS, llvm::Instruction::Mul>(L, R, mul);
 }
@@ -256,7 +256,7 @@ template <typename LHS, typename RHS>
 inline BinaryOp_match<LHS, RHS, llvm::Instruction::FMul> m_FMul(
 		const LHS &L,
 		const RHS &R,
-		llvm::Instruction** fmul = nullptr)
+		llvm::BinaryOperator** fmul = nullptr)
 {
 	return BinaryOp_match<LHS, RHS, llvm::Instruction::FMul>(L, R, fmul);
 }
@@ -265,7 +265,7 @@ template <typename LHS, typename RHS>
 inline BinaryOp_match<LHS, RHS, llvm::Instruction::UDiv> m_UDiv(
 		const LHS &L,
 		const RHS &R,
-		llvm::Instruction** udiv = nullptr)
+		llvm::BinaryOperator** udiv = nullptr)
 {
 	return BinaryOp_match<LHS, RHS, llvm::Instruction::UDiv>(L, R, udiv);
 }
@@ -274,7 +274,7 @@ template <typename LHS, typename RHS>
 inline BinaryOp_match<LHS, RHS, llvm::Instruction::SDiv> m_SDiv(
 		const LHS &L,
 		const RHS &R,
-		llvm::Instruction** sdiv = nullptr)
+		llvm::BinaryOperator** sdiv = nullptr)
 {
 	return BinaryOp_match<LHS, RHS, llvm::Instruction::SDiv>(L, R, sdiv);
 }
@@ -283,7 +283,7 @@ template <typename LHS, typename RHS>
 inline BinaryOp_match<LHS, RHS, llvm::Instruction::FDiv> m_FDiv(
 		const LHS &L,
 		const RHS &R,
-		llvm::Instruction** fdiv = nullptr)
+		llvm::BinaryOperator** fdiv = nullptr)
 {
 	return BinaryOp_match<LHS, RHS, llvm::Instruction::FDiv>(L, R, fdiv);
 }
@@ -292,7 +292,7 @@ template <typename LHS, typename RHS>
 inline BinaryOp_match<LHS, RHS, llvm::Instruction::URem> m_URem(
 		const LHS &L,
 		const RHS &R,
-		llvm::Instruction** urem = nullptr)
+		llvm::BinaryOperator** urem = nullptr)
 {
 	return BinaryOp_match<LHS, RHS, llvm::Instruction::URem>(L, R, urem);
 }
@@ -301,7 +301,7 @@ template <typename LHS, typename RHS>
 inline BinaryOp_match<LHS, RHS, llvm::Instruction::SRem> m_SRem(
 		const LHS &L,
 		const RHS &R,
-		llvm::Instruction** srem = nullptr)
+		llvm::BinaryOperator** srem = nullptr)
 {
 	return BinaryOp_match<LHS, RHS, llvm::Instruction::SRem>(L, R, srem);
 }
@@ -310,7 +310,7 @@ template <typename LHS, typename RHS>
 inline BinaryOp_match<LHS, RHS, llvm::Instruction::FRem> m_FRem(
 		const LHS &L,
 		const RHS &R,
-		llvm::Instruction** frem = nullptr)
+		llvm::BinaryOperator** frem = nullptr)
 {
 	return BinaryOp_match<LHS, RHS, llvm::Instruction::FRem>(L, R, frem);
 }
@@ -319,7 +319,7 @@ template <typename LHS, typename RHS>
 inline BinaryOp_match<LHS, RHS, llvm::Instruction::And> m_And(
 		const LHS &L,
 		const RHS &R,
-		llvm::Instruction** andi = nullptr)
+		llvm::BinaryOperator** andi = nullptr)
 {
 	return BinaryOp_match<LHS, RHS, llvm::Instruction::And>(L, R, andi);
 }
@@ -328,7 +328,7 @@ template <typename LHS, typename RHS>
 inline BinaryOp_match<LHS, RHS, llvm::Instruction::Or> m_Or(
 		const LHS &L,
 		const RHS &R,
-		llvm::Instruction** ori = nullptr)
+		llvm::BinaryOperator** ori = nullptr)
 {
 	return BinaryOp_match<LHS, RHS, llvm::Instruction::Or>(L, R, ori);
 }
@@ -337,7 +337,7 @@ template <typename LHS, typename RHS>
 inline BinaryOp_match<LHS, RHS, llvm::Instruction::Xor> m_Xor(
 		const LHS &L,
 		const RHS &R,
-		llvm::Instruction** xori = nullptr)
+		llvm::BinaryOperator** xori = nullptr)
 {
 	return BinaryOp_match<LHS, RHS, llvm::Instruction::Xor>(L, R, xori);
 }
@@ -346,7 +346,7 @@ template <typename LHS, typename RHS>
 inline BinaryOp_match<LHS, RHS, llvm::Instruction::Shl> m_Shl(
 		const LHS &L,
 		const RHS &R,
-		llvm::Instruction** shl = nullptr)
+		llvm::BinaryOperator** shl = nullptr)
 {
 	return BinaryOp_match<LHS, RHS, llvm::Instruction::Shl>(L, R, shl);
 }
@@ -355,7 +355,7 @@ template <typename LHS, typename RHS>
 inline BinaryOp_match<LHS, RHS, llvm::Instruction::LShr> m_LShr(
 		const LHS &L,
 		const RHS &R,
-		llvm::Instruction** lshr = nullptr)
+		llvm::BinaryOperator** lshr = nullptr)
 {
 	return BinaryOp_match<LHS, RHS, llvm::Instruction::LShr>(L, R, lshr);
 }
@@ -364,7 +364,7 @@ template <typename LHS, typename RHS>
 inline BinaryOp_match<LHS, RHS, llvm::Instruction::AShr> m_AShr(
 		const LHS &L,
 		const RHS &R,
-		llvm::Instruction** ashr = nullptr)
+		llvm::BinaryOperator** ashr = nullptr)
 {
 	return BinaryOp_match<LHS, RHS, llvm::Instruction::AShr>(L, R, ashr);
 }
@@ -379,7 +379,7 @@ template <typename LHS, typename RHS>
 inline BinaryOp_match<LHS, RHS, llvm::Instruction::Add, true> m_c_Add(
 		const LHS &L,
 		const RHS &R,
-		llvm::Instruction** add = nullptr)
+		llvm::BinaryOperator** add = nullptr)
 {
 	return BinaryOp_match<LHS, RHS, llvm::Instruction::Add, true>(L, R, add);
 }
@@ -388,7 +388,7 @@ template <typename LHS, typename RHS>
 inline BinaryOp_match<LHS, RHS, llvm::Instruction::Mul, true> m_c_Mul(
 		const LHS &L,
 		const RHS &R,
-		llvm::Instruction** mul = nullptr)
+		llvm::BinaryOperator** mul = nullptr)
 {
 	return BinaryOp_match<LHS, RHS, llvm::Instruction::Mul, true>(L, R, mul);
 }
@@ -397,7 +397,7 @@ template <typename LHS, typename RHS>
 inline BinaryOp_match<LHS, RHS, llvm::Instruction::And, true> m_c_And(
 		const LHS &L,
 		const RHS &R,
-		llvm::Instruction** andi = nullptr)
+		llvm::BinaryOperator** andi = nullptr)
 {
 	return BinaryOp_match<LHS, RHS, llvm::Instruction::And, true>(L, R, andi);
 }
@@ -406,7 +406,7 @@ template <typename LHS, typename RHS>
 inline BinaryOp_match<LHS, RHS, llvm::Instruction::Or, true> m_c_Or(
 		const LHS &L,
 		const RHS &R,
-		llvm::Instruction** ori = nullptr)
+		llvm::BinaryOperator** ori = nullptr)
 {
 	return BinaryOp_match<LHS, RHS, llvm::Instruction::Or, true>(L, R, ori);
 }
@@ -415,7 +415,7 @@ template <typename LHS, typename RHS>
 inline BinaryOp_match<LHS, RHS, llvm::Instruction::Xor, true> m_c_Xor(
 		const LHS &L,
 		const RHS &R,
-		llvm::Instruction** xori = nullptr)
+		llvm::BinaryOperator** xori = nullptr)
 {
 	return BinaryOp_match<LHS, RHS, llvm::Instruction::Xor, true>(L, R, xori);
 }
@@ -437,10 +437,10 @@ template<typename LHS_t> struct not_match
 
 	bool match(SymbolicTree& st)
 	{
-        if (!st.isBinary())
-        {
-            return false;
-        }
+		if (!st.isBinary())
+		{
+			return false;
+		}
 
 		if (auto *O = llvm::dyn_cast<llvm::Operator>(st.value))
 		{
@@ -479,10 +479,10 @@ template<typename LHS_t> struct neg_match
 
 	bool match(SymbolicTree& st)
 	{
-        if (!st.isBinary())
-        {
-            return false;
-        }
+		if (!st.isBinary())
+		{
+			return false;
+		}
 
 		if (auto *O = llvm::dyn_cast<llvm::Operator>(st.value))
 		{
@@ -543,10 +543,10 @@ struct CmpClass_match
 
 	bool match(SymbolicTree& st)
 	{
-        if (!st.isBinary())
-        {
-            return false;
-        }
+		if (!st.isBinary())
+		{
+			return false;
+		}
 
 		auto *I = llvm::dyn_cast<Class>(st.value);
 		if (I == nullptr)
@@ -643,10 +643,10 @@ struct CmpClass_pred_match
 
 	bool match(SymbolicTree& st)
 	{
-        if (!st.isBinary())
-        {
-            return false;
-        }
+		if (!st.isBinary())
+		{
+			return false;
+		}
 
 		auto *I = llvm::dyn_cast<Class>(st.value);
 		if (I == nullptr)
@@ -731,10 +731,10 @@ template<typename Op_t> struct LoadClass_match
 
 	bool match(SymbolicTree& st)
 	{
-        if (!st.isUnary())
-        {
-            return false;
-        }
+		if (!st.isUnary())
+		{
+			return false;
+		}
 
 		if (auto *LI = llvm::dyn_cast<llvm::LoadInst>(st.value))
 		{
@@ -767,22 +767,22 @@ template<typename OpTy> inline LoadClass_match<OpTy> m_Load(
 template <typename Class>
 struct bind_ty
 {
-    Class*& VR;
+	Class*& VR;
 
-    bind_ty(Class*& v) :
-        VR(v)
-    {
-    }
+	bind_ty(Class*& v) :
+		VR(v)
+	{
+	}
 
-    bool match(SymbolicTree& st)
-    {
-        if (auto* CV = llvm::dyn_cast<Class>(st.value))
-        {
-            VR = CV;
-            return true;
-        }
-        return false;
-    }
+	bool match(SymbolicTree& st)
+	{
+		if (auto* CV = llvm::dyn_cast<Class>(st.value))
+		{
+			VR = CV;
+			return true;
+		}
+		return false;
+	}
 };
 
 inline bind_ty<llvm::Value> m_Value(llvm::Value*& V)
@@ -1005,6 +1005,42 @@ struct match_zero
 inline match_zero m_Zero()
 {
 	return match_zero();
+}
+
+struct match_not_zero
+{
+	llvm::ConstantInt*& CI;
+
+	match_not_zero(llvm::ConstantInt*& ci) :
+		CI(ci)
+	{
+	}
+
+	bool match(SymbolicTree& st)
+	{
+		if (auto* C = llvm::dyn_cast<llvm::ConstantInt>(st.value))
+		{
+			if (!C->isNullValue())
+			{
+				CI = C;
+				return true;
+			}
+		}
+		return false;
+	}
+};
+
+/// \brief Match an arbitrary non-zero constant integer.
+inline match_not_zero m_not_Zero()
+{
+	llvm::ConstantInt* CI;
+	return match_not_zero(CI);
+}
+
+/// \brief Match and bind an arbitrary non-zero constant integer.
+inline match_not_zero m_not_Zero(llvm::ConstantInt*& CI)
+{
+	return match_not_zero(CI);
 }
 
 struct match_neg_zero

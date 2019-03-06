@@ -66,8 +66,44 @@ std::string getVersionFromDWord(const std::uint32_t version)
  * @param pathToFile Path to input file
  * @param loadFlags Load flags
  */
-MachOFormat::MachOFormat(std::string pathToFile, LoadFlags loadFlags) : FileFormat(pathToFile, loadFlags),
-	fileBuffer(MemoryBuffer::getFile(Twine(filePath))), file(nullptr), fatFile(nullptr)
+MachOFormat::MachOFormat(std::string pathToFile, LoadFlags loadFlags) :
+		FileFormat(pathToFile, loadFlags),
+		fileBuffer(MemoryBuffer::getFile(Twine(filePath))),
+		file(nullptr),
+		fatFile(nullptr)
+{
+	initStructures();
+}
+
+/**
+ * Constructor
+ * @param inputStream Representation of input file
+ * @param loadFlags Load flags
+ */
+MachOFormat::MachOFormat(std::istream &inputStream, LoadFlags loadFlags) :
+		FileFormat(inputStream, loadFlags),
+		fileBuffer(MemoryBuffer::getMemBuffer(StringRef(
+				reinterpret_cast<const char*>(bytes.data()),
+				bytes.size()))),
+		file(nullptr),
+		fatFile(nullptr)
+{
+	initStructures();
+}
+
+/**
+ * Constructor
+ * @param data Input data.
+ * @param size Input data size.
+ * @param loadFlags Load flags
+ */
+MachOFormat::MachOFormat(const std::uint8_t *data, std::size_t size, LoadFlags loadFlags) :
+		FileFormat(data, size, loadFlags),
+		fileBuffer(MemoryBuffer::getMemBuffer(StringRef(
+				reinterpret_cast<const char*>(data),
+				size))),
+		file(nullptr),
+		fatFile(nullptr)
 {
 	initStructures();
 }

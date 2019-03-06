@@ -11,8 +11,11 @@
 #include <string>
 #include <vector>
 
-#include "yaracpp/yara_detector/yara_detector.h"
 #include "fileinfo/file_information/file_information.h"
+
+namespace yaracpp {
+class YaraRule;
+} // namespace yaracpp
 
 namespace fileinfo {
 

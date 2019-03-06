@@ -214,7 +214,41 @@ Symbol::UsageType getSymbolUsageType(std::uint8_t storageClass, std::uint8_t com
  * @param pathToFile Path to input file
  * @param loadFlags Load flags
  */
-CoffFormat::CoffFormat(std::string pathToFile, LoadFlags loadFlags) : FileFormat(pathToFile, loadFlags), fileBuffer(MemoryBuffer::getFile(Twine(pathToFile)))
+CoffFormat::CoffFormat(std::string pathToFile, LoadFlags loadFlags) :
+		FileFormat(pathToFile, loadFlags),
+		fileBuffer(MemoryBuffer::getFile(Twine(pathToFile)))
+{
+	initStructures();
+}
+
+/**
+ * Constructor
+ * @param inputStream Representation of input file
+ * @param loadFlags Load flags
+ */
+CoffFormat::CoffFormat(std::istream &inputStream, LoadFlags loadFlags) :
+		FileFormat(inputStream, loadFlags),
+		fileBuffer(MemoryBuffer::getMemBuffer(
+				StringRef(
+						reinterpret_cast<const char*>(bytes.data()),
+						bytes.size()),
+				"",
+				false))
+{
+	initStructures();
+}
+
+/**
+ * Constructor
+ * @param data Input data.
+ * @param size Input data size.
+ * @param loadFlags Load flags
+ */
+CoffFormat::CoffFormat(const std::uint8_t *data, std::size_t size, LoadFlags loadFlags) :
+		FileFormat(data, size, loadFlags),
+		fileBuffer(MemoryBuffer::getMemBuffer(StringRef(
+				reinterpret_cast<const char*>(data),
+				size)))
 {
 	initStructures();
 }

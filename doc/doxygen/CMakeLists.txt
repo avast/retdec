@@ -29,6 +29,12 @@ add_custom_target(doc ALL
 	COMMENT "Generating API documentation with Doxygen" VERBATIM
 )
 
+# Show doxygen log file after the documentation is generated.
+add_custom_command(TARGET doc
+	POST_BUILD
+	COMMAND "${CMAKE_COMMAND}" "-DDOXYGEN_LOG=${DOXYGEN_LOG}" -P "${CMAKE_CURRENT_SOURCE_DIR}/show_doxygen_log.cmake"
+)
+
 # Cleanup.
 set_directory_properties(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES "${DOXYGEN_OUTPUT_DIR}")
 

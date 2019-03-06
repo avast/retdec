@@ -1,5 +1,6 @@
 set(FILEFORMAT_SOURCES
 	utils/format_detection.cpp
+	utils/byte_array_buffer.cpp
 	utils/conversions.cpp
 	utils/other.cpp
 	utils/asn1.cpp
@@ -20,6 +21,9 @@ set(FILEFORMAT_SOURCES
 	types/symbol_table/elf_symbol.cpp
 	types/rich_header/rich_header.cpp
 	types/rich_header/linker_info.cpp
+	types/visual_basic/visual_basic_info.cpp
+	types/visual_basic/visual_basic_object.cpp
+	types/visual_basic/visual_basic_extern.cpp
 	types/import_table/import.cpp
 	types/import_table/import_table.cpp
 	types/import_table/pe_import.cpp
@@ -30,6 +34,9 @@ set(FILEFORMAT_SOURCES
 	types/resource_table/resource.cpp
 	types/resource_table/resource_table.cpp
 	types/resource_table/resource_tree.cpp
+	types/resource_table/resource_icon.cpp
+	types/resource_table/resource_icon_group.cpp
+	types/resource_table/bitmap_image.cpp
 	types/certificate_table/certificate.cpp
 	types/certificate_table/certificate_table.cpp
 	types/dotnet_types/dotnet_type_reconstructor.cpp
@@ -67,5 +74,5 @@ set(FILEFORMAT_SOURCES
 )
 
 add_library(retdec-fileformat STATIC ${FILEFORMAT_SOURCES})
-target_link_libraries(retdec-fileformat retdec-crypto retdec-config retdec-utils pelib elfio llvm)
+target_link_libraries(retdec-fileformat retdec-crypto retdec-utils pelib elfio llvm)
 target_include_directories(retdec-fileformat PUBLIC ${PROJECT_SOURCE_DIR}/include/)

@@ -51,6 +51,9 @@ std::string toLower(std::string str);
 std::string toUpper(std::string str);
 
 std::string toWide(const std::string &str, std::string::size_type length);
+std::string unicodeToAscii(const std::uint8_t *bytes, std::size_t nBytes);
+std::string readNullTerminatedAscii(const std::uint8_t *bytes, std::size_t bytesLen,
+							std::size_t offset = 0, std::size_t maxBytes = 0, bool failOnExceed = false);
 
 std::string trim(std::string str, const std::string &toTrim = " \t\r\n\v");
 

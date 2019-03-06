@@ -27,6 +27,7 @@ ImportTableJsonGetter::ImportTableJsonGetter(FileInformation &fileInfo) : Iterat
 	subtitle = "imports";
 	commonHeaderElements.push_back("index");
 	commonHeaderElements.push_back("name");
+	commonHeaderElements.push_back("usageType");
 	commonHeaderElements.push_back("libraryName");
 	commonHeaderElements.push_back("ordinalNumber");
 	commonHeaderElements.push_back("address");
@@ -74,6 +75,7 @@ bool ImportTableJsonGetter::getRecord(std::size_t structIndex, std::size_t recIn
 	record.clear();
 	record.push_back(numToStr(recIndex));
 	record.push_back(replaceNonprintableChars(fileinfo.getImportName(recIndex)));
+	record.push_back(replaceNonprintableChars(fileinfo.getImportUsageType(recIndex)));
 	record.push_back(replaceNonprintableChars(fileinfo.getImportLibraryName(recIndex)));
 	record.push_back(fileinfo.getImportOrdinalNumberStr(recIndex, std::dec));
 	record.push_back(fileinfo.getImportAddressStr(recIndex, hexWithPrefix));
