@@ -13,11 +13,14 @@ namespace {
 
 const std::string ARCH_UNKNOWN = "unknown";
 const std::string ARCH_MIPS    = "mips";
+const std::string ARCH_MIPS64  = "mips64";
 const std::string ARCH_PIC32   = "pic32";
 const std::string ARCH_ARM     = "arm";
+const std::string ARCH_ARM64   = "arm64";
 const std::string ARCH_THUMB   = "thumb";
 const std::string ARCH_x86     = "x86";
 const std::string ARCH_PPC     = "powerpc";
+const std::string ARCH_PPC64   = "powerpc64";
 
 const std::string JSON_name    = "name";
 const std::string JSON_endian  = "endian";
@@ -34,15 +37,18 @@ namespace config {
 bool Architecture::isArmOrThumb() const { return isArm() || isThumb(); }
 bool Architecture::isPic32() const      { return isArch(eArch::PIC32); }
 bool Architecture::isArm() const        { return isArch(eArch::ARM); }
+bool Architecture::isArm64() const      { return isArm() && getBitSize() == 64; }
 bool Architecture::isThumb() const      { return isArch(eArch::THUMB); }
 bool Architecture::isX86() const        { return isArch(eArch::X86); }
 bool Architecture::isX86_16() const     { return isX86() && getBitSize() == 16; }
 bool Architecture::isX86_32() const     { return isX86() && getBitSize() == 32; }
 bool Architecture::isX86_64() const     { return isX86() && getBitSize() == 64; }
 bool Architecture::isPpc() const        { return isArch(eArch::PPC); }
+bool Architecture::isPpc64() const      { return isPpc() && getBitSize() == 64; }
 bool Architecture::isKnown() const      { return !isUnknown(); }
 bool Architecture::isUnknown() const    { return isArch(eArch::UNKNOWN); }
 bool Architecture::isMips() const       { return isArch(eArch::MIPS); }
+bool Architecture::isMips64() const     { return isMips() && getBitSize() == 64; }
 bool Architecture::isMipsOrPic32() const{ return isMips() || isPic32(); }
 
 /**

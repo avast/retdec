@@ -781,8 +781,8 @@ bool Decoder::getJumpTargetsFromInstruction(
 				SymbolicTree st(_RDA, l->getPointerOperand(), nullptr, 8);
 				st.simplifyNode();
 
-				ConstantInt* ci = nullptr;
-				if (match(st, m_ConstantInt(ci)))
+				auto* ci = dyn_cast<ConstantInt>(st.value);
+				if (ci && !ci->isNegative())
 				{
 					Address t(ci->getZExtValue());
 					auto sz = _abi->getTypeByteSize(l->getType());

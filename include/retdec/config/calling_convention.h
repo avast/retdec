@@ -81,7 +81,7 @@ class CallingConvention
 		Json::Value getJsonValue() const;
 		void readJsonValue(const Json::Value& val);
 
-	private:
+	public:
 		enum class eCallingConvention
 		{
 			CC_UNKNOWN = 0,
@@ -96,13 +96,31 @@ class CallingConvention
 			CC_SPOILED,
 			CC_SPECIALE,
 			CC_SPECIALP,
-			CC_SPECIAL
+			CC_SPECIAL,
+			CC_WATCOM,
+			CC_X64,
+			CC_ARM,
+			CC_ARM64,
+			CC_MIPS,
+			CC_MIPS64,
+			CC_POWERPC,
+			CC_POWERPC64,
+			CC_PIC32,
+			CC_ENDING,
 		};
-		eCallingConvention _callingConvention = eCallingConvention::CC_UNKNOWN;
+
+		eCallingConvention getID() const;
+
+		friend std::ostream& operator<< (std::ostream &out, const eCallingConvention& cc);
 
 	private:
 		CallingConvention(eCallingConvention cc);
+
+	private:
+		eCallingConvention _callingConvention = eCallingConvention::CC_UNKNOWN;
 };
+
+typedef CallingConvention::eCallingConvention CallingConventionID;
 
 } // namespace config
 } // namespace retdec
