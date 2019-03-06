@@ -2,7 +2,7 @@
 
 # dev
 
-* New Feature: Added basic support of 64-bit x86 architecture ([#9](https://github.com/avast-tl/retdec/issues/9)).
+* New Feature: Added basic support of 64-bit x86 architecture ([#9](https://github.com/avast-tl/retdec/issues/9), [#513](https://github.com/avast-tl/retdec/pull/513)).
 * New Feature: Added presentation of imported types and TypeRef hashes for .NET binaries ([#363](https://github.com/avast-tl/retdec/issues/363), [#364](https://github.com/avast-tl/retdec/issues/364), [#428](https://github.com/avast-tl/retdec/issues/428)).
 * New Feature: Added presentation of metadata from binaries written in Visual Basic and detection of P-code ([#138](https://github.com/avast-tl/retdec/issues/138), [#440](https://github.com/avast-tl/retdec/pull/440)).
 * New Feature: Added computation and presentation of icon hashes for exact and also similarity matching in PE files ([#339](https://github.com/avast-tl/retdec/issues/339)).
