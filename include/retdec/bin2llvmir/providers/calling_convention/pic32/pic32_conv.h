@@ -1,5 +1,5 @@
 /**
- * @file retdec/include/bin3llvmir/providers/calling_convention/pic32/pic32_conv.h
+ * @file include/retdec/bin2llvmir/providers/calling_convention/pic32/pic32_conv.h
  * @brief Calling conventions of PIC32 architecture.
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */

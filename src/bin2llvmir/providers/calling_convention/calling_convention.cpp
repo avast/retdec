@@ -1,5 +1,5 @@
 /**
- * @file src/retdec/bin2llvmir/providers/calling_convention/calling_convention.cpp
+ * @file src/bin2llvmir/providers/calling_convention/calling_convention.cpp
  * @brief Calling convention information.
  * @copyright (c) 2019 Avast Software, licensed under the MIT license
  */

@@ -1,5 +1,5 @@
 /**
-* @file src/bin2llvmir/optimizations/param_return/filter.cpp
+* @file src/bin2llvmir/optimizations/param_return/filter/filter.cpp
 * @brief Filters potentail values according to calling convention.
 * @copyright (c) 2019 Avast Software, licensed under the MIT license
 */
@@ -885,8 +885,8 @@ void Filter::orderRegistersBy(
 }
 
 FilterableLayout Filter::createArgsFilterableLayout(
-			const std::vector<Value*>& group,
-			const std::vector<Type*>& knownTypes) const
+			const std::vector<llvm::Value*>& group,
+			const std::vector<llvm::Type*>& knownTypes) const
 {
 	FilterableLayout layout = separateArgValues(group);
 	layout.knownTypes = knownTypes;
@@ -897,16 +897,16 @@ FilterableLayout Filter::createArgsFilterableLayout(
 }
 
 FilterableLayout Filter::createRetsFilterableLayout(
-			const std::vector<Value*>& group,
-			Type* knownType) const
+			const std::vector<llvm::Value*>& group,
+			llvm::Type* knownType) const
 {
 	std::vector<Type*> knownTypes = {knownType};
 	return createRetsFilterableLayout(group, knownTypes);
 }
 
 FilterableLayout Filter::createRetsFilterableLayout(
-			const std::vector<Value*>& group,
-			const std::vector<Type*>& knownTypes) const
+			const std::vector<llvm::Value*>& group,
+			const std::vector<llvm::Type*>& knownTypes) const
 {
 	FilterableLayout layout = separateRetValues(group);
 	layout.knownTypes = knownTypes;
@@ -916,7 +916,7 @@ FilterableLayout Filter::createRetsFilterableLayout(
 	return layout;
 }
 
-FilterableLayout Filter::separateArgValues(const std::vector<Value*>& paramValues) const
+FilterableLayout Filter::separateArgValues(const std::vector<llvm::Value*>& paramValues) const
 {
 	auto& regs = _cc->getParamRegisters();
 	auto& fpRegs = _cc->getParamFPRegisters();
@@ -926,7 +926,7 @@ FilterableLayout Filter::separateArgValues(const std::vector<Value*>& paramValue
 	return separateValues(paramValues, regs, fpRegs, doubleRegs, vecRegs);
 }
 
-FilterableLayout Filter::separateRetValues(const std::vector<Value*>& paramValues) const
+FilterableLayout Filter::separateRetValues(const std::vector<llvm::Value*>& paramValues) const
 {
 	auto& regs = _cc->getReturnRegisters();
 	auto& fpRegs = _cc->getReturnFPRegisters();
@@ -940,7 +940,7 @@ FilterableLayout Filter::separateRetValues(const std::vector<Value*>& paramValue
 }
 
 FilterableLayout Filter::separateValues(
-		const std::vector<Value*>& paramValues,
+		const std::vector<llvm::Value*>& paramValues,
 		const std::vector<uint32_t>& gpRegs,
 		const std::vector<uint32_t>& fpRegs,
 		const std::vector<uint32_t>& doubleRegs,
@@ -983,17 +983,17 @@ FilterableLayout Filter::separateValues(
 	return layout;
 }
 
-std::vector<Value*> Filter::createGroupedArgValues(const FilterableLayout& lay) const
+std::vector<llvm::Value*> Filter::createGroupedArgValues(const FilterableLayout& lay) const
 {
 	return createGroupedValues(lay);
 }
 
-std::vector<Value*> Filter::createGroupedRetValues(const FilterableLayout& lay) const
+std::vector<llvm::Value*> Filter::createGroupedRetValues(const FilterableLayout& lay) const
 {
 	return createGroupedValues(lay);
 }
 
-std::vector<Value*> Filter::createGroupedValues(const FilterableLayout& lay) const
+std::vector<llvm::Value*> Filter::createGroupedValues(const FilterableLayout& lay) const
 {
 	std::vector<Value*> paramValues;
 

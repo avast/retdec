@@ -1,5 +1,5 @@
 /**
-* @file include/retdec/bin2llvmir/optimizations/param_return/ms_x64.h
+* @file include/retdec/bin2llvmir/optimizations/param_return/filter/ms_x64.h
 * @brief Microsoft x64 specific filtration of registers.
 * @copyright (c) 2019 Avast Software, licensed under the MIT license
 */

@@ -1,5 +1,5 @@
 /**
-* @file src/bin2llvmir/optimizations/param_return/filter.cpp
+* @file src/bin2llvmir/optimizations/param_return/filter/ms_x64.cpp
 * @brief Microsoft x64 specific filtration of registers.
 * @copyright (c) 2019 Avast Software, licensed under the MIT license
 */

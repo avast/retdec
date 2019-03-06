@@ -1,5 +1,5 @@
 /**
-* @file include/retdec/bin2llvmir/optimizations/param_return/collector.h
+* @file include/retdec/bin2llvmir/optimizations/param_return/collector/collector.h
 * @brief Collects possible arguments and returns of functions.
 * @copyright (c) 2019 Avast Software, licensed under the MIT license
 */

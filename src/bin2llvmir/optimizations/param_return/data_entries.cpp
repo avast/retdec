@@ -19,12 +19,12 @@ namespace bin2llvmir {
 //=============================================================================
 //
 
-ReturnEntry::ReturnEntry(ReturnInst* r) :
+ReturnEntry::ReturnEntry(llvm::ReturnInst* r) :
 		_retInst(r)
 {
 }
 
-void ReturnEntry::addRetStore(StoreInst* st)
+void ReturnEntry::addRetStore(llvm::StoreInst* st)
 {
 	_retStores.push_back(st);
 
@@ -37,42 +37,42 @@ void ReturnEntry::addRetStore(StoreInst* st)
 	}
 }
 
-void ReturnEntry::setRetStores(std::vector<StoreInst*>&& stores)
+void ReturnEntry::setRetStores(std::vector<llvm::StoreInst*>&& stores)
 {
 	_retStores = std::move(stores);
 
-	std::set<llvm::Value*> vals;
+	std::set<Value*> vals;
 	for (auto& i: _retStores)
 	{
 		vals.insert(i->getPointerOperand());
 	}
 
-	_retValues = std::vector<llvm::Value*>(
+	_retValues = std::vector<Value*>(
 				std::make_move_iterator(vals.begin()),
 				std::make_move_iterator(vals.end()));
 }
 
-void ReturnEntry::setRetStores(const std::vector<StoreInst*>& stores)
+void ReturnEntry::setRetStores(const std::vector<llvm::StoreInst*>& stores)
 {
 	_retStores = stores;
 
-	std::set<llvm::Value*> vals;
+	std::set<Value*> vals;
 	for (auto& i: _retStores)
 	{
 		vals.insert(i->getPointerOperand());
 	}
 
-	_retValues = std::vector<llvm::Value*>(
+	_retValues = std::vector<Value*>(
 				std::make_move_iterator(vals.begin()),
 				std::make_move_iterator(vals.end()));
 }
 
-void ReturnEntry::setRetValues(std::vector<Value*>&& values)
+void ReturnEntry::setRetValues(std::vector<llvm::Value*>&& values)
 {
 	_retStores.erase(std::remove_if(
 		_retStores.begin(),
 		_retStores.end(),
-		[values](llvm::StoreInst* st)
+		[values](StoreInst* st)
 		{
 			auto* op = st->getPointerOperand();
 			return std::find(
@@ -84,12 +84,12 @@ void ReturnEntry::setRetValues(std::vector<Value*>&& values)
 	_retValues = std::move(values);
 }
 
-void ReturnEntry::setRetValues(const std::vector<Value*>& values)
+void ReturnEntry::setRetValues(const std::vector<llvm::Value*>& values)
 {
 	_retStores.erase(std::remove_if(
 		_retStores.begin(),
 		_retStores.end(),
-		[values](llvm::StoreInst* st)
+		[values](StoreInst* st)
 		{
 			auto* op = st->getPointerOperand();
 			return std::find(
@@ -106,12 +106,12 @@ ReturnInst* ReturnEntry::getRetInstruction() const
 	return _retInst;
 }
 
-const std::vector<StoreInst*>& ReturnEntry::retStores() const
+const std::vector<llvm::StoreInst*>& ReturnEntry::retStores() const
 {
 	return _retStores;
 }
 
-const std::vector<Value*>& ReturnEntry::retValues() const
+const std::vector<llvm::Value*>& ReturnEntry::retValues() const
 {
 	return _retValues;
 }
@@ -127,7 +127,7 @@ bool CallableEntry::isVoidarg() const
 	return _voidarg;
 }
 
-void CallableEntry::addArg(Value* arg)
+void CallableEntry::addArg(llvm::Value* arg)
 {
 	_args.push_back(arg);
 }
@@ -207,7 +207,7 @@ void FunctionEntry::setVariadic(bool variadic)
 	_variadic = variadic;
 }
 
-void FunctionEntry::setArgs(std::vector<Value*>&& args)
+void FunctionEntry::setArgs(std::vector<llvm::Value*>&& args)
 {
 	_args = std::move(args);
 }
@@ -315,7 +315,7 @@ void CallEntry::setArgs(std::vector<Value*>&& args)
 		std::remove_if(
 			_argStores.begin(),
 			_argStores.end(),
-			[args](llvm::StoreInst* st)
+			[args](StoreInst* st)
 			{
 				auto* op = st->getPointerOperand();
 				return std::find(
@@ -373,7 +373,7 @@ std::string CallEntry::getFormatString() const
 	return _fmtStr;
 }
 
-const std::vector<StoreInst*>& CallEntry::argStores() const
+const std::vector<llvm::StoreInst*>& CallEntry::argStores() const
 {
 	return _argStores;
 }

@@ -1,5 +1,5 @@
 /**
-* @file include/retdec/bin2llvmir/optimizations/param_return/filter.h
+* @file include/retdec/bin2llvmir/optimizations/param_return/filter/filter.h
 * @brief Filters potentail values according to calling convention.
 * @copyright (c) 2019 Avast Software, licensed under the MIT license
 */

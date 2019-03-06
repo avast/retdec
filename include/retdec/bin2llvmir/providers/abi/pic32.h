@@ -1,5 +1,5 @@
 /**
- * @file include/retdec/bin2llvmir/providers/abi/mips.h
+ * @file include/retdec/bin2llvmir/providers/abi/pic32.h
  * @brief ABI information for MIPS.
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */

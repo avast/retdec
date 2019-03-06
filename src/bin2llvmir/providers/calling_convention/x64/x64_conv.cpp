@@ -1,5 +1,5 @@
 /**
- * @file src/bin2llvmir/providers/calling_convention/x64.cpp
+ * @file src/bin2llvmir/providers/calling_convention/x64/x64_conv.cpp
  * @brief Calling conventions of X64 architecture.
  * @copyright (c) 2019 Avast Software, licensed under the MIT license
  */

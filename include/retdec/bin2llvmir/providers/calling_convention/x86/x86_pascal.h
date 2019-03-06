@@ -1,5 +1,5 @@
 /**
- * @file retdec/include/bin2llvmir/providers/calling_convention/x86/x86_pascal.h
+ * @file include/retdec/bin2llvmir/providers/calling_convention/x86/x86_pascal.h
  * @brief Pascal calling convention of x86 architecture.
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */

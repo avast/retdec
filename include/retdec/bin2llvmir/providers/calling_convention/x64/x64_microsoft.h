@@ -1,5 +1,5 @@
 /**
- * @file retdec/include/bin2llvmir/providers/calling_convention/x64/x64_microsoft.h
+ * @file include/retdec/bin2llvmir/providers/calling_convention/x64/x64_microsoft.h
  * @brief MS Windows calling convention of X64 architecture.
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */
