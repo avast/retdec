@@ -27,6 +27,8 @@ AbiMips::AbiMips(llvm::Module* m, Config* c) :
 			MIPS_REG_A1,
 			MIPS_REG_A2,
 			MIPS_REG_A3};
+
+	_defcc = CallingConvention::ID::CC_MIPS;
 }
 
 AbiMips::~AbiMips()
@@ -34,7 +36,7 @@ AbiMips::~AbiMips()
 
 }
 
-bool AbiMips::isGeneralPurposeRegister(const llvm::Value* val)
+bool AbiMips::isGeneralPurposeRegister(const llvm::Value* val) const
 {
 	uint32_t rid = getRegisterId(val);
 	return MIPS_REG_0 <= rid && rid <= MIPS_REG_31;

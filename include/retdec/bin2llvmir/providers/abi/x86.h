@@ -23,12 +23,18 @@ class AbiX86 : public Abi
 	// Registers.
 	//
 	public:
-		virtual bool isGeneralPurposeRegister(const llvm::Value* val) override;
+		virtual bool isGeneralPurposeRegister(const llvm::Value* val) const override;
 
 	// Instructions.
 	//
 	public:
 		virtual bool isNopInstruction(cs_insn* insn) override;
+
+
+	// Calling conventions.
+	//
+	private:
+		CallingConvention::ID fetchDefaultCC() const;
 };
 
 } // namespace bin2llvmir

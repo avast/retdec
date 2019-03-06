@@ -8,7 +8,9 @@
 #define RETDEC_UNPACKER_DECOMPRESSION_NRV_BIT_PARSERS_H
 
 #include "retdec/fileformat/fftypes.h"
-#include "retdec/unpacker/dynamic_buffer.h"
+#include "retdec/utils/dynamic_buffer.h"
+
+using namespace retdec::utils;
 
 namespace retdec {
 namespace unpacker {

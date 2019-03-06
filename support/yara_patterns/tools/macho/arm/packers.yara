@@ -15,7 +15,7 @@ rule upx_391_lzma
 	strings:
 		$1 = { 04 D0 4D E2 FF DF 2D E9 B9 02 00 EB 00 C0 DD E5 0E 00 5C E3 79 02 00 1A 0C 48 2D E9 00 B0 D0 E5 06 CC A0 E3 AB B1 A0 E1 1C CB A0 E1 0D B0 A0 E1 }
 	condition:
-		$1 at macho.entry_point or $1 at macho.ep_for_arch(macho.CPU_TYPE_ARM)
+		$1 at macho.entry_point or $1 at macho.entry_point_for_arch(macho.CPU_TYPE_ARM)
 }
 
 rule upx_391_nrv2b
@@ -28,7 +28,7 @@ rule upx_391_nrv2b
 	strings:
 		$1 = { 04 D0 4D E2 FF DF 2D E9 79 00 00 EB 00 10 81 E0 3E 40 2D E9 00 50 E0 E3 02 41 A0 E3 1F 00 00 EA }
 	condition:
-		$1 at macho.entry_point or $1 at macho.ep_for_arch(macho.CPU_TYPE_ARM)
+		$1 at macho.entry_point or $1 at macho.entry_point_for_arch(macho.CPU_TYPE_ARM)
 }
 
 rule upx_391_nrv2d
@@ -41,7 +41,7 @@ rule upx_391_nrv2d
 	strings:
 		$1 = { 04 D0 4D E2 FF DF 2D E9 88 00 00 EB FC 40 2D E9 00 70 81 E0 00 50 E0 E3 02 41 A0 E3 16 00 00 EA }
 	condition:
-		$1 at macho.entry_point or $1 at macho.ep_for_arch(macho.CPU_TYPE_ARM)
+		$1 at macho.entry_point or $1 at macho.entry_point_for_arch(macho.CPU_TYPE_ARM)
 }
 
 rule upx_391_nrv2e
@@ -54,5 +54,5 @@ rule upx_391_nrv2e
 	strings:
 		$1 = { 04 D0 4D E2 FF DF 2D E9 8D 00 00 EB FC 40 2D E9 00 70 81 E0 00 50 E0 E3 02 41 A0 E3 16 00 00 EA }
 	condition:
-		$1 at macho.entry_point or $1 at macho.ep_for_arch(macho.CPU_TYPE_ARM)
+		$1 at macho.entry_point or $1 at macho.entry_point_for_arch(macho.CPU_TYPE_ARM)
 }

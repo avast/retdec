@@ -30,6 +30,7 @@ set(FILEINFO_SOURCES
 	file_information/file_information_types/resource_table/resource.cpp
 	file_information/file_information_types/resource_table/resource_table.cpp
 	file_information/file_information_types/rich_header.cpp
+	file_information/file_information_types/visual_basic_info.cpp
 	file_information/file_information_types/special_information.cpp
 	file_information/file_information_types/strings.cpp
 	file_information/file_information_types/symbol_table/symbol.cpp
@@ -51,6 +52,7 @@ set(FILEINFO_SOURCES
 	file_presentation/getters/iterative_getter/iterative_distribution_getter/relocation_tables_plain_getter.cpp
 	file_presentation/getters/iterative_getter/iterative_distribution_getter/resource_plain_getter.cpp
 	file_presentation/getters/iterative_getter/iterative_distribution_getter/rich_header_plain_getter.cpp
+	file_presentation/getters/iterative_getter/iterative_distribution_getter/visual_basic_extern_table_plain_getter.cpp
 	file_presentation/getters/iterative_getter/iterative_distribution_getter/section_plain_getter.cpp
 	file_presentation/getters/iterative_getter/iterative_distribution_getter/segment_plain_getter.cpp
 	file_presentation/getters/iterative_getter/iterative_distribution_getter/strings_plain_getter.cpp
@@ -79,6 +81,8 @@ set(FILEINFO_SOURCES
 	file_presentation/getters/simple_getter/basic_plain_getter.cpp
 	file_presentation/getters/simple_getter/dotnet_json_getter.cpp
 	file_presentation/getters/simple_getter/dotnet_plain_getter.cpp
+	file_presentation/getters/simple_getter/visual_basic_plain_getter.cpp
+	file_presentation/getters/simple_getter/visual_basic_json_getter.cpp
 	file_presentation/getters/simple_getter/entry_point_json_getter.cpp
 	file_presentation/getters/simple_getter/header_json_getter.cpp
 	file_presentation/getters/simple_getter/header_plain_getter.cpp

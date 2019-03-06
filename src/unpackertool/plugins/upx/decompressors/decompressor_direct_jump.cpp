@@ -14,6 +14,7 @@
 #include "unpackertool/plugins/upx/upx_stub.h"
 #include "unpackertool/plugins/upx/upx_stub_signatures.h"
 
+using namespace retdec::utils;
 using namespace retdec::unpacker;
 
 namespace retdec {

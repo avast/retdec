@@ -38,8 +38,8 @@ def parse_args(args):
     parser.add_argument('-a', '--arch',
                         dest='arch',
                         metavar='ARCH',
-                        choices=['mips', 'pic32', 'arm', 'arm64', 'thumb', 'powerpc', 'x86'],
-                        help='Specify target architecture [mips|pic32|arm|arm64|thumb|powerpc|x86].'
+                        choices=['mips', 'pic32', 'arm', 'thumb', 'arm64', 'powerpc', 'x86', 'x86-64'],
+                        help='Specify target architecture [mips|pic32|arm|thumb|arm64|powerpc|x86|x86-64].'
                              ' Required if it cannot be autodetected from the input (e.g. raw mode, Intel HEX).')
 
     parser.add_argument('-e', '--endian',
@@ -882,7 +882,10 @@ class Decompiler:
                 arch_full = arch_full.lower()
 
                 # Strip comments in parentheses and all trailing whitespace
-                self.arch = arch_full.split(' ')[0]
+                if 'aarch64' in arch_full:
+                    self.arch = 'arm64'
+                else:
+                    self.arch = arch_full.split(' ')[0]
 
             # Get object file format.
             self.format, _, _ = CmdRunner.run_cmd([config.CONFIGTOOL, self.config_file, '--read', '--format'], buffer_output=True)
@@ -907,7 +910,7 @@ class Decompiler:
             # Check whether the correct target architecture was specified.
             if self.arch in ['arm', 'thumb', 'arm64']:
                 ords_dir = config.ARM_ORDS_DIR
-            elif self.arch in ['x86']:
+            elif self.arch in ['x86', 'x86-64']:
                 ords_dir = config.X86_ORDS_DIR
             elif self.arch in ['powerpc', 'mips', 'pic32']:
                 pass
@@ -917,7 +920,7 @@ class Decompiler:
 
                 self._cleanup()
                 utils.print_error('Unsupported target architecture \'%s\'. Supported architectures: '
-                                  'Intel x86, ARM, ARM + Thumb, ARM64, MIPS, PIC32, PowerPC.' % self.arch)
+                                  'Intel x86, Intel x86-64, ARM, ARM + Thumb, ARM64, MIPS, PIC32, PowerPC.' % self.arch)
                 return 1
 
             # Check file class (e.g. 'ELF32', 'ELF64'). At present, we can only decompile 32-bit files.
@@ -932,6 +935,18 @@ class Decompiler:
                 utils.print_error(
                     'Unsupported target format \'%s%s\'. Supported formats: ELF32, ELF64, PE32, Intel HEX 32, Mach-O 32.' % (
                         self.format.upper(), fileclass))
+                return 1
+
+            # TODO this should be somehow connected somewhere else
+            if fileclass == '64' and self.arch in ['arm', 'mips', 'pic32', 'powerpc', 'x86']:
+                if self.args.generate_log:
+                    self.generate_log()
+
+                self._cleanup()
+                utils.print_error(
+                    'Unsupported target format and architecture combination: \'%s%s\' + \'%s\'.' % (
+                        self.format.upper(), fileclass, self.arch))
+
                 return 1
 
             # Set path to statically linked code signatures.
@@ -961,6 +976,8 @@ class Decompiler:
 
             if sig_arch == 'pic32':
                 sig_arch = 'mips'
+            elif sig_arch == 'x86-64':
+                sig_arch = 'x86';
 
             signatures_dir = os.path.join(config.GENERIC_SIGNATURES_DIR, sig_format, fileclass, sig_endian, sig_arch)
 

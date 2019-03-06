@@ -2,8 +2,13 @@
 
 # dev
 
+* New Feature: Added basic support of 64-bit x86 architecture ([#9](https://github.com/avast-tl/retdec/issues/9), [#513](https://github.com/avast-tl/retdec/pull/513)).
 * New Feature: Added presentation of imported types and TypeRef hashes for .NET binaries ([#363](https://github.com/avast-tl/retdec/issues/363), [#364](https://github.com/avast-tl/retdec/issues/364), [#428](https://github.com/avast-tl/retdec/issues/428)).
+* New Feature: Added presentation of metadata from binaries written in Visual Basic and detection of P-code ([#138](https://github.com/avast-tl/retdec/issues/138), [#440](https://github.com/avast-tl/retdec/pull/440)).
 * New Feature: Added computation and presentation of icon hashes for exact and also similarity matching in PE files ([#339](https://github.com/avast-tl/retdec/issues/339)).
+* Enhancement: Update YARA to version 3.8.1 ([#218](https://github.com/avast-tl/retdec/issues/218)).
+* Enhancement: Make `--generate-log` option of `retdec-decompiler.py` work on macOS ([#383](https://github.com/avast-tl/retdec/issues/383), [#450](https://github.com/avast-tl/retdec/pull/450)).
+* Enhancement: Replace recursion with iterative implementation in x87 FPU analysis in `retdec-bin2llvmir` ([#450](https://github.com/avast-tl/retdec/pull/450)).
 * Enhancement: The `new` LLVM IR to BIR converter is now the default (and only) back-end's converter. In most cases, this improves code structure and significantly speeds up decompilations ([#211](https://github.com/avast-tl/retdec/issues/211), [#508](https://github.com/avast-tl/retdec/issues/508), [#509](https://github.com/avast-tl/retdec/pull/509)).
 * Enhancement: The `fileformat` library, and all its object file modules, accept both `std::istream` and `(data, size)` pair, in addition to the original input file path.
 * Enhancement: Reduced the needed stack space in `retdec-llvmir2hll` ([#492](https://github.com/avast-tl/retdec/pull/492)).
@@ -16,6 +21,7 @@
 * Enhancement: Add a check into our scripts that they are run from an installation directory and not from the `scripts` directory ([#418](https://github.com/avast-tl/retdec/issues/418)).
 * Enhancement: Improved corruption checks in `retdec-fileinfo` to recognize cut PE files which are still loadable ([#463](https://github.com/avast-tl/retdec/issues/463)).
 * Enhancement: Redesign output files naming scheme ([#132](https://github.com/avast-tl/retdec/issues/132)).
+* Fix: Fixed false COFF file format detections ([#421](https://github.com/avast-tl/retdec/issues/421), [#431](https://github.com/avast-tl/retdec/issues/431)).
 * Fix: Fixed LLVM IR syntax error: `Global variable initializer type does not match global variable type` ([#436](https://github.com/avast-tl/retdec/issues/436)).
 * Fix: Fixed translation of x86 `sbb` instruction ([#401](https://github.com/avast-tl/retdec/issues/401)).
 * Fix: Fixed `fileinfo` crash during `Asn1Sequence` initialization when parsing PE certificates ([#256](https://github.com/avast-tl/retdec/issues/256)).

@@ -30,6 +30,7 @@ class PeDetector : public FileDetector
 		void getDirectories();
 		void getSections();
 		void getDotnetInfo();
+		void getVisualBasicInfo();
 		/// @}
 	protected:
 		/// @name Detection methods

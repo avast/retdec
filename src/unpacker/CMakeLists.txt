@@ -5,7 +5,6 @@ set(UNPACKER_SOURCES
 	decompression/nrv/nrv2e_data.cpp
 	decompression/lzmat/lzmat_data.cpp
 	signature.cpp
-	dynamic_buffer.cpp
 )
 
 add_library(retdec-unpacker STATIC ${UNPACKER_SOURCES})

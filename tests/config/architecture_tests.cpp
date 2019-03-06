@@ -37,6 +37,11 @@ TEST_F(ArchitectureTests, CheckIfArchMethodsWork)
 	EXPECT_TRUE( arch.isKnown() );
 	EXPECT_EQ( "arm", arch.getName() );
 
+	arch.setIsArm64();
+	EXPECT_TRUE( arch.isArm64() );
+	EXPECT_TRUE( arch.isKnown() );
+	EXPECT_EQ( "aarch64", arch.getName() );
+
 	arch.setIsThumb();
 	EXPECT_TRUE( arch.isThumb() );
 	EXPECT_TRUE( arch.isArmOrThumb() );

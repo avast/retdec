@@ -127,10 +127,22 @@ bool isCoff(std::istream& stream, const std::string &header)
 
 	std::error_code errorCode;
 	COFFObjectFile coff(buffer.get()->getMemBufferRef(), errorCode);
+	if (errorCode)
+	{
+		return false;
+	}
+
 	PELIB_IMAGE_FILE_MACHINE_ITERATOR it;
-	return !errorCode
-			&& it.isValidMachineCode(
-					static_cast<PELIB_IMAGE_FILE_MACHINE>(coff.getMachine()));
+	bool validMachineCode = it.isValidMachineCode(
+			static_cast<PELIB_IMAGE_FILE_MACHINE>(coff.getMachine()));
+	bool unknownMachineCode =
+			coff.getMachine() == PELIB_IMAGE_FILE_MACHINE::PELIB_IMAGE_FILE_MACHINE_UNKNOWN;
+	if (!validMachineCode
+			|| (unknownMachineCode && coff.getNumberOfSections() == 0))
+	{
+		return false;
+	}
+	return true;
 }
 
 /**
@@ -210,6 +222,11 @@ bool isStrangeFeedface(std::istream& stream)
 
 Format detectFileFormat(std::istream &inputStream, bool isRaw)
 {
+	if (isRaw)
+	{
+		return Format::RAW_DATA;
+	}
+
 	resetStream(inputStream);
 
 	std::size_t magicSize = 0;
@@ -265,10 +282,6 @@ Format detectFileFormat(std::istream &inputStream, bool isRaw)
 	if(isCoff(inputStream, magic))
 	{
 		return Format::COFF;
-	}
-	else if(isRaw)
-	{
-		return Format::RAW_DATA;
 	}
 
 	return Format::UNKNOWN;

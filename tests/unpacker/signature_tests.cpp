@@ -6,10 +6,11 @@
 
 #include <gtest/gtest.h>
 
-#include "retdec/unpacker/dynamic_buffer.h"
+#include "retdec/utils/dynamic_buffer.h"
 #include "retdec/unpacker/signature.h"
 
 using namespace ::testing;
+using namespace retdec::utils;
 
 namespace retdec {
 namespace unpacker {

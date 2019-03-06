@@ -8,6 +8,8 @@
 
 #include "retdec/unpacker/signature.h"
 
+using namespace retdec::utils;
+
 namespace retdec {
 namespace unpacker {
 

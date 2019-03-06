@@ -6,21 +6,12 @@ matrix:
   fast_finish: true
   include:
     - os: linux
-      dist: trusty
-      compiler: gcc-4.9
+      dist: xenial
       addons:
         apt:
-          sources:
-            - deadsnakes
-            - ubuntu-toolchain-r-test
           packages:
             - build-essential
-            - gcc-4.8-multilib
-            - gcc-4.9
-            - g++-4.9
-            - cmake
-            - perl
-            - python3.5
+            - gcc-multilib
             - flex
             - bison
             - autoconf
@@ -29,10 +20,9 @@ matrix:
             - pkg-config
             - m4
             - zlib1g-dev
-            - upx
             - openssl
       env:
-        - MATRIX_EVAL="CC=gcc-4.9 && CXX=g++-4.9 && NPROC=$(nproc)"
+        - MATRIX_EVAL="NPROC=$(nproc)"
         # We need this so that ccache does not cause compilation errors.
         # e.g. retdec/tests/utils/string_tests.cpp:276:2: error: stray '\' in program
         - CCACHE_CPP2=true
@@ -50,6 +40,8 @@ install:
   - if [ "$TRAVIS_OS_NAME" = "osx" ]; then brew install ccache; fi
   # python 3
   - if [ "$TRAVIS_OS_NAME" = "osx" ]; then brew upgrade python; fi
+  # install for os x the gnu time library
+  - if [ "$TRAVIS_OS_NAME" = "osx" ]; then brew install gnu-time; fi
 
 before_script:
   - eval "${MATRIX_EVAL}"

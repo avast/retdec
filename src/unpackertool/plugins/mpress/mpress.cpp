@@ -8,8 +8,6 @@
 #include <cstdint>
 #include <memory>
 
-#include <pelib/PeLib.h>
-
 #include "retdec/loader/loader.h"
 #include "retdec/unpacker/plugin.h"
 #include "retdec/unpacker/decompression/lzma/lzma_data.h"
@@ -19,6 +17,9 @@
 #include "unpackertool/plugins/mpress/mpress.h"
 #include "unpackertool/plugins/mpress/mpress_exceptions.h"
 
+#include "retdec/fileformat/fileformat.h"
+
+using namespace retdec::utils;
 using namespace retdec::unpacker;
 
 namespace retdec {

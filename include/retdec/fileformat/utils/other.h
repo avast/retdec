@@ -19,6 +19,7 @@ std::size_t getRealSizeInRegion(std::size_t offset, std::size_t requestedSize, s
 std::string getFileFormatNameFromEnum(Format format);
 std::vector<std::string> getSupportedFileFormats();
 std::vector<std::string> getSupportedArchitectures();
+std::string lcidToStr(std::size_t lcid);
 
 } // namespace fileformat
 } // namespace retdec

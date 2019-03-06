@@ -1,5 +1,5 @@
 /**
- * @file include/retdec/unpacker/dynamic_buffer.h
+ * @file include/retdec/utils/dynamic_buffer.h
  * @brief Declaration of class for buffered data mainpulation.
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */
@@ -12,10 +12,10 @@
 #include <functional>
 #include <vector>
 
-#include "retdec/fileformat/fileformat.h"
+#include "retdec/utils/byte_value_storage.h"
 
 namespace retdec {
-namespace unpacker {
+namespace utils {
 
 /**
  * @brief The class for dynamic buffered data manipulation taking the endianness of the data in account.
@@ -70,7 +70,7 @@ public:
 	 */
 	template <typename T> T read(uint32_t pos, retdec::utils::Endianness endianness = retdec::utils::Endianness::UNKNOWN) const
 	{
-		static_assert(std::is_integral<T>::value, "retdec::unpacker::DynamicBuffer::read can only accept integral types");
+		static_assert(std::is_integral<T>::value, "retdec::utils::DynamicBuffer::read can only accept integral types");
 
 		// In case of non-specified endianness, use the default one assigned to DynamicBuffer itself
 		if (endianness == retdec::utils::Endianness::UNKNOWN)
@@ -94,7 +94,7 @@ public:
 	 */
 	template <typename T> void write(const T& data, uint32_t pos, retdec::utils::Endianness endianness = retdec::utils::Endianness::UNKNOWN)
 	{
-		static_assert(std::is_integral<T>::value, "retdec::unpacker::DynamicBuffer::write can only accept integral types");
+		static_assert(std::is_integral<T>::value, "retdec::utils::DynamicBuffer::write can only accept integral types");
 
 		// In case of non-specified endianness, use the default one assigned to DynamicBuffer itself
 		if (endianness == retdec::utils::Endianness::UNKNOWN)
@@ -182,7 +182,7 @@ private:
 	uint32_t _capacity;
 };
 
-} // namespace unpacker
+} // namespace utils
 } // namespace retdec
 
 #endif

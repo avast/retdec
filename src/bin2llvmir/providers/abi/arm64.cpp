@@ -19,7 +19,7 @@ AbiArm64::AbiArm64(llvm::Module* m, Config* c) :
 	_regStackPointerId = ARM64_REG_SP;
 
 	// system calls
-	_regSyscallId = ARM64_REG_X8;
+	_regSyscallId = ARM64_REG_X7;
 	_regSyscallReturn = ARM64_REG_X0;
 	_syscallRegs = {
 			ARM64_REG_X0,
@@ -27,8 +27,9 @@ AbiArm64::AbiArm64(llvm::Module* m, Config* c) :
 			ARM64_REG_X2,
 			ARM64_REG_X3,
 			ARM64_REG_X4,
-			ARM64_REG_X5
-		       };
+			ARM64_REG_X5};
+
+	_defcc = CallingConvention::ID::CC_ARM64;
 }
 
 AbiArm64::~AbiArm64()
@@ -36,7 +37,7 @@ AbiArm64::~AbiArm64()
 
 }
 
-bool AbiArm64::isGeneralPurposeRegister(const llvm::Value* val)
+bool AbiArm64::isGeneralPurposeRegister(const llvm::Value* val) const
 {
 	uint32_t rid = getRegisterId(val);
 	return ARM64_REG_X0 <= rid && rid <= ARM64_REG_X30;

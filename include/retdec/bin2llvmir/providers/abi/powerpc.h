@@ -23,7 +23,7 @@ class AbiPowerpc : public Abi
 	// Registers.
 	//
 	public:
-		virtual bool isGeneralPurposeRegister(const llvm::Value* val) override;
+		virtual bool isGeneralPurposeRegister(const llvm::Value* val) const override;
 
 	// Instructions.
 	//

@@ -14,8 +14,9 @@
 #include "unpackertool/plugins/upx/unfilter.h"
 #include "unpackertool/plugins/upx/upx.h"
 #include "unpackertool/plugins/upx/upx_exceptions.h"
-#include "retdec/unpacker/dynamic_buffer.h"
+#include "retdec/utils/dynamic_buffer.h"
 
+using namespace retdec::utils;
 using namespace retdec::unpacker;
 
 namespace retdec {
@@ -170,7 +171,7 @@ template <int bits> void MachOUpxStub<bits>::setupPackingMethod(std::uint8_t pac
 	_decompressor->setupPackingMethod(this, packingMethod);
 }
 
-template <int bits> void MachOUpxStub<bits>::decompress(retdec::unpacker::DynamicBuffer& packedData, retdec::unpacker::DynamicBuffer& unpackedData)
+template <int bits> void MachOUpxStub<bits>::decompress(DynamicBuffer& packedData, DynamicBuffer& unpackedData)
 {
 	_decompressor->decompress(this, packedData, unpackedData);
 }
