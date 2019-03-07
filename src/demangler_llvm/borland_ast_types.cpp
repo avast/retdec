@@ -13,9 +13,16 @@ namespace retdec {
 namespace demangler {
 namespace borland {
 
+/**
+ * Constructor for abstract class TypeNode.
+ * @param quals Qualifiers object. Types can have const/volatile qualifiers.
+ */
 TypeNode::TypeNode(const Qualifiers &quals) :
 	Node(Kind::KTypeNode), _quals(quals) {}
 
+/**
+ * @return Type qualifiers.
+ */
 Qualifiers TypeNode::quals()
 {
 	return _quals;
@@ -51,23 +58,40 @@ std::shared_ptr<BuiltInTypeNode> BuiltInTypeNode::create(
 	return newType;
 }
 
+/**
+ * @return String representation of type name.
+ */
 std::string BuiltInTypeNode::typeName() const
 {
 	return _typeName;
 }
 
+/**
+ * @brief Prints text representation of type with qualifiers to output stream.
+ */
 void BuiltInTypeNode::printLeft(std::ostream &s) const
 {
 	_quals.printSpaceR(s);
 	s << _typeName;
 }
 
+/**
+ * @brief Private constructor for Char types. Use create().
+ */
 CharTypeNode::CharTypeNode(ThreeStateSignness signness, const Qualifiers &quals) :
 	BuiltInTypeNode("char", quals), _signness(signness)
 {
 	_kind = Kind::KCharType;
 }
 
+/**
+ * @brief Function for creating char types.
+ * If type the same type was already created, then that instance is returned.
+ * @param context Storage for types.
+ * @param signness Char signnes. Chars can be char, signed char, unsigned char. All are distinct types by standard.
+ * @param quals See BuiltInTypeNode quals.
+ * @return Node representing char type.
+ */
 std::shared_ptr<CharTypeNode> CharTypeNode::create(
 	Context &context,
 	ThreeStateSignness signness,
@@ -83,11 +107,17 @@ std::shared_ptr<CharTypeNode> CharTypeNode::create(
 	return newType;
 }
 
+/**
+ * @return Signness of type.
+ */
 ThreeStateSignness CharTypeNode::signness()
 {
 	return _signness;
 }
 
+/**
+ * @brief Prints text representation of char type with qualifiers to output stream.
+ */
 void CharTypeNode::printLeft(std::ostream &s) const
 {
 	_quals.printSpaceR(s);
@@ -103,6 +133,9 @@ void CharTypeNode::printLeft(std::ostream &s) const
 	}
 }
 
+/**
+ * @brief Private constructor for integral types. Use create().
+ */
 IntegralTypeNode::IntegralTypeNode(
 	const std::string &typeName, bool isUnsigned, const Qualifiers &quals) :
 	BuiltInTypeNode(typeName, quals), _isUnsigned(isUnsigned)
@@ -110,6 +143,15 @@ IntegralTypeNode::IntegralTypeNode(
 	_kind = Kind::KIntegralType;
 };
 
+/**
+ * @brief Function for creating integral types.
+ * If type the same type was already created, then that instance is returned.
+ * @param context Storage for types.
+ * @param typeName Name of integral type to create.
+ * @param isUnsigned Information about intgral type signness.
+ * @param quals See BuiltInTypeNode quals.
+ * @return Node representing integral type.
+ */
 std::shared_ptr<IntegralTypeNode> IntegralTypeNode::create(
 	Context &context,
 	const std::string &typeName,
@@ -126,11 +168,17 @@ std::shared_ptr<IntegralTypeNode> IntegralTypeNode::create(
 	return newType;
 }
 
+/**
+ * @return true if type is unsigned, else false.
+ */
 bool IntegralTypeNode::isUnsigned()
 {
 	return _isUnsigned;
 }
 
+/**
+ * @brief Prints text representation of type with qualifiers to output stream.
+ */
 void IntegralTypeNode::printLeft(std::ostream &s) const
 {
 	_quals.printSpaceR(s);
@@ -140,12 +188,23 @@ void IntegralTypeNode::printLeft(std::ostream &s) const
 	s << _typeName;
 }
 
+/**
+ * @brief Private constructor for floating point types. Use create().
+ */
 FloatTypeNode::FloatTypeNode(const std::string &typeName, const Qualifiers &quals) :
 	BuiltInTypeNode(typeName, quals)
 {
 	_kind = Kind::KFloatType;
 }
 
+/**
+ * @brief Function for creating floating point types.
+ * If type the same type was already created, then that instance is returned.
+ * @param context Storage for types.
+ * @param typeName Name of integral type to create.
+ * @param quals See BuiltInTypeNode quals.
+ * @return Node representing floating point type.
+ */
 std::shared_ptr<FloatTypeNode> FloatTypeNode::create(
 	Context &context,
 	const std::string &typeName,
@@ -161,31 +220,51 @@ std::shared_ptr<FloatTypeNode> FloatTypeNode::create(
 	return newType;
 }
 
+/**
+ * Private constructor for named types. Use create().
+ */
 NamedTypeNode::NamedTypeNode(std::shared_ptr<Node> typeName, const Qualifiers &quals) :
 	TypeNode(quals), _typeName(typeName)
 {
 	_kind = Kind::KNamedType;
 }
 
+/**
+ * @brief Function for creating named types.
+ * If type the same type was already created, then that instance is returned.
+ * @param context Storage for types.
+ * @param typeName Name of integral type to create.
+ * @param quals See BuiltInTypeNode quals.
+ * @return Node representing named type.
+ */
 std::shared_ptr<NamedTypeNode> NamedTypeNode::create(
 	retdec::demangler::borland::Context &context,
 	std::shared_ptr<Node> typeName,
 	const Qualifiers &quals)
 {
-	return std::shared_ptr<NamedTypeNode>(new NamedTypeNode(typeName, quals));
+	return std::shared_ptr<NamedTypeNode>(new NamedTypeNode(typeName, quals)); 	// TODO
 }
 
+/**
+ * @return Node representing name.
+ */
 std::shared_ptr<Node> NamedTypeNode::name()
 {
 	return _typeName;
 }
 
+/**
+ * @brief Prints text representation of named type with qualifiers to output stream.
+ */
 void NamedTypeNode::printLeft(std::ostream &s) const
 {
 	_quals.printSpaceR(s);
 	s << _typeName->str();
 }
 
+/**
+ * Private constructor for pointers. Use create().
+ */
 PointerTypeNode::PointerTypeNode(const std::shared_ptr<Node> &pointee, const Qualifiers &quals) :
 	TypeNode(quals), _pointee(std::move(pointee))
 {
@@ -193,6 +272,14 @@ PointerTypeNode::PointerTypeNode(const std::shared_ptr<Node> &pointee, const Qua
 	_has_right = _pointee->hasRight();
 }
 
+/**
+ * @brief Function for creating pointers.
+ * If type the same type was already created, then that instance is returned.
+ * @param context Storage for types.
+ * @param pointee Pointed type.
+ * @param quals See BuiltInTypeNode quals.
+ * @return Node representing pointer type.
+ */
 std::shared_ptr<PointerTypeNode> PointerTypeNode::create(
 	Context &context,
 	const std::shared_ptr<Node> &pointee,
@@ -208,11 +295,18 @@ std::shared_ptr<PointerTypeNode> PointerTypeNode::create(
 	return newType;
 }
 
+/**
+ * @return Pointed type.
+ */
 std::shared_ptr<Node> PointerTypeNode::pointee()
 {
 	return _pointee;
 }
 
+/**
+ * @brief Prints left side of pointer type or whole, depending on pointee.
+ * Right side printing is used for arrays and pointers to function types.
+ */
 void PointerTypeNode::printLeft(std::ostream &s) const
 {
 	if (_pointee->hasRight()) {
@@ -226,12 +320,20 @@ void PointerTypeNode::printLeft(std::ostream &s) const
 	}
 }
 
+/**
+ * @brief Prints right side of pointer type.
+ * Used for array and funtion types.
+ */
 void PointerTypeNode::printRight(std::ostream &s) const
 {
 	s << ")";
 	_pointee->printRight(s);
 }
 
+/**
+ * Private constructor for references. Use create().
+ * Reference can't be const or volatile.
+ */
 ReferenceTypeNode::ReferenceTypeNode(std::shared_ptr<Node> pointee) :
 	TypeNode({false, false}), _pointee(std::move(pointee))
 {
@@ -239,6 +341,13 @@ ReferenceTypeNode::ReferenceTypeNode(std::shared_ptr<Node> pointee) :
 	_has_right = _pointee->hasRight();
 }
 
+/**
+ * @brief Function for creating references.
+ * If type the same type was already created, then that instance is returned.
+ * @param context Storage for types.
+ * @param pointee Referenced type.
+ * @return Node representing reference type.
+ */
 std::shared_ptr<ReferenceTypeNode> ReferenceTypeNode::create(
 	retdec::demangler::borland::Context &context,
 	std::shared_ptr<retdec::demangler::borland::Node> pointee)
@@ -253,11 +362,18 @@ std::shared_ptr<ReferenceTypeNode> ReferenceTypeNode::create(
 	return newType;
 }
 
+/**
+ * @return Referenced type.
+ */
 std::shared_ptr<Node> ReferenceTypeNode::pointee()
 {
 	return _pointee;
 }
 
+/**
+ * @brief Prints left side of reference type or whole, depending on pointee.
+ * Right side printing is used for arrays and references to function types.
+ */
 void ReferenceTypeNode::printLeft(std::ostream &s) const
 {
 	if (_pointee->hasRight()) {
@@ -270,12 +386,20 @@ void ReferenceTypeNode::printLeft(std::ostream &s) const
 	}
 }
 
+/**
+ * @brief Prints right side of reference type.
+ * Used for array and funtion types.
+ */
 void ReferenceTypeNode::printRight(std::ostream &s) const
 {
 	s << ")";
 	_pointee->printRight(s);
 }
 
+/**
+ * Private constructor for r-value references. Use create().
+ * Reference can't be const or volatile.
+ */
 RReferenceTypeNode::RReferenceTypeNode(std::shared_ptr<Node> pointee) :
 	TypeNode({false, false}), _pointee(std::move(pointee))
 {
@@ -283,17 +407,31 @@ RReferenceTypeNode::RReferenceTypeNode(std::shared_ptr<Node> pointee) :
 	_has_right = _pointee->hasRight();
 }
 
+/**
+ * @brief Function for creating r-value references.
+ * If type the same type was already created, then that instance is returned.
+ * @param context Storage for types.
+ * @param pointee Referenced type.
+ * @return Node representing r-value reference type.
+ */
 std::shared_ptr<RReferenceTypeNode> RReferenceTypeNode::create(
 	Context &context, std::shared_ptr<Node> pointee)
 {
 	return std::shared_ptr<RReferenceTypeNode>(new RReferenceTypeNode(std::move(pointee)));
 }
 
+/**
+ * @return Referenced type.
+ */
 std::shared_ptr<Node> RReferenceTypeNode::pointee()
 {
 	return _pointee;
 }
 
+/**
+ * @brief Prints left side of reference type or whole, depending on pointee.
+ * Right side printing is used for arrays and references to function types.
+ */
 void RReferenceTypeNode::printLeft(std::ostream &s) const
 {
 	if (_pointee->hasRight()) {
@@ -306,12 +444,19 @@ void RReferenceTypeNode::printLeft(std::ostream &s) const
 	}
 }
 
+/**
+ * @brief Prints right side of reference type.
+ * Used for array and funtion types.
+ */
 void RReferenceTypeNode::printRight(std::ostream &s) const
 {
 	s << ")";
 	_pointee->printRight(s);
 }
 
+/**
+ * Private constructor for array types. Use create().
+ */
 ArrayNode::ArrayNode(
 	std::shared_ptr<retdec::demangler::borland::Node> pointee,
 	unsigned size,
@@ -322,39 +467,65 @@ ArrayNode::ArrayNode(
 	_has_right = true;
 }
 
+/**
+ * @brief Function for creating array types.
+ * If type the same type was already created, then that instance is returned.
+ * @param context Storage for types.
+ * @param pointee Type of array.
+ * @return Node representing array type.
+ */
 std::shared_ptr<ArrayNode> ArrayNode::create(
 	Context &context,
 	std::shared_ptr<retdec::demangler::borland::Node> pointee,
 	unsigned size,
 	const Qualifiers &quals)
 {
-	return std::shared_ptr<ArrayNode>(new ArrayNode(pointee, size, quals));
+	return std::shared_ptr<ArrayNode>(new ArrayNode(pointee, size, quals));	// TODO
 }
 
+/**
+ * Prints left side of array type to output stream.
+ */
 void ArrayNode::printLeft(std::ostream &s) const
 {
 	_pointee->printLeft(s);
 	_quals.printSpaceL(s);
 }
 
+/**
+ * Prints right side of array type to output stream.
+ */
 void ArrayNode::printRight(std::ostream &s) const
 {
 	s << "[" << _size << "]";
 	_pointee->printRight(s);
 }
 
+/**
+ * @brief Private constructor for function types. Use create().
+ */
 FunctionTypeNode::FunctionTypeNode(
 	retdec::demangler::borland::CallConv callConv,
 	std::shared_ptr<retdec::demangler::borland::NodeArray> params,
 	std::shared_ptr<retdec::demangler::borland::TypeNode> retType,
 	retdec::demangler::borland::Qualifiers &quals,
 	bool isVarArg) :
-	TypeNode(quals), _callConv(callConv), _params(params), _retType(retType), _isVarArg(isVarArg)
+	TypeNode(quals), _callConv(callConv), _params(std::move(params)), _retType(std::move(retType)), _isVarArg(isVarArg)
 {
 	_kind = Kind::KFunctionType;
 	_has_right = true;
 }
 
+/**
+ * @brief Function for creating function types.
+ * @param context Storage for types.
+ * @param callConv Calling convention.
+ * @param params Node representing parameters.
+ * @param retType Return type, can be nullptr.
+ * @param quals Function qualifiers.
+ * @param isVarArg wheater function is varidic.
+ * @return Node representing function type.
+ */
 std::shared_ptr<FunctionTypeNode> FunctionTypeNode::create(
 	retdec::demangler::borland::Context &context,
 	retdec::demangler::borland::CallConv callConv,
@@ -363,9 +534,12 @@ std::shared_ptr<FunctionTypeNode> FunctionTypeNode::create(
 	retdec::demangler::borland::Qualifiers &quals,
 	bool isVarArg)
 {
-	return std::shared_ptr<FunctionTypeNode>(new FunctionTypeNode(callConv, params, retType, quals, isVarArg));
+	return std::shared_ptr<FunctionTypeNode>(new FunctionTypeNode(callConv, params, retType, quals, isVarArg));	// TODO
 }
 
+/**
+ * Prints left side of function type to output stream.
+ */
 void FunctionTypeNode::printLeft(std::ostream &s) const
 {
 	if (_retType) {
@@ -389,6 +563,9 @@ void FunctionTypeNode::printLeft(std::ostream &s) const
 	}
 }
 
+/**
+ * Prints right side of function type to output stream.
+ */
 void FunctionTypeNode::printRight(std::ostream &s) const
 {
 	s << "(";

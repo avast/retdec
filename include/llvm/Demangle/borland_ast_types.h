@@ -13,20 +13,28 @@ namespace borland {
 
 class Context;
 
+/**
+ * @brief Signnes used for chars.
+ * Chars can be signed char, unsigned char and char, which are by standard distinct.
+ * These types are all mangled differently.
+ */
 enum class ThreeStateSignness
 {
 	signed_char,
 	unsigned_char,
 	no_prefix
-};
+};	// TODO rename everywhere to signedness.
 
+/**
+ * @brief Base class for all type nodes.
+ */
 class TypeNode : public Node
 {
 public:
 	Qualifiers quals();
 
 protected:
-	explicit TypeNode(const Qualifiers &quals);
+	explicit TypeNode(const Qualifiers &quals);	// TODO kind ako volitelny parameter
 
 protected:
 	Qualifiers _quals;
@@ -54,6 +62,9 @@ protected:
 	std::string _typeName;
 };
 
+/**
+ * @brief Representation of char types.
+ */
 class CharTypeNode : public BuiltInTypeNode
 {
 public:
@@ -73,6 +84,9 @@ private:
 	ThreeStateSignness _signness;
 };
 
+/**
+ * @brief Representation of integral types.
+ */
 class IntegralTypeNode : public BuiltInTypeNode
 {
 public:
@@ -93,6 +107,9 @@ private:
 	bool _isUnsigned;
 };
 
+/**
+ * @brief Representaion of floating point types.
+ */
 class FloatTypeNode : public BuiltInTypeNode
 {
 public:
@@ -105,6 +122,9 @@ private:
 	FloatTypeNode(const std::string &typeName, const Qualifiers &quals);
 };
 
+/**
+ * @brief Representation of named types.
+ */
 class NamedTypeNode : public TypeNode
 {
 public:
@@ -124,6 +144,9 @@ private:
 	std::shared_ptr<Node> _typeName;
 };
 
+/**
+ * @brief Representation of pointers.
+ */
 class PointerTypeNode : public TypeNode
 {
 public:
@@ -145,6 +168,9 @@ private:
 	std::shared_ptr<Node> _pointee;
 };
 
+/**
+ * @brief Representation of references.
+ */
 class ReferenceTypeNode : public TypeNode
 {
 public:
@@ -165,6 +191,9 @@ private:
 	std::shared_ptr<Node> _pointee;
 };
 
+/**
+ * @brief Representation of R-value references.
+ */
 class RReferenceTypeNode : public TypeNode
 {
 public:
@@ -185,6 +214,9 @@ private:
 	std::shared_ptr<Node> _pointee;
 };
 
+/**
+ * @brief Representation of array types.
+ */
 class ArrayNode : public TypeNode
 {
 public:
@@ -206,6 +238,11 @@ private:
 	unsigned _size;
 };
 
+/**
+ * @brief Representation of function types.
+ * Used for information about functions without name.
+ * @example pointer to function as parameter
+ */
 class FunctionTypeNode: public TypeNode
 {
 public:

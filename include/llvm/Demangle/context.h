@@ -23,6 +23,10 @@ class Qualifiers;
 class NameNode;
 class NestedNameNode;
 
+/**
+ * @brief Storage for functions, types and names.
+ * Used for cacheing.
+ */
 class Context
 {
 public:
@@ -72,7 +76,7 @@ public:
 	std::shared_ptr<NestedNameNode> getNestedName(std::shared_ptr<Node> super, std::shared_ptr<Node> name);
 	void addNestedName(const std::shared_ptr<NestedNameNode> &name);
 
-//private:
+private:
 	using BuiltInTypeNodes = std::map<std::tuple<std::string, bool, bool>, std::shared_ptr<BuiltInTypeNode>>;
 	BuiltInTypeNodes builtInTypes;
 

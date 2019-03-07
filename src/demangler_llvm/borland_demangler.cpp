@@ -28,6 +28,10 @@ std::string BorlandDemangler::demangleToString(const std::string &mangled)
 	return astToString(parser.ast());
 }
 
+/**
+ * Checks ast parser status and converts it to demangler status.
+ * @return Demangler status.
+ */
 Demangler::Status BorlandDemangler::astStatusToDemStatus(const retdec::demangler::borland::BorlandASTParser::Status &parserStatus)
 {
 	switch (parserStatus) {
@@ -40,6 +44,9 @@ Demangler::Status BorlandDemangler::astStatusToDemStatus(const retdec::demangler
 	}
 }
 
+/**
+ * Checks demangler status and returns demangled string.
+ */
 std::string BorlandDemangler::astToString(const std::shared_ptr<retdec::demangler::borland::Node> &ast) const
 {
 	if (_status == success && ast) {
