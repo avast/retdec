@@ -306,7 +306,7 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateInstruction(
 	cs_detail* d = i->detail;
 	cs_arm64* ai = &d->arm64;
 
-	std::cout << i->mnemonic << " " << i->op_str << std::endl;
+	//std::cout << i->mnemonic << " " << i->op_str << std::endl;
 
 	auto fIt = _i2fm.find(i->id);
 	if (fIt != _i2fm.end() && fIt->second != nullptr)

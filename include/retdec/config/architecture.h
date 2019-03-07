@@ -87,8 +87,6 @@ class Architecture
 			MIPS,
 			PIC32,
 			ARM,
-			THUMB,
-			ARM64,
 			X86,
 			PPC,
 		};
