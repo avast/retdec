@@ -31,13 +31,13 @@ void Context::addBuiltInType(const std::shared_ptr<BuiltInTypeNode> &type)
 }
 
 std::shared_ptr<CharTypeNode> Context::getCharType(
-	const ThreeStateSignness &signness,
+	const ThreeStateSignedness &signedness,
 	const Qualifiers &quals) const
 {
 	bool isVolatile = quals.isVolatile();
 	bool isConst = quals.isConst();
 
-	auto key = std::make_tuple(signness, isVolatile, isConst);
+	auto key = std::make_tuple(signedness, isVolatile, isConst);
 
 	return retdec::utils::mapGetValueOrDefault(charTypes, key);
 }
@@ -46,11 +46,11 @@ void Context::addCharType(const std::shared_ptr<CharTypeNode> &type)
 {
 	assert(type && "violated precondition - type cannot be null");
 
-	auto signness = type->signness();
+	auto signedness = type->signedness();
 	bool isVolatile = type->quals().isVolatile();
 	bool isConst = type->quals().isConst();
 
-	auto key = std::make_tuple(signness, isVolatile, isConst);
+	auto key = std::make_tuple(signedness, isVolatile, isConst);
 
 	charTypes.emplace(key, type);
 }

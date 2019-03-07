@@ -14,16 +14,16 @@ namespace borland {
 class Context;
 
 /**
- * @brief Signnes used for chars.
+ * @brief Signedness used for chars.
  * Chars can be signed char, unsigned char and char, which are by standard distinct.
  * These types are all mangled differently.
  */
-enum class ThreeStateSignness
+enum class ThreeStateSignedness
 {
 	signed_char,
 	unsigned_char,
 	no_prefix
-};	// TODO rename everywhere to signedness.
+};
 
 /**
  * @brief Base class for all type nodes.
@@ -70,18 +70,18 @@ class CharTypeNode : public BuiltInTypeNode
 public:
 	static std::shared_ptr<CharTypeNode> create(
 		Context &context,
-		ThreeStateSignness signness,
+		ThreeStateSignedness signedness,
 		const Qualifiers &quals);
 
-	ThreeStateSignness signness();
+	ThreeStateSignedness signedness();
 
 	void printLeft(std::ostream &s) const override;
 
 private:
-	CharTypeNode(ThreeStateSignness signness, const Qualifiers &quals);
+	CharTypeNode(ThreeStateSignedness signedness, const Qualifiers &quals);
 
 private:
-	ThreeStateSignness _signness;
+	ThreeStateSignedness _signedness;
 };
 
 /**

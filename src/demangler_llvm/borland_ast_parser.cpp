@@ -755,11 +755,11 @@ std::shared_ptr<TypeNode> BorlandASTParser::parseBuildInType(const Qualifiers &q
 
 	/* char types */
 	if (consumeIfPossible("zc")) {    //only explicitly signed type
-		return CharTypeNode::create(_context, ThreeStateSignness::signed_char, quals);
+		return CharTypeNode::create(_context, ThreeStateSignedness::signed_char, quals);
 	} else if (consumeIfPossible("uc")) {
-		return CharTypeNode::create(_context, ThreeStateSignness::unsigned_char, quals);
+		return CharTypeNode::create(_context, ThreeStateSignedness::unsigned_char, quals);
 	} else if (consumeIfPossible('c')) {
-		return CharTypeNode::create(_context, ThreeStateSignness::no_prefix, quals);
+		return CharTypeNode::create(_context, ThreeStateSignedness::no_prefix, quals);
 	}
 
 	/* integral types */

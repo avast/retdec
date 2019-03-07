@@ -15,7 +15,7 @@ class BuiltInTypeNode;
 class IntegralTypeNode;
 class FloatTypeNode;
 class CharTypeNode;
-enum class ThreeStateSignness;
+enum class ThreeStateSignedness;
 class PointerTypeNode;
 class ReferenceTypeNode;
 class NamedTypeNode;
@@ -38,7 +38,7 @@ public:
 		const std::shared_ptr<BuiltInTypeNode> &type);
 
 	std::shared_ptr<CharTypeNode> getCharType(
-		const ThreeStateSignness &signness, const Qualifiers &quals) const;
+		const ThreeStateSignedness &signedness, const Qualifiers &quals) const;
 	void addCharType(
 		const std::shared_ptr<CharTypeNode> &type);
 
@@ -80,7 +80,7 @@ private:
 	using BuiltInTypeNodes = std::map<std::tuple<std::string, bool, bool>, std::shared_ptr<BuiltInTypeNode>>;
 	BuiltInTypeNodes builtInTypes;
 
-	using CharTypeNodes = std::map<std::tuple<ThreeStateSignness, bool, bool>, std::shared_ptr<CharTypeNode>>;
+	using CharTypeNodes = std::map<std::tuple<ThreeStateSignedness, bool, bool>, std::shared_ptr<CharTypeNode>>;
 	CharTypeNodes charTypes;
 
 	using IntegralTypeNodes = std::map<std::tuple<std::string, bool, bool, bool>, std::shared_ptr<IntegralTypeNode>>;

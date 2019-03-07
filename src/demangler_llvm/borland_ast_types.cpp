@@ -78,8 +78,8 @@ void BuiltInTypeNode::printLeft(std::ostream &s) const
 /**
  * @brief Private constructor for Char types. Use create().
  */
-CharTypeNode::CharTypeNode(ThreeStateSignness signness, const Qualifiers &quals) :
-	BuiltInTypeNode("char", quals), _signness(signness)
+CharTypeNode::CharTypeNode(ThreeStateSignedness signedness, const Qualifiers &quals) :
+	BuiltInTypeNode("char", quals), _signedness(signedness)
 {
 	_kind = Kind::KCharType;
 }
@@ -88,31 +88,31 @@ CharTypeNode::CharTypeNode(ThreeStateSignness signness, const Qualifiers &quals)
  * @brief Function for creating char types.
  * If type the same type was already created, then that instance is returned.
  * @param context Storage for types.
- * @param signness Char signnes. Chars can be char, signed char, unsigned char. All are distinct types by standard.
+ * @param signedness Char signednes. Chars can be char, signed char, unsigned char. All are distinct types by standard.
  * @param quals See BuiltInTypeNode quals.
  * @return Node representing char type.
  */
 std::shared_ptr<CharTypeNode> CharTypeNode::create(
 	Context &context,
-	ThreeStateSignness signness,
+	ThreeStateSignedness signedness,
 	const Qualifiers &quals)
 {
-	auto type = context.getCharType(signness, quals);
+	auto type = context.getCharType(signedness, quals);
 	if (type && type->kind() == Kind::KCharType) {
 		return type;
 	}
 
-	auto newType = std::shared_ptr<CharTypeNode>(new CharTypeNode(signness, quals));
+	auto newType = std::shared_ptr<CharTypeNode>(new CharTypeNode(signedness, quals));
 	context.addCharType(newType);
 	return newType;
 }
 
 /**
- * @return Signness of type.
+ * @return signedness of type.
  */
-ThreeStateSignness CharTypeNode::signness()
+ThreeStateSignedness CharTypeNode::signedness()
 {
-	return _signness;
+	return _signedness;
 }
 
 /**
@@ -121,11 +121,11 @@ ThreeStateSignness CharTypeNode::signness()
 void CharTypeNode::printLeft(std::ostream &s) const
 {
 	_quals.printSpaceR(s);
-	switch (_signness) {
-	case ThreeStateSignness::signed_char:
+	switch (_signedness) {
+	case ThreeStateSignedness::signed_char:
 		s << "signed char";
 		break;
-	case ThreeStateSignness::unsigned_char:
+	case ThreeStateSignedness::unsigned_char:
 		s << "unsigned char";
 		break;
 	default:
@@ -148,7 +148,7 @@ IntegralTypeNode::IntegralTypeNode(
  * If type the same type was already created, then that instance is returned.
  * @param context Storage for types.
  * @param typeName Name of integral type to create.
- * @param isUnsigned Information about intgral type signness.
+ * @param isUnsigned Information about intgral type signedness.
  * @param quals See BuiltInTypeNode quals.
  * @return Node representing integral type.
  */
