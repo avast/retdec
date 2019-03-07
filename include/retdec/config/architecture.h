@@ -25,9 +25,11 @@ class Architecture
 		bool isUnknown() const;
 		bool isKnown() const;
 		bool isMips() const;
+		bool isMips64() const;
 		bool isPic32() const;
 		bool isMipsOrPic32() const;
 		bool isArm() const;
+		bool isArm64() const;
 		bool isThumb() const;
 		bool isArmOrThumb() const;
 		bool isX86() const;
@@ -35,6 +37,7 @@ class Architecture
 		bool isX86_32() const;
 		bool isX86_64() const;
 		bool isPpc() const;
+		bool isPpc64() const;
 		bool isEndianLittle() const;
 		bool isEndianBig() const;
 		bool isEndianKnown() const;

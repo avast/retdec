@@ -3948,7 +3948,7 @@ void FileInformation::setVisualBasicInfo(const retdec::fileformat::VisualBasicIn
 void FileInformation::setVisualBasicUsed(bool set)
 {
 	visualBasicInfo.setUsed(set);
-} 
+}
 
 /**
  * Set type of related PDB file

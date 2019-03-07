@@ -16,6 +16,7 @@
 
 #include "retdec/bin2llvmir/providers/asm_instruction.h"
 #include "retdec/bin2llvmir/providers/config.h"
+#include "retdec/bin2llvmir/providers/calling_convention/calling_convention.h"
 
 //#include "retdec/capstone2llvmir/x86/x86_defs.h"
 
@@ -39,24 +40,31 @@ class Abi
 	// Registers.
 	//
 	public:
-		bool isRegister(const llvm::Value* val);
-		bool isRegister(const llvm::Value* val, uint32_t r);
+		bool isRegister(const llvm::Value* val) const;
+		bool isRegister(const llvm::Value* val, uint32_t r) const;
 		bool isFlagRegister(const llvm::Value* val);
-		bool isStackPointerRegister(const llvm::Value* val);
+		bool isStackPointerRegister(const llvm::Value* val) const;
 		bool isZeroRegister(const llvm::Value* val);
-		virtual bool isGeneralPurposeRegister(const llvm::Value* val) = 0;
+		virtual bool isGeneralPurposeRegister(const llvm::Value* val) const = 0;
 
-		llvm::GlobalVariable* getRegister(uint32_t r, bool use = true);
-		uint32_t getRegisterId(const llvm::Value* r);
+		llvm::GlobalVariable* getRegister(uint32_t r, bool use = true) const;
+		uint32_t getRegisterId(const llvm::Value* r) const;
 		const std::vector<llvm::GlobalVariable*>& getRegisters() const;
-		llvm::GlobalVariable* getStackPointerRegister();
-		llvm::GlobalVariable* getZeroRegister();
+		llvm::GlobalVariable* getStackPointerRegister() const;
+		llvm::GlobalVariable* getZeroRegister() const;
+
+		std::size_t getRegisterByteSize(uint32_t r) const;
 
 		void addRegister(uint32_t id, llvm::GlobalVariable* reg);
 
 		llvm::GlobalVariable* getSyscallIdRegister();
 		llvm::GlobalVariable* getSyscallReturnRegister();
 		llvm::GlobalVariable* getSyscallArgumentRegister(unsigned n);
+
+	// Stacks.
+	//
+	public:
+		bool isStackVariable(const llvm::Value* val) const;
 
 	// Instructions.
 	//
@@ -67,23 +75,43 @@ class Abi
 	// Types.
 	//
 	public:
-		std::size_t getTypeByteSize(llvm::Type* t) const;
-		std::size_t getTypeBitSize(llvm::Type* t) const;
+		virtual std::size_t getTypeByteSize(llvm::Type* t) const;
+		virtual std::size_t getTypeBitSize(llvm::Type* t) const;
 		llvm::IntegerType* getDefaultType() const;
 		llvm::PointerType* getDefaultPointerType() const;
+		std::size_t getWordSize() const;
 
 		static std::size_t getTypeByteSize(llvm::Module* m, llvm::Type* t);
 		static std::size_t getTypeBitSize(llvm::Module* m, llvm::Type* t);
 		static llvm::IntegerType* getDefaultType(llvm::Module* m);
+		static llvm::Type* getDefaultFPType(llvm::Module* m);
 		static llvm::PointerType* getDefaultPointerType(llvm::Module* m);
+		static std::size_t getWordSize(llvm::Module* m);
 
 	// Architectures.
 	//
 	public:
 		bool isMips() const;
+		bool isMips64() const;
 		bool isArm() const;
+		bool isArm64() const;
 		bool isX86() const;
+		bool isX64() const;
 		bool isPowerPC() const;
+		bool isPowerPC64() const;
+		bool isPic32() const;
+
+	// Calling conventions.
+	//
+	public:
+		CallingConvention* getCallingConvention(
+				const CallingConvention::ID& cc);
+		CallingConvention* getDefaultCallingConvention();
+
+	// Config.
+	//
+	public:
+		Config* getConfig() const;
 
 	// Private data - misc.
 	//
@@ -116,6 +144,13 @@ class Abi
 		uint32_t _regSyscallId = REG_INVALID;
 		/// Register that is always equal to zero - not every arch have this.
 		uint32_t _regZeroReg = REG_INVALID;
+
+	// Private data - calling convention
+	//
+	protected:
+		std::map<CallingConvention::ID, CallingConvention::Ptr> _id2cc;
+		CallingConvention::ID _defcc;
+
 };
 
 class AbiProvider

@@ -53,6 +53,7 @@ class LlvmIrTests : public ::testing::Test
 		 */
 		void clearAllStaticData()
 		{
+			AbiProvider::clear();
 			ConfigProvider::clear();
 			DebugFormatProvider::clear();
 			DemanglerProvider::clear();

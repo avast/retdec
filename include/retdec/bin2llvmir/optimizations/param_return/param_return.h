@@ -1,7 +1,7 @@
 /**
 * @file include/retdec/bin2llvmir/optimizations/param_return/param_return.h
 * @brief Detect functions' parameters and returns.
-* @copyright (c) 2017 Avast Software, licensed under the MIT license
+* @copyright (c) 2019 Avast Software, licensed under the MIT license
 */
 
 #ifndef RETDEC_BIN2LLVMIR_OPTIMIZATIONS_PARAM_RETURN_PARAM_RETURN_H
@@ -16,6 +16,8 @@
 #include <llvm/Pass.h>
 
 #include "retdec/bin2llvmir/analyses/reaching_definitions.h"
+#include "retdec/bin2llvmir/optimizations/param_return/collector/collector.h"
+#include "retdec/bin2llvmir/optimizations/param_return/data_entries.h"
 #include "retdec/bin2llvmir/providers/abi/abi.h"
 #include "retdec/bin2llvmir/providers/config.h"
 #include "retdec/bin2llvmir/providers/debugformat.h"
@@ -24,115 +26,6 @@
 
 namespace retdec {
 namespace bin2llvmir {
-
-class CallEntry
-{
-	public:
-		CallEntry(llvm::CallInst* c);
-
-	public:
-		void filterRegisters(Abi* _abi, Config* _config);
-		void filterSort(Config* _config);
-		void filterLeaveOnlyContinuousStackOffsets(Config* _config);
-		void filterLeaveOnlyNeededStackOffsets(Abi* _abi, Config* _config);
-
-		void extractFormatString(ReachingDefinitionsAnalysis& _RDA);
-
-	public:
-		llvm::CallInst* call = nullptr;
-		std::vector<llvm::StoreInst*> possibleArgStores;
-		std::vector<llvm::LoadInst*> possibleRetLoads;
-		std::string formatStr;
-};
-
-class ReturnEntry
-{
-	public:
-		ReturnEntry(llvm::ReturnInst* r);
-
-	public:
-		llvm::ReturnInst* ret = nullptr;
-		std::vector<llvm::StoreInst*> possibleRetStores;
-};
-
-class DataFlowEntry
-{
-	public:
-		DataFlowEntry(
-				llvm::Module* m,
-				ReachingDefinitionsAnalysis& rda,
-				Config* c,
-				Abi* abi,
-				FileImage* img,
-				DebugFormat* dbg,
-				Lti* lti,
-				llvm::Value* v);
-
-		bool isFunctionEntry() const;
-		bool isValueEntry() const;
-		llvm::Value* getValue() const;
-		llvm::Function* getFunction() const;
-		void dump() const;
-
-		void addCall(llvm::CallInst* call);
-
-		void filter();
-
-		void applyToIr();
-		void applyToIrOrdinary();
-		void applyToIrVariadic();
-		void connectWrappers();
-
-	private:
-		void addArgLoads();
-		void addRetStores();
-		void addCallArgs(llvm::CallInst* call, CallEntry& ce);
-		void addCallReturns(llvm::CallInst* call, CallEntry& ce);
-
-		void callsFilterCommonRegisters();
-		void callsFilterSameNumberOfStacks();
-
-		void setTypeFromExtraInfo();
-		void setTypeFromUseContext();
-		void setReturnType();
-		void setArgumentTypes();
-
-		void filterRegistersArgLoads();
-		void filterSortArgLoads();
-
-		llvm::CallInst* isSimpleWrapper(llvm::Function* fnc);
-
-	public:
-		llvm::Module* _module = nullptr;
-		ReachingDefinitionsAnalysis& _RDA;
-		Config* _config = nullptr;
-		Abi* _abi = nullptr;
-		FileImage* _image = nullptr;
-		Lti* _lti = nullptr;
-
-		llvm::Value* called = nullptr;
-		retdec::config::Function* configFnc = nullptr;
-		retdec::config::Function* dbgFnc = nullptr;
-
-		// In caller.
-		//
-		std::vector<CallEntry> calls;
-
-		// In called function.
-		//
-		std::vector<llvm::LoadInst*> argLoads;
-		std::vector<ReturnEntry> retStores;
-
-		// Result.
-		//
-		bool typeSet = false;
-		llvm::Type* retType = nullptr;
-		std::vector<llvm::Type*> argTypes;
-		std::map<std::size_t, llvm::Value*> specialArgStorage;
-		bool isVarArg = false;
-		llvm::CallInst* wrappedCall = nullptr;
-		std::vector<std::string> argNames;
-};
 
 class ParamReturn : public llvm::ModulePass
 {
@@ -150,17 +43,50 @@ class ParamReturn : public llvm::ModulePass
 
 	private:
 		bool run();
-		void dumpInfo();
+		void dumpInfo() const;
+		void dumpInfo(const DataFlowEntry& de) const;
+		void dumpInfo(const CallEntry& ce) const;
+		void dumpInfo(const ReturnEntry& de) const;
 
+	// Collection of functions.
+	//
+	private:
 		void collectAllCalls();
-		std::string extractFormatString(llvm::CallInst* call);
 
+		DataFlowEntry createDataFlowEntry(llvm::Value* calledValue) const;
+
+	private:
+		void collectExtraData(DataFlowEntry* de) const;
+		void collectExtraData(CallEntry* ce) const;
+
+		void collectCallSpecificTypes(CallEntry* ce) const;
+
+	// Collection of functions usage data.
+	//
+	private:
+		void addDataFromCall(DataFlowEntry* dataflow, llvm::CallInst* call) const;
+
+	// Optimizations.
+	//
+	private:
+		llvm::CallInst* getWrapper(llvm::Function* fnc) const;
+		llvm::Type* extractType(llvm::Value* from) const;
+
+	// Filtration of collected functions arguments.
+	//
+	private:
 		void filterCalls();
-		void filterSort(CallEntry& ce);
-		void filterLeaveOnlyContinuousStackOffsets(CallEntry& ce);
-		void filterLeaveOnlyNeededStackOffsets(CallEntry& ce);
+		void modifyType(DataFlowEntry& de) const;
 
+	// Modification of functions in IR.
+	//
+	private:
 		void applyToIr();
+		void applyToIr(DataFlowEntry& de);
+		void connectWrappers(const DataFlowEntry& de);
+
+		std::map<llvm::CallInst*, std::vector<llvm::Value*>> fetchLoadsOfCalls(
+						const std::vector<CallEntry>& calls) const;
 
 	private:
 		llvm::Module* _module = nullptr;
@@ -172,6 +98,7 @@ class ParamReturn : public llvm::ModulePass
 
 		std::map<llvm::Value*, DataFlowEntry> _fnc2calls;
 		ReachingDefinitionsAnalysis _RDA;
+		Collector::Ptr _collector;
 };
 
 } // namespace bin2llvmir

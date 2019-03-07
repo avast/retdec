@@ -7,8 +7,11 @@
 #include "retdec/bin2llvmir/providers/abi/abi.h"
 #include "retdec/bin2llvmir/providers/abi/arm.h"
 #include "retdec/bin2llvmir/providers/abi/mips.h"
+#include "retdec/bin2llvmir/providers/abi/ms_x64.h"
 #include "retdec/bin2llvmir/providers/abi/powerpc.h"
 #include "retdec/bin2llvmir/providers/abi/x86.h"
+#include "retdec/bin2llvmir/providers/abi/x64.h"
+#include "retdec/bin2llvmir/providers/abi/pic32.h"
 
 using namespace llvm;
 
@@ -36,12 +39,12 @@ Abi::~Abi()
 
 }
 
-bool Abi::isRegister(const llvm::Value* val)
+bool Abi::isRegister(const llvm::Value* val) const
 {
 	return _regs2id.count(val);
 }
 
-bool Abi::isRegister(const llvm::Value* val, uint32_t r)
+bool Abi::isRegister(const llvm::Value* val, uint32_t r) const
 {
 	return getRegister(r) == val;
 }
@@ -52,7 +55,7 @@ bool Abi::isFlagRegister(const llvm::Value* val)
 			&& val->getType()->getPointerElementType()->isIntegerTy(1);
 }
 
-bool Abi::isStackPointerRegister(const llvm::Value* val)
+bool Abi::isStackPointerRegister(const llvm::Value* val) const
 {
 	return getStackPointerRegister() == val;
 }
@@ -70,7 +73,7 @@ bool Abi::isZeroRegister(const llvm::Value* val)
  *            This solves the problem with overlapping IDs when used like this:
  *            Abi::getRegister(MIPS_REG_GP, Abi::isMips())
  */
-llvm::GlobalVariable* Abi::getRegister(uint32_t r, bool use)
+llvm::GlobalVariable* Abi::getRegister(uint32_t r, bool use) const
 {
 	if (!use)
 	{
@@ -80,7 +83,7 @@ llvm::GlobalVariable* Abi::getRegister(uint32_t r, bool use)
 	return _id2regs[r];
 }
 
-uint32_t Abi::getRegisterId(const llvm::Value* r)
+uint32_t Abi::getRegisterId(const llvm::Value* r) const
 {
 	auto it = _regs2id.find(r);
 	return it != _regs2id.end() ? it->second : Abi::REG_INVALID;
@@ -91,14 +94,27 @@ const std::vector<llvm::GlobalVariable*>& Abi::getRegisters() const
 	return _regs;
 }
 
-llvm::GlobalVariable* Abi::getStackPointerRegister()
+llvm::GlobalVariable* Abi::getStackPointerRegister() const
 {
 	return getRegister(_regStackPointerId);
 }
 
-llvm::GlobalVariable* Abi::getZeroRegister()
+llvm::GlobalVariable* Abi::getZeroRegister() const
 {
 	return getRegister(_regZeroReg);
+}
+
+std::size_t Abi::getRegisterByteSize(uint32_t reg) const
+{
+	auto r = getRegister(reg);
+	assert(r);
+
+	if (auto* p = dyn_cast<PointerType>(r->getType()))
+	{
+		return getTypeByteSize(p->getElementType());
+	}
+
+	return getTypeByteSize(r->getType());
 }
 
 void Abi::addRegister(uint32_t id, llvm::GlobalVariable* reg)
@@ -127,6 +143,11 @@ llvm::GlobalVariable* Abi::getSyscallArgumentRegister(unsigned n)
 	return n < _syscallRegs.size() ? getRegister(_syscallRegs[n]) : nullptr;
 }
 
+bool Abi::isStackVariable(const Value* val) const
+{
+	return _config->isStackVariable(val);
+}
+
 bool Abi::isNopInstruction(AsmInstruction ai)
 {
 	return isNopInstruction(ai.getCapstoneInsn());
@@ -152,15 +173,24 @@ llvm::PointerType* Abi::getDefaultPointerType() const
 	return Abi::getDefaultPointerType(_module);
 }
 
+std::size_t Abi::getWordSize() const
+{
+	return _config->getConfig().architecture.getBitSize() / 8;
+}
+
 std::size_t Abi::getTypeByteSize(llvm::Module* m, llvm::Type* t)
 {
 	assert(m);
+	assert(t->isSized());
+
 	return m->getDataLayout().getTypeStoreSize(t);
 }
 
 std::size_t Abi::getTypeBitSize(llvm::Module* m, llvm::Type* t)
 {
 	assert(m);
+	assert(t->isSized());
+
 	return m->getDataLayout().getTypeSizeInBits(t);
 }
 
@@ -171,10 +201,21 @@ llvm::IntegerType* Abi::getDefaultType(llvm::Module* m)
 	return Type::getIntNTy(m->getContext(), s);
 }
 
+llvm::Type* Abi::getDefaultFPType(llvm::Module* m)
+{
+	assert(m);
+	return Type::getFloatTy(m->getContext());
+}
+
 llvm::PointerType* Abi::getDefaultPointerType(llvm::Module* m)
 {
 	assert(m);
 	return PointerType::get(Abi::getDefaultType(m), 0);
+}
+
+std::size_t Abi::getWordSize(llvm::Module* m)
+{
+	return m->getDataLayout().getPointerSize(0);
 }
 
 bool Abi::isMips() const
@@ -182,9 +223,19 @@ bool Abi::isMips() const
 	return _config->getConfig().architecture.isMipsOrPic32();
 }
 
+bool Abi::isMips64() const
+{
+	return _config->getConfig().architecture.isMips64();
+}
+
 bool Abi::isArm() const
 {
 	return _config->getConfig().architecture.isArmOrThumb();
+}
+
+bool Abi::isArm64() const
+{
+	return _config->getConfig().architecture.isArm64();
 }
 
 bool Abi::isX86() const
@@ -192,9 +243,46 @@ bool Abi::isX86() const
 	return _config->getConfig().architecture.isX86();
 }
 
+bool Abi::isX64() const
+{
+	return _config->getConfig().architecture.isX86_64();
+}
+
 bool Abi::isPowerPC() const
 {
 	return _config->getConfig().architecture.isPpc();
+}
+
+bool Abi::isPowerPC64() const
+{
+	return _config->getConfig().architecture.isPpc64();
+}
+
+bool Abi::isPic32() const
+{
+	return _config->getConfig().architecture.isPic32();
+}
+
+CallingConvention* Abi::getDefaultCallingConvention()
+{
+	return getCallingConvention(_defcc);
+}
+
+CallingConvention* Abi::getCallingConvention(
+			const CallingConvention::ID& cc)
+{
+	if (_id2cc.find(cc) == _id2cc.end())
+	{
+		auto provider = CallingConventionProvider::getProvider();
+		_id2cc[cc] = provider->createCallingConvention(cc, this);
+	}
+
+	return _id2cc[cc].get();
+}
+
+Config* Abi::getConfig() const
+{
+	return _config;
 }
 
 //
@@ -219,14 +307,33 @@ Abi* AbiProvider::addAbi(
 		auto p = _module2abi.emplace(m, std::make_unique<AbiArm>(m, c));
 		return p.first->second.get();
 	}
-	else if (c->getConfig().architecture.isMipsOrPic32())
+	else if (c->getConfig().architecture.isMips())
 	{
 		auto p = _module2abi.emplace(m, std::make_unique<AbiMips>(m, c));
+		return p.first->second.get();
+	}
+	else if (c->getConfig().architecture.isPic32())
+	{
+		auto p = _module2abi.emplace(m, std::make_unique<AbiPic32>(m, c));
 		return p.first->second.get();
 	}
 	else if (c->getConfig().architecture.isPpc())
 	{
 		auto p = _module2abi.emplace(m, std::make_unique<AbiPowerpc>(m, c));
+		return p.first->second.get();
+	}
+	else if (c->getConfig().architecture.isX86_64())
+	{
+		bool isMinGW = c->getConfig().tools.isGcc()
+				&& c->getConfig().fileFormat.isPe();
+
+		if (isMinGW || c->getConfig().tools.isMsvc())
+		{
+			auto p = _module2abi.emplace(m, std::make_unique<AbiMS_X64>(m, c));
+			return p.first->second.get();
+		}
+
+		auto p = _module2abi.emplace(m, std::make_unique<AbiX64>(m, c));
 		return p.first->second.get();
 	}
 	else if (c->getConfig().architecture.isX86())

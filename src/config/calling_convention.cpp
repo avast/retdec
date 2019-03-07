@@ -46,6 +46,11 @@ CallingConvention::CallingConvention(eCallingConvention cc) :
 
 }
 
+CallingConventionID CallingConvention::getID() const
+{
+	return _callingConvention;
+}
+
 CallingConvention CallingConvention::initVoidarg()  { return CallingConvention(eCallingConvention::CC_VOIDARG); }
 CallingConvention CallingConvention::initCdecl()    { return CallingConvention(eCallingConvention::CC_CDECL); }
 CallingConvention CallingConvention::initEllipsis() { return CallingConvention(eCallingConvention::CC_ELLIPSIS); }
@@ -132,9 +137,9 @@ bool CallingConvention::operator<(const CallingConvention& cc) const
 	return _callingConvention < cc._callingConvention;
 }
 
-std::ostream& operator<<(std::ostream &out, const CallingConvention& cc)
+std::ostream& operator<<(std::ostream &out, const CallingConventionID& cc)
 {
-	switch(cc._callingConvention)
+	switch(cc)
 	{
 		case CallingConvention::eCallingConvention::CC_UNKNOWN:  out << "CC_UNKNOWN"; break;
 		case CallingConvention::eCallingConvention::CC_VOIDARG:  out << "CC_VOIDARG"; break;
@@ -151,6 +156,13 @@ std::ostream& operator<<(std::ostream &out, const CallingConvention& cc)
 		case CallingConvention::eCallingConvention::CC_SPECIAL:  out << "CC_SPECIAL"; break;
 		default: out << "UNHANDLED"; break;
 	}
+	return out;
+}
+
+std::ostream& operator<<(std::ostream &out, const CallingConvention& cc)
+{
+	out << cc._callingConvention;
+
 	return out;
 }
 

@@ -628,7 +628,7 @@ void PlainPresentation::presentDotnetClasses() const
 }
 
 void PlainPresentation::presentVisualBasicObjects() const
-{	
+{
 	auto nObjs = fileinfo.getVisualBasicNumberOfObjects();
 	auto guid = fileinfo.getVisualBasicObjectTableGUID();
 	if (!fileinfo.isVisualBasicUsed() || (nObjs == 0 && guid.empty()))
@@ -644,7 +644,7 @@ void PlainPresentation::presentVisualBasicObjects() const
 	std::cout << "SHA256           : " << fileinfo.getVisualBasicObjectTableHashSha256() << "\n";
 	std::cout << "GUID             : " << guid << "\n";
 	std::cout << "\n";
-	
+
 	std::size_t cnt = 0;
 	for (std::size_t i = 0; i < nObjs; i++)
 	{

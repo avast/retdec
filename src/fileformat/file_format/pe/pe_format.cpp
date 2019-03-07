@@ -862,7 +862,7 @@ bool PeFormat::parseVisualBasicComRegistrationInfo(std::size_t structureOffset,
 										comRegDataOffset + vbcri.objDescOffset, VB_MAX_STRING_LEN, true);
 		visualBasicInfo.setCOMObjectDescription(COMObjectDesc);
 	}
-	
+
 	visualBasicInfo.setCOMObjectCLSID(vbcri.objCLSID);
 	visualBasicInfo.setCOMObjectType(vbcri.objectType);
 
@@ -972,7 +972,7 @@ bool PeFormat::parseVisualBasicExternTable(std::size_t structureOffset, std::siz
 			continue;
 		}
 
-		if (!getBytes(bytes, vbExternEntryDataOffset, entryData.structureSize()) 
+		if (!getBytes(bytes, vbExternEntryDataOffset, entryData.structureSize())
 			|| bytes.size() != entryData.structureSize())
 		{
 			continue;

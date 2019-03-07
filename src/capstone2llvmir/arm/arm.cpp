@@ -1659,11 +1659,6 @@ void Capstone2LlvmIrTranslatorArm_impl::translateStr(cs_insn* i, cs_arm* ai, llv
 			op0 = irb.CreateZExtOrTrunc(op0, irb.getInt16Ty());
 			break;
 		}
-		// TODO: The new commented code is better, but without special handling
-		// in bin2llvmirl, it screws up some tests:
-		// e.g. "many-params.c -a arm -f elf -c gcc -C -O0 -g"
-		// Therefore, at the moment, we generate the same code as original sem.
-		//
 		case ARM_INS_STRD:
 		case ARM_INS_STREXD:
 		{
@@ -1687,12 +1682,15 @@ void Capstone2LlvmIrTranslatorArm_impl::translateStr(cs_insn* i, cs_arm* ai, llv
 	bool subtract = false;
 	if (i->id == ARM_INS_STRD || i->id == ARM_INS_STREXD)
 	{
-		// TODO: op1 is not stored at all at the moment. See comment above.
-
 		if (ai->op_count == 3
 				&& ai->operands[2].type == ARM_OP_MEM)
 		{
 			storeOp(ai->operands[2], op0, irb);
+
+			auto op3 = ai->operands[2];
+			op3.mem.disp += 4;
+			storeOp(op3, op1, irb);
+
 			baseR = ai->operands[2].mem.base;
 			if (auto disp = ai->operands[2].mem.disp)
 			{
@@ -1702,11 +1700,19 @@ void Capstone2LlvmIrTranslatorArm_impl::translateStr(cs_insn* i, cs_arm* ai, llv
 			{
 				idx = loadRegister(ai->operands[2].mem.index, irb);
 			}
+			// Maybe we should add +4 to idx?
 		}
 		else if (ai->op_count == 4
 				&& ai->operands[2].type == ARM_OP_MEM)
 		{
 			storeOp(ai->operands[2], op0, irb);
+
+			// We don't use op4 here, post-index offset is applied to source
+			// address only after the transfers at writeback.
+			auto op3 = ai->operands[2];
+			op3.mem.disp += 4;
+			storeOp(op3, op1, irb);
+
 			baseR = ai->operands[2].mem.base;
 			idx = loadOp(ai->operands[3], irb);
 			subtract = ai->operands[3].subtracted;
