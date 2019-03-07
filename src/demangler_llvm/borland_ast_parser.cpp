@@ -521,7 +521,7 @@ std::shared_ptr<FunctionTypeNode> BorlandASTParser::parseFuncType(Qualifiers &qu
 		}
 	}
 
-	return FunctionTypeNode::create(_context, callConv, paramsNode, retType, quals, isVarArg);
+	return FunctionTypeNode::create(callConv, paramsNode, retType, quals, isVarArg);
 }
 
 /**
@@ -842,7 +842,7 @@ std::shared_ptr<TypeNode> BorlandASTParser::parseNamedType(unsigned nameLen, con
 		return nullptr;
 	}
 
-	auto newType = NamedTypeNode::create(_context, nameNode, quals);
+	auto newType = NamedTypeNode::create(nameNode, quals);
 	_context.addNamedType(mangled_type, quals, newType);
 	return newType;
 }

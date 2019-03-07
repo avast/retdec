@@ -1,6 +1,8 @@
-//
-// Created by adam on 14.2.19.
-//
+/**
+ * @file src/demangler_llvm/borland_ast_types.cpp
+ * @brief Implementation of types in demangler ast.
+ * @copyright (c) 2019 Avast Software, licensed under the MIT license
+ */
 
 #include <sstream>
 #include <map>
@@ -238,11 +240,10 @@ NamedTypeNode::NamedTypeNode(std::shared_ptr<Node> typeName, const Qualifiers &q
  * @return Node representing named type.
  */
 std::shared_ptr<NamedTypeNode> NamedTypeNode::create(
-	retdec::demangler::borland::Context &context,
 	std::shared_ptr<Node> typeName,
 	const Qualifiers &quals)
 {
-	return std::shared_ptr<NamedTypeNode>(new NamedTypeNode(typeName, quals)); 	// TODO
+	return std::shared_ptr<NamedTypeNode>(new NamedTypeNode(std::move(typeName), quals));
 }
 
 /**
@@ -417,7 +418,15 @@ RReferenceTypeNode::RReferenceTypeNode(std::shared_ptr<Node> pointee) :
 std::shared_ptr<RReferenceTypeNode> RReferenceTypeNode::create(
 	Context &context, std::shared_ptr<Node> pointee)
 {
-	return std::shared_ptr<RReferenceTypeNode>(new RReferenceTypeNode(std::move(pointee)));
+//	return std::shared_ptr<RReferenceTypeNode>(new RReferenceTypeNode(std::move(pointee)));
+	auto type = context.getRReferenceType(pointee);
+	if (type) {
+		return type;
+	}
+
+	auto newType = std::shared_ptr<RReferenceTypeNode>(new RReferenceTypeNode(pointee));
+	context.addRReferenceType(newType);
+	return newType;
 }
 
 /**
@@ -480,7 +489,22 @@ std::shared_ptr<ArrayNode> ArrayNode::create(
 	unsigned size,
 	const Qualifiers &quals)
 {
-	return std::shared_ptr<ArrayNode>(new ArrayNode(pointee, size, quals));	// TODO
+	auto type = context.getArray(pointee, size, quals);
+	if (type) {
+		return type;
+	}
+
+	auto newType = std::shared_ptr<ArrayNode>(new ArrayNode(pointee, size, quals));
+	context.addArrayType(newType);
+	return newType;
+}
+
+unsigned ArrayNode::size() {
+	return _size;
+}
+
+std::shared_ptr<Node> ArrayNode::pointee() {
+	return _pointee;
 }
 
 /**
@@ -518,7 +542,6 @@ FunctionTypeNode::FunctionTypeNode(
 
 /**
  * @brief Function for creating function types.
- * @param context Storage for types.
  * @param callConv Calling convention.
  * @param params Node representing parameters.
  * @param retType Return type, can be nullptr.
@@ -527,14 +550,33 @@ FunctionTypeNode::FunctionTypeNode(
  * @return Node representing function type.
  */
 std::shared_ptr<FunctionTypeNode> FunctionTypeNode::create(
-	retdec::demangler::borland::Context &context,
 	retdec::demangler::borland::CallConv callConv,
 	std::shared_ptr<retdec::demangler::borland::NodeArray> params,
 	std::shared_ptr<retdec::demangler::borland::TypeNode> retType,
 	retdec::demangler::borland::Qualifiers &quals,
 	bool isVarArg)
 {
-	return std::shared_ptr<FunctionTypeNode>(new FunctionTypeNode(callConv, params, retType, quals, isVarArg));	// TODO
+	return std::shared_ptr<FunctionTypeNode>(new FunctionTypeNode(callConv, params, retType, quals, isVarArg));
+}
+
+CallConv FunctionTypeNode::callConv()
+{
+	return _callConv;
+}
+
+std::shared_ptr<NodeArray> FunctionTypeNode::params()
+{
+	return _params;
+}
+
+std::shared_ptr<TypeNode> FunctionTypeNode::retType()
+{
+	return _retType;
+}
+
+bool FunctionTypeNode::isVarArg()
+{
+	return _isVarArg;
 }
 
 /**

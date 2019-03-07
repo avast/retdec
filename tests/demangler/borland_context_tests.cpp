@@ -111,6 +111,32 @@ TEST_F(BorlandContextTests, FuntionTests)
 	EXPECT_NE(ast1, ast3);
 }
 
+TEST_F(BorlandContextTests, ArrayTests)
+{
+	auto i1 = IntegralTypeNode::create(context, "int", false, {false, false});
+	auto i2 = IntegralTypeNode::create(context, "long", false, {false, false});
+
+	auto a1 = ArrayNode::create(context, i1, 10, {false, false});
+	auto a2 = ArrayNode::create(context, i1, 10, {false, false});
+	auto a3 = ArrayNode::create(context, i2, 10, {false, false});
+
+	EXPECT_EQ(a1, a2);
+	EXPECT_NE(a1, a3);
+}
+
+TEST_F(BorlandContextTests, RReferenceTests)
+{
+	auto i1 = IntegralTypeNode::create(context, "int", false, {false, false});
+	auto i2 = IntegralTypeNode::create(context, "int", false, {false, true});
+
+	auto r1 = RReferenceTypeNode::create(context, i1);
+	auto r2 = RReferenceTypeNode::create(context, i1);
+	auto r3 = RReferenceTypeNode::create(context, i2);
+
+	EXPECT_EQ(r1, r2);
+	EXPECT_NE(r1, r3);
+}
+
 } // tests
 } // borland
 } // demangler

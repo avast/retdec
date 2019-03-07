@@ -134,6 +134,18 @@ void Context::addReferenceType(const std::shared_ptr<ReferenceTypeNode> &type)
 	referenceTypes.emplace(type->pointee(), type);
 }
 
+std::shared_ptr<RReferenceTypeNode> Context::getRReferenceType(std::shared_ptr<Node> pointee) const
+{
+	return retdec::utils::mapGetValueOrDefault(rReferenceTypes, pointee);
+}
+
+void Context::addRReferenceType(const std::shared_ptr<RReferenceTypeNode> &type)
+{
+	assert(type && "violated precondition - type cannot be null");
+
+	rReferenceTypes.emplace(type->pointee(), type);
+}
+
 std::shared_ptr<NamedTypeNode> Context::getNamedType(const std::string &name, const Qualifiers &quals) const
 {
 	bool isVolatile = quals.isVolatile();
@@ -200,6 +212,28 @@ void Context::addNestedName(const std::shared_ptr<retdec::demangler::borland::Ne
 
 	auto key = std::make_tuple(name->super(), name->name());
 	nestedNameNodes.emplace(key, name);
+}
+
+std::shared_ptr<ArrayNode> Context::getArray(
+	std::shared_ptr<retdec::demangler::borland::Node> pointee,
+	unsigned size,
+	const retdec::demangler::borland::Qualifiers &quals)
+{
+	auto key = std::make_tuple(pointee, size, quals.isVolatile(), quals.isConst());
+	return retdec::utils::mapGetValueOrDefault(arrayNodes, key);
+}
+
+void Context::addArrayType(const std::shared_ptr<retdec::demangler::borland::ArrayNode> &array) {
+	assert(array && "violated precondition - array cannot be null");
+
+	auto pointee = array->pointee();
+	auto size = array->size();
+	auto isVolatile = array->quals().isVolatile();
+	auto isConst = array->quals().isConst();
+
+	auto key = std::make_tuple(pointee, size, isVolatile, isConst);
+
+	arrayNodes.emplace(key, array);
 }
 
 }    // borland

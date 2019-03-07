@@ -1,3 +1,9 @@
+/**
+ * @file include/llvm/Demangle/borland_ast_types.h
+ * @brief Representation of types in demangler ast.
+ * @copyright (c) 2019 Avast Software, licensed under the MIT license
+ */
+
 #ifndef RETDEC_BORLAND_AST_TYPES_H
 #define RETDEC_BORLAND_AST_TYPES_H
 
@@ -129,7 +135,6 @@ class NamedTypeNode : public TypeNode
 {
 public:
 	static std::shared_ptr<NamedTypeNode> create(
-		Context &context,
 		std::shared_ptr<Node> typeName,
 		const Qualifiers &quals);
 
@@ -226,6 +231,10 @@ public:
 		unsigned size,
 		const Qualifiers &quals);
 
+	std::shared_ptr<Node> pointee();
+
+	unsigned size();
+
 	void printLeft(std::ostream &s) const override;
 
 	void printRight(std::ostream &s) const override;
@@ -247,12 +256,19 @@ class FunctionTypeNode: public TypeNode
 {
 public:
 	static std::shared_ptr<FunctionTypeNode> create(
-		Context &context,
 		CallConv callConv,
 		std::shared_ptr<NodeArray> params,
 		std::shared_ptr<TypeNode> retType,
 		Qualifiers &quals,
 		bool isVarArg);
+
+	CallConv callConv();
+
+	std::shared_ptr<NodeArray> params();
+
+	std::shared_ptr<TypeNode> retType();
+
+	bool isVarArg();
 
 	void printLeft(std::ostream &s) const override;
 

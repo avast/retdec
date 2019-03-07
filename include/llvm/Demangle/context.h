@@ -18,10 +18,12 @@ class CharTypeNode;
 enum class ThreeStateSignedness;
 class PointerTypeNode;
 class ReferenceTypeNode;
+class RReferenceTypeNode;
 class NamedTypeNode;
 class Qualifiers;
 class NameNode;
 class NestedNameNode;
+class ArrayNode;
 
 /**
  * @brief Storage for functions, types and names.
@@ -60,6 +62,9 @@ public:
 	std::shared_ptr<ReferenceTypeNode> getReferenceType(std::shared_ptr<Node> pointee) const;
 	void addReferenceType(const std::shared_ptr<ReferenceTypeNode> &type);
 
+	std::shared_ptr<RReferenceTypeNode> getRReferenceType(std::shared_ptr<Node> pointee) const;
+	void addRReferenceType(const std::shared_ptr<RReferenceTypeNode> &type);
+
 	std::shared_ptr<NamedTypeNode> getNamedType(
 		const std::string &name, const Qualifiers &quals) const;
 	void addNamedType(
@@ -75,6 +80,9 @@ public:
 
 	std::shared_ptr<NestedNameNode> getNestedName(std::shared_ptr<Node> super, std::shared_ptr<Node> name);
 	void addNestedName(const std::shared_ptr<NestedNameNode> &name);
+
+	std::shared_ptr<ArrayNode> getArray(std::shared_ptr<Node> pointee, unsigned size, const Qualifiers &quals);
+	void addArrayType(const std::shared_ptr<ArrayNode> &array);
 
 private:
 	using BuiltInTypeNodes = std::map<std::tuple<std::string, bool, bool>, std::shared_ptr<BuiltInTypeNode>>;
@@ -92,6 +100,9 @@ private:
 	using ReferenceTypeNodes = std::map<std::shared_ptr<Node>, std::shared_ptr<ReferenceTypeNode>>;
 	ReferenceTypeNodes referenceTypes;
 
+	using RReferenceTypeNodes = std::map<std::shared_ptr<Node>, std::shared_ptr<RReferenceTypeNode>>;
+	RReferenceTypeNodes rReferenceTypes;
+
 	using NamedTypeNodes = std::map<std::tuple<std::string, bool, bool>, std::shared_ptr<NamedTypeNode>>;;
 	NamedTypeNodes namedTypes;
 
@@ -103,6 +114,9 @@ private:
 
 	using NestedNameNodes = std::map<std::tuple<std::shared_ptr<Node>, std::shared_ptr<Node>>, std::shared_ptr<NestedNameNode>>;
 	NestedNameNodes nestedNameNodes;
+
+	using ArrayNodes = std::map<std::tuple<std::shared_ptr<Node>, unsigned, bool, bool>, std::shared_ptr<ArrayNode>>;
+	ArrayNodes arrayNodes;
 
 };
 
