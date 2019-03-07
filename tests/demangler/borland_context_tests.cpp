@@ -22,10 +22,11 @@ namespace tests {
 class BorlandContextTests : public Test
 {
 public:
-	BorlandContextTests() = default;
+	BorlandContextTests(): context(), parser(context) {};
 
 protected:
 	Context context;
+	borland::BorlandASTParser parser;
 };
 
 TEST_F(BorlandContextTests, IntegralTest)
@@ -97,16 +98,14 @@ TEST_F(BorlandContextTests, NestedNameNodesTests)
 
 TEST_F(BorlandContextTests, FuntionTests)
 {
-	borland::BorlandASTParser parser1{context, "@foo1$qpxi"};
-	auto ast1 = parser1.ast();
+	parser.parse("@foo1$qpxi");
+	auto ast1 = parser.ast();
 
-	EXPECT_EQ(context.functions.size(), 1);
+	parser.parse("@foo1$qpxi");
+	auto ast2 = parser.ast();
 
-	borland::BorlandASTParser parser2{context, "@foo1$qpxi"};
-	auto ast2 = parser2.ast();
-
-	borland::BorlandASTParser parser3{context, "@foo2$qpxi"};
-	auto ast3 = parser3.ast();
+	parser.parse("@foo2$qpxi");
+	auto ast3 = parser.ast();
 
 	EXPECT_EQ(ast1, ast2);
 	EXPECT_NE(ast1, ast3);

@@ -28,13 +28,16 @@ public:
 	enum Status : uint8_t
 	{
 		success = 0,
+		init,
 		in_progress,
 		invalid_mangled_name,
 		unknown_error,
 	};
 
 public:
-	explicit BorlandASTParser(Context &context, const std::string &mangled);
+	BorlandASTParser(Context &context);
+
+	void parse(const std::string &mangled);
 
 	std::shared_ptr<Node> ast();
 
@@ -53,17 +56,16 @@ private:
 	bool consume(const StringView &s);
 	static std::string getString(const StringView &s);
 
-	void parse();
 	std::shared_ptr<Node> parseFunction();
 	std::shared_ptr<FunctionTypeNode> parseFuncType(Qualifiers &quals);
 	Qualifiers parseQualifiers();
 	CallConv parseCallConv();
 	std::shared_ptr<NodeArray> parseFuncParams();
 	bool parseBackref(std::shared_ptr<NodeArray> &paramArray);
-	std::shared_ptr<Node> parseType();
-	std::shared_ptr<Node> parseBuildInType(const Qualifiers &quals);
+	std::shared_ptr<TypeNode> parseType();
+	std::shared_ptr<TypeNode> parseBuildInType(const Qualifiers &quals);
 	unsigned parseNumber();
-	std::shared_ptr<Node> parseNamedType(unsigned nameLen, const Qualifiers &quals);
+	std::shared_ptr<TypeNode> parseNamedType(unsigned nameLen, const Qualifiers &quals);
 	std::shared_ptr<Node> parseFuncName();
 	std::shared_ptr<Node> parseFuncNameClasic();
 	std::shared_ptr<Node> parseFuncNameLlvm();
@@ -72,10 +74,10 @@ private:
 	std::shared_ptr<Node> parseTemplate(std::shared_ptr<Node> templateNamespace);
 	std::shared_ptr<Node> parseTemplateName(std::shared_ptr<Node> templateNamespace);
 	std::shared_ptr<Node> parseTemplateParams();
-	std::shared_ptr<Node> parsePointer(const Qualifiers &quals);
-	std::shared_ptr<Node> parseReference();
-	std::shared_ptr<Node> parseRReference();
-	std::shared_ptr<Node> parseArray(const Qualifiers &quals);
+	std::shared_ptr<TypeNode> parsePointer(const Qualifiers &quals);
+	std::shared_ptr<TypeNode> parseReference();
+	std::shared_ptr<TypeNode> parseRReference();
+	std::shared_ptr<TypeNode> parseArray(const Qualifiers &quals);
 private:
 	Status _status;
 	StringView _mangled;

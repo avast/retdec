@@ -212,8 +212,8 @@ public:
 	static std::shared_ptr<FunctionTypeNode> create(
 		Context &context,
 		CallConv callConv,
-		std::shared_ptr<Node> params,
-		std::shared_ptr<Node> retType,
+		std::shared_ptr<NodeArray> params,
+		std::shared_ptr<TypeNode> retType,
 		Qualifiers &quals,
 		bool isVarArg);
 
@@ -224,15 +224,15 @@ public:
 private:
 	FunctionTypeNode(
 		CallConv callConv,
-		std::shared_ptr<Node> params,
-		std::shared_ptr<Node> retType,
+		std::shared_ptr<NodeArray> params,
+		std::shared_ptr<TypeNode> retType,
 		Qualifiers &quals,
 		bool isVarArg);
 
 private:
 	CallConv _callConv;
-	std::shared_ptr<Node> _params;
-	std::shared_ptr<Node> _retType;
+	std::shared_ptr<NodeArray> _params;
+	std::shared_ptr<TypeNode> _retType;
 	bool _isVarArg;
 };
 

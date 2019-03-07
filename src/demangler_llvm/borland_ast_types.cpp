@@ -92,11 +92,14 @@ void CharTypeNode::printLeft(std::ostream &s) const
 {
 	_quals.printSpaceR(s);
 	switch (_signness) {
-	case ThreeStateSignness::signed_char: s << "signed char";
+	case ThreeStateSignness::signed_char:
+		s << "signed char";
 		break;
-	case ThreeStateSignness::unsigned_char: s << "unsigned char";
+	case ThreeStateSignness::unsigned_char:
+		s << "unsigned char";
 		break;
-	default: s << "char";
+	default:
+		s << "char";
 	}
 }
 
@@ -342,8 +345,8 @@ void ArrayNode::printRight(std::ostream &s) const
 
 FunctionTypeNode::FunctionTypeNode(
 	retdec::demangler::borland::CallConv callConv,
-	std::shared_ptr<retdec::demangler::borland::Node> params,
-	std::shared_ptr<retdec::demangler::borland::Node> retType,
+	std::shared_ptr<retdec::demangler::borland::NodeArray> params,
+	std::shared_ptr<retdec::demangler::borland::TypeNode> retType,
 	retdec::demangler::borland::Qualifiers &quals,
 	bool isVarArg) :
 	TypeNode(quals), _callConv(callConv), _params(params), _retType(retType), _isVarArg(isVarArg)
@@ -355,8 +358,8 @@ FunctionTypeNode::FunctionTypeNode(
 std::shared_ptr<FunctionTypeNode> FunctionTypeNode::create(
 	retdec::demangler::borland::Context &context,
 	retdec::demangler::borland::CallConv callConv,
-	std::shared_ptr<retdec::demangler::borland::Node> params,
-	std::shared_ptr<retdec::demangler::borland::Node> retType,
+	std::shared_ptr<retdec::demangler::borland::NodeArray> params,
+	std::shared_ptr<retdec::demangler::borland::TypeNode> retType,
 	retdec::demangler::borland::Qualifiers &quals,
 	bool isVarArg)
 {
@@ -375,11 +378,14 @@ void FunctionTypeNode::printLeft(std::ostream &s) const
 	}
 
 	switch (_callConv) {
-	case CallConv::fastcall: s << "__fastcall ";
+	case CallConv::fastcall:
+		s << "__fastcall ";
 		break;
-	case CallConv::stdcall: s << "__stdcall ";
+	case CallConv::stdcall:
+		s << "__stdcall ";
 		break;
-	default: break;
+	default:
+		break;
 	}
 }
 

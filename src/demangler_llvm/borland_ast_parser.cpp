@@ -16,14 +16,11 @@ namespace borland {
  * @brief Constructor for AST parser. Immediately parses name mangled by borland mangling scheme into AST.
  * @param mangled Name mangled by borland mangling scheme.
  */
-BorlandASTParser::BorlandASTParser(Context &context, const std::string &mangled) :
-	_status(in_progress),
-	_mangled(mangled.c_str(), mangled.length()),
+BorlandASTParser::BorlandASTParser(Context &context) :
+	_status(init),
+	_mangled(""),
 	_ast(nullptr),
-	_context(context)
-{
-	parse();
-}
+	_context(context) {}
 
 /**
  * @return Shared pointer to AST.
@@ -166,8 +163,11 @@ inline std::string BorlandASTParser::getString(const retdec::demangler::borland:
  *
  * <mangled-name> ::= <mangled-function>
  */
-void BorlandASTParser::parse()
+void BorlandASTParser::parse(const std::string &mangled)
 {
+	_status = in_progress;
+	_mangled = llvm::itanium_demangle::StringView{mangled.c_str(), mangled.length()};
+
 	auto func = parseFunction();
 	if (checkResult(func)){
 		_ast = func;
@@ -513,7 +513,7 @@ std::shared_ptr<FunctionTypeNode> BorlandASTParser::parseFuncType(Qualifiers &qu
 	bool isVarArg = consumeIfPossible('e');
 
 	/* return type */
-	std::shared_ptr<Node> retType = nullptr;
+	std::shared_ptr<TypeNode> retType = nullptr;
 	if (consumeIfPossible('$')) {
 		retType = parseType();
 		if (!checkResult(retType)) {
@@ -604,7 +604,7 @@ bool BorlandASTParser::parseBackref(std::shared_ptr<retdec::demangler::borland::
  * Can have no effect, if no viable type is found and mangled string didnt breake any rule for types.
  * @return Type on success, nullptr on failure.
  */
-std::shared_ptr<Node> BorlandASTParser::parseType()
+std::shared_ptr<TypeNode> BorlandASTParser::parseType()
 {
 	/* qualifiers */
 	auto quals = parseQualifiers();
@@ -656,7 +656,7 @@ std::shared_ptr<Node> BorlandASTParser::parseType()
  * Parses pointer type.
  * @return Pointer type on success, nullptr otherwise.
  */
-std::shared_ptr<Node> BorlandASTParser::parsePointer(const Qualifiers &quals)
+std::shared_ptr<TypeNode> BorlandASTParser::parsePointer(const Qualifiers &quals)
 {
 	auto pointeeType = parseType();
 	if (!checkResult(pointeeType)) {
@@ -670,7 +670,7 @@ std::shared_ptr<Node> BorlandASTParser::parsePointer(const Qualifiers &quals)
  * Parses reference type.
  * @return Reference type on success, nullptr otherwise.
  */
-std::shared_ptr<Node> BorlandASTParser::parseReference()
+std::shared_ptr<TypeNode> BorlandASTParser::parseReference()
 {
 	if (consumeIfPossible('$')) {    // must be reference to function
 		auto fakeQuals = Qualifiers(false, false);    // reference to function cannot have qualifiers
@@ -695,7 +695,7 @@ std::shared_ptr<Node> BorlandASTParser::parseReference()
  * Parses R-reference type.
  * @return R-reference type on success, nullptr otherwise.
  */
-std::shared_ptr<Node> BorlandASTParser::parseRReference()
+std::shared_ptr<TypeNode> BorlandASTParser::parseRReference()
 {
 	if (consumeIfPossible('$')) {    // must be reference to function
 		auto fakeQuals = Qualifiers(false, false);    // reference to function cannot have
@@ -718,7 +718,7 @@ std::shared_ptr<Node> BorlandASTParser::parseRReference()
  * Parses array type.
  * @return Array on success, nullptr otherwise.
  */
-std::shared_ptr<Node> BorlandASTParser::parseArray(const retdec::demangler::borland::Qualifiers &quals)
+std::shared_ptr<TypeNode> BorlandASTParser::parseArray(const retdec::demangler::borland::Qualifiers &quals)
 {
 	unsigned len = parseNumber();
 	if (len == 0) {
@@ -743,7 +743,7 @@ std::shared_ptr<Node> BorlandASTParser::parseArray(const retdec::demangler::borl
  * If no viable type is found, method has no effect.
  * @return Type on success, nullptr otherwise.
  */
-std::shared_ptr<Node> BorlandASTParser::parseBuildInType(const Qualifiers &quals)
+std::shared_ptr<TypeNode> BorlandASTParser::parseBuildInType(const Qualifiers &quals)
 {
 	if (consumeIfPossible('o')) {
 		return BuiltInTypeNode::create(_context, "bool", quals);
@@ -821,7 +821,7 @@ unsigned BorlandASTParser::parseNumber()
  * @param nameLen Length of mangled name of the type.
  * @return Named type on success, nullptr otherwise.
  */
-std::shared_ptr<Node> BorlandASTParser::parseNamedType(unsigned nameLen, const Qualifiers &quals)
+std::shared_ptr<TypeNode> BorlandASTParser::parseNamedType(unsigned nameLen, const Qualifiers &quals)
 {
 	const char *end_named = _mangled.begin() + nameLen;
 	if (_mangled.end() < end_named) {

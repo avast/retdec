@@ -22,23 +22,26 @@ BorlandDemangler::BorlandDemangler() : Demangler("borland"), _context() {}
  */
 std::string BorlandDemangler::demangleToString(const std::string &mangled)
 {
-	_status = Status::unknown;
+	borland::BorlandASTParser parser{_context};
+	parser.parse(mangled);
+	_status = astStatusToDemStatus(parser.status());
+	return astToString(parser.ast());
+}
 
-	borland::BorlandASTParser parser{_context, mangled};
-
-	/* update demangler status based on parser status */
-	switch (parser.status()) {
+Demangler::Status BorlandDemangler::astStatusToDemStatus(const retdec::demangler::borland::BorlandASTParser::Status &parserStatus)
+{
+	switch (parserStatus) {
 	case borland::BorlandASTParser::Status::success:
-		_status = success;
-		break;
+		return success;
 	case borland::BorlandASTParser::Status::invalid_mangled_name:
-		_status = invalid_mangled_name;
-		break;
+		return invalid_mangled_name;
 	default:
-		_status = unknown;
+		return unknown;
 	}
+}
 
-	auto ast = parser.ast();
+std::string BorlandDemangler::astToString(const std::shared_ptr<retdec::demangler::borland::Node> &ast) const
+{
 	if (_status == success && ast) {
 		return ast->str();
 	} else {
