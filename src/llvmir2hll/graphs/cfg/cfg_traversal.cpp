@@ -20,30 +20,36 @@ namespace llvmir2hll {
 
 namespace {
 
+/**
+* @brief Generic depth-first iterator.
+*/
 template <class Graph>
-class df_iterator : public std::iterator<std::forward_iterator_tag,
-					 ShPtr<typename Graph::Node>>
-{
+class df_iterator: public std::iterator<std::forward_iterator_tag, ShPtr<typename Graph::Node>> {
+private:
 	using Node = ShPtr<typename Graph::Node>;
 	using super = std::iterator<std::forward_iterator_tag, Node>;
 	// The stack nodes consist of the current CFG node, a statement iterator
 	// storing the current place in the node's statements, and an iterator
-	// storing the current place in the node's successor list.  Statement
-	// place is only needed because we may be called with a statement that
-	// doesn't point to the beginning.
+	// storing the current place in the node's successor list.  Statement place
+	// is only needed because we may be called with a statement that doesn't
+	// point to the beginning.
 	using StackNodeType = std::tuple<Node, typename Graph::stmt_iterator, typename Graph::succ_iterator>;
 	using ReturnNodeType = std::pair<Node, typename Graph::stmt_iterator>;
 	std::stack<StackNodeType> visitStack;
 	std::unordered_set<Node> visitedNodes;
+
 private:
-	inline df_iterator(Node node, typename Graph::stmt_iterator stmtIter) {
+	df_iterator(Node node, typename Graph::stmt_iterator stmtIter) {
 		visitedNodes.insert(node);
 		visitStack.emplace(node, stmtIter, node->succ_begin());
 	}
-	inline df_iterator(Node node) : df_iterator(node, node->stmt_begin()) {
+
+	df_iterator(Node node): df_iterator(node, node->stmt_begin()) {
 	}
-	inline df_iterator() = default; // End is when stack is empty
-	inline void moveToNextNode() {
+
+	df_iterator() = default; // End is when stack is empty.
+
+	void moveToNextNode() {
 		// Note that we directly mutate the successor iterators that are
 		// on the stack, because we can't pop it until we are done.
 		do {
@@ -53,8 +59,7 @@ private:
 			// get visited.
 			while (succPlace != node->succ_end()) {
 				auto succNode((*succPlace)->getDst());
-				// This mutates the actual in-stack succ
-				// iterator
+				// This mutates the actual in-stack succ iterator.
 				++succPlace;
 				// Push this node on the stack to be visited if
 				// it hasn't been visited.
@@ -69,13 +74,15 @@ private:
 			visitStack.pop();
 		} while (!visitStack.empty());
 	}
+
 public:
 	using pointer = typename super::pointer;
 
-	// Provide static begin and end methods as our public "constructors"
-	static df_iterator<Graph> begin(const Node &N) { return df_iterator(N); }
-	static df_iterator<Graph> begin(const Node &N,
-					typename Graph::stmt_iterator stmtIter) {
+	// Provide static begin and end methods as our public "constructors".
+	static df_iterator<Graph> begin(const Node &N) {
+		return df_iterator(N);
+	}
+	static df_iterator<Graph> begin(const Node &N, typename Graph::stmt_iterator stmtIter) {
 		return df_iterator(N, stmtIter);
 	}
 
@@ -84,10 +91,14 @@ public:
 	bool operator==(const df_iterator &x) const {
 		return visitStack == x.visitStack;
 	}
-	bool operator!=(const df_iterator &x) const { return !(*this == x); }
+	bool operator!=(const df_iterator &x) const {
+		return !(*this == x);
+	}
 
-	ReturnNodeType operator*() const { auto &topNode = visitStack.top();
-		return std::make_pair(std::get<0>(topNode), std::get<1>(topNode)); }
+	ReturnNodeType operator*() const {
+		auto &topNode = visitStack.top();
+		return std::make_pair(std::get<0>(topNode), std::get<1>(topNode));
+	}
 
 	df_iterator &operator++() { // Preincrement
 		moveToNextNode();
@@ -107,6 +118,7 @@ public:
 		return tmp;
 	}
 };
+
 } // anonymous namespace
 
 /**
@@ -273,10 +285,10 @@ bool CFGTraversal::getCurrRetVal() const {
 */
 bool CFGTraversal::performTraversalImpl(ShPtr<CFG::Node> node,
 		CFG::stmt_iterator stmtIter) {
-	// Walk the CFG rooted at node in depth first order
+	// Walk the CFG rooted at node in depth first order.
 	auto retVal = getEndRetVal();
-	for (auto I = df_iterator<CFG>::begin(node, stmtIter), E = df_iterator<CFG>::end(node); I != E; ++I) {
-		auto nodePair = *I;
+	for (auto i = df_iterator<CFG>::begin(node, stmtIter), e = df_iterator<CFG>::end(node); i != e; ++i) {
+		auto nodePair = *i;
 		auto node = nodePair.first;
 		auto stmtPlace = nodePair.second;
 		auto visitState = visitSingleNode(stmtPlace, node->stmt_end());
@@ -285,11 +297,11 @@ bool CFGTraversal::performTraversalImpl(ShPtr<CFG::Node> node,
 		if (stopTraversal) {
 			break;
 		}
-		// If we got asked to skip children, do it
+		// If we got asked to skip children, do it.
 		if (visitState.second) {
-			// This may cause us to be at the end of the iterator
-			I.skipChildren();
-			if (I == E) {
+			// This may cause us to be at the end of the iterator.
+			i.skipChildren();
+			if (i == e) {
 				break;
 			}
 		}
@@ -306,10 +318,8 @@ bool CFGTraversal::performTraversalImpl(ShPtr<CFG::Node> node,
 *
 * @return Result of the visit, and whether to skip children of the node.
 */
-
 std::pair<bool, bool> CFGTraversal::visitSingleNode(CFG::stmt_iterator stmtIter,
-				   CFG::stmt_iterator endStmt)
-{
+		CFG::stmt_iterator endStmt) {
 	while (stmtIter != endStmt) {
 		// We're not at the end of the node, so check the statement under
 		// stmtIter.
@@ -341,7 +351,6 @@ std::pair<bool, bool> CFGTraversal::visitSingleNode(CFG::stmt_iterator stmtIter,
 */
 bool CFGTraversal::performReverseTraversalImpl(ShPtr<CFG::Node> node,
 		CFG::stmt_reverse_iterator stmtRIter) {
-
 	while (stmtRIter != node->stmt_rend()) {
 		// We're not at the start of the node, so check the statement under
 		// stmtRIter.
