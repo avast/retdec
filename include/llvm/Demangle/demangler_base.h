@@ -10,6 +10,11 @@
 #include <string>
 
 namespace retdec {
+
+namespace ctypes {
+	class Module;
+}
+
 namespace demangler {
 
 /**
@@ -34,6 +39,8 @@ class Demangler
 		virtual ~Demangler() = default;
 
 		virtual std::string demangleToString(const std::string &mangled) = 0;
+
+		virtual void demangleToModule(const std::string &mangled, retdec::ctypes::Module &module) {};
 
 		Status status();
 

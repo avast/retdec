@@ -1,5 +1,6 @@
 set(RETDEC_TESTS_CTYPESPARSER_SOURCES
 	json_ctypes_parser_tests.cpp
+	borland_ast_to_ctypes_tests.cpp
 )
 
 add_executable(retdec-tests-ctypesparser ${RETDEC_TESTS_CTYPESPARSER_SOURCES})

@@ -91,6 +91,15 @@ std::shared_ptr<FunctionNode> FunctionNode::create(
 		new FunctionNode(std::move(name), std::move(funcType)));
 }
 
+std::shared_ptr<Node> FunctionNode::name()
+{
+	return _name;
+}
+
+std::shared_ptr<FunctionTypeNode> FunctionNode::funcType() {
+	return _funcNode;
+}
+
 /**
  * @brief Prints text representation of function.
  * @param s Output stream.
@@ -215,14 +224,16 @@ void NestedNameNode::printLeft(std::ostream &s) const
 /**
  * @return Higher level nodes in nested name.
  */
-std::shared_ptr<Node> NestedNameNode::super() {
+std::shared_ptr<Node> NestedNameNode::super()
+{
 	return _super;
 }
 
 /**
  * @return Lover level node in neste name.
  */
-std::shared_ptr<Node> NestedNameNode::name() {
+std::shared_ptr<Node> NestedNameNode::name()
+{
 	return _name;
 }
 
@@ -290,7 +301,7 @@ void NodeArray::printLeft(std::ostream &s) const
  */
 std::shared_ptr<Node> NodeArray::get(unsigned i) const
 {
-	return i < _nodes.size() ? _nodes.at(i): nullptr;
+	return i < _nodes.size() ? _nodes.at(i) : nullptr;
 }
 
 /**
@@ -354,7 +365,7 @@ ConversionOperatorNode::ConversionOperatorNode(
  */
 std::shared_ptr<ConversionOperatorNode> ConversionOperatorNode::create(Context &context, std::shared_ptr<Node> type)
 {
-	return std::shared_ptr<ConversionOperatorNode>(new ConversionOperatorNode(type));	// TODO context
+	return std::shared_ptr<ConversionOperatorNode>(new ConversionOperatorNode(type));    // TODO context
 }
 
 /**

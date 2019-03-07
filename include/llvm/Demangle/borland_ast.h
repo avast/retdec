@@ -104,6 +104,10 @@ public:
 		std::shared_ptr<Node> name,
 		std::shared_ptr<FunctionTypeNode> funcType);
 
+	std::shared_ptr<Node> name();
+
+	std::shared_ptr<FunctionTypeNode> funcType();
+
 	void printLeft(std::ostream &s) const override;
 
 private:

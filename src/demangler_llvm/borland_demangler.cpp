@@ -6,6 +6,7 @@
 
 #include "llvm/Demangle/borland_demangler.h"
 #include "llvm/Demangle/borland_ast_parser.h"
+#include "retdec/ctypesparser/borland_ast_ctypes_parser.h"
 
 namespace retdec {
 namespace demangler {
@@ -13,7 +14,7 @@ namespace demangler {
 /**
  * @brief Constructor for borland demangler.
  */
-BorlandDemangler::BorlandDemangler() : Demangler("borland"), _context() {}
+BorlandDemangler::BorlandDemangler() : Demangler("borland"), _demangleContext() {}
 
 /**
  * @brief Demangles name mangled by borland mangling scheme into string.
@@ -22,10 +23,24 @@ BorlandDemangler::BorlandDemangler() : Demangler("borland"), _context() {}
  */
 std::string BorlandDemangler::demangleToString(const std::string &mangled)
 {
-	borland::BorlandASTParser parser{_context};
+	borland::BorlandASTParser parser{_demangleContext};
 	parser.parse(mangled);
 	_status = astStatusToDemStatus(parser.status());
 	return astToString(parser.ast());
+}
+
+void BorlandDemangler::demangleToModule(const std::string &mangled, retdec::ctypes::Module &module)
+{
+	borland::BorlandASTParser astParser{_demangleContext};
+	astParser.parse(mangled);
+	_status = astStatusToDemStatus(astParser.status());
+	if (_status != success) {
+		return;
+	}
+
+	ctypesparser::borland_ast::BorlandToCtypesParser ctypesParser{};
+	ctypesParser.parseInto(astParser.ast(), module);
+	_status = success;	// TODO
 }
 
 /**

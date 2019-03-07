@@ -10,6 +10,7 @@
 #include "llvm/Demangle/demangler_base.h"
 #include "llvm/Demangle/context.h"
 #include "llvm/Demangle/borland_ast_parser.h"
+#include "retdec/ctypes/context.h"
 
 namespace retdec {
 namespace demangler {
@@ -24,13 +25,15 @@ public:
 
 	std::string demangleToString(const std::string &mangled) override;
 
+	void demangleToModule(const std::string &mangled, retdec::ctypes::Module &module) override;
+
 private:
 	static Status astStatusToDemStatus(const borland::BorlandASTParser::Status &parserStatus);
 
 	std::string astToString(const std::shared_ptr<borland::Node> &ast) const;
 
 private:
-	borland::Context _context;
+	borland::Context _demangleContext;
 };
 
 }
