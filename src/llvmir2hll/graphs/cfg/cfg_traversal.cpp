@@ -60,7 +60,7 @@ private:
 				// it hasn't been visited.
 				if (visitedNodes.insert(succNode).second) {
 					visitStack.emplace(succNode, succNode->stmt_begin(),
-							   succNode->succ_begin());
+						succNode->succ_begin());
 					return;
 				}
 			}
@@ -94,18 +94,18 @@ public:
 		return *this;
 	}
 
-  // Skips all children of the current node.  Note that this may cause the
-  // iterator to be at end when it is done.
-  df_iterator &skipChildren() {
-    visitStack.pop();
-    return *this;
-  }
+	// Skips all children of the current node.  Note that this may cause the
+	// iterator to be at end when it is done.
+	df_iterator &skipChildren() {
+		visitStack.pop();
+		return *this;
+	}
 
-  df_iterator operator++(int) { // Postincrement
-    df_iterator tmp = *this;
-    ++*this;
-    return tmp;
-  }
+	df_iterator operator++(int) { // Postincrement
+		df_iterator tmp = *this;
+		++*this;
+		return tmp;
+	}
 };
 } // anonymous namespace
 
