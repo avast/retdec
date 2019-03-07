@@ -29,9 +29,10 @@ class Architecture
 		bool isPic32() const;
 		bool isMipsOrPic32() const;
 		bool isArm() const;
+		bool isArm32() const;
 		bool isArm64() const;
 		bool isThumb() const;
-		bool isArmOrThumb() const;
+		bool isArm32OrThumb() const;
 		bool isX86() const;
 		bool isX86_16() const;
 		bool isX86_32() const;
@@ -51,6 +52,7 @@ class Architecture
 		void setIsPic32();
 		void setIsArm();
 		void setIsThumb();
+		void setIsArm32();
 		void setIsArm64();
 		void setIsX86();
 		void setIsPpc();
@@ -99,6 +101,7 @@ class Architecture
 	private:
 		std::string _name;
 		unsigned _bitSize = 32;
+		bool _thumbFlag = false;
 		eEndian _endian = E_UNKNOWN;
 		eArch _arch = eArch::UNKNOWN;
 };

@@ -64,7 +64,7 @@ bool SyscallFixer::run()
 	{
 		return runMips();
 	}
-	else if (_config->getConfig().architecture.isArmOrThumb())
+	else if (_config->getConfig().architecture.isArm32OrThumb())
 	{
 		return runArm();
 	}

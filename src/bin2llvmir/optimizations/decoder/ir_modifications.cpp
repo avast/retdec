@@ -165,7 +165,7 @@ llvm::GlobalVariable* Decoder::getCallReturnObject()
 	{
 		return _abi->getRegister(PPC_REG_R3);
 	}
-	else if (_config->getConfig().architecture.isArmOrThumb())
+	else if (_config->getConfig().architecture.isArm32OrThumb())
 	{
 		return _abi->getRegister(ARM_REG_R0);
 	}

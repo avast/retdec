@@ -116,7 +116,7 @@ std::set<std::string> selectSignaturePaths(
 		{
 			arch = "x64";
 		}
-		else if (c.architecture.isArmOrThumb())
+		else if (c.architecture.isArm32OrThumb())
 		{
 			arch = "arm";
 		}
@@ -795,7 +795,7 @@ bool Finder::initDisassembler()
 		arch = CS_ARCH_MIPS;
 		_ceMode = CS_MODE_MIPS32;
 	}
-	else if (_config->architecture.isArmOrThumb())
+	else if (_config->architecture.isArm32OrThumb())
 	{
 		arch = CS_ARCH_ARM;
 		_ceMode = CS_MODE_ARM;
@@ -829,7 +829,7 @@ void Finder::solveReferences()
 	{
 		bool modeSwitch = false;
 		std::string& sigPath = p.second.signaturePath;
-		if (_config->architecture.isArmOrThumb()
+		if (_config->architecture.isArm32OrThumb()
 				&& utils::containsCaseInsensitive(sigPath, "thumb"))
 		{
 			if (cs_option(_ce, CS_OPT_MODE, CS_MODE_THUMB) != CS_ERR_OK)

@@ -380,7 +380,7 @@ std::size_t Decoder::decodeJumpTargetDryRun(
 	{
 		return decodeJumpTargetDryRun_x86(jt, bytes, strict);
 	}
-	else if (_config->getConfig().architecture.isArmOrThumb())
+	else if (_config->getConfig().architecture.isArm32OrThumb())
 	{
 		return decodeJumpTargetDryRun_arm(jt, bytes, strict);
 	}
@@ -408,7 +408,7 @@ std::size_t Decoder::decodeJumpTargetDryRun(
 
 cs_mode Decoder::determineMode(cs_insn* insn, utils::Address& target)
 {
-	if (_config->getConfig().architecture.isArmOrThumb())
+	if (_config->getConfig().architecture.isArm32OrThumb())
 	{
 		return determineMode_arm(insn, target);
 	}
@@ -480,7 +480,7 @@ bool Decoder::getJumpTargetsFromInstruction(
 	CallInst*& pCall = tr.branchCall;
 	auto nextAddr = addr + tr.size;
 
-	if (_config->getConfig().architecture.isArmOrThumb())
+	if (_config->getConfig().architecture.isArm32OrThumb())
 	{
 		AsmInstruction ai(tr.llvmInsn);
 		patternsPseudoCall_arm(pCall, ai);
@@ -1562,7 +1562,7 @@ void Decoder::finalizePseudoCalls()
 			// TODO: what about other possible LR stores? e.g. see
 			// patternsPseudoCall_arm().
 			//
-			if (_config->getConfig().architecture.isArmOrThumb()
+			if (_config->getConfig().architecture.isArm32OrThumb()
 					&& icf)
 			if (auto* st = dyn_cast<StoreInst>(i))
 			{

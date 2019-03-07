@@ -38,7 +38,7 @@ std::string mode2string(const config::Architecture& arch, cs_mode m)
 		ret += m & CS_MODE_V8 ? ", CS_MODE_V8" : ", CS_MODE_ARM";
 		ret += m & CS_MODE_MCLASS ? ", CS_MODE_MCLASS" : "";
 	}
-	else if (arch.isArmOrThumb())
+	else if (arch.isArm32OrThumb())
 	{
 		ret += m & CS_MODE_THUMB ? ", CS_MODE_THUMB" : ", CS_MODE_ARM";
 		ret += m & CS_MODE_MCLASS ? ", CS_MODE_MCLASS" : "";

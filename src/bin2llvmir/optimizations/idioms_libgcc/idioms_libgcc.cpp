@@ -211,7 +211,7 @@ bool IdiomsLibgccImpl::testArchAndInitialize(
 		config::Architecture& arch,
 		Abi* abi)
 {
-	if (arch.isArmOrThumb())
+	if (arch.isArm32OrThumb())
 	{
 		op0Single = abi->getRegister(ARM_REG_R0);
 		op0Double = abi->getRegister(ARM_REG_R0); // + r1

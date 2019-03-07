@@ -33,20 +33,35 @@ TEST_F(ArchitectureTests, CheckIfArchMethodsWork)
 
 	arch.setIsArm();
 	EXPECT_TRUE( arch.isArm() );
-	EXPECT_TRUE( arch.isArmOrThumb() );
+	EXPECT_TRUE( arch.isKnown() );
+	EXPECT_EQ( "arm", arch.getName() );
+
+	arch.setIsThumb();
+	EXPECT_TRUE( arch.isArm() );
+	EXPECT_TRUE( arch.isThumb() );
+	EXPECT_TRUE( arch.isArm32OrThumb() );
+	EXPECT_FALSE( arch.isArm64() );
+	EXPECT_FALSE( arch.isArm32() );
+	EXPECT_TRUE( arch.isKnown() );
+	EXPECT_EQ( "thumb", arch.getName() );
+
+	arch.setIsArm32();
+	EXPECT_TRUE( arch.isArm() );
+	EXPECT_TRUE( arch.isArm32() );
+	EXPECT_TRUE( arch.isArm32OrThumb() );
+	EXPECT_FALSE( arch.isThumb() );
+	EXPECT_FALSE( arch.isArm64() );
 	EXPECT_TRUE( arch.isKnown() );
 	EXPECT_EQ( "arm", arch.getName() );
 
 	arch.setIsArm64();
+	EXPECT_TRUE( arch.isArm() );
+	EXPECT_FALSE( arch.isArm32() );
+	EXPECT_FALSE( arch.isArm32OrThumb() );
+	EXPECT_FALSE( arch.isThumb() );
 	EXPECT_TRUE( arch.isArm64() );
 	EXPECT_TRUE( arch.isKnown() );
 	EXPECT_EQ( "aarch64", arch.getName() );
-
-	arch.setIsThumb();
-	EXPECT_TRUE( arch.isThumb() );
-	EXPECT_TRUE( arch.isArmOrThumb() );
-	EXPECT_TRUE( arch.isKnown() );
-	EXPECT_EQ( "thumb", arch.getName() );
 
 	arch.setIsX86();
 	EXPECT_TRUE( arch.isX86() );

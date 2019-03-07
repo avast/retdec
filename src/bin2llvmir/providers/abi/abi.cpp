@@ -231,7 +231,7 @@ bool Abi::isMips64() const
 
 bool Abi::isArm() const
 {
-	return _config->getConfig().architecture.isArmOrThumb();
+	return _config->getConfig().architecture.isArm32OrThumb();
 }
 
 bool Abi::isArm64() const
@@ -303,7 +303,7 @@ Abi* AbiProvider::addAbi(
 		return nullptr;
 	}
 
-	if (c->getConfig().architecture.isArmOrThumb())
+	if (c->getConfig().architecture.isArm32OrThumb())
 	{
 		auto p = _module2abi.emplace(m, std::make_unique<AbiArm>(m, c));
 		return p.first->second.get();
