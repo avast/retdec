@@ -1,0 +1,8 @@
+2 EPRO100_Detect
+3 EPRO100_Configure
+4 EPRO100_Diagnose
+5 EPRO100_Resource_Summary
+6 EPRO100_GetRegistryKey
+7 EPRO100_GetAdapterDescription
+8 EPRO100_InstallAnyway
+9 EPRO100_DeviceExist

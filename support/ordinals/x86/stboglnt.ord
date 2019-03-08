@@ -1,0 +1,15 @@
+1 DllMain
+2 DrvCopyContext
+3 DrvCreateContext
+4 DrvCreateLayerContext
+5 DrvDeleteContext
+6 DrvDescribeLayerPlane
+7 DrvGetLayerPaletteEntries
+8 DrvGetProcAddress
+9 DrvRealizeLayerPalette
+10 DrvReleaseContext
+11 DrvSetContext
+12 DrvSetLayerPaletteEntries
+13 DrvShareLists
+14 DrvSwapLayerBuffers
+15 DrvValidateVersion

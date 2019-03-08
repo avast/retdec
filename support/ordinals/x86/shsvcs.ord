@@ -1,0 +1,16 @@
+1 SHSVCS_1
+2 SHSVCS_2
+3 SHSVCS_3
+4 SHSVCS_4
+5 SHSVCS_5
+6 SHSVCS_6
+7 BadApplicationServiceMain
+8 DllInstall
+9 DllRegisterServer
+10 DllUnregisterServer
+11 HardwareDetectionServiceMain
+12 ThemeServiceMain
+13 CreateHardwareEventMoniker
+14 DllCanUnloadNow
+15 DllGetClassObject
+16 FUSCompatibilityEntryW

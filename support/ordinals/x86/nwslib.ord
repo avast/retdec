@@ -1,0 +1,10 @@
+1 CloseNcpSrvPerformanceData
+2 CollectNcpSrvPerformanceData
+3 CreateNewSecurityDescriptor
+4 MapNwRightsToNTAccess
+5 MapSpecificToGeneric
+6 NwAddRight
+7 NwCheckTrusteeRights
+8 NwRemoveRight
+9 NwScanTrustees
+10 OpenNcpSrvPerformanceData

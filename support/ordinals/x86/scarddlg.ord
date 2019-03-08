@@ -1,0 +1,5 @@
+1 GetOpenCardNameA
+2 GetOpenCardNameW
+3 SCardDlgExtendedError
+4 SCardUIDlgSelectCardA
+5 SCardUIDlgSelectCardW

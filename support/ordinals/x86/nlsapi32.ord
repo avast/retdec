@@ -1,0 +1,16 @@
+1 NLSInstalled
+2 NLSInUse
+3 NLSAvailable
+4 NLSUsers
+5 NLSAddAssignment
+6 NLSRemoveAssignment
+7 NLSTransferOwnership
+8 NLSGetTransaction
+9 NLSGetEntry
+10 NLSInstallCertificate
+11 NLSMoveCertificate
+12 NLSDeleteCertificate
+13 NLSGetCertificate
+14 NLSCertificateTagToMessage
+15 NLSAddProductInformation
+16 DllEntryPoint

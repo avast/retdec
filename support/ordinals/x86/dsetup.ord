@@ -1,0 +1,16 @@
+1 DirectXDeviceDriverSetupA
+2 DirectXDeviceDriverSetupW
+3 DirectXRegisterApplicationA
+4 DirectXRegisterApplicationW
+5 DirectXSetupA
+6 DirectXSetupIsJapan
+7 DirectXSetupIsJapanNec
+8 DirectXSetupW
+9 DirectXUnRegisterApplication
+10 DirectXSetupSetCallback
+11 DirectXSetupGetVersion
+12 DirectXSetupCallback
+13 DirectXSetupGetFileVersion
+14 DirectXLoadString
+15 DirectXSetupIsEng
+16 DirectXSetupShowEULA

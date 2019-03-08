@@ -1,0 +1,6 @@
+7 PerUserInit
+8 DllCanUnloadNow
+9 DllGetClassObject
+10 DllInstall
+11 DllRegisterServer
+12 DllUnregisterServer

@@ -1,0 +1,7 @@
+1 HrConvertActiveFile
+2 HrRegisterAddIn
+3 HrSaveAsPPV
+4 DllCanUnloadNow
+5 DllGetClassObject
+6 DllRegisterServer
+7 DllUnregisterServer

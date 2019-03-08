@@ -1,0 +1,15 @@
+1 DMOEnum
+2 DMOGetName
+3 DMOGetTypes
+4 DMOGuidToStrA
+5 DMOGuidToStrW
+6 DMORegister
+7 DMOStrToGuidA
+8 DMOStrToGuidW
+9 DMOUnregister
+10 MoCopyMediaType
+11 MoCreateMediaType
+12 MoDeleteMediaType
+13 MoDuplicateMediaType
+14 MoFreeMediaType
+15 MoInitMediaType

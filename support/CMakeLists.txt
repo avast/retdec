@@ -1,0 +1,2 @@
+add_subdirectory(ordinals)
+add_subdirectory(yara_patterns)

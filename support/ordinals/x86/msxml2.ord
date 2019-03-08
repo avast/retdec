@@ -1,0 +1,12 @@
+6 MSXML2_6
+7 MSXML2_7
+8 MSXML2_8
+9 MSXML2_9
+10 MSXML2_10
+11 MSXML2_11
+12 MSXML2_12
+13 DllCanUnloadNow
+14 DllGetClassObject
+15 DllMain
+16 DllRegisterServer
+17 DllUnregisterServer

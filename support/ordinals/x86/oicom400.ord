@@ -1,0 +1,11 @@
+1 OIExpand
+2 OICompress
+4 GetCmpDataWiis
+5 PutUncmpDataWiis
+6 GetUncmpDataWiis
+7 PutCmpDataWiis
+13 OICompressJpegInfo
+14 OICompressJpegCleanUp
+15 OIExpandJpegCleanUp
+16 IMGGetTaskData
+17 IMGFreeTaskData

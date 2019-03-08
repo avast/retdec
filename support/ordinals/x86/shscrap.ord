@@ -1,0 +1,6 @@
+1 Scrap_CreateFromDataObject
+2 DllCanUnloadNow
+3 DllGetClassObject
+4 OpenScrap_RunDLLA
+5 OpenScrap_RunDLLA
+6 OpenScrap_RunDLLW

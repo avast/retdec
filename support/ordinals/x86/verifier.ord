@@ -1,0 +1,17 @@
+1 VerifierAddFreeMemoryCallback
+2 VerifierCreateRpcPageHeap
+3 VerifierDeleteFreeMemoryCallback
+4 VerifierDestroyRpcPageHeap
+5 VerifierDisableFaultInjectionExclusionRange
+6 VerifierDisableFaultInjectionTargetRange
+7 VerifierEnableFaultInjectionExclusionRange
+8 VerifierEnableFaultInjectionTargetRange
+9 VerifierEnumerateResource
+10 VerifierIsCurrentThreadHoldingLocks
+11 VerifierIsDllEntryActive
+12 VerifierLogMessage
+13 VerifierQueryRuntimeFlags
+14 VerifierSetFaultInjectionProbability
+15 VerifierSetFlags
+16 VerifierSetRuntimeFlags
+17 VerifierStopMessage

@@ -1,0 +1,17 @@
+1 CsSetOptions
+2 CsCreateClassStore
+3 CsEnumApps
+4 CsGetAppCategories
+5 CsGetClassAccess
+6 CsGetClassStore
+7 CsGetClassStorePath
+8 CsRegisterAppCategory
+9 CsServerGetClassStore
+10 CsUnregisterAppCategory
+11 GenerateGroupPolicy
+12 IID_IClassAdmin
+13 ProcessGroupPolicyObjectsEx
+14 ReleaseAppCategoryInfoList
+15 ReleasePackageDetail
+16 ReleasePackageInfo
+17 ServiceMain

@@ -1,0 +1,7 @@
+1 AddEmailToAutoComplete
+2 AutoDiscoverAndOpenEmail
+3 DllCanUnloadNow
+4 DllGetClassObject
+5 DllInstall
+6 DllRegisterServer
+7 DllUnregisterServer

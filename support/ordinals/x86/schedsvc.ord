@@ -1,0 +1,7 @@
+1 SPUninstall
+2 SPUninstallCallback
+3 SchedServiceMain
+4 SysPrepBackup
+5 SysPrepRestore
+6 CloseProc
+7 SysPrepCallback

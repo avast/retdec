@@ -1,0 +1,12 @@
+1 AddNetwarePrinterProvidor
+2 DeleteNetwarePrinterProvidor
+3 AppendSzToFile
+4 RemoveSzFromFile
+5 GetKernelVersion
+6 SetEverybodyPermission
+7 lodctr
+8 unlodctr
+9 DeleteGatewayPassword
+10 SetFileSysChangeValue
+11 CleanupRegistryForNWCS
+12 SetupRegistryForNWCS

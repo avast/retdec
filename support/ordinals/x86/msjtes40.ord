@@ -1,0 +1,5 @@
+12 DllMain
+13 DllCanUnloadNow
+14 DllGetClassObject
+15 DllRegisterServer
+16 DllUnregisterServer

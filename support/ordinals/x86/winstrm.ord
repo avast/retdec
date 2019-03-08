@@ -1,0 +1,7 @@
+1 OpenStream
+2 getmsg
+3 poll
+4 putmsg
+5 s_ioctl
+6 s_open
+7 s_perror

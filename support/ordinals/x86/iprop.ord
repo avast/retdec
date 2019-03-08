@@ -1,0 +1,8 @@
+1 FmtIdToPropStgName
+2 FreePropVariantArray
+3 PropStgNameToFmtId
+4 PropVariantClear
+5 PropVariantCopy
+6 StgCreatePropSetStg
+7 StgCreatePropStg
+8 StgOpenPropStg

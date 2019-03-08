@@ -1,0 +1,8 @@
+1 EditAuditInfo
+2 EditOwnerInfo
+3 EditPermissionInfo
+4 _DllMain@12
+5 FMExtensionProcW
+6 SedDiscretionaryAclEditor
+7 SedSystemAclEditor
+8 SedTakeOwnership

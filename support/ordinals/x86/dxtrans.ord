@@ -1,0 +1,11 @@
+1 ?DXConstOverArray@@YGXPAVDXPMSAMPLE@@ABV1@K@Z
+2 ?DXConstUnderArray@@YGXPAVDXPMSAMPLE@@ABV1@K@Z
+3 ?DXDitherArray@@YGXPBUDXDITHERDESC@@@Z
+4 ?DXLinearInterpolateArray@@YGXPBVDXBASESAMPLE@@PAUDXLIMAPINFO@@PAV1@K@Z
+5 ?DXOverArray@@YGXPAVDXPMSAMPLE@@PBV1@K@Z
+6 ?DXOverArrayMMX@@YGXPAVDXPMSAMPLE@@PBV1@K@Z
+7 DllCanUnloadNow
+8 DllEnumClassObjects
+9 DllGetClassObject
+10 DllRegisterServer
+11 DllUnregisterServer

@@ -1,0 +1,10 @@
+1 AddRoute
+2 DeleteRoute
+3 FreeRouteTable
+4 FreeRouteTable
+5 GetIPAddressTable
+6 GetIfEntry
+7 GetRouteTable
+8 RefreshAddresses
+9 ReloadIPAddressTable
+10 SetAddrChangeNotifyEvent

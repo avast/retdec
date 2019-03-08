@@ -1,0 +1,7 @@
+1 USBCAMD_AdapterReceivePacket
+2 USBCAMD_ControlVendorCommand
+3 USBCAMD_Debug_LogEntry
+4 USBCAMD_DriverEntry
+5 USBCAMD_GetRegistryKeyValue
+6 USBCAMD_InitializeNewInterface
+7 USBCAMD_SelectAlternateInterface

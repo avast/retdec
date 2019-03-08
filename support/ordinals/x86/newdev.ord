@@ -1,0 +1,12 @@
+1 ClientSideInstallW
+2 DevInstallW
+3 InstallDevInst
+4 InstallDevInstEx
+5 InstallNewDevice
+6 InstallSelectedDevice
+7 InstallSelectedDriver
+8 InstallWindowsUpdateDriver
+9 RollbackDriver
+10 UpdateDriverForPlugAndPlayDevicesA
+11 UpdateDriverForPlugAndPlayDevicesW
+12 WindowsUpdateDriverSearchingPolicyUi

@@ -1,0 +1,11 @@
+1 CancelJob
+2 CloseLPR
+3 EndJob
+4 GetLongQueue
+5 GetShortQueue
+6 InitiateConnection
+7 OpenLPR
+8 PrintWaitingJobs
+9 SetLPRTimeouts
+10 StartJob
+11 WriteJobData

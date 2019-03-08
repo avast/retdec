@@ -1,0 +1,12 @@
+6 MSXML3_6
+7 MSXML3_7
+8 MSXML3_8
+9 MSXML3_9
+10 MSXML3_10
+11 MSXML3_11
+12 MSXML3_12
+13 DllCanUnloadNow
+14 DllGetClassObject
+15 DllMain
+16 DllRegisterServer
+17 DllUnregisterServer

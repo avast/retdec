@@ -1,0 +1,7 @@
+1 UsePPWForPrintTo
+2 DllCanUnloadNow
+3 DllGetClassObject
+4 DllInstall
+5 _DllMain@12
+6 DllRegisterServer
+7 DllUnregisterServer

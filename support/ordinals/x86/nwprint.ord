@@ -1,0 +1,6 @@
+1 ClosePrintProcessor
+2 ControlPrintProcessor
+3 EnumPrintProcessorDatatypesW
+4 InstallPrintProcessor
+5 OpenPrintProcessor
+6 PrintDocumentOnPrintProcessor
