@@ -937,8 +937,49 @@ uint8_t Capstone2LlvmIrTranslatorArm64_impl::getOperandAccess(cs_arm64_op& op)
 	return op.access;
 }
 
-bool Capstone2LlvmIrTranslatorArm64_impl::isCondIns(cs_arm64 * i) {
-    return (i->cc == ARM64_CC_AL || i->cc == ARM64_CC_INVALID) ? false : true;
+bool Capstone2LlvmIrTranslatorArm64_impl::isCondIns(cs_arm64 * i)
+{
+	return (i->cc == ARM64_CC_AL || i->cc == ARM64_CC_INVALID) ? false : true;
+}
+
+llvm::Value* Capstone2LlvmIrTranslatorArm64_impl::generateIntBitCastToFP(llvm::IRBuilder<>& irb, llvm::Value* val)
+{
+	if (auto* it = llvm::dyn_cast<llvm::IntegerType>(val->getType()))
+	{
+		switch(it->getBitWidth())
+		{
+		case 32:
+			return irb.CreateBitCast(val, irb.getFloatTy());
+		case 64:
+			return irb.CreateBitCast(val, irb.getDoubleTy());
+		default:
+			throw GenericError("Arm64::generateIntBitCastToFP: unhandled Integer type");
+		}
+	}
+	// Return unchanged value if its not FP type
+	return val;
+}
+
+llvm::Value* Capstone2LlvmIrTranslatorArm64_impl::generateFPBitCastToIntegerType(llvm::IRBuilder<>& irb, llvm::Value* val)
+{
+	auto* ty = val->getType();
+	if (ty->isFloatingPointTy())
+	{
+		if (ty->isDoubleTy())
+		{
+			return irb.CreateBitCast(val, irb.getInt64Ty());
+		}
+		else if (ty->isFloatTy())
+		{
+			return irb.CreateBitCast(val, irb.getInt32Ty());
+		}
+		else
+		{
+			throw GenericError("Arm64::generateFPBitCastToIntegerType: unhandled FP type");
+		}
+	}
+	// Return unchanged value if its not FP type
+	return val;
 }
 
 //
@@ -1186,7 +1227,15 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateStr(cs_insn* i, cs_arm64* ai,
 		case ARM64_INS_STTR:
 		//case ARM64_INS_STXR:
 		{
-			ty = getDefaultType();
+			ty = getRegisterType(ai->operands[0].reg);
+			if (ty->isFloatTy())
+			{
+				ty = irb.getInt32Ty();
+			}
+			else if (ty->isDoubleTy())
+			{
+				ty = irb.getInt64Ty();
+			}
 			break;
 		}
 		case ARM64_INS_STRB:
@@ -1212,6 +1261,12 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateStr(cs_insn* i, cs_arm64* ai,
 	}
 
 	op0 = loadOp(ai->operands[0], irb);
+
+	// If its floating point operand bit cast it to integer type
+	// since the ZExt or Trunc doesn't work fp numbers
+	op0 = generateFPBitCastToIntegerType(irb, op0);
+	//op0 = irb.CreateBitCast(op0, irb.getInt32Ty());
+
 	op0 = irb.CreateZExtOrTrunc(op0, ty);
 	auto* dest = generateGetOperandMemAddr(ai->operands[1], irb);
 
@@ -1317,7 +1372,7 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateLdr(cs_insn* i, cs_arm64* ai,
 		case ARM64_INS_LDAXR:
 		case ARM64_INS_LDAR:
 		{
-			ty = irb.getInt32Ty();
+			ty = getRegisterType(ai->operands[0].reg);
 			sext = false;
 			break;
 		}
@@ -1379,12 +1434,16 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateLdr(cs_insn* i, cs_arm64* ai,
 	auto* pt = llvm::PointerType::get(ty, 0);
 	auto* addr = irb.CreateIntToPtr(dest, pt);
 
-	auto* loaded_value = irb.CreateLoad(addr);
-	auto* ext_value    = sext
+	llvm::Value* loaded_value = irb.CreateLoad(addr);
+	// If the result should be floating point, bit cast it
+	if (!regType->isFloatingPointTy())
+	{
+		loaded_value = sext
 			? irb.CreateSExtOrTrunc(loaded_value, regType)
 			: irb.CreateZExtOrTrunc(loaded_value, regType);
+	}
 
-	storeRegister(ai->operands[0].reg, ext_value, irb);
+	storeRegister(ai->operands[0].reg, loaded_value, irb);
 
 	uint32_t baseR = ARM64_REG_INVALID;
 	if (ai->op_count == 2)
@@ -2591,7 +2650,10 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateFMov(cs_insn* i, cs_arm64* ai
 	EXPECT_IS_BINARY(i, ai, irb);
 
 	op1 = loadOp(ai->operands[1], irb);
-	op1 = irb.CreateBitCast(op1, getRegisterType(ai->operands[0].reg));
+	if (!op1->getType()->isFloatingPointTy())
+	{
+		op1 = irb.CreateBitCast(op1, getRegisterType(ai->operands[0].reg));
+	}
 
 	storeOp(ai->operands[0], op1, irb);
 }

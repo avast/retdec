@@ -140,6 +140,9 @@ class Capstone2LlvmIrTranslatorArm64_impl :
 				llvm::IRBuilder<>& irb,
 				eOpConv ct = eOpConv::ZEXT_TRUNC) override;
 		bool isCondIns(cs_arm64 * i);
+
+		llvm::Value* generateFPBitCastToIntegerType(llvm::IRBuilder<>& irb, llvm::Value* val);
+		llvm::Value* generateIntBitCastToFP(llvm::IRBuilder<>& irb, llvm::Value* val);
 //
 //==============================================================================
 // Helper methods.
