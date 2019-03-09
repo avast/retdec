@@ -318,21 +318,27 @@ void Capstone2LlvmIrTranslatorArm64_impl::initializePseudoCallInstructionIDs()
 	_callInsnIds =
 	{
 		ARM64_INS_BL,
+		ARM64_INS_BLR,
+		ARM64_INS_BR,
 	};
 
 	_returnInsnIds =
 	{
 		ARM64_INS_RET,
+		ARM64_INS_ERET,
 	};
 
 	_branchInsnIds =
 	{
-
+		ARM64_INS_B,
 	};
 
 	_condBranchInsnIds =
 	{
-
+		ARM64_INS_CBNZ,
+		ARM64_INS_CBZ,
+		ARM64_INS_TBNZ,
+		ARM64_INS_TBZ,
 	};
 
 	_controlFlowInsnIds =

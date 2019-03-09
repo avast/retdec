@@ -275,11 +275,11 @@ void Capstone2LlvmIrTranslatorArm64_impl::generateRegisters()
 
 	// Stack pointer.
 	createRegister(ARM64_REG_SP, _regLt);
-	createRegister(ARM64_REG_WSP, _regLt);
+	//createRegister(ARM64_REG_WSP, _regLt);
 
 	// Zero.
-	createRegister(ARM64_REG_XZR, _regLt);
-	createRegister(ARM64_REG_WZR, _regLt);
+	//createRegister(ARM64_REG_XZR, _regLt);
+	//createRegister(ARM64_REG_WZR, _regLt);
 
 	// Flags.
 	createRegister(ARM64_REG_CPSR_N, _regLt);
@@ -595,9 +595,6 @@ llvm::Value* Capstone2LlvmIrTranslatorArm64_impl::generateGetOperandMemAddr(
 		cs_arm64_op& op,
 		llvm::IRBuilder<>& irb)
 {
-	// TODO: Check the operand types
-	// TODO: If the type is IMM return load of that value, or variable
-	// TODO: name, maybe generateGetOperandValue?
 	auto* baseR = loadRegister(op.mem.base, irb);
 	auto* t = baseR ? baseR->getType() : getDefaultType();
 	llvm::Value* disp = op.mem.disp
@@ -659,6 +656,12 @@ llvm::Value* Capstone2LlvmIrTranslatorArm64_impl::loadRegister(
 	}
 
 	auto* rt = getRegisterType(r);
+	if (r == ARM64_REG_XZR || r == ARM64_REG_WZR)
+	{
+		// Loads from XZR registers generate zero
+		return llvm::ConstantInt::get(rt, 0);
+	}
+
 	auto pr = getParentRegister(r);
 	auto* llvmReg = getRegister(pr);
 	if (llvmReg == nullptr)
@@ -716,7 +719,7 @@ llvm::Value* Capstone2LlvmIrTranslatorArm64_impl::loadOp(
 		case ARM64_OP_FP:
 		{
 			auto* val = llvm::ConstantFP::get(irb.getDoubleTy(), op.fp);
-			return val; //generateOperandShift(irb, op, val);
+			return val;
 		}
 		case ARM64_OP_INVALID: 
 		case ARM64_OP_CIMM: 
@@ -748,6 +751,12 @@ llvm::Instruction* Capstone2LlvmIrTranslatorArm64_impl::storeRegister(
 	{
 		return nullptr;
 		// TODO: Check?
+	}
+
+	if (r == ARM64_REG_XZR || r == ARM64_REG_WZR)
+	{
+		// When written the register discards the result
+		return nullptr;
 	}
 
 	//auto* rt = getRegisterType(r);
