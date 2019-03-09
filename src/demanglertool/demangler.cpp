@@ -7,7 +7,7 @@
 #include <cstring>
 #include <iostream>
 
-#include "llvm/Demangle/demangler.h"
+#include "retdec/demangler/demangler.h"
 
 using namespace std;
 

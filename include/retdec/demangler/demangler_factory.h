@@ -1,5 +1,5 @@
 /**
- * @file include/llvm/Demangle/demangler_retdec.h
+ * @file include/retdec/demangler/demangler_retdec.h
  * @brief Demangler factory class. Should be included for demangling work.
  * @copyright (c) 2018 Avast Software, licensed under the MIT license
  */
@@ -9,10 +9,10 @@
 
 #include <memory>
 
-#include "llvm/Demangle/demangler_base.h"
-#include "llvm/Demangle/itanium_demangler.h"
-#include "llvm/Demangle/microsoft_demangler.h"
-#include "llvm/Demangle/borland_demangler.h"
+#include "retdec/demangler/demangler_base.h"
+#include "retdec/demangler/itanium_demangler.h"
+#include "retdec/demangler/microsoft_demangler.h"
+#include "retdec/demangler/borland_demangler.h"
 
 namespace retdec {
 namespace demangler {

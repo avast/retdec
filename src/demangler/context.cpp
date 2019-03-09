@@ -1,7 +1,7 @@
 #include <retdec/utils/container.h>
 
-#include "llvm/Demangle/context.h"
-#include "llvm/Demangle/borland_ast_types.h"
+#include "retdec/demangler/context.h"
+#include "retdec/demangler/borland_ast_types.h"
 
 namespace retdec {
 namespace demangler {

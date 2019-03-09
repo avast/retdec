@@ -12,7 +12,7 @@
 #include "retdec/config/objects.h"
 #include "retdec/config/types.h"
 
-#include "llvm/Demangle/demangler.h"
+#include "retdec/demangler/demangler.h"
 #include "retdec/dwarfparser/dwarf_file.h"
 #include "retdec/fileformat/fileformat.h"
 #include "retdec/loader/loader.h"

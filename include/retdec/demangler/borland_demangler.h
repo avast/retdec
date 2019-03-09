@@ -1,5 +1,5 @@
 /**
- * @file include/llvm/Demangle/borland_demangler.h
+ * @file include/retdec/demangler/borland_demangler.h
  * @brief Borland demangler adapter.
  * @copyright (c) 2018 Avast Software, licensed under the MIT license
  */
@@ -7,9 +7,9 @@
 #ifndef RETDEC_LLVM_BORLAND_DEMANGLER_H
 #define RETDEC_LLVM_BORLAND_DEMANGLER_H
 
-#include "llvm/Demangle/demangler_base.h"
-#include "llvm/Demangle/context.h"
-#include "llvm/Demangle/borland_ast_parser.h"
+#include "retdec/demangler/demangler_base.h"
+#include "retdec/demangler/context.h"
+#include "retdec/demangler/borland_ast_parser.h"
 
 namespace retdec {
 namespace demangler {

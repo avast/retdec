@@ -112,5 +112,5 @@ set(BIN2LLVMIR_SOURCES
 )
 
 add_library(retdec-bin2llvmir STATIC ${BIN2LLVMIR_SOURCES})
-target_link_libraries(retdec-bin2llvmir retdec-ctypesparser retdec-rtti-finder retdec-loader retdec-fileformat retdec-debugformat retdec-config llvm-demangler retdec-capstone2llvmir retdec-stacofin retdec-llvm-support llvm)
+target_link_libraries(retdec-bin2llvmir retdec-ctypesparser retdec-rtti-finder retdec-loader retdec-fileformat retdec-debugformat retdec-config retdec-demangler retdec-capstone2llvmir retdec-stacofin retdec-llvm-support llvm)
 target_include_directories(retdec-bin2llvmir PUBLIC ${PROJECT_SOURCE_DIR}/include/)

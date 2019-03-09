@@ -4,9 +4,9 @@
  * @copyright (c) 2018 Avast Software, licensed under the MIT license
  */
 
-#include "llvm/Demangle/borland_ast.h"
-#include "llvm/Demangle/borland_ast_parser.h"
-#include "llvm/Demangle/borland_ast_types.h"
+#include "retdec/demangler/borland_ast.h"
+#include "retdec/demangler/borland_ast_parser.h"
+#include "retdec/demangler/borland_ast_types.h"
 
 namespace retdec {
 namespace demangler {

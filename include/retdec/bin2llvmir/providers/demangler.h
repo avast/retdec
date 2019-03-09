@@ -11,7 +11,7 @@
 
 #include <llvm/IR/Module.h>
 
-#include "llvm/Demangle/demangler.h"
+#include "retdec/demangler/demangler.h"
 #include "retdec/config/tool_info.h"
 
 namespace retdec {

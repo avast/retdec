@@ -7,10 +7,10 @@
 #include <memory>
 #include <gtest/gtest.h>
 
-#include "llvm/Demangle/borland_ast_parser.h"
-#include "llvm/Demangle/borland_ast_types.h"
-#include "llvm/Demangle/borland_ast.h"
-#include "llvm/Demangle/context.h"
+#include "retdec/demangler/borland_ast_parser.h"
+#include "retdec/demangler/borland_ast_types.h"
+#include "retdec/demangler/borland_ast.h"
+#include "retdec/demangler/context.h"
 
 using namespace ::testing;
 
