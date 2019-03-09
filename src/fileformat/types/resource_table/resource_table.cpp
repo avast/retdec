@@ -10,6 +10,8 @@
 #include "retdec/crypto/crypto.h"
 #include "retdec/utils/conversion.h"
 #include "retdec/utils/dynamic_buffer.h"
+#include "retdec/utils/string.h"
+#include "retdec/fileformat/utils/other.h"
 #include "retdec/fileformat/types/resource_table/resource_table.h"
 #include "retdec/fileformat/types/resource_table/bitmap_image.h"
 
@@ -17,7 +19,12 @@ using namespace retdec::utils;
 
 namespace {
 
-enum class VersionInfoType = {BINARY = 0, STRING = 1};
+constexpr std::size_t VI_KEY_SIZE = 32;        ///< unicode "VS_VERSION_INFO"
+constexpr std::size_t VFI_KEY_SIZE = 24;       ///< unicode "VarFileInfo"
+constexpr std::size_t SFI_KEY_SIZE = 30;       ///< unicode "StringFileInfo"
+constexpr std::size_t VAR_KEY_SIZE = 24;       ///< unicode "Translation"
+
+enum class VersionInfoType {BINARY = 0, STRING = 1};
 
 struct FixedFileInfo
 {
@@ -25,7 +32,7 @@ struct FixedFileInfo
 	std::uint16_t strucVersionMaj;             ///< binary major version number
 	std::uint16_t strucVersionMin;             ///< binary minor version number
 	std::uint64_t fileVersion;                 ///< file version number
-	std::uint32_t productVersion;              ///< product version number
+	std::uint64_t productVersion;              ///< product version number
 	std::uint32_t fileFlagsMask;               ///< validity mask of fileFalgs member
 	std::uint32_t fileFlags;                   ///< file flags
 	std::uint32_t fileOS;                      ///< target operating system
@@ -44,8 +51,8 @@ struct FixedFileInfo
 
 struct VersionInfoHeader
 {
-	std::uint16_t length;                       ///< length of whole version info structure
-	std::uint16_t valueLength;                  ///< length of following struct FixedFileInfo
+	std::uint16_t length;                       ///< length of whole structure
+	std::uint16_t valueLength;                  ///< length of following structure
 	std::uint16_t type;                         ///< type of data
 
 	static std::size_t structSize()
@@ -53,6 +60,11 @@ struct VersionInfoHeader
 		return sizeof(length) + sizeof(valueLength) + sizeof(type);
 	}
 };
+
+std::size_t wordAlignment(std::size_t size)
+{
+	return size % sizeof(std::uint32_t);
+}
 
 } // anonymous namespace
 
@@ -398,22 +410,143 @@ void ResourceTable::parseVersionInfo()
 		struct VersionInfoHeader vih;
 		if (!ver->getBytes(bytes) || bytes.size() < vih.structSize())
 		{
-			return;
+			continue;
 		}
 
 		std::size_t offset = 0; 
 		DynamicBuffer structContent(bytes, retdec::utils::Endianness::LITTLE);
 
-		vih.length = structContent.read<std::uint16_t>(offset); offset += sizeof(vbh.length);
-		vih.valueLength = structContent.read<std::uint16_t>(offset); offset += sizeof(vbh.valueLength);
-		vih.type = structContent.read<std::uint16_t>(offset); offset += sizeof(vbh.type);
+		vih.length = structContent.read<std::uint16_t>(offset); offset += sizeof(vih.length);
+		vih.valueLength = structContent.read<std::uint16_t>(offset); offset += sizeof(vih.valueLength);
+		vih.type = structContent.read<std::uint16_t>(offset); offset += sizeof(vih.type);
 
-		std::cerr << vih.length << " " << vih.valueLength << " " << vih.type << "\n";
+		offset += VI_KEY_SIZE;
+		offset += wordAlignment(offset);
+		FixedFileInfo ffi;
+		if (vih.valueLength == ffi.structSize())
+		{
+			if (bytes.size() < offset + ffi.structSize())
+			{
+				continue;
+			}
 
-		for (std::size_t i = 0; i < 30 && i < bytes.size(); i++)
-			std::cerr << std::hex << static_cast<std::uint16_t>(bytes[i]) << " ";
-		std::cerr << "\n\n";
+			ffi.signature = structContent.read<std::uint32_t>(offset); offset += sizeof(ffi.signature);
+			ffi.strucVersionMaj = structContent.read<std::uint16_t>(offset); offset += sizeof(ffi.strucVersionMaj);
+			ffi.strucVersionMin = structContent.read<std::uint16_t>(offset); offset += sizeof(ffi.strucVersionMin);
+			ffi.fileVersion = structContent.read<std::uint64_t>(offset); offset += sizeof(ffi.fileVersion);
+			ffi.productVersion = structContent.read<std::uint32_t>(offset); offset += sizeof(ffi.productVersion);
+			ffi.fileFlagsMask = structContent.read<std::uint32_t>(offset); offset += sizeof(ffi.fileFlagsMask);
+			ffi.fileFlags = structContent.read<std::uint32_t>(offset); offset += sizeof(ffi.fileFlags);
+			ffi.fileOS = structContent.read<std::uint32_t>(offset); offset += sizeof(ffi.fileOS);
+			ffi.fileType = structContent.read<std::uint32_t>(offset); offset += sizeof(ffi.fileType);
+			ffi.fileSubtype = structContent.read<std::uint32_t>(offset); offset += sizeof(ffi.fileSubtype);
+			ffi.timestamp = structContent.read<std::uint64_t>(offset); offset += sizeof(ffi.timestamp);
+
+			if (ffi.signature != 0xFEEF04BD)
+			{
+				continue;
+			}
+		}
+
+		else if (vih.valueLength != 0)
+		{
+			continue;
+		}
+
+		offset += wordAlignment(offset);
+		parseVersionInfoChild(bytes, offset);
 	}
+}
+
+/**
+ * Parse Version Info child
+ * @param bytes Resource bytes
+ * @param offset Offset to Version Info Child structure
+ */
+void ResourceTable::parseVersionInfoChild(const std::vector<std::uint8_t> &bytes, std::size_t offset)
+{
+	struct VersionInfoHeader chh;
+	if (bytes.size() < offset + chh.structSize())
+	{
+		return;
+	}
+
+	DynamicBuffer structContent(bytes, retdec::utils::Endianness::LITTLE);
+	chh.length = structContent.read<std::uint16_t>(offset); offset += sizeof(chh.length);
+	chh.valueLength = structContent.read<std::uint16_t>(offset); offset += sizeof(chh.valueLength);
+	chh.type = structContent.read<std::uint16_t>(offset); offset += sizeof(chh.type);
+
+	std::string key = retdec::utils::unicodeToAscii(&bytes.data()[offset], bytes.size() - offset);
+
+	/* BOTH CAN OCCUR AT SAME TIME TODO */
+	if (key == "VarFileInfo")
+	{
+		offset += VFI_KEY_SIZE;
+		offset += wordAlignment(offset);
+		parseVarFileInfoChild(bytes, offset);
+	}
+	else if (key == "StringFileInfo")
+	{
+		offset += SFI_KEY_SIZE;
+		offset += wordAlignment(offset);
+		parseStringFileInfoChild(bytes, offset);
+	}
+}
+
+/**
+ * Parse VarFileInfo structure
+ * @param bytes Resource bytes
+ * @param offset Offset to structure
+ */
+void ResourceTable::parseVarFileInfoChild(const std::vector<std::uint8_t> &bytes, std::size_t offset)
+{
+	struct VersionInfoHeader var;
+	if (bytes.size() < offset + var.structSize())
+	{
+		return;
+	}
+
+	DynamicBuffer structContent(bytes, retdec::utils::Endianness::LITTLE);
+	var.length = structContent.read<std::uint16_t>(offset); offset += sizeof(var.length);
+	var.valueLength = structContent.read<std::uint16_t>(offset); offset += sizeof(var.valueLength);
+	var.type = structContent.read<std::uint16_t>(offset); offset += sizeof(var.type);
+
+	offset += VAR_KEY_SIZE;
+	offset += wordAlignment(offset);
+	if (bytes.size() < offset + var.valueLength)
+	{
+		return;
+	}
+
+	std::size_t nDblWords = var.valueLength / sizeof(std::uint32_t);
+	for (std::size_t i = 0; i < nDblWords; i++)
+	{
+		std::uint32_t lang = structContent.read<uint32_t>(offset); offset += sizeof(lang);
+		std::uint32_t lcid = lang & 0xFFFF;
+		// TODO if 0 -> ANYLANG
+		std::cerr << lcidToStr(lcid) << "TODO\n";
+	}
+}
+
+/**
+ * Parse StringFileInfo child
+ * @param bytes Resource bytes
+ * @param offset Offset to structure
+ */
+void ResourceTable::parseStringFileInfoChild(const std::vector<std::uint8_t> &bytes, std::size_t offset)
+{
+	struct VersionInfoHeader sfih;
+	if (bytes.size() < offset + sfih.structSize())
+	{
+		return;
+	}
+
+	DynamicBuffer structContent(bytes, retdec::utils::Endianness::LITTLE);
+	sfih.length = structContent.read<std::uint16_t>(offset); offset += sizeof(sfih.length);
+	sfih.valueLength = structContent.read<std::uint16_t>(offset); offset += sizeof(sfih.valueLength);
+	sfih.type = structContent.read<std::uint16_t>(offset); offset += sizeof(sfih.type);
+
+	// TODO KUBO
 }
 
 /**
