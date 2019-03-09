@@ -7,6 +7,40 @@
 #include "retdec/demangler/borland_demangler.h"
 #include "retdec/demangler/borland_ast_parser.h"
 
+namespace {
+
+/**
+ * Checks ast parser status and converts it to demangler status.
+ * @return Demangler status.
+ */
+retdec::demangler::Demangler::Status astStatusToDemStatus(const retdec::demangler::borland::BorlandASTParser::Status &parserStatus)
+{
+	switch (parserStatus) {
+	case retdec::demangler::borland::BorlandASTParser::Status::success:
+		return retdec::demangler::Demangler::Status::success;
+	case retdec::demangler::borland::BorlandASTParser::Status::invalid_mangled_name:
+		return retdec::demangler::Demangler::Status::invalid_mangled_name;
+	default:
+		return retdec::demangler::Demangler::Status::unknown;
+	}
+}
+
+/**
+ * Checks demangler status and returns demangled string.
+ */
+std::string astToString(
+	const retdec::demangler::Demangler::Status &status,
+	const std::shared_ptr<retdec::demangler::borland::Node> &ast)
+{
+	if (status == retdec::demangler::Demangler::Status::success && ast) {
+		return ast->str();
+	} else {
+		return std::string{};
+	}
+}
+
+}	// anonymous namespace
+
 namespace retdec {
 namespace demangler {
 
@@ -25,35 +59,7 @@ std::string BorlandDemangler::demangleToString(const std::string &mangled)
 	borland::BorlandASTParser parser{_context};
 	parser.parse(mangled);
 	_status = astStatusToDemStatus(parser.status());
-	return astToString(parser.ast());
-}
-
-/**
- * Checks ast parser status and converts it to demangler status.
- * @return Demangler status.
- */
-Demangler::Status BorlandDemangler::astStatusToDemStatus(const retdec::demangler::borland::BorlandASTParser::Status &parserStatus)
-{
-	switch (parserStatus) {
-	case borland::BorlandASTParser::Status::success:
-		return success;
-	case borland::BorlandASTParser::Status::invalid_mangled_name:
-		return invalid_mangled_name;
-	default:
-		return unknown;
-	}
-}
-
-/**
- * Checks demangler status and returns demangled string.
- */
-std::string BorlandDemangler::astToString(const std::shared_ptr<retdec::demangler::borland::Node> &ast) const
-{
-	if (_status == success && ast) {
-		return ast->str();
-	} else {
-		return std::string{};
-	}
+	return astToString(_status, parser.ast());
 }
 
 } // demangler

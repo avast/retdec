@@ -54,7 +54,6 @@ private:
 	bool consumeIfPossible(const StringView &s);
 	bool consume(char c);
 	bool consume(const StringView &s);
-	static std::string getString(const StringView &s);
 
 	std::shared_ptr<Node> parseFunction();
 	std::shared_ptr<FunctionTypeNode> parseFuncType(Qualifiers &quals);

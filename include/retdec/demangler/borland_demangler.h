@@ -9,7 +9,6 @@
 
 #include "retdec/demangler/demangler_base.h"
 #include "retdec/demangler/context.h"
-#include "retdec/demangler/borland_ast_parser.h"
 
 namespace retdec {
 namespace demangler {
@@ -23,11 +22,6 @@ public:
 	BorlandDemangler();
 
 	std::string demangleToString(const std::string &mangled) override;
-
-private:
-	static Status astStatusToDemStatus(const borland::BorlandASTParser::Status &parserStatus);
-
-	std::string astToString(const std::shared_ptr<borland::Node> &ast) const;
 
 private:
 	borland::Context _context;
