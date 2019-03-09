@@ -35,7 +35,9 @@ class ResourceTable
 		std::string iconPerceptualAvgHash;                ///< icon perceptual hash AvgHash
 
 		std::string computePerceptualAvgHash(const ResourceIcon &icon) const;
-		std::string computePercetualDCTpHash(const ResourceIcon &icon) const;
+		void parseVersionInfoChild(const std::vector<std::uint8_t> &bytes, std::size_t offset);
+		void parseVarFileInfoChild(const std::vector<std::uint8_t> &bytes, std::size_t offset);
+		void parseStringFileInfoChild(const std::vector<std::uint8_t> &bytes, std::size_t offset);
 	public:
 		ResourceTable();
 		~ResourceTable();
