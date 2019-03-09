@@ -8,7 +8,7 @@
 
 #include <iostream>
 
-#include "retdec/demangler/demangler.h"
+#include "llvm/Demangle/demangler.h"
 #include "retdec/utils/debug.h"
 #include "retdec/utils/string.h"
 #include "retdec/debugformat/debugformat.h"

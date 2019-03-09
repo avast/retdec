@@ -31,7 +31,7 @@ TEST_F(DemanglerProviderTests, addDemanglerAddsDemanglerForModule)
 	tools.insert(tool);
 	auto* r1 = DemanglerProvider::addDemangler(module.get(), tools);
 	auto* r2 = DemanglerProvider::getDemangler(module.get());
-	retdec::demangler::CDemangler* r3 = nullptr;
+	retdec::demangler::Demangler* r3 = nullptr;
 	bool b = DemanglerProvider::getDemangler(module.get(), r3);
 
 	EXPECT_NE(nullptr, r1);
@@ -49,7 +49,7 @@ TEST_F(DemanglerProviderTests, getDemanglerReturnsNullptrForUnknownModule)
 	DemanglerProvider::addDemangler(module.get(), tools);
 	parseInput(""); // creates a different module
 	auto* r1 = DemanglerProvider::getDemangler(module.get());
-	retdec::demangler::CDemangler* r2 = nullptr;
+	retdec::demangler::Demangler* r2 = nullptr;
 	bool b = DemanglerProvider::getDemangler(module.get(), r2);
 
 	EXPECT_EQ(nullptr, r1);
@@ -72,7 +72,7 @@ TEST_F(DemanglerProviderTests, addedDemanglerWorks)
 	auto* d = DemanglerProvider::addDemangler(module.get(), tools);
 	std::string name = d->demangleToString(f->getName());
 
-	EXPECT_EQ("wikipedia::article::print_to(std::ostream &)", name);
+	EXPECT_EQ("wikipedia::article::print_to(std::ostream&)", name);
 }
 
 TEST_F(DemanglerProviderTests, clearRemovesAllData)

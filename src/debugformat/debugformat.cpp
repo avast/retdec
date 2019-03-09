@@ -31,7 +31,7 @@ DebugFormat::DebugFormat(
 		retdec::loader::Image* inFile,
 		const std::string& pdbFile,
 		SymbolTable* symtab,
-		retdec::demangler::CDemangler* demangler,
+		retdec::demangler::Demangler* demangler,
 		unsigned long long imageBase)
 		:
 		_symtab(symtab),

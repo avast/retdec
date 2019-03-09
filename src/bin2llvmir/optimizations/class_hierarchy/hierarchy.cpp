@@ -6,7 +6,7 @@
 
 #include <sstream>
 
-#include "retdec/demangler/demangler.h"
+#include "llvm/Demangle/demangler.h"
 #include "retdec/bin2llvmir/optimizations/class_hierarchy/hierarchy.h"
 #include "retdec/bin2llvmir/providers/demangler.h"
 
