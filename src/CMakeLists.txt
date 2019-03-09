@@ -39,5 +39,5 @@ endif()
 
 if(RETDEC_DEV_TOOLS)
 	add_subdirectory(capstone2llvmirtool)
-#	add_subdirectory(demanglertool) TODO
+	add_subdirectory(demanglertool)
 endif()
