@@ -19,6 +19,8 @@ namespace borland {
 
 class Context;
 
+// TODO char16_t and char32_t
+
 /**
  * @brief Signedness used for chars.
  * Chars can be signed char, unsigned char and char, which are by standard distinct.
