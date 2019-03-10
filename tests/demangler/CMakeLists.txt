@@ -2,7 +2,6 @@ set(RETDEC_TESTS_DEMANGLER_SOURCES
 	gcc_tests.cpp
 	msvc_tests.cpp
 	borland_tests.cpp
-	borland_ast_tests.cpp
 	borland_context_tests.cpp
 )
 

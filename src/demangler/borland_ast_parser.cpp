@@ -4,9 +4,25 @@
  * @copyright (c) 2018 Avast Software, licensed under the MIT license
  */
 
-#include "retdec/demangler/borland_ast.h"
 #include "retdec/demangler/borland_ast_parser.h"
-#include "retdec/demangler/borland_ast_types.h"
+#include "retdec/demangler/borland_ast/array_type.h"
+#include "retdec/demangler/borland_ast/built_in_type.h"
+#include "retdec/demangler/borland_ast/char_type.h"
+#include "retdec/demangler/borland_ast/conversion_operator.h"
+#include "retdec/demangler/borland_ast/float_type.h"
+#include "retdec/demangler/borland_ast/function_type.h"
+#include "retdec/demangler/borland_ast/function_node.h"
+#include "retdec/demangler/borland_ast/integral_type.h"
+#include "retdec/demangler/borland_ast/name_node.h"
+#include "retdec/demangler/borland_ast/named_type.h"
+#include "retdec/demangler/borland_ast/node.h"
+#include "retdec/demangler/borland_ast/node_array.h"
+#include "retdec/demangler/borland_ast/pointer_type.h"
+#include "retdec/demangler/borland_ast/qualifiers.h"
+#include "retdec/demangler/borland_ast/reference_type.h"
+#include "retdec/demangler/borland_ast/rreference_type.h"
+#include "retdec/demangler/borland_ast/template_node.h"
+#include "retdec/demangler/borland_ast/type_node.h"
 
 namespace {
 
@@ -209,7 +225,7 @@ std::shared_ptr<Node> BorlandASTParser::parseFunction()
 
 	auto quals = parseQualifiers();
 	auto funcType = parseFuncType(quals);
-	if (!checkResult(funcType)) {
+	if (!checkResult(std::static_pointer_cast<Node>(funcType))) {
 		return nullptr;
 	}
 

@@ -9,15 +9,18 @@
 
 #include "llvm/Demangle/StringView.h"
 
-#include "retdec/demangler/borland_ast.h"
-#include "retdec/demangler/borland_ast_types.h"
 #include "retdec/demangler/context.h"
+#include "retdec/demangler/borland_ast/node.h"
 
 namespace retdec {
 namespace demangler {
 namespace borland {
 
 using StringView = llvm::itanium_demangle::StringView;
+
+class FunctionTypeNode;
+class NodeArray;
+enum class CallConv;
 
 /**
  * @brief Parses name mangled by borland mangling scheme into AST.
