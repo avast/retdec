@@ -4,7 +4,7 @@
  * @copyright (c) 2018 Avast Software, licensed under the MIT license
  */
 
-#include "llvm/Demangle/demangler_base.h"
+#include "retdec/demangler/demangler_base.h"
 
 namespace retdec {
 namespace demangler {

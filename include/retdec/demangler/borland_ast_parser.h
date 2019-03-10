@@ -1,5 +1,5 @@
 /**
- * @file include/llvm/Demangle/borland_ast_parser.h
+ * @file include/retdec/demangler/borland_ast_parser.h
  * @brief Parser of mangled names into tree for borland demangler.
  * @copyright (c) 2018 Avast Software, licensed under the MIT license
  */
@@ -7,11 +7,11 @@
 #ifndef RETDEC_BORLAND_AST_PARSER_H
 #define RETDEC_BORLAND_AST_PARSER_H
 
-#include "llvm/Demangle/borland_ast.h"
-#include "llvm/Demangle/borland_ast_types.h"
-#include "llvm/Demangle/context.h"
-
 #include "llvm/Demangle/StringView.h"
+
+#include "retdec/demangler/borland_ast.h"
+#include "retdec/demangler/borland_ast_types.h"
+#include "retdec/demangler/context.h"
 
 namespace retdec {
 namespace demangler {
@@ -54,7 +54,6 @@ private:
 	bool consumeIfPossible(const StringView &s);
 	bool consume(char c);
 	bool consume(const StringView &s);
-	static std::string getString(const StringView &s);
 
 	std::shared_ptr<Node> parseFunction();
 	std::shared_ptr<FunctionTypeNode> parseFuncType(Qualifiers &quals);

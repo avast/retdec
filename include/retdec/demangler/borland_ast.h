@@ -1,5 +1,5 @@
 /**
- * @file include/llvm/Demangle/borland_ast.h
+ * @file include/retdec/demangler/borland_ast.h
  * @brief Representation of syntactic tree for borland demangler.
  * @copyright (c) 2018 Avast Software, licensed under the MIT license
  */

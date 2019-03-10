@@ -1,8 +1,8 @@
 #ifndef RETDEC_BORLAND_AST_CTYPES_PARSER_H
 #define RETDEC_BORLAND_AST_CTYPES_PARSER_H
 
-#include "llvm/Demangle/borland_ast.h"
-#include "llvm/Demangle/borland_ast_types.h"
+#include "retdec/demangler/borland_ast.h"
+#include "retdec/demangler/borland_ast_types.h"
 #include "retdec/ctypes/module.h"
 #include "retdec/ctypes/context.h"
 #include "retdec/ctypes/function.h"
@@ -37,13 +37,13 @@ public:
 private:
 	std::shared_ptr<ctypes::Function> parseFunction(std::shared_ptr<demangler::borland::FunctionNode> function);
 	std::shared_ptr<ctypes::Type> parseType(std::shared_ptr<demangler::borland::TypeNode> typeNode);
-	std::shared_ptr<ctypes::IntegralType> parseIntegralType(std::shared_ptr<demangler::borland::IntegralTypeNode> integralNode);
-	std::shared_ptr<ctypes::FloatingPointType> parseFloatingPointType(std::shared_ptr<demangler::borland::FloatTypeNode> floatNode);
-	std::shared_ptr<ctypes::IntegralType> parseCharType(std::shared_ptr<demangler::borland::CharTypeNode> charNode);
-	std::shared_ptr<ctypes::Type> parseBuiltInType(std::shared_ptr<demangler::borland::BuiltInTypeNode> typeNode);
-	std::shared_ptr<ctypes::PointerType> parsePointerType(std::shared_ptr<demangler::borland::PointerTypeNode> pointerNode);
-	std::shared_ptr<ctypes::Type> parseReferenceType(std::shared_ptr<demangler::borland::ReferenceTypeNode> referenceNode);
-	std::shared_ptr<ctypes::Type> parseRReferenceType(std::shared_ptr<demangler::borland::RReferenceTypeNode> referenceNode);
+//	std::shared_ptr<ctypes::IntegralType> parseIntegralType(std::shared_ptr<demangler::borland::IntegralTypeNode> integralNode);
+//	std::shared_ptr<ctypes::FloatingPointType> parseFloatingPointType(std::shared_ptr<demangler::borland::FloatTypeNode> floatNode);
+//	std::shared_ptr<ctypes::IntegralType> parseCharType(std::shared_ptr<demangler::borland::CharTypeNode> charNode);
+//	std::shared_ptr<ctypes::Type> parseBuiltInType(std::shared_ptr<demangler::borland::BuiltInTypeNode> typeNode);
+//	std::shared_ptr<ctypes::PointerType> parsePointerType(std::shared_ptr<demangler::borland::PointerTypeNode> pointerNode);
+//	std::shared_ptr<ctypes::Type> parseReferenceType(std::shared_ptr<demangler::borland::ReferenceTypeNode> referenceNode);
+//	std::shared_ptr<ctypes::Type> parseRReferenceType(std::shared_ptr<demangler::borland::RReferenceTypeNode> referenceNode);
 	ctypes::Function::Parameters parseFuncParameters(std::shared_ptr<demangler::borland::NodeArray> paramsNode);
 	ctypes::CallConvention parseCallConvention(demangler::borland::CallConv callConv);
 	ctypes::FunctionType::VarArgness parseVarArgness(bool isVarArg);

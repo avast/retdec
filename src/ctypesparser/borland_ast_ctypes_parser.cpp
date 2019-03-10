@@ -1,7 +1,7 @@
 #include <cassert>
 
-#include "llvm/Demangle/borland_ast.h"
-#include "llvm/Demangle/borland_ast_types.h"
+#include "retdec/demangler/borland_ast.h"
+#include "retdec/demangler/borland_ast_types.h"
 #include "retdec/ctypes/type.h"
 #include "retdec/ctypes/function.h"
 #include "retdec/ctypes/unknown_type.h"
@@ -74,101 +74,103 @@ std::shared_ptr<retdec::ctypes::Function> BorlandToCtypesParser::parseFunction(s
 	auto funcType = function->funcType();
 
 	std::shared_ptr<ctypes::Type> returnType = parseType(funcType->retType());
-	ctypes::Function::Parameters parameters = parseFuncParameters(funcType->params());
+//	ctypes::Function::Parameters parameters = parseFuncParameters(funcType->params());
+//	ctypes::Function::Parameters parameters = ctypes::Function::Parameters();
 	ctypes::CallConvention callConvention = parseCallConvention(funcType->callConv());
 	ctypes::Function::VarArgness varArgness = parseVarArgness(funcType->isVarArg());
 
 //	// TODO check status
 //
-	return ctypes::Function::create(_context, name, returnType, parameters, callConvention, varArgness);
+//	return ctypes::Function::create(_context, name, returnType, parameters, callConvention, varArgness);
+	return nullptr;
 }
 
 std::shared_ptr<ctypes::Type> BorlandToCtypesParser::parseType(std::shared_ptr<retdec::demangler::borland::TypeNode> typeNode)
 {
-	if (typeNode) {
-		switch (typeNode->kind()) {
-		case Kind::KIntegralType: {
-			auto intType = parseIntegralType(std::static_pointer_cast<demangler::borland::IntegralTypeNode>(typeNode));
-			return std::static_pointer_cast<ctypes::Type>(intType);
-		}
-		case Kind::KFloatType: {
-			auto floatType =
-				parseFloatingPointType(std::static_pointer_cast<demangler::borland::FloatTypeNode>(typeNode));
-			return std::static_pointer_cast<ctypes::Type>(floatType);
-		}
-		case Kind::KCharType: {
-			auto charType = parseCharType(std::static_pointer_cast<demangler::borland::CharTypeNode>(typeNode));
-			return std::static_pointer_cast<ctypes::Type>(charType);
-		}
-		case Kind::KBuiltInType: {
-			return parseBuiltInType(std::static_pointer_cast<demangler::borland::BuiltInTypeNode>(typeNode));
-		}
-		case Kind::KPointerType: {
-			auto
-				pointerType = parsePointerType(std::static_pointer_cast<demangler::borland::PointerTypeNode>(typeNode));
-			return std::static_pointer_cast<ctypes::Type>(pointerType);
-		}
-		case Kind::KReferenceType: {
-			auto referenceType =
-				parseReferenceType(std::static_pointer_cast<demangler::borland::ReferenceTypeNode>(typeNode));
-			return std::static_pointer_cast<ctypes::Type>(referenceType);
-		}
-		case Kind::KRReferenceType: {
-			auto referenceType =
-				parseRReferenceType(std::static_pointer_cast<demangler::borland::RReferenceTypeNode>(typeNode));
-			return std::static_pointer_cast<ctypes::Type>(referenceType);
-		}
-		default:
-			break;
-		}
-	}
+//	if (typeNode) {
+//		switch (typeNode->kind()) {
+//		case Kind::KIntegralType: {
+//			auto intType = parseIntegralType(std::static_pointer_cast<demangler::borland::IntegralTypeNode>(typeNode));
+//			return std::static_pointer_cast<ctypes::Type>(intType);
+//		}
+//		case Kind::KFloatType: {
+//			auto floatType =
+//				parseFloatingPointType(std::static_pointer_cast<demangler::borland::FloatTypeNode>(typeNode));
+//			return std::static_pointer_cast<ctypes::Type>(floatType);
+//		}
+//		case Kind::KCharType: {
+//			auto charType = parseCharType(std::static_pointer_cast<demangler::borland::CharTypeNode>(typeNode));
+//			return std::static_pointer_cast<ctypes::Type>(charType);
+//		}
+//		case Kind::KBuiltInType: {
+//			return parseBuiltInType(std::static_pointer_cast<demangler::borland::BuiltInTypeNode>(typeNode));
+//		}
+//		case Kind::KPointerType: {
+//			auto
+//				pointerType = parsePointerType(std::static_pointer_cast<demangler::borland::PointerTypeNode>(typeNode));
+//			return std::static_pointer_cast<ctypes::Type>(pointerType);
+//		}
+//		case Kind::KReferenceType: {
+//			auto referenceType =
+//				parseReferenceType(std::static_pointer_cast<demangler::borland::ReferenceTypeNode>(typeNode));
+//			return std::static_pointer_cast<ctypes::Type>(referenceType);
+//		}
+//		case Kind::KRReferenceType: {
+//			auto referenceType =
+//				parseRReferenceType(std::static_pointer_cast<demangler::borland::RReferenceTypeNode>(typeNode));
+//			return std::static_pointer_cast<ctypes::Type>(referenceType);
+//		}
+//		default:
+//			break;
+//		}
+//	}
 
 	return std::static_pointer_cast<ctypes::Type>(ctypes::UnknownType::create());
 }
 
-std::shared_ptr<ctypes::IntegralType> BorlandToCtypesParser::parseIntegralType(
-	std::shared_ptr<retdec::demangler::borland::IntegralTypeNode> integralNode)
-{
-	std::string name = integralNode->str();
-	unsigned bitWidth = 32;    // TODO
-	ctypes::IntegralType::Signess signess = toSigness(integralNode->isUnsigned());
+//std::shared_ptr<ctypes::IntegralType> BorlandToCtypesParser::parseIntegralType(
+//	std::shared_ptr<retdec::demangler::borland::IntegralTypeNode> integralNode)
+//{
+//	std::string name = integralNode->str();
+//	unsigned bitWidth = 32;    // TODO
+//	ctypes::IntegralType::Signess signess = toSigness(integralNode->isUnsigned());
+//
+//	return ctypes::IntegralType::create(_context, name, bitWidth, signess);
+//}
+//
+//std::shared_ptr<ctypes::FloatingPointType> BorlandToCtypesParser::parseFloatingPointType(
+//	std::shared_ptr<retdec::demangler::borland::FloatTypeNode> floatNode)
+//{
+//	std::string name = floatNode->str();
+//	unsigned bitWidth = 32;    // TODO
+//
+//	return ctypes::FloatingPointType::create(_context, name, bitWidth);
+//}
+//
+//std::shared_ptr<ctypes::IntegralType> BorlandToCtypesParser::parseCharType(
+//	std::shared_ptr<retdec::demangler::borland::CharTypeNode> charNode)
+//{
+//	std::string name = charNode->str();
+//	unsigned bitWidth = 8;    // TODO
+//	ctypes::IntegralType::Signess signess = toSigness(charNode->signedness());
+//
+//	return ctypes::IntegralType::create(_context, name, bitWidth, signess);
+//}
 
-	return ctypes::IntegralType::create(_context, name, bitWidth, signess);
-}
-
-std::shared_ptr<ctypes::FloatingPointType> BorlandToCtypesParser::parseFloatingPointType(
-	std::shared_ptr<retdec::demangler::borland::FloatTypeNode> floatNode)
-{
-	std::string name = floatNode->str();
-	unsigned bitWidth = 32;    // TODO
-
-	return ctypes::FloatingPointType::create(_context, name, bitWidth);
-}
-
-std::shared_ptr<ctypes::IntegralType> BorlandToCtypesParser::parseCharType(
-	std::shared_ptr<retdec::demangler::borland::CharTypeNode> charNode)
-{
-	std::string name = charNode->str();
-	unsigned bitWidth = 8;    // TODO
-	ctypes::IntegralType::Signess signess = toSigness(charNode->signedness());
-
-	return ctypes::IntegralType::create(_context, name, bitWidth, signess);
-}
-
-ctypes::Function::Parameters BorlandToCtypesParser::parseFuncParameters(
-	std::shared_ptr<retdec::demangler::borland::NodeArray> paramsNode)
-{
-	ctypes::Function::Parameters parameters{};
-	if (paramsNode == nullptr) {
-		return parameters;
-	}
-
-// TODO
-// 	for (param: paramsNode->params) {
-//		parameters.emplace_back(parseType(param));
+//ctypes::Function::Parameters BorlandToCtypesParser::parseFuncParameters(
+//	std::shared_ptr<retdec::demangler::borland::NodeArray> paramsNode)
+//{
+//	ctypes::Function::Parameters parameters{};
+//	if (paramsNode == nullptr) {
+//		return parameters;
 //	}
-	return parameters;
-}
+//
+//// TODO
+//// 	for (param: paramsNode->params) {
+////		parameters.emplace_back(parseType(param));
+////	}
+//	return {parameters};
+//}
 
 ctypes::CallConvention BorlandToCtypesParser::parseCallConvention(retdec::demangler::borland::CallConv callConv)
 {

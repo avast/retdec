@@ -6,9 +6,9 @@
 
 #include <gtest/gtest.h>
 
-#include "llvm/Demangle/demangler.h"
+#include "retdec/demangler/demangler.h"
 #include "retdec/ctypes/module.h"
-#include "llvm/Demangle/context.h"
+#include "retdec/demangler/context.h"
 #include "retdec/ctypes/context.h"
 
 using namespace ::testing;

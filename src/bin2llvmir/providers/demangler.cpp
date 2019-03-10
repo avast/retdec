@@ -19,27 +19,27 @@ std::map<Module*, DemanglerProvider::Demangler> DemanglerProvider::_module2deman
  * @return Created and added demangler or @c nullptr if something went wrong
  *         and it was not successfully created.
  */
-retdec::demangler::CDemangler* DemanglerProvider::addDemangler(
+retdec::demangler::Demangler* DemanglerProvider::addDemangler(
 		llvm::Module* m,
 		const retdec::config::ToolInfoContainer& t)
 {
-	std::unique_ptr<retdec::demangler::CDemangler> d;
+	std::unique_ptr<retdec::demangler::Demangler> d;
 
 	if (t.isGcc())
 	{
-		d = retdec::demangler::CDemangler::createGcc();
+		d = retdec::demangler::DemanglerFactory::getItaniumDemangler();
 	}
 	else if (t.isMsvc())
 	{
-		d = retdec::demangler::CDemangler::createMs();
+		d = retdec::demangler::DemanglerFactory::getMicrosoftDemangler();
 	}
 	else if (t.isBorland())
 	{
-		d = retdec::demangler::CDemangler::createBorland();
+		d = retdec::demangler::DemanglerFactory::getBorlandDemangler();
 	}
 	else
 	{
-		d = retdec::demangler::CDemangler::createGcc();
+		d = retdec::demangler::DemanglerFactory::getItaniumDemangler();
 	}
 
 	auto p = _module2demangler.insert(std::make_pair(m, std::move(d)));
@@ -51,7 +51,7 @@ retdec::demangler::CDemangler* DemanglerProvider::addDemangler(
  * @return Get demangler associated with the given module @a m or @c nullptr
  *         if there is no associated demangler.
  */
-retdec::demangler::CDemangler* DemanglerProvider::getDemangler(llvm::Module* m)
+retdec::demangler::Demangler* DemanglerProvider::getDemangler(llvm::Module* m)
 {
 	auto f = _module2demangler.find(m);
 	return f != _module2demangler.end() ? f->second.get() : nullptr;
@@ -67,7 +67,7 @@ retdec::demangler::CDemangler* DemanglerProvider::getDemangler(llvm::Module* m)
  */
 bool DemanglerProvider::getDemangler(
 		llvm::Module* m,
-		retdec::demangler::CDemangler*& d)
+		retdec::demangler::Demangler*& d)
 {
 	d = getDemangler(m);
 	return d != nullptr;

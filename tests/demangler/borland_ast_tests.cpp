@@ -7,8 +7,8 @@
 #include <memory>
 #include <gtest/gtest.h>
 
-#include "llvm/Demangle/borland_ast_parser.h"
-#include "llvm/Demangle/borland_ast_types.h"
+#include "retdec/demangler/borland_ast_parser.h"
+#include "retdec/demangler/borland_ast_types.h"
 
 #define AST_EQ(expected, ast) ast_eq(expected, ast.get())
 

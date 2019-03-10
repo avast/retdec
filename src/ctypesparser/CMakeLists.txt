@@ -5,5 +5,5 @@ set(CTYPESPARSER_SOURCES
 )
 
 add_library(retdec-ctypesparser STATIC ${CTYPESPARSER_SOURCES})
-target_link_libraries(retdec-ctypesparser retdec-ctypes retdec-utils rapidjson llvm-demangler)
+target_link_libraries(retdec-ctypesparser retdec-ctypes retdec-utils rapidjson retdec-demangler)
 target_include_directories(retdec-ctypesparser PUBLIC ${PROJECT_SOURCE_DIR}/include/)

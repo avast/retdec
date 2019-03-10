@@ -1,5 +1,5 @@
 /**
- * @file include/llvm/Demangle/demangler_base.h
+ * @file include/retdec/demangler/demangler_base.h
  * @brief Demangler library.
  * @copyright (c) 2018 Avast Software, licensed under the MIT license
  */

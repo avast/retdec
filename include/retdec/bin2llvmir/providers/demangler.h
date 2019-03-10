@@ -30,19 +30,19 @@ namespace bin2llvmir {
 class DemanglerProvider
 {
 	public:
-		static retdec::demangler::CDemangler* addDemangler(
+		static retdec::demangler::Demangler* addDemangler(
 				llvm::Module* m,
 				const retdec::config::ToolInfoContainer& t);
 
-		static retdec::demangler::CDemangler* getDemangler(llvm::Module* m);
+		static retdec::demangler::Demangler* getDemangler(llvm::Module* m);
 		static bool getDemangler(
 				llvm::Module* m,
-				retdec::demangler::CDemangler*& d);
+				retdec::demangler::Demangler*& d);
 
 		static void clear();
 
 	private:
-		using Demangler = std::unique_ptr<retdec::demangler::CDemangler>;
+		using Demangler = std::unique_ptr<retdec::demangler::Demangler>;
 		/// Mapping of modules to demanglers associated with them.
 		static std::map<llvm::Module*, Demangler> _module2demangler;
 };

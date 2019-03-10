@@ -4,9 +4,21 @@
  * @copyright (c) 2018 Avast Software, licensed under the MIT license
  */
 
-#include "llvm/Demangle/borland_ast.h"
-#include "llvm/Demangle/borland_ast_parser.h"
-#include "llvm/Demangle/borland_ast_types.h"
+#include "retdec/demangler/borland_ast.h"
+#include "retdec/demangler/borland_ast_parser.h"
+#include "retdec/demangler/borland_ast_types.h"
+
+namespace {
+
+/**
+* @return New string from StringView object.
+*/
+inline std::string getString(const retdec::demangler::borland::StringView &s)
+{
+	return {s.begin(), s.size()};
+}
+
+}	// anonymous namespace
 
 namespace retdec {
 namespace demangler {
@@ -148,14 +160,6 @@ bool BorlandASTParser::consume(const StringView &s)
 	}
 
 	return true;
-}
-
-/**
- * @return New string from StringView object.
- */
-inline std::string BorlandASTParser::getString(const retdec::demangler::borland::StringView &s)
-{
-	return {s.begin(), s.size()};
 }
 
 /**

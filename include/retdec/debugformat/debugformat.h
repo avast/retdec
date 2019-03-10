@@ -34,7 +34,7 @@ class DebugFormat
 				retdec::loader::Image* inFile,
 				const std::string& pdbFile,
 				SymbolTable* symtab,
-				retdec::demangler::CDemangler* demangler,
+				retdec::demangler::Demangler* demangler,
 				unsigned long long imageBase = 0);
 
 		retdec::config::Function* getFunction(retdec::utils::Address a);
@@ -69,7 +69,7 @@ class DebugFormat
 		/// Underlying DWARF representation.
 		retdec::dwarfparser::DwarfFile* _dwarfFile = nullptr;
 		/// Demangler.
-		retdec::demangler::CDemangler* _demangler = nullptr;
+		retdec::demangler::Demangler* _demangler = nullptr;
 
 	public:
 		retdec::config::GlobalVarContainer globals;

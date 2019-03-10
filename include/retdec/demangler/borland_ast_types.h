@@ -1,5 +1,5 @@
 /**
- * @file include/llvm/Demangle/borland_ast_types.h
+ * @file include/retdec/demangler/borland_ast_types.h
  * @brief Representation of types in demangler ast.
  * @copyright (c) 2019 Avast Software, licensed under the MIT license
  */
@@ -11,7 +11,7 @@
 #include <string>
 #include <vector>
 
-#include "llvm/Demangle/borland_ast.h"
+#include "retdec/demangler/borland_ast.h"
 
 namespace retdec {
 namespace demangler {
