@@ -35,9 +35,11 @@ class ResourceTable
 		std::string iconPerceptualAvgHash;                ///< icon perceptual hash AvgHash
 
 		std::string computePerceptualAvgHash(const ResourceIcon &icon) const;
-		void parseVersionInfoChild(const std::vector<std::uint8_t> &bytes, std::size_t offset);
-		void parseVarFileInfoChild(const std::vector<std::uint8_t> &bytes, std::size_t offset);
-		void parseStringFileInfoChild(const std::vector<std::uint8_t> &bytes, std::size_t offset);
+		bool parseVersionInfo(const std::vector<std::uint8_t> &bytes);
+		bool parseVersionInfoChild(const std::vector<std::uint8_t> &bytes, std::size_t &offset);
+		bool parseVarFileInfoChild(const std::vector<std::uint8_t> &bytes, std::size_t &offset);
+		bool parseStringFileInfoChild(const std::vector<std::uint8_t> &bytes, std::size_t &offset);
+		bool parseVarString(const std::vector<std::uint8_t> &bytes, std::size_t &offset);
 	public:
 		ResourceTable();
 		~ResourceTable();
@@ -70,7 +72,7 @@ class ResourceTable
 		/// @name Other methods
 		/// @{
 		void computeIconHashes();
-		void parseVersionInfo();
+		void parseVersionInfoResources();
 		void clear();
 		void addResource(std::unique_ptr<Resource>&& newResource);
 		void addResourceVersion(ResourceVersion *ver);

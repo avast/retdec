@@ -1556,7 +1556,7 @@ void PeFormat::loadResources()
 	}
 
 	resourceTable->linkResourceIconGroups();
-	resourceTable->parseVersionInfo();
+	resourceTable->parseVersionInfoResources();
 	loadResourceIconHash();
 
 	for (auto&& addressRange : formatParser->getResourceDirectoryOccupiedAddresses())
