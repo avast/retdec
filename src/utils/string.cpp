@@ -448,6 +448,53 @@ std::string unicodeToAscii(const std::uint8_t *bytes, std::size_t nBytes)
 }
 
 /**
+* @brief Converts unicode @a bytes to ASCII string.
+*
+* @param[in] bytes Bytes for conversion.
+* @param[in] nBytes Number of bytes.
+* @param[in] nRead Number of bytes read. Note that this doesn't have to be the length of returned string
+*
+* @return Converted string in ASCII.
+*/
+std::string unicodeToAscii(const std::uint8_t *bytes, std::size_t nBytes, std::size_t &nRead)
+{
+	std::stringstream result;
+	if (!bytes || !nBytes)
+	{
+		return {};
+	}
+	if (nBytes & 1)
+	{
+		nBytes--;
+	}
+
+	std::size_t i;
+	for (i = 0; i < nBytes; i += 2)
+	{
+		if (bytes[i] == 0 && bytes[i + 1] == 0)
+		{
+			i += 2;
+			break;
+		}
+		if (bytes[i + 1] == 0 && isPrintableChar(bytes[i]))
+		{
+			result << bytes[i];
+		}
+		else
+		{
+			const std::size_t maxC = (1 << (sizeof(std::string::value_type) * CHAR_BIT)) - 1;
+			const auto val1 = numToStr<std::size_t>(bytes[i] & maxC, std::hex);
+			const auto val2 = numToStr<std::size_t>(bytes[i + 1] & maxC, std::hex);
+			result << "\\x" << std::setw(2) << std::setfill('0') << val1;
+			result << "\\x" << std::setw(2) << std::setfill('0') << val2;
+		}
+	}
+
+	nRead = i;
+	return result.str();
+}
+
+/**
 * @brief Read up to @a maxBytes bytes as ASCII string.
 *
 * @param[in] bytes Bytes to read from.
