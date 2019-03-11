@@ -52,18 +52,6 @@ else()
 	set(YARAC_PATH         ${YARA_DIR}/yarac)
 endif()
 
-# Compile YARA rules for tools detection.
-#set(YARA_COMPILE_PY ${CMAKE_SOURCE_DIR}/support/yara_patterns/tools/compile-yara.py)
-#install(CODE "
-#	execute_process(
-#		COMMAND \"${PYTHON_EXECUTABLE}\" -u \"${YARA_COMPILE_PY}\" \"${YARAC_PATH}\" \"${CMAKE_SOURCE_DIR}\" \"${CMAKE_INSTALL_PREFIX}\"
-#		RESULT_VARIABLE COMPILE_YARA_RES
-#	)
-#	if(COMPILE_YARA_RES)
-#		message(FATAL_ERROR \"YARA tool signatures compilation FAILED\")
-#	endif()
-#")
-
 # Add libraries.
 add_library(yaracpp INTERFACE)
 add_dependencies(yaracpp yaracpp-project)
@@ -73,3 +61,6 @@ target_link_libraries(yaracpp INTERFACE debug     ${binary_dir}/src/${DEBUG_DIR}
 target_link_libraries(yaracpp INTERFACE debug     ${YARA_LIBRARY_DIR}/${YARA_LIBRARY_NAME}${CMAKE_STATIC_LIBRARY_SUFFIX})
 target_link_libraries(yaracpp INTERFACE optimized ${binary_dir}/src/${RELEASE_DIR}${CMAKE_STATIC_LIBRARY_PREFIX}yaracpp${CMAKE_STATIC_LIBRARY_SUFFIX})
 target_link_libraries(yaracpp INTERFACE optimized ${YARA_LIBRARY_DIR}/${YARA_LIBRARY_NAME}${CMAKE_STATIC_LIBRARY_SUFFIX})
+
+# Install yarac application - we may need it to compile YARA files.
+install(FILES "${YARAC_PATH}" DESTINATION bin RENAME "retdec-yarac${CMAKE_EXECUTABLE_SUFFIX}")
