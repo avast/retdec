@@ -8,6 +8,7 @@
 #define RETDEC_LLVM_DEMANGLE_RETDEC_H
 
 #include <string>
+#include <memory>
 
 namespace retdec {
 
@@ -40,7 +41,9 @@ class Demangler
 
 		virtual std::string demangleToString(const std::string &mangled) = 0;
 
-		virtual void demangleToModule(const std::string &mangled, retdec::ctypes::Module &module) {};
+		virtual void demangleToModule(
+			const std::string &mangled,
+			std::unique_ptr<retdec::ctypes::Module> &module) {};
 
 		Status status();
 

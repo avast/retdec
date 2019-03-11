@@ -31,15 +31,9 @@
 
 namespace retdec {
 namespace ctypesparser {
-namespace borland_ast {
 
-// TODO make child of CTypesParser class and make another abstract class with parse from string to be used as parent of jsonparser
-class BorlandToCtypesParser
+class BorlandToCtypesParser: public CTypesParser
 {
-public:
-	/// Set container for C-types' signedness.
-	using TypeSignedness = std::map<std::string, ctypes::IntegralType::Signess>;
-
 public:
 	enum Status : u_char
 	{
@@ -51,11 +45,12 @@ public:
 public:
 	BorlandToCtypesParser();
 
-	Status status();
-
 	void parseInto(
 		std::shared_ptr<demangler::borland::Node> ast,
-		retdec::ctypes::Module &module);
+		std::unique_ptr<retdec::ctypes::Module> &module,
+		const TypeWidths &typeWidths = {},
+		const TypeSignedness &typeSignedness = {},
+		const retdec::ctypes::CallConvention &callConvention = retdec::ctypes::CallConvention());
 
 private:
 	std::shared_ptr<ctypes::IntegralType> createIntegral(const std::string &typeName);
@@ -72,17 +67,8 @@ private:
 	ctypes::Function::Parameters parseFuncParameters(std::shared_ptr<demangler::borland::NodeArray> paramsNode);
 	ctypes::CallConvention parseCallConvention(demangler::borland::CallConv callConv);
 	ctypes::FunctionType::VarArgness parseVarArgness(bool isVarArg);
-
-private:
-	Status _status;
-	std::shared_ptr<ctypes::Context> _context;
-	CTypesParser::TypeWidths typeWidths;
-	TypeSignedness typeSignedness;
-	unsigned defaultBitWidth;
-	retdec::ctypes::CallConvention defaultCallConv;
 };
 
-}    // borland_ast
 }    // ctypesparser
 }    // retdec
 

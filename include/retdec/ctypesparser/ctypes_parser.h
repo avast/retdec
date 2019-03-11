@@ -17,6 +17,7 @@
 #include "retdec/ctypes/enum_type.h"
 #include "retdec/ctypes/function.h"
 #include "retdec/ctypes/function_type.h"
+#include "retdec/ctypes/integral_type.h"
 #include "retdec/ctypes/parameter.h"
 #include "retdec/ctypesparser/exceptions.h"
 
@@ -24,7 +25,6 @@ namespace retdec {
 namespace ctypes {
 
 class Context;
-class IntegralType;
 class FloatingPointType;
 class Module;
 class PointerType;
@@ -39,26 +39,17 @@ namespace ctypesparser {
 /**
 * @brief A base class for parsing C-types.
 *
-* Parsers for C-types in some specific format should override @c parse(...)
-* functions.
 */
 class CTypesParser
 {
 	public:
 		/// Set container for C-types' bit width.
 		using TypeWidths = std::map<std::string, unsigned>;
+		/// Set container for C-types' signedness.
+		using TypeSignedness = std::map<std::string, ctypes::IntegralType::Signess>;
 
 	public:
 		virtual ~CTypesParser() = default;
-
-		virtual std::unique_ptr<retdec::ctypes::Module> parse(
-			std::istream &stream,
-			const TypeWidths &typeWidths = {},
-			const retdec::ctypes::CallConvention &callConvention = retdec::ctypes::CallConvention()) = 0;
-		virtual void parseInto(std::istream &stream,
-			std::unique_ptr<retdec::ctypes::Module> &module,
-			const TypeWidths &typeWidths = {},
-			const retdec::ctypes::CallConvention &callConvention = retdec::ctypes::CallConvention()) = 0;
 
 	protected:
 		CTypesParser();
@@ -69,8 +60,8 @@ class CTypesParser
 		std::shared_ptr<retdec::ctypes::Context> context;
 		/// C-types' bit widths.
 		TypeWidths typeWidths;
-//		/// C-types' signedness.
-//		TypeSignedness typeSignedness;
+		/// C-types' signedness.
+		TypeSignedness typeSignedness;
 		/// Bitwidth used for types not in @c typeWidths.
 		unsigned defaultBitWidth = 0;
 		/// Call convention used when JSON does not contain one.

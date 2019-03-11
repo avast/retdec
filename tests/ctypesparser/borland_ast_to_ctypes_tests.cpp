@@ -31,7 +31,7 @@ protected:
 TEST_F(BorlandCtypesTests, basic)
 {
 	auto context = std::make_shared<retdec::ctypes::Context>();
-	ctypes::Module module(context);
+	auto module = std::make_unique<ctypes::Module>(context);
 	demangler->demangleToModule("@myFunc_int_$qi", module);
 }
 
