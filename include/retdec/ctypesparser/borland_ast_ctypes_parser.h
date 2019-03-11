@@ -58,6 +58,8 @@ public:
 		retdec::ctypes::Module &module);
 
 private:
+	std::shared_ptr<ctypes::IntegralType> createIntegral(const std::string &typeName);
+
 	std::shared_ptr<ctypes::Function> parseFunction(std::shared_ptr<demangler::borland::FunctionNode> function);
 	std::shared_ptr<ctypes::Type> parseType(std::shared_ptr<demangler::borland::TypeNode> typeNode);
 	std::shared_ptr<ctypes::IntegralType> parseIntegralType(std::shared_ptr<demangler::borland::IntegralTypeNode> integralNode);
