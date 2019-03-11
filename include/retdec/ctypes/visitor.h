@@ -18,6 +18,7 @@ class FloatingPointType;
 class FunctionType;
 class IntegralType;
 class PointerType;
+class ReferenceType;
 class StructType;
 class TypedefedType;
 class UnionType;
@@ -38,6 +39,7 @@ class Visitor
 		virtual void visit(const std::shared_ptr<FunctionType> &type) = 0;
 		virtual void visit(const std::shared_ptr<IntegralType> &type) = 0;
 		virtual void visit(const std::shared_ptr<PointerType> &type) = 0;
+		virtual void visit(const std::shared_ptr<ReferenceType> &type) = 0;
 		virtual void visit(const std::shared_ptr<StructType> &type) = 0;
 		virtual void visit(const std::shared_ptr<TypedefedType> &type) = 0;
 		virtual void visit(const std::shared_ptr<UnionType> &type) = 0;

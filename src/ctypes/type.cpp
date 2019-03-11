@@ -55,6 +55,11 @@ bool Type::isPointer() const
 	return false;
 }
 
+bool Type::isReference() const
+{
+	return false;
+}
+
 bool Type::isStruct() const
 {
 	return false;

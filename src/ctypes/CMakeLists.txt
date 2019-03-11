@@ -19,6 +19,7 @@ set(CTYPES_SOURCES
 	module.cpp
 	parameter.cpp
 	pointer_type.cpp
+	reference_type.cpp
 	struct_type.cpp
 	type.cpp
 	typedefed_type.cpp

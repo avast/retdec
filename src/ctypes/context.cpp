@@ -10,6 +10,7 @@
 #include "retdec/ctypes/context.h"
 #include "retdec/ctypes/function.h"
 #include "retdec/ctypes/pointer_type.h"
+#include "retdec/ctypes/reference_type.h"
 #include "retdec/ctypes/type.h"
 #include "retdec/utils/container.h"
 
@@ -175,6 +176,50 @@ void Context::addPointerType(const std::shared_ptr<PointerType> &pointerType)
 	assert(pointerType && "violated precondition - pointerType cannot be null");
 
 	pointerTypes.emplace(pointerType->getPointedType(), pointerType);
+}
+
+/**
+* @brief Checks if context contains reference type.
+*
+* @return True if context has reference type, false otherwise.
+*
+* @par Preconditions
+*  - @a referencedType is not null
+*/
+bool Context::hasReferenceType(const std::shared_ptr<retdec::ctypes::Type> &referencedType) const
+{
+	assert(referencedType && "violated precondition - referencedType cannot be null");
+
+	return retdec::utils::mapHasKey(referenceTypes, referencedType);
+}
+
+/**
+* @brief Returns referenceType from context.
+*
+* @return Requested referenceType. If it is not in context return @c nullptr.
+*
+* @par Preconditions
+*  - @a referencedType is not null
+*/
+std::shared_ptr<ReferenceType> Context::getReferenceType(
+	const std::shared_ptr<retdec::ctypes::Type> &referencedType) const
+{
+	assert(referencedType && "violated precondition - referencedType cannot be null");
+
+	return retdec::utils::mapGetValueOrDefault(referenceTypes, referencedType);
+}
+
+/**
+* @brief Inserts new referenceType with specific name to context.
+*
+* @par Preconditions
+*  - @a referenceType is not null
+*/
+void Context::addReferenceType(const std::shared_ptr<retdec::ctypes::ReferenceType> &referenceType)
+{
+	assert(referenceType && "violated precondition - referenceType cannot be null");
+
+	referenceTypes.emplace(referenceType->getReferencedType(), referenceType);
 }
 
 /**
