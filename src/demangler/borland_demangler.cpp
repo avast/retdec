@@ -62,7 +62,9 @@ std::string BorlandDemangler::demangleToString(const std::string &mangled)
 	return astToString(_status, parser.ast());
 }
 
-void BorlandDemangler::demangleToModule(const std::string &mangled, retdec::ctypes::Module &module)
+void BorlandDemangler::demangleToModule(
+	const std::string &mangled,
+	std::unique_ptr<retdec::ctypes::Module> &module)
 {
 	borland::BorlandASTParser astParser{_demangleContext};
 	astParser.parse(mangled);
@@ -71,8 +73,29 @@ void BorlandDemangler::demangleToModule(const std::string &mangled, retdec::ctyp
 		return;
 	}
 
-	ctypesparser::borland_ast::BorlandToCtypesParser ctypesParser{};
-	ctypesParser.parseInto(astParser.ast(), module);
+	static const ctypesparser::CTypesParser::TypeWidths typeWidths = {
+		{"void", 0},
+		{"bool", 1},
+		{"char", 8},
+		{"wchar_t", 32},
+		{"short", 16},
+		{"int", 32},
+		{"long", 64},
+		{"long long", 64},
+		{"float", 32},
+		{"double", 64},
+		{"long double", 96},
+		{"pointer", 32}
+	};
+
+	static const ctypesparser::CTypesParser::TypeSignedness typeSignedness = {
+		{"wchar_t", ctypes::IntegralType::Signess::Unsigned},
+		{"char16_t", ctypes::IntegralType::Signess::Unsigned},
+		{"char32_t", ctypes::IntegralType::Signess::Unsigned}
+	};
+
+	ctypesparser::BorlandToCtypesParser ctypesParser{};
+	ctypesParser.parseInto(astParser.ast(), module, typeWidths, typeSignedness);
 	_status = success;	// TODO
 }
 

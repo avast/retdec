@@ -24,7 +24,9 @@ public:
 
 	std::string demangleToString(const std::string &mangled) override;
 
-	void demangleToModule(const std::string &mangled, retdec::ctypes::Module &module) override;
+	void demangleToModule(
+		const std::string &mangled,
+		std::unique_ptr<retdec::ctypes::Module> &module) override;
 
 private:
 	borland::Context _demangleContext;
