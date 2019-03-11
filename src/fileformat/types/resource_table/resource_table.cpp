@@ -412,7 +412,14 @@ void ResourceTable::parseVersionInfoResources()
 		{
 			continue;
 		}
-		parseVersionInfo(bytes);
+		if (parseVersionInfo(bytes))
+		{
+			std::cerr << "SUCCESS\n";
+		}
+		else
+		{
+			std::cerr << "FAILED\n";
+		}
 	}
 }
 
@@ -582,7 +589,7 @@ bool ResourceTable::parseVarFileInfoChild(const std::vector<std::uint8_t> &bytes
 		std::uint32_t lang = structContent.read<uint32_t>(offset); offset += sizeof(lang);
 		std::uint16_t lcid = lang & 0xFFFF;
 				// TODO if 0 -> ANYLANG
-				std::cerr << lcidToStr(lcid) << "TODO\n";
+				std::cerr << lcidToStr(lcid) << "TODO1\n";
 	}
 
 	offset += wordAlignment(offset);
@@ -597,6 +604,12 @@ bool ResourceTable::parseVarFileInfoChild(const std::vector<std::uint8_t> &bytes
  */
 bool ResourceTable::parseStringFileInfoChild(const std::vector<std::uint8_t> &bytes, std::size_t &offset)
 {
+	for (std::size_t i = 0; i < 50; i++)
+	{
+		std::cerr << std::hex << static_cast<std::uint16_t>(bytes[i]) << " ";
+	}
+	std::cerr << "\n\n";
+
 	std::size_t origOffset = offset;
 	struct VersionInfoHeader sfih;
 	if (bytes.size() < offset + sfih.structSize())
@@ -611,12 +624,13 @@ bool ResourceTable::parseStringFileInfoChild(const std::vector<std::uint8_t> &by
 
 	std::string key = retdec::utils::unicodeToAscii(&bytes.data()[offset], bytes.size() - offset);
 		std::cerr << "key: " << key << "\n";
+
 	std::uint32_t lang;
 	if (retdec::utils::strToNum(key, lang, std::hex))
 	{
 		uint16_t lcid = lang >> 16;
 			// TODO 0 and IBM code
-			std::cerr << lcidToStr(lcid) << "TODO\n";
+			std::cerr << lcidToStr(lcid) << "TODO2\n";
 	}
 
 	offset += STRTAB_KEY_SIZE;
@@ -642,6 +656,7 @@ bool ResourceTable::parseStringFileInfoChild(const std::vector<std::uint8_t> &by
  */
 bool ResourceTable::parseVarString(const std::vector<std::uint8_t> &bytes, std::size_t &offset)
 {
+	std::size_t origOffset = offset;
 	struct VersionInfoHeader str;
 	if (bytes.size() < offset + str.structSize())
 	{
@@ -653,16 +668,43 @@ bool ResourceTable::parseVarString(const std::vector<std::uint8_t> &bytes, std::
 	str.valueLength = structContent.read<std::uint16_t>(offset); offset += sizeof(str.valueLength);
 	str.type = structContent.read<std::uint16_t>(offset); offset += sizeof(str.type);
 
-	std::string key = retdec::utils::unicodeToAscii(&bytes.data()[offset], bytes.size() - offset);
-		std::cerr << "stringKey: " << key << "\n";
-	offset += (key.size() + 1) * 2;
-	offset += wordAlignment(offset);
-	std::string value = retdec::utils::unicodeToAscii(&bytes.data()[offset], bytes.size() - offset);
-		std::cerr << "stringValue: " << value << "\n";
-	offset += (value.size() + 1) * 2;
+	if (bytes.size() < origOffset + str.length || str.length < str.structSize())
+	{
+		return false;
+	}
 
+	std::size_t targetOffset = origOffset + str.length;
+
+	if (offset > targetOffset)
+	{
+		return false;
+	}
+
+	std::size_t nToRead = targetOffset - offset;
+	std::size_t nRead;
+	std::string key = retdec::utils::unicodeToAscii(&bytes.data()[offset], nToRead, nRead);
+	offset += nRead;
 	offset += wordAlignment(offset);
+		std::cerr << "stringKey: " << key << "\n";
+
+	if (offset > targetOffset)
+	{
+		return false;
+	}
+
+	nToRead = targetOffset - offset;
+	if (nToRead > 0)
+	{
+		std::string value = retdec::utils::unicodeToAscii(&bytes.data()[offset], nToRead, nRead);
+		offset += nRead;
+
+			std::cerr << "stringValue: " << value << "\n";
+
+		offset += wordAlignment(offset);
+	}
+
 	return true;
+	// TODO -> if hex chars in unicode -> x.size() + 1 fails
 }
 
 /**
