@@ -129,6 +129,13 @@ void ToLlvmTypeVisitor::visit(
 }
 
 void ToLlvmTypeVisitor::visit(
+		const std::shared_ptr<retdec::ctypes::ReferenceType>& type)
+{
+	// TODO
+	_type = Abi::getDefaultType(_module);
+}
+
+void ToLlvmTypeVisitor::visit(
 		const std::shared_ptr<retdec::ctypes::TypedefedType>& type)
 {
 	if (retdec::utils::containsCaseInsensitive(type->getName(), "wchar"))

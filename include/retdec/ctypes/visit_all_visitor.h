@@ -32,6 +32,7 @@ class VisitAllVisitor: public Visitor
 		virtual void visit(const std::shared_ptr<FunctionType> &type) override;
 		virtual void visit(const std::shared_ptr<IntegralType> &type) override;
 		virtual void visit(const std::shared_ptr<PointerType> &type) override;
+		virtual void visit(const std::shared_ptr<ReferenceType> &type) override;
 		virtual void visit(const std::shared_ptr<StructType> &type) override;
 		virtual void visit(const std::shared_ptr<TypedefedType> &type) override;
 		virtual void visit(const std::shared_ptr<UnionType> &type) override;

@@ -39,6 +39,8 @@ class ToLlvmTypeVisitor: public retdec::ctypes::Visitor
 		virtual void visit(
 				const std::shared_ptr<retdec::ctypes::PointerType>&) override;
 		virtual void visit(
+				const std::shared_ptr<retdec::ctypes::ReferenceType>&) override;
+		virtual void visit(
 				const std::shared_ptr<retdec::ctypes::StructType>&) override;
 		virtual void visit(
 				const std::shared_ptr<retdec::ctypes::TypedefedType>&) override;
