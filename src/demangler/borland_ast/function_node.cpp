@@ -15,7 +15,7 @@ FunctionNode::FunctionNode(
 	std::shared_ptr<FunctionTypeNode> funcType) :
 	Node(Kind::KFunction, false),
 	_name(std::move(name)),
-	_funcNode(std::move(funcType)) {}
+	_funcType(std::move(funcType)) {}
 
 /**
  * @brief Creates shared pointer to function node.
@@ -32,15 +32,25 @@ std::shared_ptr<FunctionNode> FunctionNode::create(
 		new FunctionNode(std::move(name), std::move(funcType)));
 }
 
+std::shared_ptr<Node> FunctionNode::name()
+{
+	return _name;
+}
+
+std::shared_ptr<FunctionTypeNode> FunctionNode::funcType()
+{
+	return _funcType;
+}
+
 /**
  * @brief Prints text representation of function.
  * @param s Output stream.
  */
 void FunctionNode::printLeft(std::ostream &s) const
 {
-	_funcNode->printLeft(s);
+	_funcType->printLeft(s);
 	_name->print(s);
-	_funcNode->printRight(s);
+	_funcType->printRight(s);
 }
 
 }    // borland

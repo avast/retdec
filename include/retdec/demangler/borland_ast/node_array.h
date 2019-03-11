@@ -24,7 +24,7 @@ public:
 
 	void printLeft(std::ostream &s) const override;
 
-	std::shared_ptr<Node> get(unsigned i) const;
+	std::shared_ptr<Node> get(unsigned i) const;	// TODO operator []
 
 private:
 	NodeArray();

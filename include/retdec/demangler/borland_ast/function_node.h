@@ -20,6 +20,10 @@ public:
 
 	void printLeft(std::ostream &s) const override;
 
+	std::shared_ptr<Node> name();
+
+	std::shared_ptr<FunctionTypeNode> funcType();
+
 private:
 	FunctionNode(
 		std::shared_ptr<Node> name,
@@ -27,7 +31,7 @@ private:
 
 private:
 	std::shared_ptr<Node> _name;
-	std::shared_ptr<FunctionTypeNode> _funcNode;
+	std::shared_ptr<FunctionTypeNode> _funcType;
 };
 
 }    // borland

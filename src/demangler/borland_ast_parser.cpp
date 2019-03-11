@@ -769,6 +769,10 @@ std::shared_ptr<TypeNode> BorlandASTParser::parseBuildInType(const Qualifiers &q
 		return BuiltInTypeNode::create(_context, "bool", quals);
 	} else if (consumeIfPossible('b')) {
 		return BuiltInTypeNode::create(_context, "wchar_t", quals);
+	} else if (consumeIfPossible("Cs")) {
+		return BuiltInTypeNode::create(_context, "char16_t", quals);
+	} else if (consumeIfPossible("Ci")) {
+		return BuiltInTypeNode::create(_context, "char32_t", quals);
 	} else if (consumeIfPossible('v')) {
 		return BuiltInTypeNode::create(_context, "void", quals);
 	}

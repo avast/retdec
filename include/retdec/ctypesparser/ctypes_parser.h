@@ -69,6 +69,8 @@ class CTypesParser
 		std::shared_ptr<retdec::ctypes::Context> context;
 		/// C-types' bit widths.
 		TypeWidths typeWidths;
+//		/// C-types' signedness.
+//		TypeSignedness typeSignedness;
 		/// Bitwidth used for types not in @c typeWidths.
 		unsigned defaultBitWidth = 0;
 		/// Call convention used when JSON does not contain one.
