@@ -63,4 +63,4 @@ target_link_libraries(yaracpp INTERFACE optimized ${binary_dir}/src/${RELEASE_DI
 target_link_libraries(yaracpp INTERFACE optimized ${YARA_LIBRARY_DIR}/${YARA_LIBRARY_NAME}${CMAKE_STATIC_LIBRARY_SUFFIX})
 
 # Install yarac application - we may need it to compile YARA files.
-install(FILES "${YARAC_PATH}" DESTINATION bin RENAME "retdec-yarac${CMAKE_EXECUTABLE_SUFFIX}")
+install(PROGRAMS "${YARAC_PATH}" DESTINATION bin RENAME "retdec-yarac${CMAKE_EXECUTABLE_SUFFIX}")

@@ -5,6 +5,8 @@ Remove the original files.
 Usage: compile-yara.py yarac-path install-path
 """
 
+import fnmatch
+import pathlib
 import os
 import shutil
 import subprocess
@@ -24,8 +26,25 @@ def get_arguments():
 
 def main():
     yarac, install_dir = get_arguments()
-    print('==============> yarac   = ', yarac)
-    print('==============> install = ', install_dir)
+
+    inputs = []
+    for root, dirnames, filenames in os.walk(install_dir):
+        for filename in fnmatch.filter(filenames, '*.yara'):
+            inputs.append(os.path.join(root, filename))
+
+    for i in inputs:
+        fn = pathlib.Path(i)
+        o = fn.with_suffix('.yarac')
+
+        print('Compiling:', i, '...')
+        cmd = [yarac, '-w'] + [i] + [str(o)]
+        ret = subprocess.call(cmd)
+        if ret != 0:
+            print('Error: yarac failed during compilation of file ', path)
+            exit(1)
+
+        os.remove(i)
+
     sys.exit(0)
 
 
