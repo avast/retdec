@@ -9,6 +9,7 @@
 #include "retdec/ctypes/floating_point_type.h"
 #include "retdec/ctypes/function_type.h"
 #include "retdec/ctypes/integral_type.h"
+#include "retdec/ctypes/named_type.h"
 #include "retdec/ctypes/member.h"
 #include "retdec/ctypes/pointer_type.h"
 #include "retdec/ctypes/reference_type.h"
@@ -75,6 +76,16 @@ void VisitAllVisitor::visit(const std::shared_ptr<FunctionType> &type)
 
 void VisitAllVisitor::visit(const std::shared_ptr<IntegralType> &type)
 {
+	if (makeAccessedAndCheckIfAccessed(type))
+	{
+		return;
+	}
+}
+
+void VisitAllVisitor::visit(const std::shared_ptr<NamedType> &type)
+{
+	// TODO
+
 	if (makeAccessedAndCheckIfAccessed(type))
 	{
 		return;

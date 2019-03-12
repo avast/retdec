@@ -17,6 +17,7 @@ class EnumType;
 class FloatingPointType;
 class FunctionType;
 class IntegralType;
+class NamedType;
 class PointerType;
 class ReferenceType;
 class StructType;
@@ -38,6 +39,7 @@ class Visitor
 		virtual void visit(const std::shared_ptr<FloatingPointType> &type) = 0;
 		virtual void visit(const std::shared_ptr<FunctionType> &type) = 0;
 		virtual void visit(const std::shared_ptr<IntegralType> &type) = 0;
+		virtual void visit(const std::shared_ptr<NamedType> &type) = 0;
 		virtual void visit(const std::shared_ptr<PointerType> &type) = 0;
 		virtual void visit(const std::shared_ptr<ReferenceType> &type) = 0;
 		virtual void visit(const std::shared_ptr<StructType> &type) = 0;
