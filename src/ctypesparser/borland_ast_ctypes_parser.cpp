@@ -126,6 +126,10 @@ std::shared_ptr<ctypes::Type> BorlandToCtypesParser::parseType(std::shared_ptr<r
 				parseRReferenceType(std::static_pointer_cast<demangler::borland::RReferenceTypeNode>(typeNode));
 			return std::static_pointer_cast<ctypes::Type>(referenceType);
 		}
+		case Kind::KNamedType: {
+			auto namedType = parseNamedType(std::static_pointer_cast<demangler::borland::NamedTypeNode>(typeNode));
+			return std::static_pointer_cast<ctypes::Type>(namedType);
+		}
 		default:
 			break;
 		}
@@ -206,6 +210,13 @@ std::shared_ptr<ctypes::Type> BorlandToCtypesParser::parseRReferenceType(
 	std::shared_ptr<retdec::demangler::borland::RReferenceTypeNode> rreferenceNode)
 {
 	return std::static_pointer_cast<ctypes::Type>(ctypes::UnknownType::create());    // TODO rreference
+}
+
+std::shared_ptr<ctypes::NamedType> BorlandToCtypesParser::parseNamedType(
+	std::shared_ptr<retdec::demangler::borland::NamedTypeNode> namedTypeNode)
+{
+	std::string name = namedTypeNode->name()->str();
+	return ctypes::NamedType::create(context, name);
 }
 
 ctypes::Function::Parameters BorlandToCtypesParser::parseFuncParameters(

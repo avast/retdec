@@ -25,6 +25,7 @@
 #include "retdec/ctypes/function.h"
 #include "retdec/ctypes/type.h"
 #include "retdec/ctypes/integral_type.h"
+#include "retdec/ctypes/named_type.h"
 #include "retdec/ctypes/pointer_type.h"
 #include "retdec/ctypes/floating_point_type.h"
 #include "retdec/ctypesparser/ctypes_parser.h"
@@ -64,6 +65,7 @@ private:
 	std::shared_ptr<ctypes::PointerType> parsePointerType(std::shared_ptr<demangler::borland::PointerTypeNode> pointerNode);
 	std::shared_ptr<ctypes::Type> parseReferenceType(std::shared_ptr<demangler::borland::ReferenceTypeNode> referenceNode);
 	std::shared_ptr<ctypes::Type> parseRReferenceType(std::shared_ptr<demangler::borland::RReferenceTypeNode> referenceNode);
+	std::shared_ptr<ctypes::NamedType> parseNamedType(std::shared_ptr<demangler::borland::NamedTypeNode> namedTypeNode);
 	ctypes::Function::Parameters parseFuncParameters(std::shared_ptr<demangler::borland::NodeArray> paramsNode);
 	ctypes::CallConvention parseCallConvention(demangler::borland::CallConv callConv);
 	ctypes::FunctionType::VarArgness parseVarArgness(bool isVarArg);
