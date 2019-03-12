@@ -68,8 +68,8 @@ TEST_F(BorlandDemanglerTests, BasicParametersTests)
 	DEM_EQ("@myFunc_long_double_$qg", "myFunc_long_double_(long double)");
 	DEM_EQ("@myFunc_bool_$qo", "myFunc_bool_(bool)");
 	DEM_EQ("@foo3$qb", "foo3(wchar_t)");
-	DEM_EQ("@myFunc_all_$qsusiuiluljujzcuccfdgo",
-		   "myFunc_all_(short, unsigned short, int, unsigned int, long, unsigned long, long long, unsigned long long, signed char, unsigned char, char, float, double, long double, bool)");
+	DEM_EQ("@myFunc_all_$qsusiuiluljujzcuccfdgoCsCib",
+		   "myFunc_all_(short, unsigned short, int, unsigned int, long, unsigned long, long long, unsigned long long, signed char, unsigned char, char, float, double, long double, bool, char16_t, char32_t, wchar_t)");
 	DEM_EQ("@foo$qie", "foo(int, ...)");
 }
 
@@ -184,7 +184,7 @@ TEST_F(BorlandDemanglerTests, TemplateTests)
 	DEM_EQ(
 		"@%foo$60std@%basic_string$c19std@%char_traits$c%17std@%allocator$c%%%$q60std@%basic_string$c19std@%char_traits$c%17std@%allocator$c%%$v",
 		"void foo<std::basic_string<char, std::char_traits<char>, std::allocator<char>>>(std::basic_string<char, std::char_traits<char>, std::allocator<char>>)");
-	DEM_EQ("@%adder$iVii%$qiii$i", "int adder<int, int, int>(int, int, int)");	// TODO check validity
+	DEM_EQ("@%adder$iVii%$qiii$i", "int adder<int, int, int>(int, int, int)");	// variadic templates demangle as non variadic
 }
 
 TEST_F(BorlandDemanglerTests, NamedTypes)
