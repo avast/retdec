@@ -46,7 +46,7 @@ public:
 public:
 	BorlandToCtypesParser();
 
-	void parseInto(
+	bool parseInto(
 		std::shared_ptr<demangler::borland::Node> ast,
 		std::unique_ptr<retdec::ctypes::Module> &module,
 		const TypeWidths &typeWidths = {},
