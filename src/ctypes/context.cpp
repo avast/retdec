@@ -62,11 +62,16 @@ void Context::addFunction(const std::shared_ptr<Function> &function)
 */
 bool Context::hasFunctionType(
 	const std::shared_ptr<Type> &returnType,
-	const FunctionType::Parameters &parameters) const
+	const FunctionType::Parameters &parameters,
+	const CallConvention &callConvention,
+	FunctionType::VarArgness varArgness) const
 {
 	assert(returnType && "violated precondition - returnType cannot be null");
 
-	return retdec::utils::mapHasKey(functionTypes, std::make_pair(returnType, parameters));
+	bool isVarArg = varArgness == FunctionType::VarArgness::IsVarArg;
+	std::string callConv = callConvention;
+	auto key = std::make_tuple(returnType, parameters, callConv, isVarArg);
+	return retdec::utils::mapHasKey(functionTypes, key);
 }
 
 /**
@@ -79,11 +84,16 @@ bool Context::hasFunctionType(
 */
 std::shared_ptr<FunctionType> Context::getFunctionType(
 	const std::shared_ptr<Type> &returnType,
-	const FunctionType::Parameters &parameters) const
+	const FunctionType::Parameters &parameters,
+	const CallConvention &callConvention,
+	FunctionType::VarArgness varArgness) const
 {
 	assert(returnType && "violated precondition - returnType cannot be null");
 
-	return retdec::utils::mapGetValueOrDefault(functionTypes, std::make_pair(returnType, parameters));
+	bool isVarArg = varArgness == FunctionType::VarArgness::IsVarArg;
+	std::string callConv = callConvention;
+	auto key = std::make_tuple(returnType, parameters, callConv, isVarArg);
+	return retdec::utils::mapGetValueOrDefault(functionTypes, key);
 }
 
 /**
@@ -97,7 +107,11 @@ void Context::addFunctionType(const std::shared_ptr<FunctionType> &functionType)
 	assert(functionType && "violated precondition - functionType cannot be null");
 
 	auto returnType = functionType->getReturnType();
-	auto key = std::make_pair(returnType, functionType->getParameters());
+	auto parameters = functionType->getParameters();
+	std::string callConv = functionType->getCallConvention();
+	auto varArgness = functionType->isVarArg();
+
+	auto key = std::make_tuple(returnType, parameters, callConv, varArgness);
 	functionTypes.emplace(key, functionType);
 }
 

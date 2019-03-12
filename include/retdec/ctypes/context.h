@@ -41,9 +41,13 @@ class Context
 		/// @name Access to function types.
 		/// @{
 		bool hasFunctionType(const std::shared_ptr<Type> &returnType,
-			const FunctionType::Parameters &parameters) const;
+			const FunctionType::Parameters &parameters,
+			const CallConvention &callConvention,
+			FunctionType::VarArgness varArgness) const;
 		std::shared_ptr<FunctionType> getFunctionType(const std::shared_ptr<Type> &returnType,
-			const FunctionType::Parameters &parameters) const;
+			const FunctionType::Parameters &parameters,
+			const CallConvention &callConvention,
+			FunctionType::VarArgness varArgness) const;
 		void addFunctionType(const std::shared_ptr<FunctionType> &functionType);
 		/// @}
 
@@ -92,7 +96,7 @@ class Context
 		Functions functions;
 
 		using FunctionTypes = std::map<
-			std::pair<std::shared_ptr<Type>, FunctionType::Parameters>,
+			std::tuple<std::shared_ptr<Type>, FunctionType::Parameters, std::string, bool>,
 			std::shared_ptr<FunctionType>
 		>;
 		/// Stored function types, key is return type and parameters' types.
@@ -112,9 +116,9 @@ class Context
 		/// Stored reference types, key is type that they reference.
 		ReferenceTypes referenceTypes;
 		
-	using ArrayTypes = std::map<
-			std::pair<std::shared_ptr<Type>, ArrayType::Dimensions>,
-			std::shared_ptr<ArrayType>
+		using ArrayTypes = std::map<
+				std::pair<std::shared_ptr<Type>, ArrayType::Dimensions>,
+				std::shared_ptr<ArrayType>
 		>;
 		/// Stored array types, key is element type and dimensions
 		ArrayTypes arrayTypes;
