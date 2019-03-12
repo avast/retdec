@@ -35,6 +35,8 @@ public:
 		ThreeStateSignedness signedness,
 		const Qualifiers &quals);
 
+	std::string typeName() const override;
+
 	ThreeStateSignedness signedness();
 
 	void printLeft(std::ostream &s) const override;

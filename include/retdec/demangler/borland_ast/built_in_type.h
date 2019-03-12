@@ -23,7 +23,7 @@ public:
 		const std::string &typeName,
 		const Qualifiers &quals);
 
-	std::string typeName() const;
+	virtual std::string typeName() const;
 
 	void printLeft(std::ostream &s) const override;
 

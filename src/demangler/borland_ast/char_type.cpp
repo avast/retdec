@@ -38,6 +38,18 @@ std::shared_ptr<CharTypeNode> CharTypeNode::create(
 	return newType;
 }
 
+std::string CharTypeNode::typeName() const
+{
+	switch (_signedness) {
+	case ThreeStateSignedness::signed_char:
+		return "signed char";
+	case ThreeStateSignedness::unsigned_char:
+		return "unsigned char";
+	default:
+		return "char";
+	}
+}
+
 /**
  * @return signedness of type.
  */
@@ -52,16 +64,7 @@ ThreeStateSignedness CharTypeNode::signedness()
 void CharTypeNode::printLeft(std::ostream &s) const
 {
 	_quals.printSpaceR(s);
-	switch (_signedness) {
-	case ThreeStateSignedness::signed_char:
-		s << "signed char";
-		break;
-	case ThreeStateSignedness::unsigned_char:
-		s << "unsigned char";
-		break;
-	default:
-		s << "char";
-	}
+	s << typeName();
 }
 
 }    // borland

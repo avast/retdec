@@ -25,6 +25,8 @@ public:
 
 	bool isUnsigned();
 
+	std::string typeName() const override;
+
 	void printLeft(std::ostream &s) const override;
 
 private:

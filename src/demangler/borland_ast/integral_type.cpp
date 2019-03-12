@@ -50,6 +50,11 @@ bool IntegralTypeNode::isUnsigned()
 	return _isUnsigned;
 }
 
+std::string IntegralTypeNode::typeName() const
+{
+	return _isUnsigned ? "unsigned " + _typeName : _typeName;
+}
+
 /**
  * @brief Prints text representation of type with qualifiers to output stream.
  */
