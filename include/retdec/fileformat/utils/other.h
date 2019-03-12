@@ -20,6 +20,7 @@ std::string getFileFormatNameFromEnum(Format format);
 std::vector<std::string> getSupportedFileFormats();
 std::vector<std::string> getSupportedArchitectures();
 std::string lcidToStr(std::size_t lcid);
+std::string codePageToStr(std::size_t cpage);
 double computeDataEntropy(const std::uint8_t *data, std::size_t dataLen);
 
 } // namespace fileformat
