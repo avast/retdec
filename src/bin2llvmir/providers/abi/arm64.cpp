@@ -19,7 +19,7 @@ AbiArm64::AbiArm64(llvm::Module* m, Config* c) :
 	_regStackPointerId = ARM64_REG_SP;
 
 	// system calls
-	_regSyscallId = ARM64_REG_X7;
+	_regSyscallId = ARM64_REG_X8;
 	_regSyscallReturn = ARM64_REG_X0;
 	_syscallRegs = {
 			ARM64_REG_X0,

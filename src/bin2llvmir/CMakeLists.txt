@@ -66,6 +66,7 @@ set(BIN2LLVMIR_SOURCES
 	optimizations/stack_pointer_ops/stack_pointer_ops.cpp
 	optimizations/value_protect/value_protect.cpp
 	optimizations/syscalls/arm.cpp
+	optimizations/syscalls/arm64.cpp
 	optimizations/syscalls/mips.cpp
 	optimizations/syscalls/syscalls.cpp
 	optimizations/syscalls/x86.cpp

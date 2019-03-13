@@ -68,6 +68,10 @@ bool SyscallFixer::run()
 	{
 		return runArm();
 	}
+	else if (_config->getConfig().architecture.isArm64())
+	{
+		return runArm64();
+	}
 	else if (_config->getConfig().architecture.isX86_32())
 	{
 		return runX86();

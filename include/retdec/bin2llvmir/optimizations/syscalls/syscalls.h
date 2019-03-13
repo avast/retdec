@@ -46,6 +46,10 @@ class SyscallFixer : public llvm::ModulePass
 		bool runArm_linux_32();
 		bool runArm_linux_32(AsmInstruction ai);
 
+		bool runArm64();
+		bool runArm64_linux_64();
+		bool runArm64_linux_64(AsmInstruction ai);
+
 		bool runMips();
 		bool runMips_linux();
 		bool runMips_linux(AsmInstruction ai);
