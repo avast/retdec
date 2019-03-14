@@ -23,14 +23,17 @@ MicrosoftDemangler::MicrosoftDemangler() : Demangler("microsoft") {}
 std::string MicrosoftDemangler::demangleToString(const std::string &mangled)
 {
 	const char *mangled_c = mangled.c_str();
+	std::string demangled_str = "";
 	int llvm_status{};
 
-	const char *demangled_c = llvm::microsoftDemangle(mangled_c, nullptr, nullptr, &llvm_status);
+	char *demangled_c = llvm::microsoftDemangle(mangled_c, nullptr, nullptr, &llvm_status);
 
 	switch (llvm_status) {
 	case llvm::demangle_success:
 		_status = success;
-		return {demangled_c};
+		demangled_str = demangled_c;
+		free(demangled_c);
+		break;
 	case llvm::demangle_invalid_mangled_name:
 		_status = invalid_mangled_name;
 		break;
@@ -42,7 +45,7 @@ std::string MicrosoftDemangler::demangleToString(const std::string &mangled)
 		break;
 	}
 
-	return "";
+	return demangled_str;
 }
 
 }
