@@ -25,7 +25,7 @@ enum errcode_t
 
 const std::string TYPES_SUFFIX     = ".json";
 const std::string ABI_SUFFIX       = ".json";
-const std::set<std::string> SIGNATURE_SUFFIXES = {".yar", ".yara"};
+const std::set<std::string> SIGNATURE_SUFFIXES = {".yar", ".yara", ".yarac"};
 
 bool hasEnding(const std::string &str, const std::set<std::string> &suffixes)
 {

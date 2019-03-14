@@ -292,6 +292,37 @@ void CompilerDetector::removeUnusedCompilers()
 }
 
 /**
+ * Add all YARA files from the given @p dir to internal paths member.
+ */
+void CompilerDetector::populateInternalPaths(
+		const retdec::utils::FilesystemPath& dir,
+		bool recursive)
+{
+	if (!dir.isDirectory())
+	{
+		return;
+	}
+
+	for (const auto *subpath : dir)
+	{
+		if (subpath->isFile()
+				&& std::any_of(externalSuffixes.begin(), externalSuffixes.end(),
+				[&] (const auto &suffix)
+			{
+				return endsWith(subpath->getPath(), suffix);
+			}
+		))
+		{
+			internalPaths.push_back(subpath->getPath());
+		}
+		else if (recursive && subpath->isDirectory())
+		{
+			populateInternalPaths(*subpath);
+		}
+	}
+}
+
+/**
  * Try detect used compiler (or packer) based on heuristics
  */
 void CompilerDetector::getAllHeuristics()
