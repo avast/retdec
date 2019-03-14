@@ -5,7 +5,7 @@
 
 import "macho"
 
-rule xcode_ios_sdk_01
+rule xcode_ios_sdk_01_arm
 {
 	meta:
 		tool = "C"
@@ -19,7 +19,7 @@ rule xcode_ios_sdk_01
 		$1 at macho.entry_point or $1 at macho.entry_point_for_arch(macho.CPU_TYPE_ARM)
 }
 
-rule xcode_ios_sdk_02 {
+rule xcode_ios_sdk_02_arm {
 	meta:
 		tool = "C"
 		name = "XCode"

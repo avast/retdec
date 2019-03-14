@@ -5,7 +5,7 @@
 
 import "macho"
 
-rule upx_391_lzma
+rule upx_391_lzma_arm
 {
 	meta:
 		tool = "P"
@@ -18,7 +18,7 @@ rule upx_391_lzma
 		$1 at macho.entry_point or $1 at macho.entry_point_for_arch(macho.CPU_TYPE_ARM)
 }
 
-rule upx_391_nrv2b
+rule upx_391_nrv2b_arm
 {
 	meta:
 		tool = "P"
@@ -31,7 +31,7 @@ rule upx_391_nrv2b
 		$1 at macho.entry_point or $1 at macho.entry_point_for_arch(macho.CPU_TYPE_ARM)
 }
 
-rule upx_391_nrv2d
+rule upx_391_nrv2d_arm
 {
 	meta:
 		tool = "P"
@@ -44,7 +44,7 @@ rule upx_391_nrv2d
 		$1 at macho.entry_point or $1 at macho.entry_point_for_arch(macho.CPU_TYPE_ARM)
 }
 
-rule upx_391_nrv2e
+rule upx_391_nrv2e_arm
 {
 	meta:
 		tool = "P"

@@ -5,7 +5,7 @@
 
 import "macho"
 
-rule upx_391_lzma
+rule upx_391_lzma_x64
 {
 	meta:
 		tool = "P"
@@ -19,7 +19,7 @@ rule upx_391_lzma
 		$1 at macho.entry_point or $1 at macho.entry_point_for_arch(macho.CPU_TYPE_X86_64)
 }
 
-rule upx_391_nrv2b
+rule upx_391_nrv2b_x64
 {
 	meta:
 		tool = "P"
@@ -34,7 +34,7 @@ rule upx_391_nrv2b
 		$1 at macho.entry_point + 112 or $1 at macho.entry_point_for_arch(macho.CPU_TYPE_X86_64) + 112
 }
 
-rule upx_391_nrv2d
+rule upx_391_nrv2d_x64
 {
 	meta:
 		tool = "P"
@@ -49,7 +49,7 @@ rule upx_391_nrv2d
 		$1 at macho.entry_point + 112 or $1 at macho.entry_point_for_arch(macho.CPU_TYPE_X86_64) + 112
 }
 
-rule upx_391_nrv2e
+rule upx_391_nrv2e_x64
 {
 	meta:
 		tool = "P"
@@ -64,7 +64,7 @@ rule upx_391_nrv2e
 		$1 at macho.entry_point + 112 or $1 at macho.entry_point_for_arch(macho.CPU_TYPE_X86_64) + 112
 }
 
-rule upx_392_lzma
+rule upx_392_lzma_x64
 {
 	meta:
 		tool = "P"
@@ -80,7 +80,7 @@ rule upx_392_lzma
 		$1 at macho.entry_point + 354 or $1 at macho.entry_point_for_arch(macho.CPU_TYPE_X86_64) + 354
 }
 
-rule upx_392_nrv2b
+rule upx_392_nrv2b_x64
 {
 	meta:
 		tool = "P"
@@ -95,7 +95,7 @@ rule upx_392_nrv2b
 		$1 at macho.entry_point + 354 or $1 at macho.entry_point_for_arch(macho.CPU_TYPE_X86_64) + 354
 }
 
-rule upx_392_nrv2d
+rule upx_392_nrv2d_x64
 {
 	meta:
 		tool = "P"
@@ -110,7 +110,7 @@ rule upx_392_nrv2d
 		$1 at macho.entry_point + 354 or $1 at macho.entry_point_for_arch(macho.CPU_TYPE_X86_64) + 354
 }
 
-rule upx_392_nrv2e
+rule upx_392_nrv2e_x64
 {
 	meta:
 		tool = "P"
@@ -125,7 +125,7 @@ rule upx_392_nrv2e
 		$1 at macho.entry_point + 354 or $1 at macho.entry_point_for_arch(macho.CPU_TYPE_X86_64) + 354
 }
 
-rule upx_393_lzma
+rule upx_393_lzma_x64
 {
 	meta:
 		tool = "P"
@@ -141,7 +141,7 @@ rule upx_393_lzma
 		$1 at macho.entry_point + 354 or $1 at macho.entry_point_for_arch(macho.CPU_TYPE_X86_64) + 354
 }
 
-rule upx_393_nrv2b
+rule upx_393_nrv2b_x64
 {
 	meta:
 		tool = "P"
@@ -156,7 +156,7 @@ rule upx_393_nrv2b
 		$1 at macho.entry_point + 354 or $1 at macho.entry_point_for_arch(macho.CPU_TYPE_X86_64) + 354
 }
 
-rule upx_393_nrv2d
+rule upx_393_nrv2d_x64
 {
 	meta:
 		tool = "P"
@@ -171,7 +171,7 @@ rule upx_393_nrv2d
 		$1 at macho.entry_point + 354 or $1 at macho.entry_point_for_arch(macho.CPU_TYPE_X86_64) + 354
 }
 
-rule upx_393_nrv2e
+rule upx_393_nrv2e_x64
 {
 	meta:
 		tool = "P"
@@ -186,7 +186,7 @@ rule upx_393_nrv2e
 		$1 at macho.entry_point + 354 or $1 at macho.entry_point_for_arch(macho.CPU_TYPE_X86_64) + 354
 }
 
-rule upx_394_lzma
+rule upx_394_lzma_x64
 {
 	meta:
 		tool = "P"
@@ -202,7 +202,7 @@ rule upx_394_lzma
 		$1 at macho.entry_point + 354 or $1 at macho.entry_point_for_arch(macho.CPU_TYPE_X86_64) + 354
 }
 
-rule upx_394_nrv2b
+rule upx_394_nrv2b_x64
 {
 	meta:
 		tool = "P"
@@ -217,7 +217,7 @@ rule upx_394_nrv2b
 		$1 at macho.entry_point + 354 or $1 at macho.entry_point_for_arch(macho.CPU_TYPE_X86_64) + 354
 }
 
-rule upx_394_nrv2d
+rule upx_394_nrv2d_x64
 {
 	meta:
 		tool = "P"
@@ -232,7 +232,7 @@ rule upx_394_nrv2d
 		$1 at macho.entry_point + 354 or $1 at macho.entry_point_for_arch(macho.CPU_TYPE_X86_64) + 354
 }
 
-rule upx_394_nrv2e
+rule upx_394_nrv2e_x64
 {
 	meta:
 		tool = "P"
