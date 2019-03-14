@@ -289,7 +289,7 @@ std::shared_ptr<Node> BorlandASTParser::parseFuncNameClasic()
 			return nullptr;
 		}
 	}
-
+	// TODO exceptions @$xt$20std@invalid_argument
 	auto op = parseOperator();
 	if (!statusOk()) {
 		return nullptr;
@@ -458,6 +458,7 @@ std::shared_ptr<Node> BorlandASTParser::parseOperator()
 		} else if (consumeIfPossible("$bdla")) {
 			return NameNode::create(_context, "operator delete[]");
 		}
+		// TODO spaceship operator, ctor, dtor
 	}
 
 	return nullptr;
