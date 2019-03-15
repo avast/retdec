@@ -5,7 +5,7 @@
 
 import "macho"
 
-rule embarcadero_delphi_01_x86
+rule embarcadero_delphi_01
 {
 	meta:
 		tool = "C"
@@ -19,7 +19,7 @@ rule embarcadero_delphi_01_x86
 		$1 at macho.entry_point or $1 at macho.entry_point_for_arch(macho.CPU_TYPE_X86)
 }
 
-rule embarcadero_delphi_02_x86
+rule embarcadero_delphi_02
 {
 	meta:
 		tool = "C"
@@ -33,8 +33,7 @@ rule embarcadero_delphi_02_x86
 		$1 at macho.entry_point or $1 at macho.entry_point_for_arch(macho.CPU_TYPE_X86)
 }
 
-rule xcode_osx_sdk_01_x86
-{
+rule xcode_osx_sdk_01 {
 	meta:
 		tool = "C"
 		name = "XCode"
@@ -47,8 +46,7 @@ rule xcode_osx_sdk_01_x86
 		$1 at macho.entry_point or $1 at macho.entry_point_for_arch(macho.CPU_TYPE_X86)
 }
 
-rule xcode_osx_sdk_02_x86
-{
+rule xcode_osx_sdk_02 {
 	meta:
 		tool = "C"
 		name = "XCode"
@@ -61,8 +59,7 @@ rule xcode_osx_sdk_02_x86
 		$1 at macho.entry_point or $1 at macho.entry_point_for_arch(macho.CPU_TYPE_X86)
 }
 
-rule xcode_osx_sdk_03_x86
-{
+rule xcode_osx_sdk_03 {
 	meta:
 		tool = "C"
 		name = "XCode"
@@ -75,7 +72,7 @@ rule xcode_osx_sdk_03_x86
 		$1 at macho.entry_point or $1 at macho.entry_point_for_arch(macho.CPU_TYPE_X86)
 }
 
-rule gc_x86
+rule gc
 {
 	meta:
 		tool = "C"

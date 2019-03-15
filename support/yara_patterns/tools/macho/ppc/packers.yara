@@ -5,7 +5,7 @@
 
 import "macho"
 
-rule upx_391_lzma_ppc {
+rule upx_391_lzma {
 	meta:
 		tool = "P"
 		name = "UPX"
@@ -18,7 +18,7 @@ rule upx_391_lzma_ppc {
 		$1 at macho.entry_point or $1 at macho.entry_point_for_arch(macho.CPU_TYPE_POWERPC)
 }
 
-rule upx_391_nrv2b_ppc {
+rule upx_391_nrv2b {
 	meta:
 		tool = "P"
 		name = "UPX"
@@ -31,7 +31,7 @@ rule upx_391_nrv2b_ppc {
 		$1 at macho.entry_point or $1 at macho.entry_point_for_arch(macho.CPU_TYPE_POWERPC)
 }
 
-rule upx_391_nrv2d_ppc {
+rule upx_391_nrv2d {
 	meta:
 		tool = "P"
 		name = "UPX"
@@ -44,7 +44,7 @@ rule upx_391_nrv2d_ppc {
 		$1 at macho.entry_point or $1 at macho.entry_point_for_arch(macho.CPU_TYPE_POWERPC)
 }
 
-rule upx_391_nrv2e_ppc {
+rule upx_391_nrv2e {
 	meta:
 		tool = "P"
 		name = "UPX"
@@ -57,7 +57,7 @@ rule upx_391_nrv2e_ppc {
 		$1 at macho.entry_point or $1 at macho.entry_point_for_arch(macho.CPU_TYPE_POWERPC)
 }
 
-rule upx_392_lzma_ppc {
+rule upx_392_lzma {
 	meta:
 		tool = "P"
 		name = "UPX"
@@ -71,7 +71,7 @@ rule upx_392_lzma_ppc {
 		$1 at macho.entry_point + 1929 or $1 at macho.entry_point_for_arch(macho.CPU_TYPE_POWERPC) + 1929
 }
 
-rule upx_392_nrv2b_ppc {
+rule upx_392_nrv2b {
 	meta:
 		tool = "P"
 		name = "UPX"
@@ -85,7 +85,7 @@ rule upx_392_nrv2b_ppc {
 		$1 at macho.entry_point + 1929 or $1 at macho.entry_point_for_arch(macho.CPU_TYPE_POWERPC) + 1929
 }
 
-rule upx_392_nrv2d_ppc {
+rule upx_392_nrv2d {
 	meta:
 		tool = "P"
 		name = "UPX"
@@ -99,7 +99,7 @@ rule upx_392_nrv2d_ppc {
 		$1 at macho.entry_point + 1929 or $1 at macho.entry_point_for_arch(macho.CPU_TYPE_POWERPC) + 1929
 }
 
-rule upx_392_nrv2e_ppc {
+rule upx_392_nrv2e {
 	meta:
 		tool = "P"
 		name = "UPX"
@@ -113,7 +113,7 @@ rule upx_392_nrv2e_ppc {
 		$1 at macho.entry_point + 1929 or $1 at macho.entry_point_for_arch(macho.CPU_TYPE_POWERPC) + 1929
 }
 
-rule upx_393_lzma_ppc {
+rule upx_393_lzma {
 	meta:
 		tool = "P"
 		name = "UPX"
@@ -127,7 +127,7 @@ rule upx_393_lzma_ppc {
 		$1 at macho.entry_point + 1929 or $1 at macho.entry_point_for_arch(macho.CPU_TYPE_POWERPC) + 1929
 }
 
-rule upx_393_nrv2b_ppc {
+rule upx_393_nrv2b {
 	meta:
 		tool = "P"
 		name = "UPX"
@@ -141,7 +141,7 @@ rule upx_393_nrv2b_ppc {
 		$1 at macho.entry_point + 1929 or $1 at macho.entry_point_for_arch(macho.CPU_TYPE_POWERPC) + 1929
 }
 
-rule upx_393_nrv2d_ppc {
+rule upx_393_nrv2d {
 	meta:
 		tool = "P"
 		name = "UPX"
@@ -155,7 +155,7 @@ rule upx_393_nrv2d_ppc {
 		$1 at macho.entry_point + 1929 or $1 at macho.entry_point_for_arch(macho.CPU_TYPE_POWERPC) + 1929
 }
 
-rule upx_393_nrv2e_ppc {
+rule upx_393_nrv2e {
 	meta:
 		tool = "P"
 		name = "UPX"
@@ -169,7 +169,7 @@ rule upx_393_nrv2e_ppc {
 		$1 at macho.entry_point + 1929 or $1 at macho.entry_point_for_arch(macho.CPU_TYPE_POWERPC) + 1929
 }
 
-rule upx_394_lzma_ppc {
+rule upx_394_lzma {
 	meta:
 		tool = "P"
 		name = "UPX"
@@ -183,7 +183,7 @@ rule upx_394_lzma_ppc {
 		$1 at macho.entry_point + 1929 or $1 at macho.entry_point_for_arch(macho.CPU_TYPE_POWERPC) + 1929
 }
 
-rule upx_394_nrv2b_ppc {
+rule upx_394_nrv2b {
 	meta:
 		tool = "P"
 		name = "UPX"
@@ -197,7 +197,7 @@ rule upx_394_nrv2b_ppc {
 		$1 at macho.entry_point + 1929 or $1 at macho.entry_point_for_arch(macho.CPU_TYPE_POWERPC) + 1929
 }
 
-rule upx_394_nrv2d_ppc {
+rule upx_394_nrv2d {
 	meta:
 		tool = "P"
 		name = "UPX"
@@ -211,7 +211,7 @@ rule upx_394_nrv2d_ppc {
 		$1 at macho.entry_point + 1929 or $1 at macho.entry_point_for_arch(macho.CPU_TYPE_POWERPC) + 1929
 }
 
-rule upx_394_nrv2e_ppc {
+rule upx_394_nrv2e {
 	meta:
 		tool = "P"
 		name = "UPX"
