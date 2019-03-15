@@ -243,7 +243,7 @@ void JsonPresentation::presentOverlay(Json::Value &root) const
 {
 	const auto offset = fileinfo.getOverlayOffsetStr(hexWithPrefix);
 	const auto size = fileinfo.getOverlaySizeStr(hexWithPrefix);
-	const auto entropy = fileinfo.getOverlayEntropyStr(std::dec);
+	const auto entropy = fileinfo.getOverlayEntropyStr(truncFloat);
 	if(!offset.empty() || !size.empty())
 	{
 		Value jOverlay;
