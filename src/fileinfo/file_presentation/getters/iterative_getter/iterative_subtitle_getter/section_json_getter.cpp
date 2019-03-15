@@ -103,7 +103,7 @@ bool SectionJsonGetter::getRecord(std::size_t structIndex, std::size_t recIndex,
 	record.push_back(fileinfo.getSectionNumberOfLineNumbersStr(recIndex));
 	record.push_back(fileinfo.getSectionLinkToOtherSectionStr(recIndex));
 	record.push_back(fileinfo.getSectionExtraInfoStr(recIndex));
-	record.push_back(fileinfo.getSectionEntropy(recIndex, std::dec));
+	record.push_back(fileinfo.getSectionEntropy(recIndex, truncFloat));
 	record.push_back(fileinfo.getSectionCrc32(recIndex));
 	record.push_back(fileinfo.getSectionMd5(recIndex));
 	record.push_back(fileinfo.getSectionSha256(recIndex));
