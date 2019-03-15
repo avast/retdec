@@ -342,16 +342,20 @@ ReturnCode CompilerDetector::getAllSignatures()
 	YaraDetector yara;
 
 	// Add internal paths.
+	unsigned iCntr = 0;
 	for (const auto &ruleFile : internalPaths)
 	{
-		yara.addRuleFile(ruleFile);
+		std::string nameSpace = "internal_" + std::to_string(iCntr++);
+		yara.addRuleFile(ruleFile, nameSpace);
 	}
 
+	unsigned eCntr = 0;
 	if (cpParams.external && getExternalDatabases())
 	{
 		for (const auto &item : externalDatabase)
 		{
-			yara.addRuleFile(item);
+			std::string nameSpace = "external_" + std::to_string(eCntr++);
+			yara.addRuleFile(item, nameSpace);
 		}
 	}
 
