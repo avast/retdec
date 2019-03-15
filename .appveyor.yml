@@ -18,7 +18,7 @@ install:
 before_build:
   - cmd: mkdir build
   - cmd: cd build
-  - cmd: cmake -DCMAKE_CXX_FLAGS_RELEASE="/Od -DNDEBUG" -G"%CMAKE_GENERATOR%" -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="install" -DRETDEC_TESTS=ON -DRETDEC_DEV_TOOLS=ON ..
+  - cmd: cmake -DCMAKE_CXX_FLAGS_RELEASE="/Od -DNDEBUG" -G"%CMAKE_GENERATOR%" -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="install" -DRETDEC_TESTS=ON -DRETDEC_DEV_TOOLS=ON -DRETDEC_COMPILE_YARA=OFF ..
 
 build_script:
   - cmd: cmake --build . --config Release --target install -- -m
