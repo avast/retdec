@@ -1,5 +1,5 @@
 /**
- * @file src/fileinfo/file_presentation/getters/iterative_getter/iterative_distribution_getter/visual_basic_extern_table_plain_getter.h
+ * @file src/fileinfo/file_presentation/getters/iterative_getter/iterative_distribution_getter/visual_basic_extern_table_plain_getter.cpp
  * @brief Definition of VisualBasicExternTablePlainGetter class.
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */

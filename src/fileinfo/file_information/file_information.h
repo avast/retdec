@@ -235,6 +235,8 @@ class FileInformation
 		/// @name Getters of @a resourceTable
 		/// @{
 		std::size_t getNumberOfStoredResources() const;
+		std::size_t getNumberOfVersionInfoLanguages() const;
+		std::size_t getNumberOfVersionInfoStrings() const;
 		std::string getResourceCrc32(std::size_t index) const;
 		std::string getResourceMd5(std::size_t index) const;
 		std::string getResourceSha256(std::size_t index) const;
@@ -245,6 +247,10 @@ class FileInformation
 		std::string getResourceName(std::size_t index) const;
 		std::string getResourceType(std::size_t index) const;
 		std::string getResourceLanguage(std::size_t index) const;
+		std::string getVersionInfoLanguageLcid(std::size_t index) const;
+		std::string getVersionInfoLanguageCodePage(std::size_t index) const;
+		std::string getVersionInfoStringName(std::size_t index) const;
+		std::string getVersionInfoStringValue(std::size_t index) const;
 		std::string getResourceNameIdStr(std::size_t index, std::ios_base &(* format)(std::ios_base &)) const;
 		std::string getResourceTypeIdStr(std::size_t index, std::ios_base &(* format)(std::ios_base &)) const;
 		std::string getResourceLanguageIdStr(std::size_t index, std::ios_base &(* format)(std::ios_base &)) const;

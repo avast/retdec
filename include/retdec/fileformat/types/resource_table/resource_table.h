@@ -8,6 +8,7 @@
 #define RETDEC_FILEFORMAT_TYPES_RESOURCE_TABLE_RESOURCE_TABLE_H
 
 #include <memory>
+#include <utility>
 #include <vector>
 
 #include "retdec/fileformat/types/resource_table/resource.h"
@@ -25,14 +26,16 @@ class ResourceTable
 {
 	private:
 		using resourcesIterator = std::vector<std::unique_ptr<Resource>>::const_iterator;
-		std::vector<std::unique_ptr<Resource>> table;     ///< stored resources
-		std::vector<ResourceVersion *> resourceVersions;  ///< icon groups
-		std::vector<ResourceIconGroup *> iconGroups;      ///< icon groups
-		std::vector<ResourceIcon *> icons;                ///< icons
-		std::string iconHashCrc32;                        ///< iconhash CRC32
-		std::string iconHashMd5;                          ///< iconhash MD5
-		std::string iconHashSha256;                       ///< iconhash SHA256
-		std::string iconPerceptualAvgHash;                ///< icon perceptual hash AvgHash
+		std::vector<std::unique_ptr<Resource>> table;                ///< stored resources
+		std::vector<ResourceVersion *> resourceVersions;             ///< icon groups
+		std::vector<ResourceIconGroup *> iconGroups;                 ///< icon groups
+		std::vector<ResourceIcon *> icons;                           ///< icons
+		std::vector<std::pair<std::string, std::string>> languages;  ///< supported languages, LCID and code page
+		std::vector<std::pair<std::string, std::string>> strings;    ///< version info strings
+		std::string iconHashCrc32;                                   ///< iconhash CRC32
+		std::string iconHashMd5;                                     ///< iconhash MD5
+		std::string iconHashSha256;                                  ///< iconhash SHA256
+		std::string iconPerceptualAvgHash;                           ///< icon perceptual hash AvgHash
 
 		std::string computePerceptualAvgHash(const ResourceIcon &icon) const;
 		bool parseVersionInfo(const std::vector<std::uint8_t> &bytes);
@@ -47,9 +50,13 @@ class ResourceTable
 		/// @name Getters
 		/// @{
 		std::size_t getNumberOfResources() const;
+		std::size_t getNumberOfLanguages() const;
+		std::size_t getNumberOfStrings() const;
 		std::size_t getSizeInFile() const;
 		std::size_t getLoadedSize() const;
 		const Resource* getResource(std::size_t rIndex) const;
+		const std::pair<std::string, std::string>* getLanguage(std::size_t rIndex) const;
+		const std::pair<std::string, std::string>* getString(std::size_t rIndex) const;
 		const Resource* getResourceWithName(const std::string &rName) const;
 		const Resource* getResourceWithName(std::size_t rId) const;
 		const Resource* getResourceWithType(const std::string &rType) const;
