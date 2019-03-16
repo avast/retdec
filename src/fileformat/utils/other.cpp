@@ -467,7 +467,7 @@ std::string lcidToStr(std::size_t lcid)
 
 /**
  * Get string representation of IBM code page
- * @param code page Language code id
+ * @param cpage Language code id
  * @return String representation of @a code page
  */
 std::string codePageToStr(std::size_t cpage)
