@@ -1375,6 +1375,24 @@ std::size_t FileInformation::getNumberOfStoredResources() const
 }
 
 /**
+ * Get number of supported version info languages
+ * @return Number of supported version info languages
+ */
+std::size_t FileInformation::getNumberOfVersionInfoLanguages() const
+{
+	return resourceTable.getNumberOfLanguages();
+}
+
+/**
+ * Get number of version info strings
+ * @return Number of version info strings
+ */
+std::size_t FileInformation::getNumberOfVersionInfoStrings() const
+{
+	return resourceTable.getNumberOfStrings();
+}
+
+/**
  * Get CRC32 of selected resource
  * @param index Index of selected resource (indexed from 0)
  * @return CRC32 of selected resource
@@ -1468,6 +1486,46 @@ std::string FileInformation::getResourceType(std::size_t index) const
 std::string FileInformation::getResourceLanguage(std::size_t index) const
 {
 	return resourceTable.getResourceLanguage(index);
+}
+
+/**
+ * Get LCID of selected version info language
+ * @param index Index of selected version info language (indexed from 0)
+ * @return LCID of selected version info language
+ */
+std::string FileInformation::getVersionInfoLanguageLcid(std::size_t index) const
+{
+	return resourceTable.getLanguageLcid(index);
+}
+
+/**
+ * Get code page of selected version info language
+ * @param index Index of selected version info language (indexed from 0)
+ * @return Code page of selected version info language
+ */
+std::string FileInformation::getVersionInfoLanguageCodePage(std::size_t index) const
+{
+	return resourceTable.getLanguageCodePage(index);
+}
+
+/**
+ * Get name of selected version info string
+ * @param index Index of selected version info string (indexed from 0)
+ * @return Name of selected version info string
+ */
+std::string FileInformation::getVersionInfoStringName(std::size_t index) const
+{
+	return resourceTable.getStringName(index);
+}
+
+/**
+ * Get value of selected version info string
+ * @param index Index of selected version info string (indexed from 0)
+ * @return Value of selected version info string
+ */
+std::string FileInformation::getVersionInfoStringValue(std::size_t index) const
+{
+	return resourceTable.getStringValue(index);
 }
 
 /**

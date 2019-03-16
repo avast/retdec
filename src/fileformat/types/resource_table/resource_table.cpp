@@ -35,7 +35,8 @@ struct FixedFileInfo
 	std::uint32_t signature;                   ///< signature FFI_SIGNATURE
 	std::uint16_t strucVersionMaj;             ///< binary major version number
 	std::uint16_t strucVersionMin;             ///< binary minor version number
-	std::uint64_t fileVersion;                 ///< file version number
+	std::uint32_t fileVersionMaj;              ///< file major version number
+	std::uint32_t fileVersionMin;              ///< file minor version number
 	std::uint64_t productVersion;              ///< product version number
 	std::uint32_t fileFlagsMask;               ///< validity mask of fileFalgs member
 	std::uint32_t fileFlags;                   ///< file flags
@@ -47,9 +48,9 @@ struct FixedFileInfo
 	static std::size_t structSize()
 	{
 		return
-			sizeof(signature) + sizeof(strucVersionMaj) + sizeof(strucVersionMin) + sizeof(fileVersion) +
-			sizeof(productVersion) + sizeof(fileFlagsMask) + sizeof(fileFlags) + sizeof(fileOS) +
-			sizeof(fileType) + sizeof(fileSubtype) + sizeof(timestamp);
+			sizeof(signature) + sizeof(strucVersionMaj) + sizeof(strucVersionMin) + sizeof(fileVersionMaj) +
+			sizeof(fileVersionMin) + sizeof(productVersion) + sizeof(fileFlagsMask) + sizeof(fileFlags) +
+			sizeof(fileOS) + sizeof(fileType) + sizeof(fileSubtype) + sizeof(timestamp);
 	}
 };
 
@@ -141,6 +142,24 @@ std::size_t ResourceTable::getNumberOfResources() const
 }
 
 /**
+ * Get number of supported languages
+ * @return Number of supported languages
+ */
+std::size_t ResourceTable::getNumberOfLanguages() const
+{
+	return languages.size();
+}
+
+/**
+ * Get number of strings
+ * @return Number of strings
+ */
+std::size_t ResourceTable::getNumberOfStrings() const
+{
+	return strings.size();
+}
+
+/**
  * Get total declared size of resources
  * @return Total declared size of resources
  */
@@ -180,6 +199,26 @@ std::size_t ResourceTable::getLoadedSize() const
 const Resource* ResourceTable::getResource(std::size_t rIndex) const
 {
 	return (rIndex < getNumberOfResources()) ? table[rIndex].get() : nullptr;
+}
+
+/**
+ * Get selected language
+ * @param rIndex Index of selected language (indexed from 0)
+ * @return Pointer to selected language or @c nullptr if language index is invalid
+ */
+const std::pair<std::string, std::string>* ResourceTable::getLanguage(std::size_t rIndex) const
+{
+	return (rIndex < getNumberOfLanguages()) ? &languages[rIndex] : nullptr;
+}
+
+/**
+ * Get selected string
+ * @param rIndex Index of selected string (indexed from 0)
+ * @return Pointer to selected string or @c nullptr if string index is invalid
+ */
+const std::pair<std::string, std::string>* ResourceTable::getString(std::size_t rIndex) const
+{
+	return (rIndex < getNumberOfStrings()) ? &strings[rIndex] : nullptr;
 }
 
 /**
@@ -410,14 +449,7 @@ void ResourceTable::parseVersionInfoResources()
 		{
 			continue;
 		}
-		if (parseVersionInfo(bytes))
-		{
-			std::cerr << "SUCCESS\n\n";
-		}
-		else
-		{
-			std::cerr << "FAILED\n\n";
-		}
+		parseVersionInfo(bytes);
 	}
 }
 
@@ -459,10 +491,13 @@ bool ResourceTable::parseVersionInfo(const std::vector<std::uint8_t> &bytes)
 		}
 
 		ffi.signature = structContent.read<std::uint32_t>(offset); offset += sizeof(ffi.signature);
-		ffi.strucVersionMaj = structContent.read<std::uint16_t>(offset); offset += sizeof(ffi.strucVersionMaj);
 		ffi.strucVersionMin = structContent.read<std::uint16_t>(offset); offset += sizeof(ffi.strucVersionMin);
-		ffi.fileVersion = structContent.read<std::uint64_t>(offset); offset += sizeof(ffi.fileVersion);
-		ffi.productVersion = structContent.read<std::uint32_t>(offset); offset += sizeof(ffi.productVersion);
+		ffi.strucVersionMaj = structContent.read<std::uint16_t>(offset); offset += sizeof(ffi.strucVersionMaj);
+		std::uint32_t t1 = structContent.read<std::uint32_t>(offset);
+		ffi.fileVersionMaj = t1 >> 16; offset += sizeof(ffi.fileVersionMaj);
+		ffi.fileVersionMin = t1 & 0xFFFF; offset += sizeof(ffi.fileVersionMin);
+		std::uint64_t t2 = structContent.read<std::uint64_t>(offset);
+		ffi.productVersion = t2 >> 16; offset += sizeof(ffi.productVersion);
 		ffi.fileFlagsMask = structContent.read<std::uint32_t>(offset); offset += sizeof(ffi.fileFlagsMask);
 		ffi.fileFlags = structContent.read<std::uint32_t>(offset); offset += sizeof(ffi.fileFlags);
 		ffi.fileOS = structContent.read<std::uint32_t>(offset); offset += sizeof(ffi.fileOS);
@@ -587,8 +622,7 @@ bool ResourceTable::parseVarFileInfoChild(const std::vector<std::uint8_t> &bytes
 		std::uint32_t lang = structContent.read<uint32_t>(offset); offset += sizeof(lang);
 		std::uint16_t lcid = lang & 0xFFFF;
 		std::uint16_t codePage = lang >> 16;
-		std::cerr << ">>> code page:\t" << codePageToStr(codePage) << "\n";
-		std::cerr << ">>> lcid:\t" << lcidToStr(lcid) << "\n";
+		languages.emplace_back(std::make_pair(lcidToStr(lcid), codePageToStr(codePage)));
 	}
 
 	offset = retdec::utils::alignUp(offset, sizeof(std::uint32_t));
@@ -617,20 +651,9 @@ bool ResourceTable::parseStringFileInfoChild(const std::vector<std::uint8_t> &by
 
 	std::size_t nRead;
 	std::string key = retdec::utils::unicodeToAscii(&bytes.data()[offset], bytes.size() - offset, nRead);
-		std::cerr << "key: " << key << "\n";
-
 	if (nRead != STRTAB_KEY_SIZE)
 	{
 		return false;
-	}
-
-	std::uint32_t lang;
-	if (retdec::utils::strToNum(key, lang, std::hex))
-	{
-		std::uint16_t lcid = lang >> 16;
-		std::uint16_t codePage = lang & 0xFFFF;
-		std::cerr << ">>> code page:\t" << codePageToStr(codePage) << "\n";
-		std::cerr << ">>> lcid:\t" << lcidToStr(lcid) << "\n";
 	}
 
 	offset += STRTAB_KEY_SIZE;
@@ -682,10 +705,9 @@ bool ResourceTable::parseVarString(const std::vector<std::uint8_t> &bytes, std::
 
 	std::size_t nToRead = targetOffset - offset;
 	std::size_t nRead;
-	std::string key = retdec::utils::unicodeToAscii(&bytes.data()[offset], nToRead, nRead);
+	std::string name = retdec::utils::unicodeToAscii(&bytes.data()[offset], nToRead, nRead);
 	offset += nRead;
 	offset = retdec::utils::alignUp(offset, sizeof(std::uint32_t));
-		std::cerr << "stringKey: " << key << "\n";
 
 	if (offset > targetOffset)
 	{
@@ -693,16 +715,15 @@ bool ResourceTable::parseVarString(const std::vector<std::uint8_t> &bytes, std::
 	}
 
 	nToRead = targetOffset - offset;
+	std::string value;
 	if (nToRead > 0)
 	{
-		std::string value = retdec::utils::unicodeToAscii(&bytes.data()[offset], nToRead, nRead);
+		value = retdec::utils::unicodeToAscii(&bytes.data()[offset], nToRead, nRead);
 		offset += nRead;
-
-			std::cerr << "stringValue: " << value << "\n";
-
 		offset = retdec::utils::alignUp(offset, sizeof(std::uint32_t));
 	}
 
+	strings.emplace_back(std::make_pair(name, value));
 	return true;
 }
 

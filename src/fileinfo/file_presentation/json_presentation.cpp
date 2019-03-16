@@ -558,6 +558,45 @@ void JsonPresentation::presentVisualBasicInfo(Json::Value &root) const
 }
 
 /**
+ * Present version information
+ * @param root Parent node in output document
+ */
+void JsonPresentation::presentVersionInfo(Json::Value &root) const
+{
+	Value jVerInfo;
+
+	auto nStrings = fileinfo.getNumberOfVersionInfoStrings();
+	if (nStrings)
+	{
+		Value jStrings;
+		for (std::size_t i = 0; i < nStrings; i++)
+		{
+			Value jStr;
+			jStr["name"] = fileinfo.getVersionInfoStringName(i);
+			jStr["value"] = fileinfo.getVersionInfoStringValue(i);
+			jStrings.append(jStr);
+		}
+		jVerInfo["strings"] = jStrings;
+	}
+
+	auto nLangs = fileinfo.getNumberOfVersionInfoLanguages();
+	if (nLangs)
+	{
+		Value jLanguages;
+		for (std::size_t i = 0; i < nLangs; i++)
+		{
+			Value jLang;
+			jLang["lcid"] = fileinfo.getVersionInfoLanguageLcid(i);
+			jLang["codePage"] = fileinfo.getVersionInfoLanguageCodePage(i);
+			jLanguages.append(jLang);
+		}
+		jVerInfo["languages"] = jLanguages;
+	}
+
+	root["versionInfo"] = jVerInfo;
+}
+
+/**
  * Present ELF notes
  * @param root Parent node in output document
  */
@@ -818,6 +857,7 @@ bool JsonPresentation::present()
 		presentCertificateAttributes(root);
 		presentDotnetInfo(root);
 		presentVisualBasicInfo(root);
+		presentVersionInfo(root);
 	}
 	else
 	{
