@@ -7714,6 +7714,37 @@ TEST_P(Capstone2LlvmIrTranslatorArm64Tests, ARM64_INS_FMOV_d_x)
 }
 
 //
+// ARM64_INS_MOVI
+//
+
+TEST_P(Capstone2LlvmIrTranslatorArm64Tests, ARM64_INS_MOVI_d_i)
+{
+	emulate("movi d0, #0");
+
+	EXPECT_NO_REGISTERS_LOADED();
+	EXPECT_JUST_REGISTERS_STORED({
+		{ARM64_REG_D0, 0._f64},
+	});
+	EXPECT_NO_MEMORY_LOADED_STORED();
+	EXPECT_NO_VALUE_CALLED();
+}
+
+TEST_P(Capstone2LlvmIrTranslatorArm64Tests, ARM64_INS_MOVI_v_i)
+{
+	// Generate pseudo instruction in this case
+	emulate("movi v15.4h, #0xcf");
+
+	EXPECT_JUST_REGISTERS_LOADED({ARM64_REG_V15});
+	EXPECT_JUST_REGISTERS_STORED({
+		{ARM64_REG_V15, ANY},
+	});
+	EXPECT_NO_MEMORY_LOADED_STORED();
+	EXPECT_JUST_VALUES_CALLED({
+		{_module.getFunction("__asm_movi"), {0, 207}},
+	});
+}
+
+//
 // ARM64_INS_FMUL
 //
 

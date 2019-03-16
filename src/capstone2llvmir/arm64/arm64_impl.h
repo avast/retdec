@@ -139,16 +139,31 @@ class Capstone2LlvmIrTranslatorArm64_impl :
 				llvm::Value* val,
 				llvm::IRBuilder<>& irb,
 				eOpConv ct = eOpConv::ZEXT_TRUNC) override;
-		bool isCondIns(cs_arm64 * i);
 
-		llvm::Value* generateFPBitCastToIntegerType(llvm::IRBuilder<>& irb, llvm::Value* val);
-		llvm::Value* generateIntBitCastToFP(llvm::IRBuilder<>& irb, llvm::Value* val);
+		/**
+		* @brief This functions will generate psuedo asm translation.
+		* Instructions that are not implemented fall back to this method which will 
+		* check there is need to generate conditional code and then generate given pseudo.
+		*/
+		void generatePseudoInstruction(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb);
+		llvm::Value* generateFPBitCastToIntegerType(llvm::IRBuilder<>& irb, llvm::Value* val) const;
+		llvm::Value* generateIntBitCastToFP(llvm::IRBuilder<>& irb, llvm::Value* val) const;
 //
 //==============================================================================
 // Helper methods.
 //==============================================================================
 //
 	protected:
+
+		bool isCondIns(cs_arm64 * i) const;
+
+		/**
+		* @brief Return if register is FP type.
+		* @param onlySupported Account only for supported registers in retdec.
+		*/
+		bool isFPRegister(cs_arm64_op& op, bool onlySupported = true) const;
+		bool isVectorRegister(cs_arm64_op& op) const;
+
 		virtual bool isOperandRegister(cs_arm64_op& op) override;
 		virtual uint8_t getOperandAccess(cs_arm64_op& op) override;
 //
@@ -225,6 +240,7 @@ class Capstone2LlvmIrTranslatorArm64_impl :
 		void translateFMinMaxNum(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb);
 		void translateFMsub(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb);
 		void translateFMov(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb);
+		void translateMovi(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb);
 		void translateFMul(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb);
 		void translateFSub(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb);
 		void translateFUnaryOp(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb);

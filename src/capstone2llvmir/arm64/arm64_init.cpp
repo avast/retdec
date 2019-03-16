@@ -38,12 +38,12 @@ void Capstone2LlvmIrTranslatorArm64_impl::initializeRegTypeMap()
 {
 	auto* i1 = llvm::IntegerType::getInt1Ty(_module->getContext());
 	auto* i8 = llvm::IntegerType::getInt8Ty(_module->getContext());
-	//auto* i16 = llvm::IntegerType::getInt16Ty(_module->getContext());
+	auto* i16 = llvm::IntegerType::getInt16Ty(_module->getContext());
 	auto* i32 = llvm::IntegerType::getInt32Ty(_module->getContext());
 	auto* i64 = llvm::IntegerType::getInt64Ty(_module->getContext());
-	//auto* i128 = llvm::IntegerType::getInt128Ty(_module->getContext());
+	auto* i128 = llvm::IntegerType::getInt128Ty(_module->getContext());
 
-	auto* f16 = llvm::Type::getHalfTy(_module->getContext());
+	//auto* f16 = llvm::Type::getHalfTy(_module->getContext());
 	auto* f32 = llvm::Type::getFloatTy(_module->getContext());
 	auto* f64 = llvm::Type::getDoubleTy(_module->getContext());
 	auto* f128 = llvm::Type::getFP128Ty(_module->getContext());
@@ -118,7 +118,41 @@ void Capstone2LlvmIrTranslatorArm64_impl::initializeRegTypeMap()
 		{ARM64_REG_W30, i32},
 
 		// FP&SIMD Regs
-		//
+		// Vector
+		{ARM64_REG_V0, i128},
+		{ARM64_REG_V1, i128},
+		{ARM64_REG_V2, i128},
+		{ARM64_REG_V3, i128},
+		{ARM64_REG_V4, i128},
+		{ARM64_REG_V5, i128},
+		{ARM64_REG_V6, i128},
+		{ARM64_REG_V7, i128},
+		{ARM64_REG_V8, i128},
+		{ARM64_REG_V9, i128},
+		{ARM64_REG_V10, i128},
+		{ARM64_REG_V11, i128},
+		{ARM64_REG_V12, i128},
+		{ARM64_REG_V13, i128},
+		{ARM64_REG_V14, i128},
+		{ARM64_REG_V15, i128},
+		{ARM64_REG_V16, i128},
+		{ARM64_REG_V17, i128},
+		{ARM64_REG_V18, i128},
+		{ARM64_REG_V19, i128},
+		{ARM64_REG_V20, i128},
+		{ARM64_REG_V21, i128},
+		{ARM64_REG_V22, i128},
+		{ARM64_REG_V23, i128},
+		{ARM64_REG_V24, i128},
+		{ARM64_REG_V25, i128},
+		{ARM64_REG_V26, i128},
+		{ARM64_REG_V27, i128},
+		{ARM64_REG_V28, i128},
+		{ARM64_REG_V29, i128},
+		{ARM64_REG_V30, i128},
+		{ARM64_REG_V31, i128},
+
+		// FP
 		{ARM64_REG_Q0, f128},
 		{ARM64_REG_Q1, f128},
 		{ARM64_REG_Q2, f128},
@@ -218,38 +252,41 @@ void Capstone2LlvmIrTranslatorArm64_impl::initializeRegTypeMap()
 		{ARM64_REG_S30, f32},
 		{ARM64_REG_S31, f32},
 
-		{ARM64_REG_H0, f16},
-		{ARM64_REG_H1, f16},
-		{ARM64_REG_H2, f16},
-		{ARM64_REG_H3, f16},
-		{ARM64_REG_H4, f16},
-		{ARM64_REG_H5, f16},
-		{ARM64_REG_H6, f16},
-		{ARM64_REG_H7, f16},
-		{ARM64_REG_H8, f16},
-		{ARM64_REG_H9, f16},
-		{ARM64_REG_H10, f16},
-		{ARM64_REG_H11, f16},
-		{ARM64_REG_H12, f16},
-		{ARM64_REG_H13, f16},
-		{ARM64_REG_H14, f16},
-		{ARM64_REG_H15, f16},
-		{ARM64_REG_H16, f16},
-		{ARM64_REG_H17, f16},
-		{ARM64_REG_H18, f16},
-		{ARM64_REG_H19, f16},
-		{ARM64_REG_H20, f16},
-		{ARM64_REG_H21, f16},
-		{ARM64_REG_H22, f16},
-		{ARM64_REG_H23, f16},
-		{ARM64_REG_H24, f16},
-		{ARM64_REG_H25, f16},
-		{ARM64_REG_H26, f16},
-		{ARM64_REG_H27, f16},
-		{ARM64_REG_H28, f16},
-		{ARM64_REG_H29, f16},
-		{ARM64_REG_H30, f16},
-		{ARM64_REG_H31, f16},
+		// Instead of 16bit floats which are not supported in llvm
+		// we use 16bit integers, so we can generate meaningfull
+		// pseudo instructions instead of crashing.
+		{ARM64_REG_H0, i16},
+		{ARM64_REG_H1, i16},
+		{ARM64_REG_H2, i16},
+		{ARM64_REG_H3, i16},
+		{ARM64_REG_H4, i16},
+		{ARM64_REG_H5, i16},
+		{ARM64_REG_H6, i16},
+		{ARM64_REG_H7, i16},
+		{ARM64_REG_H8, i16},
+		{ARM64_REG_H9, i16},
+		{ARM64_REG_H10, i16},
+		{ARM64_REG_H11, i16},
+		{ARM64_REG_H12, i16},
+		{ARM64_REG_H13, i16},
+		{ARM64_REG_H14, i16},
+		{ARM64_REG_H15, i16},
+		{ARM64_REG_H16, i16},
+		{ARM64_REG_H17, i16},
+		{ARM64_REG_H18, i16},
+		{ARM64_REG_H19, i16},
+		{ARM64_REG_H20, i16},
+		{ARM64_REG_H21, i16},
+		{ARM64_REG_H22, i16},
+		{ARM64_REG_H23, i16},
+		{ARM64_REG_H24, i16},
+		{ARM64_REG_H25, i16},
+		{ARM64_REG_H26, i16},
+		{ARM64_REG_H27, i16},
+		{ARM64_REG_H28, i16},
+		{ARM64_REG_H29, i16},
+		{ARM64_REG_H30, i16},
+		{ARM64_REG_H31, i16},
 
 		{ARM64_REG_B0, i8},
 		{ARM64_REG_B1, i8},
@@ -612,7 +649,7 @@ Capstone2LlvmIrTranslatorArm64_impl::_i2fm =
 	{ARM64_INS_MADD, &Capstone2LlvmIrTranslatorArm64_impl::translateMul},
 	{ARM64_INS_MLA, nullptr},
 	{ARM64_INS_MLS, nullptr},
-	{ARM64_INS_MOVI, nullptr},
+	{ARM64_INS_MOVI, &Capstone2LlvmIrTranslatorArm64_impl::translateMovi},
 	{ARM64_INS_MOVK, &Capstone2LlvmIrTranslatorArm64_impl::translateMovk},
 	{ARM64_INS_MOVN, &Capstone2LlvmIrTranslatorArm64_impl::translateMov},
 	{ARM64_INS_MOVZ, &Capstone2LlvmIrTranslatorArm64_impl::translateMov},

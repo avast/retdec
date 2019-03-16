@@ -68,6 +68,39 @@ void Capstone2LlvmIrTranslatorArm64_impl::generateDataLayout()
 void Capstone2LlvmIrTranslatorArm64_impl::generateRegisters()
 {
 	// FP&SIMD registers
+	createRegister(ARM64_REG_V0, _regLt);
+	createRegister(ARM64_REG_V1, _regLt);
+	createRegister(ARM64_REG_V2, _regLt);
+	createRegister(ARM64_REG_V3, _regLt);
+	createRegister(ARM64_REG_V4, _regLt);
+	createRegister(ARM64_REG_V5, _regLt);
+	createRegister(ARM64_REG_V6, _regLt);
+	createRegister(ARM64_REG_V7, _regLt);
+	createRegister(ARM64_REG_V8, _regLt);
+	createRegister(ARM64_REG_V9, _regLt);
+	createRegister(ARM64_REG_V10, _regLt);
+	createRegister(ARM64_REG_V11, _regLt);
+	createRegister(ARM64_REG_V12, _regLt);
+	createRegister(ARM64_REG_V13, _regLt);
+	createRegister(ARM64_REG_V14, _regLt);
+	createRegister(ARM64_REG_V15, _regLt);
+	createRegister(ARM64_REG_V16, _regLt);
+	createRegister(ARM64_REG_V17, _regLt);
+	createRegister(ARM64_REG_V18, _regLt);
+	createRegister(ARM64_REG_V19, _regLt);
+	createRegister(ARM64_REG_V20, _regLt);
+	createRegister(ARM64_REG_V21, _regLt);
+	createRegister(ARM64_REG_V22, _regLt);
+	createRegister(ARM64_REG_V23, _regLt);
+	createRegister(ARM64_REG_V24, _regLt);
+	createRegister(ARM64_REG_V25, _regLt);
+	createRegister(ARM64_REG_V26, _regLt);
+	createRegister(ARM64_REG_V27, _regLt);
+	createRegister(ARM64_REG_V28, _regLt);
+	createRegister(ARM64_REG_V29, _regLt);
+	createRegister(ARM64_REG_V30, _regLt);
+	createRegister(ARM64_REG_V31, _regLt);
+
 	createRegister(ARM64_REG_Q0, _regLt);
 	createRegister(ARM64_REG_Q1, _regLt);
 	createRegister(ARM64_REG_Q2, _regLt);
@@ -167,7 +200,6 @@ void Capstone2LlvmIrTranslatorArm64_impl::generateRegisters()
 	createRegister(ARM64_REG_S30, _regLt);
 	createRegister(ARM64_REG_S31, _regLt);
 
-	/*
 	createRegister(ARM64_REG_H0, _regLt);
 	createRegister(ARM64_REG_H1, _regLt);
 	createRegister(ARM64_REG_H2, _regLt);
@@ -200,7 +232,6 @@ void Capstone2LlvmIrTranslatorArm64_impl::generateRegisters()
 	createRegister(ARM64_REG_H29, _regLt);
 	createRegister(ARM64_REG_H30, _regLt);
 	createRegister(ARM64_REG_H31, _regLt);
-	*/
 
 	createRegister(ARM64_REG_B0, _regLt);
 	createRegister(ARM64_REG_B1, _regLt);
@@ -317,23 +348,7 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateInstruction(
 	}
 	else
 	{
-		throwUnhandledInstructions(i);
-
-		if (ai->cc == ARM64_CC_AL
-		    || ai->cc == ARM64_CC_INVALID)
-		{
-			_inCondition = false;
-			translatePseudoAsmGeneric(i, ai, irb);
-		}
-		else
-		{
-			_inCondition = true;
-
-			auto* cond = generateInsnConditionCode(irb, ai);
-			auto bodyIrb = generateIfThen(cond, irb);
-
-			translatePseudoAsmGeneric(i, ai, bodyIrb);
-		}
+		generatePseudoInstruction(i, ai, irb);
 	}
 }
 
@@ -926,10 +941,36 @@ llvm::Value* Capstone2LlvmIrTranslatorArm64_impl::generateInsnConditionCode(
 	}
 }
 
-
 bool Capstone2LlvmIrTranslatorArm64_impl::isOperandRegister(cs_arm64_op& op)
 {
 	return op.type == ARM64_OP_REG;
+}
+
+bool Capstone2LlvmIrTranslatorArm64_impl::isFPRegister(cs_arm64_op& op, bool onlySupported) const
+{
+	if (op.type != ARM64_OP_REG)
+	{
+	    return false;
+	}
+	bool is_q_reg = (op.reg >= ARM64_REG_Q0 && op.reg <= ARM64_REG_Q31);
+	bool is_d_reg = (op.reg >= ARM64_REG_D0 && op.reg <= ARM64_REG_D31);
+	bool is_h_reg = (op.reg >= ARM64_REG_H0 && op.reg <= ARM64_REG_H31);
+	bool is_s_reg = (op.reg >= ARM64_REG_S0 && op.reg <= ARM64_REG_S31);
+	if (onlySupported)
+	{
+	    return is_d_reg || is_h_reg;
+	}
+	else
+	{
+	    // This is the overall correct behavior but since the support for 16bit floats
+	    // or 128 bit floats is not implemented, we want to check only D and H registers
+	    return is_q_reg || is_d_reg || is_h_reg || is_s_reg;
+	}
+}
+
+bool Capstone2LlvmIrTranslatorArm64_impl::isVectorRegister(cs_arm64_op& op) const
+{
+    return op.type == ARM64_OP_REG && op.reg >= ARM64_REG_V0 && op.reg <= ARM64_REG_V31;
 }
 
 uint8_t Capstone2LlvmIrTranslatorArm64_impl::getOperandAccess(cs_arm64_op& op)
@@ -937,12 +978,12 @@ uint8_t Capstone2LlvmIrTranslatorArm64_impl::getOperandAccess(cs_arm64_op& op)
 	return op.access;
 }
 
-bool Capstone2LlvmIrTranslatorArm64_impl::isCondIns(cs_arm64 * i)
+bool Capstone2LlvmIrTranslatorArm64_impl::isCondIns(cs_arm64 * i) const
 {
 	return (i->cc == ARM64_CC_AL || i->cc == ARM64_CC_INVALID) ? false : true;
 }
 
-llvm::Value* Capstone2LlvmIrTranslatorArm64_impl::generateIntBitCastToFP(llvm::IRBuilder<>& irb, llvm::Value* val)
+llvm::Value* Capstone2LlvmIrTranslatorArm64_impl::generateIntBitCastToFP(llvm::IRBuilder<>& irb, llvm::Value* val) const
 {
 	if (auto* it = llvm::dyn_cast<llvm::IntegerType>(val->getType()))
 	{
@@ -960,7 +1001,7 @@ llvm::Value* Capstone2LlvmIrTranslatorArm64_impl::generateIntBitCastToFP(llvm::I
 	return val;
 }
 
-llvm::Value* Capstone2LlvmIrTranslatorArm64_impl::generateFPBitCastToIntegerType(llvm::IRBuilder<>& irb, llvm::Value* val)
+llvm::Value* Capstone2LlvmIrTranslatorArm64_impl::generateFPBitCastToIntegerType(llvm::IRBuilder<>& irb, llvm::Value* val) const
 {
 	auto* ty = val->getType();
 	if (ty->isFloatingPointTy())
@@ -980,6 +1021,26 @@ llvm::Value* Capstone2LlvmIrTranslatorArm64_impl::generateFPBitCastToIntegerType
 	}
 	// Return unchanged value if its not FP type
 	return val;
+}
+
+void Capstone2LlvmIrTranslatorArm64_impl::generatePseudoInstruction(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb)
+{
+	throwUnhandledInstructions(i);
+
+	if (!isCondIns(ai))
+	{
+		_inCondition = false;
+		translatePseudoAsmGeneric(i, ai, irb);
+	}
+	else
+	{
+		_inCondition = true;
+
+		auto* cond = generateInsnConditionCode(irb, ai);
+		auto bodyIrb = generateIfThen(cond, irb);
+
+		translatePseudoAsmGeneric(i, ai, bodyIrb);
+	}
 }
 
 //
@@ -1264,10 +1325,12 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateStr(cs_insn* i, cs_arm64* ai,
 
 	// If its floating point operand bit cast it to integer type
 	// since the ZExt or Trunc doesn't work fp numbers
-	op0 = generateFPBitCastToIntegerType(irb, op0);
+	//op0 = generateFPBitCastToIntegerType(irb, op0);
 	//op0 = irb.CreateBitCast(op0, irb.getInt32Ty());
-
-	op0 = irb.CreateZExtOrTrunc(op0, ty);
+	if (!op0->getType()->isFloatingPointTy())
+	{
+		op0 = irb.CreateZExtOrTrunc(op0, ty);
+	}
 	auto* dest = generateGetOperandMemAddr(ai->operands[1], irb);
 
 	auto* pt = llvm::PointerType::get(op0->getType(), 0);
@@ -2650,13 +2713,29 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateFMov(cs_insn* i, cs_arm64* ai
 	EXPECT_IS_BINARY(i, ai, irb);
 
 	op1 = loadOp(ai->operands[1], irb);
-	if (!op1->getType()->isFloatingPointTy())
-	{
-		op1 = irb.CreateBitCast(op1, getRegisterType(ai->operands[0].reg));
-	}
+	op1 = irb.CreateBitCast(op1, getRegisterType(ai->operands[0].reg));
 
 	storeOp(ai->operands[0], op1, irb);
 }
+
+/**
+ * ARM64_INS_MOVI
+ */
+void Capstone2LlvmIrTranslatorArm64_impl::translateMovi(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb)
+{
+	EXPECT_IS_BINARY(i, ai, irb);
+
+	if (!isFPRegister(ai->operands[0]))
+	{
+		// We want this behavior in cases when move destination is vector register
+		generatePseudoInstruction(i, ai, irb);
+		return;
+	}
+
+	op1 = loadOp(ai->operands[1], irb);
+	storeOp(ai->operands[0], op1, irb);
+}
+
 
 /**
  * ARM64_INS_FMUL, ARM64_INS_FNMUL
