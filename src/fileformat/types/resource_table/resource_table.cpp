@@ -456,7 +456,7 @@ void ResourceTable::parseVersionInfoResources()
 /**
  * Parse version information
  * @param bytes Resource bytes
- * @raturn @c true if parsing was successful, @c false otherwise
+ * @return @c true if parsing was successful, @c false otherwise
  */
 bool ResourceTable::parseVersionInfo(const std::vector<std::uint8_t> &bytes)
 {
@@ -532,7 +532,7 @@ bool ResourceTable::parseVersionInfo(const std::vector<std::uint8_t> &bytes)
  * Parse Version Info child
  * @param bytes Resource bytes
  * @param offset Offset to Version Info Child structure
- * @raturn @c true if parsing was successful, @c false otherwise
+ * @return @c true if parsing was successful, @c false otherwise
  */
 bool ResourceTable::parseVersionInfoChild(const std::vector<std::uint8_t> &bytes, std::size_t &offset)
 {
@@ -589,7 +589,7 @@ bool ResourceTable::parseVersionInfoChild(const std::vector<std::uint8_t> &bytes
  * Parse VarFileInfo structure
  * @param bytes Resource bytes
  * @param offset Offset to structure
- * @raturn @c true if parsing was successful, @c false otherwise
+ * @return @c true if parsing was successful, @c false otherwise
  */
 bool ResourceTable::parseVarFileInfoChild(const std::vector<std::uint8_t> &bytes, std::size_t &offset)
 {
@@ -633,7 +633,7 @@ bool ResourceTable::parseVarFileInfoChild(const std::vector<std::uint8_t> &bytes
  * Parse StringFileInfo child
  * @param bytes Resource bytes
  * @param offset Offset to structure
- * @raturn @c true if parsing was successful, @c false otherwise
+ * @return @c true if parsing was successful, @c false otherwise
  */
 bool ResourceTable::parseStringFileInfoChild(const std::vector<std::uint8_t> &bytes, std::size_t &offset)
 {
@@ -675,7 +675,7 @@ bool ResourceTable::parseStringFileInfoChild(const std::vector<std::uint8_t> &by
  * Parse var string
  * @param bytes Resource bytes
  * @param offset Offset to structure
- * @raturn @c true if parsing was successful, @c false otherwise
+ * @return @c true if parsing was successful, @c false otherwise
  */
 bool ResourceTable::parseVarString(const std::vector<std::uint8_t> &bytes, std::size_t &offset)
 {
