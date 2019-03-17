@@ -11,7 +11,7 @@
 * Enhancement: Replace recursion with iterative implementation in x87 FPU analysis in `retdec-bin2llvmir` ([#450](https://github.com/avast-tl/retdec/pull/450)).
 * Enhancement: The `new` LLVM IR to BIR converter is now the default (and only) back-end's converter. In most cases, this improves code structure and significantly speeds up decompilations ([#211](https://github.com/avast-tl/retdec/issues/211), [#508](https://github.com/avast-tl/retdec/issues/508), [#509](https://github.com/avast-tl/retdec/pull/509)).
 * Enhancement: The `fileformat` library, and all its object file modules, accept both `std::istream` and `(data, size)` pair, in addition to the original input file path.
-* Enhancement: Reduced the needed stack space in `retdec-llvmir2hll` ([#492](https://github.com/avast-tl/retdec/pull/492)).
+* Enhancement: Reduced the needed stack space in `retdec-llvmir2hll` ([#492](https://github.com/avast-tl/retdec/pull/492), [#495](https://github.com/avast-tl/retdec/pull/495)).
 * Enhancement: Added support for build and run on FreeBSD and potentially on other BSD OSes ([#476](https://github.com/avast-tl/retdec/pull/476)).
 * Enhancement: It is possible to use local PeLib directory instead of remote revision via CMake variable `PELIB_LOCAL_DIR`. This is convenient when modifying both PeLib and RetDec at the same time.
 * Enhancement: Improved detection of needed libraries and imported/external functions in ELF binaries ([#457](https://github.com/avast-tl/retdec/issues/457)).
