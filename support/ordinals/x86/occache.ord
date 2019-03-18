@@ -1,0 +1,17 @@
+1 FindControlClose
+2 FindFirstControl
+3 FindNextControl
+4 GetControlDependentFile
+5 GetControlInfo
+6 IsModuleRemovable
+7 ReleaseControlHandle
+8 RemoveControlByHandle
+9 RemoveControlByName
+10 RemoveExpiredControls
+11 SweepControlsByLastAccessDate
+12 DllCanUnloadNow
+13 DllGetClassObject
+14 DllInstall
+15 DllMain
+16 DllRegisterServer
+17 DllUnregisterServer

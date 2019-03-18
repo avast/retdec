@@ -1,0 +1,10 @@
+1 BTL_Init
+2 BTL_Deinit
+3 BTL_Open
+4 BTL_Close
+5 BTL_Read
+6 BTL_Write
+7 BTL_Seek
+8 BTL_IOControl
+9 BTL_PowerUp
+10 BTL_PowerDown

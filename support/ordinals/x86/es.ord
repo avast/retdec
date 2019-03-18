@@ -1,0 +1,10 @@
+6 NotifyLogoffUser
+7 NotifyLogonUser
+8 ServiceMain
+9 LCEControlServer
+10 RegisterTheEventServiceDuringSetup
+11 RegisterTheEventServiceAfterSetup
+12 DllRegisterServer
+13 DllUnregisterServer
+14 DllCanUnloadNow
+15 DllGetClassObject

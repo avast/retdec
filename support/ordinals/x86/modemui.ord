@@ -1,0 +1,14 @@
+2 drvCommConfigDialogW
+3 drvGetDefaultCommConfigA
+4 drvSetDefaultCommConfigW
+5 drvGetDefaultCommConfigA
+6 drvGetDefaultCommConfigW
+7 drvGetDefaultCommConfigA
+8 UnimodemDevConfigDialog
+9 CountryRunOnce
+10 UnimodemGetDefaultCommConfig
+11 UnimodemGetExtendedCaps
+12 InvokeControlPanel
+13 ModemCplDlgProc
+14 ModemPropPagesProvider
+15 QueryModemForCountrySettings

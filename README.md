@@ -246,6 +246,7 @@ You can pass the following additional parameters to `cmake`:
 * `-DRETDEC_TESTS=ON` to build with tests (disabled by default).
 * `-DRETDEC_DEV_TOOLS=ON` to build with development tools (disabled by default).
 * `-DRETDEC_FORCE_OPENSSL_BUILD=ON` to force OpenSSL build even if it is installed in the system (disabled by default).
+* `-DRETDEC_COMPILE_YARA=OFF` to disable YARA rules compilation at installation step (enabled by default).
 * `-DCMAKE_BUILD_TYPE=Debug` to build with debugging information, which is useful during development. By default, the project is built in the `Release` mode. This has no effect on Windows, but the same thing can be achieved by running `cmake --build .` with the `--config Debug` parameter.
 * `-DCMAKE_PROGRAM_PATH=<path>` to use Perl at `<path>` (probably useful only on Windows).
 

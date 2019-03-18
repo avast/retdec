@@ -1,0 +1,6 @@
+1 KsGetMediaType
+2 KsGetMediaTypeCount
+3 KsGetMultiplePinFactoryItems
+4 KsOpenDefaultDevice
+5 KsResolveRequiredAttributes
+6 KsSynchronousDeviceControl

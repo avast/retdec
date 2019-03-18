@@ -1,0 +1,8 @@
+1 ClosePopupTipbar
+2 DllCanUnloadNow
+3 DllGetClassObject
+4 DllRegisterServer
+5 DllUnregisterServer
+6 GetLibTls
+7 GetPopupTipbar
+8 SetRegisterLangBand

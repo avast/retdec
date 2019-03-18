@@ -1,0 +1,15 @@
+1 CompareLinkInfoReferents
+2 CompareLinkInfoVolumes
+3 CreateLinkInfoA
+4 CreateLinkInfoA
+5 CreateLinkInfoW
+6 DestroyLinkInfo
+7 DisconnectLinkInfo
+8 GetCanonicalPathInfoA
+9 GetCanonicalPathInfoA
+10 GetCanonicalPathInfoW
+11 GetLinkInfoData
+12 IsValidLinkInfo
+13 ResolveLinkInfoA
+14 ResolveLinkInfoA
+15 ResolveLinkInfoW

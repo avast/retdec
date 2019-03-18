@@ -1,0 +1,6 @@
+1 DllCanUnloadNow
+2 DllGetClassObject
+3 DllRegisterServer
+4 DllUnregisterServer
+5 PStoreCreateInstance
+6 PStoreEnumProviders

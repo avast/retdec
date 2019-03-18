@@ -44,6 +44,11 @@ class CompilerDetector : private retdec::utils::NonCopyable
 		/// @}
 
 	protected:
+		void populateInternalPaths(
+				const retdec::utils::FilesystemPath& dir,
+				bool recursive = false);
+
+	protected:
 		ToolInformation &toolInfo;                           ///< results - detected tools
 		retdec::fileformat::Architecture targetArchitecture; ///< target architecture of input file
 		Search *search;                                      ///< class for signature search

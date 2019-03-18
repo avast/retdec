@@ -1,0 +1,4 @@
+1 DecompressImageIndirect
+2 GetHalftonePalette
+3 Get332Palette
+4 GetTransparentColor

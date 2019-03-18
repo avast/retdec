@@ -1,0 +1,15 @@
+1 AttrLineDlgProc
+2 AttrRectDlgProc
+3 AttrNoteDlgProc
+4 AttrStampDlgProc
+7 CustClrPalUserCtlProc
+8 ChooseFontDlgProc
+9 ChooseColorDlgProc
+14 AttrTextStampEditProc
+15 AttrImageStampEditProc
+16 OiUIFileGetNameCommDlg
+17 OiUIFileSaveAsDlgProc
+19 OiUIFileOpenDlgProc
+20 OiUIFilePrintDlgProc
+21 OiUIAttribDlgBox
+22 OiUIStampAttribDlgBox

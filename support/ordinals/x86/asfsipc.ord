@@ -1,0 +1,9 @@
+1 MySIPRemoveSignedDataMsg
+2 MySIPCreateIndirectData
+3 MySIPGetSignedDataMsg
+4 MySIPPutSignedDataMsg
+5 MySIPRemoveSignedDataMsg
+6 MySIPVerifyIndirectData
+7 _DllMain@12
+8 DllRegisterServer
+9 DllUnregisterServer

@@ -1,0 +1,8 @@
+1 LSRequest
+2 LSRelease
+3 LSFreeHandle
+4 LSUpdate
+5 LSGetMessage
+6 LSQuery
+7 LSEnumProviders
+8 DllEntryPoint

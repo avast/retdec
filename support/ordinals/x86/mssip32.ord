@@ -1,0 +1,9 @@
+1 CryptSIPGetInfo
+2 CryptSIPGetRegWorkingFlags
+3 CryptSIPCreateIndirectData
+4 CryptSIPGetSignedDataMsg
+5 CryptSIPPutSignedDataMsg
+6 CryptSIPRemoveSignedDataMsg
+7 CryptSIPVerifyIndirectData
+8 DllRegisterServer
+9 DllUnregisterServer

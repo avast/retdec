@@ -1,0 +1,15 @@
+1 DllMain
+2 gfsclose
+3 gfscreat
+4 gfsgeti
+5 gfsopen
+6 gfsopts
+7 gfsputi
+8 gfsread
+9 gfswrite
+10 gfsxtrct
+11 gfsgtdata
+15 gfsdelpgs
+16 IsAWDFile
+17 CopyStorage
+18 IsStorage

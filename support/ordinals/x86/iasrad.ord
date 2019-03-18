@@ -1,0 +1,9 @@
+1 ?initialize@VSAFilter@@QAEJXZ
+2 ?radiusFromIAS@VSAFilter@@QBEJPAUIAttributesRaw@@@Z
+3 ?radiusToIAS@VSAFilter@@QBEJPAEKAAVIASAttributeVector@IASTL@@@Z
+4 ?radiusToIAS@VSAFilter@@QBEJPAUIAttributesRaw@@@Z
+5 ?shutdown@VSAFilter@@QAEJXZ
+6 DllCanUnloadNow
+7 DllGetClassObject
+8 DllRegisterServer
+9 DllUnregisterServer

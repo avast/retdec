@@ -1,0 +1,11 @@
+1 AddERExcludedApplicationA
+2 AddERExcludedApplicationW
+3 CreateMinidumpW
+4 ReportEREvent
+5 ReportEREventDW
+6 ReportFault
+7 ReportFaultDWM
+8 ReportFaultFromQueue
+9 ReportFaultToQueue
+10 ReportHang
+11 ReportKernelFaultDWW
