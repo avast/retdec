@@ -2,6 +2,7 @@ set(CTYPESPARSER_SOURCES
 	ctypes_parser.cpp
 	json_ctypes_parser.cpp
 	borland_ast_ctypes_parser.cpp
+	ms_ast_ctypes_parser.cpp
 )
 
 add_library(retdec-ctypesparser STATIC ${CTYPESPARSER_SOURCES})

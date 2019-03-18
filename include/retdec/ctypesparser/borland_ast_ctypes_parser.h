@@ -36,14 +36,6 @@ namespace ctypesparser {
 class BorlandToCtypesParser: public CTypesParser
 {
 public:
-	enum Status : u_char
-	{
-		success = 0,
-		init,
-		invalid_ast,
-	};
-
-public:
 	BorlandToCtypesParser();
 
 	bool parseInto(
