@@ -2188,10 +2188,16 @@ void Demangler::dumpBackReferences() {
     std::printf("\n");
 }
 
+Demangler::Demangler(llvm::ms_demangle::ArenaAllocator &allocator): Arena(allocator), Backrefs() {}
+
 char *llvm::microsoftDemangle(const char *MangledName, char *Buf, size_t *N,
                               int *Status, MSDemangleFlags Flags) {
   int InternalStatus = demangle_success;
-  Demangler D;
+  // RetDec {
+  ArenaAllocator Arena;
+  Demangler D(Arena);
+  // original:
+  // } RetDec
   OutputStream S;
 
   StringView Name{MangledName};

@@ -142,7 +142,11 @@ enum class FunctionIdentifierCodeGroup { Basic, Under, DoubleUnder };
 // It also has a set of functions to convert Type instances to strings.
 class Demangler {
 public:
-  Demangler() = default;
+  // RetDec {
+  Demangler(ArenaAllocator &allocator);
+  // original: Demangler(ArenaAllocator &allocator);
+  // } RetDec
+
   virtual ~Demangler() = default;
 
   // You are supposed to call parse() first and then check if error is true.  If
@@ -251,7 +255,10 @@ private:
   std::pair<Qualifiers, bool> demangleQualifiers(StringView &MangledName);
 
   // Memory allocator.
-  ArenaAllocator Arena;
+  // RetDec {
+  ArenaAllocator &Arena;
+  // original: ArenaAllocator Arena;
+  // } RetDec
 
   // A single type uses one global back-ref table for all function params.
   // This means back-refs can even go "into" other types.  Examples:
