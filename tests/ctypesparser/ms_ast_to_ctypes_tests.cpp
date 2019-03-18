@@ -84,6 +84,11 @@ TEST_F(MsCtypesTests, NamedTypes)
 TEST_F(MsCtypesTests, TemplateTypes)
 {
 	mangledToCtypes("?ee@?$e@$$A6AXXZ@@EEAAXXZ");	// private: virtual void __cdecl e<void __cdecl(void)>::ee(void)
+
+	EXPECT_TRUE(module->hasFunctionWithName("e<void __cdecl(void)>::ee"));
+	auto func = module->getFunctionWithName("e<void __cdecl(void)>::ee");
+
+	EXPECT_EQ(func->getParameterCount(), 0);
 }
 
 }	// namespace tests

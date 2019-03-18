@@ -173,7 +173,7 @@ std::shared_ptr<ctypes::Type> MsToCtypesParser::parseType(llvm::ms_demangle::Nod
 		return parseFuncType(static_cast<llvm::ms_demangle::FunctionSignatureNode *>(typeNode));
 	default:
 		break;
-	}    // TODO nonprimitive types
+	}
 
 	return std::static_pointer_cast<ctypes::Type>(ctypes::UnknownType::create());
 }
@@ -245,8 +245,8 @@ ctypes::Function::Parameters MsToCtypesParser::parseFunctionParameters(
 	if (parameters) {
 		for (size_t i = 0; i < parameters->Count; ++i) {
 			if (parameters->Nodes[i]) {                // for safety
-				auto type = parseType(static_cast<llvm::ms_demangle::TypeNode *>(parameters
-					->Nodes[i]));    // TODO dynamic cast fail
+				auto type = parseType(dynamic_cast<llvm::ms_demangle::TypeNode *>(parameters
+					->Nodes[i]));
 				auto param = ctypes::Parameter("param" + std::to_string(i), type);
 				params.emplace_back(param);
 			}
@@ -296,8 +296,11 @@ std::shared_ptr<ctypes::Type> MsToCtypesParser::parseNamedType(llvm::ms_demangle
 {
 	std::string name = printToString(node);
 
-//	return name.empty()? ctypes::UnknownType::create(): ctypes::NamedType::create(context, name);
-	return nullptr;
+	if (name.empty()) {
+		return std::static_pointer_cast<ctypes::Type>(ctypes::UnknownType::create());
+	} else {
+		return std::static_pointer_cast<ctypes::Type>(ctypes::NamedType::create(context, name));
+	}
 }
 
 std::string MsToCtypesParser::getTypeName(llvm::ms_demangle::PrimitiveKind type) const
@@ -347,8 +350,7 @@ ctypes::FunctionType::Parameters MsToCtypesParser::parseFuncTypeParameters(
 	if (parameters) {
 		for (size_t i = 0; i < parameters->Count; ++i) {
 			if (parameters->Nodes[i]) {                // for safety
-				auto type = parseType(static_cast<llvm::ms_demangle::TypeNode *>(parameters
-					->Nodes[i]));    // TODO dynamic cast fail
+				auto type = parseType(dynamic_cast<llvm::ms_demangle::TypeNode *>(parameters->Nodes[i]));
 				params.emplace_back(type);
 			}
 		}
