@@ -27,49 +27,18 @@ private:
 	alignas(long double) char InitialBuffer[AllocSize];
 	BlockMeta* BlockList = nullptr;
 
-	void grow() {
-		char* NewMeta = static_cast<char *>(std::malloc(AllocSize));
-		if (NewMeta == nullptr)
-			std::terminate();
-		BlockList = new (NewMeta) BlockMeta{BlockList, 0};
-	}
+	void grow();
 
-	void* allocateMassive(size_t NBytes) {
-		NBytes += sizeof(BlockMeta);
-		BlockMeta* NewMeta = reinterpret_cast<BlockMeta*>(std::malloc(NBytes));
-		if (NewMeta == nullptr)
-			std::terminate();
-		BlockList->Next = new (NewMeta) BlockMeta{BlockList->Next, 0};
-		return static_cast<void*>(NewMeta + 1);
-	}
+	void* allocateMassive(size_t NBytes);
 
 public:
-	BumpPointerAllocator()
-		: BlockList(new (InitialBuffer) BlockMeta{nullptr, 0}) {}
+	BumpPointerAllocator();
 
-	void* allocate(size_t N) {
-		N = (N + 15u) & ~15u;
-		if (N + BlockList->Current >= UsableAllocSize) {
-			if (N > UsableAllocSize)
-				return allocateMassive(N);
-			grow();
-		}
-		BlockList->Current += N;
-		return static_cast<void*>(reinterpret_cast<char*>(BlockList + 1) +
-			BlockList->Current - N);
-	}
+	void* allocate(size_t N);
 
-	void reset() {
-		while (BlockList) {
-			BlockMeta* Tmp = BlockList;
-			BlockList = BlockList->Next;
-			if (reinterpret_cast<char*>(Tmp) != InitialBuffer)
-				std::free(Tmp);
-		}
-		BlockList = new (InitialBuffer) BlockMeta{nullptr, 0};
-	}
+	void reset();
 
-	~BumpPointerAllocator() { reset(); }
+	~BumpPointerAllocator();
 };
 
 class DefaultAllocator {
