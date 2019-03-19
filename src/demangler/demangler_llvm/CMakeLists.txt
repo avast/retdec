@@ -1,4 +1,5 @@
 set(DEMANGLER_LLVM_SOURCES
+	Allocator.cpp
     ItaniumDemangle.cpp
     MicrosoftDemangle.cpp
     MicrosoftDemangleNodes.cpp
