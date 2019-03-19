@@ -312,7 +312,7 @@ std::string lcidToStr(std::size_t lcid)
  * Compute entropy of given data
  * @param data Data to compute entropy from
  * @param dataLen Length of @a data
- * @return entropy in <0,1>
+ * @return entropy in <0,8>
  */
 double computeDataEntropy(const std::uint8_t *data, std::size_t dataLen)
 {

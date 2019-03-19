@@ -47,7 +47,7 @@ class SecSeg
 		unsigned long long address;       ///< start address in memory
 		unsigned long long memorySize;    ///< size in memory
 		unsigned long long entrySize;     ///< size of one entry in file
-		double entropy;                   ///< entropy in <0,1>
+		double entropy;                   ///< entropy in <0,8>
 		bool memorySizeIsValid;           ///< @c true if size in memory is valid
 		bool entrySizeIsValid;            ///< size of one entry in section or segment
 		bool isInMemory;                  ///< @c true if the section or segment will appear in the memory image of a process
