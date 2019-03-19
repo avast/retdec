@@ -41,6 +41,7 @@ class Demangler
 
 		virtual std::string demangleToString(const std::string &mangled) = 0;
 
+		// TODO move to provider, demanglers could return ASTs
 		virtual void demangleToModule(
 			const std::string &mangled,
 			std::unique_ptr<retdec::ctypes::Module> &module) {};

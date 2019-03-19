@@ -20,6 +20,7 @@
 #include "retdec/demangler/borland_ast/rreference_type.h"
 #include "retdec/demangler/borland_ast/template_node.h"
 #include "retdec/demangler/borland_ast/type_node.h"
+#include "retdec/ctypes/array_type.h"
 #include "retdec/ctypes/module.h"
 #include "retdec/ctypes/context.h"
 #include "retdec/ctypes/function.h"
@@ -61,6 +62,9 @@ private:
 	ctypes::Function::Parameters parseFuncParameters(std::shared_ptr<demangler::borland::NodeArray> paramsNode);
 	ctypes::CallConvention parseCallConvention(demangler::borland::CallConv callConv);
 	ctypes::FunctionType::VarArgness parseVarArgness(bool isVarArg);
+	std::shared_ptr<ctypes::FunctionType> parsefuncType(std::shared_ptr<demangler::borland::FunctionTypeNode> funcTypeNode);
+	ctypes::FunctionType::Parameters parseFuncTypeParameters(std::shared_ptr<demangler::borland::NodeArray> paramsNode);
+	std::shared_ptr<ctypes::ArrayType> parseArrayType(std::shared_ptr<demangler::borland::ArrayNode> ArrayTypeNode);
 };
 
 }    // ctypesparser

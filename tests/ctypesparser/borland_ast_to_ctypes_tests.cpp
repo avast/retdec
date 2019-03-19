@@ -204,6 +204,48 @@ TEST_F(BorlandCtypesTests, VarArgness)
 	EXPECT_TRUE(std::static_pointer_cast<ctypes::ReferenceType>(param)->getReferencedType()->isIntegral());
 }
 
+TEST_F(BorlandCtypesTests, ArrayTypeTests)
+{
+	mangledToCtypes("@foo$qpa3$a6$i");
+	EXPECT_TRUE(module->hasFunctionWithName("foo"));
+	auto func = module->getFunctionWithName("foo");
+	auto param = func->getParameter(1).getType();
+	EXPECT_TRUE(param->isPointer());
+
+	auto pointee = std::static_pointer_cast<ctypes::PointerType>(param)->getPointedType();
+
+	EXPECT_TRUE(pointee->isArray());
+
+	auto elemType = std::static_pointer_cast<ctypes::ArrayType>(pointee)->getElementType();
+	EXPECT_TRUE(elemType->isIntegral());
+
+	EXPECT_EQ(std::static_pointer_cast<ctypes::ArrayType>(pointee)->getDimensionCount(), 2);
+
+	ctypes::ArrayType::Dimensions expectedDimensions{3,6};
+	EXPECT_EQ(std::static_pointer_cast<ctypes::ArrayType>(pointee)->getDimensions(), expectedDimensions);
+}
+
+TEST_F(BorlandCtypesTests, FunctionPointerTests)
+{
+	mangledToCtypes("@foo$qpqv$i");
+	EXPECT_TRUE(module->hasFunctionWithName("foo"));
+	auto func = module->getFunctionWithName("foo");
+	auto param = func->getParameter(1).getType();
+	EXPECT_TRUE(param->isPointer());
+
+	auto pointee = std::static_pointer_cast<ctypes::PointerType>(param)->getPointedType();
+
+	EXPECT_TRUE(pointee->isFunction());
+
+	auto funcType = std::static_pointer_cast<ctypes::FunctionType>(pointee);
+
+	EXPECT_EQ(funcType->getParameterCount(), 1);
+	EXPECT_TRUE(funcType->getParameter(1)->isVoid());
+	EXPECT_EQ(funcType->getCallConvention(), ctypes::CallConvention());
+	EXPECT_TRUE(funcType->getReturnType()->isIntegral());
+}
+
+
 }	// namespace tests
 }	// namespace ctypesparser
 }	// namespace retdec

@@ -23,7 +23,7 @@ inline ctypes::IntegralType::Signess toSigness(bool isUnsigned)
 	return isUnsigned ? ctypes::IntegralType::Signess::Unsigned : ctypes::IntegralType::Signess::Signed;
 }
 
-ctypes::IntegralType::Signess toSigness(const std::string &typeName)	// TODO config
+ctypes::IntegralType::Signess toSigness(const std::string &typeName)    // TODO config
 {
 	if (typeName.substr(0, 9) == "unsigned ") {
 		return ctypes::IntegralType::Signess::Unsigned;
@@ -36,7 +36,7 @@ ctypes::IntegralType::Signess toSigness(const std::string &typeName)	// TODO con
 	return ctypes::IntegralType::Signess::Signed;
 }
 
-}	// anonymous namespace
+}    // anonymous namespace
 
 BorlandToCtypesParser::BorlandToCtypesParser() : CTypesParser() {}
 
@@ -96,6 +96,7 @@ std::shared_ptr<retdec::ctypes::Function> BorlandToCtypesParser::parseFunction(s
 
 std::shared_ptr<ctypes::Type> BorlandToCtypesParser::parseType(std::shared_ptr<retdec::demangler::borland::TypeNode> typeNode)
 {
+	// TODO function type
 	if (typeNode) {
 		switch (typeNode->kind()) {
 		case Kind::KIntegralType: {
@@ -133,6 +134,14 @@ std::shared_ptr<ctypes::Type> BorlandToCtypesParser::parseType(std::shared_ptr<r
 			auto namedType = parseNamedType(std::static_pointer_cast<demangler::borland::NamedTypeNode>(typeNode));
 			return std::static_pointer_cast<ctypes::Type>(namedType);
 		}
+		case Kind::KFunctionType: {
+			auto funcType = parsefuncType(std::static_pointer_cast<demangler::borland::FunctionTypeNode>(typeNode));
+			return std::static_pointer_cast<ctypes::Type>(funcType);
+		}
+		case Kind::KArrayNode: {
+			auto arrayType = parseArrayType(std::static_pointer_cast<demangler::borland::ArrayNode>(typeNode));
+			return std::static_pointer_cast<ctypes::Type>(arrayType);
+		}
 		default:
 			break;
 		}
@@ -146,7 +155,7 @@ std::shared_ptr<ctypes::IntegralType> BorlandToCtypesParser::parseIntegralType(
 {
 	assert(integralNode && "Node cannot be null");
 
-	std::string name = integralNode->typeName();	// no qualifiers
+	std::string name = integralNode->typeName();    // no qualifiers
 	unsigned bitWidth = typeWidths[integralNode->typeName()];
 	ctypes::IntegralType::Signess signess = toSigness(integralNode->isUnsigned());
 
@@ -158,7 +167,7 @@ std::shared_ptr<ctypes::FloatingPointType> BorlandToCtypesParser::parseFloatingP
 {
 	assert(floatNode && "Node cannot be null");
 
-	std::string name = floatNode->typeName();	// no qualifiers
+	std::string name = floatNode->typeName();    // no qualifiers
 	unsigned bitWidth = typeWidths[floatNode->typeName()];
 
 	return ctypes::FloatingPointType::create(context, name, bitWidth);
@@ -169,7 +178,7 @@ std::shared_ptr<ctypes::IntegralType> BorlandToCtypesParser::parseCharType(
 {
 	assert(charNode && "Node cannot be null");
 
-	std::string name = charNode->typeName();	// no qualifiers
+	std::string name = charNode->typeName();    // no qualifiers
 	unsigned bitWidth = typeWidths[name];
 	ctypes::IntegralType::Signess signess = toSigness(name);
 
@@ -181,7 +190,7 @@ std::shared_ptr<ctypes::Type> BorlandToCtypesParser::parseBuiltInType(
 {
 	assert(typeNode && "Node cannot be null");
 
-	std::string typeName = typeNode->typeName();	// no qualifiers
+	std::string typeName = typeNode->typeName();    // no qualifiers
 
 	if (typeName == "void") {
 		return ctypes::VoidType::create();
@@ -234,7 +243,7 @@ std::shared_ptr<ctypes::NamedType> BorlandToCtypesParser::parseNamedType(
 {
 	assert(namedTypeNode && "Node cannot be null");
 
-	std::string name = namedTypeNode->name()->str();	// no qualifiers
+	std::string name = namedTypeNode->name()->str();    // no qualifiers
 	return ctypes::NamedType::create(context, name);
 }
 
@@ -252,7 +261,23 @@ ctypes::Function::Parameters BorlandToCtypesParser::parseFuncParameters(
 		auto param = ctypes::Parameter("", type);
 		parameters.emplace_back(param);
 	}
-	return {parameters};
+	return parameters;
+}
+
+ctypes::FunctionType::Parameters BorlandToCtypesParser::parseFuncTypeParameters(
+	std::shared_ptr<retdec::demangler::borland::NodeArray> paramsNode)
+{
+	ctypes::FunctionType::Parameters parameters{};
+	if (paramsNode == nullptr) {
+		return parameters;
+	}
+
+	for (unsigned i = 0; i < paramsNode->size(); ++i) {
+		auto paramNode = std::static_pointer_cast<demangler::borland::TypeNode>(paramsNode->get(i));
+		auto type = parseType(paramNode);
+		parameters.emplace_back(type);
+	}
+	return parameters;
 }
 
 ctypes::CallConvention BorlandToCtypesParser::parseCallConvention(retdec::demangler::borland::CallConv callConv)
@@ -278,6 +303,34 @@ ctypes::FunctionType::VarArgness BorlandToCtypesParser::parseVarArgness(bool isV
 	} else {
 		return ctypes::FunctionType::VarArgness::IsNotVarArg;
 	}
+}
+
+std::shared_ptr<ctypes::FunctionType> BorlandToCtypesParser::parsefuncType(
+	std::shared_ptr<retdec::demangler::borland::FunctionTypeNode> funcTypeNode)
+{
+	std::shared_ptr<ctypes::Type> returnType = parseType(funcTypeNode->retType());
+	ctypes::FunctionType::Parameters parameters = parseFuncTypeParameters(funcTypeNode->params());
+	ctypes::CallConvention callConvention = parseCallConvention(funcTypeNode->callConv());
+	ctypes::Function::VarArgness varArgness = parseVarArgness(funcTypeNode->isVarArg());
+
+	return ctypes::FunctionType::create(context, returnType, parameters, callConvention, varArgness);
+}
+
+std::shared_ptr<ctypes::ArrayType> BorlandToCtypesParser::parseArrayType(
+	std::shared_ptr<retdec::demangler::borland::ArrayNode> arrayTypeNode)
+{
+	ctypes::ArrayType::Dimensions dimensions;
+
+	auto pointee = arrayTypeNode->pointee();
+	dimensions.emplace_back(arrayTypeNode->size());
+	while (pointee->kind() == Kind::KArrayNode) {
+		dimensions.emplace_back(std::static_pointer_cast<demangler::borland::ArrayNode>(pointee)->size());
+		pointee = std::static_pointer_cast<demangler::borland::ArrayNode>(pointee)->pointee();
+	}
+
+	auto type = parseType(std::static_pointer_cast<demangler::borland::TypeNode>(pointee));
+
+	return ctypes::ArrayType::create(context, type, dimensions);
 }
 
 }    // ctypesparser
