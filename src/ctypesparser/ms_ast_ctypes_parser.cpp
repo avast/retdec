@@ -83,6 +83,8 @@ bool MsToCtypesParser::parseInto(
 std::shared_ptr<ctypes::Function> MsToCtypesParser::parseFunction(
 	llvm::ms_demangle::FunctionSymbolNode *functionSymbolNode)
 {
+	assert(functionSymbolNode && "Violated precondition.");
+	
 	auto funcSignature = functionSymbolNode->Signature;
 	if (!funcSignature) {
 		return nullptr;

@@ -58,7 +58,6 @@ void MicrosoftDemangler::demangleToModule(
 {
 	llvm::ms_demangle::ArenaAllocator Arena;
 	llvm::ms_demangle::Demangler D(Arena);
-	OutputStream S;
 
 	StringView Name{mangled.c_str()};
 	llvm::ms_demangle::SymbolNode *AST = D.parse(Name);
