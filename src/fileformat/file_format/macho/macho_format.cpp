@@ -563,6 +563,7 @@ template<typename T> void MachOFormat::loadSection(const T &section)
 	{
 		secPtr->load(this);
 	}
+	secPtr->computeEntropy();
 	sections.push_back(secPtr);
 	loadSectionRelocations(section.reloff, section.nreloc);
 	++sectionCounter;

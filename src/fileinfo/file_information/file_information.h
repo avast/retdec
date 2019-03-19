@@ -137,6 +137,7 @@ class FileInformation
 		std::string getNumberOfDeclaredSymbolTablesStr() const;
 		std::string getOverlayOffsetStr(std::ios_base &(* format)(std::ios_base &)) const;
 		std::string getOverlaySizeStr(std::ios_base &(* format)(std::ios_base &)) const;
+		std::string getOverlayEntropyStr(std::ios_base &(* format)(std::ios_base &)) const;
 		/// @}
 
 		/// @name Getters of @a richHeader
@@ -352,6 +353,7 @@ class FileInformation
 		std::string getSectionExtraInfoStr(std::size_t position) const;
 		std::string getSectionLineOffsetStr(std::size_t position, std::ios_base &(* format)(std::ios_base &)) const;
 		std::string getSectionRelocationsLineOffsetStr(std::size_t position, std::ios_base &(* format)(std::ios_base &)) const;
+		std::string getSectionEntropy(std::size_t position, std::ios_base &(* format)(std::ios_base &)) const;
 		unsigned long long getSectionFlagsSize(std::size_t position) const;
 		unsigned long long getSectionFlags(std::size_t position) const;
 		std::string getSectionFlagsStr(std::size_t position) const;
@@ -551,6 +553,7 @@ class FileInformation
 		void setNumberOfDeclaredSymbolTables(unsigned long long noOfTables);
 		void setOverlayOffset(unsigned long long offset);
 		void setOverlaySize(unsigned long long size);
+		void setOverlayEntropy(double entropy);
 		void setRichHeader(const retdec::fileformat::RichHeader *rHeader);
 		void setVisualBasicInfo(const retdec::fileformat::VisualBasicInfo *vbInfo);
 		void setVisualBasicUsed(bool set);
