@@ -24,8 +24,9 @@
 #include "fileinfo/file_information/file_information_types/relocation_table/relocation_table.h"
 #include "fileinfo/file_information/file_information_types/resource_table/resource_table.h"
 #include "fileinfo/file_information/file_information_types/rich_header.h"
-#include "fileinfo/file_information/file_information_types/visual_basic_info.h"
 #include "fileinfo/file_information/file_information_types/strings.h"
 #include "fileinfo/file_information/file_information_types/symbol_table/symbol_table.h"
+#include "fileinfo/file_information/file_information_types/tls_info.h"
+#include "fileinfo/file_information/file_information_types/visual_basic_info.h"
 
 #endif

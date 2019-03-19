@@ -72,6 +72,12 @@ class PeFormatParser
 		virtual bool getDebugEntryPointerToRawData(unsigned long long index, unsigned long long& pointerToRawData) const = 0;
 		virtual unsigned long long getResourceDirectoryOffset() const = 0;
 		virtual const PeLib::ResourceNode* getResourceTreeRoot() const = 0;
+		virtual unsigned long long getTlsStartAddressOfRawData() const = 0;
+		virtual unsigned long long getTlsEndAddressOfRawData() const = 0;
+		virtual unsigned long long getTlsAddressOfIndex() const = 0;
+		virtual unsigned long long getTlsAddressOfCallBacks() const = 0;
+		virtual unsigned long long getTlsSizeOfZeroFill() const = 0;
+		virtual unsigned long long getTlsCharacteristics() const = 0;
 		virtual std::unique_ptr<CLRHeader> getClrHeader() const = 0;
 		virtual unsigned long long getNumberOfRelocations() const = 0;
 		virtual unsigned long long getNumberOfRelocationData(unsigned long long index) const = 0;

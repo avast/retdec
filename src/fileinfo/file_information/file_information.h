@@ -45,6 +45,7 @@ class FileInformation
 		ExportTable exportTable;                       ///< information about exports
 		ResourceTable resourceTable;                   ///< information about resources in input file
 		CertificateTable certificateTable;             ///< information about certificates
+		TlsInfo tlsInfo;                               ///< information about thread-local storage
 		ElfCore elfCoreInfo;                           ///< information about ELF core files
 		LoaderInfo loaderInfo;                         ///< information about loaded image
 		std::vector<DataDirectory> directories;        ///< information about data directories
@@ -310,6 +311,19 @@ class FileInformation
 		bool hasCertificateTableCounterSignerCertificate() const;
 		/// @}
 
+		/// @name Getters of @a TLS information
+		/// @{
+		std::string getTlsRawDataStartAddrStr(std::ios_base &(* format)(std::ios_base &)) const;
+		std::string getTlsRawDataEndAddrStr(std::ios_base &(* format)(std::ios_base &)) const;
+		std::string getTlsIndexAddrStr(std::ios_base &(* format)(std::ios_base &)) const;
+		std::string getTlsCallBacksAddrStr(std::ios_base &(* format)(std::ios_base &)) const;
+		std::string getTlsZeroFillSizeStr(std::ios_base &(* format)(std::ios_base &)) const;
+		std::string getTlsCharacteristicsStr() const;
+		std::size_t getTlsNumberOfCallBacks() const;
+		std::string getTlsCallBackAddrStr(std::size_t position, std::ios_base &(* format)(std::ios_base &)) const;
+		bool isTlsUsed() const;
+		/// @}
+
 		/// @name Getters of @a directories
 		/// @{
 		std::string getDataDirectoryType(std::size_t position) const;
@@ -573,6 +587,7 @@ class FileInformation
 		void setResourceTable(const retdec::fileformat::ResourceTable *sTable);
 		void setStrings(const std::vector<retdec::fileformat::String> *sStrings);
 		void setCertificateTable(const retdec::fileformat::CertificateTable *sTable);
+		void setTlsInfo(const retdec::fileformat::TlsInfo *info);
 		void setSignatureVerified(bool verified);
 		void setLoadedBaseAddress(unsigned long long baseAddress);
 		void setLoaderStatusMessage(const std::string& statusMessage);

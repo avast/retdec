@@ -707,6 +707,66 @@ template<int bits> const PeLib::ResourceNode* peResourceTreeRoot(const PeLib::Re
 }
 
 /**
+ * Get TLS directory startAddressOfRawData
+ * @param tls Parser of TLS directory
+ * @return StartAddressOfRawData of TLS directory
+ */
+template<int bits> unsigned long long peTlsStartAddressOfRawData(const PeLib::TlsDirectory<bits> &tls)
+{
+	return tls.getStartAddressOfRawData();
+}
+
+/**
+ * Get TLS directory endAddressOfRawData
+ * @param tls Parser of TLS directory
+ * @return EndAddressOfRawData of TLS directory
+ */
+template<int bits> unsigned long long peTlsEndAddressOfRawData(const PeLib::TlsDirectory<bits> &tls)
+{
+	return tls.getEndAddressOfRawData();
+}
+
+/**
+ * Get TLS directory addressOfIndex
+ * @param tls Parser of TLS directory
+ * @return AddressOfIndex of  TLS directory
+ */
+template<int bits> unsigned long long peTlsAddressOfIndex(const PeLib::TlsDirectory<bits> &tls)
+{
+	return tls.getAddressOfIndex();
+}
+
+/**
+ * Get TLS directory addressOfCallBacks
+ * @param tls Parser of TLS directory
+ * @return AddressOfCallBacks of TLS directory
+ */
+template<int bits> unsigned long long peTlsAddressOfCallBacks(const PeLib::TlsDirectory<bits> &tls)
+{
+	return tls.getAddressOfCallBacks();
+}
+
+/**
+ * Get TLS directory sizeOfZeroFill
+ * @param tls Parser of TLS directory
+ * @return SizeOfZeroFill of TLS directory
+ */
+template<int bits> unsigned long long peTlsSizeOfZeroFill(const PeLib::TlsDirectory<bits> &tls)
+{
+	return tls.getSizeOfZeroFill();
+}
+
+/**
+ * Get TLS directory characteristics
+ * @param tls Parser of TLS directory
+ * @return Characteristics of TLS directory
+ */
+template<int bits> unsigned long long peTlsCharacteristics(const PeLib::TlsDirectory<bits> &tls)
+{
+	return tls.getCharacteristics();
+}
+
+/**
  * Get CLR header
  * @param comHeader Parser of PE COM/CLR directory
  * @return Parsed CLR header

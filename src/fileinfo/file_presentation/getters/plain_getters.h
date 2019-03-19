@@ -23,6 +23,7 @@
 #include "fileinfo/file_presentation/getters/iterative_getter/iterative_distribution_getter/segment_plain_getter.h"
 #include "fileinfo/file_presentation/getters/iterative_getter/iterative_distribution_getter/strings_plain_getter.h"
 #include "fileinfo/file_presentation/getters/iterative_getter/iterative_distribution_getter/symbol_tables_plain_getter.h"
+#include "fileinfo/file_presentation/getters/iterative_getter/iterative_distribution_getter/tls_info_plain_getter.h"
 #include "fileinfo/file_presentation/getters/iterative_getter/iterative_distribution_getter/typeref_table_plain_getter.h"
 #include "fileinfo/file_presentation/getters/iterative_getter/iterative_simple_getter/certificate_table_plain_getter.h"
 #include "fileinfo/file_presentation/getters/iterative_getter/iterative_distribution_getter/version_info_language_table_plain_getter.h"

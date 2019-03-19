@@ -72,6 +72,7 @@ class PeFormat : public FileFormat
 		void loadResourceNodes(std::vector<const PeLib::ResourceChild*> &nodes, const std::vector<std::size_t> &levels);
 		void loadResources();
 		void loadCertificates();
+		void loadTlsInformation();
 		/// @}
 
 		/// @name Signature verification methods

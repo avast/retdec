@@ -2059,6 +2059,94 @@ bool FileInformation::hasCertificateTableCounterSignerCertificate() const
 }
 
 /**
+ * Get start address of raw data of TLS
+ * @param format Format of result (e.g. std::dec, std::hex)
+ * @return Start address of raw data of TLS
+ */
+std::string FileInformation::getTlsRawDataStartAddrStr(std::ios_base &(* format)(std::ios_base &)) const
+{
+	return tlsInfo.getRawDataStartAddrStr(format);
+}
+
+/**
+ * Get end address of raw data of TLS
+ * @param format Format of result (e.g. std::dec, std::hex)
+ * @return End address of raw data of TLS
+ */
+std::string FileInformation::getTlsRawDataEndAddrStr(std::ios_base &(* format)(std::ios_base &)) const
+{
+	return tlsInfo.getRawDataEndAddrStr(format);
+}
+
+/**
+ * Get address of index of TLS
+ * @param format Format of result (e.g. std::dec, std::hex)
+ * @return Address of index of TLS
+ */
+std::string FileInformation::getTlsIndexAddrStr(std::ios_base &(* format)(std::ios_base &)) const
+{
+	return tlsInfo.getIndexAddrStr(format);
+}
+
+/**
+ * Get address of callbacks of TLS
+ * @param format Format of result (e.g. std::dec, std::hex)
+ * @return Address of callbacks of TLS
+ */
+std::string FileInformation::getTlsCallBacksAddrStr(std::ios_base &(* format)(std::ios_base &)) const
+{
+	return tlsInfo.getCallBacksAddrStr(format);
+}
+
+/**
+ * Get size of zero fill of TLS
+ * @param format Format of result (e.g. std::dec, std::hex)
+ * @return Size of zero fill of TLS
+ */
+std::string FileInformation::getTlsZeroFillSizeStr(std::ios_base &(* format)(std::ios_base &)) const
+{
+	return tlsInfo.getZeroFillSizeStr(format);
+}
+
+/**
+ * Get characteristics of TLS
+ * @return Characteristics of TLS
+ */
+std::string FileInformation::getTlsCharacteristicsStr() const
+{
+	return tlsInfo.getCharacteristicsStr();
+}
+
+/**
+ * Get number of callbacks of TLS
+ * @return Number of callbacks of TLS
+ */
+std::size_t FileInformation::getTlsNumberOfCallBacks() const
+{
+	return tlsInfo.getNumberOfCallBacks();
+}
+
+/**
+ * Get TLS callback
+ * @param position Position of directory in internal list of directories (0..x)
+ * @param format Format of result (e.g. std::dec, std::hex)
+ * @return TLS callback
+ */
+std::string FileInformation::getTlsCallBackAddrStr(std::size_t position, std::ios_base &(* format)(std::ios_base &)) const
+{
+	return tlsInfo.getCallBackAddrStr(position, format);
+}
+
+/**
+ * Check whether TLS is used
+ * @return @c true if TLS is used, @c false otherwise
+ */
+bool FileInformation::isTlsUsed() const
+{
+	return tlsInfo.isUsed();
+}
+
+/**
  * Get type of data directory
  * @param position Position of directory in internal list of directories (0..x)
  * @return Type of data directory
@@ -4125,6 +4213,15 @@ void FileInformation::setStrings(const std::vector<retdec::fileformat::String> *
 void FileInformation::setCertificateTable(const retdec::fileformat::CertificateTable *sTable)
 {
 	certificateTable.setTable(sTable);
+}
+
+/**
+ * Set TLS information
+ * @param info Information TLS
+ */
+void FileInformation::setTlsInfo(const retdec::fileformat::TlsInfo *info)
+{
+	tlsInfo.setTlsInfo(info);
 }
 
 /**
