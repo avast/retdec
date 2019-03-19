@@ -1,0 +1,97 @@
+#!/usr/bin/env python3
+
+"""Install all the *.yara files.
+Usage: install-yara.py yarac-path install-path yara-patterns-path compile
+    yarac-path         Path to the yarac binary to use for YARA rules compilation.
+    install-path       Path to the installation directory where to place the results.
+    yara-patterns-path Path to the source YARA patterns directory from where to copy (and compile) YARA rules.
+    compile            Flag (0|1, ON|OFF, True|False) determining if the YARA rules are to be compiled.
+"""
+
+import fnmatch
+import pathlib
+import os
+import shutil
+import subprocess
+import sys
+
+
+def print_help():
+    print('Usage: %s yarac-path install-path yara-patterns-path compile' % sys.argv[0])
+
+
+def get_arguments():
+    if len(sys.argv) != 5:
+        print_help()
+        sys.exit(1)
+    return sys.argv[1], sys.argv[2], sys.argv[3], (sys.argv[4] == '1' or sys.argv[4].lower() == 'true' or sys.argv[4].lower() == 'on')
+
+
+def print_arguments(yarac, install_dir, yara_patterns_dir, compile):
+    """ Debugging function.
+    """
+    print('===> yarac path         :', yarac)
+    print('===> install path       :', install_dir)
+    print('===> yara patterns path :', yara_patterns_dir)
+    print('===> compile flag       :', compile)
+
+
+def copy_yara_patterns(yara_patterns_dir, install_dir):
+    """ Copy *.yara files from the given source YARA patterns directory
+    to the given installation directory.
+    File is copied only if it is newer (timestamp) than already existing
+    *.yara[c] file in the installation directory, or if such file does not
+    exist.
+    """
+    for root, dirnames, filenames in os.walk(yara_patterns_dir):
+        for filename in fnmatch.filter(filenames, '*.yara'):
+            input = os.path.join(root, filename)
+            input_suffix = os.path.relpath(input, yara_patterns_dir)
+
+            output = os.path.join(install_dir, 'generic', 'yara_patterns', input_suffix)
+            output_c = str(pathlib.Path(output).with_suffix('.yarac'))
+
+            if ((not os.path.isfile(output) and not os.path.isfile(output_c))
+                    or (os.path.isfile(output) and os.path.getmtime(output) < os.path.getmtime(input))
+                    or (os.path.isfile(output_c) and os.path.getmtime(output_c) < os.path.getmtime(input))):
+                print('-- Installing:', output)
+                os.makedirs(os.path.dirname(output), exist_ok=True)
+                shutil.copy(input, output)
+
+
+def compile_yara(yarac, install_dir):
+    """ Compile all *.yara files in the given installation directory using the
+    provided YARAC program into *.yarac files.
+    Remove the source *.yara files.
+    """
+    inputs = []
+    for root, dirnames, filenames in os.walk(install_dir):
+        for filename in fnmatch.filter(filenames, '*.yara'):
+            inputs.append(os.path.join(root, filename))
+
+    for i in inputs:
+        fn = pathlib.Path(i)
+        o = fn.with_suffix('.yarac')
+
+        print('-- Compiling:', i)
+        cmd = [yarac, '-w'] + [i] + [str(o)]
+        ret = subprocess.call(cmd)
+        if ret != 0:
+            print('Error: yarac failed during compilation of file ', path)
+            exit(1)
+
+        os.remove(i)
+
+
+def main():
+    yarac, install_dir, yara_patterns_dir, compile = get_arguments()
+    copy_yara_patterns(yara_patterns_dir, install_dir)
+
+    if compile:
+        compile_yara(yarac, install_dir)
+
+    sys.exit(0)
+
+
+if __name__ == '__main__':
+    main()

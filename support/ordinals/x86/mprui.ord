@@ -1,0 +1,13 @@
+1 BrowseDialogA0
+2 MPRUI_DoPasswordDialog
+3 MPRUI_DoProfileErrorDialog
+4 MPRUI_ShowReconnectDialog
+5 MPRUI_WNetClearConnections
+6 MPRUI_WNetConnectionDialog1A
+7 MPRUI_WNetConnectionDialog1W
+8 MPRUI_WNetConnectionDialog
+9 MPRUI_WNetDisconnectDialog1A
+10 MPRUI_WNetDisconnectDialog1W
+11 MPRUI_WNetDisconnectDialog
+12 WNetBrowseDialog
+13 WNetBrowsePrinterDialog

@@ -1,0 +1,17 @@
+1 NSPStartup
+2 WSHAddressToString
+3 WSHEnumProtocols
+4 WSHGetBroadcastSockaddr
+5 WSHGetProviderGuid
+6 WSHGetSockaddrType
+7 WSHGetSocketInformation
+8 WSHGetWSAProtocolInfo
+9 WSHGetWildcardSockaddr
+10 WSHGetWinsockMapping
+11 WSHIoctl
+12 WSHJoinLeaf
+13 WSHNotify
+14 WSHOpenSocket2
+15 WSHOpenSocket
+16 WSHSetSocketInformation
+17 WSHStringToAddress

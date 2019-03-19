@@ -1,0 +1,6 @@
+5 HrRehydratorCreateServiceObject
+6 HrRehydratorInvokeServiceAction
+7 DllCanUnloadNow
+8 DllGetClassObject
+9 DllRegisterServer
+10 DllUnregisterServer

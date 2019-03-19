@@ -1,0 +1,10 @@
+2 RLDDIGetCaps
+3 D3DHAL_CleanUp
+4 RLDDIDDrawCreateDriver
+5 RLDDIFree
+6 RLDDIInit
+7 RLDDIMalloc
+8 RLDDIPopDriver
+9 RLDDIPushDriver
+10 RLDDIRaise
+11 RLDDIRealloc

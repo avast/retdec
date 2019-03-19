@@ -1,0 +1,6 @@
+1 SzNextName
+2 SzNormalizeEmailList
+3 CharSetToCodePage
+4 GetCodePageDescription
+5 ConformToRFC1522
+6 EncodeFileName

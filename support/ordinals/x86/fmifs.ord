@@ -1,0 +1,16 @@
+1 Chkdsk
+2 ChkdskEx
+3 ComputeFmMediaType
+4 DiskCopy
+5 EnableVolumeCompression
+6 Extend
+7 Format
+8 FormatEx2
+9 FormatEx
+10 QueryAvailableFileSystemFormat
+11 QueryDeviceInformation
+12 QueryDeviceInformationByHandle
+13 QueryFileSystemName
+14 QueryLatestFileSystemVersion
+15 QuerySupportedMedia
+16 SetLabel

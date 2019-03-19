@@ -1,0 +1,6 @@
+1 DirectPlayCreate
+2 DirectPlayEnumerateA
+3 DirectPlayEnumerateW
+4 DirectPlayLobbyCreateA
+5 DirectPlayLobbyCreateW
+9 DirectPlayEnumerate

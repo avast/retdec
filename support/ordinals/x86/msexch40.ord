@@ -1,0 +1,5 @@
+1 msexch40_1
+2 DllRegisterServer
+3 DllUnregisterServer
+10 msexch40_10
+11 msexch40_11

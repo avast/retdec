@@ -1,0 +1,9 @@
+1 DevQueryPrintEx
+3 DrvAdvancedDocumentProperties
+4 DrvDeviceCapabilities
+5 DrvDevicePropertySheets
+6 DrvDocumentEvent
+7 DrvDocumentProperties
+8 DrvDocumentPropertySheets
+9 DrvUpgradePrinter
+10 PrinterProperties

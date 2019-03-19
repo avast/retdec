@@ -1,0 +1,9 @@
+1 SpInitialize
+2 CredentialUpdateRegister
+3 SsiCredentialsUpdateNotify
+4 CredentialUpdateFree
+5 CredentialUpdateNotify
+6 SpLsaModeInitialize
+7 SpUserModeInitialize
+8 SsiCredentialsUpdateFree
+32 SpInstanceInit

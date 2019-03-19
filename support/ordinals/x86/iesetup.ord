@@ -1,0 +1,9 @@
+1 IEHardenAdmin
+2 IEHardenAdminNow
+3 IEHardenMachineNow
+4 IEHardenUser
+5 SetFirstHomepage
+6 DllInstall
+7 DllRegisterServer
+8 DllUnregisterServer
+9 FixIE

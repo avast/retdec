@@ -1,0 +1,5 @@
+4 ?GetDtcLocaleResourceHandle@@YAPAUHINSTANCE__@@XZ
+5 ?DtcGetTransactionManager@@YAJPAD0ABU_GUID@@KGPAXPAPAX@Z
+7 DtcGetTransactionManagerC
+8 ?FreezeLocalTransactionManagers@@YGJKK@Z
+9 ?ThawLocalTransactionManagers@@YGJXZ

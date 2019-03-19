@@ -1,0 +1,4 @@
+1 SCCPDllCanUnloadNow
+2 SCCPDllGetClassObject
+3 SCCPDllRegisterServer
+4 SCCPDllUnregisterServer

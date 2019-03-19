@@ -1,0 +1,17 @@
+2 DiagConnect
+3 TestIOReg
+4 CheckCablePresent
+5 TestFlash
+6 TestNetworkChip
+7 DoLoopback
+8 GetNetworkSpeed
+9 EndLoopback
+10 BeResponder
+11 EndResponder
+12 SendRcvStartup
+13 SendPacket
+14 RcvPacket
+15 StopSendRcv
+16 DiagDisconnect
+17 NetworkTest
+18 SetNetworkSpeed

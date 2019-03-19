@@ -1,0 +1,12 @@
+1 AddressToString
+2 CanonHex
+3 GetEtype
+4 GetProtocolDescription
+5 GetProtocolDescriptionTable
+6 GetSaps
+7 IsLLCPresent
+8 LookupByteSetString
+9 LookupDwordSetString
+10 LookupWordSetString
+11 StringToAddress
+12 VarLenSmallIntToDword

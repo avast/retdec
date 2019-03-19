@@ -1,0 +1,16 @@
+1 SfcInitProt
+2 SfcTerminateWatcherThread
+3 SfcConnectToServer
+4 SfcClose
+5 SfcFileException
+6 SfcInitiateScan
+7 SfcInstallProtectedFiles
+8 SfpInstallCatalog
+9 SfpDeleteCatalog
+10 SRSetRestorePoint
+11 SRSetRestorePointA
+12 SRSetRestorePointW
+13 SfcGetNextProtectedFile
+14 SfcIsFileProtected
+15 SfcIsKeyProtected
+16 SfpVerifyFile

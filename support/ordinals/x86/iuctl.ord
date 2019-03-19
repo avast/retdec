@@ -1,0 +1,9 @@
+1 BeginSelfUpdate
+2 LoadIUEngine
+3 UnLoadIUEngine
+4 CtlCancelEngineLoad
+5 GetControlUpdateInfo
+6 DllCanUnloadNow
+7 DllGetClassObject
+8 DllRegisterServer
+9 DllUnregisterServer

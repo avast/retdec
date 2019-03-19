@@ -1,0 +1,14 @@
+3 InvokeOn32
+4 IntOpInitialize
+5 CallbackProcessing_3216
+6 IUnknownObj32
+8 CSm16ReleaseHandler_Release32
+9 ThkMgrInitialize
+10 ThkMgrUninitialize
+11 TransformHRESULT_1632
+12 TransformHRESULT_3216
+13 ConvertObjDescriptor
+14 ConvertHr1632Thunk
+15 ConvertHr3216Thunk
+16 IntOpUninitialize
+18 ThkAddAppCompatFlag

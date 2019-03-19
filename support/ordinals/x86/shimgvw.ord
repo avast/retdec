@@ -1,0 +1,14 @@
+1 ImageView_COMServer
+2 ImageView_Fullscreen
+3 ImageView_FullscreenA
+4 imageview_fullscreenW
+5 ImageView_PrintTo
+6 ImageView_PrintToA
+7 ImageView_PrintToW
+8 imageview_fullscreenW
+9 ConvertDIBSECTIONToThumbnail
+10 DllCanUnloadNow
+11 DllGetClassObject
+12 DllInstall
+13 DllRegisterServer
+14 DllUnregisterServer

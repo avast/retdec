@@ -1,0 +1,12 @@
+1 ComputeInvCMAP
+2 CreateDDrawSurfaceOnDIB
+3 CreateMIMEMap
+4 DecodeImage
+5 DitherTo8
+6 DllCanUnloadNow
+7 DllGetClassObject
+8 DllRegisterServer
+9 DllUnregisterServer
+10 GetMaxMIMEIDBytes
+11 IdentifyMIMEType
+12 SniffStream
