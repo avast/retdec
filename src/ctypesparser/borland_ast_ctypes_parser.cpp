@@ -16,30 +16,6 @@ using Kind = retdec::demangler::borland::Node::Kind;
 namespace retdec {
 namespace ctypesparser {
 
-namespace {
-
-inline ctypes::IntegralType::Signess toSigness(bool isUnsigned)
-{
-	return isUnsigned ? ctypes::IntegralType::Signess::Unsigned : ctypes::IntegralType::Signess::Signed;
-}
-
-ctypes::IntegralType::Signess toSigness(const std::string &typeName)    // TODO config
-{
-	if (typeName.substr(0, 9) == "unsigned ") {
-		return ctypes::IntegralType::Signess::Unsigned;
-	}
-
-	if (typeName.substr(0, 4) == "char" || typeName == "wchar_t") {
-		return ctypes::IntegralType::Signess::Unsigned;
-	}
-
-	return ctypes::IntegralType::Signess::Signed;
-}
-
-}    // anonymous namespace
-
-BorlandToCtypesParser::BorlandToCtypesParser() : CTypesParser() {}
-
 bool BorlandToCtypesParser::parseInto(
 	std::shared_ptr<retdec::demangler::borland::Node> ast,
 	std::unique_ptr<retdec::ctypes::Module> &module,

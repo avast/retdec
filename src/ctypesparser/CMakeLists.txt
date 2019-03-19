@@ -1,6 +1,7 @@
 set(CTYPESPARSER_SOURCES
 	ctypes_parser.cpp
 	json_ctypes_parser.cpp
+	ast_ctypes_parser.cpp
 	borland_ast_ctypes_parser.cpp
 	ms_ast_ctypes_parser.cpp
 )

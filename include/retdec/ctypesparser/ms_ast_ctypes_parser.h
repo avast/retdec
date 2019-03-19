@@ -3,7 +3,6 @@
 #define RETDEC_MS_AST_CTYPES_PARSER_H
 
 #include <llvm/Demangle/MicrosoftDemangleNodes.h>
-#include "retdec/ctypesparser/ctypes_parser.h"
 
 #include "retdec/ctypes/module.h"
 #include "retdec/ctypes/context.h"
@@ -13,21 +12,15 @@
 #include "retdec/ctypes/named_type.h"
 #include "retdec/ctypes/pointer_type.h"
 #include "retdec/ctypes/floating_point_type.h"
-#include "retdec/ctypesparser/ctypes_parser.h"
-
-namespace llvm {
-namespace ms_demangle{
-class SymbolNode;
-}
-}
+#include "retdec/ctypesparser/ast_ctypes_parser.h"
 
 namespace retdec {
 namespace ctypesparser {
 
-class MsToCtypesParser : public CTypesParser
+class MsToCtypesParser : public AstToCtypesParser
 {
 public:
-	MsToCtypesParser();
+	MsToCtypesParser() = default;
 
 	bool parseInto(
 		llvm::ms_demangle::SymbolNode *ast,
@@ -54,7 +47,7 @@ private:
 	std::string getTypeName(llvm::ms_demangle::PrimitiveKind type) const;
 };
 
-}	// namespace ctypesparser
-}	// namespace retdec
+}    // namespace ctypesparser
+}    // namespace retdec
 
 #endif //RETDEC_MS_AST_CTYPES_PARSER_H

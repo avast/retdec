@@ -23,24 +23,6 @@ namespace ctypesparser {
 
 namespace {
 
-inline ctypes::IntegralType::Signess toSigness(bool isUnsigned)
-{
-	return isUnsigned ? ctypes::IntegralType::Signess::Unsigned : ctypes::IntegralType::Signess::Signed;
-}
-
-ctypes::IntegralType::Signess toSigness(const std::string &typeName)    // TODO config
-{
-	if (typeName.substr(0, 9) == "unsigned ") {
-		return ctypes::IntegralType::Signess::Unsigned;
-	}
-
-	if (typeName.substr(0, 4) == "char" || typeName == "wchar_t") {
-		return ctypes::IntegralType::Signess::Unsigned;
-	}
-
-	return ctypes::IntegralType::Signess::Signed;
-}
-
 std::string printToString(llvm::ms_demangle::Node *node)
 {
 
@@ -64,11 +46,9 @@ std::string printToString(llvm::ms_demangle::Node *node)
 	return name;
 }
 
-}    // anonymous namespace // TODO to parent class astctypesparser
+}    // anonymous namespace
 
 using Kind = llvm::ms_demangle::NodeKind;
-
-MsToCtypesParser::MsToCtypesParser() : CTypesParser() {}
 
 bool MsToCtypesParser::parseInto(
 	llvm::ms_demangle::SymbolNode *ast,

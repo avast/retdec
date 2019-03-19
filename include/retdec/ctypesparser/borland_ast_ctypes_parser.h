@@ -29,15 +29,15 @@
 #include "retdec/ctypes/named_type.h"
 #include "retdec/ctypes/pointer_type.h"
 #include "retdec/ctypes/floating_point_type.h"
-#include "retdec/ctypesparser/ctypes_parser.h"
+#include "retdec/ctypesparser/ast_ctypes_parser.h"
 
 namespace retdec {
 namespace ctypesparser {
 
-class BorlandToCtypesParser: public CTypesParser
+class BorlandToCtypesParser : public AstToCtypesParser
 {
 public:
-	BorlandToCtypesParser();
+	BorlandToCtypesParser() = default;
 
 	bool parseInto(
 		std::shared_ptr<demangler::borland::Node> ast,
