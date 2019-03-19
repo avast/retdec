@@ -9,7 +9,9 @@
 
 The decompiler is not limited to any particular target architecture, operating system, or executable file format:
 * Supported file formats: ELF, PE, Mach-O, COFF, AR (archive), Intel HEX, and raw machine code.
-* Supported architectures (32b only): Intel x86, ARM, MIPS, PIC32, and PowerPC.
+* Supported architectures:
+    * 32-bit: Intel x86, ARM, MIPS, PIC32, and PowerPC.
+    * 64-bit: x86-64.
 
 Features:
 * Static analysis of executable files with detailed information.
