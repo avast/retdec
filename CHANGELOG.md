@@ -2,6 +2,8 @@
 
 # dev
 
+* New Feature: Added presentation of section and overlay entropy in `retdec-fileinfo` ([#502](https://github.com/avast-tl/retdec/issues/502)).
+
 # v3.3 (2019-03-18)
 
 * New Feature: Added basic support of 64-bit x86 architecture ([#9](https://github.com/avast-tl/retdec/issues/9), [#513](https://github.com/avast-tl/retdec/pull/513)).
