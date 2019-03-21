@@ -2,7 +2,7 @@
 
 # dev
 
-* New Feature: Added presentation of section and overlay entropy in `retdec-fileinfo` ([#502](https://github.com/avast-tl/retdec/issues/502)).
+* New Feature: Added presentation of section and overlay entropy in `retdec-fileinfo` ([#502](https://github.com/avast-tl/retdec/issues/502), [#507](https://github.com/avast-tl/retdec/pull/507)).
 
 # v3.3 (2019-03-18)
 
