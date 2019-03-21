@@ -306,11 +306,6 @@ void Capstone2LlvmIrTranslatorArm64_impl::generateRegisters()
 
 	// Stack pointer.
 	createRegister(ARM64_REG_SP, _regLt);
-	//createRegister(ARM64_REG_WSP, _regLt);
-
-	// Zero.
-	//createRegister(ARM64_REG_XZR, _regLt);
-	//createRegister(ARM64_REG_WZR, _regLt);
 
 	// Flags.
 	createRegister(ARM64_REG_CPSR_N, _regLt);
@@ -460,9 +455,9 @@ llvm::Value* Capstone2LlvmIrTranslatorArm64_impl::generateOperandShift(
 
 	if (n == nullptr)
 	{
-		assert(false && "should not be possible");
-		return val;
+		throw GenericError("generateOperandShift(): nullptr shift value");
 	}
+
 	n = irb.CreateZExtOrTrunc(n, val->getType());
 
 	switch (op.shift.type)
@@ -2114,7 +2109,19 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateDiv(cs_insn* i, cs_arm64* ai,
 	EXPECT_IS_TERNARY(i, ai, irb);
 
 	std::tie(op1, op2) = loadOpBinaryOrTernaryOp1Op2(ai, irb);
+	llvm::Value *val = nullptr;
+	if (i->id == ARM64_INS_UDIV)
+	{
+		val = irb.CreateUDiv(op1, op2);
+	}
+	else if (i->id == ARM64_INS_SDIV)
+	{
+		val = irb.CreateSDiv(op1, op2);
+	}
 
+	storeOp(ai->operands[0], val, irb);
+
+	/*
 	// Zero division yelds zero as result in this case we
 	// don't want undefined behaviour so we
 	// check for zero division and manualy set the result, for now.
@@ -2139,6 +2146,7 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateDiv(cs_insn* i, cs_arm64* ai,
 
 	storeOp(ai->operands[0], val, bodyElse);
 	//ENDIF
+	*/
 }
 
 /**
