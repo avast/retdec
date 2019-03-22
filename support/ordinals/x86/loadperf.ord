@@ -1,0 +1,12 @@
+1 BackupPerfRegistryToFileW
+2 InstallPerfDllA
+3 InstallPerfDllW
+4 LoadPerfCounterTextStringsA
+5 LoadPerfCounterTextStringsW
+6 RestorePerfRegistryFromFileW
+7 SetServiceAsTrustedA
+8 SetServiceAsTrustedW
+9 UnloadPerfCounterTextStringsA
+10 UnloadPerfCounterTextStringsW
+11 UpdatePerfNameFilesA
+12 UpdatePerfNameFilesW

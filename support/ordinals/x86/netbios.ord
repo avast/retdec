@@ -1,0 +1,6 @@
+1 NetbiosAddthd
+2 NetbiosDelete
+3 NetbiosDelthd
+4 NetbiosInitialize
+5 PostRoutineCaller
+6 _Netbios

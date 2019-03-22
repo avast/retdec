@@ -1,0 +1,13 @@
+1 D3DFree
+2 D3DMalloc
+3 D3DRealloc
+4 Direct3DCreateDevice
+5 Direct3DCreateTexture
+6 Direct3DGetSWRastZPixFmts
+7 Direct3DCreate
+8 Direct3D_HALCleanUp
+9 FlushD3DDevices2
+10 FlushD3DDevices
+11 PaletteAssociateNotify
+12 PaletteUpdateNotify
+13 SurfaceFlipNotify

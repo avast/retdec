@@ -1,0 +1,10 @@
+1 UtilDLLInit
+2 CopyUamFiles
+3 WriteAfpMgrIniStrings
+4 GetPrintProcDir
+5 AddPrintProc
+6 DeletePrintProc
+7 SfmAddPrintMonitor
+8 SfmDeletePrintMonitor
+9 DelFile
+10 SfmSetUamSecurity

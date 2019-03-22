@@ -1,0 +1,9 @@
+1 DllCanUnloadNow
+2 DllGetClassObject
+3 DllRegisterServer
+4 DllUnregisterServer
+5 IASParmsFreeUserParms
+6 IASParmsQueryRasUser0
+7 IASParmsQueryUserProperty
+8 IASParmsSetRasUser0
+9 IASParmsSetUserProperty

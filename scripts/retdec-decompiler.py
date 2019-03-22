@@ -393,7 +393,7 @@ class Decompiler:
         for sigfile in self.args.static_code_sigfile:
             # User provided signature file.
             if not os.path.isfile(sigfile):
-                utils.print_error('Invalid .yara file \'%s\'' % sigfile)
+                utils.print_error('Invalid YARA file \'%s\'' % sigfile)
                 return False
 
         if self.args.selected_ranges:

@@ -1962,6 +1962,7 @@ void ElfFormat::loadSections()
 		fSec->setElfLink(sec->get_link());
 		fSec->setNumberOfSections(noOfSections);
 		fSec->setArchByteSize(getBytesPerWord());
+		fSec->computeEntropy();
 		sections.push_back(fSec);
 	}
 

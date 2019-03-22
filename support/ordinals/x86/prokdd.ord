@@ -1,0 +1,6 @@
+2 read_port_uchar
+3 write_port_uchar
+4 read_port_ushort
+5 write_port_ushort
+6 read_port_ulong
+7 write_port_ulong

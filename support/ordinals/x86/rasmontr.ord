@@ -1,0 +1,14 @@
+1 GetDiagnosticFunctions
+2 InitHelperDll
+3 RutlAlloc
+4 RutlAssignmentFromTokenAndDword
+5 RutlAssignmentFromTokens
+6 RutlCloseDumpFile
+7 RutlCreateDumpFile
+8 RutlDwordDup
+9 RutlFree
+10 RutlGetOsVersion
+11 RutlGetTagToken
+12 RutlIsHelpToken
+13 RutlParse
+14 RutlStrDup

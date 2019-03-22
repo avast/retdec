@@ -1,0 +1,5 @@
+1 DISKCOPY_1
+2 DiskCopyRunDll
+3 DiskCopyRunDllW
+4 DllCanUnloadNow
+5 DllGetClassObject

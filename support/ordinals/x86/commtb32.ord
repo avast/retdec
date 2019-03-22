@@ -1,0 +1,17 @@
+1 TB_GetVersion
+2 TB_CreateMask
+3 TB_EditButton
+4 TB_DialogBoxProc
+5 TB_EditorFunc
+6 TB_ColorBtnFunc
+7 TB_IconFunc
+8 TB_GetSize
+9 TB_DrawButton
+10 TB_CreateDisable
+11 WIN_BitMapToDIB
+12 WIN_DIBToBitMap
+13 WIN_TransformBitMap
+14 WIN_BitMapToDIBPtr
+15 WIN_DIBPtrToBitMap
+16 WIN_TransformBitMapPtr
+17 WIN_SysColorChange

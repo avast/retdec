@@ -22,6 +22,17 @@ std::ios_base& hexWithPrefix(std::ios_base &str)
 }
 
 /**
+ * Formatter for truncated real numbers
+ */
+std::ios_base& truncFloat(std::ios_base &str)
+{
+	str.setf(std::ios_base::dec, std::ios::basefield);
+	str.setf(std::ios::fixed);
+	str.precision(3);
+	return str;
+}
+
+/**
  * Divide @a str into individual strings separated by a null character ('\0')
  * @param str Input string
  * @param words Into this parameter the separated strings are saved

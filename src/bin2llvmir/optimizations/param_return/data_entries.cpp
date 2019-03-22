@@ -47,9 +47,7 @@ void ReturnEntry::setRetStores(std::vector<llvm::StoreInst*>&& stores)
 		vals.insert(i->getPointerOperand());
 	}
 
-	_retValues = std::vector<Value*>(
-				std::make_move_iterator(vals.begin()),
-				std::make_move_iterator(vals.end()));
+	_retValues.assign(vals.begin(), vals.end());
 }
 
 void ReturnEntry::setRetStores(const std::vector<llvm::StoreInst*>& stores)
@@ -62,9 +60,7 @@ void ReturnEntry::setRetStores(const std::vector<llvm::StoreInst*>& stores)
 		vals.insert(i->getPointerOperand());
 	}
 
-	_retValues = std::vector<Value*>(
-				std::make_move_iterator(vals.begin()),
-				std::make_move_iterator(vals.end()));
+	_retValues.assign(vals.begin(), vals.end());
 }
 
 void ReturnEntry::setRetValues(std::vector<llvm::Value*>&& values)
@@ -304,9 +300,7 @@ void CallEntry::setArgStores(std::vector<llvm::StoreInst*>&& stores)
 		vals.insert(i->getPointerOperand());
 	}
 
-	_args.assign(
-		std::make_move_iterator(vals.begin()),
-		std::make_move_iterator(vals.end()));
+	_args.assign(vals.begin(), vals.end());
 }
 
 void CallEntry::setArgs(std::vector<Value*>&& args)
@@ -336,9 +330,7 @@ void CallEntry::setRetLoads(std::vector<LoadInst*>&& loads)
 	{
 		vals.insert(i->getPointerOperand());
 	}
-	_retValues = std::vector<llvm::Value*>(
-			std::make_move_iterator(vals.begin()),
-			std::make_move_iterator(vals.end()));
+	_retValues.assign(vals.begin(), vals.end());
 }
 
 void CallEntry::setRetValues(std::vector<llvm::Value*>&& values)

@@ -118,6 +118,11 @@ void MachODetector::getSections()
 		fsec.setMemoryAlignment(pow(2, mSec->getAlignment()));
 		fsec.setRelocationsOffset(mSec->getRelocationOffset());
 		fsec.setNumberOfRelocations(mSec->getNumberOfRelocations());
+		double entropy;
+		if(sec->getEntropy(entropy))
+		{
+			fsec.setEntropy(entropy);
+		}
 		fileInfo.addSection(fsec);
 	}
 }

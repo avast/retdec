@@ -1,0 +1,10 @@
+1 LogonScheduleDialog
+2 ConnectionScheduleDialog
+3 DialinHoursDialog
+4 DirSyncScheduleDialog
+5 LogonScheduleDialogEx
+6 DialinHoursDialogEx
+7 ReplicationScheduleDialog
+8 ReplicationScheduleDialogEx
+9 ConnectionScheduleDialogEx
+10 DirSyncScheduleDialogEx

@@ -1,0 +1,5 @@
+1 AcsLan
+2 DlcCallDriver
+3 GetAdapterNameFromNumber
+4 GetAdapterNumberFromName
+5 NtAcsLan

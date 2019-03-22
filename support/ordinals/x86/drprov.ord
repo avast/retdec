@@ -1,0 +1,11 @@
+1 NPAddConnection
+2 NPAddConnection3
+3 NPCancelConnection
+4 NPCloseEnum
+5 NPEnumResource
+6 NPGetCaps
+7 NPGetConnection
+8 NPGetResourceInformation
+9 NPGetResourceParent
+10 NPGetUniversalName
+12 NPOpenEnum

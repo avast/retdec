@@ -1,0 +1,14 @@
+2 IID_IRichEditOle
+3 IID_IRichEditOleCallback
+4 CreateTextServices
+5 IID_ITextServices
+6 IID_ITextHost
+7 IID_ITextHost2
+8 REExtendedRegisterClass
+9 RichEditANSIWndProc
+10 RichEdit10ANSIWndProc
+11 SetCustomTextOutHandlerEx
+12 DllGetVersion
+13 RichEditWndProc
+14 RichListBoxWndProc
+15 RichComboBoxWndProc

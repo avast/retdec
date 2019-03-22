@@ -1,0 +1,13 @@
+1 InitHelperDll
+2 IpmontrDeleteInfoBlockFromInterfaceInfo
+3 IpmontrDeleteProtocol
+4 IpmontrGetFriendlyNameFromIfIndex
+5 IpmontrGetFriendlyNameFromIfName
+6 IpmontrGetIfIndexFromFriendlyName
+7 IpmontrGetIfNameFromFriendlyName
+8 IpmontrGetInfoBlockFromGlobalInfo
+9 IpmontrGetInfoBlockFromInterfaceInfo
+10 IpmontrGetInterfaceType
+11 IpmontrInterfaceEnum
+12 IpmontrSetInfoBlockInGlobalInfo
+13 IpmontrSetInfoBlockInInterfaceInfo

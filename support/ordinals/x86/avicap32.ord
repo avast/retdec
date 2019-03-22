@@ -1,0 +1,6 @@
+1 AppCleanup
+2 capCreateCaptureWindowA
+3 capCreateCaptureWindowW
+4 capGetDriverDescriptionA
+5 capGetDriverDescriptionW
+6 videoThunk32

@@ -85,9 +85,10 @@ protected:
 private:
 	bool performTraversalImpl(ShPtr<CFG::Node> startNode,
 		CFG::stmt_iterator startStmtIter);
+	std::pair<bool, bool> visitSingleNode(CFG::stmt_iterator startStmtIter,
+		CFG::stmt_iterator endStmtIter);
 	bool performReverseTraversalImpl(ShPtr<CFG::Node> startNode,
 		CFG::stmt_reverse_iterator startStmtRIter);
-	bool traverseNodeSuccessors(ShPtr<CFG::Node> node);
 	bool traverseNodePredecessors(ShPtr<CFG::Node> node);
 };
 

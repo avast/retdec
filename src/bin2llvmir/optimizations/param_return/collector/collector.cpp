@@ -164,8 +164,8 @@ void Collector::collectStoresBeforeInstruction(
 
 	stores.insert(
 		stores.end(),
-		std::make_move_iterator(afterStores.begin()),
-		std::make_move_iterator(afterStores.end()));
+		afterStores.begin(),
+		afterStores.end());
 
 	stores.erase(
 		std::remove_if(

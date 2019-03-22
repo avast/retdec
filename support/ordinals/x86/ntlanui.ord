@@ -1,0 +1,10 @@
+1 ShareAsDialogA0
+2 StopShareDialogA0
+3 _DllMain@12
+4 I_SystemFocusDialog
+5 NPGetPropertyText
+6 NPPropertyDialog
+7 ServerBrowseDialogA0
+8 ShareCreate
+9 ShareManage
+10 ShareStop

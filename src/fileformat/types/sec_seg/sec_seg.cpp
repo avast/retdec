@@ -25,8 +25,8 @@ namespace fileformat {
  * Constructor
  */
 SecSeg::SecSeg() : type(Type::UNDEFINED_SEC_SEG), index(0), offset(0), fileSize(0),
-	address(0), memorySize(0), entrySize(0), memorySizeIsValid(false),
-	entrySizeIsValid(false), isInMemory(false), loaded(false)
+	address(0), memorySize(0), entrySize(0), entropy(0), memorySizeIsValid(false),
+	entrySizeIsValid(false), isInMemory(false), loaded(false), isEntropyValid(false)
 {
 
 }
@@ -375,6 +375,21 @@ bool SecSeg::getMemory() const
 }
 
 /**
+ * Get entropy of section data
+ * @param res Variable to store result to
+ * @return @c true if entropy is valid, otherwise @c false
+ */
+bool SecSeg::getEntropy(double &res) const
+{
+	if (!isEntropyValid)
+	{
+		return false;
+	}
+	res = entropy;
+	return true;
+}
+
+/**
  * Get content of section or segment as bits
  * @param sResult Read bits in string representation
  * @return @c true if operation went OK, @c false otherwise
@@ -519,6 +534,27 @@ void SecSeg::setSizeOfOneEntry(unsigned long long sEntrySize)
 void SecSeg::setMemory(bool sMemory)
 {
 	isInMemory = sMemory;
+}
+
+/**
+ * Compute entropy of section data in <0,1>
+ */
+void SecSeg::computeEntropy()
+{
+	if (!loaded)
+	{
+		return;
+	}
+	
+	auto data = reinterpret_cast<const uint8_t *>(bytes.data());
+	auto size = bytes.size();
+	if (!data || size == 0)
+	{
+		return;
+	}
+
+	entropy = computeDataEntropy(data, size);
+	isEntropyValid = true;
 }
 
 /**

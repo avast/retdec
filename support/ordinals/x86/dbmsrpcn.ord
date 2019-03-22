@@ -1,0 +1,16 @@
+1 ConnectionObjectSize
+2 ConnectionRead
+3 ConnectionWrite
+4 ConnectionClose
+5 ConnectionError
+6 ConnectionVer
+7 ConnectionTransact
+8 ConnectionWriteOOB
+9 ConnectionMode
+10 ConnectionStatus
+11 ConnectionOpen
+12 ConnectionServerEnumW
+13 ConnectionCheckForData
+14 ConnectionOpenW
+15 ConnectionErrorW
+16 ConnectionServerEnumW

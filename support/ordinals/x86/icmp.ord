@@ -1,0 +1,8 @@
+1 IcmpCloseHandle
+2 IcmpCreateFile
+3 IcmpParseReplies
+4 IcmpSendEcho2
+5 IcmpSendEcho
+6 do_echo_rep
+7 do_echo_req
+8 register_icmp

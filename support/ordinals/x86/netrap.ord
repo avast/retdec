@@ -1,0 +1,14 @@
+1 RapArrayLength
+2 RapAsciiToDecimal
+3 RapAuxDataCount
+4 RapAuxDataCountOffset
+5 RapConvertSingleEntry
+6 RapConvertSingleEntryEx
+7 RapExamineDescriptor
+8 RapGetFieldSize
+9 RapIsValidDescriptorSmb
+10 RapLastPointerOffset
+11 RapParmNumDescriptor
+12 RapStructureAlignment
+13 RapStructureSize
+14 RapTotalSize

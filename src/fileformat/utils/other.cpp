@@ -4,6 +4,8 @@
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */
 
+#include <array>
+#include <cmath>
 #include <map>
 #include <unordered_map>
 
@@ -304,6 +306,39 @@ std::string lcidToStr(std::size_t lcid)
 		return numToStr(lcid, std::dec);
 	}
 	return l->second;
+}
+
+/*
+ * Compute entropy of given data
+ * @param data Data to compute entropy from
+ * @param dataLen Length of @a data
+ * @return entropy in <0,8>
+ */
+double computeDataEntropy(const std::uint8_t *data, std::size_t dataLen)
+{
+	std::array<std::size_t, 256> histogram{};
+	double entropy = 0;
+
+	if (!data)
+	{
+		return 0;
+	}
+
+	for (std::size_t i = 0; i < dataLen; i++)
+	{
+		histogram[data[i]]++;
+	}
+
+	for (auto frequency : histogram)
+	{
+		if (frequency)
+		{
+			double probability = static_cast<double>(frequency) / dataLen;
+			entropy -= probability * std::log2(probability);
+		}
+	}
+
+	return entropy;
 }
 
 } // namespace fileformat

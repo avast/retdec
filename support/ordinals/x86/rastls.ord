@@ -1,0 +1,14 @@
+1 DllCanUnloadNow
+2 DllGetClassObject
+3 DllRegisterServer
+4 DllUnregisterServer
+5 PeapUpdateStateToTLV
+6 RasEapCreateConnectionProperties
+7 RasEapCreateUserProperties
+8 RasEapFreeMemory
+9 RasEapGetCredentials
+10 RasEapGetIdentity
+11 RasEapGetInfo
+12 RasEapInvokeConfigUI
+13 RasEapInvokeInteractiveUI
+14 RasEapUpdateServerConfig

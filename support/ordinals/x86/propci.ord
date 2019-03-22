@@ -1,0 +1,10 @@
+1 FindPCIDevices
+2 PciReadConfigByte
+3 PciReadConfigWord
+4 PciReadConfigDWord
+5 PciWriteConfigByte
+6 PciWriteConfigWord
+7 PciWriteConfigDWord
+8 PciEnableConfigSpace
+9 PciDisableConfigSpace
+10 ReadEEprom

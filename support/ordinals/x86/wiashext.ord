@@ -1,0 +1,9 @@
+1 AddDeviceWasChosenA
+2 AddDeviceWasChosenA
+3 AddDeviceWasChosenW
+4 MakeFullPidlForDevice
+5 DllCanUnloadNow
+6 DllGetClassObject
+7 DllRegisterServer
+8 DllUnregisterServer
+9 DoDeleteAllItems

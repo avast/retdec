@@ -1,0 +1,15 @@
+1 GetFileVersionInfoA
+2 GetFileVersionInfoByHandle
+3 GetFileVersionInfoExW
+4 GetFileVersionInfoSizeA
+5 GetFileVersionInfoSizeExW
+6 GetFileVersionInfoSizeW
+7 GetFileVersionInfoW
+8 VerFindFileA
+9 VerFindFileW
+10 VerInstallFileA
+11 VerInstallFileW
+12 VerLanguageNameA
+13 VerLanguageNameW
+14 VerQueryValueA
+15 VerQueryValueW

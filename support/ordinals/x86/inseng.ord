@@ -1,0 +1,12 @@
+1 CheckForVersionConflict
+2 CheckTrust
+3 CheckTrustEx
+4 DllCanUnloadNow
+5 DllGetClassObject
+6 DllInstall
+7 DllRegisterServer
+8 DllUnregisterServer
+9 DownloadFile
+10 GetICifFileFromFile
+11 GetICifRWFileFromFile
+12 PurgeDownloadDirectory

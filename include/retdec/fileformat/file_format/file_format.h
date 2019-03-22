@@ -198,6 +198,7 @@ class FileFormat : public retdec::utils::ByteValueStorage, private retdec::utils
 		std::size_t getFileLength() const;
 		std::size_t getLoadedFileLength() const;
 		std::size_t getOverlaySize() const;
+		bool getOverlayEntropy(double &res) const;
 		std::size_t nibblesFromBytes(std::size_t bytes) const;
 		std::size_t bytesFromNibbles(std::size_t nibbles) const;
 		std::size_t bytesFromNibblesRounded(std::size_t nibbles) const;

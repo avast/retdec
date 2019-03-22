@@ -1,0 +1,6 @@
+1 PNP_GetDeviceList
+2 PNP_GetDeviceListSize
+3 PNP_HwProfFlags
+4 PNP_ReportLogOn
+5 PNP_SetActiveService
+6 ServiceEntry
