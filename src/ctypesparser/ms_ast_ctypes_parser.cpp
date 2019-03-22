@@ -94,7 +94,7 @@ std::shared_ptr<ctypes::Function> MsToCtypesParser::parseFunction(
 	std::shared_ptr<ctypes::Type> returnType = parseType(funcSignature->ReturnType);
 	ctypes::CallConvention callConvention = parseCallConvention(funcSignature->CallConvention);
 	ctypes::Function::Parameters parameters = parseFunctionParameters(funcSignature->Params);
-	ctypes::Function::VarArgness varArgness = parseVarArgness(funcSignature->IsVariadic);
+	ctypes::Function::VarArgness varArgness = toVarArgness(funcSignature->IsVariadic);
 
 	return ctypes::Function::create(context, name, returnType, parameters, callConvention, varArgness);
 }
@@ -238,15 +238,6 @@ ctypes::Function::Parameters MsToCtypesParser::parseFunctionParameters(
 	return params;
 }
 
-ctypes::FunctionType::VarArgness MsToCtypesParser::parseVarArgness(bool isVarArg)
-{    // TODO to parent class
-	if (isVarArg) {
-		return ctypes::FunctionType::VarArgness::IsVarArg;
-	} else {
-		return ctypes::FunctionType::VarArgness::IsNotVarArg;
-	}
-}
-
 std::shared_ptr<ctypes::Type> MsToCtypesParser::parsePointerType(
 	llvm::ms_demangle::PointerTypeNode *typeNode)
 {
@@ -319,7 +310,7 @@ std::shared_ptr<ctypes::FunctionType> MsToCtypesParser::parseFuncType(
 	auto callingConvention = parseCallConvention(funcSignature->CallConvention);
 	auto returnType = parseType(funcSignature->ReturnType);
 	auto parameters = parseFuncTypeParameters(funcSignature->Params);
-	auto varArgness = parseVarArgness(funcSignature->IsVariadic);
+	auto varArgness = toVarArgness(funcSignature->IsVariadic);
 
 	return ctypes::FunctionType::create(context, returnType, parameters, callingConvention, varArgness);
 }

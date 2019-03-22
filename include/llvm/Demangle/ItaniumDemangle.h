@@ -340,6 +340,10 @@ public:
   }
 
   void printRight(OutputStream &S) const override { Child->printRight(S); }
+
+  // RetDec {
+  const Node *getChild() const { return Child; }
+  // } RetDec
 };
 
 class ConversionOperatorType final : public Node {
@@ -502,6 +506,10 @@ public:
       Pointee->printRight(s);
     }
   }
+
+  // RetDec {
+  const Node *getPointee() const  { return Pointee; }
+  // } RetDec
 };
 
 enum class ReferenceKind {
@@ -565,6 +573,10 @@ public:
       s += ")";
     Collapsed.second->printRight(s);
   }
+
+  // RetDec {
+  const Node *getPointee() const { return Pointee; }
+  // } RetDec
 };
 
 class PointerToMemberType final : public Node {
@@ -664,6 +676,12 @@ public:
     S += "]";
     Base->printRight(S);
   }
+
+  // RetDec {
+  const Node *getBase() const { return Base; }
+
+  const NodeOrString *getDimension() const { return &Dimension;}
+  // } RetDec
 };
 
 class FunctionType final : public Node {
@@ -724,6 +742,11 @@ public:
       ExceptionSpec->print(S);
     }
   }
+
+  // RetDec {
+  const Node *getReturnType() const { return Ret; }
+  NodeArray getParameters() const { return Params; }
+  // } RetDec
 };
 
 class NoexceptSpec : public Node {

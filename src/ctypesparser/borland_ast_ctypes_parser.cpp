@@ -65,14 +65,13 @@ std::shared_ptr<retdec::ctypes::Function> BorlandToCtypesParser::parseFunction(s
 	std::shared_ptr<ctypes::Type> returnType = parseType(funcType->retType());
 	ctypes::Function::Parameters parameters = parseFuncParameters(funcType->params());
 	ctypes::CallConvention callConvention = parseCallConvention(funcType->callConv());
-	ctypes::Function::VarArgness varArgness = parseVarArgness(funcType->isVarArg());
+	ctypes::Function::VarArgness varArgness = toVarArgness(funcType->isVarArg());
 
 	return ctypes::Function::create(context, name, returnType, parameters, callConvention, varArgness);
 }
 
 std::shared_ptr<ctypes::Type> BorlandToCtypesParser::parseType(std::shared_ptr<retdec::demangler::borland::TypeNode> typeNode)
 {
-	// TODO function type
 	if (typeNode) {
 		switch (typeNode->kind()) {
 		case Kind::KIntegralType: {
@@ -272,22 +271,13 @@ ctypes::CallConvention BorlandToCtypesParser::parseCallConvention(retdec::demang
 	}
 }
 
-ctypes::FunctionType::VarArgness BorlandToCtypesParser::parseVarArgness(bool isVarArg)
-{
-	if (isVarArg) {
-		return ctypes::FunctionType::VarArgness::IsVarArg;
-	} else {
-		return ctypes::FunctionType::VarArgness::IsNotVarArg;
-	}
-}
-
 std::shared_ptr<ctypes::FunctionType> BorlandToCtypesParser::parsefuncType(
 	std::shared_ptr<retdec::demangler::borland::FunctionTypeNode> funcTypeNode)
 {
 	std::shared_ptr<ctypes::Type> returnType = parseType(funcTypeNode->retType());
 	ctypes::FunctionType::Parameters parameters = parseFuncTypeParameters(funcTypeNode->params());
 	ctypes::CallConvention callConvention = parseCallConvention(funcTypeNode->callConv());
-	ctypes::Function::VarArgness varArgness = parseVarArgness(funcTypeNode->isVarArg());
+	ctypes::Function::VarArgness varArgness = toVarArgness(funcTypeNode->isVarArg());
 
 	return ctypes::FunctionType::create(context, returnType, parameters, callConvention, varArgness);
 }

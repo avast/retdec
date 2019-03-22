@@ -19,5 +19,12 @@ ctypes::IntegralType::Signess AstToCtypesParser::toSigness(const std::string &ty
 	return utils::mapGetValueOrDefault(typeSignedness, typeName, ctypes::IntegralType::Signess::Signed);
 }
 
+ctypes::FunctionType::VarArgness AstToCtypesParser::toVarArgness(bool isVarArg)
+{
+	using VarArgness = ctypes::Function::VarArgness;
+
+	return isVarArg ? VarArgness::IsVarArg : VarArgness::IsNotVarArg;
+}
+
 }
 }

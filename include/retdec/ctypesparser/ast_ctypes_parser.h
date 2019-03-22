@@ -10,10 +10,12 @@ class AstToCtypesParser: public CTypesParser {
 public:
 	AstToCtypesParser () = default;
 
-//protected:
+protected:
 	ctypes::IntegralType::Signess toSigness(bool isUnsigned);
 
 	ctypes::IntegralType::Signess toSigness(const std::string &typeName);
+
+	ctypes::FunctionType::VarArgness toVarArgness(bool isVarArg);
 };
 
 }

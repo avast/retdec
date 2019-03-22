@@ -15,8 +15,15 @@
 
 namespace llvm {
 namespace itanium_demangle {
-class Node;
 class FunctionEncoding;
+class FunctionType;
+class NameType;
+class NodeArray;
+class Node;
+class PointerType;
+class ReferenceType;
+class ArrayType;
+class NodeOrString;
 }
 }
 
@@ -37,7 +44,19 @@ public:
 private:
 	std::shared_ptr<ctypes::Function> parseFunction(const llvm::itanium_demangle::FunctionEncoding *functionEncodingNode);
 	std::string parseFunctionName(const llvm::itanium_demangle::Node *node);
+	ctypes::Function::Parameters parseFunctionParameters(
+		llvm::itanium_demangle::NodeArray node, bool &isVarArg);
 	std::shared_ptr<ctypes::Type> parseType(const llvm::itanium_demangle::Node *typeNode);
+	std::shared_ptr<ctypes::IntegralType> parseIntegralType(const std::string &name);
+	std::shared_ptr<ctypes::FloatingPointType> parseFloatingPointType(const std::string &name);
+	std::shared_ptr<ctypes::PointerType> parsePointer(const llvm::itanium_demangle::PointerType *typeNode);
+	std::shared_ptr<ctypes::ReferenceType> parseReference(const llvm::itanium_demangle::ReferenceType *typeNode);
+	std::shared_ptr<ctypes::Type> parseNameTypeNode(const llvm::itanium_demangle::NameType *nameTypeNode);
+	std::shared_ptr<ctypes::ArrayType> parseArrayType(const llvm::itanium_demangle::ArrayType *typeNode);
+	unsigned parseDimension(const llvm::itanium_demangle::NodeOrString *dimensions);
+	std::shared_ptr<ctypes::FunctionType> parseFuntionType(const llvm::itanium_demangle::FunctionType *typeNode);
+	ctypes::FunctionType::Parameters parseFuncTypeParameters(const llvm::itanium_demangle::NodeArray parameters,
+																 bool &isVarArg);
 };
 
 }
