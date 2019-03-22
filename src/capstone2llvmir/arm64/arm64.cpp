@@ -2721,7 +2721,14 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateFMov(cs_insn* i, cs_arm64* ai
 	EXPECT_IS_BINARY(i, ai, irb);
 
 	op1 = loadOp(ai->operands[1], irb);
-	op1 = irb.CreateBitCast(op1, getRegisterType(ai->operands[0].reg));
+	if (ai->operands[1].type == ARM64_OP_FP)
+	{
+		op1 = generateTypeConversion(irb, op1, getRegisterType(ai->operands[0].reg), eOpConv::FP_CAST);
+	}
+	else
+	{
+		op1 = irb.CreateBitCast(op1, getRegisterType(ai->operands[0].reg));
+	}
 
 	storeOp(ai->operands[0], op1, irb);
 }
