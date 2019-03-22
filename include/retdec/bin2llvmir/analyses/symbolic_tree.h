@@ -109,7 +109,6 @@ class SymbolicTree
 		static void setToDefaultConfiguration();
 		static void setTrackThroughAllocaLoads(bool b);
 		static void setTrackThroughGeneralRegisterLoads(bool b);
-		static void setTrackThroughStackPointerRegister(bool b);
 		static void setTrackOnlyFlagRegisters(bool b);
 		static void setSimplifyAtCreation(bool b);
 		static void setNaryLimit(unsigned n);
@@ -120,7 +119,6 @@ class SymbolicTree
 		static bool _val2valUsed;
 		static bool _trackThroughAllocaLoads;
 		static bool _trackThroughGeneralRegisterLoads;
-		static bool _trackThroughStackPointerRegister;
 		static bool _trackOnlyFlagRegisters;
 		static bool _simplifyAtCreation;
 		static unsigned _naryLimit;

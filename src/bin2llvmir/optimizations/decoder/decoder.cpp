@@ -104,8 +104,6 @@ bool Decoder::run()
 		return false;
 	}
 
-	SymbolicTree::setTrackThroughStackPointerRegister(false);
-
 	initTranslator();
 	initDryRunCsInstruction();
 	initEnvironment();
@@ -140,8 +138,6 @@ bool Decoder::run()
 	}
 
 	initializeGpReg_mips();
-
-	SymbolicTree::setToDefaultConfiguration();
 
 	return false;
 }
