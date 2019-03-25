@@ -576,6 +576,7 @@ public:
 
   // RetDec {
   const Node *getPointee() const { return Pointee; }
+  ReferenceKind getReferenceKind() const { return RK; }
   // } RetDec
 };
 

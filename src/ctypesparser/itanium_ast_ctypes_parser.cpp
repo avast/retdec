@@ -193,7 +193,7 @@ std::shared_ptr<ctypes::PointerType> ItaniumAstCtypesParser::parsePointer(
 	return ctypes::PointerType::create(context, pointee, bitWidth);
 }
 
-std::shared_ptr<ctypes::ReferenceType> ItaniumAstCtypesParser::parseReference(
+std::shared_ptr<ctypes::Type> ItaniumAstCtypesParser::parseReference(
 	const llvm::itanium_demangle::ReferenceType *typeNode)
 {
 	assert(typeNode && "Violated precondition.");
@@ -201,7 +201,12 @@ std::shared_ptr<ctypes::ReferenceType> ItaniumAstCtypesParser::parseReference(
 	auto pointee = parseType(typeNode->getPointee());
 	unsigned bitWidth = utils::mapGetValueOrDefault(typeWidths, "reference", defaultBitWidth);
 
-	return ctypes::ReferenceType::create(context, pointee, bitWidth);
+	using RefrenceKind = llvm::itanium_demangle::ReferenceKind;
+	if (typeNode->getReferenceKind() == RefrenceKind::LValue) {
+		return ctypes::ReferenceType::create(context, pointee, bitWidth);
+	} else {
+		return ctypes::UnknownType::create();	// TODO r-value refrence
+	}
 }
 
 std::shared_ptr<ctypes::Type> ItaniumAstCtypesParser::parseNameTypeNode(

@@ -50,7 +50,7 @@ private:
 	std::shared_ptr<ctypes::IntegralType> parseIntegralType(const std::string &name);
 	std::shared_ptr<ctypes::FloatingPointType> parseFloatingPointType(const std::string &name);
 	std::shared_ptr<ctypes::PointerType> parsePointer(const llvm::itanium_demangle::PointerType *typeNode);
-	std::shared_ptr<ctypes::ReferenceType> parseReference(const llvm::itanium_demangle::ReferenceType *typeNode);
+	std::shared_ptr<ctypes::Type> parseReference(const llvm::itanium_demangle::ReferenceType *typeNode);
 	std::shared_ptr<ctypes::Type> parseNameTypeNode(const llvm::itanium_demangle::NameType *nameTypeNode);
 	std::shared_ptr<ctypes::ArrayType> parseArrayType(const llvm::itanium_demangle::ArrayType *typeNode);
 	unsigned parseDimension(const llvm::itanium_demangle::NodeOrString *dimensions);

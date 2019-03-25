@@ -11,7 +11,8 @@ ctypes::IntegralType::Signess AstToCtypesParser::toSigness(bool isUnsigned)
 
 ctypes::IntegralType::Signess AstToCtypesParser::toSigness(const std::string &typeName)
 {
-	if (typeName.substr(0, 9) == "unsigned ") {
+	if (typeName.substr(0, 9) == "unsigned "
+		|| typeName.substr(0, 4) == "uint") {
 		return ctypes::IntegralType::Signess::Unsigned;
 	}
 
