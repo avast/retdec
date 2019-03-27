@@ -9,57 +9,12 @@
 
 #include <llvm/IR/Module.h>
 
-#include "retdec/ctypes/context.h"
-#include "retdec/ctypes/module.h"
-#include "retdec/ctypes/type.h"
-#include "retdec/ctypes/visitor.h"
 #include "retdec/ctypesparser/json_ctypes_parser.h"
 #include "retdec/bin2llvmir/providers/config.h"
 #include "retdec/bin2llvmir/providers/fileimage.h"
 
 namespace retdec {
 namespace bin2llvmir {
-
-class ToLlvmTypeVisitor: public retdec::ctypes::Visitor
-{
-	public:
-		ToLlvmTypeVisitor(llvm::Module* m, Config* c);
-		virtual ~ToLlvmTypeVisitor() override;
-
-		virtual void visit(
-				const std::shared_ptr<retdec::ctypes::ArrayType>&) override;
-		virtual void visit(
-				const std::shared_ptr<retdec::ctypes::EnumType>&) override;
-		virtual void visit(
-				const std::shared_ptr<retdec::ctypes::FloatingPointType>&) override;
-		virtual void visit(
-				const std::shared_ptr<retdec::ctypes::FunctionType>&) override;
-		virtual void visit(
-				const std::shared_ptr<retdec::ctypes::IntegralType>&) override;
-		virtual void visit(
-				const std::shared_ptr<retdec::ctypes::NamedType>&) override;
-		virtual void visit(
-				const std::shared_ptr<retdec::ctypes::PointerType>&) override;
-		virtual void visit(
-				const std::shared_ptr<retdec::ctypes::ReferenceType>&) override;
-		virtual void visit(
-				const std::shared_ptr<retdec::ctypes::StructType>&) override;
-		virtual void visit(
-				const std::shared_ptr<retdec::ctypes::TypedefedType>&) override;
-		virtual void visit(
-				const std::shared_ptr<retdec::ctypes::UnionType>&) override;
-		virtual void visit(
-				const std::shared_ptr<retdec::ctypes::UnknownType>&) override;
-		virtual void visit(
-				const std::shared_ptr<retdec::ctypes::VoidType>&) override;
-
-		llvm::Type* getLlvmType() const;
-
-	private:
-		llvm::Module* _module = nullptr;
-		Config* _config = nullptr;
-		llvm::Type* _type = nullptr;
-};
 
 class Lti
 {

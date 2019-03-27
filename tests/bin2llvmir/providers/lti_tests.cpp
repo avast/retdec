@@ -16,6 +16,7 @@
 #include "retdec/ctypes/void_type.h"
 #include "retdec/bin2llvmir/providers/lti.h"
 #include "bin2llvmir/utils/llvmir_tests.h"
+#include "retdec/bin2llvmir/utils/ctypes2llvm.h"
 
 using namespace ::testing;
 using namespace llvm;
@@ -26,7 +27,7 @@ namespace tests {
 
 //
 //=============================================================================
-//  ToLlvmTypeVisitor
+//  Ctypes2LlvmTypeVisitor
 //=============================================================================
 //
 
@@ -47,7 +48,7 @@ class ToLlvmTypeVisitorTests: public LlvmIrTests
 	public:
 		std::shared_ptr<retdec::ctypes::Context> ctx;
 		Config config;
-		ToLlvmTypeVisitor visitor;
+		Ctypes2LlvmTypeVisitor visitor;
 };
 
 TEST_F(ToLlvmTypeVisitorTests, convertArrayType)
