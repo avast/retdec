@@ -32,6 +32,11 @@ TEST_F(BorlandDemanglerTests, BasicTest)
 	DEM_EQ("@myFunc_int_$qi", "myFunc_int_(int)");
 }
 
+TEST_F(BorlandDemanglerTests, EmptyTest)
+{
+	DEM_FAIL("", status::invalid_mangled_name);
+}
+
 TEST_F(BorlandDemanglerTests, CallConhventionsTests)
 {
 	/* cdecl and pascal cant be differenciated from mangled name */
@@ -71,6 +76,8 @@ TEST_F(BorlandDemanglerTests, BasicParametersTests)
 	DEM_EQ("@myFunc_all_$qsusiuiluljujzcuccfdgoCsCib",
 		   "myFunc_all_(short, unsigned short, int, unsigned int, long, unsigned long, long long, unsigned long long, signed char, unsigned char, char, float, double, long double, bool, char16_t, char32_t, wchar_t)");
 	DEM_EQ("@foo$qie", "foo(int, ...)");
+	DEM_EQ("@foo$qN", "foo(nullptr_t)");
+	// auto not supported in C++11
 }
 
 TEST_F(BorlandDemanglerTests, MoreComplicatedParameters)
@@ -147,6 +154,10 @@ TEST_F(BorlandDemanglerTests, RandomTests)
 	DEM_EQ(
 		"@Sqlexpr@TSQLConnection@SQLError$qqrus25Sqlexpr@TSQLExceptionTypex48System@%DelphiInterface$t20Dbxpress@ISQLCommand%",
 		"__fastcall Sqlexpr::TSQLConnection::SQLError(unsigned short, Sqlexpr::TSQLExceptionType, const System::DelphiInterface<Dbxpress::ISQLCommand>)");
+
+	DEM_EQ(
+		"@std@%basic_string$c19std@%char_traits$c%17std@%allocator$c%%@_Xlen$xqv",
+		"std::basic_string<char, std::char_traits<char>, std::allocator<char>>::_Xlen(void) const");
 }
 
 TEST_F(BorlandDemanglerTests, ArrayTests)
@@ -185,6 +196,8 @@ TEST_F(BorlandDemanglerTests, TemplateTests)
 		"@%foo$60std@%basic_string$c19std@%char_traits$c%17std@%allocator$c%%%$q60std@%basic_string$c19std@%char_traits$c%17std@%allocator$c%%$v",
 		"void foo<std::basic_string<char, std::char_traits<char>, std::allocator<char>>>(std::basic_string<char, std::char_traits<char>, std::allocator<char>>)");
 	DEM_EQ("@%adder$iVii%$qiii$i", "int adder<int, int, int>(int, int, int)");	// variadic templates demangle as non variadic
+	DEM_EQ("@std@%basic_ios$c19std@%char_traits$c%%@fill$xqv", "std::basic_ios<char, std::char_traits<char>>::fill(void) const");
+	DEM_EQ("@std@$bror$qr22std@%_Iosb$i%@_Iostate22std@%_Iosb$i%@_Iostate", ""); //TODO
 }
 
 TEST_F(BorlandDemanglerTests, NamedTypes)
@@ -250,6 +263,11 @@ TEST_F(BorlandDemanglerTests, Operators)
 	DEM_EQ("@Foo@$bdla$qpv", "Foo::operator delete[](void *)");
 	DEM_EQ("@Foo@$o3Bar$qv", "Foo::operator Bar(void)");	// TODO test with template?
 	DEM_EQ("@Foo@$oi$qv", "Foo::operator int(void)");
+	DEM_EQ("@Foo@$bctr$qv", "Foo::Foo(void)");
+	DEM_EQ("@Foo@$bctr2$qv", "Foo::Foo(void)");
+	DEM_EQ("@Foo@$bdtr1$qv", "Foo::~Foo(void)");
+	DEM_EQ("@Foo@$bdtr2$qv", "Foo::~Foo(void)");
+	DEM_EQ("@std@error_category@$beql$xqrx18std@error_category", "std::error_category::operator==(const std::error_category &) const");
 }
 
 TEST_F(BorlandDemanglerTests, FunctionPointers)
@@ -275,6 +293,44 @@ TEST_F(BorlandDemanglerTests, FailTests)
 TEST_F(BorlandDemanglerTests, FakeStubTest)
 {
 	DEM_EQ("Lllvm$workaround$fake$stub$@%$badd$3Bar%$q3Bart1$3Bar", "Bar Lllvm::workaround::fake::stub::operator+<Bar>(Bar, Bar)");
+	DEM_EQ("Lllvm$workaround$fake$stub$@Bar@$bctr$qv", "Lllvm::workaround::fake::stub::Bar::Bar(void)");
+}
+
+TEST_F(BorlandDemanglerTests, Exceptions)
+{
+	DEM_EQ("@std@_Xlength_error$qpxc", "std::length_error::length_error(const char *)");
+}
+
+TEST_F(BorlandDemanglerTests, NonClassTemplates)
+{
+	DEM_EQ("@%foo_int$i$i1$%$qv$v",
+		"void foo_int<1>(void)");
+	DEM_EQ("@%foo_enum$6MyEnum$i1$%$qv$v",
+		"void foo_enum<(MyEnum)1>()");
+	DEM_EQ("@%foo_obj_ptr$X$badrp3Bar$g@bar$E%$qv$v",
+		"void foo_obj_ptr<&bar>(void)");
+	DEM_EQ("@%foo_func_ptr$X$badrpqv$v$g@fakefunc$qv$E%$qv$v",
+		"void foo_func_ptr<&(fakefunc())>()");
+	DEM_EQ("@%foo_ref$r3Bar$gbar$%$qv$v",
+		"void foo_ref<bar>(void)");
+	DEM_EQ("@%foo_func_ref$r$qv$v$gfakefunc$qv$%$qv$v",
+		"void foo_func_ref<fakefunc()>(void)");
+	DEM_EQ("@%Strange$X$badrM3Baz3Bar$g@Baz@bar$E%@foo$qv",
+		"void Strange::<&Baz::bar>::foo(void)");
+	DEM_EQ("@%foo$N%$qN$v",
+		"void foo<nullptr_t>(nullptr_t)");
+
+	DEM_EQ("@%foo$i$i1$%$qv$v", "void foo<1>(void)");
+	DEM_EQ("@%foo$X$badrp60std@%basic_string$c19std@%char_traits$c%17std@%allocator$c%%$g@mystring$E%$qv$v", "void foo<&mystring>");
+	DEM_EQ("@Unit1@foo_Comp_$qqr11System@Comp", "__fastcall Unit1::foo_Comp_(System::Comp)");
+	DEM_EQ("@Unit1@foo_Currency_$qqr15System@Currency", "__fastcall Unit1::foo_Currency_(System::Currency)");
+	DEM_EQ("@Unit1@foo_ShortString_$qqrr29System@%SmallString$uc$i255$%", "__fastcall Unit1::foo_ShortString_(System::SmallString<unsigned char)");
+	DEM_EQ("@Unit1@foo_AnsiString_$qqr27System@%AnsiStringT$us$i0$%","__fastcall Unit1::foo_AnsiString_(System::AnsiStringT<0>)");
+	DEM_EQ("@Unit1@foo_UnicodeString_$qqr20System@UnicodeString","__fastcall Unit1::foo_UnicodeString_(System::UnicodeString)");
+	DEM_EQ("@Unit1@foo_WideString_$qqr17System@WideString", "__fastcall Unit1::foo_WideString_(System::WideString)");
+	DEM_EQ("@Unit1@foo_RawByteString_$qqr31System@%AnsiStringT$us$i65535$%", "__fastcall Unit1::foo_RawByteString_(System::AnsiStringT<65535>)");
+	DEM_EQ("@Unit1@foo_UTF8String_$qqr31System@%AnsiStringT$us$i65001$%", "__fastcall Unit1::foo_UTF8String_(System::AnsiString<65001>)");
+	DEM_EQ("@%Strange$X$badrM6Person3Dog$g@Person@dog$E%@foo$qv", "Strange<&Person::dog>::foo(void)");
 }
 
 // NOT SUPPORTING __restrict keyword and User defined literal (operator "")
