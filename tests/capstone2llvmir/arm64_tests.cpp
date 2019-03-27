@@ -4294,17 +4294,37 @@ TEST_P(Capstone2LlvmIrTranslatorArm64Tests, ARM64_INS_B)
 	});
 }
 
-TEST_P(Capstone2LlvmIrTranslatorArm64Tests, ARM64_INS_B_cond)
+TEST_P(Capstone2LlvmIrTranslatorArm64Tests, ARM64_INS_B_cond_true)
 {
+	setRegisters({
+		{ARM64_REG_CPSR_Z, false},
+	});
+
 	emulate("b.ne #0x110d8", 0x1107C);
 
 	EXPECT_JUST_REGISTERS_LOADED({ARM64_REG_CPSR_Z});
 	EXPECT_NO_REGISTERS_STORED();
 	EXPECT_NO_MEMORY_LOADED_STORED();
-	// TODO: How to test this?
-	//EXPECT_JUST_VALUES_CALLED({
-	//	{_translator->getCondBranchFunction(), {0x110d8}},
-	//});
+	EXPECT_JUST_VALUES_CALLED({
+		{_translator->getCondBranchFunction(), {true, 0x110d8}},
+	});
+}
+
+TEST_P(Capstone2LlvmIrTranslatorArm64Tests, ARM64_INS_B_cond_false)
+{
+	setRegisters({
+		{ARM64_REG_CPSR_N, true},
+		{ARM64_REG_CPSR_V, false},
+	});
+
+	emulate("b.ge #0x110d8", 0x1107C);
+
+	EXPECT_JUST_REGISTERS_LOADED({ARM64_REG_CPSR_N, ARM64_REG_CPSR_V});
+	EXPECT_NO_REGISTERS_STORED();
+	EXPECT_NO_MEMORY_LOADED_STORED();
+	EXPECT_JUST_VALUES_CALLED({
+		{_translator->getCondBranchFunction(), {false, 0x110d8}},
+	});
 }
 
 //
@@ -6758,28 +6778,6 @@ TEST_P(Capstone2LlvmIrTranslatorArm64Tests, ARM64_INS_FCMP_d_d_lt)
 	EXPECT_NO_VALUE_CALLED();
 }
 
-/* TODO: Check Ordered vs Unordered
-TEST_P(Capstone2LlvmIrTranslatorArm64Tests, ARM64_INS_FCMP_d_d_NAN)
-{
-	setRegisters({
-		{ARM64_REG_D1, NAN},
-		{ARM64_REG_D2, NAN},
-	});
-
-	emulate("fcmp d1, d2");
-
-	EXPECT_JUST_REGISTERS_LOADED({ARM64_REG_D1, ARM64_REG_D2});
-	EXPECT_JUST_REGISTERS_STORED({
-		{ARM64_REG_CPSR_N, false},
-		{ARM64_REG_CPSR_Z, false},
-		{ARM64_REG_CPSR_C, true},
-		{ARM64_REG_CPSR_V, true},
-	});
-	EXPECT_NO_MEMORY_LOADED_STORED();
-	EXPECT_NO_VALUE_CALLED();
-}
-*/
-
 //
 // ARM64_INS_FCCMP
 //
@@ -8106,7 +8104,7 @@ TEST_P(Capstone2LlvmIrTranslatorArm64Tests, ARM64_INS_FSUB_d_d_d_neg)
 	EXPECT_NO_VALUE_CALLED();
 }
 
-/* TODO: Check why those tests are failing
+/*
 //
 // ARM64_INS_FSQRT
 //
@@ -8143,10 +8141,10 @@ TEST_P(Capstone2LlvmIrTranslatorArm64Tests, ARM64_INS_FSQRT_d_d)
 		{ARM64_REG_D0, ANY},
 	});
 	EXPECT_NO_MEMORY_LOADED_STORED();
-	EXPECT_NO_VALUE_CALLED();
-	//EXPECT_VALUES_CALLED({
-	//	{_module.getFunction("llvm.fsqrt.f64"), {32.40_f64}},
-	//});
+	//EXPECT_NO_VALUE_CALLED();
+	EXPECT_VALUES_CALLED({
+		{_module.getFunction("llvm.fsqrt.f64"), {32.40_f64}},
+	});
 }
 */
 

@@ -17,36 +17,25 @@ namespace bin2llvmir {
 
 bool insnWrittesPcArm64(csh& ce, cs_insn* insn)
 {
-	//auto& arm64 = insn->detail->arm64;
+	// Aarch64 reference manual states:
+	// Software cannot write directly to the PC. It can only
+	// be updated on a branch, exception entry or exception return.
 
-	return insn->id == ARM64_INS_BL;
+	// Set of instructions that can modify PC
+	const std::set<unsigned int> branch_instructions = {
+		ARM64_INS_B,
+		ARM64_INS_CBNZ,
+		ARM64_INS_CBZ,
+		ARM64_INS_TBNZ,
+		ARM64_INS_TBZ,
+		ARM64_INS_BL,
+		ARM64_INS_BLR,
+		ARM64_INS_BR,
+		ARM64_INS_RET,
+		ARM64_INS_ERET,
+	};
 
-	// TODO: Arm64 doesn't allow PC to be an explicit operand
-	// Create list of instructions that modify PC?
-
-	/*
-	// Implicit write.
-	//
-	if (cs_reg_write(ce, insn, ARM64_REG_PC))
-	{
-		return true;
-	}
-
-	// Explicit write.
-	//
-	for (std::size_t i = 0; i < arm64.op_count; ++i)
-	{
-		auto& op = arm64.operands[i];
-		if (op.type == ARM64_OP_REG
-				&& op.reg == ARM64_REG_PC
-				&& op.access == CS_AC_WRITE)
-		{
-			return true;
-		}
-	}
-
-	return false;
-	*/
+	return (branch_instructions.count(insn->id) != 0);
 }
 
 bool looksLikeArm64FunctionStart(cs_insn* insn)
@@ -54,59 +43,6 @@ bool looksLikeArm64FunctionStart(cs_insn* insn)
 	// Create stack frame 'stp x29, x30, [sp, -48]!'
 	return insn->id == ARM64_INS_STP;
 }
-
-    /*
-std::size_t Decoder::decodeJumpTargetDryRun_arm64(
-		const JumpTarget& jt,
-		ByteData bytes,
-		bool strict)
-{
-	std::size_t decodedSzArm64 = 0;
-	auto skipArm64 = decodeJumpTargetDryRun_arm64(
-			jt,
-			bytes,
-			CS_MODE_ARM,
-			decodedSzArm64,
-			strict);
-
-	std::size_t decodedSzThumb = 0;
-	auto skipThumb = decodeJumpTargetDryRun_arm64(
-			jt,
-			bytes,
-			CS_MODE_THUMB,
-			decodedSzThumb,
-			strict);
-
-	// ARM64 ok.
-	//
-	if (skipArm64 == 0 && skipThumb)
-	{
-		jt.setMode(CS_MODE_ARM);
-		return skipArm64;
-	}
-	// THUMB ok.
-	//
-	else if (skipArm64 && skipThumb == 0)
-	{
-		jt.setMode(CS_MODE_THUMB);
-		return skipThumb;
-	}
-	// Both OK.
-	//
-	else if (skipArm64 == 0 && skipThumb == 0)
-	{
-		// Prefer ARM64.
-		jt.setMode(CS_MODE_ARM);
-		return 0;
-	}
-	// Both bad.
-	//
-	else
-	{
-		return skipArm64 < skipThumb ? skipArm64 : skipThumb;
-	}
-}
-    */
 
 std::size_t Decoder::decodeJumpTargetDryRun_arm64(
 		const JumpTarget& jt,
@@ -118,9 +54,6 @@ std::size_t Decoder::decodeJumpTargetDryRun_arm64(
 	{
 		return true;
 	}
-
-	//auto basicMode = _c2l->getBasicMode();
-	//if (mode != basicMode) _c2l->modifyBasicMode(mode);
 
 	static csh ce = _c2l->getCapstoneEngine();
 
@@ -172,56 +105,6 @@ std::size_t Decoder::decodeJumpTargetDryRun_arm64(
 	}
 
 	return true;
-}
-
-/**
- * Recognize some ARM64-specific patterns.
- */
-void Decoder::patternsPseudoCall_arm64(llvm::CallInst*& call, AsmInstruction& ai)
-{
-	// TODO: We could detect this using architecture-agnostic approach by using
-	// ABI info on LR reg.
-	//
-	// 113A0 0F E0 A0 E1    MOV LR, PC   // PC = current insn + 2*insn_size
-	// 113A4 03 F0 A0 E1    MOV PC, R3   // branch -> call
-	// 113A8 00 20 94 E5    LDR R2, [R4] // next insn = return point
-	//
-	// Check that both instructions have the same cond code:
-	// 112E8 0F E0 A0 11    MOVNE LR, PC
-	// 112EC 03 F0 A0 11    MOVNE PC, R3
-	//
-	/*
-	if (_c2l->isBranchFunctionCall(call))
-	{
-		AsmInstruction prev = ai.getPrev();
-		if (prev.isInvalid())
-		{
-			return;
-		}
-		auto* insn = ai.getCapstoneInsn();
-		auto& arm64 = insn->detail->arm64;
-		auto* pInsn = prev.getCapstoneInsn();
-		auto& pArm64 = pInsn->detail->arm64;
-
-		if (pInsn->id == ARM64_INS_MOV
-				&& arm64.cc == pArm64.cc
-				&& pArm64.op_count == 2
-				&& pArm64.operands[0].type == ARM64_OP_REG
-				&& pArm64.operands[0].reg == ARM64_REG_LR
-				&& pArm64.operands[1].type == ARM64_OP_REG
-				&& pArm64.operands[1].reg == ARM64_REG_PC)
-		{
-			// Replace pseudo branch with pseudo call.
-			auto* nc = CallInst::Create(
-					_c2l->getCallFunction(),
-					{call->getArgOperand(0)},
-					"",
-					call);
-			call->eraseFromParent();
-			call = nc;
-		}
-	}
-	*/
 }
 
 } // namespace bin2llvmir

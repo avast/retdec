@@ -659,10 +659,11 @@ llvm::Value* Capstone2LlvmIrTranslatorArm64_impl::loadRegister(
 		return nullptr;
 	}
 
+	// There is no such instruction that can access PC, but in case
+	// it happens somewhere in LLVM, we should be able to handle it.
 	if (r == ARM64_REG_PC)
 	{
 		return getCurrentPc(_insn);
-		// TODO: Check
 	}
 
 	auto* rt = getRegisterType(r);
@@ -757,10 +758,11 @@ llvm::Instruction* Capstone2LlvmIrTranslatorArm64_impl::storeRegister(
 		return nullptr;
 	}
 
+	// Direct writes to PC are not supported, the intended way to alter control flow is to
+	// use a branching instruction or exception, those will call pseudo llvm pseudo functions
 	if (r == ARM64_REG_PC)
 	{
 		return nullptr;
-		// TODO: Check?
 	}
 
 	if (r == ARM64_REG_XZR || r == ARM64_REG_WZR)
@@ -1269,7 +1271,7 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateMovk(cs_insn* i, cs_arm64* ai
  * ARM64_INS_STR, ARM64_INS_STRB, ARM64_INS_STRH
  * ARM64_INS_STUR, ARM64_INS_STURB, ARM64_INS_STURH
  * ARM64_INS_STTR, ARM64_INS_STTRB, ARM64_INS_STTRH
- * TODO: Prob pseudo! ARM64_INS_STXR, ARM64_INS_STXRB, ARM64_INS_STXRH
+ * ARM64_INS_STXR, ARM64_INS_STXRB, ARM64_INS_STXRH -- Maybe those should be pseudo
  */
 void Capstone2LlvmIrTranslatorArm64_impl::translateStr(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb)
 {
@@ -1358,7 +1360,7 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateStr(cs_insn* i, cs_arm64* ai,
 
 /**
  * ARM64_INS_STP, ARM64_INS_STNP
- * TODO: prob Pseudo! ARM64_INS_STXP
+ * ARM64_INS_STXP -- Maybe should be pseudo
  */
 void Capstone2LlvmIrTranslatorArm64_impl::translateStp(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb)
 {
@@ -1891,9 +1893,6 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateCondOp(cs_insn* i, cs_arm64* 
 	case ARM64_INS_CNEG:
 		val = generateValueNegate(bodyElse, op1);
 		val = bodyElse.CreateAdd(val, llvm::ConstantInt::get(val->getType(), 1));
-		//TODO: Express this as: (zero - op1) ?
-		//llvm::Value* zero = llvm::ConstantInt::get(val->getType(), 0);
-		//val = irb.CreateSub(zero, val);
 		break;
 	default:
 		throw GenericError("translateCondOp: Instruction id error");
@@ -1933,9 +1932,6 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateCondSelOp(cs_insn* i, cs_arm6
 	case ARM64_INS_CSNEG:
 		val = generateValueNegate(bodyElse, op2);
 		val = bodyElse.CreateAdd(val, llvm::ConstantInt::get(val->getType(), 1));
-		//TODO: Express this as: (zero - op2) ?
-		//llvm::Value* zero = llvm::ConstantInt::get(val->getType(), 0);
-		//val = irb.CreateSub(zero, val);
 		break;
 	default:
 		throw GenericError("translateCondSelOp: Instruction id error");
