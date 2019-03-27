@@ -815,6 +815,10 @@ std::shared_ptr<TypeNode> BorlandASTParser::parseBuildInType(const Qualifiers &q
 		return FloatTypeNode::create(_context, "long double", quals);
 	}
 
+	if (consumeIfPossible('N')) {
+		return NamedTypeNode::create(NameNode::create(_context, "nullptr_t"), quals);    // TODO nullptr_t as Type
+	}
+
 	return nullptr;        // did nothing
 }
 
