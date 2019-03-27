@@ -1,0 +1,7 @@
+1 DeviceConnect
+2 DeviceDone
+3 DeviceEnum
+4 DeviceGetInfo
+5 DeviceListen
+6 DeviceSetInfo
+7 DeviceWork

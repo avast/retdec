@@ -1,0 +1,7 @@
+1 Load
+2 Load_AlreadyInstalled
+3 Load_Exit
+4 Load_Init
+5 Load_PegCpuType
+6 Load_PegFreeSpace
+7 Load_RegisterFileInfo

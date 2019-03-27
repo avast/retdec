@@ -14,7 +14,7 @@ namespace fileinfo {
 /**
  * Class for save information about section
  *
- * Value std::numeric_limits<unsigned long long>::max() mean unspecified value or error for numeric types.
+ * Value std::numeric_limits<unsigned long long>::max()/min() mean unspecified value or error for numeric types.
  */
 class FileSection
 {
@@ -39,6 +39,7 @@ class FileSection
 		unsigned long long extraInfo;             ///< extra information about section
 		unsigned long long lineOffset;            ///< start line in file
 		unsigned long long relocationsLineOffset; ///< start line of relocation entries for this section
+		double entropy;                           ///< section data entropy
 		Flags flags;                              ///< section flags
 	public:
 		FileSection();
@@ -66,6 +67,7 @@ class FileSection
 		std::string getExtraInfoStr() const;
 		std::string getLineOffsetStr(std::ios_base &(* format)(std::ios_base &)) const;
 		std::string getRelocationsLineOffsetStr(std::ios_base &(* format)(std::ios_base &)) const;
+		std::string getEntropyStr(std::ios_base &(* format)(std::ios_base &)) const;
 		unsigned long long getFlagsSize() const;
 		unsigned long long getFlags() const;
 		std::string getFlagsStr() const;
@@ -95,6 +97,7 @@ class FileSection
 		void setExtraInfo(unsigned long long extraInformation);
 		void setLineOffset(unsigned long long sectionOffset);
 		void setRelocationsLineOffset(unsigned long long relocOffset);
+		void setEntropy(double entr);
 		void setFlagsSize(unsigned long long flagsSize);
 		void setFlags(unsigned long long flags);
 		/// @}

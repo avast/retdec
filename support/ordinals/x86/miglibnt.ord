@@ -1,0 +1,11 @@
+1 MigDllAddDllToListW
+2 MigDllApplySystemSettingsW
+3 MigDllCloseW
+4 MigDllCreateList
+5 MigDllEnumFirstW
+6 MigDllEnumNextW
+7 MigDllFreeList
+8 MigDllInit
+9 MigDllInitializeDstW
+10 MigDllOpenW
+11 MigDllShutdown

@@ -1,0 +1,17 @@
+1 NtdsDemote
+2 NtdsFreeDnsRRInfo
+3 NtdsGetDefaultDnsName
+4 NtdsInstall
+5 NtdsInstallCancel
+6 NtdsInstallReplicateFull
+7 NtdsInstallShutdown
+8 NtdsInstallUndo
+9 NtdsPrepareForDemotion
+10 NtdsPrepareForDemotionUndo
+11 NtdsPrepareForDsUpgrade
+12 NtdsSetReplicaMachineAccount
+13 NtdspConfigRegistry
+14 NtdspDNStoRFC1779Name
+15 NtdspFindSite
+16 NtdspValidateInstallParameters
+17 NtdspVerifyDsEnvironment

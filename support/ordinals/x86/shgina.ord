@@ -1,0 +1,6 @@
+6 SHGINA_6
+7 DllCanUnloadNow
+8 DllGetClassObject
+9 DllInstall
+10 DllRegisterServer
+11 DllUnregisterServer

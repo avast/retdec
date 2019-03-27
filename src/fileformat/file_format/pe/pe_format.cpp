@@ -1177,6 +1177,7 @@ void PeFormat::loadSections()
 			delete section;
 			continue;
 		}
+		section->computeEntropy();
 		sections.push_back(section);
 	}
 }

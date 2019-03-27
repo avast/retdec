@@ -1,0 +1,11 @@
+1 ComDBClaimNextFreePort
+2 ComDBClaimPort
+3 ComDBClose
+4 ComDBGetCurrentPortUsage
+5 ComDBOpen
+6 ComDBReleasePort
+7 ComDBResizeDatabase
+8 ParallelPortPropPageProvider
+9 PortsClassInstaller
+10 SerialDisplayAdvancedSettings
+11 SerialPortPropPageProvider

@@ -1,0 +1,12 @@
+10 EnumSelectionOffsets
+11 DllGetClassObject
+12 DllRegisterServer
+13 DllUnregisterServer
+20 EnumSummarizationOffsets
+21 EnumStemInfo
+22 EnumSentenceOffsets
+25 WordBreakInit
+26 WordBreakInitEx
+100 EnumPhrases
+104 EnumSummarizationOffsetsEx
+105 EnumStemOffsets

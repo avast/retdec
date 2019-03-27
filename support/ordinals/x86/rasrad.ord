@@ -1,0 +1,15 @@
+1 Open
+2 Collect
+3 Close
+4 RasAcctConfigChangeNotification
+5 RasAuthProviderFreeAttributes
+6 RasAcctProviderInitialize
+7 RasAcctProviderInterimAccounting
+8 RasAcctProviderStartAccounting
+9 RasAcctProviderStopAccounting
+10 RasAcctProviderTerminate
+11 RasAuthConfigChangeNotification
+12 RasAuthProviderAuthenticateUser
+13 RasAuthProviderFreeAttributes
+14 RasAuthProviderInitialize
+15 RasAuthProviderTerminate

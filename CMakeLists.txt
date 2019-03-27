@@ -12,6 +12,7 @@ option(RETDEC_DOC "Build public API documentation (requires Doxygen)." OFF)
 option(RETDEC_TESTS "Build tests." OFF)
 option(RETDEC_DEV_TOOLS "Build dev tools." OFF)
 option(RETDEC_FORCE_OPENSSL_BUILD "Force OpenSSL build." OFF)
+option(RETDEC_COMPILE_YARA "Compile YARA rules at installation." ON)
 
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -94,7 +95,6 @@ elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unused-parameter")
 endif()
 
-include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/install-external.cmake)
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/utils.cmake)
 
 add_subdirectory(deps)
@@ -103,6 +103,7 @@ if(RETDEC_DOC)
 endif()
 add_subdirectory(scripts)
 add_subdirectory(src)
+add_subdirectory(support)
 if(RETDEC_TESTS)
 	add_subdirectory(tests)
 endif()

@@ -1,0 +1,17 @@
+1 StreamClassAbortOutstandingRequests
+2 StreamClassCallAtNewPriority
+3 StreamClassCompleteRequestAndMarkQueueReady
+4 StreamClassDebugAssert
+5 StreamClassFilterReenumerateStreams
+6 StreamClassGetDmaBuffer
+7 StreamClassGetNextEvent
+8 StreamClassGetPhysicalAddress
+9 StreamClassLogError
+10 StreamClassPnPAddDeviceWorker
+11 StreamClassQueryMasterClock
+12 StreamClassQueryMasterClockSync
+13 StreamClassReadWriteConfig
+14 StreamClassReenumerateStreams
+15 StreamClassRegisterAdapter
+16 StreamClassRegisterFilterWithNoKSPins
+17 StreamClassScheduleTimer

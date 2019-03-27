@@ -1,0 +1,14 @@
+12 WSPStartUp
+13 WSPShutDown
+14 WSPOpenUrl
+15 WSPGetData
+16 WSPSetGateway
+17 WSPFreeBuffer
+18 WBXMLToTextXML
+19 WSPGetMIMEType
+20 WSPDecodeHeaders
+21 WSPSetUserAgent
+22 WSPAbortTransaction
+24 WBXMLToTextXMLGeneric
+25 WSPSetUserProfile
+26 WSPWaitForWapStartup

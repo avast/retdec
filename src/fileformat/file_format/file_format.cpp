@@ -1074,6 +1074,24 @@ std::size_t FileFormat::getOverlaySize() const
 }
 
 /**
+ * Get overlay data entropy
+ * @param res Variable to store the result to
+ * @return @c true if entropy calculation succeeded, @c false otherwise
+ */
+bool FileFormat::getOverlayEntropy(double &res) const
+{
+	const auto overlaySize = getOverlaySize();
+	const auto declSize = getDeclaredFileLength();
+	const auto &bytes = getBytes();
+	if (overlaySize == 0 || declSize == 0 || bytes.size() < declSize + overlaySize)
+	{
+		return false;
+	}
+	res = computeDataEntropy(bytes.data() + declSize, overlaySize);
+	return true;
+}
+
+/**
  * Count number of nibbles from number of bytes
  * @param bytes Number of bytes
  * @return Number of nibbles

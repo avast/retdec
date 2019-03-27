@@ -8,6 +8,7 @@
 #define PAT2YARA_MODIFICATIONS_H
 
 #include <memory>
+#include <string>
 
 // Forward declarations.
 namespace yaramod {

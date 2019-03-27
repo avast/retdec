@@ -157,9 +157,12 @@ BIN2LLVMIR_PARAMS = [
 # Paths to tools.
 FILEINFO = os.path.join(INSTALL_BIN_DIR, 'retdec-fileinfo')
 
-FILEINFO_EXTERNAL_YARA_PRIMARY_CRYPTO_DATABASES = [os.path.join(INSTALL_SHARE_YARA_DIR, 'signsrch', 'signsrch.yara')]
+FILEINFO_EXTERNAL_YARA_PRIMARY_CRYPTO_DATABASES = [
+    os.path.join(INSTALL_SHARE_YARA_DIR, 'signsrch', 'signsrch.yara'),
+    os.path.join(INSTALL_SHARE_YARA_DIR, 'signsrch', 'signsrch.yarac')]
 FILEINFO_EXTERNAL_YARA_EXTRA_CRYPTO_DATABASES = [
-    os.path.join(INSTALL_SHARE_YARA_DIR, 'signsrch', 'signsrch_regex.yara')]
+    os.path.join(INSTALL_SHARE_YARA_DIR, 'signsrch', 'signsrch_regex.yara'),
+    os.path.join(INSTALL_SHARE_YARA_DIR, 'signsrch', 'signsrch_regex.yarac')]
 
 AR = os.path.join(INSTALL_BIN_DIR, 'retdec-ar-extractor')
 BIN2PAT = os.path.join(INSTALL_BIN_DIR, 'retdec-bin2pat')

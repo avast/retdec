@@ -1,0 +1,10 @@
+1 VrAddOpenNamedPipeInfo
+2 VrCancelPipeIo
+3 VrConvertLocalNtPipeName
+4 VrDispatch
+5 VrInitialized
+6 VrIsNamedPipeHandle
+7 VrIsNamedPipeName
+8 VrReadNamedPipe
+9 VrRemoveOpenNamedPipeInfo
+10 VrWriteNamedPipe

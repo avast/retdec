@@ -1,0 +1,8 @@
+1 GetSupportNumbers
+2 _PhbkGenericDlgProc@16
+3 PhoneBookDisplaySignUpNumbers
+4 PhoneBookGetCanonical
+5 PhoneBookLoad
+6 PhoneBookMergeChanges
+7 PhoneBookSuggestNumbers
+8 PhoneBookUnload

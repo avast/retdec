@@ -1,0 +1,12 @@
+1 ApplyPatchToFileA
+2 ApplyPatchToFileByHandles
+3 ApplyPatchToFileByHandlesEx
+4 ApplyPatchToFileExA
+5 ApplyPatchToFileExW
+6 ApplyPatchToFileW
+7 GetFilePatchSignatureA
+8 GetFilePatchSignatureByHandle
+9 GetFilePatchSignatureW
+10 TestApplyPatchToFileA
+11 TestApplyPatchToFileByHandles
+12 TestApplyPatchToFileW

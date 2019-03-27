@@ -8,8 +8,10 @@
 [RetDec](https://retdec.com/) is a retargetable machine-code decompiler based on [LLVM](https://llvm.org/).
 
 The decompiler is not limited to any particular target architecture, operating system, or executable file format:
-* Supported file formats: ELF, PE, Mach-O, COFF, AR (archive), Intel HEX, and raw machine code.
-* Supported architectures (32b only): Intel x86, ARM, MIPS, PIC32, and PowerPC.
+* Supported file formats: ELF, PE, Mach-O, COFF, AR (archive), Intel HEX, and raw machine code
+* Supported architectures:
+    * 32-bit: Intel x86, ARM, MIPS, PIC32, and PowerPC
+    * 64-bit: x86-64
 
 Features:
 * Static analysis of executable files with detailed information.
@@ -246,6 +248,7 @@ You can pass the following additional parameters to `cmake`:
 * `-DRETDEC_TESTS=ON` to build with tests (disabled by default).
 * `-DRETDEC_DEV_TOOLS=ON` to build with development tools (disabled by default).
 * `-DRETDEC_FORCE_OPENSSL_BUILD=ON` to force OpenSSL build even if it is installed in the system (disabled by default).
+* `-DRETDEC_COMPILE_YARA=OFF` to disable YARA rules compilation at installation step (enabled by default).
 * `-DCMAKE_BUILD_TYPE=Debug` to build with debugging information, which is useful during development. By default, the project is built in the `Release` mode. This has no effect on Windows, but the same thing can be achieved by running `cmake --build .` with the `--config Debug` parameter.
 * `-DCMAKE_PROGRAM_PATH=<path>` to use Perl at `<path>` (probably useful only on Windows).
 
@@ -287,9 +290,9 @@ Our TeamCity servers are continuously generating up-to-date RetDec packages from
 
 You can use these as you wish, but keep in mind that there are no guarantees they will work on your system (especially the Linux version), and that regressions are a possibility. To get a stable RetDec version, either download the latest official pre-built package or build the latest RetDec version tag.
 
-* [Windows Server 2016, version 10.0](https://retdec-tc.avast.com/repository/download/Retdec_WinBuild/.lastSuccessful/package/retdec-master-windows-64b.zip)
-* [CentOS Linux, version 3.10.0-693.21.1.el7.x86_64](https://retdec-tc.avast.com/repository/download/RetDec_LinuxBuild/.lastSuccessful/package/retdec-master-linux-64b.zip)
-* [Mac OS X, version 10.13.4](https://retdec-tc.avast.com/repository/download/Retdec_MacBuild/.lastSuccessful/package/retdec-master-macos-64b.zip)
+* [Windows Server 2016, version 10.0](https://retdec-tc.avast.com/repository/download/Retdec_WinBuild/.lastSuccessful/package/retdec-master-windows-64b.zip?guest=1)
+* [CentOS Linux, version 3.10.0-693.21.1.el7.x86_64](https://retdec-tc.avast.com/repository/download/RetDec_LinuxBuild/.lastSuccessful/package/retdec-master-linux-64b.zip?guest=1)
+* [Mac OS X, version 10.13.4](https://retdec-tc.avast.com/repository/download/Retdec_MacBuild/.lastSuccessful/package/retdec-master-macos-64b.zip?guest=1)
 
 ## Repository Overview
 

@@ -678,6 +678,15 @@ std::string FileInformation::getOverlaySizeStr(std::ios_base &(* format)(std::io
 }
 
 /**
+ * Get overlay entropy
+ * @return Overlay entropy
+ */
+std::string FileInformation::getOverlayEntropyStr(std::ios_base &(* format)(std::ios_base &)) const
+{
+	return header.getOverlayEntropyStr(format);
+}
+
+/**
  * Get number of records in rich header
  * @return Number of records in rich header
  */
@@ -2208,6 +2217,17 @@ std::string FileInformation::getSectionName(std::size_t position) const
 std::string FileInformation::getSectionType(std::size_t position) const
 {
 	return sections[position].getType();
+}
+
+/**
+ * Get section entropy
+ * @param position Position of section in internal list of sections (0..x)
+ * @param format Format of resulting string (e.g. std::dec, std::hex)
+ * @return Entropy of section
+ */
+std::string FileInformation::getSectionEntropy(std::size_t position, std::ios_base &(* format)(std::ios_base &)) const
+{
+	return sections[position].getEntropyStr(format);
 }
 
 /**
@@ -3921,6 +3941,15 @@ void FileInformation::setOverlayOffset(unsigned long long offset)
 void FileInformation::setOverlaySize(unsigned long long size)
 {
 	header.setOverlaySize(size);
+}
+
+/**
+ * Set overlay entropy
+ * @param entropy Entropy of overlay
+ */
+void FileInformation::setOverlayEntropy(double entropy)
+{
+	header.setOverlayEntropy(entropy);
 }
 
 /**

@@ -1,0 +1,14 @@
+110 IsConvertINetStringAvailable
+111 ConvertINetString
+112 ConvertINetUnicodeToMultiByte
+113 ConvertINetMultiByteToUnicode
+114 ConvertINetReset
+115 DllCanUnloadNow
+116 DllGetClassObject
+117 DllRegisterServer
+118 DllUnregisterServer
+119 GetGlobalFontLinkObject
+120 LcidToRfc1766A
+121 LcidToRfc1766W
+122 Rfc1766ToLcidA
+123 Rfc1766ToLcidW

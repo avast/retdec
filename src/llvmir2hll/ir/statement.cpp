@@ -300,7 +300,8 @@ void Statement::removeStatement(ShPtr<Statement> stmt) {
 	// target's predecessors - target is not goto's successor.
 	if (auto gotoStmt = cast<GotoStmt>(stmt)) {
 		if (gotoStmt->getTarget()) {
-			gotoStmt->getTarget()->preds.erase(stmt);
+			gotoStmt->getTarget()->removeObserver(stmt);
+			gotoStmt->getTarget()->removePredecessor(stmt);
 			preserveLabel(stmt, gotoStmt->getTarget());
 		}
 	}
@@ -503,7 +504,8 @@ void Statement::replaceStatement(ShPtr<Statement> oldStmt,
 	// target's predecessors - target is not goto's successor.
 	if (auto gotoStmt = cast<GotoStmt>(oldStmt)) {
 		if (gotoStmt->getTarget()) {
-			gotoStmt->getTarget()->preds.erase(oldStmt);
+			gotoStmt->getTarget()->removeObserver(oldStmt);
+			gotoStmt->getTarget()->removePredecessor(oldStmt);
 		}
 	}
 

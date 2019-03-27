@@ -1,0 +1,15 @@
+1 IcfgSetInstallSourcePath
+2 InetSetAutodialAddress
+3 IcfgGetLastInstallErrorText
+4 IcfgInstallInetComponents
+5 IcfgInstallModem
+6 IcfgIsFileSharingTurnedOn
+7 IcfgIsGlobalDNS
+8 IcfgNeedInetComponents
+9 IcfgNeedModem
+10 IcfgRemoveGlobalDNS
+11 IcfgStartServices
+12 IcfgTurnOffFileSharing
+13 InetGetAutodial
+14 InetGetSupportedPlatform
+15 InetSetAutodial

@@ -1,0 +1,10 @@
+1 DsGetDcCloseW
+2 DsGetDcNameA
+3 DsGetDcNameW
+4 DsGetDcNameWithAccountA
+5 DsGetDcNameWithAccountW
+6 DsGetDcNextA
+7 DsGetDcNextW
+8 DsGetDcOpenA
+9 DsGetDcOpenW
+10 NetApiBufferFree

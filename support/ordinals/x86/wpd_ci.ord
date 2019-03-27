@@ -1,0 +1,4 @@
+1 DoCmd
+2 MigrateMTPDevicesInstalledAsMSC
+3 RescanBus
+4 WpdClassInstaller

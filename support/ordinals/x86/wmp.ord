@@ -1,0 +1,7 @@
+3000 wmp_3000
+3001 wmp_3001
+3002 wmp_3002
+3003 DllCanUnloadNow
+3004 DllGetClassObject
+3005 DllRegisterServer
+3006 DllUnregisterServer

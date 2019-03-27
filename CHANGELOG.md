@@ -2,13 +2,19 @@
 
 # dev
 
+* New Feature: Added presentation of section and overlay entropy in `retdec-fileinfo` ([#502](https://github.com/avast-tl/retdec/issues/502), [#507](https://github.com/avast-tl/retdec/pull/507)).
+* Enhancement: Updated YARA to version 3.9 ([#527](https://github.com/avast-tl/retdec/pull/527)).
+
+# v3.3 (2019-03-18)
+
 * New Feature: Added basic support of 64-bit x86 architecture ([#9](https://github.com/avast-tl/retdec/issues/9), [#513](https://github.com/avast-tl/retdec/pull/513)).
 * New Feature: Added presentation of imported types and TypeRef hashes for .NET binaries ([#363](https://github.com/avast-tl/retdec/issues/363), [#364](https://github.com/avast-tl/retdec/issues/364), [#428](https://github.com/avast-tl/retdec/issues/428)).
 * New Feature: Added presentation of metadata from binaries written in Visual Basic and detection of P-code ([#138](https://github.com/avast-tl/retdec/issues/138), [#440](https://github.com/avast-tl/retdec/pull/440)).
 * New Feature: Added computation and presentation of icon hashes for exact and also similarity matching in PE files ([#339](https://github.com/avast-tl/retdec/issues/339)).
-* Enhancement: Update YARA to version 3.8.1 ([#218](https://github.com/avast-tl/retdec/issues/218)).
-* Enhancement: Make `--generate-log` option of `retdec-decompiler.py` work on macOS ([#383](https://github.com/avast-tl/retdec/issues/383), [#450](https://github.com/avast-tl/retdec/pull/450)).
-* Enhancement: Replace recursion with iterative implementation in x87 FPU analysis in `retdec-bin2llvmir` ([#450](https://github.com/avast-tl/retdec/pull/450)).
+* Enhancement: Distribute YARA rules in a text form in the RetDec support package ([retdec-support #3](https://github.com/avast-tl/retdec-support/issues/3)).
+* Enhancement: Updated YARA to version 3.8.1 ([#218](https://github.com/avast-tl/retdec/issues/218)).
+* Enhancement: Made `--generate-log` option of `retdec-decompiler.py` work on macOS ([#383](https://github.com/avast-tl/retdec/issues/383), [#450](https://github.com/avast-tl/retdec/pull/450)).
+* Enhancement: Replaced recursion with iterative implementation in x87 FPU analysis in `retdec-bin2llvmir` ([#450](https://github.com/avast-tl/retdec/pull/450)).
 * Enhancement: The `new` LLVM IR to BIR converter is now the default (and only) back-end's converter. In most cases, this improves code structure and significantly speeds up decompilations ([#211](https://github.com/avast-tl/retdec/issues/211), [#508](https://github.com/avast-tl/retdec/issues/508), [#509](https://github.com/avast-tl/retdec/pull/509)).
 * Enhancement: The `fileformat` library, and all its object file modules, accept both `std::istream` and `(data, size)` pair, in addition to the original input file path.
 * Enhancement: Reduced the needed stack space in `retdec-llvmir2hll` ([#492](https://github.com/avast-tl/retdec/pull/492), [#495](https://github.com/avast-tl/retdec/pull/495)).

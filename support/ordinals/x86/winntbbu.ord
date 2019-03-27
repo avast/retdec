@@ -1,0 +1,15 @@
+1 BB_Refresh
+2 GetBBHwnd
+3 GetBBMainHwnd
+4 GetPanelCount
+5 InitBillBoard
+6 ProgressGaugeMsg
+7 SetInfoText
+8 SetProgress
+9 SetProgressText
+10 SetStep
+11 SetTimeEstimate
+12 ShowProgressGaugeWindow
+13 StartBillBoard
+14 StopBillBoard
+15 TermBillBoard
