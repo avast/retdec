@@ -158,10 +158,17 @@ class Capstone2LlvmIrTranslatorArm64_impl :
 		bool isCondIns(cs_arm64 * i) const;
 
 		/**
-		* @brief Return if register is FP type.
+		* @brief Check if register is FP type.
+		* @param op Capstone operand type to check.
 		* @param onlySupported Account only for supported registers in retdec.
 		*/
 		bool isFPRegister(cs_arm64_op& op, bool onlySupported = true) const;
+
+		/**
+		* @brief Check if register is Vector type.
+		* This is true for all  ARM64_REG_V* registers.
+		* @param op Capstone operand type to check.
+		*/
 		bool isVectorRegister(cs_arm64_op& op) const;
 
 		virtual bool isOperandRegister(cs_arm64_op& op) override;
@@ -173,6 +180,7 @@ class Capstone2LlvmIrTranslatorArm64_impl :
 //
 	protected:
 
+		/// Mapping from register to its parent register
 		std::map<uint32_t, uint32_t> _reg2parentMap;
 
 		static std::map<

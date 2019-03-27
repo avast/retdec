@@ -967,7 +967,7 @@ bool Capstone2LlvmIrTranslatorArm64_impl::isFPRegister(cs_arm64_op& op, bool onl
 
 bool Capstone2LlvmIrTranslatorArm64_impl::isVectorRegister(cs_arm64_op& op) const
 {
-    return op.type == ARM64_OP_REG && op.reg >= ARM64_REG_V0 && op.reg <= ARM64_REG_V31;
+	return op.type == ARM64_OP_REG && op.reg >= ARM64_REG_V0 && op.reg <= ARM64_REG_V31;
 }
 
 uint8_t Capstone2LlvmIrTranslatorArm64_impl::getOperandAccess(cs_arm64_op& op)
