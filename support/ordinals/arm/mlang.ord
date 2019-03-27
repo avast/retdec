@@ -1,0 +1,7 @@
+110 IsConvertINetStringAvailable
+111 ConvertINetString
+112 ConvertINetUnicodeToMultiByte
+113 ConvertINetMultiByteToUnicode
+114 ?ConvertINetReset@@YAJXZ
+121 LcidToRfc1766W
+123 Rfc1766ToLcidW

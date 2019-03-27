@@ -1,0 +1,17 @@
+1 CredUICmdLinePromptForCredentialsA
+2 CredUICmdLinePromptForCredentialsW
+3 CredUIConfirmCredentialsA
+4 CredUIConfirmCredentialsW
+5 CredUIInitControls
+6 CredUIParseUserNameA
+7 CredUIParseUserNameW
+8 CredUIPromptForCredentialsA
+9 CredUIPromptForCredentialsW
+10 CredUIReadSSOCredA
+11 CredUIReadSSOCredW
+12 CredUIStoreSSOCredA
+13 CredUIStoreSSOCredW
+14 DllCanUnloadNow
+15 DllGetClassObject
+16 DllRegisterServer
+17 DllUnregisterServer

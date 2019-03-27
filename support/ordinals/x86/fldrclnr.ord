@@ -1,0 +1,4 @@
+1 DllInstall
+2 DllMain
+3 DllRegisterServer
+4 Wizard_RunDLL

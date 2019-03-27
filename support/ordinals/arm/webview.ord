@@ -1,0 +1,10 @@
+10 ReadFromURLFile
+11 ReadFromURLFileEx
+12 WriteURLFile
+13 ?PieLoadRegistrySettings@@YAXXZ
+14 ?IsOnline@@YAHXZ
+15 ?IsNetcardInstalled@@YAHXZ
+16 ?StartUp@@YAJXZ
+17 ?ShutDown@@YAJXZ
+19 ?PieLoadCSSSettings@@YAHXZ
+20 WriteURLFileEx

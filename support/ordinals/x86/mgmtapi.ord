@@ -1,0 +1,9 @@
+1 SnmpMgrClose
+2 SnmpMgrCtl
+3 SnmpMgrGetTrap
+4 SnmpMgrGetTrapEx
+5 SnmpMgrOidToStr
+6 SnmpMgrOpen
+7 SnmpMgrRequest
+8 SnmpMgrStrToOid
+9 SnmpMgrTrapListen

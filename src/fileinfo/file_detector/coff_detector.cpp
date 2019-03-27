@@ -354,6 +354,11 @@ void CoffDetector::getSections()
 			fs.setCrc32(auxSect->getCrc32());
 			fs.setMd5(auxSect->getMd5());
 			fs.setSha256(auxSect->getSha256());
+			double entropy;
+			if(auxSect->getEntropy(entropy))
+			{
+				fs.setEntropy(entropy);
+			}
 		}
 
 		fileInfo.addSection(fs);

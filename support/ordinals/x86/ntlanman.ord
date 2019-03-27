@@ -1,0 +1,16 @@
+12 ?NPGetConnection@@YGKPAG0PAI@Z
+13 NPGetCaps
+16 NPGetUser
+17 NPAddConnection
+18 NPCancelConnection
+33 ?NPOpenEnum@@YGKIIIPAU_NETRESOURCEW@@PAPAX@Z
+34 ?NPEnumResource@@YGKPAXPAI01@Z
+35 NPCloseEnum
+36 NPFormatNetworkName
+38 NPAddConnection3
+40 ?NPGetUniversalName@@YGKPBGKPAXPAI@Z
+41 NPGetResourceParent
+49 NPGetConnectionPerformance
+52 NPGetResourceInformation
+53 ?NPGetReconnectFlags@@YGKPAGPAE@Z
+54 NPGetConnection3

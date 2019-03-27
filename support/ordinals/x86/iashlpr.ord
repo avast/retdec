@@ -1,0 +1,13 @@
+1 AllocateAttributes
+2 ConfigureIas
+3 DllCanUnloadNow
+4 DllGetClassObject
+5 DllRegisterServer
+6 DllUnregisterServer
+7 DoRequest
+8 FreeAttributes
+9 InitializeIas
+10 MemAllocIas
+11 MemFreeIas
+12 MemReallocIas
+13 ShutdownIas

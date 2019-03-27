@@ -1,0 +1,10 @@
+1 WmiCommitObject
+2 WmiAddObjectProp
+3 WmiCreateObject
+4 WmiCreateObjectWithFormat
+5 WmiCreateObjectWithProps
+6 WmiDestroyObject
+7 WmiEventSourceConnect
+8 WmiEventSourceDisconnect
+9 WmiIsObjectActive
+10 WmiSetAndCommitObject

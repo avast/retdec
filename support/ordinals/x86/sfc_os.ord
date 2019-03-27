@@ -1,0 +1,11 @@
+1 sfc_os_1
+2 sfc_os_2
+3 sfc_os_3
+4 sfc_os_4
+5 sfc_os_5
+6 sfc_os_6
+7 sfc_os_7
+8 SfcGetNextProtectedFile
+9 SfcIsFileProtected
+10 SfcWLEventLogoff
+11 SfcWLEventLogon

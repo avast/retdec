@@ -1,0 +1,10 @@
+6 DllGetVersion
+7 CleanupNetMeetingDispDriverW
+8 DllCanUnloadNow
+9 DllGetClassObject
+10 DllRegisterServer
+11 DllUnregisterServer
+82 NewMediaPhone
+83 CallToProtocolHandler
+84 OpenConfLink
+85 VerifyUserInfo

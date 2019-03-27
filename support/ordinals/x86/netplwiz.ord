@@ -1,0 +1,14 @@
+1 AddNetPlaceRunDll
+2 PassportWizardRunDll
+3 PublishRunDll
+4 UsersRunDll
+5 ClearAutoLogon
+6 DllCanUnloadNow
+7 DllGetClassObject
+8 DllInstall
+9 DllMain
+10 DllRegisterServer
+11 DllUnregisterServer
+12 NetAccessWizard
+13 NetPlacesWizardDoModal
+14 SHDisconnectNetDrives

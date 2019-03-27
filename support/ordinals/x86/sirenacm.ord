@@ -1,0 +1,15 @@
+1 _Siren7_DecodeFrame@16
+2 _Siren7_EncodeFrame@16
+3 _Siren7_InitDecoderContext@4
+4 _Siren7_InitEncoderContext@4
+5 _Siren7_SizeofBitstream@4
+6 _Siren7_SizeofEncoderContext@0
+7 _Siren7_SizeofEncoderContext@0
+8 DriverProc
+9 _Siren7_DecodeFrame@16
+10 _Siren7_EncodeFrame@16
+11 _Siren7_InitDecoderContext@4
+12 _Siren7_InitEncoderContext@4
+13 _Siren7_SizeofBitstream@4
+14 _Siren7_SizeofEncoderContext@0
+15 _Siren7_SizeofEncoderContext@0

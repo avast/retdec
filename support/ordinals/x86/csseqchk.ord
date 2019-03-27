@@ -1,0 +1,13 @@
+1 DllGetClassObject
+2 DllCanUnloadNow
+4 DllRegisterServer
+5 DllUnregisterServer
+100 ISCCreateObject
+101 ISCDestroyObject
+102 ISCCheckSequence
+103 ISCGetContext
+104 ISCGetCurrentState
+105 ISCSetCurrentState
+106 ISCMacroSequenceCheck
+107 ISCDecodeCommand
+108 ISCDecodeCommandEx

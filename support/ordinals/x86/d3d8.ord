@@ -1,0 +1,5 @@
+1 CheckFullscreen
+2 ValidatePixelShader
+3 ValidateVertexShader
+4 DebugSetMute
+5 Direct3DCreate8

@@ -1,0 +1,16 @@
+2 IMGTwainExecTriplet
+3 IMGTwainSelectDS
+4 IMGTwainOpenDSM
+5 IMGTwainCloseDSM
+6 IMGTwainProcessDCMessage
+7 IMGTwainGetCap
+8 IMGTwainSetCap
+9 IMGTwainLayout
+10 IMGTwaintoOiControl
+11 IMGTwainOpenDS
+12 IMGTwainCloseDS
+13 IMGTwainDisableDS
+14 IMGTwainEnableDS
+15 IMGTwainGetCaps
+16 IMGTwainSetCaps
+17 IMGTwainGetDSNames

@@ -1,0 +1,8 @@
+1 ?DisplayAVIBox@@YGHPAUHWND__@@PBG1PAPAU1@@Z
+2 ?DisplayUserMessage@@YGHPAUHWND__@@PAUHINSTANCE__@@IIW4ERROR_SRC@@JI@Z
+3 ?DisplayUserMessage@@YGHPAUHWND__@@PBG1W4ERROR_SRC@@JI@Z
+4 DllCanUnloadNow
+5 DllGetClassObject
+6 DllRegisterServer
+7 DllUnregisterServer
+8 _ErrorStringEx@16

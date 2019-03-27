@@ -1,0 +1,7 @@
+1 DxApi
+2 DxApiGetVersion
+3 DxApiInitialize
+4 DxAutoflipUpdate
+5 DxEnableIRQ
+6 DxLoseObject
+7 DxUpdateCapture

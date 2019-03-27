@@ -1,0 +1,4 @@
+1 vSetDdrawflag
+2 AlphaBlend
+4 GradientFill
+5 TransparentBlt

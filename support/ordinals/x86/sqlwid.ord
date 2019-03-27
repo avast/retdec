@@ -1,0 +1,10 @@
+1 GetEnvironmentStrings_
+2 GetProcAddress_
+3 OpenFile_
+4 _hwrite_
+5 _lcreat_
+6 _lopen_
+7 _lwrite_
+8 _ttof
+9 strerror_
+10 wstrlen

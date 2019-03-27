@@ -47,10 +47,12 @@ class SecSeg
 		unsigned long long address;       ///< start address in memory
 		unsigned long long memorySize;    ///< size in memory
 		unsigned long long entrySize;     ///< size of one entry in file
+		double entropy;                   ///< entropy in <0,8>
 		bool memorySizeIsValid;           ///< @c true if size in memory is valid
 		bool entrySizeIsValid;            ///< size of one entry in section or segment
 		bool isInMemory;                  ///< @c true if the section or segment will appear in the memory image of a process
 		bool loaded;                      ///< @c true if content of section or segment was successfully loaded from input file
+		bool isEntropyValid;              ///< @c true if entropy has been computed
 
 		void computeHashes();
 	public:
@@ -97,6 +99,7 @@ class SecSeg
 		bool getSizeInMemory(unsigned long long &sMemorySize) const;
 		bool getSizeOfOneEntry(unsigned long long &sEntrySize) const;
 		bool getMemory() const;
+		bool getEntropy(double &res) const;
 		/// @}
 
 		/// @name Getters of section or segment content
@@ -122,6 +125,7 @@ class SecSeg
 
 		/// @name Other methods
 		/// @{
+		void computeEntropy();
 		void invalidateMemorySize();
 		void invalidateEntrySize();
 		void load(const FileFormat *sOwner);

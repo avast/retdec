@@ -861,6 +861,14 @@ void Filter::orderStacks(std::vector<llvm::Value*>& stacks, bool asc) const
 	{
 		auto aOff = config->getStackVariableOffset(a);
 		auto bOff = config->getStackVariableOffset(b);
+		if (aOff.isUndefined())
+		{
+			return bOff.isUndefined();
+		}
+		else if (aOff.isDefined() && bOff.isUndefined())
+		{
+			return true;
+		}
 
 		bool ascOrd = aOff < bOff;
 
@@ -1148,6 +1156,11 @@ void Filter::leaveOnlyContinuousStack(FilterableLayout& lay) const
 	{
 		auto off = config->getStackVariableOffset(*it);
 
+		if (off.isUndefined())
+		{
+			++it;
+			continue;
+		}
 		if (prevOff.isUndefined())
 		{
 			prevOff = off;

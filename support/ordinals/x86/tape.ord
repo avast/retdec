@@ -1,0 +1,7 @@
+1 TapeClassAllocateSrbBuffer
+2 TapeClassCompareMemory
+3 TapeClassInitialize
+4 TapeClassLiDiv
+5 TapeClassLogicalBlockToPhysicalBlock
+6 TapeClassPhysicalBlockToLogicalBlock
+7 TapeClassZeroMemory

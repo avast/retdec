@@ -1,0 +1,8 @@
+2 DllLoadFromStream
+3 DllCreateFromClip
+4 DllCreateLinkFromClip
+5 DllCreateFromTemplate
+6 DllCreate
+7 DllCreateFromFile
+8 DllCreateLinkFromFile
+10 OleQueryObjPos

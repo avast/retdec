@@ -1,0 +1,10 @@
+1 SE_DllLoaded
+2 SE_DllUnloaded
+3 SE_DynamicShim
+4 SE_DynamicUnshim
+5 SE_InstallAfterInit
+6 SE_InstallBeforeInit
+7 SE_IsShimDll
+8 SE_ProcessDying
+9 SE_RemoveNTVDMTask
+10 SE_ShimNTVDM

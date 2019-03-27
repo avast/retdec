@@ -1,0 +1,9 @@
+1 PtiCleanup
+2 PtiInitialize
+3 PtiIsReadPending
+4 PtiPortNameFromPortId
+5 PtiQueryDeviceStatus
+6 PtiQueryMaxReadSize
+7 PtiRead
+8 PtiRegisterCallbacks
+9 PtiWrite

@@ -1,0 +1,15 @@
+2 NDDEInit
+3 NDDEGetCAPS
+4 NDDEGetNewConnection
+5 NDDEAddConnection
+6 NDDEDeleteConnection
+7 NDDEGetConnectionStatus
+8 NDDERcvPacket
+9 NDDEXmtPacket
+10 NDDESetConnectionConfig
+11 NDDEShutdown
+12 NDDETimeSlice
+13 NDDEGetConnectionConfig
+14 Configure
+15 LogDebugInfo
+16 ConfigureDlgProc

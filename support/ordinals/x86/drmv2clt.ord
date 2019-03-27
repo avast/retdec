@@ -1,0 +1,5 @@
+1 CreateDRMRightsManager
+2 LaunchURL
+3 MakeEscapedURL
+4 DllRegisterServer
+5 DllUnregisterServer

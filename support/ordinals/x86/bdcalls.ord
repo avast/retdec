@@ -1,0 +1,11 @@
+1 NlsConvertBidiNumerics
+2 NlsConvertBidiString
+3 NlsIntSetBidiAtt
+4 NlsIntQueryBidiAtt
+5 NlsSetBidiAtt
+6 NlsQueryBidiAtt
+7 NlsInverseString
+8 NlsSetBidiPrint
+9 NlsEditShape
+10 NlsShapeBidiString
+11 NlPopUp

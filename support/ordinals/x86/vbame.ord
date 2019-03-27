@@ -1,0 +1,12 @@
+1 _DllMain@12
+2 DestroyCaretBiVBA
+3 CreateCaretBiVBA
+4 PaintLineCoreBiVBA
+5 XFromIchCoreBiVBA
+6 IchFromXCoreBiVBA
+7 PickFontBiVBA
+8 ObTextOutBiVBA
+9 WCheckPlatformBiVBA
+10 VersionNumberBiVBA
+11 ResetFontCacheBiVBA
+12 PaintLineCoreROClipBiVBA

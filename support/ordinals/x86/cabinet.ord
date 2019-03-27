@@ -1,0 +1,14 @@
+1 GetDllVersion
+2 DllGetVersion
+3 Extract
+4 DeleteExtractedFiles
+10 FCICreate
+11 FCIAddFile
+12 FCIFlushFolder
+13 FCIFlushCabinet
+14 FCIDestroy
+20 FDICreate
+21 FDIIsCabinet
+22 FDICopy
+23 FDIDestroy
+24 FDITruncateCabinet

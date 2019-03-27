@@ -1,0 +1,17 @@
+1 AllocMemory
+2 AllocObject
+3 BhAllocSystemMemory
+4 BhFreeSystemMemory
+5 BhGetLastError
+6 BhSetLastError
+7 CreateObjectHeap
+8 DestroyObjectHeap
+9 FreeMemory
+10 FreeObject
+11 GetObjectHeapSize
+12 GrowObjectHeap
+13 MemorySize
+14 NormalizeAddress
+15 PurgeObjectHeap
+16 ReallocMemory
+17 TestMemory

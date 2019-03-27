@@ -1,0 +1,10 @@
+1 PhoneOpenCallLog
+2 PhoneGetCallLogEntry
+3 PhoneCloseCallLog
+4 PhoneSeekCallLog
+5 PhoneMakeCall
+6 PhoneAddSpeedDial
+7 PhoneShowCallLog
+8 PhoneSendDTMFStart
+9 PhoneSendDTMFStop
+10 PhoneIsEmergencyNumber
