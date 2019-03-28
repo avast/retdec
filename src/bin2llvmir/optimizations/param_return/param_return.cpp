@@ -354,7 +354,7 @@ CallInst* ParamReturn::getWrapper(Function* fnc) const
 	auto next = ai.getNext();
 	while (next.isValid())
 	{
-		if (!next.empty() && !isa<TerminatorInst>(next.front()))
+		if (!next.empty() && !next.front()->isTerminator())
 		{
 			single = false;
 			break;
@@ -860,15 +860,15 @@ void ParamReturn::connectWrappers(const DataFlowEntry& de)
 		return;
 	}
 
-	if (wrappedCall->getNumArgOperands() != fnc->getArgumentList().size())
+	if (wrappedCall->getNumArgOperands() != fnc->arg_size())
 	{
 		// TODO: enable assert and inspect these cases.
 		return;
 	}
-	assert(wrappedCall->getNumArgOperands() == fnc->getArgumentList().size());
+	assert(wrappedCall->getNumArgOperands() == fnc->arg_size());
 
 	unsigned i = 0;
-	for (auto& a : fnc->getArgumentList())
+	for (auto& a : fnc->args())
 	{
 		auto* conv = IrModifier::convertValueToType(&a, wrappedCall->getArgOperand(i)->getType(), wrappedCall);
 		wrappedCall->setArgOperand(i++, conv);

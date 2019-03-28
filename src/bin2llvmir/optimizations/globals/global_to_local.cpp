@@ -50,7 +50,7 @@ const char *GlobalToLocal::getPassArg() {
 }
 
 // Override.
-const char *GlobalToLocal::getPassName() const {
+llvm::StringRef GlobalToLocal::getPassName() const {
 	return PASS_NAME;
 }
 

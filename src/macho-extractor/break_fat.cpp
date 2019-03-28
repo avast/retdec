@@ -7,7 +7,6 @@
 #include <iostream>
 #include <fstream>
 
-#include <llvm/Support/MachO.h>
 #include <llvm/Support/Path.h>
 #include <rapidjson/document.h>
 #include <rapidjson/prettywriter.h>
@@ -74,7 +73,7 @@ std::string cpuTypeToString(
 std::string getArchName(
 		MachOUniversalBinary::object_iterator &it)
 {
-	std::string result = it->getArchTypeName();
+	std::string result = it->getArchFlagName();
 	if(result.empty())
 	{
 		result = cpuTypeToString(it->getCPUType());

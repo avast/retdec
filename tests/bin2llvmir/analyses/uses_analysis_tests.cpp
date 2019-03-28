@@ -31,7 +31,7 @@ protected:
 	UsesAnalysisTests() {
 		module = new Module("test", context);
 		Constant *funcConstant(module->getOrInsertFunction("func1",
-			Type::getVoidTy(context), AttributeSet(), nullptr));
+			Type::getVoidTy(context)));
 		Constant *globConstant(module->getOrInsertGlobal("glob0",
 			Type::getInt32Ty(context)));
 		glob = cast<GlobalVariable>(globConstant);
@@ -215,8 +215,7 @@ hasUseOnlyInOneFuncTest) {
 	//
 
 	// Creating the main part of test is in constructor of this test class.
-	module->getOrInsertFunction("func2", Type::getVoidTy(context),
-		AttributeSet(), nullptr);
+	module->getOrInsertFunction("func2", Type::getVoidTy(context));
 	new LoadInst(glob, "x", bbInFunc1);
 
 	EXPECT_TRUE(UsesAnalysis::hasUsesOnlyInOneFunc(*glob)) <<
@@ -241,7 +240,7 @@ hasNoUseOnlyInOneFuncTest) {
 
 	// Creating the main part of test is in constructor of this test class.
 	Constant *func2Constant(module->getOrInsertFunction(
-		"func2", Type::getVoidTy(context), AttributeSet(), nullptr));
+		"func2", Type::getVoidTy(context)));
 	BasicBlock *bbInFunc2(BasicBlock::Create(context, "bbFunc2",
 		cast<Function>(func2Constant)));
 	new LoadInst(glob, "x", bbInFunc1);

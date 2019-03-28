@@ -19,6 +19,7 @@
 #include "retdec/bin2llvmir/optimizations/globals/dead_global_assign.h"
 #include "retdec/bin2llvmir/optimizations/globals/global_to_local.h"
 #include "retdec/bin2llvmir/optimizations/globals/global_to_local_and_dead_global_assign.h"
+#include "retdec/bin2llvmir/providers/abi/abi.h"
 
 #define DEBUG_TYPE "global-to-local-and-dead-global-assign"
 
@@ -197,11 +198,6 @@ void addMappingOfLocalVarToGlobalVarInConfig(Config* config, const llvm::Functio
 
 } // anonymous namespace
 
-STATISTIC(CreatedLocVars, "Number of created local variables");
-STATISTIC(NumDeadGlobalAssign, "Number of removed dead global assigns");
-STATISTIC(NumGlobalDeclDeleted, "Number of removed declarations for global "
-	"variables");
-
 // It is the address of the variable that matters, not the value, so we can
 // initialize the ID to anything.
 char GlobalToLocalAndDeadGlobalAssign::ID = 0;
@@ -291,7 +287,7 @@ bool GlobalToLocalAndDeadGlobalAssign::runOnModule(Module &module) {
 
 	doOptimization(module, globsToOptimize);
 
-	return wasSomethingOptimized();
+	return false;
 }
 
 /**
@@ -558,7 +554,6 @@ void GlobalToLocalAndDeadGlobalAssign::removeGlobsWithoutUse(
 	auto it(globs.begin());
 	while (it != globs.end()) {
 		if (UsesAnalysis::hasNoUse(*it)) {
-			++NumGlobalDeclDeleted;
 			globs.erase(it++);
 		} else {
 			++it;
@@ -615,14 +610,6 @@ void GlobalToLocalAndDeadGlobalAssign::addFilteredRUses(const std::set<llvm::Ins
 	for (Instruction *rUse : rUses) {
 		addFilteredRUse(*rUse);
 	}
-}
-
-/**
-* @brief Returns @c true if something was optimized, otherwise @c false.
-*/
-bool GlobalToLocalAndDeadGlobalAssign::wasSomethingOptimized() {
-	return CreatedLocVars > 0 || NumGlobalDeclDeleted > 0 ||
-		NumDeadGlobalAssign > 0;
 }
 
 /**
@@ -907,7 +894,6 @@ void GlobalToLocalAndDeadGlobalAssign::FuncInfo::removeDeadGlobalAssigns() {
 		}
 
 		if (i->second.empty()) {
-			++NumDeadGlobalAssign;
 			i->first->eraseFromParent();
 		}
 	}
@@ -1062,6 +1048,7 @@ Value *GlobalToLocalAndDeadGlobalAssign::FuncInfo::getLocVarFor(
 		--lowerIt;
 		allocaInst = new AllocaInst(
 			globValue.getType()->getPointerElementType(),
+			Abi::DEFAULT_ADDR_SPACE,
 			newVarName
 		);
 		allocaInst->insertAfter(lowerIt->second);
@@ -1072,6 +1059,7 @@ Value *GlobalToLocalAndDeadGlobalAssign::FuncInfo::getLocVarFor(
 		BasicBlock &entryBB(func.getEntryBlock());
 		allocaInst = new AllocaInst(
 			globValue.getType()->getPointerElementType(),
+			Abi::DEFAULT_ADDR_SPACE,
 			newVarName,
 			&entryBB.front()
 		);
@@ -1083,7 +1071,6 @@ Value *GlobalToLocalAndDeadGlobalAssign::FuncInfo::getLocVarFor(
 		globValue.getName()
 	);
 	convertedGlobsToLoc[globValue.getName()] = allocaInst;
-	++CreatedLocVars;
 
 	return allocaInst;
 }

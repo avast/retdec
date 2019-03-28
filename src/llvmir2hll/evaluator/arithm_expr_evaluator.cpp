@@ -630,7 +630,8 @@ void ArithmExprEvaluator::visit(ShPtr<BitAndOpExpr> expr) {
 		ShPtr<Constant> result;
 		if (Maybe<ConstIntPair> constIntPair = castConstPair<ConstInt>(
 				constPair)) {
-			result = performOperationOverApInt(constIntPair, &llvm::APInt::And);
+			APSIntPair apsIntPair(getAPSIntsFromConstants(constIntPair));
+			result = ConstInt::create(apsIntPair.first & apsIntPair.second);
 		} else {
 			canBeEvaluated = false;
 		}
@@ -652,7 +653,8 @@ void ArithmExprEvaluator::visit(ShPtr<BitOrOpExpr> expr) {
 		ShPtr<Constant> result;
 		if (Maybe<ConstIntPair> constIntPair = castConstPair<ConstInt>(
 				constPair)) {
-			result = performOperationOverApInt(constIntPair, &llvm::APInt::Or);
+			APSIntPair apsIntPair(getAPSIntsFromConstants(constIntPair));
+			result = ConstInt::create(apsIntPair.first | apsIntPair.second);
 		} else {
 			canBeEvaluated = false;
 		}
@@ -674,7 +676,8 @@ void ArithmExprEvaluator::visit(ShPtr<BitXorOpExpr> expr) {
 		ShPtr<Constant> result;
 		if (Maybe<ConstIntPair> constIntPair = castConstPair<ConstInt>(
 				constPair)) {
-			result = performOperationOverApInt(constIntPair, &llvm::APInt::Xor);
+			APSIntPair apsIntPair(getAPSIntsFromConstants(constIntPair));
+			result = ConstInt::create(apsIntPair.first ^ apsIntPair.second);
 		} else {
 			canBeEvaluated = false;
 		}

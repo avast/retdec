@@ -4,8 +4,6 @@
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */
 
-#include <llvm/Support/MachO.h>
-
 #include "fileinfo/file_wrapper/macho_wrapper.h"
 
 using namespace llvm::MachO;

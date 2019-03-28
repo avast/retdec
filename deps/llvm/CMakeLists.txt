@@ -28,9 +28,13 @@ endif()
 include(ExternalProject)
 
 ExternalProject_Add(llvm-project
-	URL https://github.com/avast-tl/llvm/archive/3d1e5d0bc1122a027e83f57c86851a027dd09112.zip
-	URL_HASH SHA256=069fdb818c75c1aecad1d24848fd0fe7359ca16871aae595a1389274ba92815d
-	DOWNLOAD_NAME llvm.zip
+#	URL https://github.com/avast-tl/llvm/archive/3d1e5d0bc1122a027e83f57c86851a027dd09112.zip
+#	URL_HASH SHA256=069fdb818c75c1aecad1d24848fd0fe7359ca16871aae595a1389274ba92815d
+#	DOWNLOAD_NAME llvm.zip
+
+	DOWNLOAD_COMMAND ""
+	SOURCE_DIR "/home/peter/retdec/llvm-8.0.0"
+
 	CMAKE_ARGS
 		# Force a release build (we don't need to debug LLVM).
 		# This has no effect on Windows with MSVC, but is useful on Linux.
@@ -78,6 +82,7 @@ ExternalProject_Add(llvm-project
 	# needed libraries and tools manually).
 	INSTALL_COMMAND ""
 )
+force_configure_step(llvm-project) # TODO: remove once URL is used again
 
 # Add libraries.
 ExternalProject_Get_Property(llvm-project binary_dir)
@@ -89,8 +94,13 @@ set(LLVM_LIB_LIST
 	LLVMBitWriter
 	LLVMIRReader
 	LLVMObject
+	LLVMInstrumentation
+	LLVMLinker
+	LLVMProfileData
+	LLVMBinaryFormat
 	LLVMInstCombine
 	LLVMSupport
+	LLVMDemangle
 	LLVMipo
 	LLVMAsmParser
 	LLVMBitReader

@@ -378,9 +378,9 @@ Lti::FunctionPair Lti::getPairFunctionFree(const std::string& n)
 			GlobalValue::ExternalLinkage,
 			name);
 
-	assert(ltiFnc->getParameterCount() == ret->getArgumentList().size()
+	assert(ltiFnc->getParameterCount() == ret->arg_size()
 			|| (ltiFnc->getParameterCount() == 1
-					&& ret->getArgumentList().empty()
+					&& ret->arg_empty()
 					&& getLlvmType(ltiFnc->getParameterType(1))->isVoidTy()));
 	std::size_t i = 1;
 	std::size_t e = ltiFnc->getParameterCount();

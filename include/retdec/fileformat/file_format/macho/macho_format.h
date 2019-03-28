@@ -11,7 +11,6 @@
 
 #include <llvm/Object/MachO.h>
 #include <llvm/Object/MachOUniversal.h>
-#include <llvm/Support/MachO.h>
 
 #include "retdec/fileformat/file_format/file_format.h"
 

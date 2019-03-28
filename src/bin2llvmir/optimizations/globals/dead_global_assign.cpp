@@ -50,7 +50,7 @@ const char *DeadGlobalAssign::getPassArg() {
 }
 
 // Override.
-const char *DeadGlobalAssign::getPassName() const {
+llvm::StringRef DeadGlobalAssign::getPassName() const {
 	return PASS_NAME;
 }
 
