@@ -1,6 +1,8 @@
 set(CAPSTONE2LLVMIR_SOURCES
 	arm/arm_init.cpp
 	arm/arm.cpp
+	arm64/arm64_init.cpp
+	arm64/arm64.cpp
 	mips/mips_init.cpp
 	mips/mips.cpp
 	powerpc/powerpc_init.cpp

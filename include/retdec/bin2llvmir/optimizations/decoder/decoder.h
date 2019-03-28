@@ -207,6 +207,15 @@ class Decoder : public llvm::ModulePass
 		void patternsPseudoCall_arm(llvm::CallInst*& call, AsmInstruction& pAi);
 		cs_mode determineMode_arm(cs_insn* insn, utils::Address& target);
 
+	// ARM64 specific.
+	//
+	private:
+		std::size_t decodeJumpTargetDryRun_arm64(
+				const JumpTarget& jt,
+				ByteData bytes,
+				bool strict = false);
+		void patternsPseudoCall_arm64(llvm::CallInst*& call, AsmInstruction& pAi);
+
 	// MIPS specific.
 	//
 	private:

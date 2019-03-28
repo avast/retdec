@@ -2084,6 +2084,7 @@ void Capstone2LlvmIrTranslator_impl<CInsn, CInsnOp>::throwUnhandledInstructions(
 }
 
 template class Capstone2LlvmIrTranslator_impl<cs_arm, cs_arm_op>;
+template class Capstone2LlvmIrTranslator_impl<cs_arm64, cs_arm64_op>;
 template class Capstone2LlvmIrTranslator_impl<cs_mips, cs_mips_op>;
 template class Capstone2LlvmIrTranslator_impl<cs_ppc, cs_ppc_op>;
 template class Capstone2LlvmIrTranslator_impl<cs_x86, cs_x86_op>;

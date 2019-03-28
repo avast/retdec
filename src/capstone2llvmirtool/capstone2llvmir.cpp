@@ -74,6 +74,7 @@ class ProgramOptions
 				else if (c == "-m")
 				{
 					_basicMode = getParamOrDie(argc, argv, i);
+					_useDefaultBasicMode = false;
 					if (_basicMode == "arm") basicMode = CS_MODE_ARM;
 					else if (_basicMode == "thumb") basicMode = CS_MODE_THUMB;
 					else if (_basicMode == "16") basicMode = CS_MODE_16;
@@ -109,6 +110,11 @@ class ProgramOptions
 					printHelpAndDie();
 				}
 			}
+
+			if (_useDefaultBasicMode)
+			{
+				basicMode = getDefaultBasicModeFromArch(arch);
+			}
 		}
 
 		std::string getParamOrDie(int argc, char *argv[], int& i)
@@ -123,6 +129,27 @@ class ProgramOptions
 				return std::string();
 			}
 		}
+
+		cs_mode getDefaultBasicModeFromArch(cs_arch a)
+		{
+			switch (a)
+			{
+				case CS_ARCH_ARM: return CS_MODE_ARM; // CS_MODE_THUMB
+				case CS_ARCH_ARM64: return CS_MODE_ARM;
+				case CS_ARCH_MIPS: return CS_MODE_MIPS32; // CS_MODE_MIPS{32, 64, 32R6}
+				case CS_ARCH_X86: return CS_MODE_32; // CS_MODE_{16, 32, 64}
+				case CS_ARCH_PPC: return CS_MODE_32;
+				case CS_ARCH_SPARC: return CS_MODE_LITTLE_ENDIAN; // 0
+				case CS_ARCH_SYSZ: return CS_MODE_LITTLE_ENDIAN;
+				case CS_ARCH_XCORE: return CS_MODE_LITTLE_ENDIAN;
+				case CS_ARCH_MAX:
+				case CS_ARCH_ALL:
+				default:
+					cerr << "Can not get Capstone arch to default Capstone basic mode." << endl;
+					exit(1);
+			}
+		}
+
 
 		void dump()
 		{
@@ -180,6 +207,7 @@ class ProgramOptions
 		string _code;
 		string _basicMode;
 		string _extraMode;
+		bool _useDefaultBasicMode = true;
 };
 
 /**
@@ -237,6 +265,12 @@ ks_mode capstoneModeBasicToKeystoneMode(cs_arch a, cs_mode m)
 	else if (a == CS_ARCH_ARM && m == CS_MODE_THUMB) // 1 << 4
 	{
 		return KS_MODE_THUMB;
+	}
+	else if (a == CS_ARCH_ARM64 && m == CS_MODE_ARM) // 0
+	{
+		return KS_MODE_LITTLE_ENDIAN;
+		// In the keystone examples, only little endian mode is used with CS_ARCH_ARM64
+		// test_ks(KS_ARCH_ARM64, KS_MODE_LITTLE_ENDIAN, "ldr w1, [sp, #0x8]", 0);
 	}
 	else if (a == CS_ARCH_MIPS && m == CS_MODE_MIPS3) // 1 << 5
 	{

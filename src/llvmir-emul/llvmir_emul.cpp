@@ -3058,7 +3058,10 @@ void LlvmIrEmulator::visitCallInst(llvm::CallInst& I)
 
 	auto* cf = I.getCalledFunction();
 	if (cf && cf->isDeclaration() && cf->isIntrinsic() &&
-			cf->getIntrinsicID() != Intrinsic::fabs) // can not lower fabs
+		    !(cf->getIntrinsicID() == Intrinsic::bitreverse
+		    || cf->getIntrinsicID() == Intrinsic::maxnum
+		    || cf->getIntrinsicID() == Intrinsic::minnum
+		    || cf->getIntrinsicID() == Intrinsic::fabs)) // can not lower those functions
 	{
 		assert(cf->getIntrinsicID() != Intrinsic::vastart
 				&& cf->getIntrinsicID() != Intrinsic::vaend

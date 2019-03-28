@@ -369,7 +369,7 @@ retdec::utils::Address MainDetection::getFromContext()
 				}
 			}
 		}
-		else if (_config->getConfig().architecture.isArmOrThumb())
+		else if (_config->getConfig().architecture.isArm32OrThumb())
 		{
 			if (ci.isGcc() && major == 4 && minor == 1)
 			{

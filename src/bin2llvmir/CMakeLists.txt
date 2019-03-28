@@ -16,6 +16,7 @@ set(BIN2LLVMIR_SOURCES
 	optimizations/cond_branch_opt/cond_branch_opt.cpp
 	optimizations/constants/constants.cpp
 	optimizations/decoder/arm.cpp
+	optimizations/decoder/arm64.cpp
 	optimizations/decoder/bbs.cpp
 	optimizations/decoder/decoder_ranges.cpp
 	optimizations/decoder/decoder_init.cpp
@@ -65,6 +66,7 @@ set(BIN2LLVMIR_SOURCES
 	optimizations/stack_pointer_ops/stack_pointer_ops.cpp
 	optimizations/value_protect/value_protect.cpp
 	optimizations/syscalls/arm.cpp
+	optimizations/syscalls/arm64.cpp
 	optimizations/syscalls/mips.cpp
 	optimizations/syscalls/syscalls.cpp
 	optimizations/syscalls/x86.cpp

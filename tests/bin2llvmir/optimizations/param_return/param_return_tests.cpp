@@ -2597,7 +2597,7 @@ TEST_F(ParamReturnTests, arm64PtrCallBasicFunctionality)
 		"architecture" : {
 			"bitSize" : 64,
 			"endian" : "little",
-			"name" : "arm64"
+			"name" : "arm aarch64"
 		}
 	})");
 	AbiArm64 abi(module.get(), &config);
@@ -2648,7 +2648,7 @@ TEST_F(ParamReturnTests, arm64ExternalCallBasicFunctionality)
 		"architecture" : {
 			"bitSize" : 64,
 			"endian" : "little",
-			"name" : "arm64"
+			"name" : "arm aarch64"
 		}
 	})");
 
@@ -2719,7 +2719,7 @@ TEST_F(ParamReturnTests, arm64ExternalCallUseStacksIf8RegistersUsed)
 		"architecture" : {
 			"bitSize" : 64,
 			"endian" : "little",
-			"name" : "arm64"
+			"name" : "arm aarch64"
 		},
 		"functions" : [
 			{
@@ -2822,7 +2822,7 @@ TEST_F(ParamReturnTests, arm64ExternalCallHasDouleParameter)
 		"architecture" : {
 			"bitSize" : 64,
 			"endian" : "little",
-			"name" : "arm64"
+			"name" : "arm aarch64"
 		}
 	})");
 	AbiArm64 abi(module.get(), &config);

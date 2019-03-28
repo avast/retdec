@@ -61,11 +61,16 @@ void Decoder::initTranslator()
 			case 32: basicMode = CS_MODE_32; break;
 		}
 	}
-	else if (a.isArmOrThumb()
+	else if (a.isArm32OrThumb()
 			&& a.getBitSize() == 32)
 	{
 		arch = CS_ARCH_ARM;
 		basicMode = CS_MODE_ARM; // We start with ARM mode even for THUMB.
+	}
+	else if (a.isArm64())
+	{
+		arch = CS_ARCH_ARM64;
+		basicMode = CS_MODE_ARM;
 	}
 	else
 	{
@@ -188,7 +193,8 @@ void Decoder::initRanges()
 
 	auto& arch = _config->getConfig().architecture;
 	unsigned a = 0;
-	a = arch.isArmOrThumb() ? 2 : a;
+	a = arch.isArm32OrThumb() ? 2 : a;
+	a = arch.isArm64() ? 4 : a;
 	a = arch.isMipsOrPic32() ? 4 : a;
 	a = arch.isPpc() ? 4 : a;
 	_ranges.setArchitectureInstructionAlignment(a);
