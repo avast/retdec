@@ -4,7 +4,13 @@
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */
 
+#include <retdec/loader/loader/image.h>
 #include "retdec/bin2llvmir/providers/demangler.h"
+#include "retdec/bin2llvmir/providers/fileimage.h"
+#include "retdec/bin2llvmir/utils/ctypes2llvm.h"
+#include "retdec/ctypes/module.h"
+#include "retdec/ctypes/function.h"
+#include "retdec/ctypes/function_type.h"
 
 using namespace llvm;
 
@@ -16,53 +22,63 @@ namespace bin2llvmir {
 /******************************************************************/
 
 Demangler::Demangler(
-	std::unique_ptr<retdec::demangler::Demangler> demangler,
-	std::shared_ptr<ctypes::Module> &module) :
-	_demangler(std::move(demangler)), _module(module) {}
+	llvm::Module *llvmModule,
+	Config *config,
+	retdec::loader::Image *objf,
+	std::shared_ptr<ctypes::Module> &ltiModule,
+	std::unique_ptr<retdec::demangler::Demangler> demangler) :
+	_llvmModule(llvmModule),
+	_config(config),
+	_image(objf),
+	_ltiModule(ltiModule),
+	_demangler(std::move(demangler)) {}
 
 std::string Demangler::demangleToString(const std::string &mangled)
 {
 	return _demangler->demangleToString(mangled);
 }
 
-//Demangler::FunctionPair Demangler::getPairFunction(const std::string &mangled)
-//{
-//	auto ctypes
-//}
+Demangler::FunctionPair Demangler::getPairFunction(const std::string &mangled)
+{
+	auto ctypesFunction = _demangler->demangleFunctionToCtypes(mangled, _ltiModule);
+
+	auto *ft = dyn_cast<FunctionType>(getLlvmType(ctypesFunction->getType()));
+	assert(ft);
+
+	std::string declaration = ctypesFunction->getDeclaration();
+	if (declaration.find("...") != std::string::npos
+		&& !ft->isVarArg()) {
+		ft = FunctionType::get(ft->getReturnType(), ft->params(), true);
+	}
+
+	auto *ret = Function::Create(ft, GlobalValue::ExternalLinkage, ctypesFunction->getName());
+
+	return {ret, ctypesFunction};
+}
+
+llvm::Type *Demangler::getLlvmType(std::shared_ptr<retdec::ctypes::Type> type)
+{
+	Ctypes2LlvmTypeVisitor visitor(_llvmModule, _config);
+	type->accept(&visitor);
+	return visitor.getLlvmType();
+}
 
 /******************************************************************/
 /********************** Demangler Factory *************************/
 /******************************************************************/
 
 /**
- * @brief Abstracts instation logic, when we want specific demangler.
- * @param compiler Name of compiler mangling scheme.
- * @return Specific demangler on success or nullptr on failure.
- */
-std::unique_ptr<Demangler> DemanglerFactory::getDemangler(
-	const std::string &compiler,
-	std::shared_ptr<ctypes::Module> &module)
-{
-	if (compiler == "itanium" || compiler == "gcc" || compiler == "clang") {
-		return getItaniumDemangler(module);
-	} else if (compiler == "microsoft") {
-		return getMicrosoftDemangler(module);
-	} else if (compiler == "borland") {
-		return getBorlandDemangler(module);
-	}
-
-	// default get itanium
-	return getItaniumDemangler(module);
-}
-
-/**
  * @brief Crates new instance of ItaniumDemangler.
  * @return unique_ptr to created demangler instance
  */
 std::unique_ptr<Demangler> DemanglerFactory::getItaniumDemangler(
-	std::shared_ptr<ctypes::Module> &module)
+	llvm::Module *m,
+	Config *config,
+	retdec::loader::Image *objf,
+	std::shared_ptr<ctypes::Module> &ltiModule)
 {
-	return std::make_unique<Demangler>(std::make_unique<demangler::ItaniumDemangler>(), module);
+	return std::make_unique<Demangler>(
+		m, config, objf, ltiModule, std::make_unique<demangler::ItaniumDemangler>());
 }
 
 /**
@@ -70,9 +86,13 @@ std::unique_ptr<Demangler> DemanglerFactory::getItaniumDemangler(
  * @return unique_ptr to created demangler instance
  */
 std::unique_ptr<Demangler> DemanglerFactory::getMicrosoftDemangler(
-	std::shared_ptr<ctypes::Module> &module)
+	llvm::Module *m,
+	Config *config,
+	retdec::loader::Image *objf,
+	std::shared_ptr<ctypes::Module> &ltiModule)
 {
-	return std::make_unique<Demangler>(std::make_unique<demangler::MicrosoftDemangler>(), module);
+	return std::make_unique<Demangler>(
+		m, config, objf, ltiModule, std::make_unique<demangler::MicrosoftDemangler>());
 }
 
 /**
@@ -80,9 +100,13 @@ std::unique_ptr<Demangler> DemanglerFactory::getMicrosoftDemangler(
  * @return unique_ptr to created demangler instance
  */
 std::unique_ptr<Demangler> DemanglerFactory::getBorlandDemangler(
-	std::shared_ptr<ctypes::Module> &module)
+	llvm::Module *m,
+	Config *config,
+	retdec::loader::Image *objf,
+	std::shared_ptr<ctypes::Module> &ltiModule)
 {
-	return std::make_unique<Demangler>(std::make_unique<demangler::BorlandDemangler>(), module);
+	return std::make_unique<Demangler>(
+		m, config, objf, ltiModule, std::make_unique<demangler::BorlandDemangler>());
 }
 
 /******************************************************************/
@@ -97,23 +121,25 @@ std::map<Module *, std::unique_ptr<Demangler>> DemanglerProvider::_module2demang
  *         and it was not successfully created.
  */
 Demangler *DemanglerProvider::addDemangler(
-	llvm::Module *m,
-	const retdec::config::ToolInfoContainer &t,
+	llvm::Module *llvmModule,
+	Config *config,
+	retdec::loader::Image *objf,
 	std::shared_ptr<ctypes::Module> &ltiModule)
 {
-	std::unique_ptr<Demangler> d;
+	auto t = config->getConfig().tools;
 
+	std::unique_ptr<Demangler> d;
 	if (t.isGcc()) {
-		d = DemanglerFactory::getItaniumDemangler(ltiModule);
+		d = DemanglerFactory::getItaniumDemangler(llvmModule, config, objf, ltiModule);
 	} else if (t.isMsvc()) {
-		d = DemanglerFactory::getMicrosoftDemangler(ltiModule);
+		d = DemanglerFactory::getMicrosoftDemangler(llvmModule, config, objf, ltiModule);
 	} else if (t.isBorland()) {
-		d = DemanglerFactory::getBorlandDemangler(ltiModule);
+		d = DemanglerFactory::getBorlandDemangler(llvmModule, config, objf, ltiModule);
 	} else {
-		d = DemanglerFactory::getItaniumDemangler(ltiModule);
+		d = DemanglerFactory::getItaniumDemangler(llvmModule, config, objf, ltiModule);
 	}
 
-	auto p = _module2demangler.insert(std::make_pair(m, std::move(d)));
+	auto p = _module2demangler.insert(std::make_pair(llvmModule, std::move(d)));
 
 	return p.first->second.get();
 }

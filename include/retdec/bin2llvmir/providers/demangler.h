@@ -11,10 +11,20 @@
 
 #include <llvm/IR/Module.h>
 
-#include "retdec/demangler/demangler.h"
+#include "retdec/bin2llvmir/providers/config.h"
 #include "retdec/config/tool_info.h"
+#include "retdec/demangler/demangler.h"
 
 namespace retdec {
+
+namespace loader {
+class Image;
+}
+
+namespace ctypes {
+class Type;
+}
+
 namespace bin2llvmir {
 
 class Demangler
@@ -26,17 +36,25 @@ public:
 
 public:
 	Demangler(
-		std::unique_ptr<demangler::Demangler> demangler,
-		std::shared_ptr<ctypes::Module> &module);
+		llvm::Module *llvmModule,
+		Config *config,
+		retdec::loader::Image *objf,
+		std::shared_ptr<ctypes::Module> &ltiModule,
+		std::unique_ptr<retdec::demangler::Demangler> demangler);
 
 	std::string demangleToString(const std::string &mangled);
 
-//		FunctionPair getPairFunction(const std::string &mangled);
+	FunctionPair getPairFunction(const std::string &mangled);
 
 private:
-	std::unique_ptr<demangler::Demangler> _demangler;
+	llvm::Type *getLlvmType(std::shared_ptr<retdec::ctypes::Type> type);
 
-	std::shared_ptr<ctypes::Module> _module;
+private:
+	llvm::Module *_llvmModule = nullptr;
+	Config *_config = nullptr;
+	retdec::loader::Image *_image = nullptr;
+	std::shared_ptr<retdec::ctypes::Module> _ltiModule;
+	std::unique_ptr<demangler::Demangler> _demangler;
 };
 
 /**
@@ -45,18 +63,23 @@ private:
 class DemanglerFactory
 {
 public:
-	static std::unique_ptr<Demangler> getDemangler(
-		const std::string &compiler,
-		std::shared_ptr<ctypes::Module> &module);
-
 	static std::unique_ptr<Demangler> getItaniumDemangler(
-		std::shared_ptr<ctypes::Module> &module);
+		llvm::Module *m,
+		Config *config,
+		retdec::loader::Image *objf,
+		std::shared_ptr<ctypes::Module> &ltiModule);
 
 	static std::unique_ptr<Demangler> getMicrosoftDemangler(
-		std::shared_ptr<ctypes::Module> &module);
+		llvm::Module *m,
+		Config *config,
+		retdec::loader::Image *objf,
+		std::shared_ptr<ctypes::Module> &ltiModule);
 
 	static std::unique_ptr<Demangler> getBorlandDemangler(
-		std::shared_ptr<ctypes::Module> &module);
+		llvm::Module *m,
+		Config *config,
+		retdec::loader::Image *objf,
+		std::shared_ptr<ctypes::Module> &ltiModule);
 };
 
 /**
@@ -73,8 +96,9 @@ class DemanglerProvider
 {
 public:
 	static Demangler *addDemangler(
-		llvm::Module *m,
-		const retdec::config::ToolInfoContainer &t,
+		llvm::Module *llvmModule,
+		Config *config,
+		retdec::loader::Image *objf,
 		std::shared_ptr<ctypes::Module> &ltiModule);
 
 	static Demangler *getDemangler(llvm::Module *m);
