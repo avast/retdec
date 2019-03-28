@@ -10,6 +10,9 @@
 #include "retdec/demangler/demangler.h"
 
 using namespace std;
+using ItaniumDemangler = retdec::demangler::ItaniumDemangler;
+using MicrosoftDemangler = retdec::demangler::MicrosoftDemangler;
+using BorlandDemangler = retdec::demangler::BorlandDemangler;
 
 /**
  * @brief String constant containing help.
@@ -27,9 +30,9 @@ const string helpmsg =
  * @param argv Arguments.
  */
 int main(int argc, char *argv[]) {
-	auto dem_gcc = retdec::demangler::DemanglerFactory::getItaniumDemangler();
-	auto dem_ms =  retdec::demangler::DemanglerFactory::getMicrosoftDemangler();
-	auto dem_borland = retdec::demangler::DemanglerFactory::getBorlandDemangler();
+	auto dem_gcc = std::make_unique<ItaniumDemangler>();
+	auto dem_ms =  std::make_unique<MicrosoftDemangler>();
+	auto dem_borland = std::make_unique<BorlandDemangler>();
 
 	string demangledGcc;
 	string demangledMs;

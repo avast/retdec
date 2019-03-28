@@ -17,6 +17,41 @@
 namespace retdec {
 namespace bin2llvmir {
 
+
+
+class Demangler {
+	public:
+		using FunctionPair = std::pair<
+			llvm::Function*,
+			std::shared_ptr<retdec::ctypes::Function>>;
+
+	public:
+		explicit Demangler (std::unique_ptr<demangler::Demangler> demangler);
+
+		std::string demangleToString(const std::string &mangled);
+
+//		FunctionPair getPairFunction(const std::string &mangled);
+
+	protected:
+		std::unique_ptr<demangler::Demangler> _demangler;
+};
+
+/**
+ * @brief Class creating demanglers.
+ */
+class DemanglerFactory
+{
+public:
+	static std::unique_ptr<Demangler> getDemangler(const std::string &compiler);
+
+	static std::unique_ptr<Demangler> getItaniumDemangler();
+
+	static std::unique_ptr<Demangler> getMicrosoftDemangler();
+
+	static std::unique_ptr<Demangler> getBorlandDemangler();
+};
+
+
 /**
  * Completely static object -- all members and methods are static -> it can be
  * used by anywhere in bin2llvmirl. It provides mapping of modules to demanglers
@@ -30,21 +65,20 @@ namespace bin2llvmir {
 class DemanglerProvider
 {
 	public:
-		static retdec::demangler::Demangler* addDemangler(
+		static Demangler* addDemangler(
 				llvm::Module* m,
 				const retdec::config::ToolInfoContainer& t);
 
-		static retdec::demangler::Demangler* getDemangler(llvm::Module* m);
+		static Demangler* getDemangler(llvm::Module* m);
 		static bool getDemangler(
 				llvm::Module* m,
-				retdec::demangler::Demangler*& d);
+				Demangler*& d);
 
 		static void clear();
 
 	private:
-		using Demangler = std::unique_ptr<retdec::demangler::Demangler>;
 		/// Mapping of modules to demanglers associated with them.
-		static std::map<llvm::Module*, Demangler> _module2demangler;
+		static std::map<llvm::Module*, std::unique_ptr<Demangler>> _module2demangler;
 };
 
 } // namespace bin2llvmir

@@ -11,6 +11,5 @@
 #include "retdec/demangler/itanium_demangler.h"
 #include "retdec/demangler/microsoft_demangler.h"
 #include "retdec/demangler/borland_demangler.h"
-#include "retdec/demangler/demangler_factory.h"
 
 #endif //RETDEC_DEMANGLER_H

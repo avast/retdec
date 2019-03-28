@@ -2,7 +2,6 @@ add_subdirectory(demangler_llvm)
 
 set(DEMANGLER_LLVM_SOURCES
 	demangler_base.cpp
-	demangler_factory.cpp
 	itanium_demangler_adapter.cpp
 	microsoft_demangler_adapter.cpp
 	borland_demangler.cpp

@@ -11,7 +11,75 @@ using namespace llvm;
 namespace retdec {
 namespace bin2llvmir {
 
-std::map<Module*, DemanglerProvider::Demangler> DemanglerProvider::_module2demangler;
+/******************************************************************/
+/************************** Demangler *****************************/
+/******************************************************************/
+
+Demangler::Demangler(std::unique_ptr<retdec::demangler::Demangler> demangler) :
+	_demangler(std::move(demangler)) {}
+
+std::string Demangler::demangleToString(const std::string &mangled) {
+	return _demangler->demangleToString(mangled);
+}
+
+//FunctionPair Demangler::getPairFunction(const std::string &mangled) {
+//
+//}
+
+/******************************************************************/
+/********************** Demangler Factory *************************/
+/******************************************************************/
+
+/**
+ * @brief Abstracts instation logic, when we want specific demangler.
+ * @param compiler Name of compiler mangling scheme.
+ * @return Specific demangler on success or nullptr on failure.
+ */
+std::unique_ptr<Demangler> DemanglerFactory::getDemangler(const std::string &compiler)
+{
+	if (compiler == "itanium" || compiler == "gcc" || compiler == "clang") {
+		return getItaniumDemangler();
+	} else if (compiler == "microsoft") {
+		return getMicrosoftDemangler();
+	} else if (compiler == "borland") {
+		return getBorlandDemangler();
+	}
+
+	// default get itanium
+	return getItaniumDemangler();
+}
+
+/**
+ * @brief Crates new instance of ItaniumDemangler.
+ * @return unique_ptr to created demangler instance
+ */
+std::unique_ptr<Demangler> DemanglerFactory::getItaniumDemangler()
+{
+	return std::make_unique<Demangler>(std::make_unique<demangler::ItaniumDemangler>());
+}
+
+/**
+ * @brief Crates new instance of MicrosoftDemangler.
+ * @return unique_ptr to created demangler instance
+ */
+std::unique_ptr<Demangler> DemanglerFactory::getMicrosoftDemangler()
+{
+	return std::make_unique<Demangler>(std::make_unique<demangler::MicrosoftDemangler>());
+}
+
+/**
+ * @brief Crates new instance of BorlandDemangler.
+ * @return unique_ptr to created demangler instance
+ */
+std::unique_ptr<Demangler> DemanglerFactory::getBorlandDemangler()
+{
+	return std::make_unique<Demangler>(std::make_unique<demangler::BorlandDemangler>());
+}
+
+/******************************************************************/
+/********************** Demangler Provider ************************/
+/******************************************************************/
+std::map<Module *, std::unique_ptr<Demangler>> DemanglerProvider::_module2demangler;
 
 /**
  * Create and add to provider a demangler for the given module @a m
@@ -19,27 +87,20 @@ std::map<Module*, DemanglerProvider::Demangler> DemanglerProvider::_module2deman
  * @return Created and added demangler or @c nullptr if something went wrong
  *         and it was not successfully created.
  */
-retdec::demangler::Demangler* DemanglerProvider::addDemangler(
-		llvm::Module* m,
-		const retdec::config::ToolInfoContainer& t)
+Demangler *DemanglerProvider::addDemangler(
+	llvm::Module *m,
+	const retdec::config::ToolInfoContainer &t)
 {
-	std::unique_ptr<retdec::demangler::Demangler> d;
+	std::unique_ptr<Demangler> d;
 
-	if (t.isGcc())
-	{
-		d = retdec::demangler::DemanglerFactory::getItaniumDemangler();
-	}
-	else if (t.isMsvc())
-	{
-		d = retdec::demangler::DemanglerFactory::getMicrosoftDemangler();
-	}
-	else if (t.isBorland())
-	{
-		d = retdec::demangler::DemanglerFactory::getBorlandDemangler();
-	}
-	else
-	{
-		d = retdec::demangler::DemanglerFactory::getItaniumDemangler();
+	if (t.isGcc()) {
+		d = DemanglerFactory::getItaniumDemangler();
+	} else if (t.isMsvc()) {
+		d = DemanglerFactory::getMicrosoftDemangler();
+	} else if (t.isBorland()) {
+		d = DemanglerFactory::getBorlandDemangler();
+	} else {
+		d = DemanglerFactory::getItaniumDemangler();
 	}
 
 	auto p = _module2demangler.insert(std::make_pair(m, std::move(d)));
@@ -51,7 +112,7 @@ retdec::demangler::Demangler* DemanglerProvider::addDemangler(
  * @return Get demangler associated with the given module @a m or @c nullptr
  *         if there is no associated demangler.
  */
-retdec::demangler::Demangler* DemanglerProvider::getDemangler(llvm::Module* m)
+Demangler *DemanglerProvider::getDemangler(llvm::Module *m)
 {
 	auto f = _module2demangler.find(m);
 	return f != _module2demangler.end() ? f->second.get() : nullptr;
@@ -66,8 +127,8 @@ retdec::demangler::Demangler* DemanglerProvider::getDemangler(llvm::Module* m)
  *         @c False otherwise.
  */
 bool DemanglerProvider::getDemangler(
-		llvm::Module* m,
-		retdec::demangler::Demangler*& d)
+	llvm::Module *m,
+	Demangler *&d)
 {
 	d = getDemangler(m);
 	return d != nullptr;

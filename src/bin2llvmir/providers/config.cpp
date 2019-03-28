@@ -358,7 +358,7 @@ retdec::config::Function* Config::insertFunction(
 
 	if (cf.getDemangledName().empty())
 	{
-		retdec::demangler::Demangler* d = DemanglerProvider::getDemangler(_module);
+		Demangler* d = DemanglerProvider::getDemangler(_module);
 		if (d)
 		{
 			auto s = d->demangleToString(fnc->getName());
@@ -382,7 +382,7 @@ retdec::config::Function* Config::renameFunction(
 
 	if (cf.getDemangledName().empty())
 	{
-		retdec::demangler::Demangler* d = DemanglerProvider::getDemangler(_module);
+		Demangler* d = DemanglerProvider::getDemangler(_module);
 		if (d)
 		{
 			auto s = d->demangleToString(fnc->getName());
