@@ -9,7 +9,6 @@
 
 #include "retdec/demangler/demangler_base.h"
 #include "retdec/demangler/borland_ast_parser.h"
-#include "retdec/ctypes/context.h"
 
 namespace retdec {
 namespace demangler {
