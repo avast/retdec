@@ -25,7 +25,11 @@ public:
 
 	void demangleToModule(
 		const std::string &mangled,
-		std::unique_ptr<retdec::ctypes::Module> &module) override;
+		std::shared_ptr<retdec::ctypes::Module> &module) override;
+
+	std::shared_ptr<ctypes::Function> demangleFunctionToCtypes(
+		const std::string &mangled,
+		std::shared_ptr<retdec::ctypes::Module> &module) override;
 
 private:
 	borland::Context _demangleContext;

@@ -52,9 +52,9 @@ inline std::string toString(const StringView &s)
 
 }    // anonymous namespace
 
-bool ItaniumAstCtypesParser::parseInto(
+std::shared_ptr<ctypes::Function> ItaniumAstCtypesParser::parseAsFunction(
 	const llvm::itanium_demangle::Node *ast,
-	std::unique_ptr<retdec::ctypes::Module> &module,
+	std::shared_ptr<retdec::ctypes::Module> &module,
 	const retdec::ctypesparser::CTypesParser::TypeWidths &typeWidths,
 	const retdec::ctypesparser::CTypesParser::TypeSignedness &typeSignedness,
 	const retdec::ctypes::CallConvention &callConvention)
@@ -66,20 +66,15 @@ bool ItaniumAstCtypesParser::parseInto(
 	this->typeWidths = typeWidths;
 	this->typeSignedness = typeSignedness;
 
-	switch (ast->getKind()) {
-	case Kind::KFunctionEncoding: {
+	if (ast->getKind() == Kind::KFunctionEncoding) {
 		auto func = parseFunction(static_cast<const llvm::itanium_demangle::FunctionEncoding *>(ast));
 		if (func) {
 			module->addFunction(func);
-			return true;
+			return func;
 		}
-		break;
-	}
-	default:
-		break;
 	}
 
-	return false;
+	return nullptr;
 }
 
 std::shared_ptr<ctypes::Function> ItaniumAstCtypesParser::parseFunction(
@@ -205,7 +200,7 @@ std::shared_ptr<ctypes::Type> ItaniumAstCtypesParser::parseReference(
 	if (typeNode->getReferenceKind() == RefrenceKind::LValue) {
 		return ctypes::ReferenceType::create(context, pointee, bitWidth);
 	} else {
-		return ctypes::UnknownType::create();	// TODO r-value refrence
+		return ctypes::UnknownType::create();    // TODO r-value refrence
 	}
 }
 

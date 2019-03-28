@@ -24,7 +24,11 @@ class MicrosoftDemangler: public Demangler
 
 		void demangleToModule(
 			const std::string &mangled,
-			std::unique_ptr<retdec::ctypes::Module> &module) override;
+			std::shared_ptr<retdec::ctypes::Module> &module) override;
+
+		std::shared_ptr<ctypes::Function> demangleFunctionToCtypes(
+			const std::string &mangled,
+			std::shared_ptr<retdec::ctypes::Module> &module) override;
 };
 
 }

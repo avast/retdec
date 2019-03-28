@@ -22,9 +22,9 @@ class MsToCtypesParser : public AstToCtypesParser
 public:
 	MsToCtypesParser() = default;
 
-	bool parseInto(
+	std::shared_ptr<ctypes::Function> parseInto(
 		llvm::ms_demangle::SymbolNode *ast,
-		std::unique_ptr<retdec::ctypes::Module> &module,
+		std::shared_ptr<retdec::ctypes::Module> &module,
 		const TypeWidths &typeWidths = {},
 		const TypeSignedness &typeSignedness = {},
 		const retdec::ctypes::CallConvention &callConvention = retdec::ctypes::CallConvention());
@@ -38,7 +38,6 @@ private:
 	std::shared_ptr<ctypes::IntegralType> parseIntegralType(llvm::ms_demangle::PrimitiveTypeNode *integralTypeNode);
 	std::shared_ptr<ctypes::FloatingPointType> parseFloatingPointType(llvm::ms_demangle::PrimitiveTypeNode *floatingPointTypeNode);
 	ctypes::Function::Parameters parseFunctionParameters(llvm::ms_demangle::NodeArrayNode *parameters);
-	ctypes::FunctionType::VarArgness parseVarArgness(bool isVarArg);
 	std::shared_ptr<ctypes::Type> parsePointerType(llvm::ms_demangle::PointerTypeNode *typeNode);
 	std::shared_ptr<ctypes::Type> parseNamedType(llvm::ms_demangle::Node *node);
 	std::shared_ptr<ctypes::FunctionType> parseFuncType(llvm::ms_demangle::FunctionSignatureNode *funcSignature);

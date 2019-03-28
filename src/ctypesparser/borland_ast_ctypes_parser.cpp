@@ -16,9 +16,9 @@ using Kind = retdec::demangler::borland::Node::Kind;
 namespace retdec {
 namespace ctypesparser {
 
-bool BorlandToCtypesParser::parseInto(
+std::shared_ptr<ctypes::Function> BorlandToCtypesParser::parseAsFunction(
 	std::shared_ptr<retdec::demangler::borland::Node> ast,
-	std::unique_ptr<retdec::ctypes::Module> &module,
+	std::shared_ptr<retdec::ctypes::Module> &module,
 	const TypeWidths &typeWidths,
 	const TypeSignedness &typeSignedness,
 	const retdec::ctypes::CallConvention &callConvention)
@@ -30,20 +30,15 @@ bool BorlandToCtypesParser::parseInto(
 	this->typeWidths = typeWidths;
 	this->typeSignedness = typeSignedness;
 
-	switch (ast->kind()) {
-	case Kind::KFunction: {
+	if (ast->kind() == Kind::KFunction) {
 		auto func = parseFunction(std::static_pointer_cast<demangler::borland::FunctionNode>(ast));
 		if (func) {
 			module->addFunction(func);
-			return true;
+			return func;
 		}
-		break;
-	}
-	default:
-		break;
 	}
 
-	return false;
+	return nullptr;
 }
 
 std::shared_ptr<ctypes::IntegralType> BorlandToCtypesParser::createIntegral(const std::string &typeName)

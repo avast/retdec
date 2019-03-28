@@ -34,7 +34,7 @@ public:
 	BorlandCtypesTests() :
 		demangler(std::make_unique<retdec::demangler::BorlandDemangler>()),
 		context(std::make_shared<retdec::ctypes::Context>()),
-		module(std::make_unique<ctypes::Module>(context)) {}
+		module(std::make_shared<ctypes::Module>(context)) {}
 protected:
 	void mangledToCtypes(
 		const std::string &mangled)
@@ -44,7 +44,7 @@ protected:
 
 	std::unique_ptr<retdec::demangler::Demangler> demangler;
 	std::shared_ptr<retdec::ctypes::Context> context;
-	std::unique_ptr<retdec::ctypes::Module> module;
+	std::shared_ptr<retdec::ctypes::Module> module;
 };
 
 TEST_F(BorlandCtypesTests, basic)

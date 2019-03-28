@@ -34,9 +34,9 @@ class ItaniumAstCtypesParser: public AstToCtypesParser {
 public:
 	ItaniumAstCtypesParser() = default;
 
-	bool parseInto(
+	std::shared_ptr<ctypes::Function> parseAsFunction(
 		const llvm::itanium_demangle::Node *ast,
-		std::unique_ptr<retdec::ctypes::Module> &module,
+		std::shared_ptr<retdec::ctypes::Module> &module,
 		const TypeWidths &typeWidths = {},
 		const TypeSignedness &typeSignedness = {},
 		const retdec::ctypes::CallConvention &callConvention = retdec::ctypes::CallConvention());
@@ -55,7 +55,7 @@ private:
 	std::shared_ptr<ctypes::ArrayType> parseArrayType(const llvm::itanium_demangle::ArrayType *typeNode);
 	unsigned parseDimension(const llvm::itanium_demangle::NodeOrString *dimensions);
 	std::shared_ptr<ctypes::FunctionType> parseFuntionType(const llvm::itanium_demangle::FunctionType *typeNode);
-	ctypes::FunctionType::Parameters parseFuncTypeParameters(const llvm::itanium_demangle::NodeArray parameters,
+	ctypes::FunctionType::Parameters parseFuncTypeParameters(llvm::itanium_demangle::NodeArray parameters,
 																 bool &isVarArg);
 };
 

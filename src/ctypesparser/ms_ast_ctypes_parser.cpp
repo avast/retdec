@@ -50,9 +50,9 @@ std::string printToString(llvm::ms_demangle::Node *node)
 
 using Kind = llvm::ms_demangle::NodeKind;
 
-bool MsToCtypesParser::parseInto(
+std::shared_ptr<ctypes::Function> MsToCtypesParser::parseInto(
 	llvm::ms_demangle::SymbolNode *ast,
-	std::unique_ptr<retdec::ctypes::Module> &module,
+	std::shared_ptr<retdec::ctypes::Module> &module,
 	const retdec::ctypesparser::CTypesParser::TypeWidths &typeWidths,
 	const retdec::ctypesparser::CTypesParser::TypeSignedness &typeSignedness,
 	const retdec::ctypes::CallConvention &callConvention)
@@ -64,20 +64,15 @@ bool MsToCtypesParser::parseInto(
 	this->typeWidths = typeWidths;
 	this->typeSignedness = typeSignedness;
 
-	switch (ast->kind()) {
-	case Kind::FunctionSymbol: {
+	if (ast->kind() == Kind::FunctionSymbol) {
 		auto func = parseFunction(static_cast<llvm::ms_demangle::FunctionSymbolNode *>(ast));
 		if (func) {
 			module->addFunction(func);
-			return true;
+			return func;
 		}
-		break;
-	}
-	default:
-		break;
 	}
 
-	return false;
+	return nullptr;
 }
 
 std::shared_ptr<ctypes::Function> MsToCtypesParser::parseFunction(

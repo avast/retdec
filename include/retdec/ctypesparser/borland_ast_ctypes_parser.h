@@ -39,9 +39,9 @@ class BorlandToCtypesParser : public AstToCtypesParser
 public:
 	BorlandToCtypesParser() = default;
 
-	bool parseInto(
+	std::shared_ptr<ctypes::Function> parseAsFunction(
 		std::shared_ptr<demangler::borland::Node> ast,
-		std::unique_ptr<retdec::ctypes::Module> &module,
+		std::shared_ptr<retdec::ctypes::Module> &module,
 		const TypeWidths &typeWidths = {},
 		const TypeSignedness &typeSignedness = {},
 		const retdec::ctypes::CallConvention &callConvention = retdec::ctypes::CallConvention());
@@ -61,7 +61,6 @@ private:
 	std::shared_ptr<ctypes::NamedType> parseNamedType(std::shared_ptr<demangler::borland::NamedTypeNode> namedTypeNode);
 	ctypes::Function::Parameters parseFuncParameters(std::shared_ptr<demangler::borland::NodeArray> paramsNode);
 	ctypes::CallConvention parseCallConvention(demangler::borland::CallConv callConv);
-	ctypes::FunctionType::VarArgness parseVarArgness(bool isVarArg);
 	std::shared_ptr<ctypes::FunctionType> parsefuncType(std::shared_ptr<demangler::borland::FunctionTypeNode> funcTypeNode);
 	ctypes::FunctionType::Parameters parseFuncTypeParameters(std::shared_ptr<demangler::borland::NodeArray> paramsNode);
 	std::shared_ptr<ctypes::ArrayType> parseArrayType(std::shared_ptr<demangler::borland::ArrayNode> ArrayTypeNode);
