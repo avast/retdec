@@ -15,15 +15,19 @@ namespace bin2llvmir {
 /************************** Demangler *****************************/
 /******************************************************************/
 
-Demangler::Demangler(std::unique_ptr<retdec::demangler::Demangler> demangler) :
-	_demangler(std::move(demangler)) {}
+Demangler::Demangler(
+	std::unique_ptr<retdec::demangler::Demangler> demangler,
+	std::shared_ptr<ctypes::Module> &module) :
+	_demangler(std::move(demangler)), _module(module) {}
 
-std::string Demangler::demangleToString(const std::string &mangled) {
+std::string Demangler::demangleToString(const std::string &mangled)
+{
 	return _demangler->demangleToString(mangled);
 }
 
-//FunctionPair Demangler::getPairFunction(const std::string &mangled) {
-//
+//Demangler::FunctionPair Demangler::getPairFunction(const std::string &mangled)
+//{
+//	auto ctypes
 //}
 
 /******************************************************************/
@@ -35,45 +39,50 @@ std::string Demangler::demangleToString(const std::string &mangled) {
  * @param compiler Name of compiler mangling scheme.
  * @return Specific demangler on success or nullptr on failure.
  */
-std::unique_ptr<Demangler> DemanglerFactory::getDemangler(const std::string &compiler)
+std::unique_ptr<Demangler> DemanglerFactory::getDemangler(
+	const std::string &compiler,
+	std::shared_ptr<ctypes::Module> &module)
 {
 	if (compiler == "itanium" || compiler == "gcc" || compiler == "clang") {
-		return getItaniumDemangler();
+		return getItaniumDemangler(module);
 	} else if (compiler == "microsoft") {
-		return getMicrosoftDemangler();
+		return getMicrosoftDemangler(module);
 	} else if (compiler == "borland") {
-		return getBorlandDemangler();
+		return getBorlandDemangler(module);
 	}
 
 	// default get itanium
-	return getItaniumDemangler();
+	return getItaniumDemangler(module);
 }
 
 /**
  * @brief Crates new instance of ItaniumDemangler.
  * @return unique_ptr to created demangler instance
  */
-std::unique_ptr<Demangler> DemanglerFactory::getItaniumDemangler()
+std::unique_ptr<Demangler> DemanglerFactory::getItaniumDemangler(
+	std::shared_ptr<ctypes::Module> &module)
 {
-	return std::make_unique<Demangler>(std::make_unique<demangler::ItaniumDemangler>());
+	return std::make_unique<Demangler>(std::make_unique<demangler::ItaniumDemangler>(), module);
 }
 
 /**
  * @brief Crates new instance of MicrosoftDemangler.
  * @return unique_ptr to created demangler instance
  */
-std::unique_ptr<Demangler> DemanglerFactory::getMicrosoftDemangler()
+std::unique_ptr<Demangler> DemanglerFactory::getMicrosoftDemangler(
+	std::shared_ptr<ctypes::Module> &module)
 {
-	return std::make_unique<Demangler>(std::make_unique<demangler::MicrosoftDemangler>());
+	return std::make_unique<Demangler>(std::make_unique<demangler::MicrosoftDemangler>(), module);
 }
 
 /**
  * @brief Crates new instance of BorlandDemangler.
  * @return unique_ptr to created demangler instance
  */
-std::unique_ptr<Demangler> DemanglerFactory::getBorlandDemangler()
+std::unique_ptr<Demangler> DemanglerFactory::getBorlandDemangler(
+	std::shared_ptr<ctypes::Module> &module)
 {
-	return std::make_unique<Demangler>(std::make_unique<demangler::BorlandDemangler>());
+	return std::make_unique<Demangler>(std::make_unique<demangler::BorlandDemangler>(), module);
 }
 
 /******************************************************************/
@@ -89,18 +98,19 @@ std::map<Module *, std::unique_ptr<Demangler>> DemanglerProvider::_module2demang
  */
 Demangler *DemanglerProvider::addDemangler(
 	llvm::Module *m,
-	const retdec::config::ToolInfoContainer &t)
+	const retdec::config::ToolInfoContainer &t,
+	std::shared_ptr<ctypes::Module> &ltiModule)
 {
 	std::unique_ptr<Demangler> d;
 
 	if (t.isGcc()) {
-		d = DemanglerFactory::getItaniumDemangler();
+		d = DemanglerFactory::getItaniumDemangler(ltiModule);
 	} else if (t.isMsvc()) {
-		d = DemanglerFactory::getMicrosoftDemangler();
+		d = DemanglerFactory::getMicrosoftDemangler(ltiModule);
 	} else if (t.isBorland()) {
-		d = DemanglerFactory::getBorlandDemangler();
+		d = DemanglerFactory::getBorlandDemangler(ltiModule);
 	} else {
-		d = DemanglerFactory::getItaniumDemangler();
+		d = DemanglerFactory::getItaniumDemangler(ltiModule);
 	}
 
 	auto p = _module2demangler.insert(std::make_pair(m, std::move(d)));

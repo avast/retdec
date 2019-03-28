@@ -7,6 +7,9 @@
 #include "retdec/config/tool_info.h"
 #include "retdec/bin2llvmir/providers/demangler.h"
 #include "bin2llvmir/utils/llvmir_tests.h"
+#include "retdec/ctypes/context.h"
+#include "retdec/ctypes/module.h"
+
 
 using namespace ::testing;
 using namespace llvm;
@@ -29,7 +32,8 @@ TEST_F(DemanglerProviderTests, addDemanglerAddsDemanglerForModule)
 	tool.setIsGcc();
 	retdec::config::ToolInfoContainer tools;
 	tools.insert(tool);
-	auto* r1 = DemanglerProvider::addDemangler(module.get(), tools);
+	auto ltiModule = std::make_shared<ctypes::Module>(std::make_shared<ctypes::Context>());
+	auto* r1 = DemanglerProvider::addDemangler(module.get(), tools, ltiModule);
 	auto* r2 = DemanglerProvider::getDemangler(module.get());
 	Demangler* r3 = nullptr;
 	bool b = DemanglerProvider::getDemangler(module.get(), r3);
@@ -46,7 +50,8 @@ TEST_F(DemanglerProviderTests, getDemanglerReturnsNullptrForUnknownModule)
 	tool.setIsGcc();
 	retdec::config::ToolInfoContainer tools;
 	tools.insert(tool);
-	DemanglerProvider::addDemangler(module.get(), tools);
+	auto ltiModule = std::make_shared<ctypes::Module>(std::make_shared<ctypes::Context>());
+	DemanglerProvider::addDemangler(module.get(), tools, ltiModule);
 	parseInput(""); // creates a different module
 	auto* r1 = DemanglerProvider::getDemangler(module.get());
 	Demangler* r2 = nullptr;
@@ -69,7 +74,8 @@ TEST_F(DemanglerProviderTests, addedDemanglerWorks)
 		}
 	)");
 	Value* f = getValueByName("_ZN9wikipedia7article8print_toERSo");
-	auto* d = DemanglerProvider::addDemangler(module.get(), tools);
+	auto ltiModule = std::make_shared<ctypes::Module>(std::make_shared<ctypes::Context>());
+	auto* d = DemanglerProvider::addDemangler(module.get(), tools, ltiModule);
 	std::string name = d->demangleToString(f->getName());
 
 	EXPECT_EQ("wikipedia::article::print_to(std::ostream&)", name);
@@ -81,7 +87,8 @@ TEST_F(DemanglerProviderTests, clearRemovesAllData)
 	tool.setIsGcc();
 	retdec::config::ToolInfoContainer tools;
 	tools.insert(tool);
-	DemanglerProvider::addDemangler(module.get(), tools);
+	auto ltiModule = std::make_shared<ctypes::Module>(std::make_shared<ctypes::Context>());
+	DemanglerProvider::addDemangler(module.get(), tools, ltiModule);
 	auto* r1 = DemanglerProvider::getDemangler(module.get());
 	EXPECT_NE(nullptr, r1);
 

@@ -17,23 +17,26 @@
 namespace retdec {
 namespace bin2llvmir {
 
+class Demangler
+{
+public:
+	using FunctionPair = std::pair<
+		llvm::Function *,
+		std::shared_ptr<retdec::ctypes::Function>>;
 
+public:
+	Demangler(
+		std::unique_ptr<demangler::Demangler> demangler,
+		std::shared_ptr<ctypes::Module> &module);
 
-class Demangler {
-	public:
-		using FunctionPair = std::pair<
-			llvm::Function*,
-			std::shared_ptr<retdec::ctypes::Function>>;
-
-	public:
-		explicit Demangler (std::unique_ptr<demangler::Demangler> demangler);
-
-		std::string demangleToString(const std::string &mangled);
+	std::string demangleToString(const std::string &mangled);
 
 //		FunctionPair getPairFunction(const std::string &mangled);
 
-	protected:
-		std::unique_ptr<demangler::Demangler> _demangler;
+private:
+	std::unique_ptr<demangler::Demangler> _demangler;
+
+	std::shared_ptr<ctypes::Module> _module;
 };
 
 /**
@@ -42,15 +45,19 @@ class Demangler {
 class DemanglerFactory
 {
 public:
-	static std::unique_ptr<Demangler> getDemangler(const std::string &compiler);
+	static std::unique_ptr<Demangler> getDemangler(
+		const std::string &compiler,
+		std::shared_ptr<ctypes::Module> &module);
 
-	static std::unique_ptr<Demangler> getItaniumDemangler();
+	static std::unique_ptr<Demangler> getItaniumDemangler(
+		std::shared_ptr<ctypes::Module> &module);
 
-	static std::unique_ptr<Demangler> getMicrosoftDemangler();
+	static std::unique_ptr<Demangler> getMicrosoftDemangler(
+		std::shared_ptr<ctypes::Module> &module);
 
-	static std::unique_ptr<Demangler> getBorlandDemangler();
+	static std::unique_ptr<Demangler> getBorlandDemangler(
+		std::shared_ptr<ctypes::Module> &module);
 };
-
 
 /**
  * Completely static object -- all members and methods are static -> it can be
@@ -64,21 +71,22 @@ public:
  */
 class DemanglerProvider
 {
-	public:
-		static Demangler* addDemangler(
-				llvm::Module* m,
-				const retdec::config::ToolInfoContainer& t);
+public:
+	static Demangler *addDemangler(
+		llvm::Module *m,
+		const retdec::config::ToolInfoContainer &t,
+		std::shared_ptr<ctypes::Module> &ltiModule);
 
-		static Demangler* getDemangler(llvm::Module* m);
-		static bool getDemangler(
-				llvm::Module* m,
-				Demangler*& d);
+	static Demangler *getDemangler(llvm::Module *m);
+	static bool getDemangler(
+		llvm::Module *m,
+		Demangler *&d);
 
-		static void clear();
+	static void clear();
 
-	private:
-		/// Mapping of modules to demanglers associated with them.
-		static std::map<llvm::Module*, std::unique_ptr<Demangler>> _module2demangler;
+private:
+	/// Mapping of modules to demanglers associated with them.
+	static std::map<llvm::Module *, std::unique_ptr<Demangler>> _module2demangler;
 };
 
 } // namespace bin2llvmir

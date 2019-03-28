@@ -69,7 +69,8 @@ bool ProviderInitialization::runOnModule(Module& m)
 	SymbolicTree::setAbi(abi);
 	SymbolicTree::setConfig(c);
 
-	auto* d = DemanglerProvider::addDemangler(&m, c->getConfig().tools);
+	auto ltiModule = std::make_shared<ctypes::Module>(std::make_shared<ctypes::Context>());
+	auto* d = DemanglerProvider::addDemangler(&m, c->getConfig().tools, ltiModule);
 	if (d == nullptr)
 	{
 		return false;
@@ -91,7 +92,6 @@ bool ProviderInitialization::runOnModule(Module& m)
 			c->getConfig().getImageBase(),
 			d);
 
-	auto ltiModule = std::make_shared<ctypes::Module>(std::make_shared<ctypes::Context>());
 	auto* lti = LtiProvider::addLti(&m, c, f->getImage(), ltiModule);
 
 	NamesProvider::addNames(&m, c, debug, f, d, lti);
