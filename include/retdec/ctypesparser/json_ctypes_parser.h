@@ -136,6 +136,9 @@ class JSONCTypesParser: public CTypesParser
 
 		/// Map used to store pointers to JSON types (to speedup the parsing).
 		TypesMap typesMap;
+
+		/// Call convention used when JSON does not contain one.
+		retdec::ctypes::CallConvention defaultCallConv;
 };
 
 } // namespace ctypesparser

@@ -20,13 +20,11 @@ std::shared_ptr<ctypes::Function> BorlandToCtypesParser::parseAsFunction(
 	std::shared_ptr<retdec::demangler::borland::Node> ast,
 	std::shared_ptr<retdec::ctypes::Module> &module,
 	const TypeWidths &typeWidths,
-	const TypeSignedness &typeSignedness,
-	const retdec::ctypes::CallConvention &callConvention)
+	const TypeSignedness &typeSignedness)
 {
 	assert(ast && "Ast cannot be null");
 
 	context = module->getContext();
-	defaultCallConv = callConvention;
 	this->typeWidths = typeWidths;
 	this->typeSignedness = typeSignedness;
 
@@ -262,7 +260,7 @@ ctypes::CallConvention BorlandToCtypesParser::parseCallConvention(retdec::demang
 	case demangler::borland::CallConv::pascal:
 		return ctypes::CallConvention("pascal");
 	default:
-		return ctypes::CallConvention();
+		return ctypes::CallConvention("unknown");
 	}
 }
 

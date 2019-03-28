@@ -43,8 +43,7 @@ public:
 		std::shared_ptr<demangler::borland::Node> ast,
 		std::shared_ptr<retdec::ctypes::Module> &module,
 		const TypeWidths &typeWidths = {},
-		const TypeSignedness &typeSignedness = {},
-		const retdec::ctypes::CallConvention &callConvention = retdec::ctypes::CallConvention());
+		const TypeSignedness &typeSignedness = {});
 
 private:
 	std::shared_ptr<ctypes::IntegralType> createIntegral(const std::string &typeName);

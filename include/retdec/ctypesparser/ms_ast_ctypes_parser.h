@@ -26,8 +26,7 @@ public:
 		llvm::ms_demangle::SymbolNode *ast,
 		std::shared_ptr<retdec::ctypes::Module> &module,
 		const TypeWidths &typeWidths = {},
-		const TypeSignedness &typeSignedness = {},
-		const retdec::ctypes::CallConvention &callConvention = retdec::ctypes::CallConvention());
+		const TypeSignedness &typeSignedness = {});
 
 private:
 	std::shared_ptr<ctypes::Function> parseFunction(llvm::ms_demangle::FunctionSymbolNode *functionSymbolNode);

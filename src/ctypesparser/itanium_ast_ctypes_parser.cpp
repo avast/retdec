@@ -56,13 +56,11 @@ std::shared_ptr<ctypes::Function> ItaniumAstCtypesParser::parseAsFunction(
 	const llvm::itanium_demangle::Node *ast,
 	std::shared_ptr<retdec::ctypes::Module> &module,
 	const retdec::ctypesparser::CTypesParser::TypeWidths &typeWidths,
-	const retdec::ctypesparser::CTypesParser::TypeSignedness &typeSignedness,
-	const retdec::ctypes::CallConvention &callConvention)
+	const retdec::ctypesparser::CTypesParser::TypeSignedness &typeSignedness)
 {
 	assert(ast && "Ast cannot be null");
 
 	context = module->getContext();
-	defaultCallConv = callConvention;
 	this->typeWidths = typeWidths;
 	this->typeSignedness = typeSignedness;
 
@@ -88,7 +86,7 @@ std::shared_ptr<ctypes::Function> ItaniumAstCtypesParser::parseFunction(
 	ctypes::Function::Parameters parameters =
 		parseFunctionParameters(functionEncodingNode->getParams(), isVarArg);
 	ctypes::Function::VarArgness varArgness = toVarArgness(isVarArg);
-	ctypes::CallConvention callConvention = ctypes::CallConvention();    // TODO
+	ctypes::CallConvention callConvention = ctypes::CallConvention("unknown");    // calling convention is not mangled in names
 
 	return ctypes::Function::create(context, name, returnType, parameters, callConvention, varArgness);
 }

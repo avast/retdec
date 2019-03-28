@@ -64,8 +64,6 @@ class CTypesParser
 		TypeSignedness typeSignedness;
 		/// Bitwidth used for types not in @c typeWidths.
 		unsigned defaultBitWidth = 0;
-		/// Call convention used when JSON does not contain one.
-		retdec::ctypes::CallConvention defaultCallConv;
 };
 
 } // namespace ctypesparser

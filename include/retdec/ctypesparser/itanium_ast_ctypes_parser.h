@@ -38,8 +38,7 @@ public:
 		const llvm::itanium_demangle::Node *ast,
 		std::shared_ptr<retdec::ctypes::Module> &module,
 		const TypeWidths &typeWidths = {},
-		const TypeSignedness &typeSignedness = {},
-		const retdec::ctypes::CallConvention &callConvention = retdec::ctypes::CallConvention());
+		const TypeSignedness &typeSignedness = {});
 
 private:
 	std::shared_ptr<ctypes::Function> parseFunction(const llvm::itanium_demangle::FunctionEncoding *functionEncodingNode);

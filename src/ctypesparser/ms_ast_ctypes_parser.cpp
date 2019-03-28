@@ -54,13 +54,11 @@ std::shared_ptr<ctypes::Function> MsToCtypesParser::parseInto(
 	llvm::ms_demangle::SymbolNode *ast,
 	std::shared_ptr<retdec::ctypes::Module> &module,
 	const retdec::ctypesparser::CTypesParser::TypeWidths &typeWidths,
-	const retdec::ctypesparser::CTypesParser::TypeSignedness &typeSignedness,
-	const retdec::ctypes::CallConvention &callConvention)
+	const retdec::ctypesparser::CTypesParser::TypeSignedness &typeSignedness)
 {
 	assert(ast && "Ast cannot be null");
 
 	context = module->getContext();
-	defaultCallConv = callConvention;
 	this->typeWidths = typeWidths;
 	this->typeSignedness = typeSignedness;
 
@@ -126,7 +124,7 @@ ctypes::CallConvention MsToCtypesParser::parseCallConvention(
 	case Conv::Regcall:
 		return {"regcall"};
 	default:
-		return {};
+		return {"unknown"};
 	}
 }
 
