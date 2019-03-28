@@ -32,7 +32,7 @@ public:
 	using status = retdec::demangler::Demangler::Status;
 
 	BorlandCtypesTests() :
-		demangler(retdec::demangler::DemanglerFactory::getDemangler("borland")),
+		demangler(std::make_unique<retdec::demangler::BorlandDemangler>()),
 		context(std::make_shared<retdec::ctypes::Context>()),
 		module(std::make_unique<ctypes::Module>(context)) {}
 protected:

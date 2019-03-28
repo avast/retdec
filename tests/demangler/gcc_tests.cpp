@@ -21,7 +21,7 @@ class LlvmItaniumDemanglerTests : public Test
 		using status = retdec::demangler::Demangler::Status;
 
 		LlvmItaniumDemanglerTests():
-			demangler(retdec::demangler::DemanglerFactory::getDemangler("itanium")) {}
+			demangler(std::make_unique<retdec::demangler::ItaniumDemangler>()) {}
 
 	protected:
 		std::unique_ptr<retdec::demangler::Demangler> demangler;

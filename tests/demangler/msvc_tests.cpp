@@ -20,7 +20,7 @@ class MicrosoftDemanglerTests : public Test {
 		using status = retdec::demangler::Demangler::Status;
 
 		MicrosoftDemanglerTests() :
-			demangler(retdec::demangler::DemanglerFactory::getDemangler("microsoft")) {}
+			demangler(std::make_unique<retdec::demangler::MicrosoftDemangler>()) {}
 
 	protected:
 		std::unique_ptr<retdec::demangler::Demangler> demangler;

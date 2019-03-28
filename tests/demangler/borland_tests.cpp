@@ -21,7 +21,7 @@ public:
 	using status = retdec::demangler::Demangler::Status;
 
 	BorlandDemanglerTests() :
-		demangler(retdec::demangler::DemanglerFactory::getDemangler("borland")) {}
+		demangler(std::make_unique<retdec::demangler::BorlandDemangler>()) {}
 
 protected:
 	std::unique_ptr<retdec::demangler::Demangler> demangler;

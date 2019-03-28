@@ -32,7 +32,7 @@ public:
 	using status = retdec::demangler::Demangler::Status;
 
 	ItaniumCtypesTests() :
-		demangler(retdec::demangler::DemanglerFactory::getDemangler("itanium")),
+		demangler(std::make_unique<retdec::demangler::ItaniumDemangler>()),
 		context(std::make_shared<retdec::ctypes::Context>()),
 		module(std::make_unique<ctypes::Module>(context)) {}
 protected:
