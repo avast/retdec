@@ -27,7 +27,8 @@ class Lti
 		Lti(
 				llvm::Module* m,
 				Config* c,
-				retdec::loader::Image* objf);
+				retdec::loader::Image* objf,
+				std::shared_ptr<ctypes::Module> &ltiModule);
 
 		bool hasLtiFunction(const std::string& name);
 		std::shared_ptr<retdec::ctypes::Function> getLtiFunction(
@@ -46,7 +47,7 @@ class Lti
 		llvm::Module* _module = nullptr;
 		Config* _config = nullptr;
 		retdec::loader::Image* _image = nullptr;
-		std::unique_ptr<retdec::ctypes::Module> _ltiModule;
+		std::shared_ptr<retdec::ctypes::Module> _ltiModule;
 		ctypesparser::JSONCTypesParser _ltiParser;
 };
 
@@ -56,7 +57,8 @@ class LtiProvider
 		static Lti* addLti(
 				llvm::Module* m,
 				Config* c,
-				retdec::loader::Image* objf);
+				retdec::loader::Image* objf,
+				std::shared_ptr<ctypes::Module> &ltiModule);
 		static Lti* getLti(llvm::Module* m);
 		static bool getLti(llvm::Module* m, Lti*& lti);
 		static void clear();
