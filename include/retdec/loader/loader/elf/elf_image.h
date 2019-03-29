@@ -52,6 +52,7 @@ protected:
 	bool loadRelocatableFile();
 	bool canLoadSections(const std::vector<retdec::fileformat::Section*>& sections) const;
 	void fixBssSegments();
+	void createFakeSegment();
 	void applyRelocations();
 	void resolveRelocation(const retdec::fileformat::Relocation& rel, const retdec::fileformat::Symbol& sym);
 

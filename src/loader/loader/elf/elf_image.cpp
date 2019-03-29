@@ -65,7 +65,98 @@ bool ElfImage::load()
 	// Fix sizes of BSS segments after we have loaded and sorted everything
 	fixBssSegments();
 
+	// Create fake segment to hold functions that are relocated
+	//createFakeSegment();
+
 	return true;
+}
+
+void ElfImage::createFakeSegment()
+{
+	// std::cout << "createFakeSegment()" << std::endl;
+
+	// Get the end address of last segment, we should expect that they are not sorted now.
+	const auto& segments = getSegments();
+	const auto last_segment_end = std::max_element(segments.begin(), segments.end(),
+				  [](const auto& s1, const auto& s2) {
+				      return s1->getEndAddress() < s2->getEndAddress(); });
+
+	// Last segment not found
+	if (last_segment_end == segments.end())
+	{
+		// TODO(mato): Better error messages
+		std::cout << "End address of last segment was not found." << std::endl;
+		return;
+	}
+	// std::cout << "End address is: " << (*last_segment_end)->getEndAddress() << std::endl;
+
+	// TODO(mato): Remove this debug, dump import table
+	//std::string importTableDump;
+	//getFileFormat()->getImportTable()->dump(importTableDump);
+	//std::cout << importTableDump;
+
+	// Get the size of ptr for this elf class
+	int cur_ptr_size = 4;
+	const auto* elfInputFile = static_cast<const retdec::fileformat::ElfFormat*>(getFileFormat());
+	switch(elfInputFile->getElfClass())
+	{
+		case ELFCLASS32:
+			cur_ptr_size = 4;
+			break;
+		case ELFCLASS64:
+			cur_ptr_size = 8;
+			break;
+		default:
+			// TODO(mato): Can this be considered sensible value?
+			cur_ptr_size = 4;
+	}
+
+	// TODO(mato): Make this class member
+	// Mapping between extern symbols and their address in fake segment
+	std::map<std::string, std::uint64_t> fake_functions;
+
+	std::uint64_t extern_function_index = 0;
+	// Iterate over imports and gather functions to be created
+	const auto* it = getFileFormat()->getImportTable();
+	for (const auto &imp : *it)
+	{
+		utils::Address a = imp->getAddress();
+		// TODO(mato): Can this even be undefined? == ULLONG_MAX?
+		if (a.isUndefined())
+		{
+			continue;
+		}
+
+		if(fake_functions.count(imp->getName()))
+		{
+			// std::cout << "Import " << imp->getName() << " already exists, skipping..." << std::endl; 
+			continue;
+		}
+
+		fake_functions[imp->getName()] = extern_function_index;
+		extern_function_index += cur_ptr_size;
+	}
+
+	std::uint64_t fake_segment_size = fake_functions.size() * cur_ptr_size;
+	//std::cout << "Fake segment size: " << fake_segment_size << std::endl;
+
+	// for (const auto &s : fake_functions)
+	// {
+	//     std::cout << s.first << " @ " << s.second << std::endl;
+	// }
+
+	retdec::fileformat::SecSeg *new_segment = new retdec::fileformat::ElfSegment();
+	// TODO(mato): Consider generating name instead of using fixed name
+	new_segment->setName(".FAKE.EXTERN");
+	new_segment->setType(retdec::fileformat::SecSeg::Type::CODE);
+
+	// TODO(mato): For some reason decoder checks only physical size
+	// This makes this segment size -> 1. Maybe it does not matter?
+	new_segment->setSizeInMemory(fake_segment_size);
+	new_segment->setSizeInFile(0);
+	new_segment->setMemory(true);
+
+	addSegment(new_segment, (*last_segment_end)->getEndAddress(), fake_segment_size);
 }
 
 bool ElfImage::loadExecutableFile()
@@ -196,6 +287,8 @@ bool ElfImage::loadRelocatableFile()
 		if (addSegment(section, address, size) == nullptr)
 			return false;
 	}
+
+	createFakeSegment();
 
 	// Apply relocations
 	applyRelocations();
