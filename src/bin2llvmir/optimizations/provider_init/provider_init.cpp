@@ -18,8 +18,6 @@
 #include "retdec/bin2llvmir/providers/fileimage.h"
 #include "retdec/bin2llvmir/providers/lti.h"
 #include "retdec/bin2llvmir/providers/names.h"
-#include "retdec/ctypes/context.h"
-#include "retdec/ctypes/module.h"
 
 using namespace llvm;
 
@@ -92,7 +90,7 @@ bool ProviderInitialization::runOnModule(Module& m)
 			c->getConfig().getImageBase(),
 			d);
 
-	auto* lti = LtiProvider::addLti(&m, c, f->getImage(), ltiModule);
+	auto* lti = LtiProvider::addLti(&m, c, f->getImage());
 
 	NamesProvider::addNames(&m, c, debug, f, d, lti);
 

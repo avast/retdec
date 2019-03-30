@@ -35,14 +35,15 @@ namespace bin2llvmir {
 Lti::Lti(
 		llvm::Module* m,
 		Config* c,
-		retdec::loader::Image* objf,
-		std::shared_ptr<ctypes::Module> &ltiModule)
+		retdec::loader::Image* objf)
 		:
 		_module(m),
 		_config(c),
-		_image(objf),
-		_ltiModule(ltiModule)
+		_image(objf)
 {
+	_ltiModule = std::make_unique<retdec::ctypes::Module>(
+			std::make_shared<retdec::ctypes::Context>());
+
 	_ltiParser = ctypesparser::JSONCTypesParser(
 			static_cast<unsigned>(c->getConfig().architecture.getBitSize()));
 
@@ -257,15 +258,14 @@ std::map<llvm::Module*, Lti> LtiProvider::_module2lti;
 Lti* LtiProvider::addLti(
 		llvm::Module* m,
 		Config* c,
-		retdec::loader::Image* objf,
-		std::shared_ptr<ctypes::Module> &ltiModule)
+		retdec::loader::Image* objf)
 {
 	if (m == nullptr || c == nullptr || objf == nullptr)
 	{
 		return nullptr;
 	}
 
-	auto p = _module2lti.emplace(m, Lti(m, c, objf, ltiModule));
+	auto p = _module2lti.emplace(m, Lti(m, c, objf));
 	return &p.first->second;
 }
 
