@@ -18,6 +18,7 @@
 #include "retdec/loader/loader/elf/elf_image.h"
 #include "retdec/loader/utils/overlap_resolver.h"
 #include "retdec/loader/utils/range.h"
+#include "retdec/utils/address.h"
 
 namespace retdec {
 namespace loader {
@@ -77,18 +78,18 @@ void ElfImage::createFakeSegment()
 
 	// Get the end address of last segment, we should expect that they are not sorted now.
 	const auto& segments = getSegments();
-	const auto last_segment_end = std::max_element(segments.begin(), segments.end(),
+	const auto last_segment = std::max_element(segments.begin(), segments.end(),
 				  [](const auto& s1, const auto& s2) {
 				      return s1->getEndAddress() < s2->getEndAddress(); });
 
 	// Last segment not found
-	if (last_segment_end == segments.end())
+	if (last_segment == segments.end())
 	{
 		// TODO(mato): Better error messages
 		std::cout << "End address of last segment was not found." << std::endl;
 		return;
 	}
-	// std::cout << "End address is: " << (*last_segment_end)->getEndAddress() << std::endl;
+	// std::cout << "End address is: " << (*last_segment)->getEndAddress() << std::endl;
 
 	// TODO(mato): Remove this debug, dump import table
 	//std::string importTableDump;
@@ -111,9 +112,6 @@ void ElfImage::createFakeSegment()
 			cur_ptr_size = 4;
 	}
 
-	// TODO(mato): Make this class member
-	// Mapping between extern symbols and their address in fake segment
-	std::map<std::string, std::uint64_t> fake_functions;
 
 	std::uint64_t extern_function_index = 0;
 	// Iterate over imports and gather functions to be created
@@ -127,20 +125,20 @@ void ElfImage::createFakeSegment()
 			continue;
 		}
 
-		if(fake_functions.count(imp->getName()))
+		if(_externFncTable.count(imp->getName()))
 		{
 			// std::cout << "Import " << imp->getName() << " already exists, skipping..." << std::endl; 
 			continue;
 		}
 
-		fake_functions[imp->getName()] = extern_function_index;
+		_externFncTable[imp->getName()] = (*last_segment)->getEndAddress() + extern_function_index;
 		extern_function_index += cur_ptr_size;
 	}
 
-	std::uint64_t fake_segment_size = fake_functions.size() * cur_ptr_size;
+	std::uint64_t fake_segment_size = _externFncTable.size() * cur_ptr_size;
 	//std::cout << "Fake segment size: " << fake_segment_size << std::endl;
 
-	// for (const auto &s : fake_functions)
+	// for (const auto &s : _externFncTable)
 	// {
 	//     std::cout << s.first << " @ " << s.second << std::endl;
 	// }
@@ -148,7 +146,7 @@ void ElfImage::createFakeSegment()
 	retdec::fileformat::SecSeg *new_segment = new retdec::fileformat::ElfSegment();
 	// TODO(mato): Consider generating name instead of using fixed name
 	new_segment->setName(".FAKE.EXTERN");
-	new_segment->setType(retdec::fileformat::SecSeg::Type::CODE);
+	new_segment->setType(retdec::fileformat::SecSeg::Type::DATA);
 
 	// TODO(mato): For some reason decoder checks only physical size
 	// This makes this segment size -> 1. Maybe it does not matter?
@@ -156,7 +154,7 @@ void ElfImage::createFakeSegment()
 	new_segment->setSizeInFile(0);
 	new_segment->setMemory(true);
 
-	addSegment(new_segment, (*last_segment_end)->getEndAddress(), fake_segment_size);
+	addSegment(new_segment, (*last_segment)->getEndAddress(), fake_segment_size);
 }
 
 bool ElfImage::loadExecutableFile()
@@ -588,8 +586,8 @@ void ElfImage::applyRelocations()
 				continue;
 
 			// We are not able to handle EXTERN symbols relocation because they are not placed anywhere and it somehow causes problems in x86 decompilation
-			if (sym->getType() == retdec::fileformat::Symbol::Type::EXTERN)
-				continue;
+			// if (sym->getType() == retdec::fileformat::Symbol::Type::EXTERN)
+			// 	continue;
 
 			resolveRelocation(rel, *sym);
 		}
@@ -599,8 +597,27 @@ void ElfImage::applyRelocations()
 void ElfImage::resolveRelocation(const retdec::fileformat::Relocation& rel, const retdec::fileformat::Symbol& sym)
 {
 	unsigned long long symAddress;
-	if (!sym.getAddress(symAddress))
-		return;
+
+	const auto& extern_fnc_entry = getExternFncTable().find(sym.getName());
+
+	if (sym.getType() == retdec::fileformat::Symbol::Type::EXTERN)
+	{
+		if(extern_fnc_entry == getExternFncTable().end())
+		{
+			return;
+		}
+		else
+		{
+			symAddress = extern_fnc_entry->second;
+		}
+	}
+	else
+	{
+		if (!sym.getAddress(symAddress))
+		{
+			return;
+		}
+	}
 
 	switch (getFileFormat()->getTargetArchitecture())
 	{
@@ -780,6 +797,11 @@ void ElfImage::resolveRelocation(const retdec::fileformat::Relocation& rel, cons
 		default:
 			return;
 	}
+}
+
+const std::unordered_map<std::string, std::uint64_t>& ElfImage::getExternFncTable() const
+{
+	return _externFncTable;
 }
 
 } // namespace loader

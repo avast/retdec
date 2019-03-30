@@ -75,6 +75,7 @@ class Decoder : public llvm::ModulePass
 		void initJumpTargets();
 		void initJumpTargetsConfig();
 		void initJumpTargetsEntryPoint();
+		void initJumpTargetsExterns();
 		void initJumpTargetsImports();
 		void initJumpTargetsExports();
 		void initJumpTargetsDebug();
@@ -297,6 +298,8 @@ class Decoder : public llvm::ModulePass
 		RangesToDecode _ranges;
 		JumpTargets _jumpTargets;
 
+		/// Name of all extern functions gathered from object files
+		std::set<std::string> _externs;
 		std::set<utils::Address> _imports;
 		std::set<utils::Address> _exports;
 		std::set<utils::Address> _symbols;

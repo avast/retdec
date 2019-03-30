@@ -47,6 +47,8 @@ public:
 
 	virtual bool load() override;
 
+	const std::unordered_map<std::string, std::uint64_t>& getExternFncTable() const;
+
 protected:
 	bool loadExecutableFile();
 	bool loadRelocatableFile();
@@ -58,6 +60,11 @@ protected:
 
 	SegmentToSectionsTable createSegmentToSectionsTable();
 	const Segment* addSegment(const retdec::fileformat::SecSeg* secSeg, std::uint64_t address, std::uint64_t memSize);
+
+private:
+
+	// Mapping between extern symbols and their address in fake segment
+	std::unordered_map<std::string, std::uint64_t> _externFncTable {};
 };
 
 } // namespace loader
