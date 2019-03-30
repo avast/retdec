@@ -207,7 +207,7 @@ ParseIntoParsesFunctionsToPassedModule)
 			}
 		}
 	)");
-	auto module = std::make_shared<retdec::ctypes::Module>(std::make_shared<retdec::ctypes::Context>());
+	auto module = std::make_unique<retdec::ctypes::Module>(std::make_shared<retdec::ctypes::Context>());
 	parser.parseInto(json, module);
 }
 
@@ -239,7 +239,7 @@ ParseIntoWithExplicitTypeWidthsCorrectly)
 		}
 	)");
 	JSONCTypesParser::TypeWidths typeWidths{{"int", 32}, {"long", 64}};
-	auto module = std::make_shared<retdec::ctypes::Module>(std::make_shared<retdec::ctypes::Context>());
+	auto module = std::make_unique<retdec::ctypes::Module>(std::make_shared<retdec::ctypes::Context>());
 
 	parser.parseInto(json, module, typeWidths);
 	auto func = module->getFunctionWithName("ff");
@@ -1356,7 +1356,7 @@ ParseIntoUsingCallConventionCorrectly)
 		}
 	)");
 
-	auto module = std::make_shared<retdec::ctypes::Module>(std::make_shared<retdec::ctypes::Context>());
+	auto module = std::make_unique<retdec::ctypes::Module>(std::make_shared<retdec::ctypes::Context>());
 	parser.parseInto(json, module, {}, retdec::ctypes::CallConvention("fastcall"));
 	auto func = module->getFunctionWithName("ff");
 
@@ -1391,7 +1391,7 @@ ParseIntoWithExplicitTypeWidthsAndCallConventionCorrectly)
 		}
 	)");
 	JSONCTypesParser::TypeWidths typeWidths{{"int", 32}, {"long", 64}};
-	auto module = std::make_shared<retdec::ctypes::Module>(std::make_shared<retdec::ctypes::Context>());
+	auto module = std::make_unique<retdec::ctypes::Module>(std::make_shared<retdec::ctypes::Context>());
 
 	parser.parseInto(json, module, typeWidths, retdec::ctypes::CallConvention("cdecl"));
 	auto func = module->getFunctionWithName("ff");

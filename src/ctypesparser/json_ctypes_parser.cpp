@@ -209,12 +209,12 @@ void JSONCTypesParser::handleParsingFailure(const rapidjson::ParseResult &err) c
 *
 * Call convention is used when function itself does not specify its call convention.
 */
-std::shared_ptr<ctypes::Module> JSONCTypesParser::parse(
+std::unique_ptr<retdec::ctypes::Module> JSONCTypesParser::parse(
 	std::istream &stream,
 	const CTypesParser::TypeWidths &typeWidths,
 	const retdec::ctypes::CallConvention &callConvention)
 {
-	auto module = std::make_shared<retdec::ctypes::Module>(context);
+	auto module = std::make_unique<retdec::ctypes::Module>(context);
 	parseInto(stream, module, typeWidths, callConvention);
 	return module;
 }
@@ -234,7 +234,7 @@ std::shared_ptr<ctypes::Module> JSONCTypesParser::parse(
 */
 void JSONCTypesParser::parseInto(
 	std::istream &stream,
-	std::shared_ptr<ctypes::Module> &module,
+	std::unique_ptr<retdec::ctypes::Module> &module,
 	const CTypesParser::TypeWidths &typeWidths,
 	const retdec::ctypes::CallConvention &callConvention)
 {
@@ -291,7 +291,7 @@ std::unique_ptr<rapidjson::Document> JSONCTypesParser::parseJson(char *buffer) c
 */
 void JSONCTypesParser::parseJsonIntoModule(
 	const std::unique_ptr<rapidjson::Document> &root,
-	std::shared_ptr<ctypes::Module> &module)
+	std::unique_ptr<retdec::ctypes::Module> &module)
 {
 	// We need a clean context for each JSON because types may have different keys.
 	parserContext.clear();

@@ -27,13 +27,13 @@ class JSONCTypesParser: public CTypesParser
 		JSONCTypesParser();
 		JSONCTypesParser(unsigned defaultBitWidth);
 
-		virtual std::shared_ptr<ctypes::Module> parse(
+		virtual std::unique_ptr<retdec::ctypes::Module> parse(
 			std::istream &stream,
 			const TypeWidths &typeWidths = {},
 			const retdec::ctypes::CallConvention &callConvention = retdec::ctypes::CallConvention());
 		virtual void parseInto(
 			std::istream &stream,
-			std::shared_ptr<ctypes::Module> &module,
+			std::unique_ptr<retdec::ctypes::Module> &module,
 			const TypeWidths &typeWidths = {},
 			const retdec::ctypes::CallConvention &callConvention = retdec::ctypes::CallConvention());
 
@@ -42,7 +42,7 @@ class JSONCTypesParser: public CTypesParser
 		std::unique_ptr<rapidjson::Document> parseJson(char *buffer) const;
 		void parseJsonIntoModule(
 			const std::unique_ptr<rapidjson::Document> &root,
-			std::shared_ptr<ctypes::Module> &module);
+			std::unique_ptr<retdec::ctypes::Module> &module);
 		void addTypesToMap(const rapidjson::Value &types);
 
 		/// @name Parsing methods.
