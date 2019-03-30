@@ -116,6 +116,11 @@ void ElfImage::createFakeSegment()
 	std::uint64_t extern_function_index = 0;
 	// Iterate over imports and gather functions to be created
 	const auto* it = getFileFormat()->getImportTable();
+	if (it == nullptr)
+	{
+		return;
+	}
+
 	for (const auto &imp : *it)
 	{
 		utils::Address a = imp->getAddress();
