@@ -13,11 +13,9 @@
 
 #include "retdec/fileformat/types/resource_table/resource.h"
 #include "retdec/fileformat/types/resource_table/resource_icon_group.h"
-#include "retdec/fileformat/types/resource_table/resource_version.h"
 
 namespace retdec {
 namespace fileformat {
-
 
 /**
  * Table of resources
@@ -27,7 +25,7 @@ class ResourceTable
 	private:
 		using resourcesIterator = std::vector<std::unique_ptr<Resource>>::const_iterator;
 		std::vector<std::unique_ptr<Resource>> table;                ///< stored resources
-		std::vector<ResourceVersion *> resourceVersions;             ///< icon groups
+		std::vector<Resource *> resourceVersions;             ///< version info resources
 		std::vector<ResourceIconGroup *> iconGroups;                 ///< icon groups
 		std::vector<ResourceIcon *> icons;                           ///< icons
 		std::vector<std::pair<std::string, std::string>> languages;  ///< supported languages, LCID and code page
@@ -82,7 +80,7 @@ class ResourceTable
 		void parseVersionInfoResources();
 		void clear();
 		void addResource(std::unique_ptr<Resource>&& newResource);
-		void addResourceVersion(ResourceVersion *ver);
+		void addResourceVersion(Resource *ver);
 		void addResourceIcon(ResourceIcon *icon);
 		void addResourceIconGroup(ResourceIconGroup *iGroup);
 		void linkResourceIconGroups();

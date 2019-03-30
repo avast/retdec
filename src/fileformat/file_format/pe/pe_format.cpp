@@ -1515,8 +1515,8 @@ void PeFormat::loadResources()
 				}
 				else if (type == "Version")
 				{
-					resource = std::make_unique<ResourceVersion>();
-					resourceTable->addResourceVersion(static_cast<ResourceVersion *>(resource.get()));
+					resource = std::make_unique<Resource>();
+					resourceTable->addResourceVersion(resource.get());
 				}
 				else
 				{
