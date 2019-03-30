@@ -748,7 +748,7 @@ void ResourceTable::addResource(std::unique_ptr<Resource>&& newResource)
  * Add version resource
  * @param ver Version resource which will be added
  */
-void ResourceTable::addResourceVersion(ResourceVersion *ver)
+void ResourceTable::addResourceVersion(Resource *ver)
 {
 	resourceVersions.push_back(ver);
 }
