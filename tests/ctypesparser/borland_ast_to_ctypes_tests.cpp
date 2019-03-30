@@ -36,10 +36,10 @@ public:
 		context(std::make_shared<retdec::ctypes::Context>()),
 		module(std::make_shared<ctypes::Module>(context)) {}
 protected:
-	void mangledToCtypes(
+	std::shared_ptr<ctypes::Function> mangledToCtypes(
 		const std::string &mangled)
 	{
-		demangler->demangleToModule(mangled, module);
+		return demangler->demangleFunctionToCtypes(mangled, module);
 	}
 
 	std::unique_ptr<retdec::demangler::Demangler> demangler;
@@ -51,9 +51,10 @@ TEST_F(BorlandCtypesTests, basic)
 {
 	mangledToCtypes("@myFunc_int_$qi");
 
-	EXPECT_TRUE(module->hasFunctionWithName("myFunc_int_"));
+	EXPECT_TRUE(module->hasFunctionWithName("@myFunc_int_$qi"));
 
-	auto func = module->getFunctionWithName("myFunc_int_");
+	auto func = module->getFunctionWithName("@myFunc_int_$qi");
+	EXPECT_EQ(static_cast<std::string>(func->getDeclaration()), "myFunc_int_(int)");
 	EXPECT_TRUE(func->getReturnType()->isUnknown());
 
 	EXPECT_EQ(func->getParameterCount(), 1);
@@ -65,9 +66,9 @@ TEST_F(BorlandCtypesTests, TypeParsingTest)
 {
 	mangledToCtypes("@foo$qsusiuiluljujzcuccfdgoCsCib");
 
-	EXPECT_TRUE(module->hasFunctionWithName("foo"));
+	EXPECT_TRUE(module->hasFunctionWithName("@foo$qsusiuiluljujzcuccfdgoCsCib"));
 
-	auto func = module->getFunctionWithName("foo");
+	auto func = module->getFunctionWithName("@foo$qsusiuiluljujzcuccfdgoCsCib");
 
 	EXPECT_EQ(func->getParameterCount(), 18);
 	std::shared_ptr<ctypes::Type> param;
@@ -149,11 +150,11 @@ TEST_F(BorlandCtypesTests, templateTypes)
 	mangledToCtypes(
 		"@%foo$60std@%basic_string$c19std@%char_traits$c%17std@%allocator$c%%%$q60std@%basic_string$c19std@%char_traits$c%17std@%allocator$c%%$v");
 
-	EXPECT_TRUE(module
-					->hasFunctionWithName("foo<std::basic_string<char, std::char_traits<char>, std::allocator<char>>>"));
+	EXPECT_TRUE(module->hasFunctionWithName(
+		"@%foo$60std@%basic_string$c19std@%char_traits$c%17std@%allocator$c%%%$q60std@%basic_string$c19std@%char_traits$c%17std@%allocator$c%%$v"));
 
-	auto func =
-		module->getFunctionWithName("foo<std::basic_string<char, std::char_traits<char>, std::allocator<char>>>");
+	auto func =	module->getFunctionWithName(
+		"@%foo$60std@%basic_string$c19std@%char_traits$c%17std@%allocator$c%%%$q60std@%basic_string$c19std@%char_traits$c%17std@%allocator$c%%$v");
 	EXPECT_TRUE(func->getReturnType()->isVoid());
 
 	EXPECT_EQ(func->getParameterCount(), 1);
@@ -169,26 +170,26 @@ TEST_F(BorlandCtypesTests, callConventionTest)
 	std::shared_ptr<ctypes::Function> func;
 
 	mangledToCtypes("@foo1$qqrv");
-	EXPECT_TRUE(module->hasFunctionWithName("foo1"));
-	func = module->getFunctionWithName("foo1");
+	EXPECT_TRUE(module->hasFunctionWithName("@foo1$qqrv"));
+	func = module->getFunctionWithName("@foo1$qqrv");
 	EXPECT_EQ(static_cast<std::string>(func->getCallConvention()), "fastcall");
 
 	mangledToCtypes("@foo2$qqsv");
-	EXPECT_TRUE(module->hasFunctionWithName("foo2"));
-	func = module->getFunctionWithName("foo2");
+	EXPECT_TRUE(module->hasFunctionWithName("@foo2$qqsv"));
+	func = module->getFunctionWithName("@foo2$qqsv");
 	EXPECT_EQ(static_cast<std::string>(func->getCallConvention()), "stdcall");
 
 	mangledToCtypes("@foo3$qv");
-	EXPECT_TRUE(module->hasFunctionWithName("foo3"));
-	func = module->getFunctionWithName("foo3");
-	EXPECT_EQ(static_cast<std::string>(func->getCallConvention()), static_cast<std::string>(ctypes::CallConvention()));
+	EXPECT_TRUE(module->hasFunctionWithName("@foo3$qv"));
+	func = module->getFunctionWithName("@foo3$qv");
+	EXPECT_EQ(static_cast<std::string>(func->getCallConvention()), "unknown");
 }
 
 TEST_F(BorlandCtypesTests, PointerAndReferenceTest)
 {
 	mangledToCtypes("@foo$qpv");
-	EXPECT_TRUE(module->hasFunctionWithName("foo"));
-	auto func = module->getFunctionWithName("foo");
+	EXPECT_TRUE(module->hasFunctionWithName("@foo$qpv"));
+	auto func = module->getFunctionWithName("@foo$qpv");
 	auto param = func->getParameter(1).getType();
 	EXPECT_TRUE(param->isPointer());
 	EXPECT_TRUE(std::static_pointer_cast<ctypes::PointerType>(param)->getPointedType()->isVoid());
@@ -197,8 +198,8 @@ TEST_F(BorlandCtypesTests, PointerAndReferenceTest)
 TEST_F(BorlandCtypesTests, VarArgness)
 {
 	mangledToCtypes("@foo$qri");
-	EXPECT_TRUE(module->hasFunctionWithName("foo"));
-	auto func = module->getFunctionWithName("foo");
+	EXPECT_TRUE(module->hasFunctionWithName("@foo$qri"));
+	auto func = module->getFunctionWithName("@foo$qri");
 	auto param = func->getParameter(1).getType();
 	EXPECT_TRUE(param->isReference());
 	EXPECT_TRUE(std::static_pointer_cast<ctypes::ReferenceType>(param)->getReferencedType()->isIntegral());
@@ -207,8 +208,8 @@ TEST_F(BorlandCtypesTests, VarArgness)
 TEST_F(BorlandCtypesTests, ArrayTypeTests)
 {
 	mangledToCtypes("@foo$qpa3$a6$i");
-	EXPECT_TRUE(module->hasFunctionWithName("foo"));
-	auto func = module->getFunctionWithName("foo");
+	EXPECT_TRUE(module->hasFunctionWithName("@foo$qpa3$a6$i"));
+	auto func = module->getFunctionWithName("@foo$qpa3$a6$i");
 	auto param = func->getParameter(1).getType();
 	EXPECT_TRUE(param->isPointer());
 
@@ -228,8 +229,8 @@ TEST_F(BorlandCtypesTests, ArrayTypeTests)
 TEST_F(BorlandCtypesTests, FunctionPointerTests)
 {
 	mangledToCtypes("@foo$qpqv$i");
-	EXPECT_TRUE(module->hasFunctionWithName("foo"));
-	auto func = module->getFunctionWithName("foo");
+	EXPECT_TRUE(module->hasFunctionWithName("@foo$qpqv$i"));
+	auto func = module->getFunctionWithName("@foo$qpqv$i");
 	auto param = func->getParameter(1).getType();
 	EXPECT_TRUE(param->isPointer());
 
@@ -241,7 +242,7 @@ TEST_F(BorlandCtypesTests, FunctionPointerTests)
 
 	EXPECT_EQ(funcType->getParameterCount(), 1);
 	EXPECT_TRUE(funcType->getParameter(1)->isVoid());
-	EXPECT_EQ(funcType->getCallConvention(), ctypes::CallConvention());
+	EXPECT_EQ(static_cast<std::string>(funcType->getCallConvention()), "unknown");
 	EXPECT_TRUE(funcType->getReturnType()->isIntegral());
 }
 

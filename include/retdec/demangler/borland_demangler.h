@@ -23,10 +23,6 @@ public:
 
 	std::string demangleToString(const std::string &mangled) override;
 
-	void demangleToModule(
-		const std::string &mangled,
-		std::shared_ptr<retdec::ctypes::Module> &module) override;
-
 	std::shared_ptr<ctypes::Function> demangleFunctionToCtypes(
 		const std::string &mangled,
 		std::shared_ptr<retdec::ctypes::Module> &module) override;

@@ -22,15 +22,16 @@ class MsToCtypesParser : public AstToCtypesParser
 public:
 	MsToCtypesParser() = default;
 
-	std::shared_ptr<ctypes::Function> parseInto(
+	std::shared_ptr<ctypes::Function> parseAsFunction(
+		const std::string &mangledName,
 		llvm::ms_demangle::SymbolNode *ast,
 		std::shared_ptr<retdec::ctypes::Module> &module,
 		const TypeWidths &typeWidths = {},
 		const TypeSignedness &typeSignedness = {});
 
 private:
-	std::shared_ptr<ctypes::Function> parseFunction(llvm::ms_demangle::FunctionSymbolNode *functionSymbolNode);
-	std::string parseFunctionName(llvm::ms_demangle::QualifiedNameNode *nameNode);
+	std::shared_ptr<ctypes::Function> parseFunction(
+		const std::string &mangledName, llvm::ms_demangle::FunctionSymbolNode *functionSymbolNode);
 	ctypes::CallConvention parseCallConvention(llvm::ms_demangle::CallingConv callConv);
 	std::shared_ptr<ctypes::Type> parseType(llvm::ms_demangle::Node *typeNode);
 	std::shared_ptr<ctypes::Type> parsePrimitiveType(llvm::ms_demangle::PrimitiveTypeNode *primitiveTypeNode);

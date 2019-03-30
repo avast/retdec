@@ -15,7 +15,7 @@ namespace retdec {
 namespace ctypes {
 	class Module;
 	class Function;
-	class FunctionDeclaration;
+	class Type;
 }
 
 namespace demangler {
@@ -43,14 +43,16 @@ class Demangler
 
 		virtual std::string demangleToString(const std::string &mangled) = 0;
 
-		// TODO return declaration too
-		virtual void demangleToModule(
-			const std::string &mangled,
-			std::shared_ptr<retdec::ctypes::Module> &module) = 0;
-
 		virtual std::shared_ptr<ctypes::Function> demangleFunctionToCtypes(
 			const std::string &mangled,
 			std::shared_ptr<retdec::ctypes::Module> &module) = 0;
+
+		// TODO
+//		virtual std::shared_ptr<ctypes::Type> demangleTypeToCtypes(
+//			const std::string &mangled,
+//			std::shared_ptr<retdec::ctypes::Module> &module) = 0;
+
+		// TODO pass type widths as parameter
 
 		Status status();
 

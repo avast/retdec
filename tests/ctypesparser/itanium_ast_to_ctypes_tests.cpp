@@ -36,10 +36,10 @@ public:
 		context(std::make_shared<retdec::ctypes::Context>()),
 		module(std::make_shared<ctypes::Module>(context)) {}
 protected:
-	void mangledToCtypes(
+	std::shared_ptr<ctypes::Function> mangledToCtypes(
 		const std::string &mangled)
 	{
-		demangler->demangleToModule(mangled, module);
+		return demangler->demangleFunctionToCtypes(mangled, module);
 	}
 
 	std::unique_ptr<retdec::demangler::Demangler> demangler;
@@ -51,9 +51,9 @@ TEST_F(ItaniumCtypesTests, PointerTest)
 {
 	mangledToCtypes("_Z1fKP3Bar");	// f(Bar* const);
 
-	EXPECT_TRUE(module->hasFunctionWithName("f"));
+	EXPECT_TRUE(module->hasFunctionWithName("_Z1fKP3Bar"));
 
-	auto func = module->getFunctionWithName("f");
+	auto func = module->getFunctionWithName("_Z1fKP3Bar");
 	EXPECT_TRUE(func->getReturnType()->isUnknown());
 	EXPECT_EQ(func->getParameterCount(), 1);
 
@@ -68,9 +68,9 @@ TEST_F(ItaniumCtypesTests, ReferenceTest)
 {
 	mangledToCtypes("_Z1fRi");	// f(int &);
 
-	EXPECT_TRUE(module->hasFunctionWithName("f"));
+	EXPECT_TRUE(module->hasFunctionWithName("_Z1fRi"));
 
-	auto func = module->getFunctionWithName("f");
+	auto func = module->getFunctionWithName("_Z1fRi");
 	EXPECT_TRUE(func->getReturnType()->isUnknown());
 	EXPECT_EQ(func->getParameterCount(), 1);
 
@@ -85,9 +85,9 @@ TEST_F(ItaniumCtypesTests, VarArgnessTest)
 {
 	mangledToCtypes("_Z3fooiz");
 
-	EXPECT_TRUE(module->hasFunctionWithName("foo"));
+	EXPECT_TRUE(module->hasFunctionWithName("_Z3fooiz"));
 
-	auto func = module->getFunctionWithName("foo");
+	auto func = module->getFunctionWithName("_Z3fooiz");
 	EXPECT_TRUE(func->getReturnType()->isUnknown());
 	EXPECT_EQ(func->getParameterCount(), 1);
 	auto param = func->getParameter(1);
@@ -100,9 +100,9 @@ TEST_F(ItaniumCtypesTests, ArrayTest)
 {
 	mangledToCtypes("_Z1fA37_A42_iPS_");
 
-	EXPECT_TRUE(module->hasFunctionWithName("f"));
+	EXPECT_TRUE(module->hasFunctionWithName("_Z1fA37_A42_iPS_"));
 
-	auto func = module->getFunctionWithName("f");
+	auto func = module->getFunctionWithName("_Z1fA37_A42_iPS_");
 	EXPECT_TRUE(func->getReturnType()->isUnknown());
 	EXPECT_EQ(func->getParameterCount(), 2);
 
@@ -120,9 +120,9 @@ TEST_F(ItaniumCtypesTests, FunctionPointers)
 {
 	mangledToCtypes("_Z4foo1PFivE");
 
-	EXPECT_TRUE(module->hasFunctionWithName("foo1"));
+	EXPECT_TRUE(module->hasFunctionWithName("_Z4foo1PFivE"));
 
-	auto func = module->getFunctionWithName("foo1");
+	auto func = module->getFunctionWithName("_Z4foo1PFivE");
 	EXPECT_TRUE(func->getReturnType()->isUnknown());
 	EXPECT_EQ(func->getParameterCount(), 1);
 

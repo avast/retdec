@@ -53,6 +53,7 @@ inline std::string toString(const StringView &s)
 }    // anonymous namespace
 
 std::shared_ptr<ctypes::Function> ItaniumAstCtypesParser::parseAsFunction(
+	const std::string &name,
 	const llvm::itanium_demangle::Node *ast,
 	std::shared_ptr<retdec::ctypes::Module> &module,
 	const retdec::ctypesparser::CTypesParser::TypeWidths &typeWidths,
@@ -65,7 +66,7 @@ std::shared_ptr<ctypes::Function> ItaniumAstCtypesParser::parseAsFunction(
 	this->typeSignedness = typeSignedness;
 
 	if (ast->getKind() == Kind::KFunctionEncoding) {
-		auto func = parseFunction(static_cast<const llvm::itanium_demangle::FunctionEncoding *>(ast));
+		auto func = parseFunction(name, static_cast<const llvm::itanium_demangle::FunctionEncoding *>(ast));
 		if (func) {
 			module->addFunction(func);
 			return func;
@@ -76,11 +77,11 @@ std::shared_ptr<ctypes::Function> ItaniumAstCtypesParser::parseAsFunction(
 }
 
 std::shared_ptr<ctypes::Function> ItaniumAstCtypesParser::parseFunction(
+	const std::string &mangledName,
 	const llvm::itanium_demangle::FunctionEncoding *functionEncodingNode)
 {
 	assert(functionEncodingNode && "Violated precondition.");
 
-	std::string name = parseFunctionName(functionEncodingNode->getName());
 	std::shared_ptr<ctypes::Type> returnType = parseType(functionEncodingNode->getReturnType());
 	bool isVarArg = false;
 	ctypes::Function::Parameters parameters =
@@ -88,14 +89,12 @@ std::shared_ptr<ctypes::Function> ItaniumAstCtypesParser::parseFunction(
 	ctypes::Function::VarArgness varArgness = toVarArgness(isVarArg);
 	ctypes::CallConvention callConvention = ctypes::CallConvention("unknown");    // calling convention is not mangled in names
 
-	return ctypes::Function::create(context, name, returnType, parameters, callConvention, varArgness);
-}
-
-std::string ItaniumAstCtypesParser::parseFunctionName(const llvm::itanium_demangle::Node *node)
-{
-	assert(node && "Violated precondition.");
-
-	return toString(node);
+	auto func = ctypes::Function::create(context, mangledName, returnType, parameters, callConvention, varArgness);
+	auto declaration = toString(functionEncodingNode);
+	if (func && !declaration.empty()) {
+		func->setDeclaration(ctypes::FunctionDeclaration(declaration));
+	}
+	return func;
 }
 
 ctypes::Function::Parameters ItaniumAstCtypesParser::parseFunctionParameters(

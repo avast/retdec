@@ -17,6 +17,7 @@ namespace retdec {
 namespace ctypesparser {
 
 std::shared_ptr<ctypes::Function> BorlandToCtypesParser::parseAsFunction(
+	const std::string &name,
 	std::shared_ptr<retdec::demangler::borland::Node> ast,
 	std::shared_ptr<retdec::ctypes::Module> &module,
 	const TypeWidths &typeWidths,
@@ -29,7 +30,7 @@ std::shared_ptr<ctypes::Function> BorlandToCtypesParser::parseAsFunction(
 	this->typeSignedness = typeSignedness;
 
 	if (ast->kind() == Kind::KFunction) {
-		auto func = parseFunction(std::static_pointer_cast<demangler::borland::FunctionNode>(ast));
+		auto func = parseFunction(name, std::static_pointer_cast<demangler::borland::FunctionNode>(ast));
 		if (func) {
 			module->addFunction(func);
 			return func;
@@ -47,11 +48,11 @@ std::shared_ptr<ctypes::IntegralType> BorlandToCtypesParser::createIntegral(cons
 	return ctypes::IntegralType::create(context, typeName, bitWidth, signedness);
 }
 
-std::shared_ptr<retdec::ctypes::Function> BorlandToCtypesParser::parseFunction(std::shared_ptr<demangler::borland::FunctionNode> function)
+std::shared_ptr<retdec::ctypes::Function> BorlandToCtypesParser::parseFunction(
+	const std::string &mangledName,
+	std::shared_ptr<demangler::borland::FunctionNode> function)
 {
 	assert(function && function->name() && "Violated precondition");
-
-	std::string name = function->name()->str();
 
 	auto funcType = function->funcType();
 
@@ -60,7 +61,12 @@ std::shared_ptr<retdec::ctypes::Function> BorlandToCtypesParser::parseFunction(s
 	ctypes::CallConvention callConvention = parseCallConvention(funcType->callConv());
 	ctypes::Function::VarArgness varArgness = toVarArgness(funcType->isVarArg());
 
-	return ctypes::Function::create(context, name, returnType, parameters, callConvention, varArgness);
+	auto func = ctypes::Function::create(context, mangledName, returnType, parameters, callConvention, varArgness);
+	auto declaration = function->str();
+	if (func) {
+		func->setDeclaration(ctypes::FunctionDeclaration(declaration));
+	}
+	return func;
 }
 
 std::shared_ptr<ctypes::Type> BorlandToCtypesParser::parseType(std::shared_ptr<retdec::demangler::borland::TypeNode> typeNode)

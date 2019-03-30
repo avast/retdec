@@ -30,19 +30,21 @@ class NodeOrString;
 namespace retdec {
 namespace ctypesparser {
 
-class ItaniumAstCtypesParser: public AstToCtypesParser {
+class ItaniumAstCtypesParser : public AstToCtypesParser
+{
 public:
 	ItaniumAstCtypesParser() = default;
 
 	std::shared_ptr<ctypes::Function> parseAsFunction(
+		const std::string &name,
 		const llvm::itanium_demangle::Node *ast,
 		std::shared_ptr<retdec::ctypes::Module> &module,
 		const TypeWidths &typeWidths = {},
 		const TypeSignedness &typeSignedness = {});
 
 private:
-	std::shared_ptr<ctypes::Function> parseFunction(const llvm::itanium_demangle::FunctionEncoding *functionEncodingNode);
-	std::string parseFunctionName(const llvm::itanium_demangle::Node *node);
+	std::shared_ptr<ctypes::Function> parseFunction(
+		const std::string &mangledName, const llvm::itanium_demangle::FunctionEncoding *functionEncodingNode);
 	ctypes::Function::Parameters parseFunctionParameters(
 		llvm::itanium_demangle::NodeArray node, bool &isVarArg);
 	std::shared_ptr<ctypes::Type> parseType(const llvm::itanium_demangle::Node *typeNode);
@@ -55,7 +57,7 @@ private:
 	unsigned parseDimension(const llvm::itanium_demangle::NodeOrString *dimensions);
 	std::shared_ptr<ctypes::FunctionType> parseFuntionType(const llvm::itanium_demangle::FunctionType *typeNode);
 	ctypes::FunctionType::Parameters parseFuncTypeParameters(llvm::itanium_demangle::NodeArray parameters,
-																 bool &isVarArg);
+															 bool &isVarArg);
 };
 
 }

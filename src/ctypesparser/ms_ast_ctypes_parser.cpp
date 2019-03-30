@@ -23,7 +23,7 @@ namespace ctypesparser {
 
 namespace {
 
-std::string printToString(llvm::ms_demangle::Node *node)
+std::string toString(llvm::ms_demangle::Node *node)
 {
 
 	llvm::itanium_demangle::OutputStream s;
@@ -50,7 +50,8 @@ std::string printToString(llvm::ms_demangle::Node *node)
 
 using Kind = llvm::ms_demangle::NodeKind;
 
-std::shared_ptr<ctypes::Function> MsToCtypesParser::parseInto(
+std::shared_ptr<ctypes::Function> MsToCtypesParser::parseAsFunction(
+	const std::string &mangledName,
 	llvm::ms_demangle::SymbolNode *ast,
 	std::shared_ptr<retdec::ctypes::Module> &module,
 	const retdec::ctypesparser::CTypesParser::TypeWidths &typeWidths,
@@ -63,7 +64,7 @@ std::shared_ptr<ctypes::Function> MsToCtypesParser::parseInto(
 	this->typeSignedness = typeSignedness;
 
 	if (ast->kind() == Kind::FunctionSymbol) {
-		auto func = parseFunction(static_cast<llvm::ms_demangle::FunctionSymbolNode *>(ast));
+		auto func = parseFunction(mangledName, static_cast<llvm::ms_demangle::FunctionSymbolNode *>(ast));
 		if (func) {
 			module->addFunction(func);
 			return func;
@@ -74,29 +75,27 @@ std::shared_ptr<ctypes::Function> MsToCtypesParser::parseInto(
 }
 
 std::shared_ptr<ctypes::Function> MsToCtypesParser::parseFunction(
+	const std::string &mangledName,
 	llvm::ms_demangle::FunctionSymbolNode *functionSymbolNode)
 {
 	assert(functionSymbolNode && "Violated precondition.");
-	
+
 	auto funcSignature = functionSymbolNode->Signature;
 	if (!funcSignature) {
 		return nullptr;
 	}
 
-	std::string name = parseFunctionName(functionSymbolNode->Name);
 	std::shared_ptr<ctypes::Type> returnType = parseType(funcSignature->ReturnType);
 	ctypes::CallConvention callConvention = parseCallConvention(funcSignature->CallConvention);
 	ctypes::Function::Parameters parameters = parseFunctionParameters(funcSignature->Params);
 	ctypes::Function::VarArgness varArgness = toVarArgness(funcSignature->IsVariadic);
 
-	return ctypes::Function::create(context, name, returnType, parameters, callConvention, varArgness);
-}
-
-std::string MsToCtypesParser::parseFunctionName(llvm::ms_demangle::QualifiedNameNode *nameNode)
-{
-	assert(nameNode && "Violated precondition.");
-
-	return printToString(nameNode);
+	auto func = ctypes::Function::create(context, mangledName, returnType, parameters, callConvention, varArgness);
+	auto declaration = toString(functionSymbolNode);
+	if (func && !declaration.empty()) {
+		func ->setDeclaration(ctypes::FunctionDeclaration(declaration));
+	}
+	return func;
 }
 
 ctypes::CallConvention MsToCtypesParser::parseCallConvention(
@@ -260,7 +259,7 @@ std::shared_ptr<ctypes::Type> MsToCtypesParser::parsePointerType(
 
 std::shared_ptr<ctypes::Type> MsToCtypesParser::parseNamedType(llvm::ms_demangle::Node *node)
 {
-	std::string name = printToString(node);
+	std::string name = toString(node);
 
 	if (name.empty()) {
 		return std::static_pointer_cast<ctypes::Type>(ctypes::UnknownType::create());

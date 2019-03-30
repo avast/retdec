@@ -62,52 +62,6 @@ std::string BorlandDemangler::demangleToString(const std::string &mangled)
 	return astToString(_status, parser.ast());
 }
 
-void BorlandDemangler::demangleToModule(
-	const std::string &mangled,
-	std::shared_ptr<retdec::ctypes::Module> &module)
-{
-	borland::BorlandASTParser astParser{_demangleContext};
-	astParser.parse(mangled);
-	_status = astStatusToDemStatus(astParser.status());
-	if (_status != success) {
-		return;
-	}
-
-	static const ctypesparser::CTypesParser::TypeWidths typeWidths = {
-		{"void", 0},
-		{"bool", 1},
-		{"char", 8},
-		{"signed char", 8},
-		{"unsigned char", 8},
-		{"wchar_t", 32},
-		{"short", 16},
-		{"unsigned short", 16},
-		{"int", 32},
-		{"unsigned int", 32},
-		{"long", 64},
-		{"unsigned long", 64},
-		{"long long", 64},
-		{"unsigned long long", 64},
-		{"int64_t", 64},
-		{"uint64_t", 64},
-		{"float", 32},
-		{"double", 64},
-		{"long double", 96},
-		{"pointer", 32}
-	}; // TODO getvalordefault
-
-	static const ctypesparser::CTypesParser::TypeSignedness typeSignedness = {
-		{"wchar_t", ctypes::IntegralType::Signess::Unsigned},
-		{"char16_t", ctypes::IntegralType::Signess::Unsigned},
-		{"char32_t", ctypes::IntegralType::Signess::Unsigned},
-		{"char", ctypes::IntegralType::Signess::Unsigned},
-	};
-
-	ctypesparser::BorlandToCtypesParser ctypesParser{};
-	ctypesParser.parseAsFunction(astParser.ast(), module, typeWidths, typeSignedness);
-	_status = success;    // TODO
-}
-
 std::shared_ptr<ctypes::Function> BorlandDemangler::demangleFunctionToCtypes(
 	const std::string &mangled, std::shared_ptr<retdec::ctypes::Module> &module)
 {
@@ -149,7 +103,7 @@ std::shared_ptr<ctypes::Function> BorlandDemangler::demangleFunctionToCtypes(
 	};
 
 	ctypesparser::BorlandToCtypesParser ctypesParser{};
-	auto func = ctypesParser.parseAsFunction(astParser.ast(), module, typeWidths, typeSignedness);
+	auto func = ctypesParser.parseAsFunction(mangled, astParser.ast(), module, typeWidths, typeSignedness);
 	_status = func ? success: invalid_mangled_name;
 	return func;
 }

@@ -36,10 +36,10 @@ public:
 		context(std::make_shared<retdec::ctypes::Context>()),
 		module(std::make_shared<ctypes::Module>(context)) {}
 protected:
-	void mangledToCtypes(
+	std::shared_ptr<ctypes::Function> mangledToCtypes(
 		const std::string &mangled)
 	{
-		demangler->demangleToModule(mangled, module);
+		return demangler->demangleFunctionToCtypes(mangled, module);
 	}
 
 	std::unique_ptr<retdec::demangler::Demangler> demangler;
@@ -51,9 +51,9 @@ TEST_F(MsCtypesTests, basic)
 {
 	mangledToCtypes("?foo@@YAXI@Z");	// void __cdecl foo(unsigned int)
 
-	EXPECT_TRUE(module->hasFunctionWithName("foo"));
+	EXPECT_TRUE(module->hasFunctionWithName("?foo@@YAXI@Z"));
 
-	auto func = module->getFunctionWithName("foo");
+	auto func = module->getFunctionWithName("?foo@@YAXI@Z");
 
 	EXPECT_TRUE(func->getReturnType()->isVoid());
 
@@ -66,9 +66,9 @@ TEST_F(MsCtypesTests, Types)
 {
 	mangledToCtypes("?foo@@YAXFGHIJK_J_KCED_W_S_UMNO_N@Z");
 
-	EXPECT_TRUE(module->hasFunctionWithName("foo"));
+	EXPECT_TRUE(module->hasFunctionWithName("?foo@@YAXFGHIJK_J_KCED_W_S_UMNO_N@Z"));
 
-	auto func = module->getFunctionWithName("foo");
+	auto func = module->getFunctionWithName("?foo@@YAXFGHIJK_J_KCED_W_S_UMNO_N@Z");
 
 	EXPECT_EQ(func->getParameterCount(), 18);
 	std::shared_ptr<ctypes::Type> param;
@@ -149,15 +149,15 @@ TEST_F(MsCtypesTests, Operators)
 {
 	mangledToCtypes("??_UTypedefNewDelete@@SAPAXI@Z");	// public: static void * __cdecl TypedefNewDelete::operator new[](unsigned int)
 
-	EXPECT_TRUE(module->hasFunctionWithName("TypedefNewDelete::operator new[]"));
+	EXPECT_TRUE(module->hasFunctionWithName("??_UTypedefNewDelete@@SAPAXI@Z"));
 }
 
 TEST_F(MsCtypesTests, NamedTypes)
 {
 	mangledToCtypes("?function@@YAXV?$C@$$A6AXXZ@@@Z");	// "void __cdecl function(class C<void __cdecl(void)>)"
 
-	EXPECT_TRUE(module->hasFunctionWithName("function"));
-	auto func = module->getFunctionWithName("function");
+	EXPECT_TRUE(module->hasFunctionWithName("?function@@YAXV?$C@$$A6AXXZ@@@Z"));
+	auto func = module->getFunctionWithName("?function@@YAXV?$C@$$A6AXXZ@@@Z");
 
 	EXPECT_EQ(func->getParameterCount(), 1);
 	auto param = func->getParameter(1);
@@ -168,8 +168,8 @@ TEST_F(MsCtypesTests, TemplateTypes)
 {
 	mangledToCtypes("?ee@?$e@$$A6AXXZ@@EEAAXXZ");	// private: virtual void __cdecl e<void __cdecl(void)>::ee(void)
 
-	EXPECT_TRUE(module->hasFunctionWithName("e<void __cdecl(void)>::ee"));
-	auto func = module->getFunctionWithName("e<void __cdecl(void)>::ee");
+	EXPECT_TRUE(module->hasFunctionWithName("?ee@?$e@$$A6AXXZ@@EEAAXXZ"));
+	auto func = module->getFunctionWithName("?ee@?$e@$$A6AXXZ@@EEAAXXZ");
 
 	EXPECT_EQ(func->getParameterCount(), 0);
 }

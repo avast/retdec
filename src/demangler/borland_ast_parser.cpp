@@ -188,7 +188,6 @@ void BorlandASTParser::parse(const std::string &mangled)
 	_status = in_progress;
 	_mangled = llvm::itanium_demangle::StringView{mangled.c_str(), mangled.length()};
 
-	// todo check for function node
 	auto func = parseFunction();
 	if (checkResult(func)){
 		_ast = func;
