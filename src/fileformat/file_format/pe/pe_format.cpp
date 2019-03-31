@@ -217,6 +217,63 @@ const std::map<std::size_t, std::string> resourceLanguageMap
 	{PELIB_LANG_MALAGASY, "Malagasy"}
 };
 
+const std::vector<std::string> usualSectionNames
+{
+	".00cfg", ".apiset", ".arch", ".autoload_text", ".bindat", ".bootdat", ".bss", 
+	".BSS", ".buildid", ".CLR_UEF", ".code", ".cormeta", ".complua", ".CRT",
+	".cygwin_dll_common", ".data", ".DATA", ".data1", ".data2", ".data3", ".debug", 
+	".debug  $F", ".debug  $P", ".debug  $S", ".debug  $T", ".drectve ", ".didat", 
+	".didata", ".edata", ".eh_fram", ".export", ".fasm", ".flat", ".gfids", ".giats", 
+	".gljmp", ".glue_7t", ".glue_7", ".idata", ".idlsym", ".impdata", ".import",
+	".itext", ".ndata", ".orpc", ".pdata", ".rdata", ".reloc", ".rodata", ".rsrc", 
+	".sbss", ".script", ".shared", ".sdata", ".srdata", ".stab", ".stabstr", ".sxdata", 
+	".text", ".text0", ".text1", ".text2", ".text3", ".textbss", ".tls", ".tls$",
+	".udata", ".vsdata", ".xdata", ".wixburn", ".wpp_sf ", "BSS", "CODE", "DATA", 
+	"DGROUP", "edata", "idata", "INIT", "minATL", "PAGE", "rdata", "sdata", "shared", 
+	"Shared", "testdata", "text"
+};
+
+const std::vector<std::string> usualPackerSections
+{
+	".aspack", ".adata", "ASPack", ".ASPack", ".boom", ".ccg", ".charmve", "BitArts",
+	"DAStub", "!EPack", ".ecode", ".edata", ".enigma1", ".enigma2", "FSG!", ".gentee",
+	"kkrunchy", "lz32.dll", ".mackt", ".MaskPE", "MEW", ".mnbvcx1", ".mnbvcx2",
+	".MPRESS1", ".MPRESS2", ".neolite", ".neolit", ".nsp1", ".nsp0", ".nsp2", "nsp1",
+	"nsp0", "nsp2", ".packed", "pebundle", "PEBundle", "PEC2TO", "PECompact2", "PEC2",
+	"pec", "pec1", "pec2", "pec3", "pec4", "pec5", "pec6", "PEC2MO", "PELOCKnt",
+	".perplex", "PESHiELD", ".petite", ".pinclie", "ProCrypt", ".RLPack", ".rmnet",
+	"RCryptor", ".RPCrypt", ".seau", ".sforce3", ".shrink1", ".shrink2", ".shrink3",
+	".spack", ".svkp", "Themida", ".Themida", ".taz", ".tsuarch", ".tsustub", ".packed",
+	"PEPACK!!", ".Upack", ".ByDwing", "UPX0", "UPX1", "UPX2", "UPX3", "UPX!", ".UPX0",
+	".UPX1", ".UPX2", ".vmp0", ".vmp1", ".vmp2", "VProtect", ".winapi", "WinLicen",
+	"_winzip_", ".WWPACK", ".WWP32", ".yP", ".y0da"
+};
+
+const std::map<std::string, std::size_t> usualSectionCharacteristics
+{
+	{".bss", (PELIB_IMAGE_SCN_CNT_UNINITIALIZED_DATA | PELIB_IMAGE_SCN_MEM_READ | PELIB_IMAGE_SCN_MEM_WRITE)},
+	{".cormeta", PELIB_IMAGE_SCN_LNK_INFO},
+	{".data", (PELIB_IMAGE_SCN_CNT_INITIALIZED_DATA | PELIB_IMAGE_SCN_MEM_READ | PELIB_IMAGE_SCN_MEM_WRITE)},
+	{".debug", (PELIB_IMAGE_SCN_CNT_INITIALIZED_DATA | PELIB_IMAGE_SCN_MEM_READ | PELIB_IMAGE_SCN_MEM_DISCARDABLE)},
+	{".drective", PELIB_IMAGE_SCN_LNK_INFO},
+	{".edata", (PELIB_IMAGE_SCN_CNT_INITIALIZED_DATA | PELIB_IMAGE_SCN_MEM_READ)},
+	{".idata", (PELIB_IMAGE_SCN_CNT_INITIALIZED_DATA | PELIB_IMAGE_SCN_MEM_READ | PELIB_IMAGE_SCN_MEM_WRITE)},
+	{".idlsym", PELIB_IMAGE_SCN_LNK_INFO},
+	{".pdata", (PELIB_IMAGE_SCN_CNT_INITIALIZED_DATA | PELIB_IMAGE_SCN_MEM_READ)},
+	{".rdata", (PELIB_IMAGE_SCN_CNT_INITIALIZED_DATA | PELIB_IMAGE_SCN_MEM_READ)},
+	{".reloc", (PELIB_IMAGE_SCN_CNT_INITIALIZED_DATA | PELIB_IMAGE_SCN_MEM_READ | PELIB_IMAGE_SCN_MEM_DISCARDABLE)},
+	{".rsrc", (PELIB_IMAGE_SCN_CNT_INITIALIZED_DATA | PELIB_IMAGE_SCN_MEM_READ)},
+	{".sbss", (PELIB_IMAGE_SCN_CNT_UNINITIALIZED_DATA | PELIB_IMAGE_SCN_MEM_READ | PELIB_IMAGE_SCN_MEM_WRITE)},
+	{".sdata", (PELIB_IMAGE_SCN_CNT_INITIALIZED_DATA | PELIB_IMAGE_SCN_MEM_READ | PELIB_IMAGE_SCN_MEM_WRITE)},
+	{".srdata", (PELIB_IMAGE_SCN_CNT_INITIALIZED_DATA | PELIB_IMAGE_SCN_MEM_READ)},
+	{".sxdata", PELIB_IMAGE_SCN_LNK_INFO},
+	{".text", (PELIB_IMAGE_SCN_CNT_CODE | PELIB_IMAGE_SCN_MEM_EXECUTE | PELIB_IMAGE_SCN_MEM_READ)},
+	{".tls", (PELIB_IMAGE_SCN_CNT_INITIALIZED_DATA | PELIB_IMAGE_SCN_MEM_READ | PELIB_IMAGE_SCN_MEM_WRITE)},
+	{".tls$", (PELIB_IMAGE_SCN_CNT_INITIALIZED_DATA | PELIB_IMAGE_SCN_MEM_READ | PELIB_IMAGE_SCN_MEM_WRITE)},
+	{".vsdata", (PELIB_IMAGE_SCN_CNT_INITIALIZED_DATA | PELIB_IMAGE_SCN_MEM_READ | PELIB_IMAGE_SCN_MEM_WRITE)},
+	{".xdata", (PELIB_IMAGE_SCN_CNT_INITIALIZED_DATA | PELIB_IMAGE_SCN_MEM_READ)}
+};
+
 /**
  * Try to find offset of DOS stub
  * @param plainFile Content of input file from space after MZ header to offset
@@ -445,6 +502,7 @@ void PeFormat::initStructures(const std::string & dllListFile)
 		loadVisualBasicHeader();
 		computeSectionTableHashes();
 		loadStrings();
+		scanForAnomalies();
 	}
 }
 
@@ -3421,6 +3479,130 @@ const std::string& PeFormat::getTypeRefhashSha256() const
 const VisualBasicInfo* PeFormat::getVisualBasicInfo() const
 {
 	return &visualBasicInfo;
+}
+
+/**
+ * Scan for file format anomalies
+ */
+void PeFormat::scanForAnomalies()
+{
+	// anomalies.emplace_back(std::make_pair<std::string, std::string>("hello", "world"));
+	std::cerr << "=============\n";
+	scanForSectionAnomalies();
+}
+
+/**
+ * Scan for section anomalies
+ */
+void PeFormat::scanForSectionAnomalies()
+{
+	// TODO KUBO
+	// TODO flags dont seem to work
+
+	std::size_t nSecs = getDeclaredNumberOfSections();
+	
+	const PeCoffSection *epSec = dynamic_cast<const PeCoffSection*>(getEpSection());
+	if (epSec)
+	{
+		// scan EP in last section
+		const PeCoffSection *lastSec = (nSecs) ? getPeSection(nSecs - 1) : nullptr;
+		if (epSec == lastSec)
+		{
+			std::cerr << "EP in last section\n";
+			anomalies.emplace_back(std::make_pair<std::string, std::string>("epInLastSec",
+				"Entry point in last section"));
+		}
+
+		// scan EP in writable section
+		if (epSec->getPeCoffFlags() & PELIB_IMAGE_SCN_MEM_WRITE)
+		{
+			std::cerr << "EP in writable section\n";
+			anomalies.emplace_back(std::make_pair<std::string, std::string>("epInWritableSec",
+				"Entry point in writable section"));
+		}
+	}
+
+	for (std::size_t i = 0; i < nSecs; i++)
+	{
+		auto sec = getPeSection(i);
+		if (!sec)
+		{
+			continue;
+		}
+
+		const auto name = sec->getName();
+		const std::string msgName = (name.empty()) ? numToStr(sec->getIndex()) : name;
+		const auto flags = sec->getPeCoffFlags();
+		if (!name.empty())
+		{
+			// scan for unusual section names
+			if (std::find(usualSectionNames.begin(), usualSectionNames.end(), name) == usualSectionNames.end())
+			{
+				std::cerr << "weird section name: " << name << "\n";
+				auto p = std::make_pair<std::string, std::string>("unusualSecName", "Unusual section name: " + name);
+				anomalies.emplace_back(std::move(p));
+			}
+
+			// scan for packer section names
+			if (std::find(usualPackerSections.begin(), usualPackerSections.end(), name) != usualPackerSections.end())
+			{
+				std::cerr << "packer section name: " << name << "\n";
+				auto p = std::make_pair<std::string, std::string>("packedSecName", "Packer section name: " + name);
+				anomalies.emplace_back(std::move(p));
+			}
+
+			// scan for unexpected characteristics
+			auto characIt = usualSectionCharacteristics.find(name);
+			if (characIt != usualSectionCharacteristics.end() && characIt->second != flags)
+			{
+				std::cerr << "unusual characteristics: " << name << "\n";
+				anomalies.emplace_back(std::make_pair<std::string, std::string>("unusualSecChar",
+					"Section " + name + " has unusual characteristics"));
+			}
+
+		}
+
+		// scan section marked uninitialized but contains data
+		if ((flags & PELIB_IMAGE_SCN_CNT_UNINITIALIZED_DATA) &&
+			(sec->getOffset() != 0 || sec->getSizeInFile() != 0))
+		{
+			std::cerr << "Section " << msgName << " marked uninitialized but contains data\n";
+			anomalies.emplace_back(std::make_pair<std::string, std::string>("uninitSecHasData", 
+				"Section " + msgName + " is marked uninitialized but contains data"));
+		}
+
+		// scan sizeOfRawData of section is 0
+		if (sec->getSizeInFile() == 0)
+		{
+			std::cerr << "Zero SizeOfRawData: " << msgName << '\n';
+			anomalies.emplace_back(std::make_pair<std::string, std::string>("noRawDataSec", 
+				"Section " + msgName + " has zero SizeOfRawData"));
+		}
+
+		// scan for overlapping sections
+		for (std::size_t j = i + 1; j < nSecs; j++)
+		{
+			auto cmpSec = getSection(j);
+			if (!cmpSec)
+			{
+				continue;
+			}
+
+			auto secStart = sec->getOffset();
+			auto secEnd = secStart + sec->getSizeInFile();
+			auto cmpSecStart = cmpSec->getOffset();
+			auto cmpSecEnd = cmpSecStart + cmpSec->getSizeInFile();
+			if ((secStart <= cmpSecStart && cmpSecStart < secEnd) ||
+				(cmpSecStart <= secStart && secStart < cmpSecEnd))
+			{
+				const auto cmpName = cmpSec->getName();
+				const std::string cmpMsgName = (cmpName.empty()) ? numToStr(cmpSec->getIndex()) : cmpName;
+				std::cerr << "Sections " << name << " and " << cmpName << " overlap\n";
+				anomalies.emplace_back(std::make_pair<std::string, std::string>("overlappingSecs",
+					"Sections " + name + " and " + cmpName + " overlap"));
+			}
+		}
+	}
 }
 
 } // namespace fileformat

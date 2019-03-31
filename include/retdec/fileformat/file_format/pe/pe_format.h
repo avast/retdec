@@ -207,6 +207,12 @@ class PeFormat : public FileFormat
 		const std::string& getTypeRefhashSha256() const;
 		const VisualBasicInfo* getVisualBasicInfo() const;
 		/// @}
+
+		/// @name Scaning methods
+		/// @{
+		void scanForAnomalies();
+		void scanForSectionAnomalies();
+		/// @}
 };
 
 } // namespace fileformat
