@@ -23,6 +23,7 @@
 #include "retdec/bin2llvmir/providers/debugformat.h"
 #include "retdec/bin2llvmir/providers/fileimage.h"
 #include "retdec/bin2llvmir/providers/lti.h"
+#include "retdec/bin2llvmir/providers/demangler.h"
 
 namespace retdec {
 namespace bin2llvmir {
@@ -38,7 +39,8 @@ class ParamReturn : public llvm::ModulePass
 				Abi* abi,
 				FileImage* img = nullptr,
 				DebugFormat* dbgf = nullptr,
-				Lti* lti = nullptr);
+				Lti* lti = nullptr,
+				Demangler* demangler = nullptr);
 		virtual bool runOnModule(llvm::Module& m) override;
 
 	private:
@@ -95,6 +97,7 @@ class ParamReturn : public llvm::ModulePass
 		FileImage* _image = nullptr;
 		DebugFormat* _dbgf = nullptr;
 		Lti* _lti = nullptr;
+		Demangler* _demangler = nullptr;
 
 		std::map<llvm::Value*, DataFlowEntry> _fnc2calls;
 		ReachingDefinitionsAnalysis _RDA;
