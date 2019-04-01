@@ -45,7 +45,7 @@ class Demangler
 
 		virtual std::shared_ptr<ctypes::Function> demangleFunctionToCtypes(
 			const std::string &mangled,
-			std::shared_ptr<retdec::ctypes::Module> &module) = 0;
+			std::unique_ptr<ctypes::Module> &module) = 0;
 
 		// TODO
 //		virtual std::shared_ptr<ctypes::Type> demangleTypeToCtypes(

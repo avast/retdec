@@ -53,7 +53,7 @@ using Kind = llvm::ms_demangle::NodeKind;
 std::shared_ptr<ctypes::Function> MsToCtypesParser::parseAsFunction(
 	const std::string &mangledName,
 	llvm::ms_demangle::SymbolNode *ast,
-	std::shared_ptr<retdec::ctypes::Module> &module,
+	std::unique_ptr<ctypes::Module> &module,
 	const retdec::ctypesparser::CTypesParser::TypeWidths &typeWidths,
 	const retdec::ctypesparser::CTypesParser::TypeSignedness &typeSignedness)
 {
@@ -114,8 +114,6 @@ ctypes::CallConvention MsToCtypesParser::parseCallConvention(
 		return {"stdcall"};
 	case Conv::Fastcall:
 		return {"fastcall"};
-	case Conv::Clrcall:
-		return {"clrcall"};
 	case Conv::Eabi:
 		return {"eabi"};
 	case Conv::Vectorcall:

@@ -63,7 +63,7 @@ std::string BorlandDemangler::demangleToString(const std::string &mangled)
 }
 
 std::shared_ptr<ctypes::Function> BorlandDemangler::demangleFunctionToCtypes(
-	const std::string &mangled, std::shared_ptr<retdec::ctypes::Module> &module)
+	const std::string &mangled, std::unique_ptr<ctypes::Module> &module)
 {
 	borland::BorlandASTParser astParser{_demangleContext};
 	astParser.parse(mangled);

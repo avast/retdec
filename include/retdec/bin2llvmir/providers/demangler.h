@@ -39,7 +39,6 @@ public:
 		llvm::Module *llvmModule,
 		Config *config,
 		retdec::loader::Image *objf,
-		std::shared_ptr<ctypes::Module> &ltiModule,
 		std::unique_ptr<retdec::demangler::Demangler> demangler);
 
 	std::string demangleToString(const std::string &mangled);
@@ -53,7 +52,7 @@ private:
 	llvm::Module *_llvmModule = nullptr;
 	Config *_config = nullptr;
 	retdec::loader::Image *_image = nullptr;
-	std::shared_ptr<retdec::ctypes::Module> _ltiModule;
+	std::unique_ptr<retdec::ctypes::Module> _ltiModule;
 	std::unique_ptr<demangler::Demangler> _demangler;
 };
 
@@ -66,20 +65,17 @@ public:
 	static std::unique_ptr<Demangler> getItaniumDemangler(
 		llvm::Module *m,
 		Config *config,
-		retdec::loader::Image *objf,
-		std::shared_ptr<ctypes::Module> &ltiModule);
+		retdec::loader::Image *objf);
 
 	static std::unique_ptr<Demangler> getMicrosoftDemangler(
 		llvm::Module *m,
 		Config *config,
-		retdec::loader::Image *objf,
-		std::shared_ptr<ctypes::Module> &ltiModule);
+		retdec::loader::Image *objf);
 
 	static std::unique_ptr<Demangler> getBorlandDemangler(
 		llvm::Module *m,
 		Config *config,
-		retdec::loader::Image *objf,
-		std::shared_ptr<ctypes::Module> &ltiModule);
+		retdec::loader::Image *objf);
 };
 
 /**
@@ -98,8 +94,7 @@ public:
 	static Demangler *addDemangler(
 		llvm::Module *llvmModule,
 		Config *config,
-		retdec::loader::Image *objf,
-		std::shared_ptr<ctypes::Module> &ltiModule);
+		retdec::loader::Image *objf);
 
 	static Demangler *getDemangler(llvm::Module *m);
 	static bool getDemangler(

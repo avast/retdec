@@ -9,6 +9,7 @@
 #include "retdec/bin2llvmir/providers/fileimage.h"
 #include "retdec/bin2llvmir/utils/ctypes2llvm.h"
 #include "retdec/ctypes/module.h"
+#include "retdec/ctypes/context.h"
 #include "retdec/ctypes/function.h"
 #include "retdec/ctypes/function_type.h"
 
@@ -25,12 +26,11 @@ Demangler::Demangler(
 	llvm::Module *llvmModule,
 	Config *config,
 	retdec::loader::Image *objf,
-	std::shared_ptr<ctypes::Module> &ltiModule,
 	std::unique_ptr<retdec::demangler::Demangler> demangler) :
 	_llvmModule(llvmModule),
 	_config(config),
 	_image(objf),
-	_ltiModule(ltiModule),
+	_ltiModule(std::make_unique<ctypes::Module>(std::make_shared<ctypes::Context>())),
 	_demangler(std::move(demangler)) {}
 
 std::string Demangler::demangleToString(const std::string &mangled)
@@ -74,11 +74,10 @@ llvm::Type *Demangler::getLlvmType(std::shared_ptr<retdec::ctypes::Type> type)
 std::unique_ptr<Demangler> DemanglerFactory::getItaniumDemangler(
 	llvm::Module *m,
 	Config *config,
-	retdec::loader::Image *objf,
-	std::shared_ptr<ctypes::Module> &ltiModule)
+	retdec::loader::Image *objf)
 {
 	return std::make_unique<Demangler>(
-		m, config, objf, ltiModule, std::make_unique<demangler::ItaniumDemangler>());
+		m, config, objf, std::make_unique<demangler::ItaniumDemangler>());
 }
 
 /**
@@ -88,11 +87,10 @@ std::unique_ptr<Demangler> DemanglerFactory::getItaniumDemangler(
 std::unique_ptr<Demangler> DemanglerFactory::getMicrosoftDemangler(
 	llvm::Module *m,
 	Config *config,
-	retdec::loader::Image *objf,
-	std::shared_ptr<ctypes::Module> &ltiModule)
+	retdec::loader::Image *objf)
 {
 	return std::make_unique<Demangler>(
-		m, config, objf, ltiModule, std::make_unique<demangler::MicrosoftDemangler>());
+		m, config, objf, std::make_unique<demangler::MicrosoftDemangler>());
 }
 
 /**
@@ -102,11 +100,10 @@ std::unique_ptr<Demangler> DemanglerFactory::getMicrosoftDemangler(
 std::unique_ptr<Demangler> DemanglerFactory::getBorlandDemangler(
 	llvm::Module *m,
 	Config *config,
-	retdec::loader::Image *objf,
-	std::shared_ptr<ctypes::Module> &ltiModule)
+	retdec::loader::Image *objf)
 {
 	return std::make_unique<Demangler>(
-		m, config, objf, ltiModule, std::make_unique<demangler::BorlandDemangler>());
+		m, config, objf, std::make_unique<demangler::BorlandDemangler>());
 }
 
 /******************************************************************/
@@ -123,20 +120,19 @@ std::map<Module *, std::unique_ptr<Demangler>> DemanglerProvider::_module2demang
 Demangler *DemanglerProvider::addDemangler(
 	llvm::Module *llvmModule,
 	Config *config,
-	retdec::loader::Image *objf,
-	std::shared_ptr<ctypes::Module> &ltiModule)
+	retdec::loader::Image *objf)
 {
 	auto t = config->getConfig().tools;
 
 	std::unique_ptr<Demangler> d;
 	if (t.isGcc()) {
-		d = DemanglerFactory::getItaniumDemangler(llvmModule, config, objf, ltiModule);
+		d = DemanglerFactory::getItaniumDemangler(llvmModule, config, objf);
 	} else if (t.isMsvc()) {
-		d = DemanglerFactory::getMicrosoftDemangler(llvmModule, config, objf, ltiModule);
+		d = DemanglerFactory::getMicrosoftDemangler(llvmModule, config, objf);
 	} else if (t.isBorland()) {
-		d = DemanglerFactory::getBorlandDemangler(llvmModule, config, objf, ltiModule);
+		d = DemanglerFactory::getBorlandDemangler(llvmModule, config, objf);
 	} else {
-		d = DemanglerFactory::getItaniumDemangler(llvmModule, config, objf, ltiModule);
+		d = DemanglerFactory::getItaniumDemangler(llvmModule, config, objf);
 	}
 
 	auto p = _module2demangler.insert(std::make_pair(llvmModule, std::move(d)));

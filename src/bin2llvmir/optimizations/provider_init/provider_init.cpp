@@ -76,8 +76,7 @@ bool ProviderInitialization::runOnModule(Module& m)
 		return false;
 	}
 
-	auto ltiModule = std::make_shared<ctypes::Module>(std::make_shared<ctypes::Context>());
-	auto* d = DemanglerProvider::addDemangler(&m, c, f->getImage(), ltiModule);
+	auto* d = DemanglerProvider::addDemangler(&m, c, f->getImage());
 	if (d == nullptr)
 	{
 		return false;

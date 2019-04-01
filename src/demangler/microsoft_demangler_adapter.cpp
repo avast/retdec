@@ -53,7 +53,7 @@ std::string MicrosoftDemangler::demangleToString(const std::string &mangled)
 }
 
 std::shared_ptr<ctypes::Function> MicrosoftDemangler::demangleFunctionToCtypes(
-	const std::string &mangled, std::shared_ptr<retdec::ctypes::Module> &module)
+	const std::string &mangled, std::unique_ptr<ctypes::Module> &module)
 {
 	llvm::ms_demangle::ArenaAllocator Arena;
 	llvm::ms_demangle::Demangler D(Arena);

@@ -54,7 +54,7 @@ std::string ItaniumDemangler::demangleToString(const std::string &mangled)
 }
 
 std::shared_ptr<ctypes::Function> ItaniumDemangler::demangleFunctionToCtypes(
-	const std::string &mangled, std::shared_ptr<retdec::ctypes::Module> &module)
+	const std::string &mangled, std::unique_ptr<ctypes::Module> &module)
 {
 	using DefaultAllocator = llvm::itanium_demangle::DefaultAllocator;
 	using Demangler = llvm::itanium_demangle::ManglingParser<DefaultAllocator>;

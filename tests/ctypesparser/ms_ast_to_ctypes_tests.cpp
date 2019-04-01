@@ -33,8 +33,7 @@ public:
 
 	MsCtypesTests() :
 		demangler(std::make_unique<retdec::demangler::MicrosoftDemangler>()),
-		context(std::make_shared<retdec::ctypes::Context>()),
-		module(std::make_shared<ctypes::Module>(context)) {}
+		module(std::make_unique<ctypes::Module>(std::make_shared<retdec::ctypes::Context>())) {}
 protected:
 	std::shared_ptr<ctypes::Function> mangledToCtypes(
 		const std::string &mangled)
@@ -43,8 +42,7 @@ protected:
 	}
 
 	std::unique_ptr<retdec::demangler::Demangler> demangler;
-	std::shared_ptr<retdec::ctypes::Context> context;
-	std::shared_ptr<retdec::ctypes::Module> module;
+	std::unique_ptr<retdec::ctypes::Module> module;
 };
 
 TEST_F(MsCtypesTests, basic)

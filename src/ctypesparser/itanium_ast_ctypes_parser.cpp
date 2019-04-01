@@ -55,7 +55,7 @@ inline std::string toString(const StringView &s)
 std::shared_ptr<ctypes::Function> ItaniumAstCtypesParser::parseAsFunction(
 	const std::string &name,
 	const llvm::itanium_demangle::Node *ast,
-	std::shared_ptr<retdec::ctypes::Module> &module,
+	std::unique_ptr<ctypes::Module> &module,
 	const retdec::ctypesparser::CTypesParser::TypeWidths &typeWidths,
 	const retdec::ctypesparser::CTypesParser::TypeSignedness &typeSignedness)
 {
