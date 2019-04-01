@@ -41,6 +41,9 @@ std::string Demangler::demangleToString(const std::string &mangled)
 Demangler::FunctionPair Demangler::getPairFunction(const std::string &mangled)
 {
 	auto ctypesFunction = _demangler->demangleFunctionToCtypes(mangled, _ltiModule);
+	if (ctypesFunction == nullptr) {
+		return {};
+	}
 
 	auto *ft = dyn_cast<FunctionType>(getLlvmType(ctypesFunction->getType()));
 	assert(ft);
