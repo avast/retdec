@@ -938,7 +938,7 @@ class Decompiler:
                 return 1
 
             # TODO this should be somehow connected somewhere else
-            if fileclass == '64' and self.arch in ['arm', 'mips', 'pic32', 'powerpc', 'x86']:
+            if fileclass == '64' and self.arch in ['mips', 'pic32', 'powerpc']:
                 if self.args.generate_log:
                     self.generate_log()
 
