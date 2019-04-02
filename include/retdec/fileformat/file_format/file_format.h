@@ -214,6 +214,7 @@ class FileFormat : public retdec::utils::ByteValueStorage, private retdec::utils
 		bool getHexBytesFromEnd(std::string &result, unsigned long long numberOfBytes) const;
 		bool getString(std::string &result, unsigned long long offset, unsigned long long numberOfBytes) const;
 		bool getStringFromEnd(std::string &result, unsigned long long numberOfBytes) const;
+		bool isObjectStretchedOverSections(std::size_t addr, std::size_t size) const;
 		const Section* getEpSection();
 		const Section* getSection(const std::string &secName) const;
 		const Section* getSection(unsigned long long secIndex) const;

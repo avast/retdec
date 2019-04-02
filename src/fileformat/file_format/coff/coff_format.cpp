@@ -287,6 +287,7 @@ void CoffFormat::initStructures()
 		loadRelocations();
 		computeSectionTableHashes();
 		loadStrings();
+		scanForAnomalies();
 	}
 }
 
@@ -789,6 +790,34 @@ std::size_t CoffFormat::getTimeStamp() const
 bool CoffFormat::is32BitArchitecture() const
 {
 	return (getFileFlags() & IMAGE_FILE_32BIT_MACHINE) || getWordLength() == 32;
+}
+
+/**
+ * Scan for file format anomalies
+ */
+void CoffFormat::scanForAnomalies()
+{
+	// TODO KUBO
+	std::cerr << "=========COFF=======\n";
+	scanForObsoleteCharacteristics();
+}
+
+/**
+ * Scan for obsolete file characteristics
+ */
+void CoffFormat::scanForObsoleteCharacteristics()
+{
+	std::size_t flags = getFileFlags();	
+	std::size_t obsoleteFlags = PELIB_IMAGE_FILE_LINE_NUMS_STRIPPED |
+		PELIB_IMAGE_FILE_LOCAL_SYMS_STRIPPED | PELIB_IMAGE_FILE_AGGRESSIVE_WS_TRIM |
+		PELIB_IMAGE_FILE_BYTES_REVERSED_LO | PELIB_IMAGE_FILE_BYTES_REVERSED_HI;
+
+	if (flags & obsoleteFlags)
+	{
+		std::cerr << "Obsolete coff flags\n";
+		anomalies.emplace_back(std::make_pair<std::string, std::string>("obsoleteCoffFlags",
+			"Coff file flags are obsolete"));
+	}
 }
 
 } // namespace fileformat

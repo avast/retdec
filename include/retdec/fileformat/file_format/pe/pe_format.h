@@ -112,6 +112,14 @@ class PeFormat : public FileFormat
 		bool parseVisualBasicComRegistrationInfo(std::size_t structureOffset,
 												std::size_t comRegDataOffset);
 		/// @}
+		/// @name Auxiliary scanning methods
+		/// @{
+		void scanForSectionAnomalies();
+		void scanForResourceAnomalies();
+		void scanForImportAnomalies();
+		void scanForExportAnomalies();
+		void scanForOptHeaderAnomalies();
+		/// @}
 	protected:
 		PeLib::PeFile *file;              ///< PeLib representation of PE file
 		PeLib::PeHeaderT<32> *peHeader32; ///< header of 32-bit PE file
@@ -208,10 +216,9 @@ class PeFormat : public FileFormat
 		const VisualBasicInfo* getVisualBasicInfo() const;
 		/// @}
 
-		/// @name Scaning methods
+		/// @name Scanning methods
 		/// @{
 		void scanForAnomalies();
-		void scanForSectionAnomalies();
 		/// @}
 };
 

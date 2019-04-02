@@ -1300,6 +1300,33 @@ bool FileFormat::getStringFromEnd(std::string &result, unsigned long long number
 }
 
 /**
+ * Find out if object is stretched over multiple sections
+ * @param addr Addres of object
+ * @param size Object size
+ * @return @c true if object is stretched over multiple sections, @c false otherwise
+ */
+bool FileFormat::isObjectStretchedOverSections(std::size_t addr, std::size_t size) const
+{
+	for (const auto sec : sections)
+	{
+		if (!sec)
+		{
+			continue;
+		}
+
+		std::size_t secStart = sec->getOffset();
+		std::size_t secEnd = secStart + sec->getSizeInFile();
+		std::size_t addrEnd = addr + size;
+		if (secStart <= addr && addr < secEnd)
+		{
+			return (addrEnd > secEnd);
+		}
+	}
+
+	return false;
+}
+
+/**
  * Get information about section containing entry point
  * @return Pointer to EP section if file has entry point and EP section was detected, @c nullptr otherwise
  */
