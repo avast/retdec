@@ -33,7 +33,7 @@ ExternalProject_Add(llvm-project
 #	DOWNLOAD_NAME llvm.zip
 
 	DOWNLOAD_COMMAND ""
-	SOURCE_DIR "/home/peter/retdec/llvm-8.0.0"
+	SOURCE_DIR "/home/peter/retdec/llvm-new"
 
 	CMAKE_ARGS
 		# Force a release build (we don't need to debug LLVM).
