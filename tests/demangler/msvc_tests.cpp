@@ -1213,6 +1213,7 @@ TEST_F(MicrosoftDemanglerTests, mswindows) {
 TEST_F(MicrosoftDemanglerTests, InvalidManglings) {
 	DEM_FAIL("?ff@@$$J0YAXAU?$AS_@$0A@PEAU?$AS_@$0A@H@__clang@@@__clang@@@Z", status::invalid_mangled_name);
 	DEM_FAIL("?f0@@YAXPEU?$AS_@$00$$CAD@__clang@@@Z", status::invalid_mangled_name);
+	DEM_FAIL("??0?$basic_ostream@DU?$char_traits@D@std@@@std@@QAE@PAV?$basic_streambuf@DU?$char_traits@D@std@@", status::invalid_mangled_name);
 }
 
 } // namespace tests
