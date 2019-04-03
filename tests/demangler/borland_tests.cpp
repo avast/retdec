@@ -197,7 +197,7 @@ TEST_F(BorlandDemanglerTests, TemplateTests)
 		"void foo<std::basic_string<char, std::char_traits<char>, std::allocator<char>>>(std::basic_string<char, std::char_traits<char>, std::allocator<char>>)");
 	DEM_EQ("@%adder$iVii%$qiii$i", "int adder<int, int, int>(int, int, int)");	// variadic templates demangle as non variadic
 	DEM_EQ("@std@%basic_ios$c19std@%char_traits$c%%@fill$xqv", "std::basic_ios<char, std::char_traits<char>>::fill(void) const");
-	DEM_EQ("@std@$bror$qr22std@%_Iosb$i%@_Iostate22std@%_Iosb$i%@_Iostate", ""); //TODO
+	DEM_EQ("@std@$bror$qr22std@%_Iosb$i%@_Iostate22std@%_Iosb$i%@_Iostate", "std::operator|=(std::_Iosb<int>::_Iostate &, std::_Iosb<int>::_Iostate)");
 }
 
 TEST_F(BorlandDemanglerTests, NamedTypes)
@@ -211,6 +211,8 @@ TEST_F(BorlandDemanglerTests, Backrefs)
 {
 	DEM_EQ("@%foo$60std@%basic_string$c19std@%char_traits$c%17std@%allocator$c%%t1%$qv$v",
 		   "void foo<std::basic_string<char, std::char_traits<char>, std::allocator<char>>, std::basic_string<char, std::char_traits<char>, std::allocator<char>>>(void)");
+	DEM_EQ("@bar$q4Foo14Foo24Foo34Foo44Foo54Foo64Foo74Foo84Foo95Foo105Foo115Foo125Foo135Foo14tdtctbt1t9ta",
+		"void bar(Foo1, Foo2, Foo3, Foo4, Foo5, Foo6, Foo7, Foo8, Foo9, Foo10, Foo11, Foo12, Foo13, Foo14, Foo13, Foo12, Foo11, Foo1, Foo9, Foo10)");
 }
 
 TEST_F(BorlandDemanglerTests, Operators)
@@ -288,6 +290,7 @@ TEST_F(BorlandDemanglerTests, FailTests)
 	DEM_FAIL("@foo$q14std@%tmp$c11std@%tmp$c%", status::invalid_mangled_name);
 	DEM_FAIL("@foo$q23std@%tmp$c11std@%tmp$c%", status::invalid_mangled_name);
 	DEM_FAIL("@foo$q14std@%tmp$c11std@%tmp$c%%", status::invalid_mangled_name);
+	DEM_FAIL("@Foo@$baddi$q3Foo", status::invalid_mangled_name);
 }
 
 TEST_F(BorlandDemanglerTests, FakeStubTest)
