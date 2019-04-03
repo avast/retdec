@@ -308,13 +308,19 @@ void Capstone2LlvmIrTranslatorArm64_impl::generateRegisters()
 	createRegister(ARM64_REG_SP, _regLt);
 
 	// Flags.
-	createRegister(ARM64_REG_CPSR_N, _regLt);
-	createRegister(ARM64_REG_CPSR_Z, _regLt);
-	createRegister(ARM64_REG_CPSR_C, _regLt);
-	createRegister(ARM64_REG_CPSR_V, _regLt);
+	// createRegister(ARM64_REG_CPSR_N, _regLt);
+	// createRegister(ARM64_REG_CPSR_Z, _regLt);
+	// createRegister(ARM64_REG_CPSR_C, _regLt);
+	// createRegister(ARM64_REG_CPSR_V, _regLt);
 
 	// Program counter.
-	createRegister(ARM64_REG_PC, _regLt);
+	// createRegister(ARM64_REG_PC, _regLt);
+
+	// Intialize system & flag registers in this loop
+	for (const auto& r : _reg2name)
+	{
+		createRegister(r.first, _regLt);
+	}
 
 }
 
@@ -332,12 +338,17 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateInstruction(
 	cs_detail* d = i->detail;
 	cs_arm64* ai = &d->arm64;
 
-	//std::cout << i->mnemonic << " " << i->op_str << std::endl;
+	std::cout << i->mnemonic << " " << i->op_str << std::endl;
 
 	auto fIt = _i2fm.find(i->id);
 	if (fIt != _i2fm.end() && fIt->second != nullptr)
 	{
 		auto f = fIt->second;
+
+		// if (ifVectorGeneratePseudo(i, ai, irb))
+		// {
+		//     return;
+		// }
 
 		(this->*f)(i, ai, irb);
 	}
@@ -683,7 +694,7 @@ llvm::Value* Capstone2LlvmIrTranslatorArm64_impl::loadRegister(
 	llvm::Value* ret = irb.CreateLoad(llvmReg);
 	if (r != pr)
 	{
-	    ret = irb.CreateTrunc(ret, rt);
+		ret = irb.CreateTrunc(ret, rt);
 	}
 
 	ret = generateTypeConversion(irb, ret, dstType, ct);
@@ -699,9 +710,13 @@ llvm::Value* Capstone2LlvmIrTranslatorArm64_impl::loadOp(
 	switch (op.type)
 	{
 		case ARM64_OP_SYS:
+		case ARM64_OP_REG_MRS:
+		case ARM64_OP_REG_MSR:
 		case ARM64_OP_REG:
 		{
 			auto* val = loadRegister(op.reg, irb);
+			// TODO(mato): extractVectorValue implementation
+			// auto* vec = extractVectorValue(val, op, irb);
 			auto* ext = generateOperandExtension(irb, op.ext, val, ty);
 			return generateOperandShift(irb, op, ext);
 		}
@@ -734,11 +749,9 @@ llvm::Value* Capstone2LlvmIrTranslatorArm64_impl::loadOp(
 		}
 		case ARM64_OP_INVALID: 
 		case ARM64_OP_CIMM: 
-		case ARM64_OP_REG_MRS: 
-		case ARM64_OP_REG_MSR: 
 		case ARM64_OP_PSTATE: 
 		case ARM64_OP_PREFETCH: 
-		case ARM64_OP_BARRIER: 
+		case ARM64_OP_BARRIER:
 		default:
 		{
 			throw GenericError("Arm64: loadOp(): unhandled operand type");
@@ -794,6 +807,8 @@ llvm::Instruction* Capstone2LlvmIrTranslatorArm64_impl::storeOp(
 	{
 		case ARM64_OP_SYS:
 		case ARM64_OP_REG:
+		case ARM64_OP_REG_MRS:
+		case ARM64_OP_REG_MSR:
 		{
 			return storeRegister(op.reg, val, irb, ct);
 		}
@@ -809,8 +824,6 @@ llvm::Instruction* Capstone2LlvmIrTranslatorArm64_impl::storeOp(
 		case ARM64_OP_IMM: 
 		case ARM64_OP_FP:  
 		case ARM64_OP_CIMM: 
-		case ARM64_OP_REG_MRS: 
-		case ARM64_OP_REG_MSR: 
 		case ARM64_OP_PSTATE: 
 		case ARM64_OP_PREFETCH: 
 		case ARM64_OP_BARRIER: 
@@ -1038,6 +1051,34 @@ void Capstone2LlvmIrTranslatorArm64_impl::generatePseudoInstruction(cs_insn* i, 
 
 		translatePseudoAsmGeneric(i, ai, bodyIrb);
 	}
+}
+
+bool Capstone2LlvmIrTranslatorArm64_impl::ifVectorGeneratePseudo(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb, _translator_fnc trans)
+{
+    bool pseudo = false;
+    for (std::uint8_t i = 0; i < ai->op_count; ++i)
+    {
+	    if (isVectorRegister(ai->operands[i]))
+	    {
+		    pseudo = true;
+		    break;
+	    }
+    }
+
+    if (pseudo)
+    {
+	    throwUnhandledInstructions(i);
+	    if (trans == nullptr)
+	    {
+		    generatePseudoInstruction(i, ai, irb);
+	    }
+	    else
+	    {
+		    (this->*trans)(i, ai, irb);
+	    }
+    }
+
+    return pseudo;
 }
 
 //
@@ -2432,6 +2473,11 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateFAdd(cs_insn* i, cs_arm64* ai
 {
 	EXPECT_IS_TERNARY(i, ai, irb);
 
+	if (ifVectorGeneratePseudo(i, ai, irb))
+	{
+	    return;
+	}
+
 	op1 = loadOp(ai->operands[1], irb);
 	op2 = loadOp(ai->operands[2], irb);
 
@@ -2510,6 +2556,8 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateFCmp(cs_insn* i, cs_arm64* ai
 
 	op0 = loadOp(ai->operands[0], irb);
 	op1 = loadOp(ai->operands[1], irb);
+
+	op1 = generateTypeConversion(irb, op1, op0->getType(), eOpConv::FP_CAST);
 
 	// IF op1 == op2
 	auto* fcmpOeq = irb.CreateFCmpOEQ(op0, op1);
@@ -2627,6 +2675,11 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateFDiv(cs_insn* i, cs_arm64* ai
 {
 	EXPECT_IS_TERNARY(i, ai, irb);
 
+	if (ifVectorGeneratePseudo(i, ai, irb))
+	{
+	    return;
+	}
+
 	op1 = loadOp(ai->operands[1], irb);
 	op2 = loadOp(ai->operands[2], irb);
 
@@ -2688,6 +2741,11 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateFMinMaxNum(cs_insn* i, cs_arm
 {
 	EXPECT_IS_TERNARY(i, ai, irb);
 
+	if (ifVectorGeneratePseudo(i, ai, irb))
+	{
+	    return;
+	}
+
 	op1 = loadOp(ai->operands[1], irb);
 	op2 = loadOp(ai->operands[2], irb);
 
@@ -2715,6 +2773,13 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateFMinMaxNum(cs_insn* i, cs_arm
 void Capstone2LlvmIrTranslatorArm64_impl::translateFMov(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb)
 {
 	EXPECT_IS_BINARY(i, ai, irb);
+
+	if (isVectorRegister(ai->operands[0]) || isVectorRegister(ai->operands[1]))
+	{
+		// We want this behavior in cases when move destination is vector register
+		generatePseudoInstruction(i, ai, irb);
+		return;
+	}
 
 	op1 = loadOp(ai->operands[1], irb);
 	if (ai->operands[1].type == ARM64_OP_FP)
@@ -2755,6 +2820,11 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateFMul(cs_insn* i, cs_arm64* ai
 {
 	EXPECT_IS_TERNARY(i, ai, irb);
 
+	if (ifVectorGeneratePseudo(i, ai, irb))
+	{
+	    return;
+	}
+
 	op1 = loadOp(ai->operands[1], irb);
 	op2 = loadOp(ai->operands[2], irb);
 
@@ -2793,6 +2863,11 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateFSub(cs_insn* i, cs_arm64* ai
 {
 	EXPECT_IS_TERNARY(i, ai, irb);
 
+	if (ifVectorGeneratePseudo(i, ai, irb))
+	{
+	    return;
+	}
+
 	op1 = loadOp(ai->operands[1], irb);
 	op2 = loadOp(ai->operands[2], irb);
 
@@ -2806,6 +2881,11 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateFSub(cs_insn* i, cs_arm64* ai
 void Capstone2LlvmIrTranslatorArm64_impl::translateFUnaryOp(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb)
 {
 	EXPECT_IS_BINARY(i, ai, irb);
+
+	if (ifVectorGeneratePseudo(i, ai, irb))
+	{
+	    return;
+	}
 
 	op1 = loadOp(ai->operands[1], irb);
 
