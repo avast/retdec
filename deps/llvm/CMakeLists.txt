@@ -47,9 +47,6 @@ ExternalProject_Add(llvm-project
 		# Targets to be build.
 		-DLLVM_TARGETS_TO_BUILD=X86
 
-		# Disable the generation of targets for tests (we don't need them).
-		-DLLVM_INCLUDE_TESTS=NO
-
 		# Our tools depending on LLVM require RTTI, so build LLVM with it.
 		-DLLVM_REQUIRES_RTTI=YES
 
@@ -64,10 +61,25 @@ ExternalProject_Add(llvm-project
 		# exceptions).
 		-DLLVM_ENABLE_WARNINGS=NO
 
+		# Disable the generation of targets for tests (we don't need them).
+		-DLLVM_INCLUDE_TOOLS=OFF
+		-DLLVM_INCLUDE_UTILS=OFF
+		-DLLVM_INCLUDE_RUNTIMES=OFF
+		-DLLVM_INCLUDE_EXAMPLES=OFF
+		-DLLVM_INCLUDE_TESTS=OFF
+		-DLLVM_INCLUDE_GO_TESTS=OFF
+		-DLLVM_INCLUDE_BENCHMARKS=OFF
+		-DLLVM_INCLUDE_DOCS=OFF
+
 		# Disable build of unnecessary LLVM parts.
 		-DLLVM_BUILD_TOOLS=OFF
 		-DLLVM_BUILD_UTILS=OFF
+		-DLLVM_BUILD_RUNTIMES=OFF
 		-DLLVM_BUILD_RUNTIME=OFF
+		-DLLVM_BUILD_EXAMPLES=OFF
+		-DLLVM_BUILD_TESTS=OFF
+		-DLLVM_BUILD_BENCHMARKS=OFF
+		-DLLVM_BUILD_DOCS=OFF
 		# We don't want this so that we don't have to link with tinfo.
 		# It looks like terminal colors are working even without this.
 		-DLLVM_ENABLE_TERMINFO=OFF
@@ -94,9 +106,6 @@ set(LLVM_LIB_LIST
 	LLVMBitWriter
 	LLVMIRReader
 	LLVMObject
-	LLVMInstrumentation
-	LLVMLinker
-	LLVMProfileData
 	LLVMBinaryFormat
 	LLVMInstCombine
 	LLVMSupport
