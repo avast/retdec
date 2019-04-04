@@ -745,6 +745,7 @@ llvm::Value* Capstone2LlvmIrTranslatorArm64_impl::loadOp(
 {
 	switch (op.type)
 	{
+		case ARM64_OP_PSTATE:
 		case ARM64_OP_SYS:
 		case ARM64_OP_REG_MRS:
 		case ARM64_OP_REG_MSR:
@@ -784,7 +785,6 @@ llvm::Value* Capstone2LlvmIrTranslatorArm64_impl::loadOp(
 		}
 		case ARM64_OP_INVALID: 
 		case ARM64_OP_CIMM: 
-		case ARM64_OP_PSTATE: 
 		case ARM64_OP_PREFETCH: 
 		case ARM64_OP_BARRIER:
 		default:
@@ -840,6 +840,7 @@ llvm::Instruction* Capstone2LlvmIrTranslatorArm64_impl::storeOp(
 {
 	switch (op.type)
 	{
+		case ARM64_OP_PSTATE:
 		case ARM64_OP_SYS:
 		case ARM64_OP_REG:
 		case ARM64_OP_REG_MRS:
@@ -859,7 +860,6 @@ llvm::Instruction* Capstone2LlvmIrTranslatorArm64_impl::storeOp(
 		case ARM64_OP_IMM: 
 		case ARM64_OP_FP:  
 		case ARM64_OP_CIMM: 
-		case ARM64_OP_PSTATE: 
 		case ARM64_OP_PREFETCH: 
 		case ARM64_OP_BARRIER: 
 		default:
@@ -2770,6 +2770,11 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateFMinMax(cs_insn* i, cs_arm64*
 {
 	EXPECT_IS_TERNARY(i, ai, irb);
 
+	if (ifVectorGeneratePseudo(i, ai, irb))
+	{
+	    return;
+	}
+
 	op1 = loadOp(ai->operands[1], irb);
 	op2 = loadOp(ai->operands[2], irb);
 
@@ -2856,6 +2861,11 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateFMov(cs_insn* i, cs_arm64* ai
 void Capstone2LlvmIrTranslatorArm64_impl::translateMovi(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb)
 {
 	EXPECT_IS_BINARY(i, ai, irb);
+
+	if (ifVectorGeneratePseudo(i, ai, irb))
+	{
+	    return;
+	}
 
 	if (!isFPRegister(ai->operands[0]))
 	{
