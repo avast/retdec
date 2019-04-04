@@ -1156,9 +1156,17 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateAdd(cs_insn* i, cs_arm64* ai,
 	EXPECT_IS_BINARY_OR_TERNARY(i, ai, irb);
 
 	std::tie(op1, op2) = loadOpBinaryOrTernaryOp1Op2(ai, irb);
-	op2 = irb.CreateZExtOrTrunc(op2, op1->getType());
+	op2 = generateTypeConversion(irb, op2, op1->getType(), eOpConv::ZEXT_TRUNC);
 
-	auto *val = irb.CreateAdd(op1, op2);
+	llvm::Value *val = nullptr;
+	if (isFPRegister(ai->operands[0]))
+	{
+		val = irb.CreateFAdd(op1, op2);
+	}
+	else
+	{
+		val = irb.CreateAdd(op1, op2);
+	}
 	if (i->id != ARM64_INS_CMN)
 	{
 		storeOp(ai->operands[0], val, irb);

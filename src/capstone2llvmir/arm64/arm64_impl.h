@@ -73,6 +73,11 @@ class Capstone2LlvmIrTranslatorArm64_impl :
 
 		void initializeRegistersParentMap();
 
+		llvm::Value* extractVectorValue(
+				llvm::IRBuilder<>& irb,
+				cs_arm64_op& op,
+				llvm::Value* val);
+
 		llvm::Value* generateOperandExtension(
 				llvm::IRBuilder<>& irb,
 				arm64_extender ext,
