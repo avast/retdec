@@ -977,7 +977,10 @@ llvm::Value* Capstone2LlvmIrTranslatorArm64_impl::generateInsnConditionCode(
 			return irb.CreateOr(z, xor1);
 		}
 		case ARM64_CC_AL:
+			// Allways
 		case ARM64_CC_NV:
+			// The Condition code NV exists only to provide a valid disassembly of the 0b1111 encoding, otherwise its behavior is identical to AL.
+			return llvm::ConstantInt::get(llvm::IntegerType::getInt1Ty(_module->getContext()), 1);
 		case ARM64_CC_INVALID:
 		default:
 		{
