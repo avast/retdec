@@ -71,6 +71,7 @@ private:
 	std::shared_ptr<Node> parseFuncName();
 	std::shared_ptr<Node> parseFuncNameClasic();
 	std::shared_ptr<Node> parseFuncNameLlvm();
+	bool couldBeOperator();
 	std::shared_ptr<Node> parseOperator();
 	std::shared_ptr<Node> parseAsNameUntil(const char *end);
 	std::shared_ptr<Node> parseTemplate(std::shared_ptr<Node> templateNamespace);

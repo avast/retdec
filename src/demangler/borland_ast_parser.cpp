@@ -4,6 +4,8 @@
  * @copyright (c) 2018 Avast Software, licensed under the MIT license
  */
 
+#include <set>
+
 #include "retdec/demangler/borland_ast_parser.h"
 #include "retdec/demangler/borland_ast/array_type.h"
 #include "retdec/demangler/borland_ast/built_in_type.h"
@@ -29,12 +31,12 @@ namespace {
 /**
 * @return New string from StringView object.
 */
-inline std::string getString(const retdec::demangler::borland::StringView &s)
+inline std::string toString(const retdec::demangler::borland::StringView &s)
 {
 	return {s.begin(), s.size()};
 }
 
-}	// anonymous namespace
+}    // anonymous namespace
 
 namespace retdec {
 namespace demangler {
@@ -89,7 +91,6 @@ inline bool BorlandASTParser::peek(const StringView &s) const
 {
 	return _mangled.startsWith(s);
 }
-
 
 /**
  * @return If present number on the front of rest of mangled string. Else 0.
@@ -189,7 +190,7 @@ void BorlandASTParser::parse(const std::string &mangled)
 	_mangled = llvm::itanium_demangle::StringView{mangled.c_str(), mangled.length()};
 
 	auto func = parseFunction();
-	if (checkResult(func)){
+	if (checkResult(func)) {
 		_ast = func;
 		_status = success;
 	}
@@ -207,7 +208,7 @@ void BorlandASTParser::parse(const std::string &mangled)
  */
 std::shared_ptr<Node> BorlandASTParser::parseFunction()
 {
-	auto mangled_str = getString(_mangled);
+	auto mangled_str = toString(_mangled);
 	auto func = _context.getFunction(mangled_str);
 	if (func) {
 		_mangled.drop(_mangled.size());
@@ -240,7 +241,8 @@ std::shared_ptr<Node> BorlandASTParser::parseFunction()
  * <func-name> ::= @ <classic-func-name>
  * <func-name> ::= <llvm-func-name>
  */
-std::shared_ptr<Node> BorlandASTParser::parseFuncName() {
+std::shared_ptr<Node> BorlandASTParser::parseFuncName()
+{
 	if (consumeIfPossible('@')) {
 		return parseFuncNameClasic();
 	} else {
@@ -263,39 +265,43 @@ std::shared_ptr<Node> BorlandASTParser::parseFuncNameClasic()
 {
 	std::shared_ptr<Node> name = nullptr;
 
-	const char *start = _mangled.begin();
-	const char *end = _mangled.end();
 	const char *c = _mangled.begin();
-	while (c <= end) {
+	while (c <= _mangled.end()) {
 		if (*c == '$' || *c == '%' || *c == '@') {
-			auto nameView = StringView(start, c);
-			if (!nameView.empty()) {
-				_mangled.consumeFront(nameView);        // propagate to mangled
-				auto nameNode = NameNode::create(_context, getString(nameView));
+			auto partOfName = StringView(_mangled.begin(), c);
+			if (!partOfName.empty()) {
+				_mangled.consumeFront(partOfName);        // propagate to _mangled
+				auto nameNode = NameNode::create(_context, toString(partOfName));
 				name =
 					name ? std::static_pointer_cast<Node>(NestedNameNode::create(_context, name, nameNode)) : nameNode;
-				start = c + 1;    // skip already checked chars and one of '%', '$', '@'
 			}
-			if (!consumeIfPossible('@')) {    // $ or %
-				break;
-			}
-		}
-		++c;
-	}
 
-	if (peek('%')) {
-		name = parseTemplate(name);
-		if (!statusOk()) {
-			return nullptr;
+			if (peek('%')) {
+				name = parseTemplate(name);
+				if (!statusOk()) {
+					return nullptr;
+				}
+				c = _mangled.begin();
+			}
+
+			if (couldBeOperator()) {
+				auto op = parseOperator();
+				if (!statusOk()) {
+					return nullptr;
+				}
+				if (op) {
+					name = name ? NestedNameNode::create(_context, name, op) : op;
+				}
+			}
 		}
-	}
-	// TODO exceptions @$xt$20std@invalid_argument
-	auto op = parseOperator();
-	if (!statusOk()) {
-		return nullptr;
-	}
-	if (op) {
-		name = name ? NestedNameNode::create(_context, name, op) : op;
+
+		if (peek('$')) {
+			break;
+		}
+
+		consumeIfPossible('@');        //
+
+		++c;
 	}
 
 	checkResult(name);
@@ -330,28 +336,87 @@ std::shared_ptr<Node> BorlandASTParser::parseFuncNameLlvm()
 		}
 
 		consumeIfPossible('$');
-		auto partNameNode = std::static_pointer_cast<Node>(NameNode::create(_context, getString(partName)));
+		auto partNameNode = std::static_pointer_cast<Node>(NameNode::create(_context, toString(partName)));
 		name = NestedNameNode::create(_context, name, partNameNode);
 	}
 
-	if (peek('%')) {
-		name = parseTemplate(name);
-		if (!statusOk()) {
-			return nullptr;
-		}
-	}
-
-	auto op = parseOperator();
-	if (!statusOk()) {
-		return nullptr;
-	}
-	if (op) {
-		name = name ? NestedNameNode::create(_context, name, op) : op;
+	auto func_name = parseFuncNameClasic();
+	if (func_name) {
+		name = name ? NestedNameNode::create(_context, name, func_name) : func_name;
 	}
 
 	checkResult(name);
 
 	return name;
+}
+
+bool BorlandASTParser::couldBeOperator()
+{
+	std::set<std::string> operators = {
+		"$badd$",
+		"$bsubs$",
+		"$bsub$",
+		"$basg$",
+		"$bmul$",
+		"$bdiv$",
+		"$bmod$",
+		"$binc$",
+		"$bdec$",
+		"$beql$",
+		"$bneq$",
+		"$bgtr$",
+		"$blss$",
+		"$bgeq$",
+		"$bleq$",
+		"$bnot$",
+		"$bland$",
+		"$blor$",
+		"$bcmp$",
+		"$band$",
+		"$bor$",
+		"$bxor$",
+		"$blsh$",
+		"$brsh$",
+		"$brplu$",
+		"$brmin$",
+		"$brmul$",
+		"$brdiv$",
+		"$brmod$",
+		"$brand$",
+		"$bror$",
+		"$brxor$",
+		"$brlsh$",
+		"$brrsh$",
+		"$bind$",
+		"$badr$",
+		"$barow$",
+		"$barwm$",
+		"$bcall$",
+		"$bcoma$",
+		"$bnew$",
+		"$bnwa$",
+		"$bdele$",
+		"$bdla$",
+		"$bctr$",
+		"$bctr1$",
+		"$bctr2$",
+		"$bdtr$",
+		"$bdtr1$",
+		"$bdtr2$"};
+
+	if (peek("$o")) {    // conversion operator
+		return true;
+	}
+
+	if (peek("$b")) {
+		for (auto &op : operators) {
+			if (_mangled.startsWith(StringView(op.c_str()))) {
+				return true;
+			}
+		}
+	}
+
+	return false;
 }
 
 /**
@@ -360,9 +425,10 @@ std::shared_ptr<Node> BorlandASTParser::parseFuncNameLlvm()
  */
 std::shared_ptr<Node> BorlandASTParser::parseOperator()
 {
-	if (consumeIfPossible("$o")) {	// conversion operator
+	if (consumeIfPossible("$o")) {    // conversion operator
 		auto type = parseType();
-		if (!checkResult(type)) {
+		if (!checkResult(type) || !peek('$')) {
+			_status = invalid_mangled_name;
 			return nullptr;
 		}
 		return ConversionOperatorNode::create(_context, type);
@@ -474,18 +540,22 @@ std::shared_ptr<Node> BorlandASTParser::parseAsNameUntil(const char *end)
 {
 	std::shared_ptr<Node> name = nullptr;
 
-	const char *start = _mangled.begin();
 	const char *c = _mangled.begin();
 	while (c < end) {
-		if (*c == '%' || *c == '@') {
-			auto nameView = StringView(start, c);
+		if (*c == '%' || *c == '@' || *c == '$') {
+			auto nameView = StringView(_mangled.begin(), c);
 			if (!nameView.empty()) {
 				_mangled.consumeFront(nameView);        // propagate to mangled
-				auto nameNode = NameNode::create(_context, getString(nameView));
+				auto nameNode = NameNode::create(_context, toString(nameView));
 				name =
 					name ? std::static_pointer_cast<Node>(NestedNameNode::create(_context, name, nameNode)) : nameNode;
-				start = c + 1;
 			}
+
+			if (peek('%')) {    // check end if next parameter is template
+				name = parseTemplate(name);
+				c = _mangled.begin();
+			}
+
 			if (!consumeIfPossible('@')) {
 				break;
 			}
@@ -493,15 +563,11 @@ std::shared_ptr<Node> BorlandASTParser::parseAsNameUntil(const char *end)
 		++c;
 	}
 
-	if (c == end) { // parse remainder as name
-		auto nameView = StringView(start, c);
+	if (c == end && _mangled.begin() != end) { // parse remainder as name
+		auto nameView = StringView(_mangled.begin(), c);
 		_mangled.consumeFront(nameView);        // propagate to mangled
-		auto nameNode = NameNode::create(_context, getString(nameView));
+		auto nameNode = NameNode::create(_context, toString(nameView));
 		name = name ? std::static_pointer_cast<Node>(NestedNameNode::create(_context, name, nameNode)) : nameNode;
-	}
-
-	if (peek('%') && c != end) {    // check end if next parameter is template
-		name = parseTemplate(name);
 	}
 
 	if (_mangled.begin() != end) {        // length was wrong
@@ -876,7 +942,6 @@ std::shared_ptr<TypeNode> BorlandASTParser::parseNamedType(unsigned nameLen, con
 	return newType;
 }
 
-
 /**
  * Parses template name without namespace.
  * @param templateNamespace namespace of template.
@@ -897,7 +962,7 @@ std::shared_ptr<Node> BorlandASTParser::parseTemplateName(std::shared_ptr<Node> 
 			_status = invalid_mangled_name;
 			return nullptr;
 		}
-		templateNameNode = NameNode::create(_context, getString(templateName));
+		templateNameNode = NameNode::create(_context, toString(templateName));
 	}
 
 	if (templateNamespace) {
@@ -923,7 +988,7 @@ std::shared_ptr<Node> BorlandASTParser::parseTemplateParams()
 				params->addNode(params->get(backref - 1));
 				continue;
 			}
-		}	// TODO else nothing, check delphi tests if t can be before named types in templates
+		}    // TODO else nothing, check delphi tests if t can be before named types in templates
 		auto typeNode = parseType();
 		if (!statusOk()) {
 			return nullptr;
