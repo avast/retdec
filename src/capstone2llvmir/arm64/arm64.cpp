@@ -249,6 +249,7 @@ void Capstone2LlvmIrTranslatorArm64_impl::generateRegisters()
 	createRegister(ARM64_REG_B13, _regLt);
 	createRegister(ARM64_REG_B14, _regLt);
 	createRegister(ARM64_REG_B15, _regLt);
+	createRegister(ARM64_REG_B16, _regLt);
 	createRegister(ARM64_REG_B17, _regLt);
 	createRegister(ARM64_REG_B18, _regLt);
 	createRegister(ARM64_REG_B19, _regLt);
@@ -307,16 +308,7 @@ void Capstone2LlvmIrTranslatorArm64_impl::generateRegisters()
 	// Stack pointer.
 	createRegister(ARM64_REG_SP, _regLt);
 
-	// Flags.
-	// createRegister(ARM64_REG_CPSR_N, _regLt);
-	// createRegister(ARM64_REG_CPSR_Z, _regLt);
-	// createRegister(ARM64_REG_CPSR_C, _regLt);
-	// createRegister(ARM64_REG_CPSR_V, _regLt);
-
-	// Program counter.
-	// createRegister(ARM64_REG_PC, _regLt);
-
-	// Intialize system & flag registers in this loop
+	// Create system & flag registers in this loop
 	for (const auto& r : _reg2name)
 	{
 		createRegister(r.first, _regLt);
@@ -344,11 +336,6 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateInstruction(
 	if (fIt != _i2fm.end() && fIt->second != nullptr)
 	{
 		auto f = fIt->second;
-
-		// if (ifVectorGeneratePseudo(i, ai, irb))
-		// {
-		//     return;
-		// }
 
 		(this->*f)(i, ai, irb);
 	}
@@ -789,8 +776,7 @@ llvm::Value* Capstone2LlvmIrTranslatorArm64_impl::loadOp(
 		case ARM64_OP_BARRIER:
 		default:
 		{
-			throw GenericError("Arm64: loadOp(): unhandled operand type");
-			return nullptr;
+			return llvm::UndefValue::get(ty ? ty : getDefaultType());
 		}
 	}
 }
@@ -858,6 +844,12 @@ llvm::Instruction* Capstone2LlvmIrTranslatorArm64_impl::storeOp(
 		}
 		case ARM64_OP_INVALID: 
 		case ARM64_OP_IMM: 
+		{
+			// This is here because some operands that are for example in post-index addressing mode
+			// will have the write flag set and generic functions try to write to IMM, which is not correct
+			// Maybe solve this better?
+			return nullptr;
+		}
 		case ARM64_OP_FP:  
 		case ARM64_OP_CIMM: 
 		case ARM64_OP_PREFETCH: 
@@ -2418,6 +2410,11 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateMulOpl(cs_insn* i, cs_arm64* 
 void Capstone2LlvmIrTranslatorArm64_impl::translateMul(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb)
 {
 	EXPECT_IS_EXPR(i, ai, irb, (3 <= ai->op_count && ai->op_count <= 4));
+
+	if (ifVectorGeneratePseudo(i, ai, irb))
+	{
+	    return;
+	}
 
 	auto* op1 = loadOp(ai->operands[1], irb);
 	auto* op2 = loadOp(ai->operands[2], irb);
