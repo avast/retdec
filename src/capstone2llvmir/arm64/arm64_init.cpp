@@ -886,6 +886,7 @@ void Capstone2LlvmIrTranslatorArm64_impl::initializeRegTypeMap()
 		{ARM64_REG_B13, i8},
 		{ARM64_REG_B14, i8},
 		{ARM64_REG_B15, i8},
+		{ARM64_REG_B16, i8},
 		{ARM64_REG_B17, i8},
 		{ARM64_REG_B18, i8},
 		{ARM64_REG_B19, i8},
