@@ -409,6 +409,12 @@ void CoffFormat::loadRelocations()
 	{
 		const auto *ffSec = getSection(secIndex);
 		const auto *coffSec = file->getCOFFSection(sec);
+
+		if (coffSec->PointerToRelocations >= getFileLength())
+		{
+			continue;
+		}
+
 		for(const auto &reloc : file->getRelocations(coffSec))
 		{
 			Relocation rel;
