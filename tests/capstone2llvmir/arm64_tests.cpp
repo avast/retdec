@@ -4408,6 +4408,30 @@ TEST_P(Capstone2LlvmIrTranslatorArm64Tests, ARM64_INS_B_cond_false)
 	});
 }
 
+TEST_P(Capstone2LlvmIrTranslatorArm64Tests, ARM64_INS_B_cond_al)
+{
+	emulate("b.al #0x110d8", 0x1107C);
+
+	EXPECT_NO_REGISTERS_LOADED();
+	EXPECT_NO_REGISTERS_STORED();
+	EXPECT_NO_MEMORY_LOADED_STORED();
+	EXPECT_JUST_VALUES_CALLED({
+		{_translator->getCondBranchFunction(), {true, 0x110d8}},
+	});
+}
+
+TEST_P(Capstone2LlvmIrTranslatorArm64Tests, ARM64_INS_B_cond_nv)
+{
+	emulate("b.nv #0x110d8", 0x1107C);
+
+	EXPECT_NO_REGISTERS_LOADED();
+	EXPECT_NO_REGISTERS_STORED();
+	EXPECT_NO_MEMORY_LOADED_STORED();
+	EXPECT_JUST_VALUES_CALLED({
+		{_translator->getCondBranchFunction(), {true, 0x110d8}},
+	});
+}
+
 //
 // ARM64_INS_BL
 //

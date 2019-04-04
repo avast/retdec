@@ -1028,7 +1028,7 @@ uint8_t Capstone2LlvmIrTranslatorArm64_impl::getOperandAccess(cs_arm64_op& op)
 
 bool Capstone2LlvmIrTranslatorArm64_impl::isCondIns(cs_arm64 * i) const
 {
-	return (i->cc == ARM64_CC_AL || i->cc == ARM64_CC_INVALID) ? false : true;
+	return (i->cc == ARM64_CC_INVALID) ? false : true;
 }
 
 llvm::Value* Capstone2LlvmIrTranslatorArm64_impl::generateIntBitCastToFP(llvm::IRBuilder<>& irb, llvm::Value* val) const
