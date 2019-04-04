@@ -2464,6 +2464,54 @@ TEST_P(Capstone2LlvmIrTranslatorArm64Tests, ARM64_INS_MOV32_r_r)
 	EXPECT_NO_VALUE_CALLED();
 }
 
+TEST_P(Capstone2LlvmIrTranslatorArm64Tests, ARM64_INS_MOV_d_v_0)
+{
+	setRegisters({
+		{ARM64_REG_V1, 0x1234567890abcdef},
+	});
+
+	emulate("mov d0, v1.d[0]");
+
+	EXPECT_JUST_REGISTERS_LOADED({ARM64_REG_V1});
+	EXPECT_JUST_REGISTERS_STORED({
+		{ARM64_REG_D0, 5.6263491089085159e-221_f64},
+	});
+	EXPECT_NO_MEMORY_LOADED_STORED();
+	EXPECT_NO_VALUE_CALLED();
+}
+
+TEST_P(Capstone2LlvmIrTranslatorArm64Tests, ARM64_INS_MOV_s_v_0)
+{
+	setRegisters({
+		{ARM64_REG_V1, 0xffffffff12345678},
+	});
+
+	emulate("mov s0, v1.s[0]");
+
+	EXPECT_JUST_REGISTERS_LOADED({ARM64_REG_V1});
+	EXPECT_JUST_REGISTERS_STORED({
+		{ARM64_REG_S0, 5.69045661e-28_f32},
+	});
+	EXPECT_NO_MEMORY_LOADED_STORED();
+	EXPECT_NO_VALUE_CALLED();
+}
+
+TEST_P(Capstone2LlvmIrTranslatorArm64Tests, ARM64_INS_MOV_s_v_1)
+{
+	setRegisters({
+		{ARM64_REG_V1, 0x12345678ffffffff},
+	});
+
+	emulate("mov s0, v1.s[1]");
+
+	EXPECT_JUST_REGISTERS_LOADED({ARM64_REG_V1});
+	EXPECT_JUST_REGISTERS_STORED({
+		{ARM64_REG_S0, 5.69045661e-28_f32},
+	});
+	EXPECT_NO_MEMORY_LOADED_STORED();
+	EXPECT_NO_VALUE_CALLED();
+}
+
 //
 // ARM64_INS_MOVZ
 //

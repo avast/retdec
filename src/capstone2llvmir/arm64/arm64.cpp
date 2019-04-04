@@ -382,6 +382,42 @@ llvm::Value* Capstone2LlvmIrTranslatorArm64_impl::getCurrentPc(cs_insn* i)
 			i->address + i->size);
 }
 
+llvm::Value* Capstone2LlvmIrTranslatorArm64_impl::extractVectorValue(
+		llvm::IRBuilder<>& irb,
+		cs_arm64_op& op,
+		llvm::Value* val)
+{
+	if (val->getType() != llvm::IntegerType::getInt128Ty(_module->getContext()))
+	{
+		return val;
+	}
+
+	// Vector element size specifier
+	switch(op.vess)
+	{
+		case ARM64_VESS_B:
+			val = irb.CreateLShr(val, llvm::ConstantInt::get(val->getType(), 8 * op.vector_index));
+			return irb.CreateZExtOrTrunc(val, llvm::IntegerType::getInt8Ty(_module->getContext()));
+		case ARM64_VESS_H:
+			val = irb.CreateLShr(val, llvm::ConstantInt::get(val->getType(), 16 * op.vector_index));
+			return irb.CreateZExtOrTrunc(val, llvm::IntegerType::getInt16Ty(_module->getContext()));
+		case ARM64_VESS_S:
+			val = irb.CreateLShr(val, llvm::ConstantInt::get(val->getType(), 32 * op.vector_index));
+			val = irb.CreateZExtOrTrunc(val, llvm::IntegerType::getInt32Ty(_module->getContext()));
+			return irb.CreateBitCast(val, llvm::Type::getFloatTy(_module->getContext()));
+		case ARM64_VESS_D:
+			val = irb.CreateLShr(val, llvm::ConstantInt::get(val->getType(), 64 * op.vector_index));
+			val = irb.CreateZExtOrTrunc(val, llvm::IntegerType::getInt64Ty(_module->getContext()));
+			return irb.CreateBitCast(val, llvm::Type::getDoubleTy(_module->getContext()));
+		case ARM64_VESS_INVALID:
+			return val;
+		default:
+			throw GenericError("Arm64: extractVectorValue(): Unknown VESS type");
+	}
+
+	return val;
+}
+
 llvm::Value* Capstone2LlvmIrTranslatorArm64_impl::generateOperandExtension(
 		llvm::IRBuilder<>& irb,
 		arm64_extender ext,
@@ -715,9 +751,8 @@ llvm::Value* Capstone2LlvmIrTranslatorArm64_impl::loadOp(
 		case ARM64_OP_REG:
 		{
 			auto* val = loadRegister(op.reg, irb);
-			// TODO(mato): extractVectorValue implementation
-			// auto* vec = extractVectorValue(val, op, irb);
-			auto* ext = generateOperandExtension(irb, op.ext, val, ty);
+			auto* vec = extractVectorValue(irb, op, val);
+			auto* ext = generateOperandExtension(irb, op.ext, vec, ty);
 			return generateOperandShift(irb, op, ext);
 		}
 		case ARM64_OP_IMM:
@@ -1276,7 +1311,11 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateMov(cs_insn* i, cs_arm64* ai,
 	EXPECT_IS_BINARY(i, ai, irb);
 
 	op1 = loadOp(ai->operands[1], irb);
-	op1 = irb.CreateZExtOrTrunc(op1, getRegisterType(ai->operands[0].reg));
+	if (!op1->getType()->isFloatingPointTy())
+	{
+		op1 = irb.CreateZExtOrTrunc(op1, getRegisterType(ai->operands[0].reg));
+	}
+
 	if (i->id == ARM64_INS_MVN || i->id == ARM64_INS_MOVN)
 	{
 		op1 = generateValueNegate(irb, op1);
