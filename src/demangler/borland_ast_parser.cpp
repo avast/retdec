@@ -524,7 +524,6 @@ std::shared_ptr<Node> BorlandASTParser::parseOperator()
 		} else if (consumeIfPossible("$bdla")) {
 			return NameNode::create(_context, "operator delete[]");
 		}
-		// TODO spaceship operator, ctor, dtor
 	}
 
 	return nullptr;
@@ -676,13 +675,26 @@ std::shared_ptr<NodeArray> BorlandASTParser::parseFuncParams()
  */
 bool BorlandASTParser::parseBackref(std::shared_ptr<retdec::demangler::borland::NodeArray> &paramArray)
 {
-	unsigned backref = parseNumber();
-	if (backref == 0 || backref > paramArray->size() || !statusOk()) {
+	if (_mangled.empty()) {
 		_status = invalid_mangled_name;
 		return false;
 	}
 
-	paramArray->addNode(paramArray->get(backref - 1));
+	char backref_code = _mangled.popFront();
+	unsigned backref_pos = 0;
+	if (backref_code >= '1' && backref_code <= '9') {
+		backref_pos = static_cast<unsigned>(backref_code - '0');
+	} else if (backref_code >= 'a' && backref_code <= 'z') {
+		backref_pos = static_cast<unsigned>(backref_code - 'a') + 10;
+	}
+
+	if (backref_code == 0 // was bad character
+		|| backref_pos > paramArray->size()) {
+		_status = invalid_mangled_name;
+		return false;
+	}
+
+	paramArray->addNode(paramArray->get(backref_pos - 1));
 	return true;
 }
 
