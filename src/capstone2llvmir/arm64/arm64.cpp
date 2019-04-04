@@ -1174,9 +1174,18 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateNeg(cs_insn* i, cs_arm64* ai,
 	EXPECT_IS_BINARY(i, ai, irb);
 
 	auto* op2 = loadOpBinaryOp1(ai, irb);
-	llvm::Value* zero = llvm::ConstantInt::get(op2->getType(), 0);
 
-	auto* val = irb.CreateSub(zero, op2);
+	llvm::Value* val = nullptr;
+	if (isFPRegister(ai->operands[1]))
+	{
+		val = irb.CreateFNeg(op2);
+	}
+	else
+	{
+		llvm::Value* zero = llvm::ConstantInt::get(op2->getType(), 0);
+		val = irb.CreateSub(zero, op2);
+	}
+
 	storeOp(ai->operands[0], val, irb);
 
 	if (ai->update_flags)
