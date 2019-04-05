@@ -1679,7 +1679,7 @@ Capstone2LlvmIrTranslatorArm64_impl::_i2fm =
 	{ARM64_INS_DCPS1, nullptr},
 	{ARM64_INS_DCPS2, nullptr},
 	{ARM64_INS_DCPS3, nullptr},
-	{ARM64_INS_DMB, &Capstone2LlvmIrTranslatorArm64_impl::translateNop}, // Create strings for each bariers?
+	{ARM64_INS_DMB, nullptr},
 	{ARM64_INS_DRPS, nullptr},
 	{ARM64_INS_DSB, nullptr},
 	{ARM64_INS_DUP, nullptr},

@@ -606,33 +606,33 @@ llvm::Value* Capstone2LlvmIrTranslatorArm64_impl::generateShiftMsl(
 		llvm::Value *n,
 		bool updateFlags)
 {
-	assert(false && "Check implementation");
-	unsigned op0BitW = llvm::cast<llvm::IntegerType>(n->getType())->getBitWidth();
-	auto* doubleT = llvm::Type::getIntNTy(_module->getContext(), op0BitW*2);
+	return val;
+// 	unsigned op0BitW = llvm::cast<llvm::IntegerType>(n->getType())->getBitWidth();
+// 	auto* doubleT = llvm::Type::getIntNTy(_module->getContext(), op0BitW*2);
 
-	auto* cf = loadRegister(ARM64_REG_CPSR_C, irb);
-	cf = irb.CreateZExtOrTrunc(cf, n->getType());
+// 	auto* cf = loadRegister(ARM64_REG_CPSR_C, irb);
+// 	cf = irb.CreateZExtOrTrunc(cf, n->getType());
 
-	auto* srl = irb.CreateLShr(val, n);
-	auto* srlZext = irb.CreateZExt(srl, doubleT);
-	auto* op0Zext = irb.CreateZExt(val, doubleT);
-	auto* sub = irb.CreateSub(llvm::ConstantInt::get(n->getType(), op0BitW + 1), n);
-	auto* subZext = irb.CreateZExt(sub, doubleT);
-	auto* shl = irb.CreateShl(op0Zext, subZext);
-	auto* sub2 = irb.CreateSub(llvm::ConstantInt::get(n->getType(), op0BitW), n);
-	auto* shl2 = irb.CreateShl(cf, sub2);
-	auto* shl2Zext = irb.CreateZExt(shl2, doubleT);
-	auto* or1 = irb.CreateOr(shl, srlZext);
-	auto* or2 = irb.CreateOr(or1, shl2Zext);
-	auto* or2Trunc = irb.CreateTrunc(or2, val->getType());
+// 	auto* srl = irb.CreateLShr(val, n);
+// 	auto* srlZext = irb.CreateZExt(srl, doubleT);
+// 	auto* op0Zext = irb.CreateZExt(val, doubleT);
+// 	auto* sub = irb.CreateSub(llvm::ConstantInt::get(n->getType(), op0BitW + 1), n);
+// 	auto* subZext = irb.CreateZExt(sub, doubleT);
+// 	auto* shl = irb.CreateShl(op0Zext, subZext);
+// 	auto* sub2 = irb.CreateSub(llvm::ConstantInt::get(n->getType(), op0BitW), n);
+// 	auto* shl2 = irb.CreateShl(cf, sub2);
+// 	auto* shl2Zext = irb.CreateZExt(shl2, doubleT);
+// 	auto* or1 = irb.CreateOr(shl, srlZext);
+// 	auto* or2 = irb.CreateOr(or1, shl2Zext);
+// 	auto* or2Trunc = irb.CreateTrunc(or2, val->getType());
 
-	auto* sub3 = irb.CreateSub(n, llvm::ConstantInt::get(n->getType(), 1));
-	auto* shl3 = irb.CreateShl(llvm::ConstantInt::get(sub3->getType(), 1), sub3);
-	auto* and1 = irb.CreateAnd(shl3, val);
-	auto* cfIcmp = irb.CreateICmpNE(and1, llvm::ConstantInt::get(and1->getType(), 0));
-	storeRegister(ARM64_REG_CPSR_C, cfIcmp, irb);
+// 	auto* sub3 = irb.CreateSub(n, llvm::ConstantInt::get(n->getType(), 1));
+// 	auto* shl3 = irb.CreateShl(llvm::ConstantInt::get(sub3->getType(), 1), sub3);
+// 	auto* and1 = irb.CreateAnd(shl3, val);
+// 	auto* cfIcmp = irb.CreateICmpNE(and1, llvm::ConstantInt::get(and1->getType(), 0));
+// 	storeRegister(ARM64_REG_CPSR_C, cfIcmp, irb);
 
-	return or2Trunc;
+// 	return or2Trunc;
 }
 
 llvm::Value* Capstone2LlvmIrTranslatorArm64_impl::generateGetOperandMemAddr(
