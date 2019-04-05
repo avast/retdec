@@ -230,7 +230,7 @@ const std::vector<std::string> usualSectionNames
 	".sbss", ".script", ".shared", ".sdata", ".srdata", ".stab", ".stabstr", ".sxdata", 
 	".text", ".text0", ".text1", ".text2", ".text3", ".textbss", ".tls", ".tls$",
 	".udata", ".vsdata", ".xdata", ".wixburn", ".wpp_sf", "BSS", "CODE", "DATA",
-	"DGROUP", "edata", "idata", "INIT", "minATL", "PAGE", "rdata", "sdata", "shared", 
+	"DGROUP", "edata", "idata", "INIT", "minATL", "PAGE", "rdata", "sdata", "shared",
 	"Shared", "testdata", "text"
 };
 
