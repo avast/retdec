@@ -217,6 +217,7 @@ const std::map<std::size_t, std::string> resourceLanguageMap
 	{PELIB_LANG_MALAGASY, "Malagasy"}
 };
 
+// TODO link
 const std::vector<std::string> usualSectionNames
 {
 	".00cfg", ".apiset", ".arch", ".autoload_text", ".bindat", ".bootdat", ".bss", 
@@ -228,7 +229,7 @@ const std::vector<std::string> usualSectionNames
 	".itext", ".ndata", ".orpc", ".pdata", ".rdata", ".reloc", ".rodata", ".rsrc", 
 	".sbss", ".script", ".shared", ".sdata", ".srdata", ".stab", ".stabstr", ".sxdata", 
 	".text", ".text0", ".text1", ".text2", ".text3", ".textbss", ".tls", ".tls$",
-	".udata", ".vsdata", ".xdata", ".wixburn", ".wpp_sf ", "BSS", "CODE", "DATA", 
+	".udata", ".vsdata", ".xdata", ".wixburn", ".wpp_sf", "BSS", "CODE", "DATA", 
 	"DGROUP", "edata", "idata", "INIT", "minATL", "PAGE", "rdata", "sdata", "shared", 
 	"Shared", "testdata", "text"
 };
