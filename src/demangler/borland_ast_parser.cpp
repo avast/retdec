@@ -42,6 +42,27 @@ namespace retdec {
 namespace demangler {
 namespace borland {
 
+namespace {
+
+/**
+* @return New string from StringView object.
+*/
+inline std::string toString(const retdec::demangler::borland::StringView &s)
+{
+	return {s.begin(), s.size()};
+}
+
+std::shared_ptr<Node> getLastNameNode(const std::shared_ptr<Node> &nameNode)
+{
+	if (nameNode && nameNode->kind() == Node::Kind::KNestedName) {
+		return std::static_pointer_cast<NestedNameNode>(nameNode)->super();
+	}
+
+	return nameNode;
+}
+
+}    // anonymous namespace
+
 /**
  * @brief Constructor for AST parser. Immediately parses name mangled by borland mangling scheme into AST.
  * @param mangled Name mangled by borland mangling scheme.
@@ -290,6 +311,13 @@ std::shared_ptr<Node> BorlandASTParser::parseFuncNameClasic()
 					return nullptr;
 				}
 				if (op) {
+					std::shared_ptr<Node> className = getLastNameNode(name);
+					if (op->str() == "constructor" && className) {
+						op = className;
+					}
+					if (op->str() == "destructor" && className) {
+						op = NameNode::create(_context, "~" + className->str());
+					}
 					name = name ? NestedNameNode::create(_context, name, op) : op;
 				}
 			}
@@ -523,6 +551,16 @@ std::shared_ptr<Node> BorlandASTParser::parseOperator()
 			return NameNode::create(_context, "operator delete");
 		} else if (consumeIfPossible("$bdla")) {
 			return NameNode::create(_context, "operator delete[]");
+		} else if (
+			consumeIfPossible("$bctr1")
+				|| consumeIfPossible("$bctr2")
+				|| consumeIfPossible("$bctr")) {
+			return NameNode::create(_context, "constructor");
+		} else if (
+			consumeIfPossible("$bdtr1")
+				|| consumeIfPossible("$bdtr2")
+				|| consumeIfPossible("$bdtr")) {
+			return NameNode::create(_context, "destructor");
 		}
 	}
 
@@ -962,12 +1000,21 @@ std::shared_ptr<TypeNode> BorlandASTParser::parseNamedType(unsigned nameLen, con
 std::shared_ptr<Node> BorlandASTParser::parseTemplateName(std::shared_ptr<Node> templateNamespace)
 {
 	std::shared_ptr<Node> templateNameNode = nullptr;
-	auto op = parseOperator();
-	if (!statusOk()) {
-		return nullptr;
-	}
-	if (op) {
-		templateNameNode = op;
+	if (couldBeOperator()) {
+		auto op = parseOperator();
+		if (!statusOk()) {
+			return nullptr;
+		}
+		if (op) {
+			std::shared_ptr<Node> className = getLastNameNode(templateNamespace);
+			if (op->str() == "constructor" && className) {
+				op = className;
+			}
+			if (op->str() == "destructor" && className) {
+				op = NameNode::create(_context, "~" + className->str());
+			}
+			templateNameNode = op;
+		}
 	} else {
 		auto templateName = _mangled.cutUntil('$');
 		if (templateName.empty()) {

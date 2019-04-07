@@ -269,6 +269,7 @@ TEST_F(BorlandDemanglerTests, Operators)
 	DEM_EQ("@Foo@$bctr2$qv", "Foo::Foo(void)");
 	DEM_EQ("@Foo@$bdtr1$qv", "Foo::~Foo(void)");
 	DEM_EQ("@Foo@$bdtr2$qv", "Foo::~Foo(void)");
+	// TODO test constructors and destructors in templates
 	DEM_EQ("@std@error_category@$beql$xqrx18std@error_category", "std::error_category::operator==(const std::error_category &) const");
 }
 
