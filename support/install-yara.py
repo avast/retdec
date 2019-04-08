@@ -9,8 +9,8 @@ Usage: install-yara.py yarac-path install-path yara-patterns-path compile
 """
 
 import fnmatch
-import pathlib
 import os
+import pathlib
 import shutil
 import subprocess
 import sys
