@@ -495,9 +495,8 @@ Instruction * IdiomsGCC::exchangeCopysign(BasicBlock::iterator iter) const {
 	if (! match(&val, m_Or(m_Value(op_and1), m_Value(op_and2))))
 		return nullptr;
 
-	// left hand side of or is (A & 0x7FFFFFFF)?
-	if (! match(op_and1, m_And(m_Value(op_a), m_ConstantInt(cnst1)))
-			&& ! match(op_and1, m_And(m_ConstantInt(cnst1), m_Value(op_a))))
+	// left hand side of or is not (A & 0x7FFFFFFF)?
+	if (! match(op_and1, m_c_And(m_Value(op_a), m_ConstantInt(cnst1))))
 	{
 		// left hand side of or is (fabsf(A)?
 		op_and1 = llvm_utils::skipCasts(op_and1);
@@ -508,6 +507,25 @@ Instruction * IdiomsGCC::exchangeCopysign(BasicBlock::iterator iter) const {
 			auto* call = cast<CallInst>(op_and1);
 			op_a = call->getArgOperand(0);
 			cnst1 = cast<ConstantInt>(ConstantInt::get(op_and2->getType(), 0x7FFFFFFF));
+		}
+		else
+		{
+			return nullptr;
+		}
+	}
+
+	// right hand side of or is not (A & 0x7FFFFFFF)?
+	if (! match(op_and2, m_c_And(m_Value(op_a), m_ConstantInt(cnst1))))
+	{
+		// right hand side of or is (fabsf(A)?
+		op_and2 = llvm_utils::skipCasts(op_and2);
+		if (isa<CallInst>(op_and2)
+				&& cast<CallInst>(op_and2)->getCalledFunction()
+				&& cast<CallInst>(op_and2)->getCalledFunction()->getIntrinsicID() == Intrinsic::fabs)
+		{
+			auto* call = cast<CallInst>(op_and2);
+			op_a = call->getArgOperand(0);
+			cnst1 = cast<ConstantInt>(ConstantInt::get(op_and1->getType(), 0x7FFFFFFF));
 		}
 		else
 		{
@@ -526,8 +544,8 @@ Instruction * IdiomsGCC::exchangeCopysign(BasicBlock::iterator iter) const {
 	}
 
 	// right hand side of or
-	if (! match(op_and2, m_And(m_Value(op_b), m_ConstantInt(cnst2)))
-			&& ! match(op_and2, m_And(m_ConstantInt(cnst2), m_Value(op_b))))
+	if (! match(op_and2, m_c_And(m_Value(op_b), m_ConstantInt(cnst2)))
+			&& ! match(op_and1, m_c_And(m_Value(op_b), m_ConstantInt(cnst2))))
 		return nullptr;
 
 	if (*cnst2->getValue().getRawData() != second_cnst)
