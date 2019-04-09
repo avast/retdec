@@ -89,6 +89,9 @@ def compile_yara_files(yarac, install_dir):
         for filename in fnmatch.filter(filenames, '*.yara'):
             inputs.append(os.path.join(root, filename))
 
+    if not inputs:
+        return
+
     stdout_lock = threading.Lock()
     with multiprocessing.pool.ThreadPool() as pool:
         args = [
