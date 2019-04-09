@@ -28,12 +28,16 @@ class DemanglerProviderTests: public LlvmIrTests
 
 TEST_F(DemanglerProviderTests, addDemanglerAddsDemanglerForModule)
 {
-	retdec::config::ToolInfo tool;
-	tool.setIsGcc();
-	retdec::config::ToolInfoContainer tools;
-	tools.insert(tool);
-	auto ltiModule = std::make_shared<ctypes::Module>(std::make_shared<ctypes::Context>());
-	auto* r1 = DemanglerProvider::addDemangler(module.get(), tools, ltiModule);
+
+	auto config = Config::fromJsonString(module.get(), R"({
+		"architecture" : {
+			"bitSize" : 32,
+			"endian" : "little",
+			"name" : "x86"
+		}
+	})");
+
+	auto* r1 = DemanglerProvider::addDemangler(module.get(), &config);
 	auto* r2 = DemanglerProvider::getDemangler(module.get());
 	Demangler* r3 = nullptr;
 	bool b = DemanglerProvider::getDemangler(module.get(), r3);
@@ -46,12 +50,14 @@ TEST_F(DemanglerProviderTests, addDemanglerAddsDemanglerForModule)
 
 TEST_F(DemanglerProviderTests, getDemanglerReturnsNullptrForUnknownModule)
 {
-	retdec::config::ToolInfo tool;
-	tool.setIsGcc();
-	retdec::config::ToolInfoContainer tools;
-	tools.insert(tool);
-	auto ltiModule = std::make_shared<ctypes::Module>(std::make_shared<ctypes::Context>());
-	DemanglerProvider::addDemangler(module.get(), tools, ltiModule);
+	auto config = Config::fromJsonString(module.get(), R"({
+		"architecture" : {
+			"bitSize" : 32,
+			"endian" : "little",
+			"name" : "x86"
+		}
+	})");
+	DemanglerProvider::addDemangler(module.get(), &config);
 	parseInput(""); // creates a different module
 	auto* r1 = DemanglerProvider::getDemangler(module.get());
 	Demangler* r2 = nullptr;
@@ -64,18 +70,20 @@ TEST_F(DemanglerProviderTests, getDemanglerReturnsNullptrForUnknownModule)
 
 TEST_F(DemanglerProviderTests, addedDemanglerWorks)
 {
-	retdec::config::ToolInfo tool;
-	tool.setIsGcc();
-	retdec::config::ToolInfoContainer tools;
-	tools.insert(tool);
+	auto config = Config::fromJsonString(module.get(), R"({
+		"architecture" : {
+			"bitSize" : 32,
+			"endian" : "little",
+			"name" : "x86"
+		}
+	})");
 	parseInput(R"(
 		define void @_ZN9wikipedia7article8print_toERSo() {
 			ret void
 		}
 	)");
 	Value* f = getValueByName("_ZN9wikipedia7article8print_toERSo");
-	auto ltiModule = std::make_shared<ctypes::Module>(std::make_shared<ctypes::Context>());
-	auto* d = DemanglerProvider::addDemangler(module.get(), tools, ltiModule);
+	auto* d = DemanglerProvider::addDemangler(module.get(), &config);
 	std::string name = d->demangleToString(f->getName());
 
 	EXPECT_EQ("wikipedia::article::print_to(std::ostream&)", name);
@@ -83,12 +91,14 @@ TEST_F(DemanglerProviderTests, addedDemanglerWorks)
 
 TEST_F(DemanglerProviderTests, clearRemovesAllData)
 {
-	retdec::config::ToolInfo tool;
-	tool.setIsGcc();
-	retdec::config::ToolInfoContainer tools;
-	tools.insert(tool);
-	auto ltiModule = std::make_shared<ctypes::Module>(std::make_shared<ctypes::Context>());
-	DemanglerProvider::addDemangler(module.get(), tools, ltiModule);
+	auto config = Config::fromJsonString(module.get(), R"({
+		"architecture" : {
+			"bitSize" : 32,
+			"endian" : "little",
+			"name" : "x86"
+		}
+	})");
+	DemanglerProvider::addDemangler(module.get(), &config);
 	auto* r1 = DemanglerProvider::getDemangler(module.get());
 	EXPECT_NE(nullptr, r1);
 
