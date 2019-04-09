@@ -26,11 +26,25 @@ public:
 
 	std::shared_ptr<Node> get(unsigned i) const;	// TODO operator []
 
-private:
+protected:
 	NodeArray();
 
-private:
+protected:
 	std::vector<std::shared_ptr<Node>> _nodes;
+};
+
+/**
+ * @brief Node for representation of sequence of Nodes.
+ */
+class NodeString : public NodeArray
+{
+public:
+	static std::shared_ptr<NodeString> create();
+
+	void printLeft(std::ostream &s) const override;
+
+protected:
+	NodeString();
 };
 
 }    // borland

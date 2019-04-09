@@ -5,6 +5,7 @@
  */
 
 #include <set>
+#include <retdec/demangler/borland_ast/node.h>
 
 #include "retdec/demangler/borland_ast_parser.h"
 #include "retdec/demangler/borland_ast/array_type.h"
@@ -19,24 +20,13 @@
 #include "retdec/demangler/borland_ast/named_type.h"
 #include "retdec/demangler/borland_ast/node.h"
 #include "retdec/demangler/borland_ast/node_array.h"
+#include "retdec/demangler/borland_ast/parentheses_node.h"
 #include "retdec/demangler/borland_ast/pointer_type.h"
 #include "retdec/demangler/borland_ast/qualifiers.h"
 #include "retdec/demangler/borland_ast/reference_type.h"
 #include "retdec/demangler/borland_ast/rreference_type.h"
 #include "retdec/demangler/borland_ast/template_node.h"
 #include "retdec/demangler/borland_ast/type_node.h"
-
-namespace {
-
-/**
-* @return New string from StringView object.
-*/
-inline std::string toString(const retdec::demangler::borland::StringView &s)
-{
-	return {s.begin(), s.size()};
-}
-
-}    // anonymous namespace
 
 namespace retdec {
 namespace demangler {
@@ -327,7 +317,7 @@ std::shared_ptr<Node> BorlandASTParser::parseFuncNameClasic()
 			break;
 		}
 
-		consumeIfPossible('@');        //
+		consumeIfPossible('@');
 
 		++c;
 	}
@@ -1039,15 +1029,22 @@ std::shared_ptr<Node> BorlandASTParser::parseTemplateParams()
 {
 	auto params = NodeArray::create();
 	while (!peek('%')) {
+		/* var args */
 		consumeIfPossible('V');    // information about varargness of template is not used
+
+		/* backrefs */
 		if (consumeIfPossible('t')) {
-			unsigned backref = peekNumber();
-			if (backref > 0 && backref <= params->size()) {
-				parseNumber();
-				params->addNode(params->get(backref - 1));
+			if (parseTemplateBackref(_mangled, params)) {
 				continue;
+			} else {
+				_status = invalid_mangled_name;
+				return nullptr;
 			}
-		}    // TODO else nothing, check delphi tests if t can be before named types in templates
+		}
+
+		std::shared_ptr<Node> nodeToAdd = nullptr;
+
+		/* type params */
 		auto typeNode = parseType();
 		if (!statusOk()) {
 			return nullptr;
@@ -1055,10 +1052,102 @@ std::shared_ptr<Node> BorlandASTParser::parseTemplateParams()
 		if (!typeNode) {
 			break;
 		}
-		params->addNode(typeNode);
+		nodeToAdd = typeNode;
+
+		/* non-class params */switch (typeNode->kind()) {
+		case Node::Kind::KIntegralType:
+		case Node::Kind::KCharType: {    // try to parse $ i <number> $
+			auto mangledCopy = _mangled;
+			std::shared_ptr<Node> expr = parseIntExpresion(mangledCopy);
+			if (expr) {
+				_mangled = mangledCopy;        // propagate
+				nodeToAdd = expr;
+			}
+			break;
+		}
+		case Node::Kind::KNamedType: {
+			auto mangledCopy = _mangled;
+			std::shared_ptr<Node> expr = parseIntExpresion(mangledCopy);
+			if (expr) {
+				_mangled = mangledCopy;        // propagate
+
+				auto enumExpr = NodeString::create();
+				enumExpr->addNode(ParenthesesNode::create(_context, typeNode));
+				enumExpr->addNode(expr);
+				nodeToAdd = enumExpr;
+			}
+			break;
+		}
+		default:
+			break;
+		}
+
+		params->addNode(nodeToAdd);
 	}
 
 	return params->empty() ? nullptr : params;
+}
+
+bool BorlandASTParser::parseTemplateBackref(
+	StringView &mangled,
+	std::shared_ptr<retdec::demangler::borland::NodeArray> &params)
+{
+	if (mangled.empty()) {
+		return false;
+	}
+
+	char c = mangled.popFront();
+	unsigned backref_pos = 0;
+
+	if (c >= '1' && c <= '9') {
+		backref_pos = static_cast<unsigned>(c - '0');
+	} else if (c >= 'a' && c <= 'z') {
+		backref_pos = static_cast<unsigned>(c - 'a') + 10;
+	}
+
+	if (c == 0 // was bad character
+		|| backref_pos > params->size()) {
+		return false;
+	}
+
+	params->addNode(params->get(backref_pos - 1));
+	return true;
+}
+
+std::shared_ptr<Node> BorlandASTParser::parseIntExpresion(retdec::demangler::borland::StringView &s)
+{
+	std::shared_ptr<Node> expr;
+	if (s.consumeFront("$i")) {
+		bool isNegative = s.consumeFront('-');
+		auto s_copy = s;
+		unsigned number = parseNumber(s_copy);
+		if ((s_copy.front() != s.front())    // number was succesfully parsed
+			&& s_copy.consumeFront('$'))    // is followed by '$'
+		{
+			s = s_copy;
+			std::string exprString = isNegative ? "-" + std::to_string(number) : std::to_string(number);
+			expr = NameNode::create(_context, exprString);
+		}
+	}
+
+	return expr;
+}
+
+unsigned BorlandASTParser::parseNumber(StringView &s)
+{
+	unsigned acc = 0;
+	char c;
+
+	while (!s.empty() && (c = s.front())) {
+		if (c >= '0' && c <= '9') {
+			s.popFront();
+			acc = 10 * acc + static_cast<unsigned>(c - '0');
+		} else {
+			break;
+		}
+	}
+
+	return acc;
 }
 
 /**

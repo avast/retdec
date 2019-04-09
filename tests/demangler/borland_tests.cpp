@@ -124,35 +124,35 @@ TEST_F(BorlandDemanglerTests, RandomTests)
 		   "__fastcall Themes::TThemeServices::GetElementDetails(Themes::TThemedExplorerBar)");
 
 	DEM_EQ(
-		"@Webscriptas@TActiveScriptObjectFactory@CreateProducerObject$qqr32Webscript@TGlobalScriptVariables52System@%DelphiInterface$t24Httpprod@IScriptProducer%",
+		"@Webscriptas@TActiveScriptObjectFactory@CreateProducerObject$qqr32Webscript@TGlobalScriptVariables51System@%DelphiInterface$24Httpprod@IScriptProducer%",
 		"__fastcall Webscriptas::TActiveScriptObjectFactory::CreateProducerObject(Webscript::TGlobalScriptVariables, System::DelphiInterface<Httpprod::IScriptProducer>)");
 
 	DEM_EQ(
-		"@Webservexp@TWebServExp@GenerateNestedArraySchema$qqr51System@%DelphiInterface$t23Xmlschema@IXMLSchemaDef%56System@%DelphiInterface$t28Xmlschema@IXMLComplexTypeDef%px17Typinfo@TTypeInfori17System@WideString",
+		"@Webservexp@TWebServExp@GenerateNestedArraySchema$qqr50System@%DelphiInterface$23Xmlschema@IXMLSchemaDef%55System@%DelphiInterface$28Xmlschema@IXMLComplexTypeDef%px17Typinfo@TTypeInfori17System@WideString",
 		"__fastcall Webservexp::TWebServExp::GenerateNestedArraySchema(System::DelphiInterface<Xmlschema::IXMLSchemaDef>, System::DelphiInterface<Xmlschema::IXMLComplexTypeDef>, const Typinfo::TTypeInfo *, int &, System::WideString)");
 
 	DEM_EQ("@Dateutils@TryRecodeDateTime$qqrx16System@TDateTimexusxusxusxusxusxusxusr16System@TDateTime",
 		   "__fastcall Dateutils::TryRecodeDateTime(const System::TDateTime, const unsigned short, const unsigned short, const unsigned short, const unsigned short, const unsigned short, const unsigned short, const unsigned short, System::TDateTime &)");
 
 	DEM_EQ(
-		"@Dbxtablestorage@TDBXDelegateTableStorage@SetColumns$qqrx62System@%DynamicArray$tp36Dbxtablestorage@TDBXColumnDescriptor%",
+		"@Dbxtablestorage@TDBXDelegateTableStorage@SetColumns$qqrx61System@%DynamicArray$p36Dbxtablestorage@TDBXColumnDescriptor%",
 		"__fastcall Dbxtablestorage::TDBXDelegateTableStorage::SetColumns(const System::DynamicArray<Dbxtablestorage::TDBXColumnDescriptor *>)");
 
 	DEM_EQ(
-		"@Dbxmysqlmetadatareader@TDBXMySqlCustomMetaDataReader@TDBXMySql4IndexesCursor@FindStringSize$qqrxix62System@%DynamicArray$tp36Dbxtablestorage@TDBXColumnDescriptor%",
+		"@Dbxmysqlmetadatareader@TDBXMySqlCustomMetaDataReader@TDBXMySql4IndexesCursor@FindStringSize$qqrxix61System@%DynamicArray$p36Dbxtablestorage@TDBXColumnDescriptor%",
 		"__fastcall Dbxmysqlmetadatareader::TDBXMySqlCustomMetaDataReader::TDBXMySql4IndexesCursor::FindStringSize(const int, const System::DynamicArray<Dbxtablestorage::TDBXColumnDescriptor *>)");
 
 	DEM_EQ("@Idimap4@TIdImapSubSection@$bleq$qqrv",
 		   "__fastcall Idimap4::TIdImapSubSection::operator<=(void)");
 
-	DEM_EQ("@Idimap4@TIdImapSubSection@bagr$qqriipa15$a89$a2$ipa10$a666$25System@%DynamicArray$tuc%",
+	DEM_EQ("@Idimap4@TIdImapSubSection@bagr$qqriipa15$a89$a2$ipa10$a666$24System@%DynamicArray$uc%",
 		   "__fastcall Idimap4::TIdImapSubSection::bagr(int, int, int(*)[15][89][2], System::DynamicArray<unsigned char>(*)[10][666])");
 
 	DEM_EQ("@Idimap4@TIdImapSubSection@$brrsh$qqrv",
 		   "__fastcall Idimap4::TIdImapSubSection::operator>>=(void)");
 
 	DEM_EQ(
-		"@Sqlexpr@TSQLConnection@SQLError$qqrus25Sqlexpr@TSQLExceptionTypex48System@%DelphiInterface$t20Dbxpress@ISQLCommand%",
+		"@Sqlexpr@TSQLConnection@SQLError$qqrus25Sqlexpr@TSQLExceptionTypex47System@%DelphiInterface$20Dbxpress@ISQLCommand%",
 		"__fastcall Sqlexpr::TSQLConnection::SQLError(unsigned short, Sqlexpr::TSQLExceptionType, const System::DelphiInterface<Dbxpress::ISQLCommand>)");
 
 	DEM_EQ(
@@ -302,39 +302,41 @@ TEST_F(BorlandDemanglerTests, FakeStubTest)
 
 TEST_F(BorlandDemanglerTests, Exceptions)
 {
-	DEM_EQ("@std@_Xlength_error$qpxc", "std::length_error::length_error(const char *)");
+	DEM_EQ("@std@_Xlength_error$qpxc", "std::_Xlength_error(const char *)");	// Exceptions could colide with functions, so name is not modified
 }
 
 TEST_F(BorlandDemanglerTests, NonClassTemplates)
 {
 	DEM_EQ("@%foo_int$i$i1$%$qv$v",
 		"void foo_int<1>(void)");
+	DEM_EQ("@%foo_int$i$i-1$%$qv$v",
+		   "void foo_int<-1>(void)");
 	DEM_EQ("@%foo_enum$6MyEnum$i1$%$qv$v",
-		"void foo_enum<(MyEnum)1>()");
-	DEM_EQ("@%foo_obj_ptr$X$badrp3Bar$g@bar$E%$qv$v",
-		"void foo_obj_ptr<&bar>(void)");
-	DEM_EQ("@%foo_func_ptr$X$badrpqv$v$g@fakefunc$qv$E%$qv$v",
-		"void foo_func_ptr<&(fakefunc())>()");
-	DEM_EQ("@%foo_ref$r3Bar$gbar$%$qv$v",
-		"void foo_ref<bar>(void)");
-	DEM_EQ("@%foo_func_ref$r$qv$v$gfakefunc$qv$%$qv$v",
-		"void foo_func_ref<fakefunc()>(void)");
-	DEM_EQ("@%Strange$X$badrM3Baz3Bar$g@Baz@bar$E%@foo$qv",
-		"void Strange::<&Baz::bar>::foo(void)");
+		"void foo_enum<(MyEnum)1>(void)");
 	DEM_EQ("@%foo$N%$qN$v",
 		"void foo<nullptr_t>(nullptr_t)");
-
-	DEM_EQ("@%foo$i$i1$%$qv$v", "void foo<1>(void)");
-	DEM_EQ("@%foo$X$badrp60std@%basic_string$c19std@%char_traits$c%17std@%allocator$c%%$g@mystring$E%$qv$v", "void foo<&mystring>");
 	DEM_EQ("@Unit1@foo_Comp_$qqr11System@Comp", "__fastcall Unit1::foo_Comp_(System::Comp)");
 	DEM_EQ("@Unit1@foo_Currency_$qqr15System@Currency", "__fastcall Unit1::foo_Currency_(System::Currency)");
-	DEM_EQ("@Unit1@foo_ShortString_$qqrr29System@%SmallString$uc$i255$%", "__fastcall Unit1::foo_ShortString_(System::SmallString<unsigned char)");
+	DEM_EQ("@Unit1@foo_ShortString_$qqrr29System@%SmallString$uc$i255$%", "__fastcall Unit1::foo_ShortString_(System::SmallString<255> &)");	// TODO
 	DEM_EQ("@Unit1@foo_AnsiString_$qqr27System@%AnsiStringT$us$i0$%","__fastcall Unit1::foo_AnsiString_(System::AnsiStringT<0>)");
 	DEM_EQ("@Unit1@foo_UnicodeString_$qqr20System@UnicodeString","__fastcall Unit1::foo_UnicodeString_(System::UnicodeString)");
 	DEM_EQ("@Unit1@foo_WideString_$qqr17System@WideString", "__fastcall Unit1::foo_WideString_(System::WideString)");
 	DEM_EQ("@Unit1@foo_RawByteString_$qqr31System@%AnsiStringT$us$i65535$%", "__fastcall Unit1::foo_RawByteString_(System::AnsiStringT<65535>)");
-	DEM_EQ("@Unit1@foo_UTF8String_$qqr31System@%AnsiStringT$us$i65001$%", "__fastcall Unit1::foo_UTF8String_(System::AnsiString<65001>)");
-	DEM_EQ("@%Strange$X$badrM6Person3Dog$g@Person@dog$E%@foo$qv", "Strange<&Person::dog>::foo(void)");
+	DEM_EQ("@Unit1@foo_UTF8String_$qqr31System@%AnsiStringT$us$i65001$%", "__fastcall Unit1::foo_UTF8String_(System::AnsiStringT<65001>)");
+//	DEM_EQ("@%foo_obj_ptr$X$badrp3Bar$g@bar$E%$qv$v",
+//		"void foo_obj_ptr<&bar>(void)");
+//	DEM_EQ("@%foo_func_ptr$X$badrpqv$v$g@fakefunc$qv$E%$qv$v",
+//		"void foo_func_ptr<&(fakefunc(void))>(void)");
+//	// TODO ci tam da argument funkcie
+//	DEM_EQ("@%foo_ref$r3Bar$gbar$%$qv$v",
+//		"void foo_ref<bar>(void)");
+//	DEM_EQ("@%foo_func_ref$r$qv$v$gfakefunc$qv$%$qv$v",
+//		"void foo_func_ref<fakefunc()>(void)");
+//	DEM_EQ("@%Strange$X$badrM3Baz3Bar$g@Baz@bar$E%@foo$qv",
+//		"void Strange::<&(Baz::bar)>::foo(void)");
+//	DEM_EQ("@%foo$i$i1$%$qv$v", "void foo<1>(void)");
+//	DEM_EQ("@%foo$X$badrp60std@%basic_string$c19std@%char_traits$c%17std@%allocator$c%%$g@mystring$E%$qv$v", "void foo<&mystring>");
+//	DEM_EQ("@%Strange$X$badrM6Person3Dog$g@Person@dog$E%@foo$qv", "Strange<&Person::dog>::foo(void)");
 }
 
 // NOT SUPPORTING __restrict keyword and User defined literal (operator "")

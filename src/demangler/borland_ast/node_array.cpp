@@ -73,6 +73,26 @@ std::shared_ptr<Node> NodeArray::get(unsigned i) const
 	return i < _nodes.size() ? _nodes.at(i) : nullptr;
 }
 
+NodeString::NodeString() : NodeArray()
+{
+	_kind = Kind::KNodeString;
+}
+
+void NodeString::printLeft(std::ostream &s) const
+{
+	if (!_nodes.empty()) {
+		auto current = _nodes.begin();
+		while (current != _nodes.end()) {
+			(*current)->print(s);
+			++current;
+		}
+	}
+}
+
+std::shared_ptr<NodeString> NodeString::create() {
+	return std::shared_ptr<NodeString>(new NodeString());
+}
+
 }    // borland
 }    // demangler
 }    // retdec
