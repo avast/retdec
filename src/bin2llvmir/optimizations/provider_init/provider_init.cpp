@@ -76,7 +76,7 @@ bool ProviderInitialization::runOnModule(Module& m)
 		return false;
 	}
 
-	auto* d = DemanglerProvider::addDemangler(&m, c, f->getImage());
+	auto* d = DemanglerProvider::addDemangler(&m, c);
 	if (d == nullptr)
 	{
 		return false;

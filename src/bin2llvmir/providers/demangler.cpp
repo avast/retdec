@@ -25,11 +25,9 @@ namespace bin2llvmir {
 Demangler::Demangler(
 	llvm::Module *llvmModule,
 	Config *config,
-	retdec::loader::Image *objf,
 	std::unique_ptr<retdec::demangler::Demangler> demangler) :
 	_llvmModule(llvmModule),
 	_config(config),
-	_image(objf),
 	_ltiModule(std::make_unique<ctypes::Module>(std::make_shared<ctypes::Context>())),
 	_demangler(std::move(demangler)) {}
 
@@ -76,11 +74,10 @@ llvm::Type *Demangler::getLlvmType(std::shared_ptr<retdec::ctypes::Type> type)
  */
 std::unique_ptr<Demangler> DemanglerFactory::getItaniumDemangler(
 	llvm::Module *m,
-	Config *config,
-	retdec::loader::Image *objf)
+	Config *config)
 {
 	return std::make_unique<Demangler>(
-		m, config, objf, std::make_unique<demangler::ItaniumDemangler>());
+		m, config, std::make_unique<demangler::ItaniumDemangler>());
 }
 
 /**
@@ -89,11 +86,10 @@ std::unique_ptr<Demangler> DemanglerFactory::getItaniumDemangler(
  */
 std::unique_ptr<Demangler> DemanglerFactory::getMicrosoftDemangler(
 	llvm::Module *m,
-	Config *config,
-	retdec::loader::Image *objf)
+	Config *config)
 {
 	return std::make_unique<Demangler>(
-		m, config, objf, std::make_unique<demangler::MicrosoftDemangler>());
+		m, config, std::make_unique<demangler::MicrosoftDemangler>());
 }
 
 /**
@@ -102,11 +98,10 @@ std::unique_ptr<Demangler> DemanglerFactory::getMicrosoftDemangler(
  */
 std::unique_ptr<Demangler> DemanglerFactory::getBorlandDemangler(
 	llvm::Module *m,
-	Config *config,
-	retdec::loader::Image *objf)
+	Config *config)
 {
 	return std::make_unique<Demangler>(
-		m, config, objf, std::make_unique<demangler::BorlandDemangler>());
+		m, config, std::make_unique<demangler::BorlandDemangler>());
 }
 
 /******************************************************************/
@@ -122,20 +117,19 @@ std::map<Module *, std::unique_ptr<Demangler>> DemanglerProvider::_module2demang
  */
 Demangler *DemanglerProvider::addDemangler(
 	llvm::Module *llvmModule,
-	Config *config,
-	retdec::loader::Image *objf)
+	Config *config)
 {
 	auto t = config->getConfig().tools;
 
 	std::unique_ptr<Demangler> d;
 	if (t.isGcc()) {
-		d = DemanglerFactory::getItaniumDemangler(llvmModule, config, objf);
+		d = DemanglerFactory::getItaniumDemangler(llvmModule, config);
 	} else if (t.isMsvc()) {
-		d = DemanglerFactory::getMicrosoftDemangler(llvmModule, config, objf);
+		d = DemanglerFactory::getMicrosoftDemangler(llvmModule, config);
 	} else if (t.isBorland()) {
-		d = DemanglerFactory::getBorlandDemangler(llvmModule, config, objf);
+		d = DemanglerFactory::getBorlandDemangler(llvmModule, config);
 	} else {
-		d = DemanglerFactory::getItaniumDemangler(llvmModule, config, objf);
+		d = DemanglerFactory::getItaniumDemangler(llvmModule, config);
 	}
 
 	auto p = _module2demangler.insert(std::make_pair(llvmModule, std::move(d)));
