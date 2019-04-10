@@ -10,6 +10,7 @@
 
 #include <llvm/Transforms/InstCombine/InstCombine.h>
 
+#include "retdec/bin2llvmir/optimizations/inst_opt/inst_opt_pass.h"
 #include "retdec/bin2llvmir/optimizations/unreachable_funcs/unreachable_funcs.h"
 #include "bin2llvmir/utils/llvmir_tests.h"
 
@@ -29,6 +30,8 @@ class InstCombinePassTests: public LlvmIrTests
 		void runOnModule()
 		{
 			LlvmIrTests::runOnModule<InstructionCombiningPass>();
+			// This pass counters some undesirable LLVM optimizations.
+			LlvmIrTests::runOnModule<InstructionOptimizer>();
 		}
 };
 
@@ -226,6 +229,40 @@ TEST_F(InstCombinePassTests, unreachableBasicBlocksRemove)
 		}
 
 		!0 = !{!"name", i64 123, i64 10, !"asm", !"annotation"}
+	)";
+	checkModuleAgainstExpectedIr(exp);
+}
+
+TEST_F(InstCombinePassTests, undesirableStoreOptimizatonIsNotPerformed)
+{
+	parseInput(R"(
+		@g = global i32 0
+
+		declare double @func()
+
+		define i32 @main(i32 %argc, i8** %argv) {
+			%func_res = call double @func()
+			%1 = fptrunc double %func_res to float
+			%2 = bitcast float %1 to i32
+			store i32 %2, i32* @g
+			ret i32 0
+		}
+	)");
+
+	runOnModule();
+
+	std::string exp = R"(
+		@g = global i32 0
+
+		declare double @func()
+
+		define i32 @main(i32 %argc, i8** %argv) {
+			%func_res = call double @func()
+			%1 = fptrunc double %func_res to float
+			%2 = bitcast float %1 to i32
+			store i32 %2, i32* @g
+			ret i32 0
+		}
 	)";
 	checkModuleAgainstExpectedIr(exp);
 }

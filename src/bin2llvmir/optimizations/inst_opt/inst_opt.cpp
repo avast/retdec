@@ -440,6 +440,46 @@ bool castSequenceWrapper(llvm::Instruction* insn)
 }
 
 /**
+ * store float %val, float* bitcast (i32* @gv to float*)
+ *   ==>
+ * %conv = bitcast float %val to i32
+ * store i32 %conv, i32* @gv
+ *
+ * This is countering an undesirable LLVM instrcombine optimization
+ * that is going the other way.
+ */
+bool storeToBitcastPointer(llvm::Instruction* insn)
+{
+	Value* val;
+	Value* op;
+	if (!match(insn, m_Store(m_Value(val), m_BitCast(m_Value(op))))
+			|| !op->getType()->getPointerElementType()->isFirstClassType()
+			|| op->getType()->getPointerElementType()->isAggregateType()
+			|| op->getType()->getPointerElementType()->isPointerTy())
+	{
+		return false;
+	}
+
+	if (!BitCastInst::isBitCastable(
+			val->getType(),
+			op->getType()->getPointerElementType()))
+	{
+		return false;
+	}
+
+	auto* conv = CastInst::CreateBitOrPointerCast(
+			val,
+			op->getType()->getPointerElementType(),
+			"",
+			insn);
+	new StoreInst(conv, op, insn);
+
+	insn->eraseFromParent();
+
+	return true;
+}
+
+/**
  * Order here is important.
  * More specific patterns must go first, more general later.
  */
@@ -456,6 +496,7 @@ std::vector<bool (*)(llvm::Instruction*)> optimizations =
 		&orAndXX,
 		&addSequence,
 		&castSequenceWrapper,
+		&storeToBitcastPointer,
 };
 
 bool optimize(llvm::Instruction* insn)
