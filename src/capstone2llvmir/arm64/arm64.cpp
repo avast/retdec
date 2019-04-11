@@ -414,7 +414,6 @@ llvm::Value* Capstone2LlvmIrTranslatorArm64_impl::generateOperandExtension(
 	auto* i8  = llvm::IntegerType::getInt8Ty(_module->getContext());
 	auto* i16 = llvm::IntegerType::getInt16Ty(_module->getContext());
 	auto* i32 = llvm::IntegerType::getInt32Ty(_module->getContext());
-	auto* i64 = llvm::IntegerType::getInt64Ty(_module->getContext());
 
 	auto* ty  = destType ? destType : getDefaultType();
 
@@ -442,7 +441,7 @@ llvm::Value* Capstone2LlvmIrTranslatorArm64_impl::generateOperandExtension(
 		}
 		case ARM64_EXT_UXTX:
 		{
-			trunc = irb.CreateTrunc(val, i64);
+			trunc = irb.CreateTrunc(val, i32);
 			return irb.CreateZExt(trunc, ty);
 		}
 		case ARM64_EXT_SXTB:
@@ -462,7 +461,7 @@ llvm::Value* Capstone2LlvmIrTranslatorArm64_impl::generateOperandExtension(
 		}
 		case ARM64_EXT_SXTX:
 		{
-			trunc = irb.CreateTrunc(val, i64);
+			trunc = irb.CreateTrunc(val, i32);
 			return irb.CreateSExt(trunc, ty);
 		}
 		default:
