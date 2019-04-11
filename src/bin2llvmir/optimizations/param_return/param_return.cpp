@@ -19,7 +19,7 @@
 #include "retdec/utils/string.h"
 #include "retdec/bin2llvmir/optimizations/param_return/filter/filter.h"
 #include "retdec/bin2llvmir/optimizations/param_return/param_return.h"
-#define debug_enabled false
+#define debug_enabled true
 #include "retdec/bin2llvmir/utils/llvm.h"
 #include "retdec/bin2llvmir/providers/asm_instruction.h"
 #include "retdec/bin2llvmir/utils/ir_modifier.h"
@@ -117,6 +117,9 @@ bool ParamReturn::run()
 	collectAllCalls();
 //	dumpInfo();
 	filterCalls();
+
+//	analyzeWithDemangler();
+
 //	dumpInfo();
 	applyToIr();
 
@@ -171,7 +174,7 @@ void ParamReturn::collectAllCalls()
 					createDataFlowEntry(calledVal))).first;
 		}
 
-		addDataFromCall(&fIt->second, call);
+		addDataFromCall(&(*fIt), call);
 	}
 }
 
@@ -297,6 +300,7 @@ void ParamReturn::collectExtraData(DataFlowEntry* dataflow) const
 	//
 	if (dbgFnc)
 	{
+		auto funcName = dbgFnc->getName();
 		std::vector<Type*> argTypes;
 		std::vector<std::string> argNames;
 		for (auto& a : dbgFnc->parameters)
@@ -329,6 +333,7 @@ void ParamReturn::collectExtraData(DataFlowEntry* dataflow) const
 	auto configFnc = _config->getConfigFunction(fnc);
 	if (_config->getConfig().isIda() && configFnc)
 	{
+		auto funcName = dbgFnc->getName();
 		std::vector<Type*> argTypes;
 		std::vector<std::string> argNames;
 		for (auto& a : configFnc->parameters)
@@ -539,9 +544,9 @@ CallInst* ParamReturn::getWrapper(Function* fnc) const
 	return nullptr;
 }
 
-void ParamReturn::addDataFromCall(DataFlowEntry* dataflow, CallInst* call) const
+void ParamReturn::addDataFromCall(std::pair<Value * const, DataFlowEntry> *functionPair, CallInst *call) const
 {
-	CallEntry* ce = dataflow->createCallEntry(call);
+	CallEntry* ce = functionPair->second.createCallEntry(call);
 
 	_collector->collectCallArgs(ce);
 
@@ -707,9 +712,145 @@ void ParamReturn::filterCalls()
 			filters[cc]->filterCalls(&de);
 		}
 
+//		dumpInfo(de);
+//		if (de.getFunction()) {
+//			LOG << de.getFunction()->getName().str() << std::endl;
+//			for (auto entry : de.callEntries()) {
+//				LOG << "\t" << llvmObjToString(entry.getCallInstruction()) << std::endl;
+//				for (auto store : entry.argStores()) {
+//					LOG << "\t\t" << llvmObjToString(store->getPointerOperand()) << std::endl;
+//					if (auto *tmp = dyn_cast<PtrToIntInst>(store->getValueOperand())) {
+//						LOG << "\t\t\t" << llvmObjToString(tmp->getPointerOperand()) << std::endl;
+//						LOG << "\t\t\t" << llvmObjToString(tmp->getPointerOperand()->getType()) << std::endl;
+//					}
+//				}
+//			}
+//		}
+//
+//		LOG << "____________________________" << std::endl;
+//		dumpInfo(de);
+
+		if (de.getFunction()) {
+			auto funcName = de.getFunction()->getName().str();
+			auto demFuncPair = _demangler->getPairFunction(funcName);
+			if (demFuncPair.first)
+			{
+				modifyWithDemangledData(de, demFuncPair);
+			}
+		}
+
 		filters[cc]->estimateRetValue(&de);
 
 		modifyType(de);
+	}
+}
+
+void ParamReturn::analyzeWithDemangler()
+{
+	for (auto& p : _fnc2calls)
+	{
+		DataFlowEntry& de = p.second;
+		dumpInfo(de);
+//		if (de.getFunction())
+//		{
+//			auto funcName = de.getFunction()->getName().str();
+//			auto demFuncPair = _demangler->getPairFunction(funcName);
+//			if (demFuncPair.first)
+//			{
+//				modifyWithDemangledData(de, demFuncPair);
+//			}
+//		}
+	}
+}
+
+void ParamReturn::modifyWithDemangledData(DataFlowEntry &de, Demangler::FunctionPair &funcPair) const
+{
+	// TODO do we need all calls?
+	LOG << "-----------------------------------------------------" << std::endl;
+	LOG << de.getFunction()->getName().str() << std::endl;
+	LOG << _demangler->demangleToString(de.getFunction()->getName().str()) << std::endl;
+
+	if (!de.callEntries().empty()) {
+		auto entry = de.callEntries()[0];
+		if (entry.args().empty())
+		{
+			LOG << "no pointer, args empty" << std::endl;
+			return;
+		}
+
+		auto *firstValue = entry.args()[0];
+		if (!firstValue)
+		{
+			LOG << "no pointer, not first value" << std::endl;
+			return;
+		}
+
+		for (auto &store : entry.argStores())
+		{
+			if (store->getPointerOperand() != firstValue)
+			{
+				LOG << "continue" << std::endl;
+				continue;
+			}
+
+			if (auto *valueOp = dyn_cast<PtrToIntInst>(store->getValueOperand()))
+			{
+				if (valueOp->getPointerOperand()->getName().str().rfind("stack_var_",0) == 0
+					&& valueOp->getPointerOperand()->getType()->isPointerTy())
+				{
+					if (entry.argStores().size() == funcPair.first->arg_size() + 1
+						|| entry.argStores().size() == funcPair.first->arg_size())
+					{
+						LOG << "will force this" << std::endl;
+
+						std::vector<Type*> argTypes;
+						std::vector<std::string> argNames;
+
+						if (entry.argStores().size() == funcPair.first->arg_size() + 1)	// this pointer
+						{
+							argTypes.push_back(PointerType::get(Type::getIntNTy(_module->getContext(), 64), 0));
+							argNames.push_back("this");
+						}
+
+						for (auto& a : funcPair.first->args())
+						{
+							if (a.getType()->isSized())
+							{
+								argTypes.push_back(a.getType());
+								argNames.push_back(a.getName());
+							}
+						}
+						de.setArgTypes(
+							std::move(argTypes),
+							std::move(argNames));
+
+						if (funcPair.first->isVarArg())
+						{
+							de.setVariadic();
+						}
+						de.setRetType(funcPair.first->getReturnType());
+
+//					std::string declr = funcPair.second->getDeclaration();
+//					if (!declr.empty())
+//					{
+//						cf->setDeclarationString(declr);
+//					}
+
+						auto callConv = funcPair.second->getCallConvention();
+						de.setCallingConvention(toCallConv(callConv));
+
+						return;
+					}
+				} else {
+					LOG << "no pointer, ifs" << std::endl;
+				}
+			} else {
+				LOG << "dyn_cast fail" << std::endl;
+			}
+			break;
+		}
+	} else {
+		LOG << "no pointer, zero calls" << std::endl;
 	}
 }
 
@@ -835,6 +976,7 @@ void ParamReturn::applyToIr()
 {
 	for (auto& p : _fnc2calls)
 	{
+//		dumpInfo(p.second);
 		applyToIr(p.second);
 	}
 
