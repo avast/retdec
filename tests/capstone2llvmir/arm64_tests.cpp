@@ -406,23 +406,6 @@ TEST_P(Capstone2LlvmIrTranslatorArm64Tests, ARM64_INS_ADD32_r_r_i_extend_test)
 	EXPECT_NO_VALUE_CALLED();
 }
 
-TEST_P(Capstone2LlvmIrTranslatorArm64Tests, ARM64_INS_ADD_d_d_d)
-{
-	setRegisters({
-		{ARM64_REG_D1, 0.141592141592141592141592_f64},
-		{ARM64_REG_D2, 3.141592_f64},
-	});
-
-	emulate("add d0, d1, d2");
-
-	EXPECT_JUST_REGISTERS_LOADED({ARM64_REG_D1, ARM64_REG_D2});
-	EXPECT_JUST_REGISTERS_STORED({
-		{ARM64_REG_D0, 3.2831841415921419_f64},
-	});
-	EXPECT_NO_MEMORY_LOADED_STORED();
-	EXPECT_NO_VALUE_CALLED();
-}
-
 //
 // Extended registers
 //

@@ -1168,15 +1168,15 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateAdd(cs_insn* i, cs_arm64* ai,
 	std::tie(op1, op2) = loadOpBinaryOrTernaryOp1Op2(ai, irb);
 	op2 = generateTypeConversion(irb, op2, op1->getType(), eOpConv::ZEXT_TRUNC);
 
-	llvm::Value *val = nullptr;
-	if (isFPRegister(ai->operands[0]))
+	// For some reason it is possible to add two FP registers with integer add?
+	// This looks to be also true for sub
+	if (isFPRegister(ai->operands[0]) && i->id != ARM64_INS_CMN)
 	{
-		val = irb.CreateFAdd(op1, op2);
+		op1 = generateFPBitCastToIntegerType(irb, op1);
+		op2 = generateFPBitCastToIntegerType(irb, op2);
 	}
-	else
-	{
-		val = irb.CreateAdd(op1, op2);
-	}
+
+	auto *val = irb.CreateAdd(op1, op2);
 	if (i->id != ARM64_INS_CMN)
 	{
 		storeOp(ai->operands[0], val, irb);
@@ -1200,9 +1200,17 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateSub(cs_insn* i, cs_arm64* ai,
 	EXPECT_IS_BINARY_OR_TERNARY(i, ai, irb);
 
 	std::tie(op1, op2) = loadOpBinaryOrTernaryOp1Op2(ai, irb);
-	op2 = irb.CreateZExtOrTrunc(op2, op1->getType());
+	op2 = generateTypeConversion(irb, op2, op1->getType(), eOpConv::ZEXT_TRUNC);
 
-	auto *val = irb.CreateSub(op1, op2);
+	// For some reason it is possible to sub two FP registers with integer sub?
+	// This looks to be also true for add
+	if (isFPRegister(ai->operands[0]) && i->id != ARM64_INS_CMP)
+	{
+		op1 = generateFPBitCastToIntegerType(irb, op1);
+		op2 = generateFPBitCastToIntegerType(irb, op2);
+	}
+
+	auto* val = irb.CreateSub(op1, op2);
 	if (i->id != ARM64_INS_CMP)
 	{
 		storeOp(ai->operands[0], val, irb);
@@ -2303,6 +2311,11 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateMulh(cs_insn* i, cs_arm64* ai
 void Capstone2LlvmIrTranslatorArm64_impl::translateMull(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb)
 {
 	EXPECT_IS_TERNARY(i, ai, irb);
+
+	if (ifVectorGeneratePseudo(i, ai, irb))
+	{
+	    return;
+	}
 
 	bool sext = true;
 	if (i->id == ARM64_INS_UMULL)
