@@ -699,7 +699,21 @@ llvm::Value* Capstone2LlvmIrTranslatorArm64_impl::loadRegister(
 		return getCurrentPc(_insn);
 	}
 
-	auto* rt = getRegisterType(r);
+
+	llvm::Type* rt = nullptr;
+	try
+	{
+		rt = getRegisterType(r);
+	}
+	catch (GenericError &e)
+	{
+		// If we dont find the register type, try to recover from this returning at
+		// least the number of register
+		// Maybe solve this better
+		std::cerr << e.what() << std::endl;
+		return llvm::ConstantInt::get(dstType ? dstType : getDefaultType(), r);
+	}
+
 	if (r == ARM64_REG_XZR || r == ARM64_REG_WZR)
 	{
 		// Loads from XZR registers generate zero
@@ -809,7 +823,9 @@ llvm::Instruction* Capstone2LlvmIrTranslatorArm64_impl::storeRegister(
 	auto* llvmReg = getRegister(pr);
 	if (llvmReg == nullptr)
 	{
-		throw GenericError("storeRegister() unhandled reg.");
+		// Maybe return xchg eax, eax?
+		std::cerr << "storeRegister() unhandled reg." << std::endl;
+		return nullptr;
 	}
 
 	val = generateTypeConversion(irb, val, llvmReg->getValueType(), ct);
