@@ -60,9 +60,9 @@ int main(int argc, char *argv[]) {
 		demangledMs = dem_ms->demangleToString(argv[i]);
 		demangledBorland = dem_borland->demangleToString(argv[i]);
 
-		cout << "gcc: " << demangledGcc << endl;
-		cout << "ms: " << demangledMs << endl;
-		cout << "borland: " << demangledBorland << endl;
+		if (!demangledGcc.empty()) { cout << "gcc: " << demangledGcc << endl; }
+		if (!demangledMs.empty()) { cout << "ms: " << demangledMs << endl; }
+		if (!demangledBorland.empty()) { cout << "borland: " << demangledBorland << endl; }
 	} //for
 
 	return 0;
