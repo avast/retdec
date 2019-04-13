@@ -6,6 +6,7 @@
 #include "retdec/ctypes/integral_type.h"
 #include "retdec/ctypes/member.h"
 #include "retdec/ctypes/pointer_type.h"
+#include "retdec/ctypes/reference_type.h"
 #include "retdec/ctypes/struct_type.h"
 #include "retdec/ctypes/typedefed_type.h"
 #include "retdec/ctypes/union_type.h"
@@ -130,8 +131,11 @@ void Ctypes2LlvmTypeVisitor::visit(
 void Ctypes2LlvmTypeVisitor::visit(
 	const std::shared_ptr <retdec::ctypes::ReferenceType> &type)
 {
-	// TODO
-	_type = Abi::getDefaultType(_module);
+	type->getReferencedType()->accept(this);
+
+	auto *t = PointerType::isValidElementType(_type) ?
+			  _type : Abi::getDefaultType(_module);
+	_type = PointerType::get(t, 0);
 }
 
 void Ctypes2LlvmTypeVisitor::visit(
