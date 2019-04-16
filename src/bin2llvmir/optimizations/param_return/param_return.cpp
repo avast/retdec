@@ -117,9 +117,6 @@ bool ParamReturn::run()
 	collectAllCalls();
 //	dumpInfo();
 	filterCalls();
-
-//	analyzeWithDemangler();
-
 //	dumpInfo();
 	applyToIr();
 
@@ -174,7 +171,7 @@ void ParamReturn::collectAllCalls()
 					createDataFlowEntry(calledVal))).first;
 		}
 
-		addDataFromCall(&(*fIt), call);
+		addDataFromCall(&fIt->second, call);
 	}
 }
 
@@ -432,6 +429,19 @@ void ParamReturn::collectExtraData(DataFlowEntry* dataflow) const
 			return;
 		}
 	}
+
+	// try to get calling convention and return type if name is mangled
+	auto fp = _demangler->getPairFunction(fnc->getName().str());
+	if (fp.first)
+	{
+		LOG << "Calling convention: " << static_cast<std::string>(fp.second->getCallConvention()) << std::endl;
+		dataflow->setCallingConvention(toCallConv(fp.second->getCallConvention()));
+
+		if (!fp.second->getReturnType()->isUnknown())
+		{
+			dataflow->setRetType(fp.first->getReturnType());
+		}
+	}
 }
 
 CallInst* ParamReturn::getWrapper(Function* fnc) const
@@ -544,9 +554,9 @@ CallInst* ParamReturn::getWrapper(Function* fnc) const
 	return nullptr;
 }
 
-void ParamReturn::addDataFromCall(std::pair<Value * const, DataFlowEntry> *functionPair, CallInst *call) const
+void ParamReturn::addDataFromCall(DataFlowEntry *de, CallInst *call) const
 {
-	CallEntry* ce = functionPair->second.createCallEntry(call);
+	CallEntry* ce = de->createCallEntry(call);
 
 	_collector->collectCallArgs(ce);
 
@@ -712,32 +722,7 @@ void ParamReturn::filterCalls()
 			filters[cc]->filterCalls(&de);
 		}
 
-//		dumpInfo(de);
-//		if (de.getFunction()) {
-//			LOG << de.getFunction()->getName().str() << std::endl;
-//			for (auto entry : de.callEntries()) {
-//				LOG << "\t" << llvmObjToString(entry.getCallInstruction()) << std::endl;
-//				for (auto store : entry.argStores()) {
-//					LOG << "\t\t" << llvmObjToString(store->getPointerOperand()) << std::endl;
-//					if (auto *tmp = dyn_cast<PtrToIntInst>(store->getValueOperand())) {
-//						LOG << "\t\t\t" << llvmObjToString(tmp->getPointerOperand()) << std::endl;
-//						LOG << "\t\t\t" << llvmObjToString(tmp->getPointerOperand()->getType()) << std::endl;
-//					}
-//				}
-//			}
-//		}
-//
-//		LOG << "____________________________" << std::endl;
-//		dumpInfo(de);
-
-		if (de.getFunction()) {
-			auto funcName = de.getFunction()->getName().str();
-			auto demFuncPair = _demangler->getPairFunction(funcName);
-			if (demFuncPair.first)
-			{
-				modifyWithDemangledData(de, demFuncPair);
-			}
-		}
+		analyzeWithDemangler(de);
 
 		filters[cc]->estimateRetValue(&de);
 
@@ -745,43 +730,31 @@ void ParamReturn::filterCalls()
 	}
 }
 
-void ParamReturn::analyzeWithDemangler()
+void ParamReturn::analyzeWithDemangler(DataFlowEntry& de)
 {
-	for (auto& p : _fnc2calls)
+	if (de.getFunction())
 	{
-		DataFlowEntry& de = p.second;
-		dumpInfo(de);
-//		if (de.getFunction())
-//		{
-//			auto funcName = de.getFunction()->getName().str();
-//			auto demFuncPair = _demangler->getPairFunction(funcName);
-//			if (demFuncPair.first)
-//			{
-//				modifyWithDemangledData(de, demFuncPair);
-//			}
-//		}
+		auto funcName = de.getFunction()->getName().str();
+		auto demFuncPair = _demangler->getPairFunction(funcName);
+		if (demFuncPair.first)
+		{
+			modifyWithDemangledData(de, demFuncPair);
+		}
 	}
 }
 
 void ParamReturn::modifyWithDemangledData(DataFlowEntry &de, Demangler::FunctionPair &funcPair) const
 {
-	// TODO do we need all calls?
-	LOG << "-----------------------------------------------------" << std::endl;
-	LOG << de.getFunction()->getName().str() << std::endl;
-	LOG << _demangler->demangleToString(de.getFunction()->getName().str()) << std::endl;
-
 	if (!de.callEntries().empty()) {
 		auto entry = de.callEntries()[0];
 		if (entry.args().empty())
 		{
-			LOG << "no pointer, args empty" << std::endl;
 			return;
 		}
 
 		auto *firstValue = entry.args()[0];
 		if (!firstValue)
 		{
-			LOG << "no pointer, not first value" << std::endl;
 			return;
 		}
 
@@ -789,7 +762,6 @@ void ParamReturn::modifyWithDemangledData(DataFlowEntry &de, Demangler::Function
 		{
 			if (store->getPointerOperand() != firstValue)
 			{
-				LOG << "continue" << std::endl;
 				continue;
 			}
 
@@ -801,15 +773,13 @@ void ParamReturn::modifyWithDemangledData(DataFlowEntry &de, Demangler::Function
 					if (entry.argStores().size() == funcPair.first->arg_size() + 1
 						|| entry.argStores().size() == funcPair.first->arg_size())
 					{
-						LOG << "will force this" << std::endl;
-
 						std::vector<Type*> argTypes;
 						std::vector<std::string> argNames;
 
-						if (entry.argStores().size() == funcPair.first->arg_size() + 1)	// this pointer
+						if (entry.argStores().size() == funcPair.first->arg_size() + 1)	// adds pointer to this as first parameter
 						{
-							argTypes.push_back(PointerType::get(Type::getIntNTy(_module->getContext(), 64), 0));
-							argNames.push_back("this");
+							argTypes.emplace_back(PointerType::get(Type::getIntNTy(_module->getContext(), 64), 0));
+							argNames.emplace_back("this");
 						}
 
 						for (auto& a : funcPair.first->args())
@@ -830,27 +800,15 @@ void ParamReturn::modifyWithDemangledData(DataFlowEntry &de, Demangler::Function
 						}
 						de.setRetType(funcPair.first->getReturnType());
 
-//					std::string declr = funcPair.second->getDeclaration();
-//					if (!declr.empty())
-//					{
-//						cf->setDeclarationString(declr);
-//					}
-
 						auto callConv = funcPair.second->getCallConvention();
 						de.setCallingConvention(toCallConv(callConv));
 
 						return;
 					}
-				} else {
-					LOG << "no pointer, ifs" << std::endl;
 				}
-			} else {
-				LOG << "dyn_cast fail" << std::endl;
 			}
 			break;
 		}
-	} else {
-		LOG << "no pointer, zero calls" << std::endl;
 	}
 }
 

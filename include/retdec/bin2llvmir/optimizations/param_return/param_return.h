@@ -66,7 +66,7 @@ class ParamReturn : public llvm::ModulePass
 	// Collection of functions usage data.
 	//
 	private:
-		void addDataFromCall(std::pair<llvm::Value * const, DataFlowEntry> *functionPair, llvm::CallInst *call) const;
+		void addDataFromCall(DataFlowEntry *functionPair, llvm::CallInst *call) const;
 
 	// Optimizations.
 	//
@@ -83,8 +83,9 @@ class ParamReturn : public llvm::ModulePass
 	// Demangling informations.
 	//
 	private:
-		void analyzeWithDemangler();
+		void analyzeWithDemangler(DataFlowEntry& de);
 		void modifyWithDemangledData(DataFlowEntry& de, Demangler::FunctionPair &funcPair) const;
+
 	// Modification of functions in IR.
 	//
 	private:

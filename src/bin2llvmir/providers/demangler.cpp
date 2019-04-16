@@ -126,7 +126,7 @@ Demangler *DemanglerProvider::addDemangler(
 		d = DemanglerFactory::getItaniumDemangler(llvmModule, config);
 	} else if (t.isMsvc()) {
 		d = DemanglerFactory::getMicrosoftDemangler(llvmModule, config);
-	} else if (t.isBorland()) {
+	} else if (t.isBorland() || t.isDelphi()) {
 		d = DemanglerFactory::getBorlandDemangler(llvmModule, config);
 	} else {
 		d = DemanglerFactory::getItaniumDemangler(llvmModule, config);
