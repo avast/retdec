@@ -37,10 +37,10 @@ class ParamReturn : public llvm::ModulePass
 				llvm::Module& m,
 				Config* c,
 				Abi* abi,
+				Demangler* demangler,
 				FileImage* img = nullptr,
 				DebugFormat* dbgf = nullptr,
-				Lti* lti = nullptr,
-				Demangler* demangler = nullptr);
+				Lti* lti = nullptr);
 		virtual bool runOnModule(llvm::Module& m) override;
 
 	private:
@@ -83,8 +83,10 @@ class ParamReturn : public llvm::ModulePass
 	// Demangling informations.
 	//
 	private:
-		void analyzeWithDemangler(DataFlowEntry& de);
+		void analyzeWithDemangler(DataFlowEntry& de) const;
+		bool couldBeThisPtr(llvm::Value *operand) const;
 		void modifyWithDemangledData(DataFlowEntry& de, Demangler::FunctionPair &funcPair) const;
+		void useOnlyDemangledData(DataFlowEntry &de, Demangler::FunctionPair &funcPair, bool addThisPtr=false) const;
 
 	// Modification of functions in IR.
 	//

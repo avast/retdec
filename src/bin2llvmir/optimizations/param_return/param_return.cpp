@@ -87,10 +87,10 @@ bool ParamReturn::runOnModuleCustom(
 		Module& m,
 		Config* c,
 		Abi* abi,
+		Demangler* demangler,
 		FileImage* img,
 		DebugFormat* dbgf,
-		Lti* lti,
-		Demangler* demangler)
+		Lti* lti)
 {
 	_module = &m;
 	_config = c;
@@ -257,35 +257,8 @@ void ParamReturn::collectExtraData(DataFlowEntry* dataflow) const
 		auto demFuncPair = _demangler->getPairFunction(funcName);
 		if (demFuncPair.first)
 		{
-			std::vector<Type*> argTypes;
-			std::vector<std::string> argNames;
-			for (auto& a : demFuncPair.first->args())
-			{
-				if (a.getType()->isSized())
-				{
-					argTypes.push_back(a.getType());
-					argNames.push_back(a.getName());
-				}
-			}
-			dataflow->setArgTypes(
-				std::move(argTypes),
-				std::move(argNames));
-
-			if (demFuncPair.first->isVarArg())
-			{
-				dataflow->setVariadic();
-			}
-			dataflow->setRetType(demFuncPair.first->getReturnType());
-
-			std::string declr = demFuncPair.second->getDeclaration();
-			if (!declr.empty())
-			{
-				cf->setDeclarationString(declr);
-			}
-
-			auto callConv = demFuncPair.second->getCallConvention();
-			dataflow->setCallingConvention(toCallConv(callConv));
-
+			LOG << "LTI: " << _demangler->demangleToString(funcName) << std::endl;
+			useOnlyDemangledData(*dataflow, demFuncPair);
 			return;
 		}
 	}
@@ -402,28 +375,8 @@ void ParamReturn::collectExtraData(DataFlowEntry* dataflow) const
 		auto demFuncPair = _demangler->getPairFunction(wf->getName());
 		if (demFuncPair.first)
 		{
-			std::vector<Type*> argTypes;
-			std::vector<std::string> argNames;
-			for (auto& a : demFuncPair.first->args())
-			{
-				if (a.getType()->isSized())
-				{
-					argTypes.push_back(a.getType());
-					argNames.push_back(a.getName());
-				}
-			}
-			dataflow->setArgTypes(
-				std::move(argTypes),
-				std::move(argNames));
-
-			if (demFuncPair.first->isVarArg())
-			{
-				dataflow->setVariadic();
-			}
-			dataflow->setRetType(demFuncPair.first->getReturnType());
-
-			auto callConv = demFuncPair.second->getCallConvention();
-			dataflow->setCallingConvention(toCallConv(callConv));
+			LOG << "wrapper: " << _demangler->demangleToString(wf->getName()) << std::endl;
+			useOnlyDemangledData(*dataflow, demFuncPair);
 			dataflow->setWrappedCall(wrappedCall);
 
 			return;
@@ -434,7 +387,7 @@ void ParamReturn::collectExtraData(DataFlowEntry* dataflow) const
 	auto fp = _demangler->getPairFunction(fnc->getName().str());
 	if (fp.first)
 	{
-		LOG << "Calling convention: " << static_cast<std::string>(fp.second->getCallConvention()) << std::endl;
+		LOG << "setting call conv: " << _demangler->demangleToString(fnc->getName().str()) << std::endl;
 		dataflow->setCallingConvention(toCallConv(fp.second->getCallConvention()));
 
 		if (!fp.second->getReturnType()->isUnknown())
@@ -730,7 +683,7 @@ void ParamReturn::filterCalls()
 	}
 }
 
-void ParamReturn::analyzeWithDemangler(DataFlowEntry& de)
+void ParamReturn::analyzeWithDemangler(DataFlowEntry& de) const
 {
 	if (de.getFunction())
 	{
@@ -738,26 +691,58 @@ void ParamReturn::analyzeWithDemangler(DataFlowEntry& de)
 		auto demFuncPair = _demangler->getPairFunction(funcName);
 		if (demFuncPair.first)
 		{
+			LOG << "ANalyze: " << _demangler->demangleToString(funcName) << std::endl;
 			modifyWithDemangledData(de, demFuncPair);
 		}
 	}
 }
 
+bool ParamReturn::couldBeThisPtr(llvm::Value *operand) const
+{
+	return _abi->isStackVariable(operand) && operand->getType()->isPointerTy(); // TODO check size
+}
+
+/**
+ * @brief Uses information from demangler and compares them with informations //TODO
+ * @param de
+ * @param funcPair
+ */
 void ParamReturn::modifyWithDemangledData(DataFlowEntry &de, Demangler::FunctionPair &funcPair) const
 {
-	if (!de.callEntries().empty()) {
+	if (de.callEntries().empty())
+	{
+		LOG << "empty call entries" << std::endl;
+//		useOnlyDemangledData(de, funcPair);
+		return;
+	}
+	else
+	{
 		auto entry = de.callEntries()[0];
-		if (entry.args().empty())
+
+		// demangling detected more arguments
+		if (entry.args().size() < funcPair.second->getParameterCount())
 		{
+			LOG << "demangler detected more arguments" << std::endl;
+			useOnlyDemangledData(de, funcPair);
 			return;
 		}
 
+		// both methods detected empty args
+		if (entry.args().empty())
+		{
+			LOG << "both empty" << std::endl;
+			return;
+		}
+
+		// nullptr guard
 		auto *firstValue = entry.args()[0];
 		if (!firstValue)
 		{
+			LOG << "nullptr" << std::endl;
 			return;
 		}
 
+		// args and argStores order doesn't have to match
 		for (auto &store : entry.argStores())
 		{
 			if (store->getPointerOperand() != firstValue)
@@ -765,51 +750,58 @@ void ParamReturn::modifyWithDemangledData(DataFlowEntry &de, Demangler::Function
 				continue;
 			}
 
+			// is pointer to int
 			if (auto *valueOp = dyn_cast<PtrToIntInst>(store->getValueOperand()))
 			{
-				if (valueOp->getPointerOperand()->getName().str().rfind("stack_var_",0) == 0
-					&& valueOp->getPointerOperand()->getType()->isPointerTy())
+				if (couldBeThisPtr(valueOp->getPointerOperand())
+					&& (entry.argStores().size() == funcPair.first->arg_size() + 1
+						|| entry.argStores().size() == funcPair.first->arg_size()))
 				{
-					if (entry.argStores().size() == funcPair.first->arg_size() + 1
-						|| entry.argStores().size() == funcPair.first->arg_size())
-					{
-						std::vector<Type*> argTypes;
-						std::vector<std::string> argNames;
-
-						if (entry.argStores().size() == funcPair.first->arg_size() + 1)	// adds pointer to this as first parameter
-						{
-							argTypes.emplace_back(PointerType::get(Type::getIntNTy(_module->getContext(), 64), 0));
-							argNames.emplace_back("this");
-						}
-
-						for (auto& a : funcPair.first->args())
-						{
-							if (a.getType()->isSized())
-							{
-								argTypes.push_back(a.getType());
-								argNames.push_back(a.getName());
-							}
-						}
-						de.setArgTypes(
-							std::move(argTypes),
-							std::move(argNames));
-
-						if (funcPair.first->isVarArg())
-						{
-							de.setVariadic();
-						}
-						de.setRetType(funcPair.first->getReturnType());
-
-						auto callConv = funcPair.second->getCallConvention();
-						de.setCallingConvention(toCallConv(callConv));
-
-						return;
-					}
+					LOG << "could be this" << std::endl;
+					bool addThisPtr = entry.argStores().size() == funcPair.first->arg_size() + 1;
+					useOnlyDemangledData(de, funcPair, addThisPtr);
 				}
 			}
+
 			break;
 		}
 	}
+}
+
+void ParamReturn::useOnlyDemangledData(DataFlowEntry &de, Demangler::FunctionPair &funcPair, bool addThisPtr) const
+{
+	std::vector<Type*> argTypes;
+	std::vector<std::string> argNames;
+
+	if (addThisPtr)
+	{
+		auto ptrSize = static_cast<unsigned>(Abi::getWordSize(_module));
+		argTypes.emplace_back(PointerType::get(Type::getIntNTy(_module->getContext(), ptrSize), 0));
+		argNames.emplace_back("this");
+	}
+
+	for (auto& a : funcPair.first->args())
+	{
+		if (a.getType()->isSized())
+		{
+			argTypes.push_back(a.getType());
+			argNames.push_back(a.getName());
+		}
+	}
+	de.setArgTypes(
+		std::move(argTypes),
+		std::move(argNames));
+
+	if (funcPair.first->isVarArg())
+	{
+		de.setVariadic();
+	}
+	de.setRetType(funcPair.first->getReturnType());
+
+	auto callConv = funcPair.second->getCallConvention();
+	de.setCallingConvention(toCallConv(callConv));
+
+	return;
 }
 
 Type* ParamReturn::extractType(Value* from) const
