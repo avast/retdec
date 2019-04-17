@@ -5,29 +5,29 @@ In the event that we accidentally failed to list a required notice,
 please bring it to our attention by contacting the repository owner.
 
 RetDec uses the following third-party libraries or other resources:
-1) Capstone2LlvmIR: https://github.com/avast-tl/capstone2llvmir
-2) Ctypes: https://github.com/avast-tl/ctypes
-3) Demangler: https://github.com/avast-tl/demangler
-4) Fileformat: https://github.com/avast-tl/fileformat
-5) Fnc-patterns: https://github.com/avast-tl/fnc-patterns
+1) Capstone2LlvmIR: https://github.com/avast/capstone2llvmir
+2) Ctypes: https://github.com/avast/ctypes
+3) Demangler: https://github.com/avast/demangler
+4) Fileformat: https://github.com/avast/fileformat
+5) Fnc-patterns: https://github.com/avast/fnc-patterns
 6) Libdwarf: https://www.prevanders.net/dwarf.html
 7) Libelf: https://github.com/WolfgangSt/libelf
 8) LLVM: https://llvm.org/
-9) PDBparser: https://github.com/avast-tl/pdbparser
-10) RetDec-config: https://github.com/avast-tl/retdec-config
-11) Tl-cpputils: https://github.com/avast-tl/tl-cpputils
+9) PDBparser: https://github.com/avast/pdbparser
+10) RetDec-config: https://github.com/avast/retdec-config
+11) Tl-cpputils: https://github.com/avast/tl-cpputils
 12) Capstone Engine: http://www.capstone-engine.org/
 13) RapidJSON: https://github.com/Tencent/rapidjson
 14) Elfio: http://elfio.sourceforge.net/
 15) OpenSSL: https://www.openssl.org/
-16) PeLib: https://github.com/avast-tl/pelib
+16) PeLib: https://github.com/avast/pelib
 17) TinyXML-2: https://github.com/leethomason/tinyxml2
-18) yaracpp: https://github.com/avast-tl/yaracpp
-19) yaramod: https://github.com/avast-tl/yaramod
+18) yaracpp: https://github.com/avast/yaracpp
+19) yaramod: https://github.com/avast/yaramod
 20) JsonCpp: https://github.com/open-source-parsers/jsoncpp
 21) optional_lite: https://github.com/martinmoene/optional-lite
 22) YARA: https://virustotal.github.io/yara/
-23) Google Test: https://github.com/avast-tl/googletest
+23) Google Test: https://github.com/avast/googletest
 24) Keystone Engine: http://www.keystone-engine.org/
 25) whereami: https://github.com/gpakosz/whereami
 26) pybind11: https://github.com/pybind/pybind11

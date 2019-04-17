@@ -39,7 +39,7 @@ endfunction()
 # bin directory, where they are automatically picked up by executables.
 #
 # For more details, see
-#  - https://github.com/avast-tl/retdec/issues/77
+#  - https://github.com/avast/retdec/issues/77
 #  - https://cmake.org/Wiki/CMake_RPATH_handling
 if(APPLE)
 	set(CMAKE_INSTALL_RPATH "@executable_path/../lib")

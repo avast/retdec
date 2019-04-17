@@ -117,7 +117,7 @@ std::size_t getTotalSystemMemoryOnMacOS() {
 bool limitSystemMemoryOnMacOS(std::size_t limit) {
 	// Warning: We have found that limitSystemMemoryOnPOSIX() does not actually
 	// do anything on macOS. We need to find another way. See
-	// https://github.com/avast-tl/retdec/issues/379
+	// https://github.com/avast/retdec/issues/379
 	return limitSystemMemoryOnPOSIX(limit);
 }
 

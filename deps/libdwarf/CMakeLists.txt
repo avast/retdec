@@ -10,7 +10,7 @@ endif()
 set(LIBDWARF_INSTALL_DIR "${PROJECT_BINARY_DIR}/external/src/libdwarf-project-install")
 
 ExternalProject_Add(libdwarf-project
-	URL https://github.com/avast-tl/libdwarf/archive/85465d5e235cc2d2f90d04016d6aca1a452d0e73.zip
+	URL https://github.com/avast/libdwarf/archive/85465d5e235cc2d2f90d04016d6aca1a452d0e73.zip
 	URL_HASH SHA256=2864aa7b46529778476190e90359669eb35799ad273233c4df2203bec7db0738
 	DOWNLOAD_NAME libdwarf.zip
 	CMAKE_ARGS

@@ -28,7 +28,7 @@ endif()
 include(ExternalProject)
 
 ExternalProject_Add(llvm-project
-	URL https://github.com/avast-tl/llvm/archive/3d1e5d0bc1122a027e83f57c86851a027dd09112.zip
+	URL https://github.com/avast/llvm/archive/3d1e5d0bc1122a027e83f57c86851a027dd09112.zip
 	URL_HASH SHA256=069fdb818c75c1aecad1d24848fd0fe7359ca16871aae595a1389274ba92815d
 	DOWNLOAD_NAME llvm.zip
 	CMAKE_ARGS

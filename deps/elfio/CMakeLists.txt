@@ -8,7 +8,7 @@ if(CMAKE_CXX_COMPILER)
 endif()
 
 ExternalProject_Add(elfio-project
-	URL https://github.com/avast-tl/elfio/archive/f85f07390b756fee61408dfe0b04ae4fb86c5477.zip
+	URL https://github.com/avast/elfio/archive/f85f07390b756fee61408dfe0b04ae4fb86c5477.zip
 	URL_HASH SHA256=bc821b602cad22de1d671f0314b1171e4bca7ca1aabc85eb2d32945ed8dfcc66
 	DOWNLOAD_NAME elfio.zip
 	CMAKE_ARGS

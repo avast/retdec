@@ -31,7 +31,7 @@ else()
 	message(STATUS "YaraCpp: using remote YaraCpp revision.")
 
 	ExternalProject_Add(yaracpp-project
-		URL https://github.com/avast-tl/yaracpp/archive/f5d97cd746398a49b23e62b62994722597407543.zip
+		URL https://github.com/avast/yaracpp/archive/f5d97cd746398a49b23e62b62994722597407543.zip
 		URL_HASH SHA256=fece1814b0fac2888fc3356d414348f065c2d2eff86c27fee39e45b4a0b5e2c6
 		DOWNLOAD_NAME yaracpp.zip
 		CMAKE_ARGS

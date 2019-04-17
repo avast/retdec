@@ -8,5 +8,5 @@
 @mainpage
 
 This is an automatically generated API documentation for the
-<a href="https://github.com/avast-tl/retdec">RetDec project</a>.
+<a href="https://github.com/avast/retdec">RetDec project</a>.
 */

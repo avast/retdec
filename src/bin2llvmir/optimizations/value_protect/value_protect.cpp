@@ -566,7 +566,7 @@ llvm::Function* ValueProtect::createFunction(llvm::Type* t)
 
 /**
  * TODO: Only partial removal, see:
- * https://github.com/avast-tl/retdec/issues/301
+ * https://github.com/avast/retdec/issues/301
  */
 bool ValueProtect::unprotect()
 {
