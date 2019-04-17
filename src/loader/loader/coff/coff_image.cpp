@@ -8,6 +8,8 @@
 #include <sstream>
 #include <vector>
 
+#include <llvm/Object/COFF.h>
+
 #include "retdec/fileformat/fileformat.h"
 #include "retdec/loader/loader/coff/coff_image.h"
 #include "retdec/loader/utils/range.h"

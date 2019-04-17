@@ -6,6 +6,7 @@
 
 #include <sstream>
 
+#include <llvm/Object/COFF.h>
 #include <pelib/PeLibInc.h>
 
 #include "retdec/utils/array.h"
