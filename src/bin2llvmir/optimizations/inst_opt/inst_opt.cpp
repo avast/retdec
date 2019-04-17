@@ -4,9 +4,11 @@
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */
 
+#include <llvm/IR/Module.h>
 #include <llvm/IR/PatternMatch.h>
 
 #include "retdec/bin2llvmir/optimizations/inst_opt/inst_opt.h"
+#include "retdec/bin2llvmir/utils/debug.h"
 
 using namespace llvm;
 using namespace PatternMatch;
@@ -474,7 +476,67 @@ bool storeToBitcastPointer(llvm::Instruction* insn)
 			insn);
 	new StoreInst(conv, op, insn);
 
+	auto* bitcastI = dyn_cast<BitCastInst>(insn->getOperand(1));
+	auto* bitcastCE = dyn_cast<ConstantExpr>(insn->getOperand(1));
 	insn->eraseFromParent();
+	if (bitcastI && bitcastI->use_empty())
+	{
+		bitcastI->eraseFromParent();
+	}
+	if (bitcastCE && bitcastCE->use_empty())
+	{
+		bitcastCE->destroyConstant();
+	}
+
+	return true;
+}
+
+/**
+ * %1 = load float, float* bitcast (i32* @g to float*)
+ *   ==>
+ * %1 = load i32, i32* @g
+ * %2 = bitcast i32 %1 to float
+ *
+ * %1 = load i8*, i8** bitcast (i32* @g to i8**)
+ *   ==>
+ * %1 = load i32, i32* @g
+ * %2 = inttoptr i32 %1 to i8*
+ */
+bool loadFromBitcastPointer(llvm::Instruction* insn)
+{
+	Value* op;
+	if (!match(insn, m_Load(m_BitCast(m_Value(op))))
+			|| !op->getType()->getPointerElementType()->isFirstClassType()
+			|| op->getType()->getPointerElementType()->isAggregateType())
+	{
+		return false;
+	}
+
+	if (!BitCastInst::isBitOrNoopPointerCastable(
+			op->getType()->getPointerElementType(),
+			insn->getType(),
+			insn->getModule()->getDataLayout()))
+	{
+		return false;
+	}
+
+	auto* l = new LoadInst(op, "", insn);
+	l->setAlignment(cast<LoadInst>(insn)->getAlignment());
+	auto* conv = CastInst::CreateBitOrPointerCast(l, insn->getType(), "", insn);
+	insn->replaceAllUsesWith(conv);
+
+	auto* bitcastI = dyn_cast<BitCastInst>(insn->getOperand(0));
+	auto* bitcastCE = dyn_cast<ConstantExpr>(insn->getOperand(0));
+
+	insn->eraseFromParent();
+	if (bitcastI && bitcastI->use_empty())
+	{
+		bitcastI->eraseFromParent();
+	}
+	if (bitcastCE && bitcastCE->use_empty())
+	{
+		bitcastCE->destroyConstant();
+	}
 
 	return true;
 }
@@ -497,6 +559,7 @@ std::vector<bool (*)(llvm::Instruction*)> optimizations =
 		&addSequence,
 		&castSequenceWrapper,
 		&storeToBitcastPointer,
+		&loadFromBitcastPointer,
 };
 
 bool optimize(llvm::Instruction* insn)

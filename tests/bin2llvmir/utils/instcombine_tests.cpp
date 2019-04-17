@@ -267,6 +267,60 @@ TEST_F(InstCombinePassTests, undesirableStoreOptimizatonIsNotPerformed)
 	checkModuleAgainstExpectedIr(exp);
 }
 
+TEST_F(InstCombinePassTests, undesirableLoadOptimizatonIsNotPerformed_1)
+{
+	parseInput(R"(
+		@g = global i32 0
+
+		define float @func() {
+			%1 = load i32, i32* @g, align 4
+			%2 = bitcast i32 %1 to float
+			ret float %2
+		}
+	)");
+
+	runOnModule();
+
+	std::string exp = R"(
+		@g = global i32 0
+
+		define float @func() {
+			%1 = load i32, i32* @g, align 4
+			%2 = bitcast i32 %1 to float
+			ret float %2
+		}
+	)";
+	checkModuleAgainstExpectedIr(exp);
+}
+
+TEST_F(InstCombinePassTests, undesirableLoadOptimizatonIsNotPerformed_2)
+{
+	parseInput(R"(
+		@g = global i32 0
+
+		define i8 @func() {
+			%1 = load i32, i32* @g, align 4
+			%2 = inttoptr i32 %1 to i8*
+			%3 = load i8, i8* %2, align 1
+			ret i8 %3
+		}
+	)");
+
+	runOnModule();
+
+	std::string exp = R"(
+		@g = global i32 0
+
+		define i8 @func() {
+			%1 = load i32, i32* @g, align 4
+			%2 = inttoptr i32 %1 to i8*
+			%3 = load i8, i8* %2, align 1
+			ret i8 %3
+		}
+	)";
+	checkModuleAgainstExpectedIr(exp);
+}
+
 } // namespace tests
 } // namespace bin2llvmir
 } // namespace retdec
