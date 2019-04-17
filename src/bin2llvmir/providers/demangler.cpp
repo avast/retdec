@@ -122,7 +122,7 @@ Demangler *DemanglerProvider::addDemangler(
 	auto t = config->getConfig().tools;
 
 	std::unique_ptr<Demangler> d;
-	if (t.isGcc()) {
+	if (t.isGcc() || t.isMingw()) {
 		d = DemanglerFactory::getItaniumDemangler(llvmModule, config);
 	} else if (t.isMsvc()) {
 		d = DemanglerFactory::getMicrosoftDemangler(llvmModule, config);
