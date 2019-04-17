@@ -73,6 +73,11 @@ class Capstone2LlvmIrTranslatorArm64_impl :
 
 		void initializeRegistersParentMap();
 
+		llvm::Value* extractVectorValue(
+				llvm::IRBuilder<>& irb,
+				cs_arm64_op& op,
+				llvm::Value* val);
+
 		llvm::Value* generateOperandExtension(
 				llvm::IRBuilder<>& irb,
 				arm64_extender ext,
@@ -146,6 +151,9 @@ class Capstone2LlvmIrTranslatorArm64_impl :
 		* check there is need to generate conditional code and then generate given pseudo.
 		*/
 		void generatePseudoInstruction(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb);
+
+		using _translator_fnc = void (Capstone2LlvmIrTranslatorArm64_impl::*)(cs_insn* i, cs_arm64*, llvm::IRBuilder<>&);
+		bool ifVectorGeneratePseudo(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb, _translator_fnc = nullptr);
 		llvm::Value* generateFPBitCastToIntegerType(llvm::IRBuilder<>& irb, llvm::Value* val) const;
 		llvm::Value* generateIntBitCastToFP(llvm::IRBuilder<>& irb, llvm::Value* val) const;
 //
@@ -185,10 +193,7 @@ class Capstone2LlvmIrTranslatorArm64_impl :
 
 		static std::map<
 			std::size_t,
-			void (Capstone2LlvmIrTranslatorArm64_impl::*)(
-					cs_insn* i,
-					cs_arm64*,
-					llvm::IRBuilder<>&)> _i2fm;
+			_translator_fnc> _i2fm;
 //
 //==============================================================================
 // ARM64 instruction translation methods.

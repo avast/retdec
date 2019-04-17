@@ -249,6 +249,7 @@ void Capstone2LlvmIrTranslatorArm64_impl::generateRegisters()
 	createRegister(ARM64_REG_B13, _regLt);
 	createRegister(ARM64_REG_B14, _regLt);
 	createRegister(ARM64_REG_B15, _regLt);
+	createRegister(ARM64_REG_B16, _regLt);
 	createRegister(ARM64_REG_B17, _regLt);
 	createRegister(ARM64_REG_B18, _regLt);
 	createRegister(ARM64_REG_B19, _regLt);
@@ -307,14 +308,11 @@ void Capstone2LlvmIrTranslatorArm64_impl::generateRegisters()
 	// Stack pointer.
 	createRegister(ARM64_REG_SP, _regLt);
 
-	// Flags.
-	createRegister(ARM64_REG_CPSR_N, _regLt);
-	createRegister(ARM64_REG_CPSR_Z, _regLt);
-	createRegister(ARM64_REG_CPSR_C, _regLt);
-	createRegister(ARM64_REG_CPSR_V, _regLt);
-
-	// Program counter.
-	createRegister(ARM64_REG_PC, _regLt);
+	// Create system & flag registers in this loop
+	for (const auto& r : _reg2name)
+	{
+		createRegister(r.first, _regLt);
+	}
 
 }
 
@@ -371,6 +369,42 @@ llvm::Value* Capstone2LlvmIrTranslatorArm64_impl::getCurrentPc(cs_insn* i)
 			i->address + i->size);
 }
 
+llvm::Value* Capstone2LlvmIrTranslatorArm64_impl::extractVectorValue(
+		llvm::IRBuilder<>& irb,
+		cs_arm64_op& op,
+		llvm::Value* val)
+{
+	if (val->getType() != llvm::IntegerType::getInt128Ty(_module->getContext()))
+	{
+		return val;
+	}
+
+	// Vector element size specifier
+	switch(op.vess)
+	{
+		case ARM64_VESS_B:
+			val = irb.CreateLShr(val, llvm::ConstantInt::get(val->getType(), 8 * op.vector_index));
+			return irb.CreateZExtOrTrunc(val, llvm::IntegerType::getInt8Ty(_module->getContext()));
+		case ARM64_VESS_H:
+			val = irb.CreateLShr(val, llvm::ConstantInt::get(val->getType(), 16 * op.vector_index));
+			return irb.CreateZExtOrTrunc(val, llvm::IntegerType::getInt16Ty(_module->getContext()));
+		case ARM64_VESS_S:
+			val = irb.CreateLShr(val, llvm::ConstantInt::get(val->getType(), 32 * op.vector_index));
+			val = irb.CreateZExtOrTrunc(val, llvm::IntegerType::getInt32Ty(_module->getContext()));
+			return irb.CreateBitCast(val, llvm::Type::getFloatTy(_module->getContext()));
+		case ARM64_VESS_D:
+			val = irb.CreateLShr(val, llvm::ConstantInt::get(val->getType(), 64 * op.vector_index));
+			val = irb.CreateZExtOrTrunc(val, llvm::IntegerType::getInt64Ty(_module->getContext()));
+			return irb.CreateBitCast(val, llvm::Type::getDoubleTy(_module->getContext()));
+		case ARM64_VESS_INVALID:
+			return val;
+		default:
+			throw GenericError("Arm64: extractVectorValue(): Unknown VESS type");
+	}
+
+	return val;
+}
+
 llvm::Value* Capstone2LlvmIrTranslatorArm64_impl::generateOperandExtension(
 		llvm::IRBuilder<>& irb,
 		arm64_extender ext,
@@ -380,7 +414,6 @@ llvm::Value* Capstone2LlvmIrTranslatorArm64_impl::generateOperandExtension(
 	auto* i8  = llvm::IntegerType::getInt8Ty(_module->getContext());
 	auto* i16 = llvm::IntegerType::getInt16Ty(_module->getContext());
 	auto* i32 = llvm::IntegerType::getInt32Ty(_module->getContext());
-	auto* i64 = llvm::IntegerType::getInt64Ty(_module->getContext());
 
 	auto* ty  = destType ? destType : getDefaultType();
 
@@ -408,7 +441,7 @@ llvm::Value* Capstone2LlvmIrTranslatorArm64_impl::generateOperandExtension(
 		}
 		case ARM64_EXT_UXTX:
 		{
-			trunc = irb.CreateTrunc(val, i64);
+			trunc = irb.CreateTrunc(val, i32);
 			return irb.CreateZExt(trunc, ty);
 		}
 		case ARM64_EXT_SXTB:
@@ -428,7 +461,7 @@ llvm::Value* Capstone2LlvmIrTranslatorArm64_impl::generateOperandExtension(
 		}
 		case ARM64_EXT_SXTX:
 		{
-			trunc = irb.CreateTrunc(val, i64);
+			trunc = irb.CreateTrunc(val, i32);
 			return irb.CreateSExt(trunc, ty);
 		}
 		default:
@@ -572,33 +605,33 @@ llvm::Value* Capstone2LlvmIrTranslatorArm64_impl::generateShiftMsl(
 		llvm::Value *n,
 		bool updateFlags)
 {
-	assert(false && "Check implementation");
-	unsigned op0BitW = llvm::cast<llvm::IntegerType>(n->getType())->getBitWidth();
-	auto* doubleT = llvm::Type::getIntNTy(_module->getContext(), op0BitW*2);
+	return val;
+// 	unsigned op0BitW = llvm::cast<llvm::IntegerType>(n->getType())->getBitWidth();
+// 	auto* doubleT = llvm::Type::getIntNTy(_module->getContext(), op0BitW*2);
 
-	auto* cf = loadRegister(ARM64_REG_CPSR_C, irb);
-	cf = irb.CreateZExtOrTrunc(cf, n->getType());
+// 	auto* cf = loadRegister(ARM64_REG_CPSR_C, irb);
+// 	cf = irb.CreateZExtOrTrunc(cf, n->getType());
 
-	auto* srl = irb.CreateLShr(val, n);
-	auto* srlZext = irb.CreateZExt(srl, doubleT);
-	auto* op0Zext = irb.CreateZExt(val, doubleT);
-	auto* sub = irb.CreateSub(llvm::ConstantInt::get(n->getType(), op0BitW + 1), n);
-	auto* subZext = irb.CreateZExt(sub, doubleT);
-	auto* shl = irb.CreateShl(op0Zext, subZext);
-	auto* sub2 = irb.CreateSub(llvm::ConstantInt::get(n->getType(), op0BitW), n);
-	auto* shl2 = irb.CreateShl(cf, sub2);
-	auto* shl2Zext = irb.CreateZExt(shl2, doubleT);
-	auto* or1 = irb.CreateOr(shl, srlZext);
-	auto* or2 = irb.CreateOr(or1, shl2Zext);
-	auto* or2Trunc = irb.CreateTrunc(or2, val->getType());
+// 	auto* srl = irb.CreateLShr(val, n);
+// 	auto* srlZext = irb.CreateZExt(srl, doubleT);
+// 	auto* op0Zext = irb.CreateZExt(val, doubleT);
+// 	auto* sub = irb.CreateSub(llvm::ConstantInt::get(n->getType(), op0BitW + 1), n);
+// 	auto* subZext = irb.CreateZExt(sub, doubleT);
+// 	auto* shl = irb.CreateShl(op0Zext, subZext);
+// 	auto* sub2 = irb.CreateSub(llvm::ConstantInt::get(n->getType(), op0BitW), n);
+// 	auto* shl2 = irb.CreateShl(cf, sub2);
+// 	auto* shl2Zext = irb.CreateZExt(shl2, doubleT);
+// 	auto* or1 = irb.CreateOr(shl, srlZext);
+// 	auto* or2 = irb.CreateOr(or1, shl2Zext);
+// 	auto* or2Trunc = irb.CreateTrunc(or2, val->getType());
 
-	auto* sub3 = irb.CreateSub(n, llvm::ConstantInt::get(n->getType(), 1));
-	auto* shl3 = irb.CreateShl(llvm::ConstantInt::get(sub3->getType(), 1), sub3);
-	auto* and1 = irb.CreateAnd(shl3, val);
-	auto* cfIcmp = irb.CreateICmpNE(and1, llvm::ConstantInt::get(and1->getType(), 0));
-	storeRegister(ARM64_REG_CPSR_C, cfIcmp, irb);
+// 	auto* sub3 = irb.CreateSub(n, llvm::ConstantInt::get(n->getType(), 1));
+// 	auto* shl3 = irb.CreateShl(llvm::ConstantInt::get(sub3->getType(), 1), sub3);
+// 	auto* and1 = irb.CreateAnd(shl3, val);
+// 	auto* cfIcmp = irb.CreateICmpNE(and1, llvm::ConstantInt::get(and1->getType(), 0));
+// 	storeRegister(ARM64_REG_CPSR_C, cfIcmp, irb);
 
-	return or2Trunc;
+// 	return or2Trunc;
 }
 
 llvm::Value* Capstone2LlvmIrTranslatorArm64_impl::generateGetOperandMemAddr(
@@ -666,7 +699,21 @@ llvm::Value* Capstone2LlvmIrTranslatorArm64_impl::loadRegister(
 		return getCurrentPc(_insn);
 	}
 
-	auto* rt = getRegisterType(r);
+
+	llvm::Type* rt = nullptr;
+	try
+	{
+		rt = getRegisterType(r);
+	}
+	catch (GenericError &e)
+	{
+		// If we dont find the register type, try to recover from this returning at
+		// least the number of register
+		// Maybe solve this better
+		std::cerr << e.what() << std::endl;
+		return llvm::ConstantInt::get(dstType ? dstType : getDefaultType(), r);
+	}
+
 	if (r == ARM64_REG_XZR || r == ARM64_REG_WZR)
 	{
 		// Loads from XZR registers generate zero
@@ -683,7 +730,7 @@ llvm::Value* Capstone2LlvmIrTranslatorArm64_impl::loadRegister(
 	llvm::Value* ret = irb.CreateLoad(llvmReg);
 	if (r != pr)
 	{
-	    ret = irb.CreateTrunc(ret, rt);
+		ret = irb.CreateTrunc(ret, rt);
 	}
 
 	ret = generateTypeConversion(irb, ret, dstType, ct);
@@ -698,11 +745,15 @@ llvm::Value* Capstone2LlvmIrTranslatorArm64_impl::loadOp(
 {
 	switch (op.type)
 	{
+		case ARM64_OP_PSTATE:
 		case ARM64_OP_SYS:
+		case ARM64_OP_REG_MRS:
+		case ARM64_OP_REG_MSR:
 		case ARM64_OP_REG:
 		{
 			auto* val = loadRegister(op.reg, irb);
-			auto* ext = generateOperandExtension(irb, op.ext, val, ty);
+			auto* vec = extractVectorValue(irb, op, val);
+			auto* ext = generateOperandExtension(irb, op.ext, vec, ty);
 			return generateOperandShift(irb, op, ext);
 		}
 		case ARM64_OP_IMM:
@@ -734,15 +785,11 @@ llvm::Value* Capstone2LlvmIrTranslatorArm64_impl::loadOp(
 		}
 		case ARM64_OP_INVALID: 
 		case ARM64_OP_CIMM: 
-		case ARM64_OP_REG_MRS: 
-		case ARM64_OP_REG_MSR: 
-		case ARM64_OP_PSTATE: 
 		case ARM64_OP_PREFETCH: 
-		case ARM64_OP_BARRIER: 
+		case ARM64_OP_BARRIER:
 		default:
 		{
-			throw GenericError("Arm64: loadOp(): unhandled operand type");
-			return nullptr;
+			return llvm::UndefValue::get(ty ? ty : getDefaultType());
 		}
 	}
 }
@@ -776,7 +823,9 @@ llvm::Instruction* Capstone2LlvmIrTranslatorArm64_impl::storeRegister(
 	auto* llvmReg = getRegister(pr);
 	if (llvmReg == nullptr)
 	{
-		throw GenericError("storeRegister() unhandled reg.");
+		// Maybe return xchg eax, eax?
+		std::cerr << "storeRegister() unhandled reg." << std::endl;
+		return nullptr;
 	}
 
 	val = generateTypeConversion(irb, val, llvmReg->getValueType(), ct);
@@ -792,8 +841,11 @@ llvm::Instruction* Capstone2LlvmIrTranslatorArm64_impl::storeOp(
 {
 	switch (op.type)
 	{
+		case ARM64_OP_PSTATE:
 		case ARM64_OP_SYS:
 		case ARM64_OP_REG:
+		case ARM64_OP_REG_MRS:
+		case ARM64_OP_REG_MSR:
 		{
 			return storeRegister(op.reg, val, irb, ct);
 		}
@@ -807,11 +859,14 @@ llvm::Instruction* Capstone2LlvmIrTranslatorArm64_impl::storeOp(
 		}
 		case ARM64_OP_INVALID: 
 		case ARM64_OP_IMM: 
+		{
+			// This is here because some operands that are for example in post-index addressing mode
+			// will have the write flag set and generic functions try to write to IMM, which is not correct
+			// Maybe solve this better?
+			return nullptr;
+		}
 		case ARM64_OP_FP:  
 		case ARM64_OP_CIMM: 
-		case ARM64_OP_REG_MRS: 
-		case ARM64_OP_REG_MSR: 
-		case ARM64_OP_PSTATE: 
 		case ARM64_OP_PREFETCH: 
 		case ARM64_OP_BARRIER: 
 		default:
@@ -929,7 +984,10 @@ llvm::Value* Capstone2LlvmIrTranslatorArm64_impl::generateInsnConditionCode(
 			return irb.CreateOr(z, xor1);
 		}
 		case ARM64_CC_AL:
+			// Allways
 		case ARM64_CC_NV:
+			// The Condition code NV exists only to provide a valid disassembly of the 0b1111 encoding, otherwise its behavior is identical to AL.
+			return llvm::ConstantInt::get(llvm::IntegerType::getInt1Ty(_module->getContext()), 1);
 		case ARM64_CC_INVALID:
 		default:
 		{
@@ -977,7 +1035,7 @@ uint8_t Capstone2LlvmIrTranslatorArm64_impl::getOperandAccess(cs_arm64_op& op)
 
 bool Capstone2LlvmIrTranslatorArm64_impl::isCondIns(cs_arm64 * i) const
 {
-	return (i->cc == ARM64_CC_AL || i->cc == ARM64_CC_INVALID) ? false : true;
+	return (i->cc == ARM64_CC_INVALID) ? false : true;
 }
 
 llvm::Value* Capstone2LlvmIrTranslatorArm64_impl::generateIntBitCastToFP(llvm::IRBuilder<>& irb, llvm::Value* val) const
@@ -1040,6 +1098,34 @@ void Capstone2LlvmIrTranslatorArm64_impl::generatePseudoInstruction(cs_insn* i, 
 	}
 }
 
+bool Capstone2LlvmIrTranslatorArm64_impl::ifVectorGeneratePseudo(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb, _translator_fnc trans)
+{
+    bool pseudo = false;
+    for (std::uint8_t i = 0; i < ai->op_count; ++i)
+    {
+	    if (isVectorRegister(ai->operands[i]))
+	    {
+		    pseudo = true;
+		    break;
+	    }
+    }
+
+    if (pseudo)
+    {
+	    throwUnhandledInstructions(i);
+	    if (trans == nullptr)
+	    {
+		    generatePseudoInstruction(i, ai, irb);
+	    }
+	    else
+	    {
+		    (this->*trans)(i, ai, irb);
+	    }
+    }
+
+    return pseudo;
+}
+
 //
 //==============================================================================
 // ARM64 instruction translation methods.
@@ -1080,7 +1166,15 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateAdd(cs_insn* i, cs_arm64* ai,
 	EXPECT_IS_BINARY_OR_TERNARY(i, ai, irb);
 
 	std::tie(op1, op2) = loadOpBinaryOrTernaryOp1Op2(ai, irb);
-	op2 = irb.CreateZExtOrTrunc(op2, op1->getType());
+	op2 = generateTypeConversion(irb, op2, op1->getType(), eOpConv::ZEXT_TRUNC);
+
+	// For some reason it is possible to add two FP registers with integer add?
+	// This looks to be also true for sub
+	if (isFPRegister(ai->operands[0]) && i->id != ARM64_INS_CMN)
+	{
+		op1 = generateFPBitCastToIntegerType(irb, op1);
+		op2 = generateFPBitCastToIntegerType(irb, op2);
+	}
 
 	auto *val = irb.CreateAdd(op1, op2);
 	if (i->id != ARM64_INS_CMN)
@@ -1106,9 +1200,17 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateSub(cs_insn* i, cs_arm64* ai,
 	EXPECT_IS_BINARY_OR_TERNARY(i, ai, irb);
 
 	std::tie(op1, op2) = loadOpBinaryOrTernaryOp1Op2(ai, irb);
-	op2 = irb.CreateZExtOrTrunc(op2, op1->getType());
+	op2 = generateTypeConversion(irb, op2, op1->getType(), eOpConv::ZEXT_TRUNC);
 
-	auto *val = irb.CreateSub(op1, op2);
+	// For some reason it is possible to sub two FP registers with integer sub?
+	// This looks to be also true for add
+	if (isFPRegister(ai->operands[0]) && i->id != ARM64_INS_CMP)
+	{
+		op1 = generateFPBitCastToIntegerType(irb, op1);
+		op2 = generateFPBitCastToIntegerType(irb, op2);
+	}
+
+	auto* val = irb.CreateSub(op1, op2);
 	if (i->id != ARM64_INS_CMP)
 	{
 		storeOp(ai->operands[0], val, irb);
@@ -1133,9 +1235,18 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateNeg(cs_insn* i, cs_arm64* ai,
 	EXPECT_IS_BINARY(i, ai, irb);
 
 	auto* op2 = loadOpBinaryOp1(ai, irb);
-	llvm::Value* zero = llvm::ConstantInt::get(op2->getType(), 0);
 
-	auto* val = irb.CreateSub(zero, op2);
+	llvm::Value* val = nullptr;
+	if (isFPRegister(ai->operands[1]))
+	{
+		val = irb.CreateFNeg(op2);
+	}
+	else
+	{
+		llvm::Value* zero = llvm::ConstantInt::get(op2->getType(), 0);
+		val = irb.CreateSub(zero, op2);
+	}
+
 	storeOp(ai->operands[0], val, irb);
 
 	if (ai->update_flags)
@@ -1226,7 +1337,11 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateMov(cs_insn* i, cs_arm64* ai,
 	EXPECT_IS_BINARY(i, ai, irb);
 
 	op1 = loadOp(ai->operands[1], irb);
-	op1 = irb.CreateZExtOrTrunc(op1, getRegisterType(ai->operands[0].reg));
+	if (!op1->getType()->isFloatingPointTy())
+	{
+		op1 = irb.CreateZExtOrTrunc(op1, getRegisterType(ai->operands[0].reg));
+	}
+
 	if (i->id == ARM64_INS_MVN || i->id == ARM64_INS_MOVN)
 	{
 		op1 = generateValueNegate(irb, op1);
@@ -2197,6 +2312,11 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateMull(cs_insn* i, cs_arm64* ai
 {
 	EXPECT_IS_TERNARY(i, ai, irb);
 
+	if (ifVectorGeneratePseudo(i, ai, irb))
+	{
+	    return;
+	}
+
 	bool sext = true;
 	if (i->id == ARM64_INS_UMULL)
 	{
@@ -2319,6 +2439,11 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateMul(cs_insn* i, cs_arm64* ai,
 {
 	EXPECT_IS_EXPR(i, ai, irb, (3 <= ai->op_count && ai->op_count <= 4));
 
+	if (ifVectorGeneratePseudo(i, ai, irb))
+	{
+	    return;
+	}
+
 	auto* op1 = loadOp(ai->operands[1], irb);
 	auto* op2 = loadOp(ai->operands[2], irb);
 
@@ -2432,6 +2557,11 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateFAdd(cs_insn* i, cs_arm64* ai
 {
 	EXPECT_IS_TERNARY(i, ai, irb);
 
+	if (ifVectorGeneratePseudo(i, ai, irb))
+	{
+	    return;
+	}
+
 	op1 = loadOp(ai->operands[1], irb);
 	op2 = loadOp(ai->operands[2], irb);
 
@@ -2510,6 +2640,8 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateFCmp(cs_insn* i, cs_arm64* ai
 
 	op0 = loadOp(ai->operands[0], irb);
 	op1 = loadOp(ai->operands[1], irb);
+
+	op1 = generateTypeConversion(irb, op1, op0->getType(), eOpConv::FP_CAST);
 
 	// IF op1 == op2
 	auto* fcmpOeq = irb.CreateFCmpOEQ(op0, op1);
@@ -2627,6 +2759,11 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateFDiv(cs_insn* i, cs_arm64* ai
 {
 	EXPECT_IS_TERNARY(i, ai, irb);
 
+	if (ifVectorGeneratePseudo(i, ai, irb))
+	{
+	    return;
+	}
+
 	op1 = loadOp(ai->operands[1], irb);
 	op2 = loadOp(ai->operands[2], irb);
 
@@ -2661,6 +2798,11 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateFMinMax(cs_insn* i, cs_arm64*
 {
 	EXPECT_IS_TERNARY(i, ai, irb);
 
+	if (ifVectorGeneratePseudo(i, ai, irb))
+	{
+	    return;
+	}
+
 	op1 = loadOp(ai->operands[1], irb);
 	op2 = loadOp(ai->operands[2], irb);
 
@@ -2687,6 +2829,11 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateFMinMax(cs_insn* i, cs_arm64*
 void Capstone2LlvmIrTranslatorArm64_impl::translateFMinMaxNum(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb)
 {
 	EXPECT_IS_TERNARY(i, ai, irb);
+
+	if (ifVectorGeneratePseudo(i, ai, irb))
+	{
+	    return;
+	}
 
 	op1 = loadOp(ai->operands[1], irb);
 	op2 = loadOp(ai->operands[2], irb);
@@ -2716,6 +2863,13 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateFMov(cs_insn* i, cs_arm64* ai
 {
 	EXPECT_IS_BINARY(i, ai, irb);
 
+	if (isVectorRegister(ai->operands[0]) || isVectorRegister(ai->operands[1]))
+	{
+		// We want this behavior in cases when move destination is vector register
+		generatePseudoInstruction(i, ai, irb);
+		return;
+	}
+
 	op1 = loadOp(ai->operands[1], irb);
 	if (ai->operands[1].type == ARM64_OP_FP)
 	{
@@ -2736,6 +2890,11 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateMovi(cs_insn* i, cs_arm64* ai
 {
 	EXPECT_IS_BINARY(i, ai, irb);
 
+	if (ifVectorGeneratePseudo(i, ai, irb))
+	{
+	    return;
+	}
+
 	if (!isFPRegister(ai->operands[0]))
 	{
 		// We want this behavior in cases when move destination is vector register
@@ -2754,6 +2913,11 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateMovi(cs_insn* i, cs_arm64* ai
 void Capstone2LlvmIrTranslatorArm64_impl::translateFMul(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb)
 {
 	EXPECT_IS_TERNARY(i, ai, irb);
+
+	if (ifVectorGeneratePseudo(i, ai, irb))
+	{
+	    return;
+	}
 
 	op1 = loadOp(ai->operands[1], irb);
 	op2 = loadOp(ai->operands[2], irb);
@@ -2793,6 +2957,11 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateFSub(cs_insn* i, cs_arm64* ai
 {
 	EXPECT_IS_TERNARY(i, ai, irb);
 
+	if (ifVectorGeneratePseudo(i, ai, irb))
+	{
+	    return;
+	}
+
 	op1 = loadOp(ai->operands[1], irb);
 	op2 = loadOp(ai->operands[2], irb);
 
@@ -2806,6 +2975,11 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateFSub(cs_insn* i, cs_arm64* ai
 void Capstone2LlvmIrTranslatorArm64_impl::translateFUnaryOp(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb)
 {
 	EXPECT_IS_BINARY(i, ai, irb);
+
+	if (ifVectorGeneratePseudo(i, ai, irb))
+	{
+	    return;
+	}
 
 	op1 = loadOp(ai->operands[1], irb);
 
