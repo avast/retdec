@@ -28,8 +28,8 @@ endif()
 include(ExternalProject)
 
 ExternalProject_Add(llvm-project
-	URL https://github.com/avast-tl/llvm/archive/d8963f9f3ea7db217a15646a99eaf1b7df2ef00b.zip
-	URL_HASH SHA256=7941348697e0bcddce1767356833c72ab1601125149f3a953fdc5f6a21dbaf4d
+	URL https://github.com/avast-tl/llvm/archive/70cb53cbcdacc4d6d6261e9d523be9ac2f1efde5.zip
+	URL_HASH SHA256=fb0c39140f29278230a94a61cee491e0a3cef126e1d90392d1119978713e9105
 	DOWNLOAD_NAME llvm.zip
 	CMAKE_ARGS
 		# Force a release build (we don't need to debug LLVM).
