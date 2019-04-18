@@ -442,10 +442,12 @@ bool castSequenceWrapper(llvm::Instruction* insn)
 }
 
 /**
+ * \code{.ll}
  * store float %val, float* bitcast (i32* @gv to float*)
  *   ==>
  * %conv = bitcast float %val to i32
  * store i32 %conv, i32* @gv
+ * \endcode
  *
  * This is countering an undesirable LLVM instrcombine optimization
  * that is going the other way.
@@ -492,6 +494,7 @@ bool storeToBitcastPointer(llvm::Instruction* insn)
 }
 
 /**
+ * \code{.ll}
  * %1 = load float, float* bitcast (i32* @g to float*)
  *   ==>
  * %1 = load i32, i32* @g
@@ -501,6 +504,7 @@ bool storeToBitcastPointer(llvm::Instruction* insn)
  *   ==>
  * %1 = load i32, i32* @g
  * %2 = inttoptr i32 %1 to i8*
+ * \endcode
  */
 bool loadFromBitcastPointer(llvm::Instruction* insn)
 {
