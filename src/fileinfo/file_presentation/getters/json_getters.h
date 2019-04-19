@@ -7,6 +7,7 @@
 #ifndef FILEINFO_FILE_PRESENTATION_GETTERS_JSON_GETTERS_H
 #define FILEINFO_FILE_PRESENTATION_GETTERS_JSON_GETTERS_H
 
+#include "fileinfo/file_presentation/getters/iterative_getter/iterative_subtitle_getter/anomalies_json_getter.h"
 #include "fileinfo/file_presentation/getters/iterative_getter/iterative_subtitle_getter/certificate_table_json_getter.h"
 #include "fileinfo/file_presentation/getters/iterative_getter/iterative_subtitle_getter/data_directory_json_getter.h"
 #include "fileinfo/file_presentation/getters/iterative_getter/iterative_subtitle_getter/dynamic_sections_json_getter.h"

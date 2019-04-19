@@ -268,6 +268,7 @@ class FileFormat : public retdec::utils::ByteValueStorage, private retdec::utils
 		const std::vector<String>& getStrings() const;
 		const std::vector<ElfNoteSecSeg>& getElfNoteSecSegs() const;
 		const std::set<std::uint64_t>& getUnknownRelocations() const;
+		const std::vector<std::pair<std::string,std::string>> &getAnomalies() const;
 		/// @}
 
 		/// @name Address interpretation methods

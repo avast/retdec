@@ -1933,6 +1933,16 @@ const std::set<std::uint64_t> &FileFormat::getUnknownRelocations() const
 }
 
 /**
+ * Get all anomalies
+ * @return Reference to anomalies
+ */
+const std::vector<std::pair<std::string,std::string>> &FileFormat::getAnomalies() const
+{
+	return anomalies;
+}
+
+
+/**
  * Get integer (@a x bytes) located at provided address using the specified endian or default file endian
  * @param address Address to get integer from
  * @param x Number of bytes for conversion
