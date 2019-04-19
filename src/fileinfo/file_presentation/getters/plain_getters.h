@@ -7,6 +7,7 @@
 #ifndef FILEINFO_FILE_PRESENTATION_GETTERS_PLAIN_GETTERS_H
 #define FILEINFO_FILE_PRESENTATION_GETTERS_PLAIN_GETTERS_H
 
+#include "fileinfo/file_presentation/getters/iterative_getter/iterative_distribution_getter/anomalies_plain_getter.h"
 #include "fileinfo/file_presentation/getters/iterative_getter/iterative_distribution_getter/data_directory_plain_getter.h"
 #include "fileinfo/file_presentation/getters/iterative_getter/iterative_distribution_getter/dynamic_sections_plain_getter.h"
 #include "fileinfo/file_presentation/getters/iterative_getter/iterative_distribution_getter/elf_auxv_plain_getter.h"
