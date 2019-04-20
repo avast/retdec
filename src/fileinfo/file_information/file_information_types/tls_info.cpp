@@ -32,7 +32,7 @@ TlsInfo::~TlsInfo()
  */
 std::string TlsInfo::getRawDataStartAddrStr(std::ios_base &(* format)(std::ios_base &)) const
 {
-	std::uint32_t val;
+	std::uint64_t val;
 	return (tlsInfo && tlsInfo->getRawDataStartAddr(val)) ? getNumberAsString(val, format) : "";
 }
 
@@ -43,7 +43,7 @@ std::string TlsInfo::getRawDataStartAddrStr(std::ios_base &(* format)(std::ios_b
  */
 std::string TlsInfo::getRawDataEndAddrStr(std::ios_base &(* format)(std::ios_base &)) const
 {
-	std::uint32_t val;
+	std::uint64_t val;
 	return (tlsInfo && tlsInfo->getRawDataEndAddr(val)) ? getNumberAsString(val, format) : "";
 }
 
@@ -54,7 +54,7 @@ std::string TlsInfo::getRawDataEndAddrStr(std::ios_base &(* format)(std::ios_bas
  */
 std::string TlsInfo::getIndexAddrStr(std::ios_base &(* format)(std::ios_base &)) const
 {
-	std::uint32_t val;
+	std::uint64_t val;
 	return (tlsInfo && tlsInfo->getIndexAddr(val)) ? getNumberAsString(val, format) : "";
 }
 
@@ -65,7 +65,7 @@ std::string TlsInfo::getIndexAddrStr(std::ios_base &(* format)(std::ios_base &))
  */
 std::string TlsInfo::getCallBacksAddrStr(std::ios_base &(* format)(std::ios_base &)) const
 {
-	std::uint32_t val;
+	std::uint64_t val;
 	return (tlsInfo && tlsInfo->getCallBacksAddr(val)) ? getNumberAsString(val, format) : "";
 }
 

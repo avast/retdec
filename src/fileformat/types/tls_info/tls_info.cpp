@@ -35,7 +35,7 @@ TlsInfo::~TlsInfo()
  * @param res Variable to store the result to
  * @return @c true on success, @c false otherwise
  */
-bool TlsInfo::getRawDataStartAddr(std::uint32_t &res) const
+bool TlsInfo::getRawDataStartAddr(std::uint64_t &res) const
 {
 	if (!rawDataStartAddrValid)
 	{
@@ -50,7 +50,7 @@ bool TlsInfo::getRawDataStartAddr(std::uint32_t &res) const
  * @param res Variable to store the result to
  * @return @c true on success, @c false otherwise
  */
-bool TlsInfo::getRawDataEndAddr(std::uint32_t &res) const
+bool TlsInfo::getRawDataEndAddr(std::uint64_t &res) const
 {
 	if (!rawDataEndAddrValid)
 	{
@@ -65,7 +65,7 @@ bool TlsInfo::getRawDataEndAddr(std::uint32_t &res) const
  * @param res Variable to store the result to
  * @return @c true on success, @c false otherwise
  */
-bool TlsInfo::getIndexAddr(std::uint32_t &res) const
+bool TlsInfo::getIndexAddr(std::uint64_t &res) const
 {
 	if (!indexAddrValid)
 	{
@@ -80,7 +80,7 @@ bool TlsInfo::getIndexAddr(std::uint32_t &res) const
  * @param res Variable to store the result to
  * @return @c true on success, @c false otherwise
  */
-bool TlsInfo::getCallBacksAddr(std::uint32_t &res) const
+bool TlsInfo::getCallBacksAddr(std::uint64_t &res) const
 {
 	if (!callBacksAddrValid)
 	{
@@ -124,7 +124,7 @@ bool TlsInfo::getCharacteristics(std::uint32_t &res) const
  * Get addresses of callbacks
  * @return Addresses of callbacks
  */
-const std::vector<std::uint32_t> &TlsInfo::getCallBacks() const
+const std::vector<std::uint64_t> &TlsInfo::getCallBacks() const
 {
 	return callBacks;
 }
@@ -133,7 +133,7 @@ const std::vector<std::uint32_t> &TlsInfo::getCallBacks() const
  * Set start of raw data address
  * @param sAddr start of raw data address to set
  */
-void TlsInfo::setRawDataStartAddr(std::uint32_t sAddr)
+void TlsInfo::setRawDataStartAddr(std::uint64_t sAddr)
 {
 	rawDataStartAddr = sAddr;
 	rawDataStartAddrValid = true;
@@ -143,7 +143,7 @@ void TlsInfo::setRawDataStartAddr(std::uint32_t sAddr)
  * Set end of raw data address
  * @param eAddr end of raw data address to set
  */
-void TlsInfo::setRawDataEndAddr(std::uint32_t eAddr)
+void TlsInfo::setRawDataEndAddr(std::uint64_t eAddr)
 {
 	rawDataEndAddr = eAddr;
 	rawDataEndAddrValid = true;
@@ -153,7 +153,7 @@ void TlsInfo::setRawDataEndAddr(std::uint32_t eAddr)
  * Set address of index
  * @param iAddr address of index to set
  */
-void TlsInfo::setIndexAddr(std::uint32_t iAddr)
+void TlsInfo::setIndexAddr(std::uint64_t iAddr)
 {
 	indexAddr = iAddr;
 	indexAddrValid = true;
@@ -163,7 +163,7 @@ void TlsInfo::setIndexAddr(std::uint32_t iAddr)
  * Set address of callbacks
  * @param cbAddr address of callbacks to set
  */
-void TlsInfo::setCallBacksAddr(std::uint32_t cbAddr)
+void TlsInfo::setCallBacksAddr(std::uint64_t cbAddr)
 {
 	callBacksAddr = cbAddr;
 	callBacksAddrValid = true;
@@ -193,7 +193,7 @@ void TlsInfo::setCharacteristics(std::uint32_t chars)
  * Add callback
  * @param cb Callback to add
  */
-void TlsInfo::addCallBack(std::uint32_t cb)
+void TlsInfo::addCallBack(std::uint64_t cb)
 {
 	callBacks.push_back(cb);
 }
