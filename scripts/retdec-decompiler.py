@@ -1214,7 +1214,7 @@ class Decompiler:
                 CmdRunner.run_cmd(['dot', '-T' + self.args.graph_format, self.output_file + '.cg.dot', '-o',
                              self.output_file + '.cg.' + self.args.graph_format], print_run_msg=True)
             else:
-                print('Please install \'Graphviz\' to generate graphics.')
+                print('Please install \'Graphviz\' to generate graphics and ensure it is in PATH.')
 
         if self.args.backend_emit_cfg and self.args.backend_cfg_conversion == 'auto':
             if utils.tool_exists('dot'):
@@ -1222,7 +1222,7 @@ class Decompiler:
                     CmdRunner.run_cmd(['dot', '-T' + self.args.graph_format, cfg, '-o',
                                  os.path.splitext(cfg)[0] + '.' + self.args.graph_format], print_run_msg=True)
             else:
-                print('Please install \'Graphviz\' to generate graphics.')
+                print('Please install \'Graphviz\' to generate graphics and ensure it is in PATH.')
 
         # Remove trailing whitespace and the last redundant empty new line from the
         # generated output (if any). It is difficult to do this in the back-end, so we
