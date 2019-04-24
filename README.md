@@ -148,7 +148,7 @@ sudo dnf install gcc gcc-c++ cmake make git perl python3 bison flex autoconf aut
 On Arch Linux, the required packages can be installed with `pacman`:
 
 ```sh
-sudo pacman -S base-devel cmake git perl python3 bison flex autoconf automake libtool pkg-config m4 zlib upx doxygen graphviz
+sudo pacman --needed -S base-devel cmake git perl python3 bison flex autoconf automake libtool pkg-config m4 zlib upx doxygen graphviz
 ```
 
 #### Windows
