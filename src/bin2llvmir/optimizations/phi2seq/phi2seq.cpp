@@ -9,6 +9,7 @@
 #include <llvm/IR/Module.h>
 #include <llvm/Support/raw_ostream.h>
 #include <llvm/Transforms/Scalar.h>
+#include <llvm/Transforms/Utils.h>
 
 #include "retdec/bin2llvmir/optimizations/phi2seq/phi2seq.h"
 
@@ -188,7 +189,7 @@ BasicBlock &PHI2Seq::createPreBBAndSolveConnection(const VarDependAnalysis::
 */
 void PHI2Seq::updateBBTermInstr(BasicBlock &bbToUpdate, BasicBlock &oldSucc,
 		BasicBlock &newSucc) {
-	TerminatorInst *termInstr(bbToUpdate.getTerminator());
+	auto *termInstr(bbToUpdate.getTerminator());
 	for (unsigned j = 0, k = termInstr->getNumSuccessors(); j < k; ++j) {
 		if (termInstr->getSuccessor(j)->getName() == oldSucc.getName()) {
 			termInstr->setSuccessor(j, &newSucc);

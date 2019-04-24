@@ -47,19 +47,19 @@ CreateGetValueTestNegativeValue) {
 
 TEST_F(ConstFloatTests,
 GetSizeReturnsCorrectSizeOfUnderlyingTypeForFloatConstant) {
-	auto f = ConstFloat::create(llvm::APFloat(llvm::APFloat::IEEEsingle, "0.0"));
+	auto f = ConstFloat::create(llvm::APFloat(llvm::APFloat::IEEEsingle(), "0.0"));
 	EXPECT_EQ(32, f->getSize());
 }
 
 TEST_F(ConstFloatTests,
 GetSizeReturnsCorrectSizeOfUnderlyingTypeForDoubleConstant) {
-	auto f = ConstFloat::create(llvm::APFloat(llvm::APFloat::IEEEdouble, "0.0"));
+	auto f = ConstFloat::create(llvm::APFloat(llvm::APFloat::IEEEdouble(), "0.0"));
 	EXPECT_EQ(64, f->getSize());
 }
 
 TEST_F(ConstFloatTests,
 GetSizeReturnsCorrectSizeOfUnderlyingTypeForLongDoubleConstant) {
-	auto f = ConstFloat::create(llvm::APFloat(llvm::APFloat::x87DoubleExtended, "0.0"));
+	auto f = ConstFloat::create(llvm::APFloat(llvm::APFloat::x87DoubleExtended(), "0.0"));
 	EXPECT_EQ(80, f->getSize());
 }
 

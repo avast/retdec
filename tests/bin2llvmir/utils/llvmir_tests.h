@@ -7,6 +7,8 @@
 #ifndef TESTS_BIN2LLVMIR_UTILS_LLVMIR_TESTS_H
 #define TESTS_BIN2LLVMIR_UTILS_LLVMIR_TESTS_H
 
+#include <regex>
+
 #include <gtest/gtest.h>
 #include <llvm/IR/IRBuilder.h>
 #include <llvm/IR/LegacyPassManager.h>
@@ -117,12 +119,28 @@ class LlvmIrTests : public ::testing::Test
 		}
 
 		/**
+		 * Remove alignment of LLVM IR's load/store instructions.
+		 */
+		std::string removeAlignment(const std::string& code)
+		{
+			std::regex e(", align [0-9]+");
+			return std::regex_replace(code, e, "");;
+		}
+
+		/**
 		 * Check if the IR string from @c actual LLVM module is the same
 		 * as @c expected
 		 * LLVM IR string.
 		 * @param expected LLVM IR string.
+		 * @param removeComments Should the comments be removed before
+		 *                       comparison?
+		 * @param removeAlign Should the load/store alignment be removed before
+		 *                    comparison?
 		 */
-		void checkModuleAgainstExpectedIr(std::string& expected)
+		void checkModuleAgainstExpectedIr(
+				std::string& expected,
+				bool removeComments = true,
+				bool removeAlign = true)
 		{
 			llvm::LLVMContext expectedContext;
 			auto expectedModule = _parseInput(expected, expectedContext);
@@ -135,8 +153,17 @@ class LlvmIrTests : public ::testing::Test
 			ASSERT_FALSE(verifyModule(*module))
 				<< "actual module is not valid:\n" << actualStr;
 
-			expectedStr = retdec::utils::removeComments(expectedStr, ';');
-			actualStr = retdec::utils::removeComments(actualStr, ';');
+			if (removeComments)
+			{
+				expectedStr = retdec::utils::removeComments(expectedStr, ';');
+				actualStr = retdec::utils::removeComments(actualStr, ';');
+			}
+
+			if (removeAlign)
+			{
+				expectedStr = removeAlignment(expectedStr);
+				actualStr = removeAlignment(actualStr);
+			}
 
 			EXPECT_TRUE(
 				retdec::utils::removeWhitespace(expectedStr) ==

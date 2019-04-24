@@ -7,9 +7,20 @@
 #ifndef RETDEC_FILEFORMAT_FILE_FORMAT_COFF_COFF_FORMAT_H
 #define RETDEC_FILEFORMAT_FILE_FORMAT_COFF_COFF_FORMAT_H
 
-#include <llvm/Object/COFF.h>
+// Do not include <llvm/Object/COFF.h> in this header.
+// It defines many symbols that are also defined in winnt.h.
+// Including it here may cause name collisions later if this header
+// is included somewhere where winnt.h is also included.
 
 #include "retdec/fileformat/file_format/file_format.h"
+
+namespace llvm {
+namespace object {
+
+class COFFObjectFile;
+
+} // namespace object
+} // namespace llvm
 
 namespace retdec {
 namespace fileformat {

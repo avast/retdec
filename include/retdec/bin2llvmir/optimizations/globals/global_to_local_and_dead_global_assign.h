@@ -145,7 +145,6 @@ private:
 	void addFilteredRUse(llvm::Instruction &rUse);
 	void addFilteredLUses(const std::set<llvm::Instruction*> &lUses);
 	void addFilteredRUses(const std::set<llvm::Instruction*> &rUses);
-	bool wasSomethingOptimized();
 	FuncInfo &getFuncInfoFor(llvm::Function &func);
 
 	void printFuncInfos();

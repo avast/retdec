@@ -10,7 +10,6 @@
 #include <string>
 
 #include <llvm/Object/MachO.h>
-#include <llvm/Support/MachO.h>
 
 #include "retdec/fileformat/types/export_table/export.h"
 #include "retdec/fileformat/types/import_table/import.h"

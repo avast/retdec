@@ -7,8 +7,9 @@
 #include <fstream>
 #include <istream>
 
+#include <llvm/Object/MachO.h>
+#include <llvm/Object/MachOUniversal.h>
 #include <llvm/Support/Host.h>
-#include <llvm/Support/MachO.h>
 #include <llvm/Support/SwapByteOrder.h>
 
 #include "retdec/utils/string.h"

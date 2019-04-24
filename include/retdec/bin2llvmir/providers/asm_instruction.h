@@ -98,7 +98,7 @@ class AsmInstruction
 
 		bool instructionsCanBeErased();
 		bool eraseInstructions();
-		llvm::TerminatorInst* makeTerminal();
+		llvm::Instruction* makeTerminal();
 		llvm::BasicBlock* makeStart(const std::string& name = "");
 
 		llvm::BasicBlock* getBasicBlock() const;

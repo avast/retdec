@@ -23,7 +23,7 @@
 #include <llvm/Analysis/TargetLibraryInfo.h>
 #include <llvm/Analysis/TargetTransformInfo.h>
 #include <llvm/Bitcode/BitcodeWriterPass.h>
-#include <llvm/CodeGen/CommandFlags.h>
+#include <llvm/CodeGen/CommandFlags.inc>
 #include <llvm/IR/DataLayout.h>
 #include <llvm/IR/DebugInfo.h>
 #include <llvm/IR/IRPrintingPasses.h>
@@ -233,7 +233,7 @@ class ModulePassPrinter : public ModulePass
 			return false;
 		}
 
-		const char *getPassName() const override
+		llvm::StringRef getPassName() const override
 		{
 			return PassName.c_str();
 		}
@@ -255,7 +255,7 @@ static inline void addPassWithPossibleVerification(
 		Pass *P,
 		const std::string& phaseName = std::string())
 {
-	std::string pn = phaseName.empty() ? P->getPassName() : phaseName;
+	std::string pn = phaseName.empty() ? P->getPassName().str() : phaseName;
 
 	PM.add(new ModulePassPrinter(pn));
 	PM.add(P);
@@ -275,7 +275,7 @@ static inline void addPassWithoutVerification(
 		Pass *P,
 		const std::string& phaseName = std::string())
 {
-	std::string pn = phaseName.empty() ? P->getPassName() : phaseName;
+	std::string pn = phaseName.empty() ? P->getPassName().str() : phaseName;
 
 	PM.add(new ModulePassPrinter(pn));
 	PM.add(P);
@@ -355,9 +355,9 @@ std::unique_ptr<Module> createLlvmModule(LLVMContext& Context)
 /**
  * Create bitcode output file object.
  */
-std::unique_ptr<tool_output_file> createBitcodeOutputFile()
+std::unique_ptr<ToolOutputFile> createBitcodeOutputFile()
 {
-	std::unique_ptr<tool_output_file> Out;
+	std::unique_ptr<ToolOutputFile> Out;
 
 	if (OutputFilename.empty())
 	{
@@ -365,11 +365,11 @@ std::unique_ptr<tool_output_file> createBitcodeOutputFile()
 	}
 
 	std::error_code EC;
-	Out.reset(new tool_output_file(OutputFilename, EC, sys::fs::F_None));
+	Out.reset(new ToolOutputFile(OutputFilename, EC, sys::fs::F_None));
 	if (EC)
 	{
 		throw std::runtime_error(
-			"failed to create llvm::tool_output_file for .bc: " + EC.message()
+			"failed to create llvm::ToolOutputFile for .bc: " + EC.message()
 		);
 	}
 
@@ -379,9 +379,9 @@ std::unique_ptr<tool_output_file> createBitcodeOutputFile()
 /**
  * Create assembly output file object.
  */
-std::unique_ptr<tool_output_file> createAssemblyOutputFile()
+std::unique_ptr<ToolOutputFile> createAssemblyOutputFile()
 {
-	std::unique_ptr<tool_output_file> Out;
+	std::unique_ptr<ToolOutputFile> Out;
 
 	std::string out = OutputFilename;
 	if (out.empty())
@@ -397,11 +397,11 @@ std::unique_ptr<tool_output_file> createAssemblyOutputFile()
 	}
 
 	std::error_code EC;
-	Out.reset(new tool_output_file(asmOut, EC, sys::fs::F_None));
+	Out.reset(new ToolOutputFile(asmOut, EC, sys::fs::F_None));
 	if (EC)
 	{
 		throw std::runtime_error(
-			"failed to create llvm::tool_output_file for .dsm: " + EC.message()
+			"failed to create llvm::ToolOutputFile for .dsm: " + EC.message()
 		);
 	}
 
@@ -458,9 +458,9 @@ int _main(int argc, char **argv)
 	{
 		const PassInfo *PassInf = PassList[i];
 		Pass *P = nullptr;
-		if (PassInf->getTargetMachineCtor())
+		if (PassInf->getNormalCtor())
 		{
-			P = PassInf->getTargetMachineCtor()(nullptr);
+			P = PassInf->getNormalCtor()();
 		}
 		else if (PassInf->getNormalCtor())
 		{
@@ -469,7 +469,7 @@ int _main(int argc, char **argv)
 		else
 		{
 			throw std::runtime_error(std::string("cannot create pass: ")
-					+ PassInf->getPassName());
+					+ PassInf->getPassName().str());
 		}
 
 		if (P)
@@ -485,7 +485,7 @@ int _main(int argc, char **argv)
 	}
 
 	// Write bitcode to the output as the last step.
-	std::unique_ptr<tool_output_file> bcOut = createBitcodeOutputFile();
+	std::unique_ptr<ToolOutputFile> bcOut = createBitcodeOutputFile();
 	raw_ostream *bcOs = &bcOut->os();
 	bool PreserveBitcodeUseListOrder = false;
 	addPassWithoutVerification(
@@ -493,7 +493,7 @@ int _main(int argc, char **argv)
 			createBitcodeWriterPass(*bcOs, PreserveBitcodeUseListOrder));
 
 	// Write assembly to the output as the last step.
-	std::unique_ptr<tool_output_file> llOut = createAssemblyOutputFile();
+	std::unique_ptr<ToolOutputFile> llOut = createAssemblyOutputFile();
 	raw_ostream *llOs = &llOut->os();
 	bool PreserveAssemblyUseListOrder = false;
 	addPassWithoutVerification(

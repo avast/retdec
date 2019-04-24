@@ -4,6 +4,7 @@
 
 * New Feature: Added presentation of section and overlay entropy in `retdec-fileinfo` ([#502](https://github.com/avast/retdec/issues/502), [#507](https://github.com/avast/retdec/pull/507)).
 * New Feature: Added presentation of version info from PE file in `retdec-fileinfo` ([#408](https://github.com/avast/retdec/issues/408), [#519](https://github.com/avast/retdec/pull/519)).
+* Enhancement: Updated LLVM to version 8.0.0 ([#110](https://github.com/avast/retdec/issues/110)).
 * Enhancement: Updated YARA to version 3.9 ([#527](https://github.com/avast/retdec/pull/527)).
 
 # v3.3 (2019-03-18)

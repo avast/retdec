@@ -522,14 +522,14 @@ bool AsmInstruction::eraseInstructions()
 
 /**
  * Make this ASM instruction terminal -- last in BB, ending with
- * @c TerminatorInst.
+ * terminator @c Instruction.
  * If it already is terminal, nothing is modified and an existing terminator is
  * returned.
  * If it is not terminal yet, BB is split on the next ASM instruction, this
  * instruction ends with an unconditional branch to the new BB, and this branch
  * is returned.
  */
-llvm::TerminatorInst* AsmInstruction::makeTerminal()
+llvm::Instruction* AsmInstruction::makeTerminal()
 {
 	auto next = getNext();
 	if (next.isValid())
@@ -542,16 +542,16 @@ llvm::TerminatorInst* AsmInstruction::makeTerminal()
 			next.getBasicBlock()->splitBasicBlock(
 					next.getLlvmToAsmInstruction(),
 					names::generateBasicBlockName(next.getAddress()));
-			auto* b = dyn_cast_or_null<TerminatorInst>(back());
-			assert(b);
+			auto* b = dyn_cast_or_null<Instruction>(back());
+			assert(b->isTerminator());
 			return b;
 		}
 		// Next in different BB -> no need to split -> ends with terminator.
 		//
 		else
 		{
-			auto* b = dyn_cast_or_null<TerminatorInst>(back());
-			assert(b);
+			auto* b = dyn_cast_or_null<Instruction>(back());
+			assert(b->isTerminator());
 			return b;
 		}
 	}
@@ -559,8 +559,8 @@ llvm::TerminatorInst* AsmInstruction::makeTerminal()
 	//
 	else
 	{
-		auto* b = dyn_cast_or_null<TerminatorInst>(back());
-		assert(b);
+		auto* b = dyn_cast_or_null<Instruction>(back());
+		assert(b->isTerminator());
 		return b;
 	}
 }

@@ -65,7 +65,7 @@ Instruction * IdiomsLLVM::exchangeCompareEq(BasicBlock::iterator iter) const {
 		return nullptr;
 
 	// ~(A^B) --> icmp eq i1 A, B
-	if (! BinaryOperator::isNot(&val))
+	if (! match(&val, m_Not(m_Value())))
 		return nullptr;
 
 	op_xor = val.getOperand(0);

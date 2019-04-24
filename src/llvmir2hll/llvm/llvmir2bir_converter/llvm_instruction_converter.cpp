@@ -691,7 +691,7 @@ ShPtr<Expression> LLVMInstructionConverter::convertGEPIndices(ShPtr<Expression> 
 	auto indexOp = base;
 	for (auto i = start; i != end; ++i) {
 		auto index = getConverter()->convertValueToExpression(i.getOperand());
-		if (i->isStructTy()) {
+		if (i.isStruct()) {
 			auto indexInt = ucast<ConstInt>(index);
 			indexOp = StructIndexOpExpr::create(indexOp, indexInt);
 		} else {

@@ -83,7 +83,7 @@ void CFGNode::setLastBB(llvm::BasicBlock *bb) {
 /**
 * @brief Returns the terminator instruction of stored basic block in this node.
 */
-llvm::TerminatorInst *CFGNode::getTerm() const {
+llvm::Instruction *CFGNode::getTerm() const {
 	return lastBasicBlock->getTerminator();
 }
 

@@ -9,6 +9,7 @@
 #include <llvm/IR/InstIterator.h>
 
 #include "retdec/utils/string.h"
+#include "retdec/bin2llvmir/providers/abi/abi.h"
 #include "retdec/bin2llvmir/providers/asm_instruction.h"
 #include "retdec/bin2llvmir/providers/names.h"
 #include "retdec/bin2llvmir/utils/debug.h"
@@ -551,7 +552,7 @@ IrModifier::StackPair IrModifier::getStackVariable(
 		return {ret, csv};
 	}
 
-	ret = new AllocaInst(type, n);
+	ret = new AllocaInst(type, Abi::DEFAULT_ADDR_SPACE, n);
 
 	auto it = inst_begin(fnc);
 	assert(it != inst_end(fnc)); // -> create bb, insert alloca.
@@ -722,7 +723,11 @@ llvm::Value* IrModifier::changeObjectDeclarationType(
 
 	if (auto* alloca = dyn_cast<AllocaInst>(val))
 	{
-		auto* ret = new AllocaInst(toType, alloca->getName(), alloca);
+		auto* ret = new AllocaInst(
+				toType,
+				Abi::DEFAULT_ADDR_SPACE,
+				alloca->getName(),
+				alloca);
 		ret->takeName(alloca);
 		return ret;
 	}
@@ -1349,9 +1354,8 @@ llvm::Argument* IrModifier::modifyFunctionArgumentType(
 		args.push_back(&a == arg ? type : a.getType());
 	}
 	auto* nf = modifyFunction(f, f->getReturnType(), args).first;
-	auto& al = nf->getArgumentList();
 	std::size_t i = 0;
-	for (auto& a : al)
+	for (auto& a : nf->args())
 	{
 		if (i == arg->getArgNo())
 		{
@@ -1378,7 +1382,11 @@ llvm::AllocaInst* IrModifier::createAlloca(
 		return nullptr;
 	}
 
-	return new AllocaInst(ty, name, &fnc->getEntryBlock().front());
+	return new AllocaInst(
+			ty,
+			Abi::DEFAULT_ADDR_SPACE,
+			name,
+			&fnc->getEntryBlock().front());
 }
 
 /**

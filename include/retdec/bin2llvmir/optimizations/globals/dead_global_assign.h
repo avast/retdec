@@ -47,7 +47,7 @@ public:
 	virtual ~DeadGlobalAssign() override;
 
 	static const char *getPassArg();
-	virtual const char *getPassName() const override;
+	virtual llvm::StringRef getPassName() const override;
 
 public:
 	static char ID;

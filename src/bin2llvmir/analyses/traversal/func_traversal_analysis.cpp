@@ -4,6 +4,7 @@
 * @copyright (c) 2017 Avast Software, licensed under the MIT license
 */
 
+#include <llvm/Analysis/CallGraph.h>
 #include <llvm/ADT/SCCIterator.h>
 #include <llvm/Support/raw_ostream.h>
 

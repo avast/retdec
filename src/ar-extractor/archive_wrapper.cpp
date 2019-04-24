@@ -116,7 +116,7 @@ ArchiveWrapper::ArchiveWrapper(
 		return;
 	}
 
-	Error error;
+	Error error = Error::success();
 	archive = std::make_unique<Archive>(buffer.get()->getMemBufferRef(), error);
 	if (error) {
 		errorMessage = toString(std::move(error));
@@ -265,22 +265,22 @@ bool ArchiveWrapper::extract(
 	// Map for non-unique names - counts number of name occurrences.
 	std::map<std::string, std::size_t> nameMap;
 
-	Error error;
+	Error error = Error::success();
 	for (const auto &child : archive->children(error)) {
 		if (checkError(error, errorMessage)) {
 			return false;
 		}
 
 		// Try to get name.
-		const auto nameOrErr = child.getName();
-		std::string name = !nameOrErr ? "invalid_name" : fixName(*nameOrErr);
+		auto nameOrErr = child.getName();
+		std::string name = nameOrErr ? fixName(nameOrErr->str()) : "invalid_name";
 
 		// Increment name count and fix name if it is not unique.
 		if (++nameMap[name] != 1) {
 			name += "." + std::to_string(nameMap[name]);
 		}
 
-		const auto bufferOrErr = child.getBuffer();
+		auto bufferOrErr = child.getBuffer();
 		if (!bufferOrErr) {
 			errorMessage = "Could not get file buffer";
 			return false;
@@ -313,13 +313,13 @@ bool ArchiveWrapper::extractByName(
 	std::string &errorMessage,
 	const std::string &outputPath) const
 {
-	Error error;
+	Error error = Error::success();
 	for (const auto &child : archive->children(error)) {
 		if (checkError(error, errorMessage)) {
 			return false;
 		}
 
-		const auto nameOrErr = child.getName();
+		auto nameOrErr = child.getName();
 		if (!nameOrErr) {
 			// Could not get name.
 			continue;
@@ -331,7 +331,7 @@ bool ArchiveWrapper::extractByName(
 		}
 
 		// Get buffer and try to write to a file.
-		const auto bufferOrErr = child.getBuffer();
+		auto bufferOrErr = child.getBuffer();
 		if (!bufferOrErr) {
 			errorMessage = "Could not get file buffer";
 			return false;
@@ -367,7 +367,7 @@ bool ArchiveWrapper::extractByIndex(
 	std::string &errorMessage,
 	const std::string &outputPath) const
 {
-	Error error;
+	Error error = Error::success();
 	std::size_t counter = 0;
 	for (const auto &child : archive->children(error)) {
 		if (checkError(error, errorMessage)) {
@@ -380,7 +380,7 @@ bool ArchiveWrapper::extractByIndex(
 		}
 
 		// Get buffer and try to write to a file.
-		const auto bufferOrErr = child.getBuffer();
+		auto bufferOrErr = child.getBuffer();
 		if (!bufferOrErr) {
 			errorMessage = "Could not get file buffer";
 			return false;
@@ -389,8 +389,8 @@ bool ArchiveWrapper::extractByIndex(
 			std::string path;
 			if (outputPath.empty()) {
 				// No path given - use object name.
-				const auto nameOrErr = child.getName();
-				path = !nameOrErr ? "invalid_name" : fixName(nameOrErr->str());
+				auto nameOrErr = child.getName();
+				path = nameOrErr ? fixName(nameOrErr->str()) : "invalid_name";
 			}
 			else {
 				path = outputPath;
@@ -422,7 +422,7 @@ bool ArchiveWrapper::getNames(
 	std::vector<std::string> &result,
 	std::string &errorMessage) const
 {
-	Error error;
+	Error error = Error::success();
 	for (const auto &child : archive->children(error)) {
 		if (checkError(error, errorMessage)) {
 			return false;
@@ -452,7 +452,7 @@ bool ArchiveWrapper::getCount(
 	std::size_t &count,
 	std::string &errorMessage) const
 {
-	Error error;
+	Error error = Error::success();
 	count = 0; // Reset counter.
 	const auto &ar = archive;
 	for (auto i = ar->child_begin(error), e = ar->child_end(); i != e; ++i) {

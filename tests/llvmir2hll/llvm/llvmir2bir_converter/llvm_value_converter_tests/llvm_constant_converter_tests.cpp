@@ -27,7 +27,7 @@ class LLVMConstantConverterTests: public TestsWithLLVMValueConverter {};
 
 TEST_F(LLVMConstantConverterTests,
 NonZeroHalfConstantIsConvertedCorrectly) {
-	auto llvmAPFloatValue = llvm::APFloat(llvm::APFloat::IEEEhalf, "3.1415");
+	auto llvmAPFloatValue = llvm::APFloat(llvm::APFloat::IEEEhalf(), "3.1415");
 	auto llvmConstant = llvm::ConstantFP::get(context, llvmAPFloatValue);
 
 	auto birConstant = converter->convertConstantToExpression(llvmConstant);
@@ -39,7 +39,7 @@ NonZeroHalfConstantIsConvertedCorrectly) {
 
 TEST_F(LLVMConstantConverterTests,
 NonZeroFloatConstantIsConvertedCorrectly) {
-	auto llvmAPFloatValue = llvm::APFloat(llvm::APFloat::IEEEsingle, "3.1415");
+	auto llvmAPFloatValue = llvm::APFloat(llvm::APFloat::IEEEsingle(), "3.1415");
 	auto llvmConstant = llvm::ConstantFP::get(context, llvmAPFloatValue);
 
 	auto birConstant = converter->convertConstantToExpression(llvmConstant);
@@ -51,7 +51,7 @@ NonZeroFloatConstantIsConvertedCorrectly) {
 
 TEST_F(LLVMConstantConverterTests,
 NonZeroDoubleConstantIsConvertedCorrectly) {
-	auto llvmAPFloatValue = llvm::APFloat(llvm::APFloat::IEEEdouble, "3.1415");
+	auto llvmAPFloatValue = llvm::APFloat(llvm::APFloat::IEEEdouble(), "3.1415");
 	auto llvmConstant = llvm::ConstantFP::get(context, llvmAPFloatValue);
 
 	auto birConstant = converter->convertConstantToExpression(llvmConstant);
@@ -63,7 +63,7 @@ NonZeroDoubleConstantIsConvertedCorrectly) {
 
 TEST_F(LLVMConstantConverterTests,
 NonZeroX86_FP80ConstantIsConvertedCorrectly) {
-	auto llvmAPFloatValue = llvm::APFloat(llvm::APFloat::x87DoubleExtended, "3.1415");
+	auto llvmAPFloatValue = llvm::APFloat(llvm::APFloat::x87DoubleExtended(), "3.1415");
 	auto llvmConstant = llvm::ConstantFP::get(context, llvmAPFloatValue);
 
 	auto birConstant = converter->convertConstantToExpression(llvmConstant);
@@ -75,7 +75,7 @@ NonZeroX86_FP80ConstantIsConvertedCorrectly) {
 
 TEST_F(LLVMConstantConverterTests,
 NonZeroFP128ConstantIsConvertedCorrectly) {
-	auto llvmAPFloatValue = llvm::APFloat(llvm::APFloat::IEEEquad, "3.1415");
+	auto llvmAPFloatValue = llvm::APFloat(llvm::APFloat::IEEEquad(), "3.1415");
 	auto llvmConstant = llvm::ConstantFP::get(context, llvmAPFloatValue);
 
 	auto birConstant = converter->convertConstantToExpression(llvmConstant);
@@ -87,7 +87,7 @@ NonZeroFP128ConstantIsConvertedCorrectly) {
 
 TEST_F(LLVMConstantConverterTests,
 NonZeroPPC_FP128ConstantIsConvertedCorrectly) {
-	auto llvmAPFloatValue = llvm::APFloat(llvm::APFloat::PPCDoubleDouble, "3.1415");
+	auto llvmAPFloatValue = llvm::APFloat(llvm::APFloat::PPCDoubleDouble(), "3.1415");
 	auto llvmConstant = llvm::ConstantFP::get(context, llvmAPFloatValue);
 
 	auto birConstant = converter->convertConstantToExpression(llvmConstant);

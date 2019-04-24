@@ -32,7 +32,7 @@ class PHI2SeqTests: public LlvmIrTests
 
 TEST_F(PHI2SeqTests, OptimizerHasNonEmptyID)
 {
-	EXPECT_TRUE(pass.getPassName()) <<
+	EXPECT_FALSE(pass.getPassName().empty()) <<
 			"the optimizer should have a non-empty ID";
 }
 

@@ -36,7 +36,6 @@
 #include <llvm/Support/TargetSelect.h>
 #include <llvm/Support/ToolOutputFile.h>
 #include <llvm/Target/TargetMachine.h>
-#include <llvm/Target/TargetSubtargetInfo.h>
 
 #include "retdec/llvmir2hll/analysis/alias_analysis/alias_analysis.h"
 #include "retdec/llvmir2hll/analysis/alias_analysis/alias_analysis_factory.h"
@@ -318,7 +317,7 @@ class Decompiler: public ModulePass {
 public:
 	explicit Decompiler(raw_pwrite_stream &out);
 
-	virtual const char *getPassName() const override { return "Decompiler"; }
+	virtual llvm::StringRef getPassName() const override { return "Decompiler"; }
 	virtual bool runOnModule(Module &m) override;
 
 public:
@@ -1025,16 +1024,22 @@ public:
 		const TargetOptions &options):
 			TargetMachine(t, dataLayoutString, targetTriple, cpu, fs, options) {}
 
-	virtual bool addPassesToEmitFile(PassManagerBase &pm,
-		raw_pwrite_stream &out, CodeGenFileType fileType,
-		bool disableVerify, AnalysisID startBefore, AnalysisID startAfter,
-		AnalysisID stopAfter, MachineFunctionInitializer *mfInitializer) override;
+	virtual bool addPassesToEmitFile(
+			PassManagerBase &pm,
+			raw_pwrite_stream &out,
+			raw_pwrite_stream *,
+			CodeGenFileType fileType,
+			bool disableVerify = true,
+			MachineModuleInfo *MMI = nullptr) override;
 };
 
-bool DecompilerTargetMachine::addPassesToEmitFile(PassManagerBase &pm,
-		raw_pwrite_stream &out, CodeGenFileType fileType,
-		bool disableVerify, AnalysisID startBefore, AnalysisID startAfter,
-		AnalysisID stopAfter, MachineFunctionInitializer *mfInitializer) {
+bool DecompilerTargetMachine::addPassesToEmitFile(
+		PassManagerBase &pm,
+		raw_pwrite_stream &out,
+		raw_pwrite_stream *,
+		CodeGenFileType fileType,
+		bool disableVerify,
+		MachineModuleInfo *MMI) {
 	if (fileType != TargetMachine::CGFT_AssemblyFile) {
 		return true;
 	}
@@ -1057,10 +1062,10 @@ namespace {
 
 Target decompilerTarget;
 
-std::unique_ptr<tool_output_file> getOutputStream() {
+std::unique_ptr<ToolOutputFile> getOutputStream() {
 	// Open the file.
 	std::error_code ec;
-	auto out = std::make_unique<tool_output_file>(OutputFilename, ec, sys::fs::F_None);
+	auto out = std::make_unique<ToolOutputFile>(OutputFilename, ec, sys::fs::F_None);
 	if (ec) {
 		errs() << ec.message() << '\n';
 		return {};
@@ -1108,14 +1113,14 @@ int compileModule(char **argv, LLVMContext &context) {
 		raw_pwrite_stream &os(out->os());
 
 		bool disableVerify = false;
-		AnalysisID startBefore = nullptr;
-		AnalysisID startAfter = nullptr;
-		AnalysisID stopAfter = nullptr;
-		MachineFunctionInitializer *mfInitializer = nullptr;
 
 		// Ask the target to add back-end passes as necessary.
-		if (target->addPassesToEmitFile(pm, os, TargetMachine::CodeGenFileType(),
-				disableVerify, startBefore, startAfter, stopAfter, mfInitializer)) {
+		if (target->addPassesToEmitFile(
+				pm,
+				os,
+				nullptr,
+				TargetMachine::CodeGenFileType(),
+				disableVerify)) {
 			errs() << argv[0] << ": target does not support generation of this"
 					<< " file type!\n";
 			return 1;

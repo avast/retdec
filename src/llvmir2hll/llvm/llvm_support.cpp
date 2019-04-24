@@ -133,7 +133,7 @@ bool LLVMSupport::isInlinableInst(const llvm::Instruction *i) {
 	// It has to be an expression, and it has to be used exactly once. If it is
 	// dead, we generate it inline where it would go.
 	if (i->getType() == llvm::Type::getVoidTy(i->getContext()) || !i->hasOneUse() ||
-			llvm::isa<llvm::TerminatorInst>(i) || llvm::isa<llvm::CallInst>(i) ||
+			i->isTerminator() || llvm::isa<llvm::CallInst>(i) ||
 			llvm::isa<llvm::PHINode>(i) || llvm::isa<llvm::LoadInst>(i) ||
 			llvm::isa<llvm::VAArgInst>(i) || llvm::isa<llvm::InsertElementInst>(i) ||
 			llvm::isa<llvm::InsertValueInst>(i)) {
@@ -219,7 +219,7 @@ bool LLVMSupport::endsWithRetOrUnreachImpl(llvm::BasicBlock *bb, bool indirect){
 	}
 	endsWithRetOrUnreachBBSet.insert(bb);
 
-	llvm::TerminatorInst *t = bb->getTerminator();
+	llvm::Instruction *t = bb->getTerminator();
 	if (llvm::isa<llvm::ReturnInst>(t) || llvm::isa<llvm::UnreachableInst>(t)) {
 		return true;
 	}
