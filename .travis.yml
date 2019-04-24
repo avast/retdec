@@ -81,8 +81,6 @@ branches:
     - master
     # Version tags.
     - /^v?\d+\.\d+.*$/
-    # TODO: temp, remove
-    - llvm-8
 
 notifications:
   email:
