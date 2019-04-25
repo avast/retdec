@@ -251,6 +251,7 @@ You can pass the following additional parameters to `cmake`:
 * `-DRETDEC_COMPILE_YARA=OFF` to disable YARA rules compilation at installation step (enabled by default).
 * `-DCMAKE_BUILD_TYPE=Debug` to build with debugging information, which is useful during development. By default, the project is built in the `Release` mode. This has no effect on Windows, but the same thing can be achieved by running `cmake --build .` with the `--config Debug` parameter.
 * `-DCMAKE_PROGRAM_PATH=<path>` to use Perl at `<path>` (probably useful only on Windows).
+* `-D<dep>_LOCAL_DIR=<path>` where `<dep>` is from `{CAPSTONE, ELFIO, GOOGLETEST, JSONCPP, KEYSTONE, LIBDWARF, LLVM, PELIB, RAPIDJSON, TINYXML, YARACPP, YARAMOD}` (e.g. `-DCAPSTONE_LOCAL_DIR=<path>`), to use the local repository clone at `<path>` for RetDec dependency instead of downloading a fresh copy at build time. Multiple such options may be used at the same time. 
 
 ## Build in Docker
 
