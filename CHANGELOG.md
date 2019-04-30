@@ -4,6 +4,7 @@
 
 * New Feature: Added presentation of section and overlay entropy in `retdec-fileinfo` ([#502](https://github.com/avast/retdec/issues/502), [#507](https://github.com/avast/retdec/pull/507)).
 * New Feature: Added presentation of version info from PE file in `retdec-fileinfo` ([#408](https://github.com/avast/retdec/issues/408), [#519](https://github.com/avast/retdec/pull/519)).
+* Enhancement: Added macOS and Linux (Ubuntu, Debian, Fedora) release builds ([#526](https://github.com/avast/retdec/issues/526)).
 * Enhancement: Added support for using a local repository clone for RetDec external dependencies ([#279](https://github.com/avast/retdec/issues/279)).
 * Enhancement: Parallelized compilation of YARA rules during installation ([#540](https://github.com/avast/retdec/issues/540)).
 * Enhancement: Updated LLVM to version 8.0.0 ([#110](https://github.com/avast/retdec/issues/110)).
