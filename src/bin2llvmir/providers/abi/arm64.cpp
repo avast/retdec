@@ -1,7 +1,7 @@
 /**
  * @file src/bin2llvmir/providers/abi/arm64.cpp
  * @brief ABI information for ARM64.
- * @copyright (c) 2017 Avast Software, licensed under the MIT license
+ * @copyright (c) 2018 Avast Software, licensed under the MIT license
  */
 
 #include "retdec/bin2llvmir/providers/abi/arm64.h"

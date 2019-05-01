@@ -1,7 +1,7 @@
 /**
  * @file src/capstone2llvmir/arm64/arm64_init.cpp
  * @brief Initializations for ARM64 implementation of @c Capstone2LlvmIrTranslator.
- * @copyright (c) 2017 Avast Software, licensed under the MIT license
+ * @copyright (c) 2018 Avast Software, licensed under the MIT license
  */
 
 #include "capstone2llvmir/arm64/arm64_impl.h"
