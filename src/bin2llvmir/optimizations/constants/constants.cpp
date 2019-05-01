@@ -131,7 +131,7 @@ void ConstantsAnalysis::checkForGlobalInInstruction(
 	auto* maxC = max ? dyn_cast_or_null<ConstantInt>(max->value) : nullptr;
 	Instruction* userI = max ? dyn_cast_or_null<Instruction>(max->user) : nullptr;
 
-	if (max && maxC && maxC->getZExtValue() != 0)
+	if (max && maxC && maxC->getValue().getActiveBits() <= 64 && maxC->getZExtValue() != 0)
 	if (userI || max == &root)
 	if (_image->getImage()->hasDataOnAddress(maxC->getZExtValue()))
 	{
