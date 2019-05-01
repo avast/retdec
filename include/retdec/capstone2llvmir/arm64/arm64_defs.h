@@ -1,7 +1,7 @@
 /**
  * @file include/retdec/capstone2llvmir/arm64/arm64_defs.h
  * @brief Additional (on top of Capstone) definitions for ARM64 translator.
- * @copyright (c) 2017 Avast Software, licensed under the MIT license
+ * @copyright (c) 2018 Avast Software, licensed under the MIT license
  */
 
 #ifndef RETDEC_CAPSTONE2LLVMIR_ARM64_ARM64_DEFS_H

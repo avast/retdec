@@ -1,7 +1,7 @@
 /**
 * @file src/bin2llvmir/optimizations/decoder/arm64.cpp
 * @brief Decoding methods specific to ARM64 architecture.
-* @copyright (c) 2017 Avast Software, licensed under the MIT license
+* @copyright (c) 2018 Avast Software, licensed under the MIT license
 */
 
 #include "retdec/bin2llvmir/optimizations/decoder/decoder.h"
