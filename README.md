@@ -59,7 +59,7 @@ Currently, we support Windows (7 or later), Linux, macOS, and (experimentally) F
 
 ### Linux
 
-1. There are currently no pre-built packages for Linux. You will have to build and install the decompiler by yourself. The process is described below.
+1. Either download and unpack a [pre-built package](https://github.com/avast/retdec/releases), or build and install the decompiler by yourself (the process is described below).
 
 2. After you have built the decompiler, you will need to install the following packages via your distribution's package manager:
 
@@ -77,7 +77,7 @@ Currently, we support Windows (7 or later), Linux, macOS, and (experimentally) F
 
 ### macOS
 
-1. There are currently no pre-built packages for macOS. You will have to build and install the decompiler by yourself. The process is described below.
+1. Either download and unpack a [pre-built package](https://github.com/avast/retdec/releases), or build and install the decompiler by yourself (the process is described below).
 
 2. After you have built the decompiler, you will need to install the following packages:
 
