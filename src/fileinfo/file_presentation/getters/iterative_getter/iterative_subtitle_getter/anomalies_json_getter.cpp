@@ -23,8 +23,8 @@ AnomaliesJsonGetter::AnomaliesJsonGetter(FileInformation &fileInfo) : IterativeS
 	numberOfStructures = 1;
 	numberOfStoredRecords.push_back(fileInfo.getNumberOfAnomalies());
 	numberOfExtraElements.push_back(0);
-	title = "anomalies";
-	subtitle = "";
+	title = "anomalyTable";
+	subtitle = "anomalies";
 	commonHeaderElements.push_back("index");
 	commonHeaderElements.push_back("abbreviation");
 	commonHeaderElements.push_back("description");

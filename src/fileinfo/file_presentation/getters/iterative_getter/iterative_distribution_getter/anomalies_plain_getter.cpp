@@ -32,7 +32,7 @@ AnomaliesPlainGetter::AnomaliesPlainGetter(FileInformation &fileInfo) : Iterativ
 	numberOfStructures = 1;
 	numberOfStoredRecords.push_back(fileinfo.getNumberOfAnomalies());
 	numberOfExtraElements.push_back(0);
-	title = "Anomalies";
+	title = "Anomaly table";
 	distribution.insert(distribution.begin(), std::begin(distributionArray), std::end(distributionArray));
 	commonHeaderElements.insert(commonHeaderElements.begin(), std::begin(headerArray), std::end(headerArray));
 	commonHeaderDesc.insert(commonHeaderDesc.begin(), std::begin(headerDesc), std::end(headerDesc));
