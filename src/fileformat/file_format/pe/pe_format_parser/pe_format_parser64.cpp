@@ -278,6 +278,36 @@ const PeLib::ResourceNode* PeFormatParser64::getResourceTreeRoot() const
 	return peResourceTreeRoot(peFile->resDir());
 }
 
+unsigned long long PeFormatParser64::getTlsStartAddressOfRawData() const
+{
+	return peTlsStartAddressOfRawData(peFile->tlsDir());
+}
+
+unsigned long long PeFormatParser64::getTlsEndAddressOfRawData() const
+{
+	return peTlsEndAddressOfRawData(peFile->tlsDir());
+}
+
+unsigned long long PeFormatParser64::getTlsAddressOfIndex() const
+{
+	return peTlsAddressOfIndex(peFile->tlsDir());
+}
+
+unsigned long long PeFormatParser64::getTlsAddressOfCallBacks() const
+{
+	return peTlsAddressOfCallBacks(peFile->tlsDir());
+}
+
+unsigned long long PeFormatParser64::getTlsSizeOfZeroFill() const
+{
+	return peTlsSizeOfZeroFill(peFile->tlsDir());
+}
+
+unsigned long long PeFormatParser64::getTlsCharacteristics() const
+{
+	return peTlsCharacteristics(peFile->tlsDir());
+}
+
 std::unique_ptr<CLRHeader> PeFormatParser64::getClrHeader() const
 {
 	return peGetClrHeader(peFile->comDir());

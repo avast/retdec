@@ -213,6 +213,14 @@ void FileDetector::getCertificates()
 }
 
 /**
+ * Get information about TLS
+ */
+void FileDetector::getTlsInfo()
+{
+	fileInfo.setTlsInfo(fileParser->getTlsInfo());
+}
+
+/**
  * Get loader information
  */
 
@@ -328,6 +336,7 @@ void FileDetector::getAllInformation()
 		getHashes();
 		getAdditionalInfo();
 		getCertificates();
+		getTlsInfo();
 		getLoaderInfo();
 		getStrings();
 	}

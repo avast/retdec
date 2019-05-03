@@ -755,6 +755,7 @@ bool PlainPresentation::present()
 		presentIterativeDistribution(ResourcePlainGetter(fileinfo), explanatory);
 		presentIterativeDistribution(VersionInfoStringTablePlainGetter(fileinfo), explanatory);
 		presentIterativeDistribution(VersionInfoLanguageTablePlainGetter(fileinfo), explanatory);
+		presentIterativeDistribution(TlsInfoPlainGetter(fileinfo), explanatory);
 
 		presentNotes();
 

@@ -376,6 +376,38 @@ void JsonPresentation::presentCertificateAttributes(Json::Value &root) const
 }
 
 /**
+ * Present information about TLS
+ * @param root Parent node in output document
+ */
+void JsonPresentation::presentTlsInfo(Json::Value &root) const
+{
+	if (!fileinfo.isTlsUsed())
+	{
+		return;
+	}
+	
+	Value jTlsInfo;
+	presentIfNotEmpty("rawDataStartAddress", fileinfo.getTlsRawDataStartAddrStr(hexWithPrefix), jTlsInfo);
+	presentIfNotEmpty("rawDataEndAddress", fileinfo.getTlsRawDataEndAddrStr(hexWithPrefix), jTlsInfo);
+	presentIfNotEmpty("indexAddress", fileinfo.getTlsIndexAddrStr(hexWithPrefix), jTlsInfo);
+	presentIfNotEmpty("callbacksAddress", fileinfo.getTlsCallBacksAddrStr(hexWithPrefix), jTlsInfo);
+	presentIfNotEmpty("sizeOfZeroFill", fileinfo.getTlsZeroFillSizeStr(std::dec), jTlsInfo);
+	presentIfNotEmpty("characteristics", fileinfo.getTlsCharacteristicsStr(), jTlsInfo);
+
+	if (fileinfo.getTlsNumberOfCallBacks() > 0)
+	{
+		Value jCallbacks;
+		for (std::size_t i = 0; i < fileinfo.getTlsNumberOfCallBacks(); i++)
+		{
+			jCallbacks.append(fileinfo.getTlsCallBackAddrStr(i, hexWithPrefix));
+		}
+		jTlsInfo["callbacks"] = jCallbacks;
+	}
+
+	root["tlsInfo"] = jTlsInfo;
+}
+
+/**
  * Present information about .NET
  * @param root Parent node in output document
  */
@@ -855,6 +887,7 @@ bool JsonPresentation::present()
 		presentLoaderInfo(root);
 		presentPatterns(root);
 		presentCertificateAttributes(root);
+		presentTlsInfo(root);
 		presentDotnetInfo(root);
 		presentVisualBasicInfo(root);
 		presentVersionInfo(root);
