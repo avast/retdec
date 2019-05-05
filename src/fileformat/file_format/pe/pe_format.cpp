@@ -3492,6 +3492,7 @@ void PeFormat::scanForAnomalies()
 	scanForImportAnomalies();
 	scanForExportAnomalies();
 	scanForOptHeaderAnomalies();
+	scanForObsoleteCharacteristics();
 }
 
 /**
@@ -3533,6 +3534,7 @@ void PeFormat::scanForSectionAnomalies()
 			"Entry point is outside of mapped sections"));
 	}
 
+	std::vector<std::string> duplSections;
 	for (std::size_t i = 0; i < nSecs; i++)
 	{
 		auto sec = getPeSection(i);
@@ -3549,15 +3551,23 @@ void PeFormat::scanForSectionAnomalies()
 			// scan for unusual section names
 			if (std::find(usualSectionNames.begin(), usualSectionNames.end(), name) == usualSectionNames.end())
 			{
-				auto p = std::make_pair<std::string, std::string>("unusualSecName", "Unusual section name: " + name);
-				anomalies.emplace_back(std::move(p));
+				if (std::find(duplSections.begin(), duplSections.end(), name) == duplSections.end())
+				{
+					auto p = std::make_pair<std::string, std::string>("unusualSecName",
+						"Unusual section name: " + name);
+					anomalies.emplace_back(std::move(p));
+				}
 			}
 
 			// scan for packer section names
 			if (std::find(usualPackerSections.begin(), usualPackerSections.end(), name) != usualPackerSections.end())
 			{
-				auto p = std::make_pair<std::string, std::string>("packedSecName", "Packer section name: " + name);
-				anomalies.emplace_back(std::move(p));
+				if (std::find(duplSections.begin(), duplSections.end(), name) == duplSections.end())
+				{
+					auto p = std::make_pair<std::string, std::string>("packedSecName",
+						"Packer section name: " + name);
+					anomalies.emplace_back(std::move(p));
+				}
 			}
 
 			// scan for unexpected characteristics
@@ -3604,9 +3614,12 @@ void PeFormat::scanForSectionAnomalies()
 			const auto cmpName = cmpSec->getName();
 			if (!name.empty() && name == cmpName)
 			{
-				anomalies.emplace_back(std::make_pair<std::string, std::string>("duplSecNames",
-					"Sections " + numToStr(sec->getIndex()) + " and " + numToStr(cmpSec->getIndex()) +
-					" have the same name " + name));
+				if (std::find(duplSections.begin(), duplSections.end(), name) == duplSections.end())
+				{
+					anomalies.emplace_back(std::make_pair<std::string, std::string>("duplSecNames",
+						"Multiple sections with name " + name));
+					duplSections.push_back(name);
+				}
 			}
 
 			// scan for overlapping sections
@@ -3764,6 +3777,23 @@ void PeFormat::scanForOptHeaderAnomalies()
 	{
 		anomalies.emplace_back(std::make_pair<std::string, std::string>("sizeOfHeadersNotAligned",
 			"SizeOfHeaders is not aligned to multiple of FileAlignment"));
+	}
+}
+
+/**
+ * Scan for obsolete file characteristics
+ */
+void PeFormat::scanForObsoleteCharacteristics()
+{
+	std::size_t flags = getFileFlags();	
+	std::size_t obsoleteFlags = PELIB_IMAGE_FILE_LINE_NUMS_STRIPPED |
+		PELIB_IMAGE_FILE_LOCAL_SYMS_STRIPPED | PELIB_IMAGE_FILE_AGGRESSIVE_WS_TRIM |
+		PELIB_IMAGE_FILE_BYTES_REVERSED_LO | PELIB_IMAGE_FILE_BYTES_REVERSED_HI;
+
+	if (flags & obsoleteFlags)
+	{
+		anomalies.emplace_back(std::make_pair<std::string, std::string>("obsoleteCoffFlags",
+			"Coff file flags are obsolete"));
 	}
 }
 

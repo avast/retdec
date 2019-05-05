@@ -118,7 +118,8 @@ class PeFormat : public FileFormat
 		void scanForResourceAnomalies();
 		void scanForImportAnomalies();
 		void scanForExportAnomalies();
-		void scanForOptHeaderAnomalies();
+        void scanForOptHeaderAnomalies();
+		void scanForObsoleteCharacteristics();
 		/// @}
 	protected:
 		PeLib::PeFile *file;              ///< PeLib representation of PE file

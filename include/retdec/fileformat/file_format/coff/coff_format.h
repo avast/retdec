@@ -49,7 +49,6 @@ class CoffFormat : public FileFormat
 		void loadSymbols();
 		void loadRelocations();
 		bool getRelocationMask(unsigned relType, std::vector<std::uint8_t> &mask);
-		void scanForObsoleteCharacteristics();
 		/// @}
 	protected:
 		llvm::object::COFFObjectFile *file; ///< parser of input COFF file
@@ -95,11 +94,6 @@ class CoffFormat : public FileFormat
 		std::size_t getFileFlags() const;
 		std::size_t getTimeStamp() const;
 		bool is32BitArchitecture() const;
-		/// @}
-
-		/// @name Scanning methods
-		/// @{
-		void scanForAnomalies();
 		/// @}
 };
 
