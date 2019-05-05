@@ -86,7 +86,6 @@ class ParamReturn : public llvm::ModulePass
 		void analyzeWithDemangler(DataFlowEntry& de) const;
 		bool couldBeThisPtr(llvm::Value *operand) const;
 		void modifyWithDemangledData(DataFlowEntry& de, Demangler::FunctionPair &funcPair) const;
-		void useOnlyDemangledData(DataFlowEntry &de, Demangler::FunctionPair &funcPair, bool addThisPtr=false) const;
 
 	// Modification of functions in IR.
 	//

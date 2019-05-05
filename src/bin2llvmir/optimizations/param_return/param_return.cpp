@@ -258,7 +258,7 @@ void ParamReturn::collectExtraData(DataFlowEntry* dataflow) const
 		if (demFuncPair.first)
 		{
 			LOG << "LTI: " << _demangler->demangleToString(funcName) << std::endl;
-			useOnlyDemangledData(*dataflow, demFuncPair);
+			modifyWithDemangledData(*dataflow, demFuncPair);
 			return;
 		}
 	}
@@ -376,7 +376,7 @@ void ParamReturn::collectExtraData(DataFlowEntry* dataflow) const
 		if (demFuncPair.first)
 		{
 			LOG << "wrapper: " << _demangler->demangleToString(wf->getName()) << std::endl;
-			useOnlyDemangledData(*dataflow, demFuncPair);
+			modifyWithDemangledData(*dataflow, demFuncPair);
 			dataflow->setWrappedCall(wrappedCall);
 
 			return;
@@ -675,11 +675,13 @@ void ParamReturn::filterCalls()
 			filters[cc]->filterCalls(&de);
 		}
 
-		analyzeWithDemangler(de);
-
 		filters[cc]->estimateRetValue(&de);
 
 		modifyType(de);
+
+//		dumpInfo(de);
+
+		analyzeWithDemangler(de);
 	}
 }
 
@@ -689,9 +691,9 @@ void ParamReturn::analyzeWithDemangler(DataFlowEntry& de) const
 	{
 		auto funcName = de.getFunction()->getName().str();
 		auto demFuncPair = _demangler->getPairFunction(funcName);
-		if (demFuncPair.first)
+		if (demFuncPair.first)	// demangling successful
 		{
-			LOG << "ANalyze: " << _demangler->demangleToString(funcName) << std::endl;
+			LOG << "Analyze: " << _demangler->demangleToString(funcName) << std::endl;
 			modifyWithDemangledData(de, demFuncPair);
 		}
 	}
@@ -707,87 +709,118 @@ bool ParamReturn::couldBeThisPtr(llvm::Value *operand) const
  * @param de
  * @param funcPair
  */
+//void ParamReturn::modifyWithDemangledData(DataFlowEntry &de, Demangler::FunctionPair &funcPair) const
+//{
+//	if (de.callEntries().empty())
+//	{
+//		LOG << "empty call entries" << std::endl;
+////		useOnlyDemangledData(de, funcPair);
+//		return;
+//	}
+//	else
+//	{
+//		auto entry = de.callEntries()[0];
+//
+//		// demangling detected more arguments
+//		if (entry.args().size() < funcPair.second->getParameterCount())
+//		{
+//			LOG << "demangler detected more arguments" << std::endl;
+//			useOnlyDemangledData(de, funcPair);
+//			return;
+//		}
+//
+//		// both methods detected empty args
+//		if (entry.args().empty())
+//		{
+//			LOG << "both empty" << std::endl;
+//			return;
+//		}
+//
+//		// nullptr guard
+//		auto *firstValue = entry.args()[0];
+//		if (!firstValue)
+//		{
+//			LOG << "nullptr" << std::endl;
+//			return;
+//		}
+//
+//		// args and argStores order doesn't have to match
+//		for (auto &store : entry.argStores())
+//		{
+//			if (store->getPointerOperand() != firstValue)
+//			{
+//				continue;
+//			}
+//
+//			// is pointer to int
+//			if (auto *valueOp = dyn_cast<PtrToIntInst>(store->getValueOperand()))
+//			{
+//				if (couldBeThisPtr(valueOp->getPointerOperand())
+//					&& (entry.argStores().size() == funcPair.first->arg_size() + 1
+//						|| entry.argStores().size() == funcPair.first->arg_size()))
+//				{
+//					LOG << "could be this" << std::endl;
+//					bool addThisPtr = entry.argStores().size() == funcPair.first->arg_size() + 1;
+//					useOnlyDemangledData(de, funcPair, addThisPtr);
+//				}
+//			}
+//
+//			break;
+//		}
+//	}
+//}
+
 void ParamReturn::modifyWithDemangledData(DataFlowEntry &de, Demangler::FunctionPair &funcPair) const
-{
-	if (de.callEntries().empty())
-	{
-		LOG << "empty call entries" << std::endl;
-//		useOnlyDemangledData(de, funcPair);
-		return;
-	}
-	else
-	{
-		auto entry = de.callEntries()[0];
-
-		// demangling detected more arguments
-		if (entry.args().size() < funcPair.second->getParameterCount())
-		{
-			LOG << "demangler detected more arguments" << std::endl;
-			useOnlyDemangledData(de, funcPair);
-			return;
-		}
-
-		// both methods detected empty args
-		if (entry.args().empty())
-		{
-			LOG << "both empty" << std::endl;
-			return;
-		}
-
-		// nullptr guard
-		auto *firstValue = entry.args()[0];
-		if (!firstValue)
-		{
-			LOG << "nullptr" << std::endl;
-			return;
-		}
-
-		// args and argStores order doesn't have to match
-		for (auto &store : entry.argStores())
-		{
-			if (store->getPointerOperand() != firstValue)
-			{
-				continue;
-			}
-
-			// is pointer to int
-			if (auto *valueOp = dyn_cast<PtrToIntInst>(store->getValueOperand()))
-			{
-				if (couldBeThisPtr(valueOp->getPointerOperand())
-					&& (entry.argStores().size() == funcPair.first->arg_size() + 1
-						|| entry.argStores().size() == funcPair.first->arg_size()))
-				{
-					LOG << "could be this" << std::endl;
-					bool addThisPtr = entry.argStores().size() == funcPair.first->arg_size() + 1;
-					useOnlyDemangledData(de, funcPair, addThisPtr);
-				}
-			}
-
-			break;
-		}
-	}
-}
-
-void ParamReturn::useOnlyDemangledData(DataFlowEntry &de, Demangler::FunctionPair &funcPair, bool addThisPtr) const
 {
 	std::vector<Type*> argTypes;
 	std::vector<std::string> argNames;
 
-	if (addThisPtr)
-	{
-		auto ptrSize = static_cast<unsigned>(Abi::getWordSize(_module));
-		argTypes.emplace_back(PointerType::get(Type::getIntNTy(_module->getContext(), ptrSize), 0));
-		argNames.emplace_back("this");
+	auto detectedArgTypes = de.argTypes();
+	const size_t detectedParamCount = detectedArgTypes.size();
+	const size_t demanglerParamCount = funcPair.second->getParameterCount();
+
+	if (detectedParamCount > demanglerParamCount +2) {
+		return;		// param analysis was probably wrong, dont know what to do
 	}
 
-	for (auto& a : funcPair.first->args())
+	const auto ptrSize = static_cast<unsigned>(Abi::getWordSize(_module)) * 8;
+	bool retTypeSet = false;
+
+	if (detectedParamCount == demanglerParamCount+2)
 	{
-		if (a.getType()->isSized())
+		// add this param
+		argTypes.emplace_back(PointerType::get(Type::getIntNTy(_module->getContext(), ptrSize), 0));
+		argNames.emplace_back("this");
+
+		// add result param
+		argTypes.emplace_back(PointerType::get(Type::getIntNTy(_module->getContext(), ptrSize), 0));
+		argNames.emplace_back("result");
+
+		// set return type to result
+		de.setRetType(funcPair.first->getReturnType());
+		retTypeSet = true;
+	}
+
+	if (detectedParamCount == demanglerParamCount+1)
+	{
+		/*
+		 * Adds pointer to result or this, cant be sure based on information we have.
+		 * Parameter will be named "result"
+		 */
+		// TODO pozri ako vyzera ten detected parameter
+		argTypes.emplace_back(PointerType::get(Type::getIntNTy(_module->getContext(), ptrSize), 0));
+		argNames.emplace_back("result");
+	}
+
+	for (auto& demParam : funcPair.first->args())
+	{
+		if (demParam.getType()->isSized())
 		{
-			argTypes.push_back(a.getType());
-			argNames.push_back(a.getName());
+			argTypes.push_back(demParam.getType());
+			argNames.push_back(demParam.getName());
 		}
 	}
+
 	de.setArgTypes(
 		std::move(argTypes),
 		std::move(argNames));
@@ -796,12 +829,14 @@ void ParamReturn::useOnlyDemangledData(DataFlowEntry &de, Demangler::FunctionPai
 	{
 		de.setVariadic();
 	}
-	de.setRetType(funcPair.first->getReturnType());
+
+	if (retTypeSet)
+	{
+		de.setRetType(funcPair.first->getReturnType());
+	}
 
 	auto callConv = funcPair.second->getCallConvention();
 	de.setCallingConvention(toCallConv(callConv));
-
-	return;
 }
 
 Type* ParamReturn::extractType(Value* from) const
