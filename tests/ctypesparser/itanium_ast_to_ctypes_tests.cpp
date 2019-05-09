@@ -39,7 +39,6 @@ protected:
 		const std::string &mangled)
 	{
 		ctypesparser::CTypesParser::TypeWidths typeWidths {
-			{"void", 0},
 			{"bool", 1},
 			{"char", 8},
 			{"signed char", 8},
@@ -53,8 +52,6 @@ protected:
 			{"unsigned long", 64},
 			{"long long", 64},
 			{"unsigned long long", 64},
-			{"int64_t", 64},
-			{"uint64_t", 64},
 			{"float", 32},
 			{"double", 64},
 			{"long double", 96},
@@ -73,95 +70,333 @@ protected:
 	std::unique_ptr<retdec::ctypes::Module> module;
 };
 
-TEST_F(ItaniumCtypesTests, PointerTest)
+TEST_F(ItaniumCtypesTests, AddsFunctionsToModule)
 {
-	mangledToCtypes("_Z1fKP3Bar");	// f(Bar* const);
+	auto name1 = "_Z4foo1i";
+	auto name2 = "_Z4foo2i";
 
-	EXPECT_TRUE(module->hasFunctionWithName("_Z1fKP3Bar"));
+	auto func_returned1 = mangledToCtypes(name1);
+	auto func_returned2 = mangledToCtypes(name2);
 
-	auto func = module->getFunctionWithName("_Z1fKP3Bar");
-	EXPECT_TRUE(func->getReturnType()->isUnknown());
-	EXPECT_EQ(func->getParameterCount(), 1);
+	auto func_from_module1 = module->getFunctionWithName(name1);
+	auto func_from_module2 = module->getFunctionWithName(name2);
 
-	auto param = func->getParameter(1);
-	auto pointer = param.getType();
-	EXPECT_TRUE(pointer->isPointer());
-	auto pointee = std::static_pointer_cast<ctypes::PointerType>(pointer)->getPointedType();
-	EXPECT_TRUE(pointee->isNamed());
+	EXPECT_EQ(func_from_module1, func_returned1);
+	EXPECT_EQ(func_from_module2, func_returned2);
 }
 
-TEST_F(ItaniumCtypesTests, ReferenceTest)
+TEST_F(ItaniumCtypesTests, ReturnNullptrOnFailure)
 {
-	mangledToCtypes("_Z1fRi");	// f(int &);
+	auto func = mangledToCtypes("@foo$i");	// wrong scheme
+	EXPECT_EQ(func, nullptr);
+}
 
-	EXPECT_TRUE(module->hasFunctionWithName("_Z1fRi"));
+TEST_F(ItaniumCtypesTests, ReturnNullptrOnEmpty)
+{
+	auto func = mangledToCtypes("");
+	EXPECT_EQ(func, nullptr);
+}
 
-	auto func = module->getFunctionWithName("_Z1fRi");
-	EXPECT_TRUE(func->getReturnType()->isUnknown());
+TEST_F(ItaniumCtypesTests, DeclarationIsCorrectlySet)
+{
+	auto func = mangledToCtypes("_Z3fooi");
+	std::string declaration = func->getDeclaration();
+	EXPECT_EQ(declaration, "foo(int)");
+}
+
+TEST_F(ItaniumCtypesTests, ReturnTypeIsCorrectlySet)
+{
+	auto func = mangledToCtypes("_Z1fIiEdi");
+	EXPECT_TRUE(func->getReturnType()->isFloatingPoint());
+}
+
+TEST_F(ItaniumCtypesTests, UnknownReturnType)
+{
+	auto func = mangledToCtypes("_Z1fi");
+	auto returnType = func->getReturnType();
+	EXPECT_TRUE(returnType->isUnknown());
+}
+
+TEST_F(ItaniumCtypesTests, TypeParsingTest)
+{
+	auto func = mangledToCtypes("_Z1fstijlmxyahcfdebDsDiw");
+
+	EXPECT_EQ(func->getParameterCount(), 18);
+	std::shared_ptr<ctypes::Type> param;
+
+	param = func->getParameter(1).getType();
+	EXPECT_EQ(param->getName(), "short");
+	EXPECT_TRUE(std::static_pointer_cast<ctypes::IntegralType>(param)->isSigned());
+
+	param = func->getParameter(2).getType();
+	EXPECT_EQ(param->getName(), "unsigned short");
+	EXPECT_TRUE(std::static_pointer_cast<ctypes::IntegralType>(param)->isUnsigned());
+
+	param = func->getParameter(3).getType();
+	EXPECT_EQ(param->getName(), "int");
+	EXPECT_TRUE(std::static_pointer_cast<ctypes::IntegralType>(param)->isSigned());
+
+	param = func->getParameter(4).getType();
+	EXPECT_EQ(param->getName(), "unsigned int");
+	EXPECT_TRUE(std::static_pointer_cast<ctypes::IntegralType>(param)->isUnsigned());
+
+	param = func->getParameter(5).getType();
+	EXPECT_EQ(param->getName(), "long");
+	EXPECT_TRUE(std::static_pointer_cast<ctypes::IntegralType>(param)->isSigned());
+
+	param = func->getParameter(6).getType();
+	EXPECT_EQ(param->getName(), "unsigned long");
+	EXPECT_TRUE(std::static_pointer_cast<ctypes::IntegralType>(param)->isUnsigned());
+
+	param = func->getParameter(7).getType();
+	EXPECT_EQ(param->getName(), "long long");
+	EXPECT_TRUE(std::static_pointer_cast<ctypes::IntegralType>(param)->isSigned());
+
+	param = func->getParameter(8).getType();
+	EXPECT_EQ(param->getName(), "unsigned long long");
+	EXPECT_TRUE(std::static_pointer_cast<ctypes::IntegralType>(param)->isUnsigned());
+
+	param = func->getParameter(9).getType();
+	EXPECT_EQ(param->getName(), "signed char");
+	EXPECT_TRUE(std::static_pointer_cast<ctypes::IntegralType>(param)->isSigned());
+
+	param = func->getParameter(10).getType();
+	EXPECT_EQ(param->getName(), "unsigned char");
+	EXPECT_TRUE(std::static_pointer_cast<ctypes::IntegralType>(param)->isUnsigned());
+
+	param = func->getParameter(11).getType();
+	EXPECT_EQ(param->getName(), "char");
+	EXPECT_TRUE(std::static_pointer_cast<ctypes::IntegralType>(param)->isUnsigned());
+
+	param = func->getParameter(12).getType();
+	EXPECT_TRUE(param->isFloatingPoint());
+	EXPECT_EQ(param->getName(), "float");
+
+	param = func->getParameter(13).getType();
+	EXPECT_TRUE(param->isFloatingPoint());
+	EXPECT_EQ(param->getName(), "double");
+
+	param = func->getParameter(14).getType();
+	EXPECT_TRUE(param->isFloatingPoint());
+	EXPECT_EQ(param->getName(), "long double");
+
+	param = func->getParameter(15).getType();
+	EXPECT_EQ(param->getName(), "bool");
+
+	param = func->getParameter(16).getType();
+	EXPECT_EQ(param->getName(), "char16_t");
+	EXPECT_TRUE(std::static_pointer_cast<ctypes::IntegralType>(param)->isUnsigned());
+
+	param = func->getParameter(17).getType();
+	EXPECT_EQ(param->getName(), "char32_t");
+	EXPECT_TRUE(std::static_pointer_cast<ctypes::IntegralType>(param)->isUnsigned());
+
+	param = func->getParameter(18).getType();
+	EXPECT_EQ(param->getName(), "wchar_t");
+	EXPECT_TRUE(std::static_pointer_cast<ctypes::IntegralType>(param)->isUnsigned());
+}
+
+TEST_F(ItaniumCtypesTests, TypeWidthsOfTypesWithKnownWidth)
+{
+	std::shared_ptr<ctypes::Function> func;
+	func = mangledToCtypes("_Z1fn");
+	auto int128_type = func->getParameter(1).getType();
+	EXPECT_EQ(int128_type->getBitWidth(), 128);
+
+	func = mangledToCtypes("_Z1fo");
+	auto uint128_type = func->getParameter(1).getType();
+	EXPECT_EQ(uint128_type->getBitWidth(), 128);
+
+	func = mangledToCtypes("_Z1fDd");
+	auto dec64_type = func->getParameter(1).getType();
+	EXPECT_EQ(dec64_type->getBitWidth(), 64);
+
+	func = mangledToCtypes("_Z1fDe");
+	auto dec128_type = func->getParameter(1).getType();
+	EXPECT_EQ(dec128_type->getBitWidth(), 128);
+
+	func = mangledToCtypes("_Z1fDf");
+	auto dec32_type = func->getParameter(1).getType();
+	EXPECT_EQ(dec32_type->getBitWidth(), 32);
+
+	func = mangledToCtypes("_Z1fDh");
+	auto dec16_type = func->getParameter(1).getType();
+	EXPECT_EQ(dec16_type->getBitWidth(), 16);
+
+	func = mangledToCtypes("_Z1fDi");
+	auto char32_type = func->getParameter(1).getType();
+	EXPECT_EQ(char32_type->getBitWidth(), 32);
+
+	func = mangledToCtypes("_Z1fDs");
+	auto char16_type = func->getParameter(1).getType();
+	EXPECT_EQ(char16_type->getBitWidth(), 16);
+}
+
+TEST_F(ItaniumCtypesTests, TypeWidthsOfTypesInWidthMap)
+{
+	std::string mangled = "_Z3fooi";
+	unsigned int_width = 256;
+
+	ctypesparser::CTypesParser::TypeWidths typeWidths {{"int", int_width}};
+	ctypesparser::CTypesParser::TypeSignedness typeSignedness {};
+
+	auto func = demangler->demangleFunctionToCtypes(mangled, module, typeWidths, typeSignedness);
+
+	auto int_type = func->getParameter(1).getType();
+	EXPECT_EQ(int_type->getBitWidth(), int_width);
+}
+
+TEST_F(ItaniumCtypesTests, UseDefaultTypeWidthIfWidthIsNotKnown)
+{
+	std::string mangled = "_Z3fooi";
+	unsigned default_width = 256;
+
+	ctypesparser::CTypesParser::TypeWidths typeWidths {};
+	ctypesparser::CTypesParser::TypeSignedness typeSignedness {};
+
+	auto func = demangler->demangleFunctionToCtypes(mangled, module, typeWidths, typeSignedness, default_width);
+
+	auto int_type = func->getParameter(1).getType();
+	EXPECT_EQ(int_type->getBitWidth(), default_width);
+}
+
+TEST_F(ItaniumCtypesTests, SignednessOfTypesWithKnownSignedness)
+{
+	ctypesparser::CTypesParser::TypeWidths typeWidths {};
+	ctypesparser::CTypesParser::TypeSignedness typeSignedness {};
+
+	std::shared_ptr<ctypes::Function> func;
+
+	func = demangler->demangleFunctionToCtypes("_Z1fi", module, typeWidths, typeSignedness);
+	auto int_type = func->getParameter(1).getType();
+	EXPECT_TRUE(std::static_pointer_cast<ctypes::IntegralType>(int_type)->isSigned());
+
+	func = demangler->demangleFunctionToCtypes("_Z1fj", module, typeWidths, typeSignedness);
+	auto uint_type = func->getParameter(1).getType();
+	EXPECT_FALSE(std::static_pointer_cast<ctypes::IntegralType>(uint_type)->isSigned());
+
+	func = demangler->demangleFunctionToCtypes("_Z1fa", module, typeWidths, typeSignedness);
+	auto signed_char_type = func->getParameter(1).getType();
+	EXPECT_TRUE(std::static_pointer_cast<ctypes::IntegralType>(int_type)->isSigned());
+
+	func = demangler->demangleFunctionToCtypes("_Z1fh", module, typeWidths, typeSignedness);
+	auto unsigned_char_type = func->getParameter(1).getType();
+	EXPECT_FALSE(std::static_pointer_cast<ctypes::IntegralType>(unsigned_char_type)->isSigned());
+}
+
+TEST_F(ItaniumCtypesTests, SignednessOfTypesWithSignednessInMap)
+{
+	std::shared_ptr<ctypes::Function> func;
+	ctypesparser::CTypesParser::TypeWidths typeWidths {};
+
+	ctypesparser::CTypesParser::TypeSignedness typeSignednessSignedWchar
+		{
+			{"char", ctypes::IntegralType::Signess::Signed}
+		};
+	func = demangler->demangleFunctionToCtypes("_Z1fc", module, typeWidths, typeSignednessSignedWchar);
+	auto wcharTypeSigned = func->getParameter(1).getType();
+	EXPECT_TRUE(std::static_pointer_cast<ctypes::IntegralType>(wcharTypeSigned)->isSigned());
+
+	ctypesparser::CTypesParser::TypeSignedness typeSignednessUnsignedWchar
+		{
+			{"char", ctypes::IntegralType::Signess::Unsigned}
+		};
+	func = demangler->demangleFunctionToCtypes("_Z1fc", module, typeWidths, typeSignednessUnsignedWchar);
+	auto wcharTypeUnsigned = func->getParameter(1).getType();
+	EXPECT_TRUE(std::static_pointer_cast<ctypes::IntegralType>(wcharTypeUnsigned)->isSigned());
+}
+
+TEST_F(ItaniumCtypesTests, TemplateTypeAsParameter)
+{
+	auto func = mangledToCtypes(
+		"_Z3fooNSt12basic_stringIcSt11char_traitsIcESaIcEEE");
+
 	EXPECT_EQ(func->getParameterCount(), 1);
+	EXPECT_FALSE(func->isVarArg());
+	EXPECT_TRUE(func->getParameter(1).getType()->isNamed());
+	auto namedType = std::static_pointer_cast<ctypes::NamedType>(func->getParameter(1).getType());
+	EXPECT_EQ(namedType->getName(), "std::basic_string<char, std::char_traits<char>, std::allocator<char> >");
+}
 
-	auto param = func->getParameter(1);
-	auto reference = param.getType();
-	EXPECT_TRUE(reference->isReference());
-	auto pointee = std::static_pointer_cast<ctypes::ReferenceType>(reference)->getReferencedType();
-	EXPECT_TRUE(pointee->isIntegral());
+TEST_F(ItaniumCtypesTests, PointerTypeToNamedTypeParameterTest)
+{
+	auto func = mangledToCtypes("_Z1fKP3Bar");	// f(Bar * const);
+	auto paramType = func->getParameter(1).getType();
+	EXPECT_TRUE(paramType->isPointer());
+	auto pointeeType = std::static_pointer_cast<ctypes::PointerType>(paramType)->getPointedType();
+	EXPECT_TRUE(pointeeType->isNamed());
+}
+
+TEST_F(ItaniumCtypesTests, PointerTypeToIntTypeParameterTest)
+{
+	auto func = mangledToCtypes("_Z1fKPi");	// f(int * const);
+	auto paramType = func->getParameter(1).getType();
+	EXPECT_TRUE(paramType->isPointer());
+	auto pointeeType = std::static_pointer_cast<ctypes::PointerType>(paramType)->getPointedType();
+	EXPECT_TRUE(pointeeType->isIntegral());
+}
+
+TEST_F(ItaniumCtypesTests, LValueReferenceTest)
+{
+	auto func = mangledToCtypes("_Z1fRi");	// f(int &);
+	auto param = func->getParameter(1).getType();
+	EXPECT_TRUE(param->isReference());
+	EXPECT_TRUE(std::static_pointer_cast<ctypes::ReferenceType>(param)->getReferencedType()->isIntegral());
+}
+
+TEST_F(ItaniumCtypesTests, RValueReferenceTest)
+{
+	auto func = mangledToCtypes("_Z1fO3Bar");
+	auto param = func->getParameter(1).getType();
+	EXPECT_TRUE(param->isReference());
+	EXPECT_TRUE(std::static_pointer_cast<ctypes::ReferenceType>(param)->getReferencedType()->isNamed());
 }
 
 TEST_F(ItaniumCtypesTests, VarArgnessTest)
 {
-	mangledToCtypes("_Z3fooiz");
-
-	EXPECT_TRUE(module->hasFunctionWithName("_Z3fooiz"));
-
-	auto func = module->getFunctionWithName("_Z3fooiz");
-	EXPECT_TRUE(func->getReturnType()->isUnknown());
+	auto func = mangledToCtypes("_Z3fooiz");
 	EXPECT_EQ(func->getParameterCount(), 1);
 	auto param = func->getParameter(1);
 	EXPECT_TRUE(param.getType()->isIntegral());
-
 	EXPECT_TRUE(func->isVarArg());
 }
 
 TEST_F(ItaniumCtypesTests, ArrayTest)
 {
-	mangledToCtypes("_Z1fA37_A42_iPS_");
+	auto func = mangledToCtypes("_Z1fA37_A42_iPS_");
 
-	EXPECT_TRUE(module->hasFunctionWithName("_Z1fA37_A42_iPS_"));
-
-	auto func = module->getFunctionWithName("_Z1fA37_A42_iPS_");
-	EXPECT_TRUE(func->getReturnType()->isUnknown());
 	EXPECT_EQ(func->getParameterCount(), 2);
 
-	auto param = func->getParameter(1);
-	auto array1 = param.getType();
-	EXPECT_TRUE(array1->isArray());
-	auto type = std::static_pointer_cast<ctypes::ArrayType>(array1)->getElementType();
-
-	auto dimensions = std::static_pointer_cast<ctypes::ArrayType>(array1)->getDimensions();
+	auto paramType = func->getParameter(1).getType();
+	EXPECT_TRUE(paramType->isArray());
+	auto arrayType = std::static_pointer_cast<ctypes::ArrayType>(paramType)->getElementType();
+	auto dimensions = std::static_pointer_cast<ctypes::ArrayType>(paramType)->getDimensions();
 	ctypes::ArrayType::Dimensions expectedDimensions{37,42};
 	EXPECT_EQ(dimensions, expectedDimensions);
 }
 
 TEST_F(ItaniumCtypesTests, FunctionPointers)
 {
-	mangledToCtypes("_Z4foo1PFivE");
+	auto func = mangledToCtypes("_Z4foo1PFivE");
 
-	EXPECT_TRUE(module->hasFunctionWithName("_Z4foo1PFivE"));
-
-	auto func = module->getFunctionWithName("_Z4foo1PFivE");
-	EXPECT_TRUE(func->getReturnType()->isUnknown());
 	EXPECT_EQ(func->getParameterCount(), 1);
+	auto paramType = func->getParameter(1).getType();
+	EXPECT_TRUE(paramType->isPointer());
 
-	auto param = func->getParameter(1);
-	auto pointer = param.getType();
-	EXPECT_TRUE(pointer->isPointer());
-
-	auto pointee = std::static_pointer_cast<ctypes::PointerType>(pointer)->getPointedType();
+	auto pointee = std::static_pointer_cast<ctypes::PointerType>(paramType)->getPointedType();
 	EXPECT_TRUE(pointee->isFunction());
 
-	auto pointed_func = std::static_pointer_cast<ctypes::FunctionType>(pointee);
-	EXPECT_TRUE(pointed_func->getReturnType()->isIntegral());
-	EXPECT_EQ(pointed_func->getParameterCount(), 0);
+	auto pointedFuncType = std::static_pointer_cast<ctypes::FunctionType>(pointee);
+	EXPECT_TRUE(pointedFuncType->getReturnType()->isIntegral());
+	EXPECT_EQ(pointedFuncType->getParameterCount(), 0);
+}
+
+TEST_F(ItaniumCtypesTests, ConstTypesParsing)
+{
+	auto func = mangledToCtypes("_Z1fKi");
+	EXPECT_EQ(func->getParameterCount(), 1);
+	EXPECT_TRUE(func->getParameter(1).getType()->isIntegral());
+	EXPECT_EQ(func->getParameter(1).getType()->getName(), "int");
 }
 
 }	// namespace tests
