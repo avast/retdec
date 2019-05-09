@@ -38,7 +38,34 @@ protected:
 	std::shared_ptr<ctypes::Function> mangledToCtypes(
 		const std::string &mangled)
 	{
-		return demangler->demangleFunctionToCtypes(mangled, module);
+		ctypesparser::CTypesParser::TypeWidths typeWidths {
+			{"bool", 1},
+			{"char", 8},
+			{"signed char", 8},
+			{"unsigned char", 8},
+			{"wchar_t", 32},
+			{"short", 16},
+			{"unsigned short", 16},
+			{"int", 32},
+			{"unsigned int", 32},
+			{"long", 64},
+			{"unsigned long", 64},
+			{"long long", 64},
+			{"unsigned long long", 64},
+			{"int64_t", 64},
+			{"uint64_t", 64},
+			{"float", 32},
+			{"double", 64},
+			{"long double", 96},
+			{"ptr_t", 32}
+		};
+
+		ctypesparser::CTypesParser::TypeSignedness typeSignedness {
+			{"wchar_t", ctypes::IntegralType::Signess::Unsigned},
+			{"char", ctypes::IntegralType::Signess::Unsigned},
+		};
+
+		return demangler->demangleFunctionToCtypes(mangled, module, typeWidths, typeSignedness);
 	}
 
 	std::unique_ptr<retdec::demangler::Demangler> demangler;
@@ -60,13 +87,49 @@ TEST_F(BorlandCtypesTests, basic)
 	EXPECT_TRUE(func->getParameter(1).getType()->isIntegral());
 }
 
+TEST_F(BorlandCtypesTests, AddsFunctionsToModule)
+{
+	auto name1 = "@foo1$qi";
+	auto name2 = "@foo2@qi";
+
+	auto func_returned1 = mangledToCtypes(name1);
+	auto func_returned2 = mangledToCtypes(name2);
+
+	auto func_from_module1 = module->getFunctionWithName(name1);
+	auto func_from_module2 = module->getFunctionWithName(name2);
+
+	EXPECT_EQ(func_from_module1, func_returned1);
+	EXPECT_EQ(func_from_module2, func_returned2);
+}
+
+TEST_F(BorlandCtypesTests, ReturnNullptrOnFailure)
+{
+	auto func = mangledToCtypes("@foo$");
+	EXPECT_EQ(func, nullptr);
+}
+
+TEST_F(BorlandCtypesTests, ReturnNullptrOnEmpty)
+{
+	auto func = mangledToCtypes("");
+	EXPECT_EQ(func, nullptr);
+}
+
+TEST_F(BorlandCtypesTests, DeclarationIsCorrectlySet)
+{
+	auto func = mangledToCtypes("@foo$qi");
+	std::string declaration = func->getDeclaration();
+	EXPECT_EQ(declaration, "foo(int)");
+}
+
+TEST_F(BorlandCtypesTests, ReturnTypeIsCorrectlySet)
+{
+	auto func = mangledToCtypes("@%foo$i%$qi$d");
+	EXPECT_TRUE(func->getReturnType()->isFloatingPoint());
+}
+
 TEST_F(BorlandCtypesTests, TypeParsingTest)
 {
-	mangledToCtypes("@foo$qsusiuiluljujzcuccfdgoCsCib");
-
-	EXPECT_TRUE(module->hasFunctionWithName("@foo$qsusiuiluljujzcuccfdgoCsCib"));
-
-	auto func = module->getFunctionWithName("@foo$qsusiuiluljujzcuccfdgoCsCib");
+	auto func = mangledToCtypes("@foo$qsusiuiluljujzcuccfdgoCsCib");
 
 	EXPECT_EQ(func->getParameterCount(), 18);
 	std::shared_ptr<ctypes::Type> param;
@@ -142,23 +205,102 @@ TEST_F(BorlandCtypesTests, TypeParsingTest)
 	EXPECT_EQ(param->getName(), "wchar_t");
 	EXPECT_TRUE(std::static_pointer_cast<ctypes::IntegralType>(param)->isUnsigned());
 }
+//
+//TEST_F(BorlandCtypesTests, TypeWidthsOfTypesWithKnownWidth)
+//{
+//	// in borland scheme, only width of void is known with certainity
+//	auto func = mangledToCtypes("@foo$qv");
+//	auto void_type = func->getParameter(1).getType();
+//	EXPECT_EQ(void_type->getBitWidth(), 0);
+//}
+
+TEST_F(BorlandCtypesTests, TypeWidthsOfTypesInWidthMap)
+{
+	std::string mangled = "@foo$qi";
+	unsigned int_width = 256;
+
+	ctypesparser::CTypesParser::TypeWidths typeWidths {{"int", int_width}};
+	ctypesparser::CTypesParser::TypeSignedness typeSignedness {};
+
+	auto func = demangler->demangleFunctionToCtypes(mangled, module, typeWidths, typeSignedness);
+
+	auto int_type = func->getParameter(1).getType();
+	EXPECT_EQ(int_type->getBitWidth(), int_width);
+}
+
+TEST_F(BorlandCtypesTests, UseDefaultTypeWidthIfWidthIsNotKnown)
+{
+	std::string mangled = "@foo$qi";
+	unsigned default_width = 256;
+
+	ctypesparser::CTypesParser::TypeWidths typeWidths {};
+	ctypesparser::CTypesParser::TypeSignedness typeSignedness {};
+
+	auto func = demangler->demangleFunctionToCtypes(mangled, module, typeWidths, typeSignedness, default_width);
+
+	auto int_type = func->getParameter(1).getType();
+	EXPECT_EQ(int_type->getBitWidth(), default_width);
+}
+
+TEST_F(BorlandCtypesTests, SignednessOfTypesWithKnownSignedness)
+{
+	ctypesparser::CTypesParser::TypeWidths typeWidths {};
+	ctypesparser::CTypesParser::TypeSignedness typeSignedness {};
+
+	std::shared_ptr<ctypes::Function> func;
+
+	func = demangler->demangleFunctionToCtypes("@foo$qi", module, typeWidths, typeSignedness);
+	auto int_type = func->getParameter(1).getType();
+	EXPECT_TRUE(std::static_pointer_cast<ctypes::IntegralType>(int_type)->isSigned());
+
+	func = demangler->demangleFunctionToCtypes("@foo$qui", module, typeWidths, typeSignedness);
+	auto uint_type = func->getParameter(1).getType();
+	EXPECT_FALSE(std::static_pointer_cast<ctypes::IntegralType>(uint_type)->isSigned());
+
+	func = demangler->demangleFunctionToCtypes("@foo$qzc", module, typeWidths, typeSignedness);
+	auto signed_char_type = func->getParameter(1).getType();
+	EXPECT_TRUE(std::static_pointer_cast<ctypes::IntegralType>(int_type)->isSigned());
+
+	func = demangler->demangleFunctionToCtypes("@foo$quc", module, typeWidths, typeSignedness);
+	auto unsigned_char_type = func->getParameter(1).getType();
+	EXPECT_FALSE(std::static_pointer_cast<ctypes::IntegralType>(unsigned_char_type)->isSigned());
+}
+
+TEST_F(BorlandCtypesTests, SignednessOfTypesWithSignednessInMap)
+{
+	std::shared_ptr<ctypes::Function> func;
+	ctypesparser::CTypesParser::TypeWidths typeWidths {};
+
+	ctypesparser::CTypesParser::TypeSignedness typeSignednessSignedWchar
+	{
+		{"wchar_t", ctypes::IntegralType::Signess::Signed}
+	};
+	func = demangler->demangleFunctionToCtypes("@foo$qb", module, typeWidths, typeSignednessSignedWchar);
+	auto wcharTypeSigned = func->getParameter(1).getType();
+	EXPECT_TRUE(std::static_pointer_cast<ctypes::IntegralType>(wcharTypeSigned)->isSigned());
+
+	ctypesparser::CTypesParser::TypeSignedness typeSignednessUnsignedWchar
+	{
+		{"wchar_t", ctypes::IntegralType::Signess::Unsigned}
+	};
+	func = demangler->demangleFunctionToCtypes("@foo$qb", module, typeWidths, typeSignednessUnsignedWchar);
+	auto wcharTypeUnsigned = func->getParameter(1).getType();
+	EXPECT_TRUE(std::static_pointer_cast<ctypes::IntegralType>(wcharTypeUnsigned)->isSigned());
+
+}
 
 TEST_F(BorlandCtypesTests, templateTypes)
 {
-	mangledToCtypes(
+	auto func = mangledToCtypes(
 		"@%foo$60std@%basic_string$c19std@%char_traits$c%17std@%allocator$c%%%$q60std@%basic_string$c19std@%char_traits$c%17std@%allocator$c%%$v");
 
-	EXPECT_TRUE(module->hasFunctionWithName(
-		"@%foo$60std@%basic_string$c19std@%char_traits$c%17std@%allocator$c%%%$q60std@%basic_string$c19std@%char_traits$c%17std@%allocator$c%%$v"));
-
-	auto func =	module->getFunctionWithName(
-		"@%foo$60std@%basic_string$c19std@%char_traits$c%17std@%allocator$c%%%$q60std@%basic_string$c19std@%char_traits$c%17std@%allocator$c%%$v");
+	EXPECT_TRUE(func != nullptr);
+	EXPECT_EQ(static_cast<std::string>(func->getDeclaration()),
+		"void foo<std::basic_string<char, std::char_traits<char>, std::allocator<char>>>(std::basic_string<char, std::char_traits<char>, std::allocator<char>>)");
 	EXPECT_TRUE(func->getReturnType()->isVoid());
-
 	EXPECT_EQ(func->getParameterCount(), 1);
 	EXPECT_FALSE(func->isVarArg());
 	EXPECT_TRUE(func->getParameter(1).getType()->isNamed());
-
 	auto param = std::static_pointer_cast<ctypes::NamedType>(func->getParameter(1).getType());
 	EXPECT_EQ(param->getName(), "std::basic_string<char, std::char_traits<char>, std::allocator<char>>");
 }
@@ -167,47 +309,56 @@ TEST_F(BorlandCtypesTests, callConventionTest)
 {
 	std::shared_ptr<ctypes::Function> func;
 
-	mangledToCtypes("@foo1$qqrv");
-	EXPECT_TRUE(module->hasFunctionWithName("@foo1$qqrv"));
-	func = module->getFunctionWithName("@foo1$qqrv");
+	func = mangledToCtypes("@foo1$qqrv");
 	EXPECT_EQ(static_cast<std::string>(func->getCallConvention()), "fastcall");
 
-	mangledToCtypes("@foo2$qqsv");
-	EXPECT_TRUE(module->hasFunctionWithName("@foo2$qqsv"));
-	func = module->getFunctionWithName("@foo2$qqsv");
+	func = mangledToCtypes("@foo2$qqsv");
 	EXPECT_EQ(static_cast<std::string>(func->getCallConvention()), "stdcall");
 
-	mangledToCtypes("@foo3$qv");
-	EXPECT_TRUE(module->hasFunctionWithName("@foo3$qv"));
-	func = module->getFunctionWithName("@foo3$qv");
-	EXPECT_EQ(static_cast<std::string>(func->getCallConvention()), "unknown");
+	func = mangledToCtypes("@foo3$qv");
+	EXPECT_EQ(static_cast<std::string>(func->getCallConvention()), "cdecl");
+
+	func = mangledToCtypes("@foo3$Qv");
+	EXPECT_EQ(static_cast<std::string>(func->getCallConvention()), "pascal");
 }
 
-TEST_F(BorlandCtypesTests, PointerAndReferenceTest)
+TEST_F(BorlandCtypesTests, PointerTest)
 {
-	mangledToCtypes("@foo$qpv");
-	EXPECT_TRUE(module->hasFunctionWithName("@foo$qpv"));
-	auto func = module->getFunctionWithName("@foo$qpv");
+	auto func = mangledToCtypes("@foo$qpv");
 	auto param = func->getParameter(1).getType();
 	EXPECT_TRUE(param->isPointer());
 	EXPECT_TRUE(std::static_pointer_cast<ctypes::PointerType>(param)->getPointedType()->isVoid());
 }
 
-TEST_F(BorlandCtypesTests, VarArgness)
+TEST_F(BorlandCtypesTests, LValueReferenceTest)
 {
-	mangledToCtypes("@foo$qri");
-	EXPECT_TRUE(module->hasFunctionWithName("@foo$qri"));
-	auto func = module->getFunctionWithName("@foo$qri");
+	auto func = mangledToCtypes("@foo$qri");
 	auto param = func->getParameter(1).getType();
 	EXPECT_TRUE(param->isReference());
 	EXPECT_TRUE(std::static_pointer_cast<ctypes::ReferenceType>(param)->getReferencedType()->isIntegral());
 }
 
+TEST_F(BorlandCtypesTests, RValueReferenceTest)
+{
+	auto func = mangledToCtypes("@myFunc_ref2_$qh3Tmp");
+	auto param = func->getParameter(1).getType();
+	EXPECT_TRUE(param->isReference());
+	EXPECT_TRUE(std::static_pointer_cast<ctypes::ReferenceType>(param)->getReferencedType()->isNamed());
+}
+
+TEST_F(BorlandCtypesTests, VarArgness)
+{
+	auto func = mangledToCtypes("@foo$qie");
+	auto param = func->getParameter(1).getType();
+	EXPECT_TRUE(param->isIntegral());
+	EXPECT_TRUE(func->isVarArg());
+}
+
 TEST_F(BorlandCtypesTests, ArrayTypeTests)
 {
-	mangledToCtypes("@foo$qpa3$a6$i");
-	EXPECT_TRUE(module->hasFunctionWithName("@foo$qpa3$a6$i"));
-	auto func = module->getFunctionWithName("@foo$qpa3$a6$i");
+	// foo(int (*)[3][6])
+	auto func = mangledToCtypes("@foo$qpa3$a6$i");
+
 	auto param = func->getParameter(1).getType();
 	EXPECT_TRUE(param->isPointer());
 
@@ -226,9 +377,9 @@ TEST_F(BorlandCtypesTests, ArrayTypeTests)
 
 TEST_F(BorlandCtypesTests, FunctionPointerTests)
 {
-	mangledToCtypes("@foo$qpqv$i");
-	EXPECT_TRUE(module->hasFunctionWithName("@foo$qpqv$i"));
-	auto func = module->getFunctionWithName("@foo$qpqv$i");
+	// foo(int (*)(void))
+	auto func = mangledToCtypes("@foo$qpqv$i");
+
 	auto param = func->getParameter(1).getType();
 	EXPECT_TRUE(param->isPointer());
 
@@ -240,145 +391,17 @@ TEST_F(BorlandCtypesTests, FunctionPointerTests)
 
 	EXPECT_EQ(funcType->getParameterCount(), 1);
 	EXPECT_TRUE(funcType->getParameter(1)->isVoid());
-	EXPECT_EQ(static_cast<std::string>(funcType->getCallConvention()), "unknown");
+	EXPECT_EQ(static_cast<std::string>(funcType->getCallConvention()), "cdecl");
 	EXPECT_TRUE(funcType->getReturnType()->isIntegral());
 }
 
-TEST_F(BorlandCtypesTests, All)
+TEST_F(BorlandCtypesTests, ConstTypesParsing)
 {
-	mangledToCtypes("@myFunc_s_$q60std@%basic_string$c19std@%char_traits$c%17std@%allocator$c%%t1t1");
-	mangledToCtypes("@myFunc_empty_$qv");
-	mangledToCtypes("@myFunc_short_int_$qs");
-	mangledToCtypes("@myFunc_unsigned_short_int_$qus");
-	mangledToCtypes("@myFunc_int_$qi");
-	mangledToCtypes("@myFunc_unsigned_$qui");
-	mangledToCtypes("@myFunc_long_int_$ql");
-	mangledToCtypes("@myFunc_unsigned_long_int_$qul");
-	mangledToCtypes("@myFunc_long_long_int_$qj");
-	mangledToCtypes("@myFunc_unsigned_long_long_$quj");
-	mangledToCtypes("@myFunc_signed_char_$qzc");
-	mangledToCtypes("@myFunc_unsigned_char_$quc");
-	mangledToCtypes("@myFunc_char_$qc");
-	mangledToCtypes("@myFunc_float_$qf");
-	mangledToCtypes("@myFunc_double_$qd");
-	mangledToCtypes("@myFunc_long_double_$qg");
-	mangledToCtypes("@myFunc_bool_$qo");
-	mangledToCtypes("@foo3$qb");
-	mangledToCtypes("@myFunc_all_$qsusiuiluljujzcuccfdgoCsCib");
-	mangledToCtypes("@foo$qie");
-	mangledToCtypes("@myFunc_std__string_$q60std@%basic_string$c19std@%char_traits$c%17std@%allocator$c%%");
-	mangledToCtypes("@foo1$qpxi");
-	mangledToCtypes("@foo2$qxpi");
-	mangledToCtypes("@foo3$qxpxi");
-	mangledToCtypes("@foo4$qpwi");
-	mangledToCtypes("@foo5$qwpi");
-	mangledToCtypes("@foo6$qwpwi");
-	mangledToCtypes("@Bar@foo7$xqv");
-	mangledToCtypes("@Bar@foo8$wqv");
-	mangledToCtypes("@Bar@foo9$wxqv");
-	mangledToCtypes("@foo10$qpwxi");
-	mangledToCtypes("@foo11$qpwxi");
-	mangledToCtypes("@foonew$qrwxpi");
-	mangledToCtypes("@Bar@foo$wxqqrv");
-	mangledToCtypes("@foo$qrri");
-	mangledToCtypes("@myFunc_void1_$qpv");
-	mangledToCtypes("@myFunc_void2_$qppv");
-	mangledToCtypes("@myFunc_void123_$qpvppvpppv");
-	mangledToCtypes("@myFunc_ref1_$qr3Tmp");
-	mangledToCtypes("@myFunc_ref2_$qh3Tmp");
-	mangledToCtypes("@foo$qri");
-	mangledToCtypes("@Themes@TThemeServices@GetElementDetails$qqr25Themes@TThemedExplorerBar");
-	mangledToCtypes("@Webscriptas@TActiveScriptObjectFactory@CreateProducerObject$qqr32Webscript@TGlobalScriptVariables52System@%DelphiInterface$t24Httpprod@IScriptProducer%");
-	mangledToCtypes("@Webservexp@TWebServExp@GenerateNestedArraySchema$qqr51System@%DelphiInterface$t23Xmlschema@IXMLSchemaDef%56System@%DelphiInterface$t28Xmlschema@IXMLComplexTypeDef%px17Typinfo@TTypeInfori17System@WideString");
-	mangledToCtypes("@Dateutils@TryRecodeDateTime$qqrx16System@TDateTimexusxusxusxusxusxusxusr16System@TDateTime");
-	mangledToCtypes("@Dbxtablestorage@TDBXDelegateTableStorage@SetColumns$qqrx62System@%DynamicArray$tp36Dbxtablestorage@TDBXColumnDescriptor%");
-	mangledToCtypes("@Dbxmysqlmetadatareader@TDBXMySqlCustomMetaDataReader@TDBXMySql4IndexesCursor@FindStringSize$qqrxix62System@%DynamicArray$tp36Dbxtablestorage@TDBXColumnDescriptor%");
-	mangledToCtypes("@Idimap4@TIdImapSubSection@$bleq$qqrv");
-	mangledToCtypes("@Idimap4@TIdImapSubSection@bagr$qqriipa15$a89$a2$ipa10$a666$25System@%DynamicArray$tuc%");
-	mangledToCtypes("@Idimap4@TIdImapSubSection@$brrsh$qqrv");
-	mangledToCtypes("@Sqlexpr@TSQLConnection@SQLError$qqrus25Sqlexpr@TSQLExceptionTypex48System@%DelphiInterface$t20Dbxpress@ISQLCommand%");
-	mangledToCtypes("@foo$qpa3$i");
-	mangledToCtypes("@foo1$qpa3$a5$c");
-	mangledToCtypes("@foo3$qpxa3$i");
-	mangledToCtypes("@foo4$qpa3500$a6$i");
-	mangledToCtypes("@foo5$qra5$a5$i");
-	mangledToCtypes("@foo6$qrxa5$a5$i");
-	mangledToCtypes("@foo7$qha5$a5$i");
-	mangledToCtypes("@foo8$qxpxa5$i");
-	mangledToCtypes("@foo10$qpa3$d");
-	mangledToCtypes("@bar@foo$qi");
-	mangledToCtypes("@Baz@foo$qd");
-	mangledToCtypes("@bar@%f$i%$qii$d");
-	mangledToCtypes("@%myFunc_template_$i%$qi$d");
-	mangledToCtypes("@ns1@ns2@ns3@%foo3$c%$qv$v");
-	mangledToCtypes("@ns@ns1@ns2@%myFunc_template_$i%$qi$d");
-	mangledToCtypes("@ns@%myFunc_template_$i%$qi$d");
-	mangledToCtypes("@%foo2$20std@%basic_string$c%i%$qv$v");
-	mangledToCtypes("@%foo2$32std@%basic_string$c10%my_tmp$c%%i%$qv$v");
-	mangledToCtypes("@%foo2$60std@%basic_string$c19std@%char_traits$c%17std@%allocator$c%%i%$qv$v");
-	mangledToCtypes("@%foo$60std@%basic_string$c19std@%char_traits$c%17std@%allocator$c%%%$q60std@%basic_string$c19std@%char_traits$c%17std@%allocator$c%%$v");
-	mangledToCtypes("@%adder$iVii%$qiii$i");
-	mangledToCtypes("@foo$q10ns@Bar@Baz");
-	mangledToCtypes("@foo$qpx10ns@Bar@Baz");
-	mangledToCtypes("@%foo$60std@%basic_string$c19std@%char_traits$c%17std@%allocator$c%%t1%$qv$v");
-	mangledToCtypes("@Foo@$badd$q3Foo");
-	mangledToCtypes("@$badd$q3Bart1");
-	mangledToCtypes("@%$badd$3Bar%$q3Bart1$3Bar");
-	mangledToCtypes("@Foo@$bsub$q3Foo");
-	mangledToCtypes("@Foo@$basg$q3Foo");
-	mangledToCtypes("@Foo@$bmul$q3Foo");
-	mangledToCtypes("@Foo@$bdiv$q3Foo");
-	mangledToCtypes("@Foo@$bmod$q3Foo");
-	mangledToCtypes("@Foo@$binc$qi");
-	mangledToCtypes("@Foo@$bdec$qi");
-	mangledToCtypes("@Foo@$beql$q3Foo");
-	mangledToCtypes("@Foo@$bneq$q3Foo");
-	mangledToCtypes("@Foo@$bgtr$q3Foo");
-	mangledToCtypes("@Foo@$blss$q3Foo");
-	mangledToCtypes("@Foo@$bgeq$q3Foo");
-	mangledToCtypes("@Foo@$bleq$q3Foo");
-	mangledToCtypes("@Foo@$bnot$qv");
-	mangledToCtypes("@Foo@$bland$q3Foo");
-	mangledToCtypes("@Foo@$blor$q3Foo");
-	mangledToCtypes("@Foo@$bcmp$qv");
-	mangledToCtypes("@Foo@$band$q3Foo");
-	mangledToCtypes("@Foo@$bor$q3Foo");
-	mangledToCtypes("@Foo@$bxor$q3Foo");
-	mangledToCtypes("@Foo@$blsh$q3Foo");
-	mangledToCtypes("@Foo@$brsh$q3Foo");
-	mangledToCtypes("@Foo@$brplu$q3Foo");
-	mangledToCtypes("@Foo@$brmin$q3Foo");
-	mangledToCtypes("@Foo@$brmul$q3Foo");
-	mangledToCtypes("@Foo@$brdiv$q3Foo");
-	mangledToCtypes("@Foo@$brmod$q3Foo");
-	mangledToCtypes("@Foo@$brand$q3Foo");
-	mangledToCtypes("@Foo@$bror$q3Foo");
-	mangledToCtypes("@Foo@$brxor$q3Foo");
-	mangledToCtypes("@Foo@$brlsh$q3Foo");
-	mangledToCtypes("@Foo@$brrsh$q3Foo");
-	mangledToCtypes("@Foo@$bsubs$q3Foo");
-	mangledToCtypes("@Foo@$bind$qv");
-	mangledToCtypes("@Foo@$badr$qv");
-	mangledToCtypes("@Foo@$barow$qv");
-	mangledToCtypes("@Foo@$barwm$q3Foo");
-	mangledToCtypes("@Foo@$bcall$qi");
-	mangledToCtypes("@Foo@$bcoma$q3Foo");
-	mangledToCtypes("@Foo@$bnew$qui");
-	mangledToCtypes("@Foo@$bnwa$qui");
-	mangledToCtypes("@Foo@$bdele$qpv");
-	mangledToCtypes("@Foo@$bdla$qpv");
-	mangledToCtypes("@Foo@$o3Bar$qv");
-	mangledToCtypes("@Foo@$oi$qv");
-	mangledToCtypes("@foo1$qpqv$i");
-	mangledToCtypes("@foo2$qr$qv$i");
-	mangledToCtypes("@foo3$qh$qv$i");
-	mangledToCtypes("@foo4$qpqv$pqpi$v");
-	mangledToCtypes("@foo5$qpxpqv$vpxpqv$v");
-	mangledToCtypes("@foo6$qpqv$pqpi$pqpd$v");
-	mangledToCtypes("Lllvm$workaround$fake$stub$@%$badd$3Bar%$q3Bart1$3Bar");
-
+	auto func = mangledToCtypes("@foo1$qwxi");
+	EXPECT_EQ(func->getParameterCount(), 1);
+	EXPECT_TRUE(func->getParameter(1).getType()->isIntegral());
+	EXPECT_EQ(func->getParameter(1).getType()->getName(), "int");
 }
-
 
 }	// namespace tests
 }	// namespace ctypesparser
