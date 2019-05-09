@@ -661,8 +661,10 @@ CallConv BorlandASTParser::parseCallConv()
 		return CallConv::fastcall;
 	} else if (_mangled.consumeFront("qqs")) {
 		return CallConv::stdcall;
-	} else if (_mangled.consumeFront("q")) {    // most likely cdecl, pascal
-		return CallConv::unknown;
+	} else if (_mangled.consumeFront("q")) {
+		return CallConv::cdecl;
+	} else if (_mangled.consumeFront("Q")) {
+		return CallConv::pascal;
 	} else {
 		_status = Status::invalid_mangled_name;
 		return CallConv::unknown;

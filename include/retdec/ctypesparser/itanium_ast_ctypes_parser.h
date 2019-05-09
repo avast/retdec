@@ -40,7 +40,8 @@ public:
 		const llvm::itanium_demangle::Node *ast,
 		std::unique_ptr<ctypes::Module> &module,
 		const TypeWidths &typeWidths = {},
-		const TypeSignedness &typeSignedness = {});
+		const TypeSignedness &typeSignedness = {},
+		unsigned defaultBitWidth = 0);
 
 private:
 	std::shared_ptr<ctypes::Function> parseFunction(

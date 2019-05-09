@@ -54,14 +54,16 @@ std::shared_ptr<ctypes::Function> MsToCtypesParser::parseAsFunction(
 	const std::string &mangledName,
 	llvm::ms_demangle::SymbolNode *ast,
 	std::unique_ptr<ctypes::Module> &module,
-	const retdec::ctypesparser::CTypesParser::TypeWidths &typeWidths,
-	const retdec::ctypesparser::CTypesParser::TypeSignedness &typeSignedness)
+	const CTypesParser::TypeWidths &typeWidths,
+	const CTypesParser::TypeSignedness &typeSignedness,
+	unsigned defaultBitWidth)
 {
 	assert(ast && "Ast cannot be null");
 
-	context = module->getContext();
+	this->context = module->getContext();
 	this->typeWidths = typeWidths;
 	this->typeSignedness = typeSignedness;
+	this->defaultBitWidth = defaultBitWidth;
 
 	if (ast->kind() == Kind::FunctionSymbol) {
 		auto func = parseFunction(mangledName, static_cast<llvm::ms_demangle::FunctionSymbolNode *>(ast));

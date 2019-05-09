@@ -11,11 +11,13 @@ public:
 	AstToCtypesParser () = default;
 
 protected:
-	ctypes::IntegralType::Signess toSigness(bool isUnsigned);
+	unsigned toBitWidth(const std::string &typeName) const;
 
-	ctypes::IntegralType::Signess toSigness(const std::string &typeName);
+	ctypes::IntegralType::Signess toSigness(bool isUnsigned) const;
 
-	ctypes::FunctionType::VarArgness toVarArgness(bool isVarArg);
+	ctypes::IntegralType::Signess toSigness(const std::string &typeName) const;
+
+	ctypes::FunctionType::VarArgness toVarArgness(bool isVarArg) const;
 };
 
 }

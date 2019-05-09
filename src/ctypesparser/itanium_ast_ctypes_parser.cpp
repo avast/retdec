@@ -56,14 +56,16 @@ std::shared_ptr<ctypes::Function> ItaniumAstCtypesParser::parseAsFunction(
 	const std::string &name,
 	const llvm::itanium_demangle::Node *ast,
 	std::unique_ptr<ctypes::Module> &module,
-	const retdec::ctypesparser::CTypesParser::TypeWidths &typeWidths,
-	const retdec::ctypesparser::CTypesParser::TypeSignedness &typeSignedness)
+	const CTypesParser::TypeWidths &typeWidths,
+	const CTypesParser::TypeSignedness &typeSignedness,
+	unsigned defaultBitWidth)
 {
 	assert(ast && "Ast cannot be null");
 
-	context = module->getContext();
+	this->context = module->getContext();
 	this->typeWidths = typeWidths;
 	this->typeSignedness = typeSignedness;
+	this->defaultBitWidth = defaultBitWidth;
 
 	if (ast->getKind() == Kind::KFunctionEncoding) {
 		auto func = parseFunction(name, static_cast<const llvm::itanium_demangle::FunctionEncoding *>(ast));

@@ -9,13 +9,16 @@
 
 #include <string>
 #include <memory>
+#include <map>
+
+#include "retdec/ctypesparser/ctypes_parser.h"
 
 namespace retdec {
 
 namespace ctypes {
-	class Module;
-	class Function;
-	class Type;
+class Module;
+class Function;
+class Type;
 }
 
 namespace demangler {
@@ -25,40 +28,36 @@ namespace demangler {
  */
 class Demangler
 {
-	public:
-		enum Status: u_char
-		{
-			success = 0,
-			init,
-			init_fail,
-			memory_alloc_failure,
-			invalid_mangled_name,
-			unknown,
-		};
+public:
+	enum Status : u_char
+	{
+		success = 0,
+		init,
+		init_fail,
+		memory_alloc_failure,
+		invalid_mangled_name,
+		unknown,
+	};
 
-	public:
-		explicit Demangler(const std::string &compiler);
+public:
+	explicit Demangler(const std::string &compiler);
 
-		virtual ~Demangler() = default;
+	virtual ~Demangler() = default;
 
-		virtual std::string demangleToString(const std::string &mangled) = 0;
+	virtual std::string demangleToString(const std::string &mangled) = 0;
 
-		virtual std::shared_ptr<ctypes::Function> demangleFunctionToCtypes(
-			const std::string &mangled,
-			std::unique_ptr<ctypes::Module> &module) = 0;
+	virtual std::shared_ptr<ctypes::Function> demangleFunctionToCtypes(
+		const std::string &mangled,
+		std::unique_ptr<ctypes::Module> &module,
+		const ctypesparser::CTypesParser::TypeWidths &typeWidths,
+		const ctypesparser::CTypesParser::TypeSignedness &typeSignedness,
+		unsigned defaultBitWidth = 0) = 0;
 
-		// TODO
-//		virtual std::shared_ptr<ctypes::Type> demangleTypeToCtypes(
-//			const std::string &mangled,
-//			std::shared_ptr<retdec::ctypes::Module> &module) = 0;
+	Status status();
 
-		// TODO pass type widths as parameter
-
-		Status status();
-
-	protected:
-		std::string _compiler;
-		Status _status;
+protected:
+	std::string _compiler;
+	Status _status;
 };
 
 }

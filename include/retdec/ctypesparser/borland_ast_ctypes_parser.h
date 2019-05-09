@@ -44,11 +44,10 @@ public:
 		std::shared_ptr<demangler::borland::Node> ast,
 		std::unique_ptr<ctypes::Module> &module,
 		const TypeWidths &typeWidths = {},
-		const TypeSignedness &typeSignedness = {});
+		const TypeSignedness &typeSignedness = {},
+		unsigned defaultBitWidth = 0);
 
 private:
-	std::shared_ptr<ctypes::IntegralType> createIntegral(const std::string &typeName);
-
 	std::shared_ptr<retdec::ctypes::Function> parseFunction(
 		const std::string &mangledName,	std::shared_ptr<demangler::borland::FunctionNode> function);
 	std::shared_ptr<ctypes::Type> parseType(std::shared_ptr<demangler::borland::TypeNode> typeNode);

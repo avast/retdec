@@ -15,16 +15,19 @@ namespace demangler {
 /**
  * @brief Adapter for llvm microsoft demangler.
  */
-class MicrosoftDemangler: public Demangler
+class MicrosoftDemangler : public Demangler
 {
-	public:
-		MicrosoftDemangler();
+public:
+	MicrosoftDemangler();
 
-		std::string demangleToString(const std::string &mangled) override;
+	std::string demangleToString(const std::string &mangled) override;
 
-		std::shared_ptr<ctypes::Function> demangleFunctionToCtypes(
-			const std::string &mangled,
-			std::unique_ptr<ctypes::Module> &module) override;
+	std::shared_ptr<ctypes::Function> demangleFunctionToCtypes(
+		const std::string &mangled,
+		std::unique_ptr<ctypes::Module> &module,
+		const ctypesparser::CTypesParser::TypeWidths &typeWidths,
+		const ctypesparser::CTypesParser::TypeSignedness &typeSignedness,
+		unsigned defaultBitWidth = 0) override;
 };
 
 }
