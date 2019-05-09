@@ -127,6 +127,13 @@ TEST_F(BorlandCtypesTests, ReturnTypeIsCorrectlySet)
 	EXPECT_TRUE(func->getReturnType()->isFloatingPoint());
 }
 
+TEST_F(BorlandCtypesTests, UnknownReturnType)
+{
+	auto func = mangledToCtypes("@foo$qi");
+	auto returnType = func->getReturnType();
+	EXPECT_TRUE(returnType->isUnknown());
+}
+
 TEST_F(BorlandCtypesTests, TypeParsingTest)
 {
 	auto func = mangledToCtypes("@foo$qsusiuiluljujzcuccfdgoCsCib");
@@ -205,14 +212,19 @@ TEST_F(BorlandCtypesTests, TypeParsingTest)
 	EXPECT_EQ(param->getName(), "wchar_t");
 	EXPECT_TRUE(std::static_pointer_cast<ctypes::IntegralType>(param)->isUnsigned());
 }
-//
-//TEST_F(BorlandCtypesTests, TypeWidthsOfTypesWithKnownWidth)
-//{
-//	// in borland scheme, only width of void is known with certainity
-//	auto func = mangledToCtypes("@foo$qv");
-//	auto void_type = func->getParameter(1).getType();
-//	EXPECT_EQ(void_type->getBitWidth(), 0);
-//}
+
+TEST_F(BorlandCtypesTests, TypeWidthsOfTypesWithKnownWidth)
+{
+	std::shared_ptr<ctypes::Function> func;
+
+	func = mangledToCtypes("@foo$qCi");
+	auto char32_type = func->getParameter(1).getType();
+	EXPECT_EQ(char32_type->getBitWidth(), 32);
+
+	func = mangledToCtypes("@foo$qCs");
+	auto char16_type = func->getParameter(1).getType();
+	EXPECT_EQ(char16_type->getBitWidth(), 16);
+}
 
 TEST_F(BorlandCtypesTests, TypeWidthsOfTypesInWidthMap)
 {
@@ -286,23 +298,18 @@ TEST_F(BorlandCtypesTests, SignednessOfTypesWithSignednessInMap)
 	func = demangler->demangleFunctionToCtypes("@foo$qb", module, typeWidths, typeSignednessUnsignedWchar);
 	auto wcharTypeUnsigned = func->getParameter(1).getType();
 	EXPECT_TRUE(std::static_pointer_cast<ctypes::IntegralType>(wcharTypeUnsigned)->isSigned());
-
 }
 
-TEST_F(BorlandCtypesTests, templateTypes)
+TEST_F(BorlandCtypesTests, TemplateTypeAsParameter)
 {
 	auto func = mangledToCtypes(
-		"@%foo$60std@%basic_string$c19std@%char_traits$c%17std@%allocator$c%%%$q60std@%basic_string$c19std@%char_traits$c%17std@%allocator$c%%$v");
+		"@foo$q60std@%basic_string$c19std@%char_traits$c%17std@%allocator$c%%$v");
 
-	EXPECT_TRUE(func != nullptr);
-	EXPECT_EQ(static_cast<std::string>(func->getDeclaration()),
-		"void foo<std::basic_string<char, std::char_traits<char>, std::allocator<char>>>(std::basic_string<char, std::char_traits<char>, std::allocator<char>>)");
-	EXPECT_TRUE(func->getReturnType()->isVoid());
 	EXPECT_EQ(func->getParameterCount(), 1);
 	EXPECT_FALSE(func->isVarArg());
 	EXPECT_TRUE(func->getParameter(1).getType()->isNamed());
-	auto param = std::static_pointer_cast<ctypes::NamedType>(func->getParameter(1).getType());
-	EXPECT_EQ(param->getName(), "std::basic_string<char, std::char_traits<char>, std::allocator<char>>");
+	auto namedType = std::static_pointer_cast<ctypes::NamedType>(func->getParameter(1).getType());
+	EXPECT_EQ(namedType->getName(), "std::basic_string<char, std::char_traits<char>, std::allocator<char>>");
 }
 
 TEST_F(BorlandCtypesTests, callConventionTest)
