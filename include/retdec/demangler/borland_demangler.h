@@ -28,7 +28,7 @@ public:
 		std::unique_ptr<ctypes::Module> &module,
 		const ctypesparser::CTypesParser::TypeWidths &typeWidths,
 		const ctypesparser::CTypesParser::TypeSignedness &typeSignedness,
-		unsigned defaultBitWidth = 0) override;
+		unsigned defaultBitWidth) override;
 
 private:
 	borland::Context _demangleContext;
