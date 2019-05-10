@@ -1210,6 +1210,10 @@ TEST_F(MicrosoftDemanglerTests, mswindows) {
 	DEM_EQ("?f1@@YGXXZ", "void __stdcall f1(void)");
 }
 
+TEST_F(MicrosoftDemanglerTests, variadic) {
+	DEM_EQ("?foo@@YAHHZ", "int __cdecl foo(int, ...)");
+}
+
 TEST_F(MicrosoftDemanglerTests, InvalidManglings) {
 	DEM_FAIL("?ff@@$$J0YAXAU?$AS_@$0A@PEAU?$AS_@$0A@H@__clang@@@__clang@@@Z", status::invalid_mangled_name);
 	DEM_FAIL("?f0@@YAXPEU?$AS_@$00$$CAD@__clang@@@Z", status::invalid_mangled_name);
