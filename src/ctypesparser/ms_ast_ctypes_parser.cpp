@@ -1,5 +1,4 @@
 #include <cassert>
-#include <retdec/utils/container.h>
 #include <sstream>
 
 #include "llvm/Demangle/MicrosoftDemangleNodes.h"
@@ -95,7 +94,7 @@ std::shared_ptr<ctypes::Function> MsToCtypesParser::parseFunction(
 	auto func = ctypes::Function::create(context, mangledName, returnType, parameters, callConvention, varArgness);
 	auto declaration = toString(functionSymbolNode);
 	if (func && !declaration.empty()) {
-		func ->setDeclaration(ctypes::FunctionDeclaration(declaration));
+		func->setDeclaration(ctypes::FunctionDeclaration(declaration));
 	}
 	return func;
 }
@@ -116,6 +115,8 @@ ctypes::CallConvention MsToCtypesParser::parseCallConvention(
 		return {"stdcall"};
 	case Conv::Fastcall:
 		return {"fastcall"};
+	case Conv::Clrcall:
+		return {"clrcall"};
 	case Conv::Eabi:
 		return {"eabi"};
 	case Conv::Vectorcall:
@@ -136,6 +137,8 @@ std::shared_ptr<ctypes::Type> MsToCtypesParser::parseType(llvm::ms_demangle::Nod
 	}
 
 	switch (typeNode->kind()) {
+	case NodeKind::ArrayType:
+		return parseArrayType(static_cast<llvm::ms_demangle::ArrayTypeNode *> (typeNode));
 	case NodeKind::PrimitiveType:
 		return parsePrimitiveType(static_cast<llvm::ms_demangle::PrimitiveTypeNode *> (typeNode));
 	case NodeKind::PointerType:
@@ -150,6 +153,28 @@ std::shared_ptr<ctypes::Type> MsToCtypesParser::parseType(llvm::ms_demangle::Nod
 	}
 
 	return std::static_pointer_cast<ctypes::Type>(ctypes::UnknownType::create());
+}
+
+std::shared_ptr<ctypes::Type> MsToCtypesParser::parseArrayType(
+	llvm::ms_demangle::ArrayTypeNode *typeNode)
+{
+	if (!typeNode->ElementType || !typeNode->Dimensions) {
+		return ctypes::UnknownType::create();
+	}
+
+	auto type = parseType(typeNode->ElementType);
+
+	ctypes::ArrayType::Dimensions dimensions;
+	for (unsigned i = 0; i<typeNode->Dimensions->Count; ++i) {
+		auto node = typeNode->Dimensions->Nodes[i];
+		if (node->kind() == llvm::ms_demangle::NodeKind::IntegerLiteral) {
+			dimensions.emplace_back(
+				static_cast<llvm::ms_demangle::IntegerLiteralNode *>(node)->Value
+			);
+		}
+	}
+
+	return ctypes::ArrayType::create(context, type, dimensions);
 }
 
 std::shared_ptr<ctypes::Type> MsToCtypesParser::parsePrimitiveType(
@@ -194,7 +219,7 @@ std::shared_ptr<ctypes::IntegralType> MsToCtypesParser::parseIntegralType(
 	assert(integralTypeNode && "Violated precondition.");
 
 	std::string name = getTypeName(integralTypeNode->PrimKind);
-	unsigned bitWidth = retdec::utils::mapGetValueOrDefault(typeWidths, name, defaultBitWidth);
+	unsigned bitWidth = toBitWidth(name);
 	ctypes::IntegralType::Signess signess = toSigness(name);
 
 	return ctypes::IntegralType::create(context, name, bitWidth, signess);
@@ -206,7 +231,7 @@ std::shared_ptr<ctypes::FloatingPointType> MsToCtypesParser::parseFloatingPointT
 	assert(floatingPointTypeNode && "Violated precondition.");
 
 	std::string name = getTypeName(floatingPointTypeNode->PrimKind);
-	unsigned bitWidth = retdec::utils::mapGetValueOrDefault(typeWidths, name, defaultBitWidth);
+	unsigned bitWidth = toBitWidth(name);
 
 	return ctypes::FloatingPointType::create(context, name, bitWidth);
 }
@@ -227,6 +252,10 @@ ctypes::Function::Parameters MsToCtypesParser::parseFunctionParameters(
 		}
 	}
 
+	if (params.empty()) {
+		params.emplace_back(ctypes::Parameter("", ctypes::VoidType::create()));
+	}
+
 	return params;
 }
 
@@ -243,15 +272,17 @@ std::shared_ptr<ctypes::Type> MsToCtypesParser::parsePointerType(
 
 	switch (typeNode->Affinity) {
 	case Affinity::Pointer: {
-		unsigned bitWidth = utils::mapGetValueOrDefault(typeWidths, "pointer", defaultBitWidth);
+		unsigned bitWidth = toBitWidth("ptr_t");
 		return ctypes::PointerType::create(context, pointee, bitWidth);
 	}
 	case Affinity::Reference: {
-		unsigned bitWidth = utils::mapGetValueOrDefault(typeWidths, "pointer", defaultBitWidth);
+		unsigned bitWidth = toBitWidth("ptr_t");
 		return ctypes::ReferenceType::create(context, pointee, bitWidth);
 	}
-	case Affinity::RValueReference:
-		// TODO
+	case Affinity::RValueReference: {
+		unsigned bitWidth = toBitWidth("ptr_t");
+		return ctypes::ReferenceType::create(context, pointee, bitWidth);
+	}
 	default:
 		return ctypes::UnknownType::create();
 	}
@@ -319,6 +350,10 @@ ctypes::FunctionType::Parameters MsToCtypesParser::parseFuncTypeParameters(
 				params.emplace_back(type);
 			}
 		}
+	}
+
+	if (params.empty()) {
+		params.emplace_back(ctypes::VoidType::create());
 	}
 
 	return params;

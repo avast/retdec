@@ -35,6 +35,7 @@ private:
 		const std::string &mangledName, llvm::ms_demangle::FunctionSymbolNode *functionSymbolNode);
 	ctypes::CallConvention parseCallConvention(llvm::ms_demangle::CallingConv callConv);
 	std::shared_ptr<ctypes::Type> parseType(llvm::ms_demangle::Node *typeNode);
+	std::shared_ptr<ctypes::Type> parseArrayType(llvm::ms_demangle::ArrayTypeNode *typeNode);
 	std::shared_ptr<ctypes::Type> parsePrimitiveType(llvm::ms_demangle::PrimitiveTypeNode *primitiveTypeNode);
 	std::shared_ptr<ctypes::IntegralType> parseIntegralType(llvm::ms_demangle::PrimitiveTypeNode *integralTypeNode);
 	std::shared_ptr<ctypes::FloatingPointType> parseFloatingPointType(llvm::ms_demangle::PrimitiveTypeNode *floatingPointTypeNode);
