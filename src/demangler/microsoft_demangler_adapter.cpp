@@ -72,7 +72,7 @@ std::shared_ptr<ctypes::Function> MicrosoftDemangler::demangleFunctionToCtypes(
 
 	std::shared_ptr<ctypes::Function> func;
 	ctypesparser::MsToCtypesParser parser;
-	func = parser.parseAsFunction(mangled, AST, module, typeWidths, typeSignedness);
+	func = parser.parseAsFunction(mangled, AST, module, typeWidths, typeSignedness, defaultBitWidth);
 	if (func) {
 		_status = success;
 	}
