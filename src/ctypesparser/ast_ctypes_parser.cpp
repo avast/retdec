@@ -8,43 +8,36 @@ namespace ctypesparser {
  * @brief Finds bit width of type, based on name.
  * Function first looks in typeWidhs map.
  */
-unsigned AstToCtypesParser::toBitWidth(const std::string &typeName) const	// TODO regexp for int sizes
+unsigned AstToCtypesParser::toBitWidth(const std::string &typeName) const
 {
 	if (utils::mapHasKey(typeWidths, typeName)) {
 		return utils::mapGetValueOrDefault(typeWidths, typeName);
 	}
 
-	if (typeName.substr(0, 4) == "uint"
-		|| typeName.substr(0, 3) == "int")
-	{
-		if (typeName == "int8_t" || typeName == "uint8_t")
-		{
-			return 8;
-		}
-		else if (typeName == "int16_t" || typeName == "int32_t")
-		{
-			return 16;
-		}
-		else if (typeName == "int32_t" || typeName == "uint32_t")
-		{
-			return 32;
-		}
-		else if (typeName == "int64_t" || typeName == "uint64_t")
-		{
-			return 64;
-		}
-		else if (typeName == "int128_t" || typeName == "uint128_t")
-		{
-			return 128;
-		}
-	}
+	TypeWidths knownWidths {
+		{"int16_t", 16},
+		{"uint16_t", 16},
+		{"int32_t", 32},
+		{"uint32_t", 32},
+		{"int64_t", 64},
+		{"uint64_t", 64},
+		{"int128_t", 128},
+		{"uint128_t", 128},
+		{"__int64", 64},
+		{"unsigned __int64", 64},
+		{"__int128", 128},
+		{"unsigned __int128", 128},
+		{"char16_t", 16},
+		{"char32_t", 32},
+		{"__float128", 128},
+		{"decimal16", 16},
+		{"decimal32", 32},
+		{"decimal64", 64},
+		{"decimal128", 128},
+		{"void", 0},
+	};
 
-	if (typeName == "void")
-	{
-		return 0;
-	}
-
-	return defaultBitWidth;
+	return utils::mapGetValueOrDefault(knownWidths, typeName, defaultBitWidth);
 }
 
 ctypes::IntegralType::Signess AstToCtypesParser::toSigness(bool isUnsigned) const
