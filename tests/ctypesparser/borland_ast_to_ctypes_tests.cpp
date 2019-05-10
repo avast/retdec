@@ -370,16 +370,14 @@ TEST_F(BorlandCtypesTests, ArrayTypeTests)
 	EXPECT_TRUE(param->isPointer());
 
 	auto pointee = std::static_pointer_cast<ctypes::PointerType>(param)->getPointedType();
-
 	EXPECT_TRUE(pointee->isArray());
-
-	auto elemType = std::static_pointer_cast<ctypes::ArrayType>(pointee)->getElementType();
-	EXPECT_TRUE(elemType->isIntegral());
-
 	EXPECT_EQ(std::static_pointer_cast<ctypes::ArrayType>(pointee)->getDimensionCount(), 2);
 
 	ctypes::ArrayType::Dimensions expectedDimensions{3,6};
 	EXPECT_EQ(std::static_pointer_cast<ctypes::ArrayType>(pointee)->getDimensions(), expectedDimensions);
+
+	auto elemType = std::static_pointer_cast<ctypes::ArrayType>(pointee)->getElementType();
+	EXPECT_TRUE(elemType->isIntegral());
 }
 
 TEST_F(BorlandCtypesTests, FunctionPointerTests)
@@ -391,11 +389,9 @@ TEST_F(BorlandCtypesTests, FunctionPointerTests)
 	EXPECT_TRUE(param->isPointer());
 
 	auto pointee = std::static_pointer_cast<ctypes::PointerType>(param)->getPointedType();
-
 	EXPECT_TRUE(pointee->isFunction());
 
 	auto funcType = std::static_pointer_cast<ctypes::FunctionType>(pointee);
-
 	EXPECT_EQ(funcType->getParameterCount(), 1);
 	EXPECT_TRUE(funcType->getParameter(1)->isVoid());
 	EXPECT_EQ(static_cast<std::string>(funcType->getCallConvention()), "cdecl");
@@ -408,6 +404,14 @@ TEST_F(BorlandCtypesTests, ConstTypesParsing)
 	EXPECT_EQ(func->getParameterCount(), 1);
 	EXPECT_TRUE(func->getParameter(1).getType()->isIntegral());
 	EXPECT_EQ(func->getParameter(1).getType()->getName(), "int");
+}
+
+TEST_F(BorlandCtypesTests, VoidParameter)
+{
+	auto func = mangledToCtypes("@f$qv");	// f(void)
+
+	EXPECT_EQ(func->getParameterCount(), 1);
+	EXPECT_TRUE(func->getParameter(1).getType()->isVoid());
 }
 
 }	// namespace tests
