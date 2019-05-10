@@ -14,6 +14,7 @@
 #include "retdec/bin2llvmir/providers/config.h"
 #include "retdec/config/tool_info.h"
 #include "retdec/demangler/demangler.h"
+#include "retdec/ctypesparser/default_type_config.h"
 
 namespace retdec {
 
@@ -38,6 +39,7 @@ public:
 	Demangler(
 		llvm::Module *llvmModule,
 		Config *config,
+		const std::shared_ptr<ctypesparser::TypeConfig> &typeConfig,
 		std::unique_ptr<retdec::demangler::Demangler> demangler);
 
 	std::string demangleToString(const std::string &mangled);
@@ -51,6 +53,7 @@ private:
 	llvm::Module *_llvmModule = nullptr;
 	Config *_config = nullptr;
 	std::unique_ptr<retdec::ctypes::Module> _ltiModule;
+	std::shared_ptr<ctypesparser::TypeConfig> _typeConfig;
 	std::unique_ptr<demangler::Demangler> _demangler;
 };
 
@@ -62,15 +65,18 @@ class DemanglerFactory
 public:
 	static std::unique_ptr<Demangler> getItaniumDemangler(
 		llvm::Module *m,
-		Config *config);
+		Config *config,
+		const std::shared_ptr<ctypesparser::TypeConfig> &typeConfig);
 
 	static std::unique_ptr<Demangler> getMicrosoftDemangler(
 		llvm::Module *m,
-		Config *config);
+		Config *config,
+		const std::shared_ptr<ctypesparser::TypeConfig> &typeConfig);
 
 	static std::unique_ptr<Demangler> getBorlandDemangler(
 		llvm::Module *m,
-		Config *config);
+		Config *config,
+		const std::shared_ptr<ctypesparser::TypeConfig> &typeConfig);
 };
 
 /**
@@ -88,7 +94,8 @@ class DemanglerProvider
 public:
 	static Demangler *addDemangler(
 		llvm::Module *llvmModule,
-		Config *config);
+		Config *config,
+		const std::shared_ptr<ctypesparser::TypeConfig> &typeConfig);
 
 	static Demangler *getDemangler(llvm::Module *m);
 	static bool getDemangler(

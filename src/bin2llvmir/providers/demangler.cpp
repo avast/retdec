@@ -12,6 +12,7 @@
 #include "retdec/ctypes/context.h"
 #include "retdec/ctypes/function.h"
 #include "retdec/ctypes/function_type.h"
+#include "retdec/ctypesparser/default_type_config.h"
 
 using namespace llvm;
 
@@ -25,10 +26,12 @@ namespace bin2llvmir {
 Demangler::Demangler(
 	llvm::Module *llvmModule,
 	Config *config,
+	const std::shared_ptr<ctypesparser::TypeConfig> &typeConfig,
 	std::unique_ptr<retdec::demangler::Demangler> demangler) :
 	_llvmModule(llvmModule),
 	_config(config),
 	_ltiModule(std::make_unique<ctypes::Module>(std::make_shared<ctypes::Context>())),
+	_typeConfig(typeConfig),
 	_demangler(std::move(demangler)) {}
 
 std::string Demangler::demangleToString(const std::string &mangled)
@@ -38,19 +41,18 @@ std::string Demangler::demangleToString(const std::string &mangled)
 
 Demangler::FunctionPair Demangler::getPairFunction(const std::string &mangled)
 {
-	auto ctypesFunction = _demangler->demangleFunctionToCtypes(mangled, _ltiModule);
+	auto ctypesFunction = _demangler->demangleFunctionToCtypes(
+		mangled,
+		_ltiModule,
+		_typeConfig->typeWidths(),
+		_typeConfig->typeSignedness(),
+		_typeConfig->defaultBitWidth());
 	if (ctypesFunction == nullptr) {
 		return {};
 	}
 
 	auto *ft = dyn_cast<FunctionType>(getLlvmType(ctypesFunction->getType()));
 	assert(ft);
-
-	std::string declaration = ctypesFunction->getDeclaration();
-	if (declaration.find("...") != std::string::npos
-		&& !ft->isVarArg()) {
-		ft = FunctionType::get(ft->getReturnType(), ft->params(), true);
-	}
 
 	auto *ret = Function::Create(ft, GlobalValue::ExternalLinkage, ctypesFunction->getName());
 
@@ -74,10 +76,11 @@ llvm::Type *Demangler::getLlvmType(std::shared_ptr<retdec::ctypes::Type> type)
  */
 std::unique_ptr<Demangler> DemanglerFactory::getItaniumDemangler(
 	llvm::Module *m,
-	Config *config)
+	Config *config,
+	const std::shared_ptr<ctypesparser::TypeConfig> &typeConfig)
 {
 	return std::make_unique<Demangler>(
-		m, config, std::make_unique<demangler::ItaniumDemangler>());
+		m, config, typeConfig, std::make_unique<demangler::ItaniumDemangler>());
 }
 
 /**
@@ -86,10 +89,11 @@ std::unique_ptr<Demangler> DemanglerFactory::getItaniumDemangler(
  */
 std::unique_ptr<Demangler> DemanglerFactory::getMicrosoftDemangler(
 	llvm::Module *m,
-	Config *config)
+	Config *config,
+	const std::shared_ptr<ctypesparser::TypeConfig> &typeConfig)
 {
 	return std::make_unique<Demangler>(
-		m, config, std::make_unique<demangler::MicrosoftDemangler>());
+		m, config, typeConfig, std::make_unique<demangler::MicrosoftDemangler>());
 }
 
 /**
@@ -98,10 +102,11 @@ std::unique_ptr<Demangler> DemanglerFactory::getMicrosoftDemangler(
  */
 std::unique_ptr<Demangler> DemanglerFactory::getBorlandDemangler(
 	llvm::Module *m,
-	Config *config)
+	Config *config,
+	const std::shared_ptr<ctypesparser::TypeConfig> &typeConfig)
 {
 	return std::make_unique<Demangler>(
-		m, config, std::make_unique<demangler::BorlandDemangler>());
+		m, config, typeConfig, std::make_unique<demangler::BorlandDemangler>());
 }
 
 /******************************************************************/
@@ -117,19 +122,20 @@ std::map<Module *, std::unique_ptr<Demangler>> DemanglerProvider::_module2demang
  */
 Demangler *DemanglerProvider::addDemangler(
 	llvm::Module *llvmModule,
-	Config *config)
+	Config *config,
+	const std::shared_ptr<ctypesparser::TypeConfig> &typeConfig)
 {
 	auto t = config->getConfig().tools;
 
 	std::unique_ptr<Demangler> d;
 	if (t.isGcc() || t.isMingw()) {
-		d = DemanglerFactory::getItaniumDemangler(llvmModule, config);
+		d = DemanglerFactory::getItaniumDemangler(llvmModule, config, typeConfig);
 	} else if (t.isMsvc()) {
-		d = DemanglerFactory::getMicrosoftDemangler(llvmModule, config);
+		d = DemanglerFactory::getMicrosoftDemangler(llvmModule, config, typeConfig);
 	} else if (t.isBorland() || t.isDelphi()) {
-		d = DemanglerFactory::getBorlandDemangler(llvmModule, config);
+		d = DemanglerFactory::getBorlandDemangler(llvmModule, config, typeConfig);
 	} else {
-		d = DemanglerFactory::getItaniumDemangler(llvmModule, config);
+		d = DemanglerFactory::getItaniumDemangler(llvmModule, config, typeConfig);
 	}
 
 	auto p = _module2demangler.insert(std::make_pair(llvmModule, std::move(d)));

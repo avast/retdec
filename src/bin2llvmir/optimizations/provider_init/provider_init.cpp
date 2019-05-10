@@ -76,7 +76,9 @@ bool ProviderInitialization::runOnModule(Module& m)
 		return false;
 	}
 
-	auto* d = DemanglerProvider::addDemangler(&m, c);
+	auto typeConfig = std::make_shared<ctypesparser::TypeConfig>();
+
+	auto* d = DemanglerProvider::addDemangler(&m, c, typeConfig);
 	if (d == nullptr)
 	{
 		return false;
@@ -89,7 +91,7 @@ bool ProviderInitialization::runOnModule(Module& m)
 			c->getConfig().getImageBase(),
 			d);
 
-	auto* lti = LtiProvider::addLti(&m, c, f->getImage());
+	auto* lti = LtiProvider::addLti(&m, c, typeConfig, f->getImage());
 
 	NamesProvider::addNames(&m, c, debug, f, d, lti);
 

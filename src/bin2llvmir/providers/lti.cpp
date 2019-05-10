@@ -33,12 +33,14 @@ namespace bin2llvmir {
 //
 
 Lti::Lti(
-		llvm::Module* m,
-		Config* c,
-		retdec::loader::Image* objf)
+	llvm::Module *m,
+	Config *c,
+	const std::shared_ptr<ctypesparser::TypeConfig> &typeConfig,
+	retdec::loader::Image *objf)
 		:
 		_module(m),
 		_config(c),
+		_typeConfig(typeConfig),
 		_image(objf)
 {
 	_ltiModule = std::make_unique<retdec::ctypes::Module>(
@@ -94,27 +96,6 @@ Lti::Lti(
 
 void Lti::loadLtiFile(const std::string& filePath)
 {
-	// This could/should be derived from architecture or LLVM module.
-	//
-	static ctypesparser::JSONCTypesParser::TypeWidths typeWidths
-	{
-		{"bool", 1},
-		{"char", 8},
-		{"short", 16},
-		{"int", 32},
-		{"long", 32},
-		{"long long", 64},
-		{"float", 32},
-		{"double", 64},
-		{"long double", 80},
-
-		// more exotic types: should be solved by ctypesparserl
-		{"unsigned __int64", 64},
-		{"unsigned __int16", 16},
-		{"unsigned __int32", 32},
-		{"unsigned __int3264", 32} // this has the same size as arch size
-	};
-
 	std::ifstream file(filePath);
 	if (file)
 	{
@@ -123,7 +104,7 @@ void Lti::loadLtiFile(const std::string& filePath)
 		{
 			cc = "stdcall";
 		}
-		_ltiParser.parseInto(file, _ltiModule, typeWidths, cc);
+		_ltiParser.parseInto(file, _ltiModule, _typeConfig->typeWidths(), cc);
 	}
 }
 
@@ -256,16 +237,17 @@ llvm::Type* Lti::getLlvmType(std::shared_ptr<retdec::ctypes::Type> type)
 std::map<llvm::Module*, Lti> LtiProvider::_module2lti;
 
 Lti* LtiProvider::addLti(
-		llvm::Module* m,
-		Config* c,
-		retdec::loader::Image* objf)
+	llvm::Module *m,
+	Config *c,
+	const std::shared_ptr<ctypesparser::TypeConfig> &typeConfig,
+	retdec::loader::Image *objf)
 {
 	if (m == nullptr || c == nullptr || objf == nullptr)
 	{
 		return nullptr;
 	}
 
-	auto p = _module2lti.emplace(m, Lti(m, c, objf));
+	auto p = _module2lti.emplace(m, Lti(m, c, typeConfig, objf));
 	return &p.first->second;
 }
 
