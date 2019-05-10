@@ -1,6 +1,5 @@
 #include "llvm/Demangle/ItaniumDemangle.h"
 
-#include "retdec/utils/container.h"
 #include "retdec/ctypes/module.h"
 #include "retdec/ctypes/unknown_type.h"
 #include "retdec/ctypes/type.h"
@@ -149,6 +148,9 @@ std::shared_ptr<ctypes::Type> ItaniumAstCtypesParser::parseType(
 	case Kind::KFunctionType:
 		parsedType = parseFuntionType(static_cast<const llvm::itanium_demangle::FunctionType *>(typeNode));
 		break;
+	case Kind::KNameWithTemplateArgs:
+		parsedType = ctypes::NamedType::create(context, toString(typeNode));
+		break;
 	default:
 		parsedType = ctypes::UnknownType::create();
 	}
@@ -160,7 +162,7 @@ std::shared_ptr<ctypes::IntegralType> ItaniumAstCtypesParser::parseIntegralType(
 {
 	assert(!name.empty() && "Violated precondition.");
 
-	unsigned bitWidth = utils::mapGetValueOrDefault(typeWidths, name, defaultBitWidth);
+	unsigned bitWidth = toBitWidth(name);
 	ctypes::IntegralType::Signess signess = toSigness(name);
 
 	return ctypes::IntegralType::create(context, name, bitWidth, signess);
@@ -171,7 +173,7 @@ std::shared_ptr<ctypes::FloatingPointType> ItaniumAstCtypesParser::parseFloating
 {
 	assert(!name.empty() && "Violated precondition.");
 
-	unsigned bitWidth = utils::mapGetValueOrDefault(typeWidths, name, defaultBitWidth);
+	unsigned bitWidth = toBitWidth(name);
 
 	return ctypes::FloatingPointType::create(context, name, bitWidth);
 }
@@ -182,7 +184,7 @@ std::shared_ptr<ctypes::PointerType> ItaniumAstCtypesParser::parsePointer(
 	assert(typeNode && "Violated precondition.");
 
 	auto pointee = parseType(typeNode->getPointee());
-	unsigned bitWidth = utils::mapGetValueOrDefault(typeWidths, "pointer", defaultBitWidth);
+	unsigned bitWidth = toBitWidth("ptr_t");
 
 	return ctypes::PointerType::create(context, pointee, bitWidth);
 }
@@ -193,14 +195,9 @@ std::shared_ptr<ctypes::Type> ItaniumAstCtypesParser::parseReference(
 	assert(typeNode && "Violated precondition.");
 
 	auto pointee = parseType(typeNode->getPointee());
-	unsigned bitWidth = utils::mapGetValueOrDefault(typeWidths, "reference", defaultBitWidth);
+	unsigned bitWidth = toBitWidth("ptr_t");
 
-	using RefrenceKind = llvm::itanium_demangle::ReferenceKind;
-	if (typeNode->getReferenceKind() == RefrenceKind::LValue) {
-		return ctypes::ReferenceType::create(context, pointee, bitWidth);
-	} else {
-		return ctypes::UnknownType::create();    // TODO r-value refrence
-	}
+	return ctypes::ReferenceType::create(context, pointee, bitWidth);	// both LValue and RValue
 }
 
 std::shared_ptr<ctypes::Type> ItaniumAstCtypesParser::parseNameTypeNode(
@@ -237,15 +234,15 @@ std::shared_ptr<ctypes::Type> ItaniumAstCtypesParser::parseNameTypeNode(
 	if (name == "float"
 		|| name == "double"
 		|| name == "long double"
-		|| name == "__float128") {
+		|| name == "__float128"
+		|| name == "decimal64"
+		|| name == "decimal128"
+		|| name == "decimal32"
+		|| name == "decimal16") {
 		return parseFloatingPointType(name);
 	}
 
-	if (name == "decimal64"
-		|| name == "decimal128"
-		|| name == "decimal32"
-		|| name == "decimal16"
-		|| name == "auto"
+	if (name == "auto"
 		|| name == "decltype(auto)"
 		|| name == "std::nullptr_t") {
 		return ctypes::UnknownType::create();    // TODO decimal support
