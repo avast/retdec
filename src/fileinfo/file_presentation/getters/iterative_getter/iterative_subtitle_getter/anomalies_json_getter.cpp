@@ -1,5 +1,5 @@
 /**
- * @file src/fileinfo/file_presentation/getters/iterative_getter/iterative_subtitle_getter/anomaly_json_getter.cpp
+ * @file src/fileinfo/file_presentation/getters/iterative_getter/iterative_subtitle_getter/anomalies_json_getter.cpp
  * @brief Methods of AnomaliesJsonGetter class.
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */
