@@ -628,10 +628,12 @@ void Decoder::initJumpTargetsEntryPoint()
 
 void Decoder::initJumpTargetsExterns()
 {
-	LOG << "\n" << "initJumpTargetsExterns():" << std::endl;
 	// This section applies only for elf files
 	if (auto* elf_image = dynamic_cast<retdec::loader::ElfImage *>(_image->getImage()))
 	{
+
+		LOG << "\n" << "initJumpTargetsExterns():" << std::endl;
+
 		for (const auto& ext : elf_image->getExternFncTable())
 		{
 			Address a = ext.second;
@@ -647,10 +649,10 @@ void Decoder::initJumpTargetsExterns()
 					Address::getUndef))
 			{
 				auto* f = createFunction(jt->getAddress(), true);
+
 				// We should not alter symbols tables, so we set the name here
 				f->setName(ext.first);
-				// TODO(mato): Change to externs??
-				//_imports.emplace(jt->getAddress());
+
 				_externs.emplace(ext.first);
 
 				LOG << "\t" << "[+] " << a << " @ " << f->getName().str()
@@ -658,7 +660,7 @@ void Decoder::initJumpTargetsExterns()
 			}
 			else
 			{
-				LOG << "\t" << "[-] " << a << " @ " << ext.second
+				LOG << "\t" << "[-] " << a << " @ " << ext.first
 						<< " (no JT)" << std::endl;
 			}
 		}
@@ -667,7 +669,6 @@ void Decoder::initJumpTargetsExterns()
 
 void Decoder::initJumpTargetsImports()
 {
-	// TODO(mato): Alter imports to check if extern functions does not already exists
 	LOG << "\n" << "initJumpTargetsImports():" << std::endl;
 
 	auto* impTbl = _image->getFileFormat()->getImportTable();

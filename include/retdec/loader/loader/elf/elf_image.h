@@ -47,14 +47,17 @@ public:
 
 	virtual bool load() override;
 
-	const std::unordered_map<std::string, std::uint64_t>& getExternFncTable() const;
+	const std::unordered_map<std::string, std::uint64_t>& getExternFncTable() const
+	{
+		return _externFncTable;
+	}
 
 protected:
 	bool loadExecutableFile();
 	bool loadRelocatableFile();
 	bool canLoadSections(const std::vector<retdec::fileformat::Section*>& sections) const;
 	void fixBssSegments();
-	void createFakeSegment();
+	void createExternSegment();
 	void applyRelocations();
 	void resolveRelocation(const retdec::fileformat::Relocation& rel, const retdec::fileformat::Symbol& sym);
 
@@ -63,7 +66,9 @@ protected:
 
 private:
 
-	// Mapping between extern symbols and their address in fake segment
+	retdec::fileformat::ElfSegment _extern_segment;
+	std::vector<std::uint8_t> _externFncData {};
+	// Mapping between extern symbols and their address in extern segment
 	std::unordered_map<std::string, std::uint64_t> _externFncTable {};
 };
 

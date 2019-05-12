@@ -66,15 +66,16 @@ bool ElfImage::load()
 	// Fix sizes of BSS segments after we have loaded and sorted everything
 	fixBssSegments();
 
-	// Create fake segment to hold functions that are relocated
-	//createFakeSegment();
-
 	return true;
 }
 
-void ElfImage::createFakeSegment()
+/**
+ * Method to create segment containing extern functions.
+ * Sets the correct attributes of newly created segment.
+ */
+void ElfImage::createExternSegment()
 {
-	// std::cout << "createFakeSegment()" << std::endl;
+	// std::cout << "createExternSegment()" << std::endl;
 
 	// Get the end address of last segment, we should expect that they are not sorted now.
 	const auto& segments = getSegments();
@@ -85,46 +86,28 @@ void ElfImage::createFakeSegment()
 	// Last segment not found
 	if (last_segment == segments.end())
 	{
-		// TODO(mato): Better error messages
-		std::cout << "End address of last segment was not found." << std::endl;
+		// Don't signal anything
+		// std::cout << "createExternSegment: End address of last segment was not found." << std::endl;
 		return;
 	}
 	// std::cout << "End address is: " << (*last_segment)->getEndAddress() << std::endl;
 
-	// TODO(mato): Remove this debug, dump import table
-	//std::string importTableDump;
-	//getFileFormat()->getImportTable()->dump(importTableDump);
-	//std::cout << importTableDump;
-
 	// Get the size of ptr for this elf class
-	int cur_ptr_size = 4;
 	const auto* elfInputFile = static_cast<const retdec::fileformat::ElfFormat*>(getFileFormat());
-	switch(elfInputFile->getElfClass())
-	{
-		case ELFCLASS32:
-			cur_ptr_size = 4;
-			break;
-		case ELFCLASS64:
-			cur_ptr_size = 8;
-			break;
-		default:
-			// TODO(mato): Can this be considered sensible value?
-			cur_ptr_size = 4;
-	}
-
+	// We are dealing with only 2 possibilities ELFCLASS{32, 64}, assume 8 byte default
+	unsigned int cur_ptr_size = (elfInputFile->getElfClass() == ELFCLASS32) ? 4 : 8;
 
 	std::uint64_t extern_function_index = 0;
-	// Iterate over imports and gather functions to be created
 	const auto* it = getFileFormat()->getImportTable();
 	if (it == nullptr)
 	{
 		return;
 	}
 
+	// Iterate over imports and gather functions to be created
 	for (const auto &imp : *it)
 	{
 		utils::Address a = imp->getAddress();
-		// TODO(mato): Can this even be undefined? == ULLONG_MAX?
 		if (a.isUndefined())
 		{
 			continue;
@@ -132,7 +115,7 @@ void ElfImage::createFakeSegment()
 
 		if(_externFncTable.count(imp->getName()))
 		{
-			// std::cout << "Import " << imp->getName() << " already exists, skipping..." << std::endl; 
+			// std::cout << "Import " << imp->getName() << " already exists, skipping..." << std::endl;
 			continue;
 		}
 
@@ -145,12 +128,11 @@ void ElfImage::createFakeSegment()
 
 	// for (const auto &s : _externFncTable)
 	// {
-	//     std::cout << s.first << " @ " << s.second << std::endl;
+	// 	std::cout << s.first << " @ " << std::showbase << std::hex << s.second << std::endl;
 	// }
 
 	retdec::fileformat::SecSeg *new_segment = new retdec::fileformat::ElfSegment();
-	// TODO(mato): Consider generating name instead of using fixed name
-	new_segment->setName(".FAKE.EXTERN");
+	new_segment->setName(".EXTERN");
 	new_segment->setType(retdec::fileformat::SecSeg::Type::DATA);
 
 	// TODO(mato): For some reason decoder checks only physical size
@@ -291,7 +273,7 @@ bool ElfImage::loadRelocatableFile()
 			return false;
 	}
 
-	createFakeSegment();
+	createExternSegment();
 
 	// Apply relocations
 	applyRelocations();
@@ -399,6 +381,16 @@ const Segment* ElfImage::addSegment(const retdec::fileformat::SecSeg* secSeg, st
 	if (!secSeg->isBss())
 	{
 		llvm::StringRef secSegContent = secSeg->getBytes();
+		dataSource = std::make_unique<SegmentDataSource>(secSegContent);
+	}
+
+	if (secSeg->getName() == ".EXTERN")
+	{
+		// std::vector<std::uint8_t> e(mem);
+		unsigned long long mem;
+		secSeg->getSizeInMemory(mem);
+		_externFncData.resize(mem, 0);
+		llvm::StringRef secSegContent = llvm::StringRef(reinterpret_cast<const char *>(_externFncData.data()), _externFncData.size());
 		dataSource = std::make_unique<SegmentDataSource>(secSegContent);
 	}
 
@@ -603,10 +595,9 @@ void ElfImage::resolveRelocation(const retdec::fileformat::Relocation& rel, cons
 {
 	unsigned long long symAddress;
 
-	const auto& extern_fnc_entry = getExternFncTable().find(sym.getName());
-
 	if (sym.getType() == retdec::fileformat::Symbol::Type::EXTERN)
 	{
+		const auto& extern_fnc_entry = getExternFncTable().find(sym.getName());
 		if(extern_fnc_entry == getExternFncTable().end())
 		{
 			return;
@@ -624,6 +615,11 @@ void ElfImage::resolveRelocation(const retdec::fileformat::Relocation& rel, cons
 		}
 	}
 
+	std::cout << std::showbase << "Processing relocation of "
+			  << sym.getName() << " @ " << std::hex << rel.getAddress()
+			  << " to " << symAddress << "+" << rel.getAddend() << std::endl;
+
+	const auto* elfInputFile = static_cast<const retdec::fileformat::ElfFormat*>(getFileFormat());
 	switch (getFileFormat()->getTargetArchitecture())
 	{
 		case retdec::fileformat::Architecture::X86:
@@ -646,6 +642,34 @@ void ElfImage::resolveRelocation(const retdec::fileformat::Relocation& rel, cons
 					set4Byte(rel.getAddress(), value);
 					break;
 				}
+				// New - for extern segment
+				case R_386_PLT32:
+				{
+					std::uint64_t value;
+					value = symAddress - rel.getAddress() + rel.getAddend();
+					set4Byte(rel.getAddress(), value);
+					break;
+				}
+				default:
+					return;
+			}
+			break;
+		}
+		case retdec::fileformat::Architecture::X86_64:
+		{
+			switch (rel.getType())
+			{
+				// These are needed for object files, they are probably wrong in the context of
+				// linked executables
+				case R_X86_64_PC32:
+				case R_X86_64_PLT32:
+				{
+					if(getExternFncTable().size() == 0) break;
+					std::uint64_t value;
+					value = symAddress - rel.getAddress() + rel.getAddend();
+					set4Byte(rel.getAddress(), value);
+					break;
+				}
 				default:
 					return;
 			}
@@ -653,30 +677,42 @@ void ElfImage::resolveRelocation(const retdec::fileformat::Relocation& rel, cons
 		}
 		case retdec::fileformat::Architecture::ARM:
 		{
-			switch (rel.getType())
+			if (elfInputFile->getElfClass() == ELFCLASS32)
 			{
-				case R_ARM_ABS32:
+				switch (rel.getType())
 				{
-					std::uint64_t value;
-					get4Byte(rel.getAddress(), value);
-					value += symAddress + rel.getAddend();
-					set4Byte(rel.getAddress(), value);
-					break;
+					case R_ARM_ABS32:
+					{
+						std::uint64_t value;
+						get4Byte(rel.getAddress(), value);
+						value += symAddress + rel.getAddend();
+						set4Byte(rel.getAddress(), value);
+						break;
+					}
+					case R_ARM_CALL:
+					{
+						std::uint64_t value;
+						get4Byte(rel.getAddress(), value);
+						std::uint64_t copy = value;
+						// jumps/calls are on per-instruction level
+						value += (symAddress + rel.getAddend() - rel.getSectionOffset()) >> 2;
+						// 24 bit relocation
+						value = (copy & 0xFF000000) | (value & 0x00FFFFFF);
+						set4Byte(rel.getAddress(), value);
+						break;
+					}
+					default:
+						return;
 				}
-				case R_ARM_CALL:
+			}
+			else // AArch64 bit relocations
+			{
+				switch (rel.getType())
 				{
-					std::uint64_t value;
-					get4Byte(rel.getAddress(), value);
-					std::uint64_t copy = value;
-					// jumps/calls are on per-instruction level
-					value += (symAddress + rel.getAddend() - rel.getSectionOffset()) >> 2;
-					// 24 bit relocation
-					value = (copy & 0xFF000000) | (value & 0x00FFFFFF);
-					set4Byte(rel.getAddress(), value);
-					break;
+					// TODO
+					default:
+						return;
 				}
-				default:
-					return;
 			}
 			break;
 		}
@@ -802,11 +838,6 @@ void ElfImage::resolveRelocation(const retdec::fileformat::Relocation& rel, cons
 		default:
 			return;
 	}
-}
-
-const std::unordered_map<std::string, std::uint64_t>& ElfImage::getExternFncTable() const
-{
-	return _externFncTable;
 }
 
 } // namespace loader
