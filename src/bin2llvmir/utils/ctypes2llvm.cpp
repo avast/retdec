@@ -1,17 +1,7 @@
 
 #include "retdec/bin2llvmir/providers/lti.h"
 #include "retdec/bin2llvmir/utils/ctypes2llvm.h"
-#include "retdec/ctypes/floating_point_type.h"
-#include "retdec/ctypes/function_type.h"
-#include "retdec/ctypes/integral_type.h"
-#include "retdec/ctypes/member.h"
-#include "retdec/ctypes/pointer_type.h"
-#include "retdec/ctypes/reference_type.h"
-#include "retdec/ctypes/struct_type.h"
-#include "retdec/ctypes/typedefed_type.h"
-#include "retdec/ctypes/union_type.h"
-#include "retdec/ctypes/unknown_type.h"
-#include "retdec/ctypes/void_type.h"
+#include "retdec/ctypes/ctypes.h"
 
 using namespace llvm;
 
@@ -114,7 +104,8 @@ void Ctypes2LlvmTypeVisitor::visit(
 void Ctypes2LlvmTypeVisitor::visit(
 	const std::shared_ptr <retdec::ctypes::NamedType> &type)
 {
-	// TODO
+	// known classes (std::string, ...) could be created based on typename
+	// and pointer to them returned
 	_type = Abi::getDefaultType(_module);
 }
 
@@ -131,6 +122,8 @@ void Ctypes2LlvmTypeVisitor::visit(
 void Ctypes2LlvmTypeVisitor::visit(
 	const std::shared_ptr <retdec::ctypes::ReferenceType> &type)
 {
+	// in LLVM IR reference parameter is implemented as pointer with attribute dereferenceable
+	// this attribute must be set when creating llvm::Function and can't be set here
 	type->getReferencedType()->accept(this);
 
 	auto *t = PointerType::isValidElementType(_type) ?
@@ -141,7 +134,7 @@ void Ctypes2LlvmTypeVisitor::visit(
 void Ctypes2LlvmTypeVisitor::visit(
 	const std::shared_ptr <retdec::ctypes::TypedefedType> &type)
 {
-	if (retdec::utils::containsCaseInsensitive(type->getName(), "wchar")) {
+	if (retdec::utils::containsCaseInsensitive(type->getName(), "wchar")) {	// TODO remove and unify with lti
 		// getDefaultWchartType()?
 		if (_config->getConfig().fileFormat.isElf()) {
 			_type = Type::getInt32Ty(_module->getContext());

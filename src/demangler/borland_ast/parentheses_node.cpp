@@ -1,3 +1,9 @@
+/**
+* @file src/demangler/borland_ast/parentheses_node.cpp
+* @brief Representation of parentheses.
+* @copyright (c) 2019 Avast Software, licensed under the MIT license
+*/
+
 #include <sstream>
 
 #include "retdec/demangler/borland_ast/parentheses_node.h"

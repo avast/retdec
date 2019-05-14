@@ -1,3 +1,9 @@
+/**
+* @file src/demangler/borland_ast/rreference_type.cpp
+* @brief Representation of R-value reference types.
+* @copyright (c) 2019 Avast Software, licensed under the MIT license
+*/
+
 #include <sstream>
 
 #include "retdec/demangler/borland_ast/rreference_type.h"

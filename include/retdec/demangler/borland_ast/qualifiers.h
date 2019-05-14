@@ -1,3 +1,9 @@
+/**
+* @file include/retdec/demangler/borland_ast/qualifiers.h
+* @brief Representation of type qualifiers in borland AST.
+* @copyright (c) 2019 Avast Software, licensed under the MIT license
+*/
+
 #ifndef RETDEC_QUALIFIERS_H
 #define RETDEC_QUALIFIERS_H
 
@@ -7,6 +13,9 @@ namespace retdec {
 namespace demangler {
 namespace borland {
 
+/*
+ * @brief Representation of type qualifiers in borland AST.
+ */
 class Qualifiers
 {
 public:

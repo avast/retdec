@@ -1,3 +1,9 @@
+/**
+* @file src/demangler/borland_ast/array_type.cpp
+* @brief Representation of array types.
+* @copyright (c) 2019 Avast Software, licensed under the MIT license
+*/
+
 #include <sstream>
 
 #include "retdec/demangler/borland_ast/array_type.h"
@@ -42,11 +48,13 @@ std::shared_ptr<ArrayNode> ArrayNode::create(
 	return newType;
 }
 
-unsigned ArrayNode::size() {
+unsigned ArrayNode::size()
+{
 	return _size;
 }
 
-std::shared_ptr<Node> ArrayNode::pointee() {
+std::shared_ptr<Node> ArrayNode::pointee()
+{
 	return _pointee;
 }
 

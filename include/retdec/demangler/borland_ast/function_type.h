@@ -1,3 +1,9 @@
+/**
+* @file include/retdec/demangler/borland_ast/function_type.h
+* @brief Representation of function types in borland AST.
+* @copyright (c) 2019 Avast Software, licensed under the MIT license
+*/
+
 #ifndef RETDEC_FUNCTION_TYPE_H
 #define RETDEC_FUNCTION_TYPE_H
 
@@ -23,7 +29,7 @@ enum class CallConv
  * Used for information about functions without name.
  * @example pointer to function as parameter
  */
-class FunctionTypeNode: public TypeNode
+class FunctionTypeNode : public TypeNode
 {
 public:
 	static std::shared_ptr<FunctionTypeNode> create(

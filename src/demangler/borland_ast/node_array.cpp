@@ -1,3 +1,9 @@
+/**
+* @file src/demangler/borland_ast/node_array.cpp
+* @brief Representation of array in AST node.
+* @copyright (c) 2019 Avast Software, licensed under the MIT license
+*/
+
 #include <sstream>
 
 #include "retdec/demangler/borland_ast/node_array.h"

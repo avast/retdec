@@ -1,3 +1,9 @@
+/**
+* @file src/demangler/borland_ast/built_in_type.cpp
+* @brief Representation of built-in types.
+* @copyright (c) 2019 Avast Software, licensed under the MIT license
+*/
+
 #include "retdec/demangler/borland_ast/built_in_type.h"
 
 namespace retdec {

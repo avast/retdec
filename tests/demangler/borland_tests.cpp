@@ -77,7 +77,7 @@ TEST_F(BorlandDemanglerTests, BasicParametersTests)
 		   "myFunc_all_(short, unsigned short, int, unsigned int, long, unsigned long, long long, unsigned long long, signed char, unsigned char, char, float, double, long double, bool, char16_t, char32_t, wchar_t)");
 	DEM_EQ("@foo$qie", "foo(int, ...)");
 	DEM_EQ("@foo$qN", "foo(nullptr_t)");
-	// auto not supported in C++11
+	// TODO @foo$q
 }
 
 TEST_F(BorlandDemanglerTests, MoreComplicatedParameters)

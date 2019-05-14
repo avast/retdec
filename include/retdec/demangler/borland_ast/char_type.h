@@ -1,12 +1,13 @@
-//
-// Created by adam on 10.3.19.
-//
+/**
+* @file include/retdec/demangler/borland_ast/borland_ast/char_type.h
+* @brief Representation of char types in borland AST.
+* @copyright (c) 2019 Avast Software, licensed under the MIT license
+*/
 
 #ifndef RETDEC_CHAR_TYPE_H
 #define RETDEC_CHAR_TYPE_H
 
 #include "retdec/demangler/borland_ast/built_in_type.h"
-
 
 namespace retdec {
 namespace demangler {
@@ -42,7 +43,9 @@ public:
 	void printLeft(std::ostream &s) const override;
 
 private:
-	CharTypeNode(ThreeStateSignedness signedness, const Qualifiers &quals);
+	CharTypeNode(
+		ThreeStateSignedness signedness,
+		const Qualifiers &quals);
 
 private:
 	ThreeStateSignedness _signedness;

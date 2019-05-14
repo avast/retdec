@@ -1,3 +1,9 @@
+/**
+* @file include/retdec/bin2llvmir/utils/ctypes2llvm.h
+* @brief Ctypes to LLVM IR converter.
+* @copyright (c) 2019 Avast Software, licensed under the MIT license
+*/
+
 #ifndef RETDEC_CTYPES2LLVM_H
 #define RETDEC_CTYPES2LLVM_H
 

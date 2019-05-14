@@ -1,3 +1,8 @@
+/**
+* @file src/demangler/borland_ast/integral_type.cpp
+* @brief Representation of integral types.
+* @copyright (c) 2019 Avast Software, licensed under the MIT license
+*/
 
 #include <sstream>
 

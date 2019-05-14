@@ -1,3 +1,9 @@
+/**
+* @file src/demangler/borland_ast/function_node.cpp
+* @brief Representation of functions.
+* @copyright (c) 2019 Avast Software, licensed under the MIT license
+*/
+
 #include "retdec/demangler/borland_ast/function_node.h"
 
 namespace retdec {

@@ -1,3 +1,9 @@
+/**
+* @file include/retdec/demangler/borland_ast/parentheses_node.h
+* @brief Representation of node that adds parentheses around another node in borland AST.
+* @copyright (c) 2019 Avast Software, licensed under the MIT license
+*/
+
 #ifndef RETDEC_PARENTHESES_NODE_H
 #define RETDEC_PARENTHESES_NODE_H
 
@@ -8,6 +14,9 @@ namespace retdec {
 namespace demangler {
 namespace borland {
 
+/*
+ * @brief Representation of node that adds parentheses around another node in borland AST.
+ */
 class ParenthesesNode : public Node
 {
 public:

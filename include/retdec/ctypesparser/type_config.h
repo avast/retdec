@@ -1,6 +1,8 @@
-//
-// Created by adam on 5.5.19.
-//
+/**
+* @file include/retdec/ctypesparser/type_config.h
+* @brief Defines type widths and singnedness for types that are implementation specific.
+* @copyright (c) 2019 Avast Software, licensed under the MIT license
+*/
 
 #ifndef RETDEC_DEFAULT_TYPE_CONFIG_H
 #define RETDEC_DEFAULT_TYPE_CONFIG_H
@@ -31,7 +33,7 @@ public:
 	TypeSignedness typeSignedness();
 
 	unsigned defaultBitWidth();
-	
+
 private:
 	TypeWidths _typeWidths;
 	TypeSignedness _typeSignedness;

@@ -1,3 +1,10 @@
+/**
+* @file src/ctypesparser/ast_ctypes_parser.cpp
+* @brief Base class for all C-types parsers from demangler ASTs.
+* @copyright (c) 2019 Avast Software, licensed under the MIT license
+*/
+
+
 #include "retdec/utils/container.h"
 #include "retdec/ctypesparser/ast_ctypes_parser.h"
 
@@ -8,7 +15,7 @@ namespace ctypesparser {
  * @brief Finds bit width of type, based on name.
  * Function first looks in typeWidhs map.
  */
-unsigned AstToCtypesParser::toBitWidth(const std::string &typeName) const
+unsigned AstToCtypesParser::getBitWidth(const std::string &typeName) const
 {
 	if (utils::mapHasKey(typeWidths, typeName)) {
 		return utils::mapGetValueOrDefault(typeWidths, typeName);
@@ -40,13 +47,24 @@ unsigned AstToCtypesParser::toBitWidth(const std::string &typeName) const
 	return utils::mapGetValueOrDefault(knownWidths, typeName, defaultBitWidth);
 }
 
+/*
+ * @ brief Converts bool value to IntegralType::Signess
+ */
 ctypes::IntegralType::Signess AstToCtypesParser::toSigness(bool isUnsigned) const
 {
 	return isUnsigned ? ctypes::IntegralType::Signess::Unsigned : ctypes::IntegralType::Signess::Signed;
 }
 
+/*
+ * @brief Based on type name returns IntegralType::Signess
+ * Info in type signedness map is more important.
+ */
 ctypes::IntegralType::Signess AstToCtypesParser::toSigness(const std::string &typeName) const
 {
+	if (utils::mapHasKey(typeSignedness, typeName)) {
+		return utils::mapGetValueOrDefault(typeSignedness, typeName);
+	}
+
 	if (typeName.substr(0, 9) == "unsigned "
 		|| typeName.substr(0, 4) == "uint"
 		|| typeName == "char16_t"
@@ -54,10 +72,13 @@ ctypes::IntegralType::Signess AstToCtypesParser::toSigness(const std::string &ty
 		return ctypes::IntegralType::Signess::Unsigned;
 	}
 
-	/* find in map, if nothing found, then probably signed */
-	return utils::mapGetValueOrDefault(typeSignedness, typeName, ctypes::IntegralType::Signess::Signed);
+	/* if nothing found, then probably signed */
+	return ctypes::IntegralType::Signess::Signed;
 }
 
+/*
+ * @brief Converts bool value to Function::VarArgness
+ */
 ctypes::FunctionType::VarArgness AstToCtypesParser::toVarArgness(bool isVarArg) const
 {
 	using VarArgness = ctypes::Function::VarArgness;

@@ -1,3 +1,9 @@
+/**
+* @file include/retdec/demangler/borland_ast/function_node.h
+* @brief Representation of functions in borland AST.
+* @copyright (c) 2019 Avast Software, licensed under the MIT license
+*/
+
 #ifndef RETDEC_FUNCTION_NODE_H
 #define RETDEC_FUNCTION_NODE_H
 

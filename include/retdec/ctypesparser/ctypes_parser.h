@@ -11,33 +11,14 @@
 #include <memory>
 #include <string>
 
-#include "retdec/ctypes/array_type.h"
-#include "retdec/ctypes/call_convention.h"
-#include "retdec/ctypes/composite_type.h"
-#include "retdec/ctypes/enum_type.h"
-#include "retdec/ctypes/function.h"
-#include "retdec/ctypes/function_type.h"
-#include "retdec/ctypes/integral_type.h"
-#include "retdec/ctypes/parameter.h"
+#include "retdec/ctypes/ctypes.h"
 #include "retdec/ctypesparser/exceptions.h"
 
 namespace retdec {
-namespace ctypes {
-
-class Context;
-class FloatingPointType;
-class Module;
-class PointerType;
-class StructType;
-class Type;
-class UnionType;
-
-} // namespace ctypes
-
 namespace ctypesparser {
 
 /**
-* @brief A base class for parsing C-types.
+* @brief A base class for parsing to C-types.
 *
 */
 class CTypesParser

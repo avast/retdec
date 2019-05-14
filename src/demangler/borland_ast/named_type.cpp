@@ -1,3 +1,9 @@
+/**
+* @file src/demangler/borland_ast/named_type.cpp
+* @brief Representation of named types as classes and template class types.
+* @copyright (c) 2019 Avast Software, licensed under the MIT license
+*/
+
 #include "retdec/demangler/borland_ast/named_type.h"
 
 namespace retdec {

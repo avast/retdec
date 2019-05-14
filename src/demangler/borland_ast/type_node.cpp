@@ -1,3 +1,9 @@
+/**
+* @file src/demangler/borland_ast/conversion_operator.cpp
+* @brief Base class for all types in AST.
+* @copyright (c) 2019 Avast Software, licensed under the MIT license
+*/
+
 #include "retdec/demangler/borland_ast/type_node.h"
 
 namespace retdec {

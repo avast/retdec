@@ -1,3 +1,9 @@
+/**
+* @file src/demangler/borland_ast/reference_type.cpp
+* @brief Representation of L-value reference types.
+* @copyright (c) 2019 Avast Software, licensed under the MIT license
+*/
+
 #include <sstream>
 
 #include "retdec/demangler/borland_ast/reference_type.h"

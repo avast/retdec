@@ -1,3 +1,8 @@
+/**
+* @file src/demangler/borland_ast/conversion_operator.cpp
+* @brief Representation of conversion operators.
+* @copyright (c) 2019 Avast Software, licensed under the MIT license
+*/
 
 #include <sstream>
 
@@ -22,7 +27,7 @@ ConversionOperatorNode::ConversionOperatorNode(
  */
 std::shared_ptr<ConversionOperatorNode> ConversionOperatorNode::create(Context &context, std::shared_ptr<Node> type)
 {
-	return std::shared_ptr<ConversionOperatorNode>(new ConversionOperatorNode(type));	// TODO context
+	return std::shared_ptr<ConversionOperatorNode>(new ConversionOperatorNode(type));    // TODO context
 }
 
 /**

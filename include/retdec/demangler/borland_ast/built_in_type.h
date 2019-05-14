@@ -1,6 +1,8 @@
-//
-// Created by adam on 10.3.19.
-//
+/**
+* @file include/retdec/demangler/borland_ast/built_in_type.h
+* @brief Representation of built-in types in borland AST.
+* @copyright (c) 2019 Avast Software, licensed under the MIT license
+*/
 
 #ifndef RETDEC_BUILT_IN_TYPE_H
 #define RETDEC_BUILT_IN_TYPE_H
@@ -14,6 +16,7 @@ namespace borland {
 
 /**
  * @brief Node for representation of built-in types.
+ * Used for types: void, bool, char16_t, char32_t and wchar_t
  */
 class BuiltInTypeNode : public TypeNode
 {
@@ -28,7 +31,9 @@ public:
 	void printLeft(std::ostream &s) const override;
 
 protected:
-	BuiltInTypeNode(const std::string &typeName, const Qualifiers &quals);
+	BuiltInTypeNode(
+		const std::string &typeName,
+		const Qualifiers &quals);
 
 protected:
 	std::string _typeName;

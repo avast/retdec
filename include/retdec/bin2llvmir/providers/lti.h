@@ -12,7 +12,7 @@
 #include "retdec/ctypesparser/json_ctypes_parser.h"
 #include "retdec/bin2llvmir/providers/config.h"
 #include "retdec/bin2llvmir/providers/fileimage.h"
-#include "retdec/ctypesparser/default_type_config.h"
+#include "retdec/ctypesparser/type_config.h"
 
 namespace retdec {
 namespace bin2llvmir {
@@ -26,10 +26,10 @@ class Lti
 
 	public:
 		Lti(
-			llvm::Module *m,
-			Config *c,
-			const std::shared_ptr<ctypesparser::TypeConfig> &typeConfig,
-			retdec::loader::Image *objf);
+			llvm::Module* m,
+			Config* c,
+			const std::shared_ptr<ctypesparser::TypeConfig>& typeConfig,
+			retdec::loader::Image* objf);
 
 		bool hasLtiFunction(const std::string& name);
 		std::shared_ptr<retdec::ctypes::Function> getLtiFunction(
@@ -57,10 +57,10 @@ class LtiProvider
 {
 	public:
 		static Lti* addLti(
-			llvm::Module *m,
-			Config *c,
-			const std::shared_ptr<ctypesparser::TypeConfig> &typeConfig,
-			retdec::loader::Image *objf);
+			llvm::Module* m,
+			Config* c,
+			const std::shared_ptr<ctypesparser::TypeConfig>& typeConfig,
+			retdec::loader::Image* objf);
 		static Lti* getLti(llvm::Module* m);
 		static bool getLti(llvm::Module* m, Lti*& lti);
 		static void clear();

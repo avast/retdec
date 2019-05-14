@@ -1,6 +1,8 @@
-//
-// Created by adam on 10.3.19.
-//
+/**
+* @file include/retdec/demangler/borland_ast/integral_type.h
+* @brief Representation of integral number types in borland AST.
+* @copyright (c) 2019 Avast Software, licensed under the MIT license
+*/
 
 #ifndef RETDEC_INTEGRAL_TYPE_H
 #define RETDEC_INTEGRAL_TYPE_H
@@ -30,7 +32,10 @@ public:
 	void printLeft(std::ostream &s) const override;
 
 private:
-	IntegralTypeNode(const std::string &typeName, bool isUnsigned, const Qualifiers &quals);
+	IntegralTypeNode(
+		const std::string &typeName,
+		bool isUnsigned,
+		const Qualifiers &quals);
 
 private:
 	bool _isUnsigned;

@@ -1,3 +1,9 @@
+/**
+* @file src/demangler/borland_ast/qualifiers.cpp
+* @brief Representation of type qualifiers.
+* @copyright (c) 2019 Avast Software, licensed under the MIT license
+*/
+
 #include <sstream>
 
 #include "retdec/demangler/borland_ast/qualifiers.h"

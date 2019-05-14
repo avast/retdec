@@ -1,6 +1,6 @@
 /**
  * @file include/retdec/demangler/demangler_base.h
- * @brief Demangler library.
+ * @brief Base class for demanglers.
  * @copyright (c) 2018 Avast Software, licensed under the MIT license
  */
 
@@ -51,7 +51,7 @@ public:
 		std::unique_ptr<ctypes::Module> &module,
 		const ctypesparser::CTypesParser::TypeWidths &typeWidths,
 		const ctypesparser::CTypesParser::TypeSignedness &typeSignedness,
-		unsigned defaultBitWidth = 0) = 0;
+		unsigned defaultBitWidth) = 0;
 
 	Status status();
 

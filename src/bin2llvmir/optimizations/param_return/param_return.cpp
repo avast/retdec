@@ -19,7 +19,7 @@
 #include "retdec/utils/string.h"
 #include "retdec/bin2llvmir/optimizations/param_return/filter/filter.h"
 #include "retdec/bin2llvmir/optimizations/param_return/param_return.h"
-#define debug_enabled true
+#define debug_enabled false
 #include "retdec/bin2llvmir/utils/llvm.h"
 #include "retdec/bin2llvmir/providers/asm_instruction.h"
 #include "retdec/bin2llvmir/utils/ir_modifier.h"
@@ -257,7 +257,6 @@ void ParamReturn::collectExtraData(DataFlowEntry* dataflow) const
 		auto demFuncPair = _demangler->getPairFunction(funcName);
 		if (demFuncPair.first)
 		{
-			LOG << "LTI: " << _demangler->demangleToString(funcName) << std::endl;
 			modifyWithDemangledData(*dataflow, demFuncPair);
 			return;
 		}
@@ -387,9 +386,7 @@ void ParamReturn::collectExtraData(DataFlowEntry* dataflow) const
 	auto fp = _demangler->getPairFunction(fnc->getName().str());
 	if (fp.first)
 	{
-		LOG << "setting call conv: " << _demangler->demangleToString(fnc->getName().str()) << std::endl;
 		dataflow->setCallingConvention(toCallConv(fp.second->getCallConvention()));
-
 		if (!fp.second->getReturnType()->isUnknown())
 		{
 			dataflow->setRetType(fp.first->getReturnType());
@@ -507,9 +504,9 @@ CallInst* ParamReturn::getWrapper(Function* fnc) const
 	return nullptr;
 }
 
-void ParamReturn::addDataFromCall(DataFlowEntry *de, CallInst *call) const
+void ParamReturn::addDataFromCall(DataFlowEntry *dataflow, CallInst *call) const
 {
-	CallEntry* ce = de->createCallEntry(call);
+	CallEntry* ce = dataflow->createCallEntry(call);
 
 	_collector->collectCallArgs(ce);
 
@@ -693,7 +690,6 @@ void ParamReturn::analyzeWithDemangler(DataFlowEntry& de) const
 		auto demFuncPair = _demangler->getPairFunction(funcName);
 		if (demFuncPair.first)	// demangling successful
 		{
-			LOG << "Analyze: " << _demangler->demangleToString(funcName) << std::endl;
 			modifyWithDemangledData(de, demFuncPair);
 		}
 	}
@@ -807,8 +803,7 @@ void ParamReturn::modifyWithDemangledData(DataFlowEntry &de, Demangler::Function
 		 * Adds pointer to result or this, cant be sure based on information we have.
 		 * Parameter will be named "result"
 		 */
-		// TODO pozri ako vyzera ten detected parameter
-		argTypes.emplace_back(PointerType::get(Type::getIntNTy(_module->getContext(), ptrSize), 0));
+		argTypes.emplace_back(PointerType::get(_abi->getDefaultType(), 0));
 		argNames.emplace_back("result");
 	}
 

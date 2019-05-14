@@ -66,7 +66,7 @@ protected:
 			{"char", ctypes::IntegralType::Signess::Unsigned},
 		};
 
-		return demangler->demangleFunctionToCtypes(mangled, module, typeWidths, typeSignedness);
+		return demangler->demangleFunctionToCtypes(mangled, module, typeWidths, typeSignedness, 0);
 	}
 
 	std::unique_ptr<retdec::demangler::Demangler> demangler;
@@ -225,7 +225,7 @@ TEST_F(MsCtypesTests, TypeWidthsOfTypesInWidthMap)
 	ctypesparser::CTypesParser::TypeWidths typeWidths {{"int", int_width}};
 	ctypesparser::CTypesParser::TypeSignedness typeSignedness {};
 
-	auto func = demangler->demangleFunctionToCtypes(mangled, module, typeWidths, typeSignedness);
+	auto func = demangler->demangleFunctionToCtypes(mangled, module, typeWidths, typeSignedness, 0);
 
 	auto int_type = func->getParameter(1).getType();
 	EXPECT_EQ(int_type->getBitWidth(), int_width);
@@ -252,19 +252,19 @@ TEST_F(MsCtypesTests, SignednessOfTypesWithKnownSignedness)
 
 	std::shared_ptr<ctypes::Function> func;
 
-	func = demangler->demangleFunctionToCtypes("?foo@@YAHH@Z", module, typeWidths, typeSignedness);
+	func = demangler->demangleFunctionToCtypes("?foo@@YAHH@Z", module, typeWidths, typeSignedness, 0);
 	auto int_type = func->getParameter(1).getType();
 	EXPECT_TRUE(std::static_pointer_cast<ctypes::IntegralType>(int_type)->isSigned());
 
-	func = demangler->demangleFunctionToCtypes("?foo@@YAHI@Z", module, typeWidths, typeSignedness);
+	func = demangler->demangleFunctionToCtypes("?foo@@YAHI@Z", module, typeWidths, typeSignedness, 0);
 	auto uint_type = func->getParameter(1).getType();
 	EXPECT_FALSE(std::static_pointer_cast<ctypes::IntegralType>(uint_type)->isSigned());
 
-	func = demangler->demangleFunctionToCtypes("?foo@@YAHC@Z", module, typeWidths, typeSignedness);
+	func = demangler->demangleFunctionToCtypes("?foo@@YAHC@Z", module, typeWidths, typeSignedness, 0);
 	auto signed_char_type = func->getParameter(1).getType();
 	EXPECT_TRUE(std::static_pointer_cast<ctypes::IntegralType>(int_type)->isSigned());
 
-	func = demangler->demangleFunctionToCtypes("?foo@@YAHE@Z", module, typeWidths, typeSignedness);
+	func = demangler->demangleFunctionToCtypes("?foo@@YAHE@Z", module, typeWidths, typeSignedness, 0);
 	auto unsigned_char_type = func->getParameter(1).getType();
 	EXPECT_FALSE(std::static_pointer_cast<ctypes::IntegralType>(unsigned_char_type)->isSigned());
 }
@@ -278,7 +278,7 @@ TEST_F(MsCtypesTests, SignednessOfTypesWithSignednessInMap)
 		{
 			{"wchar_t", ctypes::IntegralType::Signess::Signed}
 		};
-	func = demangler->demangleFunctionToCtypes("?foo@@YAH_W@Z", module, typeWidths, typeSignednessSignedWchar);
+	func = demangler->demangleFunctionToCtypes("?foo@@YAH_W@Z", module, typeWidths, typeSignednessSignedWchar, 0);
 	auto wcharTypeSigned = func->getParameter(1).getType();
 	EXPECT_TRUE(std::static_pointer_cast<ctypes::IntegralType>(wcharTypeSigned)->isSigned());
 
@@ -286,7 +286,7 @@ TEST_F(MsCtypesTests, SignednessOfTypesWithSignednessInMap)
 		{
 			{"wchar_t", ctypes::IntegralType::Signess::Unsigned}
 		};
-	func = demangler->demangleFunctionToCtypes("?foo@@YAH_W@Z", module, typeWidths, typeSignednessUnsignedWchar);
+	func = demangler->demangleFunctionToCtypes("?foo@@YAH_W@Z", module, typeWidths, typeSignednessUnsignedWchar, 0);
 	auto wcharTypeUnsigned = func->getParameter(1).getType();
 	EXPECT_TRUE(std::static_pointer_cast<ctypes::IntegralType>(wcharTypeUnsigned)->isSigned());
 }

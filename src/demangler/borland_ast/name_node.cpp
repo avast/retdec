@@ -1,9 +1,14 @@
+/**
+* @file src/demangler/borland_ast/name_node.cpp
+* @brief Representation of names.
+* @copyright (c) 2019 Avast Software, licensed under the MIT license
+*/
+
 #include "retdec/demangler/borland_ast/name_node.h"
 
 namespace retdec {
 namespace demangler {
 namespace borland {
-
 
 /**
  * @brief Constructor for NameNode
@@ -79,14 +84,16 @@ void NestedNameNode::printLeft(std::ostream &s) const
 /**
  * @return Higher level nodes in nested name.
  */
-std::shared_ptr<Node> NestedNameNode::super() {
+std::shared_ptr<Node> NestedNameNode::super()
+{
 	return _super;
 }
 
 /**
  * @return Lover level node in neste name.
  */
-std::shared_ptr<Node> NestedNameNode::name() {
+std::shared_ptr<Node> NestedNameNode::name()
+{
 	return _name;
 }
 

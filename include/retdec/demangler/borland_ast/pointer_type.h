@@ -1,3 +1,8 @@
+/**
+* @file include/retdec/demangler/borland_ast/pointer_type.h
+* @brief Representation of pointer type in borland AST.
+* @copyright (c) 2019 Avast Software, licensed under the MIT license
+*/
 
 #ifndef RETDEC_POINTER_TYPE_H
 #define RETDEC_POINTER_TYPE_H
@@ -27,7 +32,9 @@ public:
 	void printRight(std::ostream &s) const override;
 
 private:
-	PointerTypeNode(const std::shared_ptr<Node> &pointee, const Qualifiers &quals);
+	PointerTypeNode(
+		const std::shared_ptr<Node> &pointee,
+		const Qualifiers &quals);
 
 private:
 	std::shared_ptr<Node> _pointee;

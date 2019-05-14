@@ -1,3 +1,8 @@
+/**
+* @file include/retdec/ctypes/named_type.h
+* @brief A representation of class and instantiated template class types.
+* @copyright (c) 2019 Avast Software, licensed under the MIT license
+*/
 
 #ifndef RETDEC_CTYPES_NAMED_TYPE_H
 #define RETDEC_CTYPES_NAMED_TYPE_H
@@ -10,6 +15,8 @@ namespace ctypes {
 
 /**
  * @brief A representation of custom types.
+ * Named type represents class types and instatiated template class types,
+ * when only name of the type is known.
  */
 class NamedType: public Type {
 public:

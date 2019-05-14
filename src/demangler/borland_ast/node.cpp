@@ -1,3 +1,9 @@
+/**
+* @file src/demangler/borland_ast/node.cpp
+* @brief Base class for all nodes in AST.
+* @copyright (c) 2019 Avast Software, licensed under the MIT license
+*/
+
 #include <sstream>
 
 #include "retdec/demangler/borland_ast/node.h"

@@ -66,7 +66,7 @@ class ParamReturn : public llvm::ModulePass
 	// Collection of functions usage data.
 	//
 	private:
-		void addDataFromCall(DataFlowEntry *functionPair, llvm::CallInst *call) const;
+		void addDataFromCall(DataFlowEntry *dataflow, llvm::CallInst *call) const;
 
 	// Optimizations.
 	//

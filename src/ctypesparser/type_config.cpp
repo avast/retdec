@@ -1,5 +1,10 @@
+/**
+* @file src/ctypesparser/type_config.cpp
+* @brief Configuration of type widths and type signedness, that are implementation specific.
+* @copyright (c) 2019 Avast Software, licensed under the MIT license
+*/
 
-#include "retdec/ctypesparser/default_type_config.h"
+#include "retdec/ctypesparser/type_config.h"
 
 namespace retdec {
 namespace ctypesparser {

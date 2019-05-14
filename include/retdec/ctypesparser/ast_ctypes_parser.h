@@ -1,3 +1,9 @@
+/**
+* @file include/retdec/ctypesparser/ast_ctypes_parser.h
+* @brief Base class for all AST to ctypes parsers.
+* @copyright (c) 2019 Avast Software, licensed under the MIT license
+*/
+
 #ifndef RETDEC_AST_CTYPES_PARSER_H
 #define RETDEC_AST_CTYPES_PARSER_H
 
@@ -6,12 +12,15 @@
 namespace retdec {
 namespace ctypesparser {
 
+/*
+ * Base class for all AST to ctypes parsers.
+ */
 class AstToCtypesParser: public CTypesParser {
 public:
 	AstToCtypesParser () = default;
 
 protected:
-	unsigned toBitWidth(const std::string &typeName) const;
+	unsigned getBitWidth(const std::string &typeName) const;
 
 	ctypes::IntegralType::Signess toSigness(bool isUnsigned) const;
 

@@ -12,7 +12,7 @@
 #include "retdec/ctypes/context.h"
 #include "retdec/ctypes/function.h"
 #include "retdec/ctypes/function_type.h"
-#include "retdec/ctypesparser/default_type_config.h"
+#include "retdec/ctypesparser/type_config.h"
 
 using namespace llvm;
 
@@ -30,7 +30,7 @@ Demangler::Demangler(
 	std::unique_ptr<retdec::demangler::Demangler> demangler) :
 	_llvmModule(llvmModule),
 	_config(config),
-	_ltiModule(std::make_unique<ctypes::Module>(std::make_shared<ctypes::Context>())),
+	_ctypesModule(std::make_unique<ctypes::Module>(std::make_shared<ctypes::Context>())),
 	_typeConfig(typeConfig),
 	_demangler(std::move(demangler)) {}
 
@@ -43,10 +43,11 @@ Demangler::FunctionPair Demangler::getPairFunction(const std::string &mangled)
 {
 	auto ctypesFunction = _demangler->demangleFunctionToCtypes(
 		mangled,
-		_ltiModule,
+		_ctypesModule,
 		_typeConfig->typeWidths(),
 		_typeConfig->typeSignedness(),
-		_typeConfig->defaultBitWidth());
+		_typeConfig->defaultBitWidth()
+	);
 	if (ctypesFunction == nullptr) {
 		return {};
 	}

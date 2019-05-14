@@ -1,3 +1,8 @@
+/**
+* @file include/retdec/demangler/borland_ast/node_array.h
+* @brief Representation of arrays of nodes in borland AST.
+* @copyright (c) 2019 Avast Software, licensed under the MIT license
+*/
 
 #ifndef RETDEC_NODE_ARRAY_H
 #define RETDEC_NODE_ARRAY_H
@@ -24,7 +29,7 @@ public:
 
 	void printLeft(std::ostream &s) const override;
 
-	std::shared_ptr<Node> get(unsigned i) const;	// TODO operator []
+	std::shared_ptr<Node> get(unsigned i) const;    // TODO operator []
 
 protected:
 	NodeArray();

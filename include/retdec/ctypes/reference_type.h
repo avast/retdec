@@ -1,7 +1,7 @@
 /**
 * @file include/retdec/ctypes/reference_type.h
 * @brief A representation of reference types.
-* @copyright (c) 2018 Avast Software, licensed under the MIT license
+* @copyright (c) 2019 Avast Software, licensed under the MIT license
 */
 
 #ifndef RETDEC_CTYPES_REFERENCE_TYPE_H
@@ -16,7 +16,7 @@ namespace retdec {
 namespace ctypes {
 
 /**
- * @brief A representation of reference types.
+ * @brief A representation of L-Value and R-Value reference types.
  */
 class ReferenceType: public Type
 {

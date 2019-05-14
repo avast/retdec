@@ -1,6 +1,9 @@
-//
-// Created by adam on 10.3.19.
-//
+/**
+* @file include/retdec/demangler/borland_ast/rreference_type.h
+* @brief Representation of R-value reference type in borland AST.
+* @copyright (c) 2019 Avast Software, licensed under the MIT license
+*/
+
 
 #ifndef RETDEC_RREFERENCE_TYPE_H
 #define RETDEC_RREFERENCE_TYPE_H

@@ -1,6 +1,8 @@
-//
-// Created by adam on 10.3.19.
-//
+/**
+* @file include/retdec/demangler/borland_ast/type_node.h
+* @brief Base class for all types in borland AST.
+* @copyright (c) 2019 Avast Software, licensed under the MIT license
+*/
 
 #ifndef RETDEC_TYPE_NODE_H
 #define RETDEC_TYPE_NODE_H
@@ -21,7 +23,7 @@ public:
 	Qualifiers quals();
 
 protected:
-	explicit TypeNode(const Qualifiers &quals);	// TODO kind ako volitelny parameter
+	explicit TypeNode(const Qualifiers &quals);
 
 protected:
 	Qualifiers _quals;

@@ -1,3 +1,9 @@
+/**
+* @file src/ctypesparser/itanium_ast_ctypes_parser.cpp
+* @brief Parser from AST created by Itanium demangler to C-types.
+* @copyright (c) 2019 Avast Software, licensed under the MIT license
+*/
+
 #include <cassert>
 #include <sstream>
 
@@ -5,23 +11,15 @@
 #include "llvm/Demangle/MicrosoftDemangle.h"
 
 #include "retdec/ctypesparser/ms_ast_ctypes_parser.h"
-#include "retdec/ctypes/module.h"
-#include "retdec/ctypes/unknown_type.h"
-#include "retdec/ctypes/type.h"
-#include "retdec/ctypes/function.h"
-#include "retdec/ctypes/parameter.h"
-#include "retdec/ctypes/unknown_type.h"
-#include "retdec/ctypes/integral_type.h"
-#include "retdec/ctypes/floating_point_type.h"
-#include "retdec/ctypes/pointer_type.h"
-#include "retdec/ctypes/reference_type.h"
-#include "retdec/ctypes/void_type.h"
 
 namespace retdec {
 namespace ctypesparser {
 
 namespace {
 
+/*
+ * @return String representation of node.
+ */
 std::string toString(llvm::ms_demangle::Node *node)
 {
 
@@ -49,6 +47,10 @@ std::string toString(llvm::ms_demangle::Node *node)
 
 using Kind = llvm::ms_demangle::NodeKind;
 
+/*
+ * @brief Entry point for parsing AST representation of functions into ctypes functions.
+ * Sets internal variables and checks if root AST node is function.
+ */
 std::shared_ptr<ctypes::Function> MsToCtypesParser::parseAsFunction(
 	const std::string &mangledName,
 	llvm::ms_demangle::SymbolNode *ast,
@@ -64,6 +66,7 @@ std::shared_ptr<ctypes::Function> MsToCtypesParser::parseAsFunction(
 	this->typeSignedness = typeSignedness;
 	this->defaultBitWidth = defaultBitWidth;
 
+	// if not function, do nothing
 	if (ast->kind() == Kind::FunctionSymbol) {
 		auto func = parseFunction(mangledName, static_cast<llvm::ms_demangle::FunctionSymbolNode *>(ast));
 		if (func) {
@@ -124,7 +127,7 @@ ctypes::CallConvention MsToCtypesParser::parseCallConvention(
 	case Conv::Regcall:
 		return {"regcall"};
 	default:
-		return {"unknown"};
+		return {"unknown"};	// shouldn't happen
 	}
 }
 
@@ -219,7 +222,7 @@ std::shared_ptr<ctypes::IntegralType> MsToCtypesParser::parseIntegralType(
 	assert(integralTypeNode && "Violated precondition.");
 
 	std::string name = getTypeName(integralTypeNode->PrimKind);
-	unsigned bitWidth = toBitWidth(name);
+	unsigned bitWidth = getBitWidth(name);
 	ctypes::IntegralType::Signess signess = toSigness(name);
 
 	return ctypes::IntegralType::create(context, name, bitWidth, signess);
@@ -231,7 +234,7 @@ std::shared_ptr<ctypes::FloatingPointType> MsToCtypesParser::parseFloatingPointT
 	assert(floatingPointTypeNode && "Violated precondition.");
 
 	std::string name = getTypeName(floatingPointTypeNode->PrimKind);
-	unsigned bitWidth = toBitWidth(name);
+	unsigned bitWidth = getBitWidth(name);
 
 	return ctypes::FloatingPointType::create(context, name, bitWidth);
 }
@@ -272,15 +275,15 @@ std::shared_ptr<ctypes::Type> MsToCtypesParser::parsePointerType(
 
 	switch (typeNode->Affinity) {
 	case Affinity::Pointer: {
-		unsigned bitWidth = toBitWidth("ptr_t");
+		unsigned bitWidth = getBitWidth("ptr_t");
 		return ctypes::PointerType::create(context, pointee, bitWidth);
 	}
 	case Affinity::Reference: {
-		unsigned bitWidth = toBitWidth("ptr_t");
+		unsigned bitWidth = getBitWidth("ptr_t");
 		return ctypes::ReferenceType::create(context, pointee, bitWidth);
 	}
 	case Affinity::RValueReference: {
-		unsigned bitWidth = toBitWidth("ptr_t");
+		unsigned bitWidth = getBitWidth("ptr_t");
 		return ctypes::ReferenceType::create(context, pointee, bitWidth);
 	}
 	default:
@@ -345,7 +348,7 @@ ctypes::FunctionType::Parameters MsToCtypesParser::parseFuncTypeParameters(
 
 	if (parameters) {
 		for (size_t i = 0; i < parameters->Count; ++i) {
-			if (parameters->Nodes[i]) {                // for safety
+			if (parameters->Nodes[i]) {
 				auto type = parseType(dynamic_cast<llvm::ms_demangle::TypeNode *>(parameters->Nodes[i]));
 				params.emplace_back(type);
 			}

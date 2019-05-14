@@ -1,6 +1,8 @@
-//
-// Created by adam on 10.3.19.
-//
+/**
+* @file include/retdec/demangler/borland_ast/array_type.h
+* @brief Representation of array types in borland AST.
+* @copyright (c) 2019 Avast Software, licensed under the MIT license
+*/
 
 #ifndef RETDEC_ARRAY_TYPE_H
 #define RETDEC_ARRAY_TYPE_H
@@ -33,7 +35,10 @@ public:
 	void printRight(std::ostream &s) const override;
 
 private:
-	ArrayNode(std::shared_ptr<retdec::demangler::borland::Node> pointee, unsigned size, const Qualifiers &quals);
+	ArrayNode(
+		std::shared_ptr<retdec::demangler::borland::Node> pointee,
+		unsigned size,
+		const Qualifiers &quals);
 
 private:
 	std::shared_ptr<Node> _pointee;

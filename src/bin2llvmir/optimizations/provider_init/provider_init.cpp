@@ -76,6 +76,7 @@ bool ProviderInitialization::runOnModule(Module& m)
 		return false;
 	}
 
+	// maybe should be in config::Config
 	auto typeConfig = std::make_shared<ctypesparser::TypeConfig>();
 
 	auto* d = DemanglerProvider::addDemangler(&m, c, typeConfig);

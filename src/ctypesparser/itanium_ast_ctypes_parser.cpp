@@ -1,16 +1,11 @@
+/**
+* @file src/ctypesparser/itanium_ast_ctypes_parser.cpp
+* @brief Parser from AST created by Itanium demangler to C-types.
+* @copyright (c) 2019 Avast Software, licensed under the MIT license
+*/
+
 #include "llvm/Demangle/ItaniumDemangle.h"
 
-#include "retdec/ctypes/module.h"
-#include "retdec/ctypes/unknown_type.h"
-#include "retdec/ctypes/type.h"
-#include "retdec/ctypes/function.h"
-#include "retdec/ctypes/parameter.h"
-#include "retdec/ctypes/unknown_type.h"
-#include "retdec/ctypes/integral_type.h"
-#include "retdec/ctypes/floating_point_type.h"
-#include "retdec/ctypes/pointer_type.h"
-#include "retdec/ctypes/reference_type.h"
-#include "retdec/ctypes/void_type.h"
 #include "retdec/ctypesparser/itanium_ast_ctypes_parser.h"
 
 namespace retdec {
@@ -21,6 +16,9 @@ using StringView = llvm::itanium_demangle::StringView;
 
 namespace {
 
+/*
+ * @return String representation of node and it's subtree.
+ */
 std::string toString(const llvm::itanium_demangle::Node *node)
 {
 
@@ -44,6 +42,9 @@ std::string toString(const llvm::itanium_demangle::Node *node)
 	return name;
 }
 
+/*
+ * @brief Converts StringView text to std::string.
+ */
 inline std::string toString(const StringView &s)
 {
 	return {s.begin(), s.size()};
@@ -51,6 +52,10 @@ inline std::string toString(const StringView &s)
 
 }    // anonymous namespace
 
+/*
+ * @brief Entry point for parsing AST representation of functions into ctypes functions.
+ * Sets internal variables and checks if root AST node is function.
+ */
 std::shared_ptr<ctypes::Function> ItaniumAstCtypesParser::parseAsFunction(
 	const std::string &name,
 	const llvm::itanium_demangle::Node *ast,
@@ -124,7 +129,7 @@ std::shared_ptr<ctypes::Type> ItaniumAstCtypesParser::parseType(
 	const llvm::itanium_demangle::Node *typeNode)
 {
 	if (!typeNode) {
-		return ctypes::UnknownType::create();
+		return ctypes::UnknownType::create();	// shouldn't happen
 	}
 
 	std::shared_ptr<ctypes::Type> parsedType;
@@ -162,7 +167,7 @@ std::shared_ptr<ctypes::IntegralType> ItaniumAstCtypesParser::parseIntegralType(
 {
 	assert(!name.empty() && "Violated precondition.");
 
-	unsigned bitWidth = toBitWidth(name);
+	unsigned bitWidth = getBitWidth(name);
 	ctypes::IntegralType::Signess signess = toSigness(name);
 
 	return ctypes::IntegralType::create(context, name, bitWidth, signess);
@@ -173,7 +178,7 @@ std::shared_ptr<ctypes::FloatingPointType> ItaniumAstCtypesParser::parseFloating
 {
 	assert(!name.empty() && "Violated precondition.");
 
-	unsigned bitWidth = toBitWidth(name);
+	unsigned bitWidth = getBitWidth(name);
 
 	return ctypes::FloatingPointType::create(context, name, bitWidth);
 }
@@ -184,7 +189,7 @@ std::shared_ptr<ctypes::PointerType> ItaniumAstCtypesParser::parsePointer(
 	assert(typeNode && "Violated precondition.");
 
 	auto pointee = parseType(typeNode->getPointee());
-	unsigned bitWidth = toBitWidth("ptr_t");
+	unsigned bitWidth = getBitWidth("ptr_t");
 
 	return ctypes::PointerType::create(context, pointee, bitWidth);
 }
@@ -195,17 +200,24 @@ std::shared_ptr<ctypes::Type> ItaniumAstCtypesParser::parseReference(
 	assert(typeNode && "Violated precondition.");
 
 	auto pointee = parseType(typeNode->getPointee());
-	unsigned bitWidth = toBitWidth("ptr_t");
+	unsigned bitWidth = getBitWidth("ptr_t");
 
 	return ctypes::ReferenceType::create(context, pointee, bitWidth);	// both LValue and RValue
 }
 
+/*
+ * @brief Parses types based on their name.
+ * Itanium AST uses KNameType nodes for representation of types, hence the name.
+ * It parses not only ctypes::NamedType
+ * To make parsing easy, information about varArgness is returned as named type.
+ * This type should't be stored anywhere and varArgness of function should be set.
+ */
 std::shared_ptr<ctypes::Type> ItaniumAstCtypesParser::parseNameTypeNode(
-	const llvm::itanium_demangle::NameType *nameTypeNode)
+	const llvm::itanium_demangle::NameType *typeNode)
 {
-	assert(nameTypeNode && "Violated precondition.");
+	assert(typeNode && "Violated precondition.");
 
-	std::string name = toString(nameTypeNode->getName());
+	std::string name = toString(typeNode->getName());
 
 	if (name == "void") {
 		return ctypes::VoidType::create();
@@ -245,10 +257,13 @@ std::shared_ptr<ctypes::Type> ItaniumAstCtypesParser::parseNameTypeNode(
 	if (name == "auto"
 		|| name == "decltype(auto)"
 		|| name == "std::nullptr_t") {
-		return ctypes::UnknownType::create();    // TODO decimal support
+		return ctypes::UnknownType::create();
 	}
 
-//	if (name == "...") return type with name "..."
+	/*
+	 * if (name == "...") return type with name "..."; <-- is implicit
+ 	 * is later used to check if function takes variable number of arguments
+	 */
 	return ctypes::NamedType::create(context, name);
 }
 
@@ -258,6 +273,7 @@ std::shared_ptr<ctypes::ArrayType> ItaniumAstCtypesParser::parseArrayType(
 	using Dimensions = ctypes::ArrayType::Dimensions;
 
 	Dimensions dimensions;
+
 	dimensions.emplace_back(parseDimension(typeNode->getDimension()));
 
 	const llvm::itanium_demangle::Node *arrayTypeNode = typeNode->getBase();
@@ -286,13 +302,14 @@ unsigned ItaniumAstCtypesParser::parseDimension(const llvm::itanium_demangle::No
 	unsigned dim = 0;
 	try {
 		size_t lenParsed;
-		int parsed = std::stoi(dimStr, &lenParsed);
+		int parsed = std::stoi(dimStr, &lenParsed);	// catch exception if fails
 		if (lenParsed == dimStr.length()) {
 			dim = static_cast<unsigned>(parsed);
 		}
 	} catch (std::exception &e) {
 		dim = 0;
 	}
+
 	return dim;
 }
 
@@ -304,7 +321,7 @@ std::shared_ptr<ctypes::FunctionType> ItaniumAstCtypesParser::parseFuntionType(
 	ctypes::FunctionType::Parameters parameters =
 		parseFuncTypeParameters(typeNode->getParameters(), isVarArg);
 	ctypes::Function::VarArgness varArgness = toVarArgness(isVarArg);
-	ctypes::CallConvention callConvention = ctypes::CallConvention();    // TODO
+	ctypes::CallConvention callConvention = ctypes::CallConvention("unknown");	// itanium scheme never mangles call conv
 
 	return ctypes::FunctionType::create(context, returnType, parameters, callConvention, varArgness);
 }
@@ -321,6 +338,8 @@ ctypes::FunctionType::Parameters ItaniumAstCtypesParser::parseFuncTypeParameters
 		auto type = parseType(parameters_node[i]);
 		if (type->isNamed()
 			&& std::static_pointer_cast<ctypes::NamedType>(type)->getName() == "...") {
+			// to make parsing easy, information about varArgness is temporarely passed as named type
+			// this type should't be stored anywhere
 			isVarArg = true;
 		} else {
 			parameters.emplace_back(type);

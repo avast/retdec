@@ -1,7 +1,7 @@
 /**
  * @file include/retdec/bin2llvmir/providers/demangler.h
  * @brief Demangler provider for bin2llvmirl.
- * @copyright (c) 2017 Avast Software, licensed under the MIT license
+ * @copyright (c) 2019 Avast Software, licensed under the MIT license
  */
 
 #ifndef RETDEC_BIN2LLVMIR_PROVIDERS_DEMANGLER_H
@@ -14,20 +14,22 @@
 #include "retdec/bin2llvmir/providers/config.h"
 #include "retdec/config/tool_info.h"
 #include "retdec/demangler/demangler.h"
-#include "retdec/ctypesparser/default_type_config.h"
+#include "retdec/ctypesparser/type_config.h"
 
 namespace retdec {
 
 namespace loader {
 class Image;
 }
-
 namespace ctypes {
 class Type;
 }
 
 namespace bin2llvmir {
 
+/*
+ * @brief Combined interface for Demangler library and ctypes2llvmir translator.
+ */
 class Demangler
 {
 public:
@@ -52,13 +54,13 @@ private:
 private:
 	llvm::Module *_llvmModule = nullptr;
 	Config *_config = nullptr;
-	std::unique_ptr<retdec::ctypes::Module> _ltiModule;
+	std::unique_ptr<retdec::ctypes::Module> _ctypesModule;
 	std::shared_ptr<ctypesparser::TypeConfig> _typeConfig;
 	std::unique_ptr<demangler::Demangler> _demangler;
 };
 
 /**
- * @brief Class creating demanglers.
+ * @brief Class for creating demanglers.
  */
 class DemanglerFactory
 {

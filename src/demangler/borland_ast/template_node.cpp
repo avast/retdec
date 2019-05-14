@@ -1,3 +1,9 @@
+/**
+* @file src/demangler/borland_ast/template_node.cpp
+* @brief Representation of templates.
+* @copyright (c) 2019 Avast Software, licensed under the MIT license
+*/
+
 #include <sstream>
 
 #include "retdec/demangler/borland_ast/template_node.h"

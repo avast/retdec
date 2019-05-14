@@ -5,7 +5,7 @@ set(CTYPESPARSER_SOURCES
 	borland_ast_ctypes_parser.cpp
 	ms_ast_ctypes_parser.cpp
 	itanium_ast_ctypes_parser.cpp
-	default_type_config.cpp
+	type_config.cpp
 )
 
 add_library(retdec-ctypesparser STATIC ${CTYPESPARSER_SOURCES})

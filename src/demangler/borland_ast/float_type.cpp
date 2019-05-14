@@ -1,3 +1,9 @@
+/**
+* @file src/demangler/borland_ast/float_type.cpp
+* @brief Representation of floating point number types.
+* @copyright (c) 2019 Avast Software, licensed under the MIT license
+*/
+
 #include "retdec/demangler/borland_ast/float_type.h"
 
 namespace retdec {
