@@ -1,15 +1,14 @@
 /**
  * @file src/demanglertool/demangler.cpp
  * @brief Demangler tool.
- * @copyright (c) 2017 Avast Software, licensed under the MIT license
+ * @copyright (c) 2019 Avast Software, licensed under the MIT license
  */
 
-#include <cstring>
+#include <string>
 #include <iostream>
 
 #include "retdec/demangler/demangler.h"
 
-using namespace std;
 using ItaniumDemangler = retdec::demangler::ItaniumDemangler;
 using MicrosoftDemangler = retdec::demangler::MicrosoftDemangler;
 using BorlandDemangler = retdec::demangler::BorlandDemangler;
@@ -17,7 +16,7 @@ using BorlandDemangler = retdec::demangler::BorlandDemangler;
 /**
  * @brief String constant containing help.
  */
-const string helpmsg =
+const std::string helpmsg =
 	"Demangler tool.\n"
 	"\n"
 	"Usage:\n"
@@ -26,31 +25,20 @@ const string helpmsg =
 
 /**
  * @brief Main function of the Demangler tool.
- * @param argc Argument count.
- * @param argv Arguments.
  */
-int main(int argc, char *argv[]) {
+int main(int argc, char *argv[])
+{
 	auto dem_gcc = std::make_unique<ItaniumDemangler>();
-	auto dem_ms =  std::make_unique<MicrosoftDemangler>();
+	auto dem_ms = std::make_unique<MicrosoftDemangler>();
 	auto dem_borland = std::make_unique<BorlandDemangler>();
 
-	string demangledGcc;
-	string demangledMs;
-	string demangledBorland;
+	std::string demangledGcc;
+	std::string demangledMs;
+	std::string demangledBorland;
 
-	//no argument -- print help
-	if (argc <= 1) {
-		cout << helpmsg;
+	if (argc <= 1 || strcmp(argv[1], "-h") == 0 || strcmp(argv[1], "--help") == 0) {
+		std::cout << helpmsg;
 		return 0;
-	}
-
-	//first argunment contains help request
-	else {
-		//print help
-		if (strcmp(argv[1],"-h") == 0 || strcmp(argv[1],"--help") == 0) {
-			cout << helpmsg;
-			return 0;
-		}
 	}
 
 	//process all mangled arguments
@@ -60,10 +48,16 @@ int main(int argc, char *argv[]) {
 		demangledMs = dem_ms->demangleToString(argv[i]);
 		demangledBorland = dem_borland->demangleToString(argv[i]);
 
-		if (!demangledGcc.empty()) { cout << "gcc: " << demangledGcc << endl; }
-		if (!demangledMs.empty()) { cout << "ms: " << demangledMs << endl; }
-		if (!demangledBorland.empty()) { cout << "borland: " << demangledBorland << endl; }
-	} //for
+		if (!demangledGcc.empty()) {
+			std::cout << "gcc: " << demangledGcc << std::endl;
+		}
+		if (!demangledMs.empty()) {
+			std::cout << "ms: " << demangledMs << std::endl;
+		}
+		if (!demangledBorland.empty()) {
+			std::cout << "borland: " << demangledBorland << std::endl;
+		}
+	}
 
 	return 0;
 }
