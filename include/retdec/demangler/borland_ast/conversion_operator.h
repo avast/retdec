@@ -20,9 +20,7 @@ namespace borland {
 class ConversionOperatorNode : public Node
 {
 public:
-	static std::shared_ptr<ConversionOperatorNode> create(
-		Context &context,
-		std::shared_ptr<Node> type);
+	static std::shared_ptr<ConversionOperatorNode> create(std::shared_ptr<Node> type);
 
 	void printLeft(std::ostream &s) const override;
 

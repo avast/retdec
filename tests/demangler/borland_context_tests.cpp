@@ -9,24 +9,7 @@
 
 #include "retdec/demangler/borland_ast_parser.h"
 #include "retdec/demangler/context.h"
-#include "retdec/demangler/borland_ast/array_type.h"
-#include "retdec/demangler/borland_ast/built_in_type.h"
-#include "retdec/demangler/borland_ast/char_type.h"
-#include "retdec/demangler/borland_ast/conversion_operator.h"
-#include "retdec/demangler/borland_ast/float_type.h"
-#include "retdec/demangler/borland_ast/function_type.h"
-#include "retdec/demangler/borland_ast/function_node.h"
-#include "retdec/demangler/borland_ast/integral_type.h"
-#include "retdec/demangler/borland_ast/name_node.h"
-#include "retdec/demangler/borland_ast/named_type.h"
-#include "retdec/demangler/borland_ast/node.h"
-#include "retdec/demangler/borland_ast/node_array.h"
-#include "retdec/demangler/borland_ast/pointer_type.h"
-#include "retdec/demangler/borland_ast/qualifiers.h"
-#include "retdec/demangler/borland_ast/reference_type.h"
-#include "retdec/demangler/borland_ast/rreference_type.h"
-#include "retdec/demangler/borland_ast/template_node.h"
-#include "retdec/demangler/borland_ast/type_node.h"
+#include "retdec/demangler/borland_ast/borland_ast.h"
 
 using namespace ::testing;
 
@@ -44,6 +27,49 @@ protected:
 	Context context;
 	borland::BorlandASTParser parser;
 };
+
+TEST_F(BorlandContextTests, BuiltInTest)
+{
+	auto b1 = BuiltInTypeNode::create(context, "void", {false, false});
+	auto b2 = BuiltInTypeNode::create(context, "void", {false, false});
+	auto b3 = BuiltInTypeNode::create(context, "void", {true, false});
+	auto b4 = BuiltInTypeNode::create(context, "notVoid", {false, false});
+
+	EXPECT_EQ(b1, b2);
+	EXPECT_NE(b1, b3);
+	EXPECT_NE(b1, b4);
+	EXPECT_NE(b3, b4);
+}
+
+TEST_F(BorlandContextTests, CharTypeTests)
+{
+	auto c0 = CharTypeNode::create(context, ThreeStateSignedness::signed_char, {false, false});
+	auto c1 = CharTypeNode::create(context, ThreeStateSignedness::signed_char, {false, false});
+	auto c2 = CharTypeNode::create(context, ThreeStateSignedness::unsigned_char, {false, false});
+	auto c3 = CharTypeNode::create(context, ThreeStateSignedness::no_prefix, {false, false});
+	auto c4 = CharTypeNode::create(context, ThreeStateSignedness::signed_char, {true, false});
+	auto c5 = CharTypeNode::create(context, ThreeStateSignedness::signed_char, {false, true});
+
+	EXPECT_EQ(c0, c1);
+	EXPECT_NE(c0, c2);
+	EXPECT_NE(c0, c3);
+	EXPECT_NE(c0, c4);
+	EXPECT_NE(c0, c5);
+}
+
+TEST_F(BorlandContextTests, FloatTypeTets)
+{
+	auto f1 = FloatTypeNode::create(context, "float", {false, false});
+	auto f2 = FloatTypeNode::create(context, "float", {false, false});
+	auto f3 = FloatTypeNode::create(context, "double", {false, false});
+	auto f4 = FloatTypeNode::create(context, "float", {true, false});
+	auto f5 = FloatTypeNode::create(context, "float", {false, true});
+
+	EXPECT_EQ(f1, f2);
+	EXPECT_NE(f1, f3);
+	EXPECT_NE(f1, f4);
+	EXPECT_NE(f1, f5);
+}
 
 TEST_F(BorlandContextTests, IntegralTest)
 {
@@ -112,20 +138,7 @@ TEST_F(BorlandContextTests, NestedNameNodesTests)
 	EXPECT_NE(nn1, nn3);
 }
 
-TEST_F(BorlandContextTests, FuntionTests)
-{
-	parser.parse("@foo1$qpxi");
-	auto ast1 = parser.ast();
 
-	parser.parse("@foo1$qpxi");
-	auto ast2 = parser.ast();
-
-	parser.parse("@foo2$qpxi");
-	auto ast3 = parser.ast();
-
-	EXPECT_EQ(ast1, ast2);
-	EXPECT_NE(ast1, ast3);
-}
 
 TEST_F(BorlandContextTests, ArrayTests)
 {

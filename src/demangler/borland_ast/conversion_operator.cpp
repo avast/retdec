@@ -25,9 +25,9 @@ ConversionOperatorNode::ConversionOperatorNode(
  * @param type Node representing target type.
  * @return pointer to constructed operator.
  */
-std::shared_ptr<ConversionOperatorNode> ConversionOperatorNode::create(Context &context, std::shared_ptr<Node> type)
+std::shared_ptr<ConversionOperatorNode> ConversionOperatorNode::create(std::shared_ptr<Node> type)
 {
-	return std::shared_ptr<ConversionOperatorNode>(new ConversionOperatorNode(type));    // TODO context
+	return std::shared_ptr<ConversionOperatorNode>(new ConversionOperatorNode(std::move(type)));
 }
 
 /**

@@ -67,7 +67,6 @@ std::shared_ptr<NestedNameNode> NestedNameNode::create(
 	auto newName = std::shared_ptr<NestedNameNode>(new NestedNameNode(super, name));
 	context.addNestedName(newName);
 	return newName;
-//	return std::shared_ptr<NestedNameNode>(new NestedNameNode(super, name));
 }
 
 /**

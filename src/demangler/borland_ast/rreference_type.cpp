@@ -33,7 +33,6 @@ RReferenceTypeNode::RReferenceTypeNode(std::shared_ptr<Node> pointee) :
 std::shared_ptr<RReferenceTypeNode> RReferenceTypeNode::create(
 	Context &context, std::shared_ptr<Node> pointee)
 {
-//	return std::shared_ptr<RReferenceTypeNode>(new RReferenceTypeNode(std::move(pointee)));
 	auto type = context.getRReferenceType(pointee);
 	if (type) {
 		return type;

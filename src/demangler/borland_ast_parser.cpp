@@ -431,7 +431,7 @@ std::shared_ptr<Node> BorlandASTParser::parseOperator()
 			_status = invalid_mangled_name;
 			return nullptr;
 		}
-		return ConversionOperatorNode::create(_context, type);
+		return ConversionOperatorNode::create(type);
 	}
 
 	if (peek("$b")) {
@@ -906,7 +906,7 @@ std::shared_ptr<TypeNode> BorlandASTParser::parseBuildInType(const Qualifiers &q
 	}
 
 	if (consumeIfPossible('N')) {
-		return NamedTypeNode::create(NameNode::create(_context, "nullptr_t"), quals);    // TODO nullptr_t as Type
+		return NamedTypeNode::create(NameNode::create(_context, "nullptr_t"), quals);
 	}
 
 	return nullptr;        // did nothing
@@ -1056,7 +1056,7 @@ std::shared_ptr<Node> BorlandASTParser::parseTemplateParams()
 				_mangled = mangledCopy;        // propagate
 
 				auto enumExpr = NodeString::create();
-				enumExpr->addNode(ParenthesesNode::create(_context, typeNode));
+				enumExpr->addNode(ParenthesesNode::create(typeNode));
 				enumExpr->addNode(expr);
 				nodeToAdd = enumExpr;
 			}
