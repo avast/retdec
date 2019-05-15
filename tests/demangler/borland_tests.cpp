@@ -77,7 +77,6 @@ TEST_F(BorlandDemanglerTests, BasicParametersTests)
 		   "myFunc_all_(short, unsigned short, int, unsigned int, long, unsigned long, long long, unsigned long long, signed char, unsigned char, char, float, double, long double, bool, char16_t, char32_t, wchar_t)");
 	DEM_EQ("@foo$qie", "foo(int, ...)");
 	DEM_EQ("@foo$qN", "foo(nullptr_t)");
-	// TODO @foo$q
 }
 
 TEST_F(BorlandDemanglerTests, MoreComplicatedParameters)
@@ -101,7 +100,6 @@ TEST_F(BorlandDemanglerTests, QualifiersTests)
 	DEM_EQ("@foo11$qpwxi", "foo11(volatile const int *)");
 	DEM_EQ("@foonew$qrwxpi", "foonew(int * volatile const &)");
 	DEM_EQ("@Bar@foo$wxqqrv", "__fastcall Bar::foo(void) volatile const");
-//	DEM_EQ("@foo$qrri", "foo(int & _restrict)"); 	// TODO when possible demangle as reference
 }
 
 TEST_F(BorlandDemanglerTests, PointersTests)
@@ -263,13 +261,12 @@ TEST_F(BorlandDemanglerTests, Operators)
 	DEM_EQ("@Foo@$bnwa$qui", "Foo::operator new[](unsigned int)");
 	DEM_EQ("@Foo@$bdele$qpv", "Foo::operator delete(void *)");
 	DEM_EQ("@Foo@$bdla$qpv", "Foo::operator delete[](void *)");
-	DEM_EQ("@Foo@$o3Bar$qv", "Foo::operator Bar(void)");	// TODO test with template?
+	DEM_EQ("@Foo@$o3Bar$qv", "Foo::operator Bar(void)");
 	DEM_EQ("@Foo@$oi$qv", "Foo::operator int(void)");
 	DEM_EQ("@Foo@$bctr$qv", "Foo::Foo(void)");
 	DEM_EQ("@Foo@$bctr2$qv", "Foo::Foo(void)");
 	DEM_EQ("@Foo@$bdtr1$qv", "Foo::~Foo(void)");
 	DEM_EQ("@Foo@$bdtr2$qv", "Foo::~Foo(void)");
-	// TODO test constructors and destructors in templates
 	DEM_EQ("@std@error_category@$beql$xqrx18std@error_category", "std::error_category::operator==(const std::error_category &) const");
 }
 
@@ -317,7 +314,7 @@ TEST_F(BorlandDemanglerTests, NonClassTemplates)
 		"void foo<nullptr_t>(nullptr_t)");
 	DEM_EQ("@Unit1@foo_Comp_$qqr11System@Comp", "__fastcall Unit1::foo_Comp_(System::Comp)");
 	DEM_EQ("@Unit1@foo_Currency_$qqr15System@Currency", "__fastcall Unit1::foo_Currency_(System::Currency)");
-	DEM_EQ("@Unit1@foo_ShortString_$qqrr29System@%SmallString$uc$i255$%", "__fastcall Unit1::foo_ShortString_(System::SmallString<255> &)");	// TODO
+	DEM_EQ("@Unit1@foo_ShortString_$qqrr29System@%SmallString$uc$i255$%", "__fastcall Unit1::foo_ShortString_(System::SmallString<255> &)");
 	DEM_EQ("@Unit1@foo_AnsiString_$qqr27System@%AnsiStringT$us$i0$%","__fastcall Unit1::foo_AnsiString_(System::AnsiStringT<0>)");
 	DEM_EQ("@Unit1@foo_UnicodeString_$qqr20System@UnicodeString","__fastcall Unit1::foo_UnicodeString_(System::UnicodeString)");
 	DEM_EQ("@Unit1@foo_WideString_$qqr17System@WideString", "__fastcall Unit1::foo_WideString_(System::WideString)");
