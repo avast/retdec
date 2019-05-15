@@ -84,8 +84,6 @@ void VisitAllVisitor::visit(const std::shared_ptr<IntegralType> &type)
 
 void VisitAllVisitor::visit(const std::shared_ptr<NamedType> &type)
 {
-	// TODO
-
 	if (makeAccessedAndCheckIfAccessed(type))
 	{
 		return;
@@ -109,7 +107,7 @@ void VisitAllVisitor::visit(const std::shared_ptr<ReferenceType> &type)
 		return;
 	}
 
-	// TODO
+	type->getReferencedType()->accept(this);
 }
 
 void VisitAllVisitor::visit(const std::shared_ptr<StructType> &type)
