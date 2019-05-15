@@ -17,11 +17,9 @@ using BorlandDemangler = retdec::demangler::BorlandDemangler;
  * @brief String constant containing help.
  */
 const std::string helpmsg =
-	"Demangler tool.\n"
-	"\n"
 	"Usage:\n"
-	"\t'demangler -h | Show this help.\n"
-	"\t'demangler mangledname | Attempt to demangle a name using all available demanglers and print result if succeded.\n";
+	"\t'retdec-demangler [-h, --help]   | Show this help.\n"
+	"\t'retdec-demangler <mangledname>  | Attempt to demangle <mangledname> using all available demanglers and print result if succeded.\n";
 
 /**
  * @brief Main function of the Demangler tool.
