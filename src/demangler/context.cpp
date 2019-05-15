@@ -1,5 +1,10 @@
-#include <retdec/utils/container.h>
+/**
+ * @file src/demangler_llvm/context.cpp
+ * @brief Implementation of cacheing of nodes in borland demangler AST.
+ * @copyright (c) 2018 Avast Software, licensed under the MIT license
+ */
 
+#include "retdec/utils/container.h"
 #include "retdec/demangler/context.h"
 #include "retdec/demangler/borland_ast/borland_ast.h"
 

@@ -24,6 +24,7 @@ MicrosoftDemangler::MicrosoftDemangler() : Demangler("microsoft") {}
  * @param mangled Name mangled by microsoft mangling scheme.
  * @return Demangled name.
  */
+
 std::string MicrosoftDemangler::demangleToString(const std::string &mangled)
 {
 	const char *mangled_c = mangled.c_str();
