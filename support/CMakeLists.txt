@@ -12,7 +12,7 @@ set(SUPPORT_TARGET_DIR "${CMAKE_INSTALL_PREFIX}/share/retdec/support")
 check_if_variable_changed(RETDEC_COMPILE_YARA CHANGED)
 if(CHANGED)
 	message(STATUS "Support: YARA rules compilation flag changed -> cleaning RetDec support.")
-	FILE(REMOVE_RECURSE "${SUPPORT_TARGET_DIR}")
+	FILE(REMOVE_RECURSE "\$ENV{DESTDIR}${SUPPORT_TARGET_DIR}")
 endif()
 
 # Get and install external support package from the retdec-support repository.
@@ -22,7 +22,10 @@ endif()
 install(CODE "
 	execute_process(
 		# -u = unbuffered -> print debug messages right away.
-		COMMAND \"${PYTHON_EXECUTABLE}\" -u \"${CMAKE_SOURCE_DIR}/support/install-share.py\" \"${CMAKE_INSTALL_PREFIX}\"
+		COMMAND \"${PYTHON_EXECUTABLE}\"
+		    -u
+		    \"${CMAKE_SOURCE_DIR}/support/install-share.py\"
+		    \"\$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}\"
 		RESULT_VARIABLE INSTALL_SHARE_RES
 	)
 	if(INSTALL_SHARE_RES)
@@ -41,14 +44,14 @@ install(DIRECTORY ordinals/x86/ DESTINATION "${SUPPORT_TARGET_DIR}/x86/ords")
 
 # Install YARA rules for tools detection.
 #
-set(YARAC_PATH "${CMAKE_INSTALL_PREFIX}/bin/retdec-yarac${CMAKE_EXECUTABLE_SUFFIX}")
+set(YARAC_PATH "\$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/bin/retdec-yarac${CMAKE_EXECUTABLE_SUFFIX}")
 set(YARA_INSTALL_PY "${CMAKE_SOURCE_DIR}/support/install-yara.py")
 
 install(CODE "
 	execute_process(
 		COMMAND \"${PYTHON_EXECUTABLE}\" -u \"${YARA_INSTALL_PY}\"
 			\"${YARAC_PATH}\"
-			\"${SUPPORT_TARGET_DIR}\"
+			\"\$ENV{DESTDIR}${SUPPORT_TARGET_DIR}\"
 			\"${CMAKE_SOURCE_DIR}/support/yara_patterns\"
 			${RETDEC_COMPILE_YARA}
 		RESULT_VARIABLE INSTALL_YARA_RES
