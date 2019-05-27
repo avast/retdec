@@ -10,7 +10,6 @@
 #include <llvm/Object/MachO.h>
 #include <llvm/Object/MachOUniversal.h>
 #include <llvm/Support/ErrorOr.h>
-#include <llvm/Support/MachO.h>
 
 namespace retdec {
 namespace macho_extractor {

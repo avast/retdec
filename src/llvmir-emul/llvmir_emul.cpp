@@ -13,7 +13,6 @@
 #include <llvm/IR/LLVMContext.h>
 #include <llvm/IR/Module.h>
 #include <llvm/IR/Type.h>
-#include <llvm/IR/TypeBuilder.h>
 #include <llvm/Support/CommandLine.h>
 #include <llvm/Support/Debug.h>
 #include <llvm/Support/DynamicLibrary.h>
@@ -916,7 +915,7 @@ GenericValue executeGEPOperation(
 
 	for (; I != E; ++I)
 	{
-		if (StructType *STy = dyn_cast<StructType>(*I))
+		if (StructType *STy = I.getStructTypeOrNull())
 		{
 			const StructLayout *SLO = DL.getStructLayout(STy);
 
@@ -927,7 +926,6 @@ GenericValue executeGEPOperation(
 		}
 		else
 		{
-			SequentialType *ST = cast<SequentialType>(*I);
 			// Get the index number for the array... which must be long type...
 			GenericValue IdxGV = GC.getOperandValue(I.getOperand(), SF);
 
@@ -943,7 +941,7 @@ GenericValue executeGEPOperation(
 				assert(BitWidth == 64 && "Invalid index type for getelementptr");
 				Idx = static_cast<int64_t>(IdxGV.IntVal.getZExtValue());
 			}
-			Total += DL.getTypeAllocSize(ST->getElementType()) * Idx;
+			Total += DL.getTypeAllocSize(I.getIndexedType()) * Idx;
 		}
 	}
 
@@ -1786,7 +1784,7 @@ llvm::GenericValue getConstantValue(const llvm::Constant* C, llvm::Module* m)
 					GV.DoubleVal = GV.IntVal.roundToDouble();
 				else if (CE->getType()->isX86_FP80Ty())
 				{
-					APFloat apf = APFloat::getZero(APFloat::x87DoubleExtended);
+					APFloat apf = APFloat::getZero(APFloat::x87DoubleExtended());
 					(void)apf.convertFromAPInt(GV.IntVal,
 							false,
 							APFloat::rmNearestTiesToEven);
@@ -1803,7 +1801,7 @@ llvm::GenericValue getConstantValue(const llvm::Constant* C, llvm::Module* m)
 					GV.DoubleVal = GV.IntVal.signedRoundToDouble();
 				else if (CE->getType()->isX86_FP80Ty())
 				{
-					APFloat apf = APFloat::getZero(APFloat::x87DoubleExtended);
+					APFloat apf = APFloat::getZero(APFloat::x87DoubleExtended());
 					(void)apf.convertFromAPInt(GV.IntVal,
 							true,
 							APFloat::rmNearestTiesToEven);
@@ -1822,12 +1820,15 @@ llvm::GenericValue getConstantValue(const llvm::Constant* C, llvm::Module* m)
 					GV.IntVal = APIntOps::RoundDoubleToAPInt(GV.DoubleVal, BitWidth);
 				else if (Op0->getType()->isX86_FP80Ty())
 				{
-					APFloat apf = APFloat(APFloat::x87DoubleExtended, GV.IntVal);
+					APFloat apf = APFloat(APFloat::x87DoubleExtended(), GV.IntVal);
 					uint64_t v;
 					bool ignored;
-					(void)apf.convertToInteger(&v, BitWidth,
+					(void)apf.convertToInteger(
+							makeMutableArrayRef(v),
+							BitWidth,
 							CE->getOpcode()==Instruction::FPToSI,
-							APFloat::rmTowardZero, &ignored);
+							APFloat::rmTowardZero,
+							&ignored);
 					GV.IntVal = v; // endian?
 				}
 				return GV;
@@ -2009,7 +2010,7 @@ llvm::GenericValue getConstantValue(const llvm::Constant* C, llvm::Module* m)
 		{
 			auto apf = cast<ConstantFP>(C)->getValueAPF();
 			bool lostPrecision;
-			apf.convert(APFloat::IEEEdouble, APFloat::rmNearestTiesToEven, &lostPrecision);
+			apf.convert(APFloat::IEEEdouble(), APFloat::rmNearestTiesToEven, &lostPrecision);
 			Result.DoubleVal = apf.convertToDouble();
 			break;
 		}
@@ -2720,12 +2721,12 @@ void LlvmIrEmulator::visitSwitchInst(llvm::SwitchInst& I)
 
 	// Check to see if any of the cases match...
 	BasicBlock *dest = nullptr;
-	for (SwitchInst::CaseIt i = I.case_begin(), e = I.case_end(); i != e; ++i)
+	for (auto Case : I.cases())
 	{
-		GenericValue caseVal = _globalEc.getOperandValue(i.getCaseValue(), ec);
-		if (executeICMP_EQ(condVal, caseVal, elTy).IntVal != false)
+		GenericValue caseVal = _globalEc.getOperandValue(Case.getCaseValue(), ec);
+		if (executeICMP_EQ(condVal, caseVal, elTy).IntVal != 0)
 		{
-			dest = cast<BasicBlock>(i.getCaseSuccessor());
+			dest = cast<BasicBlock>(Case.getCaseSuccessor());
 			break;
 		}
 	}

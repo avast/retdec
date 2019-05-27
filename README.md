@@ -1,8 +1,8 @@
 # RetDec
 
-[![Travis CI build status](https://travis-ci.org/avast-tl/retdec.svg?branch=master)](https://travis-ci.org/avast-tl/retdec)
+[![Travis CI build status](https://travis-ci.org/avast/retdec.svg?branch=master)](https://travis-ci.org/avast/retdec)
 [![AppVeyor build status](https://ci.appveyor.com/api/projects/status/daqstq396hb8ixjg/branch/master?svg=true
-)](https://ci.appveyor.com/project/avast-tl/retdec?branch=master)
+)](https://ci.appveyor.com/project/avast/retdec?branch=master)
 [![TeamCity build status](https://retdec-tc.avast.com/app/rest/builds/aggregated/strob:(buildType:(project:(id:Retdec)))/statusIcon)](https://retdec-tc.avast.com/project.html?projectId=Retdec&guest=1)
 
 [RetDec](https://retdec.com/) is a retargetable machine-code decompiler based on [LLVM](https://llvm.org/).
@@ -28,7 +28,7 @@ Features:
 * Generation of call graphs, control-flow graphs, and various statistics.
 
 For more information, check out our
-* [Wiki](https://github.com/avast-tl/retdec/wiki) (in progress)
+* [Wiki](https://github.com/avast/retdec/wiki) (in progress)
 * Botconf 2017 talk: [slides](https://retdec.com/static/publications/retdec-slides-botconf-2017.pdf), [video](https://www.youtube.com/watch?v=HHFvtt5b6yY)
 * REcon Montreal 2018 talk: [slides](https://retdec.com/static/publications/retdec-slides-recon-2018.pdf)
 * [Publications](https://retdec.com/publications/)
@@ -39,7 +39,7 @@ Currently, we support Windows (7 or later), Linux, macOS, and (experimentally) F
 
 ### Windows
 
-1. Either download and unpack a [pre-built package](https://github.com/avast-tl/retdec/releases), or build and install the decompiler by yourself (the process is described below).
+1. Either download and unpack a [pre-built package](https://github.com/avast/retdec/releases), or build and install the decompiler by yourself (the process is described below).
 
 2. Install [Microsoft Visual C++ Redistributable for Visual Studio 2015](https://www.microsoft.com/en-us/download/details.aspx?id=48145).
 
@@ -59,7 +59,7 @@ Currently, we support Windows (7 or later), Linux, macOS, and (experimentally) F
 
 ### Linux
 
-1. There are currently no pre-built packages for Linux. You will have to build and install the decompiler by yourself. The process is described below.
+1. Either download and unpack a [pre-built package](https://github.com/avast/retdec/releases), or build and install the decompiler by yourself (the process is described below).
 
 2. After you have built the decompiler, you will need to install the following packages via your distribution's package manager:
 
@@ -77,7 +77,7 @@ Currently, we support Windows (7 or later), Linux, macOS, and (experimentally) F
 
 ### macOS
 
-1. There are currently no pre-built packages for macOS. You will have to build and install the decompiler by yourself. The process is described below.
+1. Either download and unpack a [pre-built package](https://github.com/avast/retdec/releases), or build and install the decompiler by yourself (the process is described below).
 
 2. After you have built the decompiler, you will need to install the following packages:
 
@@ -148,7 +148,7 @@ sudo dnf install gcc gcc-c++ cmake make git perl python3 bison flex autoconf aut
 On Arch Linux, the required packages can be installed with `pacman`:
 
 ```sh
-sudo pacman -S base-devel cmake git perl python3 bison flex autoconf automake libtool pkg-config m4 zlib upx doxygen graphviz
+sudo pacman --needed -S base-devel cmake git perl python3 bison flex autoconf automake libtool pkg-config m4 zlib upx doxygen graphviz
 ```
 
 #### Windows
@@ -156,7 +156,7 @@ sudo pacman -S base-devel cmake git perl python3 bison flex autoconf automake li
 * Microsoft Visual C++ (version >= Visual Studio 2015 Update 2)
 * [CMake](https://cmake.org/) (version >= 3.6)
 * [Git](https://git-scm.com/)
-* [Flex + Bison](https://sourceforge.net/projects/winflexbison/files/win_flex_bison3-latest.zip/download) ([mirror](https://github.com/avast-tl/retdec-support/releases/download/2018-07-27/win_flex_bison3-latest.zip)) from the [Win flex-bison project](https://sourceforge.net/projects/winflexbison/). Add the extracted directory to the system `Path` ([HOWTO](https://www.computerhope.com/issues/ch000549.htm)).
+* [Flex + Bison](https://sourceforge.net/projects/winflexbison/files/win_flex_bison3-latest.zip/download) ([mirror](https://github.com/avast/retdec-support/releases/download/2018-07-27/win_flex_bison3-latest.zip)) from the [Win flex-bison project](https://sourceforge.net/projects/winflexbison/). Add the extracted directory to the system `Path` ([HOWTO](https://www.computerhope.com/issues/ch000549.htm)).
 * [Active Perl](https://www.activestate.com/activeperl). It needs to be the first Perl in `PATH`, or it has to be provided to CMake using `CMAKE_PROGRAM_PATH` variable, e.g. `-DCMAKE_PROGRAM_PATH=/c/perl/bin`.
 * [Python](https://www.python.org/) (version >= 3.4)
 * Optional: [Doxygen](http://ftp.stack.nl/pub/users/dimitri/doxygen-1.8.13-setup.exe) and [Graphviz](https://graphviz.gitlab.io/_pages/Download/windows/graphviz-2.38.msi) for generating API documentation
@@ -165,7 +165,7 @@ sudo pacman -S base-devel cmake git perl python3 bison flex autoconf automake li
 
 Packages should be preferably installed via [Homebrew](https://brew.sh).
 
-* Full Xcode installation ([including command-line tools](https://github.com/frida/frida/issues/338#issuecomment-426777849), see [#425](https://github.com/avast-tl/retdec/issues/425) and [#433](https://github.com/avast-tl/retdec/issues/433))
+* Full Xcode installation ([including command-line tools](https://github.com/frida/frida/issues/338#issuecomment-426777849), see [#425](https://github.com/avast/retdec/issues/425) and [#433](https://github.com/avast/retdec/issues/433))
 * [CMake](https://cmake.org/) (version >= 3.6)
 * [Git](https://git-scm.com/)
 * [Perl](https://www.perl.org/)
@@ -192,10 +192,10 @@ OR
 
 ### Process
 
-Note: Although RetDec now supports a system-wide installation ([#94](https://github.com/avast-tl/retdec/issues/94)), unless you use your distribution's package manager to install it, we recommend installing RetDec locally into a designated directory. The reason for this is that uninstallation will be easier as you will only need to remove a single directory. To perform a local installation, run `cmake` with the `-DCMAKE_INSTALL_PREFIX=<path>` parameter, where `<path>` is directory into which RetDec will be installed (e.g. `$HOME/projects/retdec-install` on Linux and macOS, and `C:\projects\retdec-install` on Windows).
+Note: Although RetDec now supports a system-wide installation ([#94](https://github.com/avast/retdec/issues/94)), unless you use your distribution's package manager to install it, we recommend installing RetDec locally into a designated directory. The reason for this is that uninstallation will be easier as you will only need to remove a single directory. To perform a local installation, run `cmake` with the `-DCMAKE_INSTALL_PREFIX=<path>` parameter, where `<path>` is directory into which RetDec will be installed (e.g. `$HOME/projects/retdec-install` on Linux and macOS, and `C:\projects\retdec-install` on Windows).
 
 * Clone the repository:
-  * `git clone https://github.com/avast-tl/retdec`
+  * `git clone https://github.com/avast/retdec`
 * Linux:
   * `cd retdec`
   * `mkdir build && cd build`
@@ -224,7 +224,7 @@ Note: Although RetDec now supports a system-wide installation ([#94](https://git
   * `make install`
 * FreeBSD:
   * `sudo pkg install git cmake`
-  * `git clone https://github.com/avast-tl/retdec`
+  * `git clone https://github.com/avast/retdec`
   * `cd retdec`
   * `mkdir build && cd build`
   * ```sh
@@ -251,6 +251,7 @@ You can pass the following additional parameters to `cmake`:
 * `-DRETDEC_COMPILE_YARA=OFF` to disable YARA rules compilation at installation step (enabled by default).
 * `-DCMAKE_BUILD_TYPE=Debug` to build with debugging information, which is useful during development. By default, the project is built in the `Release` mode. This has no effect on Windows, but the same thing can be achieved by running `cmake --build .` with the `--config Debug` parameter.
 * `-DCMAKE_PROGRAM_PATH=<path>` to use Perl at `<path>` (probably useful only on Windows).
+* `-D<dep>_LOCAL_DIR=<path>` where `<dep>` is from `{CAPSTONE, ELFIO, GOOGLETEST, JSONCPP, KEYSTONE, LIBDWARF, LLVM, PELIB, RAPIDJSON, TINYXML, YARACPP, YARAMOD}` (e.g. `-DCAPSTONE_LOCAL_DIR=<path>`), to use the local repository clone at `<path>` for RetDec dependency instead of downloading a fresh copy at build time. Multiple such options may be used at the same time. 
 
 ## Build in Docker
 
@@ -355,20 +356,20 @@ See the [project documentation](https://retdec-tc.avast.com/repository/download/
 
 ## Related Repositories
 
-* [retdec-idaplugin](https://github.com/avast-tl/retdec-idaplugin) -- Embeds RetDec into IDA (Interactive Disassembler) and makes its use much easier.
-* [retdec-regression-tests-framework](https://github.com/avast-tl/retdec-regression-tests-framework) -- A framework for writing and running regression tests for RetDec and related tools. This is a must if you plan to contribute to the RetDec project.
-* [retdec-regression-tests](https://github.com/avast-tl/retdec-regression-tests) -- A suite of regression tests for RetDec and related tools.
+* [retdec-idaplugin](https://github.com/avast/retdec-idaplugin) -- Embeds RetDec into IDA (Interactive Disassembler) and makes its use much easier.
+* [retdec-regression-tests-framework](https://github.com/avast/retdec-regression-tests-framework) -- A framework for writing and running regression tests for RetDec and related tools. This is a must if you plan to contribute to the RetDec project.
+* [retdec-regression-tests](https://github.com/avast/retdec-regression-tests) -- A suite of regression tests for RetDec and related tools.
 * [vim-syntax-retdecdsm](https://github.com/s3rvac/vim-syntax-retdecdsm) -- Vim syntax-highlighting file for the output from the RetDec's disassembler (`.dsm` files).
 
 ## License
 
-Copyright (c) 2017 Avast Software, licensed under the MIT license. See the [`LICENSE`](https://github.com/avast-tl/retdec/blob/master/LICENSE) file for more details.
+Copyright (c) 2017 Avast Software, licensed under the MIT license. See the [`LICENSE`](https://github.com/avast/retdec/blob/master/LICENSE) file for more details.
 
-RetDec uses third-party libraries or other resources listed, along with their licenses, in the [`LICENSE-THIRD-PARTY`](https://github.com/avast-tl/retdec/blob/master/LICENSE-THIRD-PARTY) file.
+RetDec uses third-party libraries or other resources listed, along with their licenses, in the [`LICENSE-THIRD-PARTY`](https://github.com/avast/retdec/blob/master/LICENSE-THIRD-PARTY) file.
 
 ## Contributing
 
-See [RetDec contribution guidelines](https://github.com/avast-tl/retdec/wiki/Contribution-Guidelines).
+See [RetDec contribution guidelines](https://github.com/avast/retdec/wiki/Contribution-Guidelines).
 
 ## Acknowledgements
 

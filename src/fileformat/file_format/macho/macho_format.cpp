@@ -951,7 +951,8 @@ void MachOFormat::dyldInfoCommand(const llvm::object::MachOObjectFile::LoadComma
 		}
 		Export exportSym;
 
-		for(auto &exportRef : file->exports())
+		Error err = Error::success();
+		for(auto &exportRef : file->exports(err))
 		{
 			exportSym.setAddress(offsetToAddress(exportRef.address()));
 			exportSym.invalidateOrdinalNumber();
@@ -967,6 +968,10 @@ void MachOFormat::dyldInfoCommand(const llvm::object::MachOObjectFile::LoadComma
 
 			exportTable->addExport(exportSym);
 		}
+		if (err)
+		{
+			// ignore errors
+		}
 	}
 
 	// Imports
@@ -977,7 +982,8 @@ void MachOFormat::dyldInfoCommand(const llvm::object::MachOObjectFile::LoadComma
 
 	if(startPtr + command.bind_off + command.bind_size <= endPtr)
 	{
-		for(const auto &importRef : file->bindTable())
+		Error err = Error::success();
+		for(const auto &importRef : file->bindTable(err))
 		{
 			auto importSym = getImportFromBindEntry(importRef);
 			if(!importSym)
@@ -986,12 +992,17 @@ void MachOFormat::dyldInfoCommand(const llvm::object::MachOObjectFile::LoadComma
 			}
 
 			importTable->addImport(std::move(importSym));
+		}
+		if (err)
+		{
+			// ignore errors
 		}
 	}
 
 	if(startPtr + command.lazy_bind_off + command.lazy_bind_size <= endPtr)
 	{
-		for(const auto &importRef : file->lazyBindTable())
+		Error err = Error::success();
+		for(const auto &importRef : file->lazyBindTable(err))
 		{
 			auto importSym = getImportFromBindEntry(importRef);
 			if(!importSym)
@@ -1001,11 +1012,16 @@ void MachOFormat::dyldInfoCommand(const llvm::object::MachOObjectFile::LoadComma
 
 			importTable->addImport(std::move(importSym));
 		}
+		if (err)
+		{
+			// ignore errors
+		}
 	}
 
 	if(startPtr + command.weak_bind_off + command.weak_bind_size <= endPtr)
 	{
-		for(const auto &importRef : file->weakBindTable())
+		Error err = Error::success();
+		for(const auto &importRef : file->weakBindTable(err))
 		{
 			auto importSym = getImportFromBindEntry(importRef);
 			if(!importSym)
@@ -1014,6 +1030,10 @@ void MachOFormat::dyldInfoCommand(const llvm::object::MachOObjectFile::LoadComma
 			}
 
 			importTable->addImport(std::move(importSym));
+		}
+		if (err)
+		{
+			// ignore errors
 		}
 	}
 }
@@ -1027,7 +1047,8 @@ void MachOFormat::dyldInfoCommand(const llvm::object::MachOObjectFile::LoadComma
  */
 std::unique_ptr<Import> MachOFormat::getImportFromBindEntry(const llvm::object::MachOBindEntry &input)
 {
-	if(input.malformed() || input.segmentIndex() >= getDeclaredNumberOfSegments())
+	if(input.segmentIndex() < 0
+			|| static_cast<std::size_t>(input.segmentIndex()) >= getDeclaredNumberOfSegments())
 	{
 		return nullptr;
 	}
@@ -1225,7 +1246,7 @@ std::vector<std::string> MachOFormat::getMachOUniversalArchitectures() const
 
 	for(auto i = fatFile->begin_objects(), e = fatFile->end_objects(); i != e; ++i)
 	{
-		std::string archName = i->getArchTypeName();
+		std::string archName = i->getArchFlagName();
 		if(archName.empty())
 		{
 			archName = "unknown subtype ";

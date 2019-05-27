@@ -35,6 +35,24 @@ std::size_t ResourceTable::getNumberOfResources() const
 }
 
 /**
+ * Get number of supported languages
+ * @return Number of supported languages
+ */
+std::size_t ResourceTable::getNumberOfLanguages() const
+{
+	return table ? table->getNumberOfLanguages() : 0;
+}
+
+/**
+ * Get number of strings
+ * @return Number of strings
+ */
+std::size_t ResourceTable::getNumberOfStrings() const
+{
+	return table ? table->getNumberOfStrings() : 0;
+}
+
+/**
  * Get CRC32 of selected resource
  * @param index Index of selected resource (indexed from 0)
  * @return CRC32 of selected resource
@@ -144,6 +162,50 @@ std::string ResourceTable::getResourceLanguage(std::size_t index) const
 {
 	const auto *record = table ? table->getResource(index) : nullptr;
 	return record ? record->getLanguage() : "";
+}
+
+/**
+ * Get LCID of supported language
+ * @param index Index of selected supported language (indexed from 0)
+ * @return LCID of supported language
+ */
+std::string ResourceTable::getLanguageLcid(std::size_t index) const
+{
+	const auto *record = table ? table->getLanguage(index) : nullptr;
+	return record ? record->first : "";
+}
+
+/**
+ * Get code page of supported language
+ * @param index Index of selected code page (indexed from 0)
+ * @return Code page of supported language
+ */
+std::string ResourceTable::getLanguageCodePage(std::size_t index) const
+{
+	const auto *record = table ? table->getLanguage(index) : nullptr;
+	return record ? record->second : "";
+}
+
+/**
+ * Get name of selected string
+ * @param index Index of selected string (indexed from 0)
+ * @return Name of string
+ */
+std::string ResourceTable::getStringName(std::size_t index) const
+{
+	const auto *record = table ? table->getString(index) : nullptr;
+	return record ? record->first : "";
+}
+
+/**
+ * Get value of selected string
+ * @param index Index of selected string (indexed from 0)
+ * @return Value of string
+ */
+std::string ResourceTable::getStringValue(std::size_t index) const
+{
+	const auto *record = table ? table->getString(index) : nullptr;
+	return record ? record->second : "";
 }
 
 /**

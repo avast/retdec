@@ -753,6 +753,9 @@ bool PlainPresentation::present()
 		presentIterativeDistribution(RelocationTablesPlainGetter(fileinfo), explanatory);
 		presentIterativeDistribution(DynamicSectionsPlainGetter(fileinfo), explanatory);
 		presentIterativeDistribution(ResourcePlainGetter(fileinfo), explanatory);
+		presentIterativeDistribution(VersionInfoStringTablePlainGetter(fileinfo), explanatory);
+		presentIterativeDistribution(VersionInfoLanguageTablePlainGetter(fileinfo), explanatory);
+		presentIterativeDistribution(TlsInfoPlainGetter(fileinfo), explanatory);
 
 		presentNotes();
 

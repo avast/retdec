@@ -9,30 +9,65 @@ if(CMAKE_CXX_COMPILER)
 	set(CMAKE_CXX_COMPILER_OPTION "-DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}")
 endif()
 
-ExternalProject_Add(googletest
-	URL https://github.com/google/googletest/archive/83fa0cb17dad47a1d905526dcdddb5b96ed189d2.zip
-	URL_HASH SHA256=3b7cf6bfd1fdec3204933b4c0419c010e89b2409dcd8cbc1ac6a78aab058e2b0
-	DOWNLOAD_NAME googletest.zip
-	CMAKE_ARGS
-		# This does not work on MSVC, but is useful on Linux.
-		-DCMAKE_BUILD_TYPE=Release
-		# Without this, googletest's CMakeLists.txt replaces "/MD" (dynamic run-time) with "-MT" (static runtime).
-		# Default config for most applications is "/MD", so this will cause problems if linked with "-MT" googletest.
-		# https://msdn.microsoft.com/en-us/library/2kzt1wy3.aspx
-		-Dgtest_force_shared_crt=ON
-		# Force the use of the same compiler as used to build the top-level
-		# project. Otherwise, the external project may pick up a different
-		# compiler, which may result in link errors.
-		"${CMAKE_C_COMPILER_OPTION}"
-		"${CMAKE_CXX_COMPILER_OPTION}"
-	# Disable the update step.
-	UPDATE_COMMAND ""
-	# Disable the install step.
-	INSTALL_COMMAND ""
-	LOG_DOWNLOAD ON
-	LOG_CONFIGURE ON
-	LOG_BUILD ON
-)
+if(GOOGLETEST_LOCAL_DIR)
+	message(STATUS "Googletest: using local Googletest directory.")
+	
+	ExternalProject_Add(googletest
+		DOWNLOAD_COMMAND ""
+		SOURCE_DIR "${GOOGLETEST_LOCAL_DIR}"
+		CMAKE_ARGS
+			# This does not work on MSVC, but is useful on Linux.
+			-DCMAKE_BUILD_TYPE=Release
+			# Without this, googletest's CMakeLists.txt replaces "/MD" (dynamic run-time) with "-MT" (static runtime).
+			# Default config for most applications is "/MD", so this will cause problems if linked with "-MT" googletest.
+			# https://msdn.microsoft.com/en-us/library/2kzt1wy3.aspx
+			-Dgtest_force_shared_crt=ON
+			# Force the use of the same compiler as used to build the top-level
+			# project. Otherwise, the external project may pick up a different
+			# compiler, which may result in link errors.
+			"${CMAKE_C_COMPILER_OPTION}"
+			"${CMAKE_CXX_COMPILER_OPTION}"
+		# Disable the update step.
+		UPDATE_COMMAND ""
+		# Disable the install step.
+		INSTALL_COMMAND ""
+	)
+	force_configure_step(googletest)
+else()
+	message(STATUS "Googletest: using remote Googletest revision.")
+	
+	ExternalProject_Add(googletest
+		URL https://github.com/google/googletest/archive/83fa0cb17dad47a1d905526dcdddb5b96ed189d2.zip
+		URL_HASH SHA256=3b7cf6bfd1fdec3204933b4c0419c010e89b2409dcd8cbc1ac6a78aab058e2b0
+		DOWNLOAD_NAME googletest.zip
+		CMAKE_ARGS
+			# This does not work on MSVC, but is useful on Linux.
+			-DCMAKE_BUILD_TYPE=Release
+			# Without this, googletest's CMakeLists.txt replaces "/MD" (dynamic run-time) with "-MT" (static runtime).
+			# Default config for most applications is "/MD", so this will cause problems if linked with "-MT" googletest.
+			# https://msdn.microsoft.com/en-us/library/2kzt1wy3.aspx
+			-Dgtest_force_shared_crt=ON
+			# Force the use of the same compiler as used to build the top-level
+			# project. Otherwise, the external project may pick up a different
+			# compiler, which may result in link errors.
+			"${CMAKE_C_COMPILER_OPTION}"
+			"${CMAKE_CXX_COMPILER_OPTION}"
+		# Disable the update step.
+		UPDATE_COMMAND ""
+		# Disable the install step.
+		INSTALL_COMMAND ""
+		LOG_DOWNLOAD ON
+		LOG_CONFIGURE ON
+		LOG_BUILD ON
+	)
+endif()
+
+check_if_variable_changed(GOOGLETEST_LOCAL_DIR CHANGED)
+if(CHANGED)
+	ExternalProject_Get_Property(googletest binary_dir)
+	message(STATUS "Googletest: path to Googletest directory changed -> cleaning CMake files in ${binary_dir}.")
+	clean_cmake_files(${binary_dir})
+endif()
 
 # Set include directories.
 ExternalProject_Get_Property(googletest source_dir)

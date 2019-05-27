@@ -376,6 +376,38 @@ void JsonPresentation::presentCertificateAttributes(Json::Value &root) const
 }
 
 /**
+ * Present information about TLS
+ * @param root Parent node in output document
+ */
+void JsonPresentation::presentTlsInfo(Json::Value &root) const
+{
+	if (!fileinfo.isTlsUsed())
+	{
+		return;
+	}
+	
+	Value jTlsInfo;
+	presentIfNotEmpty("rawDataStartAddress", fileinfo.getTlsRawDataStartAddrStr(hexWithPrefix), jTlsInfo);
+	presentIfNotEmpty("rawDataEndAddress", fileinfo.getTlsRawDataEndAddrStr(hexWithPrefix), jTlsInfo);
+	presentIfNotEmpty("indexAddress", fileinfo.getTlsIndexAddrStr(hexWithPrefix), jTlsInfo);
+	presentIfNotEmpty("callbacksAddress", fileinfo.getTlsCallBacksAddrStr(hexWithPrefix), jTlsInfo);
+	presentIfNotEmpty("sizeOfZeroFill", fileinfo.getTlsZeroFillSizeStr(std::dec), jTlsInfo);
+	presentIfNotEmpty("characteristics", fileinfo.getTlsCharacteristicsStr(), jTlsInfo);
+
+	if (fileinfo.getTlsNumberOfCallBacks() > 0)
+	{
+		Value jCallbacks;
+		for (std::size_t i = 0; i < fileinfo.getTlsNumberOfCallBacks(); i++)
+		{
+			jCallbacks.append(fileinfo.getTlsCallBackAddrStr(i, hexWithPrefix));
+		}
+		jTlsInfo["callbacks"] = jCallbacks;
+	}
+
+	root["tlsInfo"] = jTlsInfo;
+}
+
+/**
  * Present information about .NET
  * @param root Parent node in output document
  */
@@ -555,6 +587,45 @@ void JsonPresentation::presentVisualBasicInfo(Json::Value &root) const
 		jVBasic["objectTable"] = jObjectTable;
 	}
 	root["visualBasicInfo"] = jVBasic;
+}
+
+/**
+ * Present version information
+ * @param root Parent node in output document
+ */
+void JsonPresentation::presentVersionInfo(Json::Value &root) const
+{
+	Value jVerInfo;
+
+	auto nStrings = fileinfo.getNumberOfVersionInfoStrings();
+	if (nStrings)
+	{
+		Value jStrings;
+		for (std::size_t i = 0; i < nStrings; i++)
+		{
+			Value jStr;
+			jStr["name"] = fileinfo.getVersionInfoStringName(i);
+			jStr["value"] = fileinfo.getVersionInfoStringValue(i);
+			jStrings.append(jStr);
+		}
+		jVerInfo["strings"] = jStrings;
+	}
+
+	auto nLangs = fileinfo.getNumberOfVersionInfoLanguages();
+	if (nLangs)
+	{
+		Value jLanguages;
+		for (std::size_t i = 0; i < nLangs; i++)
+		{
+			Value jLang;
+			jLang["lcid"] = fileinfo.getVersionInfoLanguageLcid(i);
+			jLang["codePage"] = fileinfo.getVersionInfoLanguageCodePage(i);
+			jLanguages.append(jLang);
+		}
+		jVerInfo["languages"] = jLanguages;
+	}
+
+	root["versionInfo"] = jVerInfo;
 }
 
 /**
@@ -816,8 +887,10 @@ bool JsonPresentation::present()
 		presentLoaderInfo(root);
 		presentPatterns(root);
 		presentCertificateAttributes(root);
+		presentTlsInfo(root);
 		presentDotnetInfo(root);
 		presentVisualBasicInfo(root);
+		presentVersionInfo(root);
 	}
 	else
 	{

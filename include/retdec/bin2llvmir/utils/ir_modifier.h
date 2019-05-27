@@ -10,6 +10,7 @@
 #include <llvm/IR/Instructions.h>
 #include <llvm/IR/Module.h>
 
+#include "retdec/bin2llvmir/providers/abi/abi.h"
 #include "retdec/bin2llvmir/providers/config.h"
 #include "retdec/bin2llvmir/providers/fileimage.h"
 
@@ -134,7 +135,9 @@ bool IrModifier::localize(
 	auto* ptr = definition->getPointerOperand();
 	auto* f = definition->getFunction();
 
-	auto* local = new llvm::AllocaInst(ptr->getType()->getPointerElementType());
+	auto* local = new llvm::AllocaInst(
+			ptr->getType()->getPointerElementType(),
+			Abi::DEFAULT_ADDR_SPACE);
 	local->insertBefore(&f->getEntryBlock().front());
 
 	new llvm::StoreInst(definition->getValueOperand(), local, definition);

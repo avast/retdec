@@ -17,7 +17,7 @@ endif()
 
 # Get and install external support package from the retdec-support repository.
 # This step may erase the entire target support directory, so it needs to go
-# first. 
+# first.
 #
 install(CODE "
 	execute_process(

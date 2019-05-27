@@ -58,7 +58,7 @@ def main():
     os.makedirs(support_dir, exist_ok=True)
 
     # Download archive
-    arch_url = 'https://github.com/avast-tl/retdec-support/releases/download/%s/%s' % (version, arch_name)
+    arch_url = 'https://github.com/avast/retdec-support/releases/download/%s/%s' % (version, arch_name)
     print('Downloading archive from %s ...' % arch_url)
     try:
         urllib.request.urlretrieve(arch_url, arch_path)

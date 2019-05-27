@@ -17,7 +17,7 @@
 namespace llvm {
 
 class BasicBlock;
-class TerminatorInst;
+class Instruction;
 class Value;
 
 } // namespace llvm
@@ -70,7 +70,7 @@ public:
 
 	/// @name Operations with terminator instruction of the last basic block
 	/// @{
-	llvm::TerminatorInst *getTerm() const;
+	llvm::Instruction *getTerm() const;
 	llvm::Value *getCond() const;
 	/// @}
 

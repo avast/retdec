@@ -143,13 +143,15 @@ BIN2LLVMIR_PARAMS = [
     '-x86-addr-spaces',
     '-value-protect',
 ] + BIN2LLVMIR_LLVM_PASSES_ONLY + BIN2LLVMIR_LLVM_PASSES_ONLY + [
+    '-inst-opt',
     '-simple-types',
     '-stack-ptr-op-remove',
-    '-inst-opt',
     '-idioms',
     '-global-to-local',
     '-dead-global-assign',
     '-instcombine',
+    '-inst-opt',
+    '-idioms',
     '-phi2seq',
     '-value-protect',
 ] + BIN2LLVMIR_PARAMS_DISABLES

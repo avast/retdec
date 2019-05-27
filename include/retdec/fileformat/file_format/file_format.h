@@ -83,6 +83,7 @@ class FileFormat : public retdec::utils::ByteValueStorage, private retdec::utils
 		RichHeader *richHeader;                                           ///< rich header
 		PdbInfo *pdbInfo;                                                 ///< information about related PDB debug file
 		CertificateTable *certificateTable;                               ///< table of certificates
+		TlsInfo *tlsInfo;                                                 ///< thread-local information
 		ElfCoreInfo *elfCoreInfo;                                         ///< information about core file structures
 		Format fileFormat;                                                ///< format of input file
 		LoaderErrorInfo _ldrErrInfo;                                      ///< loader error (e.g. Windows loader error for PE files)
@@ -231,6 +232,7 @@ class FileFormat : public retdec::utils::ByteValueStorage, private retdec::utils
 		const RichHeader* getRichHeader() const;
 		const PdbInfo* getPdbInfo() const;
 		const CertificateTable* getCertificateTable() const;
+		const TlsInfo* getTlsInfo() const;
 		const ElfCoreInfo* getElfCoreInfo() const;
 		const Symbol* getSymbol(const std::string &name) const;
 		const Symbol* getSymbol(unsigned long long address) const;

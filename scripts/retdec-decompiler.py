@@ -7,6 +7,7 @@ from __future__ import print_function
 import argparse
 import glob
 import importlib
+import json
 import os
 import shutil
 import sys
@@ -569,35 +570,46 @@ class Decompiler:
                 utils.remove_file_forced(sig)
 
     def _generate_log(self):
-        log_file = self.output_file + '.decompilation.log'
         log_decompilation_end_date = str(int(time.time()))
 
-        self.log_fileinfo_output = self._json_escape(self.log_fileinfo_output)
-        self.log_unpacker_output = self._json_escape(self.log_unpacker_output)
-        self.log_bin2llvmir_output = self._json_escape(self.log_bin2llvmir_output)
-        self.log_llvmir2hll_output = self._json_escape(self.log_llvmir2hll_output)
+        self.log_fileinfo_output = self.log_fileinfo_output
+        self.log_unpacker_output = self.log_unpacker_output
+        self.log_bin2llvmir_output = self.log_bin2llvmir_output
+        self.log_llvmir2hll_output = self.log_llvmir2hll_output
 
-        log_structure = '{\n\t\"input_file\" : \"%s\",\n\t\"pdb_file\" : \"%s\",\n\t\"start_date\" : \"%s\",\n\t\"' \
-                        'end_date\" : \"%s\",\n\t\"mode\" : \"%s\",\n\t\"arch\" : \"%s\",\n\t\"format\" : \"%s\",\n\t\"' \
-                        'fileinfo_rc\" : \"%s\",\n\t\"unpacker_rc\" : \"%s\",\n\t\"bin2llvmir_rc\" : \"%s\",\n\t\"' \
-                        'llvmir2hll_rc\" : \"%s\",\n\t\"fileinfo_output\" : \"%s\",\n\t\"unpacker_output\" : \"%s\",' \
-                        '\n\t\"bin2llvmir_output\" : \"%s\",\n\t\"llvmir2hll_output\" : \"%s\",\n\t\"fileinfo_runtime\"' \
-                        ' : \"%s\",\n\t\"bin2llvmir_runtime\" : \"%s\",\n\t\"llvmir2hll_runtime\" : \"%s\",\n\t\"' \
-                        'fileinfo_memory\" : \"%s\",\n\t\"bin2llvmir_memory\" : \"%s\",\n\t\"llvmir2hll_memory\"' \
-                        ' : \"%s\"\n}\n'
+        log = {
+            'input_file': self.input_file,
+            'pdb_file': self.pdb_file,
+            'start_date': self.log_decompilation_start_date,
+            'end_date': log_decompilation_end_date,
+            'mode': self.mode,
+            'arch': self.arch,
+            'format': self.format,
+            'fileinfo_rc': self.log_fileinfo_rc,
+            'unpacker_rc': self.log_unpacker_rc,
+            'bin2llvmir_rc': self.log_bin2llvmir_rc,
+            'llvmir2hll_rc': self.log_llvmir2hll_rc,
+            'fileinfo_output': self.log_fileinfo_output,
+            'unpacker_output': self.log_unpacker_output,
+            'bin2llvmir_output': self.log_bin2llvmir_output,
+            'llvmir2hll_output': self.log_llvmir2hll_output,
+            'fileinfo_runtime': self.log_fileinfo_time,
+            'bin2llvmir_runtime': self.log_bin2llvmir_time,
+            'llvmir2hll_runtime': self.log_llvmir2hll_time,
+            'fileinfo_memory': self.log_fileinfo_memory,
+            'bin2llvmir_memory': self.log_bin2llvmir_memory,
+            'llvmir2hll_memory': self.log_llvmir2hll_memory,
+        }
 
-        json_string = log_structure % (
-            self.input_file, self.pdb_file, self.log_decompilation_start_date, log_decompilation_end_date, self.mode,
-            self.arch, self.format, self.log_fileinfo_rc, self.log_unpacker_rc, self.log_bin2llvmir_rc,
-            self.log_llvmir2hll_rc, self.log_fileinfo_output, self.log_unpacker_output, self.log_bin2llvmir_output,
-            self.log_llvmir2hll_output, self.log_fileinfo_time, self.log_bin2llvmir_time, self.log_llvmir2hll_time,
-            self.log_fileinfo_memory, self.log_bin2llvmir_memory, self.log_llvmir2hll_memory)
+        # The consumer of the log currently assumes that all values are
+        # strings, so ensure that everything is a string.
+        for k, v in log.items():
+            log[k] = str(v)
 
-        with open(log_file, 'w+') as f:
-            f.write(json_string)
-
-    def _json_escape(self, string):
-        return string.rstrip('\r\n').replace('\n', r'\n') if string else None
+        log_file = self.output_file + '.decompilation.log'
+        with open(log_file, 'w') as f:
+            json.dump(log, f, indent=4)
+            f.write('\n')
 
     def decompile(self):
         # Check arguments and set default values for unset options.
@@ -1217,7 +1229,7 @@ class Decompiler:
                 CmdRunner.run_cmd(['dot', '-T' + self.args.graph_format, self.output_file + '.cg.dot', '-o',
                              self.output_file + '.cg.' + self.args.graph_format], print_run_msg=True)
             else:
-                print('Please install \'Graphviz\' to generate graphics.')
+                print('Please install \'Graphviz\' to generate graphics and ensure it is in PATH.')
 
         if self.args.backend_emit_cfg and self.args.backend_cfg_conversion == 'auto':
             if utils.tool_exists('dot'):
@@ -1225,7 +1237,7 @@ class Decompiler:
                     CmdRunner.run_cmd(['dot', '-T' + self.args.graph_format, cfg, '-o',
                                  os.path.splitext(cfg)[0] + '.' + self.args.graph_format], print_run_msg=True)
             else:
-                print('Please install \'Graphviz\' to generate graphics.')
+                print('Please install \'Graphviz\' to generate graphics and ensure it is in PATH.')
 
         # Remove trailing whitespace and the last redundant empty new line from the
         # generated output (if any). It is difficult to do this in the back-end, so we

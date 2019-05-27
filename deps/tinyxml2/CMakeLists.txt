@@ -7,31 +7,67 @@ if(CMAKE_CXX_COMPILER)
 	set(CMAKE_CXX_COMPILER_OPTION "-DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}")
 endif()
 
-ExternalProject_Add(tinyxml2-project
-	URL https://github.com/leethomason/tinyxml2/archive/cc1745b552dd12bb1297a99f82044f83b06729e0.zip
-	URL_HASH SHA256=de255ce39ba1efe20cbffdebd3eea2d08f1269d03440a4fd60e142b0481c3f00
-	DOWNLOAD_NAME tinyxml2.zip
-	CMAKE_ARGS
-		# This does not work on MSVC, but may be useful on Linux.
-		-DCMAKE_BUILD_TYPE=Release
-		# Build only static library.
-		-DBUILD_STATIC_LIBS:BOOL=ON
-		-DBUILD_SHARED_LIBS:BOOL=OFF
-		# Do not build tests.
-		-DBUILD_TESTS:BOOL=OFF
-		# Force the use of the same compiler as used to build the top-level
-		# project. Otherwise, the external project may pick up a different
-		# compiler, which may result in link errors.
-		"${CMAKE_C_COMPILER_OPTION}"
-		"${CMAKE_CXX_COMPILER_OPTION}"
-	# Disable the update step.
-	UPDATE_COMMAND ""
-	# Disable the install step.
-	INSTALL_COMMAND ""
-	LOG_DOWNLOAD ON
-	LOG_CONFIGURE ON
-	LOG_BUILD ON
-)
+if(TINYXML_LOCAL_DIR)
+	message(STATUS "TinyXML: using local TinyXML directory.")
+
+	ExternalProject_Add(tinyxml2-project
+		DOWNLOAD_COMMAND ""
+		SOURCE_DIR "${TINYXML_LOCAL_DIR}"
+		CMAKE_ARGS
+			# This does not work on MSVC, but may be useful on Linux.
+			-DCMAKE_BUILD_TYPE=Release
+			# Build only static library.
+			-DBUILD_STATIC_LIBS:BOOL=ON
+			-DBUILD_SHARED_LIBS:BOOL=OFF
+			# Do not build tests.
+			-DBUILD_TESTS:BOOL=OFF
+			# Force the use of the same compiler as used to build the top-level
+			# project. Otherwise, the external project may pick up a different
+			# compiler, which may result in link errors.
+			"${CMAKE_C_COMPILER_OPTION}"
+			"${CMAKE_CXX_COMPILER_OPTION}"
+		# Disable the update step.
+		UPDATE_COMMAND ""
+		# Disable the install step.
+		INSTALL_COMMAND ""
+	)
+	force_configure_step(tinyxml2-project)
+else()
+	message(STATUS "TinyXML: using remote TinyXML revision.")
+
+	ExternalProject_Add(tinyxml2-project
+		URL https://github.com/leethomason/tinyxml2/archive/cc1745b552dd12bb1297a99f82044f83b06729e0.zip
+		URL_HASH SHA256=de255ce39ba1efe20cbffdebd3eea2d08f1269d03440a4fd60e142b0481c3f00
+		DOWNLOAD_NAME tinyxml2.zip
+		CMAKE_ARGS
+			# This does not work on MSVC, but may be useful on Linux.
+			-DCMAKE_BUILD_TYPE=Release
+			# Build only static library.
+			-DBUILD_STATIC_LIBS:BOOL=ON
+			-DBUILD_SHARED_LIBS:BOOL=OFF
+			# Do not build tests.
+			-DBUILD_TESTS:BOOL=OFF
+			# Force the use of the same compiler as used to build the top-level
+			# project. Otherwise, the external project may pick up a different
+			# compiler, which may result in link errors.
+			"${CMAKE_C_COMPILER_OPTION}"
+			"${CMAKE_CXX_COMPILER_OPTION}"
+		# Disable the update step.
+		UPDATE_COMMAND ""
+		# Disable the install step.
+		INSTALL_COMMAND ""
+		LOG_DOWNLOAD ON
+		LOG_CONFIGURE ON
+		LOG_BUILD ON
+	)
+endif()
+
+check_if_variable_changed(TINYXML_LOCAL_DIR CHANGED)
+if(CHANGED)
+	ExternalProject_Get_Property(tinyxml2-project binary_dir)
+	message(STATUS "TinyXML: path to TinyXML directory changed -> cleaning CMake files in ${binary_dir}.")
+	clean_cmake_files(${binary_dir})
+endif()
 
 # Set include directories.
 ExternalProject_Get_Property(tinyxml2-project source_dir)

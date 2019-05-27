@@ -32,10 +32,10 @@ set(FILEFORMAT_SOURCES
 	types/relocation_table/relocation_table.cpp
 	types/relocation_table/relocation.cpp
 	types/resource_table/resource.cpp
-	types/resource_table/resource_table.cpp
-	types/resource_table/resource_tree.cpp
 	types/resource_table/resource_icon.cpp
 	types/resource_table/resource_icon_group.cpp
+	types/resource_table/resource_table.cpp
+	types/resource_table/resource_tree.cpp
 	types/resource_table/bitmap_image.cpp
 	types/certificate_table/certificate.cpp
 	types/certificate_table/certificate_table.cpp
@@ -59,6 +59,7 @@ set(FILEFORMAT_SOURCES
 	types/strings/string.cpp
 	types/note_section/elf_notes.cpp
 	types/note_section/elf_core.cpp
+	types/tls_info/tls_info.cpp
 	file_format/pe/pe_format_parser/pe_format_parser64.cpp
 	file_format/pe/pe_format_parser/pe_format_parser.cpp
 	file_format/pe/pe_format_parser/pe_format_parser32.cpp

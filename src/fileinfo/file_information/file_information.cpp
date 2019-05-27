@@ -1375,6 +1375,24 @@ std::size_t FileInformation::getNumberOfStoredResources() const
 }
 
 /**
+ * Get number of supported version info languages
+ * @return Number of supported version info languages
+ */
+std::size_t FileInformation::getNumberOfVersionInfoLanguages() const
+{
+	return resourceTable.getNumberOfLanguages();
+}
+
+/**
+ * Get number of version info strings
+ * @return Number of version info strings
+ */
+std::size_t FileInformation::getNumberOfVersionInfoStrings() const
+{
+	return resourceTable.getNumberOfStrings();
+}
+
+/**
  * Get CRC32 of selected resource
  * @param index Index of selected resource (indexed from 0)
  * @return CRC32 of selected resource
@@ -1468,6 +1486,46 @@ std::string FileInformation::getResourceType(std::size_t index) const
 std::string FileInformation::getResourceLanguage(std::size_t index) const
 {
 	return resourceTable.getResourceLanguage(index);
+}
+
+/**
+ * Get LCID of selected version info language
+ * @param index Index of selected version info language (indexed from 0)
+ * @return LCID of selected version info language
+ */
+std::string FileInformation::getVersionInfoLanguageLcid(std::size_t index) const
+{
+	return resourceTable.getLanguageLcid(index);
+}
+
+/**
+ * Get code page of selected version info language
+ * @param index Index of selected version info language (indexed from 0)
+ * @return Code page of selected version info language
+ */
+std::string FileInformation::getVersionInfoLanguageCodePage(std::size_t index) const
+{
+	return resourceTable.getLanguageCodePage(index);
+}
+
+/**
+ * Get name of selected version info string
+ * @param index Index of selected version info string (indexed from 0)
+ * @return Name of selected version info string
+ */
+std::string FileInformation::getVersionInfoStringName(std::size_t index) const
+{
+	return resourceTable.getStringName(index);
+}
+
+/**
+ * Get value of selected version info string
+ * @param index Index of selected version info string (indexed from 0)
+ * @return Value of selected version info string
+ */
+std::string FileInformation::getVersionInfoStringValue(std::size_t index) const
+{
+	return resourceTable.getStringValue(index);
 }
 
 /**
@@ -1998,6 +2056,94 @@ bool FileInformation::hasCertificateTableSignerCertificate() const
 bool FileInformation::hasCertificateTableCounterSignerCertificate() const
 {
 	return certificateTable.hasCounterSignerCertificate();
+}
+
+/**
+ * Get start address of raw data of TLS
+ * @param format Format of result (e.g. std::dec, std::hex)
+ * @return Start address of raw data of TLS
+ */
+std::string FileInformation::getTlsRawDataStartAddrStr(std::ios_base &(* format)(std::ios_base &)) const
+{
+	return tlsInfo.getRawDataStartAddrStr(format);
+}
+
+/**
+ * Get end address of raw data of TLS
+ * @param format Format of result (e.g. std::dec, std::hex)
+ * @return End address of raw data of TLS
+ */
+std::string FileInformation::getTlsRawDataEndAddrStr(std::ios_base &(* format)(std::ios_base &)) const
+{
+	return tlsInfo.getRawDataEndAddrStr(format);
+}
+
+/**
+ * Get address of index of TLS
+ * @param format Format of result (e.g. std::dec, std::hex)
+ * @return Address of index of TLS
+ */
+std::string FileInformation::getTlsIndexAddrStr(std::ios_base &(* format)(std::ios_base &)) const
+{
+	return tlsInfo.getIndexAddrStr(format);
+}
+
+/**
+ * Get address of callbacks of TLS
+ * @param format Format of result (e.g. std::dec, std::hex)
+ * @return Address of callbacks of TLS
+ */
+std::string FileInformation::getTlsCallBacksAddrStr(std::ios_base &(* format)(std::ios_base &)) const
+{
+	return tlsInfo.getCallBacksAddrStr(format);
+}
+
+/**
+ * Get size of zero fill of TLS
+ * @param format Format of result (e.g. std::dec, std::hex)
+ * @return Size of zero fill of TLS
+ */
+std::string FileInformation::getTlsZeroFillSizeStr(std::ios_base &(* format)(std::ios_base &)) const
+{
+	return tlsInfo.getZeroFillSizeStr(format);
+}
+
+/**
+ * Get characteristics of TLS
+ * @return Characteristics of TLS
+ */
+std::string FileInformation::getTlsCharacteristicsStr() const
+{
+	return tlsInfo.getCharacteristicsStr();
+}
+
+/**
+ * Get number of callbacks of TLS
+ * @return Number of callbacks of TLS
+ */
+std::size_t FileInformation::getTlsNumberOfCallBacks() const
+{
+	return tlsInfo.getNumberOfCallBacks();
+}
+
+/**
+ * Get TLS callback
+ * @param position Position of directory in internal list of directories (0..x)
+ * @param format Format of result (e.g. std::dec, std::hex)
+ * @return TLS callback
+ */
+std::string FileInformation::getTlsCallBackAddrStr(std::size_t position, std::ios_base &(* format)(std::ios_base &)) const
+{
+	return tlsInfo.getCallBackAddrStr(position, format);
+}
+
+/**
+ * Check whether TLS is used
+ * @return @c true if TLS is used, @c false otherwise
+ */
+bool FileInformation::isTlsUsed() const
+{
+	return tlsInfo.isUsed();
 }
 
 /**
@@ -4067,6 +4213,15 @@ void FileInformation::setStrings(const std::vector<retdec::fileformat::String> *
 void FileInformation::setCertificateTable(const retdec::fileformat::CertificateTable *sTable)
 {
 	certificateTable.setTable(sTable);
+}
+
+/**
+ * Set TLS information
+ * @param info Information TLS
+ */
+void FileInformation::setTlsInfo(const retdec::fileformat::TlsInfo *info)
+{
+	tlsInfo.setTlsInfo(info);
 }
 
 /**

@@ -11,11 +11,6 @@ using namespace llvm;
 namespace retdec {
 namespace bin2llvmir {
 
-/*
- * Stats of exchanged idioms.
- */
-STATISTIC(NumIdioms, "Number of idioms exchanged in total");
-
 /**
  * Analyse given BasicBlock and use instruction exchanger to transform
  * instruction idioms
@@ -35,12 +30,9 @@ bool IdiomsAnalysis::analyse(llvm::BasicBlock & bb, llvm::Instruction * (IdiomsA
 		Instruction * res = (this->*exchanger)(insn);
 
 		if (res) {
-			++NumIdioms;
-
 			change_made = true;
 
 			(*insn).replaceAllUsesWith(res);
-			print_dbg(fname, *insn);
 
 			// Move the name to the new instruction first.
 			res->takeName(&*insn);
@@ -291,8 +283,6 @@ bool IdiomsAnalysis::analyse(llvm::Function & f, llvm::Pass * p, int (IdiomsAnal
 	int num_idioms = 0;
 
 	num_idioms += IdiomsGCC::exchangeCondBitShiftDivMultiBB(f, p);
-
-	NumIdioms += num_idioms;
 
 	return num_idioms == 0;
 }

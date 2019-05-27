@@ -244,7 +244,7 @@ void Certificate::loadSignatureAlgorithm()
 void Certificate::loadSerialNumber()
 {
 	if (auto sn = X509_get_serialNumber(certImpl))
-		retdec::utils::bytesToHexString(sn->data, sn->length, serialNumber);
+		retdec::utils::bytesToHexString(sn->data, sn->length, serialNumber, 0, 0, /*uppercase=*/false);
 }
 
 void Certificate::loadIssuerAndSubject()
@@ -279,8 +279,8 @@ void Certificate::calculateHashes()
 	SHA1(reinterpret_cast<const unsigned char*>(tmp.data()), tmp.size(), sha1Bytes.data());
 	SHA256(reinterpret_cast<const unsigned char*>(tmp.data()), tmp.size(), sha256Bytes.data());
 
-	retdec::utils::bytesToHexString(sha1Bytes, sha1Digest);
-	retdec::utils::bytesToHexString(sha256Bytes, sha256Digest);
+	retdec::utils::bytesToHexString(sha1Bytes, sha1Digest, 0, 0, /*uppercase=*/false);
+	retdec::utils::bytesToHexString(sha256Bytes, sha256Digest, 0, 0, /*uppercase=*/false);
 }
 
 /**

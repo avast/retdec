@@ -816,7 +816,7 @@ llvm::CallInst* Capstone2LlvmIrTranslator_impl<CInsn, CInsnOp>::generateCallFunc
 		llvm::IRBuilder<>& irb,
 		llvm::Value* t)
 {
-	auto* a1t = _callFunction->getArgumentList().front().getType();
+	auto* a1t = _callFunction->arg_begin()->getType();
 	t = irb.CreateSExtOrTrunc(t, a1t);
 	_branchGenerated = irb.CreateCall(_callFunction, {t});
 	return _branchGenerated;
@@ -830,7 +830,7 @@ llvm::CallInst* Capstone2LlvmIrTranslator_impl<CInsn, CInsnOp>::generateCondCall
 {
 	auto bodyIrb = generateIfThen(cond, irb);
 
-	auto* a1t = _callFunction->getArgumentList().front().getType();
+	auto* a1t = _callFunction->arg_begin()->getType();
 	t = bodyIrb.CreateSExtOrTrunc(t, a1t);
 	_branchGenerated = bodyIrb.CreateCall(_callFunction, {t});
 	_inCondition = true;
@@ -856,7 +856,7 @@ llvm::CallInst* Capstone2LlvmIrTranslator_impl<CInsn, CInsnOp>::generateReturnFu
 		llvm::IRBuilder<>& irb,
 		llvm::Value* t)
 {
-	auto* a1t = _returnFunction->getArgumentList().front().getType();
+	auto* a1t = _returnFunction->arg_begin()->getType();
 	t = irb.CreateSExtOrTrunc(t, a1t);
 	_branchGenerated = irb.CreateCall(_returnFunction, {t});
 	return _branchGenerated;
@@ -870,7 +870,7 @@ llvm::CallInst* Capstone2LlvmIrTranslator_impl<CInsn, CInsnOp>::generateCondRetu
 {
 	auto bodyIrb = generateIfThen(cond, irb);
 
-	auto* a1t = _returnFunction->getArgumentList().front().getType();
+	auto* a1t = _returnFunction->arg_begin()->getType();
 	t = bodyIrb.CreateSExtOrTrunc(t, a1t);
 	_branchGenerated = bodyIrb.CreateCall(_returnFunction, {t});
 	_inCondition = true;
@@ -896,7 +896,7 @@ llvm::CallInst* Capstone2LlvmIrTranslator_impl<CInsn, CInsnOp>::generateBranchFu
 		llvm::IRBuilder<>& irb,
 		llvm::Value* t)
 {
-	auto* a1t = _branchFunction->getArgumentList().front().getType();
+	auto* a1t = _branchFunction->arg_begin()->getType();
 	t = irb.CreateSExtOrTrunc(t, a1t);
 	_branchGenerated = irb.CreateCall(_branchFunction, {t});
 	return _branchGenerated;
@@ -925,7 +925,9 @@ llvm::CallInst* Capstone2LlvmIrTranslator_impl<CInsn, CInsnOp>::generateCondBran
 		llvm::Value* cond,
 		llvm::Value* t)
 {
-	auto* a1t = _condBranchFunction->getArgumentList().back().getType();
+	auto aIt = _condBranchFunction->arg_begin();
+	++aIt;
+	auto* a1t = aIt->getType();
 	t = irb.CreateSExtOrTrunc(t, a1t);
 	_branchGenerated = irb.CreateCall(_condBranchFunction, {cond, t});
 	return _branchGenerated;

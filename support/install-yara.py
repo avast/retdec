@@ -9,11 +9,13 @@ Usage: install-yara.py yarac-path install-path yara-patterns-path compile
 """
 
 import fnmatch
-import pathlib
+import multiprocessing.pool
 import os
+import pathlib
 import shutil
 import subprocess
 import sys
+import threading
 
 
 def print_help():
@@ -59,7 +61,25 @@ def copy_yara_patterns(yara_patterns_dir, install_dir):
                 shutil.copy(input, output)
 
 
-def compile_yara(yarac, install_dir):
+def compile_yara_file(input_file, yarac, install_dir, stdout_lock):
+    """ Compile the given .yara file in the given installation directory using
+    the provided YARAC program into a *.yarac file.
+    Remove the source *.yara file.
+    """
+    with stdout_lock:
+        print('-- Compiling:', input_file)
+
+    output_file = str(pathlib.Path(input_file).with_suffix('.yarac'))
+    cmd = [yarac, '-w', input_file, output_file]
+    ret = subprocess.call(cmd)
+    if ret != 0:
+        print('Error: yarac failed during compilation of file', input_file, file=sys.stderr)
+        sys.exit(1)
+
+    os.remove(input_file)
+
+
+def compile_yara_files(yarac, install_dir):
     """ Compile all *.yara files in the given installation directory using the
     provided YARAC program into *.yarac files.
     Remove the source *.yara files.
@@ -69,18 +89,15 @@ def compile_yara(yarac, install_dir):
         for filename in fnmatch.filter(filenames, '*.yara'):
             inputs.append(os.path.join(root, filename))
 
-    for i in inputs:
-        fn = pathlib.Path(i)
-        o = fn.with_suffix('.yarac')
+    if not inputs:
+        return
 
-        print('-- Compiling:', i)
-        cmd = [yarac, '-w'] + [i] + [str(o)]
-        ret = subprocess.call(cmd)
-        if ret != 0:
-            print('Error: yarac failed during compilation of file ', path)
-            exit(1)
-
-        os.remove(i)
+    stdout_lock = threading.Lock()
+    with multiprocessing.pool.ThreadPool() as pool:
+        args = [
+            (input_file, yarac, install_dir, stdout_lock) for input_file in inputs
+        ]
+        pool.starmap(compile_yara_file, args)
 
 
 def main():
@@ -88,7 +105,7 @@ def main():
     copy_yara_patterns(yara_patterns_dir, install_dir)
 
     if compile:
-        compile_yara(yarac, install_dir)
+        compile_yara_files(yarac, install_dir)
 
     sys.exit(0)
 

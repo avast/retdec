@@ -9,13 +9,70 @@
 
 #include "retdec/crypto/crypto.h"
 #include "retdec/utils/conversion.h"
+#include "retdec/utils/dynamic_buffer.h"
+#include "retdec/utils/string.h"
+#include "retdec/utils/alignment.h"
+#include "retdec/fileformat/utils/other.h"
 #include "retdec/fileformat/types/resource_table/resource_table.h"
 #include "retdec/fileformat/types/resource_table/bitmap_image.h"
 
 using namespace retdec::utils;
 
+namespace {
+
+constexpr std::size_t VI_KEY_SIZE = 32;               ///< unicode "VS_VERSION_INFO"
+constexpr std::size_t VFI_KEY_SIZE = 24;              ///< unicode "VarFileInfo"
+constexpr std::size_t SFI_KEY_SIZE = 30;              ///< unicode "StringFileInfo"
+constexpr std::size_t VAR_KEY_SIZE = 24;              ///< unicode "Translation"
+constexpr std::size_t STRTAB_KEY_SIZE = 18;           ///< 8 unicode hex digits
+
+constexpr std::uint32_t FFI_SIGNATURE = 0xFEEF04BD;   ///< fixed file info signature
+
+enum class VersionInfoType {BINARY = 0, STRING = 1};
+
+struct FixedFileInfo
+{
+	std::uint32_t signature;                   ///< signature FFI_SIGNATURE
+	std::uint16_t strucVersionMaj;             ///< binary major version number
+	std::uint16_t strucVersionMin;             ///< binary minor version number
+	std::uint32_t fileVersionMaj;              ///< file major version number
+	std::uint32_t fileVersionMin;              ///< file minor version number
+	std::uint64_t productVersion;              ///< product version number
+	std::uint32_t fileFlagsMask;               ///< validity mask of fileFalgs member
+	std::uint32_t fileFlags;                   ///< file flags
+	std::uint32_t fileOS;                      ///< target operating system
+	std::uint32_t fileType;                    ///< type of file
+	std::uint32_t fileSubtype;                 ///< subtype of file
+	std::uint64_t timestamp;                   ///< timestamp
+
+	static std::size_t structSize()
+	{
+		return
+			sizeof(signature) + sizeof(strucVersionMaj) + sizeof(strucVersionMin) + sizeof(fileVersionMaj) +
+			sizeof(fileVersionMin) + sizeof(productVersion) + sizeof(fileFlagsMask) + sizeof(fileFlags) +
+			sizeof(fileOS) + sizeof(fileType) + sizeof(fileSubtype) + sizeof(timestamp);
+	}
+};
+
+struct VersionInfoHeader
+{
+	std::uint16_t length;                       ///< length of whole structure
+	std::uint16_t valueLength;                  ///< length of following structure
+	std::uint16_t type;                         ///< type of data
+
+	static std::size_t structSize()
+	{
+		return sizeof(length) + sizeof(valueLength) + sizeof(type);
+	}
+};
+
+} // anonymous namespace
+
+
 namespace retdec {
 namespace fileformat {
+
+
 
 /**
  * Constructor
@@ -85,6 +142,24 @@ std::size_t ResourceTable::getNumberOfResources() const
 }
 
 /**
+ * Get number of supported languages
+ * @return Number of supported languages
+ */
+std::size_t ResourceTable::getNumberOfLanguages() const
+{
+	return languages.size();
+}
+
+/**
+ * Get number of strings
+ * @return Number of strings
+ */
+std::size_t ResourceTable::getNumberOfStrings() const
+{
+	return strings.size();
+}
+
+/**
  * Get total declared size of resources
  * @return Total declared size of resources
  */
@@ -124,6 +199,26 @@ std::size_t ResourceTable::getLoadedSize() const
 const Resource* ResourceTable::getResource(std::size_t rIndex) const
 {
 	return (rIndex < getNumberOfResources()) ? table[rIndex].get() : nullptr;
+}
+
+/**
+ * Get selected language
+ * @param rIndex Index of selected language (indexed from 0)
+ * @return Pointer to selected language or @c nullptr if language index is invalid
+ */
+const std::pair<std::string, std::string>* ResourceTable::getLanguage(std::size_t rIndex) const
+{
+	return (rIndex < getNumberOfLanguages()) ? &languages[rIndex] : nullptr;
+}
+
+/**
+ * Get selected string
+ * @param rIndex Index of selected string (indexed from 0)
+ * @return Pointer to selected string or @c nullptr if string index is invalid
+ */
+const std::pair<std::string, std::string>* ResourceTable::getString(std::size_t rIndex) const
+{
+	return (rIndex < getNumberOfStrings()) ? &strings[rIndex] : nullptr;
 }
 
 /**
@@ -342,6 +437,297 @@ void ResourceTable::computeIconHashes()
 }
 
 /**
+ * Parse all version information resources
+ */
+void ResourceTable::parseVersionInfoResources()
+{
+	std::vector<std::uint8_t> bytes;
+
+	for (auto ver : resourceVersions)
+	{
+		if (!ver->getBytes(bytes))
+		{
+			continue;
+		}
+		parseVersionInfo(bytes);
+	}
+}
+
+/**
+ * Parse version information
+ * @param bytes Resource bytes
+ * @return @c true if parsing was successful, @c false otherwise
+ */
+bool ResourceTable::parseVersionInfo(const std::vector<std::uint8_t> &bytes)
+{
+	VersionInfoHeader vih;
+	if (bytes.size() < vih.structSize())
+	{
+		return false;
+	}
+
+	std::size_t offset = 0;
+
+	DynamicBuffer structContent(bytes, retdec::utils::Endianness::LITTLE);
+	vih.length = structContent.read<std::uint16_t>(offset); offset += sizeof(vih.length);
+	vih.valueLength = structContent.read<std::uint16_t>(offset); offset += sizeof(vih.valueLength);
+	vih.type = structContent.read<std::uint16_t>(offset); offset += sizeof(vih.type);
+
+	std::string key = retdec::utils::unicodeToAscii(&bytes.data()[offset], bytes.size() - offset);
+	if (key != "VS_VERSION_INFO")
+	{
+		return false;
+	}
+
+	offset += VI_KEY_SIZE;
+	offset = retdec::utils::alignUp(offset, sizeof(std::uint32_t));
+
+	FixedFileInfo ffi;
+	if (vih.valueLength == ffi.structSize())
+	{
+		if (bytes.size() < offset + ffi.structSize())
+		{
+			return false;
+		}
+
+		ffi.signature = structContent.read<std::uint32_t>(offset); offset += sizeof(ffi.signature);
+		ffi.strucVersionMin = structContent.read<std::uint16_t>(offset); offset += sizeof(ffi.strucVersionMin);
+		ffi.strucVersionMaj = structContent.read<std::uint16_t>(offset); offset += sizeof(ffi.strucVersionMaj);
+		std::uint32_t t1 = structContent.read<std::uint32_t>(offset);
+		ffi.fileVersionMaj = t1 >> 16; offset += sizeof(ffi.fileVersionMaj);
+		ffi.fileVersionMin = t1 & 0xFFFF; offset += sizeof(ffi.fileVersionMin);
+		std::uint64_t t2 = structContent.read<std::uint64_t>(offset);
+		ffi.productVersion = t2 >> 16; offset += sizeof(ffi.productVersion);
+		ffi.fileFlagsMask = structContent.read<std::uint32_t>(offset); offset += sizeof(ffi.fileFlagsMask);
+		ffi.fileFlags = structContent.read<std::uint32_t>(offset); offset += sizeof(ffi.fileFlags);
+		ffi.fileOS = structContent.read<std::uint32_t>(offset); offset += sizeof(ffi.fileOS);
+		ffi.fileType = structContent.read<std::uint32_t>(offset); offset += sizeof(ffi.fileType);
+		ffi.fileSubtype = structContent.read<std::uint32_t>(offset); offset += sizeof(ffi.fileSubtype);
+		ffi.timestamp = structContent.read<std::uint64_t>(offset); offset += sizeof(ffi.timestamp);
+
+		if (ffi.signature != FFI_SIGNATURE)
+		{
+			return false;
+		}
+	}
+
+	else if (vih.valueLength != 0)
+	{
+		return false;
+	}
+
+	offset = retdec::utils::alignUp(offset, sizeof(std::uint32_t));
+	while (offset < vih.length)
+	{
+		if (!parseVersionInfoChild(bytes, offset))
+		{
+			return false;
+		}
+	}
+
+	return true;
+}
+
+/**
+ * Parse Version Info child
+ * @param bytes Resource bytes
+ * @param offset Offset to Version Info Child structure
+ * @return @c true if parsing was successful, @c false otherwise
+ */
+bool ResourceTable::parseVersionInfoChild(const std::vector<std::uint8_t> &bytes, std::size_t &offset)
+{
+	std::size_t origOffset = offset;
+	VersionInfoHeader chh;
+	if (bytes.size() < offset + chh.structSize())
+	{
+		return false;
+	}
+
+	DynamicBuffer structContent(bytes, retdec::utils::Endianness::LITTLE);
+	chh.length = structContent.read<std::uint16_t>(offset); offset += sizeof(chh.length);
+	chh.valueLength = structContent.read<std::uint16_t>(offset); offset += sizeof(chh.valueLength);
+	chh.type = structContent.read<std::uint16_t>(offset); offset += sizeof(chh.type);
+
+	std::string key = retdec::utils::unicodeToAscii(&bytes.data()[offset], bytes.size() - offset);
+
+	if (key == "VarFileInfo")
+	{
+		offset += VFI_KEY_SIZE;
+		offset = retdec::utils::alignUp(offset, sizeof(std::uint32_t));
+
+		for (std::size_t targetOffset = origOffset + chh.length; offset < targetOffset; )
+		{
+			if (!parseVarFileInfoChild(bytes, offset))
+			{
+				return false;
+			}
+		}
+	}
+	else if (key == "StringFileInfo")
+	{
+		offset += SFI_KEY_SIZE;
+		offset = retdec::utils::alignUp(offset, sizeof(std::uint32_t));
+
+		for (std::size_t targetOffset = origOffset + chh.length; offset < targetOffset; )
+		{
+			if (!parseStringFileInfoChild(bytes, offset))
+			{
+				return false;
+			}
+		}
+	}
+	else
+	{
+		return false;
+	}
+
+	offset = retdec::utils::alignUp(offset, sizeof(std::uint32_t));
+	return true;
+}
+
+/**
+ * Parse VarFileInfo structure
+ * @param bytes Resource bytes
+ * @param offset Offset to structure
+ * @return @c true if parsing was successful, @c false otherwise
+ */
+bool ResourceTable::parseVarFileInfoChild(const std::vector<std::uint8_t> &bytes, std::size_t &offset)
+{
+	VersionInfoHeader var;
+	if (bytes.size() < offset + var.structSize())
+	{
+		return false;
+	}
+
+	DynamicBuffer structContent(bytes, retdec::utils::Endianness::LITTLE);
+	var.length = structContent.read<std::uint16_t>(offset); offset += sizeof(var.length);
+	var.valueLength = structContent.read<std::uint16_t>(offset); offset += sizeof(var.valueLength);
+	var.type = structContent.read<std::uint16_t>(offset); offset += sizeof(var.type);
+
+	std::string key = retdec::utils::unicodeToAscii(&bytes.data()[offset], bytes.size() - offset);
+	if (key != "Translation")
+	{
+		return false;
+	}
+
+	offset += VAR_KEY_SIZE;
+	offset = retdec::utils::alignUp(offset, sizeof(std::uint32_t));
+	if (bytes.size() < offset + var.valueLength || var.valueLength % sizeof(std::uint32_t))
+	{
+		return false;
+	}
+
+	for (std::size_t targetOffset = offset + var.valueLength; offset < targetOffset; )
+	{
+		std::uint32_t lang = structContent.read<uint32_t>(offset); offset += sizeof(lang);
+		std::uint16_t lcid = lang & 0xFFFF;
+		std::uint16_t codePage = lang >> 16;
+		languages.emplace_back(std::make_pair(lcidToStr(lcid), codePageToStr(codePage)));
+	}
+
+	offset = retdec::utils::alignUp(offset, sizeof(std::uint32_t));
+	return true;
+}
+
+/**
+ * Parse StringFileInfo child
+ * @param bytes Resource bytes
+ * @param offset Offset to structure
+ * @return @c true if parsing was successful, @c false otherwise
+ */
+bool ResourceTable::parseStringFileInfoChild(const std::vector<std::uint8_t> &bytes, std::size_t &offset)
+{
+	std::size_t origOffset = offset;
+	VersionInfoHeader sfih;
+	if (bytes.size() < offset + sfih.structSize())
+	{
+		return false;
+	}
+
+	DynamicBuffer structContent(bytes, retdec::utils::Endianness::LITTLE);
+	sfih.length = structContent.read<std::uint16_t>(offset); offset += sizeof(sfih.length);
+	sfih.valueLength = structContent.read<std::uint16_t>(offset); offset += sizeof(sfih.valueLength);
+	sfih.type = structContent.read<std::uint16_t>(offset); offset += sizeof(sfih.type);
+
+	std::size_t nRead;
+	std::string key = retdec::utils::unicodeToAscii(&bytes.data()[offset], bytes.size() - offset, nRead);
+	if (nRead != STRTAB_KEY_SIZE)
+	{
+		return false;
+	}
+
+	offset += STRTAB_KEY_SIZE;
+	offset = retdec::utils::alignUp(offset, sizeof(std::uint32_t));
+
+	for (std::size_t targetOffset = origOffset + sfih.length; offset < targetOffset; )
+	{
+		if (!parseVarString(bytes, offset))
+		{
+			return false;
+		}
+	}
+
+	offset = retdec::utils::alignUp(offset, sizeof(std::uint32_t));
+	return true;
+}
+
+/**
+ * Parse var string
+ * @param bytes Resource bytes
+ * @param offset Offset to structure
+ * @return @c true if parsing was successful, @c false otherwise
+ */
+bool ResourceTable::parseVarString(const std::vector<std::uint8_t> &bytes, std::size_t &offset)
+{
+	std::size_t origOffset = offset;
+	VersionInfoHeader str;
+	if (bytes.size() < offset + str.structSize())
+	{
+		return false;
+	}
+
+	DynamicBuffer structContent(bytes, retdec::utils::Endianness::LITTLE);
+	str.length = structContent.read<std::uint16_t>(offset); offset += sizeof(str.length);
+	str.valueLength = structContent.read<std::uint16_t>(offset); offset += sizeof(str.valueLength);
+	str.type = structContent.read<std::uint16_t>(offset); offset += sizeof(str.type);
+
+	if (bytes.size() < origOffset + str.length || str.length < str.structSize())
+	{
+		return false;
+	}
+
+	std::size_t targetOffset = origOffset + str.length;
+
+	if (offset > targetOffset)
+	{
+		return false;
+	}
+
+	std::size_t nToRead = targetOffset - offset;
+	std::size_t nRead;
+	std::string name = retdec::utils::unicodeToAscii(&bytes.data()[offset], nToRead, nRead);
+	offset += nRead;
+	offset = retdec::utils::alignUp(offset, sizeof(std::uint32_t));
+
+	if (offset > targetOffset)
+	{
+		return false;
+	}
+
+	nToRead = targetOffset - offset;
+	std::string value;
+	if (nToRead > 0)
+	{
+		value = retdec::utils::unicodeToAscii(&bytes.data()[offset], nToRead, nRead);
+		offset += nRead;
+		offset = retdec::utils::alignUp(offset, sizeof(std::uint32_t));
+	}
+
+	strings.emplace_back(std::make_pair(name, value));
+	return true;
+}
+
+/**
  * Delete all records from table
  */
 void ResourceTable::clear()
@@ -356,6 +742,15 @@ void ResourceTable::clear()
 void ResourceTable::addResource(std::unique_ptr<Resource>&& newResource)
 {
 	table.push_back(std::move(newResource));
+}
+
+/**
+ * Add version resource
+ * @param ver Version resource which will be added
+ */
+void ResourceTable::addResourceVersion(Resource *ver)
+{
+	resourceVersions.push_back(ver);
 }
 
 /**
@@ -389,7 +784,7 @@ void ResourceTable::linkResourceIconGroups()
 			continue;
 		}
 
-		for(size_t eIndex = 0; eIndex < numberOfEntries; eIndex++)
+		for(std::size_t eIndex = 0; eIndex < numberOfEntries; eIndex++)
 		{
 			std::size_t entryNameID;
 			if(!iconGroup->getEntryNameID(eIndex, entryNameID))
@@ -399,7 +794,7 @@ void ResourceTable::linkResourceIconGroups()
 
 			for(auto icon : icons)
 			{
-				size_t iconNameID, iconSize;
+				std::size_t iconNameID, iconSize;
 				unsigned short width, height;
 				uint16_t planes, bitCount;
 				uint8_t colorCount;

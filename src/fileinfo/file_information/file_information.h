@@ -45,6 +45,7 @@ class FileInformation
 		ExportTable exportTable;                       ///< information about exports
 		ResourceTable resourceTable;                   ///< information about resources in input file
 		CertificateTable certificateTable;             ///< information about certificates
+		TlsInfo tlsInfo;                               ///< information about thread-local storage
 		ElfCore elfCoreInfo;                           ///< information about ELF core files
 		LoaderInfo loaderInfo;                         ///< information about loaded image
 		std::vector<DataDirectory> directories;        ///< information about data directories
@@ -235,6 +236,8 @@ class FileInformation
 		/// @name Getters of @a resourceTable
 		/// @{
 		std::size_t getNumberOfStoredResources() const;
+		std::size_t getNumberOfVersionInfoLanguages() const;
+		std::size_t getNumberOfVersionInfoStrings() const;
 		std::string getResourceCrc32(std::size_t index) const;
 		std::string getResourceMd5(std::size_t index) const;
 		std::string getResourceSha256(std::size_t index) const;
@@ -245,6 +248,10 @@ class FileInformation
 		std::string getResourceName(std::size_t index) const;
 		std::string getResourceType(std::size_t index) const;
 		std::string getResourceLanguage(std::size_t index) const;
+		std::string getVersionInfoLanguageLcid(std::size_t index) const;
+		std::string getVersionInfoLanguageCodePage(std::size_t index) const;
+		std::string getVersionInfoStringName(std::size_t index) const;
+		std::string getVersionInfoStringValue(std::size_t index) const;
 		std::string getResourceNameIdStr(std::size_t index, std::ios_base &(* format)(std::ios_base &)) const;
 		std::string getResourceTypeIdStr(std::size_t index, std::ios_base &(* format)(std::ios_base &)) const;
 		std::string getResourceLanguageIdStr(std::size_t index, std::ios_base &(* format)(std::ios_base &)) const;
@@ -302,6 +309,19 @@ class FileInformation
 		bool hasCertificateTableRecords() const;
 		bool hasCertificateTableSignerCertificate() const;
 		bool hasCertificateTableCounterSignerCertificate() const;
+		/// @}
+
+		/// @name Getters of @a TLS information
+		/// @{
+		std::string getTlsRawDataStartAddrStr(std::ios_base &(* format)(std::ios_base &)) const;
+		std::string getTlsRawDataEndAddrStr(std::ios_base &(* format)(std::ios_base &)) const;
+		std::string getTlsIndexAddrStr(std::ios_base &(* format)(std::ios_base &)) const;
+		std::string getTlsCallBacksAddrStr(std::ios_base &(* format)(std::ios_base &)) const;
+		std::string getTlsZeroFillSizeStr(std::ios_base &(* format)(std::ios_base &)) const;
+		std::string getTlsCharacteristicsStr() const;
+		std::size_t getTlsNumberOfCallBacks() const;
+		std::string getTlsCallBackAddrStr(std::size_t position, std::ios_base &(* format)(std::ios_base &)) const;
+		bool isTlsUsed() const;
 		/// @}
 
 		/// @name Getters of @a directories
@@ -567,6 +587,7 @@ class FileInformation
 		void setResourceTable(const retdec::fileformat::ResourceTable *sTable);
 		void setStrings(const std::vector<retdec::fileformat::String> *sStrings);
 		void setCertificateTable(const retdec::fileformat::CertificateTable *sTable);
+		void setTlsInfo(const retdec::fileformat::TlsInfo *info);
 		void setSignatureVerified(bool verified);
 		void setLoadedBaseAddress(unsigned long long baseAddress);
 		void setLoaderStatusMessage(const std::string& statusMessage);

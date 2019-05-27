@@ -25,7 +25,7 @@ BAD_ALLOC_RC = 135
 class CmdRunner:
     """A runner of external commands."""
 
-    # Taken from https://github.com/avast-tl/retdec-regression-tests-framework/blob/master/regression_tests/cmd_runner.py
+    # Taken from https://github.com/avast/retdec-regression-tests-framework/blob/master/regression_tests/cmd_runner.py
 
     @classmethod
     def run_cmd(cls, cmd, input='', timeout=None, buffer_output=False, discard_stdout=False, discard_stderr=False, print_run_msg=False):
@@ -297,12 +297,12 @@ def check_python_version():
 def ensure_script_is_being_run_from_installed_retdec():
     # Use this function to assist our users when they try to run the scripts
     # from the 'retdec/scripts' directory instead of from an installed RetDec.
-    # See https://github.com/avast-tl/retdec/issues/418
+    # See https://github.com/avast/retdec/issues/418
     if not os.path.dirname(__file__).endswith('bin'):
         print_error_and_die(
             'You need to build and install RetDec first and then run the installed script via '
             '`python $RETDEC_INSTALL_DIR/bin/retdec-decompiler.py`.\n'
-            'For more details, see https://github.com/avast-tl/retdec#installation-and-use'
+            'For more details, see https://github.com/avast/retdec#installation-and-use'
         )
 
 

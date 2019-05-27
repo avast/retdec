@@ -11,7 +11,7 @@
 namespace {
 
 // Icon priority list
-constexpr std::pair<unsigned short, uint16_t> iconPriorities[] =
+constexpr std::pair<uint16_t, uint16_t> iconPriorities[] =
 {
 	{32, 32},
 	{24, 32},

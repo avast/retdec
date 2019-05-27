@@ -545,7 +545,7 @@ void SecSeg::computeEntropy()
 	{
 		return;
 	}
-	
+
 	auto data = reinterpret_cast<const uint8_t *>(bytes.data());
 	auto size = bytes.size();
 	if (!data || size == 0)

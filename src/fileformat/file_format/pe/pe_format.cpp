@@ -369,6 +369,7 @@ void PeFormat::initStructures()
 			file->readDelayImportDirectory();
 			file->readExportDirectory();
 			file->readDebugDirectory();
+			file->readTlsDirectory();
 			file->readResourceDirectory();
 			file->readSecurityDirectory();
 			file->readComHeaderDirectory();
@@ -427,6 +428,7 @@ void PeFormat::initStructures()
 		loadPdbInfo();
 		loadResources();
 		loadCertificates();
+		loadTlsInformation();
 		loadDotnetHeaders();
 		loadVisualBasicHeader();
 		computeSectionTableHashes();
@@ -1513,6 +1515,11 @@ void PeFormat::loadResources()
 					resourceTable->addResourceIconGroup(static_cast<ResourceIconGroup *>(resource.get()));
 					iconGroupIDcounter++;
 				}
+				else if (type == "Version")
+				{
+					resource = std::make_unique<Resource>();
+					resourceTable->addResourceVersion(resource.get());
+				}
 				else
 				{
 					resource = std::make_unique<Resource>();
@@ -1551,7 +1558,7 @@ void PeFormat::loadResources()
 	}
 
 	resourceTable->linkResourceIconGroups();
-
+	resourceTable->parseVersionInfoResources();
 	loadResourceIconHash();
 
 	for (auto&& addressRange : formatParser->getResourceDirectoryOccupiedAddresses())
@@ -1725,6 +1732,48 @@ void PeFormat::loadCertificates()
 
 	PKCS7_free(p7);
 	BIO_free(bio);
+}
+
+/**
+ * Load thread-local storage information
+ */
+void PeFormat::loadTlsInformation()
+{
+	unsigned long long rva = 0, size = 0;
+	if (!getDataDirectoryRelative(PELIB_IMAGE_DIRECTORY_ENTRY_TLS, rva, size) || size == 0)
+	{
+		return;
+	}
+
+	tlsInfo = new TlsInfo();
+	tlsInfo->setRawDataStartAddr(formatParser->getTlsStartAddressOfRawData());
+	tlsInfo->setRawDataEndAddr(formatParser->getTlsEndAddressOfRawData());
+	tlsInfo->setIndexAddr(formatParser->getTlsAddressOfIndex());
+	tlsInfo->setZeroFillSize(formatParser->getTlsSizeOfZeroFill());
+	tlsInfo->setCharacteristics(formatParser->getTlsCharacteristics());
+
+	auto callBacksAddr = formatParser->getTlsAddressOfCallBacks();
+	tlsInfo->setCallBacksAddr(callBacksAddr);
+
+	const auto &allBytes = getBytes();
+	DynamicBuffer structContent(allBytes);
+
+	unsigned long long callBacksOffset;
+	if (getOffsetFromAddress(callBacksOffset, callBacksAddr))
+	{
+		while (allBytes.size() >= callBacksOffset + sizeof(std::uint32_t))
+		{
+			auto cbAddr = structContent.read<std::uint32_t>(callBacksOffset);
+			callBacksOffset += sizeof(std::uint32_t);
+
+			if (cbAddr == 0)
+			{
+				break;
+			}
+
+			tlsInfo->addCallBack(cbAddr);
+		}
+	}
 }
 
 /**

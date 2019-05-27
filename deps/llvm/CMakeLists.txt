@@ -27,57 +27,152 @@ endif()
 # install only some tools from LLVM, not all the libraries and tools.
 include(ExternalProject)
 
-ExternalProject_Add(llvm-project
-	URL https://github.com/avast-tl/llvm/archive/3d1e5d0bc1122a027e83f57c86851a027dd09112.zip
-	URL_HASH SHA256=069fdb818c75c1aecad1d24848fd0fe7359ca16871aae595a1389274ba92815d
-	DOWNLOAD_NAME llvm.zip
-	CMAKE_ARGS
-		# Force a release build (we don't need to debug LLVM).
-		# This has no effect on Windows with MSVC, but is useful on Linux.
-		-DCMAKE_BUILD_TYPE=Release
-		-DCMAKE_CXX_FLAGS_RELEASE=${CMAKE_CXX_FLAGS_RELEASE}
+if(LLVM_LOCAL_DIR)
+	message(STATUS "LLVM: using local LLVM directory.")
+	
+	ExternalProject_Add(llvm-project
+		DOWNLOAD_COMMAND ""
+		SOURCE_DIR "${LLVM_LOCAL_DIR}"
+		CMAKE_ARGS
+			# Force a release build (we don't need to debug LLVM).
+			# This has no effect on Windows with MSVC, but is useful on Linux.
+			-DCMAKE_BUILD_TYPE=Release
+			-DCMAKE_CXX_FLAGS_RELEASE=${CMAKE_CXX_FLAGS_RELEASE}
+	
+			# Force Python3.
+			-DPYTHON_EXECUTABLE=${PYTHON_EXECUTABLE}
+	
+			# Targets to be build.
+			-DLLVM_TARGETS_TO_BUILD=X86
+	
+			# Our tools depending on LLVM require RTTI, so build LLVM with it.
+			-DLLVM_REQUIRES_RTTI=YES
+	
+			# When building in the debug mode (=> assertions are enabled), we
+			# have to build LLVM with assertions. This prevents link errors
+			# when building the middle-end and back-end (see
+			# https://github.com/oclint/oclint/issues/129).
+			-DLLVM_ENABLE_ASSERTIONS=${IS_DEBUG_BUILD}
+	
+			# Disable the emission of warnings, which are useless since we do
+			# not modify the LLVM sources (of course, except for a few
+			# exceptions).
+			-DLLVM_ENABLE_WARNINGS=NO
+	
+			# Disable the generation of targets for tests (we don't need them).
+			-DLLVM_INCLUDE_TOOLS=OFF
+			-DLLVM_INCLUDE_UTILS=OFF
+			-DLLVM_INCLUDE_RUNTIMES=OFF
+			-DLLVM_INCLUDE_EXAMPLES=OFF
+			-DLLVM_INCLUDE_TESTS=OFF
+			-DLLVM_INCLUDE_GO_TESTS=OFF
+			-DLLVM_INCLUDE_BENCHMARKS=OFF
+			-DLLVM_INCLUDE_DOCS=OFF
+	
+			# Disable build of unnecessary LLVM parts.
+			-DLLVM_BUILD_TOOLS=OFF
+			-DLLVM_BUILD_UTILS=OFF
+			-DLLVM_BUILD_RUNTIMES=OFF
+			-DLLVM_BUILD_RUNTIME=OFF
+			-DLLVM_BUILD_EXAMPLES=OFF
+			-DLLVM_BUILD_TESTS=OFF
+			-DLLVM_BUILD_BENCHMARKS=OFF
+			-DLLVM_BUILD_DOCS=OFF
+			# We don't want this so that we don't have to link with tinfo.
+			# It looks like terminal colors are working even without this.
+			-DLLVM_ENABLE_TERMINFO=OFF
+	
+			# Necessary for builds with older MS Visual Studios (e.g. 2015).
+			-DLLVM_TEMPORARILY_ALLOW_OLD_TOOLCHAIN=ON
+	
+			# Force the use of the same compiler as used to build the top-level
+			# project. Otherwise, the external project may pick up a different
+			# compiler, which may result in link errors.
+			"${CMAKE_C_COMPILER_OPTION}"
+			"${CMAKE_CXX_COMPILER_OPTION}"
+	
+		# Disable the installation right after build (we want to install the
+		# needed libraries and tools manually).
+		INSTALL_COMMAND ""
+	)
+	force_configure_step(llvm-project)
+else()
+	message(STATUS "LLVM: using remote LLVM revision.")
 
-		# Force Python3.
-		-DPYTHON_EXECUTABLE=${PYTHON_EXECUTABLE}
+	ExternalProject_Add(llvm-project
+		URL https://github.com/avast/llvm/archive/82632c555520b4f490d33c799aa1256817d734d2.zip
+		URL_HASH SHA256=634f42177b36d1017ba09a53a9e3a8347cbf388579fa7eaecb9cb0028edeea77
+		DOWNLOAD_NAME llvm.zip
+		CMAKE_ARGS
+			# Force a release build (we don't need to debug LLVM).
+			# This has no effect on Windows with MSVC, but is useful on Linux.
+			-DCMAKE_BUILD_TYPE=Release
+			-DCMAKE_CXX_FLAGS_RELEASE=${CMAKE_CXX_FLAGS_RELEASE}
+	
+			# Force Python3.
+			-DPYTHON_EXECUTABLE=${PYTHON_EXECUTABLE}
+	
+			# Targets to be build.
+			-DLLVM_TARGETS_TO_BUILD=X86
+	
+			# Our tools depending on LLVM require RTTI, so build LLVM with it.
+			-DLLVM_REQUIRES_RTTI=YES
+	
+			# When building in the debug mode (=> assertions are enabled), we
+			# have to build LLVM with assertions. This prevents link errors
+			# when building the middle-end and back-end (see
+			# https://github.com/oclint/oclint/issues/129).
+			-DLLVM_ENABLE_ASSERTIONS=${IS_DEBUG_BUILD}
+	
+			# Disable the emission of warnings, which are useless since we do
+			# not modify the LLVM sources (of course, except for a few
+			# exceptions).
+			-DLLVM_ENABLE_WARNINGS=NO
+	
+			# Disable the generation of targets for tests (we don't need them).
+			-DLLVM_INCLUDE_TOOLS=OFF
+			-DLLVM_INCLUDE_UTILS=OFF
+			-DLLVM_INCLUDE_RUNTIMES=OFF
+			-DLLVM_INCLUDE_EXAMPLES=OFF
+			-DLLVM_INCLUDE_TESTS=OFF
+			-DLLVM_INCLUDE_GO_TESTS=OFF
+			-DLLVM_INCLUDE_BENCHMARKS=OFF
+			-DLLVM_INCLUDE_DOCS=OFF
+	
+			# Disable build of unnecessary LLVM parts.
+			-DLLVM_BUILD_TOOLS=OFF
+			-DLLVM_BUILD_UTILS=OFF
+			-DLLVM_BUILD_RUNTIMES=OFF
+			-DLLVM_BUILD_RUNTIME=OFF
+			-DLLVM_BUILD_EXAMPLES=OFF
+			-DLLVM_BUILD_TESTS=OFF
+			-DLLVM_BUILD_BENCHMARKS=OFF
+			-DLLVM_BUILD_DOCS=OFF
+			# We don't want this so that we don't have to link with tinfo.
+			# It looks like terminal colors are working even without this.
+			-DLLVM_ENABLE_TERMINFO=OFF
+	
+			# Necessary for builds with older MS Visual Studios (e.g. 2015).
+			-DLLVM_TEMPORARILY_ALLOW_OLD_TOOLCHAIN=ON
+	
+			# Force the use of the same compiler as used to build the top-level
+			# project. Otherwise, the external project may pick up a different
+			# compiler, which may result in link errors.
+			"${CMAKE_C_COMPILER_OPTION}"
+			"${CMAKE_CXX_COMPILER_OPTION}"
+	
+		# Disable the installation right after build (we want to install the
+		# needed libraries and tools manually).
+		INSTALL_COMMAND ""
+	)
+endif()
 
-		# Targets to be build.
-		-DLLVM_TARGETS_TO_BUILD=X86
-
-		# Disable the generation of targets for tests (we don't need them).
-		-DLLVM_INCLUDE_TESTS=NO
-
-		# Our tools depending on LLVM require RTTI, so build LLVM with it.
-		-DLLVM_REQUIRES_RTTI=YES
-
-		# When building in the debug mode (=> assertions are enabled), we
-		# have to build LLVM with assertions. This prevents link errors
-		# when building the middle-end and back-end (see
-		# https://github.com/oclint/oclint/issues/129).
-		-DLLVM_ENABLE_ASSERTIONS=${IS_DEBUG_BUILD}
-
-		# Disable the emission of warnings, which are useless since we do
-		# not modify the LLVM sources (of course, except for a few
-		# exceptions).
-		-DLLVM_ENABLE_WARNINGS=NO
-
-		# Disable build of unnecessary LLVM parts.
-		-DLLVM_BUILD_TOOLS=OFF
-		-DLLVM_BUILD_UTILS=OFF
-		-DLLVM_BUILD_RUNTIME=OFF
-		# We don't want this so that we don't have to link with tinfo.
-		# It looks like terminal colors are working even without this.
-		-DLLVM_ENABLE_TERMINFO=OFF
-
-		# Force the use of the same compiler as used to build the top-level
-		# project. Otherwise, the external project may pick up a different
-		# compiler, which may result in link errors.
-		"${CMAKE_C_COMPILER_OPTION}"
-		"${CMAKE_CXX_COMPILER_OPTION}"
-
-	# Disable the installation right after build (we want to install the
-	# needed libraries and tools manually).
-	INSTALL_COMMAND ""
-)
+check_if_variable_changed(LLVM_LOCAL_DIR CHANGED)
+if(CHANGED)
+	ExternalProject_Get_Property(llvm-project binary_dir)
+	message(STATUS "LLVM: path to LLVM directory changed -> cleaning CMake files in ${binary_dir}.")
+	clean_cmake_files(${binary_dir})
+endif()
 
 # Add libraries.
 ExternalProject_Get_Property(llvm-project binary_dir)
@@ -89,8 +184,10 @@ set(LLVM_LIB_LIST
 	LLVMBitWriter
 	LLVMIRReader
 	LLVMObject
+	LLVMBinaryFormat
 	LLVMInstCombine
 	LLVMSupport
+	LLVMDemangle
 	LLVMipo
 	LLVMAsmParser
 	LLVMBitReader
