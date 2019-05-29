@@ -118,7 +118,7 @@ HasFunctionTypeReturnsTrueWhenTypeIsThere)
 {
 	auto newT = FunctionType::create(context, intType, {});
 
-	EXPECT_TRUE(context->hasFunctionType(intType, {}));
+	EXPECT_TRUE(context->hasFunctionType(intType, {}, {}, FunctionType::VarArgness::IsNotVarArg));
 }
 
 TEST_F(ContextTests,
