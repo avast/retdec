@@ -36,6 +36,24 @@ namespace bin2llvmir {
 //=============================================================================
 //
 
+namespace {
+config::CallingConvention::eCallingConvention toCallConv(const std::string &callConv)
+{
+	using CallingConvention = config::CallingConvention::eCallingConvention;
+
+	std::map<std::string, CallingConvention> callConvMap {
+		{"cdecl", CallingConvention::CC_CDECL},
+		{"pascal", CallingConvention::CC_PASCAL},
+		{"thiscall", CallingConvention::CC_THISCALL},
+		{"stdcall", CallingConvention::CC_STDCALL},
+		{"fastcall", CallingConvention::CC_FASTCALL},
+		{"eabi", CallingConvention::CC_ARM}
+	};	// TODO add vectorcall and regcall
+
+	return utils::mapGetValueOrDefault(callConvMap, callConv, CallingConvention::CC_UNKNOWN);
+}
+}
+
 char ParamReturn::ID = 0;
 
 static RegisterPass<ParamReturn> X(
@@ -59,6 +77,7 @@ bool ParamReturn::runOnModule(Module& m)
 	_image = FileImageProvider::getFileImage(_module);
 	_dbgf = DebugFormatProvider::getDebugFormat(_module);
 	_lti = LtiProvider::getLti(_module);
+	_demangler = DemanglerProvider::getDemangler(_module);
 	_collector = CollectorProvider::createCollector(_abi, _module, &_RDA);
 
 	return run();
@@ -68,6 +87,7 @@ bool ParamReturn::runOnModuleCustom(
 		Module& m,
 		Config* c,
 		Abi* abi,
+		Demangler* demangler,
 		FileImage* img,
 		DebugFormat* dbgf,
 		Lti* lti)
@@ -78,6 +98,7 @@ bool ParamReturn::runOnModuleCustom(
 	_image = img;
 	_dbgf = dbgf;
 	_lti = lti;
+	_demangler = demangler;
 	_collector = CollectorProvider::createCollector(_abi, _module, &_RDA);
 
 	return run();
@@ -200,7 +221,8 @@ void ParamReturn::collectExtraData(DataFlowEntry* dataflow) const
 	auto* cf = _config->getConfigFunction(fnc);
 	if (cf && (cf->isDynamicallyLinked() || cf->isStaticallyLinked()))
 	{
-		auto fp = _lti->getPairFunctionFree(cf->getName());
+		auto funcName = cf->getName();
+		auto fp = _lti->getPairFunctionFree(funcName);
 		if (fp.first)
 		{
 			std::vector<Type*> argTypes;
@@ -231,6 +253,13 @@ void ParamReturn::collectExtraData(DataFlowEntry* dataflow) const
 			}
 			return;
 		}
+
+		auto demFuncPair = _demangler->getPairFunction(funcName);
+		if (demFuncPair.first)
+		{
+			modifyWithDemangledData(*dataflow, demFuncPair);
+			return;
+		}
 	}
 
 	auto dbgFnc = _dbgf ? _dbgf->getFunction(
@@ -240,6 +269,7 @@ void ParamReturn::collectExtraData(DataFlowEntry* dataflow) const
 	//
 	if (dbgFnc)
 	{
+		auto funcName = dbgFnc->getName();
 		std::vector<Type*> argTypes;
 		std::vector<std::string> argNames;
 		for (auto& a : dbgFnc->parameters)
@@ -272,6 +302,7 @@ void ParamReturn::collectExtraData(DataFlowEntry* dataflow) const
 	auto configFnc = _config->getConfigFunction(fnc);
 	if (_config->getConfig().isIda() && configFnc)
 	{
+		auto funcName = dbgFnc->getName();
 		std::vector<Type*> argTypes;
 		std::vector<std::string> argNames;
 		for (auto& a : configFnc->parameters)
@@ -338,6 +369,27 @@ void ParamReturn::collectExtraData(DataFlowEntry* dataflow) const
 			dataflow->setWrappedCall(wrappedCall);
 
 			return;
+		}
+
+		auto demFuncPair = _demangler->getPairFunction(wf->getName());
+		if (demFuncPair.first)
+		{
+			LOG << "wrapper: " << _demangler->demangleToString(wf->getName()) << std::endl;
+			modifyWithDemangledData(*dataflow, demFuncPair);
+			dataflow->setWrappedCall(wrappedCall);
+
+			return;
+		}
+	}
+
+	// try to get calling convention and return type if name is mangled
+	auto fp = _demangler->getPairFunction(fnc->getName().str());
+	if (fp.first)
+	{
+		dataflow->setCallingConvention(toCallConv(fp.second->getCallConvention()));
+		if (!fp.second->getReturnType()->isUnknown())
+		{
+			dataflow->setRetType(fp.first->getReturnType());
 		}
 	}
 }
@@ -452,7 +504,7 @@ CallInst* ParamReturn::getWrapper(Function* fnc) const
 	return nullptr;
 }
 
-void ParamReturn::addDataFromCall(DataFlowEntry* dataflow, CallInst* call) const
+void ParamReturn::addDataFromCall(DataFlowEntry *dataflow, CallInst *call) const
 {
 	CallEntry* ce = dataflow->createCallEntry(call);
 
@@ -623,7 +675,92 @@ void ParamReturn::filterCalls()
 		filters[cc]->estimateRetValue(&de);
 
 		modifyType(de);
+
+//		dumpInfo(de);
+
+		analyzeWithDemangler(de);
 	}
+}
+
+void ParamReturn::analyzeWithDemangler(DataFlowEntry& de) const
+{
+	if (de.getFunction())
+	{
+		auto funcName = de.getFunction()->getName().str();
+		auto demFuncPair = _demangler->getPairFunction(funcName);
+		if (demFuncPair.first)	// demangling successful
+		{
+			modifyWithDemangledData(de, demFuncPair);
+		}
+	}
+}
+
+void ParamReturn::modifyWithDemangledData(DataFlowEntry &de, Demangler::FunctionPair &funcPair) const
+{
+	std::vector<Type*> argTypes;
+	std::vector<std::string> argNames;
+
+	auto detectedArgTypes = de.argTypes();
+	const size_t detectedParamCount = detectedArgTypes.size();
+	const size_t demanglerParamCount = funcPair.second->getParameterCount();
+
+	if (detectedParamCount > demanglerParamCount +2) {
+		return;		// param analysis was probably wrong, dont know what to do
+	}
+
+	const auto ptrSize = static_cast<unsigned>(Abi::getWordSize(_module)) * 8;
+	bool retTypeSet = false;
+
+	if (detectedParamCount == demanglerParamCount+2)
+	{
+		// add this param
+		argTypes.emplace_back(PointerType::get(Type::getIntNTy(_module->getContext(), ptrSize), 0));
+		argNames.emplace_back("this");
+
+		// add result param
+		argTypes.emplace_back(PointerType::get(Type::getIntNTy(_module->getContext(), ptrSize), 0));
+		argNames.emplace_back("result");
+
+		// set return type to result
+		de.setRetType(funcPair.first->getReturnType());
+		retTypeSet = true;
+	}
+
+	if (detectedParamCount == demanglerParamCount+1)
+	{
+		/*
+		 * Adds pointer to result or this, cant be sure based on information we have.
+		 * Parameter will be named "result"
+		 */
+		argTypes.emplace_back(PointerType::get(_abi->getDefaultType(), 0));
+		argNames.emplace_back("result");
+	}
+
+	for (auto& demParam : funcPair.first->args())
+	{
+		if (demParam.getType()->isSized())
+		{
+			argTypes.push_back(demParam.getType());
+			argNames.push_back(demParam.getName());
+		}
+	}
+
+	de.setArgTypes(
+		std::move(argTypes),
+		std::move(argNames));
+
+	if (funcPair.first->isVarArg())
+	{
+		de.setVariadic();
+	}
+
+	if (retTypeSet)
+	{
+		de.setRetType(funcPair.first->getReturnType());
+	}
+
+	auto callConv = funcPair.second->getCallConvention();
+	de.setCallingConvention(toCallConv(callConv));
 }
 
 Type* ParamReturn::extractType(Value* from) const
@@ -748,6 +885,7 @@ void ParamReturn::applyToIr()
 {
 	for (auto& p : _fnc2calls)
 	{
+//		dumpInfo(p.second);
 		applyToIr(p.second);
 	}
 

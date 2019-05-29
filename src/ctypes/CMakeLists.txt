@@ -17,8 +17,10 @@ set(CTYPES_SOURCES
 	integral_type.cpp
 	member.cpp
 	module.cpp
+	named_type.cpp
 	parameter.cpp
 	pointer_type.cpp
+	reference_type.cpp
 	struct_type.cpp
 	type.cpp
 	typedefed_type.cpp

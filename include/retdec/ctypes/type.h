@@ -31,7 +31,9 @@ class Type: public Visitable, public std::enable_shared_from_this<Type>
 		virtual bool isFloatingPoint() const;
 		virtual bool isFunction() const;
 		virtual bool isIntegral() const;
+		virtual bool isNamed() const;
 		virtual bool isPointer() const;
+		virtual bool isReference() const;
 		virtual bool isStruct() const;
 		virtual bool isTypedef() const;
 		virtual bool isUnion() const;

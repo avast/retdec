@@ -30,12 +30,12 @@ class JSONCTypesParser: public CTypesParser
 		virtual std::unique_ptr<retdec::ctypes::Module> parse(
 			std::istream &stream,
 			const TypeWidths &typeWidths = {},
-			const retdec::ctypes::CallConvention &callConvention = retdec::ctypes::CallConvention()) override;
+			const retdec::ctypes::CallConvention &callConvention = retdec::ctypes::CallConvention());
 		virtual void parseInto(
 			std::istream &stream,
 			std::unique_ptr<retdec::ctypes::Module> &module,
 			const TypeWidths &typeWidths = {},
-			const retdec::ctypes::CallConvention &callConvention = retdec::ctypes::CallConvention()) override;
+			const retdec::ctypes::CallConvention &callConvention = retdec::ctypes::CallConvention());
 
 	private:
 		std::string loadJson(std::istream &stream) const;
@@ -136,6 +136,9 @@ class JSONCTypesParser: public CTypesParser
 
 		/// Map used to store pointers to JSON types (to speedup the parsing).
 		TypesMap typesMap;
+
+		/// Call convention used when JSON does not contain one.
+		retdec::ctypes::CallConvention defaultCallConv;
 };
 
 } // namespace ctypesparser
