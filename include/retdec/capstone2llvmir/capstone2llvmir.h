@@ -23,6 +23,7 @@
 
 // These are additions to capstone - include them all here.
 #include "retdec/capstone2llvmir/arm/arm_defs.h"
+#include "retdec/capstone2llvmir/arm64/arm64_defs.h"
 #include "retdec/capstone2llvmir/mips/mips_defs.h"
 #include "retdec/capstone2llvmir/powerpc/powerpc_defs.h"
 #include "retdec/capstone2llvmir/x86/x86_defs.h"

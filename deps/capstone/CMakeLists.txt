@@ -65,8 +65,8 @@ else()
 			-DCAPSTONE_MIPS_SUPPORT=ON
 			-DCAPSTONE_PPC_SUPPORT=ON
 			-DCAPSTONE_X86_SUPPORT=ON
+			-DCAPSTONE_ARM64_SUPPORT=ON
 			# Disabled architectures.
-			-DCAPSTONE_ARM64_SUPPORT=OFF
 			-DCAPSTONE_M68K_SUPPORT=OFF
 			-DCAPSTONE_SPARC_SUPPORT=OFF
 			-DCAPSTONE_SYSZ_SUPPORT=OFF
@@ -102,5 +102,6 @@ ExternalProject_Get_Property(capstone-project binary_dir)
 add_library(capstone INTERFACE)
 add_dependencies(capstone capstone-project)
 target_include_directories(capstone SYSTEM INTERFACE ${source_dir}/include)
+target_include_directories(capstone SYSTEM INTERFACE ${source_dir}/arch)
 target_link_libraries(capstone INTERFACE debug ${binary_dir}/${DEBUG_DIR}${CMAKE_STATIC_LIBRARY_PREFIX}capstone${CMAKE_STATIC_LIBRARY_SUFFIX})
 target_link_libraries(capstone INTERFACE optimized ${binary_dir}/${RELEASE_DIR}${CMAKE_STATIC_LIBRARY_PREFIX}capstone${CMAKE_STATIC_LIBRARY_SUFFIX})

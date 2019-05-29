@@ -38,7 +38,7 @@ JumpTarget::JumpTarget(
 		_fromAddress(f),
 		_mode(m)
 {
-	if (config->getConfig().architecture.isArmOrThumb() && _address % 2)
+	if (config->getConfig().architecture.isArm32OrThumb() && _address % 2)
 	{
 		_mode = CS_MODE_THUMB;
 		_address -= 1;
@@ -191,14 +191,15 @@ const JumpTarget* JumpTargets::push(
 
 	if (a.isDefined())
 	{
-		if (arch.isArmOrThumb() && a % 2)
+		if (arch.isArm32OrThumb() && a % 2)
 		{
 			m = CS_MODE_THUMB;
 			a -= 1;
 		}
 
-		if ((arch.isArmOrThumb() && m == CS_MODE_ARM && a % 4)
-				|| (arch.isArmOrThumb() && m == CS_MODE_THUMB && a % 2)
+		if ((arch.isArm32OrThumb() && m == CS_MODE_ARM && a % 4)
+				|| (arch.isArm32OrThumb() && m == CS_MODE_THUMB && a % 2)
+				|| (arch.isArm64() && a % 4)
 				|| (arch.isMipsOrPic32() && a % 4)
 				|| (arch.isPpc() && a % 4))
 		{

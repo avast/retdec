@@ -441,7 +441,7 @@ void NameContainer::initFromImage()
 					break;
 			}
 
-			if (_config->getConfig().architecture.isArmOrThumb() && a % 2)
+			if (_config->getConfig().architecture.isArm32OrThumb() && a % 2)
 			{
 				a -= 1;
 			}
@@ -455,7 +455,7 @@ void NameContainer::initFromImage()
 		unsigned long long ep = 0;
 		if (_image->getFileFormat()->getEpAddress(ep))
 		{
-			if (_config->getConfig().architecture.isArmOrThumb() && ep % 2)
+			if (_config->getConfig().architecture.isArm32OrThumb() && ep % 2)
 			{
 				ep -= 1;
 			}

@@ -1,7 +1,7 @@
 /**
  * @file src/bin2llvmir/providers/abi/arm64.cpp
  * @brief ABI information for ARM64.
- * @copyright (c) 2017 Avast Software, licensed under the MIT license
+ * @copyright (c) 2018 Avast Software, licensed under the MIT license
  */
 
 #include "retdec/bin2llvmir/providers/abi/arm64.h"
@@ -19,7 +19,7 @@ AbiArm64::AbiArm64(llvm::Module* m, Config* c) :
 	_regStackPointerId = ARM64_REG_SP;
 
 	// system calls
-	_regSyscallId = ARM64_REG_X7;
+	_regSyscallId = ARM64_REG_X8;
 	_regSyscallReturn = ARM64_REG_X0;
 	_syscallRegs = {
 			ARM64_REG_X0,

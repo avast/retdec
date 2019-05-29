@@ -277,7 +277,7 @@ Lti::Lti(
 			loadLtiFile(l);
 		}
 		else if (retdec::utils::startsWith(fileName, "arm") &&
-				_config->getConfig().architecture.isArmOrThumb())
+				_config->getConfig().architecture.isArm32OrThumb())
 		{
 			loadLtiFile(l);
 		}
