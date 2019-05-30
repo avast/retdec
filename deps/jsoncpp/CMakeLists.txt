@@ -9,7 +9,7 @@ endif()
 
 if(JSONCPP_LOCAL_DIR)
 	message(STATUS "JsonCpp: using local JsonCpp directory.")
-	
+
 	ExternalProject_Add(jsoncpp-project
 		DOWNLOAD_COMMAND ""
 		SOURCE_DIR "${JSONCPP_LOCAL_DIR}"

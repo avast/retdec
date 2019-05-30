@@ -385,7 +385,7 @@ void JsonPresentation::presentTlsInfo(Json::Value &root) const
 	{
 		return;
 	}
-	
+
 	Value jTlsInfo;
 	presentIfNotEmpty("rawDataStartAddress", fileinfo.getTlsRawDataStartAddrStr(hexWithPrefix), jTlsInfo);
 	presentIfNotEmpty("rawDataEndAddress", fileinfo.getTlsRawDataEndAddrStr(hexWithPrefix), jTlsInfo);

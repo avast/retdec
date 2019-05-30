@@ -783,9 +783,9 @@ llvm::Value* Capstone2LlvmIrTranslatorArm64_impl::loadOp(
 			auto* val = llvm::ConstantFP::get(irb.getDoubleTy(), op.fp);
 			return val;
 		}
-		case ARM64_OP_INVALID: 
-		case ARM64_OP_CIMM: 
-		case ARM64_OP_PREFETCH: 
+		case ARM64_OP_INVALID:
+		case ARM64_OP_CIMM:
+		case ARM64_OP_PREFETCH:
 		case ARM64_OP_BARRIER:
 		default:
 		{
@@ -857,18 +857,18 @@ llvm::Instruction* Capstone2LlvmIrTranslatorArm64_impl::storeOp(
 			addr = irb.CreateIntToPtr(addr, pt);
 			return irb.CreateStore(val, addr);
 		}
-		case ARM64_OP_INVALID: 
-		case ARM64_OP_IMM: 
+		case ARM64_OP_INVALID:
+		case ARM64_OP_IMM:
 		{
 			// This is here because some operands that are for example in post-index addressing mode
 			// will have the write flag set and generic functions try to write to IMM, which is not correct
 			// Maybe solve this better?
 			return nullptr;
 		}
-		case ARM64_OP_FP:  
-		case ARM64_OP_CIMM: 
-		case ARM64_OP_PREFETCH: 
-		case ARM64_OP_BARRIER: 
+		case ARM64_OP_FP:
+		case ARM64_OP_CIMM:
+		case ARM64_OP_PREFETCH:
+		case ARM64_OP_BARRIER:
 		default:
 		{
 			throw GenericError("storeOp(): unhandled operand type");
@@ -1844,7 +1844,7 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateBr(cs_insn* i, cs_arm64* ai, 
 void Capstone2LlvmIrTranslatorArm64_impl::translateB(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb)
 {
 	EXPECT_IS_UNARY(i, ai, irb);
-    
+
 	op0 = loadOpUnary(ai, irb);
 
 	if (isCondIns(ai)) {
@@ -1863,7 +1863,7 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateB(cs_insn* i, cs_arm64* ai, l
 void Capstone2LlvmIrTranslatorArm64_impl::translateBl(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb)
 {
 	EXPECT_IS_UNARY(i, ai, irb);
-    
+
 	storeRegister(ARM64_REG_LR, getNextInsnAddress(i), irb);
 	op0 = loadOpUnary(ai, irb);
 	generateCallFunctionCall(irb, op0);
