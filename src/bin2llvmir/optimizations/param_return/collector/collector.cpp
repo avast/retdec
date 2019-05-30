@@ -306,7 +306,6 @@ void Collector::collectStoresRecursively(
 	seen[block] = values;
 }
 
-
 bool Collector::collectStoresInInstructionBlock(
 			Instruction* start,
 			std::set<Value*>& values,
@@ -475,7 +474,6 @@ void Collector::collectCallSpecificTypes(CallEntry* ce) const
 	{
 		return;
 	}
-
 
 	if (!extractFormatString(ce))
 	{

@@ -133,5 +133,4 @@ bool TlsInfo::isUsed() const
 	return tlsInfo != nullptr;
 }
 
-
 } // namespace fileinfo

@@ -10,7 +10,6 @@
 #include "retdec/utils/conversion.h"
 #include "retdec/fileformat/types/visual_basic/visual_basic_info.h"
 
-
 using namespace retdec::utils;
 
 namespace retdec {
@@ -767,7 +766,6 @@ std::string VisualBasicInfo::guidToStr(const std::uint8_t data[16])
 
 	return r1 + "-" + r2 + "-" + r3 + "-" + r4 + "-" + r5;
 }
-
 
 } // namespace fileformat
 } // namespace retdec

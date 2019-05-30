@@ -630,7 +630,6 @@ void Capstone2LlvmIrTranslatorArm64_impl::initializeRegTypeMap()
 	auto* f64 = llvm::Type::getDoubleTy(_module->getContext());
 	auto* f128 = llvm::Type::getFP128Ty(_module->getContext());
 
-
 	std::map<uint32_t, llvm::Type*> r2t =
 	{
 		// General purpose registers.
@@ -1556,7 +1555,6 @@ void Capstone2LlvmIrTranslatorArm64_impl::initializeRegistersParentMapToOther(
 		_reg2parentMap.insert(std::make_pair(r, other));
 	}
 }
-
 
 void Capstone2LlvmIrTranslatorArm64_impl::initializeRegistersParentMap()
 {

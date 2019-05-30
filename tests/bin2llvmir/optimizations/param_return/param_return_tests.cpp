@@ -3442,7 +3442,6 @@ TEST_F(ParamReturnTests, x86FastcallBasic)
 	checkModuleAgainstExpectedIr(exp);
 }
 
-
 TEST_F(ParamReturnTests, x86FastcallLargeTypeCatch)
 {
 	parseInput(R"(

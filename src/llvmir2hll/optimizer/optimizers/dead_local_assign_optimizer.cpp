@@ -92,7 +92,6 @@ bool DeadLocalAssignOptimizer::canBeOptimized(ShPtr<Variable> var,
 			return false;
 		}
 
-
 		// The use cannot contain any function calls.
 		if (useData->hasCalls()) {
 			return false;

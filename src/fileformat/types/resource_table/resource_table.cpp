@@ -68,11 +68,8 @@ struct VersionInfoHeader
 
 } // anonymous namespace
 
-
 namespace retdec {
 namespace fileformat {
-
-
 
 /**
  * Constructor

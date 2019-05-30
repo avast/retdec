@@ -37,7 +37,6 @@ class ReturnEntry
 		const std::vector<llvm::StoreInst*>& retStores() const;
 		const std::vector<llvm::Value*>& retValues() const;
 
-
 	protected:
 		llvm::ReturnInst* _retInst = nullptr;
 

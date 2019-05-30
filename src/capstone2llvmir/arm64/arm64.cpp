@@ -699,7 +699,6 @@ llvm::Value* Capstone2LlvmIrTranslatorArm64_impl::loadRegister(
 		return getCurrentPc(_insn);
 	}
 
-
 	llvm::Type* rt = nullptr;
 	try
 	{
@@ -2905,7 +2904,6 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateMovi(cs_insn* i, cs_arm64* ai
 	op1 = loadOp(ai->operands[1], irb);
 	storeOp(ai->operands[0], op1, irb);
 }
-
 
 /**
  * ARM64_INS_FMUL, ARM64_INS_FNMUL

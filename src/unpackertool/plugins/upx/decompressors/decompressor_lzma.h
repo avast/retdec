@@ -8,7 +8,6 @@
 
 #include "unpackertool/plugins/upx/decompressors/decompressor.h"
 
-
 namespace retdec {
 namespace unpackertool {
 namespace upx {

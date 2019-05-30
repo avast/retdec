@@ -607,7 +607,6 @@ bool BitmapImage::reduce8x8()
 		}
 	}
 
-
 	/* crop to 8x8 */
 	image.resize(8);
 	for (auto &row : image)
@@ -710,7 +709,6 @@ void BitmapImage::greyScale()
 		}
 	}
 }
-
 
 } // namespace fileformat
 } // namespace retdec

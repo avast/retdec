@@ -765,6 +765,5 @@ void BIRWriter::visit(ShPtr<UnknownType> type) {
 	out << "type_unknown";
 }
 
-
 } // namespace llvmir2hll
 } // namespace retdec

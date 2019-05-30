@@ -30,7 +30,6 @@ class AbiX86 : public Abi
 	public:
 		virtual bool isNopInstruction(cs_insn* insn) override;
 
-
 	// Calling conventions.
 	//
 	private:

@@ -1118,13 +1118,6 @@ std::string FileInformation::getVisualBasicObjectTableHashSha256() const
 	return visualBasicInfo.getObjectTableHashSha256();
 }
 
-
-
-
-
-
-
-
 /**
  * Get type of related PDB file
  * @return Type of related PDB file

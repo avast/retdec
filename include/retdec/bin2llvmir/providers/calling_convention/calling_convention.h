@@ -4,7 +4,6 @@
  * @copyright (c) 2019 Avast Software, licensed under the MIT license
  */
 
-
 #ifndef RETDEC_BIN2LLVMIR_PROVIDERS_CALL_CONV_CALL_CONV_H
 #define RETDEC_BIN2LLVMIR_PROVIDERS_CALL_CONV_CALL_CONV_H
 
