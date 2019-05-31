@@ -5,8 +5,8 @@
  */
 
 
-#include "llvm/Demangle/Demangle.h"
-#include "llvm/Demangle/MicrosoftDemangle.h"
+#include <llvm/Demangle/Demangle.h>
+#include <llvm/Demangle/MicrosoftDemangle.h>
 
 #include "retdec/demangler/microsoft_demangler.h"
 #include "retdec/ctypesparser/ms_ast_ctypes_parser.h"

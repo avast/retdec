@@ -1,5 +1,5 @@
 /**
- * @file src/demangler_llvm/demangler_base.cpp
+ * @file src/demangler/demangler_base.cpp
  * @brief Demangler library implementation.
  * @copyright (c) 2018 Avast Software, licensed under the MIT license
  */

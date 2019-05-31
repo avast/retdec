@@ -7,8 +7,8 @@
 #include <cassert>
 #include <sstream>
 
-#include "llvm/Demangle/MicrosoftDemangleNodes.h"
-#include "llvm/Demangle/MicrosoftDemangle.h"
+#include <llvm/Demangle/MicrosoftDemangleNodes.h>
+#include <llvm/Demangle/MicrosoftDemangle.h>
 
 #include "retdec/ctypesparser/ms_ast_ctypes_parser.h"
 

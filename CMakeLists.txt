@@ -14,7 +14,7 @@ option(RETDEC_DEV_TOOLS "Build dev tools." OFF)
 option(RETDEC_FORCE_OPENSSL_BUILD "Force OpenSSL build." OFF)
 option(RETDEC_COMPILE_YARA "Compile YARA rules at installation." ON)
 
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 

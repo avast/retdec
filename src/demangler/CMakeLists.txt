@@ -1,4 +1,3 @@
-add_subdirectory(demangler_llvm)
 
 set(DEMANGLER_LLVM_SOURCES
 	demangler_base.cpp
@@ -26,8 +25,8 @@ set(DEMANGLER_LLVM_SOURCES
 	borland_ast/qualifiers.cpp
 	borland_ast/template_node.cpp
 	borland_ast/type_node.cpp
-	)
+)
 
 add_library(retdec-demangler STATIC ${DEMANGLER_LLVM_SOURCES})
-target_link_libraries(retdec-demangler llvm-demangler retdec-ctypesparser)
+target_link_libraries(retdec-demangler retdec-ctypesparser llvm)
 target_include_directories(retdec-demangler PUBLIC ${PROJECT_SOURCE_DIR}/include/)

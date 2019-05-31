@@ -4,7 +4,7 @@
 * @copyright (c) 2019 Avast Software, licensed under the MIT license
 */
 
-#include "llvm/Demangle/ItaniumDemangle.h"
+#include <llvm/Demangle/ItaniumDemangle.h>
 
 #include "retdec/ctypesparser/itanium_ast_ctypes_parser.h"
 

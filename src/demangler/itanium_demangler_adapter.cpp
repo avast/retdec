@@ -4,10 +4,10 @@
  * @copyright (c) 2018 Avast Software, licensed under the MIT license
  */
 
-#include "llvm/Demangle/ItaniumDemangle.h"
-#include "llvm/Demangle/Demangle.h"
-#include "llvm/Demangle/Allocator.h"
-#include "llvm/Demangle/Utility.h"
+#include <llvm/Demangle/ItaniumDemangle.h>
+#include <llvm/Demangle/Demangle.h>
+#include <llvm/Demangle/Allocator.h>
+#include <llvm/Demangle/Utility.h>
 
 #include "retdec/demangler/itanium_demangler.h"
 #include "retdec/ctypesparser/itanium_ast_ctypes_parser.h"
