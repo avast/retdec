@@ -269,7 +269,6 @@ void ParamReturn::collectExtraData(DataFlowEntry* dataflow) const
 	//
 	if (dbgFnc)
 	{
-		auto funcName = dbgFnc->getName();
 		std::vector<Type*> argTypes;
 		std::vector<std::string> argNames;
 		for (auto& a : dbgFnc->parameters)
@@ -296,13 +295,15 @@ void ParamReturn::collectExtraData(DataFlowEntry* dataflow) const
 				_module,
 				dbgFnc->returnType.getLlvmIr()));
 
+		// TODO: Maybe use demangled function name?
+		// Would it be useful for names from debug info?
+
 		return;
 	}
 
 	auto configFnc = _config->getConfigFunction(fnc);
 	if (_config->getConfig().isIda() && configFnc)
 	{
-		auto funcName = dbgFnc->getName();
 		std::vector<Type*> argTypes;
 		std::vector<std::string> argNames;
 		for (auto& a : configFnc->parameters)
@@ -329,6 +330,10 @@ void ParamReturn::collectExtraData(DataFlowEntry* dataflow) const
 			llvm_utils::stringToLlvmTypeDefault(
 				_module,
 				configFnc->returnType.getLlvmIr()));
+
+		// TODO: Maybe use demangled function name?
+		// Is it desired for names from IDA?
+
 		return;
 	}
 
