@@ -100,8 +100,8 @@ else()
 	message(STATUS "LLVM: using remote LLVM revision.")
 
 	ExternalProject_Add(llvm-project
-		URL https://github.com/avast/llvm/archive/82632c555520b4f490d33c799aa1256817d734d2.zip
-		URL_HASH SHA256=634f42177b36d1017ba09a53a9e3a8347cbf388579fa7eaecb9cb0028edeea77
+		URL https://github.com/avast/llvm/archive/bc60dd9445f1f1297cd67297b2a073bb1567303c.zip
+		URL_HASH SHA256=58fb039c9b6dabad2093a85b1c4d4b42880dd109341f936e3be762b5daa01143
 		DOWNLOAD_NAME llvm.zip
 		CMAKE_ARGS
 			# Force a release build (we don't need to debug LLVM).
