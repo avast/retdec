@@ -81,10 +81,10 @@ void FunctionTypeNode::printLeft(std::ostream &s) const
 	}
 
 	switch (_callConv) {
-	case CallConv::fastcall:
+	case CallConv::cc_fastcall:
 		s << "__fastcall ";
 		break;
-	case CallConv::stdcall:
+	case CallConv::cc_stdcall:
 		s << "__stdcall ";
 		break;
 	default:

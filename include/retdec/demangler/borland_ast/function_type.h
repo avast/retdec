@@ -17,11 +17,11 @@ namespace borland {
 
 enum class CallConv
 {
-	fastcall,
-	cdecl,
-	pascal,
-	stdcall,
-	unknown,
+	cc_fastcall,
+	cc_cdecl,
+	cc_pascal,
+	cc_stdcall,
+	cc_unknown,
 };
 
 /**

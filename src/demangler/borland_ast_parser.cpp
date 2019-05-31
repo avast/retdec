@@ -640,16 +640,16 @@ Qualifiers BorlandASTParser::parseQualifiers()
 CallConv BorlandASTParser::parseCallConv()
 {
 	if (_mangled.consumeFront("qqr")) {
-		return CallConv::fastcall;
+		return CallConv::cc_fastcall;
 	} else if (_mangled.consumeFront("qqs")) {
-		return CallConv::stdcall;
+		return CallConv::cc_stdcall;
 	} else if (_mangled.consumeFront("q")) {
-		return CallConv::cdecl;
+		return CallConv::cc_cdecl;
 	} else if (_mangled.consumeFront("Q")) {
-		return CallConv::pascal;
+		return CallConv::cc_pascal;
 	} else {
 		_status = Status::invalid_mangled_name;
-		return CallConv::unknown;
+		return CallConv::cc_unknown;
 	}
 }
 

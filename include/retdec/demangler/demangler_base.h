@@ -7,6 +7,7 @@
 #ifndef RETDEC_LLVM_DEMANGLE_RETDEC_H
 #define RETDEC_LLVM_DEMANGLE_RETDEC_H
 
+#include <cstdint>
 #include <string>
 #include <memory>
 #include <map>
@@ -29,7 +30,7 @@ namespace demangler {
 class Demangler
 {
 public:
-	enum Status : u_char
+	enum Status : uint8_t
 	{
 		success = 0,
 		init,

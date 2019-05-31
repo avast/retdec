@@ -292,13 +292,13 @@ ctypes::FunctionType::Parameters BorlandToCtypesParser::parseFuncTypeParameters(
 ctypes::CallConvention BorlandToCtypesParser::parseCallConvention(retdec::demangler::borland::CallConv callConv)
 {
 	switch (callConv) {
-	case demangler::borland::CallConv::cdecl:
+	case demangler::borland::CallConv::cc_cdecl:
 		return ctypes::CallConvention("cdecl");
-	case demangler::borland::CallConv::stdcall:
+	case demangler::borland::CallConv::cc_stdcall:
 		return ctypes::CallConvention("stdcall");
-	case demangler::borland::CallConv::fastcall:
+	case demangler::borland::CallConv::cc_fastcall:
 		return ctypes::CallConvention("fastcall");
-	case demangler::borland::CallConv::pascal:
+	case demangler::borland::CallConv::cc_pascal:
 		return ctypes::CallConvention("pascal");
 	default:
 		return ctypes::CallConvention("unknown");	// should not happen in borland
