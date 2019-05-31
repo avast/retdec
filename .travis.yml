@@ -64,7 +64,7 @@ script:
   - cd ..
   - rm -rf build
   # Run unit tests.
-  if [ "$TRAVIS_OS_NAME" = "osx" ]; then python3 retdec-install/bin/retdec-tests-runner.py ; fi
+  - if [ "$TRAVIS_OS_NAME" = "osx" ]; then python3 retdec-install/bin/retdec-tests-runner.py ; fi
   # Run the decompilation script.
   - python3 retdec-install/bin/retdec-decompiler.py --help
   # Run a simple decompilation.

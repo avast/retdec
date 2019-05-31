@@ -11,7 +11,7 @@ endif()
 
 if(GOOGLETEST_LOCAL_DIR)
 	message(STATUS "Googletest: using local Googletest directory.")
-	
+
 	ExternalProject_Add(googletest
 		DOWNLOAD_COMMAND ""
 		SOURCE_DIR "${GOOGLETEST_LOCAL_DIR}"
@@ -35,7 +35,7 @@ if(GOOGLETEST_LOCAL_DIR)
 	force_configure_step(googletest)
 else()
 	message(STATUS "Googletest: using remote Googletest revision.")
-	
+
 	ExternalProject_Add(googletest
 		URL https://github.com/google/googletest/archive/83fa0cb17dad47a1d905526dcdddb5b96ed189d2.zip
 		URL_HASH SHA256=3b7cf6bfd1fdec3204933b4c0419c010e89b2409dcd8cbc1ac6a78aab058e2b0

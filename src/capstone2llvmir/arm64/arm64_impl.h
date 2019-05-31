@@ -147,7 +147,7 @@ class Capstone2LlvmIrTranslatorArm64_impl :
 
 		/**
 		* @brief This functions will generate psuedo asm translation.
-		* Instructions that are not implemented fall back to this method which will 
+		* Instructions that are not implemented fall back to this method which will
 		* check there is need to generate conditional code and then generate given pseudo.
 		*/
 		void generatePseudoInstruction(cs_insn* i, cs_arm64* ai, llvm::IRBuilder<>& irb);

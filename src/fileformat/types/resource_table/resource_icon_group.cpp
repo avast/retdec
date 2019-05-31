@@ -7,7 +7,6 @@
 #include "retdec/fileformat/types/resource_table/resource_icon.h"
 #include "retdec/fileformat/types/resource_table/resource_icon_group.h"
 
-
 namespace {
 
 // Icon priority list

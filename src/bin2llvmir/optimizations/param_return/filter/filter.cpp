@@ -440,7 +440,6 @@ void Filter::filterArgsByKnownTypes(FilterableLayout& lay) const
 			}
 		}
 
-
 		if (!requiredStacks && stackOrd == OrderID::ORD_STACK)
 		{
 			requiredStacks = getNumberOfStacksForType(t);
@@ -770,7 +769,6 @@ void Filter::filterRetsByKnownTypes(FilterableLayout& lay) const
 	lay.knownTypes = {retType};
 }
 
-
 void Filter::leaveCommonArgs(std::vector<FilterableLayout>& allArgs) const
 {
 	leaveCommon(allArgs);
@@ -1092,7 +1090,6 @@ std::vector<llvm::Value*> Filter::createGroupedValues(const FilterableLayout& la
 						si++;
 					}
 				break;
-
 
 				default:
 					continue;

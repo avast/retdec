@@ -150,7 +150,6 @@ class ProgramOptions
 			}
 		}
 
-
 		void dump()
 		{
 			cout << endl;

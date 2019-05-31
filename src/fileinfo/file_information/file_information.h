@@ -195,7 +195,6 @@ class FileInformation
 		std::string getVisualBasicObjectTableHashSha256() const;
 		/// @}
 
-
 		/// @name Getters of @a pdbInfo
 		/// @{
 		std::string getPdbType() const;

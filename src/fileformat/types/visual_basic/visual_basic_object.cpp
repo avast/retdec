@@ -70,7 +70,5 @@ void VisualBasicObject::addMethod(const std::string &method)
 	methods.push_back(method);
 }
 
-
-
 } // namespace fileformat
 } // namespace retdec

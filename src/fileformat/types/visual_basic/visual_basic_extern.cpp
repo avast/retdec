@@ -61,6 +61,5 @@ void VisualBasicExtern::setApiName(const std::string &aName)
 	apiName = aName;
 }
 
-
 } // namespace fileformat
 } // namespace retdec

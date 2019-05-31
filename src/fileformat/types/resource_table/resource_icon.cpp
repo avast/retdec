@@ -187,7 +187,6 @@ bool ResourceIcon::hasLoadedProperties() const
 	return loadedProperties;
 }
 
-
 /**
  * A method which indicates whether color count of an icon is valid.
  * @return @c `true` if it is, otherwise `false`

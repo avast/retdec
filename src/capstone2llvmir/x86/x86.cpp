@@ -4427,7 +4427,6 @@ void Capstone2LlvmIrTranslatorX86_impl::translateFst(cs_insn* i, cs_x86* xi, llv
 		storeOp(xi->operands[0], src, irb, eOpConv::FP_CAST);
 	}
 
-
 	if (i->id == X86_INS_FSTP)
 	{
 		storeX87TagReg(irb, top, llvm::ConstantInt::get(irb.getIntNTy(2), 3)); // 0b11

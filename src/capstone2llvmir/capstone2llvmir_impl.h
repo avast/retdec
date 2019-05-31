@@ -476,7 +476,6 @@ class Capstone2LlvmIrTranslator_impl : virtual public Capstone2LlvmIrTranslator
 		virtual uint8_t getOperandAccess(CInsnOp& op);
 		virtual void translatePseudoAsmGeneric(cs_insn* i, CInsn* ci, llvm::IRBuilder<>& irb);
 
-
 		void throwUnexpectedOperands(cs_insn* i, const std::string comment = "");
 		void throwUnhandledInstructions(cs_insn* i, const std::string comment = "");
 

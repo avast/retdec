@@ -30,7 +30,6 @@
 #include "retdec/fileformat/utils/file_io.h"
 #include "retdec/crypto/crypto.h"
 
-
 using namespace retdec::utils;
 using namespace PeLib;
 
@@ -738,7 +737,6 @@ void PeFormat::loadVisualBasicHeader()
 	visualBasicInfo.setBackupLanguageDLL(projBackupLanguageDLL);
 	visualBasicInfo.setLanguageDLLPrimaryLCID(vbh.LCID1);
 	visualBasicInfo.setLanguageDLLSecondaryLCID(vbh.LCID2);
-
 
 	if (getOffsetFromAddress(vbProjectInfoOffset, vbh.projectInfoAddr))
 	{

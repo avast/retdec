@@ -412,5 +412,4 @@ bool VisualBasicInfo::isPcode() const
 	return visualBasicInfo ? visualBasicInfo->isPcode() : false;
 }
 
-
 } // namespace fileinfo

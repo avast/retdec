@@ -1569,7 +1569,6 @@ const TlsInfo* FileFormat::getTlsInfo() const
 	return tlsInfo;
 }
 
-
 /**
  * Get information about ELF core file
  * @return Pointer to ELF core info of @c nullptr if file has no certificates

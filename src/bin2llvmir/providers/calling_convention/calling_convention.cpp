@@ -4,7 +4,6 @@
  * @copyright (c) 2019 Avast Software, licensed under the MIT license
  */
 
-
 #include "retdec/bin2llvmir/providers/abi/abi.h"
 #include "retdec/bin2llvmir/providers/calling_convention/calling_convention.h"
 #include "retdec/bin2llvmir/providers/calling_convention/arm/arm_conv.h"
