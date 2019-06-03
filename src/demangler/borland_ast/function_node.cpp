@@ -12,9 +12,8 @@ namespace borland {
 
 /**
  * @brief Private function node constructor. Use create().
- * @param call_conv Pointer to calling convention.
  * @param name Pointer to Name or NestedName node.
- * @param params Pointer to parameters.
+ * @param funcType
  */
 FunctionNode::FunctionNode(
 	std::shared_ptr<retdec::demangler::borland::Node> name,
@@ -25,9 +24,8 @@ FunctionNode::FunctionNode(
 
 /**
  * @brief Creates shared pointer to function node.
- * @param call_conv Pointer to calling convention node.
  * @param name Pointer to Name or NestedName node.
- * @param params Pointer to parameters.
+ * @param funcType
  * @return Unique pointer to constructed FunctionNode.
  */
 std::shared_ptr<FunctionNode> FunctionNode::create(

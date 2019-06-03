@@ -15,6 +15,7 @@ namespace borland {
 /**
  * @brief Abstract constructor for base node.
  * @param kind Kind of node.
+ * @param has_right_side
  */
 Node::Node(Kind kind, bool has_right_side) :
 	_kind(kind), _has_right(has_right_side) {}

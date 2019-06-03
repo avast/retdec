@@ -1,5 +1,5 @@
 /**
- * @file src/demangler_llvm/itanium_demangler_adapter.cpp
+ * @file src/demangler/itanium_demangler_adapter.cpp
  * @brief Implementation of itanium demangler adapter.
  * @copyright (c) 2018 Avast Software, licensed under the MIT license
  */

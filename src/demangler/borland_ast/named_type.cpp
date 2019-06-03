@@ -22,7 +22,6 @@ NamedTypeNode::NamedTypeNode(std::shared_ptr<Node> typeName, const Qualifiers &q
 /**
  * @brief Function for creating named types.
  * If type the same type was already created, then that instance is returned.
- * @param context Storage for types.
  * @param typeName Name of integral type to create.
  * @param quals See BuiltInTypeNode quals.
  * @return Node representing named type.

@@ -1,5 +1,5 @@
 /**
- * @file src/demangler_llvm/context.cpp
+ * @file src/demangler/context.cpp
  * @brief Implementation of cacheing of nodes in borland demangler AST.
  * @copyright (c) 2018 Avast Software, licensed under the MIT license
  */

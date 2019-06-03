@@ -17,6 +17,7 @@ namespace borland {
 NameNode::NameNode(const std::string &name) : Node(NameNode::Kind::KName, false), _name(name) {}
 
 /**
+ * @param context
  * @param name std::string representation of name.
  * @return Unique pointer to new NameNode
  */
@@ -52,6 +53,7 @@ NestedNameNode::NestedNameNode(
 	_super(std::move(super)), _name(std::move(name)) {}
 
 /**
+ * @param context
  * @param super Higher level node.
  * @param name Lower level node.
  * @return Unique pointer to new nested name node.

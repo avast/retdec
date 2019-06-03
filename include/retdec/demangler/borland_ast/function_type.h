@@ -27,7 +27,6 @@ enum class CallConv
 /**
  * @brief Representation of function types.
  * Used for information about functions without name.
- * @example pointer to function as parameter
  */
 class FunctionTypeNode : public TypeNode
 {

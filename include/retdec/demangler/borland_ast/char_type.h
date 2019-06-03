@@ -1,5 +1,5 @@
 /**
-* @file include/retdec/demangler/borland_ast/borland_ast/char_type.h
+* @file include/retdec/demangler/borland_ast/char_type.h
 * @brief Representation of char types in borland AST.
 * @copyright (c) 2019 Avast Software, licensed under the MIT license
 */

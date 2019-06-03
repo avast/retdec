@@ -1,5 +1,5 @@
 /**
- * @file include/retdec/demangler/demangler_retdec.h
+ * @file include/retdec/demangler/demangler.h
  * @brief File to include for demangling work.
  * @copyright (c) 2018 Avast Software, licensed under the MIT license
  */

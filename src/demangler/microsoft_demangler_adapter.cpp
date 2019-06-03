@@ -1,5 +1,5 @@
 /**
- * @file src/demangler_llvm/microsoft_demangler_adapter.cpp
+ * @file src/demangler/microsoft_demangler_adapter.cpp
  * @brief Implementation of microsoft demangler adapter.
  * @copyright (c) 2018 Avast Software, licensed under the MIT license
  */

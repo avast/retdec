@@ -30,6 +30,8 @@ ArrayNode::ArrayNode(
  * If type the same type was already created, then that instance is returned.
  * @param context Storage for types.
  * @param pointee Type of array.
+ * @param size
+ * @param quals
  * @return Node representing array type.
  */
 std::shared_ptr<ArrayNode> ArrayNode::create(

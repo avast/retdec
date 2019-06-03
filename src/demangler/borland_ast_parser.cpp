@@ -1,5 +1,5 @@
 /**
- * @file src/demangler_llvm/borland_demangler.cpp
+ * @file src/demangler/borland_ast_parser.cpp
  * @brief Implementation of borland demangler parsing into AST.
  * @copyright (c) 2018 Avast Software, licensed under the MIT license
  */
@@ -37,7 +37,7 @@ std::shared_ptr<Node> getLastNameNode(const std::shared_ptr<Node> &nameNode)
 
 /**
  * @brief Constructor for AST parser. Immediately parses name mangled by borland mangling scheme into AST.
- * @param mangled Name mangled by borland mangling scheme.
+ * @param context
  */
 BorlandASTParser::BorlandASTParser(Context &context) :
 	_status(init),
@@ -231,8 +231,10 @@ std::shared_ptr<Node> BorlandASTParser::parseFunction()
 /**
  * @return Node representing name, could be nullptr on failure.
  *
+ * @code
  * <func-name> ::= @ <classic-func-name>
  * <func-name> ::= <llvm-func-name>
+ * @endcode
  */
 std::shared_ptr<Node> BorlandASTParser::parseFuncName()
 {
@@ -248,11 +250,13 @@ std::shared_ptr<Node> BorlandASTParser::parseFuncName()
  * @return Node representing function name on success or nullptr on failure.
  * On failure, status is set to incorrect_mangled_name
  *
+ * @code
  * <classic-func-name> ::= <name> <template-name> $ <operator>
  * <name> ::= <name> @ <name>
  * <name> ::=
  * <template-name> ::= % <abs-name> %
  * <template-name ::=
+ * @endcode
  */
 std::shared_ptr<Node> BorlandASTParser::parseFuncNameClasic()
 {
@@ -314,11 +318,13 @@ std::shared_ptr<Node> BorlandASTParser::parseFuncNameClasic()
  * @return Node representing function name on success or nullptr on failure.
  * On failure, status is set to incorrect_mangled_name
  *
+ * @code
  * <llvm-func-name> ::= <name> $ <template-name> <operator>
  * <name> ::= <name> @ <name>
  * <name> ::=
  * <template-name> ::= % <abs-name> %
  * <template-name ::=
+ * @endcode
  */
 std::shared_ptr<Node> BorlandASTParser::parseFuncNameLlvm()
 {
@@ -938,6 +944,7 @@ unsigned BorlandASTParser::parseNumber()
 /**
  * Parses named types.
  * @param nameLen Length of mangled name of the type.
+ * @param quals
  * @return Named type on success, nullptr otherwise.
  */
 std::shared_ptr<TypeNode> BorlandASTParser::parseNamedType(unsigned nameLen, const Qualifiers &quals)

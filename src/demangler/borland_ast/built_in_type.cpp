@@ -13,6 +13,7 @@ namespace borland {
 /**
  * @brief Private constructor for built-in type nodes. Use create().
  * @param typeName Representation of type name.
+ * @param quals
  */
 BuiltInTypeNode::BuiltInTypeNode(const std::string &typeName, const Qualifiers &quals) :
 	TypeNode(quals), _typeName(typeName)
@@ -22,7 +23,9 @@ BuiltInTypeNode::BuiltInTypeNode(const std::string &typeName, const Qualifiers &
 
 /**
  * @brief Creates unique pointer to built-in type nodes.
+ * @param context
  * @param typeName Representation of type name.
+ * @param quals
  * @return Unique pointer to built-in type nodes.
  */
 std::shared_ptr<BuiltInTypeNode> BuiltInTypeNode::create(

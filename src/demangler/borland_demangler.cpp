@@ -1,5 +1,5 @@
 /**
- * @file src/demangler_llvm/borland_demangler.cpp
+ * @file src/demangler/borland_demangler.cpp
  * @brief Implementation of borland demangler.
  * @copyright (c) 2018 Avast Software, licensed under the MIT license
  */
