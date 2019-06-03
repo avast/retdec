@@ -4,6 +4,8 @@
 * @copyright (c) 2019 Avast Software, licensed under the MIT license
 */
 
+#include <iostream>
+
 #include "retdec/demangler/borland_ast/name_node.h"
 
 namespace retdec {
