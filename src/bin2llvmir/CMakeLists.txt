@@ -108,6 +108,7 @@ set(BIN2LLVMIR_SOURCES
 	providers/lti.cpp
 	providers/names.cpp
 	utils/capstone.cpp
+	utils/ctypes2llvm.cpp
 	utils/debug.cpp
 	utils/ir_modifier.cpp
 	utils/llvm.cpp
