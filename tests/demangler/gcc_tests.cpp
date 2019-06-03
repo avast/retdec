@@ -265,6 +265,15 @@ TEST_F(LlvmItaniumDemanglerTests, BasicTests) {
 	DEM_EQ("_Z3fooPK1SS1_", "foo(S const*, S const*)");
 }
 
+TEST_F(LlvmItaniumDemanglerTests, issue_96) {
+	DEM_EQ("_ZL21size_of_encoded_valueh", "size_of_encoded_value(unsigned char)");
+	DEM_EQ("_ZStmiISt6vectorIN5cName6type_tESaIS2_EERS4_PS4_ENSt15_Deque_iteratorIT_T0_T1_E15difference_typeERKSB_SE_", "std::_Deque_iterator<std::vector<cName::type_t, std::allocator<cName::type_t> >, std::vector<cName::type_t, std::allocator<cName::type_t> >&, std::vector<cName::type_t, std::allocator<cName::type_t> >*>::difference_type std::operator-<std::vector<cName::type_t, std::allocator<cName::type_t> >, std::vector<cName::type_t, std::allocator<cName::type_t> >&, std::vector<cName::type_t, std::allocator<cName::type_t> >*>(std::_Deque_iterator<std::vector<cName::type_t, std::allocator<cName::type_t> >, std::vector<cName::type_t, std::allocator<cName::type_t> >&, std::vector<cName::type_t, std::allocator<cName::type_t> >*> const&, std::_Deque_iterator<std::vector<cName::type_t, std::allocator<cName::type_t> >, std::vector<cName::type_t, std::allocator<cName::type_t> >&, std::vector<cName::type_t, std::allocator<cName::type_t> >*> const&)");
+	DEM_EQ("_ZTI5cName", "typeinfo for cName");
+	DEM_EQ("_ZTS5cName", "typeinfo name for cName");
+	DEM_EQ("_ZTVN10__cxxabiv117__class_type_infoE", "vtable for __cxxabiv1::__class_type_info");
+	DEM_EQ("_ZdlPvS_", "operator delete(void*, void*)");
+}
+
 } // namespace tests
 } // namespace demangler
 } // namespace retdec
