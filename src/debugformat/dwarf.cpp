@@ -83,8 +83,8 @@ void DebugFormat::loadDwarfFunctions()
 	//
 	for (auto* df : *_dwarfFile->getFunctions())
 	{
-		if (df->lowAddr <= 0)
-			continue;
+		// if (df->lowAddr <= 0)
+		// 	continue;
 
 		std::string name;
 		std::string demangledName;

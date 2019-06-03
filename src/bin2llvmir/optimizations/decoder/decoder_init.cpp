@@ -7,6 +7,8 @@
 #include "retdec/bin2llvmir/optimizations/decoder/decoder.h"
 #include "retdec/utils/string.h"
 
+#include "retdec/loader/loader/elf/elf_image.h"
+
 using namespace retdec::utils;
 using namespace retdec::capstone2llvmir;
 using namespace llvm;
@@ -555,6 +557,7 @@ void Decoder::initJumpTargets()
 		initStaticCode();
 	}
 	initJumpTargetsEntryPoint();
+	initJumpTargetsExterns();
 	initJumpTargetsImports();
 	initJumpTargetsDebug();
 	initJumpTargetsSymbols(); // MUST be before exports
@@ -629,6 +632,47 @@ void Decoder::initJumpTargetsEntryPoint()
 	}
 }
 
+void Decoder::initJumpTargetsExterns()
+{
+	// This section applies only for elf files
+	if (auto* elf_image = dynamic_cast<retdec::loader::ElfImage *>(_image->getImage()))
+	{
+
+		LOG << "\n" << "initJumpTargetsExterns():" << std::endl;
+
+		for (const auto& ext : elf_image->getExternFncTable())
+		{
+			Address a = ext.second;
+			if (a.isUndefined())
+			{
+				continue;
+			}
+
+			if (auto* jt = _jumpTargets.push(
+					a,
+					JumpTarget::eType::IMPORT,
+					_c2l->getBasicMode(),
+					Address::getUndef))
+			{
+				auto* f = createFunction(jt->getAddress(), true);
+
+				// We should not alter symbols tables, so we set the name here
+				f->setName(ext.first);
+
+				_externs.emplace(ext.first);
+
+				LOG << "\t" << "[+] " << a << " @ " << f->getName().str()
+						<< std::endl;
+			}
+			else
+			{
+				LOG << "\t" << "[-] " << a << " @ " << ext.first
+						<< " (no JT)" << std::endl;
+			}
+		}
+	}
+}
+
 void Decoder::initJumpTargetsImports()
 {
 	LOG << "\n" << "initJumpTargetsImports():" << std::endl;
@@ -650,6 +694,11 @@ void Decoder::initJumpTargetsImports()
 	{
 		utils::Address a = imp->getAddress();
 		if (a.isUndefined())
+		{
+			continue;
+		}
+
+		if (_externs.count(imp->getName()))
 		{
 			continue;
 		}
