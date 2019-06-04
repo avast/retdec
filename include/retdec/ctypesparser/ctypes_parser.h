@@ -11,54 +11,26 @@
 #include <memory>
 #include <string>
 
-#include "retdec/ctypes/array_type.h"
-#include "retdec/ctypes/call_convention.h"
-#include "retdec/ctypes/composite_type.h"
-#include "retdec/ctypes/enum_type.h"
-#include "retdec/ctypes/function.h"
-#include "retdec/ctypes/function_type.h"
-#include "retdec/ctypes/parameter.h"
+#include "retdec/ctypes/ctypes.h"
 #include "retdec/ctypesparser/exceptions.h"
 
 namespace retdec {
-namespace ctypes {
-
-class Context;
-class IntegralType;
-class FloatingPointType;
-class Module;
-class PointerType;
-class StructType;
-class Type;
-class UnionType;
-
-} // namespace ctypes
-
 namespace ctypesparser {
 
 /**
-* @brief A base class for parsing C-types.
+* @brief A base class for parsing to C-types.
 *
-* Parsers for C-types in some specific format should override @c parse(...)
-* functions.
 */
 class CTypesParser
 {
 	public:
 		/// Set container for C-types' bit width.
 		using TypeWidths = std::map<std::string, unsigned>;
+		/// Set container for C-types' signedness.
+		using TypeSignedness = std::map<std::string, ctypes::IntegralType::Signess>;
 
 	public:
 		virtual ~CTypesParser() = default;
-
-		virtual std::unique_ptr<retdec::ctypes::Module> parse(
-			std::istream &stream,
-			const TypeWidths &typeWidths = {},
-			const retdec::ctypes::CallConvention &callConvention = retdec::ctypes::CallConvention()) = 0;
-		virtual void parseInto(std::istream &stream,
-			std::unique_ptr<retdec::ctypes::Module> &module,
-			const TypeWidths &typeWidths = {},
-			const retdec::ctypes::CallConvention &callConvention = retdec::ctypes::CallConvention()) = 0;
 
 	protected:
 		CTypesParser();
@@ -69,10 +41,10 @@ class CTypesParser
 		std::shared_ptr<retdec::ctypes::Context> context;
 		/// C-types' bit widths.
 		TypeWidths typeWidths;
+		/// C-types' signedness.
+		TypeSignedness typeSignedness;
 		/// Bitwidth used for types not in @c typeWidths.
 		unsigned defaultBitWidth = 0;
-		/// Call convention used when JSON does not contain one.
-		retdec::ctypes::CallConvention defaultCallConv;
 };
 
 } // namespace ctypesparser

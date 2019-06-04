@@ -12,7 +12,7 @@
 #include "retdec/config/objects.h"
 #include "retdec/config/types.h"
 
-#include "retdec/demangler/demangler.h"
+#include "retdec/bin2llvmir/providers/demangler.h"
 #include "retdec/dwarfparser/dwarf_file.h"
 #include "retdec/fileformat/fileformat.h"
 #include "retdec/loader/loader.h"
@@ -34,7 +34,7 @@ class DebugFormat
 				retdec::loader::Image* inFile,
 				const std::string& pdbFile,
 				SymbolTable* symtab,
-				retdec::demangler::CDemangler* demangler,
+				retdec::bin2llvmir::Demangler* demangler,
 				unsigned long long imageBase = 0);
 
 		retdec::config::Function* getFunction(retdec::utils::Address a);
@@ -69,7 +69,7 @@ class DebugFormat
 		/// Underlying DWARF representation.
 		retdec::dwarfparser::DwarfFile* _dwarfFile = nullptr;
 		/// Demangler.
-		retdec::demangler::CDemangler* _demangler = nullptr;
+		retdec::bin2llvmir::Demangler* _demangler = nullptr;
 
 	public:
 		retdec::config::GlobalVarContainer globals;
