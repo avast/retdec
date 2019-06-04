@@ -182,7 +182,6 @@ std::shared_ptr<PointerType> Context::getPointerType(
 /**
 * @brief Inserts new pointerType with specific name to context.
 *
-*
 * @par Preconditions
 *  - @a pointerType is not null
 */
@@ -201,7 +200,7 @@ void Context::addPointerType(const std::shared_ptr<PointerType> &pointerType)
 * @par Preconditions
 *  - @a referencedType is not null
 */
-bool Context::hasReferenceType(const std::shared_ptr<Type> &referencedType) const
+bool Context::hasReferenceType(const std::shared_ptr<retdec::ctypes::Type> &referencedType) const
 {
 	assert(referencedType && "violated precondition - referencedType cannot be null");
 
@@ -217,7 +216,7 @@ bool Context::hasReferenceType(const std::shared_ptr<Type> &referencedType) cons
 *  - @a referencedType is not null
 */
 std::shared_ptr<ReferenceType> Context::getReferenceType(
-	const std::shared_ptr<Type> &referencedType) const
+	const std::shared_ptr<retdec::ctypes::Type> &referencedType) const
 {
 	assert(referencedType && "violated precondition - referencedType cannot be null");
 
@@ -230,7 +229,7 @@ std::shared_ptr<ReferenceType> Context::getReferenceType(
 * @par Preconditions
 *  - @a referenceType is not null
 */
-void Context::addReferenceType(const std::shared_ptr<ReferenceType> &referenceType)
+void Context::addReferenceType(const std::shared_ptr<retdec::ctypes::ReferenceType> &referenceType)
 {
 	assert(referenceType && "violated precondition - referenceType cannot be null");
 
