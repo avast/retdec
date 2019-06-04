@@ -115,7 +115,7 @@ class Context
 												  std::shared_ptr<ReferenceType>>;
 		/// Stored reference types, key is type that they reference.
 		ReferenceTypes referenceTypes;
-
+		
 		using ArrayTypes = std::map<
 				std::pair<std::shared_ptr<Type>, ArrayType::Dimensions>,
 				std::shared_ptr<ArrayType>
