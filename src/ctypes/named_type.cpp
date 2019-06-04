@@ -30,7 +30,7 @@ NamedType::NamedType(const std::string &name) : Type(name, 0) {}
 * has already been created and stored in @c context.
 */
 std::shared_ptr<NamedType> NamedType::create(
-	const std::shared_ptr<retdec::ctypes::Context> &context,
+	const std::shared_ptr<Context> &context,
 	const std::string &name)
 {
 	assert(context && "violated precondition - context cannot be null");
@@ -53,7 +53,7 @@ bool NamedType::isNamed() const
 	return true;
 }
 
-void NamedType::accept(retdec::ctypes::Visitor *v)
+void NamedType::accept(Visitor *v)
 {
 	v->visit(std::static_pointer_cast<NamedType>(shared_from_this()));
 }

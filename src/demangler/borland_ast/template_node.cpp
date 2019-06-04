@@ -18,8 +18,8 @@ namespace borland {
  * @param params Array node of parameters.
  */
 TemplateNode::TemplateNode(
-	std::shared_ptr<retdec::demangler::borland::Node> name,
-	std::shared_ptr<retdec::demangler::borland::Node> params) :
+	std::shared_ptr<Node> name,
+	std::shared_ptr<Node> params) :
 	Node(Kind::KTemplateNode), _name(std::move(name)),
 	_params(std::move(params)) {}
 
@@ -30,8 +30,8 @@ TemplateNode::TemplateNode(
  * @return Unique pointer to constructed TemplateNode.
  */
 std::shared_ptr<TemplateNode> TemplateNode::create(
-	std::shared_ptr<retdec::demangler::borland::Node> name,
-	std::shared_ptr<retdec::demangler::borland::Node> params)
+	std::shared_ptr<Node> name,
+	std::shared_ptr<Node> params)
 {
 	return std::shared_ptr<TemplateNode>(
 		new TemplateNode(std::move(name), std::move(params)));

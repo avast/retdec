@@ -22,7 +22,7 @@ class ArrayNode : public TypeNode
 public:
 	static std::shared_ptr<ArrayNode> create(
 		Context &context,
-		std::shared_ptr<retdec::demangler::borland::Node> pointee,
+		std::shared_ptr<Node> pointee,
 		unsigned size,
 		const Qualifiers &quals);
 
@@ -36,7 +36,7 @@ public:
 
 private:
 	ArrayNode(
-		std::shared_ptr<retdec::demangler::borland::Node> pointee,
+		std::shared_ptr<Node> pointee,
 		unsigned size,
 		const Qualifiers &quals);
 

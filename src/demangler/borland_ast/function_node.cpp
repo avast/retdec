@@ -16,7 +16,7 @@ namespace borland {
  * @param funcType
  */
 FunctionNode::FunctionNode(
-	std::shared_ptr<retdec::demangler::borland::Node> name,
+	std::shared_ptr<Node> name,
 	std::shared_ptr<FunctionTypeNode> funcType) :
 	Node(Kind::KFunction, false),
 	_name(std::move(name)),
@@ -29,7 +29,7 @@ FunctionNode::FunctionNode(
  * @return Unique pointer to constructed FunctionNode.
  */
 std::shared_ptr<FunctionNode> FunctionNode::create(
-	std::shared_ptr<retdec::demangler::borland::Node> name,
+	std::shared_ptr<Node> name,
 	std::shared_ptr<FunctionTypeNode> funcType)
 {
 	return std::shared_ptr<FunctionNode>(

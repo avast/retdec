@@ -85,7 +85,7 @@ private:
 	unsigned parseNumber(StringView &s);
 	bool parseTemplateBackref(
 		StringView &mangled,
-		std::shared_ptr<retdec::demangler::borland::NodeArray> &params);
+		std::shared_ptr<NodeArray> &params);
 private:
 	Status _status;
 	StringView _mangled;

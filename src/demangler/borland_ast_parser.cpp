@@ -691,7 +691,7 @@ std::shared_ptr<NodeArray> BorlandASTParser::parseFuncParams()
  * Parses backreference in parameter list and adds it to parameter array.
  * @return true on success, false otherwise.
  */
-bool BorlandASTParser::parseBackref(std::shared_ptr<retdec::demangler::borland::NodeArray> &paramArray)
+bool BorlandASTParser::parseBackref(std::shared_ptr<NodeArray> &paramArray)
 {
 	if (_mangled.empty()) {
 		_status = invalid_mangled_name;
@@ -835,7 +835,7 @@ std::shared_ptr<TypeNode> BorlandASTParser::parseRReference()
  * Parses array type.
  * @return Array on success, nullptr otherwise.
  */
-std::shared_ptr<TypeNode> BorlandASTParser::parseArray(const retdec::demangler::borland::Qualifiers &quals)
+std::shared_ptr<TypeNode> BorlandASTParser::parseArray(const Qualifiers &quals)
 {
 	unsigned len = parseNumber();
 	if (len == 0) {
@@ -1081,7 +1081,7 @@ std::shared_ptr<Node> BorlandASTParser::parseTemplateParams()
 
 bool BorlandASTParser::parseTemplateBackref(
 	StringView &mangled,
-	std::shared_ptr<retdec::demangler::borland::NodeArray> &params)
+	std::shared_ptr<NodeArray> &params)
 {
 	if (mangled.empty()) {
 		return false;
@@ -1105,7 +1105,7 @@ bool BorlandASTParser::parseTemplateBackref(
 	return true;
 }
 
-std::shared_ptr<Node> BorlandASTParser::parseIntExpresion(retdec::demangler::borland::StringView &s)
+std::shared_ptr<Node> BorlandASTParser::parseIntExpresion(StringView &s)
 {
 	std::shared_ptr<Node> expr;
 	if (s.consumeFront("$i")) {

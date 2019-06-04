@@ -30,7 +30,7 @@ std::shared_ptr<NodeArray> NodeArray::create()
  * @brief Appends new node to array.
  * @param node Node to be added.
  */
-void NodeArray::addNode(std::shared_ptr<retdec::demangler::borland::Node> node)
+void NodeArray::addNode(std::shared_ptr<Node> node)
 {
 	_nodes.push_back(node);
 }

@@ -16,10 +16,10 @@ namespace borland {
  * @brief Private constructor for function types. Use create().
  */
 FunctionTypeNode::FunctionTypeNode(
-	retdec::demangler::borland::CallConv callConv,
-	std::shared_ptr<retdec::demangler::borland::NodeArray> params,
-	std::shared_ptr<retdec::demangler::borland::TypeNode> retType,
-	retdec::demangler::borland::Qualifiers &quals,
+	CallConv callConv,
+	std::shared_ptr<NodeArray> params,
+	std::shared_ptr<TypeNode> retType,
+	Qualifiers &quals,
 	bool isVarArg) :
 	TypeNode(quals), _callConv(callConv), _params(std::move(params)), _retType(std::move(retType)), _isVarArg(isVarArg)
 {
@@ -37,10 +37,10 @@ FunctionTypeNode::FunctionTypeNode(
  * @return Node representing function type.
  */
 std::shared_ptr<FunctionTypeNode> FunctionTypeNode::create(
-	retdec::demangler::borland::CallConv callConv,
-	std::shared_ptr<retdec::demangler::borland::NodeArray> params,
-	std::shared_ptr<retdec::demangler::borland::TypeNode> retType,
-	retdec::demangler::borland::Qualifiers &quals,
+	CallConv callConv,
+	std::shared_ptr<NodeArray> params,
+	std::shared_ptr<TypeNode> retType,
+	Qualifiers &quals,
 	bool isVarArg)
 {
 	return std::shared_ptr<FunctionTypeNode>(new FunctionTypeNode(callConv, params, retType, quals, isVarArg));

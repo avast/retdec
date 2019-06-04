@@ -20,7 +20,7 @@ namespace borland {
 class ParenthesesNode : public Node
 {
 public:
-	static std::shared_ptr<ParenthesesNode> create(std::shared_ptr<retdec::demangler::borland::Node> type);
+	static std::shared_ptr<ParenthesesNode> create(std::shared_ptr<Node> type);
 
 	void printLeft(std::ostream &s) const override;
 

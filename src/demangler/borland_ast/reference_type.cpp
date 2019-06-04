@@ -31,8 +31,8 @@ ReferenceTypeNode::ReferenceTypeNode(std::shared_ptr<Node> pointee) :
  * @return Node representing reference type.
  */
 std::shared_ptr<ReferenceTypeNode> ReferenceTypeNode::create(
-	retdec::demangler::borland::Context &context,
-	std::shared_ptr<retdec::demangler::borland::Node> pointee)
+	Context &context,
+	std::shared_ptr<Node> pointee)
 {
 	auto type = context.getReferenceType(pointee);
 	if (type && type->kind() == Kind::KReferenceType) {

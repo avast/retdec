@@ -12,7 +12,7 @@ namespace retdec {
 namespace demangler {
 namespace borland {
 
-ParenthesesNode::ParenthesesNode(std::shared_ptr<retdec::demangler::borland::Node> type) :
+ParenthesesNode::ParenthesesNode(std::shared_ptr<Node> type) :
 	Node(Kind::KParentheses), _type(std::move(type)) {}
 
 void ParenthesesNode::printLeft(std::ostream &s) const
@@ -22,7 +22,7 @@ void ParenthesesNode::printLeft(std::ostream &s) const
 	s << ")";
 }
 
-std::shared_ptr<ParenthesesNode> ParenthesesNode::create(std::shared_ptr<retdec::demangler::borland::Node> type)
+std::shared_ptr<ParenthesesNode> ParenthesesNode::create(std::shared_ptr<Node> type)
 {
 	return std::shared_ptr<ParenthesesNode>(new ParenthesesNode(std::move(type)));
 }

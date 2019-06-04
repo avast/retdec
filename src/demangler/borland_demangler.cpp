@@ -13,7 +13,8 @@ namespace {
  * Checks ast parser status and converts it to demangler status.
  * @return Demangler status.
  */
-retdec::demangler::Demangler::Status astStatusToDemStatus(const retdec::demangler::borland::BorlandASTParser::Status &parserStatus)
+retdec::demangler::Demangler::Status astStatusToDemStatus(
+		const retdec::demangler::borland::BorlandASTParser::Status &parserStatus)
 {
 	switch (parserStatus) {
 	case retdec::demangler::borland::BorlandASTParser::Status::success:

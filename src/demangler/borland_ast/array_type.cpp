@@ -16,7 +16,7 @@ namespace borland {
  * Private constructor for array types. Use create().
  */
 ArrayNode::ArrayNode(
-	std::shared_ptr<retdec::demangler::borland::Node> pointee,
+	std::shared_ptr<Node> pointee,
 	unsigned size,
 	const Qualifiers &quals) :
 	TypeNode(quals), _pointee(std::move(pointee)), _size(size)
@@ -36,7 +36,7 @@ ArrayNode::ArrayNode(
  */
 std::shared_ptr<ArrayNode> ArrayNode::create(
 	Context &context,
-	std::shared_ptr<retdec::demangler::borland::Node> pointee,
+	std::shared_ptr<Node> pointee,
 	unsigned size,
 	const Qualifiers &quals)
 {
