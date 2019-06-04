@@ -1,8 +1,7 @@
 set(RETDEC_TESTS_DEMANGLER_SOURCES
+	borland_tests.cpp
 	gcc_tests.cpp
 	msvc_tests.cpp
-	borland_tests.cpp
-	borland_context_tests.cpp
 )
 
 add_executable(retdec-tests-demangler ${RETDEC_TESTS_DEMANGLER_SOURCES})

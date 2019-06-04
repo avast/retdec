@@ -23,7 +23,6 @@
 #include "retdec/bin2llvmir/providers/debugformat.h"
 #include "retdec/bin2llvmir/providers/fileimage.h"
 #include "retdec/bin2llvmir/providers/lti.h"
-#include "retdec/bin2llvmir/providers/demangler.h"
 
 namespace retdec {
 namespace bin2llvmir {
@@ -37,7 +36,6 @@ class ParamReturn : public llvm::ModulePass
 				llvm::Module& m,
 				Config* c,
 				Abi* abi,
-				Demangler* demangler,
 				FileImage* img = nullptr,
 				DebugFormat* dbgf = nullptr,
 				Lti* lti = nullptr);
@@ -66,7 +64,7 @@ class ParamReturn : public llvm::ModulePass
 	// Collection of functions usage data.
 	//
 	private:
-		void addDataFromCall(DataFlowEntry *dataflow, llvm::CallInst *call) const;
+		void addDataFromCall(DataFlowEntry* dataflow, llvm::CallInst* call) const;
 
 	// Optimizations.
 	//
@@ -79,12 +77,6 @@ class ParamReturn : public llvm::ModulePass
 	private:
 		void filterCalls();
 		void modifyType(DataFlowEntry& de) const;
-
-	// Demangling informations.
-	//
-	private:
-		void analyzeWithDemangler(DataFlowEntry& de) const;
-		void modifyWithDemangledData(DataFlowEntry& de, Demangler::FunctionPair &funcPair) const;
 
 	// Modification of functions in IR.
 	//
@@ -103,7 +95,6 @@ class ParamReturn : public llvm::ModulePass
 		FileImage* _image = nullptr;
 		DebugFormat* _dbgf = nullptr;
 		Lti* _lti = nullptr;
-		Demangler* _demangler = nullptr;
 
 		std::map<llvm::Value*, DataFlowEntry> _fnc2calls;
 		ReachingDefinitionsAnalysis _RDA;

@@ -37,7 +37,7 @@ DebugFormat* DebugFormatProvider::addDebugFormat(
 				retdec::loader::Image* objf,
 				const std::string& pdbFile,
 				const retdec::utils::Address& imageBase,
-				Demangler* demangler)
+				retdec::demangler::CDemangler* demangler)
 {
 	if (objf == nullptr)
 	{

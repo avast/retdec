@@ -7,7 +7,6 @@
 #include "retdec/bin2llvmir/providers/abi/arm64.h"
 #include "retdec/bin2llvmir/providers/abi/mips64.h"
 #include "retdec/bin2llvmir/providers/abi/powerpc64.h"
-#include "retdec/bin2llvmir/providers/demangler.h"
 
 #include "retdec/bin2llvmir/optimizations/param_return/param_return.h"
 #include "bin2llvmir/utils/llvmir_tests.h"
@@ -69,12 +68,8 @@ TEST_F(ParamReturnTests, x86PtrCallBasicFunctionality)
 		]
 	})");
 	auto abi = AbiProvider::addAbi(module.get(), &config);
-	auto typeConfig = std::make_unique<ctypesparser::TypeConfig>();
-	auto demangler = DemanglerProvider::addDemangler(
-		module.get(),
-		&config,
-		std::move(typeConfig));
-	pass.runOnModuleCustom(*module, &config, abi, demangler);
+
+	pass.runOnModuleCustom(*module, &config, abi);
 
 	std::string exp = R"(
 		@r = global i32 0
@@ -135,12 +130,8 @@ TEST_F(ParamReturnTests, x86PtrCallPrevBbIsUsedOnlyIfItIsASinglePredecessor)
 		]
 	})");
 	auto abi = AbiProvider::addAbi(module.get(), &config);
-	auto typeConfig = std::make_unique<ctypesparser::TypeConfig>();
-	auto demangler = DemanglerProvider::addDemangler(
-		module.get(),
-		&config,
-		std::move(typeConfig));
-	pass.runOnModuleCustom(*module, &config, abi, demangler);
+
+	pass.runOnModuleCustom(*module, &config, abi);
 
 	std::string exp = R"(
 		@r = global i32 0
@@ -206,12 +197,8 @@ TEST_F(ParamReturnTests, x86PtrCallPrevBbIsNotUsedIfItIsNotASinglePredecessor)
 		]
 	})");
 	auto abi = AbiProvider::addAbi(module.get(), &config);
-	auto typeConfig = std::make_unique<ctypesparser::TypeConfig>();
-	auto demangler = DemanglerProvider::addDemangler(
-		module.get(),
-		&config,
-		std::move(typeConfig));
-	pass.runOnModuleCustom(*module, &config, abi, demangler);
+
+	pass.runOnModuleCustom(*module, &config, abi);
 
 	std::string exp = R"(
 		@r = global i32 0
@@ -273,13 +260,7 @@ TEST_F(ParamReturnTests, x86PtrCallOnlyStackStoresAreUsed)
 
 	abi->addRegister(X86_REG_EAX, getGlobalByName("eax"));
 
-	auto typeConfig = std::make_unique<ctypesparser::TypeConfig>();
-	auto demangler = DemanglerProvider::addDemangler(
-		module.get(),
-		&config,
-		std::move(typeConfig));
-
-	pass.runOnModuleCustom(*module, &config, abi, demangler);
+	pass.runOnModuleCustom(*module, &config, abi);
 
 	std::string exp = R"(
 		@eax = global i32 0
@@ -339,12 +320,8 @@ TEST_F(ParamReturnTests, x86PtrCallStackAreUsedAsArgumentsInCorrectOrder)
 		]
 	})");
 	auto abi = AbiProvider::addAbi(module.get(), &config);
-	auto typeConfig = std::make_unique<ctypesparser::TypeConfig>();
-	auto demangler = DemanglerProvider::addDemangler(
-		module.get(),
-		&config,
-		std::move(typeConfig));
-	pass.runOnModuleCustom(*module, &config, abi, demangler);
+
+	pass.runOnModuleCustom(*module, &config, abi);
 
 	std::string exp = R"(
 		@r = global i32 0
@@ -413,12 +390,8 @@ TEST_F(ParamReturnTests, x86PtrCallOnlyContinuousStackOffsetsAreUsed)
 		]
 	})");
 	auto abi = AbiProvider::addAbi(module.get(), &config);
-	auto typeConfig = std::make_unique<ctypesparser::TypeConfig>();
-	auto demangler = DemanglerProvider::addDemangler(
-		module.get(),
-		&config,
-		std::move(typeConfig));
-	pass.runOnModuleCustom(*module, &config, abi, demangler);
+
+	pass.runOnModuleCustom(*module, &config, abi);
 
 	std::string exp = R"(
 		@r = global i32 0
@@ -479,12 +452,8 @@ TEST_F(ParamReturnTests, x86ExternalCallBasicFunctionality)
 		]
 	})");
 	auto abi = AbiProvider::addAbi(module.get(), &config);
-	auto typeConfig = std::make_unique<ctypesparser::TypeConfig>();
-	auto demangler = DemanglerProvider::addDemangler(
-		module.get(),
-		&config,
-		std::move(typeConfig));
-	pass.runOnModuleCustom(*module, &config, abi, demangler);
+
+	pass.runOnModuleCustom(*module, &config, abi);
 
 	std::string exp = R"(
 		declare void @print(i32, i32)
@@ -566,12 +535,8 @@ TEST_F(ParamReturnTests, x86ExternalCallFixOnMultiplePlaces)
 		]
 	})");
 	auto abi = AbiProvider::addAbi(module.get(), &config);
-	auto typeConfig = std::make_unique<ctypesparser::TypeConfig>();
-	auto demangler = DemanglerProvider::addDemangler(
-		module.get(),
-		&config,
-		std::move(typeConfig));
-	pass.runOnModuleCustom(*module, &config, abi, demangler);
+
+	pass.runOnModuleCustom(*module, &config, abi);
 
 	std::string exp = R"(
 		declare void @print(i32, i32)
@@ -945,13 +910,7 @@ TEST_F(ParamReturnTests, x86_64PtrCallBasicFunctionality)
 	abi->addRegister(X86_REG_RSI, getGlobalByName("rsi"));
 	abi->addRegister(X86_REG_RAX, getGlobalByName("rax"));
 
-	auto typeConfig = std::make_unique<ctypesparser::TypeConfig>();
-	auto demangler = DemanglerProvider::addDemangler(
-		module.get(),
-		&config,
-		std::move(typeConfig));
-
-	pass.runOnModuleCustom(*module, &config, abi, demangler);
+	pass.runOnModuleCustom(*module, &config, abi);
 
 	std::string exp = R"(
 		target datalayout = "e-m:e-i64:64-f80:128-n8:16:32:64-S128"
@@ -1014,13 +973,7 @@ TEST_F(ParamReturnTests, x86_64PtrCallPrevBbIsUsedOnlyIfItIsASinglePredecessor)
 	abi->addRegister(X86_REG_RSI, getGlobalByName("rsi"));
 	abi->addRegister(X86_REG_RAX, getGlobalByName("rax"));
 
-	auto typeConfig = std::make_unique<ctypesparser::TypeConfig>();
-	auto demangler = DemanglerProvider::addDemangler(
-		module.get(),
-		&config,
-		std::move(typeConfig));
-
-	pass.runOnModuleCustom(*module, &config, abi, demangler);
+	pass.runOnModuleCustom(*module, &config, abi);
 
 	std::string exp = R"(
 		target datalayout = "e-m:e-i64:64-f80:128-n8:16:32:64-S128"
@@ -1117,13 +1070,7 @@ TEST_F(ParamReturnTests, x86_64ExternalCallUseStacksIf6RegistersUsed)
 	abi->addRegister(X86_REG_R9, getGlobalByName("r9"));
 	abi->addRegister(X86_REG_R10, getGlobalByName("r10"));
 
-	auto typeConfig = std::make_unique<ctypesparser::TypeConfig>();
-	auto demangler = DemanglerProvider::addDemangler(
-		module.get(),
-		&config,
-		std::move(typeConfig));
-
-	pass.runOnModuleCustom(*module, &config, abi, demangler);
+	pass.runOnModuleCustom(*module, &config, abi);
 
 	std::string exp = R"(
 		target datalayout = "e-m:e-i64:64-f80:128-n8:16:32:64-S128"
@@ -1203,13 +1150,7 @@ TEST_F(ParamReturnTests, x86_64ExternalCallUsesFPRegistersBasic)
 	abi->addRegister(X86_REG_XMM0, getGlobalByName("xmm0"));
 	abi->addRegister(X86_REG_XMM1, getGlobalByName("xmm1"));
 
-	auto typeConfig = std::make_unique<ctypesparser::TypeConfig>();
-	auto demangler = DemanglerProvider::addDemangler(
-		module.get(),
-		&config,
-		std::move(typeConfig));
-
-	pass.runOnModuleCustom(*module, &config, abi, demangler);
+	pass.runOnModuleCustom(*module, &config, abi);
 
 	std::string exp = R"(
 	target datalayout = "e-m:e-i64:64-f80:128-n8:16:32:64-S128"
@@ -1291,13 +1232,7 @@ TEST_F(ParamReturnTests, x86_64ExternalCallUsesFPRegisters)
 	abi->addRegister(X86_REG_XMM0, getGlobalByName("xmm0"));
 	abi->addRegister(X86_REG_XMM1, getGlobalByName("xmm1"));
 
-	auto typeConfig = std::make_unique<ctypesparser::TypeConfig>();
-	auto demangler = DemanglerProvider::addDemangler(
-		module.get(),
-		&config,
-		std::move(typeConfig));
-
-	pass.runOnModuleCustom(*module, &config, abi, demangler);
+	pass.runOnModuleCustom(*module, &config, abi);
 
 	std::string exp = R"(
 	target datalayout = "e-m:e-i64:64-f80:128-n8:16:32:64-S128"
@@ -1382,13 +1317,7 @@ TEST_F(ParamReturnTests, x86_64UsesJustContinuousSequenceOfRegisters)
 	abi->addRegister(X86_REG_RCX, getGlobalByName("rcx"));
 	abi->addRegister(X86_REG_RDX, getGlobalByName("rdx"));
 
-	auto typeConfig = std::make_unique<ctypesparser::TypeConfig>();
-	auto demangler = DemanglerProvider::addDemangler(
-		module.get(),
-		&config,
-		std::move(typeConfig));
-
-	pass.runOnModuleCustom(*module, &config, abi, demangler);
+	pass.runOnModuleCustom(*module, &config, abi);
 
 	std::string exp = R"(
 		target datalayout = "e-m:e-i64:64-f80:128-n8:16:32:64-S128"
@@ -1454,13 +1383,7 @@ TEST_F(ParamReturnTests, ms_x64PtrCallBasicFunctionality)
 	abi->addRegister(X86_REG_RDX, getGlobalByName("rdx"));
 	abi->addRegister(X86_REG_RAX, getGlobalByName("rax"));
 
-	auto typeConfig = std::make_unique<ctypesparser::TypeConfig>();
-	auto demangler = DemanglerProvider::addDemangler(
-		module.get(),
-		&config,
-		std::move(typeConfig));
-
-	pass.runOnModuleCustom(*module, &config, abi, demangler);
+	pass.runOnModuleCustom(*module, &config, abi);
 
 	std::string exp = R"(
 		target datalayout = "e-m:e-i64:64-f80:128-n8:16:32:64-S128"
@@ -1528,13 +1451,7 @@ TEST_F(ParamReturnTests, ms_x64PtrCallPrevBbIsUsedOnlyIfItIsASinglePredecessor)
 	abi->addRegister(X86_REG_RDX, getGlobalByName("rdx"));
 	abi->addRegister(X86_REG_RAX, getGlobalByName("rax"));
 
-	auto typeConfig = std::make_unique<ctypesparser::TypeConfig>();
-	auto demangler = DemanglerProvider::addDemangler(
-		module.get(),
-		&config,
-		std::move(typeConfig));
-
-	pass.runOnModuleCustom(*module, &config, abi, demangler);
+	pass.runOnModuleCustom(*module, &config, abi);
 
 	std::string exp = R"(
 		target datalayout = "e-m:e-i64:64-f80:128-n8:16:32:64-S128"
@@ -1631,13 +1548,7 @@ TEST_F(ParamReturnTests, ms_x64ExternalCallUseStacksIf4RegistersUsed)
 	abi->addRegister(X86_REG_R8, getGlobalByName("r8"));
 	abi->addRegister(X86_REG_R9, getGlobalByName("r9"));
 
-	auto typeConfig = std::make_unique<ctypesparser::TypeConfig>();
-	auto demangler = DemanglerProvider::addDemangler(
-		module.get(),
-		&config,
-		std::move(typeConfig));
-
-	pass.runOnModuleCustom(*module, &config, abi, demangler);
+	pass.runOnModuleCustom(*module, &config, abi);
 
 	std::string exp = R"(
 		target datalayout = "e-m:e-i64:64-f80:128-n8:16:32:64-S128"
@@ -1720,13 +1631,7 @@ TEST_F(ParamReturnTests, ms_x64ExternalCallUsesFPRegisters)
 	abi->addRegister(X86_REG_XMM0, getGlobalByName("xmm0"));
 	abi->addRegister(X86_REG_XMM1, getGlobalByName("xmm1"));
 
-	auto typeConfig = std::make_unique<ctypesparser::TypeConfig>();
-	auto demangler = DemanglerProvider::addDemangler(
-		module.get(),
-		&config,
-		std::move(typeConfig));
-
-	pass.runOnModuleCustom(*module, &config, abi, demangler);
+	pass.runOnModuleCustom(*module, &config, abi);
 
 	std::string exp = R"(
 	target datalayout = "e-m:e-i64:64-f80:128-n8:16:32:64-S128"
@@ -1798,13 +1703,7 @@ TEST_F(ParamReturnTests, ms_x64UsesJustContinuousSequenceOfRegisters)
 	abi->addRegister(X86_REG_RCX, getGlobalByName("rcx"));
 	abi->addRegister(X86_REG_RDX, getGlobalByName("rdx"));
 
-	auto typeConfig = std::make_unique<ctypesparser::TypeConfig>();
-	auto demangler = DemanglerProvider::addDemangler(
-		module.get(),
-		&config,
-		std::move(typeConfig));
-
-	pass.runOnModuleCustom(*module, &config, abi, demangler);
+	pass.runOnModuleCustom(*module, &config, abi);
 
 	std::string exp = R"(
 		target datalayout = "e-m:e-i64:64-f80:128-n8:16:32:64-S128"
@@ -1877,13 +1776,7 @@ TEST_F(ParamReturnTests, ms_x64ExternalCallUsesFPRegistersAdvanced)
 	abi->addRegister(X86_REG_XMM2, getGlobalByName("xmm2"));
 	abi->addRegister(X86_REG_XMM3, getGlobalByName("xmm3"));
 
-	auto typeConfig = std::make_unique<ctypesparser::TypeConfig>();
-	auto demangler = DemanglerProvider::addDemangler(
-		module.get(),
-		&config,
-		std::move(typeConfig));
-
-	pass.runOnModuleCustom(*module, &config, abi, demangler);
+	pass.runOnModuleCustom(*module, &config, abi);
 
 	std::string exp = R"(
 	target datalayout = "e-m:e-i64:64-f80:128-n8:16:32:64-S128"
@@ -1997,13 +1890,7 @@ TEST_F(ParamReturnTests, ppcPtrCallBasicFunctionality)
 	abi->addRegister(PPC_REG_R3, getGlobalByName("r3"));
 	abi->addRegister(PPC_REG_R4, getGlobalByName("r4"));
 
-	auto typeConfig = std::make_unique<ctypesparser::TypeConfig>();
-	auto demangler = DemanglerProvider::addDemangler(
-		module.get(),
-		&config,
-		std::move(typeConfig));
-
-	pass.runOnModuleCustom(*module, &config, abi, demangler);
+	pass.runOnModuleCustom(*module, &config, abi);
 
 	std::string exp = R"(
 		@r = global i32 0
@@ -2052,13 +1939,7 @@ TEST_F(ParamReturnTests, ppcExternalCallBasicFunctionality)
 	abi->addRegister(PPC_REG_R3, getGlobalByName("r3"));
 	abi->addRegister(PPC_REG_R4, getGlobalByName("r4"));
 
-	auto typeConfig = std::make_unique<ctypesparser::TypeConfig>();
-	auto demangler = DemanglerProvider::addDemangler(
-		module.get(),
-		&config,
-		std::move(typeConfig));
-
-	pass.runOnModuleCustom(*module, &config, abi, demangler);
+	pass.runOnModuleCustom(*module, &config, abi);
 
 	std::string exp = R"(
 		@r3 = global i32 0
@@ -2114,13 +1995,7 @@ TEST_F(ParamReturnTests, ppcExternalCallBasicFPFunctionality)
 	abi->addRegister(PPC_REG_F1, getGlobalByName("f1"));
 	abi->addRegister(PPC_REG_F2, getGlobalByName("f2"));
 
-	auto typeConfig = std::make_unique<ctypesparser::TypeConfig>();
-	auto demangler = DemanglerProvider::addDemangler(
-		module.get(),
-		&config,
-		std::move(typeConfig));
-
-	pass.runOnModuleCustom(*module, &config, abi, demangler);
+	pass.runOnModuleCustom(*module, &config, abi);
 
 	std::string exp = R"(
 		@r3 = global i32 0
@@ -2171,13 +2046,7 @@ TEST_F(ParamReturnTests, ppcExternalCallDoNotUseObjectsIfTheyAreNotRegisters)
 	})");
 	auto abi = AbiProvider::addAbi(module.get(), &config);
 
-	auto typeConfig = std::make_unique<ctypesparser::TypeConfig>();
-	auto demangler = DemanglerProvider::addDemangler(
-		module.get(),
-		&config,
-		std::move(typeConfig));
-
-	pass.runOnModuleCustom(*module, &config, abi, demangler);
+	pass.runOnModuleCustom(*module, &config, abi);
 
 	std::string exp = R"(
 		@r3 = global i32 0
@@ -2345,13 +2214,7 @@ TEST_F(ParamReturnTests, ppcExternalCallSortRegistersIntoCorrectOrder)
 	abi->addRegister(PPC_REG_R4, getGlobalByName("r4"));
 	abi->addRegister(PPC_REG_R5, getGlobalByName("r5"));
 
-	auto typeConfig = std::make_unique<ctypesparser::TypeConfig>();
-	auto demangler = DemanglerProvider::addDemangler(
-		module.get(),
-		&config,
-		std::move(typeConfig));
-
-	pass.runOnModuleCustom(*module, &config, abi, demangler);
+	pass.runOnModuleCustom(*module, &config, abi);
 
 	std::string exp = R"(
 		@r3 = global i32 0
@@ -2415,13 +2278,7 @@ TEST_F(ParamReturnTests, ppcExternalCallDoNotUseStacksIfLessThan7RegistersUsed)
 
 	abi->addRegister(PPC_REG_R3, getGlobalByName("r3"));
 
-	auto typeConfig = std::make_unique<ctypesparser::TypeConfig>();
-	auto demangler = DemanglerProvider::addDemangler(
-		module.get(),
-		&config,
-		std::move(typeConfig));
-
-	pass.runOnModuleCustom(*module, &config, abi, demangler);
+	pass.runOnModuleCustom(*module, &config, abi);
 
 	std::string exp = R"(
 		@r3 = global i32 0
@@ -2474,13 +2331,7 @@ TEST_F(ParamReturnTests, ppc64PtrCallBasicFunctionality)
 	abi.addRegister(PPC_REG_R3, getGlobalByName("r3"));
 	abi.addRegister(PPC_REG_R4, getGlobalByName("r4"));
 
-	auto typeConfig = std::make_unique<ctypesparser::TypeConfig>();
-	auto demangler = DemanglerProvider::addDemangler(
-		module.get(),
-		&config,
-		std::move(typeConfig));
-
-	pass.runOnModuleCustom(*module, &config, &abi, demangler);
+	pass.runOnModuleCustom(*module, &config, &abi);
 
 	std::string exp = R"(
 		target datalayout = "E-m:e-p:64:64-i64:64-n32"
@@ -2557,13 +2408,7 @@ TEST_F(ParamReturnTests, armPtrCallBasicFunctionality)
 	abi->addRegister(ARM_REG_R0, getGlobalByName("r0"));
 	abi->addRegister(ARM_REG_R1, getGlobalByName("r1"));
 
-	auto typeConfig = std::make_unique<ctypesparser::TypeConfig>();
-	auto demangler = DemanglerProvider::addDemangler(
-		module.get(),
-		&config,
-		std::move(typeConfig));
-
-	pass.runOnModuleCustom(*module, &config, abi, demangler);
+	pass.runOnModuleCustom(*module, &config, abi);
 
 	std::string exp = R"(
 		@r = global i32 0
@@ -2612,13 +2457,7 @@ TEST_F(ParamReturnTests, armExternalCallBasicFunctionality)
 	abi->addRegister(ARM_REG_R0, getGlobalByName("r0"));
 	abi->addRegister(ARM_REG_R1, getGlobalByName("r1"));
 
-	auto typeConfig = std::make_unique<ctypesparser::TypeConfig>();
-	auto demangler = DemanglerProvider::addDemangler(
-		module.get(),
-		&config,
-		std::move(typeConfig));
-
-	pass.runOnModuleCustom(*module, &config, abi, demangler);
+	pass.runOnModuleCustom(*module, &config, abi);
 
 	std::string exp = R"(
 		@r0 = global i32 0
@@ -2698,13 +2537,7 @@ TEST_F(ParamReturnTests, armExternalCallUseStacksIf4RegistersUsed)
 	abi->addRegister(ARM_REG_R3, getGlobalByName("r3"));
 	abi->addRegister(ARM_REG_R4, getGlobalByName("r4"));
 
-	auto typeConfig = std::make_unique<ctypesparser::TypeConfig>();
-	auto demangler = DemanglerProvider::addDemangler(
-		module.get(),
-		&config,
-		std::move(typeConfig));
-
-	pass.runOnModuleCustom(*module, &config, abi, demangler);
+	pass.runOnModuleCustom(*module, &config, abi);
 
 	std::string exp = R"(
 		@r0 = global i32 0
@@ -2772,13 +2605,7 @@ TEST_F(ParamReturnTests, arm64PtrCallBasicFunctionality)
 	abi.addRegister(ARM64_REG_X0, getGlobalByName("x0"));
 	abi.addRegister(ARM64_REG_X1, getGlobalByName("x1"));
 
-	auto typeConfig = std::make_unique<ctypesparser::TypeConfig>();
-	auto demangler = DemanglerProvider::addDemangler(
-		module.get(),
-		&config,
-		std::move(typeConfig));
-
-	pass.runOnModuleCustom(*module, &config, &abi, demangler);
+	pass.runOnModuleCustom(*module, &config, &abi);
 
 	std::string exp = R"(
 		target datalayout = "E-m:e-p:64:64-i64:64-n32"
@@ -2830,13 +2657,7 @@ TEST_F(ParamReturnTests, arm64ExternalCallBasicFunctionality)
 	abi.addRegister(ARM64_REG_X0, getGlobalByName("x0"));
 	abi.addRegister(ARM64_REG_X1, getGlobalByName("x1"));
 
-	auto typeConfig = std::make_unique<ctypesparser::TypeConfig>();
-	auto demangler = DemanglerProvider::addDemangler(
-		module.get(),
-		&config,
-		std::move(typeConfig));
-
-	pass.runOnModuleCustom(*module, &config, &abi, demangler);
+	pass.runOnModuleCustom(*module, &config, &abi);
 
 	std::string exp = R"(
 		@x0 = global i64 0
@@ -2928,13 +2749,7 @@ TEST_F(ParamReturnTests, arm64ExternalCallUseStacksIf8RegistersUsed)
 	abi.addRegister(ARM64_REG_X7, getGlobalByName("x7"));
 	abi.addRegister(ARM64_REG_X8, getGlobalByName("x8"));
 
-	auto typeConfig = std::make_unique<ctypesparser::TypeConfig>();
-	auto demangler = DemanglerProvider::addDemangler(
-		module.get(),
-		&config,
-		std::move(typeConfig));
-
-	pass.runOnModuleCustom(*module, &config, &abi, demangler);
+	pass.runOnModuleCustom(*module, &config, &abi);
 
 	std::string exp = R"(
 		@x0 = global i64 0
@@ -3019,13 +2834,7 @@ TEST_F(ParamReturnTests, arm64ExternalCallHasDouleParameter)
 	abi.addRegister(ARM64_REG_X4, getGlobalByName("x4"));
 	abi.addRegister(ARM64_REG_V0, getGlobalByName("v0"));
 
-	auto typeConfig = std::make_unique<ctypesparser::TypeConfig>();
-	auto demangler = DemanglerProvider::addDemangler(
-		module.get(),
-		&config,
-		std::move(typeConfig));
-
-	pass.runOnModuleCustom(*module, &config, &abi, demangler);
+	pass.runOnModuleCustom(*module, &config, &abi);
 
 	std::string exp = R"(
 		@x0 = global i64 0
@@ -3176,13 +2985,7 @@ TEST_F(ParamReturnTests, mipsPtrCallBasicFunctionality)
 	abi->addRegister(MIPS_REG_A0, getGlobalByName("a0"));
 	abi->addRegister(MIPS_REG_A1, getGlobalByName("a1"));
 
-	auto typeConfig = std::make_unique<ctypesparser::TypeConfig>();
-	auto demangler = DemanglerProvider::addDemangler(
-		module.get(),
-		&config,
-		std::move(typeConfig));
-
-	pass.runOnModuleCustom(*module, &config, abi, demangler);
+	pass.runOnModuleCustom(*module, &config, abi);
 
 	std::string exp = R"(
 		@r = global i32 0
@@ -3227,13 +3030,7 @@ TEST_F(ParamReturnTests, mipsExternalCallBasicFunctionality)
 	abi->addRegister(MIPS_REG_A0, getGlobalByName("a0"));
 	abi->addRegister(MIPS_REG_A1, getGlobalByName("a1"));
 
-	auto typeConfig = std::make_unique<ctypesparser::TypeConfig>();
-	auto demangler = DemanglerProvider::addDemangler(
-		module.get(),
-		&config,
-		std::move(typeConfig));
-
-	pass.runOnModuleCustom(*module, &config, abi, demangler);
+	pass.runOnModuleCustom(*module, &config, abi);
 
 	std::string exp = R"(
 		@a0 = global i32 0
@@ -3305,13 +3102,7 @@ TEST_F(ParamReturnTests, mipsExternalCallUseStacksIf4RegistersUsed)
 	abi->addRegister(MIPS_REG_A3, getGlobalByName("a3"));
 	abi->addRegister(MIPS_REG_T0, getGlobalByName("t0"));
 
-	auto typeConfig = std::make_unique<ctypesparser::TypeConfig>();
-	auto demangler = DemanglerProvider::addDemangler(
-		module.get(),
-		&config,
-		std::move(typeConfig));
-
-	pass.runOnModuleCustom(*module, &config, abi, demangler);
+	pass.runOnModuleCustom(*module, &config, abi);
 
 	std::string exp = R"(
 		@a0 = global i32 0
@@ -3373,13 +3164,7 @@ TEST_F(ParamReturnTests, mips64PtrCallBasicFunctionality)
 	abi.addRegister(MIPS_REG_A0, getGlobalByName("a0"));
 	abi.addRegister(MIPS_REG_A1, getGlobalByName("a1"));
 
-	auto typeConfig = std::make_unique<ctypesparser::TypeConfig>();
-	auto demangler = DemanglerProvider::addDemangler(
-		module.get(),
-		&config,
-		std::move(typeConfig));
-
-	pass.runOnModuleCustom(*module, &config, &abi, demangler);
+	pass.runOnModuleCustom(*module, &config, &abi);
 
 	std::string exp = R"(
 		target datalayout = "E-m:e-p:64:64-i64:64-f64:64"
@@ -3429,13 +3214,7 @@ TEST_F(ParamReturnTests, mips64ExternalCallBasicFunctionality)
 	abi.addRegister(MIPS_REG_A0, getGlobalByName("a0"));
 	abi.addRegister(MIPS_REG_A1, getGlobalByName("a1"));
 
-	auto typeConfig = std::make_unique<ctypesparser::TypeConfig>();
-	auto demangler = DemanglerProvider::addDemangler(
-		module.get(),
-		&config,
-		std::move(typeConfig));
-
-	pass.runOnModuleCustom(*module, &config, &abi, demangler);
+	pass.runOnModuleCustom(*module, &config, &abi);
 
 	std::string exp = R"(
 		target datalayout = "E-m:e-p:64:64-i64:64-f64:64"
@@ -3524,13 +3303,7 @@ TEST_F(ParamReturnTests, mips64ExternalCallUseStacksIf8RegistersUsed)
 	abi.addRegister(MIPS_REG_T3, getGlobalByName("a7"));
 	abi.addRegister(MIPS_REG_T4, getGlobalByName("t4"));
 
-	auto typeConfig = std::make_unique<ctypesparser::TypeConfig>();
-	auto demangler = DemanglerProvider::addDemangler(
-		module.get(),
-		&config,
-		std::move(typeConfig));
-
-	pass.runOnModuleCustom(*module, &config, &abi, demangler);
+	pass.runOnModuleCustom(*module, &config, &abi);
 
 	std::string exp = R"(
 		target datalayout = "E-m:e-p:64:64-i64:64-f64:64"
@@ -3635,13 +3408,7 @@ TEST_F(ParamReturnTests, x86FastcallBasic)
 	abi->addRegister(X86_REG_ECX, getGlobalByName("ecx"));
 	abi->addRegister(X86_REG_EDX, getGlobalByName("edx"));
 
-	auto typeConfig = std::make_unique<ctypesparser::TypeConfig>();
-	auto demangler = DemanglerProvider::addDemangler(
-		module.get(),
-		&config,
-		std::move(typeConfig));
-
-	pass.runOnModuleCustom(*module, &config, abi, demangler);
+	pass.runOnModuleCustom(*module, &config, abi);
 
 	std::string exp = R"(
 		@eax = global i32 0
@@ -3730,13 +3497,7 @@ TEST_F(ParamReturnTests, x86FastcallLargeTypeCatch)
 	abi->addRegister(X86_REG_ECX, getGlobalByName("ecx"));
 	abi->addRegister(X86_REG_EAX, getGlobalByName("eax"));
 
-	auto typeConfig = std::make_unique<ctypesparser::TypeConfig>();
-	auto demangler = DemanglerProvider::addDemangler(
-		module.get(),
-		&config,
-		std::move(typeConfig));
-
-	pass.runOnModuleCustom(*module, &config, abi, demangler);
+	pass.runOnModuleCustom(*module, &config, abi);
 
 	std::string exp = R"(
 		@r = global i32 0
@@ -3810,14 +3571,7 @@ TEST_F(ParamReturnTests, x86PascalBasic)
 	})");
 
 	auto abi = AbiProvider::addAbi(module.get(), &config);
-
-	auto typeConfig = std::make_unique<ctypesparser::TypeConfig>();
-	auto demangler = DemanglerProvider::addDemangler(
-		module.get(),
-		&config,
-		std::move(typeConfig));
-
-	pass.runOnModuleCustom(*module, &config, abi, demangler);
+	pass.runOnModuleCustom(*module, &config, abi);
 
 	std::string exp = R"(
 		@r = global i32 0
@@ -3896,13 +3650,7 @@ TEST_F(ParamReturnTests, x86PascalFastcallBasic)
 	abi->addRegister(X86_REG_EDX, getGlobalByName("edx"));
 	abi->addRegister(X86_REG_ECX, getGlobalByName("ecx"));
 
-	auto typeConfig = std::make_unique<ctypesparser::TypeConfig>();
-	auto demangler = DemanglerProvider::addDemangler(
-		module.get(),
-		&config,
-		std::move(typeConfig));
-
-	pass.runOnModuleCustom(*module, &config, abi, demangler);
+	pass.runOnModuleCustom(*module, &config, abi);
 
 	std::string exp = R"(
 		@eax = global i32 0
@@ -3994,13 +3742,7 @@ TEST_F(ParamReturnTests, x86PascalFastcallLargeType)
 	abi->addRegister(X86_REG_EAX, getGlobalByName("eax"));
 	abi->addRegister(X86_REG_EDX, getGlobalByName("edx"));
 
-	auto typeConfig = std::make_unique<ctypesparser::TypeConfig>();
-	auto demangler = DemanglerProvider::addDemangler(
-		module.get(),
-		&config,
-		std::move(typeConfig));
-
-	pass.runOnModuleCustom(*module, &config, abi, demangler);
+	pass.runOnModuleCustom(*module, &config, abi);
 
 	std::string exp = R"(
 		@eax = global i32 0
@@ -4088,13 +3830,7 @@ TEST_F(ParamReturnTests, x86WatcomBasic)
 	abi->addRegister(X86_REG_ECX, getGlobalByName("ecx"));
 	abi->addRegister(X86_REG_EDX, getGlobalByName("edx"));
 
-	auto typeConfig = std::make_unique<ctypesparser::TypeConfig>();
-	auto demangler = DemanglerProvider::addDemangler(
-		module.get(),
-		&config,
-		std::move(typeConfig));
-
-	pass.runOnModuleCustom(*module, &config, abi, demangler);
+	pass.runOnModuleCustom(*module, &config, abi);
 
 	std::string exp = R"(
 		@eax = global i32 0
@@ -4179,13 +3915,7 @@ TEST_F(ParamReturnTests, x86WatcomPassDouble)
 	abi->addRegister(X86_REG_EAX, getGlobalByName("eax"));
 	abi->addRegister(X86_REG_EDX, getGlobalByName("edx"));
 
-	auto typeConfig = std::make_unique<ctypesparser::TypeConfig>();
-	auto demangler = DemanglerProvider::addDemangler(
-		module.get(),
-		&config,
-		std::move(typeConfig));
-
-	pass.runOnModuleCustom(*module, &config, abi, demangler);
+	pass.runOnModuleCustom(*module, &config, abi);
 
 	std::string exp = R"(
 		@eax = global i32 0

@@ -266,7 +266,7 @@ NameContainer::NameContainer(
 		Config* c,
 		DebugFormat* d,
 		FileImage* i,
-		Demangler*,
+		demangler::CDemangler*,
 		Lti* lti)
 		:
 		_config(c),
@@ -554,7 +554,7 @@ NameContainer* NamesProvider::addNames(
 		Config* c,
 		DebugFormat* d,
 		FileImage* i,
-		Demangler* dm,
+		demangler::CDemangler* dm,
 		Lti* lti)
 {
 	// Debug info may not be present -> \p d can be nullptr.

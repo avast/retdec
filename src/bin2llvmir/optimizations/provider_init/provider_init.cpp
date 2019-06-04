@@ -67,20 +67,17 @@ bool ProviderInitialization::runOnModule(Module& m)
 	SymbolicTree::setAbi(abi);
 	SymbolicTree::setConfig(c);
 
+	auto* d = DemanglerProvider::addDemangler(&m, c->getConfig().tools);
+	if (d == nullptr)
+	{
+		return false;
+	}
+
 	auto* f = FileImageProvider::addFileImage(
 			&m,
 			c->getConfig().getInputFile(),
 			c);
 	if (f == nullptr)
-	{
-		return false;
-	}
-
-	// maybe should be in config::Config
-	auto typeConfig = std::make_shared<ctypesparser::TypeConfig>();
-
-	auto* d = DemanglerProvider::addDemangler(&m, c, typeConfig);
-	if (d == nullptr)
 	{
 		return false;
 	}
@@ -92,7 +89,7 @@ bool ProviderInitialization::runOnModule(Module& m)
 			c->getConfig().getImageBase(),
 			d);
 
-	auto* lti = LtiProvider::addLti(&m, c, typeConfig, f->getImage());
+	auto* lti = LtiProvider::addLti(&m, c, f->getImage());
 
 	NamesProvider::addNames(&m, c, debug, f, d, lti);
 

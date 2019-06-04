@@ -151,7 +151,7 @@ class NameContainer
 				Config* c,
 				DebugFormat* d,
 				FileImage* i,
-				Demangler* dm,
+				demangler::CDemangler* dm,
 				Lti* lti = nullptr);
 
 		bool addNameForAddress(
@@ -199,7 +199,7 @@ class NamesProvider
 				Config* c,
 				DebugFormat* d,
 				FileImage* i,
-				Demangler* dm,
+				demangler::CDemangler* dm,
 				Lti* lti);
 		static NameContainer* getNames(llvm::Module* m);
 		static bool getNames(llvm::Module* m, NameContainer*& names);

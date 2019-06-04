@@ -22,7 +22,6 @@ set(RETDEC_TESTS_BIN2LLVMIR_SOURCES
 	providers/demangler_tests.cpp
 	providers/fileimage_tests.cpp
 	providers/lti_tests.cpp
-	utils/ctypes2llvm_type_tests.cpp
 	utils/instcombine_tests.cpp
 	utils/ir_modifier_tests.cpp
 	utils/llvm_tests.cpp

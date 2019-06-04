@@ -51,7 +51,7 @@ std::shared_ptr<FunctionType> FunctionType::create(
 	assert(context && "violated precondition - context cannot be null");
 	assert(returnType && "violated precondition - returnType cannot be null");
 
-	auto type = context->getFunctionType(returnType, parameters, callConvention, varArgness);
+	auto type = context->getFunctionType(returnType, parameters);
 	if (type)
 	{
 		return type;

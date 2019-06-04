@@ -366,16 +366,13 @@ bool CHLLWriter::emitFileHeader() {
 	// Floating point typedefs
 	//
 	bool emitTypedefs = false;
-	bool emitFloat16 = false;
 	bool emitFloat32 = false;
 	bool emitFloat64 = false;
 	bool emitFloat80 = false;
 	bool emitFloat128 = false;
 	for (const auto &type : usedTypes->getFloatTypes()) {
 		auto floatType = cast<FloatType>(type);
-		if (floatType->getSize() == 16) {
-			emitFloat16 = true;
-		} else if (floatType->getSize() == 32) {
+		if (floatType->getSize() == 32) {
 			emitFloat32 = true;
 		} else if (floatType->getSize() == 64) {
 			emitFloat64 = true;
@@ -394,9 +391,6 @@ bool CHLLWriter::emitFileHeader() {
 		out << "\n";
 		emitSectionHeader("Float Types Definitions");
 		out << "\n";
-	}
-	if (emitFloat16) {
-		out << getCurrentIndent() << "typedef float float16_t;\n";
 	}
 	if (emitFloat32) {
 		out << getCurrentIndent() << "typedef float float32_t;\n";
