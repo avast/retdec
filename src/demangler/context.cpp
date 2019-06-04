@@ -164,7 +164,7 @@ std::shared_ptr<NamedTypeNode> Context::getNamedType(const std::string &name, co
 void Context::addNamedType(
 	const std::string &mangled,
 	const Qualifiers &quals,
-	const std::shared_ptr<retdec::demangler::borland::NamedTypeNode> &type)
+	const std::shared_ptr<NamedTypeNode> &type)
 {
 	assert(type && "violated precondition - type cannot be null");
 
@@ -183,7 +183,7 @@ std::shared_ptr<Node> Context::getFunction(const std::string &mangled) const
 
 void Context::addFunction(
 	const std::string &mangled,
-	const std::shared_ptr<retdec::demangler::borland::Node> &function)
+	const std::shared_ptr<Node> &function)
 {
 	assert(function && "violated precondition - function cannot be null");
 
@@ -195,7 +195,7 @@ std::shared_ptr<NameNode> Context::getName(const std::string &name) const
 	return retdec::utils::mapGetValueOrDefault(nameNodes, name);
 }
 
-void Context::addName(const std::shared_ptr<retdec::demangler::borland::NameNode> &name)
+void Context::addName(const std::shared_ptr<NameNode> &name)
 {
 	assert(name && "violated precondition - function cannot be null");
 
@@ -204,14 +204,14 @@ void Context::addName(const std::shared_ptr<retdec::demangler::borland::NameNode
 }
 
 std::shared_ptr<NestedNameNode> Context::getNestedName(
-	std::shared_ptr<retdec::demangler::borland::Node> super,
-	std::shared_ptr<retdec::demangler::borland::Node> name)
+	std::shared_ptr<Node> super,
+	std::shared_ptr<Node> name)
 {
 	auto key = std::make_tuple(super, name);
 	return retdec::utils::mapGetValueOrDefault(nestedNameNodes, key);
 }
 
-void Context::addNestedName(const std::shared_ptr<retdec::demangler::borland::NestedNameNode> &name)
+void Context::addNestedName(const std::shared_ptr<NestedNameNode> &name)
 {
 	assert(name && "violated precondition - function cannot be null");
 
@@ -220,15 +220,15 @@ void Context::addNestedName(const std::shared_ptr<retdec::demangler::borland::Ne
 }
 
 std::shared_ptr<ArrayNode> Context::getArray(
-	std::shared_ptr<retdec::demangler::borland::Node> pointee,
+	std::shared_ptr<Node> pointee,
 	unsigned size,
-	const retdec::demangler::borland::Qualifiers &quals)
+	const Qualifiers &quals)
 {
 	auto key = std::make_tuple(pointee, size, quals.isVolatile(), quals.isConst());
 	return retdec::utils::mapGetValueOrDefault(arrayNodes, key);
 }
 
-void Context::addArrayType(const std::shared_ptr<retdec::demangler::borland::ArrayNode> &array) {
+void Context::addArrayType(const std::shared_ptr<ArrayNode> &array) {
 	assert(array && "violated precondition - array cannot be null");
 
 	auto pointee = array->pointee();
