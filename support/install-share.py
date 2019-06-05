@@ -48,7 +48,7 @@ def main():
                 version_from_file = version_file.read().split('\n')[0]
 
             if version == version_from_file:
-                print('%s already exists, version is ok' % support_dir)
+                print('-- Up-to-date: %s (version is OK)' % support_dir)
                 sys.exit(0)
             else:
                 print('version is not as expected -> replace with the expected version')
