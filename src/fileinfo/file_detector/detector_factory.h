@@ -11,7 +11,7 @@
 
 namespace fileinfo {
 
-FileDetector* createFileDetector(std::string pathToInputFile, retdec::fileformat::Format fileFormat, FileInformation &finfo, retdec::cpdetect::DetectParams &searchPar, retdec::fileformat::LoadFlags loadFlags);
+FileDetector* createFileDetector(const std::string & pathToInputFile, const std::string & dllListFile, retdec::fileformat::Format fileFormat, FileInformation &finfo, retdec::cpdetect::DetectParams &searchPar, retdec::fileformat::LoadFlags loadFlags);
 
 } // namespace fileinfo
 

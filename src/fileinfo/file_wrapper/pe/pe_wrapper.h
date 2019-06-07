@@ -21,7 +21,7 @@ class PeWrapper : public retdec::fileformat::PeFormat
 	private:
 		PeWrapperParser *wrapperParser; ///< parser of PE file
 	public:
-		PeWrapper(std::string pathToFile, retdec::fileformat::LoadFlags loadFlags);
+		PeWrapper(const std::string & pathToFile, const std::string & dllListFile, retdec::fileformat::LoadFlags loadFlags);
 		virtual ~PeWrapper() override;
 
 		/// @name Detection methods

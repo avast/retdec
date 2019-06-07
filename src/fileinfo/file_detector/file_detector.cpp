@@ -23,7 +23,7 @@ namespace fileinfo {
  *
  * Constructor in subclass must initialize members @a fileParser and @a loaded.
  */
-FileDetector::FileDetector(std::string pathToInputFile, FileInformation &finfo, retdec::cpdetect::DetectParams &searchPar, retdec::fileformat::LoadFlags loadFlags) :
+FileDetector::FileDetector(const std::string & pathToInputFile, FileInformation &finfo, retdec::cpdetect::DetectParams &searchPar, retdec::fileformat::LoadFlags loadFlags) :
 	fileInfo(finfo), cpParams(searchPar), fileConfig(nullptr), fileParser(nullptr), loaded(false), loadFlags(loadFlags)
 {
 	fileInfo.setPathToFile(pathToInputFile);

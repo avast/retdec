@@ -34,10 +34,10 @@ const unsigned long long PE_16_FLAGS_SIZE = 16;
  * @param searchPar Parameters for detection of used compiler (or packer)
  * @param loadFlags Load flags
  */
-PeDetector::PeDetector(std::string pathToInputFile, FileInformation &finfo, retdec::cpdetect::DetectParams &searchPar, retdec::fileformat::LoadFlags loadFlags) :
+PeDetector::PeDetector(const std::string & pathToInputFile, const std::string & dllListFile, FileInformation &finfo, retdec::cpdetect::DetectParams &searchPar, retdec::fileformat::LoadFlags loadFlags) :
 	FileDetector(pathToInputFile, finfo, searchPar, loadFlags)
 {
-	fileParser = peParser = std::make_shared<PeWrapper>(fileInfo.getPathToFile(), loadFlags);
+	fileParser = peParser = std::make_shared<PeWrapper>(fileInfo.getPathToFile(), dllListFile, loadFlags);
 	loaded = peParser->isInValidState();
 }
 

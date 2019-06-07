@@ -93,7 +93,7 @@ std::string getSymbolType(byte type)
  * @param pathToFile Path to PE binary file
  * @param loadFlags Load flags
  */
-PeWrapper::PeWrapper(std::string pathToFile, retdec::fileformat::LoadFlags loadFlags) : PeFormat(pathToFile, loadFlags), wrapperParser(nullptr)
+PeWrapper::PeWrapper(const std::string & pathToFile, const std::string & dllListFile, retdec::fileformat::LoadFlags loadFlags) : PeFormat(pathToFile, dllListFile, loadFlags), wrapperParser(nullptr)
 {
 	switch(peClass)
 	{

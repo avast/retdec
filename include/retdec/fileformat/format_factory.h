@@ -16,6 +16,12 @@ namespace fileformat {
 
 std::unique_ptr<FileFormat> createFileFormat(
 		const std::string &filePath,
+		const std::string &dllListFile,
+		bool isRaw = false,
+		LoadFlags loadFlags = LoadFlags::NONE);
+
+std::unique_ptr<FileFormat> createFileFormat(
+		const std::string &filePath,
 		bool isRaw = false,
 		LoadFlags loadFlags = LoadFlags::NONE);
 

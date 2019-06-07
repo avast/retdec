@@ -47,6 +47,7 @@ struct ProgParams
 	bool explanatory;                       ///< print explanatory notes
 	bool generateConfigFile;                ///< flag for generating config file
 	std::string configFile;                 ///< name of the config file
+	std::string dllListFile;                ///< name of the file with the DLL list
 	std::set<std::string> yaraMalwarePaths; ///< paths to YARA malware rules
 	std::set<std::string> yaraCryptoPaths;  ///< paths to YARA crypto rules
 	std::set<std::string> yaraOtherPaths;   ///< paths to YARA other rules
@@ -211,7 +212,7 @@ bool doParams(int argc, char **_argv, ProgParams &params)
 	std::vector<std::string> argv;
 
 	std::set<std::string> withArgs = {"malware", "m", "crypto", "C", "other",
-			"o", "config", "c", "no-hashes", "max-memory", "ep-bytes"};
+			"o", "config", "c", "no-hashes", "max-memory", "ep-bytes", "dlls"};
 	for (int i = 1; i < argc; ++i)
 	{
 		std::string a = _argv[i];
@@ -353,6 +354,12 @@ bool doParams(int argc, char **_argv, ProgParams &params)
 			if (!strToNum(epBytesCountString, params.epBytesCount))
 				return false;
 		}
+		else if (c == "--dlls")
+		{
+			auto dllListFile = getParamOrDie(argv, i);
+
+			params.dllListFile = dllListFile;
+		}
 		else if (params.filePath.empty())
 		{
 			params.filePath = argv[i];
@@ -444,7 +451,7 @@ int main(int argc, char* argv[])
 		}
 		default:
 		{
-			fileDetector = createFileDetector(params.filePath, fileFormat, fileinfo, searchPar, params.loadFlags);
+			fileDetector = createFileDetector(params.filePath, params.dllListFile, fileFormat, fileinfo, searchPar, params.loadFlags);
 			if(fileDetector)
 			{
 				if(!fileDetector->getFileParser()->isInValidState())

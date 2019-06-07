@@ -294,9 +294,12 @@ Symbol::UsageType getSymbolUsageType(byte storageClass, byte complexType)
  * @param pathToFile Path to input file
  * @param loadFlags Load flags
  */
-PeFormat::PeFormat(std::string pathToFile, LoadFlags loadFlags) :
+PeFormat::PeFormat(const std::string & pathToFile, const std::string & newDllListFile, LoadFlags loadFlags) :
 		FileFormat(pathToFile, loadFlags)
 {
+	// If we got an override list of dependency DLLs, we load them into the map
+	initDllList(newDllListFile);
+
 	initStructures();
 }
 
@@ -335,13 +338,17 @@ PeFormat::~PeFormat()
 /**
 * Init information from PE loader
 */
-void PeFormat::initLoaderErrorInfo()
-{
-	PeLib::LoaderError ldrError = file->loaderError();
 
+void PeFormat::initLoaderErrorInfo(PeLib::LoaderError ldrError)
+{
 	_ldrErrInfo.loaderErrorCode = static_cast<std::uint32_t>(ldrError);
 	_ldrErrInfo.loaderError = getLoaderErrorString(ldrError, false);
 	_ldrErrInfo.loaderErrorUserFriendly = getLoaderErrorString(ldrError, true);
+}
+
+void PeFormat::initLoaderErrorInfo()
+{
+	initLoaderErrorInfo(file->loaderError());
 }
 
 /**
@@ -1240,12 +1247,20 @@ void PeFormat::loadImports()
 {
 	std::string libname;
 
+	// Make sure we have import table initialized on the beginning
+	if(importTable == nullptr)
+		importTable = new ImportTable();
+
 	for(std::size_t i = 0; formatParser->getImportedLibraryFileName(i, libname); ++i)
 	{
-		if(!importTable)
+		// Check whether this import is resolvable.
+		// Only do that for the first missing import, don't care about the others
+		if (_ldrErrInfo.loaderErrorCode == 0)
 		{
-			importTable = new ImportTable();
+			if(isMissingDependency(libname))
+				initLoaderErrorInfo(LDR_ERROR_MISSING_DEPENDENCY);
 		}
+
 		importTable->addLibrary(libname);
 
 		std::size_t index = 0;
@@ -1258,10 +1273,6 @@ void PeFormat::loadImports()
 
 	for(std::size_t i = 0; formatParser->getDelayImportedLibraryFileName(i, libname); ++i)
 	{
-		if(!importTable)
-		{
-			importTable = new ImportTable();
-		}
 		importTable->addLibrary(libname);
 
 		std::size_t index = 0;
@@ -3111,6 +3122,57 @@ std::size_t PeFormat::getDeclaredNumberOfDataDirectories() const
 {
 	return formatParser->getDeclaredNumberOfDataDirectories();
 }
+
+bool PeFormat::isMissingDependency(const std::string & dllname) const
+{
+	// In Windows 7+, DLLs beginning with name "api-" or "ext-" are resolved by API set;
+	// We consider them always existing
+	if ((dllname.length() > 4) && (!strncmp(dllname.c_str(), "api-", 4) || !strncmp(dllname.c_str(), "ext-", 4)))
+		return false;
+
+	// Always convert the name to lowercase
+	std::string dllNameLower = dllname;
+	std::transform(dllNameLower.begin(), dllNameLower.end(), dllNameLower.begin(), ::tolower);
+
+	// If we have overriden set, use that one.
+	// Otherwise, use the default DLL set
+	if(dllList.size() != 0)
+		return (dllList.count(dllNameLower) != 0);
+	return (defDllList.count(dllNameLower) != 0);
+}
+
+bool PeFormat::initDllList(const std::string & dllListFile)
+{
+	// Do nothing if the DLL list is empty
+	if (dllListFile.length())
+	{
+		std::ifstream stream(dllListFile, std::ifstream::in);
+		std::streampos fileSize;
+		std::vector<char> fileData;
+
+		if (stream)
+		{
+			// Retrieve the file size
+			stream.seekg(0, std::ifstream::end);
+			fileSize = stream.gcount();
+			stream.seekg(0, std::ifstream::beg);
+
+			// Load the entire file to memory
+//			stream.read(fileData.c_)
+
+
+
+
+
+
+		}
+
+	}
+
+	// TODO
+	return false;
+}
+
 
 /**
  * Get class of PE file
