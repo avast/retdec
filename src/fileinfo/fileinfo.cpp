@@ -173,7 +173,11 @@ void printHelp()
 				<< "    --max-memory=N\n"
 				<< "                          Limit maximal memory to N bytes (0 means no limit).\n"
 				<< "    --max-memory-half-ram\n"
-				<< "                          Limit maximal memory to half of system RAM.\n";
+				<< "                          Limit maximal memory to half of system RAM.\n"
+				<< "\n"
+				<< "Options for specifying list of available DLLs:\n"
+				<< "    --dlls=filename\n"
+				<< "                          Load the list of present DLLs from the file.\n";
 }
 
 std::string getParamOrDie(std::vector<std::string> &argv, std::size_t &i)

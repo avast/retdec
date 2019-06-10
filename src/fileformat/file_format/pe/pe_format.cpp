@@ -1246,6 +1246,7 @@ void PeFormat::loadSymbols()
 void PeFormat::loadImports()
 {
 	std::string libname;
+	bool bIsMissingDependency;
 
 	// Make sure we have import table initialized on the beginning
 	if(importTable == nullptr)
@@ -1253,15 +1254,12 @@ void PeFormat::loadImports()
 
 	for(std::size_t i = 0; formatParser->getImportedLibraryFileName(i, libname); ++i)
 	{
-		// Check whether this import is resolvable.
-		// Only do that for the first missing import, don't care about the others
-		if (_ldrErrInfo.loaderErrorCode == 0)
-		{
-			if(isMissingDependency(libname))
-				initLoaderErrorInfo(LDR_ERROR_MISSING_DEPENDENCY);
-		}
+		// Check whether the name of the DLL is available
+		bIsMissingDependency = isMissingDependency(libname);
+		if (bIsMissingDependency)
+			initLoaderErrorInfo(LDR_ERROR_MISSING_DEPENDENCY);
 
-		importTable->addLibrary(libname);
+		importTable->addLibrary(libname, bIsMissingDependency);
 
 		std::size_t index = 0;
 		while (auto import = formatParser->getImport(i, index))
@@ -3123,22 +3121,20 @@ std::size_t PeFormat::getDeclaredNumberOfDataDirectories() const
 	return formatParser->getDeclaredNumberOfDataDirectories();
 }
 
-bool PeFormat::isMissingDependency(const std::string & dllname) const
+bool PeFormat::isMissingDependency(std::string dllName) const
 {
+	// Always convert the name to lowercase
+	std::transform(dllName.begin(), dllName.end(), dllName.begin(), ::tolower);
+
 	// In Windows 7+, DLLs beginning with name "api-" or "ext-" are resolved by API set;
 	// We consider them always existing
-	if ((dllname.length() > 4) && (!strncmp(dllname.c_str(), "api-", 4) || !strncmp(dllname.c_str(), "ext-", 4)))
+	if ((dllName.length() > 4) && (!strncmp(dllName.c_str(), "api-", 4) || !strncmp(dllName.c_str(), "ext-", 4)))
 		return false;
-
-	// Always convert the name to lowercase
-	std::string dllNameLower = dllname;
-	std::transform(dllNameLower.begin(), dllNameLower.end(), dllNameLower.begin(), ::tolower);
 
 	// If we have overriden set, use that one.
 	// Otherwise, use the default DLL set
-	if(dllList.size() != 0)
-		return (dllList.count(dllNameLower) != 0);
-	return (defDllList.count(dllNameLower) != 0);
+	const std::unordered_set<std::string> & depsDllList = (dllList.size() != 0) ? dllList : defDllList;
+	return (depsDllList.count(dllName) == 0);
 }
 
 bool PeFormat::initDllList(const std::string & dllListFile)
@@ -3147,32 +3143,20 @@ bool PeFormat::initDllList(const std::string & dllListFile)
 	if (dllListFile.length())
 	{
 		std::ifstream stream(dllListFile, std::ifstream::in);
-		std::streampos fileSize;
-		std::vector<char> fileData;
+		std::string oneLine;
 
-		if (stream)
+		while(stream)
 		{
-			// Retrieve the file size
-			stream.seekg(0, std::ifstream::end);
-			fileSize = stream.gcount();
-			stream.seekg(0, std::ifstream::beg);
-
-			// Load the entire file to memory
-//			stream.read(fileData.c_)
-
-
-
-
-
-
+			std::getline(stream, oneLine);
+			std::transform(oneLine.begin(), oneLine.end(), oneLine.begin(), ::tolower);
+			dllList.insert(oneLine);
 		}
-
 	}
 
-	// TODO
-	return false;
+	// Sanity check
+	assert(isMissingDependency("kernel32.dll") == false);
+	return true;
 }
-
 
 /**
  * Get class of PE file

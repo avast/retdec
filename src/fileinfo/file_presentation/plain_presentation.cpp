@@ -782,6 +782,7 @@ bool PlainPresentation::present()
 
 		if(returnCode != ReturnCode::FILE_NOT_EXIST && returnCode != ReturnCode::UNKNOWN_FORMAT)
 		{
+			presentIterativeDistribution(MissingDepsPlainGetter(fileinfo), explanatory);
 			presentIterativeDistribution(LoaderInfoPlainGetter(fileinfo), explanatory);
 		}
 

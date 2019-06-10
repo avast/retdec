@@ -691,6 +691,15 @@ const std::string& ImportTable::getImphashSha256() const
 }
 
 /**
+ * Get list of missing dependencies
+ * @return Vector of missing dependencies
+ */
+const std::vector<std::string> & ImportTable::getMissingDependencies() const
+{
+	return missingDeps;
+}
+
+/**
  * Get name of imported library
  * @param libraryIndex Index of selected library (indexed from 0)
  * @return Name of selected library or empty string if library index is invalid
@@ -838,8 +847,10 @@ void ImportTable::clear()
  *
  * Order in which are libraries added must be same as order of libraries import in input file
  */
-void ImportTable::addLibrary(std::string name)
+void ImportTable::addLibrary(std::string name, bool bIsMissingDependency)
 {
+	if(bIsMissingDependency)
+		missingDeps.push_back(name);
 	libraries.push_back(name);
 }
 

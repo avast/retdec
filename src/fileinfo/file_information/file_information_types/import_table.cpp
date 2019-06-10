@@ -148,6 +148,12 @@ std::string ImportTable::getImportOrdinalNumberStr(std::size_t position, std::io
 	return record && record->getOrdinalNumber(ordinal) ? getNumberAsString(ordinal, format) : "";
 }
 
+const std::vector<std::string> & ImportTable::getMissingDependencies() const
+{
+	return table->getMissingDependencies();
+}
+
+
 /**
  * Set import table data
  * @param importTable Instance of class with original information about import table

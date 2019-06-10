@@ -175,7 +175,7 @@ class PeFormat : public FileFormat
 
 		/// @name Dependency checking
 		/// @{
-		bool isMissingDependency(const std::string & dllname) const;
+		bool isMissingDependency(std::string dllname) const;
 		bool initDllList(const std::string & dllListFile);
 
 		int getPeClass() const;

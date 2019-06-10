@@ -300,6 +300,26 @@ void JsonPresentation::presentPatterns(Json::Value &root) const
 }
 
 /**
+ * Present information about missing dependencies
+ * @param root Parent node in output document
+ */
+void JsonPresentation::presentMissingDepsInfo(Json::Value &root) const
+{
+	if (returnCode == ReturnCode::FILE_NOT_EXIST || returnCode == ReturnCode::UNKNOWN_FORMAT)
+	{
+		return;
+	}
+
+	const auto numberOfMissingDeps = fileinfo.getNumberOfMissingDeps();
+
+	Value jMissingDeps;
+	jMissingDeps["count"] = numberOfMissingDeps;
+
+	presentIterativeSubtitle(jMissingDeps, MissingDepsJsonGetter(fileinfo));
+	root["missingDeps"] = jMissingDeps;
+}
+
+/**
  * Present information about loader
  * @param root Parent node in output document
  */
@@ -884,6 +904,7 @@ bool JsonPresentation::present()
 			root["manifest"] = replaceNonasciiChars(manifest);
 		}
 		presentElfNotes(root);
+		presentMissingDepsInfo(root);
 		presentLoaderInfo(root);
 		presentPatterns(root);
 		presentCertificateAttributes(root);

@@ -37,6 +37,8 @@ class ImportTable
 		std::string getImportOrdinalNumberStr(std::size_t position, std::ios_base &(* format)(std::ios_base &)) const;
 		/// @}
 
+		const std::vector<std::string> & getMissingDependencies() const;
+
 		/// @name Setters
 		/// @{
 		void setTable(const retdec::fileformat::ImportTable *importTable);

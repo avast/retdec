@@ -30,6 +30,7 @@ class JsonPresentation : public FilePresentation
 		void presentPackingInfo(Json::Value &root) const;
 		void presentOverlay(Json::Value &root) const;
 		void presentPatterns(Json::Value &root) const;
+		void presentMissingDepsInfo(Json::Value &root) const;
 		void presentLoaderInfo(Json::Value &root) const;
 		void presentCertificateAttributes(Json::Value &root) const;
 		void presentTlsInfo(Json::Value &root) const;
