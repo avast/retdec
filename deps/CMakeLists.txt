@@ -19,5 +19,8 @@ add_subdirectory(variant)
 
 if(RETDEC_TESTS)
 	add_subdirectory(googletest)
+endif()
+
+if(RETDEC_TESTS OR RETDEC_DEV_TOOLS)
 	add_subdirectory(keystone)
 endif()
