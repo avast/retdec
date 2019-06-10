@@ -51,7 +51,11 @@ std::string replaceChars(const std::string &str, bool (* predicate)(unsigned cha
 	std::stringstream result;
 	const std::size_t maxC = (1 << (sizeof(std::string::value_type) * CHAR_BIT)) - 1;
 	for (const auto &c : str) {
-		if (predicate(c)) {
+		// If we want to escape characters in our string we first need to make sure that backslashes are escaped too
+		if (c == '\\') {
+			result << "\\\\";
+		}
+		else if (predicate(c)) {
 			const auto val = numToStr<std::size_t>(c & maxC, std::hex);
 			result << "\\x" << std::setw(2) << std::setfill('0') << val;
 		} else {
