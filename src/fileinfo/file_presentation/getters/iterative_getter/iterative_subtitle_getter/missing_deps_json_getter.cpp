@@ -58,7 +58,7 @@ bool MissingDepsJsonGetter::getRecord(std::size_t structIndex, std::size_t recIn
 		return false;
 	}
 
-	sprintf(szIndex, "%u", recIndex);
+	sprintf(szIndex, "%u", (unsigned)recIndex);
 
 	record.clear();
 	record.push_back(szIndex);

@@ -313,7 +313,7 @@ void JsonPresentation::presentMissingDepsInfo(Json::Value &root) const
 	const auto numberOfMissingDeps = fileinfo.getNumberOfMissingDeps();
 
 	Value jMissingDeps;
-	jMissingDeps["count"] = numberOfMissingDeps;
+	jMissingDeps["count"] = (unsigned int)numberOfMissingDeps;
 
 	presentIterativeSubtitle(jMissingDeps, MissingDepsJsonGetter(fileinfo));
 	root["missingDeps"] = jMissingDeps;

@@ -56,7 +56,7 @@ std::size_t MissingDepsPlainGetter::getBasicInfo(std::size_t structIndex, std::v
 	}
 
 	desc.push_back("Number of missing dependencies: ");
-	sprintf(szNumDeps, "%u", fileinfo.getNumberOfMissingDeps());
+	sprintf(szNumDeps, "%u", (unsigned)fileinfo.getNumberOfMissingDeps());
 	info.push_back(szNumDeps);
 	return info.size();
 }
@@ -70,7 +70,7 @@ bool MissingDepsPlainGetter::loadRecord(std::size_t structIndex, std::size_t rec
 		return false;
 	}
 
-	sprintf(szIndex, "%u", recIndex);
+	sprintf(szIndex, "%u", (unsigned)recIndex);
 
 	record.clear();
 	record.push_back(szIndex);

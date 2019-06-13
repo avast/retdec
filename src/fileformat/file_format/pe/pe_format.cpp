@@ -3154,7 +3154,7 @@ bool PeFormat::initDllList(const std::string & dllListFile)
 	}
 
 	// Sanity check
-	assert(isMissingDependency("kernel32.dll") == false);
+//	assert(isMissingDependency("kernel32.dll") == false);
 	return true;
 }
 
