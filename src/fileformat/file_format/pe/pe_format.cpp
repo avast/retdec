@@ -1257,7 +1257,7 @@ void PeFormat::loadImports()
 		// Check whether the name of the DLL is available
 		bIsMissingDependency = isMissingDependency(libname);
 		if (bIsMissingDependency)
-			initLoaderErrorInfo(LDR_ERROR_MISSING_DEPENDENCY);
+			initLoaderErrorInfo(PeLib::LDR_ERROR_MISSING_DEPENDENCY);
 
 		importTable->addLibrary(libname, bIsMissingDependency);
 
