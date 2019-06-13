@@ -342,9 +342,12 @@ PeFormat::~PeFormat()
 
 void PeFormat::initLoaderErrorInfo(PeLib::LoaderError ldrError)
 {
-	_ldrErrInfo.loaderErrorCode = static_cast<std::uint32_t>(ldrError);
-	_ldrErrInfo.loaderError = getLoaderErrorString(ldrError, false);
-	_ldrErrInfo.loaderErrorUserFriendly = getLoaderErrorString(ldrError, true);
+	if(_ldrErrInfo.loaderErrorCode == PeLib::LDR_ERROR_NONE)
+	{
+		_ldrErrInfo.loaderErrorCode = static_cast<std::uint32_t>(ldrError);
+		_ldrErrInfo.loaderError = getLoaderErrorString(ldrError, false);
+		_ldrErrInfo.loaderErrorUserFriendly = getLoaderErrorString(ldrError, true);
+	}
 }
 
 void PeFormat::initLoaderErrorInfo()
