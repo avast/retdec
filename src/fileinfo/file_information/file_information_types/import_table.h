@@ -37,7 +37,8 @@ class ImportTable
 		std::string getImportOrdinalNumberStr(std::size_t position, std::ios_base &(* format)(std::ios_base &)) const;
 		/// @}
 
-		const std::vector<std::string> & getMissingDependencies() const;
+		std::string getMissingDepName(std::size_t position) const;
+		std::size_t getNumberOfMissingDeps() const;
 
 		/// @name Setters
 		/// @{

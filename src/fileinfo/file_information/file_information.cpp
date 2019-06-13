@@ -1189,7 +1189,7 @@ std::size_t FileInformation::getNumberOfStoredImports() const
  */
 std::size_t FileInformation::getNumberOfMissingDeps() const
 {
-	return importTable.getMissingDependencies().size();
+	return importTable.getNumberOfMissingDeps();
 }
 
 /**
@@ -1256,7 +1256,7 @@ std::string FileInformation::getImportLibraryName(std::size_t position) const
  */
 std::string FileInformation::getMissingDepName(std::size_t position) const
 {
-	return importTable.getMissingDependencies().at(position);
+	return importTable.getMissingDepName(position);
 }
 
 
