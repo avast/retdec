@@ -844,6 +844,7 @@ void ImportTable::clear()
 /**
  * Add name of imported library
  * @param name Name of imported library
+ * @param bIsMissingDependency If true, then it means that the library name might be a missing dependency (aka not normally present on the OS)
  *
  * Order in which are libraries added must be same as order of libraries import in input file
  */

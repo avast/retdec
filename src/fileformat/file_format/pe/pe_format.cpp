@@ -292,13 +292,14 @@ Symbol::UsageType getSymbolUsageType(byte storageClass, byte complexType)
 /**
  * Constructor
  * @param pathToFile Path to input file
+ * @param dllListFile Path to text file containing list of OS DLLs
  * @param loadFlags Load flags
  */
-PeFormat::PeFormat(const std::string & pathToFile, const std::string & newDllListFile, LoadFlags loadFlags) :
+PeFormat::PeFormat(const std::string & pathToFile, const std::string & dllListFile, LoadFlags loadFlags) :
 		FileFormat(pathToFile, loadFlags)
 {
 	// If we got an override list of dependency DLLs, we load them into the map
-	initDllList(newDllListFile);
+	initDllList(dllListFile);
 
 	initStructures();
 }

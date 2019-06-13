@@ -30,6 +30,7 @@ const unsigned long long PE_16_FLAGS_SIZE = 16;
 /**
  * Constructor
  * @param pathToInputFile Path to input file
+ * @param dllListFile Path to text file containing list of OS DLLs
  * @param finfo Instance of class for storing information about file
  * @param searchPar Parameters for detection of used compiler (or packer)
  * @param loadFlags Load flags

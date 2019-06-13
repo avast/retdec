@@ -19,6 +19,7 @@ namespace fileinfo {
 /**
  * Create file detector
  * @param pathToInputFile Path to input file
+ * @param dllListFile Path to text file containing list of OS DLLs
  * @param fileFormat Format of input file
  * @param finfo Instance of class for storing information about input file
  * @param searchPar Parameters for detection of used compiler or packer

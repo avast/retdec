@@ -91,6 +91,7 @@ std::string getSymbolType(byte type)
 /**
  * Constructor
  * @param pathToFile Path to PE binary file
+ * @param dllListFile Path to text file containing list of OS DLLs
  * @param loadFlags Load flags
  */
 PeWrapper::PeWrapper(const std::string & pathToFile, const std::string & dllListFile, retdec::fileformat::LoadFlags loadFlags) : PeFormat(pathToFile, dllListFile, loadFlags), wrapperParser(nullptr)

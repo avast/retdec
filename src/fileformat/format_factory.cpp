@@ -18,6 +18,7 @@ namespace fileformat {
 /**
  * Create instance of FileFormat class
  * @param filePath Path to input file
+ * @param dllListFile Path to text file containing list of OS DLLs
  * @param isRaw Is the input is a raw binary?
  * @param loadFlags Load flags
  * @return Pointer to instance of FileFormat class or @c nullptr if any error
