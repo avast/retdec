@@ -5,6 +5,7 @@
  */
 
 #include "retdec/utils/string.h"
+#include "retdec/utils/conversion.h"
 #include "retdec/fileformat/utils/conversions.h"
 #include "retdec/fileformat/utils/other.h"
 #include "fileinfo/file_presentation/getters/format.h"
@@ -51,17 +52,13 @@ std::size_t MissingDepsJsonGetter::getBasicInfo(std::size_t structIndex, std::ve
 
 bool MissingDepsJsonGetter::getRecord(std::size_t structIndex, std::size_t recIndex, std::vector<std::string> &record) const
 {
-	char szIndex[0x40];
-
 	if(structIndex >= numberOfStructures || recIndex >= numberOfStoredRecords[structIndex])
 	{
 		return false;
 	}
 
-	sprintf(szIndex, "%u", (unsigned)recIndex);
-
 	record.clear();
-	record.push_back(szIndex);
+	record.push_back(retdec::utils::numToStr(recIndex));
 	record.push_back(retdec::utils::replaceNonprintableChars(fileinfo.getMissingDepName(recIndex)));
 	return true;
 }

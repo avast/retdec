@@ -5,6 +5,7 @@
  */
 
 #include "retdec/utils/string.h"
+#include "retdec/utils/conversion.h"
 #include "retdec/fileformat/utils/conversions.h"
 #include "retdec/fileformat/utils/other.h"
 #include "fileinfo/file_presentation/getters/format.h"
@@ -48,32 +49,25 @@ MissingDepsPlainGetter::~MissingDepsPlainGetter()
 
 std::size_t MissingDepsPlainGetter::getBasicInfo(std::size_t structIndex, std::vector<std::string> &desc, std::vector<std::string> &info) const
 {
-	char szNumDeps[0x40];
-
 	if(structIndex >= numberOfStructures)
 	{
 		return 0;
 	}
 
 	desc.push_back("Number of missing dependencies: ");
-	sprintf(szNumDeps, "%u", (unsigned)fileinfo.getNumberOfMissingDeps());
-	info.push_back(szNumDeps);
+	info.push_back(retdec::utils::numToStr(fileinfo.getNumberOfMissingDeps()));
 	return info.size();
 }
 
 bool MissingDepsPlainGetter::loadRecord(std::size_t structIndex, std::size_t recIndex, std::vector<std::string> &record)
 {
-	char szIndex[0x40];
-
 	if(structIndex >= numberOfStructures || recIndex >= numberOfStoredRecords[structIndex])
 	{
 		return false;
 	}
 
-	sprintf(szIndex, "%u", (unsigned)recIndex);
-
 	record.clear();
-	record.push_back(szIndex);
+	record.push_back(retdec::utils::numToStr(recIndex));
 	record.push_back(retdec::utils::replaceNonprintableChars(fileinfo.getMissingDepName(recIndex)));
 	return true;
 }

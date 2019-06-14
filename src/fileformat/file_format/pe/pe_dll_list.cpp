@@ -1,9 +1,9 @@
+#include "retdec/utils/dynamic_buffer.h"
+#include "retdec/fileformat/file_format/pe/pe_format.h"
 #include "retdec/utils/container.h"
 #include "retdec/utils/conversion.h"
 #include "retdec/utils/scope_exit.h"
 #include "retdec/utils/string.h"
-#include "retdec/utils/dynamic_buffer.h"
-#include "retdec/fileformat/file_format/pe/pe_format.h"
 
 /**
  * @file src/fileformat/file_format/pe/pe_dll_list.cpp

@@ -60,7 +60,7 @@ class ImportTable
 		/// @{
 		void computeHashes();
 		void clear();
-		void addLibrary(std::string name, bool bIsMissingDependency = false);
+		void addLibrary(std::string name, bool missingDependency = false);
 		void addImport(std::unique_ptr<Import>&& import);
 		bool hasLibraries() const;
 		bool hasLibrary(const std::string &name) const;

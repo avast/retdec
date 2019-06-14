@@ -1250,7 +1250,7 @@ void PeFormat::loadSymbols()
 void PeFormat::loadImports()
 {
 	std::string libname;
-	bool bIsMissingDependency;
+	bool missingDependency;
 
 	// Make sure we have import table initialized on the beginning
 	if(importTable == nullptr)
@@ -1259,11 +1259,11 @@ void PeFormat::loadImports()
 	for(std::size_t i = 0; formatParser->getImportedLibraryFileName(i, libname); ++i)
 	{
 		// Check whether the name of the DLL is available
-		bIsMissingDependency = isMissingDependency(libname);
-		if (bIsMissingDependency)
+		missingDependency = isMissingDependency(libname);
+		if (missingDependency)
 			initLoaderErrorInfo(PeLib::LDR_ERROR_MISSING_DEPENDENCY);
 
-		importTable->addLibrary(libname, bIsMissingDependency);
+		importTable->addLibrary(libname, missingDependency);
 
 		std::size_t index = 0;
 		while (auto import = formatParser->getImport(i, index))
