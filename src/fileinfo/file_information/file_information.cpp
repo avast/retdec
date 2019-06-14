@@ -1184,6 +1184,15 @@ std::size_t FileInformation::getNumberOfStoredImports() const
 }
 
 /**
+ * Get number of missing dependencies
+ * @return Number of missing dependencies
+ */
+std::size_t FileInformation::getNumberOfMissingDeps() const
+{
+	return importTable.getNumberOfMissingDeps();
+}
+
+/**
  * Get imphash as CRC32
  * @return Imphash as CRC32
  */
@@ -1239,6 +1248,17 @@ std::string FileInformation::getImportLibraryName(std::size_t position) const
 {
 	return importTable.getImportLibraryName(position);
 }
+
+/**
+ * Get missing dependency name
+ * @param position Index of selected dependency (indexed from 0)
+ * @return Name of the missing dependency
+ */
+std::string FileInformation::getMissingDepName(std::size_t position) const
+{
+	return importTable.getMissingDepName(position);
+}
+
 
 /**
  * Get import type

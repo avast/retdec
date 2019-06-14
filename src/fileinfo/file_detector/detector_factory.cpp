@@ -19,6 +19,7 @@ namespace fileinfo {
 /**
  * Create file detector
  * @param pathToInputFile Path to input file
+ * @param dllListFile Path to text file containing list of OS DLLs
  * @param fileFormat Format of input file
  * @param finfo Instance of class for storing information about input file
  * @param searchPar Parameters for detection of used compiler or packer
@@ -30,16 +31,18 @@ namespace fileinfo {
  * will return @c nullptr.
  */
 FileDetector* createFileDetector(
-		std::string pathToInputFile,
+		const std::string & pathToInputFile,
+		const std::string & dllListFile,
 		retdec::fileformat::Format fileFormat,
 		FileInformation &finfo,
 		retdec::cpdetect::DetectParams &searchPar,
-		retdec::fileformat::LoadFlags loadFlags)
+		retdec::fileformat::LoadFlags loadFlags
+	)
 {
 	switch(fileFormat)
 	{
 		case Format::PE:
-			return new PeDetector(pathToInputFile, finfo, searchPar, loadFlags);
+			return new PeDetector(pathToInputFile, dllListFile, finfo, searchPar, loadFlags);
 		case Format::ELF:
 			return new ElfDetector(pathToInputFile, finfo, searchPar, loadFlags);
 		case Format::COFF:

@@ -108,7 +108,7 @@ class FileFormat : public retdec::utils::ByteValueStorage, private retdec::utils
 		/// @}
 
 	public:
-		FileFormat(std::string pathToFile, LoadFlags loadFlags = LoadFlags::NONE);
+		FileFormat(const std::string & pathToFile, LoadFlags loadFlags = LoadFlags::NONE);
 		FileFormat(std::istream &inputStream, LoadFlags loadFlags = LoadFlags::NONE);
 		FileFormat(const std::uint8_t *data, std::size_t size, LoadFlags loadFlags = LoadFlags::NONE);
 		virtual ~FileFormat();

@@ -47,8 +47,12 @@ class PeFormat : public FileFormat
 		std::string typeRefHashSha256;                             ///< .NET typeref table hash as SHA256
 		VisualBasicInfo visualBasicInfo;                           ///< visual basic header information
 
+		static const std::unordered_set<std::string> defDllList;   ///< Default set of DLLs for checking dependency missing
+		std::unordered_set<std::string> dllList;                   ///< Override set of DLLs for checking dependency missing
+
 		/// @name Initialization methods
 		/// @{
+		void initLoaderErrorInfo(PeLib::LoaderError ldrError);
 		void initLoaderErrorInfo();
 		void initStructures();
 		/// @}
@@ -113,7 +117,7 @@ class PeFormat : public FileFormat
 		PeLib::PeHeaderT<64> *peHeader64; ///< header of 64-bit PE file
 		int peClass;                      ///< class of PE file
 	public:
-		PeFormat(std::string pathToFile, LoadFlags loadFlags = LoadFlags::NONE);
+		PeFormat(const std::string & pathToFile, const std::string & dllListFile, LoadFlags loadFlags = LoadFlags::NONE);
 		PeFormat(std::istream &inputStream, LoadFlags loadFlags = LoadFlags::NONE);
 		PeFormat(const std::uint8_t *data, std::size_t size, LoadFlags loadFlags = LoadFlags::NONE);
 		virtual ~PeFormat() override;
@@ -168,6 +172,11 @@ class PeFormat : public FileFormat
 		std::size_t getSizeOfHeapCommit() const;
 		std::size_t getNumberOfDataDirectories() const;
 		std::size_t getDeclaredNumberOfDataDirectories() const;
+
+		/// @name Dependency checking
+		/// @{
+		bool isMissingDependency(std::string dllname) const;
+		bool initDllList(const std::string & dllListFile);
 
 		int getPeClass() const;
 		bool isDotNet() const;

@@ -12,6 +12,7 @@
 #include "fileinfo/file_presentation/getters/iterative_getter/iterative_subtitle_getter/dynamic_sections_json_getter.h"
 #include "fileinfo/file_presentation/getters/iterative_getter/iterative_subtitle_getter/export_table_json_getter.h"
 #include "fileinfo/file_presentation/getters/iterative_getter/iterative_subtitle_getter/import_table_json_getter.h"
+#include "fileinfo/file_presentation/getters/iterative_getter/iterative_subtitle_getter/missing_deps_json_getter.h"
 #include "fileinfo/file_presentation/getters/iterative_getter/iterative_subtitle_getter/loader_info_json_getter.h"
 #include "fileinfo/file_presentation/getters/iterative_getter/iterative_subtitle_getter/relocation_tables_json_getter.h"
 #include "fileinfo/file_presentation/getters/iterative_getter/iterative_subtitle_getter/resource_json_getter.h"

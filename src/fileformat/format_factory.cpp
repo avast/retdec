@@ -18,21 +18,24 @@ namespace fileformat {
 /**
  * Create instance of FileFormat class
  * @param filePath Path to input file
+ * @param dllListFile Path to text file containing list of OS DLLs
  * @param isRaw Is the input is a raw binary?
  * @param loadFlags Load flags
  * @return Pointer to instance of FileFormat class or @c nullptr if any error
  *
  * If format of input file is not supported, function will return @c nullptr.
  */
+
 std::unique_ptr<FileFormat> createFileFormat(
 		const std::string &filePath,
+		const std::string &dllListFile,
 		bool isRaw,
 		LoadFlags loadFlags)
 {
-	switch(detectFileFormat(filePath, isRaw))
+	switch (detectFileFormat(filePath, isRaw))
 	{
 		case Format::PE:
-			return std::make_unique<PeFormat>(filePath, loadFlags);
+			return std::make_unique<PeFormat>(filePath, dllListFile, loadFlags);
 		case Format::ELF:
 			return std::make_unique<ElfFormat>(filePath, loadFlags);
 		case Format::COFF:
@@ -46,6 +49,16 @@ std::unique_ptr<FileFormat> createFileFormat(
 		default:
 			return nullptr;
 	}
+}
+
+
+std::unique_ptr<FileFormat> createFileFormat(
+		const std::string &filePath,
+		bool isRaw,
+		LoadFlags loadFlags)
+{
+	std::string emptyString;
+	return createFileFormat(filePath, emptyString, isRaw, loadFlags);
 }
 
 std::unique_ptr<FileFormat> createFileFormat(

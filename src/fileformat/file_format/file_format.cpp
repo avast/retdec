@@ -118,7 +118,7 @@ bool isAddressFromRegion(const SecSeg *actualRegion, const SecSeg *newRegion, st
  * @param pathToFile Path to input file
  * @param loadFlags Load flags
  */
-FileFormat::FileFormat(std::string pathToFile, LoadFlags loadFlags) :
+FileFormat::FileFormat(const std::string & pathToFile, LoadFlags loadFlags) :
 		auxBuff(nullptr, nullptr),
 		auxIStream(&auxBuff),
 		loadedBytes(&bytes),

@@ -37,6 +37,9 @@ class ImportTable
 		std::string getImportOrdinalNumberStr(std::size_t position, std::ios_base &(* format)(std::ios_base &)) const;
 		/// @}
 
+		std::string getMissingDepName(std::size_t position) const;
+		std::size_t getNumberOfMissingDeps() const;
+
 		/// @name Setters
 		/// @{
 		void setTable(const retdec::fileformat::ImportTable *importTable);

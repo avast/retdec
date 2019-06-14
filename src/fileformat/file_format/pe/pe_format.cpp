@@ -292,11 +292,15 @@ Symbol::UsageType getSymbolUsageType(byte storageClass, byte complexType)
 /**
  * Constructor
  * @param pathToFile Path to input file
+ * @param dllListFile Path to text file containing list of OS DLLs
  * @param loadFlags Load flags
  */
-PeFormat::PeFormat(std::string pathToFile, LoadFlags loadFlags) :
+PeFormat::PeFormat(const std::string & pathToFile, const std::string & dllListFile, LoadFlags loadFlags) :
 		FileFormat(pathToFile, loadFlags)
 {
+	// If we got an override list of dependency DLLs, we load them into the map
+	initDllList(dllListFile);
+
 	initStructures();
 }
 
@@ -335,13 +339,20 @@ PeFormat::~PeFormat()
 /**
 * Init information from PE loader
 */
+
+void PeFormat::initLoaderErrorInfo(PeLib::LoaderError ldrError)
+{
+	if(_ldrErrInfo.loaderErrorCode == PeLib::LDR_ERROR_NONE)
+	{
+		_ldrErrInfo.loaderErrorCode = static_cast<std::uint32_t>(ldrError);
+		_ldrErrInfo.loaderError = getLoaderErrorString(ldrError, false);
+		_ldrErrInfo.loaderErrorUserFriendly = getLoaderErrorString(ldrError, true);
+	}
+}
+
 void PeFormat::initLoaderErrorInfo()
 {
-	PeLib::LoaderError ldrError = file->loaderError();
-
-	_ldrErrInfo.loaderErrorCode = static_cast<std::uint32_t>(ldrError);
-	_ldrErrInfo.loaderError = getLoaderErrorString(ldrError, false);
-	_ldrErrInfo.loaderErrorUserFriendly = getLoaderErrorString(ldrError, true);
+	initLoaderErrorInfo(file->loaderError());
 }
 
 /**
@@ -1239,14 +1250,20 @@ void PeFormat::loadSymbols()
 void PeFormat::loadImports()
 {
 	std::string libname;
+	bool missingDependency;
+
+	// Make sure we have import table initialized on the beginning
+	if(importTable == nullptr)
+		importTable = new ImportTable();
 
 	for(std::size_t i = 0; formatParser->getImportedLibraryFileName(i, libname); ++i)
 	{
-		if(!importTable)
-		{
-			importTable = new ImportTable();
-		}
-		importTable->addLibrary(libname);
+		// Check whether the name of the DLL is available
+		missingDependency = isMissingDependency(libname);
+		if (missingDependency)
+			initLoaderErrorInfo(PeLib::LDR_ERROR_MISSING_DEPENDENCY);
+
+		importTable->addLibrary(libname, missingDependency);
 
 		std::size_t index = 0;
 		while (auto import = formatParser->getImport(i, index))
@@ -1258,10 +1275,6 @@ void PeFormat::loadImports()
 
 	for(std::size_t i = 0; formatParser->getDelayImportedLibraryFileName(i, libname); ++i)
 	{
-		if(!importTable)
-		{
-			importTable = new ImportTable();
-		}
 		importTable->addLibrary(libname);
 
 		std::size_t index = 0;
@@ -3110,6 +3123,43 @@ std::size_t PeFormat::getNumberOfDataDirectories() const
 std::size_t PeFormat::getDeclaredNumberOfDataDirectories() const
 {
 	return formatParser->getDeclaredNumberOfDataDirectories();
+}
+
+bool PeFormat::isMissingDependency(std::string dllName) const
+{
+	// Always convert the name to lowercase
+	std::transform(dllName.begin(), dllName.end(), dllName.begin(), ::tolower);
+
+	// In Windows 7+, DLLs beginning with name "api-" or "ext-" are resolved by API set;
+	// We consider them always existing
+	if ((dllName.length() > 4) && (!strncmp(dllName.c_str(), "api-", 4) || !strncmp(dllName.c_str(), "ext-", 4)))
+		return false;
+
+	// If we have overriden set, use that one.
+	// Otherwise, use the default DLL set
+	const std::unordered_set<std::string> & depsDllList = (dllList.size() != 0) ? dllList : defDllList;
+	return (depsDllList.count(dllName) == 0);
+}
+
+bool PeFormat::initDllList(const std::string & dllListFile)
+{
+	// Do nothing if the DLL list is empty
+	if (dllListFile.length())
+	{
+		std::ifstream stream(dllListFile, std::ifstream::in);
+		std::string oneLine;
+
+		while(stream)
+		{
+			std::getline(stream, oneLine);
+			std::transform(oneLine.begin(), oneLine.end(), oneLine.begin(), ::tolower);
+			dllList.insert(oneLine);
+		}
+	}
+
+	// Sanity check
+//	assert(isMissingDependency("kernel32.dll") == false);
+	return true;
 }
 
 /**

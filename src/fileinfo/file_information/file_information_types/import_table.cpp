@@ -149,6 +149,33 @@ std::string ImportTable::getImportOrdinalNumberStr(std::size_t position, std::io
 }
 
 /**
+ * Get n-th missing dependency
+ * @param position Index of selected import from table (indexed from 0)
+ * @return library name
+ */
+std::string ImportTable::getMissingDepName(std::size_t position) const
+{
+	std::string depName = "";
+
+	if(table != NULL)
+		depName = table->getMissingDependencies().at(position);
+	return depName;
+}
+
+/**
+ * Get the number of missing dependencies
+ * @return number of missing dependencies
+ */
+std::size_t ImportTable::getNumberOfMissingDeps() const
+{
+	size_t depsCount = 0;
+
+	if (table != NULL)
+		depsCount = table->getMissingDependencies().size();
+	return depsCount;
+}
+
+/**
  * Set import table data
  * @param importTable Instance of class with original information about import table
  */

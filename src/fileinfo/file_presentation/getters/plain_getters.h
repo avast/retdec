@@ -14,6 +14,7 @@
 #include "fileinfo/file_presentation/getters/iterative_getter/iterative_distribution_getter/elf_notes_plain_getter.h"
 #include "fileinfo/file_presentation/getters/iterative_getter/iterative_distribution_getter/export_table_plain_getter.h"
 #include "fileinfo/file_presentation/getters/iterative_getter/iterative_distribution_getter/import_table_plain_getter.h"
+#include "fileinfo/file_presentation/getters/iterative_getter/iterative_distribution_getter/missing_deps_plain_getter.h"
 #include "fileinfo/file_presentation/getters/iterative_getter/iterative_distribution_getter/loader_info_plain_getter.h"
 #include "fileinfo/file_presentation/getters/iterative_getter/iterative_distribution_getter/pattern_matches_plain_getter.h"
 #include "fileinfo/file_presentation/getters/iterative_getter/iterative_distribution_getter/relocation_tables_plain_getter.h"

@@ -64,6 +64,7 @@ set(FILEFORMAT_SOURCES
 	file_format/pe/pe_format_parser/pe_format_parser.cpp
 	file_format/pe/pe_format_parser/pe_format_parser32.cpp
 	file_format/pe/pe_format.cpp
+	file_format/pe/pe_dll_list.cpp
 	file_format/coff/coff_format.cpp
 	file_format/intel_hex/intel_hex_parser/intel_hex_tokenizer.cpp
 	file_format/intel_hex/intel_hex_parser/intel_hex_parser.cpp
