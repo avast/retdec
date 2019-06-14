@@ -18,7 +18,7 @@ install:
 before_build:
   - cmd: mkdir build
   - cmd: cd build
-  - cmd: cmake -DCMAKE_CXX_FLAGS_RELEASE="/Od -DNDEBUG" -G"%CMAKE_GENERATOR%" -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="install" -DRETDEC_TESTS=ON -DRETDEC_DEV_TOOLS=ON -DRETDEC_COMPILE_YARA=OFF ..
+  - cmd: cmake -DCMAKE_CXX_FLAGS_RELEASE="/Od -DNDEBUG" -G"%CMAKE_GENERATOR%" -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="install" -DRETDEC_DEV_TOOLS=ON -DRETDEC_COMPILE_YARA=OFF ..
 
 build_script:
   - cmd: cmake --build . --config Release --target install -- -m
@@ -28,8 +28,6 @@ test_script:
   # the build directory.
   - cmd: mv install ../retdec-install
   - cmd: cd ..
-  # Run unit tests.
-  - cmd: C:\Python36\python.exe retdec-install\bin\retdec-tests-runner.py
   # Run the decompilation script.
   - cmd: C:\Python36\python.exe retdec-install\bin\retdec-decompiler.py --help
   # Run a simple decompilation.
