@@ -6,6 +6,7 @@
 * New Feature: Added presentation of section and overlay entropy in `retdec-fileinfo` ([#502](https://github.com/avast/retdec/issues/502), [#507](https://github.com/avast/retdec/pull/507)).
 * New Feature: Added presentation of version info from PE file in `retdec-fileinfo` ([#408](https://github.com/avast/retdec/issues/408), [#519](https://github.com/avast/retdec/pull/519)).
 * New Feature: Added presentation of thread-local storage directory from PE file in `retdec-fileinfo` ([#417](https://github.com/avast/retdec/issues/417), [#523](https://github.com/avast/retdec/pull/523)).
+* New Feature: Added presentation of missing dependencies of PE files in `retdec-fileinfo` ([#585](https://github.com/avast/retdec/pull/585)).
 * Enhancement: Improved handling of ELF object files and ELF thunks (implemented in PR [#577](https://github.com/avast/retdec/pull/577), solved issues [#184](https://github.com/avast/retdec/issues/184), [#480](https://github.com/avast/retdec/issues/480), and partially solved [#201](https://github.com/avast/retdec/issues/201)).
 * Enhancement: Demangler rewritten ([#95](https://github.com/avast/retdec/issues/95)).
 * Enhancement: Added macOS and Linux (Ubuntu, Debian, Fedora) release builds ([#526](https://github.com/avast/retdec/issues/526)).
