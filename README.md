@@ -200,7 +200,7 @@ Note: Although RetDec now supports a system-wide installation ([#94](https://git
   * `cd retdec`
   * `mkdir build && cd build`
   * `cmake .. -DCMAKE_INSTALL_PREFIX=<path>`
-  * `make -jN` (`N` is the number of CPU cores to use for parallel build)
+  * `make -jN` (`N` is the number of processes to use for parallel build, typically number of cores + 1 gives fastest compilation time)
   * `make install`
 * Windows:
   * Open a command prompt (e.g. `cmd.exe`)
@@ -220,7 +220,7 @@ Note: Although RetDec now supports a system-wide installation ([#94](https://git
     export PATH="/usr/local/opt/flex/bin:/usr/local/opt/bison/bin:$PATH"
     ```
   * `cmake .. -DCMAKE_INSTALL_PREFIX=<path>`
-  * `make -jN` (`N` is the number of CPU cores to use for parallel build)
+  * `make -jN` (`N` is the number of processes to use for parallel build, typically number of cores + 1 gives fastest compilation time)
   * `make install`
 * FreeBSD:
   * `sudo pkg install git cmake`
@@ -236,7 +236,7 @@ Note: Although RetDec now supports a system-wide installation ([#94](https://git
     sudo pkg install cmake python37 bison autotools
     ```
   * `cmake .. -DCMAKE_INSTALL_PREFIX=<path>`
-  * `make -jN` (`N` is the number of CPU cores to use for parallel build)
+  * `make -jN` (`N` is the number of processes to use for parallel build, typically number of cores + 1 gives fastest compilation time)
   * `make install`
 
 You have to pass the following parameters to `cmake`:
