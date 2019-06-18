@@ -236,7 +236,7 @@ Note: Although RetDec now supports a system-wide installation ([#94](https://git
     sudo pkg install cmake python37 bison autotools
     ```
   * `cmake .. -DCMAKE_INSTALL_PREFIX=<path>`
-  * `make -jN` (`N` is the number of  of processes to use for parallel build, typically number of cores + 1 gives fastest compilation time)
+  * `make -jN` (`N` is the number of processes to use for parallel build, typically number of cores + 1 gives fastest compilation time)
   * `make install`
 
 You have to pass the following parameters to `cmake`:
