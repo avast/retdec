@@ -1908,6 +1908,8 @@ bool PeFormat::verifySignature(PKCS7 *p7)
 	auto contentInfoLen = p7->d.sign->contents->d.other->value.sequence->length;
 	std::vector<std::uint8_t> contentInfoData(contentInfoPtr, contentInfoPtr + contentInfoLen);
 	auto contentInfo = Asn1Item::parse(contentInfoData);
+	if (contentInfo == nullptr)
+		return false;
 	if (!contentInfo->isSequence())
 		return false;
 
