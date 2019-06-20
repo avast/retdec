@@ -40,6 +40,10 @@ PeDetector::PeDetector(const std::string & pathToInputFile, const std::string & 
 {
 	fileParser = peParser = std::make_shared<PeWrapper>(fileInfo.getPathToFile(), dllListFile, loadFlags);
 	loaded = peParser->isInValidState();
+
+	// Propagate information about failed load of the DLL list file
+	if(peParser->dllListFailedToLoad())
+		finfo.setDepsListFailedToLoad(dllListFile);
 }
 
 /**

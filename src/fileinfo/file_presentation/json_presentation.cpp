@@ -98,6 +98,12 @@ void JsonPresentation::presentErrors(Json::Value &root) const
 		messages.push_back("Warning: " + loaderMessage);
 	}
 
+	const auto errorMessage = fileinfo.getDepsListFailedToLoad();
+	if (!errorMessage.empty())
+	{
+		messages.push_back("Warning: Failed to load the dependency list (\"" + errorMessage + "\")\n");
+	}
+
 	for(const auto &message : fileinfo.messages)
 	{
 		messages.push_back(message);

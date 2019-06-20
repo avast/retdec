@@ -49,12 +49,13 @@ class PeFormat : public FileFormat
 
 		static const std::unordered_set<std::string> defDllList;   ///< Default set of DLLs for checking dependency missing
 		std::unordered_set<std::string> dllList;                   ///< Override set of DLLs for checking dependency missing
+		bool errorLoadingDllList;                                  ///< If true, then an error happened while loading DLL list
 
 		/// @name Initialization methods
 		/// @{
 		void initLoaderErrorInfo(PeLib::LoaderError ldrError);
 		void initLoaderErrorInfo();
-		void initStructures();
+		void initStructures(const std::string & dllListFile);
 		/// @}
 
 		/// @name Virtual initialization methods
@@ -176,6 +177,7 @@ class PeFormat : public FileFormat
 		/// @name Dependency checking
 		/// @{
 		bool isMissingDependency(std::string dllname) const;
+		bool dllListFailedToLoad() const;
 		bool initDllList(const std::string & dllListFile);
 
 		int getPeClass() const;

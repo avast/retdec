@@ -61,6 +61,7 @@ class FileInformation
 		Strings strings;                               ///< detected strings
 		retdec::utils::Maybe<bool> signatureVerified;  ///< indicates whether the signature is present and if it is verified
 		DotnetInfo dotnetInfo;                         ///< .NET information
+		std::string failedDepsList;                    /// If non-empty, trhis contains the name of the dependency list that failed to load
 	public:
 		retdec::cpdetect::ToolInformation toolInfo; ///< detected tools
 		std::vector<std::string> messages;   ///< error, warning and other messages
@@ -208,19 +209,26 @@ class FileInformation
 		/// @{
 		std::size_t getNumberOfStoredImportLibraries() const;
 		std::size_t getNumberOfStoredImports() const;
-		std::size_t getNumberOfMissingDeps() const;
 		std::string getImphashCrc32() const;
 		std::string getImphashMd5() const;
 		std::string getImphashSha256() const;
 		const retdec::fileformat::Import* getImport(std::size_t position) const;
 		std::string getImportName(std::size_t position) const;
 		std::string getImportLibraryName(std::size_t position) const;
-		std::string getMissingDepName(std::size_t position) const;
 		std::string getImportUsageType(std::size_t position) const;
 		std::string getImportAddressStr(std::size_t position, std::ios_base &(* format)(std::ios_base &)) const;
 		std::string getImportOrdinalNumberStr(std::size_t position, std::ios_base &(* format)(std::ios_base &)) const;
 		bool hasImportTableRecords() const;
 		/// @}
+
+		/// @name Getters of the missing dependency info
+		/// @{
+		std::size_t getNumberOfMissingDeps() const;
+		std::string getMissingDepName(std::size_t position) const;
+		std::string getDepsListFailedToLoad() const;
+		void setDepsListFailedToLoad(const std::string & );
+		/// @}
+
 
 		/// @name Getters of @a exportTable
 		/// @{
