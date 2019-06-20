@@ -86,7 +86,7 @@ const std::unordered_set<std::string> PeFormat::defDllList
 	"aphostclient.dll",
 	"aphostres.dll",
 	"aphostservice.dll",
-	//"api-ms-win-core-console-l1-1-0.dll",					// These DLLs are checked by 
+	//"api-ms-win-core-console-l1-1-0.dll",					// These DLLs are checked by
 	//"api-ms-win-core-datetime-l1-1-0.dll",
 	//"api-ms-win-core-debug-l1-1-0.dll",
 	//"api-ms-win-core-errorhandling-l1-1-0.dll",
