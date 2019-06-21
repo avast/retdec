@@ -298,10 +298,7 @@ Symbol::UsageType getSymbolUsageType(byte storageClass, byte complexType)
 PeFormat::PeFormat(const std::string & pathToFile, const std::string & dllListFile, LoadFlags loadFlags) :
 		FileFormat(pathToFile, loadFlags)
 {
-	// If we got an override list of dependency DLLs, we load them into the map
-	initDllList(dllListFile);
-
-	initStructures();
+	initStructures(dllListFile);
 }
 
 /**
@@ -312,7 +309,7 @@ PeFormat::PeFormat(const std::string & pathToFile, const std::string & dllListFi
 PeFormat::PeFormat(std::istream &inputStream, LoadFlags loadFlags) :
 		FileFormat(inputStream, loadFlags)
 {
-	initStructures();
+	initStructures("");
 }
 
 /**
@@ -324,7 +321,7 @@ PeFormat::PeFormat(std::istream &inputStream, LoadFlags loadFlags) :
 PeFormat::PeFormat(const std::uint8_t *data, std::size_t size, LoadFlags loadFlags) :
 		FileFormat(data, size, loadFlags)
 {
-	initStructures();
+	initStructures("");
 }
 
 /**
@@ -358,12 +355,17 @@ void PeFormat::initLoaderErrorInfo()
 /**
  * Init internal structures
  */
-void PeFormat::initStructures()
+void PeFormat::initStructures(const std::string & dllListFile)
 {
 	formatParser = nullptr;
 	peHeader32 = nullptr;
 	peHeader64 = nullptr;
 	peClass = PEFILE_UNKNOWN;
+	errorLoadingDllList = false;
+	
+	// If we got an override list of dependency DLLs, we load them into the map
+	initDllList(dllListFile);
+
 	file = openPeFile(fileStream);
 	if(file)
 	{
@@ -1260,8 +1262,10 @@ void PeFormat::loadImports()
 	{
 		// Check whether the name of the DLL is available
 		missingDependency = isMissingDependency(libname);
-		if (missingDependency)
-			initLoaderErrorInfo(PeLib::LDR_ERROR_MISSING_DEPENDENCY);
+
+		// Do not report missing dependency as loader error
+		//if (missingDependency)
+		//	initLoaderErrorInfo(PeLib::LDR_ERROR_MISSING_DEPENDENCY);
 
 		importTable->addLibrary(libname, missingDependency);
 
@@ -3143,6 +3147,15 @@ bool PeFormat::isMissingDependency(std::string dllName) const
 	return (depsDllList.count(dllName) == 0);
 }
 
+/**
+ * Returns a flag whether the given DLL list has failed to load.
+ * @return true: Failed to load the DLL list
+ */
+bool PeFormat::dllListFailedToLoad() const
+{
+	return errorLoadingDllList;
+}
+
 bool PeFormat::initDllList(const std::string & dllListFile)
 {
 	// Do nothing if the DLL list is empty
@@ -3150,6 +3163,13 @@ bool PeFormat::initDllList(const std::string & dllListFile)
 	{
 		std::ifstream stream(dllListFile, std::ifstream::in);
 		std::string oneLine;
+
+		// Do nothing if the DLL list file cannot be open
+		if (!stream)
+		{
+			errorLoadingDllList = true;
+			return false;
+		}
 
 		while(stream)
 		{

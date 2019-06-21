@@ -723,9 +723,18 @@ bool PlainPresentation::present()
 
 	if(verbose)
 	{
-		if(!fileinfo.getLoaderStatusMessage().empty())
+		std::string errorMessage;
+
+		errorMessage = fileinfo.getLoaderStatusMessage();
+		if(!errorMessage.empty())
 		{
-			std::cerr << "Warning: " << fileinfo.getLoaderStatusMessage() << "\n";
+			std::cerr << "Warning: " << errorMessage << "\n";
+		}
+
+		errorMessage = fileinfo.getDepsListFailedToLoad();
+		if (!errorMessage.empty())
+		{
+			std::cerr << "Warning: Failed to load the dependency list (\"" << errorMessage << "\")\n";
 		}
 
 		std::string flags, title;

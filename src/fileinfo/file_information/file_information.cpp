@@ -1184,15 +1184,6 @@ std::size_t FileInformation::getNumberOfStoredImports() const
 }
 
 /**
- * Get number of missing dependencies
- * @return Number of missing dependencies
- */
-std::size_t FileInformation::getNumberOfMissingDeps() const
-{
-	return importTable.getNumberOfMissingDeps();
-}
-
-/**
  * Get imphash as CRC32
  * @return Imphash as CRC32
  */
@@ -1250,17 +1241,6 @@ std::string FileInformation::getImportLibraryName(std::size_t position) const
 }
 
 /**
- * Get missing dependency name
- * @param position Index of selected dependency (indexed from 0)
- * @return Name of the missing dependency
- */
-std::string FileInformation::getMissingDepName(std::size_t position) const
-{
-	return importTable.getMissingDepName(position);
-}
-
-
-/**
  * Get import type
  * @param position Index of selected import (indexed from 0)
  * @return Symbol type
@@ -1299,6 +1279,43 @@ std::string FileInformation::getImportOrdinalNumberStr(std::size_t position, std
 bool FileInformation::hasImportTableRecords() const
 {
 	return importTable.hasRecords();
+}
+
+/**
+ * Get number of missing dependencies
+ * @return Number of missing dependencies
+ */
+std::size_t FileInformation::getNumberOfMissingDeps() const
+{
+	return importTable.getNumberOfMissingDeps();
+}
+
+/**
+ * Get missing dependency name
+ * @param position Index of selected dependency (indexed from 0)
+ * @return Name of the missing dependency
+ */
+std::string FileInformation::getMissingDepName(std::size_t position) const
+{
+	return importTable.getMissingDepName(position);
+}
+
+/**
+ * Get the name of the dependency file that failed to load
+ * @return Name of the failed-to-load dependency listfile
+ */
+std::string FileInformation::getDepsListFailedToLoad() const
+{
+	return failedDepsList;
+}
+
+/**
+ * Sets the name of the dependency file that failed to load
+ * @return Nothing
+ */
+void FileInformation::setDepsListFailedToLoad(const std::string & depsList)
+{
+	failedDepsList = depsList;
 }
 
 /**
