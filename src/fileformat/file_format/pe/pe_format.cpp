@@ -1453,8 +1453,13 @@ void PeFormat::loadResourceNodes(std::vector<const PeLib::ResourceChild*> &nodes
 void PeFormat::loadResources()
 {
 	size_t iconGroupIDcounter = 0;
-	unsigned long long rva = 0, size = 0;
+	unsigned long long rva = 0, size = 0, imageBase = 0;
 	if(!getDataDirectoryRelative(PELIB_IMAGE_DIRECTORY_ENTRY_RESOURCE, rva, size))
+	{
+		return;
+	}
+
+	if(!getImageBaseAddress(imageBase))
 	{
 		return;
 	}
@@ -1553,7 +1558,9 @@ void PeFormat::loadResources()
 					resource->setNameId(nameChild->getOffsetToName());
 				}
 
-				resource->setOffset(lanLeaf->getOffsetToData() - rva + formatParser->getResourceDirectoryOffset());
+				unsigned long long dataOffset;
+				getOffsetFromAddress(dataOffset, imageBase + lanLeaf->getOffsetToData());
+				resource->setOffset(dataOffset);
 				resource->setSizeInFile(lanLeaf->getSize());
 				resource->setLanguage(lanChild->getName());
 				resource->invalidateLanguageId();
