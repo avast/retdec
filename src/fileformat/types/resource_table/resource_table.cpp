@@ -693,8 +693,7 @@ bool ResourceTable::parseVarString(const std::vector<std::uint8_t> &bytes, std::
 		return false;
 	}
 
-	std::size_t targetOffset = origOffset + str.length;
-
+	std::size_t targetOffset = retdec::utils::alignUp(origOffset + str.length, sizeof(std::uint32_t));
 	if (offset > targetOffset)
 	{
 		return false;
@@ -705,7 +704,6 @@ bool ResourceTable::parseVarString(const std::vector<std::uint8_t> &bytes, std::
 	std::string name = retdec::utils::unicodeToAscii(&bytes.data()[offset], nToRead, nRead);
 	offset += nRead;
 	offset = retdec::utils::alignUp(offset, sizeof(std::uint32_t));
-
 	if (offset > targetOffset)
 	{
 		return false;
@@ -714,12 +712,9 @@ bool ResourceTable::parseVarString(const std::vector<std::uint8_t> &bytes, std::
 	nToRead = targetOffset - offset;
 	std::string value;
 	if (nToRead > 0)
-	{
 		value = retdec::utils::unicodeToAscii(&bytes.data()[offset], nToRead, nRead);
-		offset += nRead;
-		offset = retdec::utils::alignUp(offset, sizeof(std::uint32_t));
-	}
 
+	offset = targetOffset;
 	strings.emplace_back(std::make_pair(name, value));
 	return true;
 }
