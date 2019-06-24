@@ -355,6 +355,10 @@ ElfImage::SegmentToSectionsTable ElfImage::createSegmentToSectionsTable()
 
 			std::uint64_t start = elfSec->getAddress();
 			std::uint64_t end = elfSec->getAddress() + (elfSec->getLoadedSize() ? elfSec->getLoadedSize() : 1);
+			if (end < start)
+			{
+				continue;
+			}
 
 			auto overlapResult = OverlapResolver::resolve(segRange, retdec::utils::Range<std::uint64_t>(start, end));
 			switch (overlapResult.getOverlap())
