@@ -16,6 +16,7 @@
 * Enhancement: Updated YARA to version 3.9 ([#527](https://github.com/avast/retdec/pull/527)).
 * Fix: Resources which are located in the different section than resource tree are now properly parsed ([#596](https://github.com/avast/retdec/pull/596)).
 * Fix: Version information which contained strings shorter than reported are now properly parsed ([#596](https://github.com/avast/retdec/pull/596)).
+* Fix: Fixed crashes of `retdec-fileinfo` when analyzing ELF samples containing invalid ranges ([#521](https://github.com/avast/retdec/issues/521)).
 
 # v3.3 (2019-03-18)
 
