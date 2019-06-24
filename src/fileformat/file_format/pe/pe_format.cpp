@@ -362,7 +362,7 @@ void PeFormat::initStructures(const std::string & dllListFile)
 	peHeader64 = nullptr;
 	peClass = PEFILE_UNKNOWN;
 	errorLoadingDllList = false;
-	
+
 	// If we got an override list of dependency DLLs, we load them into the map
 	initDllList(dllListFile);
 
