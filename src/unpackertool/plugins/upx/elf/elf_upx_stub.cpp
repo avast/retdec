@@ -177,7 +177,11 @@ template <int bits> void ElfUpxStub<bits>::unpack(const std::string& outputFile)
 		additionalDataPos = retdec::utils::alignUp(_file->getEpSegment()->getSize(), 4);
 
 		// These data goes up to the end of the file
-		additionalDataSize = static_cast<AddressType>(_file->getFileFormat()->getLoadedFileLength() - additionalDataPos);
+		auto end = _file->getFileFormat()->getLoadedFileLength();
+		if (end >= additionalDataPos)
+		{
+			additionalDataSize = static_cast<AddressType>(end - additionalDataPos);
+		}
 	}
 	else
 	{
@@ -187,7 +191,10 @@ template <int bits> void ElfUpxStub<bits>::unpack(const std::string& outputFile)
 		additionalDataPos = readPos + firstBlockOffset;
 
 		// These data goes max. up to the EP
-		additionalDataSize = ep - additionalDataPos;
+		if (ep >= additionalDataPos)
+		{
+			additionalDataSize = ep - additionalDataPos;
+		}
 	}
 
 	upx_plugin->log("Additional data are at file offset 0x", std::hex, additionalDataPos,
