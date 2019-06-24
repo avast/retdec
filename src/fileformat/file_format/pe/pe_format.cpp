@@ -1263,10 +1263,6 @@ void PeFormat::loadImports()
 		// Check whether the name of the DLL is available
 		missingDependency = isMissingDependency(libname);
 
-		// Do not report missing dependency as loader error
-		//if (missingDependency)
-		//	initLoaderErrorInfo(PeLib::LDR_ERROR_MISSING_DEPENDENCY);
-
 		importTable->addLibrary(libname, missingDependency);
 
 		std::size_t index = 0;
