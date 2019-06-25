@@ -26,7 +26,7 @@ AnomaliesJsonGetter::AnomaliesJsonGetter(FileInformation &fileInfo) : IterativeS
 	title = "anomalyTable";
 	subtitle = "anomalies";
 	commonHeaderElements.push_back("index");
-	commonHeaderElements.push_back("abbreviation");
+	commonHeaderElements.push_back("identifier");
 	commonHeaderElements.push_back("description");
 }
 
@@ -63,7 +63,7 @@ bool AnomaliesJsonGetter::getRecord(std::size_t structIndex, std::size_t recInde
 
 	record.clear();
 	record.push_back(numToStr(recIndex));
-	record.push_back(fileinfo.getAnomalyAbbreviation(recIndex));
+	record.push_back(fileinfo.getAnomalyIdentifier(recIndex));
 	record.push_back(fileinfo.getAnomalyDescription(recIndex));
 
 	return true;

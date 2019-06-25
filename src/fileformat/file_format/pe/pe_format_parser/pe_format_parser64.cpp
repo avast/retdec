@@ -87,7 +87,7 @@ unsigned long long PeFormatParser64::getOptionalHeaderSize() const
 	return peSizeOfOptionalHeader(peHeader);
 }
 
-bool PeFormatParser64::isIsSizeOfHeaderMultipleOfFileAlignment() const
+bool PeFormatParser64::isSizeOfHeaderMultipleOfFileAlignment() const
 {
 	return peIsSizeOfHeaderMultipleOfFileAlignment(peHeader);
 }

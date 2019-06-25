@@ -3697,11 +3697,11 @@ std::size_t FileInformation::getNumberOfAnomalies() const
 }
 
 /**
- * Get abbreviation of anomaly
+ * Get identifier of anomaly
  * @param position Index of selected anomaly (indexed from 0)
- * @return Abbreviation of selected anomaly
+ * @return Identifier of selected anomaly
  */
-std::string FileInformation::getAnomalyAbbreviation(std::size_t position) const
+std::string FileInformation::getAnomalyIdentifier(std::size_t position) const
 {
 	return (position < getNumberOfAnomalies()) ? anomalies[position].first : "";
 }

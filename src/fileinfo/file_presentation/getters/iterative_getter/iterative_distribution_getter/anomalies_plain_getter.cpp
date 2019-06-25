@@ -17,9 +17,9 @@ namespace fileinfo {
 namespace
 {
 
-const std::size_t distributionArray[] = {6, 20, 60};
-const std::string headerArray[] = {"i", "abbreviation", "description"};
-const std::string headerDesc[] = {"index", "abbreviation of anomaly", "description of anomaly"};
+const std::size_t distributionArray[] = {6, 23, 60};
+const std::string headerArray[] = {"i", "identifier", "description"};
+const std::string headerDesc[] = {"index", "identifier of anomaly", "description of anomaly"};
 
 } // anonymous namespace
 
@@ -72,7 +72,7 @@ bool AnomaliesPlainGetter::loadRecord(std::size_t structIndex, std::size_t recIn
 
 	record.clear();
 	record.push_back(numToStr(recIndex));
-	record.push_back(fileinfo.getAnomalyAbbreviation(recIndex));
+	record.push_back(fileinfo.getAnomalyIdentifier(recIndex));
 	record.push_back(fileinfo.getAnomalyDescription(recIndex));
 
 	return true;

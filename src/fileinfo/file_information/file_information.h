@@ -536,7 +536,7 @@ class FileInformation
 		/// @name Getters of @a anomalies
 		/// @{
 		std::size_t getNumberOfAnomalies() const;
-		std::string getAnomalyAbbreviation(std::size_t position) const;
+		std::string getAnomalyIdentifier(std::size_t position) const;
 		std::string getAnomalyDescription(std::size_t position) const;
 		/// @}
 

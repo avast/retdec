@@ -3509,25 +3509,25 @@ void PeFormat::scanForSectionAnomalies()
 		const PeCoffSection *lastSec = (nSecs) ? getPeSection(nSecs - 1) : nullptr;
 		if (epSec == lastSec)
 		{
-			anomalies.emplace_back("epInLastSec", "Entry point in last section");
+			anomalies.emplace_back("EpInLastSection", "Entry point in the last section");
 		}
 
 		// scan EP in writable section
 		if (epSec->getPeCoffFlags() & PELIB_IMAGE_SCN_MEM_WRITE)
 		{
-			anomalies.emplace_back("epInWritableSec", "Entry point in writable section");
+			anomalies.emplace_back("EpInWritableSection", "Entry point in writable section");
 		}
 
 		// scan EP in nonexecutable section
 		if (!(epSec->getPeCoffFlags() & PELIB_IMAGE_SCN_MEM_EXECUTE))
 		{
-			anomalies.emplace_back("epInNonExecSec", "Entry point in nonexecutable section");
+			anomalies.emplace_back("EpInNonExecSection", "Entry point in nonexecutable section");
 		}
 	}
 	else
 	{
 		// scan EP outside mapped sections
-		anomalies.emplace_back("epOutsideSecs", "Entry point is outside of mapped sections");
+		anomalies.emplace_back("EpOutsideSections", "Entry point is outside of mapped sections");
 	}
 
 	std::vector<std::string> duplSections;
@@ -3544,21 +3544,20 @@ void PeFormat::scanForSectionAnomalies()
 		const auto flags = sec->getPeCoffFlags();
 		if (!name.empty())
 		{
-			// scan for unusual section names
-			if (std::find(usualSectionNames.begin(), usualSectionNames.end(), name) == usualSectionNames.end())
-			{
-				if (std::find(duplSections.begin(), duplSections.end(), name) == duplSections.end())
-				{
-					anomalies.emplace_back("unusualSecName", "Unusual section name: " + replaceNonprintableChars(name));
-				}
-			}
-
 			// scan for packer section names
 			if (std::find(usualPackerSections.begin(), usualPackerSections.end(), name) != usualPackerSections.end())
 			{
 				if (std::find(duplSections.begin(), duplSections.end(), name) == duplSections.end())
 				{
-					anomalies.emplace_back("packedSecName", "Packer section name: " + replaceNonprintableChars(name));
+					anomalies.emplace_back("PackerSectionName", "Packer section name: " + replaceNonprintableChars(name));
+				}
+			}
+			// scan for unusual section names
+			else if (std::find(usualSectionNames.begin(), usualSectionNames.end(), name) == usualSectionNames.end())
+			{
+				if (std::find(duplSections.begin(), duplSections.end(), name) == duplSections.end())
+				{
+					anomalies.emplace_back("UnusualSectionName", "Unusual section name: " + replaceNonprintableChars(name));
 				}
 			}
 
@@ -3566,27 +3565,26 @@ void PeFormat::scanForSectionAnomalies()
 			auto characIt = usualSectionCharacteristics.find(name);
 			if (characIt != usualSectionCharacteristics.end() && characIt->second != flags)
 			{
-				anomalies.emplace_back("unusualSecChar", "Section " + replaceNonprintableChars(name) + " has unusual characteristics");
+				anomalies.emplace_back("UnusualSectionFlags", "Section " + replaceNonprintableChars(name) + " has unusual characteristics");
 			}
 		}
 
 		// scan size over 100MB
 		if (sec->getSizeInFile() >= 100000000UL)
 		{
-			anomalies.emplace_back("largeSec", "Section " + replaceNonprintableChars(msgName) + " has size over 100MB");
+			anomalies.emplace_back("LargeSection", "Section " + replaceNonprintableChars(msgName) + " has size over 100MB");
 		}
 
 		// scan section marked uninitialized but contains data
-		if ((flags & PELIB_IMAGE_SCN_CNT_UNINITIALIZED_DATA) &&
-			(sec->getOffset() != 0 || sec->getSizeInFile() != 0))
+		if ((flags & PELIB_IMAGE_SCN_CNT_UNINITIALIZED_DATA) && (sec->getOffset() != 0 || sec->getSizeInFile() != 0))
 		{
-			anomalies.emplace_back("uninitSecHasData", "Section " + replaceNonprintableChars(msgName) + " is marked uninitialized but contains data");
+			anomalies.emplace_back("UninitSectionHasData", "Section " + replaceNonprintableChars(msgName) + " is marked uninitialized but contains data");
 		}
 
-		// scan sizeOfRawData of section is 0
-		if (sec->getSizeInFile() == 0)
+		// scan section not marked as uninitialized but sizeOfRawData of section is 0
+		if (!(flags & PELIB_IMAGE_SCN_CNT_UNINITIALIZED_DATA) && sec->getSizeInFile() == 0)
 		{
-			anomalies.emplace_back("noRawDataSec", "Section " + replaceNonprintableChars(msgName) + " has zero SizeOfRawData");
+			anomalies.emplace_back("NoRawDataSection", "Section " + replaceNonprintableChars(msgName) + " has zero SizeOfRawData");
 		}
 
 		for (std::size_t j = i + 1; j < nSecs; j++)
@@ -3603,7 +3601,7 @@ void PeFormat::scanForSectionAnomalies()
 			{
 				if (std::find(duplSections.begin(), duplSections.end(), name) == duplSections.end())
 				{
-					anomalies.emplace_back("duplSecNames", "Multiple sections with name " + replaceNonprintableChars(name));
+					anomalies.emplace_back("DuplicitSectionNames", "Multiple sections with name " + replaceNonprintableChars(name));
 					duplSections.push_back(name);
 				}
 			}
@@ -3617,7 +3615,7 @@ void PeFormat::scanForSectionAnomalies()
 				(cmpSecStart <= secStart && secStart < cmpSecEnd))
 			{
 				const std::string cmpMsgName = (cmpName.empty()) ? numToStr(cmpSec->getIndex()) : cmpName;
-				anomalies.emplace_back("overlappingSecs", "Sections " + replaceNonprintableChars(msgName) + " and " + replaceNonprintableChars(cmpMsgName) + " overlap");
+				anomalies.emplace_back("OverlappingSections", "Sections " + replaceNonprintableChars(msgName) + " and " + replaceNonprintableChars(cmpMsgName) + " overlap");
 			}
 		}
 	}
@@ -3647,7 +3645,7 @@ void PeFormat::scanForResourceAnomalies()
 		// scan for resource size over 100MB
 		if (res->getSizeInFile() >= 100000000UL)
 		{
-			anomalies.emplace_back("largeRes", "Resource " + replaceNonprintableChars(msgName) + " has size over 100MB");
+			anomalies.emplace_back("LargeResource", "Resource " + replaceNonprintableChars(msgName) + " has size over 100MB");
 		}
 
 		// scan for resource stretched over multiple sections
@@ -3655,7 +3653,7 @@ void PeFormat::scanForResourceAnomalies()
 		if (getAddressFromOffset(resAddr, res->getOffset()) &&
 			isObjectStretchedOverSections(resAddr, res->getSizeInFile()))
 		{
-			anomalies.emplace_back("stretchedRes", "Resource " + replaceNonprintableChars(msgName) + " is stretched over multiple sections");
+			anomalies.emplace_back("StretchedResource", "Resource " + replaceNonprintableChars(msgName) + " is stretched over multiple sections");
 		}
 	}
 }
@@ -3699,7 +3697,7 @@ void PeFormat::scanForImportAnomalies()
 				}
 			}
 
-			anomalies.emplace_back("stretchedImp", "Import " + replaceNonprintableChars(msgName) + " is stretched over multiple sections");
+			anomalies.emplace_back("StretchedImportTable", "Import " + replaceNonprintableChars(msgName) + " is stretched over multiple sections");
 		}
 	}
 }
@@ -3743,7 +3741,7 @@ void PeFormat::scanForExportAnomalies()
 				}
 			}
 
-			anomalies.emplace_back("stretchedExp", "Export " + replaceNonprintableChars(msgName) + " is stretched over multiple sections");
+			anomalies.emplace_back("StretchedExportTable", "Export " + replaceNonprintableChars(msgName) + " is stretched over multiple sections");
 		}
 	}
 }
@@ -3754,9 +3752,9 @@ void PeFormat::scanForExportAnomalies()
 void PeFormat::scanForOptHeaderAnomalies()
 {
 	// scan for missalignment
-	if (!formatParser->isIsSizeOfHeaderMultipleOfFileAlignment())
+	if (!formatParser->isSizeOfHeaderMultipleOfFileAlignment())
 	{
-		anomalies.emplace_back("sizeOfHeadersNotAligned", "SizeOfHeaders is not aligned to multiple of FileAlignment");
+		anomalies.emplace_back("SizeOfHeaderNotAligned", "SizeOfHeader is not aligned to multiple of FileAlignment");
 	}
 }
 
@@ -3772,7 +3770,7 @@ void PeFormat::scanForObsoleteCharacteristics()
 
 	if (flags & obsoleteFlags)
 	{
-		anomalies.emplace_back("obsoleteCoffFlags", "Coff file flags are obsolete");
+		anomalies.emplace_back("ObsoleteCoffFlags", "Coff file flags are obsolete");
 	}
 }
 
