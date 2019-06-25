@@ -138,8 +138,6 @@ TEST_F(BorlandContextTests, NestedNameNodesTests)
 	EXPECT_NE(nn1, nn3);
 }
 
-
-
 TEST_F(BorlandContextTests, ArrayTests)
 {
 	auto i1 = IntegralTypeNode::create(context, "int", false, {false, false});

@@ -56,5 +56,4 @@ protected:
 }    // demangler
 }    // retdec
 
-
 #endif //RETDEC_NODE_ARRAY_H

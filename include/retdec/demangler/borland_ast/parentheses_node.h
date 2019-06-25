@@ -35,5 +35,4 @@ private:
 }	// namespace demangler
 }	// namespace retdec
 
-
 #endif //RETDEC_PARENTHESES_NODE_H

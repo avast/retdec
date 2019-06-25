@@ -33,5 +33,4 @@ protected:
 }    // demangler
 }    // retdec
 
-
 #endif //RETDEC_TYPE_NODE_H

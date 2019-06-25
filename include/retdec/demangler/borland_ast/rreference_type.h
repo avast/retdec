@@ -4,7 +4,6 @@
 * @copyright (c) 2019 Avast Software, licensed under the MIT license
 */
 
-
 #ifndef RETDEC_RREFERENCE_TYPE_H
 #define RETDEC_RREFERENCE_TYPE_H
 

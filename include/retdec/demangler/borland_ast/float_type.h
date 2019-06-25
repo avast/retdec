@@ -32,5 +32,4 @@ private:
 }    // demangler
 }    // retdec
 
-
 #endif //RETDEC_FLOAT_TYPE_H

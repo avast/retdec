@@ -229,7 +229,6 @@ class FileInformation
 		void setDepsListFailedToLoad(const std::string & );
 		/// @}
 
-
 		/// @name Getters of @a exportTable
 		/// @{
 		std::size_t getNumberOfStoredExports() const;

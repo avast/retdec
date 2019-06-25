@@ -51,7 +51,6 @@ std::unique_ptr<FileFormat> createFileFormat(
 	}
 }
 
-
 std::unique_ptr<FileFormat> createFileFormat(
 		const std::string &filePath,
 		bool isRaw,

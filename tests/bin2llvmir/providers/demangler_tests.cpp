@@ -10,7 +10,6 @@
 #include "retdec/ctypes/context.h"
 #include "retdec/ctypes/module.h"
 
-
 using namespace ::testing;
 using namespace llvm;
 

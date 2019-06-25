@@ -4,7 +4,6 @@
 * @copyright (c) 2019 Avast Software, licensed under the MIT license
 */
 
-
 #include "retdec/utils/container.h"
 #include "retdec/ctypesparser/ast_ctypes_parser.h"
 

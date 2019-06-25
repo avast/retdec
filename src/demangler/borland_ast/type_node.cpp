@@ -25,7 +25,6 @@ Qualifiers TypeNode::quals()
 	return _quals;
 }
 
-
 }    // borland
 }    // demangler
 }    // retdec

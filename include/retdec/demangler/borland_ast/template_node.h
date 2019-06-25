@@ -4,7 +4,6 @@
 * @copyright (c) 2019 Avast Software, licensed under the MIT license
 */
 
-
 #ifndef RETDEC_TEMPLATE_NODE_H
 #define RETDEC_TEMPLATE_NODE_H
 

@@ -43,5 +43,4 @@ protected:
 }    // demangler
 }    // retdec
 
-
 #endif //RETDEC_BUILT_IN_TYPE_H

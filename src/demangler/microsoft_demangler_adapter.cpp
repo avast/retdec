@@ -4,7 +4,6 @@
  * @copyright (c) 2018 Avast Software, licensed under the MIT license
  */
 
-
 #include <llvm/Demangle/Demangle.h>
 #include <llvm/Demangle/MicrosoftDemangle.h>
 
