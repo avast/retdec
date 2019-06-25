@@ -392,6 +392,10 @@ void ValueProtect::protectValue(
 		llvm::Instruction* before)
 {
 	Function* fnc = getOrCreateFunction(t);
+	if (fnc == nullptr)
+	{
+		return;
+	}
 	auto* c = CallInst::Create(fnc);
 	c->insertBefore(before);
 	auto* s = new StoreInst(c, val);
@@ -553,6 +557,11 @@ llvm::Function* ValueProtect::getOrCreateFunction(llvm::Type* t)
 
 llvm::Function* ValueProtect::createFunction(llvm::Type* t)
 {
+	if (!FunctionType::isValidReturnType(t))
+	{
+		return nullptr;
+	}
+
 	FunctionType* ft = FunctionType::get(t, false);
 	auto* fnc = Function::Create(
 			ft,

@@ -537,7 +537,7 @@ IrModifier::StackPair IrModifier::getStackVariable(
 		llvm::Type* type,
 		const std::string& name)
 {
-	if (!PointerType::isValidElementType(type))
+	if (!PointerType::isValidElementType(type) || !type->isSized())
 	{
 		type = Abi::getDefaultType(fnc->getParent());
 	}
