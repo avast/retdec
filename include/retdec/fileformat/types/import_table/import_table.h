@@ -68,6 +68,7 @@ class ImportTable
 		bool hasImports() const;
 		bool hasImport(const std::string &name) const;
 		bool hasImport(unsigned long long address) const;
+		bool invalidImpHash() const;
 		bool empty() const;
 		void dump(std::string &dumpTable) const;
 		void dumpLibrary(std::size_t libraryIndex, std::string &libraryDump) const;

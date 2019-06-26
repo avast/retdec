@@ -824,6 +824,11 @@ void ImportTable::computeHashes()
 		}
 	}
 
+	if (impHashBytes.size() == 0)
+	{
+		return;
+	}
+
 	impHashCrc32 = retdec::crypto::getCrc32(impHashBytes.data(), impHashBytes.size());
 	impHashMd5 = retdec::crypto::getMd5(impHashBytes.data(), impHashBytes.size());
 	impHashSha256 = retdec::crypto::getSha256(impHashBytes.data(), impHashBytes.size());
@@ -928,6 +933,16 @@ bool ImportTable::hasImport(const std::string &name) const
 bool ImportTable::hasImport(unsigned long long address) const
 {
 	return getImportOnAddress(address);
+}
+
+/**
+ * @return @c True if import hashes are invalid, @c False otherwise.
+ */
+bool ImportTable::invalidImpHash() const
+{
+	return getImphashCrc32().empty()
+			|| getImphashMd5().empty()
+			|| getImphashSha256().empty();
 }
 
 /**
