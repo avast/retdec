@@ -219,8 +219,12 @@ if(CMAKE_THREAD_LIBS_INIT)
 endif()
 
 if(UNIX)
-	target_link_libraries(llvm INTERFACE debug     ${ZLIB_LIBRARIES} dl)
-	target_link_libraries(llvm INTERFACE optimized ${ZLIB_LIBRARIES} dl)
+	set(EXECINFO "")
+	if (${CMAKE_SYSTEM_NAME} MATCHES "BSD")
+		set(EXECINFO "execinfo")
+	endif()
+	target_link_libraries(llvm INTERFACE debug     ${ZLIB_LIBRARIES} ${CMAKE_DL_LIBS} ${EXECINFO})
+	target_link_libraries(llvm INTERFACE optimized ${ZLIB_LIBRARIES} ${CMAKE_DL_LIBS} ${EXECINFO})
 endif()
 
 # Set include directories.
