@@ -3492,7 +3492,6 @@ void PeFormat::scanForAnomalies()
 	scanForImportAnomalies();
 	scanForExportAnomalies();
 	scanForOptHeaderAnomalies();
-	scanForObsoleteCharacteristics();
 }
 
 /**
@@ -3516,12 +3515,6 @@ void PeFormat::scanForSectionAnomalies()
 		if (epSec->getPeCoffFlags() & PELIB_IMAGE_SCN_MEM_WRITE)
 		{
 			anomalies.emplace_back("EpInWritableSection", "Entry point in writable section");
-		}
-
-		// scan EP in nonexecutable section
-		if (!(epSec->getPeCoffFlags() & PELIB_IMAGE_SCN_MEM_EXECUTE))
-		{
-			anomalies.emplace_back("EpInNonExecSection", "Entry point in nonexecutable section");
 		}
 	}
 	else
@@ -3579,12 +3572,6 @@ void PeFormat::scanForSectionAnomalies()
 		if ((flags & PELIB_IMAGE_SCN_CNT_UNINITIALIZED_DATA) && (sec->getOffset() != 0 || sec->getSizeInFile() != 0))
 		{
 			anomalies.emplace_back("UninitSectionHasData", "Section " + replaceNonprintableChars(msgName) + " is marked uninitialized but contains data");
-		}
-
-		// scan section not marked as uninitialized but sizeOfRawData of section is 0
-		if (!(flags & PELIB_IMAGE_SCN_CNT_UNINITIALIZED_DATA) && sec->getSizeInFile() == 0)
-		{
-			anomalies.emplace_back("NoRawDataSection", "Section " + replaceNonprintableChars(msgName) + " has zero SizeOfRawData");
 		}
 
 		for (std::size_t j = i + 1; j < nSecs; j++)
@@ -3755,22 +3742,6 @@ void PeFormat::scanForOptHeaderAnomalies()
 	if (!formatParser->isSizeOfHeaderMultipleOfFileAlignment())
 	{
 		anomalies.emplace_back("SizeOfHeaderNotAligned", "SizeOfHeader is not aligned to multiple of FileAlignment");
-	}
-}
-
-/**
- * Scan for obsolete file characteristics
- */
-void PeFormat::scanForObsoleteCharacteristics()
-{
-	std::size_t flags = getFileFlags();	
-	std::size_t obsoleteFlags = PELIB_IMAGE_FILE_LINE_NUMS_STRIPPED |
-		PELIB_IMAGE_FILE_LOCAL_SYMS_STRIPPED | PELIB_IMAGE_FILE_AGGRESSIVE_WS_TRIM |
-		PELIB_IMAGE_FILE_BYTES_REVERSED_LO | PELIB_IMAGE_FILE_BYTES_REVERSED_HI;
-
-	if (flags & obsoleteFlags)
-	{
-		anomalies.emplace_back("ObsoleteCoffFlags", "Coff file flags are obsolete");
 	}
 }
 
