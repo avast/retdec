@@ -3500,27 +3500,31 @@ void PeFormat::scanForAnomalies()
 void PeFormat::scanForSectionAnomalies()
 {
 	std::size_t nSecs = getDeclaredNumberOfSections();
-	
-	const PeCoffSection *epSec = dynamic_cast<const PeCoffSection*>(getEpSection());
-	if (epSec)
-	{
-		// scan EP in last section
-		const PeCoffSection *lastSec = (nSecs) ? getPeSection(nSecs - 1) : nullptr;
-		if (epSec == lastSec)
-		{
-			anomalies.emplace_back("EpInLastSection", "Entry point in the last section");
-		}
 
-		// scan EP in writable section
-		if (epSec->getPeCoffFlags() & PELIB_IMAGE_SCN_MEM_WRITE)
-		{
-			anomalies.emplace_back("EpInWritableSection", "Entry point in writable section");
-		}
-	}
-	else
+	unsigned long long epAddr;
+	if (getEpAddress(epAddr))
 	{
-		// scan EP outside mapped sections
-		anomalies.emplace_back("EpOutsideSections", "Entry point is outside of mapped sections");
+		const PeCoffSection *epSec = dynamic_cast<const PeCoffSection*>(getEpSection());
+		if (epSec)
+		{
+			// scan EP in last section
+			const PeCoffSection *lastSec = (nSecs) ? getPeSection(nSecs - 1) : nullptr;
+			if (epSec == lastSec)
+			{
+				anomalies.emplace_back("EpInLastSection", "Entry point in the last section");
+			}
+
+			// scan EP in writable section
+			if (epSec->getPeCoffFlags() & PELIB_IMAGE_SCN_MEM_WRITE)
+			{
+				anomalies.emplace_back("EpInWritableSection", "Entry point in writable section");
+			}
+		}
+		else
+		{
+			// scan EP outside mapped sections
+			anomalies.emplace_back("EpOutsideSections", "Entry point is outside of mapped sections");
+		}
 	}
 
 	std::vector<std::string> duplSections;
