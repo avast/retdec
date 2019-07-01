@@ -192,6 +192,16 @@ template<int bits> unsigned long long peSectionAlignment(const PeLib::PeHeaderT<
 }
 
 /**
+ * Get size of image headers
+ * @param peHeader Parser of PE header
+ * @return Size of headers
+ */
+template<int bits> unsigned long long peSizeOfHeaders(const PeLib::PeHeaderT<bits> &peHeader)
+{
+	return peHeader.getSizeOfHeaders();
+}
+
+/**
  * Get size of image
  * @param peHeader Parser of PE header
  * @return Size of image

@@ -153,6 +153,7 @@ class PeFormat : public FileFormat
 
 		/// @name Detection methods
 		/// @{
+		const PeLib::MzHeader & getMzHeader() const;
 		std::size_t getMzHeaderSize() const;
 		std::size_t getOptionalHeaderSize() const;
 		std::size_t getPeHeaderOffset() const;
@@ -166,6 +167,7 @@ class PeFormat : public FileFormat
 		std::size_t getChecksum() const;
 		std::size_t getFileAlignment() const;
 		std::size_t getSectionAlignment() const;
+		std::size_t getSizeOfHeaders() const;
 		std::size_t getSizeOfImage() const;
 		std::size_t getSizeOfStackReserve() const;
 		std::size_t getSizeOfStackCommit() const;

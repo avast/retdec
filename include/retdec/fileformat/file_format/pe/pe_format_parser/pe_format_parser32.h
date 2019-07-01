@@ -36,6 +36,7 @@ class PeFormatParser32 : public PeFormatParser
 		virtual unsigned long long getOptionalHeaderSize() const override;
 		virtual unsigned long long getFileAlignment() const override;
 		virtual unsigned long long getSectionAlignment() const override;
+		virtual unsigned long long getSizeOfHeaders()  const override;
 		virtual unsigned long long getSizeOfImage() const override;
 		virtual unsigned long long getChecksum() const override;
 		virtual unsigned long long getSizeOfStackReserve() const override;
