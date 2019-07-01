@@ -102,6 +102,11 @@ unsigned long long PeFormatParser32::getSectionAlignment() const
 	return peSectionAlignment(peHeader);
 }
 
+unsigned long long PeFormatParser32::getSizeOfHeaders() const
+{
+	return peSizeOfHeaders(peHeader);
+}
+
 unsigned long long PeFormatParser32::getSizeOfImage() const
 {
 	return peSizeOfImage(peHeader);

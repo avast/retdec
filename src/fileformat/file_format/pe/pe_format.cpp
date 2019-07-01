@@ -3011,6 +3011,15 @@ std::size_t PeFormat::getSegmentTableEntrySize() const
 }
 
 /**
+ * Get reference to MZ header
+ * @return Reference to MZ header
+ */
+const PeLib::MzHeader & PeFormat::getMzHeader() const
+{
+	return mzHeader;
+}
+
+/**
  * Get size of MZ header
  * @return Size of MZ header
  */
@@ -3119,6 +3128,15 @@ std::size_t PeFormat::getFileAlignment() const
 std::size_t PeFormat::getSectionAlignment() const
 {
 	return formatParser->getSectionAlignment();
+}
+
+/**
+ * Get size of headers
+ * @return Size of headers
+ */
+std::size_t PeFormat::getSizeOfHeaders() const
+{
+	return formatParser->getSizeOfHeaders();
 }
 
 /**

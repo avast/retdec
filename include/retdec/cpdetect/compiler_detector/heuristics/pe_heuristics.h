@@ -42,6 +42,10 @@ class PeHeuristics : public Heuristics
 		/// @{
 		void getSlashedSignatures();
 		void getMorphineHeuristics();
+		void getStarForceHeuristics();
+		void getSafeDiscHeuristics();
+		bool checkSecuROMSignature(const char * fileData, const char * fileDataEnd, uint32_t FileOffset);
+		void getSecuROMHeuristics();
 		void getPelockHeuristics();
 		void getEzirizReactorHeuristics();
 		void getUpxHeuristics();
