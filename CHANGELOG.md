@@ -8,6 +8,7 @@
 * New Feature: Added presentation of thread-local storage directory from PE file in `retdec-fileinfo` ([#417](https://github.com/avast/retdec/issues/417), [#523](https://github.com/avast/retdec/pull/523)).
 * New Feature: Added presentation of missing dependencies of PE files in `retdec-fileinfo` ([#585](https://github.com/avast/retdec/pull/585)).
 * New Feature: Added presentation of anomalies of PE files in `retdec-fileinfo` ([#415](https://github.com/avast/retdec/issues/415), [#570](https://github.com/avast/retdec/pull/570)).
+* New Feature: Added heuristic detection of StarForce, SecuROM and SafeDisc ([#600](https://github.com/avast/retdec/pull/600)).
 * Enhancement: Improved handling of ELF object files and ELF thunks (implemented in PR [#577](https://github.com/avast/retdec/pull/577), solved issues [#184](https://github.com/avast/retdec/issues/184), [#480](https://github.com/avast/retdec/issues/480), and partially solved [#201](https://github.com/avast/retdec/issues/201)).
 * Enhancement: Demangler rewritten ([#95](https://github.com/avast/retdec/issues/95)).
 * Enhancement: Added macOS and Linux (Ubuntu, Debian, Fedora) release builds ([#526](https://github.com/avast/retdec/issues/526)).
