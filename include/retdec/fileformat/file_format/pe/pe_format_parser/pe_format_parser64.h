@@ -34,6 +34,7 @@ class PeFormatParser64 : public PeFormatParser
 		virtual unsigned long long getFileFlags() const override;
 		virtual unsigned long long getTimeStamp() const override;
 		virtual unsigned long long getOptionalHeaderSize() const override;
+		virtual bool isSizeOfHeaderMultipleOfFileAlignment() const override;
 		virtual unsigned long long getFileAlignment() const override;
 		virtual unsigned long long getSectionAlignment() const override;
 		virtual unsigned long long getSizeOfImage() const override;

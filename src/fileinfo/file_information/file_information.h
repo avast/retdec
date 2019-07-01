@@ -62,6 +62,8 @@ class FileInformation
 		retdec::utils::Maybe<bool> signatureVerified;  ///< indicates whether the signature is present and if it is verified
 		DotnetInfo dotnetInfo;                         ///< .NET information
 		std::string failedDepsList;                    /// If non-empty, trhis contains the name of the dependency list that failed to load
+		std::vector<std::pair<std::string,std::string>> anomalies;     ///< detected anomalies
+
 	public:
 		retdec::cpdetect::ToolInformation toolInfo; ///< detected tools
 		std::vector<std::string> messages;   ///< error, warning and other messages
@@ -531,6 +533,13 @@ class FileInformation
 		bool hasDotnetTypeRefTableRecords() const;
 		/// @}
 
+		/// @name Getters of @a anomalies
+		/// @{
+		std::size_t getNumberOfAnomalies() const;
+		std::string getAnomalyIdentifier(std::size_t position) const;
+		std::string getAnomalyDescription(std::size_t position) const;
+		/// @}
+
 		/// @name Setters
 		/// @{
 		void setStatus(retdec::cpdetect::ReturnCode state);
@@ -615,6 +624,7 @@ class FileInformation
 		void setDotnetTypeRefhashCrc32(const std::string& crc32);
 		void setDotnetTypeRefhashMd5(const std::string& md5);
 		void setDotnetTypeRefhashSha256(const std::string& sha256);
+		void setAnomalies(const std::vector<std::pair<std::string,std::string>> &anom);
 		/// @}
 
 		/// @name Other methods

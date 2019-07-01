@@ -904,6 +904,7 @@ bool JsonPresentation::present()
 		presentIterativeSubtitle(root, DynamicSectionsJsonGetter(fileinfo));
 		presentIterativeSubtitle(root, ResourceJsonGetter(fileinfo));
 		presentIterativeSubtitle(root, CertificateTableJsonGetter(fileinfo));
+		presentIterativeSubtitle(root, AnomaliesJsonGetter(fileinfo));
 		const auto manifest = fileinfo.getCompactManifest();
 		if(!manifest.empty())
 		{

@@ -11,6 +11,7 @@
 #include <initializer_list>
 #include <map>
 #include <set>
+#include <utility>
 #include <vector>
 
 #include "retdec/utils/byte_value_storage.h"
@@ -91,6 +92,7 @@ class FileFormat : public retdec::utils::ByteValueStorage, private retdec::utils
 		std::vector<std::pair<std::size_t, std::size_t>> secHashInfo;     ///< information for calculation of section table hash
 		retdec::utils::Maybe<bool> signatureVerified;                     ///< indicates whether the signature is present and also verified
 		retdec::utils::RangeContainer<std::uint64_t> nonDecodableRanges;  ///< Address ranges which should not be decoded for instructions.
+		std::vector<std::pair<std::string, std::string>> anomalies;       ///< file format anomalies
 
 		/// @name Clear methods
 		/// @{
@@ -212,6 +214,7 @@ class FileFormat : public retdec::utils::ByteValueStorage, private retdec::utils
 		bool getHexBytesFromEnd(std::string &result, unsigned long long numberOfBytes) const;
 		bool getString(std::string &result, unsigned long long offset, unsigned long long numberOfBytes) const;
 		bool getStringFromEnd(std::string &result, unsigned long long numberOfBytes) const;
+		bool isObjectStretchedOverSections(std::size_t addr, std::size_t size) const;
 		const Section* getEpSection();
 		const Section* getSection(const std::string &secName) const;
 		const Section* getSection(unsigned long long secIndex) const;
@@ -265,6 +268,7 @@ class FileFormat : public retdec::utils::ByteValueStorage, private retdec::utils
 		const std::vector<String>& getStrings() const;
 		const std::vector<ElfNoteSecSeg>& getElfNoteSecSegs() const;
 		const std::set<std::uint64_t>& getUnknownRelocations() const;
+		const std::vector<std::pair<std::string,std::string>> &getAnomalies() const;
 		/// @}
 
 		/// @name Address interpretation methods
