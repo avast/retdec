@@ -93,4 +93,3 @@ RawDataCompiler::RawDataCompiler(
 
 } // namespace cpdetect
 } // namespace retdec
-
