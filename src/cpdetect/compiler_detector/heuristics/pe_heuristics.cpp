@@ -526,7 +526,7 @@ void PeHeuristics::getSecuROMHeuristics()
 	bool foundSecuROM = false;
 
 	// There must be at least 0x2000 extra bytes beyond the last section,
-	// last data directory, last debug directory and digital signature. 
+	// last data directory, last debug directory and digital signature.
 	if (peParser.getOverlaySize() >= 0x2000)
 	{
 		// The entire file must be loaded to memory
@@ -541,7 +541,7 @@ void PeHeuristics::getSecuROMHeuristics()
 				foundSecuROM = true;
 			if(checkSecuROMSignature(fileData, fileData + loadedLength, loadedLength - (SecuromOffs - 0x0C)))
 				foundSecuROM = true;
-			
+
 			if(foundSecuROM)
 			{
 				addPacker(DetectionMethod::STRING_SEARCH_H, DetectionStrength::HIGH, "SecuROM");
