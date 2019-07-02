@@ -220,14 +220,14 @@ const std::map<std::size_t, std::string> resourceLanguageMap
 // http://www.hexacorn.com/blog/2016/12/15/pe-section-names-re-visited/
 const std::vector<std::string> usualSectionNames
 {
-	".00cfg", ".apiset", ".arch", ".autoload_text", ".bindat", ".bootdat", ".bss", 
+	".00cfg", ".apiset", ".arch", ".autoload_text", ".bindat", ".bootdat", ".bss",
 	".BSS", ".buildid", ".CLR_UEF", ".code", ".cormeta", ".complua", ".CRT",
-	".cygwin_dll_common", ".data", ".DATA", ".data1", ".data2", ".data3", ".debug", 
-	".debug  $F", ".debug  $P", ".debug  $S", ".debug  $T", ".drectve ", ".didat", 
-	".didata", ".edata", ".eh_fram", ".export", ".fasm", ".flat", ".gfids", ".giats", 
+	".cygwin_dll_common", ".data", ".DATA", ".data1", ".data2", ".data3", ".debug",
+	".debug  $F", ".debug  $P", ".debug  $S", ".debug  $T", ".drectve ", ".didat",
+	".didata", ".edata", ".eh_fram", ".export", ".fasm", ".flat", ".gfids", ".giats",
 	".gljmp", ".glue_7t", ".glue_7", ".idata", ".idlsym", ".impdata", ".import",
-	".itext", ".ndata", ".orpc", ".pdata", ".rdata", ".reloc", ".rodata", ".rsrc", 
-	".sbss", ".script", ".shared", ".sdata", ".srdata", ".stab", ".stabstr", ".sxdata", 
+	".itext", ".ndata", ".orpc", ".pdata", ".rdata", ".reloc", ".rodata", ".rsrc",
+	".sbss", ".script", ".shared", ".sdata", ".srdata", ".stab", ".stabstr", ".sxdata",
 	".text", ".text0", ".text1", ".text2", ".text3", ".textbss", ".tls", ".tls$",
 	".udata", ".vsdata", ".xdata", ".wixburn", ".wpp_sf", "BSS", "CODE", "DATA",
 	"DGROUP", "edata", "idata", "INIT", "minATL", "PAGE", "rdata", "sdata", "shared",
