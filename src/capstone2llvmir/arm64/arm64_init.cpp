@@ -608,9 +608,9 @@ void Capstone2LlvmIrTranslatorArm64_impl::initializeRegNameMap()
 			{A64SysReg_ICH_ELSR_EL2, "ich_elsr_el2"},
 
 			// PSTATE - those are probably not registers
-	 		{ARM64_PSTATE_SPSEL, "spsel"},
-	 		{ARM64_PSTATE_DAIFSET, "daifset"},
-	 		{ARM64_PSTATE_DAIFCLR, "daifclr"},
+			{ARM64_PSTATE_SPSEL, "spsel"},
+			{ARM64_PSTATE_DAIFSET, "daifset"},
+			{ARM64_PSTATE_DAIFCLR, "daifclr"},
 	};
 
 	_reg2name = std::move(r2n);
