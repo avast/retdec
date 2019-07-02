@@ -404,7 +404,6 @@ void PeHeuristics::getMorphineHeuristics()
 void PeHeuristics::getStarForceHeuristics()
 {
 	const PeLib::MzHeader & mzHeader = peParser.getMzHeader();
-	const auto &content = search.getPlainString();
 	const auto epSection = toolInfo.epSection.getIndex();
 	uint32_t e_lfanew = mzHeader.getAddressOfPeHeader();
 	uint16_t e_cblp = mzHeader.getBytesOnLastPage();
