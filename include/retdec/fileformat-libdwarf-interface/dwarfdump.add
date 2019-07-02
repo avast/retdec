@@ -17,7 +17,7 @@
                 /* not a 64-bit obj either! */
                 /* dwarfdump is quiet when not an object */
 // with
-            	process_one_file(elf, file_name, archive, &config_file_data);
+                process_one_file(elf, file_name, archive, &config_file_data);
 // or just always call process_one_file.
 
 // Add bin-interface to process_one_file().
