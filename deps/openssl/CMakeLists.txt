@@ -10,6 +10,7 @@ endif()
 message(STATUS "  --> OpenSSL will be built as an external project")
 
 find_package(Perl REQUIRED)
+find_package(Threads REQUIRED)
 
 include(ExternalProject)
 include(ProcessorCount)
@@ -173,6 +174,7 @@ set(OPENSSL_LIBRARIES
 add_library(openssl-crypto INTERFACE)
 target_include_directories(openssl-crypto SYSTEM INTERFACE "${OPENSSL_INSTALL_DIR}/include")
 target_link_libraries(openssl-crypto INTERFACE "${OPENSSL_INSTALL_DIR}/lib/libcrypto${CMAKE_STATIC_LIBRARY_SUFFIX}")
+target_link_libraries(openssl-crypto INTERFACE Threads::Threads)
 if(MSVC)
 	target_link_libraries(openssl-crypto INTERFACE ws2_32 gdi32 advapi32 crypt32 user32)
 endif()
