@@ -28,4 +28,3 @@ Qualifiers TypeNode::quals()
 }    // borland
 }    // demangler
 }    // retdec
-
