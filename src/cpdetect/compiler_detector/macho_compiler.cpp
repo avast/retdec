@@ -75,4 +75,3 @@ MachOCompiler::MachOCompiler(
 
 } // namespace cpdetect
 } // namespace retdec
-
