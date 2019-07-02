@@ -124,9 +124,9 @@ endif()
 set(OPENSSL_PREFIX         "${CMAKE_CURRENT_BINARY_DIR}/openssl")
 set(OPENSSL_SRC_DIR        "${OPENSSL_PREFIX}/src/openssl")
 set(OPENSSL_INSTALL_DIR    "${OPENSSL_PREFIX}/src/openssl-install")
-set(OPENSSL_VERSION        "1.1.0f")
+set(OPENSSL_VERSION        "1.1.1c")
 set(OPENSSL_URL            "https://www.openssl.org/source/openssl-${OPENSSL_VERSION}.tar.gz")
-set(OPENSSL_ARCHIVE_SHA256 "12f746f3f2493b2f39da7ecf63d7ee19c6ac9ec6a4fcd8c229da8a522cb12765")
+set(OPENSSL_ARCHIVE_SHA256 "f6fb3079ad15076154eda9413fed42877d668e7069d9b87396d0804fdb3f4c90")
 set(OPENSSL_DOWNLOAD_NAME  "openssl.tar.gz")
 
 set(OPENSSL_CONFIGURE_OPTIONS
