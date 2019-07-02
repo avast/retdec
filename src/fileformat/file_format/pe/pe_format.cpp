@@ -10,6 +10,7 @@
 #include <regex>
 #include <tuple>
 #include <unordered_map>
+#include <unordered_set>
 
 #include <openssl/asn1.h>
 #include <openssl/x509.h>
@@ -218,7 +219,7 @@ const std::map<std::size_t, std::string> resourceLanguageMap
 };
 
 // http://www.hexacorn.com/blog/2016/12/15/pe-section-names-re-visited/
-const std::vector<std::string> usualSectionNames
+const std::unordered_set<std::string> usualSectionNames
 {
 	".00cfg",
 	".BSS",
@@ -308,7 +309,7 @@ const std::vector<std::string> usualSectionNames
 	"text"
 };
 
-const std::vector<std::string> usualPackerSections
+const std::unordered_set<std::string> usualPackerSections
 {
 	"!EPack",
 	".ASPack",
@@ -3713,7 +3714,7 @@ void PeFormat::scanForSectionAnomalies()
 		if (!name.empty())
 		{
 			// scan for packer section names
-			if (std::find(usualPackerSections.begin(), usualPackerSections.end(), name) != usualPackerSections.end())
+			if (usualPackerSections.find(name) != usualPackerSections.end())
 			{
 				if (std::find(duplSections.begin(), duplSections.end(), name) == duplSections.end())
 				{
@@ -3721,7 +3722,7 @@ void PeFormat::scanForSectionAnomalies()
 				}
 			}
 			// scan for unusual section names
-			else if (std::find(usualSectionNames.begin(), usualSectionNames.end(), name) == usualSectionNames.end())
+			else if (usualSectionNames.find(name) == usualSectionNames.end())
 			{
 				if (std::find(duplSections.begin(), duplSections.end(), name) == duplSections.end())
 				{
