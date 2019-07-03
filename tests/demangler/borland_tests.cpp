@@ -341,4 +341,3 @@ TEST_F(BorlandDemanglerTests, NonClassTemplates)
 } // namespace tests
 } // namespace demangler
 } // namespace retdec
-

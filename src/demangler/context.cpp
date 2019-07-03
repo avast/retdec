@@ -244,4 +244,3 @@ void Context::addArrayType(const std::shared_ptr<ArrayNode> &array) {
 }    // borland
 }    // demangler
 }    // retdec
-

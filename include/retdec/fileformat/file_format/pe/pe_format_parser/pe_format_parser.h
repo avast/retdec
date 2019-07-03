@@ -38,8 +38,10 @@ class PeFormatParser
 		virtual unsigned long long getFileFlags() const = 0;
 		virtual unsigned long long getTimeStamp() const = 0;
 		virtual unsigned long long getOptionalHeaderSize() const = 0;
+		virtual bool isSizeOfHeaderMultipleOfFileAlignment() const = 0;
 		virtual unsigned long long getFileAlignment() const = 0;
 		virtual unsigned long long getSectionAlignment() const = 0;
+		virtual unsigned long long getSizeOfHeaders() const = 0;
 		virtual unsigned long long getSizeOfImage() const = 0;
 		virtual unsigned long long getChecksum() const = 0;
 		virtual unsigned long long getSizeOfStackReserve() const = 0;

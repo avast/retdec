@@ -399,6 +399,158 @@ void PeHeuristics::getMorphineHeuristics()
 }
 
 /**
+ * Try to detect StarForce protection
+ */
+void PeHeuristics::getStarForceHeuristics()
+{
+	const PeLib::MzHeader & mzHeader = peParser.getMzHeader();
+	const auto epSection = toolInfo.epSection.getIndex();
+	uint32_t e_lfanew = mzHeader.getAddressOfPeHeader();
+	uint16_t e_cblp = mzHeader.getBytesOnLastPage();
+	uint16_t e_cp = mzHeader.getPagesInFile();
+
+	if (noOfSections >= 4)
+	{
+		if (search.exactComparison("68--------FF25", toolInfo.epOffset) || search.exactComparison("FF25", toolInfo.epOffset) || search.exactComparison("E8--------68ADDE0080FF15", toolInfo.epOffset))
+		{
+			// Version A
+			if (!strncmp(sections[0]->getName().c_str(), ".sforce", 7) && !strncmp(sections[epSection]->getName().c_str(), ".start", 6) && (e_cblp == static_cast<uint16_t>(e_lfanew)) && (e_cp == 1))
+			{
+				addPacker(DetectionMethod::COMBINED, DetectionStrength::MEDIUM, "StarForce.A");
+				return;
+			}
+
+			// Version B
+			if (sections[noOfSections-1]->getName() == ".ps4" && sections[noOfSections - 1]->getOffset() == loadedLength)
+			{
+				addPacker(DetectionMethod::COMBINED, DetectionStrength::MEDIUM, "StarForce.B");
+				return;
+			}
+		}
+
+		if (sections[noOfSections - 1]->getName() == ".ps4" && sections[noOfSections - 2]->getName() == ".discard" && sections[noOfSections - 3]->getName() == ".rsrc")
+		{
+			addPacker(DetectionMethod::SECTION_TABLE_H, DetectionStrength::MEDIUM, "StarForce.C");
+			return;
+		}
+	}
+
+	if (13 <= noOfSections && noOfSections <= 15)
+	{
+		if (search.exactComparison("FF25--------FF25--------FF25", toolInfo.epOffset))
+		{
+			if (sections[noOfSections - 1]->getName() == ".ps4")
+			{
+				if(sections[0]->getName() == ".text" && sections[1]->getName() == ".data" && sections[2]->getName() == ".data" && sections[3]->getName() == ".share")
+				{
+					addPacker(DetectionMethod::COMBINED, DetectionStrength::MEDIUM, "StarForce.C");
+					return;
+				}
+			}
+		}
+	}
+}
+
+/**
+ * Try to detect SafeDisc
+ * From ntdll!LdrpCheckForSafeDiscImage
+ */
+void PeHeuristics::getSafeDiscHeuristics()
+{
+	const auto &content = search.getPlainString();
+	const std::string safeDiscString = "BoG_ *90.0&!!  Yy>";
+	auto pos = content.find(safeDiscString, peParser.getSizeOfHeaders() - 0x2C);
+
+	if (pos == peParser.getSizeOfHeaders() - 0x2C)
+	{
+		addPacker(DetectionMethod::SIGNATURE, DetectionStrength::MEDIUM, "SafeDisc");
+	}
+	else
+	{
+		for (std::size_t i = 0; i < noOfSections; i++)
+		{
+			// Note that original code does:
+			// if(!strncmp((char *)pSection->Name, "stxt371\0", sizeof("stxt371\0")))
+			if (sections[i]->getName() == "stxt371")
+			{
+				addPacker(DetectionMethod::SECTION_TABLE_H, DetectionStrength::MEDIUM, "SafeDisc");
+				break;
+			}
+
+			// Note that original code does:
+			// if(!strncmp((char *)pSection->Name, ".txt\0", sizeof(".txt\0")) || !strncmp((char *)pSection->Name, ".txt2\0", sizeof(".txt2\0")))
+			if (sections[i]->getName() == ".txt" || sections[i]->getName() == ".txt2")
+			{
+				addPacker(DetectionMethod::SECTION_TABLE_H, DetectionStrength::LOW, "SafeDisc");
+				break;
+			}
+		}
+	}
+}
+
+bool PeHeuristics::checkSecuROMSignature(const char * fileData, const char * fileDataEnd, uint32_t fileOffset)
+{
+	const uint32_t SecuRomMagic = 0x44646441;	// 'DddA'
+	const char * header = fileData + fileOffset;
+	uint32_t magicValue = 0;
+
+	if (fileData <= header && (header + 0x08) <= fileDataEnd)
+	{
+		const uint32_t * secuRomHeader = reinterpret_cast<const uint32_t *>(header);
+
+		if (secuRomHeader[1] == SecuRomMagic)
+		{
+			return true;
+		}
+		else if ((fileData + secuRomHeader[0] + sizeof(uint32_t)) < fileDataEnd)
+		{
+			memcpy(&magicValue, fileData + secuRomHeader[0], sizeof(uint32_t));
+			if (magicValue == SecuRomMagic)
+			{
+				return true;
+			}
+		}
+	}
+
+	return false;
+}
+
+/**
+ * Try to detect SecuROM protection
+ * From ntdll!LdrpCheckForSecuROMImage
+ */
+void PeHeuristics::getSecuROMHeuristics()
+{
+	const char * fileData;
+	uint32_t SecuromOffs = 0;
+	bool foundSecuROM = false;
+
+	// There must be at least 0x2000 extra bytes beyond the last section,
+	// last data directory, last debug directory and digital signature.
+	if (peParser.getOverlaySize() >= 0x2000)
+	{
+		// The entire file must be loaded to memory
+		if (loadedLength >= declaredLength)
+		{
+			// Retrieve the offset of the securom header
+			fileData = search.getPlainString().c_str();
+			memcpy(&SecuromOffs, fileData + loadedLength - sizeof(uint32_t), sizeof(uint32_t));
+
+			// Verify it
+			if(checkSecuROMSignature(fileData, fileData + loadedLength, SecuromOffs - sizeof(uint32_t)))
+				foundSecuROM = true;
+			if(checkSecuROMSignature(fileData, fileData + loadedLength, loadedLength - (SecuromOffs - 0x0C)))
+				foundSecuROM = true;
+
+			if(foundSecuROM)
+			{
+				addPacker(DetectionMethod::STRING_SEARCH_H, DetectionStrength::HIGH, "SecuROM");
+			}
+		}
+	}
+}
+
+/**
  * Try to detect PELock packer
  */
 void PeHeuristics::getPelockHeuristics()
@@ -1672,6 +1824,9 @@ void PeHeuristics::getFormatSpecificCompilerHeuristics()
 {
 	getSlashedSignatures();
 	getMorphineHeuristics();
+	getStarForceHeuristics();
+	getSafeDiscHeuristics();
+	getSecuROMHeuristics();
 	getPelockHeuristics();
 	getEzirizReactorHeuristics();
 	getUpxHeuristics();

@@ -1082,7 +1082,6 @@ utils::Address Finder::getAddressFromRef_mips(utils::Address ref)
 }
 
 /**
-<<<<<<< variant A
  * On ARM, reference may be an instruction that needs to be disassembled and
  * inspected for reference target,
  * or
@@ -1387,12 +1386,10 @@ void Finder::checkRef_x86(Reference& ref)
  * Sometimes, we don't need references to solve detections.
  * e.g. on PIC32 detected function '_scanf_cdnopuxX' is in section
  * `.text._scanf_cdnopuxX`.
->>>>>>> variant B
  * Sort detected functions.
  *
  * Functions are sorted by their address, if detection address is same bigger
  * detection is first.
-======= end
  */
 void Finder::confirmWithoutRefs()
 {

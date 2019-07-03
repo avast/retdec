@@ -10,6 +10,7 @@
 #include <regex>
 #include <tuple>
 #include <unordered_map>
+#include <unordered_set>
 
 #include <openssl/asn1.h>
 #include <openssl/x509.h>
@@ -215,6 +216,217 @@ const std::map<std::size_t, std::string> resourceLanguageMap
 	{PELIB_LANG_WOLOF, "Wolof"},
 	{PELIB_LANG_DARI, "Dari"},
 	{PELIB_LANG_MALAGASY, "Malagasy"}
+};
+
+// http://www.hexacorn.com/blog/2016/12/15/pe-section-names-re-visited/
+const std::unordered_set<std::string> usualSectionNames
+{
+	".00cfg",
+	".BSS",
+	".CLR_UEF",
+	".CRT",
+	".DATA",
+	".apiset",
+	".arch",
+	".autoload_text",
+	".bindat",
+	".bootdat",
+	".bss",
+	".buildid",
+	".code",
+	".complua",
+	".cormeta",
+	".cygwin_dll_common",
+	".data",
+	".data1",
+	".data2",
+	".data3",
+	".debug  $F",
+	".debug  $P",
+	".debug  $S",
+	".debug  $T",
+	".debug",
+	".didat",
+	".didata",
+	".drectve ",
+	".edata",
+	".eh_fram",
+	".export",
+	".fasm",
+	".flat",
+	".gfids",
+	".giats",
+	".gljmp",
+	".glue_7",
+	".glue_7t",
+	".idata",
+	".idlsym",
+	".impdata",
+	".import",
+	".itext",
+	".ndata",
+	".orpc",
+	".pdata",
+	".rdata",
+	".reloc",
+	".rodata",
+	".rsrc",
+	".sbss",
+	".script",
+	".sdata",
+	".shared",
+	".srdata",
+	".stab",
+	".stabstr",
+	".sxdata",
+	".text",
+	".text0",
+	".text1",
+	".text2",
+	".text3",
+	".textbss",
+	".tls",
+	".tls$",
+	".udata",
+	".vsdata",
+	".wixburn",
+	".wpp_sf",
+	".xdata",
+	"BSS",
+	"CODE",
+	"DATA",
+	"DGROUP",
+	"INIT",
+	"PAGE",
+	"Shared",
+	"edata",
+	"idata",
+	"minATL",
+	"rdata",
+	"sdata",
+	"shared",
+	"testdata",
+	"text"
+};
+
+const std::unordered_set<std::string> usualPackerSections
+{
+	"!EPack",
+	".ASPack",
+	".ByDwing",
+	".MPRESS1",
+	".MPRESS2",
+	".MaskPE",
+	".RLPack",
+	".RPCrypt",
+	".Themida",
+	".UPX0",
+	".UPX1",
+	".UPX2",
+	".Upack",
+	".WWP32",
+	".WWPACK",
+	".adata",
+	".aspack",
+	".boom",
+	".ccg",
+	".charmve",
+	".ecode",
+	".edata",
+	".enigma1",
+	".enigma2",
+	".gentee",
+	".mackt",
+	".mnbvcx1",
+	".mnbvcx2",
+	".neolit",
+	".neolite",
+	".nsp0",
+	".nsp1",
+	".nsp2",
+	".packed",
+	".perplex",
+	".petite",
+	".pinclie",
+	".rmnet",
+	".seau",
+	".sforce3",
+	".shrink1",
+	".shrink2",
+	".shrink3",
+	".spack",
+	".svkp",
+	".taz",
+	".tsuarch",
+	".tsustub",
+	".vmp0",
+	".vmp1",
+	".vmp2",
+	".winapi",
+	".y0da"
+	".yP",
+	"ASPack",
+	"BitArts",
+	"DAStub",
+	"FSG!",
+	"MEW",
+	"PEBundle",
+	"PEC2",
+	"PEC2MO",
+	"PEC2TO",
+	"PECompact2",
+	"PELOCKnt",
+	"PEPACK!!",
+	"PESHiELD",
+	"ProCrypt",
+	"RCryptor",
+	"Themida",
+	"UPX!",
+	"UPX0",
+	"UPX1",
+	"UPX2",
+	"UPX3",
+	"VProtect",
+	"WinLicen",
+	"_winzip_",
+	"kkrunchy",
+	"lz32.dll",
+	"nsp0",
+	"nsp1",
+	"nsp2",
+	"pebundle",
+	"pec",
+	"pec1",
+	"pec2",
+	"pec3",
+	"pec4",
+	"pec5",
+	"pec6",
+};
+
+const std::map<std::string, std::size_t> usualSectionCharacteristics
+{
+	{".bss", (PELIB_IMAGE_SCN_CNT_UNINITIALIZED_DATA | PELIB_IMAGE_SCN_MEM_READ | PELIB_IMAGE_SCN_MEM_WRITE)},
+	{".cormeta", PELIB_IMAGE_SCN_LNK_INFO},
+	{".data", (PELIB_IMAGE_SCN_CNT_INITIALIZED_DATA | PELIB_IMAGE_SCN_MEM_READ | PELIB_IMAGE_SCN_MEM_WRITE)},
+	{".debug", (PELIB_IMAGE_SCN_CNT_INITIALIZED_DATA | PELIB_IMAGE_SCN_MEM_READ | PELIB_IMAGE_SCN_MEM_DISCARDABLE)},
+	{".drective", PELIB_IMAGE_SCN_LNK_INFO},
+	{".edata", (PELIB_IMAGE_SCN_CNT_INITIALIZED_DATA | PELIB_IMAGE_SCN_MEM_READ)},
+	{".idata", (PELIB_IMAGE_SCN_CNT_INITIALIZED_DATA | PELIB_IMAGE_SCN_MEM_READ | PELIB_IMAGE_SCN_MEM_WRITE)},
+	{".idlsym", PELIB_IMAGE_SCN_LNK_INFO},
+	{".pdata", (PELIB_IMAGE_SCN_CNT_INITIALIZED_DATA | PELIB_IMAGE_SCN_MEM_READ)},
+	{".rdata", (PELIB_IMAGE_SCN_CNT_INITIALIZED_DATA | PELIB_IMAGE_SCN_MEM_READ)},
+	{".reloc", (PELIB_IMAGE_SCN_CNT_INITIALIZED_DATA | PELIB_IMAGE_SCN_MEM_READ | PELIB_IMAGE_SCN_MEM_DISCARDABLE)},
+	{".rsrc", (PELIB_IMAGE_SCN_CNT_INITIALIZED_DATA | PELIB_IMAGE_SCN_MEM_READ)},
+	{".sbss", (PELIB_IMAGE_SCN_CNT_UNINITIALIZED_DATA | PELIB_IMAGE_SCN_MEM_READ | PELIB_IMAGE_SCN_MEM_WRITE)},
+	{".sdata", (PELIB_IMAGE_SCN_CNT_INITIALIZED_DATA | PELIB_IMAGE_SCN_MEM_READ | PELIB_IMAGE_SCN_MEM_WRITE)},
+	{".srdata", (PELIB_IMAGE_SCN_CNT_INITIALIZED_DATA | PELIB_IMAGE_SCN_MEM_READ)},
+	{".sxdata", PELIB_IMAGE_SCN_LNK_INFO},
+	{".text", (PELIB_IMAGE_SCN_CNT_CODE | PELIB_IMAGE_SCN_MEM_EXECUTE | PELIB_IMAGE_SCN_MEM_READ)},
+	{".tls", (PELIB_IMAGE_SCN_CNT_INITIALIZED_DATA | PELIB_IMAGE_SCN_MEM_READ | PELIB_IMAGE_SCN_MEM_WRITE)},
+	{".tls$", (PELIB_IMAGE_SCN_CNT_INITIALIZED_DATA | PELIB_IMAGE_SCN_MEM_READ | PELIB_IMAGE_SCN_MEM_WRITE)},
+	{".vsdata", (PELIB_IMAGE_SCN_CNT_INITIALIZED_DATA | PELIB_IMAGE_SCN_MEM_READ | PELIB_IMAGE_SCN_MEM_WRITE)},
+	{".xdata", (PELIB_IMAGE_SCN_CNT_INITIALIZED_DATA | PELIB_IMAGE_SCN_MEM_READ)}
 };
 
 /**
@@ -445,6 +657,7 @@ void PeFormat::initStructures(const std::string & dllListFile)
 		loadVisualBasicHeader();
 		computeSectionTableHashes();
 		loadStrings();
+		scanForAnomalies();
 	}
 }
 
@@ -2952,6 +3165,15 @@ std::size_t PeFormat::getSegmentTableEntrySize() const
 }
 
 /**
+ * Get reference to MZ header
+ * @return Reference to MZ header
+ */
+const PeLib::MzHeader & PeFormat::getMzHeader() const
+{
+	return mzHeader;
+}
+
+/**
  * Get size of MZ header
  * @return Size of MZ header
  */
@@ -3060,6 +3282,15 @@ std::size_t PeFormat::getFileAlignment() const
 std::size_t PeFormat::getSectionAlignment() const
 {
 	return formatParser->getSectionAlignment();
+}
+
+/**
+ * Get size of headers
+ * @return Size of headers
+ */
+std::size_t PeFormat::getSizeOfHeaders() const
+{
+	return formatParser->getSizeOfHeaders();
 }
 
 /**
@@ -3421,6 +3652,273 @@ const std::string& PeFormat::getTypeRefhashSha256() const
 const VisualBasicInfo* PeFormat::getVisualBasicInfo() const
 {
 	return &visualBasicInfo;
+}
+
+/**
+ * Scan for file format anomalies
+ */
+void PeFormat::scanForAnomalies()
+{
+	scanForSectionAnomalies();
+	scanForResourceAnomalies();
+	scanForImportAnomalies();
+	scanForExportAnomalies();
+	scanForOptHeaderAnomalies();
+}
+
+/**
+ * Scan for section anomalies
+ */
+void PeFormat::scanForSectionAnomalies()
+{
+	std::size_t nSecs = getDeclaredNumberOfSections();
+
+	unsigned long long epAddr;
+	if (getEpAddress(epAddr))
+	{
+		const PeCoffSection *epSec = dynamic_cast<const PeCoffSection*>(getEpSection());
+		if (epSec)
+		{
+			// scan EP in last section
+			const PeCoffSection *lastSec = (nSecs) ? getPeSection(nSecs - 1) : nullptr;
+			if (epSec == lastSec)
+			{
+				anomalies.emplace_back("EpInLastSection", "Entry point in the last section");
+			}
+
+			// scan EP in writable section
+			if (epSec->getPeCoffFlags() & PELIB_IMAGE_SCN_MEM_WRITE)
+			{
+				anomalies.emplace_back("EpInWritableSection", "Entry point in writable section");
+			}
+		}
+		else
+		{
+			// scan EP outside mapped sections
+			anomalies.emplace_back("EpOutsideSections", "Entry point is outside of mapped sections");
+		}
+	}
+
+	std::vector<std::string> duplSections;
+	for (std::size_t i = 0; i < nSecs; i++)
+	{
+		auto sec = getPeSection(i);
+		if (!sec)
+		{
+			continue;
+		}
+
+		const auto name = sec->getName();
+		const std::string msgName = (name.empty()) ? numToStr(sec->getIndex()) : name;
+		const auto flags = sec->getPeCoffFlags();
+		if (!name.empty())
+		{
+			// scan for packer section names
+			if (usualPackerSections.find(name) != usualPackerSections.end())
+			{
+				if (std::find(duplSections.begin(), duplSections.end(), name) == duplSections.end())
+				{
+					anomalies.emplace_back("PackerSectionName", "Packer section name: " + replaceNonprintableChars(name));
+				}
+			}
+			// scan for unusual section names
+			else if (usualSectionNames.find(name) == usualSectionNames.end())
+			{
+				if (std::find(duplSections.begin(), duplSections.end(), name) == duplSections.end())
+				{
+					anomalies.emplace_back("UnusualSectionName", "Unusual section name: " + replaceNonprintableChars(name));
+				}
+			}
+
+			// scan for unexpected characteristics
+			auto characIt = usualSectionCharacteristics.find(name);
+			if (characIt != usualSectionCharacteristics.end() && characIt->second != flags)
+			{
+				anomalies.emplace_back("UnusualSectionFlags", "Section " + replaceNonprintableChars(name) + " has unusual characteristics");
+			}
+		}
+
+		// scan size over 100MB
+		if (sec->getSizeInFile() >= 100000000UL)
+		{
+			anomalies.emplace_back("LargeSection", "Section " + replaceNonprintableChars(msgName) + " has size over 100MB");
+		}
+
+		// scan section marked uninitialized but contains data
+		if ((flags & PELIB_IMAGE_SCN_CNT_UNINITIALIZED_DATA) && (sec->getOffset() != 0 || sec->getSizeInFile() != 0))
+		{
+			anomalies.emplace_back("UninitSectionHasData", "Section " + replaceNonprintableChars(msgName) + " is marked uninitialized but contains data");
+		}
+
+		for (std::size_t j = i + 1; j < nSecs; j++)
+		{
+			auto cmpSec = getSection(j);
+			if (!cmpSec)
+			{
+				continue;
+			}
+
+			// scan for duplicit section names
+			const auto cmpName = cmpSec->getName();
+			if (!name.empty() && name == cmpName)
+			{
+				if (std::find(duplSections.begin(), duplSections.end(), name) == duplSections.end())
+				{
+					anomalies.emplace_back("DuplicitSectionNames", "Multiple sections with name " + replaceNonprintableChars(name));
+					duplSections.push_back(name);
+				}
+			}
+
+			// scan for overlapping sections
+			auto secStart = sec->getOffset();
+			auto secEnd = secStart + sec->getSizeInFile();
+			auto cmpSecStart = cmpSec->getOffset();
+			auto cmpSecEnd = cmpSecStart + cmpSec->getSizeInFile();
+			if ((secStart <= cmpSecStart && cmpSecStart < secEnd) ||
+				(cmpSecStart <= secStart && secStart < cmpSecEnd))
+			{
+				const std::string cmpMsgName = (cmpName.empty()) ? numToStr(cmpSec->getIndex()) : cmpName;
+				anomalies.emplace_back("OverlappingSections", "Sections " + replaceNonprintableChars(msgName) + " and " + replaceNonprintableChars(cmpMsgName) + " overlap");
+			}
+		}
+	}
+}
+
+/**
+ * Scan for section anomalies
+ */
+void PeFormat::scanForResourceAnomalies()
+{
+	if (!resourceTable)
+	{
+		return;
+	}
+
+	for (std::size_t i = 0; i < resourceTable->getNumberOfResources(); i++)
+	{
+		auto res = resourceTable->getResource(i);
+		if (!res)
+		{
+			continue;
+		}
+
+		std::size_t nameId;
+		std::string msgName = (res->getNameId(nameId)) ? numToStr(nameId) : "<unknown>";
+
+		// scan for resource size over 100MB
+		if (res->getSizeInFile() >= 100000000UL)
+		{
+			anomalies.emplace_back("LargeResource", "Resource " + replaceNonprintableChars(msgName) + " has size over 100MB");
+		}
+
+		// scan for resource stretched over multiple sections
+		unsigned long long resAddr;
+		if (getAddressFromOffset(resAddr, res->getOffset()) &&
+			isObjectStretchedOverSections(resAddr, res->getSizeInFile()))
+		{
+			anomalies.emplace_back("StretchedResource", "Resource " + replaceNonprintableChars(msgName) + " is stretched over multiple sections");
+		}
+	}
+}
+
+/**
+ * Scan for import anomalies
+ */
+void PeFormat::scanForImportAnomalies()
+{
+	// scan for import stretched over multiple sections
+	for(const auto &impRange : formatParser->getImportDirectoryOccupiedAddresses())
+	{
+		unsigned long long impAddr;
+		if (getAddressFromOffset(impAddr, impRange.getStart()) &&
+			isObjectStretchedOverSections(impAddr, impRange.getSize()))
+		{
+			std::string msgName;
+			auto imp = getImport(impAddr);
+			if (!imp)
+			{
+				msgName = "<unknown>";
+			}
+			else
+			{
+				if (imp->hasEmptyName())
+				{
+					unsigned long long ordNum;
+					if (!imp->getOrdinalNumber(ordNum))
+					{
+						msgName = "<unknown>";
+					}
+					else
+					{
+						msgName = numToStr(ordNum);
+					}
+
+				}
+				else
+				{
+					msgName = imp->getName();
+				}
+			}
+
+			anomalies.emplace_back("StretchedImportTable", "Import " + replaceNonprintableChars(msgName) + " is stretched over multiple sections");
+		}
+	}
+}
+
+/**
+ * Scan for export anomalies
+ */
+void PeFormat::scanForExportAnomalies()
+{
+	// scan for export stretched over multiple sections
+	for(const auto &expRange : formatParser->getExportDirectoryOccupiedAddresses())
+	{
+		unsigned long long expAddr;
+		if (getAddressFromOffset(expAddr, expRange.getStart()) &&
+			isObjectStretchedOverSections(expAddr, expRange.getSize()))
+		{
+			std::string msgName;
+			auto exp = getExport(expAddr);
+			if (!exp)
+			{
+				msgName = "<unknown>";
+			}
+			else
+			{
+				if (exp->hasEmptyName())
+				{
+					unsigned long long ordNum;
+					if (!exp->getOrdinalNumber(ordNum))
+					{
+						msgName = "<unknown>";
+					}
+					else
+					{
+						msgName = numToStr(ordNum);
+					}
+
+				}
+				else
+				{
+					msgName = exp->getName();
+				}
+			}
+
+			anomalies.emplace_back("StretchedExportTable", "Export " + replaceNonprintableChars(msgName) + " is stretched over multiple sections");
+		}
+	}
+}
+
+/**
+ * Scan for optional header anomalies
+ */
+void PeFormat::scanForOptHeaderAnomalies()
+{
+	// scan for missalignment
+	if (!formatParser->isSizeOfHeaderMultipleOfFileAlignment())
+	{
+		anomalies.emplace_back("SizeOfHeaderNotAligned", "SizeOfHeader is not aligned to multiple of FileAlignment");
+	}
 }
 
 } // namespace fileformat

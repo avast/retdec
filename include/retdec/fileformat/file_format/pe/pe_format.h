@@ -112,6 +112,14 @@ class PeFormat : public FileFormat
 		bool parseVisualBasicComRegistrationInfo(std::size_t structureOffset,
 												std::size_t comRegDataOffset);
 		/// @}
+		/// @name Auxiliary scanning methods
+		/// @{
+		void scanForSectionAnomalies();
+		void scanForResourceAnomalies();
+		void scanForImportAnomalies();
+		void scanForExportAnomalies();
+		void scanForOptHeaderAnomalies();
+		/// @}
 	protected:
 		PeLib::PeFile *file;              ///< PeLib representation of PE file
 		PeLib::PeHeaderT<32> *peHeader32; ///< header of 32-bit PE file
@@ -153,6 +161,7 @@ class PeFormat : public FileFormat
 
 		/// @name Detection methods
 		/// @{
+		const PeLib::MzHeader & getMzHeader() const;
 		std::size_t getMzHeaderSize() const;
 		std::size_t getOptionalHeaderSize() const;
 		std::size_t getPeHeaderOffset() const;
@@ -166,6 +175,7 @@ class PeFormat : public FileFormat
 		std::size_t getChecksum() const;
 		std::size_t getFileAlignment() const;
 		std::size_t getSectionAlignment() const;
+		std::size_t getSizeOfHeaders() const;
 		std::size_t getSizeOfImage() const;
 		std::size_t getSizeOfStackReserve() const;
 		std::size_t getSizeOfStackCommit() const;
@@ -206,6 +216,11 @@ class PeFormat : public FileFormat
 		const std::string& getTypeRefhashMd5() const;
 		const std::string& getTypeRefhashSha256() const;
 		const VisualBasicInfo* getVisualBasicInfo() const;
+		/// @}
+
+		/// @name Scanning methods
+		/// @{
+		void scanForAnomalies();
 		/// @}
 };
 

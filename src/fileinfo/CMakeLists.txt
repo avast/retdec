@@ -40,6 +40,7 @@ set(FILEINFO_SOURCES
 	file_presentation/config_presentation.cpp
 	file_presentation/file_presentation.cpp
 	file_presentation/getters/format.cpp
+	file_presentation/getters/iterative_getter/iterative_distribution_getter/anomalies_plain_getter.cpp
 	file_presentation/getters/iterative_getter/iterative_distribution_getter/data_directory_plain_getter.cpp
 	file_presentation/getters/iterative_getter/iterative_distribution_getter/dynamic_sections_plain_getter.cpp
 	file_presentation/getters/iterative_getter/iterative_distribution_getter/export_table_plain_getter.cpp
@@ -66,6 +67,7 @@ set(FILEINFO_SOURCES
 	file_presentation/getters/iterative_getter/iterative_getter.cpp
 	file_presentation/getters/iterative_getter/iterative_simple_getter/certificate_table_plain_getter.cpp
 	file_presentation/getters/iterative_getter/iterative_simple_getter/iterative_simple_getter.cpp
+	file_presentation/getters/iterative_getter/iterative_subtitle_getter/anomalies_json_getter.cpp
 	file_presentation/getters/iterative_getter/iterative_subtitle_getter/certificate_table_json_getter.cpp
 	file_presentation/getters/iterative_getter/iterative_subtitle_getter/data_directory_json_getter.cpp
 	file_presentation/getters/iterative_getter/iterative_subtitle_getter/dynamic_sections_json_getter.cpp

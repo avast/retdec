@@ -87,6 +87,11 @@ unsigned long long PeFormatParser32::getOptionalHeaderSize() const
 	return peSizeOfOptionalHeader(peHeader);
 }
 
+bool PeFormatParser32::isSizeOfHeaderMultipleOfFileAlignment() const
+{
+	return peIsSizeOfHeaderMultipleOfFileAlignment(peHeader);
+}
+
 unsigned long long PeFormatParser32::getFileAlignment() const
 {
 	return peFileAlignment(peHeader);
@@ -95,6 +100,11 @@ unsigned long long PeFormatParser32::getFileAlignment() const
 unsigned long long PeFormatParser32::getSectionAlignment() const
 {
 	return peSectionAlignment(peHeader);
+}
+
+unsigned long long PeFormatParser32::getSizeOfHeaders() const
+{
+	return peSizeOfHeaders(peHeader);
 }
 
 unsigned long long PeFormatParser32::getSizeOfImage() const
