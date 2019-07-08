@@ -338,47 +338,53 @@ void PeHeuristics::getVisualBasicHeuristics()
 	}
 }
 
-uint32_t PeHeuristics::get_uint32_unaligned(const char * codePtr)
+uint32_t PeHeuristics::get_uint32_unaligned(const uint8_t * codePtr)
 {
-    return *(int32_t *)(codePtr);
+	const uint32_t * codePtrInt32 = reinterpret_cast<const uint32_t *>(codePtr);
+
+    return codePtrInt32[0];
 }
 
 /**
  * Parses the code, follows NOPs or JMPs
  */
-const char * PeHeuristics::skip_NOP_JMP8_JMP32(const char * codeBegin, const char * codePtr, const char * codeEnd, size_t maxCount)
+const uint8_t * PeHeuristics::skip_NOP_JMP8_JMP32(const uint8_t * codeBegin, const uint8_t * codePtr, const uint8_t * codeEnd, size_t maxCount)
 {
-    while(codeBegin <= codePtr && codePtr < codeEnd && maxCount > 0)
-    {
-        ssize_t movePtrBy = 0;
+	while(codeBegin <= codePtr && codePtr < codeEnd && maxCount > 0)
+	{
+		ssize_t movePtrBy = 0;
 
-        switch (codePtr[0])
-        {
-            case 0x90:  // NOP, move by 1 byte
-                movePtrBy = 1;
-                break;
+		switch (codePtr[0])
+		{
+			case 0x90:  // NOP, move by 1 byte
+				movePtrBy = 1;
+				break;
 
-            case 0xEB:
-                if((codePtr + 2) > codeEnd || codePtr[1] == 0x80)
-                    return nullptr;
-                movePtrBy = (ssize_t)(signed char)codePtr[1];
-                break;
+			case 0xEB:
+				if((codePtr + 2) > codeEnd || codePtr[1] == 0x80)
+					return nullptr;
+				movePtrBy = (ssize_t)(signed char)codePtr[1];
+				break;
 
-            case 0xE9:
-                if ((codePtr + 5) > codeEnd || get_uint32_unaligned(codePtr+1) == 0x80000000)
-                    return nullptr;
-                movePtrBy = (ssize_t)(int32_t)get_uint32_unaligned(codePtr + 1);
-                break;
-        }
+			case 0xE9:
+				if ((codePtr + 5) > codeEnd || get_uint32_unaligned(codePtr+1) == 0x80000000)
+					return nullptr;
+				movePtrBy = (ssize_t)(int32_t)get_uint32_unaligned(codePtr + 1);
+				break;
 
-        // If no increment, it means there was no NOP/JMP and we are done
-        if(movePtrBy == 0)
-            break;
-        
-        // Check whether we got into the code range
-        codePtr = codePtr + movePtrBy;
-        maxCount--;
-    }
+			default:
+				break;
+		}
+
+		// If no increment, it means there was no NOP/JMP and we are done
+		if(movePtrBy == 0)
+			break;
+
+		// Check whether we got into the code range
+		codePtr = codePtr + movePtrBy;
+		maxCount--;
+	}
+	return codePtr;
 }
 
 /**
@@ -634,9 +640,9 @@ void PeHeuristics::getSecuROMHeuristics()
  */
 void PeHeuristics::getMPRMMGVAHeuristics()
 {
-	const char * fileData = search.getPlainString().c_str();
-	const char * filePtr = fileData + toolInfo.epOffset;
-	const char * fileEnd = fileData + search.getPlainString().length();
+	const uint8_t * fileData = reinterpret_cast<const uint8_t *>(search.getPlainString().c_str());
+	const uint8_t * filePtr = fileData + toolInfo.epOffset;
+	const uint8_t * fileEnd = fileData + search.getPlainString().length();
 	unsigned long long offset1;
 
 	// Skip up to 8 NOPs or JMPs
