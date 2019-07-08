@@ -360,7 +360,7 @@ const uint8_t * PeHeuristics::skip_NOP_JMP8_JMP32(const uint8_t * codeBegin, con
 				movePtrBy = 1;
 				break;
 
-			case 0xEB:
+			case 0xEB:	// JMP rel8
 				if((codePtr + 2) > codeEnd || codePtr[1] == 0x80)
 					return nullptr;
 				movePtrBy = static_cast<int8_t>(codePtr[1]);
