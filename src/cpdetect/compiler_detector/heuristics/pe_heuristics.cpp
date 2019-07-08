@@ -669,6 +669,24 @@ void PeHeuristics::getActiveMarkHeuristics()
 }
 
 /**
+ * Detection of Petite packer
+ */
+void PeHeuristics::getPetiteHeuristics()
+{
+	if (search.exactComparison("B8--------608DA800----FF68--------6A40680030000068------006A00FF90----00008944241CBB--0300008DB5------008BF850E80A00000074078B44", toolInfo.epOffset) ||
+		search.exactComparison("B8--------669C60508D905C0100006800004000833A000F84--------8B04248B0A0FBAF11F7313FD8BF08BF8037204037A08F3A583C20CFCEBD983C210",     toolInfo.epOffset) ||
+		search.exactComparison("B8--------669C60508BD8030068--------6A00FF50148BCC8DA054BC0000508BC38D9010160000680000----51508004240850800424425080042461508004", toolInfo.epOffset) ||
+		search.exactComparison("B8--------669C60508BD8030068--------6A00FF501C894308680000----8B3C248B336681C780078D741E08893B538B5E10B880080000566A0250576A--6A", toolInfo.epOffset) ||
+		search.exactComparison("B8--------669C60508BD8030068--------6A00FF501C8943088BC303006870BC00006A00FF501C8BCC8DA070BC000089612E536800004000518B7C24048B33", toolInfo.epOffset) ||
+		search.exactComparison("B8--------669C60508D8800----008D90----00008BDC8BE1680000----53508004240850800424425080042461508004249D50800424BB833A000F84DC1400", toolInfo.epOffset) ||
+		search.exactComparison("B8--------68--------64FF350000000064892500000000669C6050", toolInfo.epOffset) ||
+		search.exactComparison("B8--------6A--68--------64FF350000000064892500000000669C60508BD8030068--------6A00FF50", toolInfo.epOffset))
+	{
+		addPacker(DetectionMethod::STRING_SEARCH_H, DetectionStrength::HIGH, "Petite");
+	}
+}
+
+/**
  * Try to detect PELock packer
  */
 void PeHeuristics::getPelockHeuristics()
@@ -1948,6 +1966,7 @@ void PeHeuristics::getFormatSpecificCompilerHeuristics()
 	getSecuROMHeuristics();
 	getMPRMMGVAHeuristics();
 	getActiveMarkHeuristics();
+	getPetiteHeuristics();
 	getPelockHeuristics();
 	getEzirizReactorHeuristics();
 	getUpxHeuristics();
