@@ -46,7 +46,7 @@ class PeHeuristics : public Heuristics
 
 		/// @name Heuristics for detection of used compiler or packer
 		/// @{
-        uint32_t get_uint32_unaligned(const uint8_t * codePtr);
+        int32_t get_int32_unaligned(const uint8_t * codePtr);
         const uint8_t * skip_NOP_JMP8_JMP32(const uint8_t * codeBegin, const uint8_t * codePtr, const uint8_t * codeEnd, size_t maxCount);
 		void getHeaderStyleHeuristics();
 		void getSlashedSignatures();

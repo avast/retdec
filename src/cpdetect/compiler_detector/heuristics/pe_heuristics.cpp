@@ -101,7 +101,7 @@ const std::vector<std::string> msvcRuntimeStrings =
 	toWide(msvcRuntimeString, 4)
 };
 
-const PeHeaderStyle headerStyles[] = 
+const std::vector<PeHeaderStyle> headerStyles = 
 {
 //	{"Unknown",      { 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000 }},
 	{"Microsoft",	 { 0x0090, 0x0003, 0x0000, 0x0004, 0x0000, 0xFFFF, 0x0000, 0x00B8, 0x0000, 0x0000, 0x0000, 0x0040, 0x0000 }},
@@ -338,9 +338,9 @@ void PeHeuristics::getVisualBasicHeuristics()
 	}
 }
 
-uint32_t PeHeuristics::get_uint32_unaligned(const uint8_t * codePtr)
+int32_t PeHeuristics::get_int32_unaligned(const uint8_t * codePtr)
 {
-	const uint32_t * codePtrInt32 = reinterpret_cast<const uint32_t *>(codePtr);
+	const int32_t * codePtrInt32 = reinterpret_cast<const int32_t *>(codePtr);
 
     return codePtrInt32[0];
 }
@@ -363,13 +363,13 @@ const uint8_t * PeHeuristics::skip_NOP_JMP8_JMP32(const uint8_t * codeBegin, con
 			case 0xEB:
 				if((codePtr + 2) > codeEnd || codePtr[1] == 0x80)
 					return nullptr;
-				movePtrBy = (ssize_t)(signed char)codePtr[1];
+				movePtrBy = static_cast<int8_t>(codePtr[1]);
 				break;
 
 			case 0xE9:
-				if ((codePtr + 5) > codeEnd || get_uint32_unaligned(codePtr+1) == 0x80000000)
+				if ((codePtr + 5) > codeEnd || get_int32_unaligned(codePtr+1) == 0x80000000)
 					return nullptr;
-				movePtrBy = (ssize_t)(int32_t)get_uint32_unaligned(codePtr + 1);
+				movePtrBy = get_int32_unaligned(codePtr + 1);
 				break;
 
 			default:
@@ -399,7 +399,7 @@ void PeHeuristics::getHeaderStyleHeuristics()
 	{
 		const char * e_cblp = content.c_str() + 0x02;
 
-		for (size_t i = 0; i < _countof(headerStyles); i++)
+		for (size_t i = 0; i < headerStyles.size(); i++)
 		{
 			if(!memcmp(e_cblp, headerStyles[i].headerWords, sizeof(headerStyles[i].headerWords)))
 			{
