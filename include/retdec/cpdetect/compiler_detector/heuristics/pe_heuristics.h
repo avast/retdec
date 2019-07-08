@@ -13,6 +13,12 @@
 namespace retdec {
 namespace cpdetect {
 
+struct PeHeaderStyle
+{
+	const char * headerStyle;
+	uint16_t headerWords[0x0D];
+};
+
 /**
  * PE-specific heuristics
  */
@@ -40,12 +46,17 @@ class PeHeuristics : public Heuristics
 
 		/// @name Heuristics for detection of used compiler or packer
 		/// @{
+        uint32_t get_uint32_unaligned(const char * codePtr);
+        const char * skip_NOP_JMP8_JMP32(const char * codeBegin, const char * codePtr, const char * codeEnd, size_t maxCount);
+		void getHeaderStyleHeuristics();
 		void getSlashedSignatures();
 		void getMorphineHeuristics();
 		void getStarForceHeuristics();
 		void getSafeDiscHeuristics();
 		bool checkSecuROMSignature(const char * fileData, const char * fileDataEnd, uint32_t FileOffset);
 		void getSecuROMHeuristics();
+		void getMPRMMGVAHeuristics();
+		void getActiveMarkHeuristics();
 		void getPelockHeuristics();
 		void getEzirizReactorHeuristics();
 		void getUpxHeuristics();

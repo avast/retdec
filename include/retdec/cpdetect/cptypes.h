@@ -63,6 +63,7 @@ enum class DetectionMethod
 	COMMENT_H,           ///< .comment section
 	NOTE_H,              ///< .note section
 	MANIFEST_H,          ///< manifest resource
+	HEADER_H,            ///< MZ header
 	OTHER_H              ///< other heuristic
 };
 
@@ -175,16 +176,19 @@ struct ToolInformation
 	std::vector<DetectResult> detectedTools;        ///< detected tools (compilers, packers...)
 	std::vector<DetectLanguage> detectedLanguages;  ///< detected programming language(s)
 
-	bool entryPointOffset = false;   ///< @c false if file has no has no or invalid EP offset
-	unsigned long long epOffset;     ///< entry point offset
+	bool entryPointOffset = false;                  ///< @c false if file has no has no or invalid EP offset
+	unsigned long long epOffset;                    ///< entry point offset
 
-	bool entryPointAddress = false;  ///< @c false if file has no has no or invalid EP address
-	unsigned long long epAddress;    ///< entry point address
-	unsigned long long imageBase;    ///< image base address
+	bool entryPointAddress = false;                 ///< @c false if file has no has no or invalid EP address
+	unsigned long long epAddress;                   ///< entry point address
+	unsigned long long imageBase;                   ///< image base address
 
-	bool entryPointSection = false;         ///< @c false if file has no or invalid EP section
-	retdec::fileformat::Section epSection;  ///< entry point section
-	std::string epBytes;                    ///< hexadecimal representation of entry point bytes
+	unsigned long long overlayOffset;               ///< offset of the file overlay. 0 if no overlay
+	size_t overlaySize = 0;                         ///< length of the file overlay. 0 if no overlay
+
+	bool entryPointSection = false;                 ///< @c false if file has no or invalid EP section
+	retdec::fileformat::Section epSection;          ///< entry point section
+	std::string epBytes;                            ///< hexadecimal representation of entry point bytes
 
 	ToolInformation();
 	~ToolInformation();
