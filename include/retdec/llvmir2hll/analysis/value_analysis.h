@@ -179,7 +179,7 @@ private:
 	/// Set of variables which must be accessed.
 	VarSet mustBeAccessedVars;
 
-	/// List of function calls;
+	/// List of function calls.
 	CallVector calls;
 
 	/// Set of variables whose address is taken.
