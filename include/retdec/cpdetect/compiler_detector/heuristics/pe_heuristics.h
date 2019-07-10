@@ -17,7 +17,7 @@ struct PeHeaderStyle
 {
 	// Note: Having "(const) std::string" instead of "const char *" here makes MS Visual Studio 2017 compiler (v 15.9.8)
 	// exit with "fatal error C1001: An internal error has occurred in the compiler"
-//	const std::string headerStyle;
+	// const std::string headerStyle;
 	const char * headerStyle;
 	uint16_t headerWords[0x0D];
 };
