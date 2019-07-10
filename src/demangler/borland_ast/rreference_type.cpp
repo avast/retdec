@@ -80,4 +80,3 @@ void RReferenceTypeNode::printRight(std::ostream &s) const
 }    // borland
 }    // demangler
 }    // retdec
-

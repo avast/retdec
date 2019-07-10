@@ -36,6 +36,7 @@ class FileDetector : private retdec::utils::NonCopyable
 		void getCertificates();
 		void getTlsInfo();
 		void getLoaderInfo();
+		void getAnomalies();
 		/// @}
 	protected:
 		FileInformation &fileInfo;                                  ///< information about file

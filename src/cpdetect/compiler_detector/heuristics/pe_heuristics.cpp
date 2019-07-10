@@ -488,7 +488,6 @@ void PeHeuristics::getMorphineHeuristics()
 void PeHeuristics::getStarForceHeuristics()
 {
 	const PeLib::MzHeader & mzHeader = peParser.getMzHeader();
-	const auto &content = search.getPlainString();
 	const auto epSection = toolInfo.epSection.getIndex();
 	uint32_t e_lfanew = mzHeader.getAddressOfPeHeader();
 	uint16_t e_cblp = mzHeader.getBytesOnLastPage();
@@ -499,7 +498,7 @@ void PeHeuristics::getStarForceHeuristics()
 		if (search.exactComparison("68--------FF25", toolInfo.epOffset) || search.exactComparison("FF25", toolInfo.epOffset) || search.exactComparison("E8--------68ADDE0080FF15", toolInfo.epOffset))
 		{
 			// Version A
-			if (!strncmp(sections[0]->getName().c_str(), ".sforce", 7) && !strncmp(sections[epSection]->getName().c_str(), ".start", 6)  && (e_cblp == (uint16_t)e_lfanew) && (e_cp == 1))
+			if (!strncmp(sections[0]->getName().c_str(), ".sforce", 7) && !strncmp(sections[epSection]->getName().c_str(), ".start", 6) && (e_cblp == static_cast<uint16_t>(e_lfanew)) && (e_cp == 1))
 			{
 				addPacker(DetectionMethod::COMBINED, DetectionStrength::MEDIUM, "StarForce.A");
 				return;
@@ -581,7 +580,7 @@ bool PeHeuristics::checkSecuROMSignature(const char * fileData, const char * fil
 
 	if (fileData <= header && (header + 0x08) <= fileDataEnd)
 	{
-		uint32_t * secuRomHeader = (uint32_t *)header;
+		const uint32_t * secuRomHeader = reinterpret_cast<const uint32_t *>(header);
 
 		if (secuRomHeader[1] == SecuRomMagic)
 		{

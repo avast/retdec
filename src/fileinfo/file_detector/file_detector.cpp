@@ -223,7 +223,6 @@ void FileDetector::getTlsInfo()
 /**
  * Get loader information
  */
-
 void FileDetector::getLoaderInfo()
 {
 	// Propagate loader error no matter if the Image pointer will be created or not
@@ -253,6 +252,15 @@ void FileDetector::getLoaderInfo()
 		fileInfo.setLoaderStatusMessage(image->getStatusMessage());
 	}
 }
+
+/**
+ * Get anomalies
+ */
+void FileDetector::getAnomalies()
+{
+	fileInfo.setAnomalies(fileParser->getAnomalies());
+}
+
 
 /**
  * @fn void FileDetector::detectFileClass()
@@ -339,6 +347,7 @@ void FileDetector::getAllInformation()
 		getTlsInfo();
 		getLoaderInfo();
 		getStrings();
+		getAnomalies();
 	}
 }
 

@@ -7,6 +7,8 @@
 * New Feature: Added presentation of version info from PE file in `retdec-fileinfo` ([#408](https://github.com/avast/retdec/issues/408), [#519](https://github.com/avast/retdec/pull/519)).
 * New Feature: Added presentation of thread-local storage directory from PE file in `retdec-fileinfo` ([#417](https://github.com/avast/retdec/issues/417), [#523](https://github.com/avast/retdec/pull/523)).
 * New Feature: Added presentation of missing dependencies of PE files in `retdec-fileinfo` ([#585](https://github.com/avast/retdec/pull/585)).
+* New Feature: Added presentation of anomalies of PE files in `retdec-fileinfo` ([#415](https://github.com/avast/retdec/issues/415), [#570](https://github.com/avast/retdec/pull/570)).
+* New Feature: Added heuristic detection of StarForce, SecuROM and SafeDisc ([#600](https://github.com/avast/retdec/pull/600)).
 * Enhancement: Improved handling of ELF object files and ELF thunks (implemented in PR [#577](https://github.com/avast/retdec/pull/577), solved issues [#184](https://github.com/avast/retdec/issues/184), [#480](https://github.com/avast/retdec/issues/480), and partially solved [#201](https://github.com/avast/retdec/issues/201)).
 * Enhancement: Demangler rewritten ([#95](https://github.com/avast/retdec/issues/95)).
 * Enhancement: Added macOS and Linux (Ubuntu, Debian, Fedora) release builds ([#526](https://github.com/avast/retdec/issues/526)).
@@ -14,6 +16,7 @@
 * Enhancement: Parallelized compilation of YARA rules during installation ([#540](https://github.com/avast/retdec/issues/540)).
 * Enhancement: Updated LLVM to version 8.0.0 ([#110](https://github.com/avast/retdec/issues/110)).
 * Enhancement: Updated YARA to version 3.9 ([#527](https://github.com/avast/retdec/pull/527)).
+* Enhancement: Updated OpenSSL to version 1.1.1c ([#601](https://github.com/avast/retdec/pull/601)). This fixes build of OpenSSL on macOS Mojave ([#439](https://github.com/avast/retdec/issues/439)).
 * Fix: Fixed build on BSD systems ([#598](https://github.com/avast/retdec/pull/598)).
 * Fix: Resources which are located in the different section than resource tree are now properly parsed ([#596](https://github.com/avast/retdec/pull/596)).
 * Fix: Version information which contained strings shorter than reported are now properly parsed ([#596](https://github.com/avast/retdec/pull/596)).
@@ -21,6 +24,7 @@
 * Fix: Fixed crashes of `retdec-unpacker` when trying to unpack corrupted ELF samples having incorrect size of additional data ([#582](https://github.com/avast/retdec/issues/582)).
 * Fix: Fixed several Mach-O parsing crashes ([#581](https://github.com/avast/retdec/issues/581), [#561](https://github.com/avast/retdec/issues/561), [#568](https://github.com/avast/retdec/issues/568)).
 * Fix: Fixed import table hashes computation - hashes are no longer produced from empty strings ([#460](https://github.com/avast/retdec/issues/460)).
+* Fix: Fixed build on macOS Mojave by updating OpenSSL and using `xcrun` ([#439](https://github.com/avast/retdec/issues/439)).
 
 # v3.3 (2019-03-18)
 

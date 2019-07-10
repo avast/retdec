@@ -213,10 +213,8 @@ foreach(LLVM_LIB ${LLVM_LIB_LIST})
 	target_link_libraries(llvm INTERFACE optimized ${binary_dir}/${RELEASE_DIR}lib/${CMAKE_STATIC_LIBRARY_PREFIX}${LLVM_LIB}${CMAKE_STATIC_LIBRARY_SUFFIX})
 endforeach(LLVM_LIB)
 
-if(CMAKE_THREAD_LIBS_INIT)
-	target_link_libraries(llvm INTERFACE debug     ${CMAKE_THREAD_LIBS_INIT})
-	target_link_libraries(llvm INTERFACE optimized ${CMAKE_THREAD_LIBS_INIT})
-endif()
+target_link_libraries(llvm INTERFACE debug     Threads::Threads)
+target_link_libraries(llvm INTERFACE optimized Threads::Threads)
 
 if(UNIX)
 	set(EXECINFO "")

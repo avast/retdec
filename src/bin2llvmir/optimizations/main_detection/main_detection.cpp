@@ -5,6 +5,7 @@
 */
 
 #include <algorithm>
+#include <cstdint>
 
 #include <llvm/IR/Operator.h>
 
@@ -128,7 +129,7 @@ retdec::utils::Address MainDetection::getFromFunctionNames()
 {
 	// Order is important: first -> highest priority, last -> lowest  priority.
 	std::vector<std::string> names = {"main", "_main", "wmain", "WinMain"};
-	std::pair<Address, unsigned> ret = {Address(), names.size()};
+	std::pair<Address, std::size_t> ret = {Address(), names.size()};
 
 	for (auto& p : _config->getConfig().functions)
 	{
@@ -136,7 +137,7 @@ retdec::utils::Address MainDetection::getFromFunctionNames()
 		auto it = std::find(names.begin(), names.end(), f.getName());
 		if (it != names.end())
 		{
-			auto index = std::distance(names.begin(), it);
+			std::size_t index = std::distance(names.begin(), it);
 			if (index <= ret.second)
 			{
 				ret = {f.getStart(), index};

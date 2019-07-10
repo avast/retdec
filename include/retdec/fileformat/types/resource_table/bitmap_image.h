@@ -103,4 +103,3 @@ class BitmapImage
 } // namespace retdec
 
 #endif
-

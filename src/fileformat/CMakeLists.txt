@@ -75,6 +75,8 @@ set(FILEFORMAT_SOURCES
 	file_format/elf/elf_format.cpp
 )
 
+find_package(Threads REQUIRED)
+
 add_library(retdec-fileformat STATIC ${FILEFORMAT_SOURCES})
-target_link_libraries(retdec-fileformat retdec-crypto retdec-utils pelib elfio llvm)
+target_link_libraries(retdec-fileformat retdec-crypto retdec-utils pelib elfio llvm Threads::Threads)
 target_include_directories(retdec-fileformat PUBLIC ${PROJECT_SOURCE_DIR}/include/)

@@ -9,6 +9,7 @@
 
 #include <memory>
 
+#include "retdec/utils/alignment.h"
 #include "retdec/utils/range.h"
 #include "retdec/utils/string.h"
 #include "retdec/fileformat/file_format/pe/pe_template_aux.h"
@@ -172,6 +173,18 @@ template<int bits> unsigned long long peSizeOfOptionalHeader(const PeLib::PeHead
 }
 
 /**
+ * Find out if optional header SizeOfHeaders is rounded up to multiple of FileAlignment
+ * @param peHeader Parser of PE header
+ * @return @c true if SizeOfHeaders is rounded up to multiple of FileAlignment, @c false otherwise
+ */
+template<int bits> unsigned long long peIsSizeOfHeaderMultipleOfFileAlignment(
+									const PeLib::PeHeaderT<bits> &peHeader)
+{
+	std::uint64_t remainder;
+	return retdec::utils::isAligned(peHeader.getSizeOfHeaders(), peHeader.getFileAlignment(), remainder);
+}
+
+/**
  * Get file alignment
  * @param peHeader Parser of PE header
  * @return File alignment
@@ -332,9 +345,9 @@ template<int bits> unsigned long long peNumberOfDelayImportedLibraries(const PeL
 }
 
 /**
- * Get number of data directories
+ * Find out if is DLL
  * @param peHeader Parser of PE header
- * @return Number of data directories
+ * @return @c true if is DLL, @c false otherwise
  */
 template<int bits> bool peIsDll(const PeLib::PeHeaderT<bits> &peHeader)
 {

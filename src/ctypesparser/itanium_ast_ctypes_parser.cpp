@@ -262,7 +262,7 @@ std::shared_ptr<ctypes::Type> ItaniumAstCtypesParser::parseNameTypeNode(
 
 	/*
 	 * if (name == "...") return type with name "..."; <-- is implicit
- 	 * is later used to check if function takes variable number of arguments
+	 * is later used to check if function takes variable number of arguments
 	 */
 	return ctypes::NamedType::create(context, name);
 }

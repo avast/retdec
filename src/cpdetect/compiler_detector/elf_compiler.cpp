@@ -73,4 +73,3 @@ ElfCompiler::ElfCompiler(
 
 } // namespace cpdetect
 } // namespace retdec
-

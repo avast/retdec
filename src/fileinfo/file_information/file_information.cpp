@@ -3688,6 +3688,35 @@ bool FileInformation::hasDotnetTypeRefTableRecords() const
 }
 
 /**
+ * Get number of anomalies
+ * @return Number of anomalies
+ */
+std::size_t FileInformation::getNumberOfAnomalies() const
+{
+	return anomalies.size();
+}
+
+/**
+ * Get identifier of anomaly
+ * @param position Index of selected anomaly (indexed from 0)
+ * @return Identifier of selected anomaly
+ */
+std::string FileInformation::getAnomalyIdentifier(std::size_t position) const
+{
+	return (position < getNumberOfAnomalies()) ? anomalies[position].first : "";
+}
+
+/**
+ * Get description of anomaly
+ * @param position Index of selected anomaly (indexed from 0)
+ * @return Description of selected anomaly
+ */
+std::string FileInformation::getAnomalyDescription(std::size_t position) const
+{
+	return (position < getNumberOfAnomalies()) ? anomalies[position].second : "";
+}
+
+/**
  * Set instance status
  * @param state New status of this instance
  */
@@ -4429,6 +4458,15 @@ void FileInformation::setDotnetTypeRefhashMd5(const std::string& md5)
 void FileInformation::setDotnetTypeRefhashSha256(const std::string& sha256)
 {
 	dotnetInfo.setTypeRefhashSha256(sha256);
+}
+
+/**
+ * Sets anomalies
+ * @param anom Anomalies
+ */
+void FileInformation::setAnomalies(const std::vector<std::pair<std::string,std::string>> &anom)
+{
+	anomalies = anom;
 }
 
 /**
