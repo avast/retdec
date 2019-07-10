@@ -5,6 +5,7 @@
  */
 
 #include <initializer_list>
+#include <limits>
 #include <map>
 #include <regex>
 
@@ -367,7 +368,7 @@ const std::uint8_t * PeHeuristics::skip_NOP_JMP8_JMP32(const std::uint8_t * code
 				break;
 
 			case 0xE9:
-				if ((codePtr + 5) > codeEnd || getInt32Unaligned(codePtr+1) == 0x80000000)
+				if ((codePtr + 5) > codeEnd || getInt32Unaligned(codePtr+1) == std::numeric_limits<std::int32_t>::min())
 					return nullptr;
 				movePtrBy = getInt32Unaligned(codePtr + 1);
 				break;
