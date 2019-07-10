@@ -137,7 +137,7 @@ retdec::utils::Address MainDetection::getFromFunctionNames()
 		auto it = std::find(names.begin(), names.end(), f.getName());
 		if (it != names.end())
 		{
-			auto index = std::distance(names.begin(), it);
+			std::size_t index = std::distance(names.begin(), it);
 			if (index <= ret.second)
 			{
 				ret = {f.getStart(), index};
