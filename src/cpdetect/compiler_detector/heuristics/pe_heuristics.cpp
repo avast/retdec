@@ -101,7 +101,7 @@ const std::vector<std::string> msvcRuntimeStrings =
 	toWide(msvcRuntimeString, 4)
 };
 
-const std::vector<PeHeaderStyle> headerStyles = 
+const std::vector<PeHeaderStyle> headerStyles =
 {
 //	{"Unknown",      { 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000 }},
 	{"Microsoft",	 { 0x0090, 0x0003, 0x0000, 0x0004, 0x0000, 0xFFFF, 0x0000, 0x00B8, 0x0000, 0x0000, 0x0000, 0x0040, 0x0000 }},
@@ -338,17 +338,17 @@ void PeHeuristics::getVisualBasicHeuristics()
 	}
 }
 
-int32_t PeHeuristics::get_int32_unaligned(const uint8_t * codePtr)
+std::int32_t PeHeuristics::getInt32Unaligned(const std::uint8_t * codePtr)
 {
-	const int32_t * codePtrInt32 = reinterpret_cast<const int32_t *>(codePtr);
+	const std::int32_t * codePtrInt32 = reinterpret_cast<const std::int32_t *>(codePtr);
 
-    return codePtrInt32[0];
+	return codePtrInt32[0];
 }
 
 /**
  * Parses the code, follows NOPs or JMPs
  */
-const uint8_t * PeHeuristics::skip_NOP_JMP8_JMP32(const uint8_t * codeBegin, const uint8_t * codePtr, const uint8_t * codeEnd, size_t maxCount)
+const std::uint8_t * PeHeuristics::skip_NOP_JMP8_JMP32(const std::uint8_t * codeBegin, const std::uint8_t * codePtr, const std::uint8_t * codeEnd, std::size_t maxCount)
 {
 	while(codeBegin <= codePtr && codePtr < codeEnd && maxCount > 0)
 	{
@@ -361,15 +361,15 @@ const uint8_t * PeHeuristics::skip_NOP_JMP8_JMP32(const uint8_t * codeBegin, con
 				break;
 
 			case 0xEB:	// JMP rel8
-				if((codePtr + 2) > codeEnd || codePtr[1] == 0x80)
+				if ((codePtr + 2) > codeEnd || codePtr[1] == 0x80)
 					return nullptr;
 				movePtrBy = static_cast<int8_t>(codePtr[1]);
 				break;
 
 			case 0xE9:
-				if ((codePtr + 5) > codeEnd || get_int32_unaligned(codePtr+1) == 0x80000000)
+				if ((codePtr + 5) > codeEnd || getInt32Unaligned(codePtr+1) == 0x80000000)
 					return nullptr;
-				movePtrBy = get_int32_unaligned(codePtr + 1);
+				movePtrBy = getInt32Unaligned(codePtr + 1);
 				break;
 
 			default:
@@ -377,7 +377,7 @@ const uint8_t * PeHeuristics::skip_NOP_JMP8_JMP32(const uint8_t * codeBegin, con
 		}
 
 		// If no increment, it means there was no NOP/JMP and we are done
-		if(movePtrBy == 0)
+		if (movePtrBy == 0)
 			break;
 
 		// Check whether we got into the code range
@@ -395,13 +395,13 @@ void PeHeuristics::getHeaderStyleHeuristics()
 	const auto &content = search.getPlainString();
 
 	// Must have at least IMAGE_DOS_HEADER
-	if(content.length() > 0x40)
+	if (content.length() > 0x40)
 	{
 		const char * e_cblp = content.c_str() + 0x02;
 
 		for (size_t i = 0; i < headerStyles.size(); i++)
 		{
-			if(!memcmp(e_cblp, headerStyles[i].headerWords, sizeof(headerStyles[i].headerWords)))
+			if (!std::memcmp(e_cblp, headerStyles[i].headerWords, sizeof(headerStyles[i].headerWords)))
 			{
 				addLinker(DetectionMethod::HEADER_H, DetectionStrength::MEDIUM, headerStyles[i].headerStyle);
 			}
@@ -526,7 +526,7 @@ void PeHeuristics::getStarForceHeuristics()
 		{
 			if (sections[noOfSections - 1]->getName() == ".ps4")
 			{
-				if(sections[0]->getName() == ".text" && sections[1]->getName() == ".data" && sections[2]->getName() == ".data" && sections[3]->getName() == ".share")
+				if (sections[0]->getName() == ".text" && sections[1]->getName() == ".data" && sections[2]->getName() == ".data" && sections[3]->getName() == ".share")
 				{
 					addPacker(DetectionMethod::COMBINED, DetectionStrength::MEDIUM, "StarForce.C");
 					return;
@@ -555,7 +555,7 @@ void PeHeuristics::getSafeDiscHeuristics()
 		for (std::size_t i = 0; i < noOfSections; i++)
 		{
 			// Note that original code does:
-			// if(!strncmp((char *)pSection->Name, "stxt371\0", sizeof("stxt371\0")))
+			// if (!strncmp((char *)pSection->Name, "stxt371\0", sizeof("stxt371\0")))
 			if (sections[i]->getName() == "stxt371")
 			{
 				addPacker(DetectionMethod::SECTION_TABLE_H, DetectionStrength::MEDIUM, "SafeDisc");
@@ -563,7 +563,7 @@ void PeHeuristics::getSafeDiscHeuristics()
 			}
 
 			// Note that original code does:
-			// if(!strncmp((char *)pSection->Name, ".txt\0", sizeof(".txt\0")) || !strncmp((char *)pSection->Name, ".txt2\0", sizeof(".txt2\0")))
+			// if (!strncmp((char *)pSection->Name, ".txt\0", sizeof(".txt\0")) || !strncmp((char *)pSection->Name, ".txt2\0", sizeof(".txt2\0")))
 			if (sections[i]->getName() == ".txt" || sections[i]->getName() == ".txt2")
 			{
 				addPacker(DetectionMethod::SECTION_TABLE_H, DetectionStrength::LOW, "SafeDisc");
@@ -611,7 +611,7 @@ void PeHeuristics::getSecuROMHeuristics()
 	bool foundSecuROM = false;
 
 	// There must be at least 0x2000 extra bytes beyond the last section,
-	// last data directory, last debug directory and digital signature. 
+	// last data directory, last debug directory and digital signature.
 	if (peParser.getOverlaySize() >= 0x2000)
 	{
 		// The entire file must be loaded to memory
@@ -622,12 +622,12 @@ void PeHeuristics::getSecuROMHeuristics()
 			memcpy(&SecuromOffs, fileData + loadedLength - sizeof(uint32_t), sizeof(uint32_t));
 
 			// Verify it
-			if(checkSecuROMSignature(fileData, fileData + loadedLength, SecuromOffs - sizeof(uint32_t)))
+			if (checkSecuROMSignature(fileData, fileData + loadedLength, SecuromOffs - sizeof(uint32_t)))
 				foundSecuROM = true;
-			if(checkSecuROMSignature(fileData, fileData + loadedLength, loadedLength - (SecuromOffs - 0x0C)))
+			if (checkSecuROMSignature(fileData, fileData + loadedLength, loadedLength - (SecuromOffs - 0x0C)))
 				foundSecuROM = true;
-			
-			if(foundSecuROM)
+
+			if (foundSecuROM)
 			{
 				addPacker(DetectionMethod::STRING_SEARCH_H, DetectionStrength::HIGH, "SecuROM");
 			}
@@ -640,9 +640,10 @@ void PeHeuristics::getSecuROMHeuristics()
  */
 void PeHeuristics::getMPRMMGVAHeuristics()
 {
-	const uint8_t * fileData = reinterpret_cast<const uint8_t *>(search.getPlainString().c_str());
+	const auto &content = search.getPlainString();
+	const uint8_t * fileData = reinterpret_cast<const uint8_t *>(content.c_str());
 	const uint8_t * filePtr = fileData + toolInfo.epOffset;
-	const uint8_t * fileEnd = fileData + search.getPlainString().length();
+	const uint8_t * fileEnd = fileData + content.length();
 	unsigned long long offset1;
 
 	// Skip up to 8 NOPs or JMPs
