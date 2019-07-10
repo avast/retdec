@@ -101,6 +101,17 @@ const std::vector<std::string> msvcRuntimeStrings =
 	toWide(msvcRuntimeString, 4)
 };
 
+const std::vector<PeHeaderStyle> headerStyles =
+{
+//	{"Unknown",      { 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000 }},
+	{"Microsoft",	 { 0x0090, 0x0003, 0x0000, 0x0004, 0x0000, 0xFFFF, 0x0000, 0x00B8, 0x0000, 0x0000, 0x0000, 0x0040, 0x0000 }},
+	{"Borland",		 { 0x0050, 0x0002, 0x0000, 0x0004, 0x000F, 0xFFFF, 0x0000, 0x00B8, 0x0000, 0x0000, 0x0000, 0x0040, 0x001A }},
+	{"PowerBasic",	 { 0x000A, 0x0002, 0x0000, 0x0004, 0x000F, 0xFFFF, 0x0000, 0x00C0, 0x0000, 0x0000, 0x0000, 0x0040, 0x0000 }},
+	{"Watcom",		 { 0x0080, 0x0001, 0x0000, 0x0004, 0x0000, 0xFFFF, 0x0000, 0x00B8, 0x0000, 0x0000, 0x0000, 0x0040, 0x0000 }},
+	{"IBM",			 { 0x0091, 0x0001, 0x0001, 0x0005, 0x0021, 0xFFFF, 0x0005, 0x0200, 0x68A3, 0x0000, 0x0003, 0x0040, 0x0000 }},
+//	{"Empty",        { 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0040, 0x0000 }}
+};
+
 /**
  * Try to find string which indicates AutoIt programming language
  * @param content Content of file
@@ -327,6 +338,79 @@ void PeHeuristics::getVisualBasicHeuristics()
 	}
 }
 
+std::int32_t PeHeuristics::getInt32Unaligned(const std::uint8_t * codePtr)
+{
+	const std::int32_t * codePtrInt32 = reinterpret_cast<const std::int32_t *>(codePtr);
+
+	return codePtrInt32[0];
+}
+
+/**
+ * Parses the code, follows NOPs or JMPs
+ */
+const std::uint8_t * PeHeuristics::skip_NOP_JMP8_JMP32(const std::uint8_t * codeBegin, const std::uint8_t * codePtr, const std::uint8_t * codeEnd, std::size_t maxCount)
+{
+	while(codeBegin <= codePtr && codePtr < codeEnd && maxCount > 0)
+	{
+		ssize_t movePtrBy = 0;
+
+		switch (codePtr[0])
+		{
+			case 0x90:  // NOP, move by 1 byte
+				movePtrBy = 1;
+				break;
+
+			case 0xEB:	// JMP rel8
+				if ((codePtr + 2) > codeEnd || codePtr[1] == 0x80)
+					return nullptr;
+				movePtrBy = static_cast<int8_t>(codePtr[1]);
+				break;
+
+			case 0xE9:
+				if ((codePtr + 5) > codeEnd || getInt32Unaligned(codePtr+1) == 0x80000000)
+					return nullptr;
+				movePtrBy = getInt32Unaligned(codePtr + 1);
+				break;
+
+			default:
+				break;
+		}
+
+		// If no increment, it means there was no NOP/JMP and we are done
+		if (movePtrBy == 0)
+			break;
+
+		// Check whether we got into the code range
+		codePtr = codePtr + movePtrBy;
+		maxCount--;
+	}
+	return codePtr;
+}
+
+/**
+ * Detect header heuristics
+ */
+void PeHeuristics::getHeaderStyleHeuristics()
+{
+	const auto &content = search.getPlainString();
+
+	// Must have at least IMAGE_DOS_HEADER
+	if (content.length() > 0x40)
+	{
+		const char * e_cblp = content.c_str() + 0x02;
+
+		for (size_t i = 0; i < headerStyles.size(); i++)
+		{
+			if (!std::memcmp(e_cblp, headerStyles[i].headerWords, sizeof(headerStyles[i].headerWords)))
+			{
+				addLinker(DetectionMethod::HEADER_H, DetectionStrength::MEDIUM, headerStyles[i].headerStyle);
+			}
+		}
+
+	}
+}
+
+
 /**
  * Try to detect used compiler or packer based on slashed signatures
  */
@@ -441,7 +525,7 @@ void PeHeuristics::getStarForceHeuristics()
 		{
 			if (sections[noOfSections - 1]->getName() == ".ps4")
 			{
-				if(sections[0]->getName() == ".text" && sections[1]->getName() == ".data" && sections[2]->getName() == ".data" && sections[3]->getName() == ".share")
+				if (sections[0]->getName() == ".text" && sections[1]->getName() == ".data" && sections[2]->getName() == ".data" && sections[3]->getName() == ".share")
 				{
 					addPacker(DetectionMethod::COMBINED, DetectionStrength::MEDIUM, "StarForce.C");
 					return;
@@ -470,7 +554,7 @@ void PeHeuristics::getSafeDiscHeuristics()
 		for (std::size_t i = 0; i < noOfSections; i++)
 		{
 			// Note that original code does:
-			// if(!strncmp((char *)pSection->Name, "stxt371\0", sizeof("stxt371\0")))
+			// if (!strncmp((char *)pSection->Name, "stxt371\0", sizeof("stxt371\0")))
 			if (sections[i]->getName() == "stxt371")
 			{
 				addPacker(DetectionMethod::SECTION_TABLE_H, DetectionStrength::MEDIUM, "SafeDisc");
@@ -478,7 +562,7 @@ void PeHeuristics::getSafeDiscHeuristics()
 			}
 
 			// Note that original code does:
-			// if(!strncmp((char *)pSection->Name, ".txt\0", sizeof(".txt\0")) || !strncmp((char *)pSection->Name, ".txt2\0", sizeof(".txt2\0")))
+			// if (!strncmp((char *)pSection->Name, ".txt\0", sizeof(".txt\0")) || !strncmp((char *)pSection->Name, ".txt2\0", sizeof(".txt2\0")))
 			if (sections[i]->getName() == ".txt" || sections[i]->getName() == ".txt2")
 			{
 				addPacker(DetectionMethod::SECTION_TABLE_H, DetectionStrength::LOW, "SafeDisc");
@@ -537,16 +621,74 @@ void PeHeuristics::getSecuROMHeuristics()
 			memcpy(&SecuromOffs, fileData + loadedLength - sizeof(uint32_t), sizeof(uint32_t));
 
 			// Verify it
-			if(checkSecuROMSignature(fileData, fileData + loadedLength, SecuromOffs - sizeof(uint32_t)))
+			if (checkSecuROMSignature(fileData, fileData + loadedLength, SecuromOffs - sizeof(uint32_t)))
 				foundSecuROM = true;
-			if(checkSecuROMSignature(fileData, fileData + loadedLength, loadedLength - (SecuromOffs - 0x0C)))
+			if (checkSecuROMSignature(fileData, fileData + loadedLength, loadedLength - (SecuromOffs - 0x0C)))
 				foundSecuROM = true;
 
-			if(foundSecuROM)
+			if (foundSecuROM)
 			{
 				addPacker(DetectionMethod::STRING_SEARCH_H, DetectionStrength::HIGH, "SecuROM");
 			}
 		}
+	}
+}
+
+/**
+ * Detection of MPRMMGVA packer
+ */
+void PeHeuristics::getMPRMMGVAHeuristics()
+{
+	const auto &content = search.getPlainString();
+	const uint8_t * fileData = reinterpret_cast<const uint8_t *>(content.c_str());
+	const uint8_t * filePtr = fileData + toolInfo.epOffset;
+	const uint8_t * fileEnd = fileData + content.length();
+	unsigned long long offset1;
+
+	// Skip up to 8 NOPs or JMPs
+	filePtr = skip_NOP_JMP8_JMP32(fileData, filePtr, fileEnd, 8);
+	if (filePtr != nullptr)
+	{
+		if (search.exactComparison("892504----00", toolInfo.epOffset))
+		{
+			offset1 = search.findUnslashedSignature("64FF3500000000", toolInfo.epOffset, toolInfo.epOffset + 0x80);
+			if (offset1 != 0)
+			{
+				if (search.findUnslashedSignature("64892500000000", toolInfo.epOffset + offset1, toolInfo.epOffset + offset1 + 0x40))
+				{
+					addPacker(DetectionMethod::STRING_SEARCH_H, DetectionStrength::HIGH, "MPRMMGVA");
+				}
+			}
+		}
+	}
+}
+
+/**
+ * Detection of ActiveMark packer
+ */
+void PeHeuristics::getActiveMarkHeuristics()
+{
+	if (search.exactComparison("00544D53414D564F48A49BFDFF2624E9D7F1D6F0D6AEBEFCD6DFB5C1D01F07CE", toolInfo.overlayOffset))
+	{
+		addPacker(DetectionMethod::STRING_SEARCH_H, DetectionStrength::HIGH, "ActiveMark");
+	}
+}
+
+/**
+ * Detection of Petite packer
+ */
+void PeHeuristics::getPetiteHeuristics()
+{
+	if (search.exactComparison("B8--------608DA800----FF68--------6A40680030000068------006A00FF90----00008944241CBB--0300008DB5------008BF850E80A00000074078B44", toolInfo.epOffset) ||
+		search.exactComparison("B8--------669C60508D905C0100006800004000833A000F84--------8B04248B0A0FBAF11F7313FD8BF08BF8037204037A08F3A583C20CFCEBD983C210",     toolInfo.epOffset) ||
+		search.exactComparison("B8--------669C60508BD8030068--------6A00FF50148BCC8DA054BC0000508BC38D9010160000680000----51508004240850800424425080042461508004", toolInfo.epOffset) ||
+		search.exactComparison("B8--------669C60508BD8030068--------6A00FF501C894308680000----8B3C248B336681C780078D741E08893B538B5E10B880080000566A0250576A--6A", toolInfo.epOffset) ||
+		search.exactComparison("B8--------669C60508BD8030068--------6A00FF501C8943088BC303006870BC00006A00FF501C8BCC8DA070BC000089612E536800004000518B7C24048B33", toolInfo.epOffset) ||
+		search.exactComparison("B8--------669C60508D8800----008D90----00008BDC8BE1680000----53508004240850800424425080042461508004249D50800424BB833A000F84DC1400", toolInfo.epOffset) ||
+		search.exactComparison("B8--------68--------64FF350000000064892500000000669C6050", toolInfo.epOffset) ||
+		search.exactComparison("B8--------6A--68--------64FF350000000064892500000000669C60508BD8030068--------6A00FF50", toolInfo.epOffset))
+	{
+		addPacker(DetectionMethod::STRING_SEARCH_H, DetectionStrength::HIGH, "Petite");
 	}
 }
 
@@ -1822,11 +1964,15 @@ void PeHeuristics::getFormatSpecificLanguageHeuristics()
 
 void PeHeuristics::getFormatSpecificCompilerHeuristics()
 {
+	getHeaderStyleHeuristics();
 	getSlashedSignatures();
 	getMorphineHeuristics();
 	getStarForceHeuristics();
 	getSafeDiscHeuristics();
 	getSecuROMHeuristics();
+	getMPRMMGVAHeuristics();
+	getActiveMarkHeuristics();
+	getPetiteHeuristics();
 	getPelockHeuristics();
 	getEzirizReactorHeuristics();
 	getUpxHeuristics();

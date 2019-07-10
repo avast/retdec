@@ -532,6 +532,12 @@ ReturnCode CompilerDetector::getAllInformation()
 	fileParser.getImageBaseAddress(toolInfo.imageBase);
 	toolInfo.entryPointAddress = fileParser.getEpAddress(toolInfo.epAddress);
 	toolInfo.entryPointOffset = fileParser.getEpOffset(toolInfo.epOffset);
+
+	if((toolInfo.overlaySize = fileParser.getOverlaySize()) != 0)
+	{
+		toolInfo.overlayOffset = fileParser.getDeclaredFileLength();
+	}
+
 	const bool invalidEntryPoint = !toolInfo.entryPointAddress || !toolInfo.entryPointOffset;
 	if (!fileParser.getHexEpBytes(toolInfo.epBytes, cpParams.epBytesCount)
 			&& !invalidEntryPoint && !fileParser.isInValidState())

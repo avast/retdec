@@ -127,7 +127,8 @@ DetectLanguage::~DetectLanguage()
 ToolInformation::ToolInformation()
 	: epOffset(std::numeric_limits<unsigned long long>::max()),
 		epAddress(std::numeric_limits<unsigned long long>::max()),
-		imageBase(std::numeric_limits<unsigned long long>::max())
+		imageBase(std::numeric_limits<unsigned long long>::max()),
+		overlayOffset(0)
 {
 
 }
@@ -367,6 +368,9 @@ std::string detectionMetodToString(DetectionMethod method)
 
 		case DetectionMethod::MANIFEST_H:
 			return "manifest heuristic";
+
+		case DetectionMethod::HEADER_H:
+			return "dos header style";
 
 		case DetectionMethod::OTHER_H:
 			return "heuristic";
