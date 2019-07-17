@@ -25,6 +25,7 @@
 * Fix: Fixed several Mach-O parsing crashes ([#581](https://github.com/avast/retdec/issues/581), [#561](https://github.com/avast/retdec/issues/561), [#568](https://github.com/avast/retdec/issues/568)).
 * Fix: Fixed import table hashes computation - hashes are no longer produced from empty strings ([#460](https://github.com/avast/retdec/issues/460)).
 * Fix: Fixed build on macOS Mojave by updating OpenSSL and using `xcrun` ([#439](https://github.com/avast/retdec/issues/439)).
+* Fix: Export ordinals are now correctly calculated as relative to the base ([#612](https://github.com/avast/retdec/issues/612), [#10](https://github.com/avast/pelib/pull/10)).
 
 # v3.3 (2019-03-18)
 
