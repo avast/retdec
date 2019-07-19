@@ -1,5 +1,5 @@
 find_package(Threads REQUIRED)
-if(UNIX)
+if(UNIX OR MINGW)
 	find_package(ZLIB REQUIRED)
 endif()
 
@@ -223,6 +223,9 @@ if(UNIX)
 	endif()
 	target_link_libraries(llvm INTERFACE debug     ${ZLIB_LIBRARIES} ${CMAKE_DL_LIBS} ${EXECINFO})
 	target_link_libraries(llvm INTERFACE optimized ${ZLIB_LIBRARIES} ${CMAKE_DL_LIBS} ${EXECINFO})
+elseif(MINGW)
+	target_link_libraries(llvm INTERFACE debug     ${ZLIB_LIBRARIES})
+	target_link_libraries(llvm INTERFACE optimized ${ZLIB_LIBRARIES})
 endif()
 
 # Set include directories.

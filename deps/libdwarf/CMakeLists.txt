@@ -71,12 +71,17 @@ target_include_directories(libdwarf SYSTEM INTERFACE ${source_dir}/libdwarf)
 if(MSVC)
 	target_link_libraries(libdwarf INTERFACE ${binary_dir}/libdwarf/libdwarf/$<CONFIGURATION>/${CMAKE_STATIC_LIBRARY_PREFIX}retdec-libdwarf.lib)
 	target_link_libraries(libdwarf INTERFACE ${binary_dir}/libelf/lib/$<CONFIGURATION>/${CMAKE_STATIC_LIBRARY_PREFIX}retdec-libelf.lib)
+elseif(MSYS)
+	target_link_libraries(libdwarf INTERFACE ${LIBDWARF_INSTALL_DIR}/bin/${CMAKE_STATIC_LIBRARY_PREFIX}retdec-libdwarf${CMAKE_SHARED_LIBRARY_SUFFIX})
+	target_link_libraries(libdwarf INTERFACE ${LIBDWARF_INSTALL_DIR}/bin/${CMAKE_STATIC_LIBRARY_PREFIX}retdec-libelf${CMAKE_SHARED_LIBRARY_SUFFIX})
 else() # Linux
 	target_link_libraries(libdwarf INTERFACE ${LIBDWARF_INSTALL_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}retdec-libdwarf${CMAKE_SHARED_LIBRARY_SUFFIX})
 	target_link_libraries(libdwarf INTERFACE ${LIBDWARF_INSTALL_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}retdec-libelf${CMAKE_SHARED_LIBRARY_SUFFIX})
 endif()
 
 if(MSVC)
+	install(DIRECTORY "${LIBDWARF_INSTALL_DIR}/bin" DESTINATION "${CMAKE_INSTALL_PREFIX}")
+elseif(MSYS)
 	install(DIRECTORY "${LIBDWARF_INSTALL_DIR}/bin" DESTINATION "${CMAKE_INSTALL_PREFIX}")
 else() # Linux
 	install(DIRECTORY "${LIBDWARF_INSTALL_DIR}/lib" DESTINATION "${CMAKE_INSTALL_PREFIX}")
