@@ -16,7 +16,7 @@ set(RETDEC_UTILS_SOURCES
 
 add_library(retdec-utils STATIC ${RETDEC_UTILS_SOURCES})
 target_link_libraries(retdec-utils whereami)
-if(MSVC)
+if(WIN32)
 	target_link_libraries(retdec-utils shlwapi) # shlwapi.dll for PathRemoveFileSpec()
 endif()
 target_link_libraries(retdec-utils mpark_variant)
