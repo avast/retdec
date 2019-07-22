@@ -961,6 +961,13 @@ void ParamReturn::applyToIr(DataFlowEntry& de)
 		}
 	}
 
+	// Set used calling convention to config
+	auto* cf = _config->getConfigFunction(fnc);
+	if (cf)
+	{
+		cf->callingConvention = de.getCallingConvention();
+	}
+
 	IrModifier irm(_module, _config);
 	auto* newFnc = irm.modifyFunction(
 			fnc,
