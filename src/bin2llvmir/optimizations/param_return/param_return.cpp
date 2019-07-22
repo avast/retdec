@@ -675,6 +675,14 @@ void ParamReturn::filterCalls()
 
 		filters[cc]->estimateRetValue(&de);
 
+		if (_abi->supportsCallingConvention(cc))
+		{
+			de.setCallingConvention(cc);
+		}
+		else
+		{
+			de.setCallingConvention(_abi->getDefaultCallingConventionID());
+		}
 		modifyType(de);
 
 		analyzeWithDemangler(de);
