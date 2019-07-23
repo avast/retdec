@@ -60,7 +60,8 @@ class PeHeuristics : public Heuristics
 		void getSecuROMHeuristics();
 		void getMPRMMGVAHeuristics();
 		void getActiveMarkHeuristics();
-		void getPetiteHeuristics();
+        void getRLPackHeuristics();
+        void getPetiteHeuristics();
 		void getPelockHeuristics();
 		void getEzirizReactorHeuristics();
 		void getUpxHeuristics();
