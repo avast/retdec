@@ -676,6 +676,21 @@ void PeHeuristics::getActiveMarkHeuristics()
 }
 
 /**
+ * Detection of RLPack packer
+ */
+void PeHeuristics::getRLPackHeuristics()
+{
+	if (search.exactComparison("B800000000600BC07458E8000000005805430000008038E9750361EB35E800000000582500F0FFFF33FF66BB195A6683C33466391875120FB7503C03D0BBE944", toolInfo.epOffset) ||
+		search.exactComparison("57C7C772AFB4DF8D3D5FBA581AFFCF0FACF7F20FBDFEF7C75CDC30270FBAF7330FBBF70FCFBF64A909DB85F681DFAC194648F7DF0FA3F7C7C741BC79A085F7D1", toolInfo.epOffset))
+	{
+		addPacker(DetectionMethod::STRING_SEARCH_H, DetectionStrength::HIGH, "RLPack");
+	}
+
+	// TODO: Need to scan other RLPack variants. We would need a disassembler that normalizes instructions
+	// with jump removing, so we can check sequence like "60E8--8D6424--8B6C24"
+}
+
+/**
  * Detection of Petite packer
  */
 void PeHeuristics::getPetiteHeuristics()
@@ -1973,6 +1988,7 @@ void PeHeuristics::getFormatSpecificCompilerHeuristics()
 	getSecuROMHeuristics();
 	getMPRMMGVAHeuristics();
 	getActiveMarkHeuristics();
+	getRLPackHeuristics();
 	getPetiteHeuristics();
 	getPelockHeuristics();
 	getEzirizReactorHeuristics();
