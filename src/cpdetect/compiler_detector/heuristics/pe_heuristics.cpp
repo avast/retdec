@@ -685,9 +685,6 @@ void PeHeuristics::getRLPackHeuristics()
 	{
 		addPacker(DetectionMethod::STRING_SEARCH_H, DetectionStrength::HIGH, "RLPack");
 	}
-
-	// TODO: Need to scan other RLPack variants. We would need a disassembler that normalizes instructions
-	// with jump removing, so we can check sequence like "60E8--8D6424--8B6C24"
 }
 
 /**
