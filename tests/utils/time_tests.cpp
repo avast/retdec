@@ -81,7 +81,7 @@ private:
 
 TEST_F(TimeTests,
 CorrectTimestampToDateConversion) {
-	EXPECT_EQ("2015-08-05 14:25:19", timestampToDate(std::time_t(1438784719)));
+	EXPECT_EQ("2015-08-05T14:25:19+0000", timestampToDate(std::time_t(1438784719)));
 }
 
 } // namespace tests
