@@ -9,11 +9,13 @@
 #include <string>
 
 #include <gtest/gtest.h>
+#include <gmock/gmock.h>
 
 #include "retdec/utils/os.h"
 #include "retdec/utils/time.h"
 
 using namespace ::testing;
+//using ::testing::MatchesRegex;
 
 namespace retdec {
 namespace utils {
@@ -81,7 +83,9 @@ private:
 
 TEST_F(TimeTests,
 CorrectTimestampToDateConversion) {
-	EXPECT_EQ("2015-08-05T14:25:19+0000", timestampToDate(std::time_t(1438784719)));
+	EXPECT_THAT(
+			timestampToDate(std::time_t(1438784719)),
+			MatchesRegex("2015-08-05T14:25:19[-+][0-9]{4}"));
 }
 
 } // namespace tests
