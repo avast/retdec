@@ -37,8 +37,8 @@ else()
 	message(STATUS "Googletest: using remote Googletest revision.")
 
 	ExternalProject_Add(googletest
-		URL https://github.com/google/googletest/archive/83fa0cb17dad47a1d905526dcdddb5b96ed189d2.zip
-		URL_HASH SHA256=3b7cf6bfd1fdec3204933b4c0419c010e89b2409dcd8cbc1ac6a78aab058e2b0
+		URL https://github.com/google/googletest/archive/90a443f9c2437ca8a682a1ac625eba64e1d74a8a.zip
+		URL_HASH SHA256=6fb9a49ad77656c860cfdafbb3148a91f076a3a8bda9c6d8809075c832549dd4
 		DOWNLOAD_NAME googletest.zip
 		CMAKE_ARGS
 			# This does not work on MSVC, but is useful on Linux.
@@ -84,28 +84,28 @@ if(MSVC)
 endif()
 
 add_library(gtest INTERFACE)
-target_link_libraries(gtest INTERFACE debug ${binary_dir}/googlemock/gtest/${DEBUG_DIR}${CMAKE_STATIC_LIBRARY_PREFIX}gtest${DEBUG_LIB_SUFFIX}${CMAKE_STATIC_LIBRARY_SUFFIX} Threads::Threads)
-target_link_libraries(gtest INTERFACE optimized ${binary_dir}/googlemock/gtest/${RELEASE_DIR}${CMAKE_STATIC_LIBRARY_PREFIX}gtest${CMAKE_STATIC_LIBRARY_SUFFIX} Threads::Threads)
+target_link_libraries(gtest INTERFACE debug ${binary_dir}/lib/${DEBUG_DIR}${CMAKE_STATIC_LIBRARY_PREFIX}gtest${DEBUG_LIB_SUFFIX}${CMAKE_STATIC_LIBRARY_SUFFIX} Threads::Threads)
+target_link_libraries(gtest INTERFACE optimized ${binary_dir}/lib/${RELEASE_DIR}${CMAKE_STATIC_LIBRARY_PREFIX}gtest${CMAKE_STATIC_LIBRARY_SUFFIX} Threads::Threads)
 target_include_directories(gtest SYSTEM INTERFACE ${GTEST_INCLUDE_DIR})
 add_dependencies(gtest googletest)
 
 add_library(gtest_main INTERFACE)
-target_link_libraries(gtest_main INTERFACE debug ${binary_dir}/googlemock/gtest/${DEBUG_DIR}${CMAKE_STATIC_LIBRARY_PREFIX}gtest_main${DEBUG_LIB_SUFFIX}${CMAKE_STATIC_LIBRARY_SUFFIX} Threads::Threads)
-target_link_libraries(gtest_main INTERFACE optimized ${binary_dir}/googlemock/gtest/${RELEASE_DIR}${CMAKE_STATIC_LIBRARY_PREFIX}gtest_main${CMAKE_STATIC_LIBRARY_SUFFIX} Threads::Threads)
+target_link_libraries(gtest_main INTERFACE debug ${binary_dir}/lib/${DEBUG_DIR}${CMAKE_STATIC_LIBRARY_PREFIX}gtest_main${DEBUG_LIB_SUFFIX}${CMAKE_STATIC_LIBRARY_SUFFIX} Threads::Threads)
+target_link_libraries(gtest_main INTERFACE optimized ${binary_dir}/lib/${RELEASE_DIR}${CMAKE_STATIC_LIBRARY_PREFIX}gtest_main${CMAKE_STATIC_LIBRARY_SUFFIX} Threads::Threads)
 target_link_libraries(gtest_main INTERFACE gtest)
 target_include_directories(gtest_main SYSTEM INTERFACE ${GTEST_INCLUDE_DIR})
 add_dependencies(gtest_main googletest)
 
 add_library(gmock INTERFACE)
-target_link_libraries(gmock INTERFACE debug ${binary_dir}/googlemock/${DEBUG_DIR}${CMAKE_STATIC_LIBRARY_PREFIX}gmock${DEBUG_LIB_SUFFIX}${CMAKE_STATIC_LIBRARY_SUFFIX} Threads::Threads)
-target_link_libraries(gmock INTERFACE optimized ${binary_dir}/googlemock/${RELEASE_DIR}${CMAKE_STATIC_LIBRARY_PREFIX}gmock${CMAKE_STATIC_LIBRARY_SUFFIX} Threads::Threads)
+target_link_libraries(gmock INTERFACE debug ${binary_dir}/lib/${DEBUG_DIR}${CMAKE_STATIC_LIBRARY_PREFIX}gmock${DEBUG_LIB_SUFFIX}${CMAKE_STATIC_LIBRARY_SUFFIX} Threads::Threads)
+target_link_libraries(gmock INTERFACE optimized ${binary_dir}/lib/${RELEASE_DIR}${CMAKE_STATIC_LIBRARY_PREFIX}gmock${CMAKE_STATIC_LIBRARY_SUFFIX} Threads::Threads)
 target_link_libraries(gmock INTERFACE gtest)
 target_include_directories(gmock SYSTEM INTERFACE ${GTEST_INCLUDE_DIR} ${GMOCK_INCLUDE_DIR})
 add_dependencies(gmock googletest)
 
 add_library(gmock_main INTERFACE)
-target_link_libraries(gmock_main INTERFACE debug ${binary_dir}/googlemock/${DEBUG_DIR}${CMAKE_STATIC_LIBRARY_PREFIX}gmock_main${DEBUG_LIB_SUFFIX}${CMAKE_STATIC_LIBRARY_SUFFIX} Threads::Threads)
-target_link_libraries(gmock_main INTERFACE optimized ${binary_dir}/googlemock/${RELEASE_DIR}${CMAKE_STATIC_LIBRARY_PREFIX}gmock_main${CMAKE_STATIC_LIBRARY_SUFFIX} Threads::Threads)
+target_link_libraries(gmock_main INTERFACE debug ${binary_dir}/lib/${DEBUG_DIR}${CMAKE_STATIC_LIBRARY_PREFIX}gmock_main${DEBUG_LIB_SUFFIX}${CMAKE_STATIC_LIBRARY_SUFFIX} Threads::Threads)
+target_link_libraries(gmock_main INTERFACE optimized ${binary_dir}/lib/${RELEASE_DIR}${CMAKE_STATIC_LIBRARY_PREFIX}gmock_main${CMAKE_STATIC_LIBRARY_SUFFIX} Threads::Threads)
 target_link_libraries(gmock_main INTERFACE gmock)
 target_include_directories(gmock_main SYSTEM INTERFACE ${GTEST_INCLUDE_DIR} ${GMOCK_INCLUDE_DIR})
 add_dependencies(gmock_main googletest)
