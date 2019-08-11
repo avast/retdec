@@ -177,5 +177,7 @@ target_link_libraries(openssl-crypto INTERFACE "${OPENSSL_INSTALL_DIR}/lib/libcr
 target_link_libraries(openssl-crypto INTERFACE Threads::Threads)
 if(MSVC)
 	target_link_libraries(openssl-crypto INTERFACE ws2_32 gdi32 advapi32 crypt32 user32)
+elseif(UNIX)
+	target_link_libraries(openssl-crypto INTERFACE ${CMAKE_DL_LIBS})
 endif()
 add_dependencies(openssl-crypto openssl)
