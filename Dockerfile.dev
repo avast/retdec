@@ -16,6 +16,8 @@ RUN apt-get -y update && \
 	upx                                                 \
 	flex                                                \
 	bison                                               \
+	openssl                                             \
+	libssl-dev                                          \
 	zlib1g-dev                                          \
 	autoconf                                            \
 	automake                                            \
