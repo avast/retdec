@@ -87,7 +87,7 @@ std::string getCurrentYear() {
 */
 std::string timestampToDate(std::tm *tm) {
 	if (tm == nullptr) {
-		return "";
+		return {};
 	}
 
 	std::stringstream ss;
