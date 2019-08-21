@@ -6,7 +6,6 @@
 
 #include "retdec/llvmir2hll/analysis/value_analysis.h"
 #include "retdec/llvmir2hll/graphs/cg/cg_builder.h"
-#include "retdec/llvmir2hll/hll/bir_writer.h"
 #include "retdec/llvmir2hll/hll/hll_writer.h"
 #include "retdec/llvmir2hll/obtainer/call_info_obtainer.h"
 #include "retdec/llvmir2hll/optimizer/optimizer_manager.h"

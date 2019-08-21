@@ -13,7 +13,6 @@
 #include <llvm/IR/Instructions.h>
 #include <llvm/Pass.h>
 
-#include "retdec/llvmir2hll/hll/bir_writer.h"
 #include "retdec/llvmir2hll/ir/assign_stmt.h"
 #include "retdec/llvmir2hll/ir/break_stmt.h"
 #include "retdec/llvmir2hll/ir/const_bool.h"

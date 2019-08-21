@@ -138,10 +138,17 @@ private:
 * @param[in] out Output stream into which the HLL code will be emitted.
 */
 HLLWriter::HLLWriter(llvm::raw_ostream &out):
-	out(out), emitConstantsInStructuredWay(false),
-	optionEmitDebugComments(true), optionKeepAllBrackets(false),
-	optionEmitTimeVaryingInfo(true), optionUseCompoundOperators(true),
-	currFuncGotoLabelCounter(1), currentIndent(DEFAULT_LEVEL_INDENT) {}
+	out(out),
+	emitConstantsInStructuredWay(false),
+	optionEmitDebugComments(true),
+	optionKeepAllBrackets(false),
+	optionEmitTimeVaryingInfo(false),
+	optionUseCompoundOperators(true),
+	currFuncGotoLabelCounter(1),
+	currentIndent(DEFAULT_LEVEL_INDENT)
+{
+
+}
 
 /**
 * @brief Destructs the writer.
@@ -175,7 +182,7 @@ void HLLWriter::setOptionKeepAllBrackets(bool keep) {
 *                 emitted.
 */
 void HLLWriter::setOptionEmitTimeVaryingInfo(bool emit) {
-	optionEmitTimeVaryingInfo = emit;
+	// optionEmitTimeVaryingInfo = emit;
 }
 
 /**
@@ -216,21 +223,21 @@ bool HLLWriter::emitTargetCode(ShPtr<Module> module) {
 	bool codeEmitted = false;
 	namesOfFuncsWithFixedIR = module->getNamesOfFuncsFixedWithLLVMIRFixer();
 
-	if (emitFileHeader()) { codeEmitted = true; out << "\n"; }
+	if (emitFileHeader()) { codeEmitted = true; out.newLine(); }
 
 	//
 	// Classes
 	//
-	if (emitClassesHeader()) { codeEmitted = true; out << "\n";}
-	if (emitClasses()) { codeEmitted = true; out << "\n";}
-	if (emitClassesFooter()) { codeEmitted = true; out << "\n"; }
+	if (emitClassesHeader()) { codeEmitted = true; out.newLine(); }
+	if (emitClasses()) { codeEmitted = true; out.newLine(); }
+	if (emitClassesFooter()) { codeEmitted = true; out.newLine(); }
 
 	//
 	// Function prototypes
 	//
-	if (emitFunctionPrototypesHeader()) { codeEmitted = true; out << "\n";}
-	if (emitFunctionPrototypes()) { codeEmitted = true; out << "\n";}
-	if (emitFunctionPrototypesFooter()) { codeEmitted = true; out << "\n"; }
+	if (emitFunctionPrototypesHeader()) { codeEmitted = true; out.newLine(); }
+	if (emitFunctionPrototypes()) { codeEmitted = true; out.newLine(); }
+	if (emitFunctionPrototypesFooter()) { codeEmitted = true; out.newLine(); }
 
 	//
 	// Global variables
@@ -248,51 +255,51 @@ bool HLLWriter::emitTargetCode(ShPtr<Module> module) {
 	//   void (*fp)(void) = func;
 	//
 	// is OK.
-	if (emitGlobalVariablesHeader()) { codeEmitted = true; out << "\n"; }
-	if (emitGlobalVariables()) { codeEmitted = true; out << "\n"; }
-	if (emitGlobalVariablesFooter()) { codeEmitted = true; out << "\n"; }
+	if (emitGlobalVariablesHeader()) { codeEmitted = true; out.newLine(); }
+	if (emitGlobalVariables()) { codeEmitted = true; out.newLine(); }
+	if (emitGlobalVariablesFooter()) { codeEmitted = true; out.newLine(); }
 
 	//
 	// Functions
 	//
-	if (emitFunctionsHeader()) { codeEmitted = true; out << "\n"; }
-	if (emitFunctions()) { codeEmitted = true; out << "\n"; }
-	if (emitFunctionsFooter()) { codeEmitted = true; out << "\n"; }
+	if (emitFunctionsHeader()) { codeEmitted = true; out.newLine(); }
+	if (emitFunctions()) { codeEmitted = true; out.newLine(); }
+	if (emitFunctionsFooter()) { codeEmitted = true; out.newLine(); }
 
 	//
 	// Statically linked functions
 	//
-	if (emitStaticallyLinkedFunctionsHeader()) { codeEmitted = true; out << "\n"; }
-	if (emitStaticallyLinkedFunctions()) { codeEmitted = true; out << "\n"; }
-	if (emitStaticallyLinkedFunctionsFooter()) { codeEmitted = true; out << "\n"; }
+	if (emitStaticallyLinkedFunctionsHeader()) { codeEmitted = true; out.newLine(); }
+	if (emitStaticallyLinkedFunctions()) { codeEmitted = true; out.newLine(); }
+	if (emitStaticallyLinkedFunctionsFooter()) { codeEmitted = true; out.newLine(); }
 
 	//
 	// Dynamically linked functions
 	//
-	if (emitDynamicallyLinkedFunctionsHeader()) { codeEmitted = true; out << "\n"; }
-	if (emitDynamicallyLinkedFunctions()) { codeEmitted = true; out << "\n"; }
-	if (emitDynamicallyLinkedFunctionsFooter()) { codeEmitted = true; out << "\n"; }
+	if (emitDynamicallyLinkedFunctionsHeader()) { codeEmitted = true; out.newLine(); }
+	if (emitDynamicallyLinkedFunctions()) { codeEmitted = true; out.newLine(); }
+	if (emitDynamicallyLinkedFunctionsFooter()) { codeEmitted = true; out.newLine(); }
 
 	//
 	// Syscall functions
 	//
-	if (emitSyscallFunctionsHeader()) { codeEmitted = true; out << "\n"; }
-	if (emitSyscallFunctions()) { codeEmitted = true; out << "\n"; }
-	if (emitSyscallFunctionsFooter()) { codeEmitted = true; out << "\n"; }
+	if (emitSyscallFunctionsHeader()) { codeEmitted = true; out.newLine(); }
+	if (emitSyscallFunctions()) { codeEmitted = true; out.newLine(); }
+	if (emitSyscallFunctionsFooter()) { codeEmitted = true; out.newLine(); }
 
 	//
 	// Instruction-idiom functions
 	//
-	if (emitInstructionIdiomFunctionsHeader()) { codeEmitted = true; out << "\n"; }
-	if (emitInstructionIdiomFunctions()) { codeEmitted = true; out << "\n"; }
-	if (emitInstructionIdiomFunctionsFooter()) { codeEmitted = true; out << "\n"; }
+	if (emitInstructionIdiomFunctionsHeader()) { codeEmitted = true; out.newLine(); }
+	if (emitInstructionIdiomFunctions()) { codeEmitted = true; out.newLine(); }
+	if (emitInstructionIdiomFunctionsFooter()) { codeEmitted = true; out.newLine(); }
 
 	//
 	// Meta-information
 	//
-	if (emitMetaInfoHeader()) { codeEmitted = true; out << "\n"; }
-	if (emitMetaInfo()) { codeEmitted = true; out << "\n"; }
-	if (emitMetaInfoFooter()) { codeEmitted = true; out << "\n"; }
+	if (emitMetaInfoHeader()) { codeEmitted = true; out.newLine(); }
+	if (emitMetaInfo()) { codeEmitted = true; out.newLine(); }
+	if (emitMetaInfoFooter()) { codeEmitted = true; out.newLine(); }
 
 	if (emitFileFooter()) { codeEmitted = true; }
 
@@ -391,20 +398,16 @@ std::string HLLWriter::getIndentForGotoLabel() const {
 * By default (if it is not overridden), it emits the default header.
 */
 bool HLLWriter::emitFileHeader() {
-	// Prepare the header.
-	std::ostringstream header;
-	header << "\n";
-	header << "This file was generated by the Retargetable Decompiler\n";
-	header << "Website: https://retdec.com\n";
-	header << "Copyright (c)";
-	if (optionEmitTimeVaryingInfo) {
-		header << " " << getCurrentYear();
-	}
-	header << " Retargetable Decompiler <info@retdec.com>\n";
-	header << "\n";
-
-	// Emit it.
-	out << comment(header.str());
+	out.commentLine("");
+	out.commentLine("This file was generated by the Retargetable Decompiler");
+	out.commentLine("Website: https://retdec.com");
+	out.commentLine("Copyright (c)"
+		+ (optionEmitTimeVaryingInfo
+			? (" " + getCurrentYear())
+			: (""))
+		+ " Retargetable Decompiler <info@retdec.com>"
+	);
+	out.commentLine("");
 
 	return true;
 }
@@ -466,7 +469,7 @@ bool HLLWriter::emitClass(const std::string &className) {
 			joinStrings(getReadableClassNames(baseClassNames)) << ")";
 	}
 
-	out << comment(classInfo.str() + "\n");
+	out.commentLine(classInfo.str());
 	return true;
 }
 
@@ -603,7 +606,7 @@ bool HLLWriter::emitFunctions() {
 	for (const auto &func : funcs) {
 		if (somethingEmitted) {
 			// To produce an empty line between functions.
-			out << "\n";
+			out.newLine();
 		}
 		somethingEmitted |= emitFunction(func);
 	}
@@ -886,18 +889,18 @@ bool HLLWriter::emitMetaInfoFooter() {
 void HLLWriter::emitExprWithBracketsIfNeeded(ShPtr<Expression> expr) {
 	bool bracketsAreNeeded = bracketsManager->areBracketsNeeded(expr);
 	if (bracketsAreNeeded) {
-		out << "(";
+		out.leftParen();
 	}
 	expr->accept(this);
 	if (bracketsAreNeeded) {
-		out << ")";
+		out.rightParen();
 	}
 }
 
 /**
 * @brief Emits the given unary expression.
 *
-* @param[in] opRepr Textual representation of the operator (including spaces).
+* @param[in] opRepr Textual representation of the operator (without spaces).
 * @param[in] expr Expression to be emitted.
 *
 * Brackets are emitted when needed. Use this function if you simply need to
@@ -905,30 +908,34 @@ void HLLWriter::emitExprWithBracketsIfNeeded(ShPtr<Expression> expr) {
 */
 void HLLWriter::emitUnaryOpExpr(const std::string &opRepr,
 		ShPtr<UnaryOpExpr> expr) {
-	out << opRepr;
+	out.unaryOp(opRepr);
 	emitExprWithBracketsIfNeeded(expr->getOperand());
 }
 
 /**
 * @brief Emits the given binary expression.
 *
-* @param[in] opRepr Textual representation of the operator (including spaces).
+* @param[in] opRepr Textual representation of the operator (without spaces).
 * @param[in] expr Expression to be emitted.
+* @param[in] spaceBefore Should there be a space before operator?
+* @param[in] spaceAfter Should there be a space after operator?
 *
 * Brackets are emitted when needed. Use this function if you simply need to
 * emit the operator without any specialties.
 */
 void HLLWriter::emitBinaryOpExpr(const std::string &opRepr,
-		ShPtr<BinaryOpExpr> expr) {
+		ShPtr<BinaryOpExpr> expr, bool spaceBefore, bool spaceAfter) {
 	bool bracketsAreNeeded = bracketsManager->areBracketsNeeded(expr);
 	if (bracketsAreNeeded) {
-		out << "(";
+		out.leftParen();
 	}
 	expr->getFirstOperand()->accept(this);
-	out << opRepr;
+	if (spaceBefore) out.space();
+	out.binaryOp(opRepr);
+	if (spaceAfter) out.space();
 	expr->getSecondOperand()->accept(this);
 	if (bracketsAreNeeded) {
-		out << ")";
+		out.rightParen();
 	}
 }
 
@@ -947,8 +954,8 @@ bool HLLWriter::emitDetectedCryptoPatternForGlobalVarIfAvailable(ShPtr<Variable>
 	}
 
 	std::ostringstream info;
-	info << "Detected cryptographic pattern: " << pattern << "\n";
-	out << comment(info.str());
+	info << "Detected cryptographic pattern: " << pattern;
+	out.commentLine(info.str());
 	return true;
 }
 
@@ -965,8 +972,8 @@ bool HLLWriter::emitModuleNameForFuncIfAvailable(ShPtr<Function> func) {
 	}
 
 	std::ostringstream info;
-	info << "From module:   " << moduleName << "\n";
-	out << comment(info.str());
+	info << "From module:   " << moduleName;
+	out.commentLine(info.str());
 	return true;
 }
 
@@ -985,8 +992,8 @@ bool HLLWriter::emitAddressRangeForFuncIfAvailable(ShPtr<Function> func) {
 
 	std::ostringstream info;
 	info << "Address range: " << "0x" + toHex(addressRange.first) +
-		" - 0x" + toHex(addressRange.second) << "\n";
-	out << comment(info.str());
+		" - 0x" + toHex(addressRange.second);
+	out.commentLine(info.str());
 	return true;
 }
 
@@ -1005,8 +1012,8 @@ bool HLLWriter::emitLineRangeForFuncIfAvailable(ShPtr<Function> func) {
 
 	std::ostringstream info;
 	info << "Line range:    " << lineRange.first << " - "
-		<< lineRange.second << "\n";
-	out << comment(info.str());
+		<< lineRange.second;
+	out.commentLine(info.str());
 	return true;
 }
 
@@ -1024,7 +1031,7 @@ bool HLLWriter::emitWrapperInfoForFuncIfAvailable(ShPtr<Function> func) {
 		return false;
 	}
 
-	out << comment("Wraps:         " + wrappedFunc + "\n");
+	out.commentLine("Wraps:         " + wrappedFunc);
 	return true;
 }
 
@@ -1039,10 +1046,10 @@ bool HLLWriter::emitClassInfoIfAvailable(ShPtr<Function> func) {
 		return false;
 	}
 
-	out << comment("From class:    " + getReadableClassName(className) + "\n");
+	out.commentLine("From class:    " + getReadableClassName(className));
 	auto funcType = module->getTypeOfFuncInClass(func, className);
 	if (!funcType.empty()) {
-		out << comment("Type:          " + funcType + "\n");
+		out.commentLine("Type:          " + funcType);
 	}
 	return true;
 }
@@ -1058,7 +1065,7 @@ bool HLLWriter::emitDemangledNameIfAvailable(ShPtr<Function> func) {
 		return false;
 	}
 
-	out << comment("Demangled:     " + demangledName + "\n");
+	out.commentLine("Demangled:     " + demangledName);
 	return true;
 }
 
@@ -1092,14 +1099,14 @@ bool HLLWriter::emitCommentIfAvailable(ShPtr<Function> func) {
 	// use it as a separator.
 	auto parts = split(funcComment, '\n', /*trimWhitespace=*/false);
 	if (parts.size() == 1) {
-		out << comment("Comment:       " + funcComment + "\n");
+		out.commentLine("Comment:       " + funcComment);
 	} else {
 		// A multi-line comment.
-		out << comment("Comment:\n");
+		out.commentLine("Comment:");
 		for (const auto &part : parts) {
 			// Our IDA plugin uses four spaces for indentation, so be
 			// consistent.
-			out << comment("    " + part + "\n");
+			out.commentLine("    " + part);
 		}
 	}
 
@@ -1119,11 +1126,10 @@ bool HLLWriter::emitDetectedCryptoPatternsForFuncIfAvailable(ShPtr<Function> fun
 	}
 
 	std::ostringstream usedPatterns;
-	usedPatterns << "Used cryptographic patterns:\n";
+	out.commentLine("Used cryptographic patterns:");
 	for (auto &pattern : patterns) {
-		usedPatterns << " - " << pattern << "\n";
+		out.commentLine(" - " + pattern);
 	}
-	out << comment(usedPatterns.str());
 	return true;
 }
 
@@ -1140,9 +1146,8 @@ bool HLLWriter::emitLLVMIRFixerWarningForFuncIfAny(ShPtr<Function> func) {
 		return false;
 	}
 
-	out << comment(
-		"Warning: There were some errors during the decompilation of the following\n"
-		"         function. Therefore, its body may be incomplete.\n");
+	out.commentLine("Warning: There were some errors during the decompilation of the following");
+	out.commentLine("         function. Therefore, its body may be incomplete.");
 	return true;
 }
 
@@ -1170,7 +1175,8 @@ void HLLWriter::emitSectionHeader(const std::string &sectionName) {
 
 	// Emit the comment.
 	auto section = leftSeparator + " " + sectionName + " " + rightSeparator;
-	out << getCurrentIndent() << comment(section) << "\n";
+	out.space(getCurrentIndent());
+	out.commentLine(section);
 }
 
 /**
@@ -1218,7 +1224,8 @@ bool HLLWriter::tryEmitVarInfoInComment(ShPtr<Variable> var) {
 		// which global variable corresponds to which register.
 		auto registerName = module->getRegisterForGlobalVar(var);
 		if (!registerName.empty()) {
-			out << " " << comment(registerName);
+			out.space();
+			out.comment(registerName);
 			return true;
 		}
 		return false;
@@ -1229,7 +1236,8 @@ bool HLLWriter::tryEmitVarInfoInComment(ShPtr<Variable> var) {
 		// It is a local variable comming from a global variable. We want to
 		// emit the global variable's name in a comment so we know from which
 		// global variable this local variable comes from.
-		out << " " << comment(globalVarName);
+		out.space();
+		out.comment(globalVarName);
 		return true;
 	}
 
@@ -1255,7 +1263,8 @@ bool HLLWriter::tryEmitVarAddressInComment(ShPtr<Variable> var) {
 		return false;
 	}
 
-	out << " " << comment(varAddress);
+	out.space();
+	out.comment(varAddress);
 	return true;
 }
 
@@ -1271,7 +1280,8 @@ bool HLLWriter::tryEmitVarOffsetInComment(ShPtr<Variable> var) {
 		return false;
 	}
 
-	out << " " << comment("bp" + varOffset);
+	out.space();
+	out.comment("bp" + varOffset);
 	return true;
 }
 
@@ -1354,7 +1364,7 @@ bool HLLWriter::emitMetaInfoDetectedCompilerOrPacker() {
 		return false;
 	}
 
-	out << comment("Detected compiler/packer: " + compilerOrPacker) << "\n";
+	out.commentLine("Detected compiler/packer: " + compilerOrPacker);
 	return true;
 }
 
@@ -1369,7 +1379,7 @@ bool HLLWriter::emitMetaInfoDetectedLanguage() {
 		return false;
 	}
 
-	out << comment("Detected language: " + language) << "\n";
+	out.commentLine("Detected language: " + language);
 	return true;
 }
 
@@ -1379,9 +1389,9 @@ bool HLLWriter::emitMetaInfoDetectedLanguage() {
 * @return @c true if some code was emitted, @c false otherwise.
 */
 bool HLLWriter::emitMetaInfoNumberOfDetectedFuncs() {
-	std::ostringstream funcCount;
-	funcCount << "Detected functions: " << module->getNumOfFuncDefinitions();
-	out << comment(funcCount.str()) << "\n";
+	out.commentLine("Detected functions: "
+		+ std::to_string(module->getNumOfFuncDefinitions()));
+
 	return true;
 }
 
@@ -1395,10 +1405,9 @@ bool HLLWriter::emitMetaInfoSelectedButNotFoundFuncs() {
 		return false;
 	}
 
-	out << comment(
+	out.commentLine(
 		"Functions selected to be decompiled but not found: " +
-		joinStrings(notFoundFuncs) +
-		"\n"
+		joinStrings(notFoundFuncs)
 	);
 	return true;
 }
@@ -1409,10 +1418,8 @@ bool HLLWriter::emitMetaInfoSelectedButNotFoundFuncs() {
 * @return @c true if some code was emitted, @c false otherwise.
 */
 bool HLLWriter::emitMetaInfoDecompilationDate() {
-	std::ostringstream decompDate;
-	decompDate << "Decompilation date: " << getCurrentDate() <<
-		" " << getCurrentTime() << "\n";
-	out << comment(decompDate.str());
+	out.commentLine("Decompilation date: " + getCurrentDate()
+		+ " " + getCurrentTime());
 	return true;
 }
 
@@ -1435,9 +1442,8 @@ bool HLLWriter::emitMetaInfoFuncsRemovedDueErrors() {
 			numOfFuncsRemovedDueErrors = true;
 		}
 	}
-	funcsRemovedDueErrors << "\n";
 	if (numOfFuncsRemovedDueErrors > 0) {
-		out << comment(funcsRemovedDueErrors.str());
+		out.commentLine(funcsRemovedDueErrors.str());
 		return true;
 	}
 	return false;
@@ -1460,8 +1466,8 @@ bool HLLWriter::emitMetaInfoNumberOfDecompilationErrors() {
 		namesOfFuncsWithFixedIR.size() <<
 		" (out of " << totalNumberOfFuncs << " function" <<
 		(totalNumberOfFuncs != 1 ? "s" : "") <<
-		")\n";
-	out << comment(numberOfDecompilationErrors.str());
+		")";
+	out.commentLine(numberOfDecompilationErrors.str());
 	return true;
 }
 

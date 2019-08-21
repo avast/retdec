@@ -25,6 +25,96 @@ class BinaryOpExpr;
 class BracketManager;
 class UnaryOpExpr;
 
+//==============================================================================
+
+/**
+ * TODO:
+ * - seach for all '\n' and check that there are no, or are OK.
+ * - emitConstFloatSuffixIfNeeded()
+ */
+class MyOut
+{
+	public:
+		MyOut(llvm::raw_ostream& out) : _out(out) {}
+
+	public:
+		void newLine(uint64_t addr = 0) { _out << "\n"; }
+		void space(const std::string& space = " ") { _out << space; }
+		void commentLine(
+			const std::string& comment,
+			const std::string& indent = "")
+		{
+			_out << indent << "// " << comment << "\n";
+		}
+		void comment(const std::string& comment) { _out << "// " << comment; }
+		void leftParen() { _out << "("; }
+		void rightParen() { _out << ")"; }
+		void leftSquare() { _out << "["; }
+		void rightSquare() { _out << "]"; }
+		void semicolon() { _out << ";"; }
+		void leftCurly() { _out << "{"; }
+		void rightCurly() { _out << "}"; }
+		void unaryOp(const std::string& op) { _out << op; }
+		void binaryOp(const std::string& op) { _out << op; }
+		void preprocessor(const std::string& p) { _out << p; }
+		void include(const std::string& i) { _out << i; }
+		void keyword(const std::string& k) { _out << k; }
+		void dataType(const std::string& t) { _out << t; }
+		void assignment(bool spacesAround = false)
+		{
+			if (spacesAround) space();
+			_out << "=";
+			if (spacesAround) space();
+		}
+		void colon(bool spacesAround = false)
+		{
+			if (spacesAround) space();
+			_out << ":";
+			if (spacesAround) space();
+		}
+		void operatorX(const std::string& op, bool spacesAround = false)
+		{
+			if (spacesAround) space();
+			_out << op;
+			if (spacesAround) space();
+		}
+		void variableId(const std::string& id) { _out << id; }
+		void memberId(const std::string& id) { _out << id; }
+		void labelId(const std::string& id) { _out << id; }
+		void functionId(const std::string& id) { _out << id; }
+		void parameterId(const std::string& id) { _out << id; }
+		void arrow()  { _out << "->"; }
+		void dot()  { _out << "."; }
+		void constant(const std::string& c) { _out << c; }
+		void constantString(const std::string& c) { _out << c; }
+		void constantSymbol(const std::string& s) { _out << s; }
+
+	public:
+		void emitTypedef(
+			const std::string& indent,
+			const std::string& t1,
+			const std::string& t2)
+		{
+			space(indent);
+			keyword("typedef");
+			space();
+			dataType(t1);
+			space();
+			dataType(t2);
+			semicolon();
+			newLine();
+		}
+
+	public:
+		// any token added to the end of the line is goint to be a string comment
+		void commentModifier(const std::string& indent = "") { _out << indent << "// "; }
+
+	private:
+		llvm::raw_ostream& _out;
+};
+
+//==============================================================================
+
 /**
 * @brief A base class of all HLL writers.
 *
@@ -126,7 +216,8 @@ protected:
 
 	virtual void emitExprWithBracketsIfNeeded(ShPtr<Expression> expr);
 	void emitUnaryOpExpr(const std::string &opRepr, ShPtr<UnaryOpExpr> expr);
-	void emitBinaryOpExpr(const std::string &opRepr, ShPtr<BinaryOpExpr> expr);
+	void emitBinaryOpExpr(const std::string &opRepr, ShPtr<BinaryOpExpr> expr,
+			bool spaceBefore = true, bool spaceAfter = true);
 
 	bool emitDetectedCryptoPatternForGlobalVarIfAvailable(ShPtr<Variable> var);
 	bool emitModuleNameForFuncIfAvailable(ShPtr<Function> func);
@@ -143,18 +234,24 @@ protected:
 
 	/**
 	* @brief Emits the given sequence @a seq by calling @c accept on every value.
+	*        Separator = ','
 	*
-	* @param[in] seq Sequence of values to be emitted.
-	* @param[in] sep Separater of the emitted values.
+	* @param[in] seq     Sequence of values to be emitted.
+	* @param[in] space   Space to insert after separator.
+	* @param[in] newline If @c true, newline is inserted after separator and
+	*                    before space.
 	*
 	* @tparam ContainerType Container of Visitable values.
 	*/
 	template<class ContainerType>
-	void emitSequenceWithAccept(const ContainerType &seq, const std::string &sep) {
+	void emitSequenceWithAccept(const ContainerType &seq,
+			const std::string& space = " ",	bool newline = false) {
 		bool first = true;
 		for (const auto &item : seq) {
 			if (!first) {
-				out << sep;
+				out.operatorX(",");
+				if (newline) out.newLine();
+				out.space(space);
 			}
 			item->accept(this);
 			first = false;
@@ -182,7 +279,8 @@ protected:
 	ShPtr<Module> module;
 
 	/// Stream, where the resulting code will be generated.
-	llvm::raw_ostream &out;
+//llvm::raw_ostream &out;
+MyOut out;
 
 	/// Recognizes which brackets around expressions are needed.
 	ShPtr<BracketManager> bracketsManager;
@@ -199,7 +297,7 @@ protected:
 	bool optionKeepAllBrackets;
 
 	/// Emit time-varying information, like dates?
-	bool optionEmitTimeVaryingInfo;
+	bool optionEmitTimeVaryingInfo; // TODO: default = TRUE, fix hacks
 
 	/// Use compound operators (like @c +=) instead of assignments?
 	bool optionUseCompoundOperators;
