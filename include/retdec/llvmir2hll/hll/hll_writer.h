@@ -155,7 +155,6 @@ protected:
 	* For example, in C, it should return @c "//".
 	*/
 	virtual std::string getCommentPrefix() = 0;
-	virtual std::string comment(const std::string &code);
 	/// @}
 
 	/// @name Indentation
@@ -279,8 +278,7 @@ protected:
 	ShPtr<Module> module;
 
 	/// Stream, where the resulting code will be generated.
-//llvm::raw_ostream &out;
-MyOut out;
+	MyOut out;
 
 	/// Recognizes which brackets around expressions are needed.
 	ShPtr<BracketManager> bracketsManager;

@@ -307,39 +307,6 @@ bool HLLWriter::emitTargetCode(ShPtr<Module> module) {
 }
 
 /**
-* @brief Comments the given code.
-*
-* If @a code spans over multiple lines, this function makes sure that the
-* whole block is properly commented.
-*
-* By default, it comments all lines by prefixing them with getCommentPrefix().
-*/
-std::string HLLWriter::comment(const std::string &code) {
-	std::string commentPrefix(getCommentPrefix());
-
-	// If there are no newlines, the situation is easy.
-	if (code.find_first_of("\n") == std::string::npos) {
-		return commentPrefix + " " + code;
-	}
-
-	// We split the code by newlines and comment them separately.
-	StringVector codeLines(split(code, '\n', false));
-
-	// Do not comment the last empty line (if any).
-	if (!codeLines.empty() && codeLines.back().empty()) {
-		codeLines.pop_back();
-	}
-
-	std::string result;
-	for (const auto &line : codeLines) {
-		// Insert a space between the comment prefix and the code only if the
-		// code is non-empty to prevent trailing spaces.
-		result += commentPrefix + (!line.empty() ? " " + line : line) + "\n";
-	}
-	return result;
-}
-
-/**
 * @brief Increases the indentation level.
 */
 void HLLWriter::increaseIndentLevel() {
