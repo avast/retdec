@@ -27,11 +27,6 @@ class UnaryOpExpr;
 
 //==============================================================================
 
-/**
- * TODO:
- * - seach for all '\n' and check that there are no, or are OK.
- * - emitConstFloatSuffixIfNeeded()
- */
 class MyOut
 {
 	public:

@@ -771,8 +771,8 @@ void CHLLWriter::visit(ShPtr<ConstFloat> constant) {
 		}
 		out.constant("NAN"); // the constant from <math.h>
 	} else {
-		out.constant(constant->toMostReadableString());
-		emitConstFloatSuffixIfNeeded(constant);
+		out.constant(constant->toMostReadableString()
+			+ getConstFloatSuffixIfNeeded(constant));
 	}
 }
 
@@ -2027,17 +2027,19 @@ void CHLLWriter::emitGotoLabelIfNeeded(ShPtr<Statement> stmt) {
 }
 
 /**
-* @brief Emits a suffix for the given floating-point constant (if needed).
+* @return Get a suffix for the given floating-point constant (if needed).
 */
-void CHLLWriter::emitConstFloatSuffixIfNeeded(ShPtr<ConstFloat> constant) {
+std::string CHLLWriter::getConstFloatSuffixIfNeeded(ShPtr<ConstFloat> constant) {
 	auto size = constant->getSize();
 	if (size <= 32) {
-		out.dataType("f"); // float
+		return "f"; // float
 	} else if (size <= 64) {
 		// double literals do not have any suffix.
 	} else {
-		out.dataType("L"); // long double (the biggest type we have)
+		return "L"; // long double (the biggest type we have)
 	}
+
+	return std::string();
 }
 
 /**

@@ -167,7 +167,8 @@ private:
 	void emitGlobalDirectives(ShPtr<Function> func);
 	void emitDebugComment(std::string comment, bool indent = true);
 	void emitGotoLabelIfNeeded(ShPtr<Statement> stmt);
-	void emitConstFloatSuffixIfNeeded(ShPtr<ConstFloat> constant);
+
+	std::string getConstFloatSuffixIfNeeded(ShPtr<ConstFloat> constant);
 	std::string genNameForUnnamedStruct(const StructTypeVector &usedStructTypes);
 
 private:
