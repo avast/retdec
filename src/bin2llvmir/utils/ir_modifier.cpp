@@ -667,7 +667,7 @@ GlobalVariable* IrModifier::getGlobalVariable(
 					isFromDebug,
 					realName,
 					cryptoDesc);
-			return nullptr;
+			return gv;
 		}
 
 		auto* ngv = new GlobalVariable(
