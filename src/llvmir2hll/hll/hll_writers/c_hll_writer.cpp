@@ -398,9 +398,9 @@ bool CHLLWriter::emitFileHeader() {
 	}
 	// Emit them.
 	if (emitTypedefs) {
-		out.emptyLine();
+		out.newLine();
 		emitSectionHeader("Float Types Definitions");
-		out.emptyLine();
+		out.newLine();
 	}
 	if (emitFloat16) {
 		out.typedefLine(getCurrentIndent(), "float", "float16_t");
@@ -433,11 +433,11 @@ bool CHLLWriter::emitFileHeader() {
 	}
 	// Emit them.
 	if (!usedStructTypes.empty()) {
-		out.emptyLine();
+		out.newLine();
 		emitSectionHeader("Structures");
 	}
 	for (const auto &type : usedStructTypes) {
-		out.emptyLine();
+		out.newLine();
 		emitStructDeclaration(type);
 		out.punctiation(';');
 		out.newLine();

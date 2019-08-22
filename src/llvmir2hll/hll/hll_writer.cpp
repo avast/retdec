@@ -223,21 +223,21 @@ bool HLLWriter::emitTargetCode(ShPtr<Module> module) {
 	bool codeEmitted = false;
 	namesOfFuncsWithFixedIR = module->getNamesOfFuncsFixedWithLLVMIRFixer();
 
-	if (emitFileHeader()) { codeEmitted = true; out.emptyLine(); }
+	if (emitFileHeader()) { codeEmitted = true; out.newLine(); }
 
 	//
 	// Classes
 	//
-	if (emitClassesHeader()) { codeEmitted = true; out.emptyLine(); }
-	if (emitClasses()) { codeEmitted = true; out.emptyLine(); }
-	if (emitClassesFooter()) { codeEmitted = true; out.emptyLine(); }
+	if (emitClassesHeader()) { codeEmitted = true; out.newLine(); }
+	if (emitClasses()) { codeEmitted = true; out.newLine(); }
+	if (emitClassesFooter()) { codeEmitted = true; out.newLine(); }
 
 	//
 	// Function prototypes
 	//
-	if (emitFunctionPrototypesHeader()) { codeEmitted = true; out.emptyLine(); }
-	if (emitFunctionPrototypes()) { codeEmitted = true; out.emptyLine(); }
-	if (emitFunctionPrototypesFooter()) { codeEmitted = true; out.emptyLine(); }
+	if (emitFunctionPrototypesHeader()) { codeEmitted = true; out.newLine(); }
+	if (emitFunctionPrototypes()) { codeEmitted = true; out.newLine(); }
+	if (emitFunctionPrototypesFooter()) { codeEmitted = true; out.newLine(); }
 
 	//
 	// Global variables
@@ -255,51 +255,51 @@ bool HLLWriter::emitTargetCode(ShPtr<Module> module) {
 	//   void (*fp)(void) = func;
 	//
 	// is OK.
-	if (emitGlobalVariablesHeader()) { codeEmitted = true; out.emptyLine(); }
-	if (emitGlobalVariables()) { codeEmitted = true; out.emptyLine(); }
-	if (emitGlobalVariablesFooter()) { codeEmitted = true; out.emptyLine(); }
+	if (emitGlobalVariablesHeader()) { codeEmitted = true; out.newLine(); }
+	if (emitGlobalVariables()) { codeEmitted = true; out.newLine(); }
+	if (emitGlobalVariablesFooter()) { codeEmitted = true; out.newLine(); }
 
 	//
 	// Functions
 	//
-	if (emitFunctionsHeader()) { codeEmitted = true; out.emptyLine(); }
-	if (emitFunctions()) { codeEmitted = true; out.emptyLine(); }
-	if (emitFunctionsFooter()) { codeEmitted = true; out.emptyLine(); }
+	if (emitFunctionsHeader()) { codeEmitted = true; out.newLine(); }
+	if (emitFunctions()) { codeEmitted = true; out.newLine(); }
+	if (emitFunctionsFooter()) { codeEmitted = true; out.newLine(); }
 
 	//
 	// Statically linked functions
 	//
-	if (emitStaticallyLinkedFunctionsHeader()) { codeEmitted = true; out.emptyLine(); }
-	if (emitStaticallyLinkedFunctions()) { codeEmitted = true; out.emptyLine(); }
-	if (emitStaticallyLinkedFunctionsFooter()) { codeEmitted = true; out.emptyLine(); }
+	if (emitStaticallyLinkedFunctionsHeader()) { codeEmitted = true; out.newLine(); }
+	if (emitStaticallyLinkedFunctions()) { codeEmitted = true; out.newLine(); }
+	if (emitStaticallyLinkedFunctionsFooter()) { codeEmitted = true; out.newLine(); }
 
 	//
 	// Dynamically linked functions
 	//
-	if (emitDynamicallyLinkedFunctionsHeader()) { codeEmitted = true; out.emptyLine(); }
-	if (emitDynamicallyLinkedFunctions()) { codeEmitted = true; out.emptyLine(); }
-	if (emitDynamicallyLinkedFunctionsFooter()) { codeEmitted = true; out.emptyLine(); }
+	if (emitDynamicallyLinkedFunctionsHeader()) { codeEmitted = true; out.newLine(); }
+	if (emitDynamicallyLinkedFunctions()) { codeEmitted = true; out.newLine(); }
+	if (emitDynamicallyLinkedFunctionsFooter()) { codeEmitted = true; out.newLine(); }
 
 	//
 	// Syscall functions
 	//
-	if (emitSyscallFunctionsHeader()) { codeEmitted = true; out.emptyLine(); }
-	if (emitSyscallFunctions()) { codeEmitted = true; out.emptyLine(); }
-	if (emitSyscallFunctionsFooter()) { codeEmitted = true; out.emptyLine(); }
+	if (emitSyscallFunctionsHeader()) { codeEmitted = true; out.newLine(); }
+	if (emitSyscallFunctions()) { codeEmitted = true; out.newLine(); }
+	if (emitSyscallFunctionsFooter()) { codeEmitted = true; out.newLine(); }
 
 	//
 	// Instruction-idiom functions
 	//
-	if (emitInstructionIdiomFunctionsHeader()) { codeEmitted = true; out.emptyLine(); }
-	if (emitInstructionIdiomFunctions()) { codeEmitted = true; out.emptyLine(); }
-	if (emitInstructionIdiomFunctionsFooter()) { codeEmitted = true; out.emptyLine(); }
+	if (emitInstructionIdiomFunctionsHeader()) { codeEmitted = true; out.newLine(); }
+	if (emitInstructionIdiomFunctions()) { codeEmitted = true; out.newLine(); }
+	if (emitInstructionIdiomFunctionsFooter()) { codeEmitted = true; out.newLine(); }
 
 	//
 	// Meta-information
 	//
-	if (emitMetaInfoHeader()) { codeEmitted = true; out.emptyLine(); }
-	if (emitMetaInfo()) { codeEmitted = true; out.emptyLine(); }
-	if (emitMetaInfoFooter()) { codeEmitted = true; out.emptyLine(); }
+	if (emitMetaInfoHeader()) { codeEmitted = true; out.newLine(); }
+	if (emitMetaInfo()) { codeEmitted = true; out.newLine(); }
+	if (emitMetaInfoFooter()) { codeEmitted = true; out.newLine(); }
 
 	if (emitFileFooter()) { codeEmitted = true; }
 
@@ -573,7 +573,7 @@ bool HLLWriter::emitFunctions() {
 	for (const auto &func : funcs) {
 		if (somethingEmitted) {
 			// To produce an empty line between functions.
-			out.emptyLine();
+			out.newLine();
 		}
 		somethingEmitted |= emitFunction(func);
 	}

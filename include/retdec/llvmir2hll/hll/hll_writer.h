@@ -89,13 +89,6 @@ class MyOut
 		{
 			_out << "\n";
 		}
-		// 1) Ends the current line.
-		// 2) Inserts a new empty line.
-		// 3) Starts a new empty line that can be filled.
-		void emptyLine(uint64_t addr = 0)
-		{
-			_out << "\n";
-		}
 		// Creates a new line.
 		void commentLine(
 			const std::string& comment,
