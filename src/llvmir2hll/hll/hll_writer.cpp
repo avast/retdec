@@ -223,21 +223,21 @@ bool HLLWriter::emitTargetCode(ShPtr<Module> module) {
 	bool codeEmitted = false;
 	namesOfFuncsWithFixedIR = module->getNamesOfFuncsFixedWithLLVMIRFixer();
 
-	if (emitFileHeader()) { codeEmitted = true; out.newLine(); }
+	if (emitFileHeader()) { codeEmitted = true; out.emptyLine(); }
 
 	//
 	// Classes
 	//
-	if (emitClassesHeader()) { codeEmitted = true; out.newLine(); }
-	if (emitClasses()) { codeEmitted = true; out.newLine(); }
-	if (emitClassesFooter()) { codeEmitted = true; out.newLine(); }
+	if (emitClassesHeader()) { codeEmitted = true; out.emptyLine(); }
+	if (emitClasses()) { codeEmitted = true; out.emptyLine(); }
+	if (emitClassesFooter()) { codeEmitted = true; out.emptyLine(); }
 
 	//
 	// Function prototypes
 	//
-	if (emitFunctionPrototypesHeader()) { codeEmitted = true; out.newLine(); }
-	if (emitFunctionPrototypes()) { codeEmitted = true; out.newLine(); }
-	if (emitFunctionPrototypesFooter()) { codeEmitted = true; out.newLine(); }
+	if (emitFunctionPrototypesHeader()) { codeEmitted = true; out.emptyLine(); }
+	if (emitFunctionPrototypes()) { codeEmitted = true; out.emptyLine(); }
+	if (emitFunctionPrototypesFooter()) { codeEmitted = true; out.emptyLine(); }
 
 	//
 	// Global variables
@@ -255,51 +255,51 @@ bool HLLWriter::emitTargetCode(ShPtr<Module> module) {
 	//   void (*fp)(void) = func;
 	//
 	// is OK.
-	if (emitGlobalVariablesHeader()) { codeEmitted = true; out.newLine(); }
-	if (emitGlobalVariables()) { codeEmitted = true; out.newLine(); }
-	if (emitGlobalVariablesFooter()) { codeEmitted = true; out.newLine(); }
+	if (emitGlobalVariablesHeader()) { codeEmitted = true; out.emptyLine(); }
+	if (emitGlobalVariables()) { codeEmitted = true; out.emptyLine(); }
+	if (emitGlobalVariablesFooter()) { codeEmitted = true; out.emptyLine(); }
 
 	//
 	// Functions
 	//
-	if (emitFunctionsHeader()) { codeEmitted = true; out.newLine(); }
-	if (emitFunctions()) { codeEmitted = true; out.newLine(); }
-	if (emitFunctionsFooter()) { codeEmitted = true; out.newLine(); }
+	if (emitFunctionsHeader()) { codeEmitted = true; out.emptyLine(); }
+	if (emitFunctions()) { codeEmitted = true; out.emptyLine(); }
+	if (emitFunctionsFooter()) { codeEmitted = true; out.emptyLine(); }
 
 	//
 	// Statically linked functions
 	//
-	if (emitStaticallyLinkedFunctionsHeader()) { codeEmitted = true; out.newLine(); }
-	if (emitStaticallyLinkedFunctions()) { codeEmitted = true; out.newLine(); }
-	if (emitStaticallyLinkedFunctionsFooter()) { codeEmitted = true; out.newLine(); }
+	if (emitStaticallyLinkedFunctionsHeader()) { codeEmitted = true; out.emptyLine(); }
+	if (emitStaticallyLinkedFunctions()) { codeEmitted = true; out.emptyLine(); }
+	if (emitStaticallyLinkedFunctionsFooter()) { codeEmitted = true; out.emptyLine(); }
 
 	//
 	// Dynamically linked functions
 	//
-	if (emitDynamicallyLinkedFunctionsHeader()) { codeEmitted = true; out.newLine(); }
-	if (emitDynamicallyLinkedFunctions()) { codeEmitted = true; out.newLine(); }
-	if (emitDynamicallyLinkedFunctionsFooter()) { codeEmitted = true; out.newLine(); }
+	if (emitDynamicallyLinkedFunctionsHeader()) { codeEmitted = true; out.emptyLine(); }
+	if (emitDynamicallyLinkedFunctions()) { codeEmitted = true; out.emptyLine(); }
+	if (emitDynamicallyLinkedFunctionsFooter()) { codeEmitted = true; out.emptyLine(); }
 
 	//
 	// Syscall functions
 	//
-	if (emitSyscallFunctionsHeader()) { codeEmitted = true; out.newLine(); }
-	if (emitSyscallFunctions()) { codeEmitted = true; out.newLine(); }
-	if (emitSyscallFunctionsFooter()) { codeEmitted = true; out.newLine(); }
+	if (emitSyscallFunctionsHeader()) { codeEmitted = true; out.emptyLine(); }
+	if (emitSyscallFunctions()) { codeEmitted = true; out.emptyLine(); }
+	if (emitSyscallFunctionsFooter()) { codeEmitted = true; out.emptyLine(); }
 
 	//
 	// Instruction-idiom functions
 	//
-	if (emitInstructionIdiomFunctionsHeader()) { codeEmitted = true; out.newLine(); }
-	if (emitInstructionIdiomFunctions()) { codeEmitted = true; out.newLine(); }
-	if (emitInstructionIdiomFunctionsFooter()) { codeEmitted = true; out.newLine(); }
+	if (emitInstructionIdiomFunctionsHeader()) { codeEmitted = true; out.emptyLine(); }
+	if (emitInstructionIdiomFunctions()) { codeEmitted = true; out.emptyLine(); }
+	if (emitInstructionIdiomFunctionsFooter()) { codeEmitted = true; out.emptyLine(); }
 
 	//
 	// Meta-information
 	//
-	if (emitMetaInfoHeader()) { codeEmitted = true; out.newLine(); }
-	if (emitMetaInfo()) { codeEmitted = true; out.newLine(); }
-	if (emitMetaInfoFooter()) { codeEmitted = true; out.newLine(); }
+	if (emitMetaInfoHeader()) { codeEmitted = true; out.emptyLine(); }
+	if (emitMetaInfo()) { codeEmitted = true; out.emptyLine(); }
+	if (emitMetaInfoFooter()) { codeEmitted = true; out.emptyLine(); }
 
 	if (emitFileFooter()) { codeEmitted = true; }
 
@@ -573,7 +573,7 @@ bool HLLWriter::emitFunctions() {
 	for (const auto &func : funcs) {
 		if (somethingEmitted) {
 			// To produce an empty line between functions.
-			out.newLine();
+			out.emptyLine();
 		}
 		somethingEmitted |= emitFunction(func);
 	}
@@ -856,11 +856,11 @@ bool HLLWriter::emitMetaInfoFooter() {
 void HLLWriter::emitExprWithBracketsIfNeeded(ShPtr<Expression> expr) {
 	bool bracketsAreNeeded = bracketsManager->areBracketsNeeded(expr);
 	if (bracketsAreNeeded) {
-		out.leftParen();
+		out.punctiation('(');
 	}
 	expr->accept(this);
 	if (bracketsAreNeeded) {
-		out.rightParen();
+		out.punctiation(')');
 	}
 }
 
@@ -875,7 +875,7 @@ void HLLWriter::emitExprWithBracketsIfNeeded(ShPtr<Expression> expr) {
 */
 void HLLWriter::emitUnaryOpExpr(const std::string &opRepr,
 		ShPtr<UnaryOpExpr> expr) {
-	out.unaryOp(opRepr);
+	out.operatorX(opRepr);
 	emitExprWithBracketsIfNeeded(expr->getOperand());
 }
 
@@ -894,15 +894,13 @@ void HLLWriter::emitBinaryOpExpr(const std::string &opRepr,
 		ShPtr<BinaryOpExpr> expr, bool spaceBefore, bool spaceAfter) {
 	bool bracketsAreNeeded = bracketsManager->areBracketsNeeded(expr);
 	if (bracketsAreNeeded) {
-		out.leftParen();
+		out.punctiation('(');
 	}
 	expr->getFirstOperand()->accept(this);
-	if (spaceBefore) out.space();
-	out.binaryOp(opRepr);
-	if (spaceAfter) out.space();
+	out.operatorX(opRepr, spaceBefore, spaceAfter);
 	expr->getSecondOperand()->accept(this);
 	if (bracketsAreNeeded) {
-		out.rightParen();
+		out.punctiation(')');
 	}
 }
 
@@ -1142,8 +1140,7 @@ void HLLWriter::emitSectionHeader(const std::string &sectionName) {
 
 	// Emit the comment.
 	auto section = leftSeparator + " " + sectionName + " " + rightSeparator;
-	out.space(getCurrentIndent());
-	out.commentLine(section);
+	out.commentLine(section, getCurrentIndent());
 }
 
 /**
@@ -1191,8 +1188,7 @@ bool HLLWriter::tryEmitVarInfoInComment(ShPtr<Variable> var) {
 		// which global variable corresponds to which register.
 		auto registerName = module->getRegisterForGlobalVar(var);
 		if (!registerName.empty()) {
-			out.space();
-			out.comment(registerName);
+			out.comment(registerName, " ");
 			return true;
 		}
 		return false;
@@ -1203,8 +1199,7 @@ bool HLLWriter::tryEmitVarInfoInComment(ShPtr<Variable> var) {
 		// It is a local variable comming from a global variable. We want to
 		// emit the global variable's name in a comment so we know from which
 		// global variable this local variable comes from.
-		out.space();
-		out.comment(globalVarName);
+		out.comment(globalVarName, " ");
 		return true;
 	}
 
@@ -1230,8 +1225,7 @@ bool HLLWriter::tryEmitVarAddressInComment(ShPtr<Variable> var) {
 		return false;
 	}
 
-	out.space();
-	out.comment(varAddress);
+	out.comment(varAddress, " ");
 	return true;
 }
 
@@ -1247,8 +1241,7 @@ bool HLLWriter::tryEmitVarOffsetInComment(ShPtr<Variable> var) {
 		return false;
 	}
 
-	out.space();
-	out.comment("bp" + varOffset);
+	out.comment("bp" + varOffset, " ");
 	return true;
 }
 

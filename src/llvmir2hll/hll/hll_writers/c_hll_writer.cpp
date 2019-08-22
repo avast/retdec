@@ -241,7 +241,10 @@ bool hasOnlyUninitializedConstArrayInits(ShPtr<ConstStruct> constant) {
 */
 CHLLWriter::CHLLWriter(llvm::raw_ostream &out):
 	HLLWriter(out), unnamedStructCounter(0), emittingGlobalVarDefs(false),
-	optionEmitFunctionPrototypesForNonLibraryFuncs(false) {}
+	optionEmitFunctionPrototypesForNonLibraryFuncs(false)
+{
+	HLLWriter::out.setCommentPrefix(getCommentPrefix());
+}
 
 /**
 * @brief Creates a new C writer.
@@ -302,11 +305,7 @@ bool CHLLWriter::emitFileHeader() {
 
 	// Emit the header includes.
 	for (const auto &file : headerFiles) {
-		out.space(getCurrentIndent());
-		out.preprocessor("#include");
-		out.space();
-		out.preprocessor("<" + file + ">");
-		out.newLine();
+		out.includeLine(file, getCurrentIndent());
 	}
 
 	//
@@ -357,14 +356,14 @@ bool CHLLWriter::emitFileHeader() {
 	}
 	// - signed
 	for (const auto &p : emitSignedInt) {
-		out.emitTypedef(
+		out.typedefLine(
 			getCurrentIndent(),
 			"int" + std::to_string(p.second) + "_t",
 			"int" + std::to_string(p.first) + "_t");
 	}
 	// - unsigned
 	for (const auto &p : emitUnsignedInt) {
-		out.emitTypedef(
+		out.typedefLine(
 			getCurrentIndent(),
 			"uint" + std::to_string(p.second) + "_t",
 			"uint" + std::to_string(p.first) + "_t");
@@ -399,24 +398,24 @@ bool CHLLWriter::emitFileHeader() {
 	}
 	// Emit them.
 	if (emitTypedefs) {
-		out.newLine();
+		out.emptyLine();
 		emitSectionHeader("Float Types Definitions");
-		out.newLine();
+		out.emptyLine();
 	}
 	if (emitFloat16) {
-		out.emitTypedef(getCurrentIndent(), "float", "float16_t");
+		out.typedefLine(getCurrentIndent(), "float", "float16_t");
 	}
 	if (emitFloat32) {
-		out.emitTypedef(getCurrentIndent(), "float", "float32_t");
+		out.typedefLine(getCurrentIndent(), "float", "float32_t");
 	}
 	if (emitFloat64) {
-		out.emitTypedef(getCurrentIndent(), "double", "float64_t");
+		out.typedefLine(getCurrentIndent(), "double", "float64_t");
 	}
 	if (emitFloat80) {
-		out.emitTypedef(getCurrentIndent(), "long double", "float80_t");
+		out.typedefLine(getCurrentIndent(), "long double", "float80_t");
 	}
 	if (emitFloat128) {
-		out.emitTypedef(getCurrentIndent(), "long double", "float128_t");
+		out.typedefLine(getCurrentIndent(), "long double", "float128_t");
 	}
 
 	//
@@ -434,13 +433,13 @@ bool CHLLWriter::emitFileHeader() {
 	}
 	// Emit them.
 	if (!usedStructTypes.empty()) {
-		out.newLine();
+		out.emptyLine();
 		emitSectionHeader("Structures");
 	}
 	for (const auto &type : usedStructTypes) {
-		out.newLine();
+		out.emptyLine();
 		emitStructDeclaration(type);
-		out.semicolon();
+		out.punctiation(';');
 		out.newLine();
 	}
 
@@ -507,23 +506,23 @@ void CHLLWriter::visit(ShPtr<GlobalVarDef> varDef) {
 		emitConstantsInStructuredWay = true;
 		if (ShPtr<ConstArray> constArrayInit = cast<ConstArray>(init)) {
 			if (constArrayInit->isInitialized()) {
-				out.assignment(true);
+				out.operatorX("=", true, true);
 
 				emitInitializedConstArray(constArrayInit);
 			}
 		} else if (ShPtr<ConstStruct> constStructInit = cast<ConstStruct>(init)) {
-			out.assignment(true);
+			out.operatorX("=", true, true);
 
 			// When defining a structure, we do not need to emit a cast.
 			emitConstStruct(constStructInit, false);
 		} else {
-			out.assignment(true);
+			out.operatorX("=", true, true);
 			init->accept(this);
 		}
 		emitConstantsInStructuredWay = false;
 	}
 
-	out.semicolon();
+	out.punctiation(';');
 
 	tryEmitVarInfoInComment(var);
 
@@ -571,9 +570,9 @@ void CHLLWriter::visit(ShPtr<ArrayIndexOpExpr> expr) {
 	emitExprWithBracketsIfNeeded(expr->getBase());
 
 	// Access.
-	out.leftSquare();
+	out.punctiation('[');
 	expr->getIndex()->accept(this);
-	out.rightSquare();
+	out.punctiation(']');
 }
 
 void CHLLWriter::visit(ShPtr<StructIndexOpExpr> expr) {
@@ -582,7 +581,7 @@ void CHLLWriter::visit(ShPtr<StructIndexOpExpr> expr) {
 	emitExprWithBracketsIfNeeded(base);
 
 	// Access.
-	isa<PointerType>(base->getType()) ? out.arrow() : out.dot();
+	isa<PointerType>(base->getType()) ? out.operatorX("->") : out.operatorX(".");
 
 	// Element.
 	assert(isa<ConstInt>(expr->getSecondOperand()));
@@ -629,15 +628,15 @@ void CHLLWriter::visit(ShPtr<GtEqOpExpr> expr) {
 void CHLLWriter::visit(ShPtr<TernaryOpExpr> expr) {
 	bool bracketsAreNeeded = bracketsManager->areBracketsNeeded(expr);
 	if (bracketsAreNeeded) {
-		out.leftParen();
+		out.punctiation('(');
 	}
 	expr->getCondition()->accept(this);
-	out.operatorX("?", true);
+	out.operatorX("?", true, true);
 	expr->getTrueValue()->accept(this);
-	out.colon(true);
+	out.operatorX(":", true, true);
 	expr->getFalseValue()->accept(this);
 	if (bracketsAreNeeded) {
-		out.rightParen();
+		out.punctiation(')');
 	}
 }
 
@@ -697,9 +696,9 @@ void CHLLWriter::visit(ShPtr<CallExpr> expr) {
 	emitExprWithBracketsIfNeeded(expr->getCalledExpr());
 
 	// Arguments.
-	out.leftParen();
+	out.punctiation('(');
 	emitSequenceWithAccept(expr->getArgs());
-	out.rightParen();
+	out.punctiation(')');
 }
 
 void CHLLWriter::visit(ShPtr<CommaOpExpr> expr) {
@@ -718,25 +717,25 @@ void CHLLWriter::visit(ShPtr<TruncCastExpr> expr) {
 	// Specific property, see the LLVM reference manual.
 	if (isa<IntType>(expr->getType()) &&
 			(cast<IntType>(expr->getType())->isBool())) {
-		out.leftParen();
+		out.punctiation('(');
 		expr->getOperand()->accept(this);
 		out.operatorX("&");
-		out.constant("1");
-		out.rightParen();
+		out.constantInt("1");
+		out.punctiation(')');
 	} else {
 		emitCastInStandardWay(expr);
 	}
 }
 
 void CHLLWriter::visit(ShPtr<FPToIntCastExpr> expr) {
-	out.leftParen();
+	out.punctiation('(');
 	ShPtr<IntType> type = cast<IntType>(expr->getType());
 	if (type->isBool()) {
 		out.dataType("bool");
 	} else {
 		type->accept(this);
 	}
-	out.rightParen();
+	out.punctiation(')');
 	expr->getOperand()->accept(this);
 }
 
@@ -754,7 +753,7 @@ void CHLLWriter::visit(ShPtr<PtrToIntCastExpr> expr) {
 
 void CHLLWriter::visit(ShPtr<ConstBool> constant) {
 	// from stdbool.h
-	constant->getValue() ? out.constant("true") : out.constant("false");
+	constant->getValue() ? out.constantBool("true") : out.constantBool("false");
 }
 
 void CHLLWriter::visit(ShPtr<ConstFloat> constant) {
@@ -764,28 +763,28 @@ void CHLLWriter::visit(ShPtr<ConstFloat> constant) {
 		if (value.isNegative()) {
 			out.operatorX("-");
 		}
-		out.constant("INFINITY"); // the constant from <math.h>
+		out.constantFloat("INFINITY"); // the constant from <math.h>
 	} else if (value.isNaN()) {
 		if (value.isNegative()) {
 			out.operatorX("-");
 		}
-		out.constant("NAN"); // the constant from <math.h>
+		out.constantFloat("NAN"); // the constant from <math.h>
 	} else {
-		out.constant(constant->toMostReadableString()
+		out.constantFloat(constant->toMostReadableString()
 			+ getConstFloatSuffixIfNeeded(constant));
 	}
 }
 
 void CHLLWriter::visit(ShPtr<ConstInt> constant) {
 	if (shouldBeEmittedInHexa(constant)) {
-		out.constant(constant->toString(16, "0x"));
+		out.constantInt(constant->toString(16, "0x"));
 	} else {
-		out.constant(constant->toString());
+		out.constantInt(constant->toString());
 	}
 }
 
 void CHLLWriter::visit(ShPtr<ConstNullPointer> constant) {
-	out.constant(getConstNullPointerTextRepr());
+	out.constantPointer(getConstNullPointerTextRepr());
 }
 
 void CHLLWriter::visit(ShPtr<ConstString> constant) {
@@ -824,7 +823,7 @@ void CHLLWriter::visit(ShPtr<AssignStmt> stmt) {
 
 	out.space(getCurrentIndent());
 	emitAssignment(stmt->getLhs(), stmt->getRhs());
-	out.semicolon();
+	out.punctiation(';');
 	out.newLine();
 }
 
@@ -840,7 +839,7 @@ void CHLLWriter::emitAssignment(ShPtr<Expression> lhs, ShPtr<Expression> rhs) {
 		out.operatorX(compoundOp.getOperator());
 	} else {
 		// = or X=, where X is an operator
-		out.operatorX(compoundOp.getOperator(), true);
+		out.operatorX(compoundOp.getOperator(), true, true);
 
 		emitConstantsInStructuredWay = true;
 		compoundOp.getOperand()->accept(this);
@@ -887,7 +886,7 @@ void CHLLWriter::visit(ShPtr<VarDefStmt> stmt) {
 
 	// Initializer.
 	if (ShPtr<Expression> init = stmt->getInitializer()) {
-		out.operatorX("=", true);
+		out.operatorX("=", true, true);
 
 		emitConstantsInStructuredWay = true;
 		if (ShPtr<ConstStruct> constStruct = cast<ConstStruct>(init)) {
@@ -899,7 +898,7 @@ void CHLLWriter::visit(ShPtr<VarDefStmt> stmt) {
 		emitConstantsInStructuredWay = false;
 	}
 
-	out.semicolon();
+	out.punctiation(';');
 
 	tryEmitVarInfoInComment(stmt->getVar());
 
@@ -909,7 +908,7 @@ void CHLLWriter::visit(ShPtr<VarDefStmt> stmt) {
 void CHLLWriter::visit(ShPtr<CallStmt> stmt) {
 	out.space(getCurrentIndent());
 	stmt->getCall()->accept(this);
-	out.semicolon();
+	out.punctiation(';');
 	out.newLine();
 }
 
@@ -920,7 +919,7 @@ void CHLLWriter::visit(ShPtr<ReturnStmt> stmt) {
 		out.space();
 		retVal->accept(this);
 	}
-	out.semicolon();
+	out.punctiation(';');
 	out.newLine();
 }
 
@@ -936,12 +935,14 @@ void CHLLWriter::visit(ShPtr<IfStmt> stmt) {
 			out.keyword("if");
 		} else {
 			out.space();
-			out.keyword("else if");
+			out.keyword("else");
+			out.space();
+			out.keyword("if");
 		}
 		out.space();
-		out.leftParen();
+		out.punctiation('(');
 		i->first->accept(this);
-		out.rightParen();
+		out.punctiation(')');
 		out.space();
 		emitBlock(i->second);
 	}
@@ -961,13 +962,13 @@ void CHLLWriter::visit(ShPtr<SwitchStmt> stmt) {
 	out.space(getCurrentIndent());
 	out.keyword("switch");
 	out.space();
-	out.leftParen();
+	out.punctiation('(');
 
 	stmt->getControlExpr()->accept(this);
 
-	out.rightParen();
+	out.punctiation(')');
 	out.space();
-	out.leftCurly();
+	out.punctiation('{');
 	out.newLine();
 
 	increaseIndentLevel();
@@ -991,7 +992,7 @@ void CHLLWriter::visit(ShPtr<SwitchStmt> stmt) {
 	decreaseIndentLevel();
 
 	out.space(getCurrentIndent());
-	out.rightCurly();
+	out.punctiation('}');
 	out.newLine();
 }
 
@@ -999,10 +1000,10 @@ void CHLLWriter::visit(ShPtr<WhileLoopStmt> stmt) {
 	out.space(getCurrentIndent());
 	out.keyword("while");
 	out.space();
-	out.leftParen();
+	out.punctiation('(');
 
 	stmt->getCondition()->accept(this);
-	out.rightParen();
+	out.punctiation(')');
 	out.space();
 	emitBlock(stmt->getBody());
 	out.newLine();
@@ -1012,16 +1013,16 @@ void CHLLWriter::visit(ShPtr<ForLoopStmt> stmt) {
 	out.space(getCurrentIndent());
 	out.keyword("for");
 	out.space();
-	out.leftParen();
+	out.punctiation('(');
 	stmt->getIndVar()->getType()->accept(this);
 	out.space();
 	stmt->getIndVar()->accept(this);
-	out.operatorX("=", true);
+	out.operatorX("=", true, true);
 	stmt->getStartValue()->accept(this);
-	out.semicolon();
+	out.punctiation(';');
 	out.space();
 	stmt->getEndCond()->accept(this);
-	out.semicolon();
+	out.punctiation(';');
 	out.space();
 	// Try to emit as readable step as possible.
 	if (ShPtr<ConstInt> stepInt = cast<ConstInt>(stmt->getStep())) {
@@ -1037,22 +1038,22 @@ void CHLLWriter::visit(ShPtr<ForLoopStmt> stmt) {
 		} else if (stepInt->isNegative()) {
 			// i -= x
 			stmt->getIndVar()->accept(this);
-			out.operatorX("-=", true);
+			out.operatorX("-=", true, true);
 			ShPtr<ConstInt> negStepInt(ConstInt::create(-stepInt->getValue()));
 			negStepInt->accept(this);
 		} else {
 			// i += x
 			stmt->getIndVar()->accept(this);
-			out.operatorX("+=", true);
+			out.operatorX("+=", true, true);
 			stmt->getStep()->accept(this);
 		}
 	} else {
 		// i += x (generic)
 		stmt->getIndVar()->accept(this);
-		out.operatorX("+=", true);
+		out.operatorX("+=", true, true);
 		stmt->getStep()->accept(this);
 	}
-	out.rightParen();
+	out.punctiation(')');
 	out.space();
 	emitBlock(stmt->getBody());
 	out.newLine();
@@ -1062,22 +1063,22 @@ void CHLLWriter::visit(ShPtr<UForLoopStmt> stmt) {
 	out.space(getCurrentIndent());
 	out.keyword("for");
 	out.space();
-	out.leftParen();
+	out.punctiation('(');
 	if (auto init = stmt->getInit()) {
 		emitInitVarDefWhenNeeded(stmt);
 		init->accept(this);
 	}
-	out.semicolon();
+	out.punctiation(';');
 	if (auto cond = stmt->getCond()) {
 		out.space();
 		cond->accept(this);
 	}
-	out.semicolon();
+	out.punctiation(';');
 	if (auto step = stmt->getStep()) {
 		out.space();
 		step->accept(this);
 	}
-	out.rightParen();
+	out.punctiation(')');
 	out.space();
 	emitBlock(stmt->getBody());
 	out.newLine();
@@ -1086,14 +1087,14 @@ void CHLLWriter::visit(ShPtr<UForLoopStmt> stmt) {
 void CHLLWriter::visit(ShPtr<BreakStmt> stmt) {
 	out.space(getCurrentIndent());
 	out.keyword("break");
-	out.semicolon();
+	out.punctiation(';');
 	out.newLine();
 }
 
 void CHLLWriter::visit(ShPtr<ContinueStmt> stmt) {
 	out.space(getCurrentIndent());
 	out.keyword("continue");
-	out.semicolon();
+	out.punctiation(';');
 	out.newLine();
 }
 
@@ -1102,7 +1103,7 @@ void CHLLWriter::visit(ShPtr<GotoStmt> stmt) {
 	out.keyword("goto");
 	out.space();
 	out.labelId(getGotoLabel(stmt->getTarget()));
-	out.semicolon();
+	out.punctiation(';');
 	out.newLine();
 }
 
@@ -1303,7 +1304,7 @@ bool CHLLWriter::emitFunctionPrototype(ShPtr<Function> func) {
 	}
 
 	emitFunctionHeader(func);
-	out.semicolon();
+	out.punctiation(';');
 	out.newLine();
 	return true;
 }
@@ -1365,7 +1366,7 @@ void CHLLWriter::emitFunctionHeader(ShPtr<Function> func) {
 		out.dataType("int");
 		out.space();
 		out.functionId(func->getName());
-		out.leftParen();
+		out.punctiation('(');
 		const VarVector &params(func->getParams());
 		if (params.size() == 2) {
 			auto paramIter = params.begin();
@@ -1380,7 +1381,7 @@ void CHLLWriter::emitFunctionHeader(ShPtr<Function> func) {
 			out.space();
 			out.parameterId((*paramIter++)->getName());
 		}
-		out.rightParen();
+		out.punctiation(')');
 		return;
 	}
 
@@ -1388,9 +1389,9 @@ void CHLLWriter::emitFunctionHeader(ShPtr<Function> func) {
 	retType->accept(this);
 	out.space();
 	out.functionId(func->getName());
-	out.leftParen();
+	out.punctiation('(');
 	emitFunctionParameters(func);
-	out.rightParen();
+	out.punctiation(')');
 }
 
 /**
@@ -1415,16 +1416,16 @@ void CHLLWriter::emitHeaderOfFuncReturningPointerToFunc(ShPtr<Function> func) {
 
 	emitReturnType(retFuncType);
 	out.space();
-	out.leftParen();
+	out.punctiation('(');
 	emitStarsBeforePointedValue(cast<PointerType>(retType));
 	out.functionId(func->getName());
-	out.leftParen();
+	out.punctiation('(');
 	emitFunctionParameters(func);
-	out.rightParen();
-	out.rightParen();
-	out.leftParen();
+	out.punctiation(')');
+	out.punctiation(')');
+	out.punctiation('(');
 	emitFunctionParameters(retFuncType);
-	out.rightParen();
+	out.punctiation(')');
 }
 
 /**
@@ -1449,14 +1450,13 @@ void CHLLWriter::emitHeaderOfFuncReturningPointerToArray(ShPtr<Function> func) {
 
 	emitTypeOfElementsInArray(retArrayType);
 	out.space();
-	out.leftParen();
+	out.punctiation('(');
 	emitStarsBeforePointedValue(cast<PointerType>(retType));
 	out.functionId(func->getName());
-	out.leftParen();
+	out.punctiation('(');
 	emitFunctionParameters(func);
-	out.rightParen();
-	out.rightParen();
-	out.leftParen();
+	out.punctiation(')');
+	out.punctiation(')');
 	emitArrayDimensions(retArrayType);
 }
 
@@ -1574,13 +1574,13 @@ void CHLLWriter::emitPointerToFunc(ShPtr<PointerType> pointerToFuncType,
 
 	emitReturnType(funcType);
 	out.space();
-	out.leftParen();
+	out.punctiation('(');
 	emitStarsBeforePointedValue(pointerToFuncType);
 	emitNameOfVarIfExists(var);
-	out.rightParen();
-	out.leftParen();
+	out.punctiation(')');
+	out.punctiation('(');
 	emitFunctionParameters(funcType);
-	out.rightParen();
+	out.punctiation(')');
 }
 
 /**
@@ -1613,14 +1613,14 @@ void CHLLWriter::emitArrayOfFuncPointers(ShPtr<ArrayType> arrayType,
 
 	emitReturnType(funcType);
 	out.space();
-	out.leftParen();
+	out.punctiation('(');
 	emitStarsBeforePointedValue(ptrToFuncType);
 	emitNameOfVarIfExists(var);
 	emitArrayDimensions(arrayType);
-	out.rightParen();
-	out.leftParen();
+	out.punctiation(')');
+	out.punctiation('(');
 	emitFunctionParameters(funcType);
-	out.rightParen();
+	out.punctiation(')');
 }
 
 /**
@@ -1648,10 +1648,10 @@ void CHLLWriter::emitPointerToArray(ShPtr<PointerType> pointerToArrayType,
 
 	emitTypeOfElementsInArray(arrayType);
 	out.space();
-	out.leftParen();
+	out.punctiation('(');
 	emitStarsBeforePointedValue(pointerToArrayType);
 	emitNameOfVarIfExists(var);
-	out.rightParen();
+	out.punctiation(')');
 	emitArrayDimensions(arrayType);
 }
 
@@ -1668,9 +1668,9 @@ void CHLLWriter::emitArrayDimensions(ShPtr<ArrayType> arrayType) {
 * @brief Emits the given array dimension.
 */
 void CHLLWriter::emitArrayDimension(std::size_t dimension) {
-	out.leftSquare();
-	out.constant(std::to_string(dimension));
-	out.rightSquare();
+	out.punctiation('[');
+	out.constantInt(std::to_string(dimension));
+	out.punctiation(']');
 }
 
 /**
@@ -1700,9 +1700,9 @@ void CHLLWriter::emitInitializedConstArrayInline(ShPtr<ConstArray> array) {
 	//
 	//     char *arr[3] = {"string1", "string2", "string3"}
 	//
-	out.leftCurly();
+	out.punctiation('{');
 	emitSequenceWithAccept(array->getInitializedValue());
-	out.rightCurly();
+	out.punctiation('}');
 }
 
 /**
@@ -1718,7 +1718,7 @@ void CHLLWriter::emitInitializedConstArrayInStructuredWay(ShPtr<ConstArray> arra
 	//         "string3"
 	//     }
 	//
-	out.leftCurly();
+	out.punctiation('{');
 	out.newLine();
 	increaseIndentLevel();
 	out.space(getCurrentIndent());
@@ -1726,7 +1726,7 @@ void CHLLWriter::emitInitializedConstArrayInStructuredWay(ShPtr<ConstArray> arra
 	decreaseIndentLevel();
 	out.space(getCurrentIndent());
 	out.newLine();
-	out.rightCurly();
+	out.punctiation('}');
 }
 
 /**
@@ -1740,9 +1740,9 @@ void CHLLWriter::emitUninitializedConstArray(ShPtr<ConstArray> array) {
 	// braces. Therefore, we have to initialize the array to zeros. There is
 	// nothing else to do than initializing the array to some values, and zero
 	// is just as good value as any other.
-	out.leftCurly();
-	out.constant("0");
-	out.rightCurly();
+	out.punctiation('{');
+	out.constantInt("0");
+	out.punctiation('}');
 }
 
 /**
@@ -1756,9 +1756,9 @@ void CHLLWriter::emitTypeOfElementsInArray(ShPtr<ArrayType> arrayType) {
 * @brief Emits the given cast in the standard way.
 */
 void CHLLWriter::emitCastInStandardWay(ShPtr<CastExpr> expr) {
-	out.leftParen();
+	out.punctiation('(');
 	expr->getType()->accept(this);
-	out.rightParen();
+	out.punctiation(')');
 	expr->getOperand()->accept(this);
 }
 
@@ -1836,14 +1836,14 @@ void CHLLWriter::emitNameOfVarIfExists(ShPtr<Variable> var) {
 */
 void CHLLWriter::emitConstStruct(ShPtr<ConstStruct> constant, bool emitCast) {
 	if (emitCast && !emittingGlobalVarDefs) {
-		out.leftParen();
+		out.punctiation('(');
 		constant->getType()->accept(this);
-		out.rightParen();
+		out.punctiation(')');
 	}
 
 	bool emitInStructuredWay = shouldBeEmittedInStructuredWay(constant);
 
-	out.leftCurly();
+	out.punctiation('{');
 	if (emitInStructuredWay) {
 		out.newLine();
 		increaseIndentLevel();
@@ -1882,7 +1882,7 @@ void CHLLWriter::emitConstStruct(ShPtr<ConstStruct> constant, bool emitCast) {
 		out.operatorX(".");
 		out.memberId("e" + member.first->getTextRepr());
 
-		out.operatorX("=", true);
+		out.operatorX("=", true, true);
 		member.second->accept(this);
 		someInitEmitted = true;
 	}
@@ -1892,7 +1892,7 @@ void CHLLWriter::emitConstStruct(ShPtr<ConstStruct> constant, bool emitCast) {
 		decreaseIndentLevel();
 		out.space(getCurrentIndent());
 	}
-	out.rightCurly();
+	out.punctiation('}');
 }
 
 /**
@@ -1931,7 +1931,7 @@ void CHLLWriter::emitStructDeclaration(ShPtr<StructType> structType,
 		out.space();
 	}
 
-	out.leftCurly();
+	out.punctiation('{');
 	if (!emitInline) {
 		out.newLine();
 		increaseIndentLevel();
@@ -1946,7 +1946,7 @@ void CHLLWriter::emitStructDeclaration(ShPtr<StructType> structType,
 		// Create a dummy variable so we can use emitVarWithType().
 		// All elements are named e#, where # is a number.
 		emitVarWithType(Variable::create("e" + toString(i), elemType));
-		out.semicolon();
+		out.punctiation(';');
 		if (!emitInline) {
 			out.newLine();
 		} else if (i != elements.size() - 1) {
@@ -1957,7 +1957,7 @@ void CHLLWriter::emitStructDeclaration(ShPtr<StructType> structType,
 	if (!emitInline) {
 		decreaseIndentLevel();
 	}
-	out.rightCurly();
+	out.punctiation('}');
 }
 
 /**
@@ -1972,7 +1972,7 @@ void CHLLWriter::emitStructDeclaration(ShPtr<StructType> structType,
 * before the statement.
 */
 void CHLLWriter::emitBlock(ShPtr<Statement> stmt) {
-	out.leftCurly();
+	out.punctiation('{');
 	out.newLine();
 	increaseIndentLevel();
 
@@ -1992,7 +1992,7 @@ void CHLLWriter::emitBlock(ShPtr<Statement> stmt) {
 
 	decreaseIndentLevel();
 	out.space(getCurrentIndent());
-	out.rightCurly();
+	out.punctiation('}');
 }
 
 /**
@@ -2011,7 +2011,7 @@ void CHLLWriter::emitGotoLabelIfNeeded(ShPtr<Statement> stmt) {
 			// and a variable definition/declaration is not considered to be a
 			// statement. To this end, we put the empty statement (';') after
 			// the colon to make the code syntactically correct.
-			out.semicolon();
+			out.punctiation(';');
 		}
 
 		if (isa<EmptyStmt>(stmt) && !skipEmptyStmts(stmt)) {
@@ -2019,7 +2019,7 @@ void CHLLWriter::emitGotoLabelIfNeeded(ShPtr<Statement> stmt) {
 			// labels which are not followed by any statement. To this end, in
 			// such situations, we put the empty statement (';') after the
 			// colon to make the code syntactically correct.
-			out.semicolon();
+			out.punctiation(';');
 		}
 
 		out.newLine();

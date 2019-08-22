@@ -17,6 +17,7 @@
 #include "retdec/llvmir2hll/support/types.h"
 #include "retdec/llvmir2hll/support/visitor.h"
 #include "retdec/utils/non_copyable.h"
+#include "retdec/utils/string.h"
 
 namespace retdec {
 namespace llvmir2hll {
@@ -29,63 +30,99 @@ class UnaryOpExpr;
 
 class MyOut
 {
+	// Ctors, dtors, configuration methods.
+	//
 	public:
 		MyOut(llvm::raw_ostream& out) : _out(out) {}
+		void setCommentPrefix(const std::string& prefix)
+		{
+			_commentPrefix = prefix;
+		}
 
+	// Tokens.
+	//
 	public:
-		void newLine(uint64_t addr = 0) { _out << "\n"; }
+		// any whitespace
 		void space(const std::string& space = " ") { _out << space; }
-		void commentLine(
-			const std::string& comment,
-			const std::string& indent = "")
+		// (){}[];
+		void punctiation(char p) { _out << p; }
+		// == - + * -> .
+		void operatorX(const std::string& op, bool spaceBefore = false, bool spaceAfter = false)
 		{
-			_out << indent << "// " << comment << "\n";
-		}
-		void comment(const std::string& comment) { _out << "// " << comment; }
-		void leftParen() { _out << "("; }
-		void rightParen() { _out << ")"; }
-		void leftSquare() { _out << "["; }
-		void rightSquare() { _out << "]"; }
-		void semicolon() { _out << ";"; }
-		void leftCurly() { _out << "{"; }
-		void rightCurly() { _out << "}"; }
-		void unaryOp(const std::string& op) { _out << op; }
-		void binaryOp(const std::string& op) { _out << op; }
-		void preprocessor(const std::string& p) { _out << p; }
-		void include(const std::string& i) { _out << i; }
-		void keyword(const std::string& k) { _out << k; }
-		void dataType(const std::string& t) { _out << t; }
-		void assignment(bool spacesAround = false)
-		{
-			if (spacesAround) space();
-			_out << "=";
-			if (spacesAround) space();
-		}
-		void colon(bool spacesAround = false)
-		{
-			if (spacesAround) space();
-			_out << ":";
-			if (spacesAround) space();
-		}
-		void operatorX(const std::string& op, bool spacesAround = false)
-		{
-			if (spacesAround) space();
+			if (spaceBefore) space();
 			_out << op;
-			if (spacesAround) space();
+			if (spaceAfter) space();
 		}
+		// identifiers
 		void variableId(const std::string& id) { _out << id; }
 		void memberId(const std::string& id) { _out << id; }
 		void labelId(const std::string& id) { _out << id; }
 		void functionId(const std::string& id) { _out << id; }
 		void parameterId(const std::string& id) { _out << id; }
-		void arrow()  { _out << "->"; }
-		void dot()  { _out << "."; }
-		void constant(const std::string& c) { _out << c; }
+		//
+		void keyword(const std::string& k) { _out << k; }
+		void dataType(const std::string& t) { _out << t; }
+		void preprocessor(const std::string& p){ _out << p; }
+		void include(const std::string& i){ _out << "<" << i << ">"; }
+		// constants
+		void constantBool(const std::string& c) { _out << c; }
+		void constantInt(const std::string& c) { _out << c; }
+		void constantFloat(const std::string& c) { _out << c; }
 		void constantString(const std::string& c) { _out << c; }
 		void constantSymbol(const std::string& s) { _out << s; }
+		void constantPointer(const std::string& s) { _out << s; }
+		// Adds comment to and existing line, does not end it.
+		void comment(
+			const std::string& comment,
+			const std::string& indent = "")
+		{
+			_out << indent << _commentPrefix << " "
+				<< utils::replaceCharsWithStrings(comment, '\n', " ");
+		}
 
+	// Line manipulation methods.
+	//
 	public:
-		void emitTypedef(
+		// 1) Ends the current line.
+		// 2) Starts a new empty line that can be filled.
+		void newLine(uint64_t addr = 0)
+		{
+			_out << "\n";
+		}
+		// 1) Ends the current line.
+		// 2) Inserts a new empty line.
+		// 3) Starts a new empty line that can be filled.
+		void emptyLine(uint64_t addr = 0)
+		{
+			_out << "\n";
+		}
+		// Creates a new line.
+		void commentLine(
+			const std::string& comment,
+			const std::string& indent = "",
+			uint64_t addr = 0)
+		{
+			MyOut::comment(comment);
+			newLine();
+		}
+
+	// Helpers to create more complex lines.
+	public:
+		// [indent]#include <include>[ // comment]
+		void includeLine(
+			const std::string& header,
+			const std::string& indent = "",
+			const std::string& comment = "")
+		{
+			space(indent);
+			preprocessor("#include");
+			space();
+			include(header);
+			if (!comment.empty()) MyOut::comment(comment, " ");
+			newLine();
+		}
+		// [indent]typedef t1 t2;
+		void typedefLine(
 			const std::string& indent,
 			const std::string& t1,
 			const std::string& t2)
@@ -96,16 +133,22 @@ class MyOut
 			dataType(t1);
 			space();
 			dataType(t2);
-			semicolon();
+			punctiation(';');
 			newLine();
 		}
 
+	// Special methods.
 	public:
-		// any token added to the end of the line is goint to be a string comment
-		void commentModifier(const std::string& indent = "") { _out << indent << "// "; }
+		// Any token added to the end of the line is going to be a
+		// string comment.
+		void commentModifier(const std::string& indent = "")
+		{
+			_out << indent << "// ";
+		}
 
 	private:
 		llvm::raw_ostream& _out;
+		std::string _commentPrefix;
 };
 
 //==============================================================================
