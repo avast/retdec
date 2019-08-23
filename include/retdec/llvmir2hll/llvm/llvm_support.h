@@ -11,6 +11,8 @@
 #include <set>
 #include <string>
 
+#include "retdec/llvmir2hll/support/types.h"
+
 namespace llvm {
 
 class AllocaInst;
@@ -44,6 +46,7 @@ public:
 	static const llvm::Module *getModuleFromValue(const llvm::Value *v);
 	static std::string getBasicBlockLabelPrefix();
 	static bool isBasicBlockLabel(const std::string &str);
+	static Address getInstAddress(const llvm::Instruction *i);
 
 public:
 	// Disable both constructors, destructor, and assignment operator.

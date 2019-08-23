@@ -10,6 +10,7 @@
 #include "retdec/bin2llvmir/optimizations/asm_inst_remover/asm_inst_remover.h"
 #include "retdec/bin2llvmir/providers/asm_instruction.h"
 #include "retdec/bin2llvmir/providers/names.h"
+#include "retdec/bin2llvmir/utils/debug.h"
 
 using namespace llvm;
 
@@ -47,6 +48,8 @@ bool AsmInstructionRemover::runOnModuleCustom(llvm::Module& M)
  */
 bool AsmInstructionRemover::run(Module& M)
 {
+	// dumpModuleToFile(&M, ConfigProvider::getConfig(&M)->getOutputDirectory());
+
 	bool changed = false;
 
 	for (auto& F : M.getFunctionList())
@@ -62,6 +65,19 @@ bool AsmInstructionRemover::run(Module& M)
 				i.setName(names::generateTempVariableName(ai.getAddress(), c));
 				++c;
 			}
+
+// TODO: Set addresses to instuction metadata.
+//
+llvm::MDNode* N = llvm::MDNode::get(
+	M.getContext(),
+	// MDString::get(C, "my md string content")
+	llvm::ValueAsMetadata::get(llvm::ConstantInt::get(
+		llvm::Type::getInt64Ty(M.getContext()),
+		ai.getAddress(),
+		false
+	))
+);
+i.setMetadata("insn.addr", N);
 		}
 
 		// Remove special instructions.
@@ -94,6 +110,7 @@ bool AsmInstructionRemover::run(Module& M)
 		}
 	}
 
+	// dumpModuleToFile(&M, ConfigProvider::getConfig(&M)->getOutputDirectory());
 	return changed;
 }
 

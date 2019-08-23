@@ -25,7 +25,7 @@ class Visitor;
 class WhileLoopStmt final: public Statement {
 public:
 	static ShPtr<WhileLoopStmt> create(ShPtr<Expression> cond, ShPtr<Statement> body,
-		ShPtr<Statement> succ = nullptr);
+		ShPtr<Statement> succ = nullptr, Address a = Address::getUndef);
 
 	virtual ~WhileLoopStmt() override;
 
@@ -54,7 +54,8 @@ public:
 private:
 	// Since instances are created by calling the static function create(), the
 	// constructor can be private.
-	WhileLoopStmt(ShPtr<Expression> cond, ShPtr<Statement> body);
+	WhileLoopStmt(ShPtr<Expression> cond, ShPtr<Statement> body,
+		Address a = Address::getUndef);
 
 private:
 	/// Loop condition.

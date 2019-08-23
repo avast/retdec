@@ -18,7 +18,8 @@ namespace llvmir2hll {
 *
 * See create() for more information.
 */
-ReturnStmt::ReturnStmt(ShPtr<Expression> retVal): retVal(retVal) {}
+ReturnStmt::ReturnStmt(ShPtr<Expression> retVal, Address a):
+	Statement(a), retVal(retVal) {}
 
 /**
 * @brief Destructs the statement.
@@ -26,7 +27,8 @@ ReturnStmt::ReturnStmt(ShPtr<Expression> retVal): retVal(retVal) {}
 ReturnStmt::~ReturnStmt() {}
 
 ShPtr<Value> ReturnStmt::clone() {
-	ShPtr<ReturnStmt> returnStmt(ReturnStmt::create());
+	ShPtr<ReturnStmt> returnStmt(
+		ReturnStmt::create(nullptr, nullptr, getAddress()));
 	returnStmt->setMetadata(getMetadata());
 	if (retVal) {
 		returnStmt->setRetVal(ucast<Expression>(retVal->clone()));
@@ -98,9 +100,11 @@ bool ReturnStmt::hasRetVal() const {
 *
 * @param[in] retVal Return value.
 * @param[in] succ Follower of the statement in the program flow.
+* @param[in] a Address.
 */
-ShPtr<ReturnStmt> ReturnStmt::create(ShPtr<Expression> retVal, ShPtr<Statement> succ) {
-	ShPtr<ReturnStmt> stmt(new ReturnStmt(retVal));
+ShPtr<ReturnStmt> ReturnStmt::create(ShPtr<Expression> retVal,
+	ShPtr<Statement> succ, Address a) {
+	ShPtr<ReturnStmt> stmt(new ReturnStmt(retVal, a));
 	stmt->setSuccessor(succ);
 
 	// Initialization (recall that shared_from_this() cannot be called in a

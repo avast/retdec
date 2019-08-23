@@ -181,7 +181,8 @@ void NonRecursiveCFGBuilder::createEntryNode() {
 	// way.
 	// For each parameter...
 	for (const auto &param : func->getParams()) {
-		ShPtr<Statement> varDefStmt(VarDefStmt::create(param));
+		ShPtr<Statement> varDefStmt(
+			VarDefStmt::create(param, nullptr, nullptr, func->getStartAddress()));
 		cfg->stmtNodeMapping[varDefStmt] = cfg->entryNode;
 		cfg->entryNode->stmts.push_back(varDefStmt);
 	}

@@ -122,7 +122,7 @@ public:
 	bool operator()(ShPtr<Function> f1, ShPtr<Function> f2) {
 		auto f1AddressRange = module->getAddressRangeForFunc(f1);
 		auto f2AddressRange = module->getAddressRangeForFunc(f2);
-		return f1AddressRange.first < f2AddressRange.first;
+		return f1AddressRange < f2AddressRange;
 	}
 
 private:
@@ -984,8 +984,8 @@ bool HLLWriter::emitAddressRangeForFuncIfAvailable(ShPtr<Function> func) {
 	}
 
 	std::ostringstream info;
-	info << "Address range: " << "0x" + toHex(addressRange.first) +
-		" - 0x" + toHex(addressRange.second) << "\n";
+	info << "Address range: " << addressRange.getStart().toHexPrefixString() +
+		" - " + addressRange.getEnd().toHexPrefixString() << "\n";
 	out << comment(info.str());
 	return true;
 }

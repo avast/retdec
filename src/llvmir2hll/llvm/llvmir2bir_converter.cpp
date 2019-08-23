@@ -187,7 +187,7 @@ ShPtr<Function> LLVMIR2BIRConverter::convertFuncDeclaration(
 	auto retType = converter->convertType(func.getReturnType());
 	auto params = convertFuncParams(func);
 
-	auto birFunc = Function::create(retType, func.getName(), params);
+	auto birFunc = Function::create(resModule, retType, func.getName(), params);
 	variablesManager->addGlobalValVarPair(&func, birFunc->getAsVar());
 	birFunc->setVarArg(func.isVarArg());
 	return birFunc;
@@ -230,7 +230,8 @@ VarVector LLVMIR2BIRConverter::sortLocalVars(const VarSet &vars) const {
 void LLVMIR2BIRConverter::generateVarDefinitions(ShPtr<Function> func) const {
 	auto vars = sortLocalVars(func->getLocalVars());
 	for (auto i = vars.crbegin(), e = vars.crend(); i != e; ++i) {
-		func->getBody()->prependStatement(VarDefStmt::create(*i));
+		func->getBody()->prependStatement(
+			VarDefStmt::create(*i, nullptr, nullptr, func->getStartAddress()));
 	}
 }
 

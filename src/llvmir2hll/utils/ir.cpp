@@ -264,7 +264,7 @@ StmtVector removeVarDefOrAssignStatement(ShPtr<Statement> stmt,
 	//
 
 	// Insert the first found call.
-	auto callStmt = CallStmt::create(*calls.begin());
+	auto callStmt = CallStmt::create(*calls.begin(), nullptr, stmt->getAddress());
 	callStmt->setMetadata(stmt->getMetadata());
 	Statement::replaceStatement(stmt, callStmt);
 	newStmts.push_back(callStmt);
@@ -273,7 +273,7 @@ StmtVector removeVarDefOrAssignStatement(ShPtr<Statement> stmt,
 	// Insert the remaining calls.
 	auto lastCallStmt = callStmt;
 	for (auto call : calls) {
-		callStmt = CallStmt::create(call);
+		callStmt = CallStmt::create(call, nullptr, stmt->getAddress());
 		lastCallStmt->appendStatement(callStmt);
 		newStmts.push_back(callStmt);
 		lastCallStmt = callStmt;
@@ -517,7 +517,8 @@ void addLocalVarToFunc(ShPtr<Variable> var, ShPtr<Function> func,
 		stmt = stmt->getSuccessor();
 	}
 	// ...then, we place a VarDefStmt of var into that position.
-	stmt->prependStatement(VarDefStmt::create(var, init));
+	stmt->prependStatement(
+		VarDefStmt::create(var, init, nullptr, func->getStartAddress()));
 }
 
 /**

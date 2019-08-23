@@ -42,7 +42,7 @@ TestsWithModule::TestsWithModule():
 * @return The constructed function declaration.
 */
 ShPtr<Function> TestsWithModule::addFuncDecl(const std::string &funcName) {
-	ShPtr<Function> func(Function::create(VoidType::create(), funcName,
+	ShPtr<Function> func(Function::create(nullptr, VoidType::create(), funcName,
 		VarVector(), VarSet(), ShPtr<Statement>(), false));
 	module->addFunc(func);
 	return func;
@@ -54,7 +54,7 @@ ShPtr<Function> TestsWithModule::addFuncDecl(const std::string &funcName) {
 * @return The constructed function definition.
 */
 ShPtr<Function> TestsWithModule::addFuncDef(const std::string &funcName) {
-	ShPtr<Function> func(Function::create(VoidType::create(), funcName,
+	ShPtr<Function> func(Function::create(nullptr, VoidType::create(), funcName,
 		VarVector(), VarSet(), EmptyStmt::create(), false));
 	module->addFunc(func);
 	return func;
