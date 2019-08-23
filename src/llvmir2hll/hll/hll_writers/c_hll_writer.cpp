@@ -887,7 +887,7 @@ void CHLLWriter::visit(ShPtr<VarDefStmt> stmt) {
 
 	out << ";";
 
-	tryEmitVarInfoInComment(stmt->getVar());
+	tryEmitVarInfoInComment(stmt->getVar(), stmt);
 
 	out << "\n";
 }

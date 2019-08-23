@@ -1201,9 +1201,14 @@ void HLLWriter::sortFuncsForEmission(FuncVector &funcs) {
 * If the emission of debug comments is disabled, this function does nothing and
 * returns @c false;
 */
-bool HLLWriter::tryEmitVarInfoInComment(ShPtr<Variable> var) {
+bool HLLWriter::tryEmitVarInfoInComment(ShPtr<Variable> var, ShPtr<Statement> stmt) {
 	if (!optionEmitDebugComments) {
 		return false;
+	}
+
+	if (stmt && stmt->getAddress().isDefined()) {
+		out << " " << comment(stmt->getAddress().toHexPrefixString());
+		return true;
 	}
 
 	// Both local and global variables can have an address.
