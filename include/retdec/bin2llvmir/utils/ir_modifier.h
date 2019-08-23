@@ -107,8 +107,8 @@ class IrModifier
 				llvm::Argument* arg,
 				llvm::Type* type);
 
-		llvm::GlobalVariable* convertToStructure(
-				llvm::GlobalVariable* gv,
+		llvm::Value* convertToStructure(
+				llvm::Value* gv,
 				llvm::StructType* strType);
 	protected:
 		llvm::Value* changeObjectDeclarationType(
@@ -141,15 +141,32 @@ class IrModifier
 				llvm::StructType* strType,
 				retdec::utils::Address& addr);
 
+		llvm::AllocaInst* convertToStructure(
+				llvm::AllocaInst* sv,
+				llvm::StructType* strType,
+				int offset);
+
 		void correctElementsInTypeSpace(
 			const retdec::utils::Address& start,
 			const retdec::utils::Address& end,
 			llvm::Value* structure,
 			size_t currentIdx);
 
+		void correctStackElementsInTypeSpace(
+			int start,
+			int end,
+			llvm::Value* structure,
+			size_t currentIdx);
+
 		void correctElementsInPadding(
 			const retdec::utils::Address& start,
 			const retdec::utils::Address& end,
+			llvm::Value* structure,
+			size_t lastIdx);
+
+		void correctStackElementsInPadding(
+			int startOffset,
+			int endOffset,
 			llvm::Value* structure,
 			size_t lastIdx);
 

@@ -78,7 +78,7 @@ bool ConstantsAnalysis::run()
 	ReachingDefinitionsAnalysis RDA;
 	RDA.runOnModule(*_module, _abi);
 
-	for (Function& f : *_module)
+	for (Function& f : *_module) {
 	for (inst_iterator I = inst_begin(&f), E = inst_end(&f); I != E;)
 	{
 		Instruction& i = *I;
@@ -109,6 +109,7 @@ bool ConstantsAnalysis::run()
 
 			checkForGlobalInInstruction(RDA, load, load->getPointerOperand());
 		}
+	}
 	}
 
 	std::vector<GlobalVariable*> globalList;

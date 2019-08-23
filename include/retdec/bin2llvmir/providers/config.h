@@ -95,6 +95,9 @@ class Config
 		retdec::utils::Maybe<int> getStackVariableOffset(
 				const llvm::Value* val);
 
+		std::vector<llvm::AllocaInst*> getStackVariables(llvm::Function* fnc);
+
+
 		// Insert
 		//
 		retdec::config::Object* insertGlobalVariable(

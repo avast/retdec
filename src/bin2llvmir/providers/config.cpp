@@ -311,6 +311,38 @@ bool Config::isStackVariable(const llvm::Value* val)
 	return getConfigStackVariable(val) != nullptr;
 }
 
+
+std::vector<llvm::AllocaInst*> Config::getStackVariables(llvm::Function* fnc)
+{
+	std::vector<llvm::AllocaInst*> locals;
+	auto* cf = getConfigFunction(fnc);
+	if (cf == nullptr)
+	{
+		return locals;
+	}
+
+	std::map<std::string, llvm::AllocaInst*> name2stack;
+	for (auto& b : *fnc)
+	for (auto& i : b)
+	{
+		if (AllocaInst* a = dyn_cast<AllocaInst>(&i))
+		{
+			name2stack[a->getName().str()] = a;
+		}
+	}
+
+	for (auto& p: cf->locals)
+	{
+		auto stName = p.second.getName();
+		if (name2stack.count(stName))
+		{
+			locals.push_back(name2stack[stName]);
+		}
+	}
+
+	return locals;
+}
+
 retdec::utils::Maybe<int> Config::getStackVariableOffset(
 		const llvm::Value* val)
 {

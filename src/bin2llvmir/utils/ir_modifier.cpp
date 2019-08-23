@@ -18,7 +18,7 @@
 #include "retdec/bin2llvmir/utils/ir_modifier.h"
 #include "retdec/bin2llvmir/utils/llvm.h"
 
-#define debug_enabled true
+#define debug_enabled false
 
 using namespace llvm;
 
@@ -761,7 +761,6 @@ Instruction* IrModifier::getElement(llvm::Value* v, const std::vector<Value*> &i
 
 void IrModifier::replaceElementWithStrIdx(llvm::Value* element, llvm::Value* str, std::size_t idx)
 {
-	auto elementType = dyn_cast<PointerType>(element->getType())->getElementType();
 	auto structType = dyn_cast<PointerType>(str->getType())->getElementType();
 	std::vector<User*> uses;
 
@@ -813,15 +812,23 @@ void IrModifier::replaceElementWithStrIdx(llvm::Value* element, llvm::Value* str
 			ep->replaceAllUsesWith(elem);
 			ep->eraseFromParent();
 		}
-		else if (auto* i = dyn_cast<PtrToIntInst>(u))
+		else if (false)
 		{
+			auto* i = dyn_cast<PtrToIntInst>(u);
 			auto zero = ConstantInt::get(IntegerType::get(_module->getContext(), 32), 0);
 			auto eIdx = ConstantInt::get(IntegerType::get(_module->getContext(), 32), idx);
 
-			auto elem = getElement(str, {zero, eIdx, zero});
+			auto elem = getElement(str, {zero, eIdx});
+			if (element->getType()->isArrayTy())
+				elem = getElement(str, {zero, eIdx, zero});
+
+
 			elem->insertBefore(i);
-			elem = new LoadInst(dyn_cast<PointerType>(elem->getType())->getElementType(), elem, "", i);
-			i->replaceAllUsesWith(elem);
+			Value* val = new LoadInst(dyn_cast<PointerType>(elem->getType())->getElementType(), elem, "", i);
+			if (val->getType() != i->getType())
+				val = convertValueToType(val, i->getType(), i);
+
+			i->replaceAllUsesWith(val);
 			i->eraseFromParent();
 		}
 		else if (auto* j = dyn_cast<InsertValueInst>(u))
@@ -831,6 +838,12 @@ void IrModifier::replaceElementWithStrIdx(llvm::Value* element, llvm::Value* str
 		//	exit(1);
 	}
 
+	std::cout << "Corrected!!" << std::endl;
+	if (!isa<Constant>(str))
+	{
+		//TODO: should initialize
+		return;
+	}
 
 	auto zero = ConstantInt::get(IntegerType::get(_module->getContext(), 32), 0);
 	auto eIdx = ConstantInt::get(IntegerType::get(_module->getContext(), 32), idx);
@@ -1066,6 +1079,15 @@ void IrModifier::correctElementsInTypeSpace(
 	}
 }
 
+void IrModifier::correctStackElementsInTypeSpace(
+		int startOffset,
+		int endOffset,
+		llvm::Value* structure,
+		size_t currentIdx)
+{
+	//TODO
+}
+
 // TODO: move this to config
 std::vector<GlobalVariable*> IrModifier::searchAddressRangeForGlobals(
 		const retdec::utils::Address& start,
@@ -1186,12 +1208,116 @@ void IrModifier::correctElementsInPadding(
 	}
 }
 
-llvm::GlobalVariable* IrModifier::convertToStructure(
-		GlobalVariable* gv,
+void IrModifier::correctStackElementsInPadding(
+		int startOffset,
+		int endOffset,
+		llvm::Value* structure,
+		size_t lastIdx)
+{
+	/* TODO
+	if (startOffset > endOffset)
+	{
+		return;
+	}
+	// Find all elements between range
+	std::vector<AllocaInst*> globals = searchAddressRangeForLocals(startOffset, endOffset);
+
+	for (auto i = globals.begin(); i != globals.end(); i++)
+	{
+		// Determine element size
+		std::size_t elemSize = 0;
+		auto elemAddr = _config->getGlobalAddress(*i);
+		if (i+1 == globals.endOffset())
+		{
+			elemSize = endOffset - elemAddr;
+		}
+		else
+		{
+			auto nxtElemAddr = _config->getGlobalAddress(*(i+1));
+			elemSize = nxtElemAddr - elemAddr;
+		}
+		
+		elemSize = getNearestPowerOfTwo(elemSize);
+
+		auto _abi = AbiProvider::getAbi(_module);
+		elemSize = elemSize < _abi->getWordSize() ? elemSize:_abi->getWordSize();
+		// TODO: only powers of 2
+
+		Value* global = *i;
+		auto nType = IntegerType::getIntNTy(_module->getContext(), elemSize*8);
+		auto nTypePtr = PointerType::getIntNPtrTy(_module->getContext(), elemSize*8);
+		auto image = FileImageProvider::getFileImage(_module);
+		global = changeObjectType(image, global, nType);
+
+		// Users will be changed so we must save all of the first
+		std::vector<User*> users;
+		for (auto* u: global->users())
+			users.push_back(u);
+
+		for (auto* u: users)
+		{
+			if (auto* ld = dyn_cast<LoadInst>(u))
+			{
+				auto *gep = getElement(structure, lastIdx);
+				gep->insertBefore(ld);
+				auto *chptr = PointerType::getInt8PtrTy(_module->getContext());
+				auto *cast = BitCastInst::CreatePointerCast(gep, chptr);
+				cast->insertBefore(ld);
+				gep = getArrayElement(cast, elemAddr-startOffset+1);
+				gep->insertBefore(ld);
+				cast = BitCastInst::CreatePointerCast(gep, nTypePtr);
+				cast->insertBefore(ld);
+
+				auto load = new LoadInst(nType, cast, "", ld);
+				ld->replaceAllUsesWith(load);
+				ld->eraseFromParent();
+			}
+			else if (auto * st = dyn_cast<StoreInst>(u))
+			{
+				auto *gep = getElement(structure, lastIdx);
+				gep->insertBefore(st);
+				auto *chptr = PointerType::getInt8PtrTy(_module->getContext());
+				auto *cast = BitCastInst::CreatePointerCast(gep, chptr);
+				cast->insertBefore(st);
+				gep = getArrayElement(cast, elemAddr-startOffset+1);
+				gep->insertBefore(st);
+				cast = BitCastInst::CreatePointerCast(gep, nTypePtr);
+				cast->insertBefore(st);
+			
+				new StoreInst(st->getValueOperand(), cast, st);
+				st->eraseFromParent();
+			}
+			else if (auto* gp = dyn_cast<GetElementPtrInst>(u))
+			{
+				// TODO: this should not happen, please check.
+				assert(false);
+			}
+
+			// TODO:
+			// initialize global variable with constant getelementptr.
+			// replace all usage with constant getelementptr
+		}
+	}
+	*/
+}
+
+Value* IrModifier::convertToStructure(
+		Value* obj,
 		StructType* strType)
 {
-	auto addr = _config->getGlobalAddress(gv);
-	return convertToStructure(gv, strType, addr);
+	if (auto* gv = dyn_cast<GlobalVariable>(obj))
+	{
+		auto addr = _config->getGlobalAddress(gv);
+		return convertToStructure(gv, strType, addr);
+	}
+	else if (_config->isStackVariable(obj))
+	{
+		auto offset = _config->getStackVariableOffset(obj);
+		return convertToStructure(dyn_cast<AllocaInst>(obj), strType, offset);
+	}
+
+	// TODO: should return casted object
+	return obj;
 }
 
 llvm::GlobalVariable* IrModifier::convertToStructure(
@@ -1295,6 +1421,100 @@ llvm::GlobalVariable* IrModifier::convertToStructure(
 	}
 
 	return cgv;
+}
+
+AllocaInst* IrModifier::convertToStructure(
+		AllocaInst* sv,
+		StructType* strType,
+		int offset)
+{
+	auto alignment = getAlignment(strType);
+	auto padding = alignment;
+	int origOffset = offset;
+
+	// Create copy of local variable.
+	auto* stCopy = new AllocaInst(strType, Abi::DEFAULT_ADDR_SPACE);
+	auto* fnc = sv->getFunction();
+
+	auto it = inst_begin(fnc);
+	assert(it != inst_end(fnc));
+	stCopy->insertBefore(&*it);
+
+	auto image = FileImageProvider::getFileImage(_module);
+
+	std::size_t idx = 0;
+	for (auto elem: strType->elements())
+	{
+		LOG << "Correcting element: " << llvmObjToString(elem) << std::endl;
+		LOG << "offset: " << offset << std::endl;
+		if (auto* eStrType = dyn_cast<StructType>(elem))
+		{
+			auto newAlignment = getAlignment(eStrType);
+			if (alignment > padding) {
+				int nOffset = offset+(padding)%newAlignment;
+				correctStackElementsInPadding(offset, nOffset, stCopy, idx-1);
+				offset = nOffset;
+			}
+
+			padding = alignment;
+
+			LOG << "Retrieving stack at off: " << offset << std::endl;
+			AllocaInst* structElement = getStackVariable(fnc, offset, elem).first;
+			LOG << "Retrieved: " << llvmObjToString(structElement) << std::endl;
+			auto* origType = dyn_cast<PointerType>(structElement->getType())->getElementType();
+			if (origType != elem)
+			{
+				auto* val = changeObjectDeclarationType(image, structElement, eStrType);
+				correctUsageOfModifiedObject(structElement, val, origType);
+				structElement = dyn_cast<AllocaInst>(val);
+			}
+
+			structElement = convertToStructure(structElement, eStrType, offset);
+			replaceElementWithStrIdx(structElement, stCopy, idx++);
+
+			continue;
+		}
+
+		auto a = AbiProvider::getAbi(_module);
+		auto elemSize = a->getTypeByteSize(elem);
+		if (padding < elemSize) {
+			correctStackElementsInPadding(offset, offset+padding, stCopy, idx-1);
+			offset += padding;
+			padding = alignment;
+		}
+
+		LOG << "Retrieving stack at off: " << offset << std::endl;
+		AllocaInst* structElement = getStackVariable(fnc, offset, elem).first;
+		LOG << "Retrieved: " << llvmObjToString(structElement) << std::endl;
+		// TODO:
+		// following 3 linses of code can go into replaceElementWithStrIdx.
+		auto* origType = dyn_cast<PointerType>(structElement->getType())->getElementType();
+		if (origType != elem) {
+			auto* val = changeObjectDeclarationType(image, structElement, elem);
+			correctUsageOfModifiedObject(structElement, val, origType);
+			structElement = dyn_cast<AllocaInst>(val);
+		}
+
+		correctStackElementsInTypeSpace(offset, offset+elemSize, stCopy, idx);
+		replaceElementWithStrIdx(structElement, stCopy, idx++);
+		padding -= elemSize;
+		offset += elemSize;
+	}
+
+	// During computation will be original global variable changed.
+	auto origStr = _config->getLlvmStackVariable(fnc, origOffset);
+	stCopy->takeName(origStr);
+
+	// In case of recursive structures we must align
+	// space for correct address.
+	padding = padding%alignment;
+	if (padding)
+	{
+		correctStackElementsInPadding(offset, offset+padding, stCopy, idx-1);
+		offset += padding; // (addr-oldAddr)%alignment
+	}
+
+	return stCopy;
 }
 
 /**
@@ -1570,11 +1790,7 @@ llvm::Value* IrModifier::changeObjectType(
 	// If it is global structure we need to correct elements usage.
 	if (auto* strType = dyn_cast<StructType>(toType))
 	{
-		if (auto* gv = dyn_cast<GlobalVariable>(nval)) {
-			auto addr = _config->getGlobalAddress(gv);
-			return convertToStructure(gv, strType, addr);
-		}
-
+		return convertToStructure(nval, strType);
 	}
 
 	return nval;
