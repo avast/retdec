@@ -862,7 +862,7 @@ Capstone2LlvmIrTranslatorX86_impl::_i2fm =
 		{X86_INS_IRET, nullptr},
 		{X86_INS_IRETD, nullptr},
 		{X86_INS_IRETQ, nullptr},
-		{X86_INS_FISTTP, nullptr},
+		{X86_INS_FISTTP, &Capstone2LlvmIrTranslatorX86_impl::translateFist},
 		{X86_INS_FIST, &Capstone2LlvmIrTranslatorX86_impl::translateFist},
 		{X86_INS_FISTP, &Capstone2LlvmIrTranslatorX86_impl::translateFist},
 		{X86_INS_UCOMISD, nullptr},

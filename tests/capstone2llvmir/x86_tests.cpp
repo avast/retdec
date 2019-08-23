@@ -9909,6 +9909,78 @@ TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FISTP_64)
 }
 
 //
+// X86_INS_FISTTP
+//
+
+// DF /1	FISTTP m16int	Store ST(0) in m16int with truncation.
+TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FISTTP_16)
+{
+	ALL_MODES;
+
+	setRegisters({
+		{X87_REG_TOP, 0x1},
+		{X86_REG_ST1, 3.7}, // should trunc to 3
+	 });
+
+	emulate("fisttp word ptr [0x1234]");
+
+	EXPECT_JUST_REGISTERS_LOADED({X87_REG_TOP, X86_REG_ST1});
+	EXPECT_JUST_REGISTERS_STORED({
+		 {X87_REG_TOP, 0x2},
+		 {X87_REG_TAG1, ANY},
+		 });
+	EXPECT_NO_MEMORY_LOADED();
+	EXPECT_JUST_MEMORY_STORED({
+		{0x1234, 3_w},
+	  });
+}
+
+// DF /1	FISTTP m32int	Store ST(0) in m32int with truncation.
+TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FISTTP_32)
+{
+	ALL_MODES;
+
+	setRegisters({
+		 {X87_REG_TOP, 0x1},
+		 {X86_REG_ST1, 3.7}, // should trunc to 3
+	 });
+
+	emulate("fisttp dword ptr [0x1234]");
+
+	EXPECT_JUST_REGISTERS_LOADED({X87_REG_TOP, X86_REG_ST1});
+	EXPECT_JUST_REGISTERS_STORED({
+		 {X87_REG_TOP, 0x2},
+		 {X87_REG_TAG1, ANY},
+	 });
+	EXPECT_NO_MEMORY_LOADED();
+	EXPECT_JUST_MEMORY_STORED({
+		  {0x1234, 3_dw},
+	  });
+}
+// DF /1	FISTTP m64int	Store ST(0) in m64int with truncation.
+TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FISTTP_64)
+{
+	ALL_MODES;
+
+	setRegisters({
+		 {X87_REG_TOP, 0x1},
+		 {X86_REG_ST1, 3.7}, // should trunc to 3
+	 });
+
+	emulate("fisttp qword ptr [0x1234]");
+
+	EXPECT_JUST_REGISTERS_LOADED({X87_REG_TOP, X86_REG_ST1});
+	EXPECT_JUST_REGISTERS_STORED({
+		 {X87_REG_TOP, 0x2},
+		 {X87_REG_TAG1, ANY},
+	 });
+	EXPECT_NO_MEMORY_LOADED();
+	EXPECT_JUST_MEMORY_STORED({
+		  {0x1234, 3_qw},
+		  });
+}
+
+//
 // X86_INS_FMUL
 //
 

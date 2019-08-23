@@ -4841,7 +4841,7 @@ void Capstone2LlvmIrTranslatorX86_impl::translateFucomPop(cs_insn* i, cs_x86* xi
 }
 
 /**
- * X86_INS_FIST, X86_INS_FISTP
+ * X86_INS_FIST, X86_INS_FISTP, X86_INS_FISTPP
  */
 void Capstone2LlvmIrTranslatorX86_impl::translateFist(cs_insn* i, cs_x86* xi, llvm::IRBuilder<>& irb)
 {
@@ -4850,15 +4850,17 @@ void Capstone2LlvmIrTranslatorX86_impl::translateFist(cs_insn* i, cs_x86* xi, ll
 	auto* topNum = loadX87Top(irb);
 	auto* top = loadX87DataReg(irb, topNum);
 	auto* t = getIntegerTypeFromByteSize(_module, xi->operands[0].size);
-	auto* fptosi = irb.CreateFPToSI(top, t);
+
+	auto *fptosi = irb.CreateFPToSI(top, t);
 	storeOp(xi->operands[0], fptosi, irb);
 
-	if (i->id == X86_INS_FISTP)
+	if (i->id == X86_INS_FISTP or i->id == X86_INS_FISTTP) // pop
 	{
 		clearX87TagReg(irb, topNum); // pop
 		x87IncTop(irb, topNum);
 	}
 }
+
 
 /**
  * X86_INS_FRNDINT
