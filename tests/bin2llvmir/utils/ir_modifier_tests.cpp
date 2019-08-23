@@ -487,6 +487,107 @@ TEST_F(IrModifierTests, modifyFunctionVariadic)
 	checkModuleAgainstExpectedIr(exp);
 }
 
+TEST_F(IrModifierTests, modifyGlobalStructureBasic)
+{
+	parseInput(R"(
+		@global_a = global i8 0
+		@global_b = global i8 0
+		@global_c = global i8 0
+		@global_d = global i32 0
+	)");
+
+	auto* strType = StructType::get(
+		context,
+		{
+			Type::getInt8Ty(context),
+			Type::getInt8Ty(context),
+			Type::getInt8Ty(context),
+			Type::getInt32Ty(context)
+		}
+	);
+	auto* gv = dyn_cast<GlobalVariable>(getValueByName("global_a"));
+	auto c = Config::fromJsonString(module.get(), R"({
+	"architecture" : {
+		"bitSize" : 32,
+		"endian" : "little",
+		"name" : "x86"
+	},
+	"globals" : 
+	[
+		{
+			"name" : "global_a",
+			"storage" : 
+			{
+				"type" : "global",
+				"value" : "0x2000"
+			},
+			"type" : 
+			{
+				"llvmIr" : "i8"
+			}
+		},
+		{
+			"name" : "global_b",
+			"storage" : 
+			{
+				"type" : "global",
+				"value" : "0x2001"
+			},
+			"type" : 
+			{
+				"llvmIr" : "i8"
+			}
+		},
+		{
+			"name" : "global_c",
+			"storage" : 
+			{
+				"type" : "global",
+				"value" : "0x2002"
+			},
+			"type" : 
+			{
+				"llvmIr" : "i8"
+			}
+		},
+		{
+			"name" : "global_d",
+			"storage" : 
+			{
+				"type" : "global",
+				"value" : "0x2004"
+			},
+			"type" : 
+			{
+				"llvmIr" : "i32"
+			}
+		}
+	]
+	})");
+	AbiProvider::addAbi(module.get(), &c);
+	IrModifier irm(module.get(), &c);
+	irm.convertToStructure(
+		gv, strType);
+
+	std::string exp = R"(
+	@0 = global i8 0
+	@1 = global i8 0
+	@2 = global i8 0
+	@3 = global i32 0
+	@4 = global i8 0
+	@global_a = external global { i8, i8, i8, i32 }
+	@5 = external global i8
+	@6 = global i8* getelementptr inbounds ({ i8, i8, i8, i32 }, { i8, i8, i8, i32 }* @global_a, i32 0, i32 0)
+	@7 = external global i8
+	@global_b = global i8* getelementptr inbounds ({ i8, i8, i8, i32 },{ i8, i8, i8, i32 }* @global_a, i32 0, i32 1)
+	@8 = external global i8
+	@global_c = global i8* getelementptr inbounds ({ i8, i8, i8, i32 },{ i8, i8, i8, i32 }* @global_a, i32 0, i32 2)
+	@9 = external global i32
+	@global_d = global i32* getelementptr inbounds ({ i8, i8, i8, i32 }, { i8, i8, i8, i32 }* @global_a, i32 0, i32 3)
+	)";
+	checkModuleAgainstExpectedIr(exp);
+}
+
 } // namespace tests
 } // namespace bin2llvmir
 } // namespace retdec
