@@ -1206,13 +1206,21 @@ bool HLLWriter::tryEmitVarInfoInComment(ShPtr<Variable> var, ShPtr<Statement> st
 		return false;
 	}
 
+	// It is a local variable, which can have an offset (global variables
+	// don't have offsets).
+	bool infoEmitted = tryEmitVarOffsetInComment(var);
+
 	if (stmt && stmt->getAddress().isDefined()) {
-		out << " " << comment(stmt->getAddress().toHexPrefixString());
+		if (infoEmitted) {
+			out << ", " << stmt->getAddress().toHexPrefixString();
+		} else {
+			out << " " << comment(stmt->getAddress().toHexPrefixString());
+		}
 		return true;
 	}
 
 	// Both local and global variables can have an address.
-	bool infoEmitted = tryEmitVarAddressInComment(var);
+	infoEmitted = tryEmitVarAddressInComment(var);
 	if (infoEmitted) {
 		return true;
 	}
@@ -1235,13 +1243,6 @@ bool HLLWriter::tryEmitVarInfoInComment(ShPtr<Variable> var, ShPtr<Statement> st
 		// emit the global variable's name in a comment so we know from which
 		// global variable this local variable comes from.
 		out << " " << comment(globalVarName);
-		return true;
-	}
-
-	// It is a local variable, which can have an offset (global variables
-	// don't have offsets).
-	infoEmitted = tryEmitVarOffsetInComment(var);
-	if (infoEmitted) {
 		return true;
 	}
 
