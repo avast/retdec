@@ -761,6 +761,7 @@ void ElfImage::resolveRelocation(const retdec::fileformat::Relocation& rel, cons
 		case retdec::fileformat::Architecture::MIPS:
 		{
 			static const retdec::fileformat::Relocation* lastMipsHi16 = nullptr;
+			static const retdec::fileformat::Relocation* prevMipsHi16 = nullptr;
 
 			switch (rel.getType())
 			{
@@ -791,6 +792,11 @@ void ElfImage::resolveRelocation(const retdec::fileformat::Relocation& rel, cons
 				}
 				case R_MIPS_LO16:
 				{
+					// MIPS abi allows a single hi16 value to be used with multiple lo16 values
+					// if lo16 is found without a matching hi16, use the previous hi16 value
+					if (lastMipsHi16 == nullptr)
+						lastMipsHi16 = prevMipsHi16;
+
 					if (lastMipsHi16 == nullptr)
 						return;
 
@@ -806,6 +812,7 @@ void ElfImage::resolveRelocation(const retdec::fileformat::Relocation& rel, cons
 					valueLo = value & 0xFFFF;
 					set2Byte(lastMipsHi16->getAddress() + 2, valueHi);
 					set2Byte(rel.getAddress() + 2, valueLo);
+					prevMipsHi16 = lastMipsHi16;
 					lastMipsHi16 = nullptr;
 					break;
 				}
