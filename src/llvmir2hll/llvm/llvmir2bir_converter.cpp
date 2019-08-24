@@ -230,8 +230,10 @@ VarVector LLVMIR2BIRConverter::sortLocalVars(const VarSet &vars) const {
 void LLVMIR2BIRConverter::generateVarDefinitions(ShPtr<Function> func) const {
 	auto vars = sortLocalVars(func->getLocalVars());
 	for (auto i = vars.crbegin(), e = vars.crend(); i != e; ++i) {
+		Address a = (*i)->getAddress();
+		if (a.isUndefined()) a = func->getStartAddress();
 		func->getBody()->prependStatement(
-			VarDefStmt::create(*i, nullptr, nullptr, func->getStartAddress()));
+			VarDefStmt::create(*i, nullptr, nullptr, a));
 	}
 }
 

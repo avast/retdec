@@ -688,7 +688,7 @@ void VarDefStmtOptimizer::optimizeAssignStmts(StmtSet &toRemoveStmts) const {
 			assert(assignStmt);
 			ShPtr<VarDefStmt> optimizedVarDefStmt(VarDefStmt::create(
 				varDefStmt->getVar(), assignStmt->getRhs(), nullptr,
-				varDefStmt->getAddress()));
+				assignStmt->getAddress()));
 			Statement::replaceStatement(assignStmt, optimizedVarDefStmt);
 			toRemoveStmts.insert(varDefStmt);
 		}

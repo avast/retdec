@@ -5,6 +5,7 @@
 */
 
 #include <llvm/ADT/Twine.h>
+#include <llvm/IR/Instruction.h>
 #include <llvm/IR/Value.h>
 
 #include "retdec/llvmir2hll/ir/function.h"
@@ -12,6 +13,7 @@
 #include "retdec/llvmir2hll/ir/type.h"
 #include "retdec/llvmir2hll/ir/unknown_type.h"
 #include "retdec/llvmir2hll/ir/variable.h"
+#include "retdec/llvmir2hll/llvm/llvm_support.h"
 #include "retdec/llvmir2hll/llvm/llvmir2bir_converter/variables_manager.h"
 #include "retdec/llvmir2hll/var_name_gen/var_name_gens/num_var_name_gen.h"
 #include "retdec/utils/container.h"
@@ -90,7 +92,12 @@ ShPtr<Variable> VariablesManager::getOrCreateLocalVar(llvm::Value *val) {
 		return existingVarIt->second;
 	}
 
-	auto var = Variable::create(val->getName(), UnknownType::create());
+	Address a;
+	if (auto* insn = llvm::dyn_cast<llvm::Instruction>(val)) {
+		a = LLVMSupport::getInstAddress(insn);
+	}
+
+	auto var = Variable::create(val->getName(), UnknownType::create(), a);
 	localVarsMap.emplace(val, var);
 	return var;
 }

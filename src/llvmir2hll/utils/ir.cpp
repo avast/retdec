@@ -490,7 +490,7 @@ bool isDefOfVar(ShPtr<Statement> stmt, ShPtr<Variable> var) {
 * places it in a proper place so that all VarDefStmts at the beginning of @a
 * func are sorted alphabetically.
 *
-* If @a var is already a local function of @a func, this function does nothing.
+* If @a var is already a local variable of @a func, this function does nothing.
 *
 * @par Preconditions
 *  - @a func is a definition, not a declaration
@@ -525,7 +525,7 @@ void addLocalVarToFunc(ShPtr<Variable> var, ShPtr<Function> func,
 * @brief Converts the given global variable @a var into a local variable of @a
 *        func, possibly with the given initializer @a init.
 *
-* The converted function gets the same name as the global variable.
+* The converted variable gets the same name as the global variable.
 *
 * @par Preconditions
 *  - @a var is a global variable

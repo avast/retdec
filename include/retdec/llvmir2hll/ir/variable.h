@@ -11,6 +11,7 @@
 
 #include "retdec/llvmir2hll/ir/expression.h"
 #include "retdec/llvmir2hll/support/smart_ptr.h"
+#include "retdec/llvmir2hll/support/types.h"
 
 namespace retdec {
 namespace llvmir2hll {
@@ -26,7 +27,8 @@ class Visitor;
 */
 class Variable final: public Expression {
 public:
-	static ShPtr<Variable> create(const std::string &name, ShPtr<Type> type);
+	static ShPtr<Variable> create(const std::string &name, ShPtr<Type> type,
+		Address a = Address::getUndef);
 
 	virtual ~Variable() override;
 
@@ -39,6 +41,7 @@ public:
 
 	const std::string &getInitialName() const;
 	const std::string &getName() const;
+	Address getAddress() const;
 	bool hasName() const;
 	bool isInternal() const;
 	bool isExternal() const;
@@ -46,6 +49,7 @@ public:
 
 	void setName(const std::string &newName);
 	void setType(ShPtr<Type> newType);
+	void setAddress(Address a);
 	void markAsInternal();
 	void markAsExternal();
 
@@ -57,7 +61,8 @@ public:
 private:
 	// Since instances are created by calling the static function create(), the
 	// constructor can be private.
-	Variable(const std::string &name, ShPtr<Type> type);
+	Variable(const std::string &name, ShPtr<Type> type,
+		Address a = Address::getUndef);
 
 private:
 	/// Initial name of the variable.
@@ -71,6 +76,11 @@ private:
 
 	/// Is the variable internal?
 	bool internal;
+
+	/// Some variables may have addresses:
+	/// - Local variables created from temporary LLVM variables: LLVM insn addr.
+	/// - Global variables: address in global data sections.
+	Address address;
 };
 
 } // namespace llvmir2hll
