@@ -297,7 +297,6 @@ protected:
 	void sortFuncsForEmission(FuncVector &funcs);
 	bool tryEmitVarInfoInComment(ShPtr<Variable> var, ShPtr<Statement> stmt = nullptr);
 	bool tryEmitVarAddressInComment(ShPtr<Variable> var);
-	bool tryEmitVarOffsetInComment(ShPtr<Variable> var);
 	bool shouldBeEmittedInHexa(ShPtr<ConstInt> constant) const;
 	bool shouldBeEmittedInStructuredWay(ShPtr<ConstArray> array) const;
 	bool shouldBeEmittedInStructuredWay(ShPtr<ConstStruct> structure) const;

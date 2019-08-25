@@ -1178,19 +1178,23 @@ bool HLLWriter::tryEmitVarInfoInComment(ShPtr<Variable> var, ShPtr<Statement> st
 
 	// It is a local variable, which can have an offset (global variables
 	// don't have offsets).
-	bool infoEmitted = tryEmitVarOffsetInComment(var);
-
+	std::string varOffsetComment;
+	std::string varOffset(getOffsetFromName(var->getInitialName()));
+	if (!varOffset.empty()) {
+		varOffsetComment = "bp" + varOffset;
+	}
+	// Statement ASM address.
 	if (stmt && stmt->getAddress().isDefined()) {
-		if (infoEmitted) {
-			out << ", " << stmt->getAddress().toHexPrefixString();
+		if (varOffsetComment.empty()) {
+			out.comment(stmt->getAddress().toHexPrefixString());
 		} else {
-			out << " " << comment(stmt->getAddress().toHexPrefixString());
+			out.comment(varOffsetComment + ", " + stmt->getAddress().toHexPrefixString());
 		}
 		return true;
 	}
 
 	// Both local and global variables can have an address.
-	infoEmitted = tryEmitVarAddressInComment(var);
+	bool infoEmitted = tryEmitVarAddressInComment(var);
 	if (infoEmitted) {
 		return true;
 	}
@@ -1232,22 +1236,6 @@ bool HLLWriter::tryEmitVarAddressInComment(ShPtr<Variable> var) {
 	}
 
 	out.comment(varAddress, " ");
-	return true;
-}
-
-/**
-* @brief Tries to emit the offset of the given variable into a comment.
-*
-* @return @c true if some code has been emitted, @c false otherwise.
-*/
-bool HLLWriter::tryEmitVarOffsetInComment(ShPtr<Variable> var) {
-	// The offset is stored in the initial name of the variable.
-	std::string varOffset(getOffsetFromName(var->getInitialName()));
-	if (varOffset.empty()) {
-		return false;
-	}
-
-	out.comment("bp" + varOffset, " ");
 	return true;
 }
 
