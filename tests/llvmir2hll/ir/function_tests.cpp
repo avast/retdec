@@ -30,14 +30,14 @@ namespace {
 * @brief Returns a new function declaration.
 */
 ShPtr<Function> getFuncDeclaration(const std::string &name = "func") {
-	return Function::create(VoidType::create(), name, VarVector());
+	return Function::create(nullptr, VoidType::create(), name, VarVector());
 }
 
 /**
 * @brief Returns a new function definition.
 */
 ShPtr<Function> getFuncDefinition(const std::string &name = "func") {
-	return Function::create(VoidType::create(), name,
+	return Function::create(nullptr, VoidType::create(), name,
 		VarVector(), VarSet(), EmptyStmt::create());
 }
 

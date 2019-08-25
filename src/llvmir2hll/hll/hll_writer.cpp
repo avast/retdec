@@ -122,7 +122,7 @@ public:
 	bool operator()(ShPtr<Function> f1, ShPtr<Function> f2) {
 		auto f1AddressRange = module->getAddressRangeForFunc(f1);
 		auto f2AddressRange = module->getAddressRangeForFunc(f2);
-		return f1AddressRange.first < f2AddressRange.first;
+		return f1AddressRange < f2AddressRange;
 	}
 
 private:
@@ -956,8 +956,8 @@ bool HLLWriter::emitAddressRangeForFuncIfAvailable(ShPtr<Function> func) {
 	}
 
 	std::ostringstream info;
-	info << "Address range: " << "0x" + toHex(addressRange.first) +
-		" - 0x" + toHex(addressRange.second);
+	info << "Address range: " << addressRange.getStart().toHexPrefixString() +
+		" - " + addressRange.getEnd().toHexPrefixString();
 	out.commentLine(info.str());
 	return true;
 }
@@ -1171,13 +1171,26 @@ void HLLWriter::sortFuncsForEmission(FuncVector &funcs) {
 * If the emission of debug comments is disabled, this function does nothing and
 * returns @c false;
 */
-bool HLLWriter::tryEmitVarInfoInComment(ShPtr<Variable> var) {
+bool HLLWriter::tryEmitVarInfoInComment(ShPtr<Variable> var, ShPtr<Statement> stmt) {
 	if (!optionEmitDebugComments) {
 		return false;
 	}
 
+	// It is a local variable, which can have an offset (global variables
+	// don't have offsets).
+	bool infoEmitted = tryEmitVarOffsetInComment(var);
+
+	if (stmt && stmt->getAddress().isDefined()) {
+		if (infoEmitted) {
+			out << ", " << stmt->getAddress().toHexPrefixString();
+		} else {
+			out << " " << comment(stmt->getAddress().toHexPrefixString());
+		}
+		return true;
+	}
+
 	// Both local and global variables can have an address.
-	bool infoEmitted = tryEmitVarAddressInComment(var);
+	infoEmitted = tryEmitVarAddressInComment(var);
 	if (infoEmitted) {
 		return true;
 	}
@@ -1200,13 +1213,6 @@ bool HLLWriter::tryEmitVarInfoInComment(ShPtr<Variable> var) {
 		// emit the global variable's name in a comment so we know from which
 		// global variable this local variable comes from.
 		out.comment(globalVarName, " ");
-		return true;
-	}
-
-	// It is a local variable, which can have an offset (global variables
-	// don't have offsets).
-	infoEmitted = tryEmitVarOffsetInComment(var);
-	if (infoEmitted) {
 		return true;
 	}
 

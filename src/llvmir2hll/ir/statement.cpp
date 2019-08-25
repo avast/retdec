@@ -32,8 +32,8 @@ void preserveLabel(ShPtr<Statement> origStmt, ShPtr<Statement> newStmt) {
 /**
 * @brief Constructs a new statement.
 */
-Statement::Statement():
-	succ(), preds(), label() {
+Statement::Statement(Address a):
+	succ(), preds(), label(), address(a) {
 }
 
 /**
@@ -312,7 +312,7 @@ void Statement::removeStatement(ShPtr<Statement> stmt) {
 	// stmt is a goto target and doesn't have a successor, and if this is the
 	// case, we replace it with a dummy empty statement.
 	if (stmt->isGotoTarget() && !stmt->hasSuccessor()) {
-		auto replacement = EmptyStmt::create();
+		auto replacement = EmptyStmt::create(nullptr, stmt->getAddress());
 		preserveLabel(stmt, replacement);
 		Statement::replaceStatement(stmt, replacement);
 		return;
@@ -375,7 +375,7 @@ void Statement::removeStatementButKeepDebugComment(ShPtr<Statement> stmt) {
 
 	// We cannot exploit the successor, so create an empty statement, attach
 	// the metadata to it, and replace stmt with the empty statement.
-	ShPtr<EmptyStmt> emptyStmt(EmptyStmt::create());
+	ShPtr<EmptyStmt> emptyStmt(EmptyStmt::create(nullptr, stmt->getAddress()));
 	emptyStmt->setMetadata(stmt->getMetadata());
 	Statement::replaceStatement(stmt, emptyStmt);
 }
@@ -678,6 +678,13 @@ ShPtr<Statement> Statement::getParent() const {
 
 	// There is no parent.
 	return ShPtr<Statement>();
+}
+
+/**
+ * @brief Returns statement's address.
+ */
+Address Statement::getAddress() const {
+	return address;
 }
 
 /**

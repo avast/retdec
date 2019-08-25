@@ -21,8 +21,9 @@ UForLoopStmt::UForLoopStmt(
 		ShPtr<Expression> init,
 		ShPtr<Expression> cond,
 		ShPtr<Expression> step,
-		ShPtr<Statement> body):
-	init(init), initIsDefinition(false), cond(cond), step(step),
+		ShPtr<Statement> body,
+		Address a):
+	Statement(a), init(init), initIsDefinition(false), cond(cond), step(step),
 	body(body) {}
 
 /**
@@ -35,7 +36,9 @@ ShPtr<Value> UForLoopStmt::clone() {
 		ucast<Expression>(init->clone()),
 		ucast<Expression>(cond->clone()),
 		ucast<Expression>(step->clone()),
-		ucast<Statement>(body->clone())
+		ucast<Statement>(body->clone()),
+		nullptr,
+		getAddress()
 	);
 	loop->setMetadata(getMetadata());
 	return loop;
@@ -184,6 +187,7 @@ void UForLoopStmt::markInitAsDefinition() {
 * @param[in] step Step part (eg. increment/decrement).
 * @param[in] body Body.
 * @param[in] succ Follower of the statement in the program flow (optional).
+* @param[in] a Address.
 *
 * @par Preconditions
 *  - body is non-null
@@ -193,10 +197,11 @@ ShPtr<UForLoopStmt> UForLoopStmt::create(
 		ShPtr<Expression> cond,
 		ShPtr<Expression> step,
 		ShPtr<Statement> body,
-		ShPtr<Statement> succ) {
+		ShPtr<Statement> succ,
+		Address a) {
 	PRECONDITION_NON_NULL(body);
 
-	ShPtr<UForLoopStmt> stmt(new UForLoopStmt(init, cond, step, body));
+	ShPtr<UForLoopStmt> stmt(new UForLoopStmt(init, cond, step, body, a));
 	stmt->setSuccessor(succ);
 
 	// Initialization (recall that shared_from_this() cannot be called in a

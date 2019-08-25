@@ -900,7 +900,7 @@ void CHLLWriter::visit(ShPtr<VarDefStmt> stmt) {
 
 	out.punctiation(';');
 
-	tryEmitVarInfoInComment(stmt->getVar());
+	tryEmitVarInfoInComment(stmt->getVar(), stmt);
 
 	out.newLine();
 }

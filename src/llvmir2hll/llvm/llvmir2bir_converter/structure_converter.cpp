@@ -306,7 +306,8 @@ ShPtr<Statement> StructureConverter::replaceBreakOrContinueOutsideLoop(ShPtr<Sta
 				auto it = loopTargets.find(stmt);
 				if (it != loopTargets.end()) {
 					labelsHandler->setGotoTargetLabel(it->second->getBody(), it->second->getFirstBB());
-					ShPtr<Statement> gotoStmt = GotoStmt::create(it->second->getBody());
+					ShPtr<Statement> gotoStmt =
+						GotoStmt::create(it->second->getBody(), it->first->getAddress());
 					gotoTargetsToCfgNodes.emplace(it->second->getBody(), it->second);
 					if (isa<ContinueStmt>(stmt)) {
 						gotoStmt->setMetadata("continue -> " + getLabel(it->second));
@@ -1193,12 +1194,12 @@ void StructureConverter::reduceToIfElseStatementWithBreakInLoop(ShPtr<CFGNode> n
 	if (!canBeForLoop(loop)) {
 		ShPtr<Statement> breakStmt;
 		if (targetNode == loopHeaders.at(loop)->getStatementSuccessor()) {
-			breakStmt = BreakStmt::create();
+			breakStmt = BreakStmt::create(node->getBody()->getAddress());
 			breakStmt->setMetadata("break -> " + getLabel(targetNode));
 			loopTargets.emplace(breakStmt, targetNode);
 		} else {
 			labelsHandler->setGotoTargetLabel(targetNode->getBody(), targetNode->getFirstBB());
-			auto gotoStmt = GotoStmt::create(targetNode->getBody());
+			auto gotoStmt = GotoStmt::create(targetNode->getBody(), node->getBody()->getAddress());
 			breakStmt = gotoStmt;
 			breakStmt->setMetadata("break (via goto) -> " + getLabel(targetNode));
 			targetReferences[targetNode].push_back(gotoStmt);
@@ -1239,7 +1240,7 @@ void StructureConverter::reduceToIfElseStatementWithBreakByGotoInLoop(ShPtr<CFGN
 	labelsHandler->setGotoTargetLabel(gotoTarget, targetNodeBB);
 
 	auto phiCopies = getAssignsToPHINodes(node, targetNode);
-	auto gotoStmt = GotoStmt::create(gotoTarget);
+	auto gotoStmt = GotoStmt::create(gotoTarget, node->getBody()->getAddress());
 	targetReferences[targetNode].push_back(gotoStmt);
 	gotoTargetsToCfgNodes.emplace(targetNode->getBody(), targetNode);
 	auto ifBody = Statement::mergeStatements(phiCopies, gotoStmt);
@@ -1272,12 +1273,12 @@ void StructureConverter::reduceToIfElseStatementWithContinue(ShPtr<CFGNode> node
 
 	ShPtr<Statement> continueStmt;
 	if (targetNode == loopHeaders.at(getLoopFor(node))) {
-		continueStmt = ContinueStmt::create();
+		continueStmt = ContinueStmt::create(node->getBody()->getAddress());
 		continueStmt->setMetadata("continue -> " + getLabel(targetNode));
 		loopTargets.emplace(continueStmt, targetNode);
 	} else {
 		labelsHandler->setGotoTargetLabel(targetNode->getBody(), targetNode->getFirstBB());
-		auto gotoStmt = GotoStmt::create(targetNode->getBody());
+		auto gotoStmt = GotoStmt::create(targetNode->getBody(), node->getBody()->getAddress());
 		continueStmt = gotoStmt;
 		targetReferences[targetNode].push_back(gotoStmt);
 		gotoTargetsToCfgNodes.emplace(targetNode->getBody(), targetNode);
@@ -1305,12 +1306,12 @@ void StructureConverter::reduceToContinueStatement(ShPtr<CFGNode> node) {
 
 	ShPtr<Statement> continueStmt;
 	if (targetNode == loopHeaders.at(getLoopFor(node))) {
-		continueStmt = ContinueStmt::create();
+		continueStmt = ContinueStmt::create(node->getBody()->getAddress());
 		continueStmt->setMetadata("continue -> " + getLabel(targetNode));
 		loopTargets.emplace(continueStmt, targetNode);
 	} else {
 		labelsHandler->setGotoTargetLabel(targetNode->getBody(), targetNode->getFirstBB());
-		auto gotoStmt = GotoStmt::create(targetNode->getBody());
+		auto gotoStmt = GotoStmt::create(targetNode->getBody(), node->getBody()->getAddress());
 		continueStmt = gotoStmt;
 		targetReferences[targetNode].push_back(gotoStmt);
 		gotoTargetsToCfgNodes.emplace(targetNode->getBody(), targetNode);
@@ -1343,11 +1344,12 @@ void StructureConverter::reduceToForLoop(ShPtr<CFGNode> node) {
 
 	node->appendToBody(getAssignsToPHINodes(node, node));
 
-	auto continueStmt = EmptyStmt::create();
+	auto continueStmt = EmptyStmt::create(nullptr, node->getBody()->getAddress());
 	continueStmt->setMetadata("continue -> " + getLabel(node));
 	node->appendToBody(continueStmt);
 
-	node->setBody(ForLoopStmt::create(indVar, startValue, endCond, step, node->getBody()));
+	node->setBody(ForLoopStmt::create(indVar, startValue, endCond, step,
+		node->getBody(), nullptr, node->getBody()->getAddress()));
 
 	node->removeSucc(0);
 	reducedLoops.insert(loop);
@@ -1369,11 +1371,12 @@ void StructureConverter::reduceToWhileTrueLoop(ShPtr<CFGNode> node) {
 
 	node->appendToBody(getAssignsToPHINodes(node, node));
 
-	auto continueStmt = EmptyStmt::create();
+	auto continueStmt = EmptyStmt::create(nullptr, node->getBody()->getAddress());
 	continueStmt->setMetadata("continue -> " + getLabel(node));
 	node->appendToBody(continueStmt);
 
-	node->setBody(WhileLoopStmt::create(ConstBool::create(true), node->getBody()));
+	node->setBody(WhileLoopStmt::create(ConstBool::create(true),
+		node->getBody(), nullptr, node->getBody()->getAddress()));
 
 	node->removeSucc(0);
 	reducedLoops.insert(getLoopFor(node));
@@ -1408,7 +1411,7 @@ void StructureConverter::reduceToNestedWhileTrueLoopWithContinueInHeader(
 	auto parentLoopHeader = node->getSucc(1 - succ);
 
 	auto phiCopies = getAssignsToPHINodes(node, parentLoopHeader);
-	auto breakStmt = BreakStmt::create();
+	auto breakStmt = BreakStmt::create(node->getBody()->getAddress());
 	loopTargets.emplace(breakStmt, parentLoopHeader);
 	breakStmt->setMetadata("break -> " + getLabel(parentLoopHeader));
 
@@ -1418,11 +1421,12 @@ void StructureConverter::reduceToNestedWhileTrueLoopWithContinueInHeader(
 	node->appendToBody(getSuccessorsBody(node, innerLoop));
 	node->appendToBody(getAssignsToPHINodes(innerLoop, node));
 
-	auto continueStmt = EmptyStmt::create();
+	auto continueStmt = EmptyStmt::create(nullptr, node->getBody()->getAddress());
 	continueStmt->setMetadata("continue -> " + getLabel(node));
 	node->appendToBody(continueStmt);
 
-	node->setBody(WhileLoopStmt::create(ConstBool::create(true), node->getBody()));
+	node->setBody(WhileLoopStmt::create(ConstBool::create(true),
+		node->getBody(), nullptr, node->getBody()->getAddress()));
 
 	node->deleteSucc(1);
 	node->removeSucc(0);
@@ -1458,7 +1462,8 @@ void StructureConverter::structureByGotos(ShPtr<CFGNode> cfg) {
 		if (node->getSuccNum() > 0 && switchInst &&
 				!hasItem(reducedSwitches, node->getLastBB())) {
 			auto controlExpr = converter->convertValueToExpression(node->getCond());
-			auto switchStmt = SwitchStmt::create(controlExpr);
+			auto switchStmt = SwitchStmt::create(controlExpr, nullptr,
+				node->getBody()->getAddress());
 
 			for (auto &caseIt: switchInst->cases()) {
 				auto index = caseIt.getSuccessorIndex();
@@ -1571,7 +1576,7 @@ ShPtr<IfStmt> StructureConverter::getIfStmt(const ShPtr<Expression> &cond,
 		std::swap(ifBody, elseClause);
 	}
 
-	auto ifStmt = IfStmt::create(condition, ifBody);
+	auto ifStmt = IfStmt::create(condition, ifBody, nullptr, trueBody->getAddress());
 	if (skipEmptyStmts(elseClause)) {
 		ifStmt->setElseClause(elseClause);
 	}
@@ -1843,7 +1848,8 @@ ShPtr<SwitchStmt> StructureConverter::getSwitchStmt(const ShPtr<CFGNode> &switch
 	PRECONDITION_NON_NULL(switchNode);
 
 	auto controlExpr = converter->convertValueToExpression(switchNode->getCond());
-	auto switchStmt = SwitchStmt::create(controlExpr);
+	auto switchStmt = SwitchStmt::create(controlExpr, nullptr,
+		switchNode->getBody()->getAddress());
 
 	CFGNode::CFGNodeSet generated;
 	auto clauses = getSwitchClauses(switchNode, hasDefault);
@@ -1994,12 +2000,14 @@ ShPtr<Statement> StructureConverter::getClauseBody(const ShPtr<CFGNode> &clauseN
 			"branch (via goto) -> " + clauseSuccLabel);
 		body = Statement::mergeStatements(body, gotoStmt);
 	} else if (isClauseTerminatedByBreak(clauseNode, switchSuccessor)) {
-		auto breakStmt = BreakStmt::create();
+		auto breakStmt = BreakStmt::create(
+			Statement::getLastStatement(body)->getAddress());
 		loopTargets.emplace(breakStmt, switchSuccessor);
 		breakStmt->setMetadata("break -> " + clauseSuccLabel);
 		body = Statement::mergeStatements(body, breakStmt);
 	} else if (clauseNode->getSuccNum() == 1) {
-		auto emptyStmt = EmptyStmt::create();
+		auto emptyStmt = EmptyStmt::create(nullptr,
+			Statement::getLastStatement(body)->getAddress());
 		emptyStmt->setMetadata("branch -> " + clauseSuccLabel);
 		body = Statement::mergeStatements(body, emptyStmt);
 	}
@@ -2042,7 +2050,8 @@ void StructureConverter::addClausesWithTheSameCond(ShPtr<SwitchStmt> switchStmt,
 	PRECONDITION_NON_NULL(clauseBody);
 
 	for (std::size_t i = 0, e = conds.size() - 1; i < e; ++i) {
-		switchStmt->addClause(conds[i], EmptyStmt::create());
+		switchStmt->addClause(conds[i],
+			EmptyStmt::create(nullptr, Statement::getLastStatement(clauseBody)->getAddress()));
 	}
 
 	switchStmt->addClause(conds.back(), clauseBody);
@@ -2178,7 +2187,7 @@ ShPtr<Statement> StructureConverter::getGotoForSuccessor(const ShPtr<CFGNode> &n
 	}
 
 	auto phiCopies = getAssignsToPHINodes(node, target);
-	auto gotoStmt = GotoStmt::create(target->getBody());
+	auto gotoStmt = GotoStmt::create(target->getBody(), node->getBody()->getAddress());
 	targetReferences[target].push_back(gotoStmt);
 	gotoTargetsToCfgNodes.emplace(target->getBody(), target);
 	return Statement::mergeStatements(phiCopies, gotoStmt);
@@ -2241,7 +2250,7 @@ ShPtr<Statement> StructureConverter::getPHICopiesForSuccessor(
 
 		auto lhs = converter->convertValueToVariable(&*i);
 		auto rhs = converter->convertValueToExpression(val);
-		auto phiCopy = AssignStmt::create(lhs, rhs);
+		auto phiCopy = AssignStmt::create(lhs, rhs, nullptr, LLVMSupport::getInstAddress(pn));
 		phiCopies = Statement::mergeStatements(phiCopies, phiCopy);
 	}
 
@@ -2403,7 +2412,8 @@ void StructureConverter::addGotoTargetIfNotExists(
 void StructureConverter::addBranchMetadataToEndOfBodyIfNeeded(ShPtr<Statement> &body,
 		const ShPtr<CFGNode> &clause, const ShPtr<CFGNode> &ifSuccessor) const {
 	if (clause->getSuccNum() == 1 && clause->getSucc(0) == ifSuccessor) {
-		auto emptyStmt = EmptyStmt::create();
+		auto emptyStmt = EmptyStmt::create(nullptr,
+			Statement::getLastStatement(body)->getAddress());
 		emptyStmt->setMetadata("branch -> " + getLabel(ifSuccessor));
 		body = Statement::mergeStatements(body, emptyStmt);
 	}

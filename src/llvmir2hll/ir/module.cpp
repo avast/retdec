@@ -625,14 +625,14 @@ Module::func_filter_iterator Module::func_declaration_end() const {
 *
 * If there is no address range for @a func, @c NO_ADDRESS_RANGE is returned.
 */
-AddressRange Module::getAddressRangeForFunc(ShPtr<Function> func) const {
+AddressRange Module::getAddressRangeForFunc(ShPtr<const Function> func) const {
 	return config->getAddressRangeForFunc(func->getInitialName());
 }
 
 /**
 * @brief Has the given function an address range?
 */
-bool Module::hasAddressRange(ShPtr<Function> func) const {
+bool Module::hasAddressRange(ShPtr<const Function> func) const {
 	return getAddressRangeForFunc(func) != NO_ADDRESS_RANGE;
 }
 

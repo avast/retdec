@@ -14,7 +14,7 @@ namespace llvmir2hll {
 /**
 * @brief Constructs a new continue statement.
 */
-ContinueStmt::ContinueStmt(): Statement() {}
+ContinueStmt::ContinueStmt(Address a): Statement(a) {}
 
 /**
 * @brief Destructs the statement.
@@ -22,7 +22,7 @@ ContinueStmt::ContinueStmt(): Statement() {}
 ContinueStmt::~ContinueStmt() {}
 
 ShPtr<Value> ContinueStmt::clone() {
-	ShPtr<ContinueStmt> continueStmt(ContinueStmt::create());
+	ShPtr<ContinueStmt> continueStmt(ContinueStmt::create(getAddress()));
 	continueStmt->setMetadata(getMetadata());
 	return continueStmt;
 }
@@ -42,9 +42,10 @@ ShPtr<Expression> ContinueStmt::asExpression() const {
 
 /**
 * @brief Creates a new continue statement.
+* @param[in] a Address.
 */
-ShPtr<ContinueStmt> ContinueStmt::create() {
-	return ShPtr<ContinueStmt>(new ContinueStmt());
+ShPtr<ContinueStmt> ContinueStmt::create(Address a) {
+	return ShPtr<ContinueStmt>(new ContinueStmt(a));
 }
 
 void ContinueStmt::accept(Visitor *v) {

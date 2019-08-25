@@ -27,7 +27,8 @@ class ForLoopStmt final: public Statement {
 public:
 	static ShPtr<ForLoopStmt> create(ShPtr<Variable> indVar, ShPtr<Expression> startValue,
 		ShPtr<Expression> endCond, ShPtr<Expression> step,
-		ShPtr<Statement> body, ShPtr<Statement> succ = nullptr);
+		ShPtr<Statement> body, ShPtr<Statement> succ = nullptr,
+		Address a = Address::getUndef);
 
 	virtual ~ForLoopStmt() override;
 
@@ -64,7 +65,7 @@ private:
 	// constructor can be private.
 	ForLoopStmt(ShPtr<Variable> indVar, ShPtr<Expression> startValue,
 		ShPtr<Expression> endCond, ShPtr<Expression> step,
-		ShPtr<Statement> body);
+		ShPtr<Statement> body, Address a);
 
 private:
 	/// Induction variable.
