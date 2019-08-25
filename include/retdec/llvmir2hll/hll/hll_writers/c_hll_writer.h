@@ -20,6 +20,7 @@ namespace llvmir2hll {
 class BracketManager;
 class CastExpr;
 class CompoundOpManager;
+class OutputManager;
 class StructType;
 
 /**
@@ -44,7 +45,7 @@ private:
 	using StructTypeNameMap = std::map<ShPtr<StructType>, std::string>;
 
 private:
-	CHLLWriter(llvm::raw_ostream &out);
+	CHLLWriter(UPtr<OutputManager> outM);
 
 	virtual std::string getCommentPrefix() override;
 	virtual bool emitFileHeader() override;

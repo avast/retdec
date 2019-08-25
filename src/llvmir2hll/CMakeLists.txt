@@ -48,6 +48,9 @@ set(LLVMIR2HLL_SOURCES
 	hll/compound_op_managers/no_compound_op_manager.cpp
 	hll/hll_writer.cpp
 	hll/hll_writers/c_hll_writer.cpp
+	hll/output_manager.cpp
+	hll/output_managers/json_manager.cpp
+	hll/output_managers/plain_manager.cpp
 	ir/add_op_expr.cpp
 	ir/address_op_expr.cpp
 	ir/and_op_expr.cpp

@@ -9,9 +9,11 @@
 
 #include <cstddef>
 #include <string>
+#include <sstream>
 
 #include <llvm/Support/raw_ostream.h>
 
+#include "retdec/llvmir2hll/hll/output_manager.h"
 #include "retdec/llvmir2hll/ir/module.h"
 #include "retdec/llvmir2hll/support/smart_ptr.h"
 #include "retdec/llvmir2hll/support/types.h"
@@ -25,126 +27,6 @@ namespace llvmir2hll {
 class BinaryOpExpr;
 class BracketManager;
 class UnaryOpExpr;
-
-//==============================================================================
-
-class MyOut
-{
-	// Ctors, dtors, configuration methods.
-	//
-	public:
-		MyOut(llvm::raw_ostream& out) : _out(out) {}
-		void setCommentPrefix(const std::string& prefix)
-		{
-			_commentPrefix = prefix;
-		}
-
-	// Tokens.
-	//
-	public:
-		// any whitespace
-		void space(const std::string& space = " ") { _out << space; }
-		// (){}[];
-		void punctiation(char p) { _out << p; }
-		// == - + * -> .
-		void operatorX(const std::string& op, bool spaceBefore = false, bool spaceAfter = false)
-		{
-			if (spaceBefore) space();
-			_out << op;
-			if (spaceAfter) space();
-		}
-		// identifiers
-		void variableId(const std::string& id) { _out << id; }
-		void memberId(const std::string& id) { _out << id; }
-		void labelId(const std::string& id) { _out << id; }
-		void functionId(const std::string& id) { _out << id; }
-		void parameterId(const std::string& id) { _out << id; }
-		//
-		void keyword(const std::string& k) { _out << k; }
-		void dataType(const std::string& t) { _out << t; }
-		void preprocessor(const std::string& p){ _out << p; }
-		void include(const std::string& i){ _out << "<" << i << ">"; }
-		// constants
-		void constantBool(const std::string& c) { _out << c; }
-		void constantInt(const std::string& c) { _out << c; }
-		void constantFloat(const std::string& c) { _out << c; }
-		void constantString(const std::string& c) { _out << c; }
-		void constantSymbol(const std::string& s) { _out << s; }
-		void constantPointer(const std::string& s) { _out << s; }
-		// Adds comment to and existing line, does not end it.
-		void comment(
-			const std::string& comment,
-			const std::string& indent = "")
-		{
-			_out << indent << _commentPrefix << " "
-				<< utils::replaceCharsWithStrings(comment, '\n', " ");
-		}
-
-	// Line manipulation methods.
-	//
-	public:
-		// 1) Ends the current line.
-		// 2) Starts a new empty line that can be filled.
-		void newLine(uint64_t addr = 0)
-		{
-			_out << "\n";
-		}
-		// Creates a new line.
-		void commentLine(
-			const std::string& comment,
-			const std::string& indent = "",
-			uint64_t addr = 0)
-		{
-			MyOut::comment(comment);
-			newLine();
-		}
-
-	// Helpers to create more complex lines.
-	public:
-		// [indent]#include <include>[ // comment]
-		void includeLine(
-			const std::string& header,
-			const std::string& indent = "",
-			const std::string& comment = "")
-		{
-			space(indent);
-			preprocessor("#include");
-			space();
-			include(header);
-			if (!comment.empty()) MyOut::comment(comment, " ");
-			newLine();
-		}
-		// [indent]typedef t1 t2;
-		void typedefLine(
-			const std::string& indent,
-			const std::string& t1,
-			const std::string& t2)
-		{
-			space(indent);
-			keyword("typedef");
-			space();
-			dataType(t1);
-			space();
-			dataType(t2);
-			punctiation(';');
-			newLine();
-		}
-
-	// Special methods.
-	public:
-		// Any token added to the end of the line is going to be a
-		// string comment.
-		void commentModifier(const std::string& indent = "")
-		{
-			_out << indent << "// ";
-		}
-
-	private:
-		llvm::raw_ostream& _out;
-		std::string _commentPrefix;
-};
-
-//==============================================================================
 
 /**
 * @brief A base class of all HLL writers.
@@ -176,7 +58,7 @@ public:
 	/// @}
 
 protected:
-	HLLWriter(llvm::raw_ostream &out);
+	HLLWriter(UPtr<OutputManager> out);
 
 	/// @name Commenting
 	/// @{
@@ -279,9 +161,9 @@ protected:
 		bool first = true;
 		for (const auto &item : seq) {
 			if (!first) {
-				out.operatorX(",");
-				if (newline) out.newLine();
-				out.space(space);
+				out->operatorX(",");
+				if (newline) out->newLine();
+				out->space(space);
 			}
 			item->accept(this);
 			first = false;
@@ -307,8 +189,8 @@ protected:
 	/// The module to be written.
 	ShPtr<Module> module;
 
-	/// Stream, where the resulting code will be generated.
-	MyOut out;
+	/// Output where the resulting code will be generated.
+	UPtr<OutputManager> out;
 
 	/// Recognizes which brackets around expressions are needed.
 	ShPtr<BracketManager> bracketsManager;
