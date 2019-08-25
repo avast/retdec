@@ -1186,9 +1186,9 @@ bool HLLWriter::tryEmitVarInfoInComment(ShPtr<Variable> var, ShPtr<Statement> st
 	// Statement ASM address.
 	if (stmt && stmt->getAddress().isDefined()) {
 		if (varOffsetComment.empty()) {
-			out.comment(stmt->getAddress().toHexPrefixString());
+			out.comment(stmt->getAddress().toHexPrefixString(), " ");
 		} else {
-			out.comment(varOffsetComment + ", " + stmt->getAddress().toHexPrefixString());
+			out.comment(varOffsetComment + ", " + stmt->getAddress().toHexPrefixString(), " ");
 		}
 		return true;
 	}
