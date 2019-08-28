@@ -201,7 +201,6 @@ void StackAnalysis::handleInstruction(
 	if (debugSv)
 	{
 		ca->setIsFromDebug(true);
-		ca->setRealName(debugSv->getName());
 	}
 
 	LOG << "===> " << llvmObjToString(a) << std::endl;
@@ -241,16 +240,6 @@ retdec::config::Object* StackAnalysis::getDebugStackVariable(
 		llvm::Function* fnc,
 		SymbolicTree& root)
 {
-	if (_dbgf == nullptr)
-	{
-		return nullptr;
-	}
-	auto* debugFnc = _dbgf->getFunction(_config->getFunctionAddress(fnc));
-	if (debugFnc == nullptr)
-	{
-		return nullptr;
-	}
-
 	retdec::utils::Maybe<int> baseOffset;
 	if (auto* ci = dyn_cast_or_null<ConstantInt>(root.value))
 	{
@@ -276,6 +265,29 @@ retdec::config::Object* StackAnalysis::getDebugStackVariable(
 		}
 	}
 	if (baseOffset.isUndefined())
+	{
+		return nullptr;
+	}
+
+	auto cfn = _config->getConfigFunction(fnc);
+	if (cfn && _config->getLlvmStackVariable(fnc, baseOffset) == nullptr)
+	{
+		for (auto& l: cfn->locals)
+		{
+			if (l.second.getStorage().getStackOffset() == baseOffset)
+			{
+				return &l.second;
+			}
+		}
+	}
+
+	if (_dbgf == nullptr)
+	{
+		return nullptr;
+	}
+
+	auto* debugFnc = _dbgf->getFunction(_config->getFunctionAddress(fnc));
+	if (debugFnc == nullptr)
 	{
 		return nullptr;
 	}
