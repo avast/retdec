@@ -994,7 +994,7 @@ llvm::Type* EqSet::getHigherPriorityTypePrivate(
 
 			auto* s1 = dyn_cast<StructType>(t1);
 			auto* s2 = dyn_cast<StructType>(t2);
-			if (s1 && s2)
+			if (s1 && s2 && s1->hasName() && s2->hasName())
 			{
 				std::string s1n = s1->getName().str();
 				std::string s2n = s2->getName().str();
