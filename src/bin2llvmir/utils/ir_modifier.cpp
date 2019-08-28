@@ -7,14 +7,18 @@
 #include <iostream>
 
 #include <llvm/IR/InstIterator.h>
+#include <llvm/IR/InstrTypes.h>
 
 #include "retdec/utils/string.h"
+#include "retdec/utils/math.h"
 #include "retdec/bin2llvmir/providers/abi/abi.h"
 #include "retdec/bin2llvmir/providers/asm_instruction.h"
 #include "retdec/bin2llvmir/providers/names.h"
 #include "retdec/bin2llvmir/utils/debug.h"
 #include "retdec/bin2llvmir/utils/ir_modifier.h"
 #include "retdec/bin2llvmir/utils/llvm.h"
+
+#define debug_enabled true
 
 using namespace llvm;
 
@@ -542,8 +546,7 @@ IrModifier::StackPair IrModifier::getStackVariable(
 		type = Abi::getDefaultType(fnc->getParent());
 	}
 
-	std::string n = name.empty() ? "stack_var" : name;
-	n += "_" + std::to_string(offset);
+	std::string n = name.empty() ? "stack_var"+std::to_string(offset) : name;
 	AllocaInst* ret = _config->getLlvmStackVariable(fnc, offset);
 	if (ret)
 	{
@@ -588,16 +591,15 @@ GlobalVariable* IrModifier::getGlobalVariable(
 		bool strict,
 		std::string name)
 {
-	if (!globalVariableCanBeCreated(_module, _config, objf, addr, strict))
-	{
-		return nullptr;
-	}
-
 	retdec::utils::appendHex(name, addr);
-
 	if (auto* gv = _config->getLlvmGlobalVariable(name, addr))
 	{
 		return gv;
+	}
+
+	if (!globalVariableCanBeCreated(_module, _config, objf, addr, strict))
+	{
+		return nullptr;
 	}
 
 	Constant* c = nullptr;
@@ -694,7 +696,605 @@ GlobalVariable* IrModifier::getGlobalVariable(
 			realName,
 			cryptoDesc);
 
+	if (auto* strt = dyn_cast<StructType>(dyn_cast<PointerType>(gv->getType())->getElementType()))
+	{
+		return convertToStructure(gv, strt, addr);
+	}
+
 	return gv;
+}
+
+std::size_t IrModifier::getAlignment(StructType* st) const
+{
+	auto a = AbiProvider::getAbi(_module);
+	std::size_t alignment = 0;
+	for (auto e: st->elements())
+	{
+		std::size_t eSize = 0;
+
+		if (auto* st = dyn_cast<StructType>(e))
+			eSize = getAlignment(st);
+
+		else
+			eSize = a->getTypeByteSize(e);
+
+		//TODO: did we tought through arrays?
+
+		if (eSize > alignment)
+			alignment = eSize;
+	}
+
+	return alignment;
+}
+
+Instruction* IrModifier::getArrayElement(llvm::Value* v, std::size_t idx) const
+{
+	auto* var = dyn_cast<PointerType>(v->getType());
+	assert(var && "Expects variable.");
+
+	auto eIdx= ConstantInt::get(IntegerType::get(_module->getContext(), 32), idx);
+
+	return GetElementPtrInst::Create(var->getElementType(), v, {eIdx});
+}
+
+
+Instruction* IrModifier::getElement(llvm::Value* v, std::size_t idx) const
+{
+	auto* var = dyn_cast<PointerType>(v->getType());
+	assert(var && "Expects variable.");
+	auto* strType = dyn_cast<StructType>(var->getElementType());
+
+	auto zero = ConstantInt::get(IntegerType::get(_module->getContext(), 32), 0);
+	auto eIdx= ConstantInt::get(IntegerType::get(_module->getContext(), 32), idx);
+
+	return GetElementPtrInst::CreateInBounds(strType, v, {zero, eIdx});
+}
+
+Instruction* IrModifier::getElement(llvm::Value* v, const std::vector<Value*> &idxs) const
+{
+	auto* var = dyn_cast<PointerType>(v->getType());
+	assert(var && "Expects variable.");
+	auto* strType = dyn_cast<StructType>(var->getElementType());
+
+	return GetElementPtrInst::CreateInBounds(strType, v, idxs);
+}
+
+void IrModifier::replaceElementWithStrIdx(llvm::Value* element, llvm::Value* str, std::size_t idx)
+{
+	auto elementType = dyn_cast<PointerType>(element->getType())->getElementType();
+	auto structType = dyn_cast<PointerType>(str->getType())->getElementType();
+	std::vector<User*> uses;
+
+	for (auto* u: element->users())
+	{
+		uses.push_back(u);
+	}
+
+	for (auto i = uses.begin(); i != uses.end(); i++) {
+		auto* u = *i;
+		if (auto* ld = dyn_cast<LoadInst>(u))
+		{
+			auto elemVal = getElement(str, idx);
+			elemVal->insertBefore(ld);
+			if (elemVal->getType() != ld->getPointerOperand()->getType())
+				elemVal = CastInst::CreatePointerCast(elemVal, ld->getPointerOperand()->getType(), "", ld);
+
+			Instruction* load = new LoadInst(dyn_cast<PointerType>(elemVal->getType())->getElementType(), elemVal, "", ld);
+			ld->replaceAllUsesWith(load);
+			ld->eraseFromParent();
+		}
+		else if (auto* st = dyn_cast<StoreInst>(u))
+		{
+			auto elemVal = getElement(str, idx);
+			elemVal->insertBefore(st);
+			if (elemVal->getType() != st->getPointerOperand()->getType())
+				elemVal = CastInst::CreatePointerCast(elemVal, st->getPointerOperand()->getType(), "", st);
+
+			auto* s = new StoreInst(st->getValueOperand(), elemVal);
+			s->insertAfter(st);
+			st->eraseFromParent();
+		}
+		else if (auto* ep = dyn_cast<GetElementPtrInst>(u))
+		{
+			auto zero = ConstantInt::get(IntegerType::get(_module->getContext(), 32), 0);
+			auto eIdx = ConstantInt::get(IntegerType::get(_module->getContext(), 32), idx);
+			std::vector<Value*> idxs = {zero, eIdx};
+			bool isFirst = true;
+			for (auto& i : ep->indices())
+			{
+				if (!isFirst)
+					idxs.push_back(i.get());
+				else
+					isFirst = false;
+			}
+
+			auto elem = getElement(str, idxs);
+			elem->insertBefore(ep);
+			ep->replaceAllUsesWith(elem);
+			ep->eraseFromParent();
+		}
+		else if (auto* i = dyn_cast<PtrToIntInst>(u))
+		{
+			auto zero = ConstantInt::get(IntegerType::get(_module->getContext(), 32), 0);
+			auto eIdx = ConstantInt::get(IntegerType::get(_module->getContext(), 32), idx);
+
+			auto elem = getElement(str, {zero, eIdx, zero});
+			elem->insertBefore(i);
+			elem = new LoadInst(dyn_cast<PointerType>(elem->getType())->getElementType(), elem, "", i);
+			i->replaceAllUsesWith(elem);
+			i->eraseFromParent();
+		}
+		else if (auto* j = dyn_cast<InsertValueInst>(u))
+		{
+			exit(1);
+		}
+		//	exit(1);
+	}
+
+
+	auto zero = ConstantInt::get(IntegerType::get(_module->getContext(), 32), 0);
+	auto eIdx = ConstantInt::get(IntegerType::get(_module->getContext(), 32), idx);
+	auto elem = ConstantExpr::getGetElementPtr(structType, dyn_cast<Constant>(str), ArrayRef<Constant*>{zero, eIdx});
+
+	//TODO: some constants are not replaced
+	LOG << "Constant uses" << std::endl;
+	for (auto * u: element->users())
+	{
+		LOG << "\t" << llvmObjToString(u) << std::endl;
+	}
+
+	element->replaceAllUsesWith(elem);
+
+	LOG << "Replaced uses" << std::endl;
+	for (auto * u: elem->users())
+	{
+		LOG << "\t" << llvmObjToString(u) << std::endl;
+	}
+
+
+	initializeGlobalWithGetElementPtr(element, str, idx);
+}
+
+void IrModifier::initializeGlobalWithGetElementPtr(
+		Value* element,
+		Value* str,
+		std::size_t idx)
+{
+	// 1. Create constant getelementptr getelementptr
+	// 2. Call changeObjectType with constant getelementpr
+
+	auto zero = ConstantInt::get(IntegerType::get(_module->getContext(), 32), 0);
+	auto eIdx= ConstantInt::get(IntegerType::get(_module->getContext(), 32), idx);
+	assert(isa<Constant>(str) && "Dealing with something that is not global");
+	ArrayRef<Constant*> af = {zero, eIdx};
+	auto* s = dyn_cast<PointerType>(str->getType())->getElementType();
+	auto* ce = ConstantExpr::getGetElementPtr(s, dyn_cast<Constant>(str), af);
+	auto image = FileImageProvider::getFileImage(_module);
+	element = changeObjectDeclarationType(
+			image,
+			element,
+			PointerType::get(ce->getType(), 0),
+			ce);
+}
+
+size_t IrModifier::getNearestPowerOfTwo(size_t num) const
+{
+	if (!num)
+		return 0;
+
+	size_t bits = 0;
+	while (num >>= 1)
+		bits++;
+
+	return 1 << bits;
+}
+
+/**
+ * 1. Find all elemets and their addresses
+ * 2. Go through these elements
+ *   a. for each determine its maximum possible size
+ *   b. go through its usage
+ *      - change its usage to shifts of structure element.
+ * 3. initialize global variable to point inside element.
+ */
+void IrModifier::correctElementsInTypeSpace(
+		const retdec::utils::Address& start,
+		const retdec::utils::Address& end,
+		llvm::Value* structure,
+		size_t currentIdx)
+{
+	if (start >= end)
+	{
+		return;
+	}
+
+	std::vector<GlobalVariable*> globals = searchAddressRangeForGlobals(start+1, end);
+
+	for (auto i = globals.begin(); i != globals.end(); i++)
+	{
+		// Determine element size
+		std::size_t elemSize = 0;
+		std::size_t supElemSize = end - start;
+		auto elemAddr = _config->getGlobalAddress(*i);
+		if (i+1 == globals.end())
+		{
+			elemSize = end - elemAddr;
+		}
+		else
+		{
+			auto nxtElemAddr = _config->getGlobalAddress(*(i+1));
+			elemSize = nxtElemAddr - elemAddr;
+		}
+		
+		elemSize = getNearestPowerOfTwo(elemSize);
+
+		auto _abi = AbiProvider::getAbi(_module);
+		elemSize = elemSize < _abi->getWordSize() ? elemSize:_abi->getWordSize();
+
+		Value* global = *i;
+		auto nType = IntegerType::getIntNTy(_module->getContext(), elemSize*8);
+		auto image = FileImageProvider::getFileImage(_module);
+		global = changeObjectType(image, global, nType);
+
+		// Users will be changed so we must save all of the first
+		std::vector<User*> users;
+		for (auto* u: global->users())
+			users.push_back(u);
+
+		std::size_t elemOffset = elemAddr - start;
+		std::size_t origSize = end - start;
+
+		for (auto* u: users)
+		{
+			if (auto* ld = dyn_cast<LoadInst>(u))
+			{
+				// [ |x| |x] 
+				// shr = origSize - typeSize - offset
+				// shl = offset
+
+				auto* gep = getElement(structure, currentIdx);
+				gep->insertBefore(ld);
+				auto* origType = dyn_cast<PointerType>(gep->getType())->getElementType();
+				if (!origType->isIntegerTy()) {
+					auto* intRep = IntegerType::getIntNTy(
+								_module->getContext(),
+								_abi->getTypeBitSize(origType));
+					gep = CastInst::CreateBitOrPointerCast(gep, PointerType::get(intRep, 0), "", ld);
+					origType = intRep;
+				}
+
+				std::size_t shl = (origSize - elemSize - elemOffset)*8;
+				auto* lOff = ConstantInt::get(_module->getContext(), APInt(_abi->getTypeBitSize(origType), shl, false));
+
+				Instruction* load = new LoadInst(origType, gep, "", ld);
+
+				if (shl)
+					load = BinaryOperator::CreateLShr(load, lOff, "", ld);
+
+				auto* trunc = CastInst::CreateTruncOrBitCast(load, nType, "", ld);
+
+				ld->replaceAllUsesWith(trunc);
+				ld->eraseFromParent();
+			}
+			else if (auto * st = dyn_cast<StoreInst>(u))
+			{
+				// X  = [x|x]
+				// Y  = [ |x|x| | ]
+				//
+				// Xr = Ysize - off
+				// Xl = off + Xsize
+				// Yd = (Y >> Xr) << Xr;
+				// Yu = (Y << Xl) >> Xl;
+				// Y  = Yd | Yu
+				// X  = extend(X, Ysize)
+				// X  >>= off
+				// Y = Y | X
+
+				// X
+				auto* saved = st->getValueOperand();
+				// Y
+				auto* gep = getElement(structure, currentIdx);
+				gep->insertBefore(st);
+
+				auto* origType = dyn_cast<PointerType>(gep->getType())->getElementType();
+				if (!origType->isIntegerTy())
+				{
+					auto* intRep = IntegerType::getIntNTy(
+								_module->getContext(),
+								_abi->getTypeBitSize(origType));
+					gep = CastInst::CreateBitOrPointerCast(gep, PointerType::get(intRep, 0), "", st);
+					origType = intRep;
+				}
+
+				if (!saved->getType()->isIntegerTy())
+				{
+					auto* intRep = IntegerType::getIntNTy(
+								_module->getContext(),
+								_abi->getTypeBitSize(saved->getType()));
+					saved = CastInst::CreateBitOrPointerCast(saved, intRep, "", st);
+				}
+
+				Instruction* gepLoad = new LoadInst(origType, gep, "", st);
+
+				// Xr
+				std::size_t ro = (supElemSize - elemOffset)*8;
+				// Xl
+				std::size_t lo = (elemOffset + elemSize)*8;
+				auto* rOff = ConstantInt::get(_module->getContext(), APInt(_abi->getTypeBitSize(origType), ro, false));
+				auto* lOff = ConstantInt::get(_module->getContext(), APInt(_abi->getTypeBitSize(origType), lo, false));
+				auto* eOff = ConstantInt::get(_module->getContext(), APInt(_abi->getTypeBitSize(origType), elemOffset*8, false));
+				
+				llvm::Instruction* lgap = nullptr, * rgap = nullptr;
+				// Yd
+				if (ro){
+					rgap = BinaryOperator::CreateLShr(gepLoad, rOff, "", st);
+					rgap = BinaryOperator::CreateShl(rgap, rOff, "", st);
+				}
+				// Yu
+				if (lo != supElemSize*8) {
+					lgap = BinaryOperator::CreateShl(gepLoad, lOff, "", st);
+					lgap = BinaryOperator::CreateLShr(lgap, lOff, "", st);
+				}
+
+				// Y = Yd | Yu
+				if (lgap && rgap)
+				{
+					gepLoad = BinaryOperator::CreateOr(rgap, lgap, "", st);
+				}
+				else
+				{
+					gepLoad = rgap ? rgap : lgap;
+				}
+				
+				saved = CastInst::CreateZExtOrBitCast(saved, origType, "", st);
+				saved = BinaryOperator::CreateLShr(saved, eOff, "", st);
+				saved = BinaryOperator::CreateOr(saved, gepLoad, "", st);
+
+				new StoreInst(saved, gep, st);
+				st->eraseFromParent();
+			}
+			else if (auto* gp = dyn_cast<GetElementPtrInst>(u))
+			{
+				// TODO: this should not happen, please check.
+				assert(false);
+			}
+
+			// TODO:
+			// initialize global variable with constant getelementptr.
+			// replace all usage with constant getelementptr
+		}
+	}
+}
+
+// TODO: move this to config
+std::vector<GlobalVariable*> IrModifier::searchAddressRangeForGlobals(
+		const retdec::utils::Address& start,
+		const retdec::utils::Address& end)
+{
+	std::vector<GlobalVariable*> globals;
+	for (auto i = start; i < end; i++)
+	{
+		if (auto* gv = _config->getLlvmGlobalVariable(i))
+		{
+			globals.push_back(gv);
+		}
+	}
+
+	return globals;
+}
+
+/** 
+ * 1. Find all elements in padding (and addresses)
+ * 2. Cast prev structure element to char*
+ * 3. Go through elements and
+ *   a. determine for each its max size
+ *   b. access prev element with gelemptrinst
+ *   c. go through usage of this global
+ * 4. initialize global var to point on particular padding char.
+ *
+ * @param start address on which padding starts
+ * @param end   address on which padding ends
+ */
+void IrModifier::correctElementsInPadding(
+		const retdec::utils::Address& start,
+		const retdec::utils::Address& end,
+		llvm::Value* structure,
+		size_t lastIdx)
+{
+	if (start > end)
+	{
+		return;
+	}
+	// Find all elements between range
+	std::vector<GlobalVariable*> globals = searchAddressRangeForGlobals(start, end);
+
+	for (auto i = globals.begin(); i != globals.end(); i++)
+	{
+		// Determine element size
+		std::size_t elemSize = 0;
+		auto elemAddr = _config->getGlobalAddress(*i);
+		if (i+1 == globals.end())
+		{
+			elemSize = end - elemAddr;
+		}
+		else
+		{
+			auto nxtElemAddr = _config->getGlobalAddress(*(i+1));
+			elemSize = nxtElemAddr - elemAddr;
+		}
+		
+		elemSize = getNearestPowerOfTwo(elemSize);
+
+		auto _abi = AbiProvider::getAbi(_module);
+		elemSize = elemSize < _abi->getWordSize() ? elemSize:_abi->getWordSize();
+		// TODO: only powers of 2
+
+		Value* global = *i;
+		auto nType = IntegerType::getIntNTy(_module->getContext(), elemSize*8);
+		auto nTypePtr = PointerType::getIntNPtrTy(_module->getContext(), elemSize*8);
+		auto image = FileImageProvider::getFileImage(_module);
+		global = changeObjectType(image, global, nType);
+
+		// Users will be changed so we must save all of the first
+		std::vector<User*> users;
+		for (auto* u: global->users())
+			users.push_back(u);
+
+		for (auto* u: users)
+		{
+			if (auto* ld = dyn_cast<LoadInst>(u))
+			{
+				auto *gep = getElement(structure, lastIdx);
+				gep->insertBefore(ld);
+				auto *chptr = PointerType::getInt8PtrTy(_module->getContext());
+				auto *cast = BitCastInst::CreatePointerCast(gep, chptr);
+				cast->insertBefore(ld);
+				gep = getArrayElement(cast, elemAddr-start+1);
+				gep->insertBefore(ld);
+				cast = BitCastInst::CreatePointerCast(gep, nTypePtr);
+				cast->insertBefore(ld);
+
+				auto load = new LoadInst(nType, cast, "", ld);
+				ld->replaceAllUsesWith(load);
+				ld->eraseFromParent();
+			}
+			else if (auto * st = dyn_cast<StoreInst>(u))
+			{
+				auto *gep = getElement(structure, lastIdx);
+				gep->insertBefore(st);
+				auto *chptr = PointerType::getInt8PtrTy(_module->getContext());
+				auto *cast = BitCastInst::CreatePointerCast(gep, chptr);
+				cast->insertBefore(st);
+				gep = getArrayElement(cast, elemAddr-start+1);
+				gep->insertBefore(st);
+				cast = BitCastInst::CreatePointerCast(gep, nTypePtr);
+				cast->insertBefore(st);
+			
+				new StoreInst(st->getValueOperand(), cast, st);
+				st->eraseFromParent();
+			}
+			else if (auto* gp = dyn_cast<GetElementPtrInst>(u))
+			{
+				// TODO: this should not happen, please check.
+				assert(false);
+			}
+
+			// TODO:
+			// initialize global variable with constant getelementptr.
+			// replace all usage with constant getelementptr
+		}
+	}
+}
+
+llvm::GlobalVariable* IrModifier::convertToStructure(
+		GlobalVariable* gv,
+		StructType* strType)
+{
+	auto addr = _config->getGlobalAddress(gv);
+	return convertToStructure(gv, strType, addr);
+}
+
+llvm::GlobalVariable* IrModifier::convertToStructure(
+		GlobalVariable* gv,
+		StructType* strType,
+		retdec::utils::Address& addr)
+{
+	auto alignment = getAlignment(strType);
+	auto padding = alignment;
+	auto origAddr = addr;
+
+	auto cgv = new GlobalVariable(
+			*_module,
+			dyn_cast<PointerType>(gv->getType())->getElementType(),
+			gv->isConstant(),
+			gv->getLinkage(),
+			gv->getInitializer());
+
+
+	auto image = FileImageProvider::getFileImage(_module);
+	auto dbgf = DebugFormatProvider::getDebugFormat(_module);
+
+	// This way we will have initializer converted too.
+	cgv = dyn_cast<GlobalVariable>(changeObjectDeclarationType(image, cgv, strType));
+
+	std::size_t idx = 0;
+	for (auto elem: strType->elements())
+	{
+		if (auto* eStrType = dyn_cast<StructType>(elem))
+		{
+			auto newAlignment = getAlignment(eStrType);
+			if (alignment > padding) {
+				auto naddr = addr+(padding)%newAlignment;
+				correctElementsInPadding(addr, naddr, cgv, idx-1);
+				addr = naddr;
+			}
+
+			padding = alignment;
+
+			GlobalVariable* structElement = getGlobalVariable(image, dbgf, addr);
+			auto* origType = dyn_cast<PointerType>(structElement->getType())->getElementType();
+			auto* val = changeObjectDeclarationType(image, structElement, eStrType);
+			correctUsageOfModifiedObject(structElement, val, origType);
+
+			structElement = dyn_cast<GlobalVariable>(val);
+			structElement = convertToStructure(structElement, eStrType, addr);
+			replaceElementWithStrIdx(structElement, cgv, idx++);
+
+			continue;
+		}
+
+		auto a = AbiProvider::getAbi(_module);
+		auto elemSize = a->getTypeByteSize(elem);
+		if (padding < elemSize) {
+			correctElementsInPadding(addr, addr+padding, cgv, idx-1);
+			addr += padding;
+			padding = alignment;
+		}
+
+		auto structElement = getGlobalVariable(image, dbgf, addr);
+		// TODO:
+		// following 3 linses of code can go into replaceElementWithStrIdx.
+		auto* origType = dyn_cast<PointerType>(structElement->getType())->getElementType();
+		auto* val = changeObjectDeclarationType(image, structElement, elem);
+		correctUsageOfModifiedObject(structElement, val, origType);
+
+		structElement = dyn_cast<GlobalVariable>(val);
+
+		correctElementsInTypeSpace(addr, addr+elemSize, cgv, idx);
+		replaceElementWithStrIdx(structElement, cgv, idx++);
+		padding -= elemSize;
+		addr += elemSize;
+	}
+
+	// During computation will be original global variable changed.
+	auto origStr = _config->getLlvmGlobalVariable(origAddr);
+	cgv->takeName(origStr);
+
+	//TODO
+	//is this necessary?
+	auto* econfv = _config->getConfigGlobalVariable(cgv);
+	if (econfv)
+	{
+		retdec::config::Object confv(
+				econfv->getName(),
+				econfv->getStorage());
+		confv.type.setLlvmIr(
+				llvmObjToString(cgv->getType()->getPointerElementType()));
+		_config->getConfig().globals.insert(confv);
+	}
+
+	// Here might lay some elements
+
+	// In case of recursive structures we must align
+	// space for correct address.
+	padding = padding%alignment;
+	if (padding)
+	{
+		correctElementsInPadding(addr, addr+padding, cgv, idx-1);
+		addr += padding; // (addr-oldAddr)%alignment
+	}
+
+	return cgv;
 }
 
 /**
@@ -716,10 +1316,11 @@ llvm::Value* IrModifier::changeObjectDeclarationType(
 		llvm::Constant* init,
 		bool wideString)
 {
-	if (val->getType() == toType)
-	{
-		return val;
-	}
+	//if (dyn_cast<PointerType>(val->getType())->getElementType() == toType)
+	//if (val->getType() == toType)
+	//{
+	//	return val;
+	//}
 
 	if (auto* alloca = dyn_cast<AllocaInst>(val))
 	{
@@ -735,7 +1336,8 @@ llvm::Value* IrModifier::changeObjectDeclarationType(
 	{
 		if (init == nullptr)
 		{
-			init = objf->getConstant(
+			if (objf)
+				init = objf->getConstant(
 					toType,
 					_config->getGlobalAddress(ogv),
 					wideString);
@@ -777,57 +1379,8 @@ llvm::Value* IrModifier::changeObjectDeclarationType(
 	}
 }
 
-/**
- * Change @c val type to @c toType and fix all its uses.
- * @param objf   Object file for this object -- needed to initialize it values.
- * @param val    Value which type to change.
- * @param toType Type to change it to.
- * @param init   Initializer constant.
- * @param instToErase Some instructions may become obsolete. If pointer to this
- *                    container is provided, function adds such instructions to
- *                    it and it is up to the caller to erase them. Otherwise,
- *                    function erases such instructions from parent.
- *                    If caller does not have instructions saved, it is save
- *                    to erase them here -- pass nullptr.
- *                    If caller is performing some analysis where it has
- *                    instructions stored in internal structures and it is
- *                    possible that they will be used after they would
- *                    have been erased, it should pass pointer to container
- *                    here and erase instructions when it is finished.
- * @param dbg    Flag to enable debug messages.
- * @param wideString Is type a wide string?
- */
-llvm::Value* IrModifier::changeObjectType(
-		FileImage* objf,
-		Value* val,
-		Type* toType,
-		Constant* init,
-		std::unordered_set<llvm::Instruction*>* instToErase,
-		bool dbg,
-		bool wideString)
+void IrModifier::correctUsageOfModifiedObject(Value* val, Value* nval, Type* origType, std::unordered_set<llvm::Instruction*>* instToErase)
 {
-	if (!(isa<AllocaInst>(val)
-			|| isa<GlobalVariable>(val)
-			|| isa<Argument>(val)))
-	{
-		assert(false && "only globals, allocas and arguments can be changed");
-		return val;
-	}
-
-	if (val->getType() == toType)
-	{
-		return val;
-	}
-
-	Type* origType = val->getType();
-	auto* nval = changeObjectDeclarationType(
-			objf,
-			val,
-			toType,
-			init,
-			wideString);
-	Constant* newConst = dyn_cast<Constant>(nval);
-
 	// For some reason, iteration using val->user_begin() and val->user_end()
 	// may break -- there are many uses, but after modifying one of them,
 	// iteration ends before visiting all of them. Even when we increment
@@ -836,6 +1389,7 @@ llvm::Value* IrModifier::changeObjectType(
 	// Therefore, we store all uses to our own container.
 	//
 	std::list<User*> users;
+	Constant* newConst = dyn_cast<Constant>(nval);
 	for (const auto& U : val->users())
 	{
 		users.push_back(U);
@@ -955,9 +1509,72 @@ llvm::Value* IrModifier::changeObjectType(
 		}
 		else
 		{
-			errs() << "unhandled use : " << *user << " -> " << *toType << "\n";
+			errs() << "unhandled use : " << *user << " -> " << *val->getType() << "\n";
 			assert(false && "unhandled use");
 		}
+	}
+}
+
+/**
+ * Change @c val type to @c toType and fix all its uses.
+ * @param objf   Object file for this object -- needed to initialize it values.
+ * @param val    Value which type to change.
+ * @param toType Type to change it to.
+ * @param init   Initializer constant.
+ * @param instToErase Some instructions may become obsolete. If pointer to this
+ *                    container is provided, function adds such instructions to
+ *                    it and it is up to the caller to erase them. Otherwise,
+ *                    function erases such instructions from parent.
+ *                    If caller does not have instructions saved, it is save
+ *                    to erase them here -- pass nullptr.
+ *                    If caller is performing some analysis where it has
+ *                    instructions stored in internal structures and it is
+ *                    possible that they will be used after they would
+ *                    have been erased, it should pass pointer to container
+ *                    here and erase instructions when it is finished.
+ * @param dbg    Flag to enable debug messages.
+ * @param wideString Is type a wide string?
+ */
+llvm::Value* IrModifier::changeObjectType(
+		FileImage* objf,
+		Value* val,
+		Type* toType,
+		Constant* init,
+		std::unordered_set<llvm::Instruction*>* instToErase,
+		bool dbg,
+		bool wideString)
+{
+	if (!(isa<AllocaInst>(val)
+			|| isa<GlobalVariable>(val)
+			|| isa<Argument>(val)))
+	{
+		assert(false && "only globals, allocas and arguments can be changed");
+		return val;
+	}
+
+	//if (dyn_cast<PointerType>(val->getType())->getElementType() == toType)
+	//{
+	//	return val;
+	//}
+
+	Type* origType = dyn_cast<PointerType>(val->getType())->getElementType();
+	auto* nval = changeObjectDeclarationType(
+			objf,
+			val,
+			toType,
+			init,
+			wideString);
+
+	correctUsageOfModifiedObject(val, nval, origType, instToErase);
+
+	// If it is global structure we need to correct elements usage.
+	if (auto* strType = dyn_cast<StructType>(toType))
+	{
+		if (auto* gv = dyn_cast<GlobalVariable>(nval)) {
+			auto addr = _config->getGlobalAddress(gv);
+			return convertToStructure(gv, strType, addr);
+		}
+
 	}
 
 	return nval;
