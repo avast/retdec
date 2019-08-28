@@ -111,6 +111,27 @@ bool ConstantsAnalysis::run()
 		}
 	}
 
+	std::vector<GlobalVariable*> globalList;
+	for (auto& g: _module->getGlobalList())
+	{
+		globalList.push_back(&g);
+	}
+
+	for (auto& g: globalList)
+	{
+		if (!_config->isGlobalVariable(g)) {
+			continue;
+		}
+		if (!holdsStructureType(g)) {
+			continue;
+		}
+
+		auto* st = getStructType(g);
+		auto image = FileImageProvider::getFileImage(_module);
+		IrModifier irm(_module, _config);
+		irm.changeObjectType(image, g, st);
+	}
+
 	return false;
 }
 
@@ -166,6 +187,22 @@ void ConstantsAnalysis::checkForGlobalInInstruction(
 		inst->replaceUsesOfWith(val, conv);
 		return;
 	}
+}
+
+bool ConstantsAnalysis::holdsStructureType(const llvm::Value* var) const
+{
+	return getStructType(var) != nullptr;
+}
+
+StructType* ConstantsAnalysis::getStructType(const llvm::Value* var) const
+{
+	if (auto* t = dyn_cast<PointerType>(var->getType())) {
+		auto* el = t->getElementType();
+
+		return dyn_cast<StructType>(el);
+	}
+
+	return dyn_cast<StructType>(var->getType());
 }
 
 } // namespace bin2llvmir

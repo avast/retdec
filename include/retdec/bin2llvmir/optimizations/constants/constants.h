@@ -46,6 +46,8 @@ class ConstantsAnalysis : public llvm::ModulePass
 				llvm::Value* val,
 				bool storeValue = false);
 		void tagFunctionsWithUsedCryptoGlobals();
+		bool holdsStructureType(const llvm::Value* var) const;
+		llvm::StructType* getStructType(const llvm::Value* var) const;
 
 	private:
 		llvm::Module * _module = nullptr;
