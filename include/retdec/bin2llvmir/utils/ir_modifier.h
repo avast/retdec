@@ -107,6 +107,9 @@ class IrModifier
 				llvm::Argument* arg,
 				llvm::Type* type);
 
+		llvm::GlobalVariable* convertToStructure(
+				llvm::GlobalVariable* gv,
+				llvm::StructType* strType);
 	protected:
 		llvm::Value* changeObjectDeclarationType(
 				FileImage* objf,
@@ -114,6 +117,50 @@ class IrModifier
 				llvm::Type* toType,
 				llvm::Constant* init = nullptr,
 				bool wideString = false);
+
+		size_t getNearestPowerOfTwo(size_t num) const;
+		void correctUsageOfModifiedObject(
+				llvm::Value* val,
+				llvm::Value* nval,
+				llvm::Type* origType,
+				std::unordered_set<llvm::Instruction*>* instToErase = nullptr);
+
+	protected:
+		void replaceElementWithStrIdx(
+				llvm::Value* element,
+				llvm::Value* str,
+				std::size_t idx);
+
+		void initializeGlobalWithGetElementPtr(
+				llvm::Value* element,
+				llvm::Value* str,
+				std::size_t idx);
+
+		llvm::GlobalVariable* convertToStructure(
+				llvm::GlobalVariable* gv,
+				llvm::StructType* strType,
+				retdec::utils::Address& addr);
+
+		void correctElementsInTypeSpace(
+			const retdec::utils::Address& start,
+			const retdec::utils::Address& end,
+			llvm::Value* structure,
+			size_t currentIdx);
+
+		void correctElementsInPadding(
+			const retdec::utils::Address& start,
+			const retdec::utils::Address& end,
+			llvm::Value* structure,
+			size_t lastIdx);
+
+		std::vector<llvm::GlobalVariable*> searchAddressRangeForGlobals(
+			const retdec::utils::Address& start,
+			const retdec::utils::Address& end);
+
+		std::size_t getAlignment(llvm::StructType* st) const;
+		llvm::Instruction* getElement(llvm::Value* v, std::size_t idx) const;
+		llvm::Instruction* getArrayElement(llvm::Value* v, std::size_t idx) const;
+		llvm::Instruction* getElement(llvm::Value* v, const std::vector<llvm::Value*>& idxs) const;
 
 	protected:
 		llvm::Module* _module = nullptr;
