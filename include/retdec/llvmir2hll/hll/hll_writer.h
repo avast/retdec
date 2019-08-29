@@ -82,49 +82,39 @@ protected:
 	/// @name Emission
 	/// @{
 	virtual bool emitFileHeader();
-	virtual bool emitFileFooter();
 
 	virtual bool emitGlobalVariablesHeader();
 	virtual bool emitGlobalVariables();
 	virtual bool emitGlobalVariable(ShPtr<GlobalVarDef> varDef);
-	virtual bool emitGlobalVariablesFooter();
 
 	virtual bool emitClassesHeader();
 	virtual bool emitClasses();
 	virtual bool emitClass(const std::string &className);
-	virtual bool emitClassesFooter();
 
 	virtual bool emitFunctionPrototypesHeader();
 	virtual bool emitFunctionPrototypes();
-	virtual bool emitFunctionPrototypesFooter();
 
 	virtual bool emitFunctionsHeader();
 	virtual bool emitFunctions();
 	virtual bool emitFunction(ShPtr<Function> func);
-	virtual bool emitFunctionsFooter();
 
 	virtual bool emitStaticallyLinkedFunctionsHeader();
 	virtual bool emitStaticallyLinkedFunctions();
-	virtual bool emitStaticallyLinkedFunctionsFooter();
 
 	virtual bool emitDynamicallyLinkedFunctionsHeader();
 	virtual bool emitDynamicallyLinkedFunctions();
-	virtual bool emitDynamicallyLinkedFunctionsFooter();
 
 	virtual bool emitSyscallFunctionsHeader();
 	virtual bool emitSyscallFunctions();
-	virtual bool emitSyscallFunctionsFooter();
 
 	virtual bool emitInstructionIdiomFunctionsHeader();
 	virtual bool emitInstructionIdiomFunctions();
-	virtual bool emitInstructionIdiomFunctionsFooter();
 
 	virtual bool emitExternalFunctions(const FuncSet &funcs);
 	virtual bool emitExternalFunction(ShPtr<Function> func);
 
 	virtual bool emitMetaInfoHeader();
 	virtual bool emitMetaInfo();
-	virtual bool emitMetaInfoFooter();
 
 	virtual void emitExprWithBracketsIfNeeded(ShPtr<Expression> expr);
 	void emitUnaryOpExpr(const std::string &opRepr, ShPtr<UnaryOpExpr> expr);

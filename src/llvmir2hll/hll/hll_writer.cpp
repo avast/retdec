@@ -112,7 +112,7 @@ public:
 	*
 	* @param[in] module The current module.
 	*
-	* @par Preconditions
+	* @par Preconditionsout
 	*  - all functions in @a module have available address ranges
 	*/
 	explicit AddressRangeFuncComparator(ShPtr<Module> module):
@@ -214,14 +214,13 @@ void HLLWriter::setOptionUseCompoundOperators(bool use) {
 * The functions prints the code blocks in the following order (by calling
 * appropriate emit*() functions):
 *  - file header
-*  - function prototypes header, function prototypes, function prototypes footer
-*  - global header, global variables, global footer
-*  - functions header, functions, functions footer
-*  - external functions header, external functions, external functions footer
+*  - function prototypes header, function prototypes
+*  - global header, global variables
+*  - functions header, functions
+*  - external functions header, external functions
 *    (there are many types of external functions; a separate section is emitted
 *    for each type)
-*  - meta-information header, meta-information, meta-information footer
-*  - file footer
+*  - meta-information header, meta-information
 *
 * Each block is separated by a blank line. A subclass of this class can just
 * override the appropriate emit*() functions. To change the order of blocks,
@@ -238,14 +237,12 @@ bool HLLWriter::emitTargetCode(ShPtr<Module> module) {
 	//
 	if (emitClassesHeader()) { codeEmitted = true; out->newLine(); }
 	if (emitClasses()) { codeEmitted = true; out->newLine(); }
-	if (emitClassesFooter()) { codeEmitted = true; out->newLine(); }
 
 	//
 	// Function prototypes
 	//
 	if (emitFunctionPrototypesHeader()) { codeEmitted = true; out->newLine(); }
 	if (emitFunctionPrototypes()) { codeEmitted = true; out->newLine(); }
-	if (emitFunctionPrototypesFooter()) { codeEmitted = true; out->newLine(); }
 
 	//
 	// Global variables
@@ -265,51 +262,42 @@ bool HLLWriter::emitTargetCode(ShPtr<Module> module) {
 	// is OK.
 	if (emitGlobalVariablesHeader()) { codeEmitted = true; out->newLine(); }
 	if (emitGlobalVariables()) { codeEmitted = true; out->newLine(); }
-	if (emitGlobalVariablesFooter()) { codeEmitted = true; out->newLine(); }
 
 	//
 	// Functions
 	//
 	if (emitFunctionsHeader()) { codeEmitted = true; out->newLine(); }
 	if (emitFunctions()) { codeEmitted = true; out->newLine(); }
-	if (emitFunctionsFooter()) { codeEmitted = true; out->newLine(); }
 
 	//
 	// Statically linked functions
 	//
 	if (emitStaticallyLinkedFunctionsHeader()) { codeEmitted = true; out->newLine(); }
 	if (emitStaticallyLinkedFunctions()) { codeEmitted = true; out->newLine(); }
-	if (emitStaticallyLinkedFunctionsFooter()) { codeEmitted = true; out->newLine(); }
 
 	//
 	// Dynamically linked functions
 	//
 	if (emitDynamicallyLinkedFunctionsHeader()) { codeEmitted = true; out->newLine(); }
 	if (emitDynamicallyLinkedFunctions()) { codeEmitted = true; out->newLine(); }
-	if (emitDynamicallyLinkedFunctionsFooter()) { codeEmitted = true; out->newLine(); }
 
 	//
 	// Syscall functions
 	//
 	if (emitSyscallFunctionsHeader()) { codeEmitted = true; out->newLine(); }
 	if (emitSyscallFunctions()) { codeEmitted = true; out->newLine(); }
-	if (emitSyscallFunctionsFooter()) { codeEmitted = true; out->newLine(); }
 
 	//
 	// Instruction-idiom functions
 	//
 	if (emitInstructionIdiomFunctionsHeader()) { codeEmitted = true; out->newLine(); }
 	if (emitInstructionIdiomFunctions()) { codeEmitted = true; out->newLine(); }
-	if (emitInstructionIdiomFunctionsFooter()) { codeEmitted = true; out->newLine(); }
 
 	//
 	// Meta-information
 	//
 	if (emitMetaInfoHeader()) { codeEmitted = true; out->newLine(); }
 	if (emitMetaInfo()) { codeEmitted = true; out->newLine(); }
-	if (emitMetaInfoFooter()) { codeEmitted = true; out->newLine(); }
-
-	if (emitFileFooter()) { codeEmitted = true; }
 
 	return codeEmitted;
 }
@@ -388,17 +376,6 @@ bool HLLWriter::emitFileHeader() {
 }
 
 /**
-* @brief Emits the file footer.
-*
-* @return @c true if some code has been emitted, @c false otherwise.
-*
-* By default (if it is not overridden), it emits nothing.
-*/
-bool HLLWriter::emitFileFooter() {
-	return false;
-}
-
-/**
 * @brief Emits the header of the <em>classes</em> block.
 *
 * @return @c true if some code has been emitted, @c false otherwise.
@@ -446,17 +423,6 @@ bool HLLWriter::emitClass(const std::string &className) {
 
 	out->commentLine(classInfo.str());
 	return true;
-}
-
-/**
-* @brief Emits the footer of the <em>classes</em> block.
-*
-* @return @c true if some code has been emitted, @c false otherwise.
-*
-* By default (if it is not overridden), it emits nothing.
-*/
-bool HLLWriter::emitClassesFooter() {
-	return false;
 }
 
 /**
@@ -510,17 +476,6 @@ bool HLLWriter::emitGlobalVariable(ShPtr<GlobalVarDef> varDef) {
 }
 
 /**
-* @brief Emits the footer of the <em>global variables</em> block.
-*
-* @return @c true if some code has been emitted, @c false otherwise.
-*
-* By default (if it is not overridden), it emits nothing.
-*/
-bool HLLWriter::emitGlobalVariablesFooter() {
-	return false;
-}
-
-/**
 * @brief Emits the header of the <em>function prototypes</em> block.
 *
 * @return @c true if some code has been emitted, @c false otherwise.
@@ -539,17 +494,6 @@ bool HLLWriter::emitFunctionPrototypesHeader() {
 * By default (if it is not overridden), it emits nothing.
 */
 bool HLLWriter::emitFunctionPrototypes() {
-	return false;
-}
-
-/**
-* @brief Emits the footer of the <em>function prototypes</em> block.
-*
-* @return @c true if some code has been emitted, @c false otherwise.
-*
-* By default (if it is not overridden), it emits nothing.
-*/
-bool HLLWriter::emitFunctionPrototypesFooter() {
 	return false;
 }
 
@@ -625,17 +569,6 @@ bool HLLWriter::emitFunction(ShPtr<Function> func) {
 }
 
 /**
-* @brief Emits the footer of the <em>functions</em> block.
-*
-* @return @c true if some code has been emitted, @c false otherwise.
-*
-* By default (if it is not overridden), it emits nothing.
-*/
-bool HLLWriter::emitFunctionsFooter() {
-	return false;
-}
-
-/**
 * @brief Emits the header of the <em>statically linked functions</em> block.
 *
 * @return @c true if some code has been emitted, @c false otherwise.
@@ -658,17 +591,6 @@ bool HLLWriter::emitStaticallyLinkedFunctionsHeader() {
 */
 bool HLLWriter::emitStaticallyLinkedFunctions() {
 	return emitExternalFunctions(module->getStaticallyLinkedFuncs());
-}
-
-/**
-* @brief Emits the footer of the <em>dynamically linked functions</em> block.
-*
-* @return @c true if some code has been emitted, @c false otherwise.
-*
-* By default (if it is not overridden), it emits nothing.
-*/
-bool HLLWriter::emitStaticallyLinkedFunctionsFooter() {
-	return false;
 }
 
 /**
@@ -698,17 +620,6 @@ bool HLLWriter::emitDynamicallyLinkedFunctions() {
 }
 
 /**
-* @brief Emits the footer of the <em>dynamically linked functions</em> block.
-*
-* @return @c true if some code has been emitted, @c false otherwise.
-*
-* By default (if it is not overridden), it emits nothing.
-*/
-bool HLLWriter::emitDynamicallyLinkedFunctionsFooter() {
-	return false;
-}
-
-/**
 * @brief Emits the header of the <em>syscall functions</em> block.
 *
 * @return @c true if some code has been emitted, @c false otherwise.
@@ -734,17 +645,6 @@ bool HLLWriter::emitSyscallFunctions() {
 }
 
 /**
-* @brief Emits the footer of the <em>syscall functions</em> block.
-*
-* @return @c true if some code has been emitted, @c false otherwise.
-*
-* By default (if it is not overridden), it emits nothing.
-*/
-bool HLLWriter::emitSyscallFunctionsFooter() {
-	return false;
-}
-
-/**
 * @brief Emits the header of the <em>instruction-idiom functions</em> block.
 *
 * @return @c true if some code has been emitted, @c false otherwise.
@@ -767,17 +667,6 @@ bool HLLWriter::emitInstructionIdiomFunctionsHeader() {
 */
 bool HLLWriter::emitInstructionIdiomFunctions() {
 	return emitExternalFunctions(module->getInstructionIdiomFuncs());
-}
-
-/**
-* @brief Emits the footer of the <em>instruction-idiom functions</em> block.
-*
-* @return @c true if some code has been emitted, @c false otherwise.
-*
-* By default (if it is not overridden), it emits nothing.
-*/
-bool HLLWriter::emitInstructionIdiomFunctionsFooter() {
-	return false;
 }
 
 /**
@@ -842,17 +731,6 @@ bool HLLWriter::emitMetaInfo() {
 		codeEmitted |= emitMetaInfoDecompilationDate();
 	}
 	return codeEmitted;
-}
-
-/**
-* @brief Emits the footer of the <em>meta-information</em> block.
-*
-* @return @c true if some code has been emitted, @c false otherwise.
-*
-* By default (if it is not overridden), it emits nothing.
-*/
-bool HLLWriter::emitMetaInfoFooter() {
-	return false;
 }
 
 /**
