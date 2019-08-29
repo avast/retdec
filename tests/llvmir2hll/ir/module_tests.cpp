@@ -527,19 +527,6 @@ GetDemangledNameOfFuncReturnsCorrectValue) {
 }
 
 //
-// getNamesOfFuncsFixedWithLLVMIRFixer()
-//
-
-TEST_F(ModuleTests,
-GetNamesOfFuncsFixedWithLLVMIRFixerReturnsCorrectValue) {
-	auto FIXED_FUNCS = StringSet({"func1", "func2"});
-	EXPECT_CALL(*configMock, getFuncsFixedWithLLVMIRFixer())
-		.WillOnce(Return(FIXED_FUNCS));
-
-	ASSERT_EQ(FIXED_FUNCS, module->getNamesOfFuncsFixedWithLLVMIRFixer());
-}
-
-//
 // getAddressRangeForFunc()
 //
 

@@ -118,8 +118,6 @@ public:
 	std::string getWrappedFuncName(ShPtr<Function> func) const;
 	std::string getDemangledNameOfFunc(ShPtr<Function> func) const;
 
-	StringSet getNamesOfFuncsFixedWithLLVMIRFixer() const;
-
 	AddressRange getAddressRangeForFunc(ShPtr<const Function> func) const;
 	bool hasAddressRange(ShPtr<const Function> func) const;
 	bool allFuncDefinitionsHaveAddressRange() const;

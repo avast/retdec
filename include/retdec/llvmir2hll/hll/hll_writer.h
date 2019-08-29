@@ -140,7 +140,6 @@ protected:
 	bool emitDemangledNameIfAvailable(ShPtr<Function> func);
 	bool emitCommentIfAvailable(ShPtr<Function> func);
 	bool emitDetectedCryptoPatternsForFuncIfAvailable(ShPtr<Function> func);
-	bool emitLLVMIRFixerWarningForFuncIfAny(ShPtr<Function> func);
 
 	void emitSectionHeader(const std::string &sectionName);
 
@@ -212,9 +211,6 @@ protected:
 	/// Use compound operators (like @c +=) instead of assignments?
 	bool optionUseCompoundOperators;
 
-	/// Names of functions that were fixed by the LLVM IR fixing script.
-	StringSet namesOfFuncsWithFixedIR;
-
 	/// The currently emitted function definition (if any).
 	ShPtr<Function> currFunc;
 
@@ -229,8 +225,6 @@ private:
 	bool emitMetaInfoNumberOfDetectedFuncs();
 	bool emitMetaInfoSelectedButNotFoundFuncs();
 	bool emitMetaInfoDecompilationDate();
-	bool emitMetaInfoFuncsRemovedDueErrors();
-	bool emitMetaInfoNumberOfDecompilationErrors();
 	/// @}
 
 	std::string getRawGotoLabel(ShPtr<Statement> stmt);

@@ -72,7 +72,6 @@ void printHelp()
 	std::cout << "\t--decode-only-selected true/false" << std::endl;
 	std::cout << "\t--selected-func name" << std::endl;
 	std::cout << "\t--selected-range range" << std::endl;
-	std::cout << "\t--set-fnc-fixed fncName" << std::endl;
 	std::cout << std::endl;
 }
 
@@ -348,14 +347,6 @@ int handleArguments(std::vector<std::string> &args)
 			else if (opt == "--selected-range")
 			{
 				config.parameters.selectedRanges.insert( retdec::config::AddressRangeJson(val) );
-			}
-			else if (opt == "--set-fnc-fixed")
-			{
-				auto f = config.functions.getFunctionByName(val);
-				if (f)
-				{
-					f->setIsFixed(true);
-				}
 			}
 			else
 			{

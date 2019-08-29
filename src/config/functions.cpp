@@ -29,7 +29,6 @@ const std::string JSON_locals        = "locals";
 const std::string JSON_srcFileName   = "srcFileName";
 const std::string JSON_startLine     = "startLine";
 const std::string JSON_endLine       = "endLine";
-const std::string JSON_fixed         = "wasFixed";
 const std::string JSON_fromDebug     = "isFromDebug";
 const std::string JSON_wrappedName   = "wrappedFunctionName";
 const std::string JSON_isConstructor = "isConstructor";
@@ -87,7 +86,6 @@ Function Function::fromJsonValue(const Json::Value& val)
 			safeGetAddress(val, JSON_endAddr));
 	ret.setStartLine( safeGetAddress(val, JSON_startLine) );
 	ret.setEndLine( safeGetAddress(val, JSON_endLine) );
-	ret.setIsFixed( safeGetBool(val, JSON_fixed) );
 	ret.setIsFromDebug( safeGetBool(val, JSON_fromDebug) );
 	ret.setIsConstructor( safeGetBool(val, JSON_isConstructor) );
 	ret.setIsDestructor( safeGetBool(val, JSON_isDestructor) );
@@ -136,7 +134,6 @@ Json::Value Function::getJsonValue() const
 	if (getEnd().isDefined()) fnc[JSON_endAddr] = toJsonValue(getEnd());
 	if (getStartLine().isDefined()) fnc[JSON_startLine] = toJsonValue(getStartLine());
 	if (getEndLine().isDefined()) fnc[JSON_endLine] = toJsonValue(getEndLine());
-	if (isFixed()) fnc[JSON_fixed] = isFixed();
 	if (isFromDebug()) fnc[JSON_fromDebug] = isFromDebug();
 	if (isConstructor()) fnc[JSON_isConstructor] = isConstructor();
 	if (isDestructor()) fnc[JSON_isDestructor] = isDestructor();
@@ -160,7 +157,6 @@ bool Function::isStaticallyLinked() const  { return _linkType == STATICALLY_LINK
 bool Function::isDynamicallyLinked() const { return _linkType == DYNAMICALLY_LINKED; }
 bool Function::isSyscall() const           { return _linkType == SYSCALL; }
 bool Function::isIdiom() const             { return _linkType == IDIOM; }
-bool Function::isFixed() const             { return _fixed; }
 bool Function::isFromDebug() const         { return _fromDebug; }
 bool Function::isConstructor() const       { return _constructor; }
 bool Function::isDestructor() const        { return _destructor; }
@@ -192,7 +188,6 @@ void Function::setIsStaticallyLinked()                      { _linkType = STATIC
 void Function::setIsDynamicallyLinked()                     { _linkType = DYNAMICALLY_LINKED; }
 void Function::setIsSyscall()                               { _linkType = SYSCALL; }
 void Function::setIsIdiom()                                 { _linkType = IDIOM; }
-void Function::setIsFixed(bool f)                           { _fixed = f; }
 void Function::setIsFromDebug(bool d)                       { _fromDebug = d; }
 void Function::setIsConstructor(bool f)                     { _constructor = f; }
 void Function::setIsDestructor(bool f)                      { _destructor = f; }

@@ -290,17 +290,6 @@ std::string JSONConfig::getDemangledNameOfFunc(const std::string &func) const {
 	return f.getDemangledName();
 }
 
-StringSet JSONConfig::getFuncsFixedWithLLVMIRFixer() const {
-	StringSet fixedFuncs;
-	for (const auto &addrFuncPair : impl->config.functions) {
-		auto &func = addrFuncPair.second;
-		if (func.isFixed()) {
-			fixedFuncs.insert(func.getName());
-		}
-	}
-	return fixedFuncs;
-}
-
 StringSet JSONConfig::getClassNames() const {
 	StringSet classNames;
 	for (const auto &c : impl->config.classes) {

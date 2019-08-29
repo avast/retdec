@@ -74,8 +74,6 @@ void HLLWriterTests::SetUp() {
 		.WillByDefault(Return(""));
 	ON_CALL(*configMock, getSelectedButNotFoundFuncs())
 		.WillByDefault(Return(StringSet()));
-	ON_CALL(*configMock, getFuncsFixedWithLLVMIRFixer())
-		.WillByDefault(Return(StringSet()));
 
 	ON_CALL(*semanticsMock, getCHeaderFileForFunc(_))
 		.WillByDefault(Return(Nothing<std::string>()));
