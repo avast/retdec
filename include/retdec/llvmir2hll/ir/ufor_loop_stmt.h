@@ -35,7 +35,7 @@ public:
 		ShPtr<Expression> step,
 		ShPtr<Statement> body,
 		ShPtr<Statement> succ = nullptr,
-		Address a = Address::getUndef
+		Address a = Address::Undefined
 	);
 
 	virtual ~UForLoopStmt() override;
@@ -77,7 +77,7 @@ private:
 		ShPtr<Expression> cond,
 		ShPtr<Expression> step,
 		ShPtr<Statement> body,
-		Address a = Address::getUndef
+		Address a = Address::Undefined
 	);
 
 	/// Initialization part.

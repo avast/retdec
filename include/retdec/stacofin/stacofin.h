@@ -41,8 +41,8 @@ struct Reference
 		Reference(
 				std::size_t o,
 				const std::string& n,
-				utils::Address a = utils::Address::getUndef,
-				utils::Address t = utils::Address::getUndef,
+				utils::Address a = utils::Address::Undefined,
+				utils::Address t = utils::Address::Undefined,
 				DetectedFunction* tf = nullptr,
 				bool k = false);
 

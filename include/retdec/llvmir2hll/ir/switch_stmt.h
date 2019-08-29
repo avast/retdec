@@ -46,7 +46,7 @@ public:
 public:
 	static ShPtr<SwitchStmt> create(ShPtr<Expression> controlExpr,
 		ShPtr<Statement> succ = nullptr,
-		Address a = Address::getUndef);
+		Address a = Address::Undefined);
 
 	virtual ~SwitchStmt() override;
 
@@ -90,7 +90,7 @@ private:
 	// Since instances are created by calling the static function create(), the
 	// constructor can be private.
 	explicit SwitchStmt(ShPtr<Expression> controlExpr,
-		Address a = Address::getUndef);
+		Address a = Address::Undefined);
 
 private:
 	/// List of `case` clauses.

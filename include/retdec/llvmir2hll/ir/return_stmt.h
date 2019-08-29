@@ -25,7 +25,7 @@ class Visitor;
 class ReturnStmt final: public Statement {
 public:
 	static ShPtr<ReturnStmt> create(ShPtr<Expression> retVal = nullptr,
-		ShPtr<Statement> succ = nullptr, Address a = Address::getUndef);
+		ShPtr<Statement> succ = nullptr, Address a = Address::Undefined);
 
 	virtual ~ReturnStmt() override;
 
@@ -53,7 +53,7 @@ private:
 	// Since instances are created by calling the static function create(), the
 	// constructor can be private.
 	explicit ReturnStmt(ShPtr<Expression> retVal = nullptr,
-		Address a = Address::getUndef);
+		Address a = Address::Undefined);
 
 private:
 	/// Return value.

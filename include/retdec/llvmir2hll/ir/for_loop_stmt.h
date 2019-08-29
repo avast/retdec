@@ -28,7 +28,7 @@ public:
 	static ShPtr<ForLoopStmt> create(ShPtr<Variable> indVar, ShPtr<Expression> startValue,
 		ShPtr<Expression> endCond, ShPtr<Expression> step,
 		ShPtr<Statement> body, ShPtr<Statement> succ = nullptr,
-		Address a = Address::getUndef);
+		Address a = Address::Undefined);
 
 	virtual ~ForLoopStmt() override;
 

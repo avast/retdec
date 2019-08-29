@@ -28,7 +28,7 @@ public:
 	static ShPtr<VarDefStmt> create(ShPtr<Variable> var,
 		ShPtr<Expression> init = nullptr,
 		ShPtr<Statement> succ = nullptr,
-		Address a = Address::getUndef);
+		Address a = Address::Undefined);
 
 	virtual ~VarDefStmt() override;
 
@@ -60,7 +60,7 @@ private:
 	// Since instances are created by calling the static function create(), the
 	// constructor can be private.
 	explicit VarDefStmt(ShPtr<Variable> var, ShPtr<Expression> init = nullptr,
-		Address a = Address::getUndef);
+		Address a = Address::Undefined);
 
 private:
 	/// Variable.

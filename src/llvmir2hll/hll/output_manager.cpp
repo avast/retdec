@@ -44,7 +44,7 @@ void OutputManager::operatorX(
     {
         space(" ", addr);
         // Reset so that it doesn't get used again in later tokens.
-        addr = Address::getUndef;
+        addr = Address::Undefined;
     }
     operatorX(op, addr);
     if (spaceAfter)
@@ -62,7 +62,7 @@ void OutputManager::comment(
     {
         space(indent, addr);
         // Reset so that it doesn't get used again in later tokens.
-        addr = Address::getUndef;
+        addr = Address::Undefined;
     }
     comment(c, addr);
 }
@@ -86,7 +86,7 @@ void OutputManager::includeLine(
     {
         space(indent, addr);
         // Reset so that it doesn't get used again in later tokens.
-        addr = Address::getUndef;
+        addr = Address::Undefined;
     }
     preprocessor("#include", addr);
     space();
@@ -105,7 +105,7 @@ void OutputManager::typedefLine(
     {
         space(indent, addr);
         // Reset so that it doesn't get used again in later tokens.
-        addr = Address::getUndef;
+        addr = Address::Undefined;
     }
     keyword("typedef");
     space();

@@ -44,7 +44,7 @@ class Address
 		friend std::ostream& operator<< (std::ostream &out, const Address &a);
 
 	public:
-		static const uint64_t getUndef;
+		static const uint64_t Undefined;
 
 	private:
 		uint64_t address;

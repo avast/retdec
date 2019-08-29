@@ -28,7 +28,7 @@ class Visitor;
 class Variable final: public Expression {
 public:
 	static ShPtr<Variable> create(const std::string &name, ShPtr<Type> type,
-		Address a = Address::getUndef);
+		Address a = Address::Undefined);
 
 	virtual ~Variable() override;
 
@@ -62,7 +62,7 @@ private:
 	// Since instances are created by calling the static function create(), the
 	// constructor can be private.
 	Variable(const std::string &name, ShPtr<Type> type,
-		Address a = Address::getUndef);
+		Address a = Address::Undefined);
 
 private:
 	/// Initial name of the variable.

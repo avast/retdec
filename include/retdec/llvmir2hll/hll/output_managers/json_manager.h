@@ -32,35 +32,35 @@ class JsonOutputManager : public OutputManager
         bool isHumanReadable() const;
 
     public:
-        virtual void newLine(Address a = Address::getUndef) override;
-        virtual void space(const std::string& space = " ", Address a = Address::getUndef) override;
-        virtual void punctuation(char p, Address a = Address::getUndef) override;
-        virtual void operatorX(const std::string& op, Address a = Address::getUndef) override;
-        virtual void variableId(const std::string& id, Address a = Address::getUndef) override;
-        virtual void memberId(const std::string& id, Address a = Address::getUndef) override;
-        virtual void labelId(const std::string& id, Address a = Address::getUndef) override;
-        virtual void functionId(const std::string& id, Address a = Address::getUndef) override;
-        virtual void parameterId(const std::string& id, Address a = Address::getUndef) override;
-        virtual void keyword(const std::string& k, Address a = Address::getUndef) override;
-        virtual void dataType(const std::string& t, Address a = Address::getUndef) override;
-        virtual void preprocessor(const std::string& p, Address a = Address::getUndef) override;
-        virtual void include(const std::string& i, Address a = Address::getUndef) override;
-        virtual void constantBool(const std::string& c, Address a = Address::getUndef) override;
-        virtual void constantInt(const std::string& c, Address a = Address::getUndef) override;
-        virtual void constantFloat(const std::string& c, Address a = Address::getUndef) override;
-        virtual void constantString(const std::string& c, Address a = Address::getUndef) override;
-        virtual void constantSymbol(const std::string& c, Address a = Address::getUndef) override;
-        virtual void constantPointer(const std::string& c, Address a = Address::getUndef) override;
-        virtual void comment(const std::string& comment, Address a = Address::getUndef) override;
+        virtual void newLine(Address a = Address::Undefined) override;
+        virtual void space(const std::string& space = " ", Address a = Address::Undefined) override;
+        virtual void punctuation(char p, Address a = Address::Undefined) override;
+        virtual void operatorX(const std::string& op, Address a = Address::Undefined) override;
+        virtual void variableId(const std::string& id, Address a = Address::Undefined) override;
+        virtual void memberId(const std::string& id, Address a = Address::Undefined) override;
+        virtual void labelId(const std::string& id, Address a = Address::Undefined) override;
+        virtual void functionId(const std::string& id, Address a = Address::Undefined) override;
+        virtual void parameterId(const std::string& id, Address a = Address::Undefined) override;
+        virtual void keyword(const std::string& k, Address a = Address::Undefined) override;
+        virtual void dataType(const std::string& t, Address a = Address::Undefined) override;
+        virtual void preprocessor(const std::string& p, Address a = Address::Undefined) override;
+        virtual void include(const std::string& i, Address a = Address::Undefined) override;
+        virtual void constantBool(const std::string& c, Address a = Address::Undefined) override;
+        virtual void constantInt(const std::string& c, Address a = Address::Undefined) override;
+        virtual void constantFloat(const std::string& c, Address a = Address::Undefined) override;
+        virtual void constantString(const std::string& c, Address a = Address::Undefined) override;
+        virtual void constantSymbol(const std::string& c, Address a = Address::Undefined) override;
+        virtual void constantPointer(const std::string& c, Address a = Address::Undefined) override;
+        virtual void comment(const std::string& comment, Address a = Address::Undefined) override;
 
 	public:
-		virtual void commentModifier(Address a = Address::getUndef) override;
+		virtual void commentModifier(Address a = Address::Undefined) override;
 
     private:
         Json::Value jsonToken(
             const std::string& k,
             const std::string& v,
-            Address a = Address::getUndef) const;
+            Address a = Address::Undefined) const;
 
     private:
         llvm::raw_ostream& _out;

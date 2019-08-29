@@ -22,7 +22,7 @@ class Visitor;
 */
 class ContinueStmt final: public Statement {
 public:
-	static ShPtr<ContinueStmt> create(Address a = Address::getUndef);
+	static ShPtr<ContinueStmt> create(Address a = Address::Undefined);
 
 	virtual ~ContinueStmt() override;
 
@@ -40,7 +40,7 @@ public:
 private:
 	// Since instances are created by calling the static function create(), the
 	// constructor can be private.
-	ContinueStmt(Address a = Address::getUndef);
+	ContinueStmt(Address a = Address::Undefined);
 };
 
 } // namespace llvmir2hll

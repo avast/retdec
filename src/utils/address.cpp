@@ -22,10 +22,10 @@ namespace utils {
 //=============================================================================
 //
 
-const uint64_t Address::getUndef = ULLONG_MAX;
+const uint64_t Address::Undefined = ULLONG_MAX;
 
 Address::Address() :
-		address(Address::getUndef)
+		address(Address::Undefined)
 {
 }
 
@@ -35,7 +35,7 @@ Address::Address(uint64_t a) :
 }
 
 Address::Address(const std::string &a) :
-		address(Address::getUndef)
+		address(Address::Undefined)
 {
 	try
 	{
@@ -110,7 +110,7 @@ Address& Address::operator|=(const Address& rhs)
 
 bool Address::isUndefined() const
 {
-	return address == Address::getUndef;
+	return address == Address::Undefined;
 }
 
 bool Address::isDefined() const
@@ -145,7 +145,7 @@ std::ostream& operator<<(std::ostream &out, const Address &a)
 	if (a.isDefined())
 		return out << a.toHexPrefixString();
 	else
-		return out << "UNDEFINED";
+		return out << "Undefined";
 }
 
 //
@@ -158,7 +158,7 @@ AddressRange::AddressRange()
 {
 }
 
-AddressRange::AddressRange(Address f) : Range<Address>(f, Address::getUndef)
+AddressRange::AddressRange(Address f) : Range<Address>(f, Address::Undefined)
 {
 }
 

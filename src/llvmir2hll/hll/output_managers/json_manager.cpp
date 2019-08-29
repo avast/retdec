@@ -99,7 +99,7 @@ void JsonOutputManager::newLine(Address a)
             _runningComment.clear();
         }
         _commentModifierOn = false;
-        _commentModifierAddr = Address::getUndef;
+        _commentModifierAddr = Address::Undefined;
     }
 
     _tokens.append(jsonToken(JSON_TOKEN_NEWLINE, "\n", a));

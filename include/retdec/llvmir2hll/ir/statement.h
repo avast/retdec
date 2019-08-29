@@ -136,7 +136,7 @@ public:
 	static ShPtr<Statement> getLastStatement(ShPtr<Statement> stmts);
 
 protected:
-	Statement(Address a = Address::getUndef);
+	Statement(Address a = Address::Undefined);
 
 protected:
 	/// Successor statement.

@@ -24,7 +24,7 @@ class Visitor;
 class GotoStmt final: public Statement {
 public:
 	static ShPtr<GotoStmt> create(ShPtr<Statement> target,
-		Address a = Address::getUndef);
+		Address a = Address::Undefined);
 
 	virtual ~GotoStmt() override;
 
@@ -51,7 +51,7 @@ public:
 private:
 	// Since instances are created by calling the static function create(), the
 	// constructor can be private.
-	explicit GotoStmt(ShPtr<Statement> target, Address a = Address::getUndef);
+	explicit GotoStmt(ShPtr<Statement> target, Address a = Address::Undefined);
 
 private:
 	/// Jump target.

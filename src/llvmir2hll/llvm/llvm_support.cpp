@@ -314,7 +314,7 @@ Address LLVMSupport::getInstAddress(const llvm::Instruction *i) {
 		return CI->getZExtValue();
 	}
 
-	return Address::getUndef;
+	return Address::Undefined;
 }
 
 } // namespace llvmir2hll

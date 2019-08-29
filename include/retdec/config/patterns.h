@@ -27,27 +27,27 @@ class Pattern
 				Match();
 				static Match unknown(
 						const retdec::utils::Address& offset
-							= retdec::utils::Address::getUndef,
+							= retdec::utils::Address::Undefined,
 						const retdec::utils::Address& address
-							= retdec::utils::Address::getUndef,
+							= retdec::utils::Address::Undefined,
 						retdec::utils::Maybe<unsigned> size
 							= retdec::utils::Maybe<unsigned>(),
 						retdec::utils::Maybe<unsigned> entrySize
 							= retdec::utils::Maybe<unsigned>());
 				static Match integral(
 						const retdec::utils::Address& offset
-							= retdec::utils::Address::getUndef,
+							= retdec::utils::Address::Undefined,
 						const retdec::utils::Address& address
-							= retdec::utils::Address::getUndef,
+							= retdec::utils::Address::Undefined,
 						retdec::utils::Maybe<unsigned> size
 							= retdec::utils::Maybe<unsigned>(),
 						retdec::utils::Maybe<unsigned> entrySize
 							= retdec::utils::Maybe<unsigned>());
 				static Match floatingPoint(
 						const retdec::utils::Address& offset
-							= retdec::utils::Address::getUndef,
+							= retdec::utils::Address::Undefined,
 						const retdec::utils::Address& address
-							= retdec::utils::Address::getUndef,
+							= retdec::utils::Address::Undefined,
 						retdec::utils::Maybe<unsigned> size
 							= retdec::utils::Maybe<unsigned>(),
 						retdec::utils::Maybe<unsigned> entrySize
