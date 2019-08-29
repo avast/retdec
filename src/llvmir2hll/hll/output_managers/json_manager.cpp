@@ -242,6 +242,10 @@ Json::Value JsonOutputManager::jsonToken(
     {
         r[JSON_KEY_ADDRESS] = a.toHexPrefixString();
     }
+    else if (a.isUnknown())
+    {
+        r[JSON_KEY_ADDRESS] = "";
+    }
 	return r;
 }
 
