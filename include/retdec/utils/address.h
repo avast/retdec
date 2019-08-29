@@ -34,8 +34,44 @@ class Address
 		Address& operator-=(const Address& rhs);
 		Address& operator|=(const Address& rhs);
 
-		bool isUndefined() const;
+		/**
+		 * \return Is address defined and known?
+		 */
 		bool isDefined() const;
+		/**
+		 * \return !isDefined().
+		 */
+		bool isUndefined() const;
+		/**
+		 * Special type of undefined value.
+		 * I.e.
+		 *   - Unknown value is undefined.
+		 *   - Undefined value is not unknown.
+		 *
+		 * This was added later than the (un)defined mechanism.
+		 * Because Unknown value is not a valid Address value that we could work
+		 * with, and we didn't want to re-examine all is(Un)Defined() uses when
+		 * this was added, we designed it so that is(Un)Defined() answers the
+		 * same for both Undefined and Unknown values.
+		 * But using this method, it is now possible to test if value is Unknown
+		 * and distinguish this special case from Undefined.
+		 *
+		 * Example use:
+		 *   method(Address = Address::Undefined);
+		 *   The method (whatever it does) offers a possibility to pass
+		 *   an address. If the possibility is not taken, Undefined address
+		 *   is passed as default.
+		 *   But what if we want to say:
+		 *     "In this case, we know that there is no address."?
+		 *   We need to distinguish the cases when address was not passed
+		 *   at all from cases when we needed to pass an Unknown address.
+		 *
+		 * All existing is(Un)Defined() uses work as before - before adding
+		 * Unknown value.
+		 * But new code can take advantage of this method and test the special
+		 * case if it is interested.
+		 */
+		bool isUnknown() const;
 
 		uint64_t getValue() const;
 
@@ -44,10 +80,14 @@ class Address
 		friend std::ostream& operator<< (std::ostream &out, const Address &a);
 
 	public:
+		/// The default value. See isDefined(), isUndefined(), and isUnknown().
 		static const uint64_t Undefined;
+		/// Special case of Undefined.
+		/// See isDefined(), isUndefined(), and isUnknown() for explanation.
+		static const uint64_t Unknown;
 
 	private:
-		uint64_t address;
+		uint64_t address = Address::Undefined;
 };
 
 /**

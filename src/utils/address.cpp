@@ -23,9 +23,9 @@ namespace utils {
 //
 
 const uint64_t Address::Undefined = ULLONG_MAX;
+const uint64_t Address::Unknown   = ULLONG_MAX - 1;
 
-Address::Address() :
-		address(Address::Undefined)
+Address::Address()
 {
 }
 
@@ -108,19 +108,24 @@ Address& Address::operator|=(const Address& rhs)
 	return *this;
 }
 
-bool Address::isUndefined() const
-{
-	return address == Address::Undefined;
-}
-
 bool Address::isDefined() const
 {
-	return !isUndefined();
+	return address != Address::Undefined && address != Address::Unknown;
+}
+
+bool Address::isUndefined() const
+{
+	return !isDefined();
+}
+
+bool Address::isUnknown() const
+{
+	return address == Address:: Unknown;
 }
 
 uint64_t Address::getValue() const
 {
-	assert( isDefined() );
+	assert(isDefined());
 	return address;
 }
 
