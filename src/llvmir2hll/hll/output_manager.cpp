@@ -34,22 +34,61 @@ const std::string& OutputManager::getOutputLanguage() const
     return _outLanguage;
 }
 
+void OutputManager::operatorX(
+    const std::string& op,
+    bool spaceBefore,
+    bool spaceAfter,
+    Address addr)
+{
+    if (spaceBefore)
+    {
+        space(" ", addr);
+        // Reset so that it doesn't get used again in later tokens.
+        addr = Address::getUndef;
+    }
+    operatorX(op, addr);
+    if (spaceAfter)
+    {
+        space();
+    }
+}
+
+void OutputManager::comment(
+    const std::string& c,
+    const std::string& indent,
+    Address addr)
+{
+    if (!indent.empty())
+    {
+        space(indent, addr);
+        // Reset so that it doesn't get used again in later tokens.
+        addr = Address::getUndef;
+    }
+    comment(c, addr);
+}
+
 void OutputManager::commentLine(
     const std::string& c,
     const std::string& indent,
     Address addr)
 {
-    comment(c);
+    comment(c, indent, addr);
     newLine();
 }
 
 void OutputManager::includeLine(
     const std::string& header,
     const std::string& indent,
-    const std::string& c)
+    const std::string& c,
+    Address addr)
 {
-    space(indent);
-    preprocessor("#include");
+    if (!indent.empty())
+    {
+        space(indent, addr);
+        // Reset so that it doesn't get used again in later tokens.
+        addr = Address::getUndef;
+    }
+    preprocessor("#include", addr);
     space();
     include(header);
     if (!c.empty()) comment(c, " ");
@@ -59,9 +98,15 @@ void OutputManager::includeLine(
 void OutputManager::typedefLine(
     const std::string& indent,
     const std::string& t1,
-    const std::string& t2)
+    const std::string& t2,
+    Address addr)
 {
-    space(indent);
+    if (!indent.empty())
+    {
+        space(indent, addr);
+        // Reset so that it doesn't get used again in later tokens.
+        addr = Address::getUndef;
+    }
     keyword("typedef");
     space();
     dataType(t1);

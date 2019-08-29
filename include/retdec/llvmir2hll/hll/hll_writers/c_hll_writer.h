@@ -31,7 +31,9 @@ class StructType;
 */
 class CHLLWriter: public HLLWriter {
 public:
-	static ShPtr<HLLWriter> create(llvm::raw_ostream &out);
+	static ShPtr<HLLWriter> create(
+		llvm::raw_ostream &out,
+		const std::string& outputFormat = "");
 
 	virtual std::string getId() const override;
 
@@ -45,7 +47,9 @@ private:
 	using StructTypeNameMap = std::map<ShPtr<StructType>, std::string>;
 
 private:
-	CHLLWriter(UPtr<OutputManager> outM);
+	CHLLWriter(
+		llvm::raw_ostream &out,
+		const std::string& outputFormat = "");
 
 	virtual std::string getCommentPrefix() override;
 	virtual bool emitFileHeader() override;

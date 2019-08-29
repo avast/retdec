@@ -242,8 +242,10 @@ bool hasOnlyUninitializedConstArrayInits(ShPtr<ConstStruct> constant) {
 *
 * See create() for the description of parameters.
 */
-CHLLWriter::CHLLWriter(UPtr<OutputManager> outM):
-	HLLWriter(std::move(outM)), unnamedStructCounter(0), emittingGlobalVarDefs(false),
+CHLLWriter::CHLLWriter(llvm::raw_ostream &o, const std::string& outputFormat):
+	HLLWriter(o, outputFormat),
+	unnamedStructCounter(0),
+	emittingGlobalVarDefs(false),
 	optionEmitFunctionPrototypesForNonLibraryFuncs(false)
 {
 	out->setCommentPrefix(getCommentPrefix());
@@ -253,11 +255,12 @@ CHLLWriter::CHLLWriter(UPtr<OutputManager> outM):
 * @brief Creates a new C writer.
 *
 * @param[in] out Output stream into which the HLL code will be emitted.
+* @param[in] outputFormat
 */
-ShPtr<HLLWriter> CHLLWriter::create(llvm::raw_ostream &out) {
-	UPtr<OutputManager> om(new PlainOutputManager(out));
-	// UPtr<OutputManager> om(new JsonOutputManager(out));
-	return ShPtr<HLLWriter>(new CHLLWriter(std::move(om)));
+ShPtr<HLLWriter> CHLLWriter::create(
+		llvm::raw_ostream &out,
+		const std::string& outputFormat) {
+	return ShPtr<HLLWriter>(new CHLLWriter(out, outputFormat));
 }
 
 std::string CHLLWriter::getId() const {
@@ -493,7 +496,8 @@ bool CHLLWriter::emitExternalFunction(ShPtr<Function> func) {
 	if (!funcDeclString.empty()) {
 			out->commentLine(funcDeclString, getCurrentIndent());
 	} else {
-			out->commentModifier(getCurrentIndent());
+			out->space(getCurrentIndent());
+			out->commentModifier();
 			emitFunctionPrototype(func);
 	}
 	return true;

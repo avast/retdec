@@ -12,41 +12,53 @@ namespace llvmir2hll {
 
 namespace {
 
-using JsonKeyPair = const JsonOutputManager::JsonKeyPair;
+const std::string JSON_KEY_LANGUAGE        = "language";
+const std::string JSON_KEY_ADDRESS         = "addr";
+const std::string JSON_KEY_TOKENS          = "tokens";
+const std::string JSON_KEY_KIND            = "kind";
+const std::string JSON_KEY_VALUE           = "val";
 
-JsonKeyPair JSON_KEY_LANGUAGE        = {"l", "language"};
-JsonKeyPair JSON_KEY_LINES           = {"ls", "lines"};
-JsonKeyPair JSON_KEY_ADDRESS         = {"a", "addr"};
-JsonKeyPair JSON_KEY_TOKENS          = {"ts", "tokens"};
-JsonKeyPair JSON_KEY_KIND            = {"k", "kind"};
-JsonKeyPair JSON_KEY_VALUE           = {"v", "value"};
+const std::string JSON_TOKEN_NEWLINE       = "nl";
+const std::string JSON_TOKEN_SPACE         = "ws";
+const std::string JSON_TOKEN_PUNCTUATION   = "punc";
+const std::string JSON_TOKEN_OPERATOR      = "op";
+const std::string JSON_TOKEN_ID_VAR        = "i_var";
+const std::string JSON_TOKEN_ID_MEMBER     = "i_mem";
+const std::string JSON_TOKEN_ID_LABEL      = "i_lab";
+const std::string JSON_TOKEN_ID_FUNCTION   = "i_fnc";
+const std::string JSON_TOKEN_ID_PARAMETER  = "i_arg";
+const std::string JSON_TOKEN_KEYWORD       = "keyw";
+const std::string JSON_TOKEN_DATA_TYPE     = "type";
+const std::string JSON_TOKEN_PREPROCESSOR  = "preproc";
+const std::string JSON_TOKEN_INCLUDE       = "inc";
+const std::string JSON_TOKEN_CONST_BOOL    = "c_bool";
+const std::string JSON_TOKEN_CONST_INT     = "c_int";
+const std::string JSON_TOKEN_CONST_FLOAT   = "c_fp";
+const std::string JSON_TOKEN_CONST_STRING  = "c_str";
+const std::string JSON_TOKEN_CONST_SYMBOL  = "c_sym";
+const std::string JSON_TOKEN_CONST_POINTER = "c_ptr";
+const std::string JSON_TOKEN_COMMENT       = "cmnt";
 
-JsonKeyPair JSON_TOKEN_SPACE         = {"s", "space"};
-JsonKeyPair JSON_TOKEN_PUNCTUATION   = {"p", "punctuation"};
-JsonKeyPair JSON_TOKEN_OPERATOR      = {"o", "operator"};
-JsonKeyPair JSON_TOKEN_ID_VAR        = {"iv", "id_var"};
-JsonKeyPair JSON_TOKEN_ID_MEMBER     = {"im", "id_member"};
-JsonKeyPair JSON_TOKEN_ID_LABEL      = {"il", "id_label"};
-JsonKeyPair JSON_TOKEN_ID_FUNCTION   = {"if", "id_function"};
-JsonKeyPair JSON_TOKEN_ID_PARAMETER  = {"ip", "id_param"};
-JsonKeyPair JSON_TOKEN_KEYWORD       = {"k", "keyword"};
-JsonKeyPair JSON_TOKEN_DATA_TYPE     = {"dt", "data_type"};
-JsonKeyPair JSON_TOKEN_PREPROCESSOR  = {"r", "preprocessor"};
-JsonKeyPair JSON_TOKEN_INCLUDE       = {"i", "include"};
-JsonKeyPair JSON_TOKEN_CONST_BOOL    = {"cb", "const_bool"};
-JsonKeyPair JSON_TOKEN_CONST_INT     = {"ci", "const_int"};
-JsonKeyPair JSON_TOKEN_CONST_FLOAT   = {"cf", "const_f"};
-JsonKeyPair JSON_TOKEN_CONST_STRING  = {"cs", "const_string"};
-JsonKeyPair JSON_TOKEN_CONST_SYMBOL  = {"cy", "const_symbol"};
-JsonKeyPair JSON_TOKEN_CONST_POINTER = {"cp", "const_pointer"};
-JsonKeyPair JSON_TOKEN_COMMENT       = {"c", "comment"};
+/**
+ * We don't like macros, but we potentially need to return from methods calling
+ * this helper routine, so we use it here anyway.
+ * \val Anything that can be concatenated (+) to a std::string.
+ */
+#define HANDLE_COMMENT_MODIFIER(val)                 \
+{                                                    \
+    if (_commentModifierOn)                          \
+    {                                                \
+        _runningComment += val;                      \
+        return;                                      \
+    }                                                \
+}
 
 } // anonymous namespace
 
-JsonOutputManager::JsonOutputManager(llvm::raw_ostream& out) :
+JsonOutputManager::JsonOutputManager(llvm::raw_ostream& out, bool humanReadable) :
         _out(out),
-        _lines(Json::arrayValue),
-        _line(Json::arrayValue)
+        _humanReadable(humanReadable),
+        _tokens(Json::arrayValue)
 {
 
 }
@@ -62,8 +74,8 @@ JsonOutputManager::~JsonOutputManager()
     }
 
     Json::Value root;
-    root[getJsonKey(JSON_KEY_LANGUAGE)] = getOutputLanguage();
-    root[getJsonKey(JSON_KEY_LINES)] = _lines;
+    root[JSON_KEY_LANGUAGE] = getOutputLanguage();
+    root[JSON_KEY_TOKENS] = _tokens;
     _out << writeString(builder, root);
 }
 
@@ -77,148 +89,159 @@ bool JsonOutputManager::isHumanReadable() const
     return _humanReadable;
 }
 
-void JsonOutputManager::space(const std::string& space)
+void JsonOutputManager::newLine(Address a)
 {
-    _line.append(jsonToken(JSON_TOKEN_SPACE, space));
-}
-
-void JsonOutputManager::punctuation(char p)
-{
-    _line.append(jsonToken(JSON_TOKEN_PUNCTUATION, std::string(1, p)));
-}
-
-void JsonOutputManager::operatorX(
-    const std::string& op,
-    bool spaceBefore,
-    bool spaceAfter)
-{
-    if (spaceBefore)
+    if (_commentModifierOn)
     {
-        space();
+        if (!_runningComment.empty())
+        {
+            comment(_runningComment, _commentModifierAddr);
+            _runningComment.clear();
+        }
+        _commentModifierOn = false;
+        _commentModifierAddr = Address::getUndef;
     }
-    _line.append(jsonToken(JSON_TOKEN_OPERATOR, op));
-    if (spaceAfter)
-    {
-        space();
-    }
+
+    _tokens.append(jsonToken(JSON_TOKEN_NEWLINE, "\n", a));
 }
 
-void JsonOutputManager::variableId(const std::string& id)
+void JsonOutputManager::space(const std::string& space, Address a)
 {
-    _line.append(jsonToken(JSON_TOKEN_ID_VAR, id));
+    HANDLE_COMMENT_MODIFIER(space);
+    _tokens.append(jsonToken(JSON_TOKEN_SPACE, space, a));
 }
 
-void JsonOutputManager::memberId(const std::string& id)
+void JsonOutputManager::punctuation(char p, Address a)
 {
-    _line.append(jsonToken(JSON_TOKEN_ID_MEMBER, id));
+    HANDLE_COMMENT_MODIFIER(p);
+    _tokens.append(jsonToken(JSON_TOKEN_PUNCTUATION, std::string(1, p), a));
 }
 
-void JsonOutputManager::labelId(const std::string& id)
+void JsonOutputManager::operatorX(const std::string& op, Address a)
 {
-    _line.append(jsonToken(JSON_TOKEN_ID_LABEL, id));
+    HANDLE_COMMENT_MODIFIER(op);
+    _tokens.append(jsonToken(JSON_TOKEN_OPERATOR, op, a));
 }
 
-void JsonOutputManager::functionId(const std::string& id)
+void JsonOutputManager::variableId(const std::string& id, Address a)
 {
-    _line.append(jsonToken(JSON_TOKEN_ID_FUNCTION, id));
+    HANDLE_COMMENT_MODIFIER(id);
+    _tokens.append(jsonToken(JSON_TOKEN_ID_VAR, id, a));
 }
 
-void JsonOutputManager::parameterId(const std::string& id)
+void JsonOutputManager::memberId(const std::string& id, Address a)
 {
-    _line.append(jsonToken(JSON_TOKEN_ID_PARAMETER, id));
+    HANDLE_COMMENT_MODIFIER(id);
+    _tokens.append(jsonToken(JSON_TOKEN_ID_MEMBER, id, a));
 }
 
-void JsonOutputManager::keyword(const std::string& k)
-
+void JsonOutputManager::labelId(const std::string& id, Address a)
 {
-    _line.append(jsonToken(JSON_TOKEN_KEYWORD, k));
+    HANDLE_COMMENT_MODIFIER(id);
+    _tokens.append(jsonToken(JSON_TOKEN_ID_LABEL, id, a));
 }
 
-void JsonOutputManager::dataType(const std::string& t)
+void JsonOutputManager::functionId(const std::string& id, Address a)
 {
-    _line.append(jsonToken(JSON_TOKEN_DATA_TYPE, t));
+    HANDLE_COMMENT_MODIFIER(id);
+    _tokens.append(jsonToken(JSON_TOKEN_ID_FUNCTION, id, a));
 }
 
-void JsonOutputManager::preprocessor(const std::string& p)
+void JsonOutputManager::parameterId(const std::string& id, Address a)
 {
-    _line.append(jsonToken(JSON_TOKEN_PREPROCESSOR, p));
+    HANDLE_COMMENT_MODIFIER(id);
+    _tokens.append(jsonToken(JSON_TOKEN_ID_PARAMETER, id, a));
 }
 
-void JsonOutputManager::include(const std::string& i)
+void JsonOutputManager::keyword(const std::string& k, Address a)
 {
-    _line.append(jsonToken(JSON_TOKEN_INCLUDE, "<" + i + ">"));
+    HANDLE_COMMENT_MODIFIER(k);
+    _tokens.append(jsonToken(JSON_TOKEN_KEYWORD, k, a));
 }
 
-void JsonOutputManager::constantBool(const std::string& c)
+void JsonOutputManager::dataType(const std::string& t, Address a)
 {
-    _line.append(jsonToken(JSON_TOKEN_CONST_BOOL, c));
+    HANDLE_COMMENT_MODIFIER(t);
+    _tokens.append(jsonToken(JSON_TOKEN_DATA_TYPE, t, a));
 }
 
-void JsonOutputManager::constantInt(const std::string& c)
+void JsonOutputManager::preprocessor(const std::string& p, Address a)
 {
-    _line.append(jsonToken(JSON_TOKEN_CONST_INT, c));
+    HANDLE_COMMENT_MODIFIER(p);
+    _tokens.append(jsonToken(JSON_TOKEN_PREPROCESSOR, p, a));
 }
 
-void JsonOutputManager::constantFloat(const std::string& c)
+void JsonOutputManager::include(const std::string& i, Address a)
 {
-    _line.append(jsonToken(JSON_TOKEN_CONST_FLOAT, c));
+    HANDLE_COMMENT_MODIFIER(i);
+    _tokens.append(jsonToken(JSON_TOKEN_INCLUDE, "<" + i + ">", a));
 }
 
-void JsonOutputManager::constantString(const std::string& c)
+void JsonOutputManager::constantBool(const std::string& c, Address a)
 {
-    _line.append(jsonToken(JSON_TOKEN_CONST_STRING, c));
+    HANDLE_COMMENT_MODIFIER(c);
+    _tokens.append(jsonToken(JSON_TOKEN_CONST_BOOL, c, a));
 }
 
-void JsonOutputManager::constantSymbol(const std::string& c)
+void JsonOutputManager::constantInt(const std::string& c, Address a)
 {
-    _line.append(jsonToken(JSON_TOKEN_CONST_SYMBOL, c));
+    HANDLE_COMMENT_MODIFIER(c);
+    _tokens.append(jsonToken(JSON_TOKEN_CONST_INT, c, a));
 }
 
-void JsonOutputManager::constantPointer(const std::string& c)
+void JsonOutputManager::constantFloat(const std::string& c, Address a)
 {
-    _line.append(jsonToken(JSON_TOKEN_CONST_POINTER, c));
+    HANDLE_COMMENT_MODIFIER(c);
+    _tokens.append(jsonToken(JSON_TOKEN_CONST_FLOAT, c, a));
 }
 
-void JsonOutputManager::comment(
-    const std::string& c,
-    const std::string& indent)
+void JsonOutputManager::constantString(const std::string& c, Address a)
 {
-    std::stringstream ss;
-    ss << indent << getCommentPrefix();
+    HANDLE_COMMENT_MODIFIER(c);
+    _tokens.append(jsonToken(JSON_TOKEN_CONST_STRING, c, a));
+}
+
+void JsonOutputManager::constantSymbol(const std::string& c, Address a)
+{
+    HANDLE_COMMENT_MODIFIER(c);
+    _tokens.append(jsonToken(JSON_TOKEN_CONST_SYMBOL, c, a));
+}
+
+void JsonOutputManager::constantPointer(const std::string& c, Address a)
+{
+    HANDLE_COMMENT_MODIFIER(c);
+    _tokens.append(jsonToken(JSON_TOKEN_CONST_POINTER, c, a));
+}
+
+void JsonOutputManager::comment(const std::string& c, Address a)
+{
+    HANDLE_COMMENT_MODIFIER(" " + c);
+    std::string str = getCommentPrefix();
     if (!c.empty())
     {
-        ss << " " << utils::replaceCharsWithStrings(c, '\n', " ");
+        str += " " + utils::replaceCharsWithStrings(c, '\n', " ");
     }
-    _line.append(jsonToken(JSON_TOKEN_COMMENT, ss.str()));
+    _tokens.append(jsonToken(JSON_TOKEN_COMMENT, str, a));
 }
 
-void JsonOutputManager::newLine(Address addr)
+void JsonOutputManager::commentModifier(Address a)
 {
-    Json::Value l;
-    l[getJsonKey(JSON_KEY_ADDRESS)] = utils::toHexString(addr);
-    l[getJsonKey(JSON_KEY_TOKENS)] = _line;
-    _lines.append(l);
-    _line = Json::Value(Json::arrayValue);
-}
-
-void JsonOutputManager::commentModifier(const std::string& indent)
-{
-    // TODO
-}
-
-const std::string& JsonOutputManager::getJsonKey(
-        const JsonOutputManager::JsonKeyPair& k) const
-{
-    return isHumanReadable() ? k.humanKey : k.defaultKey;
+    _commentModifierOn = true;
+    _commentModifierAddr = a;
 }
 
 Json::Value JsonOutputManager::jsonToken(
-        const JsonOutputManager::JsonKeyPair& k,
-        const std::string& v) const
+        const std::string& k,
+        const std::string& v,
+        Address a) const
 {
 	Json::Value r;
-	r[getJsonKey(JSON_KEY_KIND)] = getJsonKey(k);
-	r[getJsonKey(JSON_KEY_VALUE)] = v;
+	r[JSON_KEY_KIND] = k;
+    r[JSON_KEY_VALUE] = v;
+    if (a.isDefined())
+    {
+        r[JSON_KEY_ADDRESS] = a.toHexPrefixString();
+    }
 	return r;
 }
 

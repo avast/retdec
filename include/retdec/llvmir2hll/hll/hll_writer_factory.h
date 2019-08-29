@@ -33,7 +33,7 @@ using HLLWriterFactory = Singleton<
 		// Type of the object's identifier.
 		std::string,
 		// Type of a function used to create instances.
-		ShPtr<HLLWriter> (*)(llvm::raw_ostream &)
+		ShPtr<HLLWriter> (*)(llvm::raw_ostream &, const std::string&)
 	>
 >;
 

@@ -58,7 +58,7 @@ public:
 	/// @}
 
 protected:
-	HLLWriter(UPtr<OutputManager> out);
+	HLLWriter(llvm::raw_ostream &out, const std::string& outputFormat = "");
 
 	/// @name Commenting
 	/// @{

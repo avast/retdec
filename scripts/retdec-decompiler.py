@@ -59,8 +59,8 @@ def parse_args(args):
                         dest='hll',
                         default='c',
                         metavar='LANGUAGE',
-                        choices=['c', 'py'],
-                        help='Target high-level language [c|py].')
+                        choices=['c'],
+                        help='Target high-level language [c].')
 
     parser.add_argument('-m', '--mode',
                         dest='mode',
@@ -73,6 +73,13 @@ def parse_args(args):
                         dest='output',
                         metavar='FILE',
                         help='Output file.')
+
+    parser.add_argument('-f', '--output-format',
+                        dest='output_format',
+                        default='plain',
+                        metavar='OUTPUT_FORMAT',
+                        choices=['plain', 'json', 'json-human'],
+                        help='Output format [plain|json|json-human].')
 
     parser.add_argument('-p', '--pdb',
                         dest='pdb',
@@ -511,7 +518,10 @@ class Decompiler:
         if self.args.output:
             self.output_file = self.args.output
         else:
-            self.output_file = self.input_file + '.' + self.args.hll
+            if self.args.output_format == 'json' or self.args.output_format == 'json-human':
+                self.output_file += self.input_file + '.json'
+            else:
+                self.output_file = self.input_file + '.' + self.args.hll
 
         # Convert to absolute paths.
         self.input_file = os.path.abspath(self.input_file)
@@ -730,7 +740,7 @@ class Decompiler:
             # Assignment of other used variables.
             name = os.path.splitext(self.output_file)[0]
             self.out_unpacked = name + '-unpacked'
-            self.config_file = name + '.json'
+            self.config_file = name + '.config.json'
 
             if self.config_file != self.args.config_db:
                 utils.remove_file_forced(self.config_file)
@@ -1120,7 +1130,8 @@ class Decompiler:
             self.config_file = self.args.config_db
 
         # Create parameters for the llvmir2hll call.
-        llvmir2hll_params = ['-target-hll=' + self.args.hll, '-var-renamer=' + self.args.backend_var_renamer,
+        llvmir2hll_params = ['-target-hll=' + self.args.hll, '-output-format=' + self.args.output_format,
+                             '-var-renamer=' + self.args.backend_var_renamer,
                              '-var-name-gen=fruit', '-var-name-gen-prefix=',
                              '-call-info-obtainer=' + self.args.backend_call_info_obtainer,
                              '-arithm-expr-evaluator=' + self.args.backend_arithm_expr_evaluator, '-validate-module',

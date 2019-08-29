@@ -21,36 +21,29 @@ class PlainOutputManager : public OutputManager
         virtual ~PlainOutputManager();
 
     public:
-        virtual void space(const std::string& space = " ") override;
-        virtual void punctuation(char p) override;
-        virtual void operatorX(
-            const std::string& op,
-            bool spaceBefore = false,
-            bool spaceAfter = false) override;
-        virtual void variableId(const std::string& id) override;
-        virtual void memberId(const std::string& id) override;
-        virtual void labelId(const std::string& id) override;
-        virtual void functionId(const std::string& id) override;
-        virtual void parameterId(const std::string& id) override;
-        virtual void keyword(const std::string& k) override;
-        virtual void dataType(const std::string& t) override;
-        virtual void preprocessor(const std::string& p) override;
-        virtual void include(const std::string& i) override;
-        virtual void constantBool(const std::string& c) override;
-        virtual void constantInt(const std::string& c) override;
-        virtual void constantFloat(const std::string& c) override;
-        virtual void constantString(const std::string& c) override;
-        virtual void constantSymbol(const std::string& c) override;
-        virtual void constantPointer(const std::string& c) override;
-        virtual void comment(
-            const std::string& comment,
-            const std::string& indent = "");
-
-    public:
-        virtual void newLine(Address addr = Address::getUndef) override;
+        virtual void newLine(Address = Address::getUndef) override;
+        virtual void space(const std::string& space = " ", Address = Address::getUndef) override;
+        virtual void punctuation(char p, Address = Address::getUndef) override;
+        virtual void operatorX(const std::string& op, Address = Address::getUndef) override;
+        virtual void variableId(const std::string& id, Address = Address::getUndef) override;
+        virtual void memberId(const std::string& id, Address = Address::getUndef) override;
+        virtual void labelId(const std::string& id, Address = Address::getUndef) override;
+        virtual void functionId(const std::string& id, Address = Address::getUndef) override;
+        virtual void parameterId(const std::string& id, Address = Address::getUndef) override;
+        virtual void keyword(const std::string& k, Address = Address::getUndef) override;
+        virtual void dataType(const std::string& t, Address = Address::getUndef) override;
+        virtual void preprocessor(const std::string& p, Address = Address::getUndef) override;
+        virtual void include(const std::string& i, Address = Address::getUndef) override;
+        virtual void constantBool(const std::string& c, Address = Address::getUndef) override;
+        virtual void constantInt(const std::string& c, Address = Address::getUndef) override;
+        virtual void constantFloat(const std::string& c, Address = Address::getUndef) override;
+        virtual void constantString(const std::string& c, Address = Address::getUndef) override;
+        virtual void constantSymbol(const std::string& c, Address = Address::getUndef) override;
+        virtual void constantPointer(const std::string& c, Address = Address::getUndef) override;
+        virtual void comment(const std::string& comment, Address = Address::getUndef) override;
 
 	public:
-		virtual void commentModifier(const std::string& indent = "") override;
+		virtual void commentModifier(Address = Address::getUndef) override;
 
     private:
         llvm::raw_ostream& _out;

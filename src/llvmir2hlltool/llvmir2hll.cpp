@@ -106,6 +106,10 @@ cl::opt<std::string> TargetHLL("target-hll",
 	cl::desc("Name of the target HLL (set to 'help' to list all the supported HLLs)."),
 	cl::init("!bad!"));
 
+cl::opt<std::string> OutputFormat("output-format",
+	cl::desc("Output format."),
+	cl::init("plain"));
+
 // We cannot use just -debug because it has been already registered :(.
 cl::opt<bool> Debug("enable-debug",
 	cl::desc("Enables the emission of debugging messages, like information about the current phase."),
@@ -526,7 +530,7 @@ bool Decompiler::initialize(Module &m) {
 	// a private copy constructor, so it needs to be passed by reference.
 	if (Debug) retdec::llvm_support::printSubPhase("creating the used HLL writer [" + TargetHLL + "]");
 	hllWriter = retdec::llvmir2hll::HLLWriterFactory::getInstance().createObject<
-		raw_pwrite_stream &>(TargetHLL, out);
+		raw_pwrite_stream &>(TargetHLL, out, OutputFormat);
 	if (!hllWriter) {
 		printErrorUnsupportedObject<retdec::llvmir2hll::HLLWriterFactory>(
 			"target HLL", "target HLLs");

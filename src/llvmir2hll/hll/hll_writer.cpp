@@ -11,6 +11,8 @@
 #include "retdec/llvmir2hll/hll/bracket_manager.h"
 #include "retdec/llvmir2hll/hll/hll_writer.h"
 #include "retdec/llvmir2hll/hll/output_manager.h"
+#include "retdec/llvmir2hll/hll/output_managers/json_manager.h"
+#include "retdec/llvmir2hll/hll/output_managers/plain_manager.h"
 #include "retdec/llvmir2hll/ir/array_type.h"
 #include "retdec/llvmir2hll/ir/binary_op_expr.h"
 #include "retdec/llvmir2hll/ir/call_expr.h"
@@ -136,10 +138,10 @@ private:
 /**
 * @brief Constructs a new writer.
 *
-* @param[in] out Output into which the HLL code will be emitted.
+* @param[in] o Output into which the HLL code will be emitted.
+* @param[in] outputFormat Output format in which to emit the HLL.
 */
-HLLWriter::HLLWriter(UPtr<OutputManager> out):
-	out(std::move(out)),
+HLLWriter::HLLWriter(llvm::raw_ostream &o, const std::string& outputFormat):
 	emitConstantsInStructuredWay(false),
 	optionEmitDebugComments(true),
 	optionKeepAllBrackets(false),
@@ -148,7 +150,13 @@ HLLWriter::HLLWriter(UPtr<OutputManager> out):
 	currFuncGotoLabelCounter(1),
 	currentIndent(DEFAULT_LEVEL_INDENT)
 {
-
+	if (outputFormat == "json") {
+		out = UPtr<OutputManager>(new JsonOutputManager(o));
+	} else if (outputFormat == "json-human") {
+		out = UPtr<OutputManager>(new JsonOutputManager(o, true));
+	} else {
+		out = UPtr<OutputManager>(new PlainOutputManager(o));
+	}
 }
 
 /**
