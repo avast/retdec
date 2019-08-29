@@ -43,6 +43,7 @@ class PlainOutputManager : public OutputManager
         virtual void comment(const std::string& comment, Address = Address::Undefined) override;
 
 	public:
+        virtual void addressModifier(Address) override;
 		virtual void commentModifier(Address = Address::Undefined) override;
 
     private:

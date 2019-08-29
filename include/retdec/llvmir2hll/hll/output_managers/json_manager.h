@@ -54,6 +54,7 @@ class JsonOutputManager : public OutputManager
         virtual void comment(const std::string& comment, Address a = Address::Undefined) override;
 
 	public:
+        virtual void addressModifier(Address a) override;
 		virtual void commentModifier(Address a = Address::Undefined) override;
 
     private:
@@ -61,6 +62,7 @@ class JsonOutputManager : public OutputManager
             const std::string& k,
             const std::string& v,
             Address a = Address::Undefined) const;
+        void addAddressEntry(Json::Value& val, Address a) const;
 
     private:
         llvm::raw_ostream& _out;

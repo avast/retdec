@@ -224,6 +224,18 @@ void JsonOutputManager::comment(const std::string& c, Address a)
     _tokens.append(jsonToken(JSON_TOKEN_COMMENT, str, a));
 }
 
+void JsonOutputManager::addressModifier(Address a)
+{
+    if (_commentModifierOn)
+    {
+        return;
+    }
+
+    Json::Value r;
+    addAddressEntry(r, a);
+    _tokens.append(r);
+}
+
 void JsonOutputManager::commentModifier(Address a)
 {
     _commentModifierOn = true;
@@ -238,15 +250,20 @@ Json::Value JsonOutputManager::jsonToken(
 	Json::Value r;
 	r[JSON_KEY_KIND] = k;
     r[JSON_KEY_VALUE] = v;
+    addAddressEntry(r, a);
+	return r;
+}
+
+void JsonOutputManager::addAddressEntry(Json::Value& val, Address a) const
+{
     if (a.isDefined())
     {
-        r[JSON_KEY_ADDRESS] = a.toHexPrefixString();
+        val[JSON_KEY_ADDRESS] = a.toHexPrefixString();
     }
     else if (a.isUnknown())
     {
-        r[JSON_KEY_ADDRESS] = "";
+        val[JSON_KEY_ADDRESS] = "";
     }
-	return r;
 }
 
 } // namespace llvmir2hll

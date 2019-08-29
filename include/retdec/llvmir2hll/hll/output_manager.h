@@ -70,6 +70,8 @@ class OutputManager
 	public:
 		// Any token added to the end of the line is going to be a comment.
 		virtual void commentModifier(Address a = Address::Undefined) = 0;
+        // Modifies address for all subsequent tokens.
+        virtual void addressModifier(Address a) = 0;
 
     // Helpers to create more complex token sequences.
     //

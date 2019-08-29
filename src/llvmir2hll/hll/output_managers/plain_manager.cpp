@@ -126,6 +126,11 @@ void PlainOutputManager::comment(const std::string& c, Address)
     }
 }
 
+void PlainOutputManager::addressModifier(Address)
+{
+    // nothing
+}
+
 void PlainOutputManager::commentModifier(Address)
 {
     _out << getCommentPrefix() << " ";
