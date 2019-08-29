@@ -227,11 +227,6 @@ def parse_args(args):
                         action='store_true',
                         help='Removes temporary files created during the decompilation.')
 
-    parser.add_argument('--color-for-ida',
-                        dest='color_for_ida',
-                        action='store_true',
-                        help='Put IDA Pro color tags to output C file.')
-
     parser.add_argument('--config',
                         dest='config_db',
                         help='Specify JSON decompilation configuration file.')
@@ -1260,10 +1255,6 @@ class Decompiler:
 
         with open(self.output_file, 'w') as fh:
             [fh.write('%s\n' % line) for line in new]
-
-        # Colorize output file.
-        if self.args.color_for_ida:
-            CmdRunner.run_cmd([sys.executable, config.IDA_COLORIZER, self.output_file, self.config_file])
 
         # Store the information about the decompilation into the JSON file.
         if self.args.generate_log:
