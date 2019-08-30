@@ -60,7 +60,7 @@ JsonOutputManager::JsonOutputManager(llvm::raw_ostream& out, bool humanReadable)
         _humanReadable(humanReadable),
         _tokens(Json::arrayValue)
 {
-
+    addressPush(Address::Undefined);
 }
 
 JsonOutputManager::~JsonOutputManager()
@@ -89,131 +89,130 @@ bool JsonOutputManager::isHumanReadable() const
     return _humanReadable;
 }
 
-void JsonOutputManager::newLine(Address a)
+void JsonOutputManager::newLine()
 {
     if (_commentModifierOn)
     {
         if (!_runningComment.empty())
         {
-            comment(_runningComment, _commentModifierAddr);
+            comment(_runningComment);
             _runningComment.clear();
         }
         _commentModifierOn = false;
-        _commentModifierAddr = Address::Undefined;
     }
 
-    _tokens.append(jsonToken(JSON_TOKEN_NEWLINE, "\n", a));
+    _tokens.append(jsonToken(JSON_TOKEN_NEWLINE, "\n"));
 }
 
-void JsonOutputManager::space(const std::string& space, Address a)
+void JsonOutputManager::space(const std::string& space)
 {
     HANDLE_COMMENT_MODIFIER(space);
-    _tokens.append(jsonToken(JSON_TOKEN_SPACE, space, a));
+    _tokens.append(jsonToken(JSON_TOKEN_SPACE, space));
 }
 
-void JsonOutputManager::punctuation(char p, Address a)
+void JsonOutputManager::punctuation(char p)
 {
     HANDLE_COMMENT_MODIFIER(p);
-    _tokens.append(jsonToken(JSON_TOKEN_PUNCTUATION, std::string(1, p), a));
+    _tokens.append(jsonToken(JSON_TOKEN_PUNCTUATION, std::string(1, p)));
 }
 
-void JsonOutputManager::operatorX(const std::string& op, Address a)
+void JsonOutputManager::operatorX(const std::string& op)
 {
     HANDLE_COMMENT_MODIFIER(op);
-    _tokens.append(jsonToken(JSON_TOKEN_OPERATOR, op, a));
+    _tokens.append(jsonToken(JSON_TOKEN_OPERATOR, op));
 }
 
-void JsonOutputManager::variableId(const std::string& id, Address a)
+void JsonOutputManager::variableId(const std::string& id)
 {
     HANDLE_COMMENT_MODIFIER(id);
-    _tokens.append(jsonToken(JSON_TOKEN_ID_VAR, id, a));
+    _tokens.append(jsonToken(JSON_TOKEN_ID_VAR, id));
 }
 
-void JsonOutputManager::memberId(const std::string& id, Address a)
+void JsonOutputManager::memberId(const std::string& id)
 {
     HANDLE_COMMENT_MODIFIER(id);
-    _tokens.append(jsonToken(JSON_TOKEN_ID_MEMBER, id, a));
+    _tokens.append(jsonToken(JSON_TOKEN_ID_MEMBER, id));
 }
 
-void JsonOutputManager::labelId(const std::string& id, Address a)
+void JsonOutputManager::labelId(const std::string& id)
 {
     HANDLE_COMMENT_MODIFIER(id);
-    _tokens.append(jsonToken(JSON_TOKEN_ID_LABEL, id, a));
+    _tokens.append(jsonToken(JSON_TOKEN_ID_LABEL, id));
 }
 
-void JsonOutputManager::functionId(const std::string& id, Address a)
+void JsonOutputManager::functionId(const std::string& id)
 {
     HANDLE_COMMENT_MODIFIER(id);
-    _tokens.append(jsonToken(JSON_TOKEN_ID_FUNCTION, id, a));
+    _tokens.append(jsonToken(JSON_TOKEN_ID_FUNCTION, id));
 }
 
-void JsonOutputManager::parameterId(const std::string& id, Address a)
+void JsonOutputManager::parameterId(const std::string& id)
 {
     HANDLE_COMMENT_MODIFIER(id);
-    _tokens.append(jsonToken(JSON_TOKEN_ID_PARAMETER, id, a));
+    _tokens.append(jsonToken(JSON_TOKEN_ID_PARAMETER, id));
 }
 
-void JsonOutputManager::keyword(const std::string& k, Address a)
+void JsonOutputManager::keyword(const std::string& k)
 {
     HANDLE_COMMENT_MODIFIER(k);
-    _tokens.append(jsonToken(JSON_TOKEN_KEYWORD, k, a));
+    _tokens.append(jsonToken(JSON_TOKEN_KEYWORD, k));
 }
 
-void JsonOutputManager::dataType(const std::string& t, Address a)
+void JsonOutputManager::dataType(const std::string& t)
 {
     HANDLE_COMMENT_MODIFIER(t);
-    _tokens.append(jsonToken(JSON_TOKEN_DATA_TYPE, t, a));
+    _tokens.append(jsonToken(JSON_TOKEN_DATA_TYPE, t));
 }
 
-void JsonOutputManager::preprocessor(const std::string& p, Address a)
+void JsonOutputManager::preprocessor(const std::string& p)
 {
     HANDLE_COMMENT_MODIFIER(p);
-    _tokens.append(jsonToken(JSON_TOKEN_PREPROCESSOR, p, a));
+    _tokens.append(jsonToken(JSON_TOKEN_PREPROCESSOR, p));
 }
 
-void JsonOutputManager::include(const std::string& i, Address a)
+void JsonOutputManager::include(const std::string& i)
 {
     HANDLE_COMMENT_MODIFIER(i);
-    _tokens.append(jsonToken(JSON_TOKEN_INCLUDE, "<" + i + ">", a));
+    _tokens.append(jsonToken(JSON_TOKEN_INCLUDE, "<" + i + ">"));
 }
 
-void JsonOutputManager::constantBool(const std::string& c, Address a)
+void JsonOutputManager::constantBool(const std::string& c)
 {
     HANDLE_COMMENT_MODIFIER(c);
-    _tokens.append(jsonToken(JSON_TOKEN_CONST_BOOL, c, a));
+    _tokens.append(jsonToken(JSON_TOKEN_CONST_BOOL, c));
 }
 
-void JsonOutputManager::constantInt(const std::string& c, Address a)
+void JsonOutputManager::constantInt(const std::string& c)
 {
     HANDLE_COMMENT_MODIFIER(c);
-    _tokens.append(jsonToken(JSON_TOKEN_CONST_INT, c, a));
+    _tokens.append(jsonToken(JSON_TOKEN_CONST_INT, c));
 }
 
-void JsonOutputManager::constantFloat(const std::string& c, Address a)
+void JsonOutputManager::constantFloat(const std::string& c)
 {
     HANDLE_COMMENT_MODIFIER(c);
-    _tokens.append(jsonToken(JSON_TOKEN_CONST_FLOAT, c, a));
+    _tokens.append(jsonToken(JSON_TOKEN_CONST_FLOAT, c));
 }
 
-void JsonOutputManager::constantString(const std::string& c, Address a)
+void JsonOutputManager::constantString(const std::string& c)
 {
     HANDLE_COMMENT_MODIFIER(c);
-    _tokens.append(jsonToken(JSON_TOKEN_CONST_STRING, c, a));
+    _tokens.append(jsonToken(JSON_TOKEN_CONST_STRING, c));
 }
 
-void JsonOutputManager::constantSymbol(const std::string& c, Address a)
+void JsonOutputManager::constantSymbol(const std::string& c)
 {
     HANDLE_COMMENT_MODIFIER(c);
-    _tokens.append(jsonToken(JSON_TOKEN_CONST_SYMBOL, c, a));
+    _tokens.append(jsonToken(JSON_TOKEN_CONST_SYMBOL, c));
 }
 
-void JsonOutputManager::constantPointer(const std::string& c, Address a)
+void JsonOutputManager::constantPointer(const std::string& c)
 {
     HANDLE_COMMENT_MODIFIER(c);
-    _tokens.append(jsonToken(JSON_TOKEN_CONST_POINTER, c, a));
+    _tokens.append(jsonToken(JSON_TOKEN_CONST_POINTER, c));
 }
 
-void JsonOutputManager::comment(const std::string& c, Address a)
+void JsonOutputManager::comment(const std::string& c)
 {
     HANDLE_COMMENT_MODIFIER(" " + c);
     std::string str = getCommentPrefix();
@@ -221,49 +220,95 @@ void JsonOutputManager::comment(const std::string& c, Address a)
     {
         str += " " + utils::replaceCharsWithStrings(c, '\n', " ");
     }
-    _tokens.append(jsonToken(JSON_TOKEN_COMMENT, str, a));
+    _tokens.append(jsonToken(JSON_TOKEN_COMMENT, str));
 }
 
-void JsonOutputManager::addressModifier(Address a)
+void JsonOutputManager::commentModifier()
 {
-    if (_commentModifierOn)
+    _commentModifierOn = true;
+}
+
+void JsonOutputManager::addressPush(Address a)
+{
+    bool generate = true;
+
+    // Always generate the first pushed address so that first tokens are
+    // associated with something.
+    if (_addrs.empty())
+    {
+        generate = true;
+    }
+    // Do not generate address changes while in comment modifier mode.
+    // A single comment token is generated for all the stuff added in this mode
+    // and we cannot associate its individual parts with addresses.
+    else if (_commentModifierOn)
+    {
+        generate = false;
+    }
+    // Do not generate address if it is the same as the current top address.
+    // It is unnecessary.
+    else if (a == _addrs.top().first)
+    {
+        generate = false;
+    }
+
+    // Always do the push.
+    _addrs.push({a, generate});
+
+    if (generate)
+    {
+        generateAddressEntry(a);
+        _addrToGenerate = std::make_pair(Address::Undefined, false);
+    }
+}
+
+void JsonOutputManager::addressPop()
+{
+    // Never pop the last entry.
+    if (_addrs.size() < 2)
     {
         return;
     }
 
-    Json::Value r;
-    addAddressEntry(r, a);
-    _tokens.append(r);
+    bool generated = _addrs.top().second;
+
+    // Always do the pop.
+    _addrs.pop();
+
+    // If the popped entry was generated, re-generate the last entry.
+    if (generated)
+    {
+        // Well actually, do not generate it right away because it is possible
+        // that the next address is going to get pushed before the next token
+        // is added, and therefore it would be unnecessary to re-generate the
+        // address if no token actually was associated with it.
+        _addrToGenerate = std::make_pair(_addrs.top().first, true);
+    }
 }
 
-void JsonOutputManager::commentModifier(Address a)
+void JsonOutputManager::generateAddressEntry(Address a)
 {
-    _commentModifierOn = true;
-    _commentModifierAddr = a;
+    Json::Value r;
+
+    r[JSON_KEY_ADDRESS] = a.isDefined() ? a.toHexPrefixString() : "";
+
+    _tokens.append(r);
 }
 
 Json::Value JsonOutputManager::jsonToken(
         const std::string& k,
-        const std::string& v,
-        Address a) const
+        const std::string& v)
 {
+    if (_addrToGenerate.second)
+    {
+        generateAddressEntry(_addrToGenerate.first);
+        _addrToGenerate = std::make_pair(Address::Undefined, false);
+    }
+
 	Json::Value r;
 	r[JSON_KEY_KIND] = k;
     r[JSON_KEY_VALUE] = v;
-    addAddressEntry(r, a);
 	return r;
-}
-
-void JsonOutputManager::addAddressEntry(Json::Value& val, Address a) const
-{
-    if (a.isDefined())
-    {
-        val[JSON_KEY_ADDRESS] = a.toHexPrefixString();
-    }
-    else if (a.isUnknown())
-    {
-        val[JSON_KEY_ADDRESS] = "";
-    }
 }
 
 } // namespace llvmir2hll

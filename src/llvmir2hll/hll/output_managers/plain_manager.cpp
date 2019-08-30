@@ -21,103 +21,103 @@ PlainOutputManager::~PlainOutputManager()
 
 }
 
-void PlainOutputManager::newLine(Address)
+void PlainOutputManager::newLine()
 {
     _out << "\n";
 }
 
-void PlainOutputManager::space(const std::string& space, Address)
+void PlainOutputManager::space(const std::string& space)
 {
     _out << space;
 }
 
-void PlainOutputManager::punctuation(char p, Address)
+void PlainOutputManager::punctuation(char p)
 {
     _out << p;
 }
 
-void PlainOutputManager::operatorX(const std::string& op, Address)
+void PlainOutputManager::operatorX(const std::string& op)
 {
     _out << op;
 }
 
-void PlainOutputManager::variableId(const std::string& id, Address)
+void PlainOutputManager::variableId(const std::string& id)
 {
     _out << id;
 }
 
-void PlainOutputManager::memberId(const std::string& id, Address)
+void PlainOutputManager::memberId(const std::string& id)
 {
     _out << id;
 }
 
-void PlainOutputManager::labelId(const std::string& id, Address)
+void PlainOutputManager::labelId(const std::string& id)
 {
     _out << id;
 }
 
-void PlainOutputManager::functionId(const std::string& id, Address)
+void PlainOutputManager::functionId(const std::string& id)
 {
     _out << id;
 }
 
-void PlainOutputManager::parameterId(const std::string& id, Address)
+void PlainOutputManager::parameterId(const std::string& id)
 {
     _out << id;
 }
 
-void PlainOutputManager::keyword(const std::string& k, Address)
+void PlainOutputManager::keyword(const std::string& k)
 
 {
     _out << k;
 }
 
-void PlainOutputManager::dataType(const std::string& t, Address)
+void PlainOutputManager::dataType(const std::string& t)
 {
     _out << t;
 }
 
-void PlainOutputManager::preprocessor(const std::string& p, Address)
+void PlainOutputManager::preprocessor(const std::string& p)
 {
     _out << p;
 }
 
-void PlainOutputManager::include(const std::string& i, Address)
+void PlainOutputManager::include(const std::string& i)
 {
     _out << "<" << i << ">";
 }
 
-void PlainOutputManager::constantBool(const std::string& c, Address)
+void PlainOutputManager::constantBool(const std::string& c)
 {
     _out << c;
 }
 
-void PlainOutputManager::constantInt(const std::string& c, Address)
+void PlainOutputManager::constantInt(const std::string& c)
 {
     _out << c;
 }
 
-void PlainOutputManager::constantFloat(const std::string& c, Address)
+void PlainOutputManager::constantFloat(const std::string& c)
 {
     _out << c;
 }
 
-void PlainOutputManager::constantString(const std::string& c, Address)
+void PlainOutputManager::constantString(const std::string& c)
 {
     _out << c;
 }
 
-void PlainOutputManager::constantSymbol(const std::string& c, Address)
+void PlainOutputManager::constantSymbol(const std::string& c)
 {
     _out << c;
 }
 
-void PlainOutputManager::constantPointer(const std::string& c, Address)
+void PlainOutputManager::constantPointer(const std::string& c)
 {
     _out << c;
 }
 
-void PlainOutputManager::comment(const std::string& c, Address)
+void PlainOutputManager::comment(const std::string& c)
 {
     _out << getCommentPrefix();
     if (!c.empty())
@@ -126,14 +126,19 @@ void PlainOutputManager::comment(const std::string& c, Address)
     }
 }
 
-void PlainOutputManager::addressModifier(Address)
+void PlainOutputManager::commentModifier()
+{
+    _out << getCommentPrefix() << " ";
+}
+
+void PlainOutputManager::addressPush(Address a)
 {
     // nothing
 }
 
-void PlainOutputManager::commentModifier(Address)
+void PlainOutputManager::addressPop()
 {
-    _out << getCommentPrefix() << " ";
+    // nothing
 }
 
 } // namespace llvmir2hll

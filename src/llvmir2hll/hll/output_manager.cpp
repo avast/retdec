@@ -37,16 +37,13 @@ const std::string& OutputManager::getOutputLanguage() const
 void OutputManager::operatorX(
     const std::string& op,
     bool spaceBefore,
-    bool spaceAfter,
-    Address addr)
+    bool spaceAfter)
 {
     if (spaceBefore)
     {
-        space(" ", addr);
-        // Reset so that it doesn't get used again in later tokens.
-        addr = Address::Undefined;
+        space(" ");
     }
-    operatorX(op, addr);
+    operatorX(op);
     if (spaceAfter)
     {
         space();
@@ -55,40 +52,33 @@ void OutputManager::operatorX(
 
 void OutputManager::comment(
     const std::string& c,
-    const std::string& indent,
-    Address addr)
+    const std::string& indent)
 {
     if (!indent.empty())
     {
-        space(indent, addr);
-        // Reset so that it doesn't get used again in later tokens.
-        addr = Address::Undefined;
+        space(indent);
     }
-    comment(c, addr);
+    comment(c);
 }
 
 void OutputManager::commentLine(
     const std::string& c,
-    const std::string& indent,
-    Address addr)
+    const std::string& indent)
 {
-    comment(c, indent, addr);
+    comment(c, indent);
     newLine();
 }
 
 void OutputManager::includeLine(
     const std::string& header,
     const std::string& indent,
-    const std::string& c,
-    Address addr)
+    const std::string& c)
 {
     if (!indent.empty())
     {
-        space(indent, addr);
-        // Reset so that it doesn't get used again in later tokens.
-        addr = Address::Undefined;
+        space(indent);
     }
-    preprocessor("#include", addr);
+    preprocessor("#include");
     space();
     include(header);
     if (!c.empty()) comment(c, " ");
@@ -98,14 +88,11 @@ void OutputManager::includeLine(
 void OutputManager::typedefLine(
     const std::string& indent,
     const std::string& t1,
-    const std::string& t2,
-    Address addr)
+    const std::string& t2)
 {
     if (!indent.empty())
     {
-        space(indent, addr);
-        // Reset so that it doesn't get used again in later tokens.
-        addr = Address::Undefined;
+        space(indent);
     }
     keyword("typedef");
     space();

@@ -7,6 +7,8 @@
 #ifndef RETDEC_LLVMIR2HLL_HLL_OUTPUT_MANAGERS_JSON_MANAGER_H
 #define RETDEC_LLVMIR2HLL_HLL_OUTPUT_MANAGERS_JSON_MANAGER_H
 
+#include <stack>
+
 #include <json/json.h>
 
 #include <llvm/Support/raw_ostream.h>
@@ -32,42 +34,42 @@ class JsonOutputManager : public OutputManager
         bool isHumanReadable() const;
 
     public:
-        virtual void newLine(Address a = Address::Undefined) override;
-        virtual void space(const std::string& space = " ", Address a = Address::Undefined) override;
-        virtual void punctuation(char p, Address a = Address::Undefined) override;
-        virtual void operatorX(const std::string& op, Address a = Address::Undefined) override;
-        virtual void variableId(const std::string& id, Address a = Address::Undefined) override;
-        virtual void memberId(const std::string& id, Address a = Address::Undefined) override;
-        virtual void labelId(const std::string& id, Address a = Address::Undefined) override;
-        virtual void functionId(const std::string& id, Address a = Address::Undefined) override;
-        virtual void parameterId(const std::string& id, Address a = Address::Undefined) override;
-        virtual void keyword(const std::string& k, Address a = Address::Undefined) override;
-        virtual void dataType(const std::string& t, Address a = Address::Undefined) override;
-        virtual void preprocessor(const std::string& p, Address a = Address::Undefined) override;
-        virtual void include(const std::string& i, Address a = Address::Undefined) override;
-        virtual void constantBool(const std::string& c, Address a = Address::Undefined) override;
-        virtual void constantInt(const std::string& c, Address a = Address::Undefined) override;
-        virtual void constantFloat(const std::string& c, Address a = Address::Undefined) override;
-        virtual void constantString(const std::string& c, Address a = Address::Undefined) override;
-        virtual void constantSymbol(const std::string& c, Address a = Address::Undefined) override;
-        virtual void constantPointer(const std::string& c, Address a = Address::Undefined) override;
-        virtual void comment(const std::string& comment, Address a = Address::Undefined) override;
+        virtual void newLine() override;
+        virtual void space(const std::string& space = " ") override;
+        virtual void punctuation(char p) override;
+        virtual void operatorX(const std::string& op) override;
+        virtual void variableId(const std::string& id) override;
+        virtual void memberId(const std::string& id) override;
+        virtual void labelId(const std::string& id) override;
+        virtual void functionId(const std::string& id) override;
+        virtual void parameterId(const std::string& id) override;
+        virtual void keyword(const std::string& k) override;
+        virtual void dataType(const std::string& t) override;
+        virtual void preprocessor(const std::string& p) override;
+        virtual void include(const std::string& i) override;
+        virtual void constantBool(const std::string& c) override;
+        virtual void constantInt(const std::string& c) override;
+        virtual void constantFloat(const std::string& c) override;
+        virtual void constantString(const std::string& c) override;
+        virtual void constantSymbol(const std::string& c) override;
+        virtual void constantPointer(const std::string& c) override;
+        virtual void comment(const std::string& comment) override;
 
 	public:
-        virtual void addressModifier(Address a) override;
-		virtual void commentModifier(Address a = Address::Undefined) override;
+		virtual void commentModifier() override;
+        virtual void addressPush(Address a) override;
+        virtual void addressPop() override;
 
     private:
-        Json::Value jsonToken(
-            const std::string& k,
-            const std::string& v,
-            Address a = Address::Undefined) const;
-        void addAddressEntry(Json::Value& val, Address a) const;
+        Json::Value jsonToken(const std::string& k, const std::string& v);
+        void generateAddressEntry(Address a);
 
     private:
         llvm::raw_ostream& _out;
         bool _humanReadable = true;
         Json::Value _tokens;
+        std::stack<std::pair<Address, bool>> _addrs;
+        std::pair<Address, bool> _addrToGenerate;
         /**
          * Used to implement commentModifier():
          *   1. commentModifier() sets _commentModifierOn flag to true.
@@ -82,7 +84,6 @@ class JsonOutputManager : public OutputManager
          */
         bool _commentModifierOn = false;
         std::string _runningComment;
-        Address _commentModifierAddr;
 };
 
 } // namespace llvmir2hll

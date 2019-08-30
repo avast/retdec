@@ -9,6 +9,7 @@
 
 #include "retdec/llvmir2hll/ir/value.h"
 #include "retdec/llvmir2hll/support/smart_ptr.h"
+#include "retdec/llvmir2hll/support/types.h"
 
 namespace retdec {
 namespace llvmir2hll {
@@ -38,6 +39,7 @@ public:
 	ShPtr<Expression> getInitializer() const;
 	bool hasInitializer() const;
 	bool definesExternalVar() const;
+	Address getAddress() const;
 
 	void setVar(ShPtr<Variable> newVar);
 	void setInitializer(ShPtr<Expression> newInit);

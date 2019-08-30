@@ -492,6 +492,7 @@ bool CHLLWriter::emitFunctionPrototypes() {
 }
 
 bool CHLLWriter::emitExternalFunction(ShPtr<Function> func) {
+	out->addressPush(func->getStartAddress());
 	auto funcDeclString = module->getDeclarationStringForFunc(func);
 	if (!funcDeclString.empty()) {
 			out->commentLine(funcDeclString, getCurrentIndent());
@@ -500,6 +501,7 @@ bool CHLLWriter::emitExternalFunction(ShPtr<Function> func) {
 			out->commentModifier();
 			emitFunctionPrototype(func);
 	}
+	out->addressPop();
 	return true;
 }
 
@@ -508,6 +510,7 @@ void CHLLWriter::visit(ShPtr<GlobalVarDef> varDef) {
 	ShPtr<Expression> init(varDef->getInitializer());
 
 	out->space(getCurrentIndent());
+	out->addressPush(varDef->getAddress());
 	emitVarWithType(var);
 
 	// Initializer.
@@ -535,6 +538,7 @@ void CHLLWriter::visit(ShPtr<GlobalVarDef> varDef) {
 
 	tryEmitVarInfoInComment(var);
 
+	out->addressPop();
 	out->newLine();
 }
 
@@ -563,7 +567,9 @@ bool CHLLWriter::emitTargetCode(ShPtr<Module> module) {
 }
 
 void CHLLWriter::visit(ShPtr<Variable> var) {
+	if (var->getAddress().isDefined()) out->addressPush(var->getAddress());
 	out->variableId(var->getName());
+	if (var->getAddress().isDefined()) out->addressPop();
 }
 
 void CHLLWriter::visit(ShPtr<AddressOpExpr> expr) {
@@ -1312,8 +1318,10 @@ bool CHLLWriter::emitFunctionPrototype(ShPtr<Function> func) {
 		return false;
 	}
 
+	out->addressPush(func->getStartAddress());
 	emitFunctionHeader(func);
 	out->punctuation(';');
+	out->addressPop();
 	out->newLine();
 	return true;
 }
@@ -1327,9 +1335,11 @@ bool CHLLWriter::emitFunctionPrototype(ShPtr<Function> func) {
 void CHLLWriter::emitFunctionDefinition(ShPtr<Function> func) {
 	PRECONDITION(func->isDefinition(), "it has to be a definition");
 
+	out->addressPush(func->getStartAddress());
 	emitFunctionHeader(func);
 	out->space();
 	emitBlock(func->getBody());
+	out->addressPop();
 	out->newLine();
 }
 
@@ -1987,6 +1997,7 @@ void CHLLWriter::emitBlock(ShPtr<Statement> stmt) {
 
 	// Emit the block, statement by statement.
 	do {
+		out->addressPush(stmt->getAddress());
 		emitGotoLabelIfNeeded(stmt);
 
 		// Are there any metadata?
@@ -1996,6 +2007,7 @@ void CHLLWriter::emitBlock(ShPtr<Statement> stmt) {
 		}
 
 		stmt->accept(this);
+		out->addressPop();
 		stmt = stmt->getSuccessor();
 	} while (stmt);
 

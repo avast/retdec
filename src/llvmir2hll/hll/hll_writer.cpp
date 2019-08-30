@@ -470,8 +470,10 @@ bool HLLWriter::emitGlobalVariables() {
 * returns @c true.
 */
 bool HLLWriter::emitGlobalVariable(ShPtr<GlobalVarDef> varDef) {
+	out->addressPush(varDef->getAddress());
 	emitDetectedCryptoPatternForGlobalVarIfAvailable(varDef->getVar());
 	varDef->accept(this);
+	out->addressPop();
 	return true;
 }
 
@@ -549,6 +551,8 @@ bool HLLWriter::emitFunction(ShPtr<Function> func) {
 	currFunc = func;
 	currFuncGotoLabelCounter = 0;
 
+	out->addressPush(func->getStartAddress());
+
 	emitModuleNameForFuncIfAvailable(func);
 	emitAddressRangeForFuncIfAvailable(func);
 	emitLineRangeForFuncIfAvailable(func);
@@ -564,6 +568,7 @@ bool HLLWriter::emitFunction(ShPtr<Function> func) {
 	func->accept(this);
 
 	currFunc.reset();
+	out->addressPop();
 
 	return true;
 }
@@ -1095,7 +1100,7 @@ bool HLLWriter::tryEmitVarInfoInComment(ShPtr<Variable> var, ShPtr<Statement> st
 */
 bool HLLWriter::tryEmitVarAddressInComment(ShPtr<Variable> var) {
 	if (var->getAddress().isDefined()) {
-		out->comment(var->getAddress().toHexPrefixString, " ");
+		out->comment(var->getAddress().toHexPrefixString(), " ");
 		return true;
 	}
 
