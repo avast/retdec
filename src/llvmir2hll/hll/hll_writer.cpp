@@ -1094,14 +1094,12 @@ bool HLLWriter::tryEmitVarInfoInComment(ShPtr<Variable> var, ShPtr<Statement> st
 * @return @c true if some code has been emitted, @c false otherwise.
 */
 bool HLLWriter::tryEmitVarAddressInComment(ShPtr<Variable> var) {
-	// The address or offset is stored in the initial name of the variable.
-	std::string varAddress(getAddressFromName(var->getInitialName()));
-	if (varAddress.empty()) {
-		return false;
+	if (var->getAddress().isDefined()) {
+		out->comment(var->getAddress().toHexPrefixString, " ");
+		return true;
 	}
 
-	out->comment(varAddress, " ");
-	return true;
+	return false;
 }
 
 /**
