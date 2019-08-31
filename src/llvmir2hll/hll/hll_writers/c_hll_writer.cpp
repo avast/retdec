@@ -249,6 +249,7 @@ CHLLWriter::CHLLWriter(llvm::raw_ostream &o, const std::string& outputFormat):
 	optionEmitFunctionPrototypesForNonLibraryFuncs(false)
 {
 	out->setCommentPrefix(getCommentPrefix());
+	out->setOutputLanguage("C");
 }
 
 /**
