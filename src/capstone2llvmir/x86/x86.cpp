@@ -2757,9 +2757,8 @@ void Capstone2LlvmIrTranslatorX86_impl::translateNeg(cs_insn* i, cs_x86* xi, llv
  * IRETD, IRET, STI, CLI, VERR, VERW, LMSW, LTR,
  * SMSW, CLTS, INVD, LOCK, RSM, RDMSR, WRMSR, RDPMC, SYSENTER,
  * SYSEXIT, XGETBV, LAR, LSL, INVPCID, SLDT, LLDT, SGDT, SIDT, LGDT, LIDT,
- * XSAVE, XRSTOR, XSAVEOPT, INVLPG, FBLD, FBSTP, FLDENV, FRSTOR, FNSAVE, FFREE,
- * FCMOVE, FCMOVNE, FCMOVB, FCMOVNB, FCMOVBE, FCMOVNBE, FCMOVU, FCMOVNU, ARPL,
- * STR, FPREM, FPREM1, FSCALE, FXTRACT, FPTAN, FPATAN, F2XM1, FYL2X,
+ * XSAVE, XRSTOR, XSAVEOPT, INVLPG, FBLD, FBSTP, FLDENV, FRSTOR, FNSAVE, FFREE, ARPL,
+ * STR, FSCALE, FXTRACT, FPTAN, FPATAN, F2XM1, FYL2X,
  * FYL2XP1, FNCLEX, FWAIT, FNOP
  */
 void Capstone2LlvmIrTranslatorX86_impl::translateNop(cs_insn* i, cs_x86* xi, llvm::IRBuilder<>& irb)
@@ -4318,6 +4317,32 @@ void Capstone2LlvmIrTranslatorX86_impl::translateCMovCc(cs_insn* i, cs_x86* xi, 
 	std::tie(op0, op1) = loadOpBinary(xi, irb, eOpConv::THROW);
 	auto* val = irb.CreateSelect(cond, op1, op0);
 	storeOp(xi->operands[0], val, irb);
+}
+/**
+ * X86_INS_FCMOVB, X86_INS_FCMOVE, X86_INS_FCMOVBE, X86_INS_FCMOVU, X86_INS_FCMOVNB, X86_INS_FCMOVNE,
+ * X86_INS_FCMOVNBE, X86_INS_FCMOVNU
+ */
+void Capstone2LlvmIrTranslatorX86_impl::translateFCMovCc(cs_insn* i, cs_x86* xi, llvm::IRBuilder<>& irb)
+{
+	EXPECT_IS_BINARY(i, xi, irb);
+
+	llvm::Value* cond = nullptr;
+	switch (i->id)
+	{
+		case X86_INS_FCMOVB: 	cond = generateCcB(irb); break;
+		case X86_INS_FCMOVE:  	cond = generateCcE(irb); break;
+		case X86_INS_FCMOVBE: 	cond = generateCcBE(irb); break;
+		case X86_INS_FCMOVU:  	cond = generateCcP(irb); break;
+		case X86_INS_FCMOVNB:  	cond = generateCcAE(irb); break;
+		case X86_INS_FCMOVNE: 	cond = generateCcNE(irb); break;
+		case X86_INS_FCMOVNBE:  cond = generateCcA(irb); break;
+		case X86_INS_FCMOVNU: 	cond = generateCcNP(irb); break;
+		default: throw GenericError("Unhandled insn ID in translateSetCc().");
+	}
+
+	std::tie(op0, op1, top, idx) = loadOpFloatingBinaryTop(i, xi, irb);
+	auto* val = irb.CreateSelect(cond, op1, op0);
+	storeX87DataReg(irb, top, val);
 }
 
 /**

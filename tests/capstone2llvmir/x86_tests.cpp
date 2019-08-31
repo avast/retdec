@@ -9502,6 +9502,466 @@ TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_CMOVS_no_move)
 }
 
 //
+// X86_INS_FCMOVB
+//
+
+TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FCMOVB_move_1)
+{
+	ALL_MODES;
+
+	setRegisters({
+						 {X87_REG_TOP, 0x5},
+						 {X86_REG_ST5, 3.14}, // st(0)
+						 {X86_REG_ST6, 15.7}, // st(1)
+						 {X86_REG_CF, true},
+				 });
+
+	emulate("fcmovb st(0), st(1)");
+
+	EXPECT_JUST_REGISTERS_LOADED({X87_REG_TOP, X86_REG_ST5, X86_REG_ST6, X86_REG_CF});
+	EXPECT_JUST_REGISTERS_STORED({
+										 {X86_REG_ST5, 15.7},
+										 {X87_REG_TAG5, ANY},
+								 });
+	EXPECT_NO_MEMORY_LOADED_STORED();
+}
+
+TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FCMOVB_no_move_1)
+{
+	ALL_MODES;
+
+	setRegisters({
+						 {X87_REG_TOP, 0x2},
+						 {X86_REG_ST2, 3.14}, // st(0)
+						 {X86_REG_ST5, 15.7}, // st(3)
+						 {X86_REG_CF, false},
+				 });
+
+	emulate("fcmovb st(0), st(3)");
+
+	EXPECT_JUST_REGISTERS_LOADED({X87_REG_TOP, X86_REG_ST2, X86_REG_ST5, X86_REG_CF});
+	EXPECT_JUST_REGISTERS_STORED({
+										 {X86_REG_ST2, 3.14},
+										 {X87_REG_TAG2, ANY},
+								 });
+	EXPECT_NO_MEMORY_LOADED_STORED();
+}
+
+//
+// X86_INS_FCMOVE
+//
+
+TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FCMOVE_move_1)
+{
+	ALL_MODES;
+
+	setRegisters({
+						 {X87_REG_TOP, 0x5},
+						 {X86_REG_ST5, 3.14}, // st(0)
+						 {X86_REG_ST6, 15.7}, // st(1)
+						 {X86_REG_ZF, true},
+				 });
+
+	emulate("fcmove st(0), st(1)");
+
+	EXPECT_JUST_REGISTERS_LOADED({X87_REG_TOP, X86_REG_ST5, X86_REG_ST6, X86_REG_ZF});
+	EXPECT_JUST_REGISTERS_STORED({
+										 {X86_REG_ST5, 15.7},
+										 {X87_REG_TAG5, ANY},
+								 });
+	EXPECT_NO_MEMORY_LOADED_STORED();
+}
+
+TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FCMOVE_no_move_1)
+{
+	ALL_MODES;
+
+	setRegisters({
+						 {X87_REG_TOP, 0x2},
+						 {X86_REG_ST2, 3.14}, // st(0)
+						 {X86_REG_ST5, 15.7}, // st(3)
+						 {X86_REG_ZF, false},
+				 });
+
+	emulate("fcmove st(0), st(3)");
+
+	EXPECT_JUST_REGISTERS_LOADED({X87_REG_TOP, X86_REG_ST2, X86_REG_ST5, X86_REG_ZF});
+	EXPECT_JUST_REGISTERS_STORED({
+										 {X86_REG_ST2, 3.14},
+										 {X87_REG_TAG2, ANY},
+								 });
+	EXPECT_NO_MEMORY_LOADED_STORED();
+}
+
+//
+// X86_INS_FCMOVBE
+//
+
+TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FCMOVBE_move_1)
+{
+	ALL_MODES;
+
+	setRegisters({
+						 {X87_REG_TOP, 0x5},
+						 {X86_REG_ST5, 3.14}, // st(0)
+						 {X86_REG_ST6, 15.7}, // st(1)
+						 {X86_REG_CF, true},
+						 {X86_REG_ZF, true},
+				 });
+
+	emulate("fcmovbe st(0), st(1)");
+
+	EXPECT_JUST_REGISTERS_LOADED({X87_REG_TOP, X86_REG_ST5, X86_REG_ST6, X86_REG_CF, X86_REG_ZF});
+	EXPECT_JUST_REGISTERS_STORED({
+										 {X86_REG_ST5, 15.7},
+										 {X87_REG_TAG5, ANY},
+								 });
+	EXPECT_NO_MEMORY_LOADED_STORED();
+}
+
+TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FCMOVBE_move_2)
+{
+	ALL_MODES;
+
+	setRegisters({
+						 {X87_REG_TOP, 0x5},
+						 {X86_REG_ST5, 3.14}, // st(0)
+						 {X86_REG_ST6, 15.7}, // st(1)
+						 {X86_REG_CF, false},
+						 {X86_REG_ZF, true},
+				 });
+
+	emulate("fcmovbe st(0), st(1)");
+
+	EXPECT_JUST_REGISTERS_LOADED({X87_REG_TOP, X86_REG_ST5, X86_REG_ST6, X86_REG_CF, X86_REG_ZF});
+	EXPECT_JUST_REGISTERS_STORED({
+										 {X86_REG_ST5, 15.7},
+										 {X87_REG_TAG5, ANY},
+								 });
+	EXPECT_NO_MEMORY_LOADED_STORED();
+}
+
+TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FCMOVBE_move_3)
+{
+	ALL_MODES;
+
+	setRegisters({
+						 {X87_REG_TOP, 0x5},
+						 {X86_REG_ST5, 3.14}, // st(0)
+						 {X86_REG_ST6, 15.7}, // st(1)
+						 {X86_REG_CF, true},
+						 {X86_REG_ZF, false},
+				 });
+
+	emulate("fcmovbe st(0), st(1)");
+
+	EXPECT_JUST_REGISTERS_LOADED({X87_REG_TOP, X86_REG_ST5, X86_REG_ST6, X86_REG_CF, X86_REG_ZF});
+	EXPECT_JUST_REGISTERS_STORED({
+										 {X86_REG_ST5, 15.7},
+										 {X87_REG_TAG5, ANY},
+								 });
+	EXPECT_NO_MEMORY_LOADED_STORED();
+}
+
+TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FCMOVBE_no_move_1)
+{
+	ALL_MODES;
+
+	setRegisters({
+						 {X87_REG_TOP, 0x2},
+						 {X86_REG_ST2, 3.14}, // st(0)
+						 {X86_REG_ST5, 15.7}, // st(3)
+						 {X86_REG_CF, false},
+						 {X86_REG_ZF, false},
+				 });
+
+	emulate("fcmovbe st(0), st(3)");
+
+	EXPECT_JUST_REGISTERS_LOADED({X87_REG_TOP, X86_REG_ST2, X86_REG_ST5, X86_REG_CF, X86_REG_ZF});
+	EXPECT_JUST_REGISTERS_STORED({
+										 {X86_REG_ST2, 3.14},
+										 {X87_REG_TAG2, ANY},
+								 });
+	EXPECT_NO_MEMORY_LOADED_STORED();
+}
+
+//
+// X86_INS_FCMOVU
+//
+
+TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FCMOVU_move_1)
+{
+	ALL_MODES;
+
+	setRegisters({
+						 {X87_REG_TOP, 0x5},
+						 {X86_REG_ST5, 3.14}, // st(0)
+						 {X86_REG_ST6, 15.7}, // st(1)
+						 {X86_REG_PF, true},
+				 });
+
+	emulate("fcmovu st(0), st(1)");
+
+	EXPECT_JUST_REGISTERS_LOADED({X87_REG_TOP, X86_REG_ST5, X86_REG_ST6, X86_REG_PF});
+	EXPECT_JUST_REGISTERS_STORED({
+										 {X86_REG_ST5, 15.7},
+										 {X87_REG_TAG5, ANY},
+								 });
+	EXPECT_NO_MEMORY_LOADED_STORED();
+}
+
+TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FCMOVU_no_move_1)
+{
+	ALL_MODES;
+
+	setRegisters({
+						 {X87_REG_TOP, 0x2},
+						 {X86_REG_ST2, 3.14}, // st(0)
+						 {X86_REG_ST5, 15.7}, // st(3)
+						 {X86_REG_PF, false},
+				 });
+
+	emulate("fcmovu st(0), st(3)");
+
+	EXPECT_JUST_REGISTERS_LOADED({X87_REG_TOP, X86_REG_ST2, X86_REG_ST5, X86_REG_PF});
+	EXPECT_JUST_REGISTERS_STORED({
+										 {X86_REG_ST2, 3.14},
+										 {X87_REG_TAG2, ANY},
+								 });
+	EXPECT_NO_MEMORY_LOADED_STORED();
+}
+
+//
+// X86_INS_FCMOVNB
+//
+
+TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FCMOVNB_move_1)
+{
+	ALL_MODES;
+
+	setRegisters({
+						 {X87_REG_TOP, 0x5},
+						 {X86_REG_ST5, 3.14}, // st(0)
+						 {X86_REG_ST6, 15.7}, // st(1)
+						 {X86_REG_CF, false},
+				 });
+
+	emulate("fcmovnb st(0), st(1)");
+
+	EXPECT_JUST_REGISTERS_LOADED({X87_REG_TOP, X86_REG_ST5, X86_REG_ST6, X86_REG_CF});
+	EXPECT_JUST_REGISTERS_STORED({
+										 {X86_REG_ST5, 15.7},
+										 {X87_REG_TAG5, ANY},
+								 });
+	EXPECT_NO_MEMORY_LOADED_STORED();
+}
+
+TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FCMOVNB_no_move_1)
+{
+	ALL_MODES;
+
+	setRegisters({
+						 {X87_REG_TOP, 0x2},
+						 {X86_REG_ST2, 3.14}, // st(0)
+						 {X86_REG_ST5, 15.7}, // st(3)
+						 {X86_REG_CF, true},
+				 });
+
+	emulate("fcmovnb st(0), st(3)");
+
+	EXPECT_JUST_REGISTERS_LOADED({X87_REG_TOP, X86_REG_ST2, X86_REG_ST5, X86_REG_CF});
+	EXPECT_JUST_REGISTERS_STORED({
+										 {X86_REG_ST2, 3.14},
+										 {X87_REG_TAG2, ANY},
+								 });
+	EXPECT_NO_MEMORY_LOADED_STORED();
+}
+
+//
+// X86_INS_FCMOVNE
+//
+
+TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FCMOVNE_move_1)
+{
+	ALL_MODES;
+
+	setRegisters({
+						 {X87_REG_TOP, 0x5},
+						 {X86_REG_ST5, 3.14}, // st(0)
+						 {X86_REG_ST6, 15.7}, // st(1)
+						 {X86_REG_ZF, false},
+				 });
+
+	emulate("fcmovne st(0), st(1)");
+
+	EXPECT_JUST_REGISTERS_LOADED({X87_REG_TOP, X86_REG_ST5, X86_REG_ST6, X86_REG_ZF});
+	EXPECT_JUST_REGISTERS_STORED({
+										 {X86_REG_ST5, 15.7},
+										 {X87_REG_TAG5, ANY},
+								 });
+	EXPECT_NO_MEMORY_LOADED_STORED();
+}
+
+TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FCMOVNE_no_move_1)
+{
+	ALL_MODES;
+
+	setRegisters({
+						 {X87_REG_TOP, 0x2},
+						 {X86_REG_ST2, 3.14}, // st(0)
+						 {X86_REG_ST5, 15.7}, // st(3)
+						 {X86_REG_ZF, true},
+				 });
+
+	emulate("fcmovne st(0), st(3)");
+
+	EXPECT_JUST_REGISTERS_LOADED({X87_REG_TOP, X86_REG_ST2, X86_REG_ST5, X86_REG_ZF});
+	EXPECT_JUST_REGISTERS_STORED({
+										 {X86_REG_ST2, 3.14},
+										 {X87_REG_TAG2, ANY},
+								 });
+	EXPECT_NO_MEMORY_LOADED_STORED();
+}
+
+//
+// X86_INS_FCMOVNBE
+//
+
+TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FCMOVNBE_move_1)
+{
+	ALL_MODES;
+
+	setRegisters({
+						 {X87_REG_TOP, 0x5},
+						 {X86_REG_ST5, 3.14}, // st(0)
+						 {X86_REG_ST6, 15.7}, // st(1)
+						 {X86_REG_CF, false},
+						 {X86_REG_ZF, false},
+				 });
+
+	emulate("fcmovnbe st(0), st(1)");
+
+	EXPECT_JUST_REGISTERS_LOADED({X87_REG_TOP, X86_REG_ST5, X86_REG_ST6, X86_REG_CF, X86_REG_ZF});
+	EXPECT_JUST_REGISTERS_STORED({
+										 {X86_REG_ST5, 15.7},
+										 {X87_REG_TAG5, ANY},
+								 });
+	EXPECT_NO_MEMORY_LOADED_STORED();
+}
+
+TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FCMOVNBE_no_move_1)
+{
+	ALL_MODES;
+
+	setRegisters({
+						 {X87_REG_TOP, 0x5},
+						 {X86_REG_ST5, 3.14}, // st(0)
+						 {X86_REG_ST6, 15.7}, // st(1)
+						 {X86_REG_CF, false},
+						 {X86_REG_ZF, true},
+				 });
+
+	emulate("fcmovnbe st(0), st(1)");
+
+	EXPECT_JUST_REGISTERS_LOADED({X87_REG_TOP, X86_REG_ST5, X86_REG_ST6, X86_REG_CF, X86_REG_ZF});
+	EXPECT_JUST_REGISTERS_STORED({
+										 {X86_REG_ST5, 3.14},
+										 {X87_REG_TAG5, ANY},
+								 });
+	EXPECT_NO_MEMORY_LOADED_STORED();
+}
+
+TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FCMOVNBE_no_move_2)
+{
+	ALL_MODES;
+
+	setRegisters({
+						 {X87_REG_TOP, 0x5},
+						 {X86_REG_ST5, 3.14}, // st(0)
+						 {X86_REG_ST6, 15.7}, // st(1)
+						 {X86_REG_CF, true},
+						 {X86_REG_ZF, false},
+				 });
+
+	emulate("fcmovnbe st(0), st(1)");
+
+	EXPECT_JUST_REGISTERS_LOADED({X87_REG_TOP, X86_REG_ST5, X86_REG_ST6, X86_REG_CF, X86_REG_ZF});
+	EXPECT_JUST_REGISTERS_STORED({
+										 {X86_REG_ST5, 3.14},
+										 {X87_REG_TAG5, ANY},
+								 });
+	EXPECT_NO_MEMORY_LOADED_STORED();
+}
+
+TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FCMOVNBE_no_move_3)
+{
+	ALL_MODES;
+
+	setRegisters({
+						 {X87_REG_TOP, 0x2},
+						 {X86_REG_ST2, 3.14}, // st(0)
+						 {X86_REG_ST5, 15.7}, // st(3)
+						 {X86_REG_CF, true},
+						 {X86_REG_ZF, true},
+				 });
+
+	emulate("fcmovnbe st(0), st(3)");
+
+	EXPECT_JUST_REGISTERS_LOADED({X87_REG_TOP, X86_REG_ST2, X86_REG_ST5, X86_REG_CF, X86_REG_ZF});
+	EXPECT_JUST_REGISTERS_STORED({
+										 {X86_REG_ST2, 3.14},
+										 {X87_REG_TAG2, ANY},
+								 });
+	EXPECT_NO_MEMORY_LOADED_STORED();
+}
+
+//
+// X86_INS_FCMOVNU
+//
+
+TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FCMOVUN_move_1)
+{
+	ALL_MODES;
+
+	setRegisters({
+						 {X87_REG_TOP, 0x5},
+						 {X86_REG_ST5, 3.14}, // st(0)
+						 {X86_REG_ST6, 15.7}, // st(1)
+						 {X86_REG_PF, false},
+				 });
+
+	emulate("fcmovnu st(0), st(1)");
+
+	EXPECT_JUST_REGISTERS_LOADED({X87_REG_TOP, X86_REG_ST5, X86_REG_ST6, X86_REG_PF});
+	EXPECT_JUST_REGISTERS_STORED({
+										 {X86_REG_ST5, 15.7},
+										 {X87_REG_TAG5, ANY},
+								 });
+	EXPECT_NO_MEMORY_LOADED_STORED();
+}
+
+TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FCMOVNU_no_move_1)
+{
+	ALL_MODES;
+
+	setRegisters({
+						 {X87_REG_TOP, 0x2},
+						 {X86_REG_ST2, 3.14}, // st(0)
+						 {X86_REG_ST5, 15.7}, // st(3)
+						 {X86_REG_PF, true},
+				 });
+
+	emulate("fcmovnu st(0), st(3)");
+
+	EXPECT_JUST_REGISTERS_LOADED({X87_REG_TOP, X86_REG_ST2, X86_REG_ST5, X86_REG_PF});
+	EXPECT_JUST_REGISTERS_STORED({
+										 {X86_REG_ST2, 3.14},
+										 {X87_REG_TAG2, ANY},
+								 });
+	EXPECT_NO_MEMORY_LOADED_STORED();
+}
+
+//
 // X86_INS_FLD
 //
 

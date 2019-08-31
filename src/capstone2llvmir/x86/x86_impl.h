@@ -289,6 +289,7 @@ class Capstone2LlvmIrTranslatorX86_impl :
 		void translateFincstp(cs_insn* i, cs_x86* xi, llvm::IRBuilder<>& irb);
 		void translateFist(cs_insn* i, cs_x86* xi, llvm::IRBuilder<>& irb);
 		void translateFld(cs_insn* i, cs_x86* xi, llvm::IRBuilder<>& irb);
+		void translateFCMovCc(cs_insn *i, cs_x86 *xi, llvm::IRBuilder<> &irb);
 		void translateFloadConstant(cs_insn* i, cs_x86* xi, llvm::IRBuilder<>& irb);
 		void translateFmul(cs_insn* i, cs_x86* xi, llvm::IRBuilder<>& irb);
 		void translateFninit(cs_insn* i, cs_x86* xi, llvm::IRBuilder<>& irb);
