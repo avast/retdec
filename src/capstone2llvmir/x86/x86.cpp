@@ -4568,6 +4568,20 @@ void Capstone2LlvmIrTranslatorX86_impl::translateFdivr(cs_insn* i, cs_x86* xi, l
 }
 
 /**
+ * X86_INS_FPREM, X86_INS_FPREM1
+ */
+void Capstone2LlvmIrTranslatorX86_impl::translateFprem(cs_insn* i, cs_x86* xi, llvm::IRBuilder<>& irb)
+{
+	EXPECT_IS_EXPR(i, xi, irb, (xi->op_count == 0));
+
+	std::tie(op0, op1, top, idx) = loadOpFloatingBinaryTop(i, xi, irb);
+
+	auto* frem = irb.CreateFRem(op0, op1);
+
+	storeX87DataReg(irb, top, frem);
+}
+
+/**
  * X86_INS_FSUB, X86_INS_FSUBP, X86_INS_FISUB
  */
 void Capstone2LlvmIrTranslatorX86_impl::translateFsub(cs_insn* i, cs_x86* xi, llvm::IRBuilder<>& irb)
