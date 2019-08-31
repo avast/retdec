@@ -31,12 +31,12 @@ const std::string JSON_TOKEN_KEYWORD       = "keyw";
 const std::string JSON_TOKEN_DATA_TYPE     = "type";
 const std::string JSON_TOKEN_PREPROCESSOR  = "preproc";
 const std::string JSON_TOKEN_INCLUDE       = "inc";
-const std::string JSON_TOKEN_CONST_BOOL    = "c_bool";
-const std::string JSON_TOKEN_CONST_INT     = "c_int";
-const std::string JSON_TOKEN_CONST_FLOAT   = "c_fp";
-const std::string JSON_TOKEN_CONST_STRING  = "c_str";
-const std::string JSON_TOKEN_CONST_SYMBOL  = "c_sym";
-const std::string JSON_TOKEN_CONST_POINTER = "c_ptr";
+const std::string JSON_TOKEN_CONST_BOOL    = "l_bool";
+const std::string JSON_TOKEN_CONST_INT     = "l_int";
+const std::string JSON_TOKEN_CONST_FLOAT   = "l_fp";
+const std::string JSON_TOKEN_CONST_STRING  = "l_str";
+const std::string JSON_TOKEN_CONST_SYMBOL  = "l_sym";
+const std::string JSON_TOKEN_CONST_POINTER = "l_ptr";
 const std::string JSON_TOKEN_COMMENT       = "cmnt";
 
 /**
