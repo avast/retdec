@@ -11902,6 +11902,55 @@ TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FIDIVR_m32)
 }
 
 //
+// X86_INS_FPREM
+//
+TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FPREM)
+{
+	ALL_MODES;
+
+	setRegisters({
+						 {X87_REG_TOP, 0x2},
+						 {X86_REG_ST2, 3.14}, // st(0)
+						 {X86_REG_ST3, 3.0}, // st(1)
+				 });
+
+
+	emulate("fprem");
+
+	EXPECT_JUST_REGISTERS_LOADED({X87_REG_TOP, X86_REG_ST2, X86_REG_ST3});
+	EXPECT_JUST_REGISTERS_STORED({
+										 {X86_REG_ST2, fmod(3.14, 3.0)},
+										 {X87_REG_TAG2, ANY},
+								 });
+	EXPECT_NO_MEMORY_LOADED_STORED();
+}
+
+//
+// X86_INS_FPREM1
+//
+
+TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FPREM1)
+{
+	ALL_MODES;
+
+	setRegisters({
+						 {X87_REG_TOP, 0x4},
+						 {X86_REG_ST4, 3.6}, // st(0)
+						 {X86_REG_ST5, 3.0}, // st(1)
+				 });
+
+
+	emulate("fprem1");
+
+	EXPECT_JUST_REGISTERS_LOADED({X87_REG_TOP, X86_REG_ST4, X86_REG_ST5});
+	EXPECT_JUST_REGISTERS_STORED({
+										 {X86_REG_ST4, fmod(3.6, 3.0)},
+										 {X87_REG_TAG4, ANY},
+								 });
+	EXPECT_NO_MEMORY_LOADED_STORED();
+}
+
+//
 // X86_INS_FSUB
 //
 
