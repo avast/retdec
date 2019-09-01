@@ -93,12 +93,14 @@ void JsonOutputManager::newLine()
 {
 	if (_commentModifierOn)
 	{
+		// Clear it righ away because comment() is used to generate token
+		// and it checks for it.
+		_commentModifierOn = false;
 		if (!_runningComment.empty())
 		{
 			comment(_runningComment);
 			_runningComment.clear();
 		}
-		_commentModifierOn = false;
 	}
 
 	_tokens.append(jsonToken(JSON_TOKEN_NEWLINE, "\n"));
