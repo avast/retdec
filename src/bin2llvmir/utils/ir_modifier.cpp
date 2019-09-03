@@ -1772,6 +1772,11 @@ llvm::Value* IrModifier::changeObjectType(
 		return val;
 	}
 
+	if (val->getType() == toType)
+	{
+		return val;
+	}
+
 	//if (dyn_cast<PointerType>(val->getType())->getElementType() == toType)
 	//{
 	//	return val;
