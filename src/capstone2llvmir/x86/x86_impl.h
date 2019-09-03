@@ -303,6 +303,8 @@ class Capstone2LlvmIrTranslatorX86_impl :
 		void translateFsubr(cs_insn* i, cs_x86* xi, llvm::IRBuilder<>& irb);
 		void translateFucomPop(cs_insn* i, cs_x86* xi, llvm::IRBuilder<>& irb);
 		void translateFxch(cs_insn* i, cs_x86* xi, llvm::IRBuilder<>& irb);
+		void translateF2xm1(cs_insn* i, cs_x86* xi, llvm::IRBuilder<>& irb);
+		void translateFyl2x(cs_insn* i, cs_x86* xi, llvm::IRBuilder<>& irb);
 		void translateImul(cs_insn* i, cs_x86* xi, llvm::IRBuilder<>& irb);
 		void translateInc(cs_insn* i, cs_x86* xi, llvm::IRBuilder<>& irb);
 		void translateIns(cs_insn* i, cs_x86* xi, llvm::IRBuilder<>& irb);

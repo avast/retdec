@@ -2758,8 +2758,8 @@ void Capstone2LlvmIrTranslatorX86_impl::translateNeg(cs_insn* i, cs_x86* xi, llv
  * SMSW, CLTS, INVD, LOCK, RSM, RDMSR, WRMSR, RDPMC, SYSENTER,
  * SYSEXIT, XGETBV, LAR, LSL, INVPCID, SLDT, LLDT, SGDT, SIDT, LGDT, LIDT,
  * XSAVE, XRSTOR, XSAVEOPT, INVLPG, FBLD, FBSTP, FLDENV, FRSTOR, FNSAVE, FFREE, ARPL,
- * STR, FSCALE, FXTRACT, FPTAN, FPATAN, F2XM1, FYL2X,
- * FYL2XP1, FNCLEX, FWAIT, FNOP
+ * STR, FSCALE, FXTRACT, FPTAN, FPATAN,
+ * FNCLEX, FWAIT, FNOP
  */
 void Capstone2LlvmIrTranslatorX86_impl::translateNop(cs_insn* i, cs_x86* xi, llvm::IRBuilder<>& irb)
 {
@@ -4677,6 +4677,47 @@ void Capstone2LlvmIrTranslatorX86_impl::translateFsqrt(cs_insn* i, cs_x86* xi, l
 	auto* fabs = irb.CreateCall(f, {op0});
 
 	storeX87DataReg(irb, top, fabs);
+}
+
+/**
+ * X86_INS_F2XM1
+ */
+void Capstone2LlvmIrTranslatorX86_impl::translateF2xm1(cs_insn* i, cs_x86* xi, llvm::IRBuilder<>& irb)
+{
+	EXPECT_IS_NULLARY(i, xi, irb);
+
+	auto* top = loadX87Top(irb);
+	op0 = loadX87DataReg(irb, top);
+	op1 = llvm::ConstantFP::get(op0->getType(), 1);
+	auto* f = llvm::Intrinsic::getDeclaration(_module, llvm::Intrinsic::exp2, op0->getType());
+	auto* exp2 = irb.CreateCall(f, {op0});
+	auto* res = irb.CreateFSub(exp2, op1);
+
+	storeX87DataReg(irb, top, res);
+}
+
+/**
+ * X86_INS_FYL2X, X86_INS_FYL2X1
+ */
+void Capstone2LlvmIrTranslatorX86_impl::translateFyl2x(cs_insn* i, cs_x86* xi, llvm::IRBuilder<>& irb)
+{
+	EXPECT_IS_NULLARY(i, xi, irb);
+
+	std::tie(op0, op1, top, idx) = loadOpFloatingBinaryTop(i, xi, irb);
+
+	if (i->id == X86_INS_FYL2XP1)
+	{
+		op2 = llvm::ConstantFP::get(op0->getType(), 1);
+		op0 = irb.CreateFAdd(op0, op2);
+	}
+
+	auto* f = llvm::Intrinsic::getDeclaration(_module, llvm::Intrinsic::log2, op0->getType());
+	auto* log2 = irb.CreateCall(f, {op0});
+	auto* fmulLog2 = irb.CreateFMul(op1, log2);
+
+	storeX87DataReg(irb, idx, fmulLog2);
+	clearX87TagReg(irb, top); // pop
+	x87IncTop(irb, top);
 }
 
 /**

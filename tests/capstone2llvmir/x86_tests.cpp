@@ -12573,6 +12573,90 @@ TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FSINCOS_compute)
 }
 
 //
+// X86_INS_F2XM1
+//
+
+TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_F2XM1_compute)
+{
+	ALL_MODES;
+
+	setRegisters({
+						 {X87_REG_TOP, 0x1},
+						 {X86_REG_ST1, 16.0},
+				 });
+
+	emulate("f2xm1");
+
+	EXPECT_JUST_REGISTERS_LOADED({X87_REG_TOP, X86_REG_ST1});
+	EXPECT_JUST_REGISTERS_STORED({
+										 {X86_REG_ST1, ANY},
+										 {X87_REG_TAG1, ANY},
+								 });
+	EXPECT_NO_MEMORY_LOADED_STORED();
+	EXPECT_VALUES_CALLED({
+								 {_module.getFunction("exp2l"), {16.0}},
+						 });
+}
+
+//
+// X86_INS_FYL2X
+//
+
+TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FYL2X_compute)
+{
+	ALL_MODES;
+
+	setRegisters({
+						 {X87_REG_TOP, 0x2},
+						 {X86_REG_ST2, 16.0},
+						 {X86_REG_ST3, 7.0},
+				 });
+
+	emulate("fyl2x");
+
+	EXPECT_JUST_REGISTERS_LOADED({X87_REG_TOP, X86_REG_ST2, X86_REG_ST3});
+	EXPECT_JUST_REGISTERS_STORED({
+										 {X87_REG_TOP, 0x3},
+										 {X86_REG_ST3, ANY},
+										 {X87_REG_TAG2, ANY},
+										 {X87_REG_TAG3, ANY},
+								 });
+	EXPECT_NO_MEMORY_LOADED_STORED();
+	EXPECT_VALUES_CALLED({
+								 {_module.getFunction("log2l"), {16.0}},
+						 });
+}
+
+//
+// X86_INS_FYL2XP1
+//
+
+TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FYL2XP1_compute)
+{
+	ALL_MODES;
+
+	setRegisters({
+						 {X87_REG_TOP, 0x2},
+						 {X86_REG_ST2, 16.0},
+						 {X86_REG_ST3, 7.0},
+				 });
+
+	emulate("fyl2xp1");
+
+	EXPECT_JUST_REGISTERS_LOADED({X87_REG_TOP, X86_REG_ST2, X86_REG_ST3});
+	EXPECT_JUST_REGISTERS_STORED({
+										 {X87_REG_TOP, 0x3},
+										 {X86_REG_ST3, ANY},
+										 {X87_REG_TAG2, ANY},
+										 {X87_REG_TAG3, ANY},
+								 });
+	EXPECT_NO_MEMORY_LOADED_STORED();
+	EXPECT_VALUES_CALLED({
+								 {_module.getFunction("log2l"), {17.0}},
+						 });
+}
+
+//
 // X86_INS_FLD1
 //
 
