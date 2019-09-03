@@ -546,7 +546,7 @@ IrModifier::StackPair IrModifier::getStackVariable(
 		type = Abi::getDefaultType(fnc->getParent());
 	}
 
-	std::string n = name.empty() ? "stack_var"+std::to_string(offset) : name;
+	std::string n = name.empty() ? "stack_var_"+std::to_string(offset) : name;
 	AllocaInst* ret = _config->getLlvmStackVariable(fnc, offset);
 	if (ret)
 	{
