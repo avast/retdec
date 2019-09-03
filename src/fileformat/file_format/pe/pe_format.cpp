@@ -556,6 +556,7 @@ void PeFormat::initLoaderErrorInfo(PeLib::LoaderError ldrError)
 		_ldrErrInfo.loaderErrorCode = static_cast<std::uint32_t>(ldrError);
 		_ldrErrInfo.loaderError = getLoaderErrorString(ldrError, false);
 		_ldrErrInfo.loaderErrorUserFriendly = getLoaderErrorString(ldrError, true);
+		_ldrErrInfo.isLoadableAnyway = getLoaderErrorLoadableAnyway(ldrError);
 	}
 }
 

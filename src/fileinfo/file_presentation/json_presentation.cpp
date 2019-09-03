@@ -146,6 +146,7 @@ void JsonPresentation::presentLoaderError(Json::Value &root) const
 		loaderErrorNode["code"] = ldrErrInfo.loaderErrorCode;
 		loaderErrorNode["code_text"] = ldrErrInfo.loaderError;
 		loaderErrorNode["description"] = ldrErrInfo.loaderErrorUserFriendly;
+		loaderErrorNode["loadable_anyway"] = ldrErrInfo.isLoadableAnyway ? "true" : "false";
 
 		root["loaderError"] = loaderErrorNode;
 	}

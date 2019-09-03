@@ -35,6 +35,7 @@ struct LoaderErrorInfo
 	std::uint32_t loaderErrorCode;               // Loader error code, cast to uint32_t
 	const char * loaderError;
 	const char * loaderErrorUserFriendly;
+	bool isLoadableAnyway;
 };
 
 /**
