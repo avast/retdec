@@ -87,6 +87,10 @@ class Config
 				llvm::Function* fnc,
 				int offset);
 
+		llvm::AllocaInst* getLlvmStackVariable(
+				llvm::Function* fnc,
+				const std::string& realName);
+
 		bool isStackVariable(const llvm::Value* val);
 		retdec::utils::Maybe<int> getStackVariableOffset(
 				const llvm::Value* val);

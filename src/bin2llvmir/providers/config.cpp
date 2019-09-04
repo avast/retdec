@@ -270,6 +270,38 @@ llvm::AllocaInst* Config::getLlvmStackVariable(
 	return nullptr;
 }
 
+llvm::AllocaInst* Config::getLlvmStackVariable(
+		llvm::Function* fnc,
+		const std::string& realName)
+{
+	auto* cf = getConfigFunction(fnc);
+	if (cf == nullptr)
+	{
+		return nullptr;
+	}
+
+	for (auto& p: cf->locals)
+	{
+		auto& l = p.second;
+		if (l.getRealName() == realName)
+		{
+			for (auto& b : *fnc)
+			for (auto& i : b)
+			{
+				if (AllocaInst* a = dyn_cast<AllocaInst>(&i))
+				{
+					if (a->getName() == l.getName())
+					{
+						return a;
+					}
+				}
+			}
+		}
+	}
+
+	return nullptr;
+}
+
 /**
  * @return @c True if the the provided LLVM value @a val is a stack variable.
  *         @c False otherwise.

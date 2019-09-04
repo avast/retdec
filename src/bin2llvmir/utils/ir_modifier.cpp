@@ -1036,7 +1036,14 @@ IrModifier::FunctionPair IrModifier::modifyFunction(
 	{
 		if (nIt != argNames.end() && !nIt->empty())
 		{
-			i->setName(*nIt);
+			if (auto* st = _config->getLlvmStackVariable(nf, *nIt))
+			{
+				i->takeName(st);
+			}
+			else
+			{
+				i->setName(*nIt);
+			}
 		}
 		else
 		{
