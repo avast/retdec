@@ -4861,6 +4861,17 @@ void Capstone2LlvmIrTranslatorX86_impl::translateFfree(cs_insn* i, cs_x86* xi, l
 }
 
 /**
+ * X86_INS_FNSTSW
+ */
+void Capstone2LlvmIrTranslatorX86_impl::translateFnstsw(cs_insn* i, cs_x86* xi, llvm::IRBuilder<>& irb)
+{
+	EXPECT_IS_UNARY(i, xi, irb);
+
+	auto* fpsw = loadRegister(X86_REG_FPSW, irb);
+	storeOp(xi->operands[0], fpsw, irb);
+}
+
+/**
  * X86_INS_FUCOM, X86_INS_FUCOMP, X86_INS_FUCOMPP
  * X86_INS_FCOM, X86_INS_FCOMP, X86_INS_FCOMPP
  * X86_INS_FUCOMI, X86_INS_FUCOMIP
