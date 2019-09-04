@@ -38,7 +38,11 @@ class StackAnalysis : public llvm::ModulePass
 				llvm::Value* val,
 				llvm::Type* type,
 				std::map<llvm::Value*, llvm::Value*>& val2val);
+		retdec::utils::Maybe<int> getBaseOffset(SymbolicTree &root);
 		retdec::config::Object* getDebugStackVariable(
+				llvm::Function* fnc,
+				SymbolicTree& root);
+		retdec::config::Object* getConfigStackVariable(
 				llvm::Function* fnc,
 				SymbolicTree& root);
 
