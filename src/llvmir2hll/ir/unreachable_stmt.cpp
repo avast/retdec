@@ -14,7 +14,7 @@ namespace llvmir2hll {
 /**
 * @brief Constructs a new unreachable statement.
 */
-UnreachableStmt::UnreachableStmt() {}
+UnreachableStmt::UnreachableStmt(Address a): Statement(a) {}
 
 /**
 * @brief Destructs the statement.
@@ -22,7 +22,7 @@ UnreachableStmt::UnreachableStmt() {}
 UnreachableStmt::~UnreachableStmt() {}
 
 ShPtr<Value> UnreachableStmt::clone() {
-	ShPtr<UnreachableStmt> unreachableStmt(UnreachableStmt::create());
+	ShPtr<UnreachableStmt> unreachableStmt(UnreachableStmt::create(getAddress()));
 	unreachableStmt->setMetadata(getMetadata());
 	return unreachableStmt;
 }
@@ -44,8 +44,8 @@ void UnreachableStmt::accept(Visitor *v) {
 	v->visit(ucast<UnreachableStmt>(shared_from_this()));
 }
 
-ShPtr<UnreachableStmt> UnreachableStmt::create() {
-	return ShPtr<UnreachableStmt>(new UnreachableStmt());
+ShPtr<UnreachableStmt> UnreachableStmt::create(Address a) {
+	return ShPtr<UnreachableStmt>(new UnreachableStmt(a));
 }
 
 } // namespace llvmir2hll

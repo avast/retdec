@@ -902,7 +902,7 @@ utils::Address Decoder::getJumpTarget(
 	//
 	if (getJumpTargetSwitch(addr, branchCall, val, st))
 	{
-		return Address::getUndef;
+		return Address::Undefined;
 	}
 
 	// TOOD: ugly hack - recognize MIPS import stub functions.
@@ -923,7 +923,7 @@ utils::Address Decoder::getJumpTarget(
 				&& ai2.isValid() && ai2.getCapstoneInsn()->id == MIPS_INS_LW
 				&& ai3.isValid() && ai3.getCapstoneInsn()->id == MIPS_INS_LUI)
 		{
-			return Address::getUndef;
+			return Address::Undefined;
 		}
 	}
 
@@ -934,7 +934,7 @@ utils::Address Decoder::getJumpTarget(
 // TODO: doing this will solve more, also it will screw up integration.ack.Test_2015_ThumbGccElf
 	if (getJumpTargetSwitch(addr, branchCall, val, st))
 	{
-		return Address::getUndef;
+		return Address::Undefined;
 	}
 
 	if (auto* ci = dyn_cast<ConstantInt>(st.value))
@@ -942,7 +942,7 @@ utils::Address Decoder::getJumpTarget(
 		return ci->getZExtValue();
 	}
 
-	return Address::getUndef;
+	return Address::Undefined;
 }
 
 /**

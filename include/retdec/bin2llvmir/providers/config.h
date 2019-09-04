@@ -107,8 +107,8 @@ class Config
 
 		retdec::config::Function* insertFunction(
 				const llvm::Function* fnc,
-				retdec::utils::Address start = retdec::utils::Address::getUndef,
-				retdec::utils::Address end = retdec::utils::Address::getUndef,
+				retdec::utils::Address start = retdec::utils::Address::Undefined,
+				retdec::utils::Address end = retdec::utils::Address::Undefined,
 				bool fromDebug = false);
 
 		retdec::config::Function* renameFunction(

@@ -46,7 +46,6 @@ class Function : public retdec::utils::AddressRange
 		bool isDynamicallyLinked() const;
 		bool isSyscall() const;
 		bool isIdiom() const;
-		bool isFixed() const;
 		bool isFromDebug() const;
 		bool isWrapper() const;
 		bool isConstructor() const;
@@ -74,7 +73,6 @@ class Function : public retdec::utils::AddressRange
 		void setIsDynamicallyLinked();
 		void setIsSyscall();
 		void setIsIdiom();
-		void setIsFixed(bool f);
 		void setIsFromDebug(bool d);
 		void setIsConstructor(bool f);
 		void setIsDestructor(bool f);
@@ -132,7 +130,6 @@ class Function : public retdec::utils::AddressRange
 		eLinkType _linkType = USER_DEFINED;
 		LineNumber _startLine;
 		LineNumber _endLine;
-		bool _fixed = false;
 		bool _fromDebug = false;
 		bool _constructor = false;
 		bool _destructor = false;

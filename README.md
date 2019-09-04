@@ -341,7 +341,6 @@ This repository contains the following tools:
 This repository contains the following scripts:
 * `retdec-decompiler.py` - the main decompilation script binding it all together. This is the tool to use for full binary-to-C decompilations.
 * Support scripts used by `retdec-decompiler.py`:
-  * `retdec-color-c.py` - decorates output C sources with IDA color tags - syntax highlighting for IDA.
   * `retdec-config.py` - decompiler's configuration file.
   * `retdec-archive-decompiler.py` - decompiles objects in the given AR archive.
   * `retdec-fileinfo.py` - a Fileinfo tool wrapper.

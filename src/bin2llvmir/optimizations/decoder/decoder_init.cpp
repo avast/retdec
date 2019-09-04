@@ -357,7 +357,7 @@ void Decoder::initAllowedRangesWithConfig()
 				p.getStart(),
 				JumpTarget::eType::SELECTED_RANGE_START,
 				_c2l->getBasicMode(),
-				Address::getUndef))
+				Address::Undefined))
 		{
 			createFunction(jt->getAddress());
 			LOG << "\t" << "[+] " << p.getStart() << std::endl;
@@ -404,7 +404,7 @@ void Decoder::initAllowedRangesWithConfig()
 					start,
 					JumpTarget::eType::SELECTED_RANGE_START,
 					df.isThumb() ? CS_MODE_THUMB : _c2l->getBasicMode(),
-					Address::getUndef,
+					Address::Undefined,
 					sz))
 			{
 				foundFs.insert(*fIt);
@@ -513,7 +513,7 @@ void Decoder::initAllowedRangesWithConfig()
 						start,
 						JumpTarget::eType::SELECTED_RANGE_START,
 						s->isThumbSymbol() ? CS_MODE_THUMB :_c2l->getBasicMode(),
-						Address::getUndef,
+						Address::Undefined,
 						knownSz))
 				{
 					foundFs.insert(*fIt);
@@ -586,7 +586,7 @@ void Decoder::initJumpTargetsConfig()
 				f.getStart(),
 				JumpTarget::eType::CONFIG,
 				f.isThumb() ? CS_MODE_THUMB : _c2l->getBasicMode(),
-				Address::getUndef,
+				Address::Undefined,
 				sz))
 		{
 			auto* nf = createFunction(jt->getAddress());
@@ -611,7 +611,7 @@ void Decoder::initJumpTargetsEntryPoint()
 			ep,
 			JumpTarget::eType::ENTRY_POINT,
 			_c2l->getBasicMode(),
-			Address::getUndef))
+			Address::Undefined))
 	{
 		_entryPointFunction = createFunction(jt->getAddress());
 
@@ -652,7 +652,7 @@ void Decoder::initJumpTargetsExterns()
 					a,
 					JumpTarget::eType::IMPORT,
 					_c2l->getBasicMode(),
-					Address::getUndef))
+					Address::Undefined))
 			{
 				auto* f = createFunction(jt->getAddress(), true);
 
@@ -738,7 +738,7 @@ void Decoder::initJumpTargetsImports()
 				a,
 				JumpTarget::eType::IMPORT,
 				_c2l->getBasicMode(),
-				Address::getUndef))
+				Address::Undefined))
 		{
 			auto* f = createFunction(jt->getAddress());
 			_imports.emplace(jt->getAddress());
@@ -773,7 +773,7 @@ void Decoder::initJumpTargetsImports()
 				a,
 				JumpTarget::eType::IMPORT,
 				_c2l->getBasicMode(),
-				Address::getUndef))
+				Address::Undefined))
 		{
 			auto* f = createFunction(jt->getAddress());
 			_imports.emplace(jt->getAddress());
@@ -832,7 +832,7 @@ void Decoder::initJumpTargetsExports()
 				addr,
 				JumpTarget::eType::EXPORT,
 				_c2l->getBasicMode(),
-				Address::getUndef))
+				Address::Undefined))
 		{
 			auto* nf = createFunction(jt->getAddress());
 			_exports.emplace(jt->getAddress());
@@ -876,7 +876,7 @@ void Decoder::initJumpTargetsSymbols()
 				addr,
 				JumpTarget::eType::SYMBOL,
 				s->isThumbSymbol() ? CS_MODE_THUMB :_c2l->getBasicMode(),
-				Address::getUndef,
+				Address::Undefined,
 				sz))
 		{
 			auto* nf = createFunction(jt->getAddress());
@@ -923,7 +923,7 @@ void Decoder::initJumpTargetsDebug()
 				addr,
 				JumpTarget::eType::DEBUG,
 				f.isThumb() ? CS_MODE_THUMB : _c2l->getBasicMode(),
-				Address::getUndef,
+				Address::Undefined,
 				sz))
 		{
 			auto* nf = createFunction(jt->getAddress());
@@ -971,7 +971,7 @@ void Decoder::initStaticCode()
 				sf->getAddress(),
 				JumpTarget::eType::STATIC_CODE,
 				sf->isThumb() ? CS_MODE_THUMB : _c2l->getBasicMode(),
-				Address::getUndef,
+				Address::Undefined,
 				sf->size))
 		{
 			auto* nf = createFunction(jt->getAddress());
@@ -1021,7 +1021,7 @@ void Decoder::initVtables()
 					item.address,
 					JumpTarget::eType::VTABLE,
 					item.isThumb ? CS_MODE_THUMB : _c2l->getBasicMode(),
-					Address::getUndef))
+					Address::Undefined))
 			{
 				auto* nf = createFunction(jt->getAddress());
 				_vtableFncs.insert(jt->getAddress());

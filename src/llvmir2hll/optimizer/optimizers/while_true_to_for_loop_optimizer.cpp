@@ -148,12 +148,12 @@ void WhileTrueToForLoopOptimizer::visit(ShPtr<WhileLoopStmt> stmt) {
 	// Create the for loop's body. We have to make sure that it is non-empty.
 	auto body = splittedLoop->beforeLoopEndStmts;
 	if (!body) {
-		body = EmptyStmt::create();
+		body = EmptyStmt::create(nullptr, stmt->getAddress());
 	}
 
 	// Create the resulting for loop and replace the original loop with it.
 	auto forLoop = ForLoopStmt::create(
-		indVarInfo->indVar, startValue, endCond, step, body);
+		indVarInfo->indVar, startValue, endCond, step, body, nullptr, stmt->getAddress());
 	Statement::replaceStatement(stmt, forLoop);
 
 	// Put lastLoopStmt at the end of the new loop.

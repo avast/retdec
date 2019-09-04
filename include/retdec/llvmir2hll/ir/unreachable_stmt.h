@@ -21,7 +21,7 @@ class Visitor;
 */
 class UnreachableStmt: public Statement {
 public:
-	static ShPtr<UnreachableStmt> create();
+	static ShPtr<UnreachableStmt> create(Address a = Address::Undefined);
 
 	virtual ~UnreachableStmt() override;
 
@@ -37,7 +37,7 @@ public:
 	/// @}
 
 private:
-	UnreachableStmt();
+	UnreachableStmt(Address a = Address::Undefined);
 };
 
 } // namespace llvmir2hll

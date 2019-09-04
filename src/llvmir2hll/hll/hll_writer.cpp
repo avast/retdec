@@ -10,6 +10,9 @@
 
 #include "retdec/llvmir2hll/hll/bracket_manager.h"
 #include "retdec/llvmir2hll/hll/hll_writer.h"
+#include "retdec/llvmir2hll/hll/output_manager.h"
+#include "retdec/llvmir2hll/hll/output_managers/json_manager.h"
+#include "retdec/llvmir2hll/hll/output_managers/plain_manager.h"
 #include "retdec/llvmir2hll/ir/array_type.h"
 #include "retdec/llvmir2hll/ir/binary_op_expr.h"
 #include "retdec/llvmir2hll/ir/call_expr.h"
@@ -109,7 +112,7 @@ public:
 	*
 	* @param[in] module The current module.
 	*
-	* @par Preconditions
+	* @par Preconditionsout
 	*  - all functions in @a module have available address ranges
 	*/
 	explicit AddressRangeFuncComparator(ShPtr<Module> module):
@@ -122,7 +125,7 @@ public:
 	bool operator()(ShPtr<Function> f1, ShPtr<Function> f2) {
 		auto f1AddressRange = module->getAddressRangeForFunc(f1);
 		auto f2AddressRange = module->getAddressRangeForFunc(f2);
-		return f1AddressRange.first < f2AddressRange.first;
+		return f1AddressRange < f2AddressRange;
 	}
 
 private:
@@ -135,13 +138,26 @@ private:
 /**
 * @brief Constructs a new writer.
 *
-* @param[in] out Output stream into which the HLL code will be emitted.
+* @param[in] o Output into which the HLL code will be emitted.
+* @param[in] outputFormat Output format in which to emit the HLL.
 */
-HLLWriter::HLLWriter(llvm::raw_ostream &out):
-	out(out), emitConstantsInStructuredWay(false),
-	optionEmitDebugComments(true), optionKeepAllBrackets(false),
-	optionEmitTimeVaryingInfo(true), optionUseCompoundOperators(true),
-	currFuncGotoLabelCounter(1), currentIndent(DEFAULT_LEVEL_INDENT) {}
+HLLWriter::HLLWriter(llvm::raw_ostream &o, const std::string& outputFormat):
+	emitConstantsInStructuredWay(false),
+	optionEmitDebugComments(true),
+	optionKeepAllBrackets(false),
+	optionEmitTimeVaryingInfo(false),
+	optionUseCompoundOperators(true),
+	currFuncGotoLabelCounter(1),
+	currentIndent(DEFAULT_LEVEL_INDENT)
+{
+	if (outputFormat == "json") {
+		out = UPtr<OutputManager>(new JsonOutputManager(o));
+	} else if (outputFormat == "json-human") {
+		out = UPtr<OutputManager>(new JsonOutputManager(o, true));
+	} else {
+		out = UPtr<OutputManager>(new PlainOutputManager(o));
+	}
+}
 
 /**
 * @brief Destructs the writer.
@@ -175,7 +191,7 @@ void HLLWriter::setOptionKeepAllBrackets(bool keep) {
 *                 emitted.
 */
 void HLLWriter::setOptionEmitTimeVaryingInfo(bool emit) {
-	optionEmitTimeVaryingInfo = emit;
+	// optionEmitTimeVaryingInfo = emit;
 }
 
 /**
@@ -198,14 +214,13 @@ void HLLWriter::setOptionUseCompoundOperators(bool use) {
 * The functions prints the code blocks in the following order (by calling
 * appropriate emit*() functions):
 *  - file header
-*  - function prototypes header, function prototypes, function prototypes footer
-*  - global header, global variables, global footer
-*  - functions header, functions, functions footer
-*  - external functions header, external functions, external functions footer
+*  - function prototypes header, function prototypes
+*  - global header, global variables
+*  - functions header, functions
+*  - external functions header, external functions
 *    (there are many types of external functions; a separate section is emitted
 *    for each type)
-*  - meta-information header, meta-information, meta-information footer
-*  - file footer
+*  - meta-information header, meta-information
 *
 * Each block is separated by a blank line. A subclass of this class can just
 * override the appropriate emit*() functions. To change the order of blocks,
@@ -214,23 +229,20 @@ void HLLWriter::setOptionUseCompoundOperators(bool use) {
 bool HLLWriter::emitTargetCode(ShPtr<Module> module) {
 	this->module = module;
 	bool codeEmitted = false;
-	namesOfFuncsWithFixedIR = module->getNamesOfFuncsFixedWithLLVMIRFixer();
 
-	if (emitFileHeader()) { codeEmitted = true; out << "\n"; }
+	if (emitFileHeader()) { codeEmitted = true; out->newLine(); }
 
 	//
 	// Classes
 	//
-	if (emitClassesHeader()) { codeEmitted = true; out << "\n";}
-	if (emitClasses()) { codeEmitted = true; out << "\n";}
-	if (emitClassesFooter()) { codeEmitted = true; out << "\n"; }
+	if (emitClassesHeader()) { codeEmitted = true; out->newLine(); }
+	if (emitClasses()) { codeEmitted = true; out->newLine(); }
 
 	//
 	// Function prototypes
 	//
-	if (emitFunctionPrototypesHeader()) { codeEmitted = true; out << "\n";}
-	if (emitFunctionPrototypes()) { codeEmitted = true; out << "\n";}
-	if (emitFunctionPrototypesFooter()) { codeEmitted = true; out << "\n"; }
+	if (emitFunctionPrototypesHeader()) { codeEmitted = true; out->newLine(); }
+	if (emitFunctionPrototypes()) { codeEmitted = true; out->newLine(); }
 
 	//
 	// Global variables
@@ -248,88 +260,46 @@ bool HLLWriter::emitTargetCode(ShPtr<Module> module) {
 	//   void (*fp)(void) = func;
 	//
 	// is OK.
-	if (emitGlobalVariablesHeader()) { codeEmitted = true; out << "\n"; }
-	if (emitGlobalVariables()) { codeEmitted = true; out << "\n"; }
-	if (emitGlobalVariablesFooter()) { codeEmitted = true; out << "\n"; }
+	if (emitGlobalVariablesHeader()) { codeEmitted = true; out->newLine(); }
+	if (emitGlobalVariables()) { codeEmitted = true; out->newLine(); }
 
 	//
 	// Functions
 	//
-	if (emitFunctionsHeader()) { codeEmitted = true; out << "\n"; }
-	if (emitFunctions()) { codeEmitted = true; out << "\n"; }
-	if (emitFunctionsFooter()) { codeEmitted = true; out << "\n"; }
+	if (emitFunctionsHeader()) { codeEmitted = true; out->newLine(); }
+	if (emitFunctions()) { codeEmitted = true; out->newLine(); }
 
 	//
 	// Statically linked functions
 	//
-	if (emitStaticallyLinkedFunctionsHeader()) { codeEmitted = true; out << "\n"; }
-	if (emitStaticallyLinkedFunctions()) { codeEmitted = true; out << "\n"; }
-	if (emitStaticallyLinkedFunctionsFooter()) { codeEmitted = true; out << "\n"; }
+	if (emitStaticallyLinkedFunctionsHeader()) { codeEmitted = true; out->newLine(); }
+	if (emitStaticallyLinkedFunctions()) { codeEmitted = true; out->newLine(); }
 
 	//
 	// Dynamically linked functions
 	//
-	if (emitDynamicallyLinkedFunctionsHeader()) { codeEmitted = true; out << "\n"; }
-	if (emitDynamicallyLinkedFunctions()) { codeEmitted = true; out << "\n"; }
-	if (emitDynamicallyLinkedFunctionsFooter()) { codeEmitted = true; out << "\n"; }
+	if (emitDynamicallyLinkedFunctionsHeader()) { codeEmitted = true; out->newLine(); }
+	if (emitDynamicallyLinkedFunctions()) { codeEmitted = true; out->newLine(); }
 
 	//
 	// Syscall functions
 	//
-	if (emitSyscallFunctionsHeader()) { codeEmitted = true; out << "\n"; }
-	if (emitSyscallFunctions()) { codeEmitted = true; out << "\n"; }
-	if (emitSyscallFunctionsFooter()) { codeEmitted = true; out << "\n"; }
+	if (emitSyscallFunctionsHeader()) { codeEmitted = true; out->newLine(); }
+	if (emitSyscallFunctions()) { codeEmitted = true; out->newLine(); }
 
 	//
 	// Instruction-idiom functions
 	//
-	if (emitInstructionIdiomFunctionsHeader()) { codeEmitted = true; out << "\n"; }
-	if (emitInstructionIdiomFunctions()) { codeEmitted = true; out << "\n"; }
-	if (emitInstructionIdiomFunctionsFooter()) { codeEmitted = true; out << "\n"; }
+	if (emitInstructionIdiomFunctionsHeader()) { codeEmitted = true; out->newLine(); }
+	if (emitInstructionIdiomFunctions()) { codeEmitted = true; out->newLine(); }
 
 	//
 	// Meta-information
 	//
-	if (emitMetaInfoHeader()) { codeEmitted = true; out << "\n"; }
-	if (emitMetaInfo()) { codeEmitted = true; out << "\n"; }
-	if (emitMetaInfoFooter()) { codeEmitted = true; out << "\n"; }
-
-	if (emitFileFooter()) { codeEmitted = true; }
+	if (emitMetaInfoHeader()) { codeEmitted = true; out->newLine(); }
+	if (emitMetaInfo()) { codeEmitted = true; out->newLine(); }
 
 	return codeEmitted;
-}
-
-/**
-* @brief Comments the given code.
-*
-* If @a code spans over multiple lines, this function makes sure that the
-* whole block is properly commented.
-*
-* By default, it comments all lines by prefixing them with getCommentPrefix().
-*/
-std::string HLLWriter::comment(const std::string &code) {
-	std::string commentPrefix(getCommentPrefix());
-
-	// If there are no newlines, the situation is easy.
-	if (code.find_first_of("\n") == std::string::npos) {
-		return commentPrefix + " " + code;
-	}
-
-	// We split the code by newlines and comment them separately.
-	StringVector codeLines(split(code, '\n', false));
-
-	// Do not comment the last empty line (if any).
-	if (!codeLines.empty() && codeLines.back().empty()) {
-		codeLines.pop_back();
-	}
-
-	std::string result;
-	for (const auto &line : codeLines) {
-		// Insert a space between the comment prefix and the code only if the
-		// code is non-empty to prevent trailing spaces.
-		result += commentPrefix + (!line.empty() ? " " + line : line) + "\n";
-	}
-	return result;
 }
 
 /**
@@ -391,33 +361,18 @@ std::string HLLWriter::getIndentForGotoLabel() const {
 * By default (if it is not overridden), it emits the default header.
 */
 bool HLLWriter::emitFileHeader() {
-	// Prepare the header.
-	std::ostringstream header;
-	header << "\n";
-	header << "This file was generated by the Retargetable Decompiler\n";
-	header << "Website: https://retdec.com\n";
-	header << "Copyright (c)";
-	if (optionEmitTimeVaryingInfo) {
-		header << " " << getCurrentYear();
-	}
-	header << " Retargetable Decompiler <info@retdec.com>\n";
-	header << "\n";
-
-	// Emit it.
-	out << comment(header.str());
+	out->commentLine("");
+	out->commentLine("This file was generated by the Retargetable Decompiler");
+	out->commentLine("Website: https://retdec.com");
+	out->commentLine("Copyright (c)"
+		+ (optionEmitTimeVaryingInfo
+			? (" " + getCurrentYear())
+			: (""))
+		+ " Retargetable Decompiler <info@retdec.com>"
+	);
+	out->commentLine("");
 
 	return true;
-}
-
-/**
-* @brief Emits the file footer.
-*
-* @return @c true if some code has been emitted, @c false otherwise.
-*
-* By default (if it is not overridden), it emits nothing.
-*/
-bool HLLWriter::emitFileFooter() {
-	return false;
 }
 
 /**
@@ -466,19 +421,8 @@ bool HLLWriter::emitClass(const std::string &className) {
 			joinStrings(getReadableClassNames(baseClassNames)) << ")";
 	}
 
-	out << comment(classInfo.str() + "\n");
+	out->commentLine(classInfo.str());
 	return true;
-}
-
-/**
-* @brief Emits the footer of the <em>classes</em> block.
-*
-* @return @c true if some code has been emitted, @c false otherwise.
-*
-* By default (if it is not overridden), it emits nothing.
-*/
-bool HLLWriter::emitClassesFooter() {
-	return false;
 }
 
 /**
@@ -526,20 +470,11 @@ bool HLLWriter::emitGlobalVariables() {
 * returns @c true.
 */
 bool HLLWriter::emitGlobalVariable(ShPtr<GlobalVarDef> varDef) {
+	out->addressPush(varDef->getAddress());
 	emitDetectedCryptoPatternForGlobalVarIfAvailable(varDef->getVar());
 	varDef->accept(this);
+	out->addressPop();
 	return true;
-}
-
-/**
-* @brief Emits the footer of the <em>global variables</em> block.
-*
-* @return @c true if some code has been emitted, @c false otherwise.
-*
-* By default (if it is not overridden), it emits nothing.
-*/
-bool HLLWriter::emitGlobalVariablesFooter() {
-	return false;
 }
 
 /**
@@ -561,17 +496,6 @@ bool HLLWriter::emitFunctionPrototypesHeader() {
 * By default (if it is not overridden), it emits nothing.
 */
 bool HLLWriter::emitFunctionPrototypes() {
-	return false;
-}
-
-/**
-* @brief Emits the footer of the <em>function prototypes</em> block.
-*
-* @return @c true if some code has been emitted, @c false otherwise.
-*
-* By default (if it is not overridden), it emits nothing.
-*/
-bool HLLWriter::emitFunctionPrototypesFooter() {
 	return false;
 }
 
@@ -603,7 +527,7 @@ bool HLLWriter::emitFunctions() {
 	for (const auto &func : funcs) {
 		if (somethingEmitted) {
 			// To produce an empty line between functions.
-			out << "\n";
+			out->newLine();
 		}
 		somethingEmitted |= emitFunction(func);
 	}
@@ -627,6 +551,8 @@ bool HLLWriter::emitFunction(ShPtr<Function> func) {
 	currFunc = func;
 	currFuncGotoLabelCounter = 0;
 
+	out->addressPush(func->getStartAddress());
+
 	emitModuleNameForFuncIfAvailable(func);
 	emitAddressRangeForFuncIfAvailable(func);
 	emitLineRangeForFuncIfAvailable(func);
@@ -635,7 +561,6 @@ bool HLLWriter::emitFunction(ShPtr<Function> func) {
 	emitClassInfoIfAvailable(func);
 	emitDemangledNameIfAvailable(func);
 	emitDetectedCryptoPatternsForFuncIfAvailable(func);
-	emitLLVMIRFixerWarningForFuncIfAny(func);
 	// The comment HAS to be put as the LAST info, right before the function's
 	// signature. IDA plugin relies on that.
 	emitCommentIfAvailable(func);
@@ -643,19 +568,9 @@ bool HLLWriter::emitFunction(ShPtr<Function> func) {
 	func->accept(this);
 
 	currFunc.reset();
+	out->addressPop();
 
 	return true;
-}
-
-/**
-* @brief Emits the footer of the <em>functions</em> block.
-*
-* @return @c true if some code has been emitted, @c false otherwise.
-*
-* By default (if it is not overridden), it emits nothing.
-*/
-bool HLLWriter::emitFunctionsFooter() {
-	return false;
 }
 
 /**
@@ -681,17 +596,6 @@ bool HLLWriter::emitStaticallyLinkedFunctionsHeader() {
 */
 bool HLLWriter::emitStaticallyLinkedFunctions() {
 	return emitExternalFunctions(module->getStaticallyLinkedFuncs());
-}
-
-/**
-* @brief Emits the footer of the <em>dynamically linked functions</em> block.
-*
-* @return @c true if some code has been emitted, @c false otherwise.
-*
-* By default (if it is not overridden), it emits nothing.
-*/
-bool HLLWriter::emitStaticallyLinkedFunctionsFooter() {
-	return false;
 }
 
 /**
@@ -721,17 +625,6 @@ bool HLLWriter::emitDynamicallyLinkedFunctions() {
 }
 
 /**
-* @brief Emits the footer of the <em>dynamically linked functions</em> block.
-*
-* @return @c true if some code has been emitted, @c false otherwise.
-*
-* By default (if it is not overridden), it emits nothing.
-*/
-bool HLLWriter::emitDynamicallyLinkedFunctionsFooter() {
-	return false;
-}
-
-/**
 * @brief Emits the header of the <em>syscall functions</em> block.
 *
 * @return @c true if some code has been emitted, @c false otherwise.
@@ -757,17 +650,6 @@ bool HLLWriter::emitSyscallFunctions() {
 }
 
 /**
-* @brief Emits the footer of the <em>syscall functions</em> block.
-*
-* @return @c true if some code has been emitted, @c false otherwise.
-*
-* By default (if it is not overridden), it emits nothing.
-*/
-bool HLLWriter::emitSyscallFunctionsFooter() {
-	return false;
-}
-
-/**
 * @brief Emits the header of the <em>instruction-idiom functions</em> block.
 *
 * @return @c true if some code has been emitted, @c false otherwise.
@@ -790,17 +672,6 @@ bool HLLWriter::emitInstructionIdiomFunctionsHeader() {
 */
 bool HLLWriter::emitInstructionIdiomFunctions() {
 	return emitExternalFunctions(module->getInstructionIdiomFuncs());
-}
-
-/**
-* @brief Emits the footer of the <em>instruction-idiom functions</em> block.
-*
-* @return @c true if some code has been emitted, @c false otherwise.
-*
-* By default (if it is not overridden), it emits nothing.
-*/
-bool HLLWriter::emitInstructionIdiomFunctionsFooter() {
-	return false;
 }
 
 /**
@@ -864,20 +735,7 @@ bool HLLWriter::emitMetaInfo() {
 	if (optionEmitTimeVaryingInfo) {
 		codeEmitted |= emitMetaInfoDecompilationDate();
 	}
-	codeEmitted |= emitMetaInfoFuncsRemovedDueErrors();
-	codeEmitted |= emitMetaInfoNumberOfDecompilationErrors();
 	return codeEmitted;
-}
-
-/**
-* @brief Emits the footer of the <em>meta-information</em> block.
-*
-* @return @c true if some code has been emitted, @c false otherwise.
-*
-* By default (if it is not overridden), it emits nothing.
-*/
-bool HLLWriter::emitMetaInfoFooter() {
-	return false;
 }
 
 /**
@@ -886,18 +744,18 @@ bool HLLWriter::emitMetaInfoFooter() {
 void HLLWriter::emitExprWithBracketsIfNeeded(ShPtr<Expression> expr) {
 	bool bracketsAreNeeded = bracketsManager->areBracketsNeeded(expr);
 	if (bracketsAreNeeded) {
-		out << "(";
+		out->punctuation('(');
 	}
 	expr->accept(this);
 	if (bracketsAreNeeded) {
-		out << ")";
+		out->punctuation(')');
 	}
 }
 
 /**
 * @brief Emits the given unary expression.
 *
-* @param[in] opRepr Textual representation of the operator (including spaces).
+* @param[in] opRepr Textual representation of the operator (without spaces).
 * @param[in] expr Expression to be emitted.
 *
 * Brackets are emitted when needed. Use this function if you simply need to
@@ -905,30 +763,32 @@ void HLLWriter::emitExprWithBracketsIfNeeded(ShPtr<Expression> expr) {
 */
 void HLLWriter::emitUnaryOpExpr(const std::string &opRepr,
 		ShPtr<UnaryOpExpr> expr) {
-	out << opRepr;
+	out->operatorX(opRepr);
 	emitExprWithBracketsIfNeeded(expr->getOperand());
 }
 
 /**
 * @brief Emits the given binary expression.
 *
-* @param[in] opRepr Textual representation of the operator (including spaces).
+* @param[in] opRepr Textual representation of the operator (without spaces).
 * @param[in] expr Expression to be emitted.
+* @param[in] spaceBefore Should there be a space before operator?
+* @param[in] spaceAfter Should there be a space after operator?
 *
 * Brackets are emitted when needed. Use this function if you simply need to
 * emit the operator without any specialties.
 */
 void HLLWriter::emitBinaryOpExpr(const std::string &opRepr,
-		ShPtr<BinaryOpExpr> expr) {
+		ShPtr<BinaryOpExpr> expr, bool spaceBefore, bool spaceAfter) {
 	bool bracketsAreNeeded = bracketsManager->areBracketsNeeded(expr);
 	if (bracketsAreNeeded) {
-		out << "(";
+		out->punctuation('(');
 	}
 	expr->getFirstOperand()->accept(this);
-	out << opRepr;
+	out->operatorX(opRepr, spaceBefore, spaceAfter);
 	expr->getSecondOperand()->accept(this);
 	if (bracketsAreNeeded) {
-		out << ")";
+		out->punctuation(')');
 	}
 }
 
@@ -947,8 +807,8 @@ bool HLLWriter::emitDetectedCryptoPatternForGlobalVarIfAvailable(ShPtr<Variable>
 	}
 
 	std::ostringstream info;
-	info << "Detected cryptographic pattern: " << pattern << "\n";
-	out << comment(info.str());
+	info << "Detected cryptographic pattern: " << pattern;
+	out->commentLine(info.str());
 	return true;
 }
 
@@ -965,8 +825,8 @@ bool HLLWriter::emitModuleNameForFuncIfAvailable(ShPtr<Function> func) {
 	}
 
 	std::ostringstream info;
-	info << "From module:   " << moduleName << "\n";
-	out << comment(info.str());
+	info << "From module:   " << moduleName;
+	out->commentLine(info.str());
 	return true;
 }
 
@@ -984,9 +844,9 @@ bool HLLWriter::emitAddressRangeForFuncIfAvailable(ShPtr<Function> func) {
 	}
 
 	std::ostringstream info;
-	info << "Address range: " << "0x" + toHex(addressRange.first) +
-		" - 0x" + toHex(addressRange.second) << "\n";
-	out << comment(info.str());
+	info << "Address range: " << addressRange.getStart().toHexPrefixString() +
+		" - " + addressRange.getEnd().toHexPrefixString();
+	out->commentLine(info.str());
 	return true;
 }
 
@@ -1005,8 +865,8 @@ bool HLLWriter::emitLineRangeForFuncIfAvailable(ShPtr<Function> func) {
 
 	std::ostringstream info;
 	info << "Line range:    " << lineRange.first << " - "
-		<< lineRange.second << "\n";
-	out << comment(info.str());
+		<< lineRange.second;
+	out->commentLine(info.str());
 	return true;
 }
 
@@ -1024,7 +884,7 @@ bool HLLWriter::emitWrapperInfoForFuncIfAvailable(ShPtr<Function> func) {
 		return false;
 	}
 
-	out << comment("Wraps:         " + wrappedFunc + "\n");
+	out->commentLine("Wraps:         " + wrappedFunc);
 	return true;
 }
 
@@ -1039,10 +899,10 @@ bool HLLWriter::emitClassInfoIfAvailable(ShPtr<Function> func) {
 		return false;
 	}
 
-	out << comment("From class:    " + getReadableClassName(className) + "\n");
+	out->commentLine("From class:    " + getReadableClassName(className));
 	auto funcType = module->getTypeOfFuncInClass(func, className);
 	if (!funcType.empty()) {
-		out << comment("Type:          " + funcType + "\n");
+		out->commentLine("Type:          " + funcType);
 	}
 	return true;
 }
@@ -1058,7 +918,7 @@ bool HLLWriter::emitDemangledNameIfAvailable(ShPtr<Function> func) {
 		return false;
 	}
 
-	out << comment("Demangled:     " + demangledName + "\n");
+	out->commentLine("Demangled:     " + demangledName);
 	return true;
 }
 
@@ -1092,14 +952,14 @@ bool HLLWriter::emitCommentIfAvailable(ShPtr<Function> func) {
 	// use it as a separator.
 	auto parts = split(funcComment, '\n', /*trimWhitespace=*/false);
 	if (parts.size() == 1) {
-		out << comment("Comment:       " + funcComment + "\n");
+		out->commentLine("Comment:       " + funcComment);
 	} else {
 		// A multi-line comment.
-		out << comment("Comment:\n");
+		out->commentLine("Comment:");
 		for (const auto &part : parts) {
 			// Our IDA plugin uses four spaces for indentation, so be
 			// consistent.
-			out << comment("    " + part + "\n");
+			out->commentLine("    " + part);
 		}
 	}
 
@@ -1119,30 +979,10 @@ bool HLLWriter::emitDetectedCryptoPatternsForFuncIfAvailable(ShPtr<Function> fun
 	}
 
 	std::ostringstream usedPatterns;
-	usedPatterns << "Used cryptographic patterns:\n";
+	out->commentLine("Used cryptographic patterns:");
 	for (auto &pattern : patterns) {
-		usedPatterns << " - " << pattern << "\n";
+		out->commentLine(" - " + pattern);
 	}
-	out << comment(usedPatterns.str());
-	return true;
-}
-
-/**
-* @brief Emits a warning from LLVM IR fixing script (if any).
-*
-* If the function's body was fixed by the LLVM IR fixing script, put
-* this information in to the generated code as a comment.
-*
-* @return @c true if some code was emitted, @c false otherwise.
-*/
-bool HLLWriter::emitLLVMIRFixerWarningForFuncIfAny(ShPtr<Function> func) {
-	if (!hasItem(namesOfFuncsWithFixedIR, func->getName())) {
-		return false;
-	}
-
-	out << comment(
-		"Warning: There were some errors during the decompilation of the following\n"
-		"         function. Therefore, its body may be incomplete.\n");
 	return true;
 }
 
@@ -1170,7 +1010,7 @@ void HLLWriter::emitSectionHeader(const std::string &sectionName) {
 
 	// Emit the comment.
 	auto section = leftSeparator + " " + sectionName + " " + rightSeparator;
-	out << getCurrentIndent() << comment(section) << "\n";
+	out->commentLine(section, getCurrentIndent());
 }
 
 /**
@@ -1201,9 +1041,26 @@ void HLLWriter::sortFuncsForEmission(FuncVector &funcs) {
 * If the emission of debug comments is disabled, this function does nothing and
 * returns @c false;
 */
-bool HLLWriter::tryEmitVarInfoInComment(ShPtr<Variable> var) {
+bool HLLWriter::tryEmitVarInfoInComment(ShPtr<Variable> var, ShPtr<Statement> stmt) {
 	if (!optionEmitDebugComments) {
 		return false;
+	}
+
+	// It is a local variable, which can have an offset (global variables
+	// don't have offsets).
+	std::string varOffsetComment;
+	std::string varOffset(getOffsetFromName(var->getInitialName()));
+	if (!varOffset.empty()) {
+		varOffsetComment = "bp" + varOffset;
+	}
+	// Statement ASM address.
+	if (stmt && stmt->getAddress().isDefined()) {
+		if (varOffsetComment.empty()) {
+			out->comment(stmt->getAddress().toHexPrefixString(), " ");
+		} else {
+			out->comment(varOffsetComment + ", " + stmt->getAddress().toHexPrefixString(), " ");
+		}
+		return true;
 	}
 
 	// Both local and global variables can have an address.
@@ -1218,7 +1075,7 @@ bool HLLWriter::tryEmitVarInfoInComment(ShPtr<Variable> var) {
 		// which global variable corresponds to which register.
 		auto registerName = module->getRegisterForGlobalVar(var);
 		if (!registerName.empty()) {
-			out << " " << comment(registerName);
+			out->comment(registerName, " ");
 			return true;
 		}
 		return false;
@@ -1229,14 +1086,7 @@ bool HLLWriter::tryEmitVarInfoInComment(ShPtr<Variable> var) {
 		// It is a local variable comming from a global variable. We want to
 		// emit the global variable's name in a comment so we know from which
 		// global variable this local variable comes from.
-		out << " " << comment(globalVarName);
-		return true;
-	}
-
-	// It is a local variable, which can have an offset (global variables
-	// don't have offsets).
-	infoEmitted = tryEmitVarOffsetInComment(var);
-	if (infoEmitted) {
+		out->comment(globalVarName, " ");
 		return true;
 	}
 
@@ -1249,30 +1099,12 @@ bool HLLWriter::tryEmitVarInfoInComment(ShPtr<Variable> var) {
 * @return @c true if some code has been emitted, @c false otherwise.
 */
 bool HLLWriter::tryEmitVarAddressInComment(ShPtr<Variable> var) {
-	// The address or offset is stored in the initial name of the variable.
-	std::string varAddress(getAddressFromName(var->getInitialName()));
-	if (varAddress.empty()) {
-		return false;
+	if (var->getAddress().isDefined()) {
+		out->comment(var->getAddress().toHexPrefixString(), " ");
+		return true;
 	}
 
-	out << " " << comment(varAddress);
-	return true;
-}
-
-/**
-* @brief Tries to emit the offset of the given variable into a comment.
-*
-* @return @c true if some code has been emitted, @c false otherwise.
-*/
-bool HLLWriter::tryEmitVarOffsetInComment(ShPtr<Variable> var) {
-	// The offset is stored in the initial name of the variable.
-	std::string varOffset(getOffsetFromName(var->getInitialName()));
-	if (varOffset.empty()) {
-		return false;
-	}
-
-	out << " " << comment("bp" + varOffset);
-	return true;
+	return false;
 }
 
 /**
@@ -1354,7 +1186,7 @@ bool HLLWriter::emitMetaInfoDetectedCompilerOrPacker() {
 		return false;
 	}
 
-	out << comment("Detected compiler/packer: " + compilerOrPacker) << "\n";
+	out->commentLine("Detected compiler/packer: " + compilerOrPacker);
 	return true;
 }
 
@@ -1369,7 +1201,7 @@ bool HLLWriter::emitMetaInfoDetectedLanguage() {
 		return false;
 	}
 
-	out << comment("Detected language: " + language) << "\n";
+	out->commentLine("Detected language: " + language);
 	return true;
 }
 
@@ -1379,9 +1211,9 @@ bool HLLWriter::emitMetaInfoDetectedLanguage() {
 * @return @c true if some code was emitted, @c false otherwise.
 */
 bool HLLWriter::emitMetaInfoNumberOfDetectedFuncs() {
-	std::ostringstream funcCount;
-	funcCount << "Detected functions: " << module->getNumOfFuncDefinitions();
-	out << comment(funcCount.str()) << "\n";
+	out->commentLine("Detected functions: "
+		+ std::to_string(module->getNumOfFuncDefinitions()));
+
 	return true;
 }
 
@@ -1395,10 +1227,9 @@ bool HLLWriter::emitMetaInfoSelectedButNotFoundFuncs() {
 		return false;
 	}
 
-	out << comment(
+	out->commentLine(
 		"Functions selected to be decompiled but not found: " +
-		joinStrings(notFoundFuncs) +
-		"\n"
+		joinStrings(notFoundFuncs)
 	);
 	return true;
 }
@@ -1409,59 +1240,8 @@ bool HLLWriter::emitMetaInfoSelectedButNotFoundFuncs() {
 * @return @c true if some code was emitted, @c false otherwise.
 */
 bool HLLWriter::emitMetaInfoDecompilationDate() {
-	std::ostringstream decompDate;
-	decompDate << "Decompilation date: " << getCurrentDate() <<
-		" " << getCurrentTime() << "\n";
-	out << comment(decompDate.str());
-	return true;
-}
-
-/**
-* @brief Emits functions that were removed due to decompilation errors (if
-*        any).
-*/
-bool HLLWriter::emitMetaInfoFuncsRemovedDueErrors() {
-	std::ostringstream funcsRemovedDueErrors;
-	funcsRemovedDueErrors << "Functions removed due to errors: ";
-	std::size_t numOfFuncsRemovedDueErrors = 0;
-	for (auto &funcName : namesOfFuncsWithFixedIR) {
-		// We include only functions which do not exist in the module. Existing
-		// functions have attached a warning comment to their bodies.
-		if (!module->getFuncByName(funcName)) {
-			if (numOfFuncsRemovedDueErrors > 0) {
-				funcsRemovedDueErrors << ", ";
-			}
-			funcsRemovedDueErrors << funcName;
-			numOfFuncsRemovedDueErrors = true;
-		}
-	}
-	funcsRemovedDueErrors << "\n";
-	if (numOfFuncsRemovedDueErrors > 0) {
-		out << comment(funcsRemovedDueErrors.str());
-		return true;
-	}
-	return false;
-}
-
-/**
-* @brief Emits the number of decompilation errors (if any).
-*
-* @return @c true if some code was emitted, @c false otherwise.
-*/
-bool HLLWriter::emitMetaInfoNumberOfDecompilationErrors() {
-	if (namesOfFuncsWithFixedIR.empty()) {
-		return false;
-	}
-
-	auto totalNumberOfFuncs = module->getNumberOfFuncsDetectedInFrontend();
-	std::ostringstream numberOfDecompilationErrors;
-	numberOfDecompilationErrors <<
-		"Number of decompilation errors: " <<
-		namesOfFuncsWithFixedIR.size() <<
-		" (out of " << totalNumberOfFuncs << " function" <<
-		(totalNumberOfFuncs != 1 ? "s" : "") <<
-		")\n";
-	out << comment(numberOfDecompilationErrors.str());
+	out->commentLine("Decompilation date: " + getCurrentDate()
+		+ " " + getCurrentTime());
 	return true;
 }
 

@@ -93,6 +93,10 @@ bool GlobalVarDef::definesExternalVar() const {
 	return var->isExternal();
 }
 
+Address GlobalVarDef::getAddress() const {
+	return var->getAddress();
+}
+
 /**
 * @brief Sets a new variable.
 *

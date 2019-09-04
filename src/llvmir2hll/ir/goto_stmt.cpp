@@ -16,7 +16,8 @@ namespace llvmir2hll {
 *
 * See create() for more information.
 */
-GotoStmt::GotoStmt(ShPtr<Statement> target): target(target) {}
+GotoStmt::GotoStmt(ShPtr<Statement> target, Address a):
+	Statement(a), target(target) {}
 
 /**
 * @brief Destructs the statement.
@@ -24,7 +25,7 @@ GotoStmt::GotoStmt(ShPtr<Statement> target): target(target) {}
 GotoStmt::~GotoStmt() {}
 
 ShPtr<Value> GotoStmt::clone() {
-	ShPtr<GotoStmt> gotoStmt(GotoStmt::create(target));
+	ShPtr<GotoStmt> gotoStmt(GotoStmt::create(target, getAddress()));
 	gotoStmt->setMetadata(getMetadata());
 	return gotoStmt;
 }
@@ -73,14 +74,15 @@ void GotoStmt::setTarget(ShPtr<Statement> newTarget) {
 * @brief Creates a new goto statement.
 *
 * @param[in] target Jump target.
+* @param[in] a Address.
 *
 * @par Preconditions
 *  - @a target is non-null
 */
-ShPtr<GotoStmt> GotoStmt::create(ShPtr<Statement> target) {
+ShPtr<GotoStmt> GotoStmt::create(ShPtr<Statement> target, Address a) {
 	PRECONDITION_NON_NULL(target);
 
-	ShPtr<GotoStmt> gotoStmt(new GotoStmt(target));
+	ShPtr<GotoStmt> gotoStmt(new GotoStmt(target, a));
 
 	// Initialization (recall that shared_from_this(), which is called in
 	// setTarget(), cannot be called in a constructor).

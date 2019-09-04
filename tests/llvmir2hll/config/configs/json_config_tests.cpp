@@ -921,38 +921,6 @@ GetDemangledNameOfFuncReturnsCorrectValueWhenFuncHasDemangledName) {
 }
 
 //
-// getFuncsFixedWithLLVMIRFixer()
-//
-
-TEST_F(JSONConfigTests,
-GetFuncsFixedWithLLVMIRFixerReturnsEmptySetWhenThereAreNoFuncs) {
-	auto config = JSONConfig::empty();
-
-	ASSERT_EQ(StringSet(), config->getFuncsFixedWithLLVMIRFixer());
-}
-
-TEST_F(JSONConfigTests,
-GetFuncsFixedWithLLVMIRFixerReturnsCorrectValueWhenThereAreFixedFuncs) {
-	auto config = JSONConfig::fromString(R"({
-		"functions": [
-			{
-				"name": "my_func1",
-				"wasFixed": false
-			},
-			{
-				"name": "my_func2",
-				"wasFixed": true
-			}
-		]
-	})");
-
-	ASSERT_EQ(
-		StringSet({"my_func2"}),
-		config->getFuncsFixedWithLLVMIRFixer()
-	);
-}
-
-//
 // getClassNames()
 //
 

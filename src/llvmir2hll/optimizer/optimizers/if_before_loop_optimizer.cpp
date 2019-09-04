@@ -161,7 +161,8 @@ bool IfBeforeLoopOptimizer::tryOptimizationCase1(ShPtr<IfStmt> stmt) {
 	// Attach the if's metadata to forLoop (if any). However, put them in an
 	// empty statement because there could already be some existing metadata.
 	if (!ifStmtMetadata.empty()) {
-		ShPtr<EmptyStmt> emptyStmt(EmptyStmt::create());
+		ShPtr<EmptyStmt> emptyStmt(
+			EmptyStmt::create(nullptr, ifStmtReplacement->getAddress()));
 		emptyStmt->setMetadata(ifStmtMetadata);
 		ifStmtReplacement->prependStatement(emptyStmt);
 	}

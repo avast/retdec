@@ -114,6 +114,7 @@ public:
 	/// @}
 
 	ShPtr<Statement> getParent() const;
+	Address getAddress() const;
 
 	/// @name Goto Targets
 	/// @}
@@ -135,7 +136,7 @@ public:
 	static ShPtr<Statement> getLastStatement(ShPtr<Statement> stmts);
 
 protected:
-	Statement();
+	Statement(Address a = Address::Undefined);
 
 protected:
 	/// Successor statement.
@@ -146,6 +147,9 @@ protected:
 
 	/// Label.
 	std::string label;
+
+	/// Address of ASM instruction from which this statement was created from.
+	Address address;
 
 private:
 	bool targetIsCurrentStatement(ShPtr<GotoStmt> gotoStmt) const;

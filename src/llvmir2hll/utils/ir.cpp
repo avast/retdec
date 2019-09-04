@@ -264,7 +264,7 @@ StmtVector removeVarDefOrAssignStatement(ShPtr<Statement> stmt,
 	//
 
 	// Insert the first found call.
-	auto callStmt = CallStmt::create(*calls.begin());
+	auto callStmt = CallStmt::create(*calls.begin(), nullptr, stmt->getAddress());
 	callStmt->setMetadata(stmt->getMetadata());
 	Statement::replaceStatement(stmt, callStmt);
 	newStmts.push_back(callStmt);
@@ -273,7 +273,7 @@ StmtVector removeVarDefOrAssignStatement(ShPtr<Statement> stmt,
 	// Insert the remaining calls.
 	auto lastCallStmt = callStmt;
 	for (auto call : calls) {
-		callStmt = CallStmt::create(call);
+		callStmt = CallStmt::create(call, nullptr, stmt->getAddress());
 		lastCallStmt->appendStatement(callStmt);
 		newStmts.push_back(callStmt);
 		lastCallStmt = callStmt;
@@ -490,7 +490,7 @@ bool isDefOfVar(ShPtr<Statement> stmt, ShPtr<Variable> var) {
 * places it in a proper place so that all VarDefStmts at the beginning of @a
 * func are sorted alphabetically.
 *
-* If @a var is already a local function of @a func, this function does nothing.
+* If @a var is already a local variable of @a func, this function does nothing.
 *
 * @par Preconditions
 *  - @a func is a definition, not a declaration
@@ -517,14 +517,15 @@ void addLocalVarToFunc(ShPtr<Variable> var, ShPtr<Function> func,
 		stmt = stmt->getSuccessor();
 	}
 	// ...then, we place a VarDefStmt of var into that position.
-	stmt->prependStatement(VarDefStmt::create(var, init));
+	stmt->prependStatement(
+		VarDefStmt::create(var, init, nullptr, func->getStartAddress()));
 }
 
 /**
 * @brief Converts the given global variable @a var into a local variable of @a
 *        func, possibly with the given initializer @a init.
 *
-* The converted function gets the same name as the global variable.
+* The converted variable gets the same name as the global variable.
 *
 * @par Preconditions
 *  - @a var is a global variable

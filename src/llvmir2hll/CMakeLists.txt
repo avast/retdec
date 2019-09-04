@@ -40,18 +40,17 @@ set(LLVMIR2HLL_SOURCES
 	graphs/cg/cg_builder.cpp
 	graphs/cg/cg_writer.cpp
 	graphs/cg/cg_writers/graphviz_cg_writer.cpp
-	hll/bir_writer.cpp
 	hll/bracket_manager.cpp
 	hll/bracket_managers/c_bracket_manager.cpp
 	hll/bracket_managers/no_bracket_manager.cpp
-	hll/bracket_managers/py_bracket_manager.cpp
 	hll/compound_op_manager.cpp
 	hll/compound_op_managers/c_compound_op_manager.cpp
 	hll/compound_op_managers/no_compound_op_manager.cpp
-	hll/compound_op_managers/py_compound_op_manager.cpp
 	hll/hll_writer.cpp
 	hll/hll_writers/c_hll_writer.cpp
-	hll/hll_writers/py_hll_writer.cpp
+	hll/output_manager.cpp
+	hll/output_managers/json_manager.cpp
+	hll/output_managers/plain_manager.cpp
 	ir/add_op_expr.cpp
 	ir/address_op_expr.cpp
 	ir/and_op_expr.cpp

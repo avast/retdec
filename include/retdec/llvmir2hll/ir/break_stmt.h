@@ -22,7 +22,7 @@ class Visitor;
 */
 class BreakStmt final: public Statement {
 public:
-	static ShPtr<BreakStmt> create();
+	static ShPtr<BreakStmt> create(Address a = Address::Undefined);
 
 	virtual ~BreakStmt() override;
 
@@ -40,7 +40,7 @@ public:
 private:
 	// Since instances are created by calling the static function create(), the
 	// constructor can be private.
-	BreakStmt();
+	BreakStmt(Address a = Address::Undefined);
 };
 
 } // namespace llvmir2hll

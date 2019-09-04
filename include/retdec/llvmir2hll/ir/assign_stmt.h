@@ -26,7 +26,7 @@ class Visitor;
 class AssignStmt final: public Statement {
 public:
 	static ShPtr<AssignStmt> create(ShPtr<Expression> lhs, ShPtr<Expression> rhs,
-		ShPtr<Statement> succ = nullptr);
+		ShPtr<Statement> succ = nullptr, Address a = Address::Undefined);
 
 	virtual ~AssignStmt() override;
 
@@ -55,7 +55,8 @@ public:
 private:
 	// Since instances are created by calling the static function create(), the
 	// constructor can be private.
-	AssignStmt(ShPtr<Expression> lhs, ShPtr<Expression> rhs);
+	AssignStmt(ShPtr<Expression> lhs, ShPtr<Expression> rhs,
+		Address a = Address::Undefined);
 
 private:
 	/// Left-hand side of the assignment.

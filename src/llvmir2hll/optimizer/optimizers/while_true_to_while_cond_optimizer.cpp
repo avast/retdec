@@ -179,7 +179,7 @@ void WhileTrueToWhileCondOptimizer::visit(ShPtr<WhileLoopStmt> stmt) {
 	// to the first statement of the new loop.
 	if (stmt->getBody()->getMetadata() != "") {
 		// An empty statement need to be used.
-		ShPtr<EmptyStmt> emptyStmt(EmptyStmt::create());
+		ShPtr<EmptyStmt> emptyStmt(EmptyStmt::create(nullptr, stmt->getAddress()));
 		emptyStmt->setMetadata(firstStmtMetadata);
 		stmt->getBody()->prependStatement(emptyStmt);
 	} else {

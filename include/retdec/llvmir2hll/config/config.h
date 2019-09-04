@@ -211,11 +211,6 @@ public:
 	*/
 	virtual std::string getDemangledNameOfFunc(const std::string &func) const = 0;
 
-	/**
-	* @brief Returns a set of functions that were fixed by our LLVM-IR fixer.
-	*/
-	virtual StringSet getFuncsFixedWithLLVMIRFixer() const = 0;
-
 	/// @}
 
 	/// @name Classes

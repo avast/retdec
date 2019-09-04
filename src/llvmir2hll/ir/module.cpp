@@ -565,14 +565,6 @@ std::string Module::getDemangledNameOfFunc(ShPtr<Function> func) const {
 }
 
 /**
-* @brief Returns a set of names of functions that were fixed by our LLVM-IR
-*        fixer.
-*/
-StringSet Module::getNamesOfFuncsFixedWithLLVMIRFixer() const {
-	return config->getFuncsFixedWithLLVMIRFixer();
-}
-
-/**
 * @brief Returns a constant iterator to the first function.
 */
 Module::func_iterator Module::func_begin() const {
@@ -625,14 +617,14 @@ Module::func_filter_iterator Module::func_declaration_end() const {
 *
 * If there is no address range for @a func, @c NO_ADDRESS_RANGE is returned.
 */
-AddressRange Module::getAddressRangeForFunc(ShPtr<Function> func) const {
+AddressRange Module::getAddressRangeForFunc(ShPtr<const Function> func) const {
 	return config->getAddressRangeForFunc(func->getInitialName());
 }
 
 /**
 * @brief Has the given function an address range?
 */
-bool Module::hasAddressRange(ShPtr<Function> func) const {
+bool Module::hasAddressRange(ShPtr<const Function> func) const {
 	return getAddressRangeForFunc(func) != NO_ADDRESS_RANGE;
 }
 

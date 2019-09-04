@@ -15,14 +15,14 @@ set(RETDEC_TESTS_LLVMIR2HLL_SOURCES
 	graphs/cfg/cfg_traversals/lhs_rhs_uses_cfg_traversal_tests.cpp
 	hll/bracket_managers/c_bracket_manager_tests.cpp
 	hll/bracket_managers/no_bracket_manager_tests.cpp
-	hll/bracket_managers/py_bracket_manager_tests.cpp
 	hll/compound_op_managers/c_compound_op_manager_tests.cpp
 	hll/compound_op_managers/compound_op_manager_tests.cpp
 	hll/compound_op_managers/no_compound_op_manager_tests.cpp
-	hll/compound_op_managers/py_compound_op_manager_tests.cpp
 	hll/hll_writers/c_hll_writer_tests.cpp
 	hll/hll_writers/hll_writer_tests.cpp
-	hll/hll_writers/py_hll_writer_tests.cpp
+	hll/output_managers/json_manager_tests.cpp
+	hll/output_managers/output_manager_tests.cpp
+	hll/output_managers/plain_manager_tests.cpp
 	ir/array_index_op_expr_tests.cpp
 	ir/array_type_tests.cpp
 	ir/assign_stmt_tests.cpp

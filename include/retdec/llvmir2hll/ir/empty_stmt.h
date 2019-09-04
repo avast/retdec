@@ -22,7 +22,8 @@ class Visitor;
 */
 class EmptyStmt final: public Statement {
 public:
-	static ShPtr<EmptyStmt> create(ShPtr<Statement> succ = nullptr);
+	static ShPtr<EmptyStmt> create(ShPtr<Statement> succ = nullptr,
+		Address a = Address::Undefined);
 
 	virtual bool isEqualTo(ShPtr<Value> otherValue) const override;
 	virtual ShPtr<Value> clone() override;
@@ -40,7 +41,7 @@ public:
 private:
 	// Since instances are created by calling the static function create(), the
 	// constructor can be private.
-	EmptyStmt();
+	EmptyStmt(Address a = Address::Undefined);
 };
 
 } // namespace llvmir2hll

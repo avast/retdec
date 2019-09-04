@@ -122,8 +122,8 @@ class FileFormat : public retdec::utils::ByteValueStorage, private retdec::utils
 				Architecture arch,
 				retdec::utils::Endianness endian = retdec::utils::Endianness::UNKNOWN,
 				std::size_t bytesPerWord = 4,
-				retdec::utils::Address entryPoint = retdec::utils::Address::getUndef,
-				retdec::utils::Address sectionVMA = retdec::utils::Address::getUndef);
+				retdec::utils::Address entryPoint = retdec::utils::Address::Undefined,
+				retdec::utils::Address sectionVMA = retdec::utils::Address::Undefined);
 		void loadStrings();
 		void loadStrings(StringType type, std::size_t charSize);
 		void loadStrings(StringType type, std::size_t charSize, const SecSeg* secSeg);

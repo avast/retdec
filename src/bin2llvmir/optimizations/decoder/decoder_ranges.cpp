@@ -117,7 +117,7 @@ void RangesToDecode::removeZeroSequences(
 					{
 						toRemove.insert(zeroStart+8, addr);
 					}
-					zeroStart = Address::getUndef;
+					zeroStart = Address::Undefined;
 				}
 
 				iter += 1;

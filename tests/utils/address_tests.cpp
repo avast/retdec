@@ -27,12 +27,30 @@ TEST_F(AddressTests, UninitializedAddressIsUndefined)
 	Address a;
 	EXPECT_TRUE(a.isUndefined());
 	EXPECT_FALSE(a.isDefined());
+	EXPECT_FALSE(a.isUnknown());
+}
+
+TEST_F(AddressTests, UndefinedAddressIsUndefinedButNotUnknown)
+{
+	Address a = Address::Undefined;
+	EXPECT_TRUE(a.isUndefined());
+	EXPECT_FALSE(a.isUnknown());
+	EXPECT_FALSE(a.isDefined());
+}
+
+TEST_F(AddressTests, UnknownAddressIsUndefinedAndUnknown)
+{
+	Address a = Address::Unknown;
+	EXPECT_TRUE(a.isUndefined());
+	EXPECT_TRUE(a.isUnknown());
+	EXPECT_FALSE(a.isDefined());
 }
 
 TEST_F(AddressTests, InitializedAddressIsDefined)
 {
 	Address a(1234);
 	EXPECT_FALSE(a.isUndefined());
+	EXPECT_FALSE(a.isUnknown());
 	EXPECT_TRUE(a.isDefined());
 }
 

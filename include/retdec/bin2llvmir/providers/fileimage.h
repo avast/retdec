@@ -65,12 +65,12 @@ class FileImage
 				retdec::utils::Address addr);
 		llvm::Constant* getConstant(
 				llvm::Type* type,
-				retdec::utils::Address addr = retdec::utils::Address::getUndef,
+				retdec::utils::Address addr = retdec::utils::Address::Undefined,
 				bool wideString = false);
 		llvm::Constant* getConstant(
 				Config* config,
 				DebugFormat* dbgf = nullptr,
-				retdec::utils::Address addr = retdec::utils::Address::getUndef);
+				retdec::utils::Address addr = retdec::utils::Address::Undefined);
 
 	// Miscellaneous
 	//
