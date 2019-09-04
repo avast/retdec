@@ -2757,7 +2757,7 @@ void Capstone2LlvmIrTranslatorX86_impl::translateNeg(cs_insn* i, cs_x86* xi, llv
  * IRETD, IRET, STI, CLI, VERR, VERW, LMSW, LTR,
  * SMSW, CLTS, INVD, LOCK, RSM, RDMSR, WRMSR, RDPMC, SYSENTER,
  * SYSEXIT, XGETBV, LAR, LSL, INVPCID, SLDT, LLDT, SGDT, SIDT, LGDT, LIDT,
- * XSAVE, XRSTOR, XSAVEOPT, INVLPG, FBLD, FBSTP, FLDENV, FRSTOR, FNSAVE, FFREE, ARPL,
+ * XSAVE, XRSTOR, XSAVEOPT, INVLPG, FBLD, FBSTP, FLDENV, FRSTOR, FNSAVE, ARPL,
  * STR, FSCALE, FXTRACT, FPTAN, FPATAN,
  * FNCLEX, FWAIT, FNOP
  */
@@ -4839,6 +4839,25 @@ void Capstone2LlvmIrTranslatorX86_impl::translateFdecstp(cs_insn* i, cs_x86* xi,
 	// but because TOP is i3 type, subtracting 1 from 0 gives -1 (i.e. 111b = 7).
 	x87DecTop(irb);
 	storeRegister(X87_REG_C1, irb.getFalse(), irb);
+}
+
+/**
+ * X86_INS_FFREE
+ */
+void Capstone2LlvmIrTranslatorX86_impl::translateFfree(cs_insn* i, cs_x86* xi, llvm::IRBuilder<>& irb)
+{
+	EXPECT_IS_UNARY(i, xi, irb);
+
+	top = loadX87Top(irb);
+	auto reg = xi->operands[0].reg;
+	unsigned regOff = reg - X86_REG_ST0;
+	idx = regOff
+		  ? irb.CreateAdd(top, llvm::ConstantInt::get(top->getType(), regOff))
+		  : top;
+
+	//storeX87TagReg(irb, idx, llvm::ConstantInt::get(irb.getIntNTy(2), 0x11B)); // 0x11B
+	clearX87TagReg(irb, idx);
+
 }
 
 /**

@@ -789,7 +789,7 @@ Capstone2LlvmIrTranslatorX86_impl::_i2fm =
 		{X86_INS_FCOMPP, &Capstone2LlvmIrTranslatorX86_impl::translateFucomPop},
 		{X86_INS_FDECSTP, &Capstone2LlvmIrTranslatorX86_impl::translateFdecstp},
 		{X86_INS_FEMMS, nullptr},
-		{X86_INS_FFREE, nullptr},
+		{X86_INS_FFREE, &Capstone2LlvmIrTranslatorX86_impl::translateFfree},
 		{X86_INS_FICOM, &Capstone2LlvmIrTranslatorX86_impl::translateFucomPop},
 		{X86_INS_FICOMP, &Capstone2LlvmIrTranslatorX86_impl::translateFucomPop},
 		{X86_INS_FINCSTP, &Capstone2LlvmIrTranslatorX86_impl::translateFincstp},

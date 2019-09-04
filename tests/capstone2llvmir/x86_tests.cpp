@@ -13162,6 +13162,29 @@ TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_RDTSCP)
 }
 
 //
+// X86_INS_FFREE
+//
+
+TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FFREE)
+{
+	ALL_MODES;
+
+	setRegisters({
+						 {X87_REG_TOP, 0x0},
+						 {X86_REG_ST3, 10.0},
+						 {X87_REG_TAG3, 10.0},
+				 });
+
+	emulate("ffree st(3)");
+
+	EXPECT_JUST_REGISTERS_LOADED({X87_REG_TOP});
+	EXPECT_JUST_REGISTERS_STORED({
+										 {X87_REG_TAG3, 3},
+								 });
+	EXPECT_NO_MEMORY_LOADED_STORED();
+}
+
+//
 // TODO:
 // X86_INS_STOSB, X86_INS_STOSW, X86_INS_STOSD, X86_INS_STOSQ
 // + REP prefix variants
