@@ -512,52 +512,52 @@ TEST_F(IrModifierTests, modifyGlobalStructureBasic)
 		"endian" : "little",
 		"name" : "x86"
 	},
-	"globals" : 
+	"globals" :
 	[
 		{
 			"name" : "global_a",
-			"storage" : 
+			"storage" :
 			{
 				"type" : "global",
 				"value" : "0x2000"
 			},
-			"type" : 
+			"type" :
 			{
 				"llvmIr" : "i8"
 			}
 		},
 		{
 			"name" : "global_b",
-			"storage" : 
+			"storage" :
 			{
 				"type" : "global",
 				"value" : "0x2001"
 			},
-			"type" : 
+			"type" :
 			{
 				"llvmIr" : "i8"
 			}
 		},
 		{
 			"name" : "global_c",
-			"storage" : 
+			"storage" :
 			{
 				"type" : "global",
 				"value" : "0x2002"
 			},
-			"type" : 
+			"type" :
 			{
 				"llvmIr" : "i8"
 			}
 		},
 		{
 			"name" : "global_d",
-			"storage" : 
+			"storage" :
 			{
 				"type" : "global",
 				"value" : "0x2004"
 			},
-			"type" : 
+			"type" :
 			{
 				"llvmIr" : "i32"
 			}
