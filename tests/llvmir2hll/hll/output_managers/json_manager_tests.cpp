@@ -57,7 +57,8 @@ std::string JsonOutputManagerTests::emitSingleToken()
 		return std::string();
 	}
 
-	return all.erase(0, prefix.length()).erase(all.length() - suffix.length());
+	auto tmp = all.erase(0, prefix.length());
+	return tmp.erase(tmp.length() - suffix.length());
 }
 
 //
