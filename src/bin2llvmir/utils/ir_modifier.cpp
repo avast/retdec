@@ -938,7 +938,7 @@ void IrModifier::correctElementsInTypeSpace(
 			auto nxtElemAddr = _config->getGlobalAddress(*(i+1));
 			elemSize = nxtElemAddr - elemAddr;
 		}
-		
+
 		elemSize = getNearestPowerOfTwo(elemSize);
 
 		auto _abi = AbiProvider::getAbi(_module);
@@ -961,7 +961,7 @@ void IrModifier::correctElementsInTypeSpace(
 		{
 			if (auto* ld = dyn_cast<LoadInst>(u))
 			{
-				// [ |x| |x] 
+				// [ |x| |x]
 				// shr = origSize - typeSize - offset
 				// shl = offset
 
@@ -1036,7 +1036,7 @@ void IrModifier::correctElementsInTypeSpace(
 				auto* rOff = ConstantInt::get(_module->getContext(), APInt(_abi->getTypeBitSize(origType), ro, false));
 				auto* lOff = ConstantInt::get(_module->getContext(), APInt(_abi->getTypeBitSize(origType), lo, false));
 				auto* eOff = ConstantInt::get(_module->getContext(), APInt(_abi->getTypeBitSize(origType), elemOffset*8, false));
-				
+
 				llvm::Instruction* lgap = nullptr, * rgap = nullptr;
 				// Yd
 				if (ro){
@@ -1058,7 +1058,7 @@ void IrModifier::correctElementsInTypeSpace(
 				{
 					gepLoad = rgap ? rgap : lgap;
 				}
-				
+
 				saved = CastInst::CreateZExtOrBitCast(saved, origType, "", st);
 				saved = BinaryOperator::CreateLShr(saved, eOff, "", st);
 				saved = BinaryOperator::CreateOr(saved, gepLoad, "", st);
@@ -1105,7 +1105,7 @@ std::vector<GlobalVariable*> IrModifier::searchAddressRangeForGlobals(
 	return globals;
 }
 
-/** 
+/**
  * 1. Find all elements in padding (and addresses)
  * 2. Cast prev structure element to char*
  * 3. Go through elements and
@@ -1144,7 +1144,7 @@ void IrModifier::correctElementsInPadding(
 			auto nxtElemAddr = _config->getGlobalAddress(*(i+1));
 			elemSize = nxtElemAddr - elemAddr;
 		}
-		
+
 		elemSize = getNearestPowerOfTwo(elemSize);
 
 		auto _abi = AbiProvider::getAbi(_module);
@@ -1191,7 +1191,7 @@ void IrModifier::correctElementsInPadding(
 				gep->insertBefore(st);
 				cast = BitCastInst::CreatePointerCast(gep, nTypePtr);
 				cast->insertBefore(st);
-			
+
 				new StoreInst(st->getValueOperand(), cast, st);
 				st->eraseFromParent();
 			}
@@ -1236,7 +1236,7 @@ void IrModifier::correctStackElementsInPadding(
 			auto nxtElemAddr = _config->getGlobalAddress(*(i+1));
 			elemSize = nxtElemAddr - elemAddr;
 		}
-		
+
 		elemSize = getNearestPowerOfTwo(elemSize);
 
 		auto _abi = AbiProvider::getAbi(_module);
@@ -1283,7 +1283,7 @@ void IrModifier::correctStackElementsInPadding(
 				gep->insertBefore(st);
 				cast = BitCastInst::CreatePointerCast(gep, nTypePtr);
 				cast->insertBefore(st);
-			
+
 				new StoreInst(st->getValueOperand(), cast, st);
 				st->eraseFromParent();
 			}
