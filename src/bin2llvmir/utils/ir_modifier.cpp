@@ -812,7 +812,7 @@ void IrModifier::replaceElementWithStrIdx(llvm::Value* element, llvm::Value* str
 			ep->replaceAllUsesWith(elem);
 			ep->eraseFromParent();
 		}
-		else if (false)
+		else
 		{
 			auto* i = dyn_cast<PtrToIntInst>(u);
 			auto zero = ConstantInt::get(IntegerType::get(_module->getContext(), 32), 0);
@@ -831,11 +831,6 @@ void IrModifier::replaceElementWithStrIdx(llvm::Value* element, llvm::Value* str
 			i->replaceAllUsesWith(val);
 			i->eraseFromParent();
 		}
-		else if (auto* j = dyn_cast<InsertValueInst>(u))
-		{
-			exit(1);
-		}
-		//	exit(1);
 	}
 
 	if (!isa<Constant>(str))
@@ -864,7 +859,7 @@ void IrModifier::replaceElementWithStrIdx(llvm::Value* element, llvm::Value* str
 	}
 
 
-	initializeGlobalWithGetElementPtr(element, str, idx);
+	//initializeGlobalWithGetElementPtr(element, str, idx);
 }
 
 void IrModifier::initializeGlobalWithGetElementPtr(
