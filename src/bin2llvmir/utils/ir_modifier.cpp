@@ -769,8 +769,7 @@ void IrModifier::replaceElementWithStrIdx(llvm::Value* element, llvm::Value* str
 		uses.push_back(u);
 	}
 
-	for (auto i = uses.begin(); i != uses.end(); i++) {
-		auto* u = *i;
+	for (auto& u: uses) {
 		if (auto* ld = dyn_cast<LoadInst>(u))
 		{
 			auto elemVal = getElement(str, idx);
@@ -778,7 +777,8 @@ void IrModifier::replaceElementWithStrIdx(llvm::Value* element, llvm::Value* str
 			if (elemVal->getType() != ld->getPointerOperand()->getType())
 				elemVal = CastInst::CreatePointerCast(elemVal, ld->getPointerOperand()->getType(), "", ld);
 
-			Instruction* load = new LoadInst(dyn_cast<PointerType>(elemVal->getType())->getElementType(), elemVal, "", ld);
+			auto* tp = dyn_cast<PointerType>(elemVal->getType());
+			Instruction* load = new LoadInst(tp->getElementType(), elemVal, "", ld);
 			ld->replaceAllUsesWith(load);
 			ld->eraseFromParent();
 		}
@@ -812,9 +812,8 @@ void IrModifier::replaceElementWithStrIdx(llvm::Value* element, llvm::Value* str
 			ep->replaceAllUsesWith(elem);
 			ep->eraseFromParent();
 		}
-		else
+		else if (auto* i = dyn_cast<PtrToIntInst>(u))
 		{
-			auto* i = dyn_cast<PtrToIntInst>(u);
 			auto zero = ConstantInt::get(IntegerType::get(_module->getContext(), 32), 0);
 			auto eIdx = ConstantInt::get(IntegerType::get(_module->getContext(), 32), idx);
 
