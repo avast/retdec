@@ -838,7 +838,6 @@ void IrModifier::replaceElementWithStrIdx(llvm::Value* element, llvm::Value* str
 		//	exit(1);
 	}
 
-	std::cout << "Corrected!!" << std::endl;
 	if (!isa<Constant>(str))
 	{
 		//TODO: should initialize
