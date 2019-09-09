@@ -178,11 +178,6 @@ TEST_F(X87FpuAnalysisTests, fmulp_stack_operation)
 		@fpu_tag_6 = internal global i2 0
 		@fpu_tag_7 = internal global i2 0
 
-		declare void @__frontend_reg_store.fpu_tag(i3, i2)
-		declare void @__frontend_reg_store.fpr(i3, x86_fp80)
-		declare x86_fp80 @__frontend_reg_load.fpr(i3)
-		declare i2 @__frontend_reg_load.fpu_tag(i3)
-
 		define i32 @main(i32 %argc, i8** %argv) {
 		bb:
 		  %0 = fpext double 1.000000e+00 to x86_fp80
@@ -211,6 +206,11 @@ TEST_F(X87FpuAnalysisTests, fmulp_stack_operation)
 		  store i3 %10, i3* @fpu_stat_TOP
 		  ret i32 0
 		}
+
+		declare void @__frontend_reg_store.fpu_tag(i3, i2)
+		declare void @__frontend_reg_store.fpr(i3, x86_fp80)
+		declare x86_fp80 @__frontend_reg_load.fpr(i3)
+		declare i2 @__frontend_reg_load.fpu_tag(i3)
 )";
 	checkModuleAgainstExpectedIr(exp);
 	EXPECT_TRUE(b);
