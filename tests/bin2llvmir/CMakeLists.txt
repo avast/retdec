@@ -27,7 +27,7 @@ set(RETDEC_TESTS_BIN2LLVMIR_SOURCES
 	utils/ir_modifier_tests.cpp
 	utils/llvm_tests.cpp
 	utils/simplifycfg_tests.cpp
-)
+        optimizations/x87_fpu/x87_fpu_test.cpp)
 
 add_executable(retdec-tests-bin2llvmir ${RETDEC_TESTS_BIN2LLVMIR_SOURCES})
 target_link_libraries(retdec-tests-bin2llvmir retdec-bin2llvmir retdec-utils gmock_main)

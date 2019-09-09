@@ -186,13 +186,8 @@ bool X87FpuAnalysis::analyzeBb(
 				auto regBase = _config->isLlvmX87DataStorePseudoFunctionCall(callStore)
 							   ? uint32_t(X86_REG_ST0)
 							   : uint32_t(X87_REG_TAG0);
-				// Storing value to an empty stack -> suspicious.
-				if (tmp == 8) {
-					tmp = 7;
-					topVal = 7;
-				}
-				int regNum = tmp % 8;
-				auto *reg = _abi->getRegister(regBase + regNum);
+				int regNum = 7 - tmp;
+				auto *reg = _abi->getRegister(regBase + regNum, _abi->isX86());
 
 				LOG << "\t\t\t" << "store -- " << reg->getName().str() << std::endl;
 
@@ -207,15 +202,8 @@ bool X87FpuAnalysis::analyzeBb(
 				auto regBase = _config->isLlvmX87DataLoadPseudoFunctionCall(callLoad)
 							   ? uint32_t(X86_REG_ST0)
 							   : uint32_t(X87_REG_TAG0);
-				// Loading value from an empty stack -> value may have been placed
-				// there without us knowing, e.g. return value of some other
-				// function.
-				if (tmp == 8) {
-					tmp = 7;
-					topVal = 7;
-				}
-				int regNum = tmp % 8;
-				auto *reg = _abi->getRegister(regBase + regNum);
+				int regNum = 7 - tmp;
+				auto *reg = _abi->getRegister(regBase + regNum, _abi->isX86());
 
 				LOG << "\t\t\t" << "load -- " << reg->getName().str() << std::endl;
 
