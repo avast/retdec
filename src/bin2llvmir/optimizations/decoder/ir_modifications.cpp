@@ -423,6 +423,9 @@ bool Decoder::canSplitFunctionOn(
 				continue;
 			}
 			auto up = fncStarts.upper_bound(bAddr);
+			if (up == fncStarts.begin()) {
+				return false;
+			}	
 			--up;
 			Address bFnc = *up;
 
@@ -442,6 +445,9 @@ bool Decoder::canSplitFunctionOn(
 					continue;
 				}
 				auto up = fncStarts.upper_bound(pAddr);
+				if (up == fncStarts.begin()) {
+					return false;
+				}
 				--up;
 				Address pFnc = *up;
 
