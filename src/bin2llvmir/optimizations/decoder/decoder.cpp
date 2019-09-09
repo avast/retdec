@@ -186,6 +186,12 @@ void Decoder::decodeJumpTarget(const JumpTarget& jt)
 		LOG << "\t\t" << "unknown target address -> skip" << std::endl;
 		return;
 	}
+	
+	if (jt.getFromAddress().isUndefined() && jt.getType() == JumpTarget::eType::IMPORT)
+	{
+		LOG << "\t\t" << "target address in data section -> skip" << std::endl;
+		return;
+	}
 
 	bool alternative = false;
 	auto* range = _ranges.getPrimary(start);
