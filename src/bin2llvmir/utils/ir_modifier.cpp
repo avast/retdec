@@ -685,6 +685,8 @@ GlobalVariable* IrModifier::getGlobalVariable(
 		}
 		gv->eraseFromParent();
 		gv = ngv;
+		
+		ngv->setName(name);
 	}
 
 	_config->insertGlobalVariable(
