@@ -675,18 +675,16 @@ GlobalVariable* IrModifier::getGlobalVariable(
 				c->getType(),
 				isConstant,
 				GlobalValue::ExternalLinkage,
-				c,
-				name);
+				c);
 
 		auto* conv = IrModifier::convertConstantToType(ngv, gv->getType());
 		if (conv != gv)
 		{
 			gv->replaceAllUsesWith(conv);
 		}
+		ngv->takeName(gv);
 		gv->eraseFromParent();
 		gv = ngv;
-		
-		ngv->setName(name);
 	}
 
 	_config->insertGlobalVariable(
