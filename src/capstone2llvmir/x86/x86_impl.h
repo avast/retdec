@@ -370,8 +370,7 @@ class Capstone2LlvmIrTranslatorX86_impl :
 		void translateXchg(cs_insn* i, cs_x86* xi, llvm::IRBuilder<>& irb);
 		void translateXlatb(cs_insn* i, cs_x86* xi, llvm::IRBuilder<>& irb);
 		void translateXor(cs_insn* i, cs_x86* xi, llvm::IRBuilder<>& irb);
-
-	};
+};
 
 } // namespace capstone2llvmir
 } // namespace retdec
