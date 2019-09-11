@@ -4857,7 +4857,6 @@ void Capstone2LlvmIrTranslatorX86_impl::translateFfree(cs_insn* i, cs_x86* xi, l
 
 	//storeX87TagReg(irb, idx, llvm::ConstantInt::get(irb.getIntNTy(2), 0x11B)); // 0x11B
 	clearX87TagReg(irb, idx);
-
 }
 
 /**
@@ -4970,7 +4969,6 @@ void Capstone2LlvmIrTranslatorX86_impl::translateFist(cs_insn* i, cs_x86* xi, ll
 		x87IncTop(irb, topNum);
 	}
 }
-
 
 /**
  * X86_INS_FRNDINT
