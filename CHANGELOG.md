@@ -29,6 +29,7 @@
 * Fix: Fixed computation of the _"RVA of the import name is invalid"_ loader error ([avast/pelib#11](https://github.com/avast/pelib/pull/11)).
 * Fix: Export ordinals are now correctly calculated as relative to the base ([#612](https://github.com/avast/retdec/issues/612), [avast/pelib#10](https://github.com/avast/pelib/pull/10)).
 * Fix: Fixed crash in the decoding phase ([#637](https://github.com/avast/retdec/issues/637), [#641](https://github.com/avast/retdec/pull/641)).
+* Fix: Fixed global variable naming issue ([#636](https://github.com/avast/retdec/issues/636), [#645](https://github.com/avast/retdec/pull/645)).
 
 # v3.3 (2019-03-18)
 
