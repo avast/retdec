@@ -36,7 +36,7 @@ class IrModifier
 		static llvm::AllocaInst* createAlloca(
 				llvm::Function* fnc,
 				llvm::Type* ty,
-				const std::string& name = "");
+				const std::string& name = std::string());
 
 		static llvm::Value* convertValueToType(
 				llvm::Value* val,
@@ -71,14 +71,14 @@ class IrModifier
 				llvm::Function* fnc,
 				int offset,
 				llvm::Type* type,
-				const std::string& name = "stack_var");
+				const std::string& name = std::string());
 
 		llvm::GlobalVariable* getGlobalVariable(
 				FileImage* objf,
 				DebugFormat* dbgf,
 				retdec::utils::Address addr,
 				bool strict = false,
-				std::string name = "global_var");
+				const std::string& name = std::string());
 
 		llvm::Value* changeObjectType(
 				FileImage* objf,

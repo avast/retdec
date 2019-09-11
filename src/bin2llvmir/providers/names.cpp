@@ -32,6 +32,18 @@ std::string generateFunctionNameUnknown(utils::Address a, bool)
 	return generatedFunctionPrefixUnk + a.toHexString();
 }
 
+std::string generateGlobalVarName(utils::Address a, const std::string& name)
+{
+	return (name.empty() ? generatedGlobalVarPrefix : (name + "_"))
+			+ a.toHexString();
+}
+
+std::string generateStackVarName(int offset, const std::string& name)
+{
+	return (name.empty() ? generatedStackVarPrefix : (name + "_"))
+			+ std::to_string(offset);
+}
+
 std::string generateBasicBlockName(utils::Address a)
 {
 	return generatedBasicBlockPrefix + a.toHexString();

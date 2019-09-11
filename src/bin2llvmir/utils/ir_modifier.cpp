@@ -542,8 +542,8 @@ IrModifier::StackPair IrModifier::getStackVariable(
 		type = Abi::getDefaultType(fnc->getParent());
 	}
 
-	std::string n = name.empty() ? "stack_var" : name;
-	n += "_" + std::to_string(offset);
+	std::string n = names::generateStackVarName(offset, name);
+
 	AllocaInst* ret = _config->getLlvmStackVariable(fnc, offset);
 	if (ret)
 	{
@@ -586,16 +586,16 @@ GlobalVariable* IrModifier::getGlobalVariable(
 		DebugFormat* dbgf,
 		retdec::utils::Address addr,
 		bool strict,
-		std::string name)
+		const std::string& name)
 {
 	if (!globalVariableCanBeCreated(_module, _config, objf, addr, strict))
 	{
 		return nullptr;
 	}
 
-	retdec::utils::appendHex(name, addr);
+	std::string n = names::generateGlobalVarName(addr, name);
 
-	if (auto* gv = _config->getLlvmGlobalVariable(name, addr))
+	if (auto* gv = _config->getLlvmGlobalVariable(n, addr))
 	{
 		return gv;
 	}
@@ -612,7 +612,7 @@ GlobalVariable* IrModifier::getGlobalVariable(
 		auto* dt = llvm_utils::stringToLlvmType(_module->getContext(), dgv->type.getLlvmIr());
 		t = dt ? dt : t;
 		c = objf->getConstant(t, addr);
-		name = dgv->getName();
+		n = dgv->getName();
 		realName = dgv->getName();
 		isFromDebug = true;
 	}
@@ -623,7 +623,7 @@ GlobalVariable* IrModifier::getGlobalVariable(
 		auto* dt = llvm_utils::stringToLlvmType(_module->getContext(), cgv->type.getLlvmIr());
 		t = dt ? dt : t;
 		c = objf->getConstant(t, addr);
-		name = cgv->getName();
+		n = cgv->getName();
 		realName = cgv->getName();
 		isFromDebug = true;
 	}
@@ -641,7 +641,7 @@ GlobalVariable* IrModifier::getGlobalVariable(
 		{
 			t = cryptoType;
 			c = objf->getConstant(t, addr);
-			name = cryptoName;
+			n = cryptoName;
 			realName = std::move(cryptoName);
 			isFromDebug = true;
 		}
@@ -653,7 +653,7 @@ GlobalVariable* IrModifier::getGlobalVariable(
 			isConstant,
 			GlobalValue::ExternalLinkage,
 			c,
-			name);
+			n);
 
 	if (c == nullptr)
 	{

@@ -27,6 +27,8 @@ const std::string generatedImportPrefix        = "imported_function_ord_";
 const std::string generatedFunctionPrefix      = "function_";
 const std::string generatedFunctionPrefixIDA   = "ida_";
 const std::string generatedFunctionPrefixUnk   = "unknown_";
+const std::string generatedGlobalVarPrefix     = "global_var_";
+const std::string generatedStackVarPrefix      = "stack_var_";
 const std::string generatedTempVarPrefix       = "v";
 const std::string generatedBasicBlockPrefix    = "dec_label_pc_";
 const std::string generatedUndefFunctionPrefix = "__decompiler_undefined_function_";
@@ -43,6 +45,12 @@ const std::string pseudoX87tagStoreFunction    = "__frontend_reg_store.fpu_tag";
 
 std::string generateFunctionName(utils::Address a, bool ida = false);
 std::string generateFunctionNameUnknown(utils::Address a, bool ida = false);
+std::string generateGlobalVarName(
+		utils::Address a,
+		const std::string& name = std::string());
+std::string generateStackVarName(
+		int offset,
+		const std::string& name = std::string());
 std::string generateBasicBlockName(utils::Address a);
 std::string generateTempVariableName(utils::Address a, unsigned cntr);
 std::string generateFunctionNameUndef(unsigned cntr);
