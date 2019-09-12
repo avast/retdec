@@ -71,12 +71,12 @@ class Capstone2LlvmIrTranslatorPowerpc_impl :
 				uint32_t r,
 				llvm::Value* val,
 				llvm::IRBuilder<>& irb,
-				eOpConv ct = eOpConv::SEXT_TRUNC) override;
+				eOpConv ct = eOpConv::SEXT_TRUNC_OR_BITCAST) override;
 		virtual llvm::Instruction* storeOp(
 				cs_ppc_op& op,
 				llvm::Value* val,
 				llvm::IRBuilder<>& irb,
-				eOpConv ct = eOpConv::SEXT_TRUNC) override;
+				eOpConv ct = eOpConv::SEXT_TRUNC_OR_BITCAST) override;
 
 		void storeCrX(
 				llvm::IRBuilder<>& irb,

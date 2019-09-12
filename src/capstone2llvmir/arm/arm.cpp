@@ -865,7 +865,7 @@ void Capstone2LlvmIrTranslatorArm_impl::translateB(cs_insn* i, cs_arm* ai, llvm:
 {
 	EXPECT_IS_UNARY(i, ai, irb);
 
-	op0 = loadOpUnary(ai, irb);
+	op0 = loadOpsUnary(ai, irb);
 	bool isReturn = ai->operands[0].type == ARM_OP_REG
 			&& ai->operands[0].reg == ARM_REG_LR;
 
@@ -892,7 +892,7 @@ void Capstone2LlvmIrTranslatorArm_impl::translateBl(cs_insn* i, cs_arm* ai, llvm
 	EXPECT_IS_UNARY(i, ai, irb);
 
 	storeRegister(ARM_REG_LR, getNextInsnAddress(i), irb);
-	op0 = loadOpUnary(ai, irb);
+	op0 = loadOpsUnary(ai, irb);
 	if (ai->cc == ARM_CC_AL || ai->cc == ARM_CC_INVALID)
 	{
 		generateCallFunctionCall(irb, op0);
@@ -1115,14 +1115,14 @@ void Capstone2LlvmIrTranslatorArm_impl::translateMovt(cs_insn* i, cs_arm* ai, ll
 	// Add/Fix THUMB unit tests.
 	if (_basicMode == CS_MODE_THUMB)
 	{
-		std::tie(op0, op1) = loadOpBinary(ai, irb, eOpConv::ZEXT_TRUNC);
+		std::tie(op0, op1) = loadOpBinary(ai, irb, eOpConv::ZEXT_TRUNC_OR_BITCAST);
 		op1 = irb.CreateShl(op1, 16);
 		op0 = irb.CreateOr(op0, op1);
 		storeOp(ai->operands[0], op0, irb);
 	}
 	else
 	{
-		std::tie(op0, op1) = loadOpBinary(ai, irb, eOpConv::ZEXT_TRUNC);
+		std::tie(op0, op1) = loadOpBinary(ai, irb, eOpConv::ZEXT_TRUNC_OR_BITCAST);
 		op0 = irb.CreateAnd(op0, 0xffff);
 		op1 = irb.CreateShl(op1, 16);
 		op0 = irb.CreateOr(op0, op1);
@@ -1147,7 +1147,7 @@ void Capstone2LlvmIrTranslatorArm_impl::translateMovw(cs_insn* i, cs_arm* ai, ll
 	}
 	else
 	{
-		std::tie(op0, op1) = loadOpBinary(ai, irb, eOpConv::ZEXT_TRUNC);
+		std::tie(op0, op1) = loadOpBinary(ai, irb, eOpConv::ZEXT_TRUNC_OR_BITCAST);
 		op0 = irb.CreateAnd(op0, 0xffff0000);
 		op0 = irb.CreateOr(op0, op1);
 		storeOp(ai->operands[0], op0, irb);
