@@ -94,6 +94,13 @@ class X87FpuAnalysis : public llvm::ModulePass
 	bool isFpuStackTopValidForActualArchitectureAndCallingConvention(llvm::Function* function);
 	int getFpuStackTopForTerminatingBlockOfX86_32Arch(int top);
 
+	bool isInstructionFunctionCall(llvm::Value* inst);
+	/**
+	 * @pre Expect first call isInstructionFunctionCall().
+	 */
+	bool isFunctionReturnTypeFloatingPoint(llvm::Value* inst);
+	config::CallingConvention::eCallingConvention getCallingConvention(llvm::Value* function);
+
 	private:
 
 		llvm::Module* _module = nullptr;
