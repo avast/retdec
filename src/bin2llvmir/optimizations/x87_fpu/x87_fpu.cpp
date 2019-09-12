@@ -90,7 +90,32 @@ bool X87FpuAnalysis::run()
 	return changed;
 }
 
-bool X87FpuAnalysis::analyzeBb(
+bool X87FpuAnalysis::isInstructionFunctionCall(Value* inst)
+{
+	return dyn_cast_or_null<CallInst>(inst);
+}
+
+/**
+ * @pre Expect first call isInstructionFunctionCall().
+ */
+bool X87FpuAnalysis::isFunctionReturnTypeFloatingPoint(Value* function)
+{
+	auto* functionCall = dyn_cast_or_null<CallInst>(function);
+	auto functionReturnType = functionCall->getFunction()->getReturnType();
+	return functionReturnType->isFloatingPointTy();
+}
+
+config::CallingConvention::eCallingConvention X87FpuAnalysis::getCallingConvention(Value* function)
+{
+	auto* functionCall = dyn_cast_or_null<CallInst>(function);
+	auto functionName = functionCall->getCalledValue()->getName().str();
+	auto configFunctionMetadata = _config->getConfig().functions.getFunctionByName(functionName);
+
+	using CallingConvention = config::CallingConvention::eCallingConvention;
+	return configFunctionMetadata ? configFunctionMetadata->callingConvention.getID() : CallingConvention::CC_UNKNOWN;
+}
+
+	bool X87FpuAnalysis::analyzeBb(
 		retdec::utils::NonIterableSet<llvm::BasicBlock*>& seenBbs,
 		std::map<llvm::Value*, int>& topVals,
 		llvm::BasicBlock* bb,
@@ -183,6 +208,9 @@ bool X87FpuAnalysis::analyzeBb(
 				auto fIt = topVals.find(callStore->getArgOperand(0));
 				auto tmp = fIt->second;
 
+				if (0 > tmp || tmp > 7) // attempt to store to FPU register which is not pushed to stack
+					return false; // TODO generate comment with error info
+
 				auto regBase = _config->isLlvmX87DataStorePseudoFunctionCall(callStore)
 							   ? uint32_t(X86_REG_ST0)
 							   : uint32_t(X87_REG_TAG0);
@@ -198,6 +226,9 @@ bool X87FpuAnalysis::analyzeBb(
 					   && topVals.find(callLoad->getArgOperand(0)) != topVals.end()) {
 				auto fIt = topVals.find(callLoad->getArgOperand(0));
 				auto tmp = fIt->second;
+
+				if (0 > tmp || tmp > 7) // attempt to load FPU register which is not pushed to stack
+					return false; // TODO generate comment with error info
 
 				auto regBase = _config->isLlvmX87DataLoadPseudoFunctionCall(callLoad)
 							   ? uint32_t(X86_REG_ST0)

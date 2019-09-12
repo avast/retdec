@@ -38,6 +38,13 @@ class X87FpuAnalysis : public llvm::ModulePass
 				llvm::BasicBlock* bb,
 				int topVal);
 
+	bool isInstructionFunctionCall(llvm::Value* inst);
+	/**
+	 * @pre Expect first call isInstructionFunctionCall().
+	 */
+	bool isFunctionReturnTypeFloatingPoint(llvm::Value* inst);
+	config::CallingConvention::eCallingConvention getCallingConvention(llvm::Value* function);
+
 	private:
 		llvm::Module* _module = nullptr;
 		Config* _config = nullptr;
