@@ -17,7 +17,7 @@
 * Enhancement: Updated LLVM to version 8.0.0 ([#110](https://github.com/avast/retdec/issues/110)).
 * Enhancement: Updated YARA to version 3.9 ([#527](https://github.com/avast/retdec/pull/527)).
 * Enhancement: Updated OpenSSL to version 1.1.1c ([#601](https://github.com/avast/retdec/pull/601)). This fixes build of OpenSSL on macOS Mojave ([#439](https://github.com/avast/retdec/issues/439)).
-* Enhancement: Support for relocations that pair multiple `R_MIPS_LO16` against a single `R_MIPS_HI16` ([#627](https://github.com/avast/retdec/issues/627), [#628](https://github.com/avast/retdec/pull/628)).
+* Enhancement: Added support for relocations that pair multiple `R_MIPS_LO16` against a single `R_MIPS_HI16` ([#627](https://github.com/avast/retdec/issues/627), [#628](https://github.com/avast/retdec/pull/628)).
 * Fix: Fixed build on BSD systems ([#598](https://github.com/avast/retdec/pull/598)).
 * Fix: Resources which are located in the different section than resource tree are now properly parsed ([#596](https://github.com/avast/retdec/pull/596)).
 * Fix: Version information which contained strings shorter than reported are now properly parsed ([#596](https://github.com/avast/retdec/pull/596)).
