@@ -1371,6 +1371,12 @@ llvm::GlobalVariable* IrModifier::convertToStructure(
 		}
 
 		auto structElement = getGlobalVariable(image, dbgf, addr);
+		if (structElement == nullptr)
+		{
+			padding -= elemSize;
+			addr += elemSize;
+			continue;
+		}
 		// TODO:
 		// following 3 linses of code can go into replaceElementWithStrIdx.
 		auto* origType = dyn_cast<PointerType>(structElement->getType())->getElementType();
