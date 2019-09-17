@@ -13729,7 +13729,7 @@ TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FXRSTOR64_memory_operand)
 	EXPECT_JUST_MEMORY_LOADED({0x1234});
 	EXPECT_NO_MEMORY_STORED();
 	EXPECT_JUST_VALUES_CALLED({
-		{_module.getFunction("__asm_fxrstor64"), {0xffff}},
+		{_module.getFunction("__asm_fxrstor"), {0xffff}},
 	});
 }
 
