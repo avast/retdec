@@ -316,7 +316,7 @@ bool ValueProtect::protect()
 	bool changed = false;
 
 	changed |= protectStack();
-	changed |= protectRegisters();
+	// changed |= protectRegisters();
 	changed |= protectLoadStores();
 
 	return changed;

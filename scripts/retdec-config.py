@@ -142,6 +142,9 @@ BIN2LLVMIR_PARAMS = [
     '-inst-opt',
     '-x86-addr-spaces',
     '-value-protect',
+    #'-dump-module',
+    '-register-localization',
+    #'-dump-module',
 ] + BIN2LLVMIR_LLVM_PASSES_ONLY + BIN2LLVMIR_LLVM_PASSES_ONLY + [
     '-inst-opt',
     '-simple-types',
