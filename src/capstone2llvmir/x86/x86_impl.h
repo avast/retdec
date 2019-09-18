@@ -290,6 +290,8 @@ class Capstone2LlvmIrTranslatorX86_impl :
 		void translateFincstp(cs_insn* i, cs_x86* xi, llvm::IRBuilder<>& irb);
 		void translateFist(cs_insn* i, cs_x86* xi, llvm::IRBuilder<>& irb);
 		void translateFld(cs_insn* i, cs_x86* xi, llvm::IRBuilder<>& irb);
+		void translateFbld(cs_insn* i, cs_x86* xi, llvm::IRBuilder<>& irb);
+		void translateFbstp(cs_insn* i, cs_x86* xi, llvm::IRBuilder<>& irb);
 		void translateFCMovCc(cs_insn *i, cs_x86 *xi, llvm::IRBuilder<> &irb);
 		void translateFloadConstant(cs_insn* i, cs_x86* xi, llvm::IRBuilder<>& irb);
 		void translateFmul(cs_insn* i, cs_x86* xi, llvm::IRBuilder<>& irb);
@@ -297,16 +299,27 @@ class Capstone2LlvmIrTranslatorX86_impl :
 		void translateFrndint(cs_insn* i, cs_x86* xi, llvm::IRBuilder<>& irb);
 		void translateFsin(cs_insn* i, cs_x86* xi, llvm::IRBuilder<>& irb);
 		void translateFsincos(cs_insn* i, cs_x86* xi, llvm::IRBuilder<>& irb);
+		void translateFtan(cs_insn* i, cs_x86* xi, llvm::IRBuilder<>& irb);
+		void translateFatan(cs_insn* i, cs_x86* xi, llvm::IRBuilder<>& irb);
 		void translateFsqrt(cs_insn* i, cs_x86* xi, llvm::IRBuilder<>& irb);
+		void translateFscale(cs_insn* i, cs_x86* xi, llvm::IRBuilder<>& irb);
 		void translateFst(cs_insn* i, cs_x86* xi, llvm::IRBuilder<>& irb);
 		void translateFsub(cs_insn* i, cs_x86* xi, llvm::IRBuilder<>& irb);
 		void translateFsubr(cs_insn* i, cs_x86* xi, llvm::IRBuilder<>& irb);
 		void translateFucomPop(cs_insn* i, cs_x86* xi, llvm::IRBuilder<>& irb);
+		void translateFxam(cs_insn* i, cs_x86* xi, llvm::IRBuilder<>& irb);
+		void translateFxtract(cs_insn* i, cs_x86* xi, llvm::IRBuilder<>& irb);
 		void translateFxch(cs_insn* i, cs_x86* xi, llvm::IRBuilder<>& irb);
 		void translateF2xm1(cs_insn* i, cs_x86* xi, llvm::IRBuilder<>& irb);
 		void translateFyl2x(cs_insn* i, cs_x86* xi, llvm::IRBuilder<>& irb);
 		void translateFfree(cs_insn* i, cs_x86* xi, llvm::IRBuilder<>& irb);
 		void translateFnstsw(cs_insn* i, cs_x86* xi, llvm::IRBuilder<>& irb);
+		void translateFnclex(cs_insn* i, cs_x86* xi, llvm::IRBuilder<>& irb);
+		void translateFrstor(cs_insn* i, cs_x86* xi, llvm::IRBuilder<>& irb);
+		void translateFnsave(cs_insn* i, cs_x86* xi, llvm::IRBuilder<>& irb);
+		void translateFnstenv(cs_insn* i, cs_x86* xi, llvm::IRBuilder<>& irb);
+		void translateFxsave(cs_insn* i, cs_x86* xi, llvm::IRBuilder<>& irb);
+		void translateFxstor(cs_insn* i, cs_x86* xi, llvm::IRBuilder<>& irb);
 		void translateImul(cs_insn* i, cs_x86* xi, llvm::IRBuilder<>& irb);
 		void translateInc(cs_insn* i, cs_x86* xi, llvm::IRBuilder<>& irb);
 		void translateIns(cs_insn* i, cs_x86* xi, llvm::IRBuilder<>& irb);
@@ -358,8 +371,7 @@ class Capstone2LlvmIrTranslatorX86_impl :
 		void translateXchg(cs_insn* i, cs_x86* xi, llvm::IRBuilder<>& irb);
 		void translateXlatb(cs_insn* i, cs_x86* xi, llvm::IRBuilder<>& irb);
 		void translateXor(cs_insn* i, cs_x86* xi, llvm::IRBuilder<>& irb);
-
-	};
+};
 
 } // namespace capstone2llvmir
 } // namespace retdec
