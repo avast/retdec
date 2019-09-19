@@ -1781,7 +1781,7 @@ llvm::Value* IrModifier::changeObjectType(
 	//	return val;
 	//}
 
-	Type* origType = dyn_cast<PointerType>(val->getType())->getElementType();
+	Type* origType = val->getType();
 	auto* nval = changeObjectDeclarationType(
 			objf,
 			val,
