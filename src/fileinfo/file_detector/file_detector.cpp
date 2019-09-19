@@ -261,7 +261,6 @@ void FileDetector::getAnomalies()
 	fileInfo.setAnomalies(fileParser->getAnomalies());
 }
 
-
 /**
  * @fn void FileDetector::detectFileClass()
  * Detect class of file

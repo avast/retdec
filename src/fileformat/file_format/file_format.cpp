@@ -1941,7 +1941,6 @@ const std::vector<std::pair<std::string,std::string>> &FileFormat::getAnomalies(
 	return anomalies;
 }
 
-
 /**
  * Get integer (@a x bytes) located at provided address using the specified endian or default file endian
  * @param address Address to get integer from

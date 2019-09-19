@@ -5294,7 +5294,6 @@ void Capstone2LlvmIrTranslatorX86_impl::translateFxam(cs_insn* i, cs_x86* xi, ll
 	EXPECT_IS_NULLARY(i, xi, irb);
 	std::tie(op0, top) = loadOpFloatingNullaryOrUnaryTop(i, xi, irb);
 
-
 	llvm::Function* fnc = getPseudoAsmFunction(
 		i,
 		getRegisterType(X86_REG_FPSW),
