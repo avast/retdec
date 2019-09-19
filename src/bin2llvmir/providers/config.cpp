@@ -258,7 +258,7 @@ llvm::AllocaInst* Config::getLlvmStackVariable(
 			{
 				if (AllocaInst* a = dyn_cast<AllocaInst>(&i))
 				{
-					if (a->getName() == l.getName())
+					if (a->getName() == l.getName()+"_"+std::to_string(offset))
 					{
 						return a;
 					}

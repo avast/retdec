@@ -155,22 +155,11 @@ void StackAnalysis::handleInstruction(
 			return;
 		}
 	}
+	root.simplifyNode();
 
 	auto* debugSv = getDebugStackVariable(inst->getFunction(), root);
 	auto* configSv = getConfigStackVariable(inst->getFunction(), root);
 
-	root.simplifyNode();
-	LOG << root << std::endl;
-
-	if (debugSv == nullptr)
-	{
-		debugSv = getDebugStackVariable(inst->getFunction(), root);
-	}
-
-	if (configSv == nullptr)
-	{
-		configSv = getConfigStackVariable(inst->getFunction(), root);
-	}
 
 	auto* ci = dyn_cast_or_null<ConstantInt>(root.value);
 	if (ci == nullptr)
@@ -206,7 +195,7 @@ void StackAnalysis::handleInstruction(
 	IrModifier irModif(_module, _config);
 	auto p = irModif.getStackVariable(
 			inst->getFunction(),
-			ci->getSExtValue(),
+			getBaseOffset(root),
 			t,
 			name);
 
