@@ -12,6 +12,7 @@
 #include <llvm/Pass.h>
 
 #include "retdec/bin2llvmir/providers/abi/abi.h"
+#include "retdec/bin2llvmir/providers/config.h"
 
 namespace retdec {
 namespace bin2llvmir {
@@ -22,14 +23,23 @@ class RegisterLocalization : public llvm::ModulePass
 		static char ID;
 		RegisterLocalization();
 		virtual bool runOnModule(llvm::Module& M) override;
-		bool runOnModuleCustom(llvm::Module& M, Abi* abi);
+		bool runOnModuleCustom(llvm::Module& M, Abi* a, Config* c);
 
 	private:
 		bool run();
+		llvm::AllocaInst* getLocalized(
+				llvm::GlobalVariable* reg,
+				llvm::Function* fnc,
+				std::map<llvm::Function*, llvm::AllocaInst*>& fnc2alloca);
+		bool localize(
+				llvm::GlobalVariable* reg,
+				std::map<llvm::Function*, llvm::AllocaInst*>& fnc2alloca,
+				llvm::Instruction* insn);
 
 	private:
 		llvm::Module* _module = nullptr;
 		Abi* _abi = nullptr;
+		Config* _config = nullptr;
 		static std::map<llvm::Type*, llvm::Function*> _type2fnc;
 };
 

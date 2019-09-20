@@ -12,6 +12,7 @@
 
 #include "retdec/bin2llvmir/optimizations/register_localization/register_localization.h"
 #include "retdec/bin2llvmir/providers/names.h"
+#include "retdec/bin2llvmir/utils/debug.h"
 #include "retdec/bin2llvmir/utils/ir_modifier.h"
 #include "retdec/bin2llvmir/utils/llvm.h"
 
@@ -42,13 +43,15 @@ bool RegisterLocalization::runOnModule(Module& M)
 {
 	_module = &M;
 	_abi = AbiProvider::getAbi(_module);
+	_config = ConfigProvider::getConfig(_module);
 	return run();
 }
 
-bool RegisterLocalization::runOnModuleCustom(llvm::Module& M, Abi* abi)
+bool RegisterLocalization::runOnModuleCustom(llvm::Module& M, Abi* a, Config* c)
 {
 	_module = &M;
-	_abi = abi;
+	_abi = a;
+	_config = c;
 	return run();
 }
 
@@ -58,65 +61,98 @@ bool RegisterLocalization::runOnModuleCustom(llvm::Module& M, Abi* abi)
  */
 bool RegisterLocalization::run()
 {
-	if (_abi == nullptr)
+	if (_abi == nullptr || _config == nullptr)
 	{
 		return false;
 	}
+	const auto& regs = _abi->getRegisters();
 
 	bool changed = false;
 
-// std::cout << "RegisterLocalization::run()" << std::endl;
-// exit(1);
-
-	const auto& regs = _abi->getRegisters();
-	for (Function& F : _module->getFunctionList())
+	for (GlobalVariable* reg : regs)
 	{
-		if (F.empty() || F.front().empty())
-		{
-			continue;
-		}
+		std::map<Function*, AllocaInst*> fnc2alloca;
 
-		for (auto* r : regs)
+		for (auto uIt = reg->user_begin(); uIt != reg->user_end(); )
 		{
-			Value* localized = nullptr;
+			User* user = *uIt;
+			++uIt;
 
-			for (auto uIt = r->user_begin(); uIt != r->user_end(); )
+			if (auto* insn = dyn_cast<Instruction>(user))
 			{
-				User* user = *uIt;
-				++uIt;
-
-				Instruction* insn = dyn_cast<Instruction>(user);
-				if (insn)
+				changed = localize(reg, fnc2alloca, insn);
+			}
+			else if (auto* expr = dyn_cast<ConstantExpr>(user))
+			{
+				for (auto euIt = expr->user_begin(); euIt != expr->user_end(); )
 				{
-					if (insn->getFunction() != &F)
-					{
-						continue;
-					}
+					User* euser = *euIt;
+					++euIt;
 
-					if (localized == nullptr)
+					if (auto* insn = dyn_cast<Instruction>(euser))
 					{
-						localized = new AllocaInst(
-								r->getValueType(),
-								r->getAddressSpace(),
-								nullptr,
-								r->getName(),
-								&F.front().front());
-					}
+						auto* einsn = expr->getAsInstruction();
+						einsn->insertBefore(insn);
 
-					insn->replaceUsesOfWith(r, localized);
+						if (localize(reg, fnc2alloca, einsn))
+						{
+							insn->replaceUsesOfWith(expr, einsn);
+							changed = true;
+						}
+					}
 				}
-
-				// ConstantExpr* expr = dyn_cast<ConstantExpr>(user);
-				// if (expr)
-				// {
-				// 	expr->getpara
-				// 	expr->replaceUsesOfWith();
-				// }
 			}
 		}
 	}
 
 	return changed;
+}
+
+llvm::AllocaInst* RegisterLocalization::getLocalized(
+		llvm::GlobalVariable* reg,
+		llvm::Function* fnc,
+		std::map<llvm::Function*, llvm::AllocaInst*>& fnc2alloca)
+{
+		auto fIt = fnc2alloca.find(fnc);
+		if (fIt != fnc2alloca.end())
+		{
+			return fIt->second;
+		}
+		else if (!fnc->empty() && !fnc->front().empty())
+		{
+			auto* a = new AllocaInst(
+					reg->getValueType(),
+					reg->getAddressSpace(),
+					nullptr,
+					reg->getName(),
+					&fnc->front().front());
+			fnc2alloca.emplace(fnc, a);
+			return a;
+		}
+		else
+		{
+			// Should not really happen.
+			return nullptr;
+		}
+}
+
+bool RegisterLocalization::localize(
+		llvm::GlobalVariable* reg,
+		std::map<llvm::Function*, llvm::AllocaInst*>& fnc2alloca,
+		llvm::Instruction* insn)
+{
+	AllocaInst* localized = getLocalized(
+			reg,
+			insn->getFunction(),
+			fnc2alloca);
+
+	if (localized == nullptr)
+	{
+		return false;
+	}
+
+	insn->replaceUsesOfWith(reg, localized);
+	return true;
 }
 
 } // namespace bin2llvmir
