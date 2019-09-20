@@ -72,6 +72,8 @@ bool StackAnalysis::run()
 	ReachingDefinitionsAnalysis RDA;
 	RDA.runOnModule(*_module, _abi);
 
+	IrModifier irModif(_module, _config);
+
 	for (auto& f : *_module)
 	{
 		std::map<Value*, Value*> val2val;
@@ -119,6 +121,14 @@ bool StackAnalysis::run()
 						load->getPointerOperand(),
 						load->getType(),
 						val2val);
+			}
+		}
+
+		for (auto &sv: _config->getStackVariables(&f))
+		{
+			if (auto* strType = dyn_cast<StructType>(sv->getAllocatedType()))
+			{
+				irModif.convertToStructure(sv, strType);
 			}
 		}
 	}
