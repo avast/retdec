@@ -258,7 +258,7 @@ llvm::AllocaInst* Config::getLlvmStackVariable(
 			{
 				if (AllocaInst* a = dyn_cast<AllocaInst>(&i))
 				{
-					if (a->getName() == l.getName()+"_"+std::to_string(offset))
+					if (a->getName() == l.getName())
 					{
 						return a;
 					}
@@ -397,7 +397,8 @@ retdec::config::Object* Config::insertStackVariable(
 			retdec::config::Storage::onStack(offset));
 	local.setRealName(sv->getName());
 	local.setIsFromDebug(fromDebug);
-	local.type.setLlvmIr(llvmObjToString(sv->getType()));
+	//TODO: This my harm
+	local.type.setLlvmIr(llvmObjToString(sv->getAllocatedType()));
 
 	auto p = cf->locals.insert(local);
 	return &p.first->second;

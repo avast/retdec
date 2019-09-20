@@ -165,13 +165,23 @@ void StackAnalysis::handleInstruction(
 			return;
 		}
 	}
-	root.simplifyNode();
 
 	auto* debugSv = getDebugStackVariable(inst->getFunction(), root);
 	auto* configSv = getConfigStackVariable(inst->getFunction(), root);
 
-
 	auto* ci = dyn_cast_or_null<ConstantInt>(root.value);
+	root.simplifyNode();
+
+	if (auto* pdSv = getDebugStackVariable(inst->getFunction(), root))
+	{
+		debugSv = pdSv;
+	}
+	if (auto* pcSv = getConfigStackVariable(inst->getFunction(), root))
+	{
+		configSv = pcSv;
+	}
+	ci = dyn_cast_or_null<ConstantInt>(root.value);
+	
 	if (ci == nullptr)
 	{
 		return;
@@ -205,22 +215,17 @@ void StackAnalysis::handleInstruction(
 	IrModifier irModif(_module, _config);
 	auto p = irModif.getStackVariable(
 			inst->getFunction(),
-			getBaseOffset(root),
+			ci->getSExtValue(),
 			t,
 			name);
 
 	AllocaInst* a = p.first;
 	auto* ca = p.second;
 
-	if (debugSv)
+	if (debugSv || configSv)
 	{
+		ca->setRealName(name);
 		ca->setIsFromDebug(true);
-		ca->setRealName(debugSv->getName());
-	}
-	else if (configSv)
-	{
-		ca->setIsFromDebug(true);
-		ca->setRealName(configSv->getName());
 	}
 
 	LOG << "===> " << llvmObjToString(a) << std::endl;
