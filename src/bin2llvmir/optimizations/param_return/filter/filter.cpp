@@ -399,15 +399,51 @@ void Filter::filterArgsByKnownTypes(FilterableLayout& lay) const
 	std::size_t fpEnd = fpRegs.size();
 	std::size_t doubleEnd = doubleRegs.size();
 	std::size_t vecEnd = vecRegs.size();
+	
+	std::deque<llvm::Type*> types;
+	for (auto i: lay.knownTypes)
+		types.push_back(i);
 
-	std::vector<llvm::Type*> types = expandTypes(lay.knownTypes);
+	std::deque<llvm::Type*> structTypes; 
 
-	for (auto t: types)
+	bool excludeRegs = false;
+	bool fsFlag = false;
+	while (!types.empty() || !structTypes.empty())
 	{
+		auto& usedQue = structTypes.empty() ? types : structTypes;
+		
+		Type* t = usedQue.front();
+
+		auto* st = dyn_cast<StructType>(t);
+		if (st && !_cc->passesLargeObjectsByReference())
+		{
+			if (structTypes.empty())
+			{
+				fsFlag = true;
+			}
+			usedQue.pop_front();
+
+			excludeRegs = true;
+			//TODO: insert on beginning
+			structTypes = expandStruct(st);
+			continue;
+		}
+
 		std::size_t requiredStacks = 0;
 		OrderID stackOrd = OrderID::ORD_STACK;
 
-		if (!doubleRegs.empty() && t->isDoubleTy())
+		if (excludeRegs)
+		{
+			if (!fsFlag && !structTypes.empty())
+			{
+				stackOrd = OrderID::ORD_STACK_GROUP;
+			}
+			else
+			{
+				fsFlag = false;
+			}
+		}
+		else if (!doubleRegs.empty() && t->isDoubleTy())
 		{
 			if (newLayout.doubleRegisters.size() < doubleEnd)
 			{
@@ -440,7 +476,8 @@ void Filter::filterArgsByKnownTypes(FilterableLayout& lay) const
 			}
 		}
 
-		if (!requiredStacks && stackOrd == OrderID::ORD_STACK)
+		if (!requiredStacks &&
+			(stackOrd == OrderID::ORD_STACK || stackOrd == OrderID::ORD_STACK_GROUP))
 		{
 			requiredStacks = getNumberOfStacksForType(t);
 		}
@@ -461,6 +498,8 @@ void Filter::filterArgsByKnownTypes(FilterableLayout& lay) const
 				i == 0 ? stackOrd :
 					OrderID::ORD_STACK_GROUP);
 		}
+	
+		usedQue.pop_front();
 	}
 
 	lay = newLayout;
@@ -487,9 +526,11 @@ std::vector<Type*> Filter::expandTypes(const std::vector<Type*>& types) const
 
 			if (auto* st = dyn_cast<StructType>(t))
 			{
-				for (auto& e : st->elements())
+				auto it = st->element_end();
+				while (it != st->element_begin())
 				{
-					toExpand.push_back(e);
+					it--;
+					toExpand.push_front(*it);
 				}
 			}
 			else
@@ -500,6 +541,37 @@ std::vector<Type*> Filter::expandTypes(const std::vector<Type*>& types) const
 
 		return expanded;
 	}
+}
+
+std::deque<Type*> Filter::expandStruct(StructType* structType) const
+{
+	std::deque<Type*> expanded;
+
+	std::deque<llvm::Type*> toExpand;
+	for (auto e: structType->elements())
+		toExpand.push_back(e);
+
+	while (!toExpand.empty())
+	{
+		auto t = toExpand.front();
+		toExpand.pop_front();
+
+		if (auto* st = dyn_cast<StructType>(t))
+		{
+			auto it = st->element_end();
+			while (it != st->element_begin())
+			{
+				it--;
+				toExpand.push_front(*it);
+			}
+		}
+		else
+		{
+			expanded.push_back(t);
+		}
+	}
+
+	return expanded;
 }
 
 size_t Filter::fetchGPRegsForType(Type* type, FilterableLayout& lay) const

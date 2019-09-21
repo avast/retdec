@@ -238,53 +238,32 @@ Value* convertToType(
 		nl->insertAfter(c);
 		conv = nl;
 	}
+	else if (isa<LoadInst>(val) && type->isAggregateType())
+	{
+		conv = val;
+		std::cout << "val: " << llvmObjToString(val) << std::endl;
+		std::cout << "type: " << llvmObjToString(type) << std::endl;
+		std::cout << "EXITTING" << std::endl;
+		exit(1);
+	}
 	else if (val->getType()->isAggregateType())
 	{
-		std::vector<unsigned> idxs = { 0 };
-		Value* toSimple = nullptr;
-		if (constExpr)
-		{
-			toSimple = ConstantExpr::getExtractValue(
-					cval,
-					ArrayRef<unsigned>(idxs));
-		}
-		else
-		{
-			auto* i = ExtractValueInst::Create(
-					val,
-					ArrayRef<unsigned>(idxs),
-					"");
-			toSimple = insertBeforeAfter(i, before, after);
-		}
-		auto* a = dyn_cast<Instruction>(toSimple);
-		conv = convertToType(toSimple, type, before, a, constExpr);
+		std::cout << "Val: " << llvmObjToString(val) << std::endl;
+		std::cout << "Type: " << llvmObjToString(type) << std::endl;
+		auto* strType = dyn_cast<StructType>(val->getType());
+		Instruction* gep = GetElementPtrInst::CreateInBounds(strType, val, {0}, "", before);
+		gep = new LoadInst(gep);
+		gep->insertBefore(before);
+		conv = convertToType(gep, type, before, gep, constExpr);
 	}
 	else if (CompositeType* cmp = dyn_cast<CompositeType>(type))
 	{
-		assert(!cmp->isEmptyTy());
-		std::vector<unsigned> idxs = { 0 };
-		auto* idxt = cmp->getTypeAtIndex(0u);
-		auto* tmp = convertToType(val, idxt, before, after, constExpr);
-
-		if (constExpr)
-		{
-			auto* c = dyn_cast<Constant>(tmp);
-			assert(c);
-			conv = ConstantExpr::getInsertValue(
-					UndefValue::get(cmp),
-					c,
-					ArrayRef<unsigned>(idxs));
-		}
-		else
-		{
-			auto* i = InsertValueInst::Create(
-					UndefValue::get(cmp),
-					tmp,
-					ArrayRef<unsigned>(idxs),
-					"");
-			auto* a = val == tmp ? after : cast<Instruction>(tmp);
-			conv = insertBeforeAfter(i, before, a);
-		}
+		std::cout << "The val: " << llvmObjToString(val) << std::endl;
+		std::cout << "Type: " << llvmObjToString(type) << std::endl;
+		assert(!isa<Instruction>(val) && "This should not happen! Please rethink convertion.");
+		std::cout << "Should not happen" << std::endl;
+		exit(2);
+		conv = nullptr;
 	}
 	else
 	{
@@ -1299,6 +1278,7 @@ Value* IrModifier::convertToStructure(
 		Value* obj,
 		StructType* strType)
 {
+	std::cout << "Correcing structure" << std::endl;
 	if (auto* gv = dyn_cast<GlobalVariable>(obj))
 	{
 		auto addr = _config->getGlobalAddress(gv);
@@ -1307,6 +1287,7 @@ Value* IrModifier::convertToStructure(
 	else if (_config->isStackVariable(obj))
 	{
 		auto offset = _config->getStackVariableOffset(obj);
+		std::cout << "Modified opbject: " << llvmObjToString(obj) << std::endl;
 		return convertToStructure(dyn_cast<AllocaInst>(obj), strType, offset);
 	}
 
@@ -1488,7 +1469,9 @@ AllocaInst* IrModifier::convertToStructure(
 		LOG << "Retrieved: " << llvmObjToString(structElement) << std::endl;
 		// TODO:
 		// following 3 linses of code can go into replaceElementWithStrIdx.
-		auto* origType = dyn_cast<PointerType>(structElement->getType())->getElementType();
+		auto* origType = structElement->getType()->getPointerElementType();
+		std::cout << "Original type : " << llvmObjToString(structElement) << std::endl;
+		std::cout << "Wanted type : " << llvmObjToString(elem) << std::endl;
 		if (origType != elem) {
 			auto* val = changeObjectDeclarationType(image, structElement, elem);
 			correctUsageOfModifiedObject(structElement, val, origType);
@@ -1627,11 +1610,21 @@ void IrModifier::correctUsageOfModifiedObject(Value* val, Value* nval, Type* ori
 
 			if (val == dst)
 			{
-				PointerType* ptr = dyn_cast<PointerType>(nval->getType());
+				dst = nval;
+				if (nval->getType()->getPointerElementType()->isStructTy())
+				{
+					auto* gep = getElement(nval, 0);
+					gep->insertBefore(store);
+					dst = gep;
+				}
+				PointerType* ptr = dyn_cast<PointerType>(dst->getType());
 				assert(ptr);
-				auto* conv = IrModifier::convertValueToType(src, ptr->getElementType(), store);
-				store->setOperand(0, conv);
-				store->setOperand(1, nval);
+				std::cout << "Before convert: " << std::endl;
+				std::cout << "src " << llvmObjToString(src) << std::endl;
+				std::cout << "dst " << llvmObjToString(dst) << std::endl;
+				src = IrModifier::convertValueToType(src, ptr->getElementType(), store);
+				store->setOperand(0, src);
+				store->setOperand(1, dst);
 			}
 			else
 			{
@@ -1664,6 +1657,17 @@ void IrModifier::correctUsageOfModifiedObject(Value* val, Value* nval, Type* ori
 				}
 			}
 		}
+		else if (auto* gep = dyn_cast<GetElementPtrInst>(user))
+		{
+			//TODO: do this only if accssing first element.
+			//in other cases we are totally fucked up.
+			//But they will happen only if somene retarded
+			//will do retarded things.
+
+			auto* conv = IrModifier::convertValueToType(nval, gep->getType(), gep);
+			gep->replaceAllUsesWith(conv);
+			gep->eraseFromParent();
+		}
 		else if (auto* cast = dyn_cast<CastInst>(user))
 		{
 			if (nval->getType() == cast->getType())
@@ -1684,6 +1688,8 @@ void IrModifier::correctUsageOfModifiedObject(Value* val, Value* nval, Type* ori
 			else
 			{
 				auto* conv = IrModifier::convertValueToType(nval, cast->getType(), cast);
+				std::cout << "conv: " << llvmObjToString(conv) << std::endl;
+				std::cout << "cast: " << llvmObjToString(cast) << std::endl;
 				if (cast != conv)
 				{
 					cast->replaceAllUsesWith(conv);
@@ -1704,11 +1710,15 @@ void IrModifier::correctUsageOfModifiedObject(Value* val, Value* nval, Type* ori
 			auto* conv = IrModifier::convertValueToType(nval, origType, instr);
 			if (val != conv)
 			{
+				std::cout << "val: " << llvmObjToString(val) << std::endl;
+				std::cout << "conv: " << llvmObjToString(conv) << std::endl;
+
 				instr->replaceUsesOfWith(val, conv);
 			}
 		}
 		else if (newConst && gvDeclr)
 		{
+			std::cout << "what" << std::endl;
 			auto* conv = IrModifier::convertConstantToType(
 					newConst,
 					gvDeclr->getType()->getPointerElementType());
@@ -1721,6 +1731,7 @@ void IrModifier::correctUsageOfModifiedObject(Value* val, Value* nval, Type* ori
 		//
 		else if (newConst && c)
 		{
+			std::cout << "the funck" << std::endl;
 			auto* conv = IrModifier::convertConstantToType(newConst, c->getType());
 			if (c != conv)
 			{
@@ -1963,6 +1974,7 @@ IrModifier::FunctionPair IrModifier::modifyFunction(
 				auto* inst = dyn_cast<Instruction>(u);
 				assert(inst && "we need an instruction here");
 
+				std::cout << "Is this the case?" << std::endl;
 				auto* conv = IrModifier::convertValueToType(a2, a1->getType(), inst);
 				inst->replaceUsesOfWith(a1, conv);
 			}
@@ -1970,6 +1982,8 @@ IrModifier::FunctionPair IrModifier::modifyFunction(
 
 		a2->takeName(a1);
 	}
+
+	std::cout << "Investigating function: " << nf->getName().str() << std::endl;
 
 	// Store arguments into allocated objects (stacks, registers) at the
 	// beginning of function body.
@@ -1984,7 +1998,21 @@ IrModifier::FunctionPair IrModifier::modifyFunction(
 		auto* v = *asIt;
 
 		assert(v->getType()->isPointerTy());
-		auto* conv = IrModifier::convertValueToType(
+
+		std::cout << "Converting to structure: " << std::endl;
+		std::cout << "val: " << llvmObjToString(a) << std::endl;
+		std::cout << "at: " << llvmObjToString(a->getType()) << std::endl;
+		std::cout << "v  : " << llvmObjToString(v) << std::endl;
+		std::cout << "type: " << llvmObjToString(v->getType()) << std::endl;
+
+		Value* conv = nullptr;
+		if (auto* strType = dyn_cast<StructType>(a->getType()))
+		{
+			v = convertToStructure(v, strType);
+		}
+		std::cout << "v  : " << llvmObjToString(v) << std::endl;
+
+		conv = IrModifier::convertValueToType(
 				a,
 				v->getType()->getPointerElementType(),
 				&nf->front().front());
@@ -2063,6 +2091,7 @@ IrModifier::FunctionPair IrModifier::modifyFunction(
 		}
 	}
 
+	std::cout << "HERE" << std::endl;
 	// Update function users (calls, etc.).
 	//
 	auto uIt = fnc->user_begin();
@@ -2081,12 +2110,25 @@ IrModifier::FunctionPair IrModifier::modifyFunction(
 				auto vIt = fIt->second.begin();
 				for (auto fa = nf->arg_begin(); fa != nf->arg_end(); ++fa)
 				{
+					std::cout << "fa: " << llvmObjToString(fa) << std::endl;
 					if (vIt != fIt->second.end())
 					{
-						auto* conv = IrModifier::convertValueToType(
+						Value* conv = nullptr;
+						if (auto* strType = dyn_cast<StructType>(fa->getType()))
+						{
+							std::cout << "vItStr: " << llvmObjToString(*vIt) << std::endl;
+							conv = convertToStructure(*vIt, strType);
+							std::cout << "vItStr: " << llvmObjToString(*vIt) << std::endl;
+							std::cout << "DONE" << std::endl;
+						}
+						else
+						{
+							std::cout << "vIt: " << llvmObjToString(*vIt) << std::endl;
+							conv = IrModifier::convertValueToType(
 								*vIt,
 								fa->getType(),
 								call);
+						}
 						args.push_back(conv);
 						++vIt;
 					}
@@ -2099,6 +2141,7 @@ IrModifier::FunctionPair IrModifier::modifyFunction(
 						args.push_back(conv);
 					}
 				}
+				std::cout << "Ok?" << std::endl;
 				while (isVarArg && vIt != fIt->second.end())
 				{
 					args.push_back(*vIt);
@@ -2107,6 +2150,7 @@ IrModifier::FunctionPair IrModifier::modifyFunction(
 			}
 			else
 			{
+				std::cout << "PLS" << std::endl;
 				unsigned ai = 0;
 				unsigned ae = call->getNumArgOperands();
 				for (auto fa = nf->arg_begin(); fa != nf->arg_end(); ++fa)
@@ -2170,6 +2214,7 @@ IrModifier::FunctionPair IrModifier::modifyFunction(
 			assert(false && "unhandled use");
 		}
 	}
+	std::cout << "OLALAL" << std::endl;
 
 	if (nf->getType() != fnc->getType())
 	{

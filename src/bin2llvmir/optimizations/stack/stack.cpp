@@ -236,16 +236,32 @@ void StackAnalysis::handleInstruction(
 	auto* l = dyn_cast<LoadInst>(inst);
 	if (s && s->getPointerOperand() == val)
 	{
+		Value* dst = a;
+		if (a->getType()->getElementType()->isStructTy())
+		{
+			// TODO: more levels of structure
+			auto* gep =irModif.getElement(dst, 0);
+			gep->insertBefore(inst);
+			dst = gep;
+		}
 		auto* conv = IrModifier::convertValueToType(
 				s->getValueOperand(),
-				a->getType()->getElementType(),
+				dst->getType()->getPointerElementType(),
 				inst);
-		new StoreInst(conv, a, inst);
+		new StoreInst(conv, dst, inst);
 		s->eraseFromParent();
 	}
 	else if (l && l->getPointerOperand() == val)
 	{
-		auto* nl = new LoadInst(a, "", l);
+		Value* ptr = a;
+		if (a->getType()->getElementType()->isStructTy())
+		{
+			// TODO: more levels of structure
+			auto* gep =irModif.getElement(ptr, 0);
+			gep->insertBefore(inst);
+			ptr = gep;
+		}
+		auto* nl = new LoadInst(ptr, "", l);
 		auto* conv = IrModifier::convertValueToType(nl, l->getType(), l);
 		l->replaceAllUsesWith(conv);
 		l->eraseFromParent();

@@ -7,6 +7,8 @@
 #ifndef RETDEC_BIN2LLVMIR_OPTIMIZATIONS_PARAM_RETURN_FILTER_FILTER_H
 #define RETDEC_BIN2LLVMIR_OPTIMIZATIONS_PARAM_RETURN_FILTER_FILTER_H
 
+#include <queue>
+
 #include <llvm/IR/Instructions.h>
 
 #include "retdec/bin2llvmir/providers/abi/abi.h"
@@ -142,6 +144,8 @@ class Filter
 
 		std::vector<llvm::Type*> expandTypes(
 			const std::vector<llvm::Type*>& types) const;
+		std::deque<llvm::Type*> expandStruct(
+			llvm::StructType* structType) const;
 
 	protected:
 		std::size_t fetchGPRegsForType(
@@ -165,6 +169,9 @@ class Filter
 				std::vector<uint32_t>& store,
 				const std::vector<uint32_t>& regs,
 				std::size_t maxRegsPerObject) const;
+
+		FilterableLayout fetchArgLayoutForKnownTypes(std::vector<llvm::Type*>& types) const;
+
 
 	protected:
 		std::size_t getNumberOfStacksForType(llvm::Type* type) const;

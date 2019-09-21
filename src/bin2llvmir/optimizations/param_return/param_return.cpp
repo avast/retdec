@@ -19,7 +19,7 @@
 #include "retdec/utils/string.h"
 #include "retdec/bin2llvmir/optimizations/param_return/filter/filter.h"
 #include "retdec/bin2llvmir/optimizations/param_return/param_return.h"
-#define debug_enabled false
+#define debug_enabled true
 #include "retdec/bin2llvmir/utils/llvm.h"
 #include "retdec/bin2llvmir/providers/asm_instruction.h"
 #include "retdec/bin2llvmir/utils/ir_modifier.h"
@@ -115,9 +115,9 @@ bool ParamReturn::run()
 	_RDA.runOnModule(*_module, _abi);
 
 	collectAllCalls();
-//	dumpInfo();
+dumpInfo();
 	filterCalls();
-//	dumpInfo();
+dumpInfo();
 	applyToIr();
 
 	_RDA.clear();
@@ -1071,6 +1071,7 @@ std::map<CallInst*, std::vector<Value*>> ParamReturn::fetchLoadsOfCalls(
 						const std::vector<CallEntry>& calls) const
 {
 	std::map<CallInst*, std::vector<Value*>> loadsOfCalls;
+	IrModifier irm(_module, _config);
 
 	for (auto& e : calls)
 	{
@@ -1094,19 +1095,31 @@ std::map<CallInst*, std::vector<Value*>> ParamReturn::fetchLoadsOfCalls(
 				continue;
 			}
 
-			Value* l = new LoadInst(*aIt, "", call);
+			std::cout << llvmObjToString(*aIt) << std::endl;
 
-			if (tIt != types.end())
+			auto *t = tIt != types.end() ? *tIt++ : _abi->getDefaultType();
+
+			Value* conv = *aIt;
+			if (auto* strType = dyn_cast<StructType>(t))
 			{
-				l = IrModifier::convertValueToType(l, *tIt, call);
-				tIt++;
+				conv = irm.convertToStructure(*aIt, strType);
+			}
+
+			if (!t->isPointerTy())
+			{
+				conv = IrModifier::convertValueToType(conv, PointerType::get(t, 0), call);
+				auto* l = new LoadInst(t, conv);
+				l->insertBefore(call);
+				loads.push_back(l);
 			}
 			else
 			{
-				l = IrModifier::convertValueToType(l, _abi->getDefaultType(), call);
+				auto* l = new LoadInst(conv);
+				l->insertBefore(call);
+				conv = IrModifier::convertValueToType(conv, PointerType::get(t, 0), call);
+				loads.push_back(l);
 			}
 
-			loads.push_back(l);
 			aIt++;
 		}
 
