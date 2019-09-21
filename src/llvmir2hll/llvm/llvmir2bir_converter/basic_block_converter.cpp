@@ -141,6 +141,9 @@ ShPtr<Statement> BasicBlockConverter::visitInsertValueInst(llvm::InsertValueInst
 	auto lhs = converter->generateAccessToAggregateType(type, base, inst.getIndices());
 	auto rhs = converter->convertValueToExpression(inst.getInsertedValueOperand());
 	auto assignStmt = AssignStmt::create(lhs, rhs, nullptr, LLVMSupport::getInstAddress(&inst));
+	if (isa<llvm::UndefValue>(inst.getAggregateOperand())) {
+		return assignStmt;
+	}
 
 	auto varDef = generateAssignOfPrevValForInsertValueInst(inst);
 	varDef->setSuccessor(assignStmt);
