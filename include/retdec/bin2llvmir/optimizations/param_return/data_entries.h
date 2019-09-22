@@ -10,12 +10,112 @@
 #include <vector>
 
 #include "retdec/bin2llvmir/providers/calling_convention/calling_convention.h"
+#include "retdec/utils/value.h"
 
 #include <llvm/IR/Function.h>
 #include <llvm/IR/Instructions.h>
 
 namespace retdec {
 namespace bin2llvmir {
+
+class ArgumentEntry
+{
+	public:
+		typedef std::shared_ptr<ArgumentEntry> Ptr;
+	
+	protected:
+		ArgumentEntry();
+		ArgumentEntry(
+			llvm::Type* type = nullptr,
+			const std::string& name = "");
+
+	public:
+		void setType(llvm::Type* type);
+		void setName(const std::string& name);
+
+		std::pair<llvm::Value*, llvm::Type*> get(
+			llvm::Function* fnc,
+			const Abi& a) const;
+
+		std::pair<llvm::Value*, std::string> get(
+			llvm::Function* fnc,
+			const Abi& a,
+			const std::string& suffix,
+			const std::string& base = "") const;
+
+		llvm::Type* getType(llvm::Function* fnc, const Abi& a) const;
+		llvm::Value* getValue(llvm::Function* fnc, const Abi& a) const;
+
+		bool isDefined(llvm::Function* fnc, const Abi& a) const;
+
+		std::string getName(
+			llvm::Function* fnc,
+			const Abi& a,
+			const std::string& suffix = "",
+			const std::string& base = "") const;
+	
+	protected:
+		virtual llvm::Value* fetchArgValue(
+			llvm::Function* fnc,
+			const Abi& a) const;
+
+		virtual std::string createName(
+			llvm::Function* fnc,
+			const Abi& a,
+			const std::string& suffix = "",
+			const std::string& base = "") const;
+	
+	private:
+		llvm::Type* _type = nullptr;
+		std::string _name = "";
+};
+
+
+class DummyArgumentEntry: public ArgumentEntry {
+	public:
+		DummyArgumentEntry(
+			llvm::Type* type = nullptr,
+			const std::string& name = "");
+
+		~DummyArgumentEntry();
+};
+
+template<typename ArgID>
+class ArgumentEntryImpl : public ArgumentEntry
+{
+	public:
+		ArgumentEntryImpl(
+			ArgID argid,
+			llvm::Type* type = nullptr,
+			const std::string& name = "");
+
+		~ArgumentEntryImpl();
+	
+		virtual llvm::Value* fetchArgValue(
+			llvm::Function* fnc,
+			const Abi& a) const override;
+
+		virtual std::string createName(
+			llvm::Function* fnc,
+			const Abi& a,
+			const std::string& suffix = "",
+			const std::string& base = "") const override;
+
+	private:
+		ArgID _argid;
+};
+
+template class ArgumentEntryImpl<int>;
+typedef ArgumentEntryImpl<int> StackArgumentEntry;
+
+template class ArgumentEntryImpl<std::size_t>;
+typedef ArgumentEntryImpl<std::size_t> FunctionArgumentEntry;
+
+template class ArgumentEntryImpl<unsigned int>;
+typedef ArgumentEntryImpl<unsigned int> RegisterArgumentEntry;
+
+template class ArgumentEntryImpl<llvm::Constant*>;
+typedef ArgumentEntryImpl<llvm::Constant*> ConstantArgumentEntry;
 
 class ReturnEntry
 {
@@ -171,6 +271,10 @@ class DataFlowEntry : public FunctionEntry
 		CallEntry* createCallEntry(llvm::CallInst *call);
 		const std::vector<CallEntry>& callEntries() const;
 		std::vector<CallEntry>& callEntries();
+
+		std::vector<ArgumentEntry::Ptr> tmpArgs;
+		std::map<llvm::ReturnInst*, llvm::Value*> rets2vals;
+		std::map<llvm::CallInst*, std::vector<ArgumentEntry::Ptr>> loadsOfCalls;
 
 	private:
 		llvm::Value* _calledValue = nullptr;

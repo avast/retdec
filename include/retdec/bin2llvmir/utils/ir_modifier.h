@@ -10,6 +10,7 @@
 #include <llvm/IR/Instructions.h>
 #include <llvm/IR/Module.h>
 
+#include "retdec/bin2llvmir/optimizations/param_return/data_entries.h" //TODO: This should be moved to .*/providers/
 #include "retdec/bin2llvmir/providers/abi/abi.h"
 #include "retdec/bin2llvmir/providers/config.h"
 #include "retdec/bin2llvmir/providers/fileimage.h"
@@ -92,6 +93,15 @@ class IrModifier
 		FunctionPair modifyFunction(
 				llvm::Function* fnc,
 				llvm::Type* ret,
+				llvm::Value* retVal = nullptr,
+				const std::vector<ArgumentEntry::Ptr>& args = {},
+				const std::map<llvm::ReturnInst*, llvm::Value*>& rets2vals = {},
+				const std::map<llvm::CallInst*, std::vector<ArgumentEntry::Ptr>>& calls2args = {},
+				bool isVarArg = false);
+
+		FunctionPair modifyFunctionOld(
+				llvm::Function* fnc,
+				llvm::Type* ret,
 				std::vector<llvm::Type*> args,
 				bool isVarArg = false,
 				const std::map<llvm::ReturnInst*, llvm::Value*>& rets2vals =
@@ -110,6 +120,25 @@ class IrModifier
 		llvm::Value* convertToStructure(
 				llvm::Value* gv,
 				llvm::StructType* strType);
+
+		llvm::Value* convertToPointer(
+				llvm::Value* gv,
+				std::size_t ptrDepth);
+
+		llvm::Value* createStructureFromStacks(
+				llvm::AllocaInst* startStack,
+				llvm::StructType* strType,
+				int offset,
+				llvm::Instruction* before,
+				llvm::InsertValueInst* newStructure = nullptr,
+				std::vector<unsigned int>idxs = {});
+		llvm::Value* extractStructureToStacks(
+				llvm::AllocaInst* startStack,
+				llvm::StructType* strType,
+				int offset,
+				llvm::Instruction* before,
+				llvm::InsertValueInst* newStructure = nullptr,
+				std::vector<unsigned int>idxs = {});
 	protected:
 		llvm::Value* changeObjectDeclarationType(
 				FileImage* objf,

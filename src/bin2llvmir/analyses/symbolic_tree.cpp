@@ -377,6 +377,7 @@ void SymbolicTree::_simplifyNode()
 	Value* val = nullptr;
 	LoadInst* load = nullptr;
 	GlobalVariable* global = nullptr;
+	AllocaInst* local = nullptr;
 	ConstantInt* c1 = nullptr;
 	ConstantInt* c2 = nullptr;
 
@@ -418,6 +419,11 @@ void SymbolicTree::_simplifyNode()
 	{
 		*this = std::move(ops[0]);
 	}
+	else if (match(*this, m_Load(m_ConstantInt(c1), &load)))
+	{
+		std::cout << "You are genius!" << std::endl;
+		*this = std::move(ops[0]);
+	}
 	else if (match(*this, m_Add(m_ConstantInt(c1), m_ConstantInt(c2))))
 	{
 		value = ConstantInt::get(
@@ -456,6 +462,15 @@ void SymbolicTree::_simplifyNode()
 			ops.clear();
 		}
 	}
+	else if (match(*this, m_Add(m_Value(val), m_ConstantInt(c1)))
+			&& _config->isStackVariable(val))
+	{
+		auto offset = _config->getStackVariableOffset(val);
+		value = ConstantInt::get(
+				c1->getType(),
+				c1->getSExtValue() + offset);
+		ops.clear();
+	}
 	else if (match(*this, m_Add(m_Value(), m_Zero()))
 			|| match(*this, m_Sub(m_Value(), m_Zero())))
 	{
@@ -474,6 +489,15 @@ void SymbolicTree::_simplifyNode()
 		ops[1].value = ConstantInt::get(
 				c1->getType(),
 				c1->getSExtValue() + c2->getSExtValue());
+	}
+	else if (match(*this, m_Add(m_Value(val), m_ConstantInt(c1)))
+			&& _config->isStackVariable(val))
+	{
+		auto offset = _config->getStackVariableOffset(val);
+		value = ConstantInt::get(
+				c1->getType(),
+				c1->getSExtValue() + offset);
+		ops.clear();
 	}
 
 	// Move Constants from ops[0] to ops[1].

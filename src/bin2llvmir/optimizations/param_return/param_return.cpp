@@ -19,7 +19,7 @@
 #include "retdec/utils/string.h"
 #include "retdec/bin2llvmir/optimizations/param_return/filter/filter.h"
 #include "retdec/bin2llvmir/optimizations/param_return/param_return.h"
-#define debug_enabled true
+#define debug_enabled false
 #include "retdec/bin2llvmir/utils/llvm.h"
 #include "retdec/bin2llvmir/providers/asm_instruction.h"
 #include "retdec/bin2llvmir/utils/ir_modifier.h"
@@ -115,9 +115,9 @@ bool ParamReturn::run()
 	_RDA.runOnModule(*_module, _abi);
 
 	collectAllCalls();
-dumpInfo();
+//dumpInfo();
 	filterCalls();
-dumpInfo();
+//dumpInfo();
 	applyToIr();
 
 	_RDA.clear();
@@ -891,8 +891,16 @@ void ParamReturn::applyToIr()
 {
 	for (auto& p : _fnc2calls)
 	{
-//		dumpInfo(p.second);
+		//dumpInfo(p.second);
+		//std::cout << "Applying to ir" << std::endl;
 		applyToIr(p.second);
+		//std::cout << "Applied!" << std::endl;
+	}
+
+	//std::cout << "Appling to ir ref" << std::endl;
+	for (auto& p : _fnc2calls)
+	{
+		applyToIrRef(p.second);
 	}
 
 	for (auto& p : _fnc2calls)
@@ -902,12 +910,13 @@ void ParamReturn::applyToIr()
 	}
 }
 
-void ParamReturn::applyToIr(DataFlowEntry& de)
+void ParamReturn::applyToIrRef(DataFlowEntry& de)
 {
 	Function* fnc = de.getFunction();
 
 	if (fnc == nullptr)
 	{
+		//std::cout << "fnc == nullptr" << std::endl;
 		auto loadsOfCalls = fetchLoadsOfCalls(de.callEntries());
 
 		for (auto l : loadsOfCalls)
@@ -923,9 +932,9 @@ void ParamReturn::applyToIr(DataFlowEntry& de)
 		return;
 	}
 
-	auto loadsOfCalls = fetchLoadsOfCalls(de.callEntries());
-
 	std::map<ReturnInst*, Value*> rets2vals;
+
+	//std::cout << "Some analysis" << std::endl;
 
 	if (de.getRetValue())
 	{
@@ -952,28 +961,105 @@ void ParamReturn::applyToIr(DataFlowEntry& de)
 		de.setRetType(Type::getVoidTy(_module->getContext()));
 	}
 
-	std::vector<llvm::Value*> definitionArgs;
-	for (auto& a : de.args())
-	{
-		if (a != nullptr)
-		{
-			definitionArgs.push_back(a);
-		}
-	}
+	//std::cout << "Well here" << std::endl;
+	//std::cout << de.tmpArgs.empty() << std::endl;
+	//std::cout << de.loadsOfCalls.empty() << std::endl;
+	//std::cout << de.rets2vals.empty() << std::endl;
 
 	IrModifier irm(_module, _config);
 	auto* newFnc = irm.modifyFunction(
 			fnc,
 			de.getRetType(),
-			de.argTypes(),
-			de.isVariadic(),
-			rets2vals,
-			loadsOfCalls,
 			de.getRetValue(),
-			definitionArgs,
-			de.argNames()).first;
+			de.tmpArgs,
+			rets2vals,
+			de.loadsOfCalls,
+			de.isVariadic()).first;
+	//std::cout << "Well fuck" << std::endl;
 
+      //std::cout << "setting called value" << std::endl;
 	de.setCalledValue(newFnc);
+}
+void ParamReturn::applyToIr(DataFlowEntry& de)
+{
+	Function* fnc = de.getFunction();
+
+	if (fnc == nullptr)
+	{
+		return;
+		//std::cout << "fnc == nullptr" << std::endl;
+		auto loadsOfCalls = fetchLoadsOfCalls(de.callEntries());
+
+		for (auto l : loadsOfCalls)
+		{
+			IrModifier::modifyCallInst(l.first, de.getRetType(), l.second);
+		}
+
+		return;
+	}
+
+	if (fnc->arg_size() > 0)
+	{
+		return;
+	}
+
+	//std::cout << "fetching args of calls" << std::endl;
+	auto loadsOfCalls = fetchArgsOfCalls(de.callEntries());
+
+	//std::cout << "preparing args " << std::endl;
+
+	auto types = de.argTypes().begin();
+	auto names = de.argNames().begin();
+	auto args = de.args().begin();
+
+	std::vector<ArgumentEntry::Ptr> definitionArgs;
+	while (types != de.argTypes().end() || names != de.argNames().end() || args != de.args().end())
+	{
+		auto* t = types != de.argTypes().end() ?
+			*(types++) : nullptr;
+		auto name = names != de.argNames().end() ?
+			*(names++) : "";
+		auto a = args != de.args().end() ?
+			*(args++) : nullptr;
+
+		if (a == nullptr)
+		{
+			definitionArgs.push_back(
+				ArgumentEntry::Ptr(
+					new DummyArgumentEntry(t, name)));
+		}
+
+		if (_config->isStackVariable(a))
+		{
+			definitionArgs.push_back(
+				ArgumentEntry::Ptr(
+					new StackArgumentEntry(_config->getStackVariableOffset(a), t, name)));
+		}
+		else if (_abi->isRegister(a))
+		{
+			definitionArgs.push_back(
+				ArgumentEntry::Ptr(
+					new RegisterArgumentEntry(_abi->getRegisterId(a), t, name)));
+		}
+	}
+
+	de.tmpArgs = definitionArgs;
+	de.loadsOfCalls = loadsOfCalls;
+
+	//std::cout << "it modifier called" << std::endl;
+
+//	IrModifier irm(_module, _config);
+//	auto* newFnc = irm.modifyFunction(
+//			fnc,
+//			de.getRetType(),
+//			de.getRetValue(),
+//			definitionArgs,
+//			rets2vals,
+//			loadsOfCalls,
+//			de.isVariadic()).first;
+
+	//std::cout << "setting called value" << std::endl;
+//	de.setCalledValue(newFnc);
 }
 
 void ParamReturn::connectWrappers(const DataFlowEntry& de)
@@ -1067,11 +1153,89 @@ void ParamReturn::connectWrappers(const DataFlowEntry& de)
 	}
 }
 
+std::map<CallInst*, std::vector<ArgumentEntry::Ptr>> ParamReturn::fetchArgsOfCalls(
+						const std::vector<CallEntry>& calls) const
+{
+	std::map<CallInst*, std::vector<ArgumentEntry::Ptr>> loadsOfCalls;
+	IrModifier irm(_module, _config);
+
+	for (auto& e : calls)
+	{
+		std::vector<ArgumentEntry::Ptr> loads;
+		auto* call = e.getCallInstruction();
+
+		auto types = e.getBaseFunction()->argTypes();
+		types.insert(
+			types.end(),
+			e.argTypes().begin(),
+			e.argTypes().end());
+
+		auto tIt = types.begin();
+		auto aIt = e.args().begin();
+
+
+		retdec::utils::Maybe<int> nextPossibleOffset;
+		while (aIt != e.args().end() || tIt != types.end())
+		{
+			if (_abi->isRegister(*aIt))
+			{
+				loads.push_back(
+					ArgumentEntry::Ptr(
+						new RegisterArgumentEntry(_abi->getRegisterId(*aIt), *tIt)));
+			}
+			else if (_config->isStackVariable(*aIt))
+			{
+				int stackOffset = _config->getStackVariableOffset(*aIt);
+				//
+				// Sometimes we do not detect stack variables duting
+				// collection of values. In those cases we may
+				// guess next stack variable by applying same difference
+				// in stack offset as peviously found stack variable.
+				//
+				// Perpas better solution in those cases would be:
+				// offset = previous_off+(next_off - previous_off)/2;
+				//
+				// Where next_offset has to be found among values.
+				//
+				if (!nextPossibleOffset.isUndefined())
+				{
+					nextPossibleOffset = nextPossibleOffset+(stackOffset-nextPossibleOffset)*2;
+				}
+				else
+				{
+					nextPossibleOffset = stackOffset*2;
+				}
+				loads.push_back(ArgumentEntry::Ptr(
+							new StackArgumentEntry(stackOffset, *tIt)));
+			}
+			else if (*aIt == nullptr && nextPossibleOffset.isDefined())
+			{
+				loads.push_back(ArgumentEntry::Ptr(
+							new StackArgumentEntry(nextPossibleOffset, *tIt)));
+			}
+			else
+			{
+				loads.push_back(ArgumentEntry::Ptr(
+							new DummyArgumentEntry(*tIt)));
+			}
+
+			if (tIt != types.end())
+				tIt++;
+
+			if (aIt != e.args().end())
+				aIt++;
+		}
+
+		loadsOfCalls[call] = std::move(loads);
+	}
+
+	return loadsOfCalls;
+}
+
 std::map<CallInst*, std::vector<Value*>> ParamReturn::fetchLoadsOfCalls(
 						const std::vector<CallEntry>& calls) const
 {
 	std::map<CallInst*, std::vector<Value*>> loadsOfCalls;
-	IrModifier irm(_module, _config);
 
 	for (auto& e : calls)
 	{
@@ -1095,31 +1259,19 @@ std::map<CallInst*, std::vector<Value*>> ParamReturn::fetchLoadsOfCalls(
 				continue;
 			}
 
-			std::cout << llvmObjToString(*aIt) << std::endl;
+			Value* l = new LoadInst(*aIt, "", call);
 
-			auto *t = tIt != types.end() ? *tIt++ : _abi->getDefaultType();
-
-			Value* conv = *aIt;
-			if (auto* strType = dyn_cast<StructType>(t))
+			if (tIt != types.end())
 			{
-				conv = irm.convertToStructure(*aIt, strType);
-			}
-
-			if (!t->isPointerTy())
-			{
-				conv = IrModifier::convertValueToType(conv, PointerType::get(t, 0), call);
-				auto* l = new LoadInst(t, conv);
-				l->insertBefore(call);
-				loads.push_back(l);
+				l = IrModifier::convertValueToType(l, *tIt, call);
+				tIt++;
 			}
 			else
 			{
-				auto* l = new LoadInst(conv);
-				l->insertBefore(call);
-				conv = IrModifier::convertValueToType(conv, PointerType::get(t, 0), call);
-				loads.push_back(l);
+				l = IrModifier::convertValueToType(l, _abi->getDefaultType(), call);
 			}
 
+			loads.push_back(l);
 			aIt++;
 		}
 

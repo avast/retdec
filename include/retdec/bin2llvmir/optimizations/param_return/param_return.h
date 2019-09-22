@@ -91,10 +91,14 @@ class ParamReturn : public llvm::ModulePass
 	private:
 		void applyToIr();
 		void applyToIr(DataFlowEntry& de);
+		void applyToIrRef(DataFlowEntry& de);
 		void connectWrappers(const DataFlowEntry& de);
 
+		std::map<llvm::CallInst*, std::vector<ArgumentEntry::Ptr>> fetchArgsOfCalls(
+						const std::vector<CallEntry>& calls) const;
 		std::map<llvm::CallInst*, std::vector<llvm::Value*>> fetchLoadsOfCalls(
 						const std::vector<CallEntry>& calls) const;
+
 
 	private:
 		llvm::Module* _module = nullptr;

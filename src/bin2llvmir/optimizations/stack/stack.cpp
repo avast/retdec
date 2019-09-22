@@ -17,7 +17,7 @@
 #include "retdec/bin2llvmir/optimizations/stack/stack.h"
 #include "retdec/bin2llvmir/providers/asm_instruction.h"
 #include "retdec/bin2llvmir/utils/ir_modifier.h"
-#define debug_enabled false
+#define debug_enabled true
 #include "retdec/bin2llvmir/utils/llvm.h"
 
 using namespace llvm;
@@ -76,6 +76,8 @@ bool StackAnalysis::run()
 
 	for (auto& f : *_module)
 	{
+		std::cout << "HANDLING: " << f.getName().str() << std::endl;
+
 		std::map<Value*, Value*> val2val;
 		for (inst_iterator I = inst_begin(f), E = inst_end(f); I != E;)
 		{
@@ -96,9 +98,9 @@ bool StackAnalysis::run()
 						store->getValueOperand()->getType(),
 						val2val);
 
-				if (isa<GlobalVariable>(store->getPointerOperand()))
+				if (_abi->isStackPointerRegister(store->getPointerOperand()))
 				{
-					continue;
+						continue;
 				}
 
 				handleInstruction(
@@ -110,9 +112,9 @@ bool StackAnalysis::run()
 			}
 			else if (LoadInst* load = dyn_cast<LoadInst>(&i))
 			{
-				if (isa<GlobalVariable>(load->getPointerOperand()))
+				if (_abi->isStackPointerRegister(load->getPointerOperand()))
 				{
-					continue;
+						continue;
 				}
 
 				handleInstruction(
@@ -136,6 +138,7 @@ bool StackAnalysis::run()
 	return false;
 }
 
+
 void StackAnalysis::handleInstruction(
 		ReachingDefinitionsAnalysis& RDA,
 		llvm::Instruction* inst,
@@ -143,17 +146,21 @@ void StackAnalysis::handleInstruction(
 		llvm::Type* type,
 		std::map<llvm::Value*, llvm::Value*>& val2val)
 {
-	LOG << llvmObjToString(inst) << std::endl;
+	LOG << "Handling instruction: " << llvmObjToString(inst) << std::endl;
 
-	SymbolicTree root(RDA, val, &val2val);
-	LOG << root << std::endl;
+	//TODO: what about all globals?
+	SymbolicTree root = !_abi->isGeneralPurposeRegister(val) ?
+		SymbolicTree(RDA, val, &val2val) : SymbolicTree(RDA, inst);
+
+	LOG << "Root of instruction: " << std::endl << root << std::endl;
 
 	if (!root.isVal2ValMapUsed())
 	{
 		bool stackPtr = false;
 		for (SymbolicTree* n : root.getPostOrder())
 		{
-			if (_abi->isStackPointerRegister(n->value))
+			if (_abi->isStackPointerRegister(n->value)
+				|| _abi->isStackVariable(n->value))
 			{
 				stackPtr = true;
 				break;
@@ -171,6 +178,7 @@ void StackAnalysis::handleInstruction(
 
 	auto* ci = dyn_cast_or_null<ConstantInt>(root.value);
 	root.simplifyNode();
+	LOG << "Simplified root of instruction: " << std::endl << root << std::endl;
 
 	if (auto* pdSv = getDebugStackVariable(inst->getFunction(), root))
 	{
@@ -180,6 +188,7 @@ void StackAnalysis::handleInstruction(
 	{
 		configSv = pcSv;
 	}
+	LOG << "Root value: " << llvmObjToString(root.value) << std::endl;
 	ci = dyn_cast_or_null<ConstantInt>(root.value);
 	
 	if (ci == nullptr)
@@ -195,8 +204,8 @@ void StackAnalysis::handleInstruction(
 		}
 	}
 
-	LOG << "===> " << llvmObjToString(ci) << std::endl;
-	LOG << "===> " << ci->getSExtValue() << std::endl;
+	LOG << "\tConstant extracted: " << llvmObjToString(ci) << std::endl;
+	LOG << "\tInteger constant  : " << ci->getSExtValue() << std::endl;
 
 	std::string name = "";
 	Type* t = type;
@@ -228,8 +237,8 @@ void StackAnalysis::handleInstruction(
 		ca->setIsFromDebug(true);
 	}
 
-	LOG << "===> " << llvmObjToString(a) << std::endl;
-	LOG << "===> " << llvmObjToString(inst) << std::endl;
+	LOG << "\tHave stack variable: " << llvmObjToString(a) << std::endl;
+	LOG << "\tModifying instrucio: " << llvmObjToString(inst) << std::endl;
 	LOG << std::endl;
 
 	auto* s = dyn_cast<StoreInst>(inst);

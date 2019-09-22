@@ -79,8 +79,7 @@ TEST_F(IrModifierTests, convertValueToTypeFunctionToPointer)
 	parseInput(R"(
 		declare void @import()
 		define void @fnc() {
-			ret void
-		}
+			ret void1``		}
 	)");
 	auto* import = getValueByName("import");
 	auto* r = getNthInstruction<ReturnInst>();
@@ -305,16 +304,20 @@ TEST_F(IrModifierTests, modifyFunctionVoid)
 	auto* call2 = getNthInstruction<CallInst>(1);
 
 	auto* i32 = Type::getInt32Ty(context);
-	auto* a1 = ConstantInt::get(i32, 123);
-	auto* a2 = ConstantInt::get(i32, 456);
+	auto a1 = ArgumentEntry::Ptr(new ConstantArgumentEntry(
+			dyn_cast<Constant>(ConstantInt::get(i32, 123)),
+			i32));
+	auto a2 = ArgumentEntry::Ptr(new ConstantArgumentEntry(
+			dyn_cast<Constant>(ConstantInt::get(i32, 456)),
+			i32));
 
 	auto c = Config::empty(module.get());
 	IrModifier irm(module.get(), &c);
 	irm.modifyFunction(
 			import,
 			i32,
-			{i32},
-			false,
+			nullptr,
+			{},
 			std::map<ReturnInst*, Value*>(),
 			{{call1, {a1}}, {call2, {a2}}});
 
@@ -352,8 +355,12 @@ TEST_F(IrModifierTests, modifyFunctionWithZeroArguments)
 	auto* call2 = getNthInstruction<CallInst>(1);
 	auto* ret = getNthInstruction<ReturnInst>();
 	auto* i32 = Type::getInt32Ty(context);
-	auto* a1 = ConstantInt::get(i32, 123);
-	auto* a2 = ConstantInt::get(i32, 456);
+	auto a1 = ArgumentEntry::Ptr(new ConstantArgumentEntry(
+			dyn_cast<Constant>(ConstantInt::get(i32, 123)),
+			i32));
+	auto a2 = ArgumentEntry::Ptr(new ConstantArgumentEntry(
+			dyn_cast<Constant>(ConstantInt::get(i32, 456)),
+			i32));
 	auto* r = ConstantInt::get(i32, 789);
 	auto* userDef = cast<Function>(getValueByName("userDef"));
 
@@ -362,8 +369,8 @@ TEST_F(IrModifierTests, modifyFunctionWithZeroArguments)
 	irm.modifyFunction(
 			userDef,
 			i32,
-			{i32},
-			false,
+			nullptr,
+			{},
 			{{ret, r}},
 			{{call1, {a1}}, {call2, {a2}}});
 
@@ -407,7 +414,11 @@ TEST_F(IrModifierTests, modifyFunctionWithExistingArguments)
 	auto* d = Type::getDoubleTy(context);
 	auto c = Config::empty(module.get());
 	IrModifier irm(module.get(), &c);
-	irm.modifyFunction(fnc, f, {f, i32, d});
+	//TODO: provide separate function for this.
+	auto df = ArgumentEntry::Ptr(new DummyArgumentEntry(f));
+	auto dd = ArgumentEntry::Ptr(new DummyArgumentEntry(d));
+	auto di = ArgumentEntry::Ptr(new DummyArgumentEntry(i32));
+	irm.modifyFunction(fnc, f, nullptr, {df, di, dd});
 
 	std::string exp = R"(
 		define float @fnc(float %a1, i32 %a2, double %a3) {
@@ -452,22 +463,27 @@ TEST_F(IrModifierTests, modifyFunctionVariadic)
 			ret i32 0
 		}
 	)");
+
 	auto* fnc = cast<Function>(getValueByName("fnc"));
 	auto* c1 = getNthInstruction<CallInst>();
 	auto* c2 = getNthInstruction<CallInst>(1);
 	auto* ret = getNthInstruction<ReturnInst>();
 	auto* i32 = Type::getInt32Ty(context);
-	auto* ci = ConstantInt::get(i32, 0);
+	auto ci = ArgumentEntry::Ptr(new ConstantArgumentEntry(
+			dyn_cast<Constant>(ConstantInt::get(i32, 0)),
+			i32));
+	auto ap = ArgumentEntry::Ptr(new DummyArgumentEntry(i32));
 
 	auto c = Config::empty(module.get());
 	IrModifier irm(module.get(), &c);
 	irm.modifyFunction(
 			fnc,
 			i32,
-			{i32},
-			true,
-			{{ret, ci}},
-			{{c1, {ci, ci}}, {c2, {ci, ci, ci, ci}}});
+			nullptr,
+			{ap},
+			{{ret, ConstantInt::get(i32, 0)}},
+			{{c1, {ci, ci}}, {c2, {ci, ci, ci, ci}}},
+			true);
 
 	std::string exp = R"(
 		target datalayout = "e-p:32:32:32-f80:32:32"

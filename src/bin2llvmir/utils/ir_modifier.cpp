@@ -6,6 +6,7 @@
 
 #include <iostream>
 
+#include <llvm/IR/Constants.h>
 #include <llvm/IR/InstIterator.h>
 #include <llvm/IR/InstrTypes.h>
 
@@ -241,27 +242,21 @@ Value* convertToType(
 	else if (isa<LoadInst>(val) && type->isAggregateType())
 	{
 		conv = val;
-		std::cout << "val: " << llvmObjToString(val) << std::endl;
-		std::cout << "type: " << llvmObjToString(type) << std::endl;
-		std::cout << "EXITTING" << std::endl;
+		//std::cout << "type: " << llvmObjToString(type) << std::endl;
+		//std::cout << "EXITTING" << std::endl;
 		exit(1);
 	}
 	else if (val->getType()->isAggregateType())
 	{
-		std::cout << "Val: " << llvmObjToString(val) << std::endl;
-		std::cout << "Type: " << llvmObjToString(type) << std::endl;
 		auto* strType = dyn_cast<StructType>(val->getType());
 		Instruction* gep = GetElementPtrInst::CreateInBounds(strType, val, {0}, "", before);
-		gep = new LoadInst(gep);
-		gep->insertBefore(before);
-		conv = convertToType(gep, type, before, gep, constExpr);
+		conv = gep;
 	}
 	else if (CompositeType* cmp = dyn_cast<CompositeType>(type))
 	{
-		std::cout << "The val: " << llvmObjToString(val) << std::endl;
-		std::cout << "Type: " << llvmObjToString(type) << std::endl;
+		//std::cout << "The val: " << llvmObjToString(val) << std::endl;
+		//std::cout << "Type: " << llvmObjToString(type) << std::endl;
 		assert(!isa<Instruction>(val) && "This should not happen! Please rethink convertion.");
-		std::cout << "Should not happen" << std::endl;
 		exit(2);
 		conv = nullptr;
 	}
@@ -292,8 +287,16 @@ llvm::CallInst* _modifyCallInst(
 		llvm::Value* calledVal,
 		llvm::ArrayRef<llvm::Value*> args)
 {
+	//std::cout << "call: " << llvmObjToString(call) << std::endl;
+	//std::cout << "args: " << args.size() << std::endl;
+	for (auto a: args)
+	{
+		std::cout << "\tnarg: " << llvmObjToString(a) << std::endl;
+	}
+
 	std::set<Instruction*> toEraseCast;
 	auto* newCall = CallInst::Create(calledVal, args, "", call);
+	//std::cout << "newCall: " << llvmObjToString(newCall) << std::endl;
 	if (call->getNumUses())
 	{
 		if (!newCall->getType()->isVoidTy())
@@ -734,9 +737,8 @@ Instruction* IrModifier::getElement(llvm::Value* v, const std::vector<Value*> &i
 {
 	auto* var = dyn_cast<PointerType>(v->getType());
 	assert(var && "Expects variable.");
-	auto* strType = dyn_cast<StructType>(var->getElementType());
 
-	return GetElementPtrInst::CreateInBounds(strType, v, idxs);
+	return GetElementPtrInst::CreateInBounds(var->getPointerElementType(), v, idxs);
 }
 
 void IrModifier::replaceElementWithStrIdx(llvm::Value* element, llvm::Value* str, std::size_t idx)
@@ -798,16 +800,9 @@ void IrModifier::replaceElementWithStrIdx(llvm::Value* element, llvm::Value* str
 			auto eIdx = ConstantInt::get(IntegerType::get(_module->getContext(), 32), idx);
 
 			auto elem = getElement(str, {zero, eIdx});
-			if (element->getType()->isArrayTy())
-				elem = getElement(str, {zero, eIdx, zero});
-
 
 			elem->insertBefore(i);
-			Value* val = new LoadInst(dyn_cast<PointerType>(elem->getType())->getElementType(), elem, "", i);
-			if (val->getType() != i->getType())
-				val = convertValueToType(val, i->getType(), i);
-
-			i->replaceAllUsesWith(val);
+			i->replaceAllUsesWith(convertValueToType(elem, i->getDestTy(), i));
 			i->eraseFromParent();
 		}
 	}
@@ -1274,11 +1269,74 @@ void IrModifier::correctStackElementsInPadding(
 	*/
 }
 
+Value* IrModifier::convertToPointer(
+		Value* obj,
+		std::size_t ptrDepth)
+{
+	//std::cout << "Converting to pointer: " << llvmObjToString(obj) << std::endl;
+	//std::cout << "Desired pointer length: " << ptrDepth << std::endl;
+	auto* ptrType = obj->getType();
+	for (std::size_t i = 0; i < ptrDepth; i++)
+	{
+		ptrType = PointerType::get(ptrType, 0);
+	}
+
+	std::list<User*> users;
+
+//	auto image = FileImageProvider::getFileImage(_module);
+	auto* nobj = obj;//changeObjectDeclarationType(image, obj, ptrType);
+	//std::cout << "New Object: " << llvmObjToString(nobj) << std::endl;
+
+	for (const auto& U : obj->users())
+	{
+		users.push_back(U);
+	}
+
+	for (auto* u: users)
+	{
+		//std::cout << "u: " << llvmObjToString(u) << std::endl;
+		auto first = ConstantInt::get(IntegerType::get(_module->getContext(), 32), ptrDepth);
+		std::vector<Value*> idxs(1, first);
+		
+		if (auto* gep = dyn_cast<GetElementPtrInst>(u))
+		{
+			bool first = true;
+			for (auto& i : gep->indices())
+			{
+				if (!first)
+					idxs.push_back(i.get());
+				else
+					first = false;
+			}
+		}
+		//std::cout << "using" << std::endl;
+		for (auto i: idxs)
+		{
+			//std::cout << llvmObjToString(i) << std::endl;
+		}
+
+		if (auto* i = dyn_cast<Instruction>(u))
+		{
+			auto* ni = GetElementPtrInst::CreateInBounds(obj->getType()->getPointerElementType(), nobj, idxs);
+			//std::cout << "New get elem ptr: " << llvmObjToString(ni) << std::endl;
+			ni->insertBefore(i);
+			i->replaceAllUsesWith(ni);
+			i->eraseFromParent();
+		}
+		else
+		{
+			assert(false && "This should not happen!");
+		}
+	}
+
+	return nobj;
+}
+
+
 Value* IrModifier::convertToStructure(
 		Value* obj,
 		StructType* strType)
 {
-	std::cout << "Correcing structure" << std::endl;
 	if (auto* gv = dyn_cast<GlobalVariable>(obj))
 	{
 		auto addr = _config->getGlobalAddress(gv);
@@ -1287,12 +1345,90 @@ Value* IrModifier::convertToStructure(
 	else if (_config->isStackVariable(obj))
 	{
 		auto offset = _config->getStackVariableOffset(obj);
-		std::cout << "Modified opbject: " << llvmObjToString(obj) << std::endl;
 		return convertToStructure(dyn_cast<AllocaInst>(obj), strType, offset);
 	}
 
 	// TODO: should return casted object
 	return obj;
+}
+
+Value* IrModifier::createStructureFromStacks(
+		AllocaInst* startStack,
+		StructType* strType,
+		int offset,
+		Instruction* before,
+		InsertValueInst* newStructure,
+		std::vector<unsigned int>idxs)
+{
+	assert(_config->isStackVariable(startStack) && "Invalid usage of function!");
+
+	auto alignment = getAlignment(strType);
+	auto padding = alignment;
+
+	// Create copy of local variable.
+
+	auto* fnc = startStack->getFunction();
+
+	std::size_t idx = 0;
+	for (auto elem: strType->elements())
+	{
+		auto elemIdxs = idxs;
+		elemIdxs.push_back(idx++);
+
+		if (auto* eStrType = dyn_cast<StructType>(elem))
+		{
+			auto newAlignment = getAlignment(eStrType);
+			if (alignment > padding) {
+				int nOffset = offset+(padding)%newAlignment;
+				// TODO: find in padding
+				offset = nOffset;
+			}
+
+			padding = alignment;
+
+			AllocaInst* structElement = getStackVariable(fnc, offset, elem).first;
+			createStructureFromStacks(structElement, eStrType, offset, before, newStructure, elemIdxs);
+			continue;
+		}
+
+		auto a = AbiProvider::getAbi(_module);
+		auto elemSize = a->getTypeByteSize(elem);
+		if (padding < elemSize) {
+			//TODO: search padding
+			offset += padding;
+			padding = alignment;
+		}
+
+		AllocaInst* structElement = getStackVariable(fnc, offset, elem).first;	
+		//TODO: is this way of load/convert correct? should investigate
+		Value* conv = convertValueToType(structElement, PointerType::get(elem, 0), before);
+		conv = new LoadInst(elem, conv, "", before);
+
+		//TODO: dummy if not found
+		newStructure = InsertValueInst::Create(
+				newStructure ?
+					static_cast<Value*>(newStructure)
+					: UndefValue::get(strType),
+				conv,
+				elemIdxs,
+				"",
+				before);
+
+		//TODO: serach type space of primitive
+		padding -= elemSize;
+		offset += elemSize;
+	}
+
+	// In case of recursive structures we must align
+	// space for correct address.
+	padding = padding%alignment;
+	if (padding)
+	{
+		//TODO: search padding
+		offset += padding; // (addr-oldAddr)%alignment
+	}
+
+	return newStructure;
 }
 
 llvm::GlobalVariable* IrModifier::convertToStructure(
@@ -1470,8 +1606,6 @@ AllocaInst* IrModifier::convertToStructure(
 		// TODO:
 		// following 3 linses of code can go into replaceElementWithStrIdx.
 		auto* origType = structElement->getType()->getPointerElementType();
-		std::cout << "Original type : " << llvmObjToString(structElement) << std::endl;
-		std::cout << "Wanted type : " << llvmObjToString(elem) << std::endl;
 		if (origType != elem) {
 			auto* val = changeObjectDeclarationType(image, structElement, elem);
 			correctUsageOfModifiedObject(structElement, val, origType);
@@ -1619,9 +1753,6 @@ void IrModifier::correctUsageOfModifiedObject(Value* val, Value* nval, Type* ori
 				}
 				PointerType* ptr = dyn_cast<PointerType>(dst->getType());
 				assert(ptr);
-				std::cout << "Before convert: " << std::endl;
-				std::cout << "src " << llvmObjToString(src) << std::endl;
-				std::cout << "dst " << llvmObjToString(dst) << std::endl;
 				src = IrModifier::convertValueToType(src, ptr->getElementType(), store);
 				store->setOperand(0, src);
 				store->setOperand(1, dst);
@@ -1659,14 +1790,21 @@ void IrModifier::correctUsageOfModifiedObject(Value* val, Value* nval, Type* ori
 		}
 		else if (auto* gep = dyn_cast<GetElementPtrInst>(user))
 		{
-			//TODO: do this only if accssing first element.
-			//in other cases we are totally fucked up.
-			//But they will happen only if somene retarded
-			//will do retarded things.
+			//TODO: we should do this generally with pointers.
 
-			auto* conv = IrModifier::convertValueToType(nval, gep->getType(), gep);
-			gep->replaceAllUsesWith(conv);
-			gep->eraseFromParent();
+			if (nval->getType() == PointerType::get(gep->getPointerOperandType(), 0))
+			{
+				auto* newLoad = new LoadInst(nval);
+				newLoad->insertBefore(gep);
+				
+				gep->setOperand(0, newLoad);
+			}
+			else
+			{
+				auto* conv = IrModifier::convertValueToType(nval, gep->getType(), gep);
+				gep->replaceAllUsesWith(conv);
+				gep->eraseFromParent();
+			}
 		}
 		else if (auto* cast = dyn_cast<CastInst>(user))
 		{
@@ -1688,8 +1826,6 @@ void IrModifier::correctUsageOfModifiedObject(Value* val, Value* nval, Type* ori
 			else
 			{
 				auto* conv = IrModifier::convertValueToType(nval, cast->getType(), cast);
-				std::cout << "conv: " << llvmObjToString(conv) << std::endl;
-				std::cout << "cast: " << llvmObjToString(cast) << std::endl;
 				if (cast != conv)
 				{
 					cast->replaceAllUsesWith(conv);
@@ -1710,15 +1846,11 @@ void IrModifier::correctUsageOfModifiedObject(Value* val, Value* nval, Type* ori
 			auto* conv = IrModifier::convertValueToType(nval, origType, instr);
 			if (val != conv)
 			{
-				std::cout << "val: " << llvmObjToString(val) << std::endl;
-				std::cout << "conv: " << llvmObjToString(conv) << std::endl;
-
 				instr->replaceUsesOfWith(val, conv);
 			}
 		}
 		else if (newConst && gvDeclr)
 		{
-			std::cout << "what" << std::endl;
 			auto* conv = IrModifier::convertConstantToType(
 					newConst,
 					gvDeclr->getType()->getPointerElementType());
@@ -1731,7 +1863,6 @@ void IrModifier::correctUsageOfModifiedObject(Value* val, Value* nval, Type* ori
 		//
 		else if (newConst && c)
 		{
-			std::cout << "the funck" << std::endl;
 			auto* conv = IrModifier::convertConstantToType(newConst, c->getType());
 			if (c != conv)
 			{
@@ -1783,7 +1914,7 @@ llvm::Value* IrModifier::changeObjectType(
 		return val;
 	}
 
-	if (val->getType() == toType)
+	if (val->getType()->getPointerElementType() == toType)
 	{
 		return val;
 	}
@@ -1812,6 +1943,7 @@ llvm::Value* IrModifier::changeObjectType(
 	return nval;
 }
 
+
 /**
  * Inspired by ArgPromotion::DoPromotion().
  * Steps performed in ArgPromotion::DoPromotion() that are not done here:
@@ -1825,26 +1957,42 @@ llvm::Value* IrModifier::changeObjectType(
 IrModifier::FunctionPair IrModifier::modifyFunction(
 		llvm::Function* fnc,
 		llvm::Type* ret,
-		std::vector<llvm::Type*> args,
-		bool isVarArg,
-		const std::map<llvm::ReturnInst*, llvm::Value*>& rets2vals,
-		const std::map<llvm::CallInst*, std::vector<llvm::Value*>>& calls2vals,
 		llvm::Value* retVal,
-		const std::vector<llvm::Value*>& argStores,
-		const std::vector<std::string>& argNames)
+		const std::vector<ArgumentEntry::Ptr>& args,
+		const std::map<llvm::ReturnInst*, llvm::Value*>& rets2vals,
+		const std::map<llvm::CallInst*, std::vector<ArgumentEntry::Ptr>>& calls2args,
+		bool isVarArg)
 {
+	//std::cout << "Modifying function " << std::endl;
+	//std::cout << fnc << std::endl;
+	auto _abi = AbiProvider::getAbi(_module);
+	//std::cout << "Her!" << std::endl;
 	auto* cf = _config->getConfigFunction(fnc);
 
+	//std::cout << "Her!" << std::endl;
+	//std::cout << ret << std::endl;
+
 	if (!FunctionType::isValidReturnType(ret))
-	{
+	{ 
+		//std::cout << "This is bad" << std::endl;
 		ret = Abi::getDefaultType(fnc->getParent());
 	}
-	for (Type*& t : args)
+
+	//std::cout << "what" << std::endl;
+	std::vector<ArgumentEntry::Ptr> templArgs = args;
+	//std::cout << "no copy!" << std::endl;
+	if (args.empty() && !isVarArg && !calls2args.empty())
 	{
-		if (!FunctionType::isValidArgumentType(t))
-		{
-			t = Abi::getDefaultType(fnc->getParent());
-		}
+		//std::cout << "Suicide!" << std::endl;
+		templArgs = calls2args.begin()->second;
+	}
+
+	//std::cout << "Types:" << std::endl;
+	std::vector<Type*> argTypes;
+	for (auto& arg: templArgs)
+	{
+		//std::cout << "at: " << llvmObjToString(arg->getType(fnc, *_abi)) << std::endl;
+		argTypes.push_back(arg->getType(fnc, *_abi));
 	}
 
 	// New function type.
@@ -1852,8 +2000,10 @@ IrModifier::FunctionPair IrModifier::modifyFunction(
 	ret = ret ? ret : fnc->getReturnType();
 	llvm::FunctionType* newFncType = llvm::FunctionType::get(
 			ret,
-			args,
+			argTypes,
 			isVarArg);
+
+	//std::cout << "Created new function " << std::endl;
 
 	// New function.
 	//
@@ -1877,48 +2027,33 @@ IrModifier::FunctionPair IrModifier::modifyFunction(
 
 	// Rename arguments.
 	//
-	auto nIt = argNames.begin();
-	auto oi = fnc->arg_begin();
-	auto oie = fnc->arg_end();
-	std::size_t idx = 1;
+	
+	//std::cout << "Renaming args of new function " << std::endl;
+
+	std::size_t idx = 0;
+	std::vector<std::string> argnames;
 	for (auto i = nf->arg_begin(), e = nf->arg_end(); i != e; ++i, ++idx)
 	{
-		if (nIt != argNames.end() && !nIt->empty())
+		llvm::Value* argValue;
+		std::string argName;
+		std::tie(argValue, argName) = templArgs[idx]->get(nf, *_abi, std::to_string(idx));
+
+		//std::cout << "New arg: " << argName << std::endl;
+
+		if (_abi->isStackVariable(argValue) && argValue->getName() == argName)
 		{
-			if (auto* st = _config->getLlvmStackVariable(nf, *nIt))
-			{
-				i->takeName(st);
-			}
-			else
-			{
-				i->setName(*nIt);
-			}
+			i->takeName(argValue);
 		}
 		else
 		{
-			if (oi != oie && !oi->getName().empty())
-			{
-				if (nf != fnc)
-				{
-					i->setName(oi->getName());
-				}
-			}
-			else
-			{
-				std::string n = "arg" + std::to_string(idx);
-				i->setName(n);
-			}
+			i->setName(argName);
+			
 		}
 
-		if (nIt != argNames.end())
-		{
-			++nIt;
-		}
-		if (oi != oie)
-		{
-			++oi;
-		}
+		argnames.push_back(argName);
 	}
+
+	//std::cout << "Setting args to config function " << std::endl;
 
 	// Set arguments to config function.
 	//
@@ -1932,11 +2067,9 @@ IrModifier::FunctionPair IrModifier::modifyFunction(
 			assert(!n.empty());
 			auto s = retdec::config::Storage::undefined();
 			retdec::config::Object arg(n, s);
-			if (argNames.size() > idx)
-			{
-				arg.setRealName(argNames[idx]);
-				arg.setIsFromDebug(true);
-			}
+
+			arg.setRealName(argnames[idx]);
+			arg.setIsFromDebug(true);
 			arg.type.setLlvmIr(llvmObjToString(i->getType()));
 
 			// TODO: hack, we need to propagate type's wide string property.
@@ -1952,11 +2085,14 @@ IrModifier::FunctionPair IrModifier::modifyFunction(
 		}
 	}
 
+	//std::cout << "Replacing uses of old args in func body." << std::endl;
+
 	// Replace uses of old arguments in function body for new arguments.
 	//
 	for (auto i = fnc->arg_begin(), e = fnc->arg_end(), i2 = nf->arg_begin();
 			i != e; ++i, ++i2)
 	{
+		//std::cout << "This happening?" << std::endl;
 		auto* a1 = &(*i);
 		auto* a2 = &(*i2);
 		if (a1->getType() == a2->getType())
@@ -1974,7 +2110,6 @@ IrModifier::FunctionPair IrModifier::modifyFunction(
 				auto* inst = dyn_cast<Instruction>(u);
 				assert(inst && "we need an instruction here");
 
-				std::cout << "Is this the case?" << std::endl;
 				auto* conv = IrModifier::convertValueToType(a2, a1->getType(), inst);
 				inst->replaceUsesOfWith(a1, conv);
 			}
@@ -1982,59 +2117,105 @@ IrModifier::FunctionPair IrModifier::modifyFunction(
 
 		a2->takeName(a1);
 	}
-
-	std::cout << "Investigating function: " << nf->getName().str() << std::endl;
+	//std::cout << "Finished" << std::endl;
 
 	// Store arguments into allocated objects (stacks, registers) at the
 	// beginning of function body.
 	//
-	auto asIt = argStores.begin();
-	auto asEndIt = argStores.end();
-	for (auto aIt = nf->arg_begin(), eIt = nf->arg_end();
-			aIt != eIt && asIt != asEndIt;
-			++aIt, ++asIt)
+	idx = 0;
+	bool hasDefinitionArgs = false;
+	for (auto& a: args)
 	{
-		auto* a = &(*aIt);
-		auto* v = *asIt;
+		//std::cout << "Perhaps this?" << std::endl;
+		if (a->isDefined(nf, *_abi))
+		{
+			hasDefinitionArgs = true;
+		}
+
+		//std::cout << "I knew it!" << std::endl;
+	}
+	//std::cout << "Found out that function definition is defined? " << hasDefinitionArgs << std::endl; 
+	//TODO: check from llvm
+
+	for (auto i = nf->arg_begin(), e = nf->arg_end(); hasDefinitionArgs && i != e; ++i, ++idx)
+	{
+		auto* v = args[idx]->getValue(nf, *_abi);
+		auto* a = &(*i);
 
 		assert(v->getType()->isPointerTy());
 
-		std::cout << "Converting to structure: " << std::endl;
-		std::cout << "val: " << llvmObjToString(a) << std::endl;
-		std::cout << "at: " << llvmObjToString(a->getType()) << std::endl;
-		std::cout << "v  : " << llvmObjToString(v) << std::endl;
-		std::cout << "type: " << llvmObjToString(v->getType()) << std::endl;
+		auto primitiveType = a->getType();
+		size_t pointerDepth = 0;
 
-		Value* conv = nullptr;
-		if (auto* strType = dyn_cast<StructType>(a->getType()))
+		while (primitiveType->isPointerTy())
 		{
-			v = convertToStructure(v, strType);
+			primitiveType = primitiveType->getPointerElementType();
+			pointerDepth++;
 		}
-		std::cout << "v  : " << llvmObjToString(v) << std::endl;
 
-		conv = IrModifier::convertValueToType(
-				a,
-				v->getType()->getPointerElementType(),
-				&nf->front().front());
+		std::cout << "Converting to primitive" << std::endl;
 
-		auto* s = new StoreInst(conv, v);
+		//TODO: do not change dewclaration if -> declaration
+		Value* conv = v;
+		Value* aconv = a;
 
-		if (auto* alloca = dyn_cast<AllocaInst>(v))
+		if (_config->isStackVariable(conv))
+		{
+			if (auto* strType = dyn_cast<StructType>(primitiveType))
+			{
+				//std::cout << "Converting to structure" << std::endl;
+				conv = convertToStructure(v, strType);
+			}
+			else
+			{
+				conv = changeObjectType(
+					FileImageProvider::getFileImage(_module),
+					v,
+					primitiveType);
+			}
+
+			std::cout << "Convering to type" << std::endl;
+
+			//std::cout << "Vhangeing objet type: " << std::endl;
+			conv = changeObjectType(
+					FileImageProvider::getFileImage(_module),
+					conv,
+					a->getType());
+			std::cout << "Generatinbg store" << std::endl;
+
+			std::cout << "Well conv := " << llvmObjToString(conv) << std::endl;
+			std::cout << "Should be pointer of " << llvmObjToString(a) << std::endl;
+		}
+		else
+		{
+			aconv = convertValueToType(a, conv->getType()->getPointerElementType(), &nf->front().front());
+		}
+
+
+		auto* s = new StoreInst(aconv, conv);
+
+		std::cout << "generated" << std::endl;
+
+		if (auto* alloca = dyn_cast<AllocaInst>(conv))
 		{
 			s->insertAfter(alloca);
 		}
 		else
 		{
-			if (conv == a)
+			if (a == aconv)
 			{
 				s->insertBefore(&nf->front().front());
 			}
 			else
 			{
-				s->insertAfter(cast<Instruction>(conv));
+				s->insertAfter(cast<Instruction>(aconv));
 			}
 		}
+
+		std::cout << "Done1" << std::endl;
 	}
+
+	std::cout << "Updating returns" << std::endl;
 
 	// Update returns in function body.
 	//
@@ -2091,7 +2272,51 @@ IrModifier::FunctionPair IrModifier::modifyFunction(
 		}
 	}
 
-	std::cout << "HERE" << std::endl;
+	std::cout << "Preparing calls" << nf->getName().str() << std::endl;
+	std::map<CallInst*, std::vector<Value*>> preparedCalls;
+	// Alter calls
+	for (auto ce: calls2args)
+	{
+		CallInst* call = ce.first;
+		std::vector<Value*> args;
+		for (auto& arg: ce.second)
+		{
+			Value* v; Type* t;
+			std::tie(v, t) = arg->get(call->getFunction(), *_abi); 
+			Value* conv = v;
+			std::cout << "\tObject passed as arg: " << llvmObjToString(conv) << std::endl;
+
+			auto* strType = dyn_cast<StructType>(t);
+			if (strType && _config->isStackVariable(v))
+			{
+				conv = createStructureFromStacks(
+					dyn_cast<AllocaInst>(conv),
+					strType,
+					_config->getStackVariableOffset(conv),
+					call);
+			}
+			else if (!t->isPointerTy())
+			{
+				conv = IrModifier::convertValueToType(conv, PointerType::get(t, 0), call);
+				auto* l = new LoadInst(t, conv);
+				l->insertBefore(call);
+				conv = l;
+			}
+			else
+			{
+				auto* l = new LoadInst(conv);
+				l->insertBefore(call);
+				conv = IrModifier::convertValueToType(l, t, call);
+			}
+			std::cout << "\tObject passed as arg: " << llvmObjToString(conv) << std::endl;
+			args.push_back(conv);
+		}
+
+		preparedCalls[call] = args;
+	}
+
+	//std::cout << "Preparing other users" << std::endl;
+
 	// Update function users (calls, etc.).
 	//
 	auto uIt = fnc->user_begin();
@@ -2102,55 +2327,9 @@ IrModifier::FunctionPair IrModifier::modifyFunction(
 
 		if (CallInst* call = dyn_cast<CallInst>(u))
 		{
-			std::vector<Value*> args;
-
-			auto fIt = calls2vals.find(call);
-			if (fIt != calls2vals.end())
+			if (!calls2args.count(call))
 			{
-				auto vIt = fIt->second.begin();
-				for (auto fa = nf->arg_begin(); fa != nf->arg_end(); ++fa)
-				{
-					std::cout << "fa: " << llvmObjToString(fa) << std::endl;
-					if (vIt != fIt->second.end())
-					{
-						Value* conv = nullptr;
-						if (auto* strType = dyn_cast<StructType>(fa->getType()))
-						{
-							std::cout << "vItStr: " << llvmObjToString(*vIt) << std::endl;
-							conv = convertToStructure(*vIt, strType);
-							std::cout << "vItStr: " << llvmObjToString(*vIt) << std::endl;
-							std::cout << "DONE" << std::endl;
-						}
-						else
-						{
-							std::cout << "vIt: " << llvmObjToString(*vIt) << std::endl;
-							conv = IrModifier::convertValueToType(
-								*vIt,
-								fa->getType(),
-								call);
-						}
-						args.push_back(conv);
-						++vIt;
-					}
-					else
-					{
-						auto* conv = IrModifier::convertValueToType(
-								_config->getGlobalDummy(),
-								fa->getType(),
-								call);
-						args.push_back(conv);
-					}
-				}
-				std::cout << "Ok?" << std::endl;
-				while (isVarArg && vIt != fIt->second.end())
-				{
-					args.push_back(*vIt);
-					++vIt;
-				}
-			}
-			else
-			{
-				std::cout << "PLS" << std::endl;
+				std::vector<Value*> args;
 				unsigned ai = 0;
 				unsigned ae = call->getNumArgOperands();
 				for (auto fa = nf->arg_begin(); fa != nf->arg_end(); ++fa)
@@ -2173,23 +2352,7 @@ IrModifier::FunctionPair IrModifier::modifyFunction(
 						args.push_back(conv);
 					}
 				}
-			}
-			assert(isVarArg || args.size() == nf->arg_size());
-
-			auto* nc = _modifyCallInst(
-					call,
-					nf,
-					args);
-
-			if (!ret->isVoidTy() && retVal)
-			{
-				auto* n = nc->getNextNode();
-				assert(n);
-				auto* conv = IrModifier::convertValueToType(
-						nc,
-						retVal->getType()->getPointerElementType(),
-						n);
-				new StoreInst(conv, retVal, n);
+				preparedCalls[call] = args;
 			}
 		}
 		else if (StoreInst* s = dyn_cast<StoreInst>(u))
@@ -2214,7 +2377,35 @@ IrModifier::FunctionPair IrModifier::modifyFunction(
 			assert(false && "unhandled use");
 		}
 	}
-	std::cout << "OLALAL" << std::endl;
+
+	//std::cout << "Modifing calls and other users" << std::endl;
+
+	for (auto cv: preparedCalls)
+	{
+		CallInst* call = cv.first;
+
+		//std::cout << "Modifying call" << std::endl;
+
+		auto* nc = _modifyCallInst(
+				call,
+				nf,
+				cv.second);
+
+		//std::cout << "Setting return" << std::endl;
+
+		if (!ret->isVoidTy() && retVal)
+		{
+			auto* n = nc->getNextNode();
+			assert(n);
+			auto* conv = IrModifier::convertValueToType(
+					nc,
+						retVal->getType()->getPointerElementType(),
+						n);
+			new StoreInst(conv, retVal, n);
+		}
+	}
+
+	//std::cout << "Changing ret type" << std::endl;
 
 	if (nf->getType() != fnc->getType())
 	{
@@ -2226,6 +2417,7 @@ IrModifier::FunctionPair IrModifier::modifyFunction(
 	// No ide why.
 //	fnc->eraseFromParent();
 
+	//std::cout << "All ok!" << std::endl;
 	return {nf, cf};
 }
 
@@ -2238,12 +2430,15 @@ llvm::Argument* IrModifier::modifyFunctionArgumentType(
 		llvm::Type* type)
 {
 	auto* f = arg->getParent();
-	std::vector<Type*> args;
+	std::vector<ArgumentEntry::Ptr> args;
+	std::size_t idx = 0;
 	for (auto& a : f->args())
 	{
-		args.push_back(&a == arg ? type : a.getType());
+		args.push_back(ArgumentEntry::Ptr(
+				new FunctionArgumentEntry(idx, &a == arg ? type : a.getType())));
+		idx++;
 	}
-	auto* nf = modifyFunction(f, f->getReturnType(), args).first;
+	auto* nf = modifyFunction(f, f->getReturnType(), nullptr, args).first;
 	std::size_t i = 0;
 	for (auto& a : nf->args())
 	{

@@ -5,13 +5,208 @@
 */
 
 #include <set>
+#include <tuple>
 
 #include "retdec/bin2llvmir/optimizations/param_return/data_entries.h"
+#include "retdec/bin2llvmir/providers/abi/abi.h"
 
 using namespace llvm;
 
 namespace retdec {
 namespace bin2llvmir {
+
+//
+//=============================================================================
+// ArgumentEntryImpl
+//=============================================================================
+//
+
+ArgumentEntry::ArgumentEntry(llvm::Type* type, const std::string& name):
+	_type(type),
+	_name(name)
+{
+
+}
+
+std::pair<Value*, Type*> ArgumentEntry::get(Function* fnc, const Abi& a) const
+{
+
+	return {getValue(fnc, a), getType(fnc, a)};
+}
+
+std::pair<Value*, std::string> ArgumentEntry::get(
+		Function* fnc,
+		const Abi& a,
+		const std::string& suffix,
+		const std::string& base) const
+{
+
+	return {getValue(fnc, a), getName(fnc, a, suffix, base)};
+}
+
+std::string ArgumentEntry::getName(
+		Function* fnc,
+		const Abi& a,
+		const std::string& suffix,
+		const std::string& base) const
+{
+	if (!_name.empty())
+	{
+		return _name;
+	}
+
+	std::string newBase = base.empty() ? "arg":base;
+
+	return createName(fnc, a, suffix, newBase);
+}
+
+Value* ArgumentEntry::getValue(Function* fnc, const Abi& a) const
+{
+	Value* val = fetchArgValue(fnc, a);
+
+	return val ? val : a.getConfig()->getGlobalDummy();
+}
+
+bool ArgumentEntry::isDefined(Function* fnc, const Abi& a) const
+{
+	return fetchArgValue(fnc, a) != nullptr;
+}
+
+Type* ArgumentEntry::getType(Function* fnc, const Abi& a) const
+{
+	if (_type)
+	{
+		return _type;
+	}
+
+	auto* val = getValue(fnc, a);
+	assert(val && val->getType()->isPointerTy());
+	return val->getType()->getPointerElementType();
+}
+
+llvm::Value* ArgumentEntry::fetchArgValue(llvm::Function* fnc, const Abi& a) const
+{
+	return nullptr;
+}
+
+std::string ArgumentEntry::createName(
+		llvm::Function* fnc,
+		const Abi& a,
+		const std::string& suffix,
+		const std::string& base) const
+{
+	return base+suffix;
+}
+
+void ArgumentEntry::setType(Type* type)
+{
+	_type = FunctionType::isValidArgumentType(type) ?
+			type : nullptr;
+}
+
+DummyArgumentEntry::DummyArgumentEntry(
+		llvm::Type* type,
+		const std::string& name):
+			ArgumentEntry(type, name)
+{
+
+}
+
+DummyArgumentEntry::~DummyArgumentEntry()
+{
+
+}
+
+template<typename ArgID>
+ArgumentEntryImpl<ArgID>::ArgumentEntryImpl(
+		ArgID argid,
+		llvm::Type* type,
+		const std::string& name):
+			ArgumentEntry(type, name)
+{
+	_argid = argid;
+}
+
+template<typename ArgID>
+ArgumentEntryImpl<ArgID>::~ArgumentEntryImpl()
+{
+
+}
+
+template<>
+Value* StackArgumentEntry::fetchArgValue(Function* fnc, const Abi& a) const
+{
+	return a.getConfig()->getLlvmStackVariable(fnc, _argid);
+}
+
+template<>
+Value* RegisterArgumentEntry::fetchArgValue(Function* fnc, const Abi& a) const
+{
+	return a.getRegister(_argid);
+}
+
+template<>
+Value* FunctionArgumentEntry::fetchArgValue(Function* fnc, const Abi& a) const
+{
+	assert(fnc->arg_size() > _argid);
+	return (fnc->arg_begin() + _argid);
+}
+
+template<>
+Value* ConstantArgumentEntry::fetchArgValue(Function* fnc, const Abi& a) const
+{
+	return _argid;
+}
+	
+template<>
+std::string StackArgumentEntry::createName(
+	llvm::Function* fnc,
+	const Abi& a,
+	const std::string& suffix,
+	const std::string& base) const
+{
+	if (suffix.empty())
+	{
+		return base+std::to_string(_argid);
+	}
+
+	return base+suffix;
+}
+
+template<>
+std::string RegisterArgumentEntry::createName(
+	llvm::Function* fnc,
+	const Abi& a,
+	const std::string& suffix,
+	const std::string& base) const
+{
+	if (suffix.empty())
+	{
+		Value* val = getValue(fnc, a);
+		return base+val->getName().str();
+	}
+	return base+suffix;
+}
+
+template<>
+std::string FunctionArgumentEntry::createName(
+	llvm::Function* fnc,
+	const Abi& a,
+	const std::string& suffix,
+	const std::string& base) const
+{
+	return getValue(fnc, a)->getName().str();
+}
+
+template<>
+std::string ConstantArgumentEntry::createName(
+	llvm::Function* fnc,
+	const Abi& a,
+	const std::string& suffix,
+	const std::string& base) const
+{
+	return getValue(fnc, a)->getName().str();
+}
 
 //
 //=============================================================================
