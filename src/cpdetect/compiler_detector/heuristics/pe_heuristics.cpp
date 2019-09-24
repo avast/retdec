@@ -411,7 +411,6 @@ void PeHeuristics::getHeaderStyleHeuristics()
 	}
 }
 
-
 /**
  * Try to detect used compiler or packer based on slashed signatures
  */

@@ -791,6 +791,5 @@ bool CoffFormat::is32BitArchitecture() const
 	return (getFileFlags() & IMAGE_FILE_32BIT_MACHINE) || getWordLength() == 32;
 }
 
-
 } // namespace fileformat
 } // namespace retdec

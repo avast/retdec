@@ -425,7 +425,7 @@ bool Decoder::canSplitFunctionOn(
 			auto up = fncStarts.upper_bound(bAddr);
 			if (up == fncStarts.begin()) {
 				return false;
-			}	
+			}
 			--up;
 			Address bFnc = *up;
 
