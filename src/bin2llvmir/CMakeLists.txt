@@ -57,6 +57,7 @@ set(BIN2LLVMIR_SOURCES
 	optimizations/param_return/data_entries.cpp
 	optimizations/phi2seq/phi2seq.cpp
 	optimizations/provider_init/provider_init.cpp
+	optimizations/register_localization/register_localization.cpp
 	optimizations/x86_addr_spaces/x86_addr_spaces_pass.cpp
 	optimizations/x86_addr_spaces/x86_addr_spaces.cpp
 	optimizations/x87_fpu/x87_fpu.cpp
