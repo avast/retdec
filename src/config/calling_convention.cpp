@@ -24,7 +24,8 @@ const std::vector<std::string> ccStrings =
 	"spoiled",
 	"speciale",
 	"specialp",
-	"special"
+	"special",
+	"watcom"
 };
 
 } // anonymous namespace
