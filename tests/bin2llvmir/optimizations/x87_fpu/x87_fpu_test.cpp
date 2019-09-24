@@ -52,274 +52,8 @@ protected:
 		declare void @__frontend_reg_store.fpr(i3, x86_fp80)
 		declare x86_fp80 @__frontend_reg_load.fpr(i3)
 		declare i2 @__frontend_reg_load.fpu_tag(i3)
-)";
-
-	const std::string X86_16BIT_TEST = R"(
-		;; x86-16bit don't pass arguments through fpu registers => begin FPU_TOP=8
-		;; x86-16bit don't pass return value through fpu registers => end FPU_TOP=8
-		define double @foo(double %arg0, double %arg1) {
-			; st(0) = arg0
-			%1 = load i3, i3* @fpu_stat_TOP
-			%2 = sub i3 %1, 1
-			store i3 %2, i3* @fpu_stat_TOP
-			%3 = fpext double %arg0 to x86_fp80
-			%4 = fcmp oeq x86_fp80 %3, 0xK00000000000000000000
-			%5 = select i1 %4, i2 1, i2 0
-			call void @__frontend_reg_store.fpu_tag(i3 %2, i2 %5)
-			call void @__frontend_reg_store.fpr(i3 %2, x86_fp80 %3)
-
-			; st(1)=arg1, st(0)=arg0
-			%6 = load i3, i3* @fpu_stat_TOP
-			%7 = sub i3 %6, 1
-			store i3 %7, i3* @fpu_stat_TOP
-			%8 = fpext double %arg1 to x86_fp80
-			%9 = fcmp oeq x86_fp80 %8, 0xK00000000000000000000
-			%10 = select i1 %9, i2 1, i2 0
-			call void @__frontend_reg_store.fpu_tag(i3 %7, i2 %10)
-			call void @__frontend_reg_store.fpr(i3 %7, x86_fp80 %8)
-
-			;fmulp st(0),st(1) => st(0) = arg0 * arg1
-			%11 = load i3, i3* @fpu_stat_TOP
-			%12 = add i3 %11, 1
-			store i3 %12, i3* @fpu_stat_TOP
-			%13 = call x86_fp80 @__frontend_reg_load.fpr(i3 %11)
-			%14 = call x86_fp80 @__frontend_reg_load.fpr(i3 %12)
-			%15 = fmul x86_fp80 %13, %14
-			%16 = fcmp oeq x86_fp80 %15, 0xK00000000000000000000
-			%17 = select i1 %16, i2 1, i2 0
-			call void @__frontend_reg_store.fpu_tag(i3 %11, i2 -1)
-			call void @__frontend_reg_store.fpu_tag(i3 %12, i2 %17)
-			call void @__frontend_reg_store.fpr(i3 %12, x86_fp80 %15)
-
-			; push x87 and return result
-			%18 = load i3, i3* @fpu_stat_TOP
-			%19 = add i3 %18, 1
-			store i3 %19, i3* @fpu_stat_TOP
-			%20 = call x86_fp80 @__frontend_reg_load.fpr(i3 %18)
-			call void @__frontend_reg_store.fpu_tag(i3 %18, i2 -1)
-			%21 = fptrunc x86_fp80 %20 to double
-			ret double %21
-		}
-
-		define i32 @main(i32 %argc, i8** %argv) #0 {
-		bb:
-			;; FPU_TOP=8
-			%0 = call double @foo(double 1.000000e+00, double 2.000000e+00)
-			;; FPU_TOP=8
-
-			; st(0) = %0
-			%1 = load i3, i3* @fpu_stat_TOP
-			%2 = sub i3 %1, 1
-			store i3 %2, i3* @fpu_stat_TOP
-			%3 = fpext double %0 to x86_fp80
-			%4 = fcmp oeq x86_fp80 %3, 0xK00000000000000000000
-			%5 = select i1 %4, i2 1, i2 0
-			call void @__frontend_reg_store.fpu_tag(i3 %2, i2 %5)
-			call void @__frontend_reg_store.fpr(i3 %2, x86_fp80 %3)
-
-			; clear FPU_TOP
-			%6 = load i3, i3* @fpu_stat_TOP
-			%7 = add i3 %6, 1
-			store i3 %7, i3* @fpu_stat_TOP
-			call void @__frontend_reg_store.fpu_tag(i3 %6, i2 -1)
-
-			ret i32 0
-		}
-)";
-const std::string X86_16BIT_TEST_RESULT_EXPECTED = R"(
-		define double @foo(double %arg0, double %arg1) {
-			%1 = load i3, i3* @fpu_stat_TOP
-			%2 = sub i3 %1, 1
-			store i3 %2, i3* @fpu_stat_TOP
-			%3 = fpext double %arg0 to x86_fp80
-			%4 = fcmp oeq x86_fp80 %3, 0xK00000000000000000000
-			%5 = select i1 %4, i2 1, i2 0
-			store i2 %5, i2* @fpu_tag_0
-			store x86_fp80 %3, x86_fp80* @st0
-			%6 = load i3, i3* @fpu_stat_TOP
-			%7 = sub i3 %6, 1
-			store i3 %7, i3* @fpu_stat_TOP
-			%8 = fpext double %arg1 to x86_fp80
-			%9 = fcmp oeq x86_fp80 %8, 0xK00000000000000000000
-			%10 = select i1 %9, i2 1, i2 0
-			store i2 %10, i2* @fpu_tag_1
-			store x86_fp80 %8, x86_fp80* @st1
-			%11 = load i3, i3* @fpu_stat_TOP
-			%12 = add i3 %11, 1
-			store i3 %12, i3* @fpu_stat_TOP
-			%13 = load x86_fp80, x86_fp80* @st1
-			%14 = load x86_fp80, x86_fp80* @st0
-			%15 = fmul x86_fp80 %13, %14
-			%16 = fcmp oeq x86_fp80 %15, 0xK00000000000000000000
-			%17 = select i1 %16, i2 1, i2 0
-			store i2 -1, i2* @fpu_tag_1
-			store i2 %17, i2* @fpu_tag_0
-			store x86_fp80 %15, x86_fp80* @st0
-			%18 = load i3, i3* @fpu_stat_TOP
-			%19 = add i3 %18, 1
-			store i3 %19, i3* @fpu_stat_TOP
-			%20 = load x86_fp80, x86_fp80* @st0
-			store i2 -1, i2* @fpu_tag_0
-			%21 = fptrunc x86_fp80 %20 to double
-			ret double %21
-		}
-
-		define i32 @main(i32 %argc, i8** %argv) {
-		bb:
-			%0 = call double @foo(double 1.000000e+00, double 2.000000e+00)
-			%1 = load i3, i3* @fpu_stat_TOP
-			%2 = sub i3 %1, 1
-			store i3 %2, i3* @fpu_stat_TOP
-			%3 = fpext double %0 to x86_fp80
-			%4 = fcmp oeq x86_fp80 %3, 0xK00000000000000000000
-			%5 = select i1 %4, i2 1, i2 0
-			store i2 %5, i2* @fpu_tag_0
-			store x86_fp80 %3, x86_fp80* @st0
-			%6 = load i3, i3* @fpu_stat_TOP
-			%7 = add i3 %6, 1
-			store i3 %7, i3* @fpu_stat_TOP
-			store i2 -1, i2* @fpu_tag_0
-			ret i32 0
-		}
-)";
-const std::string X86_32_64BIT_TEST = R"(
-		;; x86-16bit don't pass arguments through fpu registers => begin FPU_TOP=8
-		;; x86-16bit don't pass return value through fpu registers => end FPU_TOP=8
-		define double @foo(double %arg0, double %arg1) {
-			; st(0) = arg0
-			%1 = load i3, i3* @fpu_stat_TOP
-			%2 = sub i3 %1, 1
-			store i3 %2, i3* @fpu_stat_TOP
-			%3 = fpext double %arg0 to x86_fp80
-			%4 = fcmp oeq x86_fp80 %3, 0xK00000000000000000000
-			%5 = select i1 %4, i2 1, i2 0
-			call void @__frontend_reg_store.fpu_tag(i3 %2, i2 %5)
-			call void @__frontend_reg_store.fpr(i3 %2, x86_fp80 %3)
-
-			; st(1)=arg1, st(0)=arg0
-			%6 = load i3, i3* @fpu_stat_TOP
-			%7 = sub i3 %6, 1
-			store i3 %7, i3* @fpu_stat_TOP
-			%8 = fpext double %arg1 to x86_fp80
-			%9 = fcmp oeq x86_fp80 %8, 0xK00000000000000000000
-			%10 = select i1 %9, i2 1, i2 0
-			call void @__frontend_reg_store.fpu_tag(i3 %7, i2 %10)
-			call void @__frontend_reg_store.fpr(i3 %7, x86_fp80 %8)
-
-			;fmulp st(0),st(1) => st(0) = arg0 * arg1
-			%11 = load i3, i3* @fpu_stat_TOP
-			%12 = add i3 %11, 1
-			store i3 %12, i3* @fpu_stat_TOP
-			%13 = call x86_fp80 @__frontend_reg_load.fpr(i3 %11)
-			%14 = call x86_fp80 @__frontend_reg_load.fpr(i3 %12)
-			%15 = fmul x86_fp80 %13, %14
-			%16 = fcmp oeq x86_fp80 %15, 0xK00000000000000000000
-			%17 = select i1 %16, i2 1, i2 0
-			call void @__frontend_reg_store.fpu_tag(i3 %11, i2 -1)
-			call void @__frontend_reg_store.fpu_tag(i3 %12, i2 %17)
-			call void @__frontend_reg_store.fpr(i3 %12, x86_fp80 %15)
-
-			; return result in st(0)
-			%18 = load i3, i3* @fpu_stat_TOP
-			%19 = call x86_fp80 @__frontend_reg_load.fpr(i3 %18)
-			%20 = fptrunc x86_fp80 %19 to double
-			ret double %20
-		}
-
-		define i32 @main(i32 %argc, i8** %argv) #0 {
-		bb:
-			;; FPU_TOP=8
-			%0 = call double @foo(double 1.000000e+00, double 2.000000e+00)
-			;; FPU_TOP=7
-
-			; FPU_TOP = 6
-			; st(1)=1.000000e+00, st(0) = %0
-			%1 = load i3, i3* @fpu_stat_TOP
-			%2 = sub i3 %1, 1
-			store i3 %2, i3* @fpu_stat_TOP
-			%3 = fpext double 1.000000e+00 to x86_fp80
-			%4 = fcmp oeq x86_fp80 %3, 0xK00000000000000000000
-			%5 = select i1 %4, i2 1, i2 0
-			call void @__frontend_reg_store.fpu_tag(i3 %2, i2 %5)
-			call void @__frontend_reg_store.fpr(i3 %2, x86_fp80 %3)
-
-			; FPU_TOP = 7
-			%6 = load i3, i3* @fpu_stat_TOP
-			%7 = add i3 %6, 1
-			store i3 %7, i3* @fpu_stat_TOP
-			call void @__frontend_reg_store.fpu_tag(i3 %6, i2 -1)
-
-			; FPU_TOP = 8
-			%8 = load i3, i3* @fpu_stat_TOP
-			%9 = add i3 %8, 1
-			store i3 %9, i3* @fpu_stat_TOP
-			call void @__frontend_reg_store.fpu_tag(i3 %8, i2 -1)
-
-			ret i32 0
-		}
-)";
-const std::string X86_32_64BIT_TEST_RESULT_EXPECTED = R"(
-		define double @foo(double %arg0, double %arg1) {
-			%1 = load i3, i3* @fpu_stat_TOP
-			%2 = sub i3 %1, 1
-			store i3 %2, i3* @fpu_stat_TOP
-			%3 = fpext double %arg0 to x86_fp80
-			%4 = fcmp oeq x86_fp80 %3, 0xK00000000000000000000
-			%5 = select i1 %4, i2 1, i2 0
-			store i2 %5, i2* @fpu_tag_0
-			store x86_fp80 %3, x86_fp80* @st0
-			%6 = load i3, i3* @fpu_stat_TOP
-			%7 = sub i3 %6, 1
-			store i3 %7, i3* @fpu_stat_TOP
-			%8 = fpext double %arg1 to x86_fp80
-			%9 = fcmp oeq x86_fp80 %8, 0xK00000000000000000000
-			%10 = select i1 %9, i2 1, i2 0
-			store i2 %10, i2* @fpu_tag_1
-			store x86_fp80 %8, x86_fp80* @st1
-			%11 = load i3, i3* @fpu_stat_TOP
-			%12 = add i3 %11, 1
-			store i3 %12, i3* @fpu_stat_TOP
-			%13 = load x86_fp80, x86_fp80* @st1
-			%14 = load x86_fp80, x86_fp80* @st0
-			%15 = fmul x86_fp80 %13, %14
-			%16 = fcmp oeq x86_fp80 %15, 0xK00000000000000000000
-			%17 = select i1 %16, i2 1, i2 0
-			store i2 -1, i2* @fpu_tag_1
-			store i2 %17, i2* @fpu_tag_0
-			store x86_fp80 %15, x86_fp80* @st0
-			%18 = load i3, i3* @fpu_stat_TOP
-			%19 = load x86_fp80, x86_fp80* @st0
-			%20 = fptrunc x86_fp80 %19 to double
-			ret double %20
-		}
-
-		define i32 @main(i32 %argc, i8** %argv) {
-		bb:
-			%0 = call double @foo(double 1.000000e+00, double 2.000000e+00)
-
-			%1 = load i3, i3* @fpu_stat_TOP
-			%2 = sub i3 %1, 1
-			store i3 %2, i3* @fpu_stat_TOP
-			%3 = fpext double 1.000000e+00 to x86_fp80
-			%4 = fcmp oeq x86_fp80 %3, 0xK00000000000000000000
-			%5 = select i1 %4, i2 1, i2 0
-			store i2 %5, i2* @fpu_tag_1
-			store x86_fp80 %3, x86_fp80* @st1
-
-			%6 = load i3, i3* @fpu_stat_TOP
-			%7 = add i3 %6, 1
-			store i3 %7, i3* @fpu_stat_TOP
-			store i2 -1, i2* @fpu_tag_1
-
-			%8 = load i3, i3* @fpu_stat_TOP
-			%9 = add i3 %8, 1
-			store i3 %9, i3* @fpu_stat_TOP
-			store i2 -1, i2* @fpu_tag_0
-
-			ret i32 0
-		}
-)";
-};
+	)";
+}; //X87FpuAnalysisTests
 
 void X87FpuAnalysisTests::setX86Environment(std::string architecture, std::string callingConvention)
 {
@@ -332,11 +66,6 @@ void X87FpuAnalysisTests::setX86Environment(std::string architecture, std::strin
 		"mainAddress" : "0x1000",
 		"functions" :
 		[
-			{
-				"callingConvention" : ")" + callingConvention + R"(",
-				"startAddr" : "0x1000",
-				"name" : "main"
-			},
 			{
 				"callingConvention" : ")" + callingConvention + R"(",
 				"name" : "foo"
@@ -365,79 +94,511 @@ void X87FpuAnalysisTests::setX86Environment(std::string architecture, std::strin
 	}
 }
 
-//
 // Architecture: 		16bit
 // Calling convention: 	cdecl
-// Operation:			Call function with floating-point arguments and return value.
-//
+// Operation:			Call function with floating-point return value.
 
-TEST_F(X87FpuAnalysisTests, x86_16bit_cdecl)
+TEST_F(X87FpuAnalysisTests, x86_16bit_cdecl_call_of_analyzed_function_success)
 {
-	parseInput(PREDEFINED_REGISTERS_AND_FUNCTIONS + X86_16BIT_TEST);
+	parseInput(PREDEFINED_REGISTERS_AND_FUNCTIONS + R"(
+		define void @foo() {
+		bb:
+			; ...
+			;; push st(0)
+			%0 = load i3, i3* @fpu_stat_TOP
+			%1 = sub i3 %0, 1
+			call void @__frontend_reg_store.fpu_tag(i3 %1, i2 0)
+			call void @__frontend_reg_store.fpr(i3 %1, x86_fp80 0xK3FFF8000000000000000)
+			store i3 %1, i3* @fpu_stat_TOP
+			; ...
+			; let assume here that st(0) is saved in memory and addr is stored to AX -> 16bit cdecl convention
+			; ...
+			;; pop st(0)
+			%2 = load i3, i3* @fpu_stat_TOP
+			call void @__frontend_reg_store.fpu_tag(i3 %2, i2 -1)
+			%3 = add i3 %2, 1
+			store i3 %3, i3* @fpu_stat_TOP
+			; ...
+			ret void
+		}
+		define void @boo() {
+		bb:
+			; ...
+			call void @foo()
+			; fp return value is saved in memory and addr is in AX -> 16bit cdecl convention
+			; ...
+			ret void
+		})");
 
 	setX86Environment("16", "cdecl");
 	bool b = pass.runOnModuleCustom(*module, &config, abi);
 
-	std::string exp = PREDEFINED_REGISTERS_AND_FUNCTIONS + X86_16BIT_TEST_RESULT_EXPECTED;
+	std::string exp = PREDEFINED_REGISTERS_AND_FUNCTIONS + R"(
+		define void @foo() {
+		bb:
+		  %0 = load i3, i3* @fpu_stat_TOP
+		  %1 = sub i3 %0, 1
+		  store i2 0, i2* @fpu_tag_0
+		  store x86_fp80 0xK3FFF8000000000000000, x86_fp80* @st0
+		  store i3 %1, i3* @fpu_stat_TOP
+		  %2 = load i3, i3* @fpu_stat_TOP
+		  store i2 -1, i2* @fpu_tag_0
+		  %3 = add i3 %2, 1
+		  store i3 %3, i3* @fpu_stat_TOP
+		  ret void
+		}
+		define void @boo() {
+		bb:
+		  call void @foo()
+		  ret void
+		})";
 	checkModuleAgainstExpectedIr(exp);
 	EXPECT_TRUE(b);
-} // x86_16bit_cdecl
+} // x86_16bit_cdecl_call_of_analyzed_function_success
 
-//
+TEST_F(X87FpuAnalysisTests, x86_16bit_cdecl_call_of_not_analyzed_function_success)
+{
+	parseInput(PREDEFINED_REGISTERS_AND_FUNCTIONS + R"(
+		define void @boo() {
+		bb:
+			; ...
+			call void @foo()
+			; ...
+			ret void
+		}
+		define void @foo() {
+		bb:
+			; ...
+			%0 = load i3, i3* @fpu_stat_TOP
+			%1 = sub i3 %0, 1
+			call void @__frontend_reg_store.fpu_tag(i3 %1, i2 0)
+			call void @__frontend_reg_store.fpr(i3 %1, x86_fp80 0xK3FFF8000000000000000)
+			store i3 %1, i3* @fpu_stat_TOP
+			; ...
+			%2 = load i3, i3* @fpu_stat_TOP
+			call void @__frontend_reg_store.fpu_tag(i3 %2, i2 -1)
+			%3 = add i3 %2, 1
+			store i3 %3, i3* @fpu_stat_TOP
+			; ...
+			ret void
+		})");
+
+		setX86Environment("16", "cdecl");
+		bool b = pass.runOnModuleCustom(*module, &config, abi);
+
+		std::string exp = PREDEFINED_REGISTERS_AND_FUNCTIONS + R"(
+		define void @boo() {
+		bb:
+		  call void @foo()
+		  ret void
+		}
+		define void @foo() {
+		bb:
+		  %0 = load i3, i3* @fpu_stat_TOP
+		  %1 = sub i3 %0, 1
+		  store i2 0, i2* @fpu_tag_0
+		  store x86_fp80 0xK3FFF8000000000000000, x86_fp80* @st0
+		  store i3 %1, i3* @fpu_stat_TOP
+		  %2 = load i3, i3* @fpu_stat_TOP
+		  store i2 -1, i2* @fpu_tag_0
+		  %3 = add i3 %2, 1
+		  store i3 %3, i3* @fpu_stat_TOP
+		  ret void
+		})";
+	checkModuleAgainstExpectedIr(exp);
+	EXPECT_TRUE(b);
+} // x86_16bit_cdecl_call_of_not_analyzed_function_success
+
+TEST_F(X87FpuAnalysisTests, x86_16bit_cdecl_analyze_fail)
+{
+	parseInput(PREDEFINED_REGISTERS_AND_FUNCTIONS + R"(
+		define void @foo() {
+		bb:
+			%0 = load i3, i3* @fpu_stat_TOP
+			%1 = sub i3 %0, 1
+			call void @__frontend_reg_store.fpu_tag(i3 %1, i2 0)
+			call void @__frontend_reg_store.fpr(i3 %1, x86_fp80 0xK3FFF8000000000000000)
+			store i3 %1, i3* @fpu_stat_TOP
+			ret void
+		})");
+
+	setX86Environment("16", "cdecl");
+	bool b = pass.runOnModuleCustom(*module, &config, abi);
+	EXPECT_FALSE(b);
+} // x86_16bit_cdecl_analyze_fail
+
 // Architecture: 		16bit
 // Calling convention: 	pascal
-// Operation:			Call function with floating-point arguments and return value.
-//
+// Operation:			Call function with floating-point return value.
 
-TEST_F(X87FpuAnalysisTests, x86_16bit_pascal)
+TEST_F(X87FpuAnalysisTests, x86_16bit_pascal_call_of_analyzed_function_success)
 {
-	parseInput(PREDEFINED_REGISTERS_AND_FUNCTIONS + X86_16BIT_TEST);
+	parseInput(PREDEFINED_REGISTERS_AND_FUNCTIONS + R"(
+		define void @foo() {
+		bb:
+			%0 = load i3, i3* @fpu_stat_TOP
+			%1 = sub i3 %0, 1
+			call void @__frontend_reg_store.fpu_tag(i3 %1, i2 0)
+			call void @__frontend_reg_store.fpr(i3 %1, x86_fp80 0xK3FFF8000000000000000)
+			store i3 %1, i3* @fpu_stat_TOP
+			%2 = load i3, i3* @fpu_stat_TOP
+			call void @__frontend_reg_store.fpu_tag(i3 %2, i2 -1)
+			%3 = add i3 %2, 1
+			store i3 %3, i3* @fpu_stat_TOP
+			ret void
+		}
+		define void @boo() {
+		bb:
+			call void @foo()
+			ret void
+		})");
 
 	setX86Environment("16", "pascal");
 	bool b = pass.runOnModuleCustom(*module, &config, abi);
 
-	std::string exp = PREDEFINED_REGISTERS_AND_FUNCTIONS + X86_16BIT_TEST_RESULT_EXPECTED;
+	std::string exp = PREDEFINED_REGISTERS_AND_FUNCTIONS + R"(
+		define void @foo() {
+		bb:
+		  %0 = load i3, i3* @fpu_stat_TOP
+		  %1 = sub i3 %0, 1
+		  store i2 0, i2* @fpu_tag_0
+		  store x86_fp80 0xK3FFF8000000000000000, x86_fp80* @st0
+		  store i3 %1, i3* @fpu_stat_TOP
+		  %2 = load i3, i3* @fpu_stat_TOP
+		  store i2 -1, i2* @fpu_tag_0
+		  %3 = add i3 %2, 1
+		  store i3 %3, i3* @fpu_stat_TOP
+		  ret void
+		}
+		define void @boo() {
+		bb:
+		  call void @foo()
+		  ret void
+		})";
 	checkModuleAgainstExpectedIr(exp);
 	EXPECT_TRUE(b);
-} // x86_16bit_pascal
+} // x86_16bit_pascal_call_of_analyzed_function_success
+
+TEST_F(X87FpuAnalysisTests, x86_16bit_pascal_call_of_not_analyzed_function_success)
+{
+	parseInput(PREDEFINED_REGISTERS_AND_FUNCTIONS + R"(
+		define void @boo() {
+		bb:
+			call void @foo()
+			ret void
+		}
+		define void @foo() {
+		bb:
+			%0 = load i3, i3* @fpu_stat_TOP
+			%1 = sub i3 %0, 1
+			call void @__frontend_reg_store.fpu_tag(i3 %1, i2 0)
+			call void @__frontend_reg_store.fpr(i3 %1, x86_fp80 0xK3FFF8000000000000000)
+			store i3 %1, i3* @fpu_stat_TOP
+			%2 = load i3, i3* @fpu_stat_TOP
+			call void @__frontend_reg_store.fpu_tag(i3 %2, i2 -1)
+			%3 = add i3 %2, 1
+			store i3 %3, i3* @fpu_stat_TOP
+			ret void
+		})");
+
+	setX86Environment("16", "pascal");
+	bool b = pass.runOnModuleCustom(*module, &config, abi);
+
+	std::string exp = PREDEFINED_REGISTERS_AND_FUNCTIONS + R"(
+		define void @boo() {
+		bb:
+		  call void @foo()
+		  ret void
+		}
+		define void @foo() {
+		bb:
+		  %0 = load i3, i3* @fpu_stat_TOP
+		  %1 = sub i3 %0, 1
+		  store i2 0, i2* @fpu_tag_0
+		  store x86_fp80 0xK3FFF8000000000000000, x86_fp80* @st0
+		  store i3 %1, i3* @fpu_stat_TOP
+		  %2 = load i3, i3* @fpu_stat_TOP
+		  store i2 -1, i2* @fpu_tag_0
+		  %3 = add i3 %2, 1
+		  store i3 %3, i3* @fpu_stat_TOP
+		  ret void
+		})";
+	checkModuleAgainstExpectedIr(exp);
+	EXPECT_TRUE(b);
+} // x86_16bit_pascal_call_of_not_analyzed_function_success
+
+TEST_F(X87FpuAnalysisTests, x86_16bit_pascal_analyze_fail)
+{
+	parseInput(PREDEFINED_REGISTERS_AND_FUNCTIONS + R"(
+		define void @foo() {
+		bb:
+			%0 = load i3, i3* @fpu_stat_TOP
+			%1 = sub i3 %0, 1
+			call void @__frontend_reg_store.fpu_tag(i3 %1, i2 0)
+			call void @__frontend_reg_store.fpr(i3 %1, x86_fp80 0xK3FFF8000000000000000)
+			store i3 %1, i3* @fpu_stat_TOP
+			ret void
+		})");
+
+	setX86Environment("16", "pascal");
+	bool b = pass.runOnModuleCustom(*module, &config, abi);
+	EXPECT_FALSE(b);
+} // x86_16bit_cdecl_analyze_fail
 
 //
 // Architecture: 		16bit
 // Calling convention: 	fastcall
-// Operation:			Call function with floating-point arguments and return value.
+// Operation:			Call function returning floating-point value.
 //
 
-TEST_F(X87FpuAnalysisTests, x86_16bit_fastcall)
+TEST_F(X87FpuAnalysisTests, x86_16bit_fastcall_call_of_analyzed_function_success)
 {
-	parseInput(PREDEFINED_REGISTERS_AND_FUNCTIONS + X86_16BIT_TEST);
+	parseInput(PREDEFINED_REGISTERS_AND_FUNCTIONS + R"(
+		define void @foo() {
+		bb:
+			%0 = load i3, i3* @fpu_stat_TOP
+			%1 = sub i3 %0, 1
+			call void @__frontend_reg_store.fpu_tag(i3 %1, i2 0)
+			call void @__frontend_reg_store.fpr(i3 %1, x86_fp80 0xK3FFF8000000000000000)
+			store i3 %1, i3* @fpu_stat_TOP
+			%2 = load i3, i3* @fpu_stat_TOP
+			call void @__frontend_reg_store.fpu_tag(i3 %2, i2 -1)
+			%3 = add i3 %2, 1
+			store i3 %3, i3* @fpu_stat_TOP
+			ret void
+		}
+		define void @boo() {
+		bb:
+			call void @foo()
+			ret void
+		})");
 
 	setX86Environment("16", "fastcall");
 	bool b = pass.runOnModuleCustom(*module, &config, abi);
 
-	std::string exp = PREDEFINED_REGISTERS_AND_FUNCTIONS + X86_16BIT_TEST_RESULT_EXPECTED;
+	std::string exp = PREDEFINED_REGISTERS_AND_FUNCTIONS + R"(
+		define void @foo() {
+		bb:
+		  %0 = load i3, i3* @fpu_stat_TOP
+		  %1 = sub i3 %0, 1
+		  store i2 0, i2* @fpu_tag_0
+		  store x86_fp80 0xK3FFF8000000000000000, x86_fp80* @st0
+		  store i3 %1, i3* @fpu_stat_TOP
+		  %2 = load i3, i3* @fpu_stat_TOP
+		  store i2 -1, i2* @fpu_tag_0
+		  %3 = add i3 %2, 1
+		  store i3 %3, i3* @fpu_stat_TOP
+		  ret void
+		}
+		define void @boo() {
+		bb:
+		  call void @foo()
+		  ret void
+		})";
 	checkModuleAgainstExpectedIr(exp);
 	EXPECT_TRUE(b);
-} // x86_16bit_fastcall
+} // x86_16bit_fastcall_call_of_analyzed_function_success
 
-// TODO 16bit watcom call convention
+TEST_F(X87FpuAnalysisTests, x86_16bit_fastcall_call_of_not_analyzed_function_success)
+{
+	parseInput(PREDEFINED_REGISTERS_AND_FUNCTIONS + R"(
+		define void @boo() {
+		bb:
+			call void @foo()
+			ret void
+		}
+		define void @foo() {
+		bb:
+			%0 = load i3, i3* @fpu_stat_TOP
+			%1 = sub i3 %0, 1
+			call void @__frontend_reg_store.fpu_tag(i3 %1, i2 0)
+			call void @__frontend_reg_store.fpr(i3 %1, x86_fp80 0xK3FFF8000000000000000)
+			store i3 %1, i3* @fpu_stat_TOP
+			%2 = load i3, i3* @fpu_stat_TOP
+			call void @__frontend_reg_store.fpu_tag(i3 %2, i2 -1)
+			%3 = add i3 %2, 1
+			store i3 %3, i3* @fpu_stat_TOP
+			ret void
+		})");
+
+	setX86Environment("16", "fastcall");
+	bool b = pass.runOnModuleCustom(*module, &config, abi);
+
+	std::string exp = PREDEFINED_REGISTERS_AND_FUNCTIONS + R"(
+		define void @boo() {
+		bb:
+		  call void @foo()
+		  ret void
+		}
+		define void @foo() {
+		bb:
+		  %0 = load i3, i3* @fpu_stat_TOP
+		  %1 = sub i3 %0, 1
+		  store i2 0, i2* @fpu_tag_0
+		  store x86_fp80 0xK3FFF8000000000000000, x86_fp80* @st0
+		  store i3 %1, i3* @fpu_stat_TOP
+		  %2 = load i3, i3* @fpu_stat_TOP
+		  store i2 -1, i2* @fpu_tag_0
+		  %3 = add i3 %2, 1
+		  store i3 %3, i3* @fpu_stat_TOP
+		  ret void
+		})";
+	checkModuleAgainstExpectedIr(exp);
+	EXPECT_TRUE(b);
+} // x86_16bit_fastcall_call_of_not_analyzed_function_success
+
+TEST_F(X87FpuAnalysisTests, x86_16bit_fastcall_analyze_fail)
+{
+	parseInput(PREDEFINED_REGISTERS_AND_FUNCTIONS + R"(
+		define void @foo() {
+		bb:
+			%0 = load i3, i3* @fpu_stat_TOP
+			%1 = sub i3 %0, 1
+			call void @__frontend_reg_store.fpu_tag(i3 %1, i2 0)
+			call void @__frontend_reg_store.fpr(i3 %1, x86_fp80 0xK3FFF8000000000000000)
+			store i3 %1, i3* @fpu_stat_TOP
+			ret void
+		})");
+
+	setX86Environment("16", "fastcall");
+	bool b = pass.runOnModuleCustom(*module, &config, abi);
+	EXPECT_FALSE(b);
+} // x86_16bit_fastcall_analyze_fail
+
+//
+// Architecture: 		16bit
+// Calling convention: 	watcom
+// Operation:			Call function returning floating-point value.
+//
+TEST_F(X87FpuAnalysisTests, x86_16bit_watcom)
+{
+	parseInput(PREDEFINED_REGISTERS_AND_FUNCTIONS + R"(
+		define void @foo() {
+		bb:
+			%0 = load i3, i3* @fpu_stat_TOP
+			%1 = sub i3 %0, 1
+			call void @__frontend_reg_store.fpu_tag(i3 %1, i2 0)
+			call void @__frontend_reg_store.fpr(i3 %1, x86_fp80 0xK3FFF8000000000000000)
+			store i3 %1, i3* @fpu_stat_TOP
+			%2 = load i3, i3* @fpu_stat_TOP
+			call void @__frontend_reg_store.fpu_tag(i3 %2, i2 -1)
+			%3 = add i3 %2, 1
+			store i3 %3, i3* @fpu_stat_TOP
+			ret void
+		}
+		define void @boo() {
+		bb:
+			call void @foo()
+			ret void
+		})");
+
+	setX86Environment("16", "watcom");
+	bool b = pass.runOnModuleCustom(*module, &config, abi);
+	EXPECT_FALSE(b);
+} // x86_16bit_watcom
 
 //
 // Architecture: 		32bit
 // Calling convention: 	cdecl
-// Operation:			Call function with floating-point arguments and return value.
+// Operation:			Call function with floating-point return value.
 //
 
-TEST_F(X87FpuAnalysisTests, x86_32bit_cdecl)
+TEST_F(X87FpuAnalysisTests, x86_32bit_cdecl_call_of_analyzed_function_success)
 {
-	parseInput(PREDEFINED_REGISTERS_AND_FUNCTIONS + X86_32_64BIT_TEST);
+	parseInput(PREDEFINED_REGISTERS_AND_FUNCTIONS + R"(
+		define void @foo() {
+		bb:
+			%0 = load i3, i3* @fpu_stat_TOP
+			%1 = sub i3 %0, 1
+			call void @__frontend_reg_store.fpu_tag(i3 %1, i2 0)
+			call void @__frontend_reg_store.fpr(i3 %1, x86_fp80 0xK3FFF8000000000000000)
+			store i3 %1, i3* @fpu_stat_TOP
+			ret void
+		}
+		define void @boo() {
+		bb:
+			call void @foo()
+			%0 = load i3, i3* @fpu_stat_TOP
+			%1 = call x86_fp80 @__frontend_reg_load.fpr(i3 %0)
+			%2 = add i3 %0, 1
+			store i3 %2, i3* @fpu_stat_TOP
+			ret void
+		})");
 
 	setX86Environment("32", "cdecl");
 	bool b = pass.runOnModuleCustom(*module, &config, abi);
 
-	std::string exp = PREDEFINED_REGISTERS_AND_FUNCTIONS + X86_32_64BIT_TEST_RESULT_EXPECTED;
+	std::string exp = PREDEFINED_REGISTERS_AND_FUNCTIONS + R"(
+		define void @foo() {
+		bb:
+		  %0 = load i3, i3* @fpu_stat_TOP
+		  %1 = sub i3 %0, 1
+		  store i2 0, i2* @fpu_tag_0
+		  store x86_fp80 0xK3FFF8000000000000000, x86_fp80* @st0
+		  store i3 %1, i3* @fpu_stat_TOP
+		  ret void
+		}
+		define void @boo() {
+		bb:
+		  call void @foo()
+		  %0 = load i3, i3* @fpu_stat_TOP
+		  %1 = load x86_fp80, x86_fp80* @st0
+		  %2 = add i3 %0, 1
+		  store i3 %2, i3* @fpu_stat_TOP
+		  ret void
+		})";
 	checkModuleAgainstExpectedIr(exp);
 	EXPECT_TRUE(b);
-} // x86_32bit_cdecl
+} // x86_32bit_cdecl_call_of_analyzed_function_success
+
+TEST_F(X87FpuAnalysisTests, x86_32bit_cdecl_call_of_not_analyzed_function_success)
+{
+	parseInput(PREDEFINED_REGISTERS_AND_FUNCTIONS + R"(
+		define void @boo() {
+		bb:
+			call void @foo()
+			%0 = load i3, i3* @fpu_stat_TOP
+			%1 = call x86_fp80 @__frontend_reg_load.fpr(i3 %0)
+			%2 = add i3 %0, 1
+			store i3 %2, i3* @fpu_stat_TOP
+			ret void
+		}
+		define void @foo() {
+		bb:
+			%0 = load i3, i3* @fpu_stat_TOP
+			%1 = sub i3 %0, 1
+			call void @__frontend_reg_store.fpu_tag(i3 %1, i2 0)
+			call void @__frontend_reg_store.fpr(i3 %1, x86_fp80 0xK3FFF8000000000000000)
+			store i3 %1, i3* @fpu_stat_TOP
+			ret void
+		})");
+
+	setX86Environment("32", "cdecl");
+	bool b = pass.runOnModuleCustom(*module, &config, abi);
+
+	std::string exp = PREDEFINED_REGISTERS_AND_FUNCTIONS + R"(
+		define void @boo() {
+		bb:
+		  call void @foo()
+		  %0 = load i3, i3* @fpu_stat_TOP
+		  %1 = load x86_fp80, x86_fp80* @st0
+		  %2 = add i3 %0, 1
+		  store i3 %2, i3* @fpu_stat_TOP
+		  ret void
+		}
+		define void @foo() {
+		bb:
+		  %0 = load i3, i3* @fpu_stat_TOP
+		  %1 = sub i3 %0, 1
+		  store i2 0, i2* @fpu_tag_0
+		  store x86_fp80 0xK3FFF8000000000000000, x86_fp80* @st0
+		  store i3 %1, i3* @fpu_stat_TOP
+		  ret void
+		})";
+	checkModuleAgainstExpectedIr(exp);
+	EXPECT_TRUE(b);
+} // x86_32bit_cdecl_call_of_not_analyzed_function_success
+
 
 //
 // Architecture: 		32bit
@@ -445,17 +606,101 @@ TEST_F(X87FpuAnalysisTests, x86_32bit_cdecl)
 // Operation:			Call function with floating-point arguments and return value.
 //
 
-TEST_F(X87FpuAnalysisTests, x86_32bit_stdcall)
+TEST_F(X87FpuAnalysisTests, x86_32bit_stdcall_call_of_analyzed_function_success)
 {
-	parseInput(PREDEFINED_REGISTERS_AND_FUNCTIONS + X86_32_64BIT_TEST);
+	parseInput(PREDEFINED_REGISTERS_AND_FUNCTIONS + R"(
+		define void @foo() {
+		bb:
+			%0 = load i3, i3* @fpu_stat_TOP
+			%1 = sub i3 %0, 1
+			call void @__frontend_reg_store.fpu_tag(i3 %1, i2 0)
+			call void @__frontend_reg_store.fpr(i3 %1, x86_fp80 0xK3FFF8000000000000000)
+			store i3 %1, i3* @fpu_stat_TOP
+			ret void
+		}
+		define void @boo() {
+		bb:
+			call void @foo()
+			%0 = load i3, i3* @fpu_stat_TOP
+			%1 = call x86_fp80 @__frontend_reg_load.fpr(i3 %0)
+			%2 = add i3 %0, 1
+			store i3 %2, i3* @fpu_stat_TOP
+			ret void
+		})");
 
 	setX86Environment("32", "stdcall");
 	bool b = pass.runOnModuleCustom(*module, &config, abi);
 
-	std::string exp = PREDEFINED_REGISTERS_AND_FUNCTIONS + X86_32_64BIT_TEST_RESULT_EXPECTED;
+	std::string exp = PREDEFINED_REGISTERS_AND_FUNCTIONS + R"(
+		define void @foo() {
+		bb:
+		  %0 = load i3, i3* @fpu_stat_TOP
+		  %1 = sub i3 %0, 1
+		  store i2 0, i2* @fpu_tag_0
+		  store x86_fp80 0xK3FFF8000000000000000, x86_fp80* @st0
+		  store i3 %1, i3* @fpu_stat_TOP
+		  ret void
+		}
+		define void @boo() {
+		bb:
+		  call void @foo()
+		  %0 = load i3, i3* @fpu_stat_TOP
+		  %1 = load x86_fp80, x86_fp80* @st0
+		  %2 = add i3 %0, 1
+		  store i3 %2, i3* @fpu_stat_TOP
+		  ret void
+		})";
 	checkModuleAgainstExpectedIr(exp);
 	EXPECT_TRUE(b);
-} // x86_32bit_stdcall
+} // x86_32bit_stdcall_call_of_analyzed_function_success
+
+TEST_F(X87FpuAnalysisTests, x86_32bit_stdcall_call_of_not_analyzed_function_success)
+{
+	parseInput(PREDEFINED_REGISTERS_AND_FUNCTIONS + R"(
+		define void @boo() {
+		bb:
+			call void @foo()
+			%0 = load i3, i3* @fpu_stat_TOP
+			%1 = call x86_fp80 @__frontend_reg_load.fpr(i3 %0)
+			%2 = add i3 %0, 1
+			store i3 %2, i3* @fpu_stat_TOP
+			ret void
+		}
+		define void @foo() {
+		bb:
+			%0 = load i3, i3* @fpu_stat_TOP
+			%1 = sub i3 %0, 1
+			call void @__frontend_reg_store.fpu_tag(i3 %1, i2 0)
+			call void @__frontend_reg_store.fpr(i3 %1, x86_fp80 0xK3FFF8000000000000000)
+			store i3 %1, i3* @fpu_stat_TOP
+			ret void
+		})");
+
+	setX86Environment("32", "stdcall");
+	bool b = pass.runOnModuleCustom(*module, &config, abi);
+
+	std::string exp = PREDEFINED_REGISTERS_AND_FUNCTIONS + R"(
+		define void @boo() {
+		bb:
+		  call void @foo()
+		  %0 = load i3, i3* @fpu_stat_TOP
+		  %1 = load x86_fp80, x86_fp80* @st0
+		  %2 = add i3 %0, 1
+		  store i3 %2, i3* @fpu_stat_TOP
+		  ret void
+		}
+		define void @foo() {
+		bb:
+		  %0 = load i3, i3* @fpu_stat_TOP
+		  %1 = sub i3 %0, 1
+		  store i2 0, i2* @fpu_tag_0
+		  store x86_fp80 0xK3FFF8000000000000000, x86_fp80* @st0
+		  store i3 %1, i3* @fpu_stat_TOP
+		  ret void
+		})";
+	checkModuleAgainstExpectedIr(exp);
+	EXPECT_TRUE(b);
+} // x86_32bit_stdcall_call_of_not_analyzed_function_success
 
 //
 // Architecture: 		32bit
@@ -463,17 +708,101 @@ TEST_F(X87FpuAnalysisTests, x86_32bit_stdcall)
 // Operation:			Call function with floating-point arguments and return value.
 //
 
-TEST_F(X87FpuAnalysisTests, x86_32bit_pascal)
+TEST_F(X87FpuAnalysisTests, x86_32bit_pascal_call_of_analyzed_function_success)
 {
-	parseInput(PREDEFINED_REGISTERS_AND_FUNCTIONS + X86_32_64BIT_TEST);
+	parseInput(PREDEFINED_REGISTERS_AND_FUNCTIONS + R"(
+		define void @foo() {
+		bb:
+			%0 = load i3, i3* @fpu_stat_TOP
+			%1 = sub i3 %0, 1
+			call void @__frontend_reg_store.fpu_tag(i3 %1, i2 0)
+			call void @__frontend_reg_store.fpr(i3 %1, x86_fp80 0xK3FFF8000000000000000)
+			store i3 %1, i3* @fpu_stat_TOP
+			ret void
+		}
+		define void @boo() {
+		bb:
+			call void @foo()
+			%0 = load i3, i3* @fpu_stat_TOP
+			%1 = call x86_fp80 @__frontend_reg_load.fpr(i3 %0)
+			%2 = add i3 %0, 1
+			store i3 %2, i3* @fpu_stat_TOP
+			ret void
+		})");
 
 	setX86Environment("32", "pascal");
 	bool b = pass.runOnModuleCustom(*module, &config, abi);
 
-	std::string exp = PREDEFINED_REGISTERS_AND_FUNCTIONS + X86_32_64BIT_TEST_RESULT_EXPECTED;
+	std::string exp = PREDEFINED_REGISTERS_AND_FUNCTIONS + R"(
+		define void @foo() {
+		bb:
+		  %0 = load i3, i3* @fpu_stat_TOP
+		  %1 = sub i3 %0, 1
+		  store i2 0, i2* @fpu_tag_0
+		  store x86_fp80 0xK3FFF8000000000000000, x86_fp80* @st0
+		  store i3 %1, i3* @fpu_stat_TOP
+		  ret void
+		}
+		define void @boo() {
+		bb:
+		  call void @foo()
+		  %0 = load i3, i3* @fpu_stat_TOP
+		  %1 = load x86_fp80, x86_fp80* @st0
+		  %2 = add i3 %0, 1
+		  store i3 %2, i3* @fpu_stat_TOP
+		  ret void
+		})";
 	checkModuleAgainstExpectedIr(exp);
 	EXPECT_TRUE(b);
-} // x86_32bit_pascal
+} // x86_32bit_pascal_call_of_analyzed_function_success
+
+TEST_F(X87FpuAnalysisTests, x86_32bit_pascal_call_of_not_analyzed_function_success)
+{
+	parseInput(PREDEFINED_REGISTERS_AND_FUNCTIONS + R"(
+		define void @boo() {
+		bb:
+			call void @foo()
+			%0 = load i3, i3* @fpu_stat_TOP
+			%1 = call x86_fp80 @__frontend_reg_load.fpr(i3 %0)
+			%2 = add i3 %0, 1
+			store i3 %2, i3* @fpu_stat_TOP
+			ret void
+		}
+		define void @foo() {
+		bb:
+			%0 = load i3, i3* @fpu_stat_TOP
+			%1 = sub i3 %0, 1
+			call void @__frontend_reg_store.fpu_tag(i3 %1, i2 0)
+			call void @__frontend_reg_store.fpr(i3 %1, x86_fp80 0xK3FFF8000000000000000)
+			store i3 %1, i3* @fpu_stat_TOP
+			ret void
+		})");
+
+	setX86Environment("32", "pascal");
+	bool b = pass.runOnModuleCustom(*module, &config, abi);
+
+	std::string exp = PREDEFINED_REGISTERS_AND_FUNCTIONS + R"(
+		define void @boo() {
+		bb:
+		  call void @foo()
+		  %0 = load i3, i3* @fpu_stat_TOP
+		  %1 = load x86_fp80, x86_fp80* @st0
+		  %2 = add i3 %0, 1
+		  store i3 %2, i3* @fpu_stat_TOP
+		  ret void
+		}
+		define void @foo() {
+		bb:
+		  %0 = load i3, i3* @fpu_stat_TOP
+		  %1 = sub i3 %0, 1
+		  store i2 0, i2* @fpu_tag_0
+		  store x86_fp80 0xK3FFF8000000000000000, x86_fp80* @st0
+		  store i3 %1, i3* @fpu_stat_TOP
+		  ret void
+		})";
+	checkModuleAgainstExpectedIr(exp);
+	EXPECT_TRUE(b);
+} // x86_32bit_pascal_call_of_not_analyzed_function_success
 
 //
 // Architecture: 		32bit
@@ -481,17 +810,101 @@ TEST_F(X87FpuAnalysisTests, x86_32bit_pascal)
 // Operation:			Call function with floating-point arguments and return value.
 //
 
-TEST_F(X87FpuAnalysisTests, x86_32bit_fastcall)
+TEST_F(X87FpuAnalysisTests, x86_32bit_fastcall_call_of_analyzed_function_success)
 {
-	parseInput(PREDEFINED_REGISTERS_AND_FUNCTIONS + X86_32_64BIT_TEST);
+	parseInput(PREDEFINED_REGISTERS_AND_FUNCTIONS + R"(
+		define void @foo() {
+		bb:
+			%0 = load i3, i3* @fpu_stat_TOP
+			%1 = sub i3 %0, 1
+			call void @__frontend_reg_store.fpu_tag(i3 %1, i2 0)
+			call void @__frontend_reg_store.fpr(i3 %1, x86_fp80 0xK3FFF8000000000000000)
+			store i3 %1, i3* @fpu_stat_TOP
+			ret void
+		}
+		define void @boo() {
+		bb:
+			call void @foo()
+			%0 = load i3, i3* @fpu_stat_TOP
+			%1 = call x86_fp80 @__frontend_reg_load.fpr(i3 %0)
+			%2 = add i3 %0, 1
+			store i3 %2, i3* @fpu_stat_TOP
+			ret void
+		})");
 
 	setX86Environment("32", "fastcall");
 	bool b = pass.runOnModuleCustom(*module, &config, abi);
 
-	std::string exp = PREDEFINED_REGISTERS_AND_FUNCTIONS + X86_32_64BIT_TEST_RESULT_EXPECTED;
+	std::string exp = PREDEFINED_REGISTERS_AND_FUNCTIONS + R"(
+		define void @foo() {
+		bb:
+		  %0 = load i3, i3* @fpu_stat_TOP
+		  %1 = sub i3 %0, 1
+		  store i2 0, i2* @fpu_tag_0
+		  store x86_fp80 0xK3FFF8000000000000000, x86_fp80* @st0
+		  store i3 %1, i3* @fpu_stat_TOP
+		  ret void
+		}
+		define void @boo() {
+		bb:
+		  call void @foo()
+		  %0 = load i3, i3* @fpu_stat_TOP
+		  %1 = load x86_fp80, x86_fp80* @st0
+		  %2 = add i3 %0, 1
+		  store i3 %2, i3* @fpu_stat_TOP
+		  ret void
+		})";
 	checkModuleAgainstExpectedIr(exp);
 	EXPECT_TRUE(b);
-}
+} // x86_32bit_fastcall_call_of_analyzed_function_success
+
+TEST_F(X87FpuAnalysisTests, x86_32bit_fastcall_call_of_not_analyzed_function_success)
+{
+	parseInput(PREDEFINED_REGISTERS_AND_FUNCTIONS + R"(
+		define void @boo() {
+		bb:
+			call void @foo()
+			%0 = load i3, i3* @fpu_stat_TOP
+			%1 = call x86_fp80 @__frontend_reg_load.fpr(i3 %0)
+			%2 = add i3 %0, 1
+			store i3 %2, i3* @fpu_stat_TOP
+			ret void
+		}
+		define void @foo() {
+		bb:
+			%0 = load i3, i3* @fpu_stat_TOP
+			%1 = sub i3 %0, 1
+			call void @__frontend_reg_store.fpu_tag(i3 %1, i2 0)
+			call void @__frontend_reg_store.fpr(i3 %1, x86_fp80 0xK3FFF8000000000000000)
+			store i3 %1, i3* @fpu_stat_TOP
+			ret void
+		})");
+
+	setX86Environment("32", "fastcall");
+	bool b = pass.runOnModuleCustom(*module, &config, abi);
+
+	std::string exp = PREDEFINED_REGISTERS_AND_FUNCTIONS + R"(
+		define void @boo() {
+		bb:
+		  call void @foo()
+		  %0 = load i3, i3* @fpu_stat_TOP
+		  %1 = load x86_fp80, x86_fp80* @st0
+		  %2 = add i3 %0, 1
+		  store i3 %2, i3* @fpu_stat_TOP
+		  ret void
+		}
+		define void @foo() {
+		bb:
+		  %0 = load i3, i3* @fpu_stat_TOP
+		  %1 = sub i3 %0, 1
+		  store i2 0, i2* @fpu_tag_0
+		  store x86_fp80 0xK3FFF8000000000000000, x86_fp80* @st0
+		  store i3 %1, i3* @fpu_stat_TOP
+		  ret void
+		})";
+	checkModuleAgainstExpectedIr(exp);
+	EXPECT_TRUE(b);
+} // x86_32bit_fastcall_call_of_not_analyzed_function_success
 
 //
 // Architecture: 		32bit
@@ -499,19 +912,213 @@ TEST_F(X87FpuAnalysisTests, x86_32bit_fastcall)
 // Operation:			Call function with floating-point arguments and return value.
 //
 
-TEST_F(X87FpuAnalysisTests, x86_32bit_thiscall)
+TEST_F(X87FpuAnalysisTests, x86_32bit_thiscall_call_of_analyzed_function_success)
 {
-	parseInput(PREDEFINED_REGISTERS_AND_FUNCTIONS + X86_32_64BIT_TEST);
+	parseInput(PREDEFINED_REGISTERS_AND_FUNCTIONS + R"(
+		define void @foo() {
+		bb:
+			%0 = load i3, i3* @fpu_stat_TOP
+			%1 = sub i3 %0, 1
+			call void @__frontend_reg_store.fpu_tag(i3 %1, i2 0)
+			call void @__frontend_reg_store.fpr(i3 %1, x86_fp80 0xK3FFF8000000000000000)
+			store i3 %1, i3* @fpu_stat_TOP
+			ret void
+		}
+		define void @boo() {
+		bb:
+			call void @foo()
+			%0 = load i3, i3* @fpu_stat_TOP
+			%1 = call x86_fp80 @__frontend_reg_load.fpr(i3 %0)
+			%2 = add i3 %0, 1
+			store i3 %2, i3* @fpu_stat_TOP
+			ret void
+		})");
 
 	setX86Environment("32", "thiscall");
 	bool b = pass.runOnModuleCustom(*module, &config, abi);
 
-	std::string exp = PREDEFINED_REGISTERS_AND_FUNCTIONS + X86_32_64BIT_TEST_RESULT_EXPECTED;
+	std::string exp = PREDEFINED_REGISTERS_AND_FUNCTIONS + R"(
+		define void @foo() {
+		bb:
+		  %0 = load i3, i3* @fpu_stat_TOP
+		  %1 = sub i3 %0, 1
+		  store i2 0, i2* @fpu_tag_0
+		  store x86_fp80 0xK3FFF8000000000000000, x86_fp80* @st0
+		  store i3 %1, i3* @fpu_stat_TOP
+		  ret void
+		}
+		define void @boo() {
+		bb:
+		  call void @foo()
+		  %0 = load i3, i3* @fpu_stat_TOP
+		  %1 = load x86_fp80, x86_fp80* @st0
+		  %2 = add i3 %0, 1
+		  store i3 %2, i3* @fpu_stat_TOP
+		  ret void
+		})";
 	checkModuleAgainstExpectedIr(exp);
 	EXPECT_TRUE(b);
-} // x86_32bit_fastcall // x86_32bit_thiscall
+} // x86_32bit_thiscall_call_of_analyzed_function_success
 
-// TODO 32bit watcom call convention test
+TEST_F(X87FpuAnalysisTests, x86_32bit_thiscall_call_of_not_analyzed_function_success)
+{
+	parseInput(PREDEFINED_REGISTERS_AND_FUNCTIONS + R"(
+		define void @boo() {
+		bb:
+			call void @foo()
+			%0 = load i3, i3* @fpu_stat_TOP
+			%1 = call x86_fp80 @__frontend_reg_load.fpr(i3 %0)
+			%2 = add i3 %0, 1
+			store i3 %2, i3* @fpu_stat_TOP
+			ret void
+		}
+		define void @foo() {
+		bb:
+			%0 = load i3, i3* @fpu_stat_TOP
+			%1 = sub i3 %0, 1
+			call void @__frontend_reg_store.fpu_tag(i3 %1, i2 0)
+			call void @__frontend_reg_store.fpr(i3 %1, x86_fp80 0xK3FFF8000000000000000)
+			store i3 %1, i3* @fpu_stat_TOP
+			ret void
+		})");
+
+	setX86Environment("32", "thiscall");
+	bool b = pass.runOnModuleCustom(*module, &config, abi);
+
+	std::string exp = PREDEFINED_REGISTERS_AND_FUNCTIONS + R"(
+		define void @boo() {
+		bb:
+		  call void @foo()
+		  %0 = load i3, i3* @fpu_stat_TOP
+		  %1 = load x86_fp80, x86_fp80* @st0
+		  %2 = add i3 %0, 1
+		  store i3 %2, i3* @fpu_stat_TOP
+		  ret void
+		}
+		define void @foo() {
+		bb:
+		  %0 = load i3, i3* @fpu_stat_TOP
+		  %1 = sub i3 %0, 1
+		  store i2 0, i2* @fpu_tag_0
+		  store x86_fp80 0xK3FFF8000000000000000, x86_fp80* @st0
+		  store i3 %1, i3* @fpu_stat_TOP
+		  ret void
+		})";
+	checkModuleAgainstExpectedIr(exp);
+	EXPECT_TRUE(b);
+} // x86_32bit_thiscall_call_of_not_analyzed_function_success
+
+//
+// Architecture: 		32bit
+// Calling convention: 	watcom
+// Operation:			Call function with floating-point arguments and return value.
+//
+
+TEST_F(X87FpuAnalysisTests, x86_32bit_watcom)
+{
+	parseInput(PREDEFINED_REGISTERS_AND_FUNCTIONS + R"(
+		define void @foo() {
+		bb:
+			%0 = load i3, i3* @fpu_stat_TOP
+			%1 = sub i3 %0, 1
+			call void @__frontend_reg_store.fpu_tag(i3 %1, i2 0)
+			call void @__frontend_reg_store.fpr(i3 %1, x86_fp80 0xK3FFF8000000000000000)
+			store i3 %1, i3* @fpu_stat_TOP
+			ret void
+		}
+		define void @boo() {
+		bb:
+			call void @foo()
+			%0 = load i3, i3* @fpu_stat_TOP
+			%1 = call x86_fp80 @__frontend_reg_load.fpr(i3 %0)
+			%2 = add i3 %0, 1
+			store i3 %2, i3* @fpu_stat_TOP
+			ret void
+		})");
+
+	setX86Environment("32", "watcom");
+	bool b = pass.runOnModuleCustom(*module, &config, abi);
+	EXPECT_FALSE(b);
+} // x86_32bit_watcom
+
+//
+// Architecture: 		32bit
+// Calling convention: 	unknown
+// Operation:			Call function without floating-point arguments and return value.
+//
+
+TEST_F(X87FpuAnalysisTests, x86_32bit_analyze_not_FP_return_success)
+{
+	parseInput(PREDEFINED_REGISTERS_AND_FUNCTIONS + R"(
+		define void @foo() {
+		bb:
+			%0 = load i3, i3* @fpu_stat_TOP
+			%1 = sub i3 %0, 1
+			call void @__frontend_reg_store.fpu_tag(i3 %1, i2 0)
+			call void @__frontend_reg_store.fpr(i3 %1, x86_fp80 0xK3FFF8000000000000000)
+			store i3 %1, i3* @fpu_stat_TOP
+			%2 = load i3, i3* @fpu_stat_TOP
+			call void @__frontend_reg_store.fpu_tag(i3 %2, i2 -1)
+			%3 = add i3 %2, 1
+			store i3 %3, i3* @fpu_stat_TOP
+			ret void
+		}
+		define void @boo() {
+		bb:
+			call void @foo()
+			ret void
+		})");
+
+	setX86Environment("32", "unknown");
+	bool b = pass.runOnModuleCustom(*module, &config, abi);
+
+	std::string exp = PREDEFINED_REGISTERS_AND_FUNCTIONS + R"(
+		define void @foo() {
+		bb:
+		  %0 = load i3, i3* @fpu_stat_TOP
+		  %1 = sub i3 %0, 1
+		  store i2 0, i2* @fpu_tag_0
+		  store x86_fp80 0xK3FFF8000000000000000, x86_fp80* @st0
+		  store i3 %1, i3* @fpu_stat_TOP
+		  %2 = load i3, i3* @fpu_stat_TOP
+		  store i2 -1, i2* @fpu_tag_0
+		  %3 = add i3 %2, 1
+		  store i3 %3, i3* @fpu_stat_TOP
+		  ret void
+		}
+		define void @boo() {
+		bb:
+		  call void @foo()
+		  ret void
+		})";
+	checkModuleAgainstExpectedIr(exp);
+	EXPECT_TRUE(b);
+} // x86_32bit_analyze_not_FP_return_success
+
+TEST_F(X87FpuAnalysisTests, x86_32bit_analyze_not_FP_return_fail)
+{
+	parseInput(PREDEFINED_REGISTERS_AND_FUNCTIONS + R"(
+		define void @foo() {
+		bb:
+			ret void
+		}
+		define void @boo() {
+		bb:
+			;FPU stack is empty => foo return type is not FP
+			call void @foo()
+			; this call of foo behave like it retun value is FP
+			%0 = load i3, i3* @fpu_stat_TOP
+			%1 = call x86_fp80 @__frontend_reg_load.fpr(i3 %0)
+			%2 = add i3 %0, 1
+			store i3 %2, i3* @fpu_stat_TOP
+			ret void
+		})");
+
+	setX86Environment("32", "unknown");
+	bool b = pass.runOnModuleCustom(*module, &config, abi);
+	EXPECT_FALSE(b);
+} // x86_32bit_analyze_not_FP_return_fail
+
 
 //
 // Architecture: 		64bit
@@ -519,53 +1126,166 @@ TEST_F(X87FpuAnalysisTests, x86_32bit_thiscall)
 // Operation:			Call function with floating-point arguments and return value.
 //
 
-TEST_F(X87FpuAnalysisTests, x86_64bit_x64_windows_linux_bsd_mac)
-{
-	parseInput(PREDEFINED_REGISTERS_AND_FUNCTIONS + X86_32_64BIT_TEST);
-
-	setX86Environment("64", "x64");
-	bool b = pass.runOnModuleCustom(*module, &config, abi);
-
-	std::string exp = PREDEFINED_REGISTERS_AND_FUNCTIONS + X86_32_64BIT_TEST_RESULT_EXPECTED;
-	checkModuleAgainstExpectedIr(exp);
-	EXPECT_TRUE(b);
-} // x86_64bit_x64_windows_linux_bsd_mac
-
-
-TEST_F(X87FpuAnalysisTests, x86_workbench)
+TEST_F(X87FpuAnalysisTests, x86_64bit_call_of_analyzed_function_success)
 {
 	parseInput(PREDEFINED_REGISTERS_AND_FUNCTIONS + R"(
-		define i32 @foo() {
+		define void @foo() {
 		bb:
-			%0 = call i32 @boo()
-			ret i32 %0
+			%0 = load i3, i3* @fpu_stat_TOP
+			%1 = sub i3 %0, 1
+			call void @__frontend_reg_store.fpu_tag(i3 %1, i2 0)
+			call void @__frontend_reg_store.fpr(i3 %1, x86_fp80 0xK3FFF8000000000000000)
+			store i3 %1, i3* @fpu_stat_TOP
+			; ...
+			%2 = load i3, i3* @fpu_stat_TOP
+			%3 = call x86_fp80 @__frontend_reg_load.fpr(i3 %2); this val will be saved to xmm0
+			%4 = add i3 %2, 1
+			store i3 %4, i3* @fpu_stat_TOP
+			ret void
 		}
-
-		define i32 @boo() {
+		define void @boo() {
 		bb:
-			%0 = call i32 @moo()
-			ret i32 %0
-		}
+			call void @foo()
+			ret void
+		})");
 
-		define i32 @moo() {
-			ret i32 1
-		}
-
-		define i32 @main(i32 %argc, i8** %argv) {
-		bb:
-			%0 = call i32 @foo()
-			ret i32 0
-		}
-
-)");
-
-	setX86Environment("32", "cdecl");
+	setX86Environment("64", "unknown");
 	bool b = pass.runOnModuleCustom(*module, &config, abi);
 
-	std::string exp = PREDEFINED_REGISTERS_AND_FUNCTIONS + X86_32_64BIT_TEST_RESULT_EXPECTED;
+	std::string exp = PREDEFINED_REGISTERS_AND_FUNCTIONS + R"(
+		define void @foo() {
+		bb:
+		  %0 = load i3, i3* @fpu_stat_TOP
+		  %1 = sub i3 %0, 1
+		  store i2 0, i2* @fpu_tag_0
+		  store x86_fp80 0xK3FFF8000000000000000, x86_fp80* @st0
+		  store i3 %1, i3* @fpu_stat_TOP
+		  %2 = load i3, i3* @fpu_stat_TOP
+		  %3 = load x86_fp80, x86_fp80* @st0
+		  %4 = add i3 %2, 1
+		  store i3 %4, i3* @fpu_stat_TOP
+		  ret void
+		}
+		define void @boo() {
+		bb:
+		  call void @foo()
+		  ret void
+		})";
 	checkModuleAgainstExpectedIr(exp);
 	EXPECT_TRUE(b);
-} // x86_64bit_x64_windows_linux_bsd_mac
+} // x86_64bit_call_of_analyzed_function_success
+
+TEST_F(X87FpuAnalysisTests, x86_64bit_call_of_not_analyzed_function_success)
+{
+	parseInput(PREDEFINED_REGISTERS_AND_FUNCTIONS + R"(
+		define void @boo() {
+		bb:
+			call void @foo()
+			ret void
+		}
+		define void @foo() {
+		bb:
+			%0 = load i3, i3* @fpu_stat_TOP
+			%1 = sub i3 %0, 1
+			call void @__frontend_reg_store.fpu_tag(i3 %1, i2 0)
+			call void @__frontend_reg_store.fpr(i3 %1, x86_fp80 0xK3FFF8000000000000000)
+			store i3 %1, i3* @fpu_stat_TOP
+			; ...
+			%2 = load i3, i3* @fpu_stat_TOP
+			%3 = call x86_fp80 @__frontend_reg_load.fpr(i3 %2); this val will be saved to xmm0
+			%4 = add i3 %2, 1
+			store i3 %4, i3* @fpu_stat_TOP
+			ret void
+		})");
+
+	setX86Environment("64", "unknown");
+	bool b = pass.runOnModuleCustom(*module, &config, abi);
+
+	std::string exp = PREDEFINED_REGISTERS_AND_FUNCTIONS + R"(
+		define void @boo() {
+		bb:
+		  call void @foo()
+		  ret void
+		}
+		define void @foo() {
+		bb:
+		  %0 = load i3, i3* @fpu_stat_TOP
+		  %1 = sub i3 %0, 1
+		  store i2 0, i2* @fpu_tag_0
+		  store x86_fp80 0xK3FFF8000000000000000, x86_fp80* @st0
+		  store i3 %1, i3* @fpu_stat_TOP
+		  %2 = load i3, i3* @fpu_stat_TOP
+		  %3 = load x86_fp80, x86_fp80* @st0
+		  %4 = add i3 %2, 1
+		  store i3 %4, i3* @fpu_stat_TOP
+		  ret void
+		})";
+	checkModuleAgainstExpectedIr(exp);
+	EXPECT_TRUE(b);
+} // x86_64bit_call_of_not_analyzed_function_success
+
+TEST_F(X87FpuAnalysisTests, x86_64bit_analyze_fail)
+{
+	parseInput(PREDEFINED_REGISTERS_AND_FUNCTIONS + R"(
+		define void @foo() {
+		bb:
+			%0 = load i3, i3* @fpu_stat_TOP
+			%1 = sub i3 %0, 1
+			call void @__frontend_reg_store.fpu_tag(i3 %1, i2 0)
+			call void @__frontend_reg_store.fpr(i3 %1, x86_fp80 0xK3FFF8000000000000000)
+			store i3 %1, i3* @fpu_stat_TOP
+			ret void
+		})");
+
+	setX86Environment("64", "unknown");
+	bool b = pass.runOnModuleCustom(*module, &config, abi);
+	EXPECT_FALSE(b);
+} // x86_64bit_analyze_fail
+
+//@todo if-else, loop tests
+//TEST_F(X87FpuAnalysisTests, x86_workbench)
+//{
+//	parseInput(PREDEFINED_REGISTERS_AND_FUNCTIONS + R"(
+//		define i32 @foo() {
+//		bb:
+//			%0 = icmp eq i32 5, 4
+//			br i1 %0, label %dec_label_if_equal, label %dec_label_if_unequal
+//			dec_label_if_equal:
+//			  %1 = call i32 @boo()
+//			  br label %dec_label_end_branch
+//			dec_label_if_unequal:
+//			  %2 = call i32 @moo()
+//			  br label %dec_label_end_branch
+//			dec_label_end_branch:
+//			%3 = phi i32 [ %2, %dec_label_if_unequal ], [ %1, %dec_label_if_equal ]
+//			ret i32 %3
+//		}
+//
+//		define i32 @boo() {
+//		bb:
+//			%0 = call i32 @moo()
+//			ret i32 %0
+//		}
+//
+//		define i32 @moo() {
+//			ret i32 1
+//		}
+//
+//		define i32 @main(i32 %argc, i8** %argv) {
+//		bb:
+//			%0 = call i32 @foo()
+//			ret i32 0
+//		}
+//
+//)");
+//
+//	setX86Environment("32", "cdecl");
+//	bool b = pass.runOnModuleCustom(*module, &config, abi);
+//
+//	std::string exp = PREDEFINED_REGISTERS_AND_FUNCTIONS;
+//	checkModuleAgainstExpectedIr(exp);
+//	EXPECT_TRUE(b);
+//} // x86_64bit_x64_windows_linux_bsd_mac
 
 } // namespace tests
 } // namespace bin2llvmir
