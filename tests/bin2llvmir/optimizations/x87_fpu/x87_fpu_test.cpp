@@ -1119,7 +1119,6 @@ TEST_F(X87FpuAnalysisTests, x86_32bit_analyze_not_FP_return_fail)
 	EXPECT_FALSE(b);
 } // x86_32bit_analyze_not_FP_return_fail
 
-
 //
 // Architecture: 		64bit
 // Calling convention: 	x64 windows, linux, bsd, mac
@@ -1224,68 +1223,256 @@ TEST_F(X87FpuAnalysisTests, x86_64bit_call_of_not_analyzed_function_success)
 	EXPECT_TRUE(b);
 } // x86_64bit_call_of_not_analyzed_function_success
 
-TEST_F(X87FpuAnalysisTests, x86_64bit_analyze_fail)
+//
+// BRANCH AND LOOPS
+//
+
+TEST_F(X87FpuAnalysisTests, if_branch_or_loop)
 {
 	parseInput(PREDEFINED_REGISTERS_AND_FUNCTIONS + R"(
 		define void @foo() {
 		bb:
-			%0 = load i3, i3* @fpu_stat_TOP
-			%1 = sub i3 %0, 1
-			call void @__frontend_reg_store.fpu_tag(i3 %1, i2 0)
-			call void @__frontend_reg_store.fpr(i3 %1, x86_fp80 0xK3FFF8000000000000000)
-			store i3 %1, i3* @fpu_stat_TOP
+			br i1 1, label %dec_label_if_true, label %dec_label_end_branch
+			dec_label_if_true:
+				%0 = load i3, i3* @fpu_stat_TOP
+				%1 = sub i3 %0, 1
+				call void @__frontend_reg_store.fpu_tag(i3 %1, i2 0)
+				call void @__frontend_reg_store.fpr(i3 %1, x86_fp80 0xK3FFF8000000000000000)
+				store i3 %1, i3* @fpu_stat_TOP
+				%2 = load i3, i3* @fpu_stat_TOP
+				call void @__frontend_reg_store.fpu_tag(i3 %2, i2 -1)
+				%3 = add i3 %2, 1
+				store i3 %3, i3* @fpu_stat_TOP
+				br label %dec_label_end_branch
+			dec_label_end_branch:
 			ret void
 		})");
 
 	setX86Environment("64", "unknown");
 	bool b = pass.runOnModuleCustom(*module, &config, abi);
-	EXPECT_FALSE(b);
-} // x86_64bit_analyze_fail
 
-//@todo if-else, loop tests
-//TEST_F(X87FpuAnalysisTests, x86_workbench)
-//{
-//	parseInput(PREDEFINED_REGISTERS_AND_FUNCTIONS + R"(
-//		define i32 @foo() {
-//		bb:
-//			%0 = icmp eq i32 5, 4
-//			br i1 %0, label %dec_label_if_equal, label %dec_label_if_unequal
-//			dec_label_if_equal:
-//			  %1 = call i32 @boo()
-//			  br label %dec_label_end_branch
-//			dec_label_if_unequal:
-//			  %2 = call i32 @moo()
-//			  br label %dec_label_end_branch
-//			dec_label_end_branch:
-//			%3 = phi i32 [ %2, %dec_label_if_unequal ], [ %1, %dec_label_if_equal ]
-//			ret i32 %3
-//		}
-//
-//		define i32 @boo() {
-//		bb:
-//			%0 = call i32 @moo()
-//			ret i32 %0
-//		}
-//
-//		define i32 @moo() {
-//			ret i32 1
-//		}
-//
-//		define i32 @main(i32 %argc, i8** %argv) {
-//		bb:
-//			%0 = call i32 @foo()
-//			ret i32 0
-//		}
-//
-//)");
-//
-//	setX86Environment("32", "cdecl");
-//	bool b = pass.runOnModuleCustom(*module, &config, abi);
-//
-//	std::string exp = PREDEFINED_REGISTERS_AND_FUNCTIONS;
-//	checkModuleAgainstExpectedIr(exp);
-//	EXPECT_TRUE(b);
-//} // x86_64bit_x64_windows_linux_bsd_mac
+	std::string exp = PREDEFINED_REGISTERS_AND_FUNCTIONS + R"(
+		define void @foo() {
+		bb:
+			br i1 1, label %dec_label_if_true, label %dec_label_end_branch
+			dec_label_if_true:
+				%0 = load i3, i3* @fpu_stat_TOP
+				%1 = sub i3 %0, 1
+				store i2 0, i2* @fpu_tag_0
+				store x86_fp80 0xK3FFF8000000000000000, x86_fp80* @st0
+				store i3 %1, i3* @fpu_stat_TOP
+				%2 = load i3, i3* @fpu_stat_TOP
+				store i2 -1, i2* @fpu_tag_0
+				%3 = add i3 %2, 1
+				store i3 %3, i3* @fpu_stat_TOP
+				br label %dec_label_end_branch
+			dec_label_end_branch:
+			ret void
+		}
+)";
+	checkModuleAgainstExpectedIr(exp);
+	EXPECT_TRUE(b);
+} // if_branch
+
+TEST_F(X87FpuAnalysisTests, if_else_branch)
+{
+	parseInput(PREDEFINED_REGISTERS_AND_FUNCTIONS + R"(
+		define void @foo() {
+		bb:
+			br i1 1, label %dec_label_if_true, label %dec_label_if_false
+			dec_label_if_true:
+				br label %dec_label_end_branch
+			dec_label_if_false:
+				%0 = load i3, i3* @fpu_stat_TOP
+				%1 = sub i3 %0, 1
+				call void @__frontend_reg_store.fpu_tag(i3 %1, i2 0)
+				call void @__frontend_reg_store.fpr(i3 %1, x86_fp80 0xK3FFF8000000000000000)
+				store i3 %1, i3* @fpu_stat_TOP
+				%2 = load i3, i3* @fpu_stat_TOP
+				call void @__frontend_reg_store.fpu_tag(i3 %2, i2 -1)
+				%3 = add i3 %2, 1
+				store i3 %3, i3* @fpu_stat_TOP
+				br label %dec_label_end_branch
+			dec_label_end_branch:
+			ret void
+		}
+)");
+
+	setX86Environment("64", "unknown");
+	bool b = pass.runOnModuleCustom(*module, &config, abi);
+
+	std::string exp = PREDEFINED_REGISTERS_AND_FUNCTIONS + R"(
+		define void @foo() {
+		bb:
+			br i1 1, label %dec_label_if_true, label %dec_label_if_false
+			dec_label_if_true:
+				br label %dec_label_end_branch
+			dec_label_if_false:
+				%0 = load i3, i3* @fpu_stat_TOP
+				%1 = sub i3 %0, 1
+				store i2 0, i2* @fpu_tag_0
+				store x86_fp80 0xK3FFF8000000000000000, x86_fp80* @st0
+				store i3 %1, i3* @fpu_stat_TOP
+				%2 = load i3, i3* @fpu_stat_TOP
+				store i2 -1, i2* @fpu_tag_0
+				%3 = add i3 %2, 1
+				store i3 %3, i3* @fpu_stat_TOP
+				br label %dec_label_end_branch
+			dec_label_end_branch:
+			ret void
+		}
+)";
+	checkModuleAgainstExpectedIr(exp);
+	EXPECT_TRUE(b);
+} // if_else_branch
+
+TEST_F(X87FpuAnalysisTests, if_elseif_else_branch_or_switch)
+{
+	parseInput(PREDEFINED_REGISTERS_AND_FUNCTIONS + R"(
+		define void @foo() {
+		bb:
+			br i1 1, label %dec_label_if_then_true, label %dec_label_if_then_false
+			dec_label_if_then_true:
+				br label %dec_label_end_branch
+			dec_label_if_then_false:
+			br i1 1, label %dec_label_else_if_true, label %dec_label_else_if_false
+			dec_label_else_if_true:
+				br label %dec_label_end_branch
+			dec_label_else_if_false:
+				%0 = load i3, i3* @fpu_stat_TOP
+				%1 = sub i3 %0, 1
+				call void @__frontend_reg_store.fpu_tag(i3 %1, i2 0)
+				call void @__frontend_reg_store.fpr(i3 %1, x86_fp80 0xK3FFF8000000000000000)
+				store i3 %1, i3* @fpu_stat_TOP
+				%2 = load i3, i3* @fpu_stat_TOP
+				call void @__frontend_reg_store.fpu_tag(i3 %2, i2 -1)
+				%3 = add i3 %2, 1
+				store i3 %3, i3* @fpu_stat_TOP
+				br label %dec_label_end_branch
+			dec_label_end_branch:
+			ret void
+		}
+)");
+
+	setX86Environment("64", "unknown");
+	bool b = pass.runOnModuleCustom(*module, &config, abi);
+
+	std::string exp = PREDEFINED_REGISTERS_AND_FUNCTIONS + R"(
+		define void @foo() {
+		bb:
+			br i1 1, label %dec_label_if_then_true, label %dec_label_if_then_false
+			dec_label_if_then_true:
+				br label %dec_label_end_branch
+			dec_label_if_then_false:
+			br i1 1, label %dec_label_else_if_true, label %dec_label_else_if_false
+			dec_label_else_if_true:
+				br label %dec_label_end_branch
+			dec_label_else_if_false:
+				%0 = load i3, i3* @fpu_stat_TOP
+				%1 = sub i3 %0, 1
+				store i2 0, i2* @fpu_tag_0
+				store x86_fp80 0xK3FFF8000000000000000, x86_fp80* @st0
+				store i3 %1, i3* @fpu_stat_TOP
+				%2 = load i3, i3* @fpu_stat_TOP
+				store i2 -1, i2* @fpu_tag_0
+				%3 = add i3 %2, 1
+				store i3 %3, i3* @fpu_stat_TOP
+				br label %dec_label_end_branch
+			dec_label_end_branch:
+			ret void
+		}
+)";
+	checkModuleAgainstExpectedIr(exp);
+	EXPECT_TRUE(b);
+} // if_elseif_else_branch
+
+TEST_F(X87FpuAnalysisTests, nested_branch)
+{
+	parseInput(PREDEFINED_REGISTERS_AND_FUNCTIONS + R"(
+		define void @foo() {
+		bb:
+			br i1 1, label %dec_label_if_true_0, label %dec_label_end_branch_0
+			dec_label_if_true_0:
+				%0 = load i3, i3* @fpu_stat_TOP
+				%1 = sub i3 %0, 1
+				call void @__frontend_reg_store.fpu_tag(i3 %1, i2 0)
+				call void @__frontend_reg_store.fpr(i3 %1, x86_fp80 0xK3FFF8000000000000000)
+				store i3 %1, i3* @fpu_stat_TOP
+				br i1 1, label %dec_label_if_true_1, label %dec_label_end_branch_1
+				dec_label_if_true_1:
+					%2 = load i3, i3* @fpu_stat_TOP
+					%3 = call x86_fp80 @__frontend_reg_load.fpr(i3 %2)
+					br label %dec_label_end_branch_1
+				dec_label_end_branch_1:
+				%4 = load i3, i3* @fpu_stat_TOP
+				%5 = add i3 %4, 1
+				store i3 %5, i3* @fpu_stat_TOP
+				br label %dec_label_end_branch_0
+			dec_label_end_branch_0:
+			ret void
+		}
+)");
+
+	setX86Environment("64", "unknown");
+	bool b = pass.runOnModuleCustom(*module, &config, abi);
+
+	std::string exp = PREDEFINED_REGISTERS_AND_FUNCTIONS + R"(
+		define void @foo() {
+		bb:
+			br i1 1, label %dec_label_if_true_0, label %dec_label_end_branch_0
+			dec_label_if_true_0:
+				%0 = load i3, i3* @fpu_stat_TOP
+				%1 = sub i3 %0, 1
+				store i2 0, i2* @fpu_tag_0
+				store x86_fp80 0xK3FFF8000000000000000, x86_fp80* @st0
+				store i3 %1, i3* @fpu_stat_TOP
+				br i1 1, label %dec_label_if_true_1, label %dec_label_end_branch_1
+				dec_label_if_true_1:
+					%2 = load i3, i3* @fpu_stat_TOP
+					%3 = call x86_fp80 @__frontend_reg_load.fpr(i3 %2)
+					br label %dec_label_end_branch_1
+				dec_label_end_branch_1:
+				%4 = load i3, i3* @fpu_stat_TOP
+				%5 = add i3 %4, 1
+				store i3 %5, i3* @fpu_stat_TOP
+				br label %dec_label_end_branch_0
+			dec_label_end_branch_0:
+			ret void
+		}
+)";
+	checkModuleAgainstExpectedIr(exp);
+	EXPECT_TRUE(b);
+} // nested_branch
+
+TEST_F(X87FpuAnalysisTests, if_else_branch_fail)
+{
+	parseInput(PREDEFINED_REGISTERS_AND_FUNCTIONS + R"(
+		define void @foo() {
+		bb:
+			br i1 1, label %dec_label_if_true, label %dec_label_if_false
+			dec_label_if_true:
+				%0 = load i3, i3* @fpu_stat_TOP
+				%1 = sub i3 %0, 1
+				call void @__frontend_reg_store.fpu_tag(i3 %1, i2 0)
+				call void @__frontend_reg_store.fpr(i3 %1, x86_fp80 0xK3FFF8000000000000000)
+				store i3 %1, i3* @fpu_stat_TOP
+				br label %dec_label_end_branch
+			dec_label_if_false:
+				%2 = load i3, i3* @fpu_stat_TOP
+				call void @__frontend_reg_store.fpu_tag(i3 %2, i2 -1)
+				%3 = add i3 %2, 1
+				store i3 %3, i3* @fpu_stat_TOP
+				br label %dec_label_end_branch
+			dec_label_end_branch:
+			ret void
+		}
+)");
+
+	setX86Environment("64", "unknown");
+	bool b = pass.runOnModuleCustom(*module, &config, abi);
+
+	EXPECT_FALSE(b);
+} // if_else_branch_fail
 
 } // namespace tests
 } // namespace bin2llvmir
