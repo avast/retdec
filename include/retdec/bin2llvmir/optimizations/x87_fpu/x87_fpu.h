@@ -42,10 +42,13 @@ class X87FpuAnalysis : public llvm::ModulePass
 	private:
 		bool run();
 		bool analyzeBasicBlock(
-				retdec::utils::NonIterableSet<llvm::BasicBlock*>& seenBbs,
 				std::map<llvm::Value*, int>& topVals,
 				llvm::BasicBlock* bb,
 				int& topVal);
+		bool analyzeNestedBasicBlocks(
+				llvm::Function& function,
+				int topVal,
+				std::map<llvm::Value*, int> topVals);
 		bool analyzeFunctionReturn(
 				llvm::Function& function,
 				int topVal,
@@ -67,20 +70,15 @@ class X87FpuAnalysis : public llvm::ModulePass
 
 	private:
 
-		struct BlockTracker {
-			llvm::BasicBlock* basicBlock;
-			int beginTop;
-		};
-
 		llvm::Module* _module = nullptr;
 		Config* _config = nullptr;
 		Abi* _abi = nullptr;
 		llvm::GlobalVariable* top = nullptr;
-		std::vector<BlockTracker> _branchBlocks;
+
 		std::map<llvm::GlobalValue::GUID, int> analyzedFunctions; // value of top at the end of function
 		std::map<llvm::GlobalValue::GUID, int> calledButNotAnalyzedFunctions; // expected value of top
-
 		std::list<std::pair<llvm::GlobalVariable*,llvm::Instruction*>> instToChange;
+		std::queue<std::pair<llvm::Value*, int>> nestedBlocksQueue;
 };
 
 } // namespace bin2llvmir
