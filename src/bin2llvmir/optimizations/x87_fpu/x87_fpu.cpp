@@ -76,20 +76,27 @@ bool X87FpuAnalysis::run()
 	for (Function& f : *_module)
 	{
 		LOG << f.getName().str() << std::endl;
-		retdec::utils::NonIterableSet<BasicBlock*> seenBbs;
 		std::map<Value*, int> topVals;
 
-		for (auto& bb : f)
+		if (f.empty())
+			continue;
+
+		auto& bb = f.front();
+
+		int topVal = 8;
+		// analyze body of function without nested blocks (branches, loops)
+		if (!analyzeBasicBlock(topVals, &bb, topVal))
 		{
-			int topVal = 8;
-			if (!analyzeBasicBlock(seenBbs, topVals, &bb, topVal))
-			{
-				return ANALYZE_FAIL;
-			}
-			if (!analyzeFunctionReturn(f, topVal, analyzedFunctions))
-			{
-				return ANALYZE_FAIL;
-			}
+			return ANALYZE_FAIL;
+		}
+		if (!analyzeFunctionReturn(f, topVal, analyzedFunctions))
+		{
+			return ANALYZE_FAIL;
+		}
+
+		if (!analyzeNestedBasicBlocks(f, topVal, topVals))
+		{
+			return ANALYZE_FAIL;
 		}
 
 		if (isFunctionDefinitionAndCallMatching(f))
@@ -99,6 +106,31 @@ bool X87FpuAnalysis::run()
 	}
 
 	optimizeAnalyzedFpuInstruction();
+	return ANALYZE_SUCCESS;
+}
+
+bool X87FpuAnalysis::analyzeNestedBasicBlocks(
+		llvm::Function& function,
+		int topVal,
+		std::map<Value*, int> topVals)
+{
+	while(!nestedBlocksQueue.empty())
+	{
+		auto pair = nestedBlocksQueue.front();
+		auto nestedBb = pair.first;
+		topVal = pair.second;
+		nestedBlocksQueue.pop();
+
+		for (auto it = function.begin(); it != function.end(); it++)
+		{
+			if (nestedBb == it.operator->()
+				&& !analyzeBasicBlock(topVals, it.operator->(), topVal))
+			{
+				return ANALYZE_FAIL;
+			}
+		}
+	}
+
 	return ANALYZE_SUCCESS;
 }
 
@@ -236,6 +268,7 @@ bool X87FpuAnalysis::analyzeInstruction(Instruction& i, std::map<llvm::Value*, i
 	auto *sub = dyn_cast<SubOperator>(&i);
 	auto *callStore = _config->isLlvmX87StorePseudoFunctionCall(&i);
 	auto *callLoad = _config->isLlvmX87LoadPseudoFunctionCall(&i);
+	auto *branch = dyn_cast<BranchInst>(&i);
 
 	// read actual value of fpu top
 	if (loadFpuTop && loadFpuTop->getPointerOperand() == top)
@@ -351,6 +384,13 @@ bool X87FpuAnalysis::analyzeInstruction(Instruction& i, std::map<llvm::Value*, i
 		//pseudo call will be replaced by store/load of concrete register but only if whole analyze succed
 		instToChange.push_back(std::make_pair(reg, &i));
 	}
+	else if (branch)
+	{
+		for (unsigned i = 1; i < branch->getNumOperands(); i++)
+		{
+			nestedBlocksQueue.push({branch->getOperand(i), topVal});
+		}
+	}
 	else if (callStore || callLoad)
 	{
 		LOG << "\t\t" << AsmInstruction(&i).getAddress() << " @ "
@@ -363,41 +403,20 @@ bool X87FpuAnalysis::analyzeInstruction(Instruction& i, std::map<llvm::Value*, i
 }
 
 bool X87FpuAnalysis::analyzeBasicBlock(
-	retdec::utils::NonIterableSet<llvm::BasicBlock*>& seenBbs,
 	std::map<llvm::Value*, int>& topVals,
 	llvm::BasicBlock* bb,
 	int& topVal)
 {
-	std::queue<std::pair<llvm::BasicBlock*, int>> queue;
-	queue.push({bb, topVal});
-	while(!queue.empty())
+	LOG << "\t" << bb->getName().str() << std::endl;
+
+	for (auto & it : *bb)
 	{
-		auto pair = queue.front();
-		auto currentBb = pair.first;
-		topVal = pair.second;
-		queue.pop();
-		LOG << "\t" << currentBb->getName().str() << std::endl;
-
-		if (seenBbs.has(currentBb)) {
-			LOG << "\t\t" << "already seen" << std::endl;
-			return ANALYZE_SUCCESS;
-		}
-		seenBbs.insert(currentBb);
-
-		for (auto & it : *currentBb)
+		if (!analyzeInstruction(it, topVals, topVal))
 		{
-			if (!analyzeInstruction(it, topVals, topVal))
-			{
-				return ANALYZE_FAIL;
-			}
-		}
-
-		for (auto succIt = succ_begin(currentBb), e = succ_end(currentBb); succIt != e; ++succIt)
-		{
-			auto *succ = *succIt;
-			queue.push({succ, topVal});
+			return ANALYZE_FAIL;
 		}
 	}
+
 	return ANALYZE_SUCCESS;
 }
 
