@@ -1429,7 +1429,7 @@ TEST_F(X87FpuAnalysisTests, nested_branch)
 				br i1 1, label %dec_label_if_true_1, label %dec_label_end_branch_1
 				dec_label_if_true_1:
 					%2 = load i3, i3* @fpu_stat_TOP
-					%3 = call x86_fp80 @__frontend_reg_load.fpr(i3 %2)
+	                %3 = load x86_fp80, x86_fp80* @st0
 					br label %dec_label_end_branch_1
 				dec_label_end_branch_1:
 				%4 = load i3, i3* @fpu_stat_TOP
