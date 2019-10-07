@@ -827,7 +827,30 @@ llvm::Instruction* Capstone2LlvmIrTranslatorArm64_impl::storeRegister(
 		return nullptr;
 	}
 
-	val = generateTypeConversion(irb, val, llvmReg->getValueType(), ct);
+	if (llvmReg->getValueType()->isFloatingPointTy())
+	{
+		switch (ct)
+		{
+			case eOpConv::SITOFP_OR_FPCAST:
+			case eOpConv::UITOFP_OR_FPCAST:
+				val = generateTypeConversion(irb, val, llvmReg->getValueType(), ct);
+				break;
+			default:
+				val = generateTypeConversion(irb, val, llvmReg->getValueType(), eOpConv::FPCAST_OR_BITCAST);
+		}
+	}
+	else
+	{
+		switch (ct)
+		{
+			case eOpConv::SEXT_TRUNC_OR_BITCAST:
+			case eOpConv::ZEXT_TRUNC_OR_BITCAST:
+				val = generateTypeConversion(irb, val, llvmReg->getValueType(), ct);
+				break;
+			default:
+				val = generateTypeConversion(irb, val, llvmReg->getValueType(), eOpConv::SEXT_TRUNC_OR_BITCAST);
+		}
+	}
 
 	return irb.CreateStore(val, llvmReg);
 }
