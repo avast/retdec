@@ -20,6 +20,7 @@
 * Enhancement: Added support for relocations that pair multiple `R_MIPS_LO16` against a single `R_MIPS_HI16` ([#627](https://github.com/avast/retdec/issues/627), [#628](https://github.com/avast/retdec/pull/628)).
 * Enhancement: Added handling of all x86 FPU instructions in assembly to LLVM IR translation ([#394](https://github.com/avast/retdec/issues/394), [#643](https://github.com/avast/retdec/pull/643)).
 * Enhancement: All registers are localized - i.e. transformed from global variables to local variables ([#652](https://github.com/avast/retdec/issues/652)). This significantly (20% on average) speeds up the decompilation process and greatly reduces noise in output.
+* Enhancement: Added CMake options to build and install only specific targets ([#510](https://github.com/avast/retdec/issues/510)).
 * Fix: Fixed build on BSD systems ([#598](https://github.com/avast/retdec/pull/598)).
 * Fix: Resources which are located in the different section than resource tree are now properly parsed ([#596](https://github.com/avast/retdec/pull/596)).
 * Fix: Version information which contained strings shorter than reported are now properly parsed ([#596](https://github.com/avast/retdec/pull/596)).

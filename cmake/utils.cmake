@@ -2,6 +2,14 @@
 # Utility functions, macros, etc.
 #
 
+function(append_if condition value)
+	if (${condition})
+		foreach(variable ${ARGN})
+			set(${variable} "${${variable}} ${value}" PARENT_SCOPE)
+		endforeach(variable)
+	endif()
+endfunction()
+
 # Forces a configure step for the given external project.
 # The configure step for external projects is needed to (1) detect source-file
 # changes and (2) fix infinite recursion of 'make' after a terminated build.
@@ -62,3 +70,11 @@ function(clean_cmake_files directory)
 		endif()
 	endforeach(file)
 endfunction()
+
+# add_subdirectory(dir) if the cond is true,
+#
+macro(cond_add_subdirectory dir cond)
+	if(${cond})
+		add_subdirectory(${dir})
+	endif()
+endmacro()
