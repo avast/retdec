@@ -386,6 +386,15 @@ class Capstone2LlvmIrTranslator_impl : virtual public Capstone2LlvmIrTranslator
 				llvm::Type* dstType = nullptr,
 				eOpConv ct = eOpConv::NOTHING);
 
+		/**
+		 * Similiar functionality as `_loadOps` but used conversion is determined
+		 * by type of first loaded operand. This means that if first operand
+		 * is of integer type then `ict` convertion will be used on all other opernads.
+		 * If first perand is floting point type then used convertion will be `fct`.
+		 *
+		 * @param ict	Integer convertion type.
+		 * @param fct	Floting point convertion type.
+		 */
 		std::vector<llvm::Value*> _loadOpsUniversal(
 				CInsn* ci,
 				llvm::IRBuilder<>& irb,
