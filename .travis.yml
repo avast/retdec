@@ -82,6 +82,8 @@ branches:
     - master
     # Version tags.
     - /^v?\d+\.\d+.*$/
+    # Temporarily enable build of this branch.
+    - issue-650
 
 notifications:
   email:
