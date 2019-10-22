@@ -28,7 +28,7 @@ matrix:
         - CCACHE_CPP2=true
 
     - os: osx
-      osx_image: xcode8.3
+      osx_image: xcode11.2
       env:
         - MATRIX_EVAL="NPROC=$(sysctl -n hw.physicalcpu)"
         - CCACHE_CPP2=true
