@@ -62,19 +62,6 @@ bool X87FpuAnalysis::runOnModuleCustom(
 	return run();
 }
 
-void FunctionAnalyzeMetadata::fillRow(
-	unsigned& row,
-	std::vector<std::pair<std::string,int>> block)
-{
-	int col;
-	for (unsigned i = 0; i < block.size(); ++i)
-	{
-		col = colIndex[block[i].first];
-		A.at<float>(row, col) = block[i].second;
-	}
-	++row;
-}
-
 std::list<FunctionAnalyzeMetadata> X87FpuAnalysis::getFunctions2Analyze()
 {
 	std::list<Function*> functions;
@@ -90,11 +77,58 @@ std::list<FunctionAnalyzeMetadata> X87FpuAnalysis::getFunctions2Analyze()
 	std::list<FunctionAnalyzeMetadata> functionsMetadata;
 	for (auto &f : functions)
 	{
+		unsigned index = 0;
 		FunctionAnalyzeMetadata metadata(*f);
+		for (Function::iterator it = f->begin(), end = f->end(); it != end; ++it)
+		{
+			BasicBlock* bb = it.operator->();
+			Instruction& endInst = bb->getInstList().back();
+			if (dyn_cast<ReturnInst>(&endInst)) //it is terminating block
+			{
+				metadata.terminatingBasicBlocks.push_back(bb);
+			}
+			metadata.indexes[bb][FunctionAnalyzeMetadata::inIndex] = index;
+			metadata.indexes[bb][FunctionAnalyzeMetadata::outIndex] = index+1;
+			index += 2;
+		}
 		functionsMetadata.push_back(metadata);
 	}
 
 	return functionsMetadata;
+}
+
+
+int matrixRank(cv::Mat& mat)
+{
+	float treshHold = 0.0001;
+	cv::Mat singularValues;
+	cv::SVD::compute(mat, singularValues);
+	singularValues = cv::abs(singularValues);
+	return cv::countNonZero(singularValues > treshHold);
+}
+
+bool consistenSystem(cv::Mat& A, cv::Mat& B)
+{
+	int rankA = matrixRank(A);
+
+	cv::Mat augmented;
+	cv::hconcat(A, B, augmented);
+	int rankAugmentedA = matrixRank(augmented);
+
+	return (rankA == rankAugmentedA);
+}
+
+void FunctionAnalyzeMetadata::addEquation(std::list<std::tuple<llvm::BasicBlock&,int,IndexType >> vars, int result)
+{
+	cv::Mat rowA = cv::Mat_<float>::zeros(1, 2*function.size());
+	cv::Mat rowB = cv::Mat_<float>(1,1) << result;
+	for (auto var : vars)
+	{
+		rowA.at<float>(0, indexes[&std::get<0>(var)][std::get<2>(var)]) = std::get<1>(var);
+	}
+	A.push_back(rowA);
+	B.push_back(rowB);
+	numberOfEquations++;
 }
 
 bool X87FpuAnalysis::run()
@@ -116,28 +150,10 @@ bool X87FpuAnalysis::run()
 
 	analyzedFunctionsMetadata = getFunctions2Analyze();
 
-	// 2 rows are by default because we know 2 equations -> value of top at the begining and at the end
-	unsigned rows = 2,
-	cols = 0;
 	for (auto& funMd: analyzedFunctionsMetadata)
 	{
-		for (Function::iterator funIt = funMd.function.begin(),
-		 	endIt = funMd.function.end(); funIt != endIt; ++funIt)
-		{
-			BasicBlock* bb = funIt.operator->();
-
-			funMd.colIndex[bb->getName().str() + "_in"] = cols;
-			funMd.colIndex[bb->getName().str() + "_out"] = cols + 1;
-
-			cols += 2;
-			rows += 1 + pred_size(bb);
-		}
-
-		funMd.A = cv::Mat_<float>::zeros(rows, cols);
-		funMd.B = cv::Mat_<float>::zeros(rows, 1);
-		funMd.x = cv::Mat_<float>::zeros(rows,1);
-
-		unsigned rowIndex = 0;
+		BasicBlock& enterBlock = funMd.function.begin().operator*();
+		funMd.addEquation({{enterBlock, 1, funMd.inIndex}}, 8);
 
 		for (Function::iterator bbIt=funMd.function.begin(),
 		 	bbEndIt = funMd.function.end(); bbIt != bbEndIt; ++bbIt)
@@ -147,53 +163,31 @@ bool X87FpuAnalysis::run()
 
 			if (!analyzeBasicBlock(funMd, bb, outTop))
 			{
-				continue;//analyze fail => genout comment and skip rest of this block
+				funMd.analyzeSuccess = false;
+			}
+			if (std::find(funMd.terminatingBasicBlocks.begin(), funMd.terminatingBasicBlocks.end(), bb) != funMd.terminatingBasicBlocks.end())
+			{
+				funMd.addEquation({{*bb, 1, funMd.outIndex}}, 8+outTop);
 			}
 
-			funMd.B.at<float>(0, rowIndex) = outTop;
-			auto inBlock = std::make_pair(bb->getName().str()+"_in", -1);
-			auto outBlock = std::make_pair(bb->getName().str()+"_out", 1);
-			funMd.fillRow(rowIndex, {inBlock, outBlock});
+			funMd.addEquation({{*bb, -1, funMd.inIndex},{*bb, 1, funMd.outIndex}}, outTop);
 
 			for (auto it = pred_begin(bb), et=pred_end(bb); it != et; ++it)
 			{
 				BasicBlock *pred = it.operator*();
-				auto inBlock = std::make_pair(bb->getName().str()+"_in", 1);
-				auto outBlock = std::make_pair(pred->getName().str()+"_out", -1);
-				funMd.fillRow(rowIndex, {inBlock, outBlock});
+				funMd.addEquation({{*bb, 1, funMd.inIndex},{*pred, -1, funMd.outIndex}}, 0);
 			}
 		}
 
-		std::string firstBlockName = funMd.function.front().getName().str() + "_in";
-		std::string lastBlockName = funMd.function.back().getName().str()+"_out";
-		funMd.B.at<float>(0, rowIndex) = 8;
-		funMd.fillRow(rowIndex, {{firstBlockName, 1}});
-		int bbOut;
-		if (analyzedFunctions.find(funMd.function.getGUID()) != analyzedFunctions.end())
-		{	// if caller definition is already analyzed then we know value of top after call
-			bbOut = analyzedFunctions[funMd.function.getGUID()];
-		}
-		else
+		if (!consistenSystem(funMd.A, funMd.B))
 		{
-			int t = expectedTopBasedOnRestOfFunction(&funMd.function.back());
-			if (!analyzeFunctionReturn(funMd.function, t,
-									   analyzedFunctions))
-			{
-				return ANALYZE_FAIL;
-			}
-			bbOut = analyzedFunctions[funMd.function.getGUID()];
+			funMd.analyzeSuccess = false;
 		}
-		funMd.B.at<float>(0, rowIndex) = bbOut;
-		funMd.fillRow(rowIndex, {{lastBlockName, 1}});
-
-
 		cv::solve(funMd.A, funMd.B, funMd.x, cv::DECOMP_SVD);
 		funMd.x.convertTo(funMd.x, CV_32S);
 	}
-	printBlocksAnalyzeResult();
 
-	optimizeAnalyzedFpuInstruction();
-	return ANALYZE_SUCCESS;
+	return optimizeAnalyzedFpuInstruction();
 }
 
 void X87FpuAnalysis::printBlocksAnalyzeResult()
@@ -207,8 +201,8 @@ void X87FpuAnalysis::printBlocksAnalyzeResult()
 			e = funMd.function.end(); functionI != e; ++functionI)
 		{
 			BasicBlock* bb = functionI.operator->();
-			int inputIndex = funMd.colIndex[bb->getName().str()+"_in"];
-			int outputIndex = funMd.colIndex[bb->getName().str()+"_out"];
+			int inputIndex = funMd.indexes[bb][funMd.inIndex];
+			int outputIndex = funMd.indexes[bb][funMd.outIndex];
 			std::cerr << bb->getName().str()<<":";
 			std::cerr << " (in=" << funMd.x.at<int>(inputIndex, 0);;
 			std::cerr << ",out=" << funMd.x.at<int>(outputIndex, 0) << ")\n";
@@ -216,160 +210,57 @@ void X87FpuAnalysis::printBlocksAnalyzeResult()
 	}
 }
 
-bool X87FpuAnalysis::isFunctionDefinitionAndCallMatching(llvm::Function& f)
+int X87FpuAnalysis::expectedTopBasedOnCallingConvention(llvm::Instruction& inst)
 {
-	return calledButNotAnalyzedFunctions.find(f.getGUID()) != calledButNotAnalyzedFunctions.end()
-	&& calledButNotAnalyzedFunctions[f.getGUID()] != analyzedFunctions[f.getGUID()];
-}
-
-int X87FpuAnalysis::expectedTopBasedOnCallingConvention(llvm::Function& function)
-{
-	using CallingConvention = config::CallingConvention::eCallingConvention;
-
-	auto configFunctionMetadata = _config->getConfig().functions.getFunctionByName(function.getName());
+	Function* f = inst.getParent()->getParent();
+	auto configFunctionMetadata = _config->getConfig().functions.getFunctionByName(f->getName());
 	if (!configFunctionMetadata)
-		return UNKNOWN_CALLING_CONVENTION;
-
-	auto convention = configFunctionMetadata->callingConvention.getID();
+	{
+		return 0;
+	}
 
 	if (_config->getConfig().architecture.isX86_16())
 	{
-		switch (convention)
-		{
-			case CallingConvention::CC_CDECL:
-			case CallingConvention::CC_PASCAL:
-			case CallingConvention::CC_FASTCALL:
-				return EMPTY_FPU_STACK;
-			case CallingConvention::CC_WATCOM:
-				return INCONSISTENT_CALLING_CONVENTION;
-			case CallingConvention::CC_UNKNOWN:
-				return EMPTY_FPU_STACK; // in this case we know that 16bit arch. almost for sure is empty
-			default:
-				return UNKNOWN_CALLING_CONVENTION; // some other call canvention witch we dont know
-		}
+		return 0;
 	}
 	else if (_config->getConfig().architecture.isX86_32())
 	{
-		switch (convention)
-		{
-			case CallingConvention::CC_CDECL:
-			case CallingConvention::CC_STDCALL:
-			case CallingConvention::CC_PASCAL:
-			case CallingConvention::CC_FASTCALL:
-			case CallingConvention::CC_THISCALL:
-				return RETURN_VALUE_PASSED_THROUGH_ST0;
-			case CallingConvention::CC_WATCOM:
-				return INCONSISTENT_CALLING_CONVENTION;
-			case CallingConvention::CC_UNKNOWN:
-				// in this case we know that 32bit arch. almost for sure pass return in ST0
-				return RETURN_VALUE_PASSED_THROUGH_ST0;
-			default:
-				return UNKNOWN_CALLING_CONVENTION; // some other call canvention witch we dont know
-		}
+		return expectedTopBasedOnRestOfBlock(inst);
 	}
 	else // x86-64bit architecture
 	{
-		return EMPTY_FPU_STACK; // returned through XMM0
+		return 0;
 	}
 }
 
-int X87FpuAnalysis::expectedTopBasedOnRestOfFunction(llvm::BasicBlock* currentBb)
+int X87FpuAnalysis::expectedTopBasedOnRestOfBlock(llvm::Instruction& analyzedInstr)
 {
-	int callConv = expectedTopBasedOnCallingConvention(*currentBb->getParent());
-	int top = EMPTY_FPU_STACK;
-	for (auto & restOfBlock : *currentBb)
+	BasicBlock* bb = analyzedInstr.getParent();
+	for (BasicBlock::iterator it = bb->begin(), e = bb->end(); it != e; ++it)
 	{
-		Instruction *j = &restOfBlock;
-		auto *add = dyn_cast<AddOperator>(j);
-		auto *sub = dyn_cast<SubOperator>(j);
-		if (sub	&& isa<ConstantInt>(sub->getOperand(1)))
+		Instruction* inst = it.operator->();
+		if (inst == &analyzedInstr)
 		{
-			--top;
+			while (it != e)
+			{
+				inst = it.operator->();
+				auto *add = dyn_cast<AddOperator>(inst);
+				auto *sub = dyn_cast<SubOperator>(inst);
+				auto *callLoad = _config->isLlvmX87LoadPseudoFunctionCall(inst);
+				if (sub	&& isa<ConstantInt>(sub->getOperand(1)))
+				{
+					return 0;
+				}
+				else if (callLoad || (add && isa<ConstantInt>(add->getOperand(1))))
+				{
+					return -1;
+				}
+				++it;
+			}
 		}
-		else if (add && isa<ConstantInt>(add->getOperand(1)))
-		{
-			++top;
-		}
-		else {continue;} // some not interesting instructions -> skip
 	}
 
-	if ((top == EMPTY_FPU_STACK && callConv == EMPTY_FPU_STACK)
-		|| (top == RETURN_VALUE_PASSED_THROUGH_ST0 && callConv == RETURN_VALUE_PASSED_THROUGH_ST0))
-	{
-		return top; // return fp value or not
-	}
-	else
-	{
-		return EMPTY_FPU_STACK; // top > 8 -> beacuse we assume that block begin at 8 but we dont know -> empty
-	}
-}
-
-int X87FpuAnalysis::expectedTopBasedOnRestOfBlock(llvm::BasicBlock* currentBb)
-{
-	for (auto & restOfBlock : *currentBb)
-	{
-		Instruction *j = &restOfBlock;
-		auto *add = dyn_cast<AddOperator>(j);
-		auto *sub = dyn_cast<SubOperator>(j);
-		auto *callStore = _config->isLlvmX87StorePseudoFunctionCall(j);
-		auto *callLoad = _config->isLlvmX87LoadPseudoFunctionCall(j);
-		if (sub	&& isa<ConstantInt>(sub->getOperand(1)))
-		{
-			return EMPTY_FPU_STACK;
-		}
-		else if (callLoad || (add && isa<ConstantInt>(add->getOperand(1))))
-		{
-			return RETURN_VALUE_PASSED_THROUGH_ST0;
-		}
-		else if (callStore)
-		{
-			return INCORRECT_STACK_OPERATION;
-		}
-		else {continue;} // some not interesting instructions -> skip
-	}
-	return EMPTY_FPU_STACK;
-}
-
-bool X87FpuAnalysis::analyzeFunctionReturn(
-	llvm::Function& function,
-	int topVal,
-	std::map<llvm::GlobalValue::GUID, int>& resultOfAnalyze)
-{
-	auto callConv = expectedTopBasedOnCallingConvention(function);
-
-	if (callConv == EMPTY_FPU_STACK && topVal == EMPTY_FPU_STACK)
-	{
-		resultOfAnalyze[function.getGUID()] = topVal;
-	}
-	else if (callConv == EMPTY_FPU_STACK && topVal != EMPTY_FPU_STACK)
-	{
-		return false; // calling convention expect empty FPU stack and it is not
-	}
-	else if (callConv == RETURN_VALUE_PASSED_THROUGH_ST0
-			 && topVal == RETURN_VALUE_PASSED_THROUGH_ST0)
-	{
-		resultOfAnalyze[function.getGUID()] = topVal;
-	}
-	else if (callConv == RETURN_VALUE_PASSED_THROUGH_ST0
-			 && topVal == EMPTY_FPU_STACK)
-	{	// calling convention expect return value in ST0 but it is not a function with float return value
-		resultOfAnalyze[function.getGUID()] = topVal;
-	}
-	else if (callConv == RETURN_VALUE_PASSED_THROUGH_ST0
-			 && (topVal != EMPTY_FPU_STACK || topVal != RETURN_VALUE_PASSED_THROUGH_ST0))
-	{
-		return false; // calling conv expect empty fpu stack or stO but there is pushed more then st0
-	}
-	else if (callConv == INCONSISTENT_CALLING_CONVENTION || topVal == INCORRECT_STACK_OPERATION)
-	{
-		return false; // not possible analyze
-	}
-	else // UNKNOWN_CALLING_CONVENTION -> so we predict
-	{
-		resultOfAnalyze[function.getGUID()] = topVal;
-	}
-
-	return true; // analyze success
+	return 0;
 }
 
 bool X87FpuAnalysis::analyzeInstruction(
@@ -412,22 +303,8 @@ bool X87FpuAnalysis::analyzeInstruction(
 		{
 			return ANALYZE_FAIL;
 		}
-
-		if (analyzedFunctions.find(function->getGUID()) != analyzedFunctions.end())
-		{	// if caller definition is already analyzed then we know value of top after call
-			outTop = analyzedFunctions[function->getGUID()] - 8;
-			topVals.push_back(outTop);
-		}
-		else// if caller definition is not analyzed then we analyze rest of block after call and implicate
-		{	// value of top, then in future we will compare out expected top with analyzed top
-			if (!analyzeFunctionReturn(*function, expectedTopBasedOnRestOfBlock(i.getParent()),
-			 calledButNotAnalyzedFunctions))
-			{
-				return ANALYZE_FAIL;
-			}
-			outTop = calledButNotAnalyzedFunctions[function->getGUID()] - 8;
-			topVals.push_back(outTop);
-		}
+		outTop = expectedTopBasedOnCallingConvention(i);
+		topVals.push_back(outTop);
 	}
 	// increment fpu top
 	else if (add && isa<ConstantInt>(add->getOperand(1)))
@@ -495,16 +372,21 @@ bool X87FpuAnalysis::analyzeBasicBlock(
 	return ANALYZE_SUCCESS;
 }
 
-void X87FpuAnalysis::optimizeAnalyzedFpuInstruction()
+bool X87FpuAnalysis::optimizeAnalyzedFpuInstruction()
 {
+	bool analyzeSucces = true;
 	for (auto& fun : analyzedFunctionsMetadata)
 	{
+		if (!fun.analyzeSuccess)
+		{
+			analyzeSucces = false;
+			continue;
+		}
 		for (auto& i : fun.pseudoCalls)
 		{
-			auto name =  i.second.getParent()->getName().str()+"_in";
 			auto *callStore = _config->isLlvmX87StorePseudoFunctionCall(&i.second);
 			auto *callLoad = _config->isLlvmX87LoadPseudoFunctionCall(&i.second);
-			int registerIndex = std::get<0>(i) + 7 - fun.x.at<int>(fun.colIndex[name], 0);
+			int registerIndex = i.first + 7 - fun.x.at<int>(fun.indexes[i.second.getParent()][fun.inIndex], 0);
 			auto *reg = _abi->getRegister(registerIndex);
 			if (!reg)
 			{
@@ -525,6 +407,8 @@ void X87FpuAnalysis::optimizeAnalyzedFpuInstruction()
 			}
 		}
 	}
+
+	return analyzeSucces;
 }
 
 } // namespace bin2llvmir
