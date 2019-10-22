@@ -7,6 +7,9 @@
 #include <llvm/IR/CFG.h>
 #include <llvm/IR/InstIterator.h>
 #include <llvm/IR/Operator.h>
+#include <llvm/ADT/SCCIterator.h>
+#include <llvm/ADT/DepthFirstIterator.h>
+#include <llvm/ADT/BreadthFirstIterator.h>
 
 #include "retdec/bin2llvmir/optimizations/x87_fpu/x87_fpu.h"
 #include "retdec/utils/string.h"
@@ -15,6 +18,9 @@
 #define debug_enabled false
 #include "retdec/bin2llvmir/utils/ir_modifier.h"
 #include "retdec/bin2llvmir/utils/llvm.h"
+
+#include <libalglib/ap.h>
+#include <opencv2/core.hpp>
 
 using namespace llvm;
 using namespace retdec::bin2llvmir::llvm_utils;
@@ -56,6 +62,41 @@ bool X87FpuAnalysis::runOnModuleCustom(
 	return run();
 }
 
+void FunctionAnalyzeMetadata::fillRow(
+	unsigned& row,
+	std::vector<std::pair<std::string,int>> block)
+{
+	int col;
+	for (unsigned i = 0; i < block.size(); ++i)
+	{
+		col = colIndex[block[i].first];
+		A.at<float>(row, col) = block[i].second;
+	}
+	++row;
+}
+
+std::list<FunctionAnalyzeMetadata> X87FpuAnalysis::getFunctions2Analyze()
+{
+	std::list<Function*> functions;
+	for (Value::use_iterator k = top->use_begin(); k != top->use_end(); ++k)
+	{
+		if (Instruction *ins= dyn_cast<Instruction>(k->getUser()))
+		{
+			functions.push_back(ins->getParent()->getParent());
+		}
+	}
+	functions.unique();
+
+	std::list<FunctionAnalyzeMetadata> functionsMetadata;
+	for (auto &f : functions)
+	{
+		FunctionAnalyzeMetadata metadata(*f);
+		functionsMetadata.push_back(metadata);
+	}
+
+	return functionsMetadata;
+}
+
 bool X87FpuAnalysis::run()
 {
 	if (_config == nullptr || _abi == nullptr)
@@ -73,65 +114,106 @@ bool X87FpuAnalysis::run()
 		return ANALYZE_FAIL;
 	}
 
-	for (Function& f : *_module)
+	analyzedFunctionsMetadata = getFunctions2Analyze();
+
+	// 2 rows are by default because we know 2 equations -> value of top at the begining and at the end
+	unsigned rows = 2,
+	cols = 0;
+	for (auto& funMd: analyzedFunctionsMetadata)
 	{
-		LOG << f.getName().str() << std::endl;
-		std::map<Value*, int> topVals;
-
-		if (f.empty())
-			continue;
-
-		auto& bb = f.front();
-
-		int topVal = 8;
-		// analyze body of function without nested blocks (branches, loops)
-		if (!analyzeBasicBlock(topVals, &bb, topVal))
+		for (Function::iterator funIt = funMd.function.begin(),
+		 	endIt = funMd.function.end(); funIt != endIt; ++funIt)
 		{
-			return ANALYZE_FAIL;
-		}
-		if (!analyzeFunctionReturn(f, topVal, analyzedFunctions))
-		{
-			return ANALYZE_FAIL;
+			BasicBlock* bb = funIt.operator->();
+
+			funMd.colIndex[bb->getName().str() + "_in"] = cols;
+			funMd.colIndex[bb->getName().str() + "_out"] = cols + 1;
+
+			cols += 2;
+			rows += 1 + pred_size(bb);
 		}
 
-		if (!analyzeNestedBasicBlocks(f, topVal, topVals))
+		funMd.A = cv::Mat_<float>::zeros(rows, cols);
+		funMd.B = cv::Mat_<float>::zeros(rows, 1);
+		funMd.x = cv::Mat_<float>::zeros(rows,1);
+
+		unsigned rowIndex = 0;
+
+		for (Function::iterator bbIt=funMd.function.begin(),
+		 	bbEndIt = funMd.function.end(); bbIt != bbEndIt; ++bbIt)
 		{
-			return ANALYZE_FAIL;
+			BasicBlock* bb = bbIt.operator->();
+			int outTop=0;
+
+			if (!analyzeBasicBlock(funMd, bb, outTop))
+			{
+				continue;//analyze fail => genout comment and skip rest of this block
+			}
+
+			funMd.B.at<float>(0, rowIndex) = outTop;
+			auto inBlock = std::make_pair(bb->getName().str()+"_in", -1);
+			auto outBlock = std::make_pair(bb->getName().str()+"_out", 1);
+			funMd.fillRow(rowIndex, {inBlock, outBlock});
+
+			for (auto it = pred_begin(bb), et=pred_end(bb); it != et; ++it)
+			{
+				BasicBlock *pred = it.operator*();
+				auto inBlock = std::make_pair(bb->getName().str()+"_in", 1);
+				auto outBlock = std::make_pair(pred->getName().str()+"_out", -1);
+				funMd.fillRow(rowIndex, {inBlock, outBlock});
+			}
 		}
 
-		if (isFunctionDefinitionAndCallMatching(f))
-		{
-			return ANALYZE_FAIL;
+		std::string firstBlockName = funMd.function.front().getName().str() + "_in";
+		std::string lastBlockName = funMd.function.back().getName().str()+"_out";
+		funMd.B.at<float>(0, rowIndex) = 8;
+		funMd.fillRow(rowIndex, {{firstBlockName, 1}});
+		int bbOut;
+		if (analyzedFunctions.find(funMd.function.getGUID()) != analyzedFunctions.end())
+		{	// if caller definition is already analyzed then we know value of top after call
+			bbOut = analyzedFunctions[funMd.function.getGUID()];
 		}
+		else
+		{
+			int t = expectedTopBasedOnRestOfFunction(&funMd.function.back());
+			if (!analyzeFunctionReturn(funMd.function, t,
+									   analyzedFunctions))
+			{
+				return ANALYZE_FAIL;
+			}
+			bbOut = analyzedFunctions[funMd.function.getGUID()];
+		}
+		funMd.B.at<float>(0, rowIndex) = bbOut;
+		funMd.fillRow(rowIndex, {{lastBlockName, 1}});
+
+
+		cv::solve(funMd.A, funMd.B, funMd.x, cv::DECOMP_SVD);
+		funMd.x.convertTo(funMd.x, CV_32S);
 	}
+	printBlocksAnalyzeResult();
 
 	optimizeAnalyzedFpuInstruction();
 	return ANALYZE_SUCCESS;
 }
 
-bool X87FpuAnalysis::analyzeNestedBasicBlocks(
-		llvm::Function& function,
-		int topVal,
-		std::map<Value*, int> topVals)
+void X87FpuAnalysis::printBlocksAnalyzeResult()
 {
-	while(!nestedBlocksQueue.empty())
+	std::cerr << "A*x=B\n";
+	for (auto& funMd: analyzedFunctionsMetadata)
 	{
-		auto pair = nestedBlocksQueue.front();
-		auto nestedBb = pair.first;
-		topVal = pair.second;
-		nestedBlocksQueue.pop();
-
-		for (auto it = function.begin(); it != function.end(); it++)
+		std::cerr << funMd.function.getName().str() <<std::endl;
+		std::cerr << "A=\n" << funMd.A << "\nx=\n" << funMd.x << "\nB=\n" << funMd.B << "\n";
+		for (Function::iterator functionI=funMd.function.begin(),
+			e = funMd.function.end(); functionI != e; ++functionI)
 		{
-			if (nestedBb == it.operator->()
-				&& !analyzeBasicBlock(topVals, it.operator->(), topVal))
-			{
-				return ANALYZE_FAIL;
-			}
+			BasicBlock* bb = functionI.operator->();
+			int inputIndex = funMd.colIndex[bb->getName().str()+"_in"];
+			int outputIndex = funMd.colIndex[bb->getName().str()+"_out"];
+			std::cerr << bb->getName().str()<<":";
+			std::cerr << " (in=" << funMd.x.at<int>(inputIndex, 0);;
+			std::cerr << ",out=" << funMd.x.at<int>(outputIndex, 0) << ")\n";
 		}
 	}
-
-	return ANALYZE_SUCCESS;
 }
 
 bool X87FpuAnalysis::isFunctionDefinitionAndCallMatching(llvm::Function& f)
@@ -188,6 +270,37 @@ int X87FpuAnalysis::expectedTopBasedOnCallingConvention(llvm::Function& function
 	else // x86-64bit architecture
 	{
 		return EMPTY_FPU_STACK; // returned through XMM0
+	}
+}
+
+int X87FpuAnalysis::expectedTopBasedOnRestOfFunction(llvm::BasicBlock* currentBb)
+{
+	int callConv = expectedTopBasedOnCallingConvention(*currentBb->getParent());
+	int top = EMPTY_FPU_STACK;
+	for (auto & restOfBlock : *currentBb)
+	{
+		Instruction *j = &restOfBlock;
+		auto *add = dyn_cast<AddOperator>(j);
+		auto *sub = dyn_cast<SubOperator>(j);
+		if (sub	&& isa<ConstantInt>(sub->getOperand(1)))
+		{
+			--top;
+		}
+		else if (add && isa<ConstantInt>(add->getOperand(1)))
+		{
+			++top;
+		}
+		else {continue;} // some not interesting instructions -> skip
+	}
+
+	if ((top == EMPTY_FPU_STACK && callConv == EMPTY_FPU_STACK)
+		|| (top == RETURN_VALUE_PASSED_THROUGH_ST0 && callConv == RETURN_VALUE_PASSED_THROUGH_ST0))
+	{
+		return top; // return fp value or not
+	}
+	else
+	{
+		return EMPTY_FPU_STACK; // top > 8 -> beacuse we assume that block begin at 8 but we dont know -> empty
 	}
 }
 
@@ -259,7 +372,11 @@ bool X87FpuAnalysis::analyzeFunctionReturn(
 	return true; // analyze success
 }
 
-bool X87FpuAnalysis::analyzeInstruction(Instruction& i, std::map<llvm::Value*, int>& topVals, int& topVal)
+bool X87FpuAnalysis::analyzeInstruction(
+	FunctionAnalyzeMetadata& funMd,
+	Instruction& i,
+	std::list<int>& topVals,
+	int& outTop)
 {
 	auto *callFunction = dyn_cast<CallInst>(&i);
 	auto *loadFpuTop = dyn_cast<LoadInst>(&i);
@@ -268,33 +385,28 @@ bool X87FpuAnalysis::analyzeInstruction(Instruction& i, std::map<llvm::Value*, i
 	auto *sub = dyn_cast<SubOperator>(&i);
 	auto *callStore = _config->isLlvmX87StorePseudoFunctionCall(&i);
 	auto *callLoad = _config->isLlvmX87LoadPseudoFunctionCall(&i);
-	auto *branch = dyn_cast<BranchInst>(&i);
 
 	// read actual value of fpu top
 	if (loadFpuTop && loadFpuTop->getPointerOperand() == top)
 	{
-		topVals[&i] = topVal;
-
-		LOG << "\t\t" << AsmInstruction(&i).getAddress()
-			<< " @ " << std::dec << topVal << std::endl;
+		if (topVals.empty())
+		{
+			topVals.push_back(0); // init FPU TOP with zero
+		}
+		outTop = topVals.back();
 	}
 	// store actual value of fpu top
-	else if (storeFpuTop && storeFpuTop->getPointerOperand() == top
-			&& topVals.find(storeFpuTop->getValueOperand()) != topVals.end())
+	else if (storeFpuTop && storeFpuTop->getPointerOperand() == top)
 	{
-		topVal = topVals.find(storeFpuTop->getValueOperand())->second;
-
-		LOG << "\t\t" << AsmInstruction(&i).getAddress()
-			<< " @ " << std::dec << topVal << std::endl;
+		if (topVals.empty())
+		{
+			return ANALYZE_FAIL;
+		}
+		outTop = topVals.back();
 	}
 	// function call -> possible change value of fpu top
 	else if (callFunction && !callStore && !callLoad)
 	{
-		if (topVal != EMPTY_FPU_STACK)
-		{
-			return ANALYZE_FAIL; //stack must be empty before function call
-		}
-
 		auto* function = _module->getFunction(callFunction->getCalledValue()->getName().str());
 		if (!function)
 		{
@@ -303,7 +415,8 @@ bool X87FpuAnalysis::analyzeInstruction(Instruction& i, std::map<llvm::Value*, i
 
 		if (analyzedFunctions.find(function->getGUID()) != analyzedFunctions.end())
 		{	// if caller definition is already analyzed then we know value of top after call
-			topVals[&i] = topVal = analyzedFunctions[function->getGUID()];
+			outTop = analyzedFunctions[function->getGUID()] - 8;
+			topVals.push_back(outTop);
 		}
 		else// if caller definition is not analyzed then we analyze rest of block after call and implicate
 		{	// value of top, then in future we will compare out expected top with analyzed top
@@ -312,46 +425,30 @@ bool X87FpuAnalysis::analyzeInstruction(Instruction& i, std::map<llvm::Value*, i
 			{
 				return ANALYZE_FAIL;
 			}
-			topVals[&i] = topVal = calledButNotAnalyzedFunctions[function->getGUID()];
+			outTop = calledButNotAnalyzedFunctions[function->getGUID()] - 8;
+			topVals.push_back(outTop);
 		}
 	}
 	// increment fpu top
-	else if (add && topVals.find(add->getOperand(0)) != topVals.end() && isa<ConstantInt>(add->getOperand(1)))
+	else if (add && isa<ConstantInt>(add->getOperand(1)))
 	{
-		int oldTopValue = topVals.find(add->getOperand(0))->second;
+		int oldTopValue = topVals.back();
 		int constValue = cast<ConstantInt>(add->getOperand(1))->getZExtValue();//it should be 1
 		int newTopValue = oldTopValue + constValue;
-		if (newTopValue > 8) // attempt to pop value from empty FPU stack
-		{
-			LOG << "\t\t\t" << "undeflow of fpu top " << oldTopValue << " -> " << newTopValue << std::endl;
-			return ANALYZE_FAIL;
-		}
-		topVals[&i] = newTopValue;
-
-		LOG << "\t\t" << AsmInstruction(&i).getAddress() << std::dec
-			<< " @ " << oldTopValue << " - " << constValue << " = "
-			<< newTopValue << std::endl;
+		outTop = newTopValue;
+		topVals.push_back(outTop);
 	}
 	// decrement fpu top
-	else if (sub && topVals.find(sub->getOperand(0)) != topVals.end()&& isa<ConstantInt>(sub->getOperand(1)))
+	else if (sub && isa<ConstantInt>(sub->getOperand(1)))
 	{
-		int oldTopValue = topVals.find(sub->getOperand(0))->second;
+		int oldTopValue = topVals.back();
 		int constValue = cast<ConstantInt>(sub->getOperand(1))->getZExtValue();//it should be 1
 		int newTopValue = oldTopValue - constValue;
-		if (newTopValue < 0)
-		{
-			LOG << "\t\t\t" << "undeflow of fpu top " << oldTopValue << " -> " << newTopValue << std::endl;
-			return ANALYZE_FAIL;
-		}
-		topVals[&i] = newTopValue;
-
-		LOG << "\t\t" << AsmInstruction(&i).getAddress() << std::dec
-			<< " @ " << oldTopValue << " - " << constValue << " = "
-			<< newTopValue << std::endl;
+		outTop = newTopValue;
+		topVals.push_back(outTop);
 	}
 	// pseudo load/store of fpu top
-	else if ((callStore && topVals.find(callStore->getArgOperand(0)) != topVals.end())
-	|| (callLoad && topVals.find(callLoad->getArgOperand(0)) != topVals.end()))
+	else if (callStore || callLoad)
 	{
 		CallInst *pseudoCall;
 		uint32_t regBase;
@@ -369,49 +466,27 @@ bool X87FpuAnalysis::analyzeInstruction(Instruction& i, std::map<llvm::Value*, i
 		}
 
 		// st(0) == TOP(7) ... st(7) == TOP(0) => st(X) = 7 - TOP(X)
-		int relativeIndexOfRegister = 7 - topVals.find(pseudoCall->getArgOperand(0))->second;
-
-		if (0 > relativeIndexOfRegister || relativeIndexOfRegister > 7)
-		{
-			return ANALYZE_FAIL; // attempt to access to FPU register with index which doesnt exist
-		}
+		int relativeIndexOfRegister = outTop*(-1);
 
 		uint32_t absoluteIndexOfRegister = regBase + relativeIndexOfRegister;
-		auto *reg = _abi->getRegister(absoluteIndexOfRegister);
-
-		LOG << "\t\t\t" << "load/store -- " << reg->getName().str() << std::endl;
 
 		//pseudo call will be replaced by store/load of concrete register but only if whole analyze succed
-		instToChange.push_back(std::make_pair(reg, &i));
-	}
-	else if (branch)
-	{
-		for (unsigned i = 1; i < branch->getNumOperands(); i++)
-		{
-			nestedBlocksQueue.push({branch->getOperand(i), topVal});
-		}
-	}
-	else if (callStore || callLoad)
-	{
-		LOG << "\t\t" << AsmInstruction(&i).getAddress() << " @ "
-			<< llvmObjToString(&i) << std::endl;
-		assert(false && "some other pattern");
-		return ANALYZE_FAIL;
+		funMd.pseudoCalls.push_back({absoluteIndexOfRegister, i});
 	}
 
 	return ANALYZE_SUCCESS;
 }
 
 bool X87FpuAnalysis::analyzeBasicBlock(
-	std::map<llvm::Value*, int>& topVals,
+	FunctionAnalyzeMetadata& funMd,
 	llvm::BasicBlock* bb,
-	int& topVal)
+	int& outTop)
 {
-	LOG << "\t" << bb->getName().str() << std::endl;
-
-	for (auto & it : *bb)
+	std::list<int> topVals;
+	for (BasicBlock::iterator it = bb->begin(), e = bb->end(); it != e; ++it)
 	{
-		if (!analyzeInstruction(it, topVals, topVal))
+		Instruction& inst = it.operator*();
+		if (!analyzeInstruction(funMd, inst, topVals, outTop))
 		{
 			return ANALYZE_FAIL;
 		}
@@ -422,21 +497,32 @@ bool X87FpuAnalysis::analyzeBasicBlock(
 
 void X87FpuAnalysis::optimizeAnalyzedFpuInstruction()
 {
-	for (auto& i : instToChange)
+	for (auto& fun : analyzedFunctionsMetadata)
 	{
-		auto *callStore = _config->isLlvmX87StorePseudoFunctionCall(i.second);
-		auto *callLoad = _config->isLlvmX87LoadPseudoFunctionCall(i.second);
-		if (callStore)
+		for (auto& i : fun.pseudoCalls)
 		{
-			new StoreInst(callStore->getArgOperand(1), i.first, callStore);
-			callStore->eraseFromParent();
-		}
-		if (callLoad)
-		{
-			auto *lTmp = new LoadInst(i.first, "", callLoad);
-			auto *conv = IrModifier::convertValueToType(lTmp, callLoad->getType(), callLoad);
-			callLoad->replaceAllUsesWith(conv);
-			callLoad->eraseFromParent();
+			auto name =  i.second.getParent()->getName().str()+"_in";
+			auto *callStore = _config->isLlvmX87StorePseudoFunctionCall(&i.second);
+			auto *callLoad = _config->isLlvmX87LoadPseudoFunctionCall(&i.second);
+			int registerIndex = std::get<0>(i) + 7 - fun.x.at<int>(fun.colIndex[name], 0);
+			auto *reg = _abi->getRegister(registerIndex);
+			if (!reg)
+			{
+				continue; // analyze fail -> skip
+			}
+
+			if (callStore)
+			{
+				new StoreInst(callStore->getArgOperand(1), reg, callStore);
+				callStore->eraseFromParent();
+			}
+			if (callLoad)
+			{
+				auto *lTmp = new LoadInst(reg, "", callLoad);
+				auto *conv = IrModifier::convertValueToType(lTmp, callLoad->getType(), callLoad);
+				callLoad->replaceAllUsesWith(conv);
+				callLoad->eraseFromParent();
+			}
 		}
 	}
 }

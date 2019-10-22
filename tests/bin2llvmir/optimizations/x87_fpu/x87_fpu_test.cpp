@@ -1390,25 +1390,25 @@ TEST_F(X87FpuAnalysisTests, nested_branch)
 {
 	parseInput(PREDEFINED_REGISTERS_AND_FUNCTIONS + R"(
 		define void @foo() {
-		bb:
-			br i1 1, label %dec_label_if_true_0, label %dec_label_end_branch_0
-			dec_label_if_true_0:
+			A:
+				br i1 1, label %B, label %C
+			B:
 				%0 = load i3, i3* @fpu_stat_TOP
 				%1 = sub i3 %0, 1
 				call void @__frontend_reg_store.fpu_tag(i3 %1, i2 0)
 				call void @__frontend_reg_store.fpr(i3 %1, x86_fp80 0xK3FFF8000000000000000)
 				store i3 %1, i3* @fpu_stat_TOP
-				br i1 1, label %dec_label_if_true_1, label %dec_label_end_branch_1
-				dec_label_if_true_1:
-					%2 = load i3, i3* @fpu_stat_TOP
-					%3 = call x86_fp80 @__frontend_reg_load.fpr(i3 %2)
-					br label %dec_label_end_branch_1
-				dec_label_end_branch_1:
+				br i1 1, label %D, label %E
+			D:
+				%2 = load i3, i3* @fpu_stat_TOP
+				%3 = call x86_fp80 @__frontend_reg_load.fpr(i3 %2)
+				br label %E
+			E:
 				%4 = load i3, i3* @fpu_stat_TOP
 				%5 = add i3 %4, 1
 				store i3 %5, i3* @fpu_stat_TOP
-				br label %dec_label_end_branch_0
-			dec_label_end_branch_0:
+				br label %C
+			C:
 			ret void
 		}
 )");
@@ -1418,25 +1418,25 @@ TEST_F(X87FpuAnalysisTests, nested_branch)
 
 	std::string exp = PREDEFINED_REGISTERS_AND_FUNCTIONS + R"(
 		define void @foo() {
-		bb:
-			br i1 1, label %dec_label_if_true_0, label %dec_label_end_branch_0
-			dec_label_if_true_0:
+			A:
+				br i1 1, label %B, label %C
+			B:
 				%0 = load i3, i3* @fpu_stat_TOP
 				%1 = sub i3 %0, 1
 				store i2 0, i2* @fpu_tag_0
 				store x86_fp80 0xK3FFF8000000000000000, x86_fp80* @st0
 				store i3 %1, i3* @fpu_stat_TOP
-				br i1 1, label %dec_label_if_true_1, label %dec_label_end_branch_1
-				dec_label_if_true_1:
-					%2 = load i3, i3* @fpu_stat_TOP
-	                %3 = load x86_fp80, x86_fp80* @st0
-					br label %dec_label_end_branch_1
-				dec_label_end_branch_1:
+				br i1 1, label %D, label %E
+			D:
+				%2 = load i3, i3* @fpu_stat_TOP
+				%3 = load x86_fp80, x86_fp80* @st0
+				br label %E
+			E:
 				%4 = load i3, i3* @fpu_stat_TOP
 				%5 = add i3 %4, 1
 				store i3 %5, i3* @fpu_stat_TOP
-				br label %dec_label_end_branch_0
-			dec_label_end_branch_0:
+				br label %C
+			C:
 			ret void
 		}
 )";

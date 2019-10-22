@@ -11,6 +11,7 @@
 
 #include <llvm/IR/Module.h>
 #include <llvm/Pass.h>
+#include <opencv2/core.hpp>
 
 #include "retdec/bin2llvmir/analyses/symbolic_tree.h"
 #include "retdec/bin2llvmir/providers/abi/abi.h"
@@ -28,6 +29,29 @@
 namespace retdec {
 namespace bin2llvmir {
 
+class FunctionAnalyzeMetadata
+{
+	public:
+
+		llvm::Function& function;
+
+		// A * x = B
+		cv::Mat A;
+		cv::Mat B;
+		cv::Mat x;
+
+		std::map<std::string,int> colIndex;
+
+		// 1. index to register, 2.pseudo instruction
+		std::list<std::pair<uint32_t ,llvm::Instruction&>> pseudoCalls;
+
+	void fillRow(
+			unsigned& row,
+			std::vector<std::pair<std::string,int>> block);
+	FunctionAnalyzeMetadata(llvm::Function &function1) : function(function1) {};
+
+};
+
 class X87FpuAnalysis : public llvm::ModulePass
 {
 	public:
@@ -42,24 +66,22 @@ class X87FpuAnalysis : public llvm::ModulePass
 	private:
 		bool run();
 		bool analyzeBasicBlock(
-				std::map<llvm::Value*, int>& topVals,
+				FunctionAnalyzeMetadata& funMd,
 				llvm::BasicBlock* bb,
-				int& topVal);
-		bool analyzeNestedBasicBlocks(
-				llvm::Function& function,
-				int topVal,
-				std::map<llvm::Value*, int> topVals);
+				int& outTop);
 		bool analyzeFunctionReturn(
 				llvm::Function& function,
 				int topVal,
 				std::map<llvm::GlobalValue::GUID,
 				int>& resultOfAnalyze);
 		bool analyzeInstruction(
+				FunctionAnalyzeMetadata& funMd,
 				llvm::Instruction& i,
-				std::map<llvm::Value*,
-				int>& topVals,
-				int& topVal);
+				std::list<int>& topVals,
+				int& outTop);
+	std::list<FunctionAnalyzeMetadata> getFunctions2Analyze();
 
+	void printBlocksAnalyzeResult();
 	bool isFunctionDefinitionAndCallMatching(llvm::Function& f);
 	/**
 	 * Replace all FPU pseudo load and store function by load and store with concrete FPU registers.
@@ -67,6 +89,7 @@ class X87FpuAnalysis : public llvm::ModulePass
 	void optimizeAnalyzedFpuInstruction();
 	int expectedTopBasedOnCallingConvention(llvm::Function& function);
 	int expectedTopBasedOnRestOfBlock(llvm::BasicBlock* currentBb);
+	int expectedTopBasedOnRestOfFunction(llvm::BasicBlock* currentBb);
 
 	private:
 
@@ -75,10 +98,10 @@ class X87FpuAnalysis : public llvm::ModulePass
 		Abi* _abi = nullptr;
 		llvm::GlobalVariable* top = nullptr;
 
+		std::list<FunctionAnalyzeMetadata> analyzedFunctionsMetadata; //functions where detected FPU stack access
 		std::map<llvm::GlobalValue::GUID, int> analyzedFunctions; // value of top at the end of function
 		std::map<llvm::GlobalValue::GUID, int> calledButNotAnalyzedFunctions; // expected value of top
-		std::list<std::pair<llvm::GlobalVariable*,llvm::Instruction*>> instToChange;
-		std::queue<std::pair<llvm::Value*, int>> nestedBlocksQueue;
+
 };
 
 } // namespace bin2llvmir
