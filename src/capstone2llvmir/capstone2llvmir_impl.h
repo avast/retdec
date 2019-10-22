@@ -339,15 +339,16 @@ class Capstone2LlvmIrTranslator_impl : virtual public Capstone2LlvmIrTranslator
 
 		/**
 		 * Creates LLVM load from LLVM value representing
-		 * openrand of instruction ci on index idx. User
+		 * operand of instruction ci on index idx. User
 		 * of this method may specify type to which will be
 		 * loaded value converted and method of the conversion.
 		 *
-		 * @param ci	Instruction of which operand will be loaded.
-		 * @param irb	LLVM IR Builder required for IR modifications.
-		 * @param loadType	Type of loaded value. (not relevant if nullptr)
-		 * @param dstType	Desired type of loaded value (not changed if nullptr).
-		 * @param ct		Used conversion. Defaultly NOTHING as "do not convert".
+		 * @param ci       Instruction of which operand will be loaded.
+		 * @param irb      LLVM IR Builder required for IR modifications.
+		 * @param idx      Operand index.
+		 * @param loadType Type of loaded value. (not relevant if nullptr)
+		 * @param dstType  Desired type of loaded value (not changed if nullptr).
+		 * @param ct       Used conversion. Defaultly NOTHING as "do not convert".
 		 */
 		llvm::Value* loadOp(
 				CInsn* ci,
@@ -392,6 +393,10 @@ class Capstone2LlvmIrTranslator_impl : virtual public Capstone2LlvmIrTranslator
 		 * is of integer type then `ict` convertion will be used on all other opernads.
 		 * If first perand is floting point type then used convertion will be `fct`.
 		 *
+		 * @param ci
+		 * @param irb
+		 * @param opCnt
+		 * @param strictCheck
 		 * @param ict	Integer convertion type.
 		 * @param fct	Floting point convertion type.
 		 */
