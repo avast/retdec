@@ -33,21 +33,26 @@ class FunctionAnalyzeMetadata
 {
 	public:
 
-		llvm::Function& function;
+		bool analyzeSuccess = true;
+		enum IndexType {
+			inIndex, outIndex
+		};
 
+		llvm::Function& function;
+		std::map<llvm::BasicBlock*, std::map<IndexType,unsigned >> indexes;
+
+		std::list<llvm::BasicBlock*> terminatingBasicBlocks;
 		// A * x = B
 		cv::Mat A;
 		cv::Mat B;
 		cv::Mat x;
 
-		std::map<std::string,int> colIndex;
+		int numberOfEquations = 0;
 
 		// 1. index to register, 2.pseudo instruction
 		std::list<std::pair<uint32_t ,llvm::Instruction&>> pseudoCalls;
 
-	void fillRow(
-			unsigned& row,
-			std::vector<std::pair<std::string,int>> block);
+	void addEquation(std::list<std::tuple<llvm::BasicBlock&,int,IndexType >> vars, int result);
 	FunctionAnalyzeMetadata(llvm::Function &function1) : function(function1) {};
 
 };
@@ -69,11 +74,6 @@ class X87FpuAnalysis : public llvm::ModulePass
 				FunctionAnalyzeMetadata& funMd,
 				llvm::BasicBlock* bb,
 				int& outTop);
-		bool analyzeFunctionReturn(
-				llvm::Function& function,
-				int topVal,
-				std::map<llvm::GlobalValue::GUID,
-				int>& resultOfAnalyze);
 		bool analyzeInstruction(
 				FunctionAnalyzeMetadata& funMd,
 				llvm::Instruction& i,
@@ -82,14 +82,12 @@ class X87FpuAnalysis : public llvm::ModulePass
 	std::list<FunctionAnalyzeMetadata> getFunctions2Analyze();
 
 	void printBlocksAnalyzeResult();
-	bool isFunctionDefinitionAndCallMatching(llvm::Function& f);
 	/**
 	 * Replace all FPU pseudo load and store function by load and store with concrete FPU registers.
 	 */
-	void optimizeAnalyzedFpuInstruction();
-	int expectedTopBasedOnCallingConvention(llvm::Function& function);
-	int expectedTopBasedOnRestOfBlock(llvm::BasicBlock* currentBb);
-	int expectedTopBasedOnRestOfFunction(llvm::BasicBlock* currentBb);
+	bool optimizeAnalyzedFpuInstruction();
+	int expectedTopBasedOnCallingConvention(llvm::Instruction& inst);
+	int expectedTopBasedOnRestOfBlock(llvm::Instruction& analyzedInstr);
 
 	private:
 
@@ -99,8 +97,6 @@ class X87FpuAnalysis : public llvm::ModulePass
 		llvm::GlobalVariable* top = nullptr;
 
 		std::list<FunctionAnalyzeMetadata> analyzedFunctionsMetadata; //functions where detected FPU stack access
-		std::map<llvm::GlobalValue::GUID, int> analyzedFunctions; // value of top at the end of function
-		std::map<llvm::GlobalValue::GUID, int> calledButNotAnalyzedFunctions; // expected value of top
 
 };
 
