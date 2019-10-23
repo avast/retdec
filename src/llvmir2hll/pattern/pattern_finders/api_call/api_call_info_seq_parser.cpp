@@ -33,8 +33,10 @@ bool isIdChar(std::string::value_type c) {
 * underscores ('_').
 */
 bool isId(const std::string &token) {
-	return std::find_if(token.begin(), token.end(),
-		std::not1(std::ptr_fun(isIdChar))) == token.end();
+	return std::find_if(
+			token.begin(),
+			token.end(),
+			[](char c){return !isIdChar(c);}) == token.end();
 }
 
 /**
