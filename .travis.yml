@@ -38,8 +38,6 @@ install:
   - if [ "$TRAVIS_OS_NAME" = "osx" ]; then brew install flex bison; fi
   # ccache is not installed on OS X.
   - if [ "$TRAVIS_OS_NAME" = "osx" ]; then brew install ccache; fi
-  # python 3
-  - if [ "$TRAVIS_OS_NAME" = "osx" ]; then brew upgrade python; fi
   # install for os x the gnu time library
   - if [ "$TRAVIS_OS_NAME" = "osx" ]; then brew install gnu-time; fi
 
