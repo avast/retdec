@@ -1276,7 +1276,7 @@ Capstone2LlvmIrTranslatorX86_impl::loadOpFloatingNullaryOrUnaryTop(
 	{
 		if (i->id == X86_INS_FILD)
 		{
-			op0 = loadOpsUnary(
+			op0 = loadOpUnary(
 					xi,
 					irb,
 					nullptr,
@@ -1286,7 +1286,7 @@ Capstone2LlvmIrTranslatorX86_impl::loadOpFloatingNullaryOrUnaryTop(
 		// X86_INS_FLD
 		else
 		{
-			op0 = loadOpsUnary(
+			op0 = loadOpUnary(
 					xi,
 					irb,
 					llvm::Type::getFloatTy(_module->getContext()),
@@ -1370,7 +1370,7 @@ Capstone2LlvmIrTranslatorX86_impl::loadOpFloatingBinaryTop(
 				|| i->id == X86_INS_FISUBR)
 		{
 			op0 = loadX87DataReg(irb, top);
-			op1 = loadOpsUnary(
+			op1 = loadOpUnary(
 					xi,
 					irb,
 					nullptr,
@@ -1381,7 +1381,7 @@ Capstone2LlvmIrTranslatorX86_impl::loadOpFloatingBinaryTop(
 				|| i->id == X86_INS_FICOMP)
 		{
 			op0 = loadX87DataReg(irb, top);
-			op1 = loadOpsUnary(
+			op1 = loadOpUnary(
 					xi,
 					irb,
 					nullptr,
@@ -1391,7 +1391,7 @@ Capstone2LlvmIrTranslatorX86_impl::loadOpFloatingBinaryTop(
 		else
 		{
 			op0 = loadX87DataReg(irb, top);
-			op1 = loadOpsUnary(
+			op1 = loadOpUnary(
 					xi,
 					irb,
 					llvm::Type::getFloatTy(_module->getContext()),
@@ -1766,7 +1766,7 @@ void Capstone2LlvmIrTranslatorX86_impl::translateAad(cs_insn* i, cs_x86* xi, llv
 	}
 	else
 	{
-		op0 = loadOpsUnary(xi, irb, nullptr, ah->getType(), eOpConv::ZEXT_TRUNC_OR_BITCAST);
+		op0 = loadOpUnary(xi, irb, nullptr, ah->getType(), eOpConv::ZEXT_TRUNC_OR_BITCAST);
 	}
 
 	auto* mul = irb.CreateMul(ah, op0);
@@ -1793,7 +1793,7 @@ void Capstone2LlvmIrTranslatorX86_impl::translateAam(cs_insn* i, cs_x86* xi, llv
 	}
 	else
 	{
-		op0 = loadOpsUnary(xi, irb, nullptr, al->getType(), eOpConv::ZEXT_TRUNC_OR_BITCAST);
+		op0 = loadOpUnary(xi, irb, nullptr, al->getType(), eOpConv::ZEXT_TRUNC_OR_BITCAST);
 	}
 
 	auto* div = irb.CreateUDiv(al, op0);
@@ -1914,7 +1914,7 @@ void Capstone2LlvmIrTranslatorX86_impl::translateBswap(cs_insn* i, cs_x86* xi, l
 {
 	EXPECT_IS_UNARY(i, xi, irb);
 
-	op0 = loadOpsUnary(xi, irb);
+	op0 = loadOpUnary(xi, irb);
 	auto* f = llvm::Intrinsic::getDeclaration(
 			_module,
 			llvm::Intrinsic::bswap,
@@ -2157,7 +2157,7 @@ void Capstone2LlvmIrTranslatorX86_impl::translateCmpxchg8b(cs_insn* i, cs_x86* x
 {
 	EXPECT_IS_UNARY(i, xi, irb);
 
-	op0 = loadOpsUnary(xi, irb);
+	op0 = loadOpUnary(xi, irb);
 	auto* eax = loadRegister(X86_REG_EAX, irb, op0->getType(), eOpConv::ZEXT_TRUNC_OR_BITCAST);
 	auto* edx = loadRegister(X86_REG_EDX, irb, op0->getType(), eOpConv::ZEXT_TRUNC_OR_BITCAST);
 	edx = irb.CreateShl(edx, 32);
@@ -2188,7 +2188,7 @@ void Capstone2LlvmIrTranslatorX86_impl::translateCmpxchg16b(cs_insn* i, cs_x86* 
 {
 	EXPECT_IS_UNARY(i, xi, irb);
 
-	op0 = loadOpsUnary(xi, irb);
+	op0 = loadOpUnary(xi, irb);
 	auto* rax = loadRegister(X86_REG_RAX, irb, op0->getType(), eOpConv::ZEXT_TRUNC_OR_BITCAST);
 	auto* rdx = loadRegister(X86_REG_RDX, irb, op0->getType(), eOpConv::ZEXT_TRUNC_OR_BITCAST);
 	rdx = irb.CreateShl(rdx, 64);
@@ -2219,7 +2219,7 @@ void Capstone2LlvmIrTranslatorX86_impl::translateDec(cs_insn* i, cs_x86* xi, llv
 {
 	EXPECT_IS_UNARY(i, xi, irb);
 
-	op0 = loadOpsUnary(xi, irb);
+	op0 = loadOpUnary(xi, irb);
 	op1 = llvm::ConstantInt::get(op0->getType(), 1);
 
 	auto* sub = irb.CreateSub(op0, op1);
@@ -2288,7 +2288,7 @@ void Capstone2LlvmIrTranslatorX86_impl::translateInc(cs_insn* i, cs_x86* xi, llv
 {
 	EXPECT_IS_UNARY(i, xi, irb);
 
-	op0 = loadOpsUnary(xi, irb);
+	op0 = loadOpUnary(xi, irb);
 	op1 = llvm::ConstantInt::get(op0->getType(), 1);
 
 	auto* add = irb.CreateAdd(op0, op1);
@@ -2307,7 +2307,7 @@ void Capstone2LlvmIrTranslatorX86_impl::translateDiv(cs_insn* i, cs_x86* xi, llv
 {
 	EXPECT_IS_UNARY(i, xi, irb);
 
-	op1 = loadOpsUnary(xi, irb);
+	op1 = loadOpUnary(xi, irb);
 	uint32_t op0l = X86_REG_INVALID;
 	uint32_t op0h = X86_REG_INVALID;
 	uint32_t divR = X86_REG_INVALID;
@@ -2396,7 +2396,7 @@ void Capstone2LlvmIrTranslatorX86_impl::translateJmp(cs_insn* i, cs_x86* xi, llv
 {
 	EXPECT_IS_UNARY(i, xi, irb);
 
-	op0 = loadOpsUnary(xi, irb);
+	op0 = loadOpUnary(xi, irb);
 	generateBranchFunctionCall(irb, op0);
 }
 
@@ -2456,7 +2456,7 @@ void Capstone2LlvmIrTranslatorX86_impl::translateCall(cs_insn* i, cs_x86* xi, ll
 	irb.CreateStore(pc, addr);
 	storeRegister(getStackPointerRegister(), sub, irb);
 
-	op0 = loadOpsUnary(xi, irb);
+	op0 = loadOpUnary(xi, irb);
 	generateCallFunctionCall(irb, op0);
 }
 
@@ -2488,7 +2488,7 @@ void Capstone2LlvmIrTranslatorX86_impl::translateLcall(cs_insn* i, cs_x86* xi, l
 
 	if (xi->op_count == 1)
 	{
-		op0 = loadOpsUnary(xi, irb);
+		op0 = loadOpUnary(xi, irb);
 	}
 	// binary e.g.: lcall 7:0
 	else
@@ -2659,7 +2659,7 @@ void Capstone2LlvmIrTranslatorX86_impl::translateMul(cs_insn* i, cs_x86* xi, llv
 {
 	EXPECT_IS_UNARY(i, xi, irb);
 
-	op0 = loadOpsUnary(xi, irb);
+	op0 = loadOpUnary(xi, irb);
 	op1 = loadRegister(getAccumulatorRegister(xi->operands[0].size), irb);
 
 	llvm::IntegerType* halfT = nullptr;
@@ -2737,7 +2737,7 @@ void Capstone2LlvmIrTranslatorX86_impl::translateNeg(cs_insn* i, cs_x86* xi, llv
 {
 	EXPECT_IS_UNARY(i, xi, irb);
 
-	op0 = loadOpsUnary(xi, irb);
+	op0 = loadOpUnary(xi, irb);
 	auto* zero = llvm::ConstantInt::get(op0->getType(), 0);
 
 	auto* sub = irb.CreateSub(zero, op0);
@@ -2834,7 +2834,7 @@ void Capstone2LlvmIrTranslatorX86_impl::translateNot(cs_insn* i, cs_x86* xi, llv
 {
 	EXPECT_IS_UNARY(i, xi, irb);
 
-	op0 = loadOpsUnary(xi, irb);
+	op0 = loadOpUnary(xi, irb);
 	auto* negativeOne = llvm::ConstantInt::getSigned(op0->getType(), -1);
 
 	auto* xorOp = irb.CreateXor(op0, negativeOne);
@@ -3012,7 +3012,7 @@ void Capstone2LlvmIrTranslatorX86_impl::translatePush(cs_insn* i, cs_x86* xi, ll
 {
 	EXPECT_IS_UNARY(i, xi, irb);
 
-	op0 = loadOpsUnary(xi, irb);
+	op0 = loadOpUnary(xi, irb);
 	auto* sp = loadRegister(getStackPointerRegister(), irb);
 
 	auto* ci = llvm::ConstantInt::get(sp->getType(), xi->operands[0].size);
@@ -3175,7 +3175,7 @@ void Capstone2LlvmIrTranslatorX86_impl::translateRet(cs_insn* i, cs_x86* xi, llv
 	op0 = nullptr;
 	if (xi->op_count == 1)
 	{
-		op0 = loadOpsUnary(xi, irb);
+		op0 = loadOpUnary(xi, irb);
 	}
 
 	auto* it = getIntegerTypeFromByteSize(_module, sz);
@@ -4153,7 +4153,7 @@ void Capstone2LlvmIrTranslatorX86_impl::translateJecxz(cs_insn* i, cs_x86* xi, l
 	}
 
 	auto* eqZ = irb.CreateICmpEQ(ecx, llvm::ConstantInt::get(ecx->getType(), 0));
-	op0 = loadOpsUnary(xi, irb);
+	op0 = loadOpUnary(xi, irb);
 	generateCondBranchFunctionCall(irb, eqZ, op0);
 }
 
@@ -4206,7 +4206,7 @@ void Capstone2LlvmIrTranslatorX86_impl::translateLoop(cs_insn* i, cs_x86* xi, ll
 		}
 	}
 
-	op0 = loadOpsUnary(xi, irb);
+	op0 = loadOpUnary(xi, irb);
 	generateCondBranchFunctionCall(irb, cnd, op0);
 }
 
@@ -4241,7 +4241,7 @@ void Capstone2LlvmIrTranslatorX86_impl::translateJCc(cs_insn* i, cs_x86* xi, llv
 		default: throw GenericError("Unhandled insn ID in translateJCc().");
 	}
 
-	op0 = loadOpsUnary(xi, irb);
+	op0 = loadOpUnary(xi, irb);
 	generateCondBranchFunctionCall(irb, cond, op0);
 }
 

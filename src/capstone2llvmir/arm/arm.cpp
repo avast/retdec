@@ -888,7 +888,7 @@ void Capstone2LlvmIrTranslatorArm_impl::translateB(cs_insn* i, cs_arm* ai, llvm:
 {
 	EXPECT_IS_UNARY(i, ai, irb);
 
-	op0 = loadOpsUnary(ai, irb);
+	op0 = loadOpUnary(ai, irb);
 	bool isReturn = ai->operands[0].type == ARM_OP_REG
 			&& ai->operands[0].reg == ARM_REG_LR;
 
@@ -915,7 +915,7 @@ void Capstone2LlvmIrTranslatorArm_impl::translateBl(cs_insn* i, cs_arm* ai, llvm
 	EXPECT_IS_UNARY(i, ai, irb);
 
 	storeRegister(ARM_REG_LR, getNextInsnAddress(i), irb);
-	op0 = loadOpsUnary(ai, irb);
+	op0 = loadOpUnary(ai, irb);
 	if (ai->cc == ARM_CC_AL || ai->cc == ARM_CC_INVALID)
 	{
 		generateCallFunctionCall(irb, op0);

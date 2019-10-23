@@ -1855,7 +1855,7 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateBr(cs_insn* i, cs_arm64* ai, 
 		storeRegister(ARM64_REG_LR, getNextInsnAddress(i), irb);
 	}
 
-	op0 = loadOpsUnary(ai, irb);
+	op0 = loadOpUnary(ai, irb);
 	generateBranchFunctionCall(irb, op0);
 }
 
@@ -1866,7 +1866,7 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateB(cs_insn* i, cs_arm64* ai, l
 {
 	EXPECT_IS_UNARY(i, ai, irb);
 
-	op0 = loadOpsUnary(ai, irb);
+	op0 = loadOpUnary(ai, irb);
 
 	if (isCondIns(ai)) {
 		auto* cond = generateInsnConditionCode(irb, ai);
@@ -1886,7 +1886,7 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateBl(cs_insn* i, cs_arm64* ai, 
 	EXPECT_IS_UNARY(i, ai, irb);
 
 	storeRegister(ARM64_REG_LR, getNextInsnAddress(i), irb);
-	op0 = loadOpsUnary(ai, irb);
+	op0 = loadOpUnary(ai, irb);
 	generateCallFunctionCall(irb, op0);
 }
 

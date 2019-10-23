@@ -1203,7 +1203,7 @@ void Capstone2LlvmIrTranslatorPowerpc_impl::translateMtcr(cs_insn* i, cs_ppc* pi
 {
 	EXPECT_IS_UNARY(i, pi, irb);
 
-	op0 = loadOpsUnary(pi, irb);
+	op0 = loadOpUnary(pi, irb);
 	op0 = irb.CreateZExtOrTrunc(op0, irb.getInt32Ty());
 
 	storeRegister(PPC_REG_CR0_LT, irb.CreateAnd(op0, irb.getInt32(1 << 0)), irb);
@@ -1254,7 +1254,7 @@ void Capstone2LlvmIrTranslatorPowerpc_impl::translateMtctr(cs_insn* i, cs_ppc* p
 {
 	EXPECT_IS_UNARY(i, pi, irb);
 
-	op0 = loadOpsUnary(pi, irb);
+	op0 = loadOpUnary(pi, irb);
 	storeRegister(PPC_REG_CTR, op0, irb);
 }
 
@@ -1265,7 +1265,7 @@ void Capstone2LlvmIrTranslatorPowerpc_impl::translateMtlr(cs_insn* i, cs_ppc* pi
 {
 	EXPECT_IS_UNARY(i, pi, irb);
 
-	op0 = loadOpsUnary(pi, irb);
+	op0 = loadOpUnary(pi, irb);
 	storeRegister(PPC_REG_LR, op0, irb);
 }
 
@@ -2225,7 +2225,7 @@ void Capstone2LlvmIrTranslatorPowerpc_impl::translateB(cs_insn* i, cs_ppc* pi, l
 				&& pi->operands[0].type == PPC_OP_IMM)
 		{
 			crReg = PPC_REG_CR0;
-			target = loadOpsUnary(pi, irb);
+			target = loadOpUnary(pi, irb);
 		}
 		else if (pi->op_count == 2
 				&& pi->operands[0].type == PPC_OP_CRX

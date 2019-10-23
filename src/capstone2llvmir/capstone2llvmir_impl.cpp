@@ -1102,7 +1102,7 @@ Capstone2LlvmIrTranslator_impl<CInsn, CInsnOp>::_loadOpsUniversal(
  * Throws if op_count != 1.
  */
 template <typename CInsn, typename CInsnOp>
-llvm::Value* Capstone2LlvmIrTranslator_impl<CInsn, CInsnOp>::loadOpsUnary(
+llvm::Value* Capstone2LlvmIrTranslator_impl<CInsn, CInsnOp>::loadOpUnary(
 		CInsn* ci,
 		llvm::IRBuilder<>& irb,
 		llvm::Type* loadType,

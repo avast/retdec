@@ -535,7 +535,7 @@ void Capstone2LlvmIrTranslatorMips_impl::translateBc1f(cs_insn* i, cs_mips* mi, 
 	if (mi->op_count == 1)
 	{
 		op0 = loadRegister(MIPS_REG_FCC0, irb); // implied operand
-		op1 = loadOpsUnary(mi, irb);
+		op1 = loadOpUnary(mi, irb);
 	}
 	else if (mi->op_count == 2)
 	{
@@ -556,7 +556,7 @@ void Capstone2LlvmIrTranslatorMips_impl::translateBc1t(cs_insn* i, cs_mips* mi, 
 	if (mi->op_count == 1)
 	{
 		op0 = loadRegister(MIPS_REG_FCC0, irb); // implied operand
-		op1 = loadOpsUnary(mi, irb);
+		op1 = loadOpUnary(mi, irb);
 	}
 	else if (mi->op_count == 2)
 	{
@@ -788,7 +788,7 @@ void Capstone2LlvmIrTranslatorMips_impl::translateBreak(cs_insn* i, cs_mips* mi,
 	}
 	else if (mi->op_count == 1)
 	{
-		op0 = loadOpsUnary(mi, irb);
+		op0 = loadOpUnary(mi, irb);
 	}
 	else if (mi->op_count == 2)
 	{
@@ -1033,7 +1033,7 @@ void Capstone2LlvmIrTranslatorMips_impl::translateJ(cs_insn* i, cs_mips* mi, llv
 {
 	EXPECT_IS_UNARY(i, mi, irb);
 
-	op0 = loadOpsUnary(mi, irb);
+	op0 = loadOpUnary(mi, irb);
 	generateBranchFunctionCall(irb, op0);
 }
 
@@ -1046,7 +1046,7 @@ void Capstone2LlvmIrTranslatorMips_impl::translateJal(cs_insn* i, cs_mips* mi, l
 	EXPECT_IS_UNARY(i, mi, irb);
 
 	storeRegister(MIPS_REG_RA, getNextNextInsnAddress(i), irb);
-	op0 = loadOpsUnary(mi, irb);
+	op0 = loadOpUnary(mi, irb);
 	generateCallFunctionCall(irb, op0);
 }
 
@@ -1464,7 +1464,7 @@ void Capstone2LlvmIrTranslatorMips_impl::translateMthi(cs_insn* i, cs_mips* mi, 
 {
 	EXPECT_IS_UNARY(i, mi, irb);
 
-	op0 = loadOpsUnary(mi, irb);
+	op0 = loadOpUnary(mi, irb);
 	storeRegister(MIPS_REG_HI, op0, irb);
 }
 
@@ -1475,7 +1475,7 @@ void Capstone2LlvmIrTranslatorMips_impl::translateMtlo(cs_insn* i, cs_mips* mi, 
 {
 	EXPECT_IS_UNARY(i, mi, irb);
 
-	op0 = loadOpsUnary(mi, irb);
+	op0 = loadOpUnary(mi, irb);
 	storeRegister(MIPS_REG_LO, op0, irb);
 }
 
@@ -1766,7 +1766,7 @@ void Capstone2LlvmIrTranslatorMips_impl::translateSyscall(cs_insn* i, cs_mips* m
 	}
 	else if (mi->op_count == 1)
 	{
-		op0 = loadOpsUnary(mi, irb);
+		op0 = loadOpUnary(mi, irb);
 	}
 
 	op0 = irb.CreateZExtOrTrunc(op0, getDefaultType());

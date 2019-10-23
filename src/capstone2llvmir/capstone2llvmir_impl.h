@@ -408,7 +408,7 @@ class Capstone2LlvmIrTranslator_impl : virtual public Capstone2LlvmIrTranslator
 				eOpConv ict = eOpConv::SEXT_TRUNC_OR_BITCAST,
 				eOpConv fct = eOpConv::FPCAST_OR_BITCAST);
 
-		llvm::Value* loadOpsUnary(
+		llvm::Value* loadOpUnary(
 				CInsn* ci,
 				llvm::IRBuilder<>& irb,
 				llvm::Type* dstType = nullptr,
