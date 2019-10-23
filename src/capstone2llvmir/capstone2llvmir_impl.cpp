@@ -1042,14 +1042,14 @@ std::vector<llvm::Value*> Capstone2LlvmIrTranslator_impl<CInsn, CInsnOp>::_loadO
 	{
 		auto* op0 = loadOp(ci, irb, startOp, loadType, dstType, ct);
 		dstType = op0->getType();
-		dstType = checkTypeConversion(irb, dstType, ct);
+		dstType = _checkTypeConversion(irb, dstType, ct);
 		op0 = generateTypeConversion(irb, op0, dstType, ct);
 		startOp++;
 		operands.push_back(op0);
 	}
 	else
 	{
-		auto* type = checkTypeConversion(irb, dstType, ct);
+		auto* type = _checkTypeConversion(irb, dstType, ct);
 		if (type != dstType)
 		{
 			throw GenericError(
@@ -1747,7 +1747,7 @@ llvm::Value* Capstone2LlvmIrTranslator_impl<CInsn, CInsnOp>::generateTypeConvers
 }
 
 template <typename CInsn, typename CInsnOp>
-llvm::Type* Capstone2LlvmIrTranslator_impl<CInsn, CInsnOp>::checkTypeConversion(
+llvm::Type* Capstone2LlvmIrTranslator_impl<CInsn, CInsnOp>::_checkTypeConversion(
 		llvm::IRBuilder<>& irb,
 		llvm::Type* to,
 		eOpConv ct)

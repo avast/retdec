@@ -185,7 +185,18 @@ class Capstone2LlvmIrTranslator_impl : virtual public Capstone2LlvmIrTranslator
 				llvm::Type* to,
 				eOpConv ct);
 
-		llvm::Type* checkTypeConversion(
+		/**
+		 * Internal method used to correct type used for operands
+		 * convertion based on specified "convertion type method" - ct.
+		 *
+		 * @param irb   LLVM IR Builder required for IR modifications.
+		 * @param to    result type that will be used to convert operands.
+		 * @param ct    convertion method by which will be opeands converted to the resut type.
+		 * @return      If result type for convertion can be used with specified conversion method
+		 *              returns param to. Otherwise will this method try to create suitable type
+		 *              for convertion method ct with size of llvm type of param to.
+		 */
+		llvm::Type* _checkTypeConversion(
 				llvm::IRBuilder<>& irb,
 				llvm::Type* to,
 				eOpConv ct);
