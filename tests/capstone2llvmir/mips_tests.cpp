@@ -6107,6 +6107,30 @@ TEST_P(Capstone2LlvmIrTranslatorMipsTests, MIPS_INS_C_ule_d_32)
 	EXPECT_NO_VALUE_CALLED();
 }
 
+//
+//==============================================================================
+// Issue unit tests.
+//==============================================================================
+//
+
+TEST_P(Capstone2LlvmIrTranslatorMipsTests, issue_633)
+{
+	ONLY_MODE_32;
+
+	setRegisters({
+		{MIPS_REG_W31, 3.14_f64},
+	});
+
+	emulate_bin("c0 ff b7 79"); // ori.b $w31, $w31, 0xb7
+
+	EXPECT_JUST_REGISTERS_LOADED({MIPS_REG_W31});
+	EXPECT_JUST_REGISTERS_STORED({
+		{MIPS_REG_W31, ANY},
+	});
+	EXPECT_NO_MEMORY_LOADED_STORED();
+	EXPECT_NO_VALUE_CALLED();
+}
+
 } // namespace tests
 } // namespace capstone2llvmir
 } // namespace retdec
