@@ -18,6 +18,7 @@
 
 #include "retdec/capstone2llvmir/capstone2llvmir.h"
 #include "retdec/llvmir-emul/llvmir_emul.h"
+#include "retdec/utils/conversion.h"
 
 /**
  * Print any LLVM object which implements @c print(llvm::raw_string_ostream&)
@@ -265,11 +266,9 @@ class Capstone2LlvmIrTranslatorTests : public ::testing::Test
 		}
 
 		virtual llvm::Function* translate(
-				const std::string& code,
+				const std::vector<uint8_t> bytes,
 				uint64_t addr = 0)
 		{
-			auto asmBytes = assemble(code, addr);
-
 			// Each translation gets its own function.
 			//
 			auto* f = llvm::Function::Create(
@@ -284,7 +283,7 @@ class Capstone2LlvmIrTranslatorTests : public ::testing::Test
 			auto* ret = irb.CreateRetVoid();
 			irb.SetInsertPoint(ret);
 
-			_translator->translate(asmBytes.data(), asmBytes.size(), addr, irb);
+			_translator->translate(bytes.data(), bytes.size(), addr, irb);
 
 			return f;
 		}
@@ -294,10 +293,40 @@ class Capstone2LlvmIrTranslatorTests : public ::testing::Test
 			return f;
 		}
 
-		virtual llvm::Function* emulate(const std::string& code,
+		/**
+		 * @param textAsm Instruction(s) in textual form (e.g. "add eax, ecx").
+		 *                This is first assembled to binary form and then
+		 *                translated to LLVM IR and emulated.
+		 * @param addr    Address where assembly is to be located.
+		 */
+		virtual llvm::Function* emulate(
+				const std::string& textAsm,
 				uint64_t addr = 0)
 		{
-			auto* f = translate(code, addr);
+			auto bytes = assemble(textAsm, addr);
+			return _emulate(bytes, addr);
+		}
+
+		/**
+		 * @param binaryAsm Instruction(s) in hexadecimal (without prefix)
+		 *                  binary form (e.g. "01 c8").
+		 *                  This is first converted to a true byte array and
+		 *                  then translated to LLVM IR and emulated.
+		 * @param addr      Address where assembly is to be located.
+		 */
+		virtual llvm::Function* emulate_bin(
+				const std::string& binaryAsm,
+				uint64_t addr = 0)
+		{
+			auto bytes = utils::hexStringToBytes(binaryAsm);
+			return _emulate(bytes, addr);
+		}
+
+		virtual llvm::Function* _emulate(
+				const std::vector<uint8_t> bytes,
+				uint64_t addr = 0)
+		{
+			auto* f = translate(bytes, addr);
 			f = modifyTranslationForEmulation(f);
 
 			_emulator->runFunction(f, {});
