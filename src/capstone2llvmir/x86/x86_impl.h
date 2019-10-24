@@ -120,12 +120,12 @@ class Capstone2LlvmIrTranslatorX86_impl :
 				uint32_t r,
 				llvm::Value* val,
 				llvm::IRBuilder<>& irb,
-				eOpConv ct = eOpConv::ZEXT_TRUNC) override;
+				eOpConv ct = eOpConv::ZEXT_TRUNC_OR_BITCAST) override;
 		virtual llvm::Instruction* storeOp(
 				cs_x86_op& op,
 				llvm::Value* val,
 				llvm::IRBuilder<>& irb,
-				eOpConv ct = eOpConv::ZEXT_TRUNC) override;
+				eOpConv ct = eOpConv::ZEXT_TRUNC_OR_BITCAST) override;
 
 		void storeRegisters(
 				llvm::IRBuilder<>& irb,

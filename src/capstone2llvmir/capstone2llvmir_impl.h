@@ -161,27 +161,43 @@ class Capstone2LlvmIrTranslator_impl : virtual public Capstone2LlvmIrTranslator
 			THROW,
 			/// Operand types does not have to be equal.
 			NOTHING,
-			/// Convert to destination type using ZEXT or TRUNC.
-			/// Types must be integer, or LLVM asserts.
-			ZEXT_TRUNC,
-			/// Convert to destination type using SEXT or TRUNC.
-			/// Types must be integer, or LLVM asserts.
-			SEXT_TRUNC,
-			/// Convert to destination type using FPCast (FPExt, BitCast,
+			/// Convert to destination integer type using ZEXT or TRUNC.
+			/// If source is FP type converts it using bitcast.
+			ZEXT_TRUNC_OR_BITCAST,
+			/// Convert to destination integer type using SEXT or TRUNC.
+			/// If source is FP type converts it using bitcast.
+			SEXT_TRUNC_OR_BITCAST,
+			/// Convert to destination FP type using FPCast (FPExt, BitCast,
 			/// or FPTrunc).
-			/// Types must be floating point, or LLVM asserts.
-			FP_CAST,
-			/// Convert to destination type using SIToFP.
+			/// If source is integer type converts it using bitcast.
+			FPCAST_OR_BITCAST,
+			/// Convert to destination FP type using SIToFP.
 			/// Source must be integer, destination fp, or LLVM asserts.
-			SITOFP,
-			/// Convert to destination type using UIToFP.
+			SITOFP_OR_FPCAST,
+			/// Convert to destination FP type using UIToFP.
 			/// Source must be integer, destination fp, or LLVM asserts.
-			UITOFP
+			UITOFP_OR_FPCAST
 		};
 
 		llvm::Value* generateTypeConversion(
 				llvm::IRBuilder<>& irb,
 				llvm::Value* from,
+				llvm::Type* to,
+				eOpConv ct);
+
+		/**
+		 * Internal method used to correct type used for operands
+		 * convertion based on specified "convertion type method" - ct.
+		 *
+		 * @param irb   LLVM IR Builder required for IR modifications.
+		 * @param to    result type that will be used to convert operands.
+		 * @param ct    convertion method by which will be opeands converted to the resut type.
+		 * @return      If result type for convertion can be used with specified conversion method
+		 *              returns param to. Otherwise will this method try to create suitable type
+		 *              for convertion method ct with size of llvm type of param to.
+		 */
+		llvm::Type* _checkTypeConversion(
+				llvm::IRBuilder<>& irb,
 				llvm::Type* to,
 				eOpConv ct);
 //
@@ -325,24 +341,109 @@ class Capstone2LlvmIrTranslator_impl : virtual public Capstone2LlvmIrTranslator
 				uint32_t r,
 				llvm::Value* val,
 				llvm::IRBuilder<>& irb,
-				eOpConv ct = eOpConv::SEXT_TRUNC) = 0;
+				eOpConv ct = eOpConv::SEXT_TRUNC_OR_BITCAST) = 0;
 		virtual llvm::Instruction* storeOp(
 				CInsnOp& op,
 				llvm::Value* val,
 				llvm::IRBuilder<>& irb,
-				eOpConv ct = eOpConv::SEXT_TRUNC) = 0;
+				eOpConv ct = eOpConv::SEXT_TRUNC_OR_BITCAST) = 0;
+
+		/**
+		 * Creates LLVM load from LLVM value representing
+		 * operand of instruction ci on index idx. User
+		 * of this method may specify type to which will be
+		 * loaded value converted and method of the conversion.
+		 *
+		 * @param ci       Instruction of which operand will be loaded.
+		 * @param irb      LLVM IR Builder required for IR modifications.
+		 * @param idx      Operand index.
+		 * @param loadType Type of loaded value. (not relevant if nullptr)
+		 * @param dstType  Desired type of loaded value (not changed if nullptr).
+		 * @param ct       Used conversion. Defaultly NOTHING as "do not convert".
+		 */
+		llvm::Value* loadOp(
+				CInsn* ci,
+				llvm::IRBuilder<>& irb,
+				std::size_t idx,
+				llvm::Type* loadType = nullptr,
+				llvm::Type* dstType = nullptr,
+				eOpConv ct = eOpConv::NOTHING);
+
+		/**
+		 * Create LLVM loads for LLVM values representing last N operands
+		 * (opCnt) of specified instruction. If strict check is set, this
+		 * method will check wheater number of operands of the instructions
+		 * is equal to the "opCnt". If conversion type is set to NOTHING
+		 * no conversion will happen and each operand may have different
+		 * size and type.
+		 *
+		 * This method was created to be used in internal load
+		 * methods. Usage of adequate loadOp(Binary|Ternary|...)
+		 * is preffered.
+		 *
+		 * @param ci	Instruction of which operands will be loaded.
+		 * @param irb	LLVM IR Builder required for IR modifications.
+		 * @param opCnt	Number of operands that will be loaded.
+		 * @param strictCheck	If set to true opCnt will be equal as number of operands. Otherwise will load N last operands.
+		 * @param loadType	Type of loaded value. (not relevant if nullptr)
+		 * @param dstType	Desired type of loaded value (not changed if nullptr).
+		 * @param ct		Used conversion. Defaultly NOTHING as "do not convert".
+		 */
+		std::vector<llvm::Value*> _loadOps(
+				CInsn* ci,
+				llvm::IRBuilder<>& irb,
+				std::size_t opCnt,
+				bool strictCheck = true,
+				llvm::Type* loadType = nullptr,
+				llvm::Type* dstType = nullptr,
+				eOpConv ct = eOpConv::NOTHING);
+
+		/**
+		 * Similiar functionality as `_loadOps` but used conversion is determined
+		 * by type of first loaded operand. This means that if first operand
+		 * is of integer type then `ict` convertion will be used on all other opernads.
+		 * If first perand is floting point type then used convertion will be `fct`.
+		 *
+		 * @param ci
+		 * @param irb
+		 * @param opCnt
+		 * @param strictCheck
+		 * @param ict	Integer convertion type.
+		 * @param fct	Floting point convertion type.
+		 */
+		std::vector<llvm::Value*> _loadOpsUniversal(
+				CInsn* ci,
+				llvm::IRBuilder<>& irb,
+				std::size_t opCnt,
+				bool strictCheck = true,
+				eOpConv ict = eOpConv::SEXT_TRUNC_OR_BITCAST,
+				eOpConv fct = eOpConv::FPCAST_OR_BITCAST);
 
 		llvm::Value* loadOpUnary(
 				CInsn* ci,
 				llvm::IRBuilder<>& irb,
 				llvm::Type* dstType = nullptr,
-				eOpConv ct = eOpConv::THROW,
-				llvm::Type* loadType = nullptr);
+				llvm::Type* loadType = nullptr,
+				eOpConv ct = eOpConv::THROW);
 
 		std::pair<llvm::Value*, llvm::Value*> loadOpBinary(
 				CInsn* ci,
 				llvm::IRBuilder<>& irb,
 				eOpConv ct = eOpConv::NOTHING);
+
+		std::pair<llvm::Value*, llvm::Value*> loadOpBinary(
+				CInsn* ci,
+				llvm::IRBuilder<>& irb,
+				eOpConv ict,
+				eOpConv fct);
+
+		std::pair<llvm::Value*, llvm::Value*> loadOpBinary(
+				CInsn* ci,
+				llvm::IRBuilder<>& irb,
+				llvm::Type* loadType,
+				llvm::Type* dstType = nullptr,
+				eOpConv ct = eOpConv::NOTHING);
+
 		llvm::Value* loadOpBinaryOp0(
 				CInsn* ci,
 				llvm::IRBuilder<>& irb,
@@ -354,11 +455,30 @@ class Capstone2LlvmIrTranslator_impl : virtual public Capstone2LlvmIrTranslator
 
 		std::tuple<llvm::Value*, llvm::Value*, llvm::Value*> loadOpTernary(
 				CInsn* ci,
-				llvm::IRBuilder<>& irb);
+				llvm::IRBuilder<>& irb,
+				eOpConv ct = eOpConv::NOTHING);
+		std::tuple<llvm::Value*, llvm::Value*, llvm::Value*> loadOpTernary(
+				CInsn* ci,
+				llvm::IRBuilder<>& irb,
+				eOpConv ict,
+				eOpConv fct);
+		std::tuple<llvm::Value*, llvm::Value*, llvm::Value*> loadOpTernary(
+				CInsn* ci,
+				llvm::IRBuilder<>& irb,
+				llvm::Type* loadType,
+				llvm::Type* dstType = nullptr,
+				eOpConv ct = eOpConv::NOTHING);
+
 		std::pair<llvm::Value*, llvm::Value*> loadOpBinaryOrTernaryOp1Op2(
 				CInsn* ai,
 				llvm::IRBuilder<>& irb,
 				eOpConv ct = eOpConv::NOTHING);
+
+		std::pair<llvm::Value*, llvm::Value*> loadOpBinaryOrTernaryOp1Op2(
+				CInsn* ai,
+				llvm::IRBuilder<>& irb,
+				eOpConv ict,
+				eOpConv fct);
 
 		std::tuple<llvm::Value*, llvm::Value*, llvm::Value*> loadOpQuaternaryOp1Op2Op3(
 				CInsn* ai,

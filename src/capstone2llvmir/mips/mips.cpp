@@ -402,7 +402,7 @@ llvm::StoreInst* Capstone2LlvmIrTranslatorMips_impl::storeRegister(
 	{
 		throw GenericError("storeRegister() unhandled reg.");
 	}
-	val = generateTypeConversion(irb, val, llvmReg->getValueType(), ct);
+	val = generateTypeConversion(irb, val, llvmReg->getValueType(),  llvmReg->getValueType()->isFloatingPointTy()? eOpConv::FPCAST_OR_BITCAST : ct);
 
 	return irb.CreateStore(val, llvmReg);
 }
@@ -506,7 +506,7 @@ void Capstone2LlvmIrTranslatorMips_impl::translateAdd(cs_insn* i, cs_mips* mi, l
 {
 	EXPECT_IS_BINARY_OR_TERNARY(i, mi, irb);
 
-	std::tie(op1, op2) = loadOpBinaryOrTernaryOp1Op2(mi, irb, eOpConv::SEXT_TRUNC);
+	std::tie(op1, op2) = loadOpBinaryOrTernaryOp1Op2(mi, irb, eOpConv::SEXT_TRUNC_OR_BITCAST, eOpConv::FPCAST_OR_BITCAST);
 	auto* add = op1->getType()->isFloatingPointTy()
 			? irb.CreateFAdd(op1, op2)
 			: irb.CreateAdd(op1, op2);
@@ -520,7 +520,7 @@ void Capstone2LlvmIrTranslatorMips_impl::translateAnd(cs_insn* i, cs_mips* mi, l
 {
 	EXPECT_IS_BINARY_OR_TERNARY(i, mi, irb);
 
-	std::tie(op1, op2) = loadOpBinaryOrTernaryOp1Op2(mi, irb, eOpConv::ZEXT_TRUNC);
+	std::tie(op1, op2) = loadOpBinaryOrTernaryOp1Op2(mi, irb, eOpConv::ZEXT_TRUNC_OR_BITCAST);
 	auto* a = irb.CreateAnd(op1, op2);
 	storeOp(mi->operands[0], a, irb);
 }
@@ -651,7 +651,7 @@ void Capstone2LlvmIrTranslatorMips_impl::translateCvt(cs_insn* i, cs_mips* mi, l
 	else if (mnem == "cvt.d.s")
 	{
 		op1 = irb.CreateLoad(getRegister(r1));
-		storeRegister(r0, op1, irb, eOpConv::FP_CAST);
+		storeRegister(r0, op1, irb, eOpConv::SITOFP_OR_FPCAST);
 	}
 	else if (mnem == "cvt.d.w" // should be only on MIPS32
 			|| mnem == "cvt.d.l") // should be only on MIPS64
@@ -662,7 +662,7 @@ void Capstone2LlvmIrTranslatorMips_impl::translateCvt(cs_insn* i, cs_mips* mi, l
 				: irb.getInt32Ty();
 		op1 = irb.CreateBitCast(op1, iTy);
 		op1 = irb.CreateSIToFP(op1, irb.getDoubleTy());
-		storeRegister(r0, op1, irb, eOpConv::FP_CAST);
+		storeRegister(r0, op1, irb, eOpConv::SITOFP_OR_FPCAST);
 	}
 	// CVT.W.fmt
 	//
@@ -898,7 +898,7 @@ void Capstone2LlvmIrTranslatorMips_impl::translateC(cs_insn* i, cs_mips* mi, llv
 		return;
 	}
 
-	storeRegister(MIPS_REG_FCC0, val, irb, eOpConv::ZEXT_TRUNC);
+	storeRegister(MIPS_REG_FCC0, val, irb, eOpConv::ZEXT_TRUNC_OR_BITCAST);
 }
 
 /**
@@ -943,7 +943,7 @@ void Capstone2LlvmIrTranslatorMips_impl::translateDiv(cs_insn* i, cs_mips* mi, l
 	{
 		EXPECT_IS_BINARY_OR_TERNARY(i, mi, irb);
 
-		std::tie(op1, op2) = loadOpBinaryOrTernaryOp1Op2(mi, irb, eOpConv::THROW);
+		std::tie(op1, op2) = loadOpBinaryOrTernaryOp1Op2(mi, irb, eOpConv::SITOFP_OR_FPCAST);
 		auto* div = irb.CreateFDiv(op1, op2);
 		storeOp(mi->operands[0], div, irb);
 	}
@@ -951,7 +951,8 @@ void Capstone2LlvmIrTranslatorMips_impl::translateDiv(cs_insn* i, cs_mips* mi, l
 	{
 		EXPECT_IS_BINARY(i, mi, irb);
 
-		std::tie(op0, op1) = loadOpBinary(mi, irb, eOpConv::THROW);
+		std::tie(op0, op1) = loadOpBinary(mi, irb, eOpConv::SEXT_TRUNC_OR_BITCAST);
+
 		auto* div = irb.CreateSDiv(op0, op1);
 		storeRegister(MIPS_REG_LO, div, irb);
 		auto* rem = irb.CreateSRem(op0, op1);
@@ -966,7 +967,7 @@ void Capstone2LlvmIrTranslatorMips_impl::translateDivu(cs_insn* i, cs_mips* mi, 
 {
 	EXPECT_IS_BINARY(i, mi, irb);
 
-	std::tie(op0, op1) = loadOpBinary(mi, irb, eOpConv::THROW);
+	std::tie(op0, op1) = loadOpBinary(mi, irb, eOpConv::SEXT_TRUNC_OR_BITCAST);
 	auto* div = irb.CreateUDiv(op0, op1);
 	storeRegister(MIPS_REG_LO, div, irb);
 	auto* rem = irb.CreateURem(op0, op1);
@@ -1065,21 +1066,21 @@ void Capstone2LlvmIrTranslatorMips_impl::translateLoadMemory(cs_insn* i, cs_mips
 
 	switch (i->id)
 	{
-		case MIPS_INS_LB: ty = irb.getInt8Ty(); ct = eOpConv::SEXT_TRUNC; break;
-		case MIPS_INS_LBU: ty = irb.getInt8Ty(); ct = eOpConv::ZEXT_TRUNC; break;
-		case MIPS_INS_LH: ty = irb.getInt16Ty(); ct = eOpConv::SEXT_TRUNC; break;
-		case MIPS_INS_LHU: ty = irb.getInt16Ty(); ct = eOpConv::ZEXT_TRUNC; break;
-		case MIPS_INS_LW: ty = irb.getInt32Ty(); ct = eOpConv::SEXT_TRUNC; break;
-		case MIPS_INS_LWU: ty = irb.getInt32Ty(); ct = eOpConv::ZEXT_TRUNC; break;
-		case MIPS_INS_LD: ty = irb.getInt64Ty(); ct = eOpConv::SEXT_TRUNC; break;
-		case MIPS_INS_LDC3: ty = irb.getInt64Ty(); ct = eOpConv::SEXT_TRUNC; break;
-		case MIPS_INS_LWC1: ty = irb.getFloatTy(); ct = eOpConv::FP_CAST; break;
-		case MIPS_INS_LDC1: ty = irb.getDoubleTy(); ct = eOpConv::FP_CAST; break;
+		case MIPS_INS_LB: ty = irb.getInt8Ty(); ct = eOpConv::SEXT_TRUNC_OR_BITCAST; break;
+		case MIPS_INS_LBU: ty = irb.getInt8Ty(); ct = eOpConv::ZEXT_TRUNC_OR_BITCAST; break;
+		case MIPS_INS_LH: ty = irb.getInt16Ty(); ct = eOpConv::SEXT_TRUNC_OR_BITCAST; break;
+		case MIPS_INS_LHU: ty = irb.getInt16Ty(); ct = eOpConv::ZEXT_TRUNC_OR_BITCAST; break;
+		case MIPS_INS_LW: ty = irb.getInt32Ty(); ct = eOpConv::SEXT_TRUNC_OR_BITCAST; break;
+		case MIPS_INS_LWU: ty = irb.getInt32Ty(); ct = eOpConv::ZEXT_TRUNC_OR_BITCAST; break;
+		case MIPS_INS_LD: ty = irb.getInt64Ty(); ct = eOpConv::SEXT_TRUNC_OR_BITCAST; break;
+		case MIPS_INS_LDC3: ty = irb.getInt64Ty(); ct = eOpConv::SEXT_TRUNC_OR_BITCAST; break;
+		case MIPS_INS_LWC1: ty = irb.getFloatTy(); ct = eOpConv::FPCAST_OR_BITCAST; break;
+		case MIPS_INS_LDC1: ty = irb.getDoubleTy(); ct = eOpConv::FPCAST_OR_BITCAST; break;
 		default:
 			throw GenericError("Unhandled insn ID in translateLoadMemory().");
 	}
 
-	op1 = loadOpBinaryOp1(mi, irb, ty);
+	op1 = loadOp(mi->operands[1], irb, ty);
 	storeOp(mi->operands[0], op1, irb, ct);
 }
 
@@ -1598,7 +1599,7 @@ void Capstone2LlvmIrTranslatorMips_impl::translateNor(cs_insn* i, cs_mips* mi, l
 {
 	EXPECT_IS_BINARY_OR_TERNARY(i, mi, irb);
 
-	std::tie(op1, op2) = loadOpBinaryOrTernaryOp1Op2(mi, irb, eOpConv::ZEXT_TRUNC);
+	std::tie(op1, op2) = loadOpBinaryOrTernaryOp1Op2(mi, irb, eOpConv::ZEXT_TRUNC_OR_BITCAST);
 	auto* o = irb.CreateOr(op1, op2);
 	auto* x = irb.CreateXor(o, llvm::ConstantInt::getSigned(o->getType(), -1));
 	storeOp(mi->operands[0], x, irb);
@@ -1623,9 +1624,9 @@ void Capstone2LlvmIrTranslatorMips_impl::translateOr(cs_insn* i, cs_mips* mi, ll
 {
 	EXPECT_IS_BINARY_OR_TERNARY(i, mi, irb);
 
-	std::tie(op1, op2) = loadOpBinaryOrTernaryOp1Op2(mi, irb, eOpConv::ZEXT_TRUNC);
+	std::tie(op1, op2) = loadOpBinaryOrTernaryOp1Op2(mi, irb, eOpConv::ZEXT_TRUNC_OR_BITCAST);
 	auto* o = irb.CreateOr(op1, op2);
-	storeOp(mi->operands[0], o, irb);
+	storeOp(mi->operands[0], o, irb, eOpConv::ZEXT_TRUNC_OR_BITCAST);
 }
 
 /**
@@ -1635,7 +1636,7 @@ void Capstone2LlvmIrTranslatorMips_impl::translateRotr(cs_insn* i, cs_mips* mi, 
 {
 	EXPECT_IS_BINARY_OR_TERNARY(i, mi, irb);
 
-	std::tie(op1, op2) = loadOpBinaryOrTernaryOp1Op2(mi, irb, eOpConv::ZEXT_TRUNC);
+	std::tie(op1, op2) = loadOpBinaryOrTernaryOp1Op2(mi, irb, eOpConv::ZEXT_TRUNC_OR_BITCAST);
 	op2 = irb.CreateAnd(op2, llvm::ConstantInt::get(op2->getType(), 31)); // low 5 bits
 	auto* lshr = irb.CreateLShr(op1, op2);
 	auto* sub = irb.CreateSub(llvm::ConstantInt::get(op2->getType(), 32), op2);
@@ -1683,7 +1684,7 @@ void Capstone2LlvmIrTranslatorMips_impl::translateSll(cs_insn* i, cs_mips* mi, l
 {
 	EXPECT_IS_BINARY_OR_TERNARY(i, mi, irb);
 
-	std::tie(op1, op2) = loadOpBinaryOrTernaryOp1Op2(mi, irb, eOpConv::ZEXT_TRUNC);
+	std::tie(op1, op2) = loadOpBinaryOrTernaryOp1Op2(mi, irb, eOpConv::ZEXT_TRUNC_OR_BITCAST);
 	auto* shl = irb.CreateShl(op1, op2);
 	storeOp(mi->operands[0], shl, irb);
 }
@@ -1695,7 +1696,7 @@ void Capstone2LlvmIrTranslatorMips_impl::translateSlt(cs_insn* i, cs_mips* mi, l
 {
 	EXPECT_IS_BINARY_OR_TERNARY(i, mi, irb);
 
-	std::tie(op1, op2) = loadOpBinaryOrTernaryOp1Op2(mi, irb, eOpConv::SEXT_TRUNC);
+	std::tie(op1, op2) = loadOpBinaryOrTernaryOp1Op2(mi, irb, eOpConv::SEXT_TRUNC_OR_BITCAST);
 	auto* slt = irb.CreateICmpSLT(op1, op2);
 	slt = irb.CreateZExt(slt, getDefaultType());
 	storeOp(mi->operands[0], slt, irb);
@@ -1708,7 +1709,7 @@ void Capstone2LlvmIrTranslatorMips_impl::translateSltu(cs_insn* i, cs_mips* mi, 
 {
 	EXPECT_IS_BINARY_OR_TERNARY(i, mi, irb);
 
-	std::tie(op1, op2) = loadOpBinaryOrTernaryOp1Op2(mi, irb, eOpConv::SEXT_TRUNC);
+	std::tie(op1, op2) = loadOpBinaryOrTernaryOp1Op2(mi, irb, eOpConv::SEXT_TRUNC_OR_BITCAST);
 	auto* ult = irb.CreateICmpULT(op1, op2);
 	ult = irb.CreateZExt(ult, getDefaultType());
 	storeOp(mi->operands[0], ult, irb);
@@ -1721,7 +1722,7 @@ void Capstone2LlvmIrTranslatorMips_impl::translateSra(cs_insn* i, cs_mips* mi, l
 {
 	EXPECT_IS_BINARY_OR_TERNARY(i, mi, irb);
 
-	std::tie(op1, op2) = loadOpBinaryOrTernaryOp1Op2(mi, irb, eOpConv::ZEXT_TRUNC);
+	std::tie(op1, op2) = loadOpBinaryOrTernaryOp1Op2(mi, irb, eOpConv::ZEXT_TRUNC_OR_BITCAST);
 	auto* sra = irb.CreateAShr(op1, op2);
 	storeOp(mi->operands[0], sra, irb);
 }
@@ -1733,7 +1734,7 @@ void Capstone2LlvmIrTranslatorMips_impl::translateSrl(cs_insn* i, cs_mips* mi, l
 {
 	EXPECT_IS_BINARY_OR_TERNARY(i, mi, irb);
 
-	std::tie(op1, op2) = loadOpBinaryOrTernaryOp1Op2(mi, irb, eOpConv::ZEXT_TRUNC);
+	std::tie(op1, op2) = loadOpBinaryOrTernaryOp1Op2(mi, irb, eOpConv::ZEXT_TRUNC_OR_BITCAST);
 	auto* shr = irb.CreateLShr(op1, op2);
 	storeOp(mi->operands[0], shr, irb);
 }
@@ -1745,7 +1746,7 @@ void Capstone2LlvmIrTranslatorMips_impl::translateSub(cs_insn* i, cs_mips* mi, l
 {
 	EXPECT_IS_BINARY_OR_TERNARY(i, mi, irb);
 
-	std::tie(op1, op2) = loadOpBinaryOrTernaryOp1Op2(mi, irb, eOpConv::SEXT_TRUNC);
+	std::tie(op1, op2) = loadOpBinaryOrTernaryOp1Op2(mi, irb, eOpConv::SEXT_TRUNC_OR_BITCAST, eOpConv::FPCAST_OR_BITCAST);
 	auto* sub = op1->getType()->isFloatingPointTy()
 			? irb.CreateFSub(op1, op2)
 			: irb.CreateSub(op1, op2);
@@ -1785,7 +1786,7 @@ void Capstone2LlvmIrTranslatorMips_impl::translateXor(cs_insn* i, cs_mips* mi, l
 {
 	EXPECT_IS_BINARY_OR_TERNARY(i, mi, irb);
 
-	std::tie(op1, op2) = loadOpBinaryOrTernaryOp1Op2(mi, irb, eOpConv::ZEXT_TRUNC);
+	std::tie(op1, op2) = loadOpBinaryOrTernaryOp1Op2(mi, irb, eOpConv::ZEXT_TRUNC_OR_BITCAST);
 	auto* x = irb.CreateXor(op1, op2);
 	storeOp(mi->operands[0], x, irb);
 }
@@ -1798,9 +1799,9 @@ void Capstone2LlvmIrTranslatorMips_impl::translateSne(cs_insn* i, cs_mips* mi, l
 {
 	EXPECT_IS_BINARY_OR_TERNARY(i, mi, irb);
 
-	std::tie(op1, op2) = loadOpBinaryOrTernaryOp1Op2(mi, irb, eOpConv::SEXT_TRUNC);
+	std::tie(op1, op2) = loadOpBinaryOrTernaryOp1Op2(mi, irb, eOpConv::SEXT_TRUNC_OR_BITCAST);
 	auto* ne = irb.CreateICmpNE(op1, op2);
-	storeOp(mi->operands[0], ne, irb, eOpConv::ZEXT_TRUNC);
+	storeOp(mi->operands[0], ne, irb, eOpConv::ZEXT_TRUNC_OR_BITCAST);
 }
 
 /**
@@ -1811,9 +1812,9 @@ void Capstone2LlvmIrTranslatorMips_impl::translateSeq(cs_insn* i, cs_mips* mi, l
 {
 	EXPECT_IS_BINARY_OR_TERNARY(i, mi, irb);
 
-	std::tie(op1, op2) = loadOpBinaryOrTernaryOp1Op2(mi, irb, eOpConv::SEXT_TRUNC);
+	std::tie(op1, op2) = loadOpBinaryOrTernaryOp1Op2(mi, irb, eOpConv::SEXT_TRUNC_OR_BITCAST);
 	auto* ne = irb.CreateICmpEQ(op1, op2);
-	storeOp(mi->operands[0], ne, irb, eOpConv::ZEXT_TRUNC);
+	storeOp(mi->operands[0], ne, irb, eOpConv::ZEXT_TRUNC_OR_BITCAST);
 }
 
 } // namespace capstone2llvmir
