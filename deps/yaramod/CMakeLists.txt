@@ -35,8 +35,8 @@ else()
 	message(STATUS "YaraMod: using remote YaraMod revision.")
 
 	ExternalProject_Add(yaramod-project
-		URL https://github.com/avast/yaramod/archive/v2.5.0.zip
-		URL_HASH SHA256=872d04dbb8c7c14aebe04fd6f091d37e8d252e3f80f1b8dae921e3ff629f53b3
+		URL https://github.com/avast/yaramod/archive/v2.12.0.zip
+		URL_HASH SHA256=2f7c1dcdfb8ef6ec2714e4c3f5fbae78a55d50d0033802ce8e2a69c65e113a94
 		DOWNLOAD_NAME yaramod.zip
 		CMAKE_ARGS
 			# This does not work on MSVC, but may be useful on Linux.
