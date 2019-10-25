@@ -1524,8 +1524,11 @@ GenericValue executeBitCastInst(
 		else if (DstTy->isIntegerTy())
 		{
 			if (SrcTy->isFloatTy())
+			{
 				Dest.IntVal = APInt::floatToBits(Src.FloatVal);
-			else if (SrcTy->isDoubleTy())
+			}
+			// FP128 uses double values.
+			else if (SrcTy->isDoubleTy() || SrcTy->isFP128Ty())
 			{
 				Dest.IntVal = APInt::doubleToBits(Src.DoubleVal);
 			}
@@ -1547,10 +1550,13 @@ GenericValue executeBitCastInst(
 				Dest.FloatVal = Src.FloatVal;
 			}
 		}
-		else if (DstTy->isDoubleTy())
+		// FP128 uses double values.
+		else if (DstTy->isDoubleTy() || DstTy->isFP128Ty())
 		{
 			if (SrcTy->isIntegerTy())
+			{
 				Dest.DoubleVal = Src.IntVal.bitsToDouble();
+			}
 			else
 			{
 				Dest.DoubleVal = Src.DoubleVal;
@@ -2849,6 +2855,21 @@ void LlvmIrEmulator::visitBinaryOperator(llvm::BinaryOperator& I)
 	}
 	else
 	{
+		// Values may not have equeal bit sizes, if one was created from fp128
+		// or something like that - it would get transformed to double, that
+		// to i64, but tehe original integer operation would have the orignal
+		// large type like i128.
+		// Change bitsizes to be the same.
+		//
+		if (op0.IntVal.getBitWidth() < op1.IntVal.getBitWidth())
+		{
+			op0.IntVal = APInt(op1.IntVal.getBitWidth(), op0.IntVal.getZExtValue());
+		}
+		else if (op0.IntVal.getBitWidth() > op1.IntVal.getBitWidth())
+		{
+			op1.IntVal = APInt(op0.IntVal.getBitWidth(), op1.IntVal.getZExtValue());
+		}
+
 		switch (I.getOpcode())
 		{
 			default:
