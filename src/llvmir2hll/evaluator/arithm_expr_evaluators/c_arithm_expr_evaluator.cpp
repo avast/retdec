@@ -119,7 +119,7 @@ bool hasOperandsSameBitWidth(const ArithmExprEvaluator::APSIntPair &apsIntPair) 
 * @param[in, out] constPair Pair of constants.
 */
 void tryConvertBoolBoolToInt(ArithmExprEvaluator::ConstPair &constPair) {
-	if (Maybe<ArithmExprEvaluator::ConstBoolPair> constBoolPair =
+	if (std::optional<ArithmExprEvaluator::ConstBoolPair> constBoolPair =
 			ArithmExprEvaluator::castConstPair<ConstBool>(constPair)) {
 		constPair.first = ConstInt::create(constBoolPair->first->getValue(),
 			DEFAULT_INT_BIT_WIDTH);
@@ -227,7 +227,7 @@ void CArithmExprEvaluator::resolveTypesBinaryOp(ConstPair &constPair) {
 	}
 
 	// Problems with integer bit width and signed/unsigned types.
-	if (Maybe<ConstIntPair> constIntPair = castConstPair<ConstInt>(constPair)) {
+	if (std::optional<ConstIntPair> constIntPair = castConstPair<ConstInt>(constPair)) {
 		APSIntPair apsIntPair(getAPSIntsFromConstants(constIntPair));
 		if (isSignedOrUnsignedOperands(apsIntPair) &&
 				!hasOperandsSameBitWidth(apsIntPair)) {
@@ -269,7 +269,7 @@ void CArithmExprEvaluator::resolveTypesBinaryOp(ConstPair &constPair) {
 	}
 
 	// Conversion to same float semantics (same size).
-	if (Maybe<ConstFloatPair> constFloatPair = castConstPair<ConstFloat>(
+	if (std::optional<ConstFloatPair> constFloatPair = castConstPair<ConstFloat>(
 			constPair)) {
 		APFloatPair apFloatPair = getAPFloatsFromConstants(constFloatPair);
 		convertOperandsToSameSemantics(apFloatPair);

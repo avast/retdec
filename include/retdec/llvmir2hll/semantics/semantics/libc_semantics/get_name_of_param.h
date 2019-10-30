@@ -8,16 +8,15 @@
 #ifndef RETDEC_LLVMIR2HLL_SEMANTICS_SEMANTICS_LIBC_SEMANTICS_GET_NAME_OF_PARAM_H
 #define RETDEC_LLVMIR2HLL_SEMANTICS_SEMANTICS_LIBC_SEMANTICS_GET_NAME_OF_PARAM_H
 
+#include <optional>
 #include <string>
-
-#include "retdec/llvmir2hll/support/maybe.h"
 
 namespace retdec {
 namespace llvmir2hll {
 namespace semantics {
 namespace libc {
 
-Maybe<std::string> getNameOfParam(const std::string &funcName,
+std::optional<std::string> getNameOfParam(const std::string &funcName,
 	unsigned paramPos);
 
 } // namespace libc

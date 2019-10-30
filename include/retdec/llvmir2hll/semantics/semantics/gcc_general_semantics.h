@@ -32,13 +32,13 @@ public:
 	/// @name Semantics Interface
 	/// @{
 	virtual std::string getId() const override;
-	virtual Maybe<std::string> getCHeaderFileForFunc(
+	virtual std::optional<std::string> getCHeaderFileForFunc(
 		const std::string &funcName) const override;
-	virtual Maybe<std::string> getNameOfVarStoringResult(
+	virtual std::optional<std::string> getNameOfVarStoringResult(
 		const std::string &funcName) const override;
-	virtual Maybe<std::string> getNameOfParam(const std::string &funcName,
+	virtual std::optional<std::string> getNameOfParam(const std::string &funcName,
 		unsigned paramPos) const override;
-	virtual Maybe<IntStringMap> getSymbolicNamesForParam(
+	virtual std::optional<IntStringMap> getSymbolicNamesForParam(
 		const std::string &funcName, unsigned paramPos) const override;
 	/// @}
 

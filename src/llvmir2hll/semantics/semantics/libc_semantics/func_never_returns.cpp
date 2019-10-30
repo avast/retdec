@@ -55,8 +55,9 @@ const StringSet &FUNC_NEVER_RETURNS(initFuncNeverReturns());
 *
 * See its description for more details.
 */
-Maybe<bool> funcNeverReturns(const std::string &funcName) {
-	return hasItem(FUNC_NEVER_RETURNS, funcName) ? Just(true) : Nothing<bool>();
+std::optional<bool> funcNeverReturns(const std::string &funcName) {
+	return hasItem(FUNC_NEVER_RETURNS, funcName)
+			? std::optional<bool>(true) : std::nullopt;
 }
 
 } // namespace libc

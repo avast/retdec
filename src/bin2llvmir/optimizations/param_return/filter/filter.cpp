@@ -859,16 +859,16 @@ void Filter::orderStacks(std::vector<llvm::Value*>& stacks, bool asc) const
 	{
 		auto aOff = config->getStackVariableOffset(a);
 		auto bOff = config->getStackVariableOffset(b);
-		if (aOff.isUndefined())
+		if (!aOff.has_value())
 		{
-			return bOff.isUndefined();
+			return !bOff.has_value();
 		}
-		else if (aOff.isDefined() && bOff.isUndefined())
+		else if (aOff.has_value() && !bOff.has_value())
 		{
 			return true;
 		}
 
-		bool ascOrd = aOff < bOff;
+		bool ascOrd = aOff.value() < bOff.value();
 
 		return asc ? ascOrd : !ascOrd;
 	});
@@ -1137,14 +1137,14 @@ void Filter::leaveOnlyPositiveStacks(FilterableLayout& lay) const
 			[config](const Value* li)
 			{
 				auto aOff = config->getStackVariableOffset(li);
-				return aOff.isDefined() && aOff < 0;
+				return aOff.has_value() && aOff.value() < 0;
 			}),
 		lay.stacks.end());
 }
 
 void Filter::leaveOnlyContinuousStack(FilterableLayout& lay) const
 {
-	retdec::utils::Maybe<int> prevOff;
+	std::optional<int> prevOff;
 	int gap = _cc->getMaxBytesPerStackParam();
 	auto* config = _abi->getConfig();
 
@@ -1153,16 +1153,16 @@ void Filter::leaveOnlyContinuousStack(FilterableLayout& lay) const
 	{
 		auto off = config->getStackVariableOffset(*it);
 
-		if (off.isUndefined())
+		if (!off.has_value())
 		{
 			++it;
 			continue;
 		}
-		if (prevOff.isUndefined())
+		else if (!prevOff.has_value())
 		{
 			prevOff = off;
 		}
-		else if (std::abs(prevOff - off) > gap)
+		else if (std::abs(prevOff.value() - off.value()) > gap)
 		{
 			it = lay.stacks.erase(it);
 			continue;

@@ -12,7 +12,6 @@
 #include "retdec/llvmir2hll/ir/void_type.h"
 #include "llvmir2hll/semantics/semantics_mock.h"
 #include "retdec/llvmir2hll/support/headers_for_declared_funcs.h"
-#include "retdec/llvmir2hll/support/maybe.h"
 #include "retdec/llvmir2hll/support/types.h"
 
 using namespace ::testing;
@@ -60,7 +59,7 @@ NoHeadersAreReturnedIfThereAreDeclaredFunctionsButNoSemanticsForThem) {
 
 	// Set-up the semantics.
 	ON_CALL(*semanticsMock, getCHeaderFileForFunc(_))
-		.WillByDefault(Return(Nothing<std::string>()));
+		.WillByDefault(Return(std::nullopt));
 
 	// Get the headers.
 	StringSet headers(HeadersForDeclaredFuncs::getHeaders(module));
@@ -84,9 +83,9 @@ HeadersForKnownFunctionDeclarationsAreReturnedCorrectly) {
 
 	// Set-up the semantics.
 	ON_CALL(*semanticsMock, getCHeaderFileForFunc("printf"))
-		.WillByDefault(Return(Just<std::string>("stdio.h")));
+		.WillByDefault(Return("stdio.h"));
 	ON_CALL(*semanticsMock, getCHeaderFileForFunc("exit"))
-		.WillByDefault(Return(Just<std::string>("stdlib.h")));
+		.WillByDefault(Return("stdlib.h"));
 
 	// Get the headers.
 	StringSet headers(HeadersForDeclaredFuncs::getHeaders(module));
@@ -110,7 +109,7 @@ HasAssocHeaderReturnsTrueWhenFunctionHasAssociatedHeaderFile) {
 
 	// Set-up the semantics.
 	ON_CALL(*semanticsMock, getCHeaderFileForFunc("printf"))
-		.WillByDefault(Return(Just<std::string>("stdio.h")));
+		.WillByDefault(Return("stdio.h"));
 
 	// Check the result.
 	EXPECT_TRUE(HeadersForDeclaredFuncs::hasAssocHeader(module,
@@ -129,7 +128,7 @@ HasAssocHeaderReturnsFalseWhenFunctionHasNoAssociatedHeaderFile) {
 
 	// Set-up the semantics.
 	ON_CALL(*semanticsMock, getCHeaderFileForFunc("unknown_func"))
-		.WillByDefault(Return(Nothing<std::string>()));
+		.WillByDefault(Return(std::nullopt));
 
 	// Check the result.
 	EXPECT_FALSE(HeadersForDeclaredFuncs::hasAssocHeader(module,

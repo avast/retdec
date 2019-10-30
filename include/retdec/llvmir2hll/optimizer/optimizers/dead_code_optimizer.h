@@ -13,7 +13,6 @@
 #include "retdec/llvmir2hll/ir/switch_stmt.h"
 #include "retdec/llvmir2hll/optimizer/func_optimizer.h"
 #include "retdec/llvmir2hll/support/debug.h"
-#include "retdec/llvmir2hll/support/maybe.h"
 #include "retdec/llvmir2hll/support/smart_ptr.h"
 
 namespace retdec {

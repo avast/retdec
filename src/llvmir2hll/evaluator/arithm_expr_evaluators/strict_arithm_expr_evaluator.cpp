@@ -50,7 +50,7 @@ void StrictArithmExprEvaluator::resolveTypesBinaryOp(ConstPair &constPair) {
 		canBeEvaluated = false;
 	}
 
-	if (Maybe<ConstIntPair> constIntPair = castConstPair<ConstInt>(constPair)) {
+	if (std::optional<ConstIntPair> constIntPair = castConstPair<ConstInt>(constPair)) {
 		APSIntPair apsIntPair(getAPSIntsFromConstants(constIntPair));
 		if (apsIntPair.first.getBitWidth() !=
 				apsIntPair.second.getBitWidth()) {
@@ -73,7 +73,7 @@ void StrictArithmExprEvaluator::resolveOpSpecifications(ShPtr<DivOpExpr> expr,
 	}
 
 	// Supported only division without remainder.
-	if (Maybe<ConstIntPair> constIntPair = castConstPair<ConstInt>(constPair)) {
+	if (std::optional<ConstIntPair> constIntPair = castConstPair<ConstInt>(constPair)) {
 		APSIntPair apsIntPair = getAPSIntsFromConstants(constIntPair);
 		ShPtr<ConstInt> remConstInt(ConstInt::create(apsIntPair.first.srem(
 			apsIntPair.second)));

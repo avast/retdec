@@ -8,7 +8,6 @@
 #define RETDEC_LLVMIR2HLL_OPTIMIZER_OPTIMIZERS_IF_TO_SWITCH_OPTIMIZER_H
 
 #include "retdec/llvmir2hll/optimizer/func_optimizer.h"
-#include "retdec/llvmir2hll/support/maybe.h"
 
 namespace retdec {
 namespace llvmir2hll {

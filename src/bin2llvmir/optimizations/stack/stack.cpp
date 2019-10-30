@@ -251,7 +251,7 @@ retdec::config::Object* StackAnalysis::getDebugStackVariable(
 		return nullptr;
 	}
 
-	retdec::utils::Maybe<int> baseOffset;
+	std::optional<int> baseOffset;
 	if (auto* ci = dyn_cast_or_null<ConstantInt>(root.value))
 	{
 		baseOffset = ci->getSExtValue();
@@ -275,7 +275,7 @@ retdec::config::Object* StackAnalysis::getDebugStackVariable(
 			}
 		}
 	}
-	if (baseOffset.isUndefined())
+	if (!baseOffset.has_value())
 	{
 		return nullptr;
 	}

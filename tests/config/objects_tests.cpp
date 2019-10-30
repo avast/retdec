@@ -63,8 +63,6 @@ TEST_F(GlobalVarContainerTests, ElementWithTheSameAddressGetsReplaced)
 
 	EXPECT_EQ("g4", globals.getObjectByAddress(0x2000)->getName());
 	EXPECT_EQ("g4", globals._addr2global.find(0x2000)->second->getName());
-
-	globals._addr2global.empty();
 }
 
 TEST_F(GlobalVarContainerTests, OperationsOnUnderlyingContainerAreReflectedInaddr2global)

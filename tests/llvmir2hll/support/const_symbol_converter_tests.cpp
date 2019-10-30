@@ -70,7 +70,7 @@ void ConstSymbolConverterTests::scenarioChangeConstantToSymbolicNamesWorksCorrec
 
 	// Set-up the semantics.
 	ON_CALL(*semanticsMock, getSymbolicNamesForParam(funcName, 1))
-		.WillByDefault(Return(Just(refMap)));
+		.WillByDefault(Return(refMap));
 
 	// Perform the conversion.
 	ConstSymbolConverter::convert(module);

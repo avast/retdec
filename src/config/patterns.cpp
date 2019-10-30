@@ -52,8 +52,8 @@ Pattern::Match::Match()
 Pattern::Match::Match(
 		const retdec::utils::Address& offset,
 		const retdec::utils::Address& address,
-		retdec::utils::Maybe<unsigned> size,
-		retdec::utils::Maybe<unsigned> entrySize,
+		std::optional<unsigned> size,
+		std::optional<unsigned> entrySize,
 		eType type)
 	:
 		_offset(offset),
@@ -68,8 +68,8 @@ Pattern::Match::Match(
 Pattern::Match Pattern::Match::unknown(
 		const retdec::utils::Address& offset,
 		const retdec::utils::Address& address,
-		retdec::utils::Maybe<unsigned> size,
-		retdec::utils::Maybe<unsigned> entrySize)
+		std::optional<unsigned> size,
+		std::optional<unsigned> entrySize)
 {
 	return Match(offset, address, size, entrySize, eType::UNKNOWN);
 }
@@ -77,8 +77,8 @@ Pattern::Match Pattern::Match::unknown(
 Pattern::Match Pattern::Match::integral(
 		const retdec::utils::Address& offset,
 		const retdec::utils::Address& address,
-		retdec::utils::Maybe<unsigned> size,
-		retdec::utils::Maybe<unsigned> entrySize)
+		std::optional<unsigned> size,
+		std::optional<unsigned> entrySize)
 {
 	return Match(offset, address, size, entrySize, eType::INTEGRAL);
 }
@@ -86,8 +86,8 @@ Pattern::Match Pattern::Match::integral(
 Pattern::Match Pattern::Match::floatingPoint(
 		const retdec::utils::Address& offset,
 		const retdec::utils::Address& address,
-		retdec::utils::Maybe<unsigned> size,
-		retdec::utils::Maybe<unsigned> entrySize)
+		std::optional<unsigned> size,
+		std::optional<unsigned> entrySize)
 {
 	return Match(offset, address, size, entrySize, eType::FLOATING_POINT);
 }
@@ -104,12 +104,12 @@ bool Pattern::Match::isAddressDefined() const
 
 bool Pattern::Match::isSizeDefined() const
 {
-	return _size.isDefined();
+	return _size.has_value();
 }
 
 bool Pattern::Match::isEntrySizeDefined() const
 {
-	return _entrySize.isDefined();
+	return _entrySize.has_value();
 }
 
 bool Pattern::Match::isTypeUnknown() const
@@ -172,12 +172,12 @@ retdec::utils::Address Pattern::Match::getAddress() const
 	return _address;
 }
 
-retdec::utils::Maybe<unsigned> Pattern::Match::getSize() const
+std::optional<unsigned> Pattern::Match::getSize() const
 {
 	return _size;
 }
 
-retdec::utils::Maybe<unsigned> Pattern::Match::getEntrySize() const
+std::optional<unsigned> Pattern::Match::getEntrySize() const
 {
 	return _entrySize;
 }
@@ -231,8 +231,8 @@ Json::Value Pattern::Match::getJsonValue() const
 
 	if (isOffsetDefined())    match[JSON_offset] = toJsonValue(getOffset());
 	if (isAddressDefined())   match[JSON_address] = toJsonValue(getAddress());
-	if (isSizeDefined())      match[JSON_size] = getSize().getValue();
-	if (isEntrySizeDefined()) match[JSON_entrySize] = getEntrySize().getValue();
+	if (isSizeDefined())      match[JSON_size] = getSize().value();
+	if (isEntrySizeDefined()) match[JSON_entrySize] = getEntrySize().value();
 
 	if (isTypeIntegral())
 		match[JSON_match_type] = JSON_val_typeIntegral;

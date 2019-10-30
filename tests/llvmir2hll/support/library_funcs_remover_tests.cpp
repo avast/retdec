@@ -50,7 +50,7 @@ DoNotRemoveAnythingIfThereIsJustTheMainFunction) {
 
 	// Set-up the semantics.
 	ON_CALL(*semanticsMock, getCHeaderFileForFunc(_))
-		.WillByDefault(Return(Nothing<std::string>()));
+		.WillByDefault(Return(std::nullopt));
 
 	// Perform the removal.
 	FuncVector removedFuncs(LibraryFuncsRemover::removeFuncs(module));
@@ -73,7 +73,7 @@ DoNotRemoveAnythingIfThereAreNoFunctionDeclarations) {
 
 	// Set-up the semantics.
 	ON_CALL(*semanticsMock, getCHeaderFileForFunc(_))
-		.WillByDefault(Return(Nothing<std::string>()));
+		.WillByDefault(Return(std::nullopt));
 
 	// Perform the removal.
 	FuncVector removedFuncs(LibraryFuncsRemover::removeFuncs(module));
@@ -101,7 +101,7 @@ DoNotRemoveAnythingIfThereAreFunctionDeclarationsButNoHeadersAreToBeIncluded) {
 
 	// Set-up the semantics.
 	ON_CALL(*semanticsMock, getCHeaderFileForFunc(_))
-		.WillByDefault(Return(Nothing<std::string>()));
+		.WillByDefault(Return(std::nullopt));
 
 	// Perform the removal.
 	FuncVector removedFuncs(LibraryFuncsRemover::removeFuncs(module));
@@ -136,11 +136,11 @@ DoNotRemoveFuncMarkedAsExportedEvenIfThereIsHeaderForIt) {
 
 	// Set-up the semantics.
 	ON_CALL(*semanticsMock, getCHeaderFileForFunc("test"))
-		.WillByDefault(Return(Nothing<std::string>()));
+		.WillByDefault(Return(std::nullopt));
 	ON_CALL(*semanticsMock, getCHeaderFileForFunc("printf"))
-		.WillByDefault(Return(Just<std::string>("stdio.h")));
+		.WillByDefault(Return("stdio.h"));
 	ON_CALL(*semanticsMock, getCHeaderFileForFunc("fprintf"))
-		.WillByDefault(Return(Just<std::string>("stdio.h")));
+		.WillByDefault(Return("stdio.h"));
 
 	// Perform the removal.
 	FuncVector removedFuncs(LibraryFuncsRemover::removeFuncs(module));
@@ -167,13 +167,13 @@ DefinedFunctionsFromIncludedHeadersAreTurnedIntoDeclarations) {
 
 	// Set-up the semantics.
 	ON_CALL(*semanticsMock, getCHeaderFileForFunc("test"))
-		.WillByDefault(Return(Nothing<std::string>()));
+		.WillByDefault(Return(std::nullopt));
 	ON_CALL(*semanticsMock, getCHeaderFileForFunc("fprintf"))
-		.WillByDefault(Return(Just<std::string>("stdio.h")));
+		.WillByDefault(Return("stdio.h"));
 	ON_CALL(*semanticsMock, getCHeaderFileForFunc("printf"))
-		.WillByDefault(Return(Just<std::string>("stdio.h")));
+		.WillByDefault(Return("stdio.h"));
 	ON_CALL(*semanticsMock, getCHeaderFileForFunc("signal"))
-		.WillByDefault(Return(Just<std::string>("signal.h")));
+		.WillByDefault(Return("signal.h"));
 
 	// Perform the removal.
 	FuncVector removedFuncs(LibraryFuncsRemover::removeFuncs(module));

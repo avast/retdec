@@ -63,7 +63,7 @@ class APICallInfoSeqParser: private retdec::utils::NonCopyable {
 public:
 	static ShPtr<APICallInfoSeqParser> create();
 
-	Maybe<APICallInfoSeq> parse(const std::string &text) const;
+	std::optional<APICallInfoSeq> parse(const std::string &text) const;
 
 private:
 	APICallInfoSeqParser();

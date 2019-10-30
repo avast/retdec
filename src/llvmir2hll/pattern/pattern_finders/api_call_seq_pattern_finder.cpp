@@ -52,9 +52,9 @@ using APICallInfoSeqMap = std::multimap<std::string, APICallInfoSeq>;
 void parseAndAddAPICallInfoSeqToMap(APICallInfoSeqMap &map,
 		const std::string &funcName, const std::string &seqTextRepr) {
 	static ShPtr<APICallInfoSeqParser> parser(APICallInfoSeqParser::create());
-	Maybe<APICallInfoSeq> seq(parser->parse(seqTextRepr));
+	std::optional<APICallInfoSeq> seq(parser->parse(seqTextRepr));
 	if (seq) {
-		map.insert(std::make_pair(funcName, seq.get()));
+		map.insert(std::make_pair(funcName, seq.value()));
 	} else {
 		printErrorMessage(
 			"APICallInfoSeqParser failed to parse the following pattern: ",

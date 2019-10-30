@@ -8,9 +8,9 @@
 #define RETDEC_CONFIG_STORAGE_H
 
 #include <string>
+#include <optional>
 
 #include "retdec/config/base.h"
-#include "retdec/utils/value.h"
 
 namespace retdec {
 namespace config {
@@ -58,7 +58,7 @@ class Storage
 		retdec::utils::Address getAddress() const;
 		std::string getRegisterName() const;
 		int getStackOffset() const;
-		retdec::utils::Maybe<unsigned> getRegisterNumber() const;
+		std::optional<unsigned> getRegisterNumber() const;
 		/// @}
 
 	protected:
@@ -78,7 +78,7 @@ class Storage
 		std::string _registerName;
 		retdec::utils::Address _globalAddress;
 
-		retdec::utils::Maybe<unsigned> _registerNumber;
+		std::optional<unsigned> _registerNumber;
 };
 
 } // namespace config

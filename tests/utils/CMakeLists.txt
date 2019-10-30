@@ -14,7 +14,6 @@ set(RETDEC_TESTS_UTILS_SOURCES
 	scope_exit_tests.cpp
 	string_tests.cpp
 	time_tests.cpp
-	value_tests.cpp
 )
 
 add_executable(retdec-tests-utils ${RETDEC_TESTS_UTILS_SOURCES})

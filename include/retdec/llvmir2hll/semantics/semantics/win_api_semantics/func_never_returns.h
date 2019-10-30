@@ -8,16 +8,15 @@
 #ifndef RETDEC_LLVMIR2HLL_SEMANTICS_SEMANTICS_WIN_API_SEMANTICS_FUNC_NEVER_RETURNS_H
 #define RETDEC_LLVMIR2HLL_SEMANTICS_SEMANTICS_WIN_API_SEMANTICS_FUNC_NEVER_RETURNS_H
 
+#include <optional>
 #include <string>
-
-#include "retdec/llvmir2hll/support/maybe.h"
 
 namespace retdec {
 namespace llvmir2hll {
 namespace semantics {
 namespace win_api {
 
-Maybe<bool> funcNeverReturns(const std::string &funcName);
+std::optional<bool> funcNeverReturns(const std::string &funcName);
 
 } // namespace win_api
 } // namespace semantics

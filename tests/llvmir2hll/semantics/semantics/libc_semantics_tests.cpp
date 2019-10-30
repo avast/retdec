@@ -43,9 +43,9 @@ SemanticsHasNonEmptyID) {
 
 TEST_F(LibcSemanticsTests,
 GetMainFuncNameReturnsMain) {
-	Maybe<std::string> mainFuncName(semantics->getMainFuncName());
+	std::optional<std::string> mainFuncName(semantics->getMainFuncName());
 	ASSERT_TRUE(mainFuncName);
-	EXPECT_EQ("main", mainFuncName.get());
+	EXPECT_EQ("main", mainFuncName.value());
 }
 
 //
@@ -55,30 +55,30 @@ GetMainFuncNameReturnsMain) {
 TEST_F(LibcSemanticsTests,
 GetCHeaderFileForKnownFunctionsReturnsCorrectAnswer) {
 	// printf
-	Maybe<std::string> headerForPrintf(semantics->getCHeaderFileForFunc("printf"));
+	std::optional<std::string> headerForPrintf(semantics->getCHeaderFileForFunc("printf"));
 	ASSERT_TRUE(headerForPrintf) << "no header file for `print`";
-	EXPECT_EQ("stdio.h", headerForPrintf.get());
+	EXPECT_EQ("stdio.h", headerForPrintf.value());
 
 	// exit
-	Maybe<std::string> headerForExit(semantics->getCHeaderFileForFunc("exit"));
+	std::optional<std::string> headerForExit(semantics->getCHeaderFileForFunc("exit"));
 	ASSERT_TRUE(headerForExit) << "no header file for `exit`";
-	EXPECT_EQ("stdlib.h", headerForExit.get());
+	EXPECT_EQ("stdlib.h", headerForExit.value());
 
 	// fabs
-	Maybe<std::string> headerForFabs(semantics->getCHeaderFileForFunc("fabs"));
+	std::optional<std::string> headerForFabs(semantics->getCHeaderFileForFunc("fabs"));
 	ASSERT_TRUE(headerForFabs) << "no header file for `fabs`";
-	EXPECT_EQ("math.h", headerForFabs.get());
+	EXPECT_EQ("math.h", headerForFabs.value());
 
 	// signal
-	Maybe<std::string> headerForSignal(semantics->getCHeaderFileForFunc("signal"));
+	std::optional<std::string> headerForSignal(semantics->getCHeaderFileForFunc("signal"));
 	ASSERT_TRUE(headerForSignal) << "no header file for `signal`";
-	EXPECT_EQ("signal.h", headerForSignal.get());
+	EXPECT_EQ("signal.h", headerForSignal.value());
 }
 
 TEST_F(LibcSemanticsTests,
 GetCHeaderFileForUnknownFunctionsReturnsNoAnswer) {
 	// foo
-	Maybe<std::string> headerForFoo(semantics->getCHeaderFileForFunc("foo"));
+	std::optional<std::string> headerForFoo(semantics->getCHeaderFileForFunc("foo"));
 	EXPECT_FALSE(headerForFoo);
 }
 
@@ -89,20 +89,20 @@ GetCHeaderFileForUnknownFunctionsReturnsNoAnswer) {
 TEST_F(LibcSemanticsTests,
 FuncNeverReturnsForKnownFunctionsThatNeverReturnsReturnsTrue) {
 	// exit
-	Maybe<bool> exitNeverReturns(semantics->funcNeverReturns("exit"));
+	std::optional<bool> exitNeverReturns(semantics->funcNeverReturns("exit"));
 	ASSERT_TRUE(exitNeverReturns) << "no information for `exit`";
-	EXPECT_TRUE(exitNeverReturns.get());
+	EXPECT_TRUE(exitNeverReturns.value());
 
 	// abort
-	Maybe<bool> abortNeverReturns(semantics->funcNeverReturns("abort"));
+	std::optional<bool> abortNeverReturns(semantics->funcNeverReturns("abort"));
 	ASSERT_TRUE(abortNeverReturns) << "no information for `abort`";
-	EXPECT_TRUE(abortNeverReturns.get());
+	EXPECT_TRUE(abortNeverReturns.value());
 }
 
 TEST_F(LibcSemanticsTests,
 FuncNeverReturnsForUnknownFunctionsReturnsNoAnswer) {
 	// foo
-	Maybe<bool> fooNeverReturns(semantics->funcNeverReturns("foo"));
+	std::optional<bool> fooNeverReturns(semantics->funcNeverReturns("foo"));
 	ASSERT_FALSE(fooNeverReturns) << "there should be no information for `foo`";
 }
 
@@ -113,20 +113,20 @@ FuncNeverReturnsForUnknownFunctionsReturnsNoAnswer) {
 TEST_F(LibcSemanticsTests,
 GetNameOfVarStoringResultForKnownFunctionsReturnsCorrectAnswer) {
 	// getchar
-	Maybe<std::string> getcharVarName(semantics->getNameOfVarStoringResult("getchar"));
+	std::optional<std::string> getcharVarName(semantics->getNameOfVarStoringResult("getchar"));
 	ASSERT_TRUE(getcharVarName) << "no name of the variable storing the result of `getchar`";
-	EXPECT_EQ("c", getcharVarName.get());
+	EXPECT_EQ("c", getcharVarName.value());
 
 	// fgetc
-	Maybe<std::string> fgetcVarName(semantics->getNameOfVarStoringResult("fgetc"));
+	std::optional<std::string> fgetcVarName(semantics->getNameOfVarStoringResult("fgetc"));
 	ASSERT_TRUE(fgetcVarName) << "no name of the variable storing the result of `fgetc`";
-	EXPECT_EQ("c", fgetcVarName.get());
+	EXPECT_EQ("c", fgetcVarName.value());
 }
 
 TEST_F(LibcSemanticsTests,
 GetNameOfVarStoringResultForUnknownFunctionsReturnsNoAnswer) {
 	// foo
-	Maybe<std::string> fooVarName(semantics->getNameOfVarStoringResult("foo"));
+	std::optional<std::string> fooVarName(semantics->getNameOfVarStoringResult("foo"));
 	EXPECT_FALSE(fooVarName);
 }
 
@@ -137,20 +137,20 @@ GetNameOfVarStoringResultForUnknownFunctionsReturnsNoAnswer) {
 TEST_F(LibcSemanticsTests,
 GetNameOfParamForKnownFunctionsReturnsCorrectAnswer) {
 	// fopen (first parameter)
-	Maybe<std::string> fopenParam1Name(semantics->getNameOfParam("fopen", 1));
+	std::optional<std::string> fopenParam1Name(semantics->getNameOfParam("fopen", 1));
 	ASSERT_TRUE(fopenParam1Name) << "no name of the first parameter of `fopen`";
-	EXPECT_EQ("file_path", fopenParam1Name.get());
+	EXPECT_EQ("file_path", fopenParam1Name.value());
 
 	// fopen (second parameter)
-	Maybe<std::string> fopenParam2Name(semantics->getNameOfParam("fopen", 2));
+	std::optional<std::string> fopenParam2Name(semantics->getNameOfParam("fopen", 2));
 	ASSERT_TRUE(fopenParam2Name) << "no name of the second parameter of `fopen`";
-	EXPECT_EQ("mode", fopenParam2Name.get());
+	EXPECT_EQ("mode", fopenParam2Name.value());
 }
 
 TEST_F(LibcSemanticsTests,
 GetNameOfParamForUnknownFunctionsReturnsNoAnswer) {
 	// foo
-	Maybe<std::string> fooParam1Name(semantics->getNameOfParam("foo", 1));
+	std::optional<std::string> fooParam1Name(semantics->getNameOfParam("foo", 1));
 	EXPECT_FALSE(fooParam1Name) << "there should be no information for `foo`";
 }
 
@@ -161,7 +161,7 @@ GetNameOfParamForUnknownFunctionsReturnsNoAnswer) {
 TEST_F(LibcSemanticsTests,
 GetSymbolicNamesForParamForKnownFunctionsReturnsCorrectAnswer) {
 	// fseek
-	Maybe<IntStringMap> fseekSymbolicNames(semantics->getSymbolicNamesForParam("fseek", 3));
+	std::optional<IntStringMap> fseekSymbolicNames(semantics->getSymbolicNamesForParam("fseek", 3));
 	ASSERT_TRUE(fseekSymbolicNames) << "no information for `fseek`";
 
 	IntStringMap refMap;
@@ -169,13 +169,13 @@ GetSymbolicNamesForParamForKnownFunctionsReturnsCorrectAnswer) {
 	refMap[1] = "SEEK_CUR";
 	refMap[2] = "SEEK_END";
 
-	EXPECT_EQ(refMap, fseekSymbolicNames.get());
+	EXPECT_EQ(refMap, fseekSymbolicNames.value());
 }
 
 TEST_F(LibcSemanticsTests,
 GetSymbolicNamesForParamForUnknownFunctionsReturnsNoAnswer) {
 	// foo
-	Maybe<IntStringMap> fooSymbolicNames(semantics->getSymbolicNamesForParam("foo", 1));
+	std::optional<IntStringMap> fooSymbolicNames(semantics->getSymbolicNamesForParam("foo", 1));
 	EXPECT_FALSE(fooSymbolicNames);
 }
 
