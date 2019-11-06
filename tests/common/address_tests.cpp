@@ -157,7 +157,7 @@ TEST_F(AddressRangeTests, CtorBothValues)
 
 TEST_F(AddressRangeTests, CtorFromString)
 {
-	AddressRange r("0x1234-0x5678");
+	AddressRange r = stringToAddrRange("0x1234-0x5678");
 
 	EXPECT_EQ(0x1234, r.getStart());
 	EXPECT_EQ(0x5678, r.getEnd());

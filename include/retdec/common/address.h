@@ -50,21 +50,8 @@ class Address
 		uint64_t address;
 };
 
-class AddressRange : public Range<Address>
-{
-	public:
-		AddressRange();
-		AddressRange(Address f, Address s);
-		explicit AddressRange(const std::string &r);
-
-		bool operator<(const AddressRange &o) const;
-		bool operator==(const AddressRange &o) const;
-		bool operator!=(const AddressRange &o) const;
-
-		friend std::ostream& operator<<(
-				std::ostream &out,
-				const AddressRange &r);
-};
+using AddressRange = Range<Address>;
+AddressRange stringToAddrRange(const std::string &r);
 
 /**
  * TODO: Merge with Marek's RangeContainer, use RangeContainer because it can

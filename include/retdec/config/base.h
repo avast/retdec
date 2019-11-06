@@ -70,7 +70,7 @@ bool safeGetBool(
 //=============================================================================
 //
 
-std::string toJsonValue(retdec::common::Address a);
+std::string toJsonValue(common::Address a);
 
 //
 //=============================================================================
@@ -78,12 +78,12 @@ std::string toJsonValue(retdec::common::Address a);
 //=============================================================================
 //
 
-class AddressRangeJson : public retdec::common::AddressRange
+class AddressRangeJson : public common::Range<common::Address>
 {
 	public:
-		AddressRangeJson() : AddressRange() {}
-		AddressRangeJson(retdec::common::Address f, retdec::common::Address s) : AddressRange(f, s) {}
-		explicit AddressRangeJson(const std::string& r) : AddressRange(r) {}
+		AddressRangeJson() : Range() {}
+		AddressRangeJson(common::Address f, common::Address s) : Range(f, s) {}
+		explicit AddressRangeJson(const std::string& r) : Range(common::stringToAddrRange(r)) {}
 
 		static AddressRangeJson fromJsonValue(const Json::Value& val)
 		{

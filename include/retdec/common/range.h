@@ -233,6 +233,17 @@ public:
 	}
 
 	/**
+	 * Return whether this range less than @p rhs. It is less if its starting
+	 * value is less than @rhs starting value.
+	 *
+	 * @return True if less, otherwise false.
+	 */
+	bool operator <(const Range<RangeType>& rhs) const
+	{
+		return _start < rhs._start;
+	}
+
+	/**
 	 * Return whether two ranges are not equal. They are equal if their starting
 	 * and ending values are the same.
 	 *
@@ -247,8 +258,8 @@ public:
 			std::ostream& out,
 			const Range<RangeType>& r)
 	{
-		return out << std::hex << std::showbase << "<"
-				<< r.getStart() << ", " << r.getEnd() << ")";
+		return out << std::hex << std::showbase
+				<< "<" << r.getStart() << ", " << r.getEnd() << ")";
 	}
 
 protected:

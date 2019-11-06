@@ -154,42 +154,18 @@ std::ostream& operator<<(std::ostream &out, const Address &a)
 //=============================================================================
 //
 
-AddressRange::AddressRange()
+AddressRange stringToAddrRange(const std::string &r)
 {
-}
+	AddressRange ar;
 
-AddressRange::AddressRange(Address f, Address s) : Range<Address>(f, s)
-{
-}
-
-AddressRange::AddressRange(const std::string &r)
-{
 	unsigned long long f = 0, s = 0;
 	int ret = std::sscanf(r.c_str(), "0x%llx-0x%llx", &f, &s);
 	if (ret == 2 && f <= s)
 	{
-		setStartEnd(f, s);
+		ar.setStartEnd(f, s);
 	}
-}
 
-bool AddressRange::operator<(const AddressRange &o) const
-{
-	return getStart() < o.getStart();
-}
-
-bool AddressRange::operator==(const AddressRange &o) const
-{
-	return getStart() == o.getStart() && getEnd() == o.getEnd();
-}
-
-bool AddressRange::operator!=(const AddressRange &o) const
-{
-	return !(*this == o);
-}
-
-std::ostream& operator<< (std::ostream &out, const AddressRange &r)
-{
-	return out << std::hex << "<" << r.getStart() << ", " << r.getEnd() << ")";
+	return ar;
 }
 
 //
