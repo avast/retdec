@@ -84,34 +84,6 @@ MaxMemoryLimitHalfRAM("max-memory-half-ram",
 		cl::desc("Limit maximal memory to half of system RAM."),
 		cl::init(false));
 
-static cl::opt<bool>
-NoVerify("disable-verify", cl::desc("Do not run the verifier"), cl::Hidden);
-
-static cl::opt<bool>
-VerifyEach("verify-each", cl::desc("Verify after each transform"));
-
-static cl::opt<bool>
-DisableInline("disable-inlining", cl::desc("Do not run the inliner pass"));
-
-static cl::opt<bool>
-DisableLoopUnrolling("disable-loop-unrolling",
-		cl::desc("Disable loop unrolling in all relevant passes"),
-		cl::init(false));
-
-static cl::opt<bool>
-DisableLoopVectorization("disable-loop-vectorization",
-		cl::desc("Disable the loop vectorization pass"),
-		cl::init(false));
-
-static cl::opt<bool>
-DisableSLPVectorization("disable-slp-vectorization",
-		cl::desc("Disable the slp vectorization pass"),
-		cl::init(false));
-
-static cl::opt<bool>
-DisableSimplifyLibCalls("disable-simplify-libcalls",
-		cl::desc("Disable simplify-libcalls"));
-
 /**
  * These passes are considered to be from LLVM, not from RetDec.
  * We do not want to write phase information for each of them.
@@ -259,12 +231,6 @@ static inline void addPassWithPossibleVerification(
 
 	PM.add(new ModulePassPrinter(pn));
 	PM.add(P);
-
-	// If we are verifying all of the intermediate steps, add the verifier...
-	if (VerifyEach)
-	{
-		PM.add(createVerifierPass());
-	}
 }
 
 /**
@@ -344,7 +310,7 @@ std::unique_ptr<Module> createLlvmModule(LLVMContext& Context)
 	// Immediately run the verifier to catch any problems before starting up the
 	// pass pipelines. Otherwise we can crash on broken code during
 	// doInitialization().
-	if (!NoVerify && verifyModule(*M, &errs()))
+	if (verifyModule(*M, &errs()))
 	{
 		throw std::runtime_error("created llvm::Module is broken");
 	}
@@ -442,10 +408,8 @@ int _main(int argc, char **argv)
 	legacy::PassManager Passes;
 
 	// The -disable-simplify-libcalls flag actually disables all builtin optzns.
-	if (DisableSimplifyLibCalls)
-	{
-		TLII.disableAllFunctions();
-	}
+	TLII.disableAllFunctions();
+
 	addPassWithoutVerification(Passes, new TargetLibraryInfoWrapperPass(TLII));
 
 	// Add internal analysis passes from the target machine.
@@ -479,10 +443,7 @@ int _main(int argc, char **argv)
 	}
 
 	// Check that the module is well formed on completion of optimization
-	if (!NoVerify && !VerifyEach)
-	{
-		addPassWithoutVerification(Passes, createVerifierPass());
-	}
+	addPassWithoutVerification(Passes, createVerifierPass());
 
 	// Write bitcode to the output as the last step.
 	std::unique_ptr<ToolOutputFile> bcOut = createBitcodeOutputFile();
