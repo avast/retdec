@@ -21,22 +21,22 @@ namespace config {
 class VtableItem
 {
 	public:
-		explicit VtableItem(const retdec::utils::Address& a);
+		explicit VtableItem(const retdec::common::Address& a);
 		static VtableItem fromJsonValue(const Json::Value& val);
 
 		Json::Value getJsonValue() const;
 
 		/// @name VtableItem set methods.
 		/// @{
-		void setTargetFunctionAddress(const retdec::utils::Address& a);
+		void setTargetFunctionAddress(const retdec::common::Address& a);
 		void setTargetFunctionName(const std::string& n);
 		/// @}
 
 		/// @name VtableItem get methods.
 		/// @{
-		retdec::utils::Address getId() const;
-		retdec::utils::Address getAddress() const;
-		retdec::utils::Address getTargetFunctionAddress() const;
+		retdec::common::Address getId() const;
+		retdec::common::Address getAddress() const;
+		retdec::common::Address getTargetFunctionAddress() const;
 		std::string getTargetFunctionName() const;
 		/// @}
 
@@ -45,9 +45,9 @@ class VtableItem
 
 	private:
 		/// Virtual table item's address in binary file.
-		retdec::utils::Address _address;
+		retdec::common::Address _address;
 		/// Virtual function address for this item.
-		retdec::utils::Address _targetAddress;
+		retdec::common::Address _targetAddress;
 		/// Name (unique ID) of function on target address.
 		std::string _targetFunctionName;
 };
@@ -59,7 +59,7 @@ class VtableItem
 class Vtable
 {
 	public:
-		explicit Vtable(const retdec::utils::Address& a);
+		explicit Vtable(const retdec::common::Address& a);
 		static Vtable fromJsonValue(const Json::Value& val);
 
 		Json::Value getJsonValue() const;
@@ -71,8 +71,8 @@ class Vtable
 
 		/// @name Vtable get methods.
 		/// @{
-		retdec::utils::Address getId() const;
-		retdec::utils::Address getAddress() const;
+		retdec::common::Address getId() const;
+		retdec::common::Address getAddress() const;
 		std::string getName() const;
 		/// @}
 
@@ -80,7 +80,7 @@ class Vtable
 		bool operator==(const Vtable& o) const;
 
 	private:
-		using VtableItemContainer = BaseAssociativeContainer<retdec::utils::Address, VtableItem>;
+		using VtableItemContainer = BaseAssociativeContainer<retdec::common::Address, VtableItem>;
 
 	public:
 		VtableItemContainer items;
@@ -88,14 +88,14 @@ class Vtable
 	private:
 		std::string _name;
 		/// Virtual table's address in binary file.
-		retdec::utils::Address _address;
+		retdec::common::Address _address;
 };
 
 /**
  * An associative container with virtual function tables' addresses as the key.
  * See Vtable class for details.
  */
-class VtableContainer : public BaseAssociativeContainer<retdec::utils::Address, Vtable>
+class VtableContainer : public BaseAssociativeContainer<retdec::common::Address, Vtable>
 {
 
 };

@@ -1,4 +1,5 @@
-set(BIN2LLVMIR_SOURCES
+
+add_library(retdec-bin2llvmir STATIC
 	analyses/ctor_dtor.cpp
 	analyses/indirectly_called_funcs_analysis.cpp
 	analyses/reachable_funcs_analysis.cpp
@@ -106,7 +107,19 @@ set(BIN2LLVMIR_SOURCES
 	utils/ir_modifier.cpp
 	utils/llvm.cpp
 )
-
-add_library(retdec-bin2llvmir STATIC ${BIN2LLVMIR_SOURCES})
-target_link_libraries(retdec-bin2llvmir retdec-ctypesparser retdec-rtti-finder retdec-loader retdec-fileformat retdec-debugformat retdec-config retdec-demangler retdec-capstone2llvmir retdec-stacofin retdec-llvm-support llvm)
+target_link_libraries(retdec-bin2llvmir
+	retdec-ctypesparser
+	retdec-rtti-finder
+	retdec-loader
+	retdec-fileformat
+	retdec-debugformat
+	retdec-config
+	retdec-demangler
+	retdec-capstone2llvmir
+	retdec-stacofin
+	retdec-llvm-support
+	retdec-common
+	retdec-utils
+	llvm
+)
 target_include_directories(retdec-bin2llvmir PUBLIC ${PROJECT_SOURCE_DIR}/include/)

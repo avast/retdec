@@ -15,8 +15,9 @@
 #include "retdec/bin2llvmir/providers/asm_instruction.h"
 #include "retdec/bin2llvmir/providers/names.h"
 #include "retdec/bin2llvmir/utils/debug.h"
-#include "retdec/utils/address.h"
+#include "retdec/common/address.h"
 
+using namespace retdec::common;
 using namespace retdec::utils;
 
 namespace retdec {
@@ -91,7 +92,7 @@ std::string genJsonLine(const std::string& name, const std::string& val)
 	return "\"" + name + "\": " + "\"" + val + "\",";
 }
 
-retdec::utils::Address getFunctionAddress(llvm::Function* f)
+retdec::common::Address getFunctionAddress(llvm::Function* f)
 {
 	if (f == nullptr)
 	{
@@ -102,7 +103,7 @@ retdec::utils::Address getFunctionAddress(llvm::Function* f)
 	return ai.isValid() ? ai.getAddress() : Address();
 }
 
-retdec::utils::Address getFunctionEndAddress(llvm::Function* f)
+retdec::common::Address getFunctionEndAddress(llvm::Function* f)
 {
 	if (f == nullptr)
 	{
@@ -118,7 +119,7 @@ retdec::utils::Address getFunctionEndAddress(llvm::Function* f)
 	return ai.isValid() ? ai.getEndAddress() : getFunctionAddress(f);
 }
 
-retdec::utils::Address getBasicBlockAddressFromName(llvm::BasicBlock* b)
+retdec::common::Address getBasicBlockAddressFromName(llvm::BasicBlock* b)
 {
 	if (b == nullptr)
 	{
@@ -133,7 +134,7 @@ retdec::utils::Address getBasicBlockAddressFromName(llvm::BasicBlock* b)
 	return ret == 1 ? Address(a) : Address();
 }
 
-retdec::utils::Address getBasicBlockAddress(llvm::BasicBlock* b)
+retdec::common::Address getBasicBlockAddress(llvm::BasicBlock* b)
 {
 	if (b == nullptr)
 	{
@@ -155,7 +156,7 @@ retdec::utils::Address getBasicBlockAddress(llvm::BasicBlock* b)
 	return ai.isValid() ? ai.getAddress() : getBasicBlockAddressFromName(b);
 }
 
-retdec::utils::Address getBasicBlockEndAddress(llvm::BasicBlock* b)
+retdec::common::Address getBasicBlockEndAddress(llvm::BasicBlock* b)
 {
 	if (b == nullptr)
 	{

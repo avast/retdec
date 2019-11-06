@@ -26,28 +26,28 @@ class Pattern
 			public:
 				Match();
 				static Match unknown(
-						const retdec::utils::Address& offset
-							= retdec::utils::Address::getUndef,
-						const retdec::utils::Address& address
-							= retdec::utils::Address::getUndef,
+						const retdec::common::Address& offset
+							= retdec::common::Address::getUndef,
+						const retdec::common::Address& address
+							= retdec::common::Address::getUndef,
 						retdec::utils::Maybe<unsigned> size
 							= retdec::utils::Maybe<unsigned>(),
 						retdec::utils::Maybe<unsigned> entrySize
 							= retdec::utils::Maybe<unsigned>());
 				static Match integral(
-						const retdec::utils::Address& offset
-							= retdec::utils::Address::getUndef,
-						const retdec::utils::Address& address
-							= retdec::utils::Address::getUndef,
+						const retdec::common::Address& offset
+							= retdec::common::Address::getUndef,
+						const retdec::common::Address& address
+							= retdec::common::Address::getUndef,
 						retdec::utils::Maybe<unsigned> size
 							= retdec::utils::Maybe<unsigned>(),
 						retdec::utils::Maybe<unsigned> entrySize
 							= retdec::utils::Maybe<unsigned>());
 				static Match floatingPoint(
-						const retdec::utils::Address& offset
-							= retdec::utils::Address::getUndef,
-						const retdec::utils::Address& address
-							= retdec::utils::Address::getUndef,
+						const retdec::common::Address& offset
+							= retdec::common::Address::getUndef,
+						const retdec::common::Address& address
+							= retdec::common::Address::getUndef,
 						retdec::utils::Maybe<unsigned> size
 							= retdec::utils::Maybe<unsigned>(),
 						retdec::utils::Maybe<unsigned> entrySize
@@ -72,8 +72,8 @@ class Pattern
 
 				/// @name Tool set methods.
 				/// @{
-				void setOffset(const retdec::utils::Address& offset);
-				void setAddress(const retdec::utils::Address& address);
+				void setOffset(const retdec::common::Address& offset);
+				void setAddress(const retdec::common::Address& address);
 				void setSize(const unsigned size);
 				void setEntrySize(const unsigned entrySize);
 				void setIsTypeUnknown();
@@ -83,8 +83,8 @@ class Pattern
 
 				/// @name Tool get methods.
 				/// @{
-				retdec::utils::Address getOffset() const;
-				retdec::utils::Address getAddress() const;
+				retdec::common::Address getOffset() const;
+				retdec::common::Address getAddress() const;
 				retdec::utils::Maybe<unsigned> getSize() const;
 				retdec::utils::Maybe<unsigned> getEntrySize() const;
 				/// @}
@@ -98,15 +98,15 @@ class Pattern
 				};
 
 			private:
-				Match(const retdec::utils::Address& offset,
-						const retdec::utils::Address& address,
+				Match(const retdec::common::Address& offset,
+						const retdec::common::Address& address,
 						retdec::utils::Maybe<unsigned> size,
 						retdec::utils::Maybe<unsigned> entrySize,
 						eType type);
 
 			private:
-				retdec::utils::Address _offset;
-				retdec::utils::Address _address;
+				retdec::common::Address _offset;
+				retdec::common::Address _address;
 				retdec::utils::Maybe<unsigned> _size;
 				retdec::utils::Maybe<unsigned> _entrySize;
 				eType _type = eType::UNKNOWN;

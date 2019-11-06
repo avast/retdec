@@ -48,10 +48,10 @@ class Config
 		void setUnpackedInputFile(const std::string& n);
 		void setPdbInputFile(const std::string& n);
 		void setFrontendVersion(const std::string& n);
-		void setEntryPoint(const retdec::utils::Address& a);
-		void setMainAddress(const retdec::utils::Address& a);
-		void setSectionVMA(const retdec::utils::Address& a);
-		void setImageBase(const retdec::utils::Address& a);
+		void setEntryPoint(const retdec::common::Address& a);
+		void setMainAddress(const retdec::common::Address& a);
+		void setSectionVMA(const retdec::common::Address& a);
+		void setImageBase(const retdec::common::Address& a);
 		void setIsIda(bool b);
 		/// @}
 
@@ -62,10 +62,10 @@ class Config
 		std::string getPdbInputFile() const;
 		std::string getFrontendVersion() const;
 		std::string getConfigFileName() const;
-		retdec::utils::Address getEntryPoint() const;
-		retdec::utils::Address getMainAddress() const;
-		retdec::utils::Address getSectionVMA() const;
-		retdec::utils::Address getImageBase() const;
+		retdec::common::Address getEntryPoint() const;
+		retdec::common::Address getMainAddress() const;
+		retdec::common::Address getSectionVMA() const;
+		retdec::common::Address getImageBase() const;
 		/// @}
 
 		std::string generateJsonString() const;
@@ -98,10 +98,10 @@ class Config
 		std::string _frontendVersion;
 		std::string _configFileName;
 
-		retdec::utils::Address _entryPoint;
-		retdec::utils::Address _mainAddress;
-		retdec::utils::Address _sectionVMA;
-		retdec::utils::Address _imageBase;
+		retdec::common::Address _entryPoint;
+		retdec::common::Address _mainAddress;
+		retdec::common::Address _sectionVMA;
+		retdec::common::Address _imageBase;
 
 		bool _ida = false;
 };

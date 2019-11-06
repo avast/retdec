@@ -10,7 +10,7 @@
 #include <cstdint>
 #include <vector>
 
-#include "retdec/utils/address.h"
+#include "retdec/common/address.h"
 
 namespace retdec {
 namespace rtti_finder {
@@ -25,13 +25,13 @@ namespace rtti_finder {
 class VtableItem
 {
 	public:
-		VtableItem(retdec::utils::Address a, bool thumb = false) :
+		VtableItem(retdec::common::Address a, bool thumb = false) :
 			address(a),
 			isThumb(thumb)
 		{}
 
 	public:
-		retdec::utils::Address address;
+		retdec::common::Address address;
 		bool isThumb = false;
 };
 
@@ -42,11 +42,11 @@ class VtableItem
 class Vtable
 {
 	public:
-		Vtable(retdec::utils::Address a) : vtableAddress(a) {}
+		Vtable(retdec::common::Address a) : vtableAddress(a) {}
 		virtual ~Vtable() {}
 
 	public:
-		retdec::utils::Address vtableAddress;
+		retdec::common::Address vtableAddress;
 		std::vector<VtableItem> virtualFncAddresses;
 };
 

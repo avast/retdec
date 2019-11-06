@@ -294,7 +294,7 @@ GlobalVarContainer& GlobalVarContainer::operator=(const GlobalVarContainer& o)
  * @return Pointer to global object or @c nullptr if not found.
  */
 const Object* GlobalVarContainer::getObjectByAddress(
-		const retdec::utils::Address& address) const
+		const retdec::common::Address& address) const
 {
 	auto fIt = _addr2global.find(address);
 	return fIt != _addr2global.end() ? fIt->second : nullptr;

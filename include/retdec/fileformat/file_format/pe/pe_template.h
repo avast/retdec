@@ -10,7 +10,7 @@
 #include <memory>
 
 #include "retdec/utils/alignment.h"
-#include "retdec/utils/range.h"
+#include "retdec/common/range.h"
 #include "retdec/utils/string.h"
 #include "retdec/fileformat/file_format/pe/pe_template_aux.h"
 #include "retdec/fileformat/types/dotnet_headers/clr_header.h"
@@ -885,16 +885,16 @@ template<int bits> unsigned long long peSecurityDirSize(const PeLib::PeHeaderT<b
  * @param peImports Parser of PE import directory
  * @return Occupied address ranges
  */
-template<int bits> retdec::utils::RangeContainer<std::uint64_t> peImportDirectoryOccupiedAddresses(const PeLib::ImportDirectory<bits> &peImports)
+template<int bits> retdec::common::RangeContainer<std::uint64_t> peImportDirectoryOccupiedAddresses(const PeLib::ImportDirectory<bits> &peImports)
 {
-	retdec::utils::RangeContainer<std::uint64_t> result;
+	retdec::common::RangeContainer<std::uint64_t> result;
 	for (const auto& addresses : peImports.getOccupiedAddresses())
 	{
 		try
 		{
-			result.addRange(retdec::utils::Range<std::uint64_t>{addresses.first, addresses.second});
+			result.addRange(retdec::common::Range<std::uint64_t>{addresses.first, addresses.second});
 		}
-		catch (const retdec::utils::InvalidRangeException&)
+		catch (const retdec::common::InvalidRangeException&)
 		{
 			continue;
 		}
@@ -908,16 +908,16 @@ template<int bits> retdec::utils::RangeContainer<std::uint64_t> peImportDirector
  * @param peExports Parser of PE export directory
  * @return Occupied address ranges
  */
-template<int bits> retdec::utils::RangeContainer<std::uint64_t> peExportDirectoryOccupiedAddresses(const PeLib::ExportDirectoryT<bits> &peExports)
+template<int bits> retdec::common::RangeContainer<std::uint64_t> peExportDirectoryOccupiedAddresses(const PeLib::ExportDirectoryT<bits> &peExports)
 {
-	retdec::utils::RangeContainer<std::uint64_t> result;
+	retdec::common::RangeContainer<std::uint64_t> result;
 	for (const auto& addresses : peExports.getOccupiedAddresses())
 	{
 		try
 		{
-			result.addRange(retdec::utils::Range<std::uint64_t>{addresses.first, addresses.second});
+			result.addRange(retdec::common::Range<std::uint64_t>{addresses.first, addresses.second});
 		}
-		catch (const retdec::utils::InvalidRangeException&)
+		catch (const retdec::common::InvalidRangeException&)
 		{
 			continue;
 		}
@@ -931,16 +931,16 @@ template<int bits> retdec::utils::RangeContainer<std::uint64_t> peExportDirector
  * @param peDebug Parser of PE debug directory
  * @return Occupied address ranges
  */
-template<int bits> retdec::utils::RangeContainer<std::uint64_t> peDebugDirectoryOccupiedAddresses(const PeLib::DebugDirectoryT<bits> &peDebug)
+template<int bits> retdec::common::RangeContainer<std::uint64_t> peDebugDirectoryOccupiedAddresses(const PeLib::DebugDirectoryT<bits> &peDebug)
 {
-	retdec::utils::RangeContainer<std::uint64_t> result;
+	retdec::common::RangeContainer<std::uint64_t> result;
 	for (const auto& addresses : peDebug.getOccupiedAddresses())
 	{
 		try
 		{
-			result.addRange(retdec::utils::Range<std::uint64_t>{addresses.first, addresses.second});
+			result.addRange(retdec::common::Range<std::uint64_t>{addresses.first, addresses.second});
 		}
-		catch (const retdec::utils::InvalidRangeException&)
+		catch (const retdec::common::InvalidRangeException&)
 		{
 			continue;
 		}
@@ -954,16 +954,16 @@ template<int bits> retdec::utils::RangeContainer<std::uint64_t> peDebugDirectory
  * @param peResources Parser of PE resource directory
  * @return Occupied address ranges
  */
-template<int bits> retdec::utils::RangeContainer<std::uint64_t> peResourceDirectoryOccupiedAddresses(const PeLib::ResourceDirectoryT<bits> &peResources)
+template<int bits> retdec::common::RangeContainer<std::uint64_t> peResourceDirectoryOccupiedAddresses(const PeLib::ResourceDirectoryT<bits> &peResources)
 {
-	retdec::utils::RangeContainer<std::uint64_t> result;
+	retdec::common::RangeContainer<std::uint64_t> result;
 	for (const auto& addresses : peResources.getOccupiedAddresses())
 	{
 		try
 		{
-			result.addRange(retdec::utils::Range<std::uint64_t>{addresses.first, addresses.second});
+			result.addRange(retdec::common::Range<std::uint64_t>{addresses.first, addresses.second});
 		}
-		catch (const retdec::utils::InvalidRangeException&)
+		catch (const retdec::common::InvalidRangeException&)
 		{
 			continue;
 		}

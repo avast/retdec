@@ -1,18 +1,18 @@
 /**
-* @file tests/utils/range_tests.cpp
-* @brief Tests for the @c address module.
-* @copyright (c) 2017 Avast Software, licensed under the MIT license
+* @file tests/common/range_tests.cpp
+* @brief Tests for the @c range module.
+* @copyright (c) 2019 Avast Software, licensed under the MIT license
 */
 
 #include <gtest/gtest.h>
 
-#include "retdec/utils/address.h"
-#include "retdec/utils/range.h"
+#include "retdec/common/address.h"
+#include "retdec/common/range.h"
 
 using namespace ::testing;
 
 namespace retdec {
-namespace utils {
+namespace common {
 namespace tests {
 
 /**
@@ -316,5 +316,5 @@ TEST_F(RangeContainerTests, InsertRangeMergeBordering)
 }
 
 } // namespace tests
-} // namespace utils
+} // namespace common
 } // namespace retdec

@@ -144,7 +144,7 @@ for (auto* p : vtable)
 	retdec::config::Vtable confVt(vt.vtableAddress);
 	confVt.setName(names::generateVtableName(vt.vtableAddress));
 
-	retdec::utils::Address itemAddr = vt.vtableAddress;
+	retdec::common::Address itemAddr = vt.vtableAddress;
 	for (auto& item : vt.virtualFncAddresses)
 	{
 		retdec::config::VtableItem confItem(itemAddr);

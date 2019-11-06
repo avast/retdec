@@ -13,7 +13,7 @@
 
 #include "retdec/rtti-finder/rtti/rtti_gcc.h"
 #include "retdec/rtti-finder/vtable/vtable.h"
-#include "retdec/utils/address.h"
+#include "retdec/common/address.h"
 
 namespace retdec {
 namespace rtti_finder {
@@ -31,19 +31,19 @@ namespace rtti_finder {
 class VtableGcc : public Vtable
 {
 	public:
-		VtableGcc(retdec::utils::Address a) : Vtable(a) {}
+		VtableGcc(retdec::common::Address a) : Vtable(a) {}
 
 	public:
 		std::vector<int> vcallOffsets; ///< TODO: not set/used right now
 		std::vector<int> vbaseOffsets; ///< TODO: not set/used right now
 		int topOffset = 0;             ///< TODO: not set/used right now
-		retdec::utils::Address rttiAddress;
+		retdec::common::Address rttiAddress;
 		// Vtable::virtualFncAddresses
 
 		std::shared_ptr<ClassTypeInfo> rtti;
 };
 
-using VtablesGcc = std::map<retdec::utils::Address, VtableGcc>;
+using VtablesGcc = std::map<retdec::common::Address, VtableGcc>;
 
 } // namespace rtti_finder
 } // namespace retdec

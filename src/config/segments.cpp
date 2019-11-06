@@ -18,7 +18,7 @@ const std::string JSON_endAddr   = "endAddr";
 namespace retdec {
 namespace config {
 
-Segment::Segment(const retdec::utils::Address& start)
+Segment::Segment(const retdec::common::Address& start)
 {
 	setStart(start);
 }

@@ -185,8 +185,8 @@ void Function::addComment(const std::string& c)             { _comment += c; }
 void Function::setDeclarationString(const std::string& s)   { _declarationString = s; }
 void Function::setSourceFileName(const std::string& n)      { _sourceFileName = n; }
 void Function::setWrappedFunctionName(const std::string& n) { _wrapperdFunctionName = n; }
-void Function::setStartLine(const retdec::utils::Address& l)       { _startLine = l; }
-void Function::setEndLine(const retdec::utils::Address& l)         { _endLine = l; }
+void Function::setStartLine(const retdec::common::Address& l)       { _startLine = l; }
+void Function::setEndLine(const retdec::common::Address& l)         { _endLine = l; }
 void Function::setIsUserDefined()                           { _linkType = USER_DEFINED; }
 void Function::setIsStaticallyLinked()                      { _linkType = STATICALLY_LINKED; }
 void Function::setIsDynamicallyLinked()                     { _linkType = DYNAMICALLY_LINKED; }
@@ -271,7 +271,7 @@ const Function* FunctionContainer::getFunctionByName(const std::string& name) co
 /**
  * @return Pointer to function or @c nullptr if not found.
  */
-Function* FunctionContainer::getFunctionByStartAddress(const retdec::utils::Address& addr)
+Function* FunctionContainer::getFunctionByStartAddress(const retdec::common::Address& addr)
 {
 	for (auto& elem : _data)
 	{

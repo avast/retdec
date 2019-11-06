@@ -38,7 +38,7 @@ class FileImageTests: public LlvmIrTests
 //
 //llvm::Constant* getConstant(
 //		llvm::Type* type,
-//		retdec::utils::Address addr)
+//		retdec::common::Address addr)
 //
 
 TEST_F(FileImageTests, getConstantReadsCorrectValuesForI1)
@@ -334,7 +334,7 @@ TEST_F(FileImageTests, getConstantReadsCorrectValuesForStructureType)
 //		llvm::Module* module,
 //		retdec::loader::Image* objf,
 //		DebugFormat* dbgf,
-//		retdec::utils::Address addr)
+//		retdec::common::Address addr)
 //
 
 TEST_F(FileImageTests, getConstantReadsDetectsAndReads32BitInteger)

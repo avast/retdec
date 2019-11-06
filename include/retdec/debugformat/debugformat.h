@@ -26,7 +26,7 @@ namespace debugformat {
 class DebugFormat
 {
 	public:
-		using SymbolTable = std::map<retdec::utils::Address, const retdec::fileformat::Symbol*>;
+		using SymbolTable = std::map<retdec::common::Address, const retdec::fileformat::Symbol*>;
 
 	public:
 		DebugFormat();
@@ -37,8 +37,8 @@ class DebugFormat
 				retdec::bin2llvmir::Demangler* demangler,
 				unsigned long long imageBase = 0);
 
-		retdec::config::Function* getFunction(retdec::utils::Address a);
-		const retdec::config::Object* getGlobalVar(retdec::utils::Address a);
+		retdec::config::Function* getFunction(retdec::common::Address a);
+		const retdec::config::Object* getGlobalVar(retdec::common::Address a);
 
 		bool hasInformation() const;
 
@@ -75,7 +75,7 @@ class DebugFormat
 		retdec::config::GlobalVarContainer globals;
 		retdec::config::TypeContainer types;
 
-		std::map<retdec::utils::Address, retdec::config::Function> functions;
+		std::map<retdec::common::Address, retdec::config::Function> functions;
 };
 
 } // namespace debugformat

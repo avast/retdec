@@ -11,7 +11,7 @@
 #include <functional>
 #include <vector>
 
-#include "retdec/utils/range.h"
+#include "retdec/common/range.h"
 #include "retdec/loader/utils/range.h"
 
 namespace retdec {
@@ -35,19 +35,19 @@ public:
 	class Result
 	{
 	public:
-		Result(Overlap overlapType, const std::vector<retdec::utils::Range<std::uint64_t>>& ranges);
+		Result(Overlap overlapType, const std::vector<retdec::common::Range<std::uint64_t>>& ranges);
 
 		Overlap getOverlap() const;
-		const std::vector<retdec::utils::Range<std::uint64_t>>& getRanges() const;
+		const std::vector<retdec::common::Range<std::uint64_t>>& getRanges() const;
 
 	private:
 		Overlap _overlap;
-		std::vector<retdec::utils::Range<std::uint64_t>> _ranges;
+		std::vector<retdec::common::Range<std::uint64_t>> _ranges;
 	};
 
 	OverlapResolver() = delete;
 
-	static OverlapResolver::Result resolve(const retdec::utils::Range<std::uint64_t>& first, const retdec::utils::Range<std::uint64_t>& second);
+	static OverlapResolver::Result resolve(const retdec::common::Range<std::uint64_t>& first, const retdec::common::Range<std::uint64_t>& second);
 };
 
 } // namespace loader

@@ -65,7 +65,7 @@ void CtorDtor::findPossibleCtorsDtors()
 			if (store == nullptr)
 				continue;
 
-			retdec::utils::Address addr;
+			retdec::common::Address addr;
 			const Value* v = llvm_utils::skipCasts(store->getValueOperand());
 			if (auto* gv = dyn_cast_or_null<GlobalVariable>(v))
 			{

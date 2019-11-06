@@ -17,7 +17,7 @@
 #include <llvm/IR/Module.h>
 
 #include "retdec/bin2llvmir/utils/llvm.h"
-#include "retdec/utils/address.h"
+#include "retdec/common/address.h"
 #include "retdec/utils/value.h"
 
 namespace retdec {
@@ -40,7 +40,7 @@ class AsmInstruction
 		AsmInstruction(llvm::Instruction* inst);
 		AsmInstruction(llvm::BasicBlock* bb);
 		AsmInstruction(llvm::Function* f);
-		AsmInstruction(llvm::Module* m, retdec::utils::Address addr);
+		AsmInstruction(llvm::Module* m, retdec::common::Address addr);
 
 	// Operators.
 	//
@@ -87,11 +87,11 @@ class AsmInstruction
 		cs_insn* getCapstoneInsn() const;
 
 		std::string getDsm() const;
-		retdec::utils::Address getAddress() const;
-		retdec::utils::Address getEndAddress() const;
+		retdec::common::Address getAddress() const;
+		retdec::common::Address getEndAddress() const;
 		std::size_t getByteSize() const;
 		std::size_t getBitSize() const;
-		bool contains(retdec::utils::Address addr) const;
+		bool contains(retdec::common::Address addr) const;
 
 		AsmInstruction getNext() const;
 		AsmInstruction getPrev() const;
@@ -160,11 +160,11 @@ class AsmInstruction
 		static void setLlvmToAsmGlobalVariable(
 				const llvm::Module* m,
 				llvm::GlobalVariable* gv);
-		static retdec::utils::Address getInstructionAddress(
+		static retdec::common::Address getInstructionAddress(
 				llvm::Instruction* inst);
-		static retdec::utils::Address getBasicBlockAddress(
+		static retdec::common::Address getBasicBlockAddress(
 				llvm::BasicBlock* bb);
-		static retdec::utils::Address getFunctionAddress(
+		static retdec::common::Address getFunctionAddress(
 				llvm::Function* f);
 		static bool isLlvmToAsmInstruction(const llvm::Value* inst);
 		static void clear();

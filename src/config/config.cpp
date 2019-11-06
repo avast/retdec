@@ -72,10 +72,10 @@ void Config::setInputFile(const std::string& n)          { _inputFile = n; }
 void Config::setUnpackedInputFile(const std::string& n)  { _unpackedInputFile = n; }
 void Config::setPdbInputFile(const std::string& n)       { _pdbInputFile = n; }
 void Config::setFrontendVersion(const std::string& n)    { _frontendVersion = n; }
-void Config::setEntryPoint(const retdec::utils::Address& a)     { _entryPoint = a; }
-void Config::setMainAddress(const retdec::utils::Address& a)    { _mainAddress = a; }
-void Config::setSectionVMA(const retdec::utils::Address& a)     { _sectionVMA = a; }
-void Config::setImageBase(const retdec::utils::Address& a)      { _imageBase = a; }
+void Config::setEntryPoint(const retdec::common::Address& a)     { _entryPoint = a; }
+void Config::setMainAddress(const retdec::common::Address& a)    { _mainAddress = a; }
+void Config::setSectionVMA(const retdec::common::Address& a)     { _sectionVMA = a; }
+void Config::setImageBase(const retdec::common::Address& a)      { _imageBase = a; }
 void Config::setIsIda(bool b)                            { _ida = b; }
 
 std::string Config::getInputFile() const          { return _inputFile; }
@@ -83,10 +83,10 @@ std::string Config::getUnpackedInputFile() const  { return _unpackedInputFile; }
 std::string Config::getPdbInputFile() const       { return _pdbInputFile; }
 std::string Config::getFrontendVersion() const    { return _frontendVersion; }
 std::string Config::getConfigFileName() const     { return _configFileName; }
-retdec::utils::Address Config::getEntryPoint() const     { return _entryPoint; }
-retdec::utils::Address Config::getMainAddress() const    { return _mainAddress; }
-retdec::utils::Address Config::getSectionVMA() const     { return _sectionVMA; }
-retdec::utils::Address Config::getImageBase() const      { return _imageBase; }
+retdec::common::Address Config::getEntryPoint() const     { return _entryPoint; }
+retdec::common::Address Config::getMainAddress() const    { return _mainAddress; }
+retdec::common::Address Config::getSectionVMA() const     { return _sectionVMA; }
+retdec::common::Address Config::getImageBase() const      { return _imageBase; }
 
 /**
  * Reads JSON file into internal representation.

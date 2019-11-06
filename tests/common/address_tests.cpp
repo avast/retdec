@@ -1,17 +1,17 @@
 /**
-* @file tests/utils/address_tests.cpp
+* @file tests/common/address_tests.cpp
 * @brief Tests for the @c address module.
-* @copyright (c) 2017 Avast Software, licensed under the MIT license
+* @copyright (c) 2019 Avast Software, licensed under the MIT license
 */
 
 #include <gtest/gtest.h>
 
-#include "retdec/utils/address.h"
+#include "retdec/common/address.h"
 
 using namespace ::testing;
 
 namespace retdec {
-namespace utils {
+namespace common {
 namespace tests {
 
 /**
@@ -596,5 +596,5 @@ TEST_F(AddressRangeContainerTests, RemoveAndGetRange)
 }
 
 } // namespace tests
-} // namespace utils
+} // namespace common
 } // namespace retdec

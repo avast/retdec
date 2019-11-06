@@ -18,7 +18,7 @@
 namespace retdec {
 namespace config {
 
-using LineNumber = retdec::utils::Address;
+using LineNumber = retdec::common::Address;
 
 /**
  * Represents function.
@@ -31,7 +31,7 @@ using LineNumber = retdec::utils::Address;
  * about functions' addresses. Some functions (syscalls) do not have
  * meaningful addresses.
  */
-class Function : public retdec::utils::AddressRange
+class Function : public retdec::common::AddressRange
 {
 	public:
 		explicit Function(const std::string& id);
@@ -67,8 +67,8 @@ class Function : public retdec::utils::AddressRange
 		void setDeclarationString(const std::string& s);
 		void setSourceFileName(const std::string& n);
 		void setWrappedFunctionName(const std::string& n);
-		void setStartLine(const retdec::utils::Address& l);
-		void setEndLine(const retdec::utils::Address& l);
+		void setStartLine(const retdec::common::Address& l);
+		void setEndLine(const retdec::common::Address& l);
 		void setIsUserDefined();
 		void setIsStaticallyLinked();
 		void setIsDynamicallyLinked();
@@ -152,7 +152,7 @@ class FunctionContainer : public BaseAssociativeContainer<std::string, Function>
 		bool hasFunction(const std::string& name);
 		Function* getFunctionByName(const std::string& name);
 		const Function* getFunctionByName(const std::string& name) const;
-		Function* getFunctionByStartAddress(const retdec::utils::Address& addr);
+		Function* getFunctionByStartAddress(const retdec::common::Address& addr);
 		Function* getFunctionByRealName(const std::string& name);
 };
 

@@ -50,8 +50,8 @@ Pattern::Match::Match()
 }
 
 Pattern::Match::Match(
-		const retdec::utils::Address& offset,
-		const retdec::utils::Address& address,
+		const retdec::common::Address& offset,
+		const retdec::common::Address& address,
 		retdec::utils::Maybe<unsigned> size,
 		retdec::utils::Maybe<unsigned> entrySize,
 		eType type)
@@ -66,8 +66,8 @@ Pattern::Match::Match(
 }
 
 Pattern::Match Pattern::Match::unknown(
-		const retdec::utils::Address& offset,
-		const retdec::utils::Address& address,
+		const retdec::common::Address& offset,
+		const retdec::common::Address& address,
 		retdec::utils::Maybe<unsigned> size,
 		retdec::utils::Maybe<unsigned> entrySize)
 {
@@ -75,8 +75,8 @@ Pattern::Match Pattern::Match::unknown(
 }
 
 Pattern::Match Pattern::Match::integral(
-		const retdec::utils::Address& offset,
-		const retdec::utils::Address& address,
+		const retdec::common::Address& offset,
+		const retdec::common::Address& address,
 		retdec::utils::Maybe<unsigned> size,
 		retdec::utils::Maybe<unsigned> entrySize)
 {
@@ -84,8 +84,8 @@ Pattern::Match Pattern::Match::integral(
 }
 
 Pattern::Match Pattern::Match::floatingPoint(
-		const retdec::utils::Address& offset,
-		const retdec::utils::Address& address,
+		const retdec::common::Address& offset,
+		const retdec::common::Address& address,
 		retdec::utils::Maybe<unsigned> size,
 		retdec::utils::Maybe<unsigned> entrySize)
 {
@@ -127,12 +127,12 @@ bool Pattern::Match::isTypeFloatingPoint() const
 	return _type == eType::FLOATING_POINT;
 }
 
-void Pattern::Match::setOffset(const retdec::utils::Address& offset)
+void Pattern::Match::setOffset(const retdec::common::Address& offset)
 {
 	_offset = offset;
 }
 
-void Pattern::Match::setAddress(const retdec::utils::Address& address)
+void Pattern::Match::setAddress(const retdec::common::Address& address)
 {
 	_address = address;
 }
@@ -162,12 +162,12 @@ void Pattern::Match::setIsTypeFloatingPoint()
 	_type = eType::FLOATING_POINT;
 }
 
-retdec::utils::Address Pattern::Match::getOffset() const
+retdec::common::Address Pattern::Match::getOffset() const
 {
 	return _offset;
 }
 
-retdec::utils::Address Pattern::Match::getAddress() const
+retdec::common::Address Pattern::Match::getAddress() const
 {
 	return _address;
 }

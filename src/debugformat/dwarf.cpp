@@ -56,8 +56,8 @@ void DebugFormat::loadDwarfGlobalVariables()
 		retdec::dwarfparser::DwarfLocationDesc::cLocType loc = gvar->getLocation(&n, &address, 1);
 		if (loc.isAddress())
 		{
-			std::string name = gvar->name.empty() ? "glob_var_" + retdec::utils::toHexString(address) : gvar->name;
-			auto addr = retdec::utils::Address(address);
+			auto addr = retdec::common::Address(address);
+			std::string name = gvar->name.empty() ? "glob_var_" + addr.toHexString() : gvar->name;
 			if (!addr.isDefined())
 				continue;
 			retdec::config::Object gv(name, retdec::config::Storage::inMemory(addr));
@@ -73,7 +73,7 @@ void DebugFormat::loadDwarfFunctions()
 {
 	// Lines
 	//
-	std::map<retdec::utils::Address, int> lines;
+	std::map<retdec::common::Address, int> lines;
 	for (auto* line : *_dwarfFile->getLines())
 	{
 		lines[line->addr] = line->lineNum;

@@ -25,7 +25,7 @@ namespace config {
 //=============================================================================
 //
 
-VtableItem::VtableItem(const retdec::utils::Address& a) :
+VtableItem::VtableItem(const retdec::common::Address& a) :
 		_address(a)
 {
 
@@ -64,7 +64,7 @@ Json::Value VtableItem::getJsonValue() const
 	return val;
 }
 
-void VtableItem::setTargetFunctionAddress(const retdec::utils::Address& a)
+void VtableItem::setTargetFunctionAddress(const retdec::common::Address& a)
 {
 	_targetAddress = a;
 }
@@ -74,7 +74,7 @@ void VtableItem::setTargetFunctionName(const std::string& n)
 	_targetFunctionName = n;
 }
 
-retdec::utils::Address VtableItem::getId() const
+retdec::common::Address VtableItem::getId() const
 {
 	return getAddress();
 }
@@ -82,7 +82,7 @@ retdec::utils::Address VtableItem::getId() const
 /**
  * @return Virtual table item's address in binary file.
  */
-retdec::utils::Address VtableItem::getAddress() const
+retdec::common::Address VtableItem::getAddress() const
 {
 	return _address;
 }
@@ -90,7 +90,7 @@ retdec::utils::Address VtableItem::getAddress() const
 /**
  * @return Virtual function address for this item.
  */
-retdec::utils::Address VtableItem::getTargetFunctionAddress() const
+retdec::common::Address VtableItem::getTargetFunctionAddress() const
 {
 	return _targetAddress;
 }
@@ -126,7 +126,7 @@ bool VtableItem::operator==(const VtableItem& o) const
 //=============================================================================
 //
 
-Vtable::Vtable(const retdec::utils::Address& a)
+Vtable::Vtable(const retdec::common::Address& a)
 {
 	_address = a;
 }
@@ -169,7 +169,7 @@ void Vtable::setName(const std::string& n)
 	_name = n;
 }
 
-retdec::utils::Address Vtable::getId() const
+retdec::common::Address Vtable::getId() const
 {
 	return getAddress();
 }
@@ -177,7 +177,7 @@ retdec::utils::Address Vtable::getId() const
 /**
  * @return Virtual table's address in binary file.
  */
-retdec::utils::Address Vtable::getAddress() const
+retdec::common::Address Vtable::getAddress() const
 {
 	return _address;
 }

@@ -6,7 +6,7 @@
 
 #include "retdec/bin2llvmir/optimizations/decoder/decoder.h"
 
-using namespace retdec::utils;
+using namespace retdec::common;
 using namespace llvm;
 
 namespace retdec {
@@ -185,7 +185,7 @@ llvm::GlobalVariable* Decoder::getCallReturnObject()
  * fill \p tBb with the result.
  */
 void Decoder::getOrCreateCallTarget(
-		utils::Address addr,
+		common::Address addr,
 		llvm::Function*& tFnc,
 		llvm::BasicBlock*& tBb)
 {
@@ -236,7 +236,7 @@ void Decoder::getOrCreateCallTarget(
  *
  */
 void Decoder::getOrCreateBranchTarget(
-		utils::Address addr,
+		common::Address addr,
 		llvm::BasicBlock*& tBb,
 		llvm::Function*& tFnc,
 		llvm::Instruction* from)
@@ -377,7 +377,7 @@ bool Decoder::canSplitFunctionOn(llvm::BasicBlock* bb)
  *     fnc2 end
  */
 bool Decoder::canSplitFunctionOn(
-		utils::Address addr,
+		common::Address addr,
 		llvm::BasicBlock* splitBb,
 		std::set<llvm::BasicBlock*>& newFncStarts)
 {
@@ -474,7 +474,7 @@ bool Decoder::canSplitFunctionOn(
  * This can create new BB at \p addr even if it then cannot split function
  * on this new BB. Is this desirable behavior?
  */
-llvm::Function* Decoder::splitFunctionOn(utils::Address addr)
+llvm::Function* Decoder::splitFunctionOn(common::Address addr)
 {
 	if (auto* bb = getBasicBlockAtAddress(addr))
 	{
@@ -515,7 +515,7 @@ llvm::Function* Decoder::splitFunctionOn(utils::Address addr)
 }
 
 llvm::Function* Decoder::splitFunctionOn(
-		utils::Address addr,
+		common::Address addr,
 		llvm::BasicBlock* splitOnBb)
 {
 	LOG << "\t\t\t\t" << "S: splitFunctionOn @ " << addr << " on "

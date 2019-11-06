@@ -9,10 +9,11 @@
 
 #include "retdec/loader/loader/elf/elf_image.h"
 
-using namespace retdec::utils;
-using namespace retdec::capstone2llvmir;
 using namespace llvm;
+using namespace retdec::capstone2llvmir;
+using namespace retdec::common;
 using namespace retdec::fileformat;
+using namespace retdec::utils;
 
 namespace retdec {
 namespace bin2llvmir {
@@ -419,7 +420,7 @@ void Decoder::initAllowedRangesWithConfig()
 		}
 
 		std::map<
-				retdec::utils::Address,
+				retdec::common::Address,
 				std::shared_ptr<const retdec::fileformat::Symbol>> symtab;
 
 		for (const auto* t : _image->getFileFormat()->getSymbolTables())
@@ -460,7 +461,7 @@ void Decoder::initAllowedRangesWithConfig()
 		{
 			auto& s = sIt->second;
 
-			retdec::utils::Address start = sIt->first;
+			retdec::common::Address start = sIt->first;
 			if (start.isUndefined())
 			{
 				continue;
@@ -484,7 +485,7 @@ void Decoder::initAllowedRangesWithConfig()
 				knownSz = size;
 			}
 
-			retdec::utils::Address end = start + size;
+			retdec::common::Address end = start + size;
 			std::string name = s->getNormalizedName();
 
 			// Exact name match.
@@ -692,7 +693,7 @@ void Decoder::initJumpTargetsImports()
 
 	for (const auto &imp : *impTbl)
 	{
-		utils::Address a = imp->getAddress();
+		common::Address a = imp->getAddress();
 		if (a.isUndefined())
 		{
 			continue;
@@ -812,7 +813,7 @@ void Decoder::initJumpTargetsExports()
 
 	for (const auto& exp : *exTbl)
 	{
-		utils::Address addr = exp.getAddress();
+		common::Address addr = exp.getAddress();
 		if (addr.isUndefined())
 		{
 			continue;
@@ -863,7 +864,7 @@ void Decoder::initJumpTargetsSymbols()
 		{
 			continue;
 		}
-		utils::Address addr = a;
+		common::Address addr = a;
 
 		utils::Maybe<std::size_t> sz;
 		unsigned long long tmpSz = 0;
@@ -905,7 +906,7 @@ void Decoder::initJumpTargetsDebug()
 
 	for (const auto& p : _debug->functions)
 	{
-		utils::Address addr = p.first;
+		common::Address addr = p.first;
 		if (addr.isUndefined())
 		{
 			continue;

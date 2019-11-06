@@ -17,9 +17,9 @@
 
 using namespace llvm;
 using namespace retdec::capstone2llvmir;
+using namespace retdec::common;
 using namespace retdec::bin2llvmir::st_match;
 using namespace retdec::fileformat;
-using namespace retdec::utils;
 
 namespace retdec {
 namespace bin2llvmir {
@@ -336,7 +336,7 @@ void Decoder::decodeJumpTarget(const JumpTarget& jt)
 }
 
 capstone2llvmir::Capstone2LlvmIrTranslator::TranslationResultOne
-Decoder::translate(ByteData& bytes, utils::Address& addr, llvm::IRBuilder<>& irb)
+Decoder::translate(ByteData& bytes, common::Address& addr, llvm::IRBuilder<>& irb)
 {
 	auto res = _c2l->translateOne(bytes.first, bytes.second, addr, irb);
 
@@ -402,7 +402,7 @@ std::size_t Decoder::decodeJumpTargetDryRun(
 	return false;
 }
 
-cs_mode Decoder::determineMode(cs_insn* insn, utils::Address& target)
+cs_mode Decoder::determineMode(cs_insn* insn, common::Address& target)
 {
 	if (_config->getConfig().architecture.isArm32OrThumb())
 	{
@@ -415,7 +415,7 @@ cs_mode Decoder::determineMode(cs_insn* insn, utils::Address& target)
 }
 
 bool Decoder::instructionBreaksBasicBlock(
-		utils::Address addr,
+		common::Address addr,
 		capstone2llvmir::Capstone2LlvmIrTranslator::TranslationResultOne& tr)
 {
 	// On x86 halt may get generated to end the entry point function:
@@ -469,7 +469,7 @@ bool Decoder::instructionBreaksBasicBlock(
  * @return @c True if this instruction ends basic block, @c false otherwise.
  */
 bool Decoder::getJumpTargetsFromInstruction(
-		utils::Address addr,
+		common::Address addr,
 		capstone2llvmir::Capstone2LlvmIrTranslator::TranslationResultOne& tr,
 		std::size_t& rangeSize)
 {
@@ -814,8 +814,8 @@ bool Decoder::getJumpTargetsFromInstruction(
 	return false;
 }
 
-utils::Address Decoder::getJumpTarget(
-		utils::Address addr,
+common::Address Decoder::getJumpTarget(
+		common::Address addr,
 		llvm::CallInst* branchCall,
 		llvm::Value* val)
 {
@@ -949,7 +949,7 @@ utils::Address Decoder::getJumpTarget(
  * \return \c True if switch recognized, \c false otherwise.
  */
 bool Decoder::getJumpTargetSwitch(
-		utils::Address addr,
+		common::Address addr,
 		llvm::CallInst* branchCall,
 		llvm::Value* val,
 		SymbolicTree& st)
@@ -1148,7 +1148,7 @@ if (brToSwitch)
 			&& insn->getType()->isIntegerTy())
 	{
 		auto* it = cast<IntegerType>(l->getType());
-		retdec::utils::Address tableAddr2(ci->getZExtValue());
+		retdec::common::Address tableAddr2(ci->getZExtValue());
 
 		LOG << "\t\t\t" << "second table addr @ " << tableAddr2 << std::endl;
 
@@ -1331,7 +1331,7 @@ if (brToSwitch)
  *     branch from prev insn
  */
 void Decoder::handleDelaySlotTypical(
-		utils::Address& addr,
+		common::Address& addr,
 		capstone2llvmir::Capstone2LlvmIrTranslator::TranslationResultOne& res,
 		ByteData& bytes,
 		llvm::IRBuilder<>& irb)
@@ -1376,7 +1376,7 @@ void Decoder::handleDelaySlotTypical(
  *     ...
  */
 void Decoder::handleDelaySlotLikely(
-		utils::Address& addr,
+		common::Address& addr,
 		capstone2llvmir::Capstone2LlvmIrTranslator::TranslationResultOne& res,
 		ByteData& bytes,
 		llvm::IRBuilder<>& irb)

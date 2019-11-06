@@ -87,7 +87,7 @@ AsmInstruction::AsmInstruction(llvm::Function* f)
 	}
 }
 
-AsmInstruction::AsmInstruction(llvm::Module* m, retdec::utils::Address addr)
+AsmInstruction::AsmInstruction(llvm::Module* m, retdec::common::Address addr)
 {
 	if (m == nullptr)
 	{
@@ -219,10 +219,10 @@ void AsmInstruction::setLlvmToAsmGlobalVariable(
 	_module2global.emplace_back(m, gv);
 }
 
-retdec::utils::Address AsmInstruction::getInstructionAddress(
+retdec::common::Address AsmInstruction::getInstructionAddress(
 		llvm::Instruction* inst)
 {
-	retdec::utils::Address ret;
+	retdec::common::Address ret;
 	AsmInstruction ai(inst);
 	if (ai.isValid())
 	{
@@ -231,19 +231,19 @@ retdec::utils::Address AsmInstruction::getInstructionAddress(
 	return ret;
 }
 
-retdec::utils::Address AsmInstruction::getBasicBlockAddress(
+retdec::common::Address AsmInstruction::getBasicBlockAddress(
 		llvm::BasicBlock* bb)
 {
 	return bb->empty()
-			? retdec::utils::Address()
+			? retdec::common::Address()
 			: getInstructionAddress(&bb->front());
 }
 
-retdec::utils::Address AsmInstruction::getFunctionAddress(
+retdec::common::Address AsmInstruction::getFunctionAddress(
 		llvm::Function* f)
 {
 	return f->empty()
-			? retdec::utils::Address()
+			? retdec::common::Address()
 			: getBasicBlockAddress(&f->front());
 }
 
@@ -310,7 +310,7 @@ std::size_t AsmInstruction::getByteSize() const
 	return getCapstoneInsn()->size;
 }
 
-retdec::utils::Address AsmInstruction::getAddress() const
+retdec::common::Address AsmInstruction::getAddress() const
 {
 	assert(isValid());
 	auto* ci = dyn_cast<ConstantInt>(_llvmToAsmInstr->getValueOperand());
@@ -318,7 +318,7 @@ retdec::utils::Address AsmInstruction::getAddress() const
 	return ci->getZExtValue();
 }
 
-retdec::utils::Address AsmInstruction::getEndAddress() const
+retdec::common::Address AsmInstruction::getEndAddress() const
 {
 	assert(isValid());
 	return getAddress() + getByteSize();
@@ -330,7 +330,7 @@ std::size_t AsmInstruction::getBitSize() const
 	return getByteSize() * 8;
 }
 
-bool AsmInstruction::contains(retdec::utils::Address addr) const
+bool AsmInstruction::contains(retdec::common::Address addr) const
 {
 	return isValid() ? getAddress() <= addr && addr < getEndAddress() : false;
 }

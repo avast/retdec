@@ -239,8 +239,8 @@ class BaseSetContainerTests: public Test
 {
 	public:
 		BaseSetContainerTests() :
-				seg1(retdec::utils::Address(0x1000)),
-				seg2(retdec::utils::Address(0x2000))
+				seg1(retdec::common::Address(0x1000)),
+				seg2(retdec::common::Address(0x2000))
 		{
 			seg1.setName("seg1");
 			seg1.setComment("comment1");
@@ -280,7 +280,7 @@ TEST_F(BaseSetContainerTests, SetInsertWorks)
 {
 	// This object is unique -> must be added.
 	//
-	Segment seg3(retdec::utils::Address(0x3000));
+	Segment seg3(retdec::common::Address(0x3000));
 	seg3.setName("seg3");
 
 	EXPECT_EQ(2, segs.size());

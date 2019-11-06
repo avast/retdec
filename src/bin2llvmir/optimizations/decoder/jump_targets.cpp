@@ -26,10 +26,10 @@ JumpTarget::JumpTarget()
 }
 
 JumpTarget::JumpTarget(
-		retdec::utils::Address a,
+		retdec::common::Address a,
 		eType t,
 		cs_mode m,
-		retdec::utils::Address f,
+		retdec::common::Address f,
 		utils::Maybe<std::size_t> sz)
 		:
 		_address(a),
@@ -64,7 +64,7 @@ bool JumpTarget::operator<(const JumpTarget& o) const
 	}
 }
 
-retdec::utils::Address JumpTarget::getAddress() const
+retdec::common::Address JumpTarget::getAddress() const
 {
 	return _address;
 }
@@ -84,7 +84,7 @@ JumpTarget::eType JumpTarget::getType() const
 	return _type;
 }
 
-retdec::utils::Address JumpTarget::getFromAddress() const
+retdec::common::Address JumpTarget::getFromAddress() const
 {
 	return _fromAddress;
 }
@@ -181,10 +181,10 @@ std::ostream& operator<<(std::ostream &out, const JumpTarget& jt)
 Config* JumpTargets::config = nullptr;
 
 const JumpTarget* JumpTargets::push(
-		retdec::utils::Address a,
+		retdec::common::Address a,
 		JumpTarget::eType t,
 		cs_mode m,
-		retdec::utils::Address f,
+		retdec::common::Address f,
 		utils::Maybe<std::size_t> sz)
 {
 	static auto& arch = config->getConfig().architecture;

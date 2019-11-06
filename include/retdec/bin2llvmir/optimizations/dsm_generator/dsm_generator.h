@@ -49,18 +49,18 @@ class DsmGenerator : public llvm::ModulePass
 				const retdec::loader::Segment* seg,
 				std::ostream& ret);
 		void generateDataRange(
-				retdec::utils::Address start,
-				retdec::utils::Address end,
+				retdec::common::Address start,
+				retdec::common::Address end,
 				std::ostream& ret);
 		void generateAlignedAddress(
-				retdec::utils::Address addr,
+				retdec::common::Address addr,
 				std::ostream& ret);
 
 		void getAsmInstructionHex(AsmInstruction& ai, std::ostream& ret);
 		std::string processInstructionDsm(AsmInstruction& ai);
 		void generateData(
 				std::ostream& ret,
-				retdec::utils::Address start,
+				retdec::common::Address start,
 				std::size_t size,
 				const std::string& objVal = "");
 		std::string escapeString(const std::string& str);
@@ -82,7 +82,7 @@ class DsmGenerator : public llvm::ModulePass
 
 		std::size_t _longestInst = 0;
 		std::size_t _longestAddr = 0;
-		std::map<retdec::utils::Address, retdec::config::Function*> _addr2fnc;
+		std::map<retdec::common::Address, retdec::config::Function*> _addr2fnc;
 
 		const std::size_t DATA_SEGMENT_LINE    = 16;
 		const std::string ALIGN = "   ";

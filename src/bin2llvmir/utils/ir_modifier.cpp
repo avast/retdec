@@ -378,7 +378,7 @@ Constant* detectGlobalVariableInitializerCycle(
 		GlobalVariable* gv,
 		Constant* c,
 		FileImage* objf,
-		retdec::utils::Address addr)
+		retdec::common::Address addr)
 {
 	if (gv == nullptr || c == nullptr || objf == nullptr || addr.isUndefined())
 	{
@@ -414,7 +414,7 @@ bool globalVariableCanBeCreated(
 		Module* module,
 		Config* config,
 		FileImage* objf,
-		retdec::utils::Address &addr,
+		retdec::common::Address &addr,
 		bool strict = false)
 {
 	if (module == nullptr || objf == nullptr || addr.isUndefined())
@@ -584,7 +584,7 @@ IrModifier::StackPair IrModifier::getStackVariable(
 GlobalVariable* IrModifier::getGlobalVariable(
 		FileImage* objf,
 		DebugFormat* dbgf,
-		retdec::utils::Address addr,
+		retdec::common::Address addr,
 		bool strict,
 		const std::string& name)
 {

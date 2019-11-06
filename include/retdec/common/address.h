@@ -1,21 +1,21 @@
 /**
- * @file include/retdec/utils/address.h
+ * @file include/retdec/common/address.h
  * @brief Address, address pair and other derived class representation.
- * @copyright (c) 2017 Avast Software, licensed under the MIT license
+ * @copyright (c) 2019 Avast Software, licensed under the MIT license
  */
 
-#ifndef RETDEC_UTILS_ADDRESS_H
-#define RETDEC_UTILS_ADDRESS_H
+#ifndef RETDEC_COMMON_ADDRESS_H
+#define RETDEC_COMMON_ADDRESS_H
 
 #include <cstddef>
 #include <ostream>
 #include <set>
 #include <sstream>
 
-#include "retdec/utils/range.h"
+#include "retdec/common/range.h"
 
 namespace retdec {
-namespace utils {
+namespace common {
 
 class Address
 {
@@ -50,9 +50,6 @@ class Address
 		uint64_t address;
 };
 
-/**
- * Range includes both start and end addresses (i.e <startAddress, endAddress>).
- */
 class AddressRange : public Range<Address>
 {
 	public:
@@ -111,7 +108,7 @@ class AddressRangeContainer
 		std::set<AddressRange> _ranges;
 };
 
-} // namespace utils
+} // namespace common
 } // namespace retdec
 
 #endif

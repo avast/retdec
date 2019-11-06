@@ -1,11 +1,11 @@
 /**
- * @file include/retdec/utils/range.h
+ * @file include/retdec/common/range.h
  * @brief Declaration of templated Range class.
- * @copyright (c) 2017 Avast Software, licensed under the MIT license
+ * @copyright (c) 2019 Avast Software, licensed under the MIT license
  */
 
-#ifndef RETDEC_UTILS_RANGE_H
-#define RETDEC_UTILS_RANGE_H
+#ifndef RETDEC_COMMON_RANGE_H
+#define RETDEC_COMMON_RANGE_H
 
 #include <algorithm>
 #include <cassert>
@@ -16,7 +16,7 @@
 #include <vector>
 
 namespace retdec {
-namespace utils {
+namespace common {
 
 class InvalidRangeException : public std::exception
 {
@@ -25,7 +25,10 @@ public:
 	InvalidRangeException(const InvalidRangeException&) noexcept = default;
 	virtual ~InvalidRangeException() = default;
 
-	virtual const char* what() const noexcept override { return "Invalid Range: end is greater than start"; }
+	virtual const char* what() const noexcept override
+	{
+		return "Invalid Range: end is greater than start";
+	}
 };
 
 /**
@@ -46,7 +49,10 @@ public:
 	/**
 	 * Default constructor.
 	 */
-	Range() : _start(), _end() {}
+	Range() :
+			_start(),
+			_end()
+	{}
 
 	/**
 	 * Constructor for specific range.
@@ -54,7 +60,9 @@ public:
 	 * @param start The starting value of the range.
 	 * @param end The ending value of the range.
 	 */
-	Range(const RangeType& start, const RangeType& end) : _start(start), _end(end)
+	Range(const RangeType& start, const RangeType& end) :
+			_start(start),
+			_end(end)
 	{
 		if (end < start)
 			throw InvalidRangeException();
@@ -65,20 +73,26 @@ public:
 	 *
 	 * @param range Range to copy.
 	 */
-	Range(const Range<RangeType>& range) : _start(range._start), _end(range._end) {}
+	Range(const Range<RangeType>& range) :
+			_start(range._start),
+			_end(range._end)
+	{}
 
 	/**
 	 * Move constructor.
 	 *
 	 * @param range Range to move.
 	 */
-	Range(Range<RangeType>&& range) noexcept(std::is_nothrow_move_constructible<RangeType>::value)
-		: _start(std::move(range._start)), _end(std::move(range._end)) {}
+	Range(Range<RangeType>&& range)
+			noexcept(std::is_nothrow_move_constructible<RangeType>::value) :
+			_start(std::move(range._start)),
+			_end(std::move(range._end)) {}
 
 	/**
 	 * Destructor.
 	 */
-	virtual ~Range() {}
+	virtual ~Range()
+	{}
 
 	/**
 	 * Assign operator.
@@ -103,14 +117,20 @@ public:
 	 *
 	 * @return Starting value of the range.
 	 */
-	const RangeType& getStart() const { return _start; }
+	const RangeType& getStart() const
+	{
+		return _start;
+	}
 
 	/**
 	 * Returns the ending value of the range.
 	 *
 	 * @return Ending value of the range.
 	 */
-	const RangeType& getEnd() const { return _end; }
+	const RangeType& getEnd() const
+	{
+		return _end;
+	}
 
 	/**
 	 * Sets the starting value of the range.
@@ -120,7 +140,9 @@ public:
 	void setStart(const RangeType& start)
 	{
 		if (_end < start)
+		{
 			throw InvalidRangeException();
+		}
 		_start = start;
 	}
 
@@ -132,7 +154,9 @@ public:
 	void setEnd(const RangeType& end)
 	{
 		if (end < _start)
+		{
 			throw InvalidRangeException();
+		}
 		_end = end;
 	}
 
@@ -145,7 +169,9 @@ public:
 	void setStartEnd(const RangeType& start, const RangeType& end)
 	{
 		if (end < start)
+		{
 			throw InvalidRangeException();
+		}
 		_start = start;
 		_end = end;
 	}
@@ -155,16 +181,23 @@ public:
 	 *
 	 * @return Size of the range.
 	 */
-	RangeType getSize() const { return _end - _start; }
+	RangeType getSize() const
+	{
+		return _end - _start;
+	}
 
 	/**
-	 * Checks whether range contains given value. It checks for non-strict order.
+	 * Checks whether range contains given value.
+	 * It checks for non-strict order.
 	 *
 	 * @param value Value to check.
 	 *
 	 * @return True if in range, otherwise false.
 	 */
-	bool contains(const RangeType& value) const { return _start <= value && value < _end; }
+	bool contains(const RangeType& value) const
+	{
+		return _start <= value && value < _end;
+	}
 
 	/**
 	 * Checks whether range fully contains given range, i.e. it contains both
@@ -174,13 +207,19 @@ public:
 	 *
 	 * @return True if in range, otherwise false.
 	 */
-	bool contains(const Range<RangeType>& o) const { return contains(o.getStart()) && o.getEnd() <= getEnd(); }
+	bool contains(const Range<RangeType>& o) const
+	{
+		return contains(o.getStart()) && o.getEnd() <= getEnd();
+	}
 
 	/**
 	 * Check whether range overlaps with the given range, i.e. there exists
 	 * some value that which is in both ranges.
 	 */
-	bool overlaps(const Range<RangeType>& o) const { return _start < o._end && o._start < _end; }
+	bool overlaps(const Range<RangeType>& o) const
+	{
+		return _start < o._end && o._start < _end;
+	}
 
 	/**
 	 * Return whether two ranges are equal. They are equal if their starting
@@ -188,7 +227,10 @@ public:
 	 *
 	 * @return True if equal, otherwise false.
 	 */
-	bool operator ==(const Range<RangeType>& rhs) const { return _start == rhs._start && _end == rhs._end; }
+	bool operator ==(const Range<RangeType>& rhs) const
+	{
+		return _start == rhs._start && _end == rhs._end;
+	}
 
 	/**
 	 * Return whether two ranges are not equal. They are equal if their starting
@@ -196,17 +238,22 @@ public:
 	 *
 	 * @return True if not equal, otherwise false.
 	 */
-	bool operator !=(const Range<RangeType>& rhs) const { return !(*this == rhs); }
+	bool operator !=(const Range<RangeType>& rhs) const
+	{
+		return !(*this == rhs);
+	}
 
 	friend std::ostream& operator<<(
 			std::ostream& out,
 			const Range<RangeType>& r)
 	{
-		return out << std::hex << std::showbase << "<" << r.getStart() << ", " << r.getEnd() << ")";
+		return out << std::hex << std::showbase << "<"
+				<< r.getStart() << ", " << r.getEnd() << ")";
 	}
 
 protected:
-	RangeType _start, _end;
+	RangeType _start;
+	RangeType _end;
 };
 
 /**
@@ -218,7 +265,8 @@ protected:
  *
  * @tparam T Range element type.
  */
-template <typename T, typename = std::enable_if_t<std::is_integral<T>::value, void>> class RangeContainer
+template <typename T, typename = std::enable_if_t<std::is_integral<T>::value, void>>
+class RangeContainer
 {
 public:
 	using iterator = typename std::vector<T>::iterator;
@@ -289,7 +337,7 @@ private:
 	std::vector<RangeType> _ranges;
 };
 
-} // namespace utils
+} // namespace common
 } // namespace retdec
 
 #endif

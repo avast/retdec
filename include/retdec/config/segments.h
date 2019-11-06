@@ -19,10 +19,10 @@ namespace config {
  * Represents binary file's segment.
  * Segment is an address range plus name and comment.
  */
-class Segment : public retdec::utils::AddressRange
+class Segment : public retdec::common::AddressRange
 {
 	public:
-		explicit Segment(const retdec::utils::Address& start);
+		explicit Segment(const retdec::common::Address& start);
 		static Segment fromJsonValue(const Json::Value& val);
 
 		Json::Value getJsonValue() const;

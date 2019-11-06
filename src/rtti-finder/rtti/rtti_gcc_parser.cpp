@@ -15,6 +15,7 @@
 	else std::cout << std::showbase << std::hex
 const bool debug_enabled = false;
 
+using namespace retdec::common;
 using namespace retdec::utils;
 
 /**
@@ -25,8 +26,8 @@ using namespace retdec::utils;
 std::shared_ptr<retdec::rtti_finder::ClassTypeInfo> retdec::rtti_finder::parseGccRtti(
 		const retdec::loader::Image* img,
 		retdec::rtti_finder::RttiGcc& rttis,
-		retdec::utils::Address rttiAddr,
-		std::set<retdec::utils::Address>& visited)
+		retdec::common::Address rttiAddr,
+		std::set<retdec::common::Address>& visited)
 {
 	LOG << "\n\t" << "parseGccRtti() @ " << rttiAddr << std::endl;
 

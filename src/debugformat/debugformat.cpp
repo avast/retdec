@@ -82,7 +82,7 @@ void DebugFormat::loadSymtab()
 
 		nf.setDemangledName(_demangler->demangleToString(funcName));
 
-		retdec::utils::Address addr = it->first;
+		retdec::common::Address addr = it->first;
 		if (_inFile->getFileFormat()->isArm() && addr % 2 != 0)
 		{
 			addr -= 1;
@@ -122,14 +122,14 @@ void DebugFormat::loadSymtab()
 	}
 }
 
-retdec::config::Function* DebugFormat::getFunction(retdec::utils::Address a)
+retdec::config::Function* DebugFormat::getFunction(retdec::common::Address a)
 {
 	auto fIt = functions.find(a);
 	return fIt != functions.end() ? &fIt->second : nullptr;
 }
 
 const retdec::config::Object* DebugFormat::getGlobalVar(
-		retdec::utils::Address a)
+		retdec::common::Address a)
 {
 	return globals.getObjectByAddress(a);
 }

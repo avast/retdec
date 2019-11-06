@@ -1,7 +1,7 @@
 /**
- * @file src/utils/address.cpp
+ * @file src/common/address.cpp
  * @brief Address, address pair and other derived class representation.
- * @copyright (c) 2017 Avast Software, licensed under the MIT license
+ * @copyright (c) 2019 Avast Software, licensed under the MIT license
  */
 
 #include <cassert>
@@ -10,11 +10,11 @@
 #include <iostream>
 #include <vector>
 
-#include "retdec/utils/address.h"
-#include "retdec/utils/string.h"
+#include "retdec/common/address.h"
+// #include "retdec/common/string.h"
 
 namespace retdec {
-namespace utils {
+namespace common {
 
 //
 //=============================================================================
@@ -386,5 +386,5 @@ void AddressRangeContainer::remove(const Address& s, const Address& e)
 	return remove(AddressRange(s, e));
 }
 
-} // namespace utils
+} // namespace common
 } // namespace retdec

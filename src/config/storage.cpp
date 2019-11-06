@@ -60,7 +60,7 @@ Storage Storage::onStack(int offset, unsigned registerNumber)
 	return ret;
 }
 
-Storage Storage::inMemory(const retdec::utils::Address& address)
+Storage Storage::inMemory(const retdec::common::Address& address)
 {
 	assert(address.isDefined());
 	Storage ret;
@@ -215,7 +215,7 @@ bool Storage::isStack() const
  * @param[out] globalAddress If storage is global this is set to its address.
  *                           Otherwise it is set to an undefined value.
  */
-bool Storage::isMemory(retdec::utils::Address& globalAddress) const
+bool Storage::isMemory(retdec::common::Address& globalAddress) const
 {
 	globalAddress = _globalAddress;
 	return isMemory();
@@ -266,7 +266,7 @@ bool Storage::isStack(int& stackOffset) const
  * @return If storage is global return its address.
  *         Otherwise return an undefined value.
  */
-retdec::utils::Address Storage::getAddress() const
+retdec::common::Address Storage::getAddress() const
 {
 	return _globalAddress;
 }

@@ -1,4 +1,5 @@
-set(RETDEC_TESTS_CONFIG_SOURCES
+
+add_executable(retdec-tests-config
 	base_tests.cpp
 	classes_tests.cpp
 	documentation_tests.cpp
@@ -15,7 +16,9 @@ set(RETDEC_TESTS_CONFIG_SOURCES
 	patterns_tests.cpp
 	types_tests.cpp
 )
-
-add_executable(retdec-tests-config ${RETDEC_TESTS_CONFIG_SOURCES})
-target_link_libraries(retdec-tests-config retdec-config gmock_main)
+target_link_libraries(retdec-tests-config
+	retdec-common
+	retdec-config
+	gmock_main
+)
 install(TARGETS retdec-tests-config RUNTIME DESTINATION ${RETDEC_TESTS_DIR})

@@ -353,22 +353,22 @@ unsigned long long PeFormatParser64::getSecurityDirSize() const
 	return peSecurityDirSize(peHeader);
 }
 
-retdec::utils::RangeContainer<std::uint64_t> PeFormatParser64::getImportDirectoryOccupiedAddresses() const
+retdec::common::RangeContainer<std::uint64_t> PeFormatParser64::getImportDirectoryOccupiedAddresses() const
 {
 	return peImportDirectoryOccupiedAddresses(peFile->impDir());
 }
 
-retdec::utils::RangeContainer<std::uint64_t> PeFormatParser64::getExportDirectoryOccupiedAddresses() const
+retdec::common::RangeContainer<std::uint64_t> PeFormatParser64::getExportDirectoryOccupiedAddresses() const
 {
 	return peExportDirectoryOccupiedAddresses(peFile->expDir());
 }
 
-retdec::utils::RangeContainer<std::uint64_t> PeFormatParser64::getDebugDirectoryOccupiedAddresses() const
+retdec::common::RangeContainer<std::uint64_t> PeFormatParser64::getDebugDirectoryOccupiedAddresses() const
 {
 	return peDebugDirectoryOccupiedAddresses(peFile->debugDir());
 }
 
-retdec::utils::RangeContainer<std::uint64_t> PeFormatParser64::getResourceDirectoryOccupiedAddresses() const
+retdec::common::RangeContainer<std::uint64_t> PeFormatParser64::getResourceDirectoryOccupiedAddresses() const
 {
 	return peResourceDirectoryOccupiedAddresses(peFile->resDir());
 }

@@ -16,6 +16,7 @@
 #include "retdec/bin2llvmir/utils/ir_modifier.h"
 #include "retdec/bin2llvmir/utils/llvm.h"
 
+using namespace retdec::common;
 using namespace retdec::utils;
 using namespace llvm;
 
@@ -125,7 +126,7 @@ void MainDetection::removeStaticallyLinked()
 	}
 }
 
-retdec::utils::Address MainDetection::getFromFunctionNames()
+retdec::common::Address MainDetection::getFromFunctionNames()
 {
 	// Order is important: first -> highest priority, last -> lowest  priority.
 	std::vector<std::string> names = {"main", "_main", "wmain", "WinMain"};
@@ -148,7 +149,7 @@ retdec::utils::Address MainDetection::getFromFunctionNames()
 	return ret.first;
 }
 
-retdec::utils::Address MainDetection::getFromContext()
+retdec::common::Address MainDetection::getFromContext()
 {
 	Address mainAddr;
 
@@ -164,7 +165,7 @@ retdec::utils::Address MainDetection::getFromContext()
 
 		if (epSeg)
 		{
-			retdec::utils::Address addr = epSeg->getAddress() + 0x10;
+			retdec::common::Address addr = epSeg->getAddress() + 0x10;
 
 			auto ai = AsmInstruction(_module, addr);
 			auto pai = ai.getPrev();
@@ -402,7 +403,7 @@ retdec::utils::Address MainDetection::getFromContext()
 /**
  * TODO: maybe add wrapper handling as in other functions.
  */
-retdec::utils::Address MainDetection::getFromEntryPointOffset(int offset)
+retdec::common::Address MainDetection::getFromEntryPointOffset(int offset)
 {
 	Address mainAddr;
 	Address ep = _config->getConfig().getEntryPoint();
@@ -420,7 +421,7 @@ retdec::utils::Address MainDetection::getFromEntryPointOffset(int offset)
  * Try to find main call at _CrtSetCheckCount + 0x2B.
  * Detect if main is called through wrapper.
  */
-retdec::utils::Address MainDetection::getFromCrtSetCheckCount()
+retdec::common::Address MainDetection::getFromCrtSetCheckCount()
 {
 	Address mainAddr;
 	auto* f = _module->getFunction("_CrtSetCheckCount");
@@ -470,7 +471,7 @@ retdec::utils::Address MainDetection::getFromCrtSetCheckCount()
  * Try to find main call at InterlockedExchange + 0x46.
  * Detect if main is called through wrapper.
  */
-retdec::utils::Address MainDetection::getFromInterlockedExchange()
+retdec::common::Address MainDetection::getFromInterlockedExchange()
 {
 	Address mainAddr;
 	auto* f = _module->getFunction("InterlockedExchange");
@@ -516,7 +517,7 @@ retdec::utils::Address MainDetection::getFromInterlockedExchange()
 	return mainAddr;
 }
 
-bool MainDetection::applyResult(retdec::utils::Address mainAddr)
+bool MainDetection::applyResult(retdec::common::Address mainAddr)
 {
 	if (mainAddr.isUndefined())
 	{

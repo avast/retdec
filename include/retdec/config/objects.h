@@ -132,7 +132,7 @@ class GlobalVarContainer : public ObjectSetContainer
 		GlobalVarContainer& operator=(const GlobalVarContainer& o);
 
 		const Object* getObjectByAddress(
-				const retdec::utils::Address& address) const;
+				const retdec::common::Address& address) const;
 
 		/// @name Reimplemented base container methods.
 		///
@@ -146,7 +146,7 @@ class GlobalVarContainer : public ObjectSetContainer
 
 	private:
 		/// Map allows fast global variables search by address.
-		std::map<retdec::utils::Address, const Object*> _addr2global;
+		std::map<retdec::common::Address, const Object*> _addr2global;
 
 		GTEST_FRIEND_TEST(
 				GlobalVarContainerTests,

@@ -76,7 +76,7 @@ class IrModifier
 		llvm::GlobalVariable* getGlobalVariable(
 				FileImage* objf,
 				DebugFormat* dbgf,
-				retdec::utils::Address addr,
+				retdec::common::Address addr,
 				bool strict = false,
 				const std::string& name = std::string());
 

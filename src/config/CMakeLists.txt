@@ -1,4 +1,5 @@
-set(RETDEC_CONFIG_SOURCES
+
+add_library(retdec-config STATIC
 	architecture.cpp
 	base.cpp
 	calling_convention.cpp
@@ -17,7 +18,9 @@ set(RETDEC_CONFIG_SOURCES
 	types.cpp
 	vtables.cpp
 )
-
-add_library(retdec-config STATIC ${RETDEC_CONFIG_SOURCES})
-target_link_libraries(retdec-config retdec-utils jsoncpp)
+target_link_libraries(retdec-config
+	retdec-common
+	retdec-utils
+	jsoncpp
+)
 target_include_directories(retdec-config PUBLIC ${PROJECT_SOURCE_DIR}/include/)

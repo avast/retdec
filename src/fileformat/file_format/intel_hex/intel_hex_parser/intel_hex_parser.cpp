@@ -111,7 +111,7 @@ bool IntelHexParser::parse()
  */
 void IntelHexParser::handleData(const IntelHexToken &token)
 {
-	retdec::utils::Address address = 0;
+	retdec::common::Address address = 0;
 	// 32bit mode
 	if(mode)
 	{

@@ -17,8 +17,9 @@
 #include "retdec/utils/time.h"
 #include "retdec/bin2llvmir/optimizations/dsm_generator/dsm_generator.h"
 
-using namespace retdec::utils;
 using namespace llvm;
+using namespace retdec::common;
+using namespace retdec::utils;
 
 #define debug_enabled false
 
@@ -354,7 +355,7 @@ std::string DsmGenerator::processInstructionDsm(AsmInstruction& ai)
 			auto addr = _config->getFunctionAddress(trueDestFnc);
 			if (trueDestAi.isValid() && addr.isDefined())
 			{
-				retdec::utils::Address o = trueDestAi.getAddress() - addr;
+				retdec::common::Address o = trueDestAi.getAddress() - addr;
 				ret += " <" + getFunctionName(trueDestFnc) + "+"
 						+ o.toHexPrefixString() + ">";
 			}
@@ -439,8 +440,8 @@ void DsmGenerator::generateDataSeg(
 }
 
 void DsmGenerator::generateDataRange(
-		retdec::utils::Address start,
-		retdec::utils::Address end,
+		retdec::common::Address start,
+		retdec::common::Address end,
 		std::ostream& ret)
 {
 	auto addr = start;
@@ -487,7 +488,7 @@ void DsmGenerator::generateDataRange(
 
 void DsmGenerator::generateData(
 		std::ostream& ret,
-		retdec::utils::Address start,
+		retdec::common::Address start,
 		std::size_t size,
 		const std::string& objVal)
 {
@@ -626,7 +627,7 @@ std::string DsmGenerator::reduceNegativeNumbers(const std::string& str)
 }
 
 void DsmGenerator::generateAlignedAddress(
-		retdec::utils::Address addr,
+		retdec::common::Address addr,
 		std::ostream& ret)
 {
 	auto as = addr.toHexPrefixString();

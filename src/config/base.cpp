@@ -58,12 +58,12 @@ Json::Value::UInt safeGetUint(
 	SAFE_TEMPLATE(val, name, defaultValue, isUInt, asUInt, "an uint");
 }
 
-retdec::utils::Address safeGetAddress(
+retdec::common::Address safeGetAddress(
 		const Json::Value& val,
 		const std::string& name)
 {
 	std::string strVal = safeGetString(val, name, "");
-	return retdec::utils::Address(strVal);
+	return retdec::common::Address(strVal);
 }
 
 Json::Value::UInt64 safeGetUint64(
@@ -104,7 +104,7 @@ bool safeGetBool(
 //=============================================================================
 //
 
-std::string toJsonValue(retdec::utils::Address a)
+std::string toJsonValue(retdec::common::Address a)
 {
 	return a.isDefined() ? a.toHexPrefixString() : std::string();
 }

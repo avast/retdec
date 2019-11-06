@@ -15,6 +15,7 @@
 #include "retdec/bin2llvmir/utils/debug.h"
 #include "retdec/bin2llvmir/utils/llvm.h"
 
+using namespace retdec::common;
 using namespace retdec::utils;
 using namespace llvm;
 
@@ -124,11 +125,11 @@ llvm::Function* Config::getLlvmFunction(Address startAddr)
 	return fnc ? _module->getFunction(fnc->getName()) : nullptr;
 }
 
-retdec::utils::Address Config::getFunctionAddress(
+retdec::common::Address Config::getFunctionAddress(
 		const llvm::Function* fnc)
 {
 	retdec::config::Function* cf = getConfigFunction(fnc);
-	return cf ? cf->getStart() : retdec::utils::Address();
+	return cf ? cf->getStart() : retdec::common::Address();
 }
 
 retdec::config::Function* Config::getConfigFunction(
@@ -138,7 +139,7 @@ retdec::config::Function* Config::getConfigFunction(
 }
 
 retdec::config::Function* Config::getConfigFunction(
-		retdec::utils::Address startAddr)
+		retdec::common::Address startAddr)
 {
 	return _configDB.functions.getFunctionByStartAddress(startAddr);
 }
@@ -165,7 +166,7 @@ const retdec::config::Object* Config::getConfigGlobalVariable(
 }
 
 const retdec::config::Object* Config::getConfigGlobalVariable(
-		retdec::utils::Address address)
+		retdec::common::Address address)
 {
 	return _configDB.globals.getObjectByAddress(address);
 }
@@ -183,7 +184,7 @@ llvm::GlobalVariable* Config::getLlvmGlobalVariable(Address address)
  */
 llvm::GlobalVariable* Config::getLlvmGlobalVariable(
 		const std::string& name,
-		retdec::utils::Address address)
+		retdec::common::Address address)
 {
 	if (auto* gv = _module->getGlobalVariable(name))
 	{
@@ -199,12 +200,12 @@ llvm::GlobalVariable* Config::getLlvmGlobalVariable(
 	}
 }
 
-retdec::utils::Address Config::getGlobalAddress(
+retdec::common::Address Config::getGlobalAddress(
 		const llvm::GlobalVariable* gv)
 {
 	assert(gv);
 	auto* cgv = gv ? _configDB.globals.getObjectByName(gv->getName()) : nullptr;
-	return cgv ? cgv->getStorage().getAddress() : retdec::utils::Address();
+	return cgv ? cgv->getStorage().getAddress() : retdec::common::Address();
 }
 
 bool Config::isGlobalVariable(const llvm::Value* val)
@@ -305,7 +306,7 @@ retdec::utils::Maybe<int> Config::getStackVariableOffset(
 
 retdec::config::Object* Config::insertGlobalVariable(
 		const llvm::GlobalVariable* gv,
-		retdec::utils::Address address,
+		retdec::common::Address address,
 		bool fromDebug,
 		const std::string& realName,
 		const std::string& cryptoDesc)
@@ -356,8 +357,8 @@ retdec::config::Object* Config::insertStackVariable(
 
 retdec::config::Function* Config::insertFunction(
 		const llvm::Function* fnc,
-		retdec::utils::Address start,
-		retdec::utils::Address end,
+		retdec::common::Address start,
+		retdec::common::Address end,
 		bool fromDebug)
 {
 	std::string dm;
@@ -656,7 +657,7 @@ llvm::CallInst* Config::isPseudoAsmFunctionCall(llvm::Value* c)
  * \return \c True if pattern was found, \c false otherwise.
  */
 bool Config::getCryptoPattern(
-		retdec::utils::Address addr,
+		retdec::common::Address addr,
 		std::string& name,
 		std::string& description,
 		llvm::Type*& type) const

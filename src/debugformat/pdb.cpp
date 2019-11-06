@@ -8,8 +8,6 @@
 
 #include <iostream>
 
-#include "retdec/utils/debug.h"
-#include "retdec/utils/string.h"
 #include "retdec/debugformat/debugformat.h"
 
 namespace retdec {
@@ -55,8 +53,8 @@ void DebugFormat::loadPdbGlobalVariables()
 		auto& pgv = gvItem.second;
 
 		std::string n = pgv.name;
-		std::string name = n.empty() ? "glob_var_" + retdec::utils::toHexString(pgv.address) : n;
-		auto addr = retdec::utils::Address(pgv.address);
+		auto addr = retdec::common::Address(pgv.address);
+		std::string name = n.empty() ? "glob_var_" + addr.toHexString() : n;
 		if (!addr.isDefined())
 			continue;
 		retdec::config::Object gv(name, retdec::config::Storage::inMemory(addr));

@@ -31,7 +31,7 @@ class Storage
 		static Storage undefined();
 		static Storage onStack(int offset);
 		static Storage onStack(int offset, unsigned registerNumber);
-		static Storage inMemory(const retdec::utils::Address& address);
+		static Storage inMemory(const retdec::common::Address& address);
 		static Storage inRegister(const std::string& registerName);
 		static Storage inRegister(unsigned registerNumber);
 		static Storage inRegister(
@@ -45,7 +45,7 @@ class Storage
 		bool isDefined() const;
 		bool isUndefined() const;
 		bool isMemory() const;
-		bool isMemory(retdec::utils::Address& globalAddress) const;
+		bool isMemory(retdec::common::Address& globalAddress) const;
 		bool isRegister() const;
 		bool isRegister(std::string& registerName) const;
 		bool isRegister(int& registerNumber) const;
@@ -55,7 +55,7 @@ class Storage
 
 		/// @name Storage get methods.
 		/// @{
-		retdec::utils::Address getAddress() const;
+		retdec::common::Address getAddress() const;
 		std::string getRegisterName() const;
 		int getStackOffset() const;
 		retdec::utils::Maybe<unsigned> getRegisterNumber() const;
@@ -76,7 +76,7 @@ class Storage
 
 		int _stackOffset = 0;
 		std::string _registerName;
-		retdec::utils::Address _globalAddress;
+		retdec::common::Address _globalAddress;
 
 		retdec::utils::Maybe<unsigned> _registerNumber;
 };

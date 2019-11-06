@@ -13,7 +13,7 @@
 
 #include "retdec/rtti-finder/rtti/rtti_msvc.h"
 #include "retdec/rtti-finder/vtable/vtable.h"
-#include "retdec/utils/address.h"
+#include "retdec/common/address.h"
 
 namespace retdec {
 namespace rtti_finder {
@@ -28,16 +28,16 @@ namespace rtti_finder {
 class VtableMsvc : public Vtable
 {
 	public:
-		VtableMsvc(retdec::utils::Address a) : Vtable(a) {}
+		VtableMsvc(retdec::common::Address a) : Vtable(a) {}
 
 	public:
-		retdec::utils::Address objLocatorAddress;
+		retdec::common::Address objLocatorAddress;
 		// Vtable::virtualFncAddresses
 
 		RTTICompleteObjectLocator* rtti = nullptr;
 };
 
-using VtablesMsvc = std::map<retdec::utils::Address, VtableMsvc>;
+using VtablesMsvc = std::map<retdec::common::Address, VtableMsvc>;
 
 } // namespace rtti_finder
 } // namespace retdec

@@ -16,7 +16,7 @@
 #include <json/json.h>
 
 #include "retdec/config/config_exceptions.h"
-#include "retdec/utils/address.h"
+#include "retdec/common/address.h"
 #include "retdec/utils/const.h"
 
 namespace retdec {
@@ -40,7 +40,7 @@ Json::Value::UInt safeGetUint(
 		const std::string& name = "",
 		Json::Value::UInt defaultValue = 0);
 
-retdec::utils::Address safeGetAddress(
+retdec::common::Address safeGetAddress(
 		const Json::Value& val,
 		const std::string& name = "");
 
@@ -70,7 +70,7 @@ bool safeGetBool(
 //=============================================================================
 //
 
-std::string toJsonValue(retdec::utils::Address a);
+std::string toJsonValue(retdec::common::Address a);
 
 //
 //=============================================================================
@@ -78,11 +78,11 @@ std::string toJsonValue(retdec::utils::Address a);
 //=============================================================================
 //
 
-class AddressRangeJson : public retdec::utils::AddressRange
+class AddressRangeJson : public retdec::common::AddressRange
 {
 	public:
 		AddressRangeJson() : AddressRange() {}
-		AddressRangeJson(retdec::utils::Address f, retdec::utils::Address s) : AddressRange(f, s) {}
+		AddressRangeJson(retdec::common::Address f, retdec::common::Address s) : AddressRange(f, s) {}
 		explicit AddressRangeJson(const std::string& r) : AddressRange(r) {}
 
 		static AddressRangeJson fromJsonValue(const Json::Value& val)
