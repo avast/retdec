@@ -39,10 +39,15 @@ cl::opt<std::string> ConfigPath(
 		cl::init("")
 );
 
-ProviderInitialization::ProviderInitialization() :
+ProviderInitialization::ProviderInitialization(retdec::config::Config* c) :
 		ModulePass(ID)
 {
+	setConfig(c);
+}
 
+void ProviderInitialization::setConfig(retdec::config::Config* c)
+{
+	_config = c;
 }
 
 /**
@@ -51,13 +56,21 @@ ProviderInitialization::ProviderInitialization() :
 bool ProviderInitialization::runOnModule(Module& m)
 {
 	static bool firstRun = true;
-	std::string confPath = ConfigPath;
-	if (!firstRun || confPath.empty())
+	if (!firstRun)
 	{
 		return false;
 	}
 
-	auto* c = ConfigProvider::addConfigFile(&m, confPath);
+	Config* c = nullptr;
+	if (_config)
+	{
+		c = ConfigProvider::addConfig(&m, *_config);
+	}
+	else if (!ConfigPath.empty())
+	{
+		c = ConfigProvider::addConfigFile(&m, ConfigPath);
+	}
+
 	if (c == nullptr)
 	{
 		return false;

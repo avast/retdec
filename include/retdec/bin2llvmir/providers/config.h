@@ -23,6 +23,7 @@ class Config
 	public:
 		static Config empty(llvm::Module* m);
 		static Config fromFile(llvm::Module* m, const std::string& path);
+		static Config fromConfig(llvm::Module* m, retdec::config::Config& c);
 		static Config fromJsonString(llvm::Module* m, const std::string& json);
 
 		void doFinalization();
@@ -209,6 +210,7 @@ class Config
 class ConfigProvider
 {
 	public:
+		static Config* addConfig(llvm::Module* m, retdec::config::Config& c);
 		static Config* addConfigFile(llvm::Module* m, const std::string& path);
 		static Config* addConfigJsonString(
 				llvm::Module* m,

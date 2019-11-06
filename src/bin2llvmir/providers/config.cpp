@@ -59,6 +59,21 @@ Config Config::fromFile(llvm::Module* m, const std::string& path)
 	return config;
 }
 
+Config Config::fromConfig(llvm::Module* m, retdec::config::Config& c)
+{
+	Config config;
+	config._module = m;
+	config._configDB = std::move(c);
+
+	// TODO: needed?
+	if (config.getConfig().tools.isPic32())
+	{
+		config.getConfig().architecture.setIsPic32();
+	}
+
+	return config;
+}
+
 Config Config::fromJsonString(llvm::Module* m, const std::string& json)
 {
 	Config config;
@@ -744,6 +759,12 @@ void Config::tagFunctionsWithUsedCryptoGlobals()
 //
 
 std::map<llvm::Module*, Config> ConfigProvider::_module2config;
+
+Config* ConfigProvider::addConfig(llvm::Module* m, retdec::config::Config& c)
+{
+	auto p = _module2config.emplace(m, Config::fromConfig(m, c));
+	return &p.first->second;
+}
 
 Config* ConfigProvider::addConfigFile(llvm::Module* m, const std::string& path)
 {
