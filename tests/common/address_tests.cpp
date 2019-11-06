@@ -147,14 +147,6 @@ TEST_F(AddressRangeTests, DefaultCtorUndefValues)
 	EXPECT_TRUE(r.getEnd().isUndefined());
 }
 
-TEST_F(AddressRangeTests, CtorOnlyFirstValue)
-{
-	AddressRange r(10);
-
-	EXPECT_EQ(10, r.getStart());
-	EXPECT_TRUE(r.getEnd().isUndefined());
-}
-
 TEST_F(AddressRangeTests, CtorBothValues)
 {
 	AddressRange r(10, 20);

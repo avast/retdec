@@ -54,7 +54,6 @@ class AddressRange : public Range<Address>
 {
 	public:
 		AddressRange();
-		explicit AddressRange(Address f);
 		AddressRange(Address f, Address s);
 		explicit AddressRange(const std::string &r);
 

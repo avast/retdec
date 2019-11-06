@@ -158,10 +158,6 @@ AddressRange::AddressRange()
 {
 }
 
-AddressRange::AddressRange(Address f) : Range<Address>(f, Address::getUndef)
-{
-}
-
 AddressRange::AddressRange(Address f, Address s) : Range<Address>(f, s)
 {
 }
