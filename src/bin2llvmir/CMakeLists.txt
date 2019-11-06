@@ -3,12 +3,7 @@ set(BIN2LLVMIR_SOURCES
 	analyses/indirectly_called_funcs_analysis.cpp
 	analyses/reachable_funcs_analysis.cpp
 	analyses/reaching_definitions.cpp
-	analyses/store_load_analysis.cpp
 	analyses/symbolic_tree.cpp
-	analyses/traversal/bb_traversal_analysis.cpp
-	analyses/traversal/func_traversal_analysis.cpp
-	analyses/traversal/traversal_analysis.cpp
-	analyses/uses_analysis.cpp
 	analyses/var_depend_analysis.cpp
 	optimizations/asm_inst_remover/asm_inst_remover.cpp
 	optimizations/class_hierarchy/hierarchy.cpp
@@ -30,9 +25,6 @@ set(BIN2LLVMIR_SOURCES
 	optimizations/decoder/x86.cpp
 	optimizations/dsm_generator/dsm_generator.cpp
 	optimizations/dump_module/dump_module.cpp
-	optimizations/globals/dead_global_assign.cpp
-	optimizations/globals/global_to_local.cpp
-	optimizations/globals/global_to_local_and_dead_global_assign.cpp
 	optimizations/idioms/idioms.cpp
 	optimizations/idioms/idioms_abstract.cpp
 	optimizations/idioms/idioms_analysis.cpp
