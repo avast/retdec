@@ -892,7 +892,7 @@ template<int bits> retdec::common::RangeContainer<std::uint64_t> peImportDirecto
 	{
 		try
 		{
-			result.addRange(retdec::common::Range<std::uint64_t>{addresses.first, addresses.second});
+			result.insert(addresses.first, addresses.second);
 		}
 		catch (const retdec::common::InvalidRangeException&)
 		{
@@ -915,7 +915,7 @@ template<int bits> retdec::common::RangeContainer<std::uint64_t> peExportDirecto
 	{
 		try
 		{
-			result.addRange(retdec::common::Range<std::uint64_t>{addresses.first, addresses.second});
+			result.insert(addresses.first, addresses.second);
 		}
 		catch (const retdec::common::InvalidRangeException&)
 		{
@@ -938,7 +938,7 @@ template<int bits> retdec::common::RangeContainer<std::uint64_t> peDebugDirector
 	{
 		try
 		{
-			result.addRange(retdec::common::Range<std::uint64_t>{addresses.first, addresses.second});
+			result.insert(addresses.first, addresses.second);
 		}
 		catch (const retdec::common::InvalidRangeException&)
 		{
@@ -961,7 +961,7 @@ template<int bits> retdec::common::RangeContainer<std::uint64_t> peResourceDirec
 	{
 		try
 		{
-			result.addRange(retdec::common::Range<std::uint64_t>{addresses.first, addresses.second});
+			result.insert(addresses.first, addresses.second);
 		}
 		catch (const retdec::common::InvalidRangeException&)
 		{

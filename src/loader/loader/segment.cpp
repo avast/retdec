@@ -311,7 +311,7 @@ void Segment::addNonDecodableRange(retdec::common::Range<std::uint64_t> range)
 			std::max(range.getStart(), secRange.getStart()),
 			std::min(range.getEnd(), secRange.getEnd()));
 
-	_nonDecodableRanges.addRange(std::move(range));
+	_nonDecodableRanges.insert(std::move(range));
 }
 
 } // namespace loader

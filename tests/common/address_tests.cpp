@@ -217,18 +217,21 @@ TEST_F(AddressRangeContainerTests, NewContainerIsEmpty)
 TEST_F(AddressRangeContainerTests, InsertRangeNonOverlapping)
 {
 	AddressRangeContainer c;
+
 	auto r1 = c.insert(AddressRange(10, 20));
+	EXPECT_TRUE(r1.second) << c;
+	EXPECT_EQ(AddressRange(10, 20), *r1.first) << c;
+
 	auto r2 = c.insert(AddressRange(30, 40));
+	EXPECT_TRUE(r2.second) << c;
+	EXPECT_EQ(AddressRange(30, 40), *r2.first) << c;
+
 	auto r3 = c.insert(AddressRange(50, 60));
+	EXPECT_TRUE(r3.second) << c;
+	EXPECT_EQ(AddressRange(50, 60), *r3.first) << c;
 
 	EXPECT_FALSE(c.empty()) << c;
 	EXPECT_EQ(3, c.size()) << c;
-	EXPECT_TRUE(r1.second) << c;
-	EXPECT_EQ(AddressRange(10, 20), *r1.first) << c;
-	EXPECT_TRUE(r2.second) << c;
-	EXPECT_EQ(AddressRange(30, 40), *r2.first) << c;
-	EXPECT_TRUE(r3.second) << c;
-	EXPECT_EQ(AddressRange(50, 60), *r3.first) << c;
 }
 
 TEST_F(AddressRangeContainerTests, InsertRangeFullyInOldRange)

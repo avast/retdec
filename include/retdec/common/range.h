@@ -276,14 +276,16 @@ protected:
  *
  * @tparam T Range element type.
  */
-template <typename T, typename = std::enable_if_t<std::is_integral<T>::value, void>>
+// template <typename T, typename = std::enable_if_t<std::is_integral<T>::value, void>>
+template <typename T>
 class RangeContainer
 {
 public:
-	using iterator = typename std::vector<T>::iterator;
-	using const_iterator = typename std::vector<T>::const_iterator;
 	using RangeType = Range<T>;
 	using RangeElementType = T;
+
+	using iterator = typename std::vector<RangeType>::iterator;
+	using const_iterator = typename std::vector<RangeType>::const_iterator;
 
 	RangeContainer() = default;
 	RangeContainer(const RangeContainer&) = default;
@@ -291,6 +293,8 @@ public:
 
 	RangeContainer& operator=(const RangeContainer&) = default;
 	RangeContainer& operator=(RangeContainer&&) = default;
+	bool operator==(const RangeContainer& o) const { return _ranges == o._ranges; }
+	bool operator!=(const RangeContainer& o) const { return !(*this == o); }
 
 	auto begin() { return _ranges.begin(); }
 	auto end() { return _ranges.end(); }
@@ -304,22 +308,33 @@ public:
 	decltype(auto) operator[](std::size_t index) const { return _ranges[index]; }
 
 	/**
-	 * Adds new range into the container. Range is merged with other ranges if it overlaps
-	 * it or is continuous with it. This method invalidates iterators.
+	 * Adds new range into the container. Range is merged with other ranges if
+	 * it overlaps it or is continuous with it. This method invalidates
+	 * iterators.
 	 *
 	 * @tparam RangeT Range type.
 	 * @param range Range to insert.
+	 * @return Iterator to the inserted (or existing) range, and bool flag if
+	 *         range was inserted or it already existed.
+	 *         Iterator may become invalid after the next insertion or other
+	 *         operation modifying the underlying container.
 	 */
 	template <typename RangeT>
-	void addRange(RangeT&& range)
+	std::pair<iterator,bool> insert(RangeT&& range)
 	{
 		// Find the range which ends right before the inserted range.
-		auto startItr = std::lower_bound(_ranges.begin(), _ranges.end(), range.getStart(),
+		auto startItr = std::lower_bound(
+				_ranges.begin(),
+				_ranges.end(),
+				range.getStart(),
 				[](const auto& range, const auto& start) {
 					return range.getEnd() < start;
 				});
 		// Find the range which starts right after the inserted range.
-		auto endItr = std::upper_bound(_ranges.begin(), _ranges.end(), range.getEnd(),
+		auto endItr = std::upper_bound(
+				_ranges.begin(),
+				_ranges.end(),
+				range.getEnd(),
 				[](const auto& end, const auto& range) {
 					return end < range.getStart();
 				});
@@ -329,19 +344,126 @@ public:
 		// Just insert it into the right position.
 		if (startItr == endItr)
 		{
-			_ranges.insert(startItr, std::forward<RangeT>(range));
+			auto it = _ranges.insert(startItr, std::forward<RangeT>(range));
+			// return {it, true};
+			return std::make_pair(it, true);
 		}
 		else
 		{
 			// Rewrite the lower bound and remove the rest which overlaps our
 			// inserted range.
-			*startItr = RangeType{
-					std::min(range.getStart(), startItr->getStart()),
-					std::max(range.getEnd(), (endItr - 1)->getEnd())
-				};
+			auto newStart = std::min(range.getStart(), startItr->getStart());
+			auto newEnd = std::max(range.getEnd(), (endItr - 1)->getEnd());
+			bool startChanged = startItr->getStart() != newStart;
+			bool endChanged = startItr->getEnd() != newEnd;
+			*startItr = RangeType{newStart, newEnd};
 			if (startItr + 1 != endItr)
+			{
 				_ranges.erase(startItr + 1, endItr);
+			}
+
+			// return {startItr, startChanged || endChanged};
+			return std::make_pair(startItr, startChanged || endChanged);
 		}
+	}
+
+	std::pair<iterator,bool> insert(
+			const RangeElementType& s,
+			const RangeElementType& e)
+	{
+		return insert(s, e);
+	}
+
+	const RangeType* getRange(const RangeElementType& e) const
+	{
+		if (_ranges.empty())
+		{
+			return nullptr;
+		}
+
+		auto pos = std::lower_bound(
+				_ranges.begin(),
+				_ranges.end(),
+				RangeType(e, e));
+
+		if (pos == _ranges.end())
+		{
+			auto last = _ranges.rbegin();
+			return (last->contains(e)) ? (&(*last)) : (nullptr);
+		}
+
+		if (pos != _ranges.begin() && pos->getStart() != e)
+		{
+			pos--;
+		}
+
+		return pos->contains(e) ? &(*pos) : nullptr;
+	}
+
+	bool contains(const RangeElementType& e) const
+	{
+		return getRange(e) != nullptr;
+	}
+
+	bool containsExact(const RangeType& r) const
+	{
+		auto* rr = getRange(r.getStart());
+		return rr ? *rr == r : false;
+	}
+
+	void remove(const RangeType& r)
+	{
+		auto pos = std::lower_bound(_ranges.begin(), _ranges.end(), r);
+		if (pos != _ranges.begin())
+		{
+			--pos; // Move to previous no matter what.
+		}
+		while (pos != _ranges.end() && pos->getStart() <= r.getEnd())
+		{
+			if (pos->contains(r.getStart())
+					|| pos->contains(r.getEnd())
+					|| r.contains(pos->getStart())
+					|| r.contains(pos->getEnd()))
+			{
+				RangeType old = *pos;
+
+				pos = _ranges.erase(pos);
+				if (old.getStart() < r.getStart())
+				{
+					pos = _ranges.emplace(
+							pos,
+							RangeType(old.getStart(), r.getStart()));
+					++pos;
+				}
+				if (old.getEnd() > r.getEnd())
+				{
+					pos = _ranges.emplace(
+							pos,
+							RangeType(r.getEnd(), old.getEnd()));
+					++pos;
+				}
+			}
+			else
+			{
+				++pos;
+			}
+		}
+	}
+
+	void remove(const RangeElementType& s, const RangeElementType& e)
+	{
+		return remove(RangeType(s, e));
+	}
+
+	friend std::ostream& operator<<(
+			std::ostream& out,
+			const RangeContainer<RangeElementType>& r)
+	{
+		for (auto& rr : r)
+		{
+			out << rr << "\n";
+		}
+		return out;
 	}
 
 private:

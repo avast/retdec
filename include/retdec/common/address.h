@@ -53,46 +53,7 @@ class Address
 using AddressRange = Range<Address>;
 AddressRange stringToAddrRange(const std::string &r);
 
-/**
- * TODO: Merge with Marek's RangeContainer, use RangeContainer because it can
- * be used with any data type, not only Address.
- * Make sure the result merges 0x0-0x5 and 0x6-0x10 into 0x0-0x10.
- */
-class AddressRangeContainer
-{
-	public:
-		using iterator       = typename std::set<AddressRange>::iterator;
-		using const_iterator = typename std::set<AddressRange>::const_iterator;
-
-	public:
-		iterator begin();
-		const_iterator begin() const;
-		iterator end();
-		const_iterator end() const;
-		std::size_t size() const;
-		bool empty() const;
-		void clear();
-
-		bool operator==(const AddressRangeContainer &o) const;
-		bool operator!=(const AddressRangeContainer &o) const;
-
-		std::pair<iterator,bool> insert(const AddressRange &r);
-		std::pair<iterator,bool> insert(const Address& s, const Address& e);
-
-		void remove(const AddressRange &r);
-		void remove(const Address& s, const Address& e);
-
-		bool contains(Address addr) const;
-		bool containsExact(AddressRange r) const;
-		const AddressRange* getRange(Address addr) const;
-
-		friend std::ostream& operator<<(
-				std::ostream &out,
-				const AddressRangeContainer &r);
-
-	private:
-		std::set<AddressRange> _ranges;
-};
+using AddressRangeContainer = RangeContainer<Address>;
 
 } // namespace common
 } // namespace retdec

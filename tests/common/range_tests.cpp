@@ -197,9 +197,9 @@ TEST_F(RangeContainerTests, NewContainerIsEmpty)
 TEST_F(RangeContainerTests, InsertRangeNonOverlapping)
 {
 	RangeContainer<int> c;
-	c.addRange(Range<int>(10, 20));
-	c.addRange(Range<int>(30, 40));
-	c.addRange(Range<int>(50, 60));
+	c.insert(Range<int>(10, 20));
+	c.insert(Range<int>(30, 40));
+	c.insert(Range<int>(50, 60));
 
 	EXPECT_FALSE(c.empty());
 	EXPECT_EQ(3, c.size());
@@ -211,11 +211,11 @@ TEST_F(RangeContainerTests, InsertRangeNonOverlapping)
 TEST_F(RangeContainerTests, InsertRangeFullyInOldRange)
 {
 	RangeContainer<int> c;
-	c.addRange(Range<int>(0x0, 0x5)); // should not be affected
-	c.addRange(Range<int>(0x10, 0x40));
-	c.addRange(Range<int>(0x100, 0x500)); // should not be affected
+	c.insert(Range<int>(0x0, 0x5)); // should not be affected
+	c.insert(Range<int>(0x10, 0x40));
+	c.insert(Range<int>(0x100, 0x500)); // should not be affected
 
-	c.addRange(Range<int>(0x20, 0x30));
+	c.insert(Range<int>(0x20, 0x30));
 
 	EXPECT_EQ(3, c.size());
 	EXPECT_EQ(Range<int>(0x0, 0x5), c[0]);
@@ -226,11 +226,11 @@ TEST_F(RangeContainerTests, InsertRangeFullyInOldRange)
 TEST_F(RangeContainerTests, InsertRangeFullyInNewRangeOne)
 {
 	RangeContainer<int> c;
-	c.addRange(Range<int>(0x0, 0x5)); // should not be affected
-	c.addRange(Range<int>(0x10, 0x40));
-	c.addRange(Range<int>(0x100, 0x500)); // should not be affected
+	c.insert(Range<int>(0x0, 0x5)); // should not be affected
+	c.insert(Range<int>(0x10, 0x40));
+	c.insert(Range<int>(0x100, 0x500)); // should not be affected
 
-	c.addRange(Range<int>(0x10, 0x60));
+	c.insert(Range<int>(0x10, 0x60));
 
 	EXPECT_EQ(3, c.size());
 	EXPECT_EQ(Range<int>(0x0, 0x5), c[0]);
@@ -241,11 +241,11 @@ TEST_F(RangeContainerTests, InsertRangeFullyInNewRangeOne)
 TEST_F(RangeContainerTests, InsertRangeMergeWithStart)
 {
 	RangeContainer<int> c;
-	c.addRange(Range<int>(0x0, 0x5)); // should not be affected
-	c.addRange(Range<int>(0x10, 0x40));
-	c.addRange(Range<int>(0x100, 0x500)); // should not be affected
+	c.insert(Range<int>(0x0, 0x5)); // should not be affected
+	c.insert(Range<int>(0x10, 0x40));
+	c.insert(Range<int>(0x100, 0x500)); // should not be affected
 
-	c.addRange(Range<int>(0x20, 0x60));
+	c.insert(Range<int>(0x20, 0x60));
 
 	EXPECT_EQ(3, c.size());
 	EXPECT_EQ(Range<int>(0x0, 0x5), c[0]);
@@ -256,11 +256,11 @@ TEST_F(RangeContainerTests, InsertRangeMergeWithStart)
 TEST_F(RangeContainerTests, InsertRangeMergeWithEnd)
 {
 	RangeContainer<int> c;
-	c.addRange(Range<int>(0x0, 0x5)); // should not be affected
-	c.addRange(Range<int>(0x20, 0x40));
-	c.addRange(Range<int>(0x100, 0x500)); // should not be affected
+	c.insert(Range<int>(0x0, 0x5)); // should not be affected
+	c.insert(Range<int>(0x20, 0x40));
+	c.insert(Range<int>(0x100, 0x500)); // should not be affected
 
-	c.addRange(Range<int>(0x10, 0x30));
+	c.insert(Range<int>(0x10, 0x30));
 
 	EXPECT_EQ(3, c.size());
 	EXPECT_EQ(Range<int>(0x0, 0x5), c[0]);
@@ -271,14 +271,14 @@ TEST_F(RangeContainerTests, InsertRangeMergeWithEnd)
 TEST_F(RangeContainerTests, InsertRangeMergeMultiple)
 {
 	RangeContainer<int> c;
-	c.addRange(Range<int>(0x0, 0x5)); // should not be affected
-	c.addRange(Range<int>(0x7, 0x20));
-	c.addRange(Range<int>(0x30, 0x40));
-	c.addRange(Range<int>(0x60, 0x70));
-	c.addRange(Range<int>(0x80, 0x95));
-	c.addRange(Range<int>(0x100, 0x500)); // should not be affected
+	c.insert(Range<int>(0x0, 0x5)); // should not be affected
+	c.insert(Range<int>(0x7, 0x20));
+	c.insert(Range<int>(0x30, 0x40));
+	c.insert(Range<int>(0x60, 0x70));
+	c.insert(Range<int>(0x80, 0x95));
+	c.insert(Range<int>(0x100, 0x500)); // should not be affected
 
-	c.addRange(Range<int>(0x10, 0x90));
+	c.insert(Range<int>(0x10, 0x90));
 
 	EXPECT_EQ(3, c.size());
 	EXPECT_EQ(Range<int>(0x0, 0x5), c[0]);
@@ -289,14 +289,14 @@ TEST_F(RangeContainerTests, InsertRangeMergeMultiple)
 TEST_F(RangeContainerTests, InsertRangeMergeMultipleInside)
 {
 	RangeContainer<int> c;
-	c.addRange(Range<int>(0x0, 0x5)); // should not be affected
-	c.addRange(Range<int>(0x15, 0x20));
-	c.addRange(Range<int>(0x30, 0x40));
-	c.addRange(Range<int>(0x60, 0x70));
-	c.addRange(Range<int>(0x80, 0x85));
-	c.addRange(Range<int>(0x100, 0x500)); // should not be affected
+	c.insert(Range<int>(0x0, 0x5)); // should not be affected
+	c.insert(Range<int>(0x15, 0x20));
+	c.insert(Range<int>(0x30, 0x40));
+	c.insert(Range<int>(0x60, 0x70));
+	c.insert(Range<int>(0x80, 0x85));
+	c.insert(Range<int>(0x100, 0x500)); // should not be affected
 
-	c.addRange(Range<int>(0x10, 0x90));
+	c.insert(Range<int>(0x10, 0x90));
 
 	EXPECT_EQ(3, c.size());
 	EXPECT_EQ(Range<int>(0x0, 0x5), c[0]);
@@ -307,9 +307,9 @@ TEST_F(RangeContainerTests, InsertRangeMergeMultipleInside)
 TEST_F(RangeContainerTests, InsertRangeMergeBordering)
 {
 	RangeContainer<int> c;
-	c.addRange(Range<int>(0x6, 0x16));
-	c.addRange(Range<int>(0x0, 0x6));
-	c.addRange(Range<int>(0x16, 0x100));
+	c.insert(Range<int>(0x6, 0x16));
+	c.insert(Range<int>(0x0, 0x6));
+	c.insert(Range<int>(0x16, 0x100));
 
 	EXPECT_EQ(1, c.size());
 	EXPECT_EQ(Range<int>(0x0, 0x100), c[0]);
