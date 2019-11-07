@@ -169,18 +169,18 @@ DataFlowEntry ParamReturn::createDataFlowEntry(Value* calledValue) const
 	return dataflow;
 }
 
-config::CallingConventionID ParamReturn::toCallConv(const std::string &cc) const
+common::CallingConventionID ParamReturn::toCallConv(const std::string &cc) const
 {
-	std::map<std::string, config::CallingConventionID> ccMap {
-		{"cdecl", config::CallingConventionID::CC_CDECL},
-		{"pascal", config::CallingConventionID::CC_PASCAL},
-		{"thiscall", config::CallingConventionID::CC_THISCALL},
-		{"stdcall", config::CallingConventionID::CC_STDCALL},
-		{"fastcall", config::CallingConventionID::CC_FASTCALL},
-		{"eabi", config::CallingConventionID::CC_ARM}
+	std::map<std::string, common::CallingConventionID> ccMap {
+		{"cdecl", common::CallingConventionID::CC_CDECL},
+		{"pascal", common::CallingConventionID::CC_PASCAL},
+		{"thiscall", common::CallingConventionID::CC_THISCALL},
+		{"stdcall", common::CallingConventionID::CC_STDCALL},
+		{"fastcall", common::CallingConventionID::CC_FASTCALL},
+		{"eabi", common::CallingConventionID::CC_ARM}
 	};	// TODO add vectorcall and regcall
 
-	return utils::mapGetValueOrDefault(ccMap, cc, config::CallingConventionID::CC_UNKNOWN);
+	return utils::mapGetValueOrDefault(ccMap, cc, common::CallingConventionID::CC_UNKNOWN);
 }
 
 void ParamReturn::collectExtraData(DataFlowEntry* dataflow) const

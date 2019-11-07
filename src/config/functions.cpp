@@ -7,6 +7,7 @@
 #include <algorithm>
 
 #include "retdec/config/functions.h"
+#include "retdec/serdes/calling_convention.h"
 #include "retdec/utils/const.h"
 
 using retdec::utils::likeConstVersion;
@@ -96,7 +97,7 @@ Function Function::fromJsonValue(const Json::Value& val)
 	ret.setIsVariadic( safeGetBool(val, JSON_isVariadic) );
 	ret.setIsThumb( safeGetBool(val, JSON_isThumb) );
 
-	ret.callingConvention.readJsonValue( val[JSON_cc] );
+	ret.callingConvention = serdes::deserialize(val[JSON_cc]);
 	ret.returnStorage.readJsonValue( val[JSON_returnStorage] );
 	ret.returnType.readJsonValue( val[JSON_returnType] );
 	ret.parameters.readJsonValue( val[JSON_parameters] );
@@ -123,7 +124,7 @@ Json::Value Function::getJsonValue() const
 	Json::Value fnc;
 
 	fnc[JSON_name]      = getName();
-	fnc[JSON_cc]        = callingConvention.getJsonValue();
+	fnc[JSON_cc]        = serdes::serialize(callingConvention);
 	fnc[JSON_fncType]   = fncTypes[ static_cast<size_t>(_linkType) ];
 
 	if (!getRealName().empty()) fnc[JSON_realName] = getRealName();

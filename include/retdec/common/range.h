@@ -371,7 +371,7 @@ public:
 			const RangeElementType& s,
 			const RangeElementType& e)
 	{
-		return insert(s, e);
+		return insert(RangeType(s, e));
 	}
 
 	const RangeType* getRange(const RangeElementType& e) const

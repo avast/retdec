@@ -2,7 +2,6 @@
 add_library(retdec-config STATIC
 	architecture.cpp
 	base.cpp
-	calling_convention.cpp
 	classes.cpp
 	config.cpp
 	file_format.cpp
@@ -19,6 +18,7 @@ add_library(retdec-config STATIC
 	vtables.cpp
 )
 target_link_libraries(retdec-config
+	retdec-serdes
 	retdec-common
 	retdec-utils
 	jsoncpp

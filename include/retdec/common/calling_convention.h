@@ -1,18 +1,18 @@
 /**
- * @file include/retdec/config/calling_convention.h
- * @brief Decompilation configuration manipulation: calling convention.
- * @copyright (c) 2017 Avast Software, licensed under the MIT license
+ * @file include/retdec/common/calling_convention.h
+ * @brief Calling convention representation.
+ * @copyright (c) 2019 Avast Software, licensed under the MIT license
  */
 
-#ifndef RETDEC_CONFIG_CALLING_CONVENTION_H
-#define RETDEC_CONFIG_CALLING_CONVENTION_H
+#ifndef RETDEC_COMMON_CALLING_CONVENTION_H
+#define RETDEC_COMMON_CALLING_CONVENTION_H
 
 #include <string>
 
 #include "retdec/config/base.h"
 
 namespace retdec {
-namespace config {
+namespace common {
 
 /**
  * Represents functions' calling conventions.
@@ -22,7 +22,42 @@ namespace config {
 class CallingConvention
 {
 	public:
+		enum class eCC
+		{
+			CC_UNKNOWN = 0,
+			CC_VOIDARG,
+			CC_CDECL,
+			CC_ELLIPSIS,
+			CC_STDCALL,
+			CC_PASCAL,
+			CC_FASTCALL,
+			CC_THISCALL,
+			CC_MANUAL,
+			CC_SPOILED,
+			CC_SPECIALE,
+			CC_SPECIALP,
+			CC_SPECIAL,
+			CC_WATCOM,
+			CC_X64,
+			CC_ARM,
+			CC_ARM64,
+			CC_MIPS,
+			CC_MIPS64,
+			CC_POWERPC,
+			CC_POWERPC64,
+			CC_PIC32,
+			CC_ENDING,
+		};
+
+		friend std::ostream& operator<<(
+				std::ostream& out,
+				const eCC& cc);
+
+	public:
 		CallingConvention();
+		CallingConvention(eCC cc);
+
+		CallingConvention& operator=(const eCC& cc);
 
 		/// @name Calling convention named constructors.
 		/// @{
@@ -56,6 +91,7 @@ class CallingConvention
 		bool isSpecialE() const;
 		bool isSpecialP() const;
 		bool isSpecial() const;
+		eCC getID() const;
 		/// @}
 
 		/// @name Calling convention set methods.
@@ -73,57 +109,21 @@ class CallingConvention
 		void setIsSpecialE();
 		void setIsSpecialP();
 		void setIsSpecial();
+		void set(eCC cc);
 		/// @}
 
 		bool operator<(const CallingConvention& cc) const;
-		friend std::ostream& operator<< (std::ostream &out, const CallingConvention& cc);
-
-		Json::Value getJsonValue() const;
-		void readJsonValue(const Json::Value& val);
-
-	public:
-		enum class eCallingConvention
-		{
-			CC_UNKNOWN = 0,
-			CC_VOIDARG,
-			CC_CDECL,
-			CC_ELLIPSIS,
-			CC_STDCALL,
-			CC_PASCAL,
-			CC_FASTCALL,
-			CC_THISCALL,
-			CC_MANUAL,
-			CC_SPOILED,
-			CC_SPECIALE,
-			CC_SPECIALP,
-			CC_SPECIAL,
-			CC_WATCOM,
-			CC_X64,
-			CC_ARM,
-			CC_ARM64,
-			CC_MIPS,
-			CC_MIPS64,
-			CC_POWERPC,
-			CC_POWERPC64,
-			CC_PIC32,
-			CC_ENDING,
-		};
-
-		eCallingConvention getID() const;
-
-		friend std::ostream& operator<< (std::ostream &out, const eCallingConvention& cc);
-		CallingConvention& operator=(const eCallingConvention& cc);
+		friend std::ostream& operator<<(
+				std::ostream &out,
+				const CallingConvention& cc);
 
 	private:
-		CallingConvention(eCallingConvention cc);
-
-	private:
-		eCallingConvention _callingConvention = eCallingConvention::CC_UNKNOWN;
+		eCC _cc = eCC::CC_UNKNOWN;
 };
 
-typedef CallingConvention::eCallingConvention CallingConventionID;
+typedef CallingConvention::eCC CallingConventionID;
 
-} // namespace config
+} // namespace common
 } // namespace retdec
 
 #endif

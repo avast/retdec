@@ -9,8 +9,8 @@
 
 #include <string>
 
+#include "retdec/common/calling_convention.h"
 #include "retdec/config/base.h"
-#include "retdec/config/calling_convention.h"
 #include "retdec/config/objects.h"
 #include "retdec/config/storage.h"
 #include "retdec/config/types.h"
@@ -103,7 +103,7 @@ class Function : public retdec::common::AddressRange
 		bool operator!=(const Function& o) const;
 
 	public:
-		CallingConvention callingConvention;
+		common::CallingConvention callingConvention;
 		Storage returnStorage;
 		Storage frameBaseStorage; // TODO - serialization
 		Type returnType;
