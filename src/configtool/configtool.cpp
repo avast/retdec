@@ -377,7 +377,6 @@ int handleArguments(std::vector<std::string> &args)
 		newConfig.globals = config.globals;
 		newConfig.registers = config.registers;
 		newConfig.structures = config.structures;
-		newConfig.segments = config.segments;
 		newConfig.vtables = config.vtables;
 		newConfig.classes = config.classes;
 

@@ -11,7 +11,6 @@ add_library(retdec-config STATIC
 	objects.cpp
 	parameters.cpp
 	patterns.cpp
-	segments.cpp
 	storage.cpp
 	tool_info.cpp
 	types.cpp

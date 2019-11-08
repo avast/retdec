@@ -36,7 +36,6 @@ const std::string JSON_globals           = "globals";
 const std::string JSON_registers         = "registers";
 const std::string JSON_languages         = "languages";
 const std::string JSON_structures        = "structures";
-const std::string JSON_segments          = "segments";
 const std::string JSON_vtables           = "vtables";
 const std::string JSON_classes           = "classes";
 const std::string JSON_patterns          = "patterns";
@@ -176,7 +175,6 @@ std::string Config::generateJsonString() const
 	root[JSON_globals]        = globals.getJsonValue();
 	root[JSON_registers]      = registers.getJsonValue();
 	root[JSON_structures]     = structures.getJsonValue();
-	root[JSON_segments]       = segments.getJsonValue();
 	root[JSON_vtables]        = vtables.getJsonValue();
 	root[JSON_classes]        = classes.getJsonValue();
 	root[JSON_patterns]       = patterns.getJsonValue();
@@ -251,7 +249,7 @@ void Config::readJsonString(const std::string& json)
 		globals.readJsonValue( root[JSON_globals] );
 		registers.readJsonValue( root[JSON_registers] );
 		structures.readJsonValue( root[JSON_structures] );
-		segments.readJsonValue( root[JSON_segments] );
+		// segments.readJsonValue( root[JSON_segments] );
 		vtables.readJsonValue( root[JSON_vtables] );
 		classes.readJsonValue( root[JSON_classes] );
 		patterns.readJsonValue( root[JSON_patterns] );

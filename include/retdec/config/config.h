@@ -86,7 +86,6 @@ class Config
 		GlobalVarContainer globals;
 		RegisterContainer registers;
 		TypeContainer structures;
-		SegmentContainer segments;
 		VtableContainer vtables;
 		ClassContainer classes;
 		PatternContainer patterns;

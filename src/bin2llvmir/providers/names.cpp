@@ -343,14 +343,6 @@ void NameContainer::initFromConfig()
 				p.second.getName(),
 				Name::eType::CONFIG_GLOBAL);
 	}
-
-	for (auto& s : _config->getConfig().segments)
-	{
-		addNameForAddress(
-				s.getStart(),
-				s.getName(),
-				Name::eType::CONFIG_SEGMENT);
-	}
 }
 
 void NameContainer::initFromDebug()
