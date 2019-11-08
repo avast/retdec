@@ -347,7 +347,8 @@ int handleArguments(std::vector<std::string> &args)
 			}
 			else if (opt == "--selected-range")
 			{
-				config.parameters.selectedRanges.insert( retdec::config::AddressRangeJson(val) );
+				config.parameters.selectedRanges.insert(
+						retdec::common::stringToAddrRange(val));
 			}
 			else if (opt == "--set-fnc-fixed")
 			{

@@ -42,7 +42,7 @@ std::string createJson()
 
 	// Other members are containers in which we can insert values.
 	config.parameters.abiPaths.insert("/path/to/abi");
-	config.parameters.selectedRanges.insert( retdec::config::AddressRangeJson(0x1000, 0x2000) );
+	config.parameters.selectedRanges.insert( retdec::common::AddressRange(0x1000, 0x2000) );
 
 	// Some containers need a little bit more work to properly fill up.
 	// Here we create a function name 'my_function', set its calling convention

@@ -9,16 +9,19 @@
 
 #include <json/json.h>
 
+#include "retdec/common/address.h"
+
 namespace retdec {
-
-namespace common {
-class Address;
-} // namespace common
-
 namespace serdes {
 
 Json::Value serialize(const common::Address& a);
 void deserialize(const Json::Value& val, common::Address& a);
+
+Json::Value serialize(const common::AddressRange& r);
+void deserialize(const Json::Value& val, common::AddressRange& r);
+
+Json::Value serialize(const common::AddressRangeContainer& c);
+void deserialize(const Json::Value& val, common::AddressRangeContainer& c);
 
 } // namespace serdes
 } // namespace retdec

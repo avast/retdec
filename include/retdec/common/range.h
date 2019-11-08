@@ -303,6 +303,10 @@ public:
 	std::size_t size() const { return _ranges.size(); }
 	bool empty() const { return _ranges.empty(); }
 	void clear() { _ranges.clear(); }
+	auto front() { return _ranges.front(); }
+	auto front() const { return _ranges.front(); }
+	auto back() { return _ranges.back(); }
+	auto back() const { return _ranges.back(); }
 
 	decltype(auto) operator[](std::size_t index) { return _ranges[index]; }
 	decltype(auto) operator[](std::size_t index) const { return _ranges[index]; }

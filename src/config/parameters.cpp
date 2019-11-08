@@ -127,7 +127,7 @@ Json::Value Parameters::getJsonValue() const
 
 	if (!getOrdinalNumbersDirectory().empty()) params[JSON_ordinalNumDir] = getOrdinalNumbersDirectory();
 
-	params[JSON_selectedRanges]       = selectedRanges.getJsonValue();
+	params[JSON_selectedRanges]       = serdes::serialize(selectedRanges);
 
 	params[JSON_userStaticSigPaths]       = getJsonStringValueVisit(userStaticSignaturePaths);
 	params[JSON_staticSigPaths]           = getJsonStringValueVisit(staticSignaturePaths);
@@ -157,7 +157,7 @@ void Parameters::readJsonValue(const Json::Value& val)
 	setOrdinalNumbersDirectory( safeGetString(val, JSON_ordinalNumDir) );
 	setOutputFile( safeGetString(val, JSON_outputFile) );
 
-	selectedRanges.readJsonValue( val[JSON_selectedRanges] );
+	serdes::deserialize(val[JSON_selectedRanges], selectedRanges);
 
 	readJsonStringValueVisit(staticSignaturePaths, val[JSON_staticSigPaths]);
 	readJsonStringValueVisit(userStaticSignaturePaths, val[JSON_userStaticSigPaths]);

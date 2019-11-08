@@ -63,61 +63,6 @@ bool safeGetBool(
 
 //
 //=============================================================================
-// AddressRangeJson
-//=============================================================================
-//
-
-class AddressRangeJson : public common::Range<common::Address>
-{
-	public:
-		AddressRangeJson() : Range() {}
-		AddressRangeJson(common::Address f, common::Address s) : Range(f, s) {}
-		explicit AddressRangeJson(const std::string& r) : Range(common::stringToAddrRange(r)) {}
-
-		static AddressRangeJson fromJsonValue(const Json::Value& val)
-		{
-			AddressRangeJson ret;
-			ret.readJsonValue(val);
-			return ret;
-		}
-
-		/**
-		 * Creates JSON object (associative array) representing address range <start, end).
-		 * @return Created JSON object.
-		 */
-		Json::Value getJsonValue() const
-		{
-			Json::Value pair;
-
-			if (getStart().isDefined() && getEnd().isDefined())
-			{
-				pair["start"] = serdes::serialize(getStart());
-				pair["end"] = serdes::serialize(getEnd());
-			}
-
-			return pair;
-		}
-
-		/**
-		 * Reads JSON object (associative array) representing address range <start, end).
-		 * @param val JSON object to read.
-		 */
-		void readJsonValue(const Json::Value& val)
-		{
-			if ( val.isNull() )
-			{
-				return;
-			}
-
-			common::Address s, e;
-			serdes::deserialize(val["start"], s);
-			serdes::deserialize(val["end"], e);
-			setStartEnd(s, e);
-		}
-};
-
-//
-//=============================================================================
 // BaseSequentialContainer
 //=============================================================================
 //
