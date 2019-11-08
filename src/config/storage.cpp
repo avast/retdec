@@ -9,6 +9,7 @@
 #include <vector>
 
 #include "retdec/config/storage.h"
+#include "retdec/serdes/address.h"
 
 namespace {
 
@@ -131,7 +132,7 @@ void Storage::readJsonValue(const Json::Value& val)
 
 	if (isMemory())
 	{
-		_globalAddress = safeGetAddress(val, JSON_value);
+		serdes::deserialize(val[JSON_value], _globalAddress);
 	}
 	else if (isRegister())
 	{
@@ -159,7 +160,7 @@ Json::Value Storage::getJsonValue() const
 	if (isMemory())
 	{
 		obj[JSON_type] = typeStrings[ static_cast<size_t>(eType::GLOBAL) ];
-		obj[JSON_value] = toJsonValue(getAddress());
+		obj[JSON_value] = serdes::serialize(getAddress());
 	}
 	else if (isRegister())
 	{

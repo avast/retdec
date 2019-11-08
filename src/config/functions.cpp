@@ -7,6 +7,7 @@
 #include <algorithm>
 
 #include "retdec/config/functions.h"
+#include "retdec/serdes/address.h"
 #include "retdec/serdes/calling_convention.h"
 #include "retdec/utils/const.h"
 
@@ -83,11 +84,10 @@ Function Function::fromJsonValue(const Json::Value& val)
 	ret.setDeclarationString( safeGetString(val, JSON_decStr) );
 	ret.setWrappedFunctionName( safeGetString(val, JSON_wrappedName) );
 	ret.setSourceFileName( safeGetString(val, JSON_srcFileName) );
-	ret.setStartEnd(
-			safeGetAddress(val, JSON_startAddr),
-			safeGetAddress(val, JSON_endAddr));
-	ret.setStartLine( safeGetAddress(val, JSON_startLine) );
-	ret.setEndLine( safeGetAddress(val, JSON_endLine) );
+	serdes::deserialize(val[JSON_startAddr], ret._start);
+	serdes::deserialize(val[JSON_endAddr], ret._end);
+	serdes::deserialize(val[JSON_startLine], ret._startLine);
+	serdes::deserialize(val[JSON_endLine], ret._endLine);
 	ret.setIsFixed( safeGetBool(val, JSON_fixed) );
 	ret.setIsFromDebug( safeGetBool(val, JSON_fromDebug) );
 	ret.setIsConstructor( safeGetBool(val, JSON_isConstructor) );
@@ -97,7 +97,7 @@ Function Function::fromJsonValue(const Json::Value& val)
 	ret.setIsVariadic( safeGetBool(val, JSON_isVariadic) );
 	ret.setIsThumb( safeGetBool(val, JSON_isThumb) );
 
-	ret.callingConvention = serdes::deserialize(val[JSON_cc]);
+	serdes::deserialize(val[JSON_cc], ret.callingConvention);
 	ret.returnStorage.readJsonValue( val[JSON_returnStorage] );
 	ret.returnType.readJsonValue( val[JSON_returnType] );
 	ret.parameters.readJsonValue( val[JSON_parameters] );
@@ -133,10 +133,10 @@ Json::Value Function::getJsonValue() const
 	if (!getDeclarationString().empty()) fnc[JSON_decStr] = getDeclarationString();
 	if (!getWrappedFunctionName().empty()) fnc[JSON_wrappedName] = getWrappedFunctionName();
 	if (!getSourceFileName().empty()) fnc[JSON_srcFileName] = getSourceFileName();
-	if (getStart().isDefined()) fnc[JSON_startAddr] = toJsonValue(getStart());
-	if (getEnd().isDefined()) fnc[JSON_endAddr] = toJsonValue(getEnd());
-	if (getStartLine().isDefined()) fnc[JSON_startLine] = toJsonValue(getStartLine());
-	if (getEndLine().isDefined()) fnc[JSON_endLine] = toJsonValue(getEndLine());
+	if (getStart().isDefined()) fnc[JSON_startAddr] = serdes::serialize(getStart());
+	if (getEnd().isDefined()) fnc[JSON_endAddr] = serdes::serialize(getEnd());
+	if (getStartLine().isDefined()) fnc[JSON_startLine] = serdes::serialize(getStartLine());
+	if (getEndLine().isDefined()) fnc[JSON_endLine] = serdes::serialize(getEndLine());
 	if (isFixed()) fnc[JSON_fixed] = isFixed();
 	if (isFromDebug()) fnc[JSON_fromDebug] = isFromDebug();
 	if (isConstructor()) fnc[JSON_isConstructor] = isConstructor();

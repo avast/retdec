@@ -17,6 +17,7 @@
 
 #include "retdec/config/config_exceptions.h"
 #include "retdec/common/address.h"
+#include "retdec/serdes/address.h"
 #include "retdec/utils/const.h"
 
 namespace retdec {
@@ -40,10 +41,6 @@ Json::Value::UInt safeGetUint(
 		const std::string& name = "",
 		Json::Value::UInt defaultValue = 0);
 
-retdec::common::Address safeGetAddress(
-		const Json::Value& val,
-		const std::string& name = "");
-
 Json::Value::UInt64 safeGetUint64(
 		const Json::Value& val,
 		const std::string& name = "",
@@ -63,14 +60,6 @@ bool safeGetBool(
 		const Json::Value& val,
 		const std::string& name = "",
 		bool defaultValue = false);
-
-//
-//=============================================================================
-// Conversions to JSON values.
-//=============================================================================
-//
-
-std::string toJsonValue(common::Address a);
 
 //
 //=============================================================================
@@ -102,8 +91,8 @@ class AddressRangeJson : public common::Range<common::Address>
 
 			if (getStart().isDefined() && getEnd().isDefined())
 			{
-				pair["start"] = toJsonValue(getStart());
-				pair["end"] = toJsonValue(getEnd());
+				pair["start"] = serdes::serialize(getStart());
+				pair["end"] = serdes::serialize(getEnd());
 			}
 
 			return pair;
@@ -120,9 +109,10 @@ class AddressRangeJson : public common::Range<common::Address>
 				return;
 			}
 
-			setStartEnd(
-					safeGetAddress(val, "start"),
-					safeGetAddress(val, "end"));
+			common::Address s, e;
+			serdes::deserialize(val["start"], s);
+			serdes::deserialize(val["end"], e);
+			setStartEnd(s, e);
 		}
 };
 

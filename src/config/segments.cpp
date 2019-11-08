@@ -5,6 +5,7 @@
  */
 
 #include "retdec/config/segments.h"
+#include "retdec/serdes/address.h"
 
 namespace {
 
@@ -31,11 +32,14 @@ Segment Segment::fromJsonValue(const Json::Value& val)
 {
 	checkJsonValueIsObject(val, "Segment");
 
-	Segment ret( safeGetAddress(val, JSON_startAddr) );
+	common::Address start;
+	serdes::deserialize(val[JSON_startAddr], start);
+	Segment ret(start);
 
 	ret.setName( safeGetString(val, JSON_name) );
 	ret.setComment( safeGetString(val, JSON_comment) );
-	ret.setEnd( safeGetAddress(val, JSON_endAddr) );
+
+	serdes::deserialize(val[JSON_endAddr], ret._end);
 
 	return ret;
 }
@@ -50,8 +54,8 @@ Json::Value Segment::getJsonValue() const
 
 	if (!getName().empty()) seg[JSON_name] = getName();
 	if (!getComment().empty()) seg[JSON_comment] = getComment();
-	if (getStart().isDefined()) seg[JSON_startAddr] = toJsonValue(getStart());
-	if (getEnd().isDefined()) seg[JSON_endAddr] = toJsonValue(getEnd());
+	if (getStart().isDefined()) seg[JSON_startAddr] = serdes::serialize(getStart());
+	if (getEnd().isDefined()) seg[JSON_endAddr] = serdes::serialize(getEnd());
 
 	return seg;
 }

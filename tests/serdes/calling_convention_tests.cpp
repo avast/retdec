@@ -66,6 +66,53 @@ TEST_F(CallingConventionTests, CheckSerialization)
 	EXPECT_EQ("special", serialize(cc).asString());
 }
 
+TEST_F(CallingConventionTests, CheckDeserialization)
+{
+	EXPECT_TRUE(cc.isUnknown());
+
+	deserialize("", cc);
+	EXPECT_TRUE(cc.isUnknown());
+
+	deserialize("unknown", cc);
+	EXPECT_TRUE(cc.isUnknown());
+
+	deserialize("voidarg", cc);
+	EXPECT_TRUE(cc.isVoidarg());
+
+	deserialize("cdecl", cc);
+	EXPECT_TRUE(cc.isCdecl());
+
+	deserialize("ellipsis", cc);
+	EXPECT_TRUE(cc.isEllipsis());
+
+	deserialize("stdcall", cc);
+	EXPECT_TRUE(cc.isStdcall());
+
+	deserialize("pascal", cc);
+	EXPECT_TRUE(cc.isPascal());
+
+	deserialize("fastcall", cc);
+	EXPECT_TRUE(cc.isFastcall());
+
+	deserialize("thiscall", cc);
+	EXPECT_TRUE(cc.isThiscall());
+
+	deserialize("manual", cc);
+	EXPECT_TRUE(cc.isManual());
+
+	deserialize("spoiled", cc);
+	EXPECT_TRUE(cc.isSpoiled());
+
+	deserialize("speciale", cc);
+	EXPECT_TRUE(cc.isSpecialE());
+
+	deserialize("specialp", cc);
+	EXPECT_TRUE(cc.isSpecialP());
+
+	deserialize("special", cc);
+	EXPECT_TRUE(cc.isSpecial());
+}
+
 } // namespace tests
 } // namespace serdes
 } // namespace retdec

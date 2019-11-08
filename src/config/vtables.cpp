@@ -5,6 +5,7 @@
  */
 
 #include "retdec/config/vtables.h"
+#include "retdec/serdes/address.h"
 
 namespace {
 
@@ -40,9 +41,11 @@ VtableItem VtableItem::fromJsonValue(const Json::Value& val)
 {
 	checkJsonValueIsObject(val, "VtableItem");
 
-	VtableItem ret( safeGetAddress(val, JSON_address) );
+	common::Address a;
+	serdes::deserialize(val[JSON_address], a);
+	VtableItem ret(a);
 
-	ret.setTargetFunctionAddress( safeGetAddress(val, JSON_targetAddress) );
+	serdes::deserialize(val[JSON_targetAddress], ret._targetAddress);
 	ret.setTargetFunctionName( safeGetString(val, JSON_targetName) );
 
 	return ret;
@@ -57,8 +60,8 @@ Json::Value VtableItem::getJsonValue() const
 {
 	Json::Value val;
 
-	if (getAddress().isDefined()) val[JSON_address] = toJsonValue(getAddress());
-	if (getTargetFunctionAddress().isDefined()) val[JSON_targetAddress] = toJsonValue(getTargetFunctionAddress());
+	if (getAddress().isDefined()) val[JSON_address] = serdes::serialize(getAddress());
+	if (getTargetFunctionAddress().isDefined()) val[JSON_targetAddress] = serdes::serialize(getTargetFunctionAddress());
 	if (!getTargetFunctionName().empty()) val[JSON_targetName] = getTargetFunctionName();
 
 	return val;
@@ -140,7 +143,9 @@ Vtable Vtable::fromJsonValue(const Json::Value& val)
 {
 	checkJsonValueIsObject(val, "Vtable");
 
-	Vtable ret( safeGetAddress(val, JSON_address) );
+	common::Address a;
+	serdes::deserialize(val[JSON_address], a);
+	Vtable ret(a);
 
 	ret.setName( safeGetString(val, JSON_name) );
 	ret.items.readJsonValue(val[JSON_items]);
@@ -158,7 +163,7 @@ Json::Value Vtable::getJsonValue() const
 	Json::Value val;
 
 	if (!getName().empty()) val[JSON_name] = getName();
-	if (getAddress().isDefined()) val[JSON_address] = toJsonValue(getAddress());
+	if (getAddress().isDefined()) val[JSON_address] = serdes::serialize(getAddress());
 	if (!items.empty()) val[JSON_items] = items.getJsonValue();
 
 	return val;

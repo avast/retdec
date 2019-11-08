@@ -55,28 +55,24 @@ Json::Value serialize(const common::CallingConvention& cc)
 	}
 }
 
-common::CallingConvention deserialize(const Json::Value& val)
+void deserialize(const Json::Value& val, common::CallingConvention& cc)
 {
-	common::CallingConvention ret;
-
 	if (val.isNull())
 	{
-		return ret;
+		return;
 	}
 
 	std::string enumStr = safeGetString(val);
 	auto it = std::find(ccStrings.begin(), ccStrings.end(), enumStr);
 	if (it == ccStrings.end())
 	{
-		ret.setIsUnknown();
+		cc.setIsUnknown();
 	}
 	else
 	{
-		ret.set(static_cast<common::CallingConvention::eCC>(
+		cc.set(static_cast<common::CallingConvention::eCC>(
 				std::distance(ccStrings.begin(), it)));
 	}
-
-	return ret;
 }
 
 } // namespace serdes

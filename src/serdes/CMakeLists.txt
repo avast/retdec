@@ -1,5 +1,6 @@
 
 add_library(retdec-serdes STATIC
+	address.cpp
 	calling_convention.cpp
 	utils.cpp
 )

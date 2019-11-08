@@ -5,6 +5,7 @@
  */
 
 #include "retdec/config/patterns.h"
+#include "retdec/serdes/address.h"
 
 namespace retdec {
 namespace config {
@@ -206,8 +207,8 @@ Pattern::Match Pattern::Match::fromJsonValue(const Json::Value& val)
 
 	Pattern::Match ret;
 
-	ret.setOffset( safeGetAddress(val, JSON_offset) );
-	ret.setAddress( safeGetAddress(val, JSON_address) );
+	serdes::deserialize(val[JSON_offset], ret._offset);
+	serdes::deserialize(val[JSON_address], ret._address);
 
 	if (val.isMember(JSON_size))
 		ret.setSize( safeGetUint(val, JSON_size) );
@@ -229,8 +230,8 @@ Json::Value Pattern::Match::getJsonValue() const
 {
 	Json::Value match;
 
-	if (isOffsetDefined())    match[JSON_offset] = toJsonValue(getOffset());
-	if (isAddressDefined())   match[JSON_address] = toJsonValue(getAddress());
+	if (isOffsetDefined())    match[JSON_offset] = serdes::serialize(getOffset());
+	if (isAddressDefined())   match[JSON_address] = serdes::serialize(getAddress());
 	if (isSizeDefined())      match[JSON_size] = getSize().getValue();
 	if (isEntrySizeDefined()) match[JSON_entrySize] = getEntrySize().getValue();
 

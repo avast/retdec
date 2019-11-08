@@ -18,7 +18,7 @@ class CallingConvention;
 namespace serdes {
 
 Json::Value serialize(const common::CallingConvention& cc);
-common::CallingConvention deserialize(const Json::Value& val);
+void deserialize(const Json::Value& val, common::CallingConvention& cc);
 
 } // namespace serdes
 } // namespace retdec

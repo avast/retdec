@@ -7,6 +7,7 @@
 #include <fstream>
 
 #include "retdec/config/config.h"
+#include "retdec/serdes/address.h"
 #include "retdec/utils/string.h"
 #include "retdec/utils/time.h"
 
@@ -160,10 +161,10 @@ std::string Config::generateJsonString() const
 	if (!getUnpackedInputFile().empty()) root[JSON_unpackedInputFile] = getUnpackedInputFile();
 	if (!getPdbInputFile().empty()) root[JSON_pdbInputFile] = getPdbInputFile();
 	if (!getFrontendVersion().empty()) root[JSON_frontendVersion] = getFrontendVersion();
-	if (getEntryPoint().isDefined()) root[JSON_entryPoint] = toJsonValue(getEntryPoint());
-	if (getMainAddress().isDefined()) root[JSON_mainAddress] = toJsonValue(getMainAddress());
-	if (getSectionVMA().isDefined()) root[JSON_sectionVMA] = toJsonValue(getSectionVMA());
-	if (getImageBase().isDefined()) root[JSON_imageBase] = toJsonValue(getImageBase());
+	if (getEntryPoint().isDefined()) root[JSON_entryPoint] = serdes::serialize(getEntryPoint());
+	if (getMainAddress().isDefined()) root[JSON_mainAddress] = serdes::serialize(getMainAddress());
+	if (getSectionVMA().isDefined()) root[JSON_sectionVMA] = serdes::serialize(getSectionVMA());
+	if (getImageBase().isDefined()) root[JSON_imageBase] = serdes::serialize(getImageBase());
 
 	root[JSON_parameters]     = parameters.getJsonValue();
 	root[JSON_architecture]   = architecture.getJsonValue();
@@ -235,10 +236,10 @@ void Config::readJsonString(const std::string& json)
 		setUnpackedInputFile( safeGetString(root, JSON_unpackedInputFile) );
 		setPdbInputFile( safeGetString(root, JSON_pdbInputFile) );
 		setFrontendVersion( safeGetString(root, JSON_frontendVersion) );
-		setEntryPoint( safeGetAddress(root, JSON_entryPoint) );
-		setMainAddress( safeGetAddress(root, JSON_mainAddress) );
-		setSectionVMA( safeGetAddress(root, JSON_sectionVMA) );
-		setImageBase( safeGetAddress(root, JSON_imageBase) );
+		serdes::deserialize(root[JSON_entryPoint], _entryPoint);
+		serdes::deserialize(root[JSON_mainAddress], _mainAddress);
+		serdes::deserialize(root[JSON_sectionVMA], _sectionVMA);
+		serdes::deserialize(root[JSON_imageBase], _imageBase);
 
 		parameters.readJsonValue( root[JSON_parameters] );
 		architecture.readJsonValue( root[JSON_architecture] );
