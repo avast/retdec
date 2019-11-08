@@ -9,6 +9,7 @@
 #include "retdec/config/functions.h"
 #include "retdec/serdes/address.h"
 #include "retdec/serdes/calling_convention.h"
+#include "retdec/serdes/std.h"
 #include "retdec/utils/const.h"
 
 using retdec::utils::likeConstVersion;
@@ -103,7 +104,7 @@ Function Function::fromJsonValue(const Json::Value& val)
 	ret.parameters.readJsonValue( val[JSON_parameters] );
 	ret.locals.readJsonValue( val[JSON_locals] );
 
-	readJsonStringValueVisit(ret.usedCryptoConstants, val[JSON_usedCrypto]);
+	serdes::deserialize(val[JSON_usedCrypto], ret.usedCryptoConstants);
 
 	std::string enumStr = safeGetString(val, JSON_fncType);
 	auto it = std::find(fncTypes.begin(), fncTypes.end(), enumStr);
@@ -151,7 +152,7 @@ Json::Value Function::getJsonValue() const
 	if (returnStorage.isDefined()) fnc[JSON_returnStorage] = returnStorage.getJsonValue();
 	if (returnType.isDefined()) fnc[JSON_returnType] = returnType.getJsonValue();
 
-	fnc[JSON_usedCrypto] = getJsonStringValueVisit(usedCryptoConstants);
+	fnc[JSON_usedCrypto] = serdes::serialize(usedCryptoConstants);
 
 	return fnc;
 }

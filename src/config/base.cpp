@@ -90,49 +90,5 @@ bool safeGetBool(
 	SAFE_TEMPLATE(val, name, defaultValue, isBool, asBool, "a bool");
 }
 
-//
-//=============================================================================
-// Helper methods
-//=============================================================================
-//
-
-/**
- * Reads array of JSON objects into elements of the provided string container.
- * Container is cleared before parsing - it contains only new objects afterwards.
- * @param data String set.
- * @param node JSON object.
- */
-void readJsonStringValueVisit(std::set<std::string>& data, const Json::Value& node)
-{
-	data.clear();
-
-	for (auto& elem : node)
-	{
-		if ( ! elem.isNull() )
-		{
-			data.insert( safeGetString(elem) );
-		}
-	}
-}
-
-/**
- * Reads array of JSON objects into elements of the provided string container.
- * Container is cleared before parsing - it contains only new objects afterwards.
- * @param data String vector.
- * @param node JSON object.
- */
-void readJsonStringValueVisit(std::vector<std::string>& data, const Json::Value& node)
-{
-	data.clear();
-
-	for (auto& elem : node)
-	{
-		if ( ! elem.isNull() )
-		{
-			data.push_back( safeGetString(elem) );
-		}
-	}
-}
-
 } // namespace config
 } // namespace retdec

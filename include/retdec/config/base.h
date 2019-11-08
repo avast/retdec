@@ -451,31 +451,6 @@ class BaseSetContainer
 		std::set<Elem> _data;
 };
 
-//
-//=============================================================================
-// Helper methods
-//=============================================================================
-//
-
-/**
- * Creates array of JSON objects created from strings in the provided container.
- * @param data String container.
- * @return Created JSON array.
- */
-template<typename Container>
-Json::Value getJsonStringValueVisit(const Container& data)
-{
-	Json::Value array(Json::arrayValue);
-	for (auto& elem : data)
-	{
-		array.append(elem);
-	}
-	return array;
-}
-
-void readJsonStringValueVisit(std::set<std::string>& data, const Json::Value& node);
-void readJsonStringValueVisit(std::vector<std::string>& data, const Json::Value& node);
-
 } // namespace config
 } // namespace retdec
 

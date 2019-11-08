@@ -5,6 +5,7 @@
  */
 
 #include "retdec/config/classes.h"
+#include "retdec/serdes/std.h"
 #include "retdec/utils/container.h"
 
 using retdec::utils::hasItem;
@@ -48,12 +49,12 @@ Class Class::fromJsonValue(const Json::Value& val)
 	Class ret(safeGetString(val, JSON_name));
 
 	ret.setDemangledName(safeGetString(val, JSON_demangledName));
-	readJsonStringValueVisit(ret._superClasses, val[JSON_superClasses]);
-	readJsonStringValueVisit(ret.virtualMethods, val[JSON_virtualMethods]);
-	readJsonStringValueVisit(ret.constructors, val[JSON_constructors]);
-	readJsonStringValueVisit(ret.destructors, val[JSON_destructors]);
-	readJsonStringValueVisit(ret.methods, val[JSON_methods]);
-	readJsonStringValueVisit(ret.virtualTables, val[JSON_vtables]);
+	serdes::deserialize(val[JSON_superClasses], ret._superClasses);
+	serdes::deserialize(val[JSON_virtualMethods], ret.virtualMethods);
+	serdes::deserialize(val[JSON_constructors], ret.constructors);
+	serdes::deserialize(val[JSON_destructors], ret.destructors);
+	serdes::deserialize(val[JSON_methods], ret.methods);
+	serdes::deserialize(val[JSON_vtables], ret.virtualTables);
 
 	return ret;
 }
@@ -69,12 +70,12 @@ Json::Value Class::getJsonValue() const
 	if (!getName().empty()) val[JSON_name] = getName();
 	if (!getDemangledName().empty()) val[JSON_demangledName] = getDemangledName();
 
-	val[JSON_superClasses]   = getJsonStringValueVisit(_superClasses);
-	val[JSON_virtualMethods] = getJsonStringValueVisit(virtualMethods);
-	val[JSON_constructors]   = getJsonStringValueVisit(constructors);
-	val[JSON_destructors]    = getJsonStringValueVisit(destructors);
-	val[JSON_methods]        = getJsonStringValueVisit(methods);
-	val[JSON_vtables]        = getJsonStringValueVisit(virtualTables);
+	val[JSON_superClasses]   = serdes::serialize(_superClasses);
+	val[JSON_virtualMethods] = serdes::serialize(virtualMethods);
+	val[JSON_constructors]   = serdes::serialize(constructors);
+	val[JSON_destructors]    = serdes::serialize(destructors);
+	val[JSON_methods]        = serdes::serialize(methods);
+	val[JSON_vtables]        = serdes::serialize(virtualTables);
 
 	return val;
 }
