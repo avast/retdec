@@ -1,6 +1,7 @@
 
 add_executable(retdec-tests-common
 	address_tests.cpp
+	architecture_tests.cpp
 	range_tests.cpp
 )
 target_link_libraries(retdec-tests-common

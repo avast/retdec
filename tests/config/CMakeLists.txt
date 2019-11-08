@@ -8,7 +8,6 @@ add_executable(retdec-tests-config
 	objects_tests.cpp
 	tool_info_tests.cpp
 	vtables_tests.cpp
-	architecture_tests.cpp
 	config_tests.cpp
 	file_type_tests.cpp
 	language_tests.cpp

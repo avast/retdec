@@ -7,7 +7,7 @@
 #ifndef RETDEC_CONFIG_CONFIG_H
 #define RETDEC_CONFIG_CONFIG_H
 
-#include "retdec/config/architecture.h"
+#include "retdec/common/architecture.h"
 #include "retdec/config/base.h"
 #include "retdec/config/classes.h"
 #include "retdec/config/file_format.h"
@@ -16,7 +16,6 @@
 #include "retdec/config/language.h"
 #include "retdec/config/parameters.h"
 #include "retdec/config/patterns.h"
-#include "retdec/config/segments.h"
 #include "retdec/config/tool_info.h"
 #include "retdec/config/types.h"
 #include "retdec/config/vtables.h"
@@ -77,7 +76,7 @@ class Config
 
 	public:
 		Parameters parameters;
-		Architecture architecture;
+		common::Architecture architecture;
 		FileType fileType;
 		FileFormat fileFormat;
 		ToolInfoContainer tools;

@@ -1,17 +1,17 @@
 /**
- * @file tests/config/architecture_tests.cpp
+ * @file tests/common/architecture_tests.cpp
  * @brief Tests for the @c address module.
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */
 
 #include <gtest/gtest.h>
 
-#include "retdec/config/architecture.h"
+#include "retdec/common/architecture.h"
 
 using namespace ::testing;
 
 namespace retdec {
-namespace config {
+namespace common {
 namespace tests {
 
 class ArchitectureTests : public Test
@@ -116,5 +116,5 @@ TEST_F(ArchitectureTests, IsArchIsCaseInsensitiveContains)
 }
 
 } // namespace tests
-} // namespace config
+} // namespace common
 } // namespace retdec

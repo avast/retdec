@@ -1,18 +1,18 @@
 /**
- * @file include/retdec/config/architecture.h
- * @brief Decompilation configuration manipulation: architecture.
- * @copyright (c) 2017 Avast Software, licensed under the MIT license
+ * @file include/retdec/common/architecture.h
+ * @brief Common architecture representation.
+ * @copyright (c) 2019 Avast Software, licensed under the MIT license
  */
 
-#ifndef RETDEC_CONFIG_ARCHITECTURE_H
-#define RETDEC_CONFIG_ARCHITECTURE_H
+#ifndef RETDEC_COMMON_ARCHITECTURE_H
+#define RETDEC_COMMON_ARCHITECTURE_H
 
 #include <string>
 
 #include "retdec/config/base.h"
 
 namespace retdec {
-namespace config {
+namespace common {
 
 /**
  * Represents input binary's target architecture.
@@ -70,9 +70,6 @@ class Architecture
 		unsigned getByteSize() const;
 		/// @}
 
-		Json::Value getJsonValue() const;
-		void readJsonValue(const Json::Value& val);
-
 	private:
 		enum eEndian
 		{
@@ -104,7 +101,7 @@ class Architecture
 		eArch _arch = eArch::UNKNOWN;
 };
 
-} // namespace config
+} // namespace common
 } // namespace retdec
 
 #endif

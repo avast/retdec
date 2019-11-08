@@ -88,11 +88,6 @@ using the full @c decdev path:
 @code{.cpp}
 #include "retdec/config/config.h"
 @endcode
-However, if you want to use only specific parts of the library, you can
-include just the used header files:
-@code{.cpp}
-#include "retdec/config/architecture.h"
-@endcode
 
 @section Namespaces
 

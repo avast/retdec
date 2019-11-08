@@ -1,12 +1,12 @@
 /**
- * @file src/config/architecture.cpp
- * @brief Decompilation configuration manipulation: architecture.
- * @copyright (c) 2017 Avast Software, licensed under the MIT license
+ * @file src/common/architecture.cpp
+ * @brief Common architecture representation.
+ * @copyright (c) 2019 Avast Software, licensed under the MIT license
  */
 
 #include <algorithm>
 
-#include "retdec/config/architecture.h"
+#include "retdec/common/architecture.h"
 #include "retdec/utils/string.h"
 
 namespace {
@@ -22,17 +22,10 @@ const std::string ARCH_x86     = "x86";
 const std::string ARCH_PPC     = "powerpc";
 const std::string ARCH_PPC64   = "powerpc64";
 
-const std::string JSON_name    = "name";
-const std::string JSON_endian  = "endian";
-const std::string JSON_bitSize = "bitSize";
-
-const std::string JSON_val_little = "little";
-const std::string JSON_val_big    = "big";
-
 } // anonymous namespace
 
 namespace retdec {
-namespace config {
+namespace common {
 
 bool Architecture::isArm32OrThumb() const { return isArm32() || isThumb(); }
 bool Architecture::isPic32() const        { return isArch(eArch::PIC32); }
@@ -143,46 +136,5 @@ void Architecture::setArch()
 	}
 }
 
-/**
- * Returns JSON object (associative array) holding architecture information.
- * @return JSON object.
- */
-Json::Value Architecture::getJsonValue() const
-{
-	Json::Value arch;
-
-	arch[JSON_name] = getName();
-	arch[JSON_bitSize] = getBitSize();
-	if (isEndianLittle())
-		arch[JSON_endian] = JSON_val_little;
-	else if (isEndianBig())
-		arch[JSON_endian] = JSON_val_big;
-
-	return arch;
-}
-
-/**
- * Reads JSON object (associative array) holding architecture information.
- * @param val JSON object.
- */
-void Architecture::readJsonValue(const Json::Value& val)
-{
-	if ( val.isNull() || !val.isObject() )
-	{
-		return;
-	}
-
-	setName( safeGetString(val, JSON_name) );
-	setBitSize( safeGetUint(val, JSON_bitSize) );
-
-	std::string e = safeGetString(val, JSON_endian);
-	if (e == JSON_val_big)
-		setIsEndianBig();
-	else if (e == JSON_val_little)
-		setIsEndianLittle();
-	else
-		setIsEndianUnknown();
-}
-
-} // namespace config
+} // namespace common
 } // namespace retdec

@@ -9,7 +9,6 @@
 #include "retdec/config/base.h"
 #include "retdec/config/functions.h"
 #include "retdec/config/objects.h"
-#include "retdec/config/segments.h"
 
 using namespace ::testing;
 
@@ -227,81 +226,6 @@ TEST_F(BaseAssociativeContainerTests, AssociativeInsertWorks)
 
 	EXPECT_TRUE(fncs.getElementById(fnc1.getName())->isDynamicallyLinked());
 	EXPECT_EQ(fnc4.getStart(), fncs.getElementById(fnc1.getName())->getStart());
-}
-
-//
-//=============================================================================
-//  BaseAssociativeContainerTests
-//=============================================================================
-//
-
-class BaseSetContainerTests: public Test
-{
-	public:
-		BaseSetContainerTests() :
-				seg1(retdec::common::Address(0x1000)),
-				seg2(retdec::common::Address(0x2000))
-		{
-			seg1.setName("seg1");
-			seg1.setComment("comment1");
-
-			seg2.setName("seg2");
-
-			EXPECT_TRUE(segs.empty());
-			segs.insert(seg1);
-			segs.insert(seg2);
-			EXPECT_EQ(2, segs.size());
-		}
-
-	protected:
-		Segment seg1;
-		Segment seg2;
-		BaseSetContainer<Segment> segs;
-};
-
-TEST_F(BaseSetContainerTests, SetSimpleMethodsWork)
-{
-	EXPECT_EQ(seg1, *segs.begin());
-
-	auto end = segs.end();
-	--end;
-	EXPECT_EQ(seg2, *end);
-
-	EXPECT_EQ(2, segs.size());
-
-	EXPECT_FALSE(segs.empty());
-
-	segs.clear();
-	EXPECT_EQ(0, segs.size());
-	EXPECT_TRUE(segs.empty());
-}
-
-TEST_F(BaseSetContainerTests, SetInsertWorks)
-{
-	// This object is unique -> must be added.
-	//
-	Segment seg3(retdec::common::Address(0x3000));
-	seg3.setName("seg3");
-
-	EXPECT_EQ(2, segs.size());
-	segs.insert(seg3);
-	EXPECT_EQ(3, segs.size());
-
-	// This object is not unique -> existing object is updated.
-	//
-	Segment seg4(seg1.getStart());
-	seg4.setName("seg4");
-	seg4.setComment("comment4");
-
-	EXPECT_EQ(seg1.getName(), segs.find(seg1)->getName());
-	EXPECT_EQ(seg1.getComment(), segs.find(seg1)->getComment());
-
-	EXPECT_EQ(3, segs.size());
-	segs.insert(seg4);
-	EXPECT_EQ(3, segs.size());
-
-	EXPECT_EQ(seg4.getName(), segs.find(seg1)->getName());
-	EXPECT_EQ(seg4.getComment(), segs.find(seg1)->getComment());
 }
 
 } // namespace tests

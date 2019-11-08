@@ -8,6 +8,7 @@
 
 #include "retdec/config/config.h"
 #include "retdec/serdes/address.h"
+#include "retdec/serdes/architecture.h"
 #include "retdec/utils/string.h"
 #include "retdec/utils/time.h"
 
@@ -166,7 +167,7 @@ std::string Config::generateJsonString() const
 	if (getImageBase().isDefined()) root[JSON_imageBase] = serdes::serialize(getImageBase());
 
 	root[JSON_parameters]     = parameters.getJsonValue();
-	root[JSON_architecture]   = architecture.getJsonValue();
+	root[JSON_architecture]   = serdes::serialize(architecture);
 	root[JSON_fileType]       = fileType.getJsonValue();
 	root[JSON_fileFormat]     = fileFormat.getJsonValue();
 	root[JSON_tools]          = tools.getJsonValue();
@@ -240,7 +241,7 @@ void Config::readJsonString(const std::string& json)
 		serdes::deserialize(root[JSON_imageBase], _imageBase);
 
 		parameters.readJsonValue( root[JSON_parameters] );
-		architecture.readJsonValue( root[JSON_architecture] );
+		serdes::deserialize(root[JSON_architecture], architecture);
 		fileType.readJsonValue( root[JSON_fileType] );
 		fileFormat.readJsonValue( root[JSON_fileFormat] );
 		tools.readJsonValue( root[JSON_tools] );
@@ -249,7 +250,6 @@ void Config::readJsonString(const std::string& json)
 		globals.readJsonValue( root[JSON_globals] );
 		registers.readJsonValue( root[JSON_registers] );
 		structures.readJsonValue( root[JSON_structures] );
-		// segments.readJsonValue( root[JSON_segments] );
 		vtables.readJsonValue( root[JSON_vtables] );
 		classes.readJsonValue( root[JSON_classes] );
 		patterns.readJsonValue( root[JSON_patterns] );
