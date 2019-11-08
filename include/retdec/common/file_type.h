@@ -1,16 +1,14 @@
 /**
- * @file include/retdec/config/file_type.h
- * @brief Decompilation configuration manipulation: file type.
- * @copyright (c) 2017 Avast Software, licensed under the MIT license
+ * @file include/retdec/common/file_type.h
+ * @brief Common file type representation.
+ * @copyright (c) 2019 Avast Software, licensed under the MIT license
  */
 
-#ifndef RETDEC_CONFIG_FILE_TYPE_H
-#define RETDEC_CONFIG_FILE_TYPE_H
-
-#include "retdec/config/base.h"
+#ifndef RETDEC_COMMON_FILE_TYPE_H
+#define RETDEC_COMMON_FILE_TYPE_H
 
 namespace retdec {
-namespace config {
+namespace common {
 
 /**
  * Represents input binary's file type (i.e. shared library,
@@ -19,29 +17,6 @@ namespace config {
 class FileType
 {
 	public:
-		/// @name File type query methods.
-		/// @{
-		bool isUnknown() const;
-		bool isKnown() const;
-		bool isShared() const;
-		bool isArchive() const;
-		bool isObject() const;
-		bool isExecutable() const;
-		/// @}
-
-		/// @name File type set methods.
-		/// @{
-		void setIsUnknown();
-		void setIsShared();
-		void setIsArchive();
-		void setIsObject();
-		void setIsExecutable();
-		/// @}
-
-		Json::Value getJsonValue() const;
-		void readJsonValue(const Json::Value& val);
-
-	private:
 		enum eFileType
 		{
 			FT_UNKNOWN = 0,
@@ -51,11 +26,33 @@ class FileType
 			FT_EXECUTABLE
 		};
 
+	public:
+		/// @name File type query methods.
+		/// @{
+		bool isUnknown() const;
+		bool isKnown() const;
+		bool isShared() const;
+		bool isArchive() const;
+		bool isObject() const;
+		bool isExecutable() const;
+		eFileType getID() const;
+		/// @}
+
+		/// @name File type set methods.
+		/// @{
+		void setIsUnknown();
+		void setIsShared();
+		void setIsArchive();
+		void setIsObject();
+		void setIsExecutable();
+		void set(eFileType ft);
+		/// @}
+
 	private:
 		eFileType _fileType = FT_UNKNOWN;
 };
 
-} // namespace config
+} // namespace common
 } // namespace retdec
 
 #endif

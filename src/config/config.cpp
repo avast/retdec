@@ -10,6 +10,7 @@
 #include "retdec/serdes/address.h"
 #include "retdec/serdes/architecture.h"
 #include "retdec/serdes/file_format.h"
+#include "retdec/serdes/file_type.h"
 #include "retdec/utils/string.h"
 #include "retdec/utils/time.h"
 
@@ -169,7 +170,7 @@ std::string Config::generateJsonString() const
 
 	root[JSON_parameters]     = parameters.getJsonValue();
 	root[JSON_architecture]   = serdes::serialize(architecture);
-	root[JSON_fileType]       = fileType.getJsonValue();
+	root[JSON_fileType]       = serdes::serialize(fileType);
 	root[JSON_fileFormat]     = serdes::serialize(fileFormat);
 	root[JSON_tools]          = tools.getJsonValue();
 	root[JSON_languages]      = languages.getJsonValue();
@@ -243,7 +244,7 @@ void Config::readJsonString(const std::string& json)
 
 		parameters.readJsonValue( root[JSON_parameters] );
 		serdes::deserialize(root[JSON_architecture], architecture);
-		fileType.readJsonValue( root[JSON_fileType] );
+		serdes::deserialize(root[JSON_fileType], fileType);
 		serdes::deserialize(root[JSON_fileFormat], fileFormat);
 		tools.readJsonValue( root[JSON_tools] );
 		languages.readJsonValue( root[JSON_languages] );

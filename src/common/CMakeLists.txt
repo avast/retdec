@@ -4,6 +4,7 @@ add_library(retdec-common STATIC
 	architecture.cpp
 	calling_convention.cpp
 	file_format.cpp
+	file_type.cpp
 )
 target_link_libraries(retdec-common
 	retdec-utils
