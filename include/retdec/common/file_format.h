@@ -1,18 +1,16 @@
 /**
- * @file include/retdec/config/file_format.h
- * @brief Decompilation configuration manipulation: file format.
- * @copyright (c) 2017 Avast Software, licensed under the MIT license
+ * @file include/retdec/common/file_format.h
+ * @brief Common file format representation.
+ * @copyright (c) 2019 Avast Software, licensed under the MIT license
  */
 
-#ifndef RETDEC_CONFIG_FILE_FORMAT_H
-#define RETDEC_CONFIG_FILE_FORMAT_H
+#ifndef RETDEC_COMMON_FILE_FORMAT_H
+#define RETDEC_COMMON_FILE_FORMAT_H
 
 #include <string>
 
-#include "retdec/config/base.h"
-
 namespace retdec {
-namespace config {
+namespace common {
 
 /**
  * Represents input binary's file format.
@@ -85,9 +83,6 @@ class FileFormat
 		unsigned getFileClassBits() const;
 		/// @}
 
-		Json::Value getJsonValue() const;
-		void readJsonValue(const Json::Value& val);
-
 	private:
 		enum eFileFormat
 		{
@@ -107,7 +102,7 @@ class FileFormat
 		unsigned _fileClassBits = 0;
 };
 
-} // namespace config
+} // namespace common
 } // namespace retdec
 
 #endif

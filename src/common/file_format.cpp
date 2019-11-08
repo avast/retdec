@@ -1,15 +1,15 @@
 /**
- * @file src/config/file_format.cpp
- * @brief Decompilation configuration manipulation: file format.
- * @copyright (c) 2017 Avast Software, licensed under the MIT license
+ * @file src/common/file_format.cpp
+ * @brief Common file format representation.
+ * @copyright (c) 2019 Avast Software, licensed under the MIT license
  */
 
 #include <algorithm>
 
-#include "retdec/config/file_format.h"
+#include "retdec/common/file_format.h"
 
 namespace retdec {
-namespace config {
+namespace common {
 
 bool FileFormat::isUnknown() const    { return _fileFormat == FF_UNKNOWN; }
 bool FileFormat::isKnown() const      { return _fileFormat != FF_UNKNOWN; }
@@ -138,30 +138,5 @@ unsigned FileFormat::getFileClassBits() const
 	return _fileClassBits;
 }
 
-/**
- * Returns JSON string value holding file format information.
- * @return JSON string value.
- */
-Json::Value FileFormat::getJsonValue() const
-{
-	if (getFileClassBits())
-		return getName() + std::to_string(getFileClassBits());
-	else
-		return getName();
-}
-
-/**
- * Reads JSON string value holding file format information.
- * @param val JSON string value.
- */
-void FileFormat::readJsonValue(const Json::Value& val)
-{
-	if ( val.isNull() )
-	{
-		return;
-	}
-	setName( safeGetString(val) );
-}
-
-} // namespace config
+} // namespace common
 } // namespace retdec

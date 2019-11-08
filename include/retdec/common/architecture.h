@@ -9,8 +9,6 @@
 
 #include <string>
 
-#include "retdec/config/base.h"
-
 namespace retdec {
 namespace common {
 

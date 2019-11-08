@@ -1,17 +1,17 @@
 /**
- * @file tests/config/file_format_tests.cpp
- * @brief Tests for the @c address module.
- * @copyright (c) 2017 Avast Software, licensed under the MIT license
+ * @file tests/common/file_format_tests.cpp
+ * @brief Tests for the file format module.
+ * @copyright (c) 2019 Avast Software, licensed under the MIT license
  */
 
 #include <gtest/gtest.h>
 
-#include "retdec/config/file_format.h"
+#include "retdec/common/file_format.h"
 
 using namespace ::testing;
 
 namespace retdec {
-namespace config {
+namespace common {
 namespace tests {
 
 class FileFormatTests : public Test
@@ -95,5 +95,5 @@ TEST_F(FileFormatTests, TestSetGetFileClassBits)
 }
 
 } // namespace tests
-} // namespace config
+} // namespace common
 } // namespace retdec

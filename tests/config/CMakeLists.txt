@@ -3,7 +3,6 @@ add_executable(retdec-tests-config
 	base_tests.cpp
 	classes_tests.cpp
 	documentation_tests.cpp
-	file_format_tests.cpp
 	functions_tests.cpp
 	objects_tests.cpp
 	tool_info_tests.cpp

@@ -3,6 +3,7 @@ add_library(retdec-serdes STATIC
 	address.cpp
 	architecture.cpp
 	calling_convention.cpp
+	file_format.cpp
 	utils.cpp
 )
 target_link_libraries(retdec-serdes

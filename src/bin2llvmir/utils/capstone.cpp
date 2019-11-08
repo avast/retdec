@@ -4,6 +4,8 @@
 * @copyright (c) 2017 Avast Software, licensed under the MIT license
 */
 
+#include <cassert>
+
 #include "retdec/bin2llvmir/utils/capstone.h"
 
 namespace retdec {

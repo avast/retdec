@@ -8,9 +8,9 @@
 #define RETDEC_CONFIG_CONFIG_H
 
 #include "retdec/common/architecture.h"
+#include "retdec/common/file_format.h"
 #include "retdec/config/base.h"
 #include "retdec/config/classes.h"
-#include "retdec/config/file_format.h"
 #include "retdec/config/file_type.h"
 #include "retdec/config/functions.h"
 #include "retdec/config/language.h"
@@ -78,7 +78,7 @@ class Config
 		Parameters parameters;
 		common::Architecture architecture;
 		FileType fileType;
-		FileFormat fileFormat;
+		common::FileFormat fileFormat;
 		ToolInfoContainer tools;
 		LanguageContainer languages;
 		FunctionContainer functions;

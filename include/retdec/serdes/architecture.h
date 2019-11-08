@@ -1,6 +1,6 @@
 /**
  * @file include/retdec/serdes/architecture.h
- * @brief Calling convention (de)serialization.
+ * @brief Architecture (de)serialization.
  * @copyright (c) 2019 Avast Software, licensed under the MIT license
  */
 
