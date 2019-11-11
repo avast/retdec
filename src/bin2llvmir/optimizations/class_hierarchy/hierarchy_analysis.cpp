@@ -141,13 +141,13 @@ for (auto* p : vtable)
 {
 	auto& vt = *p;
 
-	retdec::config::Vtable confVt(vt.vtableAddress);
+	retdec::common::Vtable confVt(vt.vtableAddress);
 	confVt.setName(names::generateVtableName(vt.vtableAddress));
 
 	retdec::common::Address itemAddr = vt.vtableAddress;
 	for (auto& item : vt.virtualFncAddresses)
 	{
-		retdec::config::VtableItem confItem(itemAddr);
+		retdec::common::VtableItem confItem(itemAddr);
 		confItem.setTargetFunctionAddress(item.address);
 		if (auto *fnc = config->getLlvmFunction(item.address))
 			confItem.setTargetFunctionName(fnc->getName().str());

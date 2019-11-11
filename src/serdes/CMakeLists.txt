@@ -8,6 +8,7 @@ add_library(retdec-serdes STATIC
 	language.cpp
 	std.cpp
 	utils.cpp
+	vtable.cpp
 )
 target_link_libraries(retdec-serdes
 	retdec-common

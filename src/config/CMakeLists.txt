@@ -10,7 +10,6 @@ add_library(retdec-config STATIC
 	storage.cpp
 	tool_info.cpp
 	types.cpp
-	vtables.cpp
 )
 target_link_libraries(retdec-config
 	retdec-serdes

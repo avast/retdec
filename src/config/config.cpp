@@ -12,6 +12,7 @@
 #include "retdec/serdes/file_format.h"
 #include "retdec/serdes/file_type.h"
 #include "retdec/serdes/language.h"
+#include "retdec/serdes/vtable.h"
 #include "retdec/serdes/std.h"
 #include "retdec/utils/string.h"
 #include "retdec/utils/time.h"
@@ -180,7 +181,7 @@ std::string Config::generateJsonString() const
 	root[JSON_globals]        = globals.getJsonValue();
 	root[JSON_registers]      = registers.getJsonValue();
 	root[JSON_structures]     = structures.getJsonValue();
-	root[JSON_vtables]        = vtables.getJsonValue();
+	root[JSON_vtables]        = serdes::serialize(vtables);
 	root[JSON_classes]        = classes.getJsonValue();
 	root[JSON_patterns]       = patterns.getJsonValue();
 
@@ -254,7 +255,7 @@ void Config::readJsonString(const std::string& json)
 		globals.readJsonValue( root[JSON_globals] );
 		registers.readJsonValue( root[JSON_registers] );
 		structures.readJsonValue( root[JSON_structures] );
-		vtables.readJsonValue( root[JSON_vtables] );
+		serdes::deserialize(root[JSON_vtables], vtables);
 		classes.readJsonValue( root[JSON_classes] );
 		patterns.readJsonValue( root[JSON_patterns] );
 	}

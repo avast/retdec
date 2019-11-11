@@ -1,18 +1,19 @@
 /**
- * @file include/retdec/config/vtables.h
- * @brief Decompilation configuration manipulation: vtables.
- * @copyright (c) 2017 Avast Software, licensed under the MIT license
+ * @file include/retdec/common/vtable.h
+ * @brief Common vtable representation.
+ * @copyright (c) 2019 Avast Software, licensed under the MIT license
  */
 
-#ifndef RETDEC_CONFIG_VTABLES_H
-#define RETDEC_CONFIG_VTABLES_H
+#ifndef RETDEC_COMMON_VTABLE_H
+#define RETDEC_COMMON_VTABLE_H
 
+#include <set>
 #include <string>
 
-#include "retdec/config/base.h"
+#include <retdec/common/address.h>
 
 namespace retdec {
-namespace config {
+namespace common {
 
 /**
  * Represents C++ virtual table.
@@ -21,13 +22,12 @@ namespace config {
 class VtableItem
 {
 	public:
-		explicit VtableItem(const retdec::common::Address& a);
-		static VtableItem fromJsonValue(const Json::Value& val);
-
-		Json::Value getJsonValue() const;
+		VtableItem(const retdec::common::Address& a
+				= retdec::common::Address::getUndef);
 
 		/// @name VtableItem set methods.
 		/// @{
+		void setAddress(const retdec::common::Address& a);
 		void setTargetFunctionAddress(const retdec::common::Address& a);
 		void setTargetFunctionName(const std::string& n);
 		/// @}
@@ -59,13 +59,12 @@ class VtableItem
 class Vtable
 {
 	public:
-		explicit Vtable(const retdec::common::Address& a);
-		static Vtable fromJsonValue(const Json::Value& val);
-
-		Json::Value getJsonValue() const;
+		Vtable(const retdec::common::Address& a
+				= retdec::common::Address::getUndef);
 
 		/// @name Vtable set methods.
 		/// @{
+		void setAddress(const retdec::common::Address& a);
 		void setName(const std::string& n);
 		/// @}
 
@@ -79,11 +78,8 @@ class Vtable
 		bool operator<(const Vtable& o) const;
 		bool operator==(const Vtable& o) const;
 
-	private:
-		using VtableItemContainer = BaseAssociativeContainer<retdec::common::Address, VtableItem>;
-
 	public:
-		VtableItemContainer items;
+		std::set<VtableItem> items;
 
 	private:
 		std::string _name;
@@ -95,12 +91,9 @@ class Vtable
  * An associative container with virtual function tables' addresses as the key.
  * See Vtable class for details.
  */
-class VtableContainer : public BaseAssociativeContainer<retdec::common::Address, Vtable>
-{
+using VtableContainer = std::set<Vtable>;
 
-};
-
-} // namespace config
+} // namespace common
 } // namespace retdec
 
 #endif

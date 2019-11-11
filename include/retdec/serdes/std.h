@@ -7,6 +7,7 @@
 #ifndef RETDEC_SERDES_STD_H
 #define RETDEC_SERDES_STD_H
 
+#include <map>
 #include <type_traits>
 
 #include <json/json.h>
