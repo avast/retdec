@@ -1,17 +1,17 @@
 /**
- * @file tests/config/language_tests.cpp
- * @brief Tests for the @c address module.
+ * @file tests/common/language_tests.cpp
+ * @brief Tests for the language module.
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */
 
 #include <gtest/gtest.h>
 
-#include "retdec/config/language.h"
+#include "retdec/common/language.h"
 
 using namespace ::testing;
 
 namespace retdec {
-namespace config {
+namespace common {
 namespace tests {
 
 //
@@ -99,5 +99,5 @@ TEST_F(LanguageContainerTests, TestHasLanguageDoesNotFindLanguageIfItDoesNotExis
 }
 
 } // namespace tests
-} // namespace config
+} // namespace common
 } // namespace retdec

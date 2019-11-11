@@ -52,32 +52,5 @@ void deserialize(const Json::Value& val, common::AddressRange& r)
 	r.setStartEnd(s, e);
 }
 
-Json::Value serialize(const common::AddressRangeContainer& c)
-{
-	Json::Value array(Json::arrayValue);
-
-	for (auto& elem : c)
-	{
-		array.append(serialize(elem));
-	}
-
-	return array;
-}
-
-void deserialize(const Json::Value& val, common::AddressRangeContainer& c)
-{
-	c.clear();
-
-	for (auto& elem : val)
-	{
-		if (!elem.isNull())
-		{
-			common::AddressRange r;
-			deserialize(elem, r);
-			c.insert(r);
-		}
-	}
-}
-
 } // namespace serdes
 } // namespace retdec

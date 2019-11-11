@@ -4,6 +4,7 @@ add_executable(retdec-tests-common
 	architecture_tests.cpp
 	file_format_tests.cpp
 	file_type_tests.cpp
+	language_tests.cpp
 	range_tests.cpp
 )
 target_link_libraries(retdec-tests-common

@@ -11,6 +11,8 @@
 #include "retdec/serdes/architecture.h"
 #include "retdec/serdes/file_format.h"
 #include "retdec/serdes/file_type.h"
+#include "retdec/serdes/language.h"
+#include "retdec/serdes/std.h"
 #include "retdec/utils/string.h"
 #include "retdec/utils/time.h"
 
@@ -173,7 +175,7 @@ std::string Config::generateJsonString() const
 	root[JSON_fileType]       = serdes::serialize(fileType);
 	root[JSON_fileFormat]     = serdes::serialize(fileFormat);
 	root[JSON_tools]          = tools.getJsonValue();
-	root[JSON_languages]      = languages.getJsonValue();
+	root[JSON_languages]      = serdes::serialize(languages);
 	root[JSON_functions]      = functions.getJsonValue();
 	root[JSON_globals]        = globals.getJsonValue();
 	root[JSON_registers]      = registers.getJsonValue();
@@ -247,7 +249,7 @@ void Config::readJsonString(const std::string& json)
 		serdes::deserialize(root[JSON_fileType], fileType);
 		serdes::deserialize(root[JSON_fileFormat], fileFormat);
 		tools.readJsonValue( root[JSON_tools] );
-		languages.readJsonValue( root[JSON_languages] );
+		serdes::deserialize(root[JSON_languages], languages);
 		functions.readJsonValue( root[JSON_functions] );
 		globals.readJsonValue( root[JSON_globals] );
 		registers.readJsonValue( root[JSON_registers] );

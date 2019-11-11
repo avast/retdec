@@ -287,6 +287,8 @@ public:
 	using iterator = typename std::vector<RangeType>::iterator;
 	using const_iterator = typename std::vector<RangeType>::const_iterator;
 
+	typedef RangeType value_type;
+
 	RangeContainer() = default;
 	RangeContainer(const RangeContainer&) = default;
 	RangeContainer(RangeContainer&&) = default;
@@ -369,6 +371,11 @@ public:
 			// return {startItr, startChanged || endChanged};
 			return std::make_pair(startItr, startChanged || endChanged);
 		}
+	}
+	template <typename RangeT>
+	std::pair<iterator,bool> insert(const_iterator, RangeT&& range)
+	{
+		return insert(range);
 	}
 
 	std::pair<iterator,bool> insert(

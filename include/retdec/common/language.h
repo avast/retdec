@@ -1,18 +1,17 @@
 /**
- * @file include/retdec/config/language.h
- * @brief Decompilation configuration manipulation: language.
- * @copyright (c) 2017 Avast Software, licensed under the MIT license
+ * @file include/retdec/common/language.h
+ * @brief Common programming language representation.
+ * @copyright (c) 2019 Avast Software, licensed under the MIT license
  */
 
-#ifndef RETDEC_CONFIG_LANGUAGE_H
-#define RETDEC_CONFIG_LANGUAGE_H
+#ifndef RETDEC_COMMON_LANGUAGE_H
+#define RETDEC_COMMON_LANGUAGE_H
 
+#include <set>
 #include <string>
 
-#include "retdec/config/base.h"
-
 namespace retdec {
-namespace config {
+namespace common {
 
 /**
  * Represents input binary's language.
@@ -21,10 +20,8 @@ namespace config {
 class Language
 {
 	public:
-		explicit Language(const std::string& langName);
-		static Language fromJsonValue(const Json::Value& val);
-
-		Json::Value getJsonValue() const;
+		Language();
+		Language(const std::string& langName);
 
 		/// @name Language query methods.
 		/// @{
@@ -36,6 +33,7 @@ class Language
 
 		/// @name Language set methods.
 		/// @{
+		void setName(const std::string& n);
 		void setIsUnknown();
 		void setModuleCount(unsigned c);
 		void setIsBytecode(bool b);
@@ -43,7 +41,6 @@ class Language
 
 		/// @name Language get methods.
 		/// @{
-		std::string getId() const;
 		std::string getName() const;
 		unsigned getModuleCount() const;
 		/// @}
@@ -62,14 +59,14 @@ class Language
  * Set container with languages' names as unique ID (set key).
  * See Language class for details.
  */
-class LanguageContainer : public BaseSetContainer<Language>
+class LanguageContainer : public std::set<Language>
 {
 	public:
 		const Language* getFirstBytecode() const;
 		bool hasLanguage(const std::string& sub) const;
 };
 
-} // namespace config
+} // namespace common
 } // namespace retdec
 
 #endif

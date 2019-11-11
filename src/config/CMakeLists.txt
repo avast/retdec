@@ -4,7 +4,6 @@ add_library(retdec-config STATIC
 	classes.cpp
 	config.cpp
 	functions.cpp
-	language.cpp
 	objects.cpp
 	parameters.cpp
 	patterns.cpp

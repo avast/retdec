@@ -123,7 +123,7 @@ void ConfigPresentation::presentLanguages()
 
 	for(std::size_t i = 0; i < noOfLanguages; ++i)
 	{
-		Language l(fileinfo.toolInfo.detectedLanguages[i].name);
+		retdec::common::Language l(fileinfo.toolInfo.detectedLanguages[i].name);
 		l.setIsBytecode(fileinfo.toolInfo.detectedLanguages[i].bytecode);
 
 		outDoc.languages.insert(l);
