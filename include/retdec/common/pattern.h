@@ -1,19 +1,19 @@
 /**
- * @file include/retdec/config/patterns.h
- * @brief Decompilation configuration manipulation: patterns.
+ * @file include/retdec/common/pattern.h
+ * @brief Common pattern representation.
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */
 
-#ifndef RETDEC_CONFIG_PATTERNS_H
-#define RETDEC_CONFIG_PATTERNS_H
+#ifndef RETDEC_COMMON_PATTERN_H
+#define RETDEC_COMMON_PATTERN_H
 
 #include <string>
 
-#include "retdec/config/base.h"
+#include "retdec/common/address.h"
 #include "retdec/utils/value.h"
 
 namespace retdec {
-namespace config {
+namespace common {
 
 /**
  * Represents pattern (e.g. crypto signature, malware) found in binary.
@@ -55,9 +55,6 @@ class Pattern
 
 				bool operator==(const Match& val) const;
 				bool operator!=(const Match& val) const;
-
-				static Match fromJsonValue(const Json::Value& val);
-				Json::Value getJsonValue() const;
 
 				/// @name Match query methods.
 				/// @{
@@ -154,9 +151,6 @@ class Pattern
 		bool operator==(const Pattern& val) const;
 		bool operator!=(const Pattern& val) const;
 
-		static Pattern fromJsonValue(const Json::Value& val);
-		Json::Value getJsonValue() const;
-
 		/// @name Pattern query methods.
 		/// @{
 		bool isTypeOther() const;
@@ -210,7 +204,7 @@ class Pattern
 				eEndian endian);
 
 	public:
-		BaseSequentialContainer<Match> matches;
+		std::vector<Match> matches;
 
 	private:
 		std::string _name;
@@ -220,15 +214,9 @@ class Pattern
 		eEndian _endian = eEndian::UNKNOWN;
 };
 
-/**
- * Sequential container of pattern informations.
- */
-class PatternContainer : public BaseSequentialContainer<Pattern>
-{
+using PatternContainer = std::vector<Pattern>;
 
-};
-
-} // namespace config
+} // namespace common
 } // namespace retdec
 
 #endif

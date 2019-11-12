@@ -6,6 +6,7 @@ add_executable(retdec-tests-common
 	file_format_tests.cpp
 	file_type_tests.cpp
 	language_tests.cpp
+	patterns_tests.cpp
 	range_tests.cpp
 	tool_info_tests.cpp
 )

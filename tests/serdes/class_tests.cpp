@@ -1,7 +1,7 @@
 /**
  * @file tests/serdes/classe_tests.cpp
- * @brief Tests for the @c classes module.
- * @copyright (c) 2017 Avast Software, licensed under the MIT license
+ * @brief Tests for the class module.
+ * @copyright (c) 2019 Avast Software, licensed under the MIT license
  */
 
 #include <gtest/gtest.h>

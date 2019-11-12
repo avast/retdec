@@ -1,7 +1,7 @@
 /**
  * @file tests/serdes/calling_convention_tests.cpp
- * @brief Tests for the @c address module.
- * @copyright (c) 2017 Avast Software, licensed under the MIT license
+ * @brief Tests for the calling convention module.
+ * @copyright (c) 2019 Avast Software, licensed under the MIT license
  */
 
 #include <gtest/gtest.h>

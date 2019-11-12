@@ -1,17 +1,17 @@
 /**
- * @file tests/config/patterns_tests.cpp
- * @brief Tests for the @c patterns module.
+ * @file tests/common/patterns_tests.cpp
+ * @brief Tests for the patterns module.
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */
 
 #include <gtest/gtest.h>
 
-#include "retdec/config/patterns.h"
+#include "retdec/common/pattern.h"
 
 using namespace ::testing;
 
 namespace retdec {
-namespace config {
+namespace common {
 namespace tests {
 
 //
@@ -119,32 +119,6 @@ TEST_F(PatternMatchItemTests, floatingPointCtorCreatesUnknownMatchWithAllParams)
 	EXPECT_EQ(0x100, m.getSize());
 	EXPECT_TRUE(m.isEntrySizeDefined());
 	EXPECT_EQ(4, m.getEntrySize());
-}
-
-TEST_F(PatternMatchItemTests, getJsonValueWorksWithFromJsonValueWithFullyDefinedMatch)
-{
-	auto m1 = Pattern::Match::floatingPoint(0x1000, 0x2000, 0x100, 4);
-	auto json = m1.getJsonValue();
-	auto m2 = Pattern::Match::fromJsonValue(json);
-
-	EXPECT_TRUE(m2.isTypeFloatingPoint());
-	EXPECT_EQ(0x1000, m2.getOffset());
-	EXPECT_EQ(0x2000, m2.getAddress());
-	EXPECT_EQ(0x100, m2.getSize());
-	EXPECT_EQ(4, m2.getEntrySize());
-}
-
-TEST_F(PatternMatchItemTests, getJsonValueWorksWithFromJsonValueWithPartiallyDefinedMatch)
-{
-	auto m1 = Pattern::Match::floatingPoint(0x1000);
-	auto json = m1.getJsonValue();
-	auto m2 = Pattern::Match::fromJsonValue(json);
-
-	EXPECT_TRUE(m2.isTypeFloatingPoint());
-	EXPECT_EQ(0x1000, m2.getOffset());
-	EXPECT_FALSE(m2.isAddressDefined());
-	EXPECT_FALSE(m2.isSizeDefined());
-	EXPECT_FALSE(m2.isEntrySizeDefined());
 }
 
 TEST_F(PatternMatchItemTests, matchesWithUndefinedValuesAreEqual)
@@ -311,30 +285,6 @@ TEST_F(PatternTests, malwareBigCtorCreatesMalwarePatternWithAllParams)
 	EXPECT_EQ("desc", p.getDescription());
 }
 
-TEST_F(PatternTests, getJsonValueWorksWithFromJsonValueWithFullyDefinedPattern)
-{
-	auto p1 = Pattern::malwareLittle("name", "desc");
-	auto json = p1.getJsonValue();
-	auto p2 = Pattern::fromJsonValue(json);
-
-	EXPECT_TRUE(p2.isTypeMalware());
-	EXPECT_TRUE(p2.isEndianLittle());
-	EXPECT_EQ("name", p2.getName());
-	EXPECT_EQ("desc", p2.getDescription());
-}
-
-TEST_F(PatternTests, getJsonValueWorksWithFromJsonValueWithPartiallyDefinedPattern)
-{
-	auto p1 = Pattern::malware();
-	auto json = p1.getJsonValue();
-	auto p2 = Pattern::fromJsonValue(json);
-
-	EXPECT_TRUE(p2.isTypeMalware());
-	EXPECT_TRUE(p2.isEndianUnknown());
-	EXPECT_EQ("", p2.getName());
-	EXPECT_EQ("", p2.getDescription());
-}
-
 TEST_F(PatternTests, defaultUninitializedPatternsAreEqual)
 {
 	Pattern p1;
@@ -348,9 +298,9 @@ TEST_F(PatternTests, SamePatternsAreEqual)
 {
 	auto m = Pattern::Match::floatingPoint(0x1000, 0x2000);
 	auto p1 = Pattern::malwareLittle("name", "desc");
-	p1.matches.insert(m);
+	p1.matches.push_back(m);
 	auto p2 = Pattern::malwareLittle("name", "desc");
-	p2.matches.insert(m);
+	p2.matches.push_back(m);
 
 	EXPECT_TRUE(p1 == p2);
 	EXPECT_FALSE(p1 != p2);
@@ -360,9 +310,9 @@ TEST_F(PatternTests, SimilarPatternsWithDifferentTypesAreNotEqual)
 {
 	auto m = Pattern::Match::floatingPoint(0x1000, 0x2000);
 	auto p1 = Pattern::malwareLittle("name", "desc");
-	p1.matches.insert(m);
+	p1.matches.push_back(m);
 	auto p2 = Pattern::cryptoLittle("name", "desc");
-	p2.matches.insert(m);
+	p2.matches.push_back(m);
 
 	EXPECT_FALSE(p1 == p2);
 	EXPECT_TRUE(p1 != p2);
@@ -372,9 +322,9 @@ TEST_F(PatternTests, SimilarPatternsWithDifferentNamesAreNotEqual)
 {
 	auto m = Pattern::Match::floatingPoint(0x1000, 0x2000);
 	auto p1 = Pattern::malwareLittle("name1", "desc");
-	p1.matches.insert(m);
+	p1.matches.push_back(m);
 	auto p2 = Pattern::malwareLittle("name2", "desc");
-	p2.matches.insert(m);
+	p2.matches.push_back(m);
 
 	EXPECT_FALSE(p1 == p2);
 	EXPECT_TRUE(p1 != p2);
@@ -385,26 +335,15 @@ TEST_F(PatternTests, SimilarPatternsWithDifferentMatchesAreNotEqual)
 	auto m1 = Pattern::Match::floatingPoint(0x1000, 0x2000);
 	auto m2 = Pattern::Match::floatingPoint(0x2000, 0x4000);
 	auto p1 = Pattern::malwareLittle("name", "desc");
-	p1.matches.insert(m1);
+	p1.matches.push_back(m1);
 	auto p2 = Pattern::malwareLittle("name", "desc");
-	p2.matches.insert(m1);
-	p2.matches.insert(m2);
+	p2.matches.push_back(m1);
+	p2.matches.push_back(m2);
 
 	EXPECT_FALSE(p1 == p2);
 	EXPECT_TRUE(p1 != p2);
 }
 
-//
-//=============================================================================
-// PatternContainer
-//=============================================================================
-//
-
-class PatternContainerTests : public Test
-{
-
-};
-
 } // namespace tests
-} // namespace config
+} // namespace common
 } // namespace retdec

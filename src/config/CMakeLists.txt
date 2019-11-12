@@ -5,7 +5,6 @@ add_library(retdec-config STATIC
 	functions.cpp
 	objects.cpp
 	parameters.cpp
-	patterns.cpp
 	storage.cpp
 	types.cpp
 )

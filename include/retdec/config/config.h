@@ -12,12 +12,12 @@
 #include "retdec/common/file_format.h"
 #include "retdec/common/file_type.h"
 #include "retdec/common/language.h"
+#include "retdec/common/pattern.h"
 #include "retdec/common/tool_info.h"
 #include "retdec/common/vtable.h"
 #include "retdec/config/base.h"
 #include "retdec/config/functions.h"
 #include "retdec/config/parameters.h"
-#include "retdec/config/patterns.h"
 #include "retdec/config/types.h"
 
 namespace retdec {
@@ -87,7 +87,7 @@ class Config
 		TypeContainer structures;
 		common::VtableContainer vtables;
 		common::ClassContainer classes;
-		PatternContainer patterns;
+		common::PatternContainer patterns;
 
 	private:
 		std::string _inputFile;

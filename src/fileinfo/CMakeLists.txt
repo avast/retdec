@@ -111,6 +111,17 @@ set(FILEINFO_SOURCES
 )
 
 add_executable(retdec-fileinfo ${FILEINFO_SOURCES})
-target_link_libraries(retdec-fileinfo retdec-loader retdec-ar-extractor retdec-fileformat retdec-cpdetect yaracpp retdec-utils retdec-config jsoncpp tinyxml2)
+target_link_libraries(retdec-fileinfo
+	retdec-loader
+	retdec-ar-extractor
+	retdec-fileformat
+	retdec-cpdetect
+	yaracpp
+	retdec-utils
+	retdec-common
+	retdec-config
+	retdec-serdes
+	jsoncpp
+	tinyxml2)
 target_include_directories(retdec-fileinfo PUBLIC ${PROJECT_SOURCE_DIR}/src/)
 install(TARGETS retdec-fileinfo RUNTIME DESTINATION bin)

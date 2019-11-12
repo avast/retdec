@@ -1,43 +1,14 @@
 /**
- * @file src/config/patterns.cpp
- * @brief Decompilation configuration manipulation: patterns.
- * @copyright (c) 2017 Avast Software, licensed under the MIT license
+ * @file src/config/pattern.cpp
+ * @brief Common pattern representation.
+ * @copyright (c) 2019 Avast Software, licensed under the MIT license
  */
 
-#include "retdec/config/patterns.h"
+#include "retdec/common/pattern.h"
 #include "retdec/serdes/address.h"
 
 namespace retdec {
-namespace config {
-
-namespace {
-
-const std::string JSON_offset            = "offset";
-const std::string JSON_address           = "address";
-const std::string JSON_size              = "size";
-const std::string JSON_entrySize         = "entrySize";
-const std::string JSON_match_type        = "type";
-
-const std::string JSON_val_typeUnknown   = "unknown";
-const std::string JSON_val_typeIntegral  = "integral";
-const std::string JSON_val_typeFP        = "floatingPoint";
-
-const std::string JSON_name              = "name";
-const std::string JSON_description       = "description";
-const std::string JSON_yara_rule_name    = "yaraRule";
-const std::string JSON_patternType       = "type";
-const std::string JSON_patternEndian     = "endian";
-const std::string JSON_matches           = "matches";
-
-const std::string JSON_val_typeOther     = "other";
-const std::string JSON_val_typeCrypto    = "crypto";
-const std::string JSON_val_typeMalware   = "malware";
-
-const std::string JSON_val_endianUnknown = "unknown";
-const std::string JSON_val_endianLittle  = "little";
-const std::string JSON_val_endianBig     = "big";
-
-} // anonymous namespace
+namespace common {
 
 //
 //=============================================================================
@@ -199,50 +170,6 @@ bool Pattern::Match::operator==(const Match& val) const
 bool Pattern::Match::operator!=(const Match& val) const
 {
 	return !(*this == val);
-}
-
-Pattern::Match Pattern::Match::fromJsonValue(const Json::Value& val)
-{
-	checkJsonValueIsObject(val, "Pattern::Match");
-
-	Pattern::Match ret;
-
-	serdes::deserialize(val[JSON_offset], ret._offset);
-	serdes::deserialize(val[JSON_address], ret._address);
-
-	if (val.isMember(JSON_size))
-		ret.setSize( safeGetUint(val, JSON_size) );
-	if (val.isMember(JSON_entrySize))
-		ret.setEntrySize( safeGetUint(val, JSON_entrySize) );
-
-	std::string e = safeGetString(val, JSON_match_type);
-	if (e == JSON_val_typeIntegral)
-		ret.setIsTypeIntegral();
-	else if (e == JSON_val_typeFP)
-		ret.setIsTypeFloatingPoint();
-	else
-		ret.setIsTypeUnknown();
-
-	return ret;
-}
-
-Json::Value Pattern::Match::getJsonValue() const
-{
-	Json::Value match;
-
-	if (isOffsetDefined())    match[JSON_offset] = serdes::serialize(getOffset());
-	if (isAddressDefined())   match[JSON_address] = serdes::serialize(getAddress());
-	if (isSizeDefined())      match[JSON_size] = getSize().getValue();
-	if (isEntrySizeDefined()) match[JSON_entrySize] = getEntrySize().getValue();
-
-	if (isTypeIntegral())
-		match[JSON_match_type] = JSON_val_typeIntegral;
-	else if (isTypeFloatingPoint())
-		match[JSON_match_type] = JSON_val_typeFP;
-	else
-		match[JSON_match_type] = JSON_val_typeUnknown;
-
-	return match;
 }
 
 //
@@ -425,70 +352,6 @@ bool Pattern::operator!=(const Pattern& val) const
 {
 	return !(*this == val);
 }
-
-Pattern Pattern::fromJsonValue(const Json::Value& val)
-{
-	checkJsonValueIsObject(val, "Pattern");
-
-	Pattern ret;
-
-	ret.setName( safeGetString(val, JSON_name) );
-	ret.setDescription( safeGetString(val, JSON_description) );
-	ret.setYaraRuleName( safeGetString(val, JSON_yara_rule_name) );
-
-	std::string t = safeGetString(val, JSON_patternType);
-	if (t == JSON_val_typeCrypto)
-		ret.setIsTypeCrypto();
-	else if (t == JSON_val_typeMalware)
-		ret.setIsTypeMalware();
-	else
-		ret.setIsTypeOther();
-
-	std::string e = safeGetString(val, JSON_patternEndian);
-	if (e == JSON_val_endianLittle)
-		ret.setIsEndianLittle();
-	else if (e == JSON_val_endianBig)
-		ret.setIsEndianBig();
-	else
-		ret.setIsEndianUnknown();
-
-	ret.matches.readJsonValue( val[JSON_matches] );
-
-	return ret;
-}
-
-Json::Value Pattern::getJsonValue() const
-{
-	Json::Value ret;
-
-	ret[JSON_name] = getName();
-	ret[JSON_description] = getDescription();
-	ret[JSON_yara_rule_name] = getYaraRuleName();
-
-	if (isTypeCrypto())
-		ret[JSON_patternType] = JSON_val_typeCrypto;
-	else if (isTypeMalware())
-		ret[JSON_patternType] = JSON_val_typeMalware;
-	else
-		ret[JSON_patternType] = JSON_val_typeOther;
-
-	if (isEndianLittle())
-		ret[JSON_patternEndian] = JSON_val_endianLittle;
-	else if (isEndianBig())
-		ret[JSON_patternEndian] = JSON_val_endianBig;
-	else
-		ret[JSON_patternEndian] = JSON_val_endianUnknown;
-
-	ret[JSON_matches] = matches.getJsonValue();
-
-	return ret;
-}
-
-//
-//=============================================================================
-// PatternContainer
-//=============================================================================
-//
 
 } // namespace config
 } // namespace retdec
