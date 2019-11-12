@@ -9,8 +9,8 @@
 
 #include <string>
 
+#include "retdec/common/storage.h"
 #include "retdec/config/base.h"
-#include "retdec/config/storage.h"
 #include "retdec/config/types.h"
 #include "retdec/utils/test.h"
 
@@ -40,7 +40,7 @@ GTEST_FORWARD_TEST(
 class Object
 {
 	public:
-		Object(const std::string& name, const Storage& storage);
+		Object(const std::string& name, const common::Storage& storage);
 		static Object fromJsonValue(const Json::Value& val);
 
 		Json::Value getJsonValue() const;
@@ -66,7 +66,7 @@ class Object
 		const std::string& getName() const;
 		const std::string& getRealName() const;
 		const std::string& getCryptoDescription() const;
-		const Storage& getStorage() const;
+		const common::Storage& getStorage() const;
 		/// @}
 
 	public:
@@ -75,7 +75,7 @@ class Object
 	protected:
 		/// Unique ID -- name used in LLVM IR.
 		std::string _name;
-		Storage _storage;
+		common::Storage _storage;
 		/// Real name of this object to appear in output C.
 		/// This may or may not differ from @c name.
 		std::string _realName;

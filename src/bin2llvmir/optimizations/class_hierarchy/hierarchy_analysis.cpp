@@ -163,7 +163,7 @@ for (auto* p : vtable)
 
 	retdec::config::Object cg(
 			global->getName(),
-			retdec::config::Storage::inMemory(vt.vtableAddress)
+			retdec::common::Storage::inMemory(vt.vtableAddress)
 	);
 	cg.setIsFromDebug(true);
 	config->getConfig().globals.insert(cg);

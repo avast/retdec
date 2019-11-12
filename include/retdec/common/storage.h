@@ -1,19 +1,19 @@
 /**
- * @file include/retdec/config/storage.h
- * @brief Decompilation configuration manipulation: storage.
- * @copyright (c) 2017 Avast Software, licensed under the MIT license
+ * @file include/retdec/common/storage.h
+ * @brief Common object storage representation.
+ * @copyright (c) 2019 Avast Software, licensed under the MIT license
  */
 
-#ifndef RETDEC_CONFIG_STORAGE_H
-#define RETDEC_CONFIG_STORAGE_H
+#ifndef RETDEC_COMMON_STORAGE_H
+#define RETDEC_COMMON_STORAGE_H
 
 #include <string>
 
-#include "retdec/config/base.h"
+#include "retdec/common/address.h"
 #include "retdec/utils/value.h"
 
 namespace retdec {
-namespace config {
+namespace common {
 
 /**
  * Represents possible storages of objects, function returns, etc.
@@ -21,10 +21,16 @@ namespace config {
 class Storage
 {
 	public:
-		Storage();
+		enum class eType
+		{
+			UNDEFINED = 0,
+			GLOBAL,
+			REGISTER,
+			STACK
+		};
 
-		Json::Value getJsonValue() const;
-		void readJsonValue(const Json::Value& val);
+	public:
+		Storage();
 
 		/// @name Storage named constructors.
 		/// @{
@@ -37,7 +43,6 @@ class Storage
 		static Storage inRegister(
 				const std::string& registerName,
 				unsigned registerNumber);
-		static Storage fromJsonValue(const Json::Value& val);
 		/// @}
 
 		/// @name Storage query methods.
@@ -61,14 +66,12 @@ class Storage
 		retdec::utils::Maybe<unsigned> getRegisterNumber() const;
 		/// @}
 
+		/// @name Storage set methods.
+		/// @{
+		void setRegisterNumber(unsigned registerNumber);
+		/// @}
+
 	protected:
-		enum class eType
-		{
-			UNDEFINED = 0,
-			GLOBAL,
-			REGISTER,
-			STACK
-		};
 		const static int UNDEF_REG_NUM = -1;
 
 	protected:
@@ -81,7 +84,7 @@ class Storage
 		retdec::utils::Maybe<unsigned> _registerNumber;
 };
 
-} // namespace config
+} // namespace common
 } // namespace retdec
 
 #endif

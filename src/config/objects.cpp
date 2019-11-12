@@ -7,6 +7,7 @@
 #include <cassert>
 
 #include "retdec/config/objects.h"
+#include "retdec/serdes/storage.h"
 
 namespace {
 
@@ -28,7 +29,7 @@ namespace config {
 //=============================================================================
 //
 
-Object::Object(const std::string& name, const Storage& storage) :
+Object::Object(const std::string& name, const common::Storage& storage) :
 		_name(name),
 		_storage(storage)
 {
@@ -43,10 +44,10 @@ Object Object::fromJsonValue(const Json::Value& val)
 {
 	checkJsonValueIsObject(val, "Object");
 
-	Object ret(
-			safeGetString(val, JSON_name),
-			Storage::fromJsonValue(val[JSON_storage])
-	);
+	common::Storage storage;
+	serdes::deserialize(val[JSON_storage], storage);
+
+	Object ret(safeGetString(val, JSON_name), storage);
 
 	ret.setRealName( safeGetString(val, JSON_realName) );
 	ret.setCryptoDescription( safeGetString(val, JSON_cryptoDesc) );
@@ -70,7 +71,7 @@ Json::Value Object::getJsonValue() const
 	if (isFromDebug()) obj[JSON_fromDebug] = isFromDebug();
 
 	if (type.isDefined()) obj[JSON_type] = type.getJsonValue();
-	if (_storage.isDefined()) obj[JSON_storage] = _storage.getJsonValue();
+	if (_storage.isDefined()) obj[JSON_storage] = serdes::serialize(_storage);
 
 	return obj;
 }
@@ -139,7 +140,7 @@ const std::string& Object::getCryptoDescription() const
 	return _cryptoDescription;
 }
 
-const Storage& Object::getStorage() const
+const common::Storage& Object::getStorage() const
 {
 	return _storage;
 }
@@ -248,7 +249,7 @@ std::pair<RegisterContainer::iterator,bool> RegisterContainer::insert(const Obje
 std::pair<RegisterContainer::iterator,bool> RegisterContainer::insert(
 		const std::string& name)
 {
-	auto s = retdec::config::Storage::inRegister(name);
+	auto s = retdec::common::Storage::inRegister(name);
 	auto r = retdec::config::Object(name, s);
 	r.setRealName(name);
 	return insert(r);

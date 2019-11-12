@@ -1,34 +1,18 @@
 /**
- * @file src/config/storage.cpp
- * @brief Decompilation configuration manipulation: storage.
- * @copyright (c) 2017 Avast Software, licensed under the MIT license
+ * @file src/common/storage.cpp
+ * @brief Common object storage representation.
+ * @copyright (c) 2019 Avast Software, licensed under the MIT license
  */
 
 #include <algorithm>
 #include <cassert>
 #include <vector>
 
-#include "retdec/config/storage.h"
+#include "retdec/common/storage.h"
 #include "retdec/serdes/address.h"
 
-namespace {
-
-const std::string JSON_type      = "type";
-const std::string JSON_value     = "value";
-const std::string JSON_regNum    = "registerNumber";
-
-const std::vector<std::string> typeStrings =
-{
-	"undefined",
-	"global",
-	"register",
-	"stack"
-};
-
-} // anonymous namespace
-
 namespace retdec {
-namespace config {
+namespace common {
 
 Storage::Storage() :
 		type(eType::UNDEFINED)
@@ -108,83 +92,6 @@ Storage Storage::inRegister(
 	ret._registerName = registerName;
 	ret._registerNumber = registerNumber;
 	return ret;
-}
-
-Storage Storage::fromJsonValue(const Json::Value& val)
-{
-	Storage ret;
-	ret.readJsonValue(val);
-	return ret;
-}
-
-void Storage::readJsonValue(const Json::Value& val)
-{
-	std::string enumStr = safeGetString(val, JSON_type);
-	auto it = std::find(typeStrings.begin(), typeStrings.end(), enumStr);
-	if (it == typeStrings.end())
-	{
-		type = eType::UNDEFINED;
-	}
-	else
-	{
-		type = static_cast<eType>( std::distance(typeStrings.begin(), it) );
-	}
-
-	if (isMemory())
-	{
-		serdes::deserialize(val[JSON_value], _globalAddress);
-	}
-	else if (isRegister())
-	{
-		_registerName = safeGetString(val, JSON_value);
-	}
-	else if (isStack())
-	{
-		_stackOffset = safeGetInt(val, JSON_value);
-	}
-	else
-	{
-		assert(isUndefined());
-	}
-
-	if (val.isMember(JSON_regNum))
-	{
-		_registerNumber = safeGetUint(val, JSON_regNum);
-	}
-}
-
-Json::Value Storage::getJsonValue() const
-{
-	Json::Value obj;
-
-	if (isMemory())
-	{
-		obj[JSON_type] = typeStrings[ static_cast<size_t>(eType::GLOBAL) ];
-		obj[JSON_value] = serdes::serialize(getAddress());
-	}
-	else if (isRegister())
-	{
-		obj[JSON_type] = typeStrings[ static_cast<size_t>(eType::REGISTER) ];
-		obj[JSON_value] = getRegisterName();
-	}
-	else if (isStack())
-	{
-		obj[JSON_type] = typeStrings[ static_cast<size_t>(eType::STACK) ];
-		obj[JSON_value] = getStackOffset();
-	}
-	else
-	{
-		assert(isUndefined());
-		obj[JSON_type] = typeStrings[ static_cast<size_t>(eType::UNDEFINED) ];
-	}
-
-	auto registerNumber = getRegisterNumber();
-	if (registerNumber.isDefined())
-	{
-		obj[JSON_regNum] = registerNumber.getValue();
-	}
-
-	return obj;
 }
 
 bool Storage::isDefined() const
@@ -301,5 +208,10 @@ retdec::utils::Maybe<unsigned> Storage::getRegisterNumber() const
 	return _registerNumber;
 }
 
-} // namespace config
+void Storage::setRegisterNumber(unsigned registerNumber)
+{
+	_registerNumber = registerNumber;
+}
+
+} // namespace common
 } // namespace retdec

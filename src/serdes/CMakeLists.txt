@@ -9,6 +9,7 @@ add_library(retdec-serdes STATIC
 	language.cpp
 	pattern.cpp
 	std.cpp
+	storage.cpp
 	tool_info.cpp
 	utils.cpp
 	vtable.cpp

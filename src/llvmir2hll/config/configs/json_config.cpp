@@ -67,7 +67,7 @@ const retdec::config::Object &JSONConfig::Impl::getConfigGlobalVariableByNameOrE
 		const std::string &name) const {
 	static const retdec::config::Object emptyGlobalVariable(
 		"no-name",
-		retdec::config::Storage::undefined()
+		retdec::common::Storage::undefined()
 	);
 	auto g = config.globals.getObjectByName(name);
 	return g ? *g : emptyGlobalVariable;

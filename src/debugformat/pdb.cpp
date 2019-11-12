@@ -57,7 +57,7 @@ void DebugFormat::loadPdbGlobalVariables()
 		std::string name = n.empty() ? "glob_var_" + addr.toHexString() : n;
 		if (!addr.isDefined())
 			continue;
-		retdec::config::Object gv(name, retdec::config::Storage::inMemory(addr));
+		retdec::config::Object gv(name, retdec::common::Storage::inMemory(addr));
 		gv.type = loadPdbType(pgv.type_def);
 		if (gv.type.getLlvmIr() == "void")
 			gv.type.setLlvmIr("i32");
@@ -102,15 +102,15 @@ void DebugFormat::loadPdbFunctions()
 		unsigned argCntr = 0;
 		for (auto& a : pfnc->arguments)
 		{
-			retdec::config::Storage storage;
+			retdec::common::Storage storage;
 			if (a.location == retdec::pdbparser::PDBLVLOC_REGISTER) // in register
 			{
-				storage = retdec::config::Storage::inRegister(a.register_num);
+				storage = retdec::common::Storage::inRegister(a.register_num);
 			}
 			else // in register-relative stack
 			{
 				auto num = a.location == retdec::pdbparser::PDBLVLOC_BPREL32 ? 22 /*CV_REG_EBP*/ : a.register_num;
-				storage = retdec::config::Storage::onStack(a.offset, num);
+				storage = retdec::common::Storage::onStack(a.offset, num);
 			}
 
 			std::string n = a.name;
@@ -129,15 +129,15 @@ void DebugFormat::loadPdbFunctions()
 				continue;
 			}
 
-			retdec::config::Storage storage;
+			retdec::common::Storage storage;
 			if (lv.location == retdec::pdbparser::PDBLVLOC_REGISTER) // in register
 			{
-				storage = retdec::config::Storage::inRegister(lv.register_num);
+				storage = retdec::common::Storage::inRegister(lv.register_num);
 			}
 			else  // in register-relative stack
 			{
 				auto num = lv.location == retdec::pdbparser::PDBLVLOC_BPREL32 ? 22 /*CV_REG_EBP*/ : lv.register_num;
-				storage = retdec::config::Storage::onStack(lv.offset, num);
+				storage = retdec::common::Storage::onStack(lv.offset, num);
 			}
 
 			retdec::config::Object newLocalVar(name, storage);

@@ -313,7 +313,7 @@ retdec::config::Object* Config::insertGlobalVariable(
 {
 	retdec::config::Object cgv(
 			gv->getName(),
-			retdec::config::Storage::inMemory(address));
+			retdec::common::Storage::inMemory(address));
 	cgv.setIsFromDebug(fromDebug);
 	cgv.setRealName(realName);
 	cgv.setCryptoDescription(cryptoDesc);
@@ -346,7 +346,7 @@ retdec::config::Object* Config::insertStackVariable(
 
 	retdec::config::Object local(
 			sv->getName(),
-			retdec::config::Storage::onStack(offset));
+			retdec::common::Storage::onStack(offset));
 	local.setRealName(sv->getName());
 	local.setIsFromDebug(fromDebug);
 	local.type.setLlvmIr(llvmObjToString(sv->getType()));

@@ -9,6 +9,7 @@
 #include "retdec/config/functions.h"
 #include "retdec/serdes/address.h"
 #include "retdec/serdes/calling_convention.h"
+#include "retdec/serdes/storage.h"
 #include "retdec/serdes/std.h"
 #include "retdec/utils/const.h"
 
@@ -26,6 +27,7 @@ const std::string JSON_endAddr       = "endAddr";
 const std::string JSON_fncType       = "fncType";
 const std::string JSON_cc            = "callingConvention";
 const std::string JSON_returnStorage = "returnStorage";
+const std::string JSON_fbStorage     = "frameBaseStorage";
 const std::string JSON_returnType    = "returnType";
 const std::string JSON_parameters    = "parameters";
 const std::string JSON_locals        = "locals";
@@ -99,7 +101,8 @@ Function Function::fromJsonValue(const Json::Value& val)
 	ret.setIsThumb( safeGetBool(val, JSON_isThumb) );
 
 	serdes::deserialize(val[JSON_cc], ret.callingConvention);
-	ret.returnStorage.readJsonValue( val[JSON_returnStorage] );
+	serdes::deserialize(val[JSON_returnStorage], ret.returnStorage);
+	serdes::deserialize(val[JSON_fbStorage], ret.frameBaseStorage);
 	ret.returnType.readJsonValue( val[JSON_returnType] );
 	ret.parameters.readJsonValue( val[JSON_parameters] );
 	ret.locals.readJsonValue( val[JSON_locals] );
@@ -149,7 +152,8 @@ Json::Value Function::getJsonValue() const
 
 	if (!parameters.empty()) fnc[JSON_parameters] = parameters.getJsonValue();
 	if (!locals.empty()) fnc[JSON_locals] = locals.getJsonValue();
-	if (returnStorage.isDefined()) fnc[JSON_returnStorage] = returnStorage.getJsonValue();
+	if (returnStorage.isDefined()) fnc[JSON_returnStorage] = serdes::serialize(returnStorage);
+	if (frameBaseStorage.isDefined()) fnc[JSON_fbStorage] = serdes::serialize(frameBaseStorage);
 	if (returnType.isDefined()) fnc[JSON_returnType] = returnType.getJsonValue();
 
 	fnc[JSON_usedCrypto] = serdes::serialize(usedCryptoConstants);

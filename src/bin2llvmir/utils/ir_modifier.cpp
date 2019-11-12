@@ -1074,7 +1074,7 @@ IrModifier::FunctionPair IrModifier::modifyFunction(
 		{
 			std::string n = i->getName();
 			assert(!n.empty());
-			auto s = retdec::config::Storage::undefined();
+			auto s = retdec::common::Storage::undefined();
 			retdec::config::Object arg(n, s);
 			if (argNames.size() > idx)
 			{
