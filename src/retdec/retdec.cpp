@@ -115,9 +115,8 @@ llvm::outs() << *M << "\n";
 std::cout << std::endl << "===========================================" << std::endl;
 
 std::cout << "functions:" << std::endl;
-for (auto& p : retdec::bin2llvmir::ConfigProvider::getConfig(M.get())->getConfig().functions)
+for (auto& f : retdec::bin2llvmir::ConfigProvider::getConfig(M.get())->getConfig().functions)
 {
-	auto& f = p.second;
 	std::cout << "\t" << f.getStart() << " @ " << f.getName() << std::endl;
 }
 

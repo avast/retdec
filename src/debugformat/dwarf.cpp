@@ -102,7 +102,7 @@ void DebugFormat::loadDwarfFunctions()
 			}
 		}
 
-		retdec::config::Function dif(name);
+		retdec::common::Function dif(name);
 		dif.setDemangledName(demangledName);
 
 		dif.setStartEnd(df->lowAddr, df->highAddr);

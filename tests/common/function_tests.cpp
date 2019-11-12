@@ -1,34 +1,18 @@
 /**
- * @file tests/config/functions_tests.cpp
- * @brief Tests for the @c address module.
- * @copyright (c) 2017 Avast Software, licensed under the MIT license
+ * @file tests/common/functions_tests.cpp
+ * @brief Tests for the function module.
+ * @copyright (c) 2019 Avast Software, licensed under the MIT license
  */
 
 #include <gtest/gtest.h>
 
-#include "retdec/config/functions.h"
+#include "retdec/common/function.h"
 
 using namespace ::testing;
 
 namespace retdec {
-namespace config {
+namespace common {
 namespace tests {
-
-//
-//=============================================================================
-//  FunctionTests
-//=============================================================================
-//
-
-class FunctionTests : public Test
-{
-
-};
-
-TEST_F(FunctionTests, TestSetIsMethods)
-{
-
-}
 
 //
 //=============================================================================
@@ -91,5 +75,5 @@ TEST_F(FunctionContainerTests, TestGetFunctionByStartAddress)
 }
 
 } // namespace tests
-} // namespace config
+} // namespace common
 } // namespace retdec

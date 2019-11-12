@@ -20,7 +20,7 @@ namespace bin2llvmir {
 class IrModifier
 {
 	public:
-		using FunctionPair = std::pair<llvm::Function*, retdec::config::Function*>;
+		using FunctionPair = std::pair<llvm::Function*, retdec::common::Function*>;
 		using StackPair = std::pair<llvm::AllocaInst*, const retdec::common::Object*>;
 
 	// Methods not using member data -> do not need instance of this class.

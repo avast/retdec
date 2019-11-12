@@ -1,22 +1,22 @@
 /**
- * @file include/retdec/config/functions.h
- * @brief Decompilation configuration manipulation: functions.
- * @copyright (c) 2017 Avast Software, licensed under the MIT license
+ * @file include/retdec/common/function.h
+ * @brief Common function representation.
+ * @copyright (c) 2019 Avast Software, licensed under the MIT license
  */
 
-#ifndef RETDEC_CONFIG_FUNCTIONS_H
-#define RETDEC_CONFIG_FUNCTIONS_H
+#ifndef RETDEC_COMMON_FUNCTION_H
+#define RETDEC_COMMON_FUNCTION_H
 
+#include <set>
 #include <string>
 
 #include "retdec/common/calling_convention.h"
 #include "retdec/common/object.h"
 #include "retdec/common/storage.h"
 #include "retdec/common/type.h"
-#include "retdec/config/base.h"
 
 namespace retdec {
-namespace config {
+namespace common {
 
 using LineNumber = retdec::common::Address;
 
@@ -34,10 +34,17 @@ using LineNumber = retdec::common::Address;
 class Function : public retdec::common::AddressRange
 {
 	public:
-		explicit Function(const std::string& id);
-		static Function fromJsonValue(const Json::Value& val);
+		enum eLinkType
+		{
+			USER_DEFINED = 0,
+			STATICALLY_LINKED,
+			DYNAMICALLY_LINKED,
+			SYSCALL,
+			IDIOM
+		};
 
-		Json::Value getJsonValue() const;
+	public:
+		Function(const std::string& name = std::string());
 
 		/// @name Function query methods.
 		/// @{
@@ -46,7 +53,6 @@ class Function : public retdec::common::AddressRange
 		bool isDynamicallyLinked() const;
 		bool isSyscall() const;
 		bool isIdiom() const;
-		bool isFixed() const;
 		bool isFromDebug() const;
 		bool isWrapper() const;
 		bool isConstructor() const;
@@ -70,11 +76,10 @@ class Function : public retdec::common::AddressRange
 		void setStartLine(const retdec::common::Address& l);
 		void setEndLine(const retdec::common::Address& l);
 		void setIsUserDefined();
-		void setIsStaticallyLinked();
-		void setIsDynamicallyLinked();
+		void setIsStaticallyLinked() const;
+		void setIsDynamicallyLinked() const;
 		void setIsSyscall();
 		void setIsIdiom();
-		void setIsFixed(bool f);
 		void setIsFromDebug(bool d);
 		void setIsConstructor(bool f);
 		void setIsDestructor(bool f);
@@ -82,6 +87,7 @@ class Function : public retdec::common::AddressRange
 		void setIsExported(bool f);
 		void setIsVariadic(bool f);
 		void setIsThumb(bool f);
+		void setLinkType(eLinkType lt);
 		/// @}
 
 		/// @name Function get methods.
@@ -96,6 +102,7 @@ class Function : public retdec::common::AddressRange
 		std::string getWrappedFunctionName() const;
 		LineNumber getStartLine() const;
 		LineNumber getEndLine() const;
+		eLinkType getLinkType() const;
 		/// @}
 
 		bool operator<(const Function& o) const;
@@ -112,16 +119,6 @@ class Function : public retdec::common::AddressRange
 		std::set<std::string> usedCryptoConstants;
 
 	private:
-		enum eLinkType
-		{
-			USER_DEFINED = 0,
-			STATICALLY_LINKED,
-			DYNAMICALLY_LINKED,
-			SYSCALL,
-			IDIOM
-		};
-
-	private:
 		std::string _name; ///< This is objects unique ID.
 		std::string _realName;
 		std::string _demangledName;
@@ -129,10 +126,9 @@ class Function : public retdec::common::AddressRange
 		std::string _declarationString;
 		std::string _sourceFileName;
 		std::string _wrapperdFunctionName;
-		eLinkType _linkType = USER_DEFINED;
+		mutable eLinkType _linkType = USER_DEFINED;
 		LineNumber _startLine;
 		LineNumber _endLine;
-		bool _fixed = false;
 		bool _fromDebug = false;
 		bool _constructor = false;
 		bool _destructor = false;
@@ -142,21 +138,39 @@ class Function : public retdec::common::AddressRange
 		bool _thumb = false;
 };
 
+struct FunctionCompare
+{
+	using is_transparent = void;
+
+	bool operator()(const Function& f1, const Function& f2) const
+	{
+		return f1 < f2;
+	}
+	bool operator()(const std::string& id, Function const& f) const
+	{
+		return id < f.getName();
+	}
+	bool operator()(const Function& f, const std::string& id) const
+	{
+		return f.getName() < id;
+	}
+};
+
 /**
  * An associative container with functions' names as the key.
  * See Function class for details.
  */
-class FunctionContainer : public BaseAssociativeContainer<std::string, Function>
+class FunctionContainer : public std::set<Function, FunctionCompare>
 {
 	public:
 		bool hasFunction(const std::string& name);
-		Function* getFunctionByName(const std::string& name);
 		const Function* getFunctionByName(const std::string& name) const;
-		Function* getFunctionByStartAddress(const retdec::common::Address& addr);
-		Function* getFunctionByRealName(const std::string& name);
+		const Function* getFunctionByStartAddress(
+				const retdec::common::Address& addr) const;
+		const Function* getFunctionByRealName(const std::string& name) const;
 };
 
-} // namespace config
+} // namespace common
 } // namespace retdec
 
 #endif

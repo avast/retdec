@@ -6,6 +6,7 @@ add_library(retdec-common STATIC
 	class.cpp
 	file_format.cpp
 	file_type.cpp
+	function.cpp
 	language.cpp
 	object.cpp
 	pattern.cpp

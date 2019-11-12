@@ -1,7 +1,7 @@
 /**
  * @file src/config/objects.cpp
- * @brief Decompilation configuration manipulation: objects.
- * @copyright (c) 2017 Avast Software, licensed under the MIT license
+ * @brief Common object representation.
+ * @copyright (c) 2019 Avast Software, licensed under the MIT license
  */
 
 #include <cassert>

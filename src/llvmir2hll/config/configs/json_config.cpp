@@ -31,9 +31,8 @@ struct JSONConfig::Impl {
 	const retdec::common::Object &getConfigGlobalVariableByNameOrEmptyVariable(
 		const std::string &name) const;
 	const retdec::common::Object *getConfigRegisterByName(const std::string &name) const;
-	retdec::config::Function *getConfigFunctionByName(const std::string &name);
-	const retdec::config::Function *getConfigFunctionByName(const std::string &name) const;
-	const retdec::config::Function &getConfigFunctionByNameOrEmptyFunction(
+	const retdec::common::Function *getConfigFunctionByName(const std::string &name) const;
+	const retdec::common::Function &getConfigFunctionByNameOrEmptyFunction(
 		const std::string &name) const;
 	const retdec::common::Class *getConfigClassByName(const std::string &name) const;
 	const retdec::common::Class &getConfigClassByNameOrEmptyClass(
@@ -52,13 +51,8 @@ struct JSONConfig::Impl {
 */
 JSONConfig::Impl::Impl() = default;
 
-retdec::config::Function *JSONConfig::Impl::getConfigFunctionByName(
-		const std::string &name) {
-	return config.functions.getFunctionByName(name);
-}
-
 // A const overload of getConfigFunctionByName().
-const retdec::config::Function *JSONConfig::Impl::getConfigFunctionByName(
+const retdec::common::Function *JSONConfig::Impl::getConfigFunctionByName(
 		const std::string &name) const {
 	return config.functions.getFunctionByName(name);
 }
@@ -78,9 +72,9 @@ const retdec::common::Object *JSONConfig::Impl::getConfigRegisterByName(
 	return config.registers.getObjectByName(name);
 }
 
-const retdec::config::Function &JSONConfig::Impl::getConfigFunctionByNameOrEmptyFunction(
+const retdec::common::Function &JSONConfig::Impl::getConfigFunctionByNameOrEmptyFunction(
 		const std::string &name) const {
-	static const retdec::config::Function emptyFunction(""s);
+	static const retdec::common::Function emptyFunction(""s);
 	auto f = getConfigFunctionByName(name);
 	return f ? *f : emptyFunction;
 }
@@ -291,17 +285,6 @@ std::string JSONConfig::getDemangledNameOfFunc(const std::string &func) const {
 	return f.getDemangledName();
 }
 
-StringSet JSONConfig::getFuncsFixedWithLLVMIRFixer() const {
-	StringSet fixedFuncs;
-	for (const auto &addrFuncPair : impl->config.functions) {
-		auto &func = addrFuncPair.second;
-		if (func.isFixed()) {
-			fixedFuncs.insert(func.getName());
-		}
-	}
-	return fixedFuncs;
-}
-
 StringSet JSONConfig::getClassNames() const {
 	StringSet classNames;
 	for (const auto &c : impl->config.classes) {
@@ -353,8 +336,7 @@ bool JSONConfig::isDebugInfoAvailable() const {
 	}
 
 	// Functions.
-	for (const auto &addrFuncPair : impl->config.functions) {
-		const auto &func = addrFuncPair.second;
+	for (const auto &func : impl->config.functions) {
 		if (func.isFromDebug()) {
 			return true;
 		}
@@ -389,8 +371,7 @@ std::string JSONConfig::getDebugModuleNameForFunc(const std::string &func) const
 
 StringSet JSONConfig::getDebugModuleNames() const {
 	StringSet moduleNames;
-	for (const auto &addrFuncPair : impl->config.functions) {
-		const auto &func = addrFuncPair.second;
+	for (const auto &func : impl->config.functions) {
 		const auto &moduleName = func.getSourceFileName();
 		if (!moduleName.empty()) {
 			moduleNames.insert(moduleName);

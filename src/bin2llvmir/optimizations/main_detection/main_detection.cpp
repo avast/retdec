@@ -116,7 +116,7 @@ bool MainDetection::skipAnalysis()
  */
 void MainDetection::removeStaticallyLinked()
 {
-	for (Function& f : _module->functions())
+	for (llvm::Function& f : _module->functions())
 	{
 		auto* cf = _config->getConfigFunction(&f);
 		if (cf && cf->isStaticallyLinked())
@@ -132,9 +132,8 @@ retdec::common::Address MainDetection::getFromFunctionNames()
 	std::vector<std::string> names = {"main", "_main", "wmain", "WinMain"};
 	std::pair<Address, std::size_t> ret = {Address(), names.size()};
 
-	for (auto& p : _config->getConfig().functions)
+	for (auto& f : _config->getConfig().functions)
 	{
-		retdec::config::Function& f = p.second;
 		auto it = std::find(names.begin(), names.end(), f.getName());
 		if (it != names.end())
 		{

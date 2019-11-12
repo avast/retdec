@@ -140,12 +140,11 @@ void DsmGenerator::generateCode(std::ostream& ret)
 	ret << ";;\n";
 	ret << "\n";
 
-	for (auto& p : _config->getConfig().functions)
+	for (auto& f : _config->getConfig().functions)
 	{
-		auto* f = &p.second;
-		if (f->getStart().isDefined())
+		if (f.getStart().isDefined())
 		{
-			_addr2fnc[f->getStart()] = f;
+			_addr2fnc[f.getStart()] = &f;
 		}
 	}
 
@@ -200,7 +199,7 @@ void DsmGenerator::generateCodeSeg(
 }
 
 void DsmGenerator::generateFunction(
-		retdec::config::Function* fnc,
+		const retdec::common::Function* fnc,
 		std::ostream& ret)
 {
 	ret << ";";
@@ -718,7 +717,7 @@ std::string DsmGenerator::getFunctionName(llvm::Function* f) const
 	return cf ? getFunctionName(cf) : f->getName().str();
 }
 
-std::string DsmGenerator::getFunctionName(retdec::config::Function* f) const
+std::string DsmGenerator::getFunctionName(const retdec::common::Function* f) const
 {
 	auto& rn = f->getRealName();
 	return rn.empty() ? f->getName() : rn;

@@ -41,7 +41,7 @@ class DsmGenerator : public llvm::ModulePass
 				const retdec::loader::Segment* seg,
 				std::ostream& ret);
 		void generateFunction(
-				retdec::config::Function* fnc,
+				const retdec::common::Function* fnc,
 				std::ostream& ret);
 		void generateInstruction(AsmInstruction& ai, std::ostream& ret);
 		void generateData(std::ostream& ret);
@@ -72,7 +72,7 @@ class DsmGenerator : public llvm::ModulePass
 				const llvm::ConstantDataArray* cda);
 
 		std::string getFunctionName(llvm::Function* f) const;
-		std::string getFunctionName(retdec::config::Function* f) const;
+		std::string getFunctionName(const retdec::common::Function* f) const;
 
 	private:
 		llvm::Module* _module = nullptr;
@@ -82,7 +82,7 @@ class DsmGenerator : public llvm::ModulePass
 
 		std::size_t _longestInst = 0;
 		std::size_t _longestAddr = 0;
-		std::map<retdec::common::Address, retdec::config::Function*> _addr2fnc;
+		std::map<retdec::common::Address, const retdec::common::Function*> _addr2fnc;
 
 		const std::size_t DATA_SEGMENT_LINE    = 16;
 		const std::string ALIGN = "   ";

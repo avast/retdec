@@ -312,7 +312,7 @@ class Decoder : public llvm::ModulePass
 		std::set<common::Address> _imports;
 		std::set<common::Address> _exports;
 		std::set<common::Address> _symbols;
-		std::map<common::Address, const config::Function*> _debugFncs;
+		std::map<common::Address, const common::Function*> _debugFncs;
 		std::set<common::Address> _staticFncs;
 		std::set<common::Address> _vtableFncs;
 		std::set<llvm::Function*> _terminatingFncs;

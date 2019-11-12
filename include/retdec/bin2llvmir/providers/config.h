@@ -34,9 +34,9 @@ class Config
 
 		// Function
 		//
-		retdec::config::Function* getConfigFunction(
+		retdec::common::Function* getConfigFunction(
 				const llvm::Function* fnc);
-		retdec::config::Function* getConfigFunction(
+		retdec::common::Function* getConfigFunction(
 				retdec::common::Address startAddr);
 
 		llvm::Function* getLlvmFunction(
@@ -105,14 +105,14 @@ class Config
 				bool fromDebug = false,
 				const std::string& realName = std::string());
 
-		retdec::config::Function* insertFunction(
+		const retdec::common::Function* insertFunction(
 				const llvm::Function* fnc,
 				retdec::common::Address start = retdec::common::Address::getUndef,
 				retdec::common::Address end = retdec::common::Address::getUndef,
 				bool fromDebug = false);
 
-		retdec::config::Function* renameFunction(
-				retdec::config::Function* fnc,
+		retdec::common::Function* renameFunction(
+				retdec::common::Function* fnc,
 				const std::string& name);
 
 		// Pseudo-functions.

@@ -41,11 +41,11 @@ TEST_F(ConfigTests, getConfigFunctionGetsExistingFunction)
 	)");
 	Function* llvmFnc = getFunctionByName("fnc");
 	auto config = Config::empty(module.get());
-	auto p = config.getConfig().functions.insert(retdec::config::Function("fnc"));
+	auto p = config.getConfig().functions.insert(retdec::common::Function("fnc"));
 	auto* configFnc1 = config.getConfigFunction(llvmFnc);
 
 	EXPECT_NE(nullptr, configFnc1);
-	EXPECT_EQ(&(p.first->second), configFnc1);
+	EXPECT_EQ(&(*p.first), configFnc1);
 }
 
 TEST_F(ConfigTests, getConfigFunctionReturnsNullptrIfFunctionNotFound)
@@ -57,11 +57,11 @@ TEST_F(ConfigTests, getConfigFunctionReturnsNullptrIfFunctionNotFound)
 	)");
 	Function* llvmFnc = getFunctionByName("fnc");
 	auto config = Config::empty(module.get());
-	auto p = config.getConfig().functions.insert(retdec::config::Function("f"));
+	auto p = config.getConfig().functions.insert(retdec::common::Function("f"));
 	auto* configFnc1 = config.getConfigFunction(llvmFnc);
 
 	EXPECT_EQ(nullptr, configFnc1);
-	EXPECT_NE(&(p.first->second), configFnc1);
+	EXPECT_NE(&(*p.first), configFnc1);
 }
 
 //
@@ -77,7 +77,7 @@ TEST_F(ConfigTests, getLlvmFunctionGetsExistingFunction)
 	)");
 	Function* llvmFnc1 = getFunctionByName("fnc");
 	auto config = Config::empty(module.get());
-	auto configFnc = retdec::config::Function("fnc");
+	auto configFnc = retdec::common::Function("fnc");
 	configFnc.setStart(0x1234);
 	config.getConfig().functions.insert(configFnc);
 	Function* llvmFnc2 = config.getLlvmFunction(0x1234);
@@ -94,7 +94,7 @@ TEST_F(ConfigTests, getLlvmFunctionReturnsNullptrIfFunctionNotFound)
 	)");
 	Function* llvmFnc1 = getFunctionByName("fnc");
 	auto config = Config::empty(module.get());
-	auto configFnc = retdec::config::Function("fnc");
+	auto configFnc = retdec::common::Function("fnc");
 	configFnc.setStart(0x1234);
 	config.getConfig().functions.insert(configFnc);
 	Function* llvmFnc2 = config.getLlvmFunction(0x5678);
@@ -116,7 +116,7 @@ TEST_F(ConfigTests, getFunctionAddressReturnsDefinedAddressIfFunctionFound)
 	)");
 	Function* llvmFnc = getFunctionByName("fnc");
 	auto config = Config::empty(module.get());
-	auto configFnc = retdec::config::Function("fnc");
+	auto configFnc = retdec::common::Function("fnc");
 	configFnc.setStart(0x1234);
 	config.getConfig().functions.insert(configFnc);
 	auto addr = config.getFunctionAddress(llvmFnc);
@@ -133,7 +133,7 @@ TEST_F(ConfigTests, getFunctionAddressReturnsUndefinedAddressIfFunctionNotFound)
 	)");
 	Function* llvmFnc = getFunctionByName("fnc");
 	auto config = Config::empty(module.get());
-	auto configFnc = retdec::config::Function("f");
+	auto configFnc = retdec::common::Function("f");
 	configFnc.setStart(0x1234);
 	config.getConfig().functions.insert(configFnc);
 	auto addr = config.getFunctionAddress(llvmFnc);
@@ -341,7 +341,7 @@ TEST_F(ConfigTests, getConfigLocalVariableFindsLocalVariables)
 	auto config = Config::empty(module.get());
 	auto s = retdec::common::Storage::undefined();
 	auto clv = retdec::common::Object("local", s);
-	auto cf = retdec::config::Function("fnc");
+	auto cf = retdec::common::Function("fnc");
 	cf.locals.insert(clv);
 	config.getConfig().functions.insert(cf);
 	auto* cclv = config.getConfigLocalVariable(llvmLv);
@@ -367,7 +367,7 @@ TEST_F(ConfigTests, getConfigLocalVariableDoesNotFindNonLocalVariables)
 	auto config = Config::empty(module.get());
 	auto s = retdec::common::Storage::onStack(4);
 	auto cSv = retdec::common::Object("stack", s);
-	auto cf = retdec::config::Function("fnc");
+	auto cf = retdec::common::Function("fnc");
 	cf.locals.insert(cSv);
 	config.getConfig().functions.insert(cf);
 
@@ -394,7 +394,7 @@ TEST_F(ConfigTests, getConfigStackVariableFindsStackVariables)
 	auto config = Config::empty(module.get());
 	auto s = retdec::common::Storage::onStack(4);
 	auto cSv = retdec::common::Object("stack", s);
-	auto cf = retdec::config::Function("fnc");
+	auto cf = retdec::common::Function("fnc");
 	cf.locals.insert(cSv);
 	config.getConfig().functions.insert(cf);
 	auto* ccSv = config.getConfigStackVariable(llvmSv);
@@ -423,7 +423,7 @@ TEST_F(ConfigTests, getConfigStackVariableDoesNotFindNonStackVariables)
 	auto config = Config::empty(module.get());
 	auto s = retdec::common::Storage::undefined();
 	auto cLv = retdec::common::Object("local", s);
-	auto cf = retdec::config::Function("fnc");
+	auto cf = retdec::common::Function("fnc");
 	cf.locals.insert(cLv);
 	config.getConfig().functions.insert(cf);
 
@@ -454,7 +454,7 @@ TEST_F(ConfigTests, getLlvmStackVariableFindsStackVariable)
 	auto config = Config::empty(module.get());
 	auto s = retdec::common::Storage::onStack(8);
 	auto cSv = retdec::common::Object("stack", s);
-	auto cf = retdec::config::Function("fnc");
+	auto cf = retdec::common::Function("fnc");
 	cf.locals.insert(cSv);
 	config.getConfig().functions.insert(cf);
 	auto* sv = config.getLlvmStackVariable(llvmFnc, 8);
@@ -475,7 +475,7 @@ TEST_F(ConfigTests, getLlvmStackVariableReturnsNullptrWhenStackVariableNotFound)
 	auto config = Config::empty(module.get());
 	auto s = retdec::common::Storage::onStack(8);
 	auto cSv = retdec::common::Object("stack", s);
-	auto cf = retdec::config::Function("fnc");
+	auto cf = retdec::common::Function("fnc");
 	cf.locals.insert(cSv);
 	config.getConfig().functions.insert(cf);
 
@@ -502,7 +502,7 @@ TEST_F(ConfigTests, getStackVariableOffsetReturnsDefinedValueForStacks)
 	auto config = Config::empty(module.get());
 	auto s = retdec::common::Storage::onStack(4);
 	auto cSv = retdec::common::Object("stack", s);
-	auto cf = retdec::config::Function("fnc");
+	auto cf = retdec::common::Function("fnc");
 	cf.locals.insert(cSv);
 	config.getConfig().functions.insert(cf);
 	auto off = config.getStackVariableOffset(llvmSv);

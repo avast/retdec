@@ -570,9 +570,8 @@ void Decoder::initJumpTargetsConfig()
 {
 	LOG << "\n" << "initJumpTargetsConfig():" << std::endl;
 
-	for (auto& p : _config->getConfig().functions)
+	for (auto& f : _config->getConfig().functions)
 	{
-		config::Function& f = p.second;
 		if (f.getStart().isUndefined())
 		{
 			continue;
@@ -1042,7 +1041,7 @@ void Decoder::initConfigFunctions()
 {
 	for (auto& p : _fnc2addr)
 	{
-		Function* f = p.first;
+		llvm::Function* f = p.first;
 
 		if (_config->getConfigFunction(p.second)) // functions from IDA
 		{
@@ -1053,7 +1052,10 @@ void Decoder::initConfigFunctions()
 		Address end = getFunctionEndAddress(f);
 		end = end > start ? end : Address(start + 1);
 
-		auto* cf = _config->insertFunction(f, start, end);
+		// TODO: this is really bad, should be solved by better design of config
+		// updates
+		common::Function* cf = const_cast<common::Function*>(
+				_config->insertFunction(f, start, end));
 
 		if (_imports.count(start))
 		{

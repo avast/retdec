@@ -514,7 +514,9 @@ IrModifier::FunctionPair IrModifier::renameFunction(
 	}
 	else
 	{
-		cf = _config->insertFunction(fnc);
+		// TODO: this is really bad, should be solved by better design of config
+		// updates
+		cf = const_cast<common::Function*>(_config->insertFunction(fnc));
 	}
 	return {fnc, cf};
 }

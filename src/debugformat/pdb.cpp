@@ -78,7 +78,7 @@ void DebugFormat::loadPdbFunctions()
 
 		retdec::pdbparser::PDBFunction *pfnc = f.second;
 
-		retdec::config::Function fnc(pfnc->getNameWithOverloadIndex());
+		retdec::common::Function fnc(pfnc->getNameWithOverloadIndex());
 
 		fnc.setStartEnd(pfnc->address, pfnc->address + pfnc->length);
 		fnc.setSourceFileName(_pdbFile->get_module_name(pfnc->module_index));

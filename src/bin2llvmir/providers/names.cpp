@@ -328,11 +328,11 @@ void NameContainer::initFromConfig()
 			names::entryPointName,
 			Name::eType::ENTRY_POINT);
 
-	for (auto& p : _config->getConfig().functions)
+	for (auto& f : _config->getConfig().functions)
 	{
 		addNameForAddress(
-				p.second.getStart(),
-				p.second.getName(),
+				f.getStart(),
+				f.getName(),
 				Name::eType::CONFIG_FUNCTION);
 	}
 

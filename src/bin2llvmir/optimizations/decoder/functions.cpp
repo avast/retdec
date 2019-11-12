@@ -124,7 +124,7 @@ llvm::Function* Decoder::createFunction(common::Address a, bool declaration)
 				: names::generateFunctionNameUnknown(a, _config->getConfig().isIda());
 	}
 
-	Function* f = Function::Create(
+	auto* f = llvm::Function::Create(
 			FunctionType::get(
 					Abi::getDefaultType(_module),
 					false),
@@ -132,7 +132,7 @@ llvm::Function* Decoder::createFunction(common::Address a, bool declaration)
 			n);
 
 	Module::FunctionListType& fl = _module->getFunctionList();
-	if (Function* before = getFunctionBeforeAddress(a))
+	if (llvm::Function* before = getFunctionBeforeAddress(a))
 	{
 		fl.insertAfter(before->getIterator(), f);
 	}

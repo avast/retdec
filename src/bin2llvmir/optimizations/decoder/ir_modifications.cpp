@@ -6,7 +6,6 @@
 
 #include "retdec/bin2llvmir/optimizations/decoder/decoder.h"
 
-using namespace retdec::common;
 using namespace llvm;
 
 namespace retdec {
@@ -396,7 +395,7 @@ bool Decoder::canSplitFunctionOn(
 		}
 	}
 
-	std::set<Address> fncStarts;
+	std::set<common::Address> fncStarts;
 	fncStarts.insert(fAddr);
 	fncStarts.insert(addr);
 
@@ -410,7 +409,7 @@ bool Decoder::canSplitFunctionOn(
 		for (BasicBlock& b : *f)
 		{
 //			Address bAddr = getBasicBlockAddress(&b);
-			Address bAddr;
+			common::Address bAddr;
 			// TODO: shitty
 			BasicBlock* bPrev = &b;
 			while (bAddr.isUndefined() && bPrev)
@@ -427,12 +426,12 @@ bool Decoder::canSplitFunctionOn(
 				return false;
 			}
 			--up;
-			Address bFnc = *up;
+			common::Address bFnc = *up;
 
 			for (auto* p : predecessors(&b))
 			{
 //				Address pAddr = getBasicBlockAddress(p);
-				Address pAddr;
+				common::Address pAddr;
 				// TODO: shitty
 				BasicBlock* pPrev = p;
 				while (pAddr.isUndefined() && pPrev)
@@ -449,7 +448,7 @@ bool Decoder::canSplitFunctionOn(
 					return false;
 				}
 				--up;
-				Address pFnc = *up;
+				common::Address pFnc = *up;
 
 				if (bFnc != pFnc)
 				{
@@ -537,7 +536,7 @@ llvm::Function* Decoder::splitFunctionOn(
 	std::set<Function*> newFncs;
 	for (auto* splitBb : newFncStarts)
 	{
-		Address splitAddr = getBasicBlockAddress(splitBb);
+		common::Address splitAddr = getBasicBlockAddress(splitBb);
 
 		LOG << "\t\t\t\t" << "S: splitting @ " << splitAddr << " on "
 				<< splitBb->getName().str() << std::endl;

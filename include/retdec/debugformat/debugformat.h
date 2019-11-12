@@ -7,10 +7,10 @@
 #ifndef RETDEC_DEBUGFORMAT_DEBUGFORMAT_H
 #define RETDEC_DEBUGFORMAT_DEBUGFORMAT_H
 
+#include "retdec/common/function.h"
 #include "retdec/common/object.h"
 #include "retdec/common/type.h"
 #include "retdec/pdbparser/pdb_file.h"
-#include "retdec/config/functions.h"
 
 #include "retdec/bin2llvmir/providers/demangler.h"
 #include "retdec/dwarfparser/dwarf_file.h"
@@ -37,7 +37,7 @@ class DebugFormat
 				retdec::bin2llvmir::Demangler* demangler,
 				unsigned long long imageBase = 0);
 
-		retdec::config::Function* getFunction(retdec::common::Address a);
+		retdec::common::Function* getFunction(retdec::common::Address a);
 		const retdec::common::Object* getGlobalVar(retdec::common::Address a);
 
 		bool hasInformation() const;
@@ -75,7 +75,7 @@ class DebugFormat
 		retdec::common::GlobalVarContainer globals;
 		retdec::common::TypeContainer types;
 
-		std::map<retdec::common::Address, retdec::config::Function> functions;
+		std::map<retdec::common::Address, retdec::common::Function> functions;
 };
 
 } // namespace debugformat

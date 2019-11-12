@@ -127,20 +127,26 @@ llvm::Function* Config::getLlvmFunction(common::Address startAddr)
 retdec::common::Address Config::getFunctionAddress(
 		const llvm::Function* fnc)
 {
-	retdec::config::Function* cf = getConfigFunction(fnc);
+	retdec::common::Function* cf = getConfigFunction(fnc);
 	return cf ? cf->getStart() : retdec::common::Address();
 }
 
-retdec::config::Function* Config::getConfigFunction(
+retdec::common::Function* Config::getConfigFunction(
 		const llvm::Function* fnc)
 {
-	return fnc ? _configDB.functions.getFunctionByName(fnc->getName()) : nullptr;
+	// TODO: remove horrible const_cast
+	return fnc
+		? const_cast<retdec::common::Function*>(
+				_configDB.functions.getFunctionByName(fnc->getName()))
+		: nullptr;
 }
 
-retdec::config::Function* Config::getConfigFunction(
+retdec::common::Function* Config::getConfigFunction(
 		retdec::common::Address startAddr)
 {
-	return _configDB.functions.getFunctionByStartAddress(startAddr);
+	// TODO: remove horrible const_cast
+	return const_cast<retdec::common::Function*>(
+			_configDB.functions.getFunctionByStartAddress(startAddr));
 }
 
 llvm::Function* Config::getIntrinsicFunction(IntrinsicFunctionCreatorPtr f)
@@ -361,7 +367,7 @@ const retdec::common::Object* Config::insertStackVariable(
 	return &(*p.first);
 }
 
-retdec::config::Function* Config::insertFunction(
+const retdec::common::Function* Config::insertFunction(
 		const llvm::Function* fnc,
 		retdec::common::Address start,
 		retdec::common::Address end,
@@ -373,7 +379,7 @@ retdec::config::Function* Config::insertFunction(
 		dm = old->getDemangledName();
 	}
 
-	retdec::config::Function cf(fnc->getName());
+	retdec::common::Function cf(fnc->getName());
 	cf.setDemangledName(dm);
 	cf.setIsFromDebug(fromDebug);
 	cf.setStartEnd(start, end);
@@ -392,14 +398,14 @@ retdec::config::Function* Config::insertFunction(
 	}
 
 	auto p = _configDB.functions.insert(cf);
-	return &p.first->second;
+	return &(*p.first);
 }
 
-retdec::config::Function* Config::renameFunction(
-		retdec::config::Function* fnc,
+retdec::common::Function* Config::renameFunction(
+		retdec::common::Function* fnc,
 		const std::string& name)
 {
-	retdec::config::Function cf = *fnc;
+	retdec::common::Function cf = *fnc;
 	cf.setName(name);
 
 	if (cf.getDemangledName().empty())
@@ -417,7 +423,9 @@ retdec::config::Function* Config::renameFunction(
 
 	_configDB.functions.erase(fnc->getName());
 	auto p = _configDB.functions.insert(cf);
-	return &p.first->second;
+
+	// TODO: remove horrible const_cast
+	return const_cast<retdec::common::Function*>(&(*p.first));
 }
 
 const retdec::common::Object* Config::getConfigRegister(

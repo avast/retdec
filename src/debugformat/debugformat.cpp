@@ -78,7 +78,7 @@ void DebugFormat::loadSymtab()
 	{
 		std::string funcName = it->second->getNormalizedName();
 
-		retdec::config::Function nf(funcName);
+		retdec::common::Function nf(funcName);
 
 		nf.setDemangledName(_demangler->demangleToString(funcName));
 
@@ -122,7 +122,7 @@ void DebugFormat::loadSymtab()
 	}
 }
 
-retdec::config::Function* DebugFormat::getFunction(retdec::common::Address a)
+retdec::common::Function* DebugFormat::getFunction(retdec::common::Address a)
 {
 	auto fIt = functions.find(a);
 	return fIt != functions.end() ? &fIt->second : nullptr;

@@ -259,7 +259,7 @@ void Decoder::decodeJumpTarget(const JumpTarget& jt)
 		}
 
 		BasicBlock* tBb = nullptr;
-		Function* tFnc = nullptr;
+		llvm::Function* tFnc = nullptr;
 		getOrCreateCallTarget(start, tFnc, tBb);
 		if (tFnc && !tFnc->empty())
 		{
@@ -483,7 +483,7 @@ bool Decoder::getJumpTargetsFromInstruction(
 	}
 
 	BasicBlock* tBb = nullptr;
-	Function* tFnc = nullptr;
+	llvm::Function* tFnc = nullptr;
 
 	_switchGenerated = false;
 
@@ -715,7 +715,7 @@ bool Decoder::getJumpTargetsFromInstruction(
 			getOrCreateBranchTarget(t, tBb, tFnc, pCall);
 
 			BasicBlock* tBbN = nullptr;
-			Function* tFncN = nullptr;
+			llvm::Function* tFncN = nullptr;
 			getOrCreateBranchTarget(nextAddr, tBbN, tFncN, pCall);
 
 			if (tBb && tBbN
@@ -1251,7 +1251,7 @@ if (brToSwitch)
 	for (auto c : cases)
 	{
 		BasicBlock* tBb = nullptr;
-		Function* tFnc = nullptr;
+		llvm::Function* tFnc = nullptr;
 		// TODO: do not split functions here.
 		// if case in another function, do not use it - it may belong to another
 		// switch table.
@@ -1266,7 +1266,7 @@ if (brToSwitch)
 		}
 	}
 
-	Function* tFnc = nullptr;
+	llvm::Function* tFnc = nullptr;
 	BasicBlock* defBb = nullptr;
 	// TODO: do not split functions here
 	getOrCreateBranchTarget(defAddr, defBb, tFnc, branchCall);
@@ -1435,7 +1435,7 @@ void Decoder::resolvePseudoCalls()
 	// This will not be easy. Can fixpoint even be reached? Reverts, etc. are
 	// hard and ugly.
 
-	for (Function& f : *_module)
+	for (llvm::Function& f : *_module)
 	for (BasicBlock& b : f)
 	for (auto i = b.begin(), e = b.end(); i != e;)
 	{
