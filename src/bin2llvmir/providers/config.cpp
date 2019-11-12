@@ -15,7 +15,6 @@
 #include "retdec/bin2llvmir/utils/debug.h"
 #include "retdec/bin2llvmir/utils/llvm.h"
 
-using namespace retdec::common;
 using namespace retdec::utils;
 using namespace llvm;
 
@@ -119,7 +118,7 @@ const retdec::config::Config& Config::getConfig() const
 	return _configDB;
 }
 
-llvm::Function* Config::getLlvmFunction(Address startAddr)
+llvm::Function* Config::getLlvmFunction(common::Address startAddr)
 {
 	auto fnc = getConfigFunction(startAddr);
 	return fnc ? _module->getFunction(fnc->getName()) : nullptr;
@@ -171,7 +170,7 @@ const retdec::config::Object* Config::getConfigGlobalVariable(
 	return _configDB.globals.getObjectByAddress(address);
 }
 
-llvm::GlobalVariable* Config::getLlvmGlobalVariable(Address address)
+llvm::GlobalVariable* Config::getLlvmGlobalVariable(common::Address address)
 {
 	auto glob = _configDB.globals.getObjectByAddress(address);
 	return glob ? _module->getGlobalVariable(glob->getName()) : nullptr;

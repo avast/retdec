@@ -10,6 +10,7 @@
 #include "retdec/serdes/address.h"
 #include "retdec/serdes/calling_convention.h"
 #include "retdec/serdes/storage.h"
+#include "retdec/serdes/type.h"
 #include "retdec/serdes/std.h"
 #include "retdec/utils/const.h"
 
@@ -103,7 +104,7 @@ Function Function::fromJsonValue(const Json::Value& val)
 	serdes::deserialize(val[JSON_cc], ret.callingConvention);
 	serdes::deserialize(val[JSON_returnStorage], ret.returnStorage);
 	serdes::deserialize(val[JSON_fbStorage], ret.frameBaseStorage);
-	ret.returnType.readJsonValue( val[JSON_returnType] );
+	serdes::deserialize(val[JSON_returnType], ret.returnType);
 	ret.parameters.readJsonValue( val[JSON_parameters] );
 	ret.locals.readJsonValue( val[JSON_locals] );
 
@@ -154,7 +155,7 @@ Json::Value Function::getJsonValue() const
 	if (!locals.empty()) fnc[JSON_locals] = locals.getJsonValue();
 	if (returnStorage.isDefined()) fnc[JSON_returnStorage] = serdes::serialize(returnStorage);
 	if (frameBaseStorage.isDefined()) fnc[JSON_fbStorage] = serdes::serialize(frameBaseStorage);
-	if (returnType.isDefined()) fnc[JSON_returnType] = returnType.getJsonValue();
+	if (returnType.isDefined()) fnc[JSON_returnType] = serdes::serialize(returnType);
 
 	fnc[JSON_usedCrypto] = serdes::serialize(usedCryptoConstants);
 

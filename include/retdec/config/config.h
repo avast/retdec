@@ -15,10 +15,10 @@
 #include "retdec/common/pattern.h"
 #include "retdec/common/tool_info.h"
 #include "retdec/common/vtable.h"
+#include "retdec/common/type.h"
 #include "retdec/config/base.h"
 #include "retdec/config/functions.h"
 #include "retdec/config/parameters.h"
-#include "retdec/config/types.h"
 
 namespace retdec {
 namespace config {
@@ -84,7 +84,7 @@ class Config
 		FunctionContainer functions;
 		GlobalVarContainer globals;
 		RegisterContainer registers;
-		TypeContainer structures;
+		common::TypeContainer structures;
 		common::VtableContainer vtables;
 		common::ClassContainer classes;
 		common::PatternContainer patterns;

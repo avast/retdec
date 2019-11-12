@@ -10,8 +10,8 @@
 #include <string>
 
 #include "retdec/common/storage.h"
+#include "retdec/common/type.h"
 #include "retdec/config/base.h"
-#include "retdec/config/types.h"
 #include "retdec/utils/test.h"
 
 namespace retdec {
@@ -70,7 +70,7 @@ class Object
 		/// @}
 
 	public:
-		Type type;
+		common::Type type;
 
 	protected:
 		/// Unique ID -- name used in LLVM IR.

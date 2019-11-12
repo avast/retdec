@@ -155,14 +155,14 @@ void DebugFormat::loadPdbFunctions()
  * @param type PDB type.
  * @return Common type representation.
  */
-retdec::config::Type DebugFormat::loadPdbType(retdec::pdbparser::PDBTypeDef* type)
+retdec::common::Type DebugFormat::loadPdbType(retdec::pdbparser::PDBTypeDef* type)
 {
 	if (type == nullptr)
 	{
-		return retdec::config::Type("i32");
+		return retdec::common::Type("i32");
 	}
-	auto t = retdec::config::Type(type->to_llvm());
-	return t.isDefined() ? t : retdec::config::Type("i32");
+	auto t = retdec::common::Type(type->to_llvm());
+	return t.isDefined() ? t : retdec::common::Type("i32");
 }
 
 } // namespace debugformat

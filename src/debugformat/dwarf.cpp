@@ -169,14 +169,14 @@ void DebugFormat::loadDwarfFunctions()
  * @param type DWARF type.
  * @return Common type representation.
  */
-retdec::config::Type DebugFormat::loadDwarfType(retdec::dwarfparser::DwarfType* type)
+retdec::common::Type DebugFormat::loadDwarfType(retdec::dwarfparser::DwarfType* type)
 {
 	if (type == nullptr)
 	{
-		return retdec::config::Type("i32");
+		return retdec::common::Type("i32");
 	}
-	auto t = retdec::config::Type(type->toLLVMString());
-	return t.isDefined() ? t : retdec::config::Type("i32");
+	auto t = retdec::common::Type(type->toLLVMString());
+	return t.isDefined() ? t : retdec::common::Type("i32");
 }
 
 } // namespace debugformat

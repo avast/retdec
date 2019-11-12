@@ -10,6 +10,7 @@ add_library(retdec-common STATIC
 	pattern.cpp
 	storage.cpp
 	tool_info.cpp
+	type.cpp
 	vtable.cpp
 )
 target_link_libraries(retdec-common

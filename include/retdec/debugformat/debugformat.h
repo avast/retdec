@@ -7,10 +7,10 @@
 #ifndef RETDEC_DEBUGFORMAT_DEBUGFORMAT_H
 #define RETDEC_DEBUGFORMAT_DEBUGFORMAT_H
 
+#include "retdec/common/type.h"
 #include "retdec/pdbparser/pdb_file.h"
 #include "retdec/config/functions.h"
 #include "retdec/config/objects.h"
-#include "retdec/config/types.h"
 
 #include "retdec/bin2llvmir/providers/demangler.h"
 #include "retdec/dwarfparser/dwarf_file.h"
@@ -47,13 +47,13 @@ class DebugFormat
 		void loadPdbTypes();
 		void loadPdbGlobalVariables();
 		void loadPdbFunctions();
-		retdec::config::Type loadPdbType(retdec::pdbparser::PDBTypeDef* type);
+		retdec::common::Type loadPdbType(retdec::pdbparser::PDBTypeDef* type);
 
 		void loadDwarf();
 		void loadDwarfTypes();
 		void loadDwarfGlobalVariables();
 		void loadDwarfFunctions();
-		retdec::config::Type loadDwarfType(retdec::dwarfparser::DwarfType* type);
+		retdec::common::Type loadDwarfType(retdec::dwarfparser::DwarfType* type);
 
 		void loadSymtab();
 
@@ -73,7 +73,7 @@ class DebugFormat
 
 	public:
 		retdec::config::GlobalVarContainer globals;
-		retdec::config::TypeContainer types;
+		retdec::common::TypeContainer types;
 
 		std::map<retdec::common::Address, retdec::config::Function> functions;
 };

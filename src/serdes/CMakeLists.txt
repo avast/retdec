@@ -11,6 +11,7 @@ add_library(retdec-serdes STATIC
 	std.cpp
 	storage.cpp
 	tool_info.cpp
+	type.cpp
 	utils.cpp
 	vtable.cpp
 )

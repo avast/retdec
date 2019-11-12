@@ -1,25 +1,25 @@
 /**
- * @file tests/config/types_tests.cpp
- * @brief Tests for the @c address module.
+ * @file tests/config/type_tests.cpp
+ * @brief Tests for the type module.
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */
 
 #include <gtest/gtest.h>
 
-#include "retdec/config/types.h"
+#include "retdec/common/type.h"
 
 using namespace ::testing;
 
 namespace retdec {
-namespace config {
+namespace common {
 namespace tests {
 
-class TypesTests : public Test
+class TypeTests : public Test
 {
 
 };
 
-TEST_F(TypesTests, WideStringSetGet)
+TEST_F(TypeTests, WideStringSetGet)
 {
 	Type type("i32*");
 	EXPECT_FALSE( type.isWideString() );
@@ -31,13 +31,13 @@ TEST_F(TypesTests, WideStringSetGet)
 	EXPECT_FALSE( type.isWideString() );
 }
 
-TEST_F(TypesTests, LlvmIrSetGet)
+TEST_F(TypeTests, LlvmIrSetGet)
 {
 	Type type("i32*");
 	EXPECT_EQ( "i32*", type.getLlvmIr() );
 }
 
-TEST_F(TypesTests, SameTypesAreNotLessThanEachOther)
+TEST_F(TypeTests, SameTypesAreNotLessThanEachOther)
 {
 	Type type1("double");
 	Type type2("double");
@@ -46,7 +46,7 @@ TEST_F(TypesTests, SameTypesAreNotLessThanEachOther)
 	EXPECT_FALSE( type2 < type1 );
 }
 
-TEST_F(TypesTests, DifferentTypesAreLessThanEachOther)
+TEST_F(TypeTests, DifferentTypesAreLessThanEachOther)
 {
 	Type type1("double");
 	Type type2("float");
@@ -56,5 +56,5 @@ TEST_F(TypesTests, DifferentTypesAreLessThanEachOther)
 }
 
 } // namespace tests
-} // namespace config
+} // namespace common
 } // namespace retdec

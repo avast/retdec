@@ -11,9 +11,9 @@
 
 #include "retdec/common/calling_convention.h"
 #include "retdec/common/storage.h"
+#include "retdec/common/type.h"
 #include "retdec/config/base.h"
 #include "retdec/config/objects.h"
-#include "retdec/config/types.h"
 
 namespace retdec {
 namespace config {
@@ -106,7 +106,7 @@ class Function : public retdec::common::AddressRange
 		common::CallingConvention callingConvention;
 		common::Storage returnStorage;
 		common::Storage frameBaseStorage;
-		Type returnType;
+		common::Type returnType;
 		ObjectSequentialContainer parameters;
 		ObjectSetContainer locals;
 		std::set<std::string> usedCryptoConstants;

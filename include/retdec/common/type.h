@@ -1,18 +1,17 @@
 /**
- * @file include/retdec/config/types.h
- * @brief Decompilation configuration manipulation: types.
- * @copyright (c) 2017 Avast Software, licensed under the MIT license
+ * @file include/retdec/common/type.h
+ * @brief Common data type representation.
+ * @copyright (c) 2019 Avast Software, licensed under the MIT license
  */
 
-#ifndef RETDEC_CONFIG_TYPES_H
-#define RETDEC_CONFIG_TYPES_H
+#ifndef RETDEC_COMMON_TYPE_H
+#define RETDEC_COMMON_TYPE_H
 
+#include <set>
 #include <string>
 
-#include "retdec/config/base.h"
-
 namespace retdec {
-namespace config {
+namespace common {
 
 /**
  * Represents data type.
@@ -23,11 +22,7 @@ class Type
 {
 	public:
 		Type();
-		explicit Type(const std::string& llvmIrRepre);
-		static Type fromJsonValue(const Json::Value& val);
-
-		Json::Value getJsonValue() const;
-		void readJsonValue(const Json::Value& val);
+		Type(const std::string& llvmIrRepre);
 
 		/// @name Type query methods.
 		/// @{
@@ -59,13 +54,9 @@ class Type
 		bool _wideString = false;
 };
 
-/**
- * Set container for data types.
- * Data types' LLVM IR strings are set's keys.
- */
-using TypeContainer = BaseSetContainer<Type>;
+using TypeContainer = std::set<Type>;
 
-} // namespace config
+} // namespace common
 } // namespace retdec
 
 #endif

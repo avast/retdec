@@ -9,6 +9,7 @@ add_executable(retdec-tests-common
 	patterns_tests.cpp
 	range_tests.cpp
 	tool_info_tests.cpp
+	type_tests.cpp
 )
 target_link_libraries(retdec-tests-common
 	retdec-common

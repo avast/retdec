@@ -8,6 +8,7 @@
 
 #include "retdec/config/objects.h"
 #include "retdec/serdes/storage.h"
+#include "retdec/serdes/type.h"
 
 namespace {
 
@@ -52,7 +53,7 @@ Object Object::fromJsonValue(const Json::Value& val)
 	ret.setRealName( safeGetString(val, JSON_realName) );
 	ret.setCryptoDescription( safeGetString(val, JSON_cryptoDesc) );
 	ret.setIsFromDebug( safeGetBool(val, JSON_fromDebug) );
-	ret.type.readJsonValue( val[JSON_type] );
+	serdes::deserialize(val[JSON_type], ret.type);
 
 	return ret;
 }
@@ -70,7 +71,7 @@ Json::Value Object::getJsonValue() const
 	if (!getCryptoDescription().empty()) obj[JSON_cryptoDesc] = getCryptoDescription();
 	if (isFromDebug()) obj[JSON_fromDebug] = isFromDebug();
 
-	if (type.isDefined()) obj[JSON_type] = type.getJsonValue();
+	if (type.isDefined()) obj[JSON_type] = serdes::serialize(type);
 	if (_storage.isDefined()) obj[JSON_storage] = serdes::serialize(_storage);
 
 	return obj;

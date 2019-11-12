@@ -1,22 +1,15 @@
 /**
- * @file src/config/types.cpp
- * @brief Decompilation configuration manipulation: objects.
+ * @file src/common/type.cpp
+ * @brief Common data type representation.
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */
 
 #include <cassert>
 
-#include "retdec/config/types.h"
-
-namespace {
-
-const std::string JSON_llvmIr     = "llvmIr";
-const std::string JSON_wideString = "isWideString";
-
-} // anonymous namespace
+#include "retdec/common/type.h"
 
 namespace retdec {
-namespace config {
+namespace common {
 
 /**
  * Default type is i32.
@@ -28,46 +21,6 @@ Type::Type()
 Type::Type(const std::string& llvmIrRepre) :
 		_llvmIr(llvmIrRepre)
 {
-}
-
-/**
- * Reads JSON object (associative array) holding type information.
- * @param val JSON object.
- */
-Type Type::fromJsonValue(const Json::Value& val)
-{
-	Type ret;
-	ret.readJsonValue(val);
-	return ret;
-}
-
-/**
- * Returns JSON object (associative array) holding type information.
- * @return JSON object.
- */
-Json::Value Type::getJsonValue() const
-{
-	Json::Value type;
-
-	if (isDefined()) type[JSON_llvmIr] = getLlvmIr();
-	if (isDefined() && isWideString()) type[JSON_wideString] = isWideString();
-
-	return type;
-}
-
-/**
- * Reads JSON object (associative array) holding type information.
- * @param val JSON object.
- */
-void Type::readJsonValue(const Json::Value& val)
-{
-	if ( val.isNull() || !val.isObject() )
-	{
-		return;
-	}
-
-	setLlvmIr( safeGetString(val, JSON_llvmIr) );
-	setIsWideString( safeGetBool(val, JSON_wideString) );
 }
 
 /**
@@ -135,5 +88,5 @@ bool Type::operator==(const Type& val) const
 	return getLlvmIr() == val.getLlvmIr();
 }
 
-} // namespace config
+} // namespace common
 } // namespace retdec
