@@ -1,18 +1,17 @@
 /**
- * @file include/retdec/config/tool_info.h
- * @brief Decompilation configuration manipulation: tool info.
- * @copyright (c) 2017 Avast Software, licensed under the MIT license
+ * @file include/retdec/common/tool_info.h
+ * @brief Common tool information representation.
+ * @copyright (c) 2019 Avast Software, licensed under the MIT license
  */
 
-#ifndef RETDEC_CONFIG_TOOL_INFO_H
-#define RETDEC_CONFIG_TOOL_INFO_H
+#ifndef RETDEC_COMMON_TOOL_INFO_H
+#define RETDEC_COMMON_TOOL_INFO_H
 
 #include <string>
-
-#include "retdec/config/base.h"
+#include <vector>
 
 namespace retdec {
-namespace config {
+namespace common {
 
 /**
  * Represents tools used to create/manipulate input binary (i.e compiler, packer).
@@ -20,9 +19,6 @@ namespace config {
 class ToolInfo
 {
 	public:
-		static ToolInfo fromJsonValue(const Json::Value& val);
-		Json::Value getJsonValue() const;
-
 		/// @name Tool query methods.
 		/// @{
 		bool isUnknown() const;
@@ -113,7 +109,7 @@ class ToolInfo
  * The order of tools in this container is important. The first one is the most,
  * and the last one the least, significant.
  */
-class ToolInfoContainer : public BaseSequentialContainer<ToolInfo>
+class ToolInfoContainer : public std::vector<ToolInfo>
 {
 	public:
 		const ToolInfo* getToolByName(const std::string& name);
@@ -143,7 +139,7 @@ class ToolInfoContainer : public BaseSequentialContainer<ToolInfo>
 		/// @}
 };
 
-} // namespace config
+} // namespace common
 } // namespace retdec
 
 #endif

@@ -220,17 +220,17 @@ int handleArguments(std::vector<std::string> &args)
 
 			if (opt == "--compiler")
 			{
-				retdec::config::ToolInfo ci;
+				retdec::common::ToolInfo ci;
 				ci.setName(val);
 				ci.setPercentage(101);
 
 				if (config.tools.empty())
 				{
-					config.tools.insert(ci);
+					config.tools.push_back(ci);
 				}
 				else
 				{
-					config.tools.insert(ci);
+					config.tools.push_back(ci);
 				}
 			}
 			else if (opt == "--arch")

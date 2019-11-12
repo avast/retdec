@@ -11,13 +11,13 @@
 #include "retdec/common/file_format.h"
 #include "retdec/common/file_type.h"
 #include "retdec/common/language.h"
+#include "retdec/common/tool_info.h"
 #include "retdec/common/vtable.h"
 #include "retdec/config/base.h"
 #include "retdec/config/classes.h"
 #include "retdec/config/functions.h"
 #include "retdec/config/parameters.h"
 #include "retdec/config/patterns.h"
-#include "retdec/config/tool_info.h"
 #include "retdec/config/types.h"
 
 namespace retdec {
@@ -79,7 +79,7 @@ class Config
 		common::Architecture architecture;
 		common::FileType fileType;
 		common::FileFormat fileFormat;
-		ToolInfoContainer tools;
+		common::ToolInfoContainer tools;
 		common::LanguageContainer languages;
 		FunctionContainer functions;
 		GlobalVarContainer globals;

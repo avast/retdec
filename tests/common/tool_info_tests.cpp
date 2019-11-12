@@ -1,17 +1,17 @@
 /**
- * @file tests/config/tool_info_tests.cpp
+ * @file tests/common/tool_info_tests.cpp
  * @brief Tests for the @c address module.
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */
 
 #include <gtest/gtest.h>
 
-#include "retdec/config/tool_info.h"
+#include "retdec/common/tool_info.h"
 
 using namespace ::testing;
 
 namespace retdec {
-namespace config {
+namespace common {
 namespace tests {
 
 //
@@ -60,14 +60,14 @@ class ToolInfoContainerTests : public Test
 		{
 			t1.setName("toool1");
 			t1.setPercentage(25.0);
-			tools.insert(t1);
+			tools.push_back(t1);
 
 			t2.setName("toool2");
-			tools.insert(t2);
+			tools.push_back(t2);
 
 			t3.setName("toool3");
 			t3.setPercentage(50.0);
-			tools.insert(t3);
+			tools.push_back(t3);
 		}
 
 	protected:
@@ -113,7 +113,7 @@ TEST_F(ToolInfoContainerTests, TestGetToolWithMaxPercentage)
 	ToolInfo t4;
 	t4.setName("tool4");
 	t4.setPercentage(50.0);
-	tools.insert(t4);
+	tools.push_back(t4);
 	t = tools.getToolWithMaxPercentage();
 	ASSERT_TRUE(t != nullptr);
 	EXPECT_EQ( t3, *t );
@@ -136,12 +136,12 @@ TEST_F(ToolInfoContainerTests, TestisMsvc)
 
 	ToolInfo t;
 	t.setName("msvc");
-	tools.insert(t);
+	tools.push_back(t);
 	EXPECT_EQ( true, t.isMsvc() );
 
 	EXPECT_EQ( true, tools.isMsvc() );
 }
 
 } // namespace tests
-} // namespace config
+} // namespace common
 } // namespace retdec

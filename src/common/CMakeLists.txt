@@ -6,6 +6,7 @@ add_library(retdec-common STATIC
 	file_format.cpp
 	file_type.cpp
 	language.cpp
+	tool_info.cpp
 	vtable.cpp
 )
 target_link_libraries(retdec-common

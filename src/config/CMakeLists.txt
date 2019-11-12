@@ -8,7 +8,6 @@ add_library(retdec-config STATIC
 	parameters.cpp
 	patterns.cpp
 	storage.cpp
-	tool_info.cpp
 	types.cpp
 )
 target_link_libraries(retdec-config

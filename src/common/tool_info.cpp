@@ -1,25 +1,16 @@
 /**
- * @file src/config/tool_info.cpp
- * @brief Decompilation configuration manipulation: tool info.
+ * @file src/common/tool_info.cpp
+ * @brief Common tool information representation.
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */
 
 #include <algorithm>
 #include <sstream>
 
-#include "retdec/config/tool_info.h"
+#include "retdec/common/tool_info.h"
 #include "retdec/utils/string.h"
 
 namespace {
-
-const std::string JSON_type             = "type";
-const std::string JSON_name             = "name";
-const std::string JSON_version          = "version";
-const std::string JSON_additional       = "additional";
-const std::string JSON_percentage       = "percentage";
-const std::string JSON_idSignNibbles    = "identicalSignificantNibbles";
-const std::string JSON_totalSignNibbles = "totalSignificantNibbles";
-const std::string JSON_heuristics       = "heuristics";
 
 const std::string CC_UNKNOWN = "unknown";
 const std::string CC_BORLAND = "borland";
@@ -37,56 +28,13 @@ const std::string T_UNKNOWN = "unknown";
 } // anonymous namespace
 
 namespace retdec {
-namespace config {
+namespace common {
 
 //
 //=============================================================================
 // ToolInfo
 //=============================================================================
 //
-
-/**
- * Reads JSON object (associative array) holding tool information.
- * @param val JSON object.
- */
-ToolInfo ToolInfo::fromJsonValue(const Json::Value& val)
-{
-	checkJsonValueIsObject(val, "ToolInfo");
-
-	ToolInfo ret;
-
-	ret.setVersion( safeGetString(val, JSON_version) );
-	ret.setType( safeGetString(val, JSON_type) );
-	ret.setName( safeGetString(val, JSON_name) );
-	ret.setAdditionalInfo( safeGetString(val, JSON_additional) );
-	ret.setPercentage( safeGetDouble(val, JSON_percentage) );
-	ret.setIdenticalSignificantNibbles( safeGetUint(val, JSON_idSignNibbles) );
-	ret.setTotalSignificantNibbles( safeGetUint(val, JSON_totalSignNibbles) );
-	ret.setIsFromHeuristics( safeGetBool(val, JSON_heuristics) );
-
-	return ret;
-}
-
-/**
- * Returns JSON object (associative array) holding tool information.
- * @return JSON object.
- */
-Json::Value ToolInfo::getJsonValue() const
-{
-	Json::Value comp;
-
-	comp[JSON_type] = getType();
-	comp[JSON_name] = getName();
-	comp[JSON_percentage] = getPercentage();
-	comp[JSON_idSignNibbles] = getIdenticalSignificantNibbles();
-	comp[JSON_totalSignNibbles] = getTotalSignificantNibbles();
-	comp[JSON_heuristics] = isFromHeuristics();
-
-	if (!getVersion().empty()) comp[JSON_version] = getVersion();
-	if (!getAdditionalInfo().empty()) comp[JSON_additional] = getAdditionalInfo();
-
-	return comp;
-}
 
 bool ToolInfo::isUnknown() const      { return !isKnown(); }
 bool ToolInfo::isKnown() const        { return isBorland() || isGcc() || isIntel() || isOpenWatcom() || isMsvc(); }
@@ -308,7 +256,7 @@ bool ToolInfo::operator==(const ToolInfo& val) const
  */
 bool ToolInfoContainer::isTool(const std::string& name) const
 {
-	return std::any_of(_data.begin(), _data.end(),
+	return std::any_of(begin(), end(),
 			[&name](const auto& t){return t.isTool(name);});
 }
 
@@ -319,7 +267,7 @@ bool ToolInfoContainer::isTool(const std::string& name) const
  */
 const ToolInfo* ToolInfoContainer::getToolByName(const std::string& name)
 {
-	for (auto& t : _data)
+	for (auto& t : *this)
 	{
 		if (t.isTool(name))
 			return &t;
@@ -337,7 +285,7 @@ const ToolInfo* ToolInfoContainer::getToolWithMaxPercentage()
 	const ToolInfo* ret = nullptr;
 	double max = 0.0;
 
-	for (auto& t : _data)
+	for (auto& t : *this)
 	{
 		if (t.getPercentage() > max)
 		{
@@ -354,7 +302,7 @@ const ToolInfo* ToolInfoContainer::getToolWithMaxPercentage()
  */
 const ToolInfo* ToolInfoContainer::getToolMostSignificant()
 {
-	return (_data.empty()) ? (nullptr) : (&_data.front());
+	return (empty()) ? (nullptr) : (&front());
 }
 
 bool ToolInfoContainer::isGcc() const           { return isTool("gcc"); }
@@ -371,9 +319,11 @@ bool ToolInfoContainer::isThumbCompiler() const { return isTool("thumb"); }
 
 bool ToolInfoContainer::isMsvc(const std::string& version) const
 {
-	return std::any_of(_data.begin(), _data.end(),
+	return std::any_of(
+			begin(),
+			end(),
 			[&](const auto& t){return t.isMsvc(version);});
 }
 
-} // namespace config
+} // namespace common
 } // namespace retdec
