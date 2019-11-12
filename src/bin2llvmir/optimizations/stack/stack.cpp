@@ -193,16 +193,12 @@ void StackAnalysis::handleInstruction(
 			inst->getFunction(),
 			ci->getSExtValue(),
 			t,
-			name);
+			name,
+			debugSv ? debugSv->getName() : std::string(),
+			debugSv != nullptr);
 
 	AllocaInst* a = p.first;
 	auto* ca = p.second;
-
-	if (debugSv)
-	{
-		ca->setIsFromDebug(true);
-		ca->setRealName(debugSv->getName());
-	}
 
 	LOG << "===> " << llvmObjToString(a) << std::endl;
 	LOG << "===> " << llvmObjToString(inst) << std::endl;
@@ -237,7 +233,7 @@ void StackAnalysis::handleInstruction(
  * Find a value that is being added to the stack pointer register in \p root.
  * Find a debug variable with offset equal to this value.
  */
-retdec::config::Object* StackAnalysis::getDebugStackVariable(
+const retdec::common::Object* StackAnalysis::getDebugStackVariable(
 		llvm::Function* fnc,
 		SymbolicTree& root)
 {
@@ -280,9 +276,8 @@ retdec::config::Object* StackAnalysis::getDebugStackVariable(
 		return nullptr;
 	}
 
-	for (auto& p : debugFnc->locals)
+	for (auto& var : debugFnc->locals)
 	{
-		auto& var = p.second;
 		if (!var.getStorage().isStack())
 		{
 			continue;

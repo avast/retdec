@@ -60,7 +60,7 @@ void DebugFormat::loadDwarfGlobalVariables()
 			std::string name = gvar->name.empty() ? "glob_var_" + addr.toHexString() : gvar->name;
 			if (!addr.isDefined())
 				continue;
-			retdec::config::Object gv(name, retdec::common::Storage::inMemory(addr));
+			retdec::common::Object gv(name, retdec::common::Storage::inMemory(addr));
 			gv.type = loadDwarfType(gvar->type);
 			if (gv.type.getLlvmIr() == "void")
 				gv.type.setLlvmIr("i32");
@@ -132,9 +132,9 @@ void DebugFormat::loadDwarfFunctions()
 		for (auto* param : *df->getParams())
 		{
 			std::string name = param->name.empty() ? std::string("arg") + std::to_string(argCntr) : param->name;
-			retdec::config::Object newArg(name, retdec::common::Storage::undefined());
+			retdec::common::Object newArg(name, retdec::common::Storage::undefined());
 			newArg.type = loadDwarfType(param->type); // void -> i32
-			dif.parameters.insert(newArg);
+			dif.parameters.push_back(newArg);
 			++argCntr;
 		}
 
@@ -154,7 +154,7 @@ void DebugFormat::loadDwarfFunctions()
 				storage = retdec::common::Storage::onStack(address, regNum);
 			}
 
-			retdec::config::Object newLocalVar(var->name, storage);
+			retdec::common::Object newLocalVar(var->name, storage);
 			newLocalVar.type = loadDwarfType(var->type); // TODO: void -> i32
 			dif.locals.insert(newLocalVar);
 		}

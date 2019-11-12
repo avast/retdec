@@ -6,23 +6,12 @@
 
 #include <cassert>
 
-#include "retdec/config/objects.h"
+#include "retdec/common/object.h"
 #include "retdec/serdes/storage.h"
 #include "retdec/serdes/type.h"
 
-namespace {
-
-const std::string JSON_name       = "name";
-const std::string JSON_realName   = "realName";
-const std::string JSON_storage    = "storage";
-const std::string JSON_type       = "type";
-const std::string JSON_fromDebug  = "isFromDebug";
-const std::string JSON_cryptoDesc = "cryptoDescription";
-
-} // anonymous namespace
-
 namespace retdec {
-namespace config {
+namespace common {
 
 //
 //=============================================================================
@@ -30,51 +19,16 @@ namespace config {
 //=============================================================================
 //
 
+Object::Object()
+{
+
+}
+
 Object::Object(const std::string& name, const common::Storage& storage) :
 		_name(name),
 		_storage(storage)
 {
 	assert( !getName().empty() );
-}
-
-/**
- * Reads JSON object (associative array) holding object information.
- * @param val JSON object.
- */
-Object Object::fromJsonValue(const Json::Value& val)
-{
-	checkJsonValueIsObject(val, "Object");
-
-	common::Storage storage;
-	serdes::deserialize(val[JSON_storage], storage);
-
-	Object ret(safeGetString(val, JSON_name), storage);
-
-	ret.setRealName( safeGetString(val, JSON_realName) );
-	ret.setCryptoDescription( safeGetString(val, JSON_cryptoDesc) );
-	ret.setIsFromDebug( safeGetBool(val, JSON_fromDebug) );
-	serdes::deserialize(val[JSON_type], ret.type);
-
-	return ret;
-}
-
-/**
- * Returns JSON object (associative array) holding object information.
- * @return JSON object.
- */
-Json::Value Object::getJsonValue() const
-{
-	Json::Value obj;
-
-	if (!getName().empty()) obj[JSON_name] = getName();
-	if (!getRealName().empty()) obj[JSON_realName] = getRealName();
-	if (!getCryptoDescription().empty()) obj[JSON_cryptoDesc] = getCryptoDescription();
-	if (isFromDebug()) obj[JSON_fromDebug] = isFromDebug();
-
-	if (type.isDefined()) obj[JSON_type] = serdes::serialize(type);
-	if (_storage.isDefined()) obj[JSON_storage] = serdes::serialize(_storage);
-
-	return obj;
 }
 
 /**
@@ -158,28 +112,12 @@ const common::Storage& Object::getStorage() const
 const Object* ObjectSequentialContainer::getObjectByName(
 		const std::string& name) const
 {
-	return getElementById(name);
-}
-
-/**
- * @return Pointer to object or @c nullptr if not found.
- */
-const Object* ObjectSequentialContainer::getObjectByRealName(
-		const std::string& name) const
-{
-	for (auto& elem : _data)
+	for (auto& elem : *this)
 	{
-		if (elem.getRealName() == name)
+		if (elem.getName() == name)
 			return &elem;
 	}
 	return nullptr;
-}
-
-const Object* ObjectSequentialContainer::getObjectByNameOrRealName(
-		const std::string& name) const
-{
-	auto* ret = getObjectByName(name);
-	return ret ? ret : getObjectByRealName(name);
 }
 
 //
@@ -194,66 +132,8 @@ const Object* ObjectSequentialContainer::getObjectByNameOrRealName(
 const Object* ObjectSetContainer::getObjectByName(
 		const std::string& name) const
 {
-	return getElementById(name);
-}
-
-/**
- * @return Pointer to object or @c nullptr if not found.
- * @note This search have linear time complexity.
- */
-const Object* ObjectSetContainer::getObjectByRealName(
-		const std::string& name) const
-{
-	for (auto& elem : _data)
-	{
-		if (elem.second.getRealName() == name)
-			return &elem.second;
-	}
-	return nullptr;
-}
-
-/**
- * @return Pointer to object or @c nullptr if not found.
- * @note This search have up to linear time complexity.
- */
-const Object* ObjectSetContainer::getObjectByNameOrRealName(
-		const std::string& name) const
-{
-	auto* ret = getObjectByName(name);
-	return ret ? ret : getObjectByRealName(name);
-}
-
-//
-//=============================================================================
-// RegisterContainer
-//=============================================================================
-//
-
-/**
- * Only register objects are allowed to be inserted.
- * See @c BaseSetContainer::insert();
- * Non-register objects are not inserted and pair {end(), false} is returned.
- */
-std::pair<RegisterContainer::iterator,bool> RegisterContainer::insert(const Object& e)
-{
-	if (e.getStorage().isRegister())
-	{
-		return BaseAssociativeContainer::insert(e);
-	}
-	else
-	{
-		assert(false && "object other than register is inserted");
-		return {RegisterContainer::end(), false};
-	}
-}
-
-std::pair<RegisterContainer::iterator,bool> RegisterContainer::insert(
-		const std::string& name)
-{
-	auto s = retdec::common::Storage::inRegister(name);
-	auto r = retdec::config::Object(name, s);
-	r.setRealName(name);
-	return insert(r);
+	auto it = find(name);
+	return it != end() ? &(*it) : nullptr;
 }
 
 //
@@ -284,9 +164,9 @@ GlobalVarContainer& GlobalVarContainer::operator=(const GlobalVarContainer& o)
 	{
 		ObjectSetContainer::operator=(o);
 		_addr2global.clear();
-		for (auto& p : _data)
+		for (auto& p : *this)
 		{
-			_addr2global[p.second.getStorage().getAddress()] = &p.second;
+			_addr2global[p.getStorage().getAddress()] = &p;
 		}
 	}
 	return *this;
@@ -324,10 +204,15 @@ std::pair<GlobalVarContainer::iterator,bool> GlobalVarContainer::insert(
 	{
 		erase(*existing);
 	}
+	auto fit = find(e.getName());
+	if (fit != end())
+	{
+		ObjectSetContainer::erase(fit);
+	}
 
-	auto retPair = BaseAssociativeContainer::insert(e);
+	auto retPair = ObjectSetContainer::insert(e);
 
-	const Object* obj = &retPair.first->second;
+	const Object* obj = &(*retPair.first);
 	const auto& addr = e.getStorage().getAddress();
 	auto res = _addr2global.emplace(addr,obj);
 	if (!res.second)
@@ -340,12 +225,19 @@ std::pair<GlobalVarContainer::iterator,bool> GlobalVarContainer::insert(
 	return retPair;
 }
 
+std::pair<GlobalVarContainer::iterator,bool> GlobalVarContainer::insert(
+		GlobalVarContainer::iterator,
+		const Object& e)
+{
+	return insert(e);
+}
+
 /**
  * Clear both underlying container and @c addr2global map.
  */
 void GlobalVarContainer::clear()
 {
-	_data.clear();
+	ObjectSetContainer::clear();
 	_addr2global.clear();
 }
 
@@ -359,8 +251,9 @@ size_t GlobalVarContainer::erase(const Object& val)
 	{
 		_addr2global.erase(val.getStorage().getAddress());
 	}
-	return _data.erase(val.getId());
+	auto it = find(val.getId());
+	return ObjectSetContainer::erase(*it);
 }
 
-} // namespace config
+} // namespace common
 } // namespace retdec

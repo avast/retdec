@@ -57,7 +57,7 @@ void DebugFormat::loadPdbGlobalVariables()
 		std::string name = n.empty() ? "glob_var_" + addr.toHexString() : n;
 		if (!addr.isDefined())
 			continue;
-		retdec::config::Object gv(name, retdec::common::Storage::inMemory(addr));
+		retdec::common::Object gv(name, retdec::common::Storage::inMemory(addr));
 		gv.type = loadPdbType(pgv.type_def);
 		if (gv.type.getLlvmIr() == "void")
 			gv.type.setLlvmIr("i32");
@@ -115,9 +115,9 @@ void DebugFormat::loadPdbFunctions()
 
 			std::string n = a.name;
 			std::string name = n.empty() ? std::string("arg") + std::to_string(argCntr) : n;
-			retdec::config::Object newArg(name, storage);
+			retdec::common::Object newArg(name, storage);
 			newArg.type = loadPdbType(a.type_def);
-			fnc.parameters.insert(newArg);
+			fnc.parameters.push_back(newArg);
 			++argCntr;
 		}
 
@@ -140,7 +140,7 @@ void DebugFormat::loadPdbFunctions()
 				storage = retdec::common::Storage::onStack(lv.offset, num);
 			}
 
-			retdec::config::Object newLocalVar(name, storage);
+			retdec::common::Object newLocalVar(name, storage);
 			newLocalVar.type = loadPdbType(lv.type_def);
 			fnc.locals.insert(newLocalVar);
 		}

@@ -68,7 +68,7 @@ class DsmGenerator : public llvm::ModulePass
 		void findLongestInstruction();
 		void findLongestAddress();
 		std::string getString(
-				const retdec::config::Object* cgv,
+				const retdec::common::Object* cgv,
 				const llvm::ConstantDataArray* cda);
 
 		std::string getFunctionName(llvm::Function* f) const;

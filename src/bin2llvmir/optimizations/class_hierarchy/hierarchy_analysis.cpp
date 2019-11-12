@@ -161,7 +161,7 @@ for (auto* p : vtable)
 	auto* global = config->getLlvmGlobalVariable(vt.vtableAddress);
 	assert(global);
 
-	retdec::config::Object cg(
+	retdec::common::Object cg(
 			global->getName(),
 			retdec::common::Storage::inMemory(vt.vtableAddress)
 	);

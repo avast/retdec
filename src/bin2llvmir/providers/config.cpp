@@ -158,13 +158,13 @@ llvm::Function* Config::getIntrinsicFunction(IntrinsicFunctionCreatorPtr f)
 	}
 }
 
-const retdec::config::Object* Config::getConfigGlobalVariable(
+const retdec::common::Object* Config::getConfigGlobalVariable(
 		const llvm::GlobalVariable* gv)
 {
 	return gv ? _configDB.globals.getObjectByName(gv->getName()) : nullptr;
 }
 
-const retdec::config::Object* Config::getConfigGlobalVariable(
+const retdec::common::Object* Config::getConfigGlobalVariable(
 		retdec::common::Address address)
 {
 	return _configDB.globals.getObjectByAddress(address);
@@ -213,7 +213,7 @@ bool Config::isGlobalVariable(const llvm::Value* val)
 	return getConfigGlobalVariable(gv) != nullptr;
 }
 
-const retdec::config::Object* Config::getConfigLocalVariable(
+const retdec::common::Object* Config::getConfigLocalVariable(
 		const llvm::Value* val)
 {
 	auto* a = dyn_cast_or_null<AllocaInst>(val);
@@ -230,7 +230,7 @@ const retdec::config::Object* Config::getConfigLocalVariable(
 	return cl && cl->getStorage().isUndefined() ? cl : nullptr;
 }
 
-retdec::config::Object* Config::getConfigStackVariable(
+retdec::common::Object* Config::getConfigStackVariable(
 		const llvm::Value* val)
 {
 	auto* a = dyn_cast_or_null<AllocaInst>(val);
@@ -243,7 +243,7 @@ retdec::config::Object* Config::getConfigStackVariable(
 	{
 		return nullptr;
 	}
-	auto* cl = const_cast<retdec::config::Object*>(
+	auto* cl = const_cast<retdec::common::Object*>(
 			cf->locals.getObjectByName(a->getName()));
 	return cl && cl->getStorage().isStack() ? cl : nullptr;
 }
@@ -262,9 +262,8 @@ llvm::AllocaInst* Config::getLlvmStackVariable(
 		return nullptr;
 	}
 
-	for (auto& p: cf->locals)
+	for (auto& l: cf->locals)
 	{
-		auto& l = p.second;
 		int off = 0;
 		if (l.getStorage().isStack(off) && off == offset)
 		{
@@ -303,14 +302,14 @@ retdec::utils::Maybe<int> Config::getStackVariableOffset(
 			: retdec::utils::Maybe<int>();
 }
 
-retdec::config::Object* Config::insertGlobalVariable(
+const retdec::common::Object* Config::insertGlobalVariable(
 		const llvm::GlobalVariable* gv,
 		retdec::common::Address address,
 		bool fromDebug,
 		const std::string& realName,
 		const std::string& cryptoDesc)
 {
-	retdec::config::Object cgv(
+	retdec::common::Object cgv(
 			gv->getName(),
 			retdec::common::Storage::inMemory(address));
 	cgv.setIsFromDebug(fromDebug);
@@ -322,13 +321,14 @@ retdec::config::Object* Config::insertGlobalVariable(
 		cgv.type.setIsWideString(true);
 	}
 	auto p = _configDB.globals.insert(cgv);
-	return &p.first->second;
+	return &(*p.first);
 }
 
-retdec::config::Object* Config::insertStackVariable(
+const retdec::common::Object* Config::insertStackVariable(
 		const llvm::AllocaInst* sv,
 		int offset,
-		bool fromDebug)
+		bool fromDebug,
+		const std::string& realName)
 {
 	auto* cf = getConfigFunction(sv->getFunction());
 
@@ -343,15 +343,22 @@ retdec::config::Object* Config::insertStackVariable(
 		return nullptr;
 	}
 
-	retdec::config::Object local(
+	retdec::common::Object local(
 			sv->getName(),
 			retdec::common::Storage::onStack(offset));
-	local.setRealName(sv->getName());
+	if (realName.empty())
+	{
+		local.setRealName(sv->getName());
+	}
+	else
+	{
+		local.setRealName(realName);
+	}
 	local.setIsFromDebug(fromDebug);
 	local.type.setLlvmIr(llvmObjToString(sv->getType()));
 
 	auto p = cf->locals.insert(local);
-	return &p.first->second;
+	return &(*p.first);
 }
 
 retdec::config::Function* Config::insertFunction(
@@ -413,7 +420,7 @@ retdec::config::Function* Config::renameFunction(
 	return &p.first->second;
 }
 
-const retdec::config::Object* Config::getConfigRegister(
+const retdec::common::Object* Config::getConfigRegister(
 		const llvm::Value* val)
 {
 	auto* gv = dyn_cast_or_null<GlobalVariable>(val);
@@ -426,13 +433,6 @@ retdec::utils::Maybe<unsigned> Config::getConfigRegisterNumber(
 	retdec::utils::Maybe<unsigned> undefVal;
 	auto* r = getConfigRegister(val);
 	return r ? r->getStorage().getRegisterNumber() : undefVal;
-}
-
-llvm::GlobalVariable* Config::getLlvmRegister(
-		const std::string& name)
-{
-	auto* cr = _configDB.registers.getObjectByRealName(name);
-	return cr ? _module->getNamedGlobal(cr->getName()) : nullptr;
 }
 
 /**

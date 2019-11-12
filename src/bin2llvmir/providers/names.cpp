@@ -336,11 +336,11 @@ void NameContainer::initFromConfig()
 				Name::eType::CONFIG_FUNCTION);
 	}
 
-	for (auto& p : _config->getConfig().globals)
+	for (auto& g : _config->getConfig().globals)
 	{
 		addNameForAddress(
-				p.second.getStorage().getAddress(),
-				p.second.getName(),
+				g.getStorage().getAddress(),
+				g.getName(),
 				Name::eType::CONFIG_GLOBAL);
 	}
 }
@@ -360,14 +360,14 @@ void NameContainer::initFromDebug()
 				Name::eType::DEBUG_FUNCTION);
 	}
 
-	for (const auto& p : _debug->globals)
+	for (const auto& g : _debug->globals)
 	{
 		Address addr;
-		if (p.second.getStorage().isMemory(addr))
+		if (g.getStorage().isMemory(addr))
 		{
 			addNameForAddress(
 					addr,
-					p.second.getName(),
+					g.getName(),
 					Name::eType::DEBUG_GLOBAL);
 		}
 	}

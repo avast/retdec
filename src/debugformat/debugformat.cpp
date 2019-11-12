@@ -128,7 +128,7 @@ retdec::config::Function* DebugFormat::getFunction(retdec::common::Address a)
 	return fIt != functions.end() ? &fIt->second : nullptr;
 }
 
-const retdec::config::Object* DebugFormat::getGlobalVar(
+const retdec::common::Object* DebugFormat::getGlobalVar(
 		retdec::common::Address a)
 {
 	return globals.getObjectByAddress(a);

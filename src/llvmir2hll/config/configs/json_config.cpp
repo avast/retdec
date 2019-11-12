@@ -28,9 +28,9 @@ namespace llvmir2hll {
 struct JSONConfig::Impl {
 	Impl();
 
-	const retdec::config::Object &getConfigGlobalVariableByNameOrEmptyVariable(
+	const retdec::common::Object &getConfigGlobalVariableByNameOrEmptyVariable(
 		const std::string &name) const;
-	const retdec::config::Object *getConfigRegisterByName(const std::string &name) const;
+	const retdec::common::Object *getConfigRegisterByName(const std::string &name) const;
 	retdec::config::Function *getConfigFunctionByName(const std::string &name);
 	const retdec::config::Function *getConfigFunctionByName(const std::string &name) const;
 	const retdec::config::Function &getConfigFunctionByNameOrEmptyFunction(
@@ -38,7 +38,7 @@ struct JSONConfig::Impl {
 	const retdec::common::Class *getConfigClassByName(const std::string &name) const;
 	const retdec::common::Class &getConfigClassByNameOrEmptyClass(
 		const std::string &name) const;
-	std::string getNameOfRegister(const retdec::config::Object &reg) const;
+	std::string getNameOfRegister(const retdec::common::Object &reg) const;
 
 	/// Path to the config file (if any).
 	std::string path;
@@ -63,9 +63,9 @@ const retdec::config::Function *JSONConfig::Impl::getConfigFunctionByName(
 	return config.functions.getFunctionByName(name);
 }
 
-const retdec::config::Object &JSONConfig::Impl::getConfigGlobalVariableByNameOrEmptyVariable(
+const retdec::common::Object &JSONConfig::Impl::getConfigGlobalVariableByNameOrEmptyVariable(
 		const std::string &name) const {
-	static const retdec::config::Object emptyGlobalVariable(
+	static const retdec::common::Object emptyGlobalVariable(
 		"no-name",
 		retdec::common::Storage::undefined()
 	);
@@ -73,7 +73,7 @@ const retdec::config::Object &JSONConfig::Impl::getConfigGlobalVariableByNameOrE
 	return g ? *g : emptyGlobalVariable;
 }
 
-const retdec::config::Object *JSONConfig::Impl::getConfigRegisterByName(
+const retdec::common::Object *JSONConfig::Impl::getConfigRegisterByName(
 		const std::string &name) const {
 	return config.registers.getObjectByName(name);
 }
@@ -91,7 +91,7 @@ const retdec::common::Class *JSONConfig::Impl::getConfigClassByName(
 	return it != config.classes.end() ? &(*it) : nullptr;
 }
 
-std::string JSONConfig::Impl::getNameOfRegister(const retdec::config::Object &reg) const {
+std::string JSONConfig::Impl::getNameOfRegister(const retdec::common::Object &reg) const {
 	// Each register has a name set in its storage. However, this name may be
 	// just our internal LLVM IR name. To get the real name, we have to perform
 	// another check.
@@ -346,8 +346,7 @@ std::string JSONConfig::getDemangledNameOfClass(const std::string &cl) const {
 
 bool JSONConfig::isDebugInfoAvailable() const {
 	// Global variables.
-	for (const auto &nameVarPair : impl->config.globals) {
-		const auto &v = nameVarPair.second;
+	for (const auto &v : impl->config.globals) {
 		if (v.isFromDebug()) {
 			return true;
 		}
@@ -373,8 +372,7 @@ bool JSONConfig::isDebugInfoAvailable() const {
 		}
 
 		// Local variables.
-		for (const auto &nameVarPair : func.locals) {
-			const auto &v = nameVarPair.second;
+		for (const auto &v : func.locals) {
 			if (v.isFromDebug()) {
 				return true;
 			}

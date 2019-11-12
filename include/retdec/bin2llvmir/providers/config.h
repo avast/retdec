@@ -52,18 +52,16 @@ class Config
 
 		// Register
 		//
-		const retdec::config::Object* getConfigRegister(
+		const retdec::common::Object* getConfigRegister(
 				const llvm::Value* val);
 		retdec::utils::Maybe<unsigned> getConfigRegisterNumber(
 				const llvm::Value* val);
-		llvm::GlobalVariable* getLlvmRegister(
-				const std::string& name);
 
 		// Global
 		//
-		const retdec::config::Object* getConfigGlobalVariable(
+		const retdec::common::Object* getConfigGlobalVariable(
 				const llvm::GlobalVariable* gv);
-		const retdec::config::Object* getConfigGlobalVariable(
+		const retdec::common::Object* getConfigGlobalVariable(
 				retdec::common::Address address);
 
 		llvm::GlobalVariable* getLlvmGlobalVariable(
@@ -79,9 +77,9 @@ class Config
 
 		// Local + Stack
 		//
-		const retdec::config::Object* getConfigLocalVariable(
+		const retdec::common::Object* getConfigLocalVariable(
 				const llvm::Value* val);
-		retdec::config::Object* getConfigStackVariable(
+		retdec::common::Object* getConfigStackVariable(
 				const llvm::Value* val);
 
 		llvm::AllocaInst* getLlvmStackVariable(
@@ -94,17 +92,18 @@ class Config
 
 		// Insert
 		//
-		retdec::config::Object* insertGlobalVariable(
+		const retdec::common::Object* insertGlobalVariable(
 				const llvm::GlobalVariable* gv,
 				retdec::common::Address address,
 				bool fromDebug = false,
 				const std::string& realName = "",
 				const std::string& cryptoDesc = "");
 
-		retdec::config::Object* insertStackVariable(
+		const retdec::common::Object* insertStackVariable(
 				const llvm::AllocaInst* sv,
 				int offset,
-				bool fromDebug = false);
+				bool fromDebug = false,
+				const std::string& realName = std::string());
 
 		retdec::config::Function* insertFunction(
 				const llvm::Function* fnc,

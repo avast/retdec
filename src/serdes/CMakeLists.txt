@@ -7,6 +7,7 @@ add_library(retdec-serdes STATIC
 	file_format.cpp
 	file_type.cpp
 	language.cpp
+	object.cpp
 	pattern.cpp
 	std.cpp
 	storage.cpp

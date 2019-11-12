@@ -1,21 +1,22 @@
 /**
- * @file include/retdec/config/objects.h
- * @brief Decompilation configuration manipulation: objects.
- * @copyright (c) 2017 Avast Software, licensed under the MIT license
+ * @file include/retdec/config/object.h
+ * @brief Common object representation.
+ * @copyright (c) 2019 Avast Software, licensed under the MIT license
  */
 
-#ifndef RETDEC_CONFIG_OBJECTS_H
-#define RETDEC_CONFIG_OBJECTS_H
+#ifndef RETDEC_COMMON_OBJECT_H
+#define RETDEC_COMMON_OBJECT_H
 
+#include <map>
+#include <vector>
 #include <string>
 
 #include "retdec/common/storage.h"
 #include "retdec/common/type.h"
-#include "retdec/config/base.h"
 #include "retdec/utils/test.h"
 
 namespace retdec {
-namespace config {
+namespace common {
 
 GTEST_FORWARD_TEST(
 		GlobalVarContainerTests,
@@ -40,10 +41,8 @@ GTEST_FORWARD_TEST(
 class Object
 {
 	public:
+		Object();
 		Object(const std::string& name, const common::Storage& storage);
-		static Object fromJsonValue(const Json::Value& val);
-
-		Json::Value getJsonValue() const;
 
 		bool operator==(const Object& o) const;
 		bool operator<(const Object& o) const;
@@ -83,41 +82,43 @@ class Object
 		bool _fromDebug = false;
 };
 
+struct ObjectCompare
+{
+	using is_transparent = void;
+
+	bool operator()(const Object& o1, const Object& o2) const
+	{
+		return o1 < o2;
+	}
+	bool operator()(const std::string& id, Object const& o) const
+	{
+		return id < o.getName();
+	}
+	bool operator()(const Object& o, const std::string& id) const
+	{
+		return o.getName() < id;
+	}
+};
+
 /**
  * Sequential container of objects.
  * The order of objects in this container is important
  * (e.g. function parameters).
  */
-class ObjectSequentialContainer : public BaseSequentialContainer<Object>
+class ObjectSequentialContainer : public std::vector<Object>
 {
 	public:
 		const Object* getObjectByName(const std::string& name) const;
-		const Object* getObjectByRealName(const std::string& name) const;
-		const Object* getObjectByNameOrRealName(const std::string& name) const;
 };
 
 /**
  * Set container of objects.
  * The order of objects in this container is unimportant (e.g. local variables).
  */
-class ObjectSetContainer : public BaseAssociativeContainer<std::string, Object>
+class ObjectSetContainer : public std::set<Object, ObjectCompare>
 {
 	public:
 		const Object* getObjectByName(const std::string& name) const;
-		const Object* getObjectByRealName(const std::string& name) const;
-		const Object* getObjectByNameOrRealName(const std::string& name) const;
-};
-
-/**
- * Set container for register objects.
- * Only register objects are allowed to be inserted -- other objects
- * are not inserted.
- */
-class RegisterContainer : public ObjectSetContainer
-{
-	public:
-		virtual std::pair<iterator,bool> insert(const Object& e) override;
-		std::pair<iterator,bool> insert(const std::string& name);
 };
 
 /**
@@ -139,7 +140,8 @@ class GlobalVarContainer : public ObjectSetContainer
 		/// They need to be reimplemented to modify both underlying container
 		/// and @c addr2global map.
 		/// @{
-		virtual std::pair<iterator,bool> insert(const Object& e) override;
+		std::pair<iterator,bool> insert(const Object& e);
+		std::pair<iterator,bool> insert(iterator, const Object& e);
 		void clear();
 		size_t erase(const Object& val);
 		/// @}
@@ -156,7 +158,7 @@ class GlobalVarContainer : public ObjectSetContainer
 				OperationsOnUnderlyingContainerAreReflectedInaddr2global);
 };
 
-} // namespace config
+} // namespace common
 } // namespace retdec
 
 #endif

@@ -82,8 +82,8 @@ class Config
 		common::ToolInfoContainer tools;
 		common::LanguageContainer languages;
 		FunctionContainer functions;
-		GlobalVarContainer globals;
-		RegisterContainer registers;
+		common::GlobalVarContainer globals;
+		common::ObjectSetContainer registers;
 		common::TypeContainer structures;
 		common::VtableContainer vtables;
 		common::ClassContainer classes;

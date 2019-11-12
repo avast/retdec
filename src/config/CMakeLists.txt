@@ -3,7 +3,6 @@ add_library(retdec-config STATIC
 	base.cpp
 	config.cpp
 	functions.cpp
-	objects.cpp
 	parameters.cpp
 )
 target_link_libraries(retdec-config

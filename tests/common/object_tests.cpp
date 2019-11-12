@@ -1,29 +1,18 @@
 /**
- * @file tests/config/objects_tests.cpp
- * @brief Tests for the @c address module.
+ * @file tests/common/object_test.cpp
+ * @brief Tests for the object module.
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */
 
 #include <gtest/gtest.h>
 
-#include "retdec/config/objects.h"
+#include "retdec/common/object.h"
 
 using namespace ::testing;
 
 namespace retdec {
-namespace config {
+namespace common {
 namespace tests {
-
-//
-//=============================================================================
-//  ObjectTests
-//=============================================================================
-//
-
-class ObjectTests : public Test
-{
-
-};
 
 //
 //=============================================================================
@@ -109,28 +98,6 @@ TEST_F(GlobalVarContainerTests, WhenGlobalVarContainerIsCopyConstructedPointersI
 	EXPECT_EQ(copy.getObjectByName("g1"), copy.getObjectByAddress(0x1000));
 }
 
-//
-//=============================================================================
-//  RegisterContainer
-//=============================================================================
-//
-
-class RegisterContainerTests : public Test
-{
-	protected:
-		RegisterContainer registers;
-};
-
-TEST_F(RegisterContainerTests, registerContainerSimpleNameInsert)
-{
-	EXPECT_TRUE(registers.empty());
-
-	registers.insert("reg");
-
-	EXPECT_FALSE(registers.empty());
-	EXPECT_EQ("reg", registers.getObjectByName("reg")->getStorage().getRegisterName());
-}
-
 } // namespace tests
-} // namespace config
+} // namespace common
 } // namespace retdec

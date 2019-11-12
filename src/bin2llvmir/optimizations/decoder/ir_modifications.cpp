@@ -171,7 +171,7 @@ llvm::GlobalVariable* Decoder::getCallReturnObject()
 	}
 	else if (_config->getConfig().architecture.isArm64())
 	{
-		return _config->getLlvmRegister("r0");
+		return _abi->getRegister(ARM64_REG_X0);
 	}
 
 	assert(false);

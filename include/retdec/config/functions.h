@@ -10,10 +10,10 @@
 #include <string>
 
 #include "retdec/common/calling_convention.h"
+#include "retdec/common/object.h"
 #include "retdec/common/storage.h"
 #include "retdec/common/type.h"
 #include "retdec/config/base.h"
-#include "retdec/config/objects.h"
 
 namespace retdec {
 namespace config {
@@ -107,8 +107,8 @@ class Function : public retdec::common::AddressRange
 		common::Storage returnStorage;
 		common::Storage frameBaseStorage;
 		common::Type returnType;
-		ObjectSequentialContainer parameters;
-		ObjectSetContainer locals;
+		common::ObjectSequentialContainer parameters;
+		common::ObjectSetContainer locals;
 		std::set<std::string> usedCryptoConstants;
 
 	private:

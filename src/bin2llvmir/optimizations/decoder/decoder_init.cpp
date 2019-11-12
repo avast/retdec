@@ -176,7 +176,7 @@ void Decoder::initEnvironmentRegisters()
 			unsigned regNum = _c2l->getCapstoneRegister(&gv);
 			auto s = common::Storage::inRegister(gv.getName(), regNum);
 
-			config::Object cr(gv.getName(), s);
+			common::Object cr(gv.getName(), s);
 			cr.type.setLlvmIr(llvmObjToString(gv.getValueType()));
 			cr.setRealName(gv.getName());
 			_config->getConfig().registers.insert(cr);

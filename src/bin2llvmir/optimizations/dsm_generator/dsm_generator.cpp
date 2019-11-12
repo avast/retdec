@@ -685,7 +685,7 @@ void DsmGenerator::findLongestInstruction()
 }
 
 std::string DsmGenerator::getString(
-		const retdec::config::Object* cgv,
+		const retdec::common::Object* cgv,
 		const llvm::ConstantDataArray* cda)
 {
 	std::string ret;

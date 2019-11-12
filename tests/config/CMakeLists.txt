@@ -1,7 +1,6 @@
 
 add_executable(retdec-tests-config
 	functions_tests.cpp
-	objects_tests.cpp
 	config_tests.cpp
 )
 target_link_libraries(retdec-tests-config

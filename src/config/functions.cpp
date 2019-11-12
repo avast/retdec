@@ -9,6 +9,7 @@
 #include "retdec/config/functions.h"
 #include "retdec/serdes/address.h"
 #include "retdec/serdes/calling_convention.h"
+#include "retdec/serdes/object.h"
 #include "retdec/serdes/storage.h"
 #include "retdec/serdes/type.h"
 #include "retdec/serdes/std.h"
@@ -105,9 +106,8 @@ Function Function::fromJsonValue(const Json::Value& val)
 	serdes::deserialize(val[JSON_returnStorage], ret.returnStorage);
 	serdes::deserialize(val[JSON_fbStorage], ret.frameBaseStorage);
 	serdes::deserialize(val[JSON_returnType], ret.returnType);
-	ret.parameters.readJsonValue( val[JSON_parameters] );
-	ret.locals.readJsonValue( val[JSON_locals] );
-
+	serdes::deserialize(val[JSON_locals], ret.locals);
+	serdes::deserialize(val[JSON_parameters], ret.parameters);
 	serdes::deserialize(val[JSON_usedCrypto], ret.usedCryptoConstants);
 
 	std::string enumStr = safeGetString(val, JSON_fncType);
@@ -151,8 +151,8 @@ Json::Value Function::getJsonValue() const
 	if (isVariadic()) fnc[JSON_isVariadic] = isVariadic();
 	if (isThumb()) fnc[JSON_isThumb] = isThumb();
 
-	if (!parameters.empty()) fnc[JSON_parameters] = parameters.getJsonValue();
-	if (!locals.empty()) fnc[JSON_locals] = locals.getJsonValue();
+	if (!locals.empty()) fnc[JSON_locals] = serdes::serialize(locals);
+	if (!parameters.empty()) fnc[JSON_parameters] = serdes::serialize(parameters);
 	if (returnStorage.isDefined()) fnc[JSON_returnStorage] = serdes::serialize(returnStorage);
 	if (frameBaseStorage.isDefined()) fnc[JSON_fbStorage] = serdes::serialize(frameBaseStorage);
 	if (returnType.isDefined()) fnc[JSON_returnType] = serdes::serialize(returnType);

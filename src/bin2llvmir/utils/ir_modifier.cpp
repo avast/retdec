@@ -528,6 +528,8 @@ IrModifier::FunctionPair IrModifier::renameFunction(
  *               Offset is always appended to this name. If you want to get
  *               this name to output C, set it as a real name to returned
  *               config stack variable entry.
+ * @param realName
+ * @param fromDebug
  * @return Pair of LLVM stack var (Alloca instruction) and associated config
  *         stack var.
  */
@@ -535,7 +537,9 @@ IrModifier::StackPair IrModifier::getStackVariable(
 		llvm::Function* fnc,
 		int offset,
 		llvm::Type* type,
-		const std::string& name)
+		const std::string& name,
+		const std::string& realName,
+		bool fromDebug)
 {
 	if (!PointerType::isValidElementType(type) || !type->isSized())
 	{
@@ -558,7 +562,7 @@ IrModifier::StackPair IrModifier::getStackVariable(
 	assert(it != inst_end(fnc)); // -> create bb, insert alloca.
 	ret->insertBefore(&*it);
 
-	auto* csv = _config->insertStackVariable(ret, offset);
+	auto* csv = _config->insertStackVariable(ret, offset, fromDebug, realName);
 
 	return {ret, csv};
 }
@@ -754,7 +758,7 @@ llvm::Value* IrModifier::changeObjectDeclarationType(
 		auto* ecgv = _config->getConfigGlobalVariable(ogv);
 		if (ecgv)
 		{
-			retdec::config::Object cgv(
+			retdec::common::Object cgv(
 					ecgv->getName(),
 					ecgv->getStorage());
 			cgv.type.setLlvmIr(
@@ -1075,7 +1079,7 @@ IrModifier::FunctionPair IrModifier::modifyFunction(
 			std::string n = i->getName();
 			assert(!n.empty());
 			auto s = retdec::common::Storage::undefined();
-			retdec::config::Object arg(n, s);
+			retdec::common::Object arg(n, s);
 			if (argNames.size() > idx)
 			{
 				arg.setRealName(argNames[idx]);
@@ -1092,7 +1096,7 @@ IrModifier::FunctionPair IrModifier::modifyFunction(
 			{
 				arg.type.setIsWideString(true);
 			}
-			cf->parameters.insert(arg);
+			cf->parameters.push_back(arg);
 		}
 	}
 
