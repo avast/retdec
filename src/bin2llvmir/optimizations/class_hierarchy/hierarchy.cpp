@@ -52,11 +52,11 @@ std::string Class::dump() const
 	return out.str();
 }
 
-retdec::config::Class Class::getConfigClass(
+retdec::common::Class Class::getConfigClass(
 		llvm::Module* m,
 		Config* config) const
 {
-	retdec::config::Class c(name);
+	retdec::common::Class c(name);
 
 	auto* demangler = DemanglerProvider::getDemangler(m);
 	if (demangler)

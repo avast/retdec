@@ -3,6 +3,7 @@ add_library(retdec-serdes STATIC
 	address.cpp
 	architecture.cpp
 	calling_convention.cpp
+	class.cpp
 	file_format.cpp
 	file_type.cpp
 	language.cpp

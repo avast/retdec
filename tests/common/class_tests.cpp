@@ -1,95 +1,21 @@
 /**
  * @file tests/config/classes_tests.cpp
  * @brief Tests for the @c classes module.
- * @copyright (c) 2017 Avast Software, licensed under the MIT license
+ * @copyright (c) 2019 Avast Software, licensed under the MIT license
  */
 
 #include <gtest/gtest.h>
 
-#include "retdec/config/classes.h"
-#include "retdec/config/config.h"
+#include "retdec/common/class.h"
 
 using namespace ::testing;
 using namespace std::string_literals;
 
 namespace retdec {
-namespace config {
+namespace common {
 namespace tests {
 
 class ClassesTests: public Test {};
-
-//
-// Parsing
-//
-
-TEST_F(ClassesTests,
-ClassesAreEmptyWhenConfigIsCreated) {
-	Config config;
-	ASSERT_TRUE(config.classes.empty());
-}
-
-TEST_F(ClassesTests,
-NoClassesAreParsedCorrectly) {
-	Config config;
-
-	config.readJsonString(R"({
-		"classes" : []
-	})");
-
-	ASSERT_TRUE(config.classes.empty());
-}
-
-TEST_F(ClassesTests,
-ClassIsParsedCorrectlyFromJSONWhenClassIsFullySpecified) {
-	Config config;
-
-	config.readJsonString(R"({
-		"classes" : [
-			{
-				"name" : "A",
-				"constructors" : [ "Actor" ],
-				"destructors" : [ "Adtor" ],
-				"methods" : [ "Amethod" ],
-				"superClasses" : [ "Asuper" ],
-				"virtualMethods" : [ "Avirtual" ],
-				"virtualTables" : [ "Avtable" ]
-			}
-		]
-	})");
-
-	ASSERT_EQ(1, config.classes.size());
-	auto cl = *config.classes.begin();
-	EXPECT_EQ("A", cl.getName());
-	EXPECT_EQ(std::set<std::string>({"Actor"}), cl.constructors);
-	EXPECT_EQ(std::set<std::string>({"Adtor"}), cl.destructors);
-	EXPECT_EQ(std::set<std::string>({"Amethod"}), cl.methods);
-	EXPECT_EQ(std::vector<std::string>({"Asuper"}), cl.getSuperClasses());
-	EXPECT_EQ(std::set<std::string>({"Avirtual"}), cl.virtualMethods);
-	EXPECT_EQ(std::set<std::string>({"Avtable"}), cl.virtualTables);
-}
-
-TEST_F(ClassesTests,
-ClassIsParsedCorrectlyFromJSONWhenClassHasOnlyNameSpecified) {
-	Config config;
-
-	config.readJsonString(R"({
-		"classes" : [
-			{
-				"name" : "A"
-			}
-		]
-	})");
-
-	ASSERT_EQ(1, config.classes.size());
-	auto cl = *config.classes.begin();
-	EXPECT_EQ("A", cl.getName());
-	EXPECT_TRUE(cl.constructors.empty());
-	EXPECT_TRUE(cl.destructors.empty());
-	EXPECT_TRUE(cl.methods.empty());
-	EXPECT_TRUE(cl.getSuperClasses().empty());
-	EXPECT_TRUE(cl.virtualMethods.empty());
-	EXPECT_TRUE(cl.virtualTables.empty());
-}
 
 //
 // hasConstructor()
@@ -267,5 +193,5 @@ AddSuperClassDoesNotAddSameSuperclassTwice) {
 }
 
 } // namespace tests
-} // namespace config
+} // namespace common
 } // namespace retdec

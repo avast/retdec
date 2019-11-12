@@ -1,30 +1,16 @@
 /**
- * @file src/config/classes.cpp
- * @brief Decompilation configuration manipulation: classes.
- * @copyright (c) 2017 Avast Software, licensed under the MIT license
+ * @file src/common/class.cpp
+ * @brief Common class representation.
+ * @copyright (c) 2019 Avast Software, licensed under the MIT license
  */
 
-#include "retdec/config/classes.h"
-#include "retdec/serdes/std.h"
+#include "retdec/common/class.h"
 #include "retdec/utils/container.h"
 
 using retdec::utils::hasItem;
 
-namespace {
-
-const std::string JSON_name           = "name";
-const std::string JSON_demangledName  = "demangledName";
-const std::string JSON_superClasses   = "superClasses";
-const std::string JSON_virtualMethods = "virtualMethods";
-const std::string JSON_constructors   = "constructors";
-const std::string JSON_destructors    = "destructors";
-const std::string JSON_methods        = "methods";
-const std::string JSON_vtables        = "virtualTables";
-
-} // anonymous namespace
-
 namespace retdec {
-namespace config {
+namespace common {
 
 //
 //=============================================================================
@@ -36,48 +22,6 @@ Class::Class(const std::string& className) :
 		_name(className)
 {
 
-}
-
-/**
- * Reads JSON object (associative array) holding class information.
- * @param val JSON object.
- */
-Class Class::fromJsonValue(const Json::Value& val)
-{
-	checkJsonValueIsObject(val, "Class");
-
-	Class ret(safeGetString(val, JSON_name));
-
-	ret.setDemangledName(safeGetString(val, JSON_demangledName));
-	serdes::deserialize(val[JSON_superClasses], ret._superClasses);
-	serdes::deserialize(val[JSON_virtualMethods], ret.virtualMethods);
-	serdes::deserialize(val[JSON_constructors], ret.constructors);
-	serdes::deserialize(val[JSON_destructors], ret.destructors);
-	serdes::deserialize(val[JSON_methods], ret.methods);
-	serdes::deserialize(val[JSON_vtables], ret.virtualTables);
-
-	return ret;
-}
-
-/**
- * Returns JSON object (associative array) holding class information.
- * @return JSON object.
- */
-Json::Value Class::getJsonValue() const
-{
-	Json::Value val;
-
-	if (!getName().empty()) val[JSON_name] = getName();
-	if (!getDemangledName().empty()) val[JSON_demangledName] = getDemangledName();
-
-	val[JSON_superClasses]   = serdes::serialize(_superClasses);
-	val[JSON_virtualMethods] = serdes::serialize(virtualMethods);
-	val[JSON_constructors]   = serdes::serialize(constructors);
-	val[JSON_destructors]    = serdes::serialize(destructors);
-	val[JSON_methods]        = serdes::serialize(methods);
-	val[JSON_vtables]        = serdes::serialize(virtualTables);
-
-	return val;
 }
 
 /**
@@ -101,6 +45,11 @@ std::string Class::getDemangledName() const
 const std::vector<std::string>& Class::getSuperClasses() const
 {
 	return _superClasses;
+}
+
+void Class::setName(const std::string& name)
+{
+	_name = name;
 }
 
 void Class::setDemangledName(const std::string& demangledName)
@@ -187,5 +136,5 @@ bool Class::operator==(const Class& o) const
 	return getName() == o.getName();
 }
 
-} // namespace config
+} // namespace common
 } // namespace retdec

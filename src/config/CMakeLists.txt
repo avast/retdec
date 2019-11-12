@@ -1,7 +1,6 @@
 
 add_library(retdec-config STATIC
 	base.cpp
-	classes.cpp
 	config.cpp
 	functions.cpp
 	objects.cpp

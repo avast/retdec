@@ -2,6 +2,7 @@
 add_executable(retdec-tests-common
 	address_tests.cpp
 	architecture_tests.cpp
+	class_tests.cpp
 	file_format_tests.cpp
 	file_type_tests.cpp
 	language_tests.cpp

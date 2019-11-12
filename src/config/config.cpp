@@ -9,6 +9,7 @@
 #include "retdec/config/config.h"
 #include "retdec/serdes/address.h"
 #include "retdec/serdes/architecture.h"
+#include "retdec/serdes/class.h"
 #include "retdec/serdes/file_format.h"
 #include "retdec/serdes/file_type.h"
 #include "retdec/serdes/language.h"
@@ -183,7 +184,7 @@ std::string Config::generateJsonString() const
 	root[JSON_registers]      = registers.getJsonValue();
 	root[JSON_structures]     = structures.getJsonValue();
 	root[JSON_vtables]        = serdes::serialize(vtables);
-	root[JSON_classes]        = classes.getJsonValue();
+	root[JSON_classes]        = serdes::serialize(classes);
 	root[JSON_patterns]       = patterns.getJsonValue();
 
 	StreamWriterBuilder builder;
@@ -257,7 +258,7 @@ void Config::readJsonString(const std::string& json)
 		registers.readJsonValue( root[JSON_registers] );
 		structures.readJsonValue( root[JSON_structures] );
 		serdes::deserialize(root[JSON_vtables], vtables);
-		classes.readJsonValue( root[JSON_classes] );
+		serdes::deserialize(root[JSON_classes], classes);
 		patterns.readJsonValue( root[JSON_patterns] );
 	}
 	catch (const InternalException& e)

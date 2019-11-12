@@ -1,19 +1,18 @@
 /**
- * @file include/retdec/config/classes.h
- * @brief Decompilation configuration manipulation: classes.
- * @copyright (c) 2017 Avast Software, licensed under the MIT license
+ * @file include/retdec/common/class.h
+ * @brief Common class representation.
+ * @copyright (c) 2019 Avast Software, licensed under the MIT license
  */
 
-#ifndef RETDEC_CONFIG_CLASSES_H
-#define RETDEC_CONFIG_CLASSES_H
+#ifndef RETDEC_COMMON_CLASS_H
+#define RETDEC_COMMON_CLASS_H
 
+#include <set>
 #include <string>
 #include <vector>
 
-#include "retdec/config/base.h"
-
 namespace retdec {
-namespace config {
+namespace common {
 
 /**
  * Represents C++ class.
@@ -22,10 +21,7 @@ namespace config {
 class Class
 {
 	public:
-		explicit Class(const std::string& className);
-		static Class fromJsonValue(const Json::Value& val);
-
-		Json::Value getJsonValue() const;
+		Class(const std::string& className = std::string());
 
 		/// @name Class get methods.
 		/// @{
@@ -42,6 +38,7 @@ class Class
 
 		/// @name Class set methods.
 		/// @{
+		void setName(const std::string& name);
 		void setDemangledName(const std::string& demangledName);
 		/// @}
 
@@ -70,12 +67,26 @@ class Class
 /**
  * A set container with classes.
  */
-class ClassContainer : public BaseSetContainer<Class>
+struct ClassCompare
 {
+	using is_transparent = void;
 
+	bool operator()(const Class& c1, const Class& c2) const
+	{
+		return c1 < c2;
+	}
+	bool operator()(const std::string& id, Class const& c) const
+	{
+		return id < c.getName();
+	}
+	bool operator()(const Class& c, const std::string& id) const
+	{
+		return c.getName() < id;
+	}
 };
+using ClassContainer = std::set<Class, ClassCompare>;
 
-} // namespace config
+} // namespace common
 } // namespace retdec
 
 #endif

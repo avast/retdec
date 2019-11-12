@@ -8,13 +8,13 @@
 #define RETDEC_CONFIG_CONFIG_H
 
 #include "retdec/common/architecture.h"
+#include "retdec/common/class.h"
 #include "retdec/common/file_format.h"
 #include "retdec/common/file_type.h"
 #include "retdec/common/language.h"
 #include "retdec/common/tool_info.h"
 #include "retdec/common/vtable.h"
 #include "retdec/config/base.h"
-#include "retdec/config/classes.h"
 #include "retdec/config/functions.h"
 #include "retdec/config/parameters.h"
 #include "retdec/config/patterns.h"
@@ -86,7 +86,7 @@ class Config
 		RegisterContainer registers;
 		TypeContainer structures;
 		common::VtableContainer vtables;
-		ClassContainer classes;
+		common::ClassContainer classes;
 		PatternContainer patterns;
 
 	private:

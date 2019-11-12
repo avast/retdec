@@ -1,6 +1,7 @@
 
 add_executable(retdec-tests-serdes
 	calling_convention_tests.cpp
+	class_tests.cpp
 )
 target_link_libraries(retdec-tests-serdes
 	retdec-serdes

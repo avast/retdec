@@ -23,7 +23,7 @@ class Class
 {
 	public:
 		std::string dump() const;
-		retdec::config::Class getConfigClass(
+		retdec::common::Class getConfigClass(
 				llvm::Module* m,
 				Config* config) const;
 

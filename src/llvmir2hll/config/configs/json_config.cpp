@@ -35,8 +35,8 @@ struct JSONConfig::Impl {
 	const retdec::config::Function *getConfigFunctionByName(const std::string &name) const;
 	const retdec::config::Function &getConfigFunctionByNameOrEmptyFunction(
 		const std::string &name) const;
-	const retdec::config::Class *getConfigClassByName(const std::string &name) const;
-	const retdec::config::Class &getConfigClassByNameOrEmptyClass(
+	const retdec::common::Class *getConfigClassByName(const std::string &name) const;
+	const retdec::common::Class &getConfigClassByNameOrEmptyClass(
 		const std::string &name) const;
 	std::string getNameOfRegister(const retdec::config::Object &reg) const;
 
@@ -85,9 +85,10 @@ const retdec::config::Function &JSONConfig::Impl::getConfigFunctionByNameOrEmpty
 	return f ? *f : emptyFunction;
 }
 
-const retdec::config::Class *JSONConfig::Impl::getConfigClassByName(
+const retdec::common::Class *JSONConfig::Impl::getConfigClassByName(
 		const std::string &name) const {
-	return config.classes.getElementById(name);
+	auto it = config.classes.find(name);
+	return it != config.classes.end() ? &(*it) : nullptr;
 }
 
 std::string JSONConfig::Impl::getNameOfRegister(const retdec::config::Object &reg) const {
@@ -105,9 +106,9 @@ std::string JSONConfig::Impl::getNameOfRegister(const retdec::config::Object &re
 	return !realName.empty() ? realName : name;
 }
 
-const retdec::config::Class &JSONConfig::Impl::getConfigClassByNameOrEmptyClass(
+const retdec::common::Class &JSONConfig::Impl::getConfigClassByNameOrEmptyClass(
 		const std::string &name) const {
-	static const retdec::config::Class emptyClass(""s);
+	static const retdec::common::Class emptyClass(""s);
 	auto c = getConfigClassByName(name);
 	return c ? *c : emptyClass;
 }
