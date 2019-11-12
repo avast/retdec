@@ -10,7 +10,9 @@
 #include <set>
 #include <string>
 
-#include "retdec/config/base.h"
+#include <json/json.h>
+
+#include "retdec/common/address.h"
 
 namespace retdec {
 namespace config {

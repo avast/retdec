@@ -4,6 +4,7 @@
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */
 
+#include "retdec/config/base.h"
 #include "retdec/config/parameters.h"
 #include "retdec/serdes/std.h"
 
