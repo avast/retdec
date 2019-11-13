@@ -2855,9 +2855,9 @@ void LlvmIrEmulator::visitBinaryOperator(llvm::BinaryOperator& I)
 	}
 	else
 	{
-		// Values may not have equeal bit sizes, if one was created from fp128
+		// Values may not have equal bit sizes, if one was created from fp128
 		// or something like that - it would get transformed to double, that
-		// to i64, but tehe original integer operation would have the orignal
+		// to i64, but the original integer operation would have the original
 		// large type like i128.
 		// Change bitsizes to be the same.
 		//
