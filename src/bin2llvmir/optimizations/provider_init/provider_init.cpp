@@ -76,10 +76,6 @@ bool ProviderInitialization::runOnModule(Module& m)
 		return false;
 	}
 
-	auto* abi = AbiProvider::addAbi(&m, c);
-	SymbolicTree::setAbi(abi);
-	SymbolicTree::setConfig(c);
-
 	auto* f = FileImageProvider::addFileImage(
 			&m,
 			c->getConfig().getInputFile(),
@@ -88,6 +84,48 @@ bool ProviderInitialization::runOnModule(Module& m)
 	{
 		return false;
 	}
+
+	// TODO: This happens if config is not initialized via fileinfo etc.
+	// TODO: This is not the right place for this. Refactor the whole thing around this.
+	auto& a = c->getConfig().architecture;
+	if (a.isUnknown())
+	{
+		if (f->getFileFormat()->isLittleEndian())
+		{
+			a.setIsEndianLittle();
+		}
+		else if (f->getFileFormat()->isBigEndian())
+		{
+			a.setIsEndianBig();
+		}
+
+		a.setBitSize(f->getFileFormat()->getWordLength());
+
+		switch (f->getFileFormat()->getTargetArchitecture())
+		{
+			case fileformat::Architecture::X86: a.setIsX86(); break;
+			case fileformat::Architecture::X86_64: a.setIsX86(); break;
+			case fileformat::Architecture::ARM: a.setIsArm(); break;
+			case fileformat::Architecture::POWERPC: a.setIsPpc(); break;
+			case fileformat::Architecture::MIPS: a.setIsMips(); break;
+			default: break; // nothing
+		}
+	}
+	auto& ff = c->getConfig().fileFormat;
+	if (ff.isUnknown())
+	{
+		if (f->getFileFormat()->isElf()) ff.setIsElf();
+		if (f->getFileFormat()->isPe()) ff.setIsPe();
+		if (f->getFileFormat()->isCoff()) ff.setIsCoff();
+		if (f->getFileFormat()->isIntelHex()) ff.setIsIntelHex();
+		if (f->getFileFormat()->isMacho()) ff.setIsMacho();
+		if (f->getFileFormat()->isRawData()) ff.setIsRaw();
+		ff.setFileClassBits(f->getFileFormat()->getWordLength());
+	}
+
+	auto* abi = AbiProvider::addAbi(&m, c);
+	SymbolicTree::setAbi(abi);
+	SymbolicTree::setConfig(c);
 
 	// maybe should be in config::Config
 	auto typeConfig = std::make_shared<ctypesparser::TypeConfig>();

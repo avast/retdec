@@ -79,7 +79,7 @@ int main(int argc, char **argv)
 	ProgramOptions po(argc, argv);
 	po.dump();
 
-	retdec::hello(po.inputFile);
+	retdec::disassemble(po.inputFile);
 
 	return EXIT_SUCCESS;
 }

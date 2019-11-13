@@ -83,18 +83,25 @@ std::unique_ptr<llvm::Module> createLlvmModule(llvm::LLVMContext& Context)
 
 namespace retdec {
 
-void hello(const std::string& inputPath)
+void disassemble(
+		const std::string& inputPath,
+		const retdec::common::Architecture& a,
+		const retdec::common::FileFormat& ff)
 {
-	std::cout << "hello world" << std::endl;
-
 	llvm::LLVMContext Context;
 	std::unique_ptr<Module> M = createLlvmModule(Context);
 
 	config::Config c;
 	c.setInputFile(inputPath);
-	c.architecture.setIsX86();
-	c.architecture.setBitSize(64);
-	c.fileFormat.setIsElf64();
+
+	if (a.isKnown())
+	{
+		c.architecture = a;
+	}
+	if (ff.isKnown())
+	{
+		c.fileFormat = ff;
+	}
 
 	// Create a PassManager to hold and optimize the collection of passes we are
 	// about to build.

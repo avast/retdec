@@ -36,7 +36,7 @@ void Decoder::initTranslator()
 	if (a.isX86())
 	{
 		arch = CS_ARCH_X86;
-		switch (_config->getConfig().architecture.getBitSize())
+		switch (a.getBitSize())
 		{
 			case 16: basicMode = CS_MODE_16; break;
 			case 64: basicMode = CS_MODE_64; break;
@@ -47,7 +47,7 @@ void Decoder::initTranslator()
 	else if (a.isMipsOrPic32())
 	{
 		arch = CS_ARCH_MIPS;
-		switch (_config->getConfig().architecture.getBitSize())
+		switch (a.getBitSize())
 		{
 			case 64: basicMode = CS_MODE_MIPS64; break;
 			default:
@@ -57,7 +57,7 @@ void Decoder::initTranslator()
 	else if (a.isPpc())
 	{
 		arch = CS_ARCH_PPC;
-		switch (_config->getConfig().architecture.getBitSize())
+		switch (a.getBitSize())
 		{
 			case 64: basicMode = CS_MODE_64; break;
 			default:

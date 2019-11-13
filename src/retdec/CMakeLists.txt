@@ -10,12 +10,18 @@ if(MSVC)
 	# its properties (associated includes, etc.) are not propagated. Therefore, we
 	# state 'bin2llvmir' twice in target_link_libraries(), first as a target to get
 	# its properties, second as path to library to link it as a whole.
-	target_link_libraries(retdec-retdec retdec-bin2llvmir -WHOLEARCHIVE:$<TARGET_FILE_NAME:retdec-bin2llvmir>)
+	target_link_libraries(retdec-retdec
+		retdec-bin2llvmir -WHOLEARCHIVE:$<TARGET_FILE_NAME:retdec-bin2llvmir>
+	)
 	set_property(TARGET retdec-retdec APPEND_STRING PROPERTY LINK_FLAGS " /FORCE:MULTIPLE")
 elseif(APPLE)
-	target_link_libraries(retdec-retdec -Wl,-force_load retdec-bin2llvmir)
+	target_link_libraries(retdec-retdec
+		-Wl,-force_load retdec-bin2llvmir
+	)
 else() # Linux
-	target_link_libraries(retdec-retdec -Wl,--whole-archive retdec-bin2llvmir -Wl,--no-whole-archive)
+	target_link_libraries(retdec-retdec
+		-Wl,--whole-archive retdec-bin2llvmir -Wl,--no-whole-archive
+	)
 endif()
 
 # Allow the 32b version of bin2llvmir on Windows handle addresses larger than 2
