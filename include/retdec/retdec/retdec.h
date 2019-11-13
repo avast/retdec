@@ -7,20 +7,21 @@
 #ifndef RETDEC_RETDEC_RETDEC_H
 #define RETDEC_RETDEC_RETDEC_H
 
-#include "retdec/common/architecture.h"
-#include "retdec/common/file_format.h"
+#include <capstone/capstone.h>
+#include <llvm/IR/Module.h>
+
+#include "retdec/common/basic_block.h"
+#include "retdec/common/function.h"
 
 namespace retdec {
 
 /**
- * \param[in] inputPath
- * \param[in] a
- * \param[in] ff
+ * \param[in] inputPath Path the the input file to disassemble.
+ * \return Pointer to LLVM module created by the disassembly,
+ *         or \c nullptr if the disassembly failed.
  */
-void disassemble(
-		const std::string& inputPath,
-		const retdec::common::Architecture& a = retdec::common::Architecture(),
-		const retdec::common::FileFormat& ff = retdec::common::FileFormat());
+std::unique_ptr<llvm::Module> disassemble(
+		const std::string& inputPath);
 
 } // namespace retdec
 

@@ -83,25 +83,14 @@ std::unique_ptr<llvm::Module> createLlvmModule(llvm::LLVMContext& Context)
 
 namespace retdec {
 
-void disassemble(
-		const std::string& inputPath,
-		const retdec::common::Architecture& a,
-		const retdec::common::FileFormat& ff)
+std::unique_ptr<llvm::Module> disassemble(
+		const std::string& inputPath)
 {
 	llvm::LLVMContext Context;
 	std::unique_ptr<Module> M = createLlvmModule(Context);
 
 	config::Config c;
 	c.setInputFile(inputPath);
-
-	if (a.isKnown())
-	{
-		c.architecture = a;
-	}
-	if (ff.isKnown())
-	{
-		c.fileFormat = ff;
-	}
 
 	// Create a PassManager to hold and optimize the collection of passes we are
 	// about to build.
@@ -127,6 +116,7 @@ for (auto& f : retdec::bin2llvmir::ConfigProvider::getConfig(M.get())->getConfig
 	std::cout << "\t" << f.getStart() << " @ " << f.getName() << std::endl;
 }
 
+	return M;
 }
 
 } // namespace retdec

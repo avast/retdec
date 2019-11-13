@@ -55,6 +55,7 @@ TEST_F(ParamReturnTests, x86PtrCallBasicFunctionality)
 		"functions" : [
 			{
 				"name" : "fnc",
+				"startAddr" : "0x1234",
 				"locals" : [
 					{
 						"name" : "stack_-4",
@@ -121,6 +122,7 @@ TEST_F(ParamReturnTests, x86PtrCallPrevBbIsUsedOnlyIfItIsASinglePredecessor)
 		"functions" : [
 			{
 				"name" : "fnc",
+				"startAddr" : "0x1234",
 				"locals" : [
 					{
 						"name" : "stack_-4",
@@ -192,6 +194,7 @@ TEST_F(ParamReturnTests, x86PtrCallPrevBbIsNotUsedIfItIsNotASinglePredecessor)
 		"functions" : [
 			{
 				"name" : "fnc",
+				"startAddr" : "0x1234",
 				"locals" : [
 					{
 						"name" : "stack_-4",
@@ -260,6 +263,7 @@ TEST_F(ParamReturnTests, x86PtrCallOnlyStackStoresAreUsed)
 		"functions" : [
 			{
 				"name" : "fnc",
+				"startAddr" : "0x1234",
 				"locals" : [
 					{
 						"name" : "stack_-4",
@@ -325,6 +329,7 @@ TEST_F(ParamReturnTests, x86PtrCallStackAreUsedAsArgumentsInCorrectOrder)
 		"functions" : [
 			{
 				"name" : "fnc",
+				"startAddr" : "0x1234",
 				"locals" : [
 					{
 						"name" : "stack_-4",
@@ -391,6 +396,7 @@ TEST_F(ParamReturnTests, x86PtrCallOnlyContinuousStackOffsetsAreUsed)
 		"functions" : [
 			{
 				"name" : "fnc",
+				"startAddr" : "0x1234",
 				"locals" : [
 					{
 						"name" : "stack_-4",
@@ -465,6 +471,7 @@ TEST_F(ParamReturnTests, x86ExternalCallBasicFunctionality)
 		"functions" : [
 			{
 				"name" : "fnc",
+				"startAddr" : "0x1234",
 				"locals" : [
 					{
 						"name" : "stack_-4",
@@ -535,6 +542,7 @@ TEST_F(ParamReturnTests, x86ExternalCallFixOnMultiplePlaces)
 		"functions" : [
 			{
 				"name" : "fnc1",
+				"startAddr" : "0x1234",
 				"locals" : [
 					{
 						"name" : "stack_-4",
@@ -548,6 +556,7 @@ TEST_F(ParamReturnTests, x86ExternalCallFixOnMultiplePlaces)
 			},
 			{
 				"name" : "fnc2",
+				"startAddr" : "0x1235",
 				"locals" : [
 					{
 						"name" : "stack_-16",
@@ -625,6 +634,7 @@ TEST_F(ParamReturnTests, x86ExternalCallFixOnMultiplePlaces)
 //		"functions" : [
 //			{
 //				"name" : "fnc",
+//				"startAddr" : "0x1234",
 //				"locals" : [
 //					{
 //						"name" : "stack_-4",
@@ -687,6 +697,7 @@ TEST_F(ParamReturnTests, x86ExternalCallFixOnMultiplePlaces)
 //		"functions" : [
 //			{
 //				"name" : "fnc",
+//				"startAddr" : "0x1234",
 //				"locals" : [
 //					{
 //						"name" : "stack_-4",
@@ -754,6 +765,7 @@ TEST_F(ParamReturnTests, x86ExternalCallFixOnMultiplePlaces)
 //		"functions" : [
 //			{
 //				"name" : "fnc",
+//				"startAddr" : "0x1234",
 //				"locals" : [
 //					{
 //						"name" : "stack_-4",
@@ -818,6 +830,7 @@ TEST_F(ParamReturnTests, x86ExternalCallFixOnMultiplePlaces)
 //		"functions" : [
 //			{
 //				"name" : "fnc",
+//				"startAddr" : "0x1234",
 //				"locals" : [
 //					{
 //						"name" : "stack_-4",
@@ -880,6 +893,7 @@ TEST_F(ParamReturnTests, x86ExternalCallFixOnMultiplePlaces)
 //		"functions" : [
 //			{
 //				"name" : "fnc",
+//				"startAddr" : "0x1234",
 //				"locals" : [
 //					{
 //						"name" : "stack_-4",
@@ -1092,6 +1106,7 @@ TEST_F(ParamReturnTests, x86_64ExternalCallUseStacksIf6RegistersUsed)
 		"functions" : [
 			{
 				"name" : "fnc",
+				"startAddr" : "0x1234",
 				"locals" : [
 					{
 						"name" : "stack_-8",
@@ -1602,6 +1617,7 @@ TEST_F(ParamReturnTests, ms_x64ExternalCallUseStacksIf4RegistersUsed)
 		"functions" : [
 			{
 				"name" : "fnc",
+				"startAddr" : "0x1234",
 				"locals" : [
 					{
 						"name" : "stack_-8",
@@ -1947,6 +1963,7 @@ TEST_F(ParamReturnTests, ms_x64ExternalCallUsesFPRegistersAdvanced)
 //		"functions" : [
 //			{
 //				"name" : "fnc",
+//				"startAddr" : "0x1234",
 //				"locals" : [
 //					{
 //						"name" : "stack_-4",
@@ -2402,6 +2419,7 @@ TEST_F(ParamReturnTests, ppcExternalCallDoNotUseStacksIfLessThan7RegistersUsed)
 		"functions" : [
 			{
 				"name" : "fnc",
+				"startAddr" : "0x1234",
 				"locals" : [
 					{
 						"name" : "stack_-4",
@@ -2677,6 +2695,7 @@ TEST_F(ParamReturnTests, armExternalCallUseStacksIf4RegistersUsed)
 		"functions" : [
 			{
 				"name" : "fnc",
+				"startAddr" : "0x1234",
 				"locals" : [
 					{
 						"name" : "stack_-4",
@@ -2903,6 +2922,7 @@ TEST_F(ParamReturnTests, arm64ExternalCallUseStacksIf8RegistersUsed)
 		"functions" : [
 			{
 				"name" : "fnc",
+				"startAddr" : "0x1234",
 				"locals" : [
 					{
 						"name" : "stack_-4",
@@ -3092,6 +3112,7 @@ TEST_F(ParamReturnTests, arm64ExternalCallHasDouleParameter)
 //		"functions" : [
 //			{
 //				"name" : "fnc",
+//				"startAddr" : "0x1234",
 //				"locals" : [
 //					{
 //						"name" : "stack_-4",
@@ -3284,6 +3305,7 @@ TEST_F(ParamReturnTests, mipsExternalCallUseStacksIf4RegistersUsed)
 		"functions" : [
 			{
 				"name" : "fnc",
+				"startAddr" : "0x1234",
 				"locals" : [
 					{
 						"name" : "stack_-4",
@@ -3498,6 +3520,7 @@ TEST_F(ParamReturnTests, mips64ExternalCallUseStacksIf8RegistersUsed)
 		"functions" : [
 			{
 				"name" : "fnc",
+				"startAddr" : "0x1234",
 				"locals" : [
 					{
 						"name" : "stack_-4",
@@ -3612,6 +3635,7 @@ TEST_F(ParamReturnTests, x86FastcallBasic)
 		"functions" : [
 			{
 				"name" : "fnc",
+				"startAddr" : "0x1234",
 				"locals" : [
 					{
 						"name" : "stack_-4",
@@ -3625,6 +3649,7 @@ TEST_F(ParamReturnTests, x86FastcallBasic)
 			},
 			{
 				"name" : "a",
+				"startAddr" : "0x5678",
 				"callingConvention" : "fastcall"
 			}
 		]
@@ -3706,6 +3731,7 @@ TEST_F(ParamReturnTests, x86FastcallLargeTypeCatch)
 		"functions" : [
 			{
 				"name" : "fnc",
+				"startAddr" : "0x1234",
 				"locals" : [
 					{
 						"name" : "stack_-4",
@@ -3720,6 +3746,7 @@ TEST_F(ParamReturnTests, x86FastcallLargeTypeCatch)
 			},
 			{
 				"name" : "a",
+				"startAddr" : "0x1235",
 				"callingConvention" : "fastcall"
 			}
 		]
@@ -3795,6 +3822,7 @@ TEST_F(ParamReturnTests, x86PascalBasic)
 		"functions" : [
 			{
 				"name" : "fnc",
+				"startAddr" : "0x1234",
 				"locals" : [
 					{
 						"name" : "stack_-4",
@@ -3872,6 +3900,7 @@ TEST_F(ParamReturnTests, x86PascalFastcallBasic)
 		"functions" : [
 			{
 				"name" : "fnc",
+				"startAddr" : "0x1234",
 				"locals" : [
 					{
 						"name" : "stack_-4",
@@ -3971,6 +4000,7 @@ TEST_F(ParamReturnTests, x86PascalFastcallLargeType)
 		"functions" : [
 			{
 				"name" : "fnc",
+				"startAddr" : "0x1234",
 				"locals" : [
 					{
 						"name" : "stack_-4",
@@ -4068,6 +4098,7 @@ TEST_F(ParamReturnTests, x86WatcomBasic)
 		"functions" : [
 			{
 				"name" : "fnc",
+				"startAddr" : "0x1234",
 				"locals" : [
 					{
 						"name" : "stack_-4",
@@ -4161,6 +4192,7 @@ TEST_F(ParamReturnTests, x86WatcomPassDouble)
 		"functions" : [
 			{
 				"name" : "fnc",
+				"startAddr" : "0x1234",
 				"locals" : [
 					{
 						"name" : "stack_-4",
