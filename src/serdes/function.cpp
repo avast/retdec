@@ -9,6 +9,7 @@
 
 #include "retdec/common/function.h"
 #include "retdec/serdes/address.h"
+#include "retdec/serdes/basic_block.h"
 #include "retdec/serdes/calling_convention.h"
 #include "retdec/serdes/function.h"
 #include "retdec/serdes/object.h"
@@ -46,6 +47,7 @@ const std::string JSON_isExported    = "isExported";
 const std::string JSON_isVariadic    = "isVariadic";
 const std::string JSON_isThumb       = "isThumb";
 const std::string JSON_usedCrypto    = "usedCryptoConstants";
+const std::string JSON_basicBlocks   = "basicBlocks";
 
 std::vector<std::string> fncTypes =
 {
@@ -92,6 +94,7 @@ Json::Value serialize(const common::Function& f)
 	if (f.returnStorage.isDefined()) fnc[JSON_returnStorage] = serdes::serialize(f.returnStorage);
 	if (f.frameBaseStorage.isDefined()) fnc[JSON_fbStorage] = serdes::serialize(f.frameBaseStorage);
 	if (f.returnType.isDefined()) fnc[JSON_returnType] = serdes::serialize(f.returnType);
+	if (!f.basicBlocks.empty()) fnc[JSON_basicBlocks] = serdes::serialize(f.basicBlocks);
 
 	fnc[JSON_usedCrypto] = serdes::serialize(f.usedCryptoConstants);
 
@@ -143,6 +146,7 @@ void deserialize(const Json::Value& val, common::Function& f)
 	serdes::deserialize(val[JSON_locals], f.locals);
 	serdes::deserialize(val[JSON_parameters], f.parameters);
 	serdes::deserialize(val[JSON_usedCrypto], f.usedCryptoConstants);
+	serdes::deserialize(val[JSON_basicBlocks], f.basicBlocks);
 
 	std::string enumStr = safeGetString(val, JSON_fncType);
 	auto it = std::find(fncTypes.begin(), fncTypes.end(), enumStr);

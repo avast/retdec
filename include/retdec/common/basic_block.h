@@ -8,6 +8,7 @@
 #define RETDEC_COMMON_BASIC_BLOCK_H
 
 #include <set>
+#include <tuple>
 
 #include "retdec/common/address.h"
 #include "retdec/common/range.h"

@@ -7,7 +7,6 @@
 #include "retdec/bin2llvmir/optimizations/decoder/decoder.h"
 
 using namespace retdec::common;
-using namespace llvm;
 
 namespace retdec {
 namespace bin2llvmir {
@@ -146,14 +145,14 @@ llvm::BasicBlock* Decoder::createBasicBlock(
 		next = next->getNextNode();
 	}
 
-	auto* b = BasicBlock::Create(
+	auto* b = llvm::BasicBlock::Create(
 			_module->getContext(),
 			names::generateBasicBlockName(a),
 			f,
 			next);
 
-	IRBuilder<> irb(b);
-	irb.CreateRet(UndefValue::get(f->getReturnType()));
+	llvm::IRBuilder<> irb(b);
+	irb.CreateRet(llvm::UndefValue::get(f->getReturnType()));
 
 	addBasicBlock(a, b);
 

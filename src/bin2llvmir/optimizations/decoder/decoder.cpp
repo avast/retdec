@@ -15,7 +15,6 @@
 #include "retdec/bin2llvmir/utils/llvm.h"
 #include "retdec/bin2llvmir/utils/capstone.h"
 
-using namespace llvm;
 using namespace retdec::capstone2llvmir;
 using namespace retdec::common;
 using namespace retdec::bin2llvmir::st_match;
@@ -26,7 +25,7 @@ namespace bin2llvmir {
 
 char Decoder::ID = 0;
 
-static RegisterPass<Decoder> X(
+static llvm::RegisterPass<Decoder> X(
 		"decoder",
 		"Input binary to LLVM IR decoding",
 		false, // Only looks at CFG
@@ -47,7 +46,7 @@ Decoder::~Decoder()
 	}
 }
 
-bool Decoder::runOnModule(Module& m)
+bool Decoder::runOnModule(llvm::Module& m)
 {
 	_module = &m;
 	_config = ConfigProvider::getConfig(_module);
@@ -249,7 +248,7 @@ void Decoder::decodeJumpTarget(const JumpTarget& jt)
 		}
 	}
 
-	BasicBlock* bb = getBasicBlockAtAddress(start);
+	llvm::BasicBlock* bb = getBasicBlockAtAddress(start);
 	if (bb == nullptr)
 	{
 		if (jt.getType() != JumpTarget::eType::LEFTOVER)
@@ -258,7 +257,7 @@ void Decoder::decodeJumpTarget(const JumpTarget& jt)
 			return;
 		}
 
-		BasicBlock* tBb = nullptr;
+		llvm::BasicBlock* tBb = nullptr;
 		llvm::Function* tFnc = nullptr;
 		getOrCreateCallTarget(start, tFnc, tBb);
 		if (tFnc && !tFnc->empty())
@@ -278,7 +277,7 @@ void Decoder::decodeJumpTarget(const JumpTarget& jt)
 		}
 	}
 	assert(bb && bb->getTerminator());
-	IRBuilder<> irb(bb->getTerminator());
+	llvm::IRBuilder<> irb(bb->getTerminator());
 	_irb = &irb;
 
 	if (_c2l->getBasicMode() != jt.getMode())
@@ -426,7 +425,7 @@ bool Decoder::instructionBreaksBasicBlock(
 			&& tr.llvmInsn->getFunction() == _entryPointFunction
 			&& tr.capstoneInsn->id == X86_INS_HLT)
 	{
-		auto* ui = new UnreachableInst(_module->getContext());
+		auto* ui = new llvm::UnreachableInst(_module->getContext());
 		ReplaceInstWithInst(&*_irb->GetInsertPoint(), ui);
 		_irb->SetInsertPoint(ui);
 		return true;
@@ -454,7 +453,7 @@ bool Decoder::instructionBreaksBasicBlock(
 					&& detail.operands[1].type == X86_OP_IMM
 					&& detail.operands[1].imm == 1)
 			{
-				auto* ui = new UnreachableInst(_module->getContext());
+				auto* ui = new llvm::UnreachableInst(_module->getContext());
 				ReplaceInstWithInst(&*_irb->GetInsertPoint(), ui);
 				_irb->SetInsertPoint(ui);
 				return true;
@@ -473,7 +472,7 @@ bool Decoder::getJumpTargetsFromInstruction(
 		capstone2llvmir::Capstone2LlvmIrTranslator::TranslationResultOne& tr,
 		std::size_t& rangeSize)
 {
-	CallInst*& pCall = tr.branchCall;
+	llvm::CallInst*& pCall = tr.branchCall;
 	auto nextAddr = addr + tr.size;
 
 	if (_config->getConfig().architecture.isArm32OrThumb())
@@ -482,7 +481,7 @@ bool Decoder::getJumpTargetsFromInstruction(
 		patternsPseudoCall_arm(pCall, ai);
 	}
 
-	BasicBlock* tBb = nullptr;
+	llvm::BasicBlock* tBb = nullptr;
 	llvm::Function* tFnc = nullptr;
 
 	_switchGenerated = false;
@@ -560,7 +559,7 @@ bool Decoder::getJumpTargetsFromInstruction(
 
 			if (tFnc && _terminatingFncs.count(tFnc))
 			{
-				auto* ui = new UnreachableInst(_module->getContext());
+				auto* ui = new llvm::UnreachableInst(_module->getContext());
 				ReplaceInstWithInst(&*_irb->GetInsertPoint(), ui);
 				_irb->SetInsertPoint(ui);
 				return true;
@@ -668,14 +667,14 @@ bool Decoder::getJumpTargetsFromInstruction(
 			// Break the flow if BB in which pseudo call is continues to the
 			// false branch of cond br.
 			auto* bodyBb = pCall->getParent();
-			auto* tBr = dyn_cast<BranchInst>(bodyBb->getTerminator());
+			auto* tBr = llvm::dyn_cast<llvm::BranchInst>(bodyBb->getTerminator());
 			if (tBr
 					&& tBr->isUnconditional()
 					&& tBr->getSuccessor(0) == cond->getSuccessor(1))
 			{
-				ReturnInst::Create(
+				llvm::ReturnInst::Create(
 						pCall->getModule()->getContext(),
-						UndefValue::get(pCall->getFunction()->getReturnType()),
+						llvm::UndefValue::get(pCall->getFunction()->getReturnType()),
 						tBr);
 				tBr->eraseFromParent();
 			}
@@ -714,7 +713,7 @@ bool Decoder::getJumpTargetsFromInstruction(
 			auto m = determineMode(tr.capstoneInsn, t);
 			getOrCreateBranchTarget(t, tBb, tFnc, pCall);
 
-			BasicBlock* tBbN = nullptr;
+			llvm::BasicBlock* tBbN = nullptr;
 			llvm::Function* tFncN = nullptr;
 			getOrCreateBranchTarget(nextAddr, tBbN, tFncN, pCall);
 
@@ -780,12 +779,12 @@ bool Decoder::getJumpTargetsFromInstruction(
 			// reconstructed - matching only constants is safe and should be
 			// enough for most cases.
 			//
-			if (auto* l = dyn_cast<LoadInst>(&i))
+			if (auto* l = llvm::dyn_cast<llvm::LoadInst>(&i))
 			{
 				SymbolicTree st(_RDA, l->getPointerOperand(), nullptr, 8);
 				st.simplifyNode();
 
-				auto* ci = dyn_cast<ConstantInt>(st.value);
+				auto* ci = llvm::dyn_cast<llvm::ConstantInt>(st.value);
 				if (ci && !ci->isNegative())
 				{
 					Address t(ci->getZExtValue());
@@ -845,7 +844,7 @@ common::Address Decoder::getJumpTarget(
 			{
 				if (_abi->isGeneralPurposeRegister(n->value))
 				{
-					n->value = ConstantInt::get(
+					n->value = llvm::ConstantInt::get(
 							_abi->getDefaultType(),
 							gotpltAddr);
 				}
@@ -855,7 +854,7 @@ common::Address Decoder::getJumpTarget(
 
 	st.simplifyNode();
 
-	ConstantInt* ci = nullptr;
+	llvm::ConstantInt* ci = nullptr;
 	if (match(st, m_ConstantInt(ci)))
 	{
 		return ci->getZExtValue();
@@ -937,7 +936,7 @@ common::Address Decoder::getJumpTarget(
 		return Address::getUndef;
 	}
 
-	if (auto* ci = dyn_cast<ConstantInt>(st.value))
+	if (auto* ci = llvm::dyn_cast<llvm::ConstantInt>(st.value))
 	{
 		return ci->getZExtValue();
 	}
@@ -956,10 +955,10 @@ bool Decoder::getJumpTargetSwitch(
 {
 	unsigned archByteSz =  _config->getConfig().architecture.getByteSize();
 
-	BinaryOperator* mulOp = nullptr;
-	BinaryOperator* shlOp = nullptr;
-	ConstantInt* mulShlCi = nullptr;
-	ConstantInt* addrTblCi = nullptr;
+	llvm::BinaryOperator* mulOp = nullptr;
+	llvm::BinaryOperator* shlOp = nullptr;
+	llvm::ConstantInt* mulShlCi = nullptr;
+	llvm::ConstantInt* addrTblCi = nullptr;
 
 	// Pattern:
 	//>|   %55 = load i32, i32* %54
@@ -986,7 +985,7 @@ bool Decoder::getJumpTargetSwitch(
 	}
 
 	Address tableAddr = addrTblCi->getZExtValue();
-	Value* idx = mulOp ? mulOp->getOperand(0) : shlOp->getOperand(0);
+	llvm::Value* idx = mulOp ? mulOp->getOperand(0) : shlOp->getOperand(0);
 
 	LOG << "\t\t" << "switch @ " << addr << std::endl;
 	LOG << "\t\t\t" << "table addr @ " << tableAddr << std::endl;
@@ -994,14 +993,14 @@ bool Decoder::getJumpTargetSwitch(
 	// Default target.
 	//
 	Address defAddr;
-	BranchInst* brToSwitch = nullptr; // TODO: i don't like how this is used
-	Value* brToSwitchCondVal = nullptr;
+	llvm::BranchInst* brToSwitch = nullptr; // TODO: i don't like how this is used
+	llvm::Value* brToSwitchCondVal = nullptr;
 	auto* thisBb = branchCall->getParent();
 
 	Address thisBbAddr = getBasicBlockAddress(thisBb);
 	for (auto* p : predecessors(thisBb))
 	{
-		auto* br = dyn_cast<BranchInst>(p->getTerminator());
+		auto* br = llvm::dyn_cast<llvm::BranchInst>(p->getTerminator());
 		if (br && br->isConditional())
 		{
 			brToSwitch = br;
@@ -1013,7 +1012,7 @@ bool Decoder::getJumpTargetSwitch(
 			if (falseAddr.isDefined() && thisBbAddr == falseAddr)
 			{
 				defAddr = trueAddr;
-				brToSwitchCondVal = ConstantInt::getFalse(_module->getContext());
+				brToSwitchCondVal = llvm::ConstantInt::getFalse(_module->getContext());
 				LOG << "\t\t\t\t" << "default: branching over -> "
 						<< defAddr << std::endl;
 			}
@@ -1021,7 +1020,7 @@ bool Decoder::getJumpTargetSwitch(
 			else if (trueAddr.isDefined() && thisBbAddr == trueAddr)
 			{
 				defAddr = falseAddr;
-				brToSwitchCondVal = ConstantInt::getTrue(_module->getContext());
+				brToSwitchCondVal = llvm::ConstantInt::getTrue(_module->getContext());
 				LOG << "\t\t\t\t" << "default: branching to -> "
 						<< defAddr << std::endl;
 			}
@@ -1036,7 +1035,7 @@ bool Decoder::getJumpTargetSwitch(
 	//
 	// Pseudo call itself is conditional -> next is default.
 	//
-	BranchInst* armCondBr = nullptr;
+	llvm::BranchInst* armCondBr = nullptr;
 	auto* cond = _c2l->isInConditionBranchFunctionCall(branchCall);
 	if (cond && thisBb == cond->getSuccessor(0))
 	{
@@ -1082,7 +1081,7 @@ if (brToSwitch)
 	auto levelOrd = stCond.getLevelOrder();
 	for (SymbolicTree* n : levelOrd)
 	{
-		ConstantInt* ci = nullptr;
+		llvm::ConstantInt* ci = nullptr;
 
 		// x86:
 		//>|   %331 = or i1 %329, %330
@@ -1095,8 +1094,8 @@ if (brToSwitch)
 		//						>| i8 90
 		//				>| i8 0
 		if (match(*n, m_c_Or(
-				m_c_ICmp(ICmpInst::ICMP_ULT, m_Value(), m_ConstantInt(ci)),
-				m_c_ICmp(ICmpInst::ICMP_EQ, m_Value(), m_Zero()))))
+				m_c_ICmp(llvm::ICmpInst::ICMP_ULT, m_Value(), m_ConstantInt(ci)),
+				m_c_ICmp(llvm::ICmpInst::ICMP_EQ, m_Value(), m_Zero()))))
 		{
 			tableSize = ci->getZExtValue() + 1;
 			LOG << "\t\t\t" << "table size (1) = " << tableSize << std::endl;
@@ -1109,16 +1108,16 @@ if (brToSwitch)
 		//				>|   %314 = and i32 %313, 255
 		//				>| i32 121
 		//		>| i32 0
-		else if (match(*n, m_c_ICmp(ICmpInst::ICMP_NE,
-				m_c_ICmp(ICmpInst::ICMP_ULT, m_Value(), m_not_Zero(ci)),
+		else if (match(*n, m_c_ICmp(llvm::ICmpInst::ICMP_NE,
+				m_c_ICmp(llvm::ICmpInst::ICMP_ULT, m_Value(), m_not_Zero(ci)),
 				m_Zero())))
 		{
 			tableSize = ci->getZExtValue();
 			LOG << "\t\t\t" << "table size (2) = " << tableSize << std::endl;
 			break;
 		}
-		else if (match(*n, m_c_ICmp(ICmpInst::ICMP_EQ,
-				m_c_ICmp(ICmpInst::ICMP_ULT, m_Value(), m_not_Zero(ci)),
+		else if (match(*n, m_c_ICmp(llvm::ICmpInst::ICMP_EQ,
+				m_c_ICmp(llvm::ICmpInst::ICMP_ULT, m_Value(), m_not_Zero(ci)),
 				m_Zero())))
 		{
 			tableSize = ci->getZExtValue();
@@ -1136,9 +1135,9 @@ if (brToSwitch)
 	SymbolicTree idxRoot(_RDA, idx);
 	idxRoot.simplifyNode();
 
-	LoadInst* l = nullptr;
-	ConstantInt* ci = nullptr;
-	Instruction* insn = nullptr;
+	llvm::LoadInst* l = nullptr;
+	llvm::ConstantInt* ci = nullptr;
+	llvm::Instruction* insn = nullptr;
 	if (_config->getConfig().architecture.isX86()
 			&& tableSize
 			&& match(idxRoot, m_Load(
@@ -1147,7 +1146,7 @@ if (brToSwitch)
 			&& l->getType()->isIntegerTy()
 			&& insn->getType()->isIntegerTy())
 	{
-		auto* it = cast<IntegerType>(l->getType());
+		auto* it = llvm::cast<llvm::IntegerType>(l->getType());
 		retdec::common::Address tableAddr2(ci->getZExtValue());
 
 		LOG << "\t\t\t" << "second table addr @ " << tableAddr2 << std::endl;
@@ -1247,10 +1246,10 @@ if (brToSwitch)
 
 	//
 	//
-	std::vector<BasicBlock*> casesBbs;
+	std::vector<llvm::BasicBlock*> casesBbs;
 	for (auto c : cases)
 	{
-		BasicBlock* tBb = nullptr;
+		llvm::BasicBlock* tBb = nullptr;
 		llvm::Function* tFnc = nullptr;
 		// TODO: do not split functions here.
 		// if case in another function, do not use it - it may belong to another
@@ -1267,7 +1266,7 @@ if (brToSwitch)
 	}
 
 	llvm::Function* tFnc = nullptr;
-	BasicBlock* defBb = nullptr;
+	llvm::BasicBlock* defBb = nullptr;
 	// TODO: do not split functions here
 	getOrCreateBranchTarget(defAddr, defBb, tFnc, branchCall);
 	if (defBb == nullptr
@@ -1309,7 +1308,7 @@ if (brToSwitch)
 
 	if (armCondBr)
 	{
-		BranchInst::Create(armCondBr->getSuccessor(0), armCondBr);
+		llvm::BranchInst::Create(armCondBr->getSuccessor(0), armCondBr);
 		auto* rmSucc = armCondBr->getSuccessor(1);
 		armCondBr->eraseFromParent();
 		rmSucc->eraseFromParent();
@@ -1390,11 +1389,11 @@ void Decoder::handleDelaySlotLikely(
 	assert(_c2l->getDelaySlot(res.capstoneInsn->id));
 	assert(_c2l->getDelaySlot(res.capstoneInsn->id) == 1);
 
-	auto* br = dyn_cast<BranchInst>(res.branchCall->getNextNode());
+	auto* br = llvm::dyn_cast<llvm::BranchInst>(res.branchCall->getNextNode());
 	if (br && br->isConditional())
 	{
 		auto* nextBb = br->getParent()->getNextNode();
-		auto* newBb = BasicBlock::Create(
+		auto* newBb = llvm::BasicBlock::Create(
 				_module->getContext(),
 				"",
 				br->getFunction(),
@@ -1402,7 +1401,7 @@ void Decoder::handleDelaySlotLikely(
 
 		auto* target = br->getSuccessor(0);
 		br->setSuccessor(0, newBb);
-		auto* newTerm = BranchInst::Create(target, newBb);
+		auto* newTerm = llvm::BranchInst::Create(target, newBb);
 		irb.SetInsertPoint(newTerm);
 
 		std::size_t sz = _c2l->getDelaySlot(res.capstoneInsn->id);
@@ -1436,10 +1435,10 @@ void Decoder::resolvePseudoCalls()
 	// hard and ugly.
 
 	for (llvm::Function& f : *_module)
-	for (BasicBlock& b : f)
+	for (llvm::BasicBlock& b : f)
 	for (auto i = b.begin(), e = b.end(); i != e;)
 	{
-		CallInst* pseudo = dyn_cast<CallInst>(&*i);
+		llvm::CallInst* pseudo = llvm::dyn_cast<llvm::CallInst>(&*i);
 		++i;
 		if (pseudo == nullptr)
 		{
@@ -1453,7 +1452,7 @@ void Decoder::resolvePseudoCalls()
 			continue;
 		}
 
-		Instruction* real = pseudo->getNextNode();
+		llvm::Instruction* real = pseudo->getNextNode();
 		if (real == nullptr)
 		{
 			continue;
@@ -1464,7 +1463,7 @@ void Decoder::resolvePseudoCalls()
 		// here.
 		//
 		if (_c2l->isCallFunctionCall(pseudo)
-				&& isa<CallInst>(real))
+				&& llvm::isa<llvm::CallInst>(real))
 		{
 			Address t = getJumpTarget(
 					AsmInstruction::getInstructionAddress(real),
@@ -1474,7 +1473,7 @@ void Decoder::resolvePseudoCalls()
 			if (t.isUndefined())
 			{
 				++i;
-				auto* st = cast<StoreInst>(*real->user_begin());
+				auto* st = llvm::cast<llvm::StoreInst>(*real->user_begin());
 				st->eraseFromParent();
 				real->eraseFromParent();
 			}
@@ -1488,7 +1487,7 @@ void Decoder::finalizePseudoCalls()
 	for (auto& b : f)
 	for (auto i = b.begin(), e = b.end(); i != e;)
 	{
-		CallInst* pseudo = dyn_cast<CallInst>(&*i);
+		auto* pseudo = llvm::dyn_cast<llvm::CallInst>(&*i);
 		++i;
 		if (pseudo == nullptr)
 		{
@@ -1505,7 +1504,7 @@ void Decoder::finalizePseudoCalls()
 			continue;
 		}
 
-		Instruction* it = pseudo->getPrevNode();
+		llvm::Instruction* it = pseudo->getPrevNode();
 		pseudo->eraseFromParent();
 
 		bool mipsFirstAsmInstr = true;
@@ -1531,10 +1530,10 @@ void Decoder::finalizePseudoCalls()
 			//
 			if (_config->getConfig().architecture.isX86()
 					&& (icf || irf))
-			if (auto* st = dyn_cast<StoreInst>(i))
+			if (auto* st = llvm::dyn_cast<llvm::StoreInst>(i))
 			{
 				if (_abi->isStackPointerRegister(st->getPointerOperand())
-						|| isa<ConstantInt>(st->getValueOperand()))
+						|| llvm::isa<llvm::ConstantInt>(st->getValueOperand()))
 				{
 					st->eraseFromParent();
 					i = nullptr;
@@ -1545,7 +1544,7 @@ void Decoder::finalizePseudoCalls()
 			//
 			if (_config->getConfig().architecture.isMipsOrPic32()
 					&& icf)
-			if (auto* st = dyn_cast<StoreInst>(i))
+			if (auto* st = llvm::dyn_cast<llvm::StoreInst>(i))
 			{
 				if (_abi->isRegister(st->getPointerOperand(), MIPS_REG_RA))
 				{
@@ -1560,7 +1559,7 @@ void Decoder::finalizePseudoCalls()
 			//
 			if (_config->getConfig().architecture.isArm32OrThumb()
 					&& icf)
-			if (auto* st = dyn_cast<StoreInst>(i))
+			if (auto* st = llvm::dyn_cast<llvm::StoreInst>(i))
 			{
 				if (_abi->isRegister(st->getPointerOperand(), ARM_REG_LR))
 				{
@@ -1573,7 +1572,7 @@ void Decoder::finalizePseudoCalls()
 			//
 			if (_config->getConfig().architecture.isPpc()
 					&& icf)
-			if (auto* st = dyn_cast<StoreInst>(i))
+			if (auto* st = llvm::dyn_cast<llvm::StoreInst>(i))
 			{
 				if (_abi->isRegister(st->getPointerOperand(), PPC_REG_LR))
 				{

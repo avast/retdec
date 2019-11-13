@@ -11,6 +11,7 @@
 #include <string>
 
 #include "retdec/common/calling_convention.h"
+#include "retdec/common/basic_block.h"
 #include "retdec/common/object.h"
 #include "retdec/common/storage.h"
 #include "retdec/common/type.h"
@@ -117,6 +118,7 @@ class Function : public retdec::common::AddressRange
 		common::ObjectSequentialContainer parameters;
 		common::ObjectSetContainer locals;
 		std::set<std::string> usedCryptoConstants;
+		std::set<common::BasicBlock> basicBlocks;
 
 	private:
 		std::string _name; ///< This is objects unique ID.
