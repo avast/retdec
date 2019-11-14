@@ -13,6 +13,8 @@
 #include "retdec/common/address.h"
 #include "retdec/common/range.h"
 
+struct cs_insn;
+
 namespace retdec {
 namespace common {
 
@@ -40,6 +42,13 @@ class BasicBlock : public AddressRange
 			}
 		};
 		std::set<CallEntry> calls;
+
+		/// Basic block instructions.
+		/// These are pointers to Capstone instruction representations.
+		/// Fill this member only if it is needed.
+		/// If used, the user of this library needs to include Capstone header
+		/// and link Capstone library. This library does neither.
+		std::vector<cs_insn*> instructions;
 };
 
 } // namespace common

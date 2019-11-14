@@ -140,7 +140,7 @@ class Function : public retdec::common::AddressRange
 		bool _thumb = false;
 };
 
-struct FunctionCompare
+struct FunctionNameCompare
 {
 	using is_transparent = void;
 
@@ -158,11 +158,29 @@ struct FunctionCompare
 	}
 };
 
+struct FunctionAddressCompare
+{
+	using is_transparent = void;
+
+	bool operator()(const Function& f1, const Function& f2) const
+	{
+		return f1.getStart() < f2.getStart();
+	}
+	bool operator()(const retdec::common::Address& id, Function const& f) const
+	{
+		return id < f.getStart();
+	}
+	bool operator()(const Function& f, const retdec::common::Address& id) const
+	{
+		return f.getStart() < id;
+	}
+};
+
 /**
  * An associative container with functions' names as the key.
  * See Function class for details.
  */
-class FunctionContainer : public std::set<Function, FunctionCompare>
+class FunctionContainer : public std::set<Function, FunctionNameCompare>
 {
 	public:
 		bool hasFunction(const std::string& name);

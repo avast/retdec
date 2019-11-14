@@ -83,40 +83,28 @@ std::unique_ptr<llvm::Module> createLlvmModule(llvm::LLVMContext& Context)
 
 namespace retdec {
 
-std::unique_ptr<llvm::Module> disassemble(
-		const std::string& inputPath)
+LlvmModuleContextPair disassemble(
+		const std::string& inputPath,
+		Functions* fs,
+		bool fillCapstoneInstructions)
 {
-	llvm::LLVMContext Context;
-	std::unique_ptr<Module> M = createLlvmModule(Context);
+	auto context = std::make_unique<llvm::LLVMContext>();
+	auto module = createLlvmModule(*context);
 
 	config::Config c;
 	c.setInputFile(inputPath);
 
-	// Create a PassManager to hold and optimize the collection of passes we are
-	// about to build.
-	legacy::PassManager pm;
+	// Create a PassManager to hold and optimize the collection of passes we
+	// are about to build.
+	llvm::legacy::PassManager pm;
 
 	pm.add(new retdec::bin2llvmir::ProviderInitialization(&c));
 	pm.add(new retdec::bin2llvmir::Decoder());
 
-std::cout << std::endl << "===========================================" << std::endl;
-llvm::outs() << *M << "\n";
-std::cout << std::endl << "===========================================" << std::endl;
-
 	// Now that we have all of the passes ready, run them.
-	pm.run(*M);
+	pm.run(*module);
 
-std::cout << std::endl << "===========================================" << std::endl;
-llvm::outs() << *M << "\n";
-std::cout << std::endl << "===========================================" << std::endl;
-
-std::cout << "functions:" << std::endl;
-for (auto& f : retdec::bin2llvmir::ConfigProvider::getConfig(M.get())->getConfig().functions)
-{
-	std::cout << "\t" << f.getStart() << " @ " << f.getName() << std::endl;
-}
-
-	return M;
+	return {std::move(module), std::move(context)};
 }
 
 } // namespace retdec
