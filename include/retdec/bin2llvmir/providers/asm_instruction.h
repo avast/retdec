@@ -162,9 +162,15 @@ class AsmInstruction
 				llvm::GlobalVariable* gv);
 		static retdec::common::Address getInstructionAddress(
 				llvm::Instruction* inst);
+		static retdec::common::Address getInstructionEndAddress(
+				llvm::Instruction* inst);
 		static retdec::common::Address getBasicBlockAddress(
 				llvm::BasicBlock* bb);
+		static retdec::common::Address getBasicBlockEndAddress(
+				llvm::BasicBlock* bb);
 		static retdec::common::Address getFunctionAddress(
+				llvm::Function* f);
+		static retdec::common::Address getFunctionEndAddress(
 				llvm::Function* f);
 		static bool isLlvmToAsmInstruction(const llvm::Value* inst);
 		static void clear();

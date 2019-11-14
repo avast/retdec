@@ -231,12 +231,51 @@ retdec::common::Address AsmInstruction::getInstructionAddress(
 	return ret;
 }
 
+retdec::common::Address AsmInstruction::getInstructionEndAddress(
+		llvm::Instruction* inst)
+{
+	retdec::common::Address ret;
+	AsmInstruction ai(inst);
+	if (ai.isValid())
+	{
+		ret = ai.getEndAddress();
+	}
+	return ret;
+}
+
+retdec::common::Address getBasicBlockAddressFromName(llvm::BasicBlock* b)
+{
+	std::string n = b->getName();
+	unsigned long long a = 0;
+	std::string pattern = names::generatedBasicBlockPrefix+"%llx";
+	int ret = std::sscanf(n.c_str(), pattern.c_str(), &a);
+	return ret == 1 ? common::Address(a) : common::Address();
+}
+
 retdec::common::Address AsmInstruction::getBasicBlockAddress(
 		llvm::BasicBlock* bb)
 {
+	std::string n = bb->getName();
+	if (!retdec::utils::startsWith(n, names::generatedBasicBlockPrefix))
+	{
+		return common::Address();
+	}
+
+	if (bb->empty())
+	{
+		return getBasicBlockAddressFromName(bb);
+	}
+
+	AsmInstruction ai(&bb->front());
+	return ai.isValid() ? ai.getAddress() : getBasicBlockAddressFromName(bb);
+}
+
+retdec::common::Address AsmInstruction::getBasicBlockEndAddress(
+		llvm::BasicBlock* bb)
+{
 	return bb->empty()
-			? retdec::common::Address()
-			: getInstructionAddress(&bb->front());
+			? getBasicBlockAddress(bb)
+			: getInstructionEndAddress(&bb->back());
 }
 
 retdec::common::Address AsmInstruction::getFunctionAddress(
@@ -245,6 +284,14 @@ retdec::common::Address AsmInstruction::getFunctionAddress(
 	return f->empty()
 			? retdec::common::Address()
 			: getBasicBlockAddress(&f->front());
+}
+
+retdec::common::Address AsmInstruction::getFunctionEndAddress(
+		llvm::Function* f)
+{
+	return f->empty() || f->back().empty()
+			? getFunctionAddress(f)
+			: getBasicBlockEndAddress(&f->back());
 }
 
 bool AsmInstruction::isLlvmToAsmInstructionPrivate(llvm::Value* inst) const

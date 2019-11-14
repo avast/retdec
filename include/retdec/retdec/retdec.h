@@ -18,27 +18,26 @@ namespace retdec {
 
 struct LlvmModuleContextPair
 {
+	LlvmModuleContextPair(LlvmModuleContextPair&&) = default;
+	~LlvmModuleContextPair()
+	{
+		// Order matters: module destructor uses context.
+		module.reset();
+		context.reset();
+	}
 	std::unique_ptr<llvm::Module> module;
 	std::unique_ptr<llvm::LLVMContext> context;
 };
 
-using Functions = std::set<
-		retdec::common::Function,
-		retdec::common::FunctionAddressCompare>;
-
 /**
  * \param[in]  inputPath Path the the input file to disassemble.
  * \param[out] fs        Set of functions to fill.
- * \param[in]  fillCapstoneInstructions Should instruction container in basis
- *                                      blocks be filled with Capstone
- *                                      instructions?
  * \return Pointer to LLVM module created by the disassembly,
  *         or \c nullptr if the disassembly failed.
  */
 LlvmModuleContextPair disassemble(
 		const std::string& inputPath,
-		Functions* fs = nullptr,
-		bool fillCapstoneInstructions = true);
+		retdec::common::FunctionSet* fs = nullptr);
 
 } // namespace retdec
 

@@ -26,6 +26,17 @@ Function::Function(const std::string& name) :
 
 }
 
+Function::Function(
+		retdec::common::Address start,
+		retdec::common::Address end,
+		const std::string& name)
+		:
+		retdec::common::AddressRange(start, end),
+		_name(name)
+{
+
+}
+
 bool Function::isUserDefined() const       { return _linkType == USER_DEFINED; }
 bool Function::isStaticallyLinked() const  { return _linkType == STATICALLY_LINKED; }
 bool Function::isDynamicallyLinked() const { return _linkType == DYNAMICALLY_LINKED; }
@@ -161,6 +172,39 @@ const Function* FunctionContainer::getFunctionByRealName(
 	}
 
 	return nullptr;
+}
+
+//
+//=============================================================================
+// FunctionSet
+//=============================================================================
+//
+
+/**
+ * Get function containing the address @p a.
+ */
+const retdec::common::Function* FunctionSet::getRange(
+		const retdec::common::Address& a) const
+{
+	if (empty())
+	{
+		return nullptr;
+	}
+
+	auto pos = lower_bound(a);
+
+	if (pos == end())
+	{
+		auto last = rbegin();
+		return (last->contains(a)) ? (&(*last)) : (nullptr);
+	}
+
+	if (pos != begin() && pos->getStart() != a)
+	{
+		pos--;
+	}
+
+	return pos->contains(a) ? &(*pos) : nullptr;
 }
 
 } // namespace common

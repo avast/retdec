@@ -46,6 +46,10 @@ class Function : public retdec::common::AddressRange
 
 	public:
 		Function(const std::string& name = std::string());
+		Function(
+			retdec::common::Address start,
+			retdec::common::Address end,
+			const std::string& name = std::string());
 
 		/// @name Function query methods.
 		/// @{
@@ -119,6 +123,8 @@ class Function : public retdec::common::AddressRange
 		common::ObjectSetContainer locals;
 		std::set<std::string> usedCryptoConstants;
 		std::set<common::BasicBlock> basicBlocks;
+		/// Addresses of instructions which reference (use) this  function.
+		std::set<common::Address> codeReferences;
 
 	private:
 		std::string _name; ///< This is objects unique ID.
@@ -188,6 +194,21 @@ class FunctionContainer : public std::set<Function, FunctionNameCompare>
 		const Function* getFunctionByStartAddress(
 				const retdec::common::Address& addr) const;
 		const Function* getFunctionByRealName(const std::string& name) const;
+};
+
+// TODO:
+// Maybe we could use common::RangeContainer for this.
+// It contains this functionality, but also some other mechanisms with
+// potentially unwanted side effects.
+// Also, because it does not take range as template argument, it is not ready
+// to be used with common::Function.
+class FunctionSet : public std::set<
+		retdec::common::Function,
+		retdec::common::FunctionAddressCompare>
+{
+	public:
+		const retdec::common::Function* getRange(
+				const retdec::common::Address& a) const;
 };
 
 } // namespace common
