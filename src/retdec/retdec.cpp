@@ -284,7 +284,7 @@ void fillFunctions(
 			{
 				fs->emplace(common::Function(sa, sa, f.getName()));
 			}
-			return;
+			continue;
 		}
 
 		fs->emplace(fillFunction(config, f));
