@@ -5,6 +5,7 @@
  */
 
 #include <algorithm>
+#include <iostream>
 
 #include "retdec/common/calling_convention.h"
 
