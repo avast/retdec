@@ -209,8 +209,16 @@ bool Decoder::patternTerminatingCalls()
 		if (newBb)
 		{
 			common::Address a = AsmInstruction::getBasicBlockAddress(newBb);
-			newBb->setName(names::generateBasicBlockName(a));
-			addBasicBlock(a, newBb);
+			if (a.isDefined())
+			{
+				newBb->setName(names::generateBasicBlockName(a));
+				addBasicBlock(a, newBb);
+			}
+			else
+			{
+				newBb->eraseFromParent();
+				newBb = nullptr;
+			}
 		}
 	}
 
