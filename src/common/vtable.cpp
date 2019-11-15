@@ -5,7 +5,7 @@
  */
 
 #include "retdec/common/vtable.h"
-#include "retdec/serdes/address.h"
+#include "retdec/common/address.h"
 
 namespace retdec {
 namespace common {

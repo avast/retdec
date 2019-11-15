@@ -1,5 +1,5 @@
 /**
- * @file src/config/calling_convention.cpp
+ * @file src/common/calling_convention.cpp
  * @brief Calling convention representation.
  * @copyright (c) 2019 Avast Software, licensed under the MIT license
  */

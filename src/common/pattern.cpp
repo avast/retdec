@@ -1,11 +1,11 @@
 /**
- * @file src/config/pattern.cpp
+ * @file src/common/pattern.cpp
  * @brief Common pattern representation.
  * @copyright (c) 2019 Avast Software, licensed under the MIT license
  */
 
 #include "retdec/common/pattern.h"
-#include "retdec/serdes/address.h"
+#include "retdec/common/address.h"
 
 namespace retdec {
 namespace common {
@@ -353,5 +353,5 @@ bool Pattern::operator!=(const Pattern& val) const
 	return !(*this == val);
 }
 
-} // namespace config
+} // namespace common
 } // namespace retdec

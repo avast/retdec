@@ -1,5 +1,5 @@
 /**
- * @file include/retdec/config/object.h
+ * @file include/retdec/common/object.h
  * @brief Common object representation.
  * @copyright (c) 2019 Avast Software, licensed under the MIT license
  */

@@ -1,5 +1,5 @@
 /**
- * @file src/config/basic_block.cpp
+ * @file src/common/basic_block.cpp
  * @brief Common basic block representation.
  * @copyright (c) 2019 Avast Software, licensed under the MIT license
  */

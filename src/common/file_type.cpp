@@ -1,5 +1,5 @@
 /**
- * @file src/config/file_type.cpp
+ * @file src/common/file_type.cpp
  * @brief Common file format representation.
  * @copyright (c) 2019 Avast Software, licensed under the MIT license
  */

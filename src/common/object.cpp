@@ -1,5 +1,5 @@
 /**
- * @file src/config/objects.cpp
+ * @file src/common/objects.cpp
  * @brief Common object representation.
  * @copyright (c) 2019 Avast Software, licensed under the MIT license
  */
@@ -7,8 +7,8 @@
 #include <cassert>
 
 #include "retdec/common/object.h"
-#include "retdec/serdes/storage.h"
-#include "retdec/serdes/type.h"
+#include "retdec/common/storage.h"
+#include "retdec/common/type.h"
 
 namespace retdec {
 namespace common {
