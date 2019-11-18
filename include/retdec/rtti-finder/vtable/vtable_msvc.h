@@ -12,8 +12,8 @@
 #include <vector>
 
 #include "retdec/rtti-finder/rtti/rtti_msvc.h"
-#include "retdec/rtti-finder/vtable/vtable.h"
 #include "retdec/common/address.h"
+#include "retdec/common/vtable.h"
 
 namespace retdec {
 namespace rtti_finder {
@@ -25,15 +25,13 @@ namespace rtti_finder {
  *   [virtual function pointers] <- vtable address in instances points here
  *
  */
-class VtableMsvc : public Vtable
+class VtableMsvc : public retdec::common::Vtable
 {
 	public:
 		VtableMsvc(retdec::common::Address a) : Vtable(a) {}
 
 	public:
 		retdec::common::Address objLocatorAddress;
-		// Vtable::virtualFncAddresses
-
 		RTTICompleteObjectLocator* rtti = nullptr;
 };
 

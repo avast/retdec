@@ -12,8 +12,8 @@
 #include <vector>
 
 #include "retdec/rtti-finder/rtti/rtti_gcc.h"
-#include "retdec/rtti-finder/vtable/vtable.h"
 #include "retdec/common/address.h"
+#include "retdec/common/vtable.h"
 
 namespace retdec {
 namespace rtti_finder {
@@ -28,7 +28,7 @@ namespace rtti_finder {
  *   [virtual function pointers] <- vtable address in instances points here
  *
  */
-class VtableGcc : public Vtable
+class VtableGcc : public retdec::common::Vtable
 {
 	public:
 		VtableGcc(retdec::common::Address a) : Vtable(a) {}
@@ -38,8 +38,6 @@ class VtableGcc : public Vtable
 		std::vector<int> vbaseOffsets; ///< TODO: not set/used right now
 		int topOffset = 0;             ///< TODO: not set/used right now
 		retdec::common::Address rttiAddress;
-		// Vtable::virtualFncAddresses
-
 		std::shared_ptr<ClassTypeInfo> rtti;
 };
 

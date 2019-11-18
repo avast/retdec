@@ -16,8 +16,13 @@ namespace common {
 //=============================================================================
 //
 
-VtableItem::VtableItem(const retdec::common::Address& a) :
-		_address(a)
+VtableItem::VtableItem(
+		const retdec::common::Address& a,
+		const retdec::common::Address& target,
+		bool isThumb)
+		: _address(a)
+		, _targetAddress(target)
+		, _isThumb(isThumb)
 {
 
 }
@@ -35,6 +40,11 @@ void VtableItem::setTargetFunctionAddress(const retdec::common::Address& a)
 void VtableItem::setTargetFunctionName(const std::string& n)
 {
 	_targetFunctionName = n;
+}
+
+void VtableItem::setIsThumb(bool isThumb)
+{
+	_isThumb = isThumb;
 }
 
 retdec::common::Address VtableItem::getId() const
@@ -64,6 +74,11 @@ retdec::common::Address VtableItem::getTargetFunctionAddress() const
 std::string VtableItem::getTargetFunctionName() const
 {
 	return _targetFunctionName;
+}
+
+bool VtableItem::isThumb() const
+{
+	return _isThumb;
 }
 
 /**

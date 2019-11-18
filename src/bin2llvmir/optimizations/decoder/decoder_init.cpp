@@ -1002,7 +1002,7 @@ void Decoder::initVtables()
 {
 	LOG << "\n" << "initVtables():" << std::endl;
 
-	std::vector<const rtti_finder::Vtable*> vtable;
+	std::vector<const common::Vtable*> vtable;
 	for (auto& p : _image->getRtti().getVtablesGcc())
 	{
 		vtable.push_back(&p.second);
@@ -1015,23 +1015,24 @@ void Decoder::initVtables()
 	for (auto* p : vtable)
 	{
 		auto& vt = *p;
-		for (auto& item : vt.virtualFncAddresses)
+		for (auto& item : vt.items)
 		{
 			if (auto* jt = _jumpTargets.push(
-					item.address,
+					item.getTargetFunctionAddress(),
 					JumpTarget::eType::VTABLE,
-					item.isThumb ? CS_MODE_THUMB : _c2l->getBasicMode(),
+					item.isThumb() ? CS_MODE_THUMB : _c2l->getBasicMode(),
 					Address::getUndef))
 			{
 				auto* nf = createFunction(jt->getAddress());
 				_vtableFncs.insert(jt->getAddress());
 
-				LOG << "\t" << "[+] " << item.address << " @ "
-						<< nf->getName().str() << std::endl;
+				LOG << "\t" << "[+] " << item.getTargetFunctionAddress()
+						<< " @ " << nf->getName().str() << std::endl;
 			}
 			else
 			{
-				LOG << "\t" << "[-] " << item.address << " (no JT)" << std::endl;
+				LOG << "\t" << "[-] " << item.getTargetFunctionAddress()
+						<< " (no JT)" << std::endl;
 			}
 		}
 	}

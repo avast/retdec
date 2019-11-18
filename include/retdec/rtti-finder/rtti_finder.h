@@ -31,7 +31,7 @@ class RttiFinder
 		const RttiGcc& getRttiGcc() const;
 		const RttiMsvc& getRttiMsvc() const;
 
-		const Vtable* getVtable(retdec::common::Address a) const;
+		const retdec::common::Vtable* getVtable(retdec::common::Address a) const;
 
 	private:
 		/// C++ GCC/Clang vtables, including RTTIs.

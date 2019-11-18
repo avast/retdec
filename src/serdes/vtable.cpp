@@ -17,6 +17,7 @@ const std::string JSON_name          = "name";
 const std::string JSON_address       = "address";
 const std::string JSON_targetAddress = "targetAddress";
 const std::string JSON_targetName    = "targetName";
+const std::string JSON_isThumb       = "isThumb";
 const std::string JSON_items         = "items";
 
 } // anonymous namespace
@@ -41,6 +42,10 @@ Json::Value serialize(const common::VtableItem& vti)
 	{
 		val[JSON_targetName] = vti.getTargetFunctionName();
 	}
+	if (vti.isThumb())
+	{
+		val[JSON_isThumb] = vti.isThumb();
+	}
 
 	return val;
 }
@@ -61,6 +66,7 @@ void deserialize(const Json::Value& val, common::VtableItem& vti)
 	vti.setTargetFunctionAddress(ta);
 
 	vti.setTargetFunctionName(safeGetString(val, JSON_targetName));
+	vti.setIsThumb(safeGetBool(val, JSON_isThumb, false));
 }
 
 Json::Value serialize(const common::Vtable& vt)

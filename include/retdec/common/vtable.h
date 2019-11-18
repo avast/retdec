@@ -23,13 +23,17 @@ class VtableItem
 {
 	public:
 		VtableItem(const retdec::common::Address& a
-				= retdec::common::Address::getUndef);
+				= retdec::common::Address::getUndef,
+				const retdec::common::Address& target
+				= retdec::common::Address::getUndef,
+				bool isThumb = false);
 
 		/// @name VtableItem set methods.
 		/// @{
 		void setAddress(const retdec::common::Address& a);
 		void setTargetFunctionAddress(const retdec::common::Address& a);
 		void setTargetFunctionName(const std::string& n);
+		void setIsThumb(bool isThumb);
 		/// @}
 
 		/// @name VtableItem get methods.
@@ -38,6 +42,7 @@ class VtableItem
 		retdec::common::Address getAddress() const;
 		retdec::common::Address getTargetFunctionAddress() const;
 		std::string getTargetFunctionName() const;
+		bool isThumb() const;
 		/// @}
 
 		bool operator<(const VtableItem& o) const;
@@ -50,6 +55,9 @@ class VtableItem
 		retdec::common::Address _targetAddress;
 		/// Name (unique ID) of function on target address.
 		std::string _targetFunctionName;
+		/// Is the target function a THUMB function?
+		/// This typically means that its address in the table was odd.
+		bool _isThumb = false;
 };
 
 /**

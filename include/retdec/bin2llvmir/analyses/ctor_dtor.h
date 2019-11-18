@@ -29,7 +29,8 @@ class CtorDtor
 				/// Super method offsets in order.
 				std::vector<int> superMethodOffsets;
 				/// Virtual table stores in order.
-				std::vector<std::pair<llvm::StoreInst*, const rtti_finder::Vtable*>> vftableStores;
+				std::vector<std::pair<llvm::StoreInst*,
+						const common::Vtable*>> vftableStores;
 				/// Virtual table offsets in order.
 				std::vector<int> vftableOffsets;
 				bool ctor = false;
@@ -38,7 +39,7 @@ class CtorDtor
 
 		using FunctionSet    = std::set<llvm::Function*>;
 		using FunctionToInfo = std::map<llvm::Function*, FunctionInfo>;
-		using StoreToVtable  = std::map<llvm::StoreInst*, const rtti_finder::Vtable*>;
+		using StoreToVtable  = std::map<llvm::StoreInst*, const common::Vtable*>;
 
 	public:
 		void runOnModule(llvm::Module* m, Config* c, FileImage* i);

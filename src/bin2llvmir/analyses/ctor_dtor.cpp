@@ -76,7 +76,7 @@ void CtorDtor::findPossibleCtorsDtors()
 			if (vt)
 			{
 				LOG << "\t" << llvmObjToString(store)
-					<< " -> " << vt->vtableAddress << std::endl;
+					<< " -> " << vt->getAddress() << std::endl;
 
 				stores2vtables[store] = vt;
 				possibleCtorsDtors.insert(&F);

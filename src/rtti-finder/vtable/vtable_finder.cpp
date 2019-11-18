@@ -119,7 +119,7 @@ bool fillVtable(
 		}
 
 		LOG << "\t\t\t" << a << " @ OK" << std::endl;
-		vt.virtualFncAddresses.emplace_back(VtableItem(ptr, isThumb));
+		vt.items.emplace(VtableItem(a, ptr, isThumb));
 		items.insert(ptr);
 		processedAddresses.insert(a);
 
@@ -127,7 +127,7 @@ bool fillVtable(
 		isPtr = img->isPointer(a, &ptr);
 	}
 
-	if (vt.virtualFncAddresses.empty())
+	if (vt.items.empty())
 	{
 		LOG << "\t\t\t" << "===> FAIL" << std::endl;
 		return false;
