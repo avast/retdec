@@ -7,6 +7,8 @@
 #ifndef BACKEND_BIR_SEMANTICS_TESTS_SEMANTICS_MOCK_H
 #define BACKEND_BIR_SEMANTICS_TESTS_SEMANTICS_MOCK_H
 
+#include <optional>
+
 #include <gmock/gmock.h>
 
 #include "retdec/llvmir2hll/semantics/semantics.h"

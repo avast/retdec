@@ -7,6 +7,7 @@
 #ifndef RETDEC_LLVMIR2HLL_SEMANTICS_SEMANTICS_GCC_GENERAL_SEMANTICS_H
 #define RETDEC_LLVMIR2HLL_SEMANTICS_SEMANTICS_GCC_GENERAL_SEMANTICS_H
 
+#include <optional>
 #include <string>
 
 #include "retdec/llvmir2hll/semantics/semantics/default_semantics.h"

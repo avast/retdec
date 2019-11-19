@@ -7,6 +7,8 @@
 #ifndef RETDEC_BIN2LLVMIR_PROVIDERS_CONFIG_H
 #define RETDEC_BIN2LLVMIR_PROVIDERS_CONFIG_H
 
+#include <optional>
+
 #include "retdec/config/config.h"
 
 #include <llvm/IR/Instructions.h>

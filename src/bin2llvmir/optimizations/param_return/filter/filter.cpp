@@ -5,6 +5,7 @@
 */
 
 #include <deque>
+#include <optional>
 
 #include "retdec/bin2llvmir/optimizations/param_return/filter/filter.h"
 #include "retdec/bin2llvmir/optimizations/param_return/filter/ms_x64.h"

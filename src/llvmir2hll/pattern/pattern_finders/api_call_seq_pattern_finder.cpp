@@ -5,6 +5,7 @@
 */
 
 #include <map>
+#include <optional>
 
 #include "retdec/llvmir2hll/analysis/value_analysis.h"
 #include "retdec/llvmir2hll/ir/call_expr.h"

@@ -4,6 +4,8 @@
 * @copyright (c) 2017 Avast Software, licensed under the MIT license
 */
 
+#include <optional>
+
 #include "retdec/llvmir2hll/analysis/goto_target_analysis.h"
 #include "retdec/llvmir2hll/evaluator/arithm_expr_evaluator.h"
 #include "retdec/llvmir2hll/ir/break_stmt.h"

@@ -7,6 +7,8 @@
 #ifndef FILEINFO_FILE_INFORMATION_FILE_INFORMATION_H
 #define FILEINFO_FILE_INFORMATION_FILE_INFORMATION_H
 
+#include <optional>
+
 #include "retdec/cpdetect/cpdetect.h"
 #include "fileinfo/file_information/file_information_types/file_information_types.h"
 

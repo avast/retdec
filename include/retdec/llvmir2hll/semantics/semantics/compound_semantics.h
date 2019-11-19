@@ -9,6 +9,7 @@
 #define RETDEC_LLVMIR2HLL_SEMANTICS_SEMANTICS_COMPOUND_SEMANTICS_H
 
 #include <deque>
+#include <optional>
 #include <string>
 
 #include "retdec/llvmir2hll/semantics/semantics.h"
