@@ -117,6 +117,24 @@ TEST_P(Capstone2LlvmIrTranslatorArmTests, ARM_INS_ADD_r_r_i)
 	EXPECT_NO_VALUE_CALLED();
 }
 
+TEST_P(Capstone2LlvmIrTranslatorArmTests, ARM_INS_ADD_r_r_i_bin)
+{
+	ONLY_MODE_ARM;
+
+	setRegisters({
+		{ARM_REG_R1, 0x1230},
+	});
+
+	emulate_bin("04 00 81 e2");
+
+	EXPECT_JUST_REGISTERS_LOADED({ARM_REG_R1});
+	EXPECT_JUST_REGISTERS_STORED({
+		{ARM_REG_R0, 0x1234},
+	});
+	EXPECT_NO_MEMORY_LOADED_STORED();
+	EXPECT_NO_VALUE_CALLED();
+}
+
 TEST_P(Capstone2LlvmIrTranslatorArmTests, ARM_INS_ADD_r_i)
 {
 	ALL_MODES;

@@ -23,6 +23,7 @@
 * Enhancement: Added CMake options to build and install only specific targets ([#510](https://github.com/avast/retdec/issues/510)).
 * Enhancement: Switched from C++14 to C++17 ([#650](https://github.com/avast/retdec/issues/650)).
 * Enhancement: Replace uses of `mpark::variant` from `deps/variant` with standard C++17 `std::variant`. Remove the `variant` dependency.
+* Fix: Increased the limit for the number of entries in import directory when deciding whether a PE file is corrupted or not ([avast/pelib#13](https://github.com/avast/pelib/pull/13)).
 * Fix: Fixed build on BSD systems ([#598](https://github.com/avast/retdec/pull/598)).
 * Fix: Resources which are located in the different section than resource tree are now properly parsed ([#596](https://github.com/avast/retdec/pull/596)).
 * Fix: Version information which contained strings shorter than reported are now properly parsed ([#596](https://github.com/avast/retdec/pull/596)).
@@ -36,6 +37,7 @@
 * Fix: Export ordinals are now correctly calculated as relative to the base ([#612](https://github.com/avast/retdec/issues/612), [avast/pelib#10](https://github.com/avast/pelib/pull/10)).
 * Fix: Fixed crash in the decoding phase ([#637](https://github.com/avast/retdec/issues/637), [#641](https://github.com/avast/retdec/pull/641)).
 * Fix: Fixed global variable naming issue ([#636](https://github.com/avast/retdec/issues/636), [#645](https://github.com/avast/retdec/pull/645)).
+* Fix: Fixed binary to LLVM IR translation of some MIPS instructions ([#633](https://github.com/avast/retdec/issues/633)), and made the translation process less error prone altogether ([#672](https://github.com/avast/retdec/pull/672)).
 
 # v3.3 (2019-03-18)
 

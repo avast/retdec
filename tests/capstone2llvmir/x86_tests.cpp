@@ -1054,6 +1054,31 @@ TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_ADD_reg32_reg32)
 	EXPECT_NO_VALUE_CALLED();
 }
 
+TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_ADD_reg32_reg32_bin)
+{
+	ONLY_MODE_32;
+
+	setRegisters({
+		{X86_REG_EAX, 0x12340000},
+		{X86_REG_ECX, 0x00005678},
+	});
+
+	emulate_bin("01 c8");
+
+	EXPECT_JUST_REGISTERS_LOADED({X86_REG_EAX, X86_REG_ECX});
+	EXPECT_JUST_REGISTERS_STORED({
+		{X86_REG_EAX, 0x12345678},
+		{X86_REG_PF, true},
+		{X86_REG_SF, false},
+		{X86_REG_ZF, false},
+		{X86_REG_OF, false},
+		{X86_REG_AF, false},
+		{X86_REG_CF, false},
+	});
+	EXPECT_NO_MEMORY_LOADED_STORED();
+	EXPECT_NO_VALUE_CALLED();
+}
+
 TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_ADD_reg64_imm32)
 {
 	ONLY_MODE_64;

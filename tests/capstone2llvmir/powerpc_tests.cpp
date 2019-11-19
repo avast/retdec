@@ -125,6 +125,25 @@ TEST_P(Capstone2LlvmIrTranslatorPowerpcTests, PPC_INS_ADD)
 	EXPECT_NO_VALUE_CALLED();
 }
 
+TEST_P(Capstone2LlvmIrTranslatorPowerpcTests, PPC_INS_ADD_bin)
+{
+	ONLY_MODE_32;
+
+	setRegisters({
+		{PPC_REG_R0, 0x1111},
+		{PPC_REG_R1, 0x2222},
+	});
+
+	emulate_bin("7c 00 0a 14");
+
+	EXPECT_JUST_REGISTERS_LOADED({PPC_REG_R0, PPC_REG_R1});
+	EXPECT_JUST_REGISTERS_STORED({
+		{PPC_REG_R0, 0x3333},
+	});
+	EXPECT_NO_MEMORY_LOADED_STORED();
+	EXPECT_NO_VALUE_CALLED();
+}
+
 TEST_P(Capstone2LlvmIrTranslatorPowerpcTests, PPC_INS_ADD_dot_zero)
 {
 	ALL_MODES;

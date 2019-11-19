@@ -138,12 +138,12 @@ class Capstone2LlvmIrTranslatorArm64_impl :
 				uint32_t r,
 				llvm::Value* val,
 				llvm::IRBuilder<>& irb,
-				eOpConv ct = eOpConv::ZEXT_TRUNC) override;
+				eOpConv ct = eOpConv::ZEXT_TRUNC_OR_BITCAST) override;
 		virtual llvm::Instruction* storeOp(
 				cs_arm64_op& op,
 				llvm::Value* val,
 				llvm::IRBuilder<>& irb,
-				eOpConv ct = eOpConv::ZEXT_TRUNC) override;
+				eOpConv ct = eOpConv::ZEXT_TRUNC_OR_BITCAST) override;
 
 		/**
 		* @brief This functions will generate psuedo asm translation.

@@ -24,7 +24,16 @@ const std::vector<std::string> ccStrings =
 	"spoiled",
 	"speciale",
 	"specialp",
-	"special"
+	"special",
+	"watcom",
+	"x64_os_default",
+	"arm_default",
+	"arm64_default",
+	"mips_default",
+	"mips64_default",
+	"powerpc_default",
+	"powerpc64_default",
+	"pic32_default"
 };
 
 } // anonymous namespace
@@ -154,6 +163,15 @@ std::ostream& operator<<(std::ostream &out, const CallingConventionID& cc)
 		case CallingConvention::eCallingConvention::CC_SPECIALE: out << "CC_SPECIALE"; break;
 		case CallingConvention::eCallingConvention::CC_SPECIALP: out << "CC_SPECIALP"; break;
 		case CallingConvention::eCallingConvention::CC_SPECIAL:  out << "CC_SPECIAL"; break;
+		case CallingConvention::eCallingConvention::CC_WATCOM:   out << "CC_WATCOM"; break;
+		case CallingConvention::eCallingConvention::CC_X64:      out << "CC_X64_OS_DEFAULT"; break;
+		case CallingConvention::eCallingConvention::CC_ARM:      out << "CC_ARM_DEFAULT"; break;
+		case CallingConvention::eCallingConvention::CC_ARM64:    out << "CC_ARM64_DEFAULT"; break;
+		case CallingConvention::eCallingConvention::CC_MIPS:     out << "CC_MIPS_DEFAULT"; break;
+		case CallingConvention::eCallingConvention::CC_MIPS64:   out << "CC_MIPS64_DEFAULT"; break;
+		case CallingConvention::eCallingConvention::CC_POWERPC:  out << "CC_POWERPC_DEFAULT"; break;
+		case CallingConvention::eCallingConvention::CC_POWERPC64:out << "CC_POWERPC64_DEFAULT"; break;
+		case CallingConvention::eCallingConvention::CC_PIC32:    out << "CC_PIC32_DEFAULT"; break;
 		default: out << "UNHANDLED"; break;
 	}
 	return out;
@@ -164,6 +182,13 @@ std::ostream& operator<<(std::ostream &out, const CallingConvention& cc)
 	out << cc._callingConvention;
 
 	return out;
+}
+
+CallingConvention& CallingConvention::operator=(const CallingConventionID& cc)
+{
+	_callingConvention = cc;
+
+	return *this;
 }
 
 } // namespace config

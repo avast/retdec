@@ -112,6 +112,7 @@ class CallingConvention
 		eCallingConvention getID() const;
 
 		friend std::ostream& operator<< (std::ostream &out, const eCallingConvention& cc);
+		CallingConvention& operator=(const eCallingConvention& cc);
 
 	private:
 		CallingConvention(eCallingConvention cc);

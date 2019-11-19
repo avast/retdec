@@ -827,7 +827,30 @@ llvm::Instruction* Capstone2LlvmIrTranslatorArm64_impl::storeRegister(
 		return nullptr;
 	}
 
-	val = generateTypeConversion(irb, val, llvmReg->getValueType(), ct);
+	if (llvmReg->getValueType()->isFloatingPointTy())
+	{
+		switch (ct)
+		{
+			case eOpConv::SITOFP_OR_FPCAST:
+			case eOpConv::UITOFP_OR_FPCAST:
+				val = generateTypeConversion(irb, val, llvmReg->getValueType(), ct);
+				break;
+			default:
+				val = generateTypeConversion(irb, val, llvmReg->getValueType(), eOpConv::FPCAST_OR_BITCAST);
+		}
+	}
+	else
+	{
+		switch (ct)
+		{
+			case eOpConv::SEXT_TRUNC_OR_BITCAST:
+			case eOpConv::ZEXT_TRUNC_OR_BITCAST:
+				val = generateTypeConversion(irb, val, llvmReg->getValueType(), ct);
+				break;
+			default:
+				val = generateTypeConversion(irb, val, llvmReg->getValueType(), eOpConv::SEXT_TRUNC_OR_BITCAST);
+		}
+	}
 
 	return irb.CreateStore(val, llvmReg);
 }
@@ -1138,8 +1161,7 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateAdc(cs_insn* i, cs_arm64* ai,
 {
 	EXPECT_IS_TERNARY(i, ai, irb);
 
-	std::tie(op1, op2) = loadOpBinaryOrTernaryOp1Op2(ai, irb);
-	op2 = irb.CreateZExtOrTrunc(op2, op1->getType());
+	std::tie(op1, op2) = loadOpBinaryOrTernaryOp1Op2(ai, irb, eOpConv::ZEXT_TRUNC_OR_BITCAST);
 	auto* carry = loadRegister(ARM64_REG_CPSR_C, irb);
 
 	auto* val = irb.CreateAdd(op1, op2);
@@ -1165,7 +1187,7 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateAdd(cs_insn* i, cs_arm64* ai,
 	EXPECT_IS_BINARY_OR_TERNARY(i, ai, irb);
 
 	std::tie(op1, op2) = loadOpBinaryOrTernaryOp1Op2(ai, irb);
-	op2 = generateTypeConversion(irb, op2, op1->getType(), eOpConv::ZEXT_TRUNC);
+	op2 = generateTypeConversion(irb, op2, op1->getType(), eOpConv::ZEXT_TRUNC_OR_BITCAST);
 
 	// For some reason it is possible to add two FP registers with integer add?
 	// This looks to be also true for sub
@@ -1199,7 +1221,7 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateSub(cs_insn* i, cs_arm64* ai,
 	EXPECT_IS_BINARY_OR_TERNARY(i, ai, irb);
 
 	std::tie(op1, op2) = loadOpBinaryOrTernaryOp1Op2(ai, irb);
-	op2 = generateTypeConversion(irb, op2, op1->getType(), eOpConv::ZEXT_TRUNC);
+	op2 = generateTypeConversion(irb, op2, op1->getType(), eOpConv::ZEXT_TRUNC_OR_BITCAST);
 
 	// For some reason it is possible to sub two FP registers with integer sub?
 	// This looks to be also true for add
@@ -1664,12 +1686,12 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateLdp(cs_insn* i, cs_arm64* ai,
 	case ARM64_INS_LDAXP:
 		data_size = llvm::ConstantInt::get(getDefaultType(), getRegisterByteSize(ai->operands[0].reg));
 		ty = getRegisterType(ai->operands[0].reg);
-		ct = eOpConv::ZEXT_TRUNC;
+		ct = eOpConv::ZEXT_TRUNC_OR_BITCAST;
 		break;
 	case ARM64_INS_LDPSW:
 		data_size = llvm::ConstantInt::get(getDefaultType(), 4);
 		ty = irb.getInt32Ty();
-		ct = eOpConv::SEXT_TRUNC;
+		ct = eOpConv::SEXT_TRUNC_OR_BITCAST;
 		break;
 	default:
 		throw GenericError("Arm64 Ldp: Instruction id error");
@@ -2092,8 +2114,7 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateEor(cs_insn* i, cs_arm64* ai,
 {
 	EXPECT_IS_BINARY_OR_TERNARY(i, ai, irb);
 
-	std::tie(op1, op2) = loadOpBinaryOrTernaryOp1Op2(ai, irb);
-	op2 = irb.CreateZExtOrTrunc(op2, op1->getType());
+	std::tie(op1, op2) = loadOpBinaryOrTernaryOp1Op2(ai, irb, eOpConv::ZEXT_TRUNC_OR_BITCAST);
 
 	if (i->id == ARM64_INS_EON)
 	{
@@ -2198,8 +2219,7 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateOrr(cs_insn* i, cs_arm64* ai,
 {
 	EXPECT_IS_BINARY_OR_TERNARY(i, ai, irb);
 
-	std::tie(op1, op2) = loadOpBinaryOrTernaryOp1Op2(ai, irb);
-	op2 = irb.CreateZExtOrTrunc(op2, op1->getType());
+	std::tie(op1, op2) = loadOpBinaryOrTernaryOp1Op2(ai, irb, eOpConv::ZEXT_TRUNC_OR_BITCAST);
 
 	if (i->id == ARM64_INS_ORN)
 	{
@@ -2218,7 +2238,7 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateDiv(cs_insn* i, cs_arm64* ai,
 {
 	EXPECT_IS_TERNARY(i, ai, irb);
 
-	std::tie(op1, op2) = loadOpBinaryOrTernaryOp1Op2(ai, irb);
+	std::tie(op1, op2) = loadOpBinaryOrTernaryOp1Op2(ai, irb, eOpConv::SEXT_TRUNC_OR_BITCAST);
 	llvm::Value *val = nullptr;
 	if (i->id == ARM64_INS_UDIV)
 	{
@@ -2640,7 +2660,7 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateFCmp(cs_insn* i, cs_arm64* ai
 	op0 = loadOp(ai->operands[0], irb);
 	op1 = loadOp(ai->operands[1], irb);
 
-	op1 = generateTypeConversion(irb, op1, op0->getType(), eOpConv::FP_CAST);
+	op1 = generateTypeConversion(irb, op1, op0->getType(), eOpConv::FPCAST_OR_BITCAST);
 
 	// IF op1 == op2
 	auto* fcmpOeq = irb.CreateFCmpOEQ(op0, op1);
@@ -2703,7 +2723,7 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateFCvt(cs_insn* i, cs_arm64* ai
 	EXPECT_IS_BINARY(i, ai, irb);
 
 	op1 = loadOp(ai->operands[1], irb);
-	storeOp(ai->operands[0], op1, irb);
+	storeOp(ai->operands[0], op1, irb, eOpConv::FPCAST_OR_BITCAST);
 }
 
 /**
@@ -2713,15 +2733,15 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateFCvtf(cs_insn* i, cs_arm64* a
 {
 	EXPECT_IS_BINARY(i, ai, irb);
 
-	op1 = loadOp(ai->operands[1], irb);
+	op1 = loadOpBinaryOp1(ai, irb);
 
 	switch(i->id)
 	{
 	case ARM64_INS_UCVTF:
-		storeOp(ai->operands[0], op1, irb, eOpConv::UITOFP);
+		storeOp(ai->operands[0], op1, irb, eOpConv::UITOFP_OR_FPCAST);
 		break;
 	case ARM64_INS_SCVTF:
-		storeOp(ai->operands[0], op1, irb, eOpConv::SITOFP);
+		storeOp(ai->operands[0], op1, irb, eOpConv::SITOFP_OR_FPCAST);
 		break;
 	default:
 		throw GenericError("Arm64: translateFCvtf(): Unsupported instruction id");
@@ -2872,7 +2892,7 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateFMov(cs_insn* i, cs_arm64* ai
 	op1 = loadOp(ai->operands[1], irb);
 	if (ai->operands[1].type == ARM64_OP_FP)
 	{
-		op1 = generateTypeConversion(irb, op1, getRegisterType(ai->operands[0].reg), eOpConv::FP_CAST);
+		op1 = generateTypeConversion(irb, op1, getRegisterType(ai->operands[0].reg), eOpConv::FPCAST_OR_BITCAST);
 	}
 	else
 	{
@@ -2902,7 +2922,7 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateMovi(cs_insn* i, cs_arm64* ai
 	}
 
 	op1 = loadOp(ai->operands[1], irb);
-	storeOp(ai->operands[0], op1, irb);
+	storeOp(ai->operands[0], op1, irb, eOpConv::FPCAST_OR_BITCAST);
 }
 
 /**

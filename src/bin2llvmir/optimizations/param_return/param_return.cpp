@@ -36,24 +36,6 @@ namespace bin2llvmir {
 //=============================================================================
 //
 
-namespace {
-config::CallingConvention::eCallingConvention toCallConv(const std::string &callConv)
-{
-	using CallingConvention = config::CallingConvention::eCallingConvention;
-
-	std::map<std::string, CallingConvention> callConvMap {
-		{"cdecl", CallingConvention::CC_CDECL},
-		{"pascal", CallingConvention::CC_PASCAL},
-		{"thiscall", CallingConvention::CC_THISCALL},
-		{"stdcall", CallingConvention::CC_STDCALL},
-		{"fastcall", CallingConvention::CC_FASTCALL},
-		{"eabi", CallingConvention::CC_ARM}
-	};	// TODO add vectorcall and regcall
-
-	return utils::mapGetValueOrDefault(callConvMap, callConv, CallingConvention::CC_UNKNOWN);
-}
-}
-
 char ParamReturn::ID = 0;
 
 static RegisterPass<ParamReturn> X(
@@ -185,6 +167,20 @@ DataFlowEntry ParamReturn::createDataFlowEntry(Value* calledValue) const
 	collectExtraData(&dataflow);
 
 	return dataflow;
+}
+
+config::CallingConventionID ParamReturn::toCallConv(const std::string &cc) const
+{
+	std::map<std::string, config::CallingConventionID> ccMap {
+		{"cdecl", config::CallingConventionID::CC_CDECL},
+		{"pascal", config::CallingConventionID::CC_PASCAL},
+		{"thiscall", config::CallingConventionID::CC_THISCALL},
+		{"stdcall", config::CallingConventionID::CC_STDCALL},
+		{"fastcall", config::CallingConventionID::CC_FASTCALL},
+		{"eabi", config::CallingConventionID::CC_ARM}
+	};	// TODO add vectorcall and regcall
+
+	return utils::mapGetValueOrDefault(ccMap, cc, config::CallingConventionID::CC_UNKNOWN);
 }
 
 void ParamReturn::collectExtraData(DataFlowEntry* dataflow) const
@@ -679,9 +675,15 @@ void ParamReturn::filterCalls()
 
 		filters[cc]->estimateRetValue(&de);
 
+		if (_abi->supportsCallingConvention(cc))
+		{
+			de.setCallingConvention(cc);
+		}
+		else
+		{
+			de.setCallingConvention(_abi->getDefaultCallingConventionID());
+		}
 		modifyType(de);
-
-//		dumpInfo(de);
 
 		analyzeWithDemangler(de);
 	}
@@ -890,7 +892,6 @@ void ParamReturn::applyToIr()
 {
 	for (auto& p : _fnc2calls)
 	{
-//		dumpInfo(p.second);
 		applyToIr(p.second);
 	}
 
@@ -958,6 +959,13 @@ void ParamReturn::applyToIr(DataFlowEntry& de)
 		{
 			definitionArgs.push_back(a);
 		}
+	}
+
+	// Set used calling convention to config
+	auto* cf = _config->getConfigFunction(fnc);
+	if (cf)
+	{
+		cf->callingConvention = de.getCallingConvention();
 	}
 
 	IrModifier irm(_module, _config);
