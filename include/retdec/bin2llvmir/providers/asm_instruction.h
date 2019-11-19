@@ -166,6 +166,8 @@ class AsmInstruction
 				llvm::Instruction* inst);
 		static retdec::common::Address getBasicBlockAddress(
 				llvm::BasicBlock* bb);
+		static retdec::common::Address getTrueBasicBlockAddress(
+				llvm::BasicBlock* bb);
 		static retdec::common::Address getBasicBlockEndAddress(
 				llvm::BasicBlock* bb);
 		static retdec::common::Address getFunctionAddress(

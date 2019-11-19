@@ -93,7 +93,7 @@ common::BasicBlock fillBasicBlock(
 	common::BasicBlock ret;
 
 	ret.setStartEnd(
-		bin2llvmir::AsmInstruction::getBasicBlockAddress(&bb),
+		bin2llvmir::AsmInstruction::getTrueBasicBlockAddress(&bb),
 		bin2llvmir::AsmInstruction::getBasicBlockEndAddress(&bbEnd)
 	);
 
@@ -103,12 +103,12 @@ common::BasicBlock fillBasicBlock(
 		// Some BBs may not have addresses - e.g. those inside
 		// if-then-else instruction models.
 		auto* pred = *pit;
-		auto start = bin2llvmir::AsmInstruction::getBasicBlockAddress(pred);
+		auto start = bin2llvmir::AsmInstruction::getTrueBasicBlockAddress(pred);
 		while (start.isUndefined())
 		{
 			pred = pred->getPrevNode();
 			assert(pred);
-			start = bin2llvmir::AsmInstruction::getBasicBlockAddress(pred);
+			start = bin2llvmir::AsmInstruction::getTrueBasicBlockAddress(pred);
 		}
 		ret.preds.insert(start);
 	}
@@ -119,19 +119,19 @@ common::BasicBlock fillBasicBlock(
 		// Some BBs may not have addresses - e.g. those inside
 		// if-then-else instruction models.
 		auto* succ = *sit;
-		auto start = bin2llvmir::AsmInstruction::getBasicBlockAddress(succ);
+		auto start = bin2llvmir::AsmInstruction::getTrueBasicBlockAddress(succ);
 		while (start.isUndefined())
 		{
 			succ = succ->getPrevNode();
 			assert(succ);
-			start = bin2llvmir::AsmInstruction::getBasicBlockAddress(succ);
+			start = bin2llvmir::AsmInstruction::getTrueBasicBlockAddress(succ);
 		}
 		ret.succs.insert(start);
 	}
 	// MIPS likely delays slot hack - recognize generated pattern and
 	// find all sucessors.
 	// Also applicable to ARM cond call/return patterns, and other cases.
-	if (bin2llvmir::AsmInstruction::getBasicBlockAddress(&bbEnd).isUndefined() // no addr
+	if (bin2llvmir::AsmInstruction::getTrueBasicBlockAddress(&bbEnd).isUndefined() // no addr
 			&& (++pred_begin(&bbEnd)) == pred_end(&bbEnd) // single pred
 			&& bbEnd.getPrevNode() == *pred_begin(&bbEnd)) // pred right before
 	{
@@ -140,11 +140,11 @@ common::BasicBlock fillBasicBlock(
 		if (br
 				&& br->isConditional()
 				&& br->getSuccessor(0) == &bbEnd
-				&& bin2llvmir::AsmInstruction::getBasicBlockAddress(
+				&& bin2llvmir::AsmInstruction::getTrueBasicBlockAddress(
 						br->getSuccessor(1)))
 		{
 			ret.succs.insert(
-					bin2llvmir::AsmInstruction::getBasicBlockAddress(
+					bin2llvmir::AsmInstruction::getTrueBasicBlockAddress(
 							br->getSuccessor(1)));
 		}
 	}
@@ -207,7 +207,7 @@ common::Function fillFunction(
 		// There are more BBs in LLVM IR than we created in control-flow
 		// decoding - e.g. BBs inside instructions that behave like
 		// if-then-else created by capstone2llvmir.
-		if (bin2llvmir::AsmInstruction::getBasicBlockAddress(&bb).isUndefined())
+		if (bin2llvmir::AsmInstruction::getTrueBasicBlockAddress(&bb).isUndefined())
 		{
 			continue;
 		}
@@ -217,7 +217,7 @@ common::Function fillFunction(
 		{
 			// Next has address -- is a proper BB.
 			//
-			if (bin2llvmir::AsmInstruction::getBasicBlockAddress(
+			if (bin2llvmir::AsmInstruction::getTrueBasicBlockAddress(
 					bbEnd->getNextNode()).isDefined())
 			{
 				break;

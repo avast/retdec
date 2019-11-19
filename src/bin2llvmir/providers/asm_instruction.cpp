@@ -243,6 +243,14 @@ retdec::common::Address AsmInstruction::getInstructionEndAddress(
 	return ret;
 }
 
+retdec::common::Address AsmInstruction::getBasicBlockAddress(
+		llvm::BasicBlock* bb)
+{
+	return bb->empty()
+			? retdec::common::Address()
+			: getInstructionAddress(&bb->front());
+}
+
 retdec::common::Address getBasicBlockAddressFromName(llvm::BasicBlock* b)
 {
 	std::string n = b->getName();
@@ -252,7 +260,8 @@ retdec::common::Address getBasicBlockAddressFromName(llvm::BasicBlock* b)
 	return ret == 1 ? common::Address(a) : common::Address();
 }
 
-retdec::common::Address AsmInstruction::getBasicBlockAddress(
+// TODO: not ideal, returns only for BBs with specific names.
+retdec::common::Address AsmInstruction::getTrueBasicBlockAddress(
 		llvm::BasicBlock* bb)
 {
 	std::string n = bb->getName();

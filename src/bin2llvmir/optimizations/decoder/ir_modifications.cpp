@@ -408,7 +408,6 @@ bool Decoder::canSplitFunctionOn(
 		changed = false;
 		for (BasicBlock& b : *f)
 		{
-//			Address bAddr = getBasicBlockAddress(&b);
 			common::Address bAddr;
 			// TODO: shitty
 			BasicBlock* bPrev = &b;
@@ -430,7 +429,6 @@ bool Decoder::canSplitFunctionOn(
 
 			for (auto* p : predecessors(&b))
 			{
-//				Address pAddr = getBasicBlockAddress(p);
 				common::Address pAddr;
 				// TODO: shitty
 				BasicBlock* pPrev = p;

@@ -99,7 +99,7 @@ void dumpControFlowToJsonBasicBlock(
 {
 	static auto* config = ConfigProvider::getConfig(bb.getModule());
 
-	auto start = AsmInstruction::getBasicBlockAddress(&bb);
+	auto start = AsmInstruction::getTrueBasicBlockAddress(&bb);
 	auto end = AsmInstruction::getBasicBlockEndAddress(&bbEnd);
 
 	out << genIndent(3) << "{" << "\n";
@@ -113,12 +113,12 @@ void dumpControFlowToJsonBasicBlock(
 		// Some BBs may not have addresses - e.g. those inside
 		// if-then-else instruction models.
 		auto* pred = *pit;
-		auto start = AsmInstruction::getBasicBlockAddress(pred);
+		auto start = AsmInstruction::getTrueBasicBlockAddress(pred);
 		while (start.isUndefined())
 		{
 			pred = pred->getPrevNode();
 			assert(pred);
-			start = AsmInstruction::getBasicBlockAddress(pred);
+			start = AsmInstruction::getTrueBasicBlockAddress(pred);
 		}
 		predsAddrs.insert(start);
 	}
@@ -154,12 +154,12 @@ void dumpControFlowToJsonBasicBlock(
 		// Some BBs may not have addresses - e.g. those inside
 		// if-then-else instruction models.
 		auto* succ = *sit;
-		auto start = AsmInstruction::getBasicBlockAddress(succ);
+		auto start = AsmInstruction::getTrueBasicBlockAddress(succ);
 		while (start.isUndefined())
 		{
 			succ = succ->getPrevNode();
 			assert(succ);
-			start = AsmInstruction::getBasicBlockAddress(succ);
+			start = AsmInstruction::getTrueBasicBlockAddress(succ);
 		}
 		succsAddrs.insert(start);
 	}
@@ -167,7 +167,7 @@ void dumpControFlowToJsonBasicBlock(
 	// find all sucessors.
 	// Also applicable to ARM cond call/return patterns, and other cases.
 	if (config
-			&& AsmInstruction::getBasicBlockAddress(&bbEnd).isUndefined() // no addr
+			&& AsmInstruction::getTrueBasicBlockAddress(&bbEnd).isUndefined() // no addr
 			&& (++pred_begin(&bbEnd)) == pred_end(&bbEnd) // single pred
 			&& bbEnd.getPrevNode() == *pred_begin(&bbEnd)) // pred right before
 	{
@@ -175,9 +175,9 @@ void dumpControFlowToJsonBasicBlock(
 		if (br
 				&& br->isConditional()
 				&& br->getSuccessor(0) == &bbEnd
-				&& AsmInstruction::getBasicBlockAddress(br->getSuccessor(1)))
+				&& AsmInstruction::getTrueBasicBlockAddress(br->getSuccessor(1)))
 		{
-			succsAddrs.insert(AsmInstruction::getBasicBlockAddress(br->getSuccessor(1)));
+			succsAddrs.insert(AsmInstruction::getTrueBasicBlockAddress(br->getSuccessor(1)));
 		}
 	}
 
@@ -234,7 +234,7 @@ void dumpControFlowToJsonFunction(
 			// There are more BBs in LLVM IR than we created in control-flow
 			// decoding - e.g. BBs inside instructions that behave like
 			// if-then-else created by capstone2llvmir.
-			if (AsmInstruction::getBasicBlockAddress(&bb).isUndefined())
+			if (AsmInstruction::getTrueBasicBlockAddress(&bb).isUndefined())
 			{
 				continue;
 			}
@@ -253,7 +253,7 @@ void dumpControFlowToJsonFunction(
 			{
 				// Next has address -- is a proper BB.
 				//
-				if (AsmInstruction::getBasicBlockAddress(bbEnd->getNextNode()).isDefined())
+				if (AsmInstruction::getTrueBasicBlockAddress(bbEnd->getNextNode()).isDefined())
 				{
 					break;
 				}
