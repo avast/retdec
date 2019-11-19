@@ -36,31 +36,31 @@ std::string LibcSemantics::getId() const {
 	return LIBC_SEMANTICS_ID;
 }
 
-Maybe<std::string> LibcSemantics::getMainFuncName() const {
-	return Just<std::string>("main");
+std::optional<std::string> LibcSemantics::getMainFuncName() const {
+	return "main";
 }
 
-Maybe<std::string> LibcSemantics::getCHeaderFileForFunc(
+std::optional<std::string> LibcSemantics::getCHeaderFileForFunc(
 		const std::string &funcName) const {
 	return semantics::libc::getCHeaderFileForFunc(funcName);
 }
 
-Maybe<bool> LibcSemantics::funcNeverReturns(
+std::optional<bool> LibcSemantics::funcNeverReturns(
 		const std::string &funcName) const {
 	return semantics::libc::funcNeverReturns(funcName);
 }
 
-Maybe<std::string> LibcSemantics::getNameOfVarStoringResult(
+std::optional<std::string> LibcSemantics::getNameOfVarStoringResult(
 		const std::string &funcName) const {
 	return semantics::libc::getNameOfVarStoringResult(funcName);
 }
 
-Maybe<std::string> LibcSemantics::getNameOfParam(
+std::optional<std::string> LibcSemantics::getNameOfParam(
 		const std::string &funcName, unsigned paramPos) const {
 	return semantics::libc::getNameOfParam(funcName, paramPos);
 }
 
-Maybe<IntStringMap> LibcSemantics::getSymbolicNamesForParam(
+std::optional<IntStringMap> LibcSemantics::getSymbolicNamesForParam(
 		const std::string &funcName, unsigned paramPos) const {
 	return semantics::libc::getSymbolicNamesForParam(funcName, paramPos);
 }

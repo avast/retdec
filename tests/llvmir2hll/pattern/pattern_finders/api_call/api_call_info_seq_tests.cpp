@@ -48,7 +48,6 @@ AssignmentToSelfWorksCorrectly) {
 	APICallInfoSeq seq;
 	APICallInfo info("func");
 	seq.add(info);
-	seq = seq;
 	EXPECT_EQ(info, seq.front());
 }
 

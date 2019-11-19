@@ -8,6 +8,7 @@
 #define RETDEC_BIN2LLVMIR_OPTIMIZATIONS_DECODER_DECODER_H
 
 #include <map>
+#include <optional>
 #include <queue>
 #include <sstream>
 
@@ -162,7 +163,7 @@ class Decoder : public llvm::ModulePass
 				utils::Address a,
 				bool declaration = false);
 		void addFunction(utils::Address a, llvm::Function* f);
-		void addFunctionSize(llvm::Function* f, utils::Maybe<std::size_t> sz);
+		void addFunctionSize(llvm::Function* f, std::optional<std::size_t> sz);
 
 		std::map<utils::Address, llvm::Function*> _addr2fnc;
 		std::map<llvm::Function*, utils::Address> _fnc2addr;

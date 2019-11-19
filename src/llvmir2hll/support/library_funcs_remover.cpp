@@ -4,13 +4,14 @@
 * @copyright (c) 2017 Avast Software, licensed under the MIT license
 */
 
+#include <optional>
+
 #include "retdec/llvmir2hll/ir/function.h"
 #include "retdec/llvmir2hll/ir/module.h"
 #include "retdec/llvmir2hll/semantics/semantics.h"
 #include "retdec/llvmir2hll/support/debug.h"
 #include "retdec/llvmir2hll/support/headers_for_declared_funcs.h"
 #include "retdec/llvmir2hll/support/library_funcs_remover.h"
-#include "retdec/llvmir2hll/support/maybe.h"
 #include "retdec/utils/container.h"
 
 using retdec::utils::hasItem;
@@ -29,7 +30,7 @@ namespace {
 */
 bool isLibraryFunc(ShPtr<Function> func, ShPtr<Module> module,
 		const StringSet &headers) {
-	Maybe<std::string> header(
+	std::optional<std::string> header(
 		module->getSemantics()->getCHeaderFileForFunc(func->getName())
 	);
 	if (!header) {
@@ -37,7 +38,7 @@ bool isLibraryFunc(ShPtr<Function> func, ShPtr<Module> module,
 		return false;
 	}
 
-	if (!hasItem(headers, header.get())) {
+	if (!hasItem(headers, header.value())) {
 		// The function is not from any of the included headers.
 		return false;
 	}

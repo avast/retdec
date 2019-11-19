@@ -1969,7 +1969,7 @@ const StringStringUMap &FUNC_C_HEADER_MAP(initFuncCHeaderMap());
 *
 * See its description for more details.
 */
-Maybe<std::string> getCHeaderFileForFunc(const std::string &funcName) {
+std::optional<std::string> getCHeaderFileForFunc(const std::string &funcName) {
 	return getCHeaderFileForFuncFromMap(funcName, FUNC_C_HEADER_MAP);
 }
 

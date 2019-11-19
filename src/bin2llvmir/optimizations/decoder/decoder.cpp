@@ -218,7 +218,7 @@ void Decoder::decodeJumpTarget(const JumpTarget& jt)
 
 	if (jt.hasSize() && jt.getSize() < bytes.second)
 	{
-		bytes.second = jt.getSize();
+		bytes.second = jt.getSize().value();
 	}
 	if (auto nextBbAddr = getBasicBlockAddressAfter(start))
 	{

@@ -24,10 +24,17 @@ namespace {
 * @brief Generic depth-first iterator.
 */
 template <class Graph>
-class df_iterator: public std::iterator<std::forward_iterator_tag, ShPtr<typename Graph::Node>> {
+class df_iterator {
 private:
 	using Node = ShPtr<typename Graph::Node>;
-	using super = std::iterator<std::forward_iterator_tag, Node>;
+
+	// Standard typedefs.
+	using value_type = Node;
+	using reference = value_type&;
+	using pointer = value_type*;
+	using difference_type = std::ptrdiff_t;
+	using iterator_category = std::forward_iterator_tag;
+
 	// The stack nodes consist of the current CFG node, a statement iterator
 	// storing the current place in the node's statements, and an iterator
 	// storing the current place in the node's successor list.  Statement place
@@ -76,7 +83,7 @@ private:
 	}
 
 public:
-	using pointer = typename super::pointer;
+	// using pointer = typename super::pointer;
 
 	// Provide static begin and end methods as our public "constructors".
 	static df_iterator<Graph> begin(const Node &N) {

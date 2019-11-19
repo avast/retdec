@@ -192,7 +192,7 @@ TEST_F(ConfigTests, getConfigRegisterNumberReturnDefinedValueIfItExists)
 	config.getConfig().registers.insert(r);
 	auto regNum = config.getConfigRegisterNumber(llvmReg);
 
-	EXPECT_TRUE(regNum.isDefined());
+	EXPECT_TRUE(regNum.has_value());
 	EXPECT_EQ(123, regNum);
 }
 
@@ -208,7 +208,7 @@ TEST_F(ConfigTests, getConfigRegisterNumberReturnUndefinedValueIfItDoesNotExist)
 	config.getConfig().registers.insert(r);
 	auto regNum = config.getConfigRegisterNumber(llvmReg);
 
-	EXPECT_TRUE(regNum.isUndefined());
+	EXPECT_FALSE(regNum.has_value());
 }
 
 //
@@ -545,8 +545,8 @@ TEST_F(ConfigTests, getStackVariableOffsetReturnsDefinedValueForStacks)
 	config.getConfig().functions.insert(cf);
 	auto off = config.getStackVariableOffset(llvmSv);
 
-	ASSERT_TRUE(off.isDefined());
-	EXPECT_EQ(4, off.getValue());
+	ASSERT_TRUE(off.has_value());
+	EXPECT_EQ(4, off.value());
 }
 
 TEST_F(ConfigTests, getStackVariableOffsetReturnsUndefinedValueForNonStacks)
@@ -560,7 +560,7 @@ TEST_F(ConfigTests, getStackVariableOffsetReturnsUndefinedValueForNonStacks)
 	auto config = Config::empty(module.get());
 	auto off = config.getStackVariableOffset(llvmFnc);
 
-	ASSERT_TRUE(off.isUndefined());
+	ASSERT_FALSE(off.has_value());
 }
 
 //

@@ -133,7 +133,6 @@ set(RETDEC_TESTS_LLVMIR2HLL_SOURCES
 	support/global_vars_sorter_tests.cpp
 	support/headers_for_declared_funcs_tests.cpp
 	support/library_funcs_remover_tests.cpp
-	support/maybe_tests.cpp
 	support/struct_types_sorter_tests.cpp
 	support/unreachable_code_in_cfg_remover_tests.cpp
 	utils/ir_tests.cpp

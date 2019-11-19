@@ -30,7 +30,7 @@ JumpTarget::JumpTarget(
 		eType t,
 		cs_mode m,
 		retdec::utils::Address f,
-		utils::Maybe<std::size_t> sz)
+		std::optional<std::size_t> sz)
 		:
 		_address(a),
 		_size(sz),
@@ -71,10 +71,10 @@ retdec::utils::Address JumpTarget::getAddress() const
 
 bool JumpTarget::hasSize() const
 {
-	return _size.isDefined();
+	return _size.has_value();
 }
 
-utils::Maybe<std::size_t> JumpTarget::getSize() const
+std::optional<std::size_t> JumpTarget::getSize() const
 {
 	return _size;
 }
@@ -166,7 +166,7 @@ std::ostream& operator<<(std::ostream &out, const JumpTarget& jt)
 	}
 	if (jt.hasSize())
 	{
-		out << ", size = " << jt.getSize();
+		out << ", size = " << jt.getSize().value();
 	}
 
 	return out;
@@ -185,7 +185,7 @@ const JumpTarget* JumpTargets::push(
 		JumpTarget::eType t,
 		cs_mode m,
 		retdec::utils::Address f,
-		utils::Maybe<std::size_t> sz)
+		std::optional<std::size_t> sz)
 {
 	static auto& arch = config->getConfig().architecture;
 

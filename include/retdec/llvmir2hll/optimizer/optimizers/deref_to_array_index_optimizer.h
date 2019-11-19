@@ -8,9 +8,10 @@
 #ifndef RETDEC_LLVMIR2HLL_OPTIMIZER_OPTIMIZERS_DEREF_TO_ARRAY_INDEX_OPTIMIZER_H
 #define RETDEC_LLVMIR2HLL_OPTIMIZER_OPTIMIZERS_DEREF_TO_ARRAY_INDEX_OPTIMIZER_H
 
+#include <optional>
+
 #include "retdec/llvmir2hll/optimizer/optimizer.h"
 #include "retdec/llvmir2hll/support/debug.h"
-#include "retdec/llvmir2hll/support/maybe.h"
 #include "retdec/llvmir2hll/support/smart_ptr.h"
 
 namespace retdec {
@@ -73,7 +74,7 @@ private:
 	virtual void visit(ShPtr<DerefOpExpr> expr) override;
 	/// @}
 
-	Maybe<BaseAndIndex> getBaseAndIndexFromExprIfPossible(ShPtr<AddOpExpr> expr);
+	std::optional<BaseAndIndex> getBaseAndIndexFromExprIfPossible(ShPtr<AddOpExpr> expr);
 	void replaceDerefWithArrayIndex(ShPtr<DerefOpExpr> oldExpr, const
 		BaseAndIndex &baseAndIndex);
 };

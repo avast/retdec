@@ -4,6 +4,8 @@
 * @copyright (c) 2017 Avast Software, licensed under the MIT license
 */
 
+#include <optional>
+
 #include "retdec/llvmir2hll/ir/assign_stmt.h"
 #include "retdec/llvmir2hll/ir/call_expr.h"
 #include "retdec/llvmir2hll/ir/for_loop_stmt.h"
@@ -15,7 +17,6 @@
 #include "retdec/llvmir2hll/ir/variable.h"
 #include "retdec/llvmir2hll/semantics/semantics.h"
 #include "retdec/llvmir2hll/support/debug.h"
-#include "retdec/llvmir2hll/support/maybe.h"
 #include "retdec/llvmir2hll/support/statements_counter.h"
 #include "retdec/llvmir2hll/support/types.h"
 #include "retdec/llvmir2hll/utils/ir.h"
@@ -296,10 +297,10 @@ void ReadableVarRenamer::tryRenameVarStoringCallResult(ShPtr<Statement> stmt) {
 		return;
 	}
 
-	Maybe<std::string> newName(module->getSemantics()->getNameOfVarStoringResult(
+	std::optional<std::string> newName(module->getSemantics()->getNameOfVarStoringResult(
 		calledFunc->getName()));
 	if (newName) {
-		assignName(lhsVar, newName.get(), currFunc);
+		assignName(lhsVar, newName.value(), currFunc);
 	}
 }
 
@@ -345,10 +346,10 @@ void ReadableVarRenamer::tryRenameVarPassedAsArgToFuncCall(
 		return;
 	}
 
-	Maybe<std::string> newName(module->getSemantics()->getNameOfParam(
+	std::optional<std::string> newName(module->getSemantics()->getNameOfParam(
 		calledFunc->getName(), argPos));
 	if (newName) {
-		assignName(var, newName.get(), currFunc);
+		assignName(var, newName.value(), currFunc);
 	}
 }
 

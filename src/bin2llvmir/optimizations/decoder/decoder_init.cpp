@@ -393,7 +393,7 @@ void Decoder::initAllowedRangesWithConfig()
 			LOG << "\t" << "[+] selected range from debug @ "
 					<< AddressRange(start, end) << std::endl;
 
-			utils::Maybe<std::size_t> sz;
+			std::optional<std::size_t> sz;
 			auto tmpSz = dfp.second.getSize();
 			if (tmpSz.isDefined() && tmpSz > 0)
 			{
@@ -466,7 +466,7 @@ void Decoder::initAllowedRangesWithConfig()
 				continue;
 			}
 
-			utils::Maybe<std::size_t> knownSz;
+			std::optional<std::size_t> knownSz;
 			unsigned long long size = 0;
 			if (!s->getSize(size))
 			{
@@ -579,8 +579,8 @@ void Decoder::initJumpTargetsConfig()
 
 		auto tmpSz = f.getSize();
 		auto sz = tmpSz.isDefined() && tmpSz > 0
-				? Maybe<std::size_t>(tmpSz)
-				: Maybe<std::size_t>();
+				? std::optional<std::size_t>(tmpSz)
+				: std::nullopt;
 
 		if (auto* jt = _jumpTargets.push(
 				f.getStart(),
@@ -865,7 +865,7 @@ void Decoder::initJumpTargetsSymbols()
 		}
 		utils::Address addr = a;
 
-		utils::Maybe<std::size_t> sz;
+		std::optional<std::size_t> sz;
 		unsigned long long tmpSz = 0;
 		if (s->getSize(tmpSz) && tmpSz > 0)
 		{
@@ -912,7 +912,7 @@ void Decoder::initJumpTargetsDebug()
 		}
 		auto& f = p.second;
 
-		utils::Maybe<std::size_t> sz;
+		std::optional<std::size_t> sz;
 		auto tmpSz = p.second.getSize();
 		if (tmpSz.isDefined() && tmpSz > 0)
 		{

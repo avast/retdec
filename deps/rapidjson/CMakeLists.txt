@@ -19,6 +19,8 @@ if(RAPIDJSON_LOCAL_DIR)
 			-DRAPIDJSON_BUILD_DOC=OFF
 			-DRAPIDJSON_BUILD_EXAMPLES=OFF
 			-DRAPIDJSON_BUILD_TESTS=OFF
+			# Prevent inheritance from std::iterator.
+			-DRAPIDJSON_NOMEMBERITERATORCLASS=ON
 			# Force the use of the same compiler as used to build the top-level
 			# project. Otherwise, the external project may pick up a different
 			# compiler, which may result in link errors.
@@ -45,6 +47,8 @@ else()
 			-DRAPIDJSON_BUILD_DOC=OFF
 			-DRAPIDJSON_BUILD_EXAMPLES=OFF
 			-DRAPIDJSON_BUILD_TESTS=OFF
+			# Prevent inheritance from std::iterator.
+			-DRAPIDJSON_NOMEMBERITERATORCLASS=ON
 			# Force the use of the same compiler as used to build the top-level
 			# project. Otherwise, the external project may pick up a different
 			# compiler, which may result in link errors.

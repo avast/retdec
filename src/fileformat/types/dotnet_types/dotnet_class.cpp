@@ -47,7 +47,7 @@ const TypeDef* DotnetClass::getRawTypeDef() const
 		return nullptr;
 	}
 
-	return mpark::get<const TypeDef*>(rawRecord);
+	return std::get<const TypeDef*>(rawRecord);
 }
 
 /**
@@ -61,7 +61,7 @@ const TypeRef* DotnetClass::getRawTypeRef() const
 		return nullptr;
 	}
 
-	return mpark::get<const TypeRef*>(rawRecord);
+	return std::get<const TypeRef*>(rawRecord);
 }
 
 /**
@@ -299,7 +299,7 @@ MetadataTableType DotnetClass::getRecordType() const
  * Sets the raw metadata table record for this class.
  * @param rRecord Raw metadata table record.
  */
-void DotnetClass::setRawRecord(mpark::variant<const TypeDef*, const TypeRef*> rRecord)
+void DotnetClass::setRawRecord(std::variant<const TypeDef*, const TypeRef*> rRecord)
 {
 	rawRecord = rRecord;
 }

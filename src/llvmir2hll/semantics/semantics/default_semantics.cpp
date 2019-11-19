@@ -30,33 +30,33 @@ std::string DefaultSemantics::getId() const {
 	return DEFAULT_SEMANTICS_ID;
 }
 
-Maybe<std::string> DefaultSemantics::getMainFuncName() const {
-	return Nothing<std::string>();
+std::optional<std::string> DefaultSemantics::getMainFuncName() const {
+	return std::nullopt;
 }
 
-Maybe<std::string> DefaultSemantics::getCHeaderFileForFunc(
+std::optional<std::string> DefaultSemantics::getCHeaderFileForFunc(
 		const std::string &funcName) const {
-	return Nothing<std::string>();
+	return std::nullopt;
 }
 
-Maybe<bool> DefaultSemantics::funcNeverReturns(
+std::optional<bool> DefaultSemantics::funcNeverReturns(
 		const std::string &funcName) const {
-	return Nothing<bool>();
+	return std::nullopt;
 }
 
-Maybe<std::string> DefaultSemantics::getNameOfVarStoringResult(
+std::optional<std::string> DefaultSemantics::getNameOfVarStoringResult(
 		const std::string &funcName) const {
-	return Nothing<std::string>();
+	return std::nullopt;
 }
 
-Maybe<std::string> DefaultSemantics::getNameOfParam(
+std::optional<std::string> DefaultSemantics::getNameOfParam(
 		const std::string &funcName, unsigned paramPos) const {
-	return Nothing<std::string>();
+	return std::nullopt;
 }
 
-Maybe<IntStringMap> DefaultSemantics::getSymbolicNamesForParam(
+std::optional<IntStringMap> DefaultSemantics::getSymbolicNamesForParam(
 		const std::string &funcName, unsigned paramPos) const {
-	return Nothing<IntStringMap>();
+	return std::nullopt;
 }
 
 } // namespace llvmir2hll

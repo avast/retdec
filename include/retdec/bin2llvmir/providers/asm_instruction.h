@@ -18,7 +18,6 @@
 
 #include "retdec/bin2llvmir/utils/llvm.h"
 #include "retdec/utils/address.h"
-#include "retdec/utils/value.h"
 
 namespace retdec {
 namespace bin2llvmir {
