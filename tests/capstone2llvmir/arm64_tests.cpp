@@ -146,7 +146,7 @@ struct PrintCapstoneModeToString_Arm64
 	}
 };
 
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
 		InstantiateArm64WithAllModes,
 		Capstone2LlvmIrTranslatorArm64Tests,
 		::testing::Values(CS_MODE_ARM),

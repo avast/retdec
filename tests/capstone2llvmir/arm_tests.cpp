@@ -89,7 +89,7 @@ struct PrintCapstoneModeToString_Arm
 // If some test case is not meant for all modes, use some of the ONLY_MODE_*,
 // SKIP_MODE_* macros.
 //
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
 		InstantiateArmWithAllModes,
 		Capstone2LlvmIrTranslatorArmTests,
 		::testing::Values(CS_MODE_ARM, CS_MODE_THUMB),

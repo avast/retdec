@@ -309,7 +309,7 @@ struct PrintCapstoneModeToString_x86
 // If some test case is not meant for all modes, use some of the ONLY_MODE_*,
 // SKIP_MODE_* macros.
 //
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
 		InstantiateX86WithAllModes,
 		Capstone2LlvmIrTranslatorX86Tests,
 		::testing::Values(CS_MODE_16, CS_MODE_32, CS_MODE_64),
