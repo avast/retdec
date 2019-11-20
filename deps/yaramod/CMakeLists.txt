@@ -1,7 +1,3 @@
-# Requirements.
-find_package(FLEX REQUIRED)
-find_package(BISON REQUIRED)
-
 include(ExternalProject)
 
 if(CMAKE_C_COMPILER)
