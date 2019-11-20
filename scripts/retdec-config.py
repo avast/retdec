@@ -134,7 +134,7 @@ BIN2LLVMIR_PARAMS = [
     '-instcombine',
     '-inst-opt',
     '-idioms',
-    '-phi2seq',
+    '-reg2mem',
     '-value-protect',
 ] + BIN2LLVMIR_PARAMS_DISABLES
 
