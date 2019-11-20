@@ -47,14 +47,11 @@ script:
   # We use "-O0" to speed up the build.
   # "-O0" causes segfaults in LLVM if we do not use "-DNDEBUG" as well.
   - cmake -DCMAKE_CXX_FLAGS_RELEASE="-O0 -DNDEBUG" -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="$(pwd)/install" -DRETDEC_COMPILE_YARA=OFF ..
-  - if [ "$TRAVIS_OS_NAME" = "osx" ]; then cmake -DRETDEC_TESTS=ON -DRETDEC_DEV_TOOLS=ON .. ; fi
   - time make install -j $NPROC
   # Check that install is movable and that it does not need the build directory.
   - mv install ../retdec-install
   - cd ..
   - rm -rf build
-  # Run unit tests.
-  - if [ "$TRAVIS_OS_NAME" = "osx" ]; then python3 retdec-install/bin/retdec-tests-runner.py ; fi
   # Run the decompilation script.
   - python3 retdec-install/bin/retdec-decompiler.py --help
   # Run a simple decompilation.
