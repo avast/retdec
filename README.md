@@ -125,8 +125,6 @@ This section describes a local build and installation of RetDec. Instructions fo
 * [Git](https://git-scm.com/)
 * [Perl](https://www.perl.org/)
 * [Python](https://www.python.org/) (version >= 3.4)
-* [Bison](https://www.gnu.org/software/bison/) (version >= 3.0)
-* [Flex](https://www.gnu.org/software/flex/) (version >= 2.6)
 * [autotools](https://en.wikipedia.org/wiki/GNU_Build_System) ([autoconf](https://www.gnu.org/software/autoconf/autoconf.html), [automake](https://www.gnu.org/software/automake/), and [libtool](https://www.gnu.org/software/libtool/))
 * [pkg-config](https://www.freedesktop.org/wiki/Software/pkg-config/)
 * [m4](https://www.gnu.org/software/m4/m4.html)
@@ -136,19 +134,19 @@ This section describes a local build and installation of RetDec. Instructions fo
 On Debian-based distributions (e.g. Ubuntu), the required packages can be installed with `apt-get`:
 
 ```sh
-sudo apt-get install build-essential cmake git perl python3 bison flex libfl-dev autoconf automake libtool pkg-config m4 zlib1g-dev upx doxygen graphviz
+sudo apt-get install build-essential cmake git perl python3 autoconf automake libtool pkg-config m4 zlib1g-dev upx doxygen graphviz
 ```
 
 On RPM-based distributions (e.g. Fedora), the required packages can be installed with `dnf`:
 
 ```sh
-sudo dnf install gcc gcc-c++ cmake make git perl python3 bison flex autoconf automake libtool pkg-config m4 zlib-devel upx doxygen graphviz
+sudo dnf install gcc gcc-c++ cmake make git perl python3 autoconf automake libtool pkg-config m4 zlib-devel upx doxygen graphviz
 ```
 
 On Arch Linux, the required packages can be installed with `pacman`:
 
 ```sh
-sudo pacman --needed -S base-devel cmake git perl python3 bison flex autoconf automake libtool pkg-config m4 zlib upx doxygen graphviz
+sudo pacman --needed -S base-devel cmake git perl python3 autoconf automake libtool pkg-config m4 zlib upx doxygen graphviz
 ```
 
 #### Windows
@@ -156,7 +154,6 @@ sudo pacman --needed -S base-devel cmake git perl python3 bison flex autoconf au
 * Microsoft Visual C++ (version >= Visual Studio 2017 version 15.7)
 * [CMake](https://cmake.org/) (version >= 3.6)
 * [Git](https://git-scm.com/)
-* [Flex + Bison](https://sourceforge.net/projects/winflexbison/files/win_flex_bison3-latest.zip/download) ([mirror](https://github.com/avast/retdec-support/releases/download/2018-07-27/win_flex_bison3-latest.zip)) from the [Win flex-bison project](https://sourceforge.net/projects/winflexbison/). Add the extracted directory to the system `Path` ([HOWTO](https://www.computerhope.com/issues/ch000549.htm)).
 * [Active Perl](https://www.activestate.com/activeperl). It needs to be the first Perl in `PATH`, or it has to be provided to CMake using `CMAKE_PROGRAM_PATH` variable, e.g. `-DCMAKE_PROGRAM_PATH=/c/perl/bin`. Does NOT work with Strawberry Perl or MSYS2 Perl (you would have to install a pre-built version of OpenSSL, see below).
   * Alternatively, you can install OpenSSL directly from [here](https://slproweb.com/products/Win32OpenSSL.html). This means OpenSSL won't be built and you don't need to install any Perl. Do not install Light version of OpenSSL as they don't contain development files.
 * [Python](https://www.python.org/) (version >= 3.4)
@@ -172,8 +169,6 @@ Packages should be preferably installed via [Homebrew](https://brew.sh).
 * [Git](https://git-scm.com/)
 * [Perl](https://www.perl.org/)
 * [Python](https://www.python.org/) (version >= 3.4)
-* [Bison](https://www.gnu.org/software/bison/) (version >= 3.0)
-* [Flex](https://www.gnu.org/software/flex/) (version >= 2.6)
 * [autotools](https://en.wikipedia.org/wiki/GNU_Build_System) ([autoconf](https://www.gnu.org/software/autoconf/autoconf.html), [automake](https://www.gnu.org/software/automake/), and [libtool](https://www.gnu.org/software/libtool/))
 * Optional: [Doxygen](http://www.stack.nl/~dimitri/doxygen/) and [Graphviz](http://www.graphviz.org/) for generating API documentation
 
@@ -182,7 +177,7 @@ Packages should be preferably installed via [Homebrew](https://brew.sh).
 Packages should be installed via FreeBSDs pre-compiled package repository using the `pkg` command or built from scratch using the `ports` database method.
 
 * Full "pkg" tool instructions: [handbook pkg method](https://www.freebsd.org/doc/handbook/pkgng-intro.html)
-  * `pkg install cmake python37 bison git autotools`
+  * `pkg install cmake python37 git autotools`
 OR
 * Full "ports" instructions: [handbook ports method](https://www.freebsd.org/doc/handbook/ports-using.html)
   * `portsnap fetch`
@@ -215,12 +210,6 @@ Note: Although RetDec now supports a system-wide installation ([#94](https://git
 * macOS:
   * `cd retdec`
   * `mkdir build && cd build`
-  * ```sh
-    # Apple ships old Flex & Bison, so Homebrew versions should be used.
-    export CMAKE_INCLUDE_PATH="/usr/local/opt/flex/include"
-    export CMAKE_LIBRARY_PATH="/usr/local/opt/flex/lib;/usr/local/opt/bison/lib"
-    export PATH="/usr/local/opt/flex/bin:/usr/local/opt/bison/bin:$PATH"
-    ```
   * `cmake .. -DCMAKE_INSTALL_PREFIX=<path>`
   * `make -jN` (`N` is the number of processes to use for parallel build, typically number of cores + 1 gives fastest compilation time)
   * `make install`
@@ -230,12 +219,12 @@ Note: Although RetDec now supports a system-wide installation ([#94](https://git
   * `cd retdec`
   * `mkdir build && cd build`
   * ```sh
-    # FreeBSD (and other BSDs) do need cmake, python3, bison, git, autotools. Flex and perl are pre-installed in the OS but check versions.
+    # FreeBSD (and other BSDs) do need cmake, python3, git, autotools. Perl is pre-installed in the OS but check its version.
     # Later versions may be available for each of the packages.
     # See what is installed:
-    sudo pkg info cmake python37 bison autotools
+    sudo pkg info cmake python37 autotools
     # Install/upgrade them:
-    sudo pkg install cmake python37 bison autotools
+    sudo pkg install cmake python37 autotools
     ```
   * `cmake .. -DCMAKE_INSTALL_PREFIX=<path>`
   * `make -jN` (`N` is the number of processes to use for parallel build, typically number of cores + 1 gives fastest compilation time)
