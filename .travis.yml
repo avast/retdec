@@ -36,6 +36,8 @@ install:
   - if [ "$TRAVIS_OS_NAME" = "osx" ]; then brew install ccache; fi
   # install for os x the gnu time library
   - if [ "$TRAVIS_OS_NAME" = "osx" ]; then brew install gnu-time; fi
+  # install for os x the openssl library
+  - if [ "$TRAVIS_OS_NAME" = "osx" ]; then brew install openssl@1.1; export OPENSSL_ROOT_DIR=/usr/local/opt/openssl@1.1; fi
 
 before_script:
   - eval "${MATRIX_EVAL}"
