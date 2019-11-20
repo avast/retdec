@@ -12,8 +12,6 @@ matrix:
           packages:
             - build-essential
             - gcc-multilib
-            - flex
-            - bison
             - autoconf
             - automake
             - libtool
@@ -34,8 +32,6 @@ matrix:
         - CCACHE_CPP2=true
 
 install:
-  # We need to install newer versions of Flex and Bison on MacOS X.
-  - if [ "$TRAVIS_OS_NAME" = "osx" ]; then brew install flex bison; fi
   # ccache is not installed on OS X.
   - if [ "$TRAVIS_OS_NAME" = "osx" ]; then brew install ccache; fi
   # install for os x the gnu time library
@@ -43,10 +39,6 @@ install:
 
 before_script:
   - eval "${MATRIX_EVAL}"
-  # We need to use newer versions of Flex and Bison on MacOS X (the ones from Homebrew).
-  - if [ "$TRAVIS_OS_NAME" = "osx" ]; then export CMAKE_INCLUDE_PATH="/usr/local/opt/flex/include"; fi
-  - if [ "$TRAVIS_OS_NAME" = "osx" ]; then export CMAKE_LIBRARY_PATH="/usr/local/opt/flex/lib;/usr/local/opt/bison/lib"; fi
-  - if [ "$TRAVIS_OS_NAME" = "osx" ]; then export PATH="/usr/local/opt/flex/bin:/usr/local/opt/bison/bin:$PATH"; fi
   # We need to add ccache before everything else into PATH.
   - if [ "$TRAVIS_OS_NAME" = "osx" ]; then export PATH="/usr/local/opt/ccache/libexec:$PATH"; fi
 
