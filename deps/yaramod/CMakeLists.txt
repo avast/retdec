@@ -35,8 +35,8 @@ else()
 	message(STATUS "YaraMod: using remote YaraMod revision.")
 
 	ExternalProject_Add(yaramod-project
-		URL https://github.com/avast/yaramod/archive/v2.12.1.zip
-		URL_HASH SHA256=16414f53ed8480e848dad665779857f3f7159cdf995f2e69d6539247ee2dbc2e
+		URL https://github.com/avast/yaramod/archive/v3.0.0b0.zip
+		URL_HASH SHA256=21b83214e72dccc4569183c30025e054fc372d0ebe0de2c909ffdad3a49786f4
 		DOWNLOAD_NAME yaramod.zip
 		CMAKE_ARGS
 			# This does not work on MSVC, but may be useful on Linux.
@@ -72,6 +72,17 @@ add_dependencies(yaramod yaramod-project)
 target_include_directories(yaramod SYSTEM INTERFACE ${source_dir}/include)
 target_include_directories(yaramod SYSTEM INTERFACE ${source_dir}/deps)
 target_include_directories(yaramod SYSTEM INTERFACE ${binary_dir}/src)
-target_include_directories(yaramod SYSTEM INTERFACE "${FLEX_INCLUDE_DIRS}")
-target_link_libraries(yaramod INTERFACE debug     ${binary_dir}/src/${DEBUG_DIR}${CMAKE_STATIC_LIBRARY_PREFIX}yaramod${CMAKE_STATIC_LIBRARY_SUFFIX})
-target_link_libraries(yaramod INTERFACE optimized ${binary_dir}/src/${RELEASE_DIR}${CMAKE_STATIC_LIBRARY_PREFIX}yaramod${CMAKE_STATIC_LIBRARY_SUFFIX})
+target_include_directories(yaramod SYSTEM INTERFACE ${binary_dir}/deps/pog/pog-install/include)
+target_include_directories(yaramod SYSTEM INTERFACE ${binary_dir}/deps/pog/pog-install/include/pog)
+target_link_libraries(yaramod
+	INTERFACE debug
+		${binary_dir}/src/${DEBUG_DIR}${CMAKE_STATIC_LIBRARY_PREFIX}yaramod${CMAKE_STATIC_LIBRARY_SUFFIX}
+		${binary_dir}/deps/pog/pog-install/lib/${DEBUG_DIR}${CMAKE_STATIC_LIBRARY_PREFIX}pog_fmt${CMAKE_STATIC_LIBRARY_SUFFIX}
+		${binary_dir}/deps/pog/pog-install/lib/${DEBUG_DIR}${CMAKE_STATIC_LIBRARY_PREFIX}pog_re2${CMAKE_STATIC_LIBRARY_SUFFIX}
+)
+target_link_libraries(yaramod
+	INTERFACE optimized
+		${binary_dir}/src/${RELEASE_DIR}${CMAKE_STATIC_LIBRARY_PREFIX}yaramod${CMAKE_STATIC_LIBRARY_SUFFIX}
+		${binary_dir}/deps/pog/pog-install/lib/${RELEASE_DIR}${CMAKE_STATIC_LIBRARY_PREFIX}pog_fmt${CMAKE_STATIC_LIBRARY_SUFFIX}
+		${binary_dir}/deps/pog/pog-install/lib/${RELEASE_DIR}${CMAKE_STATIC_LIBRARY_PREFIX}pog_re2${CMAKE_STATIC_LIBRARY_SUFFIX}
+)
