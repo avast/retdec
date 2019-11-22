@@ -59,9 +59,6 @@ bool NoVarDefCFGTraversal::noVarIsDefinedBetweenStmts(ShPtr<Statement> start,
 	PRECONDITION(va->isInValidState(), "it is not in a valid state");
 
 	ShPtr<NoVarDefCFGTraversal> traverser(new NoVarDefCFGTraversal(cfg, ends, vars, va));
-	// We mark the start statement as checked so we don't have to check this in
-	// visitStmt().
-	traverser->checkedStmts.insert(start);
 	return traverser->performReverseTraversal(start);
 }
 

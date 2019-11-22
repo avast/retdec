@@ -59,9 +59,6 @@ bool VarDefCFGTraversal::isVarDefBetweenStmts(const VarSet &vars,
 	PRECONDITION(va->isInValidState(), "it is not in a valid state");
 
 	ShPtr<VarDefCFGTraversal> traverser(new VarDefCFGTraversal(cfg, vars, end, va));
-	// We mark the start statement as checked so we don't have to check this in
-	// visitStmt().
-	traverser->checkedStmts.insert(start);
 	return traverser->performTraversalFromSuccessors(start);
 }
 
