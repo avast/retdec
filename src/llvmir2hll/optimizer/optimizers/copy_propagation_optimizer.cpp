@@ -488,6 +488,57 @@ void CopyPropagationOptimizer::handleCaseSingleUse(ShPtr<Statement> stmt,
 		return;
 	}
 
+	// Do not copy propagate NULL pointers to dereferences on the left-hand
+	// sides of assign statements. That is, do not optimize
+	//
+	//    int *p
+	//    p = NULL;
+	//    *p = 1;
+	//
+	// to
+	//
+	//    *NULL = 1;
+	if (isa<ConstNullPointer>(skipCasts(stmtRhs))) {
+		if (const auto &useAssignStmt = cast<AssignStmt>(use)) {
+			if (const auto&useLhsDeref = cast<DerefOpExpr>(
+					skipCasts(useAssignStmt->getLhs()))) {
+				if (skipCasts(useLhsDeref->getOperand()) == stmtLhsVar) {
+					return;
+				}
+			}
+		}
+	}
+
+	// If the variable is used more than once in the use, do not optimize it.
+	// Otherwise, the resulting statement might contain stmtRhs several times,
+	// which might mess up subsequent optimizations or analyses.
+	// TODO To allow this, we would need to clone stmtRhs before every
+	//      replacement.
+	auto numOfUses = va->getValueData(use)->getDirNumOfUses(stmtLhsVar);
+	if (numOfUses > 1) {
+		return;
+	}
+
+	// Perform the propagation only if at least one of the following
+	// readability-related conditions is satisfied:
+	//
+	//   (1) The right-hand side of the statement is a variable or a constant
+	//       (possibly after removing casts). This is useful to allow because
+	//       we will have much less copies.
+	//
+	//   (2) The resulting statement is no longer than MAX_STMT_LENGTH
+	//       characters. This ensures that we won't introduce huge statements.
+	//
+	auto stmtLhsVarLen = stmtLhsVar->getTextRepr().size();
+	auto stmtRhsLen = stmtRhs->getTextRepr().size();
+	auto useLen = use->getTextRepr().size();
+	auto resStmtLen = useLen - numOfUses*stmtLhsVarLen + numOfUses*stmtRhsLen;
+	const auto &stmtRhsNoCasts = skipCasts(stmtRhs);
+	if (!isa<Variable>(stmtRhsNoCasts) && !isa<Constant>(stmtRhsNoCasts) &&
+			resStmtLen > MAX_STMT_LENGTH) {
+		return;
+	}
+
 	// Check whether the statement contains function calls. For example, the
 	// following code
 	//
@@ -621,57 +672,6 @@ void CopyPropagationOptimizer::handleCaseSingleUse(ShPtr<Statement> stmt,
 				readVarsInLastDef, ducs->cfg, va)) {
 			return;
 		}
-	}
-
-	// Do not copy propagate NULL pointers to dereferences on the left-hand
-	// sides of assign statements. That is, do not optimize
-	//
-	//    int *p
-	//    p = NULL;
-	//    *p = 1;
-	//
-	// to
-	//
-	//    *NULL = 1;
-	if (isa<ConstNullPointer>(skipCasts(stmtRhs))) {
-		if (const auto &useAssignStmt = cast<AssignStmt>(use)) {
-			if (const auto&useLhsDeref = cast<DerefOpExpr>(
-					skipCasts(useAssignStmt->getLhs()))) {
-				if (skipCasts(useLhsDeref->getOperand()) == stmtLhsVar) {
-					return;
-				}
-			}
-		}
-	}
-
-	// If the variable is used more than once in the use, do not optimize it.
-	// Otherwise, the resulting statement might contain stmtRhs several times,
-	// which might mess up subsequent optimizations or analyses.
-	// TODO To allow this, we would need to clone stmtRhs before every
-	//      replacement.
-	auto numOfUses = va->getValueData(use)->getDirNumOfUses(stmtLhsVar);
-	if (numOfUses > 1) {
-		return;
-	}
-
-	// Perform the propagation only if at least one of the following
-	// readability-related conditions is satisfied:
-	//
-	//   (1) The right-hand side of the statement is a variable or a constant
-	//       (possibly after removing casts). This is useful to allow because
-	//       we will have much less copies.
-	//
-	//   (2) The resulting statement is no longer than MAX_STMT_LENGTH
-	//       characters. This ensures that we won't introduce huge statements.
-	//
-	auto stmtLhsVarLen = stmtLhsVar->getTextRepr().size();
-	auto stmtRhsLen = stmtRhs->getTextRepr().size();
-	auto useLen = use->getTextRepr().size();
-	auto resStmtLen = useLen - numOfUses*stmtLhsVarLen + numOfUses*stmtRhsLen;
-	const auto &stmtRhsNoCasts = skipCasts(stmtRhs);
-	if (!isa<Variable>(stmtRhsNoCasts) && !isa<Constant>(stmtRhsNoCasts) &&
-			resStmtLen > MAX_STMT_LENGTH) {
-		return;
 	}
 
 	// Perform the replacement.
