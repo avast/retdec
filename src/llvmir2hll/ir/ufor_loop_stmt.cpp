@@ -35,7 +35,7 @@ ShPtr<Value> UForLoopStmt::clone() {
 		ucast<Expression>(init->clone()),
 		ucast<Expression>(cond->clone()),
 		ucast<Expression>(step->clone()),
-		ucast<Statement>(body->clone())
+		ucast<Statement>(Statement::cloneStatements(body))
 	);
 	loop->setMetadata(getMetadata());
 	return loop;

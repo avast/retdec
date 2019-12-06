@@ -34,10 +34,10 @@ ShPtr<Value> SwitchStmt::clone() {
 	for (auto i = clause_begin(), e = clause_end(); i != e; ++i) {
 		if (i->first) {
 			switchStmt->addClause(ucast<Expression>(i->first->clone()),
-				ucast<Statement>(i->second->clone()));
+				ucast<Statement>(Statement::cloneStatements(i->second)));
 		} else {
 			// The default clause.
-			switchStmt->addDefaultClause(ucast<Statement>(i->second->clone()));
+			switchStmt->addDefaultClause(ucast<Statement>(Statement::cloneStatements(i->second)));
 		}
 	}
 

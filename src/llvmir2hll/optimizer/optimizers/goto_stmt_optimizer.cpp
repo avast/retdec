@@ -4,7 +4,6 @@
 * @copyright (c) 2018 Avast Software, licensed under the MIT license
 */
 
-#include <iostream>
 #include <sstream>
 
 #include "retdec/llvmir2hll/ir/break_stmt.h"

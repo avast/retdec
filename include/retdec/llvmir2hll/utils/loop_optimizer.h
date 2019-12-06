@@ -57,10 +57,18 @@ struct SplittedWhileTrueLoop {
 * @endcode
 */
 struct IndVarInfo {
-	IndVarInfo(ShPtr<Statement> initStmt, ShPtr<Variable> indVar,
-		ShPtr<Expression> exitCond, ShPtr<Statement> updateStmt):
-			initStmt(initStmt), indVar(indVar), exitCond(exitCond),
-			updateStmt(updateStmt) {}
+	IndVarInfo(
+			ShPtr<Statement> initStmt,
+			ShPtr<Variable> indVar,
+			ShPtr<Expression> exitCond,
+			ShPtr<Statement> updateStmt,
+			bool updateBeforeExit)
+			: initStmt(initStmt)
+			, indVar(indVar)
+			, exitCond(exitCond)
+			, updateStmt(updateStmt)
+			, updateBeforeExit(updateBeforeExit)
+	{}
 
 	/// Initialization of the induction variable (either a definition or an
 	/// assignment) -- corresponds to (1) in the class description.
@@ -75,11 +83,16 @@ struct IndVarInfo {
 	/// Update of the induction variable -- corresponds to (3) in the class
 	/// description.
 	ShPtr<Statement> updateStmt;
+
+	/// Is an update statement before exit condition?
+	bool updateBeforeExit;
 };
 
 bool isLoopEnd(ShPtr<Statement> stmt);
 ShPtr<Expression> getExitCondition(ShPtr<Statement> loopEnd);
-ShPtr<SplittedWhileTrueLoop> splitWhileTrueLoop(ShPtr<WhileLoopStmt> stmt);
+ShPtr<SplittedWhileTrueLoop> splitWhileTrueLoop(
+		ShPtr<WhileLoopStmt> stmt,
+		ShPtr<IndVarInfo> indVarInfo = nullptr);
 ShPtr<IndVarInfo> getIndVarInfo(ShPtr<WhileLoopStmt> stmt);
 
 } // namespace llvmir2hll

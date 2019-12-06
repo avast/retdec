@@ -47,7 +47,12 @@ private:
 
 private:
 	df_iterator(Node node, typename Graph::stmt_iterator stmtIter) {
-		visitedNodes.insert(node);
+		// If we don't start at the node beginning, we cannot say this node was
+		// visited, because we may need to come back and iterate from its start
+		// to the original starting statement.
+		if (stmtIter == node->stmt_begin()) {
+			visitedNodes.insert(node);
+		}
 		visitStack.emplace(node, stmtIter, node->succ_begin());
 	}
 

@@ -28,7 +28,7 @@ WhileLoopStmt::~WhileLoopStmt() {}
 
 ShPtr<Value> WhileLoopStmt::clone() {
 	ShPtr<WhileLoopStmt> whileLoopStmt(WhileLoopStmt::create(
-		ucast<Expression>(cond->clone()), ucast<Statement>(body->clone())));
+		ucast<Expression>(cond->clone()), ucast<Statement>(Statement::cloneStatements(body))));
 	whileLoopStmt->setMetadata(getMetadata());
 	return whileLoopStmt;
 }

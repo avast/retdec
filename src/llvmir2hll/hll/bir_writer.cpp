@@ -4,7 +4,6 @@
 * @copyright (c) 2018 Avast Software, licensed under the MIT license
 */
 
-#include <iostream>
 #include <fstream>
 
 #include "retdec/llvmir2hll/ir/add_op_expr.h"

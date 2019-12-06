@@ -29,10 +29,10 @@ IfStmt::~IfStmt() {}
 ShPtr<Value> IfStmt::clone() {
 	ShPtr<IfStmt> ifStmt(IfStmt::create(
 		ucast<Expression>(ifClauseList.front().first->clone()),
-		ucast<Statement>(ifClauseList.front().second->clone())));
+		ucast<Statement>(Statement::cloneStatements(ifClauseList.front().second))));
 	if (elseClause) {
 		ifStmt->setElseClause(
-			ucast<Statement>(elseClause->clone()));
+			ucast<Statement>(Statement::cloneStatements(elseClause)));
 	}
 
 	// Clone all other clauses.
@@ -43,7 +43,7 @@ ShPtr<Value> IfStmt::clone() {
 		}
 		ifStmt->addClause(
 			ucast<Expression>(clause.first->clone()),
-			ucast<Statement>(clause.second->clone()));
+			ucast<Statement>(Statement::cloneStatements(clause.second)));
 	}
 
 	ifStmt->setMetadata(getMetadata());
