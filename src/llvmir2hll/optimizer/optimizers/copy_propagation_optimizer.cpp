@@ -12,6 +12,7 @@
 #include "retdec/llvmir2hll/analysis/value_analysis.h"
 #include "retdec/llvmir2hll/analysis/var_uses_visitor.h"
 #include "retdec/llvmir2hll/graphs/cfg/cfg.h"
+#include "retdec/llvmir2hll/graphs/cfg/cfg_builders/non_recursive_cfg_builder.h"
 #include "retdec/llvmir2hll/graphs/cfg/cfg_traversals/no_var_def_cfg_traversal.h"
 #include "retdec/llvmir2hll/graphs/cfg/cfg_traversals/var_def_cfg_traversal.h"
 #include "retdec/llvmir2hll/graphs/cg/cg_builder.h"
@@ -205,7 +206,8 @@ auto ordered(const DefUseChains::DefUseChain &du) {
 */
 CopyPropagationOptimizer::CopyPropagationOptimizer(ShPtr<Module> module,
 	ShPtr<ValueAnalysis> va, ShPtr<CallInfoObtainer> cio):
-		FuncOptimizer(module), va(va), cio(cio), vuv(), dua(), uda(),
+		FuncOptimizer(module), cfgBuilder(NonRecursiveCFGBuilder::create()),
+		va(va), cio(cio), vuv(), dua(), uda(),
 		ducs(), udcs(), globalVars(module->getGlobalVars()),
 		toEntirelyRemoveStmts(), toRemoveStmtsPreserveCalls(), modifiedStmts(),
 		codeChanged(false) {
@@ -225,7 +227,6 @@ void CopyPropagationOptimizer::doOptimization() {
 	// surprisingly speeds up the optimization).
 	va->clearCache();
 	va->initAliasAnalysis(module);
-	cio->init(CGBuilder::getCG(module), va);
 	vuv = VarUsesVisitor::create(va, true, module);
 	dua = DefUseAnalysis::create(module, va, vuv);
 	uda = UseDefAnalysis::create(module);
@@ -234,11 +235,13 @@ void CopyPropagationOptimizer::doOptimization() {
 }
 
 void CopyPropagationOptimizer::runOnFunction(ShPtr<Function> func) {
+	auto currCFG = cfgBuilder->getCFG(func);
+
 	// Keep optimizing until there are no changes.
 	do {
 		ducs = dua->getDefUseChains(
 			func,
-			cio->getCFGForFunc(func),
+			currCFG,
 			[this](auto var) {
 				return this->shouldBeIncludedInDefUseChains(var);
 			}
@@ -611,23 +614,47 @@ void CopyPropagationOptimizer::handleCaseSingleUse(ShPtr<Statement> stmt,
 			return;
 		}
 
-		// There cannot be other function calls in the next statement.
-		// TODO Can this restriction be relaxed a bit?
-		if (stmtSuccData->hasCalls()) {
-			LOG << "\t" << "end 12" << std::endl;
-			return;
+		// There can be only calls to external (only declared) functions in the
+		// statement.
+		for (auto cit = stmtSuccData->call_begin(),
+				e = stmtSuccData->call_end(); cit != e; ++cit) {
+			auto var = cast<Variable>((*cit)->getCalledExpr());
+			if (!var) {
+				LOG << "\t" << "end 12.1" << std::endl;
+				return;
+			}
+			auto fnc = module->getFuncByName(var->getName());
+			if (!fnc) {
+				LOG << "\t" << "end 12.2" << std::endl;
+				return;
+			}
+			if (!fnc->isDeclaration()) {
+				LOG << "\t" << "end 12.3" << std::endl;
+				return;
+			}
 		}
 
-		// Check that the call in stmt does not modify variables that are read
-		// in the next statement.
-		// Since there is only a single call in callsInStmt, it suffices to
-		// use front() (we don't have to iterate over the collection).
-		const auto &callInfo = cio->getCallInfo(callsInStmt.front(), ducs->func);
-		for (auto i = stmtSuccData->dir_read_begin(), e = stmtSuccData->dir_read_end();
-				i != e ; ++i) {
-			if (callInfo->mayBeModified(*i)) {
-				LOG << "\t" << "end 13" << std::endl;
-				return;
+		// Check that the next statement does not use global variables.
+		// These might be modified by the call in stmt.
+		// This check is skipped if the call in stmt is callilng declared
+		// (external) function.
+		auto var = cast<Variable>(callsInStmt.front()->getCalledExpr());
+		if (!var) {
+			LOG << "\t" << "end 13.1" << std::endl;
+			return;
+		}
+		auto fnc = module->getFuncByName(var->getName());
+		if (!fnc) {
+			LOG << "\t" << "end 13.2" << std::endl;
+			return;
+		}
+		if (!fnc->isDeclaration()) {
+			for (auto i = stmtSuccData->dir_read_begin(),
+					e = stmtSuccData->dir_read_end(); i != e ; ++i) {
+				if (hasItem(globalVars, *i)) {
+					LOG << "\t" << "end 13.3" << std::endl;
+					return;
+				}
 			}
 		}
 	}

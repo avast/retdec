@@ -16,6 +16,7 @@ namespace retdec {
 namespace llvmir2hll {
 
 class CallInfoObtainer;
+class CFGBuilder;
 class UseDefAnalysis;
 class UseDefChains;
 class ValueAnalysis;
@@ -98,6 +99,9 @@ private:
 	bool shouldBeIncludedInDefUseChains(ShPtr<Variable> var);
 
 private:
+	/// The used builder of CFGs.
+	ShPtr<CFGBuilder> cfgBuilder;
+
 	/// Analysis of values.
 	ShPtr<ValueAnalysis> va;
 
