@@ -26,7 +26,6 @@ set(LLVMIR2HLL_SOURCES
 	graphs/cfg/cfg_builders/non_recursive_cfg_builder.cpp
 	graphs/cfg/cfg_builders/recursive_cfg_builder.cpp
 	graphs/cfg/cfg_traversal.cpp
-	graphs/cfg/cfg_traversals/auxiliary_variables_cfg_traversal.cpp
 	graphs/cfg/cfg_traversals/lhs_rhs_uses_cfg_traversal.cpp
 	graphs/cfg/cfg_traversals/modified_before_read_cfg_traversal.cpp
 	graphs/cfg/cfg_traversals/no_var_def_cfg_traversal.cpp
@@ -156,7 +155,6 @@ set(LLVMIR2HLL_SOURCES
 	optimizer/optimizer_manager.cpp
 	optimizer/optimizers/aggressive_deref_optimizer.cpp
 	optimizer/optimizers/aggressive_global_to_local_optimizer.cpp
-	optimizer/optimizers/auxiliary_variables_optimizer.cpp
 	optimizer/optimizers/bit_op_to_log_op_optimizer.cpp
 	optimizer/optimizers/bit_shift_optimizer.cpp
 	optimizer/optimizers/break_continue_return_optimizer.cpp

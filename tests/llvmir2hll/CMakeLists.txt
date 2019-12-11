@@ -71,7 +71,6 @@ set(RETDEC_TESTS_LLVMIR2HLL_SOURCES
 	llvm/llvmir2bir_converter_tests/functions_tests.cpp
 	llvm/llvmir2bir_converter_tests/glob_vars_tests.cpp
 	llvm/string_conversions_tests.cpp
-	optimizer/optimizers/auxiliary_variables_optimizer_tests.cpp
 	optimizer/optimizers/bit_op_to_log_op_optimizer_tests.cpp
 	optimizer/optimizers/bit_shift_optimizer_tests.cpp
 	optimizer/optimizers/break_continue_return_optimizer_tests.cpp
