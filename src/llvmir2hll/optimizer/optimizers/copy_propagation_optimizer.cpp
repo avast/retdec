@@ -5,6 +5,7 @@
 */
 
 #include <cstddef>
+#include <iostream>
 
 #include "retdec/llvmir2hll/analysis/def_use_analysis.h"
 #include "retdec/llvmir2hll/analysis/use_def_analysis.h"
@@ -39,6 +40,11 @@ using retdec::utils::hasItem;
 
 namespace retdec {
 namespace llvmir2hll {
+
+const bool debug_enabled = false;
+#define LOG \
+	if (!debug_enabled) {} \
+	else std::cout << std::showbase
 
 namespace {
 
@@ -268,17 +274,21 @@ void CopyPropagationOptimizer::performOptimization() {
 		const auto &uses = du.second;
 		const auto &stmt = du.first.first;
 
+		LOG << "performOptimization() : " << stmt << std::endl;
+
 		// We can optimize only VarDefStmts and AssignStmts where their
 		// left-hand side is a variable (i.e. not a pointer/array/structure
 		// access).
 		const auto &stmtLhsVar = du.first.second;
 		if (!isVarDefOrAssignStmt(stmt) || getLhs(stmt) != stmtLhsVar) {
+			LOG << "\t" << "end 1" << std::endl;
 			continue;
 		}
 
 		// Do not optimize the statement if it or any of its uses have been
 		// already modified.
 		if (stmtOrUseHasBeenModified(stmt, uses)) {
+			LOG << "\t" << "end 2" << std::endl;
 			continue;
 		}
 
@@ -363,9 +373,11 @@ bool CopyPropagationOptimizer::stmtOrUseHasBeenModified(ShPtr<Statement> stmt,
 */
 void CopyPropagationOptimizer::handleCaseEmptyUses(ShPtr<Statement> stmt,
 		ShPtr<Variable> stmtLhsVar) {
+	LOG << "handleCaseEmptyUses() : " << stmt << std::endl;
 	// Do not optimize variables that may be pointed to (to preserve
 	// correctness).
 	if (va->mayBePointed(stmtLhsVar)) {
+		LOG << "\t" << "end 1" << std::endl;
 		return;
 	}
 
@@ -399,24 +411,29 @@ void CopyPropagationOptimizer::handleCaseEmptyUses(ShPtr<Statement> stmt,
 			va->removeFromCache(stmt);
 			vuv->stmtHasBeenChanged(stmt, ducs->func);
 			codeChanged = true;
+			LOG << "\t" << "====> optimized 1" << std::endl;
 		}
+		LOG << "\t" << "end 2" << std::endl;
 		return;
 	}
 
 	// Do not optimize variables that have assigned a name from debug
 	// information (we want to keep such variables).
 	if (module->hasAssignedDebugName(stmtLhsVar)) {
+		LOG << "\t" << "end 3" << std::endl;
 		return;
 	}
 
 	// Do not optimize external variables (used in a volatile load/store).
 	if (stmtLhsVar->isExternal()) {
+		LOG << "\t" << "end 4" << std::endl;
 		return;
 	}
 
 	// Do not optimize global variables (we consider just local variables in
 	// this optimization; global variables are too hard for it).
 	if (hasItem(globalVars, stmtLhsVar)) {
+		LOG << "\t" << "end 5" << std::endl;
 		return;
 	}
 
@@ -426,6 +443,7 @@ void CopyPropagationOptimizer::handleCaseEmptyUses(ShPtr<Statement> stmt,
 	va->removeFromCache(stmt);
 	vuv->stmtHasBeenRemoved(stmt, ducs->func);
 	codeChanged = true;
+	LOG << "\t" << "====> optimized 2" << std::endl;
 }
 
 /**
@@ -445,32 +463,38 @@ void CopyPropagationOptimizer::handleCaseEmptyUses(ShPtr<Statement> stmt,
 */
 void CopyPropagationOptimizer::handleCaseSingleUse(ShPtr<Statement> stmt,
 		ShPtr<Variable> stmtLhsVar, ShPtr<Statement> use) {
+	LOG << "handleCaseSingleUse() : " << stmt << std::endl;
 	// There has to be a right-hand side.
 	const auto &stmtRhs = getRhs(stmt);
 	if (!stmtRhs) {
+		LOG << "\t" << "end 1" << std::endl;
 		return;
 	}
 
 	// Do not include global variables (we consider just local variables in
 	// this optimization; global variables are too hard for it).
 	if (hasItem(globalVars, stmtLhsVar)) {
+		LOG << "\t" << "end 2" << std::endl;
 		return;
 	}
 
 	// Do not include variables that have assigned a name from debug
 	// information (we want to keep such variables).
 	if (module->hasAssignedDebugName(stmtLhsVar)) {
+		LOG << "\t" << "end 3" << std::endl;
 		return;
 	}
 
 	// Do not optimize external variables (used in a volatile load/store).
 	if (stmtLhsVar->isExternal()) {
+		LOG << "\t" << "end 4" << std::endl;
 		return;
 	}
 
 	// Do not include variables that may be pointed to (to preserve
 	// correctness).
 	if (va->mayBePointed(stmtLhsVar)) {
+		LOG << "\t" << "end 5" << std::endl;
 		return;
 	}
 
@@ -485,6 +509,7 @@ void CopyPropagationOptimizer::handleCaseSingleUse(ShPtr<Statement> stmt,
 	//    {'0': 0, '1': 0, '2': {'0': 0.000000e+00}}['0'] = 4
 	//
 	if (isa<ConstString>(stmtRhs) || isa<ConstArray>(stmtRhs) || isa<ConstStruct>(stmtRhs)) {
+		LOG << "\t" << "end 6" << std::endl;
 		return;
 	}
 
@@ -503,6 +528,7 @@ void CopyPropagationOptimizer::handleCaseSingleUse(ShPtr<Statement> stmt,
 			if (const auto&useLhsDeref = cast<DerefOpExpr>(
 					skipCasts(useAssignStmt->getLhs()))) {
 				if (skipCasts(useLhsDeref->getOperand()) == stmtLhsVar) {
+					LOG << "\t" << "end 7" << std::endl;
 					return;
 				}
 			}
@@ -516,6 +542,7 @@ void CopyPropagationOptimizer::handleCaseSingleUse(ShPtr<Statement> stmt,
 	//      replacement.
 	auto numOfUses = va->getValueData(use)->getDirNumOfUses(stmtLhsVar);
 	if (numOfUses > 1) {
+		LOG << "\t" << "end 8" << std::endl;
 		return;
 	}
 
@@ -536,6 +563,7 @@ void CopyPropagationOptimizer::handleCaseSingleUse(ShPtr<Statement> stmt,
 	const auto &stmtRhsNoCasts = skipCasts(stmtRhs);
 	if (!isa<Variable>(stmtRhsNoCasts) && !isa<Constant>(stmtRhsNoCasts) &&
 			resStmtLen > MAX_STMT_LENGTH) {
+		LOG << "\t" << "end 9" << std::endl;
 		return;
 	}
 
@@ -562,6 +590,7 @@ void CopyPropagationOptimizer::handleCaseSingleUse(ShPtr<Statement> stmt,
 		//      statements between stmt and use.
 		const auto &stmtSucc = stmt->getSuccessor();
 		if (stmtSucc != use) {
+			LOG << "\t" << "end 10" << std::endl;
 			return;
 		}
 
@@ -578,12 +607,14 @@ void CopyPropagationOptimizer::handleCaseSingleUse(ShPtr<Statement> stmt,
 		//
 		const auto &stmtSuccData = va->getValueData(stmtSucc);
 		if (stmtSuccData->getDirNumOfUses(stmtLhsVar) != 1) {
+			LOG << "\t" << "end 11" << std::endl;
 			return;
 		}
 
 		// There cannot be other function calls in the next statement.
 		// TODO Can this restriction be relaxed a bit?
 		if (stmtSuccData->hasCalls()) {
+			LOG << "\t" << "end 12" << std::endl;
 			return;
 		}
 
@@ -595,6 +626,7 @@ void CopyPropagationOptimizer::handleCaseSingleUse(ShPtr<Statement> stmt,
 		for (auto i = stmtSuccData->dir_read_begin(), e = stmtSuccData->dir_read_end();
 				i != e ; ++i) {
 			if (callInfo->mayBeModified(*i)) {
+				LOG << "\t" << "end 13" << std::endl;
 				return;
 			}
 		}
@@ -620,6 +652,7 @@ void CopyPropagationOptimizer::handleCaseSingleUse(ShPtr<Statement> stmt,
 		const auto &readVarsInStmt = stmtData->getDirReadVars();
 		if (VarDefCFGTraversal::isVarDefBetweenStmts(readVarsInStmt, stmt, use,
 				ducs->cfg, va)) {
+			LOG << "\t" << "end 14" << std::endl;
 			return;
 		}
 	} else {
@@ -631,6 +664,7 @@ void CopyPropagationOptimizer::handleCaseSingleUse(ShPtr<Statement> stmt,
 		for (const auto &def : lhsUseDefs) {
 			if (lastDef && !lastDef->isEqualTo(def)) {
 				// They're not identical.
+				LOG << "\t" << "end 15" << std::endl;
 				return;
 			}
 			lastDef = def;
@@ -640,11 +674,13 @@ void CopyPropagationOptimizer::handleCaseSingleUse(ShPtr<Statement> stmt,
 		// Note that since they are all identical by (a), we need to check just
 		// lastDef.
 		if (!isa<AssignStmt>(lastDef) && !isa<VarDefStmt>(lastDef)) {
+			LOG << "\t" << "end 16" << std::endl;
 			return;
 		}
 
 		// (c) They do not contain function calls.
 		if (va->getValueData(lastDef)->hasCalls()) {
+			LOG << "\t" << "end 17" << std::endl;
 			return;
 		}
 
@@ -670,6 +706,7 @@ void CopyPropagationOptimizer::handleCaseSingleUse(ShPtr<Statement> stmt,
 		const auto &readVarsInLastDef = va->getValueData(lastDef)->getDirReadVars();
 		if (!NoVarDefCFGTraversal::noVarIsDefinedBetweenStmts(use, lhsUseDefs,
 				readVarsInLastDef, ducs->cfg, va)) {
+			LOG << "\t" << "end 18" << std::endl;
 			return;
 		}
 	}
@@ -693,6 +730,7 @@ void CopyPropagationOptimizer::handleCaseSingleUse(ShPtr<Statement> stmt,
 		vuv->stmtHasBeenRemoved(stmt, ducs->func);
 	}
 	codeChanged = true;
+	LOG << "\t" << "====> optimized" << std::endl;
 }
 
 /**
@@ -715,8 +753,8 @@ void CopyPropagationOptimizer::handleCaseSingleUse(ShPtr<Statement> stmt,
 *     ...
 * @endcode
 *
-* @param[in] defStmt Definition of @a defVar.
-* @param[in] defVar Variable defined in @a stmt.
+* @param[in] defStmt Definition of @a defVar
+* @param[in] defVar Variable defined in @a s
 * @param[in] uses Uses of @a defVar.
 *
 * If this function changes the code, @c codeChanged is set to @c true.
@@ -726,13 +764,16 @@ void CopyPropagationOptimizer::handleCaseInductionVariable(
 	ShPtr<Variable> defVar,
 	const StmtSet &uses)
 {
+	LOG << "handleCaseInductionVariable() : " << defStmt << std::endl;
 	// Definition is an assignment.
 	auto defAssign = cast<AssignStmt>(defStmt);
 	if (defAssign == nullptr) {
+		LOG << "\t" << "end 1" << std::endl;
 		return;
 	}
 	auto otherValue = cast<Variable>(defAssign->getRhs());
 	if (otherValue == nullptr) {
+		LOG << "\t" << "end 2" << std::endl;
 		return;
 	}
 
@@ -742,6 +783,7 @@ void CopyPropagationOptimizer::handleCaseInductionVariable(
 		// Use have 2 definitions.
 		const auto &useDefs = udcs->ud[UseDefChains::VarStmtPair(defVar, use)];
 		if (useDefs.size() != 2) {
+			LOG << "\t" << "end 3" << std::endl;
 			return;
 		}
 		auto& ud1 = *useDefs.begin();
@@ -753,23 +795,26 @@ void CopyPropagationOptimizer::handleCaseInductionVariable(
 			// Other definition is an assignment.
 			commonOtherDef = cast<AssignStmt>(otherDef);
 			if (commonOtherDef == nullptr) {
-			return;
+				LOG << "\t" << "end 4" << std::endl;
+				return;
 			}
 		}
 
 		// Other def is the same for all the uses.
 		if (commonOtherDef != otherDef) {
+			LOG << "\t" << "end 5" << std::endl;
 			return;
 		}
 
 		// Other definition has the same uses as the definition being inspected.
-		if (ordered(otherDefDU.second) != orderedUses)
-		{
+		if (ordered(otherDefDU.second) != orderedUses) {
+			LOG << "\t" << "end 6" << std::endl;
 			return;
 		}
 	}
 	if (commonOtherDef == nullptr) {
-			return;
+		LOG << "\t" << "end 7" << std::endl;
+		return;
 	}
 
 	// Other value is undefined before the other definition.
@@ -846,6 +891,7 @@ void CopyPropagationOptimizer::handleCaseInductionVariable(
 		}
 	}
 	if (!ok) {
+		LOG << "\t" << "end 8" << std::endl;
 		return;
 	}
 
@@ -855,6 +901,7 @@ void CopyPropagationOptimizer::handleCaseInductionVariable(
 	for (auto& use : uses) {
 		if (VarDefCFGTraversal::isVarDefBetweenStmts(readVarsInStmt, defStmt, use,
 				ducs->cfg, va)) {
+			LOG << "\t" << "end 9" << std::endl;
 			return;
 		}
 	}
@@ -877,6 +924,7 @@ void CopyPropagationOptimizer::handleCaseInductionVariable(
 	vuv->stmtHasBeenRemoved(defStmt, ducs->func);
 
 	codeChanged = true;
+	LOG << "\t" << "====> optimized" << std::endl;
 }
 
 /**
@@ -903,9 +951,11 @@ void CopyPropagationOptimizer::handleCaseInductionVariable2(
 	ShPtr<Variable> x,
 	const StmtSet &xUses)
 {
+	LOG << "handleCaseInductionVariable2() : " << stmt << std::endl;
 	// The statement is in while block.
 	// while(true)
 	if (!isa<WhileLoopStmt>(stmt->getParent())) {
+		LOG << "\t" << "end 1" << std::endl;
 		return;
 	}
 
@@ -913,20 +963,24 @@ void CopyPropagationOptimizer::handleCaseInductionVariable2(
 	// x = ...
 	auto xStmt = cast<AssignStmt>(stmt);
 	if (xStmt == nullptr) {
+		LOG << "\t" << "end 2" << std::endl;
 		return;
 	}
 
 	// The statement has one use, defining y.
 	// y = x
 	if (xUses.size() != 1) {
+		LOG << "\t" << "end 3" << std::endl;
 		return;
 	}
 	auto yStmt = cast<AssignStmt>(*xUses.begin());
 	if (yStmt == nullptr) {
+		LOG << "\t" << "end 4" << std::endl;
 		return;
 	}
 	auto y = cast<Variable>(yStmt->getLhs());
 	if (y == nullptr) {
+		LOG << "\t" << "end 5" << std::endl;
 		return;
 	}
 
@@ -934,6 +988,7 @@ void CopyPropagationOptimizer::handleCaseInductionVariable2(
 	// x = y + A
 	const auto &xStmtData = va->getValueData(xStmt);
 	if (!xStmtData->isDirRead(y)) {
+		LOG << "\t" << "end 6" << std::endl;
 		return;
 	}
 
@@ -946,17 +1001,20 @@ void CopyPropagationOptimizer::handleCaseInductionVariable2(
 	//     x = y + A
 	auto &xDefs = udcs->ud[UseDefChains::VarStmtPair(x, yStmt)];
 	if (xDefs.size() != 2) {
+		LOG << "\t" << "end 7" << std::endl;
 		return;
 	}
 	auto xOther = *xDefs.begin() == xStmt ? *(++xDefs.begin()) : *xDefs.begin();
 	auto xZero = cast<AssignStmt>(xOther);
 	if (xZero == nullptr) {
+		LOG << "\t" << "end 8" << std::endl;
 		return;
 	}
 
 	// x = 0 has only one use.
 	auto& xZeroDu = ducs->du[def2uses[DefUseChains::StmtVarPair(xZero, x)]];
 	if (xZeroDu.second.size() != 1) {
+		LOG << "\t" << "end 9" << std::endl;
 		return;
 	}
 
@@ -977,20 +1035,24 @@ void CopyPropagationOptimizer::handleCaseInductionVariable2(
 		prev = prev->getUniquePredecessor();
 	}
 	if (!ok) {
+		LOG << "\t" << "end 10" << std::endl;
 		return;
 	}
 
 	// There is breaking if statement after xStmt.
 	auto ifStmt = cast<IfStmt>(xStmt->getSuccessor());
 	if (ifStmt == nullptr) {
+		LOG << "\t" << "end 11" << std::endl;
 		return;
 	}
 	// y is used in its condition.
 	if (udcs->ud.count(UseDefChains::VarStmtPair(y, ifStmt)) == 0) {
+		LOG << "\t" << "end 12" << std::endl;
 		return;
 	}
 	// If statement is the last thing in the while statement.
 	if (skipEmptyStmts(ifStmt->getSuccessor()) != nullptr) {
+		LOG << "\t" << "end 13" << std::endl;
 		return;
 	}
 	// If statement contains only break.
@@ -1000,6 +1062,7 @@ void CopyPropagationOptimizer::handleCaseInductionVariable2(
 	if (breakStmt == nullptr
 			|| skipEmptyStmts(breakStmt->getSuccessor()) != nullptr
 			|| !isa<BreakStmt>(breakStmt)) {
+		LOG << "\t" << "end 14" << std::endl;
 		return;
 	}
 
@@ -1029,6 +1092,7 @@ void CopyPropagationOptimizer::handleCaseInductionVariable2(
 	vuv->stmtHasBeenChanged(ifStmt, ducs->func);
 
 	codeChanged = true;
+	LOG << "\t" << "====> optimized" << std::endl;
 }
 
 /**
@@ -1049,44 +1113,50 @@ void CopyPropagationOptimizer::handleCaseMoreThanOneUse(
 		ShPtr<Statement> stmt,
 		ShPtr<Variable> stmtLhsVar,
 		const StmtSet &uses) {
+	LOG << "handleCaseMoreThanOneUse() : " << stmt << std::endl;
 	// There has to be a right-hand side.
 	const auto &stmtRhs = getRhs(stmt);
 	if (!stmtRhs) {
+		LOG << "\t" << "end 1" << std::endl;
 		return;
 	}
 
 	// Definition is an assignment.
-	if (!isVarDefOrAssignStmt(stmt))
-	{
+	if (!isVarDefOrAssignStmt(stmt)) {
+		LOG << "\t" << "end 2" << std::endl;
 		return;
 	}
 
 	// Definition is a simple variable assignment.
-	if (!isa<Variable>(stmtRhs))
-	{
+	if (!isa<Variable>(stmtRhs)) {
+		LOG << "\t" << "end 3" << std::endl;
 		return;
 	}
 
 	// Do not include global variables (we consider just local variables in
 	// this optimization; global variables are too hard for it).
 	if (hasItem(globalVars, stmtLhsVar)) {
+		LOG << "\t" << "end 4" << std::endl;
 		return;
 	}
 
 	// Do not include variables that have assigned a name from debug
 	// information (we want to keep such variables).
 	if (module->hasAssignedDebugName(stmtLhsVar)) {
+		LOG << "\t" << "end 5" << std::endl;
 		return;
 	}
 
 	// Do not optimize external variables (used in a volatile load/store).
 	if (stmtLhsVar->isExternal()) {
+		LOG << "\t" << "end 6" << std::endl;
 		return;
 	}
 
 	// Do not include variables that may be pointed to (to preserve
 	// correctness).
 	if (va->mayBePointed(stmtLhsVar)) {
+		LOG << "\t" << "end 7" << std::endl;
 		return;
 	}
 
@@ -1096,13 +1166,15 @@ void CopyPropagationOptimizer::handleCaseMoreThanOneUse(
 	const auto &stmtData = va->getValueData(stmt);
 	const auto &callsInStmt = stmtData->getCalls();
 	if (!callsInStmt.empty()) {
-			return;
+		LOG << "\t" << "end 8" << std::endl;
+		return;
 	}
 
 	// All the uses must have only one definition.
 	for (auto& use : uses) {
 		const auto &lhsUseDefs = udcs->ud[UseDefChains::VarStmtPair(stmtLhsVar, use)];
 		if (lhsUseDefs.size() != 1) {
+			LOG << "\t" << "end 9" << std::endl;
 			return;
 		}
 	}
@@ -1123,6 +1195,7 @@ void CopyPropagationOptimizer::handleCaseMoreThanOneUse(
 				if (const auto&useLhsDeref = cast<DerefOpExpr>(
 						skipCasts(useAssignStmt->getLhs()))) {
 					if (skipCasts(useLhsDeref->getOperand()) == stmtLhsVar) {
+						LOG << "\t" << "end 10" << std::endl;
 						return;
 					}
 				}
@@ -1138,6 +1211,7 @@ void CopyPropagationOptimizer::handleCaseMoreThanOneUse(
 	for (auto& use : uses) {
 		auto numOfUses = va->getValueData(use)->getDirNumOfUses(stmtLhsVar);
 		if (numOfUses > 1) {
+			LOG << "\t" << "end 11" << std::endl;
 			return;
 		}
 	}
@@ -1154,6 +1228,7 @@ void CopyPropagationOptimizer::handleCaseMoreThanOneUse(
 	//
 	const auto &stmtRhsNoCasts = skipCasts(stmtRhs);
 	if (!isa<Variable>(stmtRhsNoCasts) && !isa<Constant>(stmtRhsNoCasts)) {
+		LOG << "\t" << "end 12" << std::endl;
 		return;
 	}
 
@@ -1163,6 +1238,7 @@ void CopyPropagationOptimizer::handleCaseMoreThanOneUse(
 	for (auto& use : uses) {
 		if (VarDefCFGTraversal::isVarDefBetweenStmts(readVarsInStmt, stmt, use,
 				ducs->cfg, va)) {
+			LOG << "\t" << "end 13" << std::endl;
 			return;
 		}
 	}
@@ -1188,6 +1264,7 @@ void CopyPropagationOptimizer::handleCaseMoreThanOneUse(
 		vuv->stmtHasBeenRemoved(stmt, ducs->func);
 	}
 	codeChanged = true;
+	LOG << "\t" << "====> optimized" << std::endl;
 }
 
 /**
