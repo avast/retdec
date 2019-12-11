@@ -136,6 +136,7 @@ BIN2LLVMIR_PARAMS = [
     '-idioms',
     '-remove-phi',
     '-value-protect',
+    '-sink'
 ] + BIN2LLVMIR_PARAMS_DISABLES
 
 # Paths to tools.
