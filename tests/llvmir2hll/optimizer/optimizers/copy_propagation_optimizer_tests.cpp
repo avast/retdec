@@ -29,6 +29,8 @@
 #include "retdec/llvmir2hll/optimizer/optimizers/copy_propagation_optimizer.h"
 #include "retdec/llvmir2hll/support/types.h"
 
+#include "retdec/llvmir2hll/hll/bir_writer.h"
+
 using namespace ::testing;
 
 namespace retdec {
@@ -648,6 +650,144 @@ DoNotPropagateNullPointersToDereferencesOnLeftHandSidesOfAssignStmts) {
 	EXPECT_EQ(varP, derefP->getOperand()) <<
 		"expected `" << varP << "`, "
 		"got `" << derefP->getOperand() << "`";
+}
+
+TEST_F(CopyPropagationOptimizerTests,
+OptimizeIfSingleUseAfterOriginalStatementWithVarDef) {
+	// Set-up the module.
+	//
+	// void test() {
+	//     int a;
+	//     a = b;
+	//     return a;
+	// }
+	//
+	ShPtr<Variable> varA(Variable::create("a", IntType::create(32)));
+	testFunc->addLocalVar(varA);
+	ShPtr<Variable> varB(Variable::create("b", IntType::create(32)));
+	testFunc->addLocalVar(varB);
+	ShPtr<ReturnStmt> returnA(ReturnStmt::create(varA));
+	ShPtr<AssignStmt> assignAB(AssignStmt::create(varA, varB, returnA));
+	ShPtr<VarDefStmt> varDefA(VarDefStmt::create(varA, ShPtr<Expression>(),
+		assignAB));
+	testFunc->setBody(varDefA);
+
+	INSTANTIATE_ALIAS_ANALYSIS_AND_VALUE_ANALYSIS(module);
+
+	// Optimize the module.
+	Optimizer::optimize<CopyPropagationOptimizer>(module, va,
+		OptimCallInfoObtainer::create());
+
+	// Check that the output is correct.
+	ShPtr<ReturnStmt> returnB(cast<ReturnStmt>(testFunc->getBody()));
+	ASSERT_TRUE(returnB) <<
+		"expected a return statement, got `" << testFunc << "`";
+	EXPECT_EQ(varB, returnB->getRetVal()) <<
+		"expected `" << varB << "` as the return value, "
+		"got `" << returnB->getRetVal() << "`";
+}
+
+TEST_F(CopyPropagationOptimizerTests,
+OptimizeIfSingleUseAfterOriginalStatementNoVarDef) {
+	// Set-up the module.
+	//
+	// void test() {
+	//     a = b;
+	//     return a;
+	// }
+	//
+	ShPtr<Variable> varA(Variable::create("a", IntType::create(32)));
+	testFunc->addLocalVar(varA);
+	ShPtr<Variable> varB(Variable::create("b", IntType::create(32)));
+	testFunc->addLocalVar(varB);
+	ShPtr<ReturnStmt> returnA(ReturnStmt::create(varA));
+	ShPtr<AssignStmt> assignAB(AssignStmt::create(varA, varB, returnA));
+	testFunc->setBody(assignAB);
+
+	INSTANTIATE_ALIAS_ANALYSIS_AND_VALUE_ANALYSIS(module);
+
+	// Optimize the module.
+	Optimizer::optimize<CopyPropagationOptimizer>(module, va,
+		OptimCallInfoObtainer::create());
+
+	// Check that the output is correct.
+	ShPtr<ReturnStmt> returnB(cast<ReturnStmt>(testFunc->getBody()));
+	ASSERT_TRUE(returnB) <<
+		"expected a return statement, got `" << testFunc->getBody() << "`";
+	EXPECT_EQ(varB, returnB->getRetVal()) <<
+		"expected `" << varB << "` as the return value, "
+		"got `" << returnB->getRetVal() << "`";
+}
+
+TEST_F(CopyPropagationOptimizerTests,
+OptimizeIfTwoUsesAfterOriginalStatementNoVarDef) {
+	// Set-up the module.
+	//
+	// void test() {
+	//     a = b;
+	//     c = a;
+	//     return a;
+	// }
+	//
+	ShPtr<Variable> varA(Variable::create("a", IntType::create(32)));
+	testFunc->addLocalVar(varA);
+	ShPtr<Variable> varB(Variable::create("b", IntType::create(32)));
+	testFunc->addLocalVar(varB);
+	ShPtr<Variable> varC(Variable::create("c", IntType::create(32)));
+	testFunc->addLocalVar(varC);
+	ShPtr<ReturnStmt> returnA(ReturnStmt::create(varA));
+	ShPtr<AssignStmt> assignCA(AssignStmt::create(varC, varA, returnA));
+	ShPtr<AssignStmt> assignAB(AssignStmt::create(varA, varB, assignCA));
+	testFunc->setBody(assignAB);
+
+	INSTANTIATE_ALIAS_ANALYSIS_AND_VALUE_ANALYSIS(module);
+
+	// Optimize the module.
+	Optimizer::optimize<CopyPropagationOptimizer>(module, va,
+		OptimCallInfoObtainer::create());
+
+	// Check that the output is correct.
+	ShPtr<ReturnStmt> returnB(cast<ReturnStmt>(testFunc->getBody()));
+	ASSERT_TRUE(returnB) <<
+		"expected a return statement, got `" << testFunc->getBody() << "`";
+	EXPECT_EQ(varB, returnB->getRetVal()) <<
+		"expected `" << varB << "` as the return value, "
+		"got `" << returnB->getRetVal() << "`";
+}
+
+TEST_F(CopyPropagationOptimizerTests,
+OptimizeIfRhsModifiedAfterTheOnlyUseOfLhsAndFuncReturnsRightAfterThat) {
+	// Set-up the module.
+	//
+	// void test() {
+	//     a = b;
+	//     c = a;
+	//     b = 1;
+	// }
+	//
+	ShPtr<Variable> varA(Variable::create("a", IntType::create(32)));
+	testFunc->addLocalVar(varA);
+	ShPtr<Variable> varB(Variable::create("b", IntType::create(32)));
+	testFunc->addLocalVar(varB);
+	ShPtr<Variable> varC(Variable::create("c", IntType::create(32)));
+	testFunc->addLocalVar(varC);
+	ShPtr<AssignStmt> assignB1(AssignStmt::create(varB, ConstInt::create(1, 32)));
+	ShPtr<AssignStmt> assignCA(AssignStmt::create(varC, varA, assignB1));
+	ShPtr<AssignStmt> assignAB(AssignStmt::create(varA, varB, assignCA));
+	testFunc->setBody(assignAB);
+
+	INSTANTIATE_ALIAS_ANALYSIS_AND_VALUE_ANALYSIS(module);
+
+	// Optimize the module.
+	Optimizer::optimize<CopyPropagationOptimizer>(module, va,
+		OptimCallInfoObtainer::create());
+
+	// Check that the output is correct.
+	ShPtr<EmptyStmt> emptyStmt(cast<EmptyStmt>(testFunc->getBody()));
+	ASSERT_TRUE(emptyStmt) <<
+		"expected a return statement, got `" << testFunc->getBody() << "`";
+	EXPECT_EQ(nullptr, emptyStmt->getSuccessor()) <<
+		"expected `" << nullptr << "`, got `" << emptyStmt->getSuccessor() << "`";
 }
 
 } // namespace tests

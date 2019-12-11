@@ -16,6 +16,7 @@ namespace retdec {
 namespace llvmir2hll {
 
 class CFG;
+class CFGBuilder;
 class CallInfoObtainer;
 class ValueAnalysis;
 class VarUsesVisitor;
@@ -85,14 +86,15 @@ private:
 	void tryOptimization(ShPtr<Statement> stmt);
 	void tryOptimizationCase1(ShPtr<Statement> stmt, ShPtr<Variable> lhsVar,
 		ShPtr<Expression> rhs);
-	void tryOptimizationCase2(ShPtr<Statement> stmt, ShPtr<Variable> lhsVar,
-		ShPtr<Expression> rhs);
 
 private:
 	/// Unordered set of variables.
 	using VarUSet = std::unordered_set<ShPtr<Variable>>;
 
 private:
+	/// The used builder of CFGs.
+	ShPtr<CFGBuilder> cfgBuilder;
+
 	/// Analysis of values.
 	ShPtr<ValueAnalysis> va;
 
