@@ -59,14 +59,14 @@ template <typename T,
 typename std::enable_if<std::is_signed<T>::value, int>::type* = nullptr>
 void deserialize(const Json::Value& val, const T& v)
 {
-	val = val.asLargestInt();
+	v = val.asLargestInt();
 }
 
 template <typename T,
 typename std::enable_if<std::is_unsigned<T>::value, int>::type* = nullptr>
 void deserialize(const Json::Value& val, const T& v)
 {
-	val = val.asLargestUInt();
+	v = val.asLargestUInt();
 }
 
 template<typename Container>
