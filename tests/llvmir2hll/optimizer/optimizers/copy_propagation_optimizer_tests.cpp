@@ -787,7 +787,7 @@ OptimizeIfRhsModifiedAfterTheOnlyUseOfLhsAndFuncReturnsRightAfterThat) {
 	ASSERT_TRUE(emptyStmt) <<
 		"expected a return statement, got `" << testFunc->getBody() << "`";
 	EXPECT_EQ(nullptr, emptyStmt->getSuccessor()) <<
-		"expected `" << nullptr << "`, got `" << emptyStmt->getSuccessor() << "`";
+		"expected `nullptr`, got `" << emptyStmt->getSuccessor() << "`";
 }
 
 //==============================================================================
