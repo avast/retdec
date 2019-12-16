@@ -29,8 +29,7 @@ test_script:
   # Run a simple decompilation.
   - cmd: C:\msys64\usr\bin\echo.exe -e "#include <stdio.h>\n#include <stdlib.h>\nint main()\n{\n  printf(\"hello world\\\n\");\n  return 0;\n}\n" > hello-orig.c
   - cmd: cat hello-orig.c
-  # Make sure 32-bit GCC will be used.
-  - set Path=C:\MinGW\bin;%Path%
+  - set Path=C:\msys64\bin;%Path%
   - cmd: gcc.exe -o hello.exe hello-orig.c
   - cmd: hello.exe
   - cmd: C:\Python36\python.exe retdec-install\bin\retdec-decompiler.py hello.exe
