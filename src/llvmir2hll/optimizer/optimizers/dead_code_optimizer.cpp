@@ -4,6 +4,8 @@
 * @copyright (c) 2017 Avast Software, licensed under the MIT license
 */
 
+#include <optional>
+
 #include "retdec/llvmir2hll/analysis/goto_target_analysis.h"
 #include "retdec/llvmir2hll/evaluator/arithm_expr_evaluator.h"
 #include "retdec/llvmir2hll/ir/break_stmt.h"
@@ -85,8 +87,8 @@ void DeadCodeOptimizer::tryToOptimizeIfStmt(ShPtr<IfStmt> stmt) {
 */
 IfStmt::clause_iterator DeadCodeOptimizer::findTrueClause(ShPtr<IfStmt> stmt) {
 	for (auto i = stmt->clause_begin(), e = stmt->clause_end(); i != e; ++i) {
-		Maybe<bool> boolResult(arithmExprEvaluator->toBool(i->first));
-		if (boolResult && boolResult.get()) {
+		std::optional<bool> boolResult(arithmExprEvaluator->toBool(i->first));
+		if (boolResult && boolResult.value()) {
 			// Evaluation was successful and a true clause was found.
 			return i;
 		}
@@ -103,11 +105,11 @@ IfStmt::clause_iterator DeadCodeOptimizer::findTrueClause(ShPtr<IfStmt> stmt) {
 void DeadCodeOptimizer::removeFalseClausesWithoutGotoLabel(ShPtr<IfStmt> stmt) {
 	auto i = stmt->clause_begin();
 	while (i != stmt->clause_end()) {
-		Maybe<bool> boolResult(arithmExprEvaluator->toBool(i->first));
+		std::optional<bool> boolResult(arithmExprEvaluator->toBool(i->first));
 		if (!boolResult) {
 			// Evaluation not successful. Can't be removed.
 			i++;
-		} else if (!boolResult.get()) {
+		} else if (!boolResult.value()) {
 			// Condition was evaluated as false.
 			if (GotoTargetAnalysis::hasGotoTargets(i->second)) {
 				// This clause can't be removed because has goto label.
@@ -401,8 +403,8 @@ void DeadCodeOptimizer::visit(ShPtr<WhileLoopStmt> stmt) {
 * @param[in] stmt @c WhileLoopStmt to optimize.
 */
 void DeadCodeOptimizer::tryToOptimizeWhileLoopStmt(ShPtr<WhileLoopStmt> stmt) {
-	Maybe<bool> boolResult(arithmExprEvaluator->toBool(stmt->getCondition()));
-	if (boolResult && !boolResult.get()) {
+	std::optional<bool> boolResult(arithmExprEvaluator->toBool(stmt->getCondition()));
+	if (boolResult && !boolResult.value()) {
 		// while (false) {
 		//    statement;
 		// }
@@ -438,9 +440,9 @@ void DeadCodeOptimizer::tryToOptimizeForLoopStmt(ShPtr<ForLoopStmt> stmt) {
 		varValues[stmt->getIndVar()] = startValue;
 	}
 
-	Maybe<bool> boolResult(arithmExprEvaluator->toBool(stmt->getEndCond(),
+	std::optional<bool> boolResult(arithmExprEvaluator->toBool(stmt->getEndCond(),
 		varValues));
-	if (boolResult && !boolResult.get()) {
+	if (boolResult && !boolResult.value()) {
 		// for (i = 5; i < 4; i++) {
 		//    statement;
 		// }

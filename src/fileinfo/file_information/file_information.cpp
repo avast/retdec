@@ -3219,7 +3219,7 @@ bool FileInformation::hasStrings() const
  */
 bool FileInformation::isSignaturePresent() const
 {
-	return signatureVerified.isDefined();
+	return signatureVerified.has_value();
 }
 
 /**
@@ -3228,7 +3228,7 @@ bool FileInformation::isSignaturePresent() const
  */
 bool FileInformation::isSignatureVerified() const
 {
-	return signatureVerified.isDefined() && signatureVerified.getValue();
+	return signatureVerified.has_value() && signatureVerified.value();
 }
 
 /**

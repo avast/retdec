@@ -7,13 +7,13 @@
 #ifndef RETDEC_BIN2LLVMIR_OPTIMIZATIONS_DECODER_JUMP_TARGETS_H
 #define RETDEC_BIN2LLVMIR_OPTIMIZATIONS_DECODER_JUMP_TARGETS_H
 
+#include <optional>
 #include <set>
 
 #include "retdec/bin2llvmir/optimizations/decoder/decoder_debug.h"
 #include "retdec/capstone2llvmir/capstone2llvmir.h"
 #include "retdec/capstone2llvmir/x86/x86.h"
 #include "retdec/common/address.h"
-#include "retdec/utils/value.h"
 
 namespace retdec {
 namespace bin2llvmir {
@@ -60,13 +60,13 @@ class JumpTarget
 				eType t,
 				cs_mode m,
 				retdec::common::Address f,
-				utils::Maybe<std::size_t> sz = utils::Maybe<std::size_t>());
+				std::optional<std::size_t> sz = std::nullopt);
 
 		bool operator<(const JumpTarget& o) const;
 
 		retdec::common::Address getAddress() const;
 		bool hasSize() const;
-		utils::Maybe<std::size_t> getSize() const;
+		std::optional<std::size_t> getSize() const;
 		eType getType() const;
 		retdec::common::Address getFromAddress() const;
 		cs_mode getMode() const;
@@ -78,7 +78,7 @@ class JumpTarget
 		// This address will be tried to be decoded.
 		retdec::common::Address _address;
 		///
-		utils::Maybe<std::size_t> _size;
+		std::optional<std::size_t> _size;
 		// The type of jump target - determined by its source.
 		eType _type = eType::UNKNOWN;
 		/// Address from which this jump target was created.
@@ -110,7 +110,7 @@ class JumpTargets
 				JumpTarget::eType t,
 				cs_mode m,
 				retdec::common::Address f,
-				utils::Maybe<std::size_t> sz = utils::Maybe<std::size_t>());
+				std::optional<std::size_t> sz = std::nullopt);
 
 	friend std::ostream& operator<<(std::ostream &out, const JumpTargets& jts);
 

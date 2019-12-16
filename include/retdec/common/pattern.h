@@ -8,9 +8,9 @@
 #define RETDEC_COMMON_PATTERN_H
 
 #include <string>
+#include <optional>
 
 #include "retdec/common/address.h"
-#include "retdec/utils/value.h"
 
 namespace retdec {
 namespace common {
@@ -30,28 +30,22 @@ class Pattern
 							= retdec::common::Address::getUndef,
 						const retdec::common::Address& address
 							= retdec::common::Address::getUndef,
-						retdec::utils::Maybe<unsigned> size
-							= retdec::utils::Maybe<unsigned>(),
-						retdec::utils::Maybe<unsigned> entrySize
-							= retdec::utils::Maybe<unsigned>());
+						std::optional<unsigned> size = std::nullopt,
+						std::optional<unsigned> entrySize = std::nullopt);
 				static Match integral(
 						const retdec::common::Address& offset
 							= retdec::common::Address::getUndef,
 						const retdec::common::Address& address
 							= retdec::common::Address::getUndef,
-						retdec::utils::Maybe<unsigned> size
-							= retdec::utils::Maybe<unsigned>(),
-						retdec::utils::Maybe<unsigned> entrySize
-							= retdec::utils::Maybe<unsigned>());
+						std::optional<unsigned> size = std::nullopt,
+						std::optional<unsigned> entrySize = std::nullopt);
 				static Match floatingPoint(
 						const retdec::common::Address& offset
 							= retdec::common::Address::getUndef,
 						const retdec::common::Address& address
 							= retdec::common::Address::getUndef,
-						retdec::utils::Maybe<unsigned> size
-							= retdec::utils::Maybe<unsigned>(),
-						retdec::utils::Maybe<unsigned> entrySize
-							= retdec::utils::Maybe<unsigned>());
+						std::optional<unsigned> size = std::nullopt,
+						std::optional<unsigned> entrySize = std::nullopt);
 
 				bool operator==(const Match& val) const;
 				bool operator!=(const Match& val) const;
@@ -82,8 +76,8 @@ class Pattern
 				/// @{
 				retdec::common::Address getOffset() const;
 				retdec::common::Address getAddress() const;
-				retdec::utils::Maybe<unsigned> getSize() const;
-				retdec::utils::Maybe<unsigned> getEntrySize() const;
+				std::optional<unsigned> getSize() const;
+				std::optional<unsigned> getEntrySize() const;
 				/// @}
 
 			private:
@@ -97,15 +91,15 @@ class Pattern
 			private:
 				Match(const retdec::common::Address& offset,
 						const retdec::common::Address& address,
-						retdec::utils::Maybe<unsigned> size,
-						retdec::utils::Maybe<unsigned> entrySize,
+						std::optional<unsigned> size,
+						std::optional<unsigned> entrySize,
 						eType type);
 
 			private:
 				retdec::common::Address _offset;
 				retdec::common::Address _address;
-				retdec::utils::Maybe<unsigned> _size;
-				retdec::utils::Maybe<unsigned> _entrySize;
+				std::optional<unsigned> _size;
+				std::optional<unsigned> _entrySize;
 				eType _type = eType::UNKNOWN;
 		};
 

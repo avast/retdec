@@ -24,8 +24,8 @@ Pattern::Match::Match()
 Pattern::Match::Match(
 		const retdec::common::Address& offset,
 		const retdec::common::Address& address,
-		retdec::utils::Maybe<unsigned> size,
-		retdec::utils::Maybe<unsigned> entrySize,
+		std::optional<unsigned> size,
+		std::optional<unsigned> entrySize,
 		eType type)
 	:
 		_offset(offset),
@@ -40,8 +40,8 @@ Pattern::Match::Match(
 Pattern::Match Pattern::Match::unknown(
 		const retdec::common::Address& offset,
 		const retdec::common::Address& address,
-		retdec::utils::Maybe<unsigned> size,
-		retdec::utils::Maybe<unsigned> entrySize)
+		std::optional<unsigned> size,
+		std::optional<unsigned> entrySize)
 {
 	return Match(offset, address, size, entrySize, eType::UNKNOWN);
 }
@@ -49,8 +49,8 @@ Pattern::Match Pattern::Match::unknown(
 Pattern::Match Pattern::Match::integral(
 		const retdec::common::Address& offset,
 		const retdec::common::Address& address,
-		retdec::utils::Maybe<unsigned> size,
-		retdec::utils::Maybe<unsigned> entrySize)
+		std::optional<unsigned> size,
+		std::optional<unsigned> entrySize)
 {
 	return Match(offset, address, size, entrySize, eType::INTEGRAL);
 }
@@ -58,8 +58,8 @@ Pattern::Match Pattern::Match::integral(
 Pattern::Match Pattern::Match::floatingPoint(
 		const retdec::common::Address& offset,
 		const retdec::common::Address& address,
-		retdec::utils::Maybe<unsigned> size,
-		retdec::utils::Maybe<unsigned> entrySize)
+		std::optional<unsigned> size,
+		std::optional<unsigned> entrySize)
 {
 	return Match(offset, address, size, entrySize, eType::FLOATING_POINT);
 }
@@ -76,12 +76,12 @@ bool Pattern::Match::isAddressDefined() const
 
 bool Pattern::Match::isSizeDefined() const
 {
-	return _size.isDefined();
+	return _size.has_value();
 }
 
 bool Pattern::Match::isEntrySizeDefined() const
 {
-	return _entrySize.isDefined();
+	return _entrySize.has_value();
 }
 
 bool Pattern::Match::isTypeUnknown() const
@@ -144,12 +144,12 @@ retdec::common::Address Pattern::Match::getAddress() const
 	return _address;
 }
 
-retdec::utils::Maybe<unsigned> Pattern::Match::getSize() const
+std::optional<unsigned> Pattern::Match::getSize() const
 {
 	return _size;
 }
 
-retdec::utils::Maybe<unsigned> Pattern::Match::getEntrySize() const
+std::optional<unsigned> Pattern::Match::getEntrySize() const
 {
 	return _entrySize;
 }

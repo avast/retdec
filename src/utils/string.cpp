@@ -110,8 +110,10 @@ bool isPrintableOrZeroByte(WideCharType c) {
 * @brief Checks if the given string has any unprintable characters.
 */
 bool hasUnprintableChars(const WideStringType &str) {
-	return std::find_if(str.begin(), str.end(),
-		std::not1(std::ptr_fun(isPrintable))) != str.end();
+	return std::find_if(
+			str.begin(),
+			str.end(),
+			[](WideCharType c){return !isPrintable(c);}) == str.end();
 }
 
 /**
@@ -119,8 +121,10 @@ bool hasUnprintableChars(const WideStringType &str) {
 *        bytes.
 */
 bool onlyUnprintableCharsAreZeroBytes(const WideStringType &str) {
-	return std::find_if(str.begin(), str.end(),
-		std::not1(std::ptr_fun(isPrintableOrZeroByte))) == str.end();
+	return std::find_if(
+			str.begin(),
+			str.end(),
+			[](WideCharType c){return !isPrintableOrZeroByte(c);}) == str.end();
 }
 
 /**

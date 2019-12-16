@@ -10,12 +10,12 @@
 #include <fstream>
 #include <initializer_list>
 #include <map>
+#include <optional>
 #include <set>
 #include <utility>
 #include <vector>
 
 #include "retdec/utils/byte_value_storage.h"
-#include "retdec/utils/value.h"
 #include "retdec/utils/non_copyable.h"
 #include "retdec/fileformat/fftypes.h"
 #include "retdec/fileformat/utils/byte_array_buffer.h"
@@ -91,7 +91,7 @@ class FileFormat : public retdec::utils::ByteValueStorage, private retdec::utils
 		LoaderErrorInfo _ldrErrInfo;                                      ///< loader error (e.g. Windows loader error for PE files)
 		bool stateIsValid;                                                ///< internal state of instance
 		std::vector<std::pair<std::size_t, std::size_t>> secHashInfo;     ///< information for calculation of section table hash
-		retdec::utils::Maybe<bool> signatureVerified;                     ///< indicates whether the signature is present and also verified
+		std::optional<bool> signatureVerified;                            ///< indicates whether the signature is present and also verified
 		retdec::common::RangeContainer<std::uint64_t> nonDecodableRanges;  ///< Address ranges which should not be decoded for instructions.
 		std::vector<std::pair<std::string, std::string>> anomalies;       ///< file format anomalies
 

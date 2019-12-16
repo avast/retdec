@@ -48,46 +48,46 @@ TEST_F(CompoundSemanticsTests,
 GetMainFuncNameReturnsAnswerIfThereIsSingleSemanticsWhichKnowsTheAnswer) {
 	INSTANTIATE_SEMANTICS_MOCK(semantics);
 	ON_CALL(*semanticsMock, getMainFuncName())
-		.WillByDefault(Return(Just("main"s)));
+		.WillByDefault(Return("main"s));
 	compoundSemantics->appendSemantics(semantics);
 
-	Maybe<std::string> answer(compoundSemantics->getMainFuncName());
+	std::optional<std::string> answer(compoundSemantics->getMainFuncName());
 	ASSERT_TRUE(answer);
-	EXPECT_EQ("main", answer.get());
+	EXPECT_EQ("main", answer.value());
 }
 
 TEST_F(CompoundSemanticsTests,
 GetMainFuncNameReturnsAnswerIfSecondSemanticsAddedByAppendKnowsTheAnswer) {
 	INSTANTIATE_SEMANTICS_MOCK(semantics1);
 	ON_CALL(*semantics1Mock, getMainFuncName())
-		.WillByDefault(Return(Nothing<std::string>()));
+		.WillByDefault(Return(std::nullopt));
 	compoundSemantics->appendSemantics(semantics1);
 
 	INSTANTIATE_SEMANTICS_MOCK(semantics2);
 	ON_CALL(*semantics2Mock, getMainFuncName())
-		.WillByDefault(Return(Just("main"s)));
+		.WillByDefault(Return("main"s));
 	compoundSemantics->appendSemantics(semantics2);
 
-	Maybe<std::string> answer(compoundSemantics->getMainFuncName());
+	std::optional<std::string> answer(compoundSemantics->getMainFuncName());
 	ASSERT_TRUE(answer);
-	EXPECT_EQ("main", answer.get());
+	EXPECT_EQ("main", answer.value());
 }
 
 TEST_F(CompoundSemanticsTests,
 GetMainFuncNameReturnsAnswerIfSecondSemanticsAddedByPrependKnowsTheAnswer) {
 	INSTANTIATE_SEMANTICS_MOCK(semantics1);
 	ON_CALL(*semantics1Mock, getMainFuncName())
-		.WillByDefault(Return(Just("main"s)));
+		.WillByDefault(Return("main"s));
 	compoundSemantics->prependSemantics(semantics1);
 
 	INSTANTIATE_SEMANTICS_MOCK(semantics2);
 	ON_CALL(*semantics2Mock, getMainFuncName())
-		.WillByDefault(Return(Nothing<std::string>()));
+		.WillByDefault(Return(std::nullopt));
 	compoundSemantics->prependSemantics(semantics2);
 
-	Maybe<std::string> answer(compoundSemantics->getMainFuncName());
+	std::optional<std::string> answer(compoundSemantics->getMainFuncName());
 	ASSERT_TRUE(answer);
-	EXPECT_EQ("main", answer.get());
+	EXPECT_EQ("main", answer.value());
 }
 
 //
@@ -103,46 +103,46 @@ TEST_F(CompoundSemanticsTests,
 GetCHeaderFileForFuncReturnsAnswerIfThereIsSingleSemanticsWhichKnowsTheAnswer) {
 	INSTANTIATE_SEMANTICS_MOCK(semantics);
 	ON_CALL(*semanticsMock, getCHeaderFileForFunc("printf"))
-		.WillByDefault(Return(Just("stdio.h"s)));
+		.WillByDefault(Return("stdio.h"s));
 	compoundSemantics->appendSemantics(semantics);
 
-	Maybe<std::string> answer(compoundSemantics->getCHeaderFileForFunc("printf"));
+	std::optional<std::string> answer(compoundSemantics->getCHeaderFileForFunc("printf"));
 	ASSERT_TRUE(answer);
-	EXPECT_EQ("stdio.h", answer.get());
+	EXPECT_EQ("stdio.h", answer.value());
 }
 
 TEST_F(CompoundSemanticsTests,
 GetCHeaderFileForFuncReturnsAnswerIfSecondSemanticsAddedByAppendKnowsTheAnswer) {
 	INSTANTIATE_SEMANTICS_MOCK(semantics1);
 	ON_CALL(*semantics1Mock, getCHeaderFileForFunc("printf"))
-		.WillByDefault(Return(Nothing<std::string>()));
+		.WillByDefault(Return(std::nullopt));
 	compoundSemantics->appendSemantics(semantics1);
 
 	INSTANTIATE_SEMANTICS_MOCK(semantics2);
 	ON_CALL(*semantics2Mock, getCHeaderFileForFunc("printf"))
-		.WillByDefault(Return(Just("stdio.h"s)));
+		.WillByDefault(Return("stdio.h"s));
 	compoundSemantics->appendSemantics(semantics2);
 
-	Maybe<std::string> answer(compoundSemantics->getCHeaderFileForFunc("printf"));
+	std::optional<std::string> answer(compoundSemantics->getCHeaderFileForFunc("printf"));
 	ASSERT_TRUE(answer);
-	EXPECT_EQ("stdio.h", answer.get());
+	EXPECT_EQ("stdio.h", answer.value());
 }
 
 TEST_F(CompoundSemanticsTests,
 GetCHeaderFileForFuncReturnsAnswerIfSecondSemanticsAddedByPrependKnowsTheAnswer) {
 	INSTANTIATE_SEMANTICS_MOCK(semantics1);
 	ON_CALL(*semantics1Mock, getCHeaderFileForFunc("printf"))
-		.WillByDefault(Return(Just("stdio.h"s)));
+		.WillByDefault(Return("stdio.h"s));
 	compoundSemantics->prependSemantics(semantics1);
 
 	INSTANTIATE_SEMANTICS_MOCK(semantics2);
 	ON_CALL(*semantics2Mock, getCHeaderFileForFunc("printf"))
-		.WillByDefault(Return(Nothing<std::string>()));
+		.WillByDefault(Return(std::nullopt));
 	compoundSemantics->prependSemantics(semantics2);
 
-	Maybe<std::string> answer(compoundSemantics->getCHeaderFileForFunc("printf"));
+	std::optional<std::string> answer(compoundSemantics->getCHeaderFileForFunc("printf"));
 	ASSERT_TRUE(answer);
-	EXPECT_EQ("stdio.h", answer.get());
+	EXPECT_EQ("stdio.h", answer.value());
 }
 
 //
@@ -158,46 +158,46 @@ TEST_F(CompoundSemanticsTests,
 FuncNeverReturnsReturnsAnswerIfThereIsSingleSemanticsWhichKnowsTheAnswer) {
 	INSTANTIATE_SEMANTICS_MOCK(semantics);
 	ON_CALL(*semanticsMock, funcNeverReturns("exit"))
-		.WillByDefault(Return(Just(true)));
+		.WillByDefault(Return(true));
 	compoundSemantics->appendSemantics(semantics);
 
-	Maybe<bool> answer(compoundSemantics->funcNeverReturns("exit"));
+	std::optional<bool> answer(compoundSemantics->funcNeverReturns("exit"));
 	ASSERT_TRUE(answer);
-	EXPECT_TRUE(answer.get());
+	EXPECT_TRUE(answer.value());
 }
 
 TEST_F(CompoundSemanticsTests,
 FuncNeverReturnsReturnsAnswerIfSecondSemanticsAddedByAppendKnowsTheAnswer) {
 	INSTANTIATE_SEMANTICS_MOCK(semantics1);
 	ON_CALL(*semantics1Mock, funcNeverReturns("exit"))
-		.WillByDefault(Return(Nothing<bool>()));
+		.WillByDefault(Return(std::nullopt));
 	compoundSemantics->appendSemantics(semantics1);
 
 	INSTANTIATE_SEMANTICS_MOCK(semantics2);
 	ON_CALL(*semantics2Mock, funcNeverReturns("exit"))
-		.WillByDefault(Return(Just(true)));
+		.WillByDefault(Return(true));
 	compoundSemantics->appendSemantics(semantics2);
 
-	Maybe<bool> answer(compoundSemantics->funcNeverReturns("exit"));
+	std::optional<bool> answer(compoundSemantics->funcNeverReturns("exit"));
 	ASSERT_TRUE(answer);
-	EXPECT_TRUE(answer.get());
+	EXPECT_TRUE(answer.value());
 }
 
 TEST_F(CompoundSemanticsTests,
 FuncNeverReturnsReturnsAnswerIfSecondSemanticsAddedByPrependKnowsTheAnswer) {
 	INSTANTIATE_SEMANTICS_MOCK(semantics1);
 	ON_CALL(*semantics1Mock, funcNeverReturns("exit"))
-		.WillByDefault(Return(Just(true)));
+		.WillByDefault(Return(true));
 	compoundSemantics->prependSemantics(semantics1);
 
 	INSTANTIATE_SEMANTICS_MOCK(semantics2);
 	ON_CALL(*semantics2Mock, funcNeverReturns("exit"))
-		.WillByDefault(Return(Nothing<bool>()));
+		.WillByDefault(Return(std::nullopt));
 	compoundSemantics->prependSemantics(semantics2);
 
-	Maybe<bool> answer(compoundSemantics->funcNeverReturns("exit"));
+	std::optional<bool> answer(compoundSemantics->funcNeverReturns("exit"));
 	ASSERT_TRUE(answer);
-	EXPECT_TRUE(answer.get());
+	EXPECT_TRUE(answer.value());
 }
 
 //
@@ -213,46 +213,46 @@ TEST_F(CompoundSemanticsTests,
 GetNameOfVarStoringResultReturnsAnswerIfThereIsSingleSemanticsWhichKnowsTheAnswer) {
 	INSTANTIATE_SEMANTICS_MOCK(semantics);
 	ON_CALL(*semanticsMock, getNameOfVarStoringResult("getchar"))
-		.WillByDefault(Return(Just("c"s)));
+		.WillByDefault(Return("c"s));
 	compoundSemantics->appendSemantics(semantics);
 
-	Maybe<std::string> answer(compoundSemantics->getNameOfVarStoringResult("getchar"));
+	std::optional<std::string> answer(compoundSemantics->getNameOfVarStoringResult("getchar"));
 	ASSERT_TRUE(answer);
-	EXPECT_EQ("c", answer.get());
+	EXPECT_EQ("c", answer.value());
 }
 
 TEST_F(CompoundSemanticsTests,
 GetNameOfVarStoringResultReturnsAnswerIfSecondSemanticsAddedByAppendKnowsTheAnswer) {
 	INSTANTIATE_SEMANTICS_MOCK(semantics1);
 	ON_CALL(*semantics1Mock, getNameOfVarStoringResult("getchar"))
-		.WillByDefault(Return(Nothing<std::string>()));
+		.WillByDefault(Return(std::nullopt));
 	compoundSemantics->appendSemantics(semantics1);
 
 	INSTANTIATE_SEMANTICS_MOCK(semantics2);
 	ON_CALL(*semantics2Mock, getNameOfVarStoringResult("getchar"))
-		.WillByDefault(Return(Just("c"s)));
+		.WillByDefault(Return("c"s));
 	compoundSemantics->appendSemantics(semantics2);
 
-	Maybe<std::string> answer(compoundSemantics->getNameOfVarStoringResult("getchar"));
+	std::optional<std::string> answer(compoundSemantics->getNameOfVarStoringResult("getchar"));
 	ASSERT_TRUE(answer);
-	EXPECT_EQ("c", answer.get());
+	EXPECT_EQ("c", answer.value());
 }
 
 TEST_F(CompoundSemanticsTests,
 GetNameOfVarStoringResultReturnsAnswerIfSecondSemanticsAddedByPrependKnowsTheAnswer) {
 	INSTANTIATE_SEMANTICS_MOCK(semantics1);
 	ON_CALL(*semantics1Mock, getNameOfVarStoringResult("getchar"))
-		.WillByDefault(Return(Just("c"s)));
+		.WillByDefault(Return("c"s));
 	compoundSemantics->prependSemantics(semantics1);
 
 	INSTANTIATE_SEMANTICS_MOCK(semantics2);
 	ON_CALL(*semantics2Mock, getNameOfVarStoringResult("getchar"))
-		.WillByDefault(Return(Nothing<std::string>()));
+		.WillByDefault(Return(std::nullopt));
 	compoundSemantics->prependSemantics(semantics2);
 
-	Maybe<std::string> answer(compoundSemantics->getNameOfVarStoringResult("getchar"));
+	std::optional<std::string> answer(compoundSemantics->getNameOfVarStoringResult("getchar"));
 	ASSERT_TRUE(answer);
-	EXPECT_EQ("c", answer.get());
+	EXPECT_EQ("c", answer.value());
 }
 
 //
@@ -268,46 +268,46 @@ TEST_F(CompoundSemanticsTests,
 GetNameOfParamReturnsAnswerIfThereIsSingleSemanticsWhichKnowsTheAnswer) {
 	INSTANTIATE_SEMANTICS_MOCK(semantics);
 	ON_CALL(*semanticsMock, getNameOfParam("fopen", 1))
-		.WillByDefault(Return(Just("file_path"s)));
+		.WillByDefault(Return("file_path"s));
 	compoundSemantics->appendSemantics(semantics);
 
-	Maybe<std::string> answer(compoundSemantics->getNameOfParam("fopen", 1));
+	std::optional<std::string> answer(compoundSemantics->getNameOfParam("fopen", 1));
 	ASSERT_TRUE(answer);
-	EXPECT_EQ("file_path", answer.get());
+	EXPECT_EQ("file_path", answer.value());
 }
 
 TEST_F(CompoundSemanticsTests,
 GetNameOfParamReturnsAnswerIfSecondSemanticsAddedByAppendKnowsTheAnswer) {
 	INSTANTIATE_SEMANTICS_MOCK(semantics1);
 	ON_CALL(*semantics1Mock, getNameOfParam("fopen", 1))
-		.WillByDefault(Return(Nothing<std::string>()));
+		.WillByDefault(Return(std::nullopt));
 	compoundSemantics->appendSemantics(semantics1);
 
 	INSTANTIATE_SEMANTICS_MOCK(semantics2);
 	ON_CALL(*semantics2Mock, getNameOfParam("fopen", 1))
-		.WillByDefault(Return(Just("file_path"s)));
+		.WillByDefault(Return("file_path"s));
 	compoundSemantics->appendSemantics(semantics2);
 
-	Maybe<std::string> answer(compoundSemantics->getNameOfParam("fopen", 1));
+	std::optional<std::string> answer(compoundSemantics->getNameOfParam("fopen", 1));
 	ASSERT_TRUE(answer);
-	EXPECT_EQ("file_path", answer.get());
+	EXPECT_EQ("file_path", answer.value());
 }
 
 TEST_F(CompoundSemanticsTests,
 GetNameOfParamReturnsAnswerIfSecondSemanticsAddedByPrependKnowsTheAnswer) {
 	INSTANTIATE_SEMANTICS_MOCK(semantics1);
 	ON_CALL(*semantics1Mock, getNameOfParam("fopen", 1))
-		.WillByDefault(Return(Just("file_path"s)));
+		.WillByDefault(Return("file_path"s));
 	compoundSemantics->prependSemantics(semantics1);
 
 	INSTANTIATE_SEMANTICS_MOCK(semantics2);
 	ON_CALL(*semantics2Mock, getNameOfParam("fopen", 1))
-		.WillByDefault(Return(Nothing<std::string>()));
+		.WillByDefault(Return(std::nullopt));
 	compoundSemantics->prependSemantics(semantics2);
 
-	Maybe<std::string> answer(compoundSemantics->getNameOfParam("fopen", 1));
+	std::optional<std::string> answer(compoundSemantics->getNameOfParam("fopen", 1));
 	ASSERT_TRUE(answer);
-	EXPECT_EQ("file_path", answer.get());
+	EXPECT_EQ("file_path", answer.value());
 }
 
 //
@@ -325,31 +325,31 @@ GetSymbolicNamesForParamReturnsAnswerIfThereIsSingleSemanticsWhichKnowsTheAnswer
 	IntStringMap refMap;
 	refMap[1] = "LOCK_SH";
 	ON_CALL(*semanticsMock, getSymbolicNamesForParam("flock", 2))
-		.WillByDefault(Return(Just(refMap)));
+		.WillByDefault(Return(refMap));
 	compoundSemantics->appendSemantics(semantics);
 
-	Maybe<IntStringMap> answer(compoundSemantics->getSymbolicNamesForParam("flock", 2));
+	std::optional<IntStringMap> answer(compoundSemantics->getSymbolicNamesForParam("flock", 2));
 	ASSERT_TRUE(answer);
-	EXPECT_EQ(refMap, answer.get());
+	EXPECT_EQ(refMap, answer.value());
 }
 
 TEST_F(CompoundSemanticsTests,
 GetSymbolicNamesForParamReturnsAnswerIfSecondSemanticsAddedByAppendKnowsTheAnswer) {
 	INSTANTIATE_SEMANTICS_MOCK(semantics1);
 	ON_CALL(*semantics1Mock, getSymbolicNamesForParam("flock", 2))
-		.WillByDefault(Return(Nothing<IntStringMap>()));
+		.WillByDefault(Return(std::nullopt));
 	compoundSemantics->appendSemantics(semantics1);
 
 	INSTANTIATE_SEMANTICS_MOCK(semantics2);
 	IntStringMap refMap;
 	refMap[1] = "LOCK_SH";
 	ON_CALL(*semantics2Mock, getSymbolicNamesForParam("flock", 2))
-		.WillByDefault(Return(Just(refMap)));
+		.WillByDefault(Return(refMap));
 	compoundSemantics->appendSemantics(semantics2);
 
-	Maybe<IntStringMap> answer(compoundSemantics->getSymbolicNamesForParam("flock", 2));
+	std::optional<IntStringMap> answer(compoundSemantics->getSymbolicNamesForParam("flock", 2));
 	ASSERT_TRUE(answer);
-	EXPECT_EQ(refMap, answer.get());
+	EXPECT_EQ(refMap, answer.value());
 }
 
 TEST_F(CompoundSemanticsTests,
@@ -358,17 +358,17 @@ GetSymbolicNamesForParamReturnsAnswerIfSecondSemanticsAddedByPrependKnowsTheAnsw
 	IntStringMap refMap;
 	refMap[1] = "LOCK_SH";
 	ON_CALL(*semantics1Mock, getSymbolicNamesForParam("flock", 2))
-		.WillByDefault(Return(Just(refMap)));
+		.WillByDefault(Return(refMap));
 	compoundSemantics->prependSemantics(semantics1);
 
 	INSTANTIATE_SEMANTICS_MOCK(semantics2);
 	ON_CALL(*semantics2Mock, getSymbolicNamesForParam("flock", 2))
-		.WillByDefault(Return(Nothing<IntStringMap>()));
+		.WillByDefault(Return(std::nullopt));
 	compoundSemantics->prependSemantics(semantics2);
 
-	Maybe<IntStringMap> answer(compoundSemantics->getSymbolicNamesForParam("flock", 2));
+	std::optional<IntStringMap> answer(compoundSemantics->getSymbolicNamesForParam("flock", 2));
 	ASSERT_TRUE(answer);
-	EXPECT_EQ(refMap, answer.get());
+	EXPECT_EQ(refMap, answer.value());
 }
 
 } // namespace tests

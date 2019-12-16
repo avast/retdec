@@ -7,6 +7,8 @@
 #ifndef FILEINFO_FILE_INFORMATION_FILE_INFORMATION_H
 #define FILEINFO_FILE_INFORMATION_FILE_INFORMATION_H
 
+#include <optional>
+
 #include "retdec/cpdetect/cpdetect.h"
 #include "fileinfo/file_information/file_information_types/file_information_types.h"
 
@@ -59,7 +61,7 @@ class FileInformation
 		std::vector<Pattern> malwarePatterns;          ///< detected malware patterns
 		std::vector<Pattern> otherPatterns;            ///< other detected patterns
 		Strings strings;                               ///< detected strings
-		retdec::utils::Maybe<bool> signatureVerified;  ///< indicates whether the signature is present and if it is verified
+		std::optional<bool> signatureVerified;         ///< indicates whether the signature is present and if it is verified
 		DotnetInfo dotnetInfo;                         ///< .NET information
 		std::string failedDepsList;                    /// If non-empty, trhis contains the name of the dependency list that failed to load
 		std::vector<std::pair<std::string,std::string>> anomalies;     ///< detected anomalies

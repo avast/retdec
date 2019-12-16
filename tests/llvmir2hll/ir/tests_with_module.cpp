@@ -13,6 +13,7 @@
 #include "llvmir2hll/ir/tests_with_module.h"
 #include "retdec/llvmir2hll/ir/variable.h"
 #include "retdec/llvmir2hll/ir/void_type.h"
+#include "retdec/llvmir2hll/support/debug.h"
 
 using namespace ::testing;
 

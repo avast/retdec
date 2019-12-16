@@ -60,11 +60,11 @@ Json::Value serialize(const common::Pattern::Match& pm)
 	}
 	if (pm.isSizeDefined())
 	{
-		match[JSON_size] = pm.getSize().getValue();
+		match[JSON_size] = pm.getSize().value();
 	}
 	if (pm.isEntrySizeDefined())
 	{
-		match[JSON_entrySize] = pm.getEntrySize().getValue();
+		match[JSON_entrySize] = pm.getEntrySize().value();
 	}
 
 	if (pm.isTypeIntegral())

@@ -8,9 +8,9 @@
 #define RETDEC_LLVMIR2HLL_SEMANTICS_SEMANTICS_IMPL_SUPPORT_GET_SYMBOLIC_NAMES_FOR_PARAM_H
 
 #include <map>
+#include <optional>
 #include <unordered_map>
 
-#include "retdec/llvmir2hll/support/maybe.h"
 #include "retdec/llvmir2hll/support/types.h"
 
 /**
@@ -70,7 +70,8 @@ using ParamSymbolsMap = std::map<unsigned, IntStringMap>;
 /// Mapping of a function name into ParamSymbolsMap.
 using FuncParamsMap = std::unordered_map<std::string, ParamSymbolsMap>;
 
-Maybe<IntStringMap> getSymbolicNamesForParamFromMap(const std::string &funcName,
+std::optional<IntStringMap> getSymbolicNamesForParamFromMap(
+	const std::string &funcName,
 	unsigned paramPos, const FuncParamsMap &map);
 
 } // namespace semantics

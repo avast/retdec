@@ -8,9 +8,9 @@
 #define RETDEC_COMMON_STORAGE_H
 
 #include <string>
+#include <optional>
 
 #include "retdec/common/address.h"
-#include "retdec/utils/value.h"
 
 namespace retdec {
 namespace common {
@@ -63,7 +63,7 @@ class Storage
 		retdec::common::Address getAddress() const;
 		std::string getRegisterName() const;
 		int getStackOffset() const;
-		retdec::utils::Maybe<unsigned> getRegisterNumber() const;
+		std::optional<unsigned> getRegisterNumber() const;
 		/// @}
 
 		/// @name Storage set methods.
@@ -81,7 +81,7 @@ class Storage
 		std::string _registerName;
 		retdec::common::Address _globalAddress;
 
-		retdec::utils::Maybe<unsigned> _registerNumber;
+		std::optional<unsigned> _registerNumber;
 };
 
 } // namespace common

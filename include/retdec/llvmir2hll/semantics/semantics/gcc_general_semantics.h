@@ -7,6 +7,7 @@
 #ifndef RETDEC_LLVMIR2HLL_SEMANTICS_SEMANTICS_GCC_GENERAL_SEMANTICS_H
 #define RETDEC_LLVMIR2HLL_SEMANTICS_SEMANTICS_GCC_GENERAL_SEMANTICS_H
 
+#include <optional>
 #include <string>
 
 #include "retdec/llvmir2hll/semantics/semantics/default_semantics.h"
@@ -32,13 +33,13 @@ public:
 	/// @name Semantics Interface
 	/// @{
 	virtual std::string getId() const override;
-	virtual Maybe<std::string> getCHeaderFileForFunc(
+	virtual std::optional<std::string> getCHeaderFileForFunc(
 		const std::string &funcName) const override;
-	virtual Maybe<std::string> getNameOfVarStoringResult(
+	virtual std::optional<std::string> getNameOfVarStoringResult(
 		const std::string &funcName) const override;
-	virtual Maybe<std::string> getNameOfParam(const std::string &funcName,
+	virtual std::optional<std::string> getNameOfParam(const std::string &funcName,
 		unsigned paramPos) const override;
-	virtual Maybe<IntStringMap> getSymbolicNamesForParam(
+	virtual std::optional<IntStringMap> getSymbolicNamesForParam(
 		const std::string &funcName, unsigned paramPos) const override;
 	/// @}
 

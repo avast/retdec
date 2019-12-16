@@ -1,18 +1,14 @@
 version: '{build}'
 
 environment:
-  WINFLEXBISON_ARCHIVE: winflexbison-2.5.16.zip
   matrix:
-    - CMAKE_GENERATOR: Visual Studio 14 2015 Win64
-      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
+    - CMAKE_GENERATOR: Visual Studio 15 2017 Win64
+      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
 
 matrix:
   fast_finish: true
 
 install:
-  - appveyor DownloadFile "https://downloads.sourceforge.net/project/winflexbison/old_versions/%WINFLEXBISON_ARCHIVE%"
-  - 7z x -y -owinflexbison\ "%WINFLEXBISON_ARCHIVE%" > nul
-  - set Path=%CD%\winflexbison;%Path%
   - set Path=C:\Python36;%Path%
 
 before_build:
@@ -33,8 +29,7 @@ test_script:
   # Run a simple decompilation.
   - cmd: C:\msys64\usr\bin\echo.exe -e "#include <stdio.h>\n#include <stdlib.h>\nint main()\n{\n  printf(\"hello world\\\n\");\n  return 0;\n}\n" > hello-orig.c
   - cmd: cat hello-orig.c
-  # Make sure 32-bit GCC will be used.
-  - set Path=C:\MinGW\bin;%Path%
+  - set Path=C:\msys64\bin;%Path%
   - cmd: gcc.exe -o hello.exe hello-orig.c
   - cmd: hello.exe
   - cmd: C:\Python36\python.exe retdec-install\bin\retdec-decompiler.py hello.exe
@@ -47,6 +42,8 @@ branches:
     - master
     # Version tags.
     - /^v?\d+\.\d+.*$/
+    # Temporarily enable build of this branch.
+    - issue-650
 
 skip_commits:
   files:

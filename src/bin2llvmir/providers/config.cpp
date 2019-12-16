@@ -299,13 +299,13 @@ bool Config::isStackVariable(const llvm::Value* val)
 	return getConfigStackVariable(val) != nullptr;
 }
 
-retdec::utils::Maybe<int> Config::getStackVariableOffset(
+std::optional<int> Config::getStackVariableOffset(
 		const llvm::Value* val)
 {
 	auto* sv = getConfigStackVariable(val);
 	return sv
-			? retdec::utils::Maybe<int>(sv->getStorage().getStackOffset())
-			: retdec::utils::Maybe<int>();
+			? std::optional<int>(sv->getStorage().getStackOffset())
+			: std::nullopt;
 }
 
 const retdec::common::Object* Config::insertGlobalVariable(
@@ -435,10 +435,10 @@ const retdec::common::Object* Config::getConfigRegister(
 	return gv ? _configDB.registers.getObjectByName(gv->getName()) : nullptr;
 }
 
-retdec::utils::Maybe<unsigned> Config::getConfigRegisterNumber(
+std::optional<unsigned> Config::getConfigRegisterNumber(
 		const llvm::Value* val)
 {
-	retdec::utils::Maybe<unsigned> undefVal;
+	std::optional<unsigned> undefVal;
 	auto* r = getConfigRegister(val);
 	return r ? r->getStorage().getRegisterNumber() : undefVal;
 }
@@ -683,12 +683,17 @@ bool Config::getCryptoPattern(
 				continue;
 			}
 
-			unsigned elemCount = m.getSize();
+			auto elemCount = m.getSize();
+			if (!elemCount.has_value())
+			{
+				continue;
+			}
+
 			Type* elemType = Type::getInt8Ty(_module->getContext());
 
 			if (m.isEntrySizeDefined())
 			{
-				elemCount /= m.getEntrySize();
+				elemCount = elemCount.value() / m.getEntrySize().value();
 				if (m.isTypeFloatingPoint() && m.getEntrySize() == 8)
 				{
 					elemType = Type::getDoubleTy(_module->getContext());
@@ -709,10 +714,10 @@ bool Config::getCryptoPattern(
 				{
 					elemType = Type::getIntNTy(
 							_module->getContext(),
-							m.getEntrySize() * 8);
+							m.getEntrySize().value() * 8);
 				}
 			}
-			auto d = elemCount > 0 ? elemCount : 1;
+			auto d = elemCount.value() > 0 ? elemCount.value() : 1;
 			type = ArrayType::get(elemType, d);
 			name = retdec::utils::appendHexRet(p.getName() + "_at", addr);
 			description = p.getDescription();

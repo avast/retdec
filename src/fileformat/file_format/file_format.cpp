@@ -1757,7 +1757,7 @@ const Resource* FileFormat::getVersionResource() const
  */
 bool FileFormat::isSignaturePresent() const
 {
-	return signatureVerified.isDefined();
+	return signatureVerified.has_value();
 }
 
 /**
@@ -1766,7 +1766,7 @@ bool FileFormat::isSignaturePresent() const
  */
 bool FileFormat::isSignatureVerified() const
 {
-	return signatureVerified.isDefined() && signatureVerified.getValue();
+	return signatureVerified.has_value() && signatureVerified.value();
 }
 
 /**

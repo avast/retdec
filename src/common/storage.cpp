@@ -149,9 +149,9 @@ bool Storage::isRegister(std::string& registerName) const
  */
 bool Storage::isRegister(int& registerNumber) const
 {
-	if (_registerNumber.isDefined())
+	if (_registerNumber.has_value())
 	{
-		registerNumber = _registerNumber;
+		registerNumber = _registerNumber.value();
 		return true;
 	}
 	else
@@ -203,7 +203,7 @@ int Storage::getStackOffset() const
  * @return If register number is set, return defined value.
  *         Otherwise return undefined value.
  */
-retdec::utils::Maybe<unsigned> Storage::getRegisterNumber() const
+std::optional<unsigned> Storage::getRegisterNumber() const
 {
 	return _registerNumber;
 }

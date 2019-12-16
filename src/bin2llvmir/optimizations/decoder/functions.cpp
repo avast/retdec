@@ -161,11 +161,11 @@ void Decoder::addFunction(common::Address a, llvm::Function* f)
  * Size \p sz is added only if function's \p f size was not set so far.
  * Use this function in more reliable, higher priority sources first.
  */
-void Decoder::addFunctionSize(llvm::Function* f, utils::Maybe<std::size_t> sz)
+void Decoder::addFunctionSize(llvm::Function* f, std::optional<std::size_t> sz)
 {
-	if (_fnc2sz.count(f) == 0 && sz.isDefined())
+	if (_fnc2sz.count(f) == 0 && sz.has_value())
 	{
-		_fnc2sz.emplace(f, sz);
+		_fnc2sz.emplace(f, sz.value());
 	}
 }
 

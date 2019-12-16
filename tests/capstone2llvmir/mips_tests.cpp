@@ -98,7 +98,7 @@ struct PrintCapstoneModeToString_Mips
 // If some test case is not meant for all modes, use some of the ONLY_MODE_*,
 // SKIP_MODE_* macros.
 //
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
 		InstantiateMipsWithAllModes,
 		Capstone2LlvmIrTranslatorMipsTests,
 // TODO: Try to add CS_MODE_MIPS3 and CS_MODE_MIPS32R6. But Keystone is failing

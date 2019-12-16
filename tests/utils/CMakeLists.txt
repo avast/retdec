@@ -13,7 +13,6 @@ add_executable(retdec-tests-utils
 	scope_exit_tests.cpp
 	string_tests.cpp
 	time_tests.cpp
-	value_tests.cpp
 )
 target_link_libraries(retdec-tests-utils
 	retdec-utils

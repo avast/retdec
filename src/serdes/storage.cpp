@@ -62,9 +62,9 @@ Json::Value serialize(const common::Storage& s)
 	}
 
 	auto registerNumber = s.getRegisterNumber();
-	if (registerNumber.isDefined())
+	if (registerNumber.has_value())
 	{
-		obj[JSON_regNum] = registerNumber.getValue();
+		obj[JSON_regNum] = registerNumber.value();
 	}
 
 	return obj;

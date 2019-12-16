@@ -13,11 +13,11 @@ namespace semantics {
 /**
 * @brief Returns the name of the given parameter from the given map.
 */
-Maybe<std::string> getNameOfParamFromMap(const std::string &funcName,
+std::optional<std::string> getNameOfParamFromMap(const std::string &funcName,
 		unsigned paramPos, const FuncParamNamesMap &map) {
 	auto funcParamIter = map.find(FuncParamPosPair(funcName, paramPos));
 	return funcParamIter != map.end() ?
-		Just(funcParamIter->second) : Nothing<std::string>();
+		std::optional<std::string>(funcParamIter->second) : std::nullopt;
 }
 
 } // namespace semantics
