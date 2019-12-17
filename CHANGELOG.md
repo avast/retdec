@@ -41,6 +41,7 @@
 * Fix: Fixed crash in the decoding phase ([#637](https://github.com/avast/retdec/issues/637), [#641](https://github.com/avast/retdec/pull/641)).
 * Fix: Fixed global variable naming issue ([#636](https://github.com/avast/retdec/issues/636), [#645](https://github.com/avast/retdec/pull/645)).
 * Fix: Fixed binary to LLVM IR translation of some MIPS instructions ([#633](https://github.com/avast/retdec/issues/633)), and made the translation process less error prone altogether ([#672](https://github.com/avast/retdec/pull/672)).
+* Fix: Fixed incorrect translation of PHI nodes in `llvmir2hll` ([#658](https://github.com/avast/retdec/issues/658)).
 
 # v3.3 (2019-03-18)
 
