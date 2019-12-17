@@ -237,9 +237,9 @@ TEST_F(AddressRangeContainerTests, InsertRangeNonOverlapping)
 TEST_F(AddressRangeContainerTests, InsertRangeFullyInOldRange)
 {
 	AddressRangeContainer c;
-	c.insert(0x0, 0x5); // should not be affected
-	c.insert(0x10, 0x40);
-	c.insert(0x100, 0x500); // should not be affected
+	c.insert(AddressRange(0x0, 0x5)); // should not be affected
+	c.insert(AddressRange(0x10, 0x40));
+	c.insert(AddressRange(0x100, 0x500)); // should not be affected
 
 	auto r = c.insert(AddressRange(0x20, 0x30));
 
