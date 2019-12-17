@@ -20,8 +20,8 @@ namespace bin2llvmir {
 class IrModifier
 {
 	public:
-		using FunctionPair = std::pair<llvm::Function*, retdec::config::Function*>;
-		using StackPair = std::pair<llvm::AllocaInst*, retdec::config::Object*>;
+		using FunctionPair = std::pair<llvm::Function*, retdec::common::Function*>;
+		using StackPair = std::pair<llvm::AllocaInst*, const retdec::common::Object*>;
 
 	// Methods not using member data -> do not need instance of this class.
 	// Can be used simply like this: \c IrModifier::method().
@@ -71,12 +71,14 @@ class IrModifier
 				llvm::Function* fnc,
 				int offset,
 				llvm::Type* type,
-				const std::string& name = std::string());
+				const std::string& name = std::string(),
+				const std::string& realName = std::string(),
+				bool fromDebug = false);
 
 		llvm::GlobalVariable* getGlobalVariable(
 				FileImage* objf,
 				DebugFormat* dbgf,
-				retdec::utils::Address addr,
+				retdec::common::Address addr,
 				bool strict = false,
 				const std::string& name = std::string());
 

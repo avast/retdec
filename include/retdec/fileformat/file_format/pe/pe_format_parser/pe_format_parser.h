@@ -9,7 +9,7 @@
 
 #include <pelib/PeLib.h>
 
-#include "retdec/utils/range.h"
+#include "retdec/common/range.h"
 #include "retdec/fileformat/fftypes.h"
 
 namespace retdec {
@@ -87,10 +87,10 @@ class PeFormatParser
 		virtual unsigned long long getSecurityDirFileOffset() const = 0;
 		virtual unsigned long long getSecurityDirRva() const = 0;
 		virtual unsigned long long getSecurityDirSize() const = 0;
-		virtual retdec::utils::RangeContainer<std::uint64_t> getImportDirectoryOccupiedAddresses() const = 0;
-		virtual retdec::utils::RangeContainer<std::uint64_t> getExportDirectoryOccupiedAddresses() const = 0;
-		virtual retdec::utils::RangeContainer<std::uint64_t> getDebugDirectoryOccupiedAddresses() const = 0;
-		virtual retdec::utils::RangeContainer<std::uint64_t> getResourceDirectoryOccupiedAddresses() const = 0;
+		virtual retdec::common::RangeContainer<std::uint64_t> getImportDirectoryOccupiedAddresses() const = 0;
+		virtual retdec::common::RangeContainer<std::uint64_t> getExportDirectoryOccupiedAddresses() const = 0;
+		virtual retdec::common::RangeContainer<std::uint64_t> getDebugDirectoryOccupiedAddresses() const = 0;
+		virtual retdec::common::RangeContainer<std::uint64_t> getResourceDirectoryOccupiedAddresses() const = 0;
 		/// @}
 };
 

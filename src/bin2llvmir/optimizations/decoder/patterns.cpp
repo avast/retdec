@@ -7,7 +7,6 @@
 #include "retdec/bin2llvmir/optimizations/decoder/decoder.h"
 #include "retdec/bin2llvmir/utils/capstone.h"
 
-using namespace retdec::utils;
 using namespace llvm;
 
 namespace retdec {
@@ -209,9 +208,17 @@ bool Decoder::patternTerminatingCalls()
 
 		if (newBb)
 		{
-			Address a = AsmInstruction::getBasicBlockAddress(newBb);
-			newBb->setName(names::generateBasicBlockName(a));
-			addBasicBlock(a, newBb);
+			common::Address a = AsmInstruction::getBasicBlockAddress(newBb);
+			if (a.isDefined())
+			{
+				newBb->setName(names::generateBasicBlockName(a));
+				addBasicBlock(a, newBb);
+			}
+			else
+			{
+				newBb->eraseFromParent();
+				newBb = nullptr;
+			}
 		}
 	}
 
@@ -275,7 +282,7 @@ bool Decoder::patternTerminatingCalls()
 
 		if (split)
 		{
-			Address addr = getBasicBlockAddress(nextBb);
+			common::Address addr = getBasicBlockAddress(nextBb);
 			assert(addr.isDefined());
 
 			LOG << "\t\tsplit fnc @ " << addr << std::endl;

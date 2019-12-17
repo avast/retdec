@@ -41,7 +41,6 @@ public:
 	MOCK_CONST_METHOD1(getDetectedCryptoPatternsForFunc, StringSet (const std::string &));
 	MOCK_CONST_METHOD1(getWrappedFunc, std::string (const std::string &));
 	MOCK_CONST_METHOD1(getDemangledNameOfFunc, std::string (const std::string &));
-	MOCK_CONST_METHOD0(getFuncsFixedWithLLVMIRFixer, StringSet ());
 	MOCK_CONST_METHOD0(getClassNames, StringSet ());
 	MOCK_CONST_METHOD1(getClassForFunc, std::string (const std::string &));
 	MOCK_CONST_METHOD2(getTypeOfFuncInClass, std::string (const std::string &, const std::string &));

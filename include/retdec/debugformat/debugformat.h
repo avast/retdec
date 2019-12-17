@@ -7,10 +7,10 @@
 #ifndef RETDEC_DEBUGFORMAT_DEBUGFORMAT_H
 #define RETDEC_DEBUGFORMAT_DEBUGFORMAT_H
 
+#include "retdec/common/function.h"
+#include "retdec/common/object.h"
+#include "retdec/common/type.h"
 #include "retdec/pdbparser/pdb_file.h"
-#include "retdec/config/functions.h"
-#include "retdec/config/objects.h"
-#include "retdec/config/types.h"
 
 #include "retdec/bin2llvmir/providers/demangler.h"
 #include "retdec/dwarfparser/dwarf_file.h"
@@ -26,7 +26,7 @@ namespace debugformat {
 class DebugFormat
 {
 	public:
-		using SymbolTable = std::map<retdec::utils::Address, const retdec::fileformat::Symbol*>;
+		using SymbolTable = std::map<retdec::common::Address, const retdec::fileformat::Symbol*>;
 
 	public:
 		DebugFormat();
@@ -37,8 +37,8 @@ class DebugFormat
 				retdec::bin2llvmir::Demangler* demangler,
 				unsigned long long imageBase = 0);
 
-		retdec::config::Function* getFunction(retdec::utils::Address a);
-		const retdec::config::Object* getGlobalVar(retdec::utils::Address a);
+		retdec::common::Function* getFunction(retdec::common::Address a);
+		const retdec::common::Object* getGlobalVar(retdec::common::Address a);
 
 		bool hasInformation() const;
 
@@ -47,13 +47,13 @@ class DebugFormat
 		void loadPdbTypes();
 		void loadPdbGlobalVariables();
 		void loadPdbFunctions();
-		retdec::config::Type loadPdbType(retdec::pdbparser::PDBTypeDef* type);
+		retdec::common::Type loadPdbType(retdec::pdbparser::PDBTypeDef* type);
 
 		void loadDwarf();
 		void loadDwarfTypes();
 		void loadDwarfGlobalVariables();
 		void loadDwarfFunctions();
-		retdec::config::Type loadDwarfType(retdec::dwarfparser::DwarfType* type);
+		retdec::common::Type loadDwarfType(retdec::dwarfparser::DwarfType* type);
 
 		void loadSymtab();
 
@@ -72,10 +72,10 @@ class DebugFormat
 		retdec::bin2llvmir::Demangler* _demangler = nullptr;
 
 	public:
-		retdec::config::GlobalVarContainer globals;
-		retdec::config::TypeContainer types;
+		retdec::common::GlobalVarContainer globals;
+		retdec::common::TypeContainer types;
 
-		std::map<retdec::utils::Address, retdec::config::Function> functions;
+		std::map<retdec::common::Address, retdec::common::Function> functions;
 };
 
 } // namespace debugformat

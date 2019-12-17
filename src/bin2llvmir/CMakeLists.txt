@@ -1,14 +1,10 @@
-set(BIN2LLVMIR_SOURCES
+
+add_library(retdec-bin2llvmir STATIC
 	analyses/ctor_dtor.cpp
 	analyses/indirectly_called_funcs_analysis.cpp
 	analyses/reachable_funcs_analysis.cpp
 	analyses/reaching_definitions.cpp
-	analyses/store_load_analysis.cpp
 	analyses/symbolic_tree.cpp
-	analyses/traversal/bb_traversal_analysis.cpp
-	analyses/traversal/func_traversal_analysis.cpp
-	analyses/traversal/traversal_analysis.cpp
-	analyses/uses_analysis.cpp
 	optimizations/asm_inst_remover/asm_inst_remover.cpp
 	optimizations/class_hierarchy/hierarchy.cpp
 	optimizations/class_hierarchy/hierarchy_analysis.cpp
@@ -29,9 +25,6 @@ set(BIN2LLVMIR_SOURCES
 	optimizations/decoder/x86.cpp
 	optimizations/dsm_generator/dsm_generator.cpp
 	optimizations/dump_module/dump_module.cpp
-	optimizations/globals/dead_global_assign.cpp
-	optimizations/globals/global_to_local.cpp
-	optimizations/globals/global_to_local_and_dead_global_assign.cpp
 	optimizations/idioms/idioms.cpp
 	optimizations/idioms/idioms_abstract.cpp
 	optimizations/idioms/idioms_analysis.cpp
@@ -113,7 +106,19 @@ set(BIN2LLVMIR_SOURCES
 	utils/ir_modifier.cpp
 	utils/llvm.cpp
 )
-
-add_library(retdec-bin2llvmir STATIC ${BIN2LLVMIR_SOURCES})
-target_link_libraries(retdec-bin2llvmir retdec-ctypesparser retdec-rtti-finder retdec-loader retdec-fileformat retdec-debugformat retdec-config retdec-demangler retdec-capstone2llvmir retdec-stacofin retdec-llvm-support llvm)
+target_link_libraries(retdec-bin2llvmir
+	retdec-ctypesparser
+	retdec-rtti-finder
+	retdec-loader
+	retdec-fileformat
+	retdec-debugformat
+	retdec-config
+	retdec-demangler
+	retdec-capstone2llvmir
+	retdec-stacofin
+	retdec-llvm-support
+	retdec-common
+	retdec-utils
+	llvm
+)
 target_include_directories(retdec-bin2llvmir PUBLIC ${PROJECT_SOURCE_DIR}/include/)

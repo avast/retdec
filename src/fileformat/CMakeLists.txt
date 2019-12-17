@@ -1,4 +1,7 @@
-set(FILEFORMAT_SOURCES
+
+find_package(Threads REQUIRED)
+
+add_library(retdec-fileformat STATIC
 	utils/format_detection.cpp
 	utils/byte_array_buffer.cpp
 	utils/conversions.cpp
@@ -74,9 +77,12 @@ set(FILEFORMAT_SOURCES
 	file_format/file_format.cpp
 	file_format/elf/elf_format.cpp
 )
-
-find_package(Threads REQUIRED)
-
-add_library(retdec-fileformat STATIC ${FILEFORMAT_SOURCES})
-target_link_libraries(retdec-fileformat retdec-crypto retdec-utils pelib elfio llvm Threads::Threads)
+target_link_libraries(retdec-fileformat
+	retdec-crypto
+	retdec-common
+	retdec-utils
+	pelib
+	elfio
+	llvm Threads::Threads
+)
 target_include_directories(retdec-fileformat PUBLIC ${PROJECT_SOURCE_DIR}/include/)

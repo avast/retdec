@@ -565,14 +565,6 @@ std::string Module::getDemangledNameOfFunc(ShPtr<Function> func) const {
 }
 
 /**
-* @brief Returns a set of names of functions that were fixed by our LLVM-IR
-*        fixer.
-*/
-StringSet Module::getNamesOfFuncsFixedWithLLVMIRFixer() const {
-	return config->getFuncsFixedWithLLVMIRFixer();
-}
-
-/**
 * @brief Returns a constant iterator to the first function.
 */
 Module::func_iterator Module::func_begin() const {

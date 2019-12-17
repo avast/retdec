@@ -79,7 +79,8 @@ const RttiMsvc& RttiFinder::getRttiMsvc() const
  * and expect that only one of them was loaded -> there should not be a vtable
  * at the address in both of them.
  */
-const Vtable* RttiFinder::getVtable(retdec::utils::Address a) const
+const retdec::common::Vtable* RttiFinder::getVtable(
+		retdec::common::Address a) const
 {
 	auto gccIt = _vtablesGcc.find(a);
 	if (gccIt != _vtablesGcc.end())

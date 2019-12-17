@@ -261,7 +261,7 @@ void RawDataFormat::setBytesLength(std::size_t l)
  * Set entry point address
  * @param entryPoint Entry point address
  */
-void RawDataFormat::setEntryPoint(Address entryPoint)
+void RawDataFormat::setEntryPoint(retdec::common::Address entryPoint)
 {
 	hasEntryPoint = true;
 	epAddress = entryPoint;
@@ -271,7 +271,7 @@ void RawDataFormat::setEntryPoint(Address entryPoint)
  * Set section base address
  * @param baseAddress Section base address
  */
-void RawDataFormat::setBaseAddress(Address baseAddress)
+void RawDataFormat::setBaseAddress(retdec::common::Address baseAddress)
 {
 	section->setAddress(baseAddress);
 }

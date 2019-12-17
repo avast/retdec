@@ -11,7 +11,7 @@
 
 #include <llvm/IR/Module.h>
 
-#include "retdec/config/calling_convention.h"
+#include "retdec/common/calling_convention.h"
 
 namespace retdec {
 namespace bin2llvmir {
@@ -24,7 +24,7 @@ class CallingConvention
 	//
 	public:
 		typedef std::unique_ptr<CallingConvention> Ptr;
-		typedef retdec::config::CallingConventionID ID;
+		typedef retdec::common::CallingConventionID ID;
 
 		typedef Ptr (*ConstructorMethod)(const Abi*);
 

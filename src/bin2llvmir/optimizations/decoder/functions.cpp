@@ -6,7 +6,7 @@
 
 #include "retdec/bin2llvmir/optimizations/decoder/decoder.h"
 
-using namespace retdec::utils;
+using namespace retdec::common;
 using namespace llvm;
 
 namespace retdec {
@@ -15,7 +15,7 @@ namespace bin2llvmir {
 /**
  * \return Start address for function \p f.
  */
-utils::Address Decoder::getFunctionAddress(llvm::Function* f)
+common::Address Decoder::getFunctionAddress(llvm::Function* f)
 {
 	auto fIt = _fnc2addr.find(f);
 	return fIt != _fnc2addr.end() ? fIt->second : Address();
@@ -25,7 +25,7 @@ utils::Address Decoder::getFunctionAddress(llvm::Function* f)
  * \return End address for function \p f.
  * \note End address is one byte beyond the function, i.e. <start, end).
  */
-utils::Address Decoder::getFunctionEndAddress(llvm::Function* f)
+common::Address Decoder::getFunctionEndAddress(llvm::Function* f)
 {
 	if (f->empty() || f->back().empty())
 	{
@@ -36,7 +36,7 @@ utils::Address Decoder::getFunctionEndAddress(llvm::Function* f)
 	return ai.isValid() ? ai.getEndAddress() : getFunctionAddress(f);
 }
 
-utils::Address Decoder::getFunctionAddressAfter(utils::Address a)
+common::Address Decoder::getFunctionAddressAfter(common::Address a)
 {
 	auto it = _addr2fnc.upper_bound(a);
 	return it != _addr2fnc.end() ? it->first : Address();
@@ -45,7 +45,7 @@ utils::Address Decoder::getFunctionAddressAfter(utils::Address a)
 /**
  * \return Function exactly at address \p a.
  */
-llvm::Function* Decoder::getFunctionAtAddress(utils::Address a)
+llvm::Function* Decoder::getFunctionAtAddress(common::Address a)
 {
 	auto fIt = _addr2fnc.find(a);
 	return fIt != _addr2fnc.end() ? fIt->second : nullptr;
@@ -54,7 +54,7 @@ llvm::Function* Decoder::getFunctionAtAddress(utils::Address a)
 /**
  * \return The first function before or at address \p a.
  */
-llvm::Function* Decoder::getFunctionBeforeAddress(utils::Address a)
+llvm::Function* Decoder::getFunctionBeforeAddress(common::Address a)
 {
 	if (_addr2fnc.empty())
 	{
@@ -82,7 +82,7 @@ llvm::Function* Decoder::getFunctionBeforeAddress(utils::Address a)
 	}
 }
 
-llvm::Function* Decoder::getFunctionAfterAddress(utils::Address a)
+llvm::Function* Decoder::getFunctionAfterAddress(common::Address a)
 {
 	auto it = _addr2fnc.upper_bound(a);
 	return it != _addr2fnc.end() ? it->second : nullptr;
@@ -92,7 +92,7 @@ llvm::Function* Decoder::getFunctionAfterAddress(utils::Address a)
  * \return Function that contains the address \p a. I.e. \p a is between
  * function's start and end address.
  */
-llvm::Function* Decoder::getFunctionContainingAddress(utils::Address a)
+llvm::Function* Decoder::getFunctionContainingAddress(common::Address a)
 {
 	if (auto* f = getFunctionBeforeAddress(a))
 	{
@@ -106,7 +106,7 @@ llvm::Function* Decoder::getFunctionContainingAddress(utils::Address a)
  * Create function at address \p a.
  * \return Created function.
  */
-llvm::Function* Decoder::createFunction(utils::Address a, bool declaration)
+llvm::Function* Decoder::createFunction(common::Address a, bool declaration)
 {
 	auto existing = _addr2fnc.find(a);
 	if (existing != _addr2fnc.end())
@@ -124,7 +124,7 @@ llvm::Function* Decoder::createFunction(utils::Address a, bool declaration)
 				: names::generateFunctionNameUnknown(a, _config->getConfig().isIda());
 	}
 
-	Function* f = Function::Create(
+	auto* f = llvm::Function::Create(
 			FunctionType::get(
 					Abi::getDefaultType(_module),
 					false),
@@ -132,7 +132,7 @@ llvm::Function* Decoder::createFunction(utils::Address a, bool declaration)
 			n);
 
 	Module::FunctionListType& fl = _module->getFunctionList();
-	if (Function* before = getFunctionBeforeAddress(a))
+	if (llvm::Function* before = getFunctionBeforeAddress(a))
 	{
 		fl.insertAfter(before->getIterator(), f);
 	}
@@ -151,7 +151,7 @@ llvm::Function* Decoder::createFunction(utils::Address a, bool declaration)
 	return f;
 }
 
-void Decoder::addFunction(utils::Address a, llvm::Function* f)
+void Decoder::addFunction(common::Address a, llvm::Function* f)
 {
 	_addr2fnc[a] = f;
 	_fnc2addr[f] = a;

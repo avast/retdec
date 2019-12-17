@@ -209,7 +209,10 @@ Lti::FunctionPair Lti::getPairFunction(const std::string& name)
 				_module->getFunctionList().end(),
 				ret.first);
 
-		auto* cf = _config->insertFunction(ret.first);
+		// TODO: this is really bad, should be solved by better design of config
+		// updates
+		common::Function* cf = const_cast<common::Function*>(
+				_config->insertFunction(ret.first));
 		cf->setDeclarationString(ret.second->getDeclaration());
 	}
 

@@ -18,7 +18,7 @@
 #include <llvm/IR/Module.h>
 #include <llvm/Support/raw_ostream.h>
 
-#include "retdec/utils/address.h"
+#include "retdec/common/address.h"
 #include "retdec/capstone2llvmir/exceptions.h"
 
 // These are additions to capstone - include them all here.
@@ -386,7 +386,7 @@ class Capstone2LlvmIrTranslator
 		virtual TranslationResult translate(
 				const uint8_t* bytes,
 				std::size_t size,
-				retdec::utils::Address a,
+				retdec::common::Address a,
 				llvm::IRBuilder<>& irb,
 				std::size_t count = 0,
 				bool stopOnBranch = false) = 0;
@@ -431,7 +431,7 @@ class Capstone2LlvmIrTranslator
 		virtual TranslationResultOne translateOne(
 				const uint8_t*& bytes,
 				std::size_t& size,
-				retdec::utils::Address& a,
+				retdec::common::Address& a,
 				llvm::IRBuilder<>& irb) = 0;
 //
 //==============================================================================

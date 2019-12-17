@@ -23,7 +23,7 @@
 #include <memory>
 #include <vector>
 
-#include "retdec/utils/address.h"
+#include "retdec/common/address.h"
 
 namespace retdec {
 namespace rtti_finder {
@@ -48,15 +48,15 @@ class TypeInfo
 
 	public:
 		/// Pointer (address) of virtual table for this @c TypeInfo instance.
-		retdec::utils::Address vtableAddr;
+		retdec::common::Address vtableAddr;
 		/// NTBS (null-terminated byte string) address.
-		retdec::utils::Address nameAddr;
+		retdec::common::Address nameAddr;
 
 	// Our methods and data.
 	//
 	public:
 		/// Position of this @c TypeInfo entry.
-		retdec::utils::Address address;
+		retdec::common::Address address;
 		/// String from @c nameAddr position.
 		std::string name;
 };
@@ -90,7 +90,7 @@ class SiClassTypeInfo : public ClassTypeInfo
 	//
 	public:
 		/// Address of the base class @c TypeInfo structure.
-		retdec::utils::Address baseClassAddr;
+		retdec::common::Address baseClassAddr;
 
 	// Our methods and data.
 	//
@@ -146,7 +146,7 @@ class BaseClassTypeInfo
 
 	public:
 		/// Address of the base class @c TypeInfo structure.
-		retdec::utils::Address baseClassAddr;
+		retdec::common::Address baseClassAddr;
 		/// Low-order byte is @c eOffsetFlagsMasks flags.
 		/// High 3 bytes are signed offset.
 		uint32_t offsetFlags = 0;
@@ -162,7 +162,7 @@ class BaseClassTypeInfo
  * RTTI container.
  */
 using RttiGcc = std::map<
-		retdec::utils::Address,
+		retdec::common::Address,
 		std::shared_ptr<ClassTypeInfo>>;
 
 } // namespace rtti_finder

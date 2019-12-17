@@ -59,7 +59,7 @@ script:
   # Run a simple decompilation.
   - echo -e '#include <stdio.h>\n#include <stdlib.h>\nint main()\n{\n  printf("hello world\\n");\n  return 0;\n}\n' > hello-orig.c
   - cat hello-orig.c
-  - gcc -m32 -o hello hello-orig.c
+  - gcc -o hello hello-orig.c
   - ./hello
   - python3 retdec-install/bin/retdec-decompiler.py hello
   - cat hello.c

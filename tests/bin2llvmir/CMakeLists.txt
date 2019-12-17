@@ -1,10 +1,7 @@
 set(RETDEC_TESTS_BIN2LLVMIR_SOURCES
 	analyses/reaching_definitions_tests.cpp
-	analyses/uses_analysis_tests.cpp
 	optimizations/asm_inst_remover/asm_inst_remover_tests.cpp
 	optimizations/dsm_generator/dsm_generator_tests.cpp
-	optimizations/globals/dead_global_assign_tests.cpp
-	optimizations/globals/global_to_local.cpp
 	optimizations/idioms_libgcc/idioms_libgcc_tests.cpp
 	optimizations/inst_opt/inst_opt_pass_tests.cpp
 	optimizations/inst_opt/inst_opt_tests.cpp

@@ -24,11 +24,9 @@ ARM_ORDS_DIR = os.path.join(INSTALL_SUPPORT_DIR, 'arm', 'ords')
 # X86-specific configuration
 X86_ORDS_DIR = os.path.join(INSTALL_SUPPORT_DIR, 'x86', 'ords')
 
+# TODO: disable-inlining
+
 """BIN2LLVMIR parameters
-The following list of passes is -O3
-   * with -disable-inlining -disable-simplify-libcalls -constprop -die -dce -ipconstprop -instnamer
-   * without -internalize -inline -inline-cost -notti -deadargelim -argpromotion -simplify-libcalls -loop-unroll
-      -loop-unswitch -sroa -tailcallelim -functionattrs -memcpyopt -prune-eh
 
 The following options are useful during debugging of bin2llvmirl optimizations.
 parameters beginning with -disable-* may be included only once, which is the
@@ -43,10 +41,6 @@ parameters beginning with -disable-* may be included only once, which is the
  - Optimization -phi2seq is needed to be run at the end and not to run two
  times. This is the reason why it is placed at the very end.
 """
-BIN2LLVMIR_PARAMS_DISABLES = [
-    '-disable-inlining',
-    '-disable-simplify-libcalls',
-]
 BIN2LLVMIR_LLVM_PASSES_ONLY = [
     '-instcombine',
     '-tbaa',
@@ -137,7 +131,7 @@ BIN2LLVMIR_PARAMS = [
     '-remove-phi',
     '-value-protect',
     '-sink'
-] + BIN2LLVMIR_PARAMS_DISABLES
+]
 
 # Paths to tools.
 FILEINFO = os.path.join(INSTALL_BIN_DIR, 'retdec-fileinfo')
