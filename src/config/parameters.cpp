@@ -4,7 +4,9 @@
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */
 
+#include "retdec/config/base.h"
 #include "retdec/config/parameters.h"
+#include "retdec/serdes/std.h"
 
 namespace {
 
@@ -127,15 +129,15 @@ Json::Value Parameters::getJsonValue() const
 
 	if (!getOrdinalNumbersDirectory().empty()) params[JSON_ordinalNumDir] = getOrdinalNumbersDirectory();
 
-	params[JSON_selectedRanges]       = selectedRanges.getJsonValue();
+	params[JSON_selectedRanges]       = serdes::serialize(selectedRanges);
 
-	params[JSON_userStaticSigPaths]       = getJsonStringValueVisit(userStaticSignaturePaths);
-	params[JSON_staticSigPaths]           = getJsonStringValueVisit(staticSignaturePaths);
-	params[JSON_libraryTypeInfoPaths]     = getJsonStringValueVisit(libraryTypeInfoPaths);
-	params[JSON_abiPaths]                 = getJsonStringValueVisit(abiPaths);
-	params[JSON_selectedFunctions]        = getJsonStringValueVisit(selectedFunctions);
-	params[JSON_frontendFunctions]        = getJsonStringValueVisit(frontendFunctions);
-	params[JSON_selectedNotFoundFncs]     = getJsonStringValueVisit(selectedNotFoundFunctions);
+	params[JSON_userStaticSigPaths]       = serdes::serialize(userStaticSignaturePaths);
+	params[JSON_staticSigPaths]           = serdes::serialize(staticSignaturePaths);
+	params[JSON_libraryTypeInfoPaths]     = serdes::serialize(libraryTypeInfoPaths);
+	params[JSON_abiPaths]                 = serdes::serialize(abiPaths);
+	params[JSON_selectedFunctions]        = serdes::serialize(selectedFunctions);
+	params[JSON_frontendFunctions]        = serdes::serialize(frontendFunctions);
+	params[JSON_selectedNotFoundFncs]     = serdes::serialize(selectedNotFoundFunctions);
 
 	return params;
 }
@@ -157,15 +159,15 @@ void Parameters::readJsonValue(const Json::Value& val)
 	setOrdinalNumbersDirectory( safeGetString(val, JSON_ordinalNumDir) );
 	setOutputFile( safeGetString(val, JSON_outputFile) );
 
-	selectedRanges.readJsonValue( val[JSON_selectedRanges] );
+	serdes::deserialize(val[JSON_selectedRanges], selectedRanges);
 
-	readJsonStringValueVisit(staticSignaturePaths, val[JSON_staticSigPaths]);
-	readJsonStringValueVisit(userStaticSignaturePaths, val[JSON_userStaticSigPaths]);
-	readJsonStringValueVisit(libraryTypeInfoPaths, val[JSON_libraryTypeInfoPaths]);
-	readJsonStringValueVisit(abiPaths, val[JSON_abiPaths]);
-	readJsonStringValueVisit(selectedFunctions, val[JSON_selectedFunctions]);
-	readJsonStringValueVisit(frontendFunctions, val[JSON_frontendFunctions]);
-	readJsonStringValueVisit(selectedNotFoundFunctions, val[JSON_selectedNotFoundFncs]);
+	serdes::deserialize(val[JSON_staticSigPaths], staticSignaturePaths);
+	serdes::deserialize(val[JSON_userStaticSigPaths], userStaticSignaturePaths);
+	serdes::deserialize(val[JSON_libraryTypeInfoPaths], libraryTypeInfoPaths);
+	serdes::deserialize(val[JSON_abiPaths], abiPaths);
+	serdes::deserialize(val[JSON_selectedFunctions], selectedFunctions);
+	serdes::deserialize(val[JSON_frontendFunctions], frontendFunctions);
+	serdes::deserialize(val[JSON_selectedNotFoundFncs], selectedNotFoundFunctions);
 }
 
 } // namespace config

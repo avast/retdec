@@ -58,14 +58,6 @@ Json::Value::UInt safeGetUint(
 	SAFE_TEMPLATE(val, name, defaultValue, isUInt, asUInt, "an uint");
 }
 
-retdec::utils::Address safeGetAddress(
-		const Json::Value& val,
-		const std::string& name)
-{
-	std::string strVal = safeGetString(val, name, "");
-	return retdec::utils::Address(strVal);
-}
-
 Json::Value::UInt64 safeGetUint64(
 		const Json::Value& val,
 		const std::string& name,
@@ -96,61 +88,6 @@ bool safeGetBool(
 		bool defaultValue)
 {
 	SAFE_TEMPLATE(val, name, defaultValue, isBool, asBool, "a bool");
-}
-
-//
-//=============================================================================
-// Conversions to JSON values.
-//=============================================================================
-//
-
-std::string toJsonValue(retdec::utils::Address a)
-{
-	return a.isDefined() ? a.toHexPrefixString() : std::string();
-}
-
-//
-//=============================================================================
-// Helper methods
-//=============================================================================
-//
-
-/**
- * Reads array of JSON objects into elements of the provided string container.
- * Container is cleared before parsing - it contains only new objects afterwards.
- * @param data String set.
- * @param node JSON object.
- */
-void readJsonStringValueVisit(std::set<std::string>& data, const Json::Value& node)
-{
-	data.clear();
-
-	for (auto& elem : node)
-	{
-		if ( ! elem.isNull() )
-		{
-			data.insert( safeGetString(elem) );
-		}
-	}
-}
-
-/**
- * Reads array of JSON objects into elements of the provided string container.
- * Container is cleared before parsing - it contains only new objects afterwards.
- * @param data String vector.
- * @param node JSON object.
- */
-void readJsonStringValueVisit(std::vector<std::string>& data, const Json::Value& node)
-{
-	data.clear();
-
-	for (auto& elem : node)
-	{
-		if ( ! elem.isNull() )
-		{
-			data.push_back( safeGetString(elem) );
-		}
-	}
 }
 
 } // namespace config

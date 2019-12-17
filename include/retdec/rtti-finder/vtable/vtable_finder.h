@@ -14,7 +14,7 @@
 #include "retdec/rtti-finder/rtti/rtti_msvc.h"
 #include "retdec/rtti-finder/vtable/vtable_gcc.h"
 #include "retdec/rtti-finder/vtable/vtable_msvc.h"
-#include "retdec/utils/address.h"
+#include "retdec/common/address.h"
 
 namespace retdec {
 namespace rtti_finder {

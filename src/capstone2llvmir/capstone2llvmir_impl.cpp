@@ -166,7 +166,7 @@ typename Capstone2LlvmIrTranslator_impl<CInsn, CInsnOp>::TranslationResult
 Capstone2LlvmIrTranslator_impl<CInsn, CInsnOp>::translate(
 		const uint8_t* bytes,
 		std::size_t size,
-		retdec::utils::Address a,
+		retdec::common::Address a,
 		llvm::IRBuilder<>& irb,
 		std::size_t count,
 		bool stopOnBranch)
@@ -234,7 +234,7 @@ typename Capstone2LlvmIrTranslator_impl<CInsn, CInsnOp>::TranslationResultOne
 Capstone2LlvmIrTranslator_impl<CInsn, CInsnOp>::translateOne(
 		const uint8_t*& bytes,
 		std::size_t& size,
-		retdec::utils::Address& a,
+		retdec::common::Address& a,
 		llvm::IRBuilder<>& irb)
 {
 	TranslationResultOne res;
@@ -790,7 +790,7 @@ llvm::StoreInst* Capstone2LlvmIrTranslator_impl<CInsn, CInsnOp>::generateSpecial
 		llvm::IRBuilder<>& irb,
 		cs_insn* i)
 {
-	retdec::utils::Address a = i->address;
+	retdec::common::Address a = i->address;
 	auto* gv = getAsm2LlvmMapGlobalVariable();
 	auto* ci = llvm::ConstantInt::get(gv->getValueType(), a, false);
 	auto* s = irb.CreateStore(ci, gv, true);

@@ -6,11 +6,11 @@
 
 #include <algorithm>
 
-#include "retdec/utils/address.h"
+#include "retdec/common/address.h"
 #include "fileinfo/file_information/file_information.h"
 #include "fileinfo/file_information/file_information_types/type_conversions.h"
 
-using namespace retdec::utils;
+using namespace retdec::common;
 using namespace retdec::cpdetect;
 using namespace retdec::fileformat;
 

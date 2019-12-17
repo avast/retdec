@@ -12,7 +12,7 @@
 #include <llvm/IR/Module.h>
 #include <llvm/Pass.h>
 
-#include "retdec/utils/address.h"
+#include "retdec/common/address.h"
 #include "retdec/bin2llvmir/providers/config.h"
 #include "retdec/bin2llvmir/providers/fileimage.h"
 #include "retdec/bin2llvmir/providers/names.h"
@@ -36,13 +36,13 @@ class MainDetection : public llvm::ModulePass
 		bool run();
 		bool skipAnalysis();
 		void removeStaticallyLinked();
-		retdec::utils::Address getFromFunctionNames();
-		retdec::utils::Address getFromContext();
-		retdec::utils::Address getFromEntryPointOffset(int offset);
-		retdec::utils::Address getFromCrtSetCheckCount();
-		retdec::utils::Address getFromInterlockedExchange();
+		retdec::common::Address getFromFunctionNames();
+		retdec::common::Address getFromContext();
+		retdec::common::Address getFromEntryPointOffset(int offset);
+		retdec::common::Address getFromCrtSetCheckCount();
+		retdec::common::Address getFromInterlockedExchange();
 
-		bool applyResult(retdec::utils::Address mainAddr);
+		bool applyResult(retdec::common::Address mainAddr);
 
 	private:
 		llvm::Module* _module = nullptr;

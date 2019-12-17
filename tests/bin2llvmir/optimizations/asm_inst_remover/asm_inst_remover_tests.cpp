@@ -59,8 +59,8 @@ TEST_F(AsmInstructionRemoverTests, passRemovesEverythingRelatedToLlvmToAsmMappin
 	)");
 	auto* gv = getGlobalByName("specialGv");
 	AsmInstruction::setLlvmToAsmGlobalVariable(module.get(), gv);
-	auto s = retdec::config::Storage::inRegister("esp");
-	auto r = retdec::config::Object("esp", s);
+	auto s = retdec::common::Storage::inRegister("esp");
+	auto r = retdec::common::Object("esp", s);
 
 	bool b = pass.runOnModuleCustom(*module);
 

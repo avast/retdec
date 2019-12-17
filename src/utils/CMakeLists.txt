@@ -1,5 +1,5 @@
-set(RETDEC_UTILS_SOURCES
-	address.cpp
+
+add_library(retdec-utils STATIC
 	alignment.cpp
 	byte_value_storage.cpp
 	binary_path.cpp
@@ -13,8 +13,6 @@ set(RETDEC_UTILS_SOURCES
 	system.cpp
 	time.cpp
 )
-
-add_library(retdec-utils STATIC ${RETDEC_UTILS_SOURCES})
 target_link_libraries(retdec-utils whereami)
 if(WIN32)
 	target_link_libraries(retdec-utils shlwapi) # shlwapi.dll for PathRemoveFileSpec()

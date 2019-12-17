@@ -45,7 +45,7 @@ class IdiomsLibgccImpl
 		llvm::GlobalVariable* res1Double = nullptr;
 
 	public:
-		bool testArchAndInitialize(config::Architecture& arch, Abi* abi);
+		bool testArchAndInitialize(common::Architecture& arch, Abi* abi);
 
 		void localize(llvm::Value* v);
 
@@ -208,7 +208,7 @@ class IdiomsLibgccImpl
  *         to do for the current architecture.
  */
 bool IdiomsLibgccImpl::testArchAndInitialize(
-		config::Architecture& arch,
+		common::Architecture& arch,
 		Abi* abi)
 {
 	if (arch.isArm32OrThumb())

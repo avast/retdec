@@ -1,5 +1,6 @@
 set(RETDEC_TESTS_DIR "bin")
 
+cond_add_subdirectory(common RETDEC_ENABLE_COMMON_TESTS)
 cond_add_subdirectory(bin2llvmir RETDEC_ENABLE_BIN2LLVMIR_TESTS)
 cond_add_subdirectory(capstone2llvmir RETDEC_ENABLE_CAPSTONE2LLVMIR_TESTS)
 cond_add_subdirectory(config RETDEC_ENABLE_CONFIG_TESTS)
@@ -10,5 +11,6 @@ cond_add_subdirectory(fileformat RETDEC_ENABLE_FILEFORMAT_TESTS)
 cond_add_subdirectory(llvmir-emul RETDEC_ENABLE_LLVMIR_EMUL_TESTS)
 cond_add_subdirectory(llvmir2hll RETDEC_ENABLE_LLVMIR2HLL_TESTS)
 cond_add_subdirectory(loader RETDEC_ENABLE_LOADER_TESTS)
+cond_add_subdirectory(serdes RETDEC_ENABLE_SERDES_TESTS)
 cond_add_subdirectory(unpacker RETDEC_ENABLE_UNPACKER_TESTS)
 cond_add_subdirectory(utils RETDEC_ENABLE_UTILS_TESTS)

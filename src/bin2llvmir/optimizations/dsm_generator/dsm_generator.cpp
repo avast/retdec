@@ -17,8 +17,8 @@
 #include "retdec/utils/time.h"
 #include "retdec/bin2llvmir/optimizations/dsm_generator/dsm_generator.h"
 
+using namespace retdec::common;
 using namespace retdec::utils;
-using namespace llvm;
 
 #define debug_enabled false
 
@@ -27,7 +27,7 @@ namespace bin2llvmir {
 
 char DsmGenerator::ID = 0;
 
-static RegisterPass<DsmGenerator> X(
+static llvm::RegisterPass<DsmGenerator> X(
 		"generate-dsm",
 		"Disassembly generation",
 		 false, // Only looks at CFG
@@ -44,7 +44,7 @@ DsmGenerator::DsmGenerator() :
  * @return Always @c false. This pass produces DSM output, it does not modify
  *         module.
  */
-bool DsmGenerator::runOnModule(Module& m)
+bool DsmGenerator::runOnModule(llvm::Module& m)
 {
 	_module = &m;
 	_objf = FileImageProvider::getFileImage(_module);
@@ -139,12 +139,11 @@ void DsmGenerator::generateCode(std::ostream& ret)
 	ret << ";;\n";
 	ret << "\n";
 
-	for (auto& p : _config->getConfig().functions)
+	for (auto& f : _config->getConfig().functions)
 	{
-		auto* f = &p.second;
-		if (f->getStart().isDefined())
+		if (f.getStart().isDefined())
 		{
-			_addr2fnc[f->getStart()] = f;
+			_addr2fnc[f.getStart()] = &f;
 		}
 	}
 
@@ -199,7 +198,7 @@ void DsmGenerator::generateCodeSeg(
 }
 
 void DsmGenerator::generateFunction(
-		retdec::config::Function* fnc,
+		const retdec::common::Function* fnc,
 		std::ostream& ret)
 {
 	ret << ";";
@@ -312,7 +311,7 @@ std::string DsmGenerator::processInstructionDsm(AsmInstruction& ai)
 		}
 	}
 
-	if (auto* c = tmpAi.getInstructionFirst<CallInst>()) // ai
+	if (auto* c = tmpAi.getInstructionFirst<llvm::CallInst>()) // ai
 	{
 		if (auto* f = c->getCalledFunction())
 		{
@@ -323,11 +322,13 @@ std::string DsmGenerator::processInstructionDsm(AsmInstruction& ai)
 			}
 		}
 	}
-	else if (auto* br = tmpAi.getInstructionFirst<BranchInst>()) // ai
+	else if (auto* br = tmpAi.getInstructionFirst<llvm::BranchInst>()) // ai
 	{
 		bool ok = true;
 		auto* falseDestUse = br->isConditional() ? br->op_end() - 2 : nullptr;
-		auto* falseDestBb = falseDestUse ? cast<BasicBlock>(falseDestUse->get()) : nullptr;
+		auto* falseDestBb = falseDestUse
+				? llvm::cast<llvm::BasicBlock>(falseDestUse->get())
+				: nullptr;
 		if (falseDestBb)
 		{
 			auto* falseDestI = &falseDestBb->front();
@@ -339,7 +340,7 @@ std::string DsmGenerator::processInstructionDsm(AsmInstruction& ai)
 		}
 
 		auto* trueDestUse = br->op_end() - 1;
-		auto* trueDestBb = cast<BasicBlock>(trueDestUse->get());
+		auto* trueDestBb = llvm::cast<llvm::BasicBlock>(trueDestUse->get());
 		auto* trueDestI = &trueDestBb->front();
 		AsmInstruction trueDestAi(trueDestI);
 
@@ -354,7 +355,7 @@ std::string DsmGenerator::processInstructionDsm(AsmInstruction& ai)
 			auto addr = _config->getFunctionAddress(trueDestFnc);
 			if (trueDestAi.isValid() && addr.isDefined())
 			{
-				retdec::utils::Address o = trueDestAi.getAddress() - addr;
+				retdec::common::Address o = trueDestAi.getAddress() - addr;
 				ret += " <" + getFunctionName(trueDestFnc) + "+"
 						+ o.toHexPrefixString() + ">";
 			}
@@ -391,7 +392,8 @@ std::string DsmGenerator::processInstructionDsm(AsmInstruction& ai)
 				auto* g = _config->getLlvmGlobalVariable(val);
 				if (cg && g && g->hasInitializer())
 				{
-					if (auto* cda = dyn_cast<ConstantDataArray>(g->getInitializer()))
+					if (auto* cda = llvm::dyn_cast<llvm::ConstantDataArray>(
+							g->getInitializer()))
 					{
 						comment += " ; " + getString(cg, cda);
 						break;
@@ -439,14 +441,14 @@ void DsmGenerator::generateDataSeg(
 }
 
 void DsmGenerator::generateDataRange(
-		retdec::utils::Address start,
-		retdec::utils::Address end,
+		retdec::common::Address start,
+		retdec::common::Address end,
 		std::ostream& ret)
 {
 	auto addr = start;
 	while (addr < end)
 	{
-		ConstantDataArray* init = nullptr;
+		llvm::ConstantDataArray* init = nullptr;
 		std::string val;
 
 		Address gvAddr = addr;
@@ -456,7 +458,8 @@ void DsmGenerator::generateDataRange(
 			auto* g = _config->getLlvmGlobalVariable(gvAddr);
 			if (cg && g && g->hasInitializer())
 			{
-				if ((init = dyn_cast<ConstantDataArray>(g->getInitializer())))
+				if ((init = llvm::dyn_cast<llvm::ConstantDataArray>(
+						g->getInitializer())))
 				{
 					val = getString(cg, init);
 					break;
@@ -487,7 +490,7 @@ void DsmGenerator::generateDataRange(
 
 void DsmGenerator::generateData(
 		std::ostream& ret,
-		retdec::utils::Address start,
+		retdec::common::Address start,
 		std::size_t size,
 		const std::string& objVal)
 {
@@ -626,7 +629,7 @@ std::string DsmGenerator::reduceNegativeNumbers(const std::string& str)
 }
 
 void DsmGenerator::generateAlignedAddress(
-		retdec::utils::Address addr,
+		retdec::common::Address addr,
 		std::ostream& ret)
 {
 	auto as = addr.toHexPrefixString();
@@ -684,7 +687,7 @@ void DsmGenerator::findLongestInstruction()
 }
 
 std::string DsmGenerator::getString(
-		const retdec::config::Object* cgv,
+		const retdec::common::Object* cgv,
 		const llvm::ConstantDataArray* cda)
 {
 	std::string ret;
@@ -717,7 +720,7 @@ std::string DsmGenerator::getFunctionName(llvm::Function* f) const
 	return cf ? getFunctionName(cf) : f->getName().str();
 }
 
-std::string DsmGenerator::getFunctionName(retdec::config::Function* f) const
+std::string DsmGenerator::getFunctionName(const retdec::common::Function* f) const
 {
 	auto& rn = f->getRealName();
 	return rn.empty() ? f->getName() : rn;

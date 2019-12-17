@@ -214,7 +214,6 @@ void HLLWriter::setOptionUseCompoundOperators(bool use) {
 bool HLLWriter::emitTargetCode(ShPtr<Module> module) {
 	this->module = module;
 	bool codeEmitted = false;
-	namesOfFuncsWithFixedIR = module->getNamesOfFuncsFixedWithLLVMIRFixer();
 
 	if (emitFileHeader()) { codeEmitted = true; out << "\n"; }
 
@@ -635,7 +634,6 @@ bool HLLWriter::emitFunction(ShPtr<Function> func) {
 	emitClassInfoIfAvailable(func);
 	emitDemangledNameIfAvailable(func);
 	emitDetectedCryptoPatternsForFuncIfAvailable(func);
-	emitLLVMIRFixerWarningForFuncIfAny(func);
 	// The comment HAS to be put as the LAST info, right before the function's
 	// signature. IDA plugin relies on that.
 	emitCommentIfAvailable(func);
@@ -864,8 +862,6 @@ bool HLLWriter::emitMetaInfo() {
 	if (optionEmitTimeVaryingInfo) {
 		codeEmitted |= emitMetaInfoDecompilationDate();
 	}
-	codeEmitted |= emitMetaInfoFuncsRemovedDueErrors();
-	codeEmitted |= emitMetaInfoNumberOfDecompilationErrors();
 	return codeEmitted;
 }
 
@@ -1124,25 +1120,6 @@ bool HLLWriter::emitDetectedCryptoPatternsForFuncIfAvailable(ShPtr<Function> fun
 		usedPatterns << " - " << pattern << "\n";
 	}
 	out << comment(usedPatterns.str());
-	return true;
-}
-
-/**
-* @brief Emits a warning from LLVM IR fixing script (if any).
-*
-* If the function's body was fixed by the LLVM IR fixing script, put
-* this information in to the generated code as a comment.
-*
-* @return @c true if some code was emitted, @c false otherwise.
-*/
-bool HLLWriter::emitLLVMIRFixerWarningForFuncIfAny(ShPtr<Function> func) {
-	if (!hasItem(namesOfFuncsWithFixedIR, func->getName())) {
-		return false;
-	}
-
-	out << comment(
-		"Warning: There were some errors during the decompilation of the following\n"
-		"         function. Therefore, its body may be incomplete.\n");
 	return true;
 }
 
@@ -1413,55 +1390,6 @@ bool HLLWriter::emitMetaInfoDecompilationDate() {
 	decompDate << "Decompilation date: " << getCurrentDate() <<
 		" " << getCurrentTime() << "\n";
 	out << comment(decompDate.str());
-	return true;
-}
-
-/**
-* @brief Emits functions that were removed due to decompilation errors (if
-*        any).
-*/
-bool HLLWriter::emitMetaInfoFuncsRemovedDueErrors() {
-	std::ostringstream funcsRemovedDueErrors;
-	funcsRemovedDueErrors << "Functions removed due to errors: ";
-	std::size_t numOfFuncsRemovedDueErrors = 0;
-	for (auto &funcName : namesOfFuncsWithFixedIR) {
-		// We include only functions which do not exist in the module. Existing
-		// functions have attached a warning comment to their bodies.
-		if (!module->getFuncByName(funcName)) {
-			if (numOfFuncsRemovedDueErrors > 0) {
-				funcsRemovedDueErrors << ", ";
-			}
-			funcsRemovedDueErrors << funcName;
-			numOfFuncsRemovedDueErrors = true;
-		}
-	}
-	funcsRemovedDueErrors << "\n";
-	if (numOfFuncsRemovedDueErrors > 0) {
-		out << comment(funcsRemovedDueErrors.str());
-		return true;
-	}
-	return false;
-}
-
-/**
-* @brief Emits the number of decompilation errors (if any).
-*
-* @return @c true if some code was emitted, @c false otherwise.
-*/
-bool HLLWriter::emitMetaInfoNumberOfDecompilationErrors() {
-	if (namesOfFuncsWithFixedIR.empty()) {
-		return false;
-	}
-
-	auto totalNumberOfFuncs = module->getNumberOfFuncsDetectedInFrontend();
-	std::ostringstream numberOfDecompilationErrors;
-	numberOfDecompilationErrors <<
-		"Number of decompilation errors: " <<
-		namesOfFuncsWithFixedIR.size() <<
-		" (out of " << totalNumberOfFuncs << " function" <<
-		(totalNumberOfFuncs != 1 ? "s" : "") <<
-		")\n";
-	out << comment(numberOfDecompilationErrors.str());
 	return true;
 }
 
