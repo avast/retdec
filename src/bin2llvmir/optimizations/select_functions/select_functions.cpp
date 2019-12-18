@@ -89,12 +89,12 @@ bool SelectFunctions::run(Module& M)
 		}
 		else
 		{
-			retdec::utils::AddressRange fncRange;
+			retdec::common::AddressRange fncRange;
 			if (cf->getStart().isDefined()
 					&& cf->getEnd().isDefined()
 					&& cf->getStart() < cf->getEnd())
 			{
-				fncRange = retdec::utils::AddressRange(
+				fncRange = retdec::common::AddressRange(
 						cf->getStart(),
 						cf->getEnd());
 			}

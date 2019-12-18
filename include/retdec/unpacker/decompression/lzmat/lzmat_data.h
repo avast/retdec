@@ -22,8 +22,6 @@ public:
 	LzmatData(const DynamicBuffer& buffer);
 	LzmatData(const LzmatData&) = delete;
 
-	virtual ~LzmatData() override;
-
 	virtual bool decompress(DynamicBuffer& outputBuffer) override;
 
 private:

@@ -27,8 +27,7 @@ template <int bits> class PeUpxStub;
 class Decompressor
 {
 public:
-	Decompressor();
-	virtual ~Decompressor();
+	virtual ~Decompressor() = default;
 
 	virtual void setupPackingMethod(ElfUpxStub<32>* stub, std::uint8_t packingMethod) = 0;
 	virtual void decompress(ElfUpxStub<32>* stub, retdec::utils::DynamicBuffer& packedData,

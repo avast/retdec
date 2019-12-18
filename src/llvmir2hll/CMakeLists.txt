@@ -26,7 +26,6 @@ set(LLVMIR2HLL_SOURCES
 	graphs/cfg/cfg_builders/non_recursive_cfg_builder.cpp
 	graphs/cfg/cfg_builders/recursive_cfg_builder.cpp
 	graphs/cfg/cfg_traversal.cpp
-	graphs/cfg/cfg_traversals/auxiliary_variables_cfg_traversal.cpp
 	graphs/cfg/cfg_traversals/lhs_rhs_uses_cfg_traversal.cpp
 	graphs/cfg/cfg_traversals/modified_before_read_cfg_traversal.cpp
 	graphs/cfg/cfg_traversals/no_var_def_cfg_traversal.cpp
@@ -40,6 +39,7 @@ set(LLVMIR2HLL_SOURCES
 	graphs/cg/cg_builder.cpp
 	graphs/cg/cg_writer.cpp
 	graphs/cg/cg_writers/graphviz_cg_writer.cpp
+	hll/bir_writer.cpp
 	hll/bracket_manager.cpp
 	hll/bracket_managers/c_bracket_manager.cpp
 	hll/bracket_managers/no_bracket_manager.cpp
@@ -78,7 +78,6 @@ set(LLVMIR2HLL_SOURCES
 	ir/const_string.cpp
 	ir/const_struct.cpp
 	ir/const_symbol.cpp
-	ir/constant.cpp
 	ir/continue_stmt.cpp
 	ir/deref_op_expr.cpp
 	ir/div_op_expr.cpp
@@ -120,7 +119,6 @@ set(LLVMIR2HLL_SOURCES
 	ir/switch_stmt.cpp
 	ir/ternary_op_expr.cpp
 	ir/trunc_cast_expr.cpp
-	ir/type.cpp
 	ir/ufor_loop_stmt.cpp
 	ir/unary_op_expr.cpp
 	ir/unknown_type.cpp
@@ -155,7 +153,6 @@ set(LLVMIR2HLL_SOURCES
 	optimizer/optimizer_manager.cpp
 	optimizer/optimizers/aggressive_deref_optimizer.cpp
 	optimizer/optimizers/aggressive_global_to_local_optimizer.cpp
-	optimizer/optimizers/auxiliary_variables_optimizer.cpp
 	optimizer/optimizers/bit_op_to_log_op_optimizer.cpp
 	optimizer/optimizers/bit_shift_optimizer.cpp
 	optimizer/optimizers/break_continue_return_optimizer.cpp
@@ -199,7 +196,6 @@ set(LLVMIR2HLL_SOURCES
 	optimizer/optimizers/while_true_to_for_loop_optimizer.cpp
 	optimizer/optimizers/while_true_to_ufor_loop_optimizer.cpp
 	optimizer/optimizers/while_true_to_while_cond_optimizer.cpp
-	pattern/pattern.cpp
 	pattern/pattern_finder.cpp
 	pattern/pattern_finder_runner.cpp
 	pattern/pattern_finder_runners/cli_pattern_finder_runner.cpp
@@ -213,7 +209,6 @@ set(LLVMIR2HLL_SOURCES
 	pattern/pattern_finders/api_call_pattern_finder.cpp
 	pattern/pattern_finders/api_call_seq_pattern_finder.cpp
 	pattern/patterns/stmts_pattern.cpp
-	semantics/semantics.cpp
 	semantics/semantics/compound_semantics.cpp
 	semantics/semantics/compound_semantics_builder.cpp
 	semantics/semantics/default_semantics.cpp
@@ -280,7 +275,6 @@ set(LLVMIR2HLL_SOURCES
 	support/valid_state.cpp
 	support/value_text_repr_visitor.cpp
 	support/variable_replacer.cpp
-	support/visitor.cpp
 	support/visitors/ordered_all_visitor.cpp
 	utils/graphviz.cpp
 	utils/ir.cpp

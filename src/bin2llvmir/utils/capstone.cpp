@@ -4,13 +4,15 @@
 * @copyright (c) 2017 Avast Software, licensed under the MIT license
 */
 
+#include <cassert>
+
 #include "retdec/bin2llvmir/utils/capstone.h"
 
 namespace retdec {
 namespace bin2llvmir {
 namespace capstone_utils {
 
-std::string mode2string(const config::Architecture& arch, cs_mode m)
+std::string mode2string(const common::Architecture& arch, cs_mode m)
 {
 	std::string ret;
 

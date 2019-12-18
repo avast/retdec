@@ -18,14 +18,11 @@ namespace fileinfo {
 class Flags
 {
 	private:
-		unsigned long long size;              ///< size of bit array
-		unsigned long long flagsArray;        ///< array of flags
+		unsigned long long size = 0;          ///< size of bit array
+		unsigned long long flagsArray = 0;    ///< array of flags
 		std::vector<std::string> descriptors; ///< descriptors of flags
 		std::vector<std::string> abbs;        ///< abbreviations of descriptors
 	public:
-		Flags();
-		~Flags();
-
 		/// @name Getters
 		/// @{
 		unsigned long long getSize() const;

@@ -28,8 +28,6 @@ public:
 	static ShPtr<AssignStmt> create(ShPtr<Expression> lhs, ShPtr<Expression> rhs,
 		ShPtr<Statement> succ = nullptr, Address a = Address::Undefined);
 
-	virtual ~AssignStmt() override;
-
 	virtual ShPtr<Value> clone() override;
 	virtual bool isEqualTo(ShPtr<Value> otherValue) const override;
 	virtual bool isCompound() override { return false; }

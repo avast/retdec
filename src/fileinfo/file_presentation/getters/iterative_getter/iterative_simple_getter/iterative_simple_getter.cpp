@@ -21,14 +21,6 @@ IterativeSimpleGetter::IterativeSimpleGetter(FileInformation &fileInfo) : Iterat
 }
 
 /**
- * Destructor
- */
-IterativeSimpleGetter::~IterativeSimpleGetter()
-{
-
-}
-
-/**
  * Get element header (title of every presented structure)
  * @param elemHeader Into this parameter the header is stored
  */

@@ -7,6 +7,7 @@
 #ifndef RETDEC_LLVMIR2HLL_PATTERN_PATTERN_FINDERS_API_CALL_API_CALL_INFO_SEQ_PARSER_H
 #define RETDEC_LLVMIR2HLL_PATTERN_PATTERN_FINDERS_API_CALL_API_CALL_INFO_SEQ_PARSER_H
 
+#include <optional>
 #include <string>
 
 #include "retdec/llvmir2hll/pattern/pattern_finders/api_call/api_call_info.h"
@@ -63,7 +64,7 @@ class APICallInfoSeqParser: private retdec::utils::NonCopyable {
 public:
 	static ShPtr<APICallInfoSeqParser> create();
 
-	Maybe<APICallInfoSeq> parse(const std::string &text) const;
+	std::optional<APICallInfoSeq> parse(const std::string &text) const;
 
 private:
 	APICallInfoSeqParser();

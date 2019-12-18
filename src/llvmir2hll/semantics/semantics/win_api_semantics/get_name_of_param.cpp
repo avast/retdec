@@ -105,7 +105,7 @@ const FuncParamNamesMap &FUNC_PARAM_NAMES_MAP(initFuncParamNamesMap());
 *
 * See its description for more details.
 */
-Maybe<std::string> getNameOfParam(const std::string &funcName,
+std::optional<std::string> getNameOfParam(const std::string &funcName,
 		unsigned paramPos) {
 	return getNameOfParamFromMap(funcName, paramPos, FUNC_PARAM_NAMES_MAP);
 }

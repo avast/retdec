@@ -160,11 +160,6 @@ HLLWriter::HLLWriter(llvm::raw_ostream &o, const std::string& outputFormat):
 }
 
 /**
-* @brief Destructs the writer.
-*/
-HLLWriter::~HLLWriter() {}
-
-/**
 * @brief Enables/disables the emission of debug comments.
 *
 * @param[in] emit If @c true, enables the emission of debug comments. If @c

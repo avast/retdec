@@ -29,9 +29,6 @@ class Statement;
 class BreakInIfAnalysis: private OrderedAllVisitor,
 		private retdec::utils::NonCopyable {
 public:
-	// It needs to be public so it can be called in ShPtr's destructor.
-	virtual ~BreakInIfAnalysis() override;
-
 	static bool hasBreakStmt(ShPtr<IfStmt> stmt);
 
 private:

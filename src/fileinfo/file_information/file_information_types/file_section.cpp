@@ -10,37 +10,6 @@
 namespace fileinfo {
 
 /**
- * Constructor
- */
-FileSection::FileSection() : index(std::numeric_limits<unsigned long long>::max()),
-								offset(std::numeric_limits<unsigned long long>::max()),
-								sizeInFile(std::numeric_limits<unsigned long long>::max()),
-								entrySize(std::numeric_limits<unsigned long long>::max()),
-								startAddress(std::numeric_limits<unsigned long long>::max()),
-								sizeInMemory(std::numeric_limits<unsigned long long>::max()),
-								relocationsOffset(std::numeric_limits<unsigned long long>::max()),
-								numberOfRelocations(std::numeric_limits<unsigned long long>::max()),
-								lineNumbersOffset(std::numeric_limits<unsigned long long>::max()),
-								numberOfLineNumbers(std::numeric_limits<unsigned long long>::max()),
-								memoryAlignment(std::numeric_limits<unsigned long long>::max()),
-								linkToSection(std::numeric_limits<unsigned long long>::max()),
-								extraInfo(std::numeric_limits<unsigned long long>::max()),
-								lineOffset(std::numeric_limits<unsigned long long>::max()),
-								relocationsLineOffset(std::numeric_limits<unsigned long long>::max()),
-								entropy(std::numeric_limits<double>::min())
-{
-
-}
-
-/**
- * Destructor
- */
-FileSection::~FileSection()
-{
-
-}
-
-/**
  * Get section name
  * @return Section name
  */

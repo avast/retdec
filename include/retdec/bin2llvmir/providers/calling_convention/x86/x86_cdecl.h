@@ -18,7 +18,6 @@ class CdeclCallingConvention: public X86CallingConvention
 	//
 	public:
 		CdeclCallingConvention(const Abi* a);
-		virtual ~CdeclCallingConvention();
 
 	// Construcor method.
 	//

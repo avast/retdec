@@ -26,9 +26,6 @@ class ExportTable
 		std::string expHashMd5;                     ///< exphash MD5
 		std::string expHashSha256;                  ///< exphash SHA256
 	public:
-		ExportTable();
-		~ExportTable();
-
 		/// @name Getters
 		/// @{
 		std::size_t getNumberOfExports() const;

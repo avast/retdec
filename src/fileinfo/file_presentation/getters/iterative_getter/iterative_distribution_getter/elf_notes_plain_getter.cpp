@@ -61,13 +61,6 @@ ElfNotesPlainGetter::ElfNotesPlainGetter(
 	loadRecords();
 }
 
-/**
- * Destructor
- */
-ElfNotesPlainGetter::~ElfNotesPlainGetter()
-{
-}
-
 std::size_t ElfNotesPlainGetter::getBasicInfo(
 		std::size_t structIndex,
 		std::vector<std::string> &desc,

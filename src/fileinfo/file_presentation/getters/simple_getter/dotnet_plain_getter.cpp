@@ -20,14 +20,6 @@ DotnetPlainGetter::DotnetPlainGetter(FileInformation &fileInfo) : SimpleGetter(f
 
 }
 
-/**
- * Destructor
- */
-DotnetPlainGetter::~DotnetPlainGetter()
-{
-
-}
-
 std::size_t DotnetPlainGetter::loadInformation(std::vector<std::string> &desc, std::vector<std::string> &info) const
 {
 	desc.clear();

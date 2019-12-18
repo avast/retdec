@@ -29,8 +29,6 @@ public:
 	static ShPtr<CommaOpExpr> create(ShPtr<Expression> op1,
 		ShPtr<Expression> op2);
 
-	virtual ~CommaOpExpr() override;
-
 	virtual bool isEqualTo(ShPtr<Value> otherValue) const override;
 	virtual ShPtr<Value> clone() override;
 

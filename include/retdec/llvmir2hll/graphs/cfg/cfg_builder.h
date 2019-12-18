@@ -30,12 +30,10 @@ class Function;
 */
 class CFGBuilder: private retdec::utils::NonCopyable {
 public:
-	virtual ~CFGBuilder();
-
 	ShPtr<CFG> getCFG(ShPtr<Function> func);
 
 protected:
-	CFGBuilder();
+	CFGBuilder() = default;
 
 protected:
 	/// A CFG that is currently being built.

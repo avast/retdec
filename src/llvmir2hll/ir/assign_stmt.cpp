@@ -22,11 +22,6 @@ namespace llvmir2hll {
 AssignStmt::AssignStmt(ShPtr<Expression> lhs, ShPtr<Expression> rhs, Address a):
 	Statement(a), lhs(lhs), rhs(rhs) {}
 
-/**
-* @brief Destructs the statement.
-*/
-AssignStmt::~AssignStmt() {}
-
 ShPtr<Value> AssignStmt::clone() {
 	ShPtr<AssignStmt> assignStmt(AssignStmt::create(
 		ucast<Expression>(lhs->clone()), ucast<Expression>(rhs->clone()),

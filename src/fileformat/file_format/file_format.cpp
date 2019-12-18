@@ -343,8 +343,8 @@ void FileFormat::initArchitecture(
 		Architecture arch,
 		retdec::utils::Endianness endian,
 		std::size_t bytesPerWord,
-		retdec::utils::Address entryPoint,
-		retdec::utils::Address sectionVMA)
+		retdec::common::Address entryPoint,
+		retdec::common::Address sectionVMA)
 {
 	if(IntelHexFormat *ihex = dynamic_cast<IntelHexFormat*>(this))
 	{
@@ -1757,7 +1757,7 @@ const Resource* FileFormat::getVersionResource() const
  */
 bool FileFormat::isSignaturePresent() const
 {
-	return signatureVerified.isDefined();
+	return signatureVerified.has_value();
 }
 
 /**
@@ -1766,14 +1766,14 @@ bool FileFormat::isSignaturePresent() const
  */
 bool FileFormat::isSignatureVerified() const
 {
-	return signatureVerified.isDefined() && signatureVerified.getValue();
+	return signatureVerified.has_value() && signatureVerified.value();
 }
 
 /**
  * Get non-decodable address ranges.
  * @return Non-decodable address ranges.
  */
-const retdec::utils::RangeContainer<std::uint64_t>& FileFormat::getNonDecodableAddressRanges() const
+const retdec::common::RangeContainer<std::uint64_t>& FileFormat::getNonDecodableAddressRanges() const
 {
 	return nonDecodableRanges;
 }
@@ -1940,7 +1940,6 @@ const std::vector<std::pair<std::string,std::string>> &FileFormat::getAnomalies(
 {
 	return anomalies;
 }
-
 
 /**
  * Get integer (@a x bytes) located at provided address using the specified endian or default file endian

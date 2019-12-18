@@ -18,7 +18,6 @@ class MipsPSPCallingConvention: public CallingConvention
 	//
 	public:
 		MipsPSPCallingConvention(const Abi* a);
-		virtual ~MipsPSPCallingConvention();
 };
 
 }

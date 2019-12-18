@@ -47,16 +47,16 @@ std::string Class::dump() const
 
 	out << "\tvtables      :" << std::endl;
 	for (auto* vt : virtualFunctionTables)
-		out << "\t\t" << vt->vtableAddress << std::endl;
+		out << "\t\t" << vt->getAddress() << std::endl;
 
 	return out.str();
 }
 
-retdec::config::Class Class::getConfigClass(
+retdec::common::Class Class::getConfigClass(
 		llvm::Module* m,
 		Config* config) const
 {
-	retdec::config::Class c(name);
+	retdec::common::Class c(name);
 
 	auto* demangler = DemanglerProvider::getDemangler(m);
 	if (demangler)
@@ -106,7 +106,7 @@ retdec::config::Class Class::getConfigClass(
 
 	for (auto* vt : virtualFunctionTables)
 	{
-		c.virtualTables.insert(names::generateVtableName(vt->vtableAddress));
+		c.virtualTables.insert(names::generateVtableName(vt->getAddress()));
 	}
 
 	return c;

@@ -40,11 +40,6 @@ Function::Function(ShPtr<Module> module, ShPtr<Type> retType, std::string name,
 	funcVar = Variable::create(name, getType());
 }
 
-/**
-* @brief Destructs the function.
-*/
-Function::~Function() {}
-
 bool Function::isEqualTo(ShPtr<Value> otherValue) const {
 	// The types of compared instances have to match.
 	ShPtr<Function> otherFunction = cast<Function>(otherValue);

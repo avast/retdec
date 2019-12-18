@@ -347,38 +347,98 @@ bool ValueProtect::protectStack()
 	return changed;
 }
 
-bool ValueProtect::protectRegisters()
+void _getConstantExprInstructionUsers(
+		llvm::ConstantExpr* expr,
+		std::set<llvm::Instruction*>& users,
+		std::set<llvm::ConstantExpr*>& seen)
 {
-	bool changed = false;
-	const auto& regs = _abi->getRegisters();
-
-	for (Function& F : _module->getFunctionList())
+	for (auto uIt = expr->user_begin(); uIt != expr->user_end(); ++uIt)
 	{
-		if (F.empty() || F.front().empty())
+		User* user = *uIt;
+		if (auto* insn = dyn_cast<Instruction>(user))
 		{
-			continue;
+			users.insert(insn);
 		}
-
-		// Protect registers only in functions that are NOT called anywhere.
-		//
-		bool skip = false;
-		for (auto uIt = F.user_begin(); uIt != F.user_end(); ++uIt)
+		else if (auto* e = dyn_cast<ConstantExpr>(user))
 		{
-			if (isa<CallInst>(*uIt))
+			if (seen.count(e) == 0)
 			{
-				skip = true;
-				break;
+				seen.insert(e);
+				_getConstantExprInstructionUsers(e, users, seen);
 			}
 		}
-		if (skip)
+	}
+}
+/**
+ * Recursively collect all instrucions where \a expr is used.
+ */
+void getConstantExprInstructionUsers(
+		llvm::ConstantExpr* expr,
+		std::set<llvm::Instruction*>& users)
+{
+	std::set<llvm::ConstantExpr*> seen;
+	_getConstantExprInstructionUsers(expr, users, seen);
+}
+
+bool ValueProtect::protectRegisters(bool skipCalledFunctions)
+{
+	bool changed = false;
+
+	std::set<Function*> fncsToSkip;
+	if (skipCalledFunctions)
+	{
+		for (Function& f : _module->getFunctionList())
 		{
-			continue;
+			for (auto uIt = f.user_begin(); uIt != f.user_end(); ++uIt)
+			{
+				if (isa<CallInst>(*uIt))
+				{
+					fncsToSkip.insert(&f);
+					break;
+				}
+			}
+		}
+	}
+
+	const auto& regs = _abi->getRegisters();
+	for (GlobalVariable* reg : regs)
+	{
+		std::set<Function*> regUsedInFunctions;
+
+		// Collect all functions where register is used.
+		//
+		for (auto uIt = reg->user_begin(); uIt != reg->user_end(); ++uIt)
+		{
+			User* user = *uIt;
+			if (auto* insn = dyn_cast<Instruction>(user))
+			{
+				regUsedInFunctions.insert(insn->getFunction());
+			}
+			else if (auto* expr = dyn_cast<ConstantExpr>(user))
+			{
+				std::set<llvm::Instruction*> insns;
+				getConstantExprInstructionUsers(expr, insns);
+				for (auto* insn : insns)
+				{
+					regUsedInFunctions.insert(insn->getFunction());
+				}
+			}
 		}
 
-		Instruction* first = &F.front().front();
-		for (auto* r : regs)
+		// Protect register in all the functions where it is used.
+		//
+		for (Function* fnc : regUsedInFunctions)
 		{
-			protectValue(r, r->getValueType(), first);
+			if (fncsToSkip.count(fnc))
+			{
+				continue;
+			}
+			if (fnc->empty() || fnc->front().empty())
+			{
+				continue;
+			}
+			Instruction* first = &fnc->front().front();
+			protectValue(reg, reg->getValueType(), first);
 			changed = true;
 		}
 	}

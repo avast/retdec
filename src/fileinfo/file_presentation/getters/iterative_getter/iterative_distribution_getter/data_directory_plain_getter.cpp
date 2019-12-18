@@ -38,14 +38,6 @@ DataDirectoryPlainGetter::DataDirectoryPlainGetter(FileInformation &fileInfo) : 
 	loadRecords();
 }
 
-/**
- * Destructor
- */
-DataDirectoryPlainGetter::~DataDirectoryPlainGetter()
-{
-
-}
-
 std::size_t DataDirectoryPlainGetter::getBasicInfo(std::size_t structIndex, std::vector<std::string> &desc, std::vector<std::string> &info) const
 {
 	if(structIndex >= numberOfStructures || !fileinfo.getNumberOfStoredDataDirectories())

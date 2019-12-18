@@ -48,11 +48,6 @@ VarDefStmtOptimizer::VarDefStmtOptimizer(ShPtr<Module> module,
 	PRECONDITION_NON_NULL(va);
 }
 
-/**
-* @brief Destructs the optimizer.
-*/
-VarDefStmtOptimizer::~VarDefStmtOptimizer() {}
-
 void VarDefStmtOptimizer::doOptimization() {
 	// Clear the cache of va because other optimizations may have left it in an
 	// invalid state.

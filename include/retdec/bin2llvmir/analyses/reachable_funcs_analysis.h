@@ -21,9 +21,6 @@ namespace bin2llvmir {
 */
 class ReachableFuncsAnalysis {
 public:
-	ReachableFuncsAnalysis();
-	~ReachableFuncsAnalysis();
-
 	std::string getName() const { return "ReachableFuncsAnalysis"; }
 
 	static std::set<llvm::Function*> getReachableDefinedFuncsFor(llvm::Function &func,

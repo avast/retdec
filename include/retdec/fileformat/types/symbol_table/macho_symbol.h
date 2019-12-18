@@ -43,9 +43,6 @@ class MachOSymbol
 		template<typename T> void setValues(const T &nList, const llvm::StringRef &strTable, unsigned index);
 		/// @}
 	public:
-		MachOSymbol();
-		~MachOSymbol();
-
 		/// @name Setters
 		/// @{
 		void makeFunction(FileFormat *fileParser);

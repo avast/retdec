@@ -36,8 +36,6 @@ public:
 		std::string name, VarVector params, VarSet localVars = VarSet(),
 		ShPtr<Statement> body = nullptr, bool isVarArg = false);
 
-	virtual ~Function() override;
-
 	virtual ShPtr<Value> clone() override;
 
 	virtual bool isEqualTo(ShPtr<Value> otherValue) const override;

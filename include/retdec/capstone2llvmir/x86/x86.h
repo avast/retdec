@@ -23,9 +23,6 @@ namespace capstone2llvmir {
 class Capstone2LlvmIrTranslatorX86 : virtual public Capstone2LlvmIrTranslator
 {
 	public:
-		virtual ~Capstone2LlvmIrTranslatorX86() {};
-
-	public:
 		/**
 		 * Is the passed LLVM function @p f the special pseudo function
 		 * whose call represents a store of fp value to the x87 fpu stack slot?

@@ -28,14 +28,12 @@ namespace llvmir2hll {
 */
 class BreakOutsideLoopValidator: public Validator {
 public:
-	virtual ~BreakOutsideLoopValidator() override;
-
 	virtual std::string getId() const override;
 
 	static ShPtr<Validator> create();
 
 private:
-	BreakOutsideLoopValidator();
+	using Validator::Validator;
 
 	/// @name Visitor Interface
 	/// @{

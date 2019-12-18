@@ -71,13 +71,6 @@ DynamicBuffer::DynamicBuffer(const DynamicBuffer& dynamicBuffer, uint32_t startP
 }
 
 /**
- * Destructor.
- */
-DynamicBuffer::~DynamicBuffer()
-{
-}
-
-/**
  * Assign operator, creates the copy of the DynamicBuffer.
  *
  * @param rhs Right hand side of the operator.

@@ -36,9 +36,5 @@ MicrosoftX64CallingConvention::MicrosoftX64CallingConvention(const Abi* a) :
 	_largeObjectsPassedByReference = true;
 }
 
-MicrosoftX64CallingConvention::~MicrosoftX64CallingConvention()
-{
-}
-
 }
 }

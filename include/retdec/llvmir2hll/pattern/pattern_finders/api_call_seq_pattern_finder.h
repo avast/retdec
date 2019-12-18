@@ -25,8 +25,6 @@ namespace llvmir2hll {
 */
 class APICallSeqPatternFinder: public PatternFinder {
 public:
-	virtual ~APICallSeqPatternFinder() override;
-
 	virtual const std::string getId() const override;
 	virtual Patterns findPatterns(ShPtr<Module> module) override;
 

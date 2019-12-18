@@ -34,11 +34,6 @@ DerefToArrayIndexOptimizer::DerefToArrayIndexOptimizer(ShPtr<Module> module):
 	PRECONDITION_NON_NULL(module);
 }
 
-/**
-* @brief Destructs the optimizer.
-*/
-DerefToArrayIndexOptimizer::~DerefToArrayIndexOptimizer() {}
-
 void DerefToArrayIndexOptimizer::doOptimization() {
 	// Visit all global variables and their initializers.
 	for (auto i = module->global_var_begin(), e = module->global_var_end();
@@ -62,7 +57,7 @@ void DerefToArrayIndexOptimizer::visit(ShPtr<DerefOpExpr> expr) {
 		return;
 	}
 
-	Maybe<BaseAndIndex> baseAndIndex(getBaseAndIndexFromExprIfPossible(
+	std::optional<BaseAndIndex> baseAndIndex(getBaseAndIndexFromExprIfPossible(
 		addOpExpr));
 	if (!baseAndIndex) {
 		// Can't optimize. Expression is not like:
@@ -70,7 +65,7 @@ void DerefToArrayIndexOptimizer::visit(ShPtr<DerefOpExpr> expr) {
 		return;
 	}
 
-	replaceDerefWithArrayIndex(expr, baseAndIndex.get());
+	replaceDerefWithArrayIndex(expr, baseAndIndex.value());
 }
 
 /**
@@ -78,10 +73,10 @@ void DerefToArrayIndexOptimizer::visit(ShPtr<DerefOpExpr> expr) {
 *
 * @param[in] expr Expression from which is trying to get base and index.
 *
-* @return <tt>Just(BaseAndIndex)</tt> if the @a expr can be parsed to base and
-*         index. Otherwise <tt>Nothing<BaseAndIndex>()</tt>.
+* @return @c BaseAndIndex if the @a expr can be parsed to base and
+*         index. Otherwise std::nullopt.
 */
-Maybe<DerefToArrayIndexOptimizer::BaseAndIndex> DerefToArrayIndexOptimizer::
+std::optional<DerefToArrayIndexOptimizer::BaseAndIndex> DerefToArrayIndexOptimizer::
 		getBaseAndIndexFromExprIfPossible(ShPtr<AddOpExpr> expr) {
 	BaseAndIndex baseAndIndex;
 	ShPtr<Expression> firstOp(expr->getFirstOperand());
@@ -93,7 +88,7 @@ Maybe<DerefToArrayIndexOptimizer::BaseAndIndex> DerefToArrayIndexOptimizer::
 	} else if (isa<ConstInt>(secOp)) {
 		baseAndIndex.index = secOp;
 	} else {
-		return Nothing<BaseAndIndex>();
+		return std::nullopt;
 	}
 
 	// One of the operand must be Variable or ArrayIndexOpExpr or
@@ -105,10 +100,10 @@ Maybe<DerefToArrayIndexOptimizer::BaseAndIndex> DerefToArrayIndexOptimizer::
 			isa<StructIndexOpExpr>(secOp)) {
 		baseAndIndex.base = secOp;
 	} else {
-		return Nothing<BaseAndIndex>();
+		return std::nullopt;
 	}
 
-	return Just(baseAndIndex);
+	return baseAndIndex;
 }
 
 /**

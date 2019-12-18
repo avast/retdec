@@ -24,8 +24,6 @@ class BreakStmt final: public Statement {
 public:
 	static ShPtr<BreakStmt> create(Address a = Address::Undefined);
 
-	virtual ~BreakStmt() override;
-
 	virtual ShPtr<Value> clone() override;
 	virtual bool isEqualTo(ShPtr<Value> otherValue) const override;
 	virtual bool isCompound() override { return false; }

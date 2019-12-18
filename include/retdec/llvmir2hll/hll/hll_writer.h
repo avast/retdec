@@ -40,8 +40,6 @@ class UnaryOpExpr;
 */
 class HLLWriter: public Visitor, private retdec::utils::NonCopyable {
 public:
-	virtual ~HLLWriter() override;
-
 	/**
 	* @brief Returns the ID of the writer.
 	*/

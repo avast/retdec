@@ -18,7 +18,6 @@ class DotnetJsonGetter : public SimpleGetter
 {
 	public:
 		DotnetJsonGetter(FileInformation &fileInfo);
-		virtual ~DotnetJsonGetter() override;
 
 		virtual std::size_t loadInformation(std::vector<std::string> &desc, std::vector<std::string> &info) const override;
 };

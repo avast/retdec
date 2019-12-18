@@ -33,8 +33,6 @@ class AggressiveDerefOptimizer final: public FuncOptimizer {
 public:
 	AggressiveDerefOptimizer(ShPtr<Module> module);
 
-	virtual ~AggressiveDerefOptimizer() override;
-
 	virtual std::string getId() const override { return "AggressiveDeref"; }
 
 private:

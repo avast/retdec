@@ -21,8 +21,6 @@ class CCompoundOpManager final: public CompoundOpManager {
 public:
 	CCompoundOpManager();
 
-	virtual ~CCompoundOpManager() override;
-
 	virtual std::string getId() const override;
 
 private:

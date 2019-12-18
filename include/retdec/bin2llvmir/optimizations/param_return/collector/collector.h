@@ -31,7 +31,7 @@ class Collector
 			llvm::Module* m,
 			const ReachingDefinitionsAnalysis* rda);
 
-		virtual ~Collector();
+		virtual ~Collector() = default;
 
 	public:
 		virtual void collectCallArgs(CallEntry* ce) const;

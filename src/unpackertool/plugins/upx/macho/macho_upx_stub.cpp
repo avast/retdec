@@ -71,15 +71,6 @@ template <int bits> MachOUpxStub<bits>::MachOUpxStub(retdec::loader::Image* inpu
 }
 
 /**
- * Destructor.
- *
- * @tparam bits Number of bits of the architecture.
- */
-template <int bits> MachOUpxStub<bits>::~MachOUpxStub()
-{
-}
-
-/**
  * Performs the whole process of unpacking. This is the method that is being run from @ref UpxPlugin to start
  * unpacking stub.
  *

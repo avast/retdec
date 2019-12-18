@@ -22,24 +22,6 @@ namespace retdec {
 namespace fileformat {
 
 /**
- * Constructor
- */
-SecSeg::SecSeg() : type(Type::UNDEFINED_SEC_SEG), index(0), offset(0), fileSize(0),
-	address(0), memorySize(0), entrySize(0), entropy(0), memorySizeIsValid(false),
-	entrySizeIsValid(false), isInMemory(false), loaded(false), isEntropyValid(false)
-{
-
-}
-
-/**
- * Destructor (default implementation)
- */
-SecSeg::~SecSeg()
-{
-
-}
-
-/**
  * Compute all supported hashes
  */
 void SecSeg::computeHashes()

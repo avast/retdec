@@ -30,14 +30,6 @@ RichHeaderJsonGetter::RichHeaderJsonGetter(FileInformation &fileInfo) : Iterativ
 	commonHeaderElements.push_back("count");
 }
 
-/**
- * Destructor
- */
-RichHeaderJsonGetter::~RichHeaderJsonGetter()
-{
-
-}
-
 std::size_t RichHeaderJsonGetter::getBasicInfo(std::size_t structIndex, std::vector<std::string> &desc, std::vector<std::string> &info) const
 {
 	if(structIndex >= numberOfStructures || !fileinfo.hasRichHeaderRecords())

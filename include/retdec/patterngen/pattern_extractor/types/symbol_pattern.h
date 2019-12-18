@@ -62,7 +62,6 @@ class SymbolPattern
 		/// @brief Constructors and destructor.
 		/// @{
 		SymbolPattern(bool isLittleEndian, std::size_t wordBitWidth);
-		~SymbolPattern();
 		/// @}
 
 		/// @brief Setters.

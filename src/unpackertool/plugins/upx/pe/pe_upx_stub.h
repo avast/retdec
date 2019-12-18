@@ -116,8 +116,6 @@ public:
 	PeUpxStub(retdec::loader::Image* inputFile, const UpxStubData* stubData, const DynamicBuffer& stubCapturedData,
 			std::unique_ptr<Decompressor> decompressor, const UpxMetadata& metadata);
 
-	virtual ~PeUpxStub() override;
-
 	virtual void unpack(const std::string& ouputFile) override;
 	virtual void setupPackingMethod(std::uint8_t packingMethod);
 	virtual void readUnpackingStub(DynamicBuffer& unpackingStub);

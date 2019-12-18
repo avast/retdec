@@ -31,14 +31,6 @@ ExportTableJsonGetter::ExportTableJsonGetter(FileInformation &fileInfo) : Iterat
 	commonHeaderElements.push_back("address");
 }
 
-/**
- * Destructor
- */
-ExportTableJsonGetter::~ExportTableJsonGetter()
-{
-
-}
-
 std::size_t ExportTableJsonGetter::getBasicInfo(std::size_t structIndex, std::vector<std::string> &desc, std::vector<std::string> &info) const
 {
 	if(structIndex >= numberOfStructures || !fileinfo.hasExportTableRecords())

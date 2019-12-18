@@ -29,8 +29,6 @@ class Variable;
 */
 class VarDefCFGTraversal final: public CFGTraversal {
 public:
-	~VarDefCFGTraversal();
-
 	static bool isVarDefBetweenStmts(const VarSet &vars,
 		ShPtr<Statement> start, ShPtr<Statement> end, ShPtr<CFG> cfg,
 		ShPtr<ValueAnalysis> va);

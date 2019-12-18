@@ -34,7 +34,7 @@ class DebugFormatProvider
 {
 	private:
 		using SymbolTable = std::map<
-				retdec::utils::Address,
+				retdec::common::Address,
 				const retdec::fileformat::Symbol*>;
 
 	public:
@@ -42,7 +42,7 @@ class DebugFormatProvider
 				llvm::Module* m,
 				retdec::loader::Image* objf,
 				const std::string& pdbFile,
-				const retdec::utils::Address& imageBase,
+				const retdec::common::Address& imageBase,
 				Demangler* demangler);
 
 		static DebugFormat* getDebugFormat(llvm::Module* m);

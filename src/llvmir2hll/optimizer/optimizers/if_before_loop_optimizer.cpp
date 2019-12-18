@@ -36,11 +36,6 @@ IfBeforeLoopOptimizer::IfBeforeLoopOptimizer(ShPtr<Module> module,
 		PRECONDITION_NON_NULL(va);
 	}
 
-/**
-* @brief Destructs the optimizer.
-*/
-IfBeforeLoopOptimizer::~IfBeforeLoopOptimizer() {}
-
 void IfBeforeLoopOptimizer::doOptimization() {
 	if (!va->isInValidState()) {
 		va->clearCache();

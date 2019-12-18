@@ -23,18 +23,15 @@ class FileSegment
 		std::string crc32;                  ///< CRC32 of segment content
 		std::string md5;                    ///< MD5 of segment content
 		std::string sha256;                 ///< SHA256 of segment content
-		unsigned long long index;           ///< index of segment
-		unsigned long long offset;          ///< offset in file
-		unsigned long long virtualAddress;  ///< virtual address in memory
-		unsigned long long physicalAddress; ///< physical address in memory
-		unsigned long long sizeInFile;      ///< size of segment in file
-		unsigned long long sizeInMemory;    ///< size of segment in memory
-		unsigned long long alignment;       ///< alignment in memory and in file
+		unsigned long long index = std::numeric_limits<unsigned long long>::max();           ///< index of segment
+		unsigned long long offset = std::numeric_limits<unsigned long long>::max();          ///< offset in file
+		unsigned long long virtualAddress = std::numeric_limits<unsigned long long>::max();  ///< virtual address in memory
+		unsigned long long physicalAddress = std::numeric_limits<unsigned long long>::max(); ///< physical address in memory
+		unsigned long long sizeInFile = std::numeric_limits<unsigned long long>::max();      ///< size of segment in file
+		unsigned long long sizeInMemory = std::numeric_limits<unsigned long long>::max();    ///< size of segment in memory
+		unsigned long long alignment = std::numeric_limits<unsigned long long>::max();       ///< alignment in memory and in file
 		Flags flags;                        ///< segment flags
 	public:
-		FileSegment();
-		~FileSegment();
-
 		/// @name Getters
 		/// @{
 		std::string getType() const;

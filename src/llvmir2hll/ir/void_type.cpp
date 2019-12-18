@@ -19,11 +19,6 @@ namespace llvmir2hll {
 VoidType::VoidType():
 	Type() {}
 
-/**
-* @brief Destructs the type.
-*/
-VoidType::~VoidType() {}
-
 ShPtr<Value> VoidType::clone() {
 	return VoidType::create();
 }

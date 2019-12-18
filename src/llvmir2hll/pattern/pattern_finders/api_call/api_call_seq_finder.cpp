@@ -31,10 +31,5 @@ APICallSeqFinder::APICallSeqFinder(ShPtr<ValueAnalysis> va,
 	PRECONDITION(cio->isInitialized(), "it is not initialized");
 }
 
-/**
-* @brief Destructs the base class.
-*/
-APICallSeqFinder::~APICallSeqFinder() {}
-
 } // namespace llvmir2hll
 } // namespace retdec

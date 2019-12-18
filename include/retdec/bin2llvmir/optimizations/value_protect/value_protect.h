@@ -45,7 +45,7 @@ class ValueProtect : public llvm::ModulePass
 		bool run();
 		bool protect();
 		bool protectStack();
-		bool protectRegisters();
+		bool protectRegisters(bool skipCalledFunctions = true);
 		bool protectLoadStores();
 		bool unprotect();
 

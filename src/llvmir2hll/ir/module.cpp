@@ -5,6 +5,7 @@
 */
 
 #include <algorithm>
+#include <optional>
 
 #include "retdec/llvmir2hll/config/config.h"
 #include "retdec/llvmir2hll/ir/empty_stmt.h"
@@ -16,7 +17,6 @@
 #include "retdec/llvmir2hll/ir/variable.h"
 #include "retdec/llvmir2hll/semantics/semantics.h"
 #include "retdec/llvmir2hll/support/debug.h"
-#include "retdec/llvmir2hll/support/maybe.h"
 #include "retdec/utils/container.h"
 #include "retdec/utils/string.h"
 
@@ -47,11 +47,6 @@ Module::Module(const llvm::Module *llvmModule, const std::string &identifier,
 		PRECONDITION_NON_NULL(llvmModule);
 		PRECONDITION_NON_NULL(semantics);
 	}
-
-/**
-* @brief Destructs the module.
-*/
-Module::~Module() {}
 
 /**
 * @brief Adds a new global variable to the module.
@@ -298,8 +293,8 @@ bool Module::funcExists(ShPtr<Function> func) const {
 * The name of the main function depends on the used semantics.
 */
 bool Module::hasMainFunc() const {
-	Maybe<std::string> mainFuncName(semantics->getMainFuncName());
-	return mainFuncName ? hasFuncWithName(mainFuncName.get()) : false;
+	std::optional<std::string> mainFuncName(semantics->getMainFuncName());
+	return mainFuncName ? hasFuncWithName(mainFuncName.value()) : false;
 }
 
 /**
@@ -309,8 +304,8 @@ bool Module::hasMainFunc() const {
 * The name of the main function depends on the used semantics.
 */
 bool Module::isMainFunc(ShPtr<Function> func) const {
-	Maybe<std::string> mainFuncName(semantics->getMainFuncName());
-	return mainFuncName ? func->getName() == mainFuncName.get() : false;
+	std::optional<std::string> mainFuncName(semantics->getMainFuncName());
+	return mainFuncName ? func->getName() == mainFuncName.value() : false;
 }
 
 /**
@@ -624,7 +619,7 @@ AddressRange Module::getAddressRangeForFunc(ShPtr<const Function> func) const {
 /**
 * @brief Has the given function an address range?
 */
-bool Module::hasAddressRange(ShPtr<const Function> func) const {
+bool Module::hasAddressRange(ShPtr<Function> func) const {
 	return getAddressRangeForFunc(func) != NO_ADDRESS_RANGE;
 }
 

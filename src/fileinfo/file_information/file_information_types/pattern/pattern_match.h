@@ -17,16 +17,13 @@ namespace fileinfo {
 class PatternMatch
 {
 	private:
-		unsigned long long offset;    ///< offset of match in file
-		unsigned long long address;   ///< address of match in memory
-		unsigned long long dataSize;  ///< total size of match in bytes
-		unsigned long long entrySize; ///< byte size of one entry in match
-		bool integer;                 ///< @c true if each entry in match is integer number
-		bool floatingPoint;           ///< @c true if each entry in match is floating point number
+		unsigned long long offset = std::numeric_limits<unsigned long long>::max();    ///< offset of match in file
+		unsigned long long address = std::numeric_limits<unsigned long long>::max();   ///< address of match in memory
+		unsigned long long dataSize = std::numeric_limits<unsigned long long>::max();  ///< total size of match in bytes
+		unsigned long long entrySize = std::numeric_limits<unsigned long long>::max(); ///< byte size of one entry in match
+		bool integer = false;                 ///< @c true if each entry in match is integer number
+		bool floatingPoint = false;           ///< @c true if each entry in match is floating point number
 	public:
-		PatternMatch();
-		~PatternMatch();
-
 		/// @name Query methods
 		/// @{
 		bool isInteger() const;

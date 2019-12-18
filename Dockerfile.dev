@@ -14,8 +14,6 @@ RUN apt-get -y update && \
 	doxygen                                             \
 	graphviz                                            \
 	upx                                                 \
-	flex                                                \
-	bison                                               \
 	openssl                                             \
 	libssl-dev                                          \
 	zlib1g-dev                                          \

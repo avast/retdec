@@ -25,6 +25,7 @@
 #include "retdec/llvmir2hll/ir/return_stmt.h"
 #include "retdec/llvmir2hll/ir/statement.h"
 #include "retdec/llvmir2hll/llvm/llvmir2bir_converter.h"
+#include "retdec/llvmir2hll/support/debug.h"
 #include "retdec/llvmir2hll/utils/ir.h"
 
 using namespace ::testing;

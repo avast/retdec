@@ -21,13 +21,6 @@ ExtCastExpr::ExtCastExpr(ShPtr<Expression> op, ShPtr<Type> dstType,
 		Variant variant):
 	CastExpr(op, dstType), variant(variant) {}
 
-/**
-* @brief Destructs the operator.
-*/
-ExtCastExpr::~ExtCastExpr() {
-	// Observers are removed in the superclass.
-}
-
 bool ExtCastExpr::isEqualTo(ShPtr<Value> otherValue) const {
 	// Both types and values of all operands have to be equal.
 	if (ShPtr<ExtCastExpr> otherCastExpr = cast<ExtCastExpr>(otherValue)) {

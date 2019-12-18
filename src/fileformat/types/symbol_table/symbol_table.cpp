@@ -13,22 +13,6 @@ namespace retdec {
 namespace fileformat {
 
 /**
- * Constructor
- */
-SymbolTable::SymbolTable() : table(), name()
-{
-
-}
-
-/**
- * Destructor
- */
-SymbolTable::~SymbolTable()
-{
-
-}
-
-/**
  * Get number of symbols in table
  * @return Number of symbols in table
  */

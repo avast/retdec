@@ -30,20 +30,6 @@ Signature secondStubSignature =
 };
 
 /**
- * Constructor.
- */
-DecompressorUpxshit::DecompressorUpxshit()
-{
-}
-
-/**
- * Destructor.
- */
-DecompressorUpxshit::~DecompressorUpxshit()
-{
-}
-
-/**
  * Reads the unpacking stub into buffer.
  *
  * @param stub The PE32 UPX unpacking stub object.

@@ -19,13 +19,6 @@ namespace llvmir2hll {
 AddressOpExpr::AddressOpExpr(ShPtr<Expression> op):
 	UnaryOpExpr(op) {}
 
-/**
-* @brief Destructs the operator.
-*/
-AddressOpExpr::~AddressOpExpr() {
-	// Observers are removed in the superclass.
-}
-
 bool AddressOpExpr::isEqualTo(ShPtr<Value> otherValue) const {
 	if (ShPtr<AddressOpExpr> otherValueAddressOpExpr = cast<AddressOpExpr>(otherValue)) {
 		return op->isEqualTo(otherValueAddressOpExpr->getOperand());

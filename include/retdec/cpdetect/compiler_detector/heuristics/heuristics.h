@@ -134,7 +134,7 @@ class Heuristics
 		Heuristics(
 				retdec::fileformat::FileFormat &parser, Search &searcher,
 				ToolInformation &toolInfo);
-		virtual ~Heuristics();
+		virtual ~Heuristics() = default;
 
 		/// @name Heuristics methods
 		/// @{

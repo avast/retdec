@@ -50,9 +50,5 @@ MipsPSPCallingConvention::MipsPSPCallingConvention(const Abi* a) :
 	_respectsRegCouples = true;
 }
 
-MipsPSPCallingConvention::~MipsPSPCallingConvention()
-{
-}
-
 }
 }

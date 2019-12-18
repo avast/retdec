@@ -35,11 +35,6 @@ AbiMips64::AbiMips64(llvm::Module* m, Config* c) :
 	_defcc = CallingConvention::ID::CC_MIPS64;
 }
 
-AbiMips64::~AbiMips64()
-{
-
-}
-
 bool AbiMips64::isGeneralPurposeRegister(const llvm::Value* val) const
 {
 	uint32_t rid = getRegisterId(val);

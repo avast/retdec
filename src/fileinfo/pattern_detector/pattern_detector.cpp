@@ -29,14 +29,6 @@ PatternDetector::PatternDetector(const retdec::fileformat::FileFormat *fparser, 
 }
 
 /**
- * Destructor
- */
-PatternDetector::~PatternDetector()
-{
-
-}
-
-/**
  * Get begin iterator
  * @return Begin iterator
  */

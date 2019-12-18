@@ -27,8 +27,6 @@ class FloatType final: public Type {
 public:
 	static ShPtr<FloatType> create(unsigned size);
 
-	virtual ~FloatType() override;
-
 	virtual ShPtr<Value> clone() override;
 
 	virtual bool isEqualTo(ShPtr<Value> otherValue) const override;

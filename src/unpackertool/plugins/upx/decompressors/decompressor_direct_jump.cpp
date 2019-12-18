@@ -22,20 +22,6 @@ namespace unpackertool {
 namespace upx {
 
 /**
- * Constructor.
- */
-DecompressorDirectJump::DecompressorDirectJump()
-{
-}
-
-/**
- * Destructor.
- */
-DecompressorDirectJump::~DecompressorDirectJump()
-{
-}
-
-/**
  * Reads the unpacking stub into buffer.
  *
  * @param stub The PE32 UPX unpacking stub object.

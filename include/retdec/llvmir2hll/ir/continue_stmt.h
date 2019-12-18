@@ -24,8 +24,6 @@ class ContinueStmt final: public Statement {
 public:
 	static ShPtr<ContinueStmt> create(Address a = Address::Undefined);
 
-	virtual ~ContinueStmt() override;
-
 	virtual ShPtr<Value> clone() override;
 	virtual bool isEqualTo(ShPtr<Value> otherValue) const override;
 	virtual bool isCompound() override { return false; }

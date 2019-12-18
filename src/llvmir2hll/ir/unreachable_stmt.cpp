@@ -16,11 +16,6 @@ namespace llvmir2hll {
 */
 UnreachableStmt::UnreachableStmt(Address a): Statement(a) {}
 
-/**
-* @brief Destructs the statement.
-*/
-UnreachableStmt::~UnreachableStmt() {}
-
 ShPtr<Value> UnreachableStmt::clone() {
 	ShPtr<UnreachableStmt> unreachableStmt(UnreachableStmt::create(getAddress()));
 	unreachableStmt->setMetadata(getMetadata());

@@ -30,14 +30,6 @@ DataDirectoryJsonGetter::DataDirectoryJsonGetter(FileInformation &fileInfo) : It
 	commonHeaderElements.push_back("size");
 }
 
-/**
- * Destructor
- */
-DataDirectoryJsonGetter::~DataDirectoryJsonGetter()
-{
-
-}
-
 std::size_t DataDirectoryJsonGetter::getBasicInfo(std::size_t structIndex, std::vector<std::string> &desc, std::vector<std::string> &info) const
 {
 	if(structIndex >= numberOfStructures || !fileinfo.getNumberOfStoredDataDirectories())

@@ -7,6 +7,7 @@
 #ifndef RETDEC_LLVMIR2HLL_OPTIMIZER_OPTIMIZERS_COPY_PROPAGATION_OPTIMIZER_H
 #define RETDEC_LLVMIR2HLL_OPTIMIZER_OPTIMIZERS_COPY_PROPAGATION_OPTIMIZER_H
 
+#include "retdec/llvmir2hll/analysis/def_use_analysis.h"
 #include "retdec/llvmir2hll/optimizer/func_optimizer.h"
 #include "retdec/llvmir2hll/support/smart_ptr.h"
 #include "retdec/llvmir2hll/support/types.h"
@@ -15,8 +16,7 @@ namespace retdec {
 namespace llvmir2hll {
 
 class CallInfoObtainer;
-class DefUseAnalysis;
-class DefUseChains;
+class CFGBuilder;
 class UseDefAnalysis;
 class UseDefChains;
 class ValueAnalysis;
@@ -66,8 +66,6 @@ public:
 	CopyPropagationOptimizer(ShPtr<Module> module, ShPtr<ValueAnalysis> va,
 		ShPtr<CallInfoObtainer> cio);
 
-	virtual ~CopyPropagationOptimizer() override;
-
 	virtual std::string getId() const override { return "CopyPropagation"; }
 
 private:
@@ -84,11 +82,24 @@ private:
 	void handleCaseEmptyUses(ShPtr<Statement> stmt, ShPtr<Variable> stmtLhsVar);
 	void handleCaseSingleUse(ShPtr<Statement> stmt, ShPtr<Variable> stmtLhsVar,
 		ShPtr<Statement> use);
-	void handleCaseMoreThanOneUse(ShPtr<Statement> stmt, ShPtr<Variable> stmtLhsVar,
+	void handleCaseInductionVariable(
+		ShPtr<Statement> stmt,
+		ShPtr<Variable> stmtLhsVar,
+		const StmtSet &uses);
+	void handleCaseInductionVariable2(
+		ShPtr<Statement> stmt,
+		ShPtr<Variable> stmtLhsVar,
+		const StmtSet &uses);
+	void handleCaseMoreThanOneUse(
+		ShPtr<Statement> stmt,
+		ShPtr<Variable> stmtLhsVar,
 		const StmtSet &uses);
 	bool shouldBeIncludedInDefUseChains(ShPtr<Variable> var);
 
 private:
+	/// The used builder of CFGs.
+	ShPtr<CFGBuilder> cfgBuilder;
+
 	/// Analysis of values.
 	ShPtr<ValueAnalysis> va;
 
@@ -109,6 +120,10 @@ private:
 
 	/// Use-def chains.
 	ShPtr<UseDefChains> udcs;
+
+	/// Associative def-use chains.
+	std::map<DefUseChains::StmtVarPair, std::size_t> def2uses;
+	std::map<ShPtr<Variable>, std::set<std::size_t>> var2dus;
 
 	/// Global variables in @c module. This is here to speedup the traversal. By
 	/// using this set, we do not have to ask @c module every time we need such

@@ -12,22 +12,6 @@ namespace retdec {
 namespace fileformat {
 
 /**
- * Constructor
- */
-RichHeader::RichHeader()
-{
-	clear();
-}
-
-/**
- * Destructor
- */
-RichHeader::~RichHeader()
-{
-
-}
-
-/**
  * Get decrypted header as string
  * @return Decrypted header as string
  */

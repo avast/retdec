@@ -18,7 +18,6 @@ class PowerPCCallingConvention: public CallingConvention
 	//
 	public:
 		PowerPCCallingConvention(const Abi* a);
-		virtual ~PowerPCCallingConvention();
 
 	// Construcor method.
 	//

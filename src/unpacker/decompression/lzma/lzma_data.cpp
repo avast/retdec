@@ -25,13 +25,6 @@ LzmaData::LzmaData(const DynamicBuffer& buffer, uint8_t pb, uint8_t lp, uint8_t 
 }
 
 /**
- * Destructor.
- */
-LzmaData::~LzmaData()
-{
-}
-
-/**
  * Decompresses the LZMA compressed data.
  *
  * @ param outputBuffer The buffer in which the datas are decompressed.

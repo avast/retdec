@@ -26,8 +26,6 @@ public:
 	static ShPtr<GotoStmt> create(ShPtr<Statement> target,
 		Address a = Address::Undefined);
 
-	virtual ~GotoStmt() override;
-
 	virtual ShPtr<Value> clone() override;
 	virtual bool isEqualTo(ShPtr<Value> otherValue) const override;
 	virtual bool isCompound() override { return false; }

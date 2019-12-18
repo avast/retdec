@@ -67,8 +67,6 @@ class VarDefStmtOptimizer final: public FuncOptimizer {
 public:
 	VarDefStmtOptimizer(ShPtr<Module> module, ShPtr<ValueAnalysis> va);
 
-	virtual ~VarDefStmtOptimizer() override;
-
 	virtual std::string getId() const override { return "VarDefStmt"; }
 
 private:

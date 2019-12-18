@@ -16,22 +16,6 @@ namespace retdec {
 namespace fileformat {
 
 /**
- * Constructor
- */
-BitmapImage::BitmapImage()
-{
-
-}
-
-/**
- * Destructor
- */
-BitmapImage::~BitmapImage()
-{
-
-}
-
-/**
  * Get image width
  * @return Image with
  */

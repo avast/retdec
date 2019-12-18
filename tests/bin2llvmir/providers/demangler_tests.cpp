@@ -4,7 +4,7 @@
 * @copyright (c) 2017 Avast Software, licensed under the MIT license
 */
 
-#include "retdec/config/tool_info.h"
+#include "retdec/common/tool_info.h"
 #include "retdec/bin2llvmir/providers/demangler.h"
 #include "bin2llvmir/utils/llvmir_tests.h"
 #include "retdec/ctypes/context.h"

@@ -15,6 +15,7 @@
 
 #include "retdec/bin2llvmir/providers/config.h"
 #include "retdec/bin2llvmir/providers/names.h"
+#include "retdec/common/vtable.h"
 
 namespace retdec {
 namespace bin2llvmir {
@@ -23,7 +24,7 @@ class Class
 {
 	public:
 		std::string dump() const;
-		retdec::config::Class getConfigClass(
+		retdec::common::Class getConfigClass(
 				llvm::Module* m,
 				Config* config) const;
 
@@ -33,7 +34,7 @@ class Class
 		std::set<const llvm::Function*> destructors;
 		std::set<const llvm::Function*> methods;
 		std::set<const llvm::Function*> virtualFunctions;
-		std::set<const rtti_finder::Vtable*> virtualFunctionTables;
+		std::set<const common::Vtable*> virtualFunctionTables;
 		std::set<Class*> superClasses;
 		llvm::Value* structure;
 

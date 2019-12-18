@@ -10,12 +10,12 @@
 #include <fstream>
 #include <initializer_list>
 #include <map>
+#include <optional>
 #include <set>
 #include <utility>
 #include <vector>
 
 #include "retdec/utils/byte_value_storage.h"
-#include "retdec/utils/value.h"
 #include "retdec/utils/non_copyable.h"
 #include "retdec/fileformat/fftypes.h"
 #include "retdec/fileformat/utils/byte_array_buffer.h"
@@ -91,8 +91,8 @@ class FileFormat : public retdec::utils::ByteValueStorage, private retdec::utils
 		LoaderErrorInfo _ldrErrInfo;                                      ///< loader error (e.g. Windows loader error for PE files)
 		bool stateIsValid;                                                ///< internal state of instance
 		std::vector<std::pair<std::size_t, std::size_t>> secHashInfo;     ///< information for calculation of section table hash
-		retdec::utils::Maybe<bool> signatureVerified;                     ///< indicates whether the signature is present and also verified
-		retdec::utils::RangeContainer<std::uint64_t> nonDecodableRanges;  ///< Address ranges which should not be decoded for instructions.
+		std::optional<bool> signatureVerified;                            ///< indicates whether the signature is present and also verified
+		retdec::common::RangeContainer<std::uint64_t> nonDecodableRanges;  ///< Address ranges which should not be decoded for instructions.
 		std::vector<std::pair<std::string, std::string>> anomalies;       ///< file format anomalies
 
 		/// @name Clear methods
@@ -122,8 +122,8 @@ class FileFormat : public retdec::utils::ByteValueStorage, private retdec::utils
 				Architecture arch,
 				retdec::utils::Endianness endian = retdec::utils::Endianness::UNKNOWN,
 				std::size_t bytesPerWord = 4,
-				retdec::utils::Address entryPoint = retdec::utils::Address::Undefined,
-				retdec::utils::Address sectionVMA = retdec::utils::Address::Undefined);
+				retdec::common::Address entryPoint = retdec::common::Address::Undefined,
+				retdec::common::Address sectionVMA = retdec::common::Address::Undefined);
 		void loadStrings();
 		void loadStrings(StringType type, std::size_t charSize);
 		void loadStrings(StringType type, std::size_t charSize, const SecSeg* secSeg);
@@ -250,7 +250,7 @@ class FileFormat : public retdec::utils::ByteValueStorage, private retdec::utils
 		const Resource* getVersionResource() const;
 		bool isSignaturePresent() const;
 		bool isSignatureVerified() const;
-		const retdec::utils::RangeContainer<std::uint64_t>& getNonDecodableAddressRanges() const;
+		const retdec::common::RangeContainer<std::uint64_t>& getNonDecodableAddressRanges() const;
 		/// @}
 
 		/// @name Containers

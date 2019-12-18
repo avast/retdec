@@ -28,8 +28,6 @@ class NotOpExpr final: public UnaryOpExpr {
 public:
 	static ShPtr<NotOpExpr> create(ShPtr<Expression> op);
 
-	virtual ~NotOpExpr() override;
-
 	virtual bool isEqualTo(ShPtr<Value> otherValue) const override;
 	virtual ShPtr<Value> clone() override;
 	virtual ShPtr<Type> getType() const override;

@@ -41,14 +41,6 @@ ResourceJsonGetter::ResourceJsonGetter(FileInformation &fileInfo) : IterativeSub
 	commonHeaderElements.push_back("sha256");
 }
 
-/**
- * Destructor
- */
-ResourceJsonGetter::~ResourceJsonGetter()
-{
-
-}
-
 std::size_t ResourceJsonGetter::getBasicInfo(std::size_t structIndex, std::vector<std::string> &desc, std::vector<std::string> &info) const
 {
 	if(structIndex >= numberOfStructures || !fileinfo.getNumberOfStoredResources())

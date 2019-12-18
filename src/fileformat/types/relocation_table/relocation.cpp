@@ -10,23 +10,6 @@ namespace retdec {
 namespace fileformat {
 
 /**
- * Constructor
- */
-Relocation::Relocation() : address(0), offsetInSection(0), linkToSection(0),
-	addend(0), type(0), linkToSectionIsValid(false), linkToSymbolIsValid(false)
-{
-
-}
-
-/**
- * Destructor
- */
-Relocation::~Relocation()
-{
-
-}
-
-/**
  * Get name of relocation
  * @return Relocation name
  */

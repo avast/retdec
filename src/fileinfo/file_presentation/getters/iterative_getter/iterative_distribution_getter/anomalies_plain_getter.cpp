@@ -39,14 +39,6 @@ AnomaliesPlainGetter::AnomaliesPlainGetter(FileInformation &fileInfo) : Iterativ
 	loadRecords();
 }
 
-/**
- * Destructor
- */
-AnomaliesPlainGetter::~AnomaliesPlainGetter()
-{
-
-}
-
 std::size_t AnomaliesPlainGetter::getBasicInfo(std::size_t structIndex, std::vector<std::string> &desc, std::vector<std::string> &info) const
 {
 	if(structIndex >= numberOfStructures || fileinfo.getNumberOfAnomalies() == 0)

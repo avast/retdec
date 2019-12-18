@@ -39,9 +39,6 @@ class ElfNotes
 		std::vector<ElfNoteEntry> notes;
 
 	public:
-		ElfNotes();
-		~ElfNotes() = default;
-
 		/// @name Getters
 		/// @{
 		std::string getSectionName() const;

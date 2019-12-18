@@ -21,15 +21,12 @@ class Relocation
 {
 	private:
 		std::string symbolName;            ///< name of associated symbol
-		unsigned long long offset;         ///< relocation offset
-		unsigned long long symbolValue;    ///< value of associated symbol
-		unsigned long long relocationType; ///< type of relocation
-		long long addend;                  ///< relocation addend
-		long long calculatedValue;         ///< calculated value of relocation
+		unsigned long long offset = std::numeric_limits<unsigned long long>::max();         ///< relocation offset
+		unsigned long long symbolValue = std::numeric_limits<unsigned long long>::max();    ///< value of associated symbol
+		unsigned long long relocationType = std::numeric_limits<unsigned long long>::max(); ///< type of relocation
+		long long addend = std::numeric_limits<long long>::min();                  ///< relocation addend
+		long long calculatedValue = std::numeric_limits<long long>::min();         ///< calculated value of relocation
 	public:
-		Relocation();
-		~Relocation();
-
 		/// @name Getters
 		/// @{
 		std::string getSymbolName() const;

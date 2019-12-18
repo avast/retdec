@@ -11,7 +11,6 @@
 #include "retdec/llvmir2hll/optimizer/optimizer_manager.h"
 #include "retdec/llvmir2hll/optimizer/optimizers/aggressive_deref_optimizer.h"
 #include "retdec/llvmir2hll/optimizer/optimizers/aggressive_global_to_local_optimizer.h"
-#include "retdec/llvmir2hll/optimizer/optimizers/auxiliary_variables_optimizer.h"
 #include "retdec/llvmir2hll/optimizer/optimizers/bit_op_to_log_op_optimizer.h"
 #include "retdec/llvmir2hll/optimizer/optimizers/bit_shift_optimizer.h"
 #include "retdec/llvmir2hll/optimizer/optimizers/break_continue_return_optimizer.h"
@@ -138,11 +137,6 @@ OptimizerManager::OptimizerManager(const StringSet &enabledOpts,
 		}
 
 /**
-* @brief Destructs the manager.
-*/
-OptimizerManager::~OptimizerManager() {}
-
-/**
 * @brief Runs the optimizations over @a m.
 */
 void OptimizerManager::optimize(ShPtr<Module> m) {
@@ -186,8 +180,6 @@ void OptimizerManager::optimize(ShPtr<Module> m) {
 	run<DeadLocalAssignOptimizer>(m, va);
 	run<SimpleCopyPropagationOptimizer>(m, va, cio);
 	run<CopyPropagationOptimizer>(m, va, cio);
-	// AuxiliaryVariablesOptimizer should be run after CopyPropagationOptimizer.
-	run<AuxiliaryVariablesOptimizer>(m, va, cio);
 
 	// SimplifyArithmExprOptimizer should be run before loop optimizations.
 	run<SimplifyArithmExprOptimizer>(m, arithmExprEvaluator);

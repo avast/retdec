@@ -24,10 +24,17 @@ namespace {
 * @brief Generic depth-first iterator.
 */
 template <class Graph>
-class df_iterator: public std::iterator<std::forward_iterator_tag, ShPtr<typename Graph::Node>> {
+class df_iterator {
 private:
 	using Node = ShPtr<typename Graph::Node>;
-	using super = std::iterator<std::forward_iterator_tag, Node>;
+
+	// Standard typedefs.
+	using value_type = Node;
+	using reference = value_type&;
+	using pointer = value_type*;
+	using difference_type = std::ptrdiff_t;
+	using iterator_category = std::forward_iterator_tag;
+
 	// The stack nodes consist of the current CFG node, a statement iterator
 	// storing the current place in the node's statements, and an iterator
 	// storing the current place in the node's successor list.  Statement place
@@ -40,7 +47,12 @@ private:
 
 private:
 	df_iterator(Node node, typename Graph::stmt_iterator stmtIter) {
-		visitedNodes.insert(node);
+		// If we don't start at the node beginning, we cannot say this node was
+		// visited, because we may need to come back and iterate from its start
+		// to the original starting statement.
+		if (stmtIter == node->stmt_begin()) {
+			visitedNodes.insert(node);
+		}
 		visitStack.emplace(node, stmtIter, node->succ_begin());
 	}
 
@@ -76,7 +88,7 @@ private:
 	}
 
 public:
-	using pointer = typename super::pointer;
+	// using pointer = typename super::pointer;
 
 	// Provide static begin and end methods as our public "constructors".
 	static df_iterator<Graph> begin(const Node &N) {
@@ -134,11 +146,6 @@ CFGTraversal::CFGTraversal(ShPtr<CFG> cfg, bool defaultCurrRetVal):
 		cfg(cfg), currRetVal(defaultCurrRetVal), stopTraversal(false) {
 	PRECONDITION_NON_NULL(cfg);
 }
-
-/**
-* @brief Destructs the traverser.
-*/
-CFGTraversal::~CFGTraversal() {}
 
 /**
 * @brief Performs a traversal of the current CFG, starting at @a startStmt.

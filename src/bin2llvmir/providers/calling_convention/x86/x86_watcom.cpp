@@ -33,10 +33,6 @@ WatcomCallingConvention::WatcomCallingConvention(const Abi* a) :
 	};
 }
 
-WatcomCallingConvention::~WatcomCallingConvention()
-{
-}
-
 CallingConvention::Ptr WatcomCallingConvention::create(const Abi* a)
 {
 	if (!a->isX86())

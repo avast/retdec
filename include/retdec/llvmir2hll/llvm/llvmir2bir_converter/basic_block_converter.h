@@ -43,7 +43,6 @@ class BasicBlockConverter final: private retdec::utils::NonCopyable,
 public:
 	BasicBlockConverter(ShPtr<LLVMValueConverter> converter,
 		ShPtr<LabelsHandler> labelsHandler);
-	~BasicBlockConverter();
 
 	ShPtr<Statement> convert(llvm::BasicBlock &bb);
 

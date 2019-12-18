@@ -10,7 +10,9 @@
 #include <set>
 #include <string>
 
-#include "retdec/config/base.h"
+#include <json/json.h>
+
+#include "retdec/common/address.h"
 
 namespace retdec {
 namespace config {
@@ -65,7 +67,7 @@ class Parameters
 		std::set<std::string> selectedNotFoundFunctions;
 
 		/// Address ranges selected by the user through selective decompilation.
-		BaseSequentialContainer<AddressRangeJson> selectedRanges;
+		common::AddressRangeContainer selectedRanges;
 
 	private:
 		/// Decompilation will verbosely inform about the

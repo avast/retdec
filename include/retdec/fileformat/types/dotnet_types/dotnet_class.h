@@ -8,9 +8,8 @@
 #define RETDEC_FILEFORMAT_TYPES_DOTNET_TYPES_DOTNET_CLASS_H
 
 #include <memory>
+#include <variant>
 #include <vector>
-
-#include <mpark/variant.hpp>
 
 #include "retdec/utils/conversion.h"
 #include "retdec/fileformat/types/dotnet_types/dotnet_field.h"
@@ -27,7 +26,7 @@ namespace fileformat {
 class DotnetClass : public DotnetType
 {
 	private:
-		mpark::variant<const TypeDef *, const TypeRef *> rawRecord;
+		std::variant<const TypeDef *, const TypeRef *> rawRecord;
 		const DotnetClass* parent;
 		std::size_t index;
 		std::size_t declaredFieldsCount;
@@ -78,7 +77,7 @@ class DotnetClass : public DotnetType
 
 		/// @name Setters
 		/// @{
-		void setRawRecord(mpark::variant<const TypeDef*, const TypeRef*> rRecord);
+		void setRawRecord(std::variant<const TypeDef*, const TypeRef*> rRecord);
 		void setParent(const DotnetClass* par);
 		void setDeclaredFieldsCount(std::size_t classFieldsCount);
 		void setDeclaredMethodsCount(std::size_t classMethodsCount);

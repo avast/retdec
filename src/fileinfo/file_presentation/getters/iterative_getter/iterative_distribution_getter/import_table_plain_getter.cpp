@@ -39,14 +39,6 @@ ImportTablePlainGetter::ImportTablePlainGetter(FileInformation &fileInfo) : Iter
 	loadRecords();
 }
 
-/**
- * Destructor
- */
-ImportTablePlainGetter::~ImportTablePlainGetter()
-{
-
-}
-
 std::size_t ImportTablePlainGetter::getBasicInfo(std::size_t structIndex, std::vector<std::string> &desc, std::vector<std::string> &info) const
 {
 	if(structIndex >= numberOfStructures || !fileinfo.hasImportTableRecords())

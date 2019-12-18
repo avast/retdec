@@ -26,9 +26,6 @@ namespace llvmir2hll {
 class RecursiveCFGBuilder: public CFGBuilder,
 		private OrderedAllVisitor {
 public:
-	// It needs to be public so it can be called in ShPtr's destructor.
-	virtual ~RecursiveCFGBuilder() override;
-
 	virtual void buildCFG() override;
 
 	static ShPtr<RecursiveCFGBuilder> create();

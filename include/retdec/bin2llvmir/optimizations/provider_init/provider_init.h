@@ -11,15 +11,26 @@
 #include <llvm/Pass.h>
 
 namespace retdec {
+
+namespace config {
+
+class Config;
+
+} // namespace config
 namespace bin2llvmir {
 
 class ProviderInitialization : public llvm::ModulePass
 {
 	public:
 		static char ID;
-		ProviderInitialization();
+		ProviderInitialization(retdec::config::Config* c = nullptr);
 		virtual bool runOnModule(llvm::Module& m) override;
 		virtual bool doFinalization(llvm::Module& m) override;
+
+		void setConfig(retdec::config::Config* c);
+
+	private:
+		retdec::config::Config* _config = nullptr;
 };
 
 } // namespace bin2llvmir

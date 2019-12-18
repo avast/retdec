@@ -71,22 +71,6 @@ namespace retdec {
 namespace fileformat {
 
 /**
- * Constructor
- */
-ResourceIconGroup::ResourceIconGroup() : iconGroupID(0)
-{
-
-}
-
-/**
- * Destructor
- */
-ResourceIconGroup::~ResourceIconGroup()
-{
-
-}
-
-/**
  * Get entry offset
  * @param eIndex Index of selected entry (indexed from 0)
  * @return Entry offset

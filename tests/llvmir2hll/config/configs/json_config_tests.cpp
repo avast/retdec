@@ -1361,11 +1361,13 @@ GetDebugModuleNamesReturnsCorrectSetWhenDebugInfoIsAvailable) {
 		"functions": [
 			{
 				"name": "my_func1",
-				"srcFileName": "module1.c"
+				"srcFileName": "module1.c",
+				"startAddr": "0x1234"
 			},
 			{
 				"name": "my_func2",
-				"srcFileName": "module2.c"
+				"srcFileName": "module2.c",
+				"startAddr": "0x5678"
 			}
 		]
 	})");

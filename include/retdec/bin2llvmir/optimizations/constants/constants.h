@@ -15,7 +15,7 @@
 #include <llvm/IR/Module.h>
 #include <llvm/Pass.h>
 
-#include "retdec/utils/address.h"
+#include "retdec/common/address.h"
 #include "retdec/bin2llvmir/analyses/reaching_definitions.h"
 #include "retdec/bin2llvmir/providers/abi/abi.h"
 #include "retdec/bin2llvmir/providers/config.h"

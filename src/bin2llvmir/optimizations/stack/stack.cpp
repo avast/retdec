@@ -203,26 +203,26 @@ void StackAnalysis::handleInstruction(
 		t = llvm_utils::stringToLlvmTypeDefault(_module, configSv->type.getLlvmIr());
 	}
 
+	std::string realName;
+	if (debugSv)
+	{
+		realName = debugSv->getName();
+	}
+	else if (configSv)
+	{
+		realName = configSv->getName();
+	}
+
 	IrModifier irModif(_module, _config);
 	auto p = irModif.getStackVariable(
 			inst->getFunction(),
 			ci->getSExtValue(),
 			t,
-			name);
+			name,
+			realName,
+			debugSv || configSv);
 
 	AllocaInst* a = p.first;
-	auto* ca = p.second;
-
-	if (debugSv)
-	{
-		ca->setIsFromDebug(true);
-		ca->setRealName(debugSv->getName());
-	}
-	else if (configSv)
-	{
-		ca->setIsFromDebug(true);
-		ca->setRealName(configSv->getName());
-	}
 
 	LOG << "===> " << llvmObjToString(a) << std::endl;
 	LOG << "===> " << llvmObjToString(inst) << std::endl;
@@ -253,9 +253,9 @@ void StackAnalysis::handleInstruction(
 	}
 }
 
-retdec::utils::Maybe<int> StackAnalysis::getBaseOffset(SymbolicTree& root)
+std::optional<int> StackAnalysis::getBaseOffset(SymbolicTree& root)
 {
-	retdec::utils::Maybe<int> baseOffset;
+	std::optional<int> baseOffset;
 	if (auto* ci = dyn_cast_or_null<ConstantInt>(root.value))
 	{
 		baseOffset = ci->getSExtValue();
@@ -287,12 +287,12 @@ retdec::utils::Maybe<int> StackAnalysis::getBaseOffset(SymbolicTree& root)
  * Find a value that is being added to the stack pointer register in \p root.
  * Find a debug variable with offset equal to this value.
  */
-retdec::config::Object* StackAnalysis::getDebugStackVariable(
+const retdec::common::Object* StackAnalysis::getDebugStackVariable(
 		llvm::Function* fnc,
 		SymbolicTree& root)
 {
 	auto baseOffset = getBaseOffset(root);
-	if (baseOffset.isUndefined())
+	if (!baseOffset.has_value())
 	{
 		return nullptr;
 	}
@@ -308,9 +308,8 @@ retdec::config::Object* StackAnalysis::getDebugStackVariable(
 		return nullptr;
 	}
 
-	for (auto& p : debugFnc->locals)
+	for (auto& var : debugFnc->locals)
 	{
-		auto& var = p.second;
 		if (!var.getStorage().isStack())
 		{
 			continue;
@@ -324,24 +323,24 @@ retdec::config::Object* StackAnalysis::getDebugStackVariable(
 	return nullptr;
 }
 
-retdec::config::Object* StackAnalysis::getConfigStackVariable(
+const retdec::common::Object* StackAnalysis::getConfigStackVariable(
 		llvm::Function* fnc,
 		SymbolicTree& root)
 {
 	auto baseOffset = getBaseOffset(root);
-	if (baseOffset.isUndefined())
+	if (!baseOffset.has_value())
 	{
 		return nullptr;
 	}
 
 	auto cfn = _config->getConfigFunction(fnc);
-	if (cfn && _config->getLlvmStackVariable(fnc, baseOffset) == nullptr)
+	if (cfn && _config->getLlvmStackVariable(fnc, baseOffset.value()) == nullptr)
 	{
-		for (auto& l: cfn->locals)
+		for (auto& var: cfn->locals)
 		{
-			if (l.second.getStorage().getStackOffset() == baseOffset)
+			if (var.getStorage().getStackOffset() == baseOffset)
 			{
-				return &l.second;
+				return &var;
 			}
 		}
 	}

@@ -1504,7 +1504,7 @@ void PeFormat::loadImports()
 
 	for(auto&& addressRange : formatParser->getImportDirectoryOccupiedAddresses())
 	{
-		nonDecodableRanges.addRange(std::move(addressRange));
+		nonDecodableRanges.insert(std::move(addressRange));
 	}
 }
 
@@ -1532,7 +1532,7 @@ void PeFormat::loadExports()
 
 	for(auto&& addressRange : formatParser->getExportDirectoryOccupiedAddresses())
 	{
-		nonDecodableRanges.addRange(std::move(addressRange));
+		nonDecodableRanges.insert(std::move(addressRange));
 	}
 }
 
@@ -1611,7 +1611,7 @@ void PeFormat::loadPdbInfo()
 
 	for (auto&& addressRange : formatParser->getDebugDirectoryOccupiedAddresses())
 	{
-		nonDecodableRanges.addRange(std::move(addressRange));
+		nonDecodableRanges.insert(std::move(addressRange));
 	}
 }
 
@@ -1795,7 +1795,7 @@ void PeFormat::loadResources()
 
 	for (auto&& addressRange : formatParser->getResourceDirectoryOccupiedAddresses())
 	{
-		nonDecodableRanges.addRange(std::move(addressRange));
+		nonDecodableRanges.insert(std::move(addressRange));
 	}
 }
 

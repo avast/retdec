@@ -23,18 +23,19 @@ namespace fileinfo {
  *
  * Constructor in subclass must initialize members @a fileParser and @a loaded.
  */
-FileDetector::FileDetector(const std::string & pathToInputFile, FileInformation &finfo, retdec::cpdetect::DetectParams &searchPar, retdec::fileformat::LoadFlags loadFlags) :
-	fileInfo(finfo), cpParams(searchPar), fileConfig(nullptr), fileParser(nullptr), loadFlags(loadFlags), loaded(false)
+FileDetector::FileDetector(
+		const std::string & pathToInputFile,
+		FileInformation &finfo,
+		retdec::cpdetect::DetectParams &searchPar,
+		retdec::fileformat::LoadFlags loadFlags)
+		: fileInfo(finfo)
+		, cpParams(searchPar)
+		, fileConfig(nullptr)
+		, fileParser(nullptr)
+		, loadFlags(loadFlags)
+		, loaded(false)
 {
 	fileInfo.setPathToFile(pathToInputFile);
-}
-
-/**
- * Destructor
- */
-FileDetector::~FileDetector()
-{
-
 }
 
 /**
@@ -260,7 +261,6 @@ void FileDetector::getAnomalies()
 {
 	fileInfo.setAnomalies(fileParser->getAnomalies());
 }
-
 
 /**
  * @fn void FileDetector::detectFileClass()

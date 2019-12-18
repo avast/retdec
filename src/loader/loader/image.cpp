@@ -22,10 +22,6 @@ Image::Image(const std::shared_ptr<retdec::fileformat::FileFormat>& fileFormat) 
 {
 }
 
-Image::~Image()
-{
-}
-
 Endianness Image::getEndianness() const
 {
 	return getFileFormat()->getEndianness();

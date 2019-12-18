@@ -23,11 +23,6 @@ namespace llvmir2hll {
 CallExpr::CallExpr(ShPtr<Expression> calledExpr, ExprVector args):
 	calledExpr(calledExpr), args(args) {}
 
-/**
-* @brief Destructs the call expression.
-*/
-CallExpr::~CallExpr() {}
-
 ShPtr<Value> CallExpr::clone() {
 	// Clone all arguments.
 	ExprVector newArgs;

@@ -30,11 +30,6 @@ VariablesManager::VariablesManager(ShPtr<Module> resModule): localVarsMap(),
 	varNameGen(NumVarNameGen::create()), resModule(resModule) {}
 
 /**
-* @brief Destructs the variables manager.
-*/
-VariablesManager::~VariablesManager() {}
-
-/**
 * @brief Resets local variables in the variables manager.
 *
 * Also resets generator of new variable names.

@@ -36,11 +36,6 @@ WhileTrueToWhileCondOptimizer::WhileTrueToWhileCondOptimizer(ShPtr<Module> modul
 		PRECONDITION_NON_NULL(module);
 	}
 
-/**
-* @brief Destructs the optimizer.
-*/
-WhileTrueToWhileCondOptimizer::~WhileTrueToWhileCondOptimizer() {}
-
 void WhileTrueToWhileCondOptimizer::visit(ShPtr<WhileLoopStmt> stmt) {
 	// First of all, visit nested and subsequent statements.
 	FuncOptimizer::visit(stmt);

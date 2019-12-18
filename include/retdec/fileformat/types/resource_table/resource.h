@@ -23,28 +23,25 @@ class FileFormat;
 class Resource
 {
 	private:
-		std::string crc32;                ///< CRC32 of resource content
-		std::string md5;                  ///< MD5 of resource content
-		std::string sha256;               ///< SHA256 of resource content
-		std::string name;                 ///< resource name
-		std::string type;                 ///< resource type
-		std::string language;             ///< resource language
-		llvm::StringRef bytes;            ///< reference to resource data
-		std::size_t offset;               ///< offset in file
-		std::size_t size;                 ///< size in file
-		std::size_t nameId;               ///< resource name identifier
-		std::size_t typeId;               ///< resource type identifier
-		std::size_t languageId;           ///< resource language identifier
-		std::size_t sublanguageId;        ///< resource sublanguage identifier
-		bool nameIdIsValid;               ///< @c true if name ID is valid
-		bool typeIdIsValid;               ///< @c true if type ID is valid
-		bool languageIdIsValid;           ///< @c true if language ID is valid
-		bool sublanguageIdIsValid;        ///< @c true if sublanguage ID is valid
-		bool loaded;                      ///< @c true if content of resource was successfully loaded from input file
+		std::string crc32;                 ///< CRC32 of resource content
+		std::string md5;                   ///< MD5 of resource content
+		std::string sha256;                ///< SHA256 of resource content
+		std::string name;                  ///< resource name
+		std::string type;                  ///< resource type
+		std::string language;              ///< resource language
+		llvm::StringRef bytes;             ///< reference to resource data
+		std::size_t offset = 0;            ///< offset in file
+		std::size_t size = 0;              ///< size in file
+		std::size_t nameId = 0;            ///< resource name identifier
+		std::size_t typeId = 0;            ///< resource type identifier
+		std::size_t languageId = 0;        ///< resource language identifier
+		std::size_t sublanguageId = 0;     ///< resource sublanguage identifier
+		bool nameIdIsValid = false;        ///< @c true if name ID is valid
+		bool typeIdIsValid = false;        ///< @c true if type ID is valid
+		bool languageIdIsValid = false;    ///< @c true if language ID is valid
+		bool sublanguageIdIsValid = false; ///< @c true if sublanguage ID is valid
+		bool loaded = false;               ///< @c true if content of resource was successfully loaded from input file
 	public:
-		Resource();
-		~Resource();
-
 		/// @name Getters
 		/// @{
 		std::string getCrc32() const;

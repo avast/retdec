@@ -21,11 +21,6 @@ namespace llvmir2hll {
 ConstStruct::ConstStruct(Type value, ShPtr<StructType> type):
 	Constant(), value(value), type(type) {}
 
-/**
-* @brief Destructs the constant.
-*/
-ConstStruct::~ConstStruct() {}
-
 ShPtr<Value> ConstStruct::clone() {
 	// Clone all struct members.
 	Type newValue;

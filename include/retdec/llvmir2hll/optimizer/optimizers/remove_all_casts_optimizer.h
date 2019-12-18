@@ -28,8 +28,6 @@ class RemoveAllCastsOptimizer final: public FuncOptimizer {
 public:
 	RemoveAllCastsOptimizer(ShPtr<Module> module);
 
-	virtual ~RemoveAllCastsOptimizer() override;
-
 	virtual std::string getId() const override { return "RemoveAllCasts"; }
 
 private:

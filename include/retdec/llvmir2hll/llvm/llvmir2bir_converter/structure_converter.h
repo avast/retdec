@@ -15,6 +15,7 @@
 #include <utility>
 #include <vector>
 
+#include "retdec/llvmir2hll/llvm/llvmir2bir_converter/basic_block_converter.h"
 #include "retdec/llvmir2hll/llvm/llvmir2bir_converter/cfg_node.h"
 #include "retdec/llvmir2hll/support/smart_ptr.h"
 #include "retdec/llvmir2hll/support/types.h"
@@ -33,7 +34,6 @@ class ScalarEvolution;
 namespace retdec {
 namespace llvmir2hll {
 
-class BasicBlockConverter;
 class IfStmt;
 class LabelsHandler;
 class LLVMValueConverter;
@@ -76,14 +76,13 @@ private:
 
 public:
 	StructureConverter(llvm::Pass *basePass, ShPtr<LLVMValueConverter> conv, ShPtr<Module> module);
-	~StructureConverter();
 
 	ShPtr<Statement> convertFuncBody(llvm::Function &func);
 
 private:
 	/// @name Construction and traversal through control-flow graph
 	/// @{
-	ShPtr<CFGNode> createCFG(llvm::BasicBlock &root) const;
+	ShPtr<CFGNode> createCFG(llvm::BasicBlock &root);
 	void detectBackEdges(ShPtr<CFGNode> cfg) const;
 	bool reduceCFG(ShPtr<CFGNode> cfg);
 	bool inspectCFGNode(ShPtr<CFGNode> node);
@@ -267,7 +266,7 @@ private:
 	ShPtr<LabelsHandler> labelsHandler;
 
 	/// A converter of the LLVM basic block.
-	UPtr<BasicBlockConverter> bbConverter;
+	BasicBlockConverter bbConverter;
 
 	/// A converter from LLVM values to values in BIR.
 	ShPtr<LLVMValueConverter> converter;

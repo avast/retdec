@@ -34,8 +34,11 @@ class RawDataDetector : public FileDetector
 		/// @}
 
 	public:
-		RawDataDetector(std::string pathToInputFile, FileInformation &finfo, retdec::cpdetect::DetectParams &searchPar, retdec::fileformat::LoadFlags loadFlags);
-		virtual ~RawDataDetector() override;
+		RawDataDetector(
+				std::string pathToInputFile,
+				FileInformation &finfo,
+				retdec::cpdetect::DetectParams &searchPar,
+				retdec::fileformat::LoadFlags loadFlags);
 };
 
 } // namespace fileinfo

@@ -9,22 +9,6 @@
 namespace fileinfo {
 
 /**
- * Constructor
- */
-CertificateTable::CertificateTable() : table(nullptr)
-{
-
-}
-
-/**
- * Destructor
- */
-CertificateTable::~CertificateTable()
-{
-
-}
-
-/**
  * Get number of certificates in table
  * @return Number of certificates in table
  */

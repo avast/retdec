@@ -31,8 +31,6 @@ public:
 	virtual void replace(ShPtr<Expression> oldExpr, ShPtr<Expression> newExpr) override;
 	virtual ShPtr<Expression> asExpression() const override;
 
-	virtual ~EmptyStmt() override;
-
 	/// @name Visitor Interface
 	/// @{
 	virtual void accept(Visitor *v) override;

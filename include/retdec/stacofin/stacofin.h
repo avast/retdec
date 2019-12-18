@@ -16,7 +16,7 @@
 
 #include "retdec/config/config.h"
 #include "retdec/fileformat/fileformat.h"
-#include "retdec/utils/address.h"
+#include "retdec/common/address.h"
 
 namespace retdec {
 namespace loader {
@@ -30,7 +30,7 @@ struct DetectedFunction;
 /**
  * Data-type for offset-name relocation pairs.
  */
-using CoveredCode = retdec::utils::AddressRangeContainer;
+using CoveredCode = retdec::common::AddressRangeContainer;
 
 /**
  * Structure representing one reference in a detected function's body.
@@ -41,8 +41,8 @@ struct Reference
 		Reference(
 				std::size_t o,
 				const std::string& n,
-				utils::Address a = utils::Address::Undefined,
-				utils::Address t = utils::Address::Undefined,
+				common::Address a = common::Address::Undefined,
+				common::Address t = common::Address::Undefined,
 				DetectedFunction* tf = nullptr,
 				bool k = false);
 
@@ -50,8 +50,8 @@ struct Reference
 		std::size_t offset = 0;
 		std::string name;
 
-		utils::Address address;
-		utils::Address target;
+		common::Address address;
+		common::Address target;
 		DetectedFunction* targetFnc = nullptr;
 		bool ok = false;
 };
@@ -75,8 +75,8 @@ struct DetectedFunction
 
 		void setReferences(const std::string &refsString);
 
-		void setAddress(retdec::utils::Address a);
-		retdec::utils::Address getAddress() const;
+		void setAddress(retdec::common::Address a);
+		retdec::common::Address getAddress() const;
 
 	public:
 		/// Original size of source.
@@ -94,17 +94,17 @@ struct DetectedFunction
 
 	private:
 		/// Virtual address.
-		retdec::utils::Address address;
+		retdec::common::Address address;
 };
 
 using DetectedFunctionsPtrMap = typename std::map<
-		utils::Address,
+		common::Address,
 		DetectedFunction*>;
 using DetectedFunctionsMultimap = typename std::multimap<
-		utils::Address,
+		common::Address,
 		DetectedFunction>;
 using DetectedFunctionsPtrMultimap = typename std::multimap<
-		utils::Address,
+		common::Address,
 		DetectedFunction*>;
 
 /**
@@ -113,9 +113,6 @@ using DetectedFunctionsPtrMultimap = typename std::multimap<
 class Finder
 {
 	public:
-		Finder();
-		~Finder();
-
 		/// @name Actions.
 		/// @{
 		void search(
@@ -165,11 +162,11 @@ class Finder
 		bool initDisassembler();
 		void solveReferences();
 
-		utils::Address getAddressFromRef(utils::Address ref);
-		utils::Address getAddressFromRef_x86(utils::Address ref);
-		utils::Address getAddressFromRef_mips(utils::Address ref);
-		utils::Address getAddressFromRef_arm(utils::Address ref);
-		utils::Address getAddressFromRef_ppc(utils::Address ref);
+		common::Address getAddressFromRef(common::Address ref);
+		common::Address getAddressFromRef_x86(common::Address ref);
+		common::Address getAddressFromRef_mips(common::Address ref);
+		common::Address getAddressFromRef_arm(common::Address ref);
+		common::Address getAddressFromRef_ppc(common::Address ref);
 
 		void checkRef(Reference& ref);
 		void checkRef_x86(Reference& ref);
@@ -187,7 +184,7 @@ class Finder
 		cs_mode _ceMode = CS_MODE_LITTLE_ENDIAN;
 		cs_insn* _ceInsn = nullptr;
 
-		std::map<utils::Address, std::string> _imports;
+		std::map<common::Address, std::string> _imports;
 		std::set<std::string> _sectionNames;
 };
 

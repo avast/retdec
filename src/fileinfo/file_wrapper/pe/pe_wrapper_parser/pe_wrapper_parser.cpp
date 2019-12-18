@@ -17,14 +17,6 @@ PeWrapperParser::PeWrapperParser()
 }
 
 /**
- * Destructor
- */
-PeWrapperParser::~PeWrapperParser()
-{
-
-}
-
-/**
  * @fn std::string PeWrapperParser::getPeType() const
  * Get type of PE file (e.g. "PE32" or "PE32+")
  * @return Type of PE file

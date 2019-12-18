@@ -6,11 +6,11 @@
 
 #include <algorithm>
 
-#include "retdec/utils/address.h"
+#include "retdec/common/address.h"
 #include "fileinfo/file_information/file_information.h"
 #include "fileinfo/file_information/file_information_types/type_conversions.h"
 
-using namespace retdec::utils;
+using namespace retdec::common;
 using namespace retdec::cpdetect;
 using namespace retdec::fileformat;
 
@@ -85,22 +85,6 @@ void sortPatternMatches(std::vector<Pattern> &patterns)
 }
 
 } // anonymous namespace
-
-/**
- * Constructor
- */
-FileInformation::FileInformation() : status(ReturnCode::OK), fileFormatEnum(Format::UNKNOWN)
-{
-
-}
-
-/**
- * Destructor
- */
-FileInformation::~FileInformation()
-{
-
-}
 
 /**
  * Get status
@@ -3219,7 +3203,7 @@ bool FileInformation::hasStrings() const
  */
 bool FileInformation::isSignaturePresent() const
 {
-	return signatureVerified.isDefined();
+	return signatureVerified.has_value();
 }
 
 /**
@@ -3228,7 +3212,7 @@ bool FileInformation::isSignaturePresent() const
  */
 bool FileInformation::isSignatureVerified() const
 {
-	return signatureVerified.isDefined() && signatureVerified.getValue();
+	return signatureVerified.has_value() && signatureVerified.value();
 }
 
 /**

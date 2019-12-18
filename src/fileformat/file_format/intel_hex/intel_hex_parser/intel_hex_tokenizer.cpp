@@ -16,22 +16,6 @@ namespace retdec {
 namespace fileformat {
 
 /**
- * Constructor
- */
-IntelHexToken::IntelHexToken()
-{
-
-}
-
-/**
- * Destructor
- */
-IntelHexToken::~IntelHexToken()
-{
-
-}
-
-/**
  * Adds chars of string by two (one data byte) for checksum
  * @param str Input string
  * @return Sum of chars by two in string
@@ -69,22 +53,6 @@ void IntelHexToken::controlChecksum()
 	csum = csum & 0x0FF; // Truncate upper bits
 
 	checksumValid = (csum == static_cast<int>(IntelHexParser::strToInt(checksum)));
-}
-
-/**
- * Constructor
- */
-IntelHexTokenizer::IntelHexTokenizer()
-{
-
-}
-
-/**
- * Destructor
- */
-IntelHexTokenizer::~IntelHexTokenizer()
-{
-
 }
 
 /**

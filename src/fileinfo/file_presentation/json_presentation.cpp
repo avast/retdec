@@ -74,14 +74,6 @@ JsonPresentation::JsonPresentation(FileInformation &fileinfo_, bool verbose_) :
 }
 
 /**
- * Destructor
- */
-JsonPresentation::~JsonPresentation()
-{
-
-}
-
-/**
  * Present information about warning and error messages
  * @param root Parent node in output document
  */

@@ -11,7 +11,7 @@
 #include <vector>
 #include <map>
 
-#include "retdec/utils/address.h"
+#include "retdec/common/address.h"
 
 namespace retdec {
 namespace fileformat {

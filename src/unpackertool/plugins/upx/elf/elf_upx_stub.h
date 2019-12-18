@@ -86,8 +86,6 @@ public:
 	ElfUpxStub(retdec::loader::Image* inputFile, const UpxStubData* stubData, const DynamicBuffer& stubCapturedData,
 			std::unique_ptr<Decompressor> decompressor, const UpxMetadata& metadata);
 
-	virtual ~ElfUpxStub() override;
-
 	virtual void unpack(const std::string& outputFile) override;
 	virtual void cleanup() override;
 

@@ -27,8 +27,6 @@ class IntType final: public Type {
 public:
 	static ShPtr<IntType> create(unsigned size, bool isSigned = true);
 
-	virtual ~IntType() override;
-
 	virtual ShPtr<Value> clone() override;
 	virtual bool isEqualTo(ShPtr<Value> otherValue) const override;
 

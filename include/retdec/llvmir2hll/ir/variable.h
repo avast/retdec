@@ -30,8 +30,6 @@ public:
 	static ShPtr<Variable> create(const std::string &name, ShPtr<Type> type,
 		Address a = Address::Undefined);
 
-	virtual ~Variable() override;
-
 	virtual ShPtr<Value> clone() override;
 
 	virtual bool isEqualTo(ShPtr<Value> otherValue) const override;

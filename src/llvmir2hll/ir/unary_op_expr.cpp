@@ -23,11 +23,6 @@ UnaryOpExpr::UnaryOpExpr(ShPtr<Expression> op):
 	PRECONDITION_NON_NULL(op);
 }
 
-/**
-* @brief Destructs the operator.
-*/
-UnaryOpExpr::~UnaryOpExpr() {}
-
 ShPtr<Type> UnaryOpExpr::getType() const {
 	return op->getType();
 }

@@ -10,7 +10,6 @@
 #include <map>
 #include <string>
 
-#include "retdec/llvmir2hll/support/maybe.h"
 #include "retdec/llvmir2hll/support/types.h"
 
 namespace retdec {

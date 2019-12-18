@@ -19,13 +19,6 @@ namespace llvmir2hll {
 BitOrOpExpr::BitOrOpExpr(ShPtr<Expression> op1, ShPtr<Expression> op2):
 	BinaryOpExpr(op1, op2) {}
 
-/**
-* @brief Destructs the operator.
-*/
-BitOrOpExpr::~BitOrOpExpr() {
-	// Observers are removed in the superclass.
-}
-
 bool BitOrOpExpr::isEqualTo(ShPtr<Value> otherValue) const {
 	if (ShPtr<BitOrOpExpr> otherValueBitOrOpExpr = cast<BitOrOpExpr>(otherValue)) {
 		return op1->isEqualTo(otherValueBitOrOpExpr->getFirstOperand()) &&

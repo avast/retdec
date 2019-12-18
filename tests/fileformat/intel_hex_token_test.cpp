@@ -41,11 +41,6 @@ class IntelHexTokenTests : public Test
 			token.checksum.push_back('F');
 			token.checksum.push_back('C');
 		}
-
-		~IntelHexTokenTests()
-		{
-
-		}
 };
 
 TEST_F(IntelHexTokenTests, ChecksumValid)

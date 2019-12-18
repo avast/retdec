@@ -18,7 +18,6 @@ class MipsCallingConvention: public CallingConvention
 	//
 	public:
 		MipsCallingConvention(const Abi* a);
-		virtual ~MipsCallingConvention();
 
 	// Construcor method.
 	//

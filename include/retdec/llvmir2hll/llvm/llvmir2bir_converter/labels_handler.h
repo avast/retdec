@@ -29,8 +29,8 @@ class Statement;
 */
 class LabelsHandler final: private retdec::utils::NonCopyable {
 public:
-	LabelsHandler();
-	~LabelsHandler();
+	LabelsHandler() = default;
+	~LabelsHandler() = default;
 
 	std::string getLabel(const llvm::BasicBlock *bb) const;
 	void removeLabel(const std::string &label);

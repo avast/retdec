@@ -18,7 +18,6 @@ class ArmCallingConvention: public CallingConvention
 	//
 	public:
 		ArmCallingConvention(const Abi* a);
-		virtual ~ArmCallingConvention();
 
 	// Construcor method.
 	//

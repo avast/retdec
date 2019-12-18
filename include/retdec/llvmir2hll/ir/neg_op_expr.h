@@ -28,8 +28,6 @@ class NegOpExpr final: public UnaryOpExpr {
 public:
 	static ShPtr<NegOpExpr> create(ShPtr<Expression> op);
 
-	virtual ~NegOpExpr() override;
-
 	virtual bool isEqualTo(ShPtr<Value> otherValue) const override;
 	virtual ShPtr<Value> clone() override;
 

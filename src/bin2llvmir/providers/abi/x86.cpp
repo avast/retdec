@@ -32,11 +32,6 @@ AbiX86::AbiX86(llvm::Module* m, Config* c) :
 	_defcc = fetchDefaultCC();
 }
 
-AbiX86::~AbiX86()
-{
-
-}
-
 bool AbiX86::isGeneralPurposeRegister(const llvm::Value* val) const
 {
 	uint32_t rid = getRegisterId(val);

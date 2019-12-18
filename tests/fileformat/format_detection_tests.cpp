@@ -10,7 +10,6 @@
 #include "fileformat/fileformat_tests.h"
 
 using namespace ::testing;
-using namespace retdec::utils;
 
 namespace retdec {
 namespace fileformat {

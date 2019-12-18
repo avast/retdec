@@ -21,11 +21,6 @@ namespace llvmir2hll {
 SwitchStmt::SwitchStmt(ShPtr<Expression> controlExpr, Address a):
 	Statement(a), switchClauseList(), controlExpr(controlExpr) {}
 
-/**
-* @brief Destructs the statement.
-*/
-SwitchStmt::~SwitchStmt() {}
-
 ShPtr<Value> SwitchStmt::clone() {
 	ShPtr<SwitchStmt> switchStmt(SwitchStmt::create(
 		ucast<Expression>(controlExpr->clone()), nullptr, getAddress()));
@@ -34,10 +29,10 @@ ShPtr<Value> SwitchStmt::clone() {
 	for (auto i = clause_begin(), e = clause_end(); i != e; ++i) {
 		if (i->first) {
 			switchStmt->addClause(ucast<Expression>(i->first->clone()),
-				ucast<Statement>(i->second->clone()));
+				ucast<Statement>(Statement::cloneStatements(i->second)));
 		} else {
 			// The default clause.
-			switchStmt->addDefaultClause(ucast<Statement>(i->second->clone()));
+			switchStmt->addDefaultClause(ucast<Statement>(Statement::cloneStatements(i->second)));
 		}
 	}
 

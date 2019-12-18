@@ -27,8 +27,6 @@ class BitCastExpr final: public CastExpr {
 public:
 	static ShPtr<BitCastExpr> create(ShPtr<Expression> op, ShPtr<Type> dstType);
 
-	virtual ~BitCastExpr() override;
-
 	virtual bool isEqualTo(ShPtr<Value> otherValue) const override;
 	virtual ShPtr<Value> clone() override;
 

@@ -51,13 +51,6 @@ ElfAuxVPlainGetter::ElfAuxVPlainGetter(
 	loadRecords();
 }
 
-/**
- * Destructor
- */
-ElfAuxVPlainGetter::~ElfAuxVPlainGetter()
-{
-}
-
 std::size_t ElfAuxVPlainGetter::getBasicInfo(
 		std::size_t structIndex,
 		std::vector<std::string> &desc,

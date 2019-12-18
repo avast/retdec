@@ -27,15 +27,14 @@ class Import
 		};
 
 	private:
-		std::string name;                 ///< import name
-		unsigned long long libraryIndex;  ///< index of library from which is import imported
-		unsigned long long address;       ///< address of import
-		unsigned long long ordinalNumber; ///< ordinal number
-		bool ordinalNumberIsValid;        ///< @c true if ordinal number is valid
-		UsageType usageType;              ///< usage of symbol
+		std::string name;
+		unsigned long long libraryIndex = 0;
+		unsigned long long address = 0;
+		unsigned long long ordinalNumber = 0;
+		bool ordinalNumberIsValid = false;
+		UsageType usageType = UsageType::UNKNOWN;
 	public:
-		Import();
-		virtual ~Import();
+		virtual ~Import() = default;
 
 		/// @name Getters
 		/// @{

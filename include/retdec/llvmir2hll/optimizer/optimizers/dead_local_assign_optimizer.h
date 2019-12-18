@@ -42,7 +42,6 @@ class VarUsesVisitor;
 class DeadLocalAssignOptimizer final: public FuncOptimizer {
 public:
 	DeadLocalAssignOptimizer(ShPtr<Module> module, ShPtr<ValueAnalysis> va);
-	virtual ~DeadLocalAssignOptimizer() override;
 
 	virtual std::string getId() const override { return "DeadLocalAssign"; }
 

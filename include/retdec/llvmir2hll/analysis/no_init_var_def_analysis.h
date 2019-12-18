@@ -19,9 +19,6 @@ namespace llvmir2hll {
 class NoInitVarDefAnalysis: private OrderedAllVisitor,
 		private retdec::utils::NonCopyable {
 public:
-	NoInitVarDefAnalysis();
-	virtual ~NoInitVarDefAnalysis() override;
-
 	VarDefStmtSet getNoInitVarDefStmts(ShPtr<Function> func);
 
 private:

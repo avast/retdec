@@ -147,11 +147,6 @@ NonRecursiveCFGBuilder::NonRecursiveCFGBuilder():
 	CFGBuilder(), stopIterNextStmts(false) {}
 
 /**
-* @brief Destructs the builder.
-*/
-NonRecursiveCFGBuilder::~NonRecursiveCFGBuilder() {}
-
-/**
 * @brief Creates and returns a new NonRecursiveCFGBuilder.
 */
 ShPtr<NonRecursiveCFGBuilder> NonRecursiveCFGBuilder::create() {

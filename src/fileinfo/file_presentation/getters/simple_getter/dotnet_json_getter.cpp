@@ -20,14 +20,6 @@ DotnetJsonGetter::DotnetJsonGetter(FileInformation &fileInfo) : SimpleGetter(fil
 
 }
 
-/**
- * Destructor
- */
-DotnetJsonGetter::~DotnetJsonGetter()
-{
-
-}
-
 std::size_t DotnetJsonGetter::loadInformation(std::vector<std::string> &desc, std::vector<std::string> &info) const
 {
 	desc.clear();

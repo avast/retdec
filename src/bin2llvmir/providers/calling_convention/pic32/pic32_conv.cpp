@@ -30,10 +30,6 @@ Pic32CallingConvention::Pic32CallingConvention(const Abi* a) :
 	_respectsRegCouples = true;
 }
 
-Pic32CallingConvention::~Pic32CallingConvention()
-{
-}
-
 CallingConvention::Ptr Pic32CallingConvention::create(const Abi* a)
 {
 	if (!a->isPic32())

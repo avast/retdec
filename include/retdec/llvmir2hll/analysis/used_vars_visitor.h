@@ -36,10 +36,9 @@ public:
 	using var_iterator = VarSet::const_iterator;
 
 public:
-	UsedVars(const UsedVars &other);
-	~UsedVars();
+	UsedVars(const UsedVars &other) = default;
 
-	UsedVars &operator=(const UsedVars &other);
+	UsedVars &operator=(const UsedVars &other) = default;
 	bool operator==(const UsedVars &other) const;
 	bool operator!=(const UsedVars &other) const;
 
@@ -101,9 +100,6 @@ class UsedVarsVisitor: private OrderedAllVisitor,
 	public Caching<ShPtr<Value>, ShPtr<UsedVars>> {
 
 public:
-	// It needs to be public so it can be called in ShPtr's destructor.
-	virtual ~UsedVarsVisitor() override;
-
 	ShPtr<UsedVars> getUsedVars_(ShPtr<Value> value);
 
 	static ShPtr<UsedVarsVisitor> create(bool visitSuccessors = true,

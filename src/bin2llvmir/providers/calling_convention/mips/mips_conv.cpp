@@ -42,10 +42,6 @@ MipsCallingConvention::MipsCallingConvention(const Abi* a) :
 	_respectsRegCouples = true;
 }
 
-MipsCallingConvention::~MipsCallingConvention()
-{
-}
-
 CallingConvention::Ptr MipsCallingConvention::create(const Abi* a)
 {
 	if (!a->isMips())

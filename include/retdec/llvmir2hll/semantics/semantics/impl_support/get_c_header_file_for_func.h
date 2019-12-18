@@ -8,8 +8,8 @@
 #define RETDEC_LLVMIR2HLL_SEMANTICS_SEMANTICS_IMPL_SUPPORT_GET_C_HEADER_FILE_FOR_FUNC_H
 
 #include <cstddef>
+#include <optional>
 
-#include "retdec/llvmir2hll/support/maybe.h"
 #include "retdec/llvmir2hll/support/types.h"
 #include "retdec/utils/array.h"
 
@@ -31,7 +31,8 @@ namespace retdec {
 namespace llvmir2hll {
 namespace semantics {
 
-Maybe<std::string> getCHeaderFileForFuncFromMap(const std::string &funcName,
+std::optional<std::string> getCHeaderFileForFuncFromMap(
+		const std::string &funcName,
 		const StringStringUMap &map);
 
 } // namespace semantics

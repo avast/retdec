@@ -12,7 +12,7 @@
 #include <string>
 #include <vector>
 
-#include "retdec/utils/range.h"
+#include "retdec/common/range.h"
 #include "retdec/fileformat/fftypes.h"
 #include "retdec/fileformat/types/sec_seg/sec_seg.h"
 #include "retdec/loader/loader/segment_data_source.h"
@@ -26,7 +26,6 @@ class Segment
 public:
 	Segment(const retdec::fileformat::SecSeg* secSeg, std::uint64_t address, std::uint64_t size, std::unique_ptr<SegmentDataSource>&& dataSource);
 	Segment(const Segment& segment);
-	~Segment();
 
 	const retdec::fileformat::SecSeg* getSecSeg() const;
 
@@ -36,9 +35,9 @@ public:
 	std::uint64_t getPhysicalEndAddress() const;
 	std::uint64_t getSize() const;
 	std::uint64_t getPhysicalSize() const;
-	retdec::utils::Range<std::uint64_t> getAddressRange() const;
-	retdec::utils::Range<std::uint64_t> getPhysicalAddressRange() const;
-	const retdec::utils::RangeContainer<std::uint64_t>& getNonDecodableAddressRanges() const;
+	retdec::common::Range<std::uint64_t> getAddressRange() const;
+	retdec::common::Range<std::uint64_t> getPhysicalAddressRange() const;
+	const retdec::common::RangeContainer<std::uint64_t>& getNonDecodableAddressRanges() const;
 	std::pair<const std::uint8_t*, std::uint64_t> getRawData() const;
 
 	bool hasName() const;
@@ -55,7 +54,7 @@ public:
 	void resize(std::uint64_t newSize);
 	void shrink(std::uint64_t shrinkOffset, std::uint64_t newSize);
 
-	void addNonDecodableRange(retdec::utils::Range<std::uint64_t> range);
+	void addNonDecodableRange(retdec::common::Range<std::uint64_t> range);
 
 private:
 	const retdec::fileformat::SecSeg* _secSeg;
@@ -63,7 +62,7 @@ private:
 	std::uint64_t _size;
 	std::unique_ptr<SegmentDataSource> _dataSource;
 	std::string _name;
-	retdec::utils::RangeContainer<std::uint64_t> _nonDecodableRanges;
+	retdec::common::RangeContainer<std::uint64_t> _nonDecodableRanges;
 };
 
 } // namespace loader

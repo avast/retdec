@@ -89,7 +89,7 @@ struct PrintCapstoneModeToString_Arm
 // If some test case is not meant for all modes, use some of the ONLY_MODE_*,
 // SKIP_MODE_* macros.
 //
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
 		InstantiateArmWithAllModes,
 		Capstone2LlvmIrTranslatorArmTests,
 		::testing::Values(CS_MODE_ARM, CS_MODE_THUMB),
@@ -108,6 +108,24 @@ TEST_P(Capstone2LlvmIrTranslatorArmTests, ARM_INS_ADD_r_r_i)
 	});
 
 	emulate("add r0, r1, #4");
+
+	EXPECT_JUST_REGISTERS_LOADED({ARM_REG_R1});
+	EXPECT_JUST_REGISTERS_STORED({
+		{ARM_REG_R0, 0x1234},
+	});
+	EXPECT_NO_MEMORY_LOADED_STORED();
+	EXPECT_NO_VALUE_CALLED();
+}
+
+TEST_P(Capstone2LlvmIrTranslatorArmTests, ARM_INS_ADD_r_r_i_bin)
+{
+	ONLY_MODE_ARM;
+
+	setRegisters({
+		{ARM_REG_R1, 0x1230},
+	});
+
+	emulate_bin("04 00 81 e2");
 
 	EXPECT_JUST_REGISTERS_LOADED({ARM_REG_R1});
 	EXPECT_JUST_REGISTERS_STORED({

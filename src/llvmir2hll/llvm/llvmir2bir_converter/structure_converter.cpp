@@ -73,14 +73,9 @@ StructureConverter::StructureConverter(llvm::Pass *basePass,
 	ShPtr<LLVMValueConverter> conv, ShPtr<Module> module):
 		basePass(basePass), loopInfo(), scalarEvolution(),
 		labelsHandler(std::make_shared<LabelsHandler>()),
-		bbConverter(std::make_unique<BasicBlockConverter>(conv, labelsHandler)),
+		bbConverter(conv, labelsHandler),
 		converter(conv), loopHeaders(), generatedPHINodes(),
 		reducedLoops(), reducedSwitches(), resModule(module) {}
-
-/**
-* @brief Destructs the converter.
-*/
-StructureConverter::~StructureConverter() {}
 
 /**
 * @brief Converts body of the given LLVM function @a func into a sequence
@@ -327,8 +322,8 @@ ShPtr<Statement> StructureConverter::replaceBreakOrContinueOutsideLoop(ShPtr<Sta
 * @brief Creates control-flow graph of the function from the given root basic
 *        block @a root.
 */
-ShPtr<CFGNode> StructureConverter::createCFG(llvm::BasicBlock &root) const {
-	auto cfg = std::make_shared<CFGNode>(&root, bbConverter->convert(root));
+ShPtr<CFGNode> StructureConverter::createCFG(llvm::BasicBlock &root) {
+	auto cfg = std::make_shared<CFGNode>(&root, bbConverter.convert(root));
 	CFGNodeQueue toBeVisited({cfg});
 	MapBBToCFGNode visited{
 		{&root, cfg}
@@ -345,7 +340,7 @@ ShPtr<CFGNode> StructureConverter::createCFG(llvm::BasicBlock &root) const {
 			auto succ = terminator->getSuccessor(i);
 			auto existingNodeIt = visited.find(succ);
 			if (existingNodeIt == visited.end()) {
-				auto body = bbConverter->convert(*succ);
+				auto body = bbConverter.convert(*succ);
 				nextNode = std::make_shared<CFGNode>(succ, body);
 				toBeVisited.push(nextNode);
 				visited.emplace(succ, nextNode);

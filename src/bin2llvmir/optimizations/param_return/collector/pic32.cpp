@@ -12,18 +12,6 @@ using namespace llvm;
 namespace retdec {
 namespace bin2llvmir {
 
-CollectorPic32::CollectorPic32(
-		const Abi* abi,
-		llvm::Module* m,
-		const ReachingDefinitionsAnalysis* rda) :
-	Collector(abi, m, rda)
-{
-}
-
-CollectorPic32::~CollectorPic32()
-{
-}
-
 void CollectorPic32::collectCallSpecificTypes(CallEntry* ce) const
 {
 	Collector::collectCallSpecificTypes(ce);

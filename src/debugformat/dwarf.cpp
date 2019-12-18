@@ -56,11 +56,11 @@ void DebugFormat::loadDwarfGlobalVariables()
 		retdec::dwarfparser::DwarfLocationDesc::cLocType loc = gvar->getLocation(&n, &address, 1);
 		if (loc.isAddress())
 		{
-			std::string name = gvar->name.empty() ? "glob_var_" + retdec::utils::toHexString(address) : gvar->name;
-			auto addr = retdec::utils::Address(address);
+			auto addr = retdec::common::Address(address);
+			std::string name = gvar->name.empty() ? "glob_var_" + addr.toHexString() : gvar->name;
 			if (!addr.isDefined())
 				continue;
-			retdec::config::Object gv(name, retdec::config::Storage::inMemory(addr));
+			retdec::common::Object gv(name, retdec::common::Storage::inMemory(addr));
 			gv.type = loadDwarfType(gvar->type);
 			if (gv.type.getLlvmIr() == "void")
 				gv.type.setLlvmIr("i32");
@@ -73,7 +73,7 @@ void DebugFormat::loadDwarfFunctions()
 {
 	// Lines
 	//
-	std::map<retdec::utils::Address, int> lines;
+	std::map<retdec::common::Address, int> lines;
 	for (auto* line : *_dwarfFile->getLines())
 	{
 		lines[line->addr] = line->lineNum;
@@ -102,7 +102,7 @@ void DebugFormat::loadDwarfFunctions()
 			}
 		}
 
-		retdec::config::Function dif(name);
+		retdec::common::Function dif(name);
 		dif.setDemangledName(demangledName);
 
 		dif.setStartEnd(df->lowAddr, df->highAddr);
@@ -125,16 +125,16 @@ void DebugFormat::loadDwarfFunctions()
 		Dwarf_Addr frameRegNum = 0;
 		if (df->frameBase && df->frameBase->computeLocation(&regName, &frameRegNum).isRegister())
 		{
-			dif.frameBaseStorage = retdec::config::Storage::inRegister(frameRegNum);
+			dif.frameBaseStorage = retdec::common::Storage::inRegister(frameRegNum);
 		}
 
 		unsigned argCntr = 0;
 		for (auto* param : *df->getParams())
 		{
 			std::string name = param->name.empty() ? std::string("arg") + std::to_string(argCntr) : param->name;
-			retdec::config::Object newArg(name, retdec::config::Storage::undefined());
+			retdec::common::Object newArg(name, retdec::common::Storage::undefined());
 			newArg.type = loadDwarfType(param->type); // void -> i32
-			dif.parameters.insert(newArg);
+			dif.parameters.push_back(newArg);
 			++argCntr;
 		}
 
@@ -145,16 +145,16 @@ void DebugFormat::loadDwarfFunctions()
 				continue;
 			}
 
-			retdec::config::Storage storage;
+			retdec::common::Storage storage;
 			Dwarf_Signed address;
 			int regNum = -1;
 			bool deref;
 			if (var->isOnStack(&address, &deref, 0, &regNum))
 			{
-				storage = retdec::config::Storage::onStack(address, regNum);
+				storage = retdec::common::Storage::onStack(address, regNum);
 			}
 
-			retdec::config::Object newLocalVar(var->name, storage);
+			retdec::common::Object newLocalVar(var->name, storage);
 			newLocalVar.type = loadDwarfType(var->type); // TODO: void -> i32
 			dif.locals.insert(newLocalVar);
 		}
@@ -169,14 +169,14 @@ void DebugFormat::loadDwarfFunctions()
  * @param type DWARF type.
  * @return Common type representation.
  */
-retdec::config::Type DebugFormat::loadDwarfType(retdec::dwarfparser::DwarfType* type)
+retdec::common::Type DebugFormat::loadDwarfType(retdec::dwarfparser::DwarfType* type)
 {
 	if (type == nullptr)
 	{
-		return retdec::config::Type("i32");
+		return retdec::common::Type("i32");
 	}
-	auto t = retdec::config::Type(type->toLLVMString());
-	return t.isDefined() ? t : retdec::config::Type("i32");
+	auto t = retdec::common::Type(type->toLLVMString());
+	return t.isDefined() ? t : retdec::common::Type("i32");
 }
 
 } // namespace debugformat

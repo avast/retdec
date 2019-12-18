@@ -51,7 +51,7 @@ const StringStringUMap &FUNC_VAR_NAME_MAP(initFuncVarNameMap());
 *
 * See its description for more details.
 */
-Maybe<std::string> getNameOfVarStoringResult(const std::string &funcName) {
+std::optional<std::string> getNameOfVarStoringResult(const std::string &funcName) {
 	return getNameOfVarStoringResultFromMap(funcName, FUNC_VAR_NAME_MAP);
 }
 

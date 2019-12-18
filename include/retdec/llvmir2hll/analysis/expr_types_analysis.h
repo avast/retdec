@@ -65,9 +65,6 @@ public:
 	using ExprTagsMap = std::map< ShPtr<Expression>, TagVector>;
 
 public:
-	// It needs to be public so it can be called in ShPtr's destructor.
-	virtual ~ExprTypesAnalysis() override;
-
 	std::size_t getCountOfTag(ShPtr<Expression> expr, ExprTag tag);
 	ExprTagsMap analyzeExprTypes(ShPtr<Module> module);
 

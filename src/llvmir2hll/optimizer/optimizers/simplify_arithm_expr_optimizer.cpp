@@ -54,11 +54,6 @@ SimplifyArithmExprOptimizer::SimplifyArithmExprOptimizer(ShPtr<Module> module,
 	createSubOptimizers(arithmExprEvaluator);
 }
 
-/**
-* @brief Destructs the optimizer.
-*/
-SimplifyArithmExprOptimizer::~SimplifyArithmExprOptimizer() {}
-
 void SimplifyArithmExprOptimizer::doOptimization() {
 	// Visit the initializer of all global variables.
 	for (auto i = module->global_var_begin(), e = module->global_var_end();

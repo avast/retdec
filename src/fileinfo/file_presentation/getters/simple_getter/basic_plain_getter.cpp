@@ -22,14 +22,6 @@ BasicPlainGetter::BasicPlainGetter(FileInformation &fileInfo) : SimpleGetter(fil
 
 }
 
-/**
- * Destructor
- */
-BasicPlainGetter::~BasicPlainGetter()
-{
-
-}
-
 std::size_t BasicPlainGetter::loadInformation(std::vector<std::string> &desc, std::vector<std::string> &info) const
 {
 	const char * loaderErrorUserFriendly = fileinfo.getLoaderErrorInfo().loaderErrorUserFriendly;

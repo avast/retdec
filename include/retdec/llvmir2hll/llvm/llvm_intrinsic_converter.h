@@ -68,9 +68,6 @@ class Module;
 class LLVMIntrinsicConverter: private OrderedAllVisitor,
 		private retdec::utils::NonCopyable {
 public:
-	// It needs to be public so it can be called in ShPtr's destructor.
-	virtual ~LLVMIntrinsicConverter() override;
-
 	static void convert(ShPtr<Module> module);
 
 private:

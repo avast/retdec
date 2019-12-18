@@ -102,7 +102,6 @@ class PeHeuristics : public Heuristics
 		PeHeuristics(
 				retdec::fileformat::PeFormat &parser, Search &searcher,
 				ToolInformation &toolInfo);
-		virtual ~PeHeuristics() override;
 };
 
 } // namespace cpdetect

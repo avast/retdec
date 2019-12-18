@@ -23,11 +23,6 @@ namespace llvmir2hll {
 FunctionType::FunctionType(ShPtr<Type> retType):
 	Type(), retType(retType), varArg(false) {}
 
-/**
-* @brief Destructs the type.
-*/
-FunctionType::~FunctionType() {}
-
 ShPtr<Value> FunctionType::clone() {
 	ShPtr<FunctionType> cloned(FunctionType::create());
 	cloned->retType = retType;

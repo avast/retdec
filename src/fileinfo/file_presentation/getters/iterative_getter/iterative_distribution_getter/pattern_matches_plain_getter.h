@@ -22,7 +22,6 @@ class PatternMatchesPlainGetter : public IterativeDistributionGetter
 		virtual bool loadRecord(std::size_t structIndex, std::size_t recIndex, std::vector<std::string> &record) override;
 	public:
 		PatternMatchesPlainGetter(FileInformation &fileInfo, const std::vector<PatternMatch> &pMatches);
-		virtual ~PatternMatchesPlainGetter() override;
 
 		virtual std::size_t getBasicInfo(std::size_t structIndex, std::vector<std::string> &desc, std::vector<std::string> &info) const override;
 		virtual bool getFlagDescriptors(std::size_t structIndex, std::vector<std::string> &desc, std::vector<std::string> &abbv) const override;

@@ -20,7 +20,6 @@ class SimpleGetter
 		FileInformation &fileinfo;
 	public:
 		SimpleGetter(FileInformation &fileInfo);
-		virtual ~SimpleGetter();
 
 		virtual std::size_t loadInformation(std::vector<std::string> &desc, std::vector<std::string> &info) const = 0;
 };

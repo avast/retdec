@@ -7,6 +7,19 @@
 #include <fstream>
 
 #include "retdec/config/config.h"
+#include "retdec/serdes/address.h"
+#include "retdec/serdes/architecture.h"
+#include "retdec/serdes/class.h"
+#include "retdec/serdes/file_format.h"
+#include "retdec/serdes/file_type.h"
+#include "retdec/serdes/function.h"
+#include "retdec/serdes/language.h"
+#include "retdec/serdes/object.h"
+#include "retdec/serdes/pattern.h"
+#include "retdec/serdes/vtable.h"
+#include "retdec/serdes/tool_info.h"
+#include "retdec/serdes/type.h"
+#include "retdec/serdes/std.h"
 #include "retdec/utils/string.h"
 #include "retdec/utils/time.h"
 
@@ -35,7 +48,6 @@ const std::string JSON_globals           = "globals";
 const std::string JSON_registers         = "registers";
 const std::string JSON_languages         = "languages";
 const std::string JSON_structures        = "structures";
-const std::string JSON_segments          = "segments";
 const std::string JSON_vtables           = "vtables";
 const std::string JSON_classes           = "classes";
 const std::string JSON_patterns          = "patterns";
@@ -72,10 +84,10 @@ void Config::setInputFile(const std::string& n)          { _inputFile = n; }
 void Config::setUnpackedInputFile(const std::string& n)  { _unpackedInputFile = n; }
 void Config::setPdbInputFile(const std::string& n)       { _pdbInputFile = n; }
 void Config::setFrontendVersion(const std::string& n)    { _frontendVersion = n; }
-void Config::setEntryPoint(const retdec::utils::Address& a)     { _entryPoint = a; }
-void Config::setMainAddress(const retdec::utils::Address& a)    { _mainAddress = a; }
-void Config::setSectionVMA(const retdec::utils::Address& a)     { _sectionVMA = a; }
-void Config::setImageBase(const retdec::utils::Address& a)      { _imageBase = a; }
+void Config::setEntryPoint(const retdec::common::Address& a)     { _entryPoint = a; }
+void Config::setMainAddress(const retdec::common::Address& a)    { _mainAddress = a; }
+void Config::setSectionVMA(const retdec::common::Address& a)     { _sectionVMA = a; }
+void Config::setImageBase(const retdec::common::Address& a)      { _imageBase = a; }
 void Config::setIsIda(bool b)                            { _ida = b; }
 
 std::string Config::getInputFile() const          { return _inputFile; }
@@ -83,10 +95,10 @@ std::string Config::getUnpackedInputFile() const  { return _unpackedInputFile; }
 std::string Config::getPdbInputFile() const       { return _pdbInputFile; }
 std::string Config::getFrontendVersion() const    { return _frontendVersion; }
 std::string Config::getConfigFileName() const     { return _configFileName; }
-retdec::utils::Address Config::getEntryPoint() const     { return _entryPoint; }
-retdec::utils::Address Config::getMainAddress() const    { return _mainAddress; }
-retdec::utils::Address Config::getSectionVMA() const     { return _sectionVMA; }
-retdec::utils::Address Config::getImageBase() const      { return _imageBase; }
+retdec::common::Address Config::getEntryPoint() const     { return _entryPoint; }
+retdec::common::Address Config::getMainAddress() const    { return _mainAddress; }
+retdec::common::Address Config::getSectionVMA() const     { return _sectionVMA; }
+retdec::common::Address Config::getImageBase() const      { return _imageBase; }
 
 /**
  * Reads JSON file into internal representation.
@@ -160,25 +172,24 @@ std::string Config::generateJsonString() const
 	if (!getUnpackedInputFile().empty()) root[JSON_unpackedInputFile] = getUnpackedInputFile();
 	if (!getPdbInputFile().empty()) root[JSON_pdbInputFile] = getPdbInputFile();
 	if (!getFrontendVersion().empty()) root[JSON_frontendVersion] = getFrontendVersion();
-	if (getEntryPoint().isDefined()) root[JSON_entryPoint] = toJsonValue(getEntryPoint());
-	if (getMainAddress().isDefined()) root[JSON_mainAddress] = toJsonValue(getMainAddress());
-	if (getSectionVMA().isDefined()) root[JSON_sectionVMA] = toJsonValue(getSectionVMA());
-	if (getImageBase().isDefined()) root[JSON_imageBase] = toJsonValue(getImageBase());
+	if (getEntryPoint().isDefined()) root[JSON_entryPoint] = serdes::serialize(getEntryPoint());
+	if (getMainAddress().isDefined()) root[JSON_mainAddress] = serdes::serialize(getMainAddress());
+	if (getSectionVMA().isDefined()) root[JSON_sectionVMA] = serdes::serialize(getSectionVMA());
+	if (getImageBase().isDefined()) root[JSON_imageBase] = serdes::serialize(getImageBase());
 
 	root[JSON_parameters]     = parameters.getJsonValue();
-	root[JSON_architecture]   = architecture.getJsonValue();
-	root[JSON_fileType]       = fileType.getJsonValue();
-	root[JSON_fileFormat]     = fileFormat.getJsonValue();
-	root[JSON_tools]          = tools.getJsonValue();
-	root[JSON_languages]      = languages.getJsonValue();
-	root[JSON_functions]      = functions.getJsonValue();
-	root[JSON_globals]        = globals.getJsonValue();
-	root[JSON_registers]      = registers.getJsonValue();
-	root[JSON_structures]     = structures.getJsonValue();
-	root[JSON_segments]       = segments.getJsonValue();
-	root[JSON_vtables]        = vtables.getJsonValue();
-	root[JSON_classes]        = classes.getJsonValue();
-	root[JSON_patterns]       = patterns.getJsonValue();
+	root[JSON_architecture]   = serdes::serialize(architecture);
+	root[JSON_fileType]       = serdes::serialize(fileType);
+	root[JSON_fileFormat]     = serdes::serialize(fileFormat);
+	root[JSON_tools]          = serdes::serialize(tools);
+	root[JSON_languages]      = serdes::serialize(languages);
+	root[JSON_functions]      = serdes::serialize(functions);
+	root[JSON_globals]        = serdes::serialize(globals);
+	root[JSON_registers]      = serdes::serialize(registers);
+	root[JSON_structures]     = serdes::serialize(structures);
+	root[JSON_vtables]        = serdes::serialize(vtables);
+	root[JSON_classes]        = serdes::serialize(classes);
+	root[JSON_patterns]       = serdes::serialize(patterns);
 
 	StreamWriterBuilder builder;
 	return writeString(builder, root);
@@ -235,25 +246,24 @@ void Config::readJsonString(const std::string& json)
 		setUnpackedInputFile( safeGetString(root, JSON_unpackedInputFile) );
 		setPdbInputFile( safeGetString(root, JSON_pdbInputFile) );
 		setFrontendVersion( safeGetString(root, JSON_frontendVersion) );
-		setEntryPoint( safeGetAddress(root, JSON_entryPoint) );
-		setMainAddress( safeGetAddress(root, JSON_mainAddress) );
-		setSectionVMA( safeGetAddress(root, JSON_sectionVMA) );
-		setImageBase( safeGetAddress(root, JSON_imageBase) );
+		serdes::deserialize(root[JSON_entryPoint], _entryPoint);
+		serdes::deserialize(root[JSON_mainAddress], _mainAddress);
+		serdes::deserialize(root[JSON_sectionVMA], _sectionVMA);
+		serdes::deserialize(root[JSON_imageBase], _imageBase);
 
 		parameters.readJsonValue( root[JSON_parameters] );
-		architecture.readJsonValue( root[JSON_architecture] );
-		fileType.readJsonValue( root[JSON_fileType] );
-		fileFormat.readJsonValue( root[JSON_fileFormat] );
-		tools.readJsonValue( root[JSON_tools] );
-		languages.readJsonValue( root[JSON_languages] );
-		functions.readJsonValue( root[JSON_functions] );
-		globals.readJsonValue( root[JSON_globals] );
-		registers.readJsonValue( root[JSON_registers] );
-		structures.readJsonValue( root[JSON_structures] );
-		segments.readJsonValue( root[JSON_segments] );
-		vtables.readJsonValue( root[JSON_vtables] );
-		classes.readJsonValue( root[JSON_classes] );
-		patterns.readJsonValue( root[JSON_patterns] );
+		serdes::deserialize(root[JSON_architecture], architecture);
+		serdes::deserialize(root[JSON_fileType], fileType);
+		serdes::deserialize(root[JSON_fileFormat], fileFormat);
+		serdes::deserialize(root[JSON_tools], tools);
+		serdes::deserialize(root[JSON_languages], languages);
+		serdes::deserialize(root[JSON_functions], functions);
+		serdes::deserialize(root[JSON_globals], globals);
+		serdes::deserialize(root[JSON_registers], registers);
+		serdes::deserialize(root[JSON_structures], structures);
+		serdes::deserialize(root[JSON_vtables], vtables);
+		serdes::deserialize(root[JSON_classes], classes);
+		serdes::deserialize(root[JSON_patterns], patterns);
 	}
 	catch (const InternalException& e)
 	{

@@ -23,8 +23,6 @@ class UnreachableStmt: public Statement {
 public:
 	static ShPtr<UnreachableStmt> create(Address a = Address::Undefined);
 
-	virtual ~UnreachableStmt() override;
-
 	virtual ShPtr<Value> clone() override;
 	virtual bool isEqualTo(ShPtr<Value> otherValue) const override;
 	virtual bool isCompound() override { return false; }

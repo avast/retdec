@@ -82,9 +82,6 @@ if(LLVM_LOCAL_DIR)
 			# It looks like terminal colors are working even without this.
 			-DLLVM_ENABLE_TERMINFO=OFF
 
-			# Necessary for builds with older MS Visual Studios (e.g. 2015).
-			-DLLVM_TEMPORARILY_ALLOW_OLD_TOOLCHAIN=ON
-
 			# Force the use of the same compiler as used to build the top-level
 			# project. Otherwise, the external project may pick up a different
 			# compiler, which may result in link errors.
@@ -151,9 +148,6 @@ else()
 			# We don't want this so that we don't have to link with tinfo.
 			# It looks like terminal colors are working even without this.
 			-DLLVM_ENABLE_TERMINFO=OFF
-
-			# Necessary for builds with older MS Visual Studios (e.g. 2015).
-			-DLLVM_TEMPORARILY_ALLOW_OLD_TOOLCHAIN=ON
 
 			# Force the use of the same compiler as used to build the top-level
 			# project. Otherwise, the external project may pick up a different

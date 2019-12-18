@@ -59,7 +59,7 @@ public:
 	/**
 	* @brief Destructs the subject.
 	*/
-	virtual ~Subject() {}
+	virtual ~Subject() = default;
 
 	/**
 	* @brief Returns a shared pointer of self.

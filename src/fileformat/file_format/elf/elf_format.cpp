@@ -1114,30 +1114,6 @@ ElfFormat::ElfFormat(const std::uint8_t *data, std::size_t size, LoadFlags loadF
 }
 
 /**
- * Destructor
- */
-ElfFormat::~ElfFormat()
-{
-
-}
-
-/**
- * Constructor of RelocationTableInfo
- */
-ElfFormat::RelocationTableInfo::RelocationTableInfo() : address(0), size(0), entrySize(0), type(SHT_NULL)
-{
-
-}
-
-/**
- * Destructor of RelocationTableInfo
- */
-ElfFormat::RelocationTableInfo::~RelocationTableInfo()
-{
-
-}
-
-/**
  * Init internal structures
  */
 void ElfFormat::initStructures()

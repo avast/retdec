@@ -54,8 +54,6 @@ public:
 	Module(const llvm::Module *llvmModule, const std::string &identifier,
 		ShPtr<Semantics> semantics, ShPtr<Config> config);
 
-	~Module();
-
 	const llvm::Module *getLLVMModule() const;
 	std::string getIdentifier(bool stripDirs = true) const;
 	ShPtr<Semantics> getSemantics() const;
@@ -119,7 +117,7 @@ public:
 	std::string getDemangledNameOfFunc(ShPtr<Function> func) const;
 
 	AddressRange getAddressRangeForFunc(ShPtr<const Function> func) const;
-	bool hasAddressRange(ShPtr<const Function> func) const;
+	bool hasAddressRange(ShPtr<Function> func) const;
 	bool allFuncDefinitionsHaveAddressRange() const;
 
 	LineRange getLineRangeForFunc(ShPtr<Function> func) const;

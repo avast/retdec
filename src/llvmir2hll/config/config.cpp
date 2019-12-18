@@ -23,7 +23,5 @@ const std::string &ConfigError::getMessage() const noexcept {
 	return message;
 }
 
-Config::~Config() = default;
-
 } // namespace llvmir2hll
 } // namespace retdec

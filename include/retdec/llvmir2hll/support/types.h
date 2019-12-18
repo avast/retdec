@@ -16,7 +16,7 @@
 #include <vector>
 
 #include "retdec/llvmir2hll/support/smart_ptr.h"
-#include "retdec/utils/address.h"
+#include "retdec/common/address.h"
 
 namespace retdec {
 namespace llvmir2hll {
@@ -33,10 +33,10 @@ class VarDefStmt;
 class Variable;
 
 /// Address.
-using Address = retdec::utils::Address;
+using Address = retdec::common::Address;
 
 /// Address range.
-using AddressRange = retdec::utils::AddressRange;
+using AddressRange = retdec::common::AddressRange;
 
 /// No address range.
 extern const AddressRange NO_ADDRESS_RANGE;

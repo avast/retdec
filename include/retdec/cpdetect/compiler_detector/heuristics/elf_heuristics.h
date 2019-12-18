@@ -39,7 +39,6 @@ class ElfHeuristics : public Heuristics
 		ElfHeuristics(
 				retdec::fileformat::ElfFormat &parser, Search &searcher,
 				ToolInformation &toolInfo);
-		virtual ~ElfHeuristics() override;
 };
 
 } // namespace cpdetect

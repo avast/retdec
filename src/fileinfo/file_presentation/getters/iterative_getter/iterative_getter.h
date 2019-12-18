@@ -29,7 +29,6 @@ class IterativeGetter
 		std::string title;                                         ///< title of presented structure
 	public:
 		IterativeGetter(FileInformation &fileInfo);
-		virtual ~IterativeGetter();
 
 		/// @name Getters
 		/// @{

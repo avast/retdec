@@ -32,11 +32,6 @@ WhileTrueToUForLoopOptimizer::WhileTrueToUForLoopOptimizer(ShPtr<Module> module,
 		PRECONDITION_NON_NULL(va);
 	}
 
-/**
-* @brief Destructs the optimizer.
-*/
-WhileTrueToUForLoopOptimizer::~WhileTrueToUForLoopOptimizer() {}
-
 void WhileTrueToUForLoopOptimizer::doOptimization() {
 	if (!va->isInValidState()) {
 		va->clearCache();

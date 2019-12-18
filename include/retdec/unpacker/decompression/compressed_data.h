@@ -28,7 +28,7 @@ public:
 	CompressedData() = delete;
 	CompressedData(const DynamicBuffer& buffer) : _buffer(buffer) {} ///< Constructor.
 	CompressedData(const CompressedData& data) : _buffer(data._buffer) {} ///< Copy constructor.
-	virtual ~CompressedData() {} ///< Destructor.
+	virtual ~CompressedData() = default;
 
 	/**
 	 * Returns the buffer containing compressed data.

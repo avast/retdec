@@ -60,11 +60,6 @@ ShPtr<FloatType> getTypeOfValue(const ConstFloat::Type &value) {
 ConstFloat::ConstFloat(Type value):
 	Constant(), value(value), type(getTypeOfValue(value)) {}
 
-/**
-* @brief Destructs the constant.
-*/
-ConstFloat::~ConstFloat() {}
-
 ShPtr<Value> ConstFloat::clone() {
 	ShPtr<ConstFloat> constFloat(ConstFloat::create(value));
 	constFloat->setMetadata(getMetadata());

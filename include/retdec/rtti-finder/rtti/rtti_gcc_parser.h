@@ -8,7 +8,7 @@
 #define RETDEC_RTTI_FINDER_RTTI_RTTI_GCC_PARSER_H
 
 #include "retdec/rtti-finder/rtti/rtti_gcc.h"
-#include "retdec/utils/address.h"
+#include "retdec/common/address.h"
 
 namespace retdec {
 namespace rtti_finder {
@@ -20,8 +20,8 @@ namespace loader {
 std::shared_ptr<ClassTypeInfo> parseGccRtti(
 		const retdec::loader::Image* img,
 		RttiGcc& rttis,
-		retdec::utils::Address rttiAddr,
-		std::set<retdec::utils::Address>& visited);
+		retdec::common::Address rttiAddr,
+		std::set<retdec::common::Address>& visited);
 
 void finalizeGccRtti(RttiGcc& rttis);
 

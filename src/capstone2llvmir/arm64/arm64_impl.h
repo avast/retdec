@@ -22,7 +22,6 @@ class Capstone2LlvmIrTranslatorArm64_impl :
 				llvm::Module* m,
 				cs_mode basic = CS_MODE_ARM,
 				cs_mode extra = CS_MODE_LITTLE_ENDIAN);
-		virtual ~Capstone2LlvmIrTranslatorArm64_impl();
 //
 //==============================================================================
 // Mode query & modification methods - from Capstone2LlvmIrTranslator.
@@ -138,12 +137,12 @@ class Capstone2LlvmIrTranslatorArm64_impl :
 				uint32_t r,
 				llvm::Value* val,
 				llvm::IRBuilder<>& irb,
-				eOpConv ct = eOpConv::ZEXT_TRUNC) override;
+				eOpConv ct = eOpConv::ZEXT_TRUNC_OR_BITCAST) override;
 		virtual llvm::Instruction* storeOp(
 				cs_arm64_op& op,
 				llvm::Value* val,
 				llvm::IRBuilder<>& irb,
-				eOpConv ct = eOpConv::ZEXT_TRUNC) override;
+				eOpConv ct = eOpConv::ZEXT_TRUNC_OR_BITCAST) override;
 
 		/**
 		* @brief This functions will generate psuedo asm translation.

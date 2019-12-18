@@ -36,11 +36,6 @@ EqualOperandsSubOptimizer::EqualOperandsSubOptimizer(ShPtr<ArithmExprEvaluator>
 		arithmExprEvaluator): SubOptimizer(arithmExprEvaluator) {}
 
 /**
-* @brief Destructor.
-*/
-EqualOperandsSubOptimizer::~EqualOperandsSubOptimizer() {}
-
-/**
 * @brief Creates a new EqualOperandsSubOptimizer.
 *
 * @param[in] arithmExprEvaluator @a The used evaluator of arithmetical

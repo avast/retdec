@@ -57,13 +57,6 @@ ElfCoreMapPlainGetter::ElfCoreMapPlainGetter(
 	loadRecords();
 }
 
-/**
- * Destructor
- */
-ElfCoreMapPlainGetter::~ElfCoreMapPlainGetter()
-{
-}
-
 std::size_t ElfCoreMapPlainGetter::getBasicInfo(
 		std::size_t structIndex,
 		std::vector<std::string> &desc,

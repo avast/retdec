@@ -18,9 +18,6 @@ namespace upx {
 class DecompressorLzma : public Decompressor
 {
 public:
-	DecompressorLzma();
-	virtual ~DecompressorLzma();
-
 	virtual void setupPackingMethod(ElfUpxStub<32>* stub, std::uint8_t packingMethod) override;
 	virtual void decompress(ElfUpxStub<32>* stub, retdec::utils::DynamicBuffer& packedData,
 							retdec::utils::DynamicBuffer& unpackedData) override;

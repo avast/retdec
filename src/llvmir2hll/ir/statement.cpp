@@ -37,11 +37,6 @@ Statement::Statement(Address a):
 }
 
 /**
-* @brief Destructs the statement.
-*/
-Statement::~Statement() {}
-
-/**
 * @brief Sets @a newSucc as the current statement's successor.
 *
 * Example: Consider the following situation:

@@ -9,10 +9,11 @@
 
 #include "retdec/loader/loader/elf/elf_image.h"
 
-using namespace retdec::utils;
-using namespace retdec::capstone2llvmir;
 using namespace llvm;
+using namespace retdec::capstone2llvmir;
+using namespace retdec::common;
 using namespace retdec::fileformat;
+using namespace retdec::utils;
 
 namespace retdec {
 namespace bin2llvmir {
@@ -35,7 +36,7 @@ void Decoder::initTranslator()
 	if (a.isX86())
 	{
 		arch = CS_ARCH_X86;
-		switch (_config->getConfig().architecture.getBitSize())
+		switch (a.getBitSize())
 		{
 			case 16: basicMode = CS_MODE_16; break;
 			case 64: basicMode = CS_MODE_64; break;
@@ -46,7 +47,7 @@ void Decoder::initTranslator()
 	else if (a.isMipsOrPic32())
 	{
 		arch = CS_ARCH_MIPS;
-		switch (_config->getConfig().architecture.getBitSize())
+		switch (a.getBitSize())
 		{
 			case 64: basicMode = CS_MODE_MIPS64; break;
 			default:
@@ -56,7 +57,7 @@ void Decoder::initTranslator()
 	else if (a.isPpc())
 	{
 		arch = CS_ARCH_PPC;
-		switch (_config->getConfig().architecture.getBitSize())
+		switch (a.getBitSize())
 		{
 			case 64: basicMode = CS_MODE_64; break;
 			default:
@@ -173,9 +174,9 @@ void Decoder::initEnvironmentRegisters()
 		if (_c2l->isRegister(&gv))
 		{
 			unsigned regNum = _c2l->getCapstoneRegister(&gv);
-			auto s = config::Storage::inRegister(gv.getName(), regNum);
+			auto s = common::Storage::inRegister(gv.getName(), regNum);
 
-			config::Object cr(gv.getName(), s);
+			common::Object cr(gv.getName(), s);
 			cr.type.setLlvmIr(llvmObjToString(gv.getValueType()));
 			cr.setRealName(gv.getName());
 			_config->getConfig().registers.insert(cr);
@@ -393,7 +394,7 @@ void Decoder::initAllowedRangesWithConfig()
 			LOG << "\t" << "[+] selected range from debug @ "
 					<< AddressRange(start, end) << std::endl;
 
-			utils::Maybe<std::size_t> sz;
+			std::optional<std::size_t> sz;
 			auto tmpSz = dfp.second.getSize();
 			if (tmpSz.isDefined() && tmpSz > 0)
 			{
@@ -419,7 +420,7 @@ void Decoder::initAllowedRangesWithConfig()
 		}
 
 		std::map<
-				retdec::utils::Address,
+				retdec::common::Address,
 				std::shared_ptr<const retdec::fileformat::Symbol>> symtab;
 
 		for (const auto* t : _image->getFileFormat()->getSymbolTables())
@@ -460,13 +461,13 @@ void Decoder::initAllowedRangesWithConfig()
 		{
 			auto& s = sIt->second;
 
-			retdec::utils::Address start = sIt->first;
+			retdec::common::Address start = sIt->first;
 			if (start.isUndefined())
 			{
 				continue;
 			}
 
-			utils::Maybe<std::size_t> knownSz;
+			std::optional<std::size_t> knownSz;
 			unsigned long long size = 0;
 			if (!s->getSize(size))
 			{
@@ -484,7 +485,7 @@ void Decoder::initAllowedRangesWithConfig()
 				knownSz = size;
 			}
 
-			retdec::utils::Address end = start + size;
+			retdec::common::Address end = start + size;
 			std::string name = s->getNormalizedName();
 
 			// Exact name match.
@@ -569,9 +570,8 @@ void Decoder::initJumpTargetsConfig()
 {
 	LOG << "\n" << "initJumpTargetsConfig():" << std::endl;
 
-	for (auto& p : _config->getConfig().functions)
+	for (auto& f : _config->getConfig().functions)
 	{
-		config::Function& f = p.second;
 		if (f.getStart().isUndefined())
 		{
 			continue;
@@ -579,8 +579,8 @@ void Decoder::initJumpTargetsConfig()
 
 		auto tmpSz = f.getSize();
 		auto sz = tmpSz.isDefined() && tmpSz > 0
-				? Maybe<std::size_t>(tmpSz)
-				: Maybe<std::size_t>();
+				? std::optional<std::size_t>(tmpSz)
+				: std::nullopt;
 
 		if (auto* jt = _jumpTargets.push(
 				f.getStart(),
@@ -692,7 +692,7 @@ void Decoder::initJumpTargetsImports()
 
 	for (const auto &imp : *impTbl)
 	{
-		utils::Address a = imp->getAddress();
+		common::Address a = imp->getAddress();
 		if (a.isUndefined())
 		{
 			continue;
@@ -812,7 +812,7 @@ void Decoder::initJumpTargetsExports()
 
 	for (const auto& exp : *exTbl)
 	{
-		utils::Address addr = exp.getAddress();
+		common::Address addr = exp.getAddress();
 		if (addr.isUndefined())
 		{
 			continue;
@@ -863,9 +863,9 @@ void Decoder::initJumpTargetsSymbols()
 		{
 			continue;
 		}
-		utils::Address addr = a;
+		common::Address addr = a;
 
-		utils::Maybe<std::size_t> sz;
+		std::optional<std::size_t> sz;
 		unsigned long long tmpSz = 0;
 		if (s->getSize(tmpSz) && tmpSz > 0)
 		{
@@ -905,14 +905,14 @@ void Decoder::initJumpTargetsDebug()
 
 	for (const auto& p : _debug->functions)
 	{
-		utils::Address addr = p.first;
+		common::Address addr = p.first;
 		if (addr.isUndefined())
 		{
 			continue;
 		}
 		auto& f = p.second;
 
-		utils::Maybe<std::size_t> sz;
+		std::optional<std::size_t> sz;
 		auto tmpSz = p.second.getSize();
 		if (tmpSz.isDefined() && tmpSz > 0)
 		{
@@ -1002,7 +1002,7 @@ void Decoder::initVtables()
 {
 	LOG << "\n" << "initVtables():" << std::endl;
 
-	std::vector<const rtti_finder::Vtable*> vtable;
+	std::vector<const common::Vtable*> vtable;
 	for (auto& p : _image->getRtti().getVtablesGcc())
 	{
 		vtable.push_back(&p.second);
@@ -1015,23 +1015,24 @@ void Decoder::initVtables()
 	for (auto* p : vtable)
 	{
 		auto& vt = *p;
-		for (auto& item : vt.virtualFncAddresses)
+		for (auto& item : vt.items)
 		{
 			if (auto* jt = _jumpTargets.push(
-					item.address,
+					item.getTargetFunctionAddress(),
 					JumpTarget::eType::VTABLE,
-					item.isThumb ? CS_MODE_THUMB : _c2l->getBasicMode(),
+					item.isThumb() ? CS_MODE_THUMB : _c2l->getBasicMode(),
 					Address::Undefined))
 			{
 				auto* nf = createFunction(jt->getAddress());
 				_vtableFncs.insert(jt->getAddress());
 
-				LOG << "\t" << "[+] " << item.address << " @ "
-						<< nf->getName().str() << std::endl;
+				LOG << "\t" << "[+] " << item.getTargetFunctionAddress()
+						<< " @ " << nf->getName().str() << std::endl;
 			}
 			else
 			{
-				LOG << "\t" << "[-] " << item.address << " (no JT)" << std::endl;
+				LOG << "\t" << "[-] " << item.getTargetFunctionAddress()
+						<< " (no JT)" << std::endl;
 			}
 		}
 	}
@@ -1041,7 +1042,7 @@ void Decoder::initConfigFunctions()
 {
 	for (auto& p : _fnc2addr)
 	{
-		Function* f = p.first;
+		llvm::Function* f = p.first;
 
 		if (_config->getConfigFunction(p.second)) // functions from IDA
 		{
@@ -1052,7 +1053,10 @@ void Decoder::initConfigFunctions()
 		Address end = getFunctionEndAddress(f);
 		end = end > start ? end : Address(start + 1);
 
-		auto* cf = _config->insertFunction(f, start, end);
+		// TODO: this is really bad, should be solved by better design of config
+		// updates
+		common::Function* cf = const_cast<common::Function*>(
+				_config->insertFunction(f, start, end));
 
 		if (_imports.count(start))
 		{

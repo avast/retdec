@@ -14,10 +14,6 @@ MachOImage::MachOImage(const std::shared_ptr<retdec::fileformat::FileFormat>& fi
 {
 }
 
-MachOImage::~MachOImage()
-{
-}
-
 /**
  * Virtual method overridden from retdec::loader::Image, which is used in image factory.
  * Loads the image using @c fileformat.

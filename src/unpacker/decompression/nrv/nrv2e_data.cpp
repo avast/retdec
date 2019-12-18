@@ -14,10 +14,6 @@ Nrv2eData::Nrv2eData(const DynamicBuffer& buffer, BitParser* bitParser) : NrvDat
 {
 }
 
-Nrv2eData::~Nrv2eData()
-{
-}
-
 bool Nrv2eData::decompress(DynamicBuffer& outputBuffer)
 {
 	// Reset just in case decompress() is called more times in row

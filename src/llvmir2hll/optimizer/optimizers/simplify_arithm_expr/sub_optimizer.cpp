@@ -30,11 +30,6 @@ SubOptimizer::SubOptimizer(ShPtr<ArithmExprEvaluator> arithmExprEvaluator):
 }
 
 /**
-* @brief Destructor.
-*/
-SubOptimizer::~SubOptimizer() {}
-
-/**
 * @brief Run optimization and try to optimize.
 *
 * @param[in] expr An expression to optimize.

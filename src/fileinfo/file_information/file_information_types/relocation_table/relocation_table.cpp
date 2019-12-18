@@ -10,24 +10,6 @@
 namespace fileinfo {
 
 /**
- * Constructor
- */
-RelocationTable::RelocationTable() : associatedSymbolTableIndex(std::numeric_limits<unsigned long long>::max()),
-										appliesSectionIndex(std::numeric_limits<unsigned long long>::max()),
-										declaredRelocations(std::numeric_limits<unsigned long long>::max())
-{
-
-}
-
-/**
- * Destructor
- */
-RelocationTable::~RelocationTable()
-{
-
-}
-
-/**
  * Get number of relocations in table
  * @return Number of relocations in table
  *

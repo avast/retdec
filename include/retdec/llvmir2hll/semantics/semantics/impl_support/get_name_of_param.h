@@ -8,10 +8,9 @@
 #define RETDEC_LLVMIR2HLL_SEMANTICS_SEMANTICS_IMPL_SUPPORT_GET_NAME_OF_PARAM_H
 
 #include <cstddef>
+#include <optional>
 #include <string>
 #include <unordered_map>
-
-#include "retdec/llvmir2hll/support/maybe.h"
 
 /**
 * @brief Sets a name of the given parameter for the given function.
@@ -40,7 +39,7 @@ struct FuncParamPosPairHasher {
 using FuncParamNamesMap = std::unordered_map<FuncParamPosPair, std::string,
 	FuncParamPosPairHasher>;
 
-Maybe<std::string> getNameOfParamFromMap(const std::string &funcName,
+std::optional<std::string> getNameOfParamFromMap(const std::string &funcName,
 	unsigned paramPos, const FuncParamNamesMap &map);
 
 } // namespace semantics

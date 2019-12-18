@@ -30,8 +30,6 @@ public:
 		ShPtr<Statement> body, ShPtr<Statement> succ = nullptr,
 		Address a = Address::Undefined);
 
-	virtual ~ForLoopStmt() override;
-
 	virtual ShPtr<Value> clone() override;
 	virtual bool isEqualTo(ShPtr<Value> otherValue) const override;
 	virtual bool isCompound() override { return true; }

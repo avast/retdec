@@ -22,14 +22,6 @@ ResourceTree::ResourceTree()
 }
 
 /**
- * Destructor
- */
-ResourceTree::~ResourceTree()
-{
-
-}
-
-/**
  * Check if stored tree structure is valid
  * @return @c true if stored tree structure is valid, @c false otherwise
  */

@@ -36,11 +36,6 @@ IfToSwitchOptimizer::IfToSwitchOptimizer(ShPtr<Module> module,
 	PRECONDITION_NON_NULL(va);
 }
 
-/**
-* @brief Destructs the optimizer.
-*/
-IfToSwitchOptimizer::~IfToSwitchOptimizer() {}
-
 void IfToSwitchOptimizer::visit(ShPtr<IfStmt> stmt) {
 	ShPtr<Expression> controlExpr(getControlExprIfConvertibleToSwitch(stmt));
 	if (!controlExpr) {

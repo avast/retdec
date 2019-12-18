@@ -19,13 +19,6 @@ namespace llvmir2hll {
 SubOpExpr::SubOpExpr(ShPtr<Expression> op1, ShPtr<Expression> op2):
 	BinaryOpExpr(op1, op2) {}
 
-/**
-* @brief Destructs the operator.
-*/
-SubOpExpr::~SubOpExpr() {
-	// Observers are deleted in the superclass.
-}
-
 bool SubOpExpr::isEqualTo(ShPtr<Value> otherValue) const {
 	if (ShPtr<SubOpExpr> otherValueSubOpExpr = cast<SubOpExpr>(otherValue)) {
 		return op1->isEqualTo(otherValueSubOpExpr->getFirstOperand()) &&

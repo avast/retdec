@@ -69,7 +69,6 @@ namespace llvmir2hll {
 class OneSubOptimizer final: public SubOptimizer {
 public:
 	OneSubOptimizer(ShPtr<ArithmExprEvaluator> arithmExprEvaluator);
-	virtual ~OneSubOptimizer() override;
 
 	static ShPtr<SubOptimizer> create(ShPtr<ArithmExprEvaluator>
 		arithmExprEvaluator);

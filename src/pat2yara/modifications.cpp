@@ -154,7 +154,9 @@ std::shared_ptr<HexString> cutHexString(
 			old.begin() + nibbleLimit);
 
 		// Create new hexadecimal string.
-		return std::make_shared<HexString>(newUnits);
+		return std::make_shared<HexString>(
+				hexString->getTokenStream(),
+				newUnits);
 	}
 
 	// String is already shorter than limit.

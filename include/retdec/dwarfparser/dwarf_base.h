@@ -132,7 +132,7 @@ class DwarfBaseElement
 		};
 
 		DwarfBaseElement(type_t type, DwarfBaseContainer<DwarfBaseElement> *prnt, Dwarf_Off d);
-		virtual ~DwarfBaseElement() {}
+		virtual ~DwarfBaseElement() = default;
 		virtual void dump() const = 0;
 
 	public:

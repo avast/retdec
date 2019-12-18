@@ -27,14 +27,6 @@ DwarfFunctionContainer::DwarfFunctionContainer(DwarfFile *file, DwarfBaseElement
 }
 
 /**
- * @brief dctor.
- */
-DwarfFunctionContainer::~DwarfFunctionContainer()
-{
-
-}
-
-/**
  * @brief Get all data from function DIE.
  * @param die Function DIE.
  * @param lvl Level (depth) of this die.

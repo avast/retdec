@@ -16,7 +16,8 @@
 #include <json/json.h>
 
 #include "retdec/config/config_exceptions.h"
-#include "retdec/utils/address.h"
+#include "retdec/common/address.h"
+#include "retdec/serdes/address.h"
 #include "retdec/utils/const.h"
 
 namespace retdec {
@@ -40,10 +41,6 @@ Json::Value::UInt safeGetUint(
 		const std::string& name = "",
 		Json::Value::UInt defaultValue = 0);
 
-retdec::utils::Address safeGetAddress(
-		const Json::Value& val,
-		const std::string& name = "");
-
 Json::Value::UInt64 safeGetUint64(
 		const Json::Value& val,
 		const std::string& name = "",
@@ -63,68 +60,6 @@ bool safeGetBool(
 		const Json::Value& val,
 		const std::string& name = "",
 		bool defaultValue = false);
-
-//
-//=============================================================================
-// Conversions to JSON values.
-//=============================================================================
-//
-
-std::string toJsonValue(retdec::utils::Address a);
-
-//
-//=============================================================================
-// AddressRangeJson
-//=============================================================================
-//
-
-class AddressRangeJson : public retdec::utils::AddressRange
-{
-	public:
-		AddressRangeJson() : AddressRange() {}
-		AddressRangeJson(retdec::utils::Address f, retdec::utils::Address s) : AddressRange(f, s) {}
-		explicit AddressRangeJson(const std::string& r) : AddressRange(r) {}
-
-		static AddressRangeJson fromJsonValue(const Json::Value& val)
-		{
-			AddressRangeJson ret;
-			ret.readJsonValue(val);
-			return ret;
-		}
-
-		/**
-		 * Creates JSON object (associative array) representing address range <start, end).
-		 * @return Created JSON object.
-		 */
-		Json::Value getJsonValue() const
-		{
-			Json::Value pair;
-
-			if (getStart().isDefined() && getEnd().isDefined())
-			{
-				pair["start"] = toJsonValue(getStart());
-				pair["end"] = toJsonValue(getEnd());
-			}
-
-			return pair;
-		}
-
-		/**
-		 * Reads JSON object (associative array) representing address range <start, end).
-		 * @param val JSON object to read.
-		 */
-		void readJsonValue(const Json::Value& val)
-		{
-			if ( val.isNull() )
-			{
-				return;
-			}
-
-			setStartEnd(
-					safeGetAddress(val, "start"),
-					safeGetAddress(val, "end"));
-		}
-};
 
 //
 //=============================================================================
@@ -149,7 +84,7 @@ class BaseSequentialContainer
 		using const_iterator = typename std::list<Elem>::const_iterator;
 
 	public:
-		virtual ~BaseSequentialContainer() {}
+		virtual ~BaseSequentialContainer() = default;
 
 		iterator begin()             { return _data.begin(); }
 		const_iterator begin() const { return _data.begin(); }
@@ -307,7 +242,7 @@ class BaseAssociativeContainer
 		using const_iterator = typename std::map<ID, Elem>::const_iterator;
 
 	public:
-		virtual ~BaseAssociativeContainer() {}
+		virtual ~BaseAssociativeContainer() = default;
 
 		iterator begin()             { return _data.begin(); }
 		const_iterator begin() const { return _data.begin(); }
@@ -428,7 +363,7 @@ class BaseSetContainer
 		using const_iterator = typename std::set<Elem>::const_iterator;
 
 	public:
-		virtual ~BaseSetContainer() {}
+		virtual ~BaseSetContainer() = default;
 
 		iterator begin()                    { return _data.begin(); }
 		const_iterator begin() const        { return _data.begin(); }
@@ -515,31 +450,6 @@ class BaseSetContainer
 	protected:
 		std::set<Elem> _data;
 };
-
-//
-//=============================================================================
-// Helper methods
-//=============================================================================
-//
-
-/**
- * Creates array of JSON objects created from strings in the provided container.
- * @param data String container.
- * @return Created JSON array.
- */
-template<typename Container>
-Json::Value getJsonStringValueVisit(const Container& data)
-{
-	Json::Value array(Json::arrayValue);
-	for (auto& elem : data)
-	{
-		array.append(elem);
-	}
-	return array;
-}
-
-void readJsonStringValueVisit(std::set<std::string>& data, const Json::Value& node);
-void readJsonStringValueVisit(std::vector<std::string>& data, const Json::Value& node);
 
 } // namespace config
 } // namespace retdec

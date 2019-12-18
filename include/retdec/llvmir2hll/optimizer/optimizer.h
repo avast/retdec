@@ -44,8 +44,6 @@ class Optimizer: public OrderedAllVisitor, private retdec::utils::NonCopyable {
 public:
 	Optimizer(ShPtr<Module> module);
 
-	virtual ~Optimizer() override;
-
 	/**
 	* @brief Returns the ID of the optimizer.
 	*/

@@ -60,11 +60,6 @@ namespace llvmir2hll {
 ExpressionNegater::ExpressionNegater(): Visitor() {}
 
 /**
-* @brief Destructs the negater.
-*/
-ExpressionNegater::~ExpressionNegater() {}
-
-/**
 * @brief Negates the given expression.
 *
 * See the class description for more details.

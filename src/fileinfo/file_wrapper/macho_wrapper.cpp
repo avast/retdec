@@ -22,14 +22,6 @@ MachOWrapper::MachOWrapper(std::string pathToFile, retdec::fileformat::LoadFlags
 }
 
 /**
- * Destructor
- */
-MachOWrapper::~MachOWrapper()
-{
-
-}
-
-/**
  * Get LLVM COFF parser
  * @return LLVM COFF parser
  */

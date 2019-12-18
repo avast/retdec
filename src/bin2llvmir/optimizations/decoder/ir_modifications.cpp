@@ -6,7 +6,6 @@
 
 #include "retdec/bin2llvmir/optimizations/decoder/decoder.h"
 
-using namespace retdec::utils;
 using namespace llvm;
 
 namespace retdec {
@@ -171,7 +170,7 @@ llvm::GlobalVariable* Decoder::getCallReturnObject()
 	}
 	else if (_config->getConfig().architecture.isArm64())
 	{
-		return _config->getLlvmRegister("r0");
+		return _abi->getRegister(ARM64_REG_X0);
 	}
 
 	assert(false);
@@ -185,7 +184,7 @@ llvm::GlobalVariable* Decoder::getCallReturnObject()
  * fill \p tBb with the result.
  */
 void Decoder::getOrCreateCallTarget(
-		utils::Address addr,
+		common::Address addr,
 		llvm::Function*& tFnc,
 		llvm::BasicBlock*& tBb)
 {
@@ -236,7 +235,7 @@ void Decoder::getOrCreateCallTarget(
  *
  */
 void Decoder::getOrCreateBranchTarget(
-		utils::Address addr,
+		common::Address addr,
 		llvm::BasicBlock*& tBb,
 		llvm::Function*& tFnc,
 		llvm::Instruction* from)
@@ -377,7 +376,7 @@ bool Decoder::canSplitFunctionOn(llvm::BasicBlock* bb)
  *     fnc2 end
  */
 bool Decoder::canSplitFunctionOn(
-		utils::Address addr,
+		common::Address addr,
 		llvm::BasicBlock* splitBb,
 		std::set<llvm::BasicBlock*>& newFncStarts)
 {
@@ -396,7 +395,7 @@ bool Decoder::canSplitFunctionOn(
 		}
 	}
 
-	std::set<Address> fncStarts;
+	std::set<common::Address> fncStarts;
 	fncStarts.insert(fAddr);
 	fncStarts.insert(addr);
 
@@ -409,8 +408,7 @@ bool Decoder::canSplitFunctionOn(
 		changed = false;
 		for (BasicBlock& b : *f)
 		{
-//			Address bAddr = getBasicBlockAddress(&b);
-			Address bAddr;
+			common::Address bAddr;
 			// TODO: shitty
 			BasicBlock* bPrev = &b;
 			while (bAddr.isUndefined() && bPrev)
@@ -423,13 +421,15 @@ bool Decoder::canSplitFunctionOn(
 				continue;
 			}
 			auto up = fncStarts.upper_bound(bAddr);
+			if (up == fncStarts.begin()) {
+				return false;
+			}
 			--up;
-			Address bFnc = *up;
+			common::Address bFnc = *up;
 
 			for (auto* p : predecessors(&b))
 			{
-//				Address pAddr = getBasicBlockAddress(p);
-				Address pAddr;
+				common::Address pAddr;
 				// TODO: shitty
 				BasicBlock* pPrev = p;
 				while (pAddr.isUndefined() && pPrev)
@@ -442,8 +442,11 @@ bool Decoder::canSplitFunctionOn(
 					continue;
 				}
 				auto up = fncStarts.upper_bound(pAddr);
+				if (up == fncStarts.begin()) {
+					return false;
+				}
 				--up;
-				Address pFnc = *up;
+				common::Address pFnc = *up;
 
 				if (bFnc != pFnc)
 				{
@@ -468,7 +471,7 @@ bool Decoder::canSplitFunctionOn(
  * This can create new BB at \p addr even if it then cannot split function
  * on this new BB. Is this desirable behavior?
  */
-llvm::Function* Decoder::splitFunctionOn(utils::Address addr)
+llvm::Function* Decoder::splitFunctionOn(common::Address addr)
 {
 	if (auto* bb = getBasicBlockAtAddress(addr))
 	{
@@ -509,7 +512,7 @@ llvm::Function* Decoder::splitFunctionOn(utils::Address addr)
 }
 
 llvm::Function* Decoder::splitFunctionOn(
-		utils::Address addr,
+		common::Address addr,
 		llvm::BasicBlock* splitOnBb)
 {
 	LOG << "\t\t\t\t" << "S: splitFunctionOn @ " << addr << " on "
@@ -531,7 +534,7 @@ llvm::Function* Decoder::splitFunctionOn(
 	std::set<Function*> newFncs;
 	for (auto* splitBb : newFncStarts)
 	{
-		Address splitAddr = getBasicBlockAddress(splitBb);
+		common::Address splitAddr = getBasicBlockAddress(splitBb);
 
 		LOG << "\t\t\t\t" << "S: splitting @ " << splitAddr << " on "
 				<< splitBb->getName().str() << std::endl;

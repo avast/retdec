@@ -42,9 +42,6 @@ class Module;
 * Instances of this class have reference object semantics.
 */
 class FuncOptimizer: public Optimizer {
-public:
-	virtual ~FuncOptimizer() override;
-
 protected:
 	FuncOptimizer(ShPtr<Module> module);
 

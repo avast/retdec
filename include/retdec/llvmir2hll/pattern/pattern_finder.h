@@ -41,8 +41,6 @@ public:
 	using Patterns = std::vector<ShPtr<Pattern>>;
 
 public:
-	virtual ~PatternFinder();
-
 	/**
 	* @brief Returns the ID of the finder.
 	*/

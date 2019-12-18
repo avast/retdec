@@ -37,9 +37,6 @@ class ExpressionNegater: private Visitor, private retdec::utils::NonCopyable {
 public:
 	static ShPtr<Expression> negate(ShPtr<Expression> expr);
 
-	// It needs to be public so it can be called in ShPtr's destructor.
-	virtual ~ExpressionNegater() override;
-
 private:
 	/// Type of a container to store expressions.
 	using ExpressionStack = std::stack<ShPtr<Expression>>;

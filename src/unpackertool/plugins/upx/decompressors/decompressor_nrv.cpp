@@ -31,13 +31,6 @@ DecompressorNrv::DecompressorNrv(std::unique_ptr<BitParser> bitParser) : _bitPar
 }
 
 /**
- * Destructor.
- */
-DecompressorNrv::~DecompressorNrv()
-{
-}
-
-/**
  * Checks whether the provided packing method is valid.
  *
  * @param stub The ELF32 UPX unpacking stub object.

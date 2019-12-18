@@ -36,8 +36,6 @@ class VoidReturnOptimizer final: public FuncOptimizer {
 public:
 	VoidReturnOptimizer(ShPtr<Module> module);
 
-	virtual ~VoidReturnOptimizer() override;
-
 	virtual std::string getId() const override { return "VoidReturn"; }
 
 private:

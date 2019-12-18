@@ -10,27 +10,6 @@
 
 namespace fileinfo {
 
-/**
- * Constructor
- */
-PatternMatch::PatternMatch() : offset(std::numeric_limits<unsigned long long>::max()),
-	address(std::numeric_limits<unsigned long long>::max()),
-	dataSize(std::numeric_limits<unsigned long long>::max()),
-	entrySize(std::numeric_limits<unsigned long long>::max()),
-	integer(false),
-	floatingPoint(false)
-{
-
-}
-
-/**
- * Destructor
- */
-PatternMatch::~PatternMatch()
-{
-
-}
-
 bool PatternMatch::isInteger() const
 {
 	return integer;

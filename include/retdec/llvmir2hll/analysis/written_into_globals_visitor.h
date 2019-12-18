@@ -27,9 +27,6 @@ class Function;
 class WrittenIntoGlobalsVisitor: private OrderedAllVisitor,
 		private retdec::utils::NonCopyable {
 public:
-	// It needs to be public so it can be called in ShPtr's destructor.
-	virtual ~WrittenIntoGlobalsVisitor() override;
-
 	static VarSet getWrittenIntoGlobals(ShPtr<Function> func,
 		ShPtr<Module> module);
 

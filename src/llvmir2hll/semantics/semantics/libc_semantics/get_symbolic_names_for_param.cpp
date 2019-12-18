@@ -56,7 +56,7 @@ const FuncParamsMap &FUNC_PARAMS_MAP(initFuncParamsMap());
 *
 * See its description for more details.
 */
-Maybe<IntStringMap> getSymbolicNamesForParam(const std::string &funcName,
+std::optional<IntStringMap> getSymbolicNamesForParam(const std::string &funcName,
 		unsigned paramPos) {
 	return getSymbolicNamesForParamFromMap(funcName, paramPos, FUNC_PARAMS_MAP);
 }

@@ -26,9 +26,6 @@ class Value;
 class CallsObtainer: private OrderedAllVisitor,
 		private retdec::utils::NonCopyable {
 public:
-	// It needs to be public so it can be called in ShPtr's destructor.
-	virtual ~CallsObtainer() override;
-
 	static CallVector getCalls(ShPtr<Value> value);
 	static bool hasCalls(ShPtr<Value> value);
 

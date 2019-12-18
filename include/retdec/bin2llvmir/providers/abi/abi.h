@@ -35,7 +35,7 @@ class Abi
 	//
 	public:
 		Abi(llvm::Module* m, Config* c);
-		virtual ~Abi();
+		virtual ~Abi() = default;
 
 	// Registers.
 	//
@@ -104,9 +104,12 @@ class Abi
 	// Calling conventions.
 	//
 	public:
+		bool supportsCallingConvention(
+				const CallingConvention::ID& cc);
 		CallingConvention* getCallingConvention(
 				const CallingConvention::ID& cc);
 		CallingConvention* getDefaultCallingConvention();
+		CallingConvention::ID getDefaultCallingConventionID() const;
 
 	// Config.
 	//

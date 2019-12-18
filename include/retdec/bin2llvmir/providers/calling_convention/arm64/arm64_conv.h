@@ -18,7 +18,6 @@ class Arm64CallingConvention: public CallingConvention
 	//
 	public:
 		Arm64CallingConvention(const Abi* a);
-		virtual ~Arm64CallingConvention();
 
 	// Construcor method.
 	//

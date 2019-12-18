@@ -22,14 +22,6 @@ EntryPointJsonGetter::EntryPointJsonGetter(FileInformation &fileInfo) : SimpleGe
 
 }
 
-/**
- * Destructor
- */
-EntryPointJsonGetter::~EntryPointJsonGetter()
-{
-
-}
-
 std::size_t EntryPointJsonGetter::loadInformation(std::vector<std::string> &desc, std::vector<std::string> &info) const
 {
 	desc.clear();

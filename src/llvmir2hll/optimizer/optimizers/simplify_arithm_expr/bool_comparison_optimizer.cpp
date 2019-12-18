@@ -27,11 +27,6 @@ BoolComparisonSubOptimizer::BoolComparisonSubOptimizer(ShPtr<ArithmExprEvaluator
 		arithmExprEvaluator): SubOptimizer(arithmExprEvaluator) {}
 
 /**
-* @brief Destructs the sub-optimizer.
-*/
-BoolComparisonSubOptimizer::~BoolComparisonSubOptimizer() {}
-
-/**
 * @brief Creates a new sub-optimizer.
 *
 * @param[in] arithmExprEvaluator @a The used evaluator of arithmetical

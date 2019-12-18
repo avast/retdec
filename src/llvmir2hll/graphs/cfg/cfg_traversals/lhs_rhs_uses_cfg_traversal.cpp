@@ -29,11 +29,6 @@ LhsRhsUsesCFGTraversal::LhsRhsUsesCFGTraversal(ShPtr<Statement> stmt,
 		origRhsVars(origRhsVars), va(va), cio(cio), uses() {}
 
 /**
-* @brief Destructs the traverser.
-*/
-LhsRhsUsesCFGTraversal::~LhsRhsUsesCFGTraversal() {}
-
-/**
 * @brief Returns the uses of left-hand side of @a stmt such that there are no
 *        modifications of variables used in @a stmt before them.
 *

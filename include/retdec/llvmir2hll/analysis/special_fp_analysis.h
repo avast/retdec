@@ -28,9 +28,6 @@ class Module;
 class SpecialFPAnalysis: private OrderedAllVisitor,
 		private retdec::utils::NonCopyable {
 public:
-	// It needs to be public so it can be called in ShPtr's destructor.
-	virtual ~SpecialFPAnalysis() override;
-
 	static bool hasSpecialFP(ShPtr<Module> module);
 
 private:

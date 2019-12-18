@@ -84,7 +84,6 @@ public:
 	public:
 		Node();
 		explicit Node(const std::string &label);
-		~Node();
 
 		std::string getLabel() const;
 
@@ -153,7 +152,6 @@ public:
 	public:
 		Edge(ShPtr<Node> src, ShPtr<Node> dst,
 			ShPtr<Expression> label = nullptr);
-		~Edge();
 
 		ShPtr<Node> getSrc() const;
 		ShPtr<Expression> getLabel() const;
@@ -172,7 +170,6 @@ public:
 
 public:
 	CFG(ShPtr<Function> func);
-	~CFG();
 
 	ShPtr<Function> getCorrespondingFunction() const;
 

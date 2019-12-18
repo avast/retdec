@@ -62,7 +62,6 @@ class Certificate
 		void calculateHashes();
 	public:
 		Certificate(X509 *cert);
-		~Certificate();
 
 		/// @name Getters
 		/// @{

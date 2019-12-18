@@ -6,15 +6,15 @@
 
 #include "retdec/bin2llvmir/optimizations/decoder/decoder_ranges.h"
 
-using namespace retdec::utils;
+using namespace retdec::common;
 
 namespace {
 
-inline retdec::utils::Address align(
-		const retdec::utils::Address& s,
+inline retdec::common::Address align(
+		const retdec::common::Address& s,
 		unsigned a)
 {
-	return a && s % a ? retdec::utils::Address(s + a - (s % a)) : s;
+	return a && s % a ? retdec::common::Address(s + a - (s % a)) : s;
 }
 
 } // namespace anonymous
@@ -22,7 +22,7 @@ inline retdec::utils::Address align(
 namespace retdec {
 namespace bin2llvmir {
 
-void RangesToDecode::addPrimary(utils::Address s, utils::Address e)
+void RangesToDecode::addPrimary(common::Address s, common::Address e)
 {
 	s = align(s, archInsnAlign);
 	if (e > s)
@@ -31,12 +31,12 @@ void RangesToDecode::addPrimary(utils::Address s, utils::Address e)
 	}
 }
 
-void RangesToDecode::addPrimary(const utils::AddressRange& r)
+void RangesToDecode::addPrimary(const common::AddressRange& r)
 {
 	addPrimary(r.getStart(), r.getEnd());
 }
 
-void RangesToDecode::addAlternative(utils::Address s, utils::Address e)
+void RangesToDecode::addAlternative(common::Address s, common::Address e)
 {
 	s = align(s, archInsnAlign);
 	if (e > s)
@@ -45,7 +45,7 @@ void RangesToDecode::addAlternative(utils::Address s, utils::Address e)
 	}
 }
 
-void RangesToDecode::addAlternative(const utils::AddressRange& r)
+void RangesToDecode::addAlternative(const common::AddressRange& r)
 {
 	addAlternative(r.getStart(), r.getEnd());
 }
@@ -56,14 +56,14 @@ void RangesToDecode::promoteAlternativeToPrimary()
 	_strict = true;
 }
 
-void RangesToDecode::remove(utils::Address s, utils::Address e)
+void RangesToDecode::remove(common::Address s, common::Address e)
 {
 	e = align(e, archInsnAlign);
 	_primaryRanges.remove(s, e);
 	_alternativeRanges.remove(s, e);
 }
 
-void RangesToDecode::remove(const utils::AddressRange& r)
+void RangesToDecode::remove(const common::AddressRange& r)
 {
 	remove(r.getStart(), r.getEnd());
 }
@@ -76,10 +76,10 @@ void RangesToDecode::removeZeroSequences(FileImage* image)
 
 void RangesToDecode::removeZeroSequences(
 		FileImage* image,
-		utils::AddressRangeContainer& rs)
+		common::AddressRangeContainer& rs)
 {
 	static unsigned minSequence = 0x50; // TODO: Maybe should be smaller.
-	retdec::utils::AddressRangeContainer toRemove;
+	retdec::common::AddressRangeContainer toRemove;
 
 	for (auto& range : rs)
 	{
@@ -165,28 +165,28 @@ bool RangesToDecode::alternativeEmpty() const
 	return _alternativeRanges.empty();
 }
 
-const utils::AddressRange& RangesToDecode::primaryFront() const
+const common::AddressRange& RangesToDecode::primaryFront() const
 {
 	return *_primaryRanges.begin();
 }
 
-const utils::AddressRange& RangesToDecode::alternativeFront() const
+const common::AddressRange& RangesToDecode::alternativeFront() const
 {
 	return *_alternativeRanges.begin();
 }
 
-const utils::AddressRange* RangesToDecode::getPrimary(utils::Address a) const
+const common::AddressRange* RangesToDecode::getPrimary(common::Address a) const
 {
 	return _primaryRanges.getRange(a);
 }
 
-const utils::AddressRange* RangesToDecode::getAlternative(
-		utils::Address a) const
+const common::AddressRange* RangesToDecode::getAlternative(
+		common::Address a) const
 {
 	return _alternativeRanges.getRange(a);
 }
 
-const utils::AddressRange* RangesToDecode::get(utils::Address a) const
+const common::AddressRange* RangesToDecode::get(common::Address a) const
 {
 	auto* p = getPrimary(a);
 	return p ? p : getAlternative(a);

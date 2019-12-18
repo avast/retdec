@@ -11,14 +11,6 @@ using namespace retdec::fileformat;
 
 namespace fileinfo {
 
-/**
- * Constructor
- */
-Strings::Strings() : strings(nullptr)
-{
-
-}
-
 std::size_t Strings::getNumberOfStrings() const
 {
 	return strings ? strings->size() : 0;

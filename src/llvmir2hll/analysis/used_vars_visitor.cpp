@@ -28,21 +28,6 @@ namespace llvmir2hll {
 UsedVars::UsedVars(): readVars(), writtenVars(), allVars(), numOfVarUses() {}
 
 /**
-* @brief Constructs a new UsedVars object from @a other.
-*/
-UsedVars::UsedVars(const UsedVars &other) = default;
-
-/**
-* @brief Destructs the object.
-*/
-UsedVars::~UsedVars() {}
-
-/**
-* @brief Assigns @a other to the current object.
-*/
-UsedVars &UsedVars::operator=(const UsedVars &other) = default;
-
-/**
 * @brief Returns @c true if the current object is equal to @a other, @c false
 *        otherwise.
 */
@@ -197,11 +182,6 @@ UsedVarsVisitor::UsedVarsVisitor(bool visitSuccessors, bool visitNestedStmts,
 	OrderedAllVisitor(), Caching(enableCaching), usedVars(),
 	writing(false), visitSuccessors(visitSuccessors), visitNestedStmts(visitNestedStmts)
 	{}
-
-/**
-* @brief Destructs the visitor.
-*/
-UsedVarsVisitor::~UsedVarsVisitor() {}
 
 /*
 * @brief Returns the set of used variables in the given value.

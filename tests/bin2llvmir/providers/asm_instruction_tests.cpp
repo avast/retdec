@@ -297,7 +297,7 @@ TEST_F(AsmInstructionTests, AsmInstructionCtorInstructionConstructsValidIfInDiff
 }
 
 //
-// AsmInstruction(llvm::Module*, retdec::utils::Address)
+// AsmInstruction(llvm::Module*, retdec::common::Address)
 //
 
 TEST_F(AsmInstructionTests, AsmInstructionCtorAddressConstructsInvalidForNullptr)

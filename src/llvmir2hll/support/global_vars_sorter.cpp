@@ -123,9 +123,6 @@ public:
 		return sorted;
 	}
 
-	// It needs to be public so it can be called in ShPtr's destructor.
-	virtual ~InterdependencySorter() override {}
-
 private:
 	explicit InterdependencySorter(const GlobalVarDefVector &globalVars) {
 		// Compute used variables in the initializers of all global variables.

@@ -11,15 +11,7 @@
 namespace retdec {
 namespace llvmir2hll {
 
-/**
-* @brief Constructs a new break statement.
-*/
 BreakStmt::BreakStmt(Address a) : Statement(a) {}
-
-/**
-* @brief Destructs the statement.
-*/
-BreakStmt::~BreakStmt() {}
 
 bool BreakStmt::isEqualTo(ShPtr<Value> otherValue) const {
 	return isa<BreakStmt>(otherValue);

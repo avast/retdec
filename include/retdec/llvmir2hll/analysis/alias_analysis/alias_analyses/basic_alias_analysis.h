@@ -25,8 +25,6 @@ class Module;
 */
 class BasicAliasAnalysis: public AliasAnalysis {
 public:
-	virtual ~BasicAliasAnalysis() override;
-
 	static ShPtr<AliasAnalysis> create();
 
 	virtual void init(ShPtr<Module> module) override;

@@ -531,12 +531,7 @@ PatternExtractor::PatternExtractor(
 	stateValid = processFile();
 }
 
-/**
- * Destructor.
- */
-PatternExtractor::~PatternExtractor()
-{
-}
+PatternExtractor::~PatternExtractor() = default;
 
 /**
  * Check state of extractor.

@@ -10,22 +10,6 @@ namespace retdec {
 namespace fileformat {
 
 /**
- * Constructor
- */
-VisualBasicExtern::VisualBasicExtern()
-{
-
-}
-
-/**
- * Destructor
- */
-VisualBasicExtern::~VisualBasicExtern()
-{
-
-}
-
-/**
  * Get module name
  * @return Module name
  */

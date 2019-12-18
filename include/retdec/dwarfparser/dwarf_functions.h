@@ -67,7 +67,6 @@ class DwarfFunctionContainer : public DwarfBaseContainer<DwarfFunction>
 {
 	public:
 		DwarfFunctionContainer(DwarfFile *file, DwarfBaseElement *elem = nullptr);
-		virtual ~DwarfFunctionContainer() override;
 		virtual void dump() const override;
 
 		virtual DwarfFunction *loadAndGetDie(Dwarf_Die die, unsigned lvl) override;

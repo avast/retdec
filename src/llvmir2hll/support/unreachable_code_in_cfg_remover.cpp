@@ -30,11 +30,6 @@ UnreachableCodeInCFGRemover::UnreachableCodeInCFGRemover(ShPtr<Module> module):
 	module(module), cfg(), cfgBuilder(NonRecursiveCFGBuilder::create()) {}
 
 /**
-* @brief Destructs the remover.
-*/
-UnreachableCodeInCFGRemover::~UnreachableCodeInCFGRemover() {}
-
-/**
 * @brief Removes code from all the functions in @a module that is unreachable
 *        in the CFG.
 *

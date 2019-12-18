@@ -24,11 +24,6 @@ Capstone2LlvmIrTranslatorArm_impl::Capstone2LlvmIrTranslatorArm_impl(
 	initialize();
 }
 
-Capstone2LlvmIrTranslatorArm_impl::~Capstone2LlvmIrTranslatorArm_impl()
-{
-	// Nothing specific to ARM.
-}
-
 //
 //==============================================================================
 // Mode query & modification methods - from Capstone2LlvmIrTranslator.
@@ -521,7 +516,30 @@ llvm::Instruction* Capstone2LlvmIrTranslatorArm_impl::storeRegister(
 	{
 		throw GenericError("storeRegister() unhandled reg.");
 	}
-	val = generateTypeConversion(irb, val, llvmReg->getValueType(), ct);
+	if (llvmReg->getValueType()->isFloatingPointTy())
+	{
+		switch (ct)
+		{
+			case eOpConv::SITOFP_OR_FPCAST:
+			case eOpConv::UITOFP_OR_FPCAST:
+				val = generateTypeConversion(irb, val, llvmReg->getValueType(), ct);
+				break;
+			default:
+				val = generateTypeConversion(irb, val, llvmReg->getValueType(), eOpConv::FPCAST_OR_BITCAST);
+		}
+	}
+	else
+	{
+		switch (ct)
+		{
+			case eOpConv::SEXT_TRUNC_OR_BITCAST:
+			case eOpConv::ZEXT_TRUNC_OR_BITCAST:
+				val = generateTypeConversion(irb, val, llvmReg->getValueType(), ct);
+				break;
+			default:
+				val = generateTypeConversion(irb, val, llvmReg->getValueType(), eOpConv::SEXT_TRUNC_OR_BITCAST);
+		}
+	}
 
 	return irb.CreateStore(val, llvmReg);
 }
@@ -1115,14 +1133,14 @@ void Capstone2LlvmIrTranslatorArm_impl::translateMovt(cs_insn* i, cs_arm* ai, ll
 	// Add/Fix THUMB unit tests.
 	if (_basicMode == CS_MODE_THUMB)
 	{
-		std::tie(op0, op1) = loadOpBinary(ai, irb, eOpConv::ZEXT_TRUNC);
+		std::tie(op0, op1) = loadOpBinary(ai, irb, eOpConv::ZEXT_TRUNC_OR_BITCAST);
 		op1 = irb.CreateShl(op1, 16);
 		op0 = irb.CreateOr(op0, op1);
 		storeOp(ai->operands[0], op0, irb);
 	}
 	else
 	{
-		std::tie(op0, op1) = loadOpBinary(ai, irb, eOpConv::ZEXT_TRUNC);
+		std::tie(op0, op1) = loadOpBinary(ai, irb, eOpConv::ZEXT_TRUNC_OR_BITCAST);
 		op0 = irb.CreateAnd(op0, 0xffff);
 		op1 = irb.CreateShl(op1, 16);
 		op0 = irb.CreateOr(op0, op1);
@@ -1147,7 +1165,7 @@ void Capstone2LlvmIrTranslatorArm_impl::translateMovw(cs_insn* i, cs_arm* ai, ll
 	}
 	else
 	{
-		std::tie(op0, op1) = loadOpBinary(ai, irb, eOpConv::ZEXT_TRUNC);
+		std::tie(op0, op1) = loadOpBinary(ai, irb, eOpConv::ZEXT_TRUNC_OR_BITCAST);
 		op0 = irb.CreateAnd(op0, 0xffff0000);
 		op0 = irb.CreateOr(op0, op1);
 		storeOp(ai->operands[0], op0, irb);

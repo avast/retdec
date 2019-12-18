@@ -36,11 +36,6 @@ ZeroSubOptimizer::ZeroSubOptimizer(ShPtr<ArithmExprEvaluator>
 		arithmExprEvaluator): SubOptimizer(arithmExprEvaluator) {}
 
 /**
-* @brief Destructor.
-*/
-ZeroSubOptimizer::~ZeroSubOptimizer() {}
-
-/**
 * @brief Creates a new ZeroSubOptimizer.
 *
 * @param[in] arithmExprEvaluator @a The used evaluator of arithmetical

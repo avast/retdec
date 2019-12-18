@@ -109,13 +109,6 @@ MachOFormat::MachOFormat(const std::uint8_t *data, std::size_t size, LoadFlags l
 }
 
 /**
- * Destructor
- */
-MachOFormat::~MachOFormat()
-{
-}
-
-/**
  * As LLVM constructor needs information about bit-width and endianness
  * we must read magic number before calling LLVM constructor
  */

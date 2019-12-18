@@ -219,17 +219,17 @@ int handleArguments(std::vector<std::string> &args)
 
 			if (opt == "--compiler")
 			{
-				retdec::config::ToolInfo ci;
+				retdec::common::ToolInfo ci;
 				ci.setName(val);
 				ci.setPercentage(101);
 
 				if (config.tools.empty())
 				{
-					config.tools.insert(ci);
+					config.tools.push_back(ci);
 				}
 				else
 				{
-					config.tools.insert(ci);
+					config.tools.push_back(ci);
 				}
 			}
 			else if (opt == "--arch")
@@ -346,7 +346,8 @@ int handleArguments(std::vector<std::string> &args)
 			}
 			else if (opt == "--selected-range")
 			{
-				config.parameters.selectedRanges.insert( retdec::config::AddressRangeJson(val) );
+				config.parameters.selectedRanges.insert(
+						retdec::common::stringToAddrRange(val));
 			}
 			else
 			{
@@ -367,7 +368,6 @@ int handleArguments(std::vector<std::string> &args)
 		newConfig.globals = config.globals;
 		newConfig.registers = config.registers;
 		newConfig.structures = config.structures;
-		newConfig.segments = config.segments;
 		newConfig.vtables = config.vtables;
 		newConfig.classes = config.classes;
 

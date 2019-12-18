@@ -23,7 +23,6 @@ class IterativeSimpleGetter : public IterativeGetter
 		std::string elementHeader; ///< header for every presented structure
 	public:
 		IterativeSimpleGetter(FileInformation &fileInfo);
-		virtual ~IterativeSimpleGetter() override;
 
 		/// @name Getters
 		/// @{

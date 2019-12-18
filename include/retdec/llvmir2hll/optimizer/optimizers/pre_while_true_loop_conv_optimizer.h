@@ -121,8 +121,6 @@ class PreWhileTrueLoopConvOptimizer final: public FuncOptimizer {
 public:
 	PreWhileTrueLoopConvOptimizer(ShPtr<Module> module, ShPtr<ValueAnalysis> va);
 
-	virtual ~PreWhileTrueLoopConvOptimizer() override;
-
 	virtual std::string getId() const override { return "PreWhileTrueLoopConv"; }
 
 private:

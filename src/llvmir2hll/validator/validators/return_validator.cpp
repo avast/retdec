@@ -24,11 +24,6 @@ REGISTER_AT_FACTORY("Return", RETURN_VALIDATOR_ID, ValidatorFactory,
 ReturnValidator::ReturnValidator(): Validator() {}
 
 /**
-* @brief Destructs the validator.
-*/
-ReturnValidator::~ReturnValidator() {}
-
-/**
 * @brief Creates a new validator.
 */
 ShPtr<Validator> ReturnValidator::create() {

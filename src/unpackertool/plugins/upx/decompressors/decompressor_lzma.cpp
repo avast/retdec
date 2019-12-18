@@ -22,20 +22,6 @@ namespace unpackertool {
 namespace upx {
 
 /**
- * Constructor.
- */
-DecompressorLzma::DecompressorLzma()
-{
-}
-
-/**
- * Destructor.
- */
-DecompressorLzma::~DecompressorLzma()
-{
-}
-
-/**
  * Checks whether the provided packing method is valid.
  *
  * @param stub The ELF32 UPX unpacking stub object.

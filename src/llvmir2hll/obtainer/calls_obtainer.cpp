@@ -18,11 +18,6 @@ CallsObtainer::CallsObtainer():
 	OrderedAllVisitor(false, false), foundCalls() {}
 
 /**
-* @brief Destructs the obtainer.
-*/
-CallsObtainer::~CallsObtainer() {}
-
-/**
 * @brief Returns a list of all function calls in the given @a value.
 *
 * Nested function calls are not considered, e.g. for

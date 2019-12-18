@@ -39,14 +39,6 @@ StringsPlainGetter::StringsPlainGetter(FileInformation &fileInfo) : IterativeDis
 	loadRecords();
 }
 
-/**
- * Destructor
- */
-StringsPlainGetter::~StringsPlainGetter()
-{
-
-}
-
 std::size_t StringsPlainGetter::getBasicInfo(std::size_t structIndex, std::vector<std::string> &desc, std::vector<std::string> &info) const
 {
 	if(structIndex >= numberOfStructures || !fileinfo.hasStrings())

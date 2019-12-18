@@ -11,7 +11,7 @@
 #include <llvm/IR/Module.h>
 #include <llvm/IR/Value.h>
 
-#include "retdec/utils/address.h"
+#include "retdec/common/address.h"
 #include "retdec/bin2llvmir/providers/abi/abi.h"
 #include "retdec/bin2llvmir/providers/config.h"
 #include "retdec/bin2llvmir/providers/debugformat.h"
@@ -46,31 +46,31 @@ class FileImage
 	public:
 		llvm::ConstantInt* getConstantInt(
 				llvm::IntegerType* t,
-				retdec::utils::Address addr);
-		llvm::ConstantInt* getConstantDefault(retdec::utils::Address addr);
-		llvm::Constant* getConstantHalf(retdec::utils::Address addr);
-		llvm::Constant* getConstantFloat(retdec::utils::Address addr);
-		llvm::Constant* getConstantDouble(retdec::utils::Address addr);
-		llvm::Constant* getConstantLongDouble(retdec::utils::Address addr);
-		llvm::Constant* getConstantCharPointer(retdec::utils::Address addr);
-		llvm::Constant* getConstantCharArrayNice(retdec::utils::Address addr);
+				retdec::common::Address addr);
+		llvm::ConstantInt* getConstantDefault(retdec::common::Address addr);
+		llvm::Constant* getConstantHalf(retdec::common::Address addr);
+		llvm::Constant* getConstantFloat(retdec::common::Address addr);
+		llvm::Constant* getConstantDouble(retdec::common::Address addr);
+		llvm::Constant* getConstantLongDouble(retdec::common::Address addr);
+		llvm::Constant* getConstantCharPointer(retdec::common::Address addr);
+		llvm::Constant* getConstantCharArrayNice(retdec::common::Address addr);
 		llvm::Constant* getConstantPointer(
 				llvm::PointerType* type,
-				retdec::utils::Address addr);
+				retdec::common::Address addr);
 		llvm::Constant* getConstantStruct(
 				llvm::StructType* type,
-				retdec::utils::Address addr);
+				retdec::common::Address addr);
 		llvm::Constant* getConstantArray(
 				llvm::ArrayType* type,
-				retdec::utils::Address addr);
+				retdec::common::Address addr);
 		llvm::Constant* getConstant(
 				llvm::Type* type,
-				retdec::utils::Address addr = retdec::utils::Address::Undefined,
+				retdec::common::Address addr = retdec::common::Address::Undefined,
 				bool wideString = false);
 		llvm::Constant* getConstant(
 				Config* config,
 				DebugFormat* dbgf = nullptr,
-				retdec::utils::Address addr = retdec::utils::Address::Undefined);
+				retdec::common::Address addr = retdec::common::Address::Undefined);
 
 	// Miscellaneous
 	//

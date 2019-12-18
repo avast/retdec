@@ -31,11 +31,6 @@ AbiPic32::AbiPic32(llvm::Module* m, Config* c) :
 	_defcc = CallingConvention::ID::CC_PIC32;
 }
 
-AbiPic32::~AbiPic32()
-{
-
-}
-
 bool AbiPic32::isGeneralPurposeRegister(const llvm::Value* val) const
 {
 	uint32_t rid = getRegisterId(val);

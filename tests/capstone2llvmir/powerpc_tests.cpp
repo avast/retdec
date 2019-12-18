@@ -96,7 +96,7 @@ struct PrintCapstoneModeToString_Powerpc
 // If some test case is not meant for all modes, use some of the ONLY_MODE_*,
 // SKIP_MODE_* macros.
 //
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
 		InstantiatePowerpcWithAllModes,
 		Capstone2LlvmIrTranslatorPowerpcTests,
 		::testing::Values(CS_MODE_32, CS_MODE_64),
@@ -116,6 +116,25 @@ TEST_P(Capstone2LlvmIrTranslatorPowerpcTests, PPC_INS_ADD)
 	});
 
 	emulate("add 0, 0, 1");
+
+	EXPECT_JUST_REGISTERS_LOADED({PPC_REG_R0, PPC_REG_R1});
+	EXPECT_JUST_REGISTERS_STORED({
+		{PPC_REG_R0, 0x3333},
+	});
+	EXPECT_NO_MEMORY_LOADED_STORED();
+	EXPECT_NO_VALUE_CALLED();
+}
+
+TEST_P(Capstone2LlvmIrTranslatorPowerpcTests, PPC_INS_ADD_bin)
+{
+	ONLY_MODE_32;
+
+	setRegisters({
+		{PPC_REG_R0, 0x1111},
+		{PPC_REG_R1, 0x2222},
+	});
+
+	emulate_bin("7c 00 0a 14");
 
 	EXPECT_JUST_REGISTERS_LOADED({PPC_REG_R0, PPC_REG_R1});
 	EXPECT_JUST_REGISTERS_STORED({

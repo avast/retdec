@@ -39,7 +39,6 @@ public:
 
 public:
 	UsedTypes(const UsedTypes &other);
-	~UsedTypes();
 
 	UsedTypes &operator=(const UsedTypes &other);
 	bool operator==(const UsedTypes &other) const;
@@ -118,9 +117,6 @@ private:
 class UsedTypesVisitor: private OrderedAllVisitor,
 		private retdec::utils::NonCopyable {
 public:
-	// It needs to be public so it can be called in ShPtr's destructor.
-	virtual ~UsedTypesVisitor() override;
-
 	static ShPtr<UsedTypes> getUsedTypes(ShPtr<Module> module);
 
 private:

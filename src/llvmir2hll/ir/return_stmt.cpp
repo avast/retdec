@@ -21,11 +21,6 @@ namespace llvmir2hll {
 ReturnStmt::ReturnStmt(ShPtr<Expression> retVal, Address a):
 	Statement(a), retVal(retVal) {}
 
-/**
-* @brief Destructs the statement.
-*/
-ReturnStmt::~ReturnStmt() {}
-
 ShPtr<Value> ReturnStmt::clone() {
 	ShPtr<ReturnStmt> returnStmt(
 		ReturnStmt::create(nullptr, nullptr, getAddress()));

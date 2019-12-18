@@ -28,8 +28,6 @@ public:
 	static ShPtr<CallStmt> create(ShPtr<CallExpr> call,
 		ShPtr<Statement> succ = nullptr, Address a = Address::Undefined);
 
-	virtual ~CallStmt() override;
-
 	virtual bool isEqualTo(ShPtr<Value> otherValue) const override;
 	virtual bool isCompound() override { return false; }
 	virtual ShPtr<Value> clone() override;

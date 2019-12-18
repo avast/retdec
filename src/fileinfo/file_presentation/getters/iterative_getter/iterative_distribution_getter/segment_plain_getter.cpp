@@ -39,14 +39,6 @@ SegmentPlainGetter::SegmentPlainGetter(FileInformation &fileInfo) : IterativeDis
 	loadRecords();
 }
 
-/**
- * Destructor
- */
-SegmentPlainGetter::~SegmentPlainGetter()
-{
-
-}
-
 std::size_t SegmentPlainGetter::getBasicInfo(std::size_t structIndex, std::vector<std::string> &desc, std::vector<std::string> &info) const
 {
 	static_cast<void>(structIndex);

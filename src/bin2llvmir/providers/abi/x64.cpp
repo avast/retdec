@@ -32,10 +32,6 @@ AbiX64::AbiX64(llvm::Module* m, Config* c) :
 	_defcc = CallingConvention::ID::CC_X64;
 }
 
-AbiX64::~AbiX64()
-{
-}
-
 bool AbiX64::isGeneralPurposeRegister(const llvm::Value* val) const
 {
 	uint32_t rid = getRegisterId(val);

@@ -24,27 +24,24 @@ class FileSection
 		std::string crc32;                        ///< CRC32 of section content
 		std::string md5;                          ///< MD5 of section content
 		std::string sha256;                       ///< SHA256 of section content
-		unsigned long long index;                 ///< index of section
-		unsigned long long offset;                ///< offset in file
-		unsigned long long sizeInFile;            ///< size of section in file
-		unsigned long long entrySize;             ///< size of one entry in section
-		unsigned long long startAddress;          ///< start address in memory
-		unsigned long long sizeInMemory;          ///< size of section in memory
-		unsigned long long relocationsOffset;     ///< offset of relocation entries for this section
-		unsigned long long numberOfRelocations;   ///< number of relocation entries for this section
-		unsigned long long lineNumbersOffset;     ///< offset of line-number entries for this section
-		unsigned long long numberOfLineNumbers;   ///< number of line-number entries for this section
-		unsigned long long memoryAlignment;       ///< alignment in memory
-		unsigned long long linkToSection;         ///< link to another section
-		unsigned long long extraInfo;             ///< extra information about section
-		unsigned long long lineOffset;            ///< start line in file
-		unsigned long long relocationsLineOffset; ///< start line of relocation entries for this section
-		double entropy;                           ///< section data entropy
+		unsigned long long index = std::numeric_limits<unsigned long long>::max();                 ///< index of section
+		unsigned long long offset = std::numeric_limits<unsigned long long>::max();                ///< offset in file
+		unsigned long long sizeInFile = std::numeric_limits<unsigned long long>::max();            ///< size of section in file
+		unsigned long long entrySize = std::numeric_limits<unsigned long long>::max();             ///< size of one entry in section
+		unsigned long long startAddress = std::numeric_limits<unsigned long long>::max();          ///< start address in memory
+		unsigned long long sizeInMemory = std::numeric_limits<unsigned long long>::max();          ///< size of section in memory
+		unsigned long long relocationsOffset = std::numeric_limits<unsigned long long>::max();     ///< offset of relocation entries for this section
+		unsigned long long numberOfRelocations = std::numeric_limits<unsigned long long>::max();   ///< number of relocation entries for this section
+		unsigned long long lineNumbersOffset = std::numeric_limits<unsigned long long>::max();     ///< offset of line-number entries for this section
+		unsigned long long numberOfLineNumbers = std::numeric_limits<unsigned long long>::max();   ///< number of line-number entries for this section
+		unsigned long long memoryAlignment = std::numeric_limits<unsigned long long>::max();       ///< alignment in memory
+		unsigned long long linkToSection = std::numeric_limits<unsigned long long>::max();         ///< link to another section
+		unsigned long long extraInfo = std::numeric_limits<unsigned long long>::max();             ///< extra information about section
+		unsigned long long lineOffset = std::numeric_limits<unsigned long long>::max();            ///< start line in file
+		unsigned long long relocationsLineOffset = std::numeric_limits<unsigned long long>::max(); ///< start line of relocation entries for this section
+		double entropy = std::numeric_limits<double>::min();                           ///< section data entropy
 		Flags flags;                              ///< section flags
 	public:
-		FileSection();
-		~FileSection();
-
 		/// @name Getters
 		/// @{
 		std::string getName() const;

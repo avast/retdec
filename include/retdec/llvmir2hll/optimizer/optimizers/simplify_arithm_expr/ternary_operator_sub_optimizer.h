@@ -39,7 +39,6 @@ namespace llvmir2hll {
 class TernaryOperatorSubOptimizer final: public SubOptimizer {
 public:
 	TernaryOperatorSubOptimizer(ShPtr<ArithmExprEvaluator> arithmExprEvaluator);
-	virtual ~TernaryOperatorSubOptimizer() override;
 
 	static ShPtr<SubOptimizer> create(ShPtr<ArithmExprEvaluator>
 		arithmExprEvaluator);

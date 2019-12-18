@@ -166,7 +166,7 @@ typename Capstone2LlvmIrTranslator_impl<CInsn, CInsnOp>::TranslationResult
 Capstone2LlvmIrTranslator_impl<CInsn, CInsnOp>::translate(
 		const uint8_t* bytes,
 		std::size_t size,
-		retdec::utils::Address a,
+		retdec::common::Address a,
 		llvm::IRBuilder<>& irb,
 		std::size_t count,
 		bool stopOnBranch)
@@ -234,7 +234,7 @@ typename Capstone2LlvmIrTranslator_impl<CInsn, CInsnOp>::TranslationResultOne
 Capstone2LlvmIrTranslator_impl<CInsn, CInsnOp>::translateOne(
 		const uint8_t*& bytes,
 		std::size_t& size,
-		retdec::utils::Address& a,
+		retdec::common::Address& a,
 		llvm::IRBuilder<>& irb)
 {
 	TranslationResultOne res;
@@ -790,7 +790,7 @@ llvm::StoreInst* Capstone2LlvmIrTranslator_impl<CInsn, CInsnOp>::generateSpecial
 		llvm::IRBuilder<>& irb,
 		cs_insn* i)
 {
-	retdec::utils::Address a = i->address;
+	retdec::common::Address a = i->address;
 	auto* gv = getAsm2LlvmMapGlobalVariable();
 	auto* ci = llvm::ConstantInt::get(gv->getValueType(), a, false);
 	auto* s = irb.CreateStore(ci, gv, true);
@@ -982,6 +982,122 @@ llvm::GlobalVariable* Capstone2LlvmIrTranslator_impl<CInsn, CInsnOp>::createRegi
 //==============================================================================
 //
 
+
+template <typename CInsn, typename CInsnOp>
+llvm::Value* Capstone2LlvmIrTranslator_impl<CInsn, CInsnOp>::loadOp(
+		CInsn* ci,
+		llvm::IRBuilder<>& irb,
+		std::size_t idx,
+		llvm::Type* loadType,
+		llvm::Type* dstType,
+		eOpConv ct)
+{
+	if (ci->op_count <= idx)
+	{
+		throw GenericError(
+				"Idx out of bounds: "+std::to_string(idx)
+				+"/"+std::to_string(ci->op_count));
+	}
+
+	auto* op = loadOp(ci->operands[idx], irb, loadType);
+	if (op == nullptr)
+	{
+		throw GenericError("Operand loading failed.");
+	}
+
+	if (dstType == nullptr)
+	{
+		return op;
+	}
+
+	return generateTypeConversion(irb, op, dstType, ct);
+}
+
+template <typename CInsn, typename CInsnOp>
+std::vector<llvm::Value*> Capstone2LlvmIrTranslator_impl<CInsn, CInsnOp>::_loadOps(
+		CInsn* ci,
+		llvm::IRBuilder<>& irb,
+		std::size_t opCnt,
+		bool strict,
+		llvm::Type* loadType,
+		llvm::Type* dstType,
+		eOpConv ct)
+{
+	if ((strict && (ci->op_count != opCnt)) || (ci->op_count < opCnt))
+	{
+		throw GenericError(
+				"Trying to load "
+				+std::to_string(opCnt)
+				+" operands from instruction with"
+				+std::to_string(ci->op_count)
+				+" opernads.");
+	}
+
+	std::size_t startOp = ci->op_count - opCnt;
+
+	std::vector<llvm::Value*> operands;
+
+	// If no destination type specified, use type of first operand.
+	if (dstType == nullptr)
+	{
+		auto* op0 = loadOp(ci, irb, startOp, loadType, dstType, ct);
+		dstType = op0->getType();
+		dstType = _checkTypeConversion(irb, dstType, ct);
+		op0 = generateTypeConversion(irb, op0, dstType, ct);
+		startOp++;
+		operands.push_back(op0);
+	}
+	else
+	{
+		auto* type = _checkTypeConversion(irb, dstType, ct);
+		if (type != dstType)
+		{
+			throw GenericError(
+				"Invalid combination of destination type and conversion type.");
+		}
+	}
+
+	for (; startOp < ci->op_count; startOp++) {
+		auto* op = loadOp(ci, irb, startOp, loadType, dstType, ct);
+		operands.push_back(op);
+	}
+
+	return operands;
+}
+
+template <typename CInsn, typename CInsnOp>
+std::vector<llvm::Value*>
+Capstone2LlvmIrTranslator_impl<CInsn, CInsnOp>::_loadOpsUniversal(
+		CInsn* ci,
+		llvm::IRBuilder<>& irb,
+		std::size_t opCnt,
+		bool strict,
+		eOpConv ict,
+		eOpConv fct)
+{
+	if ((strict && (ci->op_count != opCnt)) || (ci->op_count < opCnt))
+	{
+		throw GenericError(
+				"Trying to load "
+				+std::to_string(opCnt)
+				+" operands from instruction with"
+				+std::to_string(ci->op_count)
+				+" opernads.");
+	}
+
+	auto op0 = loadOp(ci, irb, ci->op_count - opCnt);
+	if (op0->getType()->isIntegerTy())
+	{
+		auto operands = _loadOps(ci, irb, opCnt-1, false, nullptr, op0->getType(), ict);
+		operands.insert(operands.begin(), op0);
+		return operands;
+	}
+
+	auto operands = _loadOps(ci, irb, opCnt-1, false, nullptr, op0->getType(), fct);
+	operands.insert(operands.begin(), op0);
+	return operands;
+}
+
 /**
  * Throws if op_count != 1.
  */
@@ -989,23 +1105,11 @@ template <typename CInsn, typename CInsnOp>
 llvm::Value* Capstone2LlvmIrTranslator_impl<CInsn, CInsnOp>::loadOpUnary(
 		CInsn* ci,
 		llvm::IRBuilder<>& irb,
+		llvm::Type* loadType,
 		llvm::Type* dstType,
-		eOpConv ct,
-		llvm::Type* loadType)
+		eOpConv ct)
 {
-	if (ci->op_count != 1)
-	{
-		throw GenericError("This is not an unary instruction.");
-	}
-
-	auto* op0 = loadOp(ci->operands[0], irb, loadType);
-	if (op0 == nullptr)
-	{
-		throw GenericError("Operand loading failed.");
-	}
-	op0 = generateTypeConversion(irb, op0, dstType, ct);
-
-	return op0;
+	return _loadOps(ci, irb, 1, true, loadType, dstType, ct)[0];
 }
 
 /**
@@ -1018,20 +1122,36 @@ Capstone2LlvmIrTranslator_impl<CInsn, CInsnOp>::loadOpBinary(
 		llvm::IRBuilder<>& irb,
 		eOpConv ct)
 {
-	if (ci->op_count != 2)
-	{
-		throw GenericError("This is not a binary instruction.");
-	}
+	auto operands = _loadOps(ci, irb, 2, true, nullptr, nullptr, ct);
+	return std::make_pair(operands[0], operands[1]);
+}
 
-	auto* op0 = loadOp(ci->operands[0], irb);
-	auto* op1 = loadOp(ci->operands[1], irb);
-	if (op0 == nullptr || op1 == nullptr)
-	{
-		throw GenericError("Operands loading failed.");
-	}
-	op1 = generateTypeConversion(irb, op1, op0->getType(), ct);
+/**
+ * Throws if op_count != 2.
+ */
+template <typename CInsn, typename CInsnOp>
+std::pair<llvm::Value*, llvm::Value*>
+Capstone2LlvmIrTranslator_impl<CInsn, CInsnOp>::loadOpBinary(
+		CInsn* ci,
+		llvm::IRBuilder<>& irb,
+		eOpConv ict,
+		eOpConv fct)
+{
+	auto operands = _loadOpsUniversal(ci, irb, 2, true, ict, fct);
+	return std::make_pair(operands[0], operands[1]);
+}
 
-	return std::make_pair(op0, op1);
+template <typename CInsn, typename CInsnOp>
+std::pair<llvm::Value*, llvm::Value*>
+Capstone2LlvmIrTranslator_impl<CInsn, CInsnOp>::loadOpBinary(
+		CInsn* ci,
+		llvm::IRBuilder<>& irb,
+		llvm::Type* loadType,
+		llvm::Type* dstType,
+		eOpConv ct)
+{
+	auto operands = _loadOps(ci, irb, 2, true, loadType, dstType, ct);
+	return std::make_pair(operands[0], operands[1]);
 }
 
 /**
@@ -1043,12 +1163,8 @@ llvm::Value* Capstone2LlvmIrTranslator_impl<CInsn, CInsnOp>::loadOpBinaryOp0(
 		llvm::IRBuilder<>& irb,
 		llvm::Type* ty)
 {
-	if (ci->op_count != 2)
-	{
-		throw GenericError("This is not a binary instruction.");
-	}
-
-	return loadOp(ci->operands[0], irb, ty);
+	auto operand = loadOp(ci, irb, 0, ty);
+	return operand;
 }
 
 /**
@@ -1060,12 +1176,8 @@ llvm::Value* Capstone2LlvmIrTranslator_impl<CInsn, CInsnOp>::loadOpBinaryOp1(
 		llvm::IRBuilder<>& irb,
 		llvm::Type* ty)
 {
-	if (ci->op_count != 2)
-	{
-		throw GenericError("This is not a binary instruction.");
-	}
-
-	return loadOp(ci->operands[1], irb, ty);
+	auto operand = loadOp(ci, irb, 1, ty);
+	return operand;
 }
 
 /**
@@ -1075,23 +1187,45 @@ template <typename CInsn, typename CInsnOp>
 std::tuple<llvm::Value*, llvm::Value*, llvm::Value*>
 Capstone2LlvmIrTranslator_impl<CInsn, CInsnOp>::loadOpTernary(
 		CInsn* ci,
-		llvm::IRBuilder<>& irb)
+		llvm::IRBuilder<>& irb,
+		eOpConv ct)
 {
-	if (ci->op_count != 3)
-	{
-		throw GenericError("This is not a ternary instruction.");
-	}
-
-	auto* op0 = loadOp(ci->operands[0], irb);
-	auto* op1 = loadOp(ci->operands[1], irb);
-	auto* op2 = loadOp(ci->operands[2], irb);
-	if (op0 == nullptr || op1 == nullptr || op2 == nullptr)
-	{
-		throw GenericError("Operands loading failed.");
-	}
-
-	return std::make_tuple(op0, op1, op2);
+	auto operands = _loadOps(ci, irb, 3, true, nullptr, nullptr, ct);
+	return std::make_tuple(operands[0], operands[1], operands[2]);
 }
+
+/**
+ * Throws if op_count != 3.
+ */
+template <typename CInsn, typename CInsnOp>
+std::tuple<llvm::Value*, llvm::Value*, llvm::Value*>
+Capstone2LlvmIrTranslator_impl<CInsn, CInsnOp>::loadOpTernary(
+		CInsn* ci,
+		llvm::IRBuilder<>& irb,
+		eOpConv ict,
+		eOpConv fct)
+{
+	auto operands = _loadOpsUniversal(ci, irb, 3, true, ict, fct);
+	return std::make_tuple(operands[0], operands[1], operands[2]);
+}
+
+
+/**
+ * Throws if op_count != 3.
+ */
+template <typename CInsn, typename CInsnOp>
+std::tuple<llvm::Value*, llvm::Value*, llvm::Value*>
+Capstone2LlvmIrTranslator_impl<CInsn, CInsnOp>::loadOpTernary(
+		CInsn* ci,
+		llvm::IRBuilder<>& irb,
+		llvm::Type* loadType,
+		llvm::Type* dstType,
+		eOpConv ct)
+{
+	auto operands = _loadOps(ci, irb, 3, true, loadType, dstType, ct);
+	return std::make_tuple(operands[0], operands[1], operands[2]);
+}
+
 
 /**
  * Throws if op_count not in {2, 3}.
@@ -1103,31 +1237,23 @@ Capstone2LlvmIrTranslator_impl<CInsn, CInsnOp>::loadOpBinaryOrTernaryOp1Op2(
 		llvm::IRBuilder<>& irb,
 		eOpConv ct)
 {
-	llvm::Value* op1 = nullptr;
-	llvm::Value* op2 = nullptr;
+	auto operands = _loadOps(ci, irb, 2, false, nullptr, nullptr, ct);
+	return std::make_pair(operands[0], operands[1]);
+}
 
-	// TODO: Is this desirable here? Maybe special function with this behaviour?
-	if (ci->op_count == 2)
-	{
-		op1 = loadOp(ci->operands[0], irb);
-		op2 = loadOp(ci->operands[1], irb);
-	}
-	else if (ci->op_count == 3)
-	{
-		op1 = loadOp(ci->operands[1], irb);
-		op2 = loadOp(ci->operands[2], irb);
-	}
-	else
-	{
-		throw GenericError("This is not a ternary instruction.");
-	}
-	if (op1 == nullptr || op2 == nullptr)
-	{
-		throw GenericError("Operands loading failed.");
-	}
-	op2 = generateTypeConversion(irb, op2, op1->getType(), ct);
-
-	return std::make_pair(op1, op2);
+/**
+ * Throws if op_count not in {2, 3}.
+ */
+template <typename CInsn, typename CInsnOp>
+std::pair<llvm::Value*, llvm::Value*>
+Capstone2LlvmIrTranslator_impl<CInsn, CInsnOp>::loadOpBinaryOrTernaryOp1Op2(
+		CInsn* ci,
+		llvm::IRBuilder<>& irb,
+		eOpConv ict,
+		eOpConv fct)
+{
+	auto operands = _loadOpsUniversal(ci, irb, 2, false, ict, fct);
+	return std::make_pair(operands[0], operands[1]);
 }
 
 /**
@@ -1139,20 +1265,8 @@ Capstone2LlvmIrTranslator_impl<CInsn, CInsnOp>::loadOpQuaternaryOp1Op2Op3(
 		CInsn* ci,
 		llvm::IRBuilder<>& irb)
 {
-	if (ci->op_count != 4)
-	{
-		throw GenericError("This is not a ternary instruction.");
-	}
-
-	auto* op1 = loadOp(ci->operands[1], irb);
-	auto* op2 = loadOp(ci->operands[2], irb);
-	auto* op3 = loadOp(ci->operands[3], irb);
-	if (op1 == nullptr || op2 == nullptr || op3 == nullptr)
-	{
-		throw GenericError("Operands loading failed.");
-	}
-
-	return std::make_tuple(op1, op2, op3);
+	auto operands = _loadOps(ci, irb, 3, false);
+	return std::make_tuple(operands[0], operands[1], operands[2]);
 }
 
 //
@@ -1238,7 +1352,7 @@ llvm::Value* Capstone2LlvmIrTranslator_impl<CInsn, CInsnOp>::generateCarryAddCIn
 				getCarryRegister(),
 				irb,
 				a->getType(),
-				eOpConv::ZEXT_TRUNC);
+				eOpConv::ZEXT_TRUNC_OR_BITCAST);
 	}
 	auto* cfc = irb.CreateZExtOrTrunc(cf, a->getType());
 	auto* add = irb.CreateAdd(a, cfc);
@@ -1506,69 +1620,115 @@ llvm::Value* Capstone2LlvmIrTranslator_impl<CInsn, CInsnOp>::generateTypeConvers
 
 	switch (ct)
 	{
-		case eOpConv::SEXT_TRUNC:
+		case eOpConv::SEXT_TRUNC_OR_BITCAST:
 		{
-			if (from->getType()->isIntegerTy() && to->isIntegerTy())
+			if (!to->isIntegerTy())
+			{
+				throw GenericError("Invalid combination of conversion method and destination type");
+			}
+
+			if (from->getType()->isIntegerTy())
 			{
 				ret = irb.CreateSExtOrTrunc(from, to);
 			}
-			else if (from->getType()->isFloatingPointTy()
-					&& to->isFloatingPointTy())
-			{
-				ret = irb.CreateFPCast(from, to);
-			}
-			else if (from->getType()->isIntegerTy() && to->isFloatingPointTy())
-			{
-				ret = irb.CreateSIToFP(from, to);
-			}
-			else if (from->getType()->isFloatingPointTy() && to->isIntegerTy())
-			{
-				ret = irb.CreateFPToSI(from, to);
-			}
 			else
 			{
-				throw GenericError("Unhandled eOpConv::SEXT_TRUNC conversion.");
+				auto size = _module->getDataLayout().getTypeStoreSizeInBits(from->getType());
+				auto intTy = irb.getIntNTy(size);
+				ret = irb.CreateBitCast(from, intTy);
+				ret = irb.CreateZExtOrTrunc(ret, to);
 			}
 			break;
 		}
-		case eOpConv::ZEXT_TRUNC:
+		case eOpConv::ZEXT_TRUNC_OR_BITCAST:
 		{
-			if (from->getType()->isIntegerTy() && to->isIntegerTy())
+			if (!to->isIntegerTy())
+			{
+				throw GenericError("Invalid combination of conversion method and destination type");
+			}
+
+			if (from->getType()->isIntegerTy())
 			{
 				ret = irb.CreateZExtOrTrunc(from, to);
 			}
-			else if (from->getType()->isFloatingPointTy()
-					&& to->isFloatingPointTy())
+			else
+			{
+				auto size = _module->getDataLayout().getTypeStoreSizeInBits(from->getType());
+				auto intTy = irb.getIntNTy(size);
+				ret = irb.CreateBitCast(from, intTy);
+				ret = irb.CreateZExtOrTrunc(ret, to);
+			}
+			break;
+		}
+		case eOpConv::FPCAST_OR_BITCAST:
+		{
+			if (!to->isFloatingPointTy())
+			{
+				throw GenericError("Invalid combination of conversion method and destination type");
+			}
+
+			if (from->getType()->isFloatingPointTy())
 			{
 				ret = irb.CreateFPCast(from, to);
 			}
-			else if (from->getType()->isIntegerTy() && to->isFloatingPointTy())
+			else
 			{
-				ret = irb.CreateUIToFP(from, to);
+				auto isize = _module->getDataLayout().getTypeStoreSizeInBits(from->getType());
+				auto dsize = _module->getDataLayout().getTypeStoreSizeInBits(irb.getDoubleTy());
+				auto fsize = _module->getDataLayout().getTypeStoreSizeInBits(irb.getFloatTy());
+				auto lsize = _module->getDataLayout().getTypeStoreSizeInBits(llvm::Type::getFP128Ty(_module->getContext()));
+
+				if (isize == fsize)
+				{
+					from = irb.CreateBitCast(from, irb.getFloatTy());
+				}
+				else if (isize == dsize)
+				{
+					from = irb.CreateBitCast(from, irb.getDoubleTy());
+				}
+				else if (isize == lsize)
+				{
+					from = irb.CreateBitCast(from, llvm::Type::getFP128Ty(_module->getContext()));
+				}
+				else
+				{
+					throw GenericError("Unable to create bitcast to floating point type.");
+				}
+
+				ret = irb.CreateFPCast(from, to);
 			}
-			else if (from->getType()->isFloatingPointTy() && to->isIntegerTy())
+			break;
+		}
+		case eOpConv::SITOFP_OR_FPCAST:
+		{
+			if (!to->isFloatingPointTy())
 			{
-				ret = irb.CreateFPToUI(from, to);
+				throw GenericError("Invalid combination of conversion method and destination type");
+			}
+			if (from->getType()->isFloatingPointTy())
+			{
+				ret = irb.CreateFPCast(from, to);
 			}
 			else
 			{
-				throw GenericError("Unhandled eOpConv::ZEXT_TRUNC conversion.");
+				ret = irb.CreateSIToFP(from, to);
 			}
 			break;
 		}
-		case eOpConv::FP_CAST:
+		case eOpConv::UITOFP_OR_FPCAST:
 		{
-			ret = irb.CreateFPCast(from, to);
-			break;
-		}
-		case eOpConv::SITOFP:
-		{
-			ret = irb.CreateSIToFP(from, to);
-			break;
-		}
-		case eOpConv::UITOFP:
-		{
-			ret = irb.CreateUIToFP(from, to);
+			if (!to->isFloatingPointTy())
+			{
+				throw GenericError("Invalid combination of conversion method and destination type");
+			}
+			if (from->getType()->isFloatingPointTy())
+			{
+				ret = irb.CreateFPCast(from, to);
+			}
+			else
+			{
+				ret = irb.CreateUIToFP(from, to);
+			}
 			break;
 		}
 		case eOpConv::NOTHING:
@@ -1584,6 +1744,51 @@ llvm::Value* Capstone2LlvmIrTranslator_impl<CInsn, CInsnOp>::generateTypeConvers
 	}
 
 	return ret;
+}
+
+template <typename CInsn, typename CInsnOp>
+llvm::Type* Capstone2LlvmIrTranslator_impl<CInsn, CInsnOp>::_checkTypeConversion(
+		llvm::IRBuilder<>& irb,
+		llvm::Type* to,
+		eOpConv ct)
+{
+	switch (ct)
+	{
+		case eOpConv::ZEXT_TRUNC_OR_BITCAST:
+		case eOpConv::SEXT_TRUNC_OR_BITCAST:
+		{
+			if (!to->isIntegerTy())
+			{
+				auto size = _module->getDataLayout().getTypeStoreSizeInBits(to);
+				return irb.getIntNTy(size);
+			}
+			break;
+		}
+		case eOpConv::FPCAST_OR_BITCAST:
+		case eOpConv::SITOFP_OR_FPCAST:
+		case eOpConv::UITOFP_OR_FPCAST:
+		{
+			if (!to->isFloatingPointTy())
+			{
+				auto flSize = _module->getDataLayout().getTypeStoreSizeInBits(
+							irb.getFloatTy());
+				auto size = _module->getDataLayout().getTypeStoreSizeInBits(to);
+				if (size <= flSize)
+				{
+					return irb.getFloatTy();
+				}
+
+				return irb.getDoubleTy();
+			}
+			break;
+		}
+		default:
+		{
+			return to;
+		}
+	}
+
+	return to;
 }
 
 /**

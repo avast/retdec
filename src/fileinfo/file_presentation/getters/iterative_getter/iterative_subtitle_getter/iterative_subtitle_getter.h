@@ -24,7 +24,6 @@ class IterativeSubtitleGetter : public IterativeGetter
 		std::string subtitle; ///< subtitle of presented record
 	public:
 		IterativeSubtitleGetter(FileInformation &fileInfo);
-		virtual ~IterativeSubtitleGetter() override;
 
 		/// @name Getters
 		/// @{

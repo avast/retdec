@@ -8,7 +8,6 @@
 #define RETDEC_LLVMIR2HLL_OPTIMIZER_OPTIMIZERS_IF_TO_SWITCH_OPTIMIZER_H
 
 #include "retdec/llvmir2hll/optimizer/func_optimizer.h"
-#include "retdec/llvmir2hll/support/maybe.h"
 
 namespace retdec {
 namespace llvmir2hll {
@@ -65,8 +64,6 @@ class ValueAnalysis;
 class IfToSwitchOptimizer final: public FuncOptimizer {
 public:
 	IfToSwitchOptimizer(ShPtr<Module> module, ShPtr<ValueAnalysis> va);
-
-	virtual ~IfToSwitchOptimizer() override;
 
 	virtual std::string getId() const override { return "IfToSwitch"; }
 

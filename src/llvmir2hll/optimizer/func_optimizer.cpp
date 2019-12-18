@@ -26,11 +26,6 @@ FuncOptimizer::FuncOptimizer(ShPtr<Module> module):
 	}
 
 /**
-* @brief Destructs the optimizer.
-*/
-FuncOptimizer::~FuncOptimizer() {}
-
-/**
 * @brief Performs the optimization on all functions in the module.
 *
 * This function calls runOnFunction() for each function in the module.

@@ -15,8 +15,7 @@ namespace bin2llvmir {
 class MSX64Filter : public Filter
 {
 	public:
-		MSX64Filter(const Abi* _abi, const CallingConvention* _cc);
-		virtual ~MSX64Filter() override;
+		using Filter::Filter;
 
 		virtual void filterDefinitionArgs(
 				FilterableLayout& args,

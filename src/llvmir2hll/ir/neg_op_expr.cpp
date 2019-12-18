@@ -19,13 +19,6 @@ namespace llvmir2hll {
 NegOpExpr::NegOpExpr(ShPtr<Expression> op):
 	UnaryOpExpr(op) {}
 
-/**
-* @brief Destructs the operator.
-*/
-NegOpExpr::~NegOpExpr() {
-	// Observers are removed in the superclass.
-}
-
 bool NegOpExpr::isEqualTo(ShPtr<Value> otherValue) const {
 	if (ShPtr<NegOpExpr> otherValueNegOpExpr = cast<NegOpExpr>(otherValue)) {
 		return op->isEqualTo(otherValueNegOpExpr->getOperand());

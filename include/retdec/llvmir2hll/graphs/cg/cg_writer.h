@@ -26,7 +26,7 @@ namespace llvmir2hll {
 */
 class CGWriter: private retdec::utils::NonCopyable {
 public:
-	virtual ~CGWriter() = 0;
+	virtual ~CGWriter() = default;
 
 	/**
 	* @brief Returns the ID of the writer.

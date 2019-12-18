@@ -8,10 +8,10 @@
 #include "retdec/bin2llvmir/utils/capstone.h"
 #include "retdec/utils/string.h"
 
+using namespace llvm;
 using namespace retdec::bin2llvmir::st_match;
 using namespace retdec::capstone2llvmir;
-using namespace retdec::utils;
-using namespace llvm;
+using namespace retdec::common;
 
 namespace retdec {
 namespace bin2llvmir {

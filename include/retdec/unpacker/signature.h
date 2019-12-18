@@ -65,7 +65,6 @@ public:
 	public:
 		MatchSettings(uint64_t offset = 0, uint64_t searchDistance = 0);
 		MatchSettings(const MatchSettings& settings);
-		~MatchSettings();
 
 		uint64_t getOffset() const;
 		void setOffset(uint64_t offset);
@@ -123,8 +122,6 @@ public:
 		Byte(Type type, uint8_t expectedValue, uint8_t wildcardMask);
 		Byte(const Byte& byte);
 
-		~Byte();
-
 		Type getType() const;
 		uint8_t getExpectedValue() const;
 		uint8_t getWildcardMask() const;
@@ -147,7 +144,7 @@ public:
 	Signature(const std::initializer_list<Signature::Byte>& initList);
 	Signature(const Signature& signature);
 
-	virtual ~Signature();
+	virtual ~Signature() = default;
 
 	uint64_t getSize() const;
 	uint64_t getCaptureSize() const;

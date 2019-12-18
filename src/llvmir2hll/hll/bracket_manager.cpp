@@ -71,11 +71,6 @@ BracketManager::BracketManager(ShPtr<Module> module) {
 }
 
 /**
-* @brief Destructs the brackets manager.
-*/
-BracketManager::~BracketManager() {}
-
-/**
 * @brief Iterate through the module and visit all functions and all global
 *        variables. Starts brackets analyse.
 */

@@ -18,7 +18,6 @@ class PeImage : public Image
 {
 public:
 	PeImage(const std::shared_ptr<retdec::fileformat::FileFormat>& fileFormat);
-	virtual ~PeImage();
 
 	virtual bool load() override;
 

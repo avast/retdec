@@ -20,10 +20,6 @@ namespace llvmir2hll {
 * Instances of this class have reference object semantics.
 */
 class NoActionPatternFinderRunner: public PatternFinderRunner {
-public:
-	NoActionPatternFinderRunner();
-	virtual ~NoActionPatternFinderRunner() override;
-
 private:
 	virtual void doActionsBeforePatternFinderRuns(ShPtr<PatternFinder> pf) override;
 	virtual void doActionsAfterPatternFinderHasRun(ShPtr<PatternFinder> pf,

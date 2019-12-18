@@ -28,7 +28,7 @@ class VariableReplacer: private OrderedAllVisitor,
 		private retdec::utils::NonCopyable {
 public:
 	// It needs to be public so it can be called in ShPtr's destructor.
-	virtual ~VariableReplacer() override;
+	virtual ~VariableReplacer() override = default;
 
 	static void replaceVariable(ShPtr<Variable> oldVar, ShPtr<Variable> newVar,
 		ShPtr<Function> func);

@@ -29,8 +29,6 @@ public:
 	static ShPtr<GlobalVarDef> create(ShPtr<Variable> var,
 		ShPtr<Expression> init = nullptr);
 
-	virtual ~GlobalVarDef() override;
-
 	virtual ShPtr<Value> clone() override;
 	virtual bool isEqualTo(ShPtr<Value> otherValue) const override;
 	void replace(ShPtr<Expression> oldExpr, ShPtr<Expression> newExpr);
