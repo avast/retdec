@@ -107,7 +107,6 @@ class DeadCodeOptimizer final: public FuncOptimizer {
 public:
 	DeadCodeOptimizer(ShPtr<Module> module, ShPtr<ArithmExprEvaluator>
 		arithmExprEvaluator);
-	virtual ~DeadCodeOptimizer() override;
 
 	virtual std::string getId() const override { return "DeadCode"; }
 

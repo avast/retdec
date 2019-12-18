@@ -31,10 +31,6 @@ ElfImage::ElfImage(const std::shared_ptr<retdec::fileformat::FileFormat>& fileFo
 {
 }
 
-ElfImage::~ElfImage()
-{
-}
-
 /**
  * Virtual method overridden from retdec::loader::Image, which is used in image factory.
  * Loads the image using @c fileformat.

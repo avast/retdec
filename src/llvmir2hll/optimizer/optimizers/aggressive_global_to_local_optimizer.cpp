@@ -28,11 +28,6 @@ AggressiveGlobalToLocalOptimizer::AggressiveGlobalToLocalOptimizer(
 		PRECONDITION_NON_NULL(module);
 	}
 
-/**
-* @brief Destructs the optimizer.
-*/
-AggressiveGlobalToLocalOptimizer::~AggressiveGlobalToLocalOptimizer() {}
-
 void AggressiveGlobalToLocalOptimizer::doOptimization() {
 	convertGlobalVarsToLocalVars();
 }

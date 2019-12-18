@@ -23,7 +23,7 @@ class PeFormatParser
 		const FileFormat *inputFile; ///< pointer to input file
 	public:
 		PeFormatParser(const FileFormat *fInputFile);
-		virtual ~PeFormatParser();
+		virtual ~PeFormatParser() = default;
 
 		/// @name Detection methods
 		/// @{

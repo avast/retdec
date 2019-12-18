@@ -25,11 +25,6 @@ Optimizer::Optimizer(ShPtr<Module> module):
 	}
 
 /**
-* @brief Destructs the optimizer.
-*/
-Optimizer::~Optimizer() {}
-
-/**
 * @brief Performs all the optimizations of the specific optimizer.
 *
 * @return Optimized module.

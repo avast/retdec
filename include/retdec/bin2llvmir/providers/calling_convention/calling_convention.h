@@ -38,7 +38,7 @@ class CallingConvention
 	//
 	public:
 		CallingConvention(const Abi* abi);
-		virtual ~CallingConvention();
+		virtual ~CallingConvention() = default;
 
 	// Registers.
 	//
@@ -128,7 +128,6 @@ class CallingConventionProvider
 
 	// Destructor, singleton method.
 	public:
-		~CallingConventionProvider();
 		static CallingConventionProvider* getProvider();
 
 	// Factory methods.

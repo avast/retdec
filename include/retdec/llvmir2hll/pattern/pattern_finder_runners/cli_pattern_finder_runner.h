@@ -24,7 +24,6 @@ namespace llvmir2hll {
 class CLIPatternFinderRunner: public PatternFinderRunner {
 public:
 	CLIPatternFinderRunner(llvm::raw_ostream &os);
-	virtual ~CLIPatternFinderRunner() override;
 
 private:
 	virtual void doActionsBeforePatternFinderRuns(ShPtr<PatternFinder> pf) override;

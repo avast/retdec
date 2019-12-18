@@ -10,27 +10,6 @@
 namespace fileinfo {
 
 /**
- * Constructor
- */
-Resource::Resource() : nameId(std::numeric_limits<std::size_t>::max()),
-						typeId(std::numeric_limits<std::size_t>::max()),
-						languageId(std::numeric_limits<std::size_t>::max()),
-						sublanguageId(std::numeric_limits<std::size_t>::max()),
-						offset(std::numeric_limits<std::size_t>::max()),
-						size(std::numeric_limits<std::size_t>::max())
-{
-
-}
-
-/**
- * Destructor
- */
-Resource::~Resource()
-{
-
-}
-
-/**
  * Get CRC32
  * @return CRC32 of resource content
  */

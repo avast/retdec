@@ -19,10 +19,5 @@ namespace llvmir2hll {
 CGWriter::CGWriter(ShPtr<CG> cg, std::ostream &out):
 	cg(cg), out(out) {}
 
-/**
-* @brief Destructs the writer.
-*/
-CGWriter::~CGWriter() {}
-
 } // namespace llvmir2hll
 } // namespace retdec

@@ -26,8 +26,6 @@ class EmptyStmtOptimizer final: public FuncOptimizer {
 public:
 	EmptyStmtOptimizer(ShPtr<Module> module);
 
-	virtual ~EmptyStmtOptimizer() override;
-
 	virtual std::string getId() const override { return "EmptyStmt"; }
 
 private:

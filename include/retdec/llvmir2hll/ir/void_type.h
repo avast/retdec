@@ -28,8 +28,6 @@ class VoidType final: public Type {
 public:
 	static ShPtr<VoidType> create();
 
-	virtual ~VoidType() override;
-
 	virtual ShPtr<Value> clone() override;
 
 	virtual bool isEqualTo(ShPtr<Value> otherValue) const override;

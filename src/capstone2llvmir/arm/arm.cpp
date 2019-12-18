@@ -24,11 +24,6 @@ Capstone2LlvmIrTranslatorArm_impl::Capstone2LlvmIrTranslatorArm_impl(
 	initialize();
 }
 
-Capstone2LlvmIrTranslatorArm_impl::~Capstone2LlvmIrTranslatorArm_impl()
-{
-	// Nothing specific to ARM.
-}
-
 //
 //==============================================================================
 // Mode query & modification methods - from Capstone2LlvmIrTranslator.

@@ -29,8 +29,6 @@ public:
 		ShPtr<Expression> init = nullptr,
 		ShPtr<Statement> succ = nullptr);
 
-	virtual ~VarDefStmt() override;
-
 	virtual ShPtr<Value> clone() override;
 	virtual bool isEqualTo(ShPtr<Value> otherValue) const override;
 	virtual bool isCompound() override { return false; }

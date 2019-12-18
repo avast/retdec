@@ -15,22 +15,6 @@ namespace retdec {
 namespace fileformat {
 
 /**
- * Constructor
- */
-ExportTable::ExportTable()
-{
-
-}
-
-/**
- * Destructor
- */
-ExportTable::~ExportTable()
-{
-
-}
-
-/**
  * Get number of stored exports
  * @return Number of stored exports
  */

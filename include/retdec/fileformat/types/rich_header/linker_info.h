@@ -16,14 +16,11 @@ namespace fileformat {
 class LinkerInfo
 {
 	private:
-		unsigned long long majorVersion; ///< major version of linker
-		unsigned long long minorVersion; ///< minor version of linker
-		unsigned long long buildVersion; ///< build version
-		unsigned long long count;        ///< number of uses
+		unsigned long long majorVersion = 0; ///< major version of linker
+		unsigned long long minorVersion = 0; ///< minor version of linker
+		unsigned long long buildVersion = 0; ///< build version
+		unsigned long long count = 0;        ///< number of uses
 	public:
-		LinkerInfo();
-		~LinkerInfo();
-
 		/// @name Getters
 		/// @{
 		unsigned long long getMajorVersion() const;

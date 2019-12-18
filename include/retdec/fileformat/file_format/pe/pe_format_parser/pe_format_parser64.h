@@ -19,7 +19,6 @@ class PeFormatParser64 : public PeFormatParser
 		PeLib::PeHeaderT<64> &peHeader; ///< header of 64-bit PE file
 	public:
 		PeFormatParser64(const FileFormat *fInputFile, PeLib::PeFileT<64> *peFile64);
-		virtual ~PeFormatParser64() override;
 
 		/// @name Detection methods
 		/// @{

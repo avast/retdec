@@ -114,11 +114,6 @@ CompoundOpManager::CompoundOpManager():
 	compoundOp("?") {}
 
 /**
-* @brief Destructs the compound operator manager.
-*/
-CompoundOpManager::~CompoundOpManager() {}
-
-/**
 * @brief Tries to optimize @a stmt to a compound operator.
 *
 * @param[in] stmt Statement to optimize.

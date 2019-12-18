@@ -95,18 +95,6 @@ void clearStack(ArithmExprEvaluator::ConstStack &stack) {
 } // anonymous namespace
 
 /**
-* @brief Constructs the ArithmExprEvaluator.
-*
-* Use create() to create instances.
-*/
-ArithmExprEvaluator::ArithmExprEvaluator() : canBeEvaluated(true) {}
-
-/**
-* @brief Destructor.
-*/
-ArithmExprEvaluator::~ArithmExprEvaluator() {}
-
-/**
 * @brief Evaluate an @a expr.
 *
 * @param[in] expr An expression to evaluation.

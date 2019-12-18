@@ -22,13 +22,6 @@ namespace llvmir2hll {
 ArrayIndexOpExpr::ArrayIndexOpExpr(ShPtr<Expression> base, ShPtr<Expression> index):
 	BinaryOpExpr(base, index) {}
 
-/**
-* @brief Destructs the operator.
-*/
-ArrayIndexOpExpr::~ArrayIndexOpExpr() {
-	// Observers are removed in the superclass.
-}
-
 ShPtr<Type> ArrayIndexOpExpr::getType() const {
 	ShPtr<Type> op1Type(op1->getType());
 

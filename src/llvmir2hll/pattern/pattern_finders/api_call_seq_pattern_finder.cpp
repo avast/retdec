@@ -1104,11 +1104,6 @@ APICallSeqPatternFinder::APICallSeqPatternFinder(
 		PatternFinder(va, cio), foundPatterns() {}
 
 /**
-* @brief Destructs the finder.
-*/
-APICallSeqPatternFinder::~APICallSeqPatternFinder() {}
-
-/**
 * @brief Creates and returns a new instance of APICallSeqPatternFinder.
 *
 * See PatternFinder::PatternFinder() for more information on the parameters and

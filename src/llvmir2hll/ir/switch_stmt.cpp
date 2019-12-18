@@ -21,11 +21,6 @@ namespace llvmir2hll {
 SwitchStmt::SwitchStmt(ShPtr<Expression> controlExpr):
 	switchClauseList(), controlExpr(controlExpr) {}
 
-/**
-* @brief Destructs the statement.
-*/
-SwitchStmt::~SwitchStmt() {}
-
 ShPtr<Value> SwitchStmt::clone() {
 	ShPtr<SwitchStmt> switchStmt(SwitchStmt::create(
 		ucast<Expression>(controlExpr->clone())));

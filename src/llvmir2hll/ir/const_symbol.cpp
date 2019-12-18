@@ -19,11 +19,6 @@ namespace llvmir2hll {
 ConstSymbol::ConstSymbol(const std::string &name, ShPtr<Constant> value):
 	Constant(), name(name), value(value) {}
 
-/**
-* @brief Destructs the constant.
-*/
-ConstSymbol::~ConstSymbol() {}
-
 ShPtr<Value> ConstSymbol::clone() {
 	ShPtr<ConstSymbol> constSymbol(ConstSymbol::create(name, value));
 	constSymbol->setMetadata(getMetadata());

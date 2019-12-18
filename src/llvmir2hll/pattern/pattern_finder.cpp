@@ -31,10 +31,5 @@ PatternFinder::PatternFinder(ShPtr<ValueAnalysis> va,
 	PRECONDITION(cio->isInitialized(), "it is not initialized");
 }
 
-/**
-* @brief Destructs the finder.
-*/
-PatternFinder::~PatternFinder() {}
-
 } // namespace llvmir2hll
 } // namespace retdec

@@ -31,11 +31,6 @@ NodesOfVarUseCFGTraversal::NodesOfVarUseCFGTraversal(
 }
 
 /**
-* @brief Destructs the traverser.
-*/
-NodesOfVarUseCFGTraversal::~NodesOfVarUseCFGTraversal() {}
-
-/**
 * @brief Function finds all nodes where is variable from it's own definition
 *        used.
 *

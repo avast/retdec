@@ -30,14 +30,6 @@ AnomaliesJsonGetter::AnomaliesJsonGetter(FileInformation &fileInfo) : IterativeS
 	commonHeaderElements.push_back("description");
 }
 
-/**
- * Destructor
- */
-AnomaliesJsonGetter::~AnomaliesJsonGetter()
-{
-
-}
-
 std::size_t AnomaliesJsonGetter::getBasicInfo(std::size_t structIndex, std::vector<std::string> &desc, std::vector<std::string> &info) const
 {
 	if(structIndex >= numberOfStructures || fileinfo.getNumberOfAnomalies() == 0)

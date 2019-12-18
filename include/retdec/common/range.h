@@ -91,8 +91,7 @@ public:
 	/**
 	 * Destructor.
 	 */
-	virtual ~Range()
-	{}
+	virtual ~Range() = default;
 
 	/**
 	 * Assign operator.

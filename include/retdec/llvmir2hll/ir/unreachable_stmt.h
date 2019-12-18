@@ -23,8 +23,6 @@ class UnreachableStmt: public Statement {
 public:
 	static ShPtr<UnreachableStmt> create();
 
-	virtual ~UnreachableStmt() override;
-
 	virtual ShPtr<Value> clone() override;
 	virtual bool isEqualTo(ShPtr<Value> otherValue) const override;
 	virtual bool isCompound() override { return false; }
@@ -37,7 +35,7 @@ public:
 	/// @}
 
 private:
-	UnreachableStmt();
+	UnreachableStmt() = default;
 };
 
 } // namespace llvmir2hll

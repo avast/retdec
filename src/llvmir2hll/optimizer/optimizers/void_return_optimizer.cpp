@@ -32,11 +32,6 @@ VoidReturnOptimizer::VoidReturnOptimizer(ShPtr<Module> module):
 		PRECONDITION_NON_NULL(module);
 	}
 
-/**
-* @brief Destructs the optimizer.
-*/
-VoidReturnOptimizer::~VoidReturnOptimizer() {}
-
 void VoidReturnOptimizer::visit(ShPtr<ReturnStmt> stmt) {
 	// The return statement can be eliminated only if
 	//  (1) it doesn't return a value, i.e. it is a void return;

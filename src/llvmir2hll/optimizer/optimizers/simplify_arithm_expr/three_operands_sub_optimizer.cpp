@@ -57,11 +57,6 @@ ThreeOperandsSubOptimizer::ThreeOperandsSubOptimizer(ShPtr<ArithmExprEvaluator>
 		arithmExprEvaluator): SubOptimizer(arithmExprEvaluator) {}
 
 /**
-* @brief Destructor.
-*/
-ThreeOperandsSubOptimizer::~ThreeOperandsSubOptimizer() {}
-
-/**
 * @brief Creates a new ThreeOperandsSubOptimizer.
 *
 * @param[in] arithmExprEvaluator @a The used evaluator of arithmetical

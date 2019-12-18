@@ -14,11 +14,6 @@ namespace llvmir2hll {
 */
 PyCompoundOpManager::PyCompoundOpManager(): CompoundOpManager() {}
 
-/**
-* @brief Destructor.
-*/
-PyCompoundOpManager::~PyCompoundOpManager() {}
-
 std::string PyCompoundOpManager::getId() const {
 	return "PyCompoundOpManager";
 }

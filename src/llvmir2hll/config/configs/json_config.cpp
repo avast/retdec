@@ -26,7 +26,7 @@ namespace llvmir2hll {
 * @brief Private implementation.
 */
 struct JSONConfig::Impl {
-	Impl();
+	Impl() = default;
 
 	const retdec::common::Object &getConfigGlobalVariableByNameOrEmptyVariable(
 		const std::string &name) const;
@@ -45,11 +45,6 @@ struct JSONConfig::Impl {
 	/// Underlying config.
 	retdec::config::Config config;
 };
-
-/**
-* @brief Constructs the implementation.
-*/
-JSONConfig::Impl::Impl() = default;
 
 // A const overload of getConfigFunctionByName().
 const retdec::common::Function *JSONConfig::Impl::getConfigFunctionByName(

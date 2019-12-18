@@ -19,11 +19,6 @@ namespace llvmir2hll {
 */
 CallStmt::CallStmt(ShPtr<CallExpr> call): call(call) {}
 
-/**
-* @brief Destructs the statement.
-*/
-CallStmt::~CallStmt() {}
-
 bool CallStmt::isEqualTo(ShPtr<Value> otherValue) const {
 	// Both types and values have to be equal.
 	if (ShPtr<CallStmt> otherCallStmt = cast<CallStmt>(otherValue)) {

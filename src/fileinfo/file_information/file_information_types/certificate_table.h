@@ -17,11 +17,8 @@ namespace fileinfo {
 class CertificateTable
 {
 	private:
-		const retdec::fileformat::CertificateTable *table;
+		const retdec::fileformat::CertificateTable *table = nullptr;
 	public:
-		CertificateTable();
-		~CertificateTable();
-
 		/// @name Getters
 		/// @{
 		std::size_t getNumberOfCertificates() const;

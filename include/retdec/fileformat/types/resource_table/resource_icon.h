@@ -17,20 +17,17 @@ namespace fileformat {
 class ResourceIcon : public Resource
 {
 	private:
-		std::uint16_t width;              ///< icon width
-		std::uint16_t height;             ///< icon height
-		std::size_t iconSize;             ///< icon size in file
-		std::uint8_t colorCount;          ///< icon color count
-		std::uint16_t planes;             ///< icon planes
-		std::uint16_t bitCount;           ///< icon bit count
-		std::size_t iconGroup;            ///< icon group the icon belongs to
-		bool loadedProperties;            ///< @c true if properties were successfully loaded from icon group resource
-		bool validColorCount;             ///< @c true if color count has a valid value
+		std::uint16_t width = 0;       ///< icon width
+		std::uint16_t height = 0;      ///< icon height
+		std::size_t iconSize = 0;      ///< icon size in file
+		std::uint8_t colorCount = 0;   ///< icon color count
+		std::uint16_t planes = 0;      ///< icon planes
+		std::uint16_t bitCount = 0;    ///< icon bit count
+		std::size_t iconGroup = 0;     ///< icon group the icon belongs to
+		bool loadedProperties = false; ///< @c true if properties were successfully loaded from icon group resource
+		bool validColorCount = false;  ///< @c true if color count has a valid value
 
 	public:
-		ResourceIcon();
-		~ResourceIcon();
-
 		/// @name Getters
 		/// @{
 		std::uint16_t getWidth() const;

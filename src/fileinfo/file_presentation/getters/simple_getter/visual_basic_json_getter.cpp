@@ -21,14 +21,6 @@ VisualBasicJsonGetter::VisualBasicJsonGetter(FileInformation &fileInfo) : Simple
 
 }
 
-/**
- * Destructor
- */
-VisualBasicJsonGetter::~VisualBasicJsonGetter()
-{
-
-}
-
 std::size_t VisualBasicJsonGetter::loadInformation(std::vector<std::string> &desc, std::vector<std::string> &info) const
 {
 	desc.clear();

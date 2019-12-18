@@ -32,14 +32,6 @@ StringsJsonGetter::StringsJsonGetter(FileInformation &fileInfo) : IterativeSubti
 	commonHeaderElements.push_back("content");
 }
 
-/**
- * Destructor
- */
-StringsJsonGetter::~StringsJsonGetter()
-{
-
-}
-
 std::size_t StringsJsonGetter::getBasicInfo(std::size_t structIndex, std::vector<std::string> &desc, std::vector<std::string> &info) const
 {
 	if(structIndex >= numberOfStructures || !fileinfo.hasStrings())

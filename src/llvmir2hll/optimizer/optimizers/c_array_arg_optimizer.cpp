@@ -67,11 +67,6 @@ CArrayArgOptimizer::CArrayArgOptimizer(ShPtr<Module> module):
 		PRECONDITION_NON_NULL(module);
 	}
 
-/**
-* @brief Destructs the optimizer.
-*/
-CArrayArgOptimizer::~CArrayArgOptimizer() {}
-
 void CArrayArgOptimizer::visit(ShPtr<CallExpr> expr) {
 	OrderedAllVisitor::visit(expr);
 

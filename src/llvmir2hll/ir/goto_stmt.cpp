@@ -18,11 +18,6 @@ namespace llvmir2hll {
 */
 GotoStmt::GotoStmt(ShPtr<Statement> target): target(target) {}
 
-/**
-* @brief Destructs the statement.
-*/
-GotoStmt::~GotoStmt() {}
-
 ShPtr<Value> GotoStmt::clone() {
 	ShPtr<GotoStmt> gotoStmt(GotoStmt::create(target));
 	gotoStmt->setMetadata(getMetadata());

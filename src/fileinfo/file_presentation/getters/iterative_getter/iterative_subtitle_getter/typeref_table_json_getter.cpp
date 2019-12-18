@@ -31,14 +31,6 @@ TypeRefTableJsonGetter::TypeRefTableJsonGetter(FileInformation &fileInfo) : Iter
 	commonHeaderElements.push_back("libraryName");
 }
 
-/**
- * Destructor
- */
-TypeRefTableJsonGetter::~TypeRefTableJsonGetter()
-{
-
-}
-
 std::size_t TypeRefTableJsonGetter::getBasicInfo(std::size_t structIndex, std::vector<std::string> &desc, std::vector<std::string> &info) const
 {
 	if(structIndex >= numberOfStructures || !fileinfo.hasDotnetTypeRefTableRecords())

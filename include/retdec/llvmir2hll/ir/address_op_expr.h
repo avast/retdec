@@ -28,8 +28,6 @@ class AddressOpExpr final: public UnaryOpExpr {
 public:
 	static ShPtr<AddressOpExpr> create(ShPtr<Expression> op);
 
-	virtual ~AddressOpExpr() override;
-
 	virtual bool isEqualTo(ShPtr<Value> otherValue) const override;
 	virtual ShPtr<Value> clone() override;
 

@@ -61,8 +61,6 @@ public:
 	using VarConstMap = std::map<ShPtr<Variable>, ShPtr<Constant>>;
 
 public:
-	virtual ~ArithmExprEvaluator() override;
-
 	/**
 	* @brief Returns the ID of the optimizer.
 	*/
@@ -79,7 +77,7 @@ public:
 		const ConstPair &constPair);
 
 protected:
-	ArithmExprEvaluator();
+	ArithmExprEvaluator() = default;
 
 	static APSIntPair getAPSIntsFromConstants(const std::optional<ConstIntPair>
 		&constIntPair);
@@ -89,7 +87,7 @@ protected:
 
 protected:
 	/// Signalizes if evaluation can go on.
-	bool canBeEvaluated;
+	bool canBeEvaluated = true;
 
 private:
 	using LLVMAPIntAPIntBoolOp = llvm::APInt (llvm::APInt::*)(

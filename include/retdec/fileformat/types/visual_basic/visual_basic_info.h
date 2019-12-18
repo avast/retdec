@@ -30,16 +30,16 @@ class VisualBasicInfo
 		std::string projectDescription;
 		std::string projectHelpFile;
 		std::string projectName;
-		std::uint32_t languageDLLPrimaryLCID;
-		std::uint32_t languageDLLSecondaryLCID;
+		std::uint32_t languageDLLPrimaryLCID = 0;
+		std::uint32_t languageDLLSecondaryLCID = 0;
 
 		// VB Proj Info
 		std::string projectPath;
 
 		// VB Object table
 		std::string objectTableGUID;
-		std::uint32_t projectPrimaryLCID;
-		std::uint32_t projectSecondaryLCID;
+		std::uint32_t projectPrimaryLCID = 0;
+		std::uint32_t projectSecondaryLCID = 0;
 		std::vector<std::unique_ptr<VisualBasicObject>> objects;
 
 		// VB extern table
@@ -47,9 +47,9 @@ class VisualBasicInfo
 
 		// COM register data
 		std::string typeLibCLSID;
-		std::uint32_t typeLibLCID;
-		std::uint16_t typeLibMajorVersion;
-		std::uint16_t typeLibMinorVersion;
+		std::uint32_t typeLibLCID = 0;
+		std::uint16_t typeLibMajorVersion = 0;
+		std::uint16_t typeLibMinorVersion = 0;
 
 		// COM register info
 		std::string COMObjectName;
@@ -67,21 +67,18 @@ class VisualBasicInfo
 		std::string objectTableHashMd5;
 		std::string objectTableHashSha256;
 
-		bool validLanguageDLLPrimaryLCID;
-		bool validLanguageDLLSecondaryLCID;
-		bool validProjectPrimaryLCID;
-		bool validProjectSecondaryLCID;
-		bool validTypeLibLCID;
-		bool validTypeLibMajorVersion;
-		bool validTypeLibMinorVersion;
-		bool pcodeFlag;
+		bool validLanguageDLLPrimaryLCID = false;
+		bool validLanguageDLLSecondaryLCID = false;
+		bool validProjectPrimaryLCID = false;
+		bool validProjectSecondaryLCID = false;
+		bool validTypeLibLCID = false;
+		bool validTypeLibMajorVersion = false;
+		bool validTypeLibMinorVersion = false;
+		bool pcodeFlag = false;
 
 		std::string guidToStr(const std::uint8_t data[16]);
 
 	public:
-		VisualBasicInfo();
-		~VisualBasicInfo();
-
 		/// @name Getters
 		/// @{
 		const std::string &getLanguageDLL() const;

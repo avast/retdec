@@ -47,11 +47,6 @@ UseDefAnalysis::UseDefAnalysis(ShPtr<Module> module):
 	module(module) {}
 
 /**
-* @brief Destructs the analysis.
-*/
-UseDefAnalysis::~UseDefAnalysis() {}
-
-/**
 * @brief Returns use-def chains for the given function.
 *
 * @param[in] func Function for which the analysis is computed.

@@ -35,11 +35,6 @@ Abi::Abi(llvm::Module* m, Config* c) :
 
 }
 
-Abi::~Abi()
-{
-
-}
-
 bool Abi::isRegister(const llvm::Value* val) const
 {
 	return _regs2id.count(val);

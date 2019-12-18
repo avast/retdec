@@ -23,11 +23,6 @@ NullPointerAnalysis::NullPointerAnalysis(ShPtr<Module> module):
 	OrderedAllVisitor(), module(module), foundNullPointer(false) {}
 
 /**
-* @brief Destructs the analysis.
-*/
-NullPointerAnalysis::~NullPointerAnalysis() {}
-
-/**
 * @brief Returns @c true if @a module uses null pointers, @c false otherwise.
 *
 * @param[in] module Module to be checked.

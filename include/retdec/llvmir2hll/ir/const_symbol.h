@@ -29,8 +29,6 @@ public:
 	static ShPtr<ConstSymbol> create(const std::string &name,
 		ShPtr<Constant> value);
 
-	virtual ~ConstSymbol() override;
-
 	virtual ShPtr<Value> clone() override;
 	virtual bool isEqualTo(ShPtr<Value> otherValue) const override;
 	virtual ShPtr<Type> getType() const override;

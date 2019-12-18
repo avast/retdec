@@ -28,11 +28,6 @@ VarDefCFGTraversal::VarDefCFGTraversal(ShPtr<CFG> cfg, const VarSet &vars,
 		CFGTraversal(cfg, false), vars(vars), end(end), va(va) {}
 
 /**
-* @brief Destructs the traverser.
-*/
-VarDefCFGTraversal::~VarDefCFGTraversal() {}
-
-/**
 * @brief Returns @c true if a variable from @a vars is defined between @a start
 *        and @a end in @a cfg, @c false otherwise.
 *

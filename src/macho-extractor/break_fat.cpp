@@ -121,13 +121,6 @@ BreakMachOUniversal::BreakMachOUniversal(
 }
 
 /**
- * BreakMachOUniversal destructor
- */
-BreakMachOUniversal::~BreakMachOUniversal()
-{
-}
-
-/**
  * Check if input binary contains static libraries
  * @return @c true if file contains static libraries, @c false otherwise
  */

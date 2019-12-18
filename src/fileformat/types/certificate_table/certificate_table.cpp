@@ -10,22 +10,6 @@ namespace retdec {
 namespace fileformat {
 
 /**
- * Constructor
- */
-CertificateTable::CertificateTable() : hasSigner(false), hasCounterSigner(false), signerIndex(0), counterSignerIndex(0), certificates()
-{
-
-}
-
-/**
- * Destructor
- */
-CertificateTable::~CertificateTable()
-{
-
-}
-
-/**
  * Get number of certificates
  * @return Number of certificates
  */

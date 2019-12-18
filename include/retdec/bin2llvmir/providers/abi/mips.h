@@ -18,7 +18,6 @@ class AbiMips : public Abi
 	//
 	public:
 		AbiMips(llvm::Module* m, Config* c);
-		virtual ~AbiMips();
 
 	// Registers.
 	//

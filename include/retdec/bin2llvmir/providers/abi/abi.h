@@ -35,7 +35,7 @@ class Abi
 	//
 	public:
 		Abi(llvm::Module* m, Config* c);
-		virtual ~Abi();
+		virtual ~Abi() = default;
 
 	// Registers.
 	//

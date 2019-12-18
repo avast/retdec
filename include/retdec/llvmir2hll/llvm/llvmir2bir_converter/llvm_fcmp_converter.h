@@ -27,7 +27,8 @@ class Expression;
 */
 class LLVMFCmpConverter final: private retdec::utils::NonCopyable {
 public:
-	LLVMFCmpConverter();
+	LLVMFCmpConverter() = default;
+	~LLVMFCmpConverter() = default;
 
 	ShPtr<Expression> convertToExpression(ShPtr<Expression> op1,
 		ShPtr<Expression> op2, unsigned predicate);
@@ -49,7 +50,7 @@ private:
 		ShPtr<Expression> op2) const;
 
 	/// Use strict FPU semantics?
-	bool optionStrictFPUSemantics;
+	bool optionStrictFPUSemantics = false;
 };
 
 } // namespace llvmir2hll

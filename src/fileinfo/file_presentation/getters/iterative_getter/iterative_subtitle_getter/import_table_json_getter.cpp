@@ -35,14 +35,6 @@ ImportTableJsonGetter::ImportTableJsonGetter(FileInformation &fileInfo) : Iterat
 		commonHeaderElements.push_back("delayed");
 }
 
-/**
- * Destructor
- */
-ImportTableJsonGetter::~ImportTableJsonGetter()
-{
-
-}
-
 std::size_t ImportTableJsonGetter::getBasicInfo(std::size_t structIndex, std::vector<std::string> &desc, std::vector<std::string> &info) const
 {
 	if(structIndex >= numberOfStructures || !fileinfo.hasImportTableRecords())

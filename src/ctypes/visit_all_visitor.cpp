@@ -24,16 +24,6 @@
 namespace retdec {
 namespace ctypes {
 
-/**
-* @brief Constructs a new visitor.
-*/
-VisitAllVisitor::VisitAllVisitor() = default;
-
-/**
-* @brief Destructs the visitor.
-*/
-VisitAllVisitor::~VisitAllVisitor() = default;
-
 void VisitAllVisitor::visit(const std::shared_ptr<ArrayType> &type)
 {
 	if (makeAccessedAndCheckIfAccessed(type))

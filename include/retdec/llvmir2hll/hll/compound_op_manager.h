@@ -56,8 +56,6 @@ public:
 public:
 	CompoundOpManager();
 
-	virtual ~CompoundOpManager() override;
-
 	/**
 	* @brief Returns the ID of the manager.
 	*/

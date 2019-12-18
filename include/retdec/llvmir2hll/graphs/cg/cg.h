@@ -72,8 +72,6 @@ public:
 	using caller_iterator = CallerCalleeMap::const_iterator;
 
 public:
-	~CG();
-
 	ShPtr<Module> getCorrespondingModule() const;
 	ShPtr<CalledFuncs> getCalledFuncs(ShPtr<Function> func,
 		bool includeIndirectCalls = false) const;

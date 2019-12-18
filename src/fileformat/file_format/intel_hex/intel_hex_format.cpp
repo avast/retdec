@@ -47,14 +47,6 @@ IntelHexFormat::IntelHexFormat(const std::uint8_t *data, std::size_t size, LoadF
 }
 
 /**
- * Destructor
- */
-IntelHexFormat::~IntelHexFormat()
-{
-
-}
-
-/**
  * Init internal structures
  */
 void IntelHexFormat::initStructures()

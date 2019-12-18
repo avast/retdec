@@ -36,11 +36,6 @@ LLVMIR2BIRConverter::LLVMIR2BIRConverter(llvm::Pass *basePass):
 	llvmModule(nullptr), resModule(), structConverter(), variablesManager() {}
 
 /**
-* @brief Destructor.
-*/
-LLVMIR2BIRConverter::~LLVMIR2BIRConverter() {}
-
-/**
 * @brief Creates a new converter.
 *
 * @param[in] basePass Pass that instantiates a concrete converter.

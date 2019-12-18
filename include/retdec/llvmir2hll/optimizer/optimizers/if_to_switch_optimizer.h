@@ -65,8 +65,6 @@ class IfToSwitchOptimizer final: public FuncOptimizer {
 public:
 	IfToSwitchOptimizer(ShPtr<Module> module, ShPtr<ValueAnalysis> va);
 
-	virtual ~IfToSwitchOptimizer() override;
-
 	virtual std::string getId() const override { return "IfToSwitch"; }
 
 private:

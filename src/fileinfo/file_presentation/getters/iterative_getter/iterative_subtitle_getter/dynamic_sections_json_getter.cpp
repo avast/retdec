@@ -37,14 +37,6 @@ DynamicSectionsJsonGetter::DynamicSectionsJsonGetter(FileInformation &fileInfo) 
 	commonHeaderElements.push_back("description");
 }
 
-/**
- * Destructor
- */
-DynamicSectionsJsonGetter::~DynamicSectionsJsonGetter()
-{
-
-}
-
 std::size_t DynamicSectionsJsonGetter::getBasicInfo(std::size_t structIndex, std::vector<std::string> &desc, std::vector<std::string> &info) const
 {
 	if(structIndex >= numberOfStructures)

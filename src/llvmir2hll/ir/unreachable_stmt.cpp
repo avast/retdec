@@ -11,16 +11,6 @@
 namespace retdec {
 namespace llvmir2hll {
 
-/**
-* @brief Constructs a new unreachable statement.
-*/
-UnreachableStmt::UnreachableStmt() {}
-
-/**
-* @brief Destructs the statement.
-*/
-UnreachableStmt::~UnreachableStmt() {}
-
 ShPtr<Value> UnreachableStmt::clone() {
 	ShPtr<UnreachableStmt> unreachableStmt(UnreachableStmt::create());
 	unreachableStmt->setMetadata(getMetadata());

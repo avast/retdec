@@ -138,11 +138,6 @@ OptimizerManager::OptimizerManager(const StringSet &enabledOpts,
 		}
 
 /**
-* @brief Destructs the manager.
-*/
-OptimizerManager::~OptimizerManager() {}
-
-/**
 * @brief Runs the optimizations over @a m.
 */
 void OptimizerManager::optimize(ShPtr<Module> m) {

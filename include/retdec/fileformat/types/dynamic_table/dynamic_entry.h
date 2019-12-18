@@ -18,13 +18,13 @@ namespace fileformat {
 class DynamicEntry
 {
 	private:
-		unsigned long long type;  ///< type of the dynamic record
-		unsigned long long value; ///< stored value
-		std::string description;  ///< description
+		/// type of the dynamic record
+		unsigned long long type = 0;
+		/// stored value
+		unsigned long long value = 0;
+		/// description
+		std::string description;
 	public:
-		DynamicEntry();
-		~DynamicEntry();
-
 		/// @name Getters
 		/// @{
 		unsigned long long getType() const;

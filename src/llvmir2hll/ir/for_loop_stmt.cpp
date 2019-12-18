@@ -23,11 +23,6 @@ ForLoopStmt::ForLoopStmt(ShPtr<Variable> indVar, ShPtr<Expression> startValue,
 		indVar(indVar), startValue(startValue), endCond(endCond), step(step),
 		body(body) {}
 
-/**
-* @brief Destructs the statement.
-*/
-ForLoopStmt::~ForLoopStmt() {}
-
 ShPtr<Value> ForLoopStmt::clone() {
 	ShPtr<ForLoopStmt> forLoopStmt(ForLoopStmt::create(
 		ucast<Variable>(indVar->clone()),

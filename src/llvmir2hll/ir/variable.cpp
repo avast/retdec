@@ -20,11 +20,6 @@ namespace llvmir2hll {
 Variable::Variable(const std::string &name, ShPtr<Type> type):
 	initialName(name), name(name), type(type), internal(true) {}
 
-/**
-* @brief Destructs the variable.
-*/
-Variable::~Variable() {}
-
 ShPtr<Value> Variable::clone() {
 	// Variables are not cloned (see the description of Value::clone()).
 	return shared_from_this();

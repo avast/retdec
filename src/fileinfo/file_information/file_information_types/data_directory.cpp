@@ -10,23 +10,6 @@
 namespace fileinfo {
 
 /**
- * Constructor
- */
-DataDirectory::DataDirectory() : address(std::numeric_limits<unsigned long long>::max()),
-									size(std::numeric_limits<unsigned long long>::max())
-{
-
-}
-
-/**
- * Destructor
- */
-DataDirectory::~DataDirectory()
-{
-
-}
-
-/**
  * Get type (description) of directory
  * @return Type of directory
  */

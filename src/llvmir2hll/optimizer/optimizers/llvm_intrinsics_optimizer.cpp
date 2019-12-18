@@ -33,11 +33,6 @@ LLVMIntrinsicsOptimizer::LLVMIntrinsicsOptimizer(ShPtr<Module> module):
 		PRECONDITION_NON_NULL(module);
 	}
 
-/**
-* @brief Destructs the optimizer.
-*/
-LLVMIntrinsicsOptimizer::~LLVMIntrinsicsOptimizer() {}
-
 void LLVMIntrinsicsOptimizer::doOptimization() {
 	FuncOptimizer::doOptimization();
 

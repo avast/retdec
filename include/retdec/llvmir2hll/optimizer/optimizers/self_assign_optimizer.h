@@ -34,8 +34,6 @@ class SelfAssignOptimizer final: public FuncOptimizer {
 public:
 	SelfAssignOptimizer(ShPtr<Module> module);
 
-	virtual ~SelfAssignOptimizer() override;
-
 	virtual std::string getId() const override { return "SelfAssign"; }
 
 private:

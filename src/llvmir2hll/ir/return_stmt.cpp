@@ -20,11 +20,6 @@ namespace llvmir2hll {
 */
 ReturnStmt::ReturnStmt(ShPtr<Expression> retVal): retVal(retVal) {}
 
-/**
-* @brief Destructs the statement.
-*/
-ReturnStmt::~ReturnStmt() {}
-
 ShPtr<Value> ReturnStmt::clone() {
 	ShPtr<ReturnStmt> returnStmt(ReturnStmt::create());
 	returnStmt->setMetadata(getMetadata());

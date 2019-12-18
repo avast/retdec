@@ -41,11 +41,6 @@ DeadCodeOptimizer::DeadCodeOptimizer(ShPtr<Module> module,
 	PRECONDITION_NON_NULL(arithmExprEvaluator);
 }
 
-/**
-* @brief Destructs the optimizer.
-*/
-DeadCodeOptimizer::~DeadCodeOptimizer() {}
-
 void DeadCodeOptimizer::visit(ShPtr<IfStmt> stmt) {
 	FuncOptimizer::visit(stmt);
 

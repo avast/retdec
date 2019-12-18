@@ -30,7 +30,6 @@ namespace tests {
 class TestsWithLLVMValueConverter: public TestsWithModule {
 protected:
 	TestsWithLLVMValueConverter();
-	~TestsWithLLVMValueConverter();
 
 	/// @name Helper assertions
 	/// @{

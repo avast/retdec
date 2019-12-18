@@ -21,11 +21,6 @@ namespace llvmir2hll {
 ConstArray::ConstArray(ArrayValue value, ShPtr<ArrayType> type):
 	Constant(), value(value), initialized(!value.empty()), type(type) {}
 
-/**
-* @brief Destructs the constant.
-*/
-ConstArray::~ConstArray() {}
-
 ShPtr<Value> ConstArray::clone() {
 	if (isInitialized()) {
 		ShPtr<ConstArray> constArray(ConstArray::create(value, type));

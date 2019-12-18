@@ -24,8 +24,6 @@ class BreakStmt final: public Statement {
 public:
 	static ShPtr<BreakStmt> create();
 
-	virtual ~BreakStmt() override;
-
 	virtual ShPtr<Value> clone() override;
 	virtual bool isEqualTo(ShPtr<Value> otherValue) const override;
 	virtual bool isCompound() override { return false; }
@@ -40,7 +38,7 @@ public:
 private:
 	// Since instances are created by calling the static function create(), the
 	// constructor can be private.
-	BreakStmt();
+	BreakStmt() = default;
 };
 
 } // namespace llvmir2hll

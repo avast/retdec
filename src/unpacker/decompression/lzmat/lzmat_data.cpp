@@ -13,10 +13,6 @@ LzmatData::LzmatData(const DynamicBuffer& buffer) : CompressedData(buffer)
 {
 }
 
-LzmatData::~LzmatData()
-{
-}
-
 bool LzmatData::decompress(DynamicBuffer& outputBuffer)
 {
 	outputBuffer.write<uint8_t>(_buffer.read<uint8_t>(0), 0); // First byte is just copied

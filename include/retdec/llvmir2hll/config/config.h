@@ -38,7 +38,7 @@ private:
 */
 class Config: private retdec::utils::NonCopyable {
 public:
-	virtual ~Config();
+	virtual ~Config() = default;
 
 	/// @name Loading and Saving
 	/// @{

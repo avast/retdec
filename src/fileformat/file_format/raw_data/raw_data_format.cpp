@@ -51,13 +51,6 @@ RawDataFormat::RawDataFormat(
 }
 
 /**
- * Destructor
- */
-RawDataFormat::~RawDataFormat()
-{
-}
-
-/**
  * Init internal structures
  */
 void RawDataFormat::initStructures()

@@ -27,8 +27,6 @@ public:
 	static ShPtr<ReturnStmt> create(ShPtr<Expression> retVal = nullptr,
 		ShPtr<Statement> succ = nullptr);
 
-	virtual ~ReturnStmt() override;
-
 	virtual ShPtr<Value> clone() override;
 	virtual bool isEqualTo(ShPtr<Value> otherValue) const override;
 	virtual bool isCompound() override { return false; }

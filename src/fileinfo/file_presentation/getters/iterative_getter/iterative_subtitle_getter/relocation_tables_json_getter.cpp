@@ -40,14 +40,6 @@ RelocationTablesJsonGetter::RelocationTablesJsonGetter(FileInformation &fileInfo
 	commonHeaderElements.push_back("calculatedValue");
 }
 
-/**
- * Destructor
- */
-RelocationTablesJsonGetter::~RelocationTablesJsonGetter()
-{
-
-}
-
 std::size_t RelocationTablesJsonGetter::getBasicInfo(std::size_t structIndex, std::vector<std::string> &desc, std::vector<std::string> &info) const
 {
 	if(structIndex >= numberOfStructures)

@@ -19,13 +19,6 @@ namespace llvmir2hll {
 BitCastExpr::BitCastExpr(ShPtr<Expression> op, ShPtr<Type> dstType):
 	CastExpr(op, dstType) {}
 
-/**
-* @brief Destructs the operator.
-*/
-BitCastExpr::~BitCastExpr() {
-	// Observers are removed in the superclass.
-}
-
 bool BitCastExpr::isEqualTo(ShPtr<Value> otherValue) const {
 	// Both types and values of all operands have to be equal.
 	if (ShPtr<BitCastExpr> otherCastExpr = cast<BitCastExpr>(otherValue)) {

@@ -21,11 +21,6 @@ namespace llvmir2hll {
 VarDefStmt::VarDefStmt(ShPtr<Variable> var, ShPtr<Expression> init):
 	var(var), init(init) {}
 
-/**
-* @brief Destructs the statement.
-*/
-VarDefStmt::~VarDefStmt() {}
-
 ShPtr<Value> VarDefStmt::clone() {
 	ShPtr<VarDefStmt> varDefStmt(VarDefStmt::create(ucast<Variable>(var->clone())));
 	varDefStmt->setMetadata(getMetadata());

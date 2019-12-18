@@ -22,7 +22,6 @@ class Capstone2LlvmIrTranslatorPowerpc_impl :
 				llvm::Module* m,
 				cs_mode basic = CS_MODE_32,
 				cs_mode extra = CS_MODE_LITTLE_ENDIAN);
-		virtual ~Capstone2LlvmIrTranslatorPowerpc_impl();
 //
 //==============================================================================
 // Mode query & modification methods - from Capstone2LlvmIrTranslator.

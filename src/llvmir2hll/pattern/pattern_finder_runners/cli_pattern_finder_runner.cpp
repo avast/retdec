@@ -32,11 +32,6 @@ CLIPatternFinderRunner::CLIPatternFinderRunner(llvm::raw_ostream &os):
 	os(os) {}
 
 /**
-* @brief Destructs the finder.
-*/
-CLIPatternFinderRunner::~CLIPatternFinderRunner() {}
-
-/**
 * @brief Prints a sub-phase saying that the given finder is run.
 *
 * The ID of the finder is included in the output.

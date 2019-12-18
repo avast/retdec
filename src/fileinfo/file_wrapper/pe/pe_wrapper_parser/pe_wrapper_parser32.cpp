@@ -17,14 +17,6 @@ PeWrapperParser32::PeWrapperParser32(PeLib::PeHeaderT<32> peHeader32) : PeWrappe
 
 }
 
-/**
- * Destructor
- */
-PeWrapperParser32::~PeWrapperParser32()
-{
-
-}
-
 std::string PeWrapperParser32::getPeType() const
 {
 	return peFileStatus(peHeader);

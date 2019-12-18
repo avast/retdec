@@ -13,10 +13,6 @@
 namespace retdec {
 namespace llvmir2hll {
 
-NoInitVarDefAnalysis::NoInitVarDefAnalysis() {}
-
-NoInitVarDefAnalysis::~NoInitVarDefAnalysis() {}
-
 /**
 * @brief Returns the set of all variable-defining statements without an
 *        initializer in the given function.

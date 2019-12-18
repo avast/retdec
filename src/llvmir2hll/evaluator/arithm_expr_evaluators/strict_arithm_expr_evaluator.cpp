@@ -21,16 +21,6 @@ REGISTER_AT_FACTORY("strict", STRICT_ARITHM_EXPR_EVALUATOR_ID,
 	ArithmExprEvaluatorFactory, StrictArithmExprEvaluator::create);
 
 /**
-* @brief Constructs the StrictArithmExprEvaluator.
-*/
-StrictArithmExprEvaluator::StrictArithmExprEvaluator() {}
-
-/**
-* @brief Destructor.
-*/
-StrictArithmExprEvaluator::~StrictArithmExprEvaluator() {}
-
-/**
 * @brief Creates a new StrictArithmExprEvaluator.
 */
 ShPtr<ArithmExprEvaluator> StrictArithmExprEvaluator::create() {

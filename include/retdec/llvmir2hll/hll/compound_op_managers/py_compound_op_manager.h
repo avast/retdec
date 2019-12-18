@@ -21,8 +21,6 @@ class PyCompoundOpManager final: public CompoundOpManager {
 public:
 	PyCompoundOpManager();
 
-	virtual ~PyCompoundOpManager() override;
-
 	virtual std::string getId() const override;
 
 private:

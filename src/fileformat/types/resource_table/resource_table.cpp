@@ -72,22 +72,6 @@ namespace retdec {
 namespace fileformat {
 
 /**
- * Constructor
- */
-ResourceTable::ResourceTable()
-{
-
-}
-
-/**
- * Destructor
- */
-ResourceTable::~ResourceTable()
-{
-
-}
-
-/**
  * Compute icon perceptual hashes
  * @param icon Icon to compute the hash of
  * @return Perceptual hash as AvgHash

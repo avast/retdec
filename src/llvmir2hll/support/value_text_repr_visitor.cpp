@@ -84,11 +84,6 @@ ValueTextReprVisitor::ValueTextReprVisitor():
 	OrderedAllVisitor(), textRepr() {}
 
 /**
-* @brief Destructs the visitor.
-*/
-ValueTextReprVisitor::~ValueTextReprVisitor() {}
-
-/**
 * @brief Returns a textual representation of @a value.
 *
 * @param[in] value Value whose textual representation will be obtained.

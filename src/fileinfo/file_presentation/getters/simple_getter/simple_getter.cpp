@@ -18,14 +18,6 @@ SimpleGetter::SimpleGetter(FileInformation &fileInfo) : fileinfo(fileInfo)
 }
 
 /**
- * Destructor
- */
-SimpleGetter::~SimpleGetter()
-{
-
-}
-
-/**
  * @fn std::size_t SimpleGetter::loadInformation(std::vector<std::string> &desc, std::vector<std::string> &info) const
  * Load information about file
  * @param desc Vector for save descriptions of information

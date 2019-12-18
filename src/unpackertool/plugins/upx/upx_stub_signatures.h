@@ -54,7 +54,6 @@ class UpxStubSignatures
 public:
 	UpxStubSignatures() = delete;
 	UpxStubSignatures(const UpxStubSignatures&) = delete;
-	~UpxStubSignatures();
 
 	static const UpxStubData* matchSignatures(retdec::loader::Image* file, DynamicBuffer& captureData);
 	static const UpxStubData* matchSignatures(const DynamicBuffer& data, DynamicBuffer& captureData,

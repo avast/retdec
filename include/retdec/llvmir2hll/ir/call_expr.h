@@ -29,8 +29,6 @@ public:
 	static ShPtr<CallExpr> create(ShPtr<Expression> calledExpr,
 		ExprVector args = ExprVector());
 
-	virtual ~CallExpr() override;
-
 	virtual ShPtr<Value> clone() override;
 	virtual bool isEqualTo(ShPtr<Value> otherValue) const override;
 	virtual ShPtr<Type> getType() const override;

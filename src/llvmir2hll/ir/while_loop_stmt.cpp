@@ -21,11 +21,6 @@ namespace llvmir2hll {
 WhileLoopStmt::WhileLoopStmt(ShPtr<Expression> cond, ShPtr<Statement> body):
 	cond(cond), body(body) {}
 
-/**
-* @brief Destructs the statement.
-*/
-WhileLoopStmt::~WhileLoopStmt() {}
-
 ShPtr<Value> WhileLoopStmt::clone() {
 	ShPtr<WhileLoopStmt> whileLoopStmt(WhileLoopStmt::create(
 		ucast<Expression>(cond->clone()), ucast<Statement>(Statement::cloneStatements(body))));

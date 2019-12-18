@@ -34,8 +34,11 @@ class IntelHexDetector : public FileDetector
 		/// @}
 
 	public:
-		IntelHexDetector(std::string pathToInputFile, FileInformation &finfo, retdec::cpdetect::DetectParams &searchPar, retdec::fileformat::LoadFlags loadFlags);
-		virtual ~IntelHexDetector() override;
+		IntelHexDetector(
+				std::string pathToInputFile,
+				FileInformation &finfo,
+				retdec::cpdetect::DetectParams &searchPar,
+				retdec::fileformat::LoadFlags loadFlags);
 };
 
 } // namespace fileinfo

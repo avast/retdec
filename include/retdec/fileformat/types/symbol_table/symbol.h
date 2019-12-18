@@ -37,22 +37,19 @@ class Symbol
 			FILE
 		};
 	private:
-		std::string name;                 ///< symbol name (normalized name)
-		std::string originalName;         ///< original name of symbol
-		Type type;                        ///< symbol type
-		UsageType usageType;              ///< usage of symbol
-		unsigned long long index;         ///< symbol index
-		unsigned long long address;       ///< virtual address of symbol
-		unsigned long long size;          ///< size of symbol
-		unsigned long long linkToSection; ///< link to section
-		bool addressIsValid;              ///< @c true if value of virtual address is valid
-		bool sizeIsValid;                 ///< @c true if size of symbol is valid
-		bool linkIsValid;                 ///< @c true if link to section is valid
-		bool thumbSymbol;                 ///< @c true if symbol is THUMB symbol
+		std::string name;                     ///< symbol name (normalized name)
+		std::string originalName;             ///< original name of symbol
+		Type type = Type::UNDEFINED_SYM;          ///< symbol type
+		UsageType usageType = UsageType::UNKNOWN; ///< usage of symbol
+		unsigned long long index = 0;         ///< symbol index
+		unsigned long long address = 0;       ///< virtual address of symbol
+		unsigned long long size = 0;          ///< size of symbol
+		unsigned long long linkToSection = 0; ///< link to section
+		bool addressIsValid = false;          ///< @c true if value of virtual address is valid
+		bool sizeIsValid = false;             ///< @c true if size of symbol is valid
+		bool linkIsValid = false;             ///< @c true if link to section is valid
+		bool thumbSymbol = false;             ///< @c true if symbol is THUMB symbol
 	public:
-		Symbol();
-		virtual ~Symbol();
-
 		/// @name Type queries
 		/// @{
 		bool isUndefined() const;

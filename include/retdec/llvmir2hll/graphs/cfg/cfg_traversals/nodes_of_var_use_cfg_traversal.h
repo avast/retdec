@@ -40,8 +40,6 @@ public:
 	using VarDefStmtNodeMap = std::map<ShPtr<VarDefStmt>, CFGNodeSet>;
 
 public:
-	~NodesOfVarUseCFGTraversal();
-
 	static ShPtr<VarDefStmtNodeMap> getNodesOfUseVariable(const VarDefStmtSet
 		&setOfVarDefStmt, ShPtr<CFG> cfg, ShPtr<ValueAnalysis> va);
 

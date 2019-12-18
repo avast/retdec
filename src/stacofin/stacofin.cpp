@@ -566,20 +566,6 @@ retdec::common::Address DetectedFunction::getAddress() const
 //
 
 /**
- * Default constructor.
- */
-Finder::Finder()
-{
-}
-
-/**
- * Default destructor.
- */
-Finder::~Finder()
-{
-}
-
-/**
  * Return detected code coverage.
  *
  * @return covered code

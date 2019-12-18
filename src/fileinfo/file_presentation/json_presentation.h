@@ -44,7 +44,6 @@ class JsonPresentation : public FilePresentation
 		/// @}
 	public:
 		JsonPresentation(FileInformation &fileinfo_, bool verbose_);
-		virtual ~JsonPresentation() override;
 
 		virtual bool present() override;
 };

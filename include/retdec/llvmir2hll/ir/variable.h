@@ -28,8 +28,6 @@ class Variable final: public Expression {
 public:
 	static ShPtr<Variable> create(const std::string &name, ShPtr<Type> type);
 
-	virtual ~Variable() override;
-
 	virtual ShPtr<Value> clone() override;
 
 	virtual bool isEqualTo(ShPtr<Value> otherValue) const override;

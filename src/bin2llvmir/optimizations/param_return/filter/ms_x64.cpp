@@ -14,17 +14,6 @@ using namespace llvm;
 namespace retdec {
 namespace bin2llvmir {
 
-MSX64Filter::MSX64Filter(
-		const Abi* abi,
-		const CallingConvention* cc) :
-	Filter(abi, cc)
-{
-}
-
-MSX64Filter::~MSX64Filter()
-{
-}
-
 void MSX64Filter::filterDefinitionArgs(FilterableLayout& args, bool isVoidarg) const
 {
 	leaveOnlyPositiveStacks(args);

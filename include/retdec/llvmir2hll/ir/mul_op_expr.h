@@ -28,8 +28,6 @@ class MulOpExpr final: public BinaryOpExpr {
 public:
 	static ShPtr<MulOpExpr> create(ShPtr<Expression> op1, ShPtr<Expression> op2);
 
-	virtual ~MulOpExpr() override;
-
 	virtual bool isEqualTo(ShPtr<Value> otherValue) const override;
 	virtual ShPtr<Value> clone() override;
 

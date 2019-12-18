@@ -61,9 +61,5 @@ SystemVX64CallingConvention::SystemVX64CallingConvention(const Abi* a) :
 	_numOfVectorRegsPerParam = 2;
 }
 
-SystemVX64CallingConvention::~SystemVX64CallingConvention()
-{
-}
-
 }
 }

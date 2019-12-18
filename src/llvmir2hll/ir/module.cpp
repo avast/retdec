@@ -49,11 +49,6 @@ Module::Module(const llvm::Module *llvmModule, const std::string &identifier,
 	}
 
 /**
-* @brief Destructs the module.
-*/
-Module::~Module() {}
-
-/**
 * @brief Adds a new global variable to the module.
 *
 * @param[in] var Variable to be added.

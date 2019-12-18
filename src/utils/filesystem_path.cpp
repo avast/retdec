@@ -279,9 +279,7 @@ FilesystemPath::FilesystemPath(const FilesystemPath& fspath) : FilesystemPath(fs
 /**
  * Destructor.
  */
-FilesystemPath::~FilesystemPath()
-{
-}
+FilesystemPath::~FilesystemPath() = default;
 
 /**
  * Returns the path in the normalized textual representation

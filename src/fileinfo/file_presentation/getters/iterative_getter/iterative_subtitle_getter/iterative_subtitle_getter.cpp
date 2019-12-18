@@ -21,14 +21,6 @@ IterativeSubtitleGetter::IterativeSubtitleGetter(FileInformation &fileInfo) : It
 }
 
 /**
- * Destructor
- */
-IterativeSubtitleGetter::~IterativeSubtitleGetter()
-{
-
-}
-
-/**
  * Get header (title of presented structures)
  * @param structsHeader Into this parameter the header is stored
  */

@@ -29,9 +29,6 @@ class ImportTable
 		std::string impHashMd5;                       ///< imphash MD5
 		std::string impHashSha256;                    ///< imphash SHA256
 	public:
-		ImportTable();
-		~ImportTable();
-
 		/// @name Getters
 		/// @{
 		std::size_t getNumberOfLibraries() const;

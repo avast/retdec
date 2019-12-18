@@ -25,13 +25,10 @@ class Pattern
 		std::string name;                  ///< name of pattern
 		std::string description;           ///< description of pattern
 		std::string yaraRuleName;          ///< set name of YARA rule
-		bool little;                       ///< @c true if pattern is little endian
-		bool big;                          ///< @c true if pattern is big endian
+		bool little = false;               ///< @c true if pattern is little endian
+		bool big = false;                  ///< @c true if pattern is big endian
 		std::vector<PatternMatch> matches; ///< all matches of pattern
 	public:
-		Pattern();
-		~Pattern();
-
 		/// @name Query methods
 		/// @{
 		bool isLittle() const;

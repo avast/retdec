@@ -21,13 +21,6 @@ GtEqOpExpr::GtEqOpExpr(ShPtr<Expression> op1, ShPtr<Expression> op2,
 		Variant variant):
 	BinaryOpExpr(op1, op2), variant(variant) {}
 
-/**
-* @brief Destructs the operator.
-*/
-GtEqOpExpr::~GtEqOpExpr() {
-	// Observers are removed in the superclass.
-}
-
 bool GtEqOpExpr::isEqualTo(ShPtr<Value> otherValue) const {
 	if (ShPtr<GtEqOpExpr> otherValueGtEqOpExpr = cast<GtEqOpExpr>(otherValue)) {
 		return op1->isEqualTo(otherValueGtEqOpExpr->getFirstOperand()) &&

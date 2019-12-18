@@ -20,22 +20,19 @@ class TlsInfo
 {
 	private:
 		std::vector<std::uint64_t> callBacks;  ///< addresses of callback functions
-		std::uint64_t rawDataStartAddr;        ///< start address of raw data
-		std::uint64_t rawDataEndAddr;          ///< end address of raw data
-		std::uint64_t indexAddr;               ///< address of index
-		std::uint64_t callBacksAddr;           ///< address of array of callbacks
-		std::uint32_t zeroFillSize;            ///< size of zero fill
-		std::uint32_t characteristics;         ///< characteristics
-		bool rawDataStartAddrValid;            ///< member validity flag
-		bool rawDataEndAddrValid;              ///< member validity flag
-		bool indexAddrValid;                   ///< member validity flag
-		bool callBacksAddrValid;               ///< member validity flag
-		bool zeroFillSizeValid;                ///< member validity flag
-		bool characteristicsValid;             ///< member validity flag
+		std::uint64_t rawDataStartAddr = 0;    ///< start address of raw data
+		std::uint64_t rawDataEndAddr = 0;      ///< end address of raw data
+		std::uint64_t indexAddr = 0;           ///< address of index
+		std::uint64_t callBacksAddr = 0;       ///< address of array of callbacks
+		std::uint32_t zeroFillSize = 0;        ///< size of zero fill
+		std::uint32_t characteristics = 0;     ///< characteristics
+		bool rawDataStartAddrValid = false;    ///< member validity flag
+		bool rawDataEndAddrValid = false;      ///< member validity flag
+		bool indexAddrValid = false;           ///< member validity flag
+		bool callBacksAddrValid = false;       ///< member validity flag
+		bool zeroFillSizeValid = false;        ///< member validity flag
+		bool characteristicsValid = false;     ///< member validity flag
 	public:
-		TlsInfo();
-		~TlsInfo();
-
 		/// @name Getters
 		/// @{
 		bool getRawDataStartAddr(std::uint64_t &res) const;

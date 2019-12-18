@@ -34,11 +34,6 @@ BasicBlockConverter::BasicBlockConverter(ShPtr<LLVMValueConverter> converter,
 		converter(converter), labelsHandler(labelsHandler) {}
 
 /**
-* @brief Destructs the converter.
-*/
-BasicBlockConverter::~BasicBlockConverter() {}
-
-/**
 * @brief Converts the given LLVM basic block @a bb into a sequence of statements
 *        in BIR.
 */

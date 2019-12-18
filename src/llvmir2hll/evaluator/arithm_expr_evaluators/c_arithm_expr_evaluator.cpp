@@ -183,16 +183,6 @@ REGISTER_AT_FACTORY("c", C_ARITHM_EXPR_EVALUATOR_ID,
 	ArithmExprEvaluatorFactory, CArithmExprEvaluator::create);
 
 /**
-* @brief Constructs the CArithmExprEvaluator.
-*/
-CArithmExprEvaluator::CArithmExprEvaluator() {}
-
-/**
-* @brief Destructor.
-*/
-CArithmExprEvaluator::~CArithmExprEvaluator() {}
-
-/**
 * @brief Creates a new CArithmExprEvaluator.
 */
 ShPtr<ArithmExprEvaluator> CArithmExprEvaluator::create() {

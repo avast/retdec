@@ -49,14 +49,6 @@ SectionPlainGetter::SectionPlainGetter(FileInformation &fileInfo) : IterativeDis
 	loadRecords();
 }
 
-/**
- * Destructor
- */
-SectionPlainGetter::~SectionPlainGetter()
-{
-
-}
-
 std::size_t SectionPlainGetter::getBasicInfo(std::size_t structIndex, std::vector<std::string> &desc, std::vector<std::string> &info) const
 {
 	if(structIndex >= numberOfStructures || !fileinfo.getNumberOfStoredSections())

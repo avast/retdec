@@ -84,7 +84,7 @@ class BaseSequentialContainer
 		using const_iterator = typename std::list<Elem>::const_iterator;
 
 	public:
-		virtual ~BaseSequentialContainer() {}
+		virtual ~BaseSequentialContainer() = default;
 
 		iterator begin()             { return _data.begin(); }
 		const_iterator begin() const { return _data.begin(); }
@@ -242,7 +242,7 @@ class BaseAssociativeContainer
 		using const_iterator = typename std::map<ID, Elem>::const_iterator;
 
 	public:
-		virtual ~BaseAssociativeContainer() {}
+		virtual ~BaseAssociativeContainer() = default;
 
 		iterator begin()             { return _data.begin(); }
 		const_iterator begin() const { return _data.begin(); }
@@ -363,7 +363,7 @@ class BaseSetContainer
 		using const_iterator = typename std::set<Elem>::const_iterator;
 
 	public:
-		virtual ~BaseSetContainer() {}
+		virtual ~BaseSetContainer() = default;
 
 		iterator begin()                    { return _data.begin(); }
 		const_iterator begin() const        { return _data.begin(); }

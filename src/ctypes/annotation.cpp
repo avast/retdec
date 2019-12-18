@@ -17,11 +17,6 @@ namespace ctypes {
 Annotation::Annotation(const std::string &name):
 	name(name) {}
 
-/**
-* @brief Destructs the annotations.
-*/
-Annotation::~Annotation() = default;
-
 bool Annotation::isIn() const
 {
 	return false;

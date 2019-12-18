@@ -43,12 +43,12 @@ public:
 	/**
 	* @brief Creates a new observer.
 	*/
-	Observer() {}
+	Observer() = default;
 
 	/**
 	* @brief Destructs the observer.
 	*/
-	virtual ~Observer() {}
+	virtual ~Observer() = default;
 
 	/**
 	* @brief Subject has changed its state.

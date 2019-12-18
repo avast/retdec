@@ -10,26 +10,6 @@
 namespace fileinfo {
 
 /**
- * Constructor
- */
-Relocation::Relocation() : offset(std::numeric_limits<unsigned long long>::max()),
-							symbolValue(std::numeric_limits<unsigned long long>::max()),
-							relocationType(std::numeric_limits<unsigned long long>::max()),
-							addend(std::numeric_limits<long long>::min()),
-							calculatedValue(std::numeric_limits<long long>::min())
-{
-
-}
-
-/**
- * Destructor
- */
-Relocation::~Relocation()
-{
-
-}
-
-/**
  * Get name of associated symbol
  * @return Name of associated symbol
  */

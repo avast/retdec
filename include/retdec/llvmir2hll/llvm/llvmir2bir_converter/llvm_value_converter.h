@@ -45,8 +45,6 @@ private:
 	LLVMValueConverter(ShPtr<Module> resModule, ShPtr<VariablesManager> varManager);
 
 public:
-	~LLVMValueConverter();
-
 	static ShPtr<LLVMValueConverter> create(ShPtr<Module> resModule,
 		ShPtr<VariablesManager> varManager);
 

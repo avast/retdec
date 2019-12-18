@@ -140,7 +140,6 @@ namespace llvmir2hll {
 class ThreeOperandsSubOptimizer final: public SubOptimizer {
 public:
 	ThreeOperandsSubOptimizer(ShPtr<ArithmExprEvaluator> arithmExprEvaluator);
-	virtual ~ThreeOperandsSubOptimizer() override;
 
 	static ShPtr<SubOptimizer> create(ShPtr<ArithmExprEvaluator>
 		arithmExprEvaluator);

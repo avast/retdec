@@ -24,8 +24,6 @@ class NoInitVarDefOptimizer final: public FuncOptimizer {
 public:
 	NoInitVarDefOptimizer(ShPtr<Module> module);
 
-	virtual ~NoInitVarDefOptimizer() override;
-
 	virtual std::string getId() const override { return "NoInitVarDef"; }
 
 private:

@@ -16,11 +16,6 @@ namespace llvmir2hll {
 */
 ContinueStmt::ContinueStmt(): Statement() {}
 
-/**
-* @brief Destructs the statement.
-*/
-ContinueStmt::~ContinueStmt() {}
-
 ShPtr<Value> ContinueStmt::clone() {
 	ShPtr<ContinueStmt> continueStmt(ContinueStmt::create());
 	continueStmt->setMetadata(getMetadata());

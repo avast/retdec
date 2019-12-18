@@ -349,14 +349,6 @@ PlainPresentation::PlainPresentation(FileInformation &fileinfo_, bool verbose_, 
 }
 
 /**
- * Destructor
- */
-PlainPresentation::~PlainPresentation()
-{
-
-}
-
-/**
  * Present information about used compiler (or packer)
  */
 void PlainPresentation::presentCompiler() const

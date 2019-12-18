@@ -65,25 +65,9 @@ Search::Search(retdec::fileformat::FileFormat &fileParser) : parser(fileParser),
 }
 
 /**
- * Destructor
- */
-Search::~Search()
-{
-
-}
-
-/**
  * Constructor of RelativeJump
  */
 Search::RelativeJump::RelativeJump(std::string sSlash, std::size_t sBytesAfter) : slash(sSlash), bytesAfter(sBytesAfter)
-{
-
-}
-
-/**
- * Destructor of RelativeJump
- */
-Search::RelativeJump::~RelativeJump()
 {
 
 }

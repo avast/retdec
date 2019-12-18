@@ -25,11 +25,6 @@ UForLoopStmt::UForLoopStmt(
 	init(init), initIsDefinition(false), cond(cond), step(step),
 	body(body) {}
 
-/**
-* @brief Destructs the statement.
-*/
-UForLoopStmt::~UForLoopStmt() = default;
-
 ShPtr<Value> UForLoopStmt::clone() {
 	auto loop = UForLoopStmt::create(
 		ucast<Expression>(init->clone()),

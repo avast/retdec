@@ -31,7 +31,7 @@ class Value: public Visitable, public Metadatable<std::string>,
 		public SharableFromThis<Value>, public Observer<Value>,
 		public Subject<Value>, private retdec::utils::NonCopyable {
 public:
-	virtual ~Value() = 0;
+	virtual ~Value() = default;
 
 	virtual ShPtr<Value> getSelf() override;
 
@@ -69,7 +69,7 @@ public:
 	std::string getTextRepr();
 
 protected:
-	Value();
+	Value() = default;
 };
 
 /// @name Emission To Streams

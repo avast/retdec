@@ -33,13 +33,6 @@ RegisterPass<Idioms> IdiomsRegistered(
  * Constructor
  */
 Idioms::Idioms(): FunctionPass(ID) {
-	m_idioms = nullptr;
-}
-
-/**
- * Destructor
- */
-Idioms::~Idioms() {
 }
 
 /**

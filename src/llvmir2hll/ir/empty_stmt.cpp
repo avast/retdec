@@ -11,18 +11,6 @@
 namespace retdec {
 namespace llvmir2hll {
 
-/**
-* @brief Constructs a new empty statement.
-*
-* See create() for more information.
-*/
-EmptyStmt::EmptyStmt() {}
-
-/**
-* @brief Destructs the statement.
-*/
-EmptyStmt::~EmptyStmt() {}
-
 ShPtr<Value> EmptyStmt::clone() {
 	ShPtr<EmptyStmt> emptyStmt(EmptyStmt::create());
 	emptyStmt->setMetadata(getMetadata());

@@ -27,8 +27,6 @@ class ConstNullPointer final: public Constant {
 public:
 	static ShPtr<ConstNullPointer> create(ShPtr<PointerType> type);
 
-	virtual ~ConstNullPointer() override;
-
 	virtual ShPtr<Value> clone() override;
 
 	virtual bool isEqualTo(ShPtr<Value> otherValue) const override;

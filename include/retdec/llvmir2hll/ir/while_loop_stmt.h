@@ -27,8 +27,6 @@ public:
 	static ShPtr<WhileLoopStmt> create(ShPtr<Expression> cond, ShPtr<Statement> body,
 		ShPtr<Statement> succ = nullptr);
 
-	virtual ~WhileLoopStmt() override;
-
 	virtual ShPtr<Value> clone() override;
 	virtual bool isEqualTo(ShPtr<Value> otherValue) const override;
 	virtual bool isCompound() override { return true; }

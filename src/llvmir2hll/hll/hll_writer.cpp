@@ -144,11 +144,6 @@ HLLWriter::HLLWriter(llvm::raw_ostream &out):
 	currFuncGotoLabelCounter(1), currentIndent(DEFAULT_LEVEL_INDENT) {}
 
 /**
-* @brief Destructs the writer.
-*/
-HLLWriter::~HLLWriter() {}
-
-/**
 * @brief Enables/disables the emission of debug comments.
 *
 * @param[in] emit If @c true, enables the emission of debug comments. If @c

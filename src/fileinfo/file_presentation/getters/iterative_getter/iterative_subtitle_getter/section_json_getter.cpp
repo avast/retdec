@@ -48,14 +48,6 @@ SectionJsonGetter::SectionJsonGetter(FileInformation &fileInfo) : IterativeSubti
 	commonHeaderElements.push_back("sha256");
 }
 
-/**
- * Destructor
- */
-SectionJsonGetter::~SectionJsonGetter()
-{
-
-}
-
 std::size_t SectionJsonGetter::getBasicInfo(std::size_t structIndex, std::vector<std::string> &desc, std::vector<std::string> &info) const
 {
 	if(structIndex >= numberOfStructures || !fileinfo.getNumberOfStoredSections())

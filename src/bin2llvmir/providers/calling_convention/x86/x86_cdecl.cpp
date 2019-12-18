@@ -25,10 +25,6 @@ CdeclCallingConvention::CdeclCallingConvention(const Abi* a) :
 	};
 }
 
-CdeclCallingConvention::~CdeclCallingConvention()
-{
-}
-
 CallingConvention::Ptr CdeclCallingConvention::create(const Abi* a)
 {
 	if (!a->isX86())

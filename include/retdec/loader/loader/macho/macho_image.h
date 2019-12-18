@@ -21,7 +21,6 @@ class MachOImage : public Image
 	using SegmentToSectionsTable = std::unordered_map<std::string, SectionList>;
 public:
 	MachOImage(const std::shared_ptr<retdec::fileformat::FileFormat>& fileFormat);
-	virtual ~MachOImage();
 
 	virtual bool load() override;
 

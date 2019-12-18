@@ -17,14 +17,6 @@ PeWrapperParser64::PeWrapperParser64(PeLib::PeHeaderT<64> peHeader64) : PeWrappe
 
 }
 
-/**
- * Destructor
- */
-PeWrapperParser64::~PeWrapperParser64()
-{
-
-}
-
 std::string PeWrapperParser64::getPeType() const
 {
 	return peFileStatus(peHeader);

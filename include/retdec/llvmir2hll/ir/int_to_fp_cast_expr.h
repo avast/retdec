@@ -34,8 +34,6 @@ public:
 	static ShPtr<IntToFPCastExpr> create(ShPtr<Expression> op, ShPtr<Type> dstType,
 		Variant variant = Variant::UIToFP);
 
-	virtual ~IntToFPCastExpr() override;
-
 	virtual bool isEqualTo(ShPtr<Value> otherValue) const override;
 	virtual ShPtr<Value> clone() override;
 

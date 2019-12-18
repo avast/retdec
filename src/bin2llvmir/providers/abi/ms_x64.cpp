@@ -32,10 +32,6 @@ AbiMS_X64::AbiMS_X64(llvm::Module* m, Config* c) :
 	_defcc = CallingConvention::ID::CC_X64;
 }
 
-AbiMS_X64::~AbiMS_X64()
-{
-}
-
 bool AbiMS_X64::isGeneralPurposeRegister(const llvm::Value* val) const
 {
 	uint32_t rid = getRegisterId(val);

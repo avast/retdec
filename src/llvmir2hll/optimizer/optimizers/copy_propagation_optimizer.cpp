@@ -216,11 +216,6 @@ CopyPropagationOptimizer::CopyPropagationOptimizer(ShPtr<Module> module,
 			PRECONDITION_NON_NULL(cio);
 	}
 
-/**
-* @brief Destructs the optimizer.
-*/
-CopyPropagationOptimizer::~CopyPropagationOptimizer() {}
-
 void CopyPropagationOptimizer::doOptimization() {
 	// Initialization.
 	// We clear the cache of va even if it is in a valid state (this

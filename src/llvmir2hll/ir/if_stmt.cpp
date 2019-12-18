@@ -21,11 +21,6 @@ namespace llvmir2hll {
 IfStmt::IfStmt(ShPtr<Expression> cond, ShPtr<Statement> body):
 		ifClauseList{IfClause(cond, body)}, elseClause() {}
 
-/**
-* @brief Destructs the statement.
-*/
-IfStmt::~IfStmt() {}
-
 ShPtr<Value> IfStmt::clone() {
 	ShPtr<IfStmt> ifStmt(IfStmt::create(
 		ucast<Expression>(ifClauseList.front().first->clone()),

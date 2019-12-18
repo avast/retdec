@@ -12,22 +12,6 @@ using namespace retdec::fileformat;
 namespace fileinfo {
 
 /**
- * Constructor
- */
-RichHeader::RichHeader() : header(nullptr)
-{
-
-}
-
-/**
- * Destructor
- */
-RichHeader::~RichHeader()
-{
-
-}
-
-/**
  * Get number of records in header
  * @return Number of records in header
  */

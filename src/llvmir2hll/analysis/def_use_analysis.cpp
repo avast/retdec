@@ -95,11 +95,6 @@ DefUseAnalysis::DefUseAnalysis(ShPtr<Module> module,
 }
 
 /**
-* @brief Destructs the analysis.
-*/
-DefUseAnalysis::~DefUseAnalysis() {}
-
-/**
 * @brief Returns def-use chains for the given function.
 *
 * @param[in] func Function for which the analysis is computed.

@@ -37,14 +37,6 @@ RichHeaderPlainGetter::RichHeaderPlainGetter(FileInformation &fileInfo) : Iterat
 	loadRecords();
 }
 
-/**
- * Destructor
- */
-RichHeaderPlainGetter::~RichHeaderPlainGetter()
-{
-
-}
-
 std::size_t RichHeaderPlainGetter::getBasicInfo(std::size_t structIndex, std::vector<std::string> &desc, std::vector<std::string> &info) const
 {
 	if(structIndex >= numberOfStructures || !fileinfo.hasRichHeaderRecords())

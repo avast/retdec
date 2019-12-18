@@ -51,11 +51,6 @@ LLVMValueConverter::LLVMValueConverter(ShPtr<Module> resModule,
 		resModule(resModule) {}
 
 /**
-* @brief Destructs the converter.
-*/
-LLVMValueConverter::~LLVMValueConverter() {}
-
-/**
 * @brief Creates a new converter.
 *
 * @param[in] resModule The resulting module in BIR.

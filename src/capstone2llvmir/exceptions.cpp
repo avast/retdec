@@ -12,28 +12,12 @@ namespace capstone2llvmir {
 
 //
 //==============================================================================
-// BaseError
-//==============================================================================
-//
-
-BaseError::~BaseError()
-{
-
-}
-
-//
-//==============================================================================
 // CapstoneError
 //==============================================================================
 //
 
 CapstoneError::CapstoneError(cs_err e) :
 		_csError(e)
-{
-
-}
-
-CapstoneError::~CapstoneError()
 {
 
 }
@@ -62,11 +46,6 @@ ModeSettingError::ModeSettingError(
 		_arch(a),
 		_mode(m),
 		_type(t)
-{
-
-}
-
-ModeSettingError::~ModeSettingError()
 {
 
 }
@@ -131,11 +110,6 @@ UnexpectedOperandsError::UnexpectedOperandsError(
 
 }
 
-UnexpectedOperandsError::~UnexpectedOperandsError()
-{
-
-}
-
 const char* UnexpectedOperandsError::what() const noexcept
 {
 	std::stringstream ret;
@@ -166,11 +140,6 @@ UnhandledInstructionError::UnhandledInstructionError(
 
 }
 
-UnhandledInstructionError::~UnhandledInstructionError()
-{
-
-}
-
 const char* UnhandledInstructionError::what() const noexcept
 {
 	std::stringstream ret;
@@ -193,11 +162,6 @@ const char* UnhandledInstructionError::what() const noexcept
 
 GenericError::GenericError(const std::string& message) :
 		_whatMessage(message)
-{
-
-}
-
-GenericError::~GenericError()
 {
 
 }

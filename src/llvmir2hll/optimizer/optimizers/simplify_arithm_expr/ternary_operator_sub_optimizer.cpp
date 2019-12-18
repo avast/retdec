@@ -27,11 +27,6 @@ TernaryOperatorSubOptimizer::TernaryOperatorSubOptimizer(
 			SubOptimizer(arithmExprEvaluator) {}
 
 /**
-* @brief Destructor.
-*/
-TernaryOperatorSubOptimizer::~TernaryOperatorSubOptimizer() {}
-
-/**
 * @brief Creates a new TernaryOperatorSubOptimizer.
 *
 * @param[in] arithmExprEvaluator @a The used evaluator of arithmetical

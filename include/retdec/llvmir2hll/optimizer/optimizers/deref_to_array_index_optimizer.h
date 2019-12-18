@@ -53,8 +53,6 @@ class DerefToArrayIndexOptimizer final: public Optimizer {
 public:
 	DerefToArrayIndexOptimizer(ShPtr<Module> module);
 
-	virtual ~DerefToArrayIndexOptimizer() override;
-
 	virtual std::string getId() const override { return "DerefToArrayIndex"; }
 
 private:

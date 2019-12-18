@@ -41,11 +41,6 @@ class IntelHexFormat20BitTests : public Test
 			ihexStream << intel_hex_example_20bit;
 			parser = std::make_unique<IntelHexFormat>(ihexStream);
 		}
-
-		~IntelHexFormat20BitTests()
-		{
-
-		}
 	private:
 		std::stringstream ihexStream;
 };

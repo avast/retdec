@@ -24,11 +24,6 @@ Capstone2LlvmIrTranslatorPowerpc_impl::Capstone2LlvmIrTranslatorPowerpc_impl(
 	initialize();
 }
 
-Capstone2LlvmIrTranslatorPowerpc_impl::~Capstone2LlvmIrTranslatorPowerpc_impl()
-{
-	// Nothing specific to PowerPC.
-}
-
 //
 //==============================================================================
 // Mode query & modification methods - from Capstone2LlvmIrTranslator.

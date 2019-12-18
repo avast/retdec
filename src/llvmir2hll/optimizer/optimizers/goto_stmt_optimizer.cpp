@@ -30,11 +30,6 @@ GotoStmtOptimizer::GotoStmtOptimizer(ShPtr<Module> module):
 	}
 
 /**
-* @brief Destructs the optimizer.
-*/
-GotoStmtOptimizer::~GotoStmtOptimizer() {}
-
-/**
 * @brief Optimize goto statement.
 */
 void GotoStmtOptimizer::visit(ShPtr<GotoStmt> stmt) {

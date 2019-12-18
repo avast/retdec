@@ -34,11 +34,6 @@ DerefToArrayIndexOptimizer::DerefToArrayIndexOptimizer(ShPtr<Module> module):
 	PRECONDITION_NON_NULL(module);
 }
 
-/**
-* @brief Destructs the optimizer.
-*/
-DerefToArrayIndexOptimizer::~DerefToArrayIndexOptimizer() {}
-
 void DerefToArrayIndexOptimizer::doOptimization() {
 	// Visit all global variables and their initializers.
 	for (auto i = module->global_var_begin(), e = module->global_var_end();

@@ -25,16 +25,13 @@ class Resource
 		std::string name;          ///< resource name
 		std::string type;          ///< resource type
 		std::string language;      ///< resource language
-		std::size_t nameId;        ///< resource name identifier
-		std::size_t typeId;        ///< resource type identifier
-		std::size_t languageId;    ///< resource language identifier
-		std::size_t sublanguageId; ///< resource sublanguage identifier
-		std::size_t offset;        ///< offset in file
-		std::size_t size;          ///< size in file
+		std::size_t nameId = std::numeric_limits<std::size_t>::max();        ///< resource name identifier
+		std::size_t typeId = std::numeric_limits<std::size_t>::max();        ///< resource type identifier
+		std::size_t languageId = std::numeric_limits<std::size_t>::max();    ///< resource language identifier
+		std::size_t sublanguageId = std::numeric_limits<std::size_t>::max(); ///< resource sublanguage identifier
+		std::size_t offset = std::numeric_limits<std::size_t>::max();        ///< offset in file
+		std::size_t size = std::numeric_limits<std::size_t>::max();          ///< size in file
 	public:
-		Resource();
-		~Resource();
-
 		/// @name Getters
 		/// @{
 		std::string getCrc32() const;

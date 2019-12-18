@@ -27,8 +27,6 @@ class Variable;
 */
 class ModifiedBeforeReadCFGTraversal final: public CFGTraversal {
 public:
-	~ModifiedBeforeReadCFGTraversal();
-
 	static bool isModifiedBeforeEveryRead(ShPtr<Variable> var,
 		ShPtr<Statement> startStmt, ShPtr<CFG> cfg, ShPtr<ValueAnalysis> va,
 		ShPtr<CallInfoObtainer> cio);

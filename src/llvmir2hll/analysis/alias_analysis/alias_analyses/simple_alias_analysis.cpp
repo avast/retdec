@@ -37,11 +37,6 @@ SimpleAliasAnalysis::SimpleAliasAnalysis(): AliasAnalysis(),
 	varFuncMap(), func() {}
 
 /**
-* @brief Destructs the analysis.
-*/
-SimpleAliasAnalysis::~SimpleAliasAnalysis() {}
-
-/**
 * @brief Creates a new alias analysis.
 */
 ShPtr<AliasAnalysis> SimpleAliasAnalysis::create() {

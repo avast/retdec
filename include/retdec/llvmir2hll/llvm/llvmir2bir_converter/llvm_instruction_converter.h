@@ -13,6 +13,7 @@
 
 #include "retdec/llvmir2hll/ir/ext_cast_expr.h"
 #include "retdec/llvmir2hll/ir/int_to_fp_cast_expr.h"
+#include "retdec/llvmir2hll/llvm/llvmir2bir_converter/llvm_fcmp_converter.h"
 #include "retdec/llvmir2hll/support/smart_ptr.h"
 #include "retdec/llvmir2hll/support/types.h"
 #include "retdec/utils/non_copyable.h"
@@ -51,7 +52,6 @@ namespace llvmir2hll {
 
 class CallExpr;
 class Expression;
-class LLVMFCmpConverter;
 class LLVMValueConverter;
 
 /**
@@ -66,9 +66,6 @@ class LLVMValueConverter;
 class LLVMInstructionConverter final: private retdec::utils::NonCopyable,
 	private llvm::InstVisitor<LLVMInstructionConverter, ShPtr<Expression>> {
 public:
-	LLVMInstructionConverter();
-	~LLVMInstructionConverter();
-
 	/// @name Constant expression conversion
 	/// @{
 	ShPtr<Expression> convertConstExprToExpression(llvm::ConstantExpr *cExpr);
@@ -139,7 +136,7 @@ private:
 	WkPtr<LLVMValueConverter> converter;
 
 	/// A converter from LLVM fcmp instruction to expression in BIR.
-	UPtr<LLVMFCmpConverter> fcmpConverter;
+	LLVMFCmpConverter fcmpConverter;
 };
 
 } // namespace llvmir2hll

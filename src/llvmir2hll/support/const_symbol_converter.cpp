@@ -75,11 +75,6 @@ ConstSymbolConverter::ConstSymbolConverter(ShPtr<Module> module):
 	module(module) {}
 
 /**
-* @brief Destructs the converter.
-*/
-ConstSymbolConverter::~ConstSymbolConverter() {}
-
-/**
 * @brief Converts the constants in function calls in the given module into
 *        expressions consisting of symbolic names.
 *

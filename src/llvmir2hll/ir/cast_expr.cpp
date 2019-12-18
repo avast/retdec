@@ -19,11 +19,6 @@ CastExpr::CastExpr(ShPtr<Expression> op, ShPtr<Type> dstType):
 		PRECONDITION_NON_NULL(dstType);
 }
 
-/**
-* @brief Destructs the operator.
-*/
-CastExpr::~CastExpr() {}
-
 ShPtr<Type> CastExpr::getType() const {
 	return dstType;
 }

@@ -22,14 +22,6 @@ PdbJsonGetter::PdbJsonGetter(FileInformation &fileInfo) : SimpleGetter(fileInfo)
 
 }
 
-/**
- * Destructor
- */
-PdbJsonGetter::~PdbJsonGetter()
-{
-
-}
-
 std::size_t PdbJsonGetter::loadInformation(std::vector<std::string> &desc, std::vector<std::string> &info) const
 {
 	desc.clear();

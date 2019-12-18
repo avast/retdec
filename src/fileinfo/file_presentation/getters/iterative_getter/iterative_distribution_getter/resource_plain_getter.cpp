@@ -42,14 +42,6 @@ ResourcePlainGetter::ResourcePlainGetter(FileInformation &fileInfo) : IterativeD
 	loadRecords();
 }
 
-/**
- * Destructor
- */
-ResourcePlainGetter::~ResourcePlainGetter()
-{
-
-}
-
 std::size_t ResourcePlainGetter::getBasicInfo(std::size_t structIndex, std::vector<std::string> &desc, std::vector<std::string> &info) const
 {
 	if(structIndex >= numberOfStructures || !fileinfo.getNumberOfStoredResources())

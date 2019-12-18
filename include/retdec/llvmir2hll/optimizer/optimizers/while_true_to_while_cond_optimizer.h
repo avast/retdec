@@ -66,8 +66,6 @@ class WhileTrueToWhileCondOptimizer final: public FuncOptimizer {
 public:
 	WhileTrueToWhileCondOptimizer(ShPtr<Module> module);
 
-	virtual ~WhileTrueToWhileCondOptimizer() override;
-
 	virtual std::string getId() const override { return "WhileTrueToWhileCond"; }
 
 private:

@@ -19,20 +19,15 @@ namespace fileinfo {
  * @param searchPar Parameters for detection of used compiler (or packer)
  * @param loadFlags Load flags
  */
-IntelHexDetector::IntelHexDetector(std::string pathToInputFile, FileInformation &finfo,
-	retdec::cpdetect::DetectParams &searchPar, retdec::fileformat::LoadFlags loadFlags) :
-	FileDetector(pathToInputFile, finfo, searchPar, loadFlags)
+IntelHexDetector::IntelHexDetector(
+		std::string pathToInputFile,
+		FileInformation &finfo,
+		retdec::cpdetect::DetectParams &searchPar,
+		retdec::fileformat::LoadFlags loadFlags)
+		: FileDetector(pathToInputFile, finfo, searchPar, loadFlags)
 {
 	fileParser = ihexParser = std::make_shared<IntelHexFormat>(fileInfo.getPathToFile(), loadFlags);
 	loaded = fileParser->isInValidState();
-}
-
-/**
- * Destructor
- */
-IntelHexDetector::~IntelHexDetector()
-{
-
 }
 
 /**

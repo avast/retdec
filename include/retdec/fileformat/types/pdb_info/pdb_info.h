@@ -18,15 +18,12 @@ namespace fileformat {
 class PdbInfo
 {
 	private:
-		std::string type;      ///< type of PDB file
-		std::string path;      ///< original path to PDB debug file
-		std::string guid;      ///< GUID of PDB file
-		std::size_t age;       ///< age of PDB file
-		std::size_t timeStamp; ///< time and date that PDB file was created
+		std::string type;          ///< type of PDB file
+		std::string path;          ///< original path to PDB debug file
+		std::string guid;          ///< GUID of PDB file
+		std::size_t age = 0;       ///< age of PDB file
+		std::size_t timeStamp = 0; ///< time and date that PDB file was created
 	public:
-		PdbInfo();
-		~PdbInfo();
-
 		/// @name Getters
 		/// @{
 		std::string getType() const;

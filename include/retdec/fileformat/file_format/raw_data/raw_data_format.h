@@ -64,7 +64,6 @@ class RawDataFormat : public FileFormat
 		RawDataFormat(std::istream &inputStream, LoadFlags loadFlags = LoadFlags::NONE);
 		RawDataFormat(const std::string &filePath, LoadFlags loadFlags = LoadFlags::NONE);
 		RawDataFormat(const std::uint8_t *data, std::size_t size, LoadFlags loadFlags = LoadFlags::NONE);
-		virtual ~RawDataFormat() override;
 
 		/// @name Byte value storage methods
 		/// @{

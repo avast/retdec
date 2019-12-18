@@ -113,8 +113,6 @@ public:
 	UpxStub(retdec::loader::Image* inputFile, const UpxStubData* stubData, const DynamicBuffer& stubCapturedData,
 			std::unique_ptr<Decompressor> decompressor, const UpxMetadata& metadata);
 
-	virtual ~UpxStub() override;
-
 	static std::shared_ptr<UpxStub> createStub(retdec::loader::Image* file);
 	static std::shared_ptr<UpxStub> createStub(retdec::loader::Image* file, const DynamicBuffer& stubBytes);
 

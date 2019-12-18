@@ -10,10 +10,6 @@ using namespace retdec::fileformat;
 
 namespace fileinfo {
 
-ElfNotes::ElfNotes()
-{
-}
-
 std::string ElfNotes::getSectionName() const
 {
 	return sectionName;

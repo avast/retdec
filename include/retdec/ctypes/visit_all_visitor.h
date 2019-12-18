@@ -22,8 +22,6 @@ class Type;
 class VisitAllVisitor: public Visitor
 {
 	public:
-		virtual ~VisitAllVisitor() override;
-
 		/// @name Visitor interface.
 		/// @{
 		virtual void visit(const std::shared_ptr<ArrayType> &type) override;
@@ -45,7 +43,7 @@ class VisitAllVisitor: public Visitor
 		using AccessedTypes = std::unordered_set<std::shared_ptr<Type>>;
 
 	protected:
-		VisitAllVisitor();
+		VisitAllVisitor() = default;
 
 		bool makeAccessedAndCheckIfAccessed(const std::shared_ptr<Type> &type);
 

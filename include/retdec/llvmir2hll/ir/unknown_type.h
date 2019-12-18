@@ -28,8 +28,6 @@ class UnknownType final: public Type {
 public:
 	static ShPtr<UnknownType> create();
 
-	virtual ~UnknownType() override;
-
 	virtual ShPtr<Value> clone() override;
 
 	virtual bool isEqualTo(ShPtr<Value> otherValue) const override;

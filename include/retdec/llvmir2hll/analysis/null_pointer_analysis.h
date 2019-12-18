@@ -25,9 +25,6 @@ class Module;
 class NullPointerAnalysis: private OrderedAllVisitor,
 		private retdec::utils::NonCopyable {
 public:
-	// It needs to be public so it can be called in ShPtr's destructor.
-	virtual ~NullPointerAnalysis() override;
-
 	static bool useNullPointers(ShPtr<Module> module);
 
 private:

@@ -148,11 +148,6 @@ CFGTraversal::CFGTraversal(ShPtr<CFG> cfg, bool defaultCurrRetVal):
 }
 
 /**
-* @brief Destructs the traverser.
-*/
-CFGTraversal::~CFGTraversal() {}
-
-/**
 * @brief Performs a traversal of the current CFG, starting at @a startStmt.
 *
 * @return Result of the traversal (its meaning may vary from subclass to

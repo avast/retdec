@@ -21,15 +21,17 @@ class CertificateTable
 {
 	private:
 		using certificatesIterator = std::vector<Certificate>::const_iterator;
-		bool hasSigner;                        ///< flag indicating whether signer is present
-		bool hasCounterSigner;                 ///< flag indicating whether counter signer is present
-		std::size_t signerIndex;               ///< index of certificate of the signer
-		std::size_t counterSignerIndex;        ///< index of certificate of the counter-signer
-		std::vector<Certificate> certificates; ///< stored certificates
+		/// flag indicating whether signer is present
+		bool hasSigner = false;
+		/// flag indicating whether counter signer is present
+		bool hasCounterSigner = false;
+		/// index of certificate of the signer
+		std::size_t signerIndex = 0;
+		/// index of certificate of the counter-signer
+		std::size_t counterSignerIndex = 0;
+		/// stored certificates
+		std::vector<Certificate> certificates;
 	public:
-		CertificateTable();
-		~CertificateTable();
-
 		/// @name Getters
 		/// @{
 		std::size_t getNumberOfCertificates() const;

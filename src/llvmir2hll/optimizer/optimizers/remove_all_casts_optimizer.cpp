@@ -33,11 +33,6 @@ RemoveAllCastsOptimizer::RemoveAllCastsOptimizer(ShPtr<Module> module):
 		PRECONDITION_NON_NULL(module);
 	}
 
-/**
-* @brief Destructs the optimizer.
-*/
-RemoveAllCastsOptimizer::~RemoveAllCastsOptimizer() {}
-
 void RemoveAllCastsOptimizer::visit(ShPtr<BitCastExpr> expr) {
 	FuncOptimizer::visit(expr);
 	removeCast(expr);

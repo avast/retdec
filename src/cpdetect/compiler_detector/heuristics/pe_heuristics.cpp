@@ -167,13 +167,6 @@ PeHeuristics::PeHeuristics(
 }
 
 /**
- * Destructor
- */
-PeHeuristics::~PeHeuristics()
-{
-}
-
-/**
  * Try detect version of Enigma protector
  * @return Detected version of Enigma or empty string if version is not detected
  */

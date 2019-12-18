@@ -27,9 +27,6 @@ class IntelHexSection
 		retdec::common::Address address;
 		std::vector<unsigned char> data;
 
-		IntelHexSection();
-		~IntelHexSection();
-
 		/// @name Operators
 		/// @{
 		bool operator<(IntelHexSection const &a) const;
@@ -68,7 +65,6 @@ class IntelHexParser
 		/// @}
 	public:
 		IntelHexParser();
-		~IntelHexParser();
 
 		/// @name Public parsing methods
 		/// @{

@@ -22,14 +22,6 @@ PdbPlainGetter::PdbPlainGetter(FileInformation &fileInfo) : SimpleGetter(fileInf
 
 }
 
-/**
- * Destructor
- */
-PdbPlainGetter::~PdbPlainGetter()
-{
-
-}
-
 std::size_t PdbPlainGetter::loadInformation(std::vector<std::string> &desc, std::vector<std::string> &info) const
 {
 	desc.clear();

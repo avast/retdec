@@ -17,11 +17,8 @@ namespace fileinfo {
 class RichHeader
 {
 	private:
-		const retdec::fileformat::RichHeader *header;
+		const retdec::fileformat::RichHeader *header = nullptr;
 	public:
-		RichHeader();
-		~RichHeader();
-
 		/// @name Getters
 		/// @{
 		std::size_t getNumberOfStoredRecords() const;

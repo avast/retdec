@@ -181,11 +181,6 @@ APICallPatternFinder::APICallPatternFinder(
 		PatternFinder(va, cio) {}
 
 /**
-* @brief Destructs the finder.
-*/
-APICallPatternFinder::~APICallPatternFinder() {}
-
-/**
 * @brief Creates and returns a new instance of APICallPatternFinder.
 *
 * See PatternFinder::PatternFinder() for more information on the parameters and

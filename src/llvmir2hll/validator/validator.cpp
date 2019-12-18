@@ -20,11 +20,6 @@ namespace llvmir2hll {
 Validator::Validator(): module(), func(), moduleIsCorrect(true) {}
 
 /**
-* @brief Destructs the validator.
-*/
-Validator::~Validator() {}
-
-/**
 * @brief Validates the given module.
 *
 * @param[in] module Module to be validated.

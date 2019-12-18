@@ -19,7 +19,6 @@ class PeWrapperParser32 : public PeWrapperParser
 		PeLib::PeHeaderT<32> peHeader; ///< header of 32-bit PE file
 	public:
 		PeWrapperParser32(PeLib::PeHeaderT<32> peHeader32);
-		virtual ~PeWrapperParser32() override;
 
 		/// @name Detection methods
 		/// @{

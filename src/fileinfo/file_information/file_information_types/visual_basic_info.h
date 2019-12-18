@@ -19,12 +19,9 @@ namespace fileinfo {
 class VisualBasicInfo
 {
 	private:
-		bool used;
-		const retdec::fileformat::VisualBasicInfo *visualBasicInfo;
+		bool used = false;
+		const retdec::fileformat::VisualBasicInfo *visualBasicInfo = nullptr;
 	public:
-		VisualBasicInfo();
-		~VisualBasicInfo();
-
 		/// @name Getters
 		/// @{
 		std::string getLanguageDLL() const;

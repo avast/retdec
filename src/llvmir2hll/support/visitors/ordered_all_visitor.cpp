@@ -92,11 +92,6 @@ OrderedAllVisitor::OrderedAllVisitor(bool visitSuccessors, bool visitNestedStmts
 	Visitor(), lastStmt(), accessedStmts(), visitSuccessors(visitSuccessors),
 	visitNestedStmts(visitNestedStmts) {}
 
-/**
-* @brief Destructs the visitor.
-*/
-OrderedAllVisitor::~OrderedAllVisitor() {}
-
 void OrderedAllVisitor::visit(ShPtr<GlobalVarDef> varDef) {
 	varDef->getVar()->accept(this);
 	if (ShPtr<Expression> init = varDef->getInitializer()) {

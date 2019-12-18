@@ -10,22 +10,6 @@
 namespace fileinfo {
 
 /**
- * Constructor
- */
-ImportTable::ImportTable() : table(nullptr)
-{
-
-}
-
-/**
- * Destructor
- */
-ImportTable::~ImportTable()
-{
-
-}
-
-/**
  * Get number of libraries in table
  * @return Number of libraries in table
  */

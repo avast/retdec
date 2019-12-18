@@ -20,13 +20,6 @@ namespace llvmir2hll {
 EqOpExpr::EqOpExpr(ShPtr<Expression> op1, ShPtr<Expression> op2):
 	BinaryOpExpr(op1, op2) {}
 
-/**
-* @brief Destructs the operator.
-*/
-EqOpExpr::~EqOpExpr() {
-	// Observers are removed in the superclass.
-}
-
 bool EqOpExpr::isEqualTo(ShPtr<Value> otherValue) const {
 	if (ShPtr<EqOpExpr> otherValueEqOpExpr = cast<EqOpExpr>(otherValue)) {
 		return op1->isEqualTo(otherValueEqOpExpr->getFirstOperand()) &&

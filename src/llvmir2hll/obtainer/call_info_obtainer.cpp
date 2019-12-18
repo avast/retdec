@@ -33,13 +33,6 @@ CallInfo::CallInfo(ShPtr<CallExpr> call):
 	call(call) {}
 
 /**
-* @brief Destructs the piece of information.
-*
-* A default implementation is provided.
-*/
-CallInfo::~CallInfo() {}
-
-/**
 * @brief Returns the function call for which the piece of information has been
 *        computed.
 */
@@ -52,13 +45,6 @@ ShPtr<CallExpr> CallInfo::getCall() const {
 */
 FuncInfo::FuncInfo(ShPtr<Function> func):
 	func(func) {}
-
-/**
-* @brief Destructs the piece of information.
-*
-* A default implementation is provided.
-*/
-FuncInfo::~FuncInfo() {}
 
 /**
 * @brief Returns the function for which the piece of information has been
@@ -74,11 +60,6 @@ ShPtr<Function> FuncInfo::getFunc() const {
 CallInfoObtainer::CallInfoObtainer():
 	module(), cg(), va(), funcCFGMap(),
 	cfgBuilder(NonRecursiveCFGBuilder::create()) {}
-
-/**
-* @brief Destructs the obtainer.
-*/
-CallInfoObtainer::~CallInfoObtainer() {}
 
 /**
 * @brief Returns the call graph with which the obtainer has been initialized.
@@ -333,11 +314,6 @@ CallInfoObtainer::SCCComputer::SCCComputer(ShPtr<CG> cg): cg(cg), index(0) {
 		calledFuncInfoMap[i->second] = CalledFuncInfo();
 	}
 }
-
-/**
-* @brief Destructs the computer.
-*/
-CallInfoObtainer::SCCComputer::~SCCComputer() {}
 
 /**
 * @brief Computes and returns all strongly connected components (SCCs) in the

@@ -19,14 +19,6 @@ SpecialInformation::SpecialInformation(std::string desc_, std::string abbv_) : d
 }
 
 /**
- * Destructor
- */
-SpecialInformation::~SpecialInformation()
-{
-
-}
-
-/**
  * Get number of stored values
  * @return Number of stored values
  */

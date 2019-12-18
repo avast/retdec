@@ -30,8 +30,6 @@ public:
 	virtual void replace(ShPtr<Expression> oldExpr, ShPtr<Expression> newExpr) override;
 	virtual ShPtr<Expression> asExpression() const override;
 
-	virtual ~EmptyStmt() override;
-
 	/// @name Visitor Interface
 	/// @{
 	virtual void accept(Visitor *v) override;
@@ -40,7 +38,7 @@ public:
 private:
 	// Since instances are created by calling the static function create(), the
 	// constructor can be private.
-	EmptyStmt();
+	EmptyStmt() = default;
 };
 
 } // namespace llvmir2hll

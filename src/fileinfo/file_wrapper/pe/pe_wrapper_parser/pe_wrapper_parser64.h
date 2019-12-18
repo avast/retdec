@@ -19,7 +19,6 @@ class PeWrapperParser64 : public PeWrapperParser
 		PeLib::PeHeaderT<64> peHeader; ///< header of 64-bit PE file
 	public:
 		PeWrapperParser64(PeLib::PeHeaderT<64> peHeader64);
-		virtual ~PeWrapperParser64() override;
 
 		/// @name Detection methods
 		/// @{

@@ -27,8 +27,6 @@ class TruncCastExpr final: public CastExpr {
 public:
 	static ShPtr<TruncCastExpr> create(ShPtr<Expression> op, ShPtr<Type> dstType);
 
-	virtual ~TruncCastExpr() override;
-
 	virtual bool isEqualTo(ShPtr<Value> otherValue) const override;
 	virtual ShPtr<Value> clone() override;
 

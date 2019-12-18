@@ -18,7 +18,6 @@ class VisualBasicJsonGetter : public SimpleGetter
 {
 	public:
 		VisualBasicJsonGetter(FileInformation &fileInfo);
-		virtual ~VisualBasicJsonGetter() override;
 
 		virtual std::size_t loadInformation(std::vector<std::string> &desc, std::vector<std::string> &info) const override;
 };

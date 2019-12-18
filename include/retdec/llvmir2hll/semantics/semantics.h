@@ -32,8 +32,6 @@ namespace llvmir2hll {
 */
 class Semantics: private retdec::utils::NonCopyable {
 public:
-	virtual ~Semantics();
-
 	/**
 	* @brief Returns the ID of the semantics.
 	*/
@@ -120,7 +118,7 @@ public:
 		const std::string &funcName, unsigned paramPos) const = 0;
 
 protected:
-	Semantics();
+	Semantics() = default;
 };
 
 } // namespace llvmir2hll

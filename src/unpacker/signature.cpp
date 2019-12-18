@@ -34,13 +34,6 @@ Signature::Signature(const Signature& signature) : _buffer(signature._buffer)
 }
 
 /**
- * Destructor.
- */
-Signature::~Signature()
-{
-}
-
-/**
  * Assignment operator allowing initializer list assignment.
  *
  * @param initList Initializer list containing Signature::Byte objects.
@@ -232,13 +225,6 @@ Signature::MatchSettings::MatchSettings(uint64_t offset /*= 0*/, uint64_t search
 }
 
 /**
- * Destructor.
- */
-Signature::MatchSettings::~MatchSettings()
-{
-}
-
-/**
  * Returns the offset in the settings.
  *
  * @return The offset.
@@ -324,13 +310,6 @@ Signature::Byte::Byte(Type type, uint8_t expectedValue, uint8_t wildcardMask) : 
  * @param byte Another Signature::Byte object.
  */
 Signature::Byte::Byte(const Byte& byte) : _type(byte._type), _expectedValue(byte._expectedValue), _wildcardMask(byte._wildcardMask)
-{
-}
-
-/**
- * Destructor.
- */
-Signature::Byte::~Byte()
 {
 }
 

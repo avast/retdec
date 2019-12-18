@@ -30,18 +30,6 @@ void preserveLabel(ShPtr<Statement> origStmt, ShPtr<Statement> newStmt) {
 } // anonymous namespace
 
 /**
-* @brief Constructs a new statement.
-*/
-Statement::Statement():
-	succ(), preds(), label() {
-}
-
-/**
-* @brief Destructs the statement.
-*/
-Statement::~Statement() {}
-
-/**
 * @brief Sets @a newSucc as the current statement's successor.
 *
 * Example: Consider the following situation:

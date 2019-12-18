@@ -60,10 +60,6 @@ Arm64CallingConvention::Arm64CallingConvention(const Abi* a) :
 	_numOfRegsPerParam = 2;
 }
 
-Arm64CallingConvention::~Arm64CallingConvention()
-{
-}
-
 CallingConvention::Ptr Arm64CallingConvention::create(const Abi* a)
 {
 	if (!a->isArm64())

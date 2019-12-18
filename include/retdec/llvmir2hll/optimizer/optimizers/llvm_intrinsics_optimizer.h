@@ -33,8 +33,6 @@ class LLVMIntrinsicsOptimizer final: public FuncOptimizer {
 public:
 	LLVMIntrinsicsOptimizer(ShPtr<Module> module);
 
-	virtual ~LLVMIntrinsicsOptimizer() override;
-
 	virtual std::string getId() const override { return "LLVMIntrinsics"; }
 
 private:

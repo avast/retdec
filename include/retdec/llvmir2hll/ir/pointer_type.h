@@ -25,8 +25,6 @@ class PointerType final: public Type {
 public:
 	static ShPtr<PointerType> create(ShPtr<Type> containedType);
 
-	virtual ~PointerType() override;
-
 	virtual ShPtr<Value> clone() override;
 
 	virtual bool isEqualTo(ShPtr<Value> otherValue) const override;

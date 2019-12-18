@@ -15,22 +15,6 @@ namespace retdec {
 namespace fileformat {
 
 /**
- * Constructor
- */
-IntelHexSection::IntelHexSection()
-{
-
-}
-
-/**
- * Destructor
- */
-IntelHexSection::~IntelHexSection()
-{
-
-}
-
-/**
  * operator <
  */
 bool IntelHexSection::operator<(const IntelHexSection &a) const
@@ -53,14 +37,6 @@ IntelHexParser::IntelHexParser() :
 	index(0)
 {
 	actualSection.address = 0;
-}
-
-/**
- * Destructor
- */
-IntelHexParser::~IntelHexParser()
-{
-
 }
 
 /**

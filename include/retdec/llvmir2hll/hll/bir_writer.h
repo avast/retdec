@@ -21,9 +21,6 @@ namespace llvmir2hll {
 
 class BIRWriter: public Visitor {
 public:
-	BIRWriter();
-	virtual ~BIRWriter() override;
-
 	void emit(ShPtr<Module> m, const std::string& fileName = "");
 
 protected:

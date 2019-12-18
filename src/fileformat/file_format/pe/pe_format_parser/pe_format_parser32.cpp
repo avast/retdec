@@ -24,14 +24,6 @@ PeFormatParser32::PeFormatParser32(const FileFormat *fInputFile, PeLib::PeFileT<
 
 }
 
-/**
- * Destructor
- */
-PeFormatParser32::~PeFormatParser32()
-{
-
-}
-
 unsigned long long PeFormatParser32::getDeclaredNumberOfSections() const
 {
 	return peDeclaredNumberOfSections(peHeader);

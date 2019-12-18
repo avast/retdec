@@ -40,10 +40,6 @@ PascalFastcallCallingConvention::PascalFastcallCallingConvention(const Abi* a) :
 	_stackParamOrder = LTR;
 }
 
-PascalFastcallCallingConvention::~PascalFastcallCallingConvention()
-{
-}
-
 //
 //==============================================================================
 // FastcallCallingConvention
@@ -68,10 +64,6 @@ FastcallCallingConvention::FastcallCallingConvention(const Abi* a) :
 		X86_REG_ST7,
 		X86_REG_ST0
 	};
-}
-
-FastcallCallingConvention::~FastcallCallingConvention()
-{
 }
 
 CallingConvention::Ptr FastcallCallingConvention::create(const Abi* a)

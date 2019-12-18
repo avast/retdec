@@ -22,7 +22,6 @@ class Image : public retdec::utils::ByteValueStorage
 {
 public:
 	Image(const std::shared_ptr<retdec::fileformat::FileFormat>& fileFormat);
-	virtual ~Image();
 
 	/**
 	 * Virtual method that should be overriden in every subclass of Image. Performs the logic of loading.

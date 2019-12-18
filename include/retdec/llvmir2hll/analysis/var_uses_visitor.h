@@ -52,9 +52,6 @@ public:
 class VarUsesVisitor: private OrderedAllVisitor,
 		private retdec::utils::NonCopyable {
 public:
-	// It needs to be public so it can be called in ShPtr's destructor.
-	virtual ~VarUsesVisitor() override;
-
 	bool isUsed(ShPtr<Variable> var, ShPtr<Function> func,
 		bool doNotIncludeFirstUse = false);
 	ShPtr<VarUses> getUses(ShPtr<Variable> var, ShPtr<Function> func);

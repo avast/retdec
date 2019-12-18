@@ -42,11 +42,6 @@ CCastOptimizer::CCastOptimizer(ShPtr<Module> module):
 	}
 
 /**
-* @brief Destructs the optimizer.
-*/
-CCastOptimizer::~CCastOptimizer() {}
-
-/**
 * @brief Removes cast expression of source expression, if destination
 *        expression doesn't need this cast.
 *

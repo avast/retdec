@@ -8,10 +8,6 @@
 
 namespace fileinfo {
 
-ElfCore::ElfCore()
-{
-}
-
 bool ElfCore::hasAuxVector() const
 {
 	return !auxVec.empty();

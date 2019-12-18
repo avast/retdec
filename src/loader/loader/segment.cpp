@@ -23,10 +23,6 @@ Segment::Segment(const Segment& segment) : _secSeg(segment._secSeg), _address(se
 {
 }
 
-Segment::~Segment()
-{
-}
-
 /**
  * Returns associated section or segment, which was used for loading of this segment.
  *

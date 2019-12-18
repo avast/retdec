@@ -20,13 +20,6 @@ DivOpExpr::DivOpExpr(ShPtr<Expression> op1, ShPtr<Expression> op2,
 		Variant variant):
 	BinaryOpExpr(op1, op2), variant(variant) {}
 
-/**
-* @brief Destructs the operator.
-*/
-DivOpExpr::~DivOpExpr() {
-	// Observers are removed in the superclass.
-}
-
 bool DivOpExpr::isEqualTo(ShPtr<Value> otherValue) const {
 	if (ShPtr<DivOpExpr> otherValueDivOpExpr = cast<DivOpExpr>(otherValue)) {
 		return op1->isEqualTo(otherValueDivOpExpr->getFirstOperand()) &&

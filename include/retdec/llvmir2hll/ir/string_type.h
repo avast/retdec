@@ -28,8 +28,6 @@ class StringType final: public Type {
 public:
 	static ShPtr<StringType> create(std::size_t charSize);
 
-	virtual ~StringType() override;
-
 	virtual ShPtr<Value> clone() override;
 
 	virtual bool isEqualTo(ShPtr<Value> otherValue) const override;

@@ -47,8 +47,6 @@ public:
 	static ShPtr<SwitchStmt> create(ShPtr<Expression> controlExpr,
 		ShPtr<Statement> succ = nullptr);
 
-	virtual ~SwitchStmt() override;
-
 	virtual ShPtr<Value> clone() override;
 	virtual bool isEqualTo(ShPtr<Value> otherValue) const override;
 	virtual bool isCompound() override { return true; }

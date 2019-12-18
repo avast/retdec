@@ -32,7 +32,7 @@ class VoidType;
 class Visitor
 {
 	public:
-		virtual ~Visitor() = 0;
+		virtual ~Visitor() = default;
 
 		virtual void visit(const std::shared_ptr<ArrayType> &type) = 0;
 		virtual void visit(const std::shared_ptr<EnumType> &type) = 0;
@@ -49,7 +49,7 @@ class Visitor
 		virtual void visit(const std::shared_ptr<VoidType> &type) = 0;
 
 	protected:
-		Visitor();
+		Visitor() = default;
 };
 
 } // namespace ctypes

@@ -9,22 +9,6 @@
 namespace fileinfo {
 
 /**
- * Constructor
- */
-Pattern::Pattern() : little(false), big(false)
-{
-
-}
-
-/**
- * Destructor
- */
-Pattern::~Pattern()
-{
-
-}
-
-/**
  * Check if detected pattern is in little endian
  * @return @c true if detected pattern is in little endian, @c false otherwise
  */

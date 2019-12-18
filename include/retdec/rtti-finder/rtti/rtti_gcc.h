@@ -42,7 +42,7 @@ class TypeInfo
 	// ABI specification.
 	//
 	public:
-		virtual ~TypeInfo() {}
+		virtual ~TypeInfo() = default;
 		bool operator==(const TypeInfo& o) const { return nameAddr == o.nameAddr; }
 		bool operator!=(const TypeInfo& o) const { return !(*this == o); }
 

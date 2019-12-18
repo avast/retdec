@@ -26,11 +26,6 @@ ChangeOrderOfOperandsSubOptimizer::ChangeOrderOfOperandsSubOptimizer(
 			SubOptimizer(arithmExprEvaluator) {}
 
 /**
-* @brief Destructor.
-*/
-ChangeOrderOfOperandsSubOptimizer::~ChangeOrderOfOperandsSubOptimizer() {}
-
-/**
 * @brief Creates a new ChangeOrderOfOperandsSubOptimizer.
 *
 * @param[in] arithmExprEvaluator @a The used evaluator of arithmetical

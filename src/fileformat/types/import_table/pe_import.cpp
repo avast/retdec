@@ -18,14 +18,6 @@ PeImport::PeImport(std::uint32_t importFlags) : flags(importFlags)
 }
 
 /**
- * Destructor
- */
-PeImport::~PeImport()
-{
-
-}
-
-/**
  * Is import delayed.
  * @return `true` if delayed, otherwise `false`.
  */

@@ -42,8 +42,6 @@ public:
 	using predecessor_iterator = StmtSet::const_iterator;
 
 public:
-	virtual ~Statement() override;
-
 	/**
 	* @brief Replaces all occurrences of @a oldExpr with @a newExpr in the
 	*        current statement.
@@ -135,7 +133,7 @@ public:
 	static ShPtr<Statement> getLastStatement(ShPtr<Statement> stmts);
 
 protected:
-	Statement();
+	Statement() = default;
 
 protected:
 	/// Successor statement.

@@ -22,8 +22,6 @@ class Type;
 */
 class Expression: public Value {
 public:
-	virtual ~Expression() override;
-
 	/**
 	* @brief Returns the type of the expression.
 	*
@@ -54,7 +52,7 @@ public:
 		ShPtr<Expression> newExpr);
 
 protected:
-	Expression();
+	Expression() = default;
 };
 
 } // namespace llvmir2hll

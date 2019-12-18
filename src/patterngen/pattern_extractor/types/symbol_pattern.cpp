@@ -121,13 +121,6 @@ SymbolPattern::SymbolPattern(
 }
 
 /**
- * Default destructor.
- */
-SymbolPattern::~SymbolPattern()
-{
-}
-
-/**
  * Set symbol name.
  *
  * If not provided, string 'unknown_symbol' is used.

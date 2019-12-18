@@ -88,19 +88,15 @@ std::string getSymbolType(std::uint8_t type)
  * @param searchPar Parameters for detection of used compiler (or packer)
  * @param loadFlags Load flags
  */
-CoffDetector::CoffDetector(std::string pathToInputFile, FileInformation &finfo, retdec::cpdetect::DetectParams &searchPar, retdec::fileformat::LoadFlags loadFlags) :
-	FileDetector(pathToInputFile, finfo, searchPar, loadFlags)
+CoffDetector::CoffDetector(
+		std::string pathToInputFile,
+		FileInformation &finfo,
+		retdec::cpdetect::DetectParams &searchPar,
+		retdec::fileformat::LoadFlags loadFlags)
+		: FileDetector(pathToInputFile, finfo, searchPar, loadFlags)
 {
 	fileParser = coffParser = std::make_shared<CoffWrapper>(fileInfo.getPathToFile(), loadFlags);
 	loaded = coffParser->isInValidState();
-}
-
-/**
- * Destructor
- */
-CoffDetector::~CoffDetector()
-{
-
 }
 
 /**

@@ -49,11 +49,6 @@ LLVMConstantConverter::LLVMConstantConverter(ShPtr<LLVMInstructionConverter> ins
 	instConverter(instConverter), typeConverter(typeConverter) {}
 
 /**
-* @brief Destructs the converter.
-*/
-LLVMConstantConverter::~LLVMConstantConverter() {}
-
-/**
 * @brief Converts the given LLVM constant @a constant into an expression in BIR.
 *
 * @par Preconditions

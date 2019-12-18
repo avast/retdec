@@ -56,9 +56,6 @@ class Type;
 class ExprTypesFixer final: private OrderedAllVisitor,
 		private retdec::utils::NonCopyable {
 public:
-	// It needs to be public so it can be called in ShPtr's destructor.
-	virtual ~ExprTypesFixer() override;
-
 	static void fixTypes(ShPtr<Module> module);
 
 private:

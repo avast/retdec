@@ -87,22 +87,6 @@ void sortPatternMatches(std::vector<Pattern> &patterns)
 } // anonymous namespace
 
 /**
- * Constructor
- */
-FileInformation::FileInformation() : status(ReturnCode::OK), fileFormatEnum(Format::UNKNOWN)
-{
-
-}
-
-/**
- * Destructor
- */
-FileInformation::~FileInformation()
-{
-
-}
-
-/**
  * Get status
  * @return Status of instance
  */

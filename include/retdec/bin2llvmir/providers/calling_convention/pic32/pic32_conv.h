@@ -18,7 +18,6 @@ class Pic32CallingConvention: public CallingConvention
 	//
 	public:
 		Pic32CallingConvention(const Abi* a);
-		virtual ~Pic32CallingConvention();
 
 	// Construcor method.
 	//

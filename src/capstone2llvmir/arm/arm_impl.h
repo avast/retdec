@@ -22,7 +22,6 @@ class Capstone2LlvmIrTranslatorArm_impl :
 				llvm::Module* m,
 				cs_mode basic = CS_MODE_ARM,
 				cs_mode extra = CS_MODE_LITTLE_ENDIAN);
-		virtual ~Capstone2LlvmIrTranslatorArm_impl();
 //
 //==============================================================================
 // Mode query & modification methods - from Capstone2LlvmIrTranslator.

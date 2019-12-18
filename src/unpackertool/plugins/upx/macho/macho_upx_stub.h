@@ -72,8 +72,6 @@ public:
 	MachOUpxStub(retdec::loader::Image* inputFile, const UpxStubData* stubData, const DynamicBuffer& stubCapturedData,
 			std::unique_ptr<Decompressor> decompressor, const UpxMetadata& metadata);
 
-	virtual ~MachOUpxStub() override;
-
 	virtual void unpack(const std::string& outputFile) override;
 	virtual void cleanup() override;
 

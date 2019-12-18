@@ -22,9 +22,6 @@ class UpxStub;
 class DecompressorScrambler : public Decompressor
 {
 public:
-	DecompressorScrambler();
-	virtual ~DecompressorScrambler();
-
 	virtual void setupPackingMethod(ElfUpxStub<32>* stub, std::uint8_t packingMethod) override;
 	virtual void decompress(ElfUpxStub<32>* stub, DynamicBuffer& packedData, DynamicBuffer& unpackedData) override;
 

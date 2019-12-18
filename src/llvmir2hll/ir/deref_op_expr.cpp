@@ -19,13 +19,6 @@ namespace llvmir2hll {
 DerefOpExpr::DerefOpExpr(ShPtr<Expression> op):
 	UnaryOpExpr(op) {}
 
-/**
-* @brief Destructs the operator.
-*/
-DerefOpExpr::~DerefOpExpr() {
-	// Observers are removed in the superclass.
-}
-
 bool DerefOpExpr::isEqualTo(ShPtr<Value> otherValue) const {
 	if (ShPtr<DerefOpExpr> otherValueDerefOpExpr = cast<DerefOpExpr>(otherValue)) {
 		return op->isEqualTo(otherValueDerefOpExpr->getOperand());

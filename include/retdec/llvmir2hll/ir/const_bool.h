@@ -31,8 +31,6 @@ public:
 public:
 	static ShPtr<ConstBool> create(Type value = Type());
 
-	virtual ~ConstBool() override;
-
 	virtual ShPtr<Value> clone() override;
 
 	virtual bool isEqualTo(ShPtr<Value> otherValue) const override;

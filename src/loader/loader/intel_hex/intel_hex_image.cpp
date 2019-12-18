@@ -19,10 +19,6 @@ IntelHexImage::IntelHexImage(const std::shared_ptr<retdec::fileformat::FileForma
 {
 }
 
-IntelHexImage::~IntelHexImage()
-{
-}
-
 /**
  * Virtual method overridden from retdec::loader::Image, which is used in image factory.
  * Loads the image using @c fileformat.

@@ -25,11 +25,6 @@ Capstone2LlvmIrTranslatorX86_impl::Capstone2LlvmIrTranslatorX86_impl(
 	initialize();
 }
 
-Capstone2LlvmIrTranslatorX86_impl::~Capstone2LlvmIrTranslatorX86_impl()
-{
-	// Nothing specific to x86.
-}
-
 //
 //==============================================================================
 // Mode query & modification methods - from Capstone2LlvmIrTranslator.

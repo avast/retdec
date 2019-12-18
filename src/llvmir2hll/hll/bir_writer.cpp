@@ -84,14 +84,6 @@
 namespace retdec {
 namespace llvmir2hll {
 
-BIRWriter::BIRWriter() {
-
-}
-
-BIRWriter::~BIRWriter() {
-
-}
-
 void BIRWriter::emit(ShPtr<Module> m, const std::string& fileName) {
 	module = m;
 

@@ -167,13 +167,6 @@ template <int bits> PeUpxStub<bits>::PeUpxStub(retdec::loader::Image* inputFile,
 }
 
 /**
- * Destructor.
- */
-template <int bits> PeUpxStub<bits>::~PeUpxStub()
-{
-}
-
-/**
  * Performs the whole process of unpacking. This is the method that is being run from @ref UpxPlugin to start
  * unpacking stub.
  *

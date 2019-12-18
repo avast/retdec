@@ -28,16 +28,6 @@ std::string getTextRepr(ValuePtr value) {
 
 } // anonymous namespace
 
-/**
-* @brief Constructs a new value.
-*/
-Value::Value() {}
-
-/**
-* @brief Destructs the value.
-*/
-Value::~Value() {}
-
 ShPtr<Value> Value::getSelf() {
 	return shared_from_this();
 }

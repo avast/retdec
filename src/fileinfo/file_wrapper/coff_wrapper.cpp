@@ -21,14 +21,6 @@ CoffWrapper::CoffWrapper(std::string pathToFile, retdec::fileformat::LoadFlags l
 }
 
 /**
- * Destructor
- */
-CoffWrapper::~CoffWrapper()
-{
-
-}
-
-/**
  * Get LLVM COFF parser
  * @return LLVM COFF parser
  */

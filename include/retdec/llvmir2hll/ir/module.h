@@ -54,8 +54,6 @@ public:
 	Module(const llvm::Module *llvmModule, const std::string &identifier,
 		ShPtr<Semantics> semantics, ShPtr<Config> config);
 
-	~Module();
-
 	const llvm::Module *getLLVMModule() const;
 	std::string getIdentifier(bool stripDirs = true) const;
 	ShPtr<Semantics> getSemantics() const;

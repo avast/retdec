@@ -114,7 +114,6 @@ class ConstOperatorConstSubOptimizer final: public SubOptimizer {
 public:
 	ConstOperatorConstSubOptimizer(
 		ShPtr<ArithmExprEvaluator> arithmExprEvaluator);
-	virtual ~ConstOperatorConstSubOptimizer() override;
 
 	static ShPtr<SubOptimizer> create(ShPtr<ArithmExprEvaluator>
 		arithmExprEvaluator);

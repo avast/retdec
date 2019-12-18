@@ -45,14 +45,6 @@ RelocationTablesPlainGetter::RelocationTablesPlainGetter(FileInformation &fileIn
 	loadRecords();
 }
 
-/**
- * Destructor
- */
-RelocationTablesPlainGetter::~RelocationTablesPlainGetter()
-{
-
-}
-
 std::size_t RelocationTablesPlainGetter::getBasicInfo(std::size_t structIndex, std::vector<std::string> &desc, std::vector<std::string> &info) const
 {
 	if(structIndex >= numberOfStructures)

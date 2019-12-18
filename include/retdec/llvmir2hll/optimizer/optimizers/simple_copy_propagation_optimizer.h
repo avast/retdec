@@ -68,8 +68,6 @@ public:
 	SimpleCopyPropagationOptimizer(ShPtr<Module> module, ShPtr<ValueAnalysis> va,
 		ShPtr<CallInfoObtainer> cio);
 
-	virtual ~SimpleCopyPropagationOptimizer() override;
-
 	virtual std::string getId() const override { return "SimpleCopyPropagation"; }
 
 private:

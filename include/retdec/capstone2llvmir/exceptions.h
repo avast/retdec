@@ -23,7 +23,7 @@ namespace capstone2llvmir {
 class BaseError : public std::exception
 {
 	public:
-		virtual ~BaseError();
+		virtual ~BaseError() = default;
 };
 
 /**
@@ -33,7 +33,6 @@ class CapstoneError : public BaseError
 {
 	public:
 		CapstoneError(cs_err e);
-		virtual ~CapstoneError();
 
 		std::string getMessage() const;
 		virtual const char* what() const noexcept override;
@@ -62,7 +61,6 @@ class ModeSettingError : public BaseError
 
 	public:
 		ModeSettingError(cs_arch a, cs_mode m, eType t);
-		virtual ~ModeSettingError();
 
 		std::string getMessage() const;
 		virtual const char* what() const noexcept override;
@@ -88,7 +86,6 @@ class UnexpectedOperandsError : public BaseError
 		 * @param comment Optional comment about the problem.
 		 */
 		UnexpectedOperandsError(cs_insn* i, const std::string& comment = "");
-		virtual ~UnexpectedOperandsError();
 
 		virtual const char* what() const noexcept override;
 
@@ -111,7 +108,6 @@ class UnhandledInstructionError : public BaseError
 		 * @param comment Optional comment about the problem.
 		 */
 		UnhandledInstructionError(cs_insn* i, const std::string& comment = "");
-		~UnhandledInstructionError();
 
 		virtual const char* what() const noexcept override;
 
@@ -130,7 +126,6 @@ class GenericError : public BaseError
 {
 	public:
 		GenericError(const std::string& message);
-		virtual ~GenericError();
 
 		virtual const char* what() const noexcept override;
 

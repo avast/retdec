@@ -25,8 +25,6 @@ class Variable;
 */
 class VarUseCFGTraversal final: public CFGTraversal {
 public:
-	~VarUseCFGTraversal();
-
 	static bool isDefinedPriorToEveryAccess(ShPtr<Variable> var,
 		ShPtr<CFG> cfg, ShPtr<ValueAnalysis> va);
 

@@ -42,14 +42,6 @@ PatternMatchesPlainGetter::PatternMatchesPlainGetter(FileInformation &fileInfo, 
 	loadRecords();
 }
 
-/**
- * Destrcutor
- */
-PatternMatchesPlainGetter::~PatternMatchesPlainGetter()
-{
-
-}
-
 std::size_t PatternMatchesPlainGetter::getBasicInfo(std::size_t structIndex, std::vector<std::string> &desc, std::vector<std::string> &info) const
 {
 	desc.clear();

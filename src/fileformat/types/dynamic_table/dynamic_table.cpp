@@ -12,22 +12,6 @@ namespace retdec {
 namespace fileformat {
 
 /**
- * Constructor
- */
-DynamicTable::DynamicTable()
-{
-
-}
-
-/**
- * Destructor
- */
-DynamicTable::~DynamicTable()
-{
-
-}
-
-/**
  * Get number of records in table
  * @return Number of records in table
  */

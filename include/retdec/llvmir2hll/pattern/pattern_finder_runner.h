@@ -31,9 +31,6 @@ public:
 	using PatternFinders = std::vector<ShPtr<PatternFinder>>;
 
 public:
-	PatternFinderRunner();
-	virtual ~PatternFinderRunner();
-
 	void run(const PatternFinders &pfs, ShPtr<Module> module);
 	void run(ShPtr<PatternFinder> pf, ShPtr<Module> module);
 

@@ -15,11 +15,6 @@ namespace llvmir2hll {
 */
 NoCompoundOpManager::NoCompoundOpManager(): CompoundOpManager() {}
 
-/**
-* @brief Destructor.
-*/
-NoCompoundOpManager::~NoCompoundOpManager() {}
-
 std::string NoCompoundOpManager::getId() const {
 	return "NoCompoundOpManager";
 }

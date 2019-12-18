@@ -26,7 +26,6 @@ class Segment
 public:
 	Segment(const retdec::fileformat::SecSeg* secSeg, std::uint64_t address, std::uint64_t size, std::unique_ptr<SegmentDataSource>&& dataSource);
 	Segment(const Segment& segment);
-	~Segment();
 
 	const retdec::fileformat::SecSeg* getSecSeg() const;
 

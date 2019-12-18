@@ -24,11 +24,6 @@ Capstone2LlvmIrTranslatorMips_impl::Capstone2LlvmIrTranslatorMips_impl(
 	initialize();
 }
 
-Capstone2LlvmIrTranslatorMips_impl::~Capstone2LlvmIrTranslatorMips_impl()
-{
-	// Nothing specific to MIPS.
-}
-
 //
 //==============================================================================
 // Mode query & modification methods - from Capstone2LlvmIrTranslator.

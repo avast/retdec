@@ -29,8 +29,6 @@ public:
 		ShPtr<Expression> endCond, ShPtr<Expression> step,
 		ShPtr<Statement> body, ShPtr<Statement> succ = nullptr);
 
-	virtual ~ForLoopStmt() override;
-
 	virtual ShPtr<Value> clone() override;
 	virtual bool isEqualTo(ShPtr<Value> otherValue) const override;
 	virtual bool isCompound() override { return true; }

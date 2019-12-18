@@ -22,7 +22,6 @@ class DecompressorNrv : public Decompressor
 {
 public:
 	explicit DecompressorNrv(std::unique_ptr<retdec::unpacker::BitParser> bitParser = nullptr);
-	virtual ~DecompressorNrv();
 
 	virtual void setupPackingMethod(ElfUpxStub<32>* stub, std::uint8_t packingMethod) override;
 	virtual void decompress(ElfUpxStub<32>* stub, DynamicBuffer& packedData, DynamicBuffer& unpackedData) override;

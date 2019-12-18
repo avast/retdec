@@ -18,7 +18,6 @@ class BasicPlainGetter : public SimpleGetter
 {
 	public:
 		BasicPlainGetter(FileInformation &fileInfo);
-		virtual ~BasicPlainGetter() override;
 
 		virtual std::size_t loadInformation(std::vector<std::string> &desc, std::vector<std::string> &info) const override;
 };

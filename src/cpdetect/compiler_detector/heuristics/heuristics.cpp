@@ -255,14 +255,6 @@ Heuristics::Heuristics(
 }
 
 /**
- * Destructor
- */
-Heuristics::~Heuristics()
-{
-
-}
-
-/**
  * Save all information about detected compiler
  * @param source Used detection method
  * @param strength Strength of detection method

@@ -250,7 +250,7 @@ class Capstone2LlvmIrTranslator
 				llvm::Module* m,
 				cs_mode extra = CS_MODE_LITTLE_ENDIAN);
 
-		virtual ~Capstone2LlvmIrTranslator();
+		virtual ~Capstone2LlvmIrTranslator() = default;
 //
 //==============================================================================
 // Translator configuration methods.

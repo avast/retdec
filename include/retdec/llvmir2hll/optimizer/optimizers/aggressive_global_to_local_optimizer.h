@@ -30,8 +30,6 @@ class AggressiveGlobalToLocalOptimizer final: public Optimizer {
 public:
 	AggressiveGlobalToLocalOptimizer(ShPtr<Module> module);
 
-	virtual ~AggressiveGlobalToLocalOptimizer() override;
-
 	virtual std::string getId() const override { return "AggressiveGlobalToLocal"; }
 
 private:

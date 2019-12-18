@@ -18,7 +18,6 @@ class AbiPowerpc64 : public Abi
 	//
 	public:
 		AbiPowerpc64(llvm::Module* m, Config* c);
-		virtual ~AbiPowerpc64();
 
 	// Registers.
 	//

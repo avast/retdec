@@ -27,8 +27,6 @@ class WhileTrueToUForLoopOptimizer final: public FuncOptimizer {
 public:
 	WhileTrueToUForLoopOptimizer(ShPtr<Module> module, ShPtr<ValueAnalysis> va);
 
-	virtual ~WhileTrueToUForLoopOptimizer() override;
-
 	virtual std::string getId() const override { return "WhileTrueToUForLoop"; }
 
 private:

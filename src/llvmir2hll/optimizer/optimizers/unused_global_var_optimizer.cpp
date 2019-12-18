@@ -30,11 +30,6 @@ UnusedGlobalVarOptimizer::UnusedGlobalVarOptimizer(ShPtr<Module> module):
 		PRECONDITION_NON_NULL(module);
 	}
 
-/**
-* @brief Destructs the optimizer.
-*/
-UnusedGlobalVarOptimizer::~UnusedGlobalVarOptimizer() {}
-
 void UnusedGlobalVarOptimizer::doOptimization() {
 	computeUsedGlobalVars();
 	removeUnusedGlobalVars();

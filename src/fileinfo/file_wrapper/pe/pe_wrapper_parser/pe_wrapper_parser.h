@@ -18,7 +18,7 @@ class PeWrapperParser
 {
 	public:
 		PeWrapperParser();
-		virtual ~PeWrapperParser();
+		virtual ~PeWrapperParser() = default;
 
 		/// @name Detection methods
 		/// @{

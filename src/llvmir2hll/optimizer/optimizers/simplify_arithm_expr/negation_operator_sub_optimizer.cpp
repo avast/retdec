@@ -27,11 +27,6 @@ NegationOperatorSubOptimizer::NegationOperatorSubOptimizer(ShPtr<
 		SubOptimizer(arithmExprEvaluator) {}
 
 /**
-* @brief Destructor.
-*/
-NegationOperatorSubOptimizer::~NegationOperatorSubOptimizer() {}
-
-/**
 * @brief Creates a new NegationOperatorSubOptimizer.
 *
 * @param[in] arithmExprEvaluator @a The used evaluator of arithmetical

@@ -47,9 +47,6 @@ class Module;
 class IndirectFuncRefAnalysis: private OrderedAllVisitor,
 		private retdec::utils::NonCopyable {
 public:
-	// It needs to be public so it can be called in ShPtr's destructor.
-	virtual ~IndirectFuncRefAnalysis() override;
-
 	static FuncSet getIndirectlyReferencedFuncs(ShPtr<Module> module);
 	static bool isIndirectlyReferenced(ShPtr<Module> module,
 		ShPtr<Function> func);

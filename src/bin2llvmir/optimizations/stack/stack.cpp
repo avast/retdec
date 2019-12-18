@@ -200,7 +200,6 @@ void StackAnalysis::handleInstruction(
 			debugSv != nullptr);
 
 	AllocaInst* a = p.first;
-	auto* ca = p.second;
 
 	LOG << "===> " << llvmObjToString(a) << std::endl;
 	LOG << "===> " << llvmObjToString(inst) << std::endl;

@@ -31,11 +31,6 @@ FuncsWithPrefixRemover::FuncsWithPrefixRemover(ShPtr<Module> module,
 		OrderedAllVisitor(), module(module), prefixes(prefixes) {}
 
 /**
-* @brief Destructs the remover.
-*/
-FuncsWithPrefixRemover::~FuncsWithPrefixRemover() {}
-
-/**
 * @brief Removes functions from @a module whose name starts with a prefix from
 *        @a prefixes.
 *

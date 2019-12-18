@@ -21,9 +21,6 @@ class VisualBasicExtern
 		std::string moduleName;
 		std::string apiName;
 	public:
-		VisualBasicExtern();
-		~VisualBasicExtern();
-
 		/// @name Getters
 		/// @{
 		const std::string &getModuleName() const;

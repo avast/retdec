@@ -36,8 +36,6 @@ public:
 public:
 	static ShPtr<FunctionType> create(ShPtr<Type> retType = VoidType::create());
 
-	virtual ~FunctionType() override;
-
 	virtual ShPtr<Value> clone() override;
 	virtual bool isEqualTo(ShPtr<Value> otherValue) const override;
 

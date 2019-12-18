@@ -19,7 +19,6 @@ class PeFormatParser32 : public PeFormatParser
 		PeLib::PeHeaderT<32> &peHeader; ///< header of 32-bit PE file
 	public:
 		PeFormatParser32(const FileFormat *fInputFile, PeLib::PeFileT<32> *peFile32);
-		virtual ~PeFormatParser32() override;
 
 		/// @name Detection methods
 		/// @{

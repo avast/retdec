@@ -113,9 +113,6 @@ using DetectedFunctionsPtrMultimap = typename std::multimap<
 class Finder
 {
 	public:
-		Finder();
-		~Finder();
-
 		/// @name Actions.
 		/// @{
 		void search(

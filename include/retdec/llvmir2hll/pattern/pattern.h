@@ -36,8 +36,7 @@ public:
 		const std::string &indentation = "") const = 0;
 
 protected:
-	Pattern();
-	virtual ~Pattern();
+	Pattern() = default;
 };
 
 } // namespace llvmir2hll

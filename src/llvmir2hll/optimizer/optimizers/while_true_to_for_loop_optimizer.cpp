@@ -50,11 +50,6 @@ WhileTrueToForLoopOptimizer::WhileTrueToForLoopOptimizer(ShPtr<Module> module,
 		PRECONDITION_NON_NULL(arithmExprEvaluator);
 	}
 
-/**
-* @brief Destructs the optimizer.
-*/
-WhileTrueToForLoopOptimizer::~WhileTrueToForLoopOptimizer() {}
-
 void WhileTrueToForLoopOptimizer::doOptimization() {
 	if (!va->isInValidState()) {
 		va->clearCache();

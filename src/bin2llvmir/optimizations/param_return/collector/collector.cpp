@@ -28,10 +28,6 @@ Collector::Collector(
 {
 }
 
-Collector::~Collector()
-{
-}
-
 void Collector::collectCallArgs(CallEntry* ce) const
 {
 	std::vector<llvm::StoreInst*> foundStores;

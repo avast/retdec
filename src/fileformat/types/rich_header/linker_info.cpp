@@ -10,22 +10,6 @@ namespace retdec {
 namespace fileformat {
 
 /**
- * Constructor
- */
-LinkerInfo::LinkerInfo() : majorVersion(0), minorVersion(0), buildVersion(0), count(0)
-{
-
-}
-
-/**
- * Destructor
- */
-LinkerInfo::~LinkerInfo()
-{
-
-}
-
-/**
  * Get major version
  * @return Major version of linker
  */

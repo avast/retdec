@@ -27,7 +27,6 @@ class PeImport : public Import
 		std::uint32_t flags;
 	public:
 		PeImport(std::uint32_t flags);
-		~PeImport();
 
 		/// @name Getters
 		/// @{

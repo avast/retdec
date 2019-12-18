@@ -24,7 +24,6 @@ class ElfCoreMapPlainGetter : public IterativeDistributionGetter
 
 	public:
 		ElfCoreMapPlainGetter(FileInformation &fileInfo);
-		virtual ~ElfCoreMapPlainGetter() override;
 
 		virtual std::size_t getBasicInfo(
 				std::size_t structIndex,

@@ -12,6 +12,7 @@
 
 #include "retdec/llvmir2hll/support/smart_ptr.h"
 #include "retdec/llvmir2hll/support/types.h"
+#include "retdec/llvmir2hll/var_name_gen/var_name_gen.h"
 #include "retdec/utils/non_copyable.h"
 
 namespace llvm {
@@ -26,7 +27,6 @@ namespace llvmir2hll {
 class Module;
 class Type;
 class Variable;
-class VarNameGen;
 
 /**
 * @brief Managing of local variables created during conversion of LLVM
@@ -35,7 +35,6 @@ class VarNameGen;
 class VariablesManager final: private retdec::utils::NonCopyable {
 public:
 	VariablesManager(ShPtr<Module> resModule);
-	~VariablesManager();
 
 	void reset();
 

@@ -25,8 +25,6 @@ class GotoStmt final: public Statement {
 public:
 	static ShPtr<GotoStmt> create(ShPtr<Statement> target);
 
-	virtual ~GotoStmt() override;
-
 	virtual ShPtr<Value> clone() override;
 	virtual bool isEqualTo(ShPtr<Value> otherValue) const override;
 	virtual bool isCompound() override { return false; }

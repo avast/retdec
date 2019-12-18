@@ -30,10 +30,6 @@ Filter::Filter(
 {
 }
 
-Filter::~Filter()
-{
-}
-
 void Filter::estimateRetValue(DataFlowEntry* de) const
 {
 	auto retValue = de->getRetValue();

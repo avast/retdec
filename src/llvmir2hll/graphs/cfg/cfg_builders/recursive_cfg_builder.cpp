@@ -147,11 +147,6 @@ bool isStatementInStatements(ShPtr<Statement> stmt, ShPtr<Statement> stmts) {
 RecursiveCFGBuilder::RecursiveCFGBuilder():
 	CFGBuilder(), OrderedAllVisitor(), currNode(), firstStmtNodeMapping() {}
 
-/**
-* @brief Destructs the builder.
-*/
-RecursiveCFGBuilder::~RecursiveCFGBuilder() {}
-
 void RecursiveCFGBuilder::buildCFG() {
 	// Initialization.
 	currNode.reset();

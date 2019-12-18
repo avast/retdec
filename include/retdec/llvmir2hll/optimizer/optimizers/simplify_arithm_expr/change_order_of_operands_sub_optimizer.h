@@ -40,7 +40,6 @@ class ChangeOrderOfOperandsSubOptimizer final: public SubOptimizer {
 public:
 	ChangeOrderOfOperandsSubOptimizer(
 		ShPtr<ArithmExprEvaluator> arithmExprEvaluator);
-	virtual ~ChangeOrderOfOperandsSubOptimizer() override;
 
 	static ShPtr<SubOptimizer> create(ShPtr<ArithmExprEvaluator>
 		arithmExprEvaluator);

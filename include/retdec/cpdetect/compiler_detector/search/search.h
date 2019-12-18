@@ -29,7 +29,6 @@ class Search
 				std::size_t bytesAfter; ///< number of bytes after slash for read
 			public:
 				RelativeJump(std::string sSlash, std::size_t sBytesAfter);
-				~RelativeJump();
 
 				/// @name Jump getters
 				/// @{
@@ -55,7 +54,6 @@ class Search
 		/// @}
 	public:
 		Search(retdec::fileformat::FileFormat &fileParser);
-		~Search();
 
 		/// @name Status methods
 		/// @{

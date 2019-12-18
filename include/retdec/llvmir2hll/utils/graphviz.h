@@ -24,10 +24,6 @@ class UtilsGraphviz {
 public:
 	static std::string createLabel(const std::string &str);
 	static std::string createNodeName(const std::string &str);
-
-private:
-	UtilsGraphviz();
-	~UtilsGraphviz();
 };
 
 } // namespace llvmir2hll

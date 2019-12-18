@@ -65,17 +65,6 @@ const unsigned COMPOSITE_TYPE_INDEX_SIZE_BITS = 32;
 } // anonymous namespace
 
 /**
-* @brief Constructs a new converter.
-*/
-LLVMInstructionConverter::LLVMInstructionConverter():
-	fcmpConverter(std::make_unique<LLVMFCmpConverter>()) {}
-
-/**
-* @brief Destructs the converter.
-*/
-LLVMInstructionConverter::~LLVMInstructionConverter() {}
-
-/**
 * @brief Converts the given LLVM constant expression @a cExpr into an expression
 *        in BIR.
 *
@@ -228,7 +217,7 @@ void LLVMInstructionConverter::setLLVMValueConverter(ShPtr<LLVMValueConverter> c
 *                   false, disables the use of strict FPU semantics.
 */
 void LLVMInstructionConverter::setOptionStrictFPUSemantics(bool strict) {
-	fcmpConverter->setOptionStrictFPUSemantics(strict);
+	fcmpConverter.setOptionStrictFPUSemantics(strict);
 }
 
 /**
@@ -545,7 +534,7 @@ ShPtr<Expression> LLVMInstructionConverter::convertFCmpInstToExpression(
 		llvm::User &inst, unsigned predicate) {
 	auto op1 = getConverter()->convertValueToExpression(inst.getOperand(0));
 	auto op2 = getConverter()->convertValueToExpression(inst.getOperand(1));
-	auto expr = fcmpConverter->convertToExpression(op1, op2, predicate);
+	auto expr = fcmpConverter.convertToExpression(op1, op2, predicate);
 	if (!expr) {
 		FAIL("unsupported fcmp predicate: " << inst);
 	}
