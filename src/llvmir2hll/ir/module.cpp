@@ -220,6 +220,10 @@ ShPtr<Semantics> Module::getSemantics() const {
 	return semantics;
 }
 
+ShPtr<Config> Module::getConfig() const {
+	return config;
+}
+
 /**
 * @brief Returns @c true if the module contains at least one global variable,
 *        @c false otherwise.

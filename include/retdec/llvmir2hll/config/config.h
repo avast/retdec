@@ -88,6 +88,14 @@ public:
 	virtual std::string getRegisterForGlobalVar(const std::string &var) const = 0;
 
 	/**
+	* @brief Returns the address of the given global variable.
+	*
+	* If the given variable is not a global variable or it does not have any
+	* address attached, the undefined address is returned.
+	*/
+	virtual Address getAddressForGlobalVar(const std::string &var) const = 0;
+
+	/**
 	* @brief Returns a description of the detected cryptographic pattern for
 	*        the given global variable.
 	*

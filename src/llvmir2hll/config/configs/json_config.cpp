@@ -184,6 +184,11 @@ std::string JSONConfig::getRegisterForGlobalVar(const std::string &var) const {
 	return inRegister ? registerName : std::string();
 }
 
+Address JSONConfig::getAddressForGlobalVar(const std::string &var) const {
+	const auto &g = impl->getConfigGlobalVariableByNameOrEmptyVariable(var);
+	return g.getStorage().getAddress();
+}
+
 std::string JSONConfig::getDetectedCryptoPatternForGlobalVar(const std::string &var) const {
 	const auto &g = impl->getConfigGlobalVariableByNameOrEmptyVariable(var);
 	return g.getCryptoDescription();

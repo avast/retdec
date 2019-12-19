@@ -61,6 +61,7 @@ public:
 	virtual std::string comesFromGlobalVar(const std::string &func,
 		const std::string &var) const override;
 	virtual std::string getRegisterForGlobalVar(const std::string &var) const override;
+	virtual Address getAddressForGlobalVar(const std::string &var) const override;
 	virtual std::string getDetectedCryptoPatternForGlobalVar(const std::string &var) const override;
 	/// @}
 

@@ -57,6 +57,7 @@ public:
 	const llvm::Module *getLLVMModule() const;
 	std::string getIdentifier(bool stripDirs = true) const;
 	ShPtr<Semantics> getSemantics() const;
+	ShPtr<Config> getConfig() const;
 
 	/// @name Global Variables Accessors
 	/// @{

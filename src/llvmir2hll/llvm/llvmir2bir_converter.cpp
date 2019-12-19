@@ -7,6 +7,7 @@
 #include <llvm/IR/Module.h>
 
 #include "retdec/llvm-support/diagnostics.h"
+#include "retdec/llvmir2hll/config/config.h"
 #include "retdec/llvmir2hll/ir/expression.h"
 #include "retdec/llvmir2hll/ir/function.h"
 #include "retdec/llvmir2hll/ir/module.h"
@@ -120,6 +121,9 @@ ShPtr<Variable> LLVMIR2BIRConverter::convertGlobalVariable(
 	if (isExternal(globVar)) {
 		var->markAsExternal();
 	}
+
+	auto a = resModule->getConfig()->getAddressForGlobalVar(globVar.getName());
+	var->setAddress(a);
 
 	return var;
 }

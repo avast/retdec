@@ -25,6 +25,7 @@ public:
 	MOCK_CONST_METHOD1(isGlobalVarStoringWideString, bool (const std::string &));
 	MOCK_CONST_METHOD2(comesFromGlobalVar, std::string (const std::string &, const std::string &));
 	MOCK_CONST_METHOD1(getRegisterForGlobalVar, std::string (const std::string &));
+	MOCK_CONST_METHOD1(getAddressForGlobalVar, Address (const std::string &));
 	MOCK_CONST_METHOD1(getDetectedCryptoPatternForGlobalVar, std::string (const std::string &));
 	MOCK_CONST_METHOD1(getAddressRangeForFunc, AddressRange (const std::string &));
 	MOCK_CONST_METHOD1(getLineRangeForFunc, LineRange (const std::string &));
