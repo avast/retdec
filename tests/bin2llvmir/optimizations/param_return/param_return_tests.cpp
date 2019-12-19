@@ -1156,7 +1156,7 @@ TEST_F(ParamReturnTests, x86_64ExternalCallUseStacksIf6RegistersUsed)
 
 		declare void @0()
 
-		define i32 @fnc() {
+		define i64 @fnc() {
 			store i64 1, i64* @rdi
 			%stack_-8 = alloca i64
 			%stack_-16 = alloca i64
@@ -1179,8 +1179,7 @@ TEST_F(ParamReturnTests, x86_64ExternalCallUseStacksIf6RegistersUsed)
 			%9 = call i64 @print(i64 %1, i64 %2, i64 %3, i64 %4, i64 %5, i64 %6, i64 %7, i64 %8)
 			store i64 %9, i64* @rax
 			%10 = load i64, i64* @rax
-			%11 = trunc i64 %10 to i32
-			ret i32 %11
+			ret i64 %10
 		}
 
 		declare void @1()
@@ -1670,7 +1669,7 @@ TEST_F(ParamReturnTests, ms_x64ExternalCallUseStacksIf4RegistersUsed)
 
 		declare void @0()
 
-		define i32 @fnc() {
+		define i64 @fnc() {
 			%stack_-8 = alloca i64
 			%stack_-16 = alloca i64
 			store i64 1, i64* @r9
@@ -1689,8 +1688,7 @@ TEST_F(ParamReturnTests, ms_x64ExternalCallUseStacksIf4RegistersUsed)
 			%7 = call i64 @print(i64 %1, i64 %2, i64 %3, i64 %4, i64 %5, i64 %6)
 			store i64 %7, i64* @rax
 			%8 = load i64, i64* @rax
-			%9 = trunc i64 %8 to i32
-			ret i32 %9
+			ret i64 %8
 		}
 
 		declare void @1()
@@ -2973,7 +2971,7 @@ TEST_F(ParamReturnTests, arm64ExternalCallUseStacksIf8RegistersUsed)
 
 		declare void @0()
 
-		define i32 @fnc() {
+		define i64 @fnc() {
 			%stack_-4 = alloca i64
 			%stack_-12 = alloca i64
 			store i64 1, i64* @x2
@@ -3001,8 +2999,7 @@ TEST_F(ParamReturnTests, arm64ExternalCallUseStacksIf8RegistersUsed)
 			%11 = call i64 @print(i64 %1, i64 %2, i64 %3, i64 %4, i64 %5, i64 %6, i64 %7, i64 %8, i64 %9, i64 %10)
 			store i64 %11, i64* @x0
 			%12 = load i64, i64* @x0
-			%13 = trunc i64 %12 to i32
-			ret i32 %13
+			ret i64 %12
 		}
 
 		declare void @1()

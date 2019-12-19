@@ -191,6 +191,27 @@ void ParamReturn::collectExtraData(DataFlowEntry* dataflow) const
 		return;
 	}
 
+	// Main
+	//
+	if (fnc->getName() == "main")
+	{
+		auto charPointer = PointerType::get(
+			Type::getInt8Ty(_module->getContext()), 0);
+
+		dataflow->setArgTypes(
+		{
+			_abi->getDefaultType(),
+			PointerType::get(charPointer, 0)
+		},
+		{
+			"argc",
+			"argv"
+		});
+
+		dataflow->setRetType(_abi->getDefaultType());
+		return;
+	}
+
 	// LTI info.
 	//
 	auto* cf = _config->getConfigFunction(fnc);
@@ -265,29 +286,27 @@ void ParamReturn::collectExtraData(DataFlowEntry* dataflow) const
 		{
 			dataflow->setVariadic();
 		}
-		if (dbgFnc->returnType.isDefined())
-		{
-			dataflow->setRetType(
+		dataflow->setRetType(
 			llvm_utils::stringToLlvmTypeDefault(
 				_module,
 				dbgFnc->returnType.getLlvmIr()));
-		}
-		dataflow->setCallingConvention(dbgFnc->callingConvention.getID());
 
 		// TODO: Maybe use demangled function name?
 		// Would it be useful for names from debug info?
+
 		return;
 	}
 
 	auto configFnc = _config->getConfigFunction(fnc);
-	if (configFnc)
+	if (_config->getConfig().isIda() && configFnc)
 	{
 		std::vector<Type*> argTypes;
 		std::vector<std::string> argNames;
 		for (auto& a : configFnc->parameters)
 		{
 			auto* t = llvm_utils::stringToLlvmTypeDefault(
-					_module, a.type.getLlvmIr());
+					_module,
+					a.type.getLlvmIr());
 			if (!t->isSized())
 			{
 				continue;
@@ -295,10 +314,7 @@ void ParamReturn::collectExtraData(DataFlowEntry* dataflow) const
 			argTypes.push_back(t);
 			argNames.push_back(a.getName());
 		}
-		// If no parameters are found do not call setArgType method
-		// as it will consider function to be without paprameters.
-		if (configFnc->parameters.size())
-			dataflow->setArgTypes(
+		dataflow->setArgTypes(
 				std::move(argTypes),
 				std::move(argNames));
 
@@ -306,38 +322,21 @@ void ParamReturn::collectExtraData(DataFlowEntry* dataflow) const
 		{
 			dataflow->setVariadic();
 		}
-		if (configFnc->returnType.isDefined())
-		{
-			dataflow->setRetType(
+		dataflow->setRetType(
 			llvm_utils::stringToLlvmTypeDefault(
 				_module,
 				configFnc->returnType.getLlvmIr()));
-		}
-		dataflow->setCallingConvention(configFnc->callingConvention.getID());
 
 		// TODO: Maybe use demangled function name?
-		// Would it be useful for names from debug info?
+		// Is it desired for names from IDA?
+
+		return;
 	}
 
-	// Main
-	//
-	if (!dataflow->argNames().size() && fnc->getName().str() == "main")
+	// Calling convention.
+	if (configFnc)
 	{
-		auto charPointer = PointerType::get(
-			Type::getInt8Ty(_module->getContext()), 0);
-
-		dataflow->setArgTypes(
-		{
-			_abi->getDefaultType(),
-			PointerType::get(charPointer, 0)
-		},
-		{
-			"argc",
-			"argv"
-		});
-
-		dataflow->setRetType(_abi->getDefaultType());
-		return;
+		dataflow->setCallingConvention(configFnc->callingConvention.getID());
 	}
 
 	// Wrappers.
