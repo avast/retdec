@@ -115,7 +115,7 @@ public:
 	Address getAddress() const;
 
 	/// @name Goto Targets
-	/// @}
+	/// @{
 	bool isGotoTarget() const;
 	void redirectGotosTo(ShPtr<Statement> stmt);
 	/// @}

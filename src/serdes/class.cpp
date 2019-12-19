@@ -1,5 +1,5 @@
 /**
- * @file src/serdes/class.h
+ * @file src/serdes/class.cpp
  * @brief Class (de)serialization.
  * @copyright (c) 2019 Avast Software, licensed under the MIT license
  */

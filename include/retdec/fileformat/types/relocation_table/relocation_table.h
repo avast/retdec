@@ -34,6 +34,7 @@ class RelocationTable
 		/// @}
 
 		/// @name Setters
+		/// @{
 		void setLinkToSymbolTable(std::uint64_t symbolTableIndex);
 		/// @}
 

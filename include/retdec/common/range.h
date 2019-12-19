@@ -233,7 +233,7 @@ public:
 
 	/**
 	 * Return whether this range less than @p rhs. It is less if its starting
-	 * value is less than @rhs starting value.
+	 * value is less than @a rhs starting value.
 	 *
 	 * @return True if less, otherwise false.
 	 */

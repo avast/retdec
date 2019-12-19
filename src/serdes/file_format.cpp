@@ -1,5 +1,5 @@
 /**
- * @file src/serdes/file_format.h
+ * @file src/serdes/file_format.cpp
  * @brief File format (de)serialization.
  * @copyright (c) 2019 Avast Software, licensed under the MIT license
  */

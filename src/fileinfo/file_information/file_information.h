@@ -414,7 +414,7 @@ class FileInformation
 		/// @}
 
 		/// @name Getters of @a relocationTables
-		/// {
+		/// @{
 		std::size_t getNumberOfStoredRelocationsInTable(std::size_t position) const;
 		std::string getNumberOfStoredRelocationsInTableStr(std::size_t position) const;
 		std::string getNumberOfDeclaredRelocationsInTableStr(std::size_t position) const;

@@ -46,6 +46,7 @@ public:
 	/// @}
 
 	/// @name Parameters
+	/// @{
 	bool hasParams() const;
 	bool hasParam(std::size_t n) const;
 	std::size_t getNumOfParams() const;

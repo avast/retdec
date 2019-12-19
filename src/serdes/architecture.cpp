@@ -1,5 +1,5 @@
 /**
- * @file src/serdes/architecture.h
+ * @file src/serdes/architecture.cpp
  * @brief Architecture (de)serialization.
  * @copyright (c) 2019 Avast Software, licensed under the MIT license
  */

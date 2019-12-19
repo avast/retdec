@@ -1,5 +1,5 @@
 /**
- * @file src/serdes/object.h
+ * @file src/serdes/object.cpp
  * @brief Object (de)serialization.
  * @copyright (c) 2019 Avast Software, licensed under the MIT license
  */

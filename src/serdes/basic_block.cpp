@@ -1,5 +1,5 @@
 /**
- * @file src/serdes/basic_block.h
+ * @file src/serdes/basic_block.cpp
  * @brief Basic block (de)serialization.
  * @copyright (c) 2019 Avast Software, licensed under the MIT license
  */

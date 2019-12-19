@@ -1,5 +1,5 @@
 /**
- * @file src/serdes/storage.h
+ * @file src/serdes/storage.cpp
  * @brief Storage (de)serialization.
  * @copyright (c) 2019 Avast Software, licensed under the MIT license
  */

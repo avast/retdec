@@ -1,5 +1,5 @@
 /**
- * @file src/serdes/tool_info.h
+ * @file src/serdes/tool_info.cpp
  * @brief Tool information (de)serialization.
  * @copyright (c) 2019 Avast Software, licensed under the MIT license
  */

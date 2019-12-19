@@ -1,5 +1,5 @@
 /**
- * @file src/serdes/pattern.h
+ * @file src/serdes/pattern.cpp
  * @brief Pattern (de)serialization.
  * @copyright (c) 2019 Avast Software, licensed under the MIT license
  */

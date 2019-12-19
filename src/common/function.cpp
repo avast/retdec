@@ -1,5 +1,5 @@
 /**
- * @file src/common/functions.cpp
+ * @file src/common/function.cpp
  * @brief Common function representation.
  * @copyright (c) 2019 Avast Software, licensed under the MIT license
  */

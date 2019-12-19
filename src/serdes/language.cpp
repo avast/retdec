@@ -1,5 +1,5 @@
 /**
- * @file src/serdes/language.h
+ * @file src/serdes/language.cpp
  * @brief Language (de)serialization.
  * @copyright (c) 2019 Avast Software, licensed under the MIT license
  */

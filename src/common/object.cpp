@@ -1,5 +1,5 @@
 /**
- * @file src/common/objects.cpp
+ * @file src/common/object.cpp
  * @brief Common object representation.
  * @copyright (c) 2019 Avast Software, licensed under the MIT license
  */

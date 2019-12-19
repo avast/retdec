@@ -1,5 +1,5 @@
 /**
- * @file src/serdes/function.h
+ * @file src/serdes/function.cpp
  * @brief Function (de)serialization.
  * @copyright (c) 2019 Avast Software, licensed under the MIT license
  */

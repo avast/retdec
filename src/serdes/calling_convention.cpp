@@ -1,5 +1,5 @@
 /**
- * @file src/serdes/calling_convention.h
+ * @file src/serdes/calling_convention.cpp
  * @brief Calling convention (de)serialization.
  * @copyright (c) 2019 Avast Software, licensed under the MIT license
  */

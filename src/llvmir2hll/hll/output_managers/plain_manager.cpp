@@ -1,5 +1,5 @@
 /**
-* @file src/llvmir2hll/hll/output_manager/plain_manager.cpp
+* @file src/llvmir2hll/hll/output_managers/plain_manager.cpp
 * @brief Implementation of PlainOutputManager.
 * @copyright (c) 2019 Avast Software, licensed under the MIT license
 */

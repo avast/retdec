@@ -102,6 +102,7 @@ ShPtr<Expression> getExitCondition(ShPtr<Statement> loopEnd) {
 * @brief Splits the given "while True" loop @a stmt into three parts.
 *
 * @param[in] stmt "while True" loop to be splitted.
+* @param[in] indVarInfo
 *
 * See the description of SplittedWhileTrueLoop for more details.
 *

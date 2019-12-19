@@ -1,5 +1,5 @@
 /**
- * @file src/serdes/vtable.h
+ * @file src/serdes/vtable.cpp
  * @brief Address (de)serialization.
  * @copyright (c) 2019 Avast Software, licensed under the MIT license
  */

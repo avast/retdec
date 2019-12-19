@@ -1,5 +1,5 @@
 /**
- * @file src/serdes/std.h
+ * @file src/serdes/std.cpp
  * @brief C++ standard types (de)serialization.
  * @copyright (c) 2019 Avast Software, licensed under the MIT license
  */

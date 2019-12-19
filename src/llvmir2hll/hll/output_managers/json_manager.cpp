@@ -1,5 +1,5 @@
 /**
-* @file src/llvmir2hll/hll/output_manager/json_manager.cpp
+* @file src/llvmir2hll/hll/output_managers/json_manager.cpp
 * @brief Implementation of JsonOutputManager.
 * @copyright (c) 2019 Avast Software, licensed under the MIT license
 */
@@ -42,7 +42,7 @@ const std::string JSON_TOKEN_COMMENT       = "cmnt";
 /**
  * We don't like macros, but we potentially need to return from methods calling
  * this helper routine, so we use it here anyway.
- * \val Anything that can be concatenated (+) to a std::string.
+ * \param val Anything that can be concatenated (+) to a std::string.
  */
 #define HANDLE_COMMENT_MODIFIER(val)                 \
 {                                                    \

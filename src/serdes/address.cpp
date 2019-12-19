@@ -1,5 +1,5 @@
 /**
- * @file src/serdes/address.h
+ * @file src/serdes/address.cpp
  * @brief Address (de)serialization.
  * @copyright (c) 2019 Avast Software, licensed under the MIT license
  */
