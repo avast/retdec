@@ -30,6 +30,11 @@ std::string LabelsHandler::getLabel(const llvm::BasicBlock *bb) const {
 	);
 }
 
+std::string LabelsHandler::getLabel(ShPtr<Statement> stmt) const {
+	return LLVMSupport::getBasicBlockLabelPrefix()
+			+ stmt->getAddress().toHexPrefixString();
+}
+
 /**
 * @brief Removes the given label from the set of used labels.
 */
@@ -42,13 +47,18 @@ void LabelsHandler::removeLabel(const std::string &label) {
 */
 void LabelsHandler::setGotoTargetLabel(ShPtr<Statement> target,
 		const llvm::BasicBlock *targetBB) {
-	auto label = createLabelFor(targetBB);
+	auto label = createLabelFor(targetBB, target);
 	target->setLabel(label);
 	markLabelAsUsed(label);
 }
 
-std::string LabelsHandler::createLabelFor(const llvm::BasicBlock *bb) const {
+std::string LabelsHandler::createLabelFor(
+		const llvm::BasicBlock *bb,
+		ShPtr<Statement> stmt) const {
 	auto label = getLabel(bb);
+	if (label.empty()) {
+		label = getLabel(stmt);
+	}
 	label = ensureLabelIsValid(label);
 	label = ensureLabelIsUnique(label);
 	return label;
