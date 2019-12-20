@@ -4,6 +4,8 @@
 * @copyright (c) 2017 Avast Software, licensed under the MIT license
 */
 
+// #include <iostream>
+
 #include <llvm/IR/BasicBlock.h>
 
 #include "retdec/llvmir2hll/ir/statement.h"
@@ -31,8 +33,10 @@ std::string LabelsHandler::getLabel(const llvm::BasicBlock *bb) const {
 }
 
 std::string LabelsHandler::getLabel(ShPtr<Statement> stmt) const {
-	return LLVMSupport::getBasicBlockLabelPrefix()
-			+ stmt->getAddress().toHexPrefixString();
+	auto a = stmt->getAddress();
+	return a.isDefined()
+			? LLVMSupport::getBasicBlockLabelPrefix() + a.toHexPrefixString()
+			: std::string();
 }
 
 /**
@@ -47,6 +51,7 @@ void LabelsHandler::removeLabel(const std::string &label) {
 */
 void LabelsHandler::setGotoTargetLabel(ShPtr<Statement> target,
 		const llvm::BasicBlock *targetBB) {
+// std::cout << target << " @ " << targetBB->getName().str() << " @ " << target->getAddress() << std::endl;
 	auto label = createLabelFor(targetBB, target);
 	target->setLabel(label);
 	markLabelAsUsed(label);
@@ -58,6 +63,9 @@ std::string LabelsHandler::createLabelFor(
 	auto label = getLabel(bb);
 	if (label.empty()) {
 		label = getLabel(stmt);
+	}
+	if (label.empty()) {
+		label = LLVMSupport::getBasicBlockLabelPrefix() + "unknown";
 	}
 	label = ensureLabelIsValid(label);
 	label = ensureLabelIsUnique(label);

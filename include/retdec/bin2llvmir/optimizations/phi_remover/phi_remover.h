@@ -10,6 +10,8 @@
 #include <llvm/IR/Module.h>
 #include <llvm/Pass.h>
 
+#include "retdec/bin2llvmir/providers/config.h"
+
 namespace retdec {
 namespace bin2llvmir {
 
@@ -19,10 +21,17 @@ class PhiRemover : public llvm::ModulePass
 		static char ID;
 		PhiRemover();
 		virtual bool runOnModule(llvm::Module& M) override;
-		bool runOnModuleCustom(llvm::Module& M);
+		bool runOnModuleCustom(llvm::Module& M, Config* c);
 
 	private:
-		bool run(llvm::Module& M);
+		bool run();
+		bool demotePhiToStack(
+				llvm::PHINode* phi,
+				llvm::MDNode* faddr);
+
+	private:
+		llvm::Module* _module = nullptr;
+		Config* _config = nullptr;
 };
 
 } // namespace bin2llvmir
