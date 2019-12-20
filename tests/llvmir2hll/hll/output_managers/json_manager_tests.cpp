@@ -196,7 +196,10 @@ TEST_F(JsonOutputManagerTests, token_constantFloat)
 TEST_F(JsonOutputManagerTests, token_constantString)
 {
 	manager->constantString("\"hello world\"");
-	EXPECT_EQ(R"({"kind":"l_str","val":"\"hello world\""})", emitSingleToken());
+	EXPECT_EQ(
+			"{\"kind\":\"l_str\",\"val\":\"\\\"hello world\\\"\"}",
+			emitSingleToken()
+	);
 }
 
 TEST_F(JsonOutputManagerTests, token_constantSymbol)
