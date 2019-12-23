@@ -36,6 +36,8 @@ public:
 	using Patterns = std::vector<ShPtr<Pattern>>;
 
 public:
+	virtual ~APICallSeqFinder() = default;
+
 	/**
 	* @brief Tries to find the given sequence of API calls, starting at @a
 	*        stmt.
