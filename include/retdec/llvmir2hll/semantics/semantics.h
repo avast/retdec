@@ -32,6 +32,8 @@ namespace llvmir2hll {
 */
 class Semantics: private retdec::utils::NonCopyable {
 public:
+	virtual ~Semantics() = default;
+
 	/**
 	* @brief Returns the ID of the semantics.
 	*/

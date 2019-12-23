@@ -217,6 +217,8 @@ protected:
 class CallInfoObtainer: public SharableFromThis<CallInfoObtainer>,
 	private retdec::utils::NonCopyable {
 public:
+	virtual ~CallInfoObtainer() = default;
+
 	ShPtr<CG> getCG() const;
 	ShPtr<CFG> getCFGForFunc(ShPtr<Function> func) const;
 

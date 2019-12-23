@@ -24,6 +24,8 @@ namespace llvmir2hll {
 */
 class Pattern: private retdec::utils::NonCopyable {
 public:
+	virtual ~Pattern() = default;
+
 	/**
 	* @brief Prints the pattern to stream @a os, each line indented with @a
 	*        indentation.
