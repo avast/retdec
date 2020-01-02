@@ -348,6 +348,5 @@ const retdec::common::Object* StackAnalysis::getConfigStackVariable(
 	return nullptr;
 }
 
-
 } // namespace bin2llvmir
 } // namespace retdec

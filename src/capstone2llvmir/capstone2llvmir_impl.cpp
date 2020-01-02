@@ -982,7 +982,6 @@ llvm::GlobalVariable* Capstone2LlvmIrTranslator_impl<CInsn, CInsnOp>::createRegi
 //==============================================================================
 //
 
-
 template <typename CInsn, typename CInsnOp>
 llvm::Value* Capstone2LlvmIrTranslator_impl<CInsn, CInsnOp>::loadOp(
 		CInsn* ci,
@@ -1209,7 +1208,6 @@ Capstone2LlvmIrTranslator_impl<CInsn, CInsnOp>::loadOpTernary(
 	return std::make_tuple(operands[0], operands[1], operands[2]);
 }
 
-
 /**
  * Throws if op_count != 3.
  */
@@ -1225,7 +1223,6 @@ Capstone2LlvmIrTranslator_impl<CInsn, CInsnOp>::loadOpTernary(
 	auto operands = _loadOps(ci, irb, 3, true, loadType, dstType, ct);
 	return std::make_tuple(operands[0], operands[1], operands[2]);
 }
-
 
 /**
  * Throws if op_count not in {2, 3}.
