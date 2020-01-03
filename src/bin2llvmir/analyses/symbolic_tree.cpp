@@ -28,8 +28,6 @@ using namespace retdec::bin2llvmir::st_match;
 namespace retdec {
 namespace bin2llvmir {
 
-//==============================================================================
-
 SymbolicTree SymbolicTree::PrecomputedRda(
 		ReachingDefinitionsAnalysis& rda,
 		llvm::Value* v,
@@ -60,43 +58,6 @@ SymbolicTree SymbolicTree::Linear(
 {
 	return SymbolicTree(nullptr, v, nullptr, maxNodeLevel, true);
 }
-
-//==============================================================================
-
-/**
- * No ReachingDefinitionsAnalysis -> on-demand UseDef/DefUse chains are used.
- */
-SymbolicTree::SymbolicTree(
-		llvm::Value* v,
-		unsigned maxNodeLevel)
-		:
-		SymbolicTree(nullptr, v, nullptr, maxNodeLevel, false)
-{
-
-}
-
-SymbolicTree::SymbolicTree(
-		ReachingDefinitionsAnalysis& rda,
-		llvm::Value* v,
-		unsigned maxNodeLevel)
-		:
-		SymbolicTree(&rda, v, nullptr, maxNodeLevel, false)
-{
-
-}
-
-SymbolicTree::SymbolicTree(
-		ReachingDefinitionsAnalysis& rda,
-		llvm::Value* v,
-		std::map<llvm::Value*, llvm::Value*>* val2val,
-		unsigned maxNodeLevel)
-		:
-		SymbolicTree(&rda, v, val2val, maxNodeLevel, false)
-{
-
-}
-
-//==============================================================================
 
 /**
  * Them main "public" ctor -- it is not really public, but all public ctors
@@ -300,7 +261,13 @@ void SymbolicTree::expandNode(
 			auto defs = RDA->defsFromUse(l);
 			if (defs.size() > _naryLimit)
 			{
-				ops.emplace_back(UndefValue::get(l->getType()));
+// TODO!!! replace with invalid tree
+				ops.emplace_back(
+						RDA,
+						UndefValue::get(l->getType()),
+						val2val,
+						maxNodeLevel,
+						linear);
 				return;
 			}
 			else
@@ -322,7 +289,13 @@ void SymbolicTree::expandNode(
 			auto defs = ReachingDefinitionsAnalysis::defsFromUse_onDemand(l);
 			if (defs.size() > _naryLimit)
 			{
-				ops.emplace_back(UndefValue::get(l->getType()));
+// TODO!!! replace with invalid tree
+				ops.emplace_back(
+						RDA,
+						UndefValue::get(l->getType()),
+						val2val,
+						maxNodeLevel,
+						linear);
 				return;
 			}
 

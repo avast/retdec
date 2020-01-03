@@ -44,19 +44,6 @@ class SymbolicTree
 	// Ctors, dtors.
 	//
 	public:
-		SymbolicTree(
-				llvm::Value* v,
-				unsigned maxNodeLevel = 10);
-		SymbolicTree(
-				ReachingDefinitionsAnalysis& rda,
-				llvm::Value* v,
-				unsigned maxNodeLevel = 10);
-		SymbolicTree(
-				ReachingDefinitionsAnalysis& rda,
-				llvm::Value* v,
-				std::map<llvm::Value*, llvm::Value*>* val2val,
-				unsigned maxNodeLevel = 10);
-
 		/**
 		 * The basic SymbolicTree construction method uses a precomputed
 		 * Reaching Definition Analysis (RDA) in order to fully expand the

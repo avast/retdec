@@ -818,7 +818,7 @@ common::Address Decoder::getJumpTarget(
 		llvm::CallInst* branchCall,
 		llvm::Value* val)
 {
-	SymbolicTree st(_RDA, val, nullptr, 20);
+	auto st = SymbolicTree::OnDemandRda(val, 20);
 
 	// TODO: better implementation.
 	// PIC code.
@@ -1075,7 +1075,7 @@ bool Decoder::getJumpTargetSwitch(
 	unsigned tableSize = 0;
 if (brToSwitch)
 {
-	SymbolicTree stCond(_RDA, brToSwitch->getCondition());
+	auto stCond = SymbolicTree::OnDemandRda(brToSwitch->getCondition());
 	stCond.simplifyNode();
 
 	auto levelOrd = stCond.getLevelOrder();
@@ -1132,7 +1132,7 @@ if (brToSwitch)
 	//
 	std::vector<unsigned> idxs;
 	unsigned maxIdx = 0;
-	SymbolicTree idxRoot(_RDA, idx);
+	auto idxRoot = SymbolicTree::OnDemandRda(idx);
 	idxRoot.simplifyNode();
 
 	llvm::LoadInst* l = nullptr;
