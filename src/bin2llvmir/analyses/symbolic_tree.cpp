@@ -33,7 +33,7 @@ SymbolicTree SymbolicTree::PrecomputedRda(
 		llvm::Value* v,
 		unsigned maxNodeLevel)
 {
-	return SymbolicTree(&rda, v, nullptr, maxNodeLevel, false);
+	return SymbolicTree(&rda, v, nullptr, 0, maxNodeLevel, nullptr, false);
 }
 
 SymbolicTree SymbolicTree::PrecomputedRdaWithValueMap(
@@ -42,61 +42,22 @@ SymbolicTree SymbolicTree::PrecomputedRdaWithValueMap(
 		std::map<llvm::Value*, llvm::Value*>* val2val,
 		unsigned maxNodeLevel)
 {
-	return SymbolicTree(&rda, v, val2val, maxNodeLevel, false);
+	_val2valUsed = false;
+	return SymbolicTree(&rda, v, nullptr, 0, maxNodeLevel, val2val, false);
 }
 
 SymbolicTree SymbolicTree::OnDemandRda(
 		llvm::Value* v,
 		unsigned maxNodeLevel)
 {
-	return SymbolicTree(nullptr, v, nullptr, maxNodeLevel, false);
+	return SymbolicTree(nullptr, v, nullptr, 0, maxNodeLevel, nullptr, false);
 }
 
 SymbolicTree SymbolicTree::Linear(
 		llvm::Value* v,
 		unsigned maxNodeLevel)
 {
-	return SymbolicTree(nullptr, v, nullptr, maxNodeLevel, true);
-}
-
-/**
- * Them main "public" ctor -- it is not really public, but all public ctors
- * end up here and it does all the work.
- */
-SymbolicTree::SymbolicTree(
-		ReachingDefinitionsAnalysis* rda,
-		llvm::Value* v,
-		std::map<llvm::Value*, llvm::Value*>* val2val,
-		unsigned maxNodeLevel,
-		bool linear)
-		:
-		value(v)
-{
-	ops.reserve(_naryLimit);
-
-	if (!_simplifyAtCreation)
-	{
-		maxNodeLevel += maxNodeLevel;
-	}
-	_val2valUsed = false;
-
-	if (val2val)
-	{
-		auto fIt = val2val->find(value);
-		if (fIt != val2val->end())
-		{
-			value = fIt->second;
-			_val2valUsed = true;
-			return;
-		}
-	}
-
-	if (getLevel() == maxNodeLevel)
-	{
-		return;
-	}
-
-	expandNode(rda, val2val, maxNodeLevel, linear);
+	return SymbolicTree(nullptr, v, nullptr, 0, maxNodeLevel, nullptr, true);
 }
 
 SymbolicTree::SymbolicTree(
@@ -112,6 +73,8 @@ SymbolicTree::SymbolicTree(
 		user(u),
 		_level(nodeLevel)
 {
+	ops.reserve(_naryLimit);
+
 	if (val2val)
 	{
 		auto fIt = val2val->find(value);
@@ -252,8 +215,10 @@ void SymbolicTree::expandNode(
 				ops.emplace_back(
 						RDA,
 						UndefValue::get(l->getType()),
-						val2val,
+						l,
+						getLevel() + 1,
 						maxNodeLevel,
+						val2val,
 						linear);
 				return;
 			}
@@ -279,8 +244,10 @@ void SymbolicTree::expandNode(
 				ops.emplace_back(
 						RDA,
 						UndefValue::get(l->getType()),
-						val2val,
+						l,
+						getLevel() + 1,
 						maxNodeLevel,
+						val2val,
 						linear);
 				return;
 			}

@@ -171,16 +171,12 @@ class SymbolicTree
 		void _getPostOrder(std::vector<SymbolicTree*>& res) const;
 
 	// Private ctors, dtors.
-	// This is a private constructor, do not use it. It is made public only
-	// so it can be used in std::vector<>::emplace_back().
 	//
 	public:
-		SymbolicTree(
-				ReachingDefinitionsAnalysis* rda,
-				llvm::Value* v,
-				std::map<llvm::Value*, llvm::Value*>* val2val,
-				unsigned maxNodeLevel,
-				bool linear);
+		/**
+		 * This is a private constructor, do not use it. It is made public only
+		 * so it can be used in std::vector<>::emplace_back().
+		 */
 		SymbolicTree(
 				ReachingDefinitionsAnalysis* rda,
 				llvm::Value* v,
