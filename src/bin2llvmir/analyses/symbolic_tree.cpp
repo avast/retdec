@@ -28,6 +28,41 @@ using namespace retdec::bin2llvmir::st_match;
 namespace retdec {
 namespace bin2llvmir {
 
+//==============================================================================
+
+SymbolicTree SymbolicTree::PrecomputedRda(
+		ReachingDefinitionsAnalysis& rda,
+		llvm::Value* v,
+		unsigned maxNodeLevel)
+{
+	return SymbolicTree(&rda, v, nullptr, maxNodeLevel, false);
+}
+
+SymbolicTree SymbolicTree::PrecomputedRdaWithValueMap(
+		ReachingDefinitionsAnalysis& rda,
+		llvm::Value* v,
+		std::map<llvm::Value*, llvm::Value*>* val2val,
+		unsigned maxNodeLevel)
+{
+	return SymbolicTree(&rda, v, val2val, maxNodeLevel, false);
+}
+
+SymbolicTree SymbolicTree::OnDemandRda(
+		llvm::Value* v,
+		unsigned maxNodeLevel)
+{
+	return SymbolicTree(nullptr, v, nullptr, maxNodeLevel, false);
+}
+
+SymbolicTree SymbolicTree::Linear(
+		llvm::Value* v,
+		unsigned maxNodeLevel)
+{
+	return SymbolicTree(nullptr, v, nullptr, maxNodeLevel, true);
+}
+
+//==============================================================================
+
 /**
  * No ReachingDefinitionsAnalysis -> on-demand UseDef/DefUse chains are used.
  */
@@ -35,7 +70,7 @@ SymbolicTree::SymbolicTree(
 		llvm::Value* v,
 		unsigned maxNodeLevel)
 		:
-		SymbolicTree(nullptr, v, nullptr, maxNodeLevel)
+		SymbolicTree(nullptr, v, nullptr, maxNodeLevel, false)
 {
 
 }
@@ -45,7 +80,7 @@ SymbolicTree::SymbolicTree(
 		llvm::Value* v,
 		unsigned maxNodeLevel)
 		:
-		SymbolicTree(&rda, v, nullptr, maxNodeLevel)
+		SymbolicTree(&rda, v, nullptr, maxNodeLevel, false)
 {
 
 }
@@ -56,10 +91,12 @@ SymbolicTree::SymbolicTree(
 		std::map<llvm::Value*, llvm::Value*>* val2val,
 		unsigned maxNodeLevel)
 		:
-		SymbolicTree(&rda, v, val2val, maxNodeLevel)
+		SymbolicTree(&rda, v, val2val, maxNodeLevel, false)
 {
 
 }
+
+//==============================================================================
 
 /**
  * Them main "public" ctor -- it is not really public, but all public ctors
@@ -69,7 +106,8 @@ SymbolicTree::SymbolicTree(
 		ReachingDefinitionsAnalysis* rda,
 		llvm::Value* v,
 		std::map<llvm::Value*, llvm::Value*>* val2val,
-		unsigned maxNodeLevel)
+		unsigned maxNodeLevel,
+		bool linear)
 		:
 		value(v)
 {
@@ -98,7 +136,7 @@ SymbolicTree::SymbolicTree(
 	}
 
 	std::unordered_set<Value*> processed;
-	expandNode(rda, val2val, maxNodeLevel, processed);
+	expandNode(rda, val2val, maxNodeLevel, processed, linear);
 }
 
 SymbolicTree::SymbolicTree(
@@ -108,7 +146,8 @@ SymbolicTree::SymbolicTree(
 		std::unordered_set<llvm::Value*>& processed,
 		unsigned nodeLevel,
 		unsigned maxNodeLevel,
-		std::map<llvm::Value*, llvm::Value*>* val2val)
+		std::map<llvm::Value*, llvm::Value*>* val2val,
+		bool linear)
 		:
 		value(v),
 		user(u),
@@ -130,7 +169,7 @@ SymbolicTree::SymbolicTree(
 		return;
 	}
 
-	expandNode(rda, val2val, maxNodeLevel, processed);
+	expandNode(rda, val2val, maxNodeLevel, processed, linear);
 }
 
 unsigned SymbolicTree::getLevel() const
@@ -182,7 +221,8 @@ void SymbolicTree::expandNode(
 		ReachingDefinitionsAnalysis* RDA,
 		std::map<llvm::Value*, llvm::Value*>* val2val,
 		unsigned maxNodeLevel,
-		std::unordered_set<llvm::Value*>& processed)
+		std::unordered_set<llvm::Value*>& processed,
+		bool linear)
 {
 	if (RDA && RDA->wasRun())
 	{
@@ -217,7 +257,45 @@ void SymbolicTree::expandNode(
 			return;
 		}
 
-		if (RDA && RDA->wasRun())
+		if (linear)
+		{
+			auto* bb = l->getParent();
+			Instruction* prev = l;
+			while (prev)
+			{
+				auto* s = dyn_cast<StoreInst>(prev);
+				if (s && s->getPointerOperand() == l->getPointerOperand())
+				{
+					ops.emplace_back(
+							RDA,
+							s,
+							l,
+							processed,
+							getLevel() + 1,
+							maxNodeLevel,
+							val2val,
+							linear);
+					break;
+				}
+
+				if (&bb->front() == prev)
+				{
+					prev = nullptr;
+					processed.insert(bb);
+
+					bb = bb->getSinglePredecessor();
+					if (bb && processed.count(bb) == 0)
+					{
+						prev = &bb->back();
+					}
+				}
+				else
+				{
+					prev = prev->getPrevNode();
+				}
+			}
+		}
+		else if (RDA && RDA->wasRun())
 		{
 			auto defs = RDA->defsFromUse(l);
 			if (defs.size() > _naryLimit)
@@ -235,7 +313,8 @@ void SymbolicTree::expandNode(
 						processed,
 						getLevel() + 1,
 						maxNodeLevel,
-						val2val);
+						val2val,
+						linear);
 			}
 		}
 		else
@@ -256,11 +335,13 @@ void SymbolicTree::expandNode(
 						processed,
 						getLevel() + 1,
 						maxNodeLevel,
-						val2val);
+						val2val,
+						linear);
 			}
 		}
 
-		if (ops.empty())
+// TODO!!!!! Do not replace register with their default values down the line.
+		if (!linear && ops.empty())
 		{
 			ops.emplace_back(
 					RDA,
@@ -269,7 +350,8 @@ void SymbolicTree::expandNode(
 					processed,
 					getLevel() + 1,
 					maxNodeLevel,
-					val2val);
+					val2val,
+					linear);
 		}
 	}
 	else if (auto* s = dyn_cast<StoreInst>(value))
@@ -283,7 +365,8 @@ void SymbolicTree::expandNode(
 					processed,
 					getLevel(),
 					maxNodeLevel,
-					val2val);
+					val2val,
+					linear);
 		}
 		else
 		{
@@ -294,7 +377,8 @@ void SymbolicTree::expandNode(
 					processed,
 					getLevel() + 1,
 					maxNodeLevel,
-					val2val);
+					val2val,
+					linear);
 		}
 	}
 	else if (isa<AllocaInst>(value)
@@ -318,7 +402,8 @@ void SymbolicTree::expandNode(
 				processed,
 				getLevel(),
 				maxNodeLevel,
-				val2val);
+				val2val,
+				linear);
 	}
 	else if (User* U = dyn_cast<User>(value))
 	{
@@ -331,7 +416,8 @@ void SymbolicTree::expandNode(
 					processed,
 					getLevel() + 1,
 					maxNodeLevel,
-					val2val);
+					val2val,
+					linear);
 		}
 	}
 }

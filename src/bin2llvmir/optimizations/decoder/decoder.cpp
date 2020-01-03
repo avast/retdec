@@ -781,7 +781,7 @@ bool Decoder::getJumpTargetsFromInstruction(
 			//
 			if (auto* l = llvm::dyn_cast<llvm::LoadInst>(&i))
 			{
-				SymbolicTree st(_RDA, l->getPointerOperand(), nullptr, 8);
+				auto st = SymbolicTree::Linear(l->getPointerOperand(), 8);
 				st.simplifyNode();
 
 				auto* ci = llvm::dyn_cast<llvm::ConstantInt>(st.value);
@@ -799,7 +799,7 @@ bool Decoder::getJumpTargetsFromInstruction(
 						rangeSize = t - nextAddr;
 					}
 
-					LOG << "\t\t\t\t" << "skip " << r << std::endl;
+					LOG << "\t\t\t\t" << "critical skip " << r << std::endl;
 				}
 			}
 		}
