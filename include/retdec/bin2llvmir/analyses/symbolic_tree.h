@@ -162,7 +162,6 @@ class SymbolicTree
 				ReachingDefinitionsAnalysis* RDA,
 				std::map<llvm::Value*, llvm::Value*>* val2val,
 				unsigned maxNodeLevel,
-				std::unordered_set<llvm::Value*>& processed,
 				bool linear);
 
 		void _simplifyNode();
@@ -186,7 +185,6 @@ class SymbolicTree
 				ReachingDefinitionsAnalysis* rda,
 				llvm::Value* v,
 				llvm::Value* u,
-				std::unordered_set<llvm::Value*>& processed,
 				unsigned nodeLevel,
 				unsigned maxNodeLevel,
 				std::map<llvm::Value*, llvm::Value*>* v2v,

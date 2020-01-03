@@ -96,15 +96,13 @@ SymbolicTree::SymbolicTree(
 		return;
 	}
 
-	std::unordered_set<Value*> processed;
-	expandNode(rda, val2val, maxNodeLevel, processed, linear);
+	expandNode(rda, val2val, maxNodeLevel, linear);
 }
 
 SymbolicTree::SymbolicTree(
 		ReachingDefinitionsAnalysis* rda,
 		llvm::Value* v,
 		llvm::Value* u,
-		std::unordered_set<llvm::Value*>& processed,
 		unsigned nodeLevel,
 		unsigned maxNodeLevel,
 		std::map<llvm::Value*, llvm::Value*>* val2val,
@@ -130,7 +128,7 @@ SymbolicTree::SymbolicTree(
 		return;
 	}
 
-	expandNode(rda, val2val, maxNodeLevel, processed, linear);
+	expandNode(rda, val2val, maxNodeLevel, linear);
 }
 
 unsigned SymbolicTree::getLevel() const
@@ -182,19 +180,8 @@ void SymbolicTree::expandNode(
 		ReachingDefinitionsAnalysis* RDA,
 		std::map<llvm::Value*, llvm::Value*>* val2val,
 		unsigned maxNodeLevel,
-		std::unordered_set<llvm::Value*>& processed,
 		bool linear)
 {
-	if (RDA && RDA->wasRun())
-	{
-		auto fIt = processed.find(value);
-		if (fIt != processed.end())
-		{
-			return;
-		}
-	}
-	processed.insert(value);
-
 	if (auto* l = dyn_cast<LoadInst>(value))
 	{
 		if (!_trackThroughAllocaLoads
@@ -220,6 +207,7 @@ void SymbolicTree::expandNode(
 
 		if (linear)
 		{
+			std::unordered_set<BasicBlock*> seenBbs;
 			auto* bb = l->getParent();
 			Instruction* prev = l;
 			while (prev)
@@ -231,7 +219,6 @@ void SymbolicTree::expandNode(
 							RDA,
 							s,
 							l,
-							processed,
 							getLevel() + 1,
 							maxNodeLevel,
 							val2val,
@@ -242,10 +229,10 @@ void SymbolicTree::expandNode(
 				if (&bb->front() == prev)
 				{
 					prev = nullptr;
-					processed.insert(bb);
+					seenBbs.insert(bb);
 
 					bb = bb->getSinglePredecessor();
-					if (bb && processed.count(bb) == 0)
+					if (bb && seenBbs.count(bb) == 0)
 					{
 						prev = &bb->back();
 					}
@@ -277,7 +264,6 @@ void SymbolicTree::expandNode(
 						RDA,
 						d->def,
 						l,
-						processed,
 						getLevel() + 1,
 						maxNodeLevel,
 						val2val,
@@ -305,7 +291,6 @@ void SymbolicTree::expandNode(
 						RDA,
 						d,
 						l,
-						processed,
 						getLevel() + 1,
 						maxNodeLevel,
 						val2val,
@@ -320,7 +305,6 @@ void SymbolicTree::expandNode(
 					RDA,
 					l->getPointerOperand(),
 					l,
-					processed,
 					getLevel() + 1,
 					maxNodeLevel,
 					val2val,
@@ -335,7 +319,6 @@ void SymbolicTree::expandNode(
 					RDA,
 					s->getValueOperand(),
 					s,
-					processed,
 					getLevel(),
 					maxNodeLevel,
 					val2val,
@@ -347,7 +330,6 @@ void SymbolicTree::expandNode(
 					RDA,
 					s->getValueOperand(),
 					s,
-					processed,
 					getLevel() + 1,
 					maxNodeLevel,
 					val2val,
@@ -372,7 +354,6 @@ void SymbolicTree::expandNode(
 				RDA,
 				U->getOperand(0),
 				U,
-				processed,
 				getLevel(),
 				maxNodeLevel,
 				val2val,
@@ -386,7 +367,6 @@ void SymbolicTree::expandNode(
 					RDA,
 					U->getOperand(i),
 					U,
-					processed,
 					getLevel() + 1,
 					maxNodeLevel,
 					val2val,
