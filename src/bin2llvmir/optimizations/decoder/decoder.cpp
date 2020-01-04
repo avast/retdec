@@ -86,7 +86,9 @@ bool Decoder::runCatcher()
 	//
 	try
 	{
-		return run();
+		auto b = run();;
+// exit(1);
+		return b;
 	}
 	catch (const BaseError& e)
 	{
@@ -779,7 +781,8 @@ bool Decoder::getJumpTargetsFromInstruction(
 			// reconstructed - matching only constants is safe and should be
 			// enough for most cases.
 			//
-			if (auto* l = llvm::dyn_cast<llvm::LoadInst>(&i))
+			auto* l = llvm::dyn_cast<llvm::LoadInst>(&i);
+			if (l && !_abi->isRegister(l->getPointerOperand()))
 			{
 				auto st = SymbolicTree::Linear(l->getPointerOperand(), 8);
 				st.simplifyNode();

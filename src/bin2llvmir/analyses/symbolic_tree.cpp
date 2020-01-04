@@ -189,9 +189,10 @@ void SymbolicTree::expandNode(
 					break;
 				}
 
-				if (&bb->front() == prev)
+				prev = prev->getPrevNode();
+
+				if (prev == nullptr)
 				{
-					prev = nullptr;
 					seenBbs.insert(bb);
 
 					bb = bb->getSinglePredecessor();
@@ -199,10 +200,6 @@ void SymbolicTree::expandNode(
 					{
 						prev = &bb->back();
 					}
-				}
-				else
-				{
-					prev = prev->getPrevNode();
 				}
 			}
 		}
