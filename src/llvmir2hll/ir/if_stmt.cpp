@@ -19,7 +19,8 @@ namespace llvmir2hll {
 * See create() for more information.
 */
 IfStmt::IfStmt(Expression* cond, Statement* body, Address a):
-		Statement(a), ifClauseList{IfClause(cond, body)}, elseClause() {}
+		Statement(Value::ValueKind::IfStmt, a),
+		ifClauseList{IfClause(cond, body)}, elseClause() {}
 
 Value* IfStmt::clone() {
 	IfStmt* ifStmt(IfStmt::create(

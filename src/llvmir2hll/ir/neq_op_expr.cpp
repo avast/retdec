@@ -18,7 +18,7 @@ namespace llvmir2hll {
 * See create() for more information.
 */
 NeqOpExpr::NeqOpExpr(Expression* op1, Expression* op2):
-	BinaryOpExpr(op1, op2) {}
+	BinaryOpExpr(Value::ValueKind::NeqOpExpr, op1, op2) {}
 
 bool NeqOpExpr::isEqualTo(Value* otherValue) const {
 	if (NeqOpExpr* otherValueNeqOpExpr = cast<NeqOpExpr>(otherValue)) {

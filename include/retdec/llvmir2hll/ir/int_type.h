@@ -40,6 +40,9 @@ public:
 	virtual void accept(Visitor *v) override;
 	/// @}
 
+    static bool classof(const Value* v) {
+        return v->getKind() == Value::ValueKind::IntType; }
+
 private:
 	/// Mapping of integer sizes into IntType instances.
 	using SizeToIntTypeMap = std::map<unsigned, IntType*>;

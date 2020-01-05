@@ -17,7 +17,7 @@ namespace llvmir2hll {
 * See create() for more information.
 */
 GotoStmt::GotoStmt(Statement* target, Address a):
-	Statement(a), target(target) {}
+	Statement(Value::ValueKind::GotoStmt, a), target(target) {}
 
 Value* GotoStmt::clone() {
 	GotoStmt* gotoStmt(GotoStmt::create(target, getAddress()));

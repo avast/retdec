@@ -23,8 +23,8 @@ UForLoopStmt::UForLoopStmt(
 		Expression* step,
 		Statement* body,
 		Address a):
-	Statement(a), init(init), initIsDefinition(false), cond(cond), step(step),
-	body(body) {}
+	Statement(Value::ValueKind::UForLoopStmt, a), init(init),
+	initIsDefinition(false), cond(cond), step(step), body(body) {}
 
 Value* UForLoopStmt::clone() {
 	auto loop = UForLoopStmt::create(

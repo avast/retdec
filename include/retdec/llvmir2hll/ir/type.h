@@ -21,8 +21,12 @@ class Type: public Value {
 public:
 	virtual ~Type() = default;
 
+	static bool classof(const Value* v) {
+		return v->getKind() >= Value::ValueKind::Type
+				&& v->getKind() <= Value::ValueKind::_Type_END; }
+
 protected:
-	Type() = default;
+	Type(Value::ValueKind k) : Value(k) {}
 };
 
 } // namespace llvmir2hll

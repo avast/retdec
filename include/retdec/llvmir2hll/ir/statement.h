@@ -111,7 +111,7 @@ public:
 	void transferLabelTo(Statement* stmt);
 	/// @}
 
-	Statement* getParent() const;
+	Statement* getParent();
 	Address getAddress() const;
 
 	/// @name Goto Targets
@@ -133,8 +133,12 @@ public:
 	static Statement* cloneStatements(Statement* stmts);
 	static Statement* getLastStatement(Statement* stmts);
 
+	static bool classof(const Value* v) {
+		return v->getKind() >= Value::ValueKind::Statement
+				&& v->getKind() <= Value::ValueKind::_Statement_END; }
+
 protected:
-	Statement(Address a = Address::Undefined);
+	Statement(Value::ValueKind k, Address a = Address::Undefined);
 
 protected:
 	/// Successor statement.

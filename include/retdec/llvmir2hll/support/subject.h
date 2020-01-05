@@ -137,20 +137,23 @@ protected:
 	using ObserverContainer = std::vector<ObserverPtr>;
 
 	// Observer iterator.
-	using observer_iterator = typename ObserverContainer::const_iterator;
+	// using observer_iterator = typename ObserverContainer::const_iterator;
+	using observer_iterator = typename ObserverContainer::iterator;
 
 protected:
 	/**
 	* @brief Returns a constant iterator to the first observer.
 	*/
-	observer_iterator observer_begin() const {
+	// observer_iterator observer_begin() const {
+	observer_iterator observer_begin() {
 		return observers.begin();
 	}
 
 	/**
 	* @brief Returns a constant iterator past the last observer.
 	*/
-	observer_iterator observer_end() const {
+	// observer_iterator observer_end() const {
+	observer_iterator observer_end() {
 		return observers.end();
 	}
 

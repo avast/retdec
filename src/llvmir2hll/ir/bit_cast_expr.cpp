@@ -17,7 +17,7 @@ namespace llvmir2hll {
 * See create() for more information.
 */
 BitCastExpr::BitCastExpr(Expression* op, Type* dstType):
-	CastExpr(op, dstType) {}
+	CastExpr(Value::ValueKind::BitCastExpr, op, dstType) {}
 
 bool BitCastExpr::isEqualTo(Value* otherValue) const {
 	// Both types and values of all operands have to be equal.

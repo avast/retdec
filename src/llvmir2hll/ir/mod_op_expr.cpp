@@ -18,7 +18,7 @@ namespace llvmir2hll {
 */
 ModOpExpr::ModOpExpr(Expression* op1, Expression* op2,
 		Variant variant):
-	BinaryOpExpr(op1, op2), variant(variant) {}
+	BinaryOpExpr(Value::ValueKind::ModOpExpr, op1, op2), variant(variant) {}
 
 bool ModOpExpr::isEqualTo(Value* otherValue) const {
 	if (ModOpExpr* otherValueModOpExpr = cast<ModOpExpr>(otherValue)) {

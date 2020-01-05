@@ -19,7 +19,8 @@ namespace llvmir2hll {
 */
 TernaryOpExpr::TernaryOpExpr(Expression* cond, Expression* trueValue,
 	Expression* falseValue):
-		Expression(), cond(cond), trueValue(trueValue), falseValue(falseValue) {}
+		Expression(Value::ValueKind::TernaryOpExpr), cond(cond),
+		trueValue(trueValue), falseValue(falseValue) {}
 
 Value* TernaryOpExpr::clone() {
 	TernaryOpExpr* ternaryOpExpr(TernaryOpExpr::create(

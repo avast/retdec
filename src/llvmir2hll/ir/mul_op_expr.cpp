@@ -17,7 +17,7 @@ namespace llvmir2hll {
 * See create() for more information.
 */
 MulOpExpr::MulOpExpr(Expression* op1, Expression* op2):
-	BinaryOpExpr(op1, op2) {}
+	BinaryOpExpr(Value::ValueKind::MulOpExpr, op1, op2) {}
 
 bool MulOpExpr::isEqualTo(Value* otherValue) const {
 	if (MulOpExpr* otherValueMulOpExpr = cast<MulOpExpr>(otherValue)) {

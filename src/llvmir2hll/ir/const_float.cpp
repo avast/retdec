@@ -58,7 +58,8 @@ FloatType* getTypeOfValue(const ConstFloat::Type &value) {
 * See create() for more information.
 */
 ConstFloat::ConstFloat(Type value):
-	Constant(), value(value), type(getTypeOfValue(value)) {}
+	Constant(Value::ValueKind::ConstFloat), value(value),
+	type(getTypeOfValue(value)) {}
 
 Value* ConstFloat::clone() {
 	ConstFloat* constFloat(ConstFloat::create(value));

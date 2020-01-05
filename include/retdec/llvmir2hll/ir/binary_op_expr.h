@@ -36,8 +36,12 @@ public:
 		Value* arg = nullptr) override;
 	/// @}
 
+	static bool classof(const Value* v) {
+		return v->getKind() >= Value::ValueKind::BinaryOpExpr
+				&& v->getKind() <= Value::ValueKind::_BinaryOpExpr_END; }
+
 protected:
-	BinaryOpExpr(Expression* op1, Expression* op2);
+	BinaryOpExpr(Value::ValueKind k, Expression* op1, Expression* op2);
 
 protected:
 	/// First operand.

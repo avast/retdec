@@ -49,22 +49,6 @@ protected:
 };
 
 /**
-* @brief Equivalent of dynamic_cast<> for shared pointers.
-*
-* @param[in] ptr Pointer to be casted.
-*
-* @tparam To Output type.
-* @tparam From Input type.
-*
-* The purpose of this function is to provide a more concise notation. Indeed,
-* @c cast<X>(ptr) is more concise than @c std::dynamic_pointer_cast<X>(ptr).
-*/
-template<typename To, typename From>
-To* cast(From* ptr) noexcept {
-	return dynamic_cast<To*>(ptr);
-}
-
-/**
 * @brief Equivalent of static_cast<> for shared pointers (unchecked cast).
 *
 * @param[in] ptr Pointer to be casted.
@@ -106,7 +90,25 @@ To* ucast(From* ptr) noexcept {
 */
 template<typename To, typename From>
 bool isa(From* ptr) noexcept {
-	return cast<To>(ptr) != nullptr;
+	// return cast<To>(ptr) != nullptr;
+	return ptr && To::classof(ptr);
+}
+
+/**
+* @brief Equivalent of dynamic_cast<> for shared pointers.
+*
+* @param[in] ptr Pointer to be casted.
+*
+* @tparam To Output type.
+* @tparam From Input type.
+*
+* The purpose of this function is to provide a more concise notation. Indeed,
+* @c cast<X>(ptr) is more concise than @c std::dynamic_pointer_cast<X>(ptr).
+*/
+template<typename To, typename From>
+To* cast(From* ptr) noexcept {
+	// return dynamic_cast<To*>(ptr);
+	return isa<To>(ptr) ? ucast<To>(ptr) : nullptr;
 }
 
 } // namespace llvmir2hll

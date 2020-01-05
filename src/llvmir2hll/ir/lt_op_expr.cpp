@@ -19,7 +19,7 @@ namespace llvmir2hll {
 */
 LtOpExpr::LtOpExpr(Expression* op1, Expression* op2,
 		Variant variant):
-	BinaryOpExpr(op1, op2), variant(variant) {}
+	BinaryOpExpr(Value::ValueKind::LtOpExpr, op1, op2), variant(variant) {}
 
 bool LtOpExpr::isEqualTo(Value* otherValue) const {
 	if (LtOpExpr* otherValueLtOpExpr = cast<LtOpExpr>(otherValue)) {

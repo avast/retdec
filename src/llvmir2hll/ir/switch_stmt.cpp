@@ -19,7 +19,8 @@ namespace llvmir2hll {
 * See create() for more information.
 */
 SwitchStmt::SwitchStmt(Expression* controlExpr, Address a):
-	Statement(a), switchClauseList(), controlExpr(controlExpr) {}
+	Statement(Value::ValueKind::SwitchStmt, a), switchClauseList(),
+	controlExpr(controlExpr) {}
 
 Value* SwitchStmt::clone() {
 	SwitchStmt* switchStmt(SwitchStmt::create(

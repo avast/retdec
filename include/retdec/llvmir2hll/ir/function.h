@@ -88,6 +88,9 @@ public:
 	virtual void accept(Visitor *v) override;
 	/// @}
 
+    static bool classof(const Value* v) {
+        return v->getKind() == Value::ValueKind::Function; }
+
 private:
 	/// The module to which the function belongs.
 	Module* module = nullptr;

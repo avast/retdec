@@ -18,7 +18,7 @@ namespace llvmir2hll {
 * See create() for more information.
 */
 ConstNullPointer::ConstNullPointer(PointerType* type):
-	Constant(), type(type) {}
+	Constant(Value::ValueKind::ConstNullPointer), type(type) {}
 
 Value* ConstNullPointer::clone() {
 	ConstNullPointer* constPointer(ConstNullPointer::create(type));

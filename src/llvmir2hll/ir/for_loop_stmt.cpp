@@ -21,8 +21,8 @@ namespace llvmir2hll {
 ForLoopStmt::ForLoopStmt(Variable* indVar, Expression* startValue,
 	Expression* endCond, Expression* step, Statement* body,
 	Address a):
-		Statement(a), indVar(indVar), startValue(startValue), endCond(endCond),
-		step(step), body(body) {}
+		Statement(Value::ValueKind::ForLoopStmt, a), indVar(indVar),
+		startValue(startValue), endCond(endCond), step(step), body(body) {}
 
 Value* ForLoopStmt::clone() {
 	ForLoopStmt* forLoopStmt(ForLoopStmt::create(

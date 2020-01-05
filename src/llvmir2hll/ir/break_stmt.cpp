@@ -11,7 +11,7 @@
 namespace retdec {
 namespace llvmir2hll {
 
-BreakStmt::BreakStmt(Address a) : Statement(a) {}
+BreakStmt::BreakStmt(Address a) : Statement(Value::ValueKind::BreakStmt, a) {}
 
 bool BreakStmt::isEqualTo(Value* otherValue) const {
 	return isa<BreakStmt>(otherValue);

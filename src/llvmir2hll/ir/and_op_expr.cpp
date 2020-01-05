@@ -18,7 +18,7 @@ namespace llvmir2hll {
 * See create() for more information.
 */
 AndOpExpr::AndOpExpr(Expression* op1, Expression* op2):
-	BinaryOpExpr(op1, op2) {}
+	BinaryOpExpr(Value::ValueKind::AndOpExpr, op1, op2) {}
 
 bool AndOpExpr::isEqualTo(Value* otherValue) const {
 	if (AndOpExpr* otherValueAndOpExpr = cast<AndOpExpr>(otherValue)) {

@@ -19,7 +19,7 @@ namespace llvmir2hll {
 * See create() for more information.
 */
 GlobalVarDef::GlobalVarDef(Variable* var, Expression* init):
-	var(var), init(init) {}
+	Value(Value::ValueKind::GlobalVarDef), var(var), init(init) {}
 
 Value* GlobalVarDef::clone() {
 	GlobalVarDef* varDefStmt(GlobalVarDef::create(ucast<Variable>(var->clone())));

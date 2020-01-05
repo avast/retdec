@@ -34,8 +34,12 @@ public:
 		Value* arg = nullptr) override;
 	/// @}
 
+	static bool classof(const Value* v) {
+		return v->getKind() >= Value::ValueKind::UnaryOpExpr
+				&& v->getKind() <= Value::ValueKind::_UnaryOpExpr_END; }
+
 protected:
-	explicit UnaryOpExpr(Expression* op);
+	explicit UnaryOpExpr(Value::ValueKind k, Expression* op);
 
 protected:
 	/// Operand.

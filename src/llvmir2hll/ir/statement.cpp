@@ -32,8 +32,8 @@ void preserveLabel(Statement* origStmt, Statement* newStmt) {
 /**
 * @brief Constructs a new statement.
 */
-Statement::Statement(Address a):
-	succ(), preds(), label(), address(a) {
+Statement::Statement(Value::ValueKind k, Address a):
+	Value(k), succ(), preds(), label(), address(a) {
 }
 
 /**
@@ -641,12 +641,14 @@ void Statement::removePredecessors(bool onlyNonGoto) {
 * In this example, statements (1), (2), and (5) do not have any parents, and
 * statement (2) is the parent of statements (3) and (4).
 */
-Statement* Statement::getParent() const {
+Statement* Statement::getParent() {
 	// If there are no non-goto predecessors, we're done, i.e. we can use the
 	// set of observers.
 	if (preds.empty() || containsJustGotosToCurrentStatement(preds)) {
 		for (auto i = observer_begin(), e = observer_end(); i != e ; ++i) {
-			if (Statement* observerStmt = cast<Statement>(*i)) {
+			// if (Statement* observerStmt = cast<Statement>(*i)) {
+			if (Statement* observerStmt = cast<Statement>(static_cast<Value*>(*i))) {
+			// if (Statement* observerStmt = cast<Statement>(reinterpret_cast<Value*>(*i))) {
 				// Skip goto observers.
 				if (isa<GotoStmt>(observerStmt)) {
 					continue;

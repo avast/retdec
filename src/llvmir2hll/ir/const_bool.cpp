@@ -18,7 +18,8 @@ namespace llvmir2hll {
 * See create() for more information.
 */
 ConstBool::ConstBool(Type value):
-	Constant(), value(value), type(IntType::create(1, false)) {}
+	Constant(Value::ValueKind::ConstBool), value(value),
+	type(IntType::create(1, false)) {}
 
 Value* ConstBool::clone() {
 	ConstBool* constBool(ConstBool::create(value));

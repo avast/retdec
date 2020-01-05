@@ -18,8 +18,8 @@ namespace llvmir2hll {
 * @par Preconditions
 *  - @a op is non-null
 */
-UnaryOpExpr::UnaryOpExpr(Expression* op):
-		op(op) {
+UnaryOpExpr::UnaryOpExpr(Value::ValueKind k, Expression* op):
+		Expression(k), op(op) {
 	PRECONDITION_NON_NULL(op);
 }
 

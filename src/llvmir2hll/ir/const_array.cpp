@@ -19,7 +19,8 @@ namespace llvmir2hll {
 * See create() or createUninitialized() for more information.
 */
 ConstArray::ConstArray(ArrayValue value, ArrayType* type):
-	Constant(), value(value), initialized(!value.empty()), type(type) {}
+	Constant(Value::ValueKind::ConstArray), value(value),
+	initialized(!value.empty()), type(type) {}
 
 Value* ConstArray::clone() {
 	if (isInitialized()) {

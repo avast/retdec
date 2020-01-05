@@ -17,7 +17,7 @@ namespace llvmir2hll {
 * See create() for more information.
 */
 StringType::StringType(std::size_t charSize):
-	Type(), charSize(charSize) {}
+	Type(Value::ValueKind::StringType), charSize(charSize) {}
 
 Value* StringType::clone() {
 	return StringType::create(charSize);

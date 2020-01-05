@@ -21,7 +21,7 @@ namespace llvmir2hll {
 * See create() for more information.
 */
 FunctionType::FunctionType(Type* retType):
-	Type(), retType(retType), varArg(false) {}
+	Type(Value::ValueKind::FunctionType), retType(retType), varArg(false) {}
 
 Value* FunctionType::clone() {
 	FunctionType* cloned(FunctionType::create());

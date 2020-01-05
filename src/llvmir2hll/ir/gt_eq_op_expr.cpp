@@ -19,7 +19,7 @@ namespace llvmir2hll {
 */
 GtEqOpExpr::GtEqOpExpr(Expression* op1, Expression* op2,
 		Variant variant):
-	BinaryOpExpr(op1, op2), variant(variant) {}
+	BinaryOpExpr(Value::ValueKind::GtEqOpExpr, op1, op2), variant(variant) {}
 
 bool GtEqOpExpr::isEqualTo(Value* otherValue) const {
 	if (GtEqOpExpr* otherValueGtEqOpExpr = cast<GtEqOpExpr>(otherValue)) {

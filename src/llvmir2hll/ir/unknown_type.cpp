@@ -17,7 +17,7 @@ namespace llvmir2hll {
 * See create() for more information.
 */
 UnknownType::UnknownType():
-	Type() {}
+	Type(Value::ValueKind::UnknownType) {}
 
 Value* UnknownType::clone() {
 	return UnknownType::create();

@@ -19,7 +19,7 @@ namespace llvmir2hll {
 * See create() for more information.
 */
 ConstStruct::ConstStruct(Type value, StructType* type):
-	Constant(), value(value), type(type) {}
+	Constant(Value::ValueKind::ConstStruct), value(value), type(type) {}
 
 Value* ConstStruct::clone() {
 	// Clone all struct members.

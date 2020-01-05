@@ -17,7 +17,7 @@ namespace llvmir2hll {
 * See create() for more information.
 */
 BitShlOpExpr::BitShlOpExpr(Expression* op1, Expression* op2):
-	BinaryOpExpr(op1, op2) {}
+	BinaryOpExpr(Value::ValueKind::BitShlOpExpr, op1, op2) {}
 
 bool BitShlOpExpr::isEqualTo(Value* otherValue) const {
 	if (BitShlOpExpr* otherValueBitShlOpExpr = cast<BitShlOpExpr>(otherValue)) {

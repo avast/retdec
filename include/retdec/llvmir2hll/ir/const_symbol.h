@@ -43,6 +43,9 @@ public:
 	virtual void accept(Visitor *v) override;
 	/// @}
 
+    static bool classof(const Value* v) {
+        return v->getKind() == Value::ValueKind::ConstSymbol; }
+
 private:
 	/// Name of the constant.
 	std::string name;

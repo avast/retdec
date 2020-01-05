@@ -18,7 +18,7 @@ namespace llvmir2hll {
 * See create() for more information.
 */
 NotOpExpr::NotOpExpr(Expression* op):
-	UnaryOpExpr(op) {}
+	UnaryOpExpr(Value::ValueKind::NotOpExpr, op) {}
 
 bool NotOpExpr::isEqualTo(Value* otherValue) const {
 	if (NotOpExpr* otherValueNotOpExpr = cast<NotOpExpr>(otherValue)) {
